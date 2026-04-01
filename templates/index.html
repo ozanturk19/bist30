@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIST30 Sinyal Paneli</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #f0f6fc;
+    letter-spacing: -0.3px;
+  }
+
+  header h1 span {
+    color: #58a6ff;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #updated {
+    font-size: 12px;
+    color: #8b949e;
+  }
+
+  .btn-refresh {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .btn-refresh:hover {
+    background: #30363d;
+    border-color: #8b949e;
+  }
+
+  .btn-refresh.spinning svg {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 24px;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 12px 20px;
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .stat-card .stat-num {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-card .stat-label {
+    font-size: 11px;
+    color: #8b949e;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-al .stat-num { color: #3fb950; }
+  .stat-sat .stat-num { color: #f85149; }
+  .stat-bekle .stat-num { color: #8b949e; }
+  .stat-total .stat-num { color: #58a6ff; }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-btn {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid #30363d;
+    background: transparent;
+    color: #8b949e;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover { border-color: #8b949e; color: #c9d1d9; }
+  .filter-btn.active-all { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+  .filter-btn.active-al { background: #1a4731; border-color: #3fb950; color: #3fb950; }
+  .filter-btn.active-sat { background: #3d0f0f; border-color: #f85149; color: #f85149; }
+  .filter-btn.active-bekle { background: #21262d; border-color: #8b949e; color: #8b949e; }
+
+  .search-input {
+    margin-left: auto;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    width: 160px;
+    outline: none;
+  }
+
+  .search-input:focus { border-color: #58a6ff; }
+  .search-input::placeholder { color: #484f58; }
+
+  /* Table */
+  .table-wrap {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    background: #1c2128;
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #30363d;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  thead th:hover { color: #c9d1d9; }
+
+  thead th.sorted-asc::after { content: " ↑"; }
+  thead th.sorted-desc::after { content: " ↓"; }
+
+  tbody tr {
+    border-bottom: 1px solid #21262d;
+    transition: background 0.1s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #1c2128; }
+
+  td {
+    padding: 10px 16px;
+    white-space: nowrap;
+  }
+
+  .ticker {
+    font-weight: 600;
+    font-size: 14px;
+    color: #f0f6fc;
+    letter-spacing: 0.3px;
+  }
+
+  .price {
+    font-weight: 500;
+    color: #e6edf3;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .change, .change-pct {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+  }
+
+  .change.pos, .change-pct.pos { color: #3fb950; }
+  .change.neg, .change-pct.neg { color: #f85149; }
+  .change.neu, .change-pct.neu { color: #8b949e; }
+
+  .signal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .signal-AL { background: #1a4731; color: #3fb950; border: 1px solid #238636; }
+  .signal-SAT { background: #3d0f0f; color: #f85149; border: 1px solid #da3633; }
+  .signal-BEKLE { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+
+  .indicators {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .ind-badge {
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .ind-bull { background: #1a4731; color: #3fb950; }
+  .ind-bear { background: #3d0f0f; color: #f85149; }
+  .ind-neutral { background: #21262d; color: #8b949e; }
+
+  .score-bar {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .score-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .score-dot.filled-bull { background: #3fb950; }
+  .score-dot.filled-bear { background: #f85149; }
+  .score-dot.empty { background: #30363d; }
+
+  /* Loading */
+  .loading-overlay {
+    text-align: center;
+    padding: 60px 20px;
+    color: #8b949e;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border: 3px solid #30363d;
+    border-top-color: #58a6ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 12px;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 40px;
+    color: #8b949e;
+    font-size: 13px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: #484f58;
+    font-size: 12px;
+    border-top: 1px solid #21262d;
+    margin-top: 24px;
+  }
+
+  /* ── BIST30 Chart Section ─────────────────────────── */
+  .index-section {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+  }
+
+  .index-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 24px 8px;
+    flex-wrap: wrap;
+  }
+
+  .index-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f0f6fc;
+    letter-spacing: 0.2px;
+  }
+
+  .index-price {
+    font-size: 20px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #f0f6fc;
+  }
+
+  .index-change {
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .index-change.pos { color: #3fb950; }
+  .index-change.neg { color: #f85149; }
+  .index-change.neu { color: #8b949e; }
+
+  .index-inds {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+
+  .charts-wrap {
+    padding: 0 24px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .chart-pane {
+    position: relative;
+    width: 100%;
+  }
+
+  .chart-pane-label {
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #484f58;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  #chartMain  { height: 340px; }
+  #chartMacd  { height: 90px;  }
+  #chartRsi   { height: 90px;  }
+
+  .chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 520px;
+    color: #484f58;
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  /* ── Canlı fiyat flash ────────────────────────────── */
+  @keyframes flashUp   { 0%{background:#1a3a2a} 100%{background:transparent} }
+  @keyframes flashDown { 0%{background:#3a1a1a} 100%{background:transparent} }
+
+  .flash-up   { animation: flashUp   0.8s ease-out; color: #3fb950 !important; }
+  .flash-down { animation: flashDown 0.8s ease-out; color: #f85149 !important; }
+
+  #liveTs {
+    font-size: 11px;
+    font-weight: 600;
+    color: #3fb950;
+    letter-spacing: 0.3px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Supertrend & EMA12/99 badge ──────────────────── */
+  .ind-cross {
+    background: rgba(210,168,255,0.18);
+    color: #d2a8ff;
+    border: 1px solid rgba(210,168,255,0.4);
+    font-weight: 700;
+  }
+
+  /* ── Sinyal Tarihi ────────────────────────────────── */
+  .sig-date {
+    font-size: 11px;
+    color: #8b949e;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .new-today {
+    color: #e3b341;
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  .row-new-signal {
+    background: rgba(227, 179, 65, 0.04);
+  }
+
+  .filter-today { border-color: #e3b341 !important; color: #e3b341 !important; }
+  .active-today { background: #e3b341 !important; color: #0d1117 !important; border-color: #e3b341 !important; }
+
+  /* ── Responsive ───────────────────────────────────── */
+  @media (max-width: 768px) {
+    .container { padding: 12px; }
+    header { padding: 12px; }
+    .index-header { padding: 10px 12px 6px; gap: 10px; }
+    .charts-wrap { padding: 0 12px 10px; }
+    #chartMain { height: 220px; }
+    #chartMacd { height: 70px; }
+    #chartRsi  { height: 70px; }
+    .stats-bar { gap: 8px; }
+    .stat-card { padding: 10px 12px; min-width: 80px; }
+    .stat-card .stat-num { font-size: 20px; }
+    td { padding: 8px 10px; }
+    .indicators { display: none; }
+    th.hide-mobile, td.hide-mobile { display: none; }
+    .search-input { width: 120px; }
+    .index-inds { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BIST<span>30</span> Sinyal Paneli</h1>
+  <div class="header-right">
+    <span id="liveTs" style="margin-right:8px">○ bekleniyor</span>
+    <span id="updated">—</span>
+    <button class="btn-refresh" onclick="manualRefresh()" id="refreshBtn">
+      <svg id="refreshIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+        <path d="M21 3v5h-5"/>
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+        <path d="M8 16H3v5"/>
+      </svg>
+      Yenile
+    </button>
+  </div>
+</header>
+
+<!-- ── BIST30 Endeks Grafik Bölümü ─────────────────── -->
+<div class="index-section">
+  <div class="index-header">
+    <span class="index-title">BIST 30 (XU030)</span>
+    <span class="index-price" id="idxPrice">—</span>
+    <span class="index-change neu" id="idxChange">—</span>
+    <span class="signal-badge signal-BEKLE" id="idxSignal" style="font-size:12px">● BEKLE</span>
+    <div class="index-inds" id="idxInds"></div>
+  </div>
+  <div class="charts-wrap" id="chartsWrap">
+    <div class="chart-loading" id="chartLoading">
+      <div class="spinner"></div> Grafik yükleniyor…
+    </div>
+    <div style="display:none" id="chartsInner">
+      <div class="chart-pane">
+        <div class="chart-pane-label">Fiyat · EMA20/50/200 · BB</div>
+        <div id="chartMain"></div>
+      </div>
+      <div class="chart-pane">
+        <div class="chart-pane-label">MACD Histogram</div>
+        <div id="chartMacd"></div>
+      </div>
+      <div class="chart-pane">
+        <div class="chart-pane-label">RSI(14) · ADX(14)</div>
+        <div id="chartRsi"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card stat-total"><div class="stat-num" id="statTotal">—</div><div class="stat-label">Toplam</div></div>
+    <div class="stat-card stat-al"><div class="stat-num" id="statAl">—</div><div class="stat-label">AL Sinyali</div></div>
+    <div class="stat-card stat-sat"><div class="stat-num" id="statSat">—</div><div class="stat-label">SAT Sinyali</div></div>
+    <div class="stat-card stat-bekle"><div class="stat-num" id="statBekle">—</div><div class="stat-label">BEKLE</div></div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active-all" onclick="setFilter('all', this)">Tümü</button>
+    <button class="filter-btn" onclick="setFilter('AL', this)">🟢 AL</button>
+    <button class="filter-btn" onclick="setFilter('SAT', this)">🔴 SAT</button>
+    <button class="filter-btn" onclick="setFilter('BEKLE', this)">⚪ BEKLE</button>
+    <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)">⚡ Bugün</button>
+    <input class="search-input" type="text" placeholder="Hisse ara..." oninput="setSearch(this.value)">
+  </div>
+
+  <div class="table-wrap">
+    <div id="loadingDiv" class="loading-overlay">
+      <div class="spinner"></div>
+      <div>Veriler yükleniyor… (ilk yükleme 30–60 sn sürebilir)</div>
+    </div>
+    <table id="mainTable" style="display:none">
+      <thead>
+        <tr>
+          <th onclick="sortTable('ticker')">Hisse</th>
+          <th onclick="sortTable('price')">Fiyat (₺)</th>
+          <th onclick="sortTable('change_pct')" class="hide-mobile">Değişim</th>
+          <th onclick="sortTable('signal')">Sinyal</th>
+          <th onclick="sortTable('signal_date')" class="hide-mobile">Sinyal Tarihi</th>
+          <th onclick="sortTable('bull_score')" class="hide-mobile">Güç</th>
+          <th class="hide-mobile">İndikatörler</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="noDataDiv" class="no-data" style="display:none">Sonuç bulunamadı.</div>
+  </div>
+
+</div>
+
+<footer>
+  ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Otomatik emir verilmez. Yatırım tavsiyesi değildir.
+</footer>
+
+<script>
+/* ── Lightweight Charts v4 helpers ──────────────── */
+const LC = LightweightCharts;
+
+const BASE_OPTS = {
+  layout:          { background: { color: '#161b22' }, textColor: '#8b949e' },
+  grid:            { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
+  crosshair:       { mode: LC.CrosshairMode.Normal },
+  rightPriceScale: { borderColor: '#30363d' },
+  handleScroll:    true,
+  handleScale:     true,
+};
+
+let chartMain, chartMacd, chartRsi;
+
+function mkChart(el, height, showTime) {
+  return LC.createChart(el, {
+    ...BASE_OPTS,
+    width:     el.clientWidth || el.parentElement.clientWidth || 900,
+    height:    height,
+    timeScale: { borderColor: '#30363d', timeVisible: true, visible: showTime },
+  });
+}
+
+function buildCharts(d) {
+  // Önce göster, sonra oluştur (offsetWidth için)
+  document.getElementById('chartLoading').style.display = 'none';
+  document.getElementById('chartsInner').style.display = '';
+
+  // ── Ana grafik ────────────────────────────────────
+  const elMain = document.getElementById('chartMain');
+  chartMain = mkChart(elMain, 340, false);
+
+  // ── Custom primitive: EMA bantları arası dolgu ───
+  // 3-katman area-mask yaklaşımı financial chart'larda bozuluyor
+  // (mask serisi mumları kapatıyor, y-axis 0'a scala yapıyor).
+  // Çözüm: canvas'a doğrudan trapezoid çiz — sadece iki EMA arasını boyar.
+  class EmaFillPrimitive {
+    constructor(chart, e12data, e99data, bullCol, bearCol) {
+      this._chart   = chart;
+      this._e12     = Object.fromEntries(e12data.map(p => [p.time, p.value]));
+      this._e99     = Object.fromEntries(e99data.map(p => [p.time, p.value]));
+      this._times   = e12data.filter(p => this._e99[p.time] !== undefined).map(p => p.time);
+      this._bullCol = bullCol;
+      this._bearCol = bearCol;
+      this._series  = null;
+    }
+    attached({ series }) { this._series = series; }
+    detached()           { this._series = null;   }
+    updateAllViews()     {}
+    paneViews() {
+      const self = this;
+      return [{
+        renderer() {
+          return {
+            draw(target) {
+              if (!self._series) return;
+              target.useBitmapCoordinateSpace(scope => {
+                const ctx = scope.context;
+                const hr  = scope.horizontalPixelRatio;
+                const vr  = scope.verticalPixelRatio;
+                const ts  = self._chart.timeScale();
+                const pts1 = [], pts2 = [];
+                for (const t of self._times) {
+                  const x  = ts.timeToCoordinate(t);
+                  const y1 = self._series.priceToCoordinate(self._e12[t]);
+                  const y2 = self._series.priceToCoordinate(self._e99[t]);
+                  if (x == null || y1 == null || y2 == null) continue;
+                  pts1.push({ x: x * hr, y: y1 * vr, v: self._e12[t] });
+                  pts2.push({ x: x * hr, y: y2 * vr, v: self._e99[t] });
+                }
+                if (pts1.length < 2) return;
+                ctx.save();
+                for (let i = 1; i < pts1.length; i++) {
+                  const a1 = pts1[i-1], b1 = pts1[i];
+                  const a2 = pts2[i-1], b2 = pts2[i];
+                  ctx.fillStyle = b1.v > b2.v ? self._bullCol : self._bearCol;
+                  ctx.beginPath();
+                  ctx.moveTo(a1.x, a1.y);
+                  ctx.lineTo(b1.x, b1.y);
+                  ctx.lineTo(b2.x, b2.y);
+                  ctx.lineTo(a2.x, a2.y);
+                  ctx.closePath();
+                  ctx.fill();
+                }
+                ctx.restore();
+              });
+            }
+          };
+        }
+      }];
+    }
+  }
+
+  // -- EMA99 çizgisi (turuncu) — önce ekle, altında kalır --
+  const e99Line = chartMain.addLineSeries({
+    color: '#e3b341', lineWidth: 1.5,
+    priceLineVisible: false, lastValueVisible: false,
+  });
+  e99Line.setData(d.ema99);
+
+  // -- EMA12 çizgisi (mavi) + dolgu primitive'i --
+  const e12Line = chartMain.addLineSeries({
+    color: '#58a6ff', lineWidth: 1.5,
+    priceLineVisible: false, lastValueVisible: false,
+  });
+  e12Line.setData(d.ema12);
+  e12Line.attachPrimitive(new EmaFillPrimitive(
+    chartMain, d.ema12, d.ema99,
+    'rgba(63,185,80,0.15)',   // bull: yeşil
+    'rgba(248,81,73,0.13)'    // bear: kırmızı
+  ));
+
+  // -- Mum grafik (en üstte, EMAnın üzerinde çizilir) --
+  const candle = chartMain.addCandlestickSeries({
+    upColor: '#3fb950', downColor: '#f85149',
+    borderUpColor: '#3fb950', borderDownColor: '#f85149',
+    wickUpColor:   '#3fb950', wickDownColor:   '#f85149',
+    priceLineVisible: false,    // yatay kesik çizgiyi kaldır
+    lastValueVisible: true,     // sağ eksende güncel fiyat etiketi kalsın
+  });
+  candle.setData(d.ohlc);
+
+  // -- Sol üst köşe EMA legend --
+  // Grafik div'ini relative yap, legend üstüne otur
+  elMain.style.position = 'relative';
+  const elLegend = document.createElement('div');
+  elLegend.style.cssText = [
+    'position:absolute', 'top:8px', 'left:12px', 'z-index:30',
+    'display:flex', 'gap:14px', 'pointer-events:none',
+    'font-size:11px', 'font-variant-numeric:tabular-nums',
+    'background:rgba(22,27,34,0.72)', 'padding:3px 8px',
+    'border-radius:4px', 'backdrop-filter:blur(2px)',
+  ].join(';');
+  elMain.appendChild(elLegend);
+
+  function updateLegend(v12, v99) {
+    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', {maximumFractionDigits: 0}) : '—';
+    const last12 = v12 ?? d.ema12.at(-1)?.value;
+    const last99 = v99 ?? d.ema99.at(-1)?.value;
+    elLegend.innerHTML =
+      `<span style="color:#58a6ff">EMA12 ${fmt(last12)}</span>` +
+      `<span style="color:#e3b341">EMA99 ${fmt(last99)}</span>`;
+  }
+  updateLegend();
+  chartMain.subscribeCrosshairMove(p => {
+    if (!p?.time) { updateLegend(); return; }
+    updateLegend(p.seriesData?.get(e12Line)?.value, p.seriesData?.get(e99Line)?.value);
+  });
+
+  chartMain.timeScale().fitContent();
+
+  // ── MACD Histogram ────────────────────────────────
+  const elMacd = document.getElementById('chartMacd');
+  chartMacd = mkChart(elMacd, 90, false);
+
+  const macdS = chartMacd.addHistogramSeries({ priceLineVisible: false, lastValueVisible: false, base: 0 });
+  macdS.setData(d.macd);
+  chartMacd.timeScale().fitContent();
+
+  // ── RSI + ADX ─────────────────────────────────────
+  const elRsi = document.getElementById('chartRsi');
+  chartRsi = mkChart(elRsi, 90, true);
+
+  const rsiS = chartRsi.addLineSeries({ color: '#a5d6ff', lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false });
+  rsiS.setData(d.rsi);
+
+  const adxS = chartRsi.addLineSeries({ color: '#d2a8ff', lineWidth: 1, priceLineVisible: false, lastValueVisible: false, lineStyle: LC.LineStyle.Dashed });
+  adxS.setData(d.adx);
+
+  [30, 50, 70].forEach(lvl => {
+    rsiS.createPriceLine({ price: lvl, color: lvl === 50 ? '#484f58' : '#30363d', lineWidth: 1, lineStyle: LC.LineStyle.Dotted, axisLabelVisible: true });
+  });
+
+  chartRsi.timeScale().fitContent();
+
+  // ── Crosshair sync ───────────────────────────────
+  // Her chart için ana seri referansını saklıyoruz
+  chartMacd._mainSeries = macdS;
+  chartRsi._mainSeries  = rsiS;
+  chartMain._mainSeries = candle;
+
+  function syncCross(src, targets) {
+    src.subscribeCrosshairMove(param => {
+      targets.forEach(tgt => {
+        if (!param || !param.time) { tgt.clearCrosshairPosition(); return; }
+        tgt.setCrosshairPosition(0, param.time, tgt._mainSeries);
+      });
+    });
+  }
+  syncCross(chartMain, [chartMacd, chartRsi]);
+  syncCross(chartMacd, [chartMain, chartRsi]);
+  syncCross(chartRsi,  [chartMain, chartMacd]);
+
+  // ── Zoom (zaman ekseni) sync ──────────────────────
+  let _syncing = false;
+  function syncRange(src, targets) {
+    src.timeScale().subscribeVisibleLogicalRangeChange(range => {
+      if (_syncing || !range) return;
+      _syncing = true;
+      targets.forEach(t => t.timeScale().setVisibleLogicalRange(range));
+      _syncing = false;
+    });
+  }
+  syncRange(chartMain, [chartMacd, chartRsi]);
+  syncRange(chartMacd, [chartMain, chartRsi]);
+  syncRange(chartRsi,  [chartMain, chartMacd]);
+
+  // ── Pencere boyutu değişince yeniden boyutlandır ──
+  window.addEventListener('resize', () => {
+    const w = elMain.clientWidth;
+    if (w) {
+      chartMain.applyOptions({ width: w });
+      chartMacd.applyOptions({ width: elMacd.clientWidth || w });
+      chartRsi.applyOptions({  width: elRsi.clientWidth  || w });
+    }
+  });
+}
+
+function renderIndexHeader(s) {
+  const chgClass = s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu';
+  const chgSign  = s.change_pct > 0 ? '+' : '';
+
+  document.getElementById('idxPrice').textContent =
+    s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+  const chgEl = document.getElementById('idxChange');
+  chgEl.textContent = chgSign + s.change_pct.toFixed(2) + '%';
+  chgEl.className = 'index-change ' + chgClass;
+
+  const sigEl = document.getElementById('idxSignal');
+  const icon = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
+  sigEl.textContent = icon + ' ' + s.signal;
+  sigEl.className = 'signal-badge signal-' + s.signal;
+
+  const inds = [
+    { label: 'EMA',          ok: s.signal === 'SAT' ? s.ema_bear  : s.ema_bull  },
+    { label: 'BB',           ok: s.signal === 'SAT' ? s.bb_bear   : s.bb_bull   },
+    { label: 'MACD',         ok: s.signal === 'SAT' ? s.macd_bear : s.macd_bull },
+    { label: 'RSI ' + s.rsi, ok: s.signal === 'SAT' ? s.rsi_bear  : s.rsi_bull  },
+    { label: 'ADX ' + s.adx, ok: s.adx_ok },
+  ];
+  document.getElementById('idxInds').innerHTML = inds.map(i =>
+    '<span class="ind-badge ' + (i.ok ? (s.signal === 'SAT' ? 'ind-bear' : 'ind-bull') : 'ind-neutral') + '">' + i.label + '</span>'
+  ).join('');
+}
+
+async function fetchChart() {
+  try {
+    const res  = await fetch('/api/chart');
+    const json = await res.json();
+    if (json.loading || !json.chart) { setTimeout(fetchChart, 4000); return; }
+    renderIndexHeader(json.chart.summary);
+    buildCharts(json.chart);
+  } catch(e) {
+    setTimeout(fetchChart, 5000);
+  }
+}
+
+fetchChart();
+
+/* ── SSE Canlı Fiyat ─────────────────────────────── */
+let _sseRetry = 1000;
+
+function startSSE() {
+  const es = new EventSource('/api/stream');
+
+  es.onopen = () => { _sseRetry = 1000; };
+
+  es.onmessage = (e) => {
+    try {
+      const msg = JSON.parse(e.data);
+      if (msg.type !== 'prices') return;
+      applyLivePrices(msg.data, msg.ts);
+    } catch(_) {}
+  };
+
+  es.onerror = () => {
+    es.close();
+    setTimeout(startSSE, _sseRetry);
+    _sseRetry = Math.min(_sseRetry * 2, 30000);
+  };
+}
+
+function applyLivePrices(prices, ts) {
+  // Tablo satırlarını güncelle
+  Object.entries(prices).forEach(([ticker, d]) => {
+    const priceEl  = document.getElementById('lp-' + ticker);
+    const changeEl = document.getElementById('lc-' + ticker);
+    if (!priceEl) return;
+
+    const oldPrice = parseFloat(priceEl.dataset.raw || '0');
+    const newPrice = d.price;
+
+    // Fiyatı güncelle
+    priceEl.dataset.raw = newPrice;
+    priceEl.textContent  = newPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+
+    // Değişim yüzdesini güncelle
+    if (changeEl) {
+      const sign = d.change_pct >= 0 ? '+' : '';
+      changeEl.textContent  = sign + d.change_pct.toFixed(2) + '%';
+      changeEl.className    = 'change-pct ' + (d.change_pct > 0 ? 'pos' : d.change_pct < 0 ? 'neg' : 'neu');
+    }
+
+    // Flash efekti
+    if (oldPrice && newPrice !== oldPrice) {
+      priceEl.classList.remove('flash-up', 'flash-down');
+      void priceEl.offsetWidth; // reflow
+      priceEl.classList.add(newPrice > oldPrice ? 'flash-up' : 'flash-down');
+      setTimeout(() => priceEl.classList.remove('flash-up', 'flash-down'), 800);
+    }
+  });
+
+  // Saat göstergesi
+  const liveEl = document.getElementById('liveTs');
+  if (liveEl) liveEl.textContent = '● CANLI ' + ts;
+
+  // XU030 header fiyatını güncelle
+  if (prices['XU030']) {
+    const s = prices['XU030'];
+    document.getElementById('idxPrice').textContent =
+      s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+    const chgEl = document.getElementById('idxChange');
+    const sign  = s.change_pct >= 0 ? '+' : '';
+    chgEl.textContent = sign + s.change_pct.toFixed(2) + '%';
+    chgEl.className   = 'index-change ' + (s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu');
+  }
+}
+
+startSSE();
+
+/* ── Stocks table ────────────────────────────────── */
+let allStocks = [];
+let currentFilter = 'all';
+let currentSearch = '';
+let sortKey = 'signal';
+let sortDir = 1;
+let polling;
+
+async function fetchData() {
+  try {
+    const res = await fetch('/api/data');
+    const json = await res.json();
+
+    if (json.loading) {
+      setTimeout(fetchData, 3000);
+      return;
+    }
+
+    allStocks = json.stocks;
+
+    if (json.updated_at) {
+      document.getElementById('updated').textContent = 'Güncellendi: ' + json.updated_at;
+    }
+
+    updateStats();
+    renderTable();
+
+    document.getElementById('loadingDiv').style.display = 'none';
+    document.getElementById('mainTable').style.display = '';
+
+    // Poll every 60s
+    clearTimeout(polling);
+    polling = setTimeout(fetchData, 60000);
+
+  } catch(e) {
+    setTimeout(fetchData, 5000);
+  }
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = allStocks.length;
+  document.getElementById('statAl').textContent = allStocks.filter(s => s.signal === 'AL').length;
+  document.getElementById('statSat').textContent = allStocks.filter(s => s.signal === 'SAT').length;
+  document.getElementById('statBekle').textContent = allStocks.filter(s => s.signal === 'BEKLE').length;
+}
+
+function getFiltered() {
+  return allStocks.filter(s => {
+    const matchFilter = currentFilter === 'all' || s.signal === currentFilter
+                     || (currentFilter === 'TODAY' && s.is_new_signal);
+    const matchSearch = !currentSearch || s.ticker.includes(currentSearch.toUpperCase());
+    return matchFilter && matchSearch;
+  });
+}
+
+function getSorted(arr) {
+  return [...arr].sort((a, b) => {
+    let va = a[sortKey] ?? '', vb = b[sortKey] ?? '';
+    // signal_date: DD.MM.YYYY → YYYYMMDD olarak karşılaştır
+    if (sortKey === 'signal_date') {
+      const toYMD = s => s ? s.split('.').reverse().join('') : '00000000';
+      va = toYMD(va); vb = toYMD(vb);
+    } else if (typeof va === 'string') {
+      va = va.toLowerCase(); vb = vb.toLowerCase();
+    }
+    return (va < vb ? -1 : va > vb ? 1 : 0) * sortDir;
+  });
+}
+
+function renderTable() {
+  const filtered = getSorted(getFiltered());
+  const tbody = document.getElementById('tableBody');
+
+  document.getElementById('noDataDiv').style.display = filtered.length === 0 ? '' : 'none';
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(s => {
+    const chgClass = s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu';
+    const chgSign  = s.change_pct > 0 ? '+' : '';
+    const inds     = s.indicators;
+
+    const indHtml = Object.values(inds).map(ind => {
+      // Crossover anı → özel mor badge
+      const isCross = ind.cross === true;
+      let cls;
+      if (isCross) {
+        cls = 'ind-badge ind-cross';
+      } else if ((s.signal === 'AL' && ind.bull) || (s.signal === 'SAT' && ind.bear)) {
+        cls = 'ind-badge ind-' + (s.signal === 'SAT' ? 'bear' : 'bull');
+      } else {
+        cls = 'ind-badge ind-neutral';
+      }
+      return `<span class="${cls}">${ind.label}</span>`;
+    }).join('');
+
+    // Skor max 8 (crossover = 2 puan alıyor)
+    const MAX_SCORE = 8;
+    const scoreVal  = s.signal === 'SAT' ? s.bear_score : s.bull_score;
+    const dotColor  = s.signal === 'SAT' ? 'filled-bear' : 'filled-bull';
+    const dots = Array.from({length: MAX_SCORE}, (_, i) =>
+      `<div class="score-dot ${i < scoreVal ? dotColor : 'empty'}"></div>`
+    ).join('');
+
+    const fmtPrice = s.price.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+    const isNew   = s.is_new_signal;
+    const dateTxt = s.signal_date || '—';
+    const dateHtml = isNew
+      ? `<span class="sig-date new-today">⚡ Bugün</span>`
+      : `<span class="sig-date">${dateTxt}</span>`;
+
+    return `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}">
+      <td><span class="ticker">${s.ticker}</span></td>
+      <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
+      <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
+      <td><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${s.signal}</span></td>
+      <td class="hide-mobile">${dateHtml}</td>
+      <td class="hide-mobile"><div class="score-bar">${dots}</div></td>
+      <td class="hide-mobile"><div class="indicators">${indHtml}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.className = b.classList.contains('filter-today') ? 'filter-btn filter-today' : 'filter-btn');
+  const classMap = { all: 'active-all', AL: 'active-al', SAT: 'active-sat', BEKLE: 'active-bekle', TODAY: 'active-today' };
+  btn.classList.add(classMap[f] || '');
+  renderTable();
+}
+
+function setSearch(v) {
+  currentSearch = v;
+  renderTable();
+}
+
+function sortTable(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = 1; }
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.remove('sorted-asc', 'sorted-desc');
+  });
+  const idx = ['ticker','price','change_pct','signal','bull_score'].indexOf(key);
+  if (idx >= 0) {
+    const ths = document.querySelectorAll('thead th');
+    ths[idx].classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+  }
+  renderTable();
+}
+
+async function manualRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  btn.disabled = true;
+  await fetch('/api/refresh', { method: 'POST' });
+  setTimeout(() => {
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+    fetchData();
+  }, 3000);
+}
+
+fetchData();
+</script>
+</body>
+</html>
