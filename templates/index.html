@@ -381,8 +381,6 @@
   }
 
   #chartMain  { height: 340px; }
-  #chartMacd  { height: 90px;  }
-  #chartRsi   { height: 90px;  }
 
   .chart-loading {
     display: flex;
@@ -445,8 +443,6 @@
     .index-header { padding: 10px 12px 6px; gap: 10px; }
     .charts-wrap { padding: 0 12px 10px; }
     #chartMain { height: 220px; }
-    #chartMacd { height: 70px; }
-    #chartRsi  { height: 70px; }
     .stats-bar { gap: 8px; }
     .stat-card { padding: 10px 12px; min-width: 80px; }
     .stat-card .stat-num { font-size: 20px; }
@@ -493,14 +489,6 @@
     <div style="display:none" id="chartsInner">
       <div class="chart-pane">
         <div id="chartMain"></div>
-      </div>
-      <div class="chart-pane">
-        <div class="chart-pane-label" style="right:8px;left:auto">MACD</div>
-        <div id="chartMacd"></div>
-      </div>
-      <div class="chart-pane">
-        <div class="chart-pane-label" style="right:8px;left:auto">RSI · ADX</div>
-        <div id="chartRsi"></div>
       </div>
     </div>
   </div>
@@ -565,7 +553,7 @@ const BASE_OPTS = {
   handleScale:     true,
 };
 
-let chartMain, chartMacd, chartRsi;
+let chartMain;
 
 function mkChart(el, height, showTime) {
   return LC.createChart(el, {
@@ -705,69 +693,10 @@ function buildCharts(d) {
   chartMain.timeScale().fitContent();
 
   // ── MACD Histogram ────────────────────────────────
-  const elMacd = document.getElementById('chartMacd');
-  chartMacd = mkChart(elMacd, 90, false);
-
-  const macdS = chartMacd.addHistogramSeries({ priceLineVisible: false, lastValueVisible: false, base: 0 });
-  macdS.setData(d.macd);
-  chartMacd.timeScale().fitContent();
-
-  // ── RSI + ADX ─────────────────────────────────────
-  const elRsi = document.getElementById('chartRsi');
-  chartRsi = mkChart(elRsi, 90, true);
-
-  const rsiS = chartRsi.addLineSeries({ color: '#a5d6ff', lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false });
-  rsiS.setData(d.rsi);
-
-  const adxS = chartRsi.addLineSeries({ color: '#d2a8ff', lineWidth: 1, priceLineVisible: false, lastValueVisible: false, lineStyle: LC.LineStyle.Dashed });
-  adxS.setData(d.adx);
-
-  [30, 50, 70].forEach(lvl => {
-    rsiS.createPriceLine({ price: lvl, color: lvl === 50 ? '#484f58' : '#30363d', lineWidth: 1, lineStyle: LC.LineStyle.Dotted, axisLabelVisible: true });
-  });
-
-  chartRsi.timeScale().fitContent();
-
-  // ── Crosshair sync ───────────────────────────────
-  // Her chart için ana seri referansını saklıyoruz
-  chartMacd._mainSeries = macdS;
-  chartRsi._mainSeries  = rsiS;
-  chartMain._mainSeries = candle;
-
-  function syncCross(src, targets) {
-    src.subscribeCrosshairMove(param => {
-      targets.forEach(tgt => {
-        if (!param || !param.time) { tgt.clearCrosshairPosition(); return; }
-        tgt.setCrosshairPosition(0, param.time, tgt._mainSeries);
-      });
-    });
-  }
-  syncCross(chartMain, [chartMacd, chartRsi]);
-  syncCross(chartMacd, [chartMain, chartRsi]);
-  syncCross(chartRsi,  [chartMain, chartMacd]);
-
-  // ── Zoom (zaman ekseni) sync ──────────────────────
-  let _syncing = false;
-  function syncRange(src, targets) {
-    src.timeScale().subscribeVisibleLogicalRangeChange(range => {
-      if (_syncing || !range) return;
-      _syncing = true;
-      targets.forEach(t => t.timeScale().setVisibleLogicalRange(range));
-      _syncing = false;
-    });
-  }
-  syncRange(chartMain, [chartMacd, chartRsi]);
-  syncRange(chartMacd, [chartMain, chartRsi]);
-  syncRange(chartRsi,  [chartMain, chartMacd]);
-
   // ── Pencere boyutu değişince yeniden boyutlandır ──
   window.addEventListener('resize', () => {
     const w = elMain.clientWidth;
-    if (w) {
-      chartMain.applyOptions({ width: w });
-      chartMacd.applyOptions({ width: elMacd.clientWidth || w });
-      chartRsi.applyOptions({  width: elRsi.clientWidth  || w });
-    }
+    if (w) chartMain.applyOptions({ width: w });
   });
 }
 
