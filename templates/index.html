@@ -492,7 +492,7 @@
     </div>
     <div style="display:none" id="chartsInner">
       <div class="chart-pane">
-        <div class="chart-pane-label">Fiyat · EMA20/50/200 · BB</div>
+        <div class="chart-pane-label">Fiyat · EMA12/99</div>
         <div id="chartMain"></div>
       </div>
       <div class="chart-pane">
@@ -983,8 +983,8 @@ function renderTable() {
       return `<span class="${cls}">${ind.label}</span>`;
     }).join('');
 
-    // Skor max 8 (crossover = 2 puan alıyor)
-    const MAX_SCORE = 8;
+    // Skor max 7 (crossover = 2 puan dahil, 5 kriter)
+    const MAX_SCORE = 7;
     const scoreVal  = s.signal === 'SAT' ? s.bear_score : s.bull_score;
     const dotColor  = s.signal === 'SAT' ? 'filled-bear' : 'filled-bull';
     const dots = Array.from({length: MAX_SCORE}, (_, i) =>
@@ -999,11 +999,24 @@ function renderTable() {
       ? `<span class="sig-date new-today">⚡ Bugün</span>`
       : `<span class="sig-date">${dateTxt}</span>`;
 
+    // Haftalık trend ikonu (+1 yükselen / -1 düşen / 0 belirsiz)
+    const wt = s.weekly_trend;
+    const wtHtml = wt === 1
+      ? '<span style="color:#3fb950;font-size:11px" title="Haftalık trend: Yükselen">↑</span>'
+      : wt === -1
+        ? '<span style="color:#f85149;font-size:11px" title="Haftalık trend: Düşen">↓</span>'
+        : '<span style="color:#484f58;font-size:11px" title="Haftalık trend: Belirsiz">–</span>';
+
+    // Konfirmasyon: 3+ bar aynı sinyal
+    const confHtml = s.confirmed
+      ? '<span style="color:#3fb950;font-size:10px;margin-left:4px" title="3+ bar onaylı">✓</span>'
+      : (s.signal !== 'BEKLE' ? '<span style="color:#e3b341;font-size:10px;margin-left:4px" title="Oluşuyor">…</span>' : '');
+
     return `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}">
-      <td><span class="ticker">${s.ticker}</span></td>
+      <td><span class="ticker">${s.ticker}</span> ${wtHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
-      <td><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${s.signal}</span></td>
+      <td><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${s.signal}</span>${confHtml}</td>
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile"><div class="score-bar">${dots}</div></td>
       <td class="hide-mobile"><div class="indicators">${indHtml}</div></td>

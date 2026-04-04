@@ -144,10 +144,35 @@ def compute_obv(close, volume):
     return (direction * volume).cumsum()
 
 
+def _weekly_trend(ticker: str) -> int:
+    """Haftalık EMA20 yönünü döner: +1 yükselen, -1 düşen, 0 belirsiz.
+    Hata durumunda 0 (gate bypass) döner."""
+    try:
+        wdf = yf.download(ticker, period="1y", interval="1wk",
+                          progress=False, auto_adjust=True, timeout=20)
+        if wdf is None or len(wdf) < 25:
+            return 0
+        if isinstance(wdf.columns, pd.MultiIndex):
+            wdf.columns = wdf.columns.get_level_values(0)
+            wdf = wdf.loc[:, ~wdf.columns.duplicated()]
+        wdf = wdf.dropna()
+        wclose = wdf["Close"].squeeze()
+        wema20 = compute_ema(wclose, 20)
+        if len(wema20) < 2:
+            return 0
+        # Son iki haftalık EMA20 değeri yükseliyorsa +1, düşüyorsa -1
+        return 1 if float(wema20.iloc[-1]) > float(wema20.iloc[-2]) else -1
+    except Exception:
+        return 0   # hata → gate bypass
+
+
 def analyze(ticker_base):
     ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
 
     try:
+        # Haftalık trend gate — büyük trend yönünü belirler
+        weekly_dir = _weekly_trend(ticker)  # +1 / -1 / 0
+
         # 2 yıllık veri → EMA99, Supertrend vb. için yeterli warmup
         df = yf.download(ticker, period="2y", interval="1d", progress=False, auto_adjust=True, timeout=30)
         if df is None or len(df) < 120:
@@ -195,67 +220,46 @@ def analyze(ticker_base):
         prev_c     = v2(close) if len(close) > 1 else c
         change_pct = ((c - prev_c) / prev_c) * 100 if prev_c != 0 else 0
 
-        # hacim oranı: bugünkü hacim / 20 günlük ortalama
-        vol_avg20  = float(volume.iloc[-20:].mean()) if len(volume) >= 20 else 1
-        vol_today  = float(volume.iloc[-1])
-        vol_ratio  = vol_today / vol_avg20 if vol_avg20 > 0 else 1.0
-
         # ── Sinyal koşulları ──────────────────────────────────
-        ema_bull  = e20 > e50 > e200
-        ema_bear  = e20 < e50 < e200
+        # 1) EMA 50/200 hizası — uzun vadeli trend doğrulaması
+        ema_bull  = e50 > e200
+        ema_bear  = e50 < e200
 
-        # EMA 12/99 crossover — geçen bar altında/üstünde, bu bar üstünde/altında
-        e12_cross_bull = (e12p < e99p) and (e12 > e99)   # kırılım upward
-        e12_cross_bear = (e12p > e99p) and (e12 < e99)   # kırılım downward
-        # Crossover yoksa pozisyonu da değerlendir (daha az ağırlık)
+        # 2) EMA 12/99 crossover (2pt) veya pozisyon (1pt)
+        e12_cross_bull = (e12p < e99p) and (e12 > e99)
+        e12_cross_bear = (e12p > e99p) and (e12 < e99)
         e12_pos_bull   = (not e12_cross_bull) and (e12 > e99)
         e12_pos_bear   = (not e12_cross_bear) and (e12 < e99)
 
-        # BB: fiyat BB orta bandın üstünde/altında (midline filter)
-        bb_bull   = c > bb_mid
-        bb_bear   = c < bb_mid
-
-        macd_bull = macd_val > 0 and macd_val > macd_prev
-        macd_bear = macd_val < 0 and macd_val < macd_prev
-
-        rsi_bull  = 50 <= rsi_val <= 75
-        rsi_bear  = 25 <= rsi_val <= 50
-
-        # ADX: yön bilgisiyle birlikte (DI+ > DI- = boğa trendi)
-        adx_bull  = adx_val > 25 and di_p > di_m
-        adx_bear  = adx_val > 25 and di_m > di_p
-
+        # 3) Supertrend yönü
         st_bull   = st_val == 1
         st_bear   = st_val == -1
 
-        # Hacim teyidi: yüksek hacim + fiyat yönü uyumu
-        vol_bull  = vol_ratio > 1.5 and c > prev_c
-        vol_bear  = vol_ratio > 1.5 and c < prev_c
+        # 4) ADX ≥ 30 + DI yönü (eşik 25→30: güçlü trend filtresi)
+        adx_bull  = adx_val >= 30 and di_p > di_m
+        adx_bear  = adx_val >= 30 and di_m > di_p
 
-        # OBV teyidi: OBV yükseliyor mu?
-        obv_bull  = obv_val > obv_prev
-        obv_bear  = obv_val < obv_prev
+        # 5) MACD sıfır çizgisi geçişi veya momentum devamı
+        macd_bull = macd_val > 0 and macd_val > macd_prev
+        macd_bear = macd_val < 0 and macd_val < macd_prev
 
-        # ── Puanlama (10 kriter üzerinden, eşik 5) ────────────
-        # Crossover = 2 puan, pozisyon = 1 puan
+        # ── Puanlama: max 7 (crossover 2pt dahil), eşik 4 ────
         bull_score = (
             int(ema_bull) +
             (2 if e12_cross_bull else int(e12_pos_bull)) +
-            int(bb_bull) + int(macd_bull) + int(rsi_bull) +
-            int(adx_bull) + int(st_bull) +
-            int(vol_bull) + int(obv_bull)
+            int(st_bull) + int(adx_bull) + int(macd_bull)
         )
         bear_score = (
             int(ema_bear) +
             (2 if e12_cross_bear else int(e12_pos_bear)) +
-            int(bb_bear) + int(macd_bear) + int(rsi_bear) +
-            int(adx_bear) + int(st_bear) +
-            int(vol_bear) + int(obv_bear)
+            int(st_bear) + int(adx_bear) + int(macd_bear)
         )
 
-        if bull_score >= 5:
+        # ── Haftalık gate: büyük trend ters yönde ise AL/SAT üretme ──
+        # weekly_dir == 0 → belirsiz / hata → gate bypass (sinyal üret)
+        if bull_score >= 4 and weekly_dir != -1:
             signal = "AL"
-        elif bear_score >= 5:
+        elif bear_score >= 4 and weekly_dir != 1:
             signal = "SAT"
         else:
             signal = "BEKLE"
@@ -266,77 +270,71 @@ def analyze(ticker_base):
         elif e12 > e99:      e12_label = f"12>{e99:.0f}"
         else:                e12_label = f"12<{e99:.0f}"
 
-        # ── Sinyal tarihi: geçmiş bar'ları kontrol et ────────────────────────
-        # vol_avg_series döngü dışında bir kez hesaplanır (O(n) → O(1) per bar)
-        vol_avg_series = volume.rolling(20, min_periods=1).mean()
-
+        # ── Sinyal tarihi: geçmiş bar sinyallerini kontrol et ───────────────
+        # Yeni motorla birebir aynı mantık (5 kriter, eşik 4, weekly gate yok)
         def bar_signal(i):
-            ci      = float(close.iloc[i])
-            prev_ci = float(close.iloc[i-1]) if i > 0 else ci
-            ei20    = float(ema20.iloc[i]);   ei50  = float(ema50.iloc[i])
-            ei200   = float(ema200.iloc[i]);  ei12  = float(ema12.iloc[i])
-            ei99    = float(ema99.iloc[i])
-            ri      = float(rsi.iloc[i])
-            mi      = float(macd_hist.iloc[i])
-            mp      = float(macd_hist.iloc[i-1]) if i > 0 else mi
-            bi_u    = float(bb_upper.iloc[i]);  bi_l = float(bb_lower.iloc[i])
-            bi_mid  = (bi_u + bi_l) / 2
-            ai      = float(adx.iloc[i])
-            dip_i   = float(di_plus.iloc[i]);   dim_i = float(di_minus.iloc[i])
-            sti     = int(supertrend.iloc[i])
-            vi      = float(volume.iloc[i])
-            va20    = float(vol_avg_series.iloc[i])   # O(1) — önceden hesaplı
-            vr      = vi / va20 if va20 > 0 else 1.0
-            obv_i   = float(obv.iloc[i]);  obv_p = float(obv.iloc[i-1]) if i > 0 else obv_i
-            e12p_   = float(ema12.iloc[i-1]) if i > 0 else ei12
-            e99p_   = float(ema99.iloc[i-1]) if i > 0 else ei99
-            ecb     = (e12p_ < e99p_) and (ei12 > ei99)
-            ecbr    = (e12p_ > e99p_) and (ei12 < ei99)
-            ep_b    = (not ecb)  and (ei12 > ei99)
-            ep_br   = (not ecbr) and (ei12 < ei99)
-            bs  = (int(ei20>ei50>ei200) + (2 if ecb  else int(ep_b))  +
-                   int(ci>bi_mid) + int(mi>0 and mi>mp) + int(50<=ri<=75) +
-                   int(ai>25 and dip_i>dim_i) + int(sti==1) +
-                   int(vr>1.5 and ci>prev_ci) + int(obv_i>obv_p))
-            brs = (int(ei20<ei50<ei200) + (2 if ecbr else int(ep_br)) +
-                   int(ci<bi_mid) + int(mi<0 and mi<mp) + int(25<=ri<=50) +
-                   int(ai>25 and dim_i>dip_i) + int(sti==-1) +
-                   int(vr>1.5 and ci<prev_ci) + int(obv_i<obv_p))
-            return "AL" if bs>=5 else "SAT" if brs>=5 else "BEKLE"
+            ei50  = float(ema50.iloc[i]);   ei200 = float(ema200.iloc[i])
+            ei12  = float(ema12.iloc[i]);   ei99  = float(ema99.iloc[i])
+            mi    = float(macd_hist.iloc[i])
+            mp    = float(macd_hist.iloc[i-1]) if i > 0 else mi
+            ai    = float(adx.iloc[i])
+            dip_i = float(di_plus.iloc[i]);  dim_i = float(di_minus.iloc[i])
+            sti   = int(supertrend.iloc[i])
+            e12p_ = float(ema12.iloc[i-1]) if i > 0 else ei12
+            e99p_ = float(ema99.iloc[i-1]) if i > 0 else ei99
+            ecb   = (e12p_ < e99p_) and (ei12 > ei99)
+            ecbr  = (e12p_ > e99p_) and (ei12 < ei99)
+            ep_b  = (not ecb)  and (ei12 > ei99)
+            ep_br = (not ecbr) and (ei12 < ei99)
+            bs  = (int(ei50 > ei200) + (2 if ecb  else int(ep_b)) +
+                   int(sti == 1)    + int(ai >= 30 and dip_i > dim_i) +
+                   int(mi > 0 and mi > mp))
+            brs = (int(ei50 < ei200) + (2 if ecbr else int(ep_br)) +
+                   int(sti == -1)   + int(ai >= 30 and dim_i > dip_i) +
+                   int(mi < 0 and mi < mp))
+            return "AL" if bs >= 4 else "SAT" if brs >= 4 else "BEKLE"
 
         today_str = datetime.now().strftime("%d.%m.%Y")
         signal_date = today_str   # default: bugün
+        signal_bars = 1           # kaç bar boyunca bu sinyal devam ediyor
         try:
             n = len(close)
             for i in range(n-2, max(n-120, 0), -1):
                 if bar_signal(i) != signal:
                     signal_date = close.index[i+1].strftime("%d.%m.%Y")
+                    signal_bars = (n - 1) - (i + 1) + 1   # kaç bar geçti
                     break
             else:
                 signal_date = close.index[max(n-120, 0)].strftime("%d.%m.%Y")
+                signal_bars = n - max(n-120, 0)
         except Exception:
             pass
 
         is_new_signal = (signal_date == today_str)
+        # 3 bar konfirmasyon: sinyal en az 3 gün boyunca tutarlıysa onaylı
+        confirmed = signal != "BEKLE" and signal_bars >= 3
 
         return {
-            "ticker":       ticker_base,
-            "price":        round(c, 2),
-            "change_pct":   round(change_pct, 2),
-            "signal":       signal,
-            "signal_date":  signal_date,
+            "ticker":        ticker_base,
+            "price":         round(c, 2),
+            "change_pct":    round(change_pct, 2),
+            "signal":        signal,
+            "signal_date":   signal_date,
+            "signal_bars":   signal_bars,
             "is_new_signal": is_new_signal,
-            "bull_score":   bull_score,
-            "bear_score":   bear_score,
+            "confirmed":     confirmed,    # 3+ bar boyunca aynı sinyal
+            "bull_score":    bull_score,
+            "bear_score":    bear_score,
+            "weekly_trend":  weekly_dir,   # +1 yükselen / -1 düşen / 0 belirsiz
             "indicators": {
-                "ema": {
-                    "label": "EMA 20/50/200",
-                    "value": f"{e20:.1f}/{e50:.1f}/{e200:.1f}",
+                "ema5200": {
+                    "label": "EMA50/200",
+                    "value": f"{e50:.0f}/{e200:.0f}",
                     "bull": ema_bull,   "bear": ema_bear,
                 },
                 "ema1299": {
                     "label": e12_label,
-                    "value": f"{e12:.1f}/{e99:.1f}",
+                    "value": f"{e12:.0f}/{e99:.0f}",
                     "bull": e12_cross_bull or e12_pos_bull,
                     "bear": e12_cross_bear or e12_pos_bear,
                     "cross": e12_cross_bull or e12_cross_bear,
@@ -346,30 +344,15 @@ def analyze(ticker_base):
                     "value": "LONG" if st_bull else "SHORT",
                     "bull": st_bull,   "bear": st_bear,
                 },
-                "bb": {
-                    "label": "BB",
-                    "value": f"{bbl:.1f}–{bbu:.1f}",
-                    "bull": bb_bull,   "bear": bb_bear,
+                "adx": {
+                    "label": f"ADX {adx_val:.0f}",
+                    "value": f"DI+{di_p:.0f}/DI-{di_m:.0f}",
+                    "bull": adx_bull,  "bear": adx_bear,
                 },
                 "macd": {
                     "label": "MACD",
                     "value": f"{macd_val:.2f}",
                     "bull": macd_bull, "bear": macd_bear,
-                },
-                "rsi": {
-                    "label": f"RSI {rsi_val:.0f}",
-                    "value": f"{rsi_val:.1f}",
-                    "bull": rsi_bull,  "bear": rsi_bear,
-                },
-                "adx": {
-                    "label": f"ADX {adx_val:.0f}",
-                    "value": f"{adx_val:.1f} DI+{di_p:.0f}/DI-{di_m:.0f}",
-                    "bull": adx_bull,  "bear": adx_bear,
-                },
-                "volume": {
-                    "label": "VOL",
-                    "value": f"x{vol_ratio:.1f}",
-                    "bull": vol_bull,  "bear": vol_bear,
                 },
             },
         }
@@ -452,14 +435,14 @@ def background_live_prices():
     """Her 15 saniyede bir canlı fiyat çek."""
     while True:
         fetch_live_prices()
-        time.sleep(15)
+        time.sleep(30)
 
 
 def background_refresh():
     while True:
         refresh_chart()
         refresh_data()
-        time.sleep(300)  # 5 dakikada bir indikatörleri güncelle
+        time.sleep(900)  # 15 dakikada bir indikatörleri güncelle
 
 
 @app.route("/")
