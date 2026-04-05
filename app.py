@@ -11,6 +11,26 @@ import json
 
 app = Flask(__name__)
 
+
+def _clean(obj):
+    """NaN/Inf değerlerini None'a çevir — JSON'da NaN geçersiz, JS crash yapar."""
+    import math
+    if isinstance(obj, float):
+        return None if (math.isnan(obj) or math.isinf(obj)) else obj
+    if isinstance(obj, dict):
+        return {k: _clean(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_clean(v) for v in obj]
+    return obj
+
+
+def safe_json(data):
+    """NaN-temizlenmiş JSON Response döner."""
+    return Response(
+        json.dumps(_clean(data)),
+        mimetype="application/json",
+    )
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -72,42 +92,54 @@ def compute_adx(high, low, close, period=14):
 
 
 def compute_supertrend(high, low, close, period=10, multiplier=3):
-    """ATR(10,3). Returns (direction_series, st_line_series).
-    direction: +1=bullish, -1=bearish
-    st_line : destek (bull) veya direnç (bear) — stop loss seviyesi."""
-    hl2 = (high + low) / 2
-    tr  = pd.concat([high - low,
-                     (high - close.shift(1)).abs(),
-                     (low  - close.shift(1)).abs()], axis=1).max(axis=1)
-    atr = tr.rolling(period).mean()
+    """ATR(10,3) — numpy tabanlı, hızlı vektörize implementasyon.
+    Returns (direction_arr ndarray, st_line_arr ndarray) — close ile aynı index."""
+    hl2 = (high.values + low.values) / 2
+    cl  = close.values
+    hi  = high.values
+    lo  = low.values
+    n   = len(cl)
+
+    # ATR (rolling mean of True Range)
+    tr_arr = np.maximum(hi - lo,
+             np.maximum(np.abs(hi - np.roll(cl, 1)),
+                        np.abs(lo - np.roll(cl, 1))))
+    tr_arr[0] = hi[0] - lo[0]
+
+    atr = np.empty(n)
+    atr[:period] = np.nan
+    atr[period - 1] = np.mean(tr_arr[:period])
+    for i in range(period, n):
+        atr[i] = (atr[i - 1] * (period - 1) + tr_arr[i]) / period
 
     basic_upper = hl2 + multiplier * atr
     basic_lower = hl2 - multiplier * atr
+
     final_upper = basic_upper.copy()
     final_lower = basic_lower.copy()
+    direction   = np.ones(n, dtype=int)
+    st_line     = np.full(n, np.nan)
 
-    for i in range(1, len(close)):
-        fu_prev = final_upper.iloc[i - 1]
-        fl_prev = final_lower.iloc[i - 1]
-        c_prev  = close.iloc[i - 1]
-        final_upper.iloc[i] = (basic_upper.iloc[i]
-                                if basic_upper.iloc[i] < fu_prev or c_prev > fu_prev
-                                else fu_prev)
-        final_lower.iloc[i] = (basic_lower.iloc[i]
-                                if basic_lower.iloc[i] > fl_prev or c_prev < fl_prev
-                                else fl_prev)
+    for i in range(1, n):
+        # final bands
+        final_upper[i] = (basic_upper[i]
+                          if basic_upper[i] < final_upper[i - 1] or cl[i - 1] > final_upper[i - 1]
+                          else final_upper[i - 1])
+        final_lower[i] = (basic_lower[i]
+                          if basic_lower[i] > final_lower[i - 1] or cl[i - 1] < final_lower[i - 1]
+                          else final_lower[i - 1])
 
-    direction = pd.Series(1, index=close.index, dtype=int)
-    st_line   = pd.Series(np.nan, index=close.index)
-    for i in range(1, len(close)):
-        prev = direction.iloc[i - 1]
-        if prev == 1:
-            direction.iloc[i] = 1 if close.iloc[i] >= final_lower.iloc[i] else -1
+        # direction
+        if direction[i - 1] == 1:
+            direction[i] = 1 if cl[i] >= final_lower[i] else -1
         else:
-            direction.iloc[i] = -1 if close.iloc[i] <= final_upper.iloc[i] else 1
-        st_line.iloc[i] = (final_lower.iloc[i] if direction.iloc[i] == 1
-                           else final_upper.iloc[i])
-    return direction, st_line
+            direction[i] = -1 if cl[i] <= final_upper[i] else 1
+
+        st_line[i] = final_lower[i] if direction[i] == 1 else final_upper[i]
+
+    dir_series = pd.Series(direction, index=close.index)
+    stl_series = pd.Series(st_line,   index=close.index)
+    return dir_series, stl_series
 
 
 def _weekly_trend(ticker: str) -> int:
@@ -163,7 +195,8 @@ def analyze(ticker_base):
         adx_val = v(adx)
         di_p    = v(di_plus); di_m = v(di_minus)
         st_val  = int(v(supertrend))
-        sl_val  = round(float(st_line.iloc[-1]), 2)
+        _sl_raw = float(st_line.iloc[-1])
+        sl_val  = round(_sl_raw, 2) if not np.isnan(_sl_raw) else None
 
         prev_c     = v2(close)
         change_pct = ((c - prev_c) / prev_c) * 100 if prev_c != 0 else 0
@@ -346,7 +379,7 @@ def index():
 @app.route("/api/data")
 def api_data():
     with _lock:
-        return jsonify({
+        return safe_json({
             "stocks":     _cache["data"],
             "updated_at": _cache["updated_at"],
             "loading":    len(_cache["data"]) == 0
@@ -453,20 +486,20 @@ def get_chart_data():
             except Exception:
                 continue
 
-        # Supertrend çizgisi — bull=yeşil / bear=kırmızı, SL göstergesi
+        # Supertrend çizgisi — iloc ile eriş (loc/label indexing sorununu önler)
         st_line_data = []
-        for ts in show_idx:
-            try:
-                stl = float(st_line_s[ts])
-                std = int(supertrend[ts])
-                if pd.isna(stl): continue
-                st_line_data.append({
-                    "time":  ts.strftime("%Y-%m-%d"),
-                    "value": round(stl, 2),
-                    "bull":  std == 1,
-                })
-            except Exception:
-                continue
+        stl_arr = st_line_s.values
+        std_arr = supertrend.values
+        all_dates = [ts.strftime("%Y-%m-%d") for ts in df.index]
+        for i, d_str in enumerate(all_dates):
+            if d_str not in show_set: continue
+            stl = stl_arr[i]
+            if np.isnan(stl): continue
+            st_line_data.append({
+                "time":  d_str,
+                "value": round(float(stl), 2),
+                "bull":  int(std_arr[i]) == 1,
+            })
 
         # ── Sinyal değişim işaretçileri (grafik okleri) ──────────────────
         def bar_sig(i):
@@ -502,8 +535,9 @@ def get_chart_data():
         di_p    = float(di_plus_s.iloc[-1]); di_m = float(di_minus_s.iloc[-1])
         e12_val = float(ema12.iloc[-1])
         e99_val = float(ema99.iloc[-1])
-        st_val  = int(supertrend.iloc[-1])
-        sl_val  = round(float(st_line_s.iloc[-1]), 2)
+        st_val   = int(supertrend.iloc[-1])
+        _sl_raw  = float(st_line_s.iloc[-1])
+        sl_val   = round(_sl_raw, 2) if not np.isnan(_sl_raw) else None
 
         st_bull  = st_val == 1;   st_bear  = st_val == -1
         adx_bull = adx_val >= 25 and di_p > di_m
@@ -554,7 +588,7 @@ def refresh_chart():
 @app.route("/api/chart")
 def api_chart():
     with _lock:
-        return jsonify({
+        return safe_json({
             "chart":      _chart_cache["data"],
             "updated_at": _chart_cache["updated_at"],
             "loading":    _chart_cache["data"] is None,
