@@ -272,7 +272,7 @@ def analyze(ticker_base):
             "signal_date":   signal_date,
             "signal_bars":   signal_bars,
             "signal_price":  signal_price,
-            "sl_level":      sl_val if signal != "BEKLE" else None,
+            "sl_level":      sl_val,
             "is_new_signal": is_new_signal,
             "confirmed":     confirmed,
             "bull_score":    bull_score,

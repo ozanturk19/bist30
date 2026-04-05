@@ -360,7 +360,7 @@
       <span id="ircSigPrice" class="irc-meta-val">—</span>
     </div>
     <div id="ircSlBox" class="irc-meta irc-sl-box" style="display:none">
-      <span class="irc-meta-label">SL</span>
+      <span class="irc-meta-label" id="ircSlLabel">SL</span>
       <span id="ircSl" class="irc-meta-val">—</span>
     </div>
     <div class="irc-score" id="ircScore"></div>
@@ -712,13 +712,15 @@ function renderIndexRow(stock) {
     entryBox.style.display = 'none';
   }
 
-  // SL seviyesi
+  // SL seviyesi — her zaman göster (BEKLE'de ST destek/direnç seviyesi)
   const slBox = document.getElementById('ircSlBox');
-  if (stock.sl_level && stock.signal !== 'BEKLE') {
+  const slLabel = document.getElementById('ircSlLabel');
+  if (stock.sl_level) {
     const slPct = ((stock.sl_level - stock.price) / stock.price * 100).toFixed(1);
     document.getElementById('ircSl').textContent =
       stock.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) +
       ' (' + slPct + '%)';
+    slLabel.textContent = stock.signal === 'BEKLE' ? 'ST' : 'SL';
     slBox.style.display = '';
   } else {
     slBox.style.display = 'none';
