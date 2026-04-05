@@ -536,11 +536,6 @@ function buildCharts(d) {
   });
   candle.setData(d.ohlc);
 
-  /* Sinyal işaretçileri (AL/SAT okları) */
-  if (d.markers && d.markers.length) {
-    candle.setMarkers(d.markers);
-  }
-
   /* Sol üst EMA legend */
   elMain.style.position = 'relative';
   const elLegend = document.createElement('div');
