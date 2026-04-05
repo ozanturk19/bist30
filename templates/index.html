@@ -28,421 +28,264 @@
     z-index: 100;
   }
 
-  header h1 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #f0f6fc;
-    letter-spacing: -0.3px;
-  }
+  header h1 { font-size: 18px; font-weight: 600; color: #f0f6fc; letter-spacing: -0.3px; }
+  header h1 span { color: #58a6ff; }
 
-  header h1 span {
-    color: #58a6ff;
-  }
+  .header-right { display: flex; align-items: center; gap: 12px; }
 
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  #updated {
-    font-size: 12px;
-    color: #8b949e;
-  }
+  #updated { font-size: 12px; color: #8b949e; }
 
   .btn-refresh {
-    background: #21262d;
-    border: 1px solid #30363d;
-    color: #c9d1d9;
-    padding: 6px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: background 0.15s, border-color 0.15s;
+    background: #21262d; border: 1px solid #30363d; color: #c9d1d9;
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; gap: 6px; transition: background 0.15s, border-color 0.15s;
   }
-
-  .btn-refresh:hover {
-    background: #30363d;
-    border-color: #8b949e;
-  }
-
-  .btn-refresh.spinning svg {
-    animation: spin 1s linear infinite;
-  }
-
+  .btn-refresh:hover { background: #30363d; border-color: #8b949e; }
+  .btn-refresh.spinning svg { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px 24px;
-  }
+  .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
 
   /* Stats bar */
-  .stats-bar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-
+  .stats-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
   .stat-card {
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius: 8px;
-    padding: 12px 20px;
-    flex: 1;
-    min-width: 120px;
-    text-align: center;
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 12px 20px; flex: 1; min-width: 120px; text-align: center;
   }
-
-  .stat-card .stat-num {
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 1;
-  }
-
-  .stat-card .stat-label {
-    font-size: 11px;
-    color: #8b949e;
-    margin-top: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
+  .stat-card .stat-num { font-size: 24px; font-weight: 700; line-height: 1; }
+  .stat-card .stat-label { font-size: 11px; color: #8b949e; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
   .stat-al .stat-num { color: #3fb950; }
   .stat-sat .stat-num { color: #f85149; }
   .stat-bekle .stat-num { color: #8b949e; }
   .stat-total .stat-num { color: #58a6ff; }
 
+  /* ── BIST30 Endeks Satırı ───────────────────────── */
+  .index-row-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .irc-ticker {
+    font-weight: 700;
+    font-size: 14px;
+    color: #58a6ff;
+    letter-spacing: 0.5px;
+    min-width: 54px;
+  }
+  .irc-divider {
+    width: 1px;
+    height: 22px;
+    background: #30363d;
+  }
+  .irc-price {
+    font-weight: 600;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+    color: #f0f6fc;
+  }
+  .irc-chg {
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .irc-chg.pos { color: #3fb950; }
+  .irc-chg.neg { color: #f85149; }
+  .irc-chg.neu { color: #8b949e; }
+
+  .irc-meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 3px 9px;
+  }
+  .irc-meta-label {
+    font-size: 10px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .irc-meta-val {
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #e6edf3;
+  }
+  .irc-sl-box .irc-meta-val { color: #f85149; }
+
+  .irc-inds { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+  .irc-score { display: flex; gap: 3px; align-items: center; }
+
   /* Filters */
   .filters {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    align-items: center;
+    display: flex; gap: 8px; margin-bottom: 14px;
+    flex-wrap: wrap; align-items: center;
   }
-
   .filter-btn {
-    padding: 5px 14px;
-    border-radius: 20px;
-    border: 1px solid #30363d;
-    background: transparent;
-    color: #8b949e;
-    cursor: pointer;
-    font-size: 13px;
-    transition: all 0.15s;
+    padding: 5px 14px; border-radius: 20px; border: 1px solid #30363d;
+    background: transparent; color: #8b949e; cursor: pointer;
+    font-size: 13px; transition: all 0.15s;
   }
-
   .filter-btn:hover { border-color: #8b949e; color: #c9d1d9; }
-  .filter-btn.active-all { background: #1f6feb; border-color: #1f6feb; color: #fff; }
-  .filter-btn.active-al { background: #1a4731; border-color: #3fb950; color: #3fb950; }
-  .filter-btn.active-sat { background: #3d0f0f; border-color: #f85149; color: #f85149; }
-  .filter-btn.active-bekle { background: #21262d; border-color: #8b949e; color: #8b949e; }
+  .filter-btn.active-all  { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+  .filter-btn.active-al   { background: #1a4731; border-color: #3fb950; color: #3fb950; }
+  .filter-btn.active-sat  { background: #3d0f0f; border-color: #f85149; color: #f85149; }
+  .filter-btn.active-bekle{ background: #21262d; border-color: #8b949e; color: #8b949e; }
+  .filter-today { border-color: #e3b341 !important; color: #e3b341 !important; }
+  .active-today { background: #e3b341 !important; color: #0d1117 !important; border-color: #e3b341 !important; }
 
   .search-input {
     margin-left: auto;
-    background: #0d1117;
-    border: 1px solid #30363d;
-    color: #e6edf3;
-    padding: 5px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    width: 160px;
-    outline: none;
+    background: #0d1117; border: 1px solid #30363d; color: #e6edf3;
+    padding: 5px 12px; border-radius: 6px; font-size: 13px;
+    width: 160px; outline: none;
   }
-
   .search-input:focus { border-color: #58a6ff; }
   .search-input::placeholder { color: #484f58; }
 
   /* Table */
   .table-wrap {
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius: 10px;
-    overflow: hidden;
+    background: #161b22; border: 1px solid #30363d;
+    border-radius: 10px; overflow: hidden;
   }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
+  table { width: 100%; border-collapse: collapse; }
   thead th {
-    background: #1c2128;
-    padding: 10px 16px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    color: #8b949e;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid #30363d;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
+    background: #1c2128; padding: 10px 16px; text-align: left;
+    font-size: 11px; font-weight: 600; color: #8b949e;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid #30363d; cursor: pointer;
+    user-select: none; white-space: nowrap;
   }
-
   thead th:hover { color: #c9d1d9; }
-
-  thead th.sorted-asc::after { content: " ↑"; }
+  thead th.sorted-asc::after  { content: " ↑"; }
   thead th.sorted-desc::after { content: " ↓"; }
 
-  tbody tr {
-    border-bottom: 1px solid #21262d;
-    transition: background 0.1s;
-  }
-
+  tbody tr { border-bottom: 1px solid #21262d; transition: background 0.1s; }
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: #1c2128; }
+  td { padding: 10px 16px; white-space: nowrap; }
 
-  td {
-    padding: 10px 16px;
-    white-space: nowrap;
-  }
-
-  .ticker {
-    font-weight: 600;
-    font-size: 14px;
-    color: #f0f6fc;
-    letter-spacing: 0.3px;
-  }
-
-  .price {
-    font-weight: 500;
-    color: #e6edf3;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .change, .change-pct {
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-    font-size: 13px;
-  }
-
-  .change.pos, .change-pct.pos { color: #3fb950; }
-  .change.neg, .change-pct.neg { color: #f85149; }
-  .change.neu, .change-pct.neu { color: #8b949e; }
+  .ticker { font-weight: 600; font-size: 14px; color: #f0f6fc; letter-spacing: 0.3px; }
+  .price  { font-weight: 500; color: #e6edf3; font-variant-numeric: tabular-nums; }
+  .change-pct { font-weight: 500; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .change-pct.pos { color: #3fb950; }
+  .change-pct.neg { color: #f85149; }
+  .change-pct.neu { color: #8b949e; }
 
   .signal-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 20px;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+  }
+  .signal-AL   { background: #1a4731; color: #3fb950; border: 1px solid #238636; }
+  .signal-SAT  { background: #3d0f0f; color: #f85149; border: 1px solid #da3633; }
+  .signal-BEKLE{ background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+
+  .sig-price {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: #8b949e;
+  }
+  .sl-val {
     font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.3px;
+    font-variant-numeric: tabular-nums;
+    color: #f85149;
+  }
+  .sl-pct {
+    font-size: 10px;
+    color: #8b949e;
+    margin-left: 3px;
   }
 
-  .signal-AL { background: #1a4731; color: #3fb950; border: 1px solid #238636; }
-  .signal-SAT { background: #3d0f0f; color: #f85149; border: 1px solid #da3633; }
-  .signal-BEKLE { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+  .indicators { display: flex; gap: 4px; flex-wrap: wrap; }
+  .ind-badge  { padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .ind-bull   { background: #1a4731; color: #3fb950; }
+  .ind-bear   { background: #3d0f0f; color: #f85149; }
+  .ind-neutral{ background: #21262d; color: #8b949e; }
 
-  .indicators {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-  }
-
-  .ind-badge {
-    padding: 2px 7px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 500;
-  }
-
-  .ind-bull { background: #1a4731; color: #3fb950; }
-  .ind-bear { background: #3d0f0f; color: #f85149; }
-  .ind-neutral { background: #21262d; color: #8b949e; }
-
-  .score-bar {
-    display: flex;
-    gap: 3px;
-    align-items: center;
-  }
-
-  .score-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
-
+  .score-bar  { display: flex; gap: 3px; align-items: center; }
+  .score-dot  { width: 8px; height: 8px; border-radius: 50%; }
   .score-dot.filled-bull { background: #3fb950; }
   .score-dot.filled-bear { background: #f85149; }
-  .score-dot.empty { background: #30363d; }
+  .score-dot.empty       { background: #30363d; }
 
   /* Loading */
-  .loading-overlay {
-    text-align: center;
-    padding: 60px 20px;
-    color: #8b949e;
-  }
-
+  .loading-overlay { text-align: center; padding: 60px 20px; color: #8b949e; }
   .spinner {
-    display: inline-block;
-    width: 28px;
-    height: 28px;
-    border: 3px solid #30363d;
-    border-top-color: #58a6ff;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 12px;
+    display: inline-block; width: 28px; height: 28px;
+    border: 3px solid #30363d; border-top-color: #58a6ff;
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;
   }
-
-  .no-data {
-    text-align: center;
-    padding: 40px;
-    color: #8b949e;
-    font-size: 13px;
-  }
+  .no-data { text-align: center; padding: 40px; color: #8b949e; font-size: 13px; }
 
   footer {
-    text-align: center;
-    padding: 20px;
-    color: #484f58;
-    font-size: 12px;
-    border-top: 1px solid #21262d;
-    margin-top: 24px;
+    text-align: center; padding: 20px; color: #484f58;
+    font-size: 12px; border-top: 1px solid #21262d; margin-top: 24px;
   }
 
   /* ── BIST30 Chart Section ─────────────────────────── */
-  .index-section {
-    background: #161b22;
-    border-bottom: 1px solid #30363d;
-  }
+  .index-section { background: #161b22; border-bottom: 1px solid #30363d; }
 
   .index-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 12px 24px 8px;
-    flex-wrap: wrap;
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px 24px 8px; flex-wrap: wrap;
   }
-
-  .index-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: #f0f6fc;
-    letter-spacing: 0.2px;
-  }
-
-  .index-price {
-    font-size: 20px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: #f0f6fc;
-  }
-
-  .index-change {
-    font-size: 13px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-
+  .index-title  { font-size: 15px; font-weight: 700; color: #f0f6fc; letter-spacing: 0.2px; }
+  .index-price  { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; color: #f0f6fc; }
+  .index-change { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .index-change.pos { color: #3fb950; }
   .index-change.neg { color: #f85149; }
   .index-change.neu { color: #8b949e; }
 
-  .index-inds {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-    margin-left: auto;
+  .index-sl {
+    font-size: 12px;
+    background: rgba(248,81,73,0.12);
+    border: 1px solid rgba(248,81,73,0.3);
+    color: #f85149;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-variant-numeric: tabular-nums;
   }
 
-  .charts-wrap {
-    padding: 0 24px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
+  .index-inds { display: flex; gap: 5px; flex-wrap: wrap; margin-left: auto; }
 
-  .chart-pane {
-    position: relative;
-    width: 100%;
-  }
-
-  .chart-pane-label {
-    position: absolute;
-    top: 4px;
-    left: 8px;
-    font-size: 10px;
-    font-weight: 600;
-    color: #484f58;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    z-index: 10;
-    pointer-events: none;
-  }
-
-  #chartMain  { height: 340px; }
+  .charts-wrap { padding: 0 24px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .chart-pane  { position: relative; width: 100%; }
+  #chartMain   { height: 380px; }
 
   .chart-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 520px;
-    color: #484f58;
-    font-size: 13px;
-    gap: 10px;
+    display: flex; align-items: center; justify-content: center;
+    height: 380px; color: #484f58; font-size: 13px; gap: 10px;
   }
 
-  /* ── Canlı fiyat flash ────────────────────────────── */
+  /* Flash */
   @keyframes flashUp   { 0%{background:#1a3a2a} 100%{background:transparent} }
   @keyframes flashDown { 0%{background:#3a1a1a} 100%{background:transparent} }
-
   .flash-up   { animation: flashUp   0.8s ease-out; color: #3fb950 !important; }
   .flash-down { animation: flashDown 0.8s ease-out; color: #f85149 !important; }
 
-  #liveTs {
-    font-size: 11px;
-    font-weight: 600;
-    color: #3fb950;
-    letter-spacing: 0.3px;
-    font-variant-numeric: tabular-nums;
-  }
+  #liveTs { font-size: 11px; font-weight: 600; color: #3fb950; letter-spacing: 0.3px; font-variant-numeric: tabular-nums; }
 
-  /* ── Supertrend & EMA12/99 badge ──────────────────── */
-  .ind-cross {
-    background: rgba(210,168,255,0.18);
-    color: #d2a8ff;
-    border: 1px solid rgba(210,168,255,0.4);
-    font-weight: 700;
-  }
+  .sig-date   { font-size: 11px; color: #8b949e; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .new-today  { color: #e3b341; font-weight: 700; font-size: 12px; }
+  .row-new-signal { background: rgba(227, 179, 65, 0.04); }
 
-  /* ── Sinyal Tarihi ────────────────────────────────── */
-  .sig-date {
-    font-size: 11px;
-    color: #8b949e;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  .new-today {
-    color: #e3b341;
-    font-weight: 700;
-    font-size: 12px;
-  }
-
-  .row-new-signal {
-    background: rgba(227, 179, 65, 0.04);
-  }
-
-  .filter-today { border-color: #e3b341 !important; color: #e3b341 !important; }
-  .active-today { background: #e3b341 !important; color: #0d1117 !important; border-color: #e3b341 !important; }
-
-  /* ── Responsive ───────────────────────────────────── */
+  /* Responsive */
   @media (max-width: 768px) {
     .container { padding: 12px; }
     header { padding: 12px; }
     .index-header { padding: 10px 12px 6px; gap: 10px; }
     .charts-wrap { padding: 0 12px 10px; }
-    #chartMain { height: 220px; }
+    #chartMain { height: 240px; }
     .stats-bar { gap: 8px; }
     .stat-card { padding: 10px 12px; min-width: 80px; }
     .stat-card .stat-num { font-size: 20px; }
@@ -451,6 +294,7 @@
     th.hide-mobile, td.hide-mobile { display: none; }
     .search-input { width: 120px; }
     .index-inds { margin-left: 0; }
+    .irc-inds { display: none; }
   }
 </style>
 </head>
@@ -480,6 +324,7 @@
     <span class="index-price" id="idxPrice">—</span>
     <span class="index-change neu" id="idxChange">—</span>
     <span class="signal-badge signal-BEKLE" id="idxSignal" style="font-size:12px">● BEKLE</span>
+    <span class="index-sl" id="idxSl" style="display:none">SL —</span>
     <div class="index-inds" id="idxInds"></div>
   </div>
   <div class="charts-wrap" id="chartsWrap">
@@ -498,9 +343,28 @@
 
   <div class="stats-bar" id="statsBar">
     <div class="stat-card stat-total"><div class="stat-num" id="statTotal">—</div><div class="stat-label">Toplam</div></div>
-    <div class="stat-card stat-al"><div class="stat-num" id="statAl">—</div><div class="stat-label">AL Sinyali</div></div>
-    <div class="stat-card stat-sat"><div class="stat-num" id="statSat">—</div><div class="stat-label">SAT Sinyali</div></div>
+    <div class="stat-card stat-al">   <div class="stat-num" id="statAl">—</div>   <div class="stat-label">AL Sinyali</div></div>
+    <div class="stat-card stat-sat">  <div class="stat-num" id="statSat">—</div>  <div class="stat-label">SAT Sinyali</div></div>
     <div class="stat-card stat-bekle"><div class="stat-num" id="statBekle">—</div><div class="stat-label">BEKLE</div></div>
+  </div>
+
+  <!-- ── XU030 Endeks Satırı ─────────────────────── -->
+  <div class="index-row-card" id="indexRowCard" style="display:none">
+    <div class="irc-ticker">XU030</div>
+    <div class="irc-divider"></div>
+    <span id="ircPrice" class="irc-price">—</span>
+    <span id="ircChg" class="irc-chg neu">—</span>
+    <span id="ircSignal" class="signal-badge signal-BEKLE">● BEKLE</span>
+    <div id="ircEntry" class="irc-meta" style="display:none">
+      <span class="irc-meta-label">Giriş</span>
+      <span id="ircSigPrice" class="irc-meta-val">—</span>
+    </div>
+    <div id="ircSlBox" class="irc-meta irc-sl-box" style="display:none">
+      <span class="irc-meta-label">SL</span>
+      <span id="ircSl" class="irc-meta-val">—</span>
+    </div>
+    <div class="irc-score" id="ircScore"></div>
+    <div class="indicators irc-inds" id="ircInds"></div>
   </div>
 
   <div class="filters">
@@ -524,7 +388,9 @@
           <th onclick="sortTable('price')">Fiyat (₺)</th>
           <th onclick="sortTable('change_pct')" class="hide-mobile">Değişim</th>
           <th onclick="sortTable('signal')">Sinyal</th>
-          <th onclick="sortTable('signal_date')" class="hide-mobile">Sinyal Tarihi</th>
+          <th onclick="sortTable('signal_date')" class="hide-mobile">Tarih</th>
+          <th class="hide-mobile">Giriş ₺</th>
+          <th class="hide-mobile">SL ₺</th>
           <th onclick="sortTable('bull_score')" class="hide-mobile">Güç</th>
           <th class="hide-mobile">İndikatörler</th>
         </tr>
@@ -541,7 +407,7 @@
 </footer>
 
 <script>
-/* ── Lightweight Charts v4 helpers ──────────────── */
+/* ── Lightweight Charts v4 ───────────────────────── */
 const LC = LightweightCharts;
 
 const BASE_OPTS = {
@@ -555,28 +421,23 @@ const BASE_OPTS = {
 
 let chartMain;
 
-function mkChart(el, height, showTime) {
+function mkChart(el, height) {
   return LC.createChart(el, {
     ...BASE_OPTS,
     width:     el.clientWidth || el.parentElement.clientWidth || 900,
     height:    height,
-    timeScale: { borderColor: '#30363d', timeVisible: true, visible: showTime },
+    timeScale: { borderColor: '#30363d', timeVisible: true, visible: true },
   });
 }
 
 function buildCharts(d) {
-  // Önce göster, sonra oluştur (offsetWidth için)
-  document.getElementById('chartLoading').style.display = 'none';
-  document.getElementById('chartsInner').style.display = '';
+  document.getElementById('chartLoading').style.display  = 'none';
+  document.getElementById('chartsInner').style.display   = '';
 
-  // ── Ana grafik ────────────────────────────────────
   const elMain = document.getElementById('chartMain');
-  chartMain = mkChart(elMain, 340, false);
+  chartMain = mkChart(elMain, 380);
 
-  // ── Custom primitive: EMA bantları arası dolgu ───
-  // 3-katman area-mask yaklaşımı financial chart'larda bozuluyor
-  // (mask serisi mumları kapatıyor, y-axis 0'a scala yapıyor).
-  // Çözüm: canvas'a doğrudan trapezoid çiz — sadece iki EMA arasını boyar.
+  /* EMA bantları arası dolgu — custom primitive */
   class EmaFillPrimitive {
     constructor(chart, e12data, e99data, bullCol, bearCol) {
       this._chart   = chart;
@@ -618,12 +479,9 @@ function buildCharts(d) {
                   const a2 = pts2[i-1], b2 = pts2[i];
                   ctx.fillStyle = b1.v > b2.v ? self._bullCol : self._bearCol;
                   ctx.beginPath();
-                  ctx.moveTo(a1.x, a1.y);
-                  ctx.lineTo(b1.x, b1.y);
-                  ctx.lineTo(b2.x, b2.y);
-                  ctx.lineTo(a2.x, a2.y);
-                  ctx.closePath();
-                  ctx.fill();
+                  ctx.moveTo(a1.x, a1.y); ctx.lineTo(b1.x, b1.y);
+                  ctx.lineTo(b2.x, b2.y); ctx.lineTo(a2.x, a2.y);
+                  ctx.closePath(); ctx.fill();
                 }
                 ctx.restore();
               });
@@ -634,14 +492,14 @@ function buildCharts(d) {
     }
   }
 
-  // -- EMA99 çizgisi (turuncu) — önce ekle, altında kalır --
+  /* EMA99 çizgisi (turuncu) */
   const e99Line = chartMain.addLineSeries({
     color: '#e3b341', lineWidth: 1.5,
     priceLineVisible: false, lastValueVisible: false,
   });
   e99Line.setData(d.ema99);
 
-  // -- EMA12 çizgisi (mavi) + dolgu primitive'i --
+  /* EMA12 çizgisi (mavi) + fill primitive */
   const e12Line = chartMain.addLineSeries({
     color: '#58a6ff', lineWidth: 1.5,
     priceLineVisible: false, lastValueVisible: false,
@@ -649,35 +507,54 @@ function buildCharts(d) {
   e12Line.setData(d.ema12);
   e12Line.attachPrimitive(new EmaFillPrimitive(
     chartMain, d.ema12, d.ema99,
-    'rgba(63,185,80,0.15)',   // bull: yeşil
-    'rgba(248,81,73,0.13)'    // bear: kırmızı
+    'rgba(63,185,80,0.13)',
+    'rgba(248,81,73,0.11)'
   ));
 
-  // -- Mum grafik (en üstte, EMAnın üzerinde çizilir) --
+  /* Supertrend çizgisi — bull: yeşil kesikli, bear: kırmızı kesikli */
+  const stBullData = d.st_line.filter(p => p.bull).map(p => ({ time: p.time, value: p.value }));
+  const stBearData = d.st_line.filter(p => !p.bull).map(p => ({ time: p.time, value: p.value }));
+
+  const stBullLine = chartMain.addLineSeries({
+    color: 'rgba(63,185,80,0.75)', lineWidth: 1.5, lineStyle: 2,
+    priceLineVisible: false, lastValueVisible: false,
+  });
+  stBullLine.setData(stBullData);
+
+  const stBearLine = chartMain.addLineSeries({
+    color: 'rgba(248,81,73,0.75)', lineWidth: 1.5, lineStyle: 2,
+    priceLineVisible: false, lastValueVisible: false,
+  });
+  stBearLine.setData(stBearData);
+
+  /* Mum grafik */
   const candle = chartMain.addCandlestickSeries({
     upColor: '#3fb950', downColor: '#f85149',
     borderUpColor: '#3fb950', borderDownColor: '#f85149',
     wickUpColor:   '#3fb950', wickDownColor:   '#f85149',
-    priceLineVisible: false,    // yatay kesik çizgiyi kaldır
-    lastValueVisible: true,     // sağ eksende güncel fiyat etiketi kalsın
+    priceLineVisible: false, lastValueVisible: true,
   });
   candle.setData(d.ohlc);
 
-  // -- Sol üst köşe EMA legend --
-  // Grafik div'ini relative yap, legend üstüne otur
+  /* Sinyal işaretçileri (AL/SAT okları) */
+  if (d.markers && d.markers.length) {
+    candle.setMarkers(d.markers);
+  }
+
+  /* Sol üst EMA legend */
   elMain.style.position = 'relative';
   const elLegend = document.createElement('div');
   elLegend.style.cssText = [
     'position:absolute', 'top:8px', 'left:12px', 'z-index:30',
     'display:flex', 'gap:14px', 'pointer-events:none',
     'font-size:11px', 'font-variant-numeric:tabular-nums',
-    'background:rgba(22,27,34,0.72)', 'padding:3px 8px',
+    'background:rgba(22,27,34,0.75)', 'padding:3px 8px',
     'border-radius:4px', 'backdrop-filter:blur(2px)',
   ].join(';');
   elMain.appendChild(elLegend);
 
   function updateLegend(v12, v99) {
-    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', {maximumFractionDigits: 0}) : '—';
+    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { maximumFractionDigits: 0 }) : '—';
     const last12 = v12 ?? d.ema12.at(-1)?.value;
     const last99 = v99 ?? d.ema99.at(-1)?.value;
     elLegend.innerHTML =
@@ -692,8 +569,6 @@ function buildCharts(d) {
 
   chartMain.timeScale().fitContent();
 
-  // ── MACD Histogram ────────────────────────────────
-  // ── Pencere boyutu değişince yeniden boyutlandır ──
   window.addEventListener('resize', () => {
     const w = elMain.clientWidth;
     if (w) chartMain.applyOptions({ width: w });
@@ -708,22 +583,30 @@ function renderIndexHeader(s) {
     s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
   const chgEl = document.getElementById('idxChange');
   chgEl.textContent = chgSign + s.change_pct.toFixed(2) + '%';
-  chgEl.className = 'index-change ' + chgClass;
+  chgEl.className   = 'index-change ' + chgClass;
 
   const sigEl = document.getElementById('idxSignal');
-  const icon = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
+  const icon  = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
   sigEl.textContent = icon + ' ' + s.signal;
-  sigEl.className = 'signal-badge signal-' + s.signal;
+  sigEl.className   = 'signal-badge signal-' + s.signal;
 
+  // SL seviyesi
+  const slEl = document.getElementById('idxSl');
+  if (s.sl_level && s.signal !== 'BEKLE') {
+    slEl.textContent = 'SL ' + s.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+    slEl.style.display = '';
+  } else {
+    slEl.style.display = 'none';
+  }
+
+  // 3 indikatör badge
   const inds = [
-    { label: 'EMA',          ok: s.signal === 'SAT' ? s.ema_bear  : s.ema_bull  },
-    { label: 'BB',           ok: s.signal === 'SAT' ? s.bb_bear   : s.bb_bull   },
-    { label: 'MACD',         ok: s.signal === 'SAT' ? s.macd_bear : s.macd_bull },
-    { label: 'RSI ' + s.rsi, ok: s.signal === 'SAT' ? s.rsi_bear  : s.rsi_bull  },
-    { label: 'ADX ' + s.adx, ok: s.adx_ok },
+    { label: 'ST',       ok: s.signal === 'SAT' ? s.st_bear  : s.st_bull  },
+    { label: 'ADX ' + s.adx, ok: s.signal === 'SAT' ? s.adx_bear : s.adx_bull },
+    { label: 'EMA12/99', ok: s.signal === 'SAT' ? s.e12_bear : s.e12_bull },
   ];
   document.getElementById('idxInds').innerHTML = inds.map(i =>
-    '<span class="ind-badge ' + (i.ok ? (s.signal === 'SAT' ? 'ind-bear' : 'ind-bull') : 'ind-neutral') + '">' + i.label + '</span>'
+    `<span class="ind-badge ${i.ok ? (s.signal === 'SAT' ? 'ind-bear' : 'ind-bull') : 'ind-neutral'}">${i.label}</span>`
   ).join('');
 }
 
@@ -746,9 +629,7 @@ let _sseRetry = 1000;
 
 function startSSE() {
   const es = new EventSource('/api/stream');
-
   es.onopen = () => { _sseRetry = 1000; };
-
   es.onmessage = (e) => {
     try {
       const msg = JSON.parse(e.data);
@@ -756,7 +637,6 @@ function startSSE() {
       applyLivePrices(msg.data, msg.ts);
     } catch(_) {}
   };
-
   es.onerror = () => {
     es.close();
     setTimeout(startSSE, _sseRetry);
@@ -765,7 +645,6 @@ function startSSE() {
 }
 
 function applyLivePrices(prices, ts) {
-  // Tablo satırlarını güncelle
   Object.entries(prices).forEach(([ticker, d]) => {
     const priceEl  = document.getElementById('lp-' + ticker);
     const changeEl = document.getElementById('lc-' + ticker);
@@ -774,61 +653,121 @@ function applyLivePrices(prices, ts) {
     const oldPrice = parseFloat(priceEl.dataset.raw || '0');
     const newPrice = d.price;
 
-    // Fiyatı güncelle
-    priceEl.dataset.raw = newPrice;
+    priceEl.dataset.raw  = newPrice;
     priceEl.textContent  = newPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
 
-    // Değişim yüzdesini güncelle
     if (changeEl) {
       const sign = d.change_pct >= 0 ? '+' : '';
-      changeEl.textContent  = sign + d.change_pct.toFixed(2) + '%';
-      changeEl.className    = 'change-pct ' + (d.change_pct > 0 ? 'pos' : d.change_pct < 0 ? 'neg' : 'neu');
+      changeEl.textContent = sign + d.change_pct.toFixed(2) + '%';
+      changeEl.className   = 'change-pct ' + (d.change_pct > 0 ? 'pos' : d.change_pct < 0 ? 'neg' : 'neu');
     }
 
-    // Flash efekti
     if (oldPrice && newPrice !== oldPrice) {
       priceEl.classList.remove('flash-up', 'flash-down');
-      void priceEl.offsetWidth; // reflow
+      void priceEl.offsetWidth;
       priceEl.classList.add(newPrice > oldPrice ? 'flash-up' : 'flash-down');
       setTimeout(() => priceEl.classList.remove('flash-up', 'flash-down'), 800);
     }
   });
 
-  // Saat göstergesi
   const liveEl = document.getElementById('liveTs');
   if (liveEl) liveEl.textContent = '● CANLI ' + ts;
 
-  // XU030 header fiyatını güncelle
+  // Chart header + endeks satırı — XU030 canlı fiyat
   if (prices['XU030']) {
-    const s = prices['XU030'];
-    document.getElementById('idxPrice').textContent =
-      s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+    const s    = prices['XU030'];
+    const sign = s.change_pct >= 0 ? '+' : '';
+    const cls  = s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu';
+    const fmtP = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+    const fmtC = sign + s.change_pct.toFixed(2) + '%';
+
+    document.getElementById('idxPrice').textContent = fmtP;
     const chgEl = document.getElementById('idxChange');
-    const sign  = s.change_pct >= 0 ? '+' : '';
-    chgEl.textContent = sign + s.change_pct.toFixed(2) + '%';
-    chgEl.className   = 'index-change ' + (s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu');
+    chgEl.textContent = fmtC;
+    chgEl.className   = 'index-change ' + cls;
+
+    // Endeks satırı
+    const ircPriceEl = document.getElementById('ircPrice');
+    if (ircPriceEl) ircPriceEl.textContent = fmtP;
+    const ircChgEl = document.getElementById('ircChg');
+    if (ircChgEl) { ircChgEl.textContent = fmtC; ircChgEl.className = 'irc-chg ' + cls; }
   }
 }
 
 startSSE();
 
 /* ── Stocks table ────────────────────────────────── */
-let allStocks = [];
+let allStocks    = [];
 let currentFilter = 'all';
 let currentSearch = '';
-let sortKey = 'signal';
-let sortDir = 1;
+let sortKey  = 'signal';
+let sortDir  = 1;
 let polling;
+
+function renderIndexRow(stock) {
+  const card = document.getElementById('indexRowCard');
+  if (!stock) { card.style.display = 'none'; return; }
+  card.style.display = 'flex';
+
+  const chgClass = stock.change_pct > 0 ? 'pos' : stock.change_pct < 0 ? 'neg' : 'neu';
+  const chgSign  = stock.change_pct > 0 ? '+' : '';
+
+  document.getElementById('ircPrice').textContent =
+    stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+  const ircChgEl = document.getElementById('ircChg');
+  ircChgEl.textContent = chgSign + stock.change_pct.toFixed(2) + '%';
+  ircChgEl.className   = 'irc-chg ' + chgClass;
+
+  const sigEl = document.getElementById('ircSignal');
+  const icon  = stock.signal === 'AL' ? '▲' : stock.signal === 'SAT' ? '▼' : '●';
+  sigEl.textContent = icon + ' ' + stock.signal;
+  sigEl.className   = 'signal-badge signal-' + stock.signal;
+
+  // Giriş fiyatı
+  const entryBox = document.getElementById('ircEntry');
+  if (stock.signal_price && stock.signal !== 'BEKLE') {
+    document.getElementById('ircSigPrice').textContent =
+      stock.signal_price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+    entryBox.style.display = '';
+  } else {
+    entryBox.style.display = 'none';
+  }
+
+  // SL seviyesi
+  const slBox = document.getElementById('ircSlBox');
+  if (stock.sl_level && stock.signal !== 'BEKLE') {
+    const slPct = ((stock.sl_level - stock.price) / stock.price * 100).toFixed(1);
+    document.getElementById('ircSl').textContent =
+      stock.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) +
+      ' (' + slPct + '%)';
+    slBox.style.display = '';
+  } else {
+    slBox.style.display = 'none';
+  }
+
+  // Güç noktaları (max 3)
+  const scoreVal = stock.signal === 'SAT' ? stock.bear_score : stock.bull_score;
+  const dotColor = stock.signal === 'SAT' ? 'filled-bear' : 'filled-bull';
+  document.getElementById('ircScore').innerHTML =
+    Array.from({ length: 3 }, (_, i) =>
+      `<div class="score-dot ${i < scoreVal ? dotColor : 'empty'}"></div>`
+    ).join('');
+
+  // İndikatör badge'leri
+  document.getElementById('ircInds').innerHTML =
+    Object.values(stock.indicators).map(ind => {
+      const ok  = stock.signal === 'AL' ? ind.bull : (stock.signal === 'SAT' ? ind.bear : false);
+      const cls = ok ? (stock.signal === 'SAT' ? 'ind-bear' : 'ind-bull') : 'ind-neutral';
+      return `<span class="ind-badge ${cls}">${ind.label}</span>`;
+    }).join('');
+}
 
 async function fetchData() {
   try {
-    const res = await fetch('/api/data');
+    const res  = await fetch('/api/data');
     const json = await res.json();
 
-    if (json.loading) {
-      setTimeout(fetchData, 3000);
-      return;
-    }
+    if (json.loading) { setTimeout(fetchData, 3000); return; }
 
     allStocks = json.stocks;
 
@@ -836,13 +775,16 @@ async function fetchData() {
       document.getElementById('updated').textContent = 'Güncellendi: ' + json.updated_at;
     }
 
+    // XU030 endeks satırını ayrı göster
+    const xu030 = allStocks.find(s => s.ticker === 'XU030');
+    renderIndexRow(xu030);
+
     updateStats();
     renderTable();
 
-    document.getElementById('loadingDiv').style.display = 'none';
-    document.getElementById('mainTable').style.display = '';
+    document.getElementById('loadingDiv').style.display  = 'none';
+    document.getElementById('mainTable').style.display   = '';
 
-    // Poll every 60s
     clearTimeout(polling);
     polling = setTimeout(fetchData, 60000);
 
@@ -852,14 +794,16 @@ async function fetchData() {
 }
 
 function updateStats() {
-  document.getElementById('statTotal').textContent = allStocks.length;
-  document.getElementById('statAl').textContent = allStocks.filter(s => s.signal === 'AL').length;
-  document.getElementById('statSat').textContent = allStocks.filter(s => s.signal === 'SAT').length;
-  document.getElementById('statBekle').textContent = allStocks.filter(s => s.signal === 'BEKLE').length;
+  const stocks = allStocks.filter(s => s.ticker !== 'XU030');
+  document.getElementById('statTotal').textContent = stocks.length;
+  document.getElementById('statAl').textContent    = stocks.filter(s => s.signal === 'AL').length;
+  document.getElementById('statSat').textContent   = stocks.filter(s => s.signal === 'SAT').length;
+  document.getElementById('statBekle').textContent = stocks.filter(s => s.signal === 'BEKLE').length;
 }
 
 function getFiltered() {
   return allStocks.filter(s => {
+    if (s.ticker === 'XU030') return false;   // endeks satırda gösteriliyor
     const matchFilter = currentFilter === 'all' || s.signal === currentFilter
                      || (currentFilter === 'TODAY' && s.is_new_signal);
     const matchSearch = !currentSearch || s.ticker.includes(currentSearch.toUpperCase());
@@ -870,7 +814,6 @@ function getFiltered() {
 function getSorted(arr) {
   return [...arr].sort((a, b) => {
     let va = a[sortKey] ?? '', vb = b[sortKey] ?? '';
-    // signal_date: DD.MM.YYYY → YYYYMMDD olarak karşılaştır
     if (sortKey === 'signal_date') {
       const toYMD = s => s ? s.split('.').reverse().join('') : '00000000';
       va = toYMD(va); vb = toYMD(vb);
@@ -883,14 +826,10 @@ function getSorted(arr) {
 
 function renderTable() {
   const filtered = getSorted(getFiltered());
-  const tbody = document.getElementById('tableBody');
+  const tbody    = document.getElementById('tableBody');
 
   document.getElementById('noDataDiv').style.display = filtered.length === 0 ? '' : 'none';
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = '';
-    return;
-  }
+  if (filtered.length === 0) { tbody.innerHTML = ''; return; }
 
   tbody.innerHTML = filtered.map(s => {
     const chgClass = s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu';
@@ -898,28 +837,20 @@ function renderTable() {
     const inds     = s.indicators;
 
     const indHtml = Object.values(inds).map(ind => {
-      // Crossover anı → özel mor badge
-      const isCross = ind.cross === true;
-      let cls;
-      if (isCross) {
-        cls = 'ind-badge ind-cross';
-      } else if ((s.signal === 'AL' && ind.bull) || (s.signal === 'SAT' && ind.bear)) {
-        cls = 'ind-badge ind-' + (s.signal === 'SAT' ? 'bear' : 'bull');
-      } else {
-        cls = 'ind-badge ind-neutral';
-      }
+      const ok = (s.signal === 'AL' && ind.bull) || (s.signal === 'SAT' && ind.bear);
+      const cls = ok ? 'ind-badge ind-' + (s.signal === 'SAT' ? 'bear' : 'bull') : 'ind-badge ind-neutral';
       return `<span class="${cls}">${ind.label}</span>`;
     }).join('');
 
-    // Skor max 7 (crossover = 2 puan dahil, 5 kriter)
-    const MAX_SCORE = 7;
+    // Güç noktaları — max 3
+    const MAX_SCORE = 3;
     const scoreVal  = s.signal === 'SAT' ? s.bear_score : s.bull_score;
     const dotColor  = s.signal === 'SAT' ? 'filled-bear' : 'filled-bull';
-    const dots = Array.from({length: MAX_SCORE}, (_, i) =>
+    const dots = Array.from({ length: MAX_SCORE }, (_, i) =>
       `<div class="score-dot ${i < scoreVal ? dotColor : 'empty'}"></div>`
     ).join('');
 
-    const fmtPrice = s.price.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const fmtPrice = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     const isNew   = s.is_new_signal;
     const dateTxt = s.signal_date || '—';
@@ -927,18 +858,31 @@ function renderTable() {
       ? `<span class="sig-date new-today">⚡ Bugün</span>`
       : `<span class="sig-date">${dateTxt}</span>`;
 
-    // Haftalık trend ikonu (+1 yükselen / -1 düşen / 0 belirsiz)
+    // Haftalık trend ikon
     const wt = s.weekly_trend;
     const wtHtml = wt === 1
-      ? '<span style="color:#3fb950;font-size:11px" title="Haftalık trend: Yükselen">↑</span>'
+      ? '<span style="color:#3fb950;font-size:11px" title="Haftalık: Yükselen">↑</span>'
       : wt === -1
-        ? '<span style="color:#f85149;font-size:11px" title="Haftalık trend: Düşen">↓</span>'
-        : '<span style="color:#484f58;font-size:11px" title="Haftalık trend: Belirsiz">–</span>';
+        ? '<span style="color:#f85149;font-size:11px" title="Haftalık: Düşen">↓</span>'
+        : '<span style="color:#484f58;font-size:11px" title="Haftalık: Belirsiz">–</span>';
 
-    // Konfirmasyon: 3+ bar aynı sinyal
+    // 3-bar onay
     const confHtml = s.confirmed
       ? '<span style="color:#3fb950;font-size:10px;margin-left:4px" title="3+ bar onaylı">✓</span>'
       : (s.signal !== 'BEKLE' ? '<span style="color:#e3b341;font-size:10px;margin-left:4px" title="Oluşuyor">…</span>' : '');
+
+    // Giriş fiyatı
+    const sigPriceHtml = (s.signal_price && s.signal !== 'BEKLE')
+      ? `<span class="sig-price">${s.signal_price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>`
+      : '<span style="color:#484f58">—</span>';
+
+    // SL seviyesi + risk yüzdesi
+    let slHtml = '<span style="color:#484f58">—</span>';
+    if (s.sl_level && s.signal !== 'BEKLE') {
+      const slPct = ((s.sl_level - s.price) / s.price * 100).toFixed(1);
+      slHtml = `<span class="sl-val">${s.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>` +
+               `<span class="sl-pct">${slPct}%</span>`;
+    }
 
     return `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}">
       <td><span class="ticker">${s.ticker}</span> ${wtHtml}</td>
@@ -946,6 +890,8 @@ function renderTable() {
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
       <td><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${s.signal}</span>${confHtml}</td>
       <td class="hide-mobile">${dateHtml}</td>
+      <td class="hide-mobile">${sigPriceHtml}</td>
+      <td class="hide-mobile">${slHtml}</td>
       <td class="hide-mobile"><div class="score-bar">${dots}</div></td>
       <td class="hide-mobile"><div class="indicators">${indHtml}</div></td>
     </tr>`;
@@ -954,27 +900,26 @@ function renderTable() {
 
 function setFilter(f, btn) {
   currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.className = b.classList.contains('filter-today') ? 'filter-btn filter-today' : 'filter-btn');
-  const classMap = { all: 'active-all', AL: 'active-al', SAT: 'active-sat', BEKLE: 'active-bekle', TODAY: 'active-today' };
+  document.querySelectorAll('.filter-btn').forEach(b =>
+    b.className = b.classList.contains('filter-today') ? 'filter-btn filter-today' : 'filter-btn'
+  );
+  const classMap = { all:'active-all', AL:'active-al', SAT:'active-sat', BEKLE:'active-bekle', TODAY:'active-today' };
   btn.classList.add(classMap[f] || '');
   renderTable();
 }
 
-function setSearch(v) {
-  currentSearch = v;
-  renderTable();
-}
+function setSearch(v) { currentSearch = v; renderTable(); }
 
 function sortTable(key) {
   if (sortKey === key) sortDir *= -1;
   else { sortKey = key; sortDir = 1; }
-  document.querySelectorAll('thead th').forEach(th => {
-    th.classList.remove('sorted-asc', 'sorted-desc');
-  });
-  const idx = ['ticker','price','change_pct','signal','bull_score'].indexOf(key);
-  if (idx >= 0) {
-    const ths = document.querySelectorAll('thead th');
-    ths[idx].classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+  document.querySelectorAll('thead th').forEach(th =>
+    th.classList.remove('sorted-asc', 'sorted-desc')
+  );
+  const colMap = { ticker:0, price:1, change_pct:2, signal:3, signal_date:4, bull_score:7 };
+  if (colMap[key] !== undefined) {
+    document.querySelectorAll('thead th')[colMap[key]]
+      .classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
   }
   renderTable();
 }
