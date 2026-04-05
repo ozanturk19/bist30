@@ -92,27 +92,29 @@ def compute_adx(high, low, close, period=14):
 
 
 def compute_supertrend(high, low, close, period=10, multiplier=3):
-    """ATR(10,3) — numpy tabanlı, hızlı vektörize implementasyon.
-    Returns (direction_arr ndarray, st_line_arr ndarray) — close ile aynı index."""
+    """ATR(10,3) — numpy tabanlı.
+    Returns (direction Series, st_line Series); warmup barları NaN."""
     hl2 = (high.values + low.values) / 2
     cl  = close.values
     hi  = high.values
     lo  = low.values
     n   = len(cl)
 
-    # ATR (rolling mean of True Range)
-    tr_arr = np.maximum(hi - lo,
-             np.maximum(np.abs(hi - np.roll(cl, 1)),
-                        np.abs(lo - np.roll(cl, 1))))
-    tr_arr[0] = hi[0] - lo[0]
+    # True Range
+    tr_arr      = np.empty(n)
+    tr_arr[0]   = hi[0] - lo[0]
+    tr_arr[1:]  = np.maximum(hi[1:] - lo[1:],
+                  np.maximum(np.abs(hi[1:] - cl[:-1]),
+                             np.abs(lo[1:] - cl[:-1])))
 
-    atr = np.empty(n)
-    atr[:period] = np.nan
-    atr[period - 1] = np.mean(tr_arr[:period])
-    for i in range(period, n):
-        atr[i] = (atr[i - 1] * (period - 1) + tr_arr[i]) / period
+    # ATR — Wilder smoothing (SMA seed)
+    atr         = np.full(n, np.nan)
+    if n >= period:
+        atr[period - 1] = np.mean(tr_arr[:period])
+        for i in range(period, n):
+            atr[i] = (atr[i - 1] * (period - 1) + tr_arr[i]) / period
 
-    basic_upper = hl2 + multiplier * atr
+    basic_upper = hl2 + multiplier * atr   # NaN where atr is NaN
     basic_lower = hl2 - multiplier * atr
 
     final_upper = basic_upper.copy()
@@ -120,16 +122,25 @@ def compute_supertrend(high, low, close, period=10, multiplier=3):
     direction   = np.ones(n, dtype=int)
     st_line     = np.full(n, np.nan)
 
-    for i in range(1, n):
-        # final bands
-        final_upper[i] = (basic_upper[i]
-                          if basic_upper[i] < final_upper[i - 1] or cl[i - 1] > final_upper[i - 1]
-                          else final_upper[i - 1])
-        final_lower[i] = (basic_lower[i]
-                          if basic_lower[i] > final_lower[i - 1] or cl[i - 1] < final_lower[i - 1]
-                          else final_lower[i - 1])
+    # Geçerli ilk index (ATR warmup sonrası)
+    start = period  # atr[period-1] geçerli, ama final band için period'dan başla
 
-        # direction
+    for i in range(start, n):
+        pu = final_upper[i - 1]
+        pl = final_lower[i - 1]
+
+        # NaN warmup koruması
+        if np.isnan(pu):
+            pu = basic_upper[i]
+        if np.isnan(pl):
+            pl = basic_lower[i]
+
+        bu = basic_upper[i]
+        bl = basic_lower[i]
+
+        final_upper[i] = bu if (np.isnan(bu) or bu < pu or cl[i - 1] > pu) else pu
+        final_lower[i] = bl if (np.isnan(bl) or bl > pl or cl[i - 1] < pl) else pl
+
         if direction[i - 1] == 1:
             direction[i] = 1 if cl[i] >= final_lower[i] else -1
         else:
