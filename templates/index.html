@@ -511,22 +511,6 @@ function buildCharts(d) {
     'rgba(248,81,73,0.11)'
   ));
 
-  /* Supertrend çizgisi — bull: yeşil kesikli, bear: kırmızı kesikli */
-  const stBullData = d.st_line.filter(p => p.bull).map(p => ({ time: p.time, value: p.value }));
-  const stBearData = d.st_line.filter(p => !p.bull).map(p => ({ time: p.time, value: p.value }));
-
-  const stBullLine = chartMain.addLineSeries({
-    color: 'rgba(63,185,80,0.75)', lineWidth: 1.5, lineStyle: 2,
-    priceLineVisible: false, lastValueVisible: false,
-  });
-  stBullLine.setData(stBullData);
-
-  const stBearLine = chartMain.addLineSeries({
-    color: 'rgba(248,81,73,0.75)', lineWidth: 1.5, lineStyle: 2,
-    priceLineVisible: false, lastValueVisible: false,
-  });
-  stBearLine.setData(stBearData);
-
   /* Mum grafik */
   const candle = chartMain.addCandlestickSeries({
     upColor: '#3fb950', downColor: '#f85149',
