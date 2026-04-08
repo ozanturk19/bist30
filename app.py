@@ -153,6 +153,44 @@ def compute_supertrend(high, low, close, period=10, multiplier=3):
     return dir_series, stl_series
 
 
+def _fill_intraday_gaps(df, ticker):
+    """Günlük data'da eksik günleri 1m data'dan OHLC sentezleyerek doldur.
+    yfinance bazen son 1-2 günün daily barını geciktiriyor."""
+    try:
+        df5d = yf.download(ticker, period="5d", interval="1m",
+                           progress=False, auto_adjust=True, timeout=20)
+        if df5d is None or df5d.empty:
+            return df
+        if isinstance(df5d.columns, pd.MultiIndex):
+            df5d.columns = df5d.columns.get_level_values(0)
+            df5d = df5d.loc[:, ~df5d.columns.duplicated()]
+
+        last_daily = df.index[-1].date()
+        added = False
+        for day in sorted(set(df5d.index.date)):
+            if day <= last_daily:
+                continue
+            day_bars = df5d[df5d.index.map(lambda x: x.date()) == day].dropna()
+            if len(day_bars) < 30:   # kısmen gelen gün, geç
+                continue
+            ts = pd.Timestamp(day, tz=df.index.tz)
+            synth = pd.DataFrame({
+                "Open":   float(day_bars["Open"].iloc[0]),
+                "High":   float(day_bars["High"].max()),
+                "Low":    float(day_bars["Low"].min()),
+                "Close":  float(day_bars["Close"].iloc[-1]),
+                "Volume": float(day_bars["Volume"].sum()) if "Volume" in day_bars else 0,
+            }, index=pd.DatetimeIndex([ts]))
+            df = pd.concat([df, synth[df.columns]])
+            added = True
+        if added:
+            logger.info("_fill_intraday_gaps(%s): eksik gun(ler) 1m'den eklendi", ticker)
+        return df
+    except Exception as e:
+        logger.warning("_fill_intraday_gaps(%s): %s", ticker, e)
+        return df
+
+
 def _weekly_trend(ticker: str) -> int:
     """Haftalık EMA20 yönü: +1 yükselen, -1 düşen, 0 belirsiz/hata."""
     try:
@@ -189,6 +227,8 @@ def analyze(ticker_base):
             df = df.loc[:, ~df.columns.duplicated()]
 
         df    = df.dropna()
+        df    = _fill_intraday_gaps(df, ticker)   # yfinance gecikmeli günleri 1m'den tamamla
+        df    = df.sort_index()
         close = df["Close"].squeeze()
         high  = df["High"].squeeze()
         low   = df["Low"].squeeze()
@@ -461,6 +501,8 @@ def get_chart_data():
             return None
 
         df    = df[["Open", "High", "Low", "Close"]].dropna()
+        df    = _fill_intraday_gaps(df, "XU030.IS")   # eksik günleri tamamla
+        df    = df.sort_index()
         close = df["Close"]
         high  = df["High"]
         low   = df["Low"]
