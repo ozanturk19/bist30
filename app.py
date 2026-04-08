@@ -348,9 +348,11 @@ def fetch_live_prices():
                 if closes is None or len(closes) < 2:
                     continue
 
-                price = float(closes.iloc[-1])
-                prev  = float(closes.iloc[-2])
-                chg   = ((price - prev) / prev * 100) if prev else 0
+                price      = float(closes.iloc[-1])
+                today_date = closes.index[-1].date()
+                prev_bars  = closes[closes.index.map(lambda x: x.date()) < today_date]
+                prev       = float(prev_bars.iloc[-1]) if len(prev_bars) > 0 else float(closes.iloc[-2])
+                chg        = ((price - prev) / prev * 100) if prev else 0
 
                 payload[t] = {
                     "price":      round(price, 2),
