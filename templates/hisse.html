@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ ticker }} Teknik Analiz — Supertrend & EMA Sinyal | BIST30 Panel</title>
+<meta name="description" content="{{ ticker }} ({{ name }}) güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik AL/SAT/BEKLE analizi.">
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-wrap: wrap;
+  }
+
+  .back-btn {
+    display: flex; align-items: center; gap: 6px;
+    color: #8b949e; font-size: 13px;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    background: #21262d;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .back-btn:hover { background: #30363d; color: #e6edf3; }
+
+  .header-ticker {
+    font-size: 22px;
+    font-weight: 700;
+    color: #f0f6fc;
+    letter-spacing: -0.5px;
+  }
+  .header-name {
+    font-size: 13px;
+    color: #8b949e;
+    margin-top: 1px;
+  }
+
+  .header-price-group {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .header-price {
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #f0f6fc;
+  }
+  .header-chg {
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .pos { color: #3fb950; }
+  .neg { color: #f85149; }
+  .neu { color: #8b949e; }
+
+  .signal-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .signal-AL   { background: rgba(63,185,80,.18);  color: #3fb950; border: 1px solid rgba(63,185,80,.35);  }
+  .signal-SAT  { background: rgba(248,81,73,.18);  color: #f85149; border: 1px solid rgba(248,81,73,.35);  }
+  .signal-BEKLE{ background: rgba(139,148,158,.15); color: #8b949e; border: 1px solid rgba(139,148,158,.3); }
+
+  /* ── Container ── */
+  .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
+
+  /* ── Grafik bölümü ── */
+  .chart-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .chart-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #21262d;
+    flex-wrap: wrap;
+  }
+  .chart-label {
+    font-size: 12px;
+    color: #8b949e;
+    font-weight: 500;
+  }
+  #chartLoading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 380px;
+    color: #8b949e;
+    font-size: 13px;
+  }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid #30363d;
+    border-top-color: #58a6ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #chartsInner { display: none; }
+  #chartMain   { height: 380px; }
+
+  /* ── Info cards ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .info-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .info-card-label {
+    font-size: 11px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .info-card-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #f0f6fc;
+    font-variant-numeric: tabular-nums;
+  }
+  .info-card-sub {
+    font-size: 12px;
+    color: #8b949e;
+    margin-top: 4px;
+  }
+  .score-dots {
+    display: flex;
+    gap: 5px;
+    margin-top: 6px;
+  }
+  .score-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .dot-bull  { background: #3fb950; }
+  .dot-bear  { background: #f85149; }
+  .dot-empty { background: #30363d; }
+
+  /* ── İndikatör badges ── */
+  .indicators-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-size: 12px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .ind-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .ind-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .ind-bull    { background: rgba(63,185,80,.15);  color: #3fb950; border: 1px solid rgba(63,185,80,.3);  }
+  .ind-bear    { background: rgba(248,81,73,.15);  color: #f85149; border: 1px solid rgba(248,81,73,.3);  }
+  .ind-neutral { background: rgba(139,148,158,.12); color: #8b949e; border: 1px solid rgba(139,148,158,.25); }
+
+  .ind-detail {
+    font-size: 11px;
+    color: #484f58;
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  /* ── Sinyal geçmişi ── */
+  .history-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+  }
+  .history-table th {
+    text-align: left;
+    font-size: 11px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-bottom: 1px solid #21262d;
+  }
+  .history-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #21262d;
+    font-size: 13px;
+    color: #c9d1d9;
+  }
+  .history-table tr:last-child td { border-bottom: none; }
+  .history-table tr:hover td { background: rgba(255,255,255,.02); }
+
+  /* ── Diğer hisseler ── */
+  .others-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .others-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .other-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #c9d1d9;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .other-chip:hover { background: #30363d; border-color: #8b949e; color: #f0f6fc; }
+  .other-chip .chip-sig {
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .chip-al   { color: #3fb950; }
+  .chip-sat  { color: #f85149; }
+  .chip-bekle{ color: #484f58; }
+
+  /* ── Metodoloji notu ── */
+  .methodology {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    font-size: 12px;
+    color: #8b949e;
+    line-height: 1.6;
+  }
+  .methodology strong { color: #c9d1d9; }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: #484f58;
+    border-top: 1px solid #21262d;
+  }
+
+  /* Flash animasyonları */
+  @keyframes flashUp   { 0%,100%{color:inherit} 50%{color:#3fb950} }
+  @keyframes flashDown { 0%,100%{color:inherit} 50%{color:#f85149} }
+  .flash-up   { animation: flashUp   0.6s ease; }
+  .flash-down { animation: flashDown 0.6s ease; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    header { gap: 8px; padding: 12px 16px; }
+    .header-ticker { font-size: 18px; }
+    .header-price  { font-size: 18px; }
+    .container { padding: 12px 16px; }
+    #chartMain { height: 260px; }
+    #chartLoading { height: 260px; }
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="header-ticker">{{ ticker }}</div>
+    <div class="header-name">{{ name }}</div>
+  </div>
+  <div class="header-price-group">
+    <span class="header-price" id="hpPrice">—</span>
+    <span class="header-chg neu" id="hpChg">—</span>
+    <span class="signal-badge signal-BEKLE" id="hpSignal">● BEKLE</span>
+  </div>
+  <span id="liveTs" style="font-size:12px;color:#484f58;margin-left:4px">○</span>
+</header>
+
+<div class="container">
+
+  <!-- Grafik -->
+  <div class="chart-section">
+    <div class="chart-header">
+      <span class="chart-label">{{ ticker }} — Günlük Grafik (2 Yıl)</span>
+      <span id="emaLegend" style="font-size:11px;color:#8b949e;margin-left:auto"></span>
+    </div>
+    <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
+    <div id="chartsInner"><div id="chartMain"></div></div>
+  </div>
+
+  <!-- Özet kartlar -->
+  <div class="info-grid" id="infoGrid">
+    <div class="info-card">
+      <div class="info-card-label">Güncel Sinyal</div>
+      <div id="icSignal" class="info-card-value">—</div>
+      <div class="score-dots" id="icDots"></div>
+      <div class="info-card-sub" id="icDate">—</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-label">Giriş Fiyatı</div>
+      <div class="info-card-value" id="icEntry">—</div>
+      <div class="info-card-sub" id="icEntryLbl">Sinyal başladığındaki kapanış</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-label">Stop Loss (ST)</div>
+      <div class="info-card-value" id="icSl">—</div>
+      <div class="info-card-sub" id="icSlPct">—</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-label">Süre</div>
+      <div class="info-card-value" id="icBars">—</div>
+      <div class="info-card-sub">bar (gün)</div>
+    </div>
+  </div>
+
+  <!-- İndikatörler -->
+  <div class="indicators-section">
+    <div class="section-title">İndikatör Durumu</div>
+    <div class="ind-row" id="indRow">
+      <span class="ind-badge ind-neutral">Yükleniyor…</span>
+    </div>
+  </div>
+
+  <!-- Sinyal Geçmişi -->
+  <div class="history-section">
+    <div class="section-title">Sinyal Geçmişi</div>
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Tarih</th>
+          <th>Sinyal</th>
+          <th>Fiyat</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody">
+        <tr><td colspan="3" style="color:#484f58;text-align:center;padding:20px">Yükleniyor…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Metodoloji -->
+  <div class="methodology">
+    <strong>Sinyal Metodolojisi:</strong>
+    AL/SAT sinyali 3 kriterin tamamının karşılanmasıyla oluşur:
+    <strong>Supertrend(10,3)</strong> yön + <strong>ADX ≥ 25</strong> (trend gücü) +
+    <strong>EMA12 / EMA99</strong> pozisyonu. Haftalık EMA20 gate, büyük ters trendlerde
+    sinyal üretimini engeller. Sinyal en az 3 bar devam edince "onaylı" sayılır.
+    <br><br>
+    ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
+  </div>
+
+  <!-- Diğer Hisseler -->
+  <div class="others-section">
+    <div class="section-title">Diğer BIST30 Hisseleri</div>
+    <div class="others-grid" id="othersGrid">
+      {% for t in others %}
+      <a href="/hisse/{{ t }}" class="other-chip">
+        {{ t }}
+        <span class="chip-sig chip-bekle" id="chip-sig-{{ t }}">●</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<footer>⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Otomatik emir verilmez. Yatırım tavsiyesi değildir.</footer>
+
+<script>
+const LC      = LightweightCharts;
+const TICKER  = "{{ ticker }}";
+
+const BASE_OPTS = {
+  layout:          { background: { color: '#161b22' }, textColor: '#8b949e' },
+  grid:            { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
+  crosshair:       { mode: LC.CrosshairMode.Normal },
+  rightPriceScale: { borderColor: '#30363d' },
+  handleScroll: true, handleScale: true,
+};
+
+/* ── Grafik kurulumu ─────────────────────────────────── */
+function buildChart(d) {
+  document.getElementById('chartLoading').style.display = 'none';
+  document.getElementById('chartsInner').style.display  = '';
+
+  const elMain  = document.getElementById('chartMain');
+  const isMobile = window.innerWidth < 768;
+  const chart = LC.createChart(elMain, {
+    ...BASE_OPTS,
+    width:     elMain.clientWidth || elMain.parentElement.clientWidth || 900,
+    height:    isMobile ? 260 : 380,
+    timeScale: { borderColor: '#30363d', timeVisible: true, visible: true },
+  });
+
+  /* EMA fill primitive */
+  class EmaFill {
+    constructor(chart, e12data, e99data, bc, rc) {
+      this._chart = chart;
+      this._e12   = Object.fromEntries(e12data.map(p => [p.time, p.value]));
+      this._e99   = Object.fromEntries(e99data.map(p => [p.time, p.value]));
+      this._times = e12data.filter(p => this._e99[p.time] !== undefined).map(p => p.time);
+      this._bc = bc; this._rc = rc; this._series = null;
+    }
+    attached({ series }) { this._series = series; }
+    detached()           { this._series = null; }
+    updateAllViews() {}
+    paneViews() {
+      const self = this;
+      return [{
+        renderer() {
+          return {
+            draw(target) {
+              if (!self._series) return;
+              target.useBitmapCoordinateSpace(sc => {
+                const ctx = sc.context;
+                const hr  = sc.horizontalPixelRatio;
+                const vr  = sc.verticalPixelRatio;
+                const ts  = self._chart.timeScale();
+                const p1 = [], p2 = [];
+                for (const t of self._times) {
+                  const x  = ts.timeToCoordinate(t);
+                  const y1 = self._series.priceToCoordinate(self._e12[t]);
+                  const y2 = self._series.priceToCoordinate(self._e99[t]);
+                  if (x == null || y1 == null || y2 == null) continue;
+                  p1.push({ x: x*hr, y: y1*vr, v: self._e12[t] });
+                  p2.push({ x: x*hr, y: y2*vr, v: self._e99[t] });
+                }
+                if (p1.length < 2) return;
+                ctx.save();
+                for (let i = 1; i < p1.length; i++) {
+                  const a1=p1[i-1], b1=p1[i], a2=p2[i-1], b2=p2[i];
+                  ctx.fillStyle = b1.v > b2.v ? self._bc : self._rc;
+                  ctx.beginPath();
+                  ctx.moveTo(a1.x,a1.y); ctx.lineTo(b1.x,b1.y);
+                  ctx.lineTo(b2.x,b2.y); ctx.lineTo(a2.x,a2.y);
+                  ctx.closePath(); ctx.fill();
+                }
+                ctx.restore();
+              });
+            }
+          };
+        }
+      }];
+    }
+  }
+
+  const e99 = chart.addLineSeries({ color: '#e3b341', lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false });
+  e99.setData(d.ema99);
+
+  const e12 = chart.addLineSeries({ color: '#58a6ff', lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false });
+  e12.setData(d.ema12);
+  e12.attachPrimitive(new EmaFill(chart, d.ema12, d.ema99,
+    'rgba(63,185,80,0.13)', 'rgba(248,81,73,0.11)'));
+
+  const candle = chart.addCandlestickSeries({
+    upColor: '#3fb950', downColor: '#f85149',
+    borderUpColor: '#3fb950', borderDownColor: '#f85149',
+    wickUpColor:   '#3fb950', wickDownColor:   '#f85149',
+    priceLineVisible: false, lastValueVisible: true,
+  });
+  candle.setData(d.ohlc);
+
+  /* EMA legend */
+  const legEl = document.getElementById('emaLegend');
+  function updateLeg(v12, v99_) {
+    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { maximumFractionDigits: 2 }) : '—';
+    const l12 = v12  ?? d.ema12.at(-1)?.value;
+    const l99 = v99_ ?? d.ema99.at(-1)?.value;
+    legEl.innerHTML =
+      `<span style="color:#58a6ff">EMA12 ${fmt(l12)}</span>&nbsp;&nbsp;` +
+      `<span style="color:#e3b341">EMA99 ${fmt(l99)}</span>`;
+  }
+  updateLeg();
+  chart.subscribeCrosshairMove(p => {
+    if (!p?.time) { updateLeg(); return; }
+    updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value);
+  });
+
+  chart.timeScale().fitContent();
+  window.addEventListener('resize', () => {
+    const w = elMain.clientWidth;
+    if (w) chart.applyOptions({ width: w });
+  });
+}
+
+/* ── Özet kartları doldur ──────────────────────────── */
+function renderSummary(s, signalData) {
+  /* Header */
+  const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2 }) : '—';
+  document.getElementById('hpPrice').textContent = fmt(s.price);
+  const chgEl = document.getElementById('hpChg');
+  const sign  = s.change_pct >= 0 ? '+' : '';
+  chgEl.textContent = sign + s.change_pct.toFixed(2) + '%';
+  chgEl.className   = 'header-chg ' + (s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu');
+
+  const sigEl  = document.getElementById('hpSignal');
+  const icon   = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
+  sigEl.textContent = icon + ' ' + s.signal;
+  sigEl.className   = 'signal-badge signal-' + s.signal;
+
+  /* Sinyal kartı */
+  document.getElementById('icSignal').textContent = icon + ' ' + s.signal;
+  const MAX = 3;
+  const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
+  const dotCls   = s.signal === 'SAT' ? 'dot-bear' : s.signal === 'AL' ? 'dot-bull' : 'dot-empty';
+  document.getElementById('icDots').innerHTML =
+    Array.from({ length: MAX }, (_, i) =>
+      `<div class="score-dot ${i < scoreVal ? dotCls : 'dot-empty'}"></div>`
+    ).join('');
+
+  /* Sinyal date/bars — signalData'dan */
+  if (signalData) {
+    const bars = signalData.signal_bars || 1;
+    const date = signalData.signal_date || '—';
+    const isNew = signalData.is_new_signal;
+    document.getElementById('icDate').innerHTML =
+      isNew ? '<span style="color:#e3b341">⚡ Bugün</span>' : date + ' · ' + bars + ' bar';
+    document.getElementById('icBars').textContent = bars;
+
+    if (signalData.signal_price && s.signal !== 'BEKLE') {
+      document.getElementById('icEntry').textContent = fmt(signalData.signal_price);
+    } else {
+      document.getElementById('icEntry').textContent = '—';
+      document.getElementById('icEntryLbl').textContent = 'Aktif sinyal yok';
+    }
+  }
+
+  /* SL */
+  if (s.sl_level) {
+    const slPct = ((s.sl_level - s.price) / s.price * 100).toFixed(1);
+    document.getElementById('icSl').textContent = fmt(s.sl_level);
+    document.getElementById('icSlPct').textContent =
+      (s.signal !== 'BEKLE' ? 'Riske uzaklık: ' : 'ST desteği: ') + slPct + '%';
+  }
+
+  /* İndikatörler */
+  const inds = [
+    { label: 'Supertrend', detail: s.st_bull ? 'LONG ↑' : 'SHORT ↓',
+      ok: s.signal === 'SAT' ? s.st_bear : s.st_bull },
+    { label: 'ADX ' + s.adx, detail: 'DI+ ' + s.di_plus + ' / DI− ' + s.di_minus,
+      ok: s.signal === 'SAT' ? s.adx_bear : s.adx_bull },
+    { label: 'EMA12/99', detail: s.e12 + ' / ' + s.e99,
+      ok: s.signal === 'SAT' ? s.e12_bear : s.e12_bull },
+  ];
+  document.getElementById('indRow').innerHTML = inds.map(ind => {
+    const cls = ind.ok
+      ? (s.signal === 'SAT' ? 'ind-badge ind-bear' : 'ind-badge ind-bull')
+      : 'ind-badge ind-neutral';
+    return `<span class="${cls}">${ind.label}<span class="ind-detail">${ind.detail}</span></span>`;
+  }).join('');
+}
+
+/* ── Sinyal geçmişi ─────────────────────────────────── */
+function renderHistory(history) {
+  const tbody = document.getElementById('historyBody');
+  if (!history || history.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="color:#484f58;text-align:center;padding:20px">Geçmiş bulunamadı</td></tr>';
+    return;
+  }
+  const fmt = v => (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+  tbody.innerHTML = history.map(h => {
+    const icon  = h.signal === 'AL' ? '▲' : '▼';
+    const cls   = h.signal === 'AL' ? '#3fb950' : '#f85149';
+    return `<tr>
+      <td>${h.date}</td>
+      <td><span class="signal-badge signal-${h.signal}" style="font-size:11px">${icon} ${h.signal}</span></td>
+      <td style="font-variant-numeric:tabular-nums">${fmt(h.price)} ₺</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── Veri yükle ─────────────────────────────────────── */
+async function loadChart() {
+  try {
+    const res  = await fetch('/api/hisse/' + TICKER + '/chart');
+    const json = await res.json();
+    if (json.loading || !json.chart) { setTimeout(loadChart, 4000); return; }
+
+    buildChart(json.chart);
+    renderHistory(json.chart.signal_history);
+
+    /* Özet için /api/data'dan da signal_bars/date bilgisi al */
+    const res2  = await fetch('/api/data');
+    const data2 = await res2.json();
+    const sd    = (data2.stocks || []).find(s => s.ticker === TICKER);
+    renderSummary(json.chart.summary, sd);
+
+    /* Diğer hisselerin sinyallerini chip'lere yaz */
+    if (data2.stocks) {
+      data2.stocks.forEach(s => {
+        const el = document.getElementById('chip-sig-' + s.ticker);
+        if (!el) return;
+        const icon = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
+        const cls  = s.signal === 'AL' ? 'chip-al' : s.signal === 'SAT' ? 'chip-sat' : 'chip-bekle';
+        el.textContent = icon;
+        el.className   = 'chip-sig ' + cls;
+      });
+    }
+  } catch (e) {
+    setTimeout(loadChart, 5000);
+  }
+}
+
+loadChart();
+
+/* ── SSE Canlı Fiyat ──────────────────────────────── */
+let _sseRetry = 1000;
+function startSSE() {
+  const es = new EventSource('/api/stream');
+  es.onopen = () => { _sseRetry = 1000; };
+  es.onmessage = e => {
+    try {
+      const msg = JSON.parse(e.data);
+      if (msg.type !== 'prices') return;
+      const d = msg.data[TICKER];
+      if (!d) return;
+
+      const priceEl = document.getElementById('hpPrice');
+      const chgEl   = document.getElementById('hpChg');
+      const old = parseFloat(priceEl.dataset.raw || '0');
+
+      priceEl.dataset.raw = d.price;
+      priceEl.textContent = d.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+
+      if (old && d.price !== old) {
+        priceEl.classList.remove('flash-up', 'flash-down');
+        void priceEl.offsetWidth;
+        priceEl.classList.add(d.price > old ? 'flash-up' : 'flash-down');
+        setTimeout(() => priceEl.classList.remove('flash-up', 'flash-down'), 600);
+      }
+
+      const sign = d.change_pct >= 0 ? '+' : '';
+      chgEl.textContent = sign + d.change_pct.toFixed(2) + '%';
+      chgEl.className   = 'header-chg ' + (d.change_pct > 0 ? 'pos' : d.change_pct < 0 ? 'neg' : 'neu');
+
+      document.getElementById('liveTs').textContent = '● ' + msg.ts;
+      document.getElementById('liveTs').style.color = '#3fb950';
+    } catch (_) {}
+  };
+  es.onerror = () => {
+    es.close();
+    setTimeout(startSSE, _sseRetry);
+    _sseRetry = Math.min(_sseRetry * 2, 30000);
+  };
+}
+startSSE();
+</script>
+</body>
+</html>

@@ -278,6 +278,7 @@
   .sig-date   { font-size: 11px; color: #8b949e; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .new-today  { color: #e3b341; font-weight: 700; font-size: 12px; }
   .row-new-signal { background: rgba(227, 179, 65, 0.04); }
+  #tableBody tr:hover { background: rgba(88,166,255,0.05); }
 
   /* Responsive */
   @media (max-width: 768px) {
@@ -865,7 +866,7 @@ function renderTable() {
                `<span class="sl-pct">${slPct}%</span>`;
     }
 
-    return `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}">
+    return `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
       <td><span class="ticker">${s.ticker}</span> ${wtHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>

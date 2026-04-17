@@ -47,6 +47,38 @@ BIST30 = [
     "TOASO", "TUPRS", "VAKBN", "YKBNK", "XU030"
 ]
 
+STOCK_NAMES = {
+    "AKBNK": "Akbank T.A.Ş.",
+    "ARCLK": "Arçelik A.Ş.",
+    "ASELS": "Aselsan Elektronik Sanayi",
+    "BIMAS": "BİM Birleşik Mağazalar",
+    "EKGYO": "Emlak Konut GYO",
+    "EREGL": "Ereğli Demir ve Çelik",
+    "FROTO": "Ford Otomotiv Sanayi",
+    "GARAN": "Garanti BBVA",
+    "HEKTS": "Hektaş Ticaret T.A.Ş.",
+    "ISCTR": "İş Bankası (C)",
+    "KCHOL": "Koç Holding A.Ş.",
+    "KRDMD": "Kardemir Karabük Demir Çelik",
+    "MGROS": "Migros Ticaret A.Ş.",
+    "ODAS":  "Odaş Elektrik Üretim",
+    "OYAKC": "Oyak Çimento Fabrikaları",
+    "PGSUS": "Pegasus Hava Taşımacılığı",
+    "SAHOL": "Sabancı Holding",
+    "SASA":  "Sasa Polyester Sanayi",
+    "SISE":  "Türkiye Şişe ve Cam Fabrikaları",
+    "SOKM":  "Şok Marketler Ticaret",
+    "TAVHL": "TAV Havalimanları Holding",
+    "TCELL": "Turkcell İletişim Hizmetleri",
+    "THYAO": "Türk Hava Yolları",
+    "TKFEN": "Tekfen Holding A.Ş.",
+    "TOASO": "Tofaş Türk Otomobil Fabrikası",
+    "TUPRS": "Tüpraş Türkiye Petrol Rafinerileri",
+    "VAKBN": "Vakıfbank",
+    "YKBNK": "Yapı ve Kredi Bankası",
+    "XU030": "BIST 30 Endeksi",
+}
+
 _cache       = {"data": [], "updated_at": None}
 _live_prices = {}
 _lock        = threading.Lock()
@@ -491,7 +523,7 @@ def _safe_float(val):
 
 
 def get_chart_data():
-    """XU030 grafik verisi + Supertrend çizgisi + sinyal işaretçileri."""
+    """XU030 grafik verisi — _compute_chart_data wrapper (5y period)."""
     DISPLAY_BARS = 500
     WARMUP_MIN   = 200
 
@@ -629,7 +661,164 @@ def get_chart_data():
         return None
 
 
-_chart_cache = {"data": None, "updated_at": None}
+_chart_cache       = {"data": None, "updated_at": None}
+_stock_chart_cache = {}          # {ticker: {"data": ..., "ts": float, "updated_at": str}}
+_STOCK_CACHE_TTL   = 900         # 15 dakika
+
+
+# ── Ortak grafik verisi hesaplama (XU030 + bireysel hisseler) ─────────────────
+def _compute_chart_data(ticker_base, period="2y"):
+    """Herhangi bir hisse için grafik verisi hesaplar (OHLC, EMA, ST, sinyal geçmişi)."""
+    ticker      = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
+    DISPLAY_BARS = 500
+    WARMUP_MIN   = 150
+
+    try:
+        df = yf.download(ticker, period=period, interval="1d",
+                         progress=False, auto_adjust=True, timeout=30)
+        if df is None or len(df) < WARMUP_MIN:
+            return None
+
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+            df = df.loc[:, ~df.columns.duplicated()]
+
+        df    = df[["Open", "High", "Low", "Close"]].dropna()
+        df    = _fill_intraday_gaps(df, ticker)
+        df    = df.sort_index()
+
+        close = df["Close"]
+        high  = df["High"]
+        low   = df["Low"]
+        open_ = df["Open"]
+
+        ema12                      = compute_ema(close, 12)
+        ema99                      = compute_ema(close, 99)
+        adx, di_plus_s, di_minus_s = compute_adx(high, low, close)
+        supertrend, st_line_s      = compute_supertrend(high, low, close)
+
+        show_idx = df.index[-DISPLAY_BARS:]
+        show_set = set(show_idx.strftime("%Y-%m-%d"))
+
+        def series(s):
+            out = []
+            for ts, val in s.items():
+                if pd.isna(val): continue
+                d = ts.strftime("%Y-%m-%d")
+                if d not in show_set: continue
+                out.append({"time": d, "value": round(float(val), 4)})
+            return out
+
+        # OHLC
+        ohlc = []
+        for ts in show_idx:
+            try:
+                ohlc.append({
+                    "time":  ts.strftime("%Y-%m-%d"),
+                    "open":  round(_safe_float(open_[ts]),  2),
+                    "high":  round(_safe_float(high[ts]),   2),
+                    "low":   round(_safe_float(low[ts]),    2),
+                    "close": round(_safe_float(close[ts]),  2),
+                })
+            except Exception:
+                continue
+
+        # Supertrend çizgisi
+        st_line_data = []
+        stl_arr  = st_line_s.values
+        std_arr  = supertrend.values
+        all_dates = [ts.strftime("%Y-%m-%d") for ts in df.index]
+        for i, d_str in enumerate(all_dates):
+            if d_str not in show_set: continue
+            stl = stl_arr[i]
+            if np.isnan(stl): continue
+            st_line_data.append({
+                "time":  d_str,
+                "value": round(float(stl), 2),
+                "bull":  int(std_arr[i]) == 1,
+            })
+
+        # Sinyal fonksiyonu (tek bar)
+        def bar_sig(i):
+            ei12  = float(ema12.iloc[i]);   ei99  = float(ema99.iloc[i])
+            ai    = float(adx.iloc[i])
+            dip_i = float(di_plus_s.iloc[i]); dim_i = float(di_minus_s.iloc[i])
+            sti   = int(supertrend.iloc[i])
+            bs  = int(sti == 1)  + int(ai >= 25 and dip_i > dim_i) + int(ei12 > ei99)
+            brs = int(sti == -1) + int(ai >= 25 and dim_i > dip_i) + int(ei12 < ei99)
+            return "AL" if bs >= 3 else "SAT" if brs >= 3 else "BEKLE"
+
+        # Grafik marker'ları ve sinyal geçmişi
+        markers        = []
+        signal_history = []
+        prev_sig       = "BEKLE"
+        for i in range(200, len(close)):
+            sig = bar_sig(i)
+            if sig != prev_sig and sig != "BEKLE":
+                d_str = close.index[i].strftime("%Y-%m-%d")
+                if d_str in show_set:
+                    markers.append({
+                        "time":     d_str,
+                        "position": "belowBar" if sig == "AL" else "aboveBar",
+                        "color":    "#3fb950"  if sig == "AL" else "#f85149",
+                        "shape":    "arrowUp"  if sig == "AL" else "arrowDown",
+                        "text":     sig,
+                    })
+                signal_history.append({
+                    "date":   close.index[i].strftime("%d.%m.%Y"),
+                    "signal": sig,
+                    "price":  round(float(close.iloc[i]), 2),
+                })
+            prev_sig = sig
+        signal_history = list(reversed(signal_history[-15:]))   # en yeni başta, max 15
+
+        # Özet (son bar)
+        c       = float(close.iloc[-1])
+        prev_c  = float(close.iloc[-2])
+        chg     = ((c - prev_c) / prev_c) * 100 if prev_c else 0
+        adx_val = float(adx.iloc[-1])
+        di_p    = float(di_plus_s.iloc[-1]); di_m = float(di_minus_s.iloc[-1])
+        e12_val = float(ema12.iloc[-1])
+        e99_val = float(ema99.iloc[-1])
+        st_val  = int(supertrend.iloc[-1])
+        _sl_raw = float(st_line_s.iloc[-1])
+        sl_val  = round(_sl_raw, 2) if not np.isnan(_sl_raw) else None
+
+        st_bull  = st_val == 1;   st_bear  = st_val == -1
+        adx_bull = adx_val >= 25 and di_p > di_m
+        adx_bear = adx_val >= 25 and di_m > di_p
+        e12_bull = e12_val > e99_val; e12_bear = e12_val < e99_val
+        bull_score = int(st_bull) + int(adx_bull) + int(e12_bull)
+        bear_score = int(st_bear) + int(adx_bear) + int(e12_bear)
+        signal     = "AL" if bull_score >= 3 else "SAT" if bear_score >= 3 else "BEKLE"
+
+        return {
+            "ohlc":           ohlc,
+            "ema12":          series(ema12),
+            "ema99":          series(ema99),
+            "st_line":        st_line_data,
+            "markers":        markers,
+            "signal_history": signal_history,
+            "summary": {
+                "price":      round(c, 2),
+                "change_pct": round(chg, 2),
+                "signal":     signal,
+                "bull_score": bull_score,
+                "bear_score": bear_score,
+                "sl_level":   sl_val,
+                "adx":        round(adx_val, 1),
+                "di_plus":    round(di_p, 1),
+                "di_minus":   round(di_m, 1),
+                "e12":        round(e12_val, 1),
+                "e99":        round(e99_val, 1),
+                "st_bull":    st_bull,  "st_bear":  st_bear,
+                "adx_bull":   adx_bull, "adx_bear": adx_bear,
+                "e12_bull":   e12_bull, "e12_bear": e12_bear,
+            }
+        }
+    except Exception as e:
+        logger.error("_compute_chart_data(%s): %s", ticker_base, e, exc_info=True)
+        return None
 
 
 def refresh_chart():
@@ -648,6 +837,48 @@ def api_chart():
             "updated_at": _chart_cache["updated_at"],
             "loading":    _chart_cache["data"] is None,
         })
+
+
+# ── Bireysel Hisse Sayfaları ──────────────────────────────────────────────────
+@app.route("/hisse/<ticker>")
+def stock_page(ticker):
+    ticker = ticker.upper()
+    if ticker not in BIST30:
+        return render_template("index.html"), 404
+    name = STOCK_NAMES.get(ticker, ticker)
+    others = [t for t in BIST30 if t != ticker and t != "XU030"]
+    return render_template("hisse.html",
+                           ticker=ticker,
+                           name=name,
+                           others=others,
+                           stock_names=STOCK_NAMES)
+
+
+@app.route("/api/hisse/<ticker>/chart")
+def api_stock_chart(ticker):
+    ticker = ticker.upper()
+    if ticker not in BIST30:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+
+    now = time.time()
+    with _lock:
+        cached = _stock_chart_cache.get(ticker)
+        if cached and (now - cached["ts"]) < _STOCK_CACHE_TTL:
+            return safe_json({
+                "chart":      cached["data"],
+                "updated_at": cached["updated_at"],
+                "loading":    False,
+            })
+
+    # Cache yok veya bayat → taze hesapla
+    data = _compute_chart_data(ticker, period="2y")
+    if data:
+        upd = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        with _lock:
+            _stock_chart_cache[ticker] = {"data": data, "ts": now, "updated_at": upd}
+        return safe_json({"chart": data, "updated_at": upd, "loading": False})
+
+    return safe_json({"chart": None, "loading": True})
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────
