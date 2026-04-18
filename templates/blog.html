@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Teknik Analiz, Borsa Rehberi | borsapusula.com</title>
+<meta name="description" content="BIST100, teknik analiz, Supertrend, ADX, EMA ve risk yönetimi üzerine uzman makaleler. Algoritmik borsa sinyalleri hakkında kapsamlı Türkçe rehber.">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="canonical" href="https://borsapusula.com/blog">
+<meta property="og:title"       content="Blog — Teknik Analiz Rehberi | borsapusula.com">
+<meta property="og:description" content="BIST100, Supertrend, ADX, EMA ve borsa stratejileri hakkında Türkçe makaleler.">
+<meta property="og:site_name"   content="borsapusula.com">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0d1117; color:#e6edf3; font-family:'Segoe UI',system-ui,-apple-system,sans-serif; font-size:14px; min-height:100vh; }
+  header { background:#161b22; border-bottom:1px solid #30363d; padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
+  .back-btn { display:flex; align-items:center; gap:6px; color:#8b949e; font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid #30363d; border-radius:6px; background:#21262d; transition:all .15s; white-space:nowrap; }
+  .back-btn:hover { background:#30363d; color:#e6edf3; }
+  .page-title { font-size:20px; font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:13px; color:#8b949e; margin-top:1px; }
+  .container  { max-width:1100px; margin:0 auto; padding:28px 24px; }
+
+  .cat-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+  .cat-btn { background:#21262d; border:1px solid #30363d; border-radius:20px; padding:5px 14px; font-size:12px; color:#8b949e; cursor:pointer; transition:all .15s; }
+  .cat-btn:hover, .cat-btn.active { background:#1f6feb; border-color:#1f6feb; color:#fff; }
+
+  .blog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
+  .blog-card { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:20px; text-decoration:none; display:block; transition:all .15s; }
+  .blog-card:hover { border-color:#8b949e; background:#1c2128; transform:translateY(-2px); }
+  .bc-cat  { font-size:11px; color:#58a6ff; font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+  .bc-title{ font-size:16px; font-weight:700; color:#f0f6fc; line-height:1.4; margin-bottom:8px; }
+  .bc-desc { font-size:13px; color:#8b949e; line-height:1.6; margin-bottom:14px; }
+  .bc-meta { display:flex; align-items:center; gap:12px; font-size:11px; color:#484f58; }
+  .bc-meta span { display:flex; align-items:center; gap:4px; }
+
+  footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
+  footer a { color:#8b949e; text-decoration:none; }
+  @media(max-width:600px) { .container{padding:14px;} .blog-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="page-title">📚 Blog</div>
+    <div class="page-sub">Teknik analiz, strateji ve borsa rehberleri</div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="cat-filters">
+    <button class="cat-btn active" onclick="filterCat('Tümü', this)">Tümü ({{ articles|length }})</button>
+    {% for cat, cnt in cat_counts %}
+    <button class="cat-btn" onclick="filterCat('{{ cat }}', this)">{{ cat }} ({{ cnt }})</button>
+    {% endfor %}
+  </div>
+
+  <div class="blog-grid" id="grid">
+    {% for a in articles %}
+    <a href="/blog/{{ a.slug }}" class="blog-card" data-cat="{{ a.cat }}">
+      <div class="bc-cat">{{ a.cat }}</div>
+      <div class="bc-title">{{ a.title }}</div>
+      <div class="bc-desc">{{ a.desc }}</div>
+      <div class="bc-meta">
+        <span>📅 {{ a.date }}</span>
+        <span>⏱ {{ a.mins }} dk okuma</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<footer>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/hakkinda">Hakkında</a>
+  <div style="margin-top:8px">⚠️ Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
+</footer>
+
+<script>
+function filterCat(cat, btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.blog-card').forEach(card => {
+    card.style.display = (cat === 'Tümü' || card.dataset.cat === cat) ? 'block' : 'none';
+  });
+}
+</script>
+</body>
+</html>

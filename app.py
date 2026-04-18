@@ -10,6 +10,7 @@ import time
 import json
 import os
 import requests
+from blog_content import ARTICLES, ARTICLES_BY_SLUG, CATEGORIES
 
 app = Flask(__name__)
 
@@ -1252,6 +1253,9 @@ def sitemap():
     for t in BIST30:
         if t != "XU030":
             pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
+    pages.append({"loc": "/blog", "priority": "0.8", "changefreq": "weekly"})
+    for a in ARTICLES:
+        pages.append({"loc": f"/blog/{a['slug']}", "priority": "0.7", "changefreq": "monthly"})
     today = date.today().isoformat()
     xml   = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
@@ -1369,6 +1373,29 @@ def gizlilik():
 @app.route("/iletisim")
 def iletisim():
     return render_template("iletisim.html")
+
+
+# ── Blog ──────────────────────────────────────────────────────────────────────
+@app.route("/blog")
+def blog_index():
+    from collections import Counter
+    counts = Counter(a["cat"] for a in ARTICLES)
+    cat_counts = sorted(counts.items())
+    return render_template("blog.html", articles=ARTICLES, cat_counts=cat_counts)
+
+
+@app.route("/blog/<slug>")
+def blog_article(slug):
+    from flask import abort
+    article = ARTICLES_BY_SLUG.get(slug)
+    if not article:
+        abort(404)
+    # İlgili makaleler: aynı kategori, max 3
+    related = [a for a in ARTICLES if a["cat"] == article["cat"] and a["slug"] != slug][:3]
+    if len(related) < 3:
+        extras = [a for a in ARTICLES if a["cat"] != article["cat"] and a["slug"] != slug]
+        related += extras[:3 - len(related)]
+    return render_template("blog_article.html", article=article, related=related)
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────
