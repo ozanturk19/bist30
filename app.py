@@ -8,6 +8,8 @@ import collections
 import logging
 import time
 import json
+import os
+import requests
 
 app = Flask(__name__)
 
@@ -38,16 +40,38 @@ logging.basicConfig(
 )
 logger = logging.getLogger("bist30")
 
-BIST30 = [
+# BIST100 hisse listesi (XU030 endeks dahil)
+BIST100 = [
+    # ── BIST30 ──────────────────────────────────────────
     "AKBNK", "ARCLK", "ASELS", "BIMAS", "EKGYO",
     "EREGL", "FROTO", "GARAN", "HEKTS", "ISCTR",
-    "KCHOL", "KRDMD", "MGROS", "ODAS",
-    "OYAKC", "PGSUS", "SAHOL", "SASA", "SISE",
-    "SOKM", "TAVHL", "TCELL", "THYAO", "TKFEN",
-    "TOASO", "TUPRS", "VAKBN", "YKBNK", "XU030"
+    "KCHOL", "KRDMD", "MGROS", "ODAS", "OYAKC",
+    "PGSUS", "SAHOL", "SASA", "SISE", "SOKM",
+    "TAVHL", "TCELL", "THYAO", "TKFEN", "TOASO",
+    "TUPRS", "VAKBN", "YKBNK",
+    # ── BIST100 ek hisseler ─────────────────────────────
+    "AEFES", "AGHOL", "AKSA",  "AKSEN", "ALARK",
+    "ALBRK", "ALFAS", "ALGYO", "ALKIM", "ANACM",
+    "ANHYT", "ANSGR", "ASUZU", "BJKAS", "BRSAN",
+    "BRYAT", "BUCIM", "CCOLA", "CIMSA", "CWENE",
+    "DOAS",  "DOHOL", "EGEEN", "ENJSA", "ENKAI",
+    "EUPWR", "FENER", "GENIL", "GLYHO", "GUBRF",
+    "HALKB", "INDES", "IPEKE", "ISDMR", "ISGYO",
+    "ISMEN", "IZMDC", "JANTS", "KARTN", "KCAER",
+    "KLNMA", "KONTR", "KORDS", "KOZAA", "KOZAL",
+    "LOGO",  "MAVI",  "NETAS", "NTHOL", "NTTUR",
+    "OTKAR", "PARSN", "PETKM", "PRKAB", "RYSAS",
+    "SARKY", "SELEC", "SMRTG", "TATGD", "TTKOM",
+    "TTRAK", "TURSG", "ULKER", "VESBE", "VESTL",
+    "YATAS", "ZOREN",
+    # ── Endeks ──────────────────────────────────────────
+    "XU030",
 ]
+# Geriye dönük uyumluluk için alias
+BIST30 = BIST100
 
 STOCK_NAMES = {
+    # ── BIST30 ──────────────────────────────────────────
     "AKBNK": "Akbank T.A.Ş.",
     "ARCLK": "Arçelik A.Ş.",
     "ASELS": "Aselsan Elektronik Sanayi",
@@ -76,7 +100,102 @@ STOCK_NAMES = {
     "TUPRS": "Tüpraş Türkiye Petrol Rafinerileri",
     "VAKBN": "Vakıfbank",
     "YKBNK": "Yapı ve Kredi Bankası",
+    # ── BIST100 ek hisseler ─────────────────────────────
+    "AEFES": "Anadolu Efes Biracılık",
+    "AGHOL": "AG Anadolu Grubu Holding",
+    "AKSA":  "Aksa Akrilik Kimya Sanayii",
+    "AKSEN": "Aksen Enerji",
+    "ALARK": "Alarko Holding",
+    "ALBRK": "Albaraka Türk",
+    "ALFAS": "Alfa Solar Enerji",
+    "ALGYO": "Alarko GYO",
+    "ALKIM": "Alkim Kimya Sanayii",
+    "ANACM": "Anadolu Cam Sanayii",
+    "ANHYT": "Anadolu Hayat Emeklilik",
+    "ANSGR": "Anadolu Sigorta",
+    "ASUZU": "Anadolu Isuzu",
+    "BJKAS": "Beşiktaş JK",
+    "BRSAN": "Borçelik Çelik Sanayii",
+    "BRYAT": "BR Yatırım Holding",
+    "BUCIM": "Bursa Çimento",
+    "CCOLA": "Coca-Cola İçecek A.Ş.",
+    "CIMSA": "Çimsa Çimento",
+    "CWENE": "CW Enerji",
+    "DOAS":  "Doğuş Otomotiv",
+    "DOHOL": "Doğan Holding",
+    "EGEEN": "Ege Endüstri",
+    "ENJSA": "Enerjisa Enerji",
+    "ENKAI": "Enka İnşaat",
+    "EUPWR": "Europower Enerji",
+    "FENER": "Fenerbahçe SK",
+    "GENIL": "Gen İlaç",
+    "GLYHO": "Global Yatırım Holding",
+    "GUBRF": "Gübre Fabrikaları T.A.Ş.",
+    "HALKB": "Halk Bankası",
+    "INDES": "İndeks Bilgisayar",
+    "IPEKE": "İpek Doğal Enerji",
+    "ISDMR": "İskenderun Demir ve Çelik",
+    "ISGYO": "İş GYO",
+    "ISMEN": "İş Yatırım Menkul Değerler",
+    "IZMDC": "İzmir Demir Çelik",
+    "JANTS": "Jantsa Jant Sanayii",
+    "KARTN": "Kartonsan Karton Sanayii",
+    "KCAER": "Kocaer Çelik",
+    "KLNMA": "Türkiye Kalkınma ve Yatırım Bankası",
+    "KONTR": "Kontrolmatik Teknoloji",
+    "KORDS": "Kordsa Teknik Tekstil",
+    "KOZAA": "Koza Anadolu Metal Madencilik",
+    "KOZAL": "Koza Altın İşletmeleri",
+    "LOGO":  "Logo Yazılım",
+    "MAVI":  "Mavi Giyim",
+    "NETAS": "NetAş Telekomünikasyon",
+    "NTHOL": "Net Holding",
+    "NTTUR": "Net Turizm",
+    "OTKAR": "Otokar Otomotiv",
+    "PARSN": "Parsan Makina Parçaları",
+    "PETKM": "Petkim Petrokimya",
+    "PRKAB": "Park Elektrik Üretim",
+    "RYSAS": "Reysaş Gayrimenkul",
+    "SARKY": "Sarkuysan Elektrolitik Bakır",
+    "SELEC": "Selçuk Ecza Deposu",
+    "SMRTG": "Smart Güneş Enerjisi",
+    "TATGD": "Tat Gıda Sanayi",
+    "TTKOM": "Türk Telekom",
+    "TTRAK": "Türk Traktör",
+    "TURSG": "Türkiye Sigorta",
+    "ULKER": "Ülker Bisküvi",
+    "VESBE": "Vestel Beyaz Eşya",
+    "VESTL": "Vestel Elektronik",
+    "YATAS": "Yataş Yatak ve Yorgan",
+    "ZOREN": "Zorlu Enerji",
+    # ── Endeks ──────────────────────────────────────────
     "XU030": "BIST 30 Endeksi",
+}
+
+# ── Sektör sınıflandırması ────────────────────────────────────────────────────
+SECTORS = {
+    "Bankacılık":    ["AKBNK", "GARAN", "HALKB", "ISCTR", "VAKBN", "YKBNK",
+                      "ALBRK", "KLNMA", "ISMEN"],
+    "Holding":       ["KCHOL", "SAHOL", "AGHOL", "ALARK", "DOHOL", "GLYHO",
+                      "NTHOL", "TKFEN", "BRYAT"],
+    "Sanayi":        ["ARCLK", "ASELS", "EREGL", "FROTO", "KRDMD", "TOASO",
+                      "ASUZU", "BRSAN", "DOAS",  "ISDMR", "IZMDC", "JANTS",
+                      "KCAER", "KORDS", "OTKAR", "PARSN", "SARKY", "TTRAK",
+                      "VESTL", "VESBE", "YATAS"],
+    "Enerji":        ["AKSA",  "AKSEN", "ALFAS", "CWENE", "ENJSA", "ENKAI",
+                      "EUPWR", "IPEKE", "ODAS",  "PRKAB", "SMRTG", "TUPRS",
+                      "ZOREN"],
+    "Perakende":     ["BIMAS", "MGROS", "SOKM",  "MAVI",  "SELEC", "ULKER"],
+    "Teknoloji":     ["INDES", "LOGO",  "NETAS", "KONTR"],
+    "Telekom":       ["TCELL", "TTKOM"],
+    "Ulaşım":        ["PGSUS", "TAVHL", "THYAO", "NTTUR", "RYSAS"],
+    "GYO":           ["EKGYO", "ALGYO", "ISGYO"],
+    "Kimya/Malzeme": ["ALKIM", "ANACM", "BUCIM", "CIMSA", "GUBRF", "HEKTS",
+                      "OYAKC", "PETKM", "SASA",  "SISE",  "TATGD", "AEFES",
+                      "CCOLA", "EGEEN"],
+    "Madencilik":    ["KOZAA", "KOZAL"],
+    "Sigorta":       ["ANHYT", "ANSGR", "TURSG"],
+    "Diğer":         ["BJKAS", "FENER", "GENIL", "KARTN", "TKFEN"],
 }
 
 _cache       = {"data": [], "updated_at": None}
@@ -464,11 +583,16 @@ def index():
 @app.route("/api/data")
 def api_data():
     with _lock:
-        return safe_json({
-            "stocks":     _cache["data"],
-            "updated_at": _cache["updated_at"],
-            "loading":    len(_cache["data"]) == 0
-        })
+        stocks = list(_cache["data"])
+    # Sektör bilgisini ekle
+    for s in stocks:
+        s["sector"] = _get_sector(s["ticker"])
+    return safe_json({
+        "stocks":     stocks,
+        "updated_at": _cache["updated_at"],
+        "loading":    len(stocks) == 0,
+        "sectors":    list(SECTORS.keys()),
+    })
 
 
 @app.route("/api/refresh", methods=["POST"])
@@ -664,6 +788,51 @@ def get_chart_data():
 _chart_cache       = {"data": None, "updated_at": None}
 _stock_chart_cache = {}          # {ticker: {"data": ..., "ts": float, "updated_at": str}}
 _STOCK_CACHE_TTL   = 900         # 15 dakika
+
+
+# ── Gemini API — AI haber özeti ──────────────────────────────────────────────
+GEMINI_API_KEY  = os.environ.get("GEMINI_API_KEY", "")
+_news_cache     = {}          # {ticker: {"text": str, "ts": float}}
+_NEWS_CACHE_TTL = 3600 * 6   # 6 saat
+
+def get_ai_news(ticker):
+    """Gemini Flash + Google Search grounding ile Türkçe haber özeti üretir."""
+    if not GEMINI_API_KEY:
+        return None
+    now = time.time()
+    with _lock:
+        cached = _news_cache.get(ticker)
+        if cached and (now - cached["ts"]) < _NEWS_CACHE_TTL:
+            return cached["text"]
+
+    name    = STOCK_NAMES.get(ticker, ticker)
+    prompt  = (
+        f"Borsa İstanbul'da işlem gören {ticker} ({name}) hissesi hakkında "
+        f"son 7 günün en önemli gelişmelerini, haberlerini ve şirket açıklamalarını "
+        f"Türkçe olarak 3-5 madde halinde kısaca özetle. "
+        f"Her madde 1-2 cümle olsun. Tarih belirt. Sadece maddeleri yaz, giriş/kapanış cümlesi ekleme."
+    )
+    try:
+        url  = (f"https://generativelanguage.googleapis.com/v1beta/"
+                f"models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}")
+        body = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "tools":    [{"google_search": {}}],
+        }
+        r    = requests.post(url, json=body, timeout=20)
+        r.raise_for_status()
+        data = r.json()
+        text = (data.get("candidates", [{}])[0]
+                    .get("content", {})
+                    .get("parts", [{}])[0]
+                    .get("text", "")).strip()
+        if text:
+            with _lock:
+                _news_cache[ticker] = {"text": text, "ts": now}
+        return text or None
+    except Exception as e:
+        logger.warning("get_ai_news(%s): %s", ticker, e)
+        return None
 
 
 def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di_m, e12, e99, st_bull):
@@ -931,18 +1100,38 @@ def api_chart():
 
 
 # ── Bireysel Hisse Sayfaları ──────────────────────────────────────────────────
+def _get_sector(ticker):
+    for sector, tickers in SECTORS.items():
+        if ticker in tickers:
+            return sector
+    return "Diğer"
+
 @app.route("/hisse/<ticker>")
 def stock_page(ticker):
     ticker = ticker.upper()
-    if ticker not in BIST30:
+    if ticker not in BIST100:
         return render_template("index.html"), 404
-    name = STOCK_NAMES.get(ticker, ticker)
-    others = [t for t in BIST30 if t != ticker and t != "XU030"]
+    name   = STOCK_NAMES.get(ticker, ticker)
+    sector = _get_sector(ticker)
+    others = [t for t in BIST100 if t != ticker and t != "XU030"]
     return render_template("hisse.html",
                            ticker=ticker,
                            name=name,
+                           sector=sector,
                            others=others,
                            stock_names=STOCK_NAMES)
+
+
+@app.route("/api/hisse/<ticker>/news")
+def api_stock_news(ticker):
+    """Gemini AI haber özeti — 6 saatlik cache."""
+    ticker = ticker.upper()
+    if ticker not in BIST100:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+    text = get_ai_news(ticker)
+    if text:
+        return safe_json({"news": text, "source": "gemini"})
+    return safe_json({"news": None})
 
 
 @app.route("/api/hisse/<ticker>/chart")

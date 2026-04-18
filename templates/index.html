@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BIST30 Sinyal Paneli — Algoritmik AL/SAT Sinyalleri</title>
-<meta name="description" content="BIST30 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı güncel AL/SAT/BEKLE sinyalleri. Ücretsiz, canlı güncelleme.">
-<meta name="keywords" content="BIST30 sinyalleri, borsa teknik analiz, supertrend, ADX indikatörü, hisse al sat sinyali, algoritmik borsa">
+<title>BIST100 Sinyal Paneli — Algoritmik AL/SAT Sinyalleri | borsapusula.com</title>
+<meta name="description" content="BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı güncel AL/SAT/BEKLE sinyalleri. Ücretsiz, canlı güncelleme.">
+<meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse al sat sinyali, algoritmik borsa, sektör analizi">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <link rel="canonical" href="https://borsapusula.com/">
 <!-- Open Graph -->
 <meta property="og:type"        content="website">
-<meta property="og:title"       content="BIST30 Sinyal Paneli — Algoritmik AL/SAT Sinyalleri">
-<meta property="og:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST30 teknik analiz sinyalleri. Ücretsiz ve canlı.">
+<meta property="og:title"       content="BIST100 Sinyal Paneli — Algoritmik AL/SAT Sinyalleri">
+<meta property="og:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST100 teknik analiz sinyalleri. Ücretsiz ve canlı.">
 <meta property="og:url"         content="https://borsapusula.com/">
-<meta property="og:site_name"   content="BIST30 Sinyal Paneli">
+<meta property="og:site_name"   content="BIST100 Sinyal Paneli | borsapusula.com">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary">
-<meta name="twitter:title"       content="BIST30 Sinyal Paneli">
-<meta name="twitter:description" content="Algoritmik BIST30 teknik analiz — Supertrend + ADX + EMA12/99">
+<meta name="twitter:title"       content="BIST100 Sinyal Paneli | borsapusula.com">
+<meta name="twitter:description" content="Algoritmik BIST100 teknik analiz — Supertrend + ADX + EMA12/99">
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -155,6 +155,20 @@
   .filter-btn.active-bekle{ background: #21262d; border-color: #8b949e; color: #8b949e; }
   .filter-today { border-color: #e3b341 !important; color: #e3b341 !important; }
   .active-today { background: #e3b341 !important; color: #0d1117 !important; border-color: #e3b341 !important; }
+
+  /* Sektör filtresi */
+  .sector-filters {
+    display: flex; gap: 6px; margin-bottom: 14px;
+    flex-wrap: wrap; align-items: center;
+  }
+  .sector-lbl { font-size: 11px; color: #484f58; text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0; }
+  .sector-btn {
+    padding: 4px 11px; border-radius: 14px; border: 1px solid #21262d;
+    background: transparent; color: #484f58; cursor: pointer;
+    font-size: 12px; transition: all 0.15s;
+  }
+  .sector-btn:hover { border-color: #58a6ff44; color: #8b949e; }
+  .sector-btn.active-sector { background: #1c2b3a; border-color: #1f6feb66; color: #58a6ff; }
 
   .search-input {
     margin-left: auto;
@@ -316,7 +330,7 @@
 <body>
 
 <header>
-  <h1>BIST<span>30</span> Sinyal Paneli</h1>
+  <h1>BIST<span>100</span> Sinyal Paneli</h1>
   <nav style="display:flex;gap:6px;margin-left:16px;flex-shrink:0">
     <a href="/ozet" style="font-size:12px;color:#8b949e;text-decoration:none;padding:4px 10px;border:1px solid #30363d;border-radius:6px;background:#21262d;transition:all .15s" onmouseover="this.style.color='#e6edf3'" onmouseout="this.style.color='#8b949e'">📊 Özet</a>
     <a href="/metodoloji" style="font-size:12px;color:#8b949e;text-decoration:none;padding:4px 10px;border:1px solid #30363d;border-radius:6px;background:#21262d;transition:all .15s" onmouseover="this.style.color='#e6edf3'" onmouseout="this.style.color='#8b949e'">📖 Metodoloji</a>
@@ -393,6 +407,13 @@
     <button class="filter-btn" onclick="setFilter('BEKLE', this)">⚪ BEKLE</button>
     <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)">⚡ Bugün</button>
     <input class="search-input" type="text" placeholder="Hisse ara..." oninput="setSearch(this.value)">
+  </div>
+
+  <!-- Sektör filtreleri (dinamik olarak JS ile doldurulur) -->
+  <div class="sector-filters" id="sectorFilters" style="display:none">
+    <span class="sector-lbl">Sektör:</span>
+    <button class="sector-btn active-sector" onclick="setSector('all', this)">Tümü</button>
+    <!-- JS tarafından doldurulacak -->
   </div>
 
   <div class="table-wrap">
@@ -698,6 +719,7 @@ startSSE();
 let allStocks    = [];
 let currentFilter = 'all';
 let currentSearch = '';
+let currentSector = 'all';
 let sortKey  = 'signal';
 let sortDir  = 1;
 let polling;
@@ -775,6 +797,11 @@ async function fetchData() {
       document.getElementById('updated').textContent = 'Güncellendi: ' + json.updated_at;
     }
 
+    // Sektör butonlarını oluştur (ilk yüklemede)
+    if (json.sectors && document.querySelectorAll('.sector-btn').length <= 1) {
+      buildSectorButtons(json.sectors);
+    }
+
     // XU030 endeks satırını ayrı göster
     const xu030 = allStocks.find(s => s.ticker === 'XU030');
     renderIndexRow(xu030);
@@ -806,9 +833,39 @@ function getFiltered() {
     if (s.ticker === 'XU030') return false;   // endeks satırda gösteriliyor
     const matchFilter = currentFilter === 'all' || s.signal === currentFilter
                      || (currentFilter === 'TODAY' && s.is_new_signal);
-    const matchSearch = !currentSearch || s.ticker.includes(currentSearch.toUpperCase());
-    return matchFilter && matchSearch;
+    const matchSearch = !currentSearch || s.ticker.includes(currentSearch.toUpperCase())
+                     || (s.name && s.name.toLowerCase().includes(currentSearch.toLowerCase()));
+    const matchSector = currentSector === 'all' || s.sector === currentSector;
+    return matchFilter && matchSearch && matchSector;
   });
+}
+
+function setSector(sector, btn) {
+  currentSector = sector;
+  document.querySelectorAll('.sector-btn').forEach(b => b.classList.remove('active-sector'));
+  if (btn) btn.classList.add('active-sector');
+  renderTable();
+}
+
+function buildSectorButtons(sectors) {
+  const wrap = document.getElementById('sectorFilters');
+  if (!sectors || sectors.length === 0) return;
+  // "Tümü" button zaten HTML'de var; diğerlerini ekle
+  const existing = wrap.querySelectorAll('.sector-btn');
+  existing.forEach((b, i) => { if (i > 0) b.remove(); });   // Tümü'yü koru
+  const sectorIcons = {
+    'Bankacılık': '🏦', 'Holding': '🏢', 'Sanayi': '⚙️', 'Enerji': '⚡',
+    'Perakende': '🛒', 'Teknoloji': '💻', 'Telekom': '📡', 'Ulaşım': '✈️',
+    'GYO': '🏗️', 'Kimya/Malzeme': '🧪', 'Madencilik': '⛏️', 'Sigorta': '🛡️', 'Diğer': '•'
+  };
+  sectors.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'sector-btn';
+    btn.textContent = (sectorIcons[s] || '') + ' ' + s;
+    btn.onclick = () => setSector(s, btn);
+    wrap.appendChild(btn);
+  });
+  wrap.style.display = 'flex';
 }
 
 function getSorted(arr) {
@@ -884,8 +941,11 @@ function renderTable() {
                `<span class="sl-pct">${slPct}%</span>`;
     }
 
+    const sectorHtml = s.sector && s.sector !== 'Diğer'
+      ? `<div style="font-size:10px;color:#484f58;margin-top:2px">${s.sector}</div>` : '';
+
     return `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
-      <td><span class="ticker">${s.ticker}</span> ${wtHtml}</td>
+      <td><span class="ticker">${s.ticker}</span> ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
       <td><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${s.signal}</span>${confHtml}</td>

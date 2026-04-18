@@ -364,6 +364,43 @@
   .chip-sat  { color: #f85149; }
   .chip-bekle{ color: #484f58; }
 
+  /* ── AI Haberler ── */
+  .news-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .news-loading {
+    display: flex; align-items: center; gap: 8px;
+    color: #8b949e; font-size: 13px; padding: 8px 0;
+  }
+  .news-content {
+    font-size: 13px;
+    color: #c9d1d9;
+    line-height: 1.75;
+    white-space: pre-line;
+  }
+  .news-source {
+    font-size: 11px;
+    color: #484f58;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .news-badge {
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.2);
+    color: #58a6ff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 10px;
+    letter-spacing: 0.3px;
+  }
+
   /* ── Metodoloji notu ── */
   .methodology {
     background: #161b22;
@@ -415,7 +452,9 @@
   </a>
   <div>
     <div class="header-ticker">{{ ticker }}</div>
-    <div class="header-name">{{ name }}</div>
+    <div class="header-name">{{ name }}
+      {% if sector %}<span style="margin-left:8px;font-size:11px;background:#21262d;border:1px solid #30363d;border-radius:10px;padding:2px 8px;color:#8b949e">{{ sector }}</span>{% endif %}
+    </div>
   </div>
   <div class="header-price-group">
     <span class="header-price" id="hpPrice">—</span>
@@ -510,6 +549,19 @@
         <tr><td colspan="3" style="color:#484f58;text-align:center;padding:20px">Yükleniyor…</td></tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- AI Haberler -->
+  <div class="news-section" id="newsSection">
+    <div class="section-title">🤖 AI Haber Özeti</div>
+    <div class="news-loading" id="newsLoading">
+      <div class="spinner"></div> Haberler yükleniyor…
+    </div>
+    <div class="news-content" id="newsContent" style="display:none"></div>
+    <div class="news-source" id="newsSource" style="display:none">
+      <span class="news-badge">Gemini AI</span>
+      <span>Google Search ile desteklenen yapay zeka özeti · 6 saatte bir güncellenir</span>
+    </div>
   </div>
 
   <!-- Metodoloji -->
@@ -836,6 +888,26 @@ async function loadChart() {
 }
 
 loadChart();
+
+/* ── AI Haberler ────────────────────────────────────── */
+async function loadNews() {
+  try {
+    const res  = await fetch('/api/hisse/' + TICKER + '/news');
+    const data = await res.json();
+    document.getElementById('newsLoading').style.display = 'none';
+    if (data.news) {
+      const el = document.getElementById('newsContent');
+      el.textContent = data.news;
+      el.style.display = '';
+      document.getElementById('newsSource').style.display = 'flex';
+    } else {
+      document.getElementById('newsSection').style.display = 'none';
+    }
+  } catch(e) {
+    document.getElementById('newsSection').style.display = 'none';
+  }
+}
+loadNews();
 
 /* ── SSE Canlı Fiyat ──────────────────────────────── */
 let _sseRetry = 1000;
