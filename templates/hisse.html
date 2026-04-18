@@ -570,6 +570,17 @@
     </table>
   </div>
 
+  <!-- Temel Analiz -->
+  <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 18px;margin-bottom:20px" id="fundSection">
+    <div class="section-title">📋 Temel Analiz</div>
+    <div id="fundLoading" style="color:#484f58;font-size:13px;display:flex;align-items:center;gap:8px">
+      <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Yükleniyor…
+    </div>
+    <div id="fundContent" style="display:none">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px" id="fundGrid"></div>
+    </div>
+  </div>
+
   <!-- AI Haberler -->
   <div class="news-section" id="newsSection">
     <div class="section-title">🤖 AI Haber Özeti</div>
@@ -635,7 +646,7 @@ const BASE_OPTS = {
 /* ── Grafik kurulumu ─────────────────────────────────── */
 function buildChart(d) {
   document.getElementById('chartLoading').style.display = 'none';
-  document.getElementById('chartsInner').style.display  = '';
+  document.getElementById('chartsInner').style.display  = 'block';
 
   const elMain   = document.getElementById('chartMain');
   const elVolume = document.getElementById('chartVolume');
@@ -830,8 +841,16 @@ function renderSummary(s, signalData) {
       isNew ? '<span style="color:#e3b341">⚡ Bugün</span>' : date + ' · ' + bars + ' bar';
     document.getElementById('icBars').textContent = bars;
 
-    if (signalData.signal_price && s.signal !== 'BEKLE') {
-      document.getElementById('icEntry').textContent = fmt(signalData.signal_price);
+    const bars = signalData.signal_bars || 1;
+    if (signalData.signal_price && s.signal !== 'BEKLE' && bars >= 2) {
+      const ep = signalData.signal_price;
+      const ret = ((s.price - ep) / ep * 100);
+      const retSign = ret >= 0 ? '+' : '';
+      const retColor = ret >= 0 ? '#3fb950' : '#f85149';
+      document.getElementById('icEntry').innerHTML =
+        fmt(ep) + ` <span style="font-size:11px;color:${retColor}">(${retSign}${ret.toFixed(1)}%)</span>`;
+    } else if (s.signal !== 'BEKLE' && bars === 1) {
+      document.getElementById('icEntry').innerHTML = '<span style="color:#e3b341;font-size:12px">⚡ Bugün oluştu</span>';
     } else {
       document.getElementById('icEntry').textContent = '—';
       document.getElementById('icEntryLbl').textContent = 'Aktif sinyal yok';
@@ -936,6 +955,45 @@ async function loadNews() {
   }
 }
 loadNews();
+
+/* ── Temel Analiz ──────────────────────────────────── */
+async function loadFundamentals() {
+  try {
+    const res  = await fetch('/api/hisse/' + TICKER + '/fundamentals');
+    const json = await res.json();
+    document.getElementById('fundLoading').style.display = 'none';
+    const f = json.fundamentals;
+    if (!f || Object.keys(f).length === 0) {
+      document.getElementById('fundSection').style.display = 'none';
+      return;
+    }
+    const items = [
+      { lbl: 'Piyasa Değeri', val: f.market_cap },
+      { lbl: 'F/K Oranı',     val: f.pe_ratio != null ? f.pe_ratio + 'x' : null },
+      { lbl: 'F/DD Oranı',    val: f.pb_ratio != null ? f.pb_ratio + 'x' : null },
+      { lbl: 'HBK (EPS)',     val: f.eps != null ? f.eps.toLocaleString('tr-TR', {minimumFractionDigits:2}) + ' ₺' : null },
+      { lbl: 'Yıllık Ciro',   val: f.revenue },
+      { lbl: 'Temettü Verimi',val: f.dividend_yield != null ? '%' + f.dividend_yield : null },
+      { lbl: 'Öz Sermaye Getirisi (ROE)', val: f.roe != null ? '%' + f.roe : null },
+      { lbl: 'Beta',          val: f.beta != null ? f.beta : null },
+    ].filter(i => i.val != null);
+
+    if (items.length === 0) {
+      document.getElementById('fundSection').style.display = 'none';
+      return;
+    }
+    document.getElementById('fundGrid').innerHTML = items.map(i =>
+      `<div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:12px 14px">
+        <div style="font-size:11px;color:#8b949e;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.3px">${i.lbl}</div>
+        <div style="font-size:16px;font-weight:700;color:#f0f6fc">${i.val}</div>
+      </div>`
+    ).join('');
+    document.getElementById('fundContent').style.display = '';
+  } catch(e) {
+    document.getElementById('fundSection').style.display = 'none';
+  }
+}
+loadFundamentals();
 
 /* ── SSE Canlı Fiyat ──────────────────────────────── */
 let _sseRetry = 1000;

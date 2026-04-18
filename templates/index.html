@@ -1035,10 +1035,20 @@ function renderTable() {
       ? '<span style="color:#3fb950;font-size:10px;margin-left:4px" title="3+ bar onaylı">✓</span>'
       : (s.signal !== 'BEKLE' ? '<span style="color:#e3b341;font-size:10px;margin-left:4px" title="Oluşuyor">…</span>' : '');
 
-    // Giriş fiyatı
-    const sigPriceHtml = (s.signal_price && s.signal !== 'BEKLE')
-      ? `<span class="sig-price">${s.signal_price.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>`
-      : '<span style="color:#484f58">—</span>';
+    // Giriş fiyatı — bars=1 için "Bugün" göster, bars>=2 için fiyat + getiri
+    let sigPriceHtml;
+    if (s.signal !== 'BEKLE' && s.signal_bars === 1) {
+      sigPriceHtml = '<span style="color:#e3b341;font-size:11px">⚡ Bugün</span>';
+    } else if (s.signal_price && s.signal !== 'BEKLE' && s.signal_bars >= 2) {
+      const ep = s.signal_price;
+      const ret = ((s.price - ep) / ep * 100);
+      const retSign = ret >= 0 ? '+' : '';
+      const retColor = ret >= 0 ? '#3fb950' : '#f85149';
+      sigPriceHtml = `<span class="sig-price">${ep.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>` +
+        `<span style="font-size:10px;color:${retColor};margin-left:3px">${retSign}${ret.toFixed(1)}%</span>`;
+    } else {
+      sigPriceHtml = '<span style="color:#484f58">—</span>';
+    }
 
     // SL seviyesi + risk yüzdesi
     let slHtml = '<span style="color:#484f58">—</span>';

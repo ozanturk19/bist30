@@ -1142,6 +1142,63 @@ def stock_page(ticker):
                            stock_names=STOCK_NAMES)
 
 
+_fundamentals_cache = {}
+_FUND_TTL = 3600 * 4  # 4 saat
+
+def _get_fundamentals(ticker_base):
+    """yfinance ile temel analiz verilerini döndürür."""
+    now = time.time()
+    with _lock:
+        cached = _fundamentals_cache.get(ticker_base)
+        if cached and (now - cached["ts"]) < _FUND_TTL:
+            return cached["data"]
+    try:
+        yf_ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
+        info = yf.Ticker(yf_ticker).info
+        def safe(key, default=None):
+            v = info.get(key)
+            return v if v not in (None, "N/A", 0) else default
+
+        def fmt_billion(v):
+            if v is None: return None
+            if v >= 1e12: return f"{v/1e12:.2f} T₺"
+            if v >= 1e9:  return f"{v/1e9:.2f} Mrd₺"
+            if v >= 1e6:  return f"{v/1e6:.1f} Mn₺"
+            return f"{v:,.0f} ₺"
+
+        data = {
+            "pe_ratio":       round(safe("trailingPE", 0), 1) if safe("trailingPE") else None,
+            "pb_ratio":       round(safe("priceToBook", 0), 2) if safe("priceToBook") else None,
+            "eps":            safe("trailingEps"),
+            "market_cap":     fmt_billion(safe("marketCap")),
+            "revenue":        fmt_billion(safe("totalRevenue")),
+            "dividend_yield": round(safe("dividendYield", 0) * 100, 2) if safe("dividendYield") else None,
+            "roe":            round(safe("returnOnEquity", 0) * 100, 1) if safe("returnOnEquity") else None,
+            "beta":           round(safe("beta", 0), 2) if safe("beta") else None,
+            "shares":         fmt_billion(safe("sharesOutstanding")),
+            "52w_high":       safe("fiftyTwoWeekHigh"),
+            "52w_low":        safe("fiftyTwoWeekLow"),
+            "avg_volume":     safe("averageVolume"),
+            "short_name":     safe("shortName"),
+        }
+        with _lock:
+            _fundamentals_cache[ticker_base] = {"data": data, "ts": now}
+        return data
+    except Exception as e:
+        logger.warning("_get_fundamentals(%s): %s", ticker_base, e)
+        return {}
+
+
+@app.route("/api/hisse/<ticker>/fundamentals")
+def api_stock_fundamentals(ticker):
+    """Temel analiz verileri — 4 saatlik cache."""
+    ticker = ticker.upper()
+    if ticker not in BIST100:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+    data = _get_fundamentals(ticker)
+    return safe_json({"fundamentals": data})
+
+
 @app.route("/api/hisse/<ticker>/news")
 def api_stock_news(ticker):
     """Gemini AI haber özeti — 6 saatlik cache."""
