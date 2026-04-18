@@ -26,7 +26,7 @@
 **Hedef:** Google'ın siteyi bulması ve indekslemesi.
 
 ### 1.1 Domain ve Altyapı
-- [ ] Domain al: `borsasinyali.com` / `bistanaliz.com` / `sinyalpanel.com`
+- [ ] Domain al: `borsapusula.com` / `bistanaliz.com` / `sinyalpanel.com`
 - [ ] Nginx reverse proxy kur (port 8003 → 80/443)
 - [ ] Let's Encrypt SSL sertifikası (Certbot)
 - [ ] www redirect → non-www (ya da tersi), canonical URL
@@ -36,9 +36,9 @@
 - [ ] Her sayfa için `<title>` ve `<meta description>` (hisse sayfaları zaten var)
 - [ ] `sitemap.xml` oluştur ve otomatik güncelle
   ```
-  https://borsasinyali.com/
-  https://borsasinyali.com/hisse/THYAO
-  https://borsasinyali.com/hisse/GARAN
+  https://borsapusula.com/
+  https://borsapusula.com/hisse/THYAO
+  https://borsapusula.com/hisse/GARAN
   ... (28 hisse × 2 URL = 56+ sayfa)
   ```
 - [ ] `robots.txt` ekle
@@ -129,7 +129,7 @@
 📅 08.04.2026  |  💰 Giriş: 340,50 ₺
 🛑 SL: 294,02 ₺ (-14,4%)
 📊 Skor: 3/3 (ST + ADX27 + EMA12/99)
-🔗 borsasinyali.com/hisse/THYAO
+🔗 borsapusula.com/hisse/THYAO
 ```
 - [ ] Python Telegram Bot API → otomatik sinyal gönderimi
 - [ ] Kanal büyüyünce organik trafik kaynağına dönüşür

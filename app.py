@@ -987,7 +987,7 @@ def sitemap():
     today = date.today().isoformat()
     xml   = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    base  = "https://borsasinyali.com"   # Domain eklenince burası güncellenir
+    base  = "https://borsapusula.com"   # Domain eklenince burası güncellenir
     for p in pages:
         xml.append(f"  <url><loc>{base}{p['loc']}</loc>"
                    f"<lastmod>{today}</lastmod>"
@@ -1004,7 +1004,7 @@ def robots():
         "Allow: /\n"
         "Disallow: /api/\n"
         "\n"
-        "Sitemap: https://borsasinyali.com/sitemap.xml\n"
+        "Sitemap: https://borsapusula.com/sitemap.xml\n"
     )
     return Response(body, mimetype="text/plain")
 
