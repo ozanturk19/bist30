@@ -176,15 +176,15 @@
 <div class="counter-grid">
   <div class="counter-card">
     <div class="counter-num num-al">{{ al_list|length }}</div>
-    <div class="counter-lbl">▲ AL Sinyali</div>
+    <div class="counter-lbl">▲ Güçlü Trend</div>
   </div>
   <div class="counter-card">
     <div class="counter-num num-sat">{{ sat_list|length }}</div>
-    <div class="counter-lbl">▼ SAT Sinyali</div>
+    <div class="counter-lbl">▼ Zayıf Trend</div>
   </div>
   <div class="counter-card">
     <div class="counter-num num-bekle">{{ bekle_list|length }}</div>
-    <div class="counter-lbl">● Bekle</div>
+    <div class="counter-lbl">● Belirsiz</div>
   </div>
   <div class="counter-card">
     <div class="counter-num num-new">{{ new_signals|length }}</div>
@@ -204,9 +204,9 @@
     <div class="bar-sat" style="width:{{ sat_pct }}%"></div>
   </div>
   <div class="bar-labels">
-    <span style="color:#3fb950">AL %{{ al_pct }}</span>
+    <span style="color:#3fb950">Güçlü %{{ al_pct }}</span>
     <span>BIST100 ({{ total }} hisse)</span>
-    <span style="color:#f85149">SAT %{{ sat_pct }}</span>
+    <span style="color:#f85149">Zayıf %{{ sat_pct }}</span>
   </div>
 </div>
 {% endif %}
@@ -222,7 +222,7 @@
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-{{ s.signal|lower }}">
         {{ '▲' if s.signal == 'AL' else '▼' if s.signal == 'SAT' else '●' }}
-        {{ s.signal }}
+        {{ s.signal|signal_label }}
       </div>
       <div class="sc-new">⚡ Bugün oluştu</div>
     </a>
@@ -234,13 +234,13 @@
 <!-- AL Sinyalleri -->
 {% if al_list %}
 <div class="section-box">
-  <div class="section-title" style="color:#3fb950">▲ AL Sinyali Veren Hisseler ({{ al_list|length }})</div>
+  <div class="section-title" style="color:#3fb950">▲ Güçlü Trend Hisseleri ({{ al_list|length }})</div>
   <div class="stock-grid">
     {% for s in al_list %}
     <a href="/hisse/{{ s.ticker }}" class="stock-card">
       <div class="sc-ticker">{{ s.ticker }}</div>
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
-      <div class="sc-signal sc-al">▲ AL</div>
+      <div class="sc-signal sc-al">▲ Güçlü Trend</div>
       <div class="sc-meta">{{ s.signal_bars }} gün · {{ s.signal_date }}</div>
       {% if s.signal_price %}<div class="sc-meta">Giriş: {{ s.signal_price }} ₺</div>{% endif %}
     </a>
@@ -252,13 +252,13 @@
 <!-- SAT Sinyalleri -->
 {% if sat_list %}
 <div class="section-box">
-  <div class="section-title" style="color:#f85149">▼ SAT Sinyali Veren Hisseler ({{ sat_list|length }})</div>
+  <div class="section-title" style="color:#f85149">▼ Zayıf Trend Hisseleri ({{ sat_list|length }})</div>
   <div class="stock-grid">
     {% for s in sat_list %}
     <a href="/hisse/{{ s.ticker }}" class="stock-card">
       <div class="sc-ticker">{{ s.ticker }}</div>
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
-      <div class="sc-signal sc-sat">▼ SAT</div>
+      <div class="sc-signal sc-sat">▼ Zayıf Trend</div>
       <div class="sc-meta">{{ s.signal_bars }} gün · {{ s.signal_date }}</div>
       {% if s.signal_price %}<div class="sc-meta">Giriş: {{ s.signal_price }} ₺</div>{% endif %}
     </a>
@@ -270,13 +270,13 @@
 <!-- Bekle Sinyalleri -->
 {% if bekle_list %}
 <div class="section-box">
-  <div class="section-title">● Bekle Konumundaki Hisseler ({{ bekle_list|length }})</div>
+  <div class="section-title">● Belirsiz Konumdaki Hisseler ({{ bekle_list|length }})</div>
   <div class="stock-grid">
     {% for s in bekle_list %}
     <a href="/hisse/{{ s.ticker }}" class="stock-card">
       <div class="sc-ticker">{{ s.ticker }}</div>
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
-      <div class="sc-signal sc-bekle">● BEKLE</div>
+      <div class="sc-signal sc-bekle">● Belirsiz</div>
     </a>
     {% endfor %}
   </div>

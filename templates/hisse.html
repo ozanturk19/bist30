@@ -478,7 +478,7 @@
   <div class="header-price-group">
     <span class="header-price" id="hpPrice">—</span>
     <span class="header-chg neu" id="hpChg">—</span>
-    <span class="signal-badge signal-BEKLE" id="hpSignal">● BEKLE</span>
+    <span class="signal-badge signal-BEKLE" id="hpSignal">● Belirsiz</span>
   </div>
   <span id="liveTs" style="font-size:12px;color:#484f58;margin-left:4px">○</span>
 </header>
@@ -632,6 +632,11 @@
 </footer>
 
 <script>
+/* ── Sinyal görünen etiketleri ───────────────────── */
+function sigLabel(sig) {
+  return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[sig] || sig;
+}
+
 const LC      = LightweightCharts;
 const TICKER  = "{{ ticker }}";
 
@@ -819,11 +824,11 @@ function renderSummary(s, signalData) {
 
   const sigEl  = document.getElementById('hpSignal');
   const icon   = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
-  sigEl.textContent = icon + ' ' + s.signal;
+  sigEl.textContent = icon + ' ' + sigLabel(s.signal);
   sigEl.className   = 'signal-badge signal-' + s.signal;
 
   /* Sinyal kartı */
-  document.getElementById('icSignal').textContent = icon + ' ' + s.signal;
+  document.getElementById('icSignal').textContent = icon + ' ' + sigLabel(s.signal);
   const MAX = 3;
   const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
   const dotCls   = s.signal === 'SAT' ? 'dot-bear' : s.signal === 'AL' ? 'dot-bull' : 'dot-empty';
@@ -895,7 +900,7 @@ function renderHistory(history) {
     const cls   = h.signal === 'AL' ? '#3fb950' : '#f85149';
     return `<tr>
       <td>${h.date}</td>
-      <td><span class="signal-badge signal-${h.signal}" style="font-size:11px">${icon} ${h.signal}</span></td>
+      <td><span class="signal-badge signal-${h.signal}" style="font-size:11px">${icon} ${sigLabel(h.signal)}</span></td>
       <td style="font-variant-numeric:tabular-nums">${fmt(h.price)} ₺</td>
     </tr>`;
   }).join('');

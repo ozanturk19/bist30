@@ -14,6 +14,13 @@ from blog_content import ARTICLES, ARTICLES_BY_SLUG, CATEGORIES
 
 app = Flask(__name__)
 
+# ── Sinyal görünen ad eşlemesi (iç değer AL/SAT/BEKLE değişmez) ───────────────
+_SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Zayıf Trend', 'BEKLE': 'Belirsiz'}
+
+@app.template_filter('signal_label')
+def signal_label_filter(signal):
+    return _SIGNAL_LABELS.get(signal, signal)
+
 
 def _clean(obj):
     """NaN/Inf değerlerini None'a çevir — JSON'da NaN geçersiz, JS crash yapar."""
@@ -866,7 +873,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         st_text    = "yükseliş yönünde"
         ema_text   = f"EMA12 ({e12:.0f} ₺), EMA99 ({e99:.0f} ₺) üzerinde seyrediyor"
         di_text    = f"DI+ {di_p:.0f} DI- {di_m:.0f}'i geçmiş durumda"
-        dur_text   = f"Son {signal_bars} gündür AL sinyali aktif" if signal_bars > 1 else "Bugün AL sinyali oluştu"
+        dur_text   = f"Son {signal_bars} gündür Güçlü Trend sinyali aktif" if signal_bars > 1 else "Bugün Güçlü Trend sinyali oluştu"
         if signal_date:
             dur_text += f" ({signal_date} tarihinden itibaren)" if signal_bars > 1 else ""
         return (
@@ -879,7 +886,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         st_text    = "düşüş yönünde"
         ema_text   = f"EMA12 ({e12:.0f} ₺), EMA99 ({e99:.0f} ₺) altında seyrediyor"
         di_text    = f"DI- {di_m:.0f} DI+ {di_p:.0f}'ün üzerinde"
-        dur_text   = f"Son {signal_bars} gündür SAT sinyali aktif" if signal_bars > 1 else "Bugün SAT sinyali oluştu"
+        dur_text   = f"Son {signal_bars} gündür Zayıf Trend sinyali aktif" if signal_bars > 1 else "Bugün Zayıf Trend sinyali oluştu"
         if signal_date:
             dur_text += f" ({signal_date} tarihinden itibaren)" if signal_bars > 1 else ""
         return (

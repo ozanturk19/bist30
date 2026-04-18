@@ -453,9 +453,9 @@
 
   <div class="stats-bar" id="statsBar">
     <div class="stat-card stat-total"><div class="stat-num" id="statTotal">—</div><div class="stat-label">Toplam</div></div>
-    <div class="stat-card stat-al">   <div class="stat-num" id="statAl">—</div>   <div class="stat-label">AL Sinyali</div></div>
-    <div class="stat-card stat-sat">  <div class="stat-num" id="statSat">—</div>  <div class="stat-label">SAT Sinyali</div></div>
-    <div class="stat-card stat-bekle"><div class="stat-num" id="statBekle">—</div><div class="stat-label">BEKLE</div></div>
+    <div class="stat-card stat-al">   <div class="stat-num" id="statAl">—</div>   <div class="stat-label">Güçlü Trend</div></div>
+    <div class="stat-card stat-sat">  <div class="stat-num" id="statSat">—</div>  <div class="stat-label">Zayıf Trend</div></div>
+    <div class="stat-card stat-bekle"><div class="stat-num" id="statBekle">—</div><div class="stat-label">Belirsiz</div></div>
   </div>
 
   <!-- ── XU030 Endeks Satırı ─────────────────────── -->
@@ -464,7 +464,7 @@
     <div class="irc-divider"></div>
     <span id="ircPrice" class="irc-price">—</span>
     <span id="ircChg" class="irc-chg neu">—</span>
-    <span id="ircSignal" class="signal-badge signal-BEKLE">● BEKLE</span>
+    <span id="ircSignal" class="signal-badge signal-BEKLE">● Belirsiz</span>
     <div id="ircEntry" class="irc-meta" style="display:none">
       <span class="irc-meta-label">Giriş</span>
       <span id="ircSigPrice" class="irc-meta-val">—</span>
@@ -479,9 +479,9 @@
 
   <div class="filters">
     <button class="filter-btn active-all" onclick="setFilter('all', this)">Tümü</button>
-    <button class="filter-btn" onclick="setFilter('AL', this)">🟢 AL</button>
-    <button class="filter-btn" onclick="setFilter('SAT', this)">🔴 SAT</button>
-    <button class="filter-btn" onclick="setFilter('BEKLE', this)">⚪ BEKLE</button>
+    <button class="filter-btn" onclick="setFilter('AL', this)">🟢 Güçlü Trend</button>
+    <button class="filter-btn" onclick="setFilter('SAT', this)">🔴 Zayıf Trend</button>
+    <button class="filter-btn" onclick="setFilter('BEKLE', this)">⚪ Belirsiz</button>
     <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)">⚡ Bugün</button>
     <input class="search-input" type="text" placeholder="Hisse ara..." oninput="setSearch(this.value)">
   </div>
@@ -554,6 +554,11 @@
 </footer>
 
 <script>
+/* ── Sinyal görünen etiketleri ───────────────────── */
+function sigLabel(sig) {
+  return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[sig] || sig;
+}
+
 /* ── Lightweight Charts v4 ───────────────────────── */
 const LC = LightweightCharts;
 
@@ -713,7 +718,7 @@ function renderIndexHeader(s) {
 
   const sigEl = document.getElementById('idxSignal');
   const icon  = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
-  sigEl.textContent = icon + ' ' + s.signal;
+  sigEl.textContent = icon + ' ' + sigLabel(s.signal);
   sigEl.className   = 'signal-badge signal-' + s.signal;
 
   // SL seviyesi
@@ -847,7 +852,7 @@ function renderIndexRow(stock) {
 
   const sigEl = document.getElementById('ircSignal');
   const icon  = stock.signal === 'AL' ? '▲' : stock.signal === 'SAT' ? '▼' : '●';
-  sigEl.textContent = icon + ' ' + stock.signal;
+  sigEl.textContent = icon + ' ' + sigLabel(stock.signal);
   sigEl.className   = 'signal-badge signal-' + stock.signal;
 
   // Giriş fiyatı
@@ -1067,7 +1072,7 @@ function renderTable() {
       <td><span class="ticker">${s.ticker}</span> ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
-      <td><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${s.signal}</span>${confHtml}</td>
+      <td><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}</td>
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile">${sigPriceHtml}</td>
       <td class="hide-mobile">${slHtml}</td>
