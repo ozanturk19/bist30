@@ -4,7 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ ticker }} Teknik Analiz — Supertrend & EMA Sinyal | BIST30 Panel</title>
-<meta name="description" content="{{ ticker }} ({{ name }}) güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik AL/SAT/BEKLE analizi.">
+<meta name="description" content="{{ ticker }} ({{ name }}) güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik AL/SAT/BEKLE analizi. Ücretsiz, günlük güncelleme.">
+<meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} al sat sinyali, {{ ticker }} supertrend, BIST30 sinyalleri, {{ name }} borsa analiz">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="canonical" href="https://borsasinyali.com/hisse/{{ ticker }}">
+<!-- Open Graph -->
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="{{ ticker }} Teknik Analiz — {{ name }}">
+<meta property="og:description" content="{{ ticker }} için algoritmik Supertrend + ADX + EMA12/99 teknik analiz sinyali.">
+<meta property="og:url"         content="https://borsasinyali.com/hisse/{{ ticker }}">
+<meta property="og:site_name"   content="BIST30 Sinyal Paneli">
+<!-- Twitter Card -->
+<meta name="twitter:card"        content="summary">
+<meta name="twitter:title"       content="{{ ticker }} Teknik Analiz">
+<meta name="twitter:description" content="{{ name }} — Algoritmik BIST30 teknik analiz sinyali">
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -120,7 +133,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    height: 380px;
+    height: 440px;
     color: #8b949e;
     font-size: 13px;
   }
@@ -134,7 +147,65 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   #chartsInner { display: none; }
-  #chartMain   { height: 380px; }
+  #chartMain   { height: 340px; }
+  #chartVolume { height: 90px; border-top: 1px solid #21262d; }
+
+  /* ── 52 Haftalık Bar ── */
+  .week52-bar {
+    padding: 10px 18px 14px;
+    border-top: 1px solid #21262d;
+  }
+  .week52-label {
+    font-size: 11px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .week52-track {
+    position: relative;
+    height: 6px;
+    background: #30363d;
+    border-radius: 3px;
+    overflow: visible;
+  }
+  .week52-fill {
+    position: absolute;
+    left: 0; top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #f85149, #e3b341, #3fb950);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .week52-cursor {
+    position: absolute;
+    top: -4px;
+    width: 14px; height: 14px;
+    background: #f0f6fc;
+    border: 2px solid #161b22;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    transition: left 0.4s ease;
+  }
+
+  /* ── Teknik Yorum ── */
+  .commentary-section {
+    background: rgba(88,166,255,0.05);
+    border: 1px solid rgba(88,166,255,0.15);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .commentary-text {
+    font-size: 13px;
+    color: #c9d1d9;
+    line-height: 1.7;
+  }
+  .commentary-text strong { color: #f0f6fc; }
 
   /* ── Info cards ── */
   .info-grid {
@@ -326,8 +397,9 @@
     .header-ticker { font-size: 18px; }
     .header-price  { font-size: 18px; }
     .container { padding: 12px 16px; }
-    #chartMain { height: 260px; }
-    #chartLoading { height: 260px; }
+    #chartMain    { height: 240px; }
+    #chartVolume  { height: 70px; }
+    #chartLoading { height: 330px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
@@ -362,7 +434,32 @@
       <span id="emaLegend" style="font-size:11px;color:#8b949e;margin-left:auto"></span>
     </div>
     <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
-    <div id="chartsInner"><div id="chartMain"></div></div>
+    <div id="chartsInner">
+      <div id="chartMain"></div>
+      <div id="chartVolume"></div>
+      <!-- 52 Haftalık Yüksek / Düşük Barı -->
+      <div class="week52-bar" id="week52Bar" style="display:none">
+        <div class="week52-label">
+          <span>52 Haftalık Aralık</span>
+          <span><span id="w52low" style="color:#f85149">—</span> — <span id="w52high" style="color:#3fb950">—</span></span>
+        </div>
+        <div class="week52-track">
+          <div class="week52-fill"  id="w52fill"  style="width:0%"></div>
+          <div class="week52-cursor" id="w52cursor" style="left:0%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:#484f58">
+          <span>52H Düşük</span>
+          <span id="w52cur" style="color:#e6edf3">—</span>
+          <span>52H Yüksek</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teknik Yorum -->
+  <div class="commentary-section" id="commentarySection" style="display:none">
+    <div class="section-title" style="margin-bottom:8px">📊 Teknik Görünüm</div>
+    <p class="commentary-text" id="commentaryText"></p>
   </div>
 
   <!-- Özet kartlar -->
@@ -460,14 +557,62 @@ function buildChart(d) {
   document.getElementById('chartLoading').style.display = 'none';
   document.getElementById('chartsInner').style.display  = '';
 
-  const elMain  = document.getElementById('chartMain');
+  const elMain   = document.getElementById('chartMain');
+  const elVolume = document.getElementById('chartVolume');
   const isMobile = window.innerWidth < 768;
+  const chartW   = elMain.clientWidth || elMain.parentElement.clientWidth || 900;
+
   const chart = LC.createChart(elMain, {
     ...BASE_OPTS,
-    width:     elMain.clientWidth || elMain.parentElement.clientWidth || 900,
-    height:    isMobile ? 260 : 380,
+    width:     chartW,
+    height:    isMobile ? 240 : 340,
     timeScale: { borderColor: '#30363d', timeVisible: true, visible: true },
   });
+
+  /* Volume histogram (alt panel) */
+  if (d.volume && d.volume.length > 0 && elVolume) {
+    const volChart = LC.createChart(elVolume, {
+      ...BASE_OPTS,
+      width:  chartW,
+      height: isMobile ? 70 : 90,
+      timeScale: { borderColor: '#30363d', timeVisible: false, visible: false },
+      rightPriceScale: {
+        borderColor: '#30363d',
+        scaleMargins: { top: 0.1, bottom: 0 },
+        drawTicks: false,
+      },
+    });
+    const volSeries = volChart.addHistogramSeries({
+      priceScaleId: 'right',
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
+    volSeries.setData(d.volume);
+    volChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+      chart.timeScale().setVisibleLogicalRange(range);
+    });
+    chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+      volChart.timeScale().setVisibleLogicalRange(range);
+    });
+    window.addEventListener('resize', () => {
+      const w = elMain.clientWidth;
+      if (w) { volChart.applyOptions({ width: w }); }
+    });
+  }
+
+  /* 52-haftalık bar */
+  if (d.week52) {
+    const lo = d.week52.low, hi = d.week52.high;
+    const cur = d.summary.price;
+    const pct = hi > lo ? Math.round(((cur - lo) / (hi - lo)) * 100) : 0;
+    const fmt = v => v.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+    document.getElementById('w52low').textContent    = fmt(lo) + ' ₺';
+    document.getElementById('w52high').textContent   = fmt(hi) + ' ₺';
+    document.getElementById('w52cur').textContent    = fmt(cur) + ' ₺';
+    document.getElementById('w52fill').style.width   = pct + '%';
+    document.getElementById('w52cursor').style.left  = pct + '%';
+    document.getElementById('week52Bar').style.display = '';
+  }
 
   /* EMA fill primitive */
   class EmaFill {
@@ -558,6 +703,17 @@ function buildChart(d) {
     const w = elMain.clientWidth;
     if (w) chart.applyOptions({ width: w });
   });
+}
+
+/* ── 52-hafta + commentary render ──────────────────── */
+function renderCommentary(commentary) {
+  if (!commentary) return;
+  const el = document.getElementById('commentaryText');
+  const sec = document.getElementById('commentarySection');
+  if (el && sec) {
+    el.textContent = commentary;
+    sec.style.display = '';
+  }
 }
 
 /* ── Özet kartları doldur ──────────────────────────── */
@@ -655,6 +811,7 @@ async function loadChart() {
 
     buildChart(json.chart);
     renderHistory(json.chart.signal_history);
+    renderCommentary(json.chart.commentary);
 
     /* Özet için /api/data'dan da signal_bars/date bilgisi al */
     const res2  = await fetch('/api/data');

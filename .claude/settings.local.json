@@ -1,41 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(pip3 show:*)",
-      "Bash(python3 -c \"import flask, yfinance, pandas, numpy; print\\(''OK''\\)\")",
-      "Bash(pip3 install:*)",
-      "Bash(chmod +x \"/Users/mac/Bist ve BTC/Bist30/baslat.sh\")",
-      "Bash(open http://localhost:5050)",
-      "Bash(curl -s http://localhost:5050/api/chart)",
-      "Bash(curl -s http://localhost:5050/api/data)",
-      "Bash(curl -s http://localhost:5050/)",
-      "Bash(python3:*)",
-      "Bash(lsof -ti:5050)",
-      "Skill(update-config)",
-      "Skill(update-config:*)",
-      "Bash(ssh -o StrictHostKeyChecking=no root@135.181.206.109 \"echo ''Connected OK'' && python3 --version && pip3 --version && ls /root/\")",
-      "Bash(ssh -o StrictHostKeyChecking=no root@135.181.206.109 \"ls /root/bist30 2>/dev/null || echo ''NOTFOUND''\")",
-      "Bash(ssh -o StrictHostKeyChecking=no root@135.181.206.109 \"mkdir -p /root/bist30 && echo ''Dir created''\")",
-      "Bash(scp -o StrictHostKeyChecking=no \"/Users/mac/Bist ve BTC/Bist30/app.py\" root@135.181.206.109:/root/bist30/app.py)",
-      "Bash(ssh -o StrictHostKeyChecking=no root@135.181.206.109 \"pip3 install flask yfinance pandas numpy 2>&1 | tail -5\")",
-      "Bash(ssh -o StrictHostKeyChecking=no root@135.181.206.109 \"pip3 install flask yfinance pandas numpy --break-system-packages 2>&1 | tail -8\")",
-      "Bash(ssh -o StrictHostKeyChecking=no root@135.181.206.109 \"pip3 install flask yfinance pandas numpy --break-system-packages --ignore-installed 2>&1 | tail -5\")",
-      "Bash(ssh -o:*)",
-      "Bash(ssh -o StrictHostKeyChecking=no root@135.181.206.109 \"ufw status | grep 8003 || echo ''''UFW rule not set''''\")",
-      "Bash(curl -s --max-time 10 http://135.181.206.109:8003/)",
-      "Bash(curl -s --max-time 15 http://135.181.206.109:8003/api/signals)",
-      "Bash(curl -s --max-time 5 http://135.181.206.109:8003/api/signals)",
-      "Bash(curl -s --max-time 5 \"http://135.181.206.109:8003/api/data\")",
-      "Bash(curl -s --max-time 5 \"http://135.181.206.109:8003/api/chart\")",
-      "Bash(curl -s --max-time 10 \"http://135.181.206.109:8003/api/data\")",
-      "Bash(curl -s --max-time 10 \"http://135.181.206.109:8003/api/chart\")",
-      "Bash(scp -o StrictHostKeyChecking=no \"/Users/mac/Bist ve BTC/Bist30/templates/index.html\" root@135.181.206.109:/root/bist30/templates/index.html)",
-      "Bash(brew list:*)",
-      "Read(//Applications/Claude.app/Contents/Resources/bin/**)",
-      "Read(//opt/**)",
-      "Bash(brew --version)",
-      "Bash(git config:*)",
-      "Bash(security find-internet-password:*)"
-    ]
+    "defaultMode": "bypassPermissions"
   }
 }

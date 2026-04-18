@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIST30 Sinyal Özeti {{ today_str }} — Günlük AL/SAT Raporu</title>
+<meta name="description" content="BIST30 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse AL, kaç hisse SAT sinyali veriyor? Bugün sinyal değişen hisseler.">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="canonical" href="https://borsasinyali.com/ozet">
+<meta property="og:title"       content="BIST30 Günlük Sinyal Özeti — {{ today_str }}">
+<meta property="og:description" content="Bugün BIST30'da {{ al_list|length }} AL, {{ sat_list|length }} SAT sinyali var.">
+<meta property="og:site_name"   content="BIST30 Sinyal Paneli">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+  header {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 6px;
+    color: #8b949e; font-size: 13px;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    background: #21262d;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .back-btn:hover { background: #30363d; color: #e6edf3; }
+  .page-title { font-size: 20px; font-weight: 700; color: #f0f6fc; }
+  .page-sub   { font-size: 13px; color: #8b949e; margin-top: 1px; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+  /* ── Sayaç kartları ── */
+  .counter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .counter-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 20px 18px;
+    text-align: center;
+  }
+  .counter-num  { font-size: 40px; font-weight: 800; line-height: 1; }
+  .counter-lbl  { font-size: 12px; color: #8b949e; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .num-al    { color: #3fb950; }
+  .num-sat   { color: #f85149; }
+  .num-bekle { color: #8b949e; }
+  .num-new   { color: #e3b341; }
+
+  /* ── Sinyaller ── */
+  .section-box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-size: 12px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .stock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .stock-card {
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 12px 14px;
+    text-decoration: none;
+    transition: all 0.15s;
+    display: block;
+  }
+  .stock-card:hover { background: #30363d; border-color: #8b949e; }
+  .sc-ticker  { font-size: 15px; font-weight: 700; color: #f0f6fc; }
+  .sc-name    { font-size: 11px; color: #8b949e; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .sc-al   { background: rgba(63,185,80,.15);  color: #3fb950; }
+  .sc-sat  { background: rgba(248,81,73,.15);  color: #f85149; }
+  .sc-bekle{ background: rgba(139,148,158,.12); color: #8b949e; }
+  .sc-meta { font-size: 11px; color: #484f58; margin-top: 4px; }
+  .sc-new  { font-size: 10px; color: #e3b341; font-weight: 600; }
+
+  .empty-msg { color: #484f58; font-size: 13px; text-align: center; padding: 20px; }
+
+  /* Piyasa barometresi */
+  .barometer {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .bar-track {
+    position: relative;
+    height: 12px;
+    background: #21262d;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 10px 0;
+  }
+  .bar-al  { position: absolute; left: 0; top: 0; height: 100%; background: #3fb950; border-radius: 6px 0 0 6px; transition: width .4s; }
+  .bar-sat { position: absolute; right: 0; top: 0; height: 100%; background: #f85149; border-radius: 0 6px 6px 0; transition: width .4s; }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 12px; color: #8b949e; }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: #484f58;
+    border-top: 1px solid #21262d;
+    margin-top: 20px;
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 14px; }
+    .counter-num { font-size: 32px; }
+    .stock-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="page-title">📊 Günlük Sinyal Özeti</div>
+    <div class="page-sub">{{ today_str }}{% if updated_at %} · Son güncelleme: {{ updated_at }}{% endif %}</div>
+  </div>
+</header>
+
+<div class="container">
+
+{% if loading %}
+<div style="text-align:center;padding:60px;color:#8b949e">
+  <div style="font-size:32px;margin-bottom:12px">⏳</div>
+  Sinyal verisi yükleniyor, lütfen bekleyin…
+  <br><br>
+  <a href="/" style="color:#58a6ff">Ana sayfaya dön</a>
+</div>
+{% else %}
+
+<!-- Sayaç kartları -->
+<div class="counter-grid">
+  <div class="counter-card">
+    <div class="counter-num num-al">{{ al_list|length }}</div>
+    <div class="counter-lbl">▲ AL Sinyali</div>
+  </div>
+  <div class="counter-card">
+    <div class="counter-num num-sat">{{ sat_list|length }}</div>
+    <div class="counter-lbl">▼ SAT Sinyali</div>
+  </div>
+  <div class="counter-card">
+    <div class="counter-num num-bekle">{{ bekle_list|length }}</div>
+    <div class="counter-lbl">● Bekle</div>
+  </div>
+  <div class="counter-card">
+    <div class="counter-num num-new">{{ new_signals|length }}</div>
+    <div class="counter-lbl">⚡ Yeni Sinyal</div>
+  </div>
+</div>
+
+<!-- Piyasa barometresi -->
+{% set total = stocks|length %}
+{% if total > 0 %}
+{% set al_pct   = (al_list|length / total * 100)|round|int %}
+{% set sat_pct  = (sat_list|length / total * 100)|round|int %}
+<div class="barometer">
+  <div class="section-title">Piyasa Barometresi</div>
+  <div class="bar-track">
+    <div class="bar-al"  style="width:{{ al_pct }}%"></div>
+    <div class="bar-sat" style="width:{{ sat_pct }}%"></div>
+  </div>
+  <div class="bar-labels">
+    <span style="color:#3fb950">AL %{{ al_pct }}</span>
+    <span>BIST30 ({{ total }} hisse)</span>
+    <span style="color:#f85149">SAT %{{ sat_pct }}</span>
+  </div>
+</div>
+{% endif %}
+
+<!-- Bugün sinyal değişenler -->
+{% if new_signals %}
+<div class="section-box">
+  <div class="section-title">⚡ Bugün Sinyal Değişenler</div>
+  <div class="stock-grid">
+    {% for s in new_signals %}
+    <a href="/hisse/{{ s.ticker }}" class="stock-card">
+      <div class="sc-ticker">{{ s.ticker }}</div>
+      <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
+      <div class="sc-signal sc-{{ s.signal|lower }}">
+        {{ '▲' if s.signal == 'AL' else '▼' if s.signal == 'SAT' else '●' }}
+        {{ s.signal }}
+      </div>
+      <div class="sc-new">⚡ Bugün oluştu</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- AL Sinyalleri -->
+{% if al_list %}
+<div class="section-box">
+  <div class="section-title" style="color:#3fb950">▲ AL Sinyali Veren Hisseler ({{ al_list|length }})</div>
+  <div class="stock-grid">
+    {% for s in al_list %}
+    <a href="/hisse/{{ s.ticker }}" class="stock-card">
+      <div class="sc-ticker">{{ s.ticker }}</div>
+      <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
+      <div class="sc-signal sc-al">▲ AL</div>
+      <div class="sc-meta">{{ s.signal_bars }} gün · {{ s.signal_date }}</div>
+      {% if s.signal_price %}<div class="sc-meta">Giriş: {{ s.signal_price }} ₺</div>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- SAT Sinyalleri -->
+{% if sat_list %}
+<div class="section-box">
+  <div class="section-title" style="color:#f85149">▼ SAT Sinyali Veren Hisseler ({{ sat_list|length }})</div>
+  <div class="stock-grid">
+    {% for s in sat_list %}
+    <a href="/hisse/{{ s.ticker }}" class="stock-card">
+      <div class="sc-ticker">{{ s.ticker }}</div>
+      <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
+      <div class="sc-signal sc-sat">▼ SAT</div>
+      <div class="sc-meta">{{ s.signal_bars }} gün · {{ s.signal_date }}</div>
+      {% if s.signal_price %}<div class="sc-meta">Giriş: {{ s.signal_price }} ₺</div>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Bekle Sinyalleri -->
+{% if bekle_list %}
+<div class="section-box">
+  <div class="section-title">● Bekle Konumundaki Hisseler ({{ bekle_list|length }})</div>
+  <div class="stock-grid">
+    {% for s in bekle_list %}
+    <a href="/hisse/{{ s.ticker }}" class="stock-card">
+      <div class="sc-ticker">{{ s.ticker }}</div>
+      <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
+      <div class="sc-signal sc-bekle">● BEKLE</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endif %}
+
+</div>
+
+<footer>⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir. · <a href="/metodoloji" style="color:#8b949e">Metodoloji</a> · <a href="/" style="color:#8b949e">Ana Sayfa</a></footer>
+
+</body>
+</html>

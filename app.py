@@ -1,8 +1,8 @@
-from flask import Flask, jsonify, render_template, Response
+from flask import Flask, jsonify, render_template, Response, request
 import yfinance as yf
 import pandas as pd
 import numpy as np
-from datetime import datetime
+from datetime import datetime, date
 import threading
 import collections
 import logging
@@ -666,6 +666,52 @@ _stock_chart_cache = {}          # {ticker: {"data": ..., "ts": float, "updated_
 _STOCK_CACHE_TTL   = 900         # 15 dakika
 
 
+def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di_m, e12, e99, st_bull):
+    """Algoritmik teknik yorum metni üretir (SEO + kullanıcı için)."""
+    name = STOCK_NAMES.get(ticker, ticker)
+    adx_quality = "çok güçlü" if adx >= 40 else "güçlü" if adx >= 30 else "orta güçte" if adx >= 25 else "zayıf"
+
+    if signal == "AL":
+        trend_dir  = "yükseliş"
+        st_text    = "yükseliş yönünde"
+        ema_text   = f"EMA12 ({e12:.0f} ₺), EMA99 ({e99:.0f} ₺) üzerinde seyrediyor"
+        di_text    = f"DI+ {di_p:.0f} DI- {di_m:.0f}'i geçmiş durumda"
+        dur_text   = f"Son {signal_bars} gündür AL sinyali aktif" if signal_bars > 1 else "Bugün AL sinyali oluştu"
+        if signal_date:
+            dur_text += f" ({signal_date} tarihinden itibaren)" if signal_bars > 1 else ""
+        return (
+            f"{ticker} ({name}) hissesi {dur_text}. "
+            f"Supertrend göstergesi {st_text}, ADX {adx:.0f} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
+            f"{ema_text}. {di_text}."
+        )
+    elif signal == "SAT":
+        trend_dir  = "düşüş"
+        st_text    = "düşüş yönünde"
+        ema_text   = f"EMA12 ({e12:.0f} ₺), EMA99 ({e99:.0f} ₺) altında seyrediyor"
+        di_text    = f"DI- {di_m:.0f} DI+ {di_p:.0f}'ün üzerinde"
+        dur_text   = f"Son {signal_bars} gündür SAT sinyali aktif" if signal_bars > 1 else "Bugün SAT sinyali oluştu"
+        if signal_date:
+            dur_text += f" ({signal_date} tarihinden itibaren)" if signal_bars > 1 else ""
+        return (
+            f"{ticker} ({name}) hissesi {dur_text}. "
+            f"Supertrend göstergesi {st_text}, ADX {adx:.0f} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
+            f"{ema_text}. {di_text}."
+        )
+    else:
+        mixed = ""
+        if st_bull and e12 > e99:
+            mixed = "Supertrend ve EMA yükselen ancak ADX trend gücü henüz yetersiz."
+        elif not st_bull and e12 < e99:
+            mixed = "Supertrend ve EMA düşen ancak ADX trend gücü yetersiz."
+        else:
+            mixed = "İndikatörler birbirini teyit etmiyor, karmaşık bir görünüm var."
+        return (
+            f"{ticker} ({name}) hissesi şu anda net bir AL/SAT sinyali üretmiyor. "
+            f"{mixed} "
+            f"ADX {adx:.0f} ({adx_quality}), EMA12 {e12:.0f} / EMA99 {e99:.0f}."
+        )
+
+
 # ── Ortak grafik verisi hesaplama (XU030 + bireysel hisseler) ─────────────────
 def _compute_chart_data(ticker_base, period="2y"):
     """Herhangi bir hisse için grafik verisi hesaplar (OHLC, EMA, ST, sinyal geçmişi)."""
@@ -683,14 +729,17 @@ def _compute_chart_data(ticker_base, period="2y"):
             df.columns = df.columns.get_level_values(0)
             df = df.loc[:, ~df.columns.duplicated()]
 
-        df    = df[["Open", "High", "Low", "Close"]].dropna()
+        has_volume = "Volume" in df.columns
+        cols = ["Open", "High", "Low", "Close"] + (["Volume"] if has_volume else [])
+        df    = df[cols].dropna(subset=["Open", "High", "Low", "Close"])
         df    = _fill_intraday_gaps(df, ticker)
         df    = df.sort_index()
 
-        close = df["Close"]
-        high  = df["High"]
-        low   = df["Low"]
-        open_ = df["Open"]
+        close  = df["Close"]
+        high   = df["High"]
+        low    = df["Low"]
+        open_  = df["Open"]
+        volume = df["Volume"] if has_volume else None
 
         ema12                      = compute_ema(close, 12)
         ema99                      = compute_ema(close, 99)
@@ -792,6 +841,45 @@ def _compute_chart_data(ticker_base, period="2y"):
         bear_score = int(st_bear) + int(adx_bear) + int(e12_bear)
         signal     = "AL" if bull_score >= 3 else "SAT" if bear_score >= 3 else "BEKLE"
 
+        # ── Volume histogram (gösterim barları) ──────────────────────────
+        vol_data = []
+        if volume is not None:
+            avg_vol = float(volume.iloc[-60:].mean()) if len(volume) >= 60 else float(volume.mean())
+            for ts in show_idx:
+                try:
+                    v = float(volume[ts]) if not pd.isna(volume[ts]) else 0
+                    cl_ = float(close[ts]); op_ = float(open_[ts])
+                    color = "#3fb950" if cl_ >= op_ else "#f85149"
+                    # yüksek hacim biraz daha parlak
+                    if avg_vol > 0 and v > avg_vol * 2:
+                        color = "#3fb950cc" if cl_ >= op_ else "#f85149cc"
+                    vol_data.append({"time": ts.strftime("%Y-%m-%d"), "value": v, "color": color})
+                except Exception:
+                    continue
+
+        # ── 52 haftalık yüksek / düşük (yaklaşık 252 işlem günü) ─────────
+        week52_bars = min(252, len(close))
+        w52_close   = close.iloc[-week52_bars:]
+        w52_high    = round(float(w52_close.max()), 2)
+        w52_low     = round(float(w52_close.min()), 2)
+
+        # ── Güncel sinyal süresi (son sinyal değişiminden beri) ───────────
+        signal_bars = 1
+        signal_date_str = signal_history[0]["date"] if signal_history else ""
+        if signal_history:
+            # son al/sat değişimi
+            signal_bars = 1
+            for idx2 in range(len(close) - 1, -1, -1):
+                if bar_sig(idx2) != signal:
+                    signal_bars = (len(close) - 1) - idx2
+                    break
+
+        # ── Otomatik teknik yorum metni ───────────────────────────────────
+        commentary = _generate_commentary(
+            ticker_base, signal, signal_bars, signal_date_str,
+            adx_val, di_p, di_m, e12_val, e99_val, st_bull
+        )
+
         return {
             "ohlc":           ohlc,
             "ema12":          series(ema12),
@@ -799,6 +887,9 @@ def _compute_chart_data(ticker_base, period="2y"):
             "st_line":        st_line_data,
             "markers":        markers,
             "signal_history": signal_history,
+            "volume":         vol_data,
+            "week52":         {"high": w52_high, "low": w52_low},
+            "commentary":     commentary,
             "summary": {
                 "price":      round(c, 2),
                 "change_pct": round(chg, 2),
@@ -879,6 +970,85 @@ def api_stock_chart(ticker):
         return safe_json({"chart": data, "updated_at": upd, "loading": False})
 
     return safe_json({"chart": None, "loading": True})
+
+
+# ── SEO: sitemap, robots, favicon ────────────────────────────────────────────
+@app.route("/sitemap.xml")
+def sitemap():
+    pages = [
+        {"loc": "/",            "priority": "1.0", "changefreq": "hourly"},
+        {"loc": "/ozet",        "priority": "0.9", "changefreq": "daily"},
+        {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly"},
+        {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly"},
+    ]
+    for t in BIST30:
+        if t != "XU030":
+            pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
+    today = date.today().isoformat()
+    xml   = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    base  = "https://borsasinyali.com"   # Domain eklenince burası güncellenir
+    for p in pages:
+        xml.append(f"  <url><loc>{base}{p['loc']}</loc>"
+                   f"<lastmod>{today}</lastmod>"
+                   f"<changefreq>{p['changefreq']}</changefreq>"
+                   f"<priority>{p['priority']}</priority></url>")
+    xml.append("</urlset>")
+    return Response("\n".join(xml), mimetype="application/xml")
+
+
+@app.route("/robots.txt")
+def robots():
+    body = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /api/\n"
+        "\n"
+        "Sitemap: https://borsasinyali.com/sitemap.xml\n"
+    )
+    return Response(body, mimetype="text/plain")
+
+
+@app.route("/favicon.ico")
+def favicon():
+    import os
+    fpath = os.path.join(app.root_path, "static", "favicon.svg")
+    if os.path.exists(fpath):
+        with open(fpath, "rb") as f:
+            return Response(f.read(), mimetype="image/svg+xml")
+    return "", 404
+
+
+# ── Günlük Özet Sayfası ───────────────────────────────────────────────────────
+@app.route("/ozet")
+def ozet_page():
+    with _lock:
+        stocks = list(_cache["data"])
+        updated_at = _cache.get("updated_at", "")
+        loading = len(stocks) == 0
+
+    al_list    = [s for s in stocks if s["signal"] == "AL"]
+    sat_list   = [s for s in stocks if s["signal"] == "SAT"]
+    bekle_list = [s for s in stocks if s["signal"] == "BEKLE"]
+    new_signals = [s for s in stocks if s.get("is_new_signal")]
+
+    today_str = date.today().strftime("%d.%m.%Y")
+    return render_template("ozet.html",
+        stocks=stocks, loading=loading, updated_at=updated_at,
+        al_list=al_list, sat_list=sat_list, bekle_list=bekle_list,
+        new_signals=new_signals, today_str=today_str,
+        stock_names=STOCK_NAMES)
+
+
+# ── Eğitim Sayfaları ──────────────────────────────────────────────────────────
+@app.route("/metodoloji")
+def metodoloji():
+    return render_template("metodoloji.html")
+
+
+@app.route("/hakkinda")
+def hakkinda():
+    return render_template("hakkinda.html")
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────
