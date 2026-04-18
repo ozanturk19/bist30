@@ -14,13 +14,66 @@
 <meta property="og:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST100 teknik analiz sinyalleri. Ücretsiz ve canlı.">
 <meta property="og:url"         content="https://borsapusula.com/">
 <meta property="og:site_name"   content="BIST100 Sinyal Paneli | borsapusula.com">
+<meta property="og:image"       content="https://borsapusula.com/og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height"content="630">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary">
 <meta name="twitter:title"       content="BIST100 Sinyal Paneli | borsapusula.com">
 <meta name="twitter:description" content="Algoritmik BIST100 teknik analiz — Supertrend + ADX + EMA12/99">
-<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "BIST100 Sinyal Paneli",
+  "url": "https://borsapusula.com",
+  "description": "BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı ücretsiz AL/SAT/BEKLE sinyalleri.",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
+  "inLanguage": "tr",
+  "publisher": {
+    "@type": "Organization",
+    "name": "borsapusula.com",
+    "url": "https://borsapusula.com"
+  }
+}
+</script>
+<script src="/static/lightweight-charts.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* Light tema */
+  body.light { --bg: #ffffff; --bg2: #f6f8fa; --bg3: #eaeef2; --border: #d0d7de; --text: #1f2328; --text2: #636c76; --text3: #9ea7b3; }
+  body.light { background: var(--bg); color: var(--text); }
+  body.light header { background: var(--bg2); border-color: var(--border); }
+  body.light .table-wrap, body.light .stat-card, body.light .index-section, body.light .index-row-card { background: var(--bg2); border-color: var(--border); }
+  body.light tbody tr { border-color: var(--bg3); }
+  body.light tbody tr:hover { background: var(--bg3); }
+  body.light thead th { background: var(--bg3); color: var(--text2); border-color: var(--border); }
+  body.light td { color: var(--text); }
+  body.light .ticker { color: var(--text); }
+  body.light .price  { color: var(--text); }
+  body.light #updated, body.light .sig-date { color: var(--text3); }
+  body.light .btn-refresh { background: var(--bg2); border-color: var(--border); color: var(--text2); }
+  body.light .filter-btn { color: var(--text2); }
+  body.light .search-input { background: var(--bg2); border-color: var(--border); color: var(--text); }
+  body.light .no-data { color: var(--text3); }
+  body.light footer { color: var(--text3); border-color: var(--border); }
+  body.light footer a { color: var(--text2); }
+  body.light .sector-btn { border-color: var(--border); color: var(--text3); }
+  body.light .ind-neutral { background: var(--bg3); color: var(--text2); }
+
+  /* Tema butonu */
+  .theme-btn {
+    background: none; border: 1px solid #30363d; color: #8b949e;
+    width: 32px; height: 32px; border-radius: 6px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: all .15s; flex-shrink: 0;
+  }
+  .theme-btn:hover { background: #21262d; color: #e6edf3; }
+  body.light .theme-btn { border-color: #d0d7de; color: #636c76; }
+  body.light .theme-btn:hover { background: #eaeef2; }
 
   body {
     background: #0d1117;
@@ -255,6 +308,28 @@
   }
   .no-data { text-align: center; padding: 40px; color: #8b949e; font-size: 13px; }
 
+  /* Skeleton loader */
+  @keyframes shimmer {
+    0%   { background-position: -800px 0; }
+    100% { background-position:  800px 0; }
+  }
+  .skeleton-row td {
+    padding: 12px 16px;
+  }
+  .skeleton-cell {
+    height: 14px; border-radius: 4px;
+    background: linear-gradient(90deg, #1c2128 25%, #21262d 50%, #1c2128 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
+  .sk-ticker  { width: 60px; }
+  .sk-price   { width: 80px; }
+  .sk-chg     { width: 55px; }
+  .sk-signal  { width: 70px; height: 22px; border-radius: 11px; }
+  .sk-date    { width: 75px; }
+  .sk-wide    { width: 50px; }
+  .sk-dots    { width: 40px; }
+
   footer {
     text-align: center; padding: 20px; color: #484f58;
     font-size: 12px; border-top: 1px solid #21262d; margin-top: 24px;
@@ -338,6 +413,7 @@
   <div class="header-right">
     <span id="liveTs" style="margin-right:8px">○ bekleniyor</span>
     <span id="updated">—</span>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Tema değiştir">🌙</button>
     <button class="btn-refresh" onclick="manualRefresh()" id="refreshBtn">
       <svg id="refreshIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
@@ -417,9 +493,23 @@
   </div>
 
   <div class="table-wrap">
-    <div id="loadingDiv" class="loading-overlay">
-      <div class="spinner"></div>
-      <div>Veriler yükleniyor… (ilk yükleme 30–60 sn sürebilir)</div>
+    <div id="loadingDiv">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="background:#1c2128;border-bottom:1px solid #30363d">
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Hisse</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Fiyat (₺)</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Değişim</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Sinyal</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Tarih</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Giriş ₺</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">SL ₺</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Güç</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">İndikatörler</th>
+          </tr>
+        </thead>
+        <tbody id="skeletonBody"></tbody>
+      </table>
     </div>
     <table id="mainTable" style="display:none">
       <thead>
@@ -443,7 +533,22 @@
 </div>
 
 <footer>
-  ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Otomatik emir verilmez. Yatırım tavsiyesi değildir.
+  <div style="max-width:900px;margin:0 auto">
+    <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px;font-size:13px">
+      <a href="/ozet" style="color:#8b949e;text-decoration:none">📊 Günlük Özet</a>
+      <a href="/metodoloji" style="color:#8b949e;text-decoration:none">📖 Metodoloji</a>
+      <a href="/hakkinda" style="color:#8b949e;text-decoration:none">ℹ️ Hakkında</a>
+      <a href="/gizlilik" style="color:#8b949e;text-decoration:none">🔒 Gizlilik</a>
+      <a href="/iletisim" style="color:#8b949e;text-decoration:none">📬 İletişim</a>
+    </div>
+    <p style="color:#484f58;font-size:12px;margin-bottom:4px">
+      ⚠️ <strong style="color:#6e7681">Yasal Uyarı:</strong> Bu platform yalnızca bilgilendirme amaçlıdır. Herhangi bir otomatik emir verilmez.
+      Sunulan sinyaller ve analizler <strong style="color:#6e7681">yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir.
+      Geçmiş performans gelecek getirileri garanti etmez. Tüm yatırım kararlarınızı kendi araştırmanıza
+      ve gerektiğinde lisanslı bir finansal danışmana danışarak alınız. Sermayenizin tamamını kaybetme riskiniz mevcuttur.
+    </p>
+    <p style="color:#484f58;font-size:11px">© 2026 borsapusula.com · Tüm hakları saklıdır.</p>
+  </div>
 </footer>
 
 <script>
@@ -811,6 +916,8 @@ async function fetchData() {
 
     document.getElementById('loadingDiv').style.display  = 'none';
     document.getElementById('mainTable').style.display   = '';
+    // Stats bar animasyonunu tetikle
+    document.getElementById('statsBar').style.opacity = '1';
 
     clearTimeout(polling);
     polling = setTimeout(fetchData, 60000);
@@ -995,6 +1102,40 @@ async function manualRefresh() {
     fetchData();
   }, 3000);
 }
+
+// ── Dark / Light Tema ────────────────────────────────
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙';
+}
+(function applyTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') {
+    document.body.classList.add('light');
+    const btn = document.getElementById('themeBtn');
+    if (btn) btn.textContent = '☀️';
+  }
+})();
+
+// ── Skeleton loader doldurucu ─────────────────────────
+(function buildSkeleton() {
+  const tbody = document.getElementById('skeletonBody');
+  if (!tbody) return;
+  tbody.innerHTML = Array.from({ length: 12 }, () =>
+    `<tr class="skeleton-row" style="border-bottom:1px solid #21262d">
+      <td><div class="skeleton-cell sk-ticker"></div></td>
+      <td><div class="skeleton-cell sk-price"></div></td>
+      <td class="hide-mobile"><div class="skeleton-cell sk-chg"></div></td>
+      <td><div class="skeleton-cell sk-signal"></div></td>
+      <td class="hide-mobile"><div class="skeleton-cell sk-date"></div></td>
+      <td class="hide-mobile"><div class="skeleton-cell sk-wide"></div></td>
+      <td class="hide-mobile"><div class="skeleton-cell sk-wide"></div></td>
+      <td class="hide-mobile"><div class="skeleton-cell sk-dots"></div></td>
+      <td class="hide-mobile"><div class="skeleton-cell" style="width:120px;height:14px;border-radius:4px;background:linear-gradient(90deg,#1c2128 25%,#21262d 50%,#1c2128 75%);background-size:800px 100%;animation:shimmer 1.4s infinite linear"></div></td>
+    </tr>`
+  ).join('');
+})();
 
 fetchData();
 </script>

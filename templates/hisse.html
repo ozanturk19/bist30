@@ -3,22 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ ticker }} Teknik Analiz — Supertrend & EMA Sinyal | BIST30 Panel</title>
+<title>{{ ticker }} Teknik Analiz — {{ name }} Sinyal | borsapusula.com</title>
 <meta name="description" content="{{ ticker }} ({{ name }}) güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik AL/SAT/BEKLE analizi. Ücretsiz, günlük güncelleme.">
-<meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} al sat sinyali, {{ ticker }} supertrend, BIST30 sinyalleri, {{ name }} borsa analiz">
+<meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} al sat sinyali, {{ ticker }} supertrend, BIST100 sinyalleri, {{ name }} borsa analiz">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <link rel="canonical" href="https://borsapusula.com/hisse/{{ ticker }}">
 <!-- Open Graph -->
 <meta property="og:type"        content="website">
-<meta property="og:title"       content="{{ ticker }} Teknik Analiz — {{ name }}">
-<meta property="og:description" content="{{ ticker }} için algoritmik Supertrend + ADX + EMA12/99 teknik analiz sinyali.">
+<meta property="og:title"       content="{{ ticker }} Teknik Analiz — {{ name }} | borsapusula.com">
+<meta property="og:description" content="{{ ticker }} için algoritmik Supertrend + ADX + EMA12/99 teknik analiz sinyali. BIST100 canlı sinyal paneli.">
 <meta property="og:url"         content="https://borsapusula.com/hisse/{{ ticker }}">
-<meta property="og:site_name"   content="BIST30 Sinyal Paneli">
+<meta property="og:site_name"   content="BIST100 Sinyal Paneli | borsapusula.com">
+<meta property="og:image"       content="https://borsapusula.com/og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height"content="630">
 <!-- Twitter Card -->
-<meta name="twitter:card"        content="summary">
-<meta name="twitter:title"       content="{{ ticker }} Teknik Analiz">
-<meta name="twitter:description" content="{{ name }} — Algoritmik BIST30 teknik analiz sinyali">
-<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="{{ ticker }} Teknik Analiz | borsapusula.com">
+<meta name="twitter:description" content="{{ name }} — Algoritmik BIST100 teknik analiz sinyali">
+<meta name="twitter:image"       content="https://borsapusula.com/og-image.svg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FinancialProduct",
+  "name": "{{ ticker }} ({{ name }}) Teknik Analiz Sinyali",
+  "description": "{{ ticker }} hissesi için algoritmik Supertrend + ADX + EMA12/99 teknik analiz sinyali. BIST100 canlı sinyal paneli.",
+  "url": "https://borsapusula.com/hisse/{{ ticker }}",
+  "provider": {
+    "@type": "Organization",
+    "name": "borsapusula.com",
+    "url": "https://borsapusula.com"
+  },
+  "inLanguage": "tr"
+}
+</script>
+<script src="/static/lightweight-charts.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -590,7 +609,16 @@
 
 </div>
 
-<footer>⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Otomatik emir verilmez. Yatırım tavsiyesi değildir.</footer>
+<footer style="text-align:center;padding:20px;font-size:12px;color:#484f58;border-top:1px solid #21262d;margin-top:20px">
+  <div style="margin-bottom:8px">
+    <a href="/" style="color:#8b949e;text-decoration:none">Ana Sayfa</a> ·
+    <a href="/ozet" style="color:#8b949e;text-decoration:none">Özet</a> ·
+    <a href="/metodoloji" style="color:#8b949e;text-decoration:none">Metodoloji</a> ·
+    <a href="/gizlilik" style="color:#8b949e;text-decoration:none">Gizlilik</a> ·
+    <a href="/iletisim" style="color:#8b949e;text-decoration:none">İletişim</a>
+  </div>
+  ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong style="color:#6e7681">yatırım tavsiyesi değildir</strong>. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
+</footer>
 
 <script>
 const LC      = LightweightCharts;

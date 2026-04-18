@@ -570,6 +570,31 @@ def background_refresh():
         time.sleep(900)
 
 
+# ── Güvenlik Headerları ───────────────────────────────────────────────────────
+@app.after_request
+def set_security_headers(response):
+    # X-Frame-Options — clickjacking koruması
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    # X-Content-Type-Options — MIME sniffing koruması
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    # Referrer-Policy
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    # Permissions-Policy
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    # CSP — SSE ve self-hosted JS/CSS izni
+    if response.content_type and "text/html" in response.content_type:
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "connect-src 'self'; "
+            "img-src 'self' data:; "
+            "font-src 'self'; "
+            "frame-ancestors 'none';"
+        )
+    return response
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -1164,6 +1189,8 @@ def sitemap():
         {"loc": "/ozet",        "priority": "0.9", "changefreq": "daily"},
         {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly"},
         {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly"},
+        {"loc": "/gizlilik",    "priority": "0.3", "changefreq": "yearly"},
+        {"loc": "/iletisim",    "priority": "0.4", "changefreq": "yearly"},
     ]
     for t in BIST30:
         if t != "XU030":
@@ -1203,6 +1230,48 @@ def favicon():
     return "", 404
 
 
+@app.route("/og-image.svg")
+def og_image():
+    """Dinamik OG image — 1200×630 SVG (sosyal medya önizlemesi)."""
+    with _lock:
+        stocks = list(_cache["data"])
+    al_count  = sum(1 for s in stocks if s["signal"] == "AL" and s["ticker"] != "XU030")
+    sat_count = sum(1 for s in stocks if s["signal"] == "SAT" and s["ticker"] != "XU030")
+    total     = sum(1 for s in stocks if s["ticker"] != "XU030")
+    today_s   = date.today().strftime("%d.%m.%Y")
+
+    svg = f'''<svg width="1200" height="630" viewBox="0 0 1200 630"
+     xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
+  <rect width="1200" height="630" fill="#0d1117"/>
+  <rect x="0" y="0" width="6" height="630" fill="#58a6ff"/>
+  <!-- Logo / başlık -->
+  <text x="60" y="120" font-size="64" font-weight="700" fill="#f0f6fc">BIST</text>
+  <text x="194" y="120" font-size="64" font-weight="700" fill="#58a6ff">100</text>
+  <text x="310" y="120" font-size="64" font-weight="700" fill="#f0f6fc"> Sinyal Paneli</text>
+  <text x="60" y="165" font-size="26" fill="#8b949e">borsapusula.com · Algoritmik AL/SAT Sinyalleri · {today_s}</text>
+  <!-- Ayırıcı çizgi -->
+  <line x1="60" y1="195" x2="1140" y2="195" stroke="#30363d" stroke-width="1"/>
+  <!-- İstatistik kutular -->
+  <rect x="60"  y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="200" y="305" font-size="72" font-weight="800" fill="#3fb950" text-anchor="middle">{al_count}</text>
+  <text x="200" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▲ AL SİNYALİ</text>
+  <rect x="380" y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="520" y="305" font-size="72" font-weight="800" fill="#f85149" text-anchor="middle">{sat_count}</text>
+  <text x="520" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▼ SAT SİNYALİ</text>
+  <rect x="700" y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+  <text x="840" y="305" font-size="72" font-weight="800" fill="#58a6ff" text-anchor="middle">{total}</text>
+  <text x="840" y="355" font-size="22" fill="#8b949e" text-anchor="middle">BIST100 HİSSE</text>
+  <!-- Alt slogan -->
+  <text x="60" y="480" font-size="30" fill="#c9d1d9">Supertrend · ADX · EMA12/99</text>
+  <text x="60" y="525" font-size="22" fill="#484f58">Algoritmik, ücretsiz, canlı güncelleme · Yatırım tavsiyesi değildir.</text>
+  <!-- Sağ ikon -->
+  <rect x="1020" y="230" width="120" height="160" rx="12" fill="#1c2b3a" stroke="#1f6feb44" stroke-width="1"/>
+  <text x="1080" y="335" font-size="56" text-anchor="middle">📊</text>
+</svg>'''
+    return Response(svg, mimetype="image/svg+xml",
+                    headers={"Cache-Control": "public, max-age=3600"})
+
+
 # ── Günlük Özet Sayfası ───────────────────────────────────────────────────────
 @app.route("/ozet")
 def ozet_page():
@@ -1233,6 +1302,16 @@ def metodoloji():
 @app.route("/hakkinda")
 def hakkinda():
     return render_template("hakkinda.html")
+
+
+@app.route("/gizlilik")
+def gizlilik():
+    return render_template("gizlilik.html")
+
+
+@app.route("/iletisim")
+def iletisim():
+    return render_template("iletisim.html")
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────
