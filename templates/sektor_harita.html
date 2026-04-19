@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sektör Isı Haritası — BorsaPusula</title>
+<meta name="description" content="BIST sektörlerini anlık AL/SAT sinyal yoğunluğuna göre karşılaştırın. Hangi sektörler güçlü trend sergiliyor?">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#161b22">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0d1117; color:#e6edf3; font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; min-height:100vh; }
+  header { background:#161b22; border-bottom:1px solid #30363d; padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
+  .back-btn { display:flex; align-items:center; gap:6px; color:#8b949e; font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid #30363d; border-radius:6px; background:#21262d; }
+  .back-btn:hover { background:#30363d; color:#e6edf3; }
+  .page-title { font-size:20px; font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:13px; color:#8b949e; }
+  .container  { max-width:1200px; margin:0 auto; padding:24px; }
+
+  /* Heatmap grid */
+  .heatmap { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; margin-bottom:32px; }
+
+  .sector-card {
+    background:#161b22; border:1px solid #30363d; border-radius:12px; padding:16px;
+    cursor:pointer; transition:border-color .15s, transform .1s;
+    position:relative; overflow:hidden;
+  }
+  .sector-card:hover { border-color:#58a6ff; transform:translateY(-1px); }
+  .sector-card::before {
+    content:''; position:absolute; inset:0; opacity:0.07;
+    background:var(--heat-color, #21262d);
+  }
+
+  .sec-name { font-size:15px; font-weight:700; margin-bottom:10px; position:relative; }
+  .sec-stats { display:flex; gap:8px; margin-bottom:10px; position:relative; }
+  .stat-pill { padding:3px 8px; border-radius:10px; font-size:12px; font-weight:600; }
+  .pill-al   { background:#1a4731; color:#3fb950; border:1px solid #238636; }
+  .pill-sat  { background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
+  .pill-bkl  { background:#21262d; color:#8b949e; border:1px solid #30363d; }
+
+  /* Progress bar */
+  .seg-bar { height:6px; border-radius:3px; background:#21262d; display:flex; overflow:hidden; margin-bottom:10px; position:relative; }
+  .seg-al  { background:#3fb950; transition:width .4s; }
+  .seg-sat { background:#f85149; transition:width .4s; }
+  .seg-bkl { background:#30363d; flex:1; }
+
+  /* Score meter */
+  .score { font-size:22px; font-weight:800; position:relative; }
+
+  /* Detail expand */
+  .detail-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; position:relative; }
+  .stock-chip { padding:2px 7px; border-radius:8px; font-size:11px; font-weight:600; text-decoration:none; }
+  .chip-al  { background:#1a4731; color:#3fb950; }
+  .chip-sat { background:#3d0f0f; color:#f85149; }
+  .chip-bkl { background:#21262d; color:#6e7681; }
+
+  /* Legend */
+  .legend { display:flex; gap:20px; align-items:center; margin-bottom:20px; font-size:13px; flex-wrap:wrap; }
+  .legend-dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+
+  /* Summary row */
+  .sum-row { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:24px; }
+  .sum-chip { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:10px 16px; text-align:center; flex:1; min-width:120px; }
+  .sum-num  { font-size:24px; font-weight:800; }
+  .sum-lbl  { font-size:11px; color:#8b949e; text-transform:uppercase; letter-spacing:.4px; }
+
+  /* Loading */
+  .loading-msg { text-align:center; padding:60px; color:#484f58; font-size:16px; }
+
+  footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
+  footer a { color:#8b949e; text-decoration:none; }
+
+  @media(max-width:600px) { .container{padding:12px;} .heatmap{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="page-title">🗺️ Sektör Isı Haritası</div>
+    <div class="page-sub" id="lastUpdate">Veriler yükleniyor...</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="legend">
+    <span><span class="legend-dot" style="background:#3fb950"></span> Güçlü Trend (AL)</span>
+    <span><span class="legend-dot" style="background:#f85149"></span> Zayıf Trend (SAT)</span>
+    <span><span class="legend-dot" style="background:#30363d"></span> Belirsiz</span>
+    <span style="color:#8b949e;font-size:12px">Skor: (AL − SAT) / Toplam × 100</span>
+  </div>
+
+  <div class="sum-row" id="sumRow">
+    <div class="sum-chip"><div class="sum-num" id="sumAl" style="color:#3fb950">—</div><div class="sum-lbl">Güçlü Trend</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumSat" style="color:#f85149">—</div><div class="sum-lbl">Zayıf Trend</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumBkl" style="color:#8b949e">—</div><div class="sum-lbl">Belirsiz</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumTotal" style="color:#58a6ff">—</div><div class="sum-lbl">Toplam Hisse</div></div>
+  </div>
+
+  <div class="heatmap" id="heatmap">
+    <div class="loading-msg">⏳ Veriler yükleniyor...</div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/sinyal-performans">Sinyal Performansı</a>
+  <div style="margin-top:6px">⚠️ Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
+</footer>
+
+<script>
+const SECTORS = {};  // ticker → sector (doldurulacak)
+let allStocks  = [];
+
+function sigLabel(sig) {
+  return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[sig] || sig;
+}
+
+function heatColor(score) {
+  // score: -100..+100  →  renk
+  if (score >= 60)  return '#3fb950';
+  if (score >= 30)  return '#56d364';
+  if (score >= 10)  return '#7ee787';
+  if (score >= -10) return '#8b949e';
+  if (score >= -30) return '#f78166';
+  if (score >= -60) return '#f85149';
+  return '#da3633';
+}
+
+function renderHeatmap(stocks) {
+  // Sektörlere göre grupla
+  const secMap = {};
+  let totalAl = 0, totalSat = 0, totalBkl = 0;
+
+  stocks.forEach(s => {
+    const sec = s.sector || 'Diğer';
+    if (!secMap[sec]) secMap[sec] = { al:[], sat:[], bkl:[] };
+    if (s.signal === 'AL') { secMap[sec].al.push(s); totalAl++; }
+    else if (s.signal === 'SAT') { secMap[sec].sat.push(s); totalSat++; }
+    else { secMap[sec].bkl.push(s); totalBkl++; }
+  });
+
+  // Özet güncelle
+  document.getElementById('sumAl').textContent    = totalAl;
+  document.getElementById('sumSat').textContent   = totalSat;
+  document.getElementById('sumBkl').textContent   = totalBkl;
+  document.getElementById('sumTotal').textContent = stocks.length;
+
+  // Sektörleri skor'a göre sırala
+  const sectors = Object.entries(secMap).map(([name, d]) => {
+    const total = d.al.length + d.sat.length + d.bkl.length;
+    const score = total > 0 ? Math.round((d.al.length - d.sat.length) / total * 100) : 0;
+    return { name, ...d, total, score };
+  }).sort((a, b) => b.score - a.score);
+
+  const hm = document.getElementById('heatmap');
+  hm.innerHTML = sectors.map(sec => {
+    const color = heatColor(sec.score);
+    const alPct  = sec.total > 0 ? (sec.al.length  / sec.total * 100).toFixed(0) : 0;
+    const satPct = sec.total > 0 ? (sec.sat.length / sec.total * 100).toFixed(0) : 0;
+
+    const alChips  = sec.al.map(s  => `<a href="/hisse/${s.ticker}" class="stock-chip chip-al">${s.ticker}</a>`).join('');
+    const satChips = sec.sat.map(s => `<a href="/hisse/${s.ticker}" class="stock-chip chip-sat">${s.ticker}</a>`).join('');
+    const bklSample = sec.bkl.slice(0,6).map(s => `<a href="/hisse/${s.ticker}" class="stock-chip chip-bkl">${s.ticker}</a>`).join('');
+    const bklMore  = sec.bkl.length > 6 ? `<span class="stock-chip chip-bkl">+${sec.bkl.length-6}</span>` : '';
+
+    return `
+    <div class="sector-card" style="--heat-color:${color}">
+      <div class="sec-name" style="color:${color}">${sec.name}</div>
+      <div class="sec-stats">
+        <span class="stat-pill pill-al">▲ ${sec.al.length}</span>
+        <span class="stat-pill pill-sat">▼ ${sec.sat.length}</span>
+        <span class="stat-pill pill-bkl">● ${sec.bkl.length}</span>
+        <span style="margin-left:auto;font-size:11px;color:#8b949e">${sec.total} hisse</span>
+      </div>
+      <div class="seg-bar">
+        <div class="seg-al"  style="width:${alPct}%"></div>
+        <div class="seg-sat" style="width:${satPct}%"></div>
+        <div class="seg-bkl"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="score" style="color:${color}">${sec.score > 0 ? '+' : ''}${sec.score}</div>
+        <div style="font-size:11px;color:#8b949e">Skor</div>
+      </div>
+      ${alChips || satChips ? `<div class="detail-row">${alChips}${satChips}${bklSample}${bklMore}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function load() {
+  try {
+    const r = await fetch('/api/data');
+    const j = await r.json();
+    if (!j.stocks || j.stocks.length === 0) {
+      setTimeout(load, 15000);
+      return;
+    }
+    allStocks = j.stocks.filter(s => s.ticker !== 'XU030');
+    document.getElementById('lastUpdate').textContent = `Son güncelleme: ${j.updated_at || '—'}`;
+    renderHeatmap(allStocks);
+  } catch(e) {
+    setTimeout(load, 15000);
+  }
+}
+
+load();
+setInterval(load, 120000);  // Her 2 dakika yenile
+</script>
+</body>
+</html>

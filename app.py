@@ -1347,6 +1347,7 @@ def sitemap():
     pages.append({"loc": "/blog",               "priority": "0.8", "changefreq": "weekly"})
     pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly"})
     pages.append({"loc": "/sinyal-performans",  "priority": "0.7", "changefreq": "weekly"})
+    pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
     for a in ARTICLES:
         pages.append({"loc": f"/blog/{a['slug']}", "priority": "0.7", "changefreq": "monthly"})
     today = date.today().isoformat()
@@ -1638,6 +1639,11 @@ def api_backtest():
 def api_backtest_run():
     threading.Thread(target=run_backtest, daemon=True).start()
     return jsonify({"status": "started"})
+
+
+@app.route("/sektor-harita")
+def sektor_harita():
+    return render_template("sektor_harita.html")
 
 
 @app.route("/blog")
