@@ -1303,6 +1303,67 @@ def api_stock_news(ticker):
     return safe_json({"news": None})
 
 
+@app.route("/api/hisse/<ticker>/mtf")
+def api_stock_mtf(ticker):
+    """Hisse için çoklu zaman dilimi sinyal analizi (Günlük / Haftalık / Aylık)."""
+    ticker = ticker.upper()
+    if ticker not in BIST30:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+
+    sym = ticker + ".IS"
+
+    def _tf_signal(interval, period, min_bars):
+        try:
+            df = yf.download(sym, period=period, interval=interval,
+                             progress=False, auto_adjust=True, timeout=25)
+            if df is None or len(df) < min_bars:
+                return None
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+                df = df.loc[:, ~df.columns.duplicated()]
+            df    = df.dropna().sort_index()
+            close = df["Close"].squeeze()
+            high  = df["High"].squeeze()
+            low   = df["Low"].squeeze()
+            if len(close) < min_bars:
+                return None
+
+            ema12, ema99       = compute_ema(close, 12), compute_ema(close, 99)
+            adx, dip, dim      = compute_adx(high, low, close)
+            supertrend, st_ln  = compute_supertrend(high, low, close)
+
+            c     = float(close.iloc[-1])
+            e12   = float(ema12.iloc[-1]); e99   = float(ema99.iloc[-1])
+            adxv  = float(adx.iloc[-1]);   dipv  = float(dip.iloc[-1]); dimv = float(dim.iloc[-1])
+            stv   = int(supertrend.iloc[-1])
+
+            bs    = int(stv == 1)  + int(adxv >= 25 and dipv > dimv) + int(e12 > e99)
+            brs   = int(stv == -1) + int(adxv >= 25 and dimv > dipv) + int(e12 < e99)
+            sig   = "AL" if bs >= 3 else "SAT" if brs >= 3 else "BEKLE"
+            sl    = round(float(st_ln.iloc[-1]), 2)
+            return {
+                "signal": sig,
+                "price":  round(c, 2),
+                "adx":    round(adxv, 1),
+                "sl":     sl,
+                "bull_score": bs,
+                "bear_score": brs,
+            }
+        except Exception as e:
+            logger.debug("_tf_signal(%s, %s): %s", ticker, interval, e)
+            return None
+
+    daily   = _tf_signal("1d",  "2y",  80)
+    weekly  = _tf_signal("1wk", "5y",  40)
+    monthly = _tf_signal("1mo", "10y", 12)
+    return safe_json({
+        "ticker":  ticker,
+        "daily":   daily,
+        "weekly":  weekly,
+        "monthly": monthly,
+    })
+
+
 @app.route("/api/hisse/<ticker>/chart")
 def api_stock_chart(ticker):
     ticker = ticker.upper()

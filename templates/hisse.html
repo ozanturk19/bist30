@@ -553,6 +553,14 @@
     </div>
   </div>
 
+  <!-- Çoklu Zaman Dilimi -->
+  <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 18px;margin-bottom:20px" id="mtfSection">
+    <div class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="mtfGrid">
+      <div style="color:#484f58;font-size:13px;grid-column:1/-1">Yükleniyor…</div>
+    </div>
+  </div>
+
   <!-- Sinyal Geçmişi -->
   <div class="history-section">
     <div class="section-title">Sinyal Geçmişi</div>
@@ -1019,6 +1027,62 @@ async function loadFundamentals() {
   }
 }
 loadFundamentals();
+
+/* ── Çoklu Zaman Dilimi ───────────────────────────── */
+async function loadMTF() {
+  try {
+    const res  = await fetch('/api/hisse/' + TICKER + '/mtf');
+    const json = await res.json();
+    const grid = document.getElementById('mtfGrid');
+    if (!grid) return;
+
+    const tfs = [
+      { key: 'daily',   label: '📅 Günlük',  short: '1D' },
+      { key: 'weekly',  label: '📆 Haftalık', short: '1W' },
+      { key: 'monthly', label: '🗓️ Aylık',    short: '1M' },
+    ];
+
+    const sigLabel = s => ({'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[s] || s);
+    const sigColor = s => s === 'AL' ? '#3fb950' : s === 'SAT' ? '#f85149' : '#8b949e';
+    const sigBg    = s => s === 'AL' ? '#1a4731' : s === 'SAT' ? '#3d0f0f' : '#21262d';
+    const sigBord  = s => s === 'AL' ? '#238636' : s === 'SAT' ? '#da3633' : '#30363d';
+    const sigArrow = s => s === 'AL' ? '▲' : s === 'SAT' ? '▼' : '●';
+
+    grid.innerHTML = tfs.map(tf => {
+      const d = json[tf.key];
+      if (!d) return `
+        <div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:14px;text-align:center">
+          <div style="font-size:12px;color:#8b949e;margin-bottom:6px">${tf.label}</div>
+          <div style="font-size:12px;color:#484f58">Veri yok</div>
+        </div>`;
+
+      const bg   = sigBg(d.signal);
+      const col  = sigColor(d.signal);
+      const bord = sigBord(d.signal);
+      const arr  = sigArrow(d.signal);
+      const lbl  = sigLabel(d.signal);
+      const scoreBar = d.bull_score > 0
+        ? `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
+            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bull_score?col:'#30363d'}"></div>`
+          ).join('')}</div>`
+        : `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
+            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bear_score?'#f85149':'#30363d'}"></div>`
+          ).join('')}</div>`;
+
+      return `
+        <div style="background:${bg};border:1px solid ${bord};border-radius:8px;padding:14px;text-align:center">
+          <div style="font-size:12px;color:#8b949e;margin-bottom:8px">${tf.label}</div>
+          <div style="font-size:20px;font-weight:800;color:${col}">${arr} ${lbl}</div>
+          <div style="font-size:12px;color:#8b949e;margin-top:4px">ADX ${d.adx}</div>
+          ${scoreBar}
+        </div>`;
+    }).join('');
+  } catch(e) {
+    const grid = document.getElementById('mtfGrid');
+    if (grid) grid.innerHTML = '<div style="color:#484f58;font-size:12px">Yüklenemedi</div>';
+  }
+}
+loadMTF();
 
 /* ── SSE Canlı Fiyat ──────────────────────────────── */
 let _sseRetry = 1000;
