@@ -614,12 +614,13 @@ def _notify_signal_changes(new_results):
     if not (600 <= now_tr <= 1110):  # 10:00–18:30
         return
 
-    new_sig_map = {r["ticker"]: r["signal"] for r in new_results if r["ticker"] != "XU030"}
+    new_data_map = {r["ticker"]: r for r in new_results if r["ticker"] != "XU030"}
+    new_sig_map  = {t: d["signal"] for t, d in new_data_map.items()}
     changes = []
     for t, new_sig in new_sig_map.items():
         old_sig = _prev_signals.get(t)
         if old_sig and old_sig != new_sig and new_sig in ("AL", "SAT"):
-            changes.append((t, old_sig, new_sig, new_results[next(i for i, r in enumerate(new_results) if r["ticker"] == t)]))
+            changes.append((t, old_sig, new_sig, new_data_map[t]))
 
     if changes:
         sig_emoji = {"AL": "🟢", "SAT": "🔴", "BEKLE": "⚪"}
