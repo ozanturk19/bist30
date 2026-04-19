@@ -673,15 +673,15 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     # Permissions-Policy
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
-    # CSP — SSE ve self-hosted JS/CSS izni
+    # CSP — SSE, Google Fonts ve self-hosted JS/CSS izni
     if response.content_type and "text/html" in response.content_type:
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline'; "
-            "style-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "connect-src 'self'; "
             "img-src 'self' data:; "
-            "font-src 'self'; "
+            "font-src 'self' https://fonts.gstatic.com; "
             "frame-ancestors 'none';"
         )
     return response
@@ -944,6 +944,71 @@ def get_ai_news(ticker):
         return text or None
     except Exception as e:
         logger.warning("get_ai_news(%s): %s", ticker, e)
+        return None
+
+
+_signal_explain_cache = {}           # {ticker: {"text": str, "sig": str, "ts": float}}
+_SIG_EXPLAIN_TTL      = 3600 * 4    # 4 saat
+
+def get_ai_signal_explanation(ticker, signal_data):
+    """Mevcut teknik sinyal için Gemini ile kullanıcı dostu Türkçe açıklama üretir."""
+    if not GEMINI_API_KEY:
+        return None
+    now   = time.time()
+    sig   = signal_data.get("signal", "BEKLE")
+    with _lock:
+        cached = _signal_explain_cache.get(ticker)
+        if cached and (now - cached["ts"]) < _SIG_EXPLAIN_TTL and cached.get("sig") == sig:
+            return cached["text"]
+
+    name     = STOCK_NAMES.get(ticker, ticker)
+    sig_lbl  = {"AL": "Güçlü Trend (AL)", "SAT": "Zayıf Trend (SAT)", "BEKLE": "Belirsiz (BEKLE)"}.get(sig, sig)
+    adx      = signal_data.get("adx", 0)
+    e12      = signal_data.get("e12", 0)
+    e99      = signal_data.get("e99", 0)
+    di_plus  = signal_data.get("di_plus", 0)
+    di_minus = signal_data.get("di_minus", 0)
+    st_bull  = signal_data.get("st_bull", False)
+    price    = signal_data.get("price", 0)
+    sl       = signal_data.get("sl_level")
+    bars     = signal_data.get("signal_bars", 1)
+
+    prompt = (
+        f"Sen bir borsa analistinin yardımcısısın. "
+        f"{ticker} ({name}) hissesi için şu an '{sig_lbl}' sinyali var.\n\n"
+        f"Teknik gösterge değerleri:\n"
+        f"- Fiyat: {price:.2f} ₺\n"
+        f"- Supertrend: {'YUKARI (boğa)' if st_bull else 'AŞAĞI (ayı)'}\n"
+        f"- ADX: {adx:.1f} (25 üzeri güçlü trend, 40 üzeri çok güçlü)\n"
+        f"- DI+: {di_plus:.1f}, DI-: {di_minus:.1f}\n"
+        f"- EMA12: {e12:.1f}, EMA99: {e99:.1f}\n"
+        f"- Stop-Loss seviyesi: {sl:.2f} ₺\n" if sl else
+        f"- Supertrend: {'YUKARI (boğa)' if st_bull else 'AŞAĞI (ayı)'}\n"
+        f"- ADX: {adx:.1f}, DI+: {di_plus:.1f}, DI-: {di_minus:.1f}\n"
+        f"- EMA12: {e12:.1f}, EMA99: {e99:.1f}\n"
+        f"Sinyal süresi: {bars} gün\n\n"
+        f"Lütfen bu sinyali yatırımcıya yönelik, sade ve anlaşılır Türkçe ile 3-4 cümle açıkla. "
+        f"Teknik jargonu minimize et, herkesin anlayabileceği bir dil kullan. "
+        f"Neden bu sinyal oluştu ve ne anlama geliyor kısaca anlat. "
+        f"'Yatırım tavsiyesi değildir' ibaresini sonuna ekle. Başlık ekleme, sadece paragraf yaz."
+    )
+    try:
+        url  = (f"https://generativelanguage.googleapis.com/v1beta/"
+                f"models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}")
+        body = {"contents": [{"parts": [{"text": prompt}]}]}
+        r    = requests.post(url, json=body, timeout=15)
+        r.raise_for_status()
+        data = r.json()
+        text = (data.get("candidates", [{}])[0]
+                    .get("content", {})
+                    .get("parts", [{}])[0]
+                    .get("text", "")).strip()
+        if text:
+            with _lock:
+                _signal_explain_cache[ticker] = {"text": text, "sig": sig, "ts": now}
+        return text or None
+    except Exception as e:
+        logger.warning("get_ai_signal_explanation(%s): %s", ticker, e)
         return None
 
 
@@ -1301,6 +1366,28 @@ def api_stock_news(ticker):
     if text:
         return safe_json({"news": text, "source": "gemini"})
     return safe_json({"news": None})
+
+
+@app.route("/api/hisse/<ticker>/signal-explanation")
+def api_signal_explanation(ticker):
+    """Gemini AI sinyal açıklaması — 4 saatlik cache (sinyal değişince yenilenir)."""
+    ticker = ticker.upper()
+    if ticker not in BIST100:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+    if not GEMINI_API_KEY:
+        return safe_json({"explanation": None, "reason": "no_api_key"})
+
+    # Anlık sinyal datasını cache'den al
+    with _lock:
+        stocks = list(_cache["data"])
+    stock = next((s for s in stocks if s["ticker"] == ticker), None)
+    if not stock:
+        return safe_json({"explanation": None, "reason": "no_data"})
+
+    text = get_ai_signal_explanation(ticker, stock)
+    if text:
+        return safe_json({"explanation": text, "signal": stock.get("signal"), "source": "gemini"})
+    return safe_json({"explanation": None})
 
 
 @app.route("/api/hisse/<ticker>/mtf")

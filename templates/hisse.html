@@ -628,6 +628,23 @@
     </a>
   </div>
 
+  <!-- AI Sinyal Açıklaması -->
+  <div id="sigExplainSection" style="background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(29,78,216,0.05));border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:15px">✨</span>
+      <span style="font-size:13px;font-weight:700;color:#e2e8f0;text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
+      <span style="margin-left:auto;font-size:11px;background:rgba(59,130,246,0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(59,130,246,0.25)">Gemini AI</span>
+    </div>
+    <div id="sigExplainLoading" style="display:flex;align-items:center;gap:8px;color:#64748b;font-size:13px">
+      <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div>
+      Açıklama hazırlanıyor…
+    </div>
+    <p id="sigExplainText" style="display:none;font-size:13px;color:#cbd5e1;line-height:1.75;margin:0"></p>
+    <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:11px;color:#475569">
+      🤖 Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 4 saatte bir yenilenir
+    </div>
+  </div>
+
   <!-- AI Haberler -->
   <div class="news-section" id="newsSection">
     <div class="section-title">🤖 AI Haber Özeti</div>
@@ -1007,6 +1024,26 @@ async function loadNews() {
   }
 }
 loadNews();
+
+/* ── AI Sinyal Açıklaması ─────────────────────────── */
+async function loadSignalExplanation() {
+  try {
+    const res  = await fetch('/api/hisse/' + TICKER + '/signal-explanation');
+    const data = await res.json();
+    document.getElementById('sigExplainLoading').style.display = 'none';
+    if (data.explanation) {
+      const txt = document.getElementById('sigExplainText');
+      txt.textContent = data.explanation;
+      txt.style.display = '';
+      document.getElementById('sigExplainFooter').style.display = '';
+    } else {
+      document.getElementById('sigExplainSection').style.display = 'none';
+    }
+  } catch(e) {
+    document.getElementById('sigExplainSection').style.display = 'none';
+  }
+}
+loadSignalExplanation();
 
 /* ── Temel Analiz ──────────────────────────────────── */
 async function loadFundamentals() {
