@@ -1496,6 +1496,7 @@ def sitemap():
     pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly"})
     pages.append({"loc": "/sinyal-performans",  "priority": "0.7", "changefreq": "weekly"})
     pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
+    pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "weekly"})
     for a in ARTICLES:
         pages.append({"loc": f"/blog/{a['slug']}", "priority": "0.7", "changefreq": "monthly"})
     today = date.today().isoformat()
@@ -1792,6 +1793,122 @@ def api_backtest_run():
 @app.route("/sektor-harita")
 def sektor_harita():
     return render_template("sektor_harita.html")
+
+
+# ── Bilanço Takvimi ───────────────────────────────────────────────────────────
+_earnings_cache   = {"data": None, "ts": 0}
+_EARNINGS_TTL     = 3600 * 12   # 12 saat
+
+# BIST'te finansal sonuçlar genellikle şu dönemlerde açıklanır:
+# Q4 (Ekim-Aralık bilanços): Mart-Nisan
+# Q1 (Ocak-Mart bilanços):   Mayıs ortası
+# Q2/H1 (Nisan-Haziran):     Ağustos-Eylül
+# Q3 (Temmuz-Eylül):         Ekim-Kasım
+_BILANCO_PERIODS = [
+    # (quarter_label, est_start_mm_dd, est_end_mm_dd, description)
+    ("Q4 2025 (Yıllık)", "2026-03-01", "2026-04-30", "2025 yıl sonu bilanço açıklamaları"),
+    ("Q1 2026",          "2026-05-15", "2026-06-15", "2026 1. çeyrek sonuçları"),
+    ("Q2 2026 (H1)",     "2026-08-01", "2026-09-15", "2026 ilk yarıyıl sonuçları"),
+    ("Q3 2026",          "2026-10-15", "2026-11-30", "2026 3. çeyrek sonuçları"),
+    ("Q4 2026 (Yıllık)", "2027-03-01", "2027-04-30", "2026 yıl sonu bilanço açıklamaları"),
+]
+
+def get_earnings_data():
+    """Yaklaşan finansal sonuç dönemlerini sinyallerle birleştirerek döner."""
+    now = time.time()
+    with _lock:
+        if _earnings_cache["data"] and (now - _earnings_cache["ts"]) < _EARNINGS_TTL:
+            return _earnings_cache["data"]
+
+    # Mevcut sinyal datasını al
+    with _lock:
+        stocks = list(_cache["data"])
+    sig_map = {s["ticker"]: s for s in stocks}
+
+    # Her hisse için yfinance calendar dene (bazı hisseler için gerçek tarih döner)
+    yf_dates = {}   # ticker → date_str
+    sample_tickers = BIST100[:28]   # Sadece BIST30 için hız kazanımı
+    for t in sample_tickers:
+        try:
+            cal = yf.Ticker(t + ".IS").calendar
+            if cal is not None and isinstance(cal, dict):
+                # yfinance v0.2+: cal.get('Earnings Date') list olabilir
+                ed = cal.get("Earnings Date")
+                if ed is not None:
+                    if hasattr(ed, "iloc"):
+                        ed = ed.iloc[0] if len(ed) > 0 else None
+                    if ed is not None:
+                        yf_dates[t] = str(ed)[:10]
+        except Exception:
+            pass
+        time.sleep(0.1)
+
+    # Dönemleri bugüne göre filtrele (geçmiş dönemler hariç)
+    today_str = date.today().isoformat()
+    result_periods = []
+    for qlabel, start, end, desc in _BILANCO_PERIODS:
+        if end < today_str:   # Tamamen geçmiş dönem
+            continue
+        # Bu döneme giren hisseleri al (yfinance tarih varsa + yaklaşık olarak hepsini)
+        stocks_in_period = []
+        for t in BIST100:
+            if t == "XU030":
+                continue
+            sig_data = sig_map.get(t, {})
+            yf_date  = yf_dates.get(t)
+            # yfinance tarihi bu döneme giriyorsa → kesin; girmiyor/yoksa → yaklaşık
+            in_period = False
+            date_label = "yaklaşık"
+            if yf_date and start <= yf_date <= end:
+                in_period  = True
+                date_label = yf_date
+            elif not yf_date:
+                # Yaklaşık — dönem içinde göster
+                in_period  = True
+                date_label = "yaklaşık"
+
+            if in_period:
+                stocks_in_period.append({
+                    "ticker":   t,
+                    "name":     STOCK_NAMES.get(t, t),
+                    "signal":   sig_data.get("signal", "BEKLE"),
+                    "price":    sig_data.get("price"),
+                    "date":     date_label,
+                    "kap_url":  f"https://www.kap.org.tr/tr/Bildirim/Ara?ara={t}&tip=MAL&kategori=2",
+                })
+        # Sinyal önceliği: AL → SAT → BEKLE, içinde alfabetik
+        stocks_in_period.sort(key=lambda x: (
+            0 if x["signal"] == "AL" else 1 if x["signal"] == "SAT" else 2,
+            x["ticker"]
+        ))
+        result_periods.append({
+            "label":       qlabel,
+            "start":       start,
+            "end":         end,
+            "description": desc,
+            "stocks":      stocks_in_period,
+            "is_current":  start <= today_str <= end,
+        })
+
+    data = {
+        "periods":    result_periods,
+        "updated_at": datetime.now().strftime("%d.%m.%Y %H:%M"),
+    }
+    with _lock:
+        _earnings_cache["data"] = data
+        _earnings_cache["ts"]   = now
+    return data
+
+
+@app.route("/bilanco-takvimi")
+def bilanco_takvimi():
+    return render_template("bilanco_takvimi.html")
+
+
+@app.route("/api/bilanco-takvimi")
+def api_bilanco_takvimi():
+    data = get_earnings_data()
+    return safe_json(data)
 
 
 @app.route("/blog")

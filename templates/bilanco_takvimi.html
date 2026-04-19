@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bilanço Takvimi — BIST Finansal Sonuç Tarihleri | BorsaPusula</title>
+<meta name="description" content="BIST100 şirketlerinin çeyreklik finansal sonuç açıklama dönemleri. AL/SAT sinyalleriyle birlikte bilanço takvimini takip edin.">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#0b111f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bp-bg:#0b111f; --bp-surface:#111827; --bp-surface2:#1a2438;
+    --bp-border:#1e2d45; --bp-border2:#2d4166;
+    --bp-text:#e2e8f0; --bp-text2:#94a3b8; --bp-text3:#64748b;
+    --bp-brand:#3b82f6; --bp-al:#3fb950; --bp-sat:#f85149;
+    --bp-bkl:#8b949e; --bp-gold:#f59e0b; --bp-radius:10px; --bp-radius-sm:6px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bp-bg); color:var(--bp-text);
+    font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh;
+  }
+  header {
+    background:var(--bp-surface); border-bottom:1px solid var(--bp-border);
+    padding:14px 24px; display:flex; align-items:center; gap:16px;
+    position:sticky; top:0; z-index:100;
+  }
+  .back-btn {
+    display:flex; align-items:center; gap:6px; color:var(--bp-text2);
+    font-size:13px; text-decoration:none; padding:5px 10px;
+    border:1px solid var(--bp-border); border-radius:6px;
+    background:var(--bp-surface2); white-space:nowrap;
+  }
+  .back-btn:hover { color:var(--bp-text); }
+  .page-title { font-size:20px; font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:13px; color:#8b949e; }
+  .container  { max-width:1100px; margin:0 auto; padding:24px; }
+
+  /* Filter bar */
+  .filter-bar {
+    display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; align-items:center;
+  }
+  .filter-btn {
+    padding:6px 14px; border-radius:20px; border:1px solid var(--bp-border);
+    background:var(--bp-surface2); color:var(--bp-text2); cursor:pointer;
+    font-size:12px; font-weight:600; transition:all .15s; font-family:inherit;
+  }
+  .filter-btn:hover, .filter-btn.active { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
+  .filter-btn.fal.active   { border-color:var(--bp-al);  background:rgba(63,185,80,0.12);  color:var(--bp-al); }
+  .filter-btn.fsat.active  { border-color:var(--bp-sat); background:rgba(248,81,73,0.12);  color:var(--bp-sat); }
+  .filter-btn.fbkl.active  { border-color:var(--bp-bkl); background:rgba(139,148,158,0.12);color:var(--bp-bkl);}
+
+  /* Period section */
+  .period-section { margin-bottom:32px; }
+  .period-header {
+    display:flex; align-items:center; gap:12px; margin-bottom:14px;
+    padding:14px 18px; border-radius:10px;
+    background:var(--bp-surface); border:1px solid var(--bp-border);
+  }
+  .period-header.current-period {
+    background:rgba(59,130,246,0.08); border-color:rgba(59,130,246,0.25);
+  }
+  .period-badge {
+    font-size:11px; font-weight:700; padding:2px 10px; border-radius:10px;
+    text-transform:uppercase; letter-spacing:.4px;
+  }
+  .badge-current { background:rgba(59,130,246,0.2); color:#93c5fd; }
+  .badge-upcoming { background:rgba(139,148,158,0.15); color:#8b949e; }
+  .period-label { font-size:16px; font-weight:700; color:#f0f6fc; }
+  .period-dates { font-size:12px; color:var(--bp-text3); }
+  .period-desc  { font-size:12px; color:var(--bp-text2); margin-left:auto; }
+
+  /* Stock cards grid */
+  .stocks-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px;
+  }
+  .stock-card {
+    background:var(--bp-surface); border:1px solid var(--bp-border);
+    border-radius:10px; padding:12px 14px;
+    text-decoration:none; color:inherit;
+    transition:border-color .15s, transform .1s;
+    display:block;
+  }
+  .stock-card:hover { border-color:var(--bp-brand); transform:translateY(-1px); }
+  .stock-card.sig-al  { border-color:rgba(63,185,80,0.3); background:rgba(63,185,80,0.05); }
+  .stock-card.sig-sat { border-color:rgba(248,81,73,0.3); background:rgba(248,81,73,0.05); }
+
+  .sc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .sc-ticker { font-size:14px; font-weight:700; color:#f0f6fc; }
+  .sig-badge {
+    font-size:10px; font-weight:700; padding:2px 7px; border-radius:8px;
+    text-transform:uppercase; letter-spacing:.3px;
+  }
+  .sig-al   { background:rgba(63,185,80,0.15);  color:var(--bp-al);  border:1px solid rgba(63,185,80,0.3); }
+  .sig-sat  { background:rgba(248,81,73,0.15);  color:var(--bp-sat); border:1px solid rgba(248,81,73,0.3); }
+  .sig-bkl  { background:rgba(139,148,158,0.1); color:var(--bp-bkl); border:1px solid rgba(139,148,158,0.2); }
+
+  .sc-name  { font-size:11px; color:var(--bp-text3); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sc-price { font-size:13px; font-weight:600; color:var(--bp-text2); }
+  .sc-date  { font-size:10px; color:var(--bp-text3); margin-top:4px; }
+  .sc-kap   {
+    display:inline-flex; align-items:center; gap:4px; margin-top:6px;
+    font-size:10px; color:var(--bp-brand); text-decoration:none;
+    background:rgba(59,130,246,0.08); padding:2px 7px; border-radius:6px;
+    border:1px solid rgba(59,130,246,0.15);
+  }
+  .sc-kap:hover { background:rgba(59,130,246,0.15); }
+
+  /* Summary row */
+  .summary-row {
+    display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px;
+  }
+  .sum-chip {
+    background:var(--bp-surface); border:1px solid var(--bp-border);
+    border-radius:8px; padding:10px 16px; text-align:center;
+    flex:1; min-width:110px;
+  }
+  .sum-num  { font-size:22px; font-weight:800; }
+  .sum-lbl  { font-size:11px; color:#8b949e; text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
+
+  /* Info banner */
+  .info-banner {
+    background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2);
+    border-radius:10px; padding:12px 16px; margin-bottom:20px;
+    font-size:12px; color:#fbbf24; line-height:1.6;
+  }
+
+  .loading-msg { text-align:center; padding:60px; color:#484f58; font-size:16px; }
+
+  footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
+  footer a { color:#8b949e; text-decoration:none; }
+
+  @media(max-width:600px) {
+    .container{padding:12px;}
+    .stocks-grid{grid-template-columns:1fr 1fr;}
+    .period-desc{display:none;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="back-btn">
+    <svg width="20" height="20" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#111827"/>
+      <circle cx="18" cy="18" r="13" stroke="#1e2d45" stroke-width="1"/>
+      <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#3b82f6"/>
+      <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#1e3a62"/>
+      <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#1e3a62"/>
+      <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#1e3a62"/>
+      <circle cx="18" cy="18" r="2.8" fill="#1d4ed8"/>
+      <circle cx="18" cy="18" r="1.4" fill="#bfdbfe"/>
+    </svg>
+    BorsaPusula
+  </a>
+  <div>
+    <div class="page-title">📅 Bilanço Takvimi</div>
+    <div class="page-sub" id="lastUpdate">Veriler yükleniyor…</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="info-banner">
+    ℹ️ <strong>Yaklaşık dönemler gösterilmektedir.</strong> BIST şirketleri çeyrek sonuçlarını genellikle çeyrek bitiminden 45-60 gün içinde KAP'a bildirir.
+    Kesin tarihler için her hissenin KAP bağlantısına tıklayın.
+  </div>
+
+  <div class="summary-row">
+    <div class="sum-chip"><div class="sum-num" id="sumAl" style="color:#3fb950">—</div><div class="sum-lbl">Güçlü Trend</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumSat" style="color:#f85149">—</div><div class="sum-lbl">Zayıf Trend</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumBkl" style="color:#8b949e">—</div><div class="sum-lbl">Belirsiz</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumTotal" style="color:#58a6ff">—</div><div class="sum-lbl">Toplam Hisse</div></div>
+  </div>
+
+  <div class="filter-bar">
+    <span style="font-size:12px;color:var(--bp-text3);font-weight:600">Filtre:</span>
+    <button class="filter-btn active"   onclick="setFilter('all')"  id="fbtn-all">Tümü</button>
+    <button class="filter-btn fal"      onclick="setFilter('AL')"   id="fbtn-AL">▲ Güçlü Trend</button>
+    <button class="filter-btn fsat"     onclick="setFilter('SAT')"  id="fbtn-SAT">▼ Zayıf Trend</button>
+    <button class="filter-btn fbkl"     onclick="setFilter('BEKLE')"id="fbtn-BEKLE">● Belirsiz</button>
+  </div>
+
+  <div id="periodsContainer">
+    <div class="loading-msg">⏳ Veriler yükleniyor…</div>
+  </div>
+
+</div>
+
+<footer>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/sektor-harita">Sektör Haritası</a> · <a href="/sinyal-performans">Sinyal Performansı</a>
+  <div style="margin-top:6px">⚠️ Yatırım tavsiyesi değildir. Bilanço tarihleri yaklaşık olup KAP'tan doğrulanmalıdır. © 2026 borsapusula.com</div>
+</footer>
+
+<script>
+let _allData = null;
+let _filter  = 'all';
+
+const SIG_LABELS = { AL: 'Güçlü Trend', SAT: 'Zayıf Trend', BEKLE: 'Belirsiz' };
+
+function setFilter(f) {
+  _filter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fbtn-' + (f === 'all' ? 'all' : f)).classList.add('active');
+  if (_allData) render(_allData);
+}
+
+function sigClass(sig) {
+  return sig === 'AL' ? 'al' : sig === 'SAT' ? 'sat' : 'bkl';
+}
+function sigLabel(sig) {
+  return sig === 'AL' ? '▲ AL' : sig === 'SAT' ? '▼ SAT' : '● Belirsiz';
+}
+
+function render(data) {
+  const periods = data.periods;
+
+  // Toplam sayaçlar (filtreden bağımsız — tüm dönemler)
+  let totalAl = 0, totalSat = 0, totalBkl = 0, totalAll = 0;
+  const seen = new Set();
+  periods.forEach(p => p.stocks.forEach(s => {
+    if (seen.has(s.ticker)) return;
+    seen.add(s.ticker);
+    if (s.signal === 'AL')   totalAl++;
+    else if (s.signal === 'SAT') totalSat++;
+    else                     totalBkl++;
+    totalAll++;
+  }));
+  document.getElementById('sumAl').textContent    = totalAl;
+  document.getElementById('sumSat').textContent   = totalSat;
+  document.getElementById('sumBkl').textContent   = totalBkl;
+  document.getElementById('sumTotal').textContent = totalAll;
+
+  const container = document.getElementById('periodsContainer');
+  if (!periods || periods.length === 0) {
+    container.innerHTML = '<div class="loading-msg">Dönem bulunamadı.</div>';
+    return;
+  }
+
+  container.innerHTML = periods.map(period => {
+    const filtered = _filter === 'all'
+      ? period.stocks
+      : period.stocks.filter(s => s.signal === _filter);
+
+    if (filtered.length === 0) return '';
+
+    const isCurrent = period.is_current;
+    const alCount   = filtered.filter(s => s.signal === 'AL').length;
+    const satCount  = filtered.filter(s => s.signal === 'SAT').length;
+
+    const startFmt = period.start.split('-').reverse().join('.');
+    const endFmt   = period.end.split('-').reverse().join('.');
+
+    return `
+    <div class="period-section">
+      <div class="period-header ${isCurrent ? 'current-period' : ''}">
+        <span class="period-badge ${isCurrent ? 'badge-current' : 'badge-upcoming'}">
+          ${isCurrent ? '● Aktif Dönem' : '○ Yaklaşan'}
+        </span>
+        <div>
+          <div class="period-label">${period.label}</div>
+          <div class="period-dates">${startFmt} – ${endFmt}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;background:rgba(63,185,80,0.12);color:#3fb950;padding:2px 8px;border-radius:8px;border:1px solid rgba(63,185,80,0.2)">${alCount} AL</span>
+          <span style="font-size:12px;background:rgba(248,81,73,0.12);color:#f85149;padding:2px 8px;border-radius:8px;border:1px solid rgba(248,81,73,0.2)">${satCount} SAT</span>
+        </div>
+        <div class="period-desc">${period.description}</div>
+      </div>
+
+      <div class="stocks-grid">
+        ${filtered.map(s => `
+          <a href="/hisse/${s.ticker}" class="stock-card sig-${sigClass(s.signal)}">
+            <div class="sc-top">
+              <span class="sc-ticker">${s.ticker}</span>
+              <span class="sig-badge sig-${sigClass(s.signal)}">${sigLabel(s.signal)}</span>
+            </div>
+            <div class="sc-name">${s.name}</div>
+            ${s.price ? `<div class="sc-price">${s.price.toLocaleString('tr-TR', {minimumFractionDigits:2})} ₺</div>` : ''}
+            <div class="sc-date">📅 ${s.date === 'yaklaşık' ? 'Dönem: ' + period.label : s.date}</div>
+            <a href="${s.kap_url}" target="_blank" rel="noopener"
+               class="sc-kap" onclick="event.stopPropagation()">
+              📋 KAP bildirimleri ↗
+            </a>
+          </a>
+        `).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function load() {
+  try {
+    const res  = await fetch('/api/bilanco-takvimi');
+    const data = await res.json();
+    _allData = data;
+    document.getElementById('lastUpdate').textContent = `Son güncelleme: ${data.updated_at || '—'}`;
+    render(data);
+  } catch(e) {
+    document.getElementById('periodsContainer').innerHTML =
+      '<div class="loading-msg">⚠️ Veriler yüklenemedi. <a href="javascript:location.reload()" style="color:#58a6ff">Yenile</a></div>';
+  }
+}
+
+load();
+// Her 30 dakika yenile
+setInterval(load, 1800000);
+</script>
+</body>
+</html>
