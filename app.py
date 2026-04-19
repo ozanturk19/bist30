@@ -579,6 +579,66 @@ def analyze(ticker_base):
         return None
 
 
+# ── Telegram Bildirim ─────────────────────────────────────────────────────────
+TELEGRAM_BOT_TOKEN  = os.environ.get("TELEGRAM_BOT_TOKEN",  "")
+TELEGRAM_CHANNEL_ID = os.environ.get("TELEGRAM_CHANNEL_ID", "")
+_prev_signals       = {}   # {ticker: signal}  — bir önceki döngü sinyalleri
+
+
+def _send_telegram(text):
+    """Telegram kanalına/gruba mesaj gönderir."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
+        return
+    try:
+        url  = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        resp = requests.post(url, json={
+            "chat_id":    TELEGRAM_CHANNEL_ID,
+            "text":       text,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": True,
+        }, timeout=10)
+        if not resp.ok:
+            logger.warning("Telegram gönderimi başarısız: %s", resp.text)
+    except Exception as e:
+        logger.warning("Telegram hatası: %s", e)
+
+
+def _notify_signal_changes(new_results):
+    """Önceki döngüye göre sinyal değişimlerini tespit et ve Telegram'a bildir."""
+    global _prev_signals
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
+        return
+    # Borsa saatleri dışında bildirim gönderme (UTC+3: 10:00-18:30)
+    now_utc  = datetime.utcnow()
+    now_tr   = now_utc.hour * 60 + now_utc.minute + 180  # UTC+3 dakika
+    if not (600 <= now_tr <= 1110):  # 10:00–18:30
+        return
+
+    new_sig_map = {r["ticker"]: r["signal"] for r in new_results if r["ticker"] != "XU030"}
+    changes = []
+    for t, new_sig in new_sig_map.items():
+        old_sig = _prev_signals.get(t)
+        if old_sig and old_sig != new_sig and new_sig in ("AL", "SAT"):
+            changes.append((t, old_sig, new_sig, new_results[next(i for i, r in enumerate(new_results) if r["ticker"] == t)]))
+
+    if changes:
+        sig_emoji = {"AL": "🟢", "SAT": "🔴", "BEKLE": "⚪"}
+        lines = [f"<b>📊 BorsaPusula — Sinyal Değişimi</b>\n"]
+        for t, old, new, stock in changes[:10]:   # max 10 aynı mesajda
+            e    = sig_emoji.get(new, "")
+            name = STOCK_NAMES.get(t, t)
+            lbl  = "Güçlü Trend ▲" if new == "AL" else "Zayıf Trend ▼"
+            price = stock.get("price") or ""
+            price_str = f" — {price:.2f} ₺" if price else ""
+            lines.append(f"{e} <b>{t}</b> ({name}){price_str}")
+            lines.append(f"   <i>{old} → {lbl}</i>")
+        lines.append(f"\n<a href='https://borsapusula.com'>borsapusula.com</a>")
+        lines.append("<i>⚠️ Yatırım tavsiyesi değildir.</i>")
+        _send_telegram("\n".join(lines))
+
+    _prev_signals = new_sig_map
+
+
 def refresh_data():
     results = []
     for t in BIST30:
@@ -592,6 +652,8 @@ def refresh_data():
         0 if x["signal"] == "AL" else 1 if x["signal"] == "SAT" else 2,
         -x["bull_score"] if x["signal"] == "AL" else -x["bear_score"]
     ))
+
+    _notify_signal_changes(results)
 
     with _lock:
         _cache["data"] = results
@@ -1922,6 +1984,19 @@ def bilanco_takvimi():
 def api_bilanco_takvimi():
     data = get_earnings_data()
     return safe_json(data)
+
+
+@app.route("/api/telegram/test", methods=["POST"])
+def api_telegram_test():
+    """Admin: Telegram bağlantısını test et."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
+        return safe_json({"ok": False, "error": "Telegram env vars eksik (TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID)"})
+    _send_telegram(
+        "🔔 <b>BorsaPusula Test Mesajı</b>\n"
+        "Telegram entegrasyonu başarıyla yapılandırıldı!\n"
+        f"<i>Sunucu: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}</i>"
+    )
+    return safe_json({"ok": True, "channel": TELEGRAM_CHANNEL_ID})
 
 
 @app.route("/blog")
