@@ -973,6 +973,7 @@ def get_ai_signal_explanation(ticker, signal_data):
     sl       = signal_data.get("sl_level")
     bars     = signal_data.get("signal_bars", 1)
 
+    sl_line = f"- Stop-Loss seviyesi: {sl:.2f} ₺\n" if sl else ""
     prompt = (
         f"Sen bir borsa analistinin yardımcısısın. "
         f"{ticker} ({name}) hissesi için şu an '{sig_lbl}' sinyali var.\n\n"
@@ -982,11 +983,8 @@ def get_ai_signal_explanation(ticker, signal_data):
         f"- ADX: {adx:.1f} (25 üzeri güçlü trend, 40 üzeri çok güçlü)\n"
         f"- DI+: {di_plus:.1f}, DI-: {di_minus:.1f}\n"
         f"- EMA12: {e12:.1f}, EMA99: {e99:.1f}\n"
-        f"- Stop-Loss seviyesi: {sl:.2f} ₺\n" if sl else
-        f"- Supertrend: {'YUKARI (boğa)' if st_bull else 'AŞAĞI (ayı)'}\n"
-        f"- ADX: {adx:.1f}, DI+: {di_plus:.1f}, DI-: {di_minus:.1f}\n"
-        f"- EMA12: {e12:.1f}, EMA99: {e99:.1f}\n"
-        f"Sinyal süresi: {bars} gün\n\n"
+        f"{sl_line}"
+        f"- Sinyal süresi: {bars} gün\n\n"
         f"Lütfen bu sinyali yatırımcıya yönelik, sade ve anlaşılır Türkçe ile 3-4 cümle açıkla. "
         f"Teknik jargonu minimize et, herkesin anlayabileceği bir dil kullan. "
         f"Neden bu sinyal oluştu ve ne anlama geliyor kısaca anlat. "
