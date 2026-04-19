@@ -1390,13 +1390,12 @@ def api_signal_explanation(ticker):
     return safe_json({"explanation": None})
 
 
-@app.route("/api/hisse/<ticker>/mtf")
-def api_stock_mtf(ticker):
-    """Hisse için çoklu zaman dilimi sinyal analizi (Günlük / Haftalık / Aylık)."""
-    ticker = ticker.upper()
-    if ticker not in BIST30:
-        return safe_json({"error": "Hisse bulunamadı"}), 404
+_mtf_cache     = {}        # {ticker: {"data": {...}, "ts": float}}
+_MTF_CACHE_TTL = 1800      # 30 dakika (MTF günlük/haftalık/aylık — sık değişmez)
 
+
+def _compute_mtf(ticker):
+    """Tek hisse için çoklu zaman dilimi sinyal hesaplar — cache tarafından çağrılır."""
     sym = ticker + ".IS"
 
     def _tf_signal(interval, period, min_bars):
@@ -1440,15 +1439,31 @@ def api_stock_mtf(ticker):
             logger.debug("_tf_signal(%s, %s): %s", ticker, interval, e)
             return None
 
-    daily   = _tf_signal("1d",  "2y",  80)
-    weekly  = _tf_signal("1wk", "5y",  40)
-    monthly = _tf_signal("1mo", "10y", 12)
-    return safe_json({
+    return {
         "ticker":  ticker,
-        "daily":   daily,
-        "weekly":  weekly,
-        "monthly": monthly,
-    })
+        "daily":   _tf_signal("1d",  "2y",  80),
+        "weekly":  _tf_signal("1wk", "5y",  40),
+        "monthly": _tf_signal("1mo", "10y", 12),
+    }
+
+
+@app.route("/api/hisse/<ticker>/mtf")
+def api_stock_mtf(ticker):
+    """Hisse için çoklu zaman dilimi sinyal analizi (Günlük / Haftalık / Aylık) — 30 dk cache."""
+    ticker = ticker.upper()
+    if ticker not in BIST30:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+
+    now = time.time()
+    with _lock:
+        cached = _mtf_cache.get(ticker)
+        if cached and (now - cached["ts"]) < _MTF_CACHE_TTL:
+            return safe_json(cached["data"])
+
+    data = _compute_mtf(ticker)
+    with _lock:
+        _mtf_cache[ticker] = {"data": data, "ts": now}
+    return safe_json(data)
 
 
 @app.route("/api/hisse/<ticker>/chart")
