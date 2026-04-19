@@ -5,23 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BIST100 Sinyal Özeti {{ today_str }} — Günlük AL/SAT Raporu | borsapusula.com</title>
 <meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse AL, kaç hisse SAT sinyali veriyor? Bugün sinyal değişen hisseler.">
-<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/ozet">
 <meta property="og:title"       content="BIST100 Günlük Sinyal Özeti — {{ today_str }}">
 <meta property="og:description" content="Bugün BIST100'de {{ al_list|length }} AL, {{ sat_list|length }} SAT sinyali var.">
 <meta property="og:site_name"   content="BIST30 Sinyal Paneli">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bp-bg:#0b111f; --bp-surface:#111827; --bp-surface2:#1a2438;
+    --bp-border:#1e2d45; --bp-border2:#2d4166;
+    --bp-text:#e2e8f0; --bp-text2:#94a3b8; --bp-text3:#64748b;
+    --bp-brand:#3b82f6; --bp-al:#3fb950; --bp-sat:#f85149;
+    --bp-bkl:#8b949e; --bp-gold:#f59e0b; --bp-radius:10px; --bp-radius-sm:6px;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: #0d1117;
+    background: #0b111f;
     color: #e6edf3;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
     font-size: 14px;
     min-height: 100vh;
   }
   header {
-    background: #161b22;
-    border-bottom: 1px solid #30363d;
+    background: var(--bp-surface);
+    border-bottom: 1px solid var(--bp-border);
     padding: 14px 24px;
     display: flex;
     align-items: center;
@@ -32,16 +43,16 @@
   }
   .back-btn {
     display: flex; align-items: center; gap: 6px;
-    color: #8b949e; font-size: 13px;
+    color: var(--bp-text2); font-size: 13px;
     text-decoration: none;
     padding: 5px 10px;
-    border: 1px solid #30363d;
+    border: 1px solid var(--bp-border);
     border-radius: 6px;
-    background: #21262d;
+    background: var(--bp-surface2);
     transition: all 0.15s;
     white-space: nowrap;
   }
-  .back-btn:hover { background: #30363d; color: #e6edf3; }
+  .back-btn:hover { background: var(--bp-surface2); color: var(--bp-text); }
   .page-title { font-size: 20px; font-weight: 700; color: #f0f6fc; }
   .page-sub   { font-size: 13px; color: #8b949e; margin-top: 1px; }
 
@@ -150,10 +161,17 @@
 
 <header>
   <a href="/" class="back-btn">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    <svg width="20" height="20" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#111827"/>
+      <circle cx="18" cy="18" r="13" stroke="#1e2d45" stroke-width="1"/>
+      <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#3b82f6"/>
+      <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#1e3a62"/>
+      <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#1e3a62"/>
+      <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#1e3a62"/>
+      <circle cx="18" cy="18" r="2.8" fill="#1d4ed8"/>
+      <circle cx="18" cy="18" r="1.4" fill="#bfdbfe"/>
     </svg>
-    Ana Sayfa
+    BorsaPusula
   </a>
   <div>
     <div class="page-title">📊 Günlük Sinyal Özeti</div>
