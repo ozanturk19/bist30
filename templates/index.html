@@ -45,11 +45,43 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BorsaPusula">
-<meta name="theme-color" content="#161b22">
+<meta name="theme-color" content="#0b111f">
 <link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<!-- Inter font — fintech UX standard -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="/static/lightweight-charts.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ── Design tokens ──────────────────────────────── */
+  :root {
+    --bp-bg:        #0b111f;
+    --bp-surface:   #111827;
+    --bp-surface2:  #1a2438;
+    --bp-surface3:  #222d42;
+    --bp-border:    #1e2d45;
+    --bp-border2:   #2d4166;
+    --bp-text:      #e2e8f0;
+    --bp-text2:     #94a3b8;
+    --bp-text3:     #64748b;
+    --bp-brand:     #3b82f6;
+    --bp-brand-d:   #1d4ed8;
+    --bp-al:        #3fb950;
+    --bp-al-bg:     #052e16;
+    --bp-al-bd:     #238636;
+    --bp-sat:       #f85149;
+    --bp-sat-bg:    #3d0f0f;
+    --bp-sat-bd:    #da3633;
+    --bp-bkl:       #8b949e;
+    --bp-bkl-bg:    #1e293b;
+    --bp-bkl-bd:    #30363d;
+    --bp-gold:      #f59e0b;
+    --bp-radius:    10px;
+    --bp-radius-sm: 6px;
+  }
 
   /* Light tema */
   body.light { --bg: #ffffff; --bg2: #f6f8fa; --bg3: #eaeef2; --border: #d0d7de; --text: #1f2328; --text2: #636c76; --text3: #9ea7b3; }
@@ -74,71 +106,140 @@
 
   /* Tema butonu */
   .theme-btn {
-    background: none; border: 1px solid #30363d; color: #8b949e;
-    width: 32px; height: 32px; border-radius: 6px; cursor: pointer;
+    background: none; border: 1px solid var(--bp-border); color: var(--bp-text2);
+    width: 32px; height: 32px; border-radius: var(--bp-radius-sm); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     font-size: 16px; transition: all .15s; flex-shrink: 0;
   }
-  .theme-btn:hover { background: #21262d; color: #e6edf3; }
+  .theme-btn:hover { background: var(--bp-surface2); color: var(--bp-text); }
   body.light .theme-btn { border-color: #d0d7de; color: #636c76; }
   body.light .theme-btn:hover { background: #eaeef2; }
 
   body {
-    background: #0d1117;
-    color: #e6edf3;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bp-bg);
+    color: var(--bp-text);
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
     font-size: 14px;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
   }
 
+  /* ── Header ──────────────────────────────────────── */
   header {
-    background: #161b22;
-    border-bottom: 1px solid #30363d;
-    padding: 16px 24px;
+    background: var(--bp-surface);
+    border-bottom: 1px solid var(--bp-border);
+    padding: 0 24px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 100;
+    gap: 12px;
   }
 
-  header h1 { font-size: 18px; font-weight: 600; color: #f0f6fc; letter-spacing: -0.3px; }
-  header h1 span { color: #58a6ff; }
+  /* Logo */
+  .logo-link {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; flex-shrink: 0;
+  }
+  .logo-mark {
+    width: 36px; height: 36px; flex-shrink: 0;
+  }
+  .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
+  .logo-name {
+    font-size: 16px; font-weight: 700; color: #f1f5f9;
+    letter-spacing: -0.3px;
+  }
+  .logo-name strong { color: var(--bp-brand); font-weight: 800; }
+  .logo-sub {
+    font-size: 10px; font-weight: 500; color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: 0.6px;
+  }
 
-  .header-right { display: flex; align-items: center; gap: 12px; }
+  /* Header nav */
+  .header-nav {
+    display: flex; gap: 4px; align-items: center; margin-left: 8px;
+  }
+  .header-nav a {
+    display: flex; align-items: center; gap: 5px;
+    padding: 6px 11px; border-radius: var(--bp-radius-sm);
+    font-size: 13px; font-weight: 500; color: var(--bp-text2);
+    text-decoration: none; transition: all .15s;
+    white-space: nowrap;
+  }
+  .header-nav a:hover { background: var(--bp-surface2); color: var(--bp-text); }
+  .header-nav a.active { background: var(--bp-surface2); color: var(--bp-brand); }
 
-  #updated { font-size: 12px; color: #8b949e; }
+  /* Header right actions */
+  .header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  #liveTs { font-size: 11px; font-weight: 600; color: var(--bp-al); letter-spacing: 0.3px; font-variant-numeric: tabular-nums; }
+  #updated { font-size: 11px; color: var(--bp-text3); }
 
   .btn-refresh {
-    background: #21262d; border: 1px solid #30363d; color: #c9d1d9;
-    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px;
-    display: flex; align-items: center; gap: 6px; transition: background 0.15s, border-color 0.15s;
+    background: var(--bp-surface2); border: 1px solid var(--bp-border);
+    color: var(--bp-text2); padding: 6px 12px; border-radius: var(--bp-radius-sm);
+    cursor: pointer; font-size: 12px; font-weight: 500; font-family: inherit;
+    display: flex; align-items: center; gap: 5px; transition: all 0.15s;
   }
-  .btn-refresh:hover { background: #30363d; border-color: #8b949e; }
+  .btn-refresh:hover { background: var(--bp-surface3); border-color: var(--bp-border2); color: var(--bp-text); }
   .btn-refresh.spinning svg { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
 
+  /* ── Mobile Bottom Nav ───────────────────────────── */
+  .mobile-bottom-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    background: var(--bp-surface);
+    border-top: 1px solid var(--bp-border);
+    height: 64px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mbn-inner {
+    display: flex; height: 64px;
+  }
+  .mbn-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px; text-decoration: none;
+    color: var(--bp-text3); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.2px; transition: color .15s;
+  }
+  .mbn-item svg { width: 20px; height: 20px; }
+  .mbn-item:hover, .mbn-item.active { color: var(--bp-brand); }
+  .mbn-item.active svg { filter: drop-shadow(0 0 4px rgba(59,130,246,.4)); }
+  @media (max-width: 768px) {
+    .mobile-bottom-nav { display: flex; }
+    body { padding-bottom: 64px; }
+    .alarm-fab { bottom: 80px !important; }
+    .alarm-panel { bottom: 80px !important; }
+  }
+
   /* Stats bar */
   .stats-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
   .stat-card {
-    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
-    padding: 12px 20px; flex: 1; min-width: 120px; text-align: center;
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius); padding: 14px 20px;
+    flex: 1; min-width: 120px; text-align: center;
+    transition: border-color .15s;
   }
-  .stat-card .stat-num { font-size: 24px; font-weight: 700; line-height: 1; }
-  .stat-card .stat-label { font-size: 11px; color: #8b949e; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .stat-al .stat-num { color: #3fb950; }
-  .stat-sat .stat-num { color: #f85149; }
-  .stat-bekle .stat-num { color: #8b949e; }
-  .stat-total .stat-num { color: #58a6ff; }
+  .stat-card:hover { border-color: var(--bp-border2); }
+  .stat-card .stat-num { font-size: 26px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+  .stat-card .stat-label { font-size: 10px; color: var(--bp-text3); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 500; }
+  .stat-al   .stat-num { color: var(--bp-al); }
+  .stat-sat  .stat-num { color: var(--bp-sat); }
+  .stat-bekle.stat-num { color: var(--bp-bkl); }
+  .stat-bekle .stat-num { color: var(--bp-bkl); }
+  .stat-total .stat-num { color: var(--bp-brand); }
 
   /* ── BIST30 Endeks Satırı ───────────────────────── */
   .index-row-card {
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius: 8px;
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius);
     padding: 10px 16px;
     margin-bottom: 12px;
     display: flex;
@@ -156,7 +257,7 @@
   .irc-divider {
     width: 1px;
     height: 22px;
-    background: #30363d;
+    background: var(--bp-border);
   }
   .irc-price {
     font-weight: 600;
@@ -177,14 +278,14 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    background: #0d1117;
-    border: 1px solid #30363d;
-    border-radius: 6px;
+    background: var(--bp-bg);
+    border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius-sm);
     padding: 3px 9px;
   }
   .irc-meta-label {
     font-size: 10px;
-    color: #8b949e;
+    color: var(--bp-text3);
     text-transform: uppercase;
     letter-spacing: 0.4px;
   }
@@ -205,15 +306,15 @@
     flex-wrap: wrap; align-items: center;
   }
   .filter-btn {
-    padding: 5px 14px; border-radius: 20px; border: 1px solid #30363d;
-    background: transparent; color: #8b949e; cursor: pointer;
-    font-size: 13px; transition: all 0.15s;
+    padding: 5px 14px; border-radius: 20px; border: 1px solid var(--bp-border);
+    background: transparent; color: var(--bp-text2); cursor: pointer;
+    font-size: 12px; font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
-  .filter-btn:hover { border-color: #8b949e; color: #c9d1d9; }
+  .filter-btn:hover { border-color: var(--bp-border2); color: var(--bp-text); }
   .filter-btn.active-all  { background: #1f6feb; border-color: #1f6feb; color: #fff; }
   .filter-btn.active-al   { background: #1a4731; border-color: #3fb950; color: #3fb950; }
   .filter-btn.active-sat  { background: #3d0f0f; border-color: #f85149; color: #f85149; }
-  .filter-btn.active-bekle{ background: #21262d; border-color: #8b949e; color: #8b949e; }
+  .filter-btn.active-bekle{ background: var(--bp-bkl-bg); border-color: var(--bp-bkl-bd); color: var(--bp-bkl); }
   .filter-today { border-color: #e3b341 !important; color: #e3b341 !important; }
   .active-today { background: #e3b341 !important; color: #0d1117 !important; border-color: #e3b341 !important; }
 
@@ -222,48 +323,48 @@
     display: flex; gap: 6px; margin-bottom: 14px;
     flex-wrap: wrap; align-items: center;
   }
-  .sector-lbl { font-size: 11px; color: #484f58; text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0; }
+  .sector-lbl { font-size: 10px; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; font-weight: 500; }
   .sector-btn {
-    padding: 4px 11px; border-radius: 14px; border: 1px solid #21262d;
-    background: transparent; color: #484f58; cursor: pointer;
-    font-size: 12px; transition: all 0.15s;
+    padding: 4px 11px; border-radius: 14px; border: 1px solid var(--bp-border);
+    background: transparent; color: var(--bp-text3); cursor: pointer;
+    font-size: 11px; font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
-  .sector-btn:hover { border-color: #58a6ff44; color: #8b949e; }
-  .sector-btn.active-sector { background: #1c2b3a; border-color: #1f6feb66; color: #58a6ff; }
+  .sector-btn:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
+  .sector-btn.active-sector { background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.4); color: var(--bp-brand); }
 
   .search-input {
     margin-left: auto;
-    background: #0d1117; border: 1px solid #30363d; color: #e6edf3;
-    padding: 5px 12px; border-radius: 6px; font-size: 13px;
-    width: 160px; outline: none;
+    background: var(--bp-bg); border: 1px solid var(--bp-border); color: var(--bp-text);
+    padding: 6px 12px; border-radius: var(--bp-radius-sm); font-size: 13px; font-family: inherit;
+    width: 160px; outline: none; transition: border-color .15s;
   }
-  .search-input:focus { border-color: #58a6ff; }
-  .search-input::placeholder { color: #484f58; }
+  .search-input:focus { border-color: var(--bp-brand); }
+  .search-input::placeholder { color: var(--bp-text3); }
 
   /* Table */
   .table-wrap {
-    background: #161b22; border: 1px solid #30363d;
-    border-radius: 10px; overflow: hidden;
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius); overflow: hidden;
   }
   table { width: 100%; border-collapse: collapse; }
   thead th {
-    background: #1c2128; padding: 10px 16px; text-align: left;
-    font-size: 11px; font-weight: 600; color: #8b949e;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    border-bottom: 1px solid #30363d; cursor: pointer;
-    user-select: none; white-space: nowrap;
+    background: var(--bp-surface2); padding: 10px 16px; text-align: left;
+    font-size: 10px; font-weight: 600; color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: 0.7px;
+    border-bottom: 1px solid var(--bp-border); cursor: pointer;
+    user-select: none; white-space: nowrap; font-family: inherit;
   }
-  thead th:hover { color: #c9d1d9; }
+  thead th:hover { color: var(--bp-text2); }
   thead th.sorted-asc::after  { content: " ↑"; }
   thead th.sorted-desc::after { content: " ↓"; }
 
-  tbody tr { border-bottom: 1px solid #21262d; transition: background 0.1s; }
+  tbody tr { border-bottom: 1px solid var(--bp-border); transition: background 0.1s; }
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: #1c2128; }
+  tbody tr:hover { background: var(--bp-surface2); }
   td { padding: 10px 16px; white-space: nowrap; }
 
-  .ticker { font-weight: 600; font-size: 14px; color: #f0f6fc; letter-spacing: 0.3px; }
-  .price  { font-weight: 500; color: #e6edf3; font-variant-numeric: tabular-nums; }
+  .ticker { font-weight: 700; font-size: 13px; color: #f1f5f9; letter-spacing: 0.1px; }
+  .price  { font-weight: 600; color: var(--bp-text); font-variant-numeric: tabular-nums; }
   .change-pct { font-weight: 500; font-variant-numeric: tabular-nums; font-size: 13px; }
   .change-pct.pos { color: #3fb950; }
   .change-pct.neg { color: #f85149; }
@@ -272,11 +373,12 @@
   .signal-badge {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 4px 10px; border-radius: 20px;
-    font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+    white-space: nowrap;
   }
-  .signal-AL   { background: #1a4731; color: #3fb950; border: 1px solid #238636; }
-  .signal-SAT  { background: #3d0f0f; color: #f85149; border: 1px solid #da3633; }
-  .signal-BEKLE{ background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+  .signal-AL   { background: var(--bp-al-bg);  color: var(--bp-al);  border: 1px solid var(--bp-al-bd); }
+  .signal-SAT  { background: var(--bp-sat-bg); color: var(--bp-sat); border: 1px solid var(--bp-sat-bd); }
+  .signal-BEKLE{ background: var(--bp-bkl-bg); color: var(--bp-bkl); border: 1px solid var(--bp-bkl-bd); }
 
   .sig-price {
     font-size: 11px;
@@ -296,25 +398,25 @@
   }
 
   .indicators { display: flex; gap: 4px; flex-wrap: wrap; }
-  .ind-badge  { padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-  .ind-bull   { background: #1a4731; color: #3fb950; }
-  .ind-bear   { background: #3d0f0f; color: #f85149; }
-  .ind-neutral{ background: #21262d; color: #8b949e; }
+  .ind-badge  { padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .ind-bull   { background: var(--bp-al-bg);  color: var(--bp-al); }
+  .ind-bear   { background: var(--bp-sat-bg); color: var(--bp-sat); }
+  .ind-neutral{ background: var(--bp-bkl-bg); color: var(--bp-bkl); }
 
   .score-bar  { display: flex; gap: 3px; align-items: center; }
   .score-dot  { width: 8px; height: 8px; border-radius: 50%; }
-  .score-dot.filled-bull { background: #3fb950; }
-  .score-dot.filled-bear { background: #f85149; }
-  .score-dot.empty       { background: #30363d; }
+  .score-dot.filled-bull { background: var(--bp-al); }
+  .score-dot.filled-bear { background: var(--bp-sat); }
+  .score-dot.empty       { background: var(--bp-border2); }
 
   /* Loading */
-  .loading-overlay { text-align: center; padding: 60px 20px; color: #8b949e; }
+  .loading-overlay { text-align: center; padding: 60px 20px; color: var(--bp-text2); }
   .spinner {
     display: inline-block; width: 28px; height: 28px;
-    border: 3px solid #30363d; border-top-color: #58a6ff;
+    border: 3px solid var(--bp-border2); border-top-color: var(--bp-brand);
     border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;
   }
-  .no-data { text-align: center; padding: 40px; color: #8b949e; font-size: 13px; }
+  .no-data { text-align: center; padding: 40px; color: var(--bp-text2); font-size: 13px; }
 
   /* Skeleton loader */
   @keyframes shimmer {
@@ -326,7 +428,7 @@
   }
   .skeleton-cell {
     height: 14px; border-radius: 4px;
-    background: linear-gradient(90deg, #1c2128 25%, #21262d 50%, #1c2128 75%);
+    background: linear-gradient(90deg, var(--bp-surface2) 25%, var(--bp-surface3) 50%, var(--bp-surface2) 75%);
     background-size: 800px 100%;
     animation: shimmer 1.4s infinite linear;
   }
@@ -339,12 +441,12 @@
   .sk-dots    { width: 40px; }
 
   footer {
-    text-align: center; padding: 20px; color: #484f58;
-    font-size: 12px; border-top: 1px solid #21262d; margin-top: 24px;
+    text-align: center; padding: 24px; color: var(--bp-text3);
+    font-size: 12px; border-top: 1px solid var(--bp-border); margin-top: 24px;
   }
 
   /* ── BIST30 Chart Section ─────────────────────────── */
-  .index-section { background: #161b22; border-bottom: 1px solid #30363d; }
+  .index-section { background: var(--bp-surface); border-bottom: 1px solid var(--bp-border); }
 
   .index-header {
     display: flex; align-items: center; gap: 16px;
@@ -388,8 +490,8 @@
 
   .sig-date   { font-size: 11px; color: #8b949e; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .new-today  { color: #e3b341; font-weight: 700; font-size: 12px; }
-  .row-new-signal { background: rgba(227, 179, 65, 0.04); }
-  #tableBody tr:hover { background: rgba(88,166,255,0.05); }
+  .row-new-signal { background: rgba(245,158,11,0.04); }
+  #tableBody tr:hover { background: rgba(59,130,246,0.05); }
 
   /* ── Alarm / Watchlist ─── */
   .alarm-btn { background:none; border:none; cursor:pointer; font-size:14px; padding:2px 4px; opacity:.4; transition:opacity .15s; }
@@ -397,28 +499,28 @@
   .alarm-btn.watching { opacity:1; }
   .alarm-panel {
     position:fixed; bottom:24px; right:24px; z-index:999;
-    background:#161b22; border:1px solid #30363d; border-radius:12px;
+    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:12px;
     width:300px; max-height:420px; overflow:hidden;
-    box-shadow:0 8px 32px rgba(0,0,0,.5);
+    box-shadow:0 8px 32px rgba(0,0,0,.6);
     display:flex; flex-direction:column;
     transition: all .2s;
   }
   .alarm-panel.hidden { display:none; }
-  .ap-header { padding:12px 14px; border-bottom:1px solid #21262d; display:flex; justify-content:space-between; align-items:center; }
-  .ap-title  { font-size:13px; font-weight:700; color:#f0f6fc; }
-  .ap-close  { background:none; border:none; color:#8b949e; cursor:pointer; font-size:18px; line-height:1; }
+  .ap-header { padding:12px 14px; border-bottom:1px solid var(--bp-border); display:flex; justify-content:space-between; align-items:center; }
+  .ap-title  { font-size:13px; font-weight:700; color:var(--bp-text); }
+  .ap-close  { background:none; border:none; color:var(--bp-text2); cursor:pointer; font-size:18px; line-height:1; }
   .ap-body   { overflow-y:auto; flex:1; padding:8px; }
   .ap-item   { display:flex; align-items:center; gap:8px; padding:8px 6px; border-radius:6px; font-size:13px; }
-  .ap-item:hover { background:#21262d; }
-  .ap-ticker { font-weight:700; color:#f0f6fc; flex:1; }
+  .ap-item:hover { background:var(--bp-surface2); }
+  .ap-ticker { font-weight:700; color:var(--bp-text); flex:1; }
   .ap-sig    { font-size:11px; font-weight:600; padding:2px 6px; border-radius:10px; }
-  .ap-sig.AL   { background:#1a4731; color:#3fb950; }
-  .ap-sig.SAT  { background:#3d0f0f; color:#f85149; }
-  .ap-sig.BEKLE{ background:#21262d; color:#8b949e; }
-  .ap-remove { background:none; border:none; color:#484f58; cursor:pointer; font-size:12px; }
-  .ap-remove:hover { color:#f85149; }
-  .ap-empty  { color:#484f58; font-size:12px; text-align:center; padding:20px; }
-  .ap-footer { padding:8px 14px; border-top:1px solid #21262d; font-size:11px; color:#484f58; }
+  .ap-sig.AL   { background:var(--bp-al-bg);  color:var(--bp-al); }
+  .ap-sig.SAT  { background:var(--bp-sat-bg); color:var(--bp-sat); }
+  .ap-sig.BEKLE{ background:var(--bp-bkl-bg); color:var(--bp-bkl); }
+  .ap-remove { background:none; border:none; color:var(--bp-text3); cursor:pointer; font-size:12px; }
+  .ap-remove:hover { color:var(--bp-sat); }
+  .ap-empty  { color:var(--bp-text3); font-size:12px; text-align:center; padding:20px; }
+  .ap-footer { padding:8px 14px; border-top:1px solid var(--bp-border); font-size:11px; color:var(--bp-text3); }
   .alarm-fab {
     position:fixed; bottom:24px; right:24px; z-index:998;
     background:#1f6feb; border:none; border-radius:50%; width:48px; height:48px;
@@ -437,7 +539,10 @@
   /* Responsive */
   @media (max-width: 768px) {
     .container { padding: 12px; }
-    header { padding: 12px; }
+    header { padding: 0 14px; height: 56px; }
+    .header-nav { display: none; }
+    .logo-sub { display: none; }
+    .logo-name { font-size: 15px; }
     .index-header { padding: 10px 12px 6px; gap: 10px; }
     .charts-wrap { padding: 0 12px 10px; }
     #chartMain { height: 240px; }
@@ -450,26 +555,62 @@
     .search-input { width: 120px; }
     .index-inds { margin-left: 0; }
     .irc-inds { display: none; }
+    #updated { display: none; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>BIST<span>100</span> Sinyal Paneli</h1>
-  <nav style="display:flex;gap:6px;margin-left:16px;flex-shrink:0">
-    <a href="/ozet" style="font-size:12px;color:#8b949e;text-decoration:none;padding:4px 10px;border:1px solid #30363d;border-radius:6px;background:#21262d;transition:all .15s" onmouseover="this.style.color='#e6edf3'" onmouseout="this.style.color='#8b949e'">📊 Özet</a>
-    <a href="/portfolio" style="font-size:12px;color:#8b949e;text-decoration:none;padding:4px 10px;border:1px solid #30363d;border-radius:6px;background:#21262d;transition:all .15s" onmouseover="this.style.color='#e6edf3'" onmouseout="this.style.color='#8b949e'">💼 Portföy</a>
-    <a href="/sektor-harita" style="font-size:12px;color:#8b949e;text-decoration:none;padding:4px 10px;border:1px solid #30363d;border-radius:6px;background:#21262d;transition:all .15s" onmouseover="this.style.color='#e6edf3'" onmouseout="this.style.color='#8b949e'">🗺️ Sektörler</a>
-    <a href="/blog" style="font-size:12px;color:#8b949e;text-decoration:none;padding:4px 10px;border:1px solid #30363d;border-radius:6px;background:#21262d;transition:all .15s" onmouseover="this.style.color='#e6edf3'" onmouseout="this.style.color='#8b949e'">📚 Blog</a>
-    <a href="/metodoloji" style="font-size:12px;color:#8b949e;text-decoration:none;padding:4px 10px;border:1px solid #30363d;border-radius:6px;background:#21262d;transition:all .15s" onmouseover="this.style.color='#e6edf3'" onmouseout="this.style.color='#8b949e'">📖 Metodoloji</a>
+  <!-- Logo -->
+  <a href="/" class="logo-link">
+    <svg class="logo-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="9" fill="#0b111f"/>
+      <circle cx="18" cy="18" r="13" stroke="#1e2d45" stroke-width="1"/>
+      <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#3b82f6"/>
+      <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#1e3a62"/>
+      <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#1e3a62"/>
+      <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#1e3a62"/>
+      <circle cx="18" cy="18" r="2.8" fill="#1d4ed8"/>
+      <circle cx="18" cy="18" r="1.4" fill="#bfdbfe"/>
+    </svg>
+    <div class="logo-text">
+      <span class="logo-name">Borsa<strong>Pusula</strong></span>
+      <span class="logo-sub">BIST100 Sinyal Paneli</span>
+    </div>
+  </a>
+
+  <!-- Desktop Nav -->
+  <nav class="header-nav">
+    <a href="/ozet">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Özet
+    </a>
+    <a href="/sektor-harita">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
+      Sektörler
+    </a>
+    <a href="/portfolio">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      Portföy
+    </a>
+    <a href="/sinyal-performans">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Performans
+    </a>
+    <a href="/blog">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Blog
+    </a>
   </nav>
+
+  <!-- Right actions -->
   <div class="header-right">
-    <span id="liveTs" style="margin-right:8px">○ bekleniyor</span>
-    <span id="updated">—</span>
+    <span id="liveTs" style="margin-right:4px">○</span>
+    <span id="updated" style="display:none">—</span>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Tema değiştir">🌙</button>
     <button class="btn-refresh" onclick="manualRefresh()" id="refreshBtn">
-      <svg id="refreshIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
         <path d="M21 3v5h-5"/>
         <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
@@ -479,6 +620,32 @@
     </button>
   </div>
 </header>
+
+<!-- Mobile Bottom Navigation -->
+<nav class="mobile-bottom-nav">
+  <div class="mbn-inner">
+    <a href="/" class="mbn-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Sinyaller</span>
+    </a>
+    <a href="/ozet" class="mbn-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Özet</span>
+    </a>
+    <a href="/sektor-harita" class="mbn-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <span>Sektörler</span>
+    </a>
+    <a href="/portfolio" class="mbn-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      <span>Portföy</span>
+    </a>
+    <a href="/blog" class="mbn-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>Blog</span>
+    </a>
+  </div>
+</nav>
 
 <!-- ── BIST30 Endeks Grafik Bölümü ─────────────────── -->
 <div class="index-section">
@@ -609,24 +776,35 @@
 
 <footer>
   <div style="max-width:900px;margin:0 auto">
-    <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px;font-size:13px">
-      <a href="/ozet" style="color:#8b949e;text-decoration:none">📊 Günlük Özet</a>
-      <a href="/portfolio" style="color:#8b949e;text-decoration:none">💼 Portföy</a>
-      <a href="/sinyal-performans" style="color:#8b949e;text-decoration:none">📈 Sinyal Performansı</a>
-      <a href="/sektor-harita" style="color:#8b949e;text-decoration:none">🗺️ Sektör Haritası</a>
-      <a href="/blog" style="color:#8b949e;text-decoration:none">📚 Blog</a>
-      <a href="/metodoloji" style="color:#8b949e;text-decoration:none">📖 Metodoloji</a>
-      <a href="/hakkinda" style="color:#8b949e;text-decoration:none">ℹ️ Hakkında</a>
-      <a href="/gizlilik" style="color:#8b949e;text-decoration:none">🔒 Gizlilik</a>
-      <a href="/iletisim" style="color:#8b949e;text-decoration:none">📬 İletişim</a>
+    <!-- Logo in footer -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
+      <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="36" height="36" rx="9" fill="#111827"/>
+        <circle cx="18" cy="18" r="13" stroke="#1e2d45" stroke-width="1"/>
+        <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#3b82f6"/>
+        <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#1e3a62"/>
+        <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#1e3a62"/>
+        <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#1e3a62"/>
+        <circle cx="18" cy="18" r="2.8" fill="#1d4ed8"/>
+        <circle cx="18" cy="18" r="1.4" fill="#bfdbfe"/>
+      </svg>
+      <span style="font-size:14px;font-weight:700;color:var(--bp-text2)">Borsa<strong style="color:var(--bp-brand)">Pusula</strong></span>
     </div>
-    <p style="color:#484f58;font-size:12px;margin-bottom:4px">
-      ⚠️ <strong style="color:#6e7681">Yasal Uyarı:</strong> Bu platform yalnızca bilgilendirme amaçlıdır. Herhangi bir otomatik emir verilmez.
-      Sunulan sinyaller ve analizler <strong style="color:#6e7681">yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir.
-      Geçmiş performans gelecek getirileri garanti etmez. Tüm yatırım kararlarınızı kendi araştırmanıza
-      ve gerektiğinde lisanslı bir finansal danışmana danışarak alınız. Sermayenizin tamamını kaybetme riskiniz mevcuttur.
+    <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:12px">
+      <a href="/ozet"             style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Günlük Özet</a>
+      <a href="/portfolio"        style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Portföy</a>
+      <a href="/sinyal-performans"style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Sinyal Performansı</a>
+      <a href="/sektor-harita"    style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Sektör Haritası</a>
+      <a href="/blog"             style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Blog</a>
+      <a href="/metodoloji"       style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Metodoloji</a>
+      <a href="/hakkinda"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Hakkında</a>
+      <a href="/gizlilik"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Gizlilik</a>
+      <a href="/iletisim"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">İletişim</a>
+    </div>
+    <p style="color:var(--bp-text3);font-size:11px;margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto">
+      ⚠️ Bu platform yalnızca bilgilendirme amaçlıdır. Sinyaller <strong style="color:var(--bp-text3)">yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez.
     </p>
-    <p style="color:#484f58;font-size:11px">© 2026 borsapusula.com · Tüm hakları saklıdır.</p>
+    <p style="color:var(--bp-text3);font-size:11px;margin-top:8px;opacity:0.6">© 2026 borsapusula.com</p>
   </div>
 </footer>
 

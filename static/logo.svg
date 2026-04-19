@@ -1,0 +1,15 @@
+<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="36" height="36" rx="9" fill="#0b111f"/>
+  <circle cx="18" cy="18" r="13" stroke="#1e2d45" stroke-width="1"/>
+  <!-- N needle — blue/bullish, pointing up -->
+  <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#3b82f6"/>
+  <!-- S needle — muted navy -->
+  <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#1e3a62"/>
+  <!-- E needle -->
+  <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#1e3a62"/>
+  <!-- W needle -->
+  <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#1e3a62"/>
+  <!-- Center hub -->
+  <circle cx="18" cy="18" r="2.8" fill="#1d4ed8"/>
+  <circle cx="18" cy="18" r="1.4" fill="#bfdbfe"/>
+</svg>
