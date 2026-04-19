@@ -289,6 +289,7 @@ _live_prices = {}
 _lock        = threading.Lock()
 _sse_clients = []
 _sse_lock    = threading.Lock()
+_bt_cache    = {"data": None, "computed_at": None}   # backtest cache
 
 
 def _push_sse(payload: dict):
@@ -1343,8 +1344,9 @@ def sitemap():
     for t in BIST30:
         if t != "XU030":
             pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
-    pages.append({"loc": "/blog",      "priority": "0.8", "changefreq": "weekly"})
-    pages.append({"loc": "/portfolio", "priority": "0.6", "changefreq": "monthly"})
+    pages.append({"loc": "/blog",               "priority": "0.8", "changefreq": "weekly"})
+    pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly"})
+    pages.append({"loc": "/sinyal-performans",  "priority": "0.7", "changefreq": "weekly"})
     for a in ARTICLES:
         pages.append({"loc": f"/blog/{a['slug']}", "priority": "0.7", "changefreq": "monthly"})
     today = date.today().isoformat()
@@ -1482,6 +1484,162 @@ def portfolio():
     return render_template("portfolio.html")
 
 
+# ── Backtest / Sinyal Performansı ─────────────────────────────────────────────
+def _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, i):
+    """i. bar için sinyal hesapla."""
+    ei12  = float(ema12.iloc[i]);   ei99  = float(ema99.iloc[i])
+    ai    = float(adx.iloc[i])
+    dip   = float(di_plus.iloc[i]); dim   = float(di_minus.iloc[i])
+    sti   = int(supertrend.iloc[i])
+    bs    = int(sti == 1)  + int(ai >= 25 and dip > dim) + int(ei12 > ei99)
+    brs   = int(sti == -1) + int(ai >= 25 and dim > dip) + int(ei12 < ei99)
+    return "AL" if bs >= 3 else "SAT" if brs >= 3 else "BEKLE"
+
+
+def backtest_ticker(ticker_base, fwd_days=20):
+    """Bir hisse için son 2 yıl AL/SAT sinyal performansını hesapla."""
+    ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
+    try:
+        df = yf.download(ticker, period="2y", interval="1d",
+                         progress=False, auto_adjust=True, timeout=30)
+        if df is None or len(df) < 120:
+            return None
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+            df = df.loc[:, ~df.columns.duplicated()]
+        df    = df.dropna().sort_index()
+        close = df["Close"].squeeze()
+        high  = df["High"].squeeze()
+        low   = df["Low"].squeeze()
+        n     = len(close)
+        if n < 120:
+            return None
+
+        ema12                  = compute_ema(close, 12)
+        ema99                  = compute_ema(close, 99)
+        adx, di_plus, di_minus = compute_adx(high, low, close)
+        supertrend, _          = compute_supertrend(high, low, close)
+
+        # Her bar için sinyal
+        signals = [_bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, i)
+                   for i in range(n)]
+
+        episodes = []   # {"sig", "entry_i", "entry_price", "exit_i", "exit_price", "ret_pct"}
+        i = 0
+        while i < n:
+            sig = signals[i]
+            if sig in ("AL", "SAT"):
+                entry_i     = i
+                entry_price = float(close.iloc[i])
+                # Sinyal bitmesini bekle (max fwd_days bar)
+                j = i + 1
+                while j < n and j < i + fwd_days + 1 and signals[j] == sig:
+                    j += 1
+                exit_i     = min(j, n - 1)
+                exit_price = float(close.iloc[exit_i])
+                ret_pct    = (exit_price - entry_price) / entry_price * 100
+                episodes.append({
+                    "sig":         sig,
+                    "date":        close.index[entry_i].strftime("%d.%m.%Y"),
+                    "entry_price": round(entry_price, 2),
+                    "exit_price":  round(exit_price, 2),
+                    "bars":        exit_i - entry_i,
+                    "ret_pct":     round(ret_pct, 2),
+                    "win":         (ret_pct > 0 and sig == "AL") or (ret_pct < 0 and sig == "SAT"),
+                })
+                i = j
+            else:
+                i += 1
+        return {"ticker": ticker_base, "episodes": episodes}
+    except Exception as e:
+        logger.warning("backtest_ticker(%s): %s", ticker_base, e)
+        return None
+
+
+def run_backtest():
+    """BIST30 hisseleri için backtest yürüt ve cache'e kaydet."""
+    # Sadece BIST30 (ilk 28 hisse) – 130 hisse çok yavaş olur
+    bt_tickers = BIST100[:28]
+    all_episodes = {"AL": [], "SAT": []}
+    per_ticker   = []
+
+    for t in bt_tickers:
+        res = backtest_ticker(t)
+        time.sleep(0.3)
+        if not res:
+            continue
+        t_al = [e for e in res["episodes"] if e["sig"] == "AL"]
+        t_sa = [e for e in res["episodes"] if e["sig"] == "SAT"]
+        all_episodes["AL"] += t_al
+        all_episodes["SAT"] += t_sa
+        if t_al or t_sa:
+            per_ticker.append({
+                "ticker":   t,
+                "al_count": len(t_al),
+                "al_wins":  sum(1 for e in t_al if e["win"]),
+                "al_avg":   round(sum(e["ret_pct"] for e in t_al) / len(t_al), 2) if t_al else None,
+                "sat_count":len(t_sa),
+                "sat_wins": sum(1 for e in t_sa if e["win"]),
+                "sat_avg":  round(sum(e["ret_pct"] for e in t_sa) / len(t_sa), 2) if t_sa else None,
+            })
+
+    def stats(eps):
+        if not eps: return {"count": 0, "win_rate": 0, "avg_ret": 0, "best": 0, "worst": 0}
+        wins = [e for e in eps if e["win"]]
+        rets = [e["ret_pct"] for e in eps]
+        return {
+            "count":    len(eps),
+            "win_rate": round(len(wins) / len(eps) * 100, 1),
+            "avg_ret":  round(sum(rets) / len(rets), 2),
+            "best":     round(max(rets), 2),
+            "worst":    round(min(rets), 2),
+        }
+
+    result = {
+        "al":          stats(all_episodes["AL"]),
+        "sat":         stats(all_episodes["SAT"]),
+        "per_ticker":  sorted(per_ticker, key=lambda x: -(x["al_count"] + x["sat_count"])),
+        "computed_at": datetime.now().strftime("%d.%m.%Y %H:%M"),
+        "tickers_used": len(bt_tickers),
+    }
+    with _lock:
+        _bt_cache["data"]        = result
+        _bt_cache["computed_at"] = result["computed_at"]
+    logger.info("Backtest tamamlandı: %d AL, %d SAT episod",
+                result["al"]["count"], result["sat"]["count"])
+
+
+@app.route("/sinyal-performans")
+def sinyal_performans():
+    with _lock:
+        bt = _bt_cache.get("data")
+    # Aktif sinyallerden anlık performans tablosu
+    with _lock:
+        stocks = list(_cache["data"])
+    aktif = [s for s in stocks if s["signal"] in ("AL", "SAT") and s.get("signal_price")]
+    for s in aktif:
+        if s.get("signal_price") and s.get("price"):
+            s["aktif_ret"] = round((s["price"] - s["signal_price"]) / s["signal_price"] * 100, 2)
+        else:
+            s["aktif_ret"] = None
+    return render_template("sinyal_performans.html", bt=bt, aktif=aktif)
+
+
+@app.route("/api/backtest")
+def api_backtest():
+    with _lock:
+        bt = _bt_cache.get("data")
+    if not bt:
+        return safe_json({"status": "computing", "message": "Backtest hesaplanıyor..."})
+    return safe_json(bt)
+
+
+@app.route("/api/backtest/run", methods=["POST"])
+def api_backtest_run():
+    threading.Thread(target=run_backtest, daemon=True).start()
+    return jsonify({"status": "started"})
+
+
 @app.route("/blog")
 def blog_index():
     from collections import Counter
@@ -1510,6 +1668,11 @@ def _startup():
     time.sleep(3)
     threading.Thread(target=background_refresh,     daemon=True).start()
     threading.Thread(target=background_live_prices, daemon=True).start()
+    # Backtest'i arka planda başlat (30 dakika gecikme ile — önce ana veri yüklensin)
+    def _delayed_backtest():
+        time.sleep(1800)   # 30 dakika sonra
+        run_backtest()
+    threading.Thread(target=_delayed_backtest, daemon=True).start()
 
 threading.Thread(target=_startup, daemon=True).start()
 

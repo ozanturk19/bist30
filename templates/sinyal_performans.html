@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sinyal Performans Analizi — BorsaPusula</title>
+<meta name="description" content="BorsaPusula algoritmik sinyal sisteminin geçmiş başarı oranları, ortalama getiri ve aktif sinyal performansları.">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#161b22">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0d1117; color:#e6edf3; font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; min-height:100vh; }
+  header { background:#161b22; border-bottom:1px solid #30363d; padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
+  .back-btn { display:flex; align-items:center; gap:6px; color:#8b949e; font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid #30363d; border-radius:6px; background:#21262d; }
+  .back-btn:hover { background:#30363d; color:#e6edf3; }
+  .page-title { font-size:20px; font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:13px; color:#8b949e; }
+  .container  { max-width:1100px; margin:0 auto; padding:24px; }
+
+  /* Summary cards */
+  .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:28px; }
+  .stat-card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px; text-align:center; }
+  .stat-num  { font-size:36px; font-weight:800; line-height:1; }
+  .stat-lbl  { font-size:11px; color:#8b949e; margin-top:8px; text-transform:uppercase; letter-spacing:.5px; }
+  .stat-sub  { font-size:12px; color:#8b949e; margin-top:4px; }
+  .c-green { color:#3fb950; } .c-red { color:#f85149; } .c-blue { color:#58a6ff; } .c-gold { color:#e3b341; }
+
+  /* Section header */
+  .sec-head { font-size:16px; font-weight:700; color:#f0f6fc; margin:28px 0 14px; display:flex; align-items:center; gap:8px; }
+  .sec-head span { font-size:12px; color:#8b949e; font-weight:400; }
+
+  /* Table */
+  .tbl-wrap { background:#161b22; border:1px solid #30363d; border-radius:10px; overflow:hidden; margin-bottom:24px; }
+  table { width:100%; border-collapse:collapse; }
+  thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:11px; color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
+  tbody tr { border-bottom:1px solid #21262d; }
+  tbody tr:last-child { border-bottom:none; }
+  tbody tr:hover { background:#1c2128; }
+  td { padding:10px 14px; font-size:13px; white-space:nowrap; }
+  .ticker-link { font-weight:700; color:#f0f6fc; text-decoration:none; }
+  .ticker-link:hover { color:#58a6ff; }
+
+  /* Signal badges */
+  .sig-al  { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600; background:#1a4731; color:#3fb950; border:1px solid #238636; }
+  .sig-sat { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600; background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
+
+  /* Bars */
+  .bar-wrap { background:#21262d; border-radius:4px; height:8px; width:120px; overflow:hidden; display:inline-block; vertical-align:middle; }
+  .bar-fill { height:100%; border-radius:4px; }
+
+  /* Computing notice */
+  .computing { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:40px; text-align:center; color:#8b949e; }
+  .computing .big { font-size:40px; margin-bottom:12px; }
+  .computing p { margin-top:8px; font-size:13px; }
+
+  /* Info box */
+  .info-box { background:#161b22; border:1px solid #30363d; border-left:3px solid #58a6ff; border-radius:8px; padding:14px 16px; margin-bottom:24px; font-size:13px; color:#8b949e; line-height:1.6; }
+
+  /* Trigger button */
+  .btn-run { background:#1f6feb; border:none; color:#fff; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; margin-left:12px; }
+  .btn-run:hover { background:#388bfd; }
+  .btn-run:disabled { background:#30363d; color:#8b949e; cursor:not-allowed; }
+
+  footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
+  footer a { color:#8b949e; text-decoration:none; }
+  @media(max-width:600px) { .container{padding:12px;} .hm{display:none;} }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="page-title">📊 Sinyal Performans Analizi</div>
+    <div class="page-sub">Algoritmik sinyal geçmiş başarı oranları · BIST30 üzerinde 2 yıllık backtest</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="info-box">
+    <strong>Metodoloji:</strong> Son 2 yıllık günlük OHLC verisi üzerinde, mevcut sinyal motoru (Supertrend + ADX≥25 + EMA12/99) her bar için yeniden çalıştırılır.
+    Bir AL/SAT sinyali başladığında fiyat kaydedilir; sinyal bittiğinde veya 20 iş günü geçince kapanış fiyatı ile getiri hesaplanır.
+    <strong>Geçmiş performans gelecek getiriyi garanti etmez.</strong> Yatırım tavsiyesi değildir.
+  </div>
+
+  {% if bt %}
+  <!-- Özet kartlar -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-num c-green">{{ bt.al.win_rate }}%</div>
+      <div class="stat-lbl">▲ Güçlü Trend Kazanma</div>
+      <div class="stat-sub">{{ bt.al.count }} sinyal incelendi</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num c-green">{{ bt.al.avg_ret }}%</div>
+      <div class="stat-lbl">▲ Güçlü Trend Ort. Getiri</div>
+      <div class="stat-sub">Max {{ bt.al.best }}% / Min {{ bt.al.worst }}%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num c-red">{{ bt.sat.win_rate }}%</div>
+      <div class="stat-lbl">▼ Zayıf Trend "Kazanma"</div>
+      <div class="stat-sub">{{ bt.sat.count }} sinyal incelendi</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num c-red">{{ bt.sat.avg_ret }}%</div>
+      <div class="stat-lbl">▼ Zayıf Trend Ort. Getiri</div>
+      <div class="stat-sub">Max {{ bt.sat.best }}% / Min {{ bt.sat.worst }}%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num c-blue">{{ bt.tickers_used }}</div>
+      <div class="stat-lbl">İncelenen Hisse</div>
+      <div class="stat-sub">{{ bt.computed_at }}</div>
+    </div>
+  </div>
+
+  <!-- Hisse bazlı performans -->
+  <div class="sec-head">
+    Hisse Bazlı Performans
+    <span>(AL sinyal sayısına göre sıralı)</span>
+    <button class="btn-run" id="btnRun" onclick="triggerBacktest()">🔄 Yenile</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Hisse</th>
+          <th>AL Sinyal</th>
+          <th>AL Kazanma %</th>
+          <th>AL Ort. Getiri</th>
+          <th>SAT Sinyal</th>
+          <th>SAT Kazanma %</th>
+          <th>SAT Ort. Getiri</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in bt.per_ticker %}
+        <tr>
+          <td><a href="/hisse/{{ t.ticker }}" class="ticker-link">{{ t.ticker }}</a></td>
+          <td>{{ t.al_count }}</td>
+          <td>
+            {% if t.al_count > 0 %}
+              {% set wr = (t.al_wins / t.al_count * 100)|round(0)|int %}
+              <span class="{{ 'c-green' if wr >= 50 else 'c-red' }}">{{ wr }}%</span>
+              <span class="bar-wrap"><span class="bar-fill" style="width:{{ wr }}%;background:{{ '#3fb950' if wr >= 50 else '#f85149' }}"></span></span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if t.al_avg is not none %}
+              <span class="{{ 'c-green' if t.al_avg >= 0 else 'c-red' }}">{{ '+' if t.al_avg >= 0 else '' }}{{ t.al_avg }}%</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ t.sat_count }}</td>
+          <td>
+            {% if t.sat_count > 0 %}
+              {% set wr2 = (t.sat_wins / t.sat_count * 100)|round(0)|int %}
+              <span class="{{ 'c-green' if wr2 >= 50 else 'c-red' }}">{{ wr2 }}%</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if t.sat_avg is not none %}
+              <span class="{{ 'c-red' if t.sat_avg >= 0 else 'c-green' }}">{{ '+' if t.sat_avg >= 0 else '' }}{{ t.sat_avg }}%</span>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="computing">
+    <div class="big">⏳</div>
+    <div style="font-size:16px;font-weight:700;color:#e6edf3">Backtest Hesaplanıyor</div>
+    <p>Sistem başlatıldıktan 30 dakika sonra otomatik çalışır.</p>
+    <p style="margin-top:12px">
+      <button class="btn-run" id="btnRun" onclick="triggerBacktest()">Şimdi Başlat</button>
+    </p>
+    <p style="margin-top:8px;font-size:11px">~5-10 dakika sürebilir, sayfa her 30 saniyede bir kontrol edilir.</p>
+  </div>
+  {% endif %}
+
+  <!-- Aktif sinyaller anlık performans -->
+  {% if aktif %}
+  <div class="sec-head">
+    Aktif Sinyaller — Anlık Performans
+    <span>(Sinyal başı fiyata göre)</span>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Hisse</th>
+          <th>Sinyal</th>
+          <th>Sinyal Başı ₺</th>
+          <th>Güncel ₺</th>
+          <th>Getiri %</th>
+          <th>Süre (gün)</th>
+          <th class="hm">Tarih</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in aktif|sort(attribute='aktif_ret', reverse=true) %}
+        <tr>
+          <td><a href="/hisse/{{ s.ticker }}" class="ticker-link">{{ s.ticker }}</a></td>
+          <td>
+            {% if s.signal == 'AL' %}
+              <span class="sig-al">▲ Güçlü Trend</span>
+            {% else %}
+              <span class="sig-sat">▼ Zayıf Trend</span>
+            {% endif %}
+          </td>
+          <td>{{ "%.2f"|format(s.signal_price) }} ₺</td>
+          <td>{{ "%.2f"|format(s.price) }} ₺</td>
+          <td>
+            {% if s.aktif_ret is not none %}
+              <span class="{{ 'c-green' if s.aktif_ret >= 0 else 'c-red' }}" style="font-weight:700">
+                {{ '+' if s.aktif_ret >= 0 else '' }}{{ "%.1f"|format(s.aktif_ret) }}%
+              </span>
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ s.signal_bars }}</td>
+          <td class="hm" style="color:#8b949e">{{ s.signal_date }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+</div>
+
+<footer>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/metodoloji">Metodoloji</a>
+  <div style="margin-top:6px">⚠️ Geçmiş performans gelecek getiriyi garanti etmez. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
+</footer>
+
+<script>
+async function triggerBacktest() {
+  const btn = document.getElementById('btnRun');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ Başlatılıyor...';
+  try {
+    await fetch('/api/backtest/run', { method: 'POST' });
+    btn.textContent = '✓ Çalışıyor, lütfen bekleyin...';
+    // Her 30 saniyede sayfayı yenile
+    let tries = 0;
+    const poll = setInterval(async () => {
+      tries++;
+      if (tries > 30) { clearInterval(poll); btn.textContent = '⏱ Zaman aşımı'; return; }
+      const r = await fetch('/api/backtest');
+      const j = await r.json();
+      if (j.al) { clearInterval(poll); window.location.reload(); }
+    }, 30000);
+  } catch(e) {
+    btn.textContent = '❌ Hata';
+    btn.disabled = false;
+  }
+}
+
+// Henüz backtest yoksa otomatik kontrol
+{% if not bt %}
+let autoCheck = 0;
+const iv = setInterval(async () => {
+  autoCheck++;
+  if (autoCheck > 40) { clearInterval(iv); return; }
+  try {
+    const r = await fetch('/api/backtest');
+    const j = await r.json();
+    if (j.al) { clearInterval(iv); window.location.reload(); }
+  } catch(e) {}
+}, 30000);
+{% endif %}
+</script>
+</body>
+</html>
