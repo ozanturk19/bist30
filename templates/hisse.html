@@ -581,6 +581,26 @@
     </div>
   </div>
 
+  <!-- KAP + Dış Linkler -->
+  <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+    <span style="font-size:12px;color:#8b949e;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Resmi Kaynaklar</span>
+    <a href="https://www.kap.org.tr/tr/Bildirim/Ara?ara={{ ticker }}" target="_blank" rel="noopener"
+       style="display:inline-flex;align-items:center;gap:5px;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:5px 12px;font-size:12px;color:#8b949e;text-decoration:none;transition:all .15s"
+       onmouseover="this.style.color='#f0f6fc'" onmouseout="this.style.color='#8b949e'">
+      📋 KAP Bildirimleri
+    </a>
+    <a href="https://finance.yahoo.com/quote/{{ ticker }}.IS" target="_blank" rel="noopener"
+       style="display:inline-flex;align-items:center;gap:5px;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:5px 12px;font-size:12px;color:#8b949e;text-decoration:none;transition:all .15s"
+       onmouseover="this.style.color='#f0f6fc'" onmouseout="this.style.color='#8b949e'">
+      📈 Yahoo Finance
+    </a>
+    <a href="https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/sirket-karti.aspx?hisse={{ ticker }}" target="_blank" rel="noopener"
+       style="display:inline-flex;align-items:center;gap:5px;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:5px 12px;font-size:12px;color:#8b949e;text-decoration:none;transition:all .15s"
+       onmouseover="this.style.color='#f0f6fc'" onmouseout="this.style.color='#8b949e'">
+      🏦 İş Yatırım
+    </a>
+  </div>
+
   <!-- AI Haberler -->
   <div class="news-section" id="newsSection">
     <div class="section-title">🤖 AI Haber Özeti</div>

@@ -72,6 +72,19 @@ BIST100 = [
     "SARKY", "SELEC", "SMRTG", "TATGD", "TTKOM",
     "TTRAK", "TURSG", "ULKER", "VESBE", "VESTL",
     "YATAS", "ZOREN",
+    # ── BIST100+ genişleme ──────────────────────────────
+    "ADEL",  "ADESE", "AKMGY", "AKGRT", "ARSAN",
+    "AYCES", "BASGZ", "BIOEN", "BOSSA", "CEMTS",
+    "CEMAS", "CLEBI", "CRDFA", "DENGE", "DNISI",
+    "DOBUR", "DOGUB", "DURDO", "DYOBY", "ECILC",
+    "EDIP",  "EGGUB", "EGPRO", "EMKEL", "ERBOS",
+    "ERSU",  "ESCOM", "FMIZP", "FORMT", "GESAN",
+    "GSDHO", "GSRAY", "GOKNR", "HDFGS", "HLGYO",
+    "HTTBT", "IEYHO", "IPMAT", "ISKPL", "ISFIN",
+    "KAPLM", "KATMR", "KERVT", "KMPUR", "KONYA",
+    "KRSTL", "LKMNH", "LUKSK", "MAKTK", "MPARK",
+    "MEDTR", "MEGAP", "MIPAZ", "MRDIN", "MTRKS",
+    "MUTLU", "NATEN", "NIBAS", "NUHCM", "ORGE",
     # ── Endeks ──────────────────────────────────────────
     "XU030",
 ]
@@ -172,6 +185,67 @@ STOCK_NAMES = {
     "VESTL": "Vestel Elektronik",
     "YATAS": "Yataş Yatak ve Yorgan",
     "ZOREN": "Zorlu Enerji",
+    # ── BIST100+ genişleme ───────────────────────────────
+    "ADEL":  "Adel Kalemcilik",
+    "ADESE": "Adese Alışveriş Merkezleri",
+    "AKMGY": "Akmerkez GYO",
+    "AKGRT": "Aksigorta A.Ş.",
+    "ARSAN": "Arsan Tekstil",
+    "AYCES": "Ayces Turizm",
+    "BASGZ": "Başgüç Enerji",
+    "BIOEN": "Biotrend Çevre",
+    "BOSSA": "Bossa Ticaret ve Sanayi",
+    "CEMTS": "Çemtaş Çelik Makine",
+    "CEMAS": "Çemaş Döküm Sanayi",
+    "CLEBI": "Çelebi Hava Servisi",
+    "CRDFA": "Creditwest Faktoring",
+    "DENGE": "Denge Yatırım Holding",
+    "DNISI": "Deniz İnşaat",
+    "DOBUR": "Doğuş Otomotiv Servis",
+    "DOGUB": "Doğuş Holding",
+    "DURDO": "Duran Doğan Basım",
+    "DYOBY": "DYO Boya Fabrikaları",
+    "ECILC": "Eczacıbaşı İlaç",
+    "EDIP":  "Edip İplik Sanayi",
+    "EGGUB": "Ege Gübre Sanayi",
+    "EGPRO": "Ege Profil Ticaret",
+    "EMKEL": "Emkel Elektrik Malzemeleri",
+    "ERBOS": "Erbosan Erciyas Boru",
+    "ERSU":  "Ersu Meyve ve Gıda",
+    "ESCOM": "Escort Teknoloji",
+    "FMIZP": "Formateks Tekstil",
+    "FORMT": "Formosa Asya Holding",
+    "GESAN": "Gersan Elektrik Ticaret",
+    "GSDHO": "GSD Holding",
+    "GSRAY": "Galatasaray Sportif",
+    "GOKNR": "Göknel Holding",
+    "HDFGS": "Hedef Girişim Sermayesi",
+    "HLGYO": "Halk GYO",
+    "HTTBT": "Hat Teknoloji",
+    "IEYHO": "İEYHO İnşaat",
+    "IPMAT": "İpek Matbaacılık",
+    "ISKPL": "İş Yapı GYO",
+    "ISFIN": "İş Finansal Kiralama",
+    "KAPLM": "Kaplamin Ambalaj",
+    "KATMR": "Katmerciler Araç Üstü",
+    "KERVT": "Kervansaray Yatırım",
+    "KMPUR": "Kâmpur Enerji",
+    "KONYA": "Konya Çimento",
+    "KRSTL": "Kristal Kola",
+    "LKMNH": "Lokman Hekim",
+    "LUKSK": "Lüks Kadife",
+    "MAKTK": "Maktek Makine",
+    "MPARK": "Mia Teknoloji (MParKEY)",
+    "MEDTR": "Meditera Tıbbi Malzeme",
+    "MEGAP": "Mega Polietilen",
+    "MIPAZ": "Mipaz Petrol",
+    "MRDIN": "Mardin Çimento",
+    "MTRKS": "Matriks Bilgi Dağıtım",
+    "MUTLU": "Mutlu Akü ve Malzemeleri",
+    "NATEN": "Naturel Enerji",
+    "NIBAS": "Niğbaş Niğde Beton",
+    "NUHCM": "Nuh Çimento",
+    "ORGE":  "Orge Enerji Elektrik",
     # ── Endeks ──────────────────────────────────────────
     "XU030": "BIST 30 Endeksi",
 }
@@ -179,26 +253,35 @@ STOCK_NAMES = {
 # ── Sektör sınıflandırması ────────────────────────────────────────────────────
 SECTORS = {
     "Bankacılık":    ["AKBNK", "GARAN", "HALKB", "ISCTR", "VAKBN", "YKBNK",
-                      "ALBRK", "KLNMA", "ISMEN"],
+                      "ALBRK", "KLNMA", "ISMEN", "ISFIN", "CRDFA"],
     "Holding":       ["KCHOL", "SAHOL", "AGHOL", "ALARK", "DOHOL", "GLYHO",
-                      "NTHOL", "TKFEN", "BRYAT"],
+                      "NTHOL", "TKFEN", "BRYAT", "GSDHO", "DENGE", "HDFGS",
+                      "DOGUB", "DOBUR", "GOKNR"],
     "Sanayi":        ["ARCLK", "ASELS", "EREGL", "FROTO", "KRDMD", "TOASO",
                       "ASUZU", "BRSAN", "DOAS",  "ISDMR", "IZMDC", "JANTS",
                       "KCAER", "KORDS", "OTKAR", "PARSN", "SARKY", "TTRAK",
-                      "VESTL", "VESBE", "YATAS"],
+                      "VESTL", "VESBE", "YATAS", "ARSAN", "BOSSA", "CEMTS",
+                      "CEMAS", "EDIP",  "EMKEL", "ERBOS", "EGGUB", "EGPRO",
+                      "GESAN", "KAPLM", "KATMR", "LKMNH", "LUKSK", "MAKTK",
+                      "MUTLU", "NIBAS", "NUHCM"],
     "Enerji":        ["AKSA",  "AKSEN", "ALFAS", "CWENE", "ENJSA", "ENKAI",
-                      "EUPWR", "ODAS",  "PRKAB", "SMRTG", "TUPRS",
-                      "ZOREN"],
-    "Perakende":     ["BIMAS", "MGROS", "SOKM",  "MAVI",  "SELEC", "ULKER"],
-    "Teknoloji":     ["INDES", "LOGO",  "NETAS", "KONTR"],
+                      "EUPWR", "ODAS",  "PRKAB", "SMRTG", "TUPRS", "ZOREN",
+                      "BASGZ", "BIOEN", "NATEN", "ORGE"],
+    "Perakende":     ["BIMAS", "MGROS", "SOKM",  "MAVI",  "SELEC", "ULKER",
+                      "ADESE", "KRSTL"],
+    "Teknoloji":     ["INDES", "LOGO",  "NETAS", "KONTR", "ESCOM", "MTRKS",
+                      "HTTBT", "MPARK"],
     "Telekom":       ["TCELL", "TTKOM"],
-    "Ulaşım":        ["PGSUS", "TAVHL", "THYAO", "RYSAS"],
-    "GYO":           ["EKGYO", "ALGYO", "ISGYO"],
+    "Ulaşım":        ["PGSUS", "TAVHL", "THYAO", "RYSAS", "CLEBI", "AYCES"],
+    "GYO":           ["EKGYO", "ALGYO", "ISGYO", "AKMGY", "HLGYO", "ISKPL"],
     "Kimya/Malzeme": ["ALKIM", "ANACM", "BUCIM", "CIMSA", "GUBRF", "HEKTS",
                       "OYAKC", "PETKM", "SASA",  "SISE",  "TATGD", "AEFES",
-                      "CCOLA", "EGEEN"],
-    "Sigorta":       ["ANHYT", "ANSGR", "TURSG"],
-    "Diğer":         ["BJKAS", "FENER", "GENIL", "KARTN", "TKFEN"],
+                      "CCOLA", "EGEEN", "DYOBY", "ERSU",  "KMPUR", "KONYA",
+                      "MEGAP", "MIPAZ", "MRDIN", "NUHCM"],
+    "Sigorta":       ["ANHYT", "ANSGR", "TURSG", "AKGRT"],
+    "Diğer":         ["BJKAS", "FENER", "GENIL", "KARTN", "ADEL",  "DURDO",
+                      "ECILC", "FMIZP", "FORMT", "GSRAY", "IEYHO", "IPMAT",
+                      "KERVT", "LKMNH", "MEDTR", "PARSN"],
 }
 
 _cache       = {"data": [], "updated_at": None}
@@ -1260,7 +1343,8 @@ def sitemap():
     for t in BIST30:
         if t != "XU030":
             pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
-    pages.append({"loc": "/blog", "priority": "0.8", "changefreq": "weekly"})
+    pages.append({"loc": "/blog",      "priority": "0.8", "changefreq": "weekly"})
+    pages.append({"loc": "/portfolio", "priority": "0.6", "changefreq": "monthly"})
     for a in ARTICLES:
         pages.append({"loc": f"/blog/{a['slug']}", "priority": "0.7", "changefreq": "monthly"})
     today = date.today().isoformat()
@@ -1286,6 +1370,16 @@ def robots():
         "Sitemap: https://borsapusula.com/sitemap.xml\n"
     )
     return Response(body, mimetype="text/plain")
+
+
+@app.route("/sw.js")
+def service_worker():
+    """Service worker kök scope'tan sunulmalı."""
+    import os
+    fpath = os.path.join(app.root_path, "static", "sw.js")
+    with open(fpath, "rb") as f:
+        return Response(f.read(), mimetype="application/javascript",
+                        headers={"Service-Worker-Allowed": "/"})
 
 
 @app.route("/favicon.ico")
@@ -1383,6 +1477,11 @@ def iletisim():
 
 
 # ── Blog ──────────────────────────────────────────────────────────────────────
+@app.route("/portfolio")
+def portfolio():
+    return render_template("portfolio.html")
+
+
 @app.route("/blog")
 def blog_index():
     from collections import Counter

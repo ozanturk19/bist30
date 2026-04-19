@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portföy Takibi — BorsaPusula</title>
+<meta name="description" content="BIST hisselerinizi takip edin. Giriş fiyatı, anlık değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#161b22">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0d1117; color:#e6edf3; font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; min-height:100vh; }
+  header { background:#161b22; border-bottom:1px solid #30363d; padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
+  .back-btn { display:flex; align-items:center; gap:6px; color:#8b949e; font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid #30363d; border-radius:6px; background:#21262d; }
+  .back-btn:hover { background:#30363d; color:#e6edf3; }
+  .page-title { font-size:20px; font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:13px; color:#8b949e; }
+  .container  { max-width:1100px; margin:0 auto; padding:24px; }
+
+  .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
+  .sum-card { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:16px; text-align:center; }
+  .sum-num  { font-size:28px; font-weight:800; line-height:1; }
+  .sum-lbl  { font-size:11px; color:#8b949e; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
+  .sum-green{ color:#3fb950; } .sum-red{ color:#f85149; } .sum-blue{ color:#58a6ff; } .sum-gold{ color:#e3b341; }
+
+  .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:#161b22; border:1px solid #30363d; border-radius:10px; padding:16px; }
+  .add-bar input, .add-bar select { background:#21262d; border:1px solid #30363d; color:#e6edf3; border-radius:6px; padding:7px 12px; font-size:13px; outline:none; }
+  .add-bar input:focus, .add-bar select:focus { border-color:#58a6ff; }
+  .add-bar input { width:140px; }
+  .add-bar select { width:160px; }
+  .add-bar input[type=number] { width:130px; }
+  .btn-add { background:#1f6feb; border:none; color:#fff; border-radius:6px; padding:7px 16px; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-add:hover { background:#388bfd; }
+  .add-lbl { font-size:12px; color:#8b949e; }
+
+  .pf-table { background:#161b22; border:1px solid #30363d; border-radius:10px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:11px; color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
+  tbody tr { border-bottom:1px solid #21262d; }
+  tbody tr:last-child { border-bottom:none; }
+  tbody tr:hover { background:#1c2128; }
+  td { padding:10px 14px; white-space:nowrap; font-size:13px; }
+  .ticker-link { font-weight:700; color:#f0f6fc; text-decoration:none; }
+  .ticker-link:hover { color:#58a6ff; }
+
+  .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+  .signal-AL    { background:#1a4731; color:#3fb950; border:1px solid #238636; }
+  .signal-SAT   { background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
+  .signal-BEKLE { background:#21262d; color:#8b949e; border:1px solid #30363d; }
+
+  .pos-pnl { color:#3fb950; font-weight:600; }
+  .neg-pnl { color:#f85149; font-weight:600; }
+  .neu-pnl { color:#8b949e; }
+
+  .btn-del { background:none; border:none; color:#484f58; cursor:pointer; font-size:14px; padding:2px 6px; }
+  .btn-del:hover { color:#f85149; }
+
+  .empty-msg { text-align:center; padding:60px; color:#484f58; }
+  .empty-msg .em-icon { font-size:40px; margin-bottom:12px; }
+
+  .loading-row td { color:#484f58; font-style:italic; }
+
+  footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
+  footer a { color:#8b949e; text-decoration:none; }
+  @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="page-title">💼 Portföy Takibi</div>
+    <div class="page-sub">Veriler tarayıcınızda saklanır · Hesabınıza özel, sunucuya gönderilmez</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Özet kartlar -->
+  <div class="summary-grid" id="summaryGrid">
+    <div class="sum-card"><div class="sum-num sum-blue" id="sumCount">0</div><div class="sum-lbl">Hisse</div></div>
+    <div class="sum-card"><div class="sum-num sum-blue" id="sumCost">0 ₺</div><div class="sum-lbl">Maliyet</div></div>
+    <div class="sum-card"><div class="sum-num sum-blue" id="sumValue">0 ₺</div><div class="sum-lbl">Güncel Değer</div></div>
+    <div class="sum-card"><div class="sum-num" id="sumPnl">0 ₺</div><div class="sum-lbl">Kâr / Zarar</div></div>
+    <div class="sum-card"><div class="sum-num sum-green" id="sumAlCount">0</div><div class="sum-lbl">Güçlü Trend</div></div>
+    <div class="sum-card"><div class="sum-num sum-red"  id="sumSatCount">0</div><div class="sum-lbl">Zayıf Trend</div></div>
+  </div>
+
+  <!-- Hisse ekle -->
+  <div class="add-bar">
+    <span class="add-lbl">Hisse ekle:</span>
+    <input type="text" id="addTicker" placeholder="THYAO" maxlength="6" style="text-transform:uppercase">
+    <input type="number" id="addLot" placeholder="Adet" min="1" step="1">
+    <input type="number" id="addPrice" placeholder="Alış fiyatı ₺" min="0" step="0.01">
+    <input type="date" id="addDate">
+    <button class="btn-add" onclick="addPosition()">+ Ekle</button>
+    <span id="addErr" style="color:#f85149;font-size:12px"></span>
+  </div>
+
+  <!-- Tablo -->
+  <div class="pf-table">
+    <div id="emptyMsg" class="empty-msg">
+      <div class="em-icon">💼</div>
+      <div>Portföyünüz boş.</div>
+      <div style="font-size:12px;margin-top:6px">Yukarıdaki formdan hisse ekleyin.</div>
+    </div>
+    <table id="pfTable" style="display:none">
+      <thead>
+        <tr>
+          <th>Hisse</th>
+          <th class="hm">Tarih</th>
+          <th>Adet</th>
+          <th>Alış ₺</th>
+          <th>Güncel ₺</th>
+          <th class="hm">Maliyet</th>
+          <th>Değer</th>
+          <th>K/Z</th>
+          <th>K/Z %</th>
+          <th>Sinyal</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="pfBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a>
+  <div style="margin-top:6px">⚠️ Portföy verisi yalnızca tarayıcınızda saklanır. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
+</footer>
+
+<script>
+const PF_KEY = 'bp_portfolio';
+let portfolio = JSON.parse(localStorage.getItem(PF_KEY) || '[]');
+let liveData   = {};  // ticker → {price, signal}
+
+function sigLabel(sig) {
+  return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[sig] || sig;
+}
+function fmt(v, d=2) { return (+v).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function fmtM(v) {
+  if (Math.abs(v) >= 1e6) return fmt(v/1e6,2) + ' M₺';
+  if (Math.abs(v) >= 1e3) return fmt(v/1e3,1) + ' K₺';
+  return fmt(v) + ' ₺';
+}
+
+function save() { localStorage.setItem(PF_KEY, JSON.stringify(portfolio)); }
+
+function addPosition() {
+  const ticker = document.getElementById('addTicker').value.trim().toUpperCase();
+  const lot    = parseFloat(document.getElementById('addLot').value);
+  const price  = parseFloat(document.getElementById('addPrice').value);
+  const date   = document.getElementById('addDate').value;
+  const err    = document.getElementById('addErr');
+  if (!ticker) { err.textContent = 'Hisse kodu girin.'; return; }
+  if (!lot || lot <= 0) { err.textContent = 'Geçerli adet girin.'; return; }
+  if (!price || price <= 0) { err.textContent = 'Geçerli fiyat girin.'; return; }
+  err.textContent = '';
+  portfolio.push({ ticker, lot, price, date: date || new Date().toISOString().slice(0,10), id: Date.now() });
+  save();
+  document.getElementById('addTicker').value = '';
+  document.getElementById('addLot').value    = '';
+  document.getElementById('addPrice').value  = '';
+  render();
+}
+
+function removePosition(id) {
+  portfolio = portfolio.filter(p => p.id !== id);
+  save();
+  render();
+}
+
+async function fetchLive() {
+  try {
+    const r = await fetch('/api/data');
+    const j = await r.json();
+    if (j.stocks) {
+      j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal }; });
+    }
+  } catch(e) {}
+  render();
+}
+
+function render() {
+  const tbody = document.getElementById('pfBody');
+  const empty = document.getElementById('emptyMsg');
+  const table = document.getElementById('pfTable');
+  if (portfolio.length === 0) { empty.style.display=''; table.style.display='none'; renderSummary([]); return; }
+  empty.style.display = 'none';
+  table.style.display = '';
+
+  let totalCost=0, totalVal=0, alCount=0, satCount=0;
+  const rows = portfolio.map(p => {
+    const live   = liveData[p.ticker];
+    const cur    = live ? live.price : null;
+    const sig    = live ? live.signal : '—';
+    const cost   = p.lot * p.price;
+    const val    = cur  ? p.lot * cur : null;
+    const pnl    = val  ? val - cost  : null;
+    const pnlPct = pnl  ? (pnl / cost * 100) : null;
+    totalCost += cost;
+    if (val) totalVal += val;
+    if (sig === 'AL') alCount++;
+    if (sig === 'SAT') satCount++;
+
+    const pnlHtml = pnl !== null
+      ? `<span class="${pnl>=0?'pos-pnl':'neg-pnl'}">${pnl>=0?'+':''}${fmtM(pnl)}</span>`
+      : '<span class="neu-pnl">—</span>';
+    const pnlPctHtml = pnlPct !== null
+      ? `<span class="${pnlPct>=0?'pos-pnl':'neg-pnl'}">${pnlPct>=0?'+':''}${fmt(pnlPct,1)}%</span>`
+      : '<span class="neu-pnl">—</span>';
+    const sigBadge = sig !== '—'
+      ? `<span class="signal-badge signal-${sig}">${sig==='AL'?'▲':sig==='SAT'?'▼':'●'} ${sigLabel(sig)}</span>`
+      : '<span class="neu-pnl">—</span>';
+    return `<tr>
+      <td><a href="/hisse/${p.ticker}" class="ticker-link">${p.ticker}</a></td>
+      <td class="hm" style="color:#8b949e">${p.date}</td>
+      <td>${fmt(p.lot,0)}</td>
+      <td>${fmt(p.price)}</td>
+      <td>${cur ? fmt(cur) + ' ₺' : '<span style="color:#484f58">—</span>'}</td>
+      <td class="hm" style="color:#8b949e">${fmtM(cost)}</td>
+      <td>${val ? fmtM(val) : '<span style="color:#484f58">—</span>'}</td>
+      <td>${pnlHtml}</td>
+      <td>${pnlPctHtml}</td>
+      <td>${sigBadge}</td>
+      <td><button class="btn-del" onclick="removePosition(${p.id})" title="Kaldır">✕</button></td>
+    </tr>`;
+  }).join('');
+  tbody.innerHTML = rows;
+  renderSummary({ totalCost, totalVal, pnl: totalVal - totalCost, count: portfolio.length, alCount, satCount });
+}
+
+function renderSummary(s) {
+  if (!s || s.count === 0) {
+    document.getElementById('sumCount').textContent = '0';
+    document.getElementById('sumCost').textContent  = '0 ₺';
+    document.getElementById('sumValue').textContent = '0 ₺';
+    document.getElementById('sumPnl').textContent   = '0 ₺';
+    document.getElementById('sumAlCount').textContent = '0';
+    document.getElementById('sumSatCount').textContent= '0';
+    return;
+  }
+  document.getElementById('sumCount').textContent = s.count;
+  document.getElementById('sumCost').textContent  = fmtM(s.totalCost);
+  document.getElementById('sumValue').textContent = s.totalVal ? fmtM(s.totalVal) : '—';
+  const pnlEl = document.getElementById('sumPnl');
+  pnlEl.textContent = s.totalVal ? (s.pnl >= 0 ? '+' : '') + fmtM(s.pnl) : '—';
+  pnlEl.className   = 'sum-num ' + (s.pnl >= 0 ? 'sum-green' : 'sum-red');
+  document.getElementById('sumAlCount').textContent  = s.alCount;
+  document.getElementById('sumSatCount').textContent = s.satCount;
+}
+
+// Enter key on inputs
+['addTicker','addLot','addPrice','addDate'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') addPosition(); });
+});
+document.getElementById('addTicker').addEventListener('input', e => {
+  e.target.value = e.target.value.toUpperCase();
+});
+
+render();
+fetchLive();
+setInterval(fetchLive, 60000);
+</script>
+</body>
+</html>
