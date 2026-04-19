@@ -20,7 +20,7 @@
     --bp-bkl:#8b949e; --bp-gold:#f59e0b; --bp-radius:10px; --bp-radius-sm:6px;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; }
+  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; overflow-x:hidden; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
   .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:6px; background:var(--bp-surface2); }
   .back-btn:hover { background:var(--bp-surface2); color:var(--bp-text); }
@@ -67,6 +67,16 @@
   /* Info box */
   .info-box { background:#161b22; border:1px solid #30363d; border-left:3px solid #58a6ff; border-radius:8px; padding:14px 16px; margin-bottom:24px; font-size:13px; color:#8b949e; line-height:1.6; }
 
+  /* Özet hero bar */
+  .ozet-bar { background:linear-gradient(135deg,#0d1f36 0%,#111827 100%); border:1px solid #1e2d45; border-left:3px solid #3fb950; border-radius:12px; padding:16px 20px; margin-bottom:24px; display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
+  .ozet-metric { flex:1; min-width:140px; text-align:center; padding:10px 16px; position:relative; }
+  .ozet-metric+.ozet-metric::before { content:''; position:absolute; left:0; top:15%; height:70%; width:1px; background:#1e2d45; }
+  .ozet-metric-val { font-size:34px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
+  .ozet-metric-val.hero-val { font-size:40px; text-shadow:0 0 24px rgba(63,185,80,0.35); }
+  .ozet-metric-lbl { font-size:10px; color:#64748b; margin-top:7px; text-transform:uppercase; letter-spacing:.6px; }
+  .ozet-metric-sub { font-size:11px; color:#8b949e; margin-top:3px; }
+  @media(max-width:640px) { .ozet-bar{flex-wrap:wrap;gap:0} .ozet-metric{flex:0 0 50%;min-width:0;} .ozet-metric:nth-child(2)::before,.ozet-metric:nth-child(4)::before{display:none} .ozet-metric:nth-child(3),.ozet-metric:nth-child(4){border-top:1px solid #1e2d45;} }
+
   /* Trigger button */
   .btn-run { background:#1f6feb; border:none; color:#fff; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; margin-left:12px; }
   .btn-run:hover { background:#388bfd; }
@@ -102,11 +112,37 @@
 
   <div class="info-box">
     <strong>Metodoloji:</strong> Son 2 yıllık günlük OHLC verisi üzerinde, mevcut sinyal motoru (Supertrend + ADX≥25 + EMA12/99) her bar için yeniden çalıştırılır.
-    Bir AL/SAT sinyali başladığında fiyat kaydedilir; sinyal bittiğinde veya 20 iş günü geçince kapanış fiyatı ile getiri hesaplanır.
+    Bir trend sinyali başladığında fiyat kaydedilir; sinyal bittiğinde veya 20 iş günü geçince kapanış fiyatı ile getiri hesaplanır.
     <strong>Geçmiş performans gelecek getiriyi garanti etmez.</strong> Yatırım tavsiyesi değildir.
   </div>
 
   {% if bt %}
+  <!-- Hero özet bar -->
+  {% set total_signals = bt.al.count + bt.sat.count %}
+  {% set aktif_count = aktif|length if aktif else 0 %}
+  <div class="ozet-bar">
+    <div class="ozet-metric">
+      <div class="ozet-metric-val c-blue">{{ total_signals }}</div>
+      <div class="ozet-metric-lbl">🔬 Toplam Sinyal</div>
+      <div class="ozet-metric-sub">{{ bt.tickers_used }} hisse · 2 yıl</div>
+    </div>
+    <div class="ozet-metric">
+      <div class="ozet-metric-val hero-val c-green">%{{ bt.al.win_rate }}</div>
+      <div class="ozet-metric-lbl">✅ AL Başarı Oranı</div>
+      <div class="ozet-metric-sub">{{ bt.al.count }} Güçlü Trend sinyali</div>
+    </div>
+    <div class="ozet-metric">
+      <div class="ozet-metric-val c-green">{{ '+' if bt.al.avg_ret >= 0 else '' }}{{ bt.al.avg_ret }}%</div>
+      <div class="ozet-metric-lbl">📈 Ort. Getiri (AL)</div>
+      <div class="ozet-metric-sub">Max +{{ bt.al.best }}% · Min {{ bt.al.worst }}%</div>
+    </div>
+    <div class="ozet-metric">
+      <div class="ozet-metric-val" style="color:{{ '#f59e0b' if aktif_count > 0 else '#8b949e' }}">{{ aktif_count }}</div>
+      <div class="ozet-metric-lbl">⚡ Aktif Sinyal</div>
+      <div class="ozet-metric-sub">Şu an açık pozisyon</div>
+    </div>
+  </div>
+
   <!-- Özet kartlar -->
   <div class="stat-grid">
     <div class="stat-card">
@@ -139,7 +175,7 @@
   <!-- Hisse bazlı performans -->
   <div class="sec-head">
     Hisse Bazlı Performans
-    <span>(AL sinyal sayısına göre sıralı)</span>
+    <span>(Güçlü Trend sayısına göre sıralı)</span>
     <button class="btn-run" id="btnRun" onclick="triggerBacktest()">🔄 Yenile</button>
   </div>
   <div class="tbl-wrap">
@@ -147,12 +183,12 @@
       <thead>
         <tr>
           <th>Hisse</th>
-          <th>AL Sinyal</th>
-          <th>AL Kazanma %</th>
-          <th>AL Ort. Getiri</th>
-          <th>SAT Sinyal</th>
-          <th>SAT Kazanma %</th>
-          <th>SAT Ort. Getiri</th>
+          <th>Güçlü Trend</th>
+          <th>Güçlü Kazanma %</th>
+          <th>Güçlü Ort. Getiri</th>
+          <th>Zayıf Trend</th>
+          <th>Zayıf Kazanma %</th>
+          <th>Zayıf Ort. Getiri</th>
         </tr>
       </thead>
       <tbody>
@@ -191,15 +227,20 @@
   </div>
 
   {% else %}
-  <div class="computing">
-    <div class="big">⏳</div>
-    <div style="font-size:16px;font-weight:700;color:#e6edf3">Backtest Hesaplanıyor</div>
-    <p>Sistem başlatıldıktan 30 dakika sonra otomatik çalışır.</p>
-    <p style="margin-top:12px">
-      <button class="btn-run" id="btnRun" onclick="triggerBacktest()">Şimdi Başlat</button>
+  <div class="computing" id="computingDiv">
+    <div class="big">⚙️</div>
+    <div style="font-size:16px;font-weight:700;color:#e6edf3" id="computingTitle">Backtest Başlatılıyor…</div>
+    <p id="computingMsg" style="margin-top:8px">BIST100 hisseleri için 2 yıllık geçmiş hesaplanıyor.</p>
+    <div style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:10px">
+      <div style="width:24px;height:24px;border:3px solid #1e2d45;border-top-color:#3b82f6;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+      <span id="computingStatus" style="font-size:13px;color:#94a3b8">Bağlanıyor…</span>
+    </div>
+    <p style="margin-top:16px;font-size:11px;color:#64748b">~5-10 dakika sürebilir, sayfa otomatik yenilenecek.</p>
+    <p style="margin-top:8px">
+      <button class="btn-run" id="btnRun" onclick="triggerBacktest()" style="opacity:0.6;font-size:12px">🔄 Yeniden Başlat</button>
     </p>
-    <p style="margin-top:8px;font-size:11px">~5-10 dakika sürebilir, sayfa her 30 saniyede bir kontrol edilir.</p>
   </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
   {% endif %}
 
   <!-- Aktif sinyaller anlık performans -->
@@ -253,7 +294,7 @@
 </div>
 
 <footer>
-  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/sektor-harita">Sektör Haritası</a> · <a href="/bilanco-takvimi">Bilanço Takvimi</a> · <a href="/metodoloji">Metodoloji</a>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/sektor-harita">Sektör Haritası</a> · <a href="/bilanco-takvimi">Bilanço Takvimi</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/yasal">Yasal Uyarı</a>
   <div style="margin-top:6px">⚠️ Geçmiş performans gelecek getiriyi garanti etmez. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
 </footer>
 
@@ -281,18 +322,42 @@ async function triggerBacktest() {
   }
 }
 
-// Henüz backtest yoksa otomatik kontrol
 {% if not bt %}
-let autoCheck = 0;
-const iv = setInterval(async () => {
-  autoCheck++;
-  if (autoCheck > 40) { clearInterval(iv); return; }
+/* ── Backtest yok → Otomatik başlat ───────────────── */
+(async function autoStartBacktest() {
+  const statusEl = document.getElementById('computingStatus');
+  const titleEl  = document.getElementById('computingTitle');
+
+  /* Önce mevcut sonuç var mı kontrol et */
   try {
     const r = await fetch('/api/backtest');
     const j = await r.json();
-    if (j.al) { clearInterval(iv); window.location.reload(); }
+    if (j.al) { window.location.reload(); return; }
   } catch(e) {}
-}, 30000);
+
+  /* Yoksa otomatik başlat */
+  if (statusEl) statusEl.textContent = 'Backtest başlatılıyor…';
+  try {
+    await fetch('/api/backtest/run', { method: 'POST' });
+    if (statusEl) statusEl.textContent = 'Hesaplanıyor, lütfen bekleyin…';
+    if (titleEl)  titleEl.textContent  = 'Backtest Çalışıyor';
+  } catch(e) {
+    if (statusEl) statusEl.textContent = 'Başlatılamadı — Yeniden Başlat butonunu kullanın.';
+  }
+
+  /* Her 25 saniyede kontrol et, tamamlanınca yenile */
+  let tries = 0;
+  const iv = setInterval(async () => {
+    tries++;
+    if (statusEl) statusEl.textContent = `Hesaplanıyor… (${tries * 25}s)`;
+    if (tries > 48) { clearInterval(iv); if (statusEl) statusEl.textContent = 'Zaman aşımı — sayfayı yenileyin.'; return; }
+    try {
+      const r = await fetch('/api/backtest');
+      const j = await r.json();
+      if (j.al) { clearInterval(iv); window.location.reload(); }
+    } catch(e) {}
+  }, 25000);
+})();
 {% endif %}
 </script>
 </body>

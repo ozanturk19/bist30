@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bilanço Takvimi — BIST Finansal Sonuç Tarihleri | BorsaPusula</title>
-<meta name="description" content="BIST100 şirketlerinin çeyreklik finansal sonuç açıklama dönemleri. AL/SAT sinyalleriyle birlikte bilanço takvimini takip edin.">
+<meta name="description" content="BIST100 şirketlerinin çeyreklik finansal sonuç açıklama dönemleri. Trend sinyalleriyle birlikte bilanço takvimini takip edin.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="manifest" href="/static/manifest.json">
 <meta name="theme-color" content="#0b111f">
@@ -24,6 +24,7 @@
     background:var(--bp-bg); color:var(--bp-text);
     font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
     -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh;
+    overflow-x:hidden;
   }
   header {
     background:var(--bp-surface); border-bottom:1px solid var(--bp-border);
@@ -192,7 +193,7 @@
 </div>
 
 <footer>
-  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/sektor-harita">Sektör Haritası</a> · <a href="/sinyal-performans">Sinyal Performansı</a>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/sektor-harita">Sektör Haritası</a> · <a href="/sinyal-performans">Sinyal Performansı</a> · <a href="/yasal">Yasal Uyarı</a>
   <div style="margin-top:6px">⚠️ Yatırım tavsiyesi değildir. Bilanço tarihleri yaklaşık olup KAP'tan doğrulanmalıdır. © 2026 borsapusula.com</div>
 </footer>
 
@@ -213,7 +214,7 @@ function sigClass(sig) {
   return sig === 'AL' ? 'al' : sig === 'SAT' ? 'sat' : 'bkl';
 }
 function sigLabel(sig) {
-  return sig === 'AL' ? '▲ AL' : sig === 'SAT' ? '▼ SAT' : '● Belirsiz';
+  return sig === 'AL' ? '▲ Güçlü Trend' : sig === 'SAT' ? '▼ Zayıf Trend' : '● Belirsiz';
 }
 
 function render(data) {
@@ -266,8 +267,8 @@ function render(data) {
           <div class="period-dates">${startFmt} – ${endFmt}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
-          <span style="font-size:12px;background:rgba(63,185,80,0.12);color:#3fb950;padding:2px 8px;border-radius:8px;border:1px solid rgba(63,185,80,0.2)">${alCount} AL</span>
-          <span style="font-size:12px;background:rgba(248,81,73,0.12);color:#f85149;padding:2px 8px;border-radius:8px;border:1px solid rgba(248,81,73,0.2)">${satCount} SAT</span>
+          <span style="font-size:12px;background:rgba(63,185,80,0.12);color:#3fb950;padding:2px 8px;border-radius:8px;border:1px solid rgba(63,185,80,0.2)">${alCount} Güçlü</span>
+          <span style="font-size:12px;background:rgba(248,81,73,0.12);color:#f85149;padding:2px 8px;border-radius:8px;border:1px solid rgba(248,81,73,0.2)">${satCount} Zayıf</span>
         </div>
         <div class="period-desc">${period.description}</div>
       </div>

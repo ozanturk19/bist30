@@ -20,7 +20,7 @@
     --bp-bkl:#8b949e; --bp-gold:#f59e0b; --bp-radius:10px; --bp-radius-sm:6px;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; }
+  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; overflow-x:hidden; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
   .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:6px; background:var(--bp-surface2); }
   .back-btn:hover { background:var(--bp-surface2); color:var(--bp-text); }
@@ -69,6 +69,23 @@
   .empty-msg { text-align:center; padding:60px; color:#484f58; }
   .empty-msg .em-icon { font-size:40px; margin-bottom:12px; }
 
+  /* localStorage uyarı banner */
+  .ls-warning {
+    display:flex; align-items:flex-start; gap:12px;
+    background:rgba(245,158,11,.06); border:1px solid rgba(245,158,11,.2);
+    border-radius:10px; padding:14px 16px; margin-bottom:20px;
+    font-size:13px; color:#94a3b8; line-height:1.6;
+  }
+  .ls-warning-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+  .ls-warning-body { flex:1; }
+  .ls-warning-title { font-weight:700; color:#e3b341; margin-bottom:3px; }
+  .ls-warning-close {
+    background:none; border:none; color:#64748b; cursor:pointer;
+    font-size:16px; padding:0 2px; flex-shrink:0; line-height:1;
+    transition:color .15s;
+  }
+  .ls-warning-close:hover { color:#e3b341; }
+
   .loading-row td { color:#484f58; font-style:italic; }
 
   footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
@@ -98,6 +115,18 @@
 </header>
 
 <div class="container">
+
+  <!-- localStorage Uyarı Bandı -->
+  <div class="ls-warning" id="lsWarning" style="display:none">
+    <span class="ls-warning-icon">💾</span>
+    <div class="ls-warning-body">
+      <div class="ls-warning-title">Veriler bu cihazın tarayıcısında saklanıyor</div>
+      Portföyünüz sunucuya gönderilmez — yalnızca bu tarayıcının <strong style="color:#e2e8f0">localStorage</strong>'ında tutulur.
+      Tarayıcı geçmişini, site verilerini veya çerezleri temizlerseniz <strong style="color:#e2e8f0">portföy silinir.</strong>
+      Önemli pozisyonlarınızı ayrıca not almanızı öneririz.
+    </div>
+    <button class="ls-warning-close" onclick="dismissLsWarning()" title="Kapat">×</button>
+  </div>
 
   <!-- Özet kartlar -->
   <div class="summary-grid" id="summaryGrid">
@@ -150,14 +179,26 @@
 </div>
 
 <footer>
-  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/gizlilik">Gizlilik</a>
   <div style="margin-top:6px">⚠️ Portföy verisi yalnızca tarayıcınızda saklanır. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
 </footer>
 
 <script>
-const PF_KEY = 'bp_portfolio';
+const PF_KEY      = 'bp_portfolio';
+const LS_WARN_KEY = 'bp_ls_warn_dismissed';
 let portfolio = JSON.parse(localStorage.getItem(PF_KEY) || '[]');
 let liveData   = {};  // ticker → {price, signal}
+
+/* localStorage uyarı banner */
+function showLsWarning() {
+  if (localStorage.getItem(LS_WARN_KEY)) return;   // daha önce kapatıldıysa gösterme
+  document.getElementById('lsWarning').style.display = 'flex';
+}
+function dismissLsWarning() {
+  document.getElementById('lsWarning').style.display = 'none';
+  localStorage.setItem(LS_WARN_KEY, '1');
+}
+showLsWarning();
 
 function sigLabel(sig) {
   return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[sig] || sig;
@@ -210,7 +251,7 @@ function render() {
   const tbody = document.getElementById('pfBody');
   const empty = document.getElementById('emptyMsg');
   const table = document.getElementById('pfTable');
-  if (portfolio.length === 0) { empty.style.display=''; table.style.display='none'; renderSummary([]); return; }
+  if (portfolio.length === 0) { empty.style.display=''; table.style.display='none'; renderSummary({count:0}); return; }
   empty.style.display = 'none';
   table.style.display = '';
 

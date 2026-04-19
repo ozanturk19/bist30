@@ -9,7 +9,7 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <link rel="canonical" href="https://borsapusula.com/metodoloji">
 <meta property="og:title"       content="Sinyal Metodolojisi — Supertrend + ADX + EMA12/99">
-<meta property="og:description" content="BIST30 sinyal motorunun teknik temeli: 3 kriter aynı anda yeşil olduğunda AL/SAT sinyali üretilir.">
+<meta property="og:description" content="BIST30 sinyal motorunun teknik temeli: 3 kriter aynı anda yeşil olduğunda trend sinyali üretilir.">
 <meta property="og:site_name"   content="BIST30 Sinyal Paneli">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -108,6 +108,33 @@
     color: #79c0ff;
   }
 
+  /* TL;DR Özet Kart */
+  .tldr-card {
+    background: linear-gradient(135deg, rgba(59,130,246,.06), rgba(29,78,216,.04));
+    border: 1px solid rgba(59,130,246,.22);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .tldr-title {
+    font-size: 13px; font-weight: 700; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: .6px; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tldr-rows { display: flex; flex-direction: column; gap: 8px; }
+  .tldr-row {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(0,0,0,.2); border-radius: 8px; padding: 10px 14px;
+    font-size: 13px; font-weight: 500;
+  }
+  .tldr-icon { font-size: 16px; flex-shrink: 0; }
+  .tldr-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; min-width: 90px; }
+  .tldr-eq { color: #64748b; font-size: 12px; margin: 0 4px; }
+  .tldr-formula { color: #e2e8f0; font-family: 'Fira Code','Consolas',monospace; font-size: 12px; }
+  .tldr-green .tldr-label { color: #3fb950; }
+  .tldr-red   .tldr-label { color: #f85149; }
+  .tldr-gray  .tldr-label { color: #8b949e; }
+
   .disclaimer {
     background: rgba(248,81,73,.07);
     border: 1px solid rgba(248,81,73,.2);
@@ -148,13 +175,42 @@
 </header>
 
 <div class="container">
+
+<!-- TL;DR Özet Kart -->
+<div class="tldr-card">
+  <div class="tldr-title">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    TL;DR — 3 Kriter, 3 Renk, Hepsi Bu Kadar
+  </div>
+  <div class="tldr-rows">
+    <div class="tldr-row tldr-green">
+      <span class="tldr-icon">🟢</span>
+      <span class="tldr-label">Güçlü Trend</span>
+      <span class="tldr-eq">=</span>
+      <span class="tldr-formula">Supertrend ▲ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; EMA12 &gt; EMA99</span>
+    </div>
+    <div class="tldr-row tldr-red">
+      <span class="tldr-icon">🔴</span>
+      <span class="tldr-label">Zayıf Trend</span>
+      <span class="tldr-eq">=</span>
+      <span class="tldr-formula">Supertrend ▼ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; EMA12 &lt; EMA99</span>
+    </div>
+    <div class="tldr-row tldr-gray">
+      <span class="tldr-icon">⚪</span>
+      <span class="tldr-label">Belirsiz</span>
+      <span class="tldr-eq">=</span>
+      <span class="tldr-formula">3 kriterin tamamı aynı yönde değil</span>
+    </div>
+  </div>
+</div>
+
 <article class="prose">
 
 <h2>Nasıl Çalışır?</h2>
 <p>
   BIST30 Sinyal Paneli, hisse başına <strong>3 teknik kriteri eş zamanlı</strong> değerlendirir.
-  3 kriterin tamamı aynı yönde sinyallediğinde <strong>AL</strong> veya <strong>SAT</strong> kararı üretilir;
-  herhangi bir uyumsuzlukta sinyal <strong>BEKLE</strong> olarak kalır.
+  3 kriterin tamamı aynı yönde sinyallediğinde <strong>Güçlü Trend</strong> veya <strong>Zayıf Trend</strong> kararı üretilir;
+  herhangi bir uyumsuzlukta sinyal <strong>Belirsiz</strong> olarak kalır.
 </p>
 <p>Bu yaklaşım, sahte sinyal oranını düşürür ve yalnızca <em>güçlü, onaylı trendlerde</em> pozisyon alınmasını sağlar.</p>
 
@@ -177,8 +233,8 @@
 </div>
 
 <div class="formula-box">
-AL  →  ST = LONG   AND  ADX ≥ 25  AND  DI+ &gt; DI−  AND  EMA12 &gt; EMA99<br>
-SAT →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
+Güçlü Trend  →  ST = LONG   AND  ADX ≥ 25  AND  DI+ &gt; DI−  AND  EMA12 &gt; EMA99<br>
+Zayıf Trend  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
 </div>
 
 <h2>1. Supertrend Göstergesi</h2>
@@ -191,7 +247,7 @@ SAT →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
   <li>Fiyat Supertrend bandının <strong>altında</strong> → SHORT (düşüş) trendi</li>
   <li>Band aynı zamanda dinamik bir <strong>Stop Loss</strong> seviyesi olarak kullanılır</li>
 </ul>
-<p>Grafiklerde mavi/yeşil çizgi AL, kırmızı çizgi SAT modunu gösterir. Fiyat bandı kırdığında otomatik sinyal değişir.</p>
+<p>Grafiklerde mavi/yeşil çizgi Güçlü Trend, kırmızı çizgi Zayıf Trend modunu gösterir. Fiyat bandı kırdığında otomatik sinyal değişir.</p>
 
 <h2>2. ADX — Ortalama Yönlü Hareket Endeksi</h2>
 <p>
@@ -223,11 +279,11 @@ SAT →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
 <h2>Haftalık Trend Gate (Filtre)</h2>
 <p>
   Günlük sinyaller, <strong>haftalık EMA20 yönüyle</strong> filtrelenir.
-  Büyük ters trendde (örn. haftalık grafikte düşüş varken günlük AL sinyali) sinyal üretilmez.
+  Büyük ters trendde (örn. haftalık grafikte düşüş varken günlük Güçlü Trend sinyali) sinyal üretilmez.
 </p>
 <ul>
-  <li>Haftalık EMA20 yükselen → AL sinyali geçerli, SAT sinyali engellenir</li>
-  <li>Haftalık EMA20 düşen → SAT sinyali geçerli, AL sinyali engellenir</li>
+  <li>Haftalık EMA20 yükselen → Güçlü Trend sinyali geçerli, Zayıf Trend sinyali engellenir</li>
+  <li>Haftalık EMA20 düşen → Zayıf Trend sinyali geçerli, Güçlü Trend sinyali engellenir</li>
 </ul>
 
 <h2>Sinyal Onayı</h2>
@@ -237,12 +293,12 @@ SAT →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
 </p>
 
 <div class="signal-box al">
-  <strong style="color:#3fb950">▲ AL Sinyali</strong> — 3 kriter aynı anda: ST LONG + ADX ≥ 25 + DI+ > DI− + EMA12 > EMA99.<br>
+  <strong style="color:#3fb950">▲ Güçlü Trend Sinyali</strong> — 3 kriter aynı anda: ST LONG + ADX ≥ 25 + DI+ > DI− + EMA12 > EMA99.<br>
   <small style="color:#8b949e">Giriş fiyatı: Sinyalin oluştuğu günün kapanış fiyatı. Stop Loss: Supertrend alt bandı.</small>
 </div>
 
 <div class="signal-box sat">
-  <strong style="color:#f85149">▼ SAT Sinyali</strong> — 3 kriter aynı anda: ST SHORT + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99.<br>
+  <strong style="color:#f85149">▼ Zayıf Trend Sinyali</strong> — 3 kriter aynı anda: ST SHORT + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99.<br>
   <small style="color:#8b949e">Açığa satış veya pozisyon kapatma sinyali. Stop Loss: Supertrend üst bandı.</small>
 </div>
 
@@ -265,7 +321,7 @@ SAT →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
 </div>
 
 <footer>
-  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/hakkinda">Hakkında</a> · <a href="/gizlilik">Gizlilik</a> · <a href="/iletisim">İletişim</a>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/hakkinda">Hakkında</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/gizlilik">Gizlilik</a> · <a href="/iletisim">İletişim</a>
   <div style="margin-top:8px;font-size:11px;color:#30363d">⚠️ Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
 </footer>
 

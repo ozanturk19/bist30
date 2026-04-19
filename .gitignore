@@ -5,3 +5,10 @@ __pycache__/
 .env
 venv/
 *.log
+
+# Kişisel veriler — ASLA git'e girmesin
+subscribers.json
+
+# Geliştirme araçları
+.claude/
+test_layout.html

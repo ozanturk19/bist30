@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BIST100 Sinyal Özeti {{ today_str }} — Günlük AL/SAT Raporu | borsapusula.com</title>
-<meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse AL, kaç hisse SAT sinyali veriyor? Bugün sinyal değişen hisseler.">
+<title>BIST100 Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | borsapusula.com</title>
+<meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse zayıf trend? Bugün sinyal değişen hisseler.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/ozet">
 <meta property="og:title"       content="BIST100 Günlük Sinyal Özeti — {{ today_str }}">
-<meta property="og:description" content="Bugün BIST100'de {{ al_list|length }} AL, {{ sat_list|length }} SAT sinyali var.">
+<meta property="og:description" content="Bugün BIST100'de {{ al_list|length }} güçlü, {{ sat_list|length }} zayıf trend hissesi var.">
 <meta property="og:site_name"   content="BIST30 Sinyal Paneli">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,6 +29,7 @@
     -webkit-font-smoothing: antialiased;
     font-size: 14px;
     min-height: 100vh;
+    overflow-x: hidden;
   }
   header {
     background: var(--bp-surface);
@@ -118,6 +119,10 @@
   .sc-bekle{ background: rgba(139,148,158,.12); color: #8b949e; }
   .sc-meta { font-size: 11px; color: #484f58; margin-top: 4px; }
   .sc-new  { font-size: 10px; color: #e3b341; font-weight: 600; }
+  .sc-ret  { display: inline-block; font-size: 12px; font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+  .sc-ret-pos { background: rgba(63,185,80,.15); color: #3fb950; }
+  .sc-ret-neg { background: rgba(248,81,73,.15); color: #f85149; }
+  .sc-ret-neu { background: rgba(139,148,158,.1); color: #8b949e; }
 
   .empty-msg { color: #484f58; font-size: 13px; text-align: center; padding: 20px; }
 
@@ -260,7 +265,14 @@
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-al">▲ Güçlü Trend</div>
       <div class="sc-meta">{{ s.signal_bars }} gün · {{ s.signal_date }}</div>
-      {% if s.signal_price %}<div class="sc-meta">Giriş: {{ s.signal_price }} ₺</div>{% endif %}
+      {% if s.signal_price and s.price %}
+        {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
+        <div class="sc-meta">Giriş: {{ "%.2f"|format(s.signal_price) }} ₺
+          <span class="sc-ret {{ 'sc-ret-pos' if ret >= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
+        </div>
+      {% elif s.signal_price %}
+        <div class="sc-meta">Giriş: {{ "%.2f"|format(s.signal_price) }} ₺</div>
+      {% endif %}
     </a>
     {% endfor %}
   </div>
@@ -278,7 +290,14 @@
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-sat">▼ Zayıf Trend</div>
       <div class="sc-meta">{{ s.signal_bars }} gün · {{ s.signal_date }}</div>
-      {% if s.signal_price %}<div class="sc-meta">Giriş: {{ s.signal_price }} ₺</div>{% endif %}
+      {% if s.signal_price and s.price %}
+        {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
+        <div class="sc-meta">Giriş: {{ "%.2f"|format(s.signal_price) }} ₺
+          <span class="sc-ret {{ 'sc-ret-pos' if ret <= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
+        </div>
+      {% elif s.signal_price %}
+        <div class="sc-meta">Giriş: {{ "%.2f"|format(s.signal_price) }} ₺</div>
+      {% endif %}
     </a>
     {% endfor %}
   </div>
@@ -314,6 +333,7 @@
     <a href="/portfolio" style="color:#8b949e">Portföy</a> ·
     <a href="/metodoloji" style="color:#8b949e">Metodoloji</a> ·
     <a href="/hakkinda" style="color:#8b949e">Hakkında</a> ·
+    <a href="/yasal" style="color:#8b949e">Yasal Uyarı</a> ·
     <a href="/gizlilik" style="color:#8b949e">Gizlilik</a> ·
     <a href="/iletisim" style="color:#8b949e">İletişim</a>
   </div>

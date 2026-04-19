@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ ticker }} Teknik Analiz — {{ name }} Sinyal | borsapusula.com</title>
-<meta name="description" content="{{ ticker }} ({{ name }}) güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik AL/SAT/BEKLE analizi. Ücretsiz, günlük güncelleme.">
+<meta name="description" content="{{ ticker }} ({{ name }}) güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik Güçlü/Zayıf/Belirsiz trend analizi. Ücretsiz, günlük güncelleme.">
 <meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} al sat sinyali, {{ ticker }} supertrend, BIST100 sinyalleri, {{ name }} borsa analiz">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <link rel="canonical" href="https://borsapusula.com/hisse/{{ ticker }}">
@@ -325,6 +325,25 @@
     font-weight: 400;
     margin-left: 4px;
   }
+  .ind-help {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: #1e2d45; color: #58a6ff; font-size: 9px; font-weight: 700;
+    text-decoration: none; margin-left: 2px; vertical-align: middle;
+    opacity: 0.6; transition: opacity .15s, background .15s;
+    flex-shrink: 0;
+  }
+  .ind-help:hover { opacity: 1; background: #2d4166; }
+
+  /* ── Sinyal mini istatistik satırı ── */
+  .sig-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
+  .sig-stat-card { background:#1c2128; border:1px solid #30363d; border-radius:8px; padding:12px 14px; text-align:center; transition:border-color .15s; }
+  .sig-stat-card:hover { border-color:#8b949e; }
+  .sig-stat-val  { font-size:26px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
+  .sig-stat-lbl  { font-size:10px; color:#64748b; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
+  @keyframes shimmerStat { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+  .stat-sk { background:linear-gradient(90deg,#1c2128 25%,#252d3a 50%,#1c2128 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:4px; display:inline-block; }
+  @media(max-width:500px) { .sig-stats-row{grid-template-columns:repeat(2,1fr);} }
 
   /* ── Sinyal geçmişi ── */
   .history-section {
@@ -460,15 +479,26 @@
   .flash-down { animation: flashDown 0.6s ease; }
 
   /* ── Responsive ── */
+  body { overflow-x: hidden; }
   @media (max-width: 768px) {
-    header { gap: 8px; padding: 12px 16px; }
-    .header-ticker { font-size: 18px; }
-    .header-price  { font-size: 18px; }
-    .container { padding: 12px 16px; }
+    header { gap: 6px; padding: 10px 14px; flex-wrap: nowrap; overflow: hidden; }
+    .header-ticker { font-size: 16px; }
+    .header-name   { font-size: 11px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .header-price  { font-size: 16px; }
+    .header-price-group { gap: 6px; flex-shrink: 0; }
+    .signal-badge  { font-size: 11px; padding: 3px 7px; }
+    #liveTs        { display: none; }
+    .container { padding: 10px 12px; }
     #chartMain    { height: 240px; }
     #chartVolume  { height: 70px; }
     #chartLoading { height: 330px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
+    .chart-section { overflow: hidden; }
+  }
+  @media (max-width: 400px) {
+    .signal-badge { display: none; }
+    .header-ticker { font-size: 15px; }
+    .header-price  { font-size: 15px; }
   }
 </style>
 </head>
@@ -580,6 +610,14 @@
     </div>
   </div>
 
+  <!-- Sinyal Mini İstatistik Satırı -->
+  <div class="sig-stats-row" id="sigMiniStats">
+    <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:36px;margin:auto"></div><div class="sig-stat-lbl">Toplam Sinyal</div></div>
+    <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▲ Güçlü Trend</div></div>
+    <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Zayıf Trend</div></div>
+    <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:56px;margin:auto"></div><div class="sig-stat-lbl">⏱ Ort. Aralık</div></div>
+  </div>
+
   <!-- Sinyal Geçmişi -->
   <div class="history-section">
     <div class="section-title">Sinyal Geçmişi</div>
@@ -661,7 +699,7 @@
   <!-- Metodoloji -->
   <div class="methodology">
     <strong>Sinyal Metodolojisi:</strong>
-    AL/SAT sinyali 3 kriterin tamamının karşılanmasıyla oluşur:
+    Trend sinyali 3 kriterin tamamının karşılanmasıyla oluşur:
     <strong>Supertrend(10,3)</strong> yön + <strong>ADX ≥ 25</strong> (trend gücü) +
     <strong>EMA12 / EMA99</strong> pozisyonu. Haftalık EMA20 gate, büyük ters trendlerde
     sinyal üretimini engeller. Sinyal en az 3 bar devam edince "onaylı" sayılır.
@@ -689,6 +727,7 @@
     <a href="/" style="color:#8b949e;text-decoration:none">Ana Sayfa</a> ·
     <a href="/ozet" style="color:#8b949e;text-decoration:none">Özet</a> ·
     <a href="/metodoloji" style="color:#8b949e;text-decoration:none">Metodoloji</a> ·
+    <a href="/yasal" style="color:#8b949e;text-decoration:none">Yasal Uyarı</a> ·
     <a href="/gizlilik" style="color:#8b949e;text-decoration:none">Gizlilik</a> ·
     <a href="/iletisim" style="color:#8b949e;text-decoration:none">İletişim</a>
   </div>
@@ -910,7 +949,6 @@ function renderSummary(s, signalData) {
       isNew ? '<span style="color:#e3b341">⚡ Bugün</span>' : date + ' · ' + bars + ' bar';
     document.getElementById('icBars').textContent = bars;
 
-    const bars = signalData.signal_bars || 1;
     if (signalData.signal_price && s.signal !== 'BEKLE' && bars >= 2) {
       const ep = signalData.signal_price;
       const ret = ((s.price - ep) / ep * 100);
@@ -937,18 +975,73 @@ function renderSummary(s, signalData) {
   /* İndikatörler */
   const inds = [
     { label: 'Supertrend', detail: s.st_bull ? 'LONG ↑' : 'SHORT ↓',
-      ok: s.signal === 'SAT' ? s.st_bear : s.st_bull },
+      ok: s.signal === 'SAT' ? s.st_bear : s.st_bull,
+      blog: '/blog/supertrend-indikatoru-nedir' },
     { label: 'ADX ' + s.adx, detail: 'DI+ ' + s.di_plus + ' / DI− ' + s.di_minus,
-      ok: s.signal === 'SAT' ? s.adx_bear : s.adx_bull },
+      ok: s.signal === 'SAT' ? s.adx_bear : s.adx_bull,
+      blog: '/blog/adx-indikatoru-nedir' },
     { label: 'EMA12/99', detail: s.e12 + ' / ' + s.e99,
-      ok: s.signal === 'SAT' ? s.e12_bear : s.e12_bull },
+      ok: s.signal === 'SAT' ? s.e12_bear : s.e12_bull,
+      blog: '/blog/ema-hareketli-ortalama-nedir' },
   ];
-  document.getElementById('indRow').innerHTML = inds.map(ind => {
+  let indHtml = inds.map(ind => {
     const cls = ind.ok
       ? (s.signal === 'SAT' ? 'ind-badge ind-bear' : 'ind-badge ind-bull')
       : 'ind-badge ind-neutral';
-    return `<span class="${cls}">${ind.label}<span class="ind-detail">${ind.detail}</span></span>`;
+    return `<span class="${cls}">${ind.label}<span class="ind-detail">${ind.detail}</span></span>` +
+      `<a href="${ind.blog}" class="ind-help" target="_blank" title="${ind.label} nedir?">?</a>`;
   }).join('');
+
+  /* RSI14 badge */
+  if (signalData && signalData.rsi != null) {
+    const rsi = signalData.rsi;
+    const rsiCls = rsi >= 70 ? 'ind-badge ind-bear' : rsi <= 30 ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
+    const rsiLbl = rsi >= 70 ? '⚠️ Aşırı Alım' : rsi <= 30 ? '✅ Aşırı Satım' : 'Normal';
+    indHtml += `<span class="${rsiCls}">RSI ${rsi}<span class="ind-detail">${rsiLbl}</span></span>` +
+      `<a href="/blog/rsi-gostergesi-nedir" class="ind-help" target="_blank" title="RSI nedir?">?</a>`;
+  }
+
+  /* Hacim oranı badge (sadece dikkat çekici olduğunda göster) */
+  if (signalData && signalData.vol_ratio != null) {
+    const vr = signalData.vol_ratio;
+    if (vr >= 1.5) {
+      const vrCls = vr >= 3 ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
+      indHtml += `<span class="${vrCls}">Hacim ×${vr}<span class="ind-detail">${vr >= 3 ? 'Çok yüksek hacim' : 'Yüksek hacim'}</span></span>`;
+    }
+  }
+
+  document.getElementById('indRow').innerHTML = indHtml;
+}
+
+/* ── Sinyal mini istatistik satırı ─────────────────── */
+function renderMiniStats(history) {
+  const el = document.getElementById('sigMiniStats');
+  if (!el) return;
+  const alCount  = history.filter(h => h.signal === 'AL').length;
+  const satCount = history.filter(h => h.signal === 'SAT').length;
+  let avgStr = '—';
+  const dates = history.map(h => new Date(h.date)).filter(d => !isNaN(d)).sort((a,b) => a-b);
+  if (dates.length > 1) {
+    const totalDays = (dates[dates.length-1] - dates[0]) / 86400000;
+    avgStr = Math.round(totalDays / (dates.length - 1)) + ' gün';
+  }
+  el.innerHTML = `
+    <div class="sig-stat-card">
+      <div class="sig-stat-val" style="color:#58a6ff">${history.length}</div>
+      <div class="sig-stat-lbl">📊 Toplam Sinyal</div>
+    </div>
+    <div class="sig-stat-card">
+      <div class="sig-stat-val" style="color:#3fb950">${alCount}</div>
+      <div class="sig-stat-lbl">▲ Güçlü Trend</div>
+    </div>
+    <div class="sig-stat-card">
+      <div class="sig-stat-val" style="color:#f85149">${satCount}</div>
+      <div class="sig-stat-lbl">▼ Zayıf Trend</div>
+    </div>
+    <div class="sig-stat-card">
+      <div class="sig-stat-val" style="color:#f59e0b">${avgStr}</div>
+      <div class="sig-stat-lbl">⏱ Ort. Sinyal Aralığı</div>
+    </div>`;
 }
 
 /* ── Sinyal geçmişi ─────────────────────────────────── */
@@ -956,8 +1049,10 @@ function renderHistory(history) {
   const tbody = document.getElementById('historyBody');
   if (!history || history.length === 0) {
     tbody.innerHTML = '<tr><td colspan="3" style="color:#484f58;text-align:center;padding:20px">Geçmiş bulunamadı</td></tr>';
+    renderMiniStats([]);
     return;
   }
+  renderMiniStats(history);
   const fmt = v => (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
   tbody.innerHTML = history.map(h => {
     const icon  = h.signal === 'AL' ? '▲' : '▼';
@@ -1093,9 +1188,10 @@ async function loadMTF() {
     if (!grid) return;
 
     const tfs = [
-      { key: 'daily',   label: '📅 Günlük',  short: '1D' },
-      { key: 'weekly',  label: '📆 Haftalık', short: '1W' },
-      { key: 'monthly', label: '🗓️ Aylık',    short: '1M' },
+      { key: 'h4',      label: '⏱️ 4 Saatlik', short: '4H' },
+      { key: 'daily',   label: '📅 Günlük',    short: '1D' },
+      { key: 'weekly',  label: '📆 Haftalık',  short: '1W' },
+      { key: 'monthly', label: '🗓️ Aylık',     short: '1M' },
     ];
 
     const sigLabel = s => ({'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[s] || s);

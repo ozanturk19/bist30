@@ -9,6 +9,11 @@ import logging
 import time
 import json
 import os
+import re
+import secrets
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text      import MIMEText
 import requests
 from blog_content import ARTICLES, ARTICLES_BY_SLUG, CATEGORIES
 
@@ -329,6 +334,18 @@ def compute_adx(high, low, close, period=14):
     return adx, plus_di, minus_di
 
 
+def compute_rsi(close, period=14):
+    """RSI (Relative Strength Index) — EWM yöntemi."""
+    delta    = close.diff()
+    gain     = delta.clip(lower=0)
+    loss     = -delta.clip(upper=0)
+    avg_gain = gain.ewm(com=period - 1, min_periods=period).mean()
+    avg_loss = loss.ewm(com=period - 1, min_periods=period).mean()
+    rs  = avg_gain / avg_loss.replace(0, np.nan)
+    rsi = 100 - (100 / (1 + rs))
+    return rsi.fillna(50)
+
+
 def compute_supertrend(high, low, close, period=10, multiplier=3):
     """ATR(10,3) — numpy tabanlı.
     Returns (direction Series, st_line Series); warmup barları NaN."""
@@ -471,10 +488,17 @@ def analyze(ticker_base):
         high  = df["High"].squeeze()
         low   = df["Low"].squeeze()
 
+        volume = df["Volume"].squeeze() if "Volume" in df.columns else pd.Series([0]*len(close), index=close.index)
+
         ema12                  = compute_ema(close, 12)
         ema99                  = compute_ema(close, 99)
         adx, di_plus, di_minus = compute_adx(high, low, close)
         supertrend, st_line    = compute_supertrend(high, low, close)
+        rsi_series             = compute_rsi(close, 14)
+
+        rsi_val   = round(float(rsi_series.iloc[-1]), 1)
+        _vol_avg  = float(volume.rolling(20).mean().iloc[-1])
+        vol_ratio = round(float(volume.iloc[-1]) / _vol_avg, 2) if _vol_avg > 0 else 1.0
 
         def v(s):  return float(s.iloc[-1])
         def v2(s): return float(s.iloc[-2])
@@ -573,6 +597,8 @@ def analyze(ticker_base):
                     "bull":  e12_bull, "bear": e12_bear,
                 },
             },
+            "rsi":       rsi_val,
+            "vol_ratio": vol_ratio,
         }
     except Exception as e:
         logger.error("analyze(%s): %s", ticker_base, e, exc_info=True)
@@ -637,7 +663,186 @@ def _notify_signal_changes(new_results):
         lines.append("<i>⚠️ Yatırım tavsiyesi değildir.</i>")
         _send_telegram("\n".join(lines))
 
+    if changes:
+        _notify_email_signal_changes(changes)
+
     _prev_signals = new_sig_map
+
+
+# ── E-posta Bildirim Sistemi ──────────────────────────────────────────────────
+SMTP_HOST = os.environ.get("SMTP_HOST", "")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("SMTP_USER", "")
+SMTP_PASS = os.environ.get("SMTP_PASS", "")
+SMTP_FROM = os.environ.get("SMTP_FROM", "BorsaPusula <noreply@borsapusula.com>")
+
+SUBSCRIBERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "subscribers.json")
+_sub_lock = threading.Lock()
+
+
+def _load_subscribers():
+    if not os.path.exists(SUBSCRIBERS_FILE):
+        return {}
+    try:
+        with open(SUBSCRIBERS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_subscribers(subs):
+    try:
+        with open(SUBSCRIBERS_FILE, "w", encoding="utf-8") as f:
+            json.dump(subs, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error("subscribers.json kaydetme hatası: %s", e)
+
+
+def send_email(to_email, subject, html_body):
+    """SMTP üzerinden HTML e-posta gönderir. Config eksikse sessizce atlar."""
+    if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
+        return False
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"]    = SMTP_FROM
+        msg["To"]      = to_email
+        msg.attach(MIMEText(html_body, "html", "utf-8"))
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as srv:
+            srv.ehlo()
+            srv.starttls()
+            srv.login(SMTP_USER, SMTP_PASS)
+            srv.sendmail(SMTP_USER, [to_email], msg.as_string())
+        return True
+    except Exception as e:
+        logger.error("E-posta gönderilemedi (%s): %s", to_email, e)
+        return False
+
+
+def _email_base(content_html, unsubscribe_url):
+    """Ortak e-posta şablonu."""
+    return f"""<!DOCTYPE html>
+<html lang="tr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BorsaPusula</title></head>
+<body style="margin:0;padding:0;background:#0b111f;font-family:-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;color:#e2e8f0">
+<div style="max-width:600px;margin:0 auto;padding:32px 16px">
+  <div style="text-align:center;margin-bottom:28px">
+    <a href="https://borsapusula.com" style="text-decoration:none">
+      <span style="font-size:22px;font-weight:800;color:#e2e8f0">Borsa<span style="color:#3b82f6">Pusula</span></span>
+    </a>
+  </div>
+  {content_html}
+  <div style="border-top:1px solid #1e2d45;padding-top:14px;text-align:center;margin-top:28px">
+    <div style="font-size:11px;color:#374151;margin-bottom:6px">
+      ⚠️ Bu bildirim yatırım tavsiyesi değildir. Algoritmik sinyal bilgilendirmesidir.
+    </div>
+    <a href="{unsubscribe_url}" style="font-size:11px;color:#4b5563;text-decoration:underline">
+      Abonelikten çık
+    </a>
+  </div>
+</div>
+</body></html>"""
+
+
+def _build_welcome_email(email, unsubscribe_url):
+    content = f"""
+    <div style="background:#111827;border:1px solid #1e2d45;border-radius:12px;padding:24px;margin-bottom:20px;text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">✅</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px">Abonelik Onaylandı!</div>
+      <div style="font-size:13px;color:#94a3b8;line-height:1.6">
+        <strong style="color:#e2e8f0">{email}</strong> adresi için BIST sinyal bildirimleri aktif edildi.<br>
+        BIST100 hisselerinde Güçlü Trend veya Zayıf Trend sinyali oluştuğunda e-posta alacaksınız.
+      </div>
+    </div>
+    <div style="text-align:center">
+      <a href="https://borsapusula.com" style="display:inline-block;background:#1f6feb;color:#fff;padding:10px 28px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
+        Sinyalleri İncele →
+      </a>
+    </div>"""
+    return _email_base(content, unsubscribe_url)
+
+
+def _build_signal_email(changes, unsubscribe_url):
+    """Sinyal değişim e-postası HTML içeriği."""
+    sig_color = {"AL": "#3fb950", "SAT": "#f85149", "BEKLE": "#8b949e"}
+    sig_bg    = {"AL": "#1a4731", "SAT": "#3d0f0f", "BEKLE": "#21262d"}
+    sig_lbl   = {"AL": "Güçlü Trend ▲", "SAT": "Zayıf Trend ▼", "BEKLE": "Belirsiz"}
+
+    rows = ""
+    for t, old, new, stock in changes[:8]:
+        name  = STOCK_NAMES.get(t, t)
+        price = stock.get("price") or 0
+        col   = sig_color.get(new, "#8b949e")
+        bg    = sig_bg.get(new, "#21262d")
+        lbl   = sig_lbl.get(new, new)
+        rows += f"""
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #1e2d45">
+            <a href="https://borsapusula.com/hisse/{t}" style="color:#e2e8f0;text-decoration:none;font-weight:700">{t}</a>
+            <div style="font-size:11px;color:#64748b;margin-top:2px">{name}</div>
+          </td>
+          <td style="padding:10px 16px;border-bottom:1px solid #1e2d45;font-size:13px;color:#94a3b8">{price:.2f} ₺</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #1e2d45">
+            <span style="background:{bg};color:{col};border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700">{lbl}</span>
+          </td>
+          <td style="padding:10px 16px;border-bottom:1px solid #1e2d45">
+            <a href="https://borsapusula.com/hisse/{t}" style="color:#3b82f6;font-size:12px">Detay →</a>
+          </td>
+        </tr>"""
+
+    content = f"""
+    <div style="background:#111827;border:1px solid #1e2d45;border-radius:12px;overflow:hidden;margin-bottom:20px">
+      <div style="background:#1a2438;padding:10px 16px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">
+        📊 Sinyal Değişimleri — {datetime.now().strftime('%d.%m.%Y %H:%M')}
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:#0d1117">
+          <th style="padding:8px 16px;text-align:left;font-size:10px;color:#64748b;font-weight:600;letter-spacing:.5px">HİSSE</th>
+          <th style="padding:8px 16px;text-align:left;font-size:10px;color:#64748b;font-weight:600;letter-spacing:.5px">FİYAT</th>
+          <th style="padding:8px 16px;text-align:left;font-size:10px;color:#64748b;font-weight:600;letter-spacing:.5px">SİNYAL</th>
+          <th style="padding:8px 16px"></th>
+        </tr></thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </div>
+    <div style="text-align:center">
+      <a href="https://borsapusula.com" style="display:inline-block;background:#1f6feb;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
+        Tüm Sinyalleri Görüntüle →
+      </a>
+    </div>"""
+    return _email_base(content, unsubscribe_url)
+
+
+def _notify_email_signal_changes(changes):
+    """Aktif abonelere sinyal değişim e-postası gönderir — arka planda çalışır."""
+    if not SMTP_HOST or not changes:
+        return
+
+    def _send_batch():
+        with _sub_lock:
+            subs = _load_subscribers()
+        active = {e: d for e, d in subs.items() if d.get("active", True)}
+        if not active:
+            return
+        sent = 0
+        for email, data in active.items():
+            token    = data.get("token", "")
+            tickers  = data.get("tickers", [])
+            relevant = [c for c in changes if not tickers or c[0] in tickers]
+            if not relevant:
+                continue
+            unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
+            subject   = "🔔 BorsaPusula — Sinyal Değişimi: " + ", ".join(c[0] for c in relevant[:3])
+            if len(relevant) > 3:
+                subject += f" +{len(relevant) - 3}"
+            if send_email(email, subject, _build_signal_email(relevant, unsub_url)):
+                sent += 1
+            time.sleep(0.3)
+        if sent:
+            logger.info("E-posta bildirim gönderildi: %d abone", sent)
+
+    threading.Thread(target=_send_batch, daemon=True).start()
 
 
 def refresh_data():
@@ -752,7 +957,10 @@ def set_security_headers(response):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    resp = app.make_response(render_template("index.html"))
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    return resp
 
 
 @app.route("/api/data")
@@ -909,7 +1117,7 @@ def get_chart_data():
                         "position": "belowBar" if sig == "AL" else "aboveBar",
                         "color":    "#3fb950"  if sig == "AL" else "#f85149",
                         "shape":    "arrowUp"  if sig == "AL" else "arrowDown",
-                        "text":     "AL"       if sig == "AL" else "SAT",
+                        "text":     "▲"        if sig == "AL" else "▼",
                     })
             prev_bsig = sig
 
@@ -1025,7 +1233,7 @@ def get_ai_signal_explanation(ticker, signal_data):
             return cached["text"]
 
     name     = STOCK_NAMES.get(ticker, ticker)
-    sig_lbl  = {"AL": "Güçlü Trend (AL)", "SAT": "Zayıf Trend (SAT)", "BEKLE": "Belirsiz (BEKLE)"}.get(sig, sig)
+    sig_lbl  = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend", "BEKLE": "Belirsiz"}.get(sig, sig)
     adx      = signal_data.get("adx", 0)
     e12      = signal_data.get("e12", 0)
     e99      = signal_data.get("e99", 0)
@@ -1113,7 +1321,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         else:
             mixed = "İndikatörler birbirini teyit etmiyor, karmaşık bir görünüm var."
         return (
-            f"{ticker} ({name}) hissesi şu anda net bir AL/SAT sinyali üretmiyor. "
+            f"{ticker} ({name}) hissesi şu anda net bir Güçlü/Zayıf Trend sinyali üretmiyor. "
             f"{mixed} "
             f"ADX {adx:.0f} ({adx_quality}), EMA12 {e12:.0f} / EMA99 {e99:.0f}."
         )
@@ -1218,7 +1426,7 @@ def _compute_chart_data(ticker_base, period="2y"):
                         "position": "belowBar" if sig == "AL" else "aboveBar",
                         "color":    "#3fb950"  if sig == "AL" else "#f85149",
                         "shape":    "arrowUp"  if sig == "AL" else "arrowDown",
-                        "text":     sig,
+                        "text":     "▲" if sig == "AL" else "▼",
                     })
                 signal_history.append({
                     "date":   close.index[i].strftime("%d.%m.%Y"),
@@ -1500,8 +1708,52 @@ def _compute_mtf(ticker):
             logger.debug("_tf_signal(%s, %s): %s", ticker, interval, e)
             return None
 
+    def _tf_signal_4h(sym):
+        try:
+            df = yf.download(sym, period="60d", interval="1h",
+                             progress=False, auto_adjust=True, timeout=25)
+            if df is None or df.empty:
+                return None
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+                df = df.loc[:, ~df.columns.duplicated()]
+            df = df.dropna().sort_index()
+            df_4h = df.resample("4h").agg({
+                "Open":  "first", "High": "max",
+                "Low":   "min",   "Close": "last",
+                "Volume":"sum",
+            }).dropna(subset=["Close"])
+            if len(df_4h) < 40:
+                return None
+            close = df_4h["Close"].squeeze()
+            high  = df_4h["High"].squeeze()
+            low   = df_4h["Low"].squeeze()
+            ema12, ema99      = compute_ema(close, 12), compute_ema(close, 99)
+            adx_s, dip_s, dim_s = compute_adx(high, low, close)
+            st_s, st_ln       = compute_supertrend(high, low, close)
+            c    = float(close.iloc[-1])
+            e12  = float(ema12.iloc[-1]); e99_ = float(ema99.iloc[-1])
+            adxv = float(adx_s.iloc[-1])
+            dipv = float(dip_s.iloc[-1]); dimv = float(dim_s.iloc[-1])
+            stv  = int(st_s.iloc[-1])
+            bs   = int(stv == 1)  + int(adxv >= 25 and dipv > dimv) + int(e12 > e99_)
+            brs  = int(stv == -1) + int(adxv >= 25 and dimv > dipv) + int(e12 < e99_)
+            sig  = "AL" if bs >= 3 else "SAT" if brs >= 3 else "BEKLE"
+            return {
+                "signal":     sig,
+                "price":      round(c, 2),
+                "adx":        round(adxv, 1),
+                "sl":         round(float(st_ln.iloc[-1]), 2),
+                "bull_score": bs,
+                "bear_score": brs,
+            }
+        except Exception as e:
+            logger.debug("_tf_signal_4h(%s): %s", sym, e)
+            return None
+
     return {
         "ticker":  ticker,
+        "h4":      _tf_signal_4h(sym),
         "daily":   _tf_signal("1d",  "2y",  80),
         "weekly":  _tf_signal("1wk", "5y",  40),
         "monthly": _tf_signal("1mo", "10y", 12),
@@ -1638,16 +1890,16 @@ def og_image():
   <text x="60" y="120" font-size="64" font-weight="700" fill="#f0f6fc">BIST</text>
   <text x="194" y="120" font-size="64" font-weight="700" fill="#58a6ff">100</text>
   <text x="310" y="120" font-size="64" font-weight="700" fill="#f0f6fc"> Sinyal Paneli</text>
-  <text x="60" y="165" font-size="26" fill="#8b949e">borsapusula.com · Algoritmik AL/SAT Sinyalleri · {today_s}</text>
+  <text x="60" y="165" font-size="26" fill="#8b949e">borsapusula.com · Algoritmik Trend Sinyalleri · {today_s}</text>
   <!-- Ayırıcı çizgi -->
   <line x1="60" y1="195" x2="1140" y2="195" stroke="#30363d" stroke-width="1"/>
   <!-- İstatistik kutular -->
   <rect x="60"  y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
   <text x="200" y="305" font-size="72" font-weight="800" fill="#3fb950" text-anchor="middle">{al_count}</text>
-  <text x="200" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▲ AL SİNYALİ</text>
+  <text x="200" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▲ GÜÇLÜ TREND</text>
   <rect x="380" y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
   <text x="520" y="305" font-size="72" font-weight="800" fill="#f85149" text-anchor="middle">{sat_count}</text>
-  <text x="520" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▼ SAT SİNYALİ</text>
+  <text x="520" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▼ ZAYIF TREND</text>
   <rect x="700" y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
   <text x="840" y="305" font-size="72" font-weight="800" fill="#58a6ff" text-anchor="middle">{total}</text>
   <text x="840" y="355" font-size="22" fill="#8b949e" text-anchor="middle">BIST100 HİSSE</text>
@@ -1702,6 +1954,11 @@ def gizlilik():
 @app.route("/iletisim")
 def iletisim():
     return render_template("iletisim.html")
+
+
+@app.route("/yasal")
+def yasal():
+    return render_template("yasal.html")
 
 
 # ── Blog ──────────────────────────────────────────────────────────────────────
@@ -1985,6 +2242,87 @@ def bilanco_takvimi():
 def api_bilanco_takvimi():
     data = get_earnings_data()
     return safe_json(data)
+
+
+@app.route("/api/subscribe", methods=["POST"])
+def api_subscribe():
+    """E-posta abonelik kaydı."""
+    data  = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    # Basit e-posta doğrulama
+    if not email or "@" not in email or not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+        return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
+
+    with _sub_lock:
+        subs = _load_subscribers()
+        if email in subs:
+            if subs[email].get("active", True):
+                return safe_json({"ok": False, "error": "Bu e-posta zaten kayıtlı"})
+            # Pasif abonenin kaydını yeniden aktif et
+            subs[email]["active"] = True
+            subs[email]["subscribed_at"] = datetime.now().isoformat()
+            _save_subscribers(subs)
+            token = subs[email].get("token", "")
+            unsub = f"https://borsapusula.com/unsubscribe/{token}"
+            threading.Thread(target=send_email, args=(
+                email, "✅ BorsaPusula — Abonelik Yenilendi",
+                _build_welcome_email(email, unsub)
+            ), daemon=True).start()
+            return safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!"})
+
+        token = secrets.token_hex(24)
+        subs[email] = {
+            "token":         token,
+            "subscribed_at": datetime.now().isoformat(),
+            "tickers":       [],
+            "active":        True,
+        }
+        _save_subscribers(subs)
+
+    unsub = f"https://borsapusula.com/unsubscribe/{token}"
+    threading.Thread(target=send_email, args=(
+        email, "✅ BorsaPusula — Abonelik Onayı",
+        _build_welcome_email(email, unsub)
+    ), daemon=True).start()
+
+    logger.info("Yeni e-posta abonesi: %s", email)
+    return safe_json({"ok": True, "message": "Abonelik başarılı! Onay e-postası gönderildi."})
+
+
+@app.route("/unsubscribe/<token>")
+def unsubscribe_page(token):
+    """Tek tıkla abonelik iptali."""
+    with _sub_lock:
+        subs = _load_subscribers()
+        for email, data in subs.items():
+            if data.get("token") == token:
+                subs[email]["active"] = False
+                _save_subscribers(subs)
+                logger.info("E-posta abonelik iptal: %s", email)
+                return f"""<!DOCTYPE html>
+<html lang="tr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Abonelik İptal — BorsaPusula</title>
+<style>body{{margin:0;padding:0;background:#0b111f;color:#e2e8f0;
+font-family:-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;
+display:flex;align-items:center;justify-content:center;min-height:100vh}}
+.box{{background:#111827;border:1px solid #1e2d45;border-radius:12px;
+padding:32px 40px;text-align:center;max-width:420px}}</style>
+</head>
+<body>
+<div class="box">
+  <div style="font-size:40px;margin-bottom:16px">✅</div>
+  <h2 style="font-size:18px;margin:0 0 8px;font-weight:700">Abonelik İptal Edildi</h2>
+  <p style="font-size:13px;color:#94a3b8;margin:0 0 20px;line-height:1.6">
+    <strong style="color:#e2e8f0">{email}</strong> adresi için bildirimler durduruldu.
+  </p>
+  <a href="https://borsapusula.com" style="display:inline-block;background:#1f6feb;
+  color:#fff;padding:9px 22px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
+    Ana Sayfaya Dön
+  </a>
+</div>
+</body></html>"""
+    return "<p style='font-family:sans-serif;color:#888;padding:40px'>Geçersiz veya süresi dolmuş bağlantı.</p>", 404
 
 
 @app.route("/api/telegram/test", methods=["POST"])

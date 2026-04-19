@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sektör Isı Haritası — BorsaPusula</title>
-<meta name="description" content="BIST sektörlerini anlık AL/SAT sinyal yoğunluğuna göre karşılaştırın. Hangi sektörler güçlü trend sergiliyor?">
+<meta name="description" content="BIST sektörlerini anlık trend sinyal yoğunluğuna göre karşılaştırın. Hangi sektörler güçlü trend sergiliyor?">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="manifest" href="/static/manifest.json">
 <meta name="theme-color" content="#0b111f">
@@ -20,7 +20,7 @@
     --bp-bkl:#8b949e; --bp-gold:#f59e0b; --bp-radius:10px; --bp-radius-sm:6px;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; }
+  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; overflow-x:hidden; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
   .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:6px; background:var(--bp-surface2); }
   .back-btn:hover { background:var(--bp-surface2); color:var(--bp-text); }
@@ -108,10 +108,10 @@
 <div class="container">
 
   <div class="legend">
-    <span><span class="legend-dot" style="background:#3fb950"></span> Güçlü Trend (AL)</span>
-    <span><span class="legend-dot" style="background:#f85149"></span> Zayıf Trend (SAT)</span>
+    <span><span class="legend-dot" style="background:#3fb950"></span> Güçlü Trend</span>
+    <span><span class="legend-dot" style="background:#f85149"></span> Zayıf Trend</span>
     <span><span class="legend-dot" style="background:#30363d"></span> Belirsiz</span>
-    <span style="color:#8b949e;font-size:12px">Skor: (AL − SAT) / Toplam × 100</span>
+    <span style="color:#8b949e;font-size:12px">Skor: (Güçlü − Zayıf) / Toplam × 100</span>
   </div>
 
   <div class="sum-row" id="sumRow">
@@ -127,7 +127,7 @@
 </div>
 
 <footer>
-  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/sinyal-performans">Sinyal Performansı</a> · <a href="/bilanco-takvimi">Bilanço Takvimi</a>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/sinyal-performans">Sinyal Performansı</a> · <a href="/bilanco-takvimi">Bilanço Takvimi</a> · <a href="/yasal">Yasal Uyarı</a>
   <div style="margin-top:6px">⚠️ Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
 </footer>
 
