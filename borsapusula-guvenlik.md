@@ -190,7 +190,7 @@ Environment=FLASK_SECRET_KEY=uzun-rastgele-bir-string-buraya
 
 **Mevcut durum:** `systemd service` dosyasında:
 ```ini
-Environment=GEMINI_API_KEY=AIzaSyDj7qZ7Flp1vmuyTVsHj4dTdI3CaiPBBiQ
+Environment=GEMINI_API_KEY=<GEMINI_API_KEY>
 ```
 
 **Risk:** 
