@@ -139,6 +139,52 @@
     gap: 12px;
   }
 
+  /* ── Makro Ticker Bandı ── */
+  .macro-bar {
+    background: #0b111f;
+    border-bottom: 1px solid #1a2236;
+    height: 30px;
+    overflow: hidden;
+    position: relative;
+  }
+  .macro-bar::before, .macro-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; width: 40px;
+    z-index: 2; pointer-events: none;
+  }
+  .macro-bar::before { left: 0;  background: linear-gradient(to right, #0b111f, transparent); }
+  .macro-bar::after  { right: 0; background: linear-gradient(to left,  #0b111f, transparent); }
+  .macro-track {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    white-space: nowrap;
+    animation: macroScroll 40s linear infinite;
+    will-change: transform;
+  }
+  .macro-bar:hover .macro-track { animation-play-state: paused; }
+  @keyframes macroScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .macro-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 18px;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    border-right: 1px solid #1a2236;
+    cursor: default;
+    color: #94a3b8;
+  }
+  .macro-label { font-weight: 600; color: #cbd5e1; letter-spacing: 0.2px; }
+  .macro-price { color: #e2e8f0; }
+  .macro-chg-pos { color: #3fb950; }
+  .macro-chg-neg { color: #f85149; }
+  .macro-chg-neu { color: #8b949e; }
+
   /* Logo */
   .logo-link {
     display: flex; align-items: center; gap: 10px;
@@ -822,6 +868,13 @@
   </div>
 </header>
 
+<!-- Makro Ticker Bandı -->
+<div class="macro-bar" id="macroBar">
+  <div class="macro-track" id="macroTrack">
+    <span class="macro-item"><span class="macro-label">Yükleniyor…</span></span>
+  </div>
+</div>
+
 <!-- Mobile Bottom Navigation -->
 <nav class="mobile-bottom-nav">
   <div class="mbn-inner">
@@ -1118,6 +1171,52 @@
 </footer>
 
 <script>
+/* ── Makro Ticker Bandı ──────────────────────────── */
+(function() {
+  const LABELS = {
+    XU100:'BIST100', XU030:'BIST30', BTC:'BTC',
+    ALTIN:'ALTIN', GUMUS:'GÜMÜŞ', USDTRY:'USD/TRY',
+    EURTRY:'EUR/TRY', SP500:'S&P500', NASDAQ:'NASDAQ'
+  };
+  const PRICE_FMT = {
+    XU100:0, XU030:0, BTC:0, ALTIN:2, GUMUS:2,
+    USDTRY:4, EURTRY:4, SP500:0, NASDAQ:0
+  };
+
+  function renderMacro(items) {
+    if (!items || !items.length) return;
+    const track = document.getElementById('macroTrack');
+    if (!track) return;
+    // İki kopya — sonsuz kaydırma için
+    const html = items.map(it => {
+      const label  = LABELS[it.label] || it.label;
+      const decimals = PRICE_FMT[it.label] ?? 2;
+      const price  = it.price.toLocaleString('tr-TR', {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
+      const chg    = it.change;
+      const sign   = chg > 0 ? '+' : '';
+      const cls    = chg > 0.05 ? 'macro-chg-pos' : chg < -0.05 ? 'macro-chg-neg' : 'macro-chg-neu';
+      const arrow  = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
+      return `<span class="macro-item">
+        <span class="macro-label">${label}</span>
+        <span class="macro-price">${price}</span>
+        <span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span>
+      </span>`;
+    }).join('');
+    track.innerHTML = html + html; // çift kopya
+  }
+
+  async function loadMacro() {
+    try {
+      const r = await fetch('/api/macro');
+      const d = await r.json();
+      renderMacro(d.items);
+    } catch(e) {}
+  }
+
+  loadMacro();
+  setInterval(loadMacro, 60000);
+})();
+
 /* ── Sinyal görünen etiketleri ───────────────────── */
 function sigLabel(sig) {
   return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[sig] || sig;

@@ -1001,6 +1001,52 @@ def api_refresh():
     return jsonify({"status": "refreshing"})
 
 
+# ── Makro Veri Bandı ─────────────────────────────────────────────────────────
+_macro_cache = {"data": None, "ts": 0}
+_MACRO_TTL   = 60   # 60 saniye cache
+
+def _fetch_macro():
+    """XU100, XU030, BTC, ALTIN, USD/TRY, EUR/TRY, S&P500, NASDAQ anlık veri."""
+    tickers = [
+        ("XU100",  "XU100.IS"),
+        ("XU030",  "XU030.IS"),
+        ("USDTRY", "USDTRY=X"),
+        ("EURTRY", "EURTRY=X"),
+        ("BTC",    "BTC-USD"),
+        ("ALTIN",  "GC=F"),
+        ("SP500",  "^GSPC"),
+        ("NASDAQ", "^IXIC"),
+        ("GUMUS",  "SI=F"),
+    ]
+    result = []
+    for label, sym in tickers:
+        try:
+            tk  = yf.Ticker(sym)
+            fi  = tk.fast_info
+            price  = getattr(fi, "last_price", None) or getattr(fi, "regularMarketPrice", None)
+            prev   = getattr(fi, "previous_close", None)
+            if price is None or prev is None or prev == 0:
+                continue
+            change = round((float(price) - float(prev)) / float(prev) * 100, 2)
+            result.append({"label": label, "price": round(float(price), 2), "change": change})
+        except Exception as e:
+            logger.debug("_fetch_macro %s: %s", label, e)
+    return result
+
+@app.route("/api/macro")
+@limiter.limit("60 per minute")
+def api_macro():
+    now = time.time()
+    with _lock:
+        if _macro_cache["data"] and (now - _macro_cache["ts"]) < _MACRO_TTL:
+            return safe_json({"items": _macro_cache["data"], "cached": True})
+    items = _fetch_macro()
+    with _lock:
+        _macro_cache["data"] = items
+        _macro_cache["ts"]   = now
+    return safe_json({"items": items, "cached": False})
+
+
 @app.route("/api/stream")
 def api_stream():
     client_queue = collections.deque()
