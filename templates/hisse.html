@@ -430,8 +430,40 @@
     font-size: 13px;
     color: #c9d1d9;
     line-height: 1.75;
-    white-space: pre-line;
   }
+  .news-content ul {
+    margin: 4px 0;
+    padding-left: 18px;
+  }
+  .news-content li {
+    margin-bottom: 8px;
+  }
+  .news-content p {
+    margin: 6px 0;
+  }
+  .news-content strong {
+    color: #e6edf3;
+    font-weight: 600;
+  }
+  .news-error {
+    color: #8b949e;
+    font-size: 13px;
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .news-retry-btn {
+    background: none;
+    border: 1px solid #30363d;
+    color: #58a6ff;
+    padding: 3px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: border-color .15s;
+  }
+  .news-retry-btn:hover { border-color: #58a6ff; }
   .news-source {
     font-size: 11px;
     color: #484f58;
@@ -1101,24 +1133,67 @@ async function loadChart() {
 loadChart();
 
 /* ── AI Haberler ────────────────────────────────────── */
-async function loadNews() {
+function mdToHtml(text) {
+  const lines = text.split('\n');
+  let html = '', inList = false;
+  for (let line of lines) {
+    line = line.trim();
+    // Bold **text**
+    line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    if (!line) {
+      if (inList) { html += '</ul>'; inList = false; }
+      continue;
+    }
+    if (/^[\*\-•]\s+/.test(line)) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += '<li>' + line.replace(/^[\*\-•]\s+/, '') + '</li>';
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += '<p>' + line + '</p>';
+    }
+  }
+  if (inList) html += '</ul>';
+  return html;
+}
+
+async function loadNews(retryCount) {
+  retryCount = retryCount || 0;
+  const loadingEl = document.getElementById('newsLoading');
+  const contentEl = document.getElementById('newsContent');
+  const sourceEl  = document.getElementById('newsSource');
+
+  loadingEl.style.display = 'flex';
+  contentEl.style.display = 'none';
+  sourceEl.style.display  = 'none';
+
   try {
     const res  = await fetch('/api/hisse/' + TICKER + '/news');
     const data = await res.json();
-    document.getElementById('newsLoading').style.display = 'none';
+    loadingEl.style.display = 'none';
+
     if (data.news) {
-      const el = document.getElementById('newsContent');
-      el.textContent = data.news;
-      el.style.display = '';
-      document.getElementById('newsSource').style.display = 'flex';
+      contentEl.innerHTML    = mdToHtml(data.news);
+      contentEl.style.display = '';
+      sourceEl.style.display  = 'flex';
     } else {
-      document.getElementById('newsSection').style.display = 'none';
+      // API null döndürdü — hata mesajı göster, section'ı kapatma
+      if (retryCount < 2) {
+        // Otomatik 8 saniye sonra tekrar dene
+        contentEl.innerHTML    = '<div class="news-error">⏳ Haber özeti hazırlanıyor, yeniden deneniyor…</div>';
+        contentEl.style.display = '';
+        setTimeout(() => loadNews(retryCount + 1), 8000);
+      } else {
+        contentEl.innerHTML    = '<div class="news-error">🤖 AI haber özeti şu an alınamadı. <button class="news-retry-btn" onclick="loadNews(0)">Tekrar dene</button></div>';
+        contentEl.style.display = '';
+      }
     }
   } catch(e) {
-    document.getElementById('newsSection').style.display = 'none';
+    loadingEl.style.display = 'none';
+    contentEl.innerHTML    = '<div class="news-error">Bağlantı hatası. <button class="news-retry-btn" onclick="loadNews(0)">Tekrar dene</button></div>';
+    contentEl.style.display = '';
   }
 }
-loadNews();
+loadNews(0);
 
 /* ── AI Sinyal Açıklaması ─────────────────────────── */
 async function loadSignalExplanation() {

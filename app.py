@@ -1195,14 +1195,14 @@ def get_ai_news(ticker):
         f"Türkçe olarak 3-5 madde halinde kısaca özetle. "
         f"Her madde 1-2 cümle olsun. Tarih belirt. Sadece maddeleri yaz, giriş/kapanış cümlesi ekleme."
     )
+    url  = (f"https://generativelanguage.googleapis.com/v1beta/"
+            f"models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}")
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "tools":    [{"google_search": {}}],
+    }
     try:
-        url  = (f"https://generativelanguage.googleapis.com/v1beta/"
-                f"models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}")
-        body = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "tools":    [{"google_search": {}}],
-        }
-        r    = requests.post(url, json=body, timeout=20)
+        r = requests.post(url, json=body, timeout=20)
         r.raise_for_status()
         data = r.json()
         text = (data.get("candidates", [{}])[0]
@@ -1261,11 +1261,11 @@ def get_ai_signal_explanation(ticker, signal_data):
         f"Neden bu sinyal oluştu ve ne anlama geliyor kısaca anlat. "
         f"'Yatırım tavsiyesi değildir' ibaresini sonuna ekle. Başlık ekleme, sadece paragraf yaz."
     )
+    url  = (f"https://generativelanguage.googleapis.com/v1beta/"
+            f"models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}")
+    body = {"contents": [{"parts": [{"text": prompt}]}]}
     try:
-        url  = (f"https://generativelanguage.googleapis.com/v1beta/"
-                f"models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}")
-        body = {"contents": [{"parts": [{"text": prompt}]}]}
-        r    = requests.post(url, json=body, timeout=15)
+        r = requests.post(url, json=body, timeout=15)
         r.raise_for_status()
         data = r.json()
         text = (data.get("candidates", [{}])[0]
