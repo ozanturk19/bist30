@@ -66,6 +66,31 @@
   .btn-del { background:none; border:none; color:#484f58; cursor:pointer; font-size:14px; padding:2px 6px; }
   .btn-del:hover { color:#f85149; }
 
+  /* Export / Import toolbar */
+  .pf-actions {
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .btn-action {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: none; border: 1px solid #30363d; color: #8b949e;
+    border-radius: 6px; padding: 5px 12px; font-size: 12px;
+    cursor: pointer; transition: all .15s;
+  }
+  .btn-action:hover { border-color: #58a6ff; color: #58a6ff; }
+  .btn-action.danger:hover { border-color: #f85149; color: #f85149; }
+  #importFileInput { display: none; }
+
+  /* Import modal */
+  .import-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #1c2128; border: 1px solid #30363d; border-radius: 8px;
+    padding: 10px 20px; font-size: 13px; color: #e6edf3;
+    z-index: 999; display: none; box-shadow: 0 4px 16px rgba(0,0,0,.4);
+  }
+  .import-toast.ok  { border-color: #238636; color: #3fb950; }
+  .import-toast.err { border-color: #da3633; color: #f85149; }
+
   .empty-msg { text-align:center; padding:60px; color:#484f58; }
   .empty-msg .em-icon { font-size:40px; margin-bottom:12px; }
 
@@ -137,6 +162,26 @@
     <div class="sum-card"><div class="sum-num sum-green" id="sumAlCount">0</div><div class="sum-lbl">Güçlü Trend</div></div>
     <div class="sum-card"><div class="sum-num sum-red"  id="sumSatCount">0</div><div class="sum-lbl">Zayıf Trend</div></div>
   </div>
+
+  <!-- Export / Import araçları -->
+  <div class="pf-actions">
+    <button class="btn-action" onclick="exportPortfolio()" title="Portföyü JSON dosyası olarak indir">
+      ⬇ Dışa Aktar (JSON)
+    </button>
+    <label class="btn-action" title="Daha önce dışa aktardığın JSON dosyasını yükle">
+      ⬆ İçe Aktar
+      <input type="file" id="importFileInput" accept=".json" onchange="importPortfolio(event)">
+    </label>
+    <button class="btn-action danger" onclick="clearPortfolio()" title="Tüm pozisyonları sil">
+      🗑 Temizle
+    </button>
+    <span style="font-size:11px;color:#484f58;margin-left:auto">
+      ⚠️ Veriler yalnızca bu tarayıcıda saklanır
+    </span>
+  </div>
+
+  <!-- Toast bildirimi -->
+  <div class="import-toast" id="importToast"></div>
 
   <!-- Hisse ekle -->
   <div class="add-bar">
@@ -211,6 +256,78 @@ function fmtM(v) {
 }
 
 function save() { localStorage.setItem(PF_KEY, JSON.stringify(portfolio)); }
+
+/* ── Export / Import ──────────────────────────────── */
+function showToast(msg, type='ok', ms=3000) {
+  const el = document.getElementById('importToast');
+  el.textContent = msg;
+  el.className = 'import-toast ' + type;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, ms);
+}
+
+function exportPortfolio() {
+  if (!portfolio.length) { showToast('Portföy boş — önce hisse ekleyin.', 'err'); return; }
+  const payload = {
+    exported_at: new Date().toISOString(),
+    version: 1,
+    positions: portfolio,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `borsapusula-portfolio-${new Date().toISOString().slice(0,10)}.json`,
+  });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✅ Portföy indirildi.', 'ok');
+}
+
+function importPortfolio(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      // Hem eski format (düz dizi) hem yeni format (obje) desteklenir
+      const positions = Array.isArray(data) ? data : (data.positions || []);
+      if (!positions.length) throw new Error('Boş dosya');
+      // Basit validasyon
+      positions.forEach(p => {
+        if (!p.ticker || !p.lot || !p.buy_price) throw new Error('Eksik alan: ' + JSON.stringify(p));
+      });
+      // Mevcut portföyle birleştir — aynı ticker/tarih yoksa ekle
+      let added = 0;
+      positions.forEach(p => {
+        const exists = portfolio.some(x => x.ticker === p.ticker && x.date === p.date && x.buy_price === p.buy_price);
+        if (!exists) {
+          portfolio.push({ ...p, id: Date.now() + Math.random() });
+          added++;
+        }
+      });
+      save();
+      render();
+      showToast(`✅ ${added} pozisyon içe aktarıldı (${positions.length - added} zaten vardı).`, 'ok', 4000);
+    } catch(err) {
+      showToast('❌ Geçersiz dosya: ' + err.message, 'err', 5000);
+    }
+    e.target.value = '';   // Aynı dosyayı tekrar seçebilsin
+  };
+  reader.readAsText(file);
+}
+
+function clearPortfolio() {
+  if (!portfolio.length) { showToast('Portföy zaten boş.', 'err'); return; }
+  if (!confirm(`Portföydeki ${portfolio.length} pozisyon silinecek. Önce dışa aktarmanız önerilir. Devam?`)) return;
+  portfolio = [];
+  save();
+  render();
+  showToast('🗑 Portföy temizlendi.', 'ok');
+}
 
 function addPosition() {
   const ticker = document.getElementById('addTicker').value.trim().toUpperCase();

@@ -385,12 +385,31 @@
     padding: 16px 18px;
     margin-bottom: 20px;
   }
-  .others-grid {
+  .others-header {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .others-toggle-btn {
+    background: none;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    border-radius: 5px;
+    padding: 3px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .others-toggle-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+  .others-grid {
+    display: none;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 10px;
   }
+  .others-grid.open { display: flex; }
   .other-chip {
     display: inline-flex;
     align-items: center;
@@ -739,9 +758,12 @@
     ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
   </div>
 
-  <!-- Diğer Hisseler -->
+  <!-- Diğer Hisseler (accordion) -->
   <div class="others-section">
-    <div class="section-title">Diğer BIST30 Hisseleri</div>
+    <div class="others-header" onclick="toggleOthers()">
+      <div class="section-title" style="margin:0">Diğer Hisseler <span style="font-size:12px;color:#8b949e;font-weight:400">({{ others|length }})</span></div>
+      <button class="others-toggle-btn" id="othersToggleBtn">Göster ▾</button>
+    </div>
     <div class="others-grid" id="othersGrid">
       {% for t in others %}
       <a href="/hisse/{{ t }}" class="other-chip">
@@ -1196,24 +1218,41 @@ async function loadNews(retryCount) {
 loadNews(0);
 
 /* ── AI Sinyal Açıklaması ─────────────────────────── */
-async function loadSignalExplanation() {
+async function loadSignalExplanation(retryCount) {
+  retryCount = retryCount || 0;
+  const loadEl   = document.getElementById('sigExplainLoading');
+  const textEl   = document.getElementById('sigExplainText');
+  const footerEl = document.getElementById('sigExplainFooter');
+
+  loadEl.style.display = 'flex';
+  textEl.style.display = 'none';
+  footerEl.style.display = 'none';
+
   try {
     const res  = await fetch('/api/hisse/' + TICKER + '/signal-explanation');
     const data = await res.json();
-    document.getElementById('sigExplainLoading').style.display = 'none';
+    loadEl.style.display = 'none';
+
     if (data.explanation) {
-      const txt = document.getElementById('sigExplainText');
-      txt.textContent = data.explanation;
-      txt.style.display = '';
-      document.getElementById('sigExplainFooter').style.display = '';
+      textEl.textContent = data.explanation;
+      textEl.style.display = '';
+      footerEl.style.display = '';
     } else {
-      document.getElementById('sigExplainSection').style.display = 'none';
+      if (retryCount < 2) {
+        loadEl.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Yapay zeka analiz ediyor… (deneme ' + (retryCount+1) + '/3)';
+        loadEl.style.display = 'flex';
+        setTimeout(() => loadSignalExplanation(retryCount + 1), 8000);
+      } else {
+        loadEl.innerHTML = '🤖 AI açıklaması şu an hazır değil. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid #30363d;color:#58a6ff;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
+        loadEl.style.display = 'flex';
+      }
     }
   } catch(e) {
-    document.getElementById('sigExplainSection').style.display = 'none';
+    loadEl.innerHTML = 'AI açıklaması yüklenemedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid #30363d;color:#58a6ff;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
+    loadEl.style.display = 'flex';
   }
 }
-loadSignalExplanation();
+loadSignalExplanation(0);
 
 /* ── Temel Analiz ──────────────────────────────────── */
 async function loadFundamentals() {
@@ -1352,6 +1391,14 @@ function startSSE() {
   };
 }
 startSSE();
+
+/* ── Diğer Hisseler Accordion ──────────────────── */
+function toggleOthers() {
+  const grid = document.getElementById('othersGrid');
+  const btn  = document.getElementById('othersToggleBtn');
+  const open = grid.classList.toggle('open');
+  btn.textContent = open ? 'Gizle ▴' : 'Göster ▾';
+}
 </script>
 </body>
 </html>
