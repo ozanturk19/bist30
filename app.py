@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, Response, request
+from flask import Flask, jsonify, render_template, Response, request, abort
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -15,9 +15,23 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text      import MIMEText
 import requests
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from blog_content import ARTICLES, ARTICLES_BY_SLUG, CATEGORIES
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
+
+# ── Rate Limiter ──────────────────────────────────────────────────────────────
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["300 per minute"],
+    storage_uri="memory://",
+)
+
+# ── Admin endpoint koruması ───────────────────────────────────────────────────
+ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "")
 
 # ── Sinyal görünen ad eşlemesi (iç değer AL/SAT/BEKLE değişmez) ───────────────
 _SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Zayıf Trend', 'BEKLE': 'Belirsiz'}
@@ -979,7 +993,10 @@ def api_data():
 
 
 @app.route("/api/refresh", methods=["POST"])
+@limiter.limit("1 per 5 minutes")
 def api_refresh():
+    if ADMIN_SECRET and request.headers.get("X-Admin-Secret") != ADMIN_SECRET:
+        abort(403)
     threading.Thread(target=refresh_data, daemon=True).start()
     return jsonify({"status": "refreshing"})
 
@@ -1626,6 +1643,7 @@ def api_stock_fundamentals(ticker):
 
 
 @app.route("/api/hisse/<ticker>/news")
+@limiter.limit("20 per minute")
 def api_stock_news(ticker):
     """Gemini AI haber özeti — 6 saatlik cache."""
     ticker = ticker.upper()
@@ -1638,6 +1656,7 @@ def api_stock_news(ticker):
 
 
 @app.route("/api/hisse/<ticker>/signal-explanation")
+@limiter.limit("20 per minute")
 def api_signal_explanation(ticker):
     """Gemini AI sinyal açıklaması — 4 saatlik cache (sinyal değişince yenilenir)."""
     ticker = ticker.upper()
@@ -2118,7 +2137,10 @@ def api_backtest():
 
 
 @app.route("/api/backtest/run", methods=["POST"])
+@limiter.limit("1 per 30 minutes")
 def api_backtest_run():
+    if ADMIN_SECRET and request.headers.get("X-Admin-Secret") != ADMIN_SECRET:
+        abort(403)
     threading.Thread(target=run_backtest, daemon=True).start()
     return jsonify({"status": "started"})
 
@@ -2245,6 +2267,7 @@ def api_bilanco_takvimi():
 
 
 @app.route("/api/subscribe", methods=["POST"])
+@limiter.limit("5 per hour")
 def api_subscribe():
     """E-posta abonelik kaydı."""
     data  = request.get_json(silent=True) or {}
@@ -2326,8 +2349,11 @@ padding:32px 40px;text-align:center;max-width:420px}}</style>
 
 
 @app.route("/api/telegram/test", methods=["POST"])
+@limiter.limit("5 per hour")
 def api_telegram_test():
     """Admin: Telegram bağlantısını test et."""
+    if ADMIN_SECRET and request.headers.get("X-Admin-Secret") != ADMIN_SECRET:
+        abort(403)
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
         return safe_json({"ok": False, "error": "Telegram env vars eksik (TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID)"})
     _send_telegram(

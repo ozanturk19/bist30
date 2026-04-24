@@ -210,18 +210,34 @@ function renderHeatmap(stocks) {
   }).join('');
 }
 
+let _loadAttempts = 0;
+
 async function load() {
   try {
     const r = await fetch('/api/data');
     const j = await r.json();
     if (!j.stocks || j.stocks.length === 0) {
+      _loadAttempts++;
+      if (_loadAttempts >= 4) {
+        document.getElementById('heatmap').innerHTML =
+          '<div class="loading-msg">⚠️ Veriler henüz hazır değil. <a href="javascript:location.reload()" style="color:#58a6ff">Sayfayı yenile</a></div>';
+        document.getElementById('lastUpdate').textContent = 'Veri bekleniyor…';
+        return;
+      }
       setTimeout(load, 15000);
       return;
     }
+    _loadAttempts = 0;
     allStocks = j.stocks.filter(s => s.ticker !== 'XU030');
     document.getElementById('lastUpdate').textContent = `Son güncelleme: ${j.updated_at || '—'}`;
     renderHeatmap(allStocks);
   } catch(e) {
+    _loadAttempts++;
+    if (_loadAttempts >= 3) {
+      document.getElementById('heatmap').innerHTML =
+        '<div class="loading-msg">⚠️ Bağlantı hatası. <a href="javascript:location.reload()" style="color:#58a6ff">Sayfayı yenile</a></div>';
+      return;
+    }
     setTimeout(load, 15000);
   }
 }

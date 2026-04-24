@@ -297,13 +297,16 @@ function render(data) {
 async function load() {
   try {
     const res  = await fetch('/api/bilanco-takvimi');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
+    if (!data.periods || data.periods.length === 0) throw new Error('Boş veri');
     _allData = data;
     document.getElementById('lastUpdate').textContent = `Son güncelleme: ${data.updated_at || '—'}`;
     render(data);
   } catch(e) {
     document.getElementById('periodsContainer').innerHTML =
-      '<div class="loading-msg">⚠️ Veriler yüklenemedi. <a href="javascript:location.reload()" style="color:#58a6ff">Yenile</a></div>';
+      '<div class="loading-msg">⚠️ Veriler yüklenemedi (' + e.message + '). <a href="javascript:location.reload()" style="color:#58a6ff">Yenile</a></div>';
+    document.getElementById('lastUpdate').textContent = 'Yüklenemedi';
   }
 }
 
