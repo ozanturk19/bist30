@@ -974,6 +974,35 @@ def _notify_email_signal_changes(changes):
     threading.Thread(target=_send_batch, daemon=True).start()
 
 
+_DISK_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
+
+
+def _save_cache_to_disk(data):
+    """Son başarılı sinyal datasını diske yazar — restart sonrası hızlı yükleme için."""
+    try:
+        with open(_DISK_CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+        logger.debug("Disk cache yazıldı: %d hisse", len(data))
+    except Exception as e:
+        logger.warning("Disk cache yazma hatası: %s", e)
+
+
+def _load_cache_from_disk():
+    """Disk cache'i yükler — servis başlarken ~3 dakikalık boş sayfayı önler."""
+    try:
+        if not os.path.exists(_DISK_CACHE_PATH):
+            return
+        with open(_DISK_CACHE_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if data and isinstance(data, list) and len(data) > 0:
+            with _lock:
+                _cache["data"] = data
+                _cache["updated_at"] = "disk cache (başlatılıyor…)"
+            logger.info("Disk cache yüklendi: %d hisse (anlık veri bekleniyor)", len(data))
+    except Exception as e:
+        logger.warning("Disk cache okuma hatası: %s", e)
+
+
 def refresh_data():
     results = []
     for t in BIST30:
@@ -993,6 +1022,9 @@ def refresh_data():
     with _lock:
         _cache["data"] = results
         _cache["updated_at"] = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+
+    # Başarılı güncellemeden sonra diske yaz
+    _save_cache_to_disk(results)
 
 
 def fetch_live_prices():
@@ -1584,12 +1616,55 @@ def get_ai_signal_explanation(ticker, signal_data):
 
     name     = STOCK_NAMES.get(ticker, ticker)
     sig_lbl  = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend", "BEKLE": "Belirsiz"}.get(sig, sig)
-    adx      = signal_data.get("adx", 0) or 0
-    e12      = signal_data.get("e12", 0) or 0
-    e99      = signal_data.get("e99", 0) or 0
-    di_plus  = signal_data.get("di_plus", 0) or 0
-    di_minus = signal_data.get("di_minus", 0) or 0
-    st_bull  = signal_data.get("st_bull", False)
+
+    # ── İndikatör değerlerini çıkar: US hisseleri (düz alan) + BIST (iç içe indicators) ──
+    inds = signal_data.get("indicators") or {}
+
+    # ADX: US hisseleri → düz "adx" alanı; BIST → indicators.adx.label ("ADX 25")
+    adx_raw = signal_data.get("adx")
+    if adx_raw is None:
+        adx_label = (inds.get("adx") or {}).get("label", "ADX 0")
+        try:
+            adx = float(adx_label.replace("ADX", "").strip())
+        except (ValueError, AttributeError):
+            adx = 0.0
+    else:
+        adx = float(adx_raw or 0)
+
+    # DI+/DI-: US hisseleri → düz "di_plus"/"di_minus"; BIST → indicators.adx.value ("DI+27/DI-15")
+    di_plus  = signal_data.get("di_plus")
+    di_minus = signal_data.get("di_minus")
+    if di_plus is None or di_minus is None:
+        di_val = (inds.get("adx") or {}).get("value", "")
+        try:
+            parts    = di_val.replace("DI+", "").split("/DI-")
+            di_plus  = float(parts[0]) if len(parts) >= 1 else 0.0
+            di_minus = float(parts[1]) if len(parts) >= 2 else 0.0
+        except (ValueError, IndexError, AttributeError):
+            di_plus, di_minus = 0.0, 0.0
+    else:
+        di_plus, di_minus = float(di_plus or 0), float(di_minus or 0)
+
+    # EMA12/EMA99: US hisseleri → düz "e12"/"e99"; BIST → indicators.ema1299.value ("121/104")
+    e12 = signal_data.get("e12")
+    e99 = signal_data.get("e99")
+    if e12 is None or e99 is None:
+        ema_val = (inds.get("ema1299") or {}).get("value", "")
+        try:
+            parts = ema_val.split("/")
+            e12 = float(parts[0]) if len(parts) >= 1 else 0.0
+            e99 = float(parts[1]) if len(parts) >= 2 else 0.0
+        except (ValueError, IndexError, AttributeError):
+            e12, e99 = 0.0, 0.0
+    else:
+        e12, e99 = float(e12 or 0), float(e99 or 0)
+
+    # Supertrend: US hisseleri → düz "st_bull"; BIST → indicators.supertrend.bull
+    st_bull_raw = signal_data.get("st_bull")
+    if st_bull_raw is None:
+        st_bull = bool((inds.get("supertrend") or {}).get("bull", False))
+    else:
+        st_bull = bool(st_bull_raw)
     price    = signal_data.get("price", 0) or 0
     sl       = signal_data.get("sl_level")
     bars     = signal_data.get("signal_bars", 1) or 1
@@ -1671,22 +1746,37 @@ def get_ai_signal_explanation(ticker, signal_data):
 
 
 # ── Arka plan: BIST30 haber ön-yüklemesi ─────────────────────────────────────
-_BIST30_PREFETCH = BIST100[:18]   # İlk 18 = BIST30 hisseleri
+_PREFETCH_MAX    = 8    # Aynı anda en fazla bu kadar hisse prefetch edilir
+_PREFETCH_DELAY  = 30   # İstekler arası bekleme (saniye) — Gemini rate-limit koruması
 
 
 def _prefetch_news_worker():
-    """BIST30 haberlerini cache'e önceden yükler; her 6 saatte bir çalışır.
+    """AL sinyalli hisselerin haberlerini cache'e önceden yükler; her 6 saatte bir çalışır.
 
     Sunucu yeniden başlatıldıktan sonra kullanıcılar soğuk cache'e düşmeden
-    içerik görür. Ayrıca negatif cache'i temizleyerek başarısız istekleri
-    6 saatte bir yeniden dener.
+    içerik görür. Yalnızca AL sinyalli hisseler için çalışır (max 8) ve istekler
+    arası 30 saniye bekler — Gemini ücretsiz tier rate-limit koruması.
     """
-    time.sleep(90)   # Servis startup'ı ve veri yüklemesi tamamlanana kadar bekle
+    time.sleep(120)   # Servis startup'ı ve veri yüklemesi tamamlanana kadar bekle
     while True:
         now = time.time()
+
+        # Güncel cache'den AL sinyalli hisseleri seç (en fazla _PREFETCH_MAX adet)
+        with _lock:
+            stocks = list(_cache.get("data") or [])
+        al_tickers = [
+            s["ticker"] for s in stocks
+            if s.get("signal") == "AL" and s.get("ticker") not in ("XU030", "XU100")
+        ][:_PREFETCH_MAX]
+
+        if not al_tickers:
+            # Henüz veri yüklenmemiş — tekrar dene
+            time.sleep(300)
+            continue
+
         to_fetch = []
         with _lock:
-            for ticker in _BIST30_PREFETCH:
+            for ticker in al_tickers:
                 cached = _news_cache.get(ticker)
                 if not cached:
                     to_fetch.append(ticker)          # hiç denenmemiş
@@ -1695,7 +1785,7 @@ def _prefetch_news_worker():
                 elif (now - cached["ts"]) > _NEWS_CACHE_TTL * 0.9:
                     to_fetch.append(ticker)          # cache sona ermek üzere
 
-        logger.info("Prefetch: %d/%d hisse için haber yüklenecek", len(to_fetch), len(_BIST30_PREFETCH))
+        logger.info("Prefetch: %d/%d AL hisse için haber yüklenecek", len(to_fetch), len(al_tickers))
         fetched = 0
         for ticker in to_fetch:
             try:
@@ -1704,7 +1794,7 @@ def _prefetch_news_worker():
                     fetched += 1
             except Exception as e:
                 logger.error("Prefetch hatası [%s]: %s", ticker, e)
-            time.sleep(4)   # İstekler arası 4 saniye — rate-limit koruması
+            time.sleep(_PREFETCH_DELAY)   # İstekler arası 30 saniye — rate-limit koruması
 
         logger.info("Prefetch tamamlandı: %d/%d başarılı", fetched, len(to_fetch))
         time.sleep(_NEWS_CACHE_TTL)   # Bir sonraki tur 6 saat sonra
@@ -2531,23 +2621,47 @@ def api_stock_news(ticker):
     text = get_ai_news(ticker)
     if text:
         return safe_json({"news": text, "source": "gemini"})
-    return safe_json({"news": None})
+    return safe_json({"news": ""})
 
 
 @app.route("/api/hisse/<ticker>/signal-explanation")
 @limiter.limit("20 per minute")
 def api_signal_explanation(ticker):
-    """Sinyal açıklaması — AI varsa AI, yoksa algoritmik metin döner. Her zaman dolu."""
+    """Sinyal açıklaması — AI varsa AI, yoksa algoritmik metin döner. Her zaman dolu.
+    BIST hisseleri için _cache["data"] kullanılır.
+    US hisseleri için _stock_chart_cache["US_{ticker}"]["data"]["summary"] kullanılır.
+    """
     ticker = ticker.upper()
-    if ticker not in BIST100:
+    is_bist = ticker in BIST100
+    is_us   = ticker in US_STOCKS
+
+    if not is_bist and not is_us:
         return safe_json({"error": "Hisse bulunamadı"}), 404
 
-    # Anlık sinyal datasını cache'den al
-    with _lock:
-        stocks = list(_cache.get("data") or _cache.get("stocks") or [])
-    stock = next((s for s in stocks if s.get("ticker") == ticker), None)
-    if not stock:
-        return safe_json({"explanation": None, "reason": "no_data"})
+    if is_bist:
+        # BIST hissesi — anlık sinyal datasını cache'den al
+        with _lock:
+            stocks = list(_cache.get("data") or _cache.get("stocks") or [])
+        stock = next((s for s in stocks if s.get("ticker") == ticker), None)
+        if not stock:
+            return safe_json({"explanation": None, "reason": "no_data"})
+    else:
+        # US hissesi — chart cache'inden "summary" al (lazy hesapla)
+        now = time.time()
+        with _lock:
+            cached = _stock_chart_cache.get(f"US_{ticker}")
+        if cached and cached.get("data") and cached.get("data", {}).get("summary"):
+            stock = cached["data"]["summary"]
+        else:
+            # Cache yok — hesapla (ilk açılış gecikir ama sonrası cache'den gelir)
+            data = _compute_chart_data(ticker, "2y")
+            upd  = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+            if data and data.get("summary"):
+                with _lock:
+                    _stock_chart_cache[f"US_{ticker}"] = {"data": data, "ts": now, "updated_at": upd}
+                stock = data["summary"]
+            else:
+                return safe_json({"explanation": None, "reason": "no_data"})
 
     text = get_ai_signal_explanation(ticker, stock)
     source = "gemini" if GEMINI_API_KEY else "algorithmic"
@@ -3356,7 +3470,7 @@ def api_subscribe():
         subs = _load_subscribers()
         if email in subs:
             if subs[email].get("active", True):
-                return safe_json({"ok": False, "error": "Bu e-posta zaten kayıtlı"})
+                return safe_json({"ok": False, "message": "Bu e-posta zaten kayıtlı."})
             # Pasif abonenin kaydını yeniden aktif et
             subs[email]["active"] = True
             subs[email]["subscribed_at"] = datetime.now().isoformat()
@@ -3478,6 +3592,8 @@ def blog_article(slug):
 
 # ── Startup ───────────────────────────────────────────────────────────────────
 def _startup():
+    # Disk cache'i yükle — anlık veri gelene kadar siteyi hemen dolduran eski veri
+    _load_cache_from_disk()
     refresh_chart()
     # XU100 + makro varlıkları arka planda paralel yükle
     threading.Thread(target=refresh_xu100_chart, daemon=True).start()

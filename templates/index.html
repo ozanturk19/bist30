@@ -897,6 +897,10 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>
       ABD
     </a>
+    <a href="/tarama">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Tarama
+    </a>
     <a href="/sektor-harita">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
       Sektörler
@@ -2585,7 +2589,7 @@ async function submitSubscribe() {
       document.getElementById('subscribeBar').innerHTML =
         `<div style="font-size:13px;color:#3fb950;font-weight:600">✅ ${json.message}</div>`;
     } else {
-      showToast('⚠️ ' + (json.error || 'Bir hata oluştu'));
+      showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'));
       btn.textContent = origText;
       btn.disabled    = false;
     }
