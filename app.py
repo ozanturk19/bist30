@@ -10,6 +10,7 @@ import time
 import json
 import os
 import re
+import copy
 import secrets
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -1160,6 +1161,44 @@ def background_live_prices():
         time.sleep(30)
 
 
+def _purge_stale_chart_caches():
+    """Fiyat uyuşmazlığı olan BIST hisse chart cache'lerini temizler.
+
+    background_refresh() içinde her döngüde çağrılır. Ana cache (analyze())
+    güncellendikten sonra, chart cache'inde eski bölünme/split verisi kalmış
+    hisseleri tespit edip cache'i sıfırlar — böylece bir sonraki ziyarette
+    taze data çekilir.
+    """
+    with _lock:
+        stocks = list(_cache["data"])
+    purged = 0
+    for s in stocks:
+        t = s.get("ticker")
+        if not t or t in ("XU030", "XU100"):
+            continue
+        main_price = s.get("price", 0)
+        if not main_price:
+            continue
+        with _lock:
+            cached = _stock_chart_cache.get(t)
+        if not cached:
+            continue
+        chart_price = (cached.get("data") or {}).get("summary", {}).get("price", 0)
+        if chart_price > 0 and main_price > 0:
+            ratio = max(chart_price, main_price) / min(chart_price, main_price)
+            if ratio > 1.15:
+                logger.warning(
+                    "Watchdog: fiyat uyuşmazlığı [%s] chart=%.2f main=%.2f "
+                    "oran=%.2fx — chart cache temizlendi",
+                    t, chart_price, main_price, ratio
+                )
+                with _lock:
+                    _stock_chart_cache.pop(t, None)
+                purged += 1
+    if purged:
+        logger.info("Watchdog: %d hisse chart cache temizlendi (split/veri hatası)", purged)
+
+
 def background_refresh():
     while True:
         refresh_chart()
@@ -1175,6 +1214,7 @@ def background_refresh():
         _refresh_varlik_chart("PETROL",   _petrol_chart_cache)
         _refresh_varlik_chart("DOGALGAZ", _dogalgaz_chart_cache)
         refresh_data()
+        _purge_stale_chart_caches()   # Split/split sonrası uyuşmazlık taraması
         time.sleep(900)
 
 
@@ -2127,7 +2167,25 @@ def _compute_chart_data(ticker_base, period="2y"):
         e12_bull = e12_val > e99_val; e12_bear = e12_val < e99_val
         bull_score = int(st_bull) + int(adx_bull) + int(e12_bull)
         bear_score = int(st_bear) + int(adx_bear) + int(e12_bear)
-        signal     = "AL" if bull_score >= 3 else "SAT" if bear_score >= 3 else "BEKLE"
+
+        # ── Haftalık trend kapısı — analyze() ile tam senkron ───────────
+        # Mevcut günlük veriyi yeniden örnekleyerek haftalık EMA20 hesaplar;
+        # ekstra yfinance çağrısı gerekmez, analyze() ile aynı mantık.
+        wkly_dir = 0
+        try:
+            wkly_close = close.resample("W-FRI").last().dropna()
+            if len(wkly_close) >= 20:
+                wk_ema = compute_ema(wkly_close, 20)
+                wkly_dir = 1 if float(wk_ema.iloc[-1]) > float(wk_ema.iloc[-2]) else -1
+        except Exception:
+            wkly_dir = 0
+
+        if bull_score >= 3 and wkly_dir != -1:
+            signal = "AL"
+        elif bear_score >= 3 and wkly_dir != 1:
+            signal = "SAT"
+        else:
+            signal = "BEKLE"
 
         # ── Volume histogram (gösterim barları) ──────────────────────────
         vol_data = []
@@ -2337,15 +2395,34 @@ def api_chart_dogalgaz():
 
 @app.route("/api/chart/us/<ticker>")
 def api_chart_us_stock(ticker):
-    """ABD hissesi grafik verisi — lazy cache (15 dakika TTL)."""
+    """ABD hissesi grafik verisi — lazy cache (15 dakika TTL).
+    Fiyat uyuşmazlığı tespit edilirse (split vb.) cache otomatik iptal edilir.
+    """
     ticker = ticker.upper()
     if ticker not in US_STOCKS and ticker not in ("SP500","NASDAQ","SOL","BNB","PETROL","DOGALGAZ"):
         return safe_json({"error": "Hisse bulunamadı"}), 404
     now  = time.time()
     with _lock:
         cached = _stock_chart_cache.get(f"US_{ticker}")
-        if cached and (now - cached["ts"]) < _STOCK_CACHE_TTL:
-            return safe_json({"chart": cached["data"], "updated_at": cached["updated_at"], "loading": False})
+
+    # US stock cache için global_prices ile fiyat karşılaştır
+    if cached:
+        chart_price = (cached.get("data") or {}).get("summary", {}).get("price", 0)
+        with _lock:
+            gp = _global_prices_cache.get("prices", {})
+        main_price = gp.get(ticker, {}).get("price", 0) if gp else 0
+        if chart_price > 0 and main_price > 0:
+            ratio = max(chart_price, main_price) / min(chart_price, main_price)
+            if ratio > 1.15:
+                logger.warning(
+                    "Fiyat uyuşmazlığı [US_%s]: chart=%.2f main=%.2f oran=%.2fx — cache iptal",
+                    ticker, chart_price, main_price, ratio
+                )
+                cached = None
+
+    if cached and (now - cached["ts"]) < _STOCK_CACHE_TTL:
+        return safe_json({"chart": cached["data"], "updated_at": cached["updated_at"], "loading": False})
+
     data = _compute_chart_data(ticker, "2y")
     upd  = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     if data:
@@ -2795,24 +2872,63 @@ def api_stock_chart(ticker):
         return safe_json({"error": "Hisse bulunamadı"}), 404
 
     now = time.time()
+
+    # ── Otoritelif sinyal kaynağı: ana cache ──────────────────────────────
     with _lock:
-        cached = _stock_chart_cache.get(ticker)
-        if cached and (now - cached["ts"]) < _STOCK_CACHE_TTL:
-            return safe_json({
-                "chart":      cached["data"],
-                "updated_at": cached["updated_at"],
-                "loading":    False,
-            })
+        stocks     = list(_cache["data"])
+        cached     = _stock_chart_cache.get(ticker)
+    main_stock = next((s for s in stocks if s.get("ticker") == ticker), None)
+    main_price = main_stock.get("price", 0) if main_stock else 0
 
-    # Cache yok veya bayat → taze hesapla
-    data = _compute_chart_data(ticker, period="2y")
-    if data:
-        upd = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-        with _lock:
-            _stock_chart_cache[ticker] = {"data": data, "ts": now, "updated_at": upd}
-        return safe_json({"chart": data, "updated_at": upd, "loading": False})
+    # ── Fiyat uyuşmazlık tespiti: bölünme/split sonrası eski cache'i iptal et ─
+    if cached and main_price > 0:
+        chart_price = (cached.get("data") or {}).get("summary", {}).get("price", 0)
+        if chart_price > 0:
+            ratio = max(chart_price, main_price) / min(chart_price, main_price)
+            if ratio > 1.15:   # %15 üstü fiyat sapması → hisse bölünmesi veya veri hatası
+                logger.warning(
+                    "Fiyat uyuşmazlığı [%s]: chart=%.2f main=%.2f oran=%.2fx — "
+                    "chart cache iptal ediliyor (bölünme veya veri hatası)",
+                    ticker, chart_price, main_price, ratio
+                )
+                cached = None   # Taze hesaplamaya zorla
 
-    return safe_json({"chart": None, "loading": True})
+    if cached and (now - cached["ts"]) < _STOCK_CACHE_TTL:
+        data = cached["data"]
+        upd  = cached["updated_at"]
+    else:
+        # Cache yok, bayat veya fiyat uyuşmazlığı → taze hesapla
+        data = _compute_chart_data(ticker, period="2y")
+        upd  = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        if data:
+            with _lock:
+                _stock_chart_cache[ticker] = {"data": data, "ts": now, "updated_at": upd}
+
+    if not data:
+        return safe_json({"chart": None, "loading": True})
+
+    # ── Sinyal senkronizasyonu: ana cache otoritelif kaynaktır ───────────────
+    # _compute_chart_data() ve analyze() farklı zamanlarda çalışabilir;
+    # ana cache'in sinyali her zaman önceliklidir.
+    if main_stock:
+        chart_sig = (data.get("summary") or {}).get("signal")
+        main_sig  = main_stock.get("signal")
+        if chart_sig != main_sig:
+            logger.warning(
+                "Sinyal uyuşmazlığı [%s]: chart=%s main=%s → ana cache sinyali kullanılıyor",
+                ticker, chart_sig, main_sig
+            )
+        # Derin kopya — cache'de saklanan dict'i değiştirmemek için
+        data = copy.deepcopy(data)
+        if data.get("summary") is None:
+            data["summary"] = {}
+        data["summary"]["signal"]      = main_sig or chart_sig
+        data["summary"]["bull_score"]  = main_stock.get("bull_score",  data["summary"].get("bull_score"))
+        data["summary"]["bear_score"]  = main_stock.get("bear_score",  data["summary"].get("bear_score"))
+        data["summary"]["sl_level"]    = main_stock.get("sl_level",    data["summary"].get("sl_level"))
+        data["summary"]["signal_bars"] = main_stock.get("signal_bars", data["summary"].get("signal_bars", 1))
+
+    return safe_json({"chart": data, "updated_at": upd, "loading": False})
 
 
 # ── Strateji Tarayıcısı ──────────────────────────────────────────────────────
