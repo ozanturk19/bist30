@@ -360,6 +360,23 @@ def compute_rsi(close, period=14):
     return rsi.fillna(50)
 
 
+def compute_atr(high, low, close, period=14):
+    """ATR(14) — Wilder smoothing. Bağımsız helper; giriş optimizasyonu için kullanılır."""
+    hi = high.values; lo = low.values; cl = close.values
+    n  = len(cl)
+    tr      = np.empty(n)
+    tr[0]   = hi[0] - lo[0]
+    tr[1:]  = np.maximum(hi[1:] - lo[1:],
+              np.maximum(np.abs(hi[1:] - cl[:-1]),
+                         np.abs(lo[1:] - cl[:-1])))
+    atr = np.full(n, np.nan)
+    if n >= period:
+        atr[period - 1] = np.mean(tr[:period])
+        for i in range(period, n):
+            atr[i] = (atr[i - 1] * (period - 1) + tr[i]) / period
+    return pd.Series(atr, index=close.index)
+
+
 def compute_supertrend(high, low, close, period=10, multiplier=3):
     """ATR(10,3) — numpy tabanlı.
     Returns (direction Series, st_line Series); warmup barları NaN."""
@@ -577,8 +594,97 @@ def analyze(ticker_base):
         signal_start = max(0, (n - 1) - (signal_bars - 1))
         signal_price = round(float(close.iloc[signal_start]), 2) if signal != "BEKLE" else None
 
-        is_new_signal = (signal_date == today_str)
+        # is_new_signal: yalnızca AL/SAT sinyalleri için geçerli.
+        # BEKLE sinyali bugün başladıysa (eski sinyal sona erdi) "Bugün" gösterme —
+        # kullanıcıya "Belirsiz + Bugün" kombinasyonu çelişkili ve yanıltıcı görünüyor.
+        is_new_signal = (signal_date == today_str and signal != "BEKLE")
         confirmed     = signal != "BEKLE" and signal_bars >= 3
+
+        # ── ATR(14) — giriş optimizasyonu için ────────────────────────────────
+        atr14_series = compute_atr(high, low, close, 14)
+        atr_now      = float(atr14_series.iloc[-1])
+        atr_now      = atr_now if not np.isnan(atr_now) else 0.0
+
+        # ── Volume Teyidi — SİNYAL ÇIKAN BARDAKI hacim / önceki 20 bar ort ───
+        # (Bugünkü hacim değil — sinyal breakout'undaki hacim kalitesi ölçülüyor)
+        vol_confirmed    = None
+        signal_vol_ratio = None
+        if signal != "BEKLE" and signal_start < len(volume):
+            svol      = float(volume.iloc[signal_start])
+            _slice    = volume.iloc[max(0, signal_start - 20):signal_start]
+            svol_avg  = float(_slice.mean()) if len(_slice) > 0 else svol
+            signal_vol_ratio = round(svol / svol_avg, 2) if svol_avg > 0 else 1.0
+            vol_confirmed    = signal_vol_ratio >= 1.5
+
+        # ── Giriş Optimizasyonu (Entry Quality) ───────────────────────────────
+        # Ölçüt: Fiyat sinyal gününden bu yana kaç ATR hareket etti?
+        # < 1 ATR → IDEAL  |  1-2 ATR → IYI  |  2-3.5 ATR → DIKKATLI  |  >3.5 → UZAK
+        entry_quality = None
+        entry_note    = None
+        optimal_entry = None
+        tp1 = tp2     = None
+        rr_ratio      = None
+
+        if signal == "AL" and signal_price and sl_val and c > sl_val and atr_now > 0:
+            risk         = c - sl_val                            # mevcut fiyattan SL'ye mesafe
+            sl_dist_pct  = round(risk / c * 100, 1)             # SL uzaklığı %
+            pct_moved    = (c - signal_price) / signal_price * 100  # sinyalden bu yana %
+            atr_pct      = atr_now / c * 100                    # ATR = fiyatın kaç %'i
+            atrs_moved   = round(pct_moved / atr_pct, 1) if atr_pct > 0 else 0.0
+
+            tp1      = round(c + risk * 2, 2)    # 2R hedef
+            tp2      = round(c + risk * 3, 2)    # 3R hedef
+            rr_ratio = 2.0                        # standart 2R TP hedefleniyor
+
+            if atrs_moved < 1.0:
+                entry_quality = "IDEAL"
+                entry_note    = (f"Sinyal taze ({signal_bars} bar), "
+                                 f"fiyat SL'ye yakın — R/R en avantajlı bölge")
+            elif atrs_moved < 2.0:
+                entry_quality = "IYI"
+                entry_note    = (f"Trend onaylandı ({signal_bars} bar, "
+                                 f"+{pct_moved:.1f}%), makul giriş bölgesi")
+            elif atrs_moved < 3.5:
+                entry_quality = "DIKKATLI"
+                entry_note    = (f"Fiyat +{pct_moved:.1f}% yükseldi "
+                                 f"({atrs_moved:.1f} ATR) — küçük pullback beklenmesi daha sağlıklı")
+                # Optimal giriş: SL + 0.8 ATR veya mevcut -3%, hangisi yüksekse
+                optimal_entry = round(max(sl_val + atr_now * 0.8, c * 0.97), 2)
+            else:
+                entry_quality = "UZAK"
+                entry_note    = (f"Fiyat +{pct_moved:.1f}% yükseldi "
+                                 f"({atrs_moved:.1f} ATR) — kovalama riski yüksek, pullback bekle")
+                optimal_entry = round(max(sl_val + atr_now * 0.8, c * 0.95), 2)
+
+        elif signal == "SAT" and signal_price and sl_val and c < sl_val and atr_now > 0:
+            risk        = sl_val - c
+            sl_dist_pct = round(risk / c * 100, 1)
+            pct_moved   = (signal_price - c) / signal_price * 100
+            atr_pct     = atr_now / c * 100
+            atrs_moved  = round(pct_moved / atr_pct, 1) if atr_pct > 0 else 0.0
+
+            tp1      = round(c - risk * 2, 2)
+            tp2      = round(c - risk * 3, 2)
+            rr_ratio = 2.0
+
+            if atrs_moved < 1.0:
+                entry_quality = "IDEAL"
+                entry_note    = (f"Zayıf trend taze ({signal_bars} bar), "
+                                 f"SL yakın — kısa pozisyon için avantajlı bölge")
+            elif atrs_moved < 2.0:
+                entry_quality = "IYI"
+                entry_note    = (f"Düşüş trendi onaylandı "
+                                 f"({signal_bars} bar, -{pct_moved:.1f}%)")
+            elif atrs_moved < 3.5:
+                entry_quality = "DIKKATLI"
+                entry_note    = (f"Fiyat -{pct_moved:.1f}% düştü "
+                                 f"({atrs_moved:.1f} ATR) — kısa dönem teknik geri tepme riski")
+                optimal_entry = round(min(sl_val - atr_now * 0.8, c * 1.03), 2)
+            else:
+                entry_quality = "UZAK"
+                entry_note    = (f"Fiyat -{pct_moved:.1f}% düştü "
+                                 f"({atrs_moved:.1f} ATR) — aşırı satım bölgesi, riski yüksek")
+                optimal_entry = round(min(sl_val - atr_now * 0.8, c * 1.05), 2)
 
         return {
             "ticker":        ticker_base,
@@ -611,8 +717,17 @@ def analyze(ticker_base):
                     "bull":  e12_bull, "bear": e12_bear,
                 },
             },
-            "rsi":       rsi_val,
-            "vol_ratio": vol_ratio,
+            "rsi":             rsi_val,
+            "vol_ratio":       vol_ratio,
+            "vol_confirmed":   vol_confirmed,
+            "signal_vol_ratio": signal_vol_ratio,
+            "atr14":           round(atr_now, 2) if atr_now else None,
+            "entry_quality":   entry_quality,
+            "entry_note":      entry_note,
+            "optimal_entry":   optimal_entry,
+            "tp1":             tp1,
+            "tp2":             tp2,
+            "rr_ratio":        rr_ratio,
         }
     except Exception as e:
         logger.error("analyze(%s): %s", ticker_base, e, exc_info=True)
@@ -931,6 +1046,82 @@ def fetch_live_prices():
         logger.error("fetch_live_prices: %s", e, exc_info=True)
 
 
+_GLOBAL_TICKERS_YF = {
+    "BTC":      "BTC-USD",
+    "ETH":      "ETH-USD",
+    "SOL":      "SOL-USD",
+    "BNB":      "BNB-USD",
+    "ALTIN":    "GC=F",
+    "GUMUS":    "SI=F",
+    "PETROL":   "CL=F",
+    "DOGALGAZ": "NG=F",
+    "SP500":    "^GSPC",
+    "NASDAQ":   "^IXIC",
+    # US Stocks
+    "AAPL": "AAPL", "MSFT": "MSFT", "NVDA": "NVDA", "GOOGL": "GOOGL",
+    "AMZN": "AMZN", "META": "META", "TSLA": "TSLA", "NFLX": "NFLX",
+    "JPM":  "JPM",  "BRKB": "BRK-B","WMT":  "WMT",  "V":    "V",
+    "MA":   "MA",   "UNH":  "UNH",  "XOM":  "XOM",
+}
+
+def fetch_global_prices():
+    """Kripto, emtia ve ABD hisselerinin fiyatlarını çeker, SSE'ye push eder."""
+    try:
+        syms = list(set(_GLOBAL_TICKERS_YF.values()))
+        df = yf.download(
+            " ".join(syms), period="2d", interval="1m",
+            progress=False, auto_adjust=True, group_by="ticker", timeout=30
+        )
+        if df is None or df.empty:
+            return
+
+        payload = {}
+        now_str  = datetime.now().strftime("%H:%M:%S")
+        # ters harita: yf sembol -> key listesi
+        yf_to_keys = {}
+        for k, v in _GLOBAL_TICKERS_YF.items():
+            yf_to_keys.setdefault(v, []).append(k)
+
+        for yf_sym, keys in yf_to_keys.items():
+            try:
+                if isinstance(df.columns, pd.MultiIndex):
+                    lvls = df.columns.get_level_values(0)
+                    if yf_sym not in lvls:
+                        continue
+                    closes = df[yf_sym]["Close"].dropna()
+                else:
+                    closes = df["Close"].dropna()
+
+                if closes is None or len(closes) < 2:
+                    continue
+
+                price      = float(closes.iloc[-1])
+                today_date = closes.index[-1].date()
+                prev_bars  = closes[closes.index.map(lambda x: x.date()) < today_date]
+                prev       = float(prev_bars.iloc[-1]) if len(prev_bars) > 0 else float(closes.iloc[-2])
+                chg        = ((price - prev) / prev * 100) if prev else 0
+
+                entry = {"price": round(price, 6), "change_pct": round(chg, 2), "updated": now_str}
+                for k in keys:
+                    payload[k] = entry
+            except Exception:
+                continue
+
+        if payload:
+            with _lock:
+                _live_prices.update(payload)
+            _push_sse({"type": "global_prices", "data": payload, "ts": now_str})
+
+    except Exception as e:
+        logger.error("fetch_global_prices: %s", e, exc_info=True)
+
+
+def background_global_prices():
+    while True:
+        fetch_global_prices()
+        time.sleep(60)
+
+
 def background_live_prices():
     while True:
         fetch_live_prices()
@@ -940,6 +1131,17 @@ def background_live_prices():
 def background_refresh():
     while True:
         refresh_chart()
+        refresh_xu100_chart()
+        _refresh_varlik_chart("BTC",   _btc_chart_cache)
+        _refresh_varlik_chart("ALTIN", _altin_chart_cache)
+        _refresh_varlik_chart("GUMUS", _gumus_chart_cache)
+        _refresh_varlik_chart("ETH",    _eth_chart_cache)
+        _refresh_varlik_chart("SP500",  _sp500_chart_cache)
+        _refresh_varlik_chart("NASDAQ", _nasdaq_chart_cache)
+        _refresh_varlik_chart("SOL",      _sol_chart_cache)
+        _refresh_varlik_chart("BNB",      _bnb_chart_cache)
+        _refresh_varlik_chart("PETROL",   _petrol_chart_cache)
+        _refresh_varlik_chart("DOGALGAZ", _dogalgaz_chart_cache)
         refresh_data()
         time.sleep(900)
 
@@ -1006,7 +1208,7 @@ _macro_cache = {"data": None, "ts": 0}
 _MACRO_TTL   = 60   # 60 saniye cache
 
 def _fetch_macro():
-    """XU100, XU030, BTC, ALTIN, USD/TRY, EUR/TRY, S&P500, NASDAQ anlık veri."""
+    """XU100, XU030, BTC, ALTIN, GUMUS, PETROL, USD/TRY, EUR/TRY, S&P500, NASDAQ anlık veri."""
     tickers = [
         ("XU100",  "XU100.IS"),
         ("XU030",  "XU030.IS"),
@@ -1014,9 +1216,10 @@ def _fetch_macro():
         ("EURTRY", "EURTRY=X"),
         ("BTC",    "BTC-USD"),
         ("ALTIN",  "GC=F"),
+        ("GUMUS",  "SI=F"),
+        ("PETROL", "CL=F"),
         ("SP500",  "^GSPC"),
         ("NASDAQ", "^IXIC"),
-        ("GUMUS",  "SI=F"),
     ]
     result = []
     for label, sym in tickers:
@@ -1232,121 +1435,301 @@ def get_chart_data():
 
 
 _chart_cache       = {"data": None, "updated_at": None}
+_xu100_chart_cache = {"data": None, "updated_at": None}
+_btc_chart_cache   = {"data": None, "updated_at": None}
+_altin_chart_cache = {"data": None, "updated_at": None}
+_gumus_chart_cache = {"data": None, "updated_at": None}
+_eth_chart_cache    = {"data": None, "updated_at": None}
+_sp500_chart_cache  = {"data": None, "updated_at": None}
+_nasdaq_chart_cache  = {"data": None, "updated_at": None}
+_sol_chart_cache     = {"data": None, "updated_at": None}
+_bnb_chart_cache     = {"data": None, "updated_at": None}
+_petrol_chart_cache  = {"data": None, "updated_at": None}
+_dogalgaz_chart_cache= {"data": None, "updated_at": None}
 _stock_chart_cache = {}          # {ticker: {"data": ..., "ts": float, "updated_at": str}}
 _STOCK_CACHE_TTL   = 900         # 15 dakika
 
 
-# ── Gemini API — AI haber özeti ──────────────────────────────────────────────
-GEMINI_API_KEY  = os.environ.get("GEMINI_API_KEY", "")
-_news_cache     = {}          # {ticker: {"text": str, "ts": float}}
-_NEWS_CACHE_TTL = 3600 * 6   # 6 saat
+# ── Gemini API — AI haber özeti & sinyal açıklaması ─────────────────────────
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+
+# Cache yapıları
+# failed=True → negatif cache (başarısız istek, kısa TTL)
+_news_cache           = {}   # {ticker: {"text": str|None, "ts": float, "failed": bool}}
+_NEWS_CACHE_TTL       = 3600 * 6   # 6 saat — başarılı yanıt
+_NEWS_FAIL_TTL        = 300        # 5 dakika — başarısız yanıt (negatif cache)
+
+_signal_explain_cache = {}   # {ticker: {"text": str|None, "sig": str, "ts": float, "failed": bool}}
+_SIG_EXPLAIN_TTL      = 3600 * 4   # 4 saat
+_SIG_FAIL_TTL         = 300        # 5 dakika
+
+# Model fallback zinciri: birincil 2.5-flash, yedek 1.5-flash
+# (use_search=False olan denemeler grounding olmadan gider → daha stabil)
+_GEMINI_NEWS_ATTEMPTS = [
+    ("gemini-2.5-flash",      True),   # 1. tercih: Flash 2.5 + Google Search grounding
+    ("gemini-2.5-flash-lite", False),  # fallback: Flash 2.5 Lite, stabil, grounding yok
+]
+_GEMINI_EXPLAIN_ATTEMPTS = [
+    ("gemini-2.5-flash",      False),  # 1. tercih: Flash 2.5
+    ("gemini-2.5-flash-lite", False),  # fallback: Flash 2.5 Lite, stabil
+]
+
+
+def _gemini_call(prompt, attempts, timeout=20):
+    """Model fallback zinciri ile Gemini API çağrısı yapar.
+
+    Args:
+        prompt: Gönderilecek metin
+        attempts: [(model_id, use_google_search), ...] listesi
+        timeout: İstek zaman aşımı (saniye)
+
+    Returns:
+        (model_id, text) — başarılı ise; (None, None) — tüm modeller başarısızsa
+    """
+    if not GEMINI_API_KEY:
+        return None, None
+
+    for model_id, use_search in attempts:
+        body = {"contents": [{"parts": [{"text": prompt}]}]}
+        if use_search:
+            body["tools"] = [{"google_search": {}}]
+        url = (f"https://generativelanguage.googleapis.com/v1beta/"
+               f"models/{model_id}:generateContent?key={GEMINI_API_KEY}")
+        try:
+            r = requests.post(url, json=body, timeout=timeout)
+            r.raise_for_status()
+            text = (r.json().get("candidates", [{}])[0]
+                            .get("content", {})
+                            .get("parts", [{}])[0]
+                            .get("text", "")).strip()
+            if text:
+                return model_id, text
+            # Model yanıt verdi ama boş metin — fallback'e geç
+            logger.debug("_gemini_call [%s]: boş yanıt, fallback deneniyor", model_id)
+        except Exception as e:
+            status = getattr(getattr(e, "response", None), "status_code", None)
+            logger.warning("_gemini_call [%s]: %s (HTTP %s)", model_id, type(e).__name__, status)
+            # 5xx ve 429 → geçici sorun, bir sonraki modeli dene
+            # 4xx (400, 403 vb.) → API/key sorunu, fallback da aynı hatayı verir
+            if status and 400 <= status < 500 and status != 429:
+                break   # Fallback fayda vermez, dur
+
+    return None, None
+
 
 def get_ai_news(ticker):
-    """Gemini Flash + Google Search grounding ile Türkçe haber özeti üretir."""
+    """Gemini + Google Search grounding ile Türkçe haber özeti üretir.
+
+    Model fallback: gemini-2.5-flash → gemini-1.5-flash
+    Negatif cache: tüm modeller başarısız olursa 5 dk boyunca yeniden deneme yapılmaz.
+    """
     if not GEMINI_API_KEY:
         return None
     now = time.time()
     with _lock:
         cached = _news_cache.get(ticker)
-        if cached and (now - cached["ts"]) < _NEWS_CACHE_TTL:
-            return cached["text"]
+        if cached:
+            ttl = _NEWS_FAIL_TTL if cached.get("failed") else _NEWS_CACHE_TTL
+            if (now - cached["ts"]) < ttl:
+                return cached.get("text")   # başarısız cache → None döner
 
-    name    = STOCK_NAMES.get(ticker, ticker)
-    prompt  = (
+    name       = STOCK_NAMES.get(ticker, ticker)
+    today_str  = datetime.now().strftime("%d %B %Y")   # ör: "24 Nisan 2026"
+    cutoff_str = datetime.now().strftime("%Y-%m-%d")    # ör: "2026-04-17" (7 gün öncesi referans)
+    prompt = (
+        f"Bugünün tarihi: {today_str}.\n"
         f"Borsa İstanbul'da işlem gören {ticker} ({name}) hissesi hakkında "
-        f"son 7 günün en önemli gelişmelerini, haberlerini ve şirket açıklamalarını "
-        f"Türkçe olarak 3-5 madde halinde kısaca özetle. "
-        f"Her madde 1-2 cümle olsun. Tarih belirt. Sadece maddeleri yaz, giriş/kapanış cümlesi ekleme."
+        f"YALNIZCA son 7 gün ({cutoff_str} sonrası) içindeki gelişmeleri, haberleri ve "
+        f"şirket açıklamalarını Türkçe olarak 3-5 madde halinde kısaca özetle. "
+        f"Daha eski (1 aydan eski) haberleri kesinlikle ekleme. "
+        f"Her madde 1-2 cümle olsun ve tarihi belirt. "
+        f"Son 7 günde kayda değer haber yoksa bunu açıkça belirt. "
+        f"Sadece maddeleri yaz, giriş/kapanış cümlesi ekleme."
     )
-    url  = (f"https://generativelanguage.googleapis.com/v1beta/"
-            f"models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}")
-    body = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "tools":    [{"google_search": {}}],
-    }
-    try:
-        r = requests.post(url, json=body, timeout=20)
-        r.raise_for_status()
-        data = r.json()
-        text = (data.get("candidates", [{}])[0]
-                    .get("content", {})
-                    .get("parts", [{}])[0]
-                    .get("text", "")).strip()
+
+    model_used, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=25)
+
+    with _lock:
         if text:
-            with _lock:
-                _news_cache[ticker] = {"text": text, "ts": now}
-        return text or None
-    except Exception as e:
-        logger.warning("get_ai_news(%s): %s", ticker, e)
-        return None
+            logger.info("get_ai_news(%s): OK [model=%s]", ticker, model_used)
+            _news_cache[ticker] = {"text": text, "ts": now, "failed": False}
+        else:
+            logger.warning("get_ai_news(%s): tüm modeller başarısız → negatif cache 5dk", ticker)
+            _news_cache[ticker] = {"text": None, "ts": now, "failed": True}
+    return text
 
-
-_signal_explain_cache = {}           # {ticker: {"text": str, "sig": str, "ts": float}}
-_SIG_EXPLAIN_TTL      = 3600 * 4    # 4 saat
 
 def get_ai_signal_explanation(ticker, signal_data):
-    """Mevcut teknik sinyal için Gemini ile kullanıcı dostu Türkçe açıklama üretir."""
-    if not GEMINI_API_KEY:
-        return None
-    now   = time.time()
-    sig   = signal_data.get("signal", "BEKLE")
+    """Gemini ile teknik sinyal açıklaması üretir.
+
+    Strateji:
+    - _generate_commentary() algoritmik metin GERÇEK DOĞRU olarak AI'ya verilir
+    - AI sadece bu metni daha akıcı/anlaşılır dile çevirir, kendi yorumunu YAPAMAZ
+    - Validation: AI sinyalin yönüyle çelişen anahtar kelimeler üretirse commentary fallback
+    - AI tümüyle başarısız olursa commentary direkt döner (null yerine)
+
+    Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite
+    Negatif cache: yalnızca GERÇEK API hatalarında (commentary her zaman var)
+    """
+    now = time.time()
+    sig = signal_data.get("signal", "BEKLE")
+
+    # Önce cache'i kontrol et
     with _lock:
         cached = _signal_explain_cache.get(ticker)
-        if cached and (now - cached["ts"]) < _SIG_EXPLAIN_TTL and cached.get("sig") == sig:
-            return cached["text"]
+        if cached:
+            ttl = _SIG_FAIL_TTL if cached.get("failed") else _SIG_EXPLAIN_TTL
+            if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
+                return cached.get("text")
 
     name     = STOCK_NAMES.get(ticker, ticker)
     sig_lbl  = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend", "BEKLE": "Belirsiz"}.get(sig, sig)
-    adx      = signal_data.get("adx", 0)
-    e12      = signal_data.get("e12", 0)
-    e99      = signal_data.get("e99", 0)
-    di_plus  = signal_data.get("di_plus", 0)
-    di_minus = signal_data.get("di_minus", 0)
+    adx      = signal_data.get("adx", 0) or 0
+    e12      = signal_data.get("e12", 0) or 0
+    e99      = signal_data.get("e99", 0) or 0
+    di_plus  = signal_data.get("di_plus", 0) or 0
+    di_minus = signal_data.get("di_minus", 0) or 0
     st_bull  = signal_data.get("st_bull", False)
-    price    = signal_data.get("price", 0)
+    price    = signal_data.get("price", 0) or 0
     sl       = signal_data.get("sl_level")
-    bars     = signal_data.get("signal_bars", 1)
+    bars     = signal_data.get("signal_bars", 1) or 1
 
-    sl_line = f"- Stop-Loss seviyesi: {sl:.2f} ₺\n" if sl else ""
+    # ── Algoritmik temel metin (her zaman doğru) ─────────────────────────────
+    commentary = _generate_commentary(ticker, sig, bars, None, adx, di_plus, di_minus, e12, e99, st_bull)
+
+    # AI yoksa direkt algoritmik metni döndür
+    if not GEMINI_API_KEY:
+        return commentary + " Yatırım tavsiyesi değildir."
+
+    # ── Sinyalin yönü (validation için) ──────────────────────────────────────
+    if sig == "AL":
+        direction_tr   = "yükseliş"
+        opposite_words = ["düşüş", "satış", "negatif", "aşağı", "zayıf trend", "bear", "sat ", "kayıp"]
+    elif sig == "SAT":
+        direction_tr   = "düşüş"
+        opposite_words = ["yükseliş", "alım", "pozitif", "yukarı", "güçlü trend", "bull", "al ", "kazanç"]
+    else:
+        direction_tr   = "belirsiz"
+        opposite_words = []
+
+    # ── Stop-loss satırı ─────────────────────────────────────────────────────
+    sl_line = f"\n- Stop-Loss seviyesi: {sl:.2f} ₺ (Supertrend alt/üst bandı)" if sl else ""
+
+    # ── Directive prompt: AI sadece çeviri/stilize yapıyor ───────────────────
     prompt = (
-        f"Sen bir borsa analistinin yardımcısısın. "
-        f"{ticker} ({name}) hissesi için şu an '{sig_lbl}' sinyali var.\n\n"
-        f"Teknik gösterge değerleri:\n"
-        f"- Fiyat: {price:.2f} ₺\n"
-        f"- Supertrend: {'YUKARI (boğa)' if st_bull else 'AŞAĞI (ayı)'}\n"
-        f"- ADX: {adx:.1f} (25 üzeri güçlü trend, 40 üzeri çok güçlü)\n"
-        f"- DI+: {di_plus:.1f}, DI-: {di_minus:.1f}\n"
-        f"- EMA12: {e12:.1f}, EMA99: {e99:.1f}\n"
-        f"{sl_line}"
-        f"- Sinyal süresi: {bars} gün\n\n"
-        f"Lütfen bu sinyali yatırımcıya yönelik, sade ve anlaşılır Türkçe ile 3-4 cümle açıkla. "
-        f"Teknik jargonu minimize et, herkesin anlayabileceği bir dil kullan. "
-        f"Neden bu sinyal oluştu ve ne anlama geliyor kısaca anlat. "
-        f"'Yatırım tavsiyesi değildir' ibaresini sonuna ekle. Başlık ekleme, sadece paragraf yaz."
+        f"Aşağıdaki algoritmik borsa analizi KESINLIKLE DOĞRUDUR. "
+        f"Görevin bunu olduğu gibi kabul edip sıradan bir yatırımcının anlayacağı, "
+        f"sade ve akıcı Türkçe ile 3 cümleye yeniden yazmak.\n\n"
+        f"=== DOĞRU ALGORİTMİK ANALİZ ===\n"
+        f"{commentary}\n\n"
+        f"=== ARKA PLAN ===\n"
+        f"Hisse: {ticker} ({name})\n"
+        f"Sinyal: {sig_lbl} — 3 göstergenin TAMAMI {direction_tr} yönünü işaret ediyor\n"
+        f"Göstergeler:\n"
+        f"  • Supertrend: {'YUKARI ✓' if st_bull else 'AŞAĞI ✓'}\n"
+        f"  • ADX: {adx:.0f} {'(güçlü trend ✓)' if adx >= 25 else '(orta)'}, "
+        f"DI+: {di_plus:.0f}, DI-: {di_minus:.0f}\n"
+        f"  • EMA12 {e12:.0f} {'>' if e12 > e99 else '<'} EMA99 {e99:.0f} ✓\n"
+        f"  • Fiyat: {price:.2f} ₺ | Sinyal süresi: {bars} gün{sl_line}\n\n"
+        f"=== KURALLAR ===\n"
+        f"1. Yukarıdaki algoritmik analizi destekle — ASLA çelişme veya 'ama' ile başlayan cümleler kurma\n"
+        f"2. Sinyali '{sig_lbl}' olarak sun, düşünce belirtme\n"
+        f"3. Teknik terimleri sıradan dile çevir (örn. Supertrend→fiyat trendi, ADX→trend gücü)\n"
+        f"4. Son cümle mutlaka: 'Yatırım tavsiyesi değildir.'\n"
+        f"5. Başlık ekleme, yalnızca paragraf yaz\n"
     )
-    url  = (f"https://generativelanguage.googleapis.com/v1beta/"
-            f"models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}")
-    body = {"contents": [{"parts": [{"text": prompt}]}]}
-    try:
-        r = requests.post(url, json=body, timeout=15)
-        r.raise_for_status()
-        data = r.json()
-        text = (data.get("candidates", [{}])[0]
-                    .get("content", {})
-                    .get("parts", [{}])[0]
-                    .get("text", "")).strip()
-        if text:
-            with _lock:
-                _signal_explain_cache[ticker] = {"text": text, "sig": sig, "ts": now}
-        return text or None
-    except Exception as e:
-        logger.warning("get_ai_signal_explanation(%s): %s", ticker, e)
-        return None
+
+    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=20)
+
+    # ── Validation: sinyalle çelişen metin ürettiyse commentary'ye fall back ─
+    if text and opposite_words:
+        text_lower = text.lower()
+        if any(w in text_lower for w in opposite_words):
+            logger.warning(
+                "get_ai_signal_explanation(%s): AI sinyalle çelişti [%s→%s], commentary kullanılıyor",
+                ticker, sig, text[:60]
+            )
+            text = None
+
+    final_text = text if text else (commentary + " Yatırım tavsiyesi değildir.")
+
+    with _lock:
+        # AI başarılıysa uzun TTL, commentary fallback ise kısa TTL (AI tekrar denensin)
+        ai_ok = bool(text)
+        _signal_explain_cache[ticker] = {
+            "text":   final_text,
+            "sig":    sig,
+            "ts":     now,
+            "failed": not ai_ok,
+        }
+        if ai_ok:
+            logger.info("get_ai_signal_explanation(%s): OK [model=%s]", ticker, model_used)
+        else:
+            logger.info("get_ai_signal_explanation(%s): commentary fallback kullanıldı", ticker)
+
+    return final_text
+
+
+# ── Arka plan: BIST30 haber ön-yüklemesi ─────────────────────────────────────
+_BIST30_PREFETCH = BIST100[:18]   # İlk 18 = BIST30 hisseleri
+
+
+def _prefetch_news_worker():
+    """BIST30 haberlerini cache'e önceden yükler; her 6 saatte bir çalışır.
+
+    Sunucu yeniden başlatıldıktan sonra kullanıcılar soğuk cache'e düşmeden
+    içerik görür. Ayrıca negatif cache'i temizleyerek başarısız istekleri
+    6 saatte bir yeniden dener.
+    """
+    time.sleep(90)   # Servis startup'ı ve veri yüklemesi tamamlanana kadar bekle
+    while True:
+        now = time.time()
+        to_fetch = []
+        with _lock:
+            for ticker in _BIST30_PREFETCH:
+                cached = _news_cache.get(ticker)
+                if not cached:
+                    to_fetch.append(ticker)          # hiç denenmemiş
+                elif cached.get("failed"):
+                    to_fetch.append(ticker)          # başarısız cache süresi dolmuş
+                elif (now - cached["ts"]) > _NEWS_CACHE_TTL * 0.9:
+                    to_fetch.append(ticker)          # cache sona ermek üzere
+
+        logger.info("Prefetch: %d/%d hisse için haber yüklenecek", len(to_fetch), len(_BIST30_PREFETCH))
+        fetched = 0
+        for ticker in to_fetch:
+            try:
+                result = get_ai_news(ticker)
+                if result:
+                    fetched += 1
+            except Exception as e:
+                logger.error("Prefetch hatası [%s]: %s", ticker, e)
+            time.sleep(4)   # İstekler arası 4 saniye — rate-limit koruması
+
+        logger.info("Prefetch tamamlandı: %d/%d başarılı", fetched, len(to_fetch))
+        time.sleep(_NEWS_CACHE_TTL)   # Bir sonraki tur 6 saat sonra
+
+
+_prefetch_thread = threading.Thread(
+    target=_prefetch_news_worker,
+    daemon=True,
+    name="gemini-prefetch"
+)
+_prefetch_thread.start()
 
 
 def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di_m, e12, e99, st_bull):
     """Algoritmik teknik yorum metni üretir (SEO + kullanıcı için)."""
-    name = STOCK_NAMES.get(ticker, ticker)
+    _varlik_names = {
+        "BTC":"Bitcoin","ETH":"Ethereum",
+        "ALTIN":"Altın","GUMUS":"Gümüş",
+        "SP500":"S&P 500","NASDAQ":"NASDAQ Composite",
+        "SOL":"Solana","BNB":"BNB (Binance)",
+        "PETROL":"Ham Petrol","DOGALGAZ":"Doğal Gaz",
+        "XU030":"BIST30 Endeksi","XU100":"BIST100 Endeksi",
+        **{k: v for k,v in US_STOCK_NAMES.items()},
+    }
+    name = STOCK_NAMES.get(ticker) or _varlik_names.get(ticker, ticker)
     adx_quality = "çok güçlü" if adx >= 40 else "güçlü" if adx >= 30 else "orta güçte" if adx >= 25 else "zayıf"
 
     if signal == "AL":
@@ -1390,10 +1773,147 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         )
 
 
-# ── Ortak grafik verisi hesaplama (XU030 + bireysel hisseler) ─────────────────
+# ── Makro varlık tanımları (BTC / Altın / Gümüş) ──────────────────────────────
+_VARLIK_META = {
+    "BTC": {
+        "name":       "Bitcoin",
+        "ticker_yf":  "BTC-USD",
+        "unit":       "USD",
+        "emoji":      "₿",
+        "color":      "#f7931a",
+        "desc":       "Bitcoin (BTC) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
+        "period":     "2y",
+    },
+    "ALTIN": {
+        "name":       "Altın (XAU/USD)",
+        "ticker_yf":  "GC=F",
+        "unit":       "USD/oz",
+        "emoji":      "🥇",
+        "color":      "#e3b341",
+        "desc":       "Altın (XAU/USD) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
+        "period":     "2y",
+    },
+    "GUMUS": {
+        "name":       "Gümüş (XAG/USD)",
+        "ticker_yf":  "SI=F",
+        "unit":       "USD/oz",
+        "emoji":      "🥈",
+        "color":      "#8b949e",
+        "desc":       "Gümüş (XAG/USD) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
+        "period":     "2y",
+    },
+    "ETH": {
+        "name": "Ethereum", "ticker_yf": "ETH-USD", "unit": "USD",
+        "emoji": "⟠", "color": "#627eea",
+        "desc": "Ethereum (ETH) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
+        "period": "2y",
+    },
+    "SP500": {
+        "name": "S&P 500", "ticker_yf": "^GSPC", "unit": "USD",
+        "emoji": "📈", "color": "#3fb950",
+        "desc": "S&P 500 endeksi teknik analizi — Supertrend, ADX ve EMA sinyalleri",
+        "period": "2y",
+    },
+    "NASDAQ": {
+        "name": "NASDAQ Composite", "ticker_yf": "^IXIC", "unit": "USD",
+        "emoji": "💹", "color": "#58a6ff",
+        "desc": "NASDAQ Composite endeksi teknik analizi",
+        "period": "2y",
+    },
+    "SOL": {
+        "name": "Solana", "ticker_yf": "SOL-USD", "unit": "USD",
+        "emoji": "◎", "color": "#9945ff",
+        "desc": "Solana (SOL) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
+        "period": "2y",
+    },
+    "BNB": {
+        "name": "BNB (Binance)", "ticker_yf": "BNB-USD", "unit": "USD",
+        "emoji": "⬡", "color": "#f3ba2f",
+        "desc": "BNB (Binance Coin) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
+        "period": "2y",
+    },
+    "PETROL": {
+        "name": "Ham Petrol (WTI)", "ticker_yf": "CL=F", "unit": "USD/bbl",
+        "emoji": "🛢️", "color": "#d4870b",
+        "desc": "Ham Petrol (WTI) vadeli işlem teknik analizi — Supertrend, ADX ve EMA sinyalleri",
+        "period": "2y",
+    },
+    "DOGALGAZ": {
+        "name": "Doğal Gaz", "ticker_yf": "NG=F", "unit": "USD/MMBtu",
+        "emoji": "🔥", "color": "#ef5a2a",
+        "desc": "Doğal Gaz vadeli işlem teknik analizi — Supertrend, ADX ve EMA sinyalleri",
+        "period": "2y",
+    },
+}
+
+# yfinance sembol eşleme tablosu
+_TICKER_SYMBOL_MAP = {
+    "XU030": "XU030.IS",
+    "XU100": "XU100.IS",
+    "BTC":   "BTC-USD",
+    "ALTIN": "GC=F",
+    "GUMUS": "SI=F",
+    "ETH":      "ETH-USD",
+    "SP500":    "^GSPC",
+    "NASDAQ":   "^IXIC",
+    "SOL":      "SOL-USD",
+    "BNB":      "BNB-USD",
+    "PETROL":   "CL=F",
+    "DOGALGAZ": "NG=F",
+}
+
+# ── ABD Hisseleri ─────────────────────────────────────────────────────────────
+US_STOCKS = [
+    "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA",
+    "NFLX","JPM","BRKB","WMT","V","MA","UNH","XOM",
+]
+US_STOCK_NAMES = {
+    "AAPL":"Apple","MSFT":"Microsoft","NVDA":"NVIDIA",
+    "GOOGL":"Alphabet (Google)","AMZN":"Amazon","META":"Meta Platforms",
+    "TSLA":"Tesla","NFLX":"Netflix","JPM":"JPMorgan Chase",
+    "BRKB":"Berkshire Hathaway","WMT":"Walmart","V":"Visa",
+    "MA":"Mastercard","UNH":"UnitedHealth","XOM":"ExxonMobil",
+}
+US_SECTORS = {
+    "Teknoloji":    ["AAPL","MSFT","NVDA","GOOGL","META"],
+    "E-Ticaret":    ["AMZN"],
+    "Otomotiv":     ["TSLA"],
+    "Medya":        ["NFLX"],
+    "Finans":       ["JPM","BRKB","V","MA"],
+    "Perakende":    ["WMT"],
+    "Sağlık":       ["UNH"],
+    "Enerji":       ["XOM"],
+}
+
+# US stocks için yfinance sembol eşleme (_TICKER_SYMBOL_MAP'a ekle)
+_TICKER_SYMBOL_MAP.update({
+    "AAPL":"AAPL","MSFT":"MSFT","NVDA":"NVDA","GOOGL":"GOOGL","AMZN":"AMZN",
+    "META":"META","TSLA":"TSLA","NFLX":"NFLX","JPM":"JPM","BRKB":"BRK-B",
+    "WMT":"WMT","V":"V","MA":"MA","UNH":"UNH","XOM":"XOM",
+})
+
+# ── Varlık eş grupları (kategori sayfaları için) ──────────────────────────────
+_KRIPTO_PEERS = [
+    {"key":"BTC",  "name":"Bitcoin",  "href":"/btc",  "emoji":"₿"},
+    {"key":"ETH",  "name":"Ethereum", "href":"/eth",  "emoji":"⟠"},
+    {"key":"SOL",  "name":"Solana",   "href":"/sol",  "emoji":"◎"},
+    {"key":"BNB",  "name":"BNB",      "href":"/bnb",  "emoji":"⬡"},
+]
+_EMTIA_PEERS = [
+    {"key":"ALTIN",    "name":"Altın",     "href":"/altin",    "emoji":"🥇"},
+    {"key":"GUMUS",    "name":"Gümüş",     "href":"/gumus",    "emoji":"🥈"},
+    {"key":"PETROL",   "name":"Petrol",    "href":"/petrol",   "emoji":"🛢️"},
+    {"key":"DOGALGAZ", "name":"Doğal Gaz", "href":"/dogalgaz", "emoji":"🔥"},
+]
+_ABD_INDEX_PEERS = [
+    {"key":"SP500", "name":"S&P 500","href":"/abd/sp500", "emoji":"📈"},
+    {"key":"NASDAQ","name":"NASDAQ", "href":"/abd/nasdaq","emoji":"💹"},
+]
+
+# ── Ortak grafik verisi hesaplama (XU030 + bireysel hisseler + makro varlıklar) ─
 def _compute_chart_data(ticker_base, period="2y"):
-    """Herhangi bir hisse için grafik verisi hesaplar (OHLC, EMA, ST, sinyal geçmişi)."""
-    ticker      = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
+    """Herhangi bir hisse / varlık için grafik verisi hesaplar (OHLC, EMA, ST, sinyal geçmişi)."""
+    ticker = _TICKER_SYMBOL_MAP.get(ticker_base, ticker_base + ".IS")
     DISPLAY_BARS = 500
     WARMUP_MIN   = 150
 
@@ -1598,6 +2118,19 @@ def refresh_chart():
             _chart_cache["updated_at"] = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
 
 
+def refresh_xu100_chart():
+    """XU100 grafik verisini günceller — _compute_chart_data wrapper."""
+    try:
+        d = _compute_chart_data("XU100", "5y")
+        if d:
+            with _lock:
+                _xu100_chart_cache["data"] = d
+                _xu100_chart_cache["updated_at"] = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+            logger.info("XU100 chart cache güncellendi")
+    except Exception as e:
+        logger.error("refresh_xu100_chart: %s", e, exc_info=True)
+
+
 @app.route("/api/chart")
 def api_chart():
     with _lock:
@@ -1606,6 +2139,270 @@ def api_chart():
             "updated_at": _chart_cache["updated_at"],
             "loading":    _chart_cache["data"] is None,
         })
+
+
+@app.route("/api/chart/XU100")
+def api_chart_xu100():
+    with _lock:
+        return safe_json({
+            "chart":      _xu100_chart_cache["data"],
+            "updated_at": _xu100_chart_cache["updated_at"],
+            "loading":    _xu100_chart_cache["data"] is None,
+        })
+
+
+def _refresh_varlik_chart(varlik_key, cache_obj):
+    """BTC / ALTIN / GUMUS grafik verisini günceller."""
+    meta = _VARLIK_META.get(varlik_key, {})
+    try:
+        d = _compute_chart_data(varlik_key, meta.get("period", "2y"))
+        if d:
+            with _lock:
+                cache_obj["data"] = d
+                cache_obj["updated_at"] = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+            logger.info("%s chart cache güncellendi", varlik_key)
+    except Exception as e:
+        logger.error("_refresh_varlik_chart(%s): %s", varlik_key, e, exc_info=True)
+
+
+@app.route("/api/chart/BTC")
+def api_chart_btc():
+    with _lock:
+        return safe_json({
+            "chart":      _btc_chart_cache["data"],
+            "updated_at": _btc_chart_cache["updated_at"],
+            "loading":    _btc_chart_cache["data"] is None,
+        })
+
+
+@app.route("/api/chart/ALTIN")
+def api_chart_altin():
+    with _lock:
+        return safe_json({
+            "chart":      _altin_chart_cache["data"],
+            "updated_at": _altin_chart_cache["updated_at"],
+            "loading":    _altin_chart_cache["data"] is None,
+        })
+
+
+@app.route("/api/chart/GUMUS")
+def api_chart_gumus():
+    with _lock:
+        return safe_json({
+            "chart":      _gumus_chart_cache["data"],
+            "updated_at": _gumus_chart_cache["updated_at"],
+            "loading":    _gumus_chart_cache["data"] is None,
+        })
+
+
+@app.route("/api/chart/ETH")
+def api_chart_eth():
+    with _lock:
+        return safe_json({"chart": _eth_chart_cache["data"],
+                          "updated_at": _eth_chart_cache["updated_at"],
+                          "loading": _eth_chart_cache["data"] is None})
+
+@app.route("/api/chart/SP500")
+def api_chart_sp500():
+    with _lock:
+        return safe_json({"chart": _sp500_chart_cache["data"],
+                          "updated_at": _sp500_chart_cache["updated_at"],
+                          "loading": _sp500_chart_cache["data"] is None})
+
+@app.route("/api/chart/NASDAQ")
+def api_chart_nasdaq():
+    with _lock:
+        return safe_json({"chart": _nasdaq_chart_cache["data"],
+                          "updated_at": _nasdaq_chart_cache["updated_at"],
+                          "loading": _nasdaq_chart_cache["data"] is None})
+
+@app.route("/api/chart/SOL")
+def api_chart_sol():
+    with _lock:
+        return safe_json({"chart": _sol_chart_cache["data"],
+                          "updated_at": _sol_chart_cache["updated_at"],
+                          "loading": _sol_chart_cache["data"] is None})
+
+@app.route("/api/chart/BNB")
+def api_chart_bnb():
+    with _lock:
+        return safe_json({"chart": _bnb_chart_cache["data"],
+                          "updated_at": _bnb_chart_cache["updated_at"],
+                          "loading": _bnb_chart_cache["data"] is None})
+
+@app.route("/api/chart/PETROL")
+def api_chart_petrol():
+    with _lock:
+        return safe_json({"chart": _petrol_chart_cache["data"],
+                          "updated_at": _petrol_chart_cache["updated_at"],
+                          "loading": _petrol_chart_cache["data"] is None})
+
+@app.route("/api/chart/DOGALGAZ")
+def api_chart_dogalgaz():
+    with _lock:
+        return safe_json({"chart": _dogalgaz_chart_cache["data"],
+                          "updated_at": _dogalgaz_chart_cache["updated_at"],
+                          "loading": _dogalgaz_chart_cache["data"] is None})
+
+
+@app.route("/api/chart/us/<ticker>")
+def api_chart_us_stock(ticker):
+    """ABD hissesi grafik verisi — lazy cache (15 dakika TTL)."""
+    ticker = ticker.upper()
+    if ticker not in US_STOCKS and ticker not in ("SP500","NASDAQ","SOL","BNB","PETROL","DOGALGAZ"):
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+    now  = time.time()
+    with _lock:
+        cached = _stock_chart_cache.get(f"US_{ticker}")
+        if cached and (now - cached["ts"]) < _STOCK_CACHE_TTL:
+            return safe_json({"chart": cached["data"], "updated_at": cached["updated_at"], "loading": False})
+    data = _compute_chart_data(ticker, "2y")
+    upd  = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+    if data:
+        with _lock:
+            _stock_chart_cache[f"US_{ticker}"] = {"data": data, "ts": now, "updated_at": upd}
+        return safe_json({"chart": data, "updated_at": upd, "loading": False})
+    return safe_json({"chart": None, "loading": True})
+
+
+# ── Makro Varlık Sayfaları (BTC / ETH / Altın / Gümüş) ──────────────────────
+@app.route("/btc")
+def btc_page():
+    peers = [p for p in _KRIPTO_PEERS if p["key"] != "BTC"]
+    return render_template("varlik.html", varlik_key="BTC", meta=_VARLIK_META["BTC"],
+                           peers=peers, category_url="/kripto", category_label="Kripto")
+
+
+@app.route("/eth")
+def eth_page():
+    peers = [p for p in _KRIPTO_PEERS if p["key"] != "ETH"]
+    return render_template("varlik.html", varlik_key="ETH", meta=_VARLIK_META["ETH"],
+                           peers=peers, category_url="/kripto", category_label="Kripto")
+
+
+@app.route("/sol")
+def sol_page():
+    peers = [p for p in _KRIPTO_PEERS if p["key"] != "SOL"]
+    return render_template("varlik.html", varlik_key="SOL", meta=_VARLIK_META["SOL"],
+                           peers=peers, category_url="/kripto", category_label="Kripto")
+
+@app.route("/bnb")
+def bnb_page():
+    peers = [p for p in _KRIPTO_PEERS if p["key"] != "BNB"]
+    return render_template("varlik.html", varlik_key="BNB", meta=_VARLIK_META["BNB"],
+                           peers=peers, category_url="/kripto", category_label="Kripto")
+
+
+@app.route("/altin")
+def altin_page():
+    peers = [p for p in _EMTIA_PEERS if p["key"] != "ALTIN"]
+    return render_template("varlik.html", varlik_key="ALTIN", meta=_VARLIK_META["ALTIN"],
+                           peers=peers, category_url="/emtialar", category_label="Emtialar")
+
+
+@app.route("/gumus")
+def gumus_page():
+    peers = [p for p in _EMTIA_PEERS if p["key"] != "GUMUS"]
+    return render_template("varlik.html", varlik_key="GUMUS", meta=_VARLIK_META["GUMUS"],
+                           peers=peers, category_url="/emtialar", category_label="Emtialar")
+
+
+@app.route("/petrol")
+def petrol_page():
+    peers = [p for p in _EMTIA_PEERS if p["key"] != "PETROL"]
+    return render_template("varlik.html", varlik_key="PETROL", meta=_VARLIK_META["PETROL"],
+                           peers=peers, category_url="/emtialar", category_label="Emtialar")
+
+@app.route("/dogalgaz")
+def dogalgaz_page():
+    peers = [p for p in _EMTIA_PEERS if p["key"] != "DOGALGAZ"]
+    return render_template("varlik.html", varlik_key="DOGALGAZ", meta=_VARLIK_META["DOGALGAZ"],
+                           peers=peers, category_url="/emtialar", category_label="Emtialar")
+
+
+@app.route("/kripto")
+def kripto_page():
+    return render_template("kategori.html",
+        category_key="kripto",
+        title="Kripto Varlıklar", emoji="🔐",
+        desc="Bitcoin ve Ethereum Supertrend + ADX + EMA12/99 teknik analizi",
+        assets=_KRIPTO_PEERS,
+        us_stocks=None)
+
+@app.route("/emtialar")
+def emtialar_page():
+    return render_template("kategori.html",
+        category_key="emtialar",
+        title="Emtialar", emoji="🥇",
+        desc="Altın ve Gümüş Supertrend + ADX + EMA12/99 teknik analizi",
+        assets=_EMTIA_PEERS,
+        us_stocks=None)
+
+@app.route("/abd")
+def abd_page():
+    us_list = [{"key": t, "name": US_STOCK_NAMES.get(t,t),
+                "sector": next((s for s,tl in US_SECTORS.items() if t in tl),"Diğer"),
+                "href": f"/abd/{t}"}
+               for t in US_STOCKS]
+    return render_template("kategori.html",
+        category_key="abd",
+        title="ABD Piyasaları", emoji="🇺🇸",
+        desc="S&P 500, NASDAQ ve ABD büyük şirketleri teknik analizi",
+        assets=_ABD_INDEX_PEERS,
+        us_stocks=us_list)
+
+@app.route("/abd/tarama")
+def abd_tarama_page():
+    """ABD hisseleri tarama sayfası."""
+    all_assets = []
+    # Önce endeksler
+    for p in _ABD_INDEX_PEERS:
+        all_assets.append({**p, "sector": "Endeks", "api": f"/api/chart/{p['key']}"})
+    # Sonra hisseler
+    for t in US_STOCKS:
+        sector = next((s for s,tl in US_SECTORS.items() if t in tl), "Diğer")
+        all_assets.append({
+            "key": t, "name": US_STOCK_NAMES.get(t, t),
+            "href": f"/abd/{t}", "emoji": "🇺🇸",
+            "sector": sector, "api": f"/api/chart/us/{t}"
+        })
+    return render_template("abd_tarama.html",
+        title="ABD Tarama", emoji="🔍",
+        desc="ABD hisseleri ve endeksleri — Supertrend + ADX + EMA sinyal tarayıcısı",
+        assets=all_assets)
+
+@app.route("/abd/sp500")
+def abd_sp500_page():
+    peers = [p for p in _ABD_INDEX_PEERS if p["key"] != "SP500"]
+    return render_template("varlik.html", varlik_key="SP500", meta=_VARLIK_META["SP500"],
+                           peers=peers, category_url="/abd", category_label="ABD")
+
+@app.route("/abd/nasdaq")
+def abd_nasdaq_page():
+    peers = [p for p in _ABD_INDEX_PEERS if p["key"] != "NASDAQ"]
+    return render_template("varlik.html", varlik_key="NASDAQ", meta=_VARLIK_META["NASDAQ"],
+                           peers=peers, category_url="/abd", category_label="ABD")
+
+@app.route("/abd/<ticker>")
+def abd_stock_page(ticker):
+    ticker = ticker.upper()
+    if ticker in ("SP500",): return abd_sp500_page()
+    if ticker in ("NASDAQ",): return abd_nasdaq_page()
+    if ticker not in US_STOCKS:
+        return render_template("index.html"), 404
+    name   = US_STOCK_NAMES.get(ticker, ticker)
+    sector = next((s for s,tl in US_SECTORS.items() if ticker in tl), "Diğer")
+    meta = {
+        "name": f"{ticker} — {name}", "ticker_yf": _TICKER_SYMBOL_MAP.get(ticker, ticker),
+        "unit": "USD", "emoji": "🇺🇸", "color": "#1f6feb",
+        "desc": f"{name} ({ticker}) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
+        "period": "2y",
+    }
+    peers = [{"key":t,"name":US_STOCK_NAMES.get(t,t),"href":f"/abd/{t}","emoji":"🇺🇸"}
+             for t in US_STOCKS if t != ticker][:4]
+    return render_template("varlik.html", varlik_key=ticker, meta=meta,
+                           peers=peers, category_url="/abd", category_label="ABD",
+                           chart_api=f"/api/chart/us/{ticker}")
 
 
 # ── Bireysel Hisse Sayfaları ──────────────────────────────────────────────────
@@ -1623,16 +2420,51 @@ def stock_page(ticker):
     name   = STOCK_NAMES.get(ticker, ticker)
     sector = _get_sector(ticker)
     others = [t for t in BIST100 if t != ticker and t != "XU030"]
+
+    # SEO: mevcut cache'ten temel sinyal verisini SSR için çek
+    ssr_signal = None
+    with _lock:
+        for s in _cache["data"]:
+            if s.get("ticker") == ticker:
+                ssr_signal = s
+                break
+
     return render_template("hisse.html",
                            ticker=ticker,
                            name=name,
                            sector=sector,
                            others=others,
-                           stock_names=STOCK_NAMES)
+                           stock_names=STOCK_NAMES,
+                           ssr_signal=ssr_signal)
 
 
 _fundamentals_cache = {}
 _FUND_TTL = 3600 * 4  # 4 saat
+
+# ── Temel analiz sanity sınırları (yfinance Türk hisselerinde bozuk değer üretir) ──
+_FUND_SANITY = {
+    "pe_ratio":       (0.0, 150.0),   # P/E > 150 → muhtemelen dolar/lira karışıklığı
+    "dividend_yield": (0.0, 50.0),    # %50 üstü → imkânsız (zaten *100 çarpılmış)
+    "beta":           (0.10, 5.0),    # 0.06-0.09 beta havacılık için saçma
+    "pb_ratio":       (0.0, 50.0),    # P/B > 50 → bozuk
+    "roe":            (-100.0, 200.0),# ROE > 200% → bozuk
+}
+
+def _clean_fundamentals(data: dict) -> dict:
+    """yfinance bozuk Türk hisse değerlerini sanity sınırlarına göre None'a çeker."""
+    cleaned = {}
+    for k, v in data.items():
+        if k in _FUND_SANITY and v is not None:
+            lo, hi = _FUND_SANITY[k]
+            if not (lo <= v <= hi):
+                logger.debug("_clean_fundamentals: %s=%s sınır dışı → None", k, v)
+                cleaned[k] = None
+            else:
+                cleaned[k] = v
+        else:
+            cleaned[k] = v
+    return cleaned
+
 
 def _get_fundamentals(ticker_base):
     """yfinance ile temel analiz verilerini döndürür."""
@@ -1655,7 +2487,7 @@ def _get_fundamentals(ticker_base):
             if v >= 1e6:  return f"{v/1e6:.1f} Mn₺"
             return f"{v:,.0f} ₺"
 
-        data = {
+        raw = {
             "pe_ratio":       round(safe("trailingPE", 0), 1) if safe("trailingPE") else None,
             "pb_ratio":       round(safe("priceToBook", 0), 2) if safe("priceToBook") else None,
             "eps":            safe("trailingEps"),
@@ -1670,6 +2502,7 @@ def _get_fundamentals(ticker_base):
             "avg_volume":     safe("averageVolume"),
             "short_name":     safe("shortName"),
         }
+        data = _clean_fundamentals(raw)
         with _lock:
             _fundamentals_cache[ticker_base] = {"data": data, "ts": now}
         return data
@@ -1704,24 +2537,21 @@ def api_stock_news(ticker):
 @app.route("/api/hisse/<ticker>/signal-explanation")
 @limiter.limit("20 per minute")
 def api_signal_explanation(ticker):
-    """Gemini AI sinyal açıklaması — 4 saatlik cache (sinyal değişince yenilenir)."""
+    """Sinyal açıklaması — AI varsa AI, yoksa algoritmik metin döner. Her zaman dolu."""
     ticker = ticker.upper()
     if ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
-    if not GEMINI_API_KEY:
-        return safe_json({"explanation": None, "reason": "no_api_key"})
 
     # Anlık sinyal datasını cache'den al
     with _lock:
-        stocks = list(_cache["data"])
-    stock = next((s for s in stocks if s["ticker"] == ticker), None)
+        stocks = list(_cache.get("data") or _cache.get("stocks") or [])
+    stock = next((s for s in stocks if s.get("ticker") == ticker), None)
     if not stock:
         return safe_json({"explanation": None, "reason": "no_data"})
 
     text = get_ai_signal_explanation(ticker, stock)
-    if text:
-        return safe_json({"explanation": text, "signal": stock.get("signal"), "source": "gemini"})
-    return safe_json({"explanation": None})
+    source = "gemini" if GEMINI_API_KEY else "algorithmic"
+    return safe_json({"explanation": text, "signal": stock.get("signal"), "source": source})
 
 
 _mtf_cache     = {}        # {ticker: {"data": {...}, "ts": float}}
@@ -1871,17 +2701,103 @@ def api_stock_chart(ticker):
     return safe_json({"chart": None, "loading": True})
 
 
+# ── Strateji Tarayıcısı ──────────────────────────────────────────────────────
+@app.route("/tarama")
+def tarama():
+    return render_template("tarama.html")
+
+
+@app.route("/api/tarama")
+@limiter.limit("60 per minute")
+def api_tarama():
+    """Hisse tarayıcısı — sinyal, ADX, fiyat, hacim, sektör filtresi."""
+    sig      = request.args.get("signal",    "")
+    min_adx  = float(request.args.get("min_adx",   0))
+    min_p    = float(request.args.get("min_price", 0))
+    max_p    = float(request.args.get("max_price", 999999))
+    sector   = request.args.get("sector",    "")
+    eq       = request.args.get("eq",        "")   # IDEAL | IYI | DIKKATLI | UZAK
+    sort_by  = request.args.get("sort",      "adx")
+
+    with _lock:
+        stocks = list(_cache["data"])
+        upd    = _cache.get("updated_at", "")
+
+    def _parse_adx(s):
+        """ADX değerini indicators.adx.label'dan çıkar ('ADX 26' → 26.0)."""
+        inds = s.get("indicators") or {}
+        adx_ind = inds.get("adx") or {}
+        label = adx_ind.get("label", "")  # "ADX 26"
+        try:
+            return float(label.split()[-1])
+        except (ValueError, IndexError):
+            return 0.0
+
+    results = []
+    for s in stocks:
+        if s.get("ticker") in ("XU030", "XU100"): continue
+        if sig    and s.get("signal")              != sig:    continue
+        if sector and _get_sector(s.get("ticker","")) != sector: continue
+        if eq     and s.get("entry_quality")       != eq:    continue
+        price = s.get("price")  or 0
+        adx   = _parse_adx(s)
+        if price < min_p or price > max_p: continue
+        if adx < min_adx: continue
+        results.append({
+            "ticker":        s.get("ticker"),
+            "name":          STOCK_NAMES.get(s.get("ticker",""), s.get("ticker","")),
+            "sector":        _get_sector(s.get("ticker","")),
+            "signal":        s.get("signal",""),
+            "price":         price,
+            "change_pct":    s.get("change_pct") or 0,
+            "adx":           adx,
+            "signal_bars":   s.get("signal_bars") or 1,
+            "entry_quality": s.get("entry_quality",""),
+            "vol_ratio":     s.get("vol_ratio") or 1.0,
+            "bull_score":    s.get("bull_score") or 0,
+            "sl_level":      s.get("sl_level"),
+        })
+
+    rev = sort_by in ("adx","price","signal_bars","vol_ratio","bull_score","change_pct")
+    results.sort(key=lambda x: (x.get(sort_by) or 0), reverse=rev)
+
+    with _lock:
+        sectors = sorted(set(_get_sector(s.get("ticker","")) for s in _cache["data"]
+                             if s.get("ticker") not in ("XU030","XU100")))
+
+    return jsonify({"results": results, "sectors": sectors,
+                    "count": len(results), "updated_at": upd})
+
+
 # ── SEO: sitemap, robots, favicon ────────────────────────────────────────────
 @app.route("/sitemap.xml")
 def sitemap():
     pages = [
         {"loc": "/",            "priority": "1.0", "changefreq": "hourly"},
         {"loc": "/ozet",        "priority": "0.9", "changefreq": "daily"},
+        {"loc": "/tarama",      "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/gucu-yuksek", "priority": "0.8", "changefreq": "daily"},
         {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly"},
         {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly"},
         {"loc": "/gizlilik",    "priority": "0.3", "changefreq": "yearly"},
         {"loc": "/iletisim",    "priority": "0.4", "changefreq": "yearly"},
+        {"loc": "/btc",         "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/altin",       "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/gumus",       "priority": "0.7", "changefreq": "daily"},
+        {"loc": "/eth",             "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/kripto",          "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/emtialar",        "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/abd",             "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/abd/sp500",       "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/abd/nasdaq",      "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/sol",             "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/bnb",             "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/petrol",          "priority": "0.8", "changefreq": "daily"},
+        {"loc": "/dogalgaz",        "priority": "0.7", "changefreq": "daily"},
+        {"loc": "/abd/tarama",      "priority": "0.7", "changefreq": "daily"},
     ]
+    for t in US_STOCKS:
+        pages.append({"loc": f"/abd/{t}", "priority": "0.7", "changefreq": "daily"})
     for t in BIST30:
         if t != "XU030":
             pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
@@ -2000,6 +2916,47 @@ def ozet_page():
         stock_names=STOCK_NAMES)
 
 
+# ── Güçlü Momentum Listesi ────────────────────────────────────────────────────
+@app.route("/gucu-yuksek")
+def gucu_yuksek():
+    """En güçlü momentum sinyallerini göster (ADX + hacim + bull_score kompozit skoru)."""
+    with _lock:
+        stocks = list(_cache["data"])
+        updated_at = _cache.get("updated_at", "")
+        loading = len(stocks) == 0
+
+    # Sadece AL/SAT sinyallerini al; kompozit skor hesapla
+    def momentum_score(s):
+        adx = s.get("adx") or 0
+        try:
+            adx = float(str(adx).replace(",", "."))
+        except Exception:
+            adx = 0
+        vr   = s.get("vol_ratio") or 1.0
+        bs   = s.get("bull_score") if s.get("signal") == "AL" else (s.get("bear_score") or 0)
+        bs   = bs or 0
+        conf = 10 if s.get("confirmed") else 0
+        rsi  = s.get("rsi") or 50
+        rsi_pts = 10 if 50 <= rsi <= 75 else (5 if rsi > 75 else 0)
+        return round(
+            min(adx, 50) / 50 * 30 +
+            min(vr, 5) / 5 * 25 +
+            bs / 3 * 25 +
+            conf +
+            rsi_pts
+        )
+
+    active = [s for s in stocks if s.get("signal") in ("AL", "SAT") and s.get("ticker") != "XU030"]
+    for s in active:
+        s["_mscore"] = momentum_score(s)
+    active.sort(key=lambda s: s["_mscore"], reverse=True)
+
+    today_str = date.today().strftime("%d.%m.%Y")
+    return render_template("gucu_yuksek.html",
+        stocks=active, loading=loading, updated_at=updated_at,
+        today_str=today_str, stock_names=STOCK_NAMES)
+
+
 # ── Eğitim Sayfaları ──────────────────────────────────────────────────────────
 @app.route("/metodoloji")
 def metodoloji():
@@ -2019,6 +2976,44 @@ def gizlilik():
 @app.route("/iletisim")
 def iletisim():
     return render_template("iletisim.html")
+
+
+@app.route("/api/contact", methods=["POST"])
+@limiter.limit("3 per hour")
+def api_contact():
+    data    = request.get_json(silent=True) or {}
+    name    = str(data.get("name",    "")).strip()[:100]
+    email   = str(data.get("email",   "")).strip()[:200]
+    subject = str(data.get("subject", "")).strip()[:200]
+    message = str(data.get("message", "")).strip()[:2000]
+
+    if not all([name, email, message]):
+        return jsonify({"ok": False, "error": "Eksik alan"}), 400
+    if "@" not in email or "." not in email:
+        return jsonify({"ok": False, "error": "Geçersiz e-posta"}), 400
+
+    SMTP_HOST  = os.environ.get("SMTP_HOST", "")
+    SMTP_USER  = os.environ.get("SMTP_USER", "")
+    SMTP_PASS  = os.environ.get("SMTP_PASS", "")
+    ADMIN_MAIL = os.environ.get("ADMIN_MAIL", "iletisim@borsapusula.com")
+
+    if SMTP_HOST and SMTP_USER:
+        try:
+            msg = MIMEMultipart()
+            msg["From"]    = SMTP_USER
+            msg["To"]      = ADMIN_MAIL
+            msg["Subject"] = f"[BorsaPusula İletişim] {subject}"
+            body = f"Gönderen: {name} <{email}>\nKonu: {subject}\n\n{message}"
+            msg.attach(MIMEText(body, "plain", "utf-8"))
+            with smtplib.SMTP_SSL(SMTP_HOST, 465) as s:
+                s.login(SMTP_USER, SMTP_PASS)
+                s.sendmail(SMTP_USER, ADMIN_MAIL, msg.as_string())
+            logger.info("Contact mail gönderildi: %s <%s>", name, email)
+        except Exception as ex:
+            logger.error("Contact mail hatası: %s", ex)
+            return jsonify({"ok": False, "error": "Mail gönderilemedi"}), 500
+
+    return jsonify({"ok": True})
 
 
 @app.route("/yasal")
@@ -2086,14 +3081,16 @@ def backtest_ticker(ticker_base, fwd_days=20):
                 exit_i     = min(j, n - 1)
                 exit_price = float(close.iloc[exit_i])
                 ret_pct    = (exit_price - entry_price) / entry_price * 100
+                duration_bars = exit_i - entry_i
                 episodes.append({
-                    "sig":         sig,
-                    "date":        close.index[entry_i].strftime("%d.%m.%Y"),
-                    "entry_price": round(entry_price, 2),
-                    "exit_price":  round(exit_price, 2),
-                    "bars":        exit_i - entry_i,
-                    "ret_pct":     round(ret_pct, 2),
-                    "win":         (ret_pct > 0 and sig == "AL") or (ret_pct < 0 and sig == "SAT"),
+                    "sig":           sig,
+                    "date":          close.index[entry_i].strftime("%d.%m.%Y"),
+                    "entry_price":   round(entry_price, 2),
+                    "exit_price":    round(exit_price, 2),
+                    "bars":          duration_bars,
+                    "duration_days": duration_bars,  # günlük bar = işlem günü
+                    "ret_pct":       round(ret_pct, 2),
+                    "win":           (ret_pct > 0 and sig == "AL") or (ret_pct < 0 and sig == "SAT"),
                 })
                 i = j
             else:
@@ -2132,15 +3129,48 @@ def run_backtest():
             })
 
     def stats(eps):
-        if not eps: return {"count": 0, "win_rate": 0, "avg_ret": 0, "best": 0, "worst": 0}
+        if not eps: return {
+            "count": 0, "win_rate": 0, "avg_ret": 0, "best": 0, "worst": 0,
+            "sharpe": None, "max_drawdown": None, "profit_factor": None,
+            "avg_duration_days": None,
+        }
         wins = [e for e in eps if e["win"]]
         rets = [e["ret_pct"] for e in eps]
+        avg  = sum(rets) / len(rets)
+        std  = (sum((r - avg) ** 2 for r in rets) / len(rets)) ** 0.5
+
+        # Sharpe (günlük getiri % → yıllık ölçekle; her işlem ~bağımsız)
+        sharpe = round(avg / std * (len(rets) ** 0.5), 2) if std > 0 else None
+
+        # Kümülatif max drawdown
+        cum   = 100.0
+        peak  = 100.0
+        max_dd = 0.0
+        for r in rets:
+            cum  *= (1 + r / 100)
+            peak  = max(peak, cum)
+            dd    = (cum - peak) / peak * 100
+            max_dd = min(max_dd, dd)
+
+        # Profit factor = brüt kazanç / brüt kayıp
+        gross_win  = sum(r for r in rets if r > 0)
+        gross_loss = abs(sum(r for r in rets if r < 0))
+        pf = round(gross_win / gross_loss, 2) if gross_loss > 0 else None
+
+        # Ortalama işlem süresi
+        durations = [e.get("duration_days") for e in eps if e.get("duration_days") is not None]
+        avg_dur   = round(sum(durations) / len(durations), 1) if durations else None
+
         return {
-            "count":    len(eps),
-            "win_rate": round(len(wins) / len(eps) * 100, 1),
-            "avg_ret":  round(sum(rets) / len(rets), 2),
-            "best":     round(max(rets), 2),
-            "worst":    round(min(rets), 2),
+            "count":             len(eps),
+            "win_rate":          round(len(wins) / len(eps) * 100, 1),
+            "avg_ret":           round(avg, 2),
+            "best":              round(max(rets), 2),
+            "worst":             round(min(rets), 2),
+            "sharpe":            sharpe,
+            "max_drawdown":      round(max_dd, 2),
+            "profit_factor":     pf,
+            "avg_duration_days": avg_dur,
         }
 
     result = {
@@ -2418,9 +3448,23 @@ def blog_index():
     return render_template("blog.html", articles=ARTICLES, cat_counts=cat_counts)
 
 
+# Eski / kısa slug'lar → doğru slug 301 yönlendirme tablosu
+_BLOG_SLUG_REDIRECTS = {
+    "supertrend-nedir":              "supertrend-indikatoru-nedir",
+    "supertrend":                    "supertrend-indikatoru-nedir",
+    "adx-nedir":                     "adx-indikatoru-nedir",
+    "ema-nedir":                     "ema-nedir-nasil-hesaplanir",
+    "rsi-nedir":                     "rsi-gosterge-analizi",
+    "bist30-nedir":                  "bist100-nedir",
+    "supertrend-vs-macd-karsilastirma": "supertrend-vs-macd",
+}
+
 @app.route("/blog/<slug>")
 def blog_article(slug):
-    from flask import abort
+    from flask import abort, redirect, url_for
+    # Bilinen eski slug → doğru slug 301 yönlendirme
+    if slug in _BLOG_SLUG_REDIRECTS:
+        return redirect(url_for("blog_article", slug=_BLOG_SLUG_REDIRECTS[slug]), code=301)
     article = ARTICLES_BY_SLUG.get(slug)
     if not article:
         abort(404)
@@ -2435,9 +3479,30 @@ def blog_article(slug):
 # ── Startup ───────────────────────────────────────────────────────────────────
 def _startup():
     refresh_chart()
+    # XU100 + makro varlıkları arka planda paralel yükle
+    threading.Thread(target=refresh_xu100_chart, daemon=True).start()
+    threading.Thread(target=_refresh_varlik_chart, args=("BTC",   _btc_chart_cache),   daemon=True).start()
+    threading.Thread(target=_refresh_varlik_chart, args=("ALTIN", _altin_chart_cache), daemon=True).start()
+    threading.Thread(target=_refresh_varlik_chart, args=("GUMUS", _gumus_chart_cache), daemon=True).start()
+    threading.Thread(target=_refresh_varlik_chart, args=("ETH",    _eth_chart_cache),    daemon=True).start()
+    threading.Thread(target=_refresh_varlik_chart, args=("SP500",  _sp500_chart_cache),  daemon=True).start()
+    threading.Thread(target=_refresh_varlik_chart, args=("NASDAQ", _nasdaq_chart_cache), daemon=True).start()
+    threading.Thread(target=_refresh_varlik_chart, args=("SOL",      _sol_chart_cache),      daemon=True).start()
+    threading.Thread(target=_refresh_varlik_chart, args=("BNB",      _bnb_chart_cache),      daemon=True).start()
+    threading.Thread(target=_refresh_varlik_chart, args=("PETROL",   _petrol_chart_cache),   daemon=True).start()
+    threading.Thread(target=_refresh_varlik_chart, args=("DOGALGAZ", _dogalgaz_chart_cache), daemon=True).start()
     time.sleep(3)
-    threading.Thread(target=background_refresh,     daemon=True).start()
-    threading.Thread(target=background_live_prices, daemon=True).start()
+    threading.Thread(target=background_refresh,        daemon=True).start()
+    threading.Thread(target=background_live_prices,    daemon=True).start()
+    threading.Thread(target=background_global_prices,  daemon=True).start()
+    # Makro ticker'ları servis başlar başlamaz ilk kez çek (arka planda)
+    def _warm_macro():
+        items = _fetch_macro()
+        with _lock:
+            _macro_cache["data"] = items
+            _macro_cache["ts"]   = time.time()
+        logger.info("_warm_macro: %d sembol hazır", len(items))
+    threading.Thread(target=_warm_macro, daemon=True).start()
     # Backtest'i arka planda başlat (30 dakika gecikme ile — önce ana veri yüklensin)
     def _delayed_backtest():
         time.sleep(1800)   # 30 dakika sonra

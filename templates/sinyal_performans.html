@@ -34,7 +34,7 @@
   .stat-num  { font-size:36px; font-weight:800; line-height:1; }
   .stat-lbl  { font-size:11px; color:#8b949e; margin-top:8px; text-transform:uppercase; letter-spacing:.5px; }
   .stat-sub  { font-size:12px; color:#8b949e; margin-top:4px; }
-  .c-green { color:#3fb950; } .c-red { color:#f85149; } .c-blue { color:#58a6ff; } .c-gold { color:#e3b341; }
+  .c-green { color:#3fb950; } .c-red { color:#f85149; } .c-blue { color:#58a6ff; } .c-gold { color:#f59e0b; }
 
   /* Section header */
   .sec-head { font-size:16px; font-weight:700; color:#f0f6fc; margin:28px 0 14px; display:flex; align-items:center; gap:8px; }
@@ -170,6 +170,46 @@
       <div class="stat-lbl">İncelenen Hisse</div>
       <div class="stat-sub">{{ bt.computed_at }}</div>
     </div>
+  </div>
+
+  <!-- Risk Metrikleri -->
+  <div class="sec-head">
+    Risk Metrikleri <span>(Güçlü Trend — AL sinyalleri)</span>
+  </div>
+  <div class="stat-grid" style="margin-bottom:28px">
+    <div class="stat-card" title="Sharpe Ratio: Ortalama getirinin oynaklığa oranı. >1.0 iyi, >2.0 çok iyi.">
+      <div class="stat-num {% if bt.al.sharpe and bt.al.sharpe >= 1.0 %}c-green{% elif bt.al.sharpe and bt.al.sharpe >= 0 %}c-gold{% else %}c-red{% endif %}">
+        {% if bt.al.sharpe is not none %}{{ bt.al.sharpe }}{% else %}—{% endif %}
+      </div>
+      <div class="stat-lbl">📊 Sharpe Ratio</div>
+      <div class="stat-sub">&gt;1.0 kabul edilebilir · &gt;2.0 mükemmel</div>
+    </div>
+    <div class="stat-card" title="Maksimum kümülatif düşüş. Kötü seri döneminde en derin kayıp.">
+      <div class="stat-num {% if bt.al.max_drawdown and bt.al.max_drawdown > -15 %}c-green{% elif bt.al.max_drawdown and bt.al.max_drawdown > -30 %}c-gold{% else %}c-red{% endif %}">
+        {% if bt.al.max_drawdown is not none %}{{ bt.al.max_drawdown }}%{% else %}—{% endif %}
+      </div>
+      <div class="stat-lbl">📉 Max Drawdown</div>
+      <div class="stat-sub">Ardışık kayıp serisi etkisi</div>
+    </div>
+    <div class="stat-card" title="Profit Factor: Brüt kazanç / brüt kayıp. >1.5 iyi, >2.0 çok iyi.">
+      <div class="stat-num {% if bt.al.profit_factor and bt.al.profit_factor >= 1.5 %}c-green{% elif bt.al.profit_factor and bt.al.profit_factor >= 1.0 %}c-gold{% else %}c-red{% endif %}">
+        {% if bt.al.profit_factor is not none %}{{ bt.al.profit_factor }}{% else %}—{% endif %}
+      </div>
+      <div class="stat-lbl">⚖️ Profit Factor</div>
+      <div class="stat-sub">Kazanç / kayıp oranı</div>
+    </div>
+    <div class="stat-card" title="Ortalama sinyal süre (gün)">
+      <div class="stat-num c-blue">
+        {% if bt.al.avg_duration_days is not none %}{{ bt.al.avg_duration_days }}g{% else %}—{% endif %}
+      </div>
+      <div class="stat-lbl">⏱ Ort. İşlem Süresi</div>
+      <div class="stat-sub">Gün cinsinden ortalama pozisyon</div>
+    </div>
+  </div>
+  <div class="info-box" style="margin-bottom:24px">
+    ⚠️ <strong>Not:</strong> Risk metrikleri geçmiş veri üzerinden hesaplanmıştır. Komisyon ve slipaj (%0.1 tahmini) dahil değildir.
+    Sharpe Ratio burada günlük bağımsız işlemler üzerinden hesaplanmış basit bir yaklaşımdır.
+    Geçmiş performans gelecek getirileri garanti etmez.
   </div>
 
   <!-- Hisse bazlı performans -->

@@ -35,7 +35,21 @@ ARTICLES = [
 
 <h2>BIST100 ile Yatırım Stratejisi</h2>
 <p>Endeks içindeki hisseler daha düşük riskli kabul edilir çünkü likiditesi yüksektir — hızla alınıp satılabilir. Ancak "endeks hissesi" olmak tek başına kaliteli yatırım anlamına gelmez; teknik ve temel analiz her zaman gereklidir.</p>
-"""
+""",
+    "faqs": [
+      {
+        "q": "BIST100 ile BIST30 arasındaki fark nedir?",
+        "a": "BIST100, Borsa İstanbul'daki en likit 100 hisseyi kapsar. BIST30 ise bunların en büyük 30'unu içerir ve vadeli işlemler (VİOP) için temel endeks olarak kullanılır. BIST30 daha dar ama daha likit bir endekstir."
+      },
+      {
+        "q": "BIST100 endeksi ne zaman güncellenir?",
+        "a": "Borsa İstanbul, endeks bileşenlerini her yıl Mart ve Eylül aylarında günceller. Yeterli işlem hacmini veya piyasa değerini koruyamayan hisseler endeksten çıkarılır, yeni şirketler dahil edilir."
+      },
+      {
+        "q": "BorsaPusula'da kaç BIST100 hissesi takip ediliyor?",
+        "a": "BorsaPusula, BIST100 bünyesindeki 90'dan fazla hisse için algoritmik Supertrend + ADX + EMA teknik analiz sinyallerini günlük olarak hesaplar ve ücretsiz sunar."
+      }
+    ]
   },
   {
     "slug": "supertrend-indikatoru-nedir",
@@ -73,7 +87,21 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 
 <h2>Stop Loss Olarak Supertrend</h2>
 <p>AL pozisyonunda Supertrend alt bandı dinamik stop loss görevi görür. Fiyat bu seviyenin altına inerse sinyal SAT'a döner ve pozisyondan çıkılması gerekir. Bu mekanizma, büyük kayıpları otomatik olarak sınırlar.</p>
-"""
+""",
+    "faqs": [
+      {
+        "q": "Supertrend indikatörü ne işe yarar?",
+        "a": "Supertrend, fiyatın trend yönünü ve olası dönüş noktalarını ATR tabanlı bantlarla gösterir. Yeşil bant fiyatın altında ise yükseliş trendi, kırmızı bant üstündeyse düşüş trendi sinyali verir."
+      },
+      {
+        "q": "BorsaPusula'da Supertrend hangi parametrelerle kullanılır?",
+        "a": "BorsaPusula'da Supertrend(10,3) parametreleri kullanılır: 10 günlük ATR periyodu ve 3 çarpan. Bu ayarlar BIST100 hisseleri için optimize edilmiştir."
+      },
+      {
+        "q": "Supertrend tek başına yeterli mi?",
+        "a": "Hayır. BorsaPusula sinyali için Supertrend'e ek olarak ADX≥25 (güçlü trend onayı) ve EMA12/EMA99 (yön filtresi) koşullarının üçü birden sağlanmalıdır. Yalnız kullanıldığında yatay piyasalarda çok fazla sahte sinyal üretir."
+      }
+    ]
   },
   {
     "slug": "adx-indikatoru-nedir",
@@ -109,7 +137,21 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 
 <h2>Pratik Kullanım Örneği</h2>
 <p>Diyelim ki THYAO için Supertrend LONG sinyali verdi. Ancak ADX = 18. Bu durumda BorsaPusula <strong>AL sinyali üretmez</strong> — trend yeterince güçlü değil demektir. ADX 28'e çıktığında ve DI+ > DI− olduğunda sinyal geçerli hale gelir.</p>
-"""
+""",
+    "faqs": [
+      {
+        "q": "ADX değeri ne anlama gelir?",
+        "a": "ADX (Average Directional Index), trendin gücünü 0-100 arası bir skala ile ölçer. 0-25 arası zayıf veya yok sayılabilir trend, 25-50 orta güçlü trend, 50+ güçlü trend anlamına gelir. Yön bilgisi vermez; yalnızca trendin ne kadar güçlü olduğunu gösterir."
+      },
+      {
+        "q": "BorsaPusula neden ADX ≥ 25 şartı koyuyor?",
+        "a": "ADX < 25 ise piyasa yatay seyrediyordur ve trend indikatörleri (Supertrend, EMA) çok sayıda sahte sinyal üretir. BorsaPusula, ADX ≥ 25 şartıyla yalnızca gerçek trend başlangıçlarında sinyal vererek başarı oranını artırır."
+      },
+      {
+        "q": "DI+ ve DI- ne işe yarar?",
+        "a": "DI+ (yeşil) alış baskısını, DI- (kırmızı) ise satış baskısını gösterir. DI+ > DI- ise yükseliş yönü hâkim, DI- > DI+ ise düşüş yönü hâkimdir. ADX bu iki değerin mutlak farkından türetilir."
+      }
+    ]
   },
   {
     "slug": "ema-hareketli-ortalama-nedir",

@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ meta.name }} Teknik Analiz — Supertrend Sinyali | borsapusula.com</title>
+<meta name="description" content="{{ meta.desc }}">
+<link rel="canonical" href="https://borsapusula.com/{{ varlik_key | lower }}">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="{{ meta.name }} Teknik Analiz | borsapusula.com">
+<meta property="og:description" content="{{ meta.desc }}">
+<meta property="og:url"         content="https://borsapusula.com/{{ varlik_key | lower }}">
+<meta property="og:image"       content="https://borsapusula.com/og-image.svg">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org","@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
+    {"@type":"ListItem","position":2,"name":"{{ meta.name }}","item":"https://borsapusula.com/{{ varlik_key | lower }}"}
+  ]
+}
+</script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#0d1117; --surface:#161b22; --surface2:#1c2128;
+    --border:#30363d; --border2:#21262d;
+    --text:#e6edf3; --text2:#8b949e; --text3:#484f58;
+    --al:#3fb950; --sat:#f85149; --bkl:#8b949e;
+    --brand:#1f6feb; --gold:#e3b341;
+    --accent: {{ meta.color }};
+  }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; min-height:100vh; }
+
+  /* ── Header ── */
+  header {
+    background:var(--surface); border-bottom:1px solid var(--border);
+    padding:12px 24px; display:flex; align-items:center; gap:14px;
+    position:sticky; top:0; z-index:100;
+  }
+  .back-btn {
+    display:flex; align-items:center; gap:6px; color:var(--text2);
+    font-size:13px; text-decoration:none; padding:5px 10px;
+    border:1px solid var(--border); border-radius:6px; background:var(--surface2);
+    transition:all .15s; white-space:nowrap;
+  }
+  .back-btn:hover { background:var(--border); color:var(--text); }
+  .header-info { min-width:0; }
+  .header-name { font-size:17px; font-weight:700; color:#f0f6fc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .header-sub  { font-size:12px; color:var(--text2); margin-top:1px; }
+  .header-price-block { margin-left:auto; text-align:right; }
+  .h-price { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; color:#f0f6fc; }
+  .h-chg   { font-size:12px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .chg-pos { color:var(--al); } .chg-neg { color:var(--sat); } .chg-neu { color:var(--text2); }
+
+  /* ── Makro Ticker ── */
+  .macro-bar {
+    background:#0b0f17; border-bottom:1px solid var(--border2);
+    height:32px; overflow:hidden; position:relative; white-space:nowrap;
+  }
+  .macro-bar::before,.macro-bar::after {
+    content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2;
+  }
+  .macro-bar::before { left:0; background:linear-gradient(to right,#0b0f17,transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,#0b0f17,transparent); }
+  .macro-track {
+    display:inline-flex; align-items:center;
+    animation:macroScroll 40s linear infinite; height:32px;
+  }
+  .macro-bar:hover .macro-track { animation-play-state:paused; }
+  @keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .macro-item {
+    display:inline-flex; align-items:center; gap:7px;
+    padding:0 18px; border-right:1px solid var(--border2); font-size:11px; height:32px;
+    text-decoration:none; color:inherit;
+  }
+  .macro-item:hover { background:rgba(255,255,255,.04); }
+  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
+  .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
+
+  /* ── Layout ── */
+  .container { max-width:1100px; margin:0 auto; padding:24px 20px; }
+
+  /* ── Signal Card ── */
+  .signal-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:20px 24px; margin-bottom:20px;
+    display:flex; flex-wrap:wrap; gap:20px; align-items:center;
+  }
+  .sc-main { flex:1; min-width:200px; }
+  .sc-asset-name { font-size:22px; font-weight:800; color:#f0f6fc; margin-bottom:2px; }
+  .sc-unit { font-size:12px; color:var(--text2); }
+
+  .sc-price-block { text-align:center; }
+  .sc-price { font-size:32px; font-weight:700; font-variant-numeric:tabular-nums; color:#f0f6fc; line-height:1; }
+  .sc-chg   { font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; margin-top:3px; }
+
+  .sc-signal { text-align:center; }
+  .sig-badge {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:6px 16px; border-radius:20px; font-size:13px; font-weight:700; letter-spacing:.3px;
+  }
+  .sig-AL   { background:rgba(63,185,80,.12); color:var(--al); border:1px solid rgba(63,185,80,.3); }
+  .sig-SAT  { background:rgba(248,81,73,.12); color:var(--sat); border:1px solid rgba(248,81,73,.3); }
+  .sig-BEKLE{ background:rgba(139,148,158,.1); color:var(--bkl); border:1px solid rgba(139,148,158,.2); }
+
+  .sc-meta { display:flex; flex-wrap:wrap; gap:12px; width:100%; padding-top:12px; border-top:1px solid var(--border2); }
+  .sc-meta-item { display:flex; flex-direction:column; gap:2px; min-width:80px; }
+  .sc-meta-label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; font-weight:600; }
+  .sc-meta-val   { font-size:13px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; }
+  .sc-meta-val.sl-val { color:var(--sat); }
+  .sc-meta-val.adx-val { color:var(--gold); }
+
+  /* ── Chart Area ── */
+  .chart-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; overflow:hidden; margin-bottom:20px;
+  }
+  .chart-header {
+    padding:12px 16px 10px; border-bottom:1px solid var(--border2);
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .chart-title { font-size:13px; font-weight:700; color:#f0f6fc; }
+  .chart-sub   { font-size:11px; color:var(--text2); margin-left:auto; }
+  #varlikChart { height:380px; width:100%; }
+
+  /* ── Indicators Panel ── */
+  .ind-grid {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px;
+  }
+  .ind-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:14px 16px;
+  }
+  .ind-label { font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; font-weight:600; margin-bottom:6px; }
+  .ind-value { font-size:16px; font-weight:700; }
+  .ind-value.bull { color:var(--al); }
+  .ind-value.bear { color:var(--sat); }
+  .ind-value.neu  { color:var(--text2); }
+  .ind-sub   { font-size:11px; color:var(--text2); margin-top:3px; }
+
+  /* ── Signal History ── */
+  .history-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; overflow:hidden; margin-bottom:20px;
+  }
+  .history-card h3 {
+    font-size:13px; font-weight:700; color:#f0f6fc;
+    padding:12px 16px; border-bottom:1px solid var(--border2);
+  }
+  .hist-table { width:100%; border-collapse:collapse; }
+  .hist-table th {
+    font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px;
+    padding:8px 14px; background:var(--surface2); text-align:left; font-weight:700;
+  }
+  .hist-table td { padding:8px 14px; border-top:1px solid var(--border2); font-size:12px; }
+  .hist-table tbody tr:hover td { background:rgba(255,255,255,.02); }
+
+  /* ── Commentary ── */
+  .commentary-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:16px 20px; margin-bottom:20px;
+    font-size:13px; line-height:1.7; color:var(--text2);
+  }
+  .commentary-card strong { color:var(--text); }
+
+  /* ── Week 52 ── */
+  .w52-bar-wrap { background:var(--border2); border-radius:4px; height:6px; margin-top:6px; overflow:hidden; position:relative; }
+  .w52-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--sat),var(--gold),var(--al)); }
+  .w52-marker   { position:absolute; top:-3px; width:2px; height:12px; background:var(--text); border-radius:1px; }
+
+  /* ── Other Assets ── */
+  .other-assets { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+  .other-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:12px 16px; text-decoration:none;
+    transition:all .15s; flex:1; min-width:130px;
+  }
+  .other-card:hover { border-color:var(--brand); background:var(--surface2); }
+  .oc-name  { font-size:11px; color:var(--text2); margin-bottom:4px; }
+  .oc-price { font-size:14px; font-weight:700; color:#f0f6fc; font-variant-numeric:tabular-nums; }
+  .oc-chg   { font-size:11px; font-weight:600; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .oc-active { border-color:var(--accent) !important; background:rgba(255,255,255,.03); }
+
+  /* ── Disclaimer ── */
+  .disclaimer {
+    background:rgba(248,81,73,.07); border:1px solid rgba(248,81,73,.2);
+    border-radius:8px; padding:12px 16px; color:var(--text2);
+    font-size:12px; margin-bottom:20px; line-height:1.6;
+  }
+
+  /* ── Loading ── */
+  .loading-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:60px 20px;
+    display:flex; flex-direction:column; align-items:center; gap:12px;
+    color:var(--text2);
+  }
+  .spinner {
+    width:24px; height:24px; border:3px solid var(--border);
+    border-top-color:var(--brand); border-radius:50%;
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* ── Responsive ── */
+  @media(max-width:768px) {
+    header { padding:10px 14px; }
+    .h-price { font-size:16px; }
+    .container { padding:12px; }
+    .signal-card { padding:12px 14px; gap:12px; }
+    .sc-price { font-size:24px; }
+    .sc-asset-name { font-size:18px; }
+    .ind-grid { grid-template-columns:repeat(3,1fr); gap:8px; }
+    .ind-card { padding:10px 12px; }
+    .ind-value { font-size:14px; }
+    .other-card { min-width:110px; padding:10px 12px; }
+    .sc-meta { gap:8px; }
+    .sc-meta-item { min-width:70px; }
+  }
+  @media(max-width:480px) {
+    .ind-grid { grid-template-columns:repeat(2,1fr); }
+    .header-price-block { display:none; }
+    .other-assets { gap:8px; }
+    .other-card { min-width:90px; flex:1; }
+    .sc-price { font-size:22px; }
+    .signal-card { flex-direction:column; align-items:flex-start; }
+    .sc-price-block,.sc-signal { align-self:flex-start; }
+    .sc-meta-item { min-width:60px; }
+    .history-card { font-size:12px; }
+  }
+  @media(max-width:360px) {
+    .other-card { min-width:0; }
+    .oc-name { font-size:10px; }
+    .oc-price { font-size:12px; }
+  }
+
+  footer { text-align:center; padding:20px; font-size:12px; color:var(--text3); border-top:1px solid var(--border2); margin-top:16px; }
+  footer a { color:var(--text2); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="{{ category_url or '/' }}" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    {{ category_label or 'Ana Sayfa' }}
+  </a>
+  <div class="header-info">
+    <div class="header-name">{{ meta.emoji }} {{ meta.name }}</div>
+    <div class="header-sub">Supertrend · ADX · EMA Teknik Analiz</div>
+  </div>
+  <div class="header-price-block">
+    <div class="h-price" id="hPrice">—</div>
+    <div class="h-chg" id="hChg">—</div>
+  </div>
+</header>
+
+<!-- Makro Ticker Bandı -->
+<div class="macro-bar">
+  <div class="macro-track" id="macroTrack">
+    <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Kategori ve eş varlıklar -->
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+    <a href="{{ category_url or '/' }}" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      {{ category_label or 'Ana Sayfa' }}
+    </a>
+  </div>
+  {% if peers %}
+  <div class="other-assets">
+    {% for p in peers %}
+    <a href="{{ p.href }}" class="other-card{% if varlik_key == p.key %} oc-active{% endif %}" id="oc-{{ p.key }}">
+      <div class="oc-name">{{ p.emoji }} {{ p.name }}</div>
+      <div class="oc-price" id="ocPrice-{{ p.key }}">—</div>
+      <div class="oc-chg"  id="ocChg-{{ p.key }}">—</div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Signal Card -->
+  <div class="signal-card" id="signalCard">
+    <div class="sc-main">
+      <div class="sc-asset-name">{{ meta.emoji }} {{ meta.name }}</div>
+      <div class="sc-unit">{{ meta.unit }}</div>
+    </div>
+    <div class="sc-price-block">
+      <div class="sc-price" id="scPrice">—</div>
+      <div class="sc-chg chg-neu" id="scChg">Yükleniyor…</div>
+    </div>
+    <div class="sc-signal">
+      <span class="sig-badge sig-BEKLE" id="sigBadge">● Yükleniyor</span>
+    </div>
+
+    <div class="sc-meta" id="scMeta" style="display:none">
+      <div class="sc-meta-item">
+        <span class="sc-meta-label">Stop-Loss</span>
+        <span class="sc-meta-val sl-val" id="scSL">—</span>
+      </div>
+      <div class="sc-meta-item">
+        <span class="sc-meta-label">ADX</span>
+        <span class="sc-meta-val adx-val" id="scADX">—</span>
+      </div>
+      <div class="sc-meta-item">
+        <span class="sc-meta-label">EMA12</span>
+        <span class="sc-meta-val" id="scE12">—</span>
+      </div>
+      <div class="sc-meta-item">
+        <span class="sc-meta-label">EMA99</span>
+        <span class="sc-meta-val" id="scE99">—</span>
+      </div>
+      <div class="sc-meta-item">
+        <span class="sc-meta-label">52H Yük</span>
+        <span class="sc-meta-val" id="scW52H">—</span>
+      </div>
+      <div class="sc-meta-item">
+        <span class="sc-meta-label">52H Düş</span>
+        <span class="sc-meta-val" id="scW52L">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <span class="chart-title">{{ meta.emoji }} {{ meta.name }} — Günlük Grafik</span>
+      <span id="emaLegend" style="font-size:11px;color:#8b949e;margin-left:8px"></span>
+      <span class="chart-sub" id="chartUpdated"></span>
+    </div>
+    <div id="varlikChart">
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <span>Grafik yükleniyor…</span>
+      </div>
+    </div>
+    <div id="varlikVolume" style="width:100%"></div>
+  </div>
+
+  <!-- Indicators -->
+  <div class="ind-grid" id="indGrid" style="display:none">
+    <div class="ind-card">
+      <div class="ind-label">Supertrend</div>
+      <div class="ind-value" id="indST">—</div>
+      <div class="ind-sub" id="indSTSub"></div>
+    </div>
+    <div class="ind-card">
+      <div class="ind-label">ADX (14)</div>
+      <div class="ind-value" id="indADX">—</div>
+      <div class="ind-sub" id="indADXSub"></div>
+    </div>
+    <div class="ind-card">
+      <div class="ind-label">EMA 12/99</div>
+      <div class="ind-value" id="indEMA">—</div>
+      <div class="ind-sub" id="indEMASub"></div>
+    </div>
+  </div>
+
+  <!-- Commentary -->
+  <div class="commentary-card" id="commentaryCard" style="display:none">
+    <strong>📊 Teknik Yorum:</strong> <span id="commentaryText"></span>
+  </div>
+
+  <!-- Signal History -->
+  <div class="history-card" id="historyCard" style="display:none">
+    <h3>📋 Sinyal Geçmişi</h3>
+    <table class="hist-table">
+      <thead>
+        <tr>
+          <th>Tarih</th>
+          <th>Sinyal</th>
+          <th>Fiyat ({{ meta.unit }})</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </div>
+
+  <div class="disclaimer">
+    ⚠️ <strong>Önemli Uyarı:</strong> Bu sayfa yalnızca algoritmik teknik analiz içermektedir. Yatırım tavsiyesi değildir.
+    Kaldıraçlı ürünler büyük zarar riski taşır. Geçmiş sinyal performansı gelecekteki sonuçları garanti etmez.
+  </div>
+
+</div>
+
+<footer>
+  <a href="/">Ana Sayfa</a> · <a href="/btc">BTC</a> · <a href="/altin">Altın</a> · <a href="/gumus">Gümüş</a> · <a href="/tarama">Hisse Tarayıcı</a> · <a href="/metodoloji">Metodoloji</a>
+  <div style="margin-top:8px">⚠️ Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
+</footer>
+
+<script src="/static/lightweight-charts.min.js"></script>
+<script>
+const VARLIK_KEY = '{{ varlik_key }}';
+const VARLIK_UNIT = '{{ meta.unit }}';
+const VARLIK_COLOR = '{{ meta.color }}';
+
+/* ── Para birimi formatı ── */
+function fmtPrice(v, decimals) {
+  if (v == null || isNaN(v)) return '—';
+  const d = decimals != null ? decimals : (v >= 1000 ? 0 : v >= 10 ? 2 : 4);
+  return v.toLocaleString('tr-TR', {minimumFractionDigits: d, maximumFractionDigits: d});
+}
+
+/* ── Makro ticker ── */
+const MACRO_LABELS = {
+  XU100:'BIST100',XU030:'BIST30',USDTRY:'USD/TRY',EURTRY:'EUR/TRY',
+  BTC:'BTC',ETH:'ETH',SOL:'SOL',BNB:'BNB',
+  ALTIN:'ALTIN',GUMUS:'GÜMÜŞ',PETROL:'PETROL',DOGALGAZ:'D.GAZ',
+  SP500:'S&P500',NASDAQ:'NASDAQ'
+};
+const MACRO_DEC = {
+  XU100:0,XU030:0,USDTRY:4,EURTRY:4,
+  BTC:0,ETH:2,SOL:2,BNB:2,
+  ALTIN:2,GUMUS:2,PETROL:2,DOGALGAZ:3,
+  SP500:0,NASDAQ:0
+};
+const MACRO_LINKS = {
+  BTC:'/btc',ETH:'/eth',SOL:'/sol',BNB:'/bnb',
+  ALTIN:'/altin',GUMUS:'/gumus',PETROL:'/petrol',DOGALGAZ:'/dogalgaz',
+  SP500:'/abd/sp500',NASDAQ:'/abd/nasdaq'
+};
+const PEER_KEYS = [{% for p in peers or [] %}'{{ p.key }}'{% if not loop.last %},{% endif %}{% endfor %}];
+const others = Object.fromEntries(PEER_KEYS.map(k => [k, null]));
+(function() {
+  async function load() {
+    try {
+      const d=(await (await fetch('/api/macro')).json()).items||[];
+      if(!d.length) return;
+      const h = d.map(it => {
+        const p = it.price.toLocaleString('tr-TR',{minimumFractionDigits:MACRO_DEC[it.label]??2,maximumFractionDigits:MACRO_DEC[it.label]??2});
+        const c = it.change; const s = c>0?'+':'';
+        const cls = c>0.05?'mc-pos':c<-0.05?'mc-neg':'mc-neu';
+        const href = MACRO_LINKS[it.label] ? ` href="${MACRO_LINKS[it.label]}"` : '';
+        return `<a class="macro-item"${href} style="text-decoration:none;color:inherit">
+          <span class="macro-item-lbl">${MACRO_LABELS[it.label]||it.label}</span>
+          <span>${p}</span>
+          <span class="${cls}">${c>0.05?'▲':c<-0.05?'▼':'●'} ${s}${c.toFixed(2)}%</span>
+        </a>`;
+      }).join('');
+      const _mt = document.getElementById('macroTrack');
+      _mt.innerHTML = h + h;
+      requestAnimationFrame(() => { const w = _mt.scrollWidth / 2; if (w > 50) _mt.style.animationDuration = (w / 50).toFixed(1) + 's'; });
+
+      /* Other assets quick fill */
+      d.forEach(it => { if(it.label in others) others[it.label] = it; });
+      Object.entries(others).forEach(([key, it]) => {
+        if(!it) return;
+        const dec = MACRO_DEC[key]??2;
+        const priceEl = document.getElementById('ocPrice-'+key);
+        const chgEl   = document.getElementById('ocChg-'+key);
+        if(priceEl) priceEl.textContent = it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+        if(chgEl) {
+          const s = it.change>0?'+':'';
+          chgEl.textContent = s+it.change.toFixed(2)+'%';
+          chgEl.className = 'oc-chg ' + (it.change>0.05?'chg-pos':it.change<-0.05?'chg-neg':'chg-neu');
+        }
+      });
+
+      /* Header price for active asset */
+      const activeIt = d.find(it => it.label === VARLIK_KEY);
+      if(activeIt) {
+        const dec = MACRO_DEC[VARLIK_KEY]??2;
+        document.getElementById('hPrice').textContent = activeIt.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+        const s = activeIt.change>0?'+':'';
+        const hChgEl = document.getElementById('hChg');
+        hChgEl.textContent = s+activeIt.change.toFixed(2)+'%';
+        hChgEl.className = 'h-chg ' + (activeIt.change>0.05?'chg-pos':activeIt.change<-0.05?'chg-neg':'chg-neu');
+      }
+    } catch(e){}
+  }
+  load(); setInterval(load,60000);
+})();
+
+/* ── Chart ── */
+const LC = LightweightCharts;
+
+const BASE_OPTS = {
+  layout:          { background: { color: '#161b22' }, textColor: '#8b949e' },
+  grid:            { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
+  crosshair:       { mode: LC.CrosshairMode.Normal },
+  rightPriceScale: { borderColor: '#30363d' },
+  handleScroll: true, handleScale: true,
+};
+
+function _sigLabel(sig) {
+  return {AL:'▲ Güçlü Trend', SAT:'▼ Zayıf Trend', BEKLE:'● Belirsiz'}[sig] || sig;
+}
+function _sigClass(sig) {
+  return 'sig-badge sig-'+(sig||'BEKLE');
+}
+
+/* ── EMA dolgu primitive (hisse.html ile aynı) ── */
+class EmaFill {
+  constructor(chart, e12data, e99data, bc, rc) {
+    this._chart = chart;
+    this._e12   = Object.fromEntries(e12data.map(p => [p.time, p.value]));
+    this._e99   = Object.fromEntries(e99data.map(p => [p.time, p.value]));
+    this._times = e12data.filter(p => this._e99[p.time] !== undefined).map(p => p.time);
+    this._bc = bc; this._rc = rc; this._series = null;
+  }
+  attached({ series }) { this._series = series; }
+  detached()           { this._series = null; }
+  updateAllViews() {}
+  paneViews() {
+    const self = this;
+    return [{
+      renderer() {
+        return {
+          draw(target) {
+            if (!self._series) return;
+            target.useBitmapCoordinateSpace(sc => {
+              const ctx = sc.context;
+              const hr  = sc.horizontalPixelRatio;
+              const vr  = sc.verticalPixelRatio;
+              const ts  = self._chart.timeScale();
+              const p1 = [], p2 = [];
+              for (const t of self._times) {
+                const x  = ts.timeToCoordinate(t);
+                const y1 = self._series.priceToCoordinate(self._e12[t]);
+                const y2 = self._series.priceToCoordinate(self._e99[t]);
+                if (x == null || y1 == null || y2 == null) continue;
+                p1.push({ x: x*hr, y: y1*vr, v: self._e12[t] });
+                p2.push({ x: x*hr, y: y2*vr, v: self._e99[t] });
+              }
+              if (p1.length < 2) return;
+              ctx.save();
+              for (let i = 1; i < p1.length; i++) {
+                const a1=p1[i-1], b1=p1[i], a2=p2[i-1], b2=p2[i];
+                ctx.fillStyle = b1.v > b2.v ? self._bc : self._rc;
+                ctx.beginPath();
+                ctx.moveTo(a1.x,a1.y); ctx.lineTo(b1.x,b1.y);
+                ctx.lineTo(b2.x,b2.y); ctx.lineTo(a2.x,a2.y);
+                ctx.closePath(); ctx.fill();
+              }
+              ctx.restore();
+            });
+          }
+        };
+      }
+    }];
+  }
+}
+
+function renderChart(data) {
+  const elMain   = document.getElementById('varlikChart');
+  const elVolume = document.getElementById('varlikVolume');
+  elMain.innerHTML = '';
+  if(elVolume) elVolume.innerHTML = '';
+
+  const isMobile = window.innerWidth < 768;
+  const chartW   = elMain.clientWidth || elMain.parentElement.clientWidth || 900;
+
+  const chart = LC.createChart(elMain, {
+    ...BASE_OPTS,
+    width:     chartW,
+    height:    isMobile ? 240 : 360,
+    timeScale: { borderColor: '#30363d', timeVisible: true, visible: true },
+  });
+
+  /* Volume histogram */
+  if(data.volume && data.volume.length > 0 && elVolume) {
+    const volChart = LC.createChart(elVolume, {
+      ...BASE_OPTS,
+      width:  chartW,
+      height: isMobile ? 60 : 80,
+      timeScale: { borderColor:'#30363d', timeVisible:false, visible:false },
+      rightPriceScale: {
+        borderColor: '#30363d',
+        scaleMargins: { top:0.1, bottom:0 },
+        drawTicks: false,
+      },
+    });
+    const volSeries = volChart.addHistogramSeries({
+      priceScaleId: 'right', priceLineVisible: false, lastValueVisible: false,
+    });
+    volSeries.setData(data.volume);
+    volChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+      chart.timeScale().setVisibleLogicalRange(range);
+    });
+    chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+      volChart.timeScale().setVisibleLogicalRange(range);
+    });
+    window.addEventListener('resize', () => {
+      const w = elMain.clientWidth;
+      if(w) volChart.applyOptions({ width: w });
+    });
+  }
+
+  /* EMA99 */
+  const e99 = chart.addLineSeries({ color:'#e3b341', lineWidth:1.5, priceLineVisible:false, lastValueVisible:false });
+  e99.setData(data.ema99 || []);
+
+  /* EMA12 + dolgu */
+  const e12 = chart.addLineSeries({ color:'#58a6ff', lineWidth:1.5, priceLineVisible:false, lastValueVisible:false });
+  e12.setData(data.ema12 || []);
+  if(data.ema12 && data.ema99) {
+    e12.attachPrimitive(new EmaFill(chart, data.ema12, data.ema99,
+      'rgba(63,185,80,0.13)', 'rgba(248,81,73,0.11)'));
+  }
+
+  /* OHLC mum */
+  const candle = chart.addCandlestickSeries({
+    upColor:'#3fb950', downColor:'#f85149',
+    borderUpColor:'#3fb950', borderDownColor:'#f85149',
+    wickUpColor:'#3fb950', wickDownColor:'#f85149',
+    priceLineVisible: false, lastValueVisible: true,
+  });
+  candle.setData(data.ohlc || []);
+
+  /* Sinyal marker'ları (AL/SAT okları) */
+  if(data.markers && data.markers.length) {
+    candle.setMarkers(data.markers);
+  }
+
+  /* EMA legend */
+  const legEl = document.getElementById('emaLegend');
+  function updateLeg(v12, v99_) {
+    if(!legEl) return;
+    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', {maximumFractionDigits:2}) : '—';
+    const l12 = v12  ?? data.ema12.at(-1)?.value;
+    const l99 = v99_ ?? data.ema99.at(-1)?.value;
+    legEl.innerHTML =
+      `<span style="color:#58a6ff">EMA12 ${fmt(l12)}</span>&nbsp;&nbsp;` +
+      `<span style="color:#e3b341">EMA99 ${fmt(l99)}</span>`;
+  }
+  updateLeg();
+  chart.subscribeCrosshairMove(p => {
+    if(!p?.time) { updateLeg(); return; }
+    updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value);
+  });
+
+  chart.timeScale().fitContent();
+  requestAnimationFrame(() => {
+    try {
+      const lr = chart.timeScale().getVisibleLogicalRange();
+      if(lr) chart.timeScale().setVisibleLogicalRange({from: lr.from - 10, to: lr.to + 2});
+    } catch(_){}
+  });
+
+  window.addEventListener('resize', () => {
+    const w = elMain.clientWidth;
+    if(w) chart.applyOptions({ width: w });
+  });
+}
+
+function renderSignalData(summary, history, week52, commentary) {
+  const unit = VARLIK_UNIT;
+  const dec  = summary.price >= 1000 ? 0 : summary.price >= 10 ? 2 : 4;
+
+  /* Price + change */
+  const priceEl = document.getElementById('scPrice');
+  if(priceEl) priceEl.textContent = summary.price != null ? fmtPrice(summary.price, dec) : '—';
+  const chgEl = document.getElementById('scChg');
+  if(chgEl) {
+    const c = summary.change_pct || 0;
+    const s = c>0?'+':'';
+    chgEl.textContent = s+c.toFixed(2)+'%';
+    chgEl.className   = 'sc-chg ' + (c>0.05?'chg-pos':c<-0.05?'chg-neg':'chg-neu');
+  }
+
+  /* Signal badge */
+  const badge = document.getElementById('sigBadge');
+  if(badge) {
+    badge.textContent  = _sigLabel(summary.signal);
+    badge.className    = _sigClass(summary.signal);
+  }
+
+  /* Meta row */
+  const scMeta = document.getElementById('scMeta');
+  if(scMeta) {
+    scMeta.style.display = '';
+    const sl = summary.sl_level;
+    document.getElementById('scSL').textContent  = sl  ? fmtPrice(sl,  dec) : '—';
+    document.getElementById('scADX').textContent = summary.adx ? summary.adx.toFixed(1) : '—';
+    document.getElementById('scE12').textContent = summary.e12 ? fmtPrice(summary.e12, dec) : '—';
+    document.getElementById('scE99').textContent = summary.e99 ? fmtPrice(summary.e99, dec) : '—';
+    if(week52) {
+      document.getElementById('scW52H').textContent = fmtPrice(week52.high, dec);
+      document.getElementById('scW52L').textContent = fmtPrice(week52.low,  dec);
+    }
+  }
+
+  /* Indicators */
+  const indGrid = document.getElementById('indGrid');
+  if(indGrid) {
+    indGrid.style.display = '';
+    // Supertrend
+    const stEl = document.getElementById('indST');
+    stEl.textContent = summary.st_bull ? '🟢 LONG' : '🔴 SHORT';
+    stEl.className   = 'ind-value ' + (summary.st_bull ? 'bull' : 'bear');
+    document.getElementById('indSTSub').textContent = summary.st_bull ? 'Fiyat band üzerinde' : 'Fiyat band altında';
+    // ADX
+    const adxEl = document.getElementById('indADX');
+    adxEl.textContent = summary.adx ? summary.adx.toFixed(1) : '—';
+    const adxStr = summary.adx>=40?'Çok güçlü trend':summary.adx>=30?'Güçlü trend':summary.adx>=25?'Orta güçte trend':'Zayıf / range';
+    adxEl.className = 'ind-value ' + (summary.adx_bull?'bull':summary.adx_bear?'bear':'neu');
+    document.getElementById('indADXSub').textContent = `DI+ ${(summary.di_plus||0).toFixed(0)} / DI- ${(summary.di_minus||0).toFixed(0)} · ${adxStr}`;
+    // EMA
+    const emaEl = document.getElementById('indEMA');
+    emaEl.textContent = summary.e12_bull ? '▲ Yükselen' : '▼ Düşen';
+    emaEl.className   = 'ind-value ' + (summary.e12_bull?'bull':'bear');
+    document.getElementById('indEMASub').textContent = `EMA12 ${fmtPrice(summary.e12,dec)} / EMA99 ${fmtPrice(summary.e99,dec)}`;
+  }
+
+  /* Commentary */
+  if(commentary) {
+    const cc = document.getElementById('commentaryCard');
+    const ct = document.getElementById('commentaryText');
+    if(cc && ct) { ct.textContent = commentary; cc.style.display=''; }
+  }
+
+  /* Signal history */
+  if(history && history.length) {
+    const tbody = document.getElementById('historyBody');
+    if(tbody) {
+      const sigBadge = (sig) => {
+        const cls = {AL:'sig-AL',SAT:'sig-SAT',BEKLE:'sig-BEKLE'}[sig]||'sig-BEKLE';
+        const lbl = {AL:'▲ Güçlü Trend',SAT:'▼ Zayıf Trend',BEKLE:'● Belirsiz'}[sig]||sig;
+        return `<span class="sig-badge ${cls}" style="font-size:10px;padding:2px 8px">${lbl}</span>`;
+      };
+      tbody.innerHTML = history.map(h =>
+        `<tr>
+          <td>${h.date}</td>
+          <td>${sigBadge(h.signal)}</td>
+          <td style="font-variant-numeric:tabular-nums">${fmtPrice(h.price,dec)}</td>
+        </tr>`
+      ).join('');
+      document.getElementById('historyCard').style.display = '';
+    }
+  }
+}
+
+const CHART_API = '{{ chart_api or ("/api/chart/" + varlik_key) }}';
+
+async function loadChart() {
+  try {
+    const r = await fetch(CHART_API);
+    const d = await r.json();
+    if(d.loading || !d.chart) {
+      document.getElementById('varlikChart').innerHTML =
+        '<div class="loading-card"><div class="spinner"></div><span>Grafik hesaplanıyor, lütfen bekleyin…</span></div>';
+      setTimeout(loadChart, 8000);
+      return;
+    }
+    const chart = d.chart;
+    renderChart(chart);
+    if(chart.summary) renderSignalData(chart.summary, chart.signal_history, chart.week52, chart.commentary);
+    if(d.updated_at) {
+      const el = document.getElementById('chartUpdated');
+      if(el) el.textContent = 'Güncelleme: ' + d.updated_at;
+    }
+  } catch(e) {
+    document.getElementById('varlikChart').innerHTML =
+      '<div class="loading-card" style="color:#f85149">Grafik yüklenemedi. Sayfayı yenileyin.</div>';
+  }
+}
+
+loadChart();
+
+/* ── SSE: global_prices ile peer fiyatlarını ve header'ı canlı güncelle ── */
+(function() {
+  let _retry = 2000;
+  function startSSE() {
+    const es = new EventSource('/api/stream');
+    es.onopen = () => { _retry = 2000; };
+    es.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type !== 'global_prices') return;
+        const prices = msg.data;
+
+        /* Peer kartları güncelle */
+        PEER_KEYS.forEach(key => {
+          const d = prices[key];
+          if (!d) return;
+          const dec = MACRO_DEC[key] ?? (d.price >= 1000 ? 0 : d.price >= 10 ? 2 : 4);
+          const priceEl = document.getElementById('ocPrice-' + key);
+          const chgEl   = document.getElementById('ocChg-'   + key);
+          if (priceEl) priceEl.textContent = d.price.toLocaleString('tr-TR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+          if (chgEl) {
+            const s = d.change_pct > 0 ? '+' : '';
+            chgEl.textContent = s + d.change_pct.toFixed(2) + '%';
+            chgEl.className = 'oc-chg ' + (d.change_pct > 0.05 ? 'chg-pos' : d.change_pct < -0.05 ? 'chg-neg' : 'chg-neu');
+          }
+        });
+
+        /* Header fiyatını güncelle (mevcut varlık için) */
+        const me = prices[VARLIK_KEY];
+        if (me) {
+          const dec = MACRO_DEC[VARLIK_KEY] ?? (me.price >= 1000 ? 0 : me.price >= 10 ? 2 : 4);
+          const hPriceEl = document.getElementById('hPrice');
+          const hChgEl   = document.getElementById('hChg');
+          if (hPriceEl) hPriceEl.textContent = me.price.toLocaleString('tr-TR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+          if (hChgEl) {
+            const s = me.change_pct > 0 ? '+' : '';
+            hChgEl.textContent = s + me.change_pct.toFixed(2) + '%';
+            hChgEl.className = 'h-chg ' + (me.change_pct > 0.05 ? 'chg-pos' : me.change_pct < -0.05 ? 'chg-neg' : 'chg-neu');
+          }
+        }
+      } catch(_) {}
+    };
+    es.onerror = () => {
+      es.close();
+      setTimeout(startSSE, _retry);
+      _retry = Math.min(_retry * 2, 30000);
+    };
+  }
+  startSSE();
+})();
+</script>
+</body>
+</html>

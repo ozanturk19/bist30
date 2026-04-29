@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hisse Tarayıcı — BIST Sinyal Filtresi | borsapusula.com</title>
+<meta name="description" content="BIST100 hisselerini sinyal, ADX, sektör ve fiyat kriterlerine göre filtreleyin. Güçlü Trend + ADX ≥ 25 + güvenli giriş kombinasyonlarını anında bulun.">
+<link rel="canonical" href="https://borsapusula.com/tarama">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#0d1117; --surface:#161b22; --surface2:#1c2128;
+    --border:#30363d; --border2:#21262d;
+    --text:#e6edf3; --text2:#8b949e; --text3:#484f58;
+    --al:#3fb950; --sat:#f85149; --bkl:#8b949e;
+    --brand:#1f6feb; --gold:#e3b341;
+  }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; min-height:100vh; }
+
+  /* ── Header ── */
+  header {
+    background:var(--surface); border-bottom:1px solid var(--border);
+    padding:12px 24px; display:flex; align-items:center; gap:14px;
+    position:sticky; top:0; z-index:100;
+  }
+  .back-btn {
+    display:flex; align-items:center; gap:6px; color:var(--text2);
+    font-size:13px; text-decoration:none; padding:5px 10px;
+    border:1px solid var(--border); border-radius:6px; background:var(--surface2);
+    transition:all .15s; white-space:nowrap;
+  }
+  .back-btn:hover { background:var(--border); color:var(--text); }
+  .page-title { font-size:18px; font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:12px; color:var(--text2); margin-top:1px; }
+
+  /* ── Makro bar ── */
+  .macro-bar {
+    background:#0b0f17; border-bottom:1px solid var(--border2);
+    height:32px; overflow:hidden; position:relative; white-space:nowrap;
+  }
+  .macro-bar::before,.macro-bar::after {
+    content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2;
+  }
+  .macro-bar::before { left:0; background:linear-gradient(to right,#0b0f17,transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,#0b0f17,transparent); }
+  .macro-track {
+    display:inline-flex; align-items:center;
+    animation:macroScroll 40s linear infinite; height:32px;
+  }
+  .macro-bar:hover .macro-track { animation-play-state:paused; }
+  @keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .macro-item {
+    display:inline-flex; align-items:center; gap:7px;
+    padding:0 18px; border-right:1px solid var(--border2); font-size:11px; height:32px;
+  }
+  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
+  .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
+
+  .container { max-width:1200px; margin:0 auto; padding:20px 20px; }
+
+  /* ── Filtre Çubuğu ── */
+  .filter-bar {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:16px 20px; margin-bottom:16px;
+    display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;
+  }
+  .filter-group { display:flex; flex-direction:column; gap:5px; min-width:120px; }
+  .filter-group label { font-size:10px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
+  .filter-group select,
+  .filter-group input[type=number] {
+    background:var(--surface2); border:1px solid var(--border);
+    color:var(--text); border-radius:6px; padding:7px 10px; font-size:13px;
+    font-family:inherit; outline:none; transition:border-color .15s;
+    appearance:none; cursor:pointer;
+  }
+  .filter-group select:focus,
+  .filter-group input[type=number]:focus { border-color:var(--brand); }
+
+  .filter-actions { display:flex; gap:8px; align-items:flex-end; margin-left:auto; }
+  .btn-apply {
+    background:var(--brand); color:#fff; border:none; border-radius:6px;
+    padding:8px 20px; font-size:13px; font-weight:600; cursor:pointer;
+    font-family:inherit; transition:background .15s; white-space:nowrap;
+  }
+  .btn-apply:hover { background:#388bfd; }
+  .btn-reset {
+    background:none; color:var(--text2); border:1px solid var(--border);
+    border-radius:6px; padding:8px 14px; font-size:13px; cursor:pointer;
+    font-family:inherit; transition:all .15s;
+  }
+  .btn-reset:hover { border-color:var(--text2); color:var(--text); }
+
+  /* ── Sonuç başlığı ── */
+  .result-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:10px; flex-wrap:wrap; gap:8px;
+  }
+  .result-count { font-size:13px; color:var(--text2); }
+  .result-count strong { color:var(--text); font-size:16px; }
+
+  /* Sıralama seçici */
+  .sort-select {
+    background:var(--surface2); border:1px solid var(--border);
+    color:var(--text2); border-radius:6px; padding:5px 10px; font-size:12px;
+    font-family:inherit; outline:none; cursor:pointer;
+  }
+
+  /* ── Tablo ── */
+  .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  @media(max-width:600px) {
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { min-width: 340px; }
+  }
+  table { width:100%; border-collapse:collapse; }
+  thead th {
+    font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px;
+    font-weight:700; padding:10px 14px; border-bottom:1px solid var(--border);
+    text-align:left; white-space:nowrap; background:var(--surface2); cursor:pointer;
+    user-select:none; transition:color .15s;
+  }
+  thead th:hover { color:var(--text); }
+  thead th.sort-asc::after  { content:' ▲'; color:var(--brand); }
+  thead th.sort-desc::after { content:' ▼'; color:var(--brand); }
+  tbody td { padding:10px 14px; border-bottom:1px solid var(--border2); vertical-align:middle; }
+  tbody tr:last-child td { border-bottom:none; }
+  tbody tr:hover td { background:rgba(255,255,255,.02); }
+  tbody a { text-decoration:none; color:inherit; }
+
+  .tk { font-size:14px; font-weight:700; color:#f0f6fc; }
+  .tk-name { font-size:11px; color:var(--text2); margin-top:1px; }
+  .sector-tag {
+    font-size:10px; color:var(--text3); background:var(--surface2);
+    border:1px solid var(--border2); border-radius:10px; padding:2px 7px;
+    white-space:nowrap;
+  }
+
+  .sig-badge {
+    display:inline-flex; align-items:center; gap:3px;
+    padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700;
+  }
+  .sig-AL   { background:rgba(63,185,80,.12); color:var(--al); border:1px solid rgba(63,185,80,.3); }
+  .sig-SAT  { background:rgba(248,81,73,.12); color:var(--sat); border:1px solid rgba(248,81,73,.3); }
+  .sig-BEKLE{ background:rgba(139,148,158,.1); color:var(--bkl); border:1px solid rgba(139,148,158,.2); }
+
+  .eq-badge {
+    font-size:10px; font-weight:600; padding:2px 7px; border-radius:10px;
+  }
+  .eq-safe   { background:rgba(63,185,80,.1); color:var(--al); }
+  .eq-risky  { background:rgba(227,179,65,.1); color:var(--gold); }
+
+  .adx-val { color:var(--gold); font-variant-numeric:tabular-nums; font-size:13px; }
+  .vol-val { color:#58a6ff; font-size:12px; }
+  .price-val { font-variant-numeric:tabular-nums; font-size:13px; }
+  .chg-pos { color:var(--al); font-variant-numeric:tabular-nums; font-size:12px; font-weight:600; }
+  .chg-neg { color:var(--sat); font-variant-numeric:tabular-nums; font-size:12px; font-weight:600; }
+  .chg-neu { color:var(--text2); font-variant-numeric:tabular-nums; font-size:12px; }
+  .bars-val { font-size:12px; color:var(--text2); }
+
+  /* ADX mini bar */
+  .adx-bar-bg { width:48px; height:4px; background:var(--border2); border-radius:2px; margin-top:3px; overflow:hidden; }
+  .adx-bar-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,#e3b341,#f0a500); }
+
+  /* ── Boş durum ── */
+  .empty-state {
+    text-align:center; padding:60px 20px; color:var(--text2);
+  }
+  .empty-state .empty-icon { font-size:40px; margin-bottom:14px; }
+  .empty-state h3 { font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px; }
+
+  /* ── Loading ── */
+  .loading-overlay {
+    text-align:center; padding:60px 20px; color:var(--text2);
+    display:flex; flex-direction:column; align-items:center; gap:12px;
+  }
+  .spinner {
+    width:24px; height:24px; border:3px solid var(--border);
+    border-top-color:var(--brand); border-radius:50%;
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* ── Hide mobile ── */
+  @media(max-width:768px) {
+    .hide-mob { display:none!important; }
+    .filter-bar { padding:12px; gap:8px; }
+    .container { padding:12px; }
+    header { padding:10px 14px; }
+    thead th, tbody td { padding:8px 10px; }
+  }
+
+  footer { text-align:center; padding:20px; font-size:12px; color:var(--text3); border-top:1px solid var(--border2); margin-top:32px; }
+  footer a { color:var(--text2); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="page-title">🔍 Hisse Tarayıcı</div>
+    <div class="page-sub">Sinyal · ADX · Sektör · Fiyat filtresi</div>
+  </div>
+</header>
+
+<!-- Makro Ticker Bandı -->
+<div class="macro-bar">
+  <div class="macro-track" id="macroTrack">
+    <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Filtre Çubuğu -->
+  <div class="filter-bar">
+
+    <div class="filter-group">
+      <label>Sinyal</label>
+      <select id="fSignal">
+        <option value="">Tümü</option>
+        <option value="AL">▲ Güçlü Trend</option>
+        <option value="SAT">▼ Zayıf Trend</option>
+        <option value="BEKLE">● Belirsiz</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Min ADX</label>
+      <input type="number" id="fMinAdx" value="0" min="0" max="100" step="5" style="width:90px">
+    </div>
+
+    <div class="filter-group">
+      <label>Sektör</label>
+      <select id="fSector" style="min-width:150px">
+        <option value="">Tüm Sektörler</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Giriş Kalitesi</label>
+      <select id="fEq">
+        <option value="">Tümü</option>
+        <option value="IDEAL">✅ İdeal</option>
+        <option value="IYI">👍 İyi</option>
+        <option value="DIKKATLI">⚠️ Dikkatli</option>
+        <option value="UZAK">🚫 Uzak</option>
+      </select>
+    </div>
+
+    <div class="filter-group hide-mob">
+      <label>Min Fiyat (₺)</label>
+      <input type="number" id="fMinP" value="" min="0" step="1" placeholder="—" style="width:100px">
+    </div>
+
+    <div class="filter-group hide-mob">
+      <label>Max Fiyat (₺)</label>
+      <input type="number" id="fMaxP" value="" min="0" step="1" placeholder="—" style="width:100px">
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn-reset" onclick="resetFilters()">Sıfırla</button>
+      <button class="btn-apply" onclick="applyFilters()">Filtrele</button>
+    </div>
+  </div>
+
+  <!-- Sonuç başlık -->
+  <div class="result-header">
+    <div class="result-count" id="resultCount"><strong>—</strong> sonuç</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:12px;color:var(--text2)">Sırala:</span>
+      <select class="sort-select" id="sortSel" onchange="applyFilters()">
+        <option value="adx">ADX (Güçlü → Zayıf)</option>
+        <option value="change_pct">Değişim%</option>
+        <option value="price">Fiyat</option>
+        <option value="signal_bars">Sinyal Yaşı</option>
+        <option value="vol_ratio">Hacim Oranı</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Tablo -->
+  <div class="table-wrap" id="tableWrap">
+    <div class="loading-overlay" id="loadingDiv">
+      <div class="spinner"></div>
+      <span>Veriler yükleniyor…</span>
+    </div>
+    <table id="resultTable" style="display:none">
+      <thead>
+        <tr>
+          <th>Hisse</th>
+          <th class="hide-mob">Sektör</th>
+          <th>Sinyal</th>
+          <th onclick="sortBy('adx')" id="th-adx">ADX</th>
+          <th onclick="sortBy('price')">Fiyat</th>
+          <th onclick="sortBy('change_pct')">Değişim</th>
+          <th class="hide-mob" onclick="sortBy('vol_ratio')">Hacim</th>
+          <th class="hide-mob" onclick="sortBy('signal_bars')">Süre</th>
+          <th class="hide-mob">Giriş</th>
+        </tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+    <div class="empty-state" id="emptyDiv" style="display:none">
+      <div class="empty-icon">📭</div>
+      <h3>Sonuç bulunamadı</h3>
+      <p style="font-size:13px;margin-top:6px">Filtreleri gevşeterek tekrar deneyin.</p>
+      <button class="btn-reset" style="margin-top:14px" onclick="resetFilters()">Filtreleri Sıfırla</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <a href="/">Ana Sayfa</a> ·
+  <a href="/gucu-yuksek">Güçlü Momentum</a> ·
+  <a href="/ozet">Sinyal Özeti</a> ·
+  <a href="/metodoloji">Metodoloji</a>
+</footer>
+
+<script>
+/* ── Makro ticker ── */
+(function() {
+  const L={XU100:'BIST100',XU030:'BIST30',BTC:'BTC',ALTIN:'ALTIN',GUMUS:'GÜMÜŞ',USDTRY:'USD/TRY',EURTRY:'EUR/TRY',SP500:'S&P500',NASDAQ:'NASDAQ'};
+  const F={XU100:0,XU030:0,BTC:0,ALTIN:2,GUMUS:2,USDTRY:4,EURTRY:4,SP500:0,NASDAQ:0};
+  const ML={BTC:'/btc',ALTIN:'/altin',GUMUS:'/gumus'};
+  async function load() {
+    try {
+      const d=(await (await fetch('/api/macro')).json()).items||[];
+      if(!d.length) return;
+      const h=d.map(it=>{
+        const p=it.price.toLocaleString('tr-TR',{minimumFractionDigits:F[it.label]??2,maximumFractionDigits:F[it.label]??2});
+        const c=it.change;const s=c>0?'+':'';
+        const cls=c>0.05?'mc-pos':c<-0.05?'mc-neg':'mc-neu';
+        const href=ML[it.label]?` href="${ML[it.label]}"`:'';
+        const tag=href?'a':'span';
+        return `<${tag} class="macro-item"${href} style="text-decoration:none;color:inherit"><span class="macro-item-lbl">${L[it.label]||it.label}</span><span>${p}</span><span class="${cls}">${c>0.05?'▲':c<-0.05?'▼':'●'} ${s}${c.toFixed(2)}%</span></${tag}>`;
+      }).join('');
+      const _mt=document.getElementById('macroTrack');
+      _mt.innerHTML=h+h;
+      requestAnimationFrame(()=>{ const w=_mt.scrollWidth/2; if(w>50) _mt.style.animationDuration=(w/50).toFixed(1)+'s'; });
+    }catch(e){}
+  }
+  load(); setInterval(load,60000);
+})();
+
+/* ── Tarama ── */
+let _currentSort = 'adx';
+let _sectors = [];
+
+function sigLabel(sig) {
+  return {AL:'Güçlü Trend',SAT:'Zayıf Trend',BEKLE:'Belirsiz'}[sig]||sig;
+}
+function eqLabel(eq) {
+  return {IDEAL:'İdeal',IYI:'İyi',DIKKATLI:'Dikkatli',UZAK:'Uzak'}[eq]||'';
+}
+
+async function loadSectors() {
+  try {
+    const r = await fetch('/api/tarama');
+    const d = await r.json();
+    _sectors = d.sectors || [];
+    const sel = document.getElementById('fSector');
+    _sectors.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      sel.appendChild(o);
+    });
+  } catch(e) {}
+}
+
+async function applyFilters() {
+  const sig    = document.getElementById('fSignal').value;
+  const minAdx = document.getElementById('fMinAdx').value || 0;
+  const sector = document.getElementById('fSector').value;
+  const eq     = document.getElementById('fEq').value;
+  const minP   = document.getElementById('fMinP').value || 0;
+  const maxP   = document.getElementById('fMaxP').value || 999999;
+  const sort   = document.getElementById('sortSel').value;
+  _currentSort = sort;
+
+  const params = new URLSearchParams({
+    signal: sig, min_adx: minAdx, sector, eq,
+    min_price: minP, max_price: maxP, sort
+  });
+  // Remove empty
+  [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999') params.delete(k); });
+
+  document.getElementById('loadingDiv').style.display  = '';
+  document.getElementById('resultTable').style.display = 'none';
+  document.getElementById('emptyDiv').style.display    = 'none';
+  document.getElementById('resultCount').innerHTML     = '<strong>—</strong> sonuç';
+
+  try {
+    const r = await fetch('/api/tarama?' + params);
+    const d = await r.json();
+    renderResults(d.results || [], d.count || 0);
+  } catch(e) {
+    document.getElementById('loadingDiv').innerHTML = '<div style="color:var(--sat);padding:24px">Veri yüklenemedi. Lütfen sayfayı yenileyin.</div>';
+  }
+}
+
+function renderResults(rows, count) {
+  document.getElementById('loadingDiv').style.display = 'none';
+  document.getElementById('resultCount').innerHTML = `<strong>${count}</strong> sonuç`;
+
+  if (!rows.length) {
+    document.getElementById('emptyDiv').style.display   = '';
+    document.getElementById('resultTable').style.display = 'none';
+    return;
+  }
+
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = rows.map(s => {
+    const chgCls = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
+    const chgSign = s.change_pct > 0 ? '+' : '';
+    const eqSafe  = s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI';
+    const eqHtml  = s.entry_quality
+      ? `<span class="eq-badge ${eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
+      : '—';
+    const adxPct  = Math.min(100, (s.adx / 60) * 100);
+    return `<tr>
+      <td>
+        <a href="/hisse/${s.ticker}">
+          <div class="tk">${s.ticker}</div>
+          <div class="tk-name">${(s.name||'').replace(' A.Ş.','').substring(0,20)}</div>
+        </a>
+      </td>
+      <td class="hide-mob"><span class="sector-tag">${s.sector||'—'}</span></td>
+      <td><span class="sig-badge sig-${s.signal}">
+        ${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}
+      </span></td>
+      <td>
+        <div class="adx-val">${(s.adx||0).toFixed(1)}</div>
+        <div class="adx-bar-bg"><div class="adx-bar-fill" style="width:${adxPct.toFixed(0)}%"></div></div>
+      </td>
+      <td class="price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})}</td>
+      <td class="${chgCls}">${chgSign}${(s.change_pct||0).toFixed(2)}%</td>
+      <td class="hide-mob vol-val">${s.vol_ratio ? '×'+s.vol_ratio.toFixed(1) : '—'}</td>
+      <td class="hide-mob bars-val">${s.signal_bars||1} gün</td>
+      <td class="hide-mob">${eqHtml}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('resultTable').style.display = '';
+}
+
+function sortBy(col) {
+  document.getElementById('sortSel').value = col;
+  applyFilters();
+}
+
+function resetFilters() {
+  document.getElementById('fSignal').value = '';
+  document.getElementById('fMinAdx').value = 0;
+  document.getElementById('fSector').value = '';
+  document.getElementById('fEq').value     = '';
+  document.getElementById('fMinP').value   = '';
+  document.getElementById('fMaxP').value   = '';
+  document.getElementById('sortSel').value = 'adx';
+  applyFilters();
+}
+
+// Başlangıçta yükle
+loadSectors();
+applyFilters();
+</script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔥 Güçlü Momentum Listesi — {{ today_str }} | borsapusula.com</title>
+<meta name="description" content="BIST hisseleri arasında en güçlü momentum sinyallerine sahip hisseler. ADX, hacim ve bull score kompozit skoru.">
+<link rel="canonical" href="https://borsapusula.com/gucu-yuksek">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117; color: #e6edf3;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px; line-height: 1.6; min-height: 100vh;
+  }
+  /* ── Makro Ticker Bandı ── */
+  .macro-bar {
+    background: #0d1117; border-bottom: 1px solid #21262d;
+    height: 34px; overflow: hidden; position: relative; white-space: nowrap;
+  }
+  .macro-bar::before, .macro-bar::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 60px; pointer-events: none; z-index: 2;
+  }
+  .macro-bar::before { left: 0; background: linear-gradient(to right, #0d1117, transparent); }
+  .macro-bar::after  { right: 0; background: linear-gradient(to left,  #0d1117, transparent); }
+  .macro-track {
+    display: inline-flex; align-items: center;
+    animation: macroScroll 40s linear infinite; height: 34px;
+  }
+  .macro-bar:hover .macro-track { animation-play-state: paused; }
+  @keyframes macroScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .macro-item {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 20px; border-right: 1px solid #21262d; font-size: 12px; height: 34px;
+  }
+  .macro-item-lbl { font-weight: 600; color: #cbd5e1; }
+  .macro-chg-pos { color: #3fb950; }
+  .macro-chg-neg { color: #f85149; }
+  .macro-chg-neu { color: #8b949e; }
+  header {
+    background: #161b22; border-bottom: 1px solid #30363d;
+    padding: 14px 24px; display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 6px; color: #8b949e;
+    font-size: 13px; text-decoration: none; padding: 5px 10px;
+    border: 1px solid #30363d; border-radius: 6px; background: #21262d;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .back-btn:hover { background: #30363d; color: #e6edf3; }
+  .page-title { font-size: 18px; font-weight: 700; color: #f0f6fc; }
+  .page-sub   { font-size: 12px; color: #8b949e; margin-top: 2px; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+  .intro-card {
+    background: linear-gradient(135deg, rgba(63,185,80,.08), rgba(31,111,235,.05));
+    border: 1px solid rgba(63,185,80,.2);
+    border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;
+  }
+  .intro-card h2 { font-size: 15px; font-weight: 700; color: #f0f6fc; margin-bottom: 6px; }
+  .intro-card p  { font-size: 12px; color: #8b949e; line-height: 1.6; }
+  .score-formula {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;
+  }
+  .score-pill {
+    background: rgba(31,111,235,.12); color: #58a6ff;
+    border: 1px solid rgba(31,111,235,.25);
+    border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600;
+  }
+
+  /* Loading state */
+  .loading-box {
+    text-align: center; padding: 60px 20px; color: #8b949e;
+  }
+  .spinner {
+    width: 28px; height: 28px; border: 3px solid #30363d;
+    border-top-color: #1f6feb; border-radius: 50%;
+    animation: spin .8s linear infinite; margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Table */
+  .list-table { width: 100%; border-collapse: collapse; }
+  .list-table th {
+    font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: .5px;
+    font-weight: 600; padding: 8px 12px; border-bottom: 1px solid #30363d;
+    text-align: left; white-space: nowrap;
+  }
+  .list-table td { padding: 10px 12px; border-bottom: 1px solid #21262d; vertical-align: middle; }
+  .list-table tr:last-child td { border-bottom: none; }
+  .list-table tr:hover td { background: rgba(255,255,255,.02); }
+  .list-table a { text-decoration: none; color: inherit; }
+
+  .rank { font-size: 13px; font-weight: 700; color: #484f58; width: 32px; }
+  .rank.top3 { color: #e3b341; }
+
+  .ticker-cell { display: flex; align-items: center; gap: 8px; }
+  .tk  { font-size: 14px; font-weight: 700; color: #f0f6fc; }
+  .tk-name { font-size: 11px; color: #8b949e; }
+
+  .sig-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+  .sig-al  { background: rgba(63,185,80,.12); color: #3fb950; border: 1px solid rgba(63,185,80,.3); }
+  .sig-sat { background: rgba(248,81,73,.12); color: #f85149; border: 1px solid rgba(248,81,73,.3); }
+
+  .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .score-bar-bg {
+    flex: 1; max-width: 80px; height: 6px; background: #21262d;
+    border-radius: 3px; overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, #1f6feb, #3fb950);
+    transition: width .3s;
+  }
+  .score-num {
+    font-size: 13px; font-weight: 700; color: #f0f6fc;
+    font-variant-numeric: tabular-nums; min-width: 28px;
+  }
+
+  .adx-val { font-variant-numeric: tabular-nums; font-size: 13px; color: #e3b341; }
+  .vol-val { font-variant-numeric: tabular-nums; font-size: 13px; color: #58a6ff; }
+  .rsi-val { font-variant-numeric: tabular-nums; font-size: 13px; }
+  .bars-val { font-size: 12px; color: #8b949e; }
+
+  .confirm-dot { font-size: 11px; }
+
+  .updated { font-size: 11px; color: #484f58; text-align: center; margin-top: 20px; }
+
+  @media (max-width: 768px) {
+    .container { padding: 12px; }
+    header { padding: 10px 14px; }
+    .page-sub { display: none; }
+  }
+  @media (max-width: 600px) {
+    .hide-mob { display: none !important; }
+    .list-table th, .list-table td { padding: 8px 8px; font-size: 12px; }
+    /* Tablo yatay scroll — taşma yerine kaydırma */
+    .list-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .list-table { min-width: 340px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="page-title">🔥 Güçlü Momentum Listesi</div>
+    <div class="page-sub">{{ today_str }} · ADX + Hacim + Bull Score kompozit sıralaması</div>
+  </div>
+</header>
+
+<!-- Makro Ticker Bandı -->
+<div class="macro-bar">
+  <div class="macro-track" id="macroTrack">
+    <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="intro-card">
+    <h2>Skor nasıl hesaplanır?</h2>
+    <p>Her hisse için ADX (trend gücü), hacim oranı, sinyal skoru ve teyit durumu birleştirilerek 0–100 arası bir momentum skoru oluşturulur. En yüksek skorlu hisseler listenin başındadır.</p>
+    <div class="score-formula">
+      <span class="score-pill">ADX → maks 30 pt</span>
+      <span class="score-pill">Hacim → maks 25 pt</span>
+      <span class="score-pill">Bull Score → maks 25 pt</span>
+      <span class="score-pill">Teyit → 10 pt</span>
+      <span class="score-pill">RSI bölgesi → 10 pt</span>
+    </div>
+  </div>
+
+  {% if loading %}
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div>Veriler yükleniyor…</div>
+  </div>
+
+  {% elif not stocks %}
+  <div class="loading-box">
+    <div style="font-size:36px;margin-bottom:12px">📭</div>
+    <div style="font-size:16px;font-weight:700;color:#e6edf3">Şu an aktif sinyal yok</div>
+    <div style="font-size:13px;color:#8b949e;margin-top:8px">Piyasa saatlerinde güncellenir.</div>
+    <a href="/" style="display:inline-block;margin-top:16px;background:#1f6feb;color:#fff;text-decoration:none;border-radius:6px;padding:8px 20px;font-size:13px;font-weight:600">Ana Sayfaya Dön</a>
+  </div>
+
+  {% else %}
+  <div class="list-table-wrap" style="background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden">
+    <table class="list-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Hisse</th>
+          <th>Sinyal</th>
+          <th>Skor</th>
+          <th class="hide-mob">ADX</th>
+          <th class="hide-mob">Hacim</th>
+          <th class="hide-mob">RSI</th>
+          <th class="hide-mob">Gün</th>
+          <th class="hide-mob">Teyit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in stocks %}
+        <tr>
+          <td class="rank {% if loop.index <= 3 %}top3{% endif %}">
+            {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+          </td>
+          <td>
+            <a href="/hisse/{{ s.ticker }}" class="ticker-cell">
+              <div>
+                <div class="tk">{{ s.ticker }}</div>
+                <div class="tk-name">{{ stock_names.get(s.ticker, '') | truncate(22, true, '') }}</div>
+              </div>
+            </a>
+          </td>
+          <td>
+            <span class="sig-badge {% if s.signal == 'AL' %}sig-al{% else %}sig-sat{% endif %}">
+              {% if s.signal == 'AL' %}▲ Güçlü{% else %}▼ Zayıf{% endif %}
+            </span>
+          </td>
+          <td>
+            <div class="score-bar-wrap">
+              <div class="score-bar-bg">
+                <div class="score-bar-fill" style="width:{{ s._mscore }}%"></div>
+              </div>
+              <span class="score-num">{{ s._mscore }}</span>
+            </div>
+          </td>
+          <td class="hide-mob adx-val">{{ s.adx or '—' }}</td>
+          <td class="hide-mob vol-val">{% if s.vol_ratio %}×{{ s.vol_ratio }}{% else %}—{% endif %}</td>
+          <td class="hide-mob rsi-val" style="color: {% if s.rsi and s.rsi >= 70 %}#f85149{% elif s.rsi and s.rsi <= 30 %}#3fb950{% else %}#c9d1d9{% endif %}">
+            {{ s.rsi or '—' }}
+          </td>
+          <td class="hide-mob bars-val">{{ s.signal_bars or 1 }} gün</td>
+          <td class="hide-mob confirm-dot">
+            {% if s.confirmed %}<span style="color:#3fb950">✓</span>{% else %}<span style="color:#e3b341">…</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="updated">
+    Son güncelleme: {{ updated_at or '—' }} &nbsp;·&nbsp;
+    <a href="/gucu-yuksek" style="color:#8b949e">Yenile</a> &nbsp;·&nbsp;
+    <a href="/" style="color:#8b949e">Tüm hisseler</a>
+  </p>
+  {% endif %}
+
+</div>
+
+<footer style="text-align:center;padding:20px;font-size:12px;color:#484f58;border-top:1px solid #21262d;margin-top:32px">
+  <a href="/" style="color:#8b949e;text-decoration:none">Ana Sayfa</a> ·
+  <a href="/metodoloji" style="color:#8b949e;text-decoration:none">Metodoloji</a> ·
+  <a href="/sinyal-performans" style="color:#8b949e;text-decoration:none">Performans</a>
+</footer>
+
+<script>
+(function() {
+  const LABELS = { XU100:'BIST100', XU030:'BIST30', BTC:'BTC', ALTIN:'ALTIN', GUMUS:'GÜMÜŞ', USDTRY:'USD/TRY', EURTRY:'EUR/TRY', SP500:'S&P500', NASDAQ:'NASDAQ' };
+  const PRICE_FMT = { XU100:0, XU030:0, BTC:0, ALTIN:2, GUMUS:2, USDTRY:4, EURTRY:4, SP500:0, NASDAQ:0 };
+  async function loadMacro() {
+    try {
+      const r = await fetch('/api/macro');
+      const d = await r.json();
+      const items = d.items || [];
+      if (!items.length) return;
+      const MACRO_LINKS = {BTC:'/btc', ALTIN:'/altin', GUMUS:'/gumus'};
+      const html = items.map(it => {
+        const label = LABELS[it.label] || it.label;
+        const dec   = PRICE_FMT[it.label] ?? 2;
+        const price = it.price.toLocaleString('tr-TR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+        const chg   = it.change;
+        const sign  = chg > 0 ? '+' : '';
+        const cls   = chg > 0.05 ? 'macro-chg-pos' : chg < -0.05 ? 'macro-chg-neg' : 'macro-chg-neu';
+        const arrow = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
+        const href  = MACRO_LINKS[it.label] ? ` href="${MACRO_LINKS[it.label]}"` : '';
+        const tag   = href ? 'a' : 'span';
+        return `<${tag} class="macro-item"${href} style="text-decoration:none;color:inherit"><span class="macro-item-lbl">${label}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></${tag}>`;
+      }).join('');
+      const _mt = document.getElementById('macroTrack');
+      _mt.innerHTML = html + html;
+      requestAnimationFrame(() => { const w = _mt.scrollWidth / 2; if (w > 50) _mt.style.animationDuration = (w / 50).toFixed(1) + 's'; });
+    } catch(e) {}
+  }
+  loadMacro();
+  setInterval(loadMacro, 60000);
+})();
+</script>
+</body>
+</html>

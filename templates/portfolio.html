@@ -166,7 +166,10 @@
   <!-- Export / Import araçları -->
   <div class="pf-actions">
     <button class="btn-action" onclick="exportPortfolio()" title="Portföyü JSON dosyası olarak indir">
-      ⬇ Dışa Aktar (JSON)
+      ⬇ JSON
+    </button>
+    <button class="btn-action" onclick="exportCSV()" title="Portföyü Excel/CSV dosyası olarak indir">
+      📊 CSV
     </button>
     <label class="btn-action" title="Daha önce dışa aktardığın JSON dosyasını yükle">
       ⬆ İçe Aktar
@@ -284,6 +287,40 @@ function exportPortfolio() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('✅ Portföy indirildi.', 'ok');
+}
+
+function exportCSV() {
+  if (!portfolio.length) { showToast('Portföy boş — önce hisse ekleyin.', 'err'); return; }
+  const headers = ['Hisse','Lot','Alış Fiyatı (₺)','Alış Tarihi','Güncel Fiyat (₺)','Sinyal','P&L (₺)','P&L (%)'];
+  const rows = portfolio.map(p => {
+    const current  = (window._sigCache && _sigCache[p.ticker]) ? _sigCache[p.ticker].price  : '';
+    const sig      = (window._sigCache && _sigCache[p.ticker]) ? _sigCache[p.ticker].signal : '';
+    const pnlVal   = current ? ((current - p.buy_price) * p.lot).toFixed(2) : '';
+    const pnlPct   = current ? (((current - p.buy_price) / p.buy_price) * 100).toFixed(2) : '';
+    return [
+      p.ticker,
+      p.lot,
+      String(p.buy_price).replace('.', ','),
+      p.date || '',
+      current ? String(current).replace('.', ',') : '',
+      sig,
+      pnlVal ? String(pnlVal).replace('.', ',') : '',
+      pnlPct ? String(pnlPct).replace('.', ',') + '%' : '',
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';');
+  });
+  const bom = '\uFEFF'; // UTF-8 BOM — Excel'in Türkçe karakterleri doğru okuması için
+  const csv = bom + [headers.map(h => `"${h}"`).join(';'), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `borsapusula-portfolio-${new Date().toISOString().slice(0,10)}.csv`,
+  });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✅ CSV indirildi — Excel ile açabilirsiniz.', 'ok');
 }
 
 function importPortfolio(e) {

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }} Teknik Analiz | borsapusula.com</title>
+<meta name="description" content="{{ desc }}">
+<link rel="canonical" href="https://borsapusula.com/{{ category_key }}">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#0d1117; --surface:#161b22; --surface2:#1c2128;
+    --border:#30363d; --border2:#21262d;
+    --text:#e6edf3; --text2:#8b949e; --text3:#484f58;
+    --al:#3fb950; --sat:#f85149; --bkl:#8b949e;
+    --brand:#1f6feb; --gold:#e3b341;
+  }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; min-height:100vh; }
+  header { background:var(--surface); border-bottom:1px solid var(--border); padding:12px 24px; display:flex; align-items:center; gap:14px; position:sticky; top:0; z-index:100; }
+  .back-btn { display:flex; align-items:center; gap:6px; color:var(--text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--border); border-radius:6px; background:var(--surface2); transition:all .15s; }
+  .back-btn:hover { background:var(--border); color:var(--text); }
+  .page-title { font-size:18px; font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:12px; color:var(--text2); margin-top:1px; }
+
+  /* Macro bar */
+  .macro-bar { background:#0b0f17; border-bottom:1px solid var(--border2); height:32px; overflow:hidden; position:relative; white-space:nowrap; }
+  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2; }
+  .macro-bar::before { left:0; background:linear-gradient(to right,#0b0f17,transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,#0b0f17,transparent); }
+  .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:32px; }
+  .macro-bar:hover .macro-track { animation-play-state:paused; }
+  @keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .macro-item { display:inline-flex; align-items:center; gap:7px; padding:0 18px; border-right:1px solid var(--border2); font-size:11px; height:32px; text-decoration:none; color:inherit; }
+  .macro-item:hover { background:rgba(255,255,255,.04); }
+  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
+  .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
+
+  .container { max-width:1100px; margin:0 auto; padding:24px 20px; }
+
+  /* Category hero */
+  .cat-hero { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; margin-bottom:20px; }
+  .cat-hero-title { font-size:24px; font-weight:800; color:#f0f6fc; margin-bottom:4px; }
+  .cat-hero-desc  { font-size:13px; color:var(--text2); }
+
+  /* Asset cards */
+  .asset-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin-bottom:24px; }
+  .asset-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 20px; text-decoration:none; transition:all .15s; display:block; }
+  .asset-card:hover { border-color:var(--brand); transform:translateY(-1px); }
+  .ac-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .ac-name   { font-size:14px; font-weight:700; color:#f0f6fc; }
+  .ac-unit   { font-size:11px; color:var(--text2); }
+  .ac-price  { font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; color:#f0f6fc; line-height:1; margin-bottom:4px; }
+  .ac-chg    { font-size:12px; font-weight:600; margin-bottom:12px; }
+  .chg-pos { color:var(--al); } .chg-neg { color:var(--sat); } .chg-neu { color:var(--text2); }
+  .ac-footer { display:flex; align-items:center; justify-content:space-between; padding-top:10px; border-top:1px solid var(--border2); }
+  .sig-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+  .sig-AL    { background:rgba(63,185,80,.12); color:var(--al); border:1px solid rgba(63,185,80,.3); }
+  .sig-SAT   { background:rgba(248,81,73,.12); color:var(--sat); border:1px solid rgba(248,81,73,.3); }
+  .sig-BEKLE { background:rgba(139,148,158,.1); color:var(--bkl); border:1px solid rgba(139,148,158,.2); }
+  .ac-adx    { font-size:11px; color:var(--gold); }
+  .ac-sl     { font-size:11px; color:var(--text2); }
+  .detail-btn { font-size:12px; color:var(--brand); }
+
+  /* Loading skeleton */
+  @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+  .skeleton { background:linear-gradient(90deg,var(--surface2) 25%,#1e2530 50%,var(--surface2) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:4px; }
+
+  /* US Stocks table */
+  .section-title { font-size:14px; font-weight:700; color:#f0f6fc; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border2); }
+  .stocks-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:24px; }
+  .stocks-wrap table { width:100%; border-collapse:collapse; }
+  .stocks-wrap thead th { font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; font-weight:700; padding:10px 14px; border-bottom:1px solid var(--border); background:var(--surface2); text-align:left; white-space:nowrap; }
+  .stocks-wrap tbody td { padding:10px 14px; border-bottom:1px solid var(--border2); vertical-align:middle; font-size:13px; }
+  .stocks-wrap tbody tr:last-child td { border-bottom:none; }
+  .stocks-wrap tbody tr:hover td { background:rgba(255,255,255,.02); }
+  .stocks-wrap a { text-decoration:none; color:inherit; }
+  .tk { font-size:14px; font-weight:700; color:#f0f6fc; }
+  .tk-name { font-size:11px; color:var(--text2); margin-top:1px; }
+  .sector-tag { font-size:10px; color:var(--text3); background:var(--surface2); border:1px solid var(--border2); border-radius:10px; padding:2px 7px; white-space:nowrap; }
+
+  /* Spinner */
+  .spinner { width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--brand); border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* Canlı fiyat flash animasyonu */
+  @keyframes flashUp { 0%{color:#3fb950;background:rgba(63,185,80,.18)} 100%{color:inherit;background:transparent} }
+  @keyframes flashDn { 0%{color:#f85149;background:rgba(248,81,73,.18)} 100%{color:inherit;background:transparent} }
+  .chg-flash-up { animation:flashUp .7s ease; border-radius:3px; }
+  .chg-flash-dn { animation:flashDn .7s ease; border-radius:3px; }
+
+  .disclaimer { background:rgba(248,81,73,.07); border:1px solid rgba(248,81,73,.2); border-radius:8px; padding:12px 16px; color:var(--text2); font-size:12px; margin-bottom:20px; }
+
+  @media(max-width:768px) {
+    header { padding:10px 14px; }
+    .container { padding:12px; }
+    .cat-hero { padding:14px 16px; }
+    .cat-hero-title { font-size:20px; }
+    .asset-grid { grid-template-columns:1fr 1fr; gap:10px; }
+    .ac-price { font-size:20px; }
+    .stocks-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .stocks-wrap table { min-width:400px; }
+  }
+  @media(max-width:480px) {
+    .asset-grid { grid-template-columns:1fr; }
+  }
+
+  footer { text-align:center; padding:20px; font-size:12px; color:var(--text3); border-top:1px solid var(--border2); margin-top:16px; }
+  footer a { color:var(--text2); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="page-title">{{ emoji }} {{ title }}</div>
+    <div class="page-sub">Supertrend · ADX · EMA Teknik Analiz</div>
+  </div>
+</header>
+
+<div class="macro-bar">
+  <div class="macro-track" id="macroTrack">
+    <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="cat-hero">
+    <div class="cat-hero-title">{{ emoji }} {{ title }}</div>
+    <div class="cat-hero-desc">{{ desc }}</div>
+  </div>
+
+  <!-- Ana varlık kartları -->
+  <div class="asset-grid" id="assetGrid">
+    {% for asset in assets %}
+    <a href="{{ asset.href }}" class="asset-card" id="card-{{ asset.key }}">
+      <div class="ac-header">
+        <div>
+          <div class="ac-name">{{ asset.emoji }} {{ asset.name }}</div>
+        </div>
+        <span class="sig-badge sig-BEKLE" id="sig-{{ asset.key }}">● —</span>
+      </div>
+      <div class="ac-price skeleton" id="price-{{ asset.key }}" style="width:140px;height:32px;border-radius:4px">&nbsp;</div>
+      <div class="ac-chg" id="chg-{{ asset.key }}">&nbsp;</div>
+      <div class="ac-footer">
+        <div>
+          <div class="ac-sl" id="sl-{{ asset.key }}"></div>
+          <div class="ac-adx" id="adx-{{ asset.key }}"></div>
+        </div>
+        <span class="detail-btn">Detay →</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if us_stocks %}
+  <!-- ABD Hisseleri tablosu -->
+  <div class="section-title">🇺🇸 ABD Hisseleri — Hızlı Erişim</div>
+  <div class="stocks-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Hisse</th>
+          <th>Sektör</th>
+          <th>Detay</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in us_stocks %}
+        <tr>
+          <td>
+            <a href="{{ s.href }}">
+              <div class="tk">{{ s.key }}</div>
+              <div class="tk-name">{{ s.name }}</div>
+            </a>
+          </td>
+          <td><span class="sector-tag">{{ s.sector }}</span></td>
+          <td><a href="{{ s.href }}" style="color:var(--brand);font-size:12px">Grafik →</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <div class="disclaimer">
+    ⚠️ <strong>Önemli Uyarı:</strong> Bu sayfa algoritmik teknik analiz içerir. Yatırım tavsiyesi değildir.
+  </div>
+
+</div>
+
+<footer>
+  <a href="/">Ana Sayfa</a> · <a href="/kripto">Kripto</a> · <a href="/emtialar">Emtialar</a> · <a href="/abd">ABD</a> · <a href="/tarama">Hisse Tarayıcı</a>
+  <div style="margin-top:8px">⚠️ Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
+</footer>
+
+<script>
+const ASSETS = {{ assets | tojson }};
+const MACRO_LABELS = {
+  XU100:'BIST100',XU030:'BIST30',USDTRY:'USD/TRY',EURTRY:'EUR/TRY',
+  BTC:'BTC',ETH:'ETH',SOL:'SOL',BNB:'BNB',
+  ALTIN:'ALTIN',GUMUS:'GÜMÜŞ',PETROL:'PETROL',DOGALGAZ:'D.GAZ',
+  SP500:'S&P500',NASDAQ:'NASDAQ'
+};
+const MACRO_DEC = {
+  XU100:0,XU030:0,USDTRY:4,EURTRY:4,
+  BTC:0,ETH:2,SOL:2,BNB:2,
+  ALTIN:2,GUMUS:2,PETROL:2,DOGALGAZ:3,
+  SP500:0,NASDAQ:0
+};
+const MACRO_LINKS = {
+  BTC:'/btc',ETH:'/eth',SOL:'/sol',BNB:'/bnb',
+  ALTIN:'/altin',GUMUS:'/gumus',PETROL:'/petrol',DOGALGAZ:'/dogalgaz',
+  SP500:'/abd/sp500',NASDAQ:'/abd/nasdaq'
+};
+
+/* Macro ticker */
+(function(){
+  async function load() {
+    try {
+      const d=(await (await fetch('/api/macro')).json()).items||[];
+      if(!d.length) return;
+      const h=d.map(it=>{
+        const p=it.price.toLocaleString('tr-TR',{minimumFractionDigits:MACRO_DEC[it.label]??2,maximumFractionDigits:MACRO_DEC[it.label]??2});
+        const c=it.change;const s=c>0?'+':'';
+        const cls=c>0.05?'mc-pos':c<-0.05?'mc-neg':'mc-neu';
+        const href=MACRO_LINKS[it.label]?` href="${MACRO_LINKS[it.label]}"`:'';
+        return `<a class="macro-item"${href}><span class="macro-item-lbl">${MACRO_LABELS[it.label]||it.label}</span><span>${p}</span><span class="${cls}">${c>0.05?'▲':c<-0.05?'▼':'●'} ${s}${c.toFixed(2)}%</span></a>`;
+      }).join('');
+      const _mt=document.getElementById('macroTrack');
+      _mt.innerHTML=h+h;
+      requestAnimationFrame(()=>{ const w=_mt.scrollWidth/2; if(w>50) _mt.style.animationDuration=(w/50).toFixed(1)+'s'; });
+    }catch(e){}
+  }
+  load(); setInterval(load,60000);
+})();
+
+/* Direkt /api/chart/ endpoint kullanan varlıklar (US hisseleri dışındakiler) */
+const DIRECT_CHART_KEYS = new Set(['BTC','ETH','SOL','BNB','ALTIN','GUMUS','PETROL','DOGALGAZ','SP500','NASDAQ']);
+
+/* Load asset card data */
+function fmtPrice(v, dec) {
+  if(v==null||isNaN(v)) return '—';
+  const d = dec!=null ? dec : (v>=1000?0:v>=10?2:4);
+  return v.toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+function sigLabel(s){return {AL:'▲ Güçlü Trend',SAT:'▼ Zayıf Trend',BEKLE:'● Belirsiz'}[s]||'● —';}
+
+/* Yüklenen fiyatları sakla (SSE güncellemeleri için) */
+const _loadedPrices = {};
+
+async function loadAssetCard(asset) {
+  const key = asset.key;
+  const api = DIRECT_CHART_KEYS.has(key) ? `/api/chart/${key}` : `/api/chart/us/${key}`;
+  try {
+    const d = await (await fetch(api)).json();
+    const c = d.chart;
+    if(!c || d.loading) return;
+    const s = c.summary || {};
+    const dec = s.price >= 1000 ? 0 : s.price >= 10 ? 2 : 4;
+    _loadedPrices[key] = dec;
+
+    const priceEl = document.getElementById('price-'+key);
+    if(priceEl) {
+      priceEl.className = 'ac-price';
+      priceEl.style.width = '';
+      priceEl.style.height = '';
+      priceEl.textContent = fmtPrice(s.price, dec);
+      priceEl.dataset.raw = s.price;
+    }
+    const chgEl = document.getElementById('chg-'+key);
+    if(chgEl && s.change_pct != null) {
+      const sign = s.change_pct>0?'+':'';
+      chgEl.textContent = sign+s.change_pct.toFixed(2)+'%';
+      chgEl.className = 'ac-chg '+(s.change_pct>0.05?'chg-pos':s.change_pct<-0.05?'chg-neg':'chg-neu');
+    }
+    const sigEl = document.getElementById('sig-'+key);
+    if(sigEl) {
+      sigEl.textContent = sigLabel(s.signal);
+      sigEl.className = 'sig-badge sig-'+(s.signal||'BEKLE');
+    }
+    const slEl = document.getElementById('sl-'+key);
+    if(slEl && s.sl_level) slEl.textContent = 'SL: '+fmtPrice(s.sl_level,dec);
+    const adxEl = document.getElementById('adx-'+key);
+    if(adxEl && s.adx) adxEl.textContent = 'ADX '+s.adx.toFixed(1);
+  } catch(e){}
+}
+
+Promise.all(ASSETS.map(loadAssetCard));
+
+/* SSE — global_prices mesajlarını dinle, fiyat kartlarını canlı güncelle */
+(function(){
+  let _retry = 2000;
+  function startSSE() {
+    const es = new EventSource('/api/stream');
+    es.onopen = () => { _retry = 2000; };
+    es.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if(msg.type !== 'global_prices') return;
+        Object.entries(msg.data).forEach(([key, d]) => {
+          const priceEl = document.getElementById('price-'+key);
+          if(!priceEl || priceEl.classList.contains('skeleton')) return;
+          const oldPrice = parseFloat(priceEl.dataset.raw || '0');
+          const newPrice = d.price;
+          if(!newPrice || newPrice === oldPrice) return;
+          const dec = _loadedPrices[key] ?? (newPrice >= 1000 ? 0 : newPrice >= 10 ? 2 : 4);
+          priceEl.textContent = fmtPrice(newPrice, dec);
+          priceEl.dataset.raw  = newPrice;
+          /* Flash animasyonu */
+          const dir = newPrice > oldPrice ? 'chg-flash-up' : 'chg-flash-dn';
+          priceEl.classList.remove('chg-flash-up','chg-flash-dn');
+          void priceEl.offsetWidth;
+          priceEl.classList.add(dir);
+          setTimeout(() => priceEl.classList.remove('chg-flash-up','chg-flash-dn'), 700);
+          /* Değişim % güncelle */
+          const chgEl = document.getElementById('chg-'+key);
+          if(chgEl && d.change_pct != null) {
+            const sign = d.change_pct>0?'+':'';
+            chgEl.textContent = sign+d.change_pct.toFixed(2)+'%';
+            chgEl.className = 'ac-chg '+(d.change_pct>0.05?'chg-pos':d.change_pct<-0.05?'chg-neg':'chg-neu');
+          }
+        });
+      } catch(_) {}
+    };
+    es.onerror = () => {
+      es.close();
+      setTimeout(startSSE, _retry);
+      _retry = Math.min(_retry * 2, 30000);
+    };
+  }
+  startSSE();
+})();
+</script>
+</body>
+</html>

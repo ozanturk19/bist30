@@ -87,7 +87,7 @@
   body.light { --bg: #ffffff; --bg2: #f6f8fa; --bg3: #eaeef2; --border: #d0d7de; --text: #1f2328; --text2: #636c76; --text3: #9ea7b3; }
   body.light { background: var(--bg); color: var(--text); }
   body.light header { background: var(--bg2); border-color: var(--border); }
-  body.light .table-wrap, body.light .stat-card, body.light .hero-card, body.light .index-row-card { background: var(--bg2); border-color: var(--border); }
+  body.light .table-wrap, body.light .stat-card, body.light .endeks-card, body.light .chart-accordion, body.light .index-row-card { background: var(--bg2); border-color: var(--border); }
   body.light tbody tr { border-color: var(--bg3); }
   body.light tbody tr:hover { background: var(--bg3); }
   body.light thead th { background: var(--bg3); color: var(--text2); border-color: var(--border); }
@@ -560,47 +560,89 @@
     font-size: 12px; border-top: 1px solid var(--bp-border); margin-top: 24px;
   }
 
-  /* ── BIST30 Chart Section ─────────────────────────── */
-  /* ── Index / Hero Section ───────────────────── */
-  /* Hero card: stat kartlarla aynı görsel dil */
-  .hero-card {
+  /* ── Dual Endeks Kartları ─────────────────────────── */
+  .dual-endeks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .endeks-card {
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+    user-select: none;
+  }
+  .endeks-card:hover { border-color: #30363d; box-shadow: 0 0 0 3px rgba(31,111,235,.06); }
+  .endeks-card.active { border-color: #1f6feb; box-shadow: 0 0 0 3px rgba(31,111,235,.10); }
+
+  .ec-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .ec-title { font-size: 11px; font-weight: 700; color: #8b949e; text-transform: uppercase; letter-spacing: .5px; }
+  .ec-spark { width: 80px; height: 32px; flex-shrink: 0; overflow: visible; }
+
+  .ec-price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+  .ec-price { font-size: 20px; font-weight: 700; color: #f0f6fc; font-variant-numeric: tabular-nums; }
+  .ec-chg   { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ec-chg.pos { color: #3fb950; }
+  .ec-chg.neg { color: #f85149; }
+  .ec-chg.neu { color: #8b949e; }
+
+  .ec-signal-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ec-inds { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+
+  .index-sl {
+    font-size: 11px;
+    background: rgba(248,81,73,0.12);
+    border: 1px solid rgba(248,81,73,0.3);
+    color: #f85149;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Chart Accordion ──────────────────────────────── */
+  .chart-accordion {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 16px;
   }
-  /* BIST30 başlık satırı */
-  .index-header {
-    display: flex; align-items: center; gap: 16px;
-    padding: 10px 16px 9px; flex-wrap: wrap;
+  .chart-acc-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px; cursor: pointer;
     border-bottom: 1px solid var(--bp-border);
+    user-select: none;
   }
-
-  /* Chart + panel split — yükseklik chart ile sabit */
-  .index-section {
-    display: flex; align-items: stretch;
-    height: 234px;    /* chart 230px + charts-wrap padding-top 4px */
-    overflow: hidden; /* border-right taşmasını önler */
+  .chart-acc-header:hover { background: rgba(255,255,255,.02); }
+  .chart-acc-chev {
+    font-size: 11px; color: #484f58;
+    transition: transform .2s ease; display: inline-block;
   }
-  .index-title  { font-size: 14px; font-weight: 700; color: #f0f6fc; letter-spacing: 0.2px; }
-  .index-price  { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; color: #f0f6fc; }
-  .index-change { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .index-change.pos { color: #3fb950; }
-  .index-change.neg { color: #f85149; }
-  .index-change.neu { color: #8b949e; }
+  .chart-acc-chev.open { transform: rotate(180deg); }
 
-  .index-sl {
-    font-size: 12px;
-    background: rgba(248,81,73,0.12);
-    border: 1px solid rgba(248,81,73,0.3);
-    color: #f85149;
-    padding: 3px 9px;
-    border-radius: 6px;
-    font-variant-numeric: tabular-nums;
+  .chart-tabs { display: flex; gap: 4px; }
+  .chart-tab {
+    background: none; border: 1px solid transparent;
+    color: #8b949e; font-size: 12px; font-weight: 600;
+    padding: 4px 14px; border-radius: 6px; cursor: pointer;
+    transition: all .15s; font-family: inherit;
   }
+  .chart-tab:hover { background: rgba(255,255,255,.04); color: #c9d1d9; }
+  .chart-tab.active { background: rgba(31,111,235,.12); color: #58a6ff; border-color: rgba(31,111,235,.3); }
 
-  .index-inds { display: flex; gap: 5px; flex-wrap: wrap; margin-left: auto; }
+  .chart-acc-body {
+    display: none;
+  }
+  .chart-acc-body.open {
+    display: flex;
+    align-items: stretch;
+    height: 262px;   /* chart 258px + charts-wrap padding 4px */
+    overflow: hidden;
+  }
 
   /* Sol: grafik kolonu */
   #chartCol {
@@ -616,12 +658,11 @@
     min-width: 0;
   }
   .chart-pane  { position: relative; flex: 1; min-height: 0; }
-  /* chart container full width, LightweightCharts handles sizing */
-  #chartMain   { height: 230px; }
+  #chartMain   { height: 258px; }
 
   .chart-loading {
     display: flex; align-items: center; justify-content: center;
-    height: 230px; color: #484f58; font-size: 13px; gap: 10px;
+    height: 258px; color: #484f58; font-size: 13px; gap: 10px;
   }
 
   /* Sağ: öne çıkanlar paneli */
@@ -629,6 +670,16 @@
     flex: 1; min-width: 0;
     display: flex; flex-direction: column;
     overflow-y: auto;
+    position: relative;
+    scrollbar-width: none; /* firefox */
+  }
+  .hero-panel::-webkit-scrollbar { display: none; }
+  /* Alt gradient — daha fazla içerik olduğunu ima eder */
+  .hero-panel::after {
+    content: ''; position: sticky; bottom: 0; left: 0; right: 0;
+    height: 20px; flex-shrink: 0;
+    background: linear-gradient(to top, #161b22, transparent);
+    pointer-events: none;
   }
   .hp-section {
     padding: 8px 14px 6px; flex-shrink: 0;
@@ -776,12 +827,18 @@
     .header-nav { display: none; }
     .logo-sub { display: none; }
     .logo-name { font-size: 15px; }
-    .index-header { padding: 9px 12px 6px; gap: 8px; flex-wrap: wrap; }
-    .index-section { flex-direction: column; height: auto; overflow: visible; }
+    /* Dual endeks kartları — mobilde yığılmış */
+    .dual-endeks { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .endeks-card { padding: 10px 12px; }
+    .ec-price { font-size: 16px; }
+    .ec-spark { width: 60px; height: 26px; }
+    .ec-inds { display: none; }
+    /* Accordion body — mobilde dikey */
+    .chart-acc-body.open { flex-direction: column; height: auto; overflow: visible; }
     #chartCol { flex: none !important; max-width: 100% !important; width: 100%; border-right: none; border-bottom: 1px solid var(--bp-border); }
     .charts-wrap { padding: 4px 12px 8px; }
-    #chartMain { height: 200px; }
-    .chart-loading { height: 200px; }
+    #chartMain { height: 220px; }
+    .chart-loading { height: 220px; }
     .hero-panel { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; min-height: 100px; }
     .hp-section { flex: 0 0 150px; min-width: 0; padding: 8px 10px; }
     .hp-divider { width: 1px; height: auto; background: var(--bp-border); flex-shrink: 0; }
@@ -793,7 +850,6 @@
     .indicators { display: none; }
     th.hide-mobile, td.hide-mobile { display: none; }
     .search-input { width: 120px; }
-    .index-inds { margin-left: 0; }
     .irc-inds { display: none; }
     #updated { display: none; }
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -828,6 +884,18 @@
     <a href="/ozet">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Özet
+    </a>
+    <a href="/kripto">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>
+      Kripto
+    </a>
+    <a href="/emtialar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8M11 13l2-2"/></svg>
+      Emtialar
+    </a>
+    <a href="/abd">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>
+      ABD
     </a>
     <a href="/sektor-harita">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
@@ -904,20 +972,58 @@
 <!-- ── Ana içerik container ─────────────────────────── -->
 <div class="container">
 
-<!-- ── BIST30 Hero Card (stat kartlarla aynı hizalama) ── -->
-<div class="hero-card">
-  <div class="index-header">
-    <span class="index-title">BIST 30 (XU030)</span>
-    <span class="index-price" id="idxPrice"><span class="idx-sk idx-sk-price"></span></span>
-    <span class="index-change neu" id="idxChange"><span class="idx-sk idx-sk-change"></span></span>
-    <span class="signal-badge signal-BEKLE" id="idxSignal" style="font-size:11px;opacity:0.4">● —</span>
-    <span class="index-sl" id="idxSl" style="display:none">SL —</span>
-    <div class="index-inds" id="idxInds"></div>
+<!-- ── Dual Endeks Kartları ── -->
+<div class="dual-endeks">
+
+  <!-- BIST 30 -->
+  <div class="endeks-card active" id="ec30" onclick="selectEndeks('XU030')">
+    <div class="ec-top">
+      <span class="ec-title">BIST 30</span>
+      <svg class="ec-spark" id="spark30" viewBox="0 0 80 32"></svg>
+    </div>
+    <div class="ec-price-row">
+      <span class="ec-price" id="ec30Price"><span class="idx-sk idx-sk-price"></span></span>
+      <span class="ec-chg neu" id="ec30Chg"><span class="idx-sk idx-sk-change"></span></span>
+    </div>
+    <div class="ec-signal-row">
+      <span class="signal-badge signal-BEKLE" id="ec30Signal" style="font-size:11px;opacity:.4">● —</span>
+      <span class="index-sl" id="ec30Sl" style="display:none">SL —</span>
+    </div>
+    <div class="ec-inds" id="ec30Inds"></div>
   </div>
 
-  <div class="index-section">
+  <!-- BIST 100 -->
+  <div class="endeks-card" id="ec100" onclick="selectEndeks('XU100')">
+    <div class="ec-top">
+      <span class="ec-title">BIST 100</span>
+      <svg class="ec-spark" id="spark100" viewBox="0 0 80 32"></svg>
+    </div>
+    <div class="ec-price-row">
+      <span class="ec-price" id="ec100Price"><span class="idx-sk idx-sk-price"></span></span>
+      <span class="ec-chg neu" id="ec100Chg"><span class="idx-sk idx-sk-change"></span></span>
+    </div>
+    <div class="ec-signal-row">
+      <span class="signal-badge signal-BEKLE" id="ec100Signal" style="font-size:11px;opacity:.4">● —</span>
+      <span class="index-sl" id="ec100Sl" style="display:none">SL —</span>
+    </div>
+    <div class="ec-inds" id="ec100Inds"></div>
+  </div>
 
-    <!-- Sol: XU030 Grafik -->
+</div><!-- /dual-endeks -->
+
+<!-- ── Grafik Accordion ── -->
+<div class="chart-accordion">
+  <div class="chart-acc-header" onclick="toggleChartAcc()">
+    <div class="chart-tabs">
+      <button class="chart-tab active" id="ctab-XU030" onclick="event.stopPropagation();switchChartTab('XU030')">BIST 30 Grafik</button>
+      <button class="chart-tab" id="ctab-XU100" onclick="event.stopPropagation();switchChartTab('XU100')">BIST 100 Grafik</button>
+    </div>
+    <span class="chart-acc-chev" id="chartChev">▼</span>
+  </div>
+
+  <div class="chart-acc-body" id="chartAccBody">
+
+    <!-- Sol: Grafik kolonu -->
     <div id="chartCol">
       <div class="charts-wrap" id="chartsWrap">
         <div class="chart-loading" id="chartLoading">
@@ -955,11 +1061,14 @@
 
     </div>
   </div>
-</div><!-- /hero-card -->
+</div><!-- /chart-accordion -->
 
   <div class="stats-bar" id="statsBar">
     <div class="stat-card stat-total"><div class="stat-num" id="statTotal"><span class="stat-num-sk"></span></div><div class="stat-label">Toplam</div></div>
-    <div class="stat-card stat-al">   <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>   <div class="stat-label">Güçlü Trend</div></div>
+    <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="En güçlü momentum sinyallerini gör">
+      <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>
+      <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7">↗</span></div>
+    </a>
     <div class="stat-card stat-sat">  <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>  <div class="stat-label">Zayıf Trend</div></div>
     <div class="stat-card stat-bekle"><div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div><div class="stat-label">Belirsiz</div></div>
   </div>
@@ -1103,7 +1212,12 @@
       <tbody id="tableBody"></tbody>
     </table>
     <div id="mobileCards" class="mobile-card-list"></div>
-    <div id="noDataDiv" class="no-data" style="display:none">Sonuç bulunamadı.</div>
+    <div id="noDataDiv" style="display:none;padding:48px 24px;text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">🔍</div>
+      <div style="font-size:16px;font-weight:700;color:#e6edf3;margin-bottom:8px">Sonuç bulunamadı</div>
+      <div style="font-size:13px;color:#8b949e;margin-bottom:20px">Bu kriterlere uyan hisse yok. Filtreleri gevşetin ya da arama terimini değiştirin.</div>
+      <button onclick="resetFilters()" style="background:#1f6feb;color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer">Filtreleri Sıfırla</button>
+    </div>
   </div>
 
 </div>
@@ -1146,6 +1260,9 @@
     </div>
     <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:12px">
       <a href="/ozet"             style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Günlük Özet</a>
+      <a href="/kripto"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">🔐 Kripto</a>
+      <a href="/emtialar"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">🥇 Emtialar</a>
+      <a href="/abd"              style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">🇺🇸 ABD</a>
       <a href="/portfolio"        style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Portföy</a>
       <a href="/sinyal-performans"style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Sinyal Performansı</a>
       <a href="/sektor-harita"    style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Sektör Haritası</a>
@@ -1174,20 +1291,41 @@
 /* ── Makro Ticker Bandı ──────────────────────────── */
 (function() {
   const LABELS = {
-    XU100:'BIST100', XU030:'BIST30', BTC:'BTC',
-    ALTIN:'ALTIN', GUMUS:'GÜMÜŞ', USDTRY:'USD/TRY',
-    EURTRY:'EUR/TRY', SP500:'S&P500', NASDAQ:'NASDAQ'
+    XU100:'BIST100', XU030:'BIST30', USDTRY:'USD/TRY', EURTRY:'EUR/TRY',
+    BTC:'BTC', ETH:'ETH', SOL:'SOL', BNB:'BNB',
+    ALTIN:'ALTIN', GUMUS:'GÜMÜŞ', PETROL:'PETROL', DOGALGAZ:'D.GAZ',
+    SP500:'S&P500', NASDAQ:'NASDAQ'
   };
   const PRICE_FMT = {
-    XU100:0, XU030:0, BTC:0, ALTIN:2, GUMUS:2,
-    USDTRY:4, EURTRY:4, SP500:0, NASDAQ:0
+    XU100:0, XU030:0, USDTRY:4, EURTRY:4,
+    BTC:0, ETH:2, SOL:2, BNB:2,
+    ALTIN:2, GUMUS:2, PETROL:2, DOGALGAZ:3,
+    SP500:0, NASDAQ:0
   };
 
   function renderMacro(items) {
     if (!items || !items.length) return;
+    // Endeks kartı fiyatlarını güncelle (makro API'den — chart yüklenmeden önce de çalışır)
+    items.forEach(it => {
+      if (it.label !== 'XU030' && it.label !== 'XU100') return;
+      const pfx = it.label === 'XU030' ? 'ec30' : 'ec100';
+      const pEl = document.getElementById(pfx + 'Price');
+      const cEl = document.getElementById(pfx + 'Chg');
+      if (pEl) pEl.textContent = it.price.toLocaleString('tr-TR', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+      if (cEl) {
+        const sign = it.change > 0 ? '+' : '';
+        cEl.textContent = sign + it.change.toFixed(2) + '%';
+        cEl.className = 'ec-chg ' + (it.change > 0.05 ? 'pos' : it.change < -0.05 ? 'neg' : 'neu');
+      }
+    });
     const track = document.getElementById('macroTrack');
     if (!track) return;
     // İki kopya — sonsuz kaydırma için
+    const MACRO_LINKS = {
+      BTC:'/btc', ETH:'/eth', SOL:'/sol', BNB:'/bnb',
+      ALTIN:'/altin', GUMUS:'/gumus', PETROL:'/petrol', DOGALGAZ:'/dogalgaz',
+      SP500:'/abd/sp500', NASDAQ:'/abd/nasdaq'
+    };
     const html = items.map(it => {
       const label  = LABELS[it.label] || it.label;
       const decimals = PRICE_FMT[it.label] ?? 2;
@@ -1196,13 +1334,16 @@
       const sign   = chg > 0 ? '+' : '';
       const cls    = chg > 0.05 ? 'macro-chg-pos' : chg < -0.05 ? 'macro-chg-neg' : 'macro-chg-neu';
       const arrow  = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
-      return `<span class="macro-item">
+      const href   = MACRO_LINKS[it.label] ? ` href="${MACRO_LINKS[it.label]}"` : '';
+      const tag    = href ? 'a' : 'span';
+      return `<${tag} class="macro-item"${href} style="text-decoration:none;color:inherit">
         <span class="macro-label">${label}</span>
         <span class="macro-price">${price}</span>
         <span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span>
-      </span>`;
+      </${tag}>`;
     }).join('');
     track.innerHTML = html + html; // çift kopya
+    requestAnimationFrame(() => { const w = track.scrollWidth / 2; if (w > 50) track.style.animationDuration = (w / 50).toFixed(1) + 's'; });
   }
 
   async function loadMacro() {
@@ -1362,62 +1503,195 @@ function buildCharts(d) {
   });
 
   chartMain.timeScale().fitContent();
-
-  window.addEventListener('resize', () => {
-    const w = elMain.clientWidth;
-    if (w) chartMain.applyOptions({ width: w });
+  // Sol kenardaki ilk zaman etiketi kesilmesin: 10 bar sol boşluk ekle
+  requestAnimationFrame(() => {
+    try {
+      const lr = chartMain.timeScale().getVisibleLogicalRange();
+      if (lr) chartMain.timeScale().setVisibleLogicalRange({ from: lr.from - 10, to: lr.to + 2 });
+    } catch(_) {}
   });
 }
 
-function renderIndexHeader(s) {
+/* Tek global resize handler (rebuild her çağrıldığında eklenmez) */
+window.addEventListener('resize', () => {
+  const elMain = document.getElementById('chartMain');
+  if (elMain && chartMain) {
+    const w = elMain.clientWidth;
+    const isMob = window.innerWidth < 768;
+    const h = isMob ? 220 : 258;
+    if (w) chartMain.applyOptions({ width: w, height: h });
+  }
+});
+
+/* ── Endeks kartı render ─────────────────────────── */
+function renderEndeksCard(sym, s) {
+  const pfx = sym === 'XU030' ? 'ec30' : 'ec100';
   const chgClass = s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu';
   const chgSign  = s.change_pct > 0 ? '+' : '';
 
-  const priceEl = document.getElementById('idxPrice');
-  priceEl.textContent = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-  const chgEl = document.getElementById('idxChange');
-  chgEl.textContent = chgSign + s.change_pct.toFixed(2) + '%';
-  chgEl.className   = 'index-change ' + chgClass;
+  const priceEl = document.getElementById(pfx + 'Price');
+  if (priceEl) priceEl.textContent = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
 
-  const sigEl = document.getElementById('idxSignal');
-  const icon  = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
-  sigEl.textContent = icon + ' ' + sigLabel(s.signal);
-  sigEl.className   = 'signal-badge signal-' + s.signal;
-  sigEl.style.opacity = '1';
+  const chgEl = document.getElementById(pfx + 'Chg');
+  if (chgEl) { chgEl.textContent = chgSign + s.change_pct.toFixed(2) + '%'; chgEl.className = 'ec-chg ' + chgClass; }
 
-  // SL seviyesi
-  const slEl = document.getElementById('idxSl');
-  if (s.sl_level && s.signal !== 'BEKLE') {
-    slEl.textContent = 'SL ' + s.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-    slEl.style.display = '';
-  } else {
-    slEl.style.display = 'none';
+  const sigEl = document.getElementById(pfx + 'Signal');
+  if (sigEl) {
+    const icon = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
+    sigEl.textContent = icon + ' ' + sigLabel(s.signal);
+    sigEl.className = 'signal-badge signal-' + s.signal;
+    sigEl.style.opacity = '1';
   }
 
-  // 3 indikatör badge
-  const inds = [
-    { label: 'ST',       ok: s.signal === 'SAT' ? s.st_bear  : s.st_bull  },
-    { label: 'ADX ' + s.adx, ok: s.signal === 'SAT' ? s.adx_bear : s.adx_bull },
-    { label: 'EMA12/99', ok: s.signal === 'SAT' ? s.e12_bear : s.e12_bull },
-  ];
-  document.getElementById('idxInds').innerHTML = inds.map(i =>
-    `<span class="ind-badge ${i.ok ? (s.signal === 'SAT' ? 'ind-bear' : 'ind-bull') : 'ind-neutral'}">${i.label}</span>`
-  ).join('');
+  const slEl = document.getElementById(pfx + 'Sl');
+  if (slEl) {
+    if (s.sl_level && s.signal !== 'BEKLE') {
+      slEl.textContent = 'SL ' + s.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+      slEl.style.display = '';
+    } else { slEl.style.display = 'none'; }
+  }
+
+  const indsEl = document.getElementById(pfx + 'Inds');
+  if (indsEl) {
+    const inds = [
+      { label: 'ST',          ok: s.signal === 'SAT' ? s.st_bear  : s.st_bull  },
+      { label: 'ADX ' + s.adx, ok: s.signal === 'SAT' ? s.adx_bear : s.adx_bull },
+      { label: 'EMA12/99',    ok: s.signal === 'SAT' ? s.e12_bear : s.e12_bull },
+    ];
+    indsEl.innerHTML = inds.map(i =>
+      `<span class="ind-badge ${i.ok ? (s.signal === 'SAT' ? 'ind-bear' : 'ind-bull') : 'ind-neutral'}">${i.label}</span>`
+    ).join('');
+  }
 }
 
+/* ── Mini sparkline SVG ───────────────────────────── */
+function drawSparkline(id, ohlc) {
+  const el = document.getElementById(id);
+  if (!el || !ohlc || ohlc.length < 3) return;
+  const pts = ohlc.slice(-30);
+  const W = 80, H = 32, pad = 2;
+  const vals = pts.map(p => p.close);
+  const mn = Math.min(...vals), mx = Math.max(...vals);
+  const range = mx - mn || 1;
+  const toY = v => pad + (H - 2*pad) * (1 - (v - mn) / range);
+  const toX = i => pad + (W - 2*pad) * (i / (pts.length - 1));
+
+  const rising = vals.at(-1) >= vals[0];
+  const col    = rising ? '#3fb950' : '#f85149';
+  const fill   = rising ? 'rgba(63,185,80,0.12)' : 'rgba(248,81,73,0.10)';
+
+  const lineD = pts.map((p,i) => `${i===0?'M':'L'}${toX(i).toFixed(1)},${toY(p.close).toFixed(1)}`).join(' ');
+  const areaD = lineD + ` L${toX(pts.length-1).toFixed(1)},${H} L${toX(0).toFixed(1)},${H} Z`;
+
+  el.innerHTML =
+    `<path d="${areaD}" fill="${fill}" stroke="none"/>` +
+    `<path d="${lineD}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+
+/* ── Accordion açık/kapalı ───────────────────────── */
+let _accOpen = window.innerWidth >= 768;
+
+function _setAccordion(open) {
+  _accOpen = open;
+  const body = document.getElementById('chartAccBody');
+  const chev = document.getElementById('chartChev');
+  if (open) {
+    body.classList.add('open');
+    chev.classList.add('open');
+    // LightweightCharts genişliği yeniden hesapla
+    requestAnimationFrame(() => {
+      const elMain = document.getElementById('chartMain');
+      if (elMain && chartMain) {
+        const w = elMain.clientWidth;
+        if (w) chartMain.applyOptions({ width: w });
+      }
+    });
+  } else {
+    body.classList.remove('open');
+    chev.classList.remove('open');
+  }
+}
+
+function toggleChartAcc() {
+  _setAccordion(!_accOpen);
+}
+
+/* ── Endeks seçimi (kart tıklama) ─────────────────── */
+let _activeSym = 'XU030';
+
+function selectEndeks(sym) {
+  _activeSym = sym;
+  document.getElementById('ec30').classList.toggle('active',  sym === 'XU030');
+  document.getElementById('ec100').classList.toggle('active', sym === 'XU100');
+  if (!_accOpen) _setAccordion(true);
+  _switchTab(sym);
+}
+
+/* ── Sekme değiştir (accordion içindeki buton) ────── */
+function switchChartTab(sym) {
+  _activeSym = sym;
+  document.getElementById('ec30').classList.toggle('active',  sym === 'XU030');
+  document.getElementById('ec100').classList.toggle('active', sym === 'XU100');
+  _switchTab(sym);
+}
+
+function _switchTab(sym) {
+  ['XU030','XU100'].forEach(s => {
+    const btn = document.getElementById('ctab-' + s);
+    if (btn) btn.classList.toggle('active', s === sym);
+  });
+  if (sym === 'XU030' && _chartData.xu030) _rebuildChart(_chartData.xu030);
+  else if (sym === 'XU100' && _chartData.xu100) _rebuildChart(_chartData.xu100);
+  else if (sym === 'XU100' && !_chartData.xu100) fetchChart100();
+}
+
+/* ── Chart veri deposu ───────────────────────────── */
+const _chartData = { xu030: null, xu100: null };
+
+function _rebuildChart(d) {
+  if (!_accOpen) return;  // accordion kapalıysa gereksiz
+  // Mevcut chartMain nesnesini temizle
+  if (chartMain) { try { chartMain.remove(); } catch(_) {} chartMain = null; }
+  document.getElementById('chartsInner').style.display = 'none';
+  document.getElementById('chartLoading').style.display = '';
+  // Kısa gecikme: DOM boyutlandıktan sonra çiz
+  requestAnimationFrame(() => buildCharts(d));
+}
+
+/* ── XU030 chart yükle ───────────────────────────── */
 async function fetchChart() {
   try {
     const res  = await fetch('/api/chart');
     const json = await res.json();
     if (json.loading || !json.chart) { setTimeout(fetchChart, 4000); return; }
-    renderIndexHeader(json.chart.summary);
-    buildCharts(json.chart);
+    _chartData.xu030 = json.chart;
+    renderEndeksCard('XU030', json.chart.summary);
+    drawSparkline('spark30', json.chart.ohlc);
+    if (_activeSym === 'XU030' && _accOpen) buildCharts(json.chart);
   } catch(e) {
     setTimeout(fetchChart, 5000);
   }
 }
 
+/* ── XU100 chart yükle ───────────────────────────── */
+async function fetchChart100() {
+  try {
+    const res  = await fetch('/api/chart/XU100');
+    const json = await res.json();
+    if (json.loading || !json.chart) { setTimeout(fetchChart100, 5000); return; }
+    _chartData.xu100 = json.chart;
+    renderEndeksCard('XU100', json.chart.summary);
+    drawSparkline('spark100', json.chart.ohlc);
+    if (_activeSym === 'XU100' && _accOpen) buildCharts(json.chart);
+  } catch(e) {
+    setTimeout(fetchChart100, 6000);
+  }
+}
+
+/* Accordion başlangıç durumu + chart yükle */
+_setAccordion(_accOpen);
 fetchChart();
+fetchChart100();
 
 /* ── SSE Canlı Fiyat ─────────────────────────────── */
 let _sseRetry = 1000;
@@ -1505,10 +1779,11 @@ function applyLivePrices(prices, ts) {
     const fmtP = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
     const fmtC = sign + s.change_pct.toFixed(2) + '%';
 
-    document.getElementById('idxPrice').textContent = fmtP;
-    const chgEl = document.getElementById('idxChange');
-    chgEl.textContent = fmtC;
-    chgEl.className   = 'index-change ' + cls;
+    // Endeks kartı canlı güncelle (SSE'den)
+    const ec30PEl = document.getElementById('ec30Price');
+    if (ec30PEl) ec30PEl.textContent = fmtP;
+    const ec30CEl = document.getElementById('ec30Chg');
+    if (ec30CEl) { ec30CEl.textContent = fmtC; ec30CEl.className = 'ec-chg ' + cls; }
 
     // Endeks satırı
     const ircPriceEl = document.getElementById('ircPrice');
@@ -1682,19 +1957,19 @@ function renderHeroPanel(stocks) {
     </a>`;
   };
 
-  /* 1. Güçlü Trend — AL sinyali, bull_score desc, max 5 */
+  /* 1. Güçlü Trend — AL sinyali, bull_score desc, max 4 */
   const alList = list
     .filter(s => s.signal === 'AL')
     .sort((a, b) => (b.bull_score || 0) - (a.bull_score || 0))
-    .slice(0, 5);
+    .slice(0, 4);
   document.getElementById('hpAlList').innerHTML = alList.length
     ? alList.map(s => row(s, 'hp-bar-al')).join('')
     : '<div class="hp-empty">Şu an güçlü trend yok</div>';
 
-  /* 2. Günün Hareketlileri — |change_pct| desc, max 5, sadece sinyal rengi */
+  /* 2. Günün Hareketlileri — |change_pct| desc, max 4, sadece sinyal rengi */
   const movers = [...list]
     .sort((a, b) => Math.abs(b.change_pct) - Math.abs(a.change_pct))
-    .slice(0, 5);
+    .slice(0, 4);
   document.getElementById('hpMoverList').innerHTML = movers.length
     ? movers.map(s => {
         const bar = s.signal === 'AL' ? 'hp-bar-al' : s.signal === 'SAT' ? 'hp-bar-sat' : 'hp-bar-neu';
@@ -1702,7 +1977,7 @@ function renderHeroPanel(stocks) {
       }).join('')
     : '<div class="hp-empty">Veri yok</div>';
 
-  /* 3. Yeni Sinyal — bugün oluşan AL/SAT, güce göre, max 5 */
+  /* 3. Yeni Sinyal — bugün oluşan AL/SAT, güce göre, max 4 */
   const newSigs = list
     .filter(s => s.is_new_signal && s.signal !== 'BEKLE')
     .sort((a, b) => {
@@ -1710,7 +1985,7 @@ function renderHeroPanel(stocks) {
       const sb = b.signal === 'AL' ? (b.bull_score || 0) : (b.bear_score || 0);
       return sb - sa;
     })
-    .slice(0, 5);
+    .slice(0, 4);
   document.getElementById('hpNewList').innerHTML = newSigs.length
     ? newSigs.map(s => row(s, s.signal === 'AL' ? 'hp-bar-al' : 'hp-bar-sat')).join('')
     : '<div class="hp-empty">Bugün yeni sinyal yok</div>';
@@ -1749,7 +2024,7 @@ function getFiltered() {
   return allStocks.filter(s => {
     if (s.ticker === 'XU030') return false;   // endeks satırda gösteriliyor
     const matchFilter = currentFilter === 'all' || s.signal === currentFilter
-                     || (currentFilter === 'TODAY' && s.is_new_signal);
+                     || (currentFilter === 'TODAY' && s.is_new_signal && s.signal !== 'BEKLE');
     const matchSearch = !currentSearch || s.ticker.includes(currentSearch.toUpperCase())
                      || (s.name && s.name.toLowerCase().includes(currentSearch.toLowerCase()));
     const matchSector = currentSector === 'all' || s.sector === currentSector;
@@ -1895,7 +2170,8 @@ function renderTable() {
 
     const fmtPrice = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    const isNew   = s.is_new_signal;
+    // "⚡ Bugün" badge'i yalnızca AL/SAT için — Belirsiz+Bugün çelişkili görünür
+    const isNew   = s.is_new_signal && s.signal !== 'BEKLE';
     const dateTxt = s.signal_date || '—';
     const dateHtml = isNew
       ? `<span class="sig-date new-today">⚡ Bugün</span>`
@@ -1913,6 +2189,13 @@ function renderTable() {
     const confHtml = s.confirmed
       ? '<span style="color:#3fb950;font-size:10px;margin-left:4px" title="3+ bar onaylı">✓</span>'
       : (s.signal !== 'BEKLE' ? '<span style="color:#e3b341;font-size:10px;margin-left:4px" title="Oluşuyor">…</span>' : '');
+
+    // Giriş değerlendirmesi — tek cümle
+    const _eqSafe = s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI';
+    const _eqRisky = s.entry_quality === 'DIKKATLI' || s.entry_quality === 'UZAK';
+    const eqHtml = (s.signal !== 'BEKLE' && s.entry_quality)
+      ? `<div style="margin-top:3px;font-size:10px;color:${_eqSafe ? '#3fb950' : '#e3b341'}">${_eqSafe ? 'Güvenli' : 'Giriş için riskli bölge'}</div>`
+      : '';
 
     // Giriş fiyatı — bars=1 için "Bugün" göster, bars>=2 için fiyat + getiri
     let sigPriceHtml;
@@ -1945,7 +2228,7 @@ function renderTable() {
       <td><span class="ticker">${s.ticker}</span> ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
-      <td><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}</td>
+      <td><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}${eqHtml}</td>
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile">${sigPriceHtml}</td>
       <td class="hide-mobile">${slHtml}</td>
@@ -1969,6 +2252,17 @@ function setFilter(f, btn) {
 }
 
 function setSearch(v) { currentSearch = v; renderTable(); }
+
+function resetFilters() {
+  currentSearch  = '';
+  currentSector  = 'all';
+  advFilters = { adx: 0, bars: 0, vol: 0, rsi: '' };
+  const searchEl = document.getElementById('searchInput');
+  if (searchEl) searchEl.value = '';
+  // "Tümü" butonunu aktif yap
+  const allBtn = document.querySelector('.filter-btn.active-all, .filter-btn[onclick*="all"]');
+  setFilter('all', allBtn || document.querySelector('.filter-btn'));
+}
 
 function sortTable(key) {
   if (sortKey === key) sortDir *= -1;

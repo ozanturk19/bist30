@@ -284,6 +284,91 @@
   .dot-bear  { background: #f85149; }
   .dot-empty { background: #30363d; }
 
+  /* ── Giriş Analizi section ── */
+  .entry-analysis-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .entry-analysis-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr 160px;
+    gap: 16px;
+    margin-top: 12px;
+    align-items: start;
+  }
+  @media (max-width: 768px) {
+    .entry-analysis-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .entry-analysis-grid { grid-template-columns: 1fr; }
+  }
+  .eq-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .eq-safe  { background: rgba(63,185,80,0.12);  color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
+  .eq-risky { background: rgba(210,153,34,0.12); color: #e3b341; border: 1px solid rgba(210,153,34,0.3); }
+  .eq-note {
+    font-size: 12px;
+    color: #8b949e;
+    line-height: 1.5;
+  }
+  /* R/R bar */
+  .rr-card-label {
+    font-size: 11px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .rr-bar {
+    display: flex;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .rr-risk-seg   { background: #f85149; border-radius: 5px 0 0 5px; }
+  .rr-reward-seg { background: linear-gradient(90deg, #3fb950, #1f6feb); border-radius: 0 5px 5px 0; }
+  .rr-level-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 11px;
+  }
+  .rr-lvl {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: #8b949e;
+  }
+  .rr-lvl strong { font-size: 13px; font-variant-numeric: tabular-nums; color: #e6edf3; }
+  .vol-status-lbl {
+    font-size: 11px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .vol-status-val {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .vol-status-detail {
+    font-size: 11px;
+    color: #8b949e;
+  }
+
   /* ── İndikatör badges ── */
   .indicators-section {
     background: #161b22;
@@ -548,9 +633,40 @@
   }
   @media (max-width: 400px) {
     .signal-badge { display: none; }
+    .header-price-group { display: none; }
     .header-ticker { font-size: 15px; }
     .header-price  { font-size: 15px; }
   }
+  @media (max-width: 360px) {
+    header .logo-name { font-size: 13px; }
+    .header-name { font-size: 13px; }
+  }
+  /* ── Makro Ticker Bandı ── */
+  .macro-bar {
+    background: #0b111f; border-bottom: 1px solid #1e2d45;
+    height: 34px; overflow: hidden; position: relative; white-space: nowrap;
+  }
+  .macro-bar::before, .macro-bar::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 60px;
+    pointer-events: none; z-index: 2;
+  }
+  .macro-bar::before { left: 0; background: linear-gradient(to right, #0b111f, transparent); }
+  .macro-bar::after  { right: 0; background: linear-gradient(to left,  #0b111f, transparent); }
+  .macro-track {
+    display: inline-flex; align-items: center;
+    animation: macroScroll 40s linear infinite; height: 34px;
+  }
+  .macro-bar:hover .macro-track { animation-play-state: paused; }
+  @keyframes macroScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .macro-item {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 20px; border-right: 1px solid #1e2d45;
+    font-size: 12px; height: 34px;
+  }
+  .macro-item-lbl { font-weight: 600; color: #cbd5e1; }
+  .macro-chg-pos { color: #3fb950; }
+  .macro-chg-neg { color: #f85149; }
+  .macro-chg-neu { color: #8b949e; }
 </style>
 </head>
 <body>
@@ -582,6 +698,13 @@
   </div>
   <span id="liveTs" style="font-size:12px;color:#484f58;margin-left:4px">○</span>
 </header>
+
+<!-- Makro Ticker Bandı -->
+<div class="macro-bar" id="macroBar">
+  <div class="macro-track" id="macroTrack">
+    <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
+  </div>
+</div>
 
 <div class="container">
 
@@ -642,6 +765,35 @@
       <div class="info-card-label">Süre</div>
       <div class="info-card-value" id="icBars">—</div>
       <div class="info-card-sub">bar (gün)</div>
+    </div>
+  </div>
+
+  <!-- Giriş Analizi (AL/SAT sinyallerinde gösterilir) -->
+  <div class="entry-analysis-section" id="entryAnalysisSection" style="display:none">
+    <div class="section-title">🎯 Giriş Analizi</div>
+    <div class="entry-analysis-grid">
+
+      <!-- Giriş Değerlendirmesi -->
+      <div>
+        <div class="vol-status-lbl">Değerlendirme</div>
+        <div id="eqBadge"></div>
+        <div class="eq-note" id="eqNote"></div>
+      </div>
+
+      <!-- R/R Görsel -->
+      <div>
+        <div class="rr-card-label">Risk / Ödül</div>
+        <div id="rrBarContainer"></div>
+        <div id="rrLevels"></div>
+      </div>
+
+      <!-- Volume Teyidi -->
+      <div>
+        <div class="vol-status-lbl">Volume Teyidi</div>
+        <div class="vol-status-val" id="volStatusVal">—</div>
+        <div class="vol-status-detail" id="volStatusDetail"></div>
+      </div>
+
     </div>
   </div>
 
@@ -722,7 +874,7 @@
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="font-size:15px">✨</span>
       <span style="font-size:13px;font-weight:700;color:#e2e8f0;text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
-      <span style="margin-left:auto;font-size:11px;background:rgba(59,130,246,0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(59,130,246,0.25)">Gemini AI</span>
+      <span id="sigExplainBadge" style="margin-left:auto;font-size:11px;background:rgba(59,130,246,0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(59,130,246,0.25)">Gemini AI</span>
     </div>
     <div id="sigExplainLoading" style="display:flex;align-items:center;gap:8px;color:#64748b;font-size:13px">
       <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div>
@@ -746,6 +898,29 @@
       <span>Google Search ile desteklenen yapay zeka özeti · 6 saatte bir güncellenir</span>
     </div>
   </div>
+
+  {% if ssr_signal %}
+  <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
+  <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 18px;margin-bottom:20px">
+    <div style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:10px">📊 Teknik Özet</div>
+    <p style="font-size:13px;color:#c9d1d9;line-height:1.7;margin:0">
+      <strong style="color:#e6edf3">{{ ticker }} ({{ name }})</strong> hissesi,
+      {% if ssr_signal.signal == 'AL' %}
+        BorsaPusula algoritmasına göre <strong style="color:#3fb950">Güçlü Trend (AL)</strong> sinyali veriyor.
+        {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
+        {% if ssr_signal.sl_level %}Stop loss seviyesi {{ "%.2f"|format(ssr_signal.sl_level) }} ₺.{% endif %}
+      {% elif ssr_signal.signal == 'SAT' %}
+        BorsaPusula algoritmasına göre <strong style="color:#f85149">Zayıf Trend (SAT)</strong> sinyali veriyor.
+        {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
+        {% if ssr_signal.sl_level %}Stop loss seviyesi {{ "%.2f"|format(ssr_signal.sl_level) }} ₺.{% endif %}
+      {% else %}
+        şu an <strong style="color:#8b949e">Belirsiz</strong> bölgesinde; net bir trend sinyali bulunmuyor.
+      {% endif %}
+      {% if ssr_signal.adx %}ADX değeri {{ ssr_signal.adx }}.{% endif %}
+      Sinyal; <strong>Supertrend(10,3)</strong>, <strong>ADX ≥ 25</strong> ve <strong>EMA12/EMA99</strong> göstergelerinin aynı anda uyum sağlamasıyla oluşur.
+    </p>
+  </div>
+  {% endif %}
 
   <!-- Metodoloji -->
   <div class="methodology">
@@ -998,7 +1173,8 @@ function renderSummary(s, signalData) {
   if (signalData) {
     const bars = signalData.signal_bars || 1;
     const date = signalData.signal_date || '—';
-    const isNew = signalData.is_new_signal;
+    // "⚡ Bugün" yalnızca AL/SAT için — Belirsiz+Bugün çelişkili görünür
+    const isNew = signalData.is_new_signal && signalData.signal !== 'BEKLE';
     document.getElementById('icDate').innerHTML =
       isNew ? '<span style="color:#e3b341">⚡ Bugün</span>' : date + ' · ' + bars + ' bar';
     document.getElementById('icBars').textContent = bars;
@@ -1025,6 +1201,94 @@ function renderSummary(s, signalData) {
     document.getElementById('icSlPct').textContent =
       (s.signal !== 'BEKLE' ? 'Riske uzaklık: ' : 'ST desteği: ') + slPct + '%';
   }
+
+  /* ── Giriş Analizi ── */
+  (function renderEntryAnalysis() {
+    if (!signalData || (signalData.signal !== 'AL' && signalData.signal !== 'SAT')) return;
+    if (!signalData.entry_quality) return;
+
+    const section = document.getElementById('entryAnalysisSection');
+    if (section) section.style.display = 'block';
+
+    /* Giriş Değerlendirmesi */
+    const eq = signalData.entry_quality;
+    const isSafe = (eq === 'IDEAL' || eq === 'IYI');
+    const eqBadgeEl = document.getElementById('eqBadge');
+    if (eqBadgeEl) {
+      const label = isSafe ? 'Güvenli' : 'Giriş için riskli bölge';
+      eqBadgeEl.innerHTML = `<span class="eq-badge ${isSafe ? 'eq-safe' : 'eq-risky'}">${label}</span>`;
+    }
+    let noteHtml = signalData.entry_note ? `<span>${signalData.entry_note}</span>` : '';
+    if (signalData.optimal_entry && !isSafe) {
+      noteHtml += `<br><span style="margin-top:6px;display:inline-block">İdeal bölge: <strong style="color:#e6edf3;font-variant-numeric:tabular-nums">${fmt(signalData.optimal_entry)} ₺</strong></span>`;
+    }
+    const eqNoteEl = document.getElementById('eqNote');
+    if (eqNoteEl) eqNoteEl.innerHTML = noteHtml;
+
+    /* R/R bar görsel */
+    const tp1 = signalData.tp1;
+    const tp2 = signalData.tp2;
+    const sl  = s.sl_level;
+    const cur = s.price;
+    if (tp1 && tp2 && sl && cur) {
+      const risk   = Math.abs(cur - sl);
+      const reward = Math.abs(tp2 - cur);
+      const total  = risk + reward || 1;
+      const riskW  = Math.round(risk / total * 100);
+      const rewW   = 100 - riskW;
+
+      const rrBarEl = document.getElementById('rrBarContainer');
+      if (rrBarEl) {
+        rrBarEl.innerHTML = `
+          <div class="rr-bar">
+            <div class="rr-risk-seg" style="width:${riskW}%"></div>
+            <div class="rr-reward-seg" style="width:${rewW}%"></div>
+          </div>`;
+      }
+
+      const sigDir = signalData.signal === 'AL';
+      const rrLevelsEl = document.getElementById('rrLevels');
+      if (rrLevelsEl) {
+        rrLevelsEl.innerHTML = `
+          <div class="rr-level-row">
+            <div class="rr-lvl" style="color:#f85149">
+              <span>SL</span>
+              <strong style="color:#f85149">${fmt(sl)}</strong>
+            </div>
+            <div class="rr-lvl" style="text-align:center">
+              <span>Şimdi</span>
+              <strong>${fmt(cur)}</strong>
+            </div>
+            <div class="rr-lvl" style="text-align:right">
+              <span style="color:#3fb950">TP1 (2R)</span>
+              <strong style="color:#3fb950">${fmt(tp1)}</strong>
+              <br>
+              <span style="color:#1f6feb;font-size:10px">TP2 (3R)</span>
+              <strong style="color:#1f6feb;font-size:11px"> ${fmt(tp2)}</strong>
+            </div>
+          </div>`;
+      }
+    }
+
+    /* Volume Teyidi */
+    const vr = signalData.signal_vol_ratio;
+    const vc = signalData.vol_confirmed;
+    const volValEl = document.getElementById('volStatusVal');
+    const volDetEl = document.getElementById('volStatusDetail');
+    if (volValEl && vr != null) {
+      if (vc) {
+        volValEl.innerHTML = '<span style="color:#3fb950">✅ Teyitli</span>';
+      } else {
+        volValEl.innerHTML = '<span style="color:#f85149">❌ Teyitsiz</span>';
+      }
+      if (volDetEl) {
+        const vrLabel = vr >= 2 ? 'güçlü' : vr >= 1.5 ? 'yeterli' : 'zayıf';
+        volDetEl.textContent = `×${vr} (20 bar ort.) — ${vrLabel}`;
+      }
+    } else if (volValEl) {
+      volValEl.textContent = '—';
+    }
+  })();
 
   /* İndikatörler */
   const inds = [
@@ -1119,21 +1383,25 @@ function renderHistory(history) {
   }).join('');
 }
 
-/* ── Veri yükle ─────────────────────────────────────── */
+/* ── Veri yükle — chart + /api/data paralel ─────────── */
 async function loadChart() {
   try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/chart');
-    const json = await res.json();
+    /* Chart endpoint + global data aynı anda isteniyor */
+    const [res, res2] = await Promise.all([
+      fetch('/api/hisse/' + TICKER + '/chart'),
+      fetch('/api/data'),
+    ]);
+    const json  = await res.json();
+    const data2 = await res2.json();
+
     if (json.loading || !json.chart) { setTimeout(loadChart, 4000); return; }
 
     buildChart(json.chart);
     renderHistory(json.chart.signal_history);
     renderCommentary(json.chart.commentary);
 
-    /* Özet için /api/data'dan da signal_bars/date bilgisi al */
-    const res2  = await fetch('/api/data');
-    const data2 = await res2.json();
-    const sd    = (data2.stocks || []).find(s => s.ticker === TICKER);
+    /* Özet için /api/data'dan signal_bars/date bilgisi */
+    const sd = (data2.stocks || []).find(s => s.ticker === TICKER);
     renderSummary(json.chart.summary, sd);
 
     /* Diğer hisselerin sinyallerini chip'lere yaz */
@@ -1217,12 +1485,13 @@ async function loadNews(retryCount) {
 }
 loadNews(0);
 
-/* ── AI Sinyal Açıklaması ─────────────────────────── */
+/* ── Sinyal Açıklaması ─────────────────────────────── */
 async function loadSignalExplanation(retryCount) {
   retryCount = retryCount || 0;
   const loadEl   = document.getElementById('sigExplainLoading');
   const textEl   = document.getElementById('sigExplainText');
   const footerEl = document.getElementById('sigExplainFooter');
+  const badgeEl  = document.getElementById('sigExplainBadge');
 
   loadEl.style.display = 'flex';
   textEl.style.display = 'none';
@@ -1230,6 +1499,7 @@ async function loadSignalExplanation(retryCount) {
 
   try {
     const res  = await fetch('/api/hisse/' + TICKER + '/signal-explanation');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     loadEl.style.display = 'none';
 
@@ -1237,19 +1507,40 @@ async function loadSignalExplanation(retryCount) {
       textEl.textContent = data.explanation;
       textEl.style.display = '';
       footerEl.style.display = '';
-    } else {
-      if (retryCount < 2) {
-        loadEl.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Yapay zeka analiz ediyor… (deneme ' + (retryCount+1) + '/3)';
+
+      // Badge ve footer'ı kaynağa göre ayarla
+      const isAI = data.source === 'gemini';
+      if (badgeEl) {
+        badgeEl.textContent = isAI ? 'Gemini AI' : 'Algoritmik';
+        badgeEl.title = isAI
+          ? 'Gemini yapay zekası tarafından oluşturuldu'
+          : 'Algoritmik sinyal motorundan türetildi';
+      }
+      footerEl.innerHTML = isAI
+        ? '🤖 Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 4 saatte bir yenilenir'
+        : '📐 Algoritmik analiz — sinyal motorundaki göstergeler temel alınmıştır · yatırım tavsiyesi değildir';
+
+    } else if (data.reason === 'no_data') {
+      // Stok verisi yüklenmemişse kısa süre sonra tekrar dene
+      if (retryCount < 3) {
+        loadEl.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Sinyal verisi yükleniyor…';
         loadEl.style.display = 'flex';
-        setTimeout(() => loadSignalExplanation(retryCount + 1), 8000);
+        setTimeout(() => loadSignalExplanation(retryCount + 1), 6000);
       } else {
-        loadEl.innerHTML = '🤖 AI açıklaması şu an hazır değil. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid #30363d;color:#58a6ff;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
+        loadEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid #30363d;color:#58a6ff;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
         loadEl.style.display = 'flex';
       }
+    } else {
+      loadEl.style.display = 'none';
     }
+
   } catch(e) {
-    loadEl.innerHTML = 'AI açıklaması yüklenemedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid #30363d;color:#58a6ff;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
-    loadEl.style.display = 'flex';
+    if (retryCount < 2) {
+      setTimeout(() => loadSignalExplanation(retryCount + 1), 8000);
+    } else {
+      loadEl.innerHTML = 'Açıklama yüklenemedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid #30363d;color:#58a6ff;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
+      loadEl.style.display = 'flex';
+    }
   }
 }
 loadSignalExplanation(0);
@@ -1399,6 +1690,49 @@ function toggleOthers() {
   const open = grid.classList.toggle('open');
   btn.textContent = open ? 'Gizle ▴' : 'Göster ▾';
 }
+
+/* ── Makro Ticker Bandı ─────────────────────── */
+(function() {
+  const LABELS = {
+    XU100:'BIST100', XU030:'BIST30', BTC:'BTC',
+    ALTIN:'ALTIN', GUMUS:'GÜMÜŞ', USDTRY:'USD/TRY',
+    EURTRY:'EUR/TRY', SP500:'S&P500', NASDAQ:'NASDAQ'
+  };
+  const PRICE_FMT = {
+    XU100:0, XU030:0, BTC:0, ALTIN:2, GUMUS:2,
+    USDTRY:4, EURTRY:4, SP500:0, NASDAQ:0
+  };
+  async function loadMacro() {
+    try {
+      const r = await fetch('/api/macro');
+      const d = await r.json();
+      const items = d.items || [];
+      if (!items.length) return;
+      const MACRO_LINKS = {BTC:'/btc', ALTIN:'/altin', GUMUS:'/gumus'};
+      const html = items.map(it => {
+        const label = LABELS[it.label] || it.label;
+        const dec   = PRICE_FMT[it.label] ?? 2;
+        const price = it.price.toLocaleString('tr-TR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+        const chg   = it.change;
+        const sign  = chg > 0 ? '+' : '';
+        const cls   = chg > 0.05 ? 'macro-chg-pos' : chg < -0.05 ? 'macro-chg-neg' : 'macro-chg-neu';
+        const arrow = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
+        const href  = MACRO_LINKS[it.label] ? ` href="${MACRO_LINKS[it.label]}"` : '';
+        const tag   = href ? 'a' : 'span';
+        return `<${tag} class="macro-item"${href} style="text-decoration:none;color:inherit">
+          <span class="macro-item-lbl">${label}</span>
+          <span>${price}</span>
+          <span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span>
+        </${tag}>`;
+      }).join('');
+      const _mt = document.getElementById('macroTrack');
+      _mt.innerHTML = html + html;
+      requestAnimationFrame(() => { const w = _mt.scrollWidth / 2; if (w > 50) _mt.style.animationDuration = (w / 50).toFixed(1) + 's'; });
+    } catch(e) {}
+  }
+  loadMacro();
+  setInterval(loadMacro, 60000);
+})();
 </script>
 </body>
 </html>

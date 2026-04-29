@@ -44,7 +44,7 @@
 <div class="container">
   <div class="card">
     <h2>Bize Ulaşın</h2>
-    <p>Hata bildirimi, öneri veya işbirliği için aşağıdaki kanalları kullanabilirsiniz. Genellikle 1–3 iş günü içinde yanıt veriyoruz.</p>
+    <p>Hata bildirimi, öneri veya işbirliği için formu doldurun. Genellikle 1–3 iş günü içinde yanıt veriyoruz.</p>
 
     <div class="contact-row">
       <div class="contact-icon">📧</div>
@@ -53,23 +53,88 @@
         <div class="contact-val"><a href="mailto:iletisim@borsapusula.com">iletisim@borsapusula.com</a></div>
       </div>
     </div>
-
-    <div class="contact-row">
-      <div class="contact-icon">🌐</div>
-      <div>
-        <div class="contact-lbl">Web</div>
-        <div class="contact-val"><a href="https://borsapusula.com">borsapusula.com</a></div>
-      </div>
-    </div>
-
-    <div class="contact-row">
-      <div class="contact-icon">📊</div>
-      <div>
-        <div class="contact-lbl">Konu</div>
-        <div class="contact-val" style="color:#c9d1d9">Teknik sorunlar, veri hataları, öneri ve geri bildirimler</div>
-      </div>
-    </div>
   </div>
+
+  <!-- İletişim Formu -->
+  <div class="card" style="margin-top:16px">
+    <h2 style="margin-bottom:16px">Mesaj Gönder</h2>
+    <form id="contactForm" onsubmit="submitForm(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Ad Soyad</label>
+          <input id="cfName" type="text" required placeholder="Adınız" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none;transition:border-color .15s">
+        </div>
+        <div>
+          <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">E-posta</label>
+          <input id="cfEmail" type="email" required placeholder="ornek@mail.com" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none;transition:border-color .15s">
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Konu</label>
+        <select id="cfSubject" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none">
+          <option value="Hata bildirimi">🐛 Hata bildirimi</option>
+          <option value="Öneri">💡 Öneri</option>
+          <option value="Veri hatası">📊 Veri hatası</option>
+          <option value="İşbirliği">🤝 İşbirliği</option>
+          <option value="Diğer">❓ Diğer</option>
+        </select>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Mesaj</label>
+        <textarea id="cfMessage" required rows="5" placeholder="Mesajınızı buraya yazın..." style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none;resize:vertical;font-family:inherit;transition:border-color .15s"></textarea>
+      </div>
+      <button type="submit" id="cfBtn" style="background:#1f6feb;color:#fff;border:none;border-radius:6px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s">
+        Gönder →
+      </button>
+      <div id="cfMsg" style="margin-top:12px;font-size:13px;display:none"></div>
+    </form>
+  </div>
+<style>
+  #contactForm input:focus, #contactForm select:focus, #contactForm textarea:focus {
+    border-color: #1f6feb;
+  }
+  @media (max-width: 500px) {
+    #contactForm > div:first-child { grid-template-columns: 1fr !important; }
+  }
+</style>
+<script>
+async function submitForm(e) {
+  e.preventDefault();
+  const btn = document.getElementById('cfBtn');
+  const msg = document.getElementById('cfMsg');
+  btn.disabled = true;
+  btn.textContent = 'Gönderiliyor…';
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name:    document.getElementById('cfName').value.trim(),
+        email:   document.getElementById('cfEmail').value.trim(),
+        subject: document.getElementById('cfSubject').value,
+        message: document.getElementById('cfMessage').value.trim()
+      })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      document.getElementById('contactForm').innerHTML =
+        '<div style="color:#3fb950;padding:24px;text-align:center;font-size:15px;line-height:1.6">✅ Mesajınız iletildi.<br><span style="font-size:13px;color:#8b949e">1–3 iş günü içinde yanıt veriyoruz.</span></div>';
+    } else {
+      msg.style.display = 'block';
+      msg.style.color = '#f85149';
+      msg.textContent = '❌ Hata: ' + (d.error || 'Bilinmeyen hata');
+      btn.disabled = false;
+      btn.textContent = 'Gönder →';
+    }
+  } catch(err) {
+    msg.style.display = 'block';
+    msg.style.color = '#f85149';
+    msg.textContent = '❌ Bağlantı hatası. Lütfen tekrar deneyin.';
+    btn.disabled = false;
+    btn.textContent = 'Gönder →';
+  }
+}
+</script>
 
   <div class="disclaimer">
     ⚠️ <strong>Önemli:</strong> Bu platform algoritmik bir araçtır. Yatırım tavsiyesi verilmez.
