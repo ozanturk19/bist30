@@ -266,6 +266,126 @@
 
   /* Stats bar */
   .stats-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+
+  /* ── Gündem Kutusu ────────────────────────────────────────── */
+  .gundem-section { margin-bottom: 16px; }
+  .gundem-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .gundem-layout {
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .gundem-cards-wrap { flex: 1; min-width: 0; overflow: hidden; }
+  .gundem-cards {
+    display: flex; gap: 10px;
+    overflow-x: auto; padding-bottom: 6px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin; scrollbar-color: #30363d transparent;
+  }
+  .gundem-cards::-webkit-scrollbar { height: 4px; }
+  .gundem-cards::-webkit-scrollbar-track { background: transparent; }
+  .gundem-cards::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+
+  .gnm-card {
+    background: var(--bg2); border: 1px solid var(--bp-border);
+    border-radius: 10px; padding: 13px 14px;
+    min-width: 230px; max-width: 270px; flex: 0 0 auto;
+    cursor: pointer; transition: border-color .15s, background .15s;
+    text-decoration: none; display: block;
+    scroll-snap-align: start; position: relative; overflow: hidden;
+  }
+  .gnm-card:hover { border-color: var(--bp-border2); background: #1c2128; }
+  .gnm-card::before {
+    content: ''; position: absolute; top: 0; left: 0; bottom: 0;
+    width: 3px; border-radius: 10px 0 0 10px;
+    background: var(--gnm-accent, #3fb950);
+  }
+  .gnm-card.gnm-sat::before { --gnm-accent: #f85149; }
+  .gnm-card.gnm-bekle::before { --gnm-accent: #8b949e; }
+
+  .gnm-card-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 7px; gap: 6px;
+  }
+  .gnm-ticker {
+    font-size: 13px; font-weight: 800; color: var(--bp-text); letter-spacing: .3px;
+  }
+  .gnm-name {
+    font-size: 10px; color: var(--bp-text3); font-weight: 400;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px;
+  }
+  .gnm-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+  }
+  .gnm-badge.al  { background: rgba(63,185,80,.12); color: #3fb950; border: 1px solid rgba(63,185,80,.3); }
+  .gnm-badge.sat { background: rgba(248,81,73,.12);  color: #f85149; border: 1px solid rgba(248,81,73,.3); }
+  .gnm-text {
+    font-size: 11.5px; color: var(--bp-text2); line-height: 1.55;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .gnm-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 9px;
+  }
+  .gnm-price {
+    font-size: 12px; font-weight: 700; color: var(--bp-text); font-family: monospace;
+  }
+  .gnm-chg { font-size: 11px; font-weight: 600; }
+  .gnm-chg.up { color: #3fb950; }
+  .gnm-chg.dn { color: #f85149; }
+  .gnm-link {
+    font-size: 11px; color: var(--accent); text-decoration: none; font-weight: 600;
+  }
+  .gnm-link:hover { text-decoration: underline; }
+
+  /* Skeleton */
+  @keyframes gnm-shimmer {
+    0%   { background-position: -300% 0; }
+    100% { background-position:  300% 0; }
+  }
+  .gnm-sk {
+    min-width: 230px; height: 140px; border-radius: 10px; flex: 0 0 auto;
+    background: linear-gradient(90deg, #161b22 25%, #1e2530 50%, #161b22 75%);
+    background-size: 300% 100%;
+    animation: gnm-shimmer 1.5s infinite;
+  }
+
+  /* Bilanço mini */
+  .bilanco-mini-box {
+    flex: 0 0 185px; min-width: 170px;
+    background: var(--bg2); border: 1px solid var(--bp-border);
+    border-radius: 10px; padding: 12px 13px;
+  }
+  .bilanco-mini-title {
+    font-size: 11px; font-weight: 700; color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: .6px; margin-bottom: 9px;
+  }
+  .bilanco-period {
+    padding: 7px 0;
+    border-bottom: 1px solid var(--bp-border);
+  }
+  .bilanco-period:last-child { border-bottom: none; padding-bottom: 0; }
+  .bilanco-period .bp-label {
+    font-size: 12px; font-weight: 700; color: var(--bp-text);
+  }
+  .bilanco-period .bp-desc {
+    font-size: 10px; color: var(--bp-text3); margin-top: 2px;
+  }
+  .bilanco-period .bp-days {
+    font-size: 10px; font-weight: 600; margin-top: 3px;
+    display: inline-block; padding: 1px 6px; border-radius: 10px;
+  }
+  .bp-days.active   { background: rgba(63,185,80,.12); color: #3fb950; }
+  .bp-days.upcoming { background: rgba(31,111,235,.12); color: #58a6ff; }
+  .bilanco-mini-link {
+    display: block; text-align: center; font-size: 11px; color: var(--accent);
+    text-decoration: none; margin-top: 10px; padding-top: 8px;
+    border-top: 1px solid var(--bp-border);
+  }
+  .bilanco-mini-link:hover { text-decoration: underline; }
   .stat-card {
     background: var(--bp-surface); border: 1px solid var(--bp-border);
     border-radius: var(--bp-radius); padding: 14px 20px;
@@ -855,6 +975,10 @@
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     #mainTable { display: none !important; }
     .mobile-card-list { display: flex; }
+    /* Gündem — mobil */
+    .gundem-layout { flex-direction: column; }
+    .bilanco-mini-box { flex: none !important; width: 100% !important; }
+    .gundem-cards-wrap { width: 100%; }
   }
 </style>
 </head>
@@ -1076,6 +1200,47 @@
     <div class="stat-card stat-sat">  <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>  <div class="stat-label">Zayıf Trend</div></div>
     <div class="stat-card stat-bekle"><div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div><div class="stat-label">Belirsiz</div></div>
   </div>
+
+  <!-- ── Gündem & Haberler ──────────────────────────── -->
+  <section class="gundem-section" id="gundemSec">
+    <div class="gundem-header">
+      <span style="font-size:13px;font-weight:700;color:var(--bp-text);display:flex;align-items:center;gap:6px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             style="width:15px;height:15px;flex-shrink:0;opacity:.7">
+          <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/>
+          <path d="M14 2v4a2 2 0 0 0 2 2h4"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
+        </svg>
+        Gündem &amp; Haberler
+      </span>
+      <a href="/bilanco-takvimi" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">
+        Bilanço Takvimi →
+      </a>
+    </div>
+
+    <div class="gundem-layout">
+      <!-- Sol: haber kartları -->
+      <div class="gundem-cards-wrap">
+        <div class="gundem-cards" id="gundemCards">
+          <!-- skeleton placeholders -->
+          <div class="gnm-sk"></div>
+          <div class="gnm-sk"></div>
+          <div class="gnm-sk"></div>
+        </div>
+      </div>
+
+      <!-- Sağ: bilanço mini widget -->
+      <div class="bilanco-mini-box" id="bilancoMini">
+        <div class="bilanco-mini-title">📅 Bilanço Dönemi</div>
+        <div id="bilancoMiniBody" style="min-height:60px">
+          <!-- skeleton -->
+          <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
+          <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
+          <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;width:70%"></div>
+        </div>
+        <a href="/bilanco-takvimi" class="bilanco-mini-link">Tüm takvim →</a>
+      </div>
+    </div>
+  </section>
 
   <!-- ── E-posta Abone Formu ───────────────────────── -->
   <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(59,130,246,.07),rgba(29,78,216,.04));border:1px solid rgba(59,130,246,.18);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -2599,6 +2764,80 @@ async function submitSubscribe() {
     btn.disabled    = false;
   }
 }
+
+/* ── Gündem & Haberler ───────────────────────────── */
+async function loadGundem() {
+  try {
+    const [newsRes, bilRes] = await Promise.all([
+      fetch('/api/market-news'),
+      fetch('/api/bilanco-mini')
+    ]);
+    const [newsData, bilData] = await Promise.all([
+      newsRes.json(),
+      bilRes.json()
+    ]);
+
+    // — Haber Kartları —
+    const cardsEl = document.getElementById('gundemCards');
+    const items = (newsData && newsData.items) ? newsData.items : [];
+    if (items.length === 0) {
+      cardsEl.innerHTML = '<div style="color:var(--bp-text3);font-size:12px;padding:12px 0;">Şu an güncel haber bulunamadı.</div>';
+    } else {
+      cardsEl.innerHTML = items.map(item => {
+        const isAl  = item.signal === 'AL';
+        const isSat = item.signal === 'SAT';
+        const cardCls = isAl ? '' : (isSat ? ' gnm-sat' : ' gnm-bekle');
+        const badgeCls = isAl ? 'al' : (isSat ? 'sat' : '');
+        const badgeTxt = isAl ? '▲ Güçlü Trend' : (isSat ? '▼ Zayıf Trend' : '● Belirsiz');
+        const chgVal   = parseFloat(item.change_pct || 0);
+        const chgCls   = chgVal >= 0 ? 'up' : 'dn';
+        const chgTxt   = (chgVal >= 0 ? '+' : '') + chgVal.toFixed(2) + '%';
+        const priceStr = item.price ? parseFloat(item.price).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
+        const snippet  = (item.snippet || '').trim();
+        return `<a href="/hisse/${item.ticker}" class="gnm-card${cardCls}">
+  <div class="gnm-card-top">
+    <div>
+      <div class="gnm-ticker">${item.ticker}</div>
+      <div class="gnm-name">${item.name || ''}</div>
+    </div>
+    ${badgeCls ? `<span class="gnm-badge ${badgeCls}">${badgeTxt}</span>` : ''}
+  </div>
+  ${snippet ? `<div class="gnm-text">${snippet}</div>` : '<div class="gnm-text" style="color:var(--bp-text3);font-style:italic">Haber özeti yükleniyor…</div>'}
+  <div class="gnm-footer">
+    <div>
+      <span class="gnm-price">${priceStr}</span>
+      ${priceStr ? `<span class="gnm-chg ${chgCls}" style="margin-left:5px">${chgTxt}</span>` : ''}
+    </div>
+    <span class="gnm-link">Detay →</span>
+  </div>
+</a>`;
+      }).join('');
+    }
+
+    // — Bilanço Mini —
+    const periods = (bilData && bilData.periods) ? bilData.periods : [];
+    const bodyEl  = document.getElementById('bilancoMiniBody');
+    if (periods.length === 0) {
+      bodyEl.innerHTML = '<div style="font-size:11px;color:var(--bp-text3)">Yaklaşan dönem bulunamadı.</div>';
+    } else {
+      bodyEl.innerHTML = periods.slice(0,3).map(p => {
+        const isActive = p.status === 'active';
+        const daysCls  = isActive ? 'active' : 'upcoming';
+        const daysTxt  = p.days_label || (isActive ? '● Açık' : '—');
+        return `<div class="bilanco-period">
+  <div class="bp-label">${p.label || '—'}</div>
+  <div class="bp-desc">${p.desc || ''}</div>
+  <span class="bp-days ${daysCls}">${daysTxt}</span>
+</div>`;
+      }).join('');
+    }
+  } catch(e) {
+    console.warn('loadGundem error:', e);
+    const c = document.getElementById('gundemCards');
+    if (c) c.innerHTML = '<div style="color:var(--bp-text3);font-size:12px;padding:12px 0;">Gündem yüklenemedi.</div>';
+  }
+}
+loadGundem();
 
 /* ── PWA Service Worker ──────────────────────────── */
 if ('serviceWorker' in navigator) {

@@ -3572,6 +3572,123 @@ def api_bilanco_takvimi():
     return safe_json(data)
 
 
+@app.route("/api/bilanco-mini")
+@limiter.limit("60 per minute")
+def api_bilanco_mini():
+    """Ana sayfa mini bilanço widget — yfinance çağrısı yok, sadece dönem bilgisi."""
+    today_dt  = date.today()
+    today_str = today_dt.isoformat()
+    items     = []
+    for qlabel, start, end, desc in _BILANCO_PERIODS:
+        if end < today_str:
+            continue
+        start_dt      = date.fromisoformat(start)
+        end_dt        = date.fromisoformat(end)
+        days_to_end   = (end_dt   - today_dt).days
+        days_to_start = (start_dt - today_dt).days
+        if today_dt >= start_dt:
+            status     = "active"
+            days_label = f"{days_to_end} gün kaldı"
+        else:
+            status     = "upcoming"
+            days_label = f"{days_to_start} gün sonra"
+        items.append({
+            "label":      qlabel,
+            "start":      start,
+            "end":        end,
+            "desc":       desc,
+            "status":     status,
+            "days_label": days_label,
+        })
+        if len(items) >= 3:
+            break
+    return safe_json({"periods": items})
+
+
+@app.route("/api/market-news")
+@limiter.limit("30 per minute")
+def api_market_news():
+    """Ana sayfa Gündem kutusu için öne çıkan hisse haberleri.
+
+    Sadece mevcut cache'leri okur — Gemini'ye yeni çağrı yapmaz.
+    AL sinyalli top hisseler için news veya sinyal açıklamasını döner.
+    Haber yoksa algoritmik fallback metin kullanılır.
+    """
+    with _lock:
+        stocks = list(_cache["data"])
+
+    # Top 5 AL + top 2 SAT (endeks hisseleri hariç)
+    al_stocks  = [s for s in stocks
+                  if s.get("signal") == "AL"
+                  and s.get("ticker") not in ("XU030", "XU100")][:5]
+    sat_stocks = [s for s in stocks
+                  if s.get("signal") == "SAT"
+                  and s.get("ticker") not in ("XU030", "XU100")][:2]
+    candidates = al_stocks + sat_stocks
+
+    results = []
+    for s in candidates:
+        t      = s["ticker"]
+        name   = STOCK_NAMES.get(t, t)
+        sig    = s.get("signal", "BEKLE")
+        price  = s.get("price", 0) or 0
+        chg    = s.get("change_pct", 0) or 0
+        bars   = s.get("signal_bars", 1) or 1
+
+        # ── Metin kaynağı önceliği: haber > sinyal açıklaması > algoritma ──
+        with _lock:
+            news_c = _news_cache.get(t)
+            expl_c = _signal_explain_cache.get(t)
+
+        text   = None
+        source = "algorithmic"
+
+        if news_c and not news_c.get("failed") and news_c.get("text"):
+            text   = news_c["text"]
+            source = "news"
+        elif expl_c and expl_c.get("text") and not expl_c.get("failed"):
+            text   = expl_c["text"]
+            source = "explanation"
+
+        if not text:
+            dur = "bugün" if bars <= 1 else f"son {bars} gündür"
+            if sig == "AL":
+                text = (f"{name} hissesinde {dur} Güçlü Trend sinyali aktif. "
+                        "Supertrend, ADX ve EMA göstergelerinin tamamı yükseliş yönünü destekliyor.")
+            elif sig == "SAT":
+                text = (f"{name} hissesinde {dur} Zayıf Trend sinyali aktif. "
+                        "Teknik göstergeler düşüş yönünü işaret ediyor.")
+            else:
+                continue   # BEKLE hisselerini listeye alma
+
+        # Snippet: 200 karakter — cümle ortasında kesmemek için kelime sınırına kadar al
+        snippet = text if len(text) <= 200 else text[:200].rsplit(" ", 1)[0] + "…"
+
+        results.append({
+            "ticker":      t,
+            "name":        name,
+            "signal":      sig,
+            "price":       round(price, 2),
+            "change_pct":  round(chg, 2),
+            "snippet":     snippet,
+            "source":      source,
+            "signal_date": s.get("signal_date", ""),
+            "signal_bars": bars,
+            "sector":      _get_sector(t),
+            "sl_level":    s.get("sl_level"),
+        })
+
+        if len(results) >= 5:
+            break
+
+    now = datetime.now()
+    return safe_json({
+        "items":       results,
+        "updated_at":  now.strftime("%d.%m.%Y %H:%M"),
+        "count":       len(results),
+    })
+
+
 @app.route("/api/subscribe", methods=["POST"])
 @limiter.limit("5 per hour")
 def api_subscribe():
