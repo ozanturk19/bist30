@@ -1269,6 +1269,7 @@ def _notify_email_signal_changes(changes):
 
 
 _DISK_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
+_BT_DISK_PATH    = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backtest_cache.json")
 _SNAPSHOTS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshots")
 os.makedirs(_SNAPSHOTS_DIR, exist_ok=True)
 
@@ -4249,6 +4250,13 @@ def run_backtest():
         _bt_cache["computed_at"] = result["computed_at"]
     logger.info("Backtest tamamlandı: %d AL, %d SAT episod",
                 result["al"]["count"], result["sat"]["count"])
+    # Diske kaydet — restart sonrası anında yüklenir
+    try:
+        with open(_BT_DISK_PATH, "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False)
+        logger.info("Backtest diske kaydedildi: %s", _BT_DISK_PATH)
+    except Exception as e:
+        logger.warning("Backtest disk yazma hatası: %s", e)
 
 
 @app.route("/sinyal-performans")
@@ -4765,6 +4773,18 @@ def blog_article(slug):
 def _startup():
     # Disk cache'i yükle — anlık veri gelene kadar siteyi hemen dolduran eski veri
     _load_cache_from_disk()
+    # Backtest disk cache'i yükle — restart sonrası hemen sinyal-performans sayfasına veri verir
+    try:
+        if os.path.exists(_BT_DISK_PATH):
+            with open(_BT_DISK_PATH, encoding="utf-8") as f:
+                bt_data = json.load(f)
+            if bt_data and bt_data.get("al"):
+                _bt_cache["data"]        = bt_data
+                _bt_cache["computed_at"] = bt_data.get("computed_at", "")
+                logger.info("Backtest disk cache yüklendi: AL=%s, computed=%s",
+                            bt_data["al"].get("count"), bt_data.get("computed_at"))
+    except Exception as e:
+        logger.warning("Backtest disk cache yükleme hatası: %s", e)
     # Push subscribers'ı yükle
     _load_push_subs()
     refresh_chart()
