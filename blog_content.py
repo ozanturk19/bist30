@@ -2526,6 +2526,440 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'TUPRS', 'ASELS']
   },
+
+  # ── ARTICLE 44 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "halka-arz-ipo-nedir",
+    "title": "Halka Arz (IPO) Nedir? Nasıl Katılınır?",
+    "desc": "Halka arz sürecini, nasıl talep toplama yapıldığını, avantajlarını ve risklerini anlatan kapsamlı rehber. BIST'teki halka arzlara nasıl başvurulur?",
+    "cat": "Temel Kavramlar",
+    "date": "01.05.2026",
+    "mins": 7,
+    "body": """
+<p>Halka arz (İPO — Initial Public Offering), bir şirketin hisselerini ilk kez kamuya açık olarak piyasaya sürmesidir. Bu süreç, hem şirket hem yatırımcılar için kritik önem taşır.</p>
+
+<h2>Halka Arz Neden Yapılır?</h2>
+<p>Şirketler çeşitli amaçlarla halka açılır:</p>
+<ul>
+  <li><strong>Büyüme finansmanı:</strong> Yeni fabrika, teknoloji yatırımı veya pazar genişlemesi için sermaye toplamak</li>
+  <li><strong>Borç ödeme:</strong> Mevcut borçları halka arz gelirleriyle kapatmak</li>
+  <li><strong>Marka bilinirliği:</strong> Halka açık şirket statüsü kurumsal itibar sağlar</li>
+  <li><strong>Ortaklar için çıkış:</strong> Mevcut hissedarlar kısmen veya tamamen çıkabilir</li>
+</ul>
+
+<h2>BIST'te Halka Arz Süreci Nasıl İşler?</h2>
+<p>Türkiye'de halka arz süreci şu aşamalardan oluşur:</p>
+<ol>
+  <li><strong>SPK (Sermaye Piyasası Kurulu) onayı:</strong> Şirket izahname hazırlar, SPK inceler ve onaylar</li>
+  <li><strong>Yatırım bankası seçimi:</strong> Aracı kurum işlemi organize eder (talep toplama, fiyat belirleme)</li>
+  <li><strong>Talep toplama dönemi:</strong> Yatırımcılar aracı kurumlar üzerinden talep iletir (genellikle 3-5 gün)</li>
+  <li><strong>Fiyat tespiti:</strong> Gelen taleplere göre hisse fiyatı belirlenir</li>
+  <li><strong>Dağıtım ve borsa kotasyonu:</strong> Hisseler dağıtılır, BIST'te işlem görmeye başlar</li>
+</ol>
+
+<h2>Halka Arza Nasıl Talep Verilir?</h2>
+<p>Bireysel yatırımcı olarak halka arza katılmak için:</p>
+<ul>
+  <li>Yatırım hesabınızın olduğu aracı kurumun mobil uygulamasına veya internet şubesine girin</li>
+  <li>"Halka Arz" veya "IPO" bölümüne gidin</li>
+  <li>Talep miktarını (lot sayısı) ve fiyatı (genellikle sabit fiyat veya fiyat aralığı) girin</li>
+  <li>Talep süresinde yeterli bakiyeniz bloke edilir</li>
+  <li>Dağıtım sonrası hesabınıza düşen hisseler otomatik yatırılır, artı bakiye iade edilir</li>
+</ul>
+<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#58a6ff">💡 Pratik Bilgi:</strong> Yoğun talep gören halka arzlarda oransal dağıtım yapılır. 100 lot talep ettiyseniz, dağıtım oranı %10 ise yalnızca 10 lot alabilirsiniz. Kalan bakiye iade edilir.
+</div>
+
+<h2>Halka Arzın Avantajları</h2>
+<ul>
+  <li><strong>İlk günden potansiyel kazanç:</strong> Talep fazla olan halka arzlarda ilk işlem gününde önemli fiyat artışı yaşanabilir</li>
+  <li><strong>Erken aşamada giriş:</strong> Şirkete piyasa değerlendirmesinden önce girilir</li>
+  <li><strong>Düşük giriş fiyatı:</strong> Benzer şirketlere göre iskontolu fiyat sunulabilir</li>
+</ul>
+
+<h2>Halka Arzın Riskleri</h2>
+<p>Her halka arz kazançla sonuçlanmaz. Dikkat edilmesi gereken riskler:</p>
+<ul>
+  <li><strong>Geçmiş performans garantisi yok:</strong> İlk gün yükselen hisseler sonrasında düşebilir</li>
+  <li><strong>Bilgi asimetrisi:</strong> Mevcut hissedarlar şirketi sizden çok daha iyi tanır</li>
+  <li><strong>Lock-up süresi sona erince satış baskısı:</strong> Halka arz öncesi ortakların hisselerinin satış kısıtı kalktığında fiyat düşebilir</li>
+  <li><strong>Yüksek değerleme:</strong> Spekülatif yüksek fiyatla işlem görme riski</li>
+</ul>
+
+<h2>Bir Halka Arza Katılmadan Önce Sorulacak Sorular</h2>
+<ul>
+  <li>Şirketin iş modeli sürdürülebilir mi?</li>
+  <li>Son 3 yıl gelir ve kâr büyümesi nasıl?</li>
+  <li>Piyasa değeri / kazanç oranı sektör ortalamasının neresinde?</li>
+  <li>Halka arz gelirleri ne için kullanılacak?</li>
+  <li>Aracı kurum raporu ve izahname incelendi mi?</li>
+</ul>
+<div style="background:rgba(248,81,73,.07);border:1px solid rgba(248,81,73,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#f85149">⚠️ Dikkat:</strong> Halka arzlar her zaman kazanç sağlamaz. BIST tarihinde halka arz fiyatının altına düşen birçok hisse mevcuttur. Temel analiz yapmadan yalnızca "halka arz" etiketiyle talep vermek risklidir.
+</div>
+
+<h2>Sonuç</h2>
+<p>Halka arzlar, seçici yaklaşıldığında portföye değer katabilir. Fiyat iskontosu ve ilk gün prim potansiyeli cezbedici olsa da izahname okumak, şirketin temel değerini anlamak ve piyasa koşullarını değerlendirmek uzun vadeli başarı için zorunludur.</p>
+""",
+    "faqs": [
+      {"q": "Halka arz talep etmek için ne kadar bakiye gerekir?",
+       "a": "Asgari talep miktarı halka arza göre değişir; genellikle 1-10 lot (1 lot = 100 hisse) ile başlanabilir. Talep dönemi boyunca bu bakiye bloke kalır."},
+      {"q": "Talep verdiğim hisse bana kesin dağıtılır mı?",
+       "a": "Hayır. Talep yoğunluğuna göre oransal dağıtım yapılır. Aşırı talep gören halka arzlarda dağıtım oranı %5-20 aralığında kalabilir."},
+      {"q": "Halka arzda ne zaman satmalıyım?",
+       "a": "Bu tamamen stratejinize bağlıdır. Kısa vadeli yatırımcılar ilk günlerde primli satış yaparken uzun vadeli yatırımcılar şirketin büyüme hikayesini takip eder. Sabit bir kural yoktur."},
+      {"q": "Hangi aracı kurumdan halka arza başvurabilirim?",
+       "a": "Türkiye'de lisanslı tüm aracı kurumlar üzerinden halka arz talebinde bulunabilirsiniz. Bazı halka arzlar yalnızca belirli aracı kurumlar aracılığıyla yapılır; izahname ve duyurularda belirtilir."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'EREGL', 'FROTO']
+  },
+
+  # ── ARTICLE 45 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "etf-byf-nedir",
+    "title": "ETF / BYF Nedir? Borsa Yatırım Fonu Rehberi",
+    "desc": "ETF (Exchange Traded Fund) ve BYF (Borsa Yatırım Fonu) nedir, hisse senedinden farkı nedir, BIST'te işlem gören fonlar ve nasıl yatırım yapılır?",
+    "cat": "Temel Kavramlar",
+    "date": "01.05.2026",
+    "mins": 6,
+    "body": """
+<p>ETF (Exchange Traded Fund — Borsa İşlem Gören Fon), Türkçe'de BYF (Borsa Yatırım Fonu) olarak da bilinir. Hisse senetleri gibi borsada alınıp satılabilen, genellikle bir endeksi veya emtiayı takip eden yatırım araçlarıdır.</p>
+
+<h2>ETF Nasıl Çalışır?</h2>
+<p>Bir ETF, içinde birden fazla varlık (hisse, tahvil, emtia vb.) barındıran bir "sepet" gibidir. Siz bu sepeti tek bir işlemle satın alırsınız:</p>
+<ul>
+  <li><strong>BIST100 ETF:</strong> İçinde BIST100 endeksindeki tüm hisseler oransal ağırlıklarla bulunur</li>
+  <li><strong>Altın ETF:</strong> Fiziksel altın fiyatını takip eder</li>
+  <li><strong>Temettü ETF:</strong> Yüksek temettü veren hisseleri bir araya getirir</li>
+</ul>
+
+<h2>ETF ile Hisse Senedi Arasındaki Farklar</h2>
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">Özellik</th>
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">ETF / BYF</th>
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">Hisse Senedi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">Çeşitlendirme</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">✅ Tek işlemle onlarca hisse</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#f85149">❌ Tek şirket riski</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Şirket analizi</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">✅ Gerekmez</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#f85149">❌ Detaylı analiz şart</td>
+    </tr>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">Yönetim ücreti</td>
+      <td style="padding:9px;border:1px solid #30363d">Yıllık %0.05–0.5</td>
+      <td style="padding:9px;border:1px solid #30363d">Yok (sadece alım-satım komisyonu)</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Potansiyel getiri</td>
+      <td style="padding:9px;border:1px solid #30363d">Endeks getirisi</td>
+      <td style="padding:9px;border:1px solid #30363d">Endeksi aşabilir veya altında kalabilir</td>
+    </tr>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">Temettü</td>
+      <td style="padding:9px;border:1px solid #30363d">Bazı ETF'ler yansıtır</td>
+      <td style="padding:9px;border:1px solid #30363d">Şirkete göre değişir</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>BIST'te İşlem Gören Önemli ETF'ler</h2>
+<ul>
+  <li><strong>BIST100 BYF'leri (XU100E, IST100, vb.):</strong> Türk hisse piyasasını takip eder</li>
+  <li><strong>Altın BYF'leri (GOLD, AKB, CALTM vb.):</strong> Altın fiyatına endeksli, kur riskini de içerir</li>
+  <li><strong>Yabancı endeks ETF'leri:</strong> S&P500 veya NASDAQ'ı Türk lirası cinsinden takip eden ürünler</li>
+  <li><strong>Gümüş, petrol BYF'leri:</strong> Emtia fiyatlarını takip eden fonlar</li>
+</ul>
+
+<h2>ETF Yatırımının Avantajları</h2>
+<ul>
+  <li><strong>Anında çeşitlendirme:</strong> Tek bir alım işlemiyle onlarca hisseye sahip olursunuz</li>
+  <li><strong>Düşük maliyet:</strong> Aktif yönetilen fonlara göre çok daha düşük yönetim ücreti</li>
+  <li><strong>Şeffaflık:</strong> İçerdiği varlıklar her gün açıklanır</li>
+  <li><strong>Likidite:</strong> Borsa saatlerinde hisse gibi alınıp satılabilir</li>
+  <li><strong>Başlangıç için ideal:</strong> Analiz bilgisi gerekmeden piyasaya girilebilir</li>
+</ul>
+
+<h2>ETF Yatırımının Riskleri</h2>
+<ul>
+  <li>Endeks düşünce ETF de düşer — piyasa geneli riskinden kaçış yoktur</li>
+  <li>Yabancı ETF'lerde kur riski ekstra volatilite yaratır</li>
+  <li>Dar işlem hacimli ETF'lerde alım-satım spread'i yüksek olabilir</li>
+</ul>
+
+<h2>Kimler İçin Uygundur?</h2>
+<div style="background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#3fb950">✅ ETF şu yatırımcılar için idealdir:</strong>
+  <ul style="margin:8px 0 0 0">
+    <li>Borsaya yeni başlayanlar — tek hisse seçme stresini ortadan kaldırır</li>
+    <li>Uzun vadeli, pasif yatırımcılar — piyasa getirisini yakalamak yeterli</li>
+    <li>Portföyünü çeşitlendirmek isteyenler — mevcut hisselere ETF eklemek dengeler</li>
+    <li>Altın, emtia veya yabancı hisselere kolayca ulaşmak isteyenler</li>
+  </ul>
+</div>
+<p>Aktif trader profili için bireysel hisse senetleri ve teknik analiz araçları daha uygun olabilir. BorsaPusula'nın sunduğu sinyal sistemi bu ihtiyacı karşılar.</p>
+""",
+    "faqs": [
+      {"q": "ETF ve yatırım fonu aynı şey midir?",
+       "a": "Hayır. Yatırım fonları fon yöneticisi tarafından aktif yönetilir ve günde bir kez fiyatlanır. ETF'ler ise borsada hisse gibi anlık alınıp satılır ve genellikle pasif (endeks takip) yapıdadır. ETF maliyetleri genelde çok daha düşüktür."},
+      {"q": "BIST'te ETF alabilmek için ne gerekir?",
+       "a": "Herhangi bir aracı kurumda yatırım hesabı açmanız yeterlidir. ETF'ler hisseler gibi lot bazında alınır; minimum 1 lot ile başlanabilir."},
+      {"q": "ETF'ler temettü öder mi?",
+       "a": "Bazı ETF'ler içerdiği hisselerin temettülerini yatırımcıya yansıtır (temettü dağıtımlı ETF). Bazıları ise temettüleri fona geri yatırır (birikimli ETF). Ürün belgesinden kontrol edilmelidir."},
+      {"q": "Altın ETF almak ile fiziksel altın almak arasındaki fark nedir?",
+       "a": "Altın ETF elektronik olarak alınır, depolama/güvenlik sorunu yoktur ve borsada anlık satılabilir. Fiziksel altında ise işçilik farkı ve likidite dezavantajı bulunur. Her ikisi de altın fiyatını takip eder."}
+    ],
+    "related_tickers": ['TUPRS', 'AKBNK', 'GARAN', 'THYAO', 'EREGL']
+  },
+
+  # ── ARTICLE 46 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "borsada-vergi-hisse-senedi-kazanc",
+    "title": "Borsada Vergi: Hisse Senedi Kazancı Nasıl Vergilendirilir? (2026)",
+    "desc": "BIST hisse senedi alım satım kazançlarında stopaj, temettü vergisi ve yıllık beyan yükümlülüğü. Türkiye'de borsa vergisi rehberi 2026.",
+    "cat": "Temel Kavramlar",
+    "date": "01.05.2026",
+    "mins": 7,
+    "body": """
+<p>Borsa yatırımlarında vergi konusu bireysel yatırımcılar arasında en çok karışıklığa yol açan konulardan biridir. Bu rehber, Türkiye'de BIST hisse senedi işlemlerinde 2026 itibarıyla geçerli vergilendirme kurallarını özetlemektedir.</p>
+<div style="background:rgba(248,81,73,.07);border:1px solid rgba(248,81,73,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#f85149">⚠️ Önemli Uyarı:</strong> Bu içerik genel bilgi amaçlıdır, vergi danışmanlığı değildir. Kişisel durumunuz için mutlaka mali müşavir veya vergi uzmanına başvurun. Vergi mevzuatı değişebilir.
+</div>
+
+<h2>BIST Hisse Senedi Alım Satım Kazancı — Stopaj</h2>
+<p>Türkiye'de tam mükellef gerçek kişiler için BIST'te kote edilmiş hisse senetlerinde alım satım kazancı üzerinden <strong>%0 stopaj</strong> uygulanmaktadır (Gelir Vergisi Kanunu Geçici Madde 67).</p>
+<p>Bu istisna yalnızca BIST'te işlem gören hisseler için geçerlidir. Yabancı borsalarda veya tezgahüstü piyasada işlem gören hisseler farklı kurallara tabidir.</p>
+
+<h2>Temettü Gelirlerinde Vergi</h2>
+<p>Türk şirketlerinin dağıttığı temettüler üzerinden <strong>%15 stopaj</strong> kesilir. Bu kesinti aracı kurum tarafından otomatik yapılır ve size net tutar yatırılır.</p>
+<ul>
+  <li>Temettü geliri yıllık 230.000 TL'yi (2026 tahmini sınır, her yıl güncellenir) aşarsa <strong>beyanname verilmesi</strong> gerekebilir</li>
+  <li>Yıllık toplam temettü geliriniz bu sınırın altındaysa ayrıca beyan yükümlülüğünüz yoktur</li>
+  <li>Stopaj nihai vergi olarak kabul edilir çoğu durumda</li>
+</ul>
+
+<h2>Hisse Senedi Alım Satım Kazancı Beyanı Gerekir mi?</h2>
+<p>BIST'te işlem gören hisse senetlerinden elde edilen kazançlar için:</p>
+<ul>
+  <li>%0 stopaj uygulanır → Aracı kurum otomatik keser (kesilecek bir şey yok)</li>
+  <li>Bu kazançlar için yıllık gelir vergisi beyannamesi verilmesi gerekmez</li>
+  <li><strong>İstisna:</strong> Aynı yıl hem BIST hem yabancı borsa geliri varsa durum karmaşıklaşabilir</li>
+</ul>
+<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#58a6ff">💡 Pratik Not:</strong> Aracı kurumunuz yıl sonunda "yıllık kazanç/kayıp özeti" belgesi düzenler. Bu belgeyi saklayın; olası bir vergi incelemesinde gerekli olabilir.
+</div>
+
+<h2>Zarar Mahsubu — Kayıpları Kazançtan Düşmek</h2>
+<p>Stopaj matrahı hesaplanırken aynı takvim yılı içindeki kayıplar kazançlardan mahsup edilebilir. Örneğin:</p>
+<ul>
+  <li>AKBNK'tan 50.000 TL kazandınız, EREGL'den 20.000 TL kaybettiniz → net kazanç 30.000 TL üzerinden stopaj hesaplanır</li>
+  <li>Bir yılda toplam zarar ettiyseniz bu zarar sonraki yıla devredilebilir (aynı kategoride)</li>
+</ul>
+
+<h2>Kaldıraçlı İşlemler (Forex, Varant) Vergisi</h2>
+<p>Bu ürünler BIST hisse senetlerinden farklı vergilendirmeye tabidir:</p>
+<ul>
+  <li><strong>Vadeli işlem ve opsiyon (VIOP):</strong> %0 stopaj (BIST bünyesinde)</li>
+  <li><strong>Forex, CFD:</strong> Farklı uygulama söz konusu olabilir — uzman görüşü alın</li>
+  <li><strong>Kripto para:</strong> 2026 itibarıyla kripto varlıklar Türkiye'de ayrı vergi düzenlemesine tabidir</li>
+</ul>
+
+<h2>Kurumsal Yatırımcılar İçin Farklı Kurallar</h2>
+<p>Bu rehber tam mükellef gerçek kişilere yönelik hazırlanmıştır. Şirket hesabıyla yatırım yapıyorsanız, kurumlar vergisi hükümleri farklı uygulanır; mali müşavirinize danışın.</p>
+
+<h2>Özet Tablo</h2>
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">Gelir Türü</th>
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">Stopaj Oranı</th>
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">Beyanname</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">BIST hisse alım satım kazancı</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">%0</td>
+      <td style="padding:9px;border:1px solid #30363d">Gerekmez (genel kural)</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Temettü geliri</td>
+      <td style="padding:9px;border:1px solid #30363d">%15</td>
+      <td style="padding:9px;border:1px solid #30363d">Eşiği aşarsa gerekebilir</td>
+    </tr>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">VIOP kazancı</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">%0</td>
+      <td style="padding:9px;border:1px solid #30363d">Gerekmez (genel kural)</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Yabancı borsa kazancı</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#f85149">Tabi olabilir</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#f85149">Uzman görüşü alın</td>
+    </tr>
+  </tbody>
+</table>
+""",
+    "faqs": [
+      {"q": "BIST'te hisse alım satımından vergi ödenir mi?",
+       "a": "Tam mükellef gerçek kişiler için BIST'te kote hisse senetlerinde alım satım kazancı üzerinden stopaj oranı %0'dır (GVK Geçici 67. Madde kapsamında). Ancak mevzuat değişebilir; güncel bilgi için vergi danışmanınıza danışın."},
+      {"q": "Temettü almak vergiye tabi mi?",
+       "a": "Evet. Dağıtılan temettüler üzerinden %15 stopaj kesilir. Yıllık toplam temettü geliriniz yasal sınırı aşarsa beyanname vermeniz gerekebilir."},
+      {"q": "Bir hisseden zarar ettim, başka bir hisseden kazandım. Vergi nasıl hesaplanır?",
+       "a": "Aynı yıl içindeki hisse kayıpları kazançlardan mahsup edilebilir. Net kazanç üzerinden stopaj hesaplanır. Yıl sonu kazanç/kayıp özeti için aracı kurumunuzla iletişime geçin."},
+      {"q": "Yabancı hisse veya kripto kazançlarım için ne yapmalıyım?",
+       "a": "Yabancı borsa kazançları ve kripto para gelirleri BIST hisselerinden farklı kurallara tabidir. Bu konularda mutlaka mali müşavir veya vergi uzmanına danışmanız önerilir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'KCHOL', 'EREGL']
+  },
+
+  # ── ARTICLE 47 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "yatirim-fonu-mu-hisse-mi",
+    "title": "Yatırım Fonu mu, Hisse Senedi mi? Hangisi Daha İyi?",
+    "desc": "Yatırım fonu ile hisse senedini karşılaştıran kapsamlı rehber. Başlangıç yatırımcısından deneyimli trader'a kim hangisini tercih etmeli?",
+    "cat": "Strateji",
+    "date": "01.05.2026",
+    "mins": 6,
+    "body": """
+<p>Borsaya yeni başlayanların ve portföyünü büyütmek isteyenlerin sıkça sorduğu soru: "Yatırım fonu mu alsam, yoksa direkt hisse senedi mi?" Her iki aracın kendine özgü avantajları, riskleri ve uygun kullandığı yatırımcı profilleri vardır.</p>
+
+<h2>Yatırım Fonu Nedir?</h2>
+<p>Yatırım fonu, bir fon yöneticisinin birçok yatırımcının parasını bir havuzda toplayıp çeşitli varlıklara (hisse, tahvil, döviz vb.) yatırım yaptığı kolektif bir yapıdır. Türkiye'de TEFAS (Türkiye Elektronik Fon Alım Satım Platformu) üzerinden alınabilir.</p>
+
+<h2>Temel Karşılaştırma</h2>
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">Kriter</th>
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">Yatırım Fonu</th>
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">Hisse Senedi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">Yönetim</td>
+      <td style="padding:9px;border:1px solid #30363d">Profesyonel yönetici</td>
+      <td style="padding:9px;border:1px solid #30363d">Kendiniz yönetirsiniz</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Çeşitlendirme</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Otomatik (düzinelerce varlık)</td>
+      <td style="padding:9px;border:1px solid #30363d">Manuel — yeterli sermaye gerekir</td>
+    </tr>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">Maliyet</td>
+      <td style="padding:9px;border:1px solid #30363d">Yıllık yönetim ücreti %1–3</td>
+      <td style="padding:9px;border:1px solid #30363d">Yalnızca alım satım komisyonu</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Getiri potansiyeli</td>
+      <td style="padding:9px;border:1px solid #30363d">Fona göre değişir, çoğu endeksi geçemez</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Endeksi aşabilir</td>
+    </tr>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">Zaman gereksinimi</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Düşük — fon yöneticisi takip eder</td>
+      <td style="padding:9px;border:1px solid #30363d">Yüksek — düzenli takip şart</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Bilgi gereksinimi</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Düşük</td>
+      <td style="padding:9px;border:1px solid #30363d">Teknik ve/veya temel analiz</td>
+    </tr>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">Likidite</td>
+      <td style="padding:9px;border:1px solid #30363d">Genellikle T+1 veya T+2 ödeme</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Anlık (borsa saatleri içinde)</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Şeffaflık</td>
+      <td style="padding:9px;border:1px solid #30363d">Aylık portföy açıklanır</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Anlık fiyat görünür</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Yatırım Fonu Avantajları</h2>
+<ul>
+  <li><strong>Başlangıç için idealdir:</strong> Hangi hisseyi seçeceğinizi bilmeden piyasaya girebilirsiniz</li>
+  <li><strong>Profesyonel yönetim:</strong> Tecrübeli fon yöneticileri karar alır</li>
+  <li><strong>Düşük başlangıç tutarı:</strong> Bazı fonları 100 TL ile bile alabilirsiniz</li>
+  <li><strong>Vergi avantajı:</strong> Fon içinde gerçekleşen alım satımlar stopaj doğurmaz; yalnızca fondan çıkışta vergi hesaplanır</li>
+</ul>
+
+<h2>Yatırım Fonu Dezavantajları</h2>
+<ul>
+  <li><strong>Yönetim ücreti bileşik etkisi:</strong> Yıllık %2 ücret uzun vadede ciddi getiri kaybına yol açar</li>
+  <li><strong>Çoğu aktif fon endeksi yenemez:</strong> Global araştırmalar, aktif yönetilen fonların büyük çoğunluğunun 10 yıllık vadede endeksin gerisinde kaldığını gösteriyor</li>
+  <li><strong>Anlık işlem yapılamaz:</strong> Fon fiyatı günde bir kez hesaplanır</li>
+</ul>
+
+<h2>Hisse Senedi Avantajları</h2>
+<ul>
+  <li><strong>Daha yüksek getiri potansiyeli:</strong> Doğru seçimde endeksi önemli ölçüde aşabilirsiniz</li>
+  <li><strong>Tam kontrol:</strong> Ne aldığınızı, ne zaman aldığınızı ve sattığınızı siz belirlersiniz</li>
+  <li><strong>Sıfır yönetim ücreti:</strong> Yalnızca alım satımda komisyon ödersiniz</li>
+  <li><strong>Teknik analiz araçları:</strong> BorsaPusula gibi platformlarla sinyal takibi yapabilirsiniz</li>
+</ul>
+
+<h2>Hisse Senedi Dezavantajları</h2>
+<ul>
+  <li>Düşük sermayeyle çeşitlendirme zordur — 5-6 hisse yeterli dağılım sağlamayabilir</li>
+  <li>Bireysel şirket riski: Tek bir haberde %20 kayıp yaşanabilir</li>
+  <li>Sürekli takip gerektirir — bunu karşılayabilecek zaman ve motivasyon olmalı</li>
+</ul>
+
+<h2>Kim Hangisini Seçmeli?</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0">
+  <div style="background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.15);border-radius:8px;padding:14px">
+    <strong style="color:#3fb950">Yatırım Fonu için:</strong>
+    <ul style="margin:8px 0 0 0;font-size:13px">
+      <li>Borsaya yeni başlayanlar</li>
+      <li>Piyasa takibi için zamanı olmayanlar</li>
+      <li>Küçük sermaye (%100K altı)</li>
+      <li>Pasif, uzun vadeli yatırımcılar</li>
+    </ul>
+  </div>
+  <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px">
+    <strong style="color:#58a6ff">Hisse Senedi için:</strong>
+    <ul style="margin:8px 0 0 0;font-size:13px">
+      <li>Temel/teknik analiz öğrenenler</li>
+      <li>Günlük veya haftalık takip edebilecekler</li>
+      <li>Aktif strateji uygulayabilecekler</li>
+      <li>Endeksi aşmayı hedefleyenler</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Karma Strateji: İkisini Birden Kullanmak</h2>
+<p>Pek çok deneyimli yatırımcı her ikisini birden kullanır:</p>
+<ul>
+  <li>Portföyün %60'ı endeks ETF veya fon → istikrarlı baz</li>
+  <li>Portföyün %30'u seçici hisse senetleri → alfa yaratma denemesi</li>
+  <li>Portföyün %10'u yüksek risk/ödül fırsatları (swing trade vb.)</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "Yatırım fonu mu daha güvenli, hisse senedi mi?",
+       "a": "Her iki araç da piyasa riskine tabidir; 'güvenli' değildirler. Yatırım fonu çeşitlendirme sayesinde tek hisse riskini azaltır, ancak piyasa geneli düşünce fon da düşer. Risk toleransınıza ve bilginize göre karar vermelisiniz."},
+      {"q": "Kaç TL ile yatırım fonuna başlanabilir?",
+       "a": "Türkiye'de TEFAS üzerinden işlem gören birçok fon, 100 TL gibi çok düşük tutarlarla alınabilmektedir. Bu, küçük birikimlerle bile çeşitlendirme yapılmasına olanak tanır."},
+      {"q": "Aktif fon yöneticileri neden endeksi geçemez?",
+       "a": "Yönetim ücretleri, alım satım maliyetleri ve insan psikolojisinin (kayıptan kaçınma gibi) etkisiyle aktif fonların büyük çoğunluğu uzun vadede endeksin gerisinde kalır. Bu 'aktif yönetim paradoksu' olarak bilinir."},
+      {"q": "BorsaPusula'da teknik sinyalleri kullanarak hisse seçmek mantıklı mı?",
+       "a": "Evet. BorsaPusula'nın Supertrend + ADX + EMA kombinasyonu, piyasa trendini takip eden sistematik bir yaklaşım sunar. Bu tür algoritmik araçlar, sezgisel kararların önüne geçerek disiplinli yatırım kararlarını destekler."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'TUPRS', 'ASELS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
