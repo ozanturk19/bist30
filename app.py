@@ -270,37 +270,170 @@ STOCK_NAMES = {
     "XU030": "BIST 30 Endeksi",
 }
 
-# ── KAP (Kamuyu Aydınlatma Platformu) şirket ID eşleştirme ──────────────────
-KAP_MEMBER_OIDS = {
-    "AKBNK": "2770", "GARAN": "2760", "ISCTR": "2776", "YKBNK": "2780",
-    "VAKBN": "2778", "HALKB": "2762", "ALBRK": "2750",
-    "ASELS": "792",  "THYAO": "2874", "EREGL": "2362", "TUPRS": "2878",
-    "SASA":  "2726", "FROTO": "2756", "TOASO": "2876", "ARCLK": "2748",
-    "BIMAS": "2752", "MGROS": "2772", "KCHOL": "2764", "SAHOL": "2758",
-    "AGHOL": "2744", "TKFEN": "2872", "ENJSA": "5496", "ODAS":  "6159",
-    "HEKTS": "2766", "KRDMD": "2768", "SISE":  "2724", "PETKM": "2774",
-    "EKGYO": "2754", "TTRAK": "2870", "LOGO":  "3494", "NETAS": "2773",
-    "CCOLA": "2154", "DOAS":  "2166", "ENKAI": "2368", "TCELL": "2868",
-    "TTKOM": "2876", "TAVHL": "5340", "PGSUS": "5780", "ULKER": "2886",
-    "CIMSA": "2156", "ALARK": "2746", "AEFES": "2742", "VESTL": "2890",
-    "VESBE": "2888", "AKSA":  "2136", "AKSEN": "4960", "GUBRF": "2758",
-    "DOHOL": "2168", "OYAKC": "6202", "SOKM":  "7244", "BRSAN": "2146",
-    "KONTR": "5852", "SARKY": "2716", "KCAER": "6048", "ISDMR": "4938",
-    "IZMDC": "4380", "ISGYO": "2782", "PRKAB": "2784", "JANTS": "2798",
-    "INDES": "4006", "ANKB":  "2126", "SELEC": "2720", "CLEBI": "4832",
-    "TATGD": "2860", "ANSGR": "2130", "ANHYT": "2128", "TURSG": "5954",
-    "MAVI":  "5718", "OTKAR": "2786", "PARSN": "2788", "ASUZU": "2132",
-    "KORDS": "2800", "KLNMA": "3702", "KARTN": "2796", "BUCIM": "2148",
-    "NUHCM": "2792", "CEMAS": "4736", "ECILC": "2174", "TTRAK": "2870",
-    "RYSAS": "5888",
+# ── KAP (Kamuyu Aydınlatma Platformu) UUID OID eşleştirme ───────────────────
+# Gerçek UUID'ler — KAP /tr/api/search/combined endpoint'inden alındı
+KAP_UUID_OIDS = {
+    "AKBNK": "4028e4a240e8d1830140e905edcd0006",
+    "ARCLK": "4028e4a240e95dc90140ed55b43900cf",
+    "ASELS": "4028e4a1413b7ef401413bc2251e0047",
+    "BIMAS": "4028e4a140e95be70140ee1b7b030119",
+    "EKGYO": "4028e4a2422d9a780142513cda5b232e",
+    "EREGL": "4028e4a240e95dc90140ede4c12a0133",
+    "FROTO": "4028e4a140f2ed71014106890fae0138",
+    "GARAN": "4028e4a140f2ed720140f37cb2a601b7",
+    "HEKTS": "4028e4a140ee35c00140ee5d194a0055",
+    "ISCTR": "4028e4a140f2ed7201411682b0cb05c6",
+    "KCHOL": "4028e4a140f2ed710140f2f4d6c70039",
+    "KRDMD": "4028e4a140f2ed7201412ace3ada0707",
+    "MGROS": "4028e4a141462df2014150162e1c3424",
+    "ODAS":  "4028e4a2416e696c01416edd70713183",
+    "OYAKC": "4028e4a140f2ed720140f32377aa016c",
+    "PGSUS": "4028e4a2422d9a78014232e751bc22a4",
+    "SAHOL": "4028e4a240ee37a90140ee50087e000b",
+    "SASA":  "4028e4a240ee866c0140f20abd9500cc",
+    "SISE":  "4028e4a140f2ed710140f385d5690102",
+    "SOKM":  "4028e4a14184e9c9014198095f4442bf",
+    "TAVHL": "4028e4a140f2ed720140f31195ef010e",
+    "TCELL": "4028e4a1486ec80a0148c55510d71d31",
+    "THYAO": "4028e4a140f2ed720140f376bebb01a7",
+    "TKFEN": "4028e4a140f2ed720140f31367840112",
+    "TOASO": "4028e4a140f2ed710140f328bed700a5",
+    "TUPRS": "4028e4a140f2ed720140f37f139c01bc",
+    "VAKBN": "4028e4a1415f4d9b01415fe3340f36e4",
+    "YKBNK": "4028e4a240f2ef4c01412ae6d6630538",
+    # BIST100 ek hisseler
+    "HALKB": "1DE05DAA82C3073AE0530A4A622A2EBD",
+    "ALBRK": "4028e4a240f2ef4c014106a1c5ef016d",
+    "TTRAK": "4028e4a140f2ed720140f3790d6a01ad",
+    "DOAS":  "4028e4a240e8d16e0140e951bf04007b",
+    "ENKAI": "4028e4a240e95dc90140ed3883fe0093",
+    "ULKER": "4028e4a14184e9c901419801438a422b",
+    "CCOLA": "4028e4a140ee35c00140ee586bdd0034",
+    "PETKM": "4028e4a240f2ef470141165c566a03e4",
+    "LOGO":  "4028e4a14158e41e01415b41210a6e8c",
+    "NETAS": "4028e4a240f2ef47014111d7df220232",
+    "CIMSA": "4028e4a240ee866c0140f1f64bdb0014",
+    "ALARK": "4028e4a241462fd80141500c738e36be",
+    "AEFES": "4028e4a140e95bea0140ed2fde10009d",
+    "VESTL": "4028e4a140f2ed7201412c2000c507db",
+    "VESBE": "4028e4a140f2ed7201412c223c9707e6",
+    "AKSA":  "4028e4a240f2ef470141175e189f0453",
+    "AKSEN": "4028e4a241733d42014179341a147ddb",
+    "DOHOL": "4028e4a141462df201414ff732983087",
+    "OYAKC": "4028e4a140f2ed720140f32377aa016c",
+    "BRSAN": "4028e4a140f2ed7201412ac9ca5d06e6",
+    "KONTR": "8acae2c5745d76320174c4879b101cb2",
+    "SARKY": "4028e4a140f2ed7101410294f924012d",
+    "KCAER": "4028e4a2416f888d01416f9ea04a058f",
+    "ISDMR": "4028e4a2416e696c01416ee8eb7b3770",
+    "IZMDC": "4028e4a140f275550140f27e319401ca",
+    "ISGYO": "4028e4a140f2ed7201412acbeb8b06f7",
+    "MAVI":  "4028e4a141733b5101417ea9aae11fec",
+    "OTKAR": "4028e4a140ee35c70140ee4316b3001d",
+    "NTHOL": "4028e4a140f2ed7101412ba0829f034d",
+    "GLYHO": "4028e4a140e95bea0140ee24416e0197",
+    "PRKAB": "4028e4a240f2ef470141167b777b0437",
+    "JANTS": "4028e4a240f2ef4c01413b1b57300719",
+    "TATGD": "4028e4a140f2ed720140f31089aa010a",
+    "ANSGR": "4028e4a140e95bea0140ed21b5c10078",
+    "BUCIM": "4028e4a140ee35c00140ee41a5e4000f",
+    "NUHCM": "4028e4a141558bdd014156053d9f04b2",
+    "ECILC": "4028e4a1415f4d99014160034b683108",
 }
 
+# Runtime'da API'den çekilen UUID'ler için cache (disk'e yazılmaz)
+_kap_uuid_runtime: dict = {}
+
 def kap_url_for(ticker: str) -> str:
-    """KAP şirket sayfası URL'si — bilinmiyorsa arama sonucu döner."""
-    oid = KAP_MEMBER_OIDS.get(ticker, "")
-    if oid:
-        return f"https://www.kap.org.tr/tr/sirket/{oid}"
-    return f"https://www.kap.org.tr/tr/arama?q={ticker}"
+    """KAP şirket sayfası URL'si — bildirim arama sayfasına yönlendirir."""
+    return f"https://www.kap.org.tr/tr/bildirim-sorgu?q={ticker}"
+
+
+def _get_kap_uuid(ticker: str) -> str | None:
+    """Ticker için KAP UUID OID döner. Cache'de yoksa API'den çeker."""
+    uuid = KAP_UUID_OIDS.get(ticker) or _kap_uuid_runtime.get(ticker)
+    if uuid:
+        return uuid
+    # Bilinmeyen ticker — search API'den çek
+    try:
+        r = requests.post(
+            "https://www.kap.org.tr/tr/api/search/combined",
+            json={"keyword": ticker},
+            headers={"User-Agent": "Mozilla/5.0", "Content-Type": "application/json"},
+            timeout=8
+        )
+        for cat in r.json():
+            if cat.get("category") == "companyOrFunds":
+                items = cat.get("results", [])
+                if items:
+                    uuid = items[0]["memberOrFundOid"]
+                    _kap_uuid_runtime[ticker] = uuid
+                    return uuid
+    except Exception:
+        pass
+    return None
+
+
+# ── KAP bildirim cache ────────────────────────────────────────────────────────
+_kap_cache: dict = {}          # {ticker: {"data": [...], "ts": float}}
+_KAP_CACHE_TTL = 1800          # 30 dakika
+
+
+def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
+    """Ticker için son N günlük KAP bildirimlerini çeker (ODA + FR)."""
+    uuid = _get_kap_uuid(ticker)
+    if not uuid:
+        return []
+
+    H = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Content-Type": "application/json",
+    }
+    from_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+    to_date   = datetime.now().strftime("%Y-%m-%d")
+
+    results = []
+    for disc_class in ("ODA", "FR"):
+        try:
+            payload = {
+                "fromDate": from_date,
+                "toDate":   to_date,
+                "disclosureClass": disc_class,
+                "subjectList": [],
+                "mkkMemberOidList": [uuid],
+                "inactiveMkkMemberOidList": [],
+                "bdkMemberOidList": [],
+                "fromSrc": False,
+                "disclosureIndexList": [],
+            }
+            r = requests.post(
+                "https://www.kap.org.tr/tr/api/disclosure/members/byCriteria",
+                json=payload, headers=H, timeout=12
+            )
+            if r.status_code == 200:
+                items = r.json() or []
+                for item in items:
+                    results.append({
+                        "date":    item.get("publishDate", ""),
+                        "summary": item.get("summary", ""),
+                        "subject": item.get("subject", ""),
+                        "class":   disc_class,
+                        "type":    item.get("disclosureType", ""),
+                        "index":   item.get("disclosureIndex"),
+                        "url":     f"https://www.kap.org.tr/tr/Bildirim/{item.get('disclosureIndex')}",
+                        "late":    item.get("isLate", False),
+                    })
+        except Exception as e:
+            logger.warning("fetch_kap_disclosures(%s, %s): %s", ticker, disc_class, e)
+
+    # En yeni tarihe göre sırala
+    def _parse_date(d):
+        try:
+            return datetime.strptime(d, "%d.%m.%Y %H:%M:%S")
+        except Exception:
+            return datetime.min
+    results.sort(key=lambda x: _parse_date(x["date"]), reverse=True)
+    return results
 
 # ── Sektör sınıflandırması ────────────────────────────────────────────────────
 SECTORS = {
@@ -2814,6 +2947,32 @@ def api_stock_news(ticker):
     if text:
         return safe_json({"news": text, "source": "gemini", "kap_url": kap})
     return safe_json({"news": "", "kap_url": kap})
+
+
+@app.route("/api/hisse/<ticker>/kap")
+@limiter.limit("30 per minute")
+def api_stock_kap(ticker):
+    """KAP bildirimleri — 30 dakikalık cache. Son 90 günlük ODA + FR."""
+    ticker = ticker.upper()
+    if ticker not in BIST100:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+
+    now = time.time()
+    with _lock:
+        cached = _kap_cache.get(ticker)
+        if cached and (now - cached["ts"]) < _KAP_CACHE_TTL:
+            return safe_json({"disclosures": cached["data"], "cached": True})
+
+    disclosures = fetch_kap_disclosures(ticker, days=90)
+    with _lock:
+        _kap_cache[ticker] = {"data": disclosures, "ts": now}
+
+    return safe_json({
+        "disclosures": disclosures,
+        "ticker": ticker,
+        "kap_search_url": f"https://www.kap.org.tr/tr/bildirim-sorgu?q={ticker}",
+        "cached": False,
+    })
 
 
 @app.route("/api/hisse/<ticker>/signal-explanation")

@@ -603,6 +603,77 @@
     letter-spacing: 0.3px;
   }
 
+  /* ── KAP Bildirimleri ── */
+  .kap-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .kap-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 0;
+    border-bottom: 1px solid #21262d;
+  }
+  .kap-item:last-child { border-bottom: none; }
+  .kap-item-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .kap-class-badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .kap-class-badge.oda { background: rgba(88,166,255,.1); color:#58a6ff; border:1px solid rgba(88,166,255,.2); }
+  .kap-class-badge.fr  { background: rgba(63,185,80,.1);  color:#3fb950; border:1px solid rgba(63,185,80,.2); }
+  .kap-summary {
+    font-size: 13px;
+    color: #c9d1d9;
+    line-height: 1.45;
+    flex: 1;
+  }
+  .kap-summary a {
+    color: #c9d1d9;
+    text-decoration: none;
+  }
+  .kap-summary a:hover { color:#58a6ff; text-decoration:underline; }
+  .kap-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: #484f58;
+    padding-left: 0;
+  }
+  .kap-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    color: #58a6ff;
+    text-decoration: none;
+    opacity: .7;
+    transition: opacity .15s;
+  }
+  .kap-link-btn:hover { opacity: 1; }
+  .kap-empty {
+    font-size: 13px;
+    color: #484f58;
+    padding: 12px 0;
+    text-align: center;
+  }
+
   /* ── Metodoloji notu ── */
   .methodology {
     background: #161b22;
@@ -923,6 +994,24 @@
       <span class="news-badge">Gemini AI</span>
       <span>Google Search ile desteklenen yapay zeka özeti · 6 saatte bir güncellenir</span>
     </div>
+  </div>
+
+  <!-- KAP Bildirimleri -->
+  <div class="kap-section" id="kapSection">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <div class="section-title" style="margin:0">📋 KAP Bildirimleri</div>
+      <span style="font-size:11px;color:#484f58">Son 90 gün · ODA + Finansal Rapor</span>
+      <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q={{ ticker }}" target="_blank" rel="noopener"
+         style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#8b949e;background:#21262d;border:1px solid #30363d;border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
+         onmouseover="this.style.color='#f0f6fc'" onmouseout="this.style.color='#8b949e'">
+        KAP'ta Aç ↗
+      </a>
+    </div>
+    <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:#8b949e;font-size:13px;padding:6px 0">
+      <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div>
+      Bildirimler yükleniyor…
+    </div>
+    <div id="kapList" style="display:none"></div>
   </div>
 
   {% if ssr_signal %}
@@ -1685,6 +1774,73 @@ async function loadSignalExplanation(retryCount) {
   }
 }
 loadSignalExplanation(0);
+
+/* ── KAP Bildirimleri ───────────────────────────────── */
+async function loadKapDisclosures() {
+  const loadEl = document.getElementById('kapLoading');
+  const listEl = document.getElementById('kapList');
+  if (!loadEl || !listEl) return;
+
+  try {
+    const res  = await fetch('/api/hisse/' + TICKER + '/kap');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    loadEl.style.display = 'none';
+    const items = data.disclosures || [];
+
+    if (!items.length) {
+      listEl.innerHTML = '<div class="kap-empty">Son 90 günde bildirim bulunamadı.</div>';
+      listEl.style.display = '';
+      return;
+    }
+
+    // En fazla 20 bildirim göster, daha fazlası için KAP linki
+    const show = items.slice(0, 20);
+    const CLASS_MAP = { ODA: 'oda', FR: 'fr' };
+    const CLASS_LBL = { ODA: 'ÖZEL DURUM', FR: 'FİNANSAL' };
+
+    listEl.innerHTML = show.map(d => {
+      const cls = CLASS_MAP[d.class] || 'oda';
+      const lbl = CLASS_LBL[d.class] || d.class;
+      // Tarih formatını kısalt: "31.12.2025 14:58:09" → "31.12.2025 14:58"
+      const dateShort = d.date ? d.date.substring(0, 16) : '';
+      const summaryHtml = d.url
+        ? `<a href="${d.url}" target="_blank" rel="noopener">${escHtml(d.summary)}</a>`
+        : escHtml(d.summary);
+      return `<div class="kap-item">
+        <div class="kap-item-top">
+          <span class="kap-class-badge ${cls}">${lbl}</span>
+          <span class="kap-summary">${summaryHtml}</span>
+          ${d.url ? `<a href="${d.url}" target="_blank" rel="noopener" class="kap-link-btn" title="KAP'ta aç">↗</a>` : ''}
+        </div>
+        <div class="kap-meta">
+          <span>${dateShort}</span>
+          ${d.subject ? `<span style="color:#30363d">·</span><span style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(d.subject)}">${escHtml(d.subject)}</span>` : ''}
+          ${d.late ? '<span style="color:#d29922;font-size:10px">⚠ GECİKMELİ</span>' : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    if (items.length > 20) {
+      listEl.innerHTML += `<div style="padding:10px 0;text-align:center;font-size:12px;color:#484f58">
+        +${items.length - 20} daha fazla bildirim —
+        <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q=${TICKER}" target="_blank" rel="noopener" style="color:#58a6ff;text-decoration:none">KAP'ta görüntüle ↗</a>
+      </div>`;
+    }
+
+    listEl.style.display = '';
+  } catch(e) {
+    loadEl.innerHTML = '<span style="font-size:12px;color:#484f58">KAP bildirimleri yüklenemedi.</span>';
+  }
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+loadKapDisclosures();
 
 /* ── Temel Analiz ──────────────────────────────────── */
 async function loadFundamentals() {
