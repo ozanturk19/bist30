@@ -3705,15 +3705,25 @@ def api_market_news():
             else:
                 continue   # BEKLE hisselerini listeye alma
 
-        # Snippet: gereksiz giriş cümlelerini temizle, 200 karakter kes
+        # Snippet: gereksiz giriş/kapanış cümlelerini temizle, ilk ~220 karakter
         _skip_prefixes = (
             "aşağıda", "işte", "here are", "here is", "below are",
             "son 7 gün", "son yedi gün", "belirtmek gerekir",
+            "bugünün tarihi", "bu tarihe", "01 mayıs", "belirtilen tarih",
+            "kayda değer", "son 7 günde kayda", "son yedi günde kayda",
+            "not:", "note:", "önemli not",
         )
         lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-        # İlk satır boş veya haber maddesine benzemeyen giriş ise atla
-        if lines and any(lines[0].lower().startswith(p) for p in _skip_prefixes):
-            lines = lines[1:]
+        # Başındaki giriş cümlelerini atla (maksimum 2 satır)
+        for _ in range(2):
+            if lines and any(lines[0].lower().startswith(p) for p in _skip_prefixes):
+                lines = lines[1:]
+            else:
+                break
+        # Madde işareti olan satırlarla başlıyorsa, sadece ilk 3 maddeyi al
+        bullet_lines = [ln for ln in lines if ln.startswith(("•", "-", "*", "–", "1.", "2.", "3."))]
+        if bullet_lines:
+            lines = bullet_lines[:3]
         clean = " ".join(lines).strip()
         snippet = clean if len(clean) <= 220 else clean[:220].rsplit(" ", 1)[0] + "…"
 
