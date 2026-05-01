@@ -462,6 +462,22 @@
   .history-table tr:last-child td { border-bottom: none; }
   .history-table tr:hover td { background: rgba(255,255,255,.02); }
 
+  /* ── İlgili Blog Kartları ── */
+  .blog-read-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 12px 14px;
+    text-decoration: none;
+    display: block;
+    transition: all .15s;
+  }
+  .blog-read-card:hover {
+    border-color: #8b949e;
+    background: #1c2128;
+    transform: translateY(-1px);
+  }
+
   /* ── Diğer hisseler ── */
   .others-section {
     background: #161b22;
@@ -949,9 +965,7 @@
     <div class="section-title" style="margin-bottom:10px">📖 İlgili Okumalar</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
       {% for b in related_blog %}
-      <a href="/blog/{{ b.slug }}" style="
-        background:#161b22;border:1px solid #30363d;border-radius:8px;
-        padding:12px 14px;text-decoration:none;display:block;transition:all .15s">
+      <a href="/blog/{{ b.slug }}" class="blog-read-card">
         <div style="font-size:11px;color:#58a6ff;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">{{ b.cat }}</div>
         <div style="font-size:13px;font-weight:600;color:#f0f6fc;line-height:1.4">{{ b.title }}</div>
         <div style="font-size:11px;color:#484f58;margin-top:5px">⏱ {{ b.mins }} dk okuma</div>
