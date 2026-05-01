@@ -2954,6 +2954,10 @@ def stock_page(ticker):
     sector = _get_sector(ticker)
     others = [t for t in BIST100 if t != ticker and t != "XU030"]
 
+    # Sektör karşılaştırma URL'i — aynı sektördeki ilk 2 peer ile
+    _sector_peers = [t for t in SECTORS.get(sector, []) if t != ticker and t in BIST100][:2]
+    compare_url = "/karsilastir?tickers=" + ",".join([ticker] + _sector_peers)
+
     # SEO: mevcut cache'ten temel sinyal verisini SSR için çek
     ssr_signal = None
     with _lock:
@@ -2977,7 +2981,8 @@ def stock_page(ticker):
                            stock_names=STOCK_NAMES,
                            ssr_signal=ssr_signal,
                            kap_url=kap_url_for(ticker),
-                           related_blog=related_blog)
+                           related_blog=related_blog,
+                           compare_url=compare_url)
 
 
 _fundamentals_cache = {}

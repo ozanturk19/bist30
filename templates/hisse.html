@@ -783,7 +783,7 @@
   <div>
     <div class="header-ticker">{{ ticker }}</div>
     <div class="header-name">{{ name }}
-      {% if sector %}<span style="margin-left:8px;font-size:11px;background:#21262d;border:1px solid #30363d;border-radius:10px;padding:2px 8px;color:#8b949e">{{ sector }}</span>{% endif %}
+      {% if sector %}<span style="margin-left:8px;font-size:11px;background:#21262d;border:1px solid #30363d;border-radius:10px;padding:2px 8px;color:#8b949e">{{ sector }}</span><a href="{{ compare_url }}" title="Sektördeki diğer hisselerle karşılaştır" style="margin-left:6px;font-size:11px;background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.3);border-radius:10px;padding:2px 8px;color:#58a6ff;text-decoration:none;white-space:nowrap">⇌ Karşılaştır</a>{% endif %}
     </div>
   </div>
   <div class="header-price-group">
