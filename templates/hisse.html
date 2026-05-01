@@ -1702,6 +1702,23 @@ async function loadNews(retryCount) {
       contentEl.innerHTML    = mdToHtml(data.news);
       contentEl.style.display = '';
       sourceEl.style.display  = 'flex';
+
+      // Source badge: KAP-grounded vs search-grounded
+      const badge = sourceEl.querySelector('.news-badge');
+      const desc  = sourceEl.querySelector('span:last-of-type');
+      const isKap = data.source === 'kap_ai';
+      if (badge) {
+        badge.textContent = isKap ? 'KAP + AI' : 'Gemini AI';
+        badge.style.background = isKap ? 'rgba(63,185,80,.12)' : '';
+        badge.style.color      = isKap ? '#3fb950' : '';
+        badge.style.borderColor= isKap ? 'rgba(63,185,80,.25)' : '';
+      }
+      if (desc) {
+        desc.textContent = isKap
+          ? 'KAP bildirimlerinden AI özetlemesi · doğrulanmış veri'
+          : 'Google Search ile desteklenen yapay zeka özeti · 6 saatte bir güncellenir';
+      }
+
       // KAP linki var mı? source row'a ekle
       if (data.kap_url && !document.getElementById('newsKapLink')) {
         const kapA = document.createElement('a');
