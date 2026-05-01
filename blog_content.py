@@ -3123,6 +3123,623 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'SASA', 'EREGL']
   },
 
+  # ── ARTICLE 51 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "faiz-ve-borsa-iliskisi-tcmb",
+    "title": "Faiz ve Borsa İlişkisi: TCMB Kararları BIST'i Nasıl Etkiler?",
+    "desc": "Merkez bankası faiz kararları hisse senetlerini nasıl etkiler? Faiz yükselince borsa neden düşer? Türkiye özelinde TCMB-BIST ilişkisi ve yatırımcı stratejisi.",
+    "cat": "Makro Ekonomi",
+    "date": "01.05.2026",
+    "mins": 7,
+    "body": """
+<p>Faiz oranları ile borsa arasındaki ilişki, yatırımcıların en çok merak ettiği makroekonomik konuların başında gelir. Merkez bankası kararları açıklandığında piyasalar neden sert hareket eder? Bu rehberde Türkiye Cumhuriyet Merkez Bankası (TCMB) kararlarının BIST üzerindeki etkisini ve buna göre nasıl pozisyon alınabileceğini ele alıyoruz.</p>
+
+<h2>Faiz-Borsa İlişkisinin Temel Mekanizması</h2>
+<p>Faiz oranları yatırım araçlarının cazibesini doğrudan etkiler. Temel mantık şu şekilde işler:</p>
+
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Faiz Hareketi</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Borsa Etkisi</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Neden?</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;color:#f85149;font-weight:600">Faiz ↑ (artar)</td>
+      <td style="padding:8px 12px;color:#e3b341">Borsa ↓ (genellikle)</td>
+      <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Tahvil/mevduat cazip hale gelir, hisseden çıkış başlar</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;color:#3fb950;font-weight:600">Faiz ↓ (düşer)</td>
+      <td style="padding:8px 12px;color:#3fb950">Borsa ↑ (genellikle)</td>
+      <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Alternatif getirileri düşer, hisseye para akar</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;color:#94a3b8">Sürpriz Artış</td>
+      <td style="padding:8px 12px;color:#f85149">Sert satış</td>
+      <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Piyasa fiyatlamayan bir şoka tepki verir</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;color:#94a3b8">Beklenti Karşılandı</td>
+      <td style="padding:8px 12px;color:#8b949e">Sınırlı hareket</td>
+      <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Karar zaten fiyatlanmıştı</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Türkiye'ye Özgü Dinamikler: TCMB-BIST İlişkisi</h2>
+<p>Türkiye piyasası gelişmiş ülkelerden farklı tepkiler verebilir çünkü TL ve döviz kuru faktörü devreye girer:</p>
+
+<h3>Faiz Artışı Senaryosu</h3>
+<ul>
+  <li>TCMB faiz artırırsa → TL güçlenir → Yabancı yatırımcı ilgisi artar → BIST dolar bazında yükselir</li>
+  <li>Aynı zamanda kredi maliyetleri artar → Şirket karlılığı baskı altına girer → Hisseler TL bazında düşebilir</li>
+  <li>Banka hisseleri (<strong>AKBNK, GARAN, ISCTR</strong>) faiz artışından net faiz marjı artacağı için olumlu etkilenebilir</li>
+</ul>
+
+<h3>Faiz İndirimi Senaryosu</h3>
+<ul>
+  <li>TL zayıflar → BIST TL bazında nominal yükselir (kur enflasyonu etkisi) ama dolar bazında düşebilir</li>
+  <li>Yabancı yatırımcı çıkışı hızlanır → BIST derinliği azalır</li>
+  <li>İhracatçı şirketler (<strong>EREGL, TUPRS, FROTO</strong>) dolar geliri nedeniyle göreceli korunur</li>
+</ul>
+
+<h2>Hangi Sektörler Faize En Çok Duyarlıdır?</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Sektör</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Faiz ↑ Etkisi</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Neden?</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Bankacılık</td>
+      <td style="padding:8px 12px;color:#3fb950">Potansiyel pozitif</td>
+      <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Net faiz marjı artabilir</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">GYO / Gayrimenkul</td>
+      <td style="padding:8px 12px;color:#f85149">Negatif</td>
+      <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Mortgage maliyeti artar, talep düşer</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Enerji / Altyapı</td>
+      <td style="padding:8px 12px;color:#e3b341">Karışık</td>
+      <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Borç yükü artabilir ama düzenli nakit akışı koruyucu</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">İhracatçı Sanayi</td>
+      <td style="padding:8px 12px;color:#3fb950">Pozitif (TL zayıflarsa)</td>
+      <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Dolar geliri, TL maliyet avantajı</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;font-weight:600">Perakende / Tüketim</td>
+      <td style="padding:8px 12px;color:#f85149">Negatif</td>
+      <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Tüketici harcamaları kısılır</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Faiz Kararı Öncesi ve Sonrası Strateji</h2>
+<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#58a6ff">💡 "Beklenti al, gerçek sat" kuralı:</strong>
+  <p style="margin:8px 0 0 0">Piyasalar faiz kararını genellikle haftalar öncesinden fiyatlamaya başlar. Karar açıklandığında büyük hareket çoğu zaman beklenti yönünün tersinedir. Bu nedenle karar gününde ani pozisyon açmak risklidir.</p>
+</div>
+<ul>
+  <li><strong>Karar öncesi:</strong> Konsensüsü takip et. "Sürpriz" ihtimali yüksekse volatilite artar</li>
+  <li><strong>Karar sonrası:</strong> İlk tepki genellikle abartılıdır — kalıcı trend 2-3 gün içinde netleşir</li>
+  <li><strong>Uzun vade:</strong> Faiz siklus yönü (artış mı, indirim mi?) hisse seçimini şekillendirir</li>
+</ul>
+
+<h2>Pratik Takip Listesi</h2>
+<p>TCMB kararlarını ve piyasa beklentilerini takip etmek için:</p>
+<ul>
+  <li><strong>TCMB Para Politikası Kurulu (PPK) takvimi</strong> — yılda 8 toplantı, takvim yıl başında açıklanır</li>
+  <li><strong>Bloomberg/Reuters Türkiye haberleri</strong> — beklenti anketleri</li>
+  <li><strong>BorsaPusula Bilanço Takvimi</strong> — makro takvim entegrasyonu</li>
+  <li><strong>BIST30/BIST100 günlük trend sinyali</strong> — faiz kararı sonrası trend değişimini izle</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "Faiz artışı her zaman borsa için kötü mü?",
+       "a": "Hayır. Türkiye'de faiz artışı TL'yi güçlendirebilir, yabancı sermaye girişini teşvik edebilir ve BIST'i dolar bazında yükseltebilir. Bankacılık sektörü faiz artışından olumlu etkilenebilir. Etki; sürpriz mi oldu, sektöre göre farklı mı değişiyor, önemlidir."},
+      {"q": "TCMB kararı hangi hisseleri en çok etkiler?",
+       "a": "En yüksek etki bankacılık (AKBNK, GARAN, ISCTR, VAKBN) ve GYO sektörlerinde görülür. İhracatçı sanayi hisseleri (EREGL, TUPRS, FROTO) kur etkisi nedeniyle daha farklı hareket edebilir."},
+      {"q": "Faiz kararı günü işlem yapmalı mıyım?",
+       "a": "Deneyimli yatırımcılar bile faiz kararı günü büyük pozisyon açmaktan kaçınır. İlk tepki sert ve yanıltıcı olabilir. Kararın sindirilerek kalıcı trendin netleşmesini beklemek daha sağlıklıdır."},
+      {"q": "Enflasyon yüksekken borsa iyi performans gösterebilir mi?",
+       "a": "Türkiye'de enflasyon dönemlerinde borsa TL bazında yükselir çünkü hisseler reel varlıklara sahiplik hakkıdır. Ancak dolar bazında getiri ve gerçek satın alma gücü kazancı için enflasyonun üzerinde bir BIST performansı gerekir. Her zaman gerçekleşmez."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'ISCTR', 'EREGL', 'TUPRS', 'EKGYO']
+  },
+
+  # ── ARTICLE 52 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "teknik-analiz-mi-temel-analiz-mi",
+    "title": "Teknik Analiz mi, Temel Analiz mi? Farklar ve Birlikte Kullanım",
+    "desc": "Teknik analiz ile temel analiz arasındaki temel farklar nelerdir? Hangi yatırımcı hangisini kullanmalı? BIST hisseleri için en etkili yaklaşım nedir?",
+    "cat": "Strateji",
+    "date": "01.05.2026",
+    "mins": 6,
+    "body": """
+<p>Yatırım dünyasındaki en köklü tartışmalardan biri: "Teknik analiz mi yoksa temel analiz mi daha etkili?" Bu sorunun kesin bir cevabı olmasa da her iki yaklaşımı anlamak ve doğru durumda doğru aracı kullanmak, yatırımcıya büyük avantaj sağlar.</p>
+
+<h2>Temel Farklar: Bir Bakışta</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Kriter</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#58a6ff">Teknik Analiz</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#3fb950">Temel Analiz</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600;color:#94a3b8">Odak Noktası</td>
+      <td style="padding:8px 12px">Fiyat ve hacim hareketi</td>
+      <td style="padding:8px 12px">Şirket değeri ve finansallar</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600;color:#94a3b8">Veri Kaynağı</td>
+      <td style="padding:8px 12px">Grafik, indikatörler, hacim</td>
+      <td style="padding:8px 12px">Bilanço, gelir tablosu, makro</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600;color:#94a3b8">Zaman Ufku</td>
+      <td style="padding:8px 12px">Kısa-orta vade (günler–aylar)</td>
+      <td style="padding:8px 12px">Uzun vade (aylar–yıllar)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600;color:#94a3b8">Ana Soru</td>
+      <td style="padding:8px 12px">"Ne zaman al/sat?"</td>
+      <td style="padding:8px 12px">"Hangi hisse değerli?"</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600;color:#94a3b8">Öğrenme Eğrisi</td>
+      <td style="padding:8px 12px">Orta (pratik ağırlıklı)</td>
+      <td style="padding:8px 12px">Dik (muhasebe bilgisi gerekir)</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;font-weight:600;color:#94a3b8">Subjektiflik</td>
+      <td style="padding:8px 12px">Orta — yoruma açık</td>
+      <td style="padding:8px 12px">Yüksek — gelecek tahmin gerekir</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Teknik Analizin Güçlü Yönleri</h2>
+<ul>
+  <li><strong>Zamanlama:</strong> "Ne zaman girilmeli?" sorusuna doğrudan cevap verir</li>
+  <li><strong>Disiplin:</strong> Somut giriş/çıkış seviyeleri (SL, TP) belirler</li>
+  <li><strong>Hız:</strong> Piyasa değişimlerine hızlı tepki verir</li>
+  <li><strong>Evrensellik:</strong> Her piyasada (hisse, forex, kripto) uygulanabilir</li>
+  <li><strong>Otomatikleştirilebilir:</strong> Algoritmik sistemlere dönüştürülebilir</li>
+</ul>
+
+<h2>Temel Analizin Güçlü Yönleri</h2>
+<ul>
+  <li><strong>Gerçek değer:</strong> Şirketin gerçekte ne kadar ettiğini anlamayı sağlar</li>
+  <li><strong>Uzun vade:</strong> Değer yatırımı için gerekli temel oluşturur</li>
+  <li><strong>Güvenlik marjı:</strong> Ucuz hisseleri tespit etmeye yardımcı olur</li>
+  <li><strong>Neden anlama:</strong> "Bu şirket neden değerleniyor?" sorusunu cevaplar</li>
+</ul>
+
+<h2>Birlikte Kullanım: En Güçlü Yaklaşım</h2>
+<div style="background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#3fb950">✅ Kanıtlanmış Strateji: "Temel Analiz + Teknik Zamanlama"</strong>
+  <p style="margin:8px 0 0 0">Önce temel analizle "hangi hisse" sorusunu cevapla → Ardından teknik analizle "ne zaman" gireceğini belirle. Bu iki adımlı yaklaşım profesyonel portföy yöneticilerinin büyük çoğunluğunun benimsediği yöntemdir.</p>
+</div>
+
+<h3>Örnek Uygulama — AKBNK</h3>
+<ol>
+  <li><strong>Temel filtre:</strong> Banka karlılığı güçlü, F/K oranı sektör ortalamasının altında, temettü verimi cazip</li>
+  <li><strong>Teknik giriş:</strong> BorsaPusula sinyali AL durumuna geçiyor, ADX ≥ 25, Supertrend yeşil</li>
+  <li><strong>Karar:</strong> Her iki filtreden geçen hisse için giriş değerlendirilebilir</li>
+</ol>
+
+<h2>Kim Hangisini Kullanmalı?</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Yatırımcı Tipi</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Önerilen Yaklaşım</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px">Aktif trader (günlük-haftalık işlem)</td>
+      <td style="padding:8px 12px">Teknik analiz ağırlıklı</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px">Swing trader (haftalık-aylık)</td>
+      <td style="padding:8px 12px">Teknik + minimal temel filtre</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px">Uzun vadeli yatırımcı (1+ yıl)</td>
+      <td style="padding:8px 12px">Temel analiz önce, teknik zamanlama</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px">Temettü yatırımcısı</td>
+      <td style="padding:8px 12px">Temel analiz ağırlıklı</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>BorsaPusula Yaklaşımı: Hibrit Model</h2>
+<p>BorsaPusula sinyal sistemi her ikisini birleştirir:</p>
+<ul>
+  <li><strong>Teknik katman:</strong> Supertrend + ADX ≥ 25 + EMA12/99 — zamanlama için</li>
+  <li><strong>Temel katman:</strong> Her hisse sayfasında F/K, PD/DD, ROE, temettü verimi — değerleme için</li>
+  <li><strong>Çok zaman dilimi (MTF):</strong> H4 → Günlük → Haftalık → Aylık trend uyumu — büyük trendle aynı yönde işlem için</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "Teknik analiz gerçekten işe yarıyor mu?",
+       "a": "Akademik araştırmalar karışık sonuçlar verse de teknik analiz birçok profesyonel trader ve kurum tarafından yaygın kullanılmaktadır. Özellikle trend takip stratejileri ve momentum göstergeleri, belirli koşullarda tutarlı sonuçlar üretebilmektedir. Tek başına mükemmel bir araç değil, bir karar destek sistemidir."},
+      {"q": "Temel analiz öğrenmek için ne gerekli?",
+       "a": "Temel muhasebe bilgisi (bilanço, gelir tablosu, nakit akışı okuma), sektör dinamiklerini anlama ve makroekonomik değişkenleri takip edebilme gerekir. F/K, PD/DD, ROE gibi temel oranlar başlangıç için iyi bir çıkış noktasıdır."},
+      {"q": "Kısa vadede teknik analiz, uzun vadede temel analiz mi?",
+       "a": "Bu yaygın bir ezberleme formülü ama tam doğru değil. Uzun vadeli yatırımcılar da teknik sinyallerden giriş zamanlamasında faydalanabilir; kısa vadeli traderlar da temel analizden sektör seçiminde yararlanabilir. Önemli olan yaklaşımların birbirini tamamlaması."},
+      {"q": "BorsaPusula hangi analiz yöntemini kullanıyor?",
+       "a": "BorsaPusula öncelikli olarak teknik analiz odaklıdır: Supertrend, ADX ve EMA12/99 üçlüsünü kullanır. Hisse sayfalarında temel analiz verileri (F/K, PD/DD, ROE vb.) de sunulur. Sistem, teknik ile temeli aynı ekranda görerek daha bilinçli karar almanızı hedefler."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
+  },
+
+  # ── ARTICLE 53 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "sp500-nedir-abd-borsasina-yatirim",
+    "title": "S&P500 Nedir? ABD Borsasına Yatırım Rehberi 2026",
+    "desc": "S&P500 endeksi nedir, hangi şirketler var, Türkiye'den nasıl yatırım yapılır? Nasdaq ile farkı, ETF seçimi ve kur riski. ABD borsasına yatırım rehberi.",
+    "cat": "Temel Kavramlar",
+    "date": "01.05.2026",
+    "mins": 7,
+    "body": """
+<p>S&P500 (Standard & Poor's 500), ABD borsasında işlem gören en büyük 500 şirketin piyasa değeri ağırlıklı endeksidir. Dünyada en çok takip edilen borsa endekslerinden biridir ve küresel ekonominin nabzı olarak kabul edilir.</p>
+
+<h2>S&P500 Hakkında Temel Bilgiler</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Özellik</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Detay</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Kuruluş</td>
+      <td style="padding:8px 12px">1957, Standard &amp; Poor's</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Hisse sayısı</td>
+      <td style="padding:8px 12px">~500 (birden fazla hisse sınıfı olan şirketler dahil 503+)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Piyasa değeri</td>
+      <td style="padding:8px 12px">~45 trilyon USD (2026 itibarıyla)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Tarihsel yıllık getiri</td>
+      <td style="padding:8px 12px">Ortalama ~%10 (temettü dahil, nominal)</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;font-weight:600">İşlem saatleri (TR)</td>
+      <td style="padding:8px 12px">16:30 – 23:00 (yaz) / 17:30 – 00:00 (kış)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>S&P500 vs Nasdaq: Fark Nedir?</h2>
+<p>İkisi de ABD borsasını temsil eder ancak farklı şirket gruplarını kapsar:</p>
+<ul>
+  <li><strong>S&P500:</strong> 11 sektörden 500 büyük şirket — dengeli ve geniş kapsamlı</li>
+  <li><strong>Nasdaq 100:</strong> Teknoloji ağırlıklı 100 şirket (Apple, Microsoft, Amazon, NVIDIA gibi) — daha yüksek getiri potansiyeli, daha yüksek volatilite</li>
+  <li><strong>Dow Jones (DJIA):</strong> Sadece 30 büyük şirket — en eski ama en az temsil edici</li>
+</ul>
+
+<h2>S&P500'ün En Büyük Bileşenleri (2026)</h2>
+<ul>
+  <li><strong>Apple (AAPL)</strong> — Teknoloji, piyasa değeri ~$3T</li>
+  <li><strong>Microsoft (MSFT)</strong> — Teknoloji/Bulut</li>
+  <li><strong>NVIDIA (NVDA)</strong> — Yapay zeka çipları</li>
+  <li><strong>Amazon (AMZN)</strong> — E-ticaret/Bulut (AWS)</li>
+  <li><strong>Alphabet/Google (GOOGL)</strong> — Reklam/AI</li>
+  <li><strong>Meta (META)</strong> — Sosyal medya</li>
+  <li>Bu 6 şirket endeksin yaklaşık %30'unu oluşturur</li>
+</ul>
+
+<h2>Türkiye'den ABD Borsasına Nasıl Yatırım Yapılır?</h2>
+
+<h3>1. Aracı Kurum (Doğrudan Hisse)</h3>
+<p>Midas, Passfolio gibi platformlar veya yurt içi bankaların yabancı hisse platformları aracılığıyla doğrudan AAPL, MSFT, NVDA gibi hisseler alınabilir.</p>
+<ul>
+  <li>✅ İstediğin hisseyi seç, tam kontrol</li>
+  <li>❌ Çeşitlendirme için çok sayıda hisse gerekir</li>
+</ul>
+
+<h3>2. ETF ile S&P500 (Önerilen Yöntem)</h3>
+<p>SPY, IVV, VOO gibi S&P500 ETF'leri tek alımla 500 şirkete yatırım sağlar. Türkiye'den erişim için yurt dışı platform gerekebilir.</p>
+<ul>
+  <li>✅ Düşük maliyet, geniş çeşitlendirme</li>
+  <li>✅ Yıllık yönetim ücreti 0.03-0.09%</li>
+  <li>❌ Belirli bir şirkete odaklanamama</li>
+</ul>
+
+<h3>3. Türk BYF (Borsa Yatırım Fonu)</h3>
+<p>BIST'te işlem gören, yabancı endekslere yatırım yapan BYF'ler TL ile alınabilir. Kur riski yönetimi için alternatif olabilir.</p>
+
+<h2>Kur Riski: Dolar/TL Etkisi</h2>
+<div style="background:rgba(227,179,65,.07);border:1px solid rgba(227,179,65,.2);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#e3b341">⚠️ Kritik Not:</strong>
+  <p style="margin:8px 0 0 0">TL'de değer kaybı varsa USD cinsinden aynı kalan bir yatırım TL bazında "artmış" görünür. Bu getiri yanıltıcı olabilir. Gerçek değerlendirme için ABD enflasyonu ve TL/USD paritesini birlikte değerlendirin.</p>
+</div>
+
+<h2>BorsaPusula'da ABD Hisse Sinyalleri</h2>
+<p>BorsaPusula'nın <a href="/abd">/abd</a> bölümünde S&P500 ve Nasdaq'tan 144 büyük ABD hissesi için algoritmik teknik analiz sinyalleri bulunmaktadır. AAPL, MSFT, NVDA, AMZN gibi hisseler için Supertrend + ADX + EMA sinyalleri takip edilebilir.</p>
+""",
+    "faqs": [
+      {"q": "S&P500'e yatırım yapmak güvenli mi?",
+       "a": "Hiçbir yatırım tam anlamıyla güvenli değildir; S&P500 kısa vadede ciddi düşüşler (%30-50) yaşayabilir. Ancak 20-30 yıllık perspektifte tarihsel olarak pozitif getiri sağlamıştır. Uzun vadeli yatırımcı için çeşitlendirilmiş bir araç olarak değerlendirilebilir."},
+      {"q": "S&P500 mü Nasdaq mı daha iyi?",
+       "a": "Nasdaq son 10 yılda S&P500'ü geride bıraktı, ancak çok daha volatil. S&P500 daha dengeli ve savunmacıdır. Ağır teknoloji tercihiniz varsa Nasdaq, dengeli büyüme istiyorsanız S&P500 uygun olabilir. İkisini karıştırmak da yaygın bir stratejidir."},
+      {"q": "Türkiye'den S&P500 ETF'i nasıl alınır?",
+       "a": "Yurt içi bankaların yabancı hisse platformları veya Midas gibi uygulamalar aracılığıyla SPY, IVV, VOO gibi ETF'ler alınabilir. Bazı Türk BYF'leri de yabancı endeksleri takip eder. Yatırım yapmadan önce vergi ve düzenleyici koşulları araştırın."},
+      {"q": "ABD borsası gece açık olduğunda Türklerden işlem yapılabilir mi?",
+       "a": "Evet. NYSE ve Nasdaq'ın işlem saatleri Türkiye saatiyle 16:30-23:00 (yaz) veya 17:30-00:00 (kış) arasındadır. Bu saatlerde aracı kurumunuzun platformu üzerinden işlem yapabilirsiniz."}
+    ],
+    "related_tickers": ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOGL']
+  },
+
+  # ── ARTICLE 54 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "bireysel-emeklilik-sistemi-bes-nedir",
+    "title": "BES Nedir? Bireysel Emeklilik Sistemi Rehberi 2026",
+    "desc": "Bireysel Emeklilik Sistemi (BES) nedir, nasıl çalışır, devlet katkısı ne kadar? BES mi yoksa borsa yatırımı mı daha kazançlı? Kapsamlı 2026 rehberi.",
+    "cat": "Temel Kavramlar",
+    "date": "01.05.2026",
+    "mins": 7,
+    "body": """
+<p>Bireysel Emeklilik Sistemi (BES), devlet desteğiyle uzun vadeli birikim yapmanıza olanak tanıyan gönüllü bir emeklilik tasarruf sistemidir. Türkiye'de milyonlarca kişinin katılımıyla en yaygın yatırım araçlarından biri haline gelmiştir.</p>
+
+<h2>BES Nasıl Çalışır?</h2>
+<p>Temelde üç unsuru vardır:</p>
+<ol>
+  <li><strong>Katılımcı katkısı:</strong> Ayda belirlediğiniz tutarı ödersiniz</li>
+  <li><strong>Devlet katkısı (%30):</strong> Devlet, ödediğiniz tutarın %30'unu sisteme ek katkı olarak ekler</li>
+  <li><strong>Fon getirisi:</strong> Biriken para yatırım fonlarında değerlendirilir</li>
+</ol>
+
+<div style="background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#3fb950">✅ Devlet Katkısı Avantajı:</strong>
+  <p style="margin:8px 0 0 0">Aylık 1.000 TL katkı ödüyorsanız devlet 300 TL ekler → 1.300 TL fona yatırılır. Asgari ücretin %25'i kadar olan limit dahilinde katkı için bu oran uygulanır (2026 limitlerini kontrol edin).</p>
+</div>
+
+<h2>BES Temel Özellikleri (2026)</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Özellik</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Detay</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Minimum katılım yaşı</td>
+      <td style="padding:8px 12px">18 (otomatik BES'te 18–60 arası çalışanlar)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Devlet katkısı oranı</td>
+      <td style="padding:8px 12px">%30 (ek devlet katkısı sistemine göre değişir)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Emeklilik yaşı</td>
+      <td style="padding:8px 12px">56 yaş + 10 yıl sistem içi süre</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Erken çıkış cezası</td>
+      <td style="padding:8px 12px">Devlet katkısının bir kısmı geri alınır, stopaj uygulanabilir</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;font-weight:600">Vergi avantajı</td>
+      <td style="padding:8px 12px">Fon getirileri emeklilik hakkı kazanılana kadar vergisiz birikir</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>BES Fon Seçenekleri</h2>
+<p>BES'e yatırdığınız para çeşitli fon türlerinde değerlenebilir:</p>
+<ul>
+  <li><strong>Hisse senedi fonları:</strong> Yüksek risk, yüksek potansiyel getiri — BIST endeks fonları</li>
+  <li><strong>Sabit getirili fonlar:</strong> Tahvil/bono — düşük risk, düşük getiri</li>
+  <li><strong>Para piyasası fonları:</strong> Kısa vadeli, likit</li>
+  <li><strong>Karma fonlar:</strong> Hisse + tahvil karışımı</li>
+  <li><strong>Altın/döviz fonları:</strong> Enflasyon ve kur riskine karşı korunma</li>
+</ul>
+
+<h2>BES mi, Borsa Yatırımı mı?</h2>
+<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#58a6ff">💡 Birbirinin Rakibi Değil:</strong>
+  <p style="margin:8px 0 0 0">BES ve borsa birbirini tamamlayan araçlardır. BES'in devlet katkısı benzersiz bir avantaj sağlar — bu etkiyi borsada doğrudan yeniden üretemezsiniz. İdeal: BES ile uzun vadeli birikim + BIST sinyalleriyle aktif yönetim bir arada.</p>
+</div>
+
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Kriter</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#58a6ff">BES</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#3fb950">Doğrudan Borsa</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px">Devlet katkısı</td>
+      <td style="padding:8px 12px">✅ %30</td>
+      <td style="padding:8px 12px">❌ Yok</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px">Esneklik</td>
+      <td style="padding:8px 12px">Orta (erken çıkış cezalı)</td>
+      <td style="padding:8px 12px">✅ İstediğin zaman çıkış</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px">Kontrol</td>
+      <td style="padding:8px 12px">Sınırlı (fon seçimi)</td>
+      <td style="padding:8px 12px">✅ Tam kontrol</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px">Risk profili</td>
+      <td style="padding:8px 12px">Seçilebilir (düşük → yüksek)</td>
+      <td style="padding:8px 12px">Seçilebilir</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px">Vergi avantajı</td>
+      <td style="padding:8px 12px">✅ Emekliliğe kadar vergisiz</td>
+      <td style="padding:8px 12px">%0 stopaj (BIST hisseleri)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>BES'te Akıllı Fon Seçimi</h2>
+<p>Uzun vadeli BES birikiminde tarihsel olarak en yüksek getiriyi hisse senedi ağırlıklı fonlar sağlamıştır. Ancak yaşınıza göre risk profili ayarlanmalıdır:</p>
+<ul>
+  <li><strong>20-40 yaş:</strong> Hisse ağırlıklı (%60-80) — uzun vade riski tolere eder</li>
+  <li><strong>40-50 yaş:</strong> Dengeli karışım (%40-60 hisse) — koruyucu unsurlar artırılır</li>
+  <li><strong>50+ yaş:</strong> Sabit getirili ağırlık artırılır — sermaye koruma önceliği</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "BES devlet katkısını almak için ne kadar süre kalmak gerekiyor?",
+       "a": "Devlet katkısının tamamını alabilmek için sistemde 10 yıl kalmanız ve 56 yaşında emekliliğe hak kazanmanız gerekir. Erken çıkışta devlet katkısının bir kısmı geri alınır ve stopaj uygulanabilir. Koşullar değişebileceğinden güncel BES mevzuatını kontrol edin."},
+      {"q": "BES'te hangi fonlara yatırım yapmalıyım?",
+       "a": "Uzun vadede hisse senedi fonları (özellikle endeks fonları) tarihsel olarak en yüksek reel getiriyi sağlamıştır. Ancak bu yüksek kısa vadeli volatilite anlamına gelir. Yaşınıza, risk toleransınıza ve emeklilik hedefinize göre fon dağılımınızı belirleyin."},
+      {"q": "BES ve OKS (Otomatik Katılım Sistemi) aynı şey mi?",
+       "a": "OKS (eski adıyla Otomatik BES), çalışanların otomatik olarak BES'e dahil edildiği zorunlu katılım sistemidir. Gönüllü BES'te siz katkı tutarını ve fon seçimini belirlersiniz. Her iki sistemde de devlet katkısından faydalanılabilir."},
+      {"q": "BES'i borsa sinyalleriyle nasıl entegre edebilirim?",
+       "a": "BES'inizdeki hisse senedi fonlarının performansını BIST trendleriyle takip edebilirsiniz. Güçlü boğa trendlerinde hisse ağırlığını artırmak, zayıf dönemlerde sabit getirili fonlara kaymak için BorsaPusula sinyallerini rehber olarak kullanabilirsiniz. Ancak BES fon değişiklikleri aracı kurumunuza göre sınırlandırılmış olabilir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'KCHOL']
+  },
+
+  # ── ARTICLE 55 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "sirket-bilancosunu-nasil-okursunuz",
+    "title": "Şirket Bilançosu Nasıl Okunur? Yatırımcı İçin Temel Analiz",
+    "desc": "Hisse senedi yatırımında bilanço, gelir tablosu ve nakit akışı tablosu nasıl okunur? F/K, PD/DD, ROE oranları ne anlama gelir? Temel analiz başlangıç rehberi.",
+    "cat": "Temel Analiz",
+    "date": "01.05.2026",
+    "mins": 8,
+    "body": """
+<p>Şirketin finansal tablolarını okuyabilmek, değer yatırımcısının en temel becerisidir. Bilanço, gelir tablosu ve nakit akışı tablosu — bu üç belge bir şirketin mali sağlığını tüm boyutlarıyla ortaya koyar.</p>
+
+<h2>3 Temel Finansal Tablo</h2>
+
+<h3>1. Bilanço (Balance Sheet)</h3>
+<p>Şirketin belirli bir tarihteki varlıkları, yükümlülükleri ve öz sermayesini gösterir. Temel denklem:</p>
+<div style="background:#1a2438;border:1px solid #1e2d45;border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:16px;font-weight:700;color:#58a6ff">
+  Varlıklar = Yükümlülükler + Öz Sermaye
+</div>
+<ul>
+  <li><strong>Varlıklar:</strong> Nakit, alacaklar, stoklar, duran varlıklar (fabrika, makine)</li>
+  <li><strong>Yükümlülükler:</strong> Kısa vadeli borçlar, uzun vadeli krediler, ödenecekler</li>
+  <li><strong>Öz sermaye:</strong> Hissedarların şirketteki payı (Varlıklar − Yükümlülükler)</li>
+</ul>
+
+<h3>2. Gelir Tablosu (Income Statement)</h3>
+<p>Belirli dönemde (3 ay, 1 yıl) şirketin gelirlerini, maliyetlerini ve kar/zararını gösterir:</p>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Kalem</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Ne Gösterir?</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Önemli Mi?</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Net Satışlar</td>
+      <td style="padding:8px 12px">Dönem toplam geliri</td>
+      <td style="padding:8px 12px">✅ Büyüme takibi</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">FAVÖK (EBITDA)</td>
+      <td style="padding:8px 12px">Amortisman ve faiz öncesi kar</td>
+      <td style="padding:8px 12px">✅ Operasyonel karlılık</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Net Kar</td>
+      <td style="padding:8px 12px">Tüm kesintiler sonrası nihai kar</td>
+      <td style="padding:8px 12px">✅ F/K hesabı için</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;font-weight:600">Hisse Başı Kazanç (EPS)</td>
+      <td style="padding:8px 12px">Her hisse için düşen net kar</td>
+      <td style="padding:8px 12px">✅ Hisse performansı</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>3. Nakit Akışı Tablosu</h3>
+<p>Şirketin gerçekte ne kadar nakit ürettiğini gösterir. Kar değil, nakit akışı hayatta kalmayı belirler:</p>
+<ul>
+  <li><strong>Faaliyet nakit akışı:</strong> Asıl işten gelen para — en önemli gösterge</li>
+  <li><strong>Yatırım nakit akışı:</strong> Fabrika, ekipman alım satımı</li>
+  <li><strong>Finansman nakit akışı:</strong> Borç ödemeleri, temettü, sermaye artışı</li>
+</ul>
+
+<h2>En Önemli Finansal Oranlar</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Oran</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Formül</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">İdeal Yorum</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">F/K (P/E)</td>
+      <td style="padding:8px 12px">Fiyat ÷ Hisse Başı Kazanç</td>
+      <td style="padding:8px 12px">Düşük = potansiyel ucuz; sektörle karşılaştır</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">PD/DD (P/B)</td>
+      <td style="padding:8px 12px">Piyasa Değeri ÷ Defter Değeri</td>
+      <td style="padding:8px 12px">&lt;1 = defter değerinin altında, potansiyel değer</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">ROE</td>
+      <td style="padding:8px 12px">Net Kar ÷ Öz Sermaye</td>
+      <td style="padding:8px 12px">&gt;15% genellikle güçlü karlılık</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Net Borç/FAVÖK</td>
+      <td style="padding:8px 12px">Net Borç ÷ FAVÖK</td>
+      <td style="padding:8px 12px">&lt;2x sağlıklı; &gt;4x dikkat</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;font-weight:600">Temettü Verimi</td>
+      <td style="padding:8px 12px">Yıllık Temettü ÷ Hisse Fiyatı</td>
+      <td style="padding:8px 12px">Yüksek = cazip gelir ama sürdürülebilirlik önemli</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Pratik Okuma Rehberi: Adım Adım</h2>
+<ol>
+  <li><strong>Büyüme var mı?</strong> Net satışlar yıldan yıla artıyor mu?</li>
+  <li><strong>Karlı mı?</strong> Faaliyet karı marjı pozitif mi?</li>
+  <li><strong>Borç yükü ne kadar?</strong> Net borç/FAVÖK oranına bak</li>
+  <li><strong>Nakit üretiyor mu?</strong> Faaliyet nakit akışı sürekli pozitif mi?</li>
+  <li><strong>Değerleme makul mü?</strong> F/K ve PD/DD sektör ortalamasıyla karşılaştır</li>
+</ol>
+
+<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#58a6ff">💡 KAP'tan Finansal Tablolara Erişim:</strong>
+  <p style="margin:8px 0 0 0">Türkiye'de halka açık şirketlerin tüm finansal tabloları KAP (Kamuyu Aydınlatma Platformu) üzerinden ücretsiz erişilebilir. BorsaPusula'da her hisse sayfasında KAP bildirimi linkine ve temel finansal oranlara doğrudan erişebilirsiniz.</p>
+</div>
+
+<h2>Teknik Sinyal + Temel Analiz Kombinasyonu</h2>
+<p>BorsaPusula hisse sayfalarında F/K, PD/DD, ROE ve temettü verimi temel verileri canlı olarak sunulmaktadır. Teknik AL sinyali alan bir hissenin temel analiz verilerini kontrol etmek, yatırım kararını güçlendirir.</p>
+""",
+    "faqs": [
+      {"q": "Bilanço okumak için muhasebe bilgisi şart mı?",
+       "a": "Derin muhasebe bilgisi gerekmez. Temel kavramları (varlık, borç, öz sermaye, karlılık, nakit akışı) anlamak ve F/K, PD/DD, ROE gibi özet oranları yorumlayabilmek başlangıç için yeterlidir. Zamanla daha derin analize geçilebilir."},
+      {"q": "Hangi finansal tablo en önemli?",
+       "a": "Nakit akışı tablosu genellikle en az manipüle edilebilen ve en gerçekçi tablodir. 'Kar yazılabilir ama nakit üretmek gerekir' kuralı fintech dünyasında yaygındır. Karlı görünen ama nakit üretemeyen şirketlere dikkat."},
+      {"q": "F/K oranı düşük olan hisse ucuz mudur?",
+       "a": "Düşük F/K tek başına ucuz anlamına gelmez. Aynı sektördeki rakiplerle karşılaştırmak gerekir. Ayrıca düşük F/K düşük büyüme beklentisini veya şirkete özgü riski yansıtıyor olabilir. Diğer oranlarla birlikte değerlendirilmelidir."},
+      {"q": "BIST hisselerinin finansal tablolarına nereden bakabilirim?",
+       "a": "KAP (kap.org.tr) üzerinden tüm halka açık Türk şirketlerinin finansal tabloları ücretsiz incelenebilir. BorsaPusula hisse sayfalarında temel oranlar özetlenerek sunulmaktadır. Aracı kurum platformları da genellikle temel verileri gösterir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'EREGL', 'THYAO', 'KCHOL']
+  },
+
   # ── ARTICLE 50 ─────────────────────────────────────────────────────────────
   {
     "slug": "portfoy-rebalancing-yeniden-dengeleme",
