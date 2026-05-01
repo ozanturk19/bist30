@@ -3451,10 +3451,34 @@ function showSigTip(ticker, ev) {
 
   let html = `<div class="sig-tip-head"><span style="color:${sigColor}">${sigIcon} ${sigName}</span></div>`;
 
+  const indsList = Object.values(s.indicators || {});
   if (s.signal === 'BEKLE') {
-    html += `<div style="color:#8b949e;font-size:12px;line-height:1.5">Henüz net trend sinyali oluşmadı. İndikatörler karışık.</div>`;
+    // Show which indicators are active even for BEKLE
+    const bullCount = indsList.filter(i => i.bull).length;
+    const bearCount = indsList.filter(i => i.bear).length;
+    indsList.forEach(ind => {
+      const state = ind.bull ? 'bull' : ind.bear ? 'bear' : 'no';
+      const icon  = ind.bull ? '↑' : ind.bear ? '↓' : '○';
+      const color = ind.bull ? '#3fb950' : ind.bear ? '#f85149' : '#30363d';
+      html += `<div class="sig-tip-row">
+        <span class="sig-tip-ck" style="color:${color}">${icon}</span>
+        <span class="sig-tip-lbl">${ind.label}</span>
+      </div>`;
+    });
+    // RSI extreme warnings for BEKLE
+    if (s.rsi != null && (s.rsi >= 70 || s.rsi <= 30)) {
+      const note = s.rsi >= 70 ? 'aşırı alım bölgesi' : 'aşırı satım bölgesi';
+      const clr  = s.rsi >= 70 ? '#f85149' : '#3fb950';
+      html += `<div class="sig-tip-row"><span class="sig-tip-ck" style="color:${clr}">!</span><span class="sig-tip-lbl" style="color:${clr}">RSI ${s.rsi} — ${note}</span></div>`;
+    } else if (s.rsi != null) {
+      html += `<div class="sig-tip-row"><span class="sig-tip-ck no">○</span><span class="sig-tip-lbl">RSI ${s.rsi}</span></div>`;
+    }
+    // High volume on BEKLE = watching signal
+    if (s.vol_ratio != null && s.vol_ratio >= 2) {
+      html += `<div class="sig-tip-row"><span class="sig-tip-ck" style="color:#e3b341">!</span><span class="sig-tip-lbl" style="color:#e3b341">Hacim ×${s.vol_ratio} — yükselme takip edilmeli</span></div>`;
+    }
+    html += `<div style="color:#484f58;font-size:11px;margin-top:6px">Henüz 3 indikatör hizalanmadı</div>`;
   } else {
-    const indsList = Object.values(s.indicators || {});
     indsList.forEach(ind => {
       const ok = (s.signal === 'AL' && ind.bull) || (s.signal === 'SAT' && ind.bear);
       html += `<div class="sig-tip-row">

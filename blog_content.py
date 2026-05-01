@@ -2044,6 +2044,273 @@ BorsaPusula'nın **[makro ticker bandı](/),** USD/TRY kurunu anlık olarak gös
     ],
     "related_tickers": ['FROTO', 'TOASO', 'EREGL', 'THYAO', 'AKBNK']
   },
+
+  # ── Makale 38 ──────────────────────────────────────────────────────
+  {
+    "slug": "stokastik-osilatoru-nedir",
+    "title": "Stokastik Osilatör Nedir? RSI ile Nasıl Birlikte Kullanılır?",
+    "cat": "Teknik Analiz",
+    "date": "01.05.2026",
+    "read_min": 6,
+    "summary": "Stokastik osilatör, fiyatın belirli bir dönemdeki fiyat aralığına göre nerede kapandığını ölçer. Aşırı alım/satım bölgelerini RSI'dan farklı bir perspektifle gösterir. İki göstergeyi birlikte kullanmak sinyal güvenilirliğini artırır.",
+    "body": """## Stokastik Osilatör Nedir?
+
+**Stokastik osilatör** (Stochastic Oscillator), George Lane tarafından 1950'lerde geliştirilen bir momentum göstergesidir. Temel fikri şudur: *Yükselen piyasada kapanışlar fiyat aralığının üst yarısında, düşen piyasada ise alt yarısında gerçekleşme eğilimindedir.*
+
+Formül:
+```
+%K = (Kapanış - En Düşük(n)) / (En Yüksek(n) - En Düşük(n)) × 100
+%D = %K'nın n-dönemlik hareketli ortalaması
+```
+
+Standart parametre: **%K(14), %D(3)** — yani 14 günlük fiyat aralığı.
+
+## Stokastik Nasıl Okunur?
+
+| Değer | Yorum |
+|-------|-------|
+| 80+ | Aşırı alım bölgesi — dikkatli olun |
+| 20- | Aşırı satım bölgesi — toparlanma yakın olabilir |
+| %K > %D | Yükseliş momentumu |
+| %K < %D | Düşüş momentumu |
+
+**Kesişim sinyalleri:**
+- %K, %D'yi aşağıdan yukarıya keser → Potansiyel **alım** sinyali
+- %K, %D'yi yukarıdan aşağıya keser → Potansiyel **satım** sinyali
+
+## Stokastik ile RSI Arasındaki Fark
+
+| Özellik | RSI | Stokastik |
+|---------|-----|-----------|
+| Ne ölçer? | Fiyat değişimlerinin hızı | Kapanışın fiyat aralığındaki konumu |
+| Duyarlılık | Daha pürüzsüz | Daha hızlı/duyarlı |
+| Aşırı alım/satım | 70/30 | 80/20 |
+| Trend mi, momentum mu? | Her ikisi | Ağırlıklı momentum |
+| Yanlış sinyal | Trend piyasada az | Trend piyasada çok |
+
+**Kritik fark:** RSI trend takibi için daha güvenilirken, stokastik yatay piyasalarda daha etkilidir. BorsaPusula'nın sinyal motoru trend gücü için ADX + RSI kombinasyonu kullanır.
+
+## İki Göstergeyi Birlikte Kullanma
+
+Sinyal güvenilirliği için iki göstergenin aynı yönü işaret etmesi tercih edilir:
+
+**Güçlü AL Kombinasyonu:**
+1. Stokastik 20'nin altından %K > %D kesişimi
+2. RSI 30-50 arası (aşırı satımdan çıkıyor)
+3. Fiyat güçlü destek seviyesinde
+
+**Güçlü SAT Kombinasyonu:**
+1. Stokastik 80'in üstünden %K < %D kesişimi
+2. RSI 70 üzerinde (aşırı alım)
+3. Fiyat önemli direnç seviyesinde
+
+## BorsaPusula Sinyalleriyle İlişkisi
+
+BorsaPusula'nın AL sinyali, **ADX ≥ 25 + Supertrend + EMA12/99** üçlü kritere dayanır. RSI, bu sistemde *tamamlayıcı gösterge* olarak kullanılır. [Hisse sayfasındaki](/hisse/AKBNK) sinyal badge'ine hover ettiğinizde RSI değerini görebilirsiniz.
+
+Stokastik osilatörü grafik platformunda ek katman olarak kullanarak, BorsaPusula sinyallerine **ikinci bir momentum teyidi** ekleyebilirsiniz.
+
+## Dikkat Edilmesi Gereken Tuzaklar
+
+1. **Trend piyasasında yanlış sinyal:** Güçlü yükseliş trendinde stokastik uzun süre 80'in üzerinde kalabilir. Bu "aşırı alım" değil, güçlü trendin göstergesidir.
+2. **Parametre oyuncağı:** 14 yerine 5 veya 3 kullanmak aşırı duyarlı sinyaller üretir.
+3. **Tek başına kullanım:** Stokastik tek başına hiçbir zaman yeterli değildir. Trend onayı için ADX ve Supertrend gibi trend göstergeleri gerekir.
+
+> *"Momentum göstergeleri size nereye gittiğinizi söyler; trend göstergeleri ise ne kadar hızlı gittiğinizi."*""",
+    "faqs": [
+      {"q": "Stokastik osilatör nedir?",
+       "a": "Stokastik osilatör, kapanış fiyatının belirli bir dönemdeki yüksek-düşük aralığına göre konumunu ölçen bir momentum göstergesidir. 0-100 arasında değer alır; 80 üzeri aşırı alım, 20 altı aşırı satım kabul edilir."},
+      {"q": "RSI mi stokastik mi daha iyi?",
+       "a": "Her ikisinin de farklı güçlü yanları vardır. RSI trend piyasalarda daha güvenilirken, stokastik yatay piyasalarda daha etkilidir. İkisini birlikte kullanmak sinyal güvenilirliğini artırır."},
+      {"q": "Stokastik %K ve %D çizgisi ne anlama gelir?",
+       "a": "%K hızlı stokastik çizgisidir ve anlık fiyat konumunu gösterir. %D ise %K'nın hareketli ortalamasıdır ve daha pürüzsüz bir sinyal çizgisi sağlar. %K'nın %D'yi keserek üzerine çıkması alım, altına inmesi satım sinyali olarak yorumlanır."},
+      {"q": "Stokastik hangi piyasalarda işe yarar?",
+       "a": "Stokastik, yatay (range-bound) piyasalarda ve kısa vadeli işlemlerde güçlüdür. Güçlü yükseliş veya düşüş trendlerinde ise uzun süre aşırı alım/satım bölgesinde kalarak yanıltıcı sinyaller üretebilir."},
+      {"q": "BorsaPusula stokastik osilatör kullanıyor mu?",
+       "a": "BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA üçlü kriterine dayanır. Stokastik doğrudan kullanılmasa da RSI tamamlayıcı gösterge olarak hisse sayfalarında gösterilir. Stokastiği grafik platformunuzda ek teyit için kullanabilirsiniz."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'TUPRS']
+  },
+
+  # ── Makale 39 ──────────────────────────────────────────────────────
+  {
+    "slug": "kaldirach-ve-marjin-riskleri",
+    "title": "Kaldıraç ve Marjin: Borçlanarak Yatırım Yapmanın Riskleri",
+    "cat": "Risk Yönetimi",
+    "date": "01.05.2026",
+    "read_min": 7,
+    "summary": "Kaldıraç, hem kazancınızı hem kaybınızı büyütür. Marjin hesabı nasıl çalışır, marjin çağrısı ne demektir ve kaldıraç neden deneyimsiz yatırımcılar için tehlikelidir? Türkiye piyasaları için kapsamlı rehber.",
+    "body": """## Kaldıraç (Leverage) Nedir?
+
+**Kaldıraç**, ödünç alınan para kullanarak yatırım büyüklüğünü artırmaktır. Örneğin:
+
+- Sermazye: 10.000 ₺
+- 2:1 kaldıraç kullanırsanız: 20.000 ₺ değerinde pozisyon açabilirsiniz
+- Hisse %10 yükselirse: 2.000 ₺ kâr (%20 getiri sermayenize)
+- Hisse %10 düşerse: 2.000 ₺ zarar (**%20 kayıp sermayenizden**)
+
+Kaldıraç, *hem kazancı hem kaybı* eşit oranda büyütür.
+
+## Marjin Hesabı Nasıl Çalışır?
+
+**Marjin**, borsa hesabınızda açık tutmanız gereken minimum teminat miktarıdır.
+
+### Başlangıç Marjini (Initial Margin)
+Pozisyon açmak için gereken minimum teminat. Örneğin %50 başlangıç marjini → 20.000 ₺ pozisyon için 10.000 ₺ nakit gerekir.
+
+### Sürdürme Marjini (Maintenance Margin)
+Pozisyon açık tutmak için gereken minimum. Genellikle başlangıç marjininin altındadır (%25-30).
+
+### Marjin Çağrısı (Margin Call) ⚠️
+Hesabınızdaki öz sermaye sürdürme marjininin altına düştüğünde aracı kurum sizi arar:
+1. Ya ek teminat yatırırsınız
+2. Ya da pozisyon otomatik kapatılır (zararla)
+
+## Kaldıraç Riski: Gerçek Senaryo
+
+| Durum | Kaldıraçsız | 2:1 Kaldıraç |
+|-------|-------------|---------------|
+| Sermaye | 10.000 ₺ | 10.000 ₺ |
+| Pozisyon | 10.000 ₺ | 20.000 ₺ |
+| Hisse %25 düşer | -2.500 ₺ (%25 kayıp) | -5.000 ₺ (**%50 kayıp**) |
+| Hisse %50 düşer | -5.000 ₺ (%50 kayıp) | -10.000 ₺ (**%100 — sıfır**) |
+
+**Kaldıraçla sermayenizi tamamen kaybetmek çok daha kolaydır.**
+
+## Türkiye'de Kaldıraç: Mevzuat ve Uygulamalar
+
+### Hisse Senedi Marjin Kredisi
+Türkiye'de aracı kurumlar, BIST hisselerinde marjin kredisi sunar. Yasal çerçeve SPK düzenlemelerine tabidir.
+
+**Dikkat:** Marjin kredisi faizi, hissenin değerlenmesinden daha hızlı birikebilir. Yıllık %30-40 faiz oranlarında, bir hissenin bu maliyeti karşılaması için ciddi bir yükseliş şarttır.
+
+### Türev Piyasalar (VİOP)
+Vadeli işlem sözleşmelerinde kaldıraç çok daha yüksektir:
+- **BIST30 vadeli:** ~10:1 kaldıraç
+- **Döviz vadeli:** ~20-50:1 kaldıraç
+- **Kripto:** Bazı platformlarda 100:1'e kadar
+
+Bu piyasalarda deneyimsiz yatırımcılar kısa sürede büyük kayıplar yaşayabilir.
+
+## Kaldıraç Ne Zaman Kullanılabilir?
+
+Kaldıraç, belirli koşullar altında ve **çok küçük miktarlarda** değerlendirilebilir:
+
+1. ✅ Güçlü trend onayı var (ADX ≥ 35, Supertrend onaylı)
+2. ✅ Net bir stop-loss seviyesi belirlendi
+3. ✅ Toplam pozisyon büyüklüğü portföyün max %10'u
+4. ✅ Maksimum 2:1 kaldıraç (daha yüksek = spekülasyon)
+5. ✅ Marjin çağrısı riskini karşılayabilecek rezerv nakit var
+
+## BorsaPusula Kullanıcıları İçin Not
+
+BorsaPusula'nın sinyal sistemi, trend gücünü **confirmed** (3+ bar onaylı) ve **entry_quality** metrikleriyle değerlendirir. "IDEAL" veya "İYİ" giriş kalitesi olan, yüksek ADX'li sinyaller bile kaldıraçsız kullanıldığında daha güvenlidir.
+
+> **Altın kural:** Kaldıraç, kazancınızı artırmak için değil, yalnızca çok emin olduğunuz işlemleri *biraz* büyütmek için kullanın. Emin olmak için önce kaldıraçsız deneyin.""",
+    "faqs": [
+      {"q": "Kaldıraç nedir, basitçe açıklar mısınız?",
+       "a": "Kaldıraç, sahip olduğunuzdan daha büyük bir yatırım pozisyonu açmak için borç para kullanmaktır. 2:1 kaldıraç, 10.000 ₺ sermaye ile 20.000 ₺ pozisyon açmak anlamına gelir. Hisse değer kazanırsa kâr iki katına çıkar, değer kaybederse zarar da iki katına çıkar."},
+      {"q": "Marjin çağrısı (margin call) nedir?",
+       "a": "Kaldıraçlı pozisyonunuz zarara uğradığında ve hesabınızdaki teminat minimum seviyenin altına düştüğünde aracı kurum 'marjin çağrısı' yapar. Ya ek teminat yatırmanız ya da pozisyonunuzun otomatik kapatılmasına izin vermeniz gerekir."},
+      {"q": "BIST hisselerinde kaldıraç kullanabilir miyim?",
+       "a": "Evet, SPK lisanslı aracı kurumlar marjin kredisi sunar. Ancak Türkiye'de marjin faizi yüksektir ve kreditli işlem, hissenin değer kazancının faiz maliyetini karşılamasını gerektirir."},
+      {"q": "Kaldıraç yeni başlayan yatırımcılar için uygun mu?",
+       "a": "Hayır. Kaldıraç, hem teknik analiz hem de risk yönetimi konusunda deneyim gerektiren ileri seviye bir araçtır. Yeni yatırımcıların önce kaldıraçsız işlem yaparak piyasayı öğrenmeleri tavsiye edilir."},
+      {"q": "Kaç yıllık deneyimden sonra kaldıraç kullanılabilir?",
+       "a": "Kural değil, bireysel yetkinliğe bağlıdır. Ancak en az 2-3 yıl sürekli kaldıraçsız işlem geçmişi, net bir kâr-zarar kaydı ve sağlam bir risk yönetimi disiplini olmadan kaldıraç önerilmez."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'ISCTR', 'THYAO', 'EREGL']
+  },
+
+  # ── Makale 40 ──────────────────────────────────────────────────────
+  {
+    "slug": "dca-duzenli-yatirim-stratejisi",
+    "title": "DCA (Düzenli Yatırım) Stratejisi: Ortalama Maliyet Düşürme Nedir?",
+    "cat": "Strateji",
+    "date": "01.05.2026",
+    "read_min": 6,
+    "summary": "Dollar-Cost Averaging (DCA), belirli aralıklarla sabit miktarda yatırım yaparak piyasa zamanlaması riskini azaltan bir stratejidir. BIST'te DCA nasıl uygulanır, avantajları ve sınırlılıkları nelerdir?",
+    "body": """## DCA (Dollar-Cost Averaging) Nedir?
+
+**Düzenli Yatırım Stratejisi** (DCA — Dollar-Cost Averaging), piyasanın nerede olduğundan bağımsız olarak **belirli aralıklarla sabit bir miktar yatırım** yapma yöntemidir.
+
+Örneğin:
+- Her ay 1.000 ₺ BIST30 endeks fonu veya seçili bir hisse alırsınız
+- Fiyat düşükse daha fazla lot, yüksekse daha az lot alırsınız
+- Zaman içinde ortalama maliyetiniz, piyasanın ortalamasına yaklaşır
+
+## DCA Nasıl Çalışır? Somut Örnek
+
+| Ay | Hisse Fiyatı | Yatırım | Alınan Lot | Toplam Lot |
+|----|-------------|---------|------------|------------|
+| Ocak | 100 ₺ | 1.000 ₺ | 10 | 10 |
+| Şubat | 80 ₺ | 1.000 ₺ | 12,5 | 22,5 |
+| Mart | 60 ₺ | 1.000 ₺ | 16,7 | 39,2 |
+| Nisan | 90 ₺ | 1.000 ₺ | 11,1 | 50,3 |
+| Mayıs | 110 ₺ | 1.000 ₺ | 9,1 | 59,4 |
+
+**Toplam yatırım:** 5.000 ₺
+**Ortalama maliyet:** 5.000 / 59,4 = **84,2 ₺**
+**Son fiyat:** 110 ₺ → **%31 kâr** (tek seferde 100 ₺'den alsaydınız: %10)
+
+## DCA'nın Avantajları
+
+1. **Piyasa zamanlaması riski yok:** "Dip nerede?" sorusuna cevap aramaya gerek kalmaz
+2. **Duygusal disiplin:** Panik satış ve FOMO alımları azalır
+3. **Volatilite arkadaşınız olur:** Düşüşler daha ucuz alım fırsatıdır
+4. **Basitlik:** Karmaşık analiz gerektirmez, herkes uygulayabilir
+5. **Yeni başlayanlar için ideal:** Piyasayı öğrenirken risk sınırlı kalır
+
+## DCA'nın Sınırlamaları
+
+1. **Güçlü yükseliş trendinde alt-performans:** Fiyat sürekli yükseliyorsa, her ay daha pahalıya alırsınız
+2. **Likidite sorunları:** Aylık düzenli gelir gerektiriyor
+3. **Kötü varlık seçimi:** DCA işe yaramaz bir hisseyi düzenli almayı cazip göstermeyin
+4. **İnsan psikolojisi:** Hisse düşünce "daha çok al" dürtüsü DCA'yı bozabilir
+
+> **Kritik nokta:** DCA, iyi bir varlık seçimini değiştirmez. Temelden sorunlu bir şirkete DCA yapmak, kayıplarınızı ortalamanızdan ibaret olacaktır.
+
+## BIST'te DCA: Hangi Varlıklara?
+
+### Endeks Fonları (Önerilen)
+BYF (Borsa Yatırım Fonu) veya hisse senedi fonu üzerinden BIST100 veya BIST30'a DCA, bireysel hisse riskini ortadan kaldırır.
+
+### Bireysel Hisseler — Teknik Filtreli DCA
+BorsaPusula sinyallerini DCA ile kombine etmek mümkündür:
+1. **Sinyal yoksa:** Düzenli yatırımını endeks fonuna yönelt
+2. **AL sinyali + düşük giriş maliyeti:** O hisseye DCA'nın bir kısmını yönelt
+3. **SAT sinyali:** O hissede DCA'yı durdur, endekse yönelt
+
+### Kur Riski — TL DCA
+Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA stratejisinde döviz bazlı varlıkları (altın, USD fonu) portföyün bir kısmına dahil etmek denge sağlar.
+
+## Uygulama Önerileri
+
+**Başlangıç için:**
+- Aylık gelirin %10-20'sini ayır
+- İlk hedef: 12 aylık düzenli alım
+- Endeks fonu + 1-2 sektör lideri hisse kombinasyonu
+
+**İleri seviye:**
+- BorsaPusula'da [AL sinyalinde olan hisselere](/tarama) odaklan
+- Yüksek ADX + uzun süredir aktif sinyal → DCA için tercih et
+- Quarterly rebalancing: Her çeyrekte portföy dağılımını gözden geçir
+
+> *"Piyasada zaman geçirmek, piyasayı zamanlamaya çalışmaktan daha önemlidir."* — Warren Buffett""",
+    "faqs": [
+      {"q": "DCA stratejisi nedir?",
+       "a": "DCA (Dollar-Cost Averaging veya Düzenli Yatırım), belirli aralıklarla (aylık, haftalık) sabit miktarda yatırım yapma yöntemidir. Fiyat düşükse daha fazla, yüksekse daha az birim alınır ve zamanla ortalama maliyet düzleşir."},
+      {"q": "DCA ile ortalama maliyet düşürme aynı mı?",
+       "a": "Hayır, farklıdır. DCA, düzenli aralıklarla sabit miktarda alım yapmaktır. 'Ortalama maliyet düşürme' ise fiyat düştükçe daha fazla alarak mevcut maliyetin altına inmektir. DCA önceden planlanmışken, ortalama düşürme genellikle reaktif bir karardır."},
+      {"q": "BIST'te DCA uygulamak için hangi hisseleri seçmeliyim?",
+       "a": "DCA için en güvenli seçim endeks fonlarıdır (BYF — BIST100 veya BIST30). Bireysel hissede ise sektör lideri, güçlü bilanço ve uzun vadeli büyüme hikayesi olan şirketlere odaklanılmalıdır. BorsaPusula'da uzun süredir AL sinyalinde olan, yüksek ADX'li hisseler teknik açıdan desteklenmiş seçenekler sunar."},
+      {"q": "Ne kadar sıklıkla DCA yapmalıyım?",
+       "a": "Aylık DCA en yaygın ve pratik yöntemdir. Maaş aldıktan hemen sonra otomatik olarak yatırıma yönlendirmek, psikolojik bariyer oluşturmaz. Haftalık DCA daha küçük miktarlarda da uygulanabilir ancak işlem maliyetleri önemli hale gelebilir."},
+      {"q": "DCA piyasa çöküşünde işe yarar mı?",
+       "a": "Evet, özellikle piyasa çöküşlerinde DCA en etkili biçimde çalışır. Her düşüş, aynı miktarla daha fazla birim almak anlamına gelir. Uzun vadeli bir varlıksa, toparlanma sonrası ortalama maliyet avantajı belirginleşir. Ancak bunun için sabır ve disiplin gereklidir."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'GARAN', 'BIMAS', 'KCHOL']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
