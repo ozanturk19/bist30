@@ -2960,6 +2960,246 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'TUPRS', 'ASELS']
   },
+
+  # ── ARTICLE 48 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "aciga-satis-short-selling-nedir",
+    "title": "Açığa Satış (Short Selling) Nedir? BIST'te Mümkün mü?",
+    "desc": "Açığa satış nedir, nasıl çalışır, BIST hisse senetlerinde short selling yapılabilir mi? Riskleri ve alternatif stratejiler.",
+    "cat": "Strateji",
+    "date": "01.05.2026",
+    "mins": 6,
+    "body": """
+<p>Açığa satış (short selling), sahip olmadığınız bir hisseyi ödünç alıp sattıktan sonra fiyat düştüğünde geri alarak iade ettiğiniz ve bu fiyat farkından kâr ettiğiniz bir yatırım stratejisidir. Kısaca "düşüşten para kazanmak" olarak da tanımlanır.</p>
+
+<h2>Açığa Satışın Mantığı</h2>
+<p>Normal hisse yatırımında mantık şudur: "Ucuzken al, pahalıyken sat." Açığa satışta bu mantık tersine döner: "Pahalıyken sat, ucuzken al."</p>
+<ol>
+  <li>Bir aracı kurumdan X hissesini ödünç alırsınız (ödünç işlemi günlük faiz içerir)</li>
+  <li>Hisseyi piyasada satarsınız (örn. 100 ₺'den)</li>
+  <li>Fiyat düştüğünde hisseyi geri alırsınız (örn. 80 ₺'den)</li>
+  <li>Ödünç aldığınız hisseyi iade edersiniz</li>
+  <li>Kârınız: 100 − 80 = 20 ₺ (faiz ve komisyon düşülmeden)</li>
+</ol>
+
+<h2>BIST'te Açığa Satış Yapılabilir mi?</h2>
+<p>Türkiye'de BIST bünyesinde açığa satış işlemi teknik olarak mümkündür; ancak uygulamada ciddi kısıtlamalar vardır:</p>
+<ul>
+  <li><strong>Açığa satış listesi:</strong> SPK ve BIST, açığa satışa izin verilen hisselerin listesini belirler. Bu liste sınırlıdır ve değişkendir</li>
+  <li><strong>Ödünç pay bulma zorluğu:</strong> Aracı kurumunuzun ödünç verebileceği pay bulması gerekir; bu her zaman mümkün olmayabilir</li>
+  <li><strong>Piyasa yapıcı yokluğu:</strong> Likit olmayan hisselerde açığa satış neredeyse imkânsızdır</li>
+  <li><strong>Yüksek maliyet:</strong> Ödünç alma faizi + spread + komisyon kârı eritebilir</li>
+</ul>
+<div style="background:rgba(248,81,73,.07);border:1px solid rgba(248,81,73,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#f85149">⚠️ Önemli:</strong> BIST'te bireysel yatırımcıların gerçek anlamda açığa satış yapması oldukça kısıtlı ve zordur. Kurumsal yatırımcılar bu araçlara daha kolay erişir.
+</div>
+
+<h2>Açığa Satışın Riskleri</h2>
+<p>Normal hisse yatırımında maksimum kaybınız yatırdığınız tutardır (hisse sıfıra giderse). Açığa satışta ise teorik olarak kayıp sınırsızdır:</p>
+<ul>
+  <li><strong>Sınırsız zarar potansiyeli:</strong> Hisse 100 ₺'den 500 ₺'ye çıkarsa, her payda 400 ₺ zarar edersiniz</li>
+  <li><strong>Short squeeze riski:</strong> Kitlesel kapanışlarda fiyat hızla yükselir, zararlar katlanır (GameStop örneği)</li>
+  <li><strong>Ödünç geri çağrısı:</strong> Ödünç veren aracı kurum hisseyi geri isteyebilir, kötü zamanda pozisyon kapatmak zorunda kalabilirsiniz</li>
+  <li><strong>Temettü yükümlülüğü:</strong> Açık pozisyon tutarken temettü dağıtılırsa, temettüyü hisse sahibine ödemek zorunda kalırsınız</li>
+</ul>
+
+<h2>BIST'te Düşüşten Kâr Etmenin Alternatifleri</h2>
+<p>Bireysel BIST yatırımcıları için açığa satışa alternatifler:</p>
+<ul>
+  <li><strong>VIOP (Vadeli İşlem ve Opsiyon Piyasası):</strong> Hisse vadeli sözleşmeleri veya put opsiyonları ile düşüş pozisyonu alınabilir. BIST bünyesinde, daha likit ve erişilebilir</li>
+  <li><strong>Ters ETF (Inverse ETF):</strong> Endeksin tersine hareket eden fonlar — BIST'te henüz yaygın değil</li>
+  <li><strong>Nakit tutmak:</strong> Düşüş beklentisinde en basit strateji: pozisyonu kapatıp nakit beklemek</li>
+  <li><strong>Stop loss ile koruma:</strong> Mevcut uzun pozisyonlarda sıkı stop kullanarak aşağı yönlü kayıpları sınırlamak</li>
+</ul>
+
+<h2>BorsaPusula'nın Yaklaşımı</h2>
+<p>BorsaPusula sinyalleri BIST hisseleri için "AL" (Güçlü Trend) veya "SAT" (Zayıf Trend) sinyali üretir. "SAT" sinyali, hissenin <strong>zayıf trend içinde olduğunu</strong> gösterir ve mevcut pozisyondan çıkış/kaçınma için işaret olarak kullanılır — açığa satış pozisyonu açmak için değil. Bu yaklaşım, bireysel yatırımcılara karmaşık açığa satış mekaniklerini öğrenmeden trend takibi yapma imkânı sunar.</p>
+""",
+    "faqs": [
+      {"q": "BIST'te herkes açığa satış yapabilir mi?",
+       "a": "Hayır. Açığa satış yalnızca SPK'nın onayladığı sınırlı sayıda hisse için mümkündür ve ödünç pay bulunması gerekir. Bireysel yatırımcılar için pratikte oldukça kısıtlı bir araçtır."},
+      {"q": "SAT sinyali gördüğümde açığa satış yapmalı mıyım?",
+       "a": "BorsaPusula'daki SAT (Zayıf Trend) sinyali, açığa satış için tasarlanmamıştır. Bu sinyal, mevcut pozisyondan çıkış veya o hisseden kaçınma işareti olarak değerlendirilmelidir. Açığa satış tamamen farklı risk ve mekanik içerir."},
+      {"q": "Açığa satış yerine VIOP kullanmak daha mı iyi?",
+       "a": "BIST bireysel yatırımcıları için düşüş pozisyonu almak istiyorsanız VIOP, açığa satıştan genellikle daha erişilebilir ve likittir. Ancak her iki araç da yüksek risk taşır ve kapsamlı bilgi gerektirir."},
+      {"q": "Short squeeze nedir?",
+       "a": "Çok fazla yatırımcının açık (short) pozisyon tuttuğu bir hissede ani fiyat artışı yaşanırsa, tüm açıklar pozisyonlarını aynı anda kapatmak zorunda kalır. Bu kapanışlar fiyatı daha da yukarı iter, kâr yerine ciddi zarar oluşturur. Bu olaya 'short squeeze' denir."}
+    ],
+    "related_tickers": ['ASELS', 'EREGL', 'THYAO', 'TUPRS', 'GARAN']
+  },
+
+  # ── ARTICLE 49 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "hisse-bolunmesi-stock-split-nedir",
+    "title": "Hisse Bölünmesi (Stock Split) Nedir? Yatırımcıyı Nasıl Etkiler?",
+    "desc": "Hisse bölünmesi nedir, şirket neden hisse böler, bölünme sonrası portföy değeri değişir mi? KAP bildirimi ve pratik etkileri.",
+    "cat": "Temel Kavramlar",
+    "date": "01.05.2026",
+    "mins": 5,
+    "body": """
+<p>Hisse bölünmesi (stock split), bir şirketin mevcut hisselerini daha küçük birimler halinde bölerek toplam hisse sayısını artırdığı kurumsal bir işlemdir. En yaygın form 1:2 veya 1:5 bölünmedir.</p>
+
+<h2>Hisse Bölünmesi Örneği</h2>
+<p>Diyelim ki AKBNK hissesi 150 ₺'den işlem görüyor ve 1:5 (beşe bölünme) bölünme yapıyor:</p>
+<ul>
+  <li><strong>Bölünme öncesi:</strong> 100 hisseniz var, her biri 150 ₺ → Portföy değeri: 15.000 ₺</li>
+  <li><strong>Bölünme sonrası:</strong> 500 hisseniz var, her biri 30 ₺ → Portföy değeri: 15.000 ₺</li>
+</ul>
+<p>Portföy değeri değişmez! Yalnızca hisse adedi artar, birim fiyat düşer.</p>
+
+<h2>Şirket Neden Hisse Böler?</h2>
+<ul>
+  <li><strong>Erişilebilirliği artırmak:</strong> Çok yükselen hissenin fiyatı küçük yatırımcı için pahalı hale gelir. Bölünme ile daha geniş yatırımcı kitlesine erişilir</li>
+  <li><strong>Likiditeyi artırmak:</strong> Düşük fiyatlı hisseler genellikle daha aktif işlem görür</li>
+  <li><strong>Psikolojik etki:</strong> Piyasa katılımcıları düşük fiyatlı hisseleri "ucuz" algılar, talep artabilir</li>
+  <li><strong>Endeks dahil olma kuralları:</strong> Bazı endeksler maksimum hisse fiyatı sınırı uygulayabilir</li>
+</ul>
+
+<h2>Ters Bölünme (Reverse Split) Nedir?</h2>
+<p>Ters bölünmede (veya birleşme) hisse adedi azalır, birim fiyat yükselir. Örneğin 5:1 ters bölünmede 500 hisseniz 100 hisseye düşer ama fiyat 5 katına çıkar. Şirketler genellikle borsa kurallarını karşılamak veya kurumsal görünüm için bu yola başvurur. Ters bölünmeler çoğunlukla zayıf şirketlerin özelliğidir — dikkatli olunmalıdır.</p>
+
+<h2>Hisse Bölünmesi Yatırımcıyı Nasıl Etkiler?</h2>
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">Etki</th>
+      <th style="padding:10px;text-align:left;border:1px solid #30363d">Açıklama</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">Portföy değeri</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Değişmez — matematiksel olarak aynı</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Hisse adedi</td>
+      <td style="padding:9px;border:1px solid #30363d">Bölünme oranında artar</td>
+    </tr>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">Birim fiyat</td>
+      <td style="padding:9px;border:1px solid #30363d">Bölünme oranında düşer</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Vergi</td>
+      <td style="padding:9px;border:1px solid #30363d">Bölünme işlemi vergiye tabi değildir</td>
+    </tr>
+    <tr>
+      <td style="padding:9px;border:1px solid #30363d">Stop Loss seviyeleri</td>
+      <td style="padding:9px;border:1px solid #30363d;color:#f85149">⚠️ Fiyat ayarlanır — eski stop fiyatlarını güncellemeniz gerekir</td>
+    </tr>
+    <tr style="background:#1a2030">
+      <td style="padding:9px;border:1px solid #30363d">Teknik analiz grafikleri</td>
+      <td style="padding:9px;border:1px solid #30363d">Platformlar genellikle tarihi verileri otomatik ayarlar (split-adjusted)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>KAP Bildirimi ve Süreç</h2>
+<p>BIST'te hisse bölünmesi süreci şu şekilde işler:</p>
+<ol>
+  <li>Şirket yönetim kurulu bölünme kararı alır</li>
+  <li>KAP'ta özel durum bildirimi yayınlanır</li>
+  <li>SPK onayı ve genel kurul kararı alınır</li>
+  <li>BIST ve Merkezi Kayıt Kuruluşu (MKK) belirlenen tarihte işlemi gerçekleştirir</li>
+  <li>Bölünme günü borsada yeni fiyatla açılış yapılır</li>
+</ol>
+<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#58a6ff">💡 Pratik İpucu:</strong> KAP bildirimini gördüğünüzde bölünme tarihini not alın. Özellikle stop loss ve hedef fiyat seviyelerini bölünme sonrasına göre yeniden hesaplamanız gerekecektir.
+</div>
+
+<h2>Bölünme Sonrası Fiyat Hareketi</h2>
+<p>Araştırmalar bölünme duyurusunun kısa vadede pozitif fiyat etkisi yaratabileceğini gösterse de bu etki garantili değildir. Bölünme şirketin temel değerini değiştirmez; uzun vadede performansı şirketin kazanç büyümesi belirler.</p>
+""",
+    "faqs": [
+      {"q": "Hisse bölünmesi portföyümü etkilir mi?",
+       "a": "Portföy toplam değeriniz değişmez. Hisse adedi bölünme oranında artarken birim fiyat aynı oranda düşer. Örneğin 1:5 bölünmede 100 hisseniz 500 olur, fiyat 5'te 1'e iner."},
+      {"q": "Bölünme tarihinde hisse almak mantıklı mı?",
+       "a": "Bölünme haberi fiyata genellikle duyurudan itibaren yansımaya başlar. Bölünme tarihi geldiğinde fiyat zaten ayarlanmış olduğundan 'ucuz' diye alım yapmak anlamsızdır. Şirketin temel değeri ve teknik trendi esas alınmalıdır."},
+      {"q": "Bölünme sonrası stop loss ayarlamak gerekiyor mu?",
+       "a": "Evet! Bölünme öncesi 150 ₺ için 130 ₺ stop belirlemiş iseniz, 1:5 bölünme sonrası fiyat 30 ₺ olur ve stop seviyeniz 26 ₺ olarak güncellenmeli. Aracı kurum platformları bunu otomatik yapmayabilir."},
+      {"q": "Ters bölünme (reverse split) ne anlama gelir?",
+       "a": "Ters bölünmede hisse adedi azalır, fiyat yükselir. Şirketler genellikle borsada kalabilmek için minimum fiyat kurallarını sağlamak amacıyla yapar. Ters bölünme çoğunlukla şirketin zayıf performansının işareti olabilir; dikkatli değerlendirme gerektirir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'SASA', 'EREGL']
+  },
+
+  # ── ARTICLE 50 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "portfoy-rebalancing-yeniden-dengeleme",
+    "title": "Portföy Rebalancing: Kârdaki Hisseyi Ne Zaman Satmalısın?",
+    "desc": "Portföy yeniden dengeleme (rebalancing) nedir, ne zaman yapılır, kârdaki pozisyonu azaltmak akıllıca mı? Türk yatırımcısı için pratik rehber.",
+    "cat": "Strateji",
+    "date": "01.05.2026",
+    "mins": 6,
+    "body": """
+<p>Portföy rebalancing (yeniden dengeleme), hedef varlık dağılımınızdan sapan portföyünüzü başlangıçtaki hedef ağırlıklarına geri döndürme işlemidir. Uzun vadeli yatırım disiplininin temel taşlarından biridir.</p>
+
+<h2>Neden Rebalancing Gerekir?</h2>
+<p>Portföyünüzü %60 hisse, %30 altın, %10 nakit olarak kurdunuz diyelim. 6 ay sonra hisseler %40 değer kazandıysa:</p>
+<ul>
+  <li>Yeni dağılım: Hisse %68, Altın %23, Nakit %9 gibi bir yapıya dönmüş olabilir</li>
+  <li>Maruziyetiniz değişti: Hisse piyasasına gereğinden fazla bağlandınız</li>
+  <li>Risk profiliniz başlangıçta belirlediğinizin üstüne çıktı</li>
+</ul>
+<p>Rebalancing ile hisselerden kâr alıp altın ve nakit ağırlığını artırarak orijinal %60/%30/%10 dağılımına geri dönersiniz.</p>
+
+<h2>Rebalancing Ne Zaman Yapılmalı?</h2>
+<p>İki temel yaklaşım vardır:</p>
+<h3>1. Takvim Bazlı Rebalancing</h3>
+<p>Belirli aralıklarla (3 ayda bir, 6 ayda bir, yılda bir) portföyü kontrol et ve ağırlıkları düzelt. Avantajı: disiplinli, duygusal kararları engeller. Dezavantajı: trendin ortasında gereksiz işlem yapılabilir.</p>
+
+<h3>2. Eşik Bazlı Rebalancing (Tolerans Bandı)</h3>
+<p>Bir varlık hedef ağırlığından belirli bir miktar saptığında (örn. ±5%) müdahale edilir. Örneğin hisselerin hedefi %60 ise ve %65'i aştıysa satış yapılır. Bu yaklaşım daha az işlem üretir ama sürekli takip gerektirir.</p>
+
+<h2>Kârdaki Hisseyi Satmak Akıllıca mı?</h2>
+<div style="background:rgba(248,81,73,.07);border:1px solid rgba(248,81,73,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#e3b341">🧠 Psikolojik Tuzak: "Kazanıyorum, neden satayım?"</strong>
+  <p style="margin:8px 0 0 0">Yükselen hisseleri elde tutmak doğal hissettirse de portföydeki ağırlığı bozulmuş bir portföy, beklenmedik düşüşlerde çok daha fazla zarar verebilir. Rebalancing disiplini bu tuzağı aşmanızı sağlar.</p>
+</div>
+<p>Finansal araştırmalar, düzenli rebalancing yapan yatırımcıların:</p>
+<ul>
+  <li>Uzun vadede daha istikrarlı getiri elde ettiğini</li>
+  <li>Büyük düşüşlerde daha az zarar yaşadığını</li>
+  <li>Psikolojik baskıya daha dirençli olduğunu göstermektedir</li>
+</ul>
+
+<h2>Rebalancing ve Vergi/Maliyet</h2>
+<p>BIST hisseleri için alım satım kazancında stopaj %0 olduğundan rebalancing işlemi vergi açısından avantajlıdır. Ancak:</p>
+<ul>
+  <li>Alım satım komisyonları birikebilir — çok sık rebalancing maliyeti artırır</li>
+  <li>Bir yılda çok sayıda işlem yapıyorsanız aracı kurum maliyetlerini hesaba katın</li>
+</ul>
+
+<h2>BorsaPusula Sinyalleriyle Rebalancing</h2>
+<p>Teknik sinyal sistemi rebalancing kararınızı destekleyebilir:</p>
+<ul>
+  <li>Hisse "AL" sinyalinde ve hedef ağırlığın üzerindeyse: Kademeli azaltma düşünülebilir</li>
+  <li>Hisse "SAT" veya "BEKLE" sinyaline geçtiyse: Rebalancing için iyi bir fırsat noktası olabilir</li>
+  <li>Teknik sinyal + ağırlık kontrolü kombinasyonu daha bilinçli karar üretir</li>
+</ul>
+
+<h2>Adım Adım Rebalancing Rehberi</h2>
+<ol>
+  <li><strong>Hedef ağırlıkları belirle:</strong> Başlangıçta net yüzdeler koy (hisse %X, altın %Y, nakit %Z)</li>
+  <li><strong>Periyodik kontrol:</strong> 3-6 ayda bir veya büyük piyasa hareketlerinde portföy ağırlıklarını hesapla</li>
+  <li><strong>Sapma hesapla:</strong> Her varlığın mevcut ağırlığını hedefle karşılaştır</li>
+  <li><strong>±5% tolerans uygula:</strong> Küçük sapmalar için işlem yapma, maliyet tasarrufu sağlar</li>
+  <li><strong>Kademeli ayarla:</strong> Tek seferde değil, birkaç işlemde hedef ağırlığa ulaş</li>
+  <li><strong>Kayıt tut:</strong> Her rebalancing işlemini tarih, fiyat ve gerekçeyle kaydet</li>
+</ol>
+""",
+    "faqs": [
+      {"q": "Rebalancing ne sıklıkla yapılmalı?",
+       "a": "Çoğu finansal danışman yılda 1-2 kez veya varlık ağırlığında ±5% sapma yaşandığında rebalancing önerir. Çok sık yapılan işlemler komisyon maliyetlerini artırırken çok nadir yapılan yatırım ciddi riske girer."},
+      {"q": "Kârdaki hisseyi satmak psikolojik olarak zor. Ne yapmalıyım?",
+       "a": "Bu tamamen normal bir his. Kurallara dayalı bir sistem oluşturun: 'Hisse %X ağırlığı aştığında sat' gibi önceden belirlenmiş kurallar, duygusal kararları engeller. Portföy yönetimi kurallara, hislere göre değil yapılır."},
+      {"q": "Eğer piyasa yükseliyorsa neden satayım?",
+       "a": "Rebalancing geleceği tahmin etmek değildir. Yükselen piyasada aşırı konumlanmak, düşüşte daha büyük kayba yol açabilir. Hedef ağırlıklara dönmek bir risk yönetimi disiplinidir."},
+      {"q": "BorsaPusula sinyalleri rebalancing kararında nasıl kullanılır?",
+       "a": "Hisse SAT veya BEKLE sinyaline geçtiğinde portföy ağırlığını da kontrol edin. SAT sinyali + yüksek portföy ağırlığı kombinasyonu, azaltma için güçlü bir gerekçe oluşturabilir. Ancak sinyaller yatırım tavsiyesi değildir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'TUPRS', 'THYAO', 'ASELS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
