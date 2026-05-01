@@ -226,6 +226,8 @@
 </div>
 
 <script>
+const QUALITY_LABELS = {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Uzak'};
+
 function adxFromStock(s) {
   const inds = s.indicators || {};
   const lbl  = (inds.adx || {}).label || '';
@@ -248,7 +250,7 @@ function renderCard(s, isNew) {
   if (adx != null)          metrics.push(`<div class="sc-metric"><span>ADX </span><strong>${adx.toFixed(1)}</strong></div>`);
   if (s.rsi != null)        metrics.push(`<div class="sc-metric"><span>RSI </span><strong>${parseFloat(s.rsi).toFixed(1)}</strong></div>`);
   if (s.signal_bars)        metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${s.signal_bars}g</strong></div>`);
-  if (s.entry_quality)      metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${{IDEAL:'İdeal',IYI:'İyi',DIKKATLI:'Dikkatli',UZAK:'Uzak'}[s.entry_quality]||s.entry_quality}</strong></div>`);
+  if (s.entry_quality)      metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${QUALITY_LABELS[s.entry_quality]||s.entry_quality}</strong></div>`);
   if (s.rr_ratio)           metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_ratio).toFixed(1)}</strong></div>`);
 
   const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';
