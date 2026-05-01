@@ -102,7 +102,7 @@
     {% for a in articles %}
     <a href="/blog/{{ a.slug }}" class="blog-card" data-cat="{{ a.cat }}"
        data-title="{{ a.title|lower }}" data-desc="{{ a.desc|lower }}">
-      <div class="bc-cat">{{ a.cat }}{% if loop.revcount <= 3 %}<span class="bc-new">Yeni</span>{% endif %}</div>
+      <div class="bc-cat">{{ a.cat }}{% if loop.index > (articles|length - 3) %}<span class="bc-new">Yeni</span>{% endif %}</div>
       <div class="bc-title">{{ a.title }}</div>
       <div class="bc-desc">{{ a.desc }}</div>
       <div class="bc-meta">
