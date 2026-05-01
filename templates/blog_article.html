@@ -170,6 +170,33 @@
 
   .disclaimer { background:rgba(248,81,73,.07); border:1px solid rgba(248,81,73,.2); border-radius:8px; padding:14px 16px; color:#c9d1d9; font-size:13px; margin-top:32px; }
 
+  /* CTA kutusu */
+  .cta-box {
+    background:linear-gradient(135deg,rgba(31,111,235,.1),rgba(59,130,246,.06));
+    border:1px solid rgba(59,130,246,.3); border-radius:12px;
+    padding:20px 22px; margin-top:28px;
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  }
+  .cta-box-text { flex:1; min-width:220px; }
+  .cta-box-text strong { font-size:14px; font-weight:700; color:#e2e8f0; display:block; margin-bottom:4px; }
+  .cta-box-text span   { font-size:12px; color:#64748b; line-height:1.5; }
+  .cta-box-btns { display:flex; gap:8px; flex-wrap:wrap; }
+  .cta-btn-primary {
+    background:#1f6feb; color:#fff; border:none; border-radius:7px;
+    padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer;
+    text-decoration:none; display:inline-flex; align-items:center; gap:6px;
+    transition:background .15s; white-space:nowrap;
+  }
+  .cta-btn-primary:hover { background:#388bfd; }
+  .cta-btn-secondary {
+    background:rgba(59,130,246,.1); color:#93c5fd;
+    border:1px solid rgba(59,130,246,.25); border-radius:7px;
+    padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer;
+    text-decoration:none; display:inline-flex; align-items:center; gap:6px;
+    transition:all .15s; white-space:nowrap;
+  }
+  .cta-btn-secondary:hover { background:rgba(59,130,246,.18); }
+
   footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
   footer a { color:#8b949e; text-decoration:none; }
   @media(max-width:600px) { .container{padding:16px;} .art-title{font-size:22px;} }
@@ -215,6 +242,24 @@
   <article class="prose">
     {{ article.body | safe }}
   </article>
+
+  <!-- CTA kutusu -->
+  <div class="cta-box">
+    <div class="cta-box-text">
+      <strong>📊 Canlı BIST Sinyallerini Gör</strong>
+      <span>Bu makalede öğrendiklerinizi gerçek piyasa verisiyle karşılaştırın.<br>
+        BIST100 hisseleri için algoritmik Supertrend + ADX sinyalleri — ücretsiz.</span>
+    </div>
+    <div class="cta-box-btns">
+      <a href="/" class="cta-btn-primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Sinyal Paneline Git
+      </a>
+      <a href="/tarama" class="cta-btn-secondary">
+        🔍 Tarama Yap
+      </a>
+    </div>
+  </div>
 
   <div class="disclaimer">
     ⚠️ <strong>Önemli Uyarı:</strong> Bu makale yalnızca bilgilendirme amaçlıdır. Yatırım tavsiyesi değildir.
