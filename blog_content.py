@@ -4139,6 +4139,449 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'TUPRS', 'THYAO', 'ASELS']
   },
+
+  # ── ARTICLE 59 ──
+  {
+    "slug": "borsa-seans-saatleri-2026",
+    "title": "Borsa Seans Saatleri 2026: BIST Açılış ve Kapanış Bilgileri",
+    "desc": "BIST hisse senetleri kaçta açılır, kaçta kapanır? 2026 güncel seans saatleri, işlem günleri ve tatil takvimi.",
+    "date": "2026-05-01",
+    "mins": 5,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p>Borsa İstanbul'da (BIST) işlem yapmadan önce bilmeniz gereken en temel bilgilerden biri seans saatleridir. Yanlış saatte emir girilmesi veya beklenmedik tatil günlerinde işlem yapılamayacağı için seans saatlerini ezberlemek, aktif yatırımcılar için zorunluluktur.</p>
+
+<h2>2026 BIST Hisse Senedi Seans Saatleri</h2>
+<p>Borsa İstanbul Pay Piyasası (hisse senetleri) şu seans düzenini izler:</p>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Seans</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Saat</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Açıklama</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Sabah Tek Fiyat Seansı</td>
+      <td style="padding:8px 12px;color:#3fb950;font-family:monospace;font-weight:600">09:30 – 10:00</td>
+      <td style="padding:8px 12px;color:#8b949e">Açılış fiyatı belirlenir, emir toplanır</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Sürekli Müzayede (Ana Seans)</td>
+      <td style="padding:8px 12px;color:#3fb950;font-family:monospace;font-weight:600">10:00 – 18:00</td>
+      <td style="padding:8px 12px;color:#8b949e">Emir eşleşmesi anlık gerçekleşir</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Kapanış Tek Fiyat Seansı</td>
+      <td style="padding:8px 12px;color:#f0883e;font-family:monospace;font-weight:600">18:00 – 18:10</td>
+      <td style="padding:8px 12px;color:#8b949e">Kapanış fiyatı belirlenir, emir toplanır</td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Önemli:</strong> Türkiye saati (TRT/UTC+3) kullanılır. Yaz/kış saati değişiminden etkilenmez çünkü Türkiye saati sabit kaldı.</p>
+
+<h2>Sabah Tek Fiyat Seansı Nasıl Çalışır?</h2>
+<p>Saat 09:30-10:00 arasında yatırımcılar emir girebilir ancak eşleşme gerçekleşmez. 10:00'de sistem, girilen tüm emirleri değerlendirerek en fazla işlemi sağlayan "açılış fiyatını" tek seferde belirler. Bu fiyat aynı zamanda gün içindeki ilk işlem fiyatıdır.</p>
+<ul>
+  <li>Açılış öncesinde girilmiş emirlerin büyük kısmı bu seanstta eşleşir</li>
+  <li>Fiyat hareket sınırı: bir önceki kapanışa göre ±%20 (devre kesici mekanizması)</li>
+  <li>Haber bekleyen veya bilanço açıklayan hisseler için volatilite yüksek olabilir</li>
+</ul>
+
+<h2>Sürekli Müzayede (10:00 – 18:00)</h2>
+<p>Ana işlem saatidir. Limit veya piyasa emri girildiğinde eşleşme anlık gerçekleşir. BIST hisselerinde 8 saatlik bu pencere, Avrupa borsalarıyla (Londra, Frankfurt) kısmen örtüşür ancak ABD açılışını (15:30 TRT) da kapsar.</p>
+
+<h2>Kapanış Seansı (18:00 – 18:10)</h2>
+<p>Günün kapanış fiyatını belirleyen 10 dakikalık bir "açık artırma" seansıdır. Endeks hesaplamalarında ve bazı türev ürünlerin uzlaşma fiyatında kullanılır. Bu saatte fiyatlar beklenmedik şekilde hareket edebilir — bunu göz önünde bulundurun.</p>
+
+<h2>VİOP (Vadeli İşlemler) Saatleri Farklıdır</h2>
+<p>Vadeli işlem ve opsiyon piyasası (VİOP) hisse senedi piyasasından daha uzun süre açıktır:</p>
+<ul>
+  <li><strong>Sabah seansı:</strong> 09:15 – 18:15</li>
+  <li><strong>Akşam seansı:</strong> 19:00 – 23:00 (endeks ve döviz kontratları için)</li>
+</ul>
+
+<h2>İşlem Yapılmayan Günler</h2>
+<p>Borsa, resmi tatil günlerinde kapalıdır. 2026 yılında borsanın kapalı olacağı başlıca günler şunlardır:</p>
+<ul>
+  <li>1 Ocak — Yılbaşı</li>
+  <li>23 Nisan — Ulusal Egemenlik ve Çocuk Bayramı</li>
+  <li>1 Mayıs — Emek ve Dayanışma Günü</li>
+  <li>19 Mayıs — Atatürk'ü Anma, Gençlik ve Spor Bayramı</li>
+  <li>Ramazan Bayramı (2026: yaklaşık 20-22 Mart)</li>
+  <li>Kurban Bayramı (2026: yaklaşık 27-30 Mayıs + arife)</li>
+  <li>15 Temmuz — Demokrasi ve Millî Birlik Günü</li>
+  <li>30 Ağustos — Zafer Bayramı</li>
+  <li>29 Ekim — Cumhuriyet Bayramı</li>
+</ul>
+<p>Güncel tatil takvimi için Borsa İstanbul'un resmi web sitesini kontrol edin.</p>
+
+<h2>BorsaPusula Sinyalleri Hangi Saatte Güncellenir?</h2>
+<p>BorsaPusula algoritması, seans kapatıldıktan sonra (18:00-18:10 kapanış seansı tamamlanınca) günlük bar verilerini işler ve sinyalleri hesaplar. Sinyal güncellemesi genellikle saat 18:30-19:00 arasında tamamlanır. Sabah 10:00'de ana seansa başlamadan önce güncel sinyalleri kontrol etmek idealdir.</p>
+""",
+    "faqs": [
+      {"q": "BIST kaçta açılır, kaçta kapanır?",
+       "a": "BIST Pay Piyasası, sabah 09:30'da tek fiyat seansıyla başlar. Ana sürekli müzayede seansı 10:00-18:00 saatleri arasındadır. Kapanış tek fiyat seansı ise 18:00-18:10 arasında gerçekleşir."},
+      {"q": "Borsa tatil günlerinde açık mı?",
+       "a": "Hayır, Borsa İstanbul resmi tatil günlerinde kapalıdır. Ramazan ve Kurban Bayramları, 23 Nisan, 1 Mayıs, 19 Mayıs, 30 Ağustos ve 29 Ekim'de borsa işlem görmez. Güncel tatil takvimi için Borsa İstanbul resmi sitesine bakın."},
+      {"q": "Sabah 10:00'den önce emir girebilir miyim?",
+       "a": "Evet. Sabah 09:30-10:00 arasındaki 'Tek Fiyat Seansı'nda emir girebilirsiniz. Bu emirler 10:00'de sistem tarafından eşleştirilir ve açılış fiyatını belirler. Emir eşleşmesi saat 10:00'e kadar gerçekleşmez."},
+      {"q": "BorsaPusula sinyalleri ne zaman güncellenir?",
+       "a": "Sinyaller, kapanış seansı tamamlandıktan sonra günlük bar verileri işlenerek hesaplanır. Güncelleme genellikle saat 18:30-19:00 arasında tamamlanır. Sabah işlemlerine başlamadan önce güncel sinyalleri kontrol etmenizi öneririz."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL']
+  },
+
+  # ── ARTICLE 60 ──
+  {
+    "slug": "tahvil-nedir-borsayla-farki",
+    "title": "Tahvil Nedir? Hisse Senediyle Farkı ve 2026 Yatırım Rehberi",
+    "desc": "Tahvil ile hisse senedi arasındaki temel farklar, tahvil yatırımının avantajları ve dezavantajları. Türkiye'de tahvil yatırımı nasıl yapılır?",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p>Yatırım dünyasının iki temel taşı olan <strong>hisse senedi</strong> ve <strong>tahvil</strong>, çoğunlukla birlikte anılır fakat birbirinden çok farklı araçlardır. İkisini doğru anlamak, portföyünüzü nasıl oluşturacağınızı belirler.</p>
+
+<h2>Tahvil Nedir?</h2>
+<p>Tahvil (obligasyon), bir şirketin veya devletin <strong>borç para almak için çıkardığı menkul kıymet</strong>tir. Tahvil aldığınızda, ihraçcıya borç vermiş olursunuz. Karşılığında:</p>
+<ul>
+  <li><strong>Dönemsel faiz (kupon) ödemesi</strong> alırsınız (genellikle yılda 1-4 kez)</li>
+  <li><strong>Vade sonunda</strong> ana paranız (nominal değer) geri ödenir</li>
+</ul>
+<p>Hisse senedinden farklı olarak, tahvilde sabit bir geri ödeme taahhüdü vardır. Şirket zarar etse bile tahvil faizini ödemek zorundadır.</p>
+
+<h2>Hisse Senedi vs Tahvil: Temel Farklar</h2>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Özellik</th>
+      <th style="padding:8px 12px;text-align:left;color:#3fb950;font-weight:600">Hisse Senedi</th>
+      <th style="padding:8px 12px;text-align:left;color:#f0883e;font-weight:600">Tahvil</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Ne satın alırsınız?</td>
+      <td style="padding:8px 12px;color:#e6edf3">Şirkete ortaklık payı</td>
+      <td style="padding:8px 12px;color:#e6edf3">Şirkete/devlete borç hakkı</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Getiri kaynağı</td>
+      <td style="padding:8px 12px;color:#e6edf3">Fiyat artışı + temettü</td>
+      <td style="padding:8px 12px;color:#e6edf3">Sabit faiz (kupon)</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Risk seviyesi</td>
+      <td style="padding:8px 12px;color:#f85149">Yüksek</td>
+      <td style="padding:8px 12px;color:#3fb950">Orta / Düşük (devlet)</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Oy hakkı</td>
+      <td style="padding:8px 12px;color:#e6edf3">Evet (genel kurul)</td>
+      <td style="padding:8px 12px;color:#e6edf3">Hayır</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Iflas önceliği</td>
+      <td style="padding:8px 12px;color:#f85149">Sonuncu sırada</td>
+      <td style="padding:8px 12px;color:#3fb950">Hisse senetlerinden önce</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Vade</td>
+      <td style="padding:8px 12px;color:#e6edf3">Süresiz</td>
+      <td style="padding:8px 12px;color:#e6edf3">Belirli (1 ay – 30 yıl)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Türkiye'de Tahvil Türleri</h2>
+<h3>Devlet Tahvilleri (DİBS)</h3>
+<p>Hazine ve Maliye Bakanlığı tarafından çıkarılır. Türkiye'nin en güvenli borçlanma aracı kabul edilir. İki alt türü vardır:</p>
+<ul>
+  <li><strong>Devlet Tahvili:</strong> Vadesi 1 yıldan uzun, sabit veya değişken faizli</li>
+  <li><strong>Hazine Bonosu:</strong> Vadesi 1 yıldan kısa, genellikle iskontolu satılır</li>
+</ul>
+
+<h3>Kira Sertifikası (Sukuk)</h3>
+<p>Faizsiz finans ilkeleriyle çalışır. Devlet veya şirketler varlıkları üzerinden ihraç eder. Kurumsal yatırımcılar ve katılım finans müşterileri için cazip bir alternatiftir.</p>
+
+<h3>Özel Sektör Tahvilleri</h3>
+<p>Şirketlerin bankadan borç almak yerine doğrudan piyasadan fon toplaması yöntemidir. Devlet tahvillerine göre daha yüksek faiz sunar ama risk de daha yüksektir.</p>
+
+<h2>Enflasyon ve Tahvil İlişkisi</h2>
+<p>Yüksek enflasyon dönemlerinde (Türkiye'nin 2021-2023 deneyimi gibi) sabit faizli tahvillerin gerçek getirisi eriyebilir. Bu nedenle:</p>
+<ul>
+  <li><strong>TÜFE'ye endeksli tahviller:</strong> Enflasyona karşı koruma sağlar, anapara enflasyona göre güncellenir</li>
+  <li><strong>Değişken faizli tahviller:</strong> TCMB politika faizine bağlı, faiz artışından yararlanır</li>
+  <li><strong>Sabit faizli tahvil:</strong> Enflasyon yüksekse reel kayba yol açabilir</li>
+</ul>
+
+<h2>Faiz ile Tahvil Fiyatı Ters Orantılı</h2>
+<p>Tahvil yatırımcılarının bilmesi gereken temel kural: <strong>Piyasa faiz oranları yükseldiğinde, mevcut tahvillerin fiyatı düşer.</strong> Tersine, faizler düştüğünde tahvil fiyatları yükselir.</p>
+<p>Örnek: 10% faizle aldığınız bir tahvili, piyasa faizleri 12%'ye çıktığında satmak isterseniz, alıcı daha yüksek faizli yeni tahvillere yönelir; bu nedenle tahvilinizi indirimli satmak zorunda kalırsınız.</p>
+
+<h2>Tahvil mi, Hisse mi?</h2>
+<p>Her iki araç da portföyde yer alabilir. Genel kural olarak:</p>
+<ul>
+  <li><strong>Genç / uzun vadeli yatırımcı:</strong> Hisse ağırlığı yüksek (80/20 hisse/tahvil)</li>
+  <li><strong>Emekliliğe yakın / kısa vadeli ihtiyaç:</strong> Tahvil ağırlığı artar (40/60 hisse/tahvil)</li>
+  <li><strong>Risk toleransı düşük:</strong> Devlet tahvili ile korunmalı portföy</li>
+</ul>
+<p>Türkiye'de yüksek enflasyon nedeniyle nominal tahvil faizleri cazip görünse de enflasyona karşı korumalı araçları veya kısa vadeli enstrümanları tercih etmek akıllıca olabilir.</p>
+""",
+    "faqs": [
+      {"q": "Tahvil ve hisse senedi arasındaki en temel fark nedir?",
+       "a": "Hisse senedi şirkete ortak olmak anlamına gelirken, tahvil şirkete veya devlete borç vermek anlamına gelir. Hisse senedinde getiri sınırsız olabilir ama risk yüksektir. Tahvilde belirli bir faiz getirisi garantilenirken iflas durumunda hisse senedi sahiplerinden daha öncelikli ödeme hakkınız vardır."},
+      {"q": "Türkiye'de devlet tahvili nasıl alınır?",
+       "a": "Aracı kurumlar veya bankalar üzerinden Hazine Müsteşarlığı'nın DİBS (Devlet İç Borçlanma Senetleri) ihalelerine katılabilirsiniz. Ayrıca ikincil piyasada (Borsa İstanbul Tahvil Piyasası) mevcut tahviller alınıp satılabilir."},
+      {"q": "Tahvil fiyatı neden düşer?",
+       "a": "Piyasa faiz oranları yükseldiğinde, sabit faizli mevcut tahvillerin çekiciliği azalır ve fiyatları düşer. Bu nedenle faiz artırım dönemlerinde (TCMB sıkılaştırma) uzun vadeli tahvil tutanlar zarar edebilir."},
+      {"q": "TÜFE'ye endeksli tahvil ne demek?",
+       "a": "Anapara değeri Türkiye tüketici fiyat endeksine (TÜFE) göre güncellenen tahvillerdir. Enflasyon %50 olursa anaparanız da %50 artırılır, böylece enflasyona karşı korunmuş olursunuz. Türkiye Hazinesi bu tür tahviller ihraç etmektedir."}
+    ],
+    "related_tickers": []
+  },
+
+  # ── ARTICLE 61 ──
+  {
+    "slug": "viop-vadeli-islemler-nedir",
+    "title": "VİOP Nedir? Vadeli İşlem ve Opsiyon Piyasası Başlangıç Rehberi",
+    "desc": "Borsa İstanbul VİOP (Vadeli İşlem ve Opsiyon Piyasası) nasıl çalışır? Futures ve opsiyon sözleşmelerini yeni başlayanlar için anlatan kapsamlı rehber.",
+    "date": "2026-05-01",
+    "mins": 8,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p>VİOP (Vadeli İşlem ve Opsiyon Piyasası), Borsa İstanbul bünyesinde türev ürünlerin işlem gördüğü piyasadır. Hisse senedi piyasasından farklı bir mantıkla çalışır ve hem koruma (hedging) hem de kaldıraçlı spekülasyon imkânı sunar. Doğru anlaşılmadan girilmesi halinde büyük kayıplara yol açabileceği için dikkatli bir şekilde öğrenilmesi gerekir.</p>
+
+<h2>Vadeli İşlem Sözleşmesi (Futures) Nedir?</h2>
+<p>Vadeli işlem sözleşmesi, belirli bir varlığı <strong>önceden belirlenen fiyat ve tarihte</strong> alıp satma yükümlülüğüdür. İki taraf bu sözleşmeyi imzaladığında, her iki taraf da yükümlülük altına girer.</p>
+<p>Örnek: BIST30 endeksi üzerine bir futures sözleşmesi satın aldığınızda, ilerleyen bir tarihte endeksin şimdiki değeri üzerinden hesaplanan tutarı nakit olarak alacağınız veya ödeyeceğiniz bir anlaşma yapıyorsunuz demektir.</p>
+
+<h2>Opsiyon Sözleşmesi Nedir?</h2>
+<p>Opsiyon, belirli bir varlığı belirli bir fiyattan <strong>alma (call) veya satma (put) hakkıdır</strong> — ancak yükümlülük değil. Opsiyon alıcısı bu hakkı kullanıp kullanmamakta serbesttir; opsiyon satıcısı ise karşı tarafın kararına uymak zorundadır.</p>
+<ul>
+  <li><strong>Call Opsiyon:</strong> Belirlenen fiyattan alma hakkı (fiyat yükselişinde kazanılır)</li>
+  <li><strong>Put Opsiyon:</strong> Belirlenen fiyattan satma hakkı (fiyat düşüşünde kazanılır)</li>
+  <li><strong>Prim:</strong> Bu hakkı satın almak için ödenen ücret</li>
+</ul>
+
+<h2>VİOP'ta Ne İşlem Görür?</h2>
+<p>Borsa İstanbul VİOP'ta çeşitli dayanak varlıklar üzerine kontratlar bulunur:</p>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Ürün Grubu</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Örnekler</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Endeks Futures</td>
+      <td style="padding:8px 12px;color:#e6edf3">BIST30 vadeli (XU030 kontratları)</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Döviz Futures</td>
+      <td style="padding:8px 12px;color:#e6edf3">USD/TRY, EUR/TRY, GBP/TRY</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Pay Futures</td>
+      <td style="padding:8px 12px;color:#e6edf3">AKBNK, GARAN, THYAO gibi bireysel hisseler</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Metal/Emtia Futures</td>
+      <td style="padding:8px 12px;color:#e6edf3">Altın, Gümüş</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Endeks Opsiyonları</td>
+      <td style="padding:8px 12px;color:#e6edf3">BIST30 call/put opsiyonları</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Kaldıraç: Avantaj mı, Tuzak mı?</h2>
+<p>VİOP'un en dikkat çekici özelliği <strong>kaldıraçtır</strong>. Sözleşmenin toplam değerinin yalnızca küçük bir bölümünü (<em>başlangıç teminatı</em>) yatırarak büyük pozisyon açabilirsiniz.</p>
+<p>Örnek: 10:1 kaldıraçla çalışıyorsanız, 10.000₺ ile 100.000₺'lik pozisyon açabilirsiniz. Piyasa %5 lehinize hareket ederse 5.000₺ kazanırsınız (%50 getiri). Ancak %5 aleyhinize hareket ederse 5.000₺ kaybedersiniz (%50 kayıp). Hareket %10'u aşarsa başlangıç teminatınızın tamamını kaybedebilirsiniz.</p>
+<p style="background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);border-radius:6px;padding:10px 14px;color:#f85149;font-size:13px">
+⚠️ <strong>Risk Uyarısı:</strong> VİOP yatırımcıların büyük çoğunluğu zarar etmektedir. Kaldıraçlı işlemler hem kazancı hem de kaybı büyütür. Yeterli deneyim ve risk yönetimi olmadan girilmesi ciddi sermaye kaybına yol açabilir.
+</p>
+
+<h2>Teminat ve Teminat Tamamlama (Margin Call)</h2>
+<p>Pozisyon açmak için hesabınızda başlangıç teminatı bulunmalıdır. Piyasa aleyhinize hareket edip hesap bakiyeniz sürdürme teminatının altına düşerse, aracı kurum ek teminat yatırmanızı (margin call) ister. Yatırmazsanız pozisyonunuz zorla kapatılır.</p>
+
+<h2>VİOP'ta Hedging (Korunma) Nasıl Yapılır?</h2>
+<p>Portföyünüzde BIST30 hisseleri taşıyorsanız ve kısa vadeli bir düşüşten korunmak istiyorsanız, BIST30 futures'ı satarak (short) portföyünüzü hedge edebilirsiniz. Bu sayede piyasa düşse bile futures pozisyonunuzdan kazanç sağlarsınız.</p>
+
+<h2>Yeni Başlayanlar İçin Öneriler</h2>
+<ul>
+  <li>Önce hisse senedi piyasasında en az 1-2 yıl deneyim kazanın</li>
+  <li>Kağıt üzerinde (simülasyon) en az 3 ay işlem yapın</li>
+  <li>Kaldıraç oranını başlangıçta düşük tutun (3x veya altı)</li>
+  <li>Stop loss olmadan hiçbir pozisyon açmayın</li>
+  <li>Risk etmek istediğiniz tutarın ötesine geçmeyin</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "VİOP ve normal borsa arasındaki fark nedir?",
+       "a": "Normal borsada (Pay Piyasası) gerçek hisse senetleri alınıp satılır. VİOP'ta ise hissenin kendisi değil, hissenin veya endeksin gelecekteki fiyatına dair sözleşmeler (türev ürünler) işlem görür. VİOP kaldıraçlı çalışır, bu hem kazanç hem de zarar potansiyelini büyütür."},
+      {"q": "VİOP'a başlamak için ne kadar sermaye gerekir?",
+       "a": "Aracı kurumlara göre değişmekle birlikte, çoğu aracı kurumda minimum 10.000-20.000 TL ile VİOP işlemine başlanabilir. Ancak kaldıraç riski nedeniyle yeterli bir tampon sermaye bulundurmak önemlidir."},
+      {"q": "BIST30 vadeli işlemi nasıl çalışır?",
+       "a": "BIST30 futures sözleşmesi, belirli bir vadede XU030 endeksinin belirli bir değerden alınıp satılacağını garanti eder. Endeks 1 yükselirse kontrat başına 10₺ kazanılır (1 kontrat = 10 çarpan). Her gün sonunda kâr/zarar hesabınıza anlık yansır (günlük uzlaşma)."},
+      {"q": "VİOP'ta opsiyon ile futures arasındaki temel fark nedir?",
+       "a": "Futures sözleşmesinde her iki taraf da yükümlüdür; vade geldiğinde ödeme zorunludur. Opsiyonda ise alıcı yalnızca bir hak satın alır — bu hakkı kullanıp kullanmamakta serbesttir. Futures daha riskli olabilir çünkü iki yönlü yükümlülük doğurur."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
+  },
+
+  # ── ARTICLE 62 ──
+  {
+    "slug": "limit-emir-piyasa-emri-nedir",
+    "title": "Limit Emir ve Piyasa Emri Nedir? Borsa Emir Tipleri Rehberi",
+    "desc": "Limit emir, piyasa emri, koşullu emir ve stop emir nedir? BIST'te hangi emir türünü ne zaman kullanmalısınız? Pratik örneklerle açıklama.",
+    "date": "2026-05-01",
+    "mins": 6,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p>Borsada hisse alıp satmak için bir emir girmek gerekir. Emir türünü yanlış seçmek, beklediğinizden çok daha kötü bir fiyattan işlem yapmanıza ya da hiç işlem gerçekleşmemesine yol açabilir. Bu rehberde BIST'te kullanılan temel emir tiplerini öğreneceksiniz.</p>
+
+<h2>Piyasa Emri (Market Order)</h2>
+<p>Piyasa emri, o anda piyasada mevcut en iyi fiyattan <strong>anında işlem gerçekleştirme</strong> talimatıdır. Fiyat belirtmezsiniz; sistem sizi mevcut en iyi alış veya satış fiyatına eşleştirir.</p>
+<ul>
+  <li><strong>Avantaj:</strong> Anında ve kesinlikle işlem gerçekleşir</li>
+  <li><strong>Dezavantaj:</strong> Yüksek volatilite dönemlerinde beklediğinizden çok farklı fiyattan işlem olabilir (slippage)</li>
+  <li><strong>Ne zaman kullanılır:</strong> Hızla girmek veya çıkmak istediğinizde; likidite yüksek hisselerde</li>
+</ul>
+<p>⚠️ Hacmi düşük hisselerde piyasa emri kullanmaktan kaçının. Alış-satış farkı (spread) büyük olduğunda ciddi kayıp yaşatabilir.</p>
+
+<h2>Limit Emir (Limit Order)</h2>
+<p>Limit emri, belirlediğiniz fiyattan <strong>veya daha iyi bir fiyattan</strong> işlem gerçekleştirme talimatıdır.</p>
+<ul>
+  <li><strong>Alım limiti:</strong> "AKBNK'ı en fazla 130₺'den al" — fiyat 130₺ veya altına gelirse işlem olur</li>
+  <li><strong>Satım limiti:</strong> "AKBNK'ı en az 140₺'den sat" — fiyat 140₺ veya üstüne çıkarsa işlem olur</li>
+</ul>
+<p><strong>Avantaj:</strong> Fiyat kontrolü tamamen sizde. Beklediğinizden kötü fiyattan işlem olmaz.</p>
+<p><strong>Dezavantaj:</strong> Piyasa belirlediğiniz fiyata ulaşmazsa emir gerçekleşmez, fırsatı kaçırabilirsiniz.</p>
+
+<h2>Stop Emir (Stop Order)</h2>
+<p>Stop emir (tetik emri), fiyat belirli bir seviyeye geldiğinde devreye giren emirdir. İki türü vardır:</p>
+<ul>
+  <li><strong>Stop-Loss:</strong> Zarar kesme emri. "Fiyat 120₺'ye düşerse sat" — fiyat bu seviyeye gelince piyasa emrine dönüşür ve pozisyon kapatılır.</li>
+  <li><strong>Stop-Buy (Kır Geç):</strong> Kırılım bekleyen alım. "Fiyat direnç olan 150₺'yi aşarsa al" — trendi teyit eden giriş için kullanılır.</li>
+</ul>
+
+<h2>Koşullu Emir (OCO — One Cancels the Other)</h2>
+<p>İki emrin aynı anda girildiği; birinin gerçekleşmesi halinde diğerinin otomatik iptal edildiği emir tipidir. Tipik kullanım: "Ya 140₺ hedefe ulaşırsa sat, ya da 120₺ stop seviyesine düşerse sat — ikisinden hangisi önce gerçekleşirse diğeri iptal olsun."</p>
+
+<h2>Hangi Durumda Hangi Emri Kullanmalı?</h2>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Durum</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Önerilen Emir</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Açılışta hızlıca girmek istiyorum</td>
+      <td style="padding:8px 12px;color:#e6edf3">Piyasa emri (likit hisselerde)</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Fiyat düşünce almak istiyorum</td>
+      <td style="padding:8px 12px;color:#e6edf3">Limit alım emri</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Kırılım sonrası trende girmek istiyorum</td>
+      <td style="padding:8px 12px;color:#e6edf3">Stop-buy emri</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Zarar kesmek istiyorum</td>
+      <td style="padding:8px 12px;color:#e6edf3">Stop-loss emri</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Hem hedef hem stop belirlemek istiyorum</td>
+      <td style="padding:8px 12px;color:#e6edf3">OCO emri</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>BorsaPusula Sinyallerinde Stop Loss</h2>
+<p>BorsaPusula her hisse için ATR tabanlı bir stop loss seviyesi hesaplar. Bu seviyeyi stop emir olarak girebilirsiniz. Örneğin AKBNK için stop loss 120₺ görünüyorsa, elinizde AKBNK hissesi varken 120₺'lik stop-loss emri girebilirsiniz. Fiyat bu seviyeye düşerse sistem otomatik olarak satış yapar ve büyük zararı önler.</p>
+<p>Hisse detay sayfasında SL (Stop Loss) ve TP (Hedef Fiyat) değerlerini görebilir, bunları doğrudan limit veya stop emir olarak aracı kurumunuza girebilirsiniz.</p>
+""",
+    "faqs": [
+      {"q": "Limit emir ile piyasa emri arasındaki fark nedir?",
+       "a": "Piyasa emri, o anda en iyi mevcut fiyattan anında işlem gerçekleştirmek için kullanılır. Limit emir ise belirlediğiniz fiyattan veya daha iyi bir fiyattan işlem yapılmasını sağlar; ancak piyasa o fiyata ulaşmazsa emir gerçekleşmez."},
+      {"q": "Stop loss emrini nasıl girerim?",
+       "a": "Aracı kurum uygulamanızda 'koşullu emir' veya 'stop emir' seçeneğini kullanın. Tetik fiyatı olarak stop loss seviyesini girin. Fiyat bu seviyeye geldiğinde emir devreye girer ve piyasa emrine dönüşerek pozisyonunuz kapatılır."},
+      {"q": "BorsaPusula'daki stop loss seviyesini nasıl kullanabilirim?",
+       "a": "Hisse detay sayfasında görünen SL (Stop Loss) değerini, aracı kurum uygulamanızda stop emir olarak girebilirsiniz. Bu seviye ATR tabanlı hesaplanmış olup sinyal geçerliyken koruma sağlar. SL seviyesi kırılırsa sinyal da güncellenir."},
+      {"q": "Emir iptali nasıl yapılır?",
+       "a": "Gün bitmeden gerçekleşmemiş emirler 'günlük emir' olarak ayarlanmışsa günün sonunda otomatik iptal olur. İptal etmek için aracı kurum uygulamanızdaki 'bekleyen emirler' bölümünden manuel iptal de yapabilirsiniz."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL']
+  },
+
+  # ── ARTICLE 63 ──
+  {
+    "slug": "borsada-lot-ve-pay-nedir",
+    "title": "Lot Nedir? Borsada Lot ve Pay Senedi Alım Rehberi",
+    "desc": "Borsada lot kavramı ne demek? Kaç lot almalısınız? Pay senedi, lot adedi ve fraksiyon pay hesaplamalarını pratik örneklerle öğrenin.",
+    "date": "2026-05-01",
+    "mins": 5,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p>Borsa işlemlerine yeni başlayanların sıkça kafasını karıştıran kavramlardan biri "lot"tur. "1 lot AKBNK alalım" ya da "500 lot GARAN" gibi ifadeler duyduğunuzda ne anlaşılır? Bu rehberde lot kavramını ve pay senedi hesaplamalarını net biçimde açıklıyoruz.</p>
+
+<h2>Lot Nedir?</h2>
+<p>Türkiye borsasında (BIST) <strong>1 lot = 1 adet pay senedi</strong> (hisse)dir. Bu tanım 2014'teki Borsa İstanbul reformuyla basitleştirildi. Önceden 1 lot = 1.000 hisse anlamına geliyordu; ancak bu değiştirildi.</p>
+<p>Yani AKBNK hissesinden "5 lot" almak istiyorsanız, aslında 5 adet AKBNK pay senedi almak istiyorsunuz demektir. Banka uygulamalarında "adet" veya "pay" olarak da ifade edilebilir.</p>
+
+<h2>Lot Hesabı: Kaç Lira Ödersiniz?</h2>
+<p>İşlem maliyeti son derece basit hesaplanır:</p>
+<pre style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:#e6edf3">
+Maliyet = Lot Adedi × Hisse Fiyatı × (1 + Komisyon Oranı)
+
+Örnek — AKBNK @ 130₺, 100 lot:
+100 × 130 = 13.000₺ (komisyon hariç)
+Komisyon %0,03 → 13.000 × 0,0003 = 3,9₺
+Toplam ≈ 13.003,90₺
+</pre>
+
+<h2>Minimum Lot Miktarı Var mı?</h2>
+<p>BIST hisse piyasasında minimum 1 lot (1 adet) ile işlem yapılabilir. Bu, düşük bütçeli yatırımcılar için büyük bir avantajdır. 5 TL'lik bir hisseden 1 lot alabilirsiniz.</p>
+<p>Bazı aracı kurumlar minimum işlem tutarı belirlemiş olsa da yasal bir zorunluluk değildir. Büyük çoğunluk minimum tutar uygulamaz.</p>
+
+<h2>Fraksiyon Pay Nedir?</h2>
+<p>Belirli kurumsal işlemlerde (sermaye artırımı, bedelsiz pay dağıtımı, bölünme gibi) tam sayı olmayan pay miktarları oluşabilir. Bu durumda <strong>fraksiyon pay</strong> hesabınıza yansır. Örneğin 135 lotunuz varken %10 bedelsiz pay geldiğinde 13,5 pay oluşur; 13 pay hesabınıza girer, 0,5 pay ise para olarak ödenir veya yukarı yuvarlama yapılır (aracı kuruma göre farklılık gösterir).</p>
+
+<h2>Borsa'da Kaç Lot Almalısınız?</h2>
+<p>Bütçenizi tek bir hisseye bağlamak yerine portföy çeşitlendirmesi yapmanız önerilir:</p>
+<ul>
+  <li><strong>Küçük bütçe (1.000-5.000₺):</strong> 1-2 hisse, az lot — önce öğrenmek için</li>
+  <li><strong>Orta bütçe (5.000-50.000₺):</strong> 5-10 farklı hisse, pozisyon başı portföyün %10-15'i</li>
+  <li><strong>Büyük bütçe (50.000₺+):</strong> 10-20 hisse, sektör çeşitlendirmesi, her pozisyon %5-10</li>
+</ul>
+
+<h2>Lot Değişimi — Hisse Bölünmesi (Spliyt)</h2>
+<p>Borsa'da bir hisse <strong>bölünmesi (stock split)</strong> gerçekleştiğinde, sahip olduğunuz lot adedi artar ancak toplam değer aynı kalır. Örneğin 2'ye bölünme (1:2 split) olduğunda, elimizdeki 100 lot AKBNK → 200 lot AKBNK'ya dönüşür, ancak her lotun değeri yarıya iner.</p>
+<p>Bu durum psikolojik bir yanılgıya yol açabilir: Elinizdeki hisse adedi ikiye katlandığı için daha zenginmiş gibi hissedebilirsiniz, oysa toplam değer değişmez.</p>
+
+<h2>BorsaPusula'da Lot Bazlı Hesaplamalar</h2>
+<p>BorsaPusula Portföy sayfasında hisse adedini (lot) girerek portföyünüzün toplam değerini, kâr/zarar durumunu ve stop loss seviyesini izleyebilirsiniz. Örneğin 200 lot ASELS girildiğinde, algoritmik stop loss seviyesine göre maksimum zarar tutarı otomatik hesaplanır.</p>
+""",
+    "faqs": [
+      {"q": "1 lot ne kadar eder?",
+       "a": "1 lot, 1 adet hisse senedi (pay senedi) anlamına gelir. Maliyeti hissenin güncel fiyatına eşittir. AKBNK 130₺ ise 1 lot AKBNK = 130₺'dir (komisyon hariç)."},
+      {"q": "BIST'te minimum kaç lot alınabilir?",
+       "a": "Borsa İstanbul Pay Piyasası'nda minimum 1 lot (1 adet pay) ile işlem yapılabilir. Çoğu aracı kurum minimum tutar belirlememektedir; dolayısıyla 1 adet hisse alabilirsiniz."},
+      {"q": "Lot ile pay aynı şey midir?",
+       "a": "Evet, Türkiye borsasında 1 lot = 1 pay (hisse) = 1 adet hisse senedidir. 2014 reformundan önce 1 lot 1.000 hisseye eşitti; artık 1:1 oranındadır. Banka uygulamalarında 'lot', 'pay' veya 'adet' kelimeleri aynı anlama gelir."},
+      {"q": "Hisse bölünmesi (split) sonrasında lotlarım ne olur?",
+       "a": "Split oranında lot adedisi artar, fiyat aynı oranda düşer. Toplam değer değişmez. 2:1 split olduğunda 100 lot → 200 lot olur ama her lot değeri yarıya iner. Portföyünüzün toplam değeri aynı kalır."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
