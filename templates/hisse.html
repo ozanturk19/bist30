@@ -1465,6 +1465,17 @@ async function loadNews(retryCount) {
       contentEl.innerHTML    = mdToHtml(data.news);
       contentEl.style.display = '';
       sourceEl.style.display  = 'flex';
+      // KAP linki var mı? source row'a ekle
+      if (data.kap_url && !document.getElementById('newsKapLink')) {
+        const kapA = document.createElement('a');
+        kapA.id = 'newsKapLink';
+        kapA.href = data.kap_url;
+        kapA.target = '_blank';
+        kapA.rel = 'noopener';
+        kapA.style.cssText = 'font-size:11px;color:#8b949e;background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.2);border-radius:4px;padding:2px 7px;text-decoration:none;margin-left:auto;white-space:nowrap;';
+        kapA.textContent = 'KAP ↗';
+        sourceEl.appendChild(kapA);
+      }
     } else {
       // API null döndürdü — hata mesajı göster, section'ı kapatma
       if (retryCount < 2) {
