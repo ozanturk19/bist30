@@ -170,6 +170,25 @@
 
   .disclaimer { background:rgba(248,81,73,.07); border:1px solid rgba(248,81,73,.2); border-radius:8px; padding:14px 16px; color:#c9d1d9; font-size:13px; margin-top:32px; }
 
+  /* SSS Akordeon */
+  .faq-section { margin-top:36px; padding-top:28px; border-top:1px solid #21262d; }
+  .faq-section-title { font-size:16px; font-weight:700; color:#f0f6fc; margin-bottom:14px; }
+  .faq-item { border:1px solid #30363d; border-radius:8px; margin-bottom:8px; overflow:hidden; transition:border-color .15s; }
+  .faq-item:hover { border-color:#484f58; }
+  .faq-q {
+    width:100%; text-align:left; background:none; border:none; cursor:pointer;
+    padding:13px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px;
+    font-size:13px; font-weight:600; color:#e6edf3; font-family:inherit; line-height:1.4;
+    transition:background .12s;
+  }
+  .faq-q:hover { background:rgba(255,255,255,.03); }
+  .faq-q .faq-chevron { flex-shrink:0; color:#484f58; transition:transform .2s; }
+  .faq-item.open .faq-chevron { transform:rotate(180deg); }
+  .faq-a {
+    display:none; padding:0 16px 13px; font-size:13px; color:#8b949e; line-height:1.65;
+  }
+  .faq-item.open .faq-a { display:block; }
+
   /* CTA kutusu */
   .cta-box {
     background:linear-gradient(135deg,rgba(31,111,235,.1),rgba(59,130,246,.06));
@@ -265,6 +284,22 @@
   <article class="prose">
     {{ article.body | safe }}
   </article>
+
+  {% if article.faqs %}
+  <!-- SSS (Sık Sorulan Sorular) -->
+  <div class="faq-section" id="faqSection">
+    <div class="faq-section-title">❓ Sık Sorulan Sorular</div>
+    {% for faq in article.faqs %}
+    <div class="faq-item" id="faq-{{ loop.index }}">
+      <button class="faq-q" onclick="toggleFaq('faq-{{ loop.index }}')">
+        <span>{{ faq.q }}</span>
+        <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="faq-a">{{ faq.a }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <!-- CTA kutusu -->
   <div class="cta-box">
@@ -416,6 +451,13 @@ function shareBlogCopy() {
     const btn = document.getElementById('blogCopyBtn');
     if (btn) { const t = btn.textContent; btn.textContent = '✅'; setTimeout(() => btn.textContent = t, 2000); }
   });
+}
+
+// ── SSS Akordeon ─────────────────────────────────────────
+function toggleFaq(id) {
+  const item = document.getElementById(id);
+  if (!item) return;
+  item.classList.toggle('open');
 }
 
 // ── E-posta abonelik ────────────────────────────────────
