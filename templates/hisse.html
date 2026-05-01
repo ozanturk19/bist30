@@ -954,6 +954,31 @@
     </div>
   </div>
 
+  <!-- Geçmiş Sinyal Performansı (backtest) -->
+  {% if ticker_bt and ticker_bt.al_win_rate is not none %}
+  <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 18px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="section-title" style="margin:0">📊 Geçmiş Sinyal Performansı</div>
+      <a href="/sinyal-performans" style="font-size:11px;color:#1f6feb;text-decoration:none;font-weight:600">Tüm backtest →</a>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
+        <div style="font-size:24px;font-weight:800;color:{% if ticker_bt.al_win_rate >= 50 %}#3fb950{% else %}#f85149{% endif %}">%{{ ticker_bt.al_win_rate }}</div>
+        <div style="font-size:11px;color:#8b949e;margin-top:3px">AL Kazanma Oranı</div>
+      </div>
+      <div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
+        <div style="font-size:24px;font-weight:800;color:{% if ticker_bt.al_avg > 0 %}#3fb950{% elif ticker_bt.al_avg < 0 %}#f85149{% else %}#8b949e{% endif %}">{% if ticker_bt.al_avg > 0 %}+{% endif %}{{ ticker_bt.al_avg }}%</div>
+        <div style="font-size:11px;color:#8b949e;margin-top:3px">Ort. AL Getirisi</div>
+      </div>
+      <div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
+        <div style="font-size:24px;font-weight:800;color:#64748b">{{ ticker_bt.al_count }}</div>
+        <div style="font-size:11px;color:#8b949e;margin-top:3px">Analiz Edilen Sinyal</div>
+      </div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:#484f58">2 yıllık backtest · {{ ticker_bt.computed_at[:10] if ticker_bt.computed_at else '' }} · ⚠️ Geçmiş performans gelecek garantisi değildir</div>
+  </div>
+  {% endif %}
+
   <!-- KAP + Dış Linkler -->
   <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
     <span style="font-size:12px;color:#8b949e;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Resmi Kaynaklar</span>
