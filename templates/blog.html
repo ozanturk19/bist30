@@ -28,9 +28,20 @@
   .page-sub   { font-size:13px; color:#8b949e; margin-top:1px; }
   .container  { max-width:1100px; margin:0 auto; padding:28px 24px; }
 
-  .cat-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+  .cat-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
   .cat-btn { background:#21262d; border:1px solid #30363d; border-radius:20px; padding:5px 14px; font-size:12px; color:#8b949e; cursor:pointer; transition:all .15s; }
   .cat-btn:hover, .cat-btn.active { background:#1f6feb; border-color:#1f6feb; color:#fff; }
+  .blog-search-wrap { position:relative; margin-bottom:20px; }
+  .blog-search {
+    width:100%; background:#161b22; border:1px solid #30363d; border-radius:8px;
+    color:#e6edf3; padding:9px 14px 9px 38px; font-size:13px; outline:none;
+    transition:border-color .15s; font-family:inherit;
+  }
+  .blog-search:focus { border-color:#1f6feb; }
+  .blog-search::placeholder { color:#484f58; }
+  .blog-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#484f58; pointer-events:none; }
+  .no-results { padding:40px 24px; text-align:center; color:#484f58; }
+  .bc-new { display:inline-block; background:rgba(63,185,80,.12); border:1px solid rgba(63,185,80,.3); color:#3fb950; font-size:9px; font-weight:700; padding:1px 6px; border-radius:8px; margin-left:6px; vertical-align:middle; text-transform:uppercase; letter-spacing:.3px; }
 
   .blog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
   .blog-card { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:20px; text-decoration:none; display:block; transition:all .15s; }
@@ -73,8 +84,15 @@
 <div class="macro-bar"><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 <div class="container">
+  <!-- Blog search -->
+  <div class="blog-search-wrap">
+    <svg class="blog-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="blog-search" id="blogSearch" type="text" placeholder="Makale ara… (başlık, konu, kategori)"
+           oninput="filterBlog()" autocomplete="off" spellcheck="false">
+  </div>
+
   <div class="cat-filters">
-    <button class="cat-btn active" onclick="filterCat('Tümü', this)">Tümü ({{ articles|length }})</button>
+    <button class="cat-btn active" id="catAll" onclick="filterCat('Tümü', this)">Tümü ({{ articles|length }})</button>
     {% for cat, cnt in cat_counts %}
     <button class="cat-btn" onclick="filterCat('{{ cat }}', this)">{{ cat }} ({{ cnt }})</button>
     {% endfor %}
@@ -82,8 +100,9 @@
 
   <div class="blog-grid" id="grid">
     {% for a in articles %}
-    <a href="/blog/{{ a.slug }}" class="blog-card" data-cat="{{ a.cat }}">
-      <div class="bc-cat">{{ a.cat }}</div>
+    <a href="/blog/{{ a.slug }}" class="blog-card" data-cat="{{ a.cat }}"
+       data-title="{{ a.title|lower }}" data-desc="{{ a.desc|lower }}">
+      <div class="bc-cat">{{ a.cat }}{% if loop.revcount <= 3 %}<span class="bc-new">Yeni</span>{% endif %}</div>
       <div class="bc-title">{{ a.title }}</div>
       <div class="bc-desc">{{ a.desc }}</div>
       <div class="bc-meta">
@@ -93,6 +112,11 @@
     </a>
     {% endfor %}
   </div>
+  <div class="no-results" id="noResults" style="display:none">
+    <div style="font-size:32px;margin-bottom:10px">🔍</div>
+    <div style="font-size:15px;font-weight:600;color:#c9d1d9;margin-bottom:6px">Makale bulunamadı</div>
+    <div>Farklı anahtar kelimeler deneyin veya kategori filtresini kaldırın.</div>
+  </div>
 </div>
 
 <footer>
@@ -101,12 +125,28 @@
 </footer>
 
 <script>
+let _activeCat = 'Tümü';
+
 function filterCat(cat, btn) {
+  _activeCat = cat;
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.querySelectorAll('.blog-card').forEach(card => {
-    card.style.display = (cat === 'Tümü' || card.dataset.cat === cat) ? 'block' : 'none';
+  filterBlog();
+}
+
+function filterBlog() {
+  const q = (document.getElementById('blogSearch').value || '').toLowerCase().trim();
+  const cards = document.querySelectorAll('.blog-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const catMatch = _activeCat === 'Tümü' || card.dataset.cat === _activeCat;
+    const textMatch = !q || card.dataset.title.includes(q) || card.dataset.desc.includes(q)
+                       || card.dataset.cat.toLowerCase().includes(q);
+    const show = catMatch && textMatch;
+    card.style.display = show ? 'block' : 'none';
+    if (show) visible++;
   });
+  document.getElementById('noResults').style.display = visible === 0 ? '' : 'none';
 }
 // Makro Ticker
 const _ML={USDTRY:'USD/TRY',EURTRY:'EUR/TRY',XU100:'BIST100',XU030:'BIST30',BIST30:'BIST30',BTC:'BTC',ALTIN:'Altın',GUMUS:'Gümüş',SP500:'S&P500',NASDAQ:'NASDAQ'};
