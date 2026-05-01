@@ -90,6 +90,18 @@
   footer a { color:#8b949e; text-decoration:none; }
 
   @media(max-width:600px) { .container{padding:12px;} .heatmap{grid-template-columns:1fr;} }
+
+  /* ── Makro Ticker Bandı ── */
+  .macro-bar { background:#0b111f; border-bottom:1px solid #1e2d45; height:34px; overflow:hidden; position:relative; white-space:nowrap; }
+  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2; }
+  .macro-bar::before { left:0; background:linear-gradient(to right,#0b111f,transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,#0b111f,transparent); }
+  .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
+  .macro-bar:hover .macro-track { animation-play-state:paused; }
+  @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #1e2d45; font-size:12px; height:34px; color:inherit; }
+  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
+  .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
 </style>
 </head>
 <body>
@@ -112,6 +124,8 @@
     <div class="page-sub" id="lastUpdate">Veriler yükleniyor...</div>
   </div>
 </header>
+<!-- Makro Ticker Bandı -->
+<div class="macro-bar"><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 <div class="container">
 
@@ -252,6 +266,12 @@ async function load() {
 
 load();
 setInterval(load, 120000);  // Her 2 dakika yenile
+
+// Makro Ticker Bandı
+const _ML={USDTRY:'USD/TRY',EURTRY:'EUR/TRY',XU100:'BIST100',XU030:'BIST30',BIST30:'BIST30',BTC:'BTC',ALTIN:'Altın',GUMUS:'Gümüş',SP500:'S&P500',NASDAQ:'NASDAQ'};
+const _MD={USDTRY:4,EURTRY:4,XU100:0,XU030:0,SP500:0,NASDAQ:0,BTC:0};
+async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e){}}
+loadMacroBar();setInterval(loadMacroBar,60000);
 </script>
 </body>
 </html>
