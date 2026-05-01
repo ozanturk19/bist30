@@ -1263,6 +1263,20 @@
     <div class="stat-card stat-bekle"><div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div><div class="stat-label">Belirsiz</div></div>
   </div>
 
+  <!-- Backtest güven rozeti -->
+  <a href="/sinyal-performans" id="btTrustBadge" style="display:none;text-decoration:none;
+    background:linear-gradient(135deg,rgba(63,185,80,.07),rgba(59,130,246,.05));
+    border:1px solid rgba(63,185,80,.2);border-radius:10px;padding:10px 16px;margin-bottom:16px;
+    flex-wrap:wrap;gap:8px;align-items:center;transition:border-color .15s"
+    onmouseover="this.style.borderColor='rgba(63,185,80,.4)'" onmouseout="this.style.borderColor='rgba(63,185,80,.2)'">
+    <span style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;font-weight:600">📊 2 Yıllık Backtest</span>
+    <span id="btWinRate" style="font-size:20px;font-weight:800;color:#3fb950;letter-spacing:-0.5px"></span>
+    <span style="font-size:11px;color:#64748b">başarı oranı ·</span>
+    <span id="btAvgRet" style="font-size:13px;font-weight:700;color:#3fb950"></span>
+    <span style="font-size:11px;color:#64748b">ort. getiri</span>
+    <span style="margin-left:auto;font-size:11px;color:#3b82f6;font-weight:600">Tüm rapor →</span>
+  </a>
+
   <!-- ── Gündem & Haberler ──────────────────────────── -->
   <section class="gundem-section" id="gundemSec">
     <div class="gundem-header">
@@ -3049,6 +3063,23 @@ async function loadGundem(newsOnly) {
   }
 }
 loadGundem(false);
+
+/* ── Backtest Güven Rozeti ───────────────────────── */
+(async function loadBtBadge() {
+  try {
+    const r = await fetch('/api/backtest');
+    const d = await r.json();
+    if (d.status === 'computing' || !d.al) return;
+    const badge = document.getElementById('btTrustBadge');
+    const wr = document.getElementById('btWinRate');
+    const ar = document.getElementById('btAvgRet');
+    if (!badge || !wr || !ar) return;
+    wr.textContent = '%' + d.al.win_rate;
+    const retSign = d.al.avg_ret >= 0 ? '+' : '';
+    ar.textContent = retSign + d.al.avg_ret + '%';
+    badge.style.display = 'flex';
+  } catch(e) {}
+})();
 
 /* ── PWA Service Worker + Push ──────────────────── */
 let _swReg = null;
