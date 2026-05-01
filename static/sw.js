@@ -1,5 +1,5 @@
-/* BorsaPusula Service Worker v1.0 */
-const CACHE = 'borsapusula-v1';
+/* BorsaPusula Service Worker v1.1 */
+const CACHE = 'borsapusula-v2';
 const STATIC = [
   '/static/lightweight-charts.min.js',
   '/static/manifest.json',
@@ -47,16 +47,32 @@ self.addEventListener('push', e => {
   const data = e.data ? e.data.json() : {};
   e.waitUntil(
     self.registration.showNotification(data.title || 'BorsaPusula', {
-      body: data.body || 'Sinyal değişikliği var.',
-      icon: '/static/icon-192.png',
-      badge: '/static/icon-192.png',
-      tag: data.tag || 'borsapusula-signal',
-      data: { url: data.url || '/' },
+      body:             data.body || 'Sinyal değişikliği var.',
+      icon:             '/static/icon-192.png',
+      badge:            '/static/icon-192.png',
+      tag:              data.tag || 'borsapusula-signal',
+      renotify:         true,
+      requireInteraction: false,
+      vibrate:          [200, 100, 200],
+      data:             { url: data.url || '/' },
     })
   );
 });
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  e.waitUntil(clients.openWindow(e.notification.data.url || '/'));
+  const url = (e.notification.data && e.notification.data.url) || '/';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(wins => {
+      // Focus existing window if open
+      for (const w of wins) {
+        if (w.url.includes(self.location.origin) && 'focus' in w) {
+          w.focus();
+          if (url !== '/') w.navigate(url);
+          return;
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
 });

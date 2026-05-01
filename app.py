@@ -20,6 +20,13 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from blog_content import ARTICLES, ARTICLES_BY_SLUG, CATEGORIES
 
+# ── Web Push (VAPID) — opsiyonel; eksikse özellik devre dışı ──────────────────
+try:
+    from pywebpush import webpush, WebPushException
+    _PUSH_ENABLED = True
+except ImportError:
+    _PUSH_ENABLED = False
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
 
@@ -33,6 +40,106 @@ limiter = Limiter(
 
 # ── Admin endpoint koruması ───────────────────────────────────────────────────
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "")
+
+# ── VAPID Web Push Bildirimleri ───────────────────────────────────────────────
+_APP_DIR        = os.path.dirname(os.path.abspath(__file__))
+VAPID_PUBLIC    = os.environ.get("VAPID_PUBLIC", "")
+VAPID_PRIV_PATH = os.environ.get(
+    "VAPID_PRIVATE_PATH",
+    os.path.join(_APP_DIR, "vapid_private.pem")
+)
+VAPID_CLAIMS    = {"sub": "mailto:hello@borsapusula.com"}
+
+# Auto-load VAPID public key from file if env var not set
+if not VAPID_PUBLIC and os.path.exists(os.path.join(_APP_DIR, "vapid_public.txt")):
+    try:
+        with open(os.path.join(_APP_DIR, "vapid_public.txt")) as _f:
+            VAPID_PUBLIC = _f.read().strip()
+    except Exception:
+        pass
+
+# Push subscriber storage
+_PUSH_SUBS_FILE = os.path.join(_APP_DIR, "push_subs.json")
+_push_subs: list = []
+_push_lock = threading.Lock()
+
+
+def _load_push_subs():
+    global _push_subs
+    try:
+        if os.path.exists(_PUSH_SUBS_FILE):
+            with open(_PUSH_SUBS_FILE, encoding="utf-8") as f:
+                _push_subs = json.load(f)
+            logger = logging.getLogger(__name__)
+            logger.info("Push subscribers yüklendi: %d", len(_push_subs))
+    except Exception as e:
+        pass  # logger not yet set up at import time
+
+
+def _save_push_subs_locked():
+    """Must be called while holding _push_lock."""
+    try:
+        with open(_PUSH_SUBS_FILE, "w", encoding="utf-8") as f:
+            json.dump(_push_subs, f)
+    except Exception:
+        pass
+
+
+def _send_one_push(sub_info: dict, payload: str) -> bool | None:
+    """Tek subscriber'a push gönder. False=expired, True=ok, None=error."""
+    if not _PUSH_ENABLED:
+        return None
+    try:
+        webpush(
+            subscription_info=sub_info,
+            data=payload,
+            vapid_private_key=VAPID_PRIV_PATH,
+            vapid_claims=VAPID_CLAIMS,
+        )
+        return True
+    except Exception as exc:
+        s = str(exc)
+        if "410" in s or "404" in s or "unsubscribed" in s.lower():
+            return False     # Expired subscription
+        return None          # Transient error
+
+
+def _broadcast_push(title: str, body: str, url: str = "/"):
+    """Tüm push subscriber'larına bildirim gönder, süresi dolmuşları temizle."""
+    if not _PUSH_ENABLED or not VAPID_PUBLIC or not os.path.exists(VAPID_PRIV_PATH):
+        return
+    with _push_lock:
+        subs_snap = list(_push_subs)
+
+    if not subs_snap:
+        return
+
+    payload = json.dumps({
+        "title": title,
+        "body": body,
+        "url": url,
+        "tag": "borsapusula-signal",
+        "icon": "/static/icon-192.png",
+    })
+
+    keep = []
+    sent = 0
+    for sub in subs_snap:
+        result = _send_one_push(sub, payload)
+        if result is not False:
+            keep.append(sub)
+        if result is True:
+            sent += 1
+
+    removed = len(subs_snap) - len(keep)
+    if removed > 0:
+        with _push_lock:
+            _push_subs[:] = keep
+            _save_push_subs_locked()
+
+    logging.getLogger(__name__).info(
+        "Push broadcast: %d sent, %d expired removed", sent, removed
+    )
 
 # ── Sinyal görünen ad eşlemesi (iç değer AL/SAT/BEKLE değişmez) ───────────────
 _SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Zayıf Trend', 'BEKLE': 'Belirsiz'}
@@ -960,6 +1067,27 @@ def _notify_signal_changes(new_results):
 
     if changes:
         _notify_email_signal_changes(changes)
+
+    if changes:
+        # Web push: tek mesaj, en fazla 3 hisse
+        _push_changes = changes[:3]
+        if len(_push_changes) == 1:
+            t, old, new, stock = _push_changes[0]
+            name = STOCK_NAMES.get(t, t)
+            lbl  = "AL ▲ Güçlü Trend" if new == "AL" else "SAT ▼ Zayıf Trend"
+            push_title = f"{t} — {lbl}"
+            push_body  = f"{name} sinyali değişti: {old} → {new}"
+            push_url   = f"/hisse/{t}"
+        else:
+            tickers_str = ", ".join(t for t, *_ in _push_changes)
+            push_title  = f"Sinyal Değişimi: {tickers_str}"
+            push_body   = f"{len(changes)} hissede sinyal değişti"
+            push_url    = "/"
+        threading.Thread(
+            target=_broadcast_push,
+            args=(push_title, push_body, push_url),
+            daemon=True
+        ).start()
 
     _prev_signals = new_sig_map
 
@@ -4339,6 +4467,48 @@ def api_subscribe():
     return safe_json({"ok": True, "message": "Abonelik başarılı! Onay e-postası gönderildi."})
 
 
+# ── Web Push API ─────────────────────────────────────────────────────────────
+
+@app.route("/api/push/vapid-public-key")
+def api_push_vapid_key():
+    """Frontend'in subscription için ihtiyaç duyduğu VAPID public key."""
+    return safe_json({"publicKey": VAPID_PUBLIC})
+
+
+@app.route("/api/push/subscribe", methods=["POST"])
+@limiter.limit("20 per hour")
+def api_push_subscribe():
+    """Browser push subscription'ı kaydet."""
+    sub = request.get_json(silent=True)
+    if not sub or "endpoint" not in sub:
+        return safe_json({"error": "Geçersiz subscription"}), 400
+
+    with _push_lock:
+        existing = any(s.get("endpoint") == sub["endpoint"] for s in _push_subs)
+        if not existing:
+            _push_subs.append(sub)
+            _save_push_subs_locked()
+        count = len(_push_subs)
+
+    logger.info("Push sub kaydedildi (toplam %d)", count)
+    return safe_json({"ok": True, "subscribed": not existing, "count": count})
+
+
+@app.route("/api/push/unsubscribe", methods=["POST"])
+@limiter.limit("20 per hour")
+def api_push_unsubscribe():
+    """Push subscription'ı iptal et."""
+    data     = request.get_json(silent=True) or {}
+    endpoint = data.get("endpoint", "")
+    with _push_lock:
+        before = len(_push_subs)
+        _push_subs[:] = [s for s in _push_subs if s.get("endpoint") != endpoint]
+        removed = before - len(_push_subs)
+        if removed:
+            _save_push_subs_locked()
+    return safe_json({"ok": True, "removed": removed})
+
+
 @app.route("/unsubscribe/<token>")
 def unsubscribe_page(token):
     """Tek tıkla abonelik iptali."""
@@ -4431,6 +4601,8 @@ def blog_article(slug):
 def _startup():
     # Disk cache'i yükle — anlık veri gelene kadar siteyi hemen dolduran eski veri
     _load_cache_from_disk()
+    # Push subscribers'ı yükle
+    _load_push_subs()
     refresh_chart()
     # XU100 + makro varlıkları arka planda paralel yükle
     threading.Thread(target=refresh_xu100_chart, daemon=True).start()

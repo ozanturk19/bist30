@@ -1266,11 +1266,11 @@
     </div>
   </section>
 
-  <!-- ── E-posta Abone Formu ───────────────────────── -->
+  <!-- ── Bildirim Çubuğu (E-posta + Push) ────────── -->
   <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(59,130,246,.07),rgba(29,78,216,.04));border:1px solid rgba(59,130,246,.18);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
       <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:2px">📬 Sinyal Bildirimleri</div>
-      <div style="font-size:11px;color:#64748b">Sinyal değiştiğinde e-posta al — ücretsiz</div>
+      <div style="font-size:11px;color:#64748b">Sinyal değiştiğinde bildirim al — ücretsiz</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px" id="subForm">
       <input id="subEmail" type="email" placeholder="e-posta adresiniz"
@@ -1287,6 +1287,15 @@
         Abone Ol
       </button>
     </div>
+    <!-- Push bildirim butonu -->
+    <button id="pushBtn" onclick="togglePushSubscription()"
+      style="display:none;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);
+             color:#93c5fd;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;
+             cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s"
+      onmouseover="this.style.background='rgba(59,130,246,.2)'" onmouseout="this.style.background='rgba(59,130,246,.1)'"
+      title="Tarayıcı push bildirimi">
+      🔔 Push Aç
+    </button>
     <button onclick="document.getElementById('subscribeBar').style.display='none'"
       style="background:none;border:none;color:#374151;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px"
       title="Kapat">×</button>
@@ -2910,10 +2919,99 @@ async function loadGundem(newsOnly) {
 }
 loadGundem(false);
 
-/* ── PWA Service Worker ──────────────────────────── */
+/* ── PWA Service Worker + Push ──────────────────── */
+let _swReg = null;
+let _pushSubscription = null;
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
+    .then(reg => {
+      _swReg = reg;
+      _initPushButton();
+    })
     .catch(e => console.warn('SW register fail:', e));
+}
+
+async function _initPushButton() {
+  if (!('PushManager' in window) || !('Notification' in window)) return;
+  const btn = document.getElementById('pushBtn');
+  if (!btn) return;
+  btn.style.display = '';
+
+  // Check existing subscription
+  try {
+    _pushSubscription = await _swReg.pushManager.getSubscription();
+    _updatePushBtn();
+  } catch(e) {}
+}
+
+function _updatePushBtn() {
+  const btn = document.getElementById('pushBtn');
+  if (!btn) return;
+  if (_pushSubscription) {
+    btn.textContent = '🔕 Push Kapat';
+    btn.style.color = '#94a3b8';
+    btn.style.borderColor = 'rgba(100,116,139,.3)';
+  } else {
+    btn.textContent = '🔔 Push Aç';
+    btn.style.color = '#93c5fd';
+    btn.style.borderColor = 'rgba(59,130,246,.3)';
+  }
+}
+
+async function togglePushSubscription() {
+  if (!_swReg) return;
+  const btn = document.getElementById('pushBtn');
+  if (btn) btn.disabled = true;
+
+  try {
+    if (_pushSubscription) {
+      // Unsubscribe
+      await fetch('/api/push/unsubscribe', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({endpoint: _pushSubscription.endpoint})
+      });
+      await _pushSubscription.unsubscribe();
+      _pushSubscription = null;
+    } else {
+      // Request permission
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') {
+        if (btn) btn.disabled = false;
+        return;
+      }
+      // Get VAPID key
+      const keyRes = await fetch('/api/push/vapid-public-key');
+      const {publicKey} = await keyRes.json();
+      if (!publicKey) { if (btn) btn.disabled = false; return; }
+
+      // Subscribe
+      const appServerKey = _urlBase64ToUint8Array(publicKey);
+      _pushSubscription = await _swReg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: appServerKey,
+      });
+      await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(_pushSubscription.toJSON()),
+      });
+    }
+    _updatePushBtn();
+  } catch(e) {
+    console.warn('Push toggle error:', e);
+  }
+  if (btn) btn.disabled = false;
+}
+
+function _urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = window.atob(base64);
+  const arr     = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
 }
 </script>
 </body>
