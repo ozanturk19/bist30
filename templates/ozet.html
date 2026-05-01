@@ -379,6 +379,36 @@ function goToDate(date) {
 
 </div>
 
+<!-- E-posta Abonelik CTA -->
+<div style="max-width:800px;margin:0 auto 28px auto;padding:0 20px">
+  <div id="ozSubBar" style="background:linear-gradient(135deg,rgba(59,130,246,.07),rgba(29,78,216,.04));
+       border:1px solid rgba(59,130,246,.18);border-radius:10px;padding:16px 20px;
+       display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div style="flex:1;min-width:180px">
+      <div style="font-size:14px;font-weight:700;color:#e2e8f0;margin-bottom:3px">📬 Günlük Özeti E-postayla Al</div>
+      <div style="font-size:12px;color:#64748b">Her sabah BIST sinyal özeti gelen kutunuzda — ücretsiz, iptal her zaman.</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px" id="ozSubForm">
+      <input id="ozSubEmail" type="email" placeholder="e-posta adresiniz"
+        style="flex:1;background:#111827;border:1px solid #1e2d45;color:#e2e8f0;
+               padding:8px 12px;border-radius:7px;font-size:13px;font-family:inherit;outline:none;
+               transition:border-color .15s;min-width:0"
+        onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#1e2d45'"
+        onkeydown="if(event.key==='Enter')ozSubmitSub()">
+      <button onclick="ozSubmitSub()"
+        style="background:#1f6feb;color:#fff;border:none;padding:8px 18px;border-radius:7px;
+               font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;
+               transition:background .15s"
+        onmouseover="this.style.background='#388bfd'" onmouseout="this.style.background='#1f6feb'">
+        Abone Ol
+      </button>
+    </div>
+    <button onclick="document.getElementById('ozSubBar').style.display='none'"
+      style="background:none;border:none;color:#374151;cursor:pointer;font-size:16px;line-height:1;padding:2px 6px;flex-shrink:0"
+      title="Kapat">×</button>
+  </div>
+</div>
+
 <footer>
   <div style="margin-bottom:8px">
     <a href="/" style="color:#8b949e">Ana Sayfa</a> ·
@@ -399,6 +429,34 @@ const _ML={USDTRY:'USD/TRY',EURTRY:'EUR/TRY',XU100:'BIST100',XU030:'BIST30',BIST
 const _MD={USDTRY:4,EURTRY:4,XU100:0,XU030:0,SP500:0,NASDAQ:0,BTC:0};
 async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e){}}
 loadMacroBar();setInterval(loadMacroBar,60000);
+
+async function ozSubmitSub() {
+  const emailEl = document.getElementById('ozSubEmail');
+  const email   = emailEl ? emailEl.value.trim() : '';
+  if (!email || !email.includes('@')) {
+    if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
+    return;
+  }
+  try {
+    const res  = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email})
+    });
+    const data = await res.json();
+    const form = document.getElementById('ozSubForm');
+    if (form) {
+      if (data.ok || data.message) {
+        form.innerHTML = '<div style="color:#3fb950;font-size:13px;font-weight:600">✅ ' + (data.message || 'Abone oldunuz!') + '</div>';
+      } else {
+        form.innerHTML = '<div style="color:#f85149;font-size:13px">' + (data.error || 'Bir hata oluştu.') + '</div>';
+      }
+    }
+  } catch(e) {
+    const form = document.getElementById('ozSubForm');
+    if (form) form.innerHTML = '<div style="color:#f85149;font-size:13px">Bağlantı hatası. Lütfen tekrar deneyin.</div>';
+  }
+}
 </script>
 </body>
 </html>
