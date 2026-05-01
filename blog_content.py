@@ -5066,6 +5066,319 @@ ROA = Net Kâr / Toplam Aktifler × 100
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'TUPRS']
   },
+
+  # ── ARTICLE 69 ──
+  {
+    "slug": "fed-faiz-kararlari-bist-etkisi",
+    "title": "FED Faiz Kararları BIST'i Nasıl Etkiler? Kapsamlı Rehber",
+    "desc": "Amerikan Merkez Bankası FED'in faiz kararları Türkiye borsasını ve hisselerini nasıl etkiler? FED toplantıları, dolar/TL ilişkisi ve BIST bağlantısı.",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Makro Ekonomi",
+    "body": """
+<p>FED (Federal Reserve — ABD Merkez Bankası) aldığı faiz kararları, sadece ABD piyasalarını değil, tüm dünyayı — Türkiye dahil — etkiler. BIST yatırımcıları için FED'i anlamak, küresel para akışını anlamak anlamına gelir.</p>
+
+<h2>FED Nedir ve Neden Önemlidir?</h2>
+<p>FED, ABD'nin merkez bankasıdır. Yılda sekiz kez toplanan FOMC (Federal Open Market Committee) kurulu, politika faiz oranını (federal funds rate) belirler. Bu oran:</p>
+<ul>
+  <li>ABD bankacılık sisteminin borçlanma maliyetini belirler</li>
+  <li>Küresel dolar likiditesini kontrol eder</li>
+  <li>Gelişmekte olan piyasalara (Türkiye dahil) sermaye akışını doğrudan etkiler</li>
+</ul>
+
+<h2>FED'in BIST'e Etkisi — Mekanizma</h2>
+<p>FED kararları Türkiye'yi iki kanaldan etkiler:</p>
+
+<h3>1. Sermaye Akışı Kanalı</h3>
+<p>FED faiz artırdığında → ABD varlıkları daha cazip hale gelir → Yabancı yatırımcılar gelişmekte olan piyasalardan (Türkiye dahil) çıkar → TL satar, dolar alır → TL değer kaybeder → BIST'te satış baskısı oluşur.</p>
+<p>FED faiz indirdiğinde → ABD varlıkları görece daha az cazip → Yabancı yatırımcılar risk iştahı ile EM (Emerging Markets) varlıklarına yönelir → TL'ye talep artar → BIST'e alım gelir.</p>
+
+<h3>2. Dolar/TL Kanalı</h3>
+<p>Dolar güçlendiğinde → TL değer kaybeder → BIST nominal olarak yükselir ama dolar bazında aynı kalır veya düşer → Yabancı yatırımcılar için BIST cazibesini kaybeder.</p>
+
+<h2>FED Artış Dönemleri ve BIST</h2>
+<p>Tarihsel örüntü incelendiğinde:</p>
+<ul>
+  <li><strong>FED sıkılaştırma dönemleri (faiz artışı):</strong> Yabancı çıkışı, TL baskısı, BIST volatilitesi artar</li>
+  <li><strong>FED genişleme dönemleri (faiz indirimi / QE):</strong> Yabancı girişi, TL desteklenir, BIST pozitif etkilenir</li>
+  <li><strong>FED belirsizlik dönemleri:</strong> "Pivote" beklentileri — Türkiye hisseleri FED kararına duyarlı reaksiyon verir</li>
+</ul>
+
+<h2>FED Toplantı Takvimi</h2>
+<p>FOMC yılda 8 kez toplanır (yaklaşık her 6 haftada bir). Toplantı tarihleri önceden duyurulur. Karar açıklaması Çarşamba günü (saat 21:00 TRT) yayımlanır. Toplantıdan sonra yapılan Powell basın konferansı piyasalarda büyük volatiliteye yol açabilir.</p>
+<p>FED toplantı haftalarında BIST'te ekstra volatilite beklemek mantıklıdır.</p>
+
+<h2>FED'i Takip Etmenin Pratik Yolları</h2>
+<ul>
+  <li><strong>CME FedWatch Tool:</strong> Piyasanın FED kararını ne kadar ihtimalle beklediğini gösterir</li>
+  <li><strong>Fed Dot Plot:</strong> FED üyelerinin faiz tahminlerini içeren grafik — "pivot" işaretleri için kritik</li>
+  <li><strong>ABD enflasyon verisi (CPI):</strong> FED kararını öngörmek için en önemli öncü gösterge</li>
+  <li><strong>ABD işgücü piyasası (NFP, işsizlik):</strong> İkinci en önemli FED verisi</li>
+</ul>
+
+<h2>TCMB ile FED'in Farkı</h2>
+<p>TCMB (Türkiye Cumhuriyet Merkez Bankası), Türkiye'nin kendi para politikasını yürütür. Ancak TCMB kararları FED'den bağımsız değildir:</p>
+<ul>
+  <li>FED sıkılaştırırken TCMB gevşetirse → TL üzerinde ciddi baskı</li>
+  <li>FED ve TCMB aynı yönde hareket ederse → Etki nötralize edilebilir</li>
+  <li>TCMB'nin döviz rezervleri → FED dönemlerinde kritik tampon</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "FED faiz artırınca BIST neden düşer?",
+       "a": "FED faiz artışı ABD varlıklarını daha cazip kılar. Bu nedenle yabancı yatırımcılar Türkiye gibi gelişmekte olan piyasalardan çıkar, dolar alır. TL değer kaybeder, BIST'te satış baskısı oluşur. Yüksek dolar aynı zamanda cari açığı ve borçlanma maliyetlerini artırarak Türk şirketlerini olumsuz etkiler."},
+      {"q": "FED kararları ne zaman açıklanır?",
+       "a": "FOMC yılda 8 kez toplanır (yaklaşık her 6 haftada bir). Karar Çarşamba günü Türkiye saatiyle 21:00'de açıklanır, ardından Fed Başkanı basın toplantısı yapar. Bu toplantı tarihlerini önceden bilmek, volatil dönemler için pozisyonunuzu yönetmenizi kolaylaştırır."},
+      {"q": "FED pivot nedir?",
+       "a": "FED pivot, merkez bankasının faiz artışından faiz indirimine (veya duraksama) geçiş yapacağı an anlamında kullanılır. Pivot beklentileri genellikle gelişmekte olan piyasalarda (EM) güçlü ralli başlatır; çünkü yatırımcılar daha yüksek riskli varlıklara dönmeye başlar."},
+      {"q": "FED kararına göre hangi hisseler ne yönde hareket eder?",
+       "a": "Faiz indirim dönemlerinde büyüme ve teknoloji hisseleri, EM (gelişmekte olan piyasa) varlıkları, altın fiyatları ve kripto güçlenir. Faiz artışı dönemlerinde finansal hisseler (bankalar yüksek faizden kâr eder) olumlu etkilenirken, borçluluk oranı yüksek şirketler baskı altına girer."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'TUPRS', 'EREGL']
+  },
+
+  # ── ARTICLE 70 ──
+  {
+    "slug": "zarar-kesme-pozisyon-kapatma-rehberi",
+    "title": "Zararda Hisseyi Ne Zaman Satmalısınız? Pozisyon Kapatma Rehberi",
+    "desc": "Zarardaki bir hisseyi tutmak mı, satmak mı? Stop loss seviyesine uymak neden kritiktir? Yatırım kararlarında zarar kesmenin psikolojisi ve kuralları.",
+    "date": "2026-05-01",
+    "mins": 6,
+    "cat": "Risk Yönetimi",
+    "body": """
+<p>"Düşüşte sat, bekleyince zaten çıkar" mantığı yatırımcıların yapabileceği en tehlikeli hatalardan biridir. Zararda beklemek, doğru bir strateji değil — çoğu zaman zararlı bir inkar mekanizmasıdır. Bu rehberde ne zaman satmanız gerektiğini net kurallara bağlıyoruz.</p>
+
+<h2>Kayıp Psikolojisi: Neden Bekleriz?</h2>
+<p>Kaybı realize etmek psikolojik olarak acı verir. Hisse hala portföyde iken "kağıt üzerinde kayıp" olarak görülür — gerçek kayıp değil sanılır. Davranışsal finans bu durumu <strong>kayıp kaçınma</strong> (loss aversion) olarak tanımlar: İnsanlar eşit miktarda kazançtan aldıkları mutluluktan 2 kat daha fazla kayıptan acı duyarlar.</p>
+<p>Sonuç: Yatırımcılar kazanan pozisyonları çok erken kapatır, kaybeden pozisyonları çok uzun tutar. Bu "değer etkisi" (disposition effect) araştırmalarda en yaygın yatırımcı hatasıdır.</p>
+
+<h2>Stop Loss: Önceden Belirlenmiş Çıkış Kuralı</h2>
+<p>Stop loss, pozisyon açmadan önce belirlenen maksimum kabul edilebilir zarar seviyesidir. Örnek: AKBNK'ı 130₺'den aldıysanız ve %8 kayba katlanmaya razısanız, stop loss = 119,6₺. Bu seviyeye düşünce satış yapılır.</p>
+<p>Stop loss'un en kritik kuralı: <strong>Sonradan değiştirmeyin.</strong> "Biraz daha bekleyeyim, belki çıkar" düşüncesi stop loss'u anlamsız kılar.</p>
+
+<h2>Zararda Satmayı Gerektiren Net Sinyaller</h2>
+<ul>
+  <li><strong>Stop loss seviyesi kırıldığında:</strong> Önceden belirlenen çıkış noktasına gelindiğinde hemen sat</li>
+  <li><strong>Sinyal tersine döndüğünde:</strong> AL sinyali olan hisse SAT'a döndüyse pozisyonun gerekçesi kalkmıştır</li>
+  <li><strong>Şirket haberleri temel analizi değiştirdiğinde:</strong> Büyük skandal, CEO değişikliği, iflas riski</li>
+  <li><strong>Daha iyi fırsat ortaya çıktığında:</strong> Zararın büyümesini beklemek yerine parayı daha iyi fırsata taşıyın</li>
+  <li><strong>Portföyün sağlığını korumalısınız:</strong> Tek pozisyonun büyük zararı portföyü ezmemeli</li>
+</ul>
+
+<h2>Ortalama Düşürme: Tuzak mı, Fırsat mı?</h2>
+<p>Zarardaki bir hissede ek alım yaparak maliyet ortalamasını düşürmeye <strong>ortalama düşürme</strong> (averaging down) denir. Bazı durumlarda mantıklı olabilir — ama dikkatli olunmalıdır:</p>
+<p>Ortalama düşürme ne zaman makul değildir?</p>
+<ul>
+  <li>Hisse teknik olarak kırılmış ve aşağı trende girmiş</li>
+  <li>Şirketle ilgili olumsuz temel gelişme var</li>
+  <li>Yalnızca "düşmüş olduğu için ucuz" diye alınıyor</li>
+  <li>Portföyün zaten büyük bir yüzdesini oluşturuyorsa</li>
+</ul>
+<p>Ortalama düşürme ne zaman makul olabilir?</p>
+<ul>
+  <li>Genel piyasa düşüşünde sağlam temel/teknik yapısını koruyan hisselerde</li>
+  <li>Önceden planlanmış kademeli alım stratejisinin parçasıysa</li>
+  <li>Sinyal hala AL durumundaysa (geçici geri çekilme)</li>
+</ul>
+
+<h2>BorsaPusula Stop Loss Kuralı</h2>
+<p>BorsaPusula her hisse için ATR (Average True Range) tabanlı stop loss hesaplar. Hisse detay sayfasında görünen <strong>SL seviyesi</strong> bu hesabın sonucudur. Bu seviye kırıldığında:</p>
+<ul>
+  <li>Teknik yapı bozulmuştur</li>
+  <li>Trendin devam etme olasılığı ciddi ölçüde azalmıştır</li>
+  <li>Pozisyondan çıkmak için gerekçe oluşmuştur</li>
+</ul>
+<p>Stop loss disiplini kısa vadede bazı fırsatları kaçırmanıza yol açabilir — ancak uzun vadede büyük kayıplardan koruması, kaçırılan fırsatların çok üzerinde değer taşır.</p>
+""",
+    "faqs": [
+      {"q": "Zararda hisseyi ne zaman satmalıyım?",
+       "a": "Önceden belirlediğiniz stop loss seviyesine gelindiğinde, sinyal tersine döndüğünde veya şirketle ilgili temel analizinizi değiştiren bir gelişme yaşandığında satmalısınız. 'Belki çıkar' beklentisiyle tutmak genellikle zararı büyütür."},
+      {"q": "Ortalama düşürme yapmalı mıyım?",
+       "a": "Genel piyasa düşüşünde sağlam temel yapısını koruyan, sinyali hala AL olan hisselerde kademeli ek alım makul olabilir. Ancak trendin aşağı döndüğü, sinyalin bozulduğu veya şirketle olumsuz haberler olduğu durumlarda ortalama düşürme riski artırır."},
+      {"q": "Stop loss seviyesini sonradan değiştirebilir miyim?",
+       "a": "Piyasanın lehinize gittiği durumlarda stop loss'u yukarı çekmek (trailing stop) mantıklıdır. Ancak aleyhinize gidince 'biraz daha bekleyeyim' diyerek stop loss'u aşağı indirmek en yaygın ve zararlı hatadır. Stop loss orijinal planınızın parçasıdır."},
+      {"q": "BorsaPusula'daki SL seviyesi ne işe yarar?",
+       "a": "BorsaPusula'daki SL (Stop Loss) değeri, ATR tabanlı dinamik bir çıkış seviyesidir. Bu seviye kırıldığında trendin bozulduğunu ve pozisyonun kapatılması gerektiğini gösterir. Bu seviyeyi aracı kurum uygulamanıza stop emir olarak girebilirsiniz."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'ASELS', 'THYAO', 'EREGL']
+  },
+
+  # ── ARTICLE 71 ──
+  {
+    "slug": "makroekonomik-gostergeler-yatirimci-rehberi",
+    "title": "Makroekonomik Göstergeler: Yatırımcı İçin Rehber",
+    "desc": "GDP, enflasyon, işsizlik, cari açık — makro ekonomik göstergeleri nasıl yorumlamalısınız? BIST ve dolar/TL üzerindeki etkileri pratik örneklerle.",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Makro Ekonomi",
+    "body": """
+<p>Makroekonomik göstergeler, bir ülkenin ekonomik sağlık durumunu ölçen verilerdir. Bu veriler tek tek bakıldığında anlam ifade eder; birlikte değerlendirildiğinde piyasaların nereye gittiğini anlamak için değerli ipuçları sunar.</p>
+
+<h2>Temel Makro Göstergeler ve BIST'e Etkileri</h2>
+
+<h3>1. GSYH (GDP) — Gayri Safi Yurt İçi Hasıla</h3>
+<p>Ekonominin ürettiği toplam değeri ölçer. Çeyreklik açıklanır.</p>
+<ul>
+  <li><strong>Beklentinin üzerinde büyüme:</strong> Ekonomik ivme güçlü → Şirket kârları büyür → BIST pozitif</li>
+  <li><strong>Yavaşlama / resesyon:</strong> Tüketim ve yatırım düşer → Şirket kârları azalır → BIST baskı altında</li>
+</ul>
+
+<h3>2. Enflasyon (TÜFE)</h3>
+<p>Tüketici fiyat endeksindeki değişimdir. Türkiye'de her ay TÜİK tarafından açıklanır.</p>
+<ul>
+  <li><strong>Yüksek enflasyon:</strong> TCMB sıkılaştırma baskısı → Faizler yükselir → Borçluluk maliyeti artar → Hisse değerlemeleri baskı altında</li>
+  <li><strong>Düşen enflasyon:</strong> Faiz indirim beklentisi → BIST için olumlu</li>
+  <li><strong>TL varlıklar:</strong> Nominal yükseliş yanıltıcı olabilir; reel getiriyi kontrol edin</li>
+</ul>
+
+<h3>3. İşsizlik Oranı</h3>
+<p>Güçlü işgücü piyasası iç tüketimi destekler → perakende ve tüketici sektörü (BIMAS, MGROS gibi) lehine.</p>
+<p>Yüksek işsizlik tüketim talebini düşürür → ekonomik yavaşlama sinyali.</p>
+
+<h3>4. Cari Hesap Dengesi</h3>
+<p>Türkiye kronik cari açık veren bir ülkedir. Cari açık büyüdükçe:</p>
+<ul>
+  <li>Dış finansman ihtiyacı artar</li>
+  <li>TL üzerinde kur baskısı oluşur</li>
+  <li>Yabancı yatırımcı güvensizliği artar</li>
+  <li>BIST'te dolar bazlı değerleme düşer</li>
+</ul>
+
+<h3>5. Merkez Bankası Faiz Kararları (TCMB)</h3>
+<p>Politika faizindeki değişiklikler piyasanın en yakından izlediği makro verilerden biridir.</p>
+<ul>
+  <li><strong>Faiz artışı:</strong> Borçlanma maliyeti artar → Şirket kârları baskı altında → Ancak TL güçlenirse yabancı yatırımcı gelebilir</li>
+  <li><strong>Faiz indirimi:</strong> TL riski artar ama iç büyüme desteklenir → Bankacılık dışı sektörlerde olumlu</li>
+</ul>
+
+<h3>6. Bütçe Açığı / Kamu Borcu</h3>
+<p>Büyüyen bütçe açığı → ileride yüksek borçlanma → faiz baskısı → enflasyon riski. Sürdürülebilir kamu finansmanı, ülke risk primini düşürür ve yabancı yatırımcı çeker.</p>
+
+<h2>Göstergeleri Nerede Takip Edersiniz?</h2>
+<ul>
+  <li><strong>TÜİK (tuik.gov.tr):</strong> TÜFE, GDP, işsizlik, dış ticaret</li>
+  <li><strong>TCMB (tcmb.gov.tr):</strong> Faiz kararları, rezervler, cari hesap</li>
+  <li><strong>Hazine (hmb.gov.tr):</strong> Bütçe, kamu borç istatistikleri</li>
+  <li><strong>EPDK (epdk.gov.tr):</strong> Enerji istatistikleri (enerji hisseleri için)</li>
+  <li><strong>Investing.com/tr:</strong> Türkiye ekonomik takvimi, veri akışı</li>
+</ul>
+
+<h2>Ekonomik Takvim Stratejisi</h2>
+<p>Büyük makro veri açıklamalarından önce pozisyonlarınızı gözden geçirin:</p>
+<ul>
+  <li>TÜFE açıklama günü → TCMB politika beklentilerini yeniden değerlendirin</li>
+  <li>TCMB faiz kararı → TL varlıklarda volatilite beklenebilir</li>
+  <li>ABD CPI açıklaması → FED beklentilerini günceller, EM varlıklarını etkiler</li>
+</ul>
+<p>BorsaPusula <a href="/bilanco-takvimi">Bilanço Takvimi</a> sayfası şirket bazlı önemli tarihleri listeler; makro takvim için Investing.com Türkiye ekonomik takvimini paralel takip edin.</p>
+""",
+    "faqs": [
+      {"q": "Hangi makro gösterge borsayı en çok etkiler?",
+       "a": "Türkiye için en kritik makro göstergeler: TCMB faiz kararları, TÜFE (enflasyon), cari hesap dengesi ve dolar/TL kuru. ABD cephesinde FED kararları ve ABD enflasyon verisi (CPI) Türkiye piyasalarını doğrudan etkiler."},
+      {"q": "TÜFE açıklandığında borsada ne olur?",
+       "a": "Yüksek gelen TÜFE verisi, TCMB'nin faiz artışını zorunlu kılabileceği beklentisi oluşturur. Bu durumda TL kısmen güçlenebilir ama BIST'te değerleme baskısı oluşabilir. Beklentinin altında gelen TÜFE ise faiz indirim beklentisi ile genellikle BIST için olumludur."},
+      {"q": "Cari açık neden önemli?",
+       "a": "Türkiye kronik cari açık veriyor. Bu, ülkenin dış finansmana bağımlılığını gösterir. Cari açık arttıkça TL üzerindeki baskı artar, yabancı sermaye çıkışı hızlanabilir ve BIST dolar bazlı olarak değer kaybedebilir."},
+      {"q": "Makro veri takibi için en iyi kaynak hangisi?",
+       "a": "TÜİK (tuik.gov.tr) resmi Türkiye makro verileri için, TCMB (tcmb.gov.tr) para politikası için birincil kaynaklardır. Investing.com Türkiye bölümü tüm ekonomik veri açıklama tarihlerini ve beklentileri önceden listeler."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'TUPRS', 'EKGYO']
+  },
+
+  # ── ARTICLE 72 ──
+  {
+    "slug": "gun-ici-islem-day-trading-riski",
+    "title": "Gün İçi İşlem (Day Trading) Nedir? Bireysel Yatırımcı İçin Riskler",
+    "desc": "Day trading (gün içi alım satım) ne demek? Bireysel yatırımcılar için day trading neden risklidir? Swing trading ve uzun vadeli yatırımla karşılaştırma.",
+    "date": "2026-05-01",
+    "mins": 6,
+    "cat": "Trading Stratejileri",
+    "body": """
+<p>Sosyal medyada "günde 1.000₺ kazan" vaatleriyle popülerleşen day trading, en çok yanlış anlaşılan yatırım yöntemidir. Gerçekte ise day trading, kurumsal yatırımcıların bile büyük çoğunluğunun başarısız olduğu, yüksek risk ve bilgi gerektiren bir alandır.</p>
+
+<h2>Day Trading Nedir?</h2>
+<p>Day trading (gün içi işlem), tüm pozisyonların <strong>aynı gün içinde</strong> açılıp kapatıldığı alım satım stratejisidir. Gecelik pozisyon taşınmaz. Küçük fiyat hareketlerinden defalarca işlem yaparak kâr edilmeye çalışılır.</p>
+
+<h2>Bireysel Yatırımcı için Neden Zordur?</h2>
+<h3>1. Bilgi Asimetrisi</h3>
+<p>Karşı tarafınız genellikle algoritmik trading sistemleri veya profesyonel kurumsal traderlar. Milisaniyeler içinde tepki veren bu sistemlere karşı bireysel yatırımcının hız ve bilgi dezavantajı büyüktür.</p>
+
+<h3>2. Komisyon Maliyeti</h3>
+<p>Günde 10-20 işlem yapan bir day trader, yıllık yüzlerce ila binlerce lira komisyon öder. Bu komisyon, kârlı bir stratejiyi bile zarar hanesine çevirebilir.</p>
+
+<h3>3. Psikolojik Baskı</h3>
+<p>Anlık fiyat hareketleri sürekli dikkat gerektirir. Kısa vadeli kayıplar duygusal kararlar almayı tetikler — "hızlıca geri kazanayım" düşüncesiyle daha büyük riskler alınır (revenge trading). Bu kısır döngü hesabı hızla eritir.</p>
+
+<h3>4. Araştırma Yetersizliği</h3>
+<p>Başarılı day traderlar binlerce saatlik pratik, gelişmiş teknik analiz araçları ve sağlam bir strateji backtest'i gerektirir. "Bugün deneyeyim" düşüncesiyle başlamak bir aracı kuruma bağış yapmakla eşdeğerdir.</p>
+
+<h2>İstatistiksel Gerçek</h2>
+<p>ABD borsasında yapılan bir çalışmaya göre aktif day traderların %70-80'i ilk yılda para kaybeder. Uzun vadeli (2+ yıl) tutarlı kâr eden bireysel day trader oranı %5-10 arasında tahmin edilmektedir. Bu oran hem zor hem de bu alanda harcanan zamanın büyük maliyetini görmezden gelir.</p>
+
+<h2>Day Trading vs Swing Trading vs Uzun Vade</h2>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Özellik</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Day Trading</th>
+      <th style="padding:8px 12px;text-align:left;color:#f0883e;font-weight:600">Swing Trading</th>
+      <th style="padding:8px 12px;text-align:left;color:#3fb950;font-weight:600">Uzun Vade</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Pozisyon süresi</td>
+      <td style="padding:8px 12px;color:#e6edf3">Dakika – saat</td>
+      <td style="padding:8px 12px;color:#e6edf3">Gün – hafta</td>
+      <td style="padding:8px 12px;color:#e6edf3">Ay – yıl</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Gereken zaman</td>
+      <td style="padding:8px 12px;color:#f85149">Tam gün (6-8 saat)</td>
+      <td style="padding:8px 12px;color:#e6edf3">Günde 1-2 saat</td>
+      <td style="padding:8px 12px;color:#3fb950">Haftada 1-2 saat</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Komisyon maliyeti</td>
+      <td style="padding:8px 12px;color:#f85149">Çok yüksek</td>
+      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
+      <td style="padding:8px 12px;color:#3fb950">Düşük</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Psikolojik stres</td>
+      <td style="padding:8px 12px;color:#f85149">Çok yüksek</td>
+      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
+      <td style="padding:8px 12px;color:#3fb950">Düşük</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Başarı gereklilikleri</td>
+      <td style="padding:8px 12px;color:#f85149">Çok yüksek</td>
+      <td style="padding:8px 12px;color:#e6edf3">Orta-Yüksek</td>
+      <td style="padding:8px 12px;color:#3fb950">Orta</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>BorsaPusula Hangi Trading Stilini Destekler?</h2>
+<p>BorsaPusula'nın sinyal sistemi <strong>günlük bar verileri</strong> üzerinde çalışır ve Supertrend + ADX + EMA kombinasyonu kullanır. Bu sinyal yapısı:</p>
+<ul>
+  <li>Day trading için uygun değil (sinyaller günlük bazda güncellenir)</li>
+  <li>Swing trading için çok uygun (günlük trend takibi)</li>
+  <li>Uzun vadeli yatırım için de uygun (aylık sinyal bağlamıyla)</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "Day trading bireysel yatırımcılar için uygun mu?",
+       "a": "Büyük çoğunluk için hayır. Araştırmalar day traderların %70-80'inin ilk yılda para kaybettiğini göstermektedir. Kurumsal traderlar ve algoritmik sistemlere karşı bilgi, hız ve kaynak dezavantajı çok büyüktür."},
+      {"q": "Day trading ile swing trading arasındaki fark nedir?",
+       "a": "Day trading tüm pozisyonları aynı gün içinde kapatırken, swing trading birkaç günden birkaç haftaya kadar uzanan pozisyonları kapsar. Swing trading daha az zaman ve stres gerektirir, komisyon maliyeti daha düşüktür ve başarı istatistikleri daha iyi görünmektedir."},
+      {"q": "BorsaPusula sinyalleri day trading için kullanılabilir mi?",
+       "a": "Hayır. BorsaPusula sinyalleri günlük bar verilerine dayalıdır ve her gün kapanış sonrası güncellenir. Bu yapı swing trading ve orta-uzun vadeli pozisyon yönetimi için tasarlanmıştır. Day trading için intraday veriler gerekmektedir."},
+      {"q": "Hangi ticaret stili yeni başlayanlar için daha uygun?",
+       "a": "Yeni başlayanlar için uzun vadeli yatırım veya swing trading çok daha uygun başlangıç noktalarıdır. Az zaman, daha az stres ve daha iyi başarı istatistikleri sunarlar. Day trading binlerce saatlik pratik ve çok yüksek öz-disiplin gerektirir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
