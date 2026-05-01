@@ -2938,15 +2938,72 @@ def api_stock_fundamentals(ticker):
 @app.route("/api/hisse/<ticker>/news")
 @limiter.limit("20 per minute")
 def api_stock_news(ticker):
-    """Gemini AI haber özeti — 6 saatlik cache."""
+    """Gemini AI haber özeti — 6 saatlik cache.
+    Önce son 7 gündeki gerçek KAP bildirimlerini çeker; varsa AI sadece özetler
+    (hallucination sıfır). KAP bildirimi yoksa search-grounded Gemini kullanılır.
+    """
     ticker = ticker.upper()
     if ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
+
+    # ── KAP tabanlı haber özeti (gerçek kaynak) ──────────────────────────────
+    kap_url = kap_url_for(ticker)
+
+    # KAP cache'den son 7 günlük bildirimleri al (yoksa çek)
+    now_ts = time.time()
+    with _lock:
+        kap_hit = _kap_cache.get(ticker)
+    if kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL:
+        kap_discs = kap_hit["data"]
+    else:
+        kap_discs = fetch_kap_disclosures(ticker, days=7)
+        with _lock:
+            _kap_cache[ticker] = {"data": kap_discs, "ts": now_ts}
+
+    if kap_discs and GEMINI_API_KEY:
+        # Cache key: ticker + son bildirim tarihi (değişince cache invalidate)
+        cache_key = f"{ticker}_kap_{kap_discs[0]['date'][:10] if kap_discs else 'none'}"
+        with _lock:
+            cached = _news_cache.get(cache_key)
+            if cached and not cached.get("failed"):
+                ttl = _NEWS_FAIL_TTL if cached.get("failed") else _NEWS_CACHE_TTL
+                if (now_ts - cached["ts"]) < ttl:
+                    return safe_json({
+                        "news": cached["text"], "source": "kap_ai",
+                        "kap_url": kap_url, "kap_count": len(kap_discs)
+                    })
+
+        # Gerçek KAP bildirimleri → AI sadece özetler, uydurmaz
+        name = STOCK_NAMES.get(ticker, ticker)
+        today_str = datetime.now().strftime("%d %B %Y")
+        disc_lines = "\n".join([
+            f"- {d['date'][:10]}: {d.get('summary') or d.get('subject', '')} [{d['class']}]"
+            for d in kap_discs[:8]
+            if d.get('summary') or d.get('subject')
+        ])
+        kap_prompt = (
+            f"Bugün {today_str}. Aşağıdakiler {ticker} ({name}) şirketinin "
+            f"son 7 günlük resmi KAP (Kamuyu Aydınlatma Platformu) bildirimleridir:\n\n"
+            f"{disc_lines}\n\n"
+            f"Bu bildirimleri bireysel yatırımcı için Türkçe madde madde özetle. "
+            f"Her madde 1-2 cümle. Teknik finansal jargonu sade dile çevir. "
+            f"SADECE bu gerçek bildirimlerden hareket et — ek yorum veya tarih ekleme. "
+            f"Giriş/kapanış cümlesi ekleme."
+        )
+        model_used, kap_text = _gemini_call(kap_prompt, _GEMINI_NEWS_ATTEMPTS, timeout=20)
+        with _lock:
+            if kap_text:
+                _news_cache[cache_key] = {"text": kap_text, "ts": now_ts, "failed": False}
+                return safe_json({
+                    "news": kap_text, "source": "kap_ai",
+                    "kap_url": kap_url, "kap_count": len(kap_discs)
+                })
+
+    # ── Fallback: Search-grounded Gemini (KAP bildirimi yok veya API başarısız) ──
     text = get_ai_news(ticker)
-    kap  = kap_url_for(ticker)
     if text:
-        return safe_json({"news": text, "source": "gemini", "kap_url": kap})
-    return safe_json({"news": "", "kap_url": kap})
+        return safe_json({"news": text, "source": "gemini", "kap_url": kap_url})
+    return safe_json({"news": "", "kap_url": kap_url})
 
 
 @app.route("/api/hisse/<ticker>/kap")
