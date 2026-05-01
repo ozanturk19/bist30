@@ -4738,7 +4738,8 @@ def blog_index():
     from collections import Counter
     counts = Counter(a["cat"] for a in ARTICLES)
     cat_counts = sorted(counts.items())
-    return render_template("blog.html", articles=ARTICLES, cat_counts=cat_counts)
+    normalized = [_normalize_article(a) for a in ARTICLES]
+    return render_template("blog.html", articles=normalized, cat_counts=cat_counts)
 
 
 # Eski / kısa slug'lar → doğru slug 301 yönlendirme tablosu
@@ -4752,19 +4753,50 @@ _BLOG_SLUG_REDIRECTS = {
     "supertrend-vs-macd-karsilastirma": "supertrend-vs-macd",
 }
 
+def _normalize_article(a):
+    """Eski ve yeni makale formatını ortak template formatına normalize et."""
+    import copy
+    art = copy.copy(a)
+    # desc: 'desc' yoksa 'summary' kullan
+    if not art.get("desc") and art.get("summary"):
+        art["desc"] = art["summary"]
+    # mins: 'mins' yoksa 'read_min' kullan
+    if not art.get("mins") and art.get("read_min"):
+        art["mins"] = art["read_min"]
+    # date: yoksa varsayılan
+    if not art.get("date"):
+        art["date"] = "2026-05-01"
+    # body: markdown ise HTML'e çevir
+    body = art.get("body", "")
+    if body and not body.strip().startswith("<"):
+        try:
+            import markdown as md_lib
+            # markdown tabloları ve kod blokları için extras
+            art["body"] = md_lib.markdown(
+                body,
+                extensions=["tables", "fenced_code"],
+                output_format="html"
+            )
+        except Exception:
+            # Fallback: basit satır kırma dönüşümü
+            art["body"] = "<p>" + "</p><p>".join(p for p in body.split("\n\n") if p.strip()) + "</p>"
+    return art
+
+
 @app.route("/blog/<slug>")
 def blog_article(slug):
     from flask import abort, redirect, url_for
     # Bilinen eski slug → doğru slug 301 yönlendirme
     if slug in _BLOG_SLUG_REDIRECTS:
         return redirect(url_for("blog_article", slug=_BLOG_SLUG_REDIRECTS[slug]), code=301)
-    article = ARTICLES_BY_SLUG.get(slug)
-    if not article:
+    raw_article = ARTICLES_BY_SLUG.get(slug)
+    if not raw_article:
         abort(404)
+    article = _normalize_article(raw_article)
     # İlgili makaleler: aynı kategori, max 3
-    related = [a for a in ARTICLES if a["cat"] == article["cat"] and a["slug"] != slug][:3]
+    related = [_normalize_article(a) for a in ARTICLES if a["cat"] == article["cat"] and a["slug"] != slug][:3]
     if len(related) < 3:
-        extras = [a for a in ARTICLES if a["cat"] != article["cat"] and a["slug"] != slug]
+        extras = [_normalize_article(a) for a in ARTICLES if a["cat"] != article["cat"] and a["slug"] != slug]
         related += extras[:3 - len(related)]
     return render_template("blog_article.html", article=article, related=related)
 
