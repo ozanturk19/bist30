@@ -2,7 +2,7 @@ from flask import Flask, jsonify, render_template, Response, request, abort
 import yfinance as yf
 import pandas as pd
 import numpy as np
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import threading
 import collections
 import logging
@@ -269,6 +269,38 @@ STOCK_NAMES = {
     # ── Endeks ──────────────────────────────────────────
     "XU030": "BIST 30 Endeksi",
 }
+
+# ── KAP (Kamuyu Aydınlatma Platformu) şirket ID eşleştirme ──────────────────
+KAP_MEMBER_OIDS = {
+    "AKBNK": "2770", "GARAN": "2760", "ISCTR": "2776", "YKBNK": "2780",
+    "VAKBN": "2778", "HALKB": "2762", "ALBRK": "2750",
+    "ASELS": "792",  "THYAO": "2874", "EREGL": "2362", "TUPRS": "2878",
+    "SASA":  "2726", "FROTO": "2756", "TOASO": "2876", "ARCLK": "2748",
+    "BIMAS": "2752", "MGROS": "2772", "KCHOL": "2764", "SAHOL": "2758",
+    "AGHOL": "2744", "TKFEN": "2872", "ENJSA": "5496", "ODAS":  "6159",
+    "HEKTS": "2766", "KRDMD": "2768", "SISE":  "2724", "PETKM": "2774",
+    "EKGYO": "2754", "TTRAK": "2870", "LOGO":  "3494", "NETAS": "2773",
+    "CCOLA": "2154", "DOAS":  "2166", "ENKAI": "2368", "TCELL": "2868",
+    "TTKOM": "2876", "TAVHL": "5340", "PGSUS": "5780", "ULKER": "2886",
+    "CIMSA": "2156", "ALARK": "2746", "AEFES": "2742", "VESTL": "2890",
+    "VESBE": "2888", "AKSA":  "2136", "AKSEN": "4960", "GUBRF": "2758",
+    "DOHOL": "2168", "OYAKC": "6202", "SOKM":  "7244", "BRSAN": "2146",
+    "KONTR": "5852", "SARKY": "2716", "KCAER": "6048", "ISDMR": "4938",
+    "IZMDC": "4380", "ISGYO": "2782", "PRKAB": "2784", "JANTS": "2798",
+    "INDES": "4006", "ANKB":  "2126", "SELEC": "2720", "CLEBI": "4832",
+    "TATGD": "2860", "ANSGR": "2130", "ANHYT": "2128", "TURSG": "5954",
+    "MAVI":  "5718", "OTKAR": "2786", "PARSN": "2788", "ASUZU": "2132",
+    "KORDS": "2800", "KLNMA": "3702", "KARTN": "2796", "BUCIM": "2148",
+    "NUHCM": "2792", "CEMAS": "4736", "ECILC": "2174", "TTRAK": "2870",
+    "RYSAS": "5888",
+}
+
+def kap_url_for(ticker: str) -> str:
+    """KAP şirket sayfası URL'si — bilinmiyorsa arama sonucu döner."""
+    oid = KAP_MEMBER_OIDS.get(ticker, "")
+    if oid:
+        return f"https://www.kap.org.tr/tr/sirket/{oid}"
+    return f"https://www.kap.org.tr/tr/arama?q={ticker}"
 
 # ── Sektör sınıflandırması ────────────────────────────────────────────────────
 SECTORS = {
@@ -1584,7 +1616,10 @@ def _gemini_call(prompt, attempts, timeout=20):
             logger.debug("_gemini_call [%s]: boş yanıt, fallback deneniyor", model_id)
         except Exception as e:
             status = getattr(getattr(e, "response", None), "status_code", None)
-            logger.warning("_gemini_call [%s]: %s (HTTP %s)", model_id, type(e).__name__, status)
+            if status == 429:
+                logger.debug("_gemini_call [%s]: rate-limited (429)", model_id)  # sessiz — log dolmasın
+            else:
+                logger.warning("_gemini_call [%s]: %s (HTTP %s)", model_id, type(e).__name__, status)
             # 5xx ve 429 → geçici sorun, bir sonraki modeli dene
             # 4xx (400, 403 vb.) → API/key sorunu, fallback da aynı hatayı verir
             if status and 400 <= status < 500 and status != 429:
@@ -1610,17 +1645,20 @@ def get_ai_news(ticker):
                 return cached.get("text")   # başarısız cache → None döner
 
     name       = STOCK_NAMES.get(ticker, ticker)
-    today_str  = datetime.now().strftime("%d %B %Y")   # ör: "24 Nisan 2026"
-    cutoff_str = datetime.now().strftime("%Y-%m-%d")    # ör: "2026-04-17" (7 gün öncesi referans)
+    today_str  = datetime.now().strftime("%d %B %Y")   # ör: "01 Mayıs 2026"
+    today_iso  = datetime.now().strftime("%Y-%m-%d")   # ör: "2026-05-01"
+    week_ago   = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
     prompt = (
-        f"Bugünün tarihi: {today_str}.\n"
-        f"Borsa İstanbul'da işlem gören {ticker} ({name}) hissesi hakkında "
-        f"YALNIZCA son 7 gün ({cutoff_str} sonrası) içindeki gelişmeleri, haberleri ve "
-        f"şirket açıklamalarını Türkçe olarak 3-5 madde halinde kısaca özetle. "
-        f"Daha eski (1 aydan eski) haberleri kesinlikle ekleme. "
-        f"Her madde 1-2 cümle olsun ve tarihi belirt. "
-        f"Son 7 günde kayda değer haber yoksa bunu açıkça belirt. "
-        f"Sadece maddeleri yaz, giriş/kapanış cümlesi ekleme."
+        f"Bugünün tarihi: {today_str} ({today_iso}).\n"
+        f"KURAL 1: YALNIZCA {today_iso} TARİHİNDEN ÖNCE (veya bu tarihte) gerçekleşmiş "
+        f"olayları yaz. {today_iso} sonrasındaki tarihler YAZMA — gelecek bilinmez.\n"
+        f"KURAL 2: YALNIZCA {week_ago} TARİHİNDEN SONRA olan olayları yaz (son 7 gün).\n"
+        f"KURAL 3: Bu zaman aralığında {ticker} hakkında doğrulanmış bilgin yoksa SADECE "
+        f"şunu yaz: 'Son 7 günde kayda değer bir gelişme bulunmuyor.'\n"
+        f"KURAL 4: Tarih uydurma, tahmin yapma, spekülasyon ekleme.\n\n"
+        f"Görev: {ticker} ({name}) hissesi için {week_ago}–{today_iso} arasındaki "
+        f"gerçek KAP bildirimleri, finansal sonuçlar veya önemli şirket açıklamalarını "
+        f"Türkçe madde madde özetle. Her madde 1-2 cümle. Giriş/kapanış cümlesi ekleme."
     )
 
     model_used, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=25)
@@ -2730,9 +2768,10 @@ def api_stock_news(ticker):
     if ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
     text = get_ai_news(ticker)
+    kap  = kap_url_for(ticker)
     if text:
-        return safe_json({"news": text, "source": "gemini"})
-    return safe_json({"news": ""})
+        return safe_json({"news": text, "source": "gemini", "kap_url": kap})
+    return safe_json({"news": "", "kap_url": kap})
 
 
 @app.route("/api/hisse/<ticker>/signal-explanation")
@@ -3157,6 +3196,105 @@ def og_image():
 </svg>'''
     return Response(svg, mimetype="image/svg+xml",
                     headers={"Cache-Control": "public, max-age=3600"})
+
+
+# ── Hisse Karşılaştırma ──────────────────────────────────────────────────────
+@app.route("/karsilastir")
+def karsilastir():
+    tickers_param = request.args.get("tickers", "")
+    return render_template("karsilastir.html", tickers_param=tickers_param)
+
+
+@app.route("/api/karsilastir")
+@limiter.limit("30 per minute")
+def api_karsilastir():
+    """2-4 hisseyi yan yana karşılaştır — tüm sinyal metrikleri."""
+    tickers = [t.strip().upper() for t in
+               request.args.get("tickers", "").split(",")
+               if t.strip()][:4]
+    if not tickers:
+        return safe_json({"error": "tickers parametresi gerekli"}), 400
+
+    with _lock:
+        data_map = {s["ticker"]: s for s in _cache["data"]}
+
+    results = []
+    for ticker in tickers:
+        s = data_map.get(ticker, {})
+        inds      = s.get("indicators") or {}
+        adx_label = (inds.get("adx") or {}).get("label", "")
+        try:
+            adx_val = float(adx_label.replace("ADX", "").strip()) if adx_label else None
+        except (ValueError, TypeError):
+            adx_val = None
+        results.append({
+            "ticker":        ticker,
+            "name":          STOCK_NAMES.get(ticker, US_STOCK_NAMES.get(ticker, ticker)),
+            "signal":        s.get("signal"),
+            "price":         s.get("price"),
+            "change_pct":    s.get("change_pct"),
+            "adx":           adx_val,
+            "rsi":           s.get("rsi"),
+            "signal_bars":   s.get("signal_bars"),
+            "signal_date":   s.get("signal_date"),
+            "entry_quality": s.get("entry_quality"),
+            "sl_level":      s.get("sl_level"),
+            "tp1":           s.get("tp1"),
+            "tp2":           s.get("tp2"),
+            "rr_ratio":      s.get("rr_ratio"),
+            "bull_score":    s.get("bull_score"),
+            "bear_score":    s.get("bear_score"),
+            "sector":        _get_sector(ticker),
+            "kap_url":       kap_url_for(ticker),
+            "found":         bool(s),
+        })
+    return safe_json({"stocks": results, "count": len(results)})
+
+
+# ── Piyasa Gündem Merkezi ────────────────────────────────────────────────────
+@app.route("/gundem")
+def gundem_page():
+    return render_template("gundem.html")
+
+
+@app.route("/api/gundem")
+@limiter.limit("30 per minute")
+def api_gundem():
+    """Piyasa Gündem API — bugün değişen sinyaller, güçlü trendler, sinyal özeti."""
+    with _lock:
+        stocks = list(_cache["data"])
+
+    today = date.today().strftime("%d.%m.%Y")
+
+    # Bugün sinyal alan hisseler
+    new_signals = [s for s in stocks
+                   if s.get("signal_date") == today and s.get("signal") != "BEKLE"]
+
+    # ADX sıralamalı en güçlü AL hisseler
+    def _adx_val(s):
+        inds = s.get("indicators") or {}
+        lbl  = (inds.get("adx") or {}).get("label", "")
+        try:
+            return float(lbl.replace("ADX", "").strip())
+        except Exception:
+            return 0.0
+
+    strong_al = sorted(
+        [s for s in stocks if s.get("signal") == "AL"],
+        key=_adx_val, reverse=True
+    )[:8]
+
+    return safe_json({
+        "new_signals": new_signals,
+        "strong_al":   strong_al,
+        "updated_at":  datetime.now().strftime("%d.%m.%Y %H:%M"),
+        "signal_summary": {
+            "al":    sum(1 for s in stocks if s.get("signal") == "AL"),
+            "sat":   sum(1 for s in stocks if s.get("signal") == "SAT"),
+            "bekle": sum(1 for s in stocks if s.get("signal") == "BEKLE"),
+            "total": len(stocks),
+        }
+    })
 
 
 # ── Günlük Özet Sayfası ───────────────────────────────────────────────────────
@@ -3727,6 +3865,27 @@ def api_market_news():
         clean = " ".join(lines).strip()
         snippet = clean if len(clean) <= 220 else clean[:220].rsplit(" ", 1)[0] + "…"
 
+        # "Kayda değer gelişme yok" → boş kart yerine algoritmik sinyal bilgisi göster
+        _EMPTY_PATTERNS = (
+            "kayda değer bir gelişme",
+            "kayda değer gelişme bulunmuyor",
+            "kayda değer bir haber",
+            "herhangi bir haber bulunamadı",
+            "son 7 günde kayda değer",
+        )
+        if source == "news" and len(snippet) < 160 and \
+                any(pat in snippet.lower() for pat in _EMPTY_PATTERNS):
+            dur = "bugün" if bars <= 1 else f"son {bars} gündür"
+            entry_q = s.get("entry_quality", "")
+            sl_val  = s.get("sl_level") or 0
+            tp_val  = s.get("tp1") or 0
+            snippet = (
+                f"{dur.capitalize()} {sig} sinyali aktif"
+                f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
+                f"SL: {sl_val:.2f}₺ | Hedef: {tp_val:.2f}₺"
+            )
+            source = "algorithmic"
+
         results.append({
             "ticker":      t,
             "name":        name,
@@ -3739,6 +3898,7 @@ def api_market_news():
             "signal_bars": bars,
             "sector":      _get_sector(t),
             "sl_level":    s.get("sl_level"),
+            "kap_url":     kap_url_for(t),
         })
 
         if len(results) >= 5:

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piyasa Gündem Merkezi — BorsaPusula</title>
+<meta name="description" content="Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="canonical" href="https://borsapusula.com/gundem">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bp-bg:#0b111f; --bp-surface:#111827; --bp-surface2:#1a2438;
+    --bp-border:#1e2d45; --bp-border2:#2d4166;
+    --bp-text:#e2e8f0; --bp-text2:#94a3b8; --bp-text3:#64748b;
+    --bp-brand:#3b82f6; --bp-al:#3fb950; --bp-sat:#f85149;
+    --bp-bkl:#8b949e; --bp-gold:#f59e0b; --bp-radius:10px;
+    --accent:#1f6feb;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bp-bg); color: var(--bp-text);
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased; font-size: 14px; min-height: 100vh;
+  }
+  header {
+    background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
+    padding: 14px 24px; display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 6px; color: var(--bp-text2);
+    font-size: 13px; text-decoration: none; padding: 5px 10px;
+    border: 1px solid var(--bp-border); border-radius: 6px;
+    background: var(--bp-surface2); transition: all 0.15s; white-space: nowrap;
+  }
+  .back-btn:hover { color: var(--bp-text); border-color: var(--bp-border2); }
+  .page-title { font-size: 20px; font-weight: 700; }
+  .page-sub   { font-size: 12px; color: var(--bp-text3); margin-top: 1px; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+  /* ── Stats Row ── */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius); padding: 18px 16px; text-align: center;
+    transition: border-color .15s;
+  }
+  .stat-card:hover { border-color: var(--bp-border2); }
+  .stat-num  { font-size: 36px; font-weight: 800; line-height: 1; }
+  .stat-lbl  { font-size: 11px; color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: .5px; }
+  .num-al  { color: var(--bp-al); }
+  .num-sat { color: var(--bp-sat); }
+  .num-bkl { color: var(--bp-bkl); }
+  .num-tot { color: var(--bp-text); }
+
+  /* ── Section ── */
+  .section { margin-bottom: 28px; }
+  .section-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-size: 14px; font-weight: 700; color: var(--bp-text);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .section-title .dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-al  { background: var(--bp-al); box-shadow: 0 0 6px rgba(63,185,80,.5); }
+  .dot-str { background: var(--accent); box-shadow: 0 0 6px rgba(31,111,235,.5); }
+  .section-sub { font-size: 11px; color: var(--bp-text3); }
+
+  /* ── Stock Cards ── */
+  .stock-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;
+  }
+  .stock-card {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius); padding: 14px 16px; text-decoration: none; color: inherit;
+    display: block; transition: all .15s; position: relative; overflow: hidden;
+  }
+  .stock-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--card-accent, var(--bp-bkl)); border-radius: 3px 0 0 3px;
+  }
+  .stock-card.al  { --card-accent: var(--bp-al); }
+  .stock-card.sat { --card-accent: var(--bp-sat); }
+  .stock-card:hover { border-color: var(--bp-border2); background: var(--bp-surface2); transform: translateY(-1px); }
+
+  .sc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .sc-ticker { font-size: 16px; font-weight: 800; font-family: monospace; }
+  .sc-name   { font-size: 11px; color: var(--bp-text3); margin-top: 1px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px;
+    border-radius: 20px; font-size: 10px; font-weight: 600; letter-spacing: .3px;
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .badge.al  { background: rgba(63,185,80,.12);  color:var(--bp-al);  border:1px solid rgba(63,185,80,.3); }
+  .badge.sat { background: rgba(248,81,73,.12);  color:var(--bp-sat); border:1px solid rgba(248,81,73,.3); }
+  .badge.bkl { background: rgba(139,148,158,.1); color:var(--bp-bkl); border:1px solid rgba(139,148,158,.2); }
+
+  .sc-metrics {
+    display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;
+  }
+  .sc-metric { font-size: 11px; color: var(--bp-text3); }
+  .sc-metric strong { color: var(--bp-text2); font-weight: 600; }
+  .sc-metric.up-val strong { color: var(--bp-al); }
+  .sc-metric.dn-val strong { color: var(--bp-sat); }
+
+  .sc-footer {
+    display: flex; align-items: center; justify-content: space-between; margin-top: 10px;
+  }
+  .sc-price { font-size: 14px; font-weight: 700; font-family: monospace; }
+  .sc-chg   { font-size: 11px; font-weight: 600; }
+  .sc-chg.up { color: var(--bp-al); }
+  .sc-chg.dn { color: var(--bp-sat); }
+  .sc-arrow  { font-size: 11px; color: var(--accent); font-weight: 600; }
+
+  /* ── New signal highlight ── */
+  .stock-card.new-signal {
+    border-color: rgba(63,185,80,.4);
+    background: rgba(63,185,80,.04);
+  }
+  .stock-card.new-signal.sat {
+    border-color: rgba(248,81,73,.4);
+    background: rgba(248,81,73,.04);
+  }
+  .new-badge {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    background: rgba(63,185,80,.2); color: var(--bp-al); border-radius: 3px;
+    padding: 1px 5px; text-transform: uppercase; letter-spacing: .5px; margin-left: 4px;
+  }
+  .sat .new-badge { background: rgba(248,81,73,.2); color: var(--bp-sat); }
+
+  /* ── Empty state ── */
+  .empty-box {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius); padding: 28px; text-align: center;
+    color: var(--bp-text3); font-size: 13px;
+  }
+
+  /* ── Skeleton ── */
+  .skeleton {
+    background: linear-gradient(90deg, #161b22 25%, #1e2530 50%, #161b22 75%);
+    background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 4px;
+  }
+  @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+  .sk-card { height: 100px; border-radius: var(--bp-radius); }
+
+  .updated-at { font-size: 11px; color: var(--bp-text3); margin-top: 20px; text-align: right; }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    header { padding: 12px 16px; }
+    .container { padding: 16px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .stat-num  { font-size: 28px; }
+    .stock-grid { grid-template-columns: 1fr; }
+    .page-title { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="page-title">Piyasa Gündem Merkezi</div>
+    <div class="page-sub" id="updatedAt">Yükleniyor…</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Stats -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Güçlü Trend</div></div>
+    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Zayıf Trend</div></div>
+    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Belirsiz</div></div>
+    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Toplam Hisse</div></div>
+  </div>
+
+  <!-- Bugün Sinyal Değişenler -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-title">
+        <span class="dot dot-al"></span>
+        Bugün Sinyal Değişenler
+      </div>
+      <span class="section-sub" id="newSigCount">—</span>
+    </div>
+    <div id="newSignalsGrid" class="stock-grid">
+      <div class="skeleton sk-card"></div>
+      <div class="skeleton sk-card"></div>
+    </div>
+  </div>
+
+  <!-- En Güçlü Trendler -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-title">
+        <span class="dot dot-str"></span>
+        En Güçlü Trendler
+      </div>
+      <span class="section-sub">ADX sıralamalı — Top 8</span>
+    </div>
+    <div id="strongAlGrid" class="stock-grid">
+      <div class="skeleton sk-card"></div>
+      <div class="skeleton sk-card"></div>
+      <div class="skeleton sk-card"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function adxFromStock(s) {
+  const inds = s.indicators || {};
+  const lbl  = (inds.adx || {}).label || '';
+  try { return parseFloat(lbl.replace('ADX','').trim()) || null; }
+  catch { return null; }
+}
+
+function renderCard(s, isNew) {
+  const isAl  = s.signal === 'AL';
+  const isSat = s.signal === 'SAT';
+  const sigCls  = isAl ? 'al' : isSat ? 'sat' : 'bkl';
+  const badgeTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Zayıf Trend' : '● Belirsiz';
+  const adx  = adxFromStock(s);
+  const chg  = parseFloat(s.change_pct || 0);
+  const chgCls = chg >= 0 ? 'up' : 'dn';
+  const chgTxt = (chg>=0?'+':'') + chg.toFixed(2) + '%';
+  const priceStr = s.price ? parseFloat(s.price).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '';
+
+  const metrics = [];
+  if (adx != null)          metrics.push(`<div class="sc-metric"><span>ADX </span><strong>${adx.toFixed(1)}</strong></div>`);
+  if (s.rsi != null)        metrics.push(`<div class="sc-metric"><span>RSI </span><strong>${parseFloat(s.rsi).toFixed(1)}</strong></div>`);
+  if (s.signal_bars)        metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${s.signal_bars}g</strong></div>`);
+  if (s.entry_quality)      metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${{IDEAL:'İdeal',IYI:'İyi',DIKKATLI:'Dikkatli',UZAK:'Uzak'}[s.entry_quality]||s.entry_quality}</strong></div>`);
+  if (s.rr_ratio)           metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_ratio).toFixed(1)}</strong></div>`);
+
+  const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';
+
+  return `<a href="/hisse/${s.ticker}" class="stock-card ${sigCls}${isNew?' new-signal':''}">
+    <div class="sc-top">
+      <div>
+        <div class="sc-ticker">${s.ticker}${newMark}</div>
+        <div class="sc-name">${(s.name||'').replace(' A.Ş.','').replace(' T.A.Ş.','')}</div>
+      </div>
+      <span class="badge ${sigCls}">${badgeTxt}</span>
+    </div>
+    ${metrics.length ? `<div class="sc-metrics">${metrics.join('')}</div>` : ''}
+    <div class="sc-footer">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="sc-price">${priceStr}</span>
+        ${priceStr ? `<span class="sc-chg ${chgCls}">${chgTxt}</span>` : ''}
+      </div>
+      <span class="sc-arrow">Detay →</span>
+    </div>
+  </a>`;
+}
+
+async function loadGundem() {
+  try {
+    const [gundemRes, newsRes] = await Promise.all([
+      fetch('/api/gundem'),
+      fetch('/api/market-news'),
+    ]);
+    const d = await gundemRes.json();
+
+    // Stats
+    const sm = d.signal_summary || {};
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><div class="stat-num num-al">${sm.al||0}</div><div class="stat-lbl">Güçlü Trend</div></div>
+      <div class="stat-card"><div class="stat-num num-sat">${sm.sat||0}</div><div class="stat-lbl">Zayıf Trend</div></div>
+      <div class="stat-card"><div class="stat-num num-bkl">${sm.bekle||0}</div><div class="stat-lbl">Belirsiz</div></div>
+      <div class="stat-card"><div class="stat-num num-tot">${sm.total||0}</div><div class="stat-lbl">Toplam Hisse</div></div>
+    `;
+
+    // Updated at
+    if (d.updated_at) {
+      document.getElementById('updatedAt').textContent = 'Güncellendi: ' + d.updated_at;
+    }
+
+    // New signals
+    const newSigs = d.new_signals || [];
+    document.getElementById('newSigCount').textContent = newSigs.length > 0 ? `${newSigs.length} hisse` : '';
+    if (newSigs.length === 0) {
+      document.getElementById('newSignalsGrid').innerHTML =
+        '<div class="empty-box">Bugün henüz sinyal değişimi yok. Piyasa sinyalleri gün içinde güncellenir.</div>';
+    } else {
+      document.getElementById('newSignalsGrid').innerHTML = newSigs.map(s => renderCard(s, true)).join('');
+    }
+
+    // Strong AL
+    const strong = d.strong_al || [];
+    if (strong.length === 0) {
+      document.getElementById('strongAlGrid').innerHTML =
+        '<div class="empty-box">Güçlü trend verisi bekleniyor…</div>';
+    } else {
+      document.getElementById('strongAlGrid').innerHTML = strong.map(s => renderCard(s, false)).join('');
+    }
+
+  } catch(e) {
+    console.error('loadGundem error:', e);
+    ['newSignalsGrid','strongAlGrid'].forEach(id => {
+      document.getElementById(id).innerHTML = '<div class="empty-box">Veri yüklenemedi. Sayfayı yenileyin.</div>';
+    });
+  }
+}
+
+loadGundem();
+// 5 dakikada bir otomatik yenile
+setInterval(loadGundem, 5 * 60 * 1000);
+</script>
+</body>
+</html>

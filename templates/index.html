@@ -340,6 +340,14 @@
     font-size: 11px; color: var(--accent); text-decoration: none; font-weight: 600;
   }
   .gnm-link:hover { text-decoration: underline; }
+  .gnm-kap-link {
+    font-size: 10px; font-weight: 600; color: var(--bp-text3); text-decoration: none;
+    background: rgba(139,148,158,0.1); border: 1px solid rgba(139,148,158,0.2);
+    border-radius: 4px; padding: 1px 5px; transition: all .15s;
+  }
+  .gnm-kap-link:hover {
+    color: var(--bp-text); background: rgba(139,148,158,0.2);
+  }
 
   /* Skeleton */
   @keyframes gnm-shimmer {
@@ -2768,6 +2776,17 @@ async function submitSubscribe() {
 /* ── Gündem & Haberler ───────────────────────────── */
 let _gundemRetryTimer = null;
 
+/** Haber metni: * ve ** markdown işaretlerini temizle, bullet → • */
+function _parseNewsText(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, '$1')   // **bold** → düz metin
+    .replace(/\*([^*]+)\*/g, '$1')        // *italic* → düz metin
+    .replace(/^[\*\-]\s+/gm, '• ')       // * item veya - item → • item
+    .replace(/^\d+\.\s+/gm, '• ')        // 1. item → • item
+    .trim();
+}
+
 function _renderGnmCard(item) {
   const isAl  = item.signal === 'AL';
   const isSat = item.signal === 'SAT';
@@ -2778,8 +2797,10 @@ function _renderGnmCard(item) {
   const chgCls   = chgVal >= 0 ? 'up' : 'dn';
   const chgTxt   = (chgVal >= 0 ? '+' : '') + chgVal.toFixed(2) + '%';
   const priceStr = item.price ? parseFloat(item.price).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
-  const snippet  = (item.snippet || '').trim();
+  const snippet  = _parseNewsText((item.snippet || '').trim());
   const isLoading = item.source === 'loading';
+  const kapUrl   = item.kap_url || '';
+
   const snippetEl = isLoading
     ? `<div class="gnm-text" style="color:var(--bp-text3);font-style:italic;display:flex;align-items:center;gap:5px;">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -2790,6 +2811,15 @@ function _renderGnmCard(item) {
         Haber yükleniyor…
        </div>`
     : `<div class="gnm-text">${snippet}</div>`;
+
+  const kapLink = kapUrl
+    ? `<a href="${kapUrl}" target="_blank" rel="noopener"
+          class="gnm-kap-link"
+          onclick="event.stopPropagation();event.preventDefault();window.open('${kapUrl}','_blank')">
+         KAP ↗
+       </a>`
+    : '';
+
   return `<a href="/hisse/${item.ticker}" class="gnm-card${cardCls}">
   <div class="gnm-card-top">
     <div>
@@ -2804,7 +2834,10 @@ function _renderGnmCard(item) {
       <span class="gnm-price">${priceStr}</span>
       ${priceStr ? `<span class="gnm-chg ${chgCls}" style="margin-left:5px">${chgTxt}</span>` : ''}
     </div>
-    <span class="gnm-link">Detay →</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      ${kapLink}
+      <span class="gnm-link">Detay →</span>
+    </div>
   </div>
 </a>`;
 }

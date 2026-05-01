@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hisse Karşılaştırma — BorsaPusula</title>
+<meta name="description" content="BIST hisselerini teknik sinyal metrikleriyle yan yana karşılaştırın. ADX, RSI, SL, TP, RR oranı.">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="canonical" href="https://borsapusula.com/karsilastir">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bp-bg:#0b111f; --bp-surface:#111827; --bp-surface2:#1a2438;
+    --bp-border:#1e2d45; --bp-border2:#2d4166;
+    --bp-text:#e2e8f0; --bp-text2:#94a3b8; --bp-text3:#64748b;
+    --bp-brand:#3b82f6; --bp-al:#3fb950; --bp-sat:#f85149;
+    --bp-bkl:#8b949e; --bp-gold:#f59e0b; --bp-radius:10px;
+    --accent:#1f6feb;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bp-bg); color: var(--bp-text);
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased; font-size: 14px; min-height: 100vh;
+  }
+  header {
+    background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
+    padding: 14px 24px; display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 6px; color: var(--bp-text2);
+    font-size: 13px; text-decoration: none; padding: 5px 10px;
+    border: 1px solid var(--bp-border); border-radius: 6px;
+    background: var(--bp-surface2); transition: all 0.15s; white-space: nowrap;
+  }
+  .back-btn:hover { color: var(--bp-text); border-color: var(--bp-border2); }
+  .page-title { font-size: 20px; font-weight: 700; }
+  .page-sub   { font-size: 13px; color: var(--bp-text3); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  /* ── Search Bar ── */
+  .search-bar {
+    display: flex; gap: 8px; margin-bottom: 28px;
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: 10px; padding: 16px;
+    flex-wrap: wrap; align-items: center;
+  }
+  .search-bar label {
+    font-size: 12px; color: var(--bp-text3); text-transform: uppercase;
+    letter-spacing: 0.5px; font-weight: 600; width: 100%; margin-bottom: 4px;
+  }
+  .ticker-inputs { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+  .ticker-input {
+    background: var(--bp-bg); border: 1px solid var(--bp-border2);
+    color: var(--bp-text); border-radius: 6px; padding: 8px 12px;
+    font-size: 13px; font-family: monospace; text-transform: uppercase;
+    width: 100px; outline: none; transition: border-color .15s;
+  }
+  .ticker-input:focus { border-color: var(--accent); }
+  .ticker-input::placeholder { color: var(--bp-text3); text-transform: none; font-family: inherit; }
+  .compare-btn {
+    background: var(--accent); color: #fff; border: none; border-radius: 6px;
+    padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background .15s; white-space: nowrap;
+  }
+  .compare-btn:hover { background: #388bfd; }
+  .share-btn {
+    background: var(--bp-surface2); color: var(--bp-text2); border: 1px solid var(--bp-border);
+    border-radius: 6px; padding: 8px 14px; font-size: 12px; cursor: pointer;
+    transition: all .15s; white-space: nowrap; text-decoration: none; display: flex;
+    align-items: center; gap: 5px;
+  }
+  .share-btn:hover { color: var(--bp-text); border-color: var(--bp-border2); }
+
+  /* ── Comparison Table ── */
+  .compare-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--bp-border);
+  }
+  table.compare-table {
+    width: 100%; border-collapse: collapse; min-width: 600px;
+  }
+  .compare-table th {
+    background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
+    padding: 0; text-align: center; font-weight: 700; font-size: 13px;
+  }
+  .compare-table td {
+    padding: 12px 16px; border-bottom: 1px solid var(--bp-border);
+    text-align: center; font-size: 13px; vertical-align: middle;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table .row-label {
+    text-align: left; color: var(--bp-text3); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+    padding: 12px 16px; background: rgba(255,255,255,.02);
+    white-space: nowrap; min-width: 130px;
+  }
+  .compare-table .col-hdr {
+    padding: 16px 12px; border-right: 1px solid var(--bp-border);
+  }
+  .compare-table .col-hdr:last-child { border-right: none; }
+  .compare-table td { border-right: 1px solid rgba(30,45,69,.5); }
+  .compare-table td:last-child { border-right: none; }
+
+  .col-ticker { font-size: 18px; font-weight: 800; font-family: monospace; }
+  .col-name   { font-size: 11px; color: var(--bp-text3); margin-top: 2px; }
+  .col-kap    {
+    display: inline-block; font-size: 10px; color: var(--bp-text3);
+    background: rgba(139,148,158,.1); border: 1px solid rgba(139,148,158,.2);
+    border-radius: 4px; padding: 1px 5px; text-decoration: none; margin-top: 6px;
+    transition: all .15s;
+  }
+  .col-kap:hover { color: var(--bp-text); background: rgba(139,148,158,.2); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 3px; padding: 4px 10px;
+    border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .3px;
+    text-transform: uppercase;
+  }
+  .badge.al  { background: rgba(63,185,80,.12); color:#3fb950; border:1px solid rgba(63,185,80,.3); }
+  .badge.sat { background: rgba(248,81,73,.12);  color:#f85149; border:1px solid rgba(248,81,73,.3); }
+  .badge.bkl { background: rgba(139,148,158,.1); color:#8b949e; border:1px solid rgba(139,148,158,.2); }
+
+  .mono { font-family: monospace; font-size: 13px; }
+  .up   { color: #3fb950; }
+  .dn   { color: #f85149; }
+  .muted{ color: var(--bp-text3); }
+
+  .quality-badge {
+    padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .4px;
+  }
+  .q-ideal  { background: rgba(63,185,80,.18);  color:#3fb950; }
+  .q-iyi    { background: rgba(31,111,235,.18);  color:#58a6ff; }
+  .q-dikkat { background: rgba(210,153,34,.18);  color:#d29922; }
+  .q-uzak   { background: rgba(248,81,73,.18);   color:#f85149; }
+  .q-none   { color: var(--bp-text3); }
+
+  .score-pip { display: inline-block; width:8px; height:8px; border-radius:50%; margin: 0 1px; }
+  .pip-filled  { background: #3fb950; }
+  .pip-empty   { background: rgba(139,148,158,.25); }
+  .pip-sat-filled { background: #f85149; }
+
+  /* ── Empty / Loading ── */
+  .empty-state {
+    text-align: center; padding: 60px 24px; color: var(--bp-text3);
+  }
+  .empty-state h2 { font-size: 16px; font-weight: 600; color: var(--bp-text2); margin-bottom: 8px; }
+  .empty-state p  { font-size: 13px; line-height: 1.6; }
+
+  .skeleton {
+    background: linear-gradient(90deg, #161b22 25%, #1e2530 50%, #161b22 75%);
+    background-size: 200% 100%; animation: shimmer 1.4s infinite;
+    border-radius: 4px; height: 14px; width: 80px; display: inline-block;
+  }
+  @keyframes shimmer {
+    0%  { background-position: -200% 0; }
+    100%{ background-position:  200% 0; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    header { padding: 12px 16px; gap: 10px; }
+    .container { padding: 16px; }
+    .search-bar { padding: 12px; }
+    .ticker-input { width: 80px; }
+    .page-title { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Ana Sayfa
+  </a>
+  <div>
+    <div class="page-title">Hisse Karşılaştırma</div>
+    <div class="page-sub" id="compareSubtitle">2-4 hisseyi seçin</div>
+  </div>
+</header>
+
+<div class="container">
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <label>Karşılaştırılacak hisseler (2-4 adet)</label>
+    <div class="ticker-inputs">
+      <input type="text" class="ticker-input" id="t1" placeholder="AKBNK" maxlength="8">
+      <input type="text" class="ticker-input" id="t2" placeholder="GARAN" maxlength="8">
+      <input type="text" class="ticker-input" id="t3" placeholder="ISCTR" maxlength="8">
+      <input type="text" class="ticker-input" id="t4" placeholder="(4. hisse)" maxlength="8">
+    </div>
+    <button class="compare-btn" onclick="doCompare()">Karşılaştır</button>
+    <a id="shareBtn" class="share-btn" href="#" onclick="copyShareUrl(event)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      </svg>
+      Paylaş
+    </a>
+  </div>
+
+  <!-- Results -->
+  <div id="compareResult">
+    <div class="empty-state">
+      <h2>Karşılaştırma Aracı</h2>
+      <p>En az 2 hisse sembolü girin ve karşılaştırın.<br>
+         ADX, RSI, Stop-Loss, Hedef Fiyat ve daha fazlası yan yana.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const TICKERS_PARAM = "{{ tickers_param }}";
+
+const ROW_LABELS = [
+  { key: 'signal',        label: 'Sinyal' },
+  { key: 'price',         label: 'Son Fiyat' },
+  { key: 'change_pct',    label: 'Günlük Değişim' },
+  { key: 'adx',           label: 'ADX (Trend Gücü)' },
+  { key: 'rsi',           label: 'RSI (14)' },
+  { key: 'signal_date',   label: 'Sinyal Tarihi' },
+  { key: 'signal_bars',   label: 'Sinyal Süresi' },
+  { key: 'entry_quality', label: 'Giriş Kalitesi' },
+  { key: 'sl_level',      label: 'Stop-Loss' },
+  { key: 'tp1',           label: 'Hedef 1 (TP1)' },
+  { key: 'tp2',           label: 'Hedef 2 (TP2)' },
+  { key: 'rr_ratio',      label: 'Risk/Ödül (R/R)' },
+  { key: 'bull_score',    label: 'Boğa Skoru' },
+  { key: 'sector',        label: 'Sektör' },
+];
+
+function renderSignal(s) {
+  if (!s) return '<span class="muted">—</span>';
+  const cl = s==='AL'?'al': s==='SAT'?'sat':'bkl';
+  const ic = s==='AL'?'▲': s==='SAT'?'▼':'●';
+  const lbl = s==='AL'?'Güçlü Trend': s==='SAT'?'Zayıf Trend':'Belirsiz';
+  return `<span class="badge ${cl}">${ic} ${lbl}</span>`;
+}
+
+function renderPrice(v) {
+  if (v == null) return '<span class="muted">—</span>';
+  return `<span class="mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>`;
+}
+
+function renderChg(v) {
+  if (v == null) return '<span class="muted">—</span>';
+  const n = parseFloat(v), cl = n>=0?'up':'dn', sign = n>=0?'+':'';
+  return `<span class="${cl} mono">${sign}${n.toFixed(2)}%</span>`;
+}
+
+function renderAdx(v) {
+  if (v == null) return '<span class="muted">—</span>';
+  const n = parseFloat(v);
+  const cl = n>=25 ? 'up' : 'muted';
+  const lbl = n>=35 ? 'Çok Güçlü' : n>=25 ? 'Güçlü' : 'Zayıf Trend';
+  return `<span class="${cl} mono">${n.toFixed(1)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
+}
+
+function renderRsi(v) {
+  if (v == null) return '<span class="muted">—</span>';
+  const n = parseFloat(v);
+  const cl = n>70 ? 'dn' : n<30 ? 'up' : '';
+  const lbl = n>70 ? '(Aşırı Alım)' : n<30 ? '(Aşırı Satım)' : '';
+  return `<span class="${cl} mono">${n.toFixed(1)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
+}
+
+function renderQuality(v) {
+  if (!v) return '<span class="muted">—</span>';
+  const map = { 'IDEAL':'q-ideal', 'IYI':'q-iyi', 'DIKKATLI':'q-dikkat', 'UZAK':'q-uzak' };
+  const lbl = { 'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Uzak' };
+  const cls = map[v] || 'q-none';
+  return `<span class="quality-badge ${cls}">${lbl[v]||v}</span>`;
+}
+
+function renderBullScore(v, signal) {
+  if (v == null) return '<span class="muted">—</span>';
+  const max = 3;
+  const pips = Array.from({length:max}, (_,i) => {
+    const filled = signal==='SAT' ? i < (3-v) : i < v;
+    const cls = signal==='SAT' && filled ? 'pip-sat-filled' : filled ? 'pip-filled' : 'pip-empty';
+    return `<span class="score-pip ${cls}"></span>`;
+  }).join('');
+  return `${pips} <span class="mono" style="font-size:12px">${v}/3</span>`;
+}
+
+function renderCell(key, s) {
+  if (!s || !s.found) return '<span class="muted" style="font-size:20px">—</span>';
+  const v = s[key];
+  switch(key) {
+    case 'signal':        return renderSignal(v);
+    case 'price':         return renderPrice(v);
+    case 'change_pct':    return renderChg(v);
+    case 'adx':           return renderAdx(v);
+    case 'rsi':           return renderRsi(v);
+    case 'signal_bars':   return v ? `<span class="mono">${v} gün</span>` : '<span class="muted">—</span>';
+    case 'signal_date':   return v ? `<span style="font-size:12px">${v}</span>` : '<span class="muted">—</span>';
+    case 'entry_quality': return renderQuality(v);
+    case 'sl_level':      return v ? `<span class="dn mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>';
+    case 'tp1':           return v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>';
+    case 'tp2':           return v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>';
+    case 'rr_ratio':      return v ? `<span class="mono" style="color:#58a6ff">1 : ${parseFloat(v).toFixed(1)}</span>` : '<span class="muted">—</span>';
+    case 'bull_score':    return renderBullScore(v, s.signal);
+    case 'sector':        return v ? `<span style="font-size:11px;color:var(--bp-text2)">${v}</span>` : '<span class="muted">—</span>';
+    default:              return v != null ? String(v) : '<span class="muted">—</span>';
+  }
+}
+
+function buildTable(stocks) {
+  const active = stocks.filter(s => s.found);
+  if (active.length === 0) {
+    return `<div class="empty-state">
+      <h2>Hisse bulunamadı</h2>
+      <p>Girdiğiniz semboller sistemde kayıtlı değil.<br>Lütfen geçerli BIST hisse kodları girin.</p>
+    </div>`;
+  }
+
+  const headers = stocks.map(s => `
+    <th class="col-hdr">
+      <a href="/hisse/${s.ticker}" style="text-decoration:none;color:inherit">
+        <div class="col-ticker">${s.ticker}</div>
+        <div class="col-name">${s.name||''}</div>
+        ${s.kap_url ? `<a href="${s.kap_url}" target="_blank" rel="noopener" class="col-kap">KAP ↗</a>` : ''}
+      </a>
+    </th>`).join('');
+
+  const rows = ROW_LABELS.map(({key, label}) => {
+    const cells = stocks.map(s => `<td>${renderCell(key, s)}</td>`).join('');
+    return `<tr><td class="row-label">${label}</td>${cells}</tr>`;
+  }).join('');
+
+  return `<div class="compare-wrap">
+    <table class="compare-table">
+      <thead><tr><th class="row-label" style="background:var(--bp-surface)"></th>${headers}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+async function doCompare() {
+  const inputs = ['t1','t2','t3','t4'].map(id => document.getElementById(id).value.trim().toUpperCase()).filter(Boolean);
+  if (inputs.length < 2) {
+    document.getElementById('compareResult').innerHTML =
+      '<div class="empty-state"><h2>En az 2 hisse giriniz</h2><p>Karşılaştırma için 2 ila 4 hisse sembolü girin.</p></div>';
+    return;
+  }
+
+  // Loading skeletons
+  document.getElementById('compareResult').innerHTML = `
+    <div class="compare-wrap">
+      <table class="compare-table" style="min-width:400px">
+        <thead><tr><th class="row-label"></th>${inputs.map(t=>`<th class="col-hdr"><div class="col-ticker">${t}</div><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`).join('')}</tr></thead>
+        <tbody>${ROW_LABELS.map(({label})=>`<tr><td class="row-label">${label}</td>${inputs.map(()=>`<td><div class="skeleton"></div></td>`).join('')}</tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+
+  // Update URL
+  const url = new URL(window.location.href);
+  url.searchParams.set('tickers', inputs.join(','));
+  window.history.pushState({}, '', url.toString());
+  document.getElementById('compareSubtitle').textContent = inputs.join(' · ');
+
+  try {
+    const res  = await fetch(`/api/karsilastir?tickers=${inputs.join(',')}`);
+    const data = await res.json();
+    document.getElementById('compareResult').innerHTML = buildTable(data.stocks || []);
+  } catch(e) {
+    document.getElementById('compareResult').innerHTML =
+      '<div class="empty-state"><h2>Yükleme hatası</h2><p>Lütfen tekrar deneyin.</p></div>';
+  }
+}
+
+function copyShareUrl(e) {
+  e.preventDefault();
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('shareBtn');
+    btn.textContent = '✓ Kopyalandı';
+    setTimeout(() => { btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş`; }, 2000);
+  });
+}
+
+// Ticker input'larında Enter tuşu ile karşılaştır
+document.querySelectorAll('.ticker-input').forEach(inp => {
+  inp.addEventListener('keydown', e => { if (e.key==='Enter') doCompare(); });
+});
+
+// URL'den otomatik yükle
+if (TICKERS_PARAM) {
+  const parts = TICKERS_PARAM.split(',').slice(0,4);
+  parts.forEach((t,i) => {
+    const el = document.getElementById('t' + (i+1));
+    if (el) el.value = t.trim().toUpperCase();
+  });
+  doCompare();
+}
+</script>
+</body>
+</html>
