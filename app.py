@@ -3754,6 +3754,28 @@ def api_gundem():
         key=_adx_val, reverse=True
     )[:8]
 
+    # Yaklaşan bilanço dönemleri (gündem için)
+    today_dt  = date.today()
+    today_iso = today_dt.isoformat()
+    bilanco_upcoming = []
+    for qlabel, start, end, desc in _BILANCO_PERIODS:
+        if end < today_iso:
+            continue
+        start_dt      = date.fromisoformat(start)
+        end_dt        = date.fromisoformat(end)
+        days_to_end   = (end_dt   - today_dt).days
+        days_to_start = (start_dt - today_dt).days
+        bilanco_upcoming.append({
+            "label":      qlabel,
+            "desc":       desc,
+            "start":      start,
+            "end":        end,
+            "status":     "active" if today_dt >= start_dt else "upcoming",
+            "days_label": f"{days_to_end} gün kaldı" if today_dt >= start_dt else f"{days_to_start} gün sonra",
+        })
+        if len(bilanco_upcoming) >= 2:
+            break
+
     return safe_json({
         "new_signals": new_signals,
         "strong_al":   strong_al,
@@ -3763,7 +3785,8 @@ def api_gundem():
             "sat":   sum(1 for s in stocks if s.get("signal") == "SAT"),
             "bekle": sum(1 for s in stocks if s.get("signal") == "BEKLE"),
             "total": len(stocks),
-        }
+        },
+        "bilanco_upcoming": bilanco_upcoming,
     })
 
 

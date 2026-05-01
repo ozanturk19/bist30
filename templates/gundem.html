@@ -231,6 +231,18 @@
     </div>
   </div>
 
+  <!-- Bilanço Takvimi -->
+  <div class="section" id="bilancoBand" style="display:none">
+    <div class="section-hdr">
+      <div class="section-title">
+        <span class="dot" style="background:#f59e0b"></span>
+        Bilanço Takvimi
+      </div>
+      <a href="/bilanco-takvimi" style="font-size:11px;color:#58a6ff;text-decoration:none">Tümü →</a>
+    </div>
+    <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+  </div>
+
   <!-- Piyasa Haberleri -->
   <div class="section">
     <div class="section-hdr">
@@ -336,6 +348,31 @@ async function loadGundem() {
         '<div class="empty-box">Güçlü trend verisi bekleniyor…</div>';
     } else {
       document.getElementById('strongAlGrid').innerHTML = strong.map(s => renderCard(s, false)).join('');
+    }
+
+    // Bilanço takvimi
+    const bilPeriods = d.bilanco_upcoming || [];
+    if (bilPeriods.length > 0) {
+      const bilEl = document.getElementById('bilancoPeriods');
+      const bandEl = document.getElementById('bilancoBand');
+      if (bilEl && bandEl) {
+        bandEl.style.display = '';
+        bilEl.innerHTML = bilPeriods.map(p => {
+          const isActive = p.status === 'active';
+          const dotClr   = isActive ? '#f59e0b' : '#8b949e';
+          const badgeBg  = isActive ? 'rgba(245,158,11,.12)' : 'rgba(139,148,158,.08)';
+          const badgeBrd = isActive ? 'rgba(245,158,11,.3)' : 'rgba(139,148,158,.2)';
+          return `<div style="flex:1;min-width:200px;background:#111827;border:1px solid ${badgeBrd};border-radius:8px;padding:12px 14px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+              <span style="width:7px;height:7px;border-radius:50%;background:${dotClr};flex-shrink:0"></span>
+              <span style="font-size:12px;font-weight:600;color:#e2e8f0">${p.label}</span>
+              <span style="font-size:10px;padding:1px 7px;border-radius:10px;background:${badgeBg};border:1px solid ${badgeBrd};color:${dotClr};margin-left:auto">${isActive ? 'Aktif' : 'Yaklaşıyor'}</span>
+            </div>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:3px">${p.desc}</div>
+            <div style="font-size:11px;color:${dotClr};font-weight:500">${p.days_label}</div>
+          </div>`;
+        }).join('');
+      }
     }
 
     // Market news
