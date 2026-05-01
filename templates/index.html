@@ -527,6 +527,8 @@
   .filter-btn.active-bekle{ background: var(--bp-bkl-bg); border-color: var(--bp-bkl-bd); color: var(--bp-bkl); }
   .filter-today { border-color: #e3b341 !important; color: #e3b341 !important; }
   .active-today { background: #e3b341 !important; color: #0d1117 !important; border-color: #e3b341 !important; }
+  .filter-watch { border-color: rgba(56,139,253,.5) !important; color: #58a6ff !important; }
+  .active-watch { background: rgba(56,139,253,.15) !important; border-color: #388bfd !important; color: #58a6ff !important; }
 
   /* Sektör filtresi */
   .sector-filters {
@@ -1433,6 +1435,7 @@
     <button class="filter-btn" onclick="setFilter('SAT', this)">🔴 Zayıf Trend</button>
     <button class="filter-btn" onclick="setFilter('BEKLE', this)">⚪ Belirsiz</button>
     <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)">⚡ Bugün</button>
+    <button class="filter-btn filter-watch" id="filterWatchBtn" onclick="setFilter('WATCH', this)" style="display:none">🔔 Takibim <span id="watchFilterCount"></span></button>
     <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()">⚙️ Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
     <div class="search-wrap">
       <input class="search-input" type="text" placeholder="Hisse ara… (/)"
@@ -2358,7 +2361,8 @@ function getFiltered() {
   return allStocks.filter(s => {
     if (s.ticker === 'XU030') return false;   // endeks satırda gösteriliyor
     const matchFilter = currentFilter === 'all' || s.signal === currentFilter
-                     || (currentFilter === 'TODAY' && s.is_new_signal && s.signal !== 'BEKLE');
+                     || (currentFilter === 'TODAY' && s.is_new_signal && s.signal !== 'BEKLE')
+                     || (currentFilter === 'WATCH' && watchlist.has(s.ticker));
     const matchSearch = !currentSearch || s.ticker.includes(currentSearch.toUpperCase())
                      || (s.name && s.name.toLowerCase().includes(currentSearch.toLowerCase()));
     const matchSector = currentSector === 'all' || s.sector === currentSector;
@@ -2577,11 +2581,14 @@ function renderTable() {
 
 function setFilter(f, btn) {
   currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b =>
-    b.className = b.classList.contains('filter-today') ? 'filter-btn filter-today' : 'filter-btn'
-  );
-  const classMap = { all:'active-all', AL:'active-al', SAT:'active-sat', BEKLE:'active-bekle', TODAY:'active-today' };
-  btn.classList.add(classMap[f] || '');
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    let base = 'filter-btn';
+    if (b.classList.contains('filter-today')) base += ' filter-today';
+    if (b.classList.contains('filter-watch')) base += ' filter-watch';
+    b.className = base;
+  });
+  const classMap = { all:'active-all', AL:'active-al', SAT:'active-sat', BEKLE:'active-bekle', TODAY:'active-today', WATCH:'active-watch' };
+  if (btn) btn.classList.add(classMap[f] || '');
   renderTable();
 }
 
@@ -2591,10 +2598,11 @@ function resetFilters() {
   currentSearch  = '';
   currentSector  = 'all';
   advFilters = { adx: 0, bars: 0, vol: 0, rsi: '' };
-  const searchEl = document.getElementById('searchInput');
+  const searchEl = document.querySelector('.search-input');
   if (searchEl) searchEl.value = '';
+  document.getElementById('searchAc')?.classList.remove('open');
   // "Tümü" butonunu aktif yap
-  const allBtn = document.querySelector('.filter-btn.active-all, .filter-btn[onclick*="all"]');
+  const allBtn = document.querySelector('.filter-btn[onclick*="\'all\'"]');
   setFilter('all', allBtn || document.querySelector('.filter-btn'));
 }
 
@@ -2719,6 +2727,17 @@ function updateFabBadge() {
   const n = watchlist.size;
   badge.textContent = n;
   badge.classList.toggle('show', n > 0);
+  // Show/hide "Takibim" filter button
+  const watchBtn = document.getElementById('filterWatchBtn');
+  const watchCount = document.getElementById('watchFilterCount');
+  if (watchBtn) {
+    watchBtn.style.display = n > 0 ? '' : 'none';
+    if (watchCount) watchCount.textContent = n > 0 ? `(${n})` : '';
+  }
+  // If filter is set to WATCH and watchlist becomes empty, reset to all
+  if (n === 0 && currentFilter === 'WATCH') {
+    setFilter('all', document.querySelector('.filter-btn.active-all') || document.querySelector('.filter-btn'));
+  }
 }
 
 function setPriceAlarm(ticker, dir, inputId) {
