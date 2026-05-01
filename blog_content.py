@@ -1483,6 +1483,269 @@ Yüksek ATR dönemlerinde sinyaller daha geniş stop ile gelir, bu normaldir ve 
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'EREGL', 'GARAN']
   },
+
+  # ── Makale 32 ──────────────────────────────────────────────────────
+  {
+    "slug": "macd-indikatoru-nedir",
+    "title": "MACD İndikatörü Nedir? Nasıl Yorumlanır?",
+    "cat": "Teknik Analiz",
+    "read_min": 6,
+    "summary": "MACD (Moving Average Convergence/Divergence), trend yönünü ve momentumu aynı anda ölçen en popüler teknik analiz araçlarından biridir. Sinyal üretme kurallarını ve BIST'te nasıl kullanıldığını öğrenin.",
+    "body": """## MACD Nedir?
+
+**MACD (Hareketli Ortalama Yakınsama/Iraksama)**, iki üstel hareketli ortalamanın (EMA) farkına dayanan bir momentum indikatörüdür. 1979'da Gerald Appel tarafından geliştirilmiştir.
+
+MACD üç bileşenden oluşur:
+- **MACD Hattı** = EMA(12) − EMA(26)
+- **Sinyal Hattı** = EMA(9) of MACD
+- **Histogram** = MACD − Sinyal Hattı
+
+## MACD Sinyalleri Nasıl Okunur?
+
+### 1. MACD Kesişimleri
+- MACD hattı sinyal hattını **yukarı keser** → Alış sinyali
+- MACD hattı sinyal hattını **aşağı keser** → Satış sinyali
+
+### 2. Sıfır Çizgisi Kesişimi
+- MACD hattı sıfırın **üzerine geçer** → Yükseliş trendi güçleniyor
+- MACD hattı sıfırın **altına iner** → Düşüş trendi güçleniyor
+
+### 3. Histogram Yorumu
+Histogram büyürse momentum güçleniyor, küçülürse zayıflıyor demektir:
+- Pozitif histogram büyüyorsa: Güçlenen yükseliş
+- Pozitif histogram küçülüyorsa: Yükseliş yoruluyor, dikkat
+- Negatif histogram küçülüyorsa: Düşüş yavaşlıyor, toparlanma beklentisi
+
+### 4. Uyumsuzluk (Divergence)
+MACD'nin en güçlü sinyali **uyumsuzluk**tur:
+- **Boğa uyumsuzluğu:** Fiyat yeni dip yaparken MACD yeni dip yapmaz → Dönüş sinyali
+- **Ayı uyumsuzluğu:** Fiyat yeni zirve yaparken MACD yeni zirve yapmaz → Düzeltme sinyali
+
+## MACD ile BIST Uygulaması
+
+BIST hisselerinde MACD kullanırken dikkat edilmesi gerekenler:
+
+**Haftalık grafikte daha güvenilir.** Günlük MACD çok gürültülüdür, haftalık MACD daha kaliteli sinyal üretir.
+
+**Trend yönüyle kullanın.** MACD'yi yalnız kullanmak yerine EMA veya Supertrend gibi trend filtresiyle birleştirin:
+- Trend yukarıysa (EMA12 > EMA99) → yalnızca MACD alım sinyallerini değerlendirin
+- Trend aşağıysa → yalnızca satış sinyallerini değerlendirin
+
+**Hacim teyidi şart.** MACD kesişimi düşük hacimde oluşursa güvenilirlik azalır.
+
+## MACD vs RSI — Hangisi Daha İyi?
+
+| Özellik | MACD | RSI |
+|---------|------|-----|
+| Tip | Trend + Momentum | Momentum (osilatör) |
+| Gecikme | Orta | Düşük |
+| En iyi kullanım | Trend varlığında | Aşırı alım/satım tespiti |
+| Uyumsuzluk | ✅ Çok güçlü | ✅ Güçlü |
+
+**Sonuç:** MACD ve RSI birbirini tamamlar. MACD trend yönünü ve momentumu, RSI aşırı alım/satım bölgelerini gösterir.
+
+## BorsaPusula'da MACD
+
+BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA12/99 kombinasyonunu kullanır. MACD histogram, sinyal sayfalarında destekleyici gösterge olarak sunulur. [Canlı sinyalleri görmek için ana sayfayı ziyaret edin.](/)""",
+    "faqs": [
+      {"q": "MACD için en iyi periyot ayarları nelerdir?", "a": "Standart ayarlar EMA(12,26,9)'dur. Kısa vadeli trading için (3,10,16) kullanılabilir. BIST günlük grafiklerinde standart 12-26-9 ayarı yeterince iyi performans göstermektedir."},
+      {"q": "MACD sıfır çizgisinin önemi nedir?", "a": "MACD hattı sıfırın üzerindeyse EMA12 > EMA26 demektir, yani kısa vadeli ortalama uzun vadeliyi geçmiştir ve yükseliş momentumu var. Sıfırın altındaysa tersi geçerlidir."},
+      {"q": "MACD uyumsuzluğu neden önemlidir?", "a": "Uyumsuzluk, fiyat ile momentum arasındaki çelişkiyi gösterir. Fiyat yeni zirve yaparken MACD yapmıyorsa, yükseliş momentumu zayıflıyor demektir ve yakında düzeltme gelebilir. Bu sinyaller çok güvenilir olmakla birlikte kesin değildir."},
+      {"q": "MACD ile ne sıklıkla işlem yapılabilir?", "a": "Günlük grafikte MACD ayda 2-5 sinyal üretebilir. Çok kısa vadeli grafikte (15dk) sinyaller çok fazla ve gürültülü olur. Haftalık grafikte sinyaller seyrek ama güvenilir olur."},
+      {"q": "MACD'yi Supertrend ile birleştirmek mümkün mü?", "a": "Evet, ikisi çok iyi tamamlar. Supertrend trend yönünü ve stop seviyesini belirler; MACD giriş zamanlaması için kullanılır. Supertrend AL veriyorken MACD kesişimi oluşursa sinyal kalitesi artar."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'SISE', 'KRDMD']
+  },
+
+  # ── Makale 33 ──────────────────────────────────────────────────────
+  {
+    "slug": "destek-direnc-seviyeleri-nedir",
+    "title": "Destek ve Direnç Seviyeleri Nedir? Nasıl Belirlenir?",
+    "cat": "Teknik Analiz",
+    "read_min": 7,
+    "summary": "Destek ve direnç seviyeleri, teknik analizin temel taşlarıdır. Fiyatın nerede durduğunu, nerede geri döndüğünü anlamak için bu kavramları öğrenmek şarttır.",
+    "body": """## Destek Nedir?
+
+**Destek seviyesi**, fiyatın düşerken *durduğu* veya *geri döndüğü* fiyat bölgesidir. Teknik açıdan bakıldığında, bu seviyede alıcılar satıcıları bastırır ve fiyat düşmeyi durdurur.
+
+Destek seviyelerini oluşturan faktörler:
+- Önceki dip noktaları
+- Yuvarlak sayılar (100 TL, 50 TL gibi)
+- Hareketli ortalamalar (EMA50, EMA200)
+- Supertrend çizgisi (AL sinyalinde)
+- Fibonacci geri çekilme seviyeleri
+
+## Direnç Nedir?
+
+**Direnç seviyesi**, fiyatın yükselirken *durduğu* veya *geri döndüğü* fiyat bölgesidir. Bu bölgede satıcılar alıcıları bastırır.
+
+Direnç seviyelerini oluşturan faktörler:
+- Önceki zirve noktaları
+- Yuvarlak sayılar
+- Uzun vadeli hareketli ortalamalar (EMA200)
+- Supertrend çizgisi (SAT sinyalinde)
+- Önceki destek kırıldıktan sonra oluşan dirençler
+
+## Destek ve Direnç'in Temel Özellikleri
+
+### Rol Değişimi
+Kırılan destek, dirençe dönüşür; kırılan direnç, desteğe dönüşür. Bu en önemli kuraldır:
+
+```
+Fiyat 90 TL desteği aşağı kırarsa → 90 TL artık direnç olur
+Fiyat 90 TL direncini yukarı kırarsa → 90 TL artık destek olur
+```
+
+### Test Sayısı = Güvenilirlik
+Bir seviye ne kadar çok test edilip tutunursa, o kadar güçlüdür:
+- 2 kez test → zayıf seviye
+- 3-4 kez test → güçlü seviye
+- 5+ kez test → çok güçlü, kırılması halinde büyük hareket beklenebilir
+
+### Hacim Teyidi
+Destek/direnç bölgesine yaklaşırken hacim artışı önemlidir:
+- Desteğe inerken hacim artarsa → Alıcılar devreye giriyor, güçlü destek
+- Desteği kırarken hacim artarsa → Güçlü kırılım, sahte değil
+
+## BIST Hisselerinde Pratik Uygulama
+
+### Adım 1: Grafik Çerçevesini Belirle
+- **Uzun vadeli destek/direnç:** Haftalık veya aylık grafik
+- **Kısa vadeli destek/direnç:** Günlük grafik
+- **Giriş noktası:** 4 saatlik veya günlük grafik
+
+### Adım 2: Seviyeleri İşaretle
+1. Açık zirveler ve dipleri işaretle
+2. Bu seviyelerde birden fazla temas var mı kontrol et
+3. Hacmin nasıl davrandığına bak
+
+### Adım 3: Stop-Loss Yerleştir
+- AL pozisyonu için: Destek seviyesinin biraz altına stop koy (ATR × 0.5 mesafe)
+- SAT pozisyonu için: Direnç seviyesinin biraz üstüne stop koy
+
+### Adım 4: Hedef Fiyat Belirle
+- Bir sonraki anlamlı destek/direnç seviyesini hedef al
+- Risk/ödül oranının en az 1:2 olmasını hedefle
+
+## Supertrend ile Birleştirme
+
+BorsaPusula'nın sinyalleri, Supertrend çizgisini dinamik destek/direnç olarak kullanır:
+
+- **AL sinyalinde:** Supertrend alt çizgisi → dinamik destek, stop-loss buraya konulur
+- **SAT sinyalinde:** Supertrend üst çizgisi → dinamik direnç, stop-loss buraya konulur
+
+Bu yaklaşım, klasik statik destek/direnç yerine piyasanın volatilitesine otomatik adapte olur.
+
+## Yaygın Hatalar
+
+❌ **Tek bir çizgi olarak düşünmek** — Destek/direnç bir çizgi değil, bir *bölge*dir. ±%1-2 tolerans bırakın.
+
+❌ **Küçük zaman diliminde aramak** — 15 dakikalık grafikteki "kritik destek" büyük zaman diliminde anlamsız olabilir.
+
+❌ **Sabır göstermemek** — Fiyat desteğe dokunduktan hemen sonra giriş yerine, tepkiyi onaylayana kadar bekleyin.
+
+❌ **Stop koymamak** — Destek kırılabilir. Her desteğin altına mutlaka stop koyun.
+
+[Canlı Supertrend seviyeleri ve AL/SAT sinyallerini gör →](/)""",
+    "faqs": [
+      {"q": "Destek ve direnç nasıl çizilir?", "a": "Grafikte önceki zirve ve dip noktalarını bulun. Birden fazla kez fiyatın durduğu veya geri döndüğü seviyeleri yatay çizgilerle işaretleyin. Bu seviyelere ne kadar çok dokunulmuşsa o kadar güçlüdür."},
+      {"q": "Yuvarlak sayılar neden önemli destek/direnç seviyeleridir?", "a": "100, 50, 200 gibi yuvarlak sayılar psikolojik olarak önemlidir. Birçok yatırımcı bu seviyelerde emir verir. Bu yüzden bu seviyelerde çok sayıda alış/satış emri birikir ve fiyat buralarda sıkça durur veya geri döner."},
+      {"q": "Destek kırılınca ne yapmalı?", "a": "Destek kırılması, piyasanın yukarı yönlü görüşünü bozar. Varsa stop-loss devreye girer. Kırılım güçlüyse (yüksek hacimle) yeni destek seviyesini belirleyip bekleyin. Sahte kırılım ihtimali için hacmi kontrol edin."},
+      {"q": "Dinamik destek nedir?", "a": "Hareketli ortalamalar (EMA50, EMA200) veya Supertrend gibi fiyatla birlikte hareket eden göstergeler dinamik destek oluşturur. Statik seviyelerin aksine zamanla değişirler ve trend içinde sürekli fiyatı destekler ya da dirençlendirirler."},
+      {"q": "Destek ve direnç seviyeleri ne kadar güvenilirdir?", "a": "Destek/direnç seviyeleri kesin değildir, olasılıksal bir yaklaşımdır. Güçlü seviyeler daha sık tutunur ama bazen kırılır. Bu yüzden her zaman stop-loss kullanmak ve risk yönetimine uymak şarttır."}
+    ],
+    "related_tickers": ['THYAO', 'AKBNK', 'EREGL', 'FROTO', 'TUPRS']
+  },
+
+  # ── Makale 34 ──────────────────────────────────────────────────────
+  {
+    "slug": "hacim-analizi-nedir",
+    "title": "Hacim Analizi: Fiyatı Hacimle Doğrulama",
+    "cat": "Teknik Analiz",
+    "read_min": 5,
+    "summary": "Hacim, fiyat hareketinin arkasındaki 'güç'ü gösterir. Yüksek hacimli kırılımlar ve düşük hacimli hareketler arasındaki farkı anlamak, daha kaliteli giriş noktaları bulmanızı sağlar.",
+    "body": """## Hacim Neden Önemlidir?
+
+**Hacim**, belirli bir zaman diliminde alınıp satılan hisse adedidir. Fiyatın nereye gittiğini görürsünüz, hacim ise bu hareketin *ne kadar kararlı* olduğunu söyler.
+
+Temel kural: **Hacim trendin arkasında ise trend güvenilirdir.**
+
+## Hacim Analizi Temel Kuralları
+
+### Kural 1: Kırılım + Hacim = Güçlü Sinyal
+Fiyat önemli bir direnç seviyesini kırıyorsa ve hacim normalden %50+ fazlaysa:
+- Bu **gerçek bir kırılım** olma ihtimali yüksektir
+- Kurumsal yatırımcılar devreye girmiş demektir
+
+Fiyat kırılıyor ama hacim normalin altındaysa:
+- **Sahte kırılım** ihtimali yüksektir
+- Fiyat çok geçmeden geri dönebilir
+
+### Kural 2: Trend + Hacim
+| Fiyat | Hacim | Yorum |
+|-------|-------|-------|
+| Yükseliyor | Yüksek | ✅ Güçlü yükseliş trendi |
+| Yükseliyor | Düşük | ⚠️ Zayıf yükseliş, dikkat |
+| Düşüyor | Yüksek | ❌ Güçlü düşüş trendi |
+| Düşüyor | Düşük | 🔄 Zayıf düşüş, toparlanma yakın |
+
+### Kural 3: Hacim Uyumsuzluğu
+Fiyat yeni zirve yapıyor ama hacim azalıyorsa → yükseliş güç kaybediyor, düzeltme yakın.
+
+Fiyat yeni dip yapıyor ama hacim azalıyorsa → düşüş güç kaybediyor, toparlanma yakın.
+
+## BIST'te Hacim Nasıl Kullanılır?
+
+### Ortalama Hacim Referansı
+BorsaPusula, her hisse için 20 günlük ortalama hacmi referans alır. Günlük hacim bu ortalamanın:
+- **2x üzerinde:** Yüksek hacim — sinyal güvenilirliği artar
+- **1-2x arası:** Normal hacim
+- **0.5x altında:** Düşük hacim — sinyaller daha az güvenilir
+
+### Supertrend + Hacim Teyidi
+BorsaPusula sinyallerinde hacim teyidi önemli rol oynar:
+- AL sinyali + yüksek hacim = **Güçlü AL**, giriş kalitesi yüksek
+- AL sinyali + düşük hacim = **Zayıf AL**, kırılım sahte olabilir
+
+Hisse sayfasında "Volume Teyidi" bölümü bu bilgiyi otomatik gösterir.
+
+## Dikkat Edilmesi Gereken Hacim Kalıpları
+
+### Climax Volume (Doruk Hacim)
+Uzun bir trendin sonunda normalin 3-5 katı hacim oluşur. Bu genellikle trendin bitmekte olduğunu gösterir:
+- Güçlü yükseliş + rekor hacim → kurumsal satış başlamış olabilir
+- Güçlü düşüş + rekor hacim → paniksel satışlar bitiyor, dip olabilir
+
+### Volume Dry-Up (Hacim Kuruması)
+Trend devam ederken hacim azalır. Bu konsolidasyon döneminin sinyal olabilir:
+- Konsolidasyon süresince hacim kurur → kırılım hazırlanıyor
+- Kırılım geldiğinde güçlü hacim eşlik etmeli
+
+## Hacim İndikatörleri
+
+En yaygın kullanılanlar:
+- **OBV (On-Balance Volume):** Yükselen günlerde hacim ekler, düşende çıkarır. Uyumsuzluklar için kullanılır.
+- **Chaikin Money Flow:** Hacim para akışını ölçer. +0.25 üstü güçlü alım baskısı, -0.25 altı güçlü satım baskısı.
+- **Volume MA:** 20 günlük hacim ortalaması, referans için kullanılır.
+
+## Özet: Hacim Kontrol Listesi
+
+Her sinyal öncesi şunları kontrol edin:
+1. ✅ Hacim ortalamanın üzerinde mi?
+2. ✅ Kırılım hacimli mi yoksa hacimsiz mi?
+3. ✅ Trend yönüyle hacim uyumlu mu?
+4. ✅ Hacim uyumsuzluğu var mı?
+
+[BIST hisselerinin hacim verisini ve AL/SAT sinyallerini gör →](/)""",
+    "faqs": [
+      {"q": "Hacim analizi için hangi periyot kullanılmalı?", "a": "Günlük grafikte 20 günlük ortalama hacim sık kullanılan referanstır. Kısa vadeli işlemler için 5-10 günlük ortalama daha duyarlıdır. BorsaPusula'nın vol_ratio metriği 20 günlük ortalaması üzerinden hesaplanır."},
+      {"q": "Düşük hacimli hisseler nasıl ele alınmalı?", "a": "Düşük hacimli (illik) hisseler, büyük alım-satım emirlerinde fiyatı hızla etkileyebilir. Bu hisselerde teknik analiz daha az güvenilir olur. BIST30 hisselerinin yüksek likiditesi teknik analizin etkinliğini artırır."},
+      {"q": "Hisse başına hacim mi endeks hacmi mi önemlidir?", "a": "Her ikisi de önemlidir. Endeks hacmi piyasa genelinin katılımını gösterir. Hisse hacmi ise o spesifik hissede ne kadar para hareket ettiğini gösterir. Kırılım sinyallerinde hisse bazlı hacim daha kritiktir."},
+      {"q": "MACD ile hacim birlikte nasıl kullanılır?", "a": "MACD momentum gösterirken hacim bu momentumun gücünü teyit eder. MACD kesişimi oluştuktan sonra hacim de artıyorsa sinyal güçlüdür. MACD kesişti ama hacim yoksa, sahte sinyal ihtimali yüksektir."},
+      {"q": "Hacim olmadan teknik analiz yapılabilir mi?", "a": "Yapılabilir ama eksik kalır. Hacim, fiyatın manipülatif mi yoksa gerçek mi olduğunu anlamada kritik rol oynar. Özellikle kırılım sinyallerinde hacim teyidi olmadan işlem açmak risk seviyesini önemli ölçüde artırır."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'BIMAS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
