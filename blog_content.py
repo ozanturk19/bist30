@@ -1267,6 +1267,222 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
   },
+  {
+    "slug": "swing-trading-nedir",
+    "title": "Swing Trading Nedir? BIST'te Swing Trade Nasıl Yapılır?",
+    "cat": "Strateji",
+    "read_min": 7,
+    "summary": "Swing trading, birkaç günden birkaç haftaya uzanan fiyat hareketlerinden kazanç sağlamayı hedefleyen bir trading stratejisidir. BIST hisselerinde nasıl uygulanır, hangi indikatörler kullanılır?",
+    "body": """## Swing Trading Nedir?
+
+Swing trading, bir hisse senedini birkaç gün ile birkaç hafta arasında tutarak, **orta vadeli fiyat dalgalanmalarından** kazanç sağlamayı hedefleyen bir stratejidir.
+
+Günlük (day trading) gibi çok kısa vadeli değil, uzun vadeli yatırım gibi aylar/yıllar süren bir strateji de değil. "Swing" (salınım) adını, fiyatın yukarı-aşağı salınımlarından yararlanma mantığından alır.
+
+## Swing Trade vs Diğer Stratejiler
+
+| Strateji | Süre | Odak | Risk |
+|----------|------|------|------|
+| Scalping | Dakika - Saat | Küçük hareketler | Çok yüksek |
+| Day Trading | Aynı gün | Günlük hareket | Yüksek |
+| **Swing Trading** | **3-20 gün** | **Trend dalgaları** | **Orta** |
+| Pozisyon Trading | Hafta - Ay | Büyük trendler | Orta-Düşük |
+| Yatırım | Yıl+ | Değer artışı | Uzun vadeli |
+
+## BIST'te Swing Trading Mantığı
+
+BIST hisseleri günde %5-15 hareket edebilir. Swing trader bu dalgalanmalardan yararlanır:
+
+- **Giriş:** Trend başlangıcında veya geri çekilmede
+- **Tutma:** Trendin devam ettiği süre (ortalama 5-15 gün)
+- **Çıkış:** Hedef fiyata ulaşınca veya sinyal tersine döünce
+
+## Swing Trading İçin Temel İndikatörler
+
+### 1. Supertrend
+Swing traderin en iyi arkadaşı. Trendin yönünü ve döndüğü noktayı net olarak gösterir:
+- **Yeşil Supertrend:** Uzun pozisyon tutmak için uygun
+- **Kırmızı Supertrend:** Düşüş trendinde çıkmak gerekir
+
+### 2. ADX (Average Directional Index)
+Trendin **gücünü** ölçer (yönünü değil):
+- ADX > 25 → Güçlü trend var, swing fırsatı yüksek
+- ADX < 20 → Yatay piyasa, swing yapmak riskli
+
+### 3. RSI (Relative Strength Index)
+Giriş/çıkış zamanlaması için:
+- RSI 35-40 bölgesinde geri çekilme → Potansiyel alım fırsatı
+- RSI 70+ bölgesinde fiyat → Kar alım bölgesi
+
+### 4. EMA (Hareketli Ortalama)
+- EMA 20 > EMA 50 > EMA 100 hizalaması → Güçlü yükseliş trendi
+- Fiyat EMA 20'ye geri çekilirse → Swing alım noktası
+
+## Pratik Swing Trading Stratejisi: Pullback Al
+
+**Adım 1:** Ana trend yukarı olduğunu doğrula (EMA hizalama + Supertrend yeşil)
+
+**Adım 2:** Fiyatın bir geri çekilme (pullback) yaşadığını bekle — genellikle EMA 20 veya 50 seviyesine
+
+**Adım 3:** RSI 35-45 bölgesine gelince alım yap
+
+**Adım 4:** Stop-loss: Giriş fiyatının %3-5 altına koy
+
+**Adım 5:** Hedef: Önceki zirve veya R/R = 1:2 seviyesi
+
+## Swing Trading Risk Yönetimi
+
+Swing traderde sermayeyi korumak kritiktir:
+
+- **Her işlemde maksimum %1-2 risk** (stop-loss ile hesaplanır)
+- **Pozisyon büyüklüğü** = (Sermaye × Risk%) ÷ (Giriş - Stop)
+- **En az 1:2 risk/ödül oranı** — 1 birim riskle 2 birim kazanç hedefle
+- **Aynı anda çok fazla pozisyon açma** — maksimum 3-5 pozisyon
+
+## BIST'te Swing Trading: Dikkat Edilecekler
+
+**Makro faktörler önemli:**
+- Dolar/TL hareketi BIST'i direkt etkiler
+- TCMB kararları, enflasyon verileri sert hareketler yaratabilir
+- Bu haberleri takip et, stop-loss'unu koruyun
+
+**Likiditeye dikkat:**
+- BIST30 hisseleri swing için uygundur — likiditesi yüksek
+- Küçük hisselerde alım/satım spreadi swing karı yiyebilir
+
+**Piyasa saatleri:**
+- BIST 10:00-18:00 arası açık
+- İlk 30 dakika (10:00-10:30) ve son 30 dakika (17:30-18:00) en volatil
+
+## BorsaPusula ile Swing Fırsatı Bul
+
+BorsaPusula'daki algoritmik sinyaller tam olarak swing trading için tasarlanmıştır:
+
+- **AL sinyali** = Supertrend + ADX + EMA üçlü onayı → Swing giriş fırsatı
+- **ADX değeri** → Trendin ne kadar güçlü olduğunu gösterir
+- **Sinyal yaşı** → Kaç gün önce girdi, henüz erken mi geç mi?
+- **Giriş/SL seviyeleri** → Stop-loss otomatik hesaplanmış
+
+[Şu anki swing fırsatlarını gör →](/)""",
+    "faqs": [
+      {"q": "Swing trading günlük tradingden ne farkı var?", "a": "Day trading aynı gün içinde pozisyon kapatır, gecelik risk almaz. Swing trading ise 3-20 gün arasında pozisyon tutar, gecelik fiyat hareketlerinden de yararlanır. Daha az ekran başında olunmasını gerektirdiği için çalışan bireysel yatırımcılara daha uygundur."},
+      {"q": "BIST'te swing trading için minimum sermaye ne olmalı?", "a": "Minimum 10.000 TL önerilir. Bunun altında tek bir hissede anlamlı pozisyon almak ve risk yönetimi yapmak zorlaşır. Swing trading için her işlemde sermayenin maksimum %1-2'si riske atılmalıdır."},
+      {"q": "Swing traderde en önemli indikatör hangisi?", "a": "Supertrend ve ADX kombinasyonu swing traderin temel araçlarıdır. Supertrend trendin yönünü ve döndüğü noktayı gösterirken, ADX trendin gücünü ölçer. ADX 25 üzerindeyken Supertrend yeşilse güçlü bir swing fırsatı mevcuttur."},
+      {"q": "Stop-loss olmadan swing trade yapılabilir mi?", "a": "Kesinlikle hayır. Stop-loss, swing traderin en önemli koruma mekanizmasıdır. Borsada her işlem ters gidebilir. Stop-loss olmadan küçük bir kayıp büyüyerek sermayenin büyük bölümünü eritebilir."},
+      {"q": "BIST'te en iyi swing trade günleri hangileridir?", "a": "Genel olarak Salı-Perşembe en istikrarlı trading günleridir. Pazartesi sabahı hafta sonu haberleri fiyatlanır (gap riski yüksek). Cuma öğleden sonra pozisyon tutmak hafta sonu riski taşır."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'EREGL', 'ASELS', 'GARAN']
+  },
+  {
+    "slug": "atr-indikatoru-nedir",
+    "title": "ATR (Average True Range) Nedir? Volatilite Ölçümü",
+    "cat": "Teknik Analiz",
+    "read_min": 5,
+    "summary": "ATR (Ortalama Gerçek Aralık), bir varlığın volatilitesini ölçen bir teknik indikatördür. Stop-loss hesaplamada ve Supertrend'in temelinde kullanılır.",
+    "body": """## ATR (Average True Range) Nedir?
+
+ATR, **Average True Range** (Ortalama Gerçek Aralık) kelimelerinin kısaltmasıdır. 1978 yılında J. Welles Wilder tarafından geliştirilen bu indikatör, bir hisse senedinin **ne kadar volatil (oynak) olduğunu** ölçer.
+
+ATR fiyatın yönünü değil, sadece **hareket genişliğini** ölçer. Bu yüzden hem yükselen hem düşen piyasada geçerlidir.
+
+## True Range (Gerçek Aralık) Nasıl Hesaplanır?
+
+Her mum çubuğu için "True Range" şu üç değerin en büyüğüdür:
+
+1. **Günlük Yüksek - Günlük Düşük** (normal gün içi aralık)
+2. **|Günlük Yüksek - Önceki Kapanış|** (gap yukarı durumunda)
+3. **|Günlük Düşük - Önceki Kapanış|** (gap aşağı durumunda)
+
+**ATR = Belirli periyot boyunca True Range'in üstel hareketli ortalaması** (genellikle 14 periyot)
+
+## ATR Ne Anlama Gelir?
+
+| ATR Değeri | Anlam | Ne Yapmalı? |
+|-----------|-------|------------|
+| Düşük ATR | Düşük volatilite, sıkışık fiyat | Kırılma bekleniyor |
+| Yükselen ATR | Volatilite artıyor, trend güçleniyor | Dikkatli ol, pozisyon yönet |
+| Çok yüksek ATR | Panik/coşku, aşırı hareket | Stop-loss genişlet |
+
+## ATR'nin Kullanım Alanları
+
+### 1. Stop-Loss Belirleme (En Önemli Kullanım)
+ATR tabanlı stop-loss, sabit yüzde stop'tan çok daha akıllıcadır:
+
+```
+Stop-Loss = Giriş Fiyatı - (ATR × Çarpan)
+
+Swing Trade için: ATR × 1.5
+Günlük Trade için: ATR × 1.0
+Pozisyon Trade için: ATR × 2.0-3.0
+```
+
+**Örnek:** AKBNK ATR = 2.5 TL, giriş 85 TL
+- Stop = 85 - (2.5 × 1.5) = 85 - 3.75 = **81.25 TL**
+
+Bu yaklaşım, hissenin volatilitesine göre dinamik stop belirler.
+
+### 2. Supertrend İndikatöründe
+BorsaPusula'nın kullandığı **Supertrend indikatörü** doğrudan ATR kullanır:
+
+```
+Supertrend = Temel Fiyat ± (ATR × Çarpan)
+```
+
+Varsayılan parametreler: ATR(10) × 3.0
+
+ATR yükseldikçe Supertrend bantları genişler, yani daha fazla hareket tolerans edilir.
+
+### 3. Pozisyon Büyüklüğü Hesabı
+```
+Pozisyon = (Sermaye × Risk%) ÷ (ATR × Çarpan)
+```
+
+ATR yüksek hissede daha az lot al, ATR düşük hissede daha fazla.
+
+## BIST Hisselerinde Tipik ATR Değerleri
+
+| Hisse | Günlük ATR | Haftalık ATR |
+|-------|-----------|-------------|
+| BIST30 büyük cap | %1.5-3.0 | %4-8 |
+| BIST100 orta cap | %2.0-4.0 | %6-12 |
+| Küçük hisseler | %3.0-8.0+ | %10-25+ |
+
+BIST büyük hisseleri günlük %2-3 ATR ile hareket ediyorsa, bu normal ve beklenen bir volatilitedir.
+
+## ATR ve Diğer İndikatörlerle Birlikte Kullanım
+
+**ATR + Supertrend:** Supertrend, ATR üzerine inşa edilmiştir. ATR yükselince Supertrend daha geniş bantlarla hareket eder.
+
+**ATR + ADX:** Her ikisi de Welles Wilder'ın eserleridir. ADX trendin varlığını, ATR trendin genişliğini gösterir.
+
+**ATR + Bollinger Bantları:** Her ikisi de volatilite ölçer. ATR yükseldiğinde Bollinger bantları da genişler.
+
+## ATR'nin Sınırlamaları
+
+- **Yön bilgisi vermez** — sadece genişlik/volatilite
+- **Gecikmeli gösterge** — geçmiş volatiliteyi ölçer
+- **Çok düşük ATR aldatıcı olabilir** — sessizlik öncesi fırtına
+
+## BorsaPusula'da ATR Etkisi
+
+BorsaPusula sinyalleri ATR'yi arka planda kullanır:
+
+- **Sinyal kalitesi** — Supertrend, ATR ile dinamik destek/direnç çizer
+- **Stop-loss seviyeleri** — Görüntülenen SL seviyeleri ATR bazlıdır
+- **Risk değerlendirmesi** — Giriş kalitesi kısmen volatiliteye göre belirlenir
+
+Yüksek ATR dönemlerinde sinyaller daha geniş stop ile gelir, bu normaldir ve piyasanın oynaklığını yansıtır.
+
+[BIST hisselerinin sinyal ve SL seviyelerini gör →](/)""",
+    "faqs": [
+      {"q": "ATR indikatörü için ideal periyot nedir?", "a": "Standart ATR periyodu 14'tür. Kısa vadeli trading için 7-10, uzun vadeli pozisyonlar için 20-21 kullanılabilir. BorsaPusula'nın Supertrend sinyallerinde ATR(10) kullanılmaktadır."},
+      {"q": "ATR değeri ne kadar olmalı ki işlem yapılabilir?", "a": "Belirli bir 'ideal ATR' yoktur. Önemli olan ATR'nin trend sırasında yükselmesi, daralma dönemlerinde düşmesidir. Yükselen ATR ile birlikte gelen fiyat kırılması güçlü bir sinyal olarak yorumlanır."},
+      {"q": "Supertrend ile ATR arasındaki ilişki nedir?", "a": "Supertrend indikatörü tamamen ATR üzerine inşa edilmiştir. Supertrend = Orta Fiyat ± (ATR × Çarpan) formülünü kullanır. ATR yükseldikçe Supertrend bantları genişler ve stop seviyesi uzaklaşır; bu volatiliteye adaptasyondur."},
+      {"q": "ATR stop-loss neden sabit yüzde stop'tan iyidir?", "a": "Sabit yüzde stop (%5 gibi) piyasanın volatilitesini görmezden gelir. Çok oynak hissede %5 çok dar, durağan hissede çok geniş olabilir. ATR tabanlı stop ise hissenin kendi volatilitesine göre dinamik olarak ayarlanır, gereksiz stop-out'ları azaltır."},
+      {"q": "ATR sadece hisse senedi için mi kullanılır?", "a": "Hayır. ATR her finansal varlıkta kullanılabilir: forex (USD/TRY gibi), kripto para (BTC), emtia (altın, petrol), endeksler (BIST30, S&P500). Hesaplama prensibi aynıdır."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'EREGL', 'GARAN']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
