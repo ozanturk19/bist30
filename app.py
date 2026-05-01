@@ -1531,6 +1531,10 @@ _news_cache           = {}   # {ticker: {"text": str|None, "ts": float, "failed"
 _NEWS_CACHE_TTL       = 3600 * 6   # 6 saat — başarılı yanıt
 _NEWS_FAIL_TTL        = 300        # 5 dakika — başarısız yanıt (negatif cache)
 
+# On-demand news fetch kuyruğu (market-news endpoint'i tarafından doldurulur)
+_news_fetch_queue     = set()      # tickers waiting for background fetch
+_news_queue_lock      = threading.Lock()
+
 _signal_explain_cache = {}   # {ticker: {"text": str|None, "sig": str, "ts": float, "failed": bool}}
 _SIG_EXPLAIN_TTL      = 3600 * 4   # 4 saat
 _SIG_FAIL_TTL         = 300        # 5 dakika
@@ -1846,6 +1850,36 @@ _prefetch_thread = threading.Thread(
     name="gemini-prefetch"
 )
 _prefetch_thread.start()
+
+
+def _on_demand_news_worker():
+    """market-news endpoint'inden gelen talep üzerine haber cache'i arka planda doldurur.
+
+    Kuyrukta bekleyen her ticker için get_ai_news() çağırır; istekler arası
+    15 saniye bekler (Gemini rate-limit koruması). Kuyruk boşsa 5s polling.
+    """
+    while True:
+        ticker = None
+        with _news_queue_lock:
+            if _news_fetch_queue:
+                ticker = _news_fetch_queue.pop()
+        if ticker:
+            try:
+                result = get_ai_news(ticker)
+                logger.info("On-demand news [%s]: %s", ticker, "OK" if result else "FAIL")
+            except Exception as exc:
+                logger.error("On-demand news hatası [%s]: %s", ticker, exc)
+            time.sleep(15)   # İstekler arası 15s — rate-limit koruması
+        else:
+            time.sleep(5)    # Kuyruk boşsa 5s bekle
+
+
+_on_demand_thread = threading.Thread(
+    target=_on_demand_news_worker,
+    daemon=True,
+    name="news-ondemand"
+)
+_on_demand_thread.start()
 
 
 def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di_m, e12, e99, st_bull):
@@ -3651,13 +3685,23 @@ def api_market_news():
             source = "explanation"
 
         if not text:
+            # Haber cache yok → on-demand kuyruğuna ekle (eğer başarısız cache yoksa)
+            failed_recently = news_c and news_c.get("failed") and \
+                              (time.time() - news_c.get("ts", 0)) < _NEWS_FAIL_TTL
+            if not failed_recently:
+                with _news_queue_lock:
+                    _news_fetch_queue.add(t)
+
+            # Algoritmik fallback metin (kaynak = "loading" — frontend polling tetikler)
             dur = "bugün" if bars <= 1 else f"son {bars} gündür"
             if sig == "AL":
                 text = (f"{name} hissesinde {dur} Güçlü Trend sinyali aktif. "
                         "Supertrend, ADX ve EMA göstergelerinin tamamı yükseliş yönünü destekliyor.")
+                source = "loading"
             elif sig == "SAT":
                 text = (f"{name} hissesinde {dur} Zayıf Trend sinyali aktif. "
                         "Teknik göstergeler düşüş yönünü işaret ediyor.")
+                source = "loading"
             else:
                 continue   # BEKLE hisselerini listeye alma
 
@@ -3681,11 +3725,13 @@ def api_market_news():
         if len(results) >= 5:
             break
 
+    has_loading = any(r.get("source") == "loading" for r in results)
     now = datetime.now()
     return safe_json({
         "items":       results,
         "updated_at":  now.strftime("%d.%m.%Y %H:%M"),
         "count":       len(results),
+        "has_loading": has_loading,   # True → frontend 30s sonra yenile
     })
 
 

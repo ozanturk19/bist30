@@ -2766,35 +2766,31 @@ async function submitSubscribe() {
 }
 
 /* ── Gündem & Haberler ───────────────────────────── */
-async function loadGundem() {
-  try {
-    const [newsRes, bilRes] = await Promise.all([
-      fetch('/api/market-news'),
-      fetch('/api/bilanco-mini')
-    ]);
-    const [newsData, bilData] = await Promise.all([
-      newsRes.json(),
-      bilRes.json()
-    ]);
+let _gundemRetryTimer = null;
 
-    // — Haber Kartları —
-    const cardsEl = document.getElementById('gundemCards');
-    const items = (newsData && newsData.items) ? newsData.items : [];
-    if (items.length === 0) {
-      cardsEl.innerHTML = '<div style="color:var(--bp-text3);font-size:12px;padding:12px 0;">Şu an güncel haber bulunamadı.</div>';
-    } else {
-      cardsEl.innerHTML = items.map(item => {
-        const isAl  = item.signal === 'AL';
-        const isSat = item.signal === 'SAT';
-        const cardCls = isAl ? '' : (isSat ? ' gnm-sat' : ' gnm-bekle');
-        const badgeCls = isAl ? 'al' : (isSat ? 'sat' : '');
-        const badgeTxt = isAl ? '▲ Güçlü Trend' : (isSat ? '▼ Zayıf Trend' : '● Belirsiz');
-        const chgVal   = parseFloat(item.change_pct || 0);
-        const chgCls   = chgVal >= 0 ? 'up' : 'dn';
-        const chgTxt   = (chgVal >= 0 ? '+' : '') + chgVal.toFixed(2) + '%';
-        const priceStr = item.price ? parseFloat(item.price).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
-        const snippet  = (item.snippet || '').trim();
-        return `<a href="/hisse/${item.ticker}" class="gnm-card${cardCls}">
+function _renderGnmCard(item) {
+  const isAl  = item.signal === 'AL';
+  const isSat = item.signal === 'SAT';
+  const cardCls  = isAl ? '' : (isSat ? ' gnm-sat' : ' gnm-bekle');
+  const badgeCls = isAl ? 'al' : (isSat ? 'sat' : '');
+  const badgeTxt = isAl ? '▲ Güçlü Trend' : (isSat ? '▼ Zayıf Trend' : '● Belirsiz');
+  const chgVal   = parseFloat(item.change_pct || 0);
+  const chgCls   = chgVal >= 0 ? 'up' : 'dn';
+  const chgTxt   = (chgVal >= 0 ? '+' : '') + chgVal.toFixed(2) + '%';
+  const priceStr = item.price ? parseFloat(item.price).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
+  const snippet  = (item.snippet || '').trim();
+  const isLoading = item.source === 'loading';
+  const snippetEl = isLoading
+    ? `<div class="gnm-text" style="color:var(--bp-text3);font-style:italic;display:flex;align-items:center;gap:5px;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             style="animation:spin 1s linear infinite;flex-shrink:0;opacity:.6">
+          <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0" opacity=".25"/>
+          <path d="M12 3a9 9 0 0 1 9 9"/>
+        </svg>
+        Haber yükleniyor…
+       </div>`
+    : `<div class="gnm-text">${snippet}</div>`;
+  return `<a href="/hisse/${item.ticker}" class="gnm-card${cardCls}">
   <div class="gnm-card-top">
     <div>
       <div class="gnm-ticker">${item.ticker}</div>
@@ -2802,7 +2798,7 @@ async function loadGundem() {
     </div>
     ${badgeCls ? `<span class="gnm-badge ${badgeCls}">${badgeTxt}</span>` : ''}
   </div>
-  ${snippet ? `<div class="gnm-text">${snippet}</div>` : '<div class="gnm-text" style="color:var(--bp-text3);font-style:italic">Haber özeti yükleniyor…</div>'}
+  ${snippetEl}
   <div class="gnm-footer">
     <div>
       <span class="gnm-price">${priceStr}</span>
@@ -2811,33 +2807,59 @@ async function loadGundem() {
     <span class="gnm-link">Detay →</span>
   </div>
 </a>`;
-      }).join('');
+}
+
+async function loadGundem(newsOnly) {
+  try {
+    const fetches = newsOnly
+      ? [fetch('/api/market-news'), Promise.resolve(null)]
+      : [fetch('/api/market-news'), fetch('/api/bilanco-mini')];
+    const [newsRes, bilRes] = await Promise.all(fetches);
+    const newsData = await newsRes.json();
+    const bilData  = bilRes ? await bilRes.json() : null;
+
+    // — Haber Kartları —
+    const cardsEl = document.getElementById('gundemCards');
+    const items = (newsData && newsData.items) ? newsData.items : [];
+    if (items.length === 0) {
+      cardsEl.innerHTML = '<div style="color:var(--bp-text3);font-size:12px;padding:12px 0;">Şu an güncel haber bulunamadı.</div>';
+    } else {
+      cardsEl.innerHTML = items.map(_renderGnmCard).join('');
     }
 
-    // — Bilanço Mini —
-    const periods = (bilData && bilData.periods) ? bilData.periods : [];
-    const bodyEl  = document.getElementById('bilancoMiniBody');
-    if (periods.length === 0) {
-      bodyEl.innerHTML = '<div style="font-size:11px;color:var(--bp-text3)">Yaklaşan dönem bulunamadı.</div>';
-    } else {
-      bodyEl.innerHTML = periods.slice(0,3).map(p => {
-        const isActive = p.status === 'active';
-        const daysCls  = isActive ? 'active' : 'upcoming';
-        const daysTxt  = p.days_label || (isActive ? '● Açık' : '—');
-        return `<div class="bilanco-period">
+    // — Bilanço Mini (ilk yüklemede) —
+    if (bilData) {
+      const periods = (bilData.periods) ? bilData.periods : [];
+      const bodyEl  = document.getElementById('bilancoMiniBody');
+      if (periods.length === 0) {
+        bodyEl.innerHTML = '<div style="font-size:11px;color:var(--bp-text3)">Yaklaşan dönem bulunamadı.</div>';
+      } else {
+        bodyEl.innerHTML = periods.slice(0,3).map(p => {
+          const isActive = p.status === 'active';
+          const daysCls  = isActive ? 'active' : 'upcoming';
+          const daysTxt  = p.days_label || (isActive ? '● Açık' : '—');
+          return `<div class="bilanco-period">
   <div class="bp-label">${p.label || '—'}</div>
   <div class="bp-desc">${p.desc || ''}</div>
   <span class="bp-days ${daysCls}">${daysTxt}</span>
 </div>`;
-      }).join('');
+        }).join('');
+      }
     }
+
+    // — Otomatik yenileme (haberler arka planda yükleniyorsa) —
+    if (_gundemRetryTimer) { clearTimeout(_gundemRetryTimer); _gundemRetryTimer = null; }
+    if (newsData.has_loading) {
+      _gundemRetryTimer = setTimeout(() => loadGundem(true), 30000);
+    }
+
   } catch(e) {
     console.warn('loadGundem error:', e);
     const c = document.getElementById('gundemCards');
     if (c) c.innerHTML = '<div style="color:var(--bp-text3);font-size:12px;padding:12px 0;">Gündem yüklenemedi.</div>';
   }
 }
-loadGundem();
+loadGundem(false);
 
 /* ── PWA Service Worker ──────────────────────────── */
 if ('serviceWorker' in navigator) {
