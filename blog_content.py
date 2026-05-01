@@ -1129,6 +1129,144 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
     ],
     "related_tickers": ['ASELS', 'THYAO', 'AKBNK']
   },
+
+  {
+    "slug": "kap-bildirimleri-nedir",
+    "title": "KAP Bildirimleri Nedir? Yatırımcı İçin Rehber",
+    "desc": "KAP (Kamuyu Aydınlatma Platformu) bildirimleri nelerdir, nasıl okunur ve sinyal üzerindeki etkisi ne anlama gelir?",
+    "date": "2026-05-01",
+    "mins": 6,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p><strong>KAP (Kamuyu Aydınlatma Platformu)</strong>, halka açık şirketlerin yatırımcıları bilgilendirmek amacıyla yaptıkları resmi açıklamaları yayınladıkları platformdur. Türkiye'de borsaya kote her şirket, SPK düzenlemeleri gereği önemli her gelişmeyi KAP üzerinden kamuoyuyla paylaşmak zorundadır.</p>
+
+<h2>KAP Bildirimi Türleri</h2>
+<ul>
+  <li><strong>ÖDA (Özel Durum Açıklaması):</strong> Şirketin değerini etkileyebilecek önemli gelişmeler — büyük sözleşmeler, ortaklık değişiklikleri, önemli davalar</li>
+  <li><strong>FR (Finansal Rapor):</strong> Üç aylık ve yıllık mali tablolar — bilanço, gelir tablosu, nakit akışı</li>
+  <li><strong>ODA (Olağan/Olağanüstü Genel Kurul):</strong> Genel kurul kararları, temettü açıklamaları</li>
+  <li><strong>Pay Alım/Satım:</strong> İçeriden işlem bildirimleri — yöneticilerin hisse alım/satımları</li>
+  <li><strong>Sözleşme:</strong> Kamu ya da özel sektörle imzalanan önemli sözleşmeler</li>
+</ul>
+
+<h2>KAP Bildirimini Nasıl Yorumlamalısınız?</h2>
+<p>Her KAP bildirimi aynı etkiyi yaratmaz. Değerlendirme için bu soruları sorun:</p>
+<ol>
+  <li><strong>Büyüklük:</strong> Bu sözleşme/gelişme şirketin yıllık cirosunun yüzde kaçını etkiliyor?</li>
+  <li><strong>Yinelelenebilirlik:</strong> Tek seferlik mi, tekrarlayan mı?</li>
+  <li><strong>Piyasanın beklentisi:</strong> Beklenen bir gelişmeyse zaten fiyatlanmış olabilir.</li>
+  <li><strong>Teknik sinyal ile uyum:</strong> Hisse aynı anda AL sinyali veriyor mu?</li>
+</ol>
+
+<h2>KAP + Teknik Sinyal Kombinasyonu</h2>
+<p>BorsaPusula'nın en güçlü özelliklerinden biri, KAP bildirimleri ile teknik sinyalleri aynı ekranda göstermesidir. Bir hissenin hem AL sinyali verdiği hem de güçlü bir KAP bildirimi yaptığı dönemler — örneğin büyük sözleşme + Supertrend AL uyumu — genellikle güçlü katalizör oluşturur.</p>
+
+<h2>KAP Bildirimlerine Nasıl Erişilir?</h2>
+<p>BorsaPusula'da her hisse sayfasında <strong>"KAP Bildirimleri"</strong> sekmesi bulunur. Son 90 günlük bildirimler orada listelenir. Doğrudan KAP platformuna (kap.org.tr) da erişebilirsiniz.</p>
+
+<h2>Sık Yapılan Hatalar</h2>
+<ul>
+  <li>KAP bildirimi yayınlanır yayınlanmaz panikle alım/satım yapmak — çoğunlukla haber zaten fiyatlanmıştır.</li>
+  <li>Her FR (finansal rapor) bildirimini olumlu zannetmek — rakamların detayını okumak gerekir.</li>
+  <li>KAP bildirimine güvenerek teknik sinyali görmezden gelmek — ikisi birlikte değerlendirilmelidir.</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "KAP nedir ve neden önemlidir?", "a": "KAP (Kamuyu Aydınlatma Platformu), Türkiye'de borsaya kote şirketlerin zorunlu resmi açıklamalarını yaptıkları platformdur. Finansal sonuçlar, büyük sözleşmeler ve şirketi etkileyen önemli gelişmeler burada yayınlanır. Yatırımcılar için şeffaf ve güvenilir birincil haber kaynağıdır."},
+      {"q": "KAP bildirimi hisse fiyatını etkiler mi?", "a": "Evet, özellikle beklenmedik özel durum açıklamaları (ÖDA) ve finansal sonuçlar (FR) hisse fiyatını doğrudan etkiler. Ancak beklenen bir bildirimse piyasa bunu önceden fiyatlamış olabilir. KAP bildirimini teknik sinyal ile birlikte değerlendirmek daha sağlıklı karar verilmesini sağlar."},
+      {"q": "BorsaPusula'da KAP bildirimleri nasıl gösterilir?", "a": "Her hisse sayfasında 'KAP Bildirimleri' sekmesi bulunur ve son 90 güne ait resmi KAP bildirimleri listelenir. Ayrıca 'Sinyalin Hikayesi' bölümünde sinyal tarihi etrafındaki KAP bildirimleri de gösterilir."}
+    ],
+    "related_tickers": ['AKBNK', 'ASELS', 'THYAO']
+  },
+
+  {
+    "slug": "bist30-hisseleri-2026",
+    "title": "BIST30 Hisseleri 2026 — Tam Liste ve Analiz",
+    "desc": "BIST30 endeksindeki tüm hisseler, sektörel dağılım ve teknik sinyal özetleriyle 2026 güncel rehber.",
+    "date": "2026-05-01",
+    "mins": 8,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p><strong>BIST30</strong>, Borsa İstanbul'daki en yüksek işlem hacmine sahip 30 büyük hisseyi kapsayan prestijli bir endekstir. Türkiye vadeli işlemler piyasasının (VİOP) temel endeksi olması nedeniyle kurumsal yatırımcılar ve fon yöneticilerinin en yakından takip ettiği endekstir.</p>
+
+<h2>BIST30 Hisseleri (2026)</h2>
+<p>Endeks bileşenleri Borsa İstanbul tarafından Mart ve Eylül aylarında güncellenir. 2026 yılı itibarıyla BIST30 şu sektörlerden oluşmaktadır:</p>
+
+<h3>Bankacılık</h3>
+<ul>
+  <li><strong>AKBNK</strong> — Akbank T.A.Ş.</li>
+  <li><strong>GARAN</strong> — Garanti BBVA</li>
+  <li><strong>ISCTR</strong> — İş Bankası C</li>
+  <li><strong>VAKBN</strong> — Vakıfbank</li>
+  <li><strong>YKBNK</strong> — Yapı Kredi Bankası</li>
+  <li><strong>HALKB</strong> — Halkbank</li>
+</ul>
+
+<h3>Holding ve Sanayi</h3>
+<ul>
+  <li><strong>KCHOL</strong> — Koç Holding</li>
+  <li><strong>SAHOL</strong> — Sabancı Holding</li>
+  <li><strong>ARCLK</strong> — Arçelik</li>
+  <li><strong>FROTO</strong> — Ford Otosan</li>
+  <li><strong>TOASO</strong> — Tofaş Oto</li>
+  <li><strong>EREGL</strong> — Ereğli Demir Çelik</li>
+</ul>
+
+<h3>Enerji ve Petrokimya</h3>
+<ul>
+  <li><strong>TUPRS</strong> — Tüpraş</li>
+  <li><strong>PETKM</strong> — Petkim</li>
+  <li><strong>SASA</strong> — Sasa Polyester</li>
+  <li><strong>AKSEN</strong> — Aksen Enerji</li>
+  <li><strong>ENKAI</strong> — Enka İnşaat</li>
+</ul>
+
+<h3>Diğer Sektörler</h3>
+<ul>
+  <li><strong>THYAO</strong> — Türk Hava Yolları (Ulaşım)</li>
+  <li><strong>TCELL</strong> — Turkcell (Telekom)</li>
+  <li><strong>TTKOM</strong> — Türk Telekom (Telekom)</li>
+  <li><strong>BIMAS</strong> — BİM Mağazalar (Perakende)</li>
+  <li><strong>MGROS</strong> — Migros (Perakende)</li>
+  <li><strong>ASELS</strong> — Aselsan (Savunma)</li>
+  <li><strong>EKGYO</strong> — Emlak Konut GYO</li>
+  <li><strong>TKFEN</strong> — Tekfen Holding</li>
+  <li><strong>TAVHL</strong> — TAV Havalimanları</li>
+  <li><strong>PGSUS</strong> — Pegasus Hava Yolları</li>
+  <li><strong>SISE</strong> — Şişe Cam</li>
+  <li><strong>HEKTS</strong> — Hektaş</li>
+</ul>
+
+<h2>BIST30'un Önemi</h2>
+<p>BIST30 hisseleri birkaç kritik özellik taşır:</p>
+<ul>
+  <li><strong>Yüksek likidite:</strong> Kolayca alınıp satılabilir; büyük emirler fiyatı fazla etkilemez.</li>
+  <li><strong>Kurumsal takip:</strong> Yabancı yatırımcılar ve büyük fonlar bu hisseleri yoğun takip eder.</li>
+  <li><strong>VİOP bağlantısı:</strong> Vadeli işlemler (BIST30 futures) ile hedge edilebilir.</li>
+  <li><strong>Endeks fonu yatırımı:</strong> BIST30 ETF'leri aracılığıyla tek alımla 30 hisseye yatırım yapılabilir.</li>
+</ul>
+
+<h2>BIST30 Sinyal Analizi — Güncel Durum</h2>
+<p>BorsaPusula, BIST30 hisselerinin tamamı için Supertrend, ADX ve EMA tabanlı algoritmik sinyal hesaplar. <a href="/">Güncel sinyalleri</a> görmek için ana sayfayı ziyaret edin. <a href="/ozet">Sinyal Özeti</a> sayfasında ise tüm endeksin anlık durumunu tek bakışta görebilirsiniz.</p>
+
+<h2>Hangi BIST30 Hissesi Daha İyi?</h2>
+<p>"En iyi BIST30 hissesi" sorusunun tek bir yanıtı yoktur. Değerlendirirken şunlara bakın:</p>
+<ol>
+  <li><strong>Aktif sinyal:</strong> AL sinyali var mı, kaç gündür sürüyor?</li>
+  <li><strong>Trend gücü:</strong> ADX değeri 25'in üzerinde mi?</li>
+  <li><strong>Giriş kalitesi:</strong> Fiyat Supertrend'e yakın mı (IDEAL/İYİ)?</li>
+  <li><strong>Risk/Ödül:</strong> R/R oranı en az 1:2 mi?</li>
+  <li><strong>Sektör bağlamı:</strong> Sektörde genel trend yukarı mı?</li>
+</ol>
+<p><a href="/gucu-yuksek">Güçlü Momentum</a> sayfasında tüm bu kriterleri en iyi karşılayan BIST30 hisseleri sıralanmaktadır.</p>
+""",
+    "faqs": [
+      {"q": "BIST30'da kaç hisse var ve hangileri?", "a": "BIST30, Borsa İstanbul'da en likit 30 hisseyi kapsar. Bankacılık (AKBNK, GARAN, ISCTR, YKBNK, VAKBN, HALKB), holding/sanayi (KCHOL, SAHOL, ARCLK, FROTO, TOASO, EREGL), enerji (TUPRS, AKSEN, ENKAI, SASA) ve diğer sektörlerden oluşur."},
+      {"q": "BIST30 endeksi ne kadar sıklıkla güncellenir?", "a": "Borsa İstanbul, BIST30 endeks bileşenlerini her yıl Mart ve Eylül aylarında inceler ve günceller. Yeterli likidite ve piyasa değeri kriterlerini karşılayamayan hisseler çıkarılır, yerlerine uygun hisseler alınır."},
+      {"q": "BIST30 hisselerinin teknik sinyalleri nereden takip edilir?", "a": "BorsaPusula'da BIST30 hisselerinin tamamı için Supertrend + ADX + EMA algoritmik sinyalleri ücretsiz olarak sunulmaktadır. Ana sayfada 'BIST30' filtresiyle bu hisseleri ayrıca görebilirsiniz."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
