@@ -943,6 +943,24 @@
     ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
   </div>
 
+  <!-- İlgili Blog Makaleleri (T3-4) -->
+  {% if related_blog %}
+  <div style="margin-bottom:16px">
+    <div class="section-title" style="margin-bottom:10px">📖 İlgili Okumalar</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+      {% for b in related_blog %}
+      <a href="/blog/{{ b.slug }}" style="
+        background:#161b22;border:1px solid #30363d;border-radius:8px;
+        padding:12px 14px;text-decoration:none;display:block;transition:all .15s">
+        <div style="font-size:11px;color:#58a6ff;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">{{ b.cat }}</div>
+        <div style="font-size:13px;font-weight:600;color:#f0f6fc;line-height:1.4">{{ b.title }}</div>
+        <div style="font-size:11px;color:#484f58;margin-top:5px">⏱ {{ b.mins }} dk okuma</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Diğer Hisseler (accordion) -->
   <div class="others-section">
     <div class="others-header" onclick="toggleOthers()">

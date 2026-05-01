@@ -2701,6 +2701,13 @@ def stock_page(ticker):
                 ssr_signal = s
                 break
 
+    # T3-4: İlgili blog makaleleri — bu ticker'ı related_tickers olarak işaretleyenler
+    related_blog = [
+        {"slug": a["slug"], "title": a["title"], "cat": a["cat"], "mins": a["mins"]}
+        for a in ARTICLES
+        if ticker in a.get("related_tickers", [])
+    ][:4]  # max 4 makale
+
     return render_template("hisse.html",
                            ticker=ticker,
                            name=name,
@@ -2708,7 +2715,8 @@ def stock_page(ticker):
                            others=others,
                            stock_names=STOCK_NAMES,
                            ssr_signal=ssr_signal,
-                           kap_url=kap_url_for(ticker))
+                           kap_url=kap_url_for(ticker),
+                           related_blog=related_blog)
 
 
 _fundamentals_cache = {}

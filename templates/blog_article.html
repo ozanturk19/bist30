@@ -149,6 +149,17 @@
   .rel-title { font-size:13px; font-weight:600; color:#f0f6fc; line-height:1.4; }
   .rel-mins  { font-size:11px; color:#484f58; margin-top:6px; }
 
+  /* İlgili Hisseler */
+  .rel-stock-card { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:12px 16px; min-width:130px; flex:1; max-width:180px; text-decoration:none; display:block; transition:all .15s; }
+  .rel-stock-card:hover { border-color:#8b949e; background:#1c2128; transform:translateY(-1px); }
+  .rel-stock-ticker { font-size:13px; font-weight:700; color:#f0f6fc; margin-bottom:3px; }
+  .rel-stock-price  { font-family:'Fira Code',monospace; font-size:13px; color:#e6edf3; }
+  .rel-stock-sig    { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:700; margin-top:5px; }
+  .rel-stock-sig.al    { background:rgba(63,185,80,.12); color:#3fb950; border:1px solid rgba(63,185,80,.25); }
+  .rel-stock-sig.sat   { background:rgba(248,81,73,.12); color:#f85149; border:1px solid rgba(248,81,73,.25); }
+  .rel-stock-sig.bekle { background:rgba(139,148,158,.1); color:#8b949e; border:1px solid rgba(139,148,158,.2); }
+  @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+
   .disclaimer { background:rgba(248,81,73,.07); border:1px solid rgba(248,81,73,.2); border-radius:8px; padding:14px 16px; color:#c9d1d9; font-size:13px; margin-top:32px; }
 
   footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
@@ -189,6 +200,23 @@
     profesyonel danışmanlık gerektirir.
   </div>
 
+  {% if article.related_tickers %}
+  <!-- İlgili Hisseler — canlı sinyal kartları -->
+  <div class="related" id="relatedStocks">
+    <div class="related-title">İlgili Hisseler — Güncel Sinyal</div>
+    <div id="relStockCards" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+      {% for t in article.related_tickers %}
+      <div class="rel-stock-skeleton" data-ticker="{{ t }}" style="
+        background:#161b22;border:1px solid #30363d;border-radius:8px;
+        padding:12px 16px;min-width:130px;flex:1;max-width:180px">
+        <div style="background:#21262d;height:12px;border-radius:4px;width:40px;margin-bottom:8px;animation:shimmer 1.4s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%)"></div>
+        <div style="background:#21262d;height:16px;border-radius:4px;width:70px;animation:shimmer 1.4s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%)"></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   {% if related %}
   <div class="related">
     <div class="related-title">İlgili Makaleler</div>
@@ -209,5 +237,39 @@
   <a href="/">Ana Sayfa</a> · <a href="/blog">Blog</a> · <a href="/ozet">Günlük Özet</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/yasal">Yasal Uyarı</a>
   <div style="margin-top:8px">⚠️ Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
 </footer>
+
+{% if article.related_tickers %}
+<script>
+(async () => {
+  const TICKERS = {{ article.related_tickers | tojson }};
+  if (!TICKERS || !TICKERS.length) return;
+  try {
+    const res  = await fetch('/api/data');
+    const json = await res.json();
+    const map  = {};
+    (json.stocks || []).forEach(s => { map[s.ticker] = s; });
+    const container = document.getElementById('relStockCards');
+    if (!container) return;
+    container.innerHTML = TICKERS.map(t => {
+      const s = map[t];
+      if (!s) return '';
+      const sig    = (s.signal || 'BEKLE').toLowerCase().replace('ü','u');
+      const sigLbl = s.signal === 'AL' ? '▲ AL' : s.signal === 'SAT' ? '▼ SAT' : '● BEKLE';
+      const chg    = s.change_pct != null ? (s.change_pct >= 0 ? '+' : '') + (+s.change_pct).toFixed(1) + '%' : '';
+      const chgClr = s.change_pct >= 0 ? '#3fb950' : '#f85149';
+      const price  = s.price != null ? (+s.price).toLocaleString('tr-TR',{minimumFractionDigits:2}) + ' ₺' : '—';
+      return `<a href="/hisse/${t}" class="rel-stock-card" title="${s.name||t}">
+        <div class="rel-stock-ticker">${t}</div>
+        <div class="rel-stock-price">${price} <span style="color:${chgClr};font-size:11px">${chg}</span></div>
+        <span class="rel-stock-sig ${sig}">${sigLbl}</span>
+      </a>`;
+    }).filter(Boolean).join('');
+  } catch(e) {
+    // Sessizce yut — blok zaten gizlenir
+    document.getElementById('relatedStocks')?.remove();
+  }
+})();
+</script>
+{% endif %}
 </body>
 </html>
