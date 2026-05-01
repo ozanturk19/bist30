@@ -4582,6 +4582,490 @@ Toplam ≈ 13.003,90₺
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
   },
+
+  # ── ARTICLE 64 ──
+  {
+    "slug": "yuksek-enflasyonda-yatirim-araclari",
+    "title": "Yüksek Enflasyonda Yatırım Araçları: 2026 Türkiye Rehberi",
+    "desc": "Yüksek enflasyon döneminde tasarrufları nasıl korunur? Altın, hisse, döviz, TÜFE tahvil ve diğer enflasyon koruyucu araçların karşılaştırması.",
+    "date": "2026-05-01",
+    "mins": 8,
+    "cat": "Strateji",
+    "body": """
+<p>Türkiye son yıllarda kronik yüksek enflasyonla yaşıyor. Bu ortamda bankada vadeli mevduat bile enflasyonun altında kalan gerçek kayba yol açabiliyor. Peki tasarruflarınızı enflasyona karşı nasıl korursunuz?</p>
+
+<h2>Enflasyon Yatırımcıyı Nasıl Etkiler?</h2>
+<p>Enflasyon, paranızın satın alma gücünü eritir. Yılık enflasyon %50 iken bankada %40 faiz alıyorsanız, <em>reel anlamda</em> %10 kaybediyorsunuz demektir. Reel getiri = Nominal getiri − Enflasyon oranı.</p>
+<p>Yatırım araçları genellikle iki kategoriye ayrılır:</p>
+<ul>
+  <li><strong>Reel varlıklar:</strong> Fiyatı enflasyonla birlikte yükselen varlıklar (altın, hisse senedi, gayrimenkul, emtia)</li>
+  <li><strong>Nominal varlıklar:</strong> Sabit tutarda geri ödenen araçlar (nakit, sabit faizli mevduat/tahvil)</li>
+</ul>
+<p>Yüksek enflasyon dönemlerinde reel varlıklara yönelmek mantıklı bir stratejidir.</p>
+
+<h2>Enflasyona Karşı Yatırım Araçları Karşılaştırması</h2>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Araç</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Enflasyon Koruması</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Risk</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Likidite</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Altın (TL bazlı)</td>
+      <td style="padding:8px 12px;color:#3fb950">✅ Güçlü</td>
+      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
+      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Hisse Senedi (BIST)</td>
+      <td style="padding:8px 12px;color:#3fb950">✅ Orta-Güçlü</td>
+      <td style="padding:8px 12px;color:#f85149">Yüksek</td>
+      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Döviz (USD/EUR)</td>
+      <td style="padding:8px 12px;color:#3fb950">✅ Güçlü (TL depreciation)</td>
+      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
+      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">TÜFE Tahvil (Hazine)</td>
+      <td style="padding:8px 12px;color:#3fb950">✅ Tam</td>
+      <td style="padding:8px 12px;color:#e6edf3">Düşük</td>
+      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Kira Geliri (GYO/BYF)</td>
+      <td style="padding:8px 12px;color:#e6edf3">⚠️ Sektöre Bağlı</td>
+      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
+      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Sabit Mevduat (TL)</td>
+      <td style="padding:8px 12px;color:#f85149">❌ Yetersiz</td>
+      <td style="padding:8px 12px;color:#3fb950">Çok Düşük</td>
+      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Kripto (BTC)</td>
+      <td style="padding:8px 12px;color:#e6edf3">⚠️ Spekülatif</td>
+      <td style="padding:8px 12px;color:#f85149">Çok Yüksek</td>
+      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Altın: Klasik Enflasyon Koruması</h2>
+<p>Altın, TL bazında değerlendiğinde uzun vadede enflasyonu genellikle aşar çünkü iki faktör birden altın fiyatını yukarı taşır: hem küresel altın fiyatındaki artış hem de TL'nin USD karşısında değer kaybı.</p>
+<p>Fiziksel altın yerine borsa üzerinden işlem gören <a href="/altin">altın</a> takip etmek daha pratiktir. BIST'te gram altın, çeyrek altın ve altın BYF işlem görür.</p>
+
+<h2>Hisse Senedi: Uzun Vadede Enflasyonun Üzerinde</h2>
+<p>BIST hisseleri uzun vadede —özellikle güçlü piyasa koşullarında— enflasyonu geçmiştir. Ancak bu uzun vadeli bir ilişkidir; kısa vadede hisseler enflasyondan bağımsız hareket edebilir. Özellikle:</p>
+<ul>
+  <li><strong>Bankacılık hisseleri:</strong> Yüksek faiz ortamından kâr eden sektör</li>
+  <li><strong>Enerji ve emtia:</strong> Ham madde fiyatlarıyla birlikte yükselebilir (EREGL, PETKM, TUPRS)</li>
+  <li><strong>GYO (Gayrimenkul Yatırım Ortaklıkları):</strong> Kira geliri + gayrimenkul değer artışı</li>
+  <li><strong>Nakit pozisyonu zayıf şirketler:</strong> Yüksek borçluluk oranı, enflasyonda tehlikeli</li>
+</ul>
+
+<h2>TÜFE Tahvilleri: Garantili Reel Getiri</h2>
+<p>Hazine tarafından ihraç edilen TÜFE'ye endeksli tahvillerde anaparanız enflasyon oranında güncellenir. Ek olarak küçük bir reel faiz de alırsınız. Örneğin %50 enflasyon ile TÜFE tahvil tutuyorsanız, anaparanız %50 büyür; üzerine %2-4 reel faiz de eklenir.</p>
+<p>Dezavantajı: Vade öncesi satışta fiyat iskontosu olabilir. En iyisi vadeye kadar tutmaktır.</p>
+
+<h2>Döviz: Basit Ama Dikkatli Olunması Gereken</h2>
+<p>TL'nin uzun vadeli değer kaybı tarihi bir gerçektir. Döviz alımı bu nedenle cazip görünür. Ancak:</p>
+<ul>
+  <li>Döviz mevduatının faizi TL mevduata göre düşüktür</li>
+  <li>TCMB müdahale dönemlerinde kur sabitlenebilir, beklenmedik zararlar oluşabilir</li>
+  <li>Ani TL güçlenme dönemlerinde döviz tutanlar kayıpla satmak zorunda kalabilir</li>
+</ul>
+
+<h2>Pratik Öneriler — 2026 Türkiye için</h2>
+<ol>
+  <li><strong>Tek araca bağlı kalmayın:</strong> Altın + hisse + TÜFE tahvil kombinasyonu</li>
+  <li><strong>Nakit tamponunuzu koruyun:</strong> Portföyün %15-20'si her zaman likit tutun</li>
+  <li><strong>Kısa vadeli düşünmeyin:</strong> Enflasyon koruması uzun vadeli bir oyundur</li>
+  <li><strong>Borçlanmayın:</strong> Yüksek faiz döneminde borçla yatırım tehlikelidir</li>
+  <li><strong>Sinyal takibi yapın:</strong> Hisse seçiminde BorsaPusula gibi teknik analiz araçlarını kullanın</li>
+</ol>
+""",
+    "faqs": [
+      {"q": "Enflasyona karşı en iyi yatırım aracı hangisi?",
+       "a": "Türkiye'de enflasyona karşı en güçlü araçlar tarihsel olarak altın (TL bazlı), hisse senedi (uzun vadeli) ve TÜFE'ye endeksli tahvillerdir. Tek araca bağlı kalmak yerine çeşitlendirme yapılması önerilir."},
+      {"q": "TÜFE tahvili nedir, nasıl alınır?",
+       "a": "Hazine'nin ihraç ettiği, anaparası Türkiye enflasyon endeksine (TÜFE) bağlı devlet tahvilidir. Anaparanız enflasyon oranında güncellenir, üzerine küçük bir reel faiz de eklenir. Aracı kurumlar veya bankalar üzerinden satın alınabilir."},
+      {"q": "Hisse senedi enflasyona karşı korur mu?",
+       "a": "Uzun vadede evet. BIST hisseleri uzun dönemde çoğunlukla enflasyonu aşmıştır. Ancak kısa vadede hisseler enflasyondan bağımsız düşebilir. Özellikle bankacılık ve emtia sektörü hisseleri yüksek faiz ve enflasyon ortamından genellikle olumlu etkilenir."},
+      {"q": "Enflasyon döneminde nakit tutmak mantıklı mı?",
+       "a": "Yüksek enflasyon döneminde nakit (TL) tutmak alım gücü kaybettirir. Ancak acil fon ve kısa vadeli ihtiyaçlar için mutlaka likit bölüm bulundurun. Uzun vadeli birikimler için enflasyonun üzerinde getiri sağlayan araçlara yönelin."}
+    ],
+    "related_tickers": ['AKBNK', 'EREGL', 'TUPRS', 'SASA', 'EKGYO']
+  },
+
+  # ── ARTICLE 65 ──
+  {
+    "slug": "bayrak-kanat-ucgen-grafik-formasyonlari",
+    "title": "Bayrak, Kanat ve Üçgen Grafik Formasyonları: Devam Sinyalleri",
+    "desc": "Teknik analizde bayrak, flama, yükselen/alçalan kanat ve simetrik üçgen formasyonları nasıl tespit edilir ve yorumlanır? Pratik örneklerle rehber.",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Teknik Analiz",
+    "body": """
+<p>Grafik formasyonları, fiyat hareketlerindeki tekrar eden kalıplardır. Teknik analistler bu kalıpları kullanarak trendin süreceğini veya tersineceğini tahmin etmeye çalışır. Bu makalede <strong>devam formasyonlarını</strong> öğreneceksiniz: bayrak, flama (kanat) ve üçgen.</p>
+
+<h2>Devam Formasyonu Nedir?</h2>
+<p>Devam formasyonu, mevcut trendin bir süre konsolidasyon (duraklama) yapıp aynı yönde devam edeceğine işaret eden grafik kalıplarıdır. Trend yukarıysa yukarı, aşağıysa aşağı devam sinyali verir.</p>
+<p>Devam formasyonları, trend takip sistemleriyle (Supertrend, EMA kırılım gibi) birleştirildiğinde daha güvenilir giriş noktaları sunar.</p>
+
+<h2>Bayrak Formasyonu (Flag)</h2>
+<p>Bayrak, güçlü bir fiyat hareketi (direk) ardından gelen küçük ve dar bir konsolidasyondan (bayrak bezi) oluşur.</p>
+<ul>
+  <li><strong>Boğa bayrağı:</strong> Hızlı yükseliş (direk) + küçük aşağı eğimli konsolidasyon → Yukarı kırılım beklenir</li>
+  <li><strong>Ayı bayrağı:</strong> Hızlı düşüş (direk) + küçük yukarı eğimli konsolidasyon → Aşağı kırılım beklenir</li>
+</ul>
+<p>Bayrak formasyonunda hacim önemlidir: Kırılım yüksek hacimle gerçekleşirse formasyon güvenilirliği artar. Hedef fiyat genellikle "direk boyunun" kırılım noktasına eklenmesiyle hesaplanır.</p>
+
+<h2>Flama Formasyonu (Pennant)</h2>
+<p>Flama, bayrak formasyonuna benzer ancak konsolidasyon bölümü dikdörtgen değil, giderek daralan üçgen şeklindedir. Bayrak bezindeki konsolidasyon eğimli bir banttan oluşurken, flamada her iki bant da birbirine doğru yaklaşır.</p>
+<ul>
+  <li>Kısa süre içinde daralan bir konsolidasyon görülür</li>
+  <li>Hacim konsolidasyon boyunca azalır, kırılımda artar</li>
+  <li>Hedef: direk boyunun kırılım noktasına eklenmesi</li>
+</ul>
+
+<h2>Simetrik Üçgen (Symmetrical Triangle)</h2>
+<p>Simetrik üçgen, alçalan tepe ve yükselen dip noktalarının oluşturduğu sıkışma formasyonudur. Her iki bant birbirine doğru daralmaktadır.</p>
+<ul>
+  <li>Yukarı veya aşağı kırılım olabilir (yön belirsiz)</li>
+  <li>Kırılım öncesinde hacim düşer, kırılımda artar</li>
+  <li>Mevcut trendin yönünde kırılma ihtimali daha yüksektir</li>
+  <li>Kırılım olmadan tepe noktasına yaklaşılırsa patlama gücü azalır</li>
+</ul>
+
+<h2>Yükselen Üçgen (Ascending Triangle)</h2>
+<p>Altta giderek yükselen dip noktaları ve üstte yatay dirençten oluşur. Bu formasyon boğa sinyalidir — yeterli güç toplandığında direnç kırılarak yukarı patlama beklenir.</p>
+<p>Bankacılık hisselerinde konsolidasyon sıklıkla yükselen üçgen şeklinde oluşur.</p>
+
+<h2>Alçalan Üçgen (Descending Triangle)</h2>
+<p>Üstte alçalan tepe noktaları, altta yatay destekten oluşur. Ayı sinyalidir — destek kırıldığında aşağı patlama beklenir. Teknik satış emirleri genellikle bu kırılım noktasının altına konumlandırılır.</p>
+
+<h2>Formasyonları BorsaPusula Sinyalleriyle Birleştirmek</h2>
+<p>BorsaPusula sistemi Supertrend + ADX + EMA kırılımını baz alır; grafik formasyonları ek teyit olarak kullanılabilir:</p>
+<ul>
+  <li>Hisse AL sinyalindeyken yükselen üçgen üst bandı kırıyorsa → Güçlü alım sinyali</li>
+  <li>Hisse BEKLE sinyalindeyken bayrak konsolidasyonundan çıkış görülüyorsa → Önceden takibe al</li>
+  <li>Formasyonun hacim desteği varsa → Sinyal güvenilirliği artar</li>
+</ul>
+<p>Formasyonlar tek başına yeterli değildir. Her zaman trend yönüyle ve hacim verileriyle teyit edin.</p>
+
+<h2>En Sık Yapılan Hatalar</h2>
+<ul>
+  <li>Formasyon tamamlanmadan pozisyon açmak (kırılımı bekleyin)</li>
+  <li>Her konsolidasyonu formasyon olarak yorumlamak</li>
+  <li>Düşük hacimdeki kırılımı güvenilir saymak</li>
+  <li>Stop loss koymadan formasyon oyunu oynamak</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "Bayrak ve flama formasyonu arasındaki fark nedir?",
+       "a": "Her ikisi de güçlü bir hareket (direk) sonrası konsolidasyon formasyonudur. Bayrakta konsolidasyon bölümü eğimli paralel bantlar arasında oluşurken, flamada (pennant) konsolidasyon giderek daralan simetrik bir üçgen şeklindedir."},
+      {"q": "Simetrik üçgenin kırılımı hangi yönde olur?",
+       "a": "Simetrik üçgen tek başına yön belirtmez. Mevcut trendin yönünde kırılma ihtimali genellikle daha yüksektir. Yükselen trendde oluşan simetrik üçgenin yukarı kırılması, alçalan trendde aşağı kırılması daha olasıdır."},
+      {"q": "Grafik formasyonları tek başına yatırım kararı için yeterli midir?",
+       "a": "Hayır. Grafik formasyonları yardımcı araçlardır; tek başına yeterli değildir. Trend yönü, hacim teyidi ve diğer teknik göstergeler (ADX, Supertrend, RSI) ile birlikte değerlendirildiğinde daha güvenilir sinyaller üretir."},
+      {"q": "Kırılımı onaylamak için ne kadar beklenmeli?",
+       "a": "Güçlü bir kapanış kırılımın teyidi için en sağlıklı yöntemdir. Tek mumun kırılması yetersiz — ardışık 1-2 kapanış kırılım noktasının üzerinde/altında gerçekleşmesi ve hacmin artması güvenilirliği artırır."}
+    ],
+    "related_tickers": ['AKBNK', 'ASELS', 'THYAO', 'EREGL', 'GARAN']
+  },
+
+  # ── ARTICLE 66 ──
+  {
+    "slug": "kucuk-sermayeyle-borsaya-baslamak",
+    "title": "Küçük Sermayeyle Borsaya Başlamak: 1.000₺ ile Ne Yapılır?",
+    "desc": "Az sermayeyle borsaya nasıl başlanır? 1.000-10.000₺ bütçeyle hisse senedi yatırımı yapmanın pratik rehberi ve sık yapılan başlangıç hataları.",
+    "date": "2026-05-01",
+    "mins": 6,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p>Borsaya girmek için büyük bir sermayeye ihtiyacınız olmadığını biliyor muydunuz? BIST'te 1 adet hisse bile alabilirsiniz — bu da 5₺'dan başlayabileceğiniz anlamına gelir. Ancak küçük sermayeyle verimli bir yatırım yapmak, doğru strateji gerektiriyor.</p>
+
+<h2>1.000₺ – 5.000₺ Arası: Ne Yapmalısınız?</h2>
+<p>Bu bütçe aralığında temel hedef <strong>öğrenmek</strong> olmalıdır. Kazanç ikincil plandadır çünkü küçük sermayeyle gerçek kazanç sınırlı olsa da gerçek parayla yaşanan deneyim, hiçbir kitabın veremeyeceği bir eğitim sağlar.</p>
+
+<h3>Yapılacaklar:</h3>
+<ul>
+  <li>Tek bir likit ve takibi kolay hisse ile başlayın (örn. AKBNK, GARAN, THYAO gibi BIST30 hisseleri)</li>
+  <li>Sermayenizin tamamını tek bir hisseye koymayın — en fazla iki hisse seçin</li>
+  <li>Her işlemi neden yaptığınızı bir not defterine yazın — sonra geri dönüp okuyun</li>
+  <li>Stop loss kullanın, kaybı sınırlayın</li>
+  <li>Borsaya acele ettiren haberlere veya sosyal medya yorumlarına inanmayın</li>
+</ul>
+
+<h3>Yapılmayacaklar:</h3>
+<ul>
+  <li>Kaldıraçlı ürünlere (VİOP) girmek — başlangıç sermayesini bir gecede bitirebilir</li>
+  <li>Kripto piyasasında margin trading — profesyoneller bile ciddi kayıplar yaşar</li>
+  <li>Düşen hisseyi "zarar kesinleşmesin" diye tutmak</li>
+  <li>Bir tanıdığın önerisine körü körüne güvenmek</li>
+</ul>
+
+<h2>5.000₺ – 20.000₺: Çeşitlendirme Başlar</h2>
+<p>Bu aralıkta 3-5 farklı hisseye dağılım yapabilir, sektörel çeşitlendirmeye başlayabilirsiniz. Bankacılık + enerji + savunma gibi farklı sektörlerden seçim yapın.</p>
+<p>Her pozisyon için toplam portföyün maksimum %25-30'unu kullanın. Bu sınır, bir hissenin ciddi düşüşünün sizi harabe etmesini engeller.</p>
+
+<h2>Komisyon Maliyetlerine Dikkat</h2>
+<p>Küçük sermayeli yatırımcılar için komisyon oranı kritik bir maliyettir. 1.000₺ işlem için %0,15 komisyon = 1,5₺ görünüşte küçük, ancak sık işlem yaparsanız bu maliyet birikir.</p>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Komisyon Oranı</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">1.000₺ işlem</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Yıllık 50 işlem</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">%0,03 (düşük)</td>
+      <td style="padding:8px 12px;color:#e6edf3">0,30₺</td>
+      <td style="padding:8px 12px;color:#e6edf3">15₺</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">%0,10 (orta)</td>
+      <td style="padding:8px 12px;color:#e6edf3">1₺</td>
+      <td style="padding:8px 12px;color:#e6edf3">50₺</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#f85149">%0,30 (yüksek)</td>
+      <td style="padding:8px 12px;color:#f85149">3₺</td>
+      <td style="padding:8px 12px;color:#f85149">150₺</td>
+    </tr>
+  </tbody>
+</table>
+<p>Küçük sermayeyle işlem yapanlar için düşük komisyon sunan aracı kurumları araştırın.</p>
+
+<h2>DCA Stratejisi: Küçük Sermayenin En İyi Dostu</h2>
+<p>Tek seferde büyük bir yatırım yapmak yerine, her ay düzenli olarak küçük miktarlarda alım yapmak (DCA — Dolar Maliyet Ortalaması) küçük sermayeli yatırımcılar için ideal bir başlangıç stratejisidir.</p>
+<ul>
+  <li>Her ay 500₺ yatırıyorsanız, bazı aylar ucuza, bazı aylar pahalıya alırsınız</li>
+  <li>Uzun vadede maliyet ortalamasını dengeler</li>
+  <li>Piyasa zamanlaması yapmaya gerek kalmaz</li>
+  <li>Alışkanlık kazandırır — disiplin gelişir</li>
+</ul>
+
+<h2>BorsaPusula'yı Küçük Sermayeyle Kullanmak</h2>
+<p>Sinyal takip sistemi küçük sermayeli yatırımcılara da tam hizmet verir. <a href="/tarama">Hisse Tarayıcı</a>'da AL sinyali + IDEAL giriş kalitesi filtreleyerek en uygun giriş noktalarındaki hisseleri görüntüleyebilirsiniz. Her hissenin stop loss ve hedef fiyatını görerek risk/ödül oranını hesaplamak kolaylaşır.</p>
+""",
+    "faqs": [
+      {"q": "Borsaya başlamak için minimum ne kadar para gerekir?",
+       "a": "BIST'te minimum 1 lot (1 adet hisse) alabilirsiniz. Hissenin fiyatına göre bu 5₺ ile 500₺+ arasında değişebilir. Aracı kurumların çoğunda minimum işlem tutarı yoktur. Ancak gerçek bir öğrenme deneyimi için 1.000-2.000₺ ile başlamanız daha anlamlıdır."},
+      {"q": "Küçük sermayeyle kaç hisseye yatırım yapmalıyım?",
+       "a": "1.000-5.000₺ arası bütçede 1-2 hisse ile başlamak idealdir. Bu aşama öğrenme aşamasıdır; çeşitlendirme yerine bir hisseyi derinlemesine takip etmek daha değerli bir deneyim kazandırır."},
+      {"q": "Küçük sermayeyle VİOP yapılır mı?",
+       "a": "Kesinlikle önerilmez. VİOP kaldıraçlı işlemler içerir ve küçük sermayeyi bir gecede sıfıra düşürebilir. Kaldıraçlı ürünlere başlamadan önce en az 2-3 yıl hisse senedi deneyimi kazanılması gerekir."},
+      {"q": "DCA stratejisi küçük sermayeyle işe yarar mı?",
+       "a": "Evet, DCA (Dolar Maliyet Ortalaması) küçük sermayeli yatırımcılar için en uygun stratejilerden biridir. Her ay düzenli miktarlarda alım yaparak hem piyasa zamanlaması yapmaktan kaçınır hem de portföy birikiminizi sistematik olarak artırırsınız."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'BIMAS']
+  },
+
+  # ── ARTICLE 67 ──
+  {
+    "slug": "roe-net-kar-marji-sirket-karlilik-analizi",
+    "title": "ROE ve Net Kâr Marjı: Şirket Kârlılığını Doğru Okumak",
+    "desc": "ROE (özkaynak kârlılığı), ROA ve net kâr marjı nedir? BIST hisseleri için kârlılık oranlarını nasıl yorumlamalısınız? Pratik örneklerle temel analiz rehberi.",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Temel Analiz",
+    "body": """
+<p>Bir şirketin gerçekten kârlı olup olmadığını anlamak için fiyat verisine değil, finansal oranlara bakmanız gerekir. Bu oranların başında <strong>ROE (Özkaynak Kârlılığı)</strong> ve <strong>Net Kâr Marjı</strong> gelir. Bu iki metrik, bir şirketin kaynaklarını ne kadar verimli kullandığını gösterir.</p>
+
+<h2>ROE (Return on Equity) Nedir?</h2>
+<p>ROE, şirketin <strong>özkaynaklarını kullanarak ne kadar kâr ettiğini</strong> ölçer.</p>
+<pre style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:#e6edf3">
+ROE = Net Kâr / Ortalama Özkaynak × 100
+
+Örnek: Net Kâr 1 milyar₺, Özkaynak 5 milyar₺
+ROE = 1/5 × 100 = %20
+</pre>
+<p>Bu, şirketin hissedarlara ait her 100₺ için 20₺ net kâr ürettiği anlamına gelir.</p>
+
+<h3>ROE Nasıl Yorumlanır?</h3>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">ROE Değeri</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Değerlendirme</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#f85149">%0 altı</td>
+      <td style="padding:8px 12px;color:#e6edf3">Zarar ediyor — dikkat</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">%0 – %10</td>
+      <td style="padding:8px 12px;color:#e6edf3">Düşük kârlılık</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#f0883e">%10 – %20</td>
+      <td style="padding:8px 12px;color:#e6edf3">Makul, sektöre göre değişir</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#3fb950">%20+</td>
+      <td style="padding:8px 12px;color:#e6edf3">Güçlü kârlılık</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#3fb950">%30+</td>
+      <td style="padding:8px 12px;color:#e6edf3">Excellent — Warren Buffett eşiği</td>
+    </tr>
+  </tbody>
+</table>
+<p>⚠️ Önemli: Yüksek borçla çalışan şirketlerde ROE yapay olarak şişebilir. Her zaman borç/özkaynak oranıyla birlikte değerlendirin.</p>
+
+<h2>Net Kâr Marjı Nedir?</h2>
+<p>Net kâr marjı, şirketin gelirinin ne kadarını net kâra dönüştürebildiğini gösterir.</p>
+<pre style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:#e6edf3">
+Net Kâr Marjı = Net Kâr / Net Satışlar × 100
+
+Örnek: Net Kâr 500M₺, Satışlar 5 milyar₺
+Net Kâr Marjı = 500/5000 × 100 = %10
+</pre>
+<p>Bu, şirketin sattığı her 100₺'lik ürün/hizmetten 10₺ net kâr bıraktığı anlamına gelir.</p>
+<p>Sektöre göre "iyi" marj çok farklıdır:</p>
+<ul>
+  <li><strong>Bankacılık:</strong> %20-40 net kâr marjı normal (faiz gelirleri yüksek)</li>
+  <li><strong>Perakende (Bim, Migros):</strong> %2-5 düşük görünür ama hacim ile telafi edilir</li>
+  <li><strong>Teknoloji:</strong> %15-40 arasında geniş spektrum</li>
+  <li><strong>Petrokimya/Enerji:</strong> Ham madde fiyatına çok duyarlı, döngüsel</li>
+</ul>
+
+<h2>ROA (Return on Assets — Aktif Kârlılığı)</h2>
+<p>ROA, şirketin tüm varlıklarını (özkaynak + borç) ne kadar verimli kullandığını ölçer.</p>
+<pre style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:#e6edf3">
+ROA = Net Kâr / Toplam Aktifler × 100
+</pre>
+<p>Düşük ROA ama yüksek ROE → Şirket yüksek borç kullanıyor. Kaldıraç hem kazancı hem riski büyütür.</p>
+
+<h2>BIST Hisselerinde Bu Oranları Nerede Bulursunuz?</h2>
+<p>BorsaPusula hisse detay sayfalarında P/E oranı, F/K, PD/DD gibi temel veriler gösterilir. Daha detaylı finansal oranlar için:</p>
+<ul>
+  <li>Şirketin KAP'ta yayımlanan finansal tabloları</li>
+  <li>Aracı kurumların hisse analiz sayfaları</li>
+  <li>İş Yatırım, Garanti BBVA Yatırım gibi aracı kurumların araştırma raporları</li>
+</ul>
+
+<h2>ROE ve Teknik Analizi Birleştirmek</h2>
+<p>Yüksek ROE'li bir şirket, güçlü teknik sinyalle birleştiğinde ideal yatırım adayı olabilir. BorsaPusula sinyalleri teknik analizi hızla tarama imkânı sunarken, ROE ve net kâr marjı o hissenin <em>fundamentalinin</em> güçlü olup olmadığını anlamanızı sağlar.</p>
+<p>Temel yaklaşım: <strong>Teknik analiz ile giriş zamanlarken, temel analiz ile kalite kontrol yapın.</strong></p>
+""",
+    "faqs": [
+      {"q": "ROE ne anlama gelir ve iyi bir ROE değeri nedir?",
+       "a": "ROE (Return on Equity), özkaynak kârlılığı demektir. Şirketin hissedarlara ait sermayeyi ne kadar verimli kullandığını gösterir. Genel kural: %10 altı düşük, %20 üzeri iyi, %30 üzeri mükemmel. Ancak sektöre göre değişir ve borçluluğu da göz önünde bulundurun."},
+      {"q": "Net kâr marjı yüksek olan hisse daha mı iyidir?",
+       "a": "Yüksek net kâr marjı olumlu bir işarettir, ancak sektörler arası karşılaştırma yaparken dikkatli olun. Bankacılık yüksek marjlı görünürken perakende düşük marjlıdır ama hacim ile telafi eder. Karşılaştırmayı aynı sektördeki rakiplerle yapın."},
+      {"q": "ROE ile ROA arasındaki fark nedir?",
+       "a": "ROE yalnızca özkaynak üzerinden hesaplanırken, ROA tüm varlıklar (özkaynak + borç) üzerinden hesaplanır. Şirket yüksek borç kullanıyorsa ROE şişebilir. ROA, borç etkisini arındırarak gerçek varlık verimliliğini gösterir."},
+      {"q": "BIST hisselerinin ROE değerlerini nereden bulabilirim?",
+       "a": "KAP'ta yayımlanan finansal tablolar, aracı kurum araştırma raporları ve Borsa İstanbul veri hizmetlerinden ulaşabilirsiniz. BorsaPusula hisse sayfalarında P/D, F/K gibi temel metrikler gösterilmektedir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'SASA', 'BIMAS', 'ASELS']
+  },
+
+  # ── ARTICLE 68 ──
+  {
+    "slug": "endeks-fonu-mu-bireysel-hisse-mi",
+    "title": "Endeks Fonu mu, Bireysel Hisse mi? Hangi Yatırım Stratejisi Daha İyi?",
+    "desc": "ETF ve endeks fonlarına yatırım mı, yoksa bireysel hisse seçimi mi daha avantajlı? Risk, getiri ve zaman maliyeti karşılaştırmalı analiz.",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Strateji",
+    "body": """
+<p>Borsaya giren çoğu yatırımcı önünde sonunda şu soruyla yüzleşir: "BIST100 endeks fonuna mı yatırsam, yoksa kendi seçtiğim hisselere mi?" Bu iki yaklaşım tamamen farklı zaman, bilgi ve risk profili gerektirir.</p>
+
+<h2>Endeks Fonu (ETF/BYF) Nedir?</h2>
+<p>Endeks fonu, belirli bir endeksin (BIST30, BIST100, S&P500 gibi) performansını taklit etmeye çalışan bir yatırım aracıdır. Bir endeks fonuna yatırım yaptığınızda, o endeksteki tüm hisselerden oluşan çeşitlendirilmiş bir sepete sahip olursunuz.</p>
+<p>Türkiye'de Borsa İstanbul'da işlem gören BIST30 ve BIST100 borsa yatırım fonları (BYF) mevcuttur. Ayrıca bank portföy yönetim şirketlerinin endeks fonlarına da yatırım yapılabilir.</p>
+
+<h2>İki Yaklaşımın Karşılaştırması</h2>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Özellik</th>
+      <th style="padding:8px 12px;text-align:left;color:#3fb950;font-weight:600">Endeks Fonu</th>
+      <th style="padding:8px 12px;text-align:left;color:#f0883e;font-weight:600">Bireysel Hisse</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Çeşitlendirme</td>
+      <td style="padding:8px 12px;color:#3fb950">Otomatik (30-100 hisse)</td>
+      <td style="padding:8px 12px;color:#e6edf3">Manuel, emek gerektirir</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Zaman maliyeti</td>
+      <td style="padding:8px 12px;color:#3fb950">Çok düşük</td>
+      <td style="padding:8px 12px;color:#f85149">Yüksek (araştırma, takip)</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Piyasayı yenme potansiyeli</td>
+      <td style="padding:8px 12px;color:#f85149">Yok (endeksin getirisi)</td>
+      <td style="padding:8px 12px;color:#3fb950">Var (ama zor)</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Komisyon maliyeti</td>
+      <td style="padding:8px 12px;color:#3fb950">Düşük</td>
+      <td style="padding:8px 12px;color:#e6edf3">Her işlemde birikim</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Duygusal stres</td>
+      <td style="padding:8px 12px;color:#3fb950">Düşük ("pasif" yaklaşım)</td>
+      <td style="padding:8px 12px;color:#f85149">Yüksek (bireysel karar)</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Öğrenme fırsatı</td>
+      <td style="padding:8px 12px;color:#f85149">Düşük</td>
+      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Performans (uzun vade)</td>
+      <td style="padding:8px 12px;color:#e6edf3">Endeks getirisi</td>
+      <td style="padding:8px 12px;color:#e6edf3">Değişken</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Akademik Gerçek: Bireysel Hisse Seçmek Zorlu</h2>
+<p>ABD'de yapılan araştırmalar, aktif yönetilen fonların büyük çoğunluğunun (%85-90+) uzun vadede ilgili endeksin gerisinde kaldığını göstermektedir. Bu sonuç bireysel yatırımcılar için daha da dramatiktir: Komisyonlar, duygusal kararlar ve yetersiz çeşitlendirme getiriyi büyük ölçüde eritir.</p>
+<p>BIST için benzer araştırmalar sınırlı olmakla birlikte, yüksek volatilite ortamında bireysel seçimin başarılı olması için güçlü teknik veya temel analiz becerileri gerekmektedir.</p>
+
+<h2>Hibrit Yaklaşım: En İyisi İkisi Birden</h2>
+<p>Çoğu uzman, özellikle yeni başlayanlar için hibrit bir yaklaşım önerir:</p>
+<ul>
+  <li><strong>Uzun vadeli tasarruf çekirdeği (%60-70):</strong> Endeks fonu — pasif, düşük maliyetli</li>
+  <li><strong>Aktif deney bölümü (%30-40):</strong> Bireysel hisse seçimi — öğrenme ve üstün getiri denemesi</li>
+</ul>
+<p>Bu yapı hem piyasa getirisini güvence altına alırken, hem de bireysel yatırım becerisi geliştirmenizi sağlar.</p>
+
+<h2>BorsaPusula'da Endeks Fonu vs Hisse Dengesi</h2>
+<p>Eğer aktif hisse takibine zaman ayırabiliyorsanız, BorsaPusula sinyalleri doğrudan bireysel hisse seçimini destekler. Zaman kısıtınız varsa, portföyünüzün büyük bölümünü endeks fonuna ayırıp geri kalanını takip edebileceğiniz 3-5 BIST100 hissesine yönlendirmek makuldür.</p>
+""",
+    "faqs": [
+      {"q": "Endeks fonu mu daha iyi, bireysel hisse mi?",
+       "a": "Her birinin avantajları farklıdır. Endeks fonu otomatik çeşitlendirme ve düşük zaman maliyeti sunar, ancak endeksin üzerinde getiri imkânı yoktur. Bireysel hisse piyasayı yenme fırsatı verir ama derin araştırma, disiplin ve zaman gerektirir."},
+      {"q": "Türkiye'de BIST100 endeks fonuna nasıl yatırım yapılır?",
+       "a": "Borsa İstanbul'da işlem gören BIST100 BYF'lerine aracı kurum hesabınız üzerinden hisse gibi işlem yapabilirsiniz. Ayrıca bankaların portföy yönetim şirketlerinin endeks fonlarına da yatırım yapılabilir."},
+      {"q": "Aktif yönetilen fonlar endeksi geçer mi?",
+       "a": "Araştırmalar, aktif yönetilen fonların büyük çoğunluğunun (%85+) uzun vadede ilgili endeksin gerisinde kaldığını göstermektedir. Bunun başlıca nedenleri: yüksek yönetim ücretleri, işlem maliyetleri ve piyasayı sürekli yenmenin zorluğudur."},
+      {"q": "Hem endeks fonu hem hisse tutmak mantıklı mı?",
+       "a": "Evet, hibrit yaklaşım makuldür. Uzun vadeli tasarrufun büyük bölümü için endeks fonu (güvenli çekirdek), küçük bir kısım için bireysel hisse (öğrenme ve üstün getiri denemesi) kombinasyonu yaygın bir stratejidir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'TUPRS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
