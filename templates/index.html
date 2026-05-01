@@ -542,14 +542,34 @@
   .sector-btn:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
   .sector-btn.active-sector { background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.4); color: var(--bp-brand); }
 
+  .search-wrap { position: relative; margin-left: auto; }
   .search-input {
-    margin-left: auto;
     background: var(--bp-bg); border: 1px solid var(--bp-border); color: var(--bp-text);
     padding: 6px 12px; border-radius: var(--bp-radius-sm); font-size: 13px; font-family: inherit;
-    width: 160px; outline: none; transition: border-color .15s;
+    width: 170px; outline: none; transition: border-color .15s;
   }
-  .search-input:focus { border-color: var(--bp-brand); }
+  .search-input:focus { border-color: var(--bp-brand); width: 210px; }
   .search-input::placeholder { color: var(--bp-text3); }
+
+  /* Search autocomplete */
+  .search-ac {
+    display: none; position: absolute; top: calc(100% + 5px); right: 0;
+    background: var(--bp-surface); border: 1px solid var(--bp-border2);
+    border-radius: 10px; min-width: 270px; padding: 4px;
+    z-index: 400; box-shadow: 0 12px 32px rgba(0,0,0,.6);
+    max-height: 330px; overflow-y: auto;
+  }
+  .search-ac.open { display: block; animation: ddIn .13s ease; }
+  .sac-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 10px; border-radius: 6px; cursor: pointer;
+    transition: background .1s; text-decoration: none;
+  }
+  .sac-item:hover, .sac-item.sac-sel { background: var(--bp-surface2); }
+  .sac-ticker { font-size: 13px; font-weight: 700; color: var(--bp-text); min-width: 60px; font-variant-numeric: tabular-nums; }
+  .sac-name { font-size: 12px; color: var(--bp-text3); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sac-sig { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+  .sac-empty { padding: 10px 12px; font-size: 13px; color: var(--bp-text3); text-align: center; }
 
   /* Gelişmiş Filtre Paneli */
   .adv-toggle {
@@ -1051,6 +1071,8 @@
     .indicators { display: none; }
     th.hide-mobile, td.hide-mobile { display: none; }
     .search-input { width: 120px; }
+    .search-input:focus { width: 120px; }
+    .search-ac { min-width: 200px; right: 0; left: auto; }
     .irc-inds { display: none; }
     #updated { display: none; }
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -1412,7 +1434,14 @@
     <button class="filter-btn" onclick="setFilter('BEKLE', this)">⚪ Belirsiz</button>
     <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)">⚡ Bugün</button>
     <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()">⚙️ Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
-    <input class="search-input" type="text" placeholder="Hisse ara..." oninput="setSearch(this.value)">
+    <div class="search-wrap">
+      <input class="search-input" type="text" placeholder="Hisse ara… (/)"
+             oninput="setSearch(this.value);showSearchAc(this.value)"
+             onkeydown="handleSearchKey(event)"
+             onfocus="showSearchAc(this.value)"
+             autocomplete="off" spellcheck="false">
+      <div class="search-ac" id="searchAc"></div>
+    </div>
   </div>
 
   <!-- Gelişmiş Screener Paneli -->
@@ -3212,6 +3241,76 @@ function _urlBase64ToUint8Array(base64String) {
   return arr;
 }
 
+// ── Search autocomplete ──────────────────────────────────
+let _acIdx = -1;
+
+function showSearchAc(val) {
+  const ac = document.getElementById('searchAc');
+  if (!ac) return;
+  if (!val || val.length < 1 || allStocks.length === 0) {
+    ac.classList.remove('open');
+    return;
+  }
+  const q = val.toUpperCase();
+  const matches = allStocks
+    .filter(s => s.ticker !== 'XU030' && (
+      s.ticker.includes(q) ||
+      (s.name && s.name.toUpperCase().includes(q))
+    ))
+    .sort((a, b) => {
+      const aT = a.ticker.startsWith(q) ? 0 : 1;
+      const bT = b.ticker.startsWith(q) ? 0 : 1;
+      return aT - bT || a.ticker.localeCompare(b.ticker);
+    })
+    .slice(0, 8);
+
+  if (matches.length === 0) {
+    ac.innerHTML = '<div class="sac-empty">Sonuç bulunamadı</div>';
+    ac.classList.add('open');
+    return;
+  }
+
+  ac.innerHTML = matches.map((s, i) => {
+    const sigColor = s.signal === 'AL' ? '#3fb950' : s.signal === 'SAT' ? '#f85149' : '#8b949e';
+    const sigBg    = s.signal === 'AL' ? 'rgba(63,185,80,.12)' : s.signal === 'SAT' ? 'rgba(248,81,73,.12)' : 'rgba(139,148,158,.1)';
+    const sigIcon  = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
+    const shortName = (s.name || '').replace(' A.Ş.','').replace(' Holding','').substring(0, 24);
+    return `<a class="sac-item" href="/hisse/${s.ticker}" data-idx="${i}">
+      <span class="sac-ticker">${s.ticker}</span>
+      <span class="sac-name">${shortName}</span>
+      <span class="sac-sig" style="color:${sigColor};background:${sigBg}">${sigIcon} ${sigLabel(s.signal)}</span>
+    </a>`;
+  }).join('');
+  _acIdx = -1;
+  ac.classList.add('open');
+}
+
+function handleSearchKey(e) {
+  const ac = document.getElementById('searchAc');
+  if (!ac || !ac.classList.contains('open')) return;
+  const items = ac.querySelectorAll('.sac-item');
+  if (items.length === 0) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _acIdx = Math.min(_acIdx + 1, items.length - 1);
+    items.forEach((it, i) => it.classList.toggle('sac-sel', i === _acIdx));
+    items[_acIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _acIdx = Math.max(_acIdx - 1, 0);
+    items.forEach((it, i) => it.classList.toggle('sac-sel', i === _acIdx));
+    items[_acIdx]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    const target = _acIdx >= 0 ? items[_acIdx] : items.length === 1 ? items[0] : null;
+    if (target) window.location.href = target.href;
+  } else if (e.key === 'Escape') {
+    ac.classList.remove('open');
+    e.target.blur();
+  }
+}
+
 // ── Nav dropdown toggle ──────────────────────────────────
 function toggleNavDd(id, btn) {
   const menu = document.getElementById(id);
@@ -3228,6 +3327,9 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.nav-dropdown')) {
     document.querySelectorAll('.nav-dropdown-menu').forEach(m => m.classList.remove('open'));
     document.querySelectorAll('.nav-dropdown-btn').forEach(b => b.classList.remove('open'));
+  }
+  if (!e.target.closest('.search-wrap')) {
+    document.getElementById('searchAc')?.classList.remove('open');
   }
 }, true);
 
