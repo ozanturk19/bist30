@@ -1349,12 +1349,18 @@
 
   <div class="stats-bar" id="statsBar">
     <div class="stat-card stat-total"><div class="stat-num" id="statTotal"><span class="stat-num-sk"></span></div><div class="stat-label">Toplam</div></div>
-    <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="En güçlü momentum sinyallerini gör">
+    <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="Güçlü Trend (AL): Supertrend ↑ + ADX ≥25 + EMA12>EMA99. Tıkla: Momentum sıralamasını gör">
       <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7">↗</span></div>
     </a>
-    <div class="stat-card stat-sat">  <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>  <div class="stat-label">Zayıf Trend</div></div>
-    <div class="stat-card stat-bekle"><div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div><div class="stat-label">Belirsiz</div></div>
+    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=\"SAT\"]'))" title="Supertrend aşağı + ADX güçlü + EMA uyumu → düşüş trendi sinyali. Tıkla: SAT sinyallerini filtrele">
+      <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>
+      <div class="stat-label">Zayıf Trend</div>
+    </div>
+    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=\"BEKLE\"]'))" title="3 indikatör henüz hizalanmadı. Trend net değil — izleme listesine alın. Tıkla: Belirsiz hisseleri filtrele">
+      <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
+      <div class="stat-label">Belirsiz</div>
+    </div>
   </div>
 
   <!-- Market Breadth Bar -->
@@ -1495,11 +1501,11 @@
   </div>
 
   <div class="filters">
-    <button class="filter-btn active-all" onclick="setFilter('all', this)">Tümü</button>
-    <button class="filter-btn" onclick="setFilter('AL', this)">🟢 Güçlü Trend</button>
-    <button class="filter-btn" onclick="setFilter('SAT', this)">🔴 Zayıf Trend</button>
-    <button class="filter-btn" onclick="setFilter('BEKLE', this)">⚪ Belirsiz</button>
-    <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)">⚡ Bugün</button>
+    <button class="filter-btn active-all" onclick="setFilter('all', this)" title="Tüm hisseleri göster">Tümü</button>
+    <button class="filter-btn" onclick="setFilter('AL', this)" title="Supertrend ↑ + ADX ≥25 + EMA12>EMA99 — 3 indikatör aynı anda yükseliş yönünde">🟢 Güçlü Trend</button>
+    <button class="filter-btn" onclick="setFilter('SAT', this)" title="Supertrend ↓ + ADX ≥25 + EMA12&lt;EMA99 — 3 indikatör aynı anda düşüş yönünde">🔴 Zayıf Trend</button>
+    <button class="filter-btn" onclick="setFilter('BEKLE', this)" title="Henüz 3 indikatör hizalanmadı — trend belirsiz, yeni sinyal bekleniyor">⚪ Belirsiz</button>
+    <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)" title="Bugün ilk kez AL veya SAT sinyali oluşan hisseler — taze fırsatlar">⚡ Bugün</button>
     <button class="filter-btn filter-watch" id="filterWatchBtn" onclick="setFilter('WATCH', this)" style="display:none">🔔 Takibim <span id="watchFilterCount"></span></button>
     <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()">⚙️ Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
     <div class="search-wrap">
