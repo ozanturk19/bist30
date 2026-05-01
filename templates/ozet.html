@@ -339,6 +339,28 @@ function goToDate(date) {
 </div>
 {% endif %}
 
+<!-- İdeal Giriş Noktaları -->
+{% set ideal_al = al_list | selectattr('entry_quality', 'equalto', 'IDEAL') | list %}
+{% if ideal_al %}
+<div class="section-box" style="margin-bottom:20px;border-color:rgba(63,185,80,.25);background:linear-gradient(135deg,rgba(63,185,80,.04),rgba(17,24,39,.0))">
+  <div class="section-title" style="color:#3fb950;margin-bottom:10px">🎯 İdeal Giriş Noktası ({{ ideal_al|length }})</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px">
+    {% for s in ideal_al %}
+    <a href="/hisse/{{ s.ticker }}" style="display:inline-flex;align-items:center;gap:6px;background:#21262d;border:1px solid rgba(63,185,80,.2);border-radius:7px;padding:5px 10px;text-decoration:none;transition:all .15s"
+       onmouseover="this.style.background='#2d3748'" onmouseout="this.style.background='#21262d'">
+      <span style="font-size:13px;font-weight:700;color:#f0f6fc">{{ s.ticker }}</span>
+      {% if s.signal_price and s.price %}
+        {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
+        <span style="font-size:11px;font-weight:600;color:{% if ret >= 0 %}#3fb950{% else %}#f85149{% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
+      {% endif %}
+      <span style="font-size:10px;color:#3fb950;font-weight:600">✅</span>
+    </a>
+    {% endfor %}
+  </div>
+  <div style="font-size:11px;color:#484f58;margin-top:10px">✅ İdeal: Supertrend + ADX güçlü + Fiyat giriş bölgesinde · <a href="/" style="color:#58a6ff;text-decoration:none">Detaylı filtrele →</a></div>
+</div>
+{% endif %}
+
 <!-- Sektör Sinyal Nabzı -->
 {% if total > 0 %}
 <div class="section-box" style="margin-bottom:20px">
