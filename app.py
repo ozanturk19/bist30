@@ -3936,6 +3936,116 @@ def portfolio():
     return render_template("portfolio.html")
 
 
+# ── Sunucu Taraflı Portföy (UUID Token Bazlı) ─────────────────────────────────
+_PF_DIR = os.path.join(_APP_DIR, "portfolios")
+os.makedirs(_PF_DIR, exist_ok=True)
+
+_PF_MAX_ENTRIES  = 100     # Token başına maksimum pozisyon
+_PF_MAX_BYTES    = 65536   # 64KB — saldırı hafifletme
+_PF_LOCK         = threading.Lock()
+
+
+def _pf_path(token: str) -> str | None:
+    """Token güvenlik kontrolü — path traversal koruma."""
+    if not re.match(r'^[0-9a-f\-]{36}$', token):  # UUID4 formatı
+        return None
+    return os.path.join(_PF_DIR, f"{token}.json")
+
+
+@app.route("/api/portfolio/new", methods=["POST"])
+@limiter.limit("10 per hour")
+def api_portfolio_new():
+    """Yeni UUID token oluştur."""
+    token = str(__import__('uuid').uuid4())
+    path  = _pf_path(token)
+    with _PF_LOCK:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"positions": [], "created_at": datetime.now().isoformat()}, f)
+    return safe_json({"token": token})
+
+
+@app.route("/api/portfolio/<token>", methods=["GET"])
+@limiter.limit("60 per minute")
+def api_portfolio_get(token):
+    """Token'a ait portföyü getir."""
+    path = _pf_path(token)
+    if not path:
+        return safe_json({"error": "Geçersiz token"}), 400
+    if not os.path.exists(path):
+        return safe_json({"error": "Portföy bulunamadı"}), 404
+    try:
+        with _PF_LOCK:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+        return safe_json(data)
+    except Exception as e:
+        logger.error("Portfolio get [%s]: %s", token, e)
+        return safe_json({"error": "Sunucu hatası"}), 500
+
+
+@app.route("/api/portfolio/<token>", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_portfolio_save(token):
+    """Token'a ait portföyü kaydet."""
+    path = _pf_path(token)
+    if not path:
+        return safe_json({"error": "Geçersiz token"}), 400
+
+    # Content-Length kontrolü — büyük payload'ları reddet
+    cl = request.content_length
+    if cl and cl > _PF_MAX_BYTES:
+        return safe_json({"error": "Veri çok büyük"}), 413
+    raw = request.get_data()
+    if len(raw) > _PF_MAX_BYTES:
+        return safe_json({"error": "Veri çok büyük"}), 413
+
+    try:
+        body = json.loads(raw)
+    except (ValueError, TypeError):
+        return safe_json({"error": "Geçersiz JSON"}), 400
+
+    positions = body.get("positions", [])
+    if not isinstance(positions, list):
+        return safe_json({"error": "positions listesi gerekli"}), 400
+    if len(positions) > _PF_MAX_ENTRIES:
+        return safe_json({"error": f"Maksimum {_PF_MAX_ENTRIES} pozisyon izin verilir"}), 400
+
+    # Sadece izin verilen alanları kaydet (injection güvenliği)
+    ALLOWED = {"id","ticker","name","buy_price","quantity","date","note","sector"}
+    clean = []
+    for p in positions:
+        if not isinstance(p, dict):
+            continue
+        entry = {k: v for k, v in p.items() if k in ALLOWED}
+        # Tip güvenliği: fiyat ve miktar sayısal olmalı
+        if "buy_price" in entry:
+            try: entry["buy_price"] = float(entry["buy_price"])
+            except (ValueError, TypeError): entry["buy_price"] = 0.0
+        if "quantity" in entry:
+            try: entry["quantity"] = float(entry["quantity"])
+            except (ValueError, TypeError): entry["quantity"] = 0.0
+        # String alanları kırp
+        for k in ("ticker","name","date","note","sector"):
+            if k in entry and isinstance(entry[k], str):
+                entry[k] = entry[k][:200]
+        clean.append(entry)
+
+    payload = {
+        "positions":   clean,
+        "updated_at":  datetime.now().isoformat(),
+        "count":       len(clean),
+    }
+
+    try:
+        with _PF_LOCK:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(payload, f, ensure_ascii=False)
+        return safe_json({"ok": True, "count": len(clean)})
+    except Exception as e:
+        logger.error("Portfolio save [%s]: %s", token, e)
+        return safe_json({"error": "Sunucu hatası"}), 500
+
+
 # ── Backtest / Sinyal Performansı ─────────────────────────────────────────────
 def _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, i):
     """i. bar için sinyal hesapla."""

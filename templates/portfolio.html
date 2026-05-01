@@ -186,9 +186,55 @@
     <button class="btn-action danger" onclick="clearPortfolio()" title="Tüm pozisyonları sil">
       🗑 Temizle
     </button>
-    <span style="font-size:11px;color:#484f58;margin-left:auto">
-      ⚠️ Veriler yalnızca bu tarayıcıda saklanır
-    </span>
+    <!-- Cloud Sync -->
+    <button class="btn-action" id="cloudBtn" onclick="openCloudSync()"
+      style="margin-left:auto;background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#93c5fd"
+      title="Cihazlar arası senkronizasyon">
+      ☁ Cloud Sync
+    </button>
+  </div>
+
+  <!-- Cloud Sync Modal -->
+  <div id="cloudModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center">
+    <div style="background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;max-width:440px;width:90%;position:relative">
+      <button onclick="closeCloudSync()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#8b949e;font-size:18px;cursor:pointer">×</button>
+      <div style="font-size:16px;font-weight:700;color:#f0f6fc;margin-bottom:6px">☁ Cloud Sync</div>
+      <div style="font-size:12px;color:#8b949e;margin-bottom:16px">Portföyünüzü sunucuya kaydedin — farklı cihazlardan erişin veya bağlantıyla paylaşın.</div>
+      <!-- Yeni oluştur / var olan token -->
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button onclick="createCloudToken()" style="flex:1;background:#1f6feb;color:#fff;border:none;padding:8px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">
+          + Yeni Oluştur
+        </button>
+        <div style="flex:2;display:flex;gap:6px">
+          <input id="cloudTokenInput" type="text" placeholder="Token girin (XXXX-XXXX-...)"
+            style="flex:1;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:7px 10px;border-radius:7px;font-size:12px;font-family:monospace;outline:none;min-width:0">
+          <button onclick="loadCloudToken()" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:7px 12px;border-radius:7px;font-size:12px;cursor:pointer">Yükle</button>
+        </div>
+      </div>
+      <!-- Aktif token göster -->
+      <div id="cloudActiveSection" style="display:none">
+        <div style="font-size:11px;color:#8b949e;margin-bottom:6px">Aktif Token:</div>
+        <div style="display:flex;gap:8px;align-items:center;background:#0d1117;border:1px solid #30363d;border-radius:7px;padding:8px 12px;margin-bottom:12px">
+          <code id="cloudActiveToken" style="font-size:12px;color:#58a6ff;flex:1;word-break:break-all"></code>
+          <button onclick="copyCloudLink()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:14px" title="Kopyala">📋</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="saveToCloud()" style="flex:1;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);color:#3fb950;padding:8px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">
+            ⬆ Sunucuya Kaydet
+          </button>
+          <button onclick="loadFromCloud()" style="flex:1;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.15);color:#58a6ff;padding:8px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">
+            ⬇ Sunucudan Yükle
+          </button>
+          <button onclick="forgetCloudToken()" style="background:none;border:1px solid #30363d;color:#8b949e;padding:8px 10px;border-radius:7px;font-size:12px;cursor:pointer" title="Token'ı unut (yerel portföy kalır)">
+            ✕ Unut
+          </button>
+        </div>
+      </div>
+      <div id="cloudMsg" style="font-size:12px;color:#8b949e;margin-top:10px;min-height:18px"></div>
+      <div style="font-size:11px;color:#484f58;margin-top:14px;padding-top:10px;border-top:1px solid #21262d">
+        ⚠️ Token herkese açık bir şifre gibidir — paylaşmamanızı öneririz. Kişisel veri kaydedilmez (isim, e-posta yok).
+      </div>
+    </div>
   </div>
 
   <!-- Toast bildirimi -->
@@ -489,6 +535,131 @@ document.getElementById('addTicker').addEventListener('input', e => {
 render();
 fetchLive();
 setInterval(fetchLive, 60000);
+
+/* ── Cloud Sync ───────────────────────────────── */
+const CLOUD_TOKEN_KEY = 'bp_cloud_token';
+
+function openCloudSync() {
+  const modal = document.getElementById('cloudModal');
+  modal.style.display = 'flex';
+  const saved = localStorage.getItem(CLOUD_TOKEN_KEY);
+  if (saved) _showActiveToken(saved);
+  else document.getElementById('cloudActiveSection').style.display = 'none';
+  document.getElementById('cloudMsg').textContent = '';
+}
+function closeCloudSync() {
+  document.getElementById('cloudModal').style.display = 'none';
+}
+
+function _showActiveToken(token) {
+  document.getElementById('cloudActiveToken').textContent = token;
+  document.getElementById('cloudActiveSection').style.display = '';
+}
+
+async function createCloudToken() {
+  _setCloudMsg('Oluşturuluyor…', '#8b949e');
+  try {
+    const res  = await fetch('/api/portfolio/new', {method:'POST'});
+    const data = await res.json();
+    if (!data.token) throw new Error('no token');
+    localStorage.setItem(CLOUD_TOKEN_KEY, data.token);
+    _showActiveToken(data.token);
+    // Auto-save current portfolio
+    await saveToCloud(true);
+    _setCloudMsg('Token oluşturuldu ve portföy kaydedildi!', '#3fb950');
+  } catch(e) {
+    _setCloudMsg('Hata: ' + e.message, '#f85149');
+  }
+}
+
+async function loadCloudToken() {
+  const input = document.getElementById('cloudTokenInput');
+  const token = (input.value || '').trim();
+  if (!token) { _setCloudMsg('Token girin.', '#f85149'); return; }
+  _setCloudMsg('Yükleniyor…', '#8b949e');
+  try {
+    const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`);
+    if (!res.ok) { _setCloudMsg('Token bulunamadı.', '#f85149'); return; }
+    const data = await res.json();
+    if (!data.positions) { _setCloudMsg('Geçersiz portföy verisi.', '#f85149'); return; }
+    localStorage.setItem(CLOUD_TOKEN_KEY, token);
+    _showActiveToken(token);
+    // Merge positions
+    data.positions.forEach(p => {
+      const exists = portfolio.some(x => x.ticker === p.ticker && +x.buy_price === +p.buy_price && x.date === p.date);
+      if (!exists) portfolio.push({...p, id: Date.now() + Math.random()});
+    });
+    save(); render();
+    _setCloudMsg(`Yüklendi! ${data.positions.length} pozisyon.`, '#3fb950');
+    input.value = '';
+  } catch(e) {
+    _setCloudMsg('Hata: ' + e.message, '#f85149');
+  }
+}
+
+async function saveToCloud(silent) {
+  const token = localStorage.getItem(CLOUD_TOKEN_KEY);
+  if (!token) { _setCloudMsg('Önce token oluşturun.', '#f85149'); return; }
+  if (!silent) _setCloudMsg('Kaydediliyor…', '#8b949e');
+  try {
+    const res = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({positions: portfolio}),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      if (!silent) _setCloudMsg(`Kaydedildi! ${data.count} pozisyon.`, '#3fb950');
+    } else {
+      _setCloudMsg('Kayıt hatası: ' + (data.error || '?'), '#f85149');
+    }
+  } catch(e) {
+    _setCloudMsg('Hata: ' + e.message, '#f85149');
+  }
+}
+
+async function loadFromCloud() {
+  const token = localStorage.getItem(CLOUD_TOKEN_KEY);
+  if (!token) { _setCloudMsg('Önce token oluşturun.', '#f85149'); return; }
+  _setCloudMsg('Yükleniyor…', '#8b949e');
+  try {
+    const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`);
+    if (!res.ok) { _setCloudMsg('Token bulunamadı.', '#f85149'); return; }
+    const data = await res.json();
+    if (!data.positions) { _setCloudMsg('Geçersiz portföy.', '#f85149'); return; }
+    portfolio = data.positions.map(p => ({...p, id: p.id || (Date.now() + Math.random())}));
+    save(); render();
+    _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.`, '#3fb950');
+  } catch(e) {
+    _setCloudMsg('Hata: ' + e.message, '#f85149');
+  }
+}
+
+function forgetCloudToken() {
+  localStorage.removeItem(CLOUD_TOKEN_KEY);
+  document.getElementById('cloudActiveSection').style.display = 'none';
+  document.getElementById('cloudTokenInput').value = '';
+  _setCloudMsg('Token unutuldu (portföy bu cihazda korunuyor).', '#8b949e');
+}
+
+function copyCloudLink() {
+  const token = localStorage.getItem(CLOUD_TOKEN_KEY);
+  if (!token) return;
+  navigator.clipboard.writeText(token).then(
+    () => _setCloudMsg('Token kopyalandı!', '#3fb950'),
+    () => _setCloudMsg('Kopyalama başarısız.', '#f85149')
+  );
+}
+
+function _setCloudMsg(msg, color) {
+  const el = document.getElementById('cloudMsg');
+  if (el) { el.textContent = msg; el.style.color = color || '#8b949e'; }
+}
+
+// Close modal on overlay click
+document.getElementById('cloudModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCloudSync();
+});
 </script>
 </body>
 </html>
