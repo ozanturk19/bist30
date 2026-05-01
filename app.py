@@ -3705,8 +3705,17 @@ def api_market_news():
             else:
                 continue   # BEKLE hisselerini listeye alma
 
-        # Snippet: 200 karakter — cümle ortasında kesmemek için kelime sınırına kadar al
-        snippet = text if len(text) <= 200 else text[:200].rsplit(" ", 1)[0] + "…"
+        # Snippet: gereksiz giriş cümlelerini temizle, 200 karakter kes
+        _skip_prefixes = (
+            "aşağıda", "işte", "here are", "here is", "below are",
+            "son 7 gün", "son yedi gün", "belirtmek gerekir",
+        )
+        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        # İlk satır boş veya haber maddesine benzemeyen giriş ise atla
+        if lines and any(lines[0].lower().startswith(p) for p in _skip_prefixes):
+            lines = lines[1:]
+        clean = " ".join(lines).strip()
+        snippet = clean if len(clean) <= 220 else clean[:220].rsplit(" ", 1)[0] + "…"
 
         results.append({
             "ticker":      t,
