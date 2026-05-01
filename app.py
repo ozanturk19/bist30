@@ -3572,6 +3572,8 @@ def sitemap():
     pages.append({"loc": "/sinyal-performans",  "priority": "0.7", "changefreq": "weekly"})
     pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
     pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "weekly"})
+    pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
+    pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly"})
     for a in ARTICLES:
         pages.append({"loc": f"/blog/{a['slug']}", "priority": "0.7", "changefreq": "monthly"})
     today = date.today().isoformat()
@@ -3802,6 +3804,21 @@ def ozet_gecmis(tarih):
         new_signals=new_signals, today_str=snap.get("date_tr", tarih),
         stock_names=STOCK_NAMES,
         historical_date=tarih)
+
+
+@app.route("/api/ozet/snapshots")
+def api_ozet_snapshots():
+    """Mevcut geçmiş özet tarihlerini listele."""
+    try:
+        files = sorted([
+            f.replace(".json", "")
+            for f in os.listdir(_SNAPSHOTS_DIR)
+            if re.match(r"^\d{4}-\d{2}-\d{2}\.json$", f)
+        ], reverse=True)
+        return safe_json({"dates": files[:90]})  # Son 90 gün max
+    except Exception as e:
+        logger.error("Snapshot list: %s", e)
+        return safe_json({"dates": []})
 
 
 # ── Günlük Özet Sayfası ───────────────────────────────────────────────────────

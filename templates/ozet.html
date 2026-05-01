@@ -188,11 +188,37 @@
     </svg>
     BorsaPusula
   </a>
-  <div>
+  <div style="flex:1;min-width:0">
     <div class="page-title">📊 Günlük Sinyal Özeti</div>
     <div class="page-sub">{{ today_str }}{% if updated_at %} · Son güncelleme: {{ updated_at }}{% endif %}</div>
   </div>
+  <!-- Geçmiş tarih seçici -->
+  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+    <select id="dateSelector"
+      style="background:#1a2438;border:1px solid #1e2d45;color:#94a3b8;padding:5px 8px;border-radius:6px;font-size:12px;cursor:pointer;outline:none"
+      onchange="goToDate(this.value)">
+      <option value="">📅 Geçmiş Özet</option>
+    </select>
+  </div>
 </header>
+<script>
+// Load available snapshot dates for the selector
+fetch('/api/ozet/snapshots').then(r=>r.json()).then(d=>{
+  const sel = document.getElementById('dateSelector');
+  if (!sel || !d.dates) return;
+  d.dates.forEach(date => {
+    const o = document.createElement('option');
+    o.value = date;
+    // Format: 2026-05-01 → 01.05.2026
+    const [y,m,dd] = date.split('-');
+    o.textContent = `${dd}.${m}.${y}`;
+    sel.appendChild(o);
+  });
+}).catch(()=>{});
+function goToDate(date) {
+  if (date) window.location.href = '/ozet/' + date;
+}
+</script>
 
 <div class="container">
 
