@@ -270,6 +270,7 @@
     body { padding-bottom: 64px; }
     .alarm-fab { bottom: 80px !important; }
     .alarm-panel { bottom: 80px !important; }
+    .sub-toast { bottom: 150px; }
   }
 
   /* Stats bar */
@@ -926,6 +927,43 @@
   }
   .ap-pa-clear:hover { color:var(--bp-sat); }
   @media(max-width:400px) { .alarm-panel { width:calc(100vw - 16px); right:8px; } }
+  /* ── Sticky subscription toast ── */
+  .sub-toast {
+    position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px);
+    z-index:997; width:min(420px, calc(100vw - 32px));
+    background:linear-gradient(135deg,#111827,#0f1e34);
+    border:1px solid rgba(59,130,246,.35); border-radius:14px;
+    padding:16px 18px; box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(59,130,246,.1);
+    opacity:0; pointer-events:none;
+    transition:opacity .35s ease,transform .35s ease;
+  }
+  .sub-toast.visible {
+    opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;
+  }
+  .sub-toast-close {
+    position:absolute; top:10px; right:12px; background:none; border:none;
+    color:#64748b; font-size:18px; cursor:pointer; line-height:1; padding:2px 4px;
+    transition:color .15s;
+  }
+  .sub-toast-close:hover { color:#94a3b8; }
+  .sub-toast-title { font-size:13px; font-weight:700; color:#e2e8f0; margin-bottom:3px; }
+  .sub-toast-sub   { font-size:11px; color:#64748b; margin-bottom:12px; line-height:1.5; }
+  .sub-toast-row   { display:flex; gap:8px; }
+  .sub-toast-input {
+    flex:1; background:#1a2438; border:1px solid #1e2d45; color:#e2e8f0;
+    padding:7px 12px; border-radius:7px; font-size:13px; outline:none; min-width:0;
+    font-family:inherit; transition:border-color .15s;
+  }
+  .sub-toast-input:focus { border-color:#3b82f6; }
+  .sub-toast-btn {
+    background:#1f6feb; color:#fff; border:none; padding:7px 16px; border-radius:7px;
+    font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; white-space:nowrap;
+    transition:background .15s;
+  }
+  .sub-toast-btn:hover { background:#388bfd; }
+  .sub-toast-benefits { display:flex; gap:14px; margin-bottom:10px; flex-wrap:wrap; }
+  .sub-toast-benefit  { display:flex; align-items:center; gap:5px; font-size:11px; color:#94a3b8; }
+
   .alarm-fab {
     position:fixed; bottom:24px; right:24px; z-index:998;
     background:#1f6feb; border:none; border-radius:50%; width:48px; height:48px;
@@ -1441,6 +1479,24 @@
   </div>
   <div class="ap-footer" id="apFooter">
     Sinyal değişince tarayıcı bildirimi gönderilir.
+  </div>
+</div>
+
+<!-- ── Sticky Subscription Toast ── -->
+<div class="sub-toast" id="subToast" role="dialog" aria-label="E-posta aboneliği">
+  <button class="sub-toast-close" onclick="dismissSubToast()" title="Kapat" aria-label="Kapat">×</button>
+  <div class="sub-toast-title">📬 Günlük Sinyal Özeti Al</div>
+  <div class="sub-toast-sub">Her gün piyasa kapanışında önemli sinyal değişikliklerini e-posta ile al.</div>
+  <div class="sub-toast-benefits">
+    <span class="sub-toast-benefit">✓ Ücretsiz</span>
+    <span class="sub-toast-benefit">✓ Günde 1 e-posta</span>
+    <span class="sub-toast-benefit">✓ İstediğin zaman çık</span>
+  </div>
+  <div class="sub-toast-row" id="subToastForm">
+    <input id="subToastEmail" type="email" class="sub-toast-input" placeholder="e-posta adresiniz"
+      onkeydown="if(event.key==='Enter')submitToastSubscribe()"
+      aria-label="E-posta adresi">
+    <button class="sub-toast-btn" onclick="submitToastSubscribe()">Abone Ol</button>
   </div>
 </div>
 
@@ -2762,6 +2818,81 @@ function showToast(msg) {
 }
 
 updateFabBadge();
+
+/* ── Sticky Subscription Toast ──────────────────── */
+(function() {
+  const KEY = 'bp_sub_dismissed_v2';
+  const DELAY_MS = 25000; // 25 saniye
+  function shouldShow() {
+    try {
+      const v = localStorage.getItem(KEY);
+      if (!v) return true;
+      const ts = parseInt(v, 10);
+      // 7 gün sonra tekrar göster
+      return (Date.now() - ts) > 7 * 24 * 3600 * 1000;
+    } catch(e) { return false; }
+  }
+  if (shouldShow()) {
+    let shown = false;
+    const show = () => {
+      if (shown) return;
+      shown = true;
+      const el = document.getElementById('subToast');
+      if (el) { el.classList.add('visible'); }
+    };
+    // Zamanlayıcı ile göster
+    const timer = setTimeout(show, DELAY_MS);
+    // Veya %40 scroll ile göster
+    const onScroll = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      if (h > 0 && window.scrollY / h >= 0.4) {
+        clearTimeout(timer);
+        show();
+        window.removeEventListener('scroll', onScroll);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+})();
+
+function dismissSubToast() {
+  const el = document.getElementById('subToast');
+  if (el) { el.classList.remove('visible'); }
+  try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) {}
+}
+
+async function submitToastSubscribe() {
+  const emailEl = document.getElementById('subToastEmail');
+  const email   = emailEl ? emailEl.value.trim() : '';
+  if (!email || !email.includes('@')) {
+    if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
+    return;
+  }
+  const btn = document.querySelector('#subToastForm button');
+  if (btn) { btn.textContent = 'Kaydediliyor…'; btn.disabled = true; }
+  try {
+    const res  = await fetch('/api/subscribe', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email }),
+    });
+    const json = await res.json();
+    const toast = document.getElementById('subToast');
+    if (json.ok) {
+      if (toast) toast.innerHTML = '<div style="font-size:13px;color:#3fb950;font-weight:600;padding:4px 0">✅ ' + (json.message || 'Abone oldunuz!') + '</div><div style="font-size:11px;color:#64748b;margin-top:4px">Onay e-postası gönderildi.</div>';
+      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) {}
+      setTimeout(() => dismissSubToast(), 4000);
+      // Ana subscription bar'ı da güncelle
+      const bar = document.getElementById('subscribeBar');
+      if (bar) bar.innerHTML = '<div style="font-size:13px;color:#3fb950;font-weight:600">✅ ' + (json.message || 'Abone oldunuz!') + '</div>';
+    } else {
+      showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'));
+      if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
+    }
+  } catch(e) {
+    showToast('Bağlantı hatası, tekrar deneyin.');
+    if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
+  }
+}
 
 /* ── E-posta Abone Formu ─────────────────────────── */
 async function submitSubscribe() {
