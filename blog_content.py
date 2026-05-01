@@ -3123,6 +3123,328 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'SASA', 'EREGL']
   },
 
+  # ── ARTICLE 56 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "altin-mi-borsa-mi-doviz-mi",
+    "title": "Altın mı, Borsa mı, Döviz mi? 2026 Yatırım Karşılaştırması",
+    "desc": "Altın, BIST hisseleri ve dolar/euro arasında hangisi daha karlı? Türkiye'de en iyi yatırım aracı nedir? 2026 için kapsamlı karşılaştırma ve strateji rehberi.",
+    "cat": "Strateji",
+    "date": "01.05.2026",
+    "mins": 7,
+    "body": """
+<p>Türk yatırımcısının en sık sorduğu soru: "Paramı nereye yatırmalıyım?" Altın, borsa ve döviz — her birinin güçlü ve zayıf yönleri var. Bu rehberde her üç seçeneği çeşitli kriterlerle karşılaştırıyor ve 2026 koşullarında değerlendiriyoruz.</p>
+
+<h2>Hızlı Karşılaştırma Tablosu</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Kriter</th>
+    <th style="padding:8px 12px;text-align:center;font-size:12px;color:#e3b341">🥇 Altın</th>
+    <th style="padding:8px 12px;text-align:center;font-size:12px;color:#3fb950">📈 Borsa</th>
+    <th style="padding:8px 12px;text-align:center;font-size:12px;color:#58a6ff">💵 Döviz</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Enflasyon Koruması</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Güçlü</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Orta-Güçlü</td>
+      <td style="padding:8px 12px;text-align:center;color:#e3b341">⚠️ Değişken</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Uzun Vade Getiri Potansiyeli</td>
+      <td style="padding:8px 12px;text-align:center;color:#e3b341">⚠️ Orta</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Yüksek</td>
+      <td style="padding:8px 12px;text-align:center;color:#f85149">❌ Düşük</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Likidite (Paraya Çevirme)</td>
+      <td style="padding:8px 12px;text-align:center;color:#e3b341">⚠️ Orta</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Yüksek</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Yüksek</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Volatilite / Risk</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">Düşük-Orta</td>
+      <td style="padding:8px 12px;text-align:center;color:#e3b341">Orta-Yüksek</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">Düşük-Orta</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Temettü / Düzenli Gelir</td>
+      <td style="padding:8px 12px;text-align:center;color:#f85149">❌ Yok</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Var (bazı hisseler)</td>
+      <td style="padding:8px 12px;text-align:center;color:#f85149">❌ Yok</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;font-weight:600">Kriz Döneminde Güvenli Liman</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Güçlü</td>
+      <td style="padding:8px 12px;text-align:center;color:#f85149">❌ Zayıf</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Güçlü (USD)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Altın: Güvenli Liman mı, Fırsatçı Yatırım mı?</h2>
+<p>Türkiye'de altın tarihsel olarak en güvenilen tasarruf aracı olmuştur. TL'deki değer kaybına karşı güçlü bir koruma sağlamıştır.</p>
+<ul>
+  <li><strong>Avantajları:</strong> Kriz dönemlerinde değer kazanır, global para birimi gibi davranır, enflasyona karşı uzun vadede iyi korur</li>
+  <li><strong>Dezavantajları:</strong> Düzenli gelir (temettü/faiz) üretmez, fiziksel saklama maliyeti, kısa vadede negatif getiri dönemleri olabilir</li>
+  <li><strong>2026 görünümü:</strong> Yüksek faiz ortamında baskı altında olabilir; jeopolitik riskler ve merkez bankası alımları destek verir</li>
+</ul>
+
+<h2>BIST Hisseleri: Yüksek Risk, Yüksek Ödül</h2>
+<p>BIST100, uzun vadede Türk yatırımcısının en yüksek reel getiriyi elde ettiği araç olmuştur — ama bu getiri ciddi volatiliteyle gelir.</p>
+<ul>
+  <li><strong>Avantajları:</strong> Uzun vadede en yüksek getiri potansiyeli, temettü geliri, ekonomik büyümeden pay alma</li>
+  <li><strong>Dezavantajları:</strong> Yüksek volatilite, siyasi riskler, TCMB öngörülemezliği, sektörel konsantrasyon</li>
+  <li><strong>2026 görünümü:</strong> Güçlü bilanço döngüsü ve ihracatçı şirketler olumlu; faiz riski bankacılık için izlenmeli</li>
+</ul>
+
+<h2>Döviz: Korunma mı, Yatırım mı?</h2>
+<p>Dolar ve euro Türk tasarrufçu için başlıca hedge aracıdır. Ancak dövizin kendisi üretken bir varlık değildir.</p>
+<ul>
+  <li><strong>Avantajları:</strong> TL değer kaybına karşı anlık koruma, çok likit, küresel varlıklara kapı</li>
+  <li><strong>Dezavantajları:</strong> Reel getiri üretmez, mevduatta düşük faiz, kur müdahalesi riski</li>
+  <li><strong>2026 görünümü:</strong> Enflasyon ile değer erozyonu; dolar bazlı yatırımlara kapı açar</li>
+</ul>
+
+<h2>Karma Portföy: En Akıllıca Yaklaşım</h2>
+<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#58a6ff">💡 Türk yatırımcısı için örnek karma portföy:</strong>
+  <ul style="margin:8px 0 0 0">
+    <li>%40 BIST hisseleri (teknik sinyal + temel filtre)</li>
+    <li>%25 Altın (kriz tamponu)</li>
+    <li>%20 Döviz / Dövizli mevduat</li>
+    <li>%15 Nakit / TL araçlar</li>
+  </ul>
+  <p style="font-size:11px;color:#64748b;margin-top:8px">Bu yalnızca örnek dağılımdır, kişisel mali durumunuza ve risk toleransınıza göre ayarlamalısınız. Yatırım tavsiyesi değildir.</p>
+</div>
+
+<h2>BorsaPusula ile BIST Sinyallerini Takip Et</h2>
+<p>Portföyünüzün borsa bölümü için BorsaPusula'nın algoritmik sinyal sistemi kullanılabilir. AL sinyalindeki BIST100 hisseleri gerçek zamanlı takip edilir, giriş kalitesi ve SL/TP seviyeleri gösterilir.</p>
+""",
+    "faqs": [
+      {"q": "Türkiye'de en güvenli yatırım aracı hangisi?",
+       "a": "Kısa vadede 'en güvenli' genellikle mevduat veya dövizdir. Uzun vadede ise altın ve seçici hisse portföyü tarihsel olarak enflasyonun üzerinde getiri sağlamıştır. Güvenli limana ihtiyaç duyduğunuzda altın ve döviz; büyüme için borsayı değerlendirin."},
+      {"q": "Altın mı borsa mı daha çok kazandırır?",
+       "a": "20-30 yıllık perspektifte küresel borsa endeksleri genellikle altını geride bırakmıştır. Türkiye özelinde ise kriz dönemlerinde altın çok iyi performans göstermiştir. 'Hangisi daha iyi?' sorusunun cevabı dönemden ve yatırım horizonundan bağımsız değildir."},
+      {"q": "Dolar almak hâlâ mantıklı mı?",
+       "a": "Dolar TL değer kaybına karşı koruma sağlar ama uzun vadede enflasyon etkisi doların reel değerini de aşındırır. Döviz tutmak bir koruma aracı olarak mantıklıdır; ancak yalnızca dövizde durmak uzun vadede reel getiri açısından zayıf kalabilir."},
+      {"q": "BorsaPusula bu kararımda nasıl yardımcı olur?",
+       "a": "BorsaPusula portföyünüzün BIST hissesi bölümü için algoritmik sinyal üretir. Altın ve döviz fiyatlarını makro ticker'da, altın ve gümüş teknik analizini /emtialar sayfasında bulabilirsiniz. Kripto varlıklar /kripto sayfasında takip edilmektedir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'KCHOL']
+  },
+
+  # ── ARTICLE 57 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "bist100-temettü-hisseleri-2026",
+    "title": "BIST100 Temettü Hisseleri 2026: Düzenli Gelir İçin Rehber",
+    "desc": "BIST100'de en yüksek temettü verimine sahip hisseler hangileri? Temettü yatırımı nasıl yapılır, ne zaman alınır, vergi avantajları nelerdir? 2026 rehberi.",
+    "cat": "Temel Analiz",
+    "date": "01.05.2026",
+    "mins": 7,
+    "body": """
+<p>Temettü (dividant) yatırımı, hisse senedini yalnızca fiyat artışından değil, düzenli nakit akışından da kazanmak için kullanılan stratejidir. BIST'te bazı şirketler her yıl yüksek oranlarda kâr payı dağıtır; bu da temettü yatırımcısı için önemli bir gelir kaynağı olur.</p>
+
+<h2>Temettü Verimi Nedir?</h2>
+<p>Temettü verimi (dividend yield), hisse başına ödenen yıllık temettünün hisse fiyatına bölünmesiyle hesaplanır:</p>
+<div style="background:#1a2438;border:1px solid #1e2d45;border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:15px;font-weight:700;color:#58a6ff">
+  Temettü Verimi = (Hisse Başı Temettü ÷ Hisse Fiyatı) × 100
+</div>
+<p>Örnek: Hissesi 50 TL olan bir şirket 5 TL temettü ödüyorsa temettü verimi %10 olur.</p>
+
+<h2>BIST'te Yüksek Temettü Verimiyle Öne Çıkan Sektörler</h2>
+<p>BIST'te en yüksek temettü verimini genellikle şu sektörler sunar:</p>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Sektör</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Temettü Potansiyeli</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Önemli Hisseler</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Bankacılık</td>
+      <td style="padding:8px 12px;color:#3fb950">Yüksek (BDDK sınırlı yıllarda orta)</td>
+      <td style="padding:8px 12px">AKBNK, GARAN, ISCTR</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Holding</td>
+      <td style="padding:8px 12px;color:#e3b341">Orta-Yüksek</td>
+      <td style="padding:8px 12px">KCHOL, SAHOL</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Perakende</td>
+      <td style="padding:8px 12px;color:#3fb950">Yüksek (büyük zincirler)</td>
+      <td style="padding:8px 12px">BIMAS, MGROS</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Enerji</td>
+      <td style="padding:8px 12px;color:#e3b341">Dönemsel</td>
+      <td style="padding:8px 12px">TUPRS, ENJSA</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;font-weight:600">Sanayi / İhracat</td>
+      <td style="padding:8px 12px;color:#e3b341">Orta</td>
+      <td style="padding:8px 12px">EREGL, FROTO</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Temettü Yatırımı Nasıl Yapılır?</h2>
+
+<h3>1. Temettü Tarihleri</h3>
+<ul>
+  <li><strong>Genel Kurul tarihi:</strong> Temettü dağıtım kararı burada alınır</li>
+  <li><strong>Temettü kesim tarihi:</strong> Bu tarihte hisseye sahip olanlar temettü alır</li>
+  <li><strong>Temettü ödeme tarihi:</strong> Hesabınıza yatar</li>
+  <li>Temettüyü almak için <strong>kesim tarihinden bir gün önce</strong> hisseye sahip olmalısınız</li>
+</ul>
+
+<h3>2. Temettü Sonrası Fiyat Düşüşü</h3>
+<div style="background:rgba(227,179,65,.07);border:1px solid rgba(227,179,65,.2);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#e3b341">⚠️ Önemli:</strong> Temettü kesim tarihi sabahında hisse fiyatı genellikle ödenen temettü kadar düşer. Örneğin 50 TL'lik hisse 5 TL temettü ödediğinde, ertesi gün ~45 TL'den açılır. Temettü için satın alıp hemen satmak anlamsızdır.
+</div>
+
+<h3>3. Temettü Vergi Avantajı</h3>
+<p>Türkiye'de gerçek kişilerin BIST hisselerinden aldığı temettü üzerinde <strong>%15 stopaj</strong> uygulanır. Ancak bu stopaj nihaidir; ayrıca beyan gerekmiyor (belirli limitlerde).</p>
+
+<h2>Teknik Sinyal + Temettü Kombinasyonu</h2>
+<p>BorsaPusula'nın önerilen yaklaşımı:</p>
+<ol>
+  <li>Yüksek temettü verimi olan BIST hisselerini temel analiz kısmından listele</li>
+  <li>Sinyal "AL" durumuna geçtiğinde giriş noktasını değerlendir</li>
+  <li>Güçlü trend + yüksek temettü = dual kaynak: fiyat artışı + temettü geliri</li>
+</ol>
+
+<h2>Temettü Yatırımının Riskleri</h2>
+<ul>
+  <li><strong>Temettü kesme riski:</strong> Şirket kötü yıl geçirirse temettü ödemeyebilir</li>
+  <li><strong>Yüksek verim tuzağı:</strong> Çok yüksek temettü verimi bazen şirket sorunlarını yansıtabilir (fiyat çok düşmüş)</li>
+  <li><strong>Enflasyon etkisi:</strong> TL temettü, dolar bazında değer kaybedebilir</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "Temettü almak için ne kadar süre hisse tutmak gerekiyor?",
+       "a": "Sadece temettü kesim tarihinde (T-2 iş günü öncesi) hisseye sahip olmanız yeterlidir. Ertesi gün satsanız da temettü hakkı kazanırsınız. Ancak fiyat genellikle temettü miktarı kadar düşer, bu yüzden kısa vadeli 'temettü avı' pratikte kazançlı değildir."},
+      {"q": "BIST'te en yüksek temettü verimine hangi sektörler sahip?",
+       "a": "Tarihsel olarak bankacılık (AKBNK, GARAN), perakende zincirler (BIMAS, MGROS) ve büyük holdinglerden (KCHOL) düzenli yüksek temettü ödemeleri gelmiştir. Ancak her yıl değişebilir; güncel KAP bildirimlerini ve analist beklentilerini takip edin."},
+      {"q": "Temettü sonrası hisse düşüyor mu?",
+       "a": "Evet, temettü kesim tarihi sabahı hisse fiyatı ödenen temettü kadar teorik olarak düşer. Bu 'temettü düzeltmesi'dir ve normaldir. Uzun vadeli yatırımcı için bu düşüş önemli değildir; şirketin temettüyü büyütme kapasitesi daha önemlidir."},
+      {"q": "BorsaPusula temettü verilerini nerede görebilirim?",
+       "a": "BorsaPusula'da her hisse sayfasında temel analiz bölümünde temettü verimi, hisse başı kazanç ve diğer oranlar görüntülenmektedir. Temettü ödemeleri Bilanço Takvimi sayfasında da yer almaktadır."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'BIMAS', 'KCHOL', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 58 ─────────────────────────────────────────────────────────────
+  {
+    "slug": "kripto-para-mi-borsa-mi",
+    "title": "Kripto Para mı, Borsa mı? Risk ve Getiri Karşılaştırması",
+    "desc": "Bitcoin vs BIST hisseleri: hangisi daha karlı, hangisi daha riskli? Volatilite, düzenleme, likidite ve vergi açısından kapsamlı karşılaştırma.",
+    "cat": "Strateji",
+    "date": "01.05.2026",
+    "mins": 6,
+    "body": """
+<p>Özellikle genç yatırımcılar için "kripto mu, borsa mı?" sorusu giderek daha önemli hale geliyor. Her ikisi de yüksek getiri potansiyeli sunarken çok farklı risk profilleri taşıyor. Bu rehberde iki dünya arasındaki temel farkları ele alıyoruz.</p>
+
+<h2>Temel Karşılaştırma</h2>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <thead><tr style="background:#1e2d45">
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Kriter</th>
+    <th style="padding:8px 12px;text-align:center;font-size:12px;color:#f59e0b">₿ Bitcoin/Kripto</th>
+    <th style="padding:8px 12px;text-align:center;font-size:12px;color:#3fb950">📈 BIST Hisseleri</th>
+  </tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Volatilite</td>
+      <td style="padding:8px 12px;text-align:center;color:#f85149">Çok Yüksek (%50-80 yıllık)</td>
+      <td style="padding:8px 12px;text-align:center;color:#e3b341">Yüksek (%20-40 yıllık)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Gerçek Değer</td>
+      <td style="padding:8px 12px;text-align:center;color:#e3b341">Tartışmalı (teknoloji değeri)</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">Şirketin kazancı, varlıkları</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">İşlem Saatleri</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">7/24</td>
+      <td style="padding:8px 12px;text-align:center;color:#e3b341">Hafta içi 10:00-18:00</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Düzenleme/Koruma</td>
+      <td style="padding:8px 12px;text-align:center;color:#f85149">Düşük (MASAK/SPK yok)</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">Yüksek (SPK, MKK, BIST)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Temettü / Pasif Gelir</td>
+      <td style="padding:8px 12px;text-align:center;color:#f85149">Yok (staking hariç)</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">Var (yüksek temettü hisseleri)</td>
+    </tr>
+    <tr style="border-bottom:1px solid #1e2d45">
+      <td style="padding:8px 12px;font-weight:600">Vergi (Türkiye 2026)</td>
+      <td style="padding:8px 12px;text-align:center;color:#f85149">%0 (henüz net değil)</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">%0 sermaye kazancı, %15 temettü</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px;font-weight:600">Uzun Vade (10 yıl) Getiri</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">Çok Yüksek (BTC 2014-2024)</td>
+      <td style="padding:8px 12px;text-align:center;color:#3fb950">Yüksek (BIST enflasyon üstü)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Bitcoin Neden Bu Kadar Volatil?</h2>
+<p>Bitcoin ve diğer kripto varlıkların yüksek volatilitesinin başlıca nedenleri:</p>
+<ul>
+  <li>Düzenleyici belirsizlik — bir haber tüm piyasayı sarsabilir</li>
+  <li>Piyasa büyüklüğü küçüklüğü — büyük kurumsal satışlar sert düşüş yaratır</li>
+  <li>Spekülatif talep — gerçek kullanım değerinden çok beklenti fiyatlanır</li>
+  <li>Kaldıraçlı işlem yaygınlığı — zorunlu tasfiyeler (liquidation) ani sert hareketler üretir</li>
+</ul>
+
+<h2>BIST Hisselerinin Kripto Karşısındaki Avantajları</h2>
+<ul>
+  <li><strong>Şirket değeri:</strong> Hisse gerçek bir şirketin varlıklarına ve kazancına dayanır</li>
+  <li><strong>SPK düzenlemesi:</strong> Hisse senetleri yasal koruma altındadır</li>
+  <li><strong>Teknik analiz:</strong> Piyasa saatleri ve düzenli veri sayesinde teknik analiz daha güvenilir çalışır</li>
+  <li><strong>Temettü:</strong> Pasif gelir imkânı sunar</li>
+</ul>
+
+<h2>Kriptoya Yatırım Yaparken Dikkat Edilmesi Gerekenler</h2>
+<div style="background:rgba(248,81,73,.07);border:1px solid rgba(248,81,73,.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:#f85149">⚠️ Risk Uyarısı:</strong>
+  <ul style="margin:8px 0 0 0">
+    <li>Kripto borsası iflasları (FTX, Celsius) tüm bakiyeyi sıfırlayabilir</li>
+    <li>Cüzdan şifresi kaybı = kalıcı kayıp</li>
+    <li>Sahte projeler (rug pull) yaygındır</li>
+    <li>Türkiye'de kripto vergi düzenlemesi hâlâ gelişiyor</li>
+  </ul>
+</div>
+
+<h2>Dengeli Yaklaşım: İkisini Birlikte Kullanmak</h2>
+<p>Birçok deneyimli yatırımcı kripto ve hisseyi kombine kullanır:</p>
+<ul>
+  <li><strong>%70-80:</strong> Düzenlenmiş varlıklar (BIST, ETF) — temel portföy</li>
+  <li><strong>%10-20:</strong> Bitcoin/Ethereum — büyüme ve çeşitlendirme</li>
+  <li><strong>%5-10:</strong> Altcoin — yüksek riskli spekülatif pozisyon</li>
+</ul>
+<p>Bu dağılım kişisel risk toleransına ve yatırım ufkuna göre önemli ölçüde farklılaşabilir.</p>
+
+<h2>BorsaPusula Kripto Teknik Analizi</h2>
+<p>BorsaPusula'nın <a href="/kripto">/kripto</a> sayfasında Bitcoin, Ethereum, BNB ve Solana için algoritmik Supertrend + ADX + EMA12/99 sinyalleri takip edilebilir.</p>
+""",
+    "faqs": [
+      {"q": "Bitcoin mi BIST hisseleri mi daha karlı?",
+       "a": "2015-2025 dönemine bakıldığında Bitcoin çok daha yüksek nominal getiri sağlamıştır; ancak çok daha yüksek volatilite ve kayıp dönemleriyle. BIST ise yüksek enflasyon dönemlerinde bile düzenlenmiş ve temettü sunan bir piyasadır. Hangisi 'daha karlı' sorusunun cevabı ölçülen döneme göre büyük değişiklik gösterir."},
+      {"q": "Türkiye'de kripto vergisi var mı?",
+       "a": "2026 itibarıyla kripto para kazancı için Türkiye'de net bir vergi düzenlemesi henüz tam oturtulamamıştır. Düzenlemenin geliştiğini takip edin. BIST hisselerinde ise sermaye kazancı stopajı %0, temettü stopajı %15'tir."},
+      {"q": "Kripto borsası güvenli mi?",
+       "a": "Merkezi kripto borsaları (Binance, Bitfinex gibi) SPK denetiminde değildir ve siz borsanın iflas riskini taşırsınız. FTX iflasında milyonlarca kullanıcı fonuna erişemedi. Donanım cüzdan kullanmak, güvenilir platformlar seçmek ve yatırım miktarını sınırlandırmak risk azaltmanın yollarıdır."},
+      {"q": "BorsaPusula kripto sinyalleri veriyor mu?",
+       "a": "Evet. BorsaPusula /kripto sayfasında Bitcoin (BTC), Ethereum (ETH), BNB ve Solana (SOL) için algoritmik Supertrend + ADX + EMA12/99 teknik analiz sinyalleri sunulmaktadır."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'KCHOL']
+  },
+
   # ── ARTICLE 51 ─────────────────────────────────────────────────────────────
   {
     "slug": "faiz-ve-borsa-iliskisi-tcmb",
