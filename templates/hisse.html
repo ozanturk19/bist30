@@ -2,6 +2,14 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WXLPNFHYLP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("js", new Date());
+  gtag("config", "G-WXLPNFHYLP");
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ ticker }} Teknik Analiz — {{ name }} Sinyal | borsapusula.com</title>
 <meta name="description" content="{{ ticker }} ({{ name }}) güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik Güçlü/Zayıf/Belirsiz trend analizi. Ücretsiz, günlük güncelleme.">
@@ -1748,6 +1756,11 @@ async function loadSignalExplanation(retryCount) {
       textEl.style.display = '';
       footerEl.style.display = '';
 
+      // GA4: sinyal açıklaması görüntülendi
+      if (typeof gtag === 'function') {
+        gtag('event', 'signal_view', { ticker: TICKER, source: data.source || 'unknown' });
+      }
+
       // Badge ve footer'ı kaynağa göre ayarla
       const isAI = data.source === 'gemini';
       if (badgeEl) {
@@ -1867,7 +1880,7 @@ async function loadKapDisclosures() {
         <div class="kap-item-top">
           <span class="kap-class-badge ${cls}">${lbl}</span>
           <span class="kap-summary">${summaryHtml}</span>
-          ${d.url ? `<a href="${d.url}" target="_blank" rel="noopener" class="kap-link-btn" title="KAP'ta aç">↗</a>` : ''}
+          ${d.url ? `<a href="${d.url}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" title="KAP'ta aç">↗</a>` : ''}
         </div>
         <div class="kap-meta">
           <span>${dateShort}</span>
@@ -1885,6 +1898,15 @@ async function loadKapDisclosures() {
     }
 
     listEl.style.display = '';
+
+    // GA4: KAP link tıklamaları (delegated)
+    listEl.addEventListener('click', function(e) {
+      const link = e.target.closest('.kap-ga-link');
+      if (link && typeof gtag === 'function') {
+        gtag('event', 'kap_click', { ticker: TICKER, class: link.dataset.cls || 'unknown' });
+      }
+    }, { once: false });
+
   } catch(e) {
     loadEl.innerHTML = '<span style="font-size:12px;color:#484f58">KAP bildirimleri yüklenemedi.</span>';
   }
