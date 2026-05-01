@@ -212,9 +212,19 @@
   .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #1e2d45; font-size:12px; height:34px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
+
+  /* Reading progress bar */
+  .read-progress {
+    position: fixed; top: 0; left: 0;
+    width: 0%; height: 3px; z-index: 9999;
+    background: linear-gradient(90deg, #1f6feb 0%, #3b82f6 50%, #7c3aed 100%);
+    will-change: width; pointer-events: none;
+    transition: width 60ms linear;
+  }
 </style>
 </head>
 <body>
+<div class="read-progress" id="readProgress"></div>
 <header>
   <a href="/blog" class="back-btn">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -376,6 +386,23 @@ function shareBlogCopy() {
     if (btn) { const t = btn.textContent; btn.textContent = '✅'; setTimeout(() => btn.textContent = t, 2000); }
   });
 }
+
+// ── Reading progress bar ─────────────────────────────────
+(function() {
+  const bar = document.getElementById('readProgress');
+  const art = document.querySelector('.prose');
+  if (!bar || !art) return;
+  function tick() {
+    const top = art.getBoundingClientRect().top + window.scrollY;
+    const h   = art.offsetHeight;
+    const scrolled = window.scrollY - top + window.innerHeight * 0.15;
+    const pct = h > 0 ? Math.min(Math.max(scrolled / h * 100, 0), 100) : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', tick, { passive: true });
+  window.addEventListener('resize', tick, { passive: true });
+  tick();
+})();
 </script>
 </body>
 </html>
