@@ -280,7 +280,7 @@
   <!-- Sonuç başlık -->
   <div class="result-header">
     <div class="result-count" id="resultCount"><strong>—</strong> sonuç</div>
-    <div style="display:flex;align-items:center;gap:8px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:12px;color:var(--text2)">Sırala:</span>
       <select class="sort-select" id="sortSel" onchange="applyFilters()">
         <option value="adx">ADX (Güçlü → Zayıf)</option>
@@ -289,6 +289,16 @@
         <option value="signal_bars">Sinyal Yaşı</option>
         <option value="vol_ratio">Hacim Oranı</option>
       </select>
+      <button onclick="exportCSV()" title="Sonuçları CSV olarak indir"
+        style="background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.3);color:#58a6ff;
+               border-radius:6px;padding:5px 11px;font-size:12px;cursor:pointer;font-family:inherit;
+               display:flex;align-items:center;gap:5px;transition:all .15s"
+        onmouseover="this.style.background='rgba(31,111,235,.2)'" onmouseout="this.style.background='rgba(31,111,235,.1)'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        CSV
+      </button>
     </div>
   </div>
 
@@ -368,6 +378,32 @@ function eqLabel(eq) {
   return {IDEAL:'İdeal',IYI:'İyi',DIKKATLI:'Dikkatli',UZAK:'Uzak'}[eq]||'';
 }
 
+let _csvData = [];
+
+function exportCSV() {
+  if (!_csvData.length) { alert('Önce filtre uygulayın.'); return; }
+  const hdr = ['Hisse','İsim','Sektör','Sinyal','ADX','Fiyat','Değişim%','Hacim Oranı','Sinyal Yaşı (gün)','Giriş Kalitesi'];
+  const rows = _csvData.map(s => [
+    s.ticker,
+    (s.name||'').replace(/"/g,"'"),
+    s.sector||'',
+    sigLabel(s.signal),
+    (s.adx||0).toFixed(1),
+    (s.price||0).toFixed(2),
+    (s.change_pct||0).toFixed(2)+'%',
+    s.vol_ratio ? '×'+s.vol_ratio.toFixed(1) : '',
+    s.signal_bars||1,
+    s.entry_quality||''
+  ].map(v => `"${v}"`).join(','));
+  const csv = [hdr.map(h=>`"${h}"`).join(','), ...rows].join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'borsapusula-tarama-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 async function loadSectors() {
   try {
     const r = await fetch('/api/tarama');
@@ -414,6 +450,7 @@ async function applyFilters() {
 }
 
 function renderResults(rows, count) {
+  _csvData = rows;
   document.getElementById('loadingDiv').style.display = 'none';
   document.getElementById('resultCount').innerHTML = `<strong>${count}</strong> sonuç`;
 
