@@ -1556,6 +1556,15 @@
         <button class="adv-chip sel-bear" data-val="overbought" onclick="setAdv('rsi','overbought',this)">Aşırı Alım ≥70</button>
       </div>
     </div>
+    <div class="adv-group">
+      <div class="adv-group-label">🎯 Giriş Kalitesi</div>
+      <div class="adv-chips" id="adv-eq">
+        <button class="adv-chip sel" data-val="all"      onclick="setAdv('eq','all',this)">Tümü</button>
+        <button class="adv-chip"     data-val="IDEAL"    onclick="setAdv('eq','IDEAL',this)">✅ İdeal</button>
+        <button class="adv-chip"     data-val="IYI"      onclick="setAdv('eq','IYI',this)">👍 İyi</button>
+        <button class="adv-chip"     data-val="DIKKATLI" onclick="setAdv('eq','DIKKATLI',this)">⚠️ Dikkatli</button>
+      </div>
+    </div>
   </div>
 
   <!-- Sektör filtreleri (dinamik olarak JS ile doldurulur) -->
@@ -2213,7 +2222,7 @@ let sortDir  = 1;
 let polling;
 
 /* Gelişmiş filtreler */
-const advFilters = { adx: 0, bars: 0, vol: 0, rsi: 'all' };
+const advFilters = { adx: 0, bars: 0, vol: 0, rsi: 'all', eq: 'all' };
 
 function toggleAdvPanel() {
   const panel = document.getElementById('advPanel');
@@ -2235,7 +2244,8 @@ function setAdv(key, val, btn) {
   btn.className = 'adv-chip sel';
   /* Aktif filtre sayısı badge */
   const active = (advFilters.adx > 0 ? 1 : 0) + (advFilters.bars > 0 ? 1 : 0)
-               + (advFilters.vol > 0 ? 1 : 0) + (advFilters.rsi !== 'all' ? 1 : 0);
+               + (advFilters.vol > 0 ? 1 : 0) + (advFilters.rsi !== 'all' ? 1 : 0)
+               + (advFilters.eq !== 'all' ? 1 : 0);
   const badge = document.getElementById('advBadge');
   badge.textContent = active;
   badge.style.display = active > 0 ? '' : 'none';
@@ -2468,7 +2478,8 @@ function getFiltered() {
     if (advFilters.rsi === 'oversold')   matchRsi = (s.rsi != null && s.rsi <= 30);
     if (advFilters.rsi === 'overbought') matchRsi = (s.rsi != null && s.rsi >= 70);
     if (advFilters.rsi === 'neutral')    matchRsi = (s.rsi != null && s.rsi > 30 && s.rsi < 70);
-    return matchFilter && matchSearch && matchSector && matchAdx && matchBars && matchVol && matchRsi;
+    const matchEq = advFilters.eq === 'all' || s.entry_quality === advFilters.eq;
+    return matchFilter && matchSearch && matchSector && matchAdx && matchBars && matchVol && matchRsi && matchEq;
   });
 }
 
@@ -2690,7 +2701,7 @@ function setSearch(v) { currentSearch = v; renderTable(); }
 function resetFilters() {
   currentSearch  = '';
   currentSector  = 'all';
-  advFilters = { adx: 0, bars: 0, vol: 0, rsi: '' };
+  advFilters = { adx: 0, bars: 0, vol: 0, rsi: 'all', eq: 'all' };
   const searchEl = document.querySelector('.search-input');
   if (searchEl) searchEl.value = '';
   document.getElementById('searchAc')?.classList.remove('open');
