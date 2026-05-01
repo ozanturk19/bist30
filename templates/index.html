@@ -1381,6 +1381,15 @@
     </div>
   </div>
 
+  <!-- ── İdeal Giriş Şeridi ──────────────────────── -->
+  <div id="idealStrip" style="display:none;background:linear-gradient(135deg,rgba(63,185,80,.06),rgba(59,130,246,.03));
+    border:1px solid rgba(63,185,80,.2);border-radius:10px;padding:9px 14px;margin-bottom:12px;
+    align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:11px;color:#3fb950;font-weight:700;white-space:nowrap;flex-shrink:0">✅ İdeal Giriş</span>
+    <div id="idealStripItems" style="display:flex;flex-wrap:wrap;gap:6px;flex:1"></div>
+    <a href="/tarama?signal=AL&min_adx=25" style="font-size:11px;color:#3b82f6;text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0">Hepsini gör →</a>
+  </div>
+
   <!-- Backtest güven rozeti -->
   <a href="/sinyal-performans" id="btTrustBadge" style="display:none;text-decoration:none;
     background:linear-gradient(135deg,rgba(63,185,80,.06),rgba(59,130,246,.04));
@@ -1677,6 +1686,10 @@
     </div>
     <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:12px">
       <a href="/ozet"             style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Günlük Özet</a>
+      <a href="/gundem"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Gündem</a>
+      <a href="/gucu-yuksek"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Güçlü Trendler</a>
+      <a href="/tarama"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Hisse Tarayıcı</a>
+      <a href="/karsilastir"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Karşılaştır</a>
       <a href="/kripto"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">🔐 Kripto</a>
       <a href="/emtialar"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">🥇 Emtialar</a>
       <a href="/abd"              style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">🇺🇸 ABD</a>
@@ -2430,12 +2443,32 @@ function animateCounter(el, target) {
   requestAnimationFrame(tick);
 }
 
+function _updateIdealStrip(stocks) {
+  const ideal = stocks.filter(s => s.signal === 'AL' && s.entry_quality === 'IDEAL');
+  const strip = document.getElementById('idealStrip');
+  const items = document.getElementById('idealStripItems');
+  if (!strip || !items || ideal.length === 0) { if (strip) strip.style.display = 'none'; return; }
+  items.innerHTML = ideal.slice(0, 10).map(s => {
+    const ret = s.signal_price ? ((s.price - s.signal_price) / s.signal_price * 100) : null;
+    const retHtml = ret !== null
+      ? ` <span style="font-size:10px;font-weight:600;color:${ret >= 0 ? '#3fb950' : '#f85149'}">${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%</span>`
+      : '';
+    return `<a href="/hisse/${s.ticker}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(63,185,80,.08);
+      border:1px solid rgba(63,185,80,.2);border-radius:6px;padding:3px 8px;text-decoration:none;
+      font-size:12px;font-weight:700;color:#f0f6fc;transition:background .12s;white-space:nowrap"
+      onmouseover="this.style.background='rgba(63,185,80,.16)'" onmouseout="this.style.background='rgba(63,185,80,.08)'"
+      >${s.ticker}${retHtml}</a>`;
+  }).join('');
+  strip.style.display = 'flex';
+}
+
 function updateStats() {
   const stocks = allStocks.filter(s => s.ticker !== 'XU030');
   animateCounter(document.getElementById('statTotal'), stocks.length);
   animateCounter(document.getElementById('statAl'),    stocks.filter(s => s.signal === 'AL').length);
   animateCounter(document.getElementById('statSat'),   stocks.filter(s => s.signal === 'SAT').length);
   animateCounter(document.getElementById('statBekle'), stocks.filter(s => s.signal === 'BEKLE').length);
+  _updateIdealStrip(stocks);
 
   // Market breadth bar
   const total = stocks.length;
