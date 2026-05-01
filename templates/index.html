@@ -445,6 +445,36 @@
   .stat-bekle .stat-num { color: var(--bp-bkl); }
   .stat-total .stat-num { color: var(--bp-brand); }
 
+  /* Market breadth bar */
+  .market-breadth {
+    display: none;
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+  }
+  .mb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+  .mb-title { font-size: 11px; font-weight: 600; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; }
+  .mb-sentiment { font-size: 12px; font-weight: 700; }
+  .mb-bar {
+    display: flex; height: 5px; border-radius: 3px; overflow: hidden; gap: 1px;
+    background: var(--bp-surface2);
+  }
+  .mb-seg { height: 100%; transition: width .7s cubic-bezier(.4,0,.2,1); }
+  .mb-seg-al  { background: #3fb950; border-radius: 3px 0 0 3px; }
+  .mb-seg-sat { background: #f85149; border-radius: 0 3px 3px 0; }
+  .mb-seg-bkl { background: #2d4166; flex: 1; }
+  .mb-legend { display: flex; gap: 16px; margin-top: 7px; }
+  .mb-lg { font-size: 11px; display: flex; align-items: center; gap: 5px; }
+  .mb-lg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .mb-lg-al  .mb-lg-dot { background: #3fb950; }
+  .mb-lg-sat .mb-lg-dot { background: #f85149; }
+  .mb-lg-bkl .mb-lg-dot { background: #2d4166; }
+  .mb-lg-al  { color: #3fb950; }
+  .mb-lg-sat { color: #f85149; }
+  .mb-lg-bkl { color: var(--bp-text3); }
+
   /* ── BIST30 Endeks Satırı ───────────────────────── */
   .index-row-card {
     background: var(--bp-surface);
@@ -1308,6 +1338,24 @@
     </a>
     <div class="stat-card stat-sat">  <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>  <div class="stat-label">Zayıf Trend</div></div>
     <div class="stat-card stat-bekle"><div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div><div class="stat-label">Belirsiz</div></div>
+  </div>
+
+  <!-- Market Breadth Bar -->
+  <div class="market-breadth" id="marketBreadth">
+    <div class="mb-header">
+      <span class="mb-title">Piyasa Geneli</span>
+      <span class="mb-sentiment" id="mbSentiment"></span>
+    </div>
+    <div class="mb-bar">
+      <div class="mb-seg mb-seg-al"  id="mbSegAl"  style="width:0%"></div>
+      <div class="mb-seg mb-seg-bkl" id="mbSegBkl" style="width:100%"></div>
+      <div class="mb-seg mb-seg-sat" id="mbSegSat" style="width:0%"></div>
+    </div>
+    <div class="mb-legend">
+      <span class="mb-lg mb-lg-al"><span class="mb-lg-dot"></span><span id="mbLgAl">–</span></span>
+      <span class="mb-lg mb-lg-bkl"><span class="mb-lg-dot"></span><span id="mbLgBkl">–</span></span>
+      <span class="mb-lg mb-lg-sat"><span class="mb-lg-dot"></span><span id="mbLgSat">–</span></span>
+    </div>
   </div>
 
   <!-- Backtest güven rozeti -->
@@ -2355,6 +2403,28 @@ function updateStats() {
   animateCounter(document.getElementById('statAl'),    stocks.filter(s => s.signal === 'AL').length);
   animateCounter(document.getElementById('statSat'),   stocks.filter(s => s.signal === 'SAT').length);
   animateCounter(document.getElementById('statBekle'), stocks.filter(s => s.signal === 'BEKLE').length);
+
+  // Market breadth bar
+  const total = stocks.length;
+  if (total > 0) {
+    const alCnt  = stocks.filter(s => s.signal === 'AL').length;
+    const satCnt = stocks.filter(s => s.signal === 'SAT').length;
+    const bklCnt = total - alCnt - satCnt;
+    const alPct  = alCnt  / total * 100;
+    const satPct = satCnt / total * 100;
+    document.getElementById('mbSegAl').style.width  = alPct  + '%';
+    document.getElementById('mbSegSat').style.width = satPct + '%';
+    document.getElementById('mbLgAl').textContent  = alCnt  + ' Güçlü Trend (' + alPct.toFixed(0)  + '%)';
+    document.getElementById('mbLgBkl').textContent = bklCnt + ' Belirsiz ('   + (bklCnt/total*100).toFixed(0) + '%)';
+    document.getElementById('mbLgSat').textContent = satCnt + ' Zayıf Trend (' + satPct.toFixed(0) + '%)';
+    // Sentiment label
+    const sent = alPct >= 60 ? '🔥 Güçlü Boğa' : alPct >= 40 ? '📈 Hafif Yükseliş' : satPct >= 30 ? '📉 Baskı Altında' : '⚪ Yatay';
+    const sentColor = alPct >= 60 ? '#3fb950' : alPct >= 40 ? '#86efac' : satPct >= 30 ? '#f85149' : '#8b949e';
+    const sentEl = document.getElementById('mbSentiment');
+    sentEl.textContent = sent;
+    sentEl.style.color = sentColor;
+    document.getElementById('marketBreadth').style.display = '';
+  }
 }
 
 function getFiltered() {
