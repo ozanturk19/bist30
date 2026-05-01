@@ -966,6 +966,15 @@
     </a>
   </div>
 
+  <!-- Sinyalin Hikayesi — Sinyal tarihi etrafındaki KAP bildirimleri -->
+  <div id="storySection" style="display:none;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 18px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <div class="section-title" style="margin:0">📖 Sinyalin Hikayesi</div>
+      <span id="storyWindow" style="font-size:11px;color:#484f58"></span>
+    </div>
+    <div id="storyList"></div>
+  </div>
+
   <!-- AI Sinyal Açıklaması -->
   <div id="sigExplainSection" style="background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(29,78,216,0.05));border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
@@ -1775,6 +1784,51 @@ async function loadSignalExplanation(retryCount) {
   }
 }
 loadSignalExplanation(0);
+
+/* ── Sinyalin Hikayesi ──────────────────────────────── */
+async function loadSignalStory() {
+  try {
+    const res  = await fetch('/api/hisse/' + TICKER + '/signal-story');
+    if (!res.ok) return;
+    const data = await res.json();
+
+    const events = data.events || [];
+    if (!events.length) return;
+
+    const sec  = document.getElementById('storySection');
+    const list = document.getElementById('storyList');
+    const win  = document.getElementById('storyWindow');
+    if (!sec || !list) return;
+
+    if (win && data.window_start && data.signal_date) {
+      win.textContent = `${data.window_start} – ${data.signal_date} (sinyal)`;
+    }
+
+    const CLASS_CLR = { ODA: '#58a6ff', FR: '#3fb950' };
+
+    list.innerHTML = events.map(ev => {
+      const delta    = ev.days_delta;
+      const deltaStr = delta === 0 ? 'Sinyal günü'
+                     : delta > 0  ? `+${delta}g sonra`
+                     : `${Math.abs(delta)}g önce`;
+      const clr     = CLASS_CLR[ev.class] || '#8b949e';
+      const summary = ev.summary || ev.subject || '—';
+      return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #21262d">
+        <span style="font-size:10px;color:${clr};background:rgba(0,0,0,.15);border:1px solid currentColor;border-radius:3px;padding:1px 5px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escHtml(ev.class)}</span>
+        <div style="flex:1;min-width:0">
+          <a href="${ev.url || '#'}" target="_blank" rel="noopener" style="font-size:13px;color:#c9d1d9;text-decoration:none;line-height:1.4;display:block">${escHtml(summary)}</a>
+          <div style="font-size:11px;color:#484f58;margin-top:2px">${ev.date.substring(0,10)} · <span style="color:${delta <= 0 ? '#484f58' : '#58a6ff'}">${deltaStr}</span></div>
+        </div>
+        ${ev.url ? `<a href="${ev.url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;opacity:.6;flex-shrink:0;margin-top:2px">↗</a>` : ''}
+      </div>`;
+    }).join('');
+
+    list.querySelector('div:last-child')?.style?.setProperty('border-bottom', 'none');
+    sec.style.display = '';
+  } catch(e) { /* sessiz hata */ }
+}
+
+loadSignalStory();
 
 /* ── KAP Bildirimleri ───────────────────────────────── */
 async function loadKapDisclosures() {

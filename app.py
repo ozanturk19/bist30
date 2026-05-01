@@ -3006,6 +3006,83 @@ def api_stock_news(ticker):
     return safe_json({"news": "", "kap_url": kap_url})
 
 
+def get_signal_story(ticker: str, signal_date: str) -> dict:
+    """Sinyal tarihi etrafındaki (-20/+5 gün) KAP bildirimleri.
+    AL/SAT sinyalinin hangi haber ortamında oluştuğunu gösterir.
+    """
+    try:
+        sig_dt = datetime.strptime(signal_date, "%d.%m.%Y")
+    except ValueError:
+        return {"events": [], "window_start": "", "window_end": ""}
+
+    window_start = sig_dt - timedelta(days=20)
+    window_end   = sig_dt + timedelta(days=5)
+
+    # Son 90 günlük KAP cache'ini kullan
+    now_ts = time.time()
+    with _lock:
+        kap_hit = _kap_cache.get(ticker)
+    if kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL:
+        all_discs = kap_hit["data"]
+    else:
+        all_discs = fetch_kap_disclosures(ticker, days=90)
+        with _lock:
+            _kap_cache[ticker] = {"data": all_discs, "ts": now_ts}
+
+    events = []
+    for d in all_discs:
+        try:
+            d_date = datetime.strptime(d["date"][:10], "%d.%m.%Y")
+        except ValueError:
+            continue
+        if window_start <= d_date <= window_end:
+            # Sinyal öncesi/sonrası etiketleme
+            if d_date < sig_dt - timedelta(days=1):
+                timing = "before"
+            elif d_date > sig_dt + timedelta(days=1):
+                timing = "after"
+            else:
+                timing = "at"
+            events.append({
+                **d,
+                "timing": timing,
+                "days_delta": (d_date - sig_dt).days,
+            })
+
+    return {
+        "events": events[:10],  # En fazla 10 olay
+        "window_start": window_start.strftime("%d.%m.%Y"),
+        "window_end":   window_end.strftime("%d.%m.%Y"),
+        "signal_date":  signal_date,
+    }
+
+
+@app.route("/api/hisse/<ticker>/signal-story")
+@limiter.limit("20 per minute")
+def api_signal_story(ticker):
+    """Sinyal tarihindeki KAP bağlamı — sinyal neden oluştu?"""
+    ticker = ticker.upper()
+    if ticker not in BIST100:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+
+    # Signal date'i cache'den al
+    with _lock:
+        stocks = list(_cache.get("data") or [])
+    stock = next((s for s in stocks if s.get("ticker") == ticker), None)
+    if not stock:
+        return safe_json({"error": "Veri yok", "events": []})
+
+    signal_date = stock.get("signal_date", "")
+    if not signal_date:
+        return safe_json({"error": "Sinyal tarihi yok", "events": []})
+
+    story = get_signal_story(ticker, signal_date)
+    story["signal"]      = stock.get("signal", "BEKLE")
+    story["signal_bars"] = stock.get("signal_bars", 0)
+    story["ticker"]      = ticker
+    return safe_json(story)
+
+
 @app.route("/api/hisse/<ticker>/kap")
 @limiter.limit("30 per minute")
 def api_stock_kap(ticker):
