@@ -4501,7 +4501,16 @@ def api_market_news():
         bullet_lines = [ln for ln in lines if ln.startswith(("•", "-", "*", "–", "1.", "2.", "3."))]
         if bullet_lines:
             lines = bullet_lines[:3]
-        clean = " ".join(lines).strip()
+        # Markdown temizle: bullet prefix, bold markers, italic markers
+        _MD_STRIP_RE = re.compile(r'^\s*[\*\-•–]\s+|\*\*([^*]+)\*\*|\*([^*]+)\*')
+        def _clean_md(ln):
+            ln = re.sub(r'^\s*[\*\-•–]\s+', '', ln)  # bullet prefix
+            ln = re.sub(r'\*\*([^*]+)\*\*', r'\1', ln)  # **bold**
+            ln = re.sub(r'\*([^*]+)\*', r'\1', ln)   # *italic*
+            ln = re.sub(r'^\d+\.\s+', '', ln)         # 1. numbered
+            return ln.strip()
+        lines = [_clean_md(ln) for ln in lines if ln.strip()]
+        clean = " ".join(ln for ln in lines if ln).strip()
         snippet = clean if len(clean) <= 220 else clean[:220].rsplit(" ", 1)[0] + "…"
 
         # "Kayda değer gelişme yok" → boş kart yerine algoritmik sinyal bilgisi göster
