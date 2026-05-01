@@ -233,9 +233,22 @@
     <div class="art-cat">{{ article.cat }}</div>
     <h1 class="art-title">{{ article.title }}</h1>
     <div class="art-desc">{{ article.desc }}</div>
-    <div class="art-meta">
-      <span>📅 {{ article.date }}</span>
-      <span>⏱ {{ article.mins }} dakika okuma</span>
+    <div class="art-meta" style="justify-content:space-between">
+      <div style="display:flex;gap:12px;align-items:center">
+        <span>📅 {{ article.date }}</span>
+        <span>⏱ {{ article.mins }} dakika okuma</span>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button onclick="shareBlogWA()" title="WhatsApp'ta paylaş"
+          style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);border-radius:6px;padding:4px 10px;font-size:11px;color:#25D366;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s"
+          onmouseover="this.style.background='rgba(37,211,102,.2)'" onmouseout="this.style.background='rgba(37,211,102,.1)'">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="#25D366" style="vertical-align:middle"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Paylaş
+        </button>
+        <button onclick="shareBlogCopy()" id="blogCopyBtn" title="Linki kopyala"
+          style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:6px;padding:4px 10px;font-size:11px;color:#93c5fd;cursor:pointer;font-family:inherit;transition:all .15s"
+          onmouseover="this.style.background='rgba(59,130,246,.15)'" onmouseout="this.style.background='rgba(59,130,246,.08)'">🔗</button>
+      </div>
     </div>
   </div>
 
@@ -344,6 +357,25 @@ const _ML={USDTRY:'USD/TRY',EURTRY:'EUR/TRY',XU100:'BIST100',XU030:'BIST30',BIST
 const _MD={USDTRY:4,EURTRY:4,XU100:0,XU030:0,SP500:0,NASDAQ:0,BTC:0};
 async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e){}}
 loadMacroBar();setInterval(loadMacroBar,60000);
+
+// Blog paylaşım fonksiyonları
+const _BLOG_TITLE = {{ article.title | tojson }};
+const _BLOG_URL   = 'https://borsapusula.com/blog/' + {{ article.slug | tojson }};
+function shareBlogWA() {
+  const text = _BLOG_TITLE + '\n' + _BLOG_URL + '\n\nborsapusula.com — BIST teknik analiz';
+  window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank', 'noopener');
+}
+function shareBlogCopy() {
+  navigator.clipboard.writeText(_BLOG_URL).then(() => {
+    const btn = document.getElementById('blogCopyBtn');
+    if (btn) { const t = btn.textContent; btn.textContent = '✅'; setTimeout(() => btn.textContent = t, 2000); }
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = _BLOG_URL; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    const btn = document.getElementById('blogCopyBtn');
+    if (btn) { const t = btn.textContent; btn.textContent = '✅'; setTimeout(() => btn.textContent = t, 2000); }
+  });
+}
 </script>
 </body>
 </html>
