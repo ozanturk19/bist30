@@ -187,6 +187,20 @@
   .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #1e2d45; font-size:12px; height:34px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
+
+  /* ── Sektör Nabzı ── */
+  .sector-nabzi { display:flex; flex-direction:column; gap:7px; }
+  .sector-row { display:flex; align-items:center; gap:10px; }
+  .sr-name { font-size:12px; color:#94a3b8; width:130px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sr-bar-wrap { flex:1; }
+  .sr-bar { height:7px; background:#21262d; border-radius:4px; overflow:hidden; }
+  .sr-fill { height:100%; border-radius:4px; transition:width 0.5s ease; }
+  .sr-stats { width:72px; flex-shrink:0; display:flex; align-items:center; gap:5px; justify-content:flex-end; }
+  .sr-pct { font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .sr-cnt { font-size:10px; color:#484f58; }
+  .sr-al-c  { color:#3fb950; }
+  .sr-mid-c { color:#e3b341; }
+  .sr-low-c { color:#f85149; }
 </style>
 </head>
 <body>
@@ -301,6 +315,33 @@ function goToDate(date) {
     <span style="color:#3fb950">Güçlü %{{ al_pct }}</span>
     <span>BIST100 ({{ total }} hisse)</span>
     <span style="color:#f85149">Zayıf %{{ sat_pct }}</span>
+  </div>
+</div>
+{% endif %}
+
+<!-- Sektör Sinyal Nabzı -->
+{% if total > 0 %}
+<div class="section-box" style="margin-bottom:20px">
+  <div class="section-title">🏭 Sektör Sinyal Nabzı</div>
+  <div class="sector-nabzi" id="sectorNabzi">
+    {% for sector_name, sector_stocks in stocks|groupby('sector') %}
+    {% set ns = namespace(al=0) %}
+    {% for s in sector_stocks %}{% if s.signal == 'AL' %}{% set ns.al = ns.al + 1 %}{% endif %}{% endfor %}
+    {% set stotal = sector_stocks|list|length %}
+    {% set al_pct = (ns.al / stotal * 100)|round|int if stotal > 0 else 0 %}
+    <div class="sector-row" data-al="{{ al_pct }}">
+      <div class="sr-name">{{ sector_name }}</div>
+      <div class="sr-bar-wrap">
+        <div class="sr-bar">
+          <div class="sr-fill" style="width:{{ al_pct }}%;background:{% if al_pct >= 50 %}#3fb950{% elif al_pct >= 30 %}#e3b341{% else %}#f85149{% endif %}"></div>
+        </div>
+      </div>
+      <div class="sr-stats">
+        <span class="sr-pct {% if al_pct >= 50 %}sr-al-c{% elif al_pct >= 30 %}sr-mid-c{% else %}sr-low-c{% endif %}">%{{ al_pct }}</span>
+        <span class="sr-cnt">{{ ns.al }}/{{ stotal }}</span>
+      </div>
+    </div>
+    {% endfor %}
   </div>
 </div>
 {% endif %}
@@ -445,6 +486,15 @@ const _ML={USDTRY:'USD/TRY',EURTRY:'EUR/TRY',XU100:'BIST100',XU030:'BIST30',BIST
 const _MD={USDTRY:4,EURTRY:4,XU100:0,XU030:0,SP500:0,NASDAQ:0,BTC:0};
 async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e){}}
 loadMacroBar();setInterval(loadMacroBar,60000);
+
+// Sort sector rows by AL% descending
+(function(){
+  const g = document.getElementById('sectorNabzi');
+  if (!g) return;
+  const rows = Array.from(g.querySelectorAll('.sector-row'));
+  rows.sort((a,b) => parseInt(b.dataset.al||0) - parseInt(a.dataset.al||0));
+  rows.forEach(r => g.appendChild(r));
+})();
 
 async function ozSubmitSub() {
   const emailEl = document.getElementById('ozSubEmail');
