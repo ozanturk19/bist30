@@ -2674,7 +2674,8 @@ def stock_page(ticker):
                            sector=sector,
                            others=others,
                            stock_names=STOCK_NAMES,
-                           ssr_signal=ssr_signal)
+                           ssr_signal=ssr_signal,
+                           kap_url=kap_url_for(ticker))
 
 
 _fundamentals_cache = {}
