@@ -2314,6 +2314,218 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'GARAN', 'BIMAS', 'KCHOL']
   },
+
+  # ── Makale 41 ──────────────────────────────────────────────────────
+  {
+    "slug": "sektor-rotasyonu-nedir",
+    "title": "Sektör Rotasyonu Nedir? Hangi Sektöre Ne Zaman Yatırım Yapılır?",
+    "cat": "Strateji",
+    "date": "01.05.2026",
+    "mins": 7,
+    "desc": "Ekonomik döngünün farklı evrelerinde hangi sektörlerin öne çıktığını, sektör rotasyonu stratejisini ve BIST'te nasıl uygulandığını öğrenin.",
+    "body": """<p>Piyasanın her köşesi aynı anda yükselemez. Faiz döngüsü, ekonomik büyüme ve enflasyon, sektörleri farklı hız ve yönlerde etkiler. Bu gerçeği fırsata dönüştürmenin adı <strong>sektör rotasyonu</strong>'dur.</p>
+
+<h2>Ekonomik Döngü ve Sektörler</h2>
+<p>Klasik ekonomik döngü dört evreden oluşur ve her evrede farklı sektörler öne çıkar:</p>
+
+<table>
+<thead><tr><th>Döngü Evresi</th><th>Özellikler</th><th>Güçlü Sektörler</th></tr></thead>
+<tbody>
+<tr><td><strong>Toparlanma</strong></td><td>Düşük faiz, artan talep, yükselen güven</td><td>Teknoloji, Tüketim, Sanayi</td></tr>
+<tr><td><strong>Büyüme</strong></td><td>Güçlü büyüme, yükselen gelirler</td><td>Finans, Enerji, Hammadde</td></tr>
+<tr><td><strong>Yavaşlama</strong></td><td>Faizler yüksek, büyüme ivme kaybediyor</td><td>Sağlık, Tüketim Zorunluları, Kamu</td></tr>
+<tr><td><strong>Resesyon</strong></td><td>Daralma, işsizlik, deflasyon korkusu</td><td>Altın, Nakit, Tahvil</td></tr>
+</tbody>
+</table>
+
+<h2>BIST'te Sektör Rotasyonu Nasıl İzlenir?</h2>
+<p>Türkiye piyasasında sektör rotasyonu, küresel dinamiklerden farklı bir şekilde işler. TCMB faiz politikası, kur hareketleri ve siyasi gelişmeler, sektörlerin performansını küresel döngüden bağımsız biçimde şekillendirebilir.</p>
+
+<h3>1. Bankacılık ve Finans</h3>
+<p>Faiz artış dönemlerinde net faiz marjı yükselen bankalar kazanır. Ancak TCMB politika belirsizliğinde bankacılık sektörü yüksek volatilite yaşar. <strong>Net faiz marjı (NIM)</strong> ve <strong>kredi büyüme oranı</strong> izlenmesi gereken temel metriklerdir.</p>
+
+<h3>2. Enerji ve Kimya</h3>
+<p>Petrol fiyatları yükseldiğinde BIST'teki enerji hisseleri (TUPRS, BIMAS vb.) öne çıkar. Türkiye net enerji ithalatçısı olduğundan enerji fiyatları aynı zamanda cari açığı etkiler — bu da TL üzerinde baskı yaratabilir.</p>
+
+<h3>3. İhracatçı Sanayi</h3>
+<p>Kur yükseldiğinde döviz geliri olan ihracatçı şirketler (FROTO, TOASO, EREGL) kazanır. Bu hisseler TL değer kaybına karşı doğal bir hedge görevi görür.</p>
+
+<h3>4. GYO ve Konut</h3>
+<p>Enflasyonun yüksek olduğu dönemlerde gayrimenkul değerlendiği için GYO hisseleri avantajlı konuma geçer. Ancak faiz artışları GYO değerlemelerini baskı altına alabilir.</p>
+
+<h2>Sektör Rotasyonu Stratejisini Nasıl Uygularsınız?</h2>
+<ol>
+<li><strong>Makro bağlamı belirleyin:</strong> TCMB faizi artırıyor mu, indiriyor mu? Enflasyon yüksekse hangi sektörler korunma sağlar?</li>
+<li><strong>Teknik sinyali filtreleyin:</strong> BorsaPusula'da sektör bazlı AL sinyal yoğunluğunu inceleyin. Hangi sektörde AL sinyali veren hisse oranı yüksek?</li>
+<li><strong>Relatif güç karşılaştırması:</strong> Sektörün BIST100'e göre relatif performansına bakın. BIST100 düşerken sektör daha az düşüyorsa güçlü görünümdedir.</li>
+<li><strong>Rotasyona dikkat:</strong> Haber akışı veya kurumsal yatırımcı hareketleri hangi sektörü ön plana çıkarıyor?</li>
+</ol>
+
+<h2>BorsaPusula Sektör Verileri</h2>
+<p>BorsaPusula ana sayfasındaki <strong>Sektör filtresi</strong>, tüm sektörlerin güncel AL/SAT/BEKLE sinyal dağılımını anlık gösterir. Kimya/Malzeme ve Enerji gibi sektörlerde AL sinyal yoğunluğu arttığında, bu sektörlere olan kurumsal ilginin arttığına işaret edebilir.</p>
+
+<p><a href="/">Ana sayfada sektör bazlı sinyalleri filtreleyin →</a></p>""",
+    "faqs": [
+      {"q": "Sektör rotasyonu nedir?",
+       "a": "Ekonomik döngünün farklı evrelerinde farklı sektörler öne çıkar — bunu takip ederek öne çıkmakta olan sektörlere yatırımı yönlendirme stratejisine sektör rotasyonu denir."},
+      {"q": "BIST'te en güçlü sektörü nasıl bulabilirim?",
+       "a": "BorsaPusula ana sayfasındaki sektör filtresi, her sektördeki AL/SAT/BEKLE sinyal dağılımını gösterir. AL sinyal yoğunluğu yüksek sektörler teknik açıdan güçlüdür."},
+      {"q": "Bankacılık sektörü ne zaman güçlenir?",
+       "a": "Faiz artış dönemlerinde net faiz marjı yükselen bankalar genellikle kazanır. Ancak Türkiye'de TCMB belirsizliği bu ilişkiyi karmaşıklaştırabilir. Kredi büyümesi ve NIM takip edilmesi gereken metriklerdir."},
+      {"q": "İhracatçı sektörler ne zaman öne çıkar?",
+       "a": "TL değer kaybederken döviz gelirleri olan ihracatçı sanayi şirketleri (otomotiv, çelik, savunma) fayda görür. Bu hisseler aynı zamanda kur riskine karşı bir hedge unsuru olabilir."},
+      {"q": "Sektör rotasyonu ETF stratejisiyle uyumlu mu?",
+       "a": "BIST'te sektör bazlı ETF seçeneği sınırlı olsa da sektör lider hisselerine küçük pozisyonlar alarak rotasyon stratejisi uygulanabilir. Her yatırım aracında olduğu gibi risk yönetimi önceliklidir."}
+    ],
+    "related_tickers": ['TUPRS', 'EREGL', 'AKBNK', 'FROTO', 'TOASO']
+  },
+
+  # ── Makale 42 ──────────────────────────────────────────────────────
+  {
+    "slug": "trend-takip-stratejisi",
+    "title": "Trend Takip Stratejisi: Trende Ortak Olmak Neden İşe Yarar?",
+    "cat": "Strateji",
+    "date": "01.05.2026",
+    "mins": 6,
+    "desc": "Trend takip stratejisi, fiyatın mevcut yönünde devam edeceği varsayımıyla çalışır. Supertrend, EMA ve ADX birleşimi güçlü trendleri nasıl yakalar?",
+    "body": """<p>"Trend dostunuzdur." Borsa dünyasının en eski ve en sağlam prensiplerinden biri. Ama trendi doğru tanımlamak, zamanında girmek ve doğru çıkış noktasını belirlemek ayrı birer sanattır.</p>
+
+<h2>Trend Takip Stratejisi Nedir?</h2>
+<p><strong>Trend takip (trend following)</strong>, fiyatın mevcut yönünde devam edeceği varsayımıyla alım veya satım pozisyonu almayı içeren bir yaklaşımdır. Temel mantık şudur: <em>Güçlü bir trend başladığında, o trend genellikle beklenen süreden daha uzun sürer.</em></p>
+
+<p>Bu strateji, "dibden al, tepeden sat" mantığına karşı durur. Aksine şöyle der: <em>"Trendin başladığını gördüğünde katıl, bitmediği sürece bekle."</em></p>
+
+<h2>Üç Temel Bileşen</h2>
+<p>BorsaPusula'nın sinyal motoru tam da bu prensibe dayanır: Üç indikatörün aynı anda aynı yönü göstermesi.</p>
+
+<h3>1. Supertrend — Trend Yönü</h3>
+<p>Supertrend göstergesi, ATR bazlı dinamik destek/direnç çizer. Fiyat bu çizginin üzerindeyken yükseliş trendi, altındayken düşüş trendi devam ediyor demektir. Basit, net, gecikmesi düşük.</p>
+
+<h3>2. ADX ≥ 25 — Trend Gücü</h3>
+<p>ADX (Average Directional Index), trendin ne kadar güçlü olduğunu 0-100 arası ölçer. ADX &gt; 25 olduğunda trend "güçlü" kabul edilir. ADX 20'nin altındayken yatay piyasada sinyal üretmek yanıltıcıdır.</p>
+
+<h3>3. EMA12 &gt; EMA99 — Momentum Onayı</h3>
+<p>Kısa vadeli hareketli ortalamanın (EMA12) uzun vadeliyi (EMA99) aşması, yükseliş momentumunun yerleştiğini gösterir. Bu iki ortalama arasındaki mesafe büyüdükçe trend güçlenir.</p>
+
+<h2>Neden Üç İndikatörün Aynı Anda Onaylaması?</h2>
+<p>Tek bir gösterge her zaman yanıltabilir. Supertrend yanlış kırılım üretebilir; ADX yüksek ama trend tersine dönüyor olabilir; EMA geçişi de bazen gürültülü olabilir. Üç koşulun birlikte sağlanması, yanlış sinyal olasılığını önemli ölçüde azaltır.</p>
+
+<table>
+<thead><tr><th>Senaryo</th><th>ST</th><th>ADX</th><th>EMA</th><th>Sonuç</th></tr></thead>
+<tbody>
+<tr><td>Güçlü AL</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &gt; 99</td><td>✅ Pozisyon gir</td></tr>
+<tr><td>Zayıf Onay</td><td>▲ Yeşil</td><td>&lt; 25</td><td>12 &gt; 99</td><td>⚠️ Bekle</td></tr>
+<tr><td>Karışık</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &lt; 99</td><td>⚠️ Bekle</td></tr>
+<tr><td>Güçlü SAT</td><td>▼ Kırmızı</td><td>≥ 25</td><td>12 &lt; 99</td><td>❌ Pozisyondan çık</td></tr>
+</tbody>
+</table>
+
+<h2>Giriş ve Çıkış Kuralları</h2>
+<ul>
+<li><strong>Giriş:</strong> Üç koşul aynı anda sağlandığında, ilk kapanıştan sonra giriş. Gecikme riskini azaltmak için ATR bazlı giriş bölgesi kullanılır.</li>
+<li><strong>Stop loss:</strong> Supertrend çizgisinin hemen altı — trendin bozulduğunu kanıtlayan seviye.</li>
+<li><strong>Kâr alma:</strong> TP1 = 1.5× ATR, TP2 = 3× ATR; ya da Supertrend çizgisi kırıldığında.</li>
+<li><strong>Çıkış:</strong> Supertrend SAT'a geçtiğinde veya ADX 20'nin altına indiğinde.</li>
+</ul>
+
+<h2>Trend Takibin Zayıf Yönleri</h2>
+<p>Hiçbir strateji kusursuz değildir. Trend takibinin bilinen tuzakları:</p>
+<ul>
+<li><strong>Yatay piyasada yüksek kayıp:</strong> Trend olmayan dönemlerde çok sayıda küçük zararlı sinyal üretilir.</li>
+<li><strong>Gecikmeli giriş:</strong> Trend başladıktan bir süre sonra sinyali almak, %20-30 hareketi kaçırmak anlamına gelebilir.</li>
+<li><strong>Ani tersine dönüş riski:</strong> Güçlü trend aniden bozulabilir; bu nedenle stop loss kritik önem taşır.</li>
+</ul>
+
+<p>BorsaPusula sinyallerinin geçmiş performans analizine <a href="/sinyal-performans">Sinyal Performans sayfasından</a> ulaşabilirsiniz.</p>""",
+    "faqs": [
+      {"q": "Trend takip stratejisi nedir?",
+       "a": "Fiyatın mevcut yönünde devam edeceği varsayımıyla hareket eden bir yatırım yaklaşımıdır. 'Dibe yakın al, tepeye yakın sat' değil; 'trend başladığında katıl, trend bitmeden çık' mantığıyla çalışır."},
+      {"q": "ADX neden 25 olarak seçildi?",
+       "a": "ADX 25, piyasanın trend mi yoksa yatay mı olduğunu ayırt etmek için yaygın olarak kabul edilen eşik değeridir. 25'in altı genellikle gürültülü, yatay piyasayı işaret eder; 25 ve üzeri trendin gerçekten güçlendiğine işaret eder."},
+      {"q": "Supertrend ne zaman yanlış sinyal verir?",
+       "a": "Volatilitenin ani arttığı dönemlerde, özellikle yatay piyasada, Supertrend sık sık yön değiştirir. Bu nedenle ADX filtresi kritik önem taşır — trend gücü zayıfken Supertrend sinyalleri güvenilir değildir."},
+      {"q": "Stop loss nereye koyulmalı?",
+       "a": "Trend takip stratejisinde stop loss tipik olarak Supertrend çizgisinin biraz altına (AL için) veya üstüne (SAT için) yerleştirilir. Bu seviyenin kırılması trendin bozulduğuna işaret eder."},
+      {"q": "Kâr alma hedefleri nasıl belirlenir?",
+       "a": "BorsaPusula TP1 için ~1.5×ATR, TP2 için ~3×ATR kullanır. Aktif yönetimde ise Supertrend çizgisinin kırılması güçlü bir çıkış sinyali olarak değerlendirilebilir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL']
+  },
+
+  # ── Makale 43 ──────────────────────────────────────────────────────
+  {
+    "slug": "rsi-uyusmazligi-divergence",
+    "title": "RSI Uyuşmazlığı (Divergence): Trend Dönüşünü Erkenden Yakalamak",
+    "cat": "Teknik Analiz",
+    "date": "01.05.2026",
+    "mins": 6,
+    "desc": "RSI uyuşmazlığı (divergence), fiyat ve momentum arasındaki ayrışmayı gösterir. Gizli uyuşmazlık, açık uyuşmazlık ve pratik kullanım rehberi.",
+    "body": """<p>Fiyat yeni zirve yapıyor, ama RSI yapmıyor. Ya da tam tersi. Bu tutarsızlık, trend dönüşünün habercisi olabilir. İşte <strong>RSI uyuşmazlığı (divergence)</strong> adı verilen güçlü sinyal tekniği.</p>
+
+<h2>Uyuşmazlık Nedir?</h2>
+<p>Uyuşmazlık, fiyat hareketi ile bir gösterge (burada RSI) arasındaki <em>zıt yönlü hareket</em>'tir. Fiyat bir yöne giderken RSI farklı bir yön izliyorsa, bu momentumun zayıfladığına işaret eder.</p>
+
+<h2>İki Tür Uyuşmazlık</h2>
+
+<h3>1. Açık Uyuşmazlık (Regular Divergence) — Trend Dönüşü Sinyali</h3>
+<table>
+<thead><tr><th>Tür</th><th>Fiyat</th><th>RSI</th><th>Sinyal</th></tr></thead>
+<tbody>
+<tr><td><strong>Ayı uyuşmazlığı</strong></td><td>Yeni yüksek ↑</td><td>Daha düşük tepe ↓</td><td>Düşüş uyarısı ⚠️</td></tr>
+<tr><td><strong>Boğa uyuşmazlığı</strong></td><td>Yeni düşük ↓</td><td>Daha yüksek dip ↑</td><td>Yükseliş fırsatı 📈</td></tr>
+</tbody>
+</table>
+
+<p><strong>Ayı uyuşmazlığı örneği:</strong> Fiyat 100'den 110'a çıkarken RSI 70'ten 65'e düşüyorsa, yukarı hareket giderek zayıflıyor demektir. Alıcılar yoruluyor.</p>
+
+<p><strong>Boğa uyuşmazlığı örneği:</strong> Fiyat 50'den 45'e inerken RSI 30'dan 35'e çıkıyorsa, aşağı baskı azalıyor demektir. Satıcılar yoruluyor.</p>
+
+<h3>2. Gizli Uyuşmazlık (Hidden Divergence) — Trend Devamı Sinyali</h3>
+<table>
+<thead><tr><th>Tür</th><th>Fiyat</th><th>RSI</th><th>Sinyal</th></tr></thead>
+<tbody>
+<tr><td><strong>Gizli boğa</strong></td><td>Daha yüksek dip ↑</td><td>Daha düşük dip ↓</td><td>Yükseliş devamı ✅</td></tr>
+<tr><td><strong>Gizli ayı</strong></td><td>Daha düşük tepe ↓</td><td>Daha yüksek tepe ↑</td><td>Düşüş devamı ✅</td></tr>
+</tbody>
+</table>
+
+<p>Gizli uyuşmazlık, trendin devam edeceğini gösteren "trend içi düzeltme" sinyalidir. Yükseliş trendinde her dip biraz daha yüksek yapılıyorsa ve RSI daha düşük dip yapıyorsa, bu trend içi alım fırsatı olabilir.</p>
+
+<h2>RSI Uyuşmazlığını Nasıl Tanımlarsınız?</h2>
+<ol>
+<li>Grafikte iki anlamlı tepe veya dip belirleyin (en az 5-10 bar aralıklı).</li>
+<li>RSI'da da aynı noktalardaki değerlere bakın.</li>
+<li>Fiyat ile RSI zıt yön gösteriyorsa uyuşmazlık vardır.</li>
+<li><strong>Kritik:</strong> Uyuşmazlık tek başına giriş sinyali değildir — destek/direnç kırılımı veya başka bir onay bekleyin.</li>
+</ol>
+
+<h2>Güçlü Sinyal için Ek Filtreler</h2>
+<p>RSI uyuşmazlığı güçlü bir araç olsa da yanıltabilir. Güvenilirliği artırmak için:</p>
+<ul>
+<li><strong>Supertrend + RSI divergence:</strong> Supertrend yön değiştirdiğinde uyuşmazlık mevcut mu?</li>
+<li><strong>Hacim onayı:</strong> Uyuşmazlık noktasında hacim artışı güveni artırır.</li>
+<li><strong>Destek/direnç:</strong> Uyuşmazlık kritik bir seviyede mi oluşuyor?</li>
+<li><strong>Zaman dilimi uyumu:</strong> Haftalık grafikte uyuşmazlık + günlük grafikte giriş sinyali en güçlü kombinasyondur.</li>
+</ul>
+
+<h2>BorsaPusula'da Uyuşmazlık Nasıl İzlenir?</h2>
+<p>Her hisse detay sayfasında RSI değeri ve grafik üzerinde fiyat hareketleri görülebilir. RSI 70 üzerindeyken fiyat yeni zirve yapıyorsa ve RSI önceki zirveyi kıramıyorsa, bu durumu göz önünde bulundurun.</p>
+
+<p>Unutmayın: BorsaPusula sinyali 3 indikatörün <em>hizalanmasını</em> arar — uyuşmazlık bu hizalamayı bozabilir ve sinyali zayıflatabilir. <a href="/">Anlık sinyalleri inceleyin →</a></p>""",
+    "faqs": [
+      {"q": "RSI uyuşmazlığı (divergence) nedir?",
+       "a": "Fiyat yeni zirve ya da dip yaparken RSI aynı hareketi yapmıyorsa bu uyuşmazlık (divergence) olarak adlandırılır. Fiyat ile momentum arasındaki bu ayrışma, olası trend dönüşünün habercisidir."},
+      {"q": "Açık ve gizli uyuşmazlık arasındaki fark nedir?",
+       "a": "Açık uyuşmazlık olası bir trend dönüşüne işaret ederken, gizli uyuşmazlık mevcut trendin devam ettiğini gösterir. Gizli uyuşmazlık, trend içi geri çekilmelerde pozisyon eklemek için kullanılır."},
+      {"q": "RSI uyuşmazlığı her zaman işe yarar mı?",
+       "a": "Hayır. Güçlü bir trend sırasında uyuşmazlık uzun süre devam edebilir. Bu nedenle uyuşmazlık tek başına yeterli değildir — destek/direnç kırılımı veya hacim onayı gibi ek filtreler gereklidir."},
+      {"q": "Hangi zaman diliminde uyuşmazlığa bakmalıyım?",
+       "a": "Yüksek zaman dilimlerindeki (haftalık, günlük) uyuşmazlıklar daha güvenilirdir. Günlük grafikte uyuşmazlık görülüp haftalık grafikte de destekleniyorsa sinyal güçlenir."},
+      {"q": "RSI uyuşmazlığı ile Supertrend birlikte kullanılabilir mi?",
+       "a": "Evet, bu kombinasyon çok değerlidir. Supertrend yön değiştirdiği anda RSI'da da uyuşmazlık varsa bu iki ayrı kaynaktan gelen trend dönüş sinyalidir ve güvenilirliği artar."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'TUPRS', 'ASELS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
