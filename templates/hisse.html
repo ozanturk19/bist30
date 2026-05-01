@@ -715,7 +715,14 @@
       <span id="emaLegend" style="font-size:11px;color:#8b949e;margin-left:auto"></span>
     </div>
     <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
-    <div id="chartsInner">
+    <!-- Marker tooltip (konumlandırma için position:relative şart) -->
+    <div id="markerTooltip" style="
+      display:none; position:absolute; z-index:50; pointer-events:none;
+      background:#1c2128; border:1px solid #30363d; border-radius:8px;
+      padding:8px 12px; font-size:12px; line-height:1.55; white-space:nowrap;
+      box-shadow:0 4px 16px rgba(0,0,0,.5);
+    "></div>
+    <div id="chartsInner" style="position:relative">
       <div id="chartMain"></div>
       <div id="chartVolume"></div>
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
@@ -823,17 +830,20 @@
 
   <!-- Sinyal Geçmişi -->
   <div class="history-section">
-    <div class="section-title">Sinyal Geçmişi</div>
+    <div class="section-title">Sinyal Geçmişi
+      <span style="font-size:10px;color:#484f58;font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
+    </div>
     <table class="history-table">
       <thead>
         <tr>
           <th>Tarih</th>
           <th>Sinyal</th>
-          <th>Fiyat</th>
+          <th>Giriş Fiyatı</th>
+          <th>Getiri</th>
         </tr>
       </thead>
       <tbody id="historyBody">
-        <tr><td colspan="3" style="color:#484f58;text-align:center;padding:20px">Yükleniyor…</td></tr>
+        <tr><td colspan="4" style="color:#484f58;text-align:center;padding:20px">Yükleniyor…</td></tr>
       </tbody>
     </table>
   </div>
@@ -1110,6 +1120,68 @@ function buildChart(d) {
   });
   candle.setData(d.ohlc);
 
+  /* ── Sinyal Marker'ları (T3-5) ──────────────────────── */
+  if (d.markers && d.markers.length > 0) {
+    // LightweightCharts marker text field kısıtlı — emoji kısaltma kullan
+    const chartMarkers = d.markers.map(m => ({
+      time:     m.time,
+      position: m.position,
+      color:    m.color,
+      shape:    m.shape,
+      text:     m.signal === 'AL' ? '▲' : '▼',
+    }));
+    candle.setMarkers(chartMarkers);
+  }
+
+  /* ── Marker Tooltip: crosshair marker'a yaklaştığında göster ── */
+  const tooltipEl  = document.getElementById('markerTooltip');
+  const markerMap  = {};   // time → marker data
+  if (d.markers) d.markers.forEach(m => { markerMap[m.time] = m; });
+  const lastClose  = d.ohlc.length > 0 ? d.ohlc[d.ohlc.length - 1].close : null;
+
+  chart.subscribeCrosshairMove(p => {
+    if (!p?.time || !tooltipEl) { updateLeg(); return; }
+    updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value);
+
+    const m = markerMap[p.time];
+    if (!m) { tooltipEl.style.display = 'none'; return; }
+
+    const isAl   = m.signal === 'AL';
+    const clr    = isAl ? '#3fb950' : '#f85149';
+    const icon   = isAl ? '▲' : '▼';
+    const sigLbl = isAl ? 'Güçlü Trend AL' : 'Zayıf Trend SAT';
+    const ep     = m.price;
+    const fmtP   = v => v ? (+v).toLocaleString('tr-TR',{minimumFractionDigits:2}) + ' ₺' : '—';
+    let retHtml  = '';
+    if (ep && lastClose) {
+      const ret    = ((lastClose - ep) / ep * 100);
+      const retClr = ret >= 0 ? '#3fb950' : '#f85149';
+      const sign   = ret >= 0 ? '+' : '';
+      retHtml = `<div style="margin-top:4px;font-size:11px;color:${retClr};font-weight:600">
+        Bugüne getiri: ${sign}${ret.toFixed(1)}% · ${fmtP(lastClose)}
+      </div>`;
+    }
+    tooltipEl.innerHTML = `
+      <div style="color:${clr};font-weight:700;font-size:12px">${icon} ${sigLbl}</div>
+      <div style="color:#8b949e;margin-top:2px">${m.date_tr || m.time}</div>
+      <div style="margin-top:4px">Giriş: <strong style="font-family:monospace">${fmtP(ep)}</strong></div>
+      ${retHtml}
+    `;
+
+    // Tooltip konumu — chart container içinde, marker yanında
+    const chartRect = elMain.getBoundingClientRect();
+    const containerRect = elMain.parentElement.getBoundingClientRect();
+    if (p.point) {
+      let left = p.point.x + 12;
+      let top  = p.point.y - 10;
+      // Sağ kenara taşma koruması
+      if (left + 200 > elMain.clientWidth) left = p.point.x - 210;
+      tooltipEl.style.left    = left + 'px';
+      tooltipEl.style.top     = top  + 'px';
+      tooltipEl.style.display = 'block';
+    }
+  });
+
   /* EMA legend */
   const legEl = document.getElementById('emaLegend');
   function updateLeg(v12, v99_) {
@@ -1366,19 +1438,45 @@ function renderMiniStats(history) {
 function renderHistory(history) {
   const tbody = document.getElementById('historyBody');
   if (!history || history.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="color:#484f58;text-align:center;padding:20px">Geçmiş bulunamadı</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="color:#484f58;text-align:center;padding:20px">Geçmiş bulunamadı</td></tr>';
     renderMiniStats([]);
     return;
   }
   renderMiniStats(history);
   const fmt = v => (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-  tbody.innerHTML = history.map(h => {
-    const icon  = h.signal === 'AL' ? '▲' : '▼';
-    const cls   = h.signal === 'AL' ? '#3fb950' : '#f85149';
+
+  // Getiri hesabı: her sinyal → sonraki sinyalin fiyatına kadar getiri
+  // history dizisi: en yeni başta → biz ters sırada hesaplarız
+  tbody.innerHTML = history.map((h, idx) => {
+    const icon = h.signal === 'AL' ? '▲' : '▼';
+    let retHtml = '<td style="color:#484f58;font-size:11px">—</td>';
+
+    // Bir önceki kayıt (eski tarih) bu sinyalin çıkış fiyatı
+    const nextH = history[idx + 1];  // daha eski sinyal (history ters sıralı = yeni başta)
+    if (nextH) {
+      // Bu sinyalin girişi: h.price, çıkışı: nextH.price (bir sonraki sinyal anı)
+      const ret    = ((nextH.price - h.price) / h.price * 100);
+      const isGain = h.signal === 'AL' ? ret > 0 : ret < 0;   // AL→yükseliş iyi, SAT→düşüş iyi
+      const clr    = isGain ? '#3fb950' : (Math.abs(ret) < 1 ? '#8b949e' : '#f85149');
+      const sign   = ret >= 0 ? '+' : '';
+      retHtml = `<td style="color:${clr};font-weight:600;font-family:monospace;font-size:12px">${sign}${ret.toFixed(1)}%</td>`;
+    } else if (idx === 0) {
+      // En güncel sinyal — bugünkü fiyat ile karşılaştır (SSR price)
+      const curP = parseFloat(document.getElementById('hpPrice')?.textContent?.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+      if (curP && h.price) {
+        const ret    = ((curP - h.price) / h.price * 100);
+        const isGain = h.signal === 'AL' ? ret > 0 : ret < 0;
+        const clr    = isGain ? '#3fb950' : (Math.abs(ret) < 1 ? '#8b949e' : '#f85149');
+        const sign   = ret >= 0 ? '+' : '';
+        retHtml = `<td style="color:${clr};font-weight:600;font-family:monospace;font-size:12px">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:#484f58">(aktif)</span></td>`;
+      }
+    }
+
     return `<tr>
       <td>${h.date}</td>
       <td><span class="signal-badge signal-${h.signal}" style="font-size:11px">${icon} ${sigLabel(h.signal)}</span></td>
-      <td style="font-variant-numeric:tabular-nums">${fmt(h.price)} ₺</td>
+      <td style="font-variant-numeric:tabular-nums;font-family:monospace">${fmt(h.price)} ₺</td>
+      ${retHtml}
     </tr>`;
   }).join('');
 }

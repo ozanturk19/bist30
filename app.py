@@ -1008,6 +1008,34 @@ def _notify_email_signal_changes(changes):
 
 
 _DISK_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
+_SNAPSHOTS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshots")
+os.makedirs(_SNAPSHOTS_DIR, exist_ok=True)
+
+
+def _save_daily_snapshot(data: list):
+    """Seans kapandıktan sonra (14:00 UTC = 17:00 TR) günlük snapshot yazar.
+    Her gün için bir kez; dosya varsa üzerine yazmaz."""
+    now = datetime.now()
+    # Sadece seans saati sonrası yaz (14:00 UTC → 17:00 TR)
+    if now.hour < 14:
+        return
+    fname = os.path.join(_SNAPSHOTS_DIR, f"{now.strftime('%Y-%m-%d')}.json")
+    if os.path.exists(fname):
+        return  # Bugün zaten yazıldı
+    try:
+        with open(fname, "w", encoding="utf-8") as f:
+            json.dump({
+                "date":     now.strftime("%Y-%m-%d"),
+                "date_tr":  now.strftime("%d.%m.%Y"),
+                "stocks":   data,
+                "saved_at": now.isoformat(),
+                "al_count":    sum(1 for s in data if s.get("signal") == "AL"),
+                "sat_count":   sum(1 for s in data if s.get("signal") == "SAT"),
+                "bekle_count": sum(1 for s in data if s.get("signal") == "BEKLE"),
+            }, f, ensure_ascii=False, default=str)
+        logger.info("Günlük snapshot yazıldı: %s (%d hisse)", fname, len(data))
+    except Exception as e:
+        logger.warning("Snapshot yazma hatası: %s", e)
 
 
 def _save_cache_to_disk(data):
@@ -1058,6 +1086,7 @@ def refresh_data():
 
     # Başarılı güncellemeden sonra diske yaz
     _save_cache_to_disk(results)
+    _save_daily_snapshot(results)   # T2-6: Günlük snapshot (seans sonrası)
 
 
 def fetch_live_prices():
@@ -2205,18 +2234,22 @@ def _compute_chart_data(ticker_base, period="2y"):
             sig = bar_sig(i)
             if sig != prev_sig and sig != "BEKLE":
                 d_str = close.index[i].strftime("%Y-%m-%d")
+                entry_price = round(float(close.iloc[i]), 2)
                 if d_str in show_set:
                     markers.append({
                         "time":     d_str,
                         "position": "belowBar" if sig == "AL" else "aboveBar",
                         "color":    "#3fb950"  if sig == "AL" else "#f85149",
                         "shape":    "arrowUp"  if sig == "AL" else "arrowDown",
-                        "text":     "▲" if sig == "AL" else "▼",
+                        "text":     "▲ AL" if sig == "AL" else "▼ SAT",
+                        "signal":   sig,
+                        "price":    entry_price,
+                        "date_tr":  close.index[i].strftime("%d.%m.%Y"),
                     })
                 signal_history.append({
                     "date":   close.index[i].strftime("%d.%m.%Y"),
                     "signal": sig,
-                    "price":  round(float(close.iloc[i]), 2),
+                    "price":  entry_price,
                 })
             prev_sig = sig
         signal_history = list(reversed(signal_history[-15:]))   # en yeni başta, max 15
@@ -3296,6 +3329,50 @@ def api_gundem():
             "total": len(stocks),
         }
     })
+
+
+# ── Geçmiş Günlük Snapshot API ───────────────────────────────────────────────
+@app.route("/api/snapshots")
+@limiter.limit("30 per minute")
+def api_snapshots():
+    """Mevcut günlük snapshot tarihlerini listele."""
+    try:
+        files = sorted([
+            f.replace(".json", "")
+            for f in os.listdir(_SNAPSHOTS_DIR)
+            if re.match(r"^\d{4}-\d{2}-\d{2}\.json$", f)
+        ], reverse=True)
+        return safe_json({"dates": files[:30]})  # son 30 gün
+    except Exception as e:
+        return safe_json({"dates": [], "error": str(e)})
+
+
+@app.route("/ozet/<tarih>")
+def ozet_gecmis(tarih):
+    """Geçmiş tarihli sinyal özeti."""
+    if not re.match(r"^\d{4}-\d{2}-\d{2}$", tarih):
+        abort(404)
+    fname = os.path.join(_SNAPSHOTS_DIR, f"{tarih}.json")
+    if not os.path.exists(fname):
+        abort(404)
+    try:
+        with open(fname, encoding="utf-8") as f:
+            snap = json.load(f)
+    except Exception:
+        abort(404)
+
+    stocks     = snap.get("stocks", [])
+    al_list    = [s for s in stocks if s.get("signal") == "AL"]
+    sat_list   = [s for s in stocks if s.get("signal") == "SAT"]
+    bekle_list = [s for s in stocks if s.get("signal") == "BEKLE"]
+    new_signals = [s for s in stocks if s.get("is_new_signal")]
+    return render_template("ozet.html",
+        stocks=stocks, loading=False,
+        updated_at=snap.get("date_tr", tarih),
+        al_list=al_list, sat_list=sat_list, bekle_list=bekle_list,
+        new_signals=new_signals, today_str=snap.get("date_tr", tarih),
+        stock_names=STOCK_NAMES,
+        historical_date=tarih)
 
 
 # ── Günlük Özet Sayfası ───────────────────────────────────────────────────────
