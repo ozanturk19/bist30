@@ -674,6 +674,23 @@
   .signal-SAT  { background: var(--bp-sat-bg); color: var(--bp-sat); border: 1px solid var(--bp-sat-bd); }
   .signal-BEKLE{ background: var(--bp-bkl-bg); color: var(--bp-bkl); border: 1px solid var(--bp-bkl-bd); }
 
+  /* ── Signal Tooltip ─────────────────────────────────── */
+  .sig-tip {
+    display: none; position: fixed; z-index: 9000;
+    background: #1c2128; border: 1px solid #30363d; border-radius: 10px;
+    padding: 11px 14px; min-width: 200px; max-width: 252px;
+    box-shadow: 0 10px 32px rgba(0,0,0,.68);
+    pointer-events: none; font-size: 12px; line-height: 1.55; color: #e6edf3;
+  }
+  .sig-tip.open { display: block; animation: ddIn .12s ease; }
+  .sig-tip-head { font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .sig-tip-sep  { border: none; border-top: 1px solid #21262d; margin: 7px 0; }
+  .sig-tip-row  { display: flex; align-items: center; gap: 7px; padding: 1px 0; }
+  .sig-tip-ck   { font-size: 11px; font-weight: 700; min-width: 13px; }
+  .sig-tip-ck.ok { color: #3fb950; } .sig-tip-ck.no { color: #30363d; }
+  .sig-tip-lbl  { color: #c9d1d9; font-size: 12px; }
+  .sig-tip-footer { font-size: 11px; color: #8b949e; margin-top: 7px; display: flex; flex-direction: column; gap: 2px; }
+
   .sig-price {
     font-size: 11px;
     font-variant-numeric: tabular-nums;
@@ -2537,7 +2554,7 @@ function renderTable() {
           </div>
           <div class="mc-row2">
             <div style="display:flex;align-items:center;gap:7px">
-              <span class="signal-badge signal-${s.signal}" style="font-size:10px">${sigIcon} ${sigLabel(s.signal)}</span>
+              <span class="signal-badge signal-${s.signal}" style="font-size:10px" onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()">${sigIcon} ${sigLabel(s.signal)}</span>
               ${confIcon}<div class="score-bar">${dots}</div>
             </div>
             <div class="mc-entry">${entryTxt}</div>
@@ -2636,7 +2653,7 @@ function renderTable() {
       <td><span class="ticker">${s.ticker}</span> ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
-      <td><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}${eqHtml}</td>
+      <td onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}${eqHtml}</td>
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile">${sigPriceHtml}</td>
       <td class="hide-mobile">${slHtml}</td>
@@ -3422,6 +3439,70 @@ document.addEventListener('click', e => {
   }
 }, true);
 
+// ── Signal Tooltip ────────────────────────────────────────
+function showSigTip(ticker, ev) {
+  const s   = allStocks.find(st => st.ticker === ticker);
+  const tip = document.getElementById('sigTip');
+  if (!s || !tip) return;
+
+  const sigColor = s.signal === 'AL' ? '#3fb950' : s.signal === 'SAT' ? '#f85149' : '#8b949e';
+  const sigIcon  = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
+  const sigName  = s.signal === 'AL' ? 'Güçlü Trend' : s.signal === 'SAT' ? 'Zayıf Trend' : 'Belirsiz';
+
+  let html = `<div class="sig-tip-head"><span style="color:${sigColor}">${sigIcon} ${sigName}</span></div>`;
+
+  if (s.signal === 'BEKLE') {
+    html += `<div style="color:#8b949e;font-size:12px;line-height:1.5">Henüz net trend sinyali oluşmadı. İndikatörler karışık.</div>`;
+  } else {
+    const indsList = Object.values(s.indicators || {});
+    indsList.forEach(ind => {
+      const ok = (s.signal === 'AL' && ind.bull) || (s.signal === 'SAT' && ind.bear);
+      html += `<div class="sig-tip-row">
+        <span class="sig-tip-ck ${ok ? 'ok' : 'no'}">${ok ? '✓' : '○'}</span>
+        <span class="sig-tip-lbl">${ind.label}</span>
+      </div>`;
+    });
+    if (s.rsi != null) {
+      const rsiNote = s.rsi >= 70 ? ' · aşırı alım ⚠' : s.rsi <= 30 ? ' · aşırı satım ⚠' : '';
+      html += `<div class="sig-tip-row"><span class="sig-tip-ck no">○</span><span class="sig-tip-lbl">RSI ${s.rsi}${rsiNote}</span></div>`;
+    }
+    if (s.vol_ratio != null && s.vol_ratio >= 1.5) {
+      html += `<div class="sig-tip-row"><span class="sig-tip-ck ok">✓</span><span class="sig-tip-lbl">Hacim ×${s.vol_ratio} ortalama üstü</span></div>`;
+    }
+  }
+
+  html += '<div class="sig-tip-sep"></div><div class="sig-tip-footer">';
+  if (s.signal_bars > 0 && s.signal !== 'BEKLE') {
+    html += `<span>${s.signal_bars} gün aktif</span>`;
+  }
+  const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
+  if (scoreVal != null) {
+    const filled = '●'.repeat(scoreVal);
+    const empty  = '○'.repeat(Math.max(0, 3 - scoreVal));
+    html += `<span>Güç: <span style="color:${sigColor}">${filled}</span><span style="color:#30363d">${empty}</span></span>`;
+  }
+  if (s.entry_quality && s.signal !== 'BEKLE') {
+    const eqMap = { IDEAL: '✓ İdeal giriş bölgesi', IYI: '✓ İyi giriş bölgesi', DIKKATLI: '⚠ Giriş için riskli', UZAK: '✗ Girişten uzak' };
+    const eqColor = (s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI') ? '#3fb950' : '#e3b341';
+    html += `<span style="color:${eqColor}">${eqMap[s.entry_quality] || s.entry_quality}</span>`;
+  }
+  html += '</div>';
+
+  tip.innerHTML = html;
+
+  // Smart positioning — avoid viewport edges
+  const tw = 240, th = 180;
+  const left = ev.clientX + 16 + tw > window.innerWidth  ? ev.clientX - tw - 10 : ev.clientX + 16;
+  const top  = ev.clientY + 10 + th > window.innerHeight ? ev.clientY - th - 10 : ev.clientY + 10;
+  tip.style.left = left + 'px';
+  tip.style.top  = top  + 'px';
+  tip.classList.add('open');
+}
+
+function hideSigTip() {
+  document.getElementById('sigTip')?.classList.remove('open');
+}
+
 // ── Keyboard shortcut: "/" → focus search ──────────────
 document.addEventListener('keydown', e => {
   if (e.key === '/' && !e.target.matches('input,textarea,select,[contenteditable]')) {
@@ -3437,5 +3518,6 @@ document.addEventListener('keydown', e => {
   }
 });
 </script>
+<div class="sig-tip" id="sigTip"></div>
 </body>
 </html>
