@@ -511,6 +511,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   },
   {
     "slug": "destek-direnc-seviyeleri",
+    "canonical_slug": "destek-direnc-seviyeleri-nedir",
     "title": "Destek ve Direnç Seviyeleri Nedir?",
     "desc": "Borsa grafiklerindeki en önemli kavramlardan destek ve direnç seviyeleri nasıl belirlenir ve kullanılır?",
     "date": "2026-04-13",
@@ -587,6 +588,7 @@ RS = Ortalama Yükselen Bar / Ortalama Düşen Bar (genellikle son 14 bar)</pre>
   },
   {
     "slug": "macd-gostergesi-nedir",
+    "canonical_slug": "macd-indikatoru-nedir",
     "title": "MACD Göstergesi Nedir? Trend ve Momentum Kombinasyonu",
     "desc": "MACD nasıl hesaplanır, sinyal çizgisi ve histogram nasıl yorumlanır, hangi tuzaklara dikkat edilmeli?",
     "date": "2026-04-15",
@@ -623,6 +625,7 @@ Histogram = MACD − Sinyal</pre>
   },
   {
     "slug": "hacim-analizi",
+    "canonical_slug": "hacim-analizi-nedir",
     "title": "Hacim Analizi: Fiyat Hareketi Kadar Önemli",
     "desc": "İşlem hacmi neden önemlidir, yükselen fiyat + düşen hacim ne anlama gelir, OBV ve VWAP nasıl kullanılır?",
     "date": "2026-04-16",

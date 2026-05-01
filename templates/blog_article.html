@@ -14,11 +14,11 @@
 <title>{{ article.title }} | borsapusula.com</title>
 <meta name="description" content="{{ article.desc }}">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
-<link rel="canonical" href="https://borsapusula.com/blog/{{ article.slug }}">
+<link rel="canonical" href="https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}">
 <meta property="og:type"        content="article">
 <meta property="og:title"       content="{{ article.title }} | borsapusula.com">
 <meta property="og:description" content="{{ article.desc }}">
-<meta property="og:url"         content="https://borsapusula.com/blog/{{ article.slug }}">
+<meta property="og:url"         content="https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:image"       content="https://borsapusula.com/og-image.svg">
 <meta name="twitter:card"        content="summary_large_image">
