@@ -1099,6 +1099,26 @@
 
 </div>
 
+<!-- Subscription CTA -->
+<div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(31,111,235,.07),rgba(29,78,216,.04));border:1px solid rgba(31,111,235,.2);border-radius:10px;padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
+  <div style="flex:1;min-width:160px">
+    <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:1px">📬 {{ ticker }} sinyali değişince bildirim al</div>
+    <div style="font-size:11px;color:#64748b">Ücretsiz e-posta aboneliği</div>
+  </div>
+  <div style="display:flex;gap:7px;align-items:center" id="hisseSubForm">
+    <input id="hisseSubEmail" type="email" placeholder="e-posta adresiniz"
+      style="background:#111827;border:1px solid #1e2d45;color:#e2e8f0;padding:6px 11px;border-radius:7px;font-size:12px;font-family:inherit;outline:none;transition:border-color .15s;width:200px"
+      onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#1e2d45'"
+      onkeydown="if(event.key==='Enter')hisseSubscribe()">
+    <button onclick="hisseSubscribe()"
+      style="background:#1f6feb;color:#fff;border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+      Abone Ol
+    </button>
+  </div>
+  <button onclick="document.getElementById('hisseSubCta').style.display='none'"
+    style="background:none;border:none;color:#374151;cursor:pointer;font-size:16px;padding:2px 4px">×</button>
+</div>
+
 <footer style="text-align:center;padding:20px;font-size:12px;color:#484f58;border-top:1px solid #21262d;margin-top:20px">
   <div style="margin-bottom:8px">
     <a href="/" style="color:#8b949e;text-decoration:none">Ana Sayfa</a> ·
@@ -1113,6 +1133,27 @@
 </footer>
 
 <script>
+/* ── Hisse sayfası e-posta aboneliği ── */
+async function hisseSubscribe() {
+  const emailEl = document.getElementById('hisseSubEmail');
+  const email   = (emailEl.value || '').trim();
+  if (!email || !email.includes('@')) { emailEl.style.borderColor='#f85149'; emailEl.focus(); return; }
+  const btn = document.querySelector('#hisseSubForm button');
+  btn.textContent = 'Kaydediliyor…'; btn.disabled = true;
+  try {
+    const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email}) });
+    const j = await r.json();
+    const cta = document.getElementById('hisseSubCta');
+    if (j.ok) {
+      cta.innerHTML = '<div style="font-size:13px;color:#3fb950;font-weight:600;padding:4px 0">✅ ' + (j.message||'Kaydınız alındı!') + '</div>';
+      setTimeout(() => { if(cta) cta.style.display='none'; }, 4000);
+    } else {
+      btn.textContent = 'Abone Ol'; btn.disabled = false;
+      emailEl.style.borderColor = '#f85149';
+    }
+  } catch(e) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
+}
+
 /* ── Sinyal görünen etiketleri ───────────────────── */
 function sigLabel(sig) {
   return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[sig] || sig;
