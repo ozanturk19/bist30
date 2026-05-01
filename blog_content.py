@@ -1746,6 +1746,304 @@ Her sinyal öncesi şunları kontrol edin:
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'BIMAS']
   },
+
+  # ── Makale 35 ──────────────────────────────────────────────────────
+  {
+    "slug": "guclu-momentum-hisseleri-nasil-tespit-edilir",
+    "title": "Güçlü Momentum Hisseleri Nasıl Tespit Edilir?",
+    "cat": "Trading Stratejileri",
+    "read_min": 6,
+    "summary": "Momentum yatırımcıları, güçlü trend içindeki hisseleri erken tespit ederek üstün getiri elde eder. ADX, Supertrend ve hacim kombinasyonuyla güçlü momentum hisseleri nasıl bulunur?",
+    "body": """## Momentum Nedir?
+
+**Momentum**, bir hissenin fiyat hareketinin gücünü ve sürdürülebilirliğini ölçer. "Güçlü momentum" olan hisseler, yükseliş veya düşüşlerini belirli bir süre daha devam ettirme eğilimindedir.
+
+*Momentum yatırımının temel fikri:* Yükselen hisseler yükselmeye, düşen hisseler düşmeye devam eder.
+
+## Güçlü Momentum Göstergeleri
+
+### 1. ADX (Ortalama Yönsel İndeks)
+
+ADX, trendin *yönünü değil, gücünü* ölçer:
+
+| ADX Değeri | Yorum |
+|-----------|-------|
+| < 20 | Yatay piyasa, zayıf trend |
+| 20–25 | Trend oluşmaya başlıyor |
+| 25–35 | **Güçlü trend — işlem yapılabilir** |
+| 35–50 | Çok güçlü trend |
+| > 50 | Aşırı trend, dikkat! |
+
+**Kural:** ADX ≥ 25 olmadan momentum stratejisi uygulamak risklidir.
+
+### 2. Supertrend İndikatörü
+
+Supertrend hem yönü hem de dinamik stop seviyesini gösterir:
+- **Yeşil çizgi** (fiyatın altında) = yükseliş momentumu aktif
+- **Kırmızı çizgi** (fiyatın üstünde) = düşüş momentumu aktif
+
+Fiyat Supertrend çizgisinin üzerinde ve çizgi uzaklaşıyorsa momentum güçlüdür.
+
+### 3. EMA Hizalaması
+
+Güçlü yükseliş momentumunda:
+- EMA 12 > EMA 50 > EMA 200 (tüm kısa vadeli ortalamar uzun vadeliyi geçmiş)
+- EMA'lar arasındaki mesafe artıyorsa momentum güçleniyor
+
+### 4. Hacim Teyidi
+
+Güçlü momentum için hacim şart:
+- Yükseliş günlerinde hacim ortalamanın **üzerinde** olmalı
+- Düşüş günlerinde hacim ortalamanın **altında** olmalı
+- "Vol Ratio" ≥ 1.5 güçlü alıcı ilgisine işaret eder
+
+## Güçlü Momentum Hisseleri Nasıl Taranır?
+
+**Filtre kriterleri:**
+1. Supertrend = AL (yükseliş trendi aktif)
+2. ADX ≥ 25 (trend güçlü)
+3. EMA12 > EMA99 (uzun vadeli eğilim yukarı)
+4. Sinyal 3+ bar onaylı (geçici sinyal değil)
+5. Hacim ≥ ortalamanın 1.2x'i
+
+Bu kriterlerin tamamını sağlayan hisseler en güçlü momentum adaylarıdır.
+
+## BorsaPusula'da Momentum Taraması
+
+[BorsaPusula'nın tarama sayfası](/tarama) bu kriterlerin tamamını uygular:
+- "Güçlü Trend" filtresi → Supertrend AL + ADX uyumlu
+- "ADX ≥ 25" gelişmiş filtresi → trend gücü doğrulaması
+- "Vol Ratio" filtresi → hacim teyidi
+- Sinyal güç çubukları → momentum yoğunluğunu görsel olarak gösterir
+
+## Momentum Stratejisinin Riskleri
+
+Momentum stratejisi güçlü olmakla birlikte riskler içerir:
+
+**Geç giriş riski:** Sinyal oluştuktan 5-10 bar sonra girilirse fiyat zirveye yakın olabilir.
+
+**Stop-out riski:** Güçlü momentumda bile geçici düzeltmeler olur. ATR bazlı stop, bu dalgalanmalara alan bırakır.
+
+**Momentum kırılması:** ADX 50+ iken sinyaller çok sık tersine döner. Aşırı yükselmiş hisselerde daha geniş stop kullanın.
+
+**Makro riskler:** TCMB kararı, jeopolitik gelişmeler ve FED açıklamaları tek bir seansta tüm momentumu bozabilir.
+
+## Örnek: BIST'te Momentum Tradeı
+
+Klasik BIST momentum yaklaşımı:
+1. BorsaPusula sinyaller sayfasında "⚡ Bugün" filtresi → yeni sinyaller
+2. ADX ≥ 25 + hacim teyidi olanları seç
+3. Supertrend çizgisi giriş fiyatı olarak kullan
+4. SL = Supertrend çizgisi altına 1-2 ATR mesafe
+5. TP = giriş fiyatının 2-3x SL mesafesi (R/R ≥ 1:2)
+
+Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir.""",
+    "faqs": [
+      {"q": "Momentum hissesi ne kadar süre elde tutulmalı?", "a": "Supertrend sinyali devam ettiği sürece pozisyon korunabilir. Klasik yaklaşımda sinyal kapanana (Supertrend tersine dönene) veya stop-loss tetiklenene kadar beklenebilir. Bu bazen 2 hafta, bazen 3 ay sürebilir."},
+      {"q": "Momentum ve trend takip aynı şey mi?", "a": "Çok benzer stratejilerdir. Trend takip daha uzun vadeli (haftalar-aylar), momentum genellikle daha kısa vadeli (günler-haftalar) olur. Her ikisi de 'güçlü yükselişi takip et' prensibine dayanır."},
+      {"q": "ADX 50'nin üzerindeyken ne yapılmalı?", "a": "ADX 50+ aşırı momentum gösterir ve genellikle yakında yavaşlama/düzeltme gelir. Bu seviyede yeni pozisyon açmak yerine mevcut pozisyonun stop'unu sıkılaştırmak veya kısmi kar almak düşünülebilir."},
+      {"q": "Düşük ADX'te momentum stratejisi işe yarar mı?", "a": "ADX 20'nin altındayken piyasa yatay hareket eder ve momentum sinyalleri çok fazla false positive üretir. Bu ortamda momentum stratejisi yerine destek/direnç ticareti daha uygun olabilir."},
+      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Ana sayfadaki 'Güçlü Trend' filtresini seçin, ardından gelişmiş filtrelerden 'ADX ≥ 25' ve 'Vol Ratio ≥ 1.5' seçin. Sinyal güç çubukları en yüksek olan hisseler en güçlü momentum adaylarıdır."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'GARAN', 'KCHOL', 'BIMAS']
+  },
+
+  # ── Makale 36 ──────────────────────────────────────────────────────
+  {
+    "slug": "mum-grafik-formasyonlari",
+    "title": "Mum Grafik Formasyonları: 10 Kritik Sinyal",
+    "cat": "Teknik Analiz",
+    "read_min": 8,
+    "summary": "Mum grafik (candlestick) formasyonları, fiyat dönüşlerini ve devam sinyallerini en erken tespit eden araçlardan biridir. Yatırımcının bilmesi gereken 10 kritik formasyon ve anlamları.",
+    "body": """## Mum Grafik Nedir?
+
+**Mum grafik (Candlestick)**, her dönem için dört fiyat noktasını görselleştirir: Açılış, Kapanış, En Yüksek, En Düşük. 17. yüzyılda Japon pirinç tüccarları tarafından geliştirilmiş olan bu sistem, günümüzde en yaygın kullanılan grafik türüdür.
+
+Her mum:
+- **Gövde (Body):** Açılış ve kapanış arasındaki fark
+- **Fitil (Shadow/Wick):** Gövdenin dışındaki yüksek ve düşük noktalar
+- **Renk:** Yeşil/beyaz = kapanış > açılış (yükseliş), Kırmızı/siyah = kapanış < açılış (düşüş)
+
+## Dönüş Formasyonları — 7 Kritik Sinyal
+
+### 1. Doji
+
+Açılış ve kapanış neredeyse aynı fiyatta. Gövde çok küçük, fitiller uzun.
+
+**Anlam:** Alıcı-satıcı dengesi, kararsızlık. Güçlü trend sonrasında doji görülürse dönüş yakın olabilir.
+
+**BIST'te:** Uzun süreli yükselişin ardından doji → kısmi kar alma fırsatı.
+
+### 2. Çekiç (Hammer)
+
+Küçük gövde yukarıda, uzun alt fitil (gövdenin en az 2 katı). Düşüş trendinin sonunda görülür.
+
+**Anlam:** Satıcılar fiyatı aşağı çekti ama alıcılar geri kazandı. Güçlü dönüş sinyali.
+
+**Teyit:** Ertesi gün yeşil mum ile teyit edilirse güvenilirlik artar.
+
+### 3. Ters Çekiç (Inverted Hammer)
+
+Küçük gövde aşağıda, uzun üst fitil. Düşüş trendinin sonunda.
+
+**Anlam:** Alıcılar fiyatı yukarı itmek istedi ama tam başaramadı. Potansiyel dönüş, teyit gerekli.
+
+### 4. Asılı Adam (Hanging Man)
+
+Çekiç ile aynı şekil ama *yükseliş trendinin sonunda* görülür.
+
+**Anlam:** Yükseliş trendinde satış baskısı artıyor. Dikkatli olun!
+
+### 5. Karanlık Bulut Örtüsü (Dark Cloud Cover)
+
+İki mum formasyonu:
+1. Güçlü yeşil mum
+2. Önceki mumun üzerinde açılıp gövdesinin ortasının altında kapanan kırmızı mum
+
+**Anlam:** Alıcılar kontrolü kaybetti, satıcılar devreye girdi. Yükseliş trendinde ayı dönüşü sinyali.
+
+### 6. Üçlü Karga (Three Black Crows)
+
+Üst üste üç güçlü kırmızı mum, her biri öncekinin kapanışının altında açılır.
+
+**Anlam:** Güçlü satış baskısı, trend dönüşünü teyit eder. Nadiren görülür ama çok güvenilir bir sinyal.
+
+### 7. Engulfing (Yutan Formasyon)
+
+**Boğa Engulfing:** Kırmızı mum ardından tamamen onu kapsayan büyük yeşil mum.
+
+**Ayı Engulfing:** Yeşil mum ardından tamamen onu kapsayan büyük kırmızı mum.
+
+**Anlam:** Önceki günün tüm hareketi tersine döndü. En güvenilir dönüş sinyallerinden biri.
+
+## Devam Formasyonları — 3 Önemli Sinyal
+
+### 8. Marubozu
+
+Fitilsiz veya çok kısa fitilli güçlü mum. Açılıştan kapanışa tek yönlü güçlü hareket.
+
+**Anlam:** Tam kontrol — yeşil marubozu alıcıların, kırmızı marubozu satıcıların tam hakimiyetini gösterir. Trend devam edebilir.
+
+### 9. Spinning Top
+
+Küçük gövde, her iki yönde de uzun fitiller.
+
+**Anlam:** Alıcı-satıcı dengesi, kararsızlık. Devam mı dönüş mü olduğunu sonraki mum belirler.
+
+### 10. Üç Beyaz Asker (Three White Soldiers)
+
+Üst üste üç güçlü yeşil mum, her biri öncekinin üzerinde kapanır.
+
+**Anlam:** Güçlü yükseliş momentumu. Düşüş trendi sonunda görülürse çok güçlü dönüş sinyalidir.
+
+## Mum Formasyonlarını Doğru Kullanmak
+
+Mum formasyonları *tek başına yeterli değildir*. Güvenilirliği artırmak için:
+
+1. **Hacim teyidi:** Dönüş formasyonu yüksek hacimle oluşursa güvenilirlik 2x artar
+2. **Destek/Direnç uyumu:** Formasyon önemli bir destek/direnç bölgesinde oluşursa daha anlamlı
+3. **Büyük zaman dilimi:** Haftalık grafikte oluşan formasyonlar günlük grafiğe göre çok daha güçlü
+4. **Supertrend onayı:** Formasyon Supertrend yönüyle uyumluysa işleme girilebilir
+
+## BorsaPusula Bağlantısı
+
+BorsaPusula'nın sinyal algoritması doğrudan mum formasyonlarına bakmaz; Supertrend + ADX + EMA kombinasyonunu kullanır. Ancak bu sinyaller zaten güçlü mum oluşumlarıyla sık sık örtüşür. [Canlı sinyalleri görmek için ana sayfayı ziyaret edin.](/)""",
+    "faqs": [
+      {"q": "Mum grafik formasyonları ne kadar güvenilir?", "a": "Tek başına kullanıldığında %50-65 başarı oranına sahiptirler. Hacim teyidi, destek/direnç uyumu ve büyük zaman dilimiyle birleştirildiğinde güvenilirlik %70-80'e çıkabilir. Hiçbir formasyon %100 kesin değildir."},
+      {"q": "Çekiç ve ters çekiç arasındaki fark nedir?", "a": "Çekiç'te uzun fitil altta, gövde yukarıdadır; güçlü dönüş sinyalidir. Ters Çekiç'te uzun fitil üstte, gövde alttadır; daha zayıf bir sinyal olup mutlaka teyit gerektir."},
+      {"q": "Engulfing formasyon en güvenilir formasyon mudur?", "a": "Boğa ve Ayı Engulfing, en güvenilir tek mum dönüş formasyonları arasında sayılır. Özellikle yüksek hacimle teyit edilmesi halinde çok değerli sinyallerdir. Yine de kesin değildir."},
+      {"q": "Doji'yi nasıl yorumlamalıyım?", "a": "Doji tek başına 'piyasa kararsız' der. Anlam kazanması için bağlamı önemlidir. Güçlü bir yükseliş trendinin tepesinde oluşan doji, düşüş uyarısı verebilirken; destek bölgesindeki doji al fırsatı işareti olabilir."},
+      {"q": "Mum formasyonlarını BIST'te kullanmak ne kadar etkili?", "a": "BIST'te yabancı yatırımcı oranı düşük olduğundan teknik analiz sinyalleri bazen daha az güvenilir olabilir. Bununla birlikte BIST30 hisseleri yeterli likiditeye sahiptir ve mum formasyonları genel olarak işlevseldir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'FROTO', 'TUPRS']
+  },
+
+  # ── Makale 37 ──────────────────────────────────────────────────────
+  {
+    "slug": "dolar-tl-borsa-iliskisi",
+    "title": "Dolar/TL ve BIST İlişkisi: Kur Yükselince Ne Olur?",
+    "cat": "Makro Analiz",
+    "read_min": 5,
+    "summary": "Türk yatırımcılar için en kritik makro faktörlerden biri kur hareketleridir. USD/TRY artışı BIST'i nasıl etkiler? Hangi sektörler kurdan kazanır, hangisi kaybeder?",
+    "body": """## Kur-Borsa İlişkisi Neden Önemli?
+
+Türkiye ekonomisinin dışa açıklığı nedeniyle **USD/TRY kuru, BIST'in en kritik makro değişkenlerinden biridir.** Kur yükseldiğinde (TL değer kaybettiğinde) bazı sektörler kazanırken bazıları kaybeder.
+
+Bu ilişkiyi doğru anlamak; sektör rotasyonunu zamanında görmek ve portföyünüzü kuruma karşı konumlandırmak için şarttır.
+
+## Kur Artışında Kazanan Sektörler
+
+### 1. İhracata Yönelik Şirketler 🟢
+
+Gelirleri dolar/euro bazlı ama maliyetleri TL olan şirketler kur artışından *direkt kazanır*:
+
+- **Otomotiv:** FROTO, TOASO (ihracat ağırlıklı, TL maliyeti düşük)
+- **Beyaz eşya / Ev aletleri:** ARCLK, VESTL
+- **Tekstil / Konfeksiyon:** İhracatçı şirketler
+- **Demir-çelik:** EREGL (hem ihracatçı hem emtia fiyatı USD bazlı)
+
+**Neden kazanır?** 1 dolar gelirleri TL olarak daha fazlaya çevrilir. Yabancı piyasalarda Türk ürünleri daha ucuzladığı için talep artar.
+
+### 2. Turizm Şirketleri (Dolaylı) 🟡
+
+Kur yükseldiğinde Türkiye yabancı turistler için ucuzlar, talep artar:
+- Otel şirketleri, havacılık (THYAO özellikle)
+
+**Not:** THYAO yakıt maliyeti USD bazlı olduğu için net etki karmaşıktır.
+
+### 3. Bankalar (Karma) 🟡
+
+Bankalar hem TL hem döviz varlık/yükümlülüklerine sahiptir. Kısa vadede belirsiz etki yaşanır; uzun vadede yüksek enflasyon dönemlerinde kredi büyümesi ve faiz marjı belirleyici olur.
+
+## Kur Artışında Kaybeden Sektörler
+
+### 1. İthalata Bağımlı Şirketler 🔴
+
+Hammaddesi veya ürünleri USD/EUR bazlı olan şirketler:
+- **Enerji şirketleri:** Petrol fiyatı USD bazlı → artan maliyet
+- **İlaç sektörü:** Bileşenler çoğunlukla ithal
+- **Teknoloji dağıtıcıları:** Ürün maliyetleri dolar bazlı
+- **Perakende:** Çok sayıda ithal ürün satan şirketler
+
+### 2. Yüksek Döviz Borcu Olan Şirketler 🔴
+
+USD borcu olan şirketlerin borç yükü TL cinsinden artar. Bu şirketlerin kur artışından negatif etkilendiğini görürsünüz.
+
+## Nominal vs Reel Getiri: Dolar Bazında BIST
+
+BIST nominal (TL bazında) çok iyi görünse bile, dolar bazında değerlendirildiğinde farklı bir tablo çıkabilir.
+
+**Örnek hesaplama:**
+- BIST endeksi +50% yükseldi (TL bazında)
+- Aynı dönemde USD/TRY +40% arttı
+- Dolar bazında BIST getirisi: ≈ +7% (50% ÷ 1.4 − 1)
+
+Bu nedenle yabancı yatırımcılar BIST'i **dolar bazında** değerlendirir. BIST/USD'nin güçlendiği dönemler, yabancı ilgisinin arttığı dönemlerdir.
+
+## TCMB Kararlarının Kur Üzerindeki Etkisi
+
+Türkiye'de para politikası ve kur arasındaki ilişki özellikle kritiktir:
+
+- **Faiz artışı** → TL güçlenir (yabancı yatırımcı ilgisi artar) → Kur düşer → İhracatçılar kısmen olumsuz etkilenir
+- **Faiz indirimi** → TL zayıflar (yabancı sermaye çıkışı riski) → Kur yükselir → İhracatçılar kazanır ama ithalatçılar kaybeder
+- **Ortodoks para politikası** → Enflasyon kontrol altında → TL değer kaybı yavaşlar → Daha istikrarlı BIST ortamı
+
+## BorsaPusula'da Kur Takibi
+
+BorsaPusula'nın **[makro ticker bandı](/),** USD/TRY kurunu anlık olarak gösterir. Kur hareketlerine göre sektör filtresi kullanarak:
+- Kur yükselişinde: FROTO, EREGL gibi ihracatçı hisselerin sinyallerini takip edin
+- Kur düşüşünde: İthalatçı şirketler ve tüketici sektörü sinyallerini değerlendirin
+
+[Tüm BIST100 hisselerinin canlı sinyallerine bakmak için ana sayfayı ziyaret edin.](/)""",
+    "faqs": [
+      {"q": "Kur yükselince BIST her zaman düşer mi?", "a": "Hayır. Kur yükselişi piyasayı hem pozitif (ihracatçı şirketler, döviz geliri olanlar) hem negatif (ithalatçılar, döviz borçlular) etkiler. BIST üzerindeki net etki, hangi sektörlerin ağırlıklı olduğuna bağlıdır. Hızlı kur yükselişleri genellikle genel bir risk kaçışına yol açsa da orta vadede ihracat odaklı şirketler kazanır."},
+      {"q": "Dolar/TL ve altın arasındaki ilişki nasıl?", "a": "Altın hem USD hem güvenli liman varlığı olduğundan, Türk yatırımcı için TL bazındaki altın fiyatı kur × uluslararası altın fiyatından oluşur. Kur yükselirken uluslararası altın sabit kalsa bile TL bazındaki altın fiyatı artar."},
+      {"q": "Yabancı yatırımcı BIST'e ne zaman ilgi gösterir?", "a": "Yabancılar genellikle TL'nin istikrar kazandığı, reel faizin pozitife döndüğü veya BIST'in dolar bazında aşırı değer kaybettiği dönemlerde ilgi gösterir. BIST/USD tarihi düşüklerine yakın seviyeler alım fırsatı olarak değerlendirilebilir."},
+      {"q": "Türk şirketlerinin döviz borcu ne kadar önemli?", "a": "Şirket bilançolarında 'net döviz pozisyonu' kritik bir metriktir. Net döviz açığı büyük olan şirketler (borçları alacaklarından fazla), kur artışında zarar yazar. KAP bildirimleri ve yıllık raporlarda bu bilgiye ulaşılabilir."},
+      {"q": "Kur korumalı mevduat (KKM) BIST'i nasıl etkiler?", "a": "KKM, TL'nin değer kaybetmesi durumunda Hazine farkı karşıladığından, TL'yi tutmayı cazip kılar. Bu mekanizma güçlüyken TL baskısı sınırlı kalır ve BIST daha istikrarlı seyreder. KKM'nin kaldırılması veya zayıflaması kur riskini artırabilir."}
+    ],
+    "related_tickers": ['FROTO', 'TOASO', 'EREGL', 'THYAO', 'AKBNK']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
