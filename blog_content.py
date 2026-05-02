@@ -7006,6 +7006,258 @@ ROA = Net Kâr / Toplam Aktifler × 100
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
   },
+
+  # ── ARTICLE 97 ──
+  {
+    "slug": "mum-formasyonlari-teknik-analiz-rehberi",
+    "title": "Mum Formasyonları: Teknik Analizde En Güçlü Mum Grafik Sinyalleri",
+    "desc": "Doji, engulfing, çekiç, gece yıldızı ve sabah yıldızı başta olmak üzere teknik analizin en önemli mum grafik formasyonları ve BIST'te kullanımı.",
+    "date": "2026-05-06",
+    "mins": 8,
+    "cat": "Teknik Analiz",
+    "body": """
+<p>Mum grafikleri (candlestick charts), Japon pirinç tüccarları tarafından 17. yüzyılda geliştirilen ve günümüz teknik analizinin temelini oluşturan grafik türüdür. Her bir mum; açılış, kapanış, en yüksek ve en düşük fiyatı görsel olarak özetler. Belirli mum örüntüleri güçlü alım veya satım sinyalleri verebilir.</p>
+
+<h2>Mum Grafik Anatomisi</h2>
+<p>Her mumun dört bileşeni vardır:</p>
+<ul>
+  <li><strong>Gövde (Real Body):</strong> Açılış ile kapanış arasındaki fiyat aralığı. Yeşil/beyaz → kapanış açılışın üstünde (yükseliş). Kırmızı/siyah → kapanış açılışın altında (düşüş).</li>
+  <li><strong>Üst Fitil (Upper Shadow/Wick):</strong> Gövdenin üst noktasından en yüksek fiyata uzanan çizgi.</li>
+  <li><strong>Alt Fitil (Lower Shadow/Wick):</strong> Gövdenin alt noktasından en düşük fiyata uzanan çizgi.</li>
+</ul>
+
+<h2>Tek Mum Formasyonları</h2>
+<p><strong>Doji:</strong> Açılış ve kapanış neredeyse aynı seviyede — gövde yok veya çok küçük. Alıcı ve satıcılar dengededir; trend belirsizliği veya dönüş öncesi duraksamayı temsil eder. Uzun bir yükseliş veya düşüşün sonunda oluşan doji, daha güçlü dönüş sinyali verir.</p>
+<p><strong>Çekiç (Hammer):</strong> Küçük gövde + çok uzun alt fitil. Düşen trendde oluşursa güçlü dönüş sinyali. Alt fitil uzunluğu en az gövdenin 2 katı olmalı. Mesaj: Satıcılar fiyatı sert düşürdü ama alıcılar geri aldı.</p>
+<p><strong>Ters Çekiç (Inverted Hammer):</strong> Küçük gövde + uzun üst fitil. Düşen trendde dip noktasında oluşursa toparlanma işareti olabilir ama çekiçten daha az güvenilir.</p>
+<p><strong>Asılı Adam (Hanging Man):</strong> Çekiçle aynı şekle sahip ama yükselen trendde oluşur → SAT sinyali. Aynı form, konuma göre farklı anlam taşır.</p>
+<p><strong>Kayan Yıldız (Shooting Star):</strong> Küçük gövde + çok uzun üst fitil. Yükselen trendde oluşursa güçlü düşüş sinyali. Alıcılar fiyatı yukarı itti ama satıcılar geri çekti.</p>
+
+<h2>Çift Mum Formasyonları</h2>
+<p><strong>Yutan Formasyon / Bullish Engulfing:</strong> Küçük kırmızı mumun arkasından büyük yeşil mum gelir ve kırmızı mumu tamamen kapsar. Düşen trendde güçlü dönüş sinyali.</p>
+<p><strong>Bearish Engulfing:</strong> Küçük yeşil mumun arkasından büyük kırmızı mum gelir. Yükselen trendde güçlü düşüş sinyali.</p>
+<p><strong>Harami:</strong> Büyük bir mumun içinde kalan küçük mum. Trendin ivme kaybettiğine işaret eder.</p>
+
+<h2>Üç Mum Formasyonları</h2>
+<p><strong>Sabah Yıldızı (Morning Star):</strong> Düşen trend → büyük kırmızı mum → küçük gövdeli belirsizlik mumu (boşluklu) → büyük yeşil mum. Üç mumlu bu formasyon güçlü dip dönüş sinyalidir.</p>
+<p><strong>Gece Yıldızı (Evening Star):</strong> Sabah yıldızının tersi. Yükselen trend → büyük yeşil mum → küçük gövdeli belirsizlik → büyük kırmızı mum. Tepe dönüş sinyali.</p>
+<p><strong>Üç Karga (Three Black Crows):</strong> Üst üste üç düşük kapanışlı büyük kırmızı mum. Güçlü düşüş trendi başlangıcı.</p>
+<p><strong>Üç Asker (Three White Soldiers):</strong> Üst üste üç yüksek kapanışlı büyük yeşil mum. Güçlü yükseliş başlangıcı.</p>
+
+<h2>Mum Formasyonlarını Doğru Kullanmak</h2>
+<p>Mum formasyonları tek başına yeterli değildir. Güvenilirliği artırmak için:</p>
+<ul>
+  <li>Destek/direnç seviyesinde oluşan formasyon daha güçlüdür</li>
+  <li>Yüksek hacimle oluşan formasyon daha güvenilirdir</li>
+  <li>Trend bağlamında değerlendirin: Yükselen trendde çekiç daha anlamlı</li>
+  <li>BorsaPusula Supertrend sinyali ile teyit edin</li>
+</ul>
+<p>Doji + destek seviyesi + düşük RSI + Supertrend dönüşü kombinasyonu, tek başına mum formasyonundan çok daha güçlü sinyal kalitesi sunar.</p>
+""",
+    "faqs": [
+      {"q": "Mum grafiği mi çubuk grafik mi daha iyi?",
+       "a": "Mum grafikleri, çubuk grafiklere aynı bilgiyi çok daha görsel ve okunabilir biçimde sunar. Günümüzde neredeyse tüm profesyonel trader mum grafik kullanır. Çubuk grafik artık büyük ölçüde yerini mum grafiğe bırakmıştır. Başlangıç seviyesi için mum grafik öğrenmek hem daha kolay hem daha bilgilendiricidir."},
+      {"q": "Mum formasyonu ne kadar güvenilir?",
+       "a": "Mum formasyonları, diğer teknik göstergeler ve bağlamla birlikte kullanıldığında değer kazanır. Tek başına bir mum formasyonu %60-65 civarında başarı oranı sunarken, destekleyici göstergelerle (%70-75+) bu oran artar. Her formasyon için stop-loss ile pozisyon yönetmek şarttır."},
+      {"q": "Hangi zaman diliminde mum formasyonları daha güvenilir?",
+       "a": "Daha uzun zaman dilimleri daha güvenilir formasyon verir: Günlük > 4 saatlik > 1 saatlik > 15 dakikalık. Dakikalık grafikler çok fazla gürültü içerir. Swing trader için günlük grafikteki mum formasyonları, scalper için ise 15 dakikalık-1 saatlik grafikler daha uygun olabilir."},
+      {"q": "Doji her zaman trend dönüşü mü gösterir?",
+       "a": "Hayır. Doji 'belirsizlik' veya 'denge' gösterir ama dönüş garantisi değildir. Güçlü bir trendde doji oluşsa bile trend devam edebilir. Dönüş sinyali için doji'nin ardından gelen mumun yönü çok önemlidir: doji'nin ardından güçlü yükseliş mumu gelirse dönüş, düşüş mumu gelirse trend devamı olarak yorumlanır."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 98 ──
+  {
+    "slug": "bist-halka-arz-ipo-yatirimi",
+    "title": "BIST'te Halka Arz (IPO) Yatırımı: Fırsatlar, Riskler ve Başvuru Rehberi",
+    "desc": "Borsa İstanbul'da halka arz nedir? IPO'ya nasıl başvurulur, değerleme nasıl yapılır, halka arz yatırımının riskleri ve BIST halka arz tarihi örnekleri.",
+    "date": "2026-05-06",
+    "mins": 7,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p>Halka arz (IPO — Initial Public Offering), bir şirketin hisselerini ilk kez kamuya sunması ve borsada işlem görmeye başlamasıdır. Türkiye'de son yıllarda halka arz sayısı ve yatırımcı ilgisi belirgin biçimde artmıştır. Ancak "her halka arz kârlı mıdır?" sorusunun cevabı karmaşıktır.</p>
+
+<h2>Halka Arz Süreci Nasıl İşler?</h2>
+<p>Türkiye'de halka arz süreci birkaç aşamadan oluşur:</p>
+<ol>
+  <li><strong>SPK Onayı:</strong> Şirket, Sermaye Piyasası Kurulu'na izahname ve belgelerini sunar; onay alır.</li>
+  <li><strong>Fiyat Tespit Süreci:</strong> Halka arz fiyatı, talep toplama yöntemi (book building) veya sabit fiyat yöntemiyle belirlenir.</li>
+  <li><strong>Başvuru Dönemi:</strong> Yatırımcılar belirli bir süre içinde talep bildirir ve başvuru parasını bloke eder.</li>
+  <li><strong>Dağıtım:</strong> Talep arzı aşarsa oransal dağıtım yapılır. Bloke edilen para iade edilir.</li>
+  <li><strong>Borsada İşlem Başlangıcı:</strong> Halka arz sonrası belirli bir süre içinde BIST'te işlem görmeye başlar.</li>
+</ol>
+
+<h2>Halka Arza Nasıl Başvurulur?</h2>
+<p>Yatırımcı olarak halka arza katılmak için:</p>
+<ul>
+  <li>Aracı kurum hesabınızın açık ve blokaj için yeterli nakit bakiyenizin olması gerekir</li>
+  <li>İzahnameyi okuyun: Şirketin iş modeli, risk faktörleri ve mali tabloları burada yer alır</li>
+  <li>Talep toplama süresinde (genellikle 3-5 gün) aracı kurum platformunuzdan başvuru yapın</li>
+  <li>Bloke paradan faiz gelmeyebilir; bu süreyi göz önünde bulundurun</li>
+</ul>
+
+<h2>Halka Arz Değerleme Kriterleri</h2>
+<p>Halka arz fiyatının makul olup olmadığını değerlendirmek için:</p>
+<ul>
+  <li><strong>Sektör karşılaştırması:</strong> Benzer şirketlerin F/K, EV/FAVÖK çarpanlarıyla karşılaştırın</li>
+  <li><strong>Büyüme hikayesi:</strong> Neden halka arz oluyor? Büyüme finansmanı mı yoksa mevcut hissedarların çıkışı mı?</li>
+  <li><strong>Şirket sağlığı:</strong> Gelirler büyüyor mu? Kârlı mı? Borç yükü nedir?</li>
+  <li><strong>Halka arz fiyatı vs değerleme:</strong> Şirketi iyi şirket olarak değerlendirseniz bile çok yüksek değerlemeye halka arz olursa geri dönüş potansiyeli sınırlı kalır</li>
+</ul>
+
+<h2>Halka Arz Tuzakları</h2>
+<p>Türkiye'de yaşanan halka arz deneyimleri bazı tekrarlayan riskleri gündeme getirmiştir:</p>
+<ul>
+  <li><strong>Aşırı değerleme:</strong> Yüksek talep dönemlerinde şirketler piyasa değerinin çok üzerinde fiyatlanarak halka arzedilebilir.</li>
+  <li><strong>Kilitlenme süresi sona erince satış:</strong> Mevcut hissedarların lock-up süresi bitince büyük satış yapması baskı yaratabilir.</li>
+  <li><strong>Hype odaklı arz:</strong> Popüler sektörlerde gerçek iş değerinden bağımsız talep oluşabilir — balonlar hem hızlı yükselir hem hızlı söner.</li>
+  <li><strong>Küçük halka arz büyüklüğü:</strong> Çok az hisse halka arzedilirse fiyat yapay olarak yükselebilir ve sonrasında büyük düşüş yaşanabilir.</li>
+</ul>
+
+<h2>İlk Gün ve Uzun Vadeli Halka Arz Performansı</h2>
+<p>Araştırmalar ilginç bir örüntü ortaya koyar: Halka arzlar kısa vadede (ilk gün veya ilk ay) olumlu performans gösterirken uzun vadede (1-3 yıl) genellikle endeksin gerisinde kalma eğilimindedir. Bu nedenle halka arza "al ve unut" yaklaşımıyla değil, kısa vadeli fırsatı değerlendirme veya uzun vadeli için titizce seçme perspektifiyle bakmak daha sağlıklıdır.</p>
+<p>BorsaPusula hisseleri halka arzdan yeterli süre geçtikten ve yeterli fiyat geçmişi oluştuktan sonra sinyal üretmeye başlar. Bu nedenle yeni halka arz edilen hisseleri takip etmek için biraz beklemeniz gerekebilir.</p>
+""",
+    "faqs": [
+      {"q": "Her halka arza başvurmak mantıklı mı?",
+       "a": "Hayır. Her halka arz farklı değerleme, sektör ve iş modeli taşır. Kör başvuru stratejisi bazen kârlı olsa da uzun vadede seçici olmak daha sağlıklı getiri sağlar. İzahnameyi okumak, benzer şirket çarpanlarıyla karşılaştırmak ve sektör görünümünü değerlendirmek minimum düzeyde yapılması gerekenlerdir."},
+      {"q": "Halka arz başvurusu parasız çıkarsa ne olur?",
+       "a": "Dağıtım oransal olarak yapılır; talep arzı aştığında başvuran her yatırımcı istediği miktarın belirli bir oranını alır. Çok aşırı taleplerin olduğu arzlarda dağıtım oranı çok düşük olabilir (%1-5 gibi). Başvuran ama dağıtım alamayan yatırımcılara ödedikleri blokaj tutarı iade edilir."},
+      {"q": "Halka arzda izahname neden önemli?",
+       "a": "İzahname, şirketin resmi açıklama belgesidir — bilanço, yönetim yapısı, risk faktörleri, kullanım planı ve iş modeli bu belgede yer alır. 'Halka arz parasını ne için kullanacaklar?' sorusu kritiktir: büyüme yatırımı mı yoksa mevcut hissedarların çıkışını finanse mi edecek? İkincisi daha az cazip bir sinyal olabilir."},
+      {"q": "Halka arzdan ne kadar süre sonra satılmalı?",
+       "a": "Kısa vadeli strateji: İlk birkaç gün veya hafta içinde fiyat artışından yararlanmak. Uzun vadeli strateji: Şirketi gerçek iş değeri üzerinden analiz edip tutmak veya satmak. Mevcut hissedar lock-up sürelerini kontrol edin — bu sürenin sona ermesi satış baskısı yaratabilir."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 99 ──
+  {
+    "slug": "emeklilik-icin-borsa-yatirimi-uzun-vadeli-strateji",
+    "title": "Emeklilik İçin Borsa Yatırımı: Uzun Vadeli Hisse Stratejisi",
+    "desc": "Emeklilik birikimi için borsa yatırımı nasıl yapılır? Bileşik faizin gücü, düzenli yatırım planı, BES vs hisse senedi karşılaştırması ve uzun vadeli BIST stratejisi.",
+    "date": "2026-05-06",
+    "mins": 7,
+    "cat": "Strateji",
+    "body": """
+<p>Emeklilik birikimi için hisse senedi piyasası, uzun vadede en güçlü servet yaratma araçlarından biridir. Buna karşın Türkiye'de emeklilik için hisse yatırımını aktif olarak kullanan bireysel yatırımcı sayısı hâlâ oldukça sınırlıdır. Bu rehberde uzun vadeli perspektiften BIST'te nasıl emeklilik birikimi yapabileceğinizi inceleyeceğiz.</p>
+
+<h2>Bileşik Faizin Gücü</h2>
+<p>Albert Einstein'ın "dünyanın sekizinci harikası" dediği bileşik faiz, uzun vadeli yatırımın temel motorudur. Örnek:</p>
+<ul>
+  <li>Aylık 1.000 TL yatırım, yıllık %15 ortalama getiri, 30 yıl → yaklaşık 6.9 milyon TL birikim</li>
+  <li>Aynı yatırım 20 yıl → yaklaşık 1.5 milyon TL</li>
+  <li>Aynı yatırım 10 yıl → yaklaşık 270.000 TL</li>
+</ul>
+<p>Erken başlamak, daha yüksek getiri oranı kadar kritik öneme sahiptir. 25 yaşında başlayan, 35 yaşında başlayana kıyasla 10 yıl önce başladığı için emeklilikte çok daha büyük bir farka sahip olabilir.</p>
+
+<h2>Düzenli Yatırım (DCA — Dollar Cost Averaging)</h2>
+<p>Piyasanın zamanlamasını tahmin etmeye çalışmak yerine, düzenli aralıklarla belirli miktarda yatırım yapmak (DCA) uzun vadeli yatırımcı için en güçlü stratejidir.</p>
+<p>DCA'nın avantajları:</p>
+<ul>
+  <li>Piyasa düşükken daha fazla hisse alınır, yüksekken daha az — ortalama maliyet optimize edilir</li>
+  <li>FOMO ve piyasa zamanlama hataları minimize edilir</li>
+  <li>Aylık maaşla bütünleşen bir alışkanlık haline getirilebilir</li>
+  <li>Duygusal karar verme azalır</li>
+</ul>
+
+<h2>BES vs Hisse Senedi Yatırımı</h2>
+<p>Bireysel Emeklilik Sistemi (BES) ile doğrudan hisse senedi yatırımı arasındaki fark:</p>
+<ul>
+  <li><strong>BES avantajı:</strong> Devlet katkısı (%25-30 destek), vergi avantajı, profesyonel fon yönetimi. Asgari 10 yıl tutma koşulu.</li>
+  <li><strong>Hisse avantajı:</strong> Yüksek seçicilik, 2 yıl sonra vergi muafiyeti, likidite (istediğiniz zaman çıkabilirsiniz), potansiyel yüksek getiri.</li>
+  <li><strong>Karma strateji:</strong> BES devlet desteğini maksimize etmek için kullanılırken, ek birikim için doğrudan hisse veya hisse fonu tercih edilir.</li>
+</ul>
+
+<h2>Uzun Vadeli BIST Yatırım Stratejisi</h2>
+<p>Emeklilik ufuğuyla (15-30 yıl) BIST'e yatırım yapanlar için öneriler:</p>
+<ul>
+  <li><strong>Kaliteli şirketler seçin:</strong> Sürdürülebilir rekabet avantajı, güçlü bilanço, temettü geçmişi. Spekülatif hisseler uzun vade portföyüne uygun değil.</li>
+  <li><strong>Çeşitlendirin:</strong> 3-4 sektör, 8-12 hisse. Tek bir şirketin iflası tüm portföyü etkilemeyecek.</li>
+  <li><strong>Temettüleri yeniden yatırın:</strong> Uzun vadede temettü yeniden yatırımı toplam getirinin büyük bölümünü oluşturabilir.</li>
+  <li><strong>Volatiliteye dayanın:</strong> 30 yıllık ufukta %30-40 düşüşler geçici kalır. Panik satışı uzun vadeli getiriyi tahrip eder.</li>
+  <li><strong>Enflasyona karşı koruyun:</strong> Döviz geliri olan şirketler (THYAO, ASELS) ve reel varlıklar (EREGL gibi emtia-yoğun), TL enflasyonuna karşı doğal koruma sağlar.</li>
+</ul>
+
+<h2>Emeklilik Yatırımında Riskler</h2>
+<ul>
+  <li><strong>Konsantrasyon riski:</strong> Tek bir şirkete veya sektöre aşırı bağımlılık</li>
+  <li><strong>Erken çekim:</strong> Piyasa düşük seyrederken acil nakit ihtiyacıyla satmak, uzun vadeli getiriyi mahveder</li>
+  <li><strong>Enflasyon riski:</strong> TL bazlı getiri, enflasyonun altında kalırsa reel değer kaybolur</li>
+  <li><strong>Kur riski:</strong> TL'nin sürekli değer kaybı uluslararası karşılaştırmada portföyü eritebilir</li>
+</ul>
+<p>Bu riskleri yönetmek için: Acil fon oluşturun (3-6 aylık gider), çeşitlendirin ve kademeli yatırım yapın. Borsa yatırımına koymayacağınız kadar kısa vadeli veya kritik parayı asla hisse senetlerine bağlamayın.</p>
+""",
+    "faqs": [
+      {"q": "Kaç yaşında borsa yatırımına başlanmalı?",
+       "a": "Ne kadar erken başlanırsa bileşik faizin gücünden o kadar uzun süre yararlanılır. 20'li yaşlarda başlamak, 40'lı yaşlarda başlamaya kıyasla eşit miktarda yatırımla emeklilikte çok daha büyük birikim anlamına gelir. 'Bugünün en iyi zamanı' diyebilirsiniz — birikimimizin büyümesi için her zaman en iyi başlangıç noktası 'şu an'dır."},
+      {"q": "Piyasa düşerken yatırıma devam edilmeli mi?",
+       "a": "Uzun vadeli yatırımcı için evet. Düşen piyasada aynı parayla daha fazla hisse alınır — ortalama maliyet düşer. Tarihsel olarak tüm büyük borsa düşüşleri sonunda toparlanmıştır. Kısa vadeli ağrı olsa da uzun vadeli perspektiften piyasa düşüşleri indirim fırsatıdır. Tek önemli soru: Nakde ihtiyacınız var mı? Yoksa devam edin."},
+      {"q": "BES fonu mu yoksa bireysel hisse mi daha iyi?",
+       "a": "İkisinin birlikte kullanılması ideal. BES'te devlet katkısından (%25-30) yararlanmak neredeyse garantili erken getiri sağlar. BES limiti kadar BES'e yatırım yapıp, kalan birikimleri doğrudan hisse veya fon üzerinden yönetmek yaygın bir karma stratejidir. Uzmanlık düzeyine göre doğrudan hisse veya yatırım fonu tercih edilebilir."},
+      {"q": "Emeklilik yatırımında hangi hisseler tercih edilmeli?",
+       "a": "Uzun vadeli emeklilik portföyü için: sürdürülebilir rekabet avantajlı şirketler, istikrarlı temettü geçmişi, güçlü bilanço ve yönetim, büyüme potansiyeli taşıyan ama spekülatif olmayan işletmeler. BIST'te AKBNK, GARAN, EREGL, THYAO, ASELS ve TCELL gibi büyük ve köklü şirketler emeklilik portföyleri için sıkça değerlendirilen seçeneklerdir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL', 'TCELL']
+  },
+
+  # ── ARTICLE 100 ──
+  {
+    "slug": "borsada-basarisiz-yatirimcilarin-yaptigi-hatalar",
+    "title": "Borsada Başarısız Yatırımcıların Yaptığı 10 Kritik Hata",
+    "desc": "BIST yatırımcılarının en sık yaptığı hatalar: stop-loss koymamak, FOMO, aşırı çeşitlendirme, sürü psikolojisi ve daha fazlası — bunlardan nasıl kaçınılır?",
+    "date": "2026-05-06",
+    "mins": 7,
+    "cat": "Strateji",
+    "body": """
+<p>Borsa yatırımında başarısızlık çoğunlukla zeka eksikliğinden değil, sistematik hatalardan kaynaklanır. Bu hatalar tekrarlanabilir ve öngörülebilirdir — dolayısıyla önlenebilirdir. Başarılı yatırımcıların çoğu aynı hataları en az bir kez yaşamış; farkları bu hatalardan ders çıkarabilmeleridir.</p>
+
+<h2>Hata 1 — Stop-Loss Kullanmamak</h2>
+<p>"Düşük seviyede satar gibi görünüyor, biraz daha bekleyeyim" düşüncesi küçük kayıpları büyük felaketlere dönüştürür. Her pozisyon için önceden stop-loss belirlemek ve kurallara uymak, uzun vadeli portföyü korur.</p>
+
+<h2>Hata 2 — Tek Hisseye Yoğunlaşmak</h2>
+<p>Portföyün tamamını tek bir hisseye veya sektöre koymak, o şirkete veya sektöre özgü bir riske karşı tüm sermayeyi açık bırakır. Bir şirkette büyük haber veya skandal çıktığında çeşitlendirilmemiş portföy büyük yara alabilir.</p>
+
+<h2>Hata 3 — FOMO ile Hareket Etmek</h2>
+<p>Sosyal medyada "fırlatıyor" denilen hisseye temele bakmadan girmek, genellikle en üst noktadan alış anlamına gelir. Trend zaten olgunlaşmış ve kalabalık yetişmiştir. Her kaçan trene yetişmeye çalışmak yorucu ve pahalı sonuçlar doğurur.</p>
+
+<h2>Hata 4 — Aşırı İşlem Yapmak (Overtrading)</h2>
+<p>Çok sık alım-satım, komisyon maliyetini artırır ve davranışsal hataların sayısını çoğaltır. Her piyasa hareketine reaksiyon vermek yerine, belirlenmiş kriterlere uyan fırsatlarda hareket etmek daha az ama daha kaliteli işlem anlamına gelir.</p>
+
+<h2>Hata 5 — Emir Türlerini Anlamamak</h2>
+<p>Piyasa emri, limit emri, stop emri farkını bilmeden işlem yapmak, yanlış fiyattan gerçekleşen emirler veya tetiklenmemesi gereken stop-loss'lar yaratır. Temel emir türlerini anlamak, her yatırımcının tamamlaması gereken temel eğitimdir.</p>
+
+<h2>Hata 6 — Habere Geç Tepki Vermek</h2>
+<p>KAP bildirimi çıktığında veya haber yayıldığında fiyat çoğunlukla zaten tepkisini vermiştir. "Büyük haber duydum, alayım" çoğu zaman tepede alış anlamına gelir. Piyasayı sürekli takip edemiyorsanız, haber odaklı kısa vadeli işlemlerden kaçınmak daha güvenlidir.</p>
+
+<h2>Hata 7 — Kaybeden Pozisyonu Ortalama Yapmak (Averaging Down)</h2>
+<p>Zarardaki hisseyi "daha ucuzladı" diye alarak ortalama maliyeti düşürmek, bazen işe yarar ama genellikle tehlikelidir. Temel sorunlar devam ediyorsa hisse düşmeye devam eder ve her "ortalama" yeni kayıp demektir. "İyi şirkete dip yaparken ekle" ile "batmakta olan şirkete para gömme" arasındaki farkı anlamak kritiktir.</p>
+
+<h2>Hata 8 — Performansı Kısa Vadede Ölçmek</h2>
+<p>Haftalık veya aylık bazda portföy performansını değerlendirip stratejileri değiştirmek, uzun vadeli bir yaklaşımı sabote eder. Hisse yatırımı 3-5 yıllık bir oyundur; kısa vadeli dalgalanmalar stratejik kararlar için kötü bir temel oluşturur.</p>
+
+<h2>Hata 9 — Piyasayı Tahmin Etmeye Çalışmak</h2>
+<p>"Piyasa önümüzdeki ay düşecek" gibi kesin tahminlere dayalı hareket etmek çoğunlukla başarısızlıkla sonuçlanır. Piyasanın yönünü sürekli ve doğru tahmin eden kimse yoktur. Tahmin değil tepki — sinyallere ve verilere dayalı hareket — çok daha sağlam bir yaklaşımdır.</p>
+
+<h2>Hata 10 — Sisteme Uymamak</h2>
+<p>BorsaPusula gibi kural tabanlı bir sistem kullanmak ama "bu sefer farklı" diyerek sinyalleri görmezden gelmek, sistemi anlamsız kılar. Belirlenmiş kuralları tutarlı biçimde uygulamak, zaman zaman kaçırılan fırsatları telafi eden tutarlı bir disiplin yaratır. Sistem ancak tutarlı uygulandığında değer üretir.</p>
+
+<h2>Sonuç: Disiplin Zekanın Önünde</h2>
+<p>Borsa yatırımında başarı, olağanüstü zekaya değil tutarlı disipline bağlıdır. Yukarıdaki hataların farkında olmak ve sistematik olarak kaçınmak, ortalama yatırımcıyı piyasanın üzerine çıkarabilir. BorsaPusula sinyalleri, bu süreçte duygusal kararları azaltan ve kural tabanlı yaklaşımı destekleyen bir araç olarak tasarlanmıştır.</p>
+""",
+    "faqs": [
+      {"q": "Yeni başlayan bir yatırımcı hangi hatayı en çok yapar?",
+       "a": "Stop-loss kullanmamak ve FOMO ile hareket etmek en sık görülen başlangıç hatalarıdır. İkisi birleşince küçük bir yanlış işlem büyük kayba dönüşür. Başlangıç için en önemli iki kural: Her işlemde stop-loss belirle ve sosyal medya 'fırsatlarına' hemen reaksiyon gösterme."},
+      {"q": "Aşırı işlem yapmaktan nasıl kaçınılır?",
+       "a": "Kural koyun: Sadece belirlenmiş kriterleri karşılayan hisselerde, belirlenmiş koşullarda (örneğin Supertrend dönüşü + hacim teyidi) işlem yapın. Günlük veya haftalık maksimum işlem sayısı sınırı da işe yarayabilir. Her harekete reaksiyon vermek yerine 'neden bu işlemi yapıyorum?' sorusunu cevaplamak yeterli filtre sağlar."},
+      {"q": "Averaging down (ortalama yapma) ne zaman mantıklı?",
+       "a": "Uzun vadeli perspektiften, temel analiz sağlamsa ve trendin dönüşü için teknik teyit varsa ortalama yapmak mantıklı olabilir. Ancak düşen trendin devam ettiği, fundamentalin bozulduğu veya sektörün yapısal sorun yaşadığı durumlarda ortalama yapmak riski artırır. Kural olarak: Sinyal düşüşteyken, trendi teyit etmek için bekle."},
+      {"q": "Sisteme ne zaman güvenilir?",
+       "a": "Her sistem tutarsız uygulandığında değersizdir. BorsaPusula sinyallerine güven, sistem kurallarını anlamaktan geçer: Supertrend nasıl çalışır? ADX ne zaman güçlü trend gösterir? Bu mekanizmaları anladıktan sonra kısa vadeli olumsuz sonuçlar sistemi terk etme nedeni olmaz. Uzun vadeli istatistiksel değerlendirme, sitemin gerçek performansını gösterir."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
