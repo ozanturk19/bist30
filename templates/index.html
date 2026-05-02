@@ -385,6 +385,50 @@
     color: var(--bp-text); background: rgba(139,148,158,0.2);
   }
 
+  /* ── Gündem Tab Sistemi ─── */
+  .gnm-tabs {
+    display: flex; gap: 2px; margin-bottom: 12px;
+  }
+  .gnm-tab-btn {
+    font-size: 12px; font-weight: 600; padding: 5px 12px;
+    border: 1px solid transparent; border-radius: 6px;
+    cursor: pointer; transition: all .15s; color: var(--bp-text3);
+    background: none;
+  }
+  .gnm-tab-btn:hover { color: var(--bp-text); background: rgba(139,148,158,.08); }
+  .gnm-tab-btn.active {
+    color: var(--accent); background: rgba(31,111,235,.1);
+    border-color: rgba(31,111,235,.25);
+  }
+
+  /* ── Makro Haberler Liste ─── */
+  .macro-news-list { display: flex; flex-direction: column; gap: 8px; }
+  .macro-news-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 12px; border-radius: 8px;
+    background: var(--bg2); border: 1px solid var(--bp-border);
+    text-decoration: none; transition: border-color .15s, background .15s;
+  }
+  .macro-news-item:hover { border-color: var(--bp-border2); background: #1c2128; }
+  .macro-news-src {
+    font-size: 9px; font-weight: 700; color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: .5px;
+    background: rgba(139,148,158,.1); border: 1px solid rgba(139,148,158,.15);
+    border-radius: 4px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .macro-news-title {
+    font-size: 12.5px; color: var(--bp-text); line-height: 1.4; font-weight: 500;
+    flex: 1;
+  }
+  .macro-news-time {
+    font-size: 10px; color: var(--bp-text3); white-space: nowrap; flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .macro-news-empty {
+    font-size: 12px; color: var(--bp-text3); padding: 20px 12px; text-align: center;
+  }
+
   /* Skeleton */
   @keyframes gnm-shimmer {
     0%   { background-position: -300% 0; }
@@ -1417,40 +1461,62 @@
   <!-- ── Gündem & Haberler ──────────────────────────── -->
   <section class="gundem-section" id="gundemSec">
     <div class="gundem-header">
-      <span style="font-size:13px;font-weight:700;color:var(--bp-text);display:flex;align-items:center;gap:6px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             style="width:15px;height:15px;flex-shrink:0;opacity:.7">
-          <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/>
-          <path d="M14 2v4a2 2 0 0 0 2 2h4"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
-        </svg>
-        Gündem &amp; Haberler
-      </span>
-      <a href="/bilanco-takvimi" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">
-        Bilanço Takvimi →
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:13px;font-weight:700;color:var(--bp-text);display:flex;align-items:center;gap:6px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               style="width:15px;height:15px;flex-shrink:0;opacity:.7">
+            <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/>
+            <path d="M14 2v4a2 2 0 0 0 2 2h4"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
+          </svg>
+          Gündem &amp; Haberler
+        </span>
+        <!-- Tabs -->
+        <div class="gnm-tabs" id="gnmTabs">
+          <button class="gnm-tab-btn active" id="tabBtnHisse" onclick="switchGnmTab('hisse')">📈 Hisse</button>
+          <button class="gnm-tab-btn" id="tabBtnMakro" onclick="switchGnmTab('makro')">🌍 Makro</button>
+        </div>
+      </div>
+      <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">
+        Tümü →
       </a>
     </div>
 
-    <div class="gundem-layout">
-      <!-- Sol: haber kartları -->
-      <div class="gundem-cards-wrap">
-        <div class="gundem-cards" id="gundemCards">
-          <!-- skeleton placeholders -->
-          <div class="gnm-sk"></div>
-          <div class="gnm-sk"></div>
-          <div class="gnm-sk"></div>
+    <!-- Tab: Hisse Haberleri -->
+    <div id="gnmPanelHisse">
+      <div class="gundem-layout">
+        <!-- Sol: haber kartları -->
+        <div class="gundem-cards-wrap">
+          <div class="gundem-cards" id="gundemCards">
+            <!-- skeleton placeholders -->
+            <div class="gnm-sk"></div>
+            <div class="gnm-sk"></div>
+            <div class="gnm-sk"></div>
+          </div>
+        </div>
+
+        <!-- Sağ: bilanço mini widget -->
+        <div class="bilanco-mini-box" id="bilancoMini">
+          <div class="bilanco-mini-title">📅 Bilanço Dönemi</div>
+          <div id="bilancoMiniBody" style="min-height:60px">
+            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
+            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
+            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;width:70%"></div>
+          </div>
+          <a href="/bilanco-takvimi" class="bilanco-mini-link">Tüm takvim →</a>
         </div>
       </div>
+    </div>
 
-      <!-- Sağ: bilanço mini widget -->
-      <div class="bilanco-mini-box" id="bilancoMini">
-        <div class="bilanco-mini-title">📅 Bilanço Dönemi</div>
-        <div id="bilancoMiniBody" style="min-height:60px">
-          <!-- skeleton -->
-          <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
-          <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
-          <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;width:70%"></div>
-        </div>
-        <a href="/bilanco-takvimi" class="bilanco-mini-link">Tüm takvim →</a>
+    <!-- Tab: Makro Haberler -->
+    <div id="gnmPanelMakro" style="display:none">
+      <div id="macroNewsList" class="macro-news-list">
+        <!-- skeleton -->
+        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+      </div>
+      <div style="text-align:right;margin-top:8px">
+        <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">Piyasa Gündem Merkezi →</a>
       </div>
     </div>
   </section>
@@ -3575,6 +3641,52 @@ function showSigTip(ticker, ev) {
 
 function hideSigTip() {
   document.getElementById('sigTip')?.classList.remove('open');
+}
+
+// ── Gündem Tab Switcher ─────────────────────────────────
+let _macroLoaded = false;
+
+function switchGnmTab(tab) {
+  const btnHisse = document.getElementById('tabBtnHisse');
+  const btnMakro = document.getElementById('tabBtnMakro');
+  const panelHisse = document.getElementById('gnmPanelHisse');
+  const panelMakro = document.getElementById('gnmPanelMakro');
+  if (!btnHisse || !panelHisse) return;
+
+  if (tab === 'makro') {
+    btnHisse.classList.remove('active');
+    btnMakro.classList.add('active');
+    panelHisse.style.display = 'none';
+    panelMakro.style.display = 'block';
+    if (!_macroLoaded) loadMacroNews();
+  } else {
+    btnMakro.classList.remove('active');
+    btnHisse.classList.add('active');
+    panelMakro.style.display = 'none';
+    panelHisse.style.display = 'block';
+  }
+}
+
+async function loadMacroNews() {
+  const list = document.getElementById('macroNewsList');
+  if (!list) return;
+  try {
+    const res = await fetch('/api/macro-news');
+    const data = await res.json();
+    if (!data.items || data.items.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--bp-text3);font-size:12px;">Şu an haber bulunamadı.</div>';
+      return;
+    }
+    list.innerHTML = data.items.slice(0, 8).map(item => `
+      <a href="${item.url}" target="_blank" rel="noopener" class="macro-news-item">
+        <span class="macro-news-src">${item.source}</span>
+        <span class="macro-news-title">${item.title}</span>
+        <span class="macro-news-time">${item.date_str || ''}</span>
+      </a>`).join('');
+    _macroLoaded = true;
+  } catch(e) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--bp-text3);font-size:12px;">Haberler yüklenemedi.</div>';
+  }
 }
 
 // ── Keyboard shortcut: "/" → focus search ──────────────
