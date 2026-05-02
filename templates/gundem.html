@@ -280,6 +280,37 @@
     <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap"></div>
   </div>
 
+  <!-- Ekonomik Takvim -->
+  <div class="section" id="econCalSection">
+    <div class="section-hdr">
+      <div class="section-title">
+        <span class="dot" style="background:#f59e0b"></span>
+        Ekonomik Takvim
+      </div>
+      <span class="section-sub">Yaklaşan önemli tarihler</span>
+    </div>
+    <div id="econCalGrid" style="display:flex;flex-direction:column;gap:8px">
+      <div class="skeleton" style="height:48px;border-radius:8px"></div>
+      <div class="skeleton" style="height:48px;border-radius:8px"></div>
+    </div>
+  </div>
+
+  <!-- Makro Haberler -->
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-title">
+        <span class="dot" style="background:#8b5cf6"></span>
+        Makro Haberler
+      </div>
+      <span class="section-sub" id="macroNewsUpdatedAt">—</span>
+    </div>
+    <div id="macroNewsGrid" style="display:flex;flex-direction:column;gap:8px">
+      <div class="skeleton" style="height:52px;border-radius:8px"></div>
+      <div class="skeleton" style="height:52px;border-radius:8px"></div>
+      <div class="skeleton" style="height:52px;border-radius:8px"></div>
+    </div>
+  </div>
+
   <!-- Piyasa Haberleri -->
   <div class="section">
     <div class="section-hdr">
@@ -451,9 +482,74 @@ async function loadGundem() {
   }
 }
 
+async function loadEconCalendar() {
+  const grid = document.getElementById('econCalGrid');
+  if (!grid) return;
+  try {
+    const res = await fetch('/api/economic-calendar');
+    const d   = await res.json();
+    const events = [...(d.today || []), ...(d.upcoming || [])];
+    const unique = [];
+    const seen = new Set();
+    events.forEach(e => { if (!seen.has(e.date)) { seen.add(e.date); unique.push(e); } });
+    if (!unique.length) {
+      grid.innerHTML = '<div class="empty-box">Yaklaşan önemli ekonomik olay bulunamadı.</div>';
+      return;
+    }
+    const IMP = { HIGH: { lbl: 'Yüksek', cls: 'color:#f85149' }, MED: { lbl: 'Orta', cls: 'color:#f59e0b' }, LOW: { lbl: 'Düşük', cls: 'color:#8b949e' } };
+    grid.innerHTML = unique.slice(0, 6).map(e => {
+      const imp = IMP[e.importance] || IMP.MED;
+      const du  = e.days_until;
+      const duTxt = e.is_today ? '<strong style="color:#f59e0b">Bugün!</strong>'
+                   : du === 1  ? '<span style="color:#f59e0b">Yarın</span>'
+                   : `<span style="color:#94a3b8">${du} gün sonra</span>`;
+      return `<div style="display:flex;align-items:center;gap:12px;background:#111827;border:1px solid ${e.is_today?'rgba(245,158,11,.3)':'#1e2d45'};border-radius:8px;padding:10px 14px">
+        <span style="font-size:18px;flex-shrink:0">${e.icon||'📅'}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:#e2e8f0">${e.event}</div>
+          <div style="font-size:11px;color:#64748b;margin-top:1px">${e.date_fmt} · <span ${imp.cls}>${imp.lbl} Öncelik</span> · ${e.source}</div>
+        </div>
+        <div style="font-size:12px;text-align:right;flex-shrink:0">${duTxt}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('econCalGrid').innerHTML = '<div class="empty-box">Takvim yüklenemedi.</div>';
+  }
+}
+
+async function loadMacroNewsSection() {
+  const grid = document.getElementById('macroNewsGrid');
+  const upEl = document.getElementById('macroNewsUpdatedAt');
+  if (!grid) return;
+  try {
+    const res  = await fetch('/api/macro-news');
+    const data = await res.json();
+    if (upEl && data.updated_at) upEl.textContent = 'Güncellendi: ' + data.updated_at;
+    const items = data.items || [];
+    if (!items.length) {
+      grid.innerHTML = '<div class="empty-box">Makro haber bekleniyor…</div>';
+      return;
+    }
+    grid.innerHTML = items.slice(0, 8).map(item => {
+      return `<a href="${item.url}" target="_blank" rel="noopener"
+        style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:#111827;border:1px solid #1e2d45;border-radius:8px;padding:10px 14px;transition:border-color .15s"
+        onmouseover="this.style.borderColor='#2d4166'" onmouseout="this.style.borderColor='#1e2d45'">
+        <span style="font-size:9px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.15);border-radius:4px;padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.source}</span>
+        <span style="font-size:12.5px;color:#e2e8f0;line-height:1.4;font-weight:500;flex:1">${item.title}</span>
+        <span style="font-size:10px;color:#64748b;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.date_str||item.published||''}</span>
+      </a>`;
+    }).join('');
+  } catch(e) {
+    grid.innerHTML = '<div class="empty-box">Makro haberler yüklenemedi.</div>';
+  }
+}
+
 loadGundem();
+loadEconCalendar();
+loadMacroNewsSection();
 // 5 dakikada bir otomatik yenile
 setInterval(loadGundem, 5 * 60 * 1000);
+setInterval(loadMacroNewsSection, 30 * 60 * 1000);
 
 /* ── Makro Ticker ── */
 const MACRO_LABELS = {
