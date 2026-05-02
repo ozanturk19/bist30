@@ -49,7 +49,8 @@ ARTICLES = [
         "q": "BorsaPusula'da kaç BIST100 hissesi takip ediliyor?",
         "a": "BorsaPusula, BIST100 bünyesindeki 90'dan fazla hisse için algoritmik Supertrend + ADX + EMA teknik analiz sinyallerini günlük olarak hesaplar ve ücretsiz sunar."
       }
-    ]
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS', 'TUPRS', 'ISCTR', 'FROTO']
   },
   {
     "slug": "supertrend-indikatoru-nedir",
@@ -101,7 +102,8 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
         "q": "Supertrend tek başına yeterli mi?",
         "a": "Hayır. BorsaPusula sinyali için Supertrend'e ek olarak ADX≥25 (güçlü trend onayı) ve EMA12/EMA99 (yön filtresi) koşullarının üçü birden sağlanmalıdır. Yalnız kullanıldığında yatay piyasalarda çok fazla sahte sinyal üretir."
       }
-    ]
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'ASELS', 'THYAO', 'EREGL']
   },
   {
     "slug": "adx-indikatoru-nedir",
@@ -151,7 +153,8 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
         "q": "DI+ ve DI- ne işe yarar?",
         "a": "DI+ (yeşil) alış baskısını, DI- (kırmızı) ise satış baskısını gösterir. DI+ > DI- ise yükseliş yönü hâkim, DI- > DI+ ise düşüş yönü hâkimdir. ADX bu iki değerin mutlak farkından türetilir."
       }
-    ]
+    ],
+    "related_tickers": ['AKBNK', 'ASELS', 'GARAN', 'THYAO', 'EREGL']
   },
   {
     "slug": "ema-hareketli-ortalama-nedir",
@@ -4340,7 +4343,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "TÜFE'ye endeksli tahvil ne demek?",
        "a": "Anapara değeri Türkiye tüketici fiyat endeksine (TÜFE) göre güncellenen tahvillerdir. Enflasyon %50 olursa anaparanız da %50 artırılır, böylece enflasyona karşı korunmuş olursunuz. Türkiye Hazinesi bu tür tahviller ihraç etmektedir."}
     ],
-    "related_tickers": []
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL']
   },
 
   # ── ARTICLE 61 ──
