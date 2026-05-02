@@ -6760,6 +6760,252 @@ ROA = Net Kâr / Toplam Aktifler × 100
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
   },
+
+  # ── ARTICLE 93 ──
+  {
+    "slug": "destek-ve-direnc-seviyeleri-nasil-belirlenir",
+    "title": "Teknik Analizde Destek ve Direnç Seviyeleri Nasıl Belirlenir?",
+    "desc": "Destek ve direnç seviyeleri nedir? Yatay seviyeler, trend çizgileri, dinamik destek ve BIST hisselerinde pratik destek-direnç analizi rehberi.",
+    "date": "2026-05-05",
+    "mins": 7,
+    "cat": "Teknik Analiz",
+    "body": """
+<p>Destek ve direnç seviyeleri, teknik analizin en temel ve en pratik kavramlarından ikisidir. Her deneyim seviyesindeki yatırımcı bu seviyeleri kullanır; çünkü fiyatın nerede durup nerede döndüğünü anlayabilmek, hem giriş noktası hem de stop-loss belirleme açısından kritik önem taşır.</p>
+
+<h2>Destek Seviyesi Nedir?</h2>
+<p>Destek seviyesi, fiyatın düşerken durduğu ve yeniden yükselmeye başladığı bölgedir. Bu bölgede alıcılar satıcılardan güçlüdür; talep arzı absorbe eder.</p>
+<p>Psikolojik mekanizma: Belirli bir fiyatın dip yaptığını gören yatırımcılar, o seviyeye yaklaşıldığında alım yapmaya hazır bekler. Bu davranış, seviyenin yeniden destek olarak işlev görmesini sağlar (kendi kendini doğrulayan bir örüntü).</p>
+
+<h2>Direnç Seviyesi Nedir?</h2>
+<p>Direnç seviyesi, fiyatın yükselirken durduğu ve aşağı döndüğü bölgedir. Bu bölgede satıcılar alıcılardan güçlüdür; arz talebi bastırır.</p>
+<p>Direnç seviyesinin psikolojik boyutu: Daha önce tepe yapan bir seviye, yatırımcıların "Buraya kadar yükseldi, artık satayım" düşüncesiyle davrandığı noktadır.</p>
+
+<h2>Destek ve Direncin Yer Değiştirmesi</h2>
+<p>Teknik analizin en önemli prensiplerinden biri: <strong>Kırılan direnç destek olur; kırılan destek direnç olur.</strong></p>
+<p>Örneğin hisse 100 TL direnç seviyesini yukarı kırarsa, bir sonraki geri çekilmede 100 TL seviyesi artık destek olarak çalışır. Bu prensip, kırılım noktalarını dinamik referans olarak kullanmayı mümkün kılar.</p>
+
+<h2>Destek ve Direnç Nasıl Belirlenir?</h2>
+<p><strong>1. Yatay Seviyeler (Swing High/Low):</strong> Fiyatın geçmişte birden fazla kez tepki verdiği yatay fiyat bölgeleri. Ne kadar çok dokunuş varsa seviye o kadar güçlüdür.</p>
+<p><strong>2. Yuvarlak Sayılar (Psikolojik Seviyeler):</strong> 100 TL, 50 TL, 10 TL gibi yuvarlak rakamlar psikolojik destek/direnç oluşturur. Emirlerin bu seviyelerde yoğunlaşması eğilimi analistlerce iyi bilinir.</p>
+<p><strong>3. Trend Çizgileri (Dinamik Destek/Direnç):</strong> Yükselen trendde dip noktalarını birleştiren çizgi dinamik destek, tepe noktalarını birleştiren çizgi dinamik direnç oluşturur. Kanal içinde fiyat hareket eder.</p>
+<p><strong>4. Hareketli Ortalamalar (Dinamik):</strong> EMA 20, EMA 50, EMA 200 yükselen trendlerde dinamik destek olarak işlev görür. Fiyatın bu ortalamalara çekilip sektiği defalarca gözlemlenmiştir.</p>
+<p><strong>5. Fibonacci Seviyeleri:</strong> %38.2, %50, %61.8 geri çekilme seviyeleri teknik destekler arasında en yaygın kullanılanlardandır.</p>
+
+<h2>Güçlü Destek/Direnç Özellikleri</h2>
+<p>Bir destek veya direnç seviyesinin güçlü olduğuna işaret eden faktörler:</p>
+<ul>
+  <li>Birden fazla dokunuş (test sayısı ne kadar fazla, o kadar güçlü)</li>
+  <li>Yüksek hacimle oluşmuş tepe/dip noktaları</li>
+  <li>Uzun zaman dilimine ait seviye (aylık grafik > haftalık > günlük)</li>
+  <li>Birden fazla teknik araçla çakışma (Fibonacci + EMA 200 + yatay seviye)</li>
+</ul>
+
+<h2>Kırılım (Breakout) ve Yalancı Kırılım</h2>
+<p>Bir seviye kırıldığında teyit için şunlara bakılır:</p>
+<ul>
+  <li>Yüksek hacimle kırılım → güçlü sinyal</li>
+  <li>Kapanış kırılım seviyesinin üzerinde/altında → teyit</li>
+  <li>Kırılım sonrası eski seviyeye geri test (retest) ve sekme → en güçlü teyit</li>
+</ul>
+<p>Yalancı kırılım (fakeout): Fiyat kısa süre kırılım yapar ama hızla geri döner. Hacim düşükse kırılımdan şüphe etmek gerekir.</p>
+<p>BorsaPusula'nın Supertrend sinyalleri, destek/direnç kırılımları ile sık sık örtüşür. Supertrend değişimi genellikle önemli bir teknik seviyenin kırıldığına da işaret eder.</p>
+""",
+    "faqs": [
+      {"q": "Destek seviyesi ne sıklıkla test edilebilir?",
+       "a": "Bir destek seviyesi ne kadar çok test edilirse o kadar güçlü kabul edilir — ama aynı zamanda birçok kez test edilen seviye eninde sonunda kırılma riskini de taşır. Üçüncü veya dördüncü dokunuşta kırılım, çoğunlukla ilk iki dokunuşa kıyasla daha sert bir aşağı hareket yaratır çünkü biriken alıcılar zarar durumuna düşerek satışa geçer."},
+      {"q": "Destek kırıldıktan sonra ne yapmalı?",
+       "a": "Destek kırılımı, trendin zayıfladığının teknik işaretidir. Long pozisyondaysanız ve önceden belirlediğiniz stop-loss bu seviyeydi, pozisyonu kapatma zamanıdır. Kırılımın yalancı kırılım olmadığını teyit etmek için kapanışı ve sonraki günü takip etmek önerilir. Hacimsiz kırılım daha şüpheli değerlendirilmeli."},
+      {"q": "Yatay destek mi trend çizgisi mi daha güvenilir?",
+       "a": "İkisi de değerlidir ama farklı karakterdedir. Yatay destek belirli bir fiyat noktasında güçlüdür, trend çizgisi ise zaman içinde eğimlidir. En güçlü destek/direnç, yatay seviye ile trend çizgisinin kesiştiği bölgedir. Bu 'konfluence' (çakışma) noktaları en yüksek olasılıklı tepki alanlarıdır."},
+      {"q": "Destek ve direnci hangi zaman diliminde çizmeliyim?",
+       "a": "Daha uzun zaman dilimlerindeki seviyeler daha önemlidir. Aylık grafikte oluşan destek, günlük grafiğin ürettiği seviyeden çok daha güçlüdür. Pratik yaklaşım: Önce haftalık veya aylık grafikte büyük seviyeleri belirleyin, ardından günlük grafikte giriş-çıkış noktalarını netleştirin. İkili zaman dilimi analizi daha sağlıklı karar almayı destekler."}
+    ],
+    "related_tickers": ['AKBNK', 'ASELS', 'THYAO', 'GARAN', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 94 ──
+  {
+    "slug": "kap-bildirimleri-nasil-takip-edilir",
+    "title": "KAP Bildirimleri Nasıl Takip Edilir? Hisse Haberciliğinde KAP Rehberi",
+    "desc": "KAP (Kamuyu Aydınlatma Platformu) nedir, nasıl kullanılır? Özel durum açıklamaları, bilanço haberleri ve KAP bildirimlerini hisse kararlarında nasıl değerlendirirsiniz?",
+    "date": "2026-05-05",
+    "mins": 6,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p>KAP (Kamuyu Aydınlatma Platformu), Türkiye'de Borsa İstanbul'da işlem gören tüm halka açık şirketlerin yatırımcılara duyuru yaptığı resmi platformdur. Finansal tablolar, özel durum açıklamaları, yönetim kurulu kararları ve temettü duyuruları KAP üzerinden yayımlanır. Bir hisseye yatırım yapıyorsanız KAP'ı takip etmek zorunludur.</p>
+
+<h2>KAP'ta Neler Yayımlanır?</h2>
+<ul>
+  <li><strong>Finansal Tablolar:</strong> Çeyreklik ve yıllık bilanço, gelir tablosu, nakit akış tablosu. Her çeyrek sonunda açıklanır.</li>
+  <li><strong>Özel Durum Açıklamaları (ÖDA):</strong> Şirketi etkileyen her önemli gelişme için yayımlanır: sözleşme imzalama, satın alma/satma, ortaklık değişikliği, dava, ihraç, yatırım kararı.</li>
+  <li><strong>Kâr Dağıtım Kararları:</strong> Temettü miktarı, ödeme tarihi ve yöntemi.</li>
+  <li><strong>Genel Kurul Duyuruları:</strong> Olağan/olağanüstü genel kurul tarihleri ve gündemleri.</li>
+  <li><strong>Sermaye Artışı Duyuruları:</strong> Bedelli/bedelsiz sermaye artışı haberleri.</li>
+  <li><strong>İçtika (İçeriden Öğrenenlerin Ticareti) Bildirimleri:</strong> Yönetim kurulu üyeleri ve büyük hissedarların hisse alım-satımı.</li>
+</ul>
+
+<h2>KAP Bildirimleri Piyasayı Nasıl Etkiler?</h2>
+<p>KAP bildirimleri haberi kamuoyuyla eş zamanlı paylaşır — bu nedenle iyi haber için "herkesle birlikte" öğrenmiş olursunuz. Ancak bildirimler piyasada önemli fiyat hareketleri oluşturur:</p>
+<p><strong>Pozitif sürpriz etkileri:</strong> Beklentinin üzerinde bilanço, büyük sözleşme, temettü artışı → hisse sert yükselir.</p>
+<p><strong>Negatif sürpriz etkileri:</strong> Zarar, sermaye artışı (dilüsyon riski), büyük dava → hisse sert düşer.</p>
+<p><strong>Fiyatlanmış bilgi:</strong> Çoğunlukla piyasa, KAP açıklamasından önce dedikodu veya sızdırılan bilgiyle fiyatlamayı yapar. "Haber çıkınca sat" (sell the news) davranışı buradan kaynaklanır.</p>
+
+<h2>Bilanço Açıklama Dönemleri</h2>
+<p>Bilanço açıklamaları yılda 4 kez yoğunlaşır:</p>
+<ul>
+  <li>Mayıs: 1. çeyrek (Ocak-Mart) sonuçları</li>
+  <li>Ağustos: 2. çeyrek ve yarıyıl sonuçları</li>
+  <li>Kasım: 3. çeyrek (9 aylık) sonuçları</li>
+  <li>Mart-Nisan: 4. çeyrek ve yıllık sonuçlar</li>
+</ul>
+<p>BorsaPusula'nın bilanço takvim sayfası bu tarihleri önceden gösterir, böylece hangi hissenin ne zaman açıklama yapacağını planlayabilirsiniz.</p>
+
+<h2>İçtika Bildirimleri: Yönetim Kurulunun Hareketleri</h2>
+<p>Şirket yöneticilerinin kendi hisselerini alması veya satması, KAP'ta zorunlu olarak açıklanır. Bu işlemler "içtika" bildirimi olarak adlandırılır.</p>
+<p>Yönetim kurulunun kendi şirket hissesi alması genellikle pozitif sinyal olarak yorumlanır: İçerdekiler şirketin değerini görüyor ve kendi parasını koyuyor. Tersi — yöneticilerin hisse satması — tek başına negatif bir işaret olmak zorunda değildir (vergiler, çeşitlendirme, kişisel nakit ihtiyacı olabilir) ama dikkat çekicidir.</p>
+
+<h2>KAP'ı Etkin Takip Etme Yöntemleri</h2>
+<ul>
+  <li>KAP mobil uygulaması bildirim özelliğiyle belirli şirketleri takip edin</li>
+  <li>Portföyünüzdeki hisseler için KAP uyarıları kurun</li>
+  <li>Bilanço tarihlerini takvime ekleyin</li>
+  <li>BorsaPusula'nın haber ve bilanço takvim sayfasını güncel tutun</li>
+</ul>
+<p>Önemli not: KAP bildirimleri resmi kaynak olmakla birlikte yorumlanması zaman ve deneyim gerektirir. Olumlu görünen bir açıklama beklentilerle kıyaslandığında hayal kırıklığı yaratabilir; olumsuz görünen bir açıklama bazen çoktan fiyatlanmış olabilir. Bildirim + piyasa beklentisi + teknik görünüm üçgenine bakmak en sağlıklı yaklaşımdır.</p>
+""",
+    "faqs": [
+      {"q": "KAP'a nasıl ulaşılır?",
+       "a": "kap.org.tr web adresi ve KAP mobil uygulaması üzerinden erişilebilir. Tüm bildirimler ücretsiz ve halka açıktır. Şirket adı veya hisse kodu ile arama yaparak ilgili şirketin tüm geçmiş ve güncel bildirimlerini görebilirsiniz."},
+      {"q": "KAP bildirimi gece yayımlanırsa ne olur?",
+       "a": "Mesai saatleri dışında yayımlanan önemli KAP bildirimleri ertesi sabah piyasa açılışında fiyatlanır. Bu nedenle açılışta ani yükseliş veya düşüş görülmesi normaldir. Özellikle bilanço açıklamaları mesai saatlerinde (09:40-18:00) yapılmak zorunda değildir; akşam veya gece de gelebilir."},
+      {"q": "Özel durum açıklaması (ÖDA) neden önemli?",
+       "a": "ÖDA, şirketi etkileyen önemli gelişmelerin yatırımcılara eşit ve eş zamanlı biçimde duyurulmasını sağlar. Büyük bir sözleşme kazanımı, önemli bir ortaklık, varlık satışı veya hukuki gelişme gibi hisse değerini etkileyebilecek bilgiler ÖDA ile kamuoyuna duyurulur. Bu bildirimler gün içinde hızlı fiyat hareketlerine neden olabilir."},
+      {"q": "İçtika bildirimi ne zaman kamuoyuna duyurulmalı?",
+       "a": "Şirket içindekiler (yönetim kurulu üyeleri, büyük hissedarlar) hisse alım-satımlarını SPK yönetmeliğine göre genellikle 3 iş günü içinde KAP'ta bildirmek zorundadır. Bu zorunluluk, içeriden öğrenenlerin bilgi avantajını kamuyla paylaşmasını sağlar — yatırımcılar yönetimin piyasa hareketlerini takip edebilir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 95 ──
+  {
+    "slug": "hacim-analizi-borsa-volume",
+    "title": "Hacim Analizi: Borsa'da Hacim Fiyat Hareketini Nasıl Doğrular?",
+    "desc": "Borsa hacmi nedir, neden önemlidir? Hacim-fiyat ilişkisi, yüksek hacimdeki kırılımlar ve düşen hacimle yükselen fiyat — BIST hisselerinde hacim analizi.",
+    "date": "2026-05-05",
+    "mins": 6,
+    "cat": "Teknik Analiz",
+    "body": """
+<p>İşlem hacmi (volume), belirli bir zaman diliminde el değiştiren hisse miktarıdır. Fiyat analizin "ne" sorusunu cevaplarken hacim "neden" sorusunu cevaplar. Fiyat hareketini teyit eden veya çürüten en önemli ikincil göstergedir.</p>
+
+<h2>Hacim-Fiyat Temel İlişkisi</h2>
+<p>Teknik analizdeki temel kural: <strong>Hacim trendi teyit etmeli.</strong></p>
+<ul>
+  <li><strong>Yükselen fiyat + Yükselen hacim → Güçlü yükseliş:</strong> Alıcılar giderek daha fazla katılıyor, trend güçlü.</li>
+  <li><strong>Yükselen fiyat + Düşen hacim → Dikkat:</strong> Fiyat yükseliyor ama ilgi azalıyor. Trendin son aşaması veya düzeltme öncesi olabilir.</li>
+  <li><strong>Düşen fiyat + Yükselen hacim → Güçlü düşüş:</strong> Satış baskısı yoğun, trend aşağı güçlü.</li>
+  <li><strong>Düşen fiyat + Düşen hacim → Zayıf düşüş:</strong> Satıcılar tükenmeye başlıyor, dip yakın olabilir.</li>
+</ul>
+
+<h2>Kırılımda Hacimin Önemi</h2>
+<p>Direnç kırılımı veya destek kırılımı için hacim teyidi kritik önemdedir:</p>
+<p><strong>Yüksek hacimdeki kırılım:</strong> Güçlü katılım, kırılım sürdürülebilir. "Gerçek kırılım" olarak yorumlanır.</p>
+<p><strong>Düşük hacimdeki kırılım:</strong> Az katılım, kırılım yalancı olabilir (fakeout). Ertesi gün geri dönüş riski yüksek.</p>
+<p>Pratik kural: Kırılım günkü hacim, son 20 günlük ortalama hacmin 1.5-2 katını geçiyorsa güvenilir kabul edilir.</p>
+
+<h2>Hacim Zirveleri ve Trend Dönüşleri</h2>
+<p>Özellikle dikkat edilmesi gereken hacim örüntüleri:</p>
+<p><strong>Tükenme Hacmi (Exhaustion Volume):</strong> Uzun bir yükseliş veya düşüş sonrası aniden patlayan yüksek hacim, trendin son nefesine işaret edebilir. Bu "son büyük satış" veya "son büyük alış" olarak yorumlanır — ardından trend dönüşü gelebilir.</p>
+<p><strong>Kümülatif Dağıtım (Distribution Days):</strong> Yükselen trendde birkaç gün üst üste yüksek hacimle düşüş, büyük oyuncuların pozisyon kapattığına işaret edebilir.</p>
+<p><strong>Kümülatif Birikim (Accumulation):</strong> Düşen trendde birkaç gün üst üste yüksek hacimle yükseliş, büyük oyuncuların birikim yaptığına işaret edebilir.</p>
+
+<h2>On-Balance Volume (OBV)</h2>
+<p>OBV, fiyat artış günlerindeki hacmi toplar, düşüş günlerindeki hacmi çıkarır. Kümülatif bir göstergedir. Fiyat ile OBV arasındaki diverjans önemli sinyal verebilir:</p>
+<ul>
+  <li>Fiyat yeni tepe yaparken OBV yeni tepe yapmıyorsa → dağıtım (zayıflık işareti)</li>
+  <li>Fiyat yeni dip yaparken OBV daha yüksek dip yaparsa → birikim (güçlülük işareti)</li>
+</ul>
+
+<h2>BIST'te Hacim Analizi</h2>
+<p>BIST'e özgü bazı hacim dinamikleri:</p>
+<ul>
+  <li>Bilanço açıklama günlerinde hacim olağandışı artabilir — bu teknik sinyal değil, haber tepkisidir</li>
+  <li>Piyasanın genel yüksek volatilite dönemlerinde (seçim, kriz) sektörel veya şirket bazlı hacim yüksek olabilir; bireysel hisse analizinde bunu ayırt etmek gerekir</li>
+  <li>Ortalama günlük işlem hacmi düşük olan hisseler için hacim analizi daha az güvenilirdir — birkaç büyük emir hacmi manipüle edebilir</li>
+</ul>
+<p>BorsaPusula sinyalleri, hacim verilerini otomatik olarak değerlendirir. AL sinyallerinin hacimsiz kırılım dönemlerinde değil güçlü hacimlerin eşliğinde oluşması, sinyal güvenilirliğini artıran faktörler arasında yer alır.</p>
+""",
+    "faqs": [
+      {"q": "Hacim ne kadar yüksek olursa kırılım o kadar güçlü müdür?",
+       "a": "Genel olarak evet — kırılım günkü hacmin son 20 günlük ortalamanın 1.5-2 katı üzerinde olması güvenilir kırılım işareti sayılır. Çok aşırı hacim (10 kat) ise bazen tükenme işaretine dönüşebilir. 'Normal kırılım hacmi' ile 'patlama hacmi' arasındaki fark yorumda önemli rol oynar."},
+      {"q": "Düşük hacimde yükselen hisse ne anlama gelir?",
+       "a": "Düşük hacimde yükselen hisse, fiyat artışının geniş katılımcı tabanı tarafından desteklenmediğini gösterir. Büyük alıcılar çekilmişse fiyat yapay olarak tutulabilir ya da sadece birkaç büyük emir fiyatı çekmiş olabilir. Böyle durumlarda kırılım güvenilmez, trendin kısa vadede sürdürülmesi güçtür."},
+      {"q": "OBV göstergesi nerede bulunur?",
+       "a": "OBV, TradingView, Matriks, Foreks ve çoğu teknik analiz platformunda standart göstergeler listesinde yer alır. Grafik platformunuzda 'OBV' veya 'On Balance Volume' araması yaparak eklemeniz yeterlidir. Grafiğin alt panelinde fiyatla birlikte görüntülenir."},
+      {"q": "Türkiye'de işlem hacmi ne anlama gelir?",
+       "a": "TL cinsinden işlem hacmi, o hissede gün içinde el değiştiren toplam para miktarını gösterir. BIST'te en yüksek hacimli hisseler genellikle AKBNK, THYAO, GARAN, EREGL gibi BIST30 hisseleridir. Yüksek likidite, daha sıkı spread ve daha güvenilir teknik analiz anlamına gelir. Küçük değerli hisselerde (penny stocks) hacim analizi yanıltıcı olabilir."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 96 ──
+  {
+    "slug": "portfoy-rebalancing-ne-zaman-nasil",
+    "title": "Portföy Rebalancing: Ne Zaman ve Nasıl Yapılır?",
+    "desc": "Portföy rebalancing (yeniden dengeleme) nedir? Drift hesabı, zaman bazlı vs eşik bazlı rebalancing ve BIST'te pratik portföy yönetim rehberi.",
+    "date": "2026-05-05",
+    "mins": 6,
+    "cat": "Risk Yönetimi",
+    "body": """
+<p>Portföy rebalancing (yeniden dengeleme), zaman içinde değişen varlık dağılımını başlangıçta belirlenen hedef dağılıma geri döndürme işlemidir. Çoğu yatırımcı bu disiplini görmezden gelir — ancak uzun vadeli başarılı portföy yönetiminin kritik bir bileşenidir.</p>
+
+<h2>Portföy Neden Dengesizleşir?</h2>
+<p>Belirli varlıkların farklı performans göstermesi portföyün zamanla başlangıç hedefinden sapmasına (drift) neden olur.</p>
+<p>Örnek: Başlangıçta %60 hisse, %20 altın, %20 nakit olan portföy — hisseler %30 yükselirse şu hale gelir: Hisse %65 → %68+, altın ve nakit payı göreceli olarak azalır. Portföy daha fazla hisse riski almaya başlamıştır.</p>
+
+<h2>Rebalancing Neden Yapılmalı?</h2>
+<ul>
+  <li><strong>Risk kontrolü:</strong> Belirli bir varlık sınıfının oransal büyümesini sınırlamak, hedeflenen risk profilini korur.</li>
+  <li><strong>Disiplinli al-sat:</strong> Rebalancing, doğal olarak "pahalı olan sat, ucuz olanı al" davranışını zorunlu kılar. Bu sistematik kâr alma ve dip alma mantığına yol açar.</li>
+  <li><strong>Duygusal kararları engeller:</strong> Mekanik bir kural olduğundan FOMO veya panik satışını minimize eder.</li>
+  <li><strong>Uzun vadeli performans:</strong> Tarihsel araştırmalar, düzenli rebalancing yapan portföylerin uzun vadede daha iyi risk-ayarlı getiri sağladığını göstermektedir.</li>
+</ul>
+
+<h2>Rebalancing Stratejileri</h2>
+<p><strong>1. Zaman Bazlı Rebalancing:</strong> Belirli aralıklarla (3 aylık, 6 aylık, yıllık) portföyü hedef dağılıma döndürme. Basit ve uygulanabilir. Sıklık arttıkça işlem maliyeti artar.</p>
+<p><strong>2. Eşik Bazlı Rebalancing:</strong> Herhangi bir varlık hedef ağırlığından belirli bir yüzde sapınca (örneğin ±5 veya ±10 puan) rebalancing yapılır. Piyasa koşullarına adaptif — yatay piyasada gereksiz işlem yapılmaz, büyük hareketlerde otomatik tepki verilir.</p>
+<p><strong>3. Karma Strateji:</strong> Hem zaman hem eşik koşulunu birleştirmek. "6 ayda bir kontrol et, ±5 puan sapma varsa dengele" gibi.</p>
+
+<h2>BIST'te Rebalancing Nasıl Yapılır?</h2>
+<p>Pratik adımlar:</p>
+<ol>
+  <li>Hedef dağılımı belirleyin: Hangi hisselerden kaçar %?</li>
+  <li>Mevcut dağılımı hesaplayın: Güncel fiyatlarla her hissenin portföy payını bulun</li>
+  <li>Sapmaları tespit edin: Hedefe kıyasla hangi hisseler fazla/az ağırlıklı?</li>
+  <li>İşlemleri planlayın: Fazla ağırlıklı olanı sat, az ağırlıklı olanı al</li>
+  <li>Vergi ve komisyon etkisini değerlendirin: Rebalancing maliyetinin faydasını aştığı nokta?</li>
+</ol>
+
+<h2>Rebalancing ve BorsaPusula Sinyalleri</h2>
+<p>BorsaPusula sinyalleri rebalancing kararlarını destekler:</p>
+<ul>
+  <li>Portföyde oranı büyümüş hissenin SAT sinyali varsa → rebalancing için doğal çıkış noktası</li>
+  <li>Az ağırlıklı olmak istediğiniz sektörde AL sinyali geliyorsa → kademeli ekleme fırsatı</li>
+  <li>Tüm hisseler AL sinyalindeyken rebalancing, güçlü trendde gereksiz satış yaratabilir — sinyal durumuna göre zamanlama ayarlanmalı</li>
+</ul>
+<p>Türkiye gibi yüksek volatiliteli piyasalarda 3-6 aylık rebalancing sıklığı, gereksiz işlem maliyetine neden olmadan risk profilini kontrol altında tutar. Yıllık tek rebalancing ise drift riskini taşır.</p>
+""",
+    "faqs": [
+      {"q": "Rebalancing ne sıklıkla yapılmalı?",
+       "a": "Araştırmalar, çok sık rebalancing (aylık) ile çok seyrek rebalancing (yıllık üzeri) arasında optimal nokta olarak 3-6 aylık aralıkları işaret ediyor. Eşik bazlı yaklaşımla birleştirildiğinde piyasa hareketi büyük olduğunda otomatik müdahale, sakin dönemlerde ise gereksiz işlem yapılmaz."},
+      {"q": "Rebalancing vergi yükümlülüğü doğurur mu?",
+       "a": "Türkiye'de hisse satışı durumunda iki yıl kuralı geçerliyse vergi yükümlülüğü oluşabilir (iki yılı dolmamış hisseler için). Bu nedenle vergi avantajlı rebalancing için uzun süre tutulan pozisyonlardan çıkmak tercih edilebilir. Yatırım fonu veya ETF üzerinden rebalancing daha düşük vergi yüküyle yapılabilir."},
+      {"q": "Rebalancing yerine yeni para ekleyerek dengelemek mümkün mü?",
+       "a": "Evet — 'katkıyla yeniden dengeleme' (contribution-based rebalancing) işlem maliyetini ve vergi yükümlülüğünü sıfırlar. Yeni para eklendiğinde, az ağırlıklı olan varlığa yatırım yapılır. Portföye düzenli katkı yapan yatırımcılar için en verimli yöntemdir."},
+      {"q": "Portföyde kaç farklı hisse tutmak ideali?",
+       "a": "Akademik araştırmalar, 10-15 hisse ile çeşitlendirmenin önemli bir kısmının sağlandığını gösteriyor. 20-30 hisse, pratik yönetimi zorlaştırır ve endeks performansını taklit etmeye başlar. Bireysel BIST yatırımcısı için 5-12 hisse, en az 3-4 farklı sektörden, ideal aralık sayılır."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
