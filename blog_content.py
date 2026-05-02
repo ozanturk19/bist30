@@ -6232,6 +6232,262 @@ ROA = Net Kâr / Toplam Aktifler × 100
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO', 'GARAN', 'EREGL', 'TUPRS']
   },
+
+  # ── ARTICLE 85 ──
+  {
+    "slug": "fibonacci-geri-cekilme-seviyeleri",
+    "title": "Fibonacci Geri Çekilme Seviyeleri: Giriş Noktası Nasıl Belirlenir?",
+    "desc": "Fibonacci oranları teknik analizde nasıl kullanılır? %23.6, %38.2, %50, %61.8 geri çekilme seviyeleri ve BIST hisselerinde pratik Fibonacci uygulaması.",
+    "date": "2026-05-03",
+    "mins": 7,
+    "cat": "Teknik Analiz",
+    "body": """
+<p>Fibonacci sayı dizisi (0, 1, 1, 2, 3, 5, 8, 13, 21…) ve bu diziden elde edilen oran sistemi, 13. yüzyılda İtalyan matematikçi Leonardo Fibonacci tarafından Avrupa'ya tanıtıldı. Bu oranların finansal piyasalarda neden bu kadar iyi çalıştığı tartışmalı olsa da deneyimli trader'ların kullandığı ve dolayısıyla önem kazanan teknik seviyeler arasında yer alır.</p>
+
+<h2>Temel Fibonacci Oranları</h2>
+<p>Fibonacci dizisinden türetilen başlıca oranlar:</p>
+<ul>
+  <li><strong>%23.6:</strong> Zayıf geri çekilme. Güçlü trendlerde fiyat bu seviyeden tekrar trendin yönüne devam edebilir.</li>
+  <li><strong>%38.2:</strong> Normal geri çekilme. Güçlü yükselen trendlerde genellikle ilk önemli destek seviyesi.</li>
+  <li><strong>%50:</strong> Teknik olarak Fibonacci serisi değil ama tradisyonel olarak dahil edilir. Psikolojik orta nokta.</li>
+  <li><strong>%61.8 (Altın Oran):</strong> En kritik Fibonacci seviyesi. Bu seviyeden sekme trendin devamını güçlü biçimde teyit eder; kırılım ise trend dönüşüne işaret eder.</li>
+  <li><strong>%78.6:</strong> Derin geri çekilme. Bu seviyenin tutmaması trend sona ermiş olabilir anlamına gelir.</li>
+</ul>
+
+<h2>Fibonacci Geri Çekilmesi Nasıl Çizilir?</h2>
+<p>Fibonacci geri çekilme seviyelerini doğru çizmek için:</p>
+<ol>
+  <li>Trendin başlangıç noktasını (swing low) belirleyin</li>
+  <li>Trendin doruk noktasını (swing high) belirleyin</li>
+  <li>Fibonacci aracını bu iki nokta arasına uygulayın</li>
+  <li>Oluşan yatay seviyeler potansiyel destek/direnç noktalarıdır</li>
+</ol>
+<p>Düşen trende uygulandığında işlem tersine çevrilir: doruktan dibe çizilir ve oluşan seviyeler direnç olarak çalışır.</p>
+
+<h2>Fibonacci Seviyeleri Neden İşe Yarar?</h2>
+<p>Fibonacci seviyelerinin işe yaramasının temel açıklaması kendi kendini gerçekleştiren kehane fenomenidir: Milyonlarca trader aynı seviyelere baktığı için buy/sell emirleri bu bölgelerde yoğunlaşır ve seviye destek veya direnç olarak davranır. Bunun ötesinde doğal bilimlerde de yaygın olan bu oranların piyasa katılımcılarının kolektif davranışında içgüdüsel karşılık bulduğu da öne sürülür.</p>
+
+<h2>Fibonacci + Diğer Araçlarla Kombinasyon</h2>
+<p>Fibonacci seviyeleri tek başına kullanıldığında güvenilirliği artar veya azalır. En güçlü kombinasyonlar:</p>
+<ul>
+  <li><strong>Fibonacci + EMA:</strong> %38.2 geri çekilme seviyesi EMA 50 ile çakışıyorsa destek çok daha güçlüdür.</li>
+  <li><strong>Fibonacci + Hacim:</strong> Fibonacci desteğine düşen fiyatın hacimi azalıyorsa sekme ihtimali artar.</li>
+  <li><strong>Fibonacci + Supertrend:</strong> Supertrend yeşil (yükselen trend) + fiyat %38.2 veya %61.8 desteğinde → güçlü alım noktası.</li>
+  <li><strong>Fibonacci + RSI:</strong> Fibonacci desteği + RSI 30-40 aralığı → aşırı satım + teknik destek kombinasyonu.</li>
+</ul>
+
+<h2>BIST'te Fibonacci Kullanımı</h2>
+<p>Türkiye piyasasında özellikle BIST30 hisselerinde Fibonacci seviyeleri dikkat çekici biçimde çalışabilir. Yüksek işlem hacimli hisselerde kurumsal alıcılar da bu seviyelere dikkat ettiğinden destek/direnç kalitesi artar.</p>
+<p>Örnek yaklaşım: Güçlü bir Supertrend yükseliş sürecindeki AKBNK veya GARAN gibi hissede %38.2 veya %50 geri çekilme yaşandığında, bu seviyeden hacim azalması + RSI yükselişi + Supertrend yatay/yeşil kombinasyonu görülürse swing trade girişi değerlendirilebilir.</p>
+<p>Stop-loss: %61.8 seviyesinin altı genellikle makul stop bölgesidir. Bu seviye kırılırsa trend dönüşü veya daha derin düzeltme ihtimali artar.</p>
+""",
+    "faqs": [
+      {"q": "Fibonacci seviyeleri hangi grafikte çalışır?",
+       "a": "Fibonacci geri çekilme seviyeleri tüm zaman dilimlerinde (15 dakika, saatlik, günlük, haftalık) kullanılabilir. Ancak daha uzun zaman dilimlerinde (günlük, haftalık) Fibonacci seviyeleri daha güvenilir sonuç verir çünkü daha fazla katılımcı bu seviyeleri takip eder."},
+      {"q": "En önemli Fibonacci seviyesi hangisi?",
+       "a": "%61.8 — 'Altın Oran' olarak da bilinir. Bu seviyeden sekme, yükselen trendin en güçlü destek noktasını temsil eder. Bu seviyenin kırılması genellikle trendin bitişine veya daha derin bir düzeltmeye işaret eder. Bu nedenle %61.8, stop-loss konumlandırması için de en yaygın kullanılan referans seviyesidir."},
+      {"q": "Fibonacci uzantısı (extension) nedir?",
+       "a": "Fibonacci geri çekilme seviyeleri destek/direnç için kullanılırken Fibonacci uzantıları fiyat hedefi belirlemek için kullanılır. %127.2, %161.8 gibi uzantı seviyeleri trend devam ettiğinde hedef fiyatları gösterir. Geri çekilmenin sonunda bir trend devam formasyonu oluşursa uzantı seviyeleri kâr alma noktası olarak planlanabilir."},
+      {"q": "Fibonacci seviyeleri her zaman tutar mı?",
+       "a": "Hayır. Fibonacci seviyeleri olasılıksal göstergelerdir, garanti değildir. Güçlü fundamental haberler, makroekonomik şoklar veya yüksek hacimli satış baskısı Fibonacci desteğini kolayca kırabilir. Bu nedenle Fibonacci seviyelerini stop-loss ile birlikte kullanmak ve tek başına karar verici olarak görmemek önemlidir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 86 ──
+  {
+    "slug": "bist-yabanci-yatirimci-sicak-para-akislari",
+    "title": "BIST'te Yabancı Yatırımcı Etkisi: Sıcak Para Akışları ve Piyasa Dinamikleri",
+    "desc": "Yabancı yatırımcılar BIST'i nasıl etkiler? Sıcak para girişi/çıkışı, dolar/TL bağlantısı ve yabancı sahiplik oranlarının hisse fiyatlarına etkisi.",
+    "date": "2026-05-03",
+    "mins": 6,
+    "cat": "Makro Ekonomi",
+    "body": """
+<p>BIST'te fiyatları yalnızca şirket fundamentalları ve teknik göstergeler belirlemez. Küresel risk iştahı, FED kararları ve gelişmekte olan piyasalara (EM) yabancı para akışları BIST için kritik makro bir bağlamdır. Türk bireysel yatırımcılar büyük oranda yabancı yatırımcıların hareketlerine tabi kalır.</p>
+
+<h2>Yabancı Yatırımcının BIST'teki Ağırlığı</h2>
+<p>Tarihsel olarak BIST'in işlem hacminin %60-70'i yabancı yatırımcılar tarafından gerçekleştirilmiştir. Bu oran son yıllarda yerli yatırımcıların piyasaya katılım artışıyla değişime uğrasa da yabancı yatırımcılar hâlâ piyasanın en büyük tek oyuncusudur.</p>
+<p>Yabancı sahiplik oranındaki değişimler Borsa İstanbul ve TAKASBANK raporlarıyla takip edilebilir. Bu oran arttığında genel eğilim yükseliş, azaldığında düşüştür — ancak bu ilişki lineer değildir.</p>
+
+<h2>Sıcak Para Nedir?</h2>
+<p>Sıcak para (hot money), getiri avantajından yararlanmak amacıyla hızlı hareket eden kısa vadeli yabancı sermayedir. Özellikleri:</p>
+<ul>
+  <li>Hızla girer, hızla çıkar — volatiliteyi artırır</li>
+  <li>Faiz farkı ve kur beklentisine duyarlı</li>
+  <li>Risk iştahı (VIX, global EM sentiment) tarafından yönlendirilen</li>
+  <li>Ülke spesifik risk (CDS spreadi) arttıkça çekilir</li>
+</ul>
+<p>Sıcak para girişi → TL güçlenir → BIST yükselir → dolar bazında getiri cazip. Sıcak para çıkışı → TL zayıflar → BIST düşer → negatif dolar bazlı getiri spirali.</p>
+
+<h2>Global Risk İştahı ve BIST Bağlantısı</h2>
+<p>BIST, küresel risk iştahı ile yüksek korelasyon gösterir. Bunu belirleyen başlıca faktörler:</p>
+<ul>
+  <li><strong>FED Kararları:</strong> FED faiz artırdığında gelişmekte olan piyasalardan (Türkiye dahil) para çekilme eğilimi güçlenir çünkü ABD risk-free getirisi yükselir. FED faiz indirdiğinde EM'e sermaye akışı artar.</li>
+  <li><strong>VIX (Korku Endeksi):</strong> VIX 20-25'in üzerine çıktığında yabancılar EM hisselerini satıp güvenli limanlara (USD, CHF, altın) geçer. VIX düştüğünde risk iştahı artar.</li>
+  <li><strong>DXY (Dolar Endeksi):</strong> Dolar güçlendiğinde EM varlıkları baskı altına girer. Dolar zayıfladığında EM avantaj kazanır.</li>
+  <li><strong>Türkiye CDS Spreadi:</strong> Türkiye'nin 5 yıllık kredi temerrüt swap priminin yükselmesi yabancı çıkışını hızlandırır.</li>
+</ul>
+
+<h2>Yabancı Yatırımcıların Favori BIST Hisseleri</h2>
+<p>Yabancı yatırımcılar genellikle şu özelliklere sahip hisseleri tercih eder:</p>
+<ul>
+  <li>Dolar veya euro bazlı geliri olan şirketler (THYAO, ASELS, EREGL)</li>
+  <li>Yüksek likidite ve derin piyasa (AKBNK, GARAN, THYAO)</li>
+  <li>Global sektörlerde faaliyet gösteren (Türkiye ekonomik döngüsüne bağımlı olmayan)</li>
+  <li>Siyasi riske görece düşük maruz kalan</li>
+</ul>
+
+<h2>Yerli-Yabancı Dinamiği</h2>
+<p>Türkiye'de son yıllarda yaşanan bir değişim dikkat çekicidir: Yüksek enflasyon döneminde yerli yatırımcılar borsa ve altın gibi varlıklara yöneldi. Bu durum borsanın TL bazında yüksek nominal getiri kaydetmesine katkı sağlarken dolar bazlı performans bazen çok daha mütevazı kaldı.</p>
+<p>Yatırım kararı alırken hem TL bazlı hem dolar bazlı performansı değerlendirmek önemlidir. Özellikle uzun vadeli yatırım ufkunda olan ya da döviz borcu bulunan yatırımcılar için dolar bazlı getiri anlam taşır.</p>
+
+<h2>Pratik Uygulama</h2>
+<p>Makro bağlamı BIST yatırımına entegre etmek için:</p>
+<ul>
+  <li>FED toplantı tarihlerini ve karar beklentilerini takip edin</li>
+  <li>VIX 20'nin altında → risk iştahı yüksek → BIST için nötr/pozitif ortam</li>
+  <li>VIX 25-30 üzeri → dikkatli olun, pozisyon büyüklüklerini azaltın</li>
+  <li>Türkiye CDS spreadi trend olarak yükseliyorsa yabancı çıkışı riski artıyor</li>
+  <li>Dolar/TL hızlı yükseliyorsa döviz geliri olan hisseler görece koruma sağlar</li>
+</ul>
+<p>BorsaPusula'nın gündem sayfası bu makro verileri tek ekranda izlemenizi kolaylaştırır.</p>
+""",
+    "faqs": [
+      {"q": "Yabancı yatırımcı satışı nasıl anlaşılır?",
+       "a": "Borsa İstanbul ve TAKASBANK haftalık yabancı yatırımcı işlem ve sahiplik verilerini yayımlar. Ayrıca bir hissede yüksek hacimle fiyat düşüyorsa ve TL de aynı anda baskı altındaysa yabancı çıkışı düşünülebilir. Büyük çaplı yabancı satışı genellikle geniş piyasa hareketleri (TL zayıflama, tahvil faiz artışı) ile eş zamanlı gerçekleşir."},
+      {"q": "FED faiz artırımı BIST'i neden etkiler?",
+       "a": "FED faiz artırdığında ABD dolar bazlı risk-free getirisi yükselir. Bu durum gelişmekte olan piyasalara (Türkiye dahil) yatırımı görece daha az cazip hale getirir. Yabancı fonlar EM'den çıkıp ABD tahvillerine yönelebilir. Bu çıkış TL'ye baskı yapar, BIST'e de olumsuz yansır."},
+      {"q": "BIST dolar bazlı mı yoksa TL bazlı mı değerlendirilmeli?",
+       "a": "İkisi birlikte değerlendirilmeli. TL bazlı performans enflasyondan etkilendiği için gerçek satın alma gücü artışını göstermeyebilir. Dolar bazlı performans ise uluslararası karşılaştırma için daha anlamlıdır. Uzun vadeli Türk yatırımcısı için TL bazlı reel getiri (enflasyon üzeri), döviz kaybını telafi edip etmediğini ölçmek açısından kritik bir metriktir."},
+      {"q": "Türkiye CDS spreadi ne anlama gelir?",
+       "a": "CDS (Credit Default Swap) spreadi, Türkiye'nin temerrüt riskini hedge etmenin maliyetini gösterir. Yüksek CDS = yüksek ülke riski algısı = yabancı yatırımcıların Türkiye varlıklarından kaçındığı dönem. 300-400 baz puan üzeri yabancı yatırımcılar için kritik eşik olarak kabul edilir. Bu seviyenin üstüne çıkışlar BIST üzerinde olumsuz baskı oluşturur."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 87 ──
+  {
+    "slug": "stop-loss-emirleri-nereye-konulur",
+    "title": "Stop-Loss Emirleri: Türleri, Nereye Konulur ve Neden Uygulanır?",
+    "desc": "Stop-loss (zarar durdur) emri nedir? ATR bazlı stop hesabı, trailing stop, stop-loss koymama hatası ve BIST'te pratik stop-loss stratejileri.",
+    "date": "2026-05-03",
+    "mins": 7,
+    "cat": "Risk Yönetimi",
+    "body": """
+<p>Stop-loss, belirlenen fiyat seviyesine ulaşıldığında pozisyonun otomatik olarak kapatılmasını sağlayan bir emir türüdür. Yatırım dünyasının en önemli risk yönetimi aracıdır. Pek çok başarılı trader şöyle der: "Nerede kazanacağımı bilmiyorum ama nerede kaybedeceğimi biliyorum." Stop-loss bu düşüncenin pratik uygulamasıdır.</p>
+
+<h2>Stop-Loss Neden Şarttır?</h2>
+<p>Stop-loss olmaksızın oluşabilecek senaryolar:</p>
+<ul>
+  <li>Küçük bir kayıp büyür → "Nasılsa geri döner" düşüncesiyle tutulur → Zarar büyür → Panik çıkışı en dip noktada</li>
+  <li>Kayıptan kaçınma önyargısı (loss aversion) nedeniyle zarar eden pozisyon sonsuza kadar tutulur</li>
+  <li>Tek bir büyük kayıp, uzun vadeli birikimini silip götürür</li>
+</ul>
+<p>Stop-loss, bu psikolojik tuzağı mekanik bir kuralla ortadan kaldırır: Belirli bir seviyeye gelindiğinde pozisyon kapanır, tartışmaya açık değildir.</p>
+
+<h2>Stop-Loss Türleri</h2>
+<p><strong>1. Sabit Stop-Loss (Fixed Stop):</strong> Belirli bir fiyat seviyesine stop koyulur. Örneğin: 100 TL'ye alındı, stop-loss 90 TL. Basit ve öngörülebilir ama volatiliteye adapte olmaz.</p>
+<p><strong>2. Yüzde Bazlı Stop:</strong> Alış fiyatının belirli bir yüzdesi altına stop koyulur. "Alış fiyatından %5 düşerse çık" gibi. Tutarlı ama hisse volatilitesini görmezden gelir.</p>
+<p><strong>3. ATR Bazlı Stop (En Pratik Yöntem):</strong> ATR (Average True Range) hissenin günlük ortalama fiyat hareketini ölçer. Stop-loss = Alış Fiyatı − (ATR × Çarpan). Çarpan genellikle 1.5-3 arasında seçilir. Bu yöntem her hissenin volatilitesine göre dinamik stop koyar — düşük volatiliteli hissede dar, yüksek volatiliteli hissede geniş stop.</p>
+<p><strong>4. Supertrend Stop:</strong> BorsaPusula'nın kullandığı yöntem — Supertrend çizgisi dinamik stop-loss seviyesi olarak işlev görür. Fiyat Supertrend'in altına düşerse pozisyon kapatılır. Avantajı: Stop-loss trendle birlikte yükselir, gereksiz yere tetiklenmez.</p>
+<p><strong>5. Trailing Stop (İzleyen Stop):</strong> Stop-loss, fiyat yükseldikçe otomatik olarak yukarı çekilir; düşüşlerde sabit kalır. Örneğin: %5 trailing stop ile 100 TL'den alındı → fiyat 120'ye çıktı → stop-loss 114 TL'ye çekildi. Kârlı pozisyonda kâr kilitleyen akıllı bir stop türüdür.</p>
+
+<h2>Stop-Loss Nereye Konulur?</h2>
+<p>Stop-loss konumlandırmanın altın kuralları:</p>
+<ul>
+  <li><strong>Gürültünün dışına koy:</strong> Günlük fiyat dalgalanmasının (ATR) içinde stop olursa sürekli tetiklenir. Stop-loss normal volatilitenin ötesine konulmalı.</li>
+  <li><strong>Anlamlı teknik seviyelerin altına/üstüne koy:</strong> Destek seviyesinin biraz altı (long pozisyon için) veya direnç seviyesinin biraz üstü (short için). Bu seviyenin kırılması trendin bozulduğuna işaret eder.</li>
+  <li><strong>EMA 200 altına koy:</strong> Uzun vadeli bull trend için EMA 200 kritik sınırdır. Bu seviyenin altına düşen pozisyonlar kapatılabilir.</li>
+  <li><strong>"Yakın olsun" tuzağından kaçın:</strong> Stop-lossu çok yakın koymak, normal geri çekilmelerde pozisyonun haksız yere kapatılmasına (stop-out) neden olur.</li>
+</ul>
+
+<h2>Pozisyon Büyüklüğü ve Stop-Loss İlişkisi</h2>
+<p>Stop-loss mesafesi aynı zamanda pozisyon büyüklüğünü belirler:</p>
+<p>Pozisyon Büyüklüğü = (Portföy × Risk%) / (Alış Fiyatı − Stop-Loss)</p>
+<p>Örnek: 100.000 TL portföy, %1 risk = 1.000 TL maksimum kayıp. Alış fiyatı 50 TL, stop-loss 47 TL → fark 3 TL → pozisyon büyüklüğü = 1.000 / 3 = 333 hisse (= 16.650 TL).</p>
+<p>Bu hesap, stop-loss ne kadar uzaksa o kadar az hisse alınması gerektiğini gösterir — risk sabit tutulur.</p>
+
+<h2>BIST'te Stop-Loss Kullanımı</h2>
+<p>Türk yatırımcıların çoğu stop-loss kullanmaz. Bu hem davranışsal (kayıptan kaçınma önyargısı) hem de pratik (aracı kurum sistemleri) nedenlerden kaynaklanır. Önerilen yaklaşım:</p>
+<ul>
+  <li>Her pozisyonda mental (zihinsel) stop-loss seviyesi belirleyin</li>
+  <li>BorsaPusula'nın SAT sinyali = sistematik stop-loss gibi çalışır</li>
+  <li>Supertrend kırmızıya döndüğünde pozisyon kapatmak, mekanik stop-loss yetersizliğini telafi eder</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "Stop-loss emirleri BIST'te nasıl verilir?",
+       "a": "Türkiye'de aracı kurumlar 'koşullu emir' veya 'şartlı emir' adıyla stop-loss benzeri emirler sunmaktadır. Ancak tüm platformlarda gerçek trailing stop veya garantili stop bulunmayabilir. Alterneatif olarak, BorsaPusula gibi sinyal platformlarının SAT sinyallerini manuel stop-loss olarak kullanmak pratik bir çözümdür."},
+      {"q": "Stop-loss tetiklenirse ne kaybetmiş olurum?",
+       "a": "Stop-loss, baştan kabul ettiğiniz maksimum kayıp miktarını temsil eder. Örneğin alış fiyatından %7 stop-loss koyduysanız, o pozisyonda en fazla %7 kaybedersiniz. Bu kayıp acı verse de kurtarılabilir bir kayıptır. Stop-loss koymadan tutulup %40-50 kaybeden pozisyonlar ise çok daha zor telafi edilir."},
+      {"q": "ATR nasıl hesaplanır?",
+       "a": "ATR (Average True Range), belirli bir periyottaki gerçek fiyat aralığının (true range) ortalamasıdır. Her günün en yüksek-en düşük farkı, bir önceki günün kapanışına göre yukarı ve aşağı boşlukları da hesaba katar. Genellikle 14 periyot ATR kullanılır. Çoğu grafik platformu ATR'yi otomatik hesaplar — manuel hesaplamaya gerek yoktur."},
+      {"q": "Stop-loss seviyesi değiştirilebilir mi?",
+       "a": "Teknik olarak evet ama psikolojik bir tuzak vardır: Stop-loss tetikleneceği anda 'biraz daha bekleyeyim' düşüncesiyle seviye aşağı çekilirse stop-loss anlamsızlaşır. Stop-loss'u yalnızca tek yönde hareket ettirin: trend yükseldikçe yukarı çekin (trailing stop mantığı), ancak kayıp büyüdükçe asla aşağı çekmeyin."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 88 ──
+  {
+    "slug": "borsada-vergi-rehberi-hisse-kazanci",
+    "title": "Borsada Vergi Rehberi: Hisse Senedi Kazancı Nasıl Vergilendirilir?",
+    "desc": "BIST'te hisse senedi alım-satım kazancı vergisi, iki yıl muafiyeti, temettü vergisi ve 2025-2026 güncel vergi kuralları rehberi.",
+    "date": "2026-05-03",
+    "mins": 6,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p>Borsa kazançları vergilendiriliyor mu? Bu soru, BIST'e yeni katılan yatırımcıların en sık sorduğu sorular arasındadır. Cevap hem evet hem hayır — detaylar önemli. Türkiye'de hisse senedi vergi kuralları karmaşık görünse de birkaç temel prensip anlaşıldığında netleşir.</p>
+
+<h2>Hisse Senedi Alım-Satım Kazancı Vergisi</h2>
+<p>2024-2025 itibarıyla geçerli temel kural:</p>
+<p><strong>BIST'te işlem gören hisse senetleri için:</strong> Hisse senedini aldıktan 2 yıl sonra satarsanız alım-satım kârından gelir vergisi ödenmez. Bu "iki yıl muafiyeti" veya "hisse senedi istisnası" olarak bilinir.</p>
+<p>Ancak 2 yıl dolmadan satılırsa kâr, beyan sınırını aşıyorsa yıllık gelir vergisi beyannamesiyle beyan edilmeli ve vergilendirilmelidir.</p>
+
+<h2>İki Yıl Kuralı Detayları</h2>
+<p>Uygulamada dikkat edilmesi gereken noktalar:</p>
+<ul>
+  <li>İki yıl hesabı alım tarihinden itibaren, hisse bazında tutulur (FIFO — ilk giren ilk çıkar).</li>
+  <li>Aynı hisseden birden fazla alım yapıldıysa her alımın kendi 2 yıllık süresi vardır.</li>
+  <li>Halka arz (IPO) hisseleri için farklı kurallar uygulanabilir — güncel mevzuatı kontrol edin.</li>
+  <li>Vadeli işlem ve kaldıraçlı ürünler hisse senedinden farklı şekilde vergilendirilir.</li>
+</ul>
+
+<h2>Temettü Vergisi</h2>
+<p>Hisse senedi alım-satım kârından farklı olarak, temettü geliri vergiye tabidir:</p>
+<ul>
+  <li>Türkiye mukimi gerçek kişiler için tam mükellef Türk kurumlarından alınan temettünün %50'si gelir vergisinden muaf tutulur.</li>
+  <li>Kalan %50 üzerinden stopaj (kaynakta kesinti) uygulanır. 2025 itibarıyla bu oran %10'dur.</li>
+  <li>Stopaj, genellikle aracı kurum veya şirket tarafından otomatik kesilir.</li>
+</ul>
+
+<h2>Kâr-Zarar Mahsubu</h2>
+<p>Aynı takvim yılı içinde bazı hisselerden kâr, bazılarından zarar ettiyseniz:</p>
+<ul>
+  <li>Kâr ve zararlar mahsup edilebilir — yalnızca net kâr üzerinden vergi hesaplanır.</li>
+  <li>Bu nedenle yıl sonunda zararlı pozisyon kapatmak vergi optimizasyonunun bir parçası olabilir (yılın en son gün işlemi olarak).</li>
+  <li>Mahsup kurallarının detayları için Mali Müşavir veya Vergi Dairesi'ne başvurulması önerilir.</li>
+</ul>
+
+<h2>Aracı Kurum Bildirimleri</h2>
+<p>Aracı kurumlar, müşterilerinin yıllık gerçekleşen işlemlerini vergi otoritelerine bildirmekle yükümlüdür. Bununla birlikte beyannamenizi düzgün doldurmak sizin sorumluluğunuzdadır. Özellikle birden fazla aracı kurumda hesabınız varsa tüm hesapların toplam kâr-zarar durumunu takip etmek gerekir.</p>
+
+<h2>Önemli Uyarı</h2>
+<p>Türkiye'de vergi mevzuatı değişkenlik gösterebilir. Yukarıdaki bilgiler 2025-2026 dönemi için genel çerçeveyi özetlemekte olup yasal bağlayıcılığı yoktur. Somut vergi kararları için mutlaka güncel mevzuata bakın veya sertifikalı mali müşavir/vergi uzmanına danışın.</p>
+<p>BorsaPusula bilanço takvim sayfası üzerinden temettü tarihlerini takip ederek vergi planlama dönemini optimize edebilirsiniz.</p>
+""",
+    "faqs": [
+      {"q": "BIST hisse kazancı her zaman vergiden muaf mı?",
+       "a": "Hayır. İki yılı doldurmadan satılan hisse senetlerinden elde edilen kâr vergilendirilir. İki yılı dolduran hisselerden elde edilen alım-satım kârı ise gelir vergisinden muaf tutulur. Temettü geliri ise iki yıl kuralına tabi değildir ve ayrı bir vergilendirme rejimine tabidir."},
+      {"q": "İki yıl dolmadan hisse satarsam ne olur?",
+       "a": "İki yıl dolmadan satıştan elde ettiğiniz kâr, diğer menkul kıymet gelirleriyle birlikte yıllık gelir vergisi beyan sınırını aşıyorsa beyan edilip vergilendirilmesi gerekebilir. Kesintisiz elde tutma süresi 2 yılı doldurana kadar bu vergi sorumluluğu devam eder."},
+      {"q": "Zarar eden hissemi vergi için yıl sonunda satsam faydalı mı?",
+       "a": "Vergi optimizasyonu açısından yıl içinde zararlı pozisyonları kapatarak kâr eden pozisyonlarla mahsup etmek vergi yükünü azaltabilir. Ancak bu kararı vermeden önce söz konusu hissenin gerçek yatırım değerini, likidasyon maliyetini ve geri alım olasılığını değerlendirmeniz gerekir. Saf vergi optimizasyonu amacıyla iyi bir hisseyi satmak uzun vadeli getiriye zarar verebilir."},
+      {"q": "Temettü vergisi nasıl ödenir?",
+       "a": "Çoğu durumda temettü vergisi, temettü ödemesiyle birlikte kaynakta (stopaj yöntemiyle) kesilir. Yani hesabınıza gelen tutar stopaj sonrası tutardır. Eğer beyan zorunluluğu doğuran gelir eşiğini aşıyorsanız yıllık gelir vergisi beyannamesi de vermeniz gerekebilir. Güncel eşikler için Gelir İdaresi Başkanlığı resmi sitesini kontrol edin."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'TUPRS', 'EREGL', 'ASELS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
