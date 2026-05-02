@@ -5382,6 +5382,341 @@ ROA = Net Kâr / Toplam Aktifler × 100
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL']
   },
+
+  # ── ARTICLE 73 ──
+  {
+    "slug": "kar-alma-ne-zaman-satmali-tp-stratejisi",
+    "title": "Kâr Alma Stratejisi: Hissede Ne Zaman Satış Yapmalısınız?",
+    "desc": "Hedef fiyata (TP) ulaşınca mı satmalısınız? Hisseyi nasıl kademeli satabilirsiniz? Kâr almanın doğru zamanı ve strateji rehberi.",
+    "date": "2026-05-01",
+    "mins": 6,
+    "cat": "Strateji",
+    "body": """
+<p>Stop loss'u bilmek ne zaman çıkacağınızı belirler — ancak sadece zarardan. Peki kârdayken ne zaman satmalısınız? "Biraz daha beklesem belki daha çıkar" tuzağına düşmeden kâr almanın pratik stratejilerini bu rehberde bulacaksınız.</p>
+
+<h2>Neden Kâr Almak Zordur?</h2>
+<p>Psikolojik açıdan kârdaki bir hisseden çıkmak, zarardaki bir hisseden çıkmaktan bile zor olabilir. Buna <strong>pişmanlık kaçınma</strong> denir: Sattıktan sonra hisse daha yükseldiyse büyük pişmanlık hissedilir. Bu kaygı yatırımcıları satışı ertelemeye iter.</p>
+<p>Sonuç: Kâr bir noktada zirve yapar, geri çekilir ve yatırımcı "neden satmadım ki?" der. İşte bu döngüyü kırmak için önceden belirlenmiş kâr alma kuralları şarttır.</p>
+
+<h2>TP (Hedef Fiyat) Nedir?</h2>
+<p>TP (Take Profit — Kâr Al), pozisyon açılmadan önce belirlenen çıkış fiyatıdır. BorsaPusula her hisse için algoritma bazlı TP1 ve TP2 hesaplar:</p>
+<ul>
+  <li><strong>TP1 (İlk Hedef):</strong> Konservatif hedef — sinyal güçlüyse ilk olası direnç bölgesi</li>
+  <li><strong>TP2 (İkinci Hedef):</strong> Agresif hedef — tüm iyi koşullar devam ederse ulaşılabilecek seviye</li>
+</ul>
+<p>R/R (Risk/Ödül) oranı 2.0+ olan hisselerde TP1'e ulaşmak, kaybedilen stop loss pozisyonlarını telafi etmek için yeterlidir.</p>
+
+<h2>Kademeli Satış Stratejisi</h2>
+<p>Tek seferde tüm pozisyonu kapatmak yerine kademeli satış yapmak hem riski yönetir hem de "erken sattım" pişmanlığını azaltır:</p>
+<ol>
+  <li>TP1'e ulaşıldığında → Pozisyonun <strong>%40-50'sini</strong> sat, kalan kısım için stop loss'u maliyet fiyatına çek (breakeven stop)</li>
+  <li>TP2 bölgesine yaklaşıldığında → Kalan pozisyonun <strong>%30-40'ını</strong> daha sat</li>
+  <li>Sinyal devam ediyor ve trend güçlüyse → <strong>Kalan %10-20'yi</strong> tutmaya devam et</li>
+</ol>
+<p>Bu strateji hem kâr kitler, hem de trendin devam etmesi durumunda daha fazla kâr fırsatı bırakır.</p>
+
+<h2>Trailing Stop (Takip Eden Stop)</h2>
+<p>Fiyat yükseldikçe stop loss seviyesini yukarı çekerek kârı "kilitleyen" dinamik bir yöntemdir.</p>
+<ul>
+  <li>Hisse 10% kazandırdıysa stop loss'u giriş fiyatına çekin (en kötü ihtimalle başa baş)</li>
+  <li>Hisse 20% kazandırdıysa stop loss'u giriş + %8 seviyesine çekin (minimum %8 kâr güvenceli)</li>
+  <li>Her yeni zirve sonrası stop loss'u belirli bir miktarda yukarı taşıyın</li>
+</ul>
+<p>ATR bazlı trailing stop için BorsaPusula'nın hesapladığı SL değerini referans alabilirsiniz; yeni zirvelerden sonra bu değer güncellenir.</p>
+
+<h2>Kâr Alma Gerektiren Sinyal Değişiklikleri</h2>
+<p>BorsaPusula sinyali çerçevesinde şu durumlarda çıkış düşünülmelidir:</p>
+<ul>
+  <li>AL sinyali → BEKLE veya SAT'a döndüğünde</li>
+  <li>Giriş kalitesi IDEAL/IYI'dan DIKKATLI/UZAK'a düştüğünde (pozisyon genişletme değil, değerlendirme)</li>
+  <li>ADX 25'in altına düştüğünde (trend zayıflıyor)</li>
+  <li>Hisse TP1 veya TP2 seviyesine ulaştığında</li>
+</ul>
+
+<h2>Sektörel ve Mevsimsel Döngüler</h2>
+<p>Bazı hisseler belirli periyotlarda güçlü sezonsal örüntüler sergilemektedir. Örneğin bilanço açıklama sezonlarında veya ekonomik takvim yoğun olduğunda volatilite artar. Kârlı pozisyonları bu dönemlerden önce kısmen kapatmak riski yönetme açısından mantıklı olabilir.</p>
+""",
+    "faqs": [
+      {"q": "Kâr alma stratejisinde TP1 mi, TP2 mi hedeflenmeli?",
+       "a": "Konservatif yaklaşım için TP1 yeterlidir — pozisyonun yarısını burada kapatıp geri kalanı için trailing stop kullanın. Trend güçlü devam ediyorsa TP2'ye uzanabilirsiniz. Kademeli çıkış en sağlıklı yöntemdir."},
+      {"q": "Trailing stop nedir?",
+       "a": "Fiyat yükseldikçe stop loss seviyesini otomatik olarak yukarı çeken dinamik bir çıkış mekanizmasıdır. Örneğin hisse %10 kazandığında stop'u giriş fiyatına çekerek en kötü ihtimalde başa baş çıkmanızı sağlar."},
+      {"q": "BorsaPusula TP1 ve TP2 nasıl hesaplanır?",
+       "a": "TP seviyeleri ATR ve önceki fiyat hareketlerine dayalı algoritmik hesaplamayla belirlenir. TP1 daha yakın ve ulaşılabilir bir hedeftir; TP2 trendin güçlü devam etmesi durumunda hedeflenen ikinci seviyedir."},
+      {"q": "Sinyal değişmeden önce kâr alınabilir mi?",
+       "a": "Evet. Pozisyonun TP1'e veya TP2'ye ulaşması, kâr almanız için sinyalin değişmesini beklemenizi gerektirmez. Önceden belirlediğiniz fiyat hedeflerine ulaşıldığında çıkmak tamamen geçerli bir stratejidir."}
+    ],
+    "related_tickers": ['AKBNK', 'ASELS', 'GARAN', 'THYAO', 'EREGL']
+  },
+
+  # ── ARTICLE 74 ──
+  {
+    "slug": "donusum-formasyonlari-ikili-tepe-bas-omuz",
+    "title": "Dönüş Formasyonları: İkili Tepe, İkili Dip ve Baş-Omuz",
+    "desc": "Teknik analizde en güçlü dönüş sinyalleri veren ikili tepe, ikili dip ve baş-omuz formasyonları nasıl tanınır ve yorumlanır? Pratik rehber.",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Teknik Analiz",
+    "body": """
+<p>Dönüş formasyonları, mevcut trendin tersine dönüşüne işaret eden grafik kalıplarıdır. Devam formasyonlarından farklı olarak, yön değişimi sinyali verirler. En güçlü ve en güvenilir teknik analiz sinyalleri arasında sayılırlar.</p>
+
+<h2>İkili Tepe (Double Top)</h2>
+<p>İkili tepe, yükselen bir trendden sonra fiyatın benzer seviyelerde iki kez direnç bulup geri döndüğü formasyondur. Harfine benzetildiğinden "M formasyonu" olarak da bilinir.</p>
+<p>Oluşum süreci:</p>
+<ol>
+  <li>Fiyat belirli bir tepe noktasına ulaşır (1. tepe)</li>
+  <li>Geri çekilir (boyun çizgisi bölgesi oluşur)</li>
+  <li>Tekrar yükselir ama 1. tepeye yakın seviyede reddedilir (2. tepe)</li>
+  <li>Boyun çizgisini kırarsa aşağı hareket başlar</li>
+</ol>
+<p><strong>Hedef fiyat:</strong> Boyun çizgisinden tepe noktasına olan mesafe kadar aşağı projeksiyonu yapılır.</p>
+<p>Hacim örüntüsü: 1. tepe yüksek hacimle, 2. tepe daha düşük hacimle oluşursa formasyon daha güvenilirdir.</p>
+
+<h2>İkili Dip (Double Bottom)</h2>
+<p>İkili dip, düşen bir trendden sonra fiyatın benzer seviyelerde iki kez destek bulup yukarı döndüğü formasyondur. "W formasyonu" olarak da bilinir.</p>
+<p>İkili dipin en kritik onayı: <strong>boyun çizgisinin yukarı kırılması</strong> ve kırılımın hacim artışıyla desteklenmesidir.</p>
+<ul>
+  <li>1. dip: Trend desteği bulur</li>
+  <li>Ara yükseliş: Boyun çizgisi oluşur</li>
+  <li>2. dip: Benzer seviyede tekrar destek</li>
+  <li>Kırılım: Boyun çizgisi aşılır → Alış sinyali</li>
+</ul>
+<p><strong>Hedef fiyat:</strong> İki dip noktasından boyun çizgisine kadar olan mesafe, boyun çizgisinden yukarı yansıtılır.</p>
+
+<h2>Baş-Omuz (Head and Shoulders)</h2>
+<p>Baş-omuz, teknik analizdeki en güvenilir dönüş formasyonlarından biridir. Trendden düşüşe dönüşü işaret eder.</p>
+<p>Unsurlar:</p>
+<ul>
+  <li><strong>Sol omuz:</strong> Trend içinde bir tepe noktası, ardından geri çekilme</li>
+  <li><strong>Baş:</strong> Sol omuzdan daha yüksek bir tepe (trendin son güçlü hamle)</li>
+  <li><strong>Sağ omuz:</strong> Baştan düşük, sol omuzla yakın bir tepe</li>
+  <li><strong>Boyun çizgisi:</strong> Sol omuz ve başın dip noktalarını birleştiren çizgi</li>
+</ul>
+<p><strong>Satış sinyali:</strong> Fiyat boyun çizgisini aşağı kırdığında oluşur.</p>
+<p><strong>Hedef fiyat:</strong> Baş noktasından boyun çizgisine olan mesafe, kırılım noktasından aşağı yansıtılır.</p>
+
+<h2>Ters Baş-Omuz (Inverse Head and Shoulders)</h2>
+<p>Düşen trendi tersine çeviren alım formasyonudur. Baş-omuzun yansımasıdır: sol omuz, boyun çizgisinin altında bir dip, daha derin bir baş dibi, boyun çizgisine yakın sağ omuz dibi. Boyun çizgisi yukarı kırıldığında alım sinyali verir.</p>
+
+<h2>Formasyonları BorsaPusula ile Kullanmak</h2>
+<p>Bu dönüş formasyonları, sinyal değişimiyle birleştirildiğinde daha güçlü olur:</p>
+<ul>
+  <li>Hisse SAT sinyaline döndüğünde + baş-omuz boyun kırılımı eş zamanlı oluşuyorsa → Güçlü düşüş teyidi</li>
+  <li>İkili dip + yeni AL sinyali → Güçlü dönüş teyidi</li>
+  <li>Formasyon tamamlanmadan sinyal değişimi yoksa → Dikkatli ol, erken giriş riski</li>
+</ul>
+<p>Her formasyon kırılımı için stop loss: Formasyonun en yüksek (ikili tepe, baş-omuz) veya en düşük (ikili dip, ters baş-omuz) noktasının hemen ötesine konumlandırılır.</p>
+""",
+    "faqs": [
+      {"q": "İkili tepe nasıl anlaşılır?",
+       "a": "Yükselen trendde fiyat benzer seviyelerde iki kez direnç buluyorsa ikili tepe oluşuyor olabilir. Boyun çizgisi (iki tepe arası dip) aşağı kırıldığında ve hacim artışıyla teyit edildiğinde satış sinyali güçlenir."},
+      {"q": "Baş-omuz formasyonu ne kadar güvenilir?",
+       "a": "Baş-omuz teknik analizin en güvenilir formasyonlarından biri olarak kabul edilir — özellikle hacim teyidi eşlik ettiğinde. Ancak hiçbir formasyon %100 kesin değildir; her zaman stop loss kullanın."},
+      {"q": "İkili dip ile ikili tepe arasındaki fark nedir?",
+       "a": "İkili dip (W formasyonu) düşen trendin biteceğini, ikili tepe (M formasyonu) ise yükselen trendin biteceğini işaret eder. İkili dip alım fırsatı, ikili tepe ise satış/çıkış uyarısı verir."},
+      {"q": "Bu formasyonlar ne kadar sürede oluşur?",
+       "a": "Günlük grafiklerde bu formasyonlar haftalar ile aylar arasında oluşur. Kısa zaman dilimlerinde (saatlik, 4 saatlik) daha hızlı oluşabilir ancak güvenilirlik düşer. BorsaPusula günlük sinyal sistemiyle uyumlu olarak, haftalık zaman diliminde değerlendirilen formasyonlar daha anlamlıdır."}
+    ],
+    "related_tickers": ['AKBNK', 'ASELS', 'GARAN', 'THYAO', 'EREGL']
+  },
+
+  # ── ARTICLE 75 ──
+  {
+    "slug": "bist-bankacilik-sektoru-hisseleri",
+    "title": "BIST Bankacılık Sektörü Hisseleri: 2026 Analiz Rehberi",
+    "desc": "AKBNK, GARAN, ISCTR, YKBNK, VAKBN: BIST bankacılık hisselerini nasıl analiz edersiniz? Faiz marjı, aktif kalitesi ve değerleme metrikleri.",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Temel Analiz",
+    "body": """
+<p>Bankacılık sektörü, BIST100'ün yaklaşık %30-35'ini oluşturan en ağırlıklı sektördür. Bu nedenle BIST100'ü analiz etmek büyük ölçüde Türk bankalarını analiz etmek anlamına gelir. Bankacılık hisselerini doğru okumak için sektöre özgü metrikleri bilmek gerekir.</p>
+
+<h2>BIST'teki Başlıca Bankacılık Hisseleri</h2>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Hisse</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Banka</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Tür</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/AKBNK" style="color:#58a6ff">AKBNK</a></td>
+      <td style="padding:8px 12px;color:#e6edf3">Akbank T.A.Ş.</td>
+      <td style="padding:8px 12px;color:#e6edf3">Özel Mevduat</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/GARAN" style="color:#58a6ff">GARAN</a></td>
+      <td style="padding:8px 12px;color:#e6edf3">T. Garanti Bankası A.Ş.</td>
+      <td style="padding:8px 12px;color:#e6edf3">Özel Mevduat</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/ISCTR" style="color:#58a6ff">ISCTR</a></td>
+      <td style="padding:8px 12px;color:#e6edf3">Türkiye İş Bankası A.Ş.</td>
+      <td style="padding:8px 12px;color:#e6edf3">Özel Mevduat</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/YKBNK" style="color:#58a6ff">YKBNK</a></td>
+      <td style="padding:8px 12px;color:#e6edf3">Yapı ve Kredi Bankası A.Ş.</td>
+      <td style="padding:8px 12px;color:#e6edf3">Özel Mevduat</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/VAKBN" style="color:#58a6ff">VAKBN</a></td>
+      <td style="padding:8px 12px;color:#e6edf3">Vakıflar Bankası T.A.O.</td>
+      <td style="padding:8px 12px;color:#e6edf3">Kamu Mevduat</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/HALKB" style="color:#58a6ff">HALKB</a></td>
+      <td style="padding:8px 12px;color:#e6edf3">Türkiye Halk Bankası A.Ş.</td>
+      <td style="padding:8px 12px;color:#e6edf3">Kamu Mevduat</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/ALBRK" style="color:#58a6ff">ALBRK</a></td>
+      <td style="padding:8px 12px;color:#e6edf3">Albaraka Türk Katılım Bankası</td>
+      <td style="padding:8px 12px;color:#e6edf3">Katılım</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Bankacılık Hisseleri İçin Temel Metrikler</h2>
+<h3>Net Faiz Marjı (NFM / NIM)</h3>
+<p>Bankanın kredi faiz geliri ile mevduat faiz gideri arasındaki farktır. NFM yüksekse banka daha kârlı kredi faaliyeti yürütüyor demektir. Faiz artış dönemlerinde genellikle bankalar lehine hareket eder.</p>
+
+<h3>Özkaynak Kârlılığı (ROE)</h3>
+<p>Türk bankalarında iyi bir ROE %15-25 arasında kabul edilir. Kriz dönemlerinde keskin düşebilir; normalleşme dönemlerinde toparlanır.</p>
+
+<h3>Takipteki Kredi Oranı (NPL)</h3>
+<p>Geri ödenemeyen kredilerin toplam kredilere oranıdır. %3'ün altı düşük risk, %5+ ise ciddi uyarı işaretidir. Ekonomik yavaşlama dönemlerinde bu oran yükselir.</p>
+
+<h3>Fiyat/Defter (PD/DD veya P/B)</h3>
+<p>Bankaların değerlemesi için P/B çok kritiktir. P/B 1.0 altı genellikle "ucuz" olarak değerlendirilebilir (varlık değerinin altında işlem görüyor), ancak düşük P/B bazen düşük kaliteyi de yansıtır.</p>
+
+<h2>Bankacılık Hisselerini Etkileyen Faktörler</h2>
+<ul>
+  <li><strong>TCMB politika faizi:</strong> Faiz artışı NIM'e genellikle olumlu etki eder</li>
+  <li><strong>Kredi büyüme hızı:</strong> Hızlı büyüme kısa vadeli kâr artırırken uzun vadede NPL riskini yükseltir</li>
+  <li><strong>Kur riski:</strong> Yabancı para açık pozisyonu (kur yükselişinde banka kâr/zarar eder)</li>
+  <li><strong>Düzenleme değişiklikleri:</strong> BDDK (Bankacılık Düzenleme ve Denetleme Kurumu) kararları hisseleri anlık etkiler</li>
+  <li><strong>Yabancı yatırımcı iştahı:</strong> Bankalar, yabancıların en çok tercih ettiği BIST hisseleridir</li>
+</ul>
+
+<h2>Bankacılık Hisselerinde Teknik + Temel Analiz Kombinasyonu</h2>
+<p>BorsaPusula bankacılık hisselerini teknik sinyal sistemiyle izler. Güçlü sinyal (AL + IDEAL + ADX yüksek) olduğunda:</p>
+<ul>
+  <li>Temel analiz katmanı ekleyin: ROE > %15, NPL < %4, P/B < 1.5 gibi filtreler uygulayın</li>
+  <li>Makro bağlama bakın: TCMB sıkılaştırma mı, gevşetme mi?</li>
+  <li>Seçim dönemleri ve büyük ekonomik kararlar yaklaşıyorsa volatilite beklentisi yüksek tutun</li>
+</ul>
+""",
+    "faqs": [
+      {"q": "BIST'te hangi bankacılık hisseleri en çok işlem görür?",
+       "a": "AKBNK, GARAN, ISCTR ve YKBNK en yüksek işlem hacmine sahip özel bankacılık hisseleridir. Bu hisseler BIST30'da yer alır ve kurumsal yatırımcıların en çok tercih ettiği hisseler arasındadır."},
+      {"q": "Bankacılık hisselerini analiz etmek için hangi metrikler önemli?",
+       "a": "Net Faiz Marjı (NIM), Özkaynak Kârlılığı (ROE), Takipteki Kredi Oranı (NPL) ve Fiyat/Defter (P/B) oranı bankacılık sektörüne özgü en kritik metriklerdir. Genel hisse analizi metrikleri olan P/E ile birlikte değerlendirilmelidir."},
+      {"q": "Faiz artışı bankacılık hisselerine iyi mi gelir?",
+       "a": "Genellikle evet, ancak karmaşık bir ilişkidir. Faiz artışı net faiz marjını (NIM) yükseltebilir, bu bankalar için olumludur. Ancak çok yüksek faiz kredi büyümesini yavaşlatır ve NPL riskini artırır. TCMB'nin faiz kararlarını ve takip eden kredi kalitesi verilerini birlikte değerlendirin."},
+      {"q": "Özel banka ile kamu bankası hisseleri arasındaki fark nedir?",
+       "a": "Özel bankalar (AKBNK, GARAN, ISCTR, YKBNK) genellikle daha yüksek verimlilik ve kâr odaklı yönetim sergiler. Kamu bankaları (VAKBN, HALKB) ise hükümet politikalarından daha doğrudan etkilenir. Risk profili ve dinamikleri farklılık gösterir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'ISCTR', 'YKBNK', 'VAKBN', 'HALKB']
+  },
+
+  # ── ARTICLE 76 ──
+  {
+    "slug": "guvenli-liman-varliklar-nelerdir",
+    "title": "Güvenli Liman Varlıklar: Kriz Döneminde Portföyünüzü Nasıl Korursunuz?",
+    "desc": "Altın, ABD doları, İsviçre frangı ve ABD tahvilleri neden güvenli liman varlık sayılır? Piyasa stresinde bu varlıklara nasıl yatırım yapılır?",
+    "date": "2026-05-01",
+    "mins": 6,
+    "cat": "Risk Yönetimi",
+    "body": """
+<p>Jeopolitik kriz, ekonomik çöküş veya ani bir piyasa şoku sırasında bazı varlıklar güçlenirken diğerleri sert düşer. Yatırımcıların risk-off döneminde sığındığı bu varlıklara <strong>güvenli liman (safe haven)</strong> denir. Portföyünüzde güvenli liman varlıkları bulundurmak, kriz dönemlerinin etkisini önemli ölçüde azaltabilir.</p>
+
+<h2>Klasik Güvenli Liman Varlıklar</h2>
+
+<h3>1. Altın (Gold)</h3>
+<p>Altın, binlerce yıllık geçmişiyle en klasik güvenli limandır. Özellikleri:</p>
+<ul>
+  <li>Merkez bankalarının rezervlerinde bulunur (güvenilirlik)</li>
+  <li>Sınırlı arzı vardır — enflasyona karşı koruma</li>
+  <li>Hisse senetleriyle düşük/negatif korelasyon (kriz döneminde hisseler düşerken altın yükselir)</li>
+  <li>TL bazında hem global altın fiyatından hem de TL değer kaybından yararlanır</li>
+</ul>
+<p>BorsaPusula üzerinden <a href="/altin">altın</a> ve <a href="/gumus">gümüş</a> fiyatlarını ve teknik sinyallerini takip edebilirsiniz.</p>
+
+<h3>2. ABD Doları (USD)</h3>
+<p>Dünya rezerv para birimi olması nedeniyle global krizlerde USD güçlenir. Türk yatırımcılar için TL'nin tarihi değer kaybından dolayı USD tutmak çift koruma sağlar: hem kriz koruması hem TL erimesinden korunma.</p>
+
+<h3>3. ABD Hazine Tahvilleri</h3>
+<p>Dünya'nın "risksiz" olarak kabul edilen varlığı. Kriz döneminde büyük fonlar buraya akın eder. Türk yatırımcılar için doğrudan erişim sınırlı olsa da ABD tahvil ETF'lerine yatırım yapmak mümkündür.</p>
+
+<h3>4. İsviçre Frangı (CHF)</h3>
+<p>Siyasi istikrar ve güçlü ekonomisiyle CHF kriz dönemlerinde değer kazanır. Özellikle Avrupa kaynaklı krizlerde tercih edilir.</p>
+
+<h3>5. Japon Yeni (JPY)</h3>
+<p>Risk-off ortamında güçlenen bir diğer para birimi. ABD faizi düştüğünde özellikle yen-carry trade'in çözülmesiyle JPY güçlenir.</p>
+
+<h2>Güvenli Liman mı, Risk-On Varlık mı?</h2>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+  <thead>
+    <tr style="background:#21262d">
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Varlık</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Kriz döneminde</th>
+      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Rallide</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Altın</td>
+      <td style="padding:8px 12px;color:#3fb950">Yükselir</td>
+      <td style="padding:8px 12px;color:#8b949e">Geri kalabilir</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">USD</td>
+      <td style="padding:8px 12px;color:#3fb950">Güçlenir</td>
+      <td style="padding:8px 12px;color:#8b949e">Zayıflayabilir</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Hisse Senedi</td>
+      <td style="padding:8px 12px;color:#f85149">Düşer</td>
+      <td style="padding:8px 12px;color:#3fb950">Yükselir</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
+      <td style="padding:8px 12px;color:#e6edf3">Kripto (BTC)</td>
+      <td style="padding:8px 12px;color:#f85149">Genellikle düşer</td>
+      <td style="padding:8px 12px;color:#3fb950">Güçlü yükselir</td>
+    </tr>
+    <tr style="border-top:1px solid #30363d">
+      <td style="padding:8px 12px;color:#e6edf3">Petrol</td>
+      <td style="padding:8px 12px;color:#e6edf3">Duruma bağlı</td>
+      <td style="padding:8px 12px;color:#e6edf3">Duruma bağlı</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Türkiye'de Güvenli Liman Stratejisi</h2>
+<p>Türk yatırımcılar için önerilen savunma karışımı:</p>
+<ul>
+  <li><strong>Fiziksel/Finansal Altın (%10-20):</strong> Kriz koruması + TL enflasyonu kalkanı</li>
+  <li><strong>Döviz Mevduatı/USD (%15-25):</strong> TL'nin tarihi eğilimi göz önünde bulundurularak</li>
+  <li><strong>Kısa Vadeli TL Mevduat/Tahvil (%10-20):</strong> Yüksek faiz döneminde cazip getiri</li>
+  <li><strong>Hisse (%40-60):</strong> Uzun vadede enflasyonun üzerinde getiri potansiyeli</li>
+</ul>
+<p>Kriz başladıktan sonra güvenli limanlara geçmek çoğunlukla geç kalınmış bir tepkidir. Portföyde sürekli belirli bir güvenli liman payı bulundurmak, kriz zamanı reaktif davranmaktan daha iyi sonuç verir.</p>
+""",
+    "faqs": [
+      {"q": "Güvenli liman varlık nedir?",
+       "a": "Ekonomik kriz, jeopolitik risk veya piyasa stresinde değer koruyan veya değer kazanan varlıklardır. Altın, ABD doları, İsviçre frangı ve ABD hazine tahvilleri en klasik güvenli liman varlıklarıdır."},
+      {"q": "Kriz döneminde altın neden yükselir?",
+       "a": "Altın, binlerce yıllık güven tarihine sahip, sınırlı arzı olan bir değer deposudur. Kriz ortamında hisse senetleri satılırken yatırımcılar güveni kanıtlanmış altına yönelir. Ayrıca faiz ortamı kötüleştiğinde altın göreli olarak daha cazip hale gelir."},
+      {"q": "Kripto para güvenli liman sayılır mı?",
+       "a": "Genellikle hayır. Bitcoin başta olmak üzere kripto varlıklar, büyük kriz dönemlerinde hisse senetleriyle birlikte düşme eğilimindedir. 'Digital altın' anlatısı popüler olsa da davranışsal veriler krizlerde kriptanın risk-off varlık gibi hareket etmediğini göstermektedir."},
+      {"q": "Türk yatırımcılar için en mantıklı güvenli liman nedir?",
+       "a": "Türkiye özelinde altın (TL bazlı) ve yabancı döviz (USD/EUR) double koruma sağlar: hem global kriz koruması hem de TL'nin değer kaybına karşı güvence. Portföyün %20-30'u bu tür güvenli liman varlıklarda tutulması önerilir."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'TUPRS', 'EREGL', 'GARAN']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
