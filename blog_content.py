@@ -6488,6 +6488,278 @@ ROA = Net Kâr / Toplam Aktifler × 100
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'TUPRS', 'EREGL', 'ASELS']
   },
+
+  # ── ARTICLE 89 ──
+  {
+    "slug": "piyasa-emri-limit-emri-stop-emri-farki",
+    "title": "Piyasa Emri, Limit Emri ve Stop Emri Farkı: Hisse Alım-Satımında Hangi Emri Kullanmalı?",
+    "desc": "Borsada emir türleri nelerdir? Piyasa emri, limit emri, stop emri, koşullu emir — her biri ne zaman kullanılır? BIST'te pratik emir rehberi.",
+    "date": "2026-05-04",
+    "mins": 6,
+    "cat": "Temel Kavramlar",
+    "body": """
+<p>Borsada bir hisse almak veya satmak basit görünür, ancak emir türlerini doğru kullanmak fiyat kalitesini ve risk yönetimini doğrudan etkiler. Yanlış emir türü seçmek fazladan maliyet yaratabilir veya istenen fiyattan işlem yapılamamasına neden olabilir.</p>
+
+<h2>Piyasa Emri (Market Order)</h2>
+<p>Piyasa emri, hisseyi anlık piyasa fiyatından hemen almak veya satmak için verilir. İşlem garantisi yüksektir — emir piyasadaki mevcut en iyi fiyattan anında gerçekleşir.</p>
+<p><strong>Ne zaman kullanılır?</strong></p>
+<ul>
+  <li>Hızlı işlem yapmak istediğinizde (haber çıktı, fiyat atladı)</li>
+  <li>Likiditesi çok yüksek hisselerde (AKBNK, THYAO gibi) spread çok dardır</li>
+  <li>Bir pozisyondan hızla çıkmanız gerektiğinde (stop-loss tetiklendiğinde)</li>
+</ul>
+<p><strong>Riski:</strong> Düşük hacimli hisselerde piyasa emri geniş spread nedeniyle beklediğinizden farklı bir fiyattan gerçekleşebilir ("slippage" — kayma).</p>
+
+<h2>Limit Emri (Limit Order)</h2>
+<p>Limit emri, belirli bir fiyat veya daha iyi bir fiyattan işlem yapmayı zorunlu kılan emirdir. Alım için: en fazla X fiyata alırım. Satım için: en az Y fiyattan satarım.</p>
+<p><strong>Ne zaman kullanılır?</strong></p>
+<ul>
+  <li>Spesifik bir fiyattan girmek istediğinizde (Fibonacci geri çekilme veya destek seviyesine limit koyma)</li>
+  <li>Düşük hacimli hisselerde spread riski taşımamak için</li>
+  <li>Otomatik kâr alma için (take-profit emri)</li>
+</ul>
+<p><strong>Riski:</strong> Fiyat limit seviyenize ulaşmazsa emir gerçekleşmez. Hızlı hareket eden piyasalarda treni kaçırabilirsiniz.</p>
+
+<h2>Stop Emri (Stop Order)</h2>
+<p>Stop emri, belirtilen fiyat tetiklendiğinde aktive olan emirdir. İki türü vardır:</p>
+<p><strong>Stop-Loss (Zarar Durdur):</strong> Fiyat belirlenen seviyenin altına düştüğünde satış yapılır. Örneğin 90 TL stop-loss → fiyat 90'ın altına düşünce satış emri devreye girer.</p>
+<p><strong>Stop-Buy (Kırılım Alımı):</strong> Fiyat belirtilen seviyenin üstüne çıkınca alış yapılır. Direnç kırılımı durumunda pozisyon almak için kullanılır.</p>
+<p><strong>Stop-Limit Emri:</strong> Stop fiyatı tetiklendiğinde piyasa emri yerine limit emri devreye girer. Kırılma hızlıysa gerçekleşmeyebilir; ama slippage riskini azaltır.</p>
+
+<h2>Koşullu Emir (BIST'e Özgü)</h2>
+<p>Türk aracı kurumlarının çoğu "koşullu emir" veya "şartlı emir" özelliği sunar. Bu özellik, belirli bir fiyat koşulu gerçekleştiğinde otomatik olarak alım veya satım emri iletir. Stop-loss ve take-profit işlevini yerine getiren pratik bir araçtır.</p>
+<p>Tüm aracı kurumların uygulaması farklılık gösterebilir; platformunuzun yardım belgesini incelemeniz önerilir.</p>
+
+<h2>Hangi Emri Ne Zaman Kullanmalı?</h2>
+<table style="width:100%; border-collapse:collapse;">
+  <tr style="background:#1c2128;">
+    <th style="padding:8px; border:1px solid #30363d;">Durum</th>
+    <th style="padding:8px; border:1px solid #30363d;">Önerilen Emir</th>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #30363d;">Hızlı sinyal geldi, hemen al</td>
+    <td style="padding:8px; border:1px solid #30363d;">Piyasa emri (yüksek likidite)</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #30363d;">Belirli bir fiyattan girmek istiyorum</td>
+    <td style="padding:8px; border:1px solid #30363d;">Limit emri</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #30363d;">Zararı sınırlandırmak istiyorum</td>
+    <td style="padding:8px; border:1px solid #30363d;">Stop-loss emri</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #30363d;">Direnç kırılınca almak istiyorum</td>
+    <td style="padding:8px; border:1px solid #30363d;">Stop-buy emri</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #30363d;">Hedef fiyattan kâr almak istiyorum</td>
+    <td style="padding:8px; border:1px solid #30363d;">Limit satış emri</td>
+  </tr>
+</table>
+<p>BorsaPusula'nın AL ve SAT sinyalleri, emir türü kararını basitleştirir: Sinyal geldiğinde giriş fiyatı önerisini limit emrinde kullanabilir veya hızlı hareket için piyasa emrini tercih edebilirsiniz.</p>
+""",
+    "faqs": [
+      {"q": "Piyasa emri mi limit emri mi daha iyi?",
+       "a": "Duruma göre değişir. BIST30 gibi yüksek hacimli hisselerde piyasa emri ve limit emri arasındaki fark minimumdur. Düşük hacimli hisselerde ise limit emri daha iyi fiyat garantisi sağlar. Hızlı giriş/çıkış gerektiren durumlarda piyasa emri, fiyata hassas pozisyonlarda limit emri tercih edilir."},
+      {"q": "Stop-loss emri kesin fiyattan mı işler?",
+       "a": "Stop-loss emri, stop fiyatına ulaşıldığında piyasa emrine dönüşür (standart stop emri). Bu nedenle işlem kesin olarak stop fiyatından değil, o andaki piyasa fiyatından gerçekleşebilir. Buna 'slippage' denir. Stop-limit kullanılırsa kırılma hızlıysa emir gerçekleşmeyebilir — farklı bir risk."},
+      {"q": "Limit emrim neden gerçekleşmedi?",
+       "a": "İki temel neden: Birincisi fiyat hiç limit seviyenize ulaşmadı. İkincisi fiyat seviyenize ulaşmasına rağmen o seviyede sizden önce gerçekleşen emirler fiyatı tüketti (fiyat önce yükseldi, dönmedi). Özellikle yoğun işlem dönemlerinde kuyruktaki emir sıralaması belirleyicidir."},
+      {"q": "Koşullu emir platformumu kapatınca da çalışır mı?",
+       "a": "Genellikle evet — koşullu emirler borsa sistemine iletildikten sonra bilgisayarınızın veya uygulamanızın açık olmasına gerek kalmaz. Ancak her aracı kurumun uygulaması farklılık gösterebilir; platforma göre işlem gününe veya belirli bir tarihe kadar aktif kalabilir. Platformunuzun kurallarını kontrol etmenizi öneririz."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'GARAN', 'ASELS', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 90 ──
+  {
+    "slug": "bist-sektor-rotasyonu-hangi-donemde-hangi-sektor",
+    "title": "BIST'te Sektör Rotasyonu: Ekonomik Döngüde Hangi Sektör Öne Çıkar?",
+    "desc": "Sektör rotasyonu stratejisi nedir? Ekonomik döngünün farklı aşamalarında BIST'te öne çıkan sektörler ve pratik uygulama rehberi.",
+    "date": "2026-05-04",
+    "mins": 7,
+    "cat": "Strateji",
+    "body": """
+<p>Tüm hisseler aynı anda yükselmez. Ekonomik döngünün farklı aşamalarında farklı sektörler liderlik eder. Sektör rotasyonu stratejisi, bu döngüsel örüntüden yararlanarak ekonominin mevcut aşamasına göre portföyü konumlandırmayı hedefler.</p>
+
+<h2>Ekonomik Döngü ve Sektör Performansı</h2>
+<p>Klasik ekonomik döngü dört aşamadan oluşur:</p>
+<p><strong>Erken Toparlanma (Early Recovery):</strong> Merkez bankası faizleri düşürür, kredi genişler, ekonomi dibe vurmuş ancak toparlanma başlamıştır. Bu dönemde öne çıkan sektörler: Tüketici Takdirsel (otomobil, dayanıklı tüketim), Finansal (bankacılık, sigorta), Teknoloji.</p>
+<p><strong>Büyüme (Expansion):</strong> Ekonomi ivme kazanır, işsizlik düşer, şirket kârları artar. Bu dönemde öne çıkan sektörler: Sanayi, Enerji, Hammadde ve Malzeme, Teknoloji.</p>
+<p><strong>Geç Dönem (Late Cycle):</strong> Büyüme devam eder ama yavaşlar, enflasyon artar, merkez bankası faizleri yükseltir. Bu dönemde öne çıkan sektörler: Enerji, Hammadde (emtia), Savunmacı sektörler.</p>
+<p><strong>Daralma/Durgunluk (Recession):</strong> Ekonomi küçülür, kârlar düşer, işsizlik artar. Bu dönemde öne çıkan sektörler: Savunmacı sektörler — Sağlık, Gıda-Temel Tüketim, Kamu Hizmetleri (yardımcı sektörler), Telekomünikasyon.</p>
+
+<h2>BIST Özelinde Sektör Rotasyonu</h2>
+<p>Türkiye'nin kendine özgü ekonomik dinamikleri geleneksel rotasyon modelini modifiye eder:</p>
+<ul>
+  <li><strong>Kur şoku dönemlerinde:</strong> İhracat geliri olan şirketler (THYAO, ASELS, EREGL) ve döviz varlıkları öne çıkar. TL bazlı geliri olan, ithalata bağımlı sektörler baskı altına girer.</li>
+  <li><strong>Faiz yüksek dönemlerde:</strong> Bankacılık sektörü teorik olarak faiz marjından yararlanır ama kredi riskinin artması dengeleme yapar. Savunmacı sektörler (TCELL, TTKOM) daha istikrarlı seyreder.</li>
+  <li><strong>Enflasyon yüksek dönemlerde:</strong> Fiyat geçirebilen sektörler (enerji, gıda, hammadde) reel kayıpları telafi eder. Fiyat belirleyici olamayan, sabit gider yüklü sektörler kâr marjlarında baskı yaşar.</li>
+  <li><strong>Jeopolitik risk dönemlerinde:</strong> Savunma (ASELS) öne çıkar, turizm ve havacılık (THYAO) baskı altına girebilir.</li>
+</ul>
+
+<h2>Sektör Rotasyonu Nasıl Uygulanır?</h2>
+<p><strong>Adım 1 — Makro Rejimi Tanımlayın:</strong> Türkiye şu an ekonomik döngünün hangi aşamasında? Büyüme hızlanıyor mu, yavaşlıyor mu? Enflasyon ve faiz yönü ne?</p>
+<p><strong>Adım 2 — Sektör Liderliğini İzleyin:</strong> Hangi sektörler piyasadan daha güçlü performans gösteriyor (rölatif güç)? Piyasa liderlerini teyit etmek için sektör endekslerini takip edin.</p>
+<p><strong>Adım 3 — Güçlü Sinyalleri Filtreleyin:</strong> Lider sektördeki AL sinyali olan hisseler, hem makro döngüde hem de teknik analizde çift teyit sunar.</p>
+<p><strong>Adım 4 — Kademeli Geçiş:</strong> Tüm portföyü bir anda döndürmek yerine kademeli rotasyon riski azaltır. Eski sektördeki hisseler SAT sinyali vermeye başladıkça yeni sektördeki hisselerle değiştirilir.</p>
+
+<h2>BorsaPusula ile Sektör Rotasyonu</h2>
+<p>BorsaPusula ana sayfasındaki sektör filtresi, belirli bir sektördeki tüm hisselerin sinyal durumunu tek seferde görmenizi sağlar. Bir sektörde AL sinyalleri yoğunlaşıyorsa sektörel momentum güçleniyor demektir. Birden fazla sektörü karşılaştırarak hangi sektörün sinyal kalitesinin daha güçlü olduğunu analiz edebilirsiniz.</p>
+""",
+    "faqs": [
+      {"q": "Sektör rotasyonu bireysel yatırımcı için uygun mu?",
+       "a": "Evet, büyük kurumsal fonlar kadar aktif olmasa da bireysel yatırımcılar sektör rotasyonu ilkelerinden yararlanabilir. Önemli olan her hafta portföyü değiştirmek değil, uzun dönemli makro görünüme göre yılda birkaç kez konumlanmayı ayarlamaktır. Bu yaklaşım gereksiz işlem maliyeti olmadan risk-getiri dengesini optimize eder."},
+      {"q": "BIST'in en savunmacı sektörü hangisi?",
+       "a": "Telekomünikasyon (TCELL, TTKOM) ve gıda/perakende sektörü en savunmacı BIST sektörleri arasında sayılır. Bu şirketler ekonomik yavaşlamada da temel hizmet sunduklarından gelirler görece stabil kalır. Durgunluk döneminde portföyde bu sektörlere ağırlık vermek volatiliteyi düşürür."},
+      {"q": "Türkiye'de faiz artışı hangi sektörleri etkiler?",
+       "a": "Faiz artışı: Borçlanma maliyeti artar → yüksek borçlu şirketler (GYO, inşaat, bazı holdingler) baskı altına girer. Kredi talebi düşer → bankacılık sektörü karma etkilenir (marj genişlemesi vs kredi yavaşlaması). Faize duyarlı sektörlerin (GYO, tüketici finansmanı) rölatif performansı genellikle düşer. Savunmacı sektörler nispeten daha az etkilenir."},
+      {"q": "Sektör ETF veya endeksi var mı?",
+       "a": "Borsa İstanbul'da birçok sektör endeksi yayımlanır: XBANK (bankacılık), XHOLD (holding), XGMYO (GYO), XTCRT (ticaret), XUSIN (sanayi) gibi. Bu endeksleri takip ederek hangi sektörün relatif güç kazandığını veya kaybettiğini görebilirsiniz. Ayrıca bazı Türk yatırım fonları belirli sektörlere odaklanır."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'TCELL', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 91 ──
+  {
+    "slug": "deger-yatirimi-value-investing-hisse-secimi",
+    "title": "Değer Yatırımı (Value Investing): Warren Buffett Prensiplerine Göre Hisse Seçimi",
+    "desc": "Değer yatırımı nedir? Benjamin Graham ve Warren Buffett'ın yaklaşımı, BIST'te değer hissesi bulma kriterleri ve uzun vadeli değer yatırımı stratejisi.",
+    "date": "2026-05-04",
+    "mins": 8,
+    "cat": "Strateji",
+    "body": """
+<p>Değer yatırımı (value investing), şirketlerin gerçek içsel değerlerinin altında işlem gördüklerine inananlar tarafından o hisseleri satın alma stratejisidir. Warren Buffett ve öğretmeni Benjamin Graham tarafından popülerleştirilen bu yaklaşım, uzun vadeli borsa yatırımının en kanıtlanmış metodolojilerinden biri olarak kabul edilmektedir.</p>
+
+<h2>Değer Yatırımının Temel Felsefesi</h2>
+<p>Değer yatırımının özü: <em>"Fiyat ne ödediğinizdir; değer ne aldığınızdır."</em></p>
+<p>Bu yaklaşıma göre:</p>
+<ul>
+  <li>Piyasa kısa vadede duygusal tepkiler verir; uzun vadede şirketlerin gerçek değerine yakınsar</li>
+  <li>Bu kısa vadeli yanlış fiyatlamalar, sabırlı yatırımcılar için fırsat penceresi açar</li>
+  <li>Güvenlik marjı (margin of safety) prensibi: İçsel değerin önemli ölçüde altında al ki hata payın olsun</li>
+</ul>
+
+<h2>İçsel Değer (Intrinsic Value) Nasıl Hesaplanır?</h2>
+<p>İçsel değer hesaplaması sanat ve bilim karışımıdır. Yaygın yöntemler:</p>
+<p><strong>İndirgenmiş Nakit Akışı (DCF):</strong> Şirketin gelecekteki nakit akışlarını bugünkü değere indirger. En teorik yöntem ama tahminlerdeki küçük sapmalar sonucu büyük değiştirebilir.</p>
+<p><strong>Karşılaştırmalı Değerleme:</strong> Benzer şirketlerin F/K, PD/DD, EV/FAVÖK gibi çarpanlarıyla karşılaştırma.</p>
+<p><strong>Defter Değeri:</strong> Şirketin özkaynaklarının hisse başına değeri. Graham özellikle defter değerinin altında işlem gören hisselere odaklanırdı.</p>
+
+<h2>Buffett'ın Hisse Seçim Kriterleri</h2>
+<p>Warren Buffett değer yatırımını evrimlendirdi ve "makul fiyata mükemmel şirket" yaklaşımını benimsedi:</p>
+<ul>
+  <li><strong>Anlaşılabilir iş modeli:</strong> İş modeli anlayamıyorsan al ma. "Çevreni gör" (circle of competence).</li>
+  <li><strong>Sürdürülebilir rekabet avantajı (Economic Moat):</strong> Şirketin rakipler tarafından kolayca kopyalanamayan güçlü bir avantajı var mı? Marka, ağ etkisi, maliyet avantajı, geçiş maliyeti.</li>
+  <li><strong>Güvenilir ve dürüst yönetim:</strong> Yönetim hissedarlara karşı şeffaf mı, sermayeyi verimli kullanıyor mu?</li>
+  <li><strong>Güçlü finansal performans:</strong> Yüksek ve istikrarlı özkaynak getirisi (ROE), güçlü serbest nakit akışı, düşük borç.</li>
+  <li><strong>Makul fiyat:</strong> Mükemmel şirketi bile aşırı pahalıya almak getiriyi mahveder.</li>
+</ul>
+
+<h2>BIST'te Değer Yatırımı Kriterleri</h2>
+<p>Türkiye piyasasında değer arayanlar için bazı özel notlar:</p>
+<ul>
+  <li><strong>Enflasyon ayarlaması:</strong> Yüksek enflasyon ortamında nominal değerler yanıltıcı olabilir. Reel büyüme ve reel kârlılık odak noktası olmalı.</li>
+  <li><strong>Kur riski:</strong> TL değer kaybı şirketin dolar bazlı değerini etkiler. Döviz gelirleri ve borç yapısı incelenmeli.</li>
+  <li><strong>F/K tuzağı:</strong> Türk hisselerinin global ortalamaya göre düşük F/K oranı kalıcı bir değer fırsatı olmayabilir — siyasi risk ve döviz riski primleri düşük F/K'ya neden olabilir.</li>
+  <li><strong>Uzun vadeli perspektif:</strong> BIST'te değer yatırımı için en az 3-5 yıllık ufuk gereklidir; kısa vadeli volatilite yüksektir.</li>
+</ul>
+
+<h2>Değer Yatırımı vs Momentum/Teknik Analiz</h2>
+<p>Bu iki yaklaşım genellikle zıt sanılsa da bir arada kullanılabilir:</p>
+<ul>
+  <li>Değer analizi size hangi hisseyi alacağınızı söyler (ne)</li>
+  <li>Teknik analiz ve BorsaPusula sinyalleri size ne zaman gireceğinizi söyler (ne zaman)</li>
+</ul>
+<p>Değerli olduğunu düşündüğünüz bir hissede BorsaPusula AL sinyali oluştuğunda ikili teyit elde edilir: hem temel hem teknik görünüm olumlu. Bu kombinasyon, yalnızca teknik veya yalnızca temel analiz kullanan yaklaşımların ötesinde daha güçlü bir karar zemini oluşturur.</p>
+""",
+    "faqs": [
+      {"q": "Değer yatırımı BIST'te işe yarar mı?",
+       "a": "Evet ama sabır gerektirir. BIST'te yüksek volatilite, makroekonomik belirsizlik ve yabancı yatırımcı döngüleri, hisselerin gerçek değerden uzaklaşabileceği dönemler yaratır. Bu durum sabırlı değer yatırımcıları için fırsat penceresi açar. Ancak 'ucuz' görünen hissenin gerçekten değer mi yoksa kalıcı sorun mu barındırdığını ayırt etmek deneyim gerektirir."},
+      {"q": "Güvenlik marjı (margin of safety) nedir?",
+       "a": "Benjamin Graham'ın temel konsepti: İçsel değeri 100 TL olan bir hisseyi 70 TL'ye almak, %30 güvenlik marjı sağlar. Bu marj, değerleme hatalarına ve beklenmedik olumsuz gelişmelere karşı tampon oluşturur. Ne kadar belirsizlik varsa güvenlik marjı o kadar geniş tutulmalıdır."},
+      {"q": "Warren Buffett'ın en sevdiği metrik nedir?",
+       "a": "Buffett özellikle özkaynak kârlılığı (ROE) ve serbest nakit akışına (free cash flow) odaklanır. Uzun yıllar boyunca tutarlı biçimde yüksek ROE üretebilen şirketler 'ekonomik moat'a sahiptir ve rekabet avantajı sürdürülebilirdir. Kârlılığını borçlanmadan değil kendi özkaynakları üzerinden üreten şirketler Buffett'ın en sık tercih ettiği profildedir."},
+      {"q": "BIST'te değer hissesi bulmak için hangi rasyolara bakılmalı?",
+       "a": "Başlangıç noktaları: Sektör ortalamasının altında F/K ve PD/DD, güçlü ve istikrarlı özkaynak kârlılığı (ROE > %15), düşük Net Borç/FAVÖK (tercihen 2x altı), pozitif serbest nakit akışı, temettü ödeme kapasitesi. Bu kriterler, bir eleme listesi oluşturmak için kullanılabilir — her kriteri karşılayan hisseler daha ayrıntılı analize alınabilir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'EREGL', 'KCHOL', 'TUPRS', 'THYAO']
+  },
+
+  # ── ARTICLE 92 ──
+  {
+    "slug": "bist-borsa-kriz-donemlerinde-yatirim",
+    "title": "Borsa Krizlerinde Yatırım: Dip mi Almak, Beklemek mi, Çıkmak mı?",
+    "desc": "Borsa düşüşlerinde ne yapmalı? Dip alma stratejileri, 'catching a falling knife' riski, kriz döneminde portföy yönetimi ve tarihsel kriz örnekleri.",
+    "date": "2026-05-04",
+    "mins": 7,
+    "cat": "Strateji",
+    "body": """
+<p>Borsa zirve noktasında değil kriz dönemlerinde test edilir. Piyasa %20 veya daha fazla düştüğünde — teknik olarak "bear market" tanımına girildiğinde — yatırımcıların büyük çoğunluğu panikler ve yanlış karar verir. Oysa tarih, büyük krizlerin en iyi uzun vadeli alım fırsatlarını sunduğunu defalarca göstermiştir.</p>
+
+<h2>Kriz Döneminde Psikoloji Tuzağı</h2>
+<p>Kriz döneminde insan beyninin verdiği tepkiler sistematik olarak yanlıştır:</p>
+<ul>
+  <li>Fiyatlar düşünce "daha düşer" düşüncesiyle satış yapılır (panik satışı)</li>
+  <li>Düşük seviyedeyken "artık almam" kararı verilir — tam tersini yapma zamanı olabilir</li>
+  <li>Medya ve sosyal medyanın aşırı kötümser yayını, psikolojik baskıyı derinleştirir</li>
+  <li>Kısa vadeli ağrı, uzun vadeli kazancın önüne geçer</li>
+</ul>
+<p>Warren Buffett'ın formülü: "Başkaları korkarken açgözlü, başkaları açgözlüyken korkak ol." Bunu uygulamak söylenmesi kadar kolay değildir — ama fırsat buradadır.</p>
+
+<h2>Dip Almak: Ne Zaman Mantıklı?</h2>
+<p>Her düşüş dip alma fırsatı değildir. "Düşen bıçağı tutmak" (catching a falling knife) ise en tehlikeli finansal davranışlardan biridir. Dip alma kararı için beklenmesi gereken koşullar:</p>
+<ul>
+  <li><strong>Trendin dönüş işaretleri:</strong> Supertrend yeşile dönmeye başlıyor, ADX düşüyor (trend zayıflıyor), RSI aşırı satım bölgesinden çıkıyor.</li>
+  <li><strong>Hacim teyidi:</strong> Düşüş sırasında hacim düşüyor (satış baskısı azalıyor) ve ilk toparlanmada hacim artıyor.</li>
+  <li><strong>Makro iyileşme:</strong> Krizin tetikleyicisi çözüme kavuşuyor (faiz indirimi, jeopolitik yumuşama, ekonomik canlanma sinyali).</li>
+  <li><strong>Değerleme seviyeleri:</strong> F/K, PD/DD gibi metrikler tarihsel ortalamalarının belirgin altına geldi.</li>
+</ul>
+<p>Bu koşulların tamamını beklemek "en dibi" kaçırmanıza neden olabilir — ama trendin dönüşünü teyit eden ilk sinyaller oluştuktan sonra kademeli giriş yapmak, sadece "ucuz göründüğü için" almaktan çok daha güvenlidir.</p>
+
+<h2>Kademeli Alım (Dollar Cost Averaging)</h2>
+<p>Dip belirsiz olduğunda en güçlü strateji kademeli alımdır. Ayırdığınız tutarı eşit parçalara bölün ve belirli aralıklarla (haftalık, aylık) alın. Avantajlar:</p>
+<ul>
+  <li>Dibi tam tutturma baskısını ortadan kaldırır</li>
+  <li>Düşüş devam ederse daha düşük fiyattan alım imkânı doğar</li>
+  <li>Ortalama alış maliyetinizi düşürür (cost averaging)</li>
+  <li>Psikolojik baskıyı azaltır</li>
+</ul>
+
+<h2>Beklemek: Nakit Pozisyon Avantajı</h2>
+<p>Kriz döneminde nakit tutmak bazen en iyi stratejidir. Warren Buffett'ın Berkshire Hathaway, piyasa zirve noktalarında tarihsel olarak nakit oranını artırmış, krizlerde hisse almıştır. Nakit size şunu sağlar:</p>
+<ul>
+  <li>Duygusal karar vermeden kaçınma fırsatı</li>
+  <li>Gerçek dip yaklaştığında hareket kabiliyeti</li>
+  <li>Portföyde baskı azaltma (negatif piyasada kârlı varlık olmaması psikolojik rahatlık sağlar)</li>
+</ul>
+
+<h2>BIST Kriz Örnekleri ve Toparlanma Süreleri</h2>
+<p>BIST tarihinde önemli düşüşler ve toparlanma örüntüleri:</p>
+<ul>
+  <li>2001 krizi: Keskin düşüş, ardından çok güçlü uzun vadeli toparlanma</li>
+  <li>2008 küresel finans krizi: BIST sert düştü, 12-18 ay içinde yeni zirvelere ulaştı</li>
+  <li>2018 TL krizi: %40+ düşüş, uzun toparlanma süreci</li>
+  <li>2020 COVID: Mart 2020'de %30 düşüş, Kasım 2020'de tam toparlanma — 8 aylık süreç</li>
+</ul>
+<p>Ortak nokta: Her büyük kriz, sabırlı uzun vadeli yatırımcılar için önemli alım fırsatı sundu. Panikle satan kısa vadeli yatırımcılar her seferinde toparlanmanın dışında kaldı.</p>
+
+<h2>BorsaPusula ile Kriz Yönetimi</h2>
+<p>BorsaPusula sinyalleri kriz dönemlerinde netlik sağlar: Tüm BIST30'da SAT sinyali ağırlıklıysa piyasa henüz dip yapmamış olabilir. AL sinyalleri yeniden yoğunlaşmaya başladığında trendin dönüşü teknik olarak teyit ediliyor demektir. Bu mekanik teyit, duygusal kararların yerini alır.</p>
+""",
+    "faqs": [
+      {"q": "Düşen bıçağı tutmak neden tehlikeli?",
+       "a": "Hisse düşerken 'bu kadar düştü, daha ne kadar düşer' düşüncesiyle almak, trendin dönüşünü teyit etmeden hareket etmektir. Hisse %50 düşmüşse yarısına gelmek için %100 daha yükselmesi gerekir. Trend dönüşünün ilk teknik işaretleri oluşmadan pozisyon almak zaman ve para kaybına yol açabilir."},
+      {"q": "Krizde hisselerimi satmalı mıyım?",
+       "a": "Durum bağlam gerektirir. Temel sorunuza dönün: Şirketi neden tuttuğunuz hâlâ geçerli mi? Evet ise satmak için iyi neden yok — piyasa geri döner. Eğer finansal bir aciliyetiniz yoksa ve uzun vadeli yatırımcıysanız, krizde satmak genellikle en kötü kararlardan biridir. Stop-loss seviyeleri önceden belirlenmiş olmalı; ancak o seviyelere ulaşmamışsa panik satışı tavsiye edilmez."},
+      {"q": "Kriz döneminde hangi hisseler daha dayanıklı?",
+       "a": "Savunmacı sektörler (telekomünikasyon, temel tüketim, sağlık) kriz dönemlerinde genellikle endeksin altında düşer. Döviz geliri olan (THYAO, ASELS) ve güçlü nakit pozisyonlu şirketler de görece daha dayanıklı olabilir. Yüksek borçlu, büyüme bağımlı şirketler ise kriz dönemlerinde en fazla zarar görme eğilimindedir."},
+      {"q": "Borsa krizleri ne kadar sürer?",
+       "a": "Tarihsel verilere göre kısa süreli krizler (COVID 2020 gibi) 3-6 ayda toparlanabilirken yapısal krizler (2001 Türkiye, 2008 küresel) 1-3 yıl sürebilir. Toparlanma süresi krizin kaynağına (makroekonomik, sektörel, küresel) ve politika tepkisinin hızına göre değişir. Uzun vadeli perspektiften bakıldığında tüm büyük krizler nihayetinde toparlanmıştır."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
