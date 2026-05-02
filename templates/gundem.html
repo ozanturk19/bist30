@@ -229,6 +229,18 @@
 
 <div class="container">
 
+  <!-- AI Makro Özeti -->
+  <div id="macroSummaryBox" style="display:none;background:linear-gradient(135deg,rgba(31,111,235,.07),rgba(139,92,246,.04));border:1px solid rgba(31,111,235,.18);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <span style="font-size:18px;flex-shrink:0;margin-top:1px">🤖</span>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">AI Piyasa Özeti</div>
+        <div id="macroSummaryText" style="font-size:13px;color:#e2e8f0;line-height:1.6"></div>
+        <div id="macroSummaryTime" style="font-size:10px;color:#64748b;margin-top:4px"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Stats -->
   <div class="stats-row" id="statsRow">
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Güçlü Trend</div></div>
@@ -544,9 +556,25 @@ async function loadMacroNewsSection() {
   }
 }
 
+async function loadMacroSummary() {
+  try {
+    const res  = await fetch('/api/macro-summary');
+    const data = await res.json();
+    const txt  = (data.summary || '').trim();
+    if (!txt) return;
+    const box  = document.getElementById('macroSummaryBox');
+    const el   = document.getElementById('macroSummaryText');
+    const tm   = document.getElementById('macroSummaryTime');
+    if (el) el.textContent = txt;
+    if (tm && data.generated_at) tm.textContent = 'Oluşturuldu: ' + data.generated_at;
+    if (box) box.style.display = '';
+  } catch(e) {}
+}
+
 loadGundem();
 loadEconCalendar();
 loadMacroNewsSection();
+loadMacroSummary();
 // 5 dakikada bir otomatik yenile
 setInterval(loadGundem, 5 * 60 * 1000);
 setInterval(loadMacroNewsSection, 30 * 60 * 1000);
