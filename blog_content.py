@@ -5974,6 +5974,264 @@ ROA = Net Kâr / Toplam Aktifler × 100
     ],
     "related_tickers": ['AKBNK', 'TUPRS', 'THYAO', 'EREGL', 'GARAN', 'TCELL']
   },
+
+  # ── ARTICLE 81 ──
+  {
+    "slug": "bilanco-nasil-okunur-temel-analiz",
+    "title": "Hisse Analizi Yaparken Bilanço Nasıl Okunur? Temel Finansal Tablolar Rehberi",
+    "desc": "Bilanço, gelir tablosu ve nakit akış tablosu nedir? Hisse analizi için kritik finansal göstergeler ve BIST şirketlerinde pratik okuma rehberi.",
+    "date": "2026-05-02",
+    "mins": 8,
+    "cat": "Temel Analiz",
+    "body": """
+<p>Bir hisseye yatırım yapmadan önce şirketin gerçek finansal sağlığını anlamak için bilanço okumayı bilmek şarttır. Teknik analiz fiyatın geçmişini gösterirken temel analiz şirketin içini gösterir. Bu rehberde BIST şirketlerinin finansal tablolarını nasıl okuyacağınızı adım adım inceleyeceğiz.</p>
+
+<h2>Üç Temel Finansal Tablo</h2>
+<p>Her halka açık şirket üç temel finansal tabloyu KAP üzerinden kamuoyuyla paylaşır:</p>
+<ol>
+  <li><strong>Bilanço (Balance Sheet):</strong> Belirli bir tarihteki varlıklar, yükümlülükler ve özkaynaklar — şirketin fotoğrafı.</li>
+  <li><strong>Gelir Tablosu (Income Statement):</strong> Belirli bir dönemdeki gelirler, giderler ve kâr — şirketin filmi.</li>
+  <li><strong>Nakit Akış Tablosu (Cash Flow Statement):</strong> Gerçek nakit girişi ve çıkışı — şirketin nabzı.</li>
+</ol>
+
+<h2>Bilanço: Varlıklar = Yükümlülükler + Özkaynaklar</h2>
+<p>Bilanço denkleminin sol tarafı (varlıklar) şirkete ait her şeyi, sağ tarafı ise bu varlıkların nasıl finanse edildiğini gösterir.</p>
+<p><strong>Dönen Varlıklar (Current Assets):</strong> 1 yıl içinde nakde çevrilebilecekler. Nakit, kısa vadeli yatırımlar, alacaklar, stoklar.</p>
+<p><strong>Duran Varlıklar (Non-Current Assets):</strong> Uzun vadeli varlıklar. Makine, fabrika, bina, uzun vadeli yatırımlar.</p>
+<p><strong>Kısa Vadeli Borçlar:</strong> 1 yıl içinde ödenecek yükümlülükler. Ticari borçlar, kısa vadeli finansal borçlar.</p>
+<p><strong>Uzun Vadeli Borçlar:</strong> 1 yıldan fazla vadeli yükümlülükler. Uzun vadeli krediler, tahviller.</p>
+<p><strong>Özkaynaklar:</strong> Şirkete ait net değer. Ödenmiş sermaye + birikmiş kârlar.</p>
+
+<h2>Gelir Tablosunu Okumak</h2>
+<p>Gelir tablosu tepe noktadan taban noktaya doğru okunur:</p>
+<ul>
+  <li><strong>Net Satışlar / Hasılat:</strong> Şirketin ürün veya hizmet satışından elde ettiği toplam gelir.</li>
+  <li><strong>Brüt Kâr:</strong> Hasılat − Satılan Malın Maliyeti. Brüt kâr marjı = Brüt Kâr / Hasılat. Bu oran sektörden sektöre büyük fark gösterir.</li>
+  <li><strong>FAVÖK (EBITDA):</strong> Faiz, amortisman ve vergi öncesi kazanç. Farklı şirketleri karşılaştırmak için kullanışlıdır.</li>
+  <li><strong>Net Kâr:</strong> Tüm giderler, faiz ve vergi sonrası kalan. Hisse başına kazanç (EPS) = Net Kâr / Hisse Sayısı.</li>
+</ul>
+
+<h2>Nakit Akış Tablosu: En Önemli Tablo</h2>
+<p>Şirket kâr gösterirken nakit üretemiyorsa sorun var. Nakit akış tablosu üç bölümden oluşur:</p>
+<ul>
+  <li><strong>Operasyonel Nakit Akışı:</strong> Ana iş faaliyetlerinden gelen nakit. Pozitif olmalı — bu şirketin gerçekten para kazandığını gösterir.</li>
+  <li><strong>Yatırım Nakit Akışı:</strong> Makine, ekipman, satın almalar için harcanan nakit. Büyüyen bir şirkette genellikle negatiftir.</li>
+  <li><strong>Finansman Nakit Akışı:</strong> Borç alma/ödeme, temettü, sermaye artışı. Şirketin nasıl finanse edildiğini gösterir.</li>
+</ul>
+<p><strong>Serbest Nakit Akışı (Free Cash Flow) = Operasyonel Nakit Akışı − Sermaye Harcamaları.</strong> Bu rakam şirketin temettü ödeme kapasitesini ve büyüme potansiyelini doğrudan yansıtır.</p>
+
+<h2>Kritik Finansal Rasyolar</h2>
+<ul>
+  <li><strong>F/K (P/E):</strong> Fiyat / Hisse Başına Kazanç. Şirketin kârının kaç katına işlem gördüğünü gösterir. Sektör ortalamasıyla karşılaştırılmalıdır.</li>
+  <li><strong>PD/DD (P/B):</strong> Piyasa Değeri / Defter Değeri. 1'in altı teorik olarak "ucuz" ama her zaman al sinyali değildir.</li>
+  <li><strong>Net Borç/FAVÖK:</strong> Şirketin borcunu kaç yılda ödeyebileceği. 3x'in üzeri dikkatli olunması gereken seviye.</li>
+  <li><strong>Cari Oran:</strong> Dönen Varlıklar / Kısa Vadeli Borçlar. 1'in altı likidite sorunu işareti.</li>
+</ul>
+
+<h2>BIST'te Finansal Tablo Takibi</h2>
+<p>Türkiye'de halka açık şirketler çeyreklik (3 aylık) finansal tablolarını KAP (Kamuyu Aydınlatma Platformu) üzerinden yayımlar. Finansal tablolar Türkiye Finansal Raporlama Standartları (TFRS) çerçevesinde hazırlanır. BorsaPusula'nın bilanço takvim özelliği sayesinde hangi şirketlerin hangi dönemde finansal sonuç açıklayacağını önceden takip edebilirsiniz.</p>
+<p>Önemli not: Tek bir çeyrek verisi yerine trend önemlidir. Üst üste büyüyen hasılat, genişleyen marjlar ve artan serbest nakit akışı, güçlü şirketin işaretleridir.</p>
+""",
+    "faqs": [
+      {"q": "BIST şirketlerinin finansal tablolarına nereden ulaşılır?",
+       "a": "KAP (kap.org.tr) — Kamuyu Aydınlatma Platformu — tüm halka açık BIST şirketlerinin finansal tablolarını yayımlar. Her şirketin sayfasında çeyreklik ve yıllık tablolara ücretsiz ulaşabilirsiniz. Ayrıca birçok aracı kurum platformu bu verileri düzenlenmiş haliyle sunar."},
+      {"q": "F/K oranı düşük olan hisse ucuz mıdır?",
+       "a": "Mutlaka değil. F/K oranını sektör ortalaması ve şirketin büyüme hızıyla birlikte değerlendirmek gerekir. Düşük büyümeli bir sektörde F/K 8 normal olabilirken, yüksek büyümeli bir teknoloji şirketinde F/K 30 makul sayılabilir. Ayrıca F/K zarar eden şirketlerde anlamsızlaşır."},
+      {"q": "Şirket kâr açıklamasına rağmen hisse neden düşer?",
+       "a": "Piyasalar 'fiyatlama yapar' — yatırımcılar beklentilerini hisse fiyatına önceden yansıtır. Açıklanan kâr beklentinin altında kalırsa ('beklenti karşılanmadı') hisse düşebilir. 'Oluştur ve sat' (buy the rumor, sell the news) fenomeni de budur: beklenti döneminde fiyat yükselir, açıklama günü gerçekleşse bile satış gelebilir."},
+      {"q": "Bilanço analizi ne sıklıkla yapılmalı?",
+       "a": "Uzun vadeli yatırımcılar için her çeyrek sonucu takip etmek yeterlidir (yılda 4 kez). Spekülatif değil temel yaklaşım benimseyenler için yıllık tablo yeterliyken büyüme odaklı analistler çeyreklik değişimlere dikkat eder. Bilanço tarihleri BorsaPusula takvim sayfasından takip edilebilir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'EREGL', 'KCHOL', 'THYAO', 'ASELS']
+  },
+
+  # ── ARTICLE 82 ──
+  {
+    "slug": "scalp-trading-nedir-kisa-vadeli-bist-stratejileri",
+    "title": "Scalp Trading Nedir? Kısa Vadeli BIST Yatırım Stratejileri",
+    "desc": "Scalping ve kısa vadeli trade stratejileri: ne zaman işe yarar, riskleri nelerdir? BIST'e özgü koşullar ve günlük trader için pratik rehber.",
+    "date": "2026-05-02",
+    "mins": 6,
+    "cat": "Trading Stratejileri",
+    "body": """
+<p>Scalp trading, pozisyonların dakikalar hatta saniyeler içinde açılıp kapandığı, küçük fiyat hareketlerinden sık sık kâr almayı hedefleyen yoğun bir işlem stratejisidir. Uzun vadeli yatırımcılığın tam tersi ucundadır: Şirketi analiz etmek yerine anlık fiyat hareketine odaklanılır.</p>
+
+<h2>Scalping Nasıl Çalışır?</h2>
+<p>Scalper'lar (scalping yapan trader'lar) gün boyunca onlarca hatta yüzlerce işlem yapar. Her işlemde hedeflenen kâr küçüktür (0.1%-0.5%) ama yüksek işlem sıklığıyla toplam getiri elde edilmeye çalışılır. Kaldıraç kullanımı bu stratejiyi daha da yoğunlaştırır.</p>
+<p>Scalping'de temel prensipler:</p>
+<ul>
+  <li>Her pozisyon için sıkı stop-loss (fiyatın belirli bir yüzdesi veya ATR tabanlı)</li>
+  <li>Yüksek likidite — düşük işlem hacimli hisseler scalping için uygun değil</li>
+  <li>Hızlı karar ve uygulama kapasitesi</li>
+  <li>Sürekli ekran başında olma zorunluluğu</li>
+</ul>
+
+<h2>BIST'te Scalping Koşulları</h2>
+<p>BIST, bazı özellikleriyle scalping için zorlayıcı bir ortam oluşturur:</p>
+<ul>
+  <li><strong>Spread maliyeti:</strong> Alış-satış fiyatı arasındaki fark (spread) BIST'te bazı hisselerde belirgindir. Her işlemde bu farkı aşmak gerekir — düşük getirili scalp işlemleri komisyon+spread maliyetini karşılamayabilir.</li>
+  <li><strong>Banka ve komisyon giderleri:</strong> Sık işlem, komisyon maliyetini artırır. Komisyon ne kadar düşük olursa scalping o kadar mantıklı hale gelir.</li>
+  <li><strong>İşlem saatleri:</strong> BIST'in seansı sınırlı (09:40-18:00). Premarket veya aftermarket işlem yok.</li>
+  <li><strong>Volatilite dönemleri:</strong> Açılış ve kapanış saat dilimlerinde, önemli haber açıklamalarında volatilite artar — hem fırsat hem risk büyür.</li>
+  <li><strong>Yüksek likidite hisseleri:</strong> BIST30 hisseleri (AKBNK, THYAO, EREGL, ASELS vb.) en sıkı spread ile işlem görür ve scalping için daha uygundur.</li>
+</ul>
+
+<h2>Scalp Trading Teknikleri</h2>
+<p><strong>1. Destek-Direnç Scalping:</strong> Belirlenen kısa vadeli destek seviyesine yakın alım, direnç seviyesine yakın satım yapılır. Her seviye dar stop-loss ile korunur.</p>
+<p><strong>2. Momentum Scalping:</strong> Güçlü bir itici güçle (haber, hacim artışı) başlayan momentumu takip etmek. Sinyaller: ani hacim patlaması, RSI 50'yi hızla aşma, MACD kesişimi.</p>
+<p><strong>3. Bid-Ask Scalping:</strong> Alış-satış farkını sürekli olarak kâra çevirmek. BIST'te büyük oyuncular dışında bireysel yatırımcılar için zor bir stratejidir.</p>
+<p><strong>4. Haber Scalping:</strong> KAP açıklaması, bilanço, temettü duyurusu gibi haberlere hızlı reaksiyon. Çok riskli — slippage (kayma) ve piyasa derinliği önemli.</p>
+
+<h2>Scalping'in Riskleri</h2>
+<p>Yüksek işlem sıklığı beraberinde birçok risk getirir:</p>
+<ul>
+  <li><strong>Duygusal yorgunluk:</strong> Sürekli karar vermek stres yaratır ve karar kalitesini düşürür.</li>
+  <li><strong>Komisyon maliyeti:</strong> İşlem başına düşük komisyon bile sıklıkla çarpılınca önemli bir maliyet oluşturur.</li>
+  <li><strong>Hata maliyeti:</strong> Hızlı ortamda yanlış tuşa basmak veya yanlış hisse seçmek gerçek bir risktir.</li>
+  <li><strong>Piyasa koşullarına bağımlılık:</strong> Dar bir bant içinde seyreden (düşük volatilite) piyasada scalping işe yaramaz.</li>
+</ul>
+
+<h2>Scalping mi, Swing Trade mi?</h2>
+<p>Kısa vadeli işlem yapacaksanız scalping ile swing trading arasında seçim yapmanız gerekir:</p>
+<ul>
+  <li><strong>Scalping:</strong> Günde onlarca işlem, dakikalık grafik, tam zaman yoğunluk gerektiren, komisyon maliyeti yüksek.</li>
+  <li><strong>Swing Trading:</strong> Günler-haftalar boyunca tutulan pozisyonlar, günlük-haftalık grafik, daha az zaman yoğun, daha düşük işlem maliyeti.</li>
+</ul>
+<p>BorsaPusula'nın Supertrend ve ADX tabanlı sinyalleri özellikle swing trading için tasarlanmıştır. Günlük/haftalık periyotta oluşan sinyaller, birkaç günden birkaç haftaya kadar uzanan trade'leri hedefler — scalping değil ama kısa/orta vadeli aktif trader için pratik bir rehber sunar.</p>
+""",
+    "faqs": [
+      {"q": "Scalping yasal mı ve BIST'te mümkün mü?",
+       "a": "Evet, scalping yasal bir işlem yöntemidir. BIST'te teknik olarak mümkün olmakla birlikte spread maliyeti, seans saatleri ve bireysel yatırımcının erişim hızı bazı sınırlamalar oluşturur. BIST30 gibi yüksek likiditeye sahip hisseler scalping için daha uygundur."},
+      {"q": "Scalping için hangi grafik zaman dilimi kullanılır?",
+       "a": "Scalping genellikle 1 dakika, 5 dakika veya en fazla 15 dakikalık grafiklerde yapılır. Bu zaman dilimlerinde RSI, MACD ve hacim analizi sıkça kullanılır. Daha uzun zaman dilimleri (1 saatlik veya günlük) bağlam vermek için arka planda tutulur ama işlem kararları kısa dilimlerden verilir."},
+      {"q": "Scalping başlangıç yatırımcısına uygun mu?",
+       "a": "Genel olarak hayır. Scalping deneyimli trader'lar için bile zorlu bir stratejidir. Yüksek işlem sıklığı, psikolojik baskı, komisyon maliyeti ve teknik bilgi gereksinimi açısından başlangıç yatırımcıları için önerilmez. Temel kavramları, risk yönetimini ve swing trading'i öğrendikten sonra scalping'e geçmek daha sağlıklıdır."},
+      {"q": "BIST'te en çok scalp yapılan hisseler hangileridir?",
+       "a": "İşlem hacmi ve likiditesi en yüksek hisseler scalping için tercih edilir. BIST30 endeksindeki bankacılık hisseleri (AKBNK, GARAN, ISCTR), THYAO, EREGL ve ASELS gibi yüksek hacimli hisseler daha sıkı spreadlerle işlem görür ve scalping için daha uygundur. Düşük hacimli hisselerde giriş/çıkış yapmak çok daha pahalıya mal olur."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'EREGL', 'ASELS', 'GARAN', 'ISCTR']
+  },
+
+  # ── ARTICLE 83 ──
+  {
+    "slug": "portfoy-cesitlendirmesi-bist-sektor-dagilimi",
+    "title": "Portföy Çeşitlendirmesi: BIST'te Sektör Dağılımı Nasıl Yapılır?",
+    "desc": "Portföy çeşitlendirmesi neden önemlidir? BIST sektörleri, korelasyon analizi ve bireysel yatırımcı için pratik çeşitlendirme stratejileri.",
+    "date": "2026-05-02",
+    "mins": 6,
+    "cat": "Risk Yönetimi",
+    "body": """
+<p>"Tüm yumurtalarını aynı sepete koyma" — portföy yönetiminin en temel ve en evrensel kuralıdır. Çeşitlendirme (diversification), tek bir hissenin veya sektörün sert düşüşünün tüm portföyü yok etmesini önleyen risk yönetimi stratejisidir.</p>
+
+<h2>Çeşitlendirme Neden İşe Yarar?</h2>
+<p>Farklı varlıkların birbirine bağımlılığı (korelasyon) düşük olduğunda, birinin düşmesi diğerini otomatik olarak etkilemez. Matematiğin güzelliği şudur: Birbirinden bağımsız birçok hisseyi bir araya getirmek, tek hisse riskini almadan benzer bir getiri elde etmeyi sağlar.</p>
+<p>Nobel Ödüllü Harry Markowitz'in Modern Portföy Teorisi (MPT) bunu formüle etti: Aynı beklenen getiride daha az risk, veya aynı risk düzeyinde daha yüksek beklenen getiri — çeşitlendirmeyle mümkündür.</p>
+
+<h2>BIST'te Sektörler ve Korelasyon</h2>
+<p>BIST endüstriyel sınıflandırmasında başlıca sektörler:</p>
+<ul>
+  <li><strong>Bankacılık ve Finansal Hizmetler:</strong> BIST'in en ağırlıklı sektörü. AKBNK, GARAN, ISCTR, YKBNK, VAKBN, HALKB.</li>
+  <li><strong>Holding şirketleri:</strong> KCHOL, SAHOL, ECZYT — geniş iş alanlarına yayılmış, içsel çeşitlendirme.</li>
+  <li><strong>Savunma ve Havacılık:</strong> ASELS, TUSAS — büyük ölçüde ihracat ve savunma bütçeleriyle yönleniyor.</li>
+  <li><strong>Enerji ve Petro-Kimya:</strong> TUPRS, BIMAS — enflasyon geçirgenliği güçlü.</li>
+  <li><strong>Havayolu ve Turizm:</strong> THYAO — döviz geliri nedeniyle TL zayıfladığında göreceli avantaj.</li>
+  <li><strong>Demir-Çelik:</strong> EREGL — emtia fiyatlarına ve küresel çelik döngüsüne bağlı.</li>
+  <li><strong>Telekomünikasyon:</strong> TCELL, TTKOM — savunmacı, istikrarlı nakit akışı.</li>
+  <li><strong>İnşaat ve GYO:</strong> TOASO, SISE — faiz oranlarına hassas.</li>
+</ul>
+
+<h2>Etkili Çeşitlendirme İlkeleri</h2>
+<p><strong>1. Sektörel Çeşitlendirme:</strong> Farklı sektörlerden hisseler seçin. Sadece bankacılık hisseleri tutmak, bir BDDK kararı veya ekonomik stres döneminde tüm portföyü etkiler. Bankacılık + Savunma + Havayolu gibi düşük korelasyonlu kombinasyonlar daha sağlam portföyler oluşturur.</p>
+<p><strong>2. Büyüklük Çeşitlendirmesi:</strong> Büyük ölçekli (BIST30) + orta ölçekli (BIST50/100) şirketler. Büyükler daha savunmacı, küçükler daha yüksek büyüme potansiyeli ama daha yüksek volatilite.</p>
+<p><strong>3. Döviz Geliri Çeşitlendirmesi:</strong> TL gelirli ve döviz gelirli şirketler. Döviz geliri olan THYAO, ASELS, EREGL gibi hisseler TL değer kaybı dönemlerinde koruma sağlar.</p>
+<p><strong>4. Varlık Sınıfı Çeşitlendirmesi:</strong> Hisse + Altın + TL mevduat/tahvil + döviz kombinasyonu. Kriz dönemlerinde korelatif davranış gösteren hisselere ek olarak farklı varlık sınıfları kritik önem taşır.</p>
+
+<h2>Aşırı Çeşitlendirme Tuzağı</h2>
+<p>"Diworsification" (fazla çeşitlendirme bozulması) terimi, çok fazla hisse tutmanın faydayı azaltması durumunu tanımlar. Peter Lynch'e göre ortalama bireysel yatırımcı 5-15 hisse tutmalıdır. Daha fazlası:</p>
+<ul>
+  <li>Takip etmesi zor bir portföy yaratır</li>
+  <li>Piyasa ortalamasını yakalamak dışında anlam taşımaz</li>
+  <li>Yüksek yönetim süresi gerektirir</li>
+</ul>
+<p>Pratik kural: BIST'te bireysel yatırımcı için 5-12 hisse, en az 3-4 farklı sektörden, ideal aralık.</p>
+
+<h2>BorsaPusula ile Çeşitlendirme Takibi</h2>
+<p>BorsaPusula'nın ana sayfasında tüm BIST30 hisselerinin sinyal durumunu tek ekranda görebilirsiniz. Sektörel filtreleme özelliğiyle belirli bir sektördeki hisseleri izole edebilir ve portföyünüzün sektörel dağılımını optimize edebilirsiniz. Güçlü AL sinyali veren hisseler farklı sektörlerden seçildiğinde hem kâr potansiyeli hem risk yönetimi dengesi sağlanmış olur.</p>
+""",
+    "faqs": [
+      {"q": "Kaç hisse ile portföy oluşturulmalı?",
+       "a": "Araştırmalar, ilk 10-15 hissenin çeşitlendirmenin büyük kısmını sağladığını göstermektedir. 30+ hisse tutmak ek risk azaltımı sağlamaz ama takip edilebilirliği ciddi ölçüde düşürür. Bireysel BIST yatırımcıları için 5-12 hisse, en az 3 farklı sektörden optimal aralık sayılır."},
+      {"q": "Çeşitlendirme kayıpları tamamen engeller mi?",
+       "a": "Hayır. Çeşitlendirme sistematik olmayan riski (şirkete özgü) azaltır ama sistematik riski (piyasanın tamamını etkileyen) engelleyemez. Ekonomik kriz, kur şoku veya küresel resesyon gibi faktörler tüm BIST'i aynı anda olumsuz etkileyebilir. Bu nedenle sadece hisse değil, varlık sınıfı bazında da çeşitlendirme önerilir."},
+      {"q": "Korelasyon neden önemli?",
+       "a": "İki hisse birbiriyle yüksek korelasyonlu ise (birlikte yükselip düşüyorlarsa) tutmak çeşitlendirme sağlamaz. AKBNK ve GARAN'ı birlikte tutmak, ikisi de bankacılık sektörü olduğundan aynı risklere maruz bırakır. Korelasyonu düşük (ters veya bağımsız) hisseler seçmek gerçek çeşitlendirme sağlar."},
+      {"q": "Dövizle çeşitlendirme nasıl yapılır?",
+       "a": "Doğrudan yabancı döviz (USD/EUR mevduat), yabancı hisse fonları veya döviz geliri olan BIST hisseleri aracılığıyla döviz bazında çeşitlendirme yapılabilir. TL değer kaybına karşı en doğrudan koruma, döviz cinsinden varlık tutmak veya döviz geliri olan şirketlere (THYAO, ASELS, EREGL) yatırım yapmaktır."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'EREGL', 'TUPRS', 'TCELL']
+  },
+
+  # ── ARTICLE 84 ──
+  {
+    "slug": "hareketli-ortalamalar-ema-sma-altin-kesisim",
+    "title": "Hareketli Ortalamalar: EMA ve SMA Farkı, Altın Kesişim Stratejisi",
+    "desc": "Basit ve üstel hareketli ortalamalar nedir? EMA 20-50-200 hizalaması, altın kesişim ve ölüm kesişimi, BorsaPusula sinyallerinde nasıl kullanılır?",
+    "date": "2026-05-02",
+    "mins": 7,
+    "cat": "Teknik Analiz",
+    "body": """
+<p>Hareketli ortalamalar, teknik analizin en temel ve en yaygın kullanılan göstergelerinden biridir. Fiyat gürültüsünü filtreleyerek trendin yönünü net biçimde görmeyi sağlarlar. BorsaPusula sinyallerinin temel katmanlarından biri EMA (Üstel Hareketli Ortalama) hizalamasıdır.</p>
+
+<h2>SMA vs EMA: Fark Nedir?</h2>
+<p><strong>Basit Hareketli Ortalama (SMA — Simple Moving Average):</strong> Belirlenen periyottaki kapanış fiyatlarının aritmetik ortalamasıdır. Örneğin 20 günlük SMA, son 20 günün kapanış fiyatlarının toplamının 20'ye bölümüdür. Tüm günlere eşit ağırlık verir.</p>
+<p><strong>Üstel Hareketli Ortalama (EMA — Exponential Moving Average):</strong> Son fiyatlara daha fazla ağırlık veren hareketli ortalamadır. Bu nedenle SMA'ya göre fiyat değişimlerine daha hızlı tepki verir.</p>
+<p>Pratik fark: EMA trend değişimlerini daha erken fark eder ama daha fazla yanlış sinyal üretebilir. SMA daha yavaş ama daha stabil sinyaller verir. Aktif trader'lar genellikle EMA'yı, uzun vadeli yatırımcılar SMA'yı tercih eder.</p>
+
+<h2>Temel EMA Periyotları</h2>
+<ul>
+  <li><strong>EMA 20:</strong> Kısa vadeli trend göstergesi. Fiyat EMA 20'nin üzerinde → kısa vadeli yükselen trend.</li>
+  <li><strong>EMA 50:</strong> Orta vadeli trend. EMA 20 > EMA 50 → orta vadeli yükselen momentum.</li>
+  <li><strong>EMA 200:</strong> Uzun vadeli trend sınırı. Fiyat EMA 200'ün üzerinde → bull market rejimi. Altında → bear market rejimi. En kritik EMA seviyesi olarak kabul edilir.</li>
+</ul>
+
+<h2>EMA Hizalaması: Trend Gücü Skalası</h2>
+<p>EMA'ların birbirine göre konumu, trendin gücünü gösterir:</p>
+<ul>
+  <li><strong>EMA 20 > EMA 50 > EMA 200 ve Fiyat > EMA 20:</strong> → Tam hizalı yükseliş trendi. En güçlü alım ortamı.</li>
+  <li><strong>EMA 20 > EMA 50 > EMA 200 ama Fiyat &lt; EMA 20:</strong> → Trend güçlü ama kısa vadeli geri çekilme. Potansiyel giriş noktası.</li>
+  <li><strong>EMA'lar karışık:</strong> → Trend belirsiz, range piyasa. İşlem yapmak yerine beklemek mantıklı.</li>
+  <li><strong>EMA 20 &lt; EMA 50 &lt; EMA 200:</strong> → Tam hizalı düşüş trendi. Alımdan kaçınılmalı.</li>
+</ul>
+
+<h2>Altın Kesişim (Golden Cross)</h2>
+<p>Altın Kesişim, EMA 50 (veya SMA 50) EMA 200'ü (veya SMA 200) aşağıdan yukarı kırdığında oluşan sinyaldir. Uzun vadeli boğa piyasasının başlangıcı olarak yorumlanır. Tarihsel verilerde oldukça güvenilir bir uzun vadeli alım sinyali kabul edilir — ancak gecikme süresi uzundur (fiyat zaten önemli ölçüde yükselmiş olabilir).</p>
+
+<h2>Ölüm Kesişimi (Death Cross)</h2>
+<p>Ölüm Kesişimi, EMA 50 EMA 200'ü yukarıdan aşağı kırdığında oluşur. Uzun vadeli ayı piyasasının başlangıcına işaret eder. 2018 kripto ayısı, 2020 COVID düşüşü ve birçok BIST düzeltmesinde Death Cross öncesinde veya erken döneminde oluştu.</p>
+
+<h2>EMA'yı Destek ve Direnç Olarak Kullanmak</h2>
+<p>Yükselen trendlerde fiyat çoğunlukla EMA 20 veya EMA 50 seviyelerine çekilir ve bu seviyelerden sekmeye devam eder. Bu dinamik destek anlayışı, giriş noktası belirlemek için kullanılabilir:</p>
+<ul>
+  <li>Fiyat EMA 20'ye geldi ve sekiyorsa + trend yukarı → potansiyel alım noktası</li>
+  <li>Fiyat EMA 50'yi kırdıysa → EMA 20/50 arasında konsolidasyon veya trend zayıflıyor</li>
+  <li>Fiyat EMA 200'ün altına düştüyse → stop-loss seviyesi veya tamamen çıkış</li>
+</ul>
+
+<h2>BorsaPusula'da EMA Kullanımı</h2>
+<p>BorsaPusula sinyalleri, EMA hizalamasını Supertrend ve ADX ile birleştirerek daha güvenilir sonuçlar üretir. Sadece EMA hizalı olan ama ADX zayıfsa (ADX &lt; 20) veya Supertrend henüz dönmemişse sinyal verilmez. Bu üçlü filtre sistemi yanlış sinyal oranını önemli ölçüde düşürür. Hisse detay sayfasında EMA 20, EMA 50 ve EMA 200 seviyelerini doğrudan grafikte inceleyebilirsiniz.</p>
+""",
+    "faqs": [
+      {"q": "EMA mı SMA mı daha iyi?",
+       "a": "Her ikisinin de avantajları var. EMA daha hızlı tepki verdiği için aktif trader'lar ve kısa vadeli analistler tercih eder. SMA daha yavaş ve daha stabil olduğundan uzun vadeli trend analizinde daha az gürültü verir. BorsaPusula EMA kullanır çünkü BIST hisselerinde kısa ve orta vadeli sinyal için daha iyi performans gösterdiği gözlemlenmiştir."},
+      {"q": "EMA 200 neden bu kadar önemli?",
+       "a": "EMA 200, kurumsal yatırımcılar ve büyük fonlar tarafından çok yaygın biçimde kullanılan bir referans noktasıdır. Bu kadar çok oyuncunun aynı seviyeye bakması, seviyenin kendiliğinden önem kazanmasını sağlar (kendi kendini gerçekleştiren kehanet). Fiyatın EMA 200 üzerinde olması büyük paranın hissede uzun pozisyon tutmayı tercih edeceği anlamına gelir."},
+      {"q": "Altın Kesişim her zaman işe yarar mı?",
+       "a": "Hayır. Altın Kesişim güvenilir bir uzun vadeli sinyal olsa da yüksek gecikmesi nedeniyle fiyat zaten büyük kısmını yapmış olabilir. Ayrıca yatay (range) piyasalarda çok fazla yanlış Altın Kesişim sinyali oluşabilir. Bu nedenle trend gücü (ADX), hacim ve Supertrend gibi göstergelerle teyit etmek önerilir."},
+      {"q": "Kaç tane EMA takip edilmeli?",
+       "a": "3-4 EMA yeterlidir: EMA 20 (kısa vade), EMA 50 (orta vade), EMA 200 (uzun vade). Daha fazla EMA eklemek genellikle kafa karışıklığı yaratır — her EMA birbiriyle çakışır ve net sinyal vermek zorlaşır. Az EMA, net karar."}
+    ],
+    "related_tickers": ['AKBNK', 'ASELS', 'THYAO', 'GARAN', 'EREGL', 'TUPRS']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
