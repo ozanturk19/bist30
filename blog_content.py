@@ -5717,6 +5717,263 @@ ROA = Net Kâr / Toplam Aktifler × 100
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'TUPRS', 'EREGL', 'GARAN']
   },
+
+  # ── ARTICLE 77 ──
+  {
+    "slug": "rsi-gostergesi-nasil-kullanilir",
+    "title": "RSI Göstergesi Nasıl Kullanılır? Aşırı Alım ve Satım Seviyeleri",
+    "desc": "Relative Strength Index (RSI) nedir, nasıl hesaplanır ve BIST hisselerinde nasıl uygulanır? 30-70 seviyeleri, diverjans ve pratik RSI stratejileri.",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Teknik Analiz",
+    "body": """
+<p>RSI (Relative Strength Index / Göreceli Güç Endeksi), J. Welles Wilder tarafından 1978'de geliştirilen ve günümüzde hâlâ en yaygın kullanılan teknik analiz göstergelerinden biridir. Fiyatın belirli bir dönemdeki kazanımlarını kayıplarına oranlar; böylece trendin gücünü ve momentum yönünü ölçer.</p>
+
+<h2>RSI Nasıl Hesaplanır?</h2>
+<p>RSI = 100 – [100 / (1 + RS)]</p>
+<p>RS = Ortalama yükseliş / Ortalama düşüş (genellikle 14 periyot)</p>
+<p>Sonuç 0-100 arasında bir değerdir. Değer ne kadar yüksekse fiyat o kadar güçlü bir yükseliş momentumunda, ne kadar düşükse o kadar güçlü bir düşüş momentumundadır.</p>
+
+<h2>Temel RSI Seviyeleri</h2>
+<ul>
+  <li><strong>70 üzeri — Aşırı Alım (Overbought):</strong> Hisse kısa vadede çok yüksek; fiyat düzeltmesi gelebilir. Ancak güçlü trendlerde RSI uzun süre 70 üzerinde kalabilir — bu nedenle aşırı alımı doğrudan satış sinyali olarak yorumlamak tehlikeli olabilir.</li>
+  <li><strong>30 altı — Aşırı Satım (Oversold):</strong> Hisse kısa vadede çok düşmüş; toparlanma gelebilir. Düşen trendlerde ise RSI uzun süre 30 altında kalabilir.</li>
+  <li><strong>50 çizgisi — Momentum sınırı:</strong> RSI 50'nin üzerinde → yükselen momentum, altında → düşen momentum. Bazı analistler 50 üstüne çıkışı al, altına düşüşü sat sinyali olarak kullanır.</li>
+</ul>
+
+<h2>RSI Diverjansı (En Güçlü Sinyal)</h2>
+<p>Diverjans, fiyat ve RSI'nin zıt yönlerde hareket etmesidir. İki türü vardır:</p>
+<p><strong>Yükseliş Diverjansı (Bullish Divergence):</strong> Fiyat daha düşük dip yaparken RSI daha yüksek dip yapar. Gizli güç işareti — satış baskısı azalıyor. Yakında yükseliş gelebilir.</p>
+<p><strong>Düşüş Diverjansı (Bearish Divergence):</strong> Fiyat daha yüksek tepe yaparken RSI daha düşük tepe yapar. Gizli zayıflık işareti — alım gücü tükeniyor. Yakında düşüş gelebilir.</p>
+<p>Diverjanslar, basit aşırı alım/satım sinyallerinden çok daha güvenilir kabul edilir çünkü fiyat ile momentumun ayrışmasını gösterir.</p>
+
+<h2>RSI ve BIST Hisseleri</h2>
+<p>BIST'te RSI kullanırken dikkat edilmesi gereken bazı özel durumlar vardır:</p>
+<ul>
+  <li><strong>Bülten/KAP açıklaması sonrası:</strong> Şirket haberleri sonrası RSI normalin dışına çıkabilir; bu seviyeleri trend dışı kabul etmek daha doğrudur.</li>
+  <li><strong>Düşük işlem hacminde:</strong> Az hacimli hisselerde RSI yanıltıcı olabilir; hacim ile teyit şarttır.</li>
+  <li><strong>Seçim/makro dönemleri:</strong> Yoğun dış etki dönemlerinde tüm BIST'te RSI senkron hareket edebilir; sektörel veya bireysel hisse analizi daha az anlamlı olur.</li>
+</ul>
+
+<h2>RSI Stratejileri</h2>
+<p><strong>Klasik 30/70 Stratejisi:</strong> RSI 30'un altına düştüğünde alım, 70'in üstüne çıktığında satım yapılır. Yatay (range) piyasalarda etkilidir; trend piyasalarda yetersizdir.</p>
+<p><strong>RSI + Trend Filtresi:</strong> EMA 200 üzerindeyken (yükselen trend) sadece RSI 30-40 aralığından alım yapılır. EMA 200 altındayken (düşen trend) sadece RSI 60-70 aralığından satış yapılır. Trend yönünde işlem yaparak başarı oranı artırılır.</p>
+<p><strong>RSI + Supertrend:</strong> BorsaPusula'nın kullandığı Supertrend ile birleştirildiğinde çok güçlü sinyal kombinasyonu oluşur: Supertrend yeşil + RSI 50'nin üstü ve dip noktadan dönüş → al; Supertrend kırmızı + RSI 50'nin altı ve tepe noktadan dönüş → sat.</p>
+
+<h2>RSI'ın Sınırlamaları</h2>
+<p>RSI mükemmel değildir. Güçlü trendlerde aşırı alım/satım seviyeleri uzun süre aşılabilir. Sinyal gecikmesi yaşanabilir — fiyat zaten hareket etmişken RSI sinyal verebilir. Diğer göstergelerle (hacim, trend, formasyon) kombinasyon kullanımı daha sağlıklı sonuç verir.</p>
+<p>BorsaPusula sinyalleri, RSI'ı tek başına değil Supertrend ve ADX ile birlikte kullanarak bu sınırlamaları minimize etmeyi hedefler.</p>
+""",
+    "faqs": [
+      {"q": "RSI kaç periyotta kullanılmalı?",
+       "a": "Standart 14 periyot en yaygın kullanımdır ve çoğu platform için varsayılan ayardır. Kısa vadeli trade için 7-9 periyot, uzun vadeli analiz için 21 periyot tercih edilebilir. 14 periyot kısa vadeli gürültü ile uzun vadeli yavaşlık arasında iyi bir denge sağlar."},
+      {"q": "RSI 70'e ulaştığında hisse satılmalı mı?",
+       "a": "Güçlü yükselen trendlerde RSI uzun süre 70'in üzerinde kalabilir. 70'i otomatik satış sinyali olarak kullanmak güçlü trendlerde erken çıkışa neden olur. Diverjans oluşumu veya Supertrend/EMA sinyali değişimi gibi ek teyitler beklemek daha güvenlidir."},
+      {"q": "RSI diverjansı neden önemli?",
+       "a": "Diverjans, fiyatın yönü ile momentumun yönü arasındaki kopuşu gösterir. Bu kopuş, mevcut trendin zayıfladığına işaret eder. Fiyat yeni tepe yaparken RSI daha düşük tepe yapıyorsa alım baskısı düşüyor ve yakında düzeltme gelebilir — bu sinyali önceden vermesi açısından değerlidir."},
+      {"q": "RSI ve MACD arasındaki fark nedir?",
+       "a": "RSI aşırı alım/satım seviyelerini ve trend momentumunu ölçer. MACD ise iki hareketli ortalamanın kesişimini ve momentumun ivmesini gösterir. İkisi birbirini tamamlar: RSI momentum gücünü, MACD ise yön değişimini daha iyi yakalar. Birlikte kullanıldığında daha güvenilir sinyaller üretilir."}
+    ],
+    "related_tickers": ['AKBNK', 'ASELS', 'GARAN', 'THYAO', 'EREGL', 'TUPRS']
+  },
+
+  # ── ARTICLE 78 ──
+  {
+    "slug": "bist-temettue-yatirimligi-rehberi",
+    "title": "BIST'te Temettü Yatırımcılığı: Yüksek Temettü Veren Hisseler ve Stratejiler",
+    "desc": "BIST'te temettü yatırımcılığı nasıl yapılır? Temettü verimi hesabı, ex-temettü tarihi, BIST'in en yüksek temettü veren sektörleri ve uzun vadeli strateji rehberi.",
+    "date": "2026-05-01",
+    "mins": 8,
+    "cat": "Temel Analiz",
+    "body": """
+<p>Temettü yatırımcılığı, hisselerin fiyat artışından değil şirketlerin dağıttığı kâr payından gelir elde etmeyi hedefleyen uzun vadeli bir stratejidir. Dünyada en köklü yatırım yaklaşımlarından biri olan bu strateji, BIST'te de giderek daha fazla ilgi görmektedir.</p>
+
+<h2>Temettü ve Temettü Verimi Nedir?</h2>
+<p><strong>Temettü:</strong> Şirketin belirli bir dönemde elde ettiği kârın hissedarlara dağıtılan kısmıdır. Nakit (nakit temettü) veya hisse (bedelsiz hisse) şeklinde ödenebilir.</p>
+<p><strong>Temettü Verimi (Dividend Yield):</strong> Hisse başına ödenen yıllık temettünün, hissenin mevcut fiyatına bölünmesiyle hesaplanır.</p>
+<p>Temettü Verimi = (Hisse Başına Yıllık Temettü / Hisse Fiyatı) × 100</p>
+<p>Örneğin hisse fiyatı 100 TL olan bir şirket 8 TL temettü ödediyse verim %8'dir. Bu verimi mevduat faizi veya tahvil getirisiyle karşılaştırmak yatırım kararını kolaylaştırır.</p>
+
+<h2>BIST'te Temettü Takvimi Nasıl İşler?</h2>
+<p><strong>Kâr Dağıtım Kararı:</strong> Şirketin Genel Kurulu, bir önceki yılın kârından ne kadar temettü dağıtacağına karar verir. Bu karar KAP'ta açıklanır.</p>
+<p><strong>Ex-Temettü Tarihi (Temettü Kaydı):</strong> Bu tarihte veya sonrasında hisseyi satın alanlar o dönemin temettüsünü alamaz. Ex-temettü tarihinde hisse fiyatı teorik olarak temettü kadar düşer.</p>
+<p><strong>Ödeme Tarihi:</strong> Temettü, hak kazanan yatırımcılara belirtilen tarihte ödenir.</p>
+<p>BIST'te temettü ödemeleri genellikle Mart-Haziran döneminde yoğunlaşır (bir önceki yılın kâr dağıtımları). BorsaPusula /takvim sayfasında temettü takvimini takip edebilirsiniz.</p>
+
+<h2>BIST'te Yüksek Temettü Veren Sektörler</h2>
+<p>Temettü geliri açısından öne çıkan BIST sektörleri:</p>
+<ul>
+  <li><strong>Bankacılık:</strong> AKBNK, GARAN, ISCTR, YKBNK — yüksek kârlılık ve düzenli temettü geleneği. BDDK kısıtları ve ekonomik konjonktür oranları etkiler.</li>
+  <li><strong>Enerji ve Petro-Kimya:</strong> TUPRS — Türkiye'nin tek rafinerisi, yüksek temettü verimi tarihiyle öne çıkar.</li>
+  <li><strong>Telekomünikasyon:</strong> TCELL, TTKOM — Savunmacı sektör olarak istikrarlı nakit akışı üretir.</li>
+  <li><strong>Holding şirketleri:</strong> KCHOL, SAHOL — portföyündeki şirketlerin temettülerini yansıtabilir.</li>
+  <li><strong>Sigortacılık:</strong> AKGRT — düzenli temettü geleneği bulunan sektörlerden biri.</li>
+</ul>
+
+<h2>Temettü Yatırımcılığı Stratejileri</h2>
+<p><strong>1. Yüksek Verimli Temettü Stratejisi (High Yield):</strong> En yüksek temettü verimiyle işlem gören hisseleri satın almak. Risk: Verim yüksekse bazen hissenin düştüğü için verim "yapay" yüksek görünebilir — "temettü tuzağı" adı verilen durum.</p>
+<p><strong>2. Temettü Büyümesi Stratejisi (Dividend Growth):</strong> Her yıl temettü ödemesini artıran şirketlere odaklanmak. Mutlak verim düşük olsa bile büyüme oranı yüksekse uzun vadede avantaj yaratır.</p>
+<p><strong>3. DRİP (Temettü Yeniden Yatırım):</strong> Alınan temettüleri aynı hisseye yeniden yatırmak. Bileşik getirinin gücünden yararlanma stratejisi. Türkiye'de otomatik sistem henüz yaygın değil ama manuel uygulamak mümkün.</p>
+
+<h2>Temettü Yatırımcısının Dikkat Edeceği Metrikler</h2>
+<ul>
+  <li><strong>Payout Ratio (Kâr Dağıtım Oranı):</strong> Temettünün net kâra oranı. %50-70 arası sürdürülebilir; %100'ü aşıyorsa şirket borçlanarak temettü ödüyor olabilir.</li>
+  <li><strong>Serbest Nakit Akışı (Free Cash Flow):</strong> Şirket temettüyü gerçek nakit üretiminden mi yoksa kâr manipülasyonundan mı ödüyor?</li>
+  <li><strong>Borç/Özkaynak Oranı:</strong> Yüksek borçlu şirket ekonomik stres döneminde temettüyü kesebilir.</li>
+  <li><strong>Temettü Geçmişi:</strong> 5-10 yıl boyunca düzenli ve artarak temettü ödemiş şirketler daha güvenilirdir.</li>
+</ul>
+
+<h2>Temettü Yatırımcılığının Riskleri</h2>
+<p>Temettü verimi çekici görünse de bazı riskler göz önünde bulundurulmalı: şirket zararında kârdan temettü verilmez; ekonomik krizde temettü kesilebilir; ex-temettü tarihinde hisse fiyatı temettü miktarı kadar düşer (net verim sıfır olabilir); enflasyonun üzerinde getiri için verim oranının yüksek olması gerekmektedir.</p>
+<p>BorsaPusula sinyalleri, temettü tarihlerini bilanço takvimi ile birlikte takip etmenizi sağlar. Yüksek temettü veren bir hisseyi AL sinyalinin başında almak, hem temettü hem de fiyat artışından yararlanma fırsatı sunabilir.</p>
+""",
+    "faqs": [
+      {"q": "Temettü almak için hisseyi ne kadar tutmak gerekir?",
+       "a": "Ex-temettü tarihinden en az 1 gün önce hisseyi satın almış ve o gün portföyünüzde bulunduruyor olmanız yeterlidir. Temettü ödendikten hemen sonra satış yapabilirsiniz, ancak bu durumda fiyatın temettü miktarı kadar düştüğünü görebilirsiniz."},
+      {"q": "BIST'te en yüksek temettü veren hisseler hangileridir?",
+       "a": "Temettü verimi her yıl değiştiğinden güncel veriye bakmak önemlidir. Tarihsel olarak yüksek temettü verimiyle öne çıkan sektörler: bankacılık (AKBNK, GARAN), enerji (TUPRS), telekomünikasyon (TCELL, TTKOM) ve bazı holdingler sayılabilir. KAP ve borsa verilerinden güncel kâr dağıtım kararlarını takip edebilirsiniz."},
+      {"q": "Temettü tuzağı nedir?",
+       "a": "Temettü tuzağı, görünürde çok yüksek temettü verimine sahip bir hissenin aslında temel sorunları nedeniyle değer kaybetmesi durumudur. Hisse fiyatı düştüğü için temettü verimi yüksek görünür, ama şirketin uzun vadeli temettü ödeme kapasitesi de sorgulanır hale gelir. Bu nedenle yüksek verim tek başına yeterli kriter değildir."},
+      {"q": "Temettü geliri vergilendirilir mi?",
+       "a": "Türkiye'de gerçek kişilerin tam mükellef kurumlardaki hisselerinden aldıkları temettünün yarısı gelir vergisinden muaf tutulur (istisna uygulaması). Kalan yarı için 2025 itibarıyla tevkifat oranı %10'dur. Vergi mevzuatı değişebileceğinden güncel bilgi için vergi danışmanınıza başvurmanız önerilir."}
+    ],
+    "related_tickers": ['AKBNK', 'GARAN', 'TUPRS', 'TCELL', 'ISCTR', 'YKBNK']
+  },
+
+  # ── ARTICLE 79 ──
+  {
+    "slug": "piyasalarda-suru-psikolojisi-ve-davranissal-finans",
+    "title": "Piyasalarda Sürü Psikolojisi ve Davranışsal Finans: Yatırımcı Hatalarından Nasıl Kaçınırsınız?",
+    "desc": "Sürü psikolojisi, FOMO, kayıptan kaçınma önyargısı — davranışsal finansın temel kavramları ve BIST yatırımcılarının en sık yaptığı psikolojik hatalar.",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Strateji",
+    "body": """
+<p>Klasik ekonomi teorisi yatırımcıların her zaman rasyonel kararlar verdiğini varsayar. Gerçeklik ise çok daha karmaşık. Daniel Kahneman'ın Nobel Ödüllü araştırmalarının da ortaya koyduğu gibi, insan zihni sistematik önyargılarla doludur — ve bu önyargılar piyasalarda tekrarlayan, öngörülebilir hatalar doğurur.</p>
+
+<h2>Sürü Psikolojisi (Herd Behavior)</h2>
+<p>Sürü psikolojisi, yatırımcıların kendi bağımsız analizleri yerine büyük kitlenin hareketini taklit etme eğilimidir. BIST'te bu fenomen özellikle çarpıcı biçimde gözlemlenir:</p>
+<ul>
+  <li>Sosyal medyada "XYZ hissesi fırlatıyor" gürültüsü başladığında alıcı kalabalığı oluşur</li>
+  <li>Piyasa düşmeye başladığında panik satışlar birbirini tetikler ve düşüş büyür</li>
+  <li>Herkesin konuştuğu sektör veya tema yatırımları balonlaşabilir</li>
+</ul>
+<p>Sürüye katılmanın maliyeti genellikle gec giriş: fiyat zaten çok yükselmiş veya düşmüş olur; sürü doğrulanır gibi görünse de en büyük kayıplar sürünün en coşkulu olduğu ve en güçlü çekilmenin olduğu son aşamada yaşanır.</p>
+
+<h2>FOMO (Kaçırma Korkusu)</h2>
+<p>FOMO, hızla yükselen bir hisseyi veya fırsatı kaçırdığımızı düşündüğümüzde mantıklı analiz yapmaksızın pozisyon almaya yönlendiren duygusal tepkidir. Sosyal medya FOMO'yu özellikle güçlendirir: insanlar kazançlarını paylaşır, kayıplarını gizler; bu seçici yayın kârlı fırsatların her yerde olduğu yanılsamasını yaratır.</p>
+<p>FOMO ile alınan pozisyonlar genellikle şu özelliklere sahiptir: Stop-loss yoktur veya çok geniştir; pozisyon büyüklüğü risk yönetimi gözetilmeksizin belirlenir; kâr hedefi belirsizdir; çıkış planı yoktur.</p>
+
+<h2>Kayıptan Kaçınma Önyargısı (Loss Aversion)</h2>
+<p>Kahneman ve Tversky'nin keşfettiği bu önyargıya göre insanlar 100 TL kazanmanın verdiği mutluluktan 2 kat daha fazlasını 100 TL kaybetmenin verdiği acıda hisseder. Piyasalarda bu şöyle tezahür eder:</p>
+<ul>
+  <li><strong>Kazananı erken sat, kaybedeni uzun tut:</strong> Kârdaki hisseyi hızlıca satarız (daha fazla kazanmak yerine "kilitlemek" isteriz), zarardaki hisseyi ise sonsuza kadar tutarız ("gerçekleşmemiş zarar" psikolojisi).</li>
+  <li><strong>Stop-loss koymama:</strong> Stop-loss = kaybı kabul etmek anlamına gelir ve zihnen acı vericidir. Bu yüzden birçok yatırımcı stop-loss koymaktan kaçınır ve küçük kayıplar büyük zararlara dönüşür.</li>
+</ul>
+
+<h2>Doğrulama Önyargısı (Confirmation Bias)</h2>
+<p>Bir hisse hakkında karar verdikten sonra yalnızca o kararı destekleyen haberleri ve analizleri arar, karşı görüşleri görmezden geliriz. Bu önyargı zararlı pozisyonları uzatır ve çıkış sinyallerini fark etmemizi engelleyen bir bariyer oluşturur.</p>
+
+<h2>Aşırı Güven (Overconfidence)</h2>
+<p>Özellikle piyasanın yükseldiği dönemlerde yatırımcılar kendi yeteneklerini aşırı değerlendirme eğilimi gösterir. "Bu hisseler yükseldi çünkü doğru seçtim" yerine "piyasa genel olarak yükseldi" gerçeğini görmek zordur. Aşırı güven aşırı işlem sıklığına (ve komisyon+vergi maliyetlerine) ve yetersiz çeşitlendirmeye yol açar.</p>
+
+<h2>Bu Hatalardan Nasıl Kaçınılır?</h2>
+<p><strong>1. Kural Tabanlı Sistem Kullanın:</strong> BorsaPusula gibi algoritma tabanlı sinyal platformları, duygusal karar vermenin önüne geçmek için etkili araçlardır. "Sistem AL dedi, ben de aldım" yaklaşımı FOMO ve sürü kararlarını azaltır.</p>
+<p><strong>2. İşlem Öncesi Plan Yapın:</strong> Alım kararı vermeden önce şunu yazın: Neden alıyorum? Hedef fiyatım ne? Stop-lossum nerede? Bu koşullarda satarım? Plan yazmak duygusal kararları filtreler.</p>
+<p><strong>3. Pozisyon Büyüklüğü Kuralı:</strong> Tek bir hisseye portföyün %10'undan fazlasını koymamak, kayıptan kaçınma önyargısının yarattığı "bu kez farklı olacak" düşüncesine karşı mekanik bir koruma sağlar.</p>
+<p><strong>4. Performans Günlüğü Tutun:</strong> Her işlemi kaydedin: gerekçe, giriş/çıkış fiyatı, sonuç. Zaman içinde hangi önyargılardan en çok etkilendiğinizi göreceksiniz.</p>
+<p><strong>5. Sosyal Medyadan Karar Kopuklukla Sağlayın:</strong> Haber ve sosyal medya akışından etkilendiğinizi fark ettiğinizde 24 saat bekleyin. FOMO kaynaklı aciliyet hissi çoğunlukla bir günde azalır.</p>
+
+<h2>Piyasa Döngüsü ve Duygular</h2>
+<p>Piyasa döngüsünün farklı aşamalarında hâkim olan duygular: İyimserlik → Heyecan → Coşku (zirve, maksimum risk) → Kaygı → İnkar → Korku → Panik → Çaresizlik (dip, maksimum fırsat) → Depresyon → Umursuzluk → Umut → İyimserlik.</p>
+<p>Bu döngüde Warren Buffett'ın formülü: "Başkaları korkarken açgözlü, başkaları açgözlüyken korkak ol." Bunu uygulamak insan doğasına aykırıdır — ve tam da bu yüzden çoğu yatırımcı piyasanın gerisinde kalır.</p>
+""",
+    "faqs": [
+      {"q": "Sürü psikolojisi her zaman kötü mü?",
+       "a": "Her zaman değil. Bazen sürü gerçekten haklıdır — güçlü bir trendin başında sürüye katılmak kârlı olabilir. Sorun genellikle sürünün sonuna katılmaktır. Fiyat çok yükselmiş, hacim dorukta ve herkes haberdar olmuşken katılmak yüksek risk demektir. Trend erken aşamada sinyallerle tespit edilirse makul bir strateji oluşturulabilir."},
+      {"q": "FOMO'yu engellemek için ne yapmalı?",
+       "a": "Her fırsatı değerlendirmek zorunda olmadığınızı kabul edin. Her gün onlarca hisse yükselir — hepsini yakalamak imkânsızdır. İyi bir sistem, fırsatların bir kısmını kaçırmanıza izin verirken sistematik olarak kâr etmenizi sağlar. 'Kaçan tren' yerine 'bir sonraki tren' odağı daha sağlıklıdır."},
+      {"q": "Davranışsal finans nasıl para kazandırır?",
+       "a": "Davranışsal finans bilgisini iki şekilde kullanabilirsiniz: Birincisi savunma — kendi önyargılarınızı tanıyarak daha az hata yaparsınız. İkincisi saldırı — diğer yatırımcıların panik satışı yaptığı dönemde (maksimum korku = maksimum fırsat) pozisyon almak, sürünün tersine hareket eden kazançlı bir strateji olabilir."},
+      {"q": "Algoritmik sinyaller psikolojik hataları engeller mi?",
+       "a": "Büyük ölçüde evet. BorsaPusula gibi kural tabanlı sistemler, algoritmanın belirlediği kriterlere göre sinyal üretir — insan duygusuna bağlı değildir. Ancak sinyali uygulamak hâlâ insan kararına bağlıdır. Sisteme güven ve tutarlı uygulama, psikolojik disiplinin en önemli bileşenlerinden biridir."}
+    ],
+    "related_tickers": ['AKBNK', 'THYAO', 'EREGL', 'ASELS', 'GARAN']
+  },
+
+  # ── ARTICLE 80 ──
+  {
+    "slug": "stagflasyon-nedir-yatirim-stratejileri",
+    "title": "Stagflasyon Nedir? Türkiye Ekonomisi ve Portföy Stratejileri",
+    "desc": "Stagflasyon tanımı, tarihsel örnekler, Türkiye ekonomisindeki tezahürleri ve stagflasyon ortamında hangi varlık sınıflarının öne çıktığı — kapsamlı rehber.",
+    "date": "2026-05-01",
+    "mins": 7,
+    "cat": "Makro Ekonomi",
+    "body": """
+<p>Stagflasyon, ekonomistlerin uzun süre teorik olarak imkânsız saydığı ama 1970'lerden bu yana defalarca yaşanan tuhaf bir makroekonomik kombinezonudur: aynı anda yüksek enflasyon + durgun büyüme (veya durgunluk) + yüksek işsizlik.</p>
+
+<h2>Stagflasyon Neden Paradoks?</h2>
+<p>Geleneksel Keynezyen ekonomi şunu öngörür: Enflasyon varsa büyüme de var (fazla para harcama var). Durgunluk varsa enflasyon düşer (talep zayıf). Stagflasyon bu denklemi altüst eder: büyüme durmuş ama fiyatlar yükselmektedir.</p>
+<p>Stagflasyonun en zorlu özelliği merkez bankalarını açmaza sokmasıdır: Faiz artırırsan durgunlaşan ekonomiyi daha da zayıflatırsın. Faiz indirirsen enflasyonu daha da körüklersin. Her iki politika aracı da eş zamanlı soruna çözüm üretemiyor.</p>
+
+<h2>Stagflasyon Nasıl Oluşur?</h2>
+<p>Stagflasyonun başlıca tetikleyicileri:</p>
+<ul>
+  <li><strong>Arz Şoku:</strong> 1973-74 petrol ambargosu klasik örnektir. Enerji maliyetleri fırlarsa hem üretim maliyeti artar (enflasyon) hem de üretim düşer (durgunluk).</li>
+  <li><strong>Yapısal Sorunlar:</strong> Kronik bütçe açıkları, para basılması ve verimlilik sorunlarının bir arada bulunduğu ekonomilerde stagflasyon eğilimi güçlüdür.</li>
+  <li><strong>Döviz Krizi:</strong> Para biriminin hızla değer kaybı hem ithal enflasyona hem de ekonomik durgunluğa yol açabilir.</li>
+  <li><strong>Tedarik Zinciri Kesintileri:</strong> 2021-22'deki pandemi sonrası dönemde küresel tedarik zinciri sorunları benzer bir tablo yarattı.</li>
+</ul>
+
+<h2>Türkiye ve Stagflasyon</h2>
+<p>Türkiye, stagflasyona eğilimli ekonomik yapısıyla öne çıkan gelişmekte olan piyasalardan biridir:</p>
+<ul>
+  <li><strong>Kronik enflasyon:</strong> Türkiye, 2000'lerin ortasındaki kısa dönem dışında tarihinin büyük bölümünde çift haneli enflasyonla yaşamıştır.</li>
+  <li><strong>Döviz kırılganlığı:</strong> TL'nin değer kaybı ithal enflasyonu doğrudan besler. Enerjide ve ara malında büyük ölçüde ithalata bağımlı bir ekonomi olduğundan kur artışı maliyet enflasyonuna dönüşür.</li>
+  <li><strong>Büyüme-enflasyon gerilimi:</strong> Para politikası gevşekken büyüme desteklenebilir ama enflasyon artar; sıkılaşınca enflasyon yavaşlar ama büyüme de yavaşlar.</li>
+</ul>
+
+<h2>Stagflasyon Ortamında Kazandıran Varlıklar</h2>
+<p>Tarihsel veriler stagflasyonun en çok hangi varlıkları koruduğunu göstermektedir:</p>
+<ul>
+  <li><strong>Altın:</strong> 1970'lerdeki stagflasyon döneminde altın en çok kazandıran varlık olmuştur. Enflasyona karşı klasik korunma aracıdır.</li>
+  <li><strong>Emtialar (Enerji ve Tarım):</strong> Stagflasyonun kendisi çoğunlukla bir emtia fiyatı şokundan kaynaklanır. Petrol, doğalgaz, tarımsal ürünler maliyet enflasyonunun kaynağı olduğundan değer kazanır.</li>
+  <li><strong>TÜFE'ye Endeksli Tahviller:</strong> Enflasyonla birlikte değeri artan sabit getirili araçlar. Türkiye'de TÜFE'ye endeksli devlet tahvilleri bu kategoriye girer.</li>
+  <li><strong>Değer Hisseleri (Value Stocks):</strong> Yüksek temettü verimiyle işlem gören, ucuz değerlemeye sahip şirketler; büyüme hisselerine göre daha dayanıklı olabilir.</li>
+  <li><strong>Döviz Mevduatı / Yabancı Varlıklar:</strong> TL bazlı stagflasyonda yabancı para cinsinden varlıklar korunma sağlar.</li>
+</ul>
+
+<h2>Stagflasyon Ortamında Dezavantajlı Varlıklar</h2>
+<ul>
+  <li><strong>Uzun Vadeli Tahviller:</strong> Enflasyon yükseldikçe sabit getirili uzun vadeli tahvil değeri erir.</li>
+  <li><strong>Büyüme Hisseleri (Growth Stocks):</strong> Yüksek faiz ortamı, gelecekteki nakit akışlarının bugünkü değerini düşürür; bu hisseler baskı altına girer.</li>
+  <li><strong>Yüksek Borçlu Şirketler:</strong> Artan faiz maliyetleri kârlılığı aşındırır.</li>
+</ul>
+
+<h2>Stagflasyon Portföy Stratejisi</h2>
+<p>Stagflasyon riski yüksekken portföy nasıl konumlandırılmalı:</p>
+<ul>
+  <li>Altın payını artır (%10-20 aralığı)</li>
+  <li>Döviz varlıklarını koru (USD/EUR mevduat veya yabancı hisse)</li>
+  <li>Temettü getirisi yüksek, borcu düşük şirketlere ağırlık ver</li>
+  <li>Enerji/hammadde sektörü hisselerini değerlendir</li>
+  <li>Uzun vadeli sabit faizli tahvilden uzak dur</li>
+  <li>Nakit oranını portföyde artır (fırsat fonu)</li>
+</ul>
+<p>BorsaPusula sinyalleri, her hissenin trend ve momentum durumunu gerçek zamanlı takip eder. Stagflasyon döneminde trendin yönüne göre konumlanmak, makro ortamın yarattığı sürtünmeyi minimize etmek için en pratik yaklaşımlardan biridir.</p>
+""",
+    "faqs": [
+      {"q": "Stagflasyon durgunluktan farkı nedir?",
+       "a": "Durgunluk (recession), ekonomik büyümenin negatife döndüğü dönemdir — enflasyon genellikle düşüktür çünkü talep zayıflar. Stagflasyonda ise ekonomi yavaşlamasına rağmen enflasyon yüksek kalmaya devam eder. Bu kombinasyon hem enflasyona hem büyüme kaybına karşı aynı anda savaşılması gerektiğinden politika yapıcılar için çok daha zordur."},
+      {"q": "Türkiye'de stagflasyon var mı?",
+       "a": "Türkiye, 2021-2023 döneminde stagflasyona benzer koşullar yaşadı: hem çok yüksek enflasyon (üç haneli dönemler dahil) hem de ekonomik büyümenin yavaşladığı dönemler. Yüksek enflasyon + kur baskısı + reel ücret erimesi kombinasyonu Türkiye'yi stagflasyona yapısal olarak duyarlı hale getirmektedir."},
+      {"q": "Stagflasyonda hisse senetleri nasıl performans gösterir?",
+       "a": "Genel olarak hisse senetleri stagflasyonda zayıf performans gösterir — ancak sektörler arasında büyük fark oluşur. Enerji, hammadde ve savunmacı sektörler (gıda, sağlık) daha dayanıklı olabilirken büyüme hisseleri ve yüksek borçlu şirketler daha fazla baskı altına girer. Türkiye'de nominal fiyat artışı enflasyonun altında kalabilir, yani reel anlamda kayıp yaşanabilir."},
+      {"q": "Stagflasyonda altın neden tercih edilir?",
+       "a": "Altın hem enflasyona karşı koruma (reel değerini korur) hem de ekonomik belirsizlikte 'güvenli liman' işlevi görür. Stagflasyonun her iki unsurundan (enflasyon + ekonomik stres) da yararlanan nadir varlık sınıflarından biridir. 1970'lerdeki ABD stagflasyonunda altın bu dönemde en güçlü performansı gösteren varlık sınıfı olmuştur."}
+    ],
+    "related_tickers": ['AKBNK', 'TUPRS', 'THYAO', 'EREGL', 'GARAN', 'TCELL']
+  },
 ]
 
 ARTICLES_BY_SLUG = {a["slug"]: a for a in ARTICLES}
