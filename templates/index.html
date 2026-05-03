@@ -94,52 +94,6 @@
     --bg2:          #161b22;
   }
 
-  /* Light tema */
-  body.light { --bg: #ffffff; --bg2: #f6f8fa; --bg3: #eaeef2; --border: #d0d7de; --text: #1f2328; --text2: #636c76; --text3: #9ea7b3; }
-  /* Light mode MUST override ALL --bp-* tokens used in components; without this,
-     dark-mode palette (#e2e8f0 text) renders on a light (#f6f8fa) background → invisible */
-  body.light {
-    --bp-bg:       #ffffff;
-    --bp-surface:  #f6f8fa;
-    --bp-surface2: #eaeef2;
-    --bp-surface3: #d0d7de;
-    --bp-border:   #d0d7de;
-    --bp-border2:  #b0b7c0;
-    --bp-text:     #1f2328;
-    --bp-text2:    #636c76;
-    --bp-text3:    #8c959f;
-    --bg2:         #f6f8fa;
-    --accent:      #0969da;
-  }
-  body.light { background: var(--bg); color: var(--text); }
-  body.light header { background: var(--bg2); border-color: var(--border); }
-  body.light .table-wrap, body.light .stat-card, body.light .endeks-card, body.light .chart-accordion, body.light .index-row-card { background: var(--bg2); border-color: var(--border); }
-  body.light tbody tr { border-color: var(--bg3); }
-  body.light tbody tr:hover { background: var(--bg3); }
-  body.light thead th { background: var(--bg3); color: var(--text2); border-color: var(--border); }
-  body.light td { color: var(--text); }
-  body.light .ticker { color: var(--text); }
-  body.light .price  { color: var(--text); }
-  body.light #updated, body.light .sig-date { color: var(--text3); }
-  body.light .btn-refresh { background: var(--bg2); border-color: var(--border); color: var(--text2); }
-  body.light .filter-btn { color: var(--text2); }
-  body.light .search-input { background: var(--bg2); border-color: var(--border); color: var(--text); }
-  body.light .no-data { color: var(--text3); }
-  body.light footer { color: var(--text3); border-color: var(--border); }
-  body.light footer a { color: var(--text2); }
-  body.light .sector-btn { border-color: var(--border); color: var(--text3); }
-  body.light .ind-neutral { background: var(--bg3); color: var(--text2); }
-
-  /* Tema butonu */
-  .theme-btn {
-    background: none; border: 1px solid var(--bp-border); color: var(--bp-text2);
-    width: 32px; height: 32px; border-radius: var(--bp-radius-sm); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; transition: all .15s; flex-shrink: 0;
-  }
-  .theme-btn:hover { background: var(--bp-surface2); color: var(--bp-text); }
-  body.light .theme-btn { border-color: #d0d7de; color: #636c76; }
-  body.light .theme-btn:hover { background: #eaeef2; }
 
   body {
     background: var(--bp-bg);
@@ -312,10 +266,10 @@
   .mbn-item.active svg { filter: drop-shadow(0 0 4px rgba(59,130,246,.4)); }
   @media (max-width: 768px) {
     .mobile-bottom-nav { display: flex; }
-    body { padding-bottom: 64px; }
-    .alarm-fab { bottom: 80px !important; }
-    .alarm-panel { bottom: 80px !important; }
-    .sub-toast { bottom: 150px; }
+    body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+    .alarm-fab { bottom: calc(80px + env(safe-area-inset-bottom)) !important; }
+    .alarm-panel { bottom: calc(80px + env(safe-area-inset-bottom)) !important; }
+    .sub-toast { bottom: calc(150px + env(safe-area-inset-bottom)); }
   }
 
   /* Stats bar */
@@ -1029,8 +983,6 @@
   .flash-up   { animation: flashUp   0.8s ease-out; color: #3fb950 !important; }
   .flash-down { animation: flashDown 0.8s ease-out; color: #f85149 !important; }
 
-  #liveTs { font-size: 11px; font-weight: 600; color: #3fb950; letter-spacing: 0.3px; font-variant-numeric: tabular-nums; }
-
   .sig-date   { font-size: 11px; color: #8b949e; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .new-today  { color: #e3b341; font-weight: 700; font-size: 12px; }
   .row-new-signal { background: rgba(245,158,11,0.04); }
@@ -1144,17 +1096,21 @@
 
   /* ── Mobile card list ── */
   .mobile-card-list { display:none; flex-direction:column; gap:8px; }
-  .mc { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:11px 13px; cursor:pointer; transition:border-color .15s; text-decoration:none; display:block; }
-  .mc:hover { border-color:#8b949e; }
-  .mc.mc-new { border-left:2px solid #e3b341; }
+  .mc { background: var(--bp-surface); border:1px solid var(--bp-border); border-radius:10px; padding:12px 14px; cursor:pointer; transition:border-color .15s; text-decoration:none; display:block; }
+  .mc:active { background: var(--bp-surface2); }
+  .mc:hover { border-color: var(--bp-border2); }
+  .mc.mc-new { border-left:3px solid #e3b341; }
   .mc-row1 { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
   .mc-lft { min-width:0; }
   .mc-rgt { text-align:right; flex-shrink:0; }
-  .mc-ticker { font-size:15px; font-weight:800; color:#f0f6fc; line-height:1.2; }
-  .mc-sector { font-size:10px; color:#8b949e; margin-top:2px; }
-  .mc-price  { font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; color:#f0f6fc; line-height:1.3; }
-  .mc-row2   { display:flex; align-items:center; justify-content:space-between; margin-top:9px; padding-top:8px; border-top:1px solid #21262d; }
-  .mc-entry  { font-size:11px; color:#8b949e; }
+  .mc-ticker { font-size:16px; font-weight:800; color: var(--bp-text); line-height:1.2; }
+  .mc-sector { font-size:10px; color: var(--bp-text3); margin-top:2px; }
+  .mc-price  { font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; color: var(--bp-text); line-height:1.3; }
+  .mc-row2   { display:flex; align-items:center; justify-content:space-between; margin-top:9px; padding-top:8px; border-top:1px solid var(--bp-border); }
+  .mc-entry  { font-size:11px; color: var(--bp-text3); }
+
+  /* Refresh label */
+  .refresh-label { font-size: 12px; }
 
   /* Responsive */
   body { overflow-x: hidden; }
@@ -1164,6 +1120,7 @@
     .header-nav { display: none; }
     .logo-sub { display: none; }
     .logo-name { font-size: 15px; }
+    .refresh-label { display: none; }
     /* Dual endeks kartları — mobilde yığılmış */
     .dual-endeks { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
     .endeks-card { padding: 10px 12px; }
@@ -1174,16 +1131,17 @@
     .chart-acc-body.open { flex-direction: column; height: auto; overflow: visible; }
     #chartCol { flex: none !important; max-width: 100% !important; width: 100%; border-right: none; border-bottom: 1px solid var(--bp-border); }
     .charts-wrap { padding: 4px 12px 8px; }
-    #chartMain { height: 220px; }
-    .chart-loading { height: 220px; }
+    #chartMain { height: 250px; }
+    .chart-loading { height: 250px; }
     .hero-panel { min-height: 110px; }
     .hp-twin { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .hp-section { flex: 0 0 140px; min-width: 0; padding: 8px 10px; overflow-y: visible; }
     .hp-section-r { border-left: 1px solid var(--bp-border); }
     .hp-name { display: none; }
-    .stats-bar { gap: 8px; }
-    .stat-card { padding: 10px 12px; min-width: 80px; }
-    .stat-card .stat-num { font-size: 20px; }
+    /* Stats bar → 2×2 grid (was cramped 4-card row) */
+    .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-card { padding: 12px 14px; min-width: unset; }
+    .stat-card .stat-num { font-size: 22px; }
     td { padding: 8px 10px; }
     .indicators { display: none; }
     th.hide-mobile, td.hide-mobile { display: none; }
@@ -1197,8 +1155,13 @@
     .mobile-card-list { display: flex; }
     /* Gündem — mobil */
     .gundem-layout { flex-direction: column; }
+    .gundem-header { flex-wrap: wrap; gap: 6px; }
     .bilanco-mini-box { flex: none !important; width: 100% !important; }
     .gundem-cards-wrap { width: 100%; }
+    /* Backtest badge: her satır tam genişlik */
+    #btTrustBadge { gap: 4px 12px; }
+    /* Index row card — mobil */
+    .index-row-card { gap: 8px; padding: 8px 12px; }
   }
 </style>
 </head>
@@ -1277,7 +1240,6 @@
   <div class="header-right">
     <span id="liveTs" style="margin-right:4px">○</span>
     <span id="updated" style="display:none">—</span>
-    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Tema değiştir">🌙</button>
     <button class="btn-refresh" onclick="manualRefresh()" id="refreshBtn">
       <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
@@ -1285,7 +1247,7 @@
         <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
         <path d="M8 16H3v5"/>
       </svg>
-      Yenile
+      <span class="refresh-label">Yenile</span>
     </button>
   </div>
 </header>
@@ -2873,20 +2835,6 @@ async function manualRefresh() {
   }, 3000);
 }
 
-// ── Dark / Light Tema ────────────────────────────────
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light');
-  localStorage.setItem('theme', isLight ? 'light' : 'dark');
-  document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙';
-}
-(function applyTheme() {
-  const saved = localStorage.getItem('theme');
-  if (saved === 'light') {
-    document.body.classList.add('light');
-    const btn = document.getElementById('themeBtn');
-    if (btn) btn.textContent = '☀️';
-  }
-})();
 
 // ── Skeleton loader doldurucu ─────────────────────────
 (function buildSkeleton() {
