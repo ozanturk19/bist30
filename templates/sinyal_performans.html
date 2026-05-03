@@ -14,6 +14,13 @@
 <title>Sinyal Performans Analizi — BorsaPusula</title>
 <meta name="description" content="BorsaPusula algoritmik sinyal sisteminin geçmiş başarı oranları, ortalama getiri ve aktif sinyal performansları.">
 <link rel="canonical" href="https://borsapusula.com/sinyal-performans">
+<meta property="og:title"       content="Sinyal Performans Analizi — BorsaPusula">
+<meta property="og:description" content="BorsaPusula algoritmik sinyal sisteminin geçmiş başarı oranları, ortalama getiri ve aktif sinyal performansları.">
+<meta property="og:url"         content="https://borsapusula.com/sinyal-performans">
+<meta property="og:image"       content="https://borsapusula.com/og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height"content="630">
+<meta property="og:site_name"   content="borsapusula.com">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
   {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
@@ -130,7 +137,7 @@
     BorsaPusula
   </a>
   <div>
-    <div class="page-title">📊 Sinyal Performans Analizi</div>
+    <h1 class="page-title">📊 Sinyal Performans Analizi</h1>
     <div class="page-sub">Algoritmik sinyal geçmiş başarı oranları · BIST30 üzerinde 2 yıllık backtest</div>
   </div>
 </header>
@@ -157,12 +164,12 @@
     </div>
     <div class="ozet-metric">
       <div class="ozet-metric-val hero-val c-green">%{{ bt.al.win_rate }}</div>
-      <div class="ozet-metric-lbl">✅ AL Başarı Oranı</div>
+      <div class="ozet-metric-lbl">✅ Güçlü Trend Başarı Oranı</div>
       <div class="ozet-metric-sub">{{ bt.al.count }} Güçlü Trend sinyali</div>
     </div>
     <div class="ozet-metric">
       <div class="ozet-metric-val c-green">{{ '+' if bt.al.avg_ret >= 0 else '' }}{{ bt.al.avg_ret }}%</div>
-      <div class="ozet-metric-lbl">📈 Ort. Getiri (AL)</div>
+      <div class="ozet-metric-lbl">📈 Ort. Getiri (Güçlü Trend)</div>
       <div class="ozet-metric-sub">Max +{{ bt.al.best }}% · Min {{ bt.al.worst }}%</div>
     </div>
     <div class="ozet-metric">
@@ -203,7 +210,7 @@
 
   <!-- Risk Metrikleri -->
   <div class="sec-head">
-    Risk Metrikleri <span>(Güçlü Trend — AL sinyalleri)</span>
+    Risk Metrikleri <span>(Güçlü Trend sinyalleri)</span>
   </div>
   <div class="stat-grid" style="margin-bottom:28px">
     <div class="stat-card" title="Sharpe Ratio: Ortalama getirinin oynaklığa oranı. >1.0 iyi, >2.0 çok iyi.">

@@ -410,7 +410,7 @@
       const s = map[t];
       if (!s) return '';
       const sig    = (s.signal || 'BEKLE').toLowerCase().replace('ü','u');
-      const sigLbl = s.signal === 'AL' ? '▲ AL' : s.signal === 'SAT' ? '▼ SAT' : '● BEKLE';
+      const sigLbl = s.signal === 'AL' ? '▲ Güçlü Trend' : s.signal === 'SAT' ? '▼ Zayıf Trend' : '● Belirsiz';
       const chg    = s.change_pct != null ? (s.change_pct >= 0 ? '+' : '') + (+s.change_pct).toFixed(1) + '%' : '';
       const chgClr = s.change_pct >= 0 ? '#3fb950' : '#f85149';
       const price  = s.price != null ? (+s.price).toLocaleString('tr-TR',{minimumFractionDigits:2}) + ' ₺' : '—';

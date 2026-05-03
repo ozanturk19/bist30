@@ -15,6 +15,13 @@
 <meta name="description" content="Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/gundem">
+<meta property="og:title"       content="Piyasa Gündem Merkezi — BorsaPusula">
+<meta property="og:description" content="Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.">
+<meta property="og:url"         content="https://borsapusula.com/gundem">
+<meta property="og:image"       content="https://borsapusula.com/og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height"content="630">
+<meta property="og:site_name"   content="borsapusula.com">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
   {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
@@ -215,7 +222,7 @@
     Ana Sayfa
   </a>
   <div>
-    <div class="page-title">Piyasa Gündem Merkezi</div>
+    <h1 class="page-title">Piyasa Gündem Merkezi</h1>
     <div class="page-sub" id="updatedAt">Yükleniyor…</div>
   </div>
 </header>
@@ -469,7 +476,7 @@ async function loadGundem() {
           const isAl  = item.signal === 'AL';
           const isSat = item.signal === 'SAT';
           const sigCls = isAl ? '#3fb950' : isSat ? '#f85149' : '#8b949e';
-          const sigTxt = isAl ? '▲ AL' : isSat ? '▼ SAT' : '● BEKLE';
+          const sigTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Zayıf Trend' : '● Belirsiz';
           const snippet = (item.snippet||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/^\*\s+/gm,'• ').replace(/^-\s+/gm,'• ').trim();
           const kapHref = item.kap_url ? `<a href="${item.kap_url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP ↗</a>` : '';
           return `<a href="/hisse/${item.ticker}" style="display:block;text-decoration:none;background:#111827;border:1px solid #1e2d45;border-radius:8px;padding:12px 14px;transition:border-color .15s"

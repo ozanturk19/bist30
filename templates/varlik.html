@@ -258,7 +258,7 @@
     {{ category_label or 'Ana Sayfa' }}
   </a>
   <div class="header-info">
-    <div class="header-name">{{ meta.emoji }} {{ meta.name }}</div>
+    <h1 class="header-name">{{ meta.emoji }} {{ meta.name }}</h1>
     <div class="header-sub">Supertrend · ADX · EMA Teknik Analiz</div>
   </div>
   <div class="header-price-block">
@@ -498,6 +498,25 @@ const BASE_OPTS = {
   handleScroll: true, handleScale: true,
 };
 
+/* Grafik eksen label formatı: "10" → "Nis 10", crosshair'de "00:00:00" kalkıyor */
+const _MTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+function _tickFmt(time, type) {
+  let yr, mo, dy;
+  if (typeof time === 'string') {
+    const p = time.split('-');
+    yr = +p[0]; mo = +p[1] - 1; dy = +p[2];
+  } else if (typeof time === 'number') {
+    const d = new Date(time * 1000);
+    yr = d.getUTCFullYear(); mo = d.getUTCMonth(); dy = d.getUTCDate();
+  } else if (time && typeof time === 'object') {
+    yr = time.year; mo = (time.month || 1) - 1; dy = time.day;
+  } else { return ''; }
+  if (type === 0) return String(yr);
+  if (type === 1) return _MTHS[mo] || '';
+  if (type === 2) return (_MTHS[mo] || '') + ' ' + dy;
+  return '';
+}
+
 function _sigLabel(sig) {
   return {AL:'▲ Güçlü Trend', SAT:'▼ Zayıf Trend', BEKLE:'● Belirsiz'}[sig] || sig;
 }
@@ -570,7 +589,7 @@ function renderChart(data) {
     ...BASE_OPTS,
     width:     chartW,
     height:    isMobile ? 240 : 360,
-    timeScale: { borderColor: '#30363d', timeVisible: true, visible: true },
+    timeScale: { borderColor: '#30363d', timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmt },
   });
 
   /* Volume histogram */
@@ -578,8 +597,8 @@ function renderChart(data) {
     const volChart = LC.createChart(elVolume, {
       ...BASE_OPTS,
       width:  chartW,
-      height: isMobile ? 60 : 80,
-      timeScale: { borderColor:'#30363d', timeVisible:false, visible:false },
+      height: isMobile ? 70 : 90,
+      timeScale: { borderColor:'#30363d', timeVisible:false, visible:false, rightOffset: 8 },
       rightPriceScale: {
         borderColor: '#30363d',
         scaleMargins: { top:0.1, bottom:0 },
@@ -623,11 +642,6 @@ function renderChart(data) {
   });
   candle.setData(data.ohlc || []);
 
-  /* Sinyal marker'ları (AL/SAT okları) */
-  if(data.markers && data.markers.length) {
-    candle.setMarkers(data.markers);
-  }
-
   /* EMA legend */
   const legEl = document.getElementById('emaLegend');
   function updateLeg(v12, v99_) {
@@ -645,12 +659,18 @@ function renderChart(data) {
     updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value);
   });
 
+  /* Son 1 yılı göster + sağda 10 boş bar boşluk */
   chart.timeScale().fitContent();
   requestAnimationFrame(() => {
     try {
-      const lr = chart.timeScale().getVisibleLogicalRange();
-      if(lr) chart.timeScale().setVisibleLogicalRange({from: lr.from - 10, to: lr.to + 2});
-    } catch(_){}
+      const n = (data.ohlc || []).length;
+      if (n > 0) {
+        chart.timeScale().setVisibleLogicalRange({
+          from: Math.max(0, n - 260),   // 8 ekstra sol bar — ilk label kırpılmasın
+          to:   n - 1 + 10,
+        });
+      }
+    } catch(_) {}
   });
 
   window.addEventListener('resize', () => {
