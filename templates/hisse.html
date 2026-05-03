@@ -11,35 +11,51 @@
   gtag("config", "G-WXLPNFHYLP");
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ ticker }} Teknik Analiz — {{ name }} Sinyal | borsapusula.com</title>
-<meta name="description" content="{{ ticker }} ({{ name }}) güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik Güçlü/Zayıf/Belirsiz trend analizi. Ücretsiz, günlük güncelleme.">
-<meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} al sat sinyali, {{ ticker }} supertrend, BIST100 sinyalleri, {{ name }} borsa analiz">
+{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
+{% if ssr_signal and ssr_signal.signal == 'AL' %}
+  {% set _st = ticker ~ ' Güçlü Trend — Teknik Analiz | BorsaPusula' %}
+  {% set _sd = ticker ~ ' Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
+{% elif ssr_signal and ssr_signal.signal == 'SAT' %}
+  {% set _st = ticker ~ ' Zayıf Trend — Teknik Analiz | BorsaPusula' %}
+  {% set _sd = ticker ~ ' Zayıf Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
+{% elif ssr_signal %}
+  {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA12/99 tabanlı algoritmik BIST sinyali. Ücretsiz.' %}
+{% else %}
+  {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST analizi. Ücretsiz, günlük güncelleme.' %}
+{% endif %}
+<title>{{ _st }}</title>
+<meta name="description" content="{{ _sd }}">
+<meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} sinyal, {{ ticker }} al sat, {{ ticker }} supertrend, {{ name }} borsa analiz, {{ name }} teknik, BIST100 sinyalleri{% if sector %}, {{ sector }} hisseleri{% endif %}, {{ ticker }} stop loss, {{ ticker }} RSI ADX">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <link rel="canonical" href="https://borsapusula.com/hisse/{{ ticker }}">
 <!-- Open Graph -->
 <meta property="og:type"        content="website">
-<meta property="og:title"       content="{{ ticker }} Teknik Analiz — {{ name }} | borsapusula.com">
-<meta property="og:description" content="{{ ticker }} için algoritmik Supertrend + ADX + EMA12/99 teknik analiz sinyali. BIST100 canlı sinyal paneli.">
+<meta property="og:title"       content="{{ _st }}">
+<meta property="og:description" content="{{ _sd }}">
 <meta property="og:url"         content="https://borsapusula.com/hisse/{{ ticker }}">
-<meta property="og:site_name"   content="BIST100 Sinyal Paneli | borsapusula.com">
+<meta property="og:site_name"   content="BorsaPusula — BIST Sinyal Paneli">
 <meta property="og:image"       content="https://borsapusula.com/og-image.svg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height"content="630">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="{{ ticker }} Teknik Analiz | borsapusula.com">
-<meta name="twitter:description" content="{{ name }} — Algoritmik BIST100 teknik analiz sinyali">
+<meta name="twitter:title"       content="{{ _st }}">
+<meta name="twitter:description" content="{{ _sd }}">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.svg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "FinancialProduct",
   "name": "{{ ticker }} ({{ name }}) Teknik Analiz Sinyali",
-  "description": "{{ ticker }} hissesi için algoritmik Supertrend + ADX + EMA12/99 teknik analiz sinyali. BIST100 canlı sinyal paneli.",
+  "description": "{{ ticker }} hissesi için algoritmik Supertrend(10,3) + ADX + EMA12/99 teknik analiz sinyali. Günlük güncelleme, ücretsiz.",
   "url": "https://borsapusula.com/hisse/{{ ticker }}",
+  "tickerSymbol": "{{ ticker }}",{% if sector %}
+  "category": "{{ sector }}",{% endif %}
   "provider": {
     "@type": "Organization",
-    "name": "borsapusula.com",
+    "name": "BorsaPusula",
     "url": "https://borsapusula.com"
   },
   "inLanguage": "tr"
@@ -50,17 +66,59 @@
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    {"@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": "https://borsapusula.com/"},
-    {"@type": "ListItem", "position": 2, "name": "BIST100 Sinyaller", "item": "https://borsapusula.com/"},
+    {"@type": "ListItem", "position": 1, "name": "Ana Sayfa",       "item": "https://borsapusula.com/"},
+    {"@type": "ListItem", "position": 2, "name": "BIST Sinyalleri", "item": "https://borsapusula.com/"},
     {"@type": "ListItem", "position": 3, "name": "{{ ticker }} — {{ name }}", "item": "https://borsapusula.com/hisse/{{ ticker }}"}
   ]
 }
 </script>
+{% if ssr_signal %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "{{ ticker }} şu an hangi sinyalde?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ ticker }} ({{ name }}) hissesi BorsaPusula algoritmasına göre {% if ssr_signal.signal == 'AL' %}Güçlü Trend{% elif ssr_signal.signal == 'SAT' %}Zayıf Trend{% else %}Belirsiz{% endif %} sinyalinde ({{ ssr_signal.signal_date }}). ADX: {{ (ssr_signal.adx or 0)|int }}, RSI: {{ (ssr_signal.rsi or 0)|int }}."
+      }
+    },{% if ssr_signal.sl_level %}
+    {
+      "@type": "Question",
+      "name": "{{ ticker }} için stop loss nerede?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ ticker }} için mevcut algoritmik stop loss seviyesi {{ '%.2f'|format(ssr_signal.sl_level) }} TL olarak hesaplanmıştır. ATR tabanlı dinamik hesaplanır, Supertrend(10,3) çıkış seviyesini baz alır."
+      }
+    },{% endif %}
+    {
+      "@type": "Question",
+      "name": "{{ ticker }} teknik analizi nasıl hesaplanıyor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ ticker }} sinyali 3 kriterin eş zamanlı karşılanmasıyla oluşur: Supertrend(10,3) yön, ADX 25 ve üzeri trend gücü, EMA12 ve EMA99 pozisyonu. Sinyal en az 3 bar devam edince onaylı sayılır. Haftalık EMA20 filtresi büyük ters trendlerde sinyal üretimini engeller."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "{{ ticker }} borsapusula.com sinyali ücretsiz mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Evet. BorsaPusula.com'daki tüm BIST100 teknik analiz sinyalleri tamamen ücretsizdir, kayıt gerekmez ve her işlem gününün sonunda otomatik güncellenir."
+      }
+    }
+  ]
+}
+</script>
+{% endif %}
 <!-- Inter font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="/static/lightweight-charts.min.js"></script>
+<script src="/static/lightweight-charts.min.js" defer></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -404,6 +462,16 @@
     font-weight: 600;
     margin-bottom: 12px;
   }
+  /* Screen-reader only — visually hidden but crawlable */
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
   .ind-row {
     display: flex;
     gap: 10px;
@@ -425,7 +493,7 @@
 
   .ind-detail {
     font-size: 11px;
-    color: #484f58;
+    color: #8b949e;
     font-weight: 400;
     margin-left: 4px;
   }
@@ -540,11 +608,11 @@
   .oc-chg    { font-size: 10px; font-variant-numeric: tabular-nums; font-weight: 600; }
   .oc-chg.pos { color: #3fb950; }
   .oc-chg.neg { color: #f85149; }
-  .oc-chg.neu { color: #484f58; }
+  .oc-chg.neu { color: #8b949e; }
   .oc-sig    { font-size: 10px; font-weight: 700; }
   .chip-al   { color: #3fb950; }
   .chip-sat  { color: #f85149; }
-  .chip-bekle{ color: #484f58; }
+  .chip-bekle{ color: #8b949e; }
 
   /* ── AI Haberler ── */
   .news-section {
@@ -598,7 +666,7 @@
   .news-retry-btn:hover { border-color: #58a6ff; }
   .news-source {
     font-size: 11px;
-    color: #484f58;
+    color: #8b949e;
     margin-top: 10px;
     display: flex;
     align-items: center;
@@ -665,7 +733,7 @@
     align-items: center;
     gap: 10px;
     font-size: 11px;
-    color: #484f58;
+    color: #8b949e;
     padding-left: 0;
   }
   .kap-link-btn {
@@ -681,7 +749,7 @@
   .kap-link-btn:hover { opacity: 1; }
   .kap-empty {
     font-size: 13px;
-    color: #484f58;
+    color: #8b949e;
     padding: 12px 0;
     text-align: center;
   }
@@ -703,7 +771,7 @@
     text-align: center;
     padding: 20px;
     font-size: 12px;
-    color: #484f58;
+    color: #8b949e;
     border-top: 1px solid #21262d;
   }
 
@@ -785,7 +853,7 @@
     BorsaPusula
   </a>
   <div>
-    <div class="header-ticker">{{ ticker }}</div>
+    <h1 class="header-ticker">{{ ticker }}<span class="sr-only"> — {{ name }} Teknik Analiz</span></h1>
     <div class="header-name">{{ name }}
       {% if sector %}<span style="margin-left:8px;font-size:11px;background:#21262d;border:1px solid #30363d;border-radius:10px;padding:2px 8px;color:#8b949e">{{ sector }}</span><a href="{{ compare_url }}" title="Sektördeki diğer hisselerle karşılaştır" style="margin-left:6px;font-size:11px;background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.3);border-radius:10px;padding:2px 8px;color:#58a6ff;text-decoration:none;white-space:nowrap">⇌ Karşılaştır</a>{% endif %}
     </div>
@@ -795,7 +863,7 @@
     <span class="header-chg neu" id="hpChg">—</span>
     <span class="signal-badge signal-BEKLE" id="hpSignal">● Belirsiz</span>
   </div>
-  <span id="liveTs" style="font-size:12px;color:#484f58;margin-left:4px">○</span>
+  <span id="liveTs" style="font-size:12px;color:#8b949e;margin-left:4px">○</span>
 </header>
 
 <!-- Makro Ticker Bandı -->
@@ -805,7 +873,7 @@
   </div>
 </div>
 
-<div class="container">
+<main class="container">
 
   <!-- Grafik -->
   <div class="chart-section">
@@ -814,13 +882,6 @@
       <span id="emaLegend" style="font-size:11px;color:#8b949e;margin-left:auto"></span>
     </div>
     <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
-    <!-- Marker tooltip (konumlandırma için position:relative şart) -->
-    <div id="markerTooltip" style="
-      display:none; position:absolute; z-index:50; pointer-events:none;
-      background:#1c2128; border:1px solid #30363d; border-radius:8px;
-      padding:8px 12px; font-size:12px; line-height:1.55; white-space:nowrap;
-      box-shadow:0 4px 16px rgba(0,0,0,.5);
-    "></div>
     <div id="chartsInner" style="position:relative">
       <div id="chartMain"></div>
       <div id="chartVolume"></div>
@@ -834,7 +895,7 @@
           <div class="week52-fill"  id="w52fill"  style="width:0%"></div>
           <div class="week52-cursor" id="w52cursor" style="left:0%"></div>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:#484f58">
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:#8b949e">
           <span>52H Düşük</span>
           <span id="w52cur" style="color:#e6edf3">—</span>
           <span>52H Yüksek</span>
@@ -845,7 +906,7 @@
 
   <!-- Teknik Yorum -->
   <div class="commentary-section" id="commentarySection" style="display:none">
-    <div class="section-title" style="margin-bottom:8px">📊 Teknik Görünüm</div>
+    <h2 class="section-title" style="margin-bottom:8px">📊 Teknik Görünüm</h2>
     <p class="commentary-text" id="commentaryText"></p>
   </div>
 
@@ -876,7 +937,7 @@
 
   <!-- Giriş Analizi (AL/SAT sinyallerinde gösterilir) -->
   <div class="entry-analysis-section" id="entryAnalysisSection" style="display:none">
-    <div class="section-title">🎯 Giriş Analizi</div>
+    <h2 class="section-title">🎯 Giriş Analizi</h2>
     <div class="entry-analysis-grid">
 
       <!-- Giriş Değerlendirmesi -->
@@ -905,7 +966,7 @@
 
   <!-- İndikatörler -->
   <div class="indicators-section">
-    <div class="section-title">İndikatör Durumu</div>
+    <h2 class="section-title">İndikatör Durumu</h2>
     <div class="ind-row" id="indRow">
       <span class="ind-badge ind-neutral">Yükleniyor…</span>
     </div>
@@ -913,9 +974,9 @@
 
   <!-- Çoklu Zaman Dilimi -->
   <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 18px;margin-bottom:20px" id="mtfSection">
-    <div class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</div>
+    <h2 class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="mtfGrid">
-      <div style="color:#484f58;font-size:13px;grid-column:1/-1">Yükleniyor…</div>
+      <div style="color:#8b949e;font-size:13px;grid-column:1/-1">Yükleniyor…</div>
     </div>
   </div>
 
@@ -929,9 +990,9 @@
 
   <!-- Sinyal Geçmişi -->
   <div class="history-section">
-    <div class="section-title">Sinyal Geçmişi
-      <span style="font-size:10px;color:#484f58;font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
-    </div>
+    <h2 class="section-title">Sinyal Geçmişi
+      <span style="font-size:10px;color:#8b949e;font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
+    </h2>
     <table class="history-table">
       <thead>
         <tr>
@@ -942,15 +1003,15 @@
         </tr>
       </thead>
       <tbody id="historyBody">
-        <tr><td colspan="4" style="color:#484f58;text-align:center;padding:20px">Yükleniyor…</td></tr>
+        <tr><td colspan="4" style="color:#8b949e;text-align:center;padding:20px">Yükleniyor…</td></tr>
       </tbody>
     </table>
   </div>
 
   <!-- Temel Analiz -->
   <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 18px;margin-bottom:20px" id="fundSection">
-    <div class="section-title">📋 Temel Analiz</div>
-    <div id="fundLoading" style="color:#484f58;font-size:13px;display:flex;align-items:center;gap:8px">
+    <h2 class="section-title">📋 Temel Analiz</h2>
+    <div id="fundLoading" style="color:#8b949e;font-size:13px;display:flex;align-items:center;gap:8px">
       <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Yükleniyor…
     </div>
     <div id="fundContent" style="display:none">
@@ -962,24 +1023,24 @@
   {% if ticker_bt and ticker_bt.al_win_rate is not none %}
   <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="section-title" style="margin:0">📊 Geçmiş Sinyal Performansı</div>
+      <h2 class="section-title" style="margin:0">📊 Geçmiş Sinyal Performansı</h2>
       <a href="/sinyal-performans" style="font-size:11px;color:#1f6feb;text-decoration:none;font-weight:600">Tüm backtest →</a>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
       <div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
         <div style="font-size:24px;font-weight:800;color:{% if ticker_bt.al_win_rate >= 50 %}#3fb950{% else %}#f85149{% endif %}">%{{ ticker_bt.al_win_rate }}</div>
-        <div style="font-size:11px;color:#8b949e;margin-top:3px">AL Kazanma Oranı</div>
+        <div style="font-size:11px;color:#8b949e;margin-top:3px">Güçlü Trend Kazanma Oranı</div>
       </div>
       <div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
         <div style="font-size:24px;font-weight:800;color:{% if ticker_bt.al_avg > 0 %}#3fb950{% elif ticker_bt.al_avg < 0 %}#f85149{% else %}#8b949e{% endif %}">{% if ticker_bt.al_avg > 0 %}+{% endif %}{{ ticker_bt.al_avg }}%</div>
-        <div style="font-size:11px;color:#8b949e;margin-top:3px">Ort. AL Getirisi</div>
+        <div style="font-size:11px;color:#8b949e;margin-top:3px">Ort. Güçlü Trend Getirisi</div>
       </div>
       <div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
         <div style="font-size:24px;font-weight:800;color:#64748b">{{ ticker_bt.al_count }}</div>
         <div style="font-size:11px;color:#8b949e;margin-top:3px">Analiz Edilen Sinyal</div>
       </div>
     </div>
-    <div style="margin-top:8px;font-size:11px;color:#484f58">2 yıllık backtest · {{ ticker_bt.computed_at[:10] if ticker_bt.computed_at else '' }} · ⚠️ Geçmiş performans gelecek garantisi değildir</div>
+    <div style="margin-top:8px;font-size:11px;color:#8b949e">2 yıllık backtest · {{ ticker_bt.computed_at[:10] if ticker_bt.computed_at else '' }} · ⚠️ Geçmiş performans gelecek garantisi değildir</div>
   </div>
   {% endif %}
 
@@ -1028,8 +1089,8 @@
   <!-- Sinyalin Hikayesi — Sinyal tarihi etrafındaki KAP bildirimleri -->
   <div id="storySection" style="display:none;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <div class="section-title" style="margin:0">📖 Sinyalin Hikayesi</div>
-      <span id="storyWindow" style="font-size:11px;color:#484f58"></span>
+      <h2 class="section-title" style="margin:0">📖 Sinyalin Hikayesi</h2>
+      <span id="storyWindow" style="font-size:11px;color:#8b949e"></span>
     </div>
     <div id="storyList"></div>
   </div>
@@ -1053,7 +1114,7 @@
 
   <!-- AI Haberler -->
   <div class="news-section" id="newsSection">
-    <div class="section-title">🤖 AI Haber Özeti</div>
+    <h2 class="section-title">🤖 AI Haber Özeti</h2>
     <div class="news-loading" id="newsLoading">
       <div class="spinner"></div> Haberler yükleniyor…
     </div>
@@ -1067,8 +1128,8 @@
   <!-- KAP Bildirimleri -->
   <div class="kap-section" id="kapSection">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <div class="section-title" style="margin:0">📋 KAP Bildirimleri</div>
-      <span style="font-size:11px;color:#484f58">Son 90 gün · ODA + Finansal Rapor</span>
+      <h2 class="section-title" style="margin:0">📋 KAP Bildirimleri</h2>
+      <span style="font-size:11px;color:#8b949e">Son 90 gün · ODA + Finansal Rapor</span>
       <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q={{ ticker }}" target="_blank" rel="noopener"
          style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#8b949e;background:#21262d;border:1px solid #30363d;border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
          onmouseover="this.style.color='#f0f6fc'" onmouseout="this.style.color='#8b949e'">
@@ -1089,11 +1150,11 @@
     <p style="font-size:13px;color:#c9d1d9;line-height:1.7;margin:0">
       <strong style="color:#e6edf3">{{ ticker }} ({{ name }})</strong> hissesi,
       {% if ssr_signal.signal == 'AL' %}
-        BorsaPusula algoritmasına göre <strong style="color:#3fb950">Güçlü Trend (AL)</strong> sinyali veriyor.
+        BorsaPusula algoritmasına göre <strong style="color:#3fb950">Güçlü Trend</strong> sinyali veriyor.
         {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
         {% if ssr_signal.sl_level %}Stop loss seviyesi {{ "%.2f"|format(ssr_signal.sl_level) }} ₺.{% endif %}
       {% elif ssr_signal.signal == 'SAT' %}
-        BorsaPusula algoritmasına göre <strong style="color:#f85149">Zayıf Trend (SAT)</strong> sinyali veriyor.
+        BorsaPusula algoritmasına göre <strong style="color:#f85149">Zayıf Trend</strong> sinyali veriyor.
         {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
         {% if ssr_signal.sl_level %}Stop loss seviyesi {{ "%.2f"|format(ssr_signal.sl_level) }} ₺.{% endif %}
       {% else %}
@@ -1119,13 +1180,13 @@
   <!-- İlgili Blog Makaleleri (T3-4) -->
   {% if related_blog %}
   <div style="margin-bottom:16px">
-    <div class="section-title" style="margin-bottom:10px">📖 İlgili Okumalar</div>
+    <h2 class="section-title" style="margin-bottom:10px">📖 İlgili Okumalar</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
       {% for b in related_blog %}
       <a href="/blog/{{ b.slug }}" class="blog-read-card">
         <div style="font-size:11px;color:#58a6ff;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">{{ b.cat }}</div>
         <div style="font-size:13px;font-weight:600;color:#f0f6fc;line-height:1.4">{{ b.title }}</div>
-        <div style="font-size:11px;color:#484f58;margin-top:5px">⏱ {{ b.mins }} dk okuma</div>
+        <div style="font-size:11px;color:#8b949e;margin-top:5px">⏱ {{ b.mins }} dk okuma</div>
       </a>
       {% endfor %}
     </div>
@@ -1134,10 +1195,10 @@
 
   <!-- Diğer Hisseler — yatay scroll -->
   <div class="others-section">
-    <div class="section-title" style="margin-bottom:10px;padding-right:18px">
+    <h2 class="section-title" style="margin-bottom:10px;padding-right:18px">
       Tüm BIST100 Hisseleri
-      <span style="font-size:11px;color:#484f58;font-weight:400;margin-left:6px">{{ others|length + 1 }} hisse · canlı veriler</span>
-    </div>
+      <span style="font-size:11px;color:#8b949e;font-weight:400;margin-left:6px">{{ others|length + 1 }} hisse · canlı veriler</span>
+    </h2>
     <div class="others-scroll" id="othersScroll">
       <!-- Mevcut hisse (aktif) -->
       <div class="other-card oc-active">
@@ -1176,10 +1237,12 @@
     </button>
   </div>
   <button onclick="document.getElementById('hisseSubCta').style.display='none'"
-    style="background:none;border:none;color:#374151;cursor:pointer;font-size:16px;padding:2px 4px">×</button>
+    style="background:none;border:none;color:#374151;cursor:pointer;font-size:16px;padding:2px 4px" aria-label="Kapat">×</button>
 </div>
 
-<footer style="text-align:center;padding:20px;font-size:12px;color:#484f58;border-top:1px solid #21262d;margin-top:20px">
+</main>
+
+<footer style="text-align:center;padding:20px;font-size:12px;color:#6e7681;border-top:1px solid #21262d;margin-top:20px">
   <div style="margin-bottom:8px">
     <a href="/" style="color:#8b949e;text-decoration:none">Ana Sayfa</a> ·
     <a href="/tarama" style="color:#8b949e;text-decoration:none">Tarayıcı</a> ·
@@ -1220,6 +1283,32 @@ function sigLabel(sig) {
 }
 
 const LC      = LightweightCharts;
+
+/* ── Grafik eksen label formatı ─────────────────────────
+   Sorunlar çözülüyor:
+   1. DayOfMonth tick'i "10" → "Nis 10" (bağlam kazanıyor)
+   2. timeVisible:false ile crosshair'de "00:00:00" kalkıyor
+   3. setVisibleLogicalRange from değeri -260 ile sol label kırpılması engelleniyor */
+const _MTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+/* tickMarkFormatter — time: "YYYY-MM-DD" string (app.py format), number (unix ts) veya {year,month,day}
+   type: 0=Year 1=Month 2=DayOfMonth (LC numeric constants — TickMarkType enum'a bağımlı değil) */
+function _tickFmt(time, type) {
+  let yr, mo, dy;
+  if (typeof time === 'string') {
+    const p = time.split('-');
+    yr = +p[0]; mo = +p[1] - 1; dy = +p[2];          // "2025-05-15" → month 0-indexed
+  } else if (typeof time === 'number') {
+    const d = new Date(time * 1000);
+    yr = d.getUTCFullYear(); mo = d.getUTCMonth(); dy = d.getUTCDate();
+  } else if (time && typeof time === 'object') {
+    yr = time.year; mo = (time.month || 1) - 1; dy = time.day;  // BusinessDay {year,month,day}
+  } else { return ''; }
+  if (type === 0) return String(yr);                             // Year
+  if (type === 1) return _MTHS[mo] || '';                        // Month
+  if (type === 2) return (_MTHS[mo] || '') + ' ' + dy;          // DayOfMonth → "Nis 10"
+  return '';
+}
+
 const TICKER  = "{{ ticker }}";
 const HISSE_NAME = "{{ name }}";
 
@@ -1282,7 +1371,7 @@ function buildChart(d) {
     ...BASE_OPTS,
     width:     chartW,
     height:    isMobile ? 240 : 340,
-    timeScale: { borderColor: '#30363d', timeVisible: true, visible: true },
+    timeScale: { borderColor: '#30363d', timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmt },
   });
 
   /* Volume histogram (alt panel) */
@@ -1291,7 +1380,7 @@ function buildChart(d) {
       ...BASE_OPTS,
       width:  chartW,
       height: isMobile ? 70 : 90,
-      timeScale: { borderColor: '#30363d', timeVisible: false, visible: false },
+      timeScale: { borderColor: '#30363d', timeVisible: false, visible: false, rightOffset: 8 },
       rightPriceScale: {
         borderColor: '#30363d',
         scaleMargins: { top: 0.1, bottom: 0 },
@@ -1398,68 +1487,6 @@ function buildChart(d) {
   });
   candle.setData(d.ohlc);
 
-  /* ── Sinyal Marker'ları (T3-5) ──────────────────────── */
-  if (d.markers && d.markers.length > 0) {
-    // LightweightCharts marker text field kısıtlı — emoji kısaltma kullan
-    const chartMarkers = d.markers.map(m => ({
-      time:     m.time,
-      position: m.position,
-      color:    m.color,
-      shape:    m.shape,
-      text:     m.signal === 'AL' ? '▲' : '▼',
-    }));
-    candle.setMarkers(chartMarkers);
-  }
-
-  /* ── Marker Tooltip: crosshair marker'a yaklaştığında göster ── */
-  const tooltipEl  = document.getElementById('markerTooltip');
-  const markerMap  = {};   // time → marker data
-  if (d.markers) d.markers.forEach(m => { markerMap[m.time] = m; });
-  const lastClose  = d.ohlc.length > 0 ? d.ohlc[d.ohlc.length - 1].close : null;
-
-  chart.subscribeCrosshairMove(p => {
-    if (!p?.time || !tooltipEl) { updateLeg(); return; }
-    updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value);
-
-    const m = markerMap[p.time];
-    if (!m) { tooltipEl.style.display = 'none'; return; }
-
-    const isAl   = m.signal === 'AL';
-    const clr    = isAl ? '#3fb950' : '#f85149';
-    const icon   = isAl ? '▲' : '▼';
-    const sigLbl = isAl ? 'Güçlü Trend AL' : 'Zayıf Trend SAT';
-    const ep     = m.price;
-    const fmtP   = v => v ? (+v).toLocaleString('tr-TR',{minimumFractionDigits:2}) + ' ₺' : '—';
-    let retHtml  = '';
-    if (ep && lastClose) {
-      const ret    = ((lastClose - ep) / ep * 100);
-      const retClr = ret >= 0 ? '#3fb950' : '#f85149';
-      const sign   = ret >= 0 ? '+' : '';
-      retHtml = `<div style="margin-top:4px;font-size:11px;color:${retClr};font-weight:600">
-        Bugüne getiri: ${sign}${ret.toFixed(1)}% · ${fmtP(lastClose)}
-      </div>`;
-    }
-    tooltipEl.innerHTML = `
-      <div style="color:${clr};font-weight:700;font-size:12px">${icon} ${sigLbl}</div>
-      <div style="color:#8b949e;margin-top:2px">${m.date_tr || m.time}</div>
-      <div style="margin-top:4px">Giriş: <strong style="font-family:monospace">${fmtP(ep)}</strong></div>
-      ${retHtml}
-    `;
-
-    // Tooltip konumu — chart container içinde, marker yanında
-    const chartRect = elMain.getBoundingClientRect();
-    const containerRect = elMain.parentElement.getBoundingClientRect();
-    if (p.point) {
-      let left = p.point.x + 12;
-      let top  = p.point.y - 10;
-      // Sağ kenara taşma koruması
-      if (left + 200 > elMain.clientWidth) left = p.point.x - 210;
-      tooltipEl.style.left    = left + 'px';
-      tooltipEl.style.top     = top  + 'px';
-      tooltipEl.style.display = 'block';
-    }
-  });
-
   /* EMA legend */
   const legEl = document.getElementById('emaLegend');
   function updateLeg(v12, v99_) {
@@ -1476,7 +1503,21 @@ function buildChart(d) {
     updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value);
   });
 
+  /* Son 1 yılı göster + sağda 10 boş bar boşluk
+     NOT: setVisibleLogicalRange kullanıyoruz çünkü setVisibleRange rightOffset'i eziyor */
   chart.timeScale().fitContent();
+  requestAnimationFrame(() => {
+    try {
+      const n = d.ohlc.length;
+      if (n > 0) {
+        chart.timeScale().setVisibleLogicalRange({
+          from: Math.max(0, n - 260),   // ~1 yıl + 8 ekstra sol bar (ilk label kırpılmasın)
+          to:   n - 1 + 10,             // son bar + 10 boş slot = sağ boşluk
+        });
+      }
+    } catch(_) {}
+  });
+
   window.addEventListener('resize', () => {
     const w = elMain.clientWidth;
     if (w) chart.applyOptions({ width: w });
@@ -1657,7 +1698,7 @@ function renderSummary(s, signalData) {
       ? (s.signal === 'SAT' ? 'ind-badge ind-bear' : 'ind-badge ind-bull')
       : 'ind-badge ind-neutral';
     return `<span class="${cls}">${ind.label}<span class="ind-detail">${ind.detail}</span></span>` +
-      `<a href="${ind.blog}" class="ind-help" target="_blank" title="${ind.label} nedir?">?</a>`;
+      `<a href="${ind.blog}" class="ind-help" target="_blank" title="${ind.label} nedir?" aria-label="${ind.label} nedir?">?</a>`;
   }).join('');
 
   /* RSI14 badge */
@@ -1666,7 +1707,7 @@ function renderSummary(s, signalData) {
     const rsiCls = rsi >= 70 ? 'ind-badge ind-bear' : rsi <= 30 ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
     const rsiLbl = rsi >= 70 ? '⚠️ Aşırı Alım' : rsi <= 30 ? '✅ Aşırı Satım' : 'Normal';
     indHtml += `<span class="${rsiCls}">RSI ${rsi}<span class="ind-detail">${rsiLbl}</span></span>` +
-      `<a href="/blog/rsi-gostergesi-nedir" class="ind-help" target="_blank" title="RSI nedir?">?</a>`;
+      `<a href="/blog/rsi-gostergesi-nedir" class="ind-help" target="_blank" title="RSI nedir?" aria-label="RSI nedir?">?</a>`;
   }
 
   /* Hacim oranı badge (sadece dikkat çekici olduğunda göster) */
@@ -1716,7 +1757,7 @@ function renderMiniStats(history) {
 function renderHistory(history) {
   const tbody = document.getElementById('historyBody');
   if (!history || history.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="color:#484f58;text-align:center;padding:20px">Geçmiş bulunamadı</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="color:#8b949e;text-align:center;padding:20px">Geçmiş bulunamadı</td></tr>';
     renderMiniStats([]);
     return;
   }
@@ -1727,7 +1768,7 @@ function renderHistory(history) {
   // history dizisi: en yeni başta → biz ters sırada hesaplarız
   tbody.innerHTML = history.map((h, idx) => {
     const icon = h.signal === 'AL' ? '▲' : '▼';
-    let retHtml = '<td style="color:#484f58;font-size:11px">—</td>';
+    let retHtml = '<td style="color:#8b949e;font-size:11px">—</td>';
 
     // Bir önceki kayıt (eski tarih) bu sinyalin çıkış fiyatı
     const nextH = history[idx + 1];  // daha eski sinyal (history ters sıralı = yeni başta)
@@ -1746,7 +1787,7 @@ function renderHistory(history) {
         const isGain = h.signal === 'AL' ? ret > 0 : ret < 0;
         const clr    = isGain ? '#3fb950' : (Math.abs(ret) < 1 ? '#8b949e' : '#f85149');
         const sign   = ret >= 0 ? '+' : '';
-        retHtml = `<td style="color:${clr};font-weight:600;font-family:monospace;font-size:12px">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:#484f58">(aktif)</span></td>`;
+        retHtml = `<td style="color:${clr};font-weight:600;font-family:monospace;font-size:12px">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:#8b949e">(aktif)</span></td>`;
       }
     }
 
@@ -2012,9 +2053,9 @@ async function loadSignalStory() {
         <span style="font-size:10px;color:${clr};background:rgba(0,0,0,.15);border:1px solid currentColor;border-radius:3px;padding:1px 5px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escHtml(ev.class)}</span>
         <div style="flex:1;min-width:0">
           <a href="${ev.url || '#'}" target="_blank" rel="noopener" style="font-size:13px;color:#c9d1d9;text-decoration:none;line-height:1.4;display:block">${escHtml(summary)}</a>
-          <div style="font-size:11px;color:#484f58;margin-top:2px">${ev.date.substring(0,10)} · <span style="color:${delta <= 0 ? '#484f58' : '#58a6ff'}">${deltaStr}</span></div>
+          <div style="font-size:11px;color:#8b949e;margin-top:2px">${ev.date.substring(0,10)} · <span style="color:${delta <= 0 ? '#484f58' : '#58a6ff'}">${deltaStr}</span></div>
         </div>
-        ${ev.url ? `<a href="${ev.url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;opacity:.6;flex-shrink:0;margin-top:2px">↗</a>` : ''}
+        ${ev.url ? `<a href="${ev.url}" target="_blank" rel="noopener" aria-label="Haberi aç" style="font-size:11px;color:#58a6ff;opacity:.6;flex-shrink:0;margin-top:2px">↗</a>` : ''}
       </div>`;
     }).join('');
 
@@ -2062,7 +2103,7 @@ async function loadKapDisclosures() {
         <div class="kap-item-top">
           <span class="kap-class-badge ${cls}">${lbl}</span>
           <span class="kap-summary">${summaryHtml}</span>
-          ${d.url ? `<a href="${d.url}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" title="KAP'ta aç">↗</a>` : ''}
+          ${d.url ? `<a href="${d.url}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" title="KAP'ta aç" aria-label="KAP'ta aç">↗</a>` : ''}
         </div>
         <div class="kap-meta">
           <span>${dateShort}</span>
@@ -2073,7 +2114,7 @@ async function loadKapDisclosures() {
     }).join('');
 
     if (items.length > 20) {
-      listEl.innerHTML += `<div style="padding:10px 0;text-align:center;font-size:12px;color:#484f58">
+      listEl.innerHTML += `<div style="padding:10px 0;text-align:center;font-size:12px;color:#8b949e">
         +${items.length - 20} daha fazla bildirim —
         <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q=${TICKER}" target="_blank" rel="noopener" style="color:#58a6ff;text-decoration:none">KAP'ta görüntüle ↗</a>
       </div>`;
@@ -2090,7 +2131,7 @@ async function loadKapDisclosures() {
     }, { once: false });
 
   } catch(e) {
-    loadEl.innerHTML = '<span style="font-size:12px;color:#484f58">KAP bildirimleri yüklenemedi.</span>';
+    loadEl.innerHTML = '<span style="font-size:12px;color:#8b949e">KAP bildirimleri yüklenemedi.</span>';
   }
 }
 
@@ -2166,7 +2207,7 @@ async function loadMTF() {
       if (!d) return `
         <div style="background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:14px;text-align:center">
           <div style="font-size:12px;color:#8b949e;margin-bottom:6px">${tf.label}</div>
-          <div style="font-size:12px;color:#484f58">Veri yok</div>
+          <div style="font-size:12px;color:#8b949e">Veri yok</div>
         </div>`;
 
       const bg   = sigBg(d.signal);
@@ -2192,7 +2233,7 @@ async function loadMTF() {
     }).join('');
   } catch(e) {
     const grid = document.getElementById('mtfGrid');
-    if (grid) grid.innerHTML = '<div style="color:#484f58;font-size:12px">Yüklenemedi</div>';
+    if (grid) grid.innerHTML = '<div style="color:#8b949e;font-size:12px">Yüklenemedi</div>';
   }
 }
 loadMTF();

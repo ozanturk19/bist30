@@ -452,7 +452,10 @@ KAP_UUID_OIDS = {
 _kap_uuid_runtime: dict = {}
 
 def kap_url_for(ticker: str) -> str:
-    """KAP şirket sayfası URL'si — bildirim arama sayfasına yönlendirir."""
+    """KAP şirket sayfası URL'si — doğrudan bildirimleri sayfasına yönlendirir."""
+    uuid = KAP_UUID_OIDS.get(ticker) or _kap_uuid_runtime.get(ticker)
+    if uuid:
+        return f"https://www.kap.org.tr/tr/bildirim-sorgu?company={uuid}&year=&dcType=&isLate=&orderBy=date&orderDir=desc"
     return f"https://www.kap.org.tr/tr/bildirim-sorgu?q={ticker}"
 
 
@@ -713,8 +716,8 @@ def compute_supertrend(high, low, close, period=10, multiplier=3):
 
 
 def _fill_intraday_gaps(df, ticker):
-    """Günlük data'da eksik günleri 1m data'dan OHLC sentezleyerek doldur.
-    yfinance bazen son 1-2 günün daily barını geciktiriyor."""
+    """Gunluk data eksik gunleri 1m data'dan OHLC sentezleyerek doldur.
+    yfinance bazen son 1-2 gunun daily barini geciktiriyor."""
     try:
         df5d = yf.download(ticker, period="5d", interval="1m",
                            progress=False, auto_adjust=True, timeout=20)
@@ -725,23 +728,33 @@ def _fill_intraday_gaps(df, ticker):
             df5d = df5d.loc[:, ~df5d.columns.duplicated()]
 
         last_daily = df.index[-1].date()
+        last_close = float(df["Close"].iloc[-1])
         added = False
         for day in sorted(set(df5d.index.date)):
             if day <= last_daily:
                 continue
             day_bars = df5d[df5d.index.map(lambda x: x.date()) == day].dropna()
-            if len(day_bars) < 30:   # kısmen gelen gün, geç
+            if len(day_bars) < 30:
+                continue
+            synth_close = float(day_bars["Close"].iloc[-1])
+            # Skala koruma: intraday veri gunluk kapanistan >%25 sapiyorsa yoksay
+            if last_close > 0 and abs(synth_close / last_close - 1) > 0.25:
+                logger.warning(
+                    "_fill_intraday_gaps(%s): skala uyusmazligi (%.2f vs %.2f), bar atlandi",
+                    ticker, synth_close, last_close,
+                )
                 continue
             ts = pd.Timestamp(day, tz=df.index.tz)
             synth = pd.DataFrame({
                 "Open":   float(day_bars["Open"].iloc[0]),
                 "High":   float(day_bars["High"].max()),
                 "Low":    float(day_bars["Low"].min()),
-                "Close":  float(day_bars["Close"].iloc[-1]),
+                "Close":  synth_close,
                 "Volume": float(day_bars["Volume"].sum()) if "Volume" in day_bars else 0,
             }, index=pd.DatetimeIndex([ts]))
             df = pd.concat([df, synth[df.columns]])
             added = True
+            last_close = synth_close
         if added:
             logger.info("_fill_intraday_gaps(%s): eksik gun(ler) 1m'den eklendi", ticker)
         return df
@@ -973,6 +986,7 @@ def analyze(ticker_base):
             "bull_score":    bull_score,
             "bear_score":    bear_score,
             "weekly_trend":  weekly_dir,
+            "adx":           round(adx_val, 1),  # top-level for SSR/SEO
             "indicators": {
                 "supertrend": {
                     "label": "ST",
@@ -1544,22 +1558,18 @@ def background_refresh():
 # ── Güvenlik Headerları ───────────────────────────────────────────────────────
 @app.after_request
 def set_security_headers(response):
-    # X-Frame-Options — clickjacking koruması
-    response.headers["X-Frame-Options"] = "SAMEORIGIN"
-    # X-Content-Type-Options — MIME sniffing koruması
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    # Referrer-Policy
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    # Permissions-Policy
-    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
-    # CSP — SSE, Google Fonts ve self-hosted JS/CSS izni
+    # Cloudflare: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+    # Flask sadece CSP ekler (Cloudflare bunu eklemez, uygulamaya ozgudur)
+    # CSP — GA4 + Google Fonts + SSE + self-hosted JS/CSS
     if response.content_type and "text/html" in response.content_type:
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline'; "
+            # GA4 + Cloudflare Insights script icin izin
+            "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            "connect-src 'self'; "
-            "img-src 'self' data:; "
+            # GA4 veri gonderimi + SSE (self) + Cloudflare Insights beacon
+            "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://cloudflareinsights.com; "
+            "img-src 'self' data: https://www.google-analytics.com; "
             "font-src 'self' https://fonts.gstatic.com; "
             "frame-ancestors 'none';"
         )
@@ -1578,9 +1588,21 @@ def index():
 def api_data():
     with _lock:
         stocks = list(_cache["data"])
-    # Sektör bilgisini ekle
+    # Sektör bilgisini ekle + ADX null fix (BUG-C1)
     for s in stocks:
         s["sector"] = _get_sector(s["ticker"])
+        # Parse ADX from nested indicators if top-level is null
+        if s.get("adx") is None:
+            _adx_lbl = (s.get("indicators") or {}).get("adx", {}).get("label", "")
+            try:
+                s["adx"] = float(_adx_lbl.replace("ADX", "").strip()) if _adx_lbl else 0.0
+            except (ValueError, TypeError):
+                s["adx"] = 0.0
+            _adx_val = (s.get("indicators") or {}).get("adx", {}).get("value", "")
+            _parts = re.findall(r"[0-9]+", _adx_val)
+            if len(_parts) >= 2:
+                s["di_plus"]  = float(_parts[0])
+                s["di_minus"] = float(_parts[1])
     return safe_json({
         "stocks":     stocks,
         "updated_at": _cache["updated_at"],
@@ -1588,6 +1610,135 @@ def api_data():
         "sectors":    list(SECTORS.keys()),
     })
 
+
+
+# ── Makro Haber RSS ──────────────────────────────────────────────────────────
+import feedparser as _feedparser
+
+_MACRO_RSS_SOURCES = [
+    ("Reuters TR",  "https://tr.reuters.com/rssFeed/businessNews"),
+    ("Bloomberg HT", "https://www.bloomberght.com/rss"),
+    ("Dünya",        "https://www.dunya.com/rss/ekonomi.xml"),
+    ("Haberler.com", "https://www.haberler.com/ekonomi/rss/"),
+    ("AA Ekonomi",   "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"),
+]
+
+_macro_news_cache: list = []
+_macro_news_ts: float   = 0.0
+_MACRO_NEWS_TTL         = 1800  # 30 dk
+
+def _fetch_macro_rss_once() -> list:
+    results = []
+    cutoff  = datetime.now() - timedelta(hours=24)
+    for source_name, url in _MACRO_RSS_SOURCES:
+        try:
+            feed = _feedparser.parse(url)
+            for entry in (feed.entries or [])[:6]:
+                try:
+                    parsed = entry.get("published_parsed") or entry.get("updated_parsed")
+                    if parsed:
+                        pub = datetime(*parsed[:6])
+                    else:
+                        pub = datetime.now()
+                    if pub < cutoff:
+                        continue
+                    title = (entry.get("title") or "").strip()
+                    link  = (entry.get("link")  or "").strip()
+                    if not title:
+                        continue
+                    results.append({
+                        "title":     title,
+                        "url":       link,
+                        "source":    source_name,
+                        "published": pub.strftime("%H:%M"),
+                        "date_str":  pub.strftime("%d.%m"),
+                        "pub_ts":    pub.timestamp(),   # gerçek timestamp → doğru sıralama
+                        "category":  "makro",
+                    })
+                except Exception:
+                    continue
+        except Exception as e:
+            logger.debug("RSS fetch [%s]: %s", source_name, e)
+    # pub_ts ile sırala — sadece saat string'i değil, tam tarih+saat kullanılır
+    results.sort(key=lambda x: x.get("pub_ts", 0), reverse=True)
+    return results[:20]
+
+def _macro_news_bg_loop():
+    global _macro_news_cache, _macro_news_ts
+    while True:
+        try:
+            news = _fetch_macro_rss_once()
+            if news:
+                _macro_news_cache = news
+                _macro_news_ts    = time.time()
+                logger.info("Makro RSS: %d haber", len(news))
+        except Exception as e:
+            logger.debug("Makro RSS loop: %s", e)
+        time.sleep(_MACRO_NEWS_TTL)
+
+threading.Thread(target=_macro_news_bg_loop, daemon=True, name="macro-rss").start()
+
+
+# ── Ekonomik Takvim ───────────────────────────────────────────────────────────
+ECONOMIC_CALENDAR_2026 = [
+    # TCMB Para Politikası Kurulu Toplantıları
+    {"date": "2026-05-22", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
+    {"date": "2026-06-26", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
+    {"date": "2026-07-23", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
+    # TUIK Enflasyon Verileri
+    {"date": "2026-05-05", "event": "TÜFE Nisan 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
+    {"date": "2026-06-03", "event": "TÜFE Mayıs 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
+    {"date": "2026-07-03", "event": "TÜFE Haziran 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
+    # Fed Faiz Kararları
+    {"date": "2026-05-07", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
+    {"date": "2026-06-18", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
+    {"date": "2026-07-30", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
+    # Bilanço Dönemleri
+    {"date": "2026-05-15", "event": "1Ç 2026 Bilanço Son Günü (ilk açıklamalar)", "importance": "MED", "source": "KAP", "icon": "📋"},
+    {"date": "2026-08-14", "event": "2Ç 2026 Bilanço Son Günü", "importance": "MED", "source": "KAP", "icon": "📋"},
+    # Türkiye büyüme verisi
+    {"date": "2026-05-30", "event": "1Ç 2026 GSYH Büyüme", "importance": "HIGH", "source": "TUIK", "icon": "📈"},
+    # BIST genel
+    {"date": "2026-06-01", "event": "BIST Aylık İşlem İstatistikleri", "importance": "LOW", "source": "BIST", "icon": "📉"},
+]
+
+@app.route("/api/economic-calendar")
+@limiter.limit("60 per minute")
+def api_economic_calendar():
+    """Ekonomik takvim — yaklaşan ve son 7 günün önemli olayları."""
+    today = datetime.now().date()
+    all_events = []
+    for e in ECONOMIC_CALENDAR_2026:
+        try:
+            ev_date = datetime.strptime(e["date"], "%Y-%m-%d").date()
+            delta   = (ev_date - today).days
+            e2 = dict(e)
+            e2["days_until"] = delta
+            e2["date_fmt"]   = ev_date.strftime("%d.%m.%Y")
+            e2["is_today"]   = (delta == 0)
+            e2["is_past"]    = (delta < 0)
+            all_events.append(e2)
+        except Exception:
+            continue
+    upcoming = sorted([e for e in all_events if not e["is_past"]], key=lambda x: x["days_until"])
+    recent   = sorted([e for e in all_events if e["is_past"] and e["days_until"] >= -7],
+                       key=lambda x: x["days_until"], reverse=True)
+    return safe_json({
+        "upcoming": upcoming[:6],
+        "recent":   recent[:3],
+        "today":    [e for e in upcoming if e["is_today"]],
+    })
+
+@app.route("/api/macro-news")
+@limiter.limit("60 per minute")
+def api_macro_news():
+    """Makro ekonomi haberleri — RSS tabanlı."""
+    return safe_json({
+        "items":      _macro_news_cache,
+        "updated_at": datetime.fromtimestamp(_macro_news_ts).strftime("%H:%M")
+                        if _macro_news_ts else "—",
+        "count":      len(_macro_news_cache),
+    })
 
 @app.route("/api/refresh", methods=["POST"])
 @limiter.limit("1 per 5 minutes")
@@ -1643,6 +1794,90 @@ def api_macro():
         _macro_cache["data"] = items
         _macro_cache["ts"]   = now
     return safe_json({"items": items, "cached": False})
+
+
+# ── Günlük Makro AI Özeti ────────────────────────────────────────────────────
+_macro_ai_cache: dict = {}   # {"text": str, "ts": float, "date": str}
+_MACRO_AI_TTL   = 14400      # 4 saat
+_macro_ai_refreshing = False  # arka plan yenileme kilidi
+
+
+def _do_macro_ai_refresh():
+    """Makro özet Gemini çağrısını arka planda yapar — endpoint'i bloklamaz."""
+    global _macro_ai_refreshing
+    if _macro_ai_refreshing:
+        return
+    _macro_ai_refreshing = True
+    try:
+        with _lock:
+            macro_items = _macro_cache.get("data") or []
+        if not macro_items:
+            macro_items = _fetch_macro()
+
+        def _lbl(label):
+            return next((m["price"] for m in macro_items if m.get("label") == label), None)
+
+        xu100  = _lbl("XU100")
+        xu100c = next((m.get("change") for m in macro_items if m.get("label") == "XU100"), None)
+        usdtry = _lbl("USDTRY")
+        gold   = _lbl("ALTIN")
+        oil    = _lbl("PETROL")
+        btc    = _lbl("BTC")
+
+        today_str = datetime.now().strftime("%d %B %Y")
+        lines = []
+        if xu100:
+            chg_str = ('%+.2f' % xu100c + '%') if xu100c is not None else '—'
+            lines.append(f"BIST100: {xu100:,.0f} ({chg_str})")
+        if usdtry: lines.append(f"USD/TRY: {usdtry:.4f}")
+        if gold:   lines.append(f"Altın: {gold:,.0f} ₺/gr")
+        if oil:    lines.append(f"Brent Petrol: {oil:.2f} USD")
+        if btc:    lines.append(f"BTC: {btc:,.0f} USD")
+
+        if not lines:
+            return
+
+        prompt = (
+            f"Bugün {today_str}. Türk piyasaları anlık verileri:\n"
+            + "\n".join(f"• {ln}" for ln in lines)
+            + "\n\nKURAL: Sadece bu verileri yorumla. Spekülasyon yapma. Tahmin yapma.\n"
+            "GÖREV: Bireysel yatırımcı için 2 cümlelik Türkçe piyasa özeti. "
+            "Yatırım tavsiyesi verme. Giriş/kapanış cümlesi ekleme."
+        )
+        _, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=12)
+        if text:
+            now = time.time()
+            today_s = datetime.now().strftime("%Y-%m-%d")
+            _macro_ai_cache.update({"text": text, "ts": now, "date": today_s,
+                                    "generated_at": datetime.now().strftime("%H:%M")})
+            logger.info("_do_macro_ai_refresh: tamamlandi")
+    except Exception as e:
+        logger.warning("_do_macro_ai_refresh: hata — %s", e)
+    finally:
+        _macro_ai_refreshing = False
+
+
+@app.route("/api/macro-summary")
+@limiter.limit("30 per minute")
+def api_macro_summary():
+    """Günlük makro ekonomi özeti — Gemini ile üretilir, 4 saat cache'lenir.
+    Stale-while-revalidate: cache varsa anında döner, arka planda yeniler."""
+    now     = time.time()
+    today_s = datetime.now().strftime("%Y-%m-%d")
+    cached  = _macro_ai_cache
+
+    cache_fresh = (cached.get("date") == today_s
+                   and (now - cached.get("ts", 0)) < _MACRO_AI_TTL)
+
+    # Stale veya başka gün — arka planda yenile, şimdi var olan cache'i dön
+    if not cache_fresh and not _macro_ai_refreshing:
+        threading.Thread(target=_do_macro_ai_refresh, daemon=True,
+                         name="macro-ai-refresh").start()
+
+    if cached.get("text"):
+        return safe_json({"summary": cached["text"], "cached": cache_fresh,
+                          "generated_at": cached.get("generated_at", "")})
+    return safe_json({"summary": "", "cached": False})
 
 
 @app.route("/api/stream")
@@ -2503,7 +2738,7 @@ def _compute_chart_data(ticker_base, period="2y"):
                         "position": "belowBar" if sig == "AL" else "aboveBar",
                         "color":    "#3fb950"  if sig == "AL" else "#f85149",
                         "shape":    "arrowUp"  if sig == "AL" else "arrowDown",
-                        "text":     "▲ AL" if sig == "AL" else "▼ SAT",
+                        "text":     "▲" if sig == "AL" else "▼",
                         "signal":   sig,
                         "price":    entry_price,
                         "date_tr":  close.index[i].strftime("%d.%m.%Y"),
@@ -3563,8 +3798,13 @@ def api_tarama():
 
 
 # ── SEO: sitemap, robots, favicon ────────────────────────────────────────────
+_sitemap_cache: dict = {}  # {"xml": str, "date": str}
+
 @app.route("/sitemap.xml")
 def sitemap():
+    today = date.today().isoformat()
+    if _sitemap_cache.get("date") == today and _sitemap_cache.get("xml"):
+        return Response(_sitemap_cache["xml"], mimetype="application/xml")
     pages = [
         {"loc": "/",            "priority": "1.0", "changefreq": "hourly"},
         {"loc": "/ozet",        "priority": "0.9", "changefreq": "daily"},
@@ -3613,7 +3853,9 @@ def sitemap():
                    f"<changefreq>{p['changefreq']}</changefreq>"
                    f"<priority>{p['priority']}</priority></url>")
     xml.append("</urlset>")
-    return Response("\n".join(xml), mimetype="application/xml")
+    xml_str = "\n".join(xml)
+    _sitemap_cache.update({"xml": xml_str, "date": today})
+    return Response(xml_str, mimetype="application/xml")
 
 
 @app.route("/robots.txt")
@@ -3843,6 +4085,10 @@ def ozet_gecmis(tarih):
         abort(404)
 
     stocks     = snap.get("stocks", [])
+    # Add sector field (not stored in snapshot) — fixes groupby error
+    for s in stocks:
+        if "sector" not in s:
+            s["sector"] = _get_sector(s["ticker"])
     al_list    = [s for s in stocks if s.get("signal") == "AL"]
     sat_list   = [s for s in stocks if s.get("signal") == "SAT"]
     bekle_list = [s for s in stocks if s.get("signal") == "BEKLE"]
@@ -4320,8 +4566,9 @@ def sektor_harita():
 
 
 # ── Bilanço Takvimi ───────────────────────────────────────────────────────────
-_earnings_cache   = {"data": None, "ts": 0}
-_EARNINGS_TTL     = 3600 * 12   # 12 saat
+_earnings_cache      = {"data": None, "ts": 0}
+_EARNINGS_TTL        = 3600 * 12   # 12 saat
+_earnings_refreshing = False         # arka plan yenileme kilidi
 
 # BIST'te finansal sonuçlar genellikle şu dönemlerde açıklanır:
 # Q4 (Ekim-Aralık bilanços): Mart-Nisan
@@ -4337,12 +4584,23 @@ _BILANCO_PERIODS = [
     ("Q4 2026 (Yıllık)", "2027-03-01", "2027-04-30", "2026 yıl sonu bilanço açıklamaları"),
 ]
 
-def get_earnings_data():
-    """Yaklaşan finansal sonuç dönemlerini sinyallerle birleştirerek döner."""
+def _do_earnings_refresh():
+    """Bilanço takvimi yfinance verilerini arka planda yeniler — endpoint'i bloklamaz."""
+    global _earnings_refreshing
+    if _earnings_refreshing:
+        return
+    _earnings_refreshing = True
+    try:
+        _earnings_refresh_impl()
+    except Exception as e:
+        logger.warning("_do_earnings_refresh: hata — %s", e)
+    finally:
+        _earnings_refreshing = False
+
+
+def _earnings_refresh_impl():
+    """Gerçek yfinance çağrılarını yapar, cache'i günceller."""
     now = time.time()
-    with _lock:
-        if _earnings_cache["data"] and (now - _earnings_cache["ts"]) < _EARNINGS_TTL:
-            return _earnings_cache["data"]
 
     # Mevcut sinyal datasını al
     with _lock:
@@ -4421,7 +4679,29 @@ def get_earnings_data():
     with _lock:
         _earnings_cache["data"] = data
         _earnings_cache["ts"]   = now
-    return data
+    logger.info("_earnings_refresh_impl: tamamlandi (%d donem)", len(result_periods))
+
+
+def get_earnings_data():
+    """Bilanço takvimi verisi — cache'den döner, stale ise arka planda yeniler."""
+    now = time.time()
+    # GIL sayesinde dict key read thread-safe; _lock yerine direkt oku (lock contention önleme)
+    cached = _earnings_cache.get("data")
+    ts     = _earnings_cache.get("ts", 0)
+
+    # Cache taze ise anında dön
+    if cached and (now - ts) < _EARNINGS_TTL:
+        return cached
+
+    # Stale veya yok — arka planda yenile
+    if not _earnings_refreshing:
+        threading.Thread(target=_do_earnings_refresh, daemon=True,
+                         name="earnings-refresh").start()
+
+    # Stale cache varsa onu dön; yoksa boş döndür (loading state)
+    if cached:
+        return cached
+    return {"periods": [], "updated_at": "—"}
 
 
 @app.route("/bilanco-takvimi")
@@ -4498,7 +4778,7 @@ def api_market_news():
         chg    = s.get("change_pct", 0) or 0
         bars   = s.get("signal_bars", 1) or 1
 
-        # ── Metin kaynağı önceliği: haber > sinyal açıklaması > algoritma ──
+        # ── Metin kaynağı önceliği: kap_cache > haber_cache > sinyal_açıklama > algoritma ──
         with _lock:
             news_c = _news_cache.get(t)
             expl_c = _signal_explain_cache.get(t)
@@ -4506,10 +4786,23 @@ def api_market_news():
         text   = None
         source = "algorithmic"
 
-        if news_c and not news_c.get("failed") and news_c.get("text"):
+        # 1. KAP cache'den doğrudan bildirim konularını snippet olarak kullan (hallucination yok)
+        kap_cached = _kap_cache.get(t, {})
+        kap_discs  = kap_cached.get("data", []) if kap_cached else []
+        if kap_discs:
+            lines = [f"{d['date'][:10]}: {d['subject']}"
+                     for d in kap_discs[:3] if d.get("subject")]
+            if lines:
+                text   = " | ".join(lines)
+                source = "kap"
+
+        # 2. AI haber cache (Google Search grounding)
+        if not text and news_c and not news_c.get("failed") and news_c.get("text"):
             text   = news_c["text"]
             source = "news"
-        elif expl_c and expl_c.get("text") and not expl_c.get("failed"):
+
+        # 3. Sinyal açıklama cache
+        if not text and expl_c and expl_c.get("text") and not expl_c.get("failed"):
             text   = expl_c["text"]
             source = "explanation"
 
@@ -4575,6 +4868,19 @@ def api_market_news():
         )
         if source == "news" and len(snippet) < 160 and \
                 any(pat in snippet.lower() for pat in _EMPTY_PATTERNS):
+            dur = "bugün" if bars <= 1 else f"son {bars} gündür"
+            entry_q = s.get("entry_quality", "")
+            sl_val  = s.get("sl_level") or 0
+            tp_val  = s.get("tp1") or 0
+            snippet = (
+                f"{dur.capitalize()} {sig} sinyali aktif"
+                f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
+                f"SL: {sl_val:.2f}₺ | Hedef: {tp_val:.2f}₺"
+            )
+            source = "algorithmic"
+
+        # Guard: _skip_prefixes tüm satırları silmişse (ör. "kayda değer" yanıtı) → algoritmik fallback
+        if not snippet.strip():
             dur = "bugün" if bars <= 1 else f"son {bars} gündür"
             entry_q = s.get("entry_quality", "")
             sl_val  = s.get("sl_level") or 0
@@ -4754,12 +5060,23 @@ def api_telegram_test():
     return safe_json({"ok": True, "channel": TELEGRAM_CHANNEL_ID})
 
 
+# ── Blog önbelleği: startup'ta bir kez normalize et, her request'te yeniden hesaplama yok ──
+_BLOG_NORMALIZED_CACHE: list | None = None
+_BLOG_CAT_COUNTS_CACHE: list | None = None
+
+def _get_blog_cache():
+    global _BLOG_NORMALIZED_CACHE, _BLOG_CAT_COUNTS_CACHE
+    if _BLOG_NORMALIZED_CACHE is None:
+        from collections import Counter
+        _counts = Counter(a["cat"] for a in ARTICLES)
+        _BLOG_CAT_COUNTS_CACHE = sorted(_counts.items())
+        _BLOG_NORMALIZED_CACHE = [_normalize_article(a) for a in ARTICLES]
+        logger.info("Blog önbelleği hazırlandı: %d makale", len(_BLOG_NORMALIZED_CACHE))
+    return _BLOG_NORMALIZED_CACHE, _BLOG_CAT_COUNTS_CACHE
+
 @app.route("/blog")
 def blog_index():
-    from collections import Counter
-    counts = Counter(a["cat"] for a in ARTICLES)
-    cat_counts = sorted(counts.items())
-    normalized = [_normalize_article(a) for a in ARTICLES]
+    normalized, cat_counts = _get_blog_cache()
     return render_template("blog.html", articles=normalized, cat_counts=cat_counts)
 
 
@@ -4841,20 +5158,60 @@ def _startup():
     # Push subscribers'ı yükle
     _load_push_subs()
     refresh_chart()
-    # XU100 + makro varlıkları arka planda paralel yükle
-    threading.Thread(target=refresh_xu100_chart, daemon=True).start()
-    threading.Thread(target=_refresh_varlik_chart, args=("BTC",   _btc_chart_cache),   daemon=True).start()
-    threading.Thread(target=_refresh_varlik_chart, args=("ALTIN", _altin_chart_cache), daemon=True).start()
-    threading.Thread(target=_refresh_varlik_chart, args=("GUMUS", _gumus_chart_cache), daemon=True).start()
-    threading.Thread(target=_refresh_varlik_chart, args=("ETH",    _eth_chart_cache),    daemon=True).start()
-    threading.Thread(target=_refresh_varlik_chart, args=("SP500",  _sp500_chart_cache),  daemon=True).start()
-    threading.Thread(target=_refresh_varlik_chart, args=("NASDAQ", _nasdaq_chart_cache), daemon=True).start()
-    threading.Thread(target=_refresh_varlik_chart, args=("SOL",      _sol_chart_cache),      daemon=True).start()
-    threading.Thread(target=_refresh_varlik_chart, args=("BNB",      _bnb_chart_cache),      daemon=True).start()
-    threading.Thread(target=_refresh_varlik_chart, args=("PETROL",   _petrol_chart_cache),   daemon=True).start()
-    threading.Thread(target=_refresh_varlik_chart, args=("DOGALGAZ", _dogalgaz_chart_cache), daemon=True).start()
-    time.sleep(3)
-    threading.Thread(target=background_refresh,        daemon=True).start()
+    # XU100 + makro varliklari sirali sekilde yukle
+    # Paralel yfinance calisi veri bozulmasina neden olur — sirali calis zorunlu
+    def _serial_chart_refresh():
+        time.sleep(1)
+        refresh_xu100_chart()
+        time.sleep(1)
+        varlik_list = [
+            ("BTC",      _btc_chart_cache),
+            ("ALTIN",    _altin_chart_cache),
+            ("GUMUS",    _gumus_chart_cache),
+            ("ETH",      _eth_chart_cache),
+            ("SP500",    _sp500_chart_cache),
+            ("NASDAQ",   _nasdaq_chart_cache),
+            ("SOL",      _sol_chart_cache),
+            ("BNB",      _bnb_chart_cache),
+            ("PETROL",   _petrol_chart_cache),
+            ("DOGALGAZ", _dogalgaz_chart_cache),
+        ]
+        for key, cache in varlik_list:
+            try:
+                _refresh_varlik_chart(key, cache)
+                time.sleep(0.5)
+            except Exception as exc:
+                logger.warning("serial_chart_refresh %s: %s", key, exc)
+    _serial_done = threading.Event()
+
+    _orig_serial = _serial_chart_refresh
+    def _serial_chart_refresh_with_event():
+        _orig_serial()
+        _serial_done.set()
+        logger.info("serial_chart_refresh tamamlandi, background_refresh baslayabilir")
+
+    def _background_refresh_after_serial():
+        # Baslatma suresince paralel yfinance cagrisi olmasin: serial bitince basla
+        _serial_done.wait(timeout=120)
+        # En çok ziyaret edilen BIST30 hisselerinin chart cache'ini ısıt
+        _warm_tickers = ["THYAO", "AKBNK", "GARAN", "ASELS", "EREGL"]
+        for _t in _warm_tickers:
+            try:
+                _compute_chart_data(_t, "2y")
+                time.sleep(0.5)
+            except Exception as _e:
+                logger.warning("prewarm chart [%s]: %s", _t, _e)
+        # Temel analiz verilerini ısıt (yfinance - hisse başına ~1s)
+        for _t in _warm_tickers[:3]:
+            try:
+                _get_fundamentals(_t)
+                time.sleep(0.3)
+            except Exception as _e:
+                logger.warning("prewarm fundamentals [%s]: %s", _t, _e)
+        background_refresh()
+
+    threading.Thread(target=_serial_chart_refresh_with_event, daemon=True).start()
+    threading.Thread(target=_background_refresh_after_serial,  daemon=True).start()
     threading.Thread(target=background_live_prices,    daemon=True).start()
     threading.Thread(target=background_global_prices,  daemon=True).start()
     # Makro ticker'ları servis başlar başlamaz ilk kez çek (arka planda)
@@ -4865,11 +5222,30 @@ def _startup():
             _macro_cache["ts"]   = time.time()
         logger.info("_warm_macro: %d sembol hazır", len(items))
     threading.Thread(target=_warm_macro, daemon=True).start()
+    # Makro AI özetini başlangıçta ısıt (arka planda — _warm_macro bittikten sonra)
+    def _warm_macro_summary():
+        time.sleep(10)   # macro fiyatlarının gelmesini bekle
+        _do_macro_ai_refresh()
+    threading.Thread(target=_warm_macro_summary, daemon=True).start()
+    # Bilanço takvimini arka planda yükle (yfinance çağrıları — ana veri hazır olunca)
+    def _warm_earnings():
+        time.sleep(30)   # ana sinyal datasının gelmesini bekle
+        _do_earnings_refresh()
+    threading.Thread(target=_warm_earnings, daemon=True).start()
     # Backtest'i arka planda başlat (30 dakika gecikme ile — önce ana veri yüklensin)
     def _delayed_backtest():
         time.sleep(1800)   # 30 dakika sonra
         run_backtest()
     threading.Thread(target=_delayed_backtest, daemon=True).start()
+    # Bilanco takvimi ilk yuklemesini arkaplanda hazirla (yfinance cagrilari yuzunden yavastir)
+    def _warm_earnings():
+        time.sleep(60)    # Ana veri yüklendikten 60s sonra başla
+        try:
+            get_earnings_data()
+            logger.info("_warm_earnings: bilanço takvimi ön yüklendi")
+        except Exception as e:
+            logger.warning("_warm_earnings: %s", e)
+    threading.Thread(target=_warm_earnings, daemon=True).start()
 
 threading.Thread(target=_startup, daemon=True).start()
 

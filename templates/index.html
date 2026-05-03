@@ -60,7 +60,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="/static/lightweight-charts.min.js"></script>
+<script src="/static/lightweight-charts.min.js" defer></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -96,6 +96,21 @@
 
   /* Light tema */
   body.light { --bg: #ffffff; --bg2: #f6f8fa; --bg3: #eaeef2; --border: #d0d7de; --text: #1f2328; --text2: #636c76; --text3: #9ea7b3; }
+  /* Light mode MUST override ALL --bp-* tokens used in components; without this,
+     dark-mode palette (#e2e8f0 text) renders on a light (#f6f8fa) background → invisible */
+  body.light {
+    --bp-bg:       #ffffff;
+    --bp-surface:  #f6f8fa;
+    --bp-surface2: #eaeef2;
+    --bp-surface3: #d0d7de;
+    --bp-border:   #d0d7de;
+    --bp-border2:  #b0b7c0;
+    --bp-text:     #1f2328;
+    --bp-text2:    #636c76;
+    --bp-text3:    #8c959f;
+    --bg2:         #f6f8fa;
+    --accent:      #0969da;
+  }
   body.light { background: var(--bg); color: var(--text); }
   body.light header { background: var(--bg2); border-color: var(--border); }
   body.light .table-wrap, body.light .stat-card, body.light .endeks-card, body.light .chart-accordion, body.light .index-row-card { background: var(--bg2); border-color: var(--border); }
@@ -357,6 +372,8 @@
   .gnm-badge {
     font-size: 10px; font-weight: 700; padding: 2px 7px;
     border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+    /* neutral/bekle fallback — always visible regardless of signal type */
+    background: rgba(139,148,158,.1); color: var(--bp-text3); border: 1px solid rgba(139,148,158,.2);
   }
   .gnm-badge.al  { background: rgba(63,185,80,.12); color: #3fb950; border: 1px solid rgba(63,185,80,.3); }
   .gnm-badge.sat { background: rgba(248,81,73,.12);  color: #f85149; border: 1px solid rgba(248,81,73,.3); }
@@ -364,10 +381,12 @@
     font-size: 11.5px; color: var(--bp-text2); line-height: 1.55;
     display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: 36px; /* at least 2 lines — prevents collapsed card when snippet is very short */
+    margin-bottom: 9px;
   }
   .gnm-footer {
     display: flex; align-items: center; justify-content: space-between;
-    margin-top: 9px;
+    margin-top: 2px; /* gnm-text already has margin-bottom:9px */
   }
   .gnm-price {
     font-size: 12px; font-weight: 700; color: var(--bp-text); font-family: monospace;
@@ -899,7 +918,7 @@
   }
   .chart-acc-header:hover { background: rgba(255,255,255,.02); }
   .chart-acc-chev {
-    font-size: 11px; color: #484f58;
+    font-size: 11px; color: #8b949e;
     transition: transform .2s ease; display: inline-block;
   }
   .chart-acc-chev.open { transform: rotate(180deg); }
@@ -942,27 +961,28 @@
 
   .chart-loading {
     display: flex; align-items: center; justify-content: center;
-    height: 258px; color: #484f58; font-size: 13px; gap: 10px;
+    height: 258px; color: #8b949e; font-size: 13px; gap: 10px;
   }
 
-  /* Sağ: öne çıkanlar paneli */
+  /* Sağ: öne çıkanlar paneli — 2 kolon yan yana */
   .hero-panel {
     flex: 1; min-width: 0;
     display: flex; flex-direction: column;
-    overflow-y: auto;
+    overflow: hidden;
     position: relative;
-    scrollbar-width: none; /* firefox */
   }
-  .hero-panel::-webkit-scrollbar { display: none; }
-  /* Alt gradient — daha fazla içerik olduğunu ima eder */
-  .hero-panel::after {
-    content: ''; position: sticky; bottom: 0; left: 0; right: 0;
-    height: 20px; flex-shrink: 0;
-    background: linear-gradient(to top, #161b22, transparent);
-    pointer-events: none;
+  .hp-twin {
+    display: flex; flex: 1; min-height: 0; overflow: hidden;
   }
   .hp-section {
-    padding: 8px 14px 6px; flex-shrink: 0;
+    flex: 1; min-width: 0;
+    padding: 8px 12px 6px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .hp-section::-webkit-scrollbar { display: none; }
+  .hp-section-r {
+    border-left: 1px solid var(--bp-border);
   }
   .hp-title {
     font-size: 10px; font-weight: 700; color: var(--bp-text3);
@@ -1001,7 +1021,7 @@
   .hp-chg.pos { color: #3fb950; }
   .hp-chg.neg { color: #f85149; }
   .hp-chg.neu { color: #8b949e; }
-  .hp-empty { font-size: 11px; color: #484f58; padding: 4px 2px; }
+  .hp-empty { font-size: 11px; color: #8b949e; padding: 4px 2px; }
 
   /* Flash */
   @keyframes flashUp   { 0%{background:#1a3a2a} 100%{background:transparent} }
@@ -1131,7 +1151,7 @@
   .mc-lft { min-width:0; }
   .mc-rgt { text-align:right; flex-shrink:0; }
   .mc-ticker { font-size:15px; font-weight:800; color:#f0f6fc; line-height:1.2; }
-  .mc-sector { font-size:10px; color:#484f58; margin-top:2px; }
+  .mc-sector { font-size:10px; color:#8b949e; margin-top:2px; }
   .mc-price  { font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; color:#f0f6fc; line-height:1.3; }
   .mc-row2   { display:flex; align-items:center; justify-content:space-between; margin-top:9px; padding-top:8px; border-top:1px solid #21262d; }
   .mc-entry  { font-size:11px; color:#8b949e; }
@@ -1156,9 +1176,10 @@
     .charts-wrap { padding: 4px 12px 8px; }
     #chartMain { height: 220px; }
     .chart-loading { height: 220px; }
-    .hero-panel { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; min-height: 100px; }
-    .hp-section { flex: 0 0 150px; min-width: 0; padding: 8px 10px; }
-    .hp-divider { width: 1px; height: auto; background: var(--bp-border); flex-shrink: 0; }
+    .hero-panel { min-height: 110px; }
+    .hp-twin { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .hp-section { flex: 0 0 140px; min-width: 0; padding: 8px 10px; overflow-y: visible; }
+    .hp-section-r { border-left: 1px solid var(--bp-border); }
     .hp-name { display: none; }
     .stats-bar { gap: 8px; }
     .stat-card { padding: 10px 12px; min-width: 80px; }
@@ -1182,6 +1203,8 @@
 </style>
 </head>
 <body>
+<!-- SEO: visually-hidden h1 — required by search engines; logo already communicates brand visually -->
+<h1 style="position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri</h1>
 
 <header>
   <!-- Logo -->
@@ -1301,7 +1324,7 @@
 </nav>
 
 <!-- ── Ana içerik container ─────────────────────────── -->
-<div class="container">
+<main class="container">
 
 <!-- ── Dual Endeks Kartları ── -->
 <div class="dual-endeks">
@@ -1368,39 +1391,29 @@
       </div>
     </div>
 
-    <!-- Sağ: Öne Çıkanlar Paneli -->
+    <!-- Sağ: Öne Çıkanlar Paneli — yan yana 2 kolon -->
     <div class="hero-panel" id="heroPanel">
-
-      <div class="hp-section">
-        <div class="hp-title">🟢 Güçlü Trend</div>
-        <div id="hpAlList" class="hp-sk-wrap"></div>
+      <div class="hp-twin">
+        <div class="hp-section">
+          <div class="hp-title">🟢 Güçlü Trend</div>
+          <div id="hpAlList" class="hp-sk-wrap"></div>
+        </div>
+        <div class="hp-section hp-section-r">
+          <div class="hp-title">🔥 Hareketliler</div>
+          <div id="hpMoverList" class="hp-sk-wrap"></div>
+        </div>
       </div>
-
-      <div class="hp-divider"></div>
-
-      <div class="hp-section">
-        <div class="hp-title">🔥 Günün Hareketlileri</div>
-        <div id="hpMoverList" class="hp-sk-wrap"></div>
-      </div>
-
-      <div class="hp-divider"></div>
-
-      <div class="hp-section">
-        <div class="hp-title">⚡ Yeni Sinyal</div>
-        <div id="hpNewList" class="hp-sk-wrap"></div>
-      </div>
-
     </div>
   </div>
 </div><!-- /chart-accordion -->
 
   <div class="stats-bar" id="statsBar">
     <div class="stat-card stat-total"><div class="stat-num" id="statTotal"><span class="stat-num-sk"></span></div><div class="stat-label">Toplam</div></div>
-    <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="Güçlü Trend (AL): Supertrend ↑ + ADX ≥25 + EMA12>EMA99. Tıkla: Momentum sıralamasını gör">
+    <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="Güçlü Trend: Supertrend ↑ + ADX ≥25 + EMA12>EMA99. Tıkla: Momentum sıralamasını gör">
       <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7">↗</span></div>
     </a>
-    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=\"SAT\"]'))" title="Supertrend aşağı + ADX güçlü + EMA uyumu → düşüş trendi sinyali. Tıkla: SAT sinyallerini filtrele">
+    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=\"SAT\"]'))" title="Supertrend aşağı + ADX güçlü + EMA uyumu → düşüş trendi sinyali. Tıkla: Zayıf Trend sinyallerini filtrele">
       <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Zayıf Trend</div>
     </div>
@@ -1484,8 +1497,8 @@
       <div style="display:flex;align-items:center;gap:10px;">
         <!-- Tabs -->
         <div class="gnm-tabs" id="gnmTabs">
-          <button class="gnm-tab-btn active" id="tabBtnHisse" onclick="switchGnmTab('hisse')">📈 Hisse</button>
-          <button class="gnm-tab-btn" id="tabBtnMakro" onclick="switchGnmTab('makro')">🌍 Makro</button>
+          <button class="gnm-tab-btn active" id="tabBtnMakro" onclick="switchGnmTab('makro')">🌍 Makro</button>
+          <button class="gnm-tab-btn" id="tabBtnHisse" onclick="switchGnmTab('hisse')">📈 Hisse</button>
         </div>
         <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;">
           Tümü →
@@ -1493,8 +1506,21 @@
       </div>
     </div>
 
-    <!-- Tab: Hisse Haberleri -->
-    <div id="gnmPanelHisse">
+    <!-- Tab: Makro Haberler (VARSAYILAN — ilk açılışta görünen) -->
+    <div id="gnmPanelMakro">
+      <div id="macroNewsList" class="macro-news-list">
+        <!-- skeleton -->
+        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+      </div>
+      <div style="text-align:right;margin-top:8px">
+        <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">Piyasa Gündem Merkezi →</a>
+      </div>
+    </div>
+
+    <!-- Tab: Hisse Haberleri (gizli başlar) -->
+    <div id="gnmPanelHisse" style="display:none">
       <div class="gundem-layout">
         <!-- Sol: haber kartları -->
         <div class="gundem-cards-wrap">
@@ -1516,19 +1542,6 @@
           </div>
           <a href="/bilanco-takvimi" class="bilanco-mini-link">Tüm takvim →</a>
         </div>
-      </div>
-    </div>
-
-    <!-- Tab: Makro Haberler -->
-    <div id="gnmPanelMakro" style="display:none">
-      <div id="macroNewsList" class="macro-news-list">
-        <!-- skeleton -->
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
-      </div>
-      <div style="text-align:right;margin-top:8px">
-        <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">Piyasa Gündem Merkezi →</a>
       </div>
     </div>
   </section>
@@ -1592,7 +1605,7 @@
     <button class="filter-btn" onclick="setFilter('AL', this)" title="Supertrend ↑ + ADX ≥25 + EMA12>EMA99 — 3 indikatör aynı anda yükseliş yönünde">🟢 Güçlü Trend</button>
     <button class="filter-btn" onclick="setFilter('SAT', this)" title="Supertrend ↓ + ADX ≥25 + EMA12&lt;EMA99 — 3 indikatör aynı anda düşüş yönünde">🔴 Zayıf Trend</button>
     <button class="filter-btn" onclick="setFilter('BEKLE', this)" title="Henüz 3 indikatör hizalanmadı — trend belirsiz, yeni sinyal bekleniyor">⚪ Belirsiz</button>
-    <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)" title="Bugün ilk kez AL veya SAT sinyali oluşan hisseler — taze fırsatlar">⚡ Bugün</button>
+    <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)" title="Bugün ilk kez Güçlü Trend veya Zayıf Trend sinyali oluşan hisseler — taze fırsatlar">⚡ Bugün</button>
     <button class="filter-btn filter-watch" id="filterWatchBtn" onclick="setFilter('WATCH', this)" style="display:none">🔔 Takibim <span id="watchFilterCount"></span></button>
     <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()">⚙️ Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
     <div class="search-wrap">
@@ -1746,6 +1759,8 @@
   </div>
 </div>
 
+</main>
+
 <footer>
   <div style="max-width:900px;margin:0 auto">
     <!-- Logo in footer -->
@@ -1883,6 +1898,25 @@ const BASE_OPTS = {
   handleScale:     true,
 };
 
+/* Grafik eksen label formatı: "10" → "Nis 10", crosshair'de "00:00:00" kalkıyor */
+const _MTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+function _tickFmt(time, type) {
+  let yr, mo, dy;
+  if (typeof time === 'string') {
+    const p = time.split('-');
+    yr = +p[0]; mo = +p[1] - 1; dy = +p[2];
+  } else if (typeof time === 'number') {
+    const d = new Date(time * 1000);
+    yr = d.getUTCFullYear(); mo = d.getUTCMonth(); dy = d.getUTCDate();
+  } else if (time && typeof time === 'object') {
+    yr = time.year; mo = (time.month || 1) - 1; dy = time.day;
+  } else { return ''; }
+  if (type === 0) return String(yr);
+  if (type === 1) return _MTHS[mo] || '';
+  if (type === 2) return (_MTHS[mo] || '') + ' ' + dy;
+  return '';
+}
+
 let chartMain;
 
 function mkChart(el, height) {
@@ -1890,7 +1924,7 @@ function mkChart(el, height) {
     ...BASE_OPTS,
     width:     el.clientWidth || el.parentElement.clientWidth || 900,
     height:    height,
-    timeScale: { borderColor: '#30363d', timeVisible: true, visible: true, rightOffset: 10 },
+    timeScale: { borderColor: '#30363d', timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmt },
   });
 }
 
@@ -2010,12 +2044,17 @@ function buildCharts(d) {
     updateLegend(p.seriesData?.get(e12Line)?.value, p.seriesData?.get(e99Line)?.value);
   });
 
+  /* Son 1 yılı göster + sağda 10 boş bar boşluk */
   chartMain.timeScale().fitContent();
-  // Sol kenardaki ilk zaman etiketi kesilmesin: 10 bar sol boşluk ekle
   requestAnimationFrame(() => {
     try {
-      const lr = chartMain.timeScale().getVisibleLogicalRange();
-      if (lr) chartMain.timeScale().setVisibleLogicalRange({ from: lr.from - 10, to: lr.to + 2 });
+      const n = d.ohlc.length;
+      if (n > 0) {
+        chartMain.timeScale().setVisibleLogicalRange({
+          from: Math.max(0, n - 260),   // 8 ekstra sol bar — ilk label kırpılmasın
+          to:   n - 1 + 10,
+        });
+      }
     } catch(_) {}
   });
 }
@@ -2466,38 +2505,25 @@ function renderHeroPanel(stocks) {
     </a>`;
   };
 
-  /* 1. Güçlü Trend — AL sinyali, bull_score desc, max 4 */
+  /* 1. Güçlü Trend — AL sinyali, bull_score desc, max 5 */
   const alList = list
     .filter(s => s.signal === 'AL')
     .sort((a, b) => (b.bull_score || 0) - (a.bull_score || 0))
-    .slice(0, 4);
+    .slice(0, 5);
   document.getElementById('hpAlList').innerHTML = alList.length
     ? alList.map(s => row(s, 'hp-bar-al')).join('')
     : '<div class="hp-empty">Şu an güçlü trend yok</div>';
 
-  /* 2. Günün Hareketlileri — |change_pct| desc, max 4, sadece sinyal rengi */
+  /* 2. Günün Hareketlileri — |change_pct| desc, max 5 */
   const movers = [...list]
     .sort((a, b) => Math.abs(b.change_pct) - Math.abs(a.change_pct))
-    .slice(0, 4);
+    .slice(0, 5);
   document.getElementById('hpMoverList').innerHTML = movers.length
     ? movers.map(s => {
         const bar = s.signal === 'AL' ? 'hp-bar-al' : s.signal === 'SAT' ? 'hp-bar-sat' : 'hp-bar-neu';
         return row(s, bar);
       }).join('')
     : '<div class="hp-empty">Veri yok</div>';
-
-  /* 3. Yeni Sinyal — bugün oluşan AL/SAT, güce göre, max 4 */
-  const newSigs = list
-    .filter(s => s.is_new_signal && s.signal !== 'BEKLE')
-    .sort((a, b) => {
-      const sa = a.signal === 'AL' ? (a.bull_score || 0) : (a.bear_score || 0);
-      const sb = b.signal === 'AL' ? (b.bull_score || 0) : (b.bear_score || 0);
-      return sb - sa;
-    })
-    .slice(0, 4);
-  document.getElementById('hpNewList').innerHTML = newSigs.length
-    ? newSigs.map(s => row(s, s.signal === 'AL' ? 'hp-bar-al' : 'hp-bar-sat')).join('')
-    : '<div class="hp-empty">Bugün yeni sinyal yok</div>';
 }
 
 /* ── Counter animasyonu ─────────────────────────── */
@@ -2736,7 +2762,7 @@ function renderTable() {
       ? '<span style="color:#3fb950;font-size:11px" title="Haftalık: Yükselen">↑</span>'
       : wt === -1
         ? '<span style="color:#f85149;font-size:11px" title="Haftalık: Düşen">↓</span>'
-        : '<span style="color:#484f58;font-size:11px" title="Haftalık: Belirsiz">–</span>';
+        : '<span style="color:#8b949e;font-size:11px" title="Haftalık: Belirsiz">–</span>';
 
     // 3-bar onay
     const confHtml = s.confirmed
@@ -2762,11 +2788,11 @@ function renderTable() {
       sigPriceHtml = `<span class="sig-price">${ep.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>` +
         `<span style="font-size:10px;color:${retColor};margin-left:3px">${retSign}${ret.toFixed(1)}%</span>`;
     } else {
-      sigPriceHtml = '<span style="color:#484f58">—</span>';
+      sigPriceHtml = '<span style="color:#8b949e">—</span>';
     }
 
     // SL seviyesi + risk yüzdesi
-    let slHtml = '<span style="color:#484f58">—</span>';
+    let slHtml = '<span style="color:#8b949e">—</span>';
     if (s.sl_level && s.signal !== 'BEKLE') {
       const slPct = ((s.sl_level - s.price) / s.price * 100).toFixed(1);
       slHtml = `<span class="sl-val">${s.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>` +
@@ -2774,7 +2800,7 @@ function renderTable() {
     }
 
     const sectorHtml = s.sector && s.sector !== 'Diğer'
-      ? `<div style="font-size:10px;color:#484f58;margin-top:2px">${s.sector}</div>` : '';
+      ? `<div style="font-size:10px;color:#8b949e;margin-top:2px">${s.sector}</div>` : '';
 
     const isWatching = watchlist.has(s.ticker);
     return `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
@@ -2890,7 +2916,7 @@ function toggleTheme() {
       <div class="skeleton-cell hp-sk-name"></div>
       <div class="skeleton-cell hp-sk-chg"></div>
     </div>`;
-  ['hpAlList','hpMoverList','hpNewList'].forEach(id => {
+  ['hpAlList','hpMoverList'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = Array.from({length: 4}, hpSkRow).join('');
   });
@@ -3242,6 +3268,17 @@ async function submitSubscribe() {
 /* ── Gündem & Haberler ───────────────────────────── */
 let _gundemRetryTimer = null;
 
+/** HTML özel karakterleri güvenli biçimde kaçır — XSS/yapı bozulması önlemi */
+function _esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 /** Haber metni: * ve ** markdown işaretlerini temizle, bullet → • */
 function _parseNewsText(text) {
   if (!text) return '';
@@ -3263,9 +3300,12 @@ function _renderGnmCard(item) {
   const chgCls   = chgVal >= 0 ? 'up' : 'dn';
   const chgTxt   = (chgVal >= 0 ? '+' : '') + chgVal.toFixed(2) + '%';
   const priceStr = item.price ? parseFloat(item.price).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
-  const snippet  = _parseNewsText((item.snippet || '').trim());
+  const snippet   = _esc(_parseNewsText((item.snippet || '').trim()));
   const isLoading = item.source === 'loading';
-  const kapUrl   = item.kap_url || '';
+  // KAP URL: only allow kap.org.tr URLs to prevent open-redirect injection
+  const rawKap = item.kap_url || '';
+  const kapUrl = /^https:\/\/www\.kap\.org\.tr\//i.test(rawKap) ? rawKap : '';
+  const dest    = '/hisse/' + _esc(item.ticker);
 
   const snippetEl = isLoading
     ? `<div class="gnm-text" style="color:var(--bp-text3);font-style:italic;display:flex;align-items:center;gap:5px;">
@@ -3276,23 +3316,30 @@ function _renderGnmCard(item) {
         </svg>
         Haber yükleniyor…
        </div>`
-    : `<div class="gnm-text">${snippet}</div>`;
+    : `<div class="gnm-text">${snippet || '<span style="color:var(--bp-text3);font-style:italic">Haber özeti yükleniyor…</span>'}</div>`;
 
+  // KAP linki: artık outer element <div> olduğu için iç içe <a> sorunu YOK
   const kapLink = kapUrl
-    ? `<a href="${kapUrl}" target="_blank" rel="noopener"
+    ? `<a href="${_esc(kapUrl)}" target="_blank" rel="noopener noreferrer"
           class="gnm-kap-link"
-          onclick="event.stopPropagation();event.preventDefault();window.open('${kapUrl}','_blank')">
-         KAP ↗
-       </a>`
+          onclick="event.stopPropagation()">KAP ↗</a>`
     : '';
 
-  return `<a href="/hisse/${item.ticker}" class="gnm-card${cardCls}">
+  /* ⚠️ CRITICAL: Outer element MUST be <div>, NOT <a>.
+     Nesting <a> inside <a> is invalid HTML — browsers auto-close the outer <a>
+     and the footer/KAP link pop out as stray flex children of .gundem-cards,
+     causing the wide broken middle element visible in the UI.
+     Solution: div + onclick + role="link" + keyboard handler. */
+  return `<div class="gnm-card${cardCls}" role="link" tabindex="0"
+  onclick="location.href='${dest}'"
+  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='${dest}'}"
+  style="cursor:pointer">
   <div class="gnm-card-top">
     <div>
-      <div class="gnm-ticker">${item.ticker}</div>
-      <div class="gnm-name">${item.name || ''}</div>
+      <div class="gnm-ticker">${_esc(item.ticker)}</div>
+      <div class="gnm-name">${_esc(item.name || '')}</div>
     </div>
-    ${badgeCls ? `<span class="gnm-badge ${badgeCls}">${badgeTxt}</span>` : ''}
+    <span class="gnm-badge ${badgeCls}">${badgeTxt}</span>
   </div>
   ${snippetEl}
   <div class="gnm-footer">
@@ -3305,7 +3352,7 @@ function _renderGnmCard(item) {
       <span class="gnm-link">Detay →</span>
     </div>
   </div>
-</a>`;
+</div>`;
 }
 
 async function loadGundem(newsOnly) {
@@ -3314,39 +3361,50 @@ async function loadGundem(newsOnly) {
       ? [fetch('/api/market-news'), Promise.resolve(null)]
       : [fetch('/api/market-news'), fetch('/api/bilanco-mini')];
     const [newsRes, bilRes] = await Promise.all(fetches);
+    if (!newsRes.ok) throw new Error('market-news ' + newsRes.status);
     const newsData = await newsRes.json();
     const bilData  = bilRes ? await bilRes.json() : null;
 
     // — Haber Kartları —
     const cardsEl = document.getElementById('gundemCards');
-    const items = (newsData && newsData.items) ? newsData.items : [];
+    if (!cardsEl) return;
+    const items = Array.isArray(newsData?.items) ? newsData.items : [];
     if (items.length === 0) {
       cardsEl.innerHTML = '<div style="color:var(--bp-text3);font-size:12px;padding:12px 0;">Şu an güncel haber bulunamadı.</div>';
     } else {
-      cardsEl.innerHTML = items.map(_renderGnmCard).join('');
+      // render each card defensively — one broken item must not abort all cards
+      const cardHtmls = items.map(item => {
+        try { return _renderGnmCard(item); }
+        catch(e) { console.warn('gnm card render error', item?.ticker, e); return ''; }
+      });
+      cardsEl.innerHTML = cardHtmls.join('');
     }
 
     // — Bilanço Mini (ilk yüklemede) —
     if (bilData) {
-      const periods = (bilData.periods) ? bilData.periods : [];
+      const periods = Array.isArray(bilData.periods) ? bilData.periods : [];
       const bodyEl  = document.getElementById('bilancoMiniBody');
-      if (periods.length === 0) {
+      if (!bodyEl) { /* ok */ }
+      else if (periods.length === 0) {
         bodyEl.innerHTML = '<div style="font-size:11px;color:var(--bp-text3)">Yaklaşan dönem bulunamadı.</div>';
       } else {
         bodyEl.innerHTML = periods.slice(0,3).map(p => {
           const isActive = p.status === 'active';
           const daysCls  = isActive ? 'active' : 'upcoming';
-          const daysTxt  = p.days_label || (isActive ? '● Açık' : '—');
+          const daysTxt  = _esc(p.days_label || (isActive ? '● Açık' : '—'));
           return `<div class="bilanco-period">
-  <div class="bp-label">${p.label || '—'}</div>
-  <div class="bp-desc">${p.desc || ''}</div>
+  <div class="bp-label">${_esc(p.label || '—')}</div>
+  <div class="bp-desc">${_esc(p.desc || '')}</div>
   <span class="bp-days ${daysCls}">${daysTxt}</span>
 </div>`;
         }).join('');
       }
     }
 
-    // — Otomatik yenileme (haberler arka planda yükleniyorsa) —
+    // — Yükleme başarılı — hisse tab artık hazır —
+    _hisseLoaded = true;
+
+    // — Otomatik yenileme (haberler arka planda hâlâ yükleniyorsa) —
     if (_gundemRetryTimer) { clearTimeout(_gundemRetryTimer); _gundemRetryTimer = null; }
     if (newsData.has_loading) {
       _gundemRetryTimer = setTimeout(() => loadGundem(true), 30000);
@@ -3358,7 +3416,6 @@ async function loadGundem(newsOnly) {
     if (c) c.innerHTML = '<div style="color:var(--bp-text3);font-size:12px;padding:12px 0;">Gündem yüklenemedi.</div>';
   }
 }
-loadGundem(false);
 
 /* ── Backtest Güven Rozeti ───────────────────────── */
 (async function loadBtBadge() {
@@ -3385,7 +3442,7 @@ let _swReg = null;
 let _pushSubscription = null;
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
+  navigator.serviceWorker.register('/sw.js', { scope: '/' })
     .then(reg => {
       _swReg = reg;
       _initPushButton();
@@ -3605,7 +3662,7 @@ function showSigTip(ticker, ev) {
     if (s.vol_ratio != null && s.vol_ratio >= 2) {
       html += `<div class="sig-tip-row"><span class="sig-tip-ck" style="color:#e3b341">!</span><span class="sig-tip-lbl" style="color:#e3b341">Hacim ×${s.vol_ratio} — yükselme takip edilmeli</span></div>`;
     }
-    html += `<div style="color:#484f58;font-size:11px;margin-top:6px">Henüz 3 indikatör hizalanmadı</div>`;
+    html += `<div style="color:#8b949e;font-size:11px;margin-top:6px">Henüz 3 indikatör hizalanmadı</div>`;
   } else {
     indsList.forEach(ind => {
       const ok = (s.signal === 'AL' && ind.bull) || (s.signal === 'SAT' && ind.bear);
@@ -3670,26 +3727,29 @@ function hideSigTip() {
 })();
 
 // ── Gündem Tab Switcher ─────────────────────────────────
+// Varsayılan: Makro açık (HTML'de de Makro paneli gizlenmiş değil)
 let _macroLoaded = false;
+let _hisseLoaded = false;
 
 function switchGnmTab(tab) {
-  const btnHisse = document.getElementById('tabBtnHisse');
-  const btnMakro = document.getElementById('tabBtnMakro');
+  const btnHisse   = document.getElementById('tabBtnHisse');
+  const btnMakro   = document.getElementById('tabBtnMakro');
   const panelHisse = document.getElementById('gnmPanelHisse');
   const panelMakro = document.getElementById('gnmPanelMakro');
-  if (!btnHisse || !panelHisse) return;
+  if (!panelHisse || !panelMakro) return;
 
   if (tab === 'makro') {
-    btnHisse.classList.remove('active');
-    btnMakro.classList.add('active');
-    panelHisse.style.display = 'none';
+    btnMakro && btnMakro.classList.add('active');
+    btnHisse && btnHisse.classList.remove('active');
     panelMakro.style.display = 'block';
+    panelHisse.style.display = 'none';
     if (!_macroLoaded) loadMacroNews();
   } else {
-    btnMakro.classList.remove('active');
-    btnHisse.classList.add('active');
-    panelMakro.style.display = 'none';
+    btnHisse && btnHisse.classList.add('active');
+    btnMakro && btnMakro.classList.remove('active');
     panelHisse.style.display = 'block';
+    panelMakro.style.display = 'none';
+    if (!_hisseLoaded) loadGundem(false);
   }
 }
 
@@ -3697,23 +3757,33 @@ async function loadMacroNews() {
   const list = document.getElementById('macroNewsList');
   if (!list) return;
   try {
-    const res = await fetch('/api/macro-news');
+    const res  = await fetch('/api/macro-news');
     const data = await res.json();
     if (!data.items || data.items.length === 0) {
-      list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--bp-text3);font-size:12px;">Şu an haber bulunamadı.</div>';
+      list.innerHTML = '<div class="macro-news-empty">Şu an haber bulunamadı.</div>';
       return;
     }
-    list.innerHTML = data.items.slice(0, 8).map(item => `
-      <a href="${item.url}" target="_blank" rel="noopener" class="macro-news-item">
-        <span class="macro-news-src">${item.source}</span>
-        <span class="macro-news-title">${item.title}</span>
-        <span class="macro-news-time">${item.date_str || ''}</span>
-      </a>`).join('');
+    list.innerHTML = data.items.slice(0, 8).map(item => {
+      const safeUrl   = _esc(item.url   || '#');
+      const safeSrc   = _esc(item.source || '');
+      const safeTitle = _esc(item.title  || '');
+      const safeTime  = _esc(item.date_str || '');
+      return `<a href="${safeUrl}" target="_blank" rel="noopener" class="macro-news-item">
+        <span class="macro-news-src">${safeSrc}</span>
+        <span class="macro-news-title">${safeTitle}</span>
+        <span class="macro-news-time">${safeTime}</span>
+      </a>`;
+    }).join('');
     _macroLoaded = true;
   } catch(e) {
-    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--bp-text3);font-size:12px;">Haberler yüklenemedi.</div>';
+    list.innerHTML = '<div class="macro-news-empty">Haberler yüklenemedi.</div>';
   }
 }
+
+// Sayfa açılışında Makro tab aktif (HTML'de de active), Makro haberler yüklenir.
+// Hisse verileri arka planda çekilir (Hisse tab'a geçince skeleton yok).
+loadMacroNews();
+loadGundem(false);
 
 // ── Keyboard shortcut: "/" → focus search ──────────────
 document.addEventListener('keydown', e => {

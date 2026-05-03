@@ -12,12 +12,16 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hakkında — borsapusula.com</title>
-<meta name="description" content="BorsaPusula hakkında: proje amacı, kullanılan teknolojiler, veri kaynakları ve iletişim bilgileri. Türkiye'nin algoritmik BIST100 teknik analiz platformu.">
+<meta name="description" content="BorsaPusula hakkında: BIST100, ABD piyasaları ve kripto için algoritmik teknik analiz platformu. Supertrend, ADX, EMA tabanlı sinyaller. Proje amacı, teknolojiler ve yol haritası.">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <link rel="canonical" href="https://borsapusula.com/hakkinda">
 <meta property="og:title"       content="Hakkında — borsapusula.com">
-<meta property="og:description" content="Türkiye'nin en sade, algoritmik, ücretsiz BIST100 teknik analiz platformu.">
+<meta property="og:description" content="Türkiye'nin algoritmik, ücretsiz çok varlıklı teknik analiz platformu. BIST100, ABD hisseleri, BTC, altın.">
 <meta property="og:site_name"   content="borsapusula.com">
+<meta property="og:url"         content="https://borsapusula.com/hakkinda">
+<meta property="og:image"       content="https://borsapusula.com/og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height"content="630">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
   {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
@@ -54,47 +58,101 @@
   .back-btn:hover { background: #30363d; color: #e6edf3; }
   .page-title { font-size: 20px; font-weight: 700; color: #f0f6fc; }
 
-  .container { max-width: 820px; margin: 0 auto; padding: 32px 24px; }
+  .container { max-width: 860px; margin: 0 auto; padding: 36px 24px 48px; }
 
   .prose h2 {
     font-size: 18px; font-weight: 700; color: #f0f6fc;
-    margin: 28px 0 12px;
+    margin: 32px 0 14px;
     padding-bottom: 8px;
     border-bottom: 1px solid #21262d;
+  }
+  .prose h3 {
+    font-size: 14px; font-weight: 700; color: #e6edf3;
+    margin: 20px 0 8px;
   }
   .prose p  { color: #c9d1d9; margin-bottom: 12px; }
   .prose ul { color: #c9d1d9; margin: 8px 0 12px 20px; }
   .prose li { margin-bottom: 6px; }
   .prose strong { color: #f0f6fc; }
 
-  .tagline {
-    font-size: 22px;
-    font-weight: 700;
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, rgba(31,111,235,.08) 0%, rgba(63,185,80,.05) 100%);
+    border: 1px solid rgba(31,111,235,.2);
+    border-radius: 12px;
+    padding: 28px 28px 24px;
+    margin-bottom: 8px;
+  }
+  .hero-title {
+    font-size: 26px;
+    font-weight: 800;
     color: #f0f6fc;
-    margin-bottom: 6px;
-    line-height: 1.3;
+    line-height: 1.2;
+    margin-bottom: 10px;
   }
-  .tagline span { color: #58a6ff; }
-
-  .niche-box {
-    display: inline-flex;
-    gap: 10px;
+  .hero-title span { color: #58a6ff; }
+  .hero-sub {
+    color: #8b949e;
+    font-size: 15px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .hero-tags {
+    display: flex;
+    gap: 8px;
     flex-wrap: wrap;
-    margin: 16px 0;
   }
-  .niche-tag {
+  .hero-tag {
     background: #21262d;
     border: 1px solid #30363d;
     border-radius: 20px;
-    padding: 5px 14px;
-    font-size: 13px;
+    padding: 4px 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #58a6ff;
   }
 
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin: 20px 0 8px;
+  }
+  .stat-box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .stat-num { font-size: 22px; font-weight: 800; color: #58a6ff; }
+  .stat-lbl { font-size: 11px; color: #8b949e; margin-top: 3px; }
+
+  /* Feature cards */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .feature-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .feature-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .feature-title { font-size: 13px; font-weight: 700; color: #f0f6fc; }
+  .feature-desc  { font-size: 12px; color: #8b949e; margin-top: 3px; line-height: 1.5; }
+
+  /* Tech grid */
   .tech-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 10px;
     margin: 14px 0;
   }
@@ -104,9 +162,51 @@
     border-radius: 8px;
     padding: 12px 14px;
   }
-  .tech-name { font-size: 14px; font-weight: 600; color: #f0f6fc; }
+  .tech-name { font-size: 13px; font-weight: 700; color: #f0f6fc; }
   .tech-desc { font-size: 12px; color: #8b949e; margin-top: 3px; }
 
+  /* Market coverage */
+  .market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .market-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .market-card-title {
+    font-size: 13px; font-weight: 700; color: #f0f6fc;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+  }
+  .market-card ul { margin-left: 0; list-style: none; }
+  .market-card li { font-size: 12px; color: #8b949e; padding: 3px 0; border-bottom: 1px solid #21262d; }
+  .market-card li:last-child { border-bottom: none; }
+
+  /* Methodology box */
+  .method-box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-left: 3px solid #1f6feb;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 14px 0;
+  }
+  .method-formula {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #79c0ff;
+    background: rgba(31,111,235,.08);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    line-height: 1.8;
+  }
+
+  /* Roadmap */
   .roadmap-list {
     list-style: none;
     margin: 12px 0 !important;
@@ -118,146 +218,349 @@
     padding: 8px 0;
     border-bottom: 1px solid #21262d;
     color: #c9d1d9;
+    font-size: 13px;
   }
   .roadmap-list li:last-child { border-bottom: none; }
-  .rl-done { color: #3fb950; font-size: 14px; flex-shrink: 0; }
-  .rl-todo { color: #8b949e; font-size: 14px; flex-shrink: 0; }
+  .rl-done    { color: #3fb950; font-size: 14px; flex-shrink: 0; }
+  .rl-wip     { color: #d29922; font-size: 14px; flex-shrink: 0; }
+  .rl-todo    { color: #8b949e; font-size: 14px; flex-shrink: 0; }
+
+  /* Warning box */
+  .warning-box {
+    background: rgba(210,153,34,.06);
+    border: 1px solid rgba(210,153,34,.3);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 14px 0;
+  }
+  .warning-box p { color: #c9d1d9; margin-bottom: 8px; }
+  .warning-box p:last-child { margin-bottom: 0; }
 
   footer {
     text-align: center;
     padding: 20px;
     font-size: 12px;
-    color: #484f58;
+    color: #6e7681;
     border-top: 1px solid #21262d;
     margin-top: 32px;
   }
   footer a { color: #8b949e; text-decoration: none; }
+  footer a:hover { color: #e6edf3; }
 
-  @media (max-width: 600px) { .container { padding: 16px; } }
+  @media (max-width: 600px) {
+    .container { padding: 16px 16px 32px; }
+    .hero { padding: 20px 16px; }
+    .hero-title { font-size: 20px; }
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <a href="/" class="back-btn">
+  <a href="/" class="back-btn" aria-label="Ana sayfaya dön">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <path d="M19 12H5M12 5l-7 7 7 7"/>
     </svg>
     Ana Sayfa
   </a>
-  <div>
-    <div class="page-title">ℹ️ Hakkında</div>
-  </div>
+  <h1 class="page-title">Hakkında</h1>
 </header>
 
-<div class="container">
+<main class="container">
 <article class="prose">
 
-<p class="tagline">BIST30 <span>Sinyal Paneli</span></p>
-<p style="color:#8b949e;font-size:15px;margin-bottom:16px">Türkiye'nin en sade, algoritmik ve ücretsiz borsa teknik analiz platformu.</p>
-
-<div class="niche-box">
-  <span class="niche-tag">🇹🇷 Türkçe</span>
-  <span class="niche-tag">🤖 Algoritmik</span>
-  <span class="niche-tag">⚡ Modern UI</span>
-  <span class="niche-tag">🆓 Ücretsiz</span>
-  <span class="niche-tag">📡 Canlı</span>
+<!-- ── HERO ─────────────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-title">Borsa<span>Pusula</span></div>
+  <p class="hero-sub">
+    Türkiye'nin algoritmik, ücretsiz çok varlıklı teknik analiz platformu.
+    BIST100, ABD hisseleri, kripto ve emtialar için sade ve hızlı sinyal paneli.
+  </p>
+  <div class="hero-tags">
+    <span class="hero-tag">🇹🇷 Türkçe</span>
+    <span class="hero-tag">🤖 Algoritmik</span>
+    <span class="hero-tag">⚡ Canlı Veri</span>
+    <span class="hero-tag">🆓 Tamamen Ücretsiz</span>
+    <span class="hero-tag">🌍 Çok Varlıklı</span>
+    <span class="hero-tag">📡 SSE Akışı</span>
+  </div>
 </div>
 
+<!-- ── SAYILARLA PLATFORM ─────────────────────────────────────── -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="stat-num">~145</div>
+    <div class="stat-lbl">Takip edilen BIST hissesi</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">30 sn</div>
+    <div class="stat-lbl">Canlı fiyat güncelleme</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">3</div>
+    <div class="stat-lbl">Sinyal indikatörü (ST+ADX+EMA)</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">500+</div>
+    <div class="stat-lbl">Günlük bar geçmişi</div>
+  </div>
+</div>
+
+<!-- ── PROJE AMACI ────────────────────────────────────────────── -->
 <h2>Proje Amacı</h2>
 <p>
   Borsa teknik analizi, birçok platform tarafından ya çok karmaşık, ya çok pahalı
-  ya da yabancı dilde sunuluyor. Bu proje, <strong>BIST30 hisseleri</strong> için
-  algoritmik trend sinyallerini <strong>sade, hızlı ve ücretsiz</strong> bir arayüzde
-  herkesin erişimine sunmayı hedefliyor.
+  ya da yabancı dilde sunuluyor. Bu proje, <strong>BIST100 hisseleri başta olmak üzere
+  ABD piyasaları, kripto ve emtialar</strong> için algoritmik trend sinyallerini
+  <strong>sade, hızlı ve ücretsiz</strong> bir arayüzde herkesin erişimine sunmayı hedefliyor.
 </p>
 <p>
   Herhangi bir insan yorumu içermez — her sinyal <strong>tamamen algoritmik</strong> olarak
-  3 teknik kriter üzerinden üretilir:
-  <strong>Supertrend(10,3)</strong> + <strong>ADX ≥ 25</strong> + <strong>EMA12/99 kesişimi</strong>.
+  üretilir. Hedef: sabah ekrana bak, 30 saniyede "bugün hangi hisselerde trend güçlü?" sorusunu yanıtla.
 </p>
 
-<h2>Ne Sunuyor?</h2>
-<ul>
-  <li>📊 BIST30 endeks grafiği — 500 günlük, Supertrend + EMA çakıştırmalı</li>
-  <li>📈 Her hisse için bireysel sayfa — detaylı grafik, sinyal geçmişi, stop loss</li>
-  <li>⚡ Canlı fiyat akışı — 30 saniyede bir güncelleme (SSE)</li>
-  <li>📋 Günlük sinyal özeti — Güçlü/Zayıf/Belirsiz trend dağılımı, yeni sinyaller</li>
-  <li>🔢 Hacim grafiği — günlük işlem hacmi histogram</li>
-  <li>📏 52 haftalık aralık barı — mevcut fiyatın konumunu gösterir</li>
-</ul>
+<!-- ── SİNYAL METODOLOJİSİ ───────────────────────────────────── -->
+<h2>Sinyal Metodolojisi</h2>
+<div class="method-box">
+  <p style="color:#c9d1d9;font-size:13px;margin-bottom:8px">
+    Her hisse için 3 teknik gösterge aynı anda değerlendiriliyor:
+  </p>
+  <div class="method-formula">
+Güçlü Trend  →  Supertrend(10,3) LONG  <br>
+               +  ADX(14) ≥ 25          <br>
+               +  EMA12 &gt; EMA99       <br><br>
+Zayıf Trend  →  Supertrend SHORT        <br>
+               +  ADX(14) ≥ 25          <br>
+               +  EMA12 &lt; EMA99
+  </div>
+  <p style="color:#8b949e;font-size:12px;margin-top:8px;margin-bottom:0">
+    Haftalık trend yönü ek filtre olarak kullanılır; stop-loss ATR(14) ile otomatik hesaplanır.
+    Detaylı metodoloji için <a href="/metodoloji" style="color:#58a6ff">Metodoloji sayfasına</a> bakın.
+  </p>
+</div>
 
+<!-- ── PLATFORM KAPSAMI ───────────────────────────────────────── -->
+<h2>Platform Kapsami</h2>
+<div class="market-grid">
+  <div class="market-card">
+    <div class="market-card-title">🇹🇷 BIST100</div>
+    <ul>
+      <li>~145 hisse, sektör filtreleri</li>
+      <li>XU030 ve XU100 endeks grafikleri</li>
+      <li>Canlı fiyat akışı (SSE)</li>
+      <li>KAP bildirim entegrasyonu</li>
+      <li>Bilanço takvimi</li>
+    </ul>
+  </div>
+  <div class="market-card">
+    <div class="market-card-title">🇺🇸 ABD Piyasaları</div>
+    <ul>
+      <li>S&amp;P 500 endeks analizi</li>
+      <li>NASDAQ Composite analizi</li>
+      <li>Büyük ABD hisseleri (Apple, Tesla, NVDA…)</li>
+      <li>Aynı algoritmik sinyal sistemi</li>
+    </ul>
+  </div>
+  <div class="market-card">
+    <div class="market-card-title">₿ Kripto &amp; Emtia</div>
+    <ul>
+      <li>Bitcoin (BTC/USD)</li>
+      <li>Ethereum (ETH/USD)</li>
+      <li>Altın (XAU/USD)</li>
+      <li>Gümüş (XAG/USD)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── ÖZELLİKLER ────────────────────────────────────────────── -->
+<h2>Ne Sunuyor?</h2>
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-icon">📊</div>
+    <div>
+      <div class="feature-title">Sinyal Paneli</div>
+      <div class="feature-desc">BIST100 hisselerinin anlık trend sinyali, giriş fiyatı ve stop-loss seviyeleri tek sayfada.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">📈</div>
+    <div>
+      <div class="feature-title">Hisse Detay Sayfası</div>
+      <div class="feature-desc">Bireysel grafik (500 gün), Supertrend + EMA çakıştırması, sinyal geçmişi, KAP haberleri, AI haber özeti.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">⚡</div>
+    <div>
+      <div class="feature-title">Canlı Fiyat Akışı</div>
+      <div class="feature-desc">Server-Sent Events (SSE) ile ~30 saniyede bir fiyat güncellemesi — sayfa yenilemesi gerekmez.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🔍</div>
+    <div>
+      <div class="feature-title">Hisse Tarayıcı</div>
+      <div class="feature-desc">Sinyal tipi, ADX gücü, sektör ve fiyat aralığı ile filtreli tarama. Kriterlere uyan hisseleri anında listele.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🔥</div>
+    <div>
+      <div class="feature-title">Güçlü Momentum Listesi</div>
+      <div class="feature-desc">ADX, hacim oranı ve sinyal kalitesine göre sıralanmış, günün en güçlü hareketli hisseleri.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">📰</div>
+    <div>
+      <div class="feature-title">Piyasa Gündem Merkezi</div>
+      <div class="feature-desc">Bugün sinyal değişen hisseler, en güçlü trendler (ADX sıralamalı), makro haberler ve ekonomik takvim.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">⇌</div>
+    <div>
+      <div class="feature-title">Hisse Karşılaştırma</div>
+      <div class="feature-desc">Birden fazla hisseyi ADX, RSI, Supertrend ve EMA metrikleriyle yan yana karşılaştır.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">💼</div>
+    <div>
+      <div class="feature-title">Portföy Takibi</div>
+      <div class="feature-desc">Yerel tarayıcıda (localStorage) portföy oluştur; giriş fiyatı, anlık değer, kâr/zarar ve sinyal durumunu takip et.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">📅</div>
+    <div>
+      <div class="feature-title">Bilanço Takvimi</div>
+      <div class="feature-desc">BIST100 şirketlerinin çeyreklik finansal sonuç açıklama dönemleri; sinyal durumlarıyla birlikte gösterim.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🗺️</div>
+    <div>
+      <div class="feature-title">Sektör Isı Haritası</div>
+      <div class="feature-desc">Hangi sektörde güçlü trend yoğunluğu var? Tüm BIST sektörlerini sinyal dağılımına göre görsel haritada gör.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🤖</div>
+    <div>
+      <div class="feature-title">AI Haber Özeti</div>
+      <div class="feature-desc">Gemini 2.0 Flash ile hisse başına güncel haber özeti ve piyasa etkisi analizi. Google Search grounding.</div>
+    </div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">📉</div>
+    <div>
+      <div class="feature-title">Sinyal Performans Analizi</div>
+      <div class="feature-desc">Geçmiş sinyallerin başarı oranı, ortalama getiri ve R/R istatistikleri — backtest verisiyle şeffaflık.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TEKNOLOJİLER ──────────────────────────────────────────── -->
 <h2>Kullanılan Teknolojiler</h2>
 <div class="tech-grid">
   <div class="tech-card">
     <div class="tech-name">Python / Flask</div>
-    <div class="tech-desc">Backend, sinyal motoru, API</div>
+    <div class="tech-desc">Backend, sinyal motoru, REST API, SSE</div>
   </div>
   <div class="tech-card">
     <div class="tech-name">yfinance</div>
-    <div class="tech-desc">Yahoo Finance fiyat verisi</div>
+    <div class="tech-desc">Yahoo Finance — OHLCV fiyat verisi</div>
   </div>
   <div class="tech-card">
     <div class="tech-name">Pandas / NumPy</div>
-    <div class="tech-desc">Veri işleme ve gösterge hesaplama</div>
+    <div class="tech-desc">Veri işleme, indikatör hesaplama</div>
   </div>
   <div class="tech-card">
     <div class="tech-name">Lightweight Charts</div>
-    <div class="tech-desc">TradingView'in açık kaynak grafik kütüphanesi</div>
+    <div class="tech-desc">TradingView açık kaynak grafik kütüphanesi</div>
   </div>
   <div class="tech-card">
     <div class="tech-name">SSE (EventSource)</div>
-    <div class="tech-desc">Gerçek zamanlı fiyat akışı</div>
+    <div class="tech-desc">Gerçek zamanlı push — WebSocket gerekmez</div>
   </div>
   <div class="tech-card">
     <div class="tech-name">Gunicorn + Gevent</div>
-    <div class="tech-desc">Async SSE destekli web sunucusu</div>
+    <div class="tech-desc">Async SSE destekli prodüksiyon sunucusu</div>
+  </div>
+  <div class="tech-card">
+    <div class="tech-name">Gemini 2.0 Flash</div>
+    <div class="tech-desc">Google AI — haber özetleme, Search grounding</div>
+  </div>
+  <div class="tech-card">
+    <div class="tech-name">Service Worker / PWA</div>
+    <div class="tech-desc">Çevrimdışı destek, hızlı yükleme önbelleği</div>
   </div>
 </div>
 
+<!-- ── VERİ KAYNAKLARI ────────────────────────────────────────── -->
 <h2>Veri Kaynakları ve Güncellik</h2>
 <ul>
-  <li><strong>Fiyat verisi:</strong> Yahoo Finance (yfinance) — ücretsiz, gecikmeli (~15 dk)</li>
-  <li><strong>Sinyal hesaplama:</strong> Her 15 dakikada bir yenilenir</li>
-  <li><strong>Canlı fiyat:</strong> Yaklaşık 30 saniyede bir güncellenir</li>
-  <li><strong>Kapsam:</strong> BIST100 hisseleri (~95 hisse, sektör filtreleri) + XU030 endeksi</li>
+  <li><strong>Fiyat verisi:</strong> Yahoo Finance (yfinance) — ücretsiz, ~15 dakika gecikmeli</li>
+  <li><strong>Sinyal hesaplama:</strong> Her 15 dakikada bir sunucu tarafında yenilenir</li>
+  <li><strong>Canlı fiyat:</strong> SSE ile yaklaşık 30 saniyede bir tarayıcıya iletilir</li>
+  <li><strong>BIST kapsamı:</strong> ~145 hisse (BIST100 + ek hisseler), 12 sektör</li>
+  <li><strong>ABD / Kripto / Emtia:</strong> Aynı yfinance altyapısı, günlük güncelleme</li>
+  <li><strong>KAP haberleri:</strong> Anlık KAP bildirimleri hisse sayfalarında gösterilir</li>
+  <li><strong>AI haberleri:</strong> Gemini 2.0 Flash — Gemini 429 rate limit nedeniyle önbellek kullanılır</li>
 </ul>
 
+<!-- ── YOL HARİTASI ──────────────────────────────────────────── -->
 <h2>Yol Haritası</h2>
 <ul class="roadmap-list">
-  <li><span class="rl-done">✅</span> <span>BIST30 sinyal motoru (ST + ADX + EMA)</span></li>
-  <li><span class="rl-done">✅</span> <span>XU030 endeks grafiği</span></li>
-  <li><span class="rl-done">✅</span> <span>Bireysel hisse sayfaları</span></li>
-  <li><span class="rl-done">✅</span> <span>Canlı fiyat akışı (SSE)</span></li>
+  <li><span class="rl-done">✅</span> <span>BIST100 sinyal motoru (Supertrend + ADX + EMA)</span></li>
+  <li><span class="rl-done">✅</span> <span>XU030 / XU100 endeks grafikleri</span></li>
+  <li><span class="rl-done">✅</span> <span>Bireysel hisse sayfaları (~145 hisse)</span></li>
+  <li><span class="rl-done">✅</span> <span>Canlı fiyat akışı (SSE, ~30 sn)</span></li>
   <li><span class="rl-done">✅</span> <span>Sinyal geçmişi tablosu</span></li>
-  <li><span class="rl-done">✅</span> <span>Hacim grafiği + 52-hafta aralığı</span></li>
+  <li><span class="rl-done">✅</span> <span>Hacim grafiği + 52-hafta aralık barı</span></li>
   <li><span class="rl-done">✅</span> <span>Günlük özet sayfası</span></li>
-  <li><span class="rl-done">✅</span> <span>SEO altyapısı (sitemap, meta tags)</span></li>
-  <li><span class="rl-done">✅</span> <span>BIST100 kapsamına genişleme (~95 hisse, sektör filtreleri)</span></li>
+  <li><span class="rl-done">✅</span> <span>SEO altyapısı (sitemap, meta tags, JSON-LD)</span></li>
+  <li><span class="rl-done">✅</span> <span>Sektör filtreleri ve sektör ısı haritası</span></li>
   <li><span class="rl-done">✅</span> <span>AI haber özeti — Gemini 2.0 Flash + Google Search grounding</span></li>
-  <li><span class="rl-todo">🔜</span> <span>Telegram sinyal botu</span></li>
-  <li><span class="rl-todo">🔜</span> <span>E-posta bildirim listesi</span></li>
-  <li><span class="rl-todo">🔜</span> <span>Backtest performans tablosu</span></li>
-  <li><span class="rl-todo">🔜</span> <span>Portföy takip (localStorage)</span></li>
+  <li><span class="rl-done">✅</span> <span>Piyasa Gündem Merkezi</span></li>
+  <li><span class="rl-done">✅</span> <span>Hisse Tarayıcı (ADX / sektör / fiyat filtreli)</span></li>
+  <li><span class="rl-done">✅</span> <span>Güçlü Momentum Listesi (ADX sıralamalı)</span></li>
+  <li><span class="rl-done">✅</span> <span>Portföy Takibi (localStorage)</span></li>
+  <li><span class="rl-done">✅</span> <span>Bilanço Takvimi (çeyreklik finansal sonuç tarihleri)</span></li>
+  <li><span class="rl-done">✅</span> <span>ABD Hisseleri — S&amp;P 500, NASDAQ, büyük hisseler</span></li>
+  <li><span class="rl-done">✅</span> <span>Kripto &amp; Emtia — BTC, ETH, Altın, Gümüş</span></li>
+  <li><span class="rl-done">✅</span> <span>Hisse Karşılaştırma (yan yana teknik metrikler)</span></li>
+  <li><span class="rl-done">✅</span> <span>Sinyal Performans Analizi (backtest istatistikleri)</span></li>
+  <li><span class="rl-done">✅</span> <span>Blog — teknik analiz içerikleri</span></li>
+  <li><span class="rl-done">✅</span> <span>PWA (Service Worker, çevrimdışı destek)</span></li>
+  <li><span class="rl-wip">🔜</span> <span>Telegram sinyal botu</span></li>
+  <li><span class="rl-wip">🔜</span> <span>Kişisel fiyat alarmları (breakout bildirimi)</span></li>
+  <li><span class="rl-wip">🔜</span> <span>Genişletilmiş backtest arayüzü (parametre testi)</span></li>
+  <li><span class="rl-todo">💡</span> <span>Sosyal paylaşım (sinyal kartı görseli)</span></li>
 </ul>
 
+<!-- ── ÖNEMLİ UYARI ──────────────────────────────────────────── -->
 <h2>Önemli Uyarı</h2>
-<p>
-  Bu platform <strong>yalnızca bilgilendirme amaçlıdır</strong>. Herhangi bir otomatik emir verilmez,
-  yatırım tavsiyesi verilmez. Sinyal geçmişi iyi sonuçlar göstermiş olsa bile
-  geçmiş performans gelecek getiriyi garanti etmez.
-</p>
-<p>
-  Tüm yatırım kararları kişisel araştırma ve gerektiğinde lisanslı finansal danışmanlık
-  gerektirmektedir. Sermayenizi kaybetme riskiniz her zaman mevcuttur.
-</p>
-
-</article>
+<div class="warning-box">
+  <p>
+    Bu platform <strong>yalnızca bilgilendirme amaçlıdır</strong>. Herhangi bir otomatik emir
+    verilmez, yatırım tavsiyesi sunulmaz. Sinyal geçmişi olumlu sonuçlar göstermiş olsa bile
+    <strong>geçmiş performans gelecek getiriyi garanti etmez.</strong>
+  </p>
+  <p>
+    Tüm yatırım kararları kişisel araştırma ve gerektiğinde <strong>lisanslı finansal danışmanlık</strong>
+    gerektirmektedir. Sermayenizi kaybetme riskiniz her zaman mevcuttur. BorsaPusula,
+    herhangi bir işlemden doğabilecek kayıplardan sorumlu tutulamaz.
+  </p>
 </div>
 
+</article>
+</main>
+
 <footer>
-  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/gizlilik">Gizlilik</a> · <a href="/iletisim">İletişim</a>
-  <div style="margin-top:8px;font-size:11px;color:#30363d">⚠️ Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/sinyal-performans">Sinyal Performansı</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/gizlilik">Gizlilik</a> · <a href="/iletisim">İletişim</a>
+  <div style="margin-top:8px;font-size:11px;color:#484f58">⚠️ Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
 </footer>
 
 </body>
