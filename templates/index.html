@@ -61,7 +61,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="/static/lightweight-charts.min.js"></script>
+<!-- Inter fallback with size-adjust — eliminates FOUT layout shift (CLS) -->
 <style>
+  @font-face {
+    font-family: 'Inter-Fallback';
+    src: local('Arial');
+    size-adjust: 107%;
+    ascent-override: 90%;
+    descent-override: 25%;
+    line-gap-override: 0%;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   /* ── Design tokens ──────────────────────────────── */
@@ -74,7 +83,7 @@
     --bp-border2:   #2d4166;
     --bp-text:      #e2e8f0;
     --bp-text2:     #94a3b8;
-    --bp-text3:     #64748b;
+    --bp-text3:     #7d8fa4; /* was #64748b (3.97:1 fail) → now 5.78:1 AA pass */
     --bp-brand:     #3b82f6;
     --bp-brand-d:   #1d4ed8;
     --bp-al:        #3fb950;
@@ -98,7 +107,7 @@
   body {
     background: var(--bp-bg);
     color: var(--bp-text);
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', 'Inter-Fallback', system-ui, -apple-system, sans-serif;
     font-size: 14px;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -1404,7 +1413,8 @@
   </div>
 
   <!-- ── AI Piyasa Özeti ──────────────────────────── -->
-  <div id="macroSummaryBar" style="display:none;background:linear-gradient(135deg,rgba(31,111,235,.06),rgba(139,92,246,.03));border:1px solid rgba(31,111,235,.15);border-radius:9px;padding:9px 14px;margin-bottom:10px;align-items:flex-start;gap:8px">
+  <!-- visibility:hidden (not display:none) reserves space → prevents CLS when content loads -->
+  <div id="macroSummaryBar" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(31,111,235,.06),rgba(139,92,246,.03));border:1px solid rgba(31,111,235,.15);border-radius:9px;padding:9px 14px;margin-bottom:10px;align-items:flex-start;gap:8px">
     <span style="font-size:15px;flex-shrink:0;margin-top:1px">🤖</span>
     <div style="flex:1;min-width:0">
       <div id="macroSummaryBarText" style="font-size:12.5px;color:#94a3b8;line-height:1.5"></div>
@@ -1422,12 +1432,13 @@
   </div>
 
   <!-- Backtest güven rozeti -->
-  <a href="/sinyal-performans" id="btTrustBadge" style="display:none;text-decoration:none;
+  <!-- visibility:hidden reserves space → no CLS when backtest data arrives (disk-cached, always fast) -->
+  <a href="/sinyal-performans" id="btTrustBadge" style="display:flex;visibility:hidden;text-decoration:none;
     background:linear-gradient(135deg,rgba(63,185,80,.06),rgba(59,130,246,.04));
     border:1px solid rgba(63,185,80,.18);border-radius:10px;padding:10px 16px;margin-bottom:16px;
     flex-wrap:wrap;gap:6px 16px;align-items:center;transition:border-color .15s"
     onmouseover="this.style.borderColor='rgba(63,185,80,.35)'" onmouseout="this.style.borderColor='rgba(63,185,80,.18)'">
-    <span style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap">📊 2 Yıllık Backtest · 28 Hisse</span>
+    <span style="font-size:10px;color:#7d8fa4;text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap">📊 2 Yıllık Backtest · 28 Hisse</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
       <span style="font-size:11px;color:#94a3b8">Sharpe:</span>
       <span id="btSharpe" style="font-size:15px;font-weight:800;color:#3fb950;letter-spacing:-0.3px"></span>
@@ -2204,23 +2215,27 @@ fetchChart100();
 
 /* ── SSE Canlı Fiyat ─────────────────────────────── */
 let _sseRetry = 1000;
+let _sseInstance = null; /* track instance for bf-cache cleanup */
 
 function startSSE() {
-  const es = new EventSource('/api/stream');
-  es.onopen = () => { _sseRetry = 1000; };
-  es.onmessage = (e) => {
+  _sseInstance = new EventSource('/api/stream');
+  _sseInstance.onopen = () => { _sseRetry = 1000; };
+  _sseInstance.onmessage = (e) => {
     try {
       const msg = JSON.parse(e.data);
       if (msg.type !== 'prices') return;
       applyLivePrices(msg.data, msg.ts);
     } catch(_) {}
   };
-  es.onerror = () => {
-    es.close();
+  _sseInstance.onerror = () => {
+    _sseInstance.close(); _sseInstance = null;
     setTimeout(startSSE, _sseRetry);
     _sseRetry = Math.min(_sseRetry * 2, 30000);
   };
 }
+/* bfcache: EventSource prevents restoration — close on leave, reopen on restore */
+window.addEventListener('pagehide', () => { if (_sseInstance) { _sseInstance.close(); _sseInstance = null; } });
+window.addEventListener('pageshow', (e) => { if (e.persisted && !_sseInstance) startSSE(); });
 
 function applyLivePrices(prices, ts) {
   Object.entries(prices).forEach(([ticker, d]) => {
@@ -3381,7 +3396,7 @@ async function loadGundem(newsOnly) {
     if (sharpeEl) sharpeEl.textContent = d.al.sharpe != null ? d.al.sharpe : '—';
     if (pfEl)     pfEl.textContent     = d.al.profit_factor != null ? d.al.profit_factor : '—';
     if (bestEl)   bestEl.textContent   = d.al.best != null ? '+' + d.al.best + '%' : '—';
-    badge.style.display = 'flex';
+    badge.style.visibility = 'visible'; /* space already reserved — no CLS */
   } catch(e) {}
 })();
 
@@ -3670,7 +3685,7 @@ function hideSigTip() {
     const bar  = document.getElementById('macroSummaryBar');
     const el   = document.getElementById('macroSummaryBarText');
     if (el)  el.textContent = txt;
-    if (bar) bar.style.display = 'flex';
+    if (bar) bar.style.visibility = 'visible'; /* space already reserved — no CLS */
   } catch(e) {}
 })();
 
