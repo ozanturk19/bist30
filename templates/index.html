@@ -32,19 +32,110 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://borsapusula.com/#organization",
+  "name": "BorsaPusula",
+  "alternateName": "borsapusula.com",
+  "url": "https://borsapusula.com",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "https://borsapusula.com/static/icon-512.png",
+    "width": 512,
+    "height": 512
+  },
+  "description": "BorsaPusula, Türk yatırımcılar için algoritmik teknik analiz sinyalleri sunan ücretsiz BIST sinyal platformudur. Supertrend, ADX ve EMA12/99 göstergelerine dayalı şeffaf, backtest doğrulanmış sinyaller.",
+  "foundingDate": "2025",
+  "areaServed": {
+    "@type": "Country",
+    "name": "Türkiye"
+  },
+  "knowsAbout": ["BIST", "Borsa İstanbul", "Teknik Analiz", "Algoritmik Trading", "Hisse Senedi Sinyalleri", "Supertrend", "ADX", "EMA"],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "Customer Support",
+    "email": "iletisim@borsapusula.com",
+    "availableLanguage": ["Turkish", "English"],
+    "url": "https://borsapusula.com/iletisim"
+  },
+  "sameAs": [
+    "https://twitter.com/borsapusula",
+    "https://x.com/borsapusula"
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://borsapusula.com/#website",
+  "url": "https://borsapusula.com",
+  "name": "BorsaPusula",
+  "description": "BIST teknik analiz sinyalleri ve piyasa gözlem platformu",
+  "inLanguage": "tr-TR",
+  "publisher": { "@id": "https://borsapusula.com/#organization" },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://borsapusula.com/hisse/{search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FinancialService",
+  "@id": "https://borsapusula.com/#service",
+  "name": "BorsaPusula — BIST Sinyal Servisi",
+  "url": "https://borsapusula.com",
+  "description": "Algoritmik BIST hisse senedi teknik analiz sinyalleri. Günlük güncellenmiş Güçlü Trend / Zayıf Trend / Belirsiz sinyalleri, geriye dönük backtest doğrulamasıyla.",
+  "provider": { "@id": "https://borsapusula.com/#organization" },
+  "areaServed": "TR",
+  "serviceType": "Teknik Analiz Sinyal Servisi",
+  "category": "FinancialService",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY",
+    "availability": "https://schema.org/InStock",
+    "description": "Ücretsiz sinyal erişimi"
+  },
+  "termsOfService": "https://borsapusula.com/yasal",
+  "audience": {
+    "@type": "Audience",
+    "audienceType": "Bireysel Yatırımcı"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "WebApplication",
+  "@id": "https://borsapusula.com/#webapp",
   "name": "BIST100 Sinyal Paneli",
   "url": "https://borsapusula.com",
   "description": "BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı ücretsiz Güçlü/Zayıf/Belirsiz trend sinyalleri.",
   "applicationCategory": "FinanceApplication",
-  "operatingSystem": "Web",
+  "applicationSubCategory": "Stock Market Analysis",
+  "operatingSystem": "Web Browser",
+  "browserRequirements": "Requires JavaScript. Requires HTML5.",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
   "inLanguage": "tr",
-  "publisher": {
-    "@type": "Organization",
-    "name": "borsapusula.com",
-    "url": "https://borsapusula.com"
-  }
+  "isAccessibleForFree": true,
+  "publisher": { "@id": "https://borsapusula.com/#organization" },
+  "featureList": [
+    "Algoritmik teknik analiz sinyalleri",
+    "Backtest performans raporu",
+    "Premium hacim filtreli sinyaller",
+    "Sektör ısı haritası",
+    "Bilanço takvimi",
+    "Hisse karşılaştırma"
+  ]
 }
 </script>
 <!-- PWA -->
@@ -53,70 +144,84 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BorsaPusula">
-<meta name="theme-color" content="#0b111f">
+<meta name="theme-color" content="#0e0e12">
 <link rel="apple-touch-icon" href="/static/icon-192.png">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<!-- Inter font — fintech UX standard -->
+<!-- Stitch post-modern fonts — Space Grotesk (headings) + Manrope (body) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="/static/lightweight-charts.min.js"></script>
-<!-- Inter fallback with size-adjust — eliminates FOUT layout shift (CLS) -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
+<!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
 <style>
   @font-face {
     font-family: 'Inter-Fallback';
     src: local('Arial');
-    size-adjust: 107%;
-    ascent-override: 90%;
-    descent-override: 25%;
+    size-adjust: 105%;
+    ascent-override: 92%;
+    descent-override: 24%;
     line-gap-override: 0%;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* ── Design tokens ──────────────────────────────── */
+  /* ── Design tokens (Stitch post-modern redesign) ─── */
   :root {
-    --bp-bg:        #0b111f;
-    --bp-surface:   #111827;
-    --bp-surface2:  #1a2438;
-    --bp-surface3:  #222d42;
-    --bp-border:    #1e2d45;
-    --bp-border2:   #2d4166;
-    --bp-text:      #e2e8f0;
-    --bp-text2:     #94a3b8;
-    --bp-text3:     #7d8fa4; /* was #64748b (3.97:1 fail) → now 5.78:1 AA pass */
-    --bp-brand:     #3b82f6;
-    --bp-brand-d:   #1d4ed8;
-    --bp-al:        #3fb950;
-    --bp-al-bg:     #052e16;
-    --bp-al-bd:     #238636;
-    --bp-sat:       #f85149;
+    --bp-bg:        #0e0e12;
+    --bp-surface:   #141416;
+    --bp-surface2:  #1c1b1f;
+    --bp-surface3:  #201f21;
+    --bp-border:    #2a2a2c;
+    --bp-border2:   #46464d;
+    --bp-text:      #e5e1e4;
+    --bp-text2:     #c7c5cd;
+    --bp-text3:     #909097;
+    --bp-brand:     #b8c3ff;     /* periwinkle / electric violet */
+    --bp-brand-d:   #0043eb;
+    --bp-al:        #00e290;     /* NEON MINT */
+    --bp-al-bg:     rgba(0, 226, 144, 0.07);
+    --bp-al-bd:     rgba(0, 226, 144, 0.32);
+    --bp-sat:       #f85149;     /* corruption red preserved */
     --bp-sat-bg:    #3d0f0f;
     --bp-sat-bd:    #da3633;
-    --bp-bkl:       #8b949e;
+    --bp-bkl:       #909097;
     --bp-bkl-bg:    #1e293b;
     --bp-bkl-bd:    #30363d;
     --bp-gold:      #f59e0b;
-    --bp-radius:    10px;
-    --bp-radius-sm: 6px;
+    --bp-radius:    6px;
+    --bp-radius-sm: 3px;
     /* Compat aliases — eski stil kodlarıyla uyumluluk */
-    --accent:       #1f6feb;
-    --bg2:          #161b22;
+    --accent:       #b8c3ff;
+    --bg2:          #141416;
   }
 
 
   body {
     background: var(--bp-bg);
     color: var(--bp-text);
-    font-family: 'Inter', 'Inter-Fallback', system-ui, -apple-system, sans-serif;
+    font-family: 'Manrope', 'Inter-Fallback', system-ui, -apple-system, sans-serif;
     font-size: 14px;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  /* ── Header ──────────────────────────────────────── */
+  /* Section / panel headings — Space Grotesk (sharp, machined look) */
+  .section-title, .panel-title, .chart-label,
+  .ec-title, .hp-title, .mb-title, .gnm-title,
+  .bilanco-mini-title, h1, h2, h3 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+  .stat-card .stat-num,
+  .ec-price, .hp-ticker, .ticker, .gnm-ticker {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  /* ── Header (glass) ──────────────────────────────── */
   header {
-    background: var(--bp-surface);
-    border-bottom: 1px solid var(--bp-border);
+    background: rgba(14,14,18,0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(42,42,44,0.8);
     padding: 0 24px;
     height: 60px;
     display: flex;
@@ -130,8 +235,8 @@
 
   /* ── Makro Ticker Bandı ── */
   .macro-bar {
-    background: #0b111f;
-    border-bottom: 1px solid #1a2236;
+    background: #0b0b0e;
+    border-bottom: 1px solid #1a1a1c;
     height: 30px;
     overflow: hidden;
     position: relative;
@@ -142,8 +247,8 @@
     top: 0; bottom: 0; width: 40px;
     z-index: 2; pointer-events: none;
   }
-  .macro-bar::before { left: 0;  background: linear-gradient(to right, #0b111f, transparent); }
-  .macro-bar::after  { right: 0; background: linear-gradient(to left,  #0b111f, transparent); }
+  .macro-bar::before { left: 0;  background: linear-gradient(to right, #0b0b0e, transparent); }
+  .macro-bar::after  { right: 0; background: linear-gradient(to left,  #0b0b0e, transparent); }
   .macro-track {
     display: flex;
     align-items: center;
@@ -164,15 +269,206 @@
     padding: 0 18px;
     font-size: 11.5px;
     font-variant-numeric: tabular-nums;
-    border-right: 1px solid #1a2236;
+    border-right: 1px solid #1a1a1c;
     cursor: default;
-    color: #94a3b8;
+    color: var(--bp-text2);
   }
-  .macro-label { font-weight: 600; color: #cbd5e1; letter-spacing: 0.2px; }
-  .macro-price { color: #e2e8f0; }
-  .macro-chg-pos { color: #3fb950; }
+  .macro-label { font-weight: 600; color: var(--bp-text); letter-spacing: 0.2px; }
+  .macro-price { color: var(--bp-text); }
+  .macro-chg-pos { color: #00e290; }
   .macro-chg-neg { color: #f85149; }
-  .macro-chg-neu { color: #8b949e; }
+  .macro-chg-neu { color: #909097; }
+
+  /* ── Quick Topic Chips (Foreks-style popular topics) ── */
+  .quick-topics {
+    display: flex; gap: 8px; align-items: center;
+    padding: 9px 24px;
+    background: rgba(20,20,22,0.5);
+    border-bottom: 1px solid var(--bp-border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    position: relative; z-index: 5;
+  }
+  .quick-topics::-webkit-scrollbar { display: none; }
+  .qt-label {
+    flex-shrink: 0;
+    font-size: 10px; font-weight: 700;
+    color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-right: 2px;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+  .qt-chip {
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 11px;
+    background: rgba(184,195,255,0.04);
+    border: 1px solid var(--bp-border);
+    border-radius: 14px;
+    font-size: 12px; font-weight: 500;
+    color: var(--bp-text2);
+    text-decoration: none;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+    font-family: 'Manrope', system-ui, sans-serif;
+    line-height: 1.3;
+  }
+  .qt-chip:hover {
+    background: rgba(184,195,255,0.10);
+    border-color: var(--bp-border2);
+    color: var(--bp-text);
+  }
+  .qt-chip-icon { font-size: 12px; line-height: 1; }
+  .qt-chip-hot {
+    background: rgba(0,226,144,0.07);
+    border-color: rgba(0,226,144,0.28);
+    color: #6fdfb1;
+  }
+  .qt-chip-hot:hover {
+    background: rgba(0,226,144,0.14);
+    border-color: #00e290;
+    color: #00e290;
+  }
+  .qt-chip-hot .qt-chip-pulse {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #00e290;
+    box-shadow: 0 0 6px rgba(0,226,144,0.7);
+    animation: qtPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes qtPulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%     { opacity: 0.5; transform: scale(0.7); }
+  }
+  @media (max-width: 768px) {
+    .quick-topics { padding: 8px 12px; }
+    .qt-label { display: none; }
+  }
+
+  /* ── Header Search Button ── */
+  .header-search-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px;
+    background: transparent;
+    border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius);
+    color: var(--bp-text2); cursor: pointer;
+    transition: all .15s;
+    flex-shrink: 0;
+  }
+  .header-search-btn:hover {
+    background: var(--bp-surface2);
+    border-color: var(--bp-border2);
+    color: var(--bp-text);
+  }
+
+  /* ── Search Overlay ── */
+  .search-overlay {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    align-items: flex-start; justify-content: center;
+    padding-top: 80px;
+  }
+  .search-overlay.open { display: flex; }
+  .search-modal {
+    width: min(560px, calc(100vw - 32px));
+    background: #141416;
+    border: 1px solid var(--bp-border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    max-height: calc(100vh - 120px);
+    display: flex; flex-direction: column;
+  }
+  .search-input-wrap {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px;
+    border-bottom: 1px solid var(--bp-border);
+  }
+  .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
+  #searchInput {
+    flex: 1; background: none; border: none; outline: none;
+    font-size: 15px; color: var(--bp-text);
+    font-family: 'Manrope', system-ui, sans-serif;
+    min-width: 0;
+  }
+  #searchInput::placeholder { color: var(--bp-text3); }
+  .search-close {
+    background: var(--bp-surface2); border: 1px solid var(--bp-border);
+    color: var(--bp-text2); width: 28px; height: 28px;
+    border-radius: 6px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .search-close:hover { background: var(--bp-surface3); color: var(--bp-text); }
+  .search-results { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
+  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: 13px; }
+  .search-section-title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 10px; font-weight: 700;
+    color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 10px 12px 6px;
+  }
+  .search-result {
+    display: grid;
+    grid-template-columns: 64px 14px 1fr auto auto;
+    align-items: center; gap: 8px;
+    padding: 9px 12px;
+    text-decoration: none;
+    color: var(--bp-text);
+    border-radius: 8px;
+    transition: background .12s;
+    font-size: 13px;
+  }
+  .search-result:hover, .search-result.sr-selected { background: var(--bp-surface2); }
+  .sr-tk {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 700; color: var(--bp-text);
+    font-size: 13px;
+  }
+  .sr-sig.sr-al { color: #00e290; font-weight: 700; }
+  .sr-sig.sr-sat { color: #f85149; font-weight: 700; }
+  .sr-sig.sr-bekle { color: #909097; }
+  .sr-name {
+    color: var(--bp-text2); font-size: 12px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    min-width: 0;
+  }
+  .sr-price { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--bp-text2); }
+  .sr-chg {
+    font-variant-numeric: tabular-nums;
+    font-size: 12px; font-weight: 600;
+    min-width: 56px; text-align: right;
+  }
+  .sr-chg.pos { color: #00e290; }
+  .sr-chg.neg { color: #f85149; }
+  .sr-chg.neu { color: #909097; }
+  .search-topic {
+    display: block; padding: 9px 12px;
+    text-decoration: none; color: var(--bp-text);
+    border-radius: 8px; font-size: 13px;
+    transition: background .12s;
+  }
+  .search-topic:hover, .search-topic.sr-selected { background: var(--bp-surface2); }
+  .search-kbd {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 10px; padding: 2px 5px;
+    background: var(--bp-surface2); border: 1px solid var(--bp-border);
+    border-radius: 3px; color: var(--bp-text3);
+    margin-left: auto;
+  }
+  @media (max-width: 600px) {
+    .search-overlay { padding-top: 0; align-items: stretch; }
+    .search-modal {
+      width: 100vw; height: 100vh; max-height: 100vh;
+      border-radius: 0; border: none;
+    }
+    .search-result { grid-template-columns: 56px 14px 1fr auto; }
+    .sr-price { display: none; }
+  }
 
   /* Logo */
   .logo-link {
@@ -184,10 +480,11 @@
   }
   .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
   .logo-name {
-    font-size: 16px; font-weight: 700; color: #f1f5f9;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 16px; font-weight: 700; color: var(--bp-text);
     letter-spacing: -0.3px;
   }
-  .logo-name strong { color: var(--bp-brand); font-weight: 800; }
+  .logo-name strong { color: #00e290; font-weight: 700; }
   .logo-sub {
     font-size: 10px; font-weight: 500; color: var(--bp-text3);
     text-transform: uppercase; letter-spacing: 0.6px;
@@ -217,7 +514,7 @@
     transition: all .15s; white-space: nowrap; font-family: inherit;
   }
   .nav-dropdown-btn:hover { background: var(--bp-surface2); color: var(--bp-text); }
-  .nav-dropdown-btn.open { background: rgba(59,130,246,.1); color: var(--bp-brand); }
+  .nav-dropdown-btn.open { background: rgba(184,195,255,.1); color: var(--bp-brand); }
   .nav-dropdown-btn.open .dd-chev { transform: rotate(180deg); }
   .dd-chev { transition: transform .2s ease; flex-shrink: 0; opacity: .7; }
   .nav-dropdown-menu {
@@ -251,34 +548,107 @@
 
   .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
 
-  /* ── Mobile Bottom Nav ───────────────────────────── */
+  /* ── Mobile Bottom Nav (v2 — readable, 64px, top accent) ── */
   .mobile-bottom-nav {
     display: none;
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-    background: var(--bp-surface);
-    border-top: 1px solid var(--bp-border);
-    height: 64px;
+    background: rgba(14,14,18,0.96);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border-top: 1px solid rgba(42,42,44,0.7);
     padding-bottom: env(safe-area-inset-bottom);
   }
   .mbn-inner {
-    display: flex; height: 64px;
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    height: 64px; max-width: 600px; margin: 0 auto;
   }
   .mbn-item {
-    flex: 1; display: flex; flex-direction: column;
+    display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 3px; text-decoration: none;
-    color: var(--bp-text3); font-size: 10px; font-weight: 500;
-    letter-spacing: 0.2px; transition: color .15s;
+    gap: 4px; text-decoration: none;
+    color: var(--bp-text3); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.05px; transition: color .2s ease;
+    font-family: 'Manrope', system-ui, sans-serif;
+    position: relative; background: none; border: none; cursor: pointer;
+    padding: 0; min-height: 48px;
+    -webkit-tap-highlight-color: transparent;
   }
-  .mbn-item svg { width: 20px; height: 20px; }
-  .mbn-item:hover, .mbn-item.active { color: var(--bp-brand); }
-  .mbn-item.active svg { filter: drop-shadow(0 0 4px rgba(59,130,246,.4)); }
+  .mbn-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px;
+    transition: transform .2s ease;
+  }
+  .mbn-icon svg { width: 22px; height: 22px; stroke-width: 1.85; }
+  .mbn-label { line-height: 1; white-space: nowrap; }
+  .mbn-item:active .mbn-icon { transform: scale(0.85); }
+  .mbn-item.active { color: #00e290; }
+  .mbn-item.active::before {
+    content: ''; position: absolute; top: 0; left: 50%;
+    transform: translateX(-50%); width: 28px; height: 3px;
+    background: #00e290; border-radius: 0 0 3px 3px;
+    box-shadow: 0 0 10px rgba(0,226,144,.55);
+  }
+  .mbn-item.active .mbn-icon svg {
+    filter: drop-shadow(0 0 4px rgba(0,226,144,.45)); stroke-width: 2.1;
+  }
+  /* "Daha" bottom sheet */
+  .mbn-sheet-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 250;
+    opacity: 0; transition: opacity .25s ease;
+  }
+  .mbn-sheet-backdrop.open { display: block; opacity: 1; }
+  .mbn-sheet {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 260;
+    background: #141416; border-top: 1px solid #2a2a2c;
+    border-radius: 16px 16px 0 0;
+    transform: translateY(100%);
+    transition: transform .32s cubic-bezier(.32,.72,0,1);
+    padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
+    max-height: 75vh; overflow-y: auto;
+    box-shadow: 0 -10px 40px rgba(0,0,0,.4);
+  }
+  .mbn-sheet.open { transform: translateY(0); }
+  .mbn-sheet-handle {
+    width: 40px; height: 4px; background: #46464d;
+    border-radius: 2px; margin: 4px auto 14px;
+  }
+  .mbn-sheet-title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 12px; font-weight: 700;
+    color: #909097; text-transform: uppercase;
+    letter-spacing: 0.5px; margin: 0 0 12px 4px;
+  }
+  .mbn-sheet-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  }
+  @media (max-width: 360px) {
+    .mbn-sheet-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .mbn-sheet-item {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 7px; text-decoration: none; color: #e5e1e4;
+    background: #1c1b1f; border: 1px solid #2a2a2c; border-radius: 10px;
+    padding: 14px 6px; font-size: 11px; font-weight: 600;
+    font-family: 'Manrope', system-ui, sans-serif;
+    letter-spacing: 0.1px; min-height: 70px;
+    transition: background .15s, border-color .15s, transform .1s;
+    text-align: center;
+  }
+  .mbn-sheet-item svg { width: 22px; height: 22px; color: #b8c3ff; stroke-width: 1.85; }
+  .mbn-sheet-item:active {
+    transform: scale(0.96); background: #201f21; border-color: #46464d;
+  }
   @media (max-width: 768px) {
-    .mobile-bottom-nav { display: flex; }
+    .mobile-bottom-nav { display: block; }
     body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
     .alarm-fab { bottom: calc(80px + env(safe-area-inset-bottom)) !important; }
     .alarm-panel { bottom: calc(80px + env(safe-area-inset-bottom)) !important; }
     .sub-toast { bottom: calc(150px + env(safe-area-inset-bottom)); }
+    /* Touch feedback on interactive cards */
+    .gnm-card:active { transform: scale(0.98); }
+    .filter-btn:active, .sector-btn:active { transform: scale(0.95); }
+    .stat-card:active { transform: scale(0.97); }
   }
 
   /* Stats bar */
@@ -316,10 +686,10 @@
   .gnm-card::before {
     content: ''; position: absolute; top: 0; left: 0; bottom: 0;
     width: 3px; border-radius: 10px 0 0 10px;
-    background: var(--gnm-accent, #3fb950);
+    background: var(--gnm-accent, #00e290);
   }
   .gnm-card.gnm-sat::before { --gnm-accent: #f85149; }
-  .gnm-card.gnm-bekle::before { --gnm-accent: #8b949e; }
+  .gnm-card.gnm-bekle::before { --gnm-accent: #909097; }
 
   .gnm-card-top {
     display: flex; align-items: center; justify-content: space-between;
@@ -338,7 +708,7 @@
     /* neutral/bekle fallback — always visible regardless of signal type */
     background: rgba(139,148,158,.1); color: var(--bp-text3); border: 1px solid rgba(139,148,158,.2);
   }
-  .gnm-badge.al  { background: rgba(63,185,80,.12); color: #3fb950; border: 1px solid rgba(63,185,80,.3); }
+  .gnm-badge.al  { background: rgba(0,226,144,.08); color: #00e290; border: 1px solid rgba(0,226,144,.28); }
   .gnm-badge.sat { background: rgba(248,81,73,.12);  color: #f85149; border: 1px solid rgba(248,81,73,.3); }
   .gnm-text {
     font-size: 11.5px; color: var(--bp-text2); line-height: 1.55;
@@ -355,7 +725,7 @@
     font-size: 12px; font-weight: 700; color: var(--bp-text); font-family: monospace;
   }
   .gnm-chg { font-size: 11px; font-weight: 600; }
-  .gnm-chg.up { color: #3fb950; }
+  .gnm-chg.up { color: #00e290; }
   .gnm-chg.dn { color: #f85149; }
   .gnm-link {
     font-size: 11px; color: var(--accent); text-decoration: none; font-weight: 600;
@@ -382,8 +752,8 @@
   }
   .gnm-tab-btn:hover { color: var(--bp-text); background: rgba(139,148,158,.08); }
   .gnm-tab-btn.active {
-    color: var(--accent); background: rgba(31,111,235,.1);
-    border-color: rgba(31,111,235,.25);
+    color: var(--accent); background: rgba(184,195,255,.1);
+    border-color: rgba(184,195,255,.28);
   }
 
   /* ── Makro Haberler Liste ─── */
@@ -421,7 +791,7 @@
   }
   .gnm-sk {
     min-width: 230px; height: 140px; border-radius: 10px; flex: 0 0 auto;
-    background: linear-gradient(90deg, #161b22 25%, #1e2530 50%, #161b22 75%);
+    background: linear-gradient(90deg, #141416 25%, #1e1e22 50%, #141416 75%);
     background-size: 300% 100%;
     animation: gnm-shimmer 1.5s infinite;
   }
@@ -451,8 +821,8 @@
     font-size: 10px; font-weight: 600; margin-top: 3px;
     display: inline-block; padding: 1px 6px; border-radius: 10px;
   }
-  .bp-days.active   { background: rgba(63,185,80,.12); color: #3fb950; }
-  .bp-days.upcoming { background: rgba(31,111,235,.12); color: #58a6ff; }
+  .bp-days.active   { background: rgba(0,226,144,.10); color: #00e290; }
+  .bp-days.upcoming { background: rgba(184,195,255,.12); color: #b8c3ff; }
   .bilanco-mini-link {
     display: block; text-align: center; font-size: 11px; color: var(--accent);
     text-decoration: none; margin-top: 10px; padding-top: 8px;
@@ -460,19 +830,37 @@
   }
   .bilanco-mini-link:hover { text-decoration: underline; }
   .stat-card {
-    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    background: rgba(20,20,22,0.8); border: 1px solid var(--bp-border);
     border-radius: var(--bp-radius); padding: 14px 20px;
     flex: 1; min-width: 120px; text-align: center;
-    transition: border-color .15s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: border-color .2s, transform .2s, box-shadow .2s;
   }
-  .stat-card:hover { border-color: var(--bp-border2); }
-  .stat-card .stat-num { font-size: 26px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+  .stat-card:hover {
+    border-color: var(--bp-border2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .stat-card .stat-num {
+    font-family: 'Space Grotesk', monospace, sans-serif;
+    font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px;
+  }
   .stat-card .stat-label { font-size: 10px; color: var(--bp-text3); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 500; }
   .stat-al   .stat-num { color: var(--bp-al); }
   .stat-sat  .stat-num { color: var(--bp-sat); }
   .stat-bekle.stat-num { color: var(--bp-bkl); }
   .stat-bekle .stat-num { color: var(--bp-bkl); }
   .stat-total .stat-num { color: var(--bp-brand); }
+  .stat-al.stat-card    { border-top: 2px solid rgba(0, 226, 144, 0.5); }
+  .stat-sat.stat-card   { border-top: 2px solid rgba(248, 81, 73, 0.5); }
+  .stat-bekle.stat-card { border-top: 2px solid rgba(144,144,151, 0.4); }
+  .stat-premium.stat-card { border-top: 2px solid rgba(255,200,80,0.65); }
+  .stat-premium .stat-num { color: #ffc850; }
+  /* Premium row indicator: subtle gold border-left */
+  tr[data-ticker]:has(.ticker + span[title*="Premium"]) td:first-child { border-left: 2px solid rgba(255,200,80,0.55); }
+  .mc:has(.mc-ticker > span[title*="Premium"]) { border-left: 2px solid rgba(255,200,80,0.55); }
+  .stat-total.stat-card { border-top: 2px solid rgba(184, 195, 255, 0.5); }
 
   /* Market breadth bar */
   .market-breadth {
@@ -491,83 +879,20 @@
     background: var(--bp-surface2);
   }
   .mb-seg { height: 100%; transition: width .7s cubic-bezier(.4,0,.2,1); }
-  .mb-seg-al  { background: #3fb950; border-radius: 3px 0 0 3px; }
+  .mb-seg-al  { background: #00e290; border-radius: 3px 0 0 3px; }
   .mb-seg-sat { background: #f85149; border-radius: 0 3px 3px 0; }
-  .mb-seg-bkl { background: #2d4166; flex: 1; }
+  .mb-seg-bkl { background: #46464d; flex: 1; }
   .mb-legend { display: flex; gap: 16px; margin-top: 7px; }
   .mb-lg { font-size: 11px; display: flex; align-items: center; gap: 5px; }
   .mb-lg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .mb-lg-al  .mb-lg-dot { background: #3fb950; }
+  .mb-lg-al  .mb-lg-dot { background: #00e290; }
   .mb-lg-sat .mb-lg-dot { background: #f85149; }
-  .mb-lg-bkl .mb-lg-dot { background: #2d4166; }
-  .mb-lg-al  { color: #3fb950; }
+  .mb-lg-bkl .mb-lg-dot { background: #46464d; }
+  .mb-lg-al  { color: #00e290; }
   .mb-lg-sat { color: #f85149; }
   .mb-lg-bkl { color: var(--bp-text3); }
 
-  /* ── BIST30 Endeks Satırı ───────────────────────── */
-  .index-row-card {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius);
-    padding: 10px 16px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-  }
-  .irc-ticker {
-    font-weight: 700;
-    font-size: 14px;
-    color: #58a6ff;
-    letter-spacing: 0.5px;
-    min-width: 54px;
-  }
-  .irc-divider {
-    width: 1px;
-    height: 22px;
-    background: var(--bp-border);
-  }
-  .irc-price {
-    font-weight: 600;
-    font-size: 16px;
-    font-variant-numeric: tabular-nums;
-    color: #f0f6fc;
-  }
-  .irc-chg {
-    font-size: 13px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-  }
-  .irc-chg.pos { color: #3fb950; }
-  .irc-chg.neg { color: #f85149; }
-  .irc-chg.neu { color: #8b949e; }
-
-  .irc-meta {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--bp-bg);
-    border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius-sm);
-    padding: 3px 9px;
-  }
-  .irc-meta-label {
-    font-size: 10px;
-    color: var(--bp-text3);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-  }
-  .irc-meta-val {
-    font-size: 13px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    color: #e6edf3;
-  }
-  .irc-sl-box .irc-meta-val { color: #f85149; }
-
-  .irc-inds { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
-  .irc-score { display: flex; gap: 3px; align-items: center; }
+  /* .index-row-card kaldırıldı */
 
   /* Filters */
   .filters {
@@ -580,10 +905,11 @@
     font-size: 12px; font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
   .filter-btn:hover { border-color: var(--bp-border2); color: var(--bp-text); }
-  .filter-btn.active-all  { background: #1f6feb; border-color: #1f6feb; color: #fff; }
-  .filter-btn.active-al   { background: #1a4731; border-color: #3fb950; color: #3fb950; }
+  .filter-btn.active-all  { background: rgba(184,195,255,.18); border-color: #b8c3ff; color: #b8c3ff; }
+  .filter-btn.active-al   { background: rgba(0,226,144,.10); border-color: #00e290; color: #00e290; }
   .filter-btn.active-sat  { background: #3d0f0f; border-color: #f85149; color: #f85149; }
   .filter-btn.active-bekle{ background: var(--bp-bkl-bg); border-color: var(--bp-bkl-bd); color: var(--bp-bkl); }
+  .filter-btn.active-premium{ background: rgba(255,200,80,.12); border-color: #ffc850; color: #ffc850; }
   .filter-today { border-color: #e3b341 !important; color: #e3b341 !important; }
   .active-today { background: #e3b341 !important; color: #0d1117 !important; border-color: #e3b341 !important; }
   .filter-watch { border-color: rgba(56,139,253,.5) !important; color: #58a6ff !important; }
@@ -601,7 +927,89 @@
     font-size: 11px; font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
   .sector-btn:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
-  .sector-btn.active-sector { background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.4); color: var(--bp-brand); }
+  .sector-btn.active-sector { background: rgba(184,195,255,.14); border-color: rgba(184,195,255,.45); color: var(--bp-brand); }
+
+  /* ── Active Filters Bar (afb) ── */
+  .afb {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,200,80,0.06);
+    border: 1px solid rgba(255,200,80,0.20);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    animation: afbSlideIn 0.22s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes afbSlideIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .afb-label {
+    font-size: 11px; color: #909097;
+    text-transform: uppercase; letter-spacing: 0.7px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .afb-chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    flex: 1; min-width: 0;
+  }
+  .afb-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(184,195,255,0.10);
+    border: 1px solid rgba(184,195,255,0.30);
+    color: var(--bp-text);
+    border-radius: 14px;
+    padding: 3px 4px 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    transition: background .15s, border-color .15s;
+  }
+  .afb-chip:hover { background: rgba(184,195,255,0.16); }
+  .afb-chip-x {
+    width: 18px; height: 18px;
+    background: transparent;
+    border: none;
+    color: #909097;
+    cursor: pointer;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background .12s, color .12s;
+    padding: 0;
+    margin-left: 2px;
+  }
+  .afb-chip-x:hover {
+    background: rgba(248,81,73,0.20);
+    color: #f85149;
+  }
+  .afb-chip-x svg { width: 10px; height: 10px; }
+  .afb-clear-all {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 5px;
+    background: transparent;
+    border: 1px solid rgba(248,81,73,0.40);
+    color: #f85149;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    transition: background .15s, border-color .15s;
+    flex-shrink: 0;
+  }
+  .afb-clear-all:hover {
+    background: rgba(248,81,73,0.10);
+    border-color: #f85149;
+  }
+  @media (max-width: 720px) {
+    .afb { padding: 7px 10px; gap: 8px; }
+    .afb-label { font-size: 10px; }
+    .afb-chip { font-size: 11px; padding: 2px 3px 2px 8px; }
+    .afb-clear-all { font-size: 10px; padding: 4px 9px; }
+  }
 
   .search-wrap { position: relative; margin-left: auto; }
   .search-input {
@@ -640,7 +1048,7 @@
     display: flex; align-items: center; gap: 5px;
   }
   .adv-toggle:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
-  .adv-toggle.active { background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.4); color: var(--bp-brand); }
+  .adv-toggle.active { background: rgba(184,195,255,.14); border-color: rgba(184,195,255,.45); color: var(--bp-brand); }
   .adv-panel {
     background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius: 10px;
     padding: 14px 16px; margin-bottom: 14px; display: none; flex-wrap: wrap; gap: 14px;
@@ -655,8 +1063,8 @@
     font-size: 11px; font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
   .adv-chip:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
-  .adv-chip.sel { background: rgba(59,130,246,.15); border-color: rgba(59,130,246,.5); color: var(--bp-brand); }
-  .adv-chip.sel-bull { background: rgba(63,185,80,.12); border-color: rgba(63,185,80,.4); color: var(--bp-al); }
+  .adv-chip.sel { background: rgba(184,195,255,.15); border-color: rgba(184,195,255,.55); color: var(--bp-brand); }
+  .adv-chip.sel-bull { background: rgba(0,226,144,.10); border-color: rgba(0,226,144,.42); color: var(--bp-al); }
   .adv-chip.sel-bear { background: rgba(248,81,73,.12); border-color: rgba(248,81,73,.4); color: var(--bp-sat); }
   .adv-active-badge {
     display: inline-flex; align-items: center; justify-content: center;
@@ -681,17 +1089,20 @@
   thead th.sorted-asc::after  { content: " ↑"; }
   thead th.sorted-desc::after { content: " ↓"; }
 
-  tbody tr { border-bottom: 1px solid var(--bp-border); transition: background 0.1s; }
+  tbody tr { border-bottom: 1px solid var(--bp-border); transition: background 0.15s, box-shadow 0.15s; }
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--bp-surface2); }
+  tbody tr:hover {
+    background: var(--bp-surface2);
+    box-shadow: inset 3px 0 0 rgba(0, 226, 144, 0.35);
+  }
   td { padding: 10px 16px; white-space: nowrap; }
 
-  .ticker { font-weight: 700; font-size: 13px; color: #f1f5f9; letter-spacing: 0.1px; }
+  .ticker { font-weight: 700; font-size: 13px; color: var(--bp-text); letter-spacing: 0.1px; }
   .price  { font-weight: 600; color: var(--bp-text); font-variant-numeric: tabular-nums; }
   .change-pct { font-weight: 500; font-variant-numeric: tabular-nums; font-size: 13px; }
-  .change-pct.pos { color: #3fb950; }
+  .change-pct.pos { color: #00e290; }
   .change-pct.neg { color: #f85149; }
-  .change-pct.neu { color: #8b949e; }
+  .change-pct.neu { color: #909097; }
 
   .signal-badge {
     display: inline-flex; align-items: center; gap: 5px;
@@ -699,8 +1110,14 @@
     font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
     white-space: nowrap;
   }
-  .signal-AL   { background: var(--bp-al-bg);  color: var(--bp-al);  border: 1px solid var(--bp-al-bd); }
-  .signal-SAT  { background: var(--bp-sat-bg); color: var(--bp-sat); border: 1px solid var(--bp-sat-bd); }
+  .signal-AL   {
+    background: var(--bp-al-bg);  color: var(--bp-al);  border: 1px solid var(--bp-al-bd);
+    box-shadow: 0 0 8px rgba(0, 226, 144, 0.12), inset 0 0 8px rgba(0, 226, 144, 0.04);
+  }
+  .signal-SAT  {
+    background: var(--bp-sat-bg); color: var(--bp-sat); border: 1px solid var(--bp-sat-bd);
+    box-shadow: 0 0 6px rgba(248, 81, 73, 0.18);
+  }
   .signal-BEKLE{ background: var(--bp-bkl-bg); color: var(--bp-bkl); border: 1px solid var(--bp-bkl-bd); }
 
   /* ── Signal Tooltip ─────────────────────────────────── */
@@ -716,7 +1133,7 @@
   .sig-tip-sep  { border: none; border-top: 1px solid #21262d; margin: 7px 0; }
   .sig-tip-row  { display: flex; align-items: center; gap: 7px; padding: 1px 0; }
   .sig-tip-ck   { font-size: 11px; font-weight: 700; min-width: 13px; }
-  .sig-tip-ck.ok { color: #3fb950; } .sig-tip-ck.no { color: #30363d; }
+  .sig-tip-ck.ok { color: #00e290; } .sig-tip-ck.no { color: #30363d; }
   .sig-tip-lbl  { color: #c9d1d9; font-size: 12px; }
   .sig-tip-footer { font-size: 11px; color: #8b949e; margin-top: 7px; display: flex; flex-direction: column; gap: 2px; }
 
@@ -805,7 +1222,7 @@
   .idx-sk-change { width: 56px; }
 
   /* ── Tick animasyonu — fiyat + değişim flash ─── */
-  @keyframes tickUp   { 0%{background:rgba(63,185,80,.18);color:#3fb950} 100%{background:transparent} }
+  @keyframes tickUp   { 0%{background:rgba(0,226,144,.18);color:#00e290} 100%{background:transparent} }
   @keyframes tickDown { 0%{background:rgba(248,81,73,.18);color:#f85149} 100%{background:transparent} }
   .tick-up-cell   { animation: tickUp   0.7s ease-out; border-radius: 3px; }
   .tick-down-cell { animation: tickDown 0.7s ease-out; border-radius: 3px; }
@@ -838,19 +1255,19 @@
     transition: border-color .15s, box-shadow .15s;
     user-select: none;
   }
-  .endeks-card:hover { border-color: #30363d; box-shadow: 0 0 0 3px rgba(31,111,235,.06); }
-  .endeks-card.active { border-color: #1f6feb; box-shadow: 0 0 0 3px rgba(31,111,235,.10); }
+  .endeks-card:hover { border-color: var(--bp-border2); box-shadow: 0 0 0 3px rgba(184,195,255,.06); transform: translate(-1px,-1px); }
+  .endeks-card.active { border-color: #b8c3ff; box-shadow: 0 0 0 3px rgba(184,195,255,.10); }
 
   .ec-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .ec-title { font-size: 11px; font-weight: 700; color: #8b949e; text-transform: uppercase; letter-spacing: .5px; }
+  .ec-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; }
   .ec-spark { width: 80px; height: 32px; flex-shrink: 0; overflow: visible; }
 
   .ec-price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
-  .ec-price { font-size: 20px; font-weight: 700; color: #f0f6fc; font-variant-numeric: tabular-nums; }
+  .ec-price { font-family: 'Space Grotesk', monospace, sans-serif; font-size: 20px; font-weight: 700; color: var(--bp-text); font-variant-numeric: tabular-nums; }
   .ec-chg   { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .ec-chg.pos { color: #3fb950; }
+  .ec-chg.pos { color: #00e290; }
   .ec-chg.neg { color: #f85149; }
-  .ec-chg.neu { color: #8b949e; }
+  .ec-chg.neu { color: #909097; }
 
   .ec-signal-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .ec-inds { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
@@ -881,7 +1298,7 @@
   }
   .chart-acc-header:hover { background: rgba(255,255,255,.02); }
   .chart-acc-chev {
-    font-size: 11px; color: #8b949e;
+    font-size: 11px; color: var(--bp-text3);
     transition: transform .2s ease; display: inline-block;
   }
   .chart-acc-chev.open { transform: rotate(180deg); }
@@ -889,12 +1306,12 @@
   .chart-tabs { display: flex; gap: 4px; }
   .chart-tab {
     background: none; border: 1px solid transparent;
-    color: #8b949e; font-size: 12px; font-weight: 600;
+    color: var(--bp-text3); font-size: 12px; font-weight: 600;
     padding: 4px 14px; border-radius: 6px; cursor: pointer;
     transition: all .15s; font-family: inherit;
   }
-  .chart-tab:hover { background: rgba(255,255,255,.04); color: #c9d1d9; }
-  .chart-tab.active { background: rgba(31,111,235,.12); color: #58a6ff; border-color: rgba(31,111,235,.3); }
+  .chart-tab:hover { background: rgba(255,255,255,.04); color: var(--bp-text); }
+  .chart-tab.active { background: rgba(184,195,255,.14); color: #b8c3ff; border-color: rgba(184,195,255,.35); }
 
   .chart-acc-body {
     display: none;
@@ -934,6 +1351,20 @@
     overflow: hidden;
     position: relative;
   }
+  .bp-highlights {
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-border);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 6px 4px;
+    min-height: 200px;
+    display: flex;
+  }
+  .bp-highlights .hp-twin { flex: 1; min-height: 188px; overflow: visible; }
+  @media (max-width: 720px) {
+    .bp-highlights { padding: 4px 2px; }
+    .bp-highlights .hp-twin { flex-direction: row; min-height: 220px; }
+  }
   .hp-twin {
     display: flex; flex: 1; min-height: 0; overflow: hidden;
   }
@@ -962,40 +1393,41 @@
   .hp-row:hover { background: rgba(255,255,255,.04); }
 
   .hp-ticker {
-    font-size: 12px; font-weight: 700; color: #e2e8f0;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 12px; font-weight: 700; color: var(--bp-text);
     width: 52px; flex-shrink: 0;
   }
   /* renk çizgisi — sinyal rengi solda dar şerit */
   .hp-bar {
     width: 3px; height: 22px; border-radius: 2px; flex-shrink: 0;
   }
-  .hp-bar-al  { background: #3fb950; }
+  .hp-bar-al  { background: #00e290; }
   .hp-bar-sat { background: #f85149; }
   .hp-bar-neu { background: #484f58; }
 
   .hp-name {
-    font-size: 10px; color: #64748b; flex: 1; min-width: 0;
+    font-size: 10px; color: var(--bp-text3); flex: 1; min-width: 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .hp-chg {
     font-size: 12px; font-weight: 700; flex-shrink: 0;
     font-variant-numeric: tabular-nums;
   }
-  .hp-chg.pos { color: #3fb950; }
+  .hp-chg.pos { color: #00e290; }
   .hp-chg.neg { color: #f85149; }
-  .hp-chg.neu { color: #8b949e; }
-  .hp-empty { font-size: 11px; color: #8b949e; padding: 4px 2px; }
+  .hp-chg.neu { color: #909097; }
+  .hp-empty { font-size: 11px; color: var(--bp-text3); padding: 4px 2px; }
 
   /* Flash */
-  @keyframes flashUp   { 0%{background:#1a3a2a} 100%{background:transparent} }
+  @keyframes flashUp   { 0%{background:rgba(0,226,144,.18)} 100%{background:transparent} }
   @keyframes flashDown { 0%{background:#3a1a1a} 100%{background:transparent} }
-  .flash-up   { animation: flashUp   0.8s ease-out; color: #3fb950 !important; }
+  .flash-up   { animation: flashUp   0.8s ease-out; color: #00e290 !important; }
   .flash-down { animation: flashDown 0.8s ease-out; color: #f85149 !important; }
 
   .sig-date   { font-size: 11px; color: #8b949e; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .new-today  { color: #e3b341; font-weight: 700; font-size: 12px; }
   .row-new-signal { background: rgba(245,158,11,0.04); }
-  #tableBody tr:hover { background: rgba(59,130,246,0.05); }
+  #tableBody tr:hover { background: rgba(184,195,255,0.05); }
 
   /* ── Alarm / Watchlist ─── */
   .alarm-btn { background:none; border:none; cursor:pointer; font-size:14px; padding:2px 4px; opacity:.4; transition:opacity .15s; }
@@ -1055,9 +1487,9 @@
   .sub-toast {
     position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px);
     z-index:997; width:min(420px, calc(100vw - 32px));
-    background:linear-gradient(135deg,#111827,#0f1e34);
-    border:1px solid rgba(59,130,246,.35); border-radius:14px;
-    padding:16px 18px; box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(59,130,246,.1);
+    background:linear-gradient(135deg,#141416,#1c1b1f);
+    border:1px solid rgba(184,195,255,.35); border-radius:14px;
+    padding:16px 18px; box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(184,195,255,.1);
     opacity:0; pointer-events:none;
     transition:opacity .35s ease,transform .35s ease;
   }
@@ -1066,35 +1498,45 @@
   }
   .sub-toast-close {
     position:absolute; top:10px; right:12px; background:none; border:none;
-    color:#64748b; font-size:18px; cursor:pointer; line-height:1; padding:2px 4px;
+    color:var(--bp-text3); font-size:18px; cursor:pointer; line-height:1; padding:2px 4px;
     transition:color .15s;
   }
-  .sub-toast-close:hover { color:#94a3b8; }
-  .sub-toast-title { font-size:13px; font-weight:700; color:#e2e8f0; margin-bottom:3px; }
-  .sub-toast-sub   { font-size:11px; color:#64748b; margin-bottom:12px; line-height:1.5; }
-  .sub-toast-row   { display:flex; gap:8px; }
+  .sub-toast-close:hover { color:var(--bp-text2); }
+  .sub-toast-title { font-size:13px; font-weight:700; color:var(--bp-text); margin-bottom:3px; }
+  .sub-toast-sub   { font-size:11px; color:var(--bp-text3); margin-bottom:12px; line-height:1.5; }
+  .sub-toast-row   { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
   .sub-toast-input {
-    flex:1; background:#1a2438; border:1px solid #1e2d45; color:#e2e8f0;
-    padding:7px 12px; border-radius:7px; font-size:13px; outline:none; min-width:0;
-    font-family:inherit; transition:border-color .15s;
+    width:100%; background:var(--bp-surface2); border:1px solid var(--bp-border); color:var(--bp-text);
+    padding:9px 12px; border-radius:7px; font-size:13px; outline:none;
+    font-family:inherit; transition:border-color .15s; box-sizing:border-box;
   }
-  .sub-toast-input:focus { border-color:#3b82f6; }
+  .sub-toast-input:focus { border-color:#b8c3ff; }
   .sub-toast-btn {
-    background:#1f6feb; color:#fff; border:none; padding:7px 16px; border-radius:7px;
-    font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; white-space:nowrap;
-    transition:background .15s;
+    background:#b8c3ff; color:#0e0e12; border:none; padding:9px 16px; border-radius:7px;
+    font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap;
+    transition:background .15s; margin-top:2px;
   }
-  .sub-toast-btn:hover { background:#388bfd; }
+  .sub-toast-btn:hover { background:#cdd5ff; }
+  .sub-toast-btn:hover { background:#cdd5ff; }
   .sub-toast-benefits { display:flex; gap:14px; margin-bottom:10px; flex-wrap:wrap; }
-  .sub-toast-benefit  { display:flex; align-items:center; gap:5px; font-size:11px; color:#94a3b8; }
+  .sub-toast-benefit  { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--bp-text2); }
 
   .alarm-fab {
-    position:fixed; bottom:24px; right:24px; z-index:998;
-    background:#1f6feb; border:none; border-radius:50%; width:48px; height:48px;
-    font-size:20px; cursor:pointer; box-shadow:0 4px 16px rgba(31,111,235,.4);
-    display:flex; align-items:center; justify-content:center; transition:all .2s;
+    position:fixed; bottom:24px; right:20px; z-index:998;
+    background: rgba(0,226,144,0.14);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0,226,144,0.45);
+    border-radius: 14px;
+    width:52px; height:52px;
+    font-size:22px; cursor:pointer;
+    box-shadow: 0 0 18px rgba(0,226,144,0.22), 0 4px 20px rgba(0,0,0,0.5);
+    display:flex; align-items:center; justify-content:center;
+    transition: all .2s; color:#00e290;
+    -webkit-tap-highlight-color: transparent;
   }
-  .alarm-fab:hover { background:#388bfd; transform:scale(1.05); }
+  .alarm-fab:hover { background: rgba(0,226,144,0.22); transform:scale(1.05); box-shadow: 0 0 24px rgba(0,226,144,0.35), 0 6px 24px rgba(0,0,0,0.5); }
+  .alarm-fab:active { transform: scale(0.94); }
   .alarm-fab .fab-badge {
     position:absolute; top:-4px; right:-4px; background:#f85149;
     color:#fff; font-size:10px; font-weight:700; border-radius:50%;
@@ -1105,17 +1547,78 @@
 
   /* ── Mobile card list ── */
   .mobile-card-list { display:none; flex-direction:column; gap:8px; }
-  .mc { background: var(--bp-surface); border:1px solid var(--bp-border); border-radius:10px; padding:12px 14px; cursor:pointer; transition:border-color .15s; text-decoration:none; display:block; }
-  .mc:active { background: var(--bp-surface2); }
-  .mc:hover { border-color: var(--bp-border2); }
-  .mc.mc-new { border-left:3px solid #e3b341; }
+
+  /* Glass card — Stitch mobile */
+  .mc {
+    background: rgba(20,20,22,0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(42,42,44,0.75);
+    border-radius: 8px; padding:13px 14px;
+    cursor:pointer;
+    transition: border-color .18s, transform .12s, box-shadow .18s;
+    text-decoration:none; display:block;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mc:hover { border-color: rgba(70,70,77,0.9); }
+  .mc:active { transform: scale(0.98); box-shadow: 0 0 0 1px rgba(0,226,144,0.2); }
+  /* AL signal — neon left border */
+  .mc.mc-al { border-left: 2px solid rgba(0,226,144,0.55); }
+  .mc.mc-al:hover { border-color: rgba(0,226,144,0.4); border-left-color: rgba(0,226,144,0.8); }
+  /* SAT signal — red left border */
+  .mc.mc-sat { border-left: 2px solid rgba(248,81,73,0.45); }
+  .mc.mc-new { border-left: 2px solid #e3b341 !important; }
+
   .mc-row1 { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+  .mc-bell {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--bp-border);
+    border-radius: 6px;
+    width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--bp-text3); cursor: pointer;
+    flex-shrink: 0; transition: all .15s ease;
+    padding: 0;
+  }
+  .mc-bell:hover { background: rgba(255,255,255,0.08); border-color: var(--bp-border2); color: var(--bp-text); }
+  .mc-bell.watching {
+    background: rgba(255,200,80,0.16);
+    border-color: rgba(255,200,80,0.55);
+    color: #ffc850;
+  }
+  .mc-bell svg { width: 14px; height: 14px; }
+  .mc-rgt-wrap { display: flex; align-items: flex-start; gap: 8px; }
   .mc-lft { min-width:0; }
   .mc-rgt { text-align:right; flex-shrink:0; }
-  .mc-ticker { font-size:16px; font-weight:800; color: var(--bp-text); line-height:1.2; }
-  .mc-sector { font-size:10px; color: var(--bp-text3); margin-top:2px; }
-  .mc-price  { font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; color: var(--bp-text); line-height:1.3; }
-  .mc-row2   { display:flex; align-items:center; justify-content:space-between; margin-top:9px; padding-top:8px; border-top:1px solid var(--bp-border); }
+  .mc-ticker {
+    font-size:17px; font-weight:800; color: var(--bp-text); line-height:1.2;
+    font-family: 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.2px;
+  }
+  .mc-sector { font-size:10px; color: var(--bp-text3); margin-top:2px; text-transform: uppercase; letter-spacing: 0.4px; font-family: 'Space Grotesk', sans-serif; }
+  .mc-price  { font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; color: var(--bp-text); line-height:1.3; font-family: 'Space Grotesk', monospace, sans-serif; }
+
+  /* Data strip — GİRİŞ / SL / DÖNEM */
+  .mc-strip {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 5px; margin-top: 10px;
+  }
+  .mc-cell {
+    background: rgba(32,31,33,0.6);
+    border: 1px solid rgba(42,42,44,0.6);
+    border-radius: 4px; padding: 5px 7px;
+  }
+  .mc-cell-lbl {
+    font-size: 9px; font-weight: 600; color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    font-family: 'Space Grotesk', sans-serif;
+    margin-bottom: 2px;
+  }
+  .mc-cell-val {
+    font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
+    font-family: 'Space Grotesk', monospace, sans-serif;
+  }
+
+  .mc-row2   { display:flex; align-items:center; justify-content:space-between; margin-top:9px; padding-top:8px; border-top:1px solid rgba(42,42,44,0.6); }
   .mc-entry  { font-size:11px; color: var(--bp-text3); }
 
   /* Refresh label */
@@ -1169,10 +1672,27 @@
     .gundem-cards-wrap { width: 100%; }
     /* Backtest badge: her satır tam genişlik */
     #btTrustBadge { gap: 4px 12px; }
-    /* Index row card — mobil */
-    .index-row-card { gap: 8px; padding: 8px 12px; }
+
   }
+
+/* Item 11 fix: mobile hareketliler centering */
+@media (max-width: 720px) {
+  .hp-twin {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .hp-section {
+    width: 100%;
+    margin: 0;
+  }
+  .hp-section-r {
+    border-left: none !important;
+    border-top: 1px solid var(--bp-border);
+    padding-top: 10px;
+  }
+}
 </style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 </head>
 <body>
 <!-- SEO: visually-hidden h1 — required by search engines; logo already communicates brand visually -->
@@ -1180,85 +1700,85 @@
 
 <header>
   <!-- Logo -->
-  <a href="/" class="logo-link">
-    <svg class="logo-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="36" height="36" rx="9" fill="#0b111f"/>
-      <circle cx="18" cy="18" r="13" stroke="#1e2d45" stroke-width="1"/>
-      <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#3b82f6"/>
-      <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#1e3a62"/>
-      <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#1e3a62"/>
-      <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#1e3a62"/>
-      <circle cx="18" cy="18" r="2.8" fill="#1d4ed8"/>
-      <circle cx="18" cy="18" r="1.4" fill="#bfdbfe"/>
+  <a href="/" class="logo-link" aria-label="BorsaPusula — Piyasanın Yönü">
+    <svg class="bp-logo" width="200" height="52" viewBox="0 0 460 120" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bpNeedle" x1="60" y1="22" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#b8c3ff"/>
+          <stop offset="1" stop-color="#00e2a1"/>
+        </linearGradient>
+      </defs>
+      <rect x="14" y="20" width="80" height="80" rx="18" fill="#0f1218" stroke="#28303f"/>
+      <g stroke="#222a37" stroke-width="1">
+        <line x1="22" y1="46" x2="86" y2="46"/>
+        <line x1="22" y1="74" x2="86" y2="74"/>
+        <line x1="40" y1="28" x2="40" y2="92"/>
+        <line x1="68" y1="28" x2="68" y2="92"/>
+      </g>
+      <path d="M54 33 L62 60 L54 55 L46 60 Z" fill="url(#bpNeedle)"/>
+      <path d="M54 87 L60 61 L54 64 L48 61 Z" fill="#2c3445"/>
+      <circle cx="54" cy="60" r="3.5" fill="#eef3f8"/>
+      <circle cx="54" cy="60" r="1.4" fill="#00e2a1"/>
+      <text x="116" y="66" fill="#eef3f8" font-family="'Sora','Manrope',Arial,sans-serif" font-size="34" font-weight="800" letter-spacing="-0.5">Borsa<tspan fill="#00e2a1">Pusula</tspan></text>
+      <line x1="118" y1="78" x2="430" y2="78" stroke="#1e2532" stroke-width="1"/>
+      <text x="118" y="94" fill="#8f98a8" font-family="'Manrope',Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2.4">PİYASANIN YÖNÜ</text>
     </svg>
-    <div class="logo-text">
-      <span class="logo-name">Borsa<strong>Pusula</strong></span>
-      <span class="logo-sub">BIST100 Sinyal Paneli</span>
-    </div>
   </a>
 
   <!-- Desktop Nav -->
-  <nav class="header-nav">
-    <!-- Tarama — standalone primary action -->
-    <a href="/tarama">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      Tarama
-    </a>
-
-    <!-- Piyasalar dropdown -->
-    <div class="nav-dropdown">
-      <button class="nav-dropdown-btn" onclick="toggleNavDd('dd-piyasalar',this)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        Piyasalar
-        <svg class="dd-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-      <div class="nav-dropdown-menu" id="dd-piyasalar">
-        <a href="/ozet"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Özet</a>
-        <a href="/kripto"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>Kripto</a>
-        <a href="/emtialar"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8M11 13l2-2"/></svg>Emtialar</a>
-        <a href="/abd"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>ABD</a>
-        <div class="dd-sep"></div>
-        <a href="/sektor-harita"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>Sektörler</a>
-        <a href="/gundem"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Gündem</a>
-      </div>
-    </div>
-
-    <!-- Araçlar dropdown -->
-    <div class="nav-dropdown">
-      <button class="nav-dropdown-btn" onclick="toggleNavDd('dd-araclar',this)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-        Araçlar
-        <svg class="dd-chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-      <div class="nav-dropdown-menu" id="dd-araclar">
-        <a href="/karsilastir"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
-        <a href="/portfolio"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
-        <a href="/bilanco-takvimi"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Takvim</a>
-        <a href="/sinyal-performans"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Performans</a>
-      </div>
-    </div>
-
-    <!-- Blog — standalone -->
-    <a href="/blog">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      Blog
-    </a>
-  </nav>
-
-  <!-- Right actions -->
-  <div class="header-right">
-    <span id="liveTs" style="margin-right:4px">○</span>
-    <span id="updated" style="display:none">—</span>
-    <button class="btn-refresh" onclick="manualRefresh()" id="refreshBtn">
-      <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-        <path d="M21 3v5h-5"/>
-        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-        <path d="M8 16H3v5"/>
-      </svg>
-      <span class="refresh-label">Yenile</span>
+  <nav class="bp-main-nav" aria-label="Ana navigasyon">
+  <a href="/" data-route="/" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Sinyaller</span>
+  </a>
+  <a href="/tarama" data-route="/tarama" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>Tarama</span>
+  </a>
+  <a href="/bilanco-takvimi" data-route="/bilanco-takvimi" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Bilanço</span>
+  </a>
+  <a href="/sektor-harita" data-route="/sektor-harita" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
+    <span>Sektörler</span>
+  </a>
+  <a href="/sinyal-performans" data-route="/sinyal-performans" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span>Performans</span>
+  </a>
+  <a href="/blog" data-route="/blog" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    <span>Blog</span>
+  </a>
+  <div class="bp-nav-more-wrap">
+    <button type="button" class="bp-nav-item bp-nav-more-btn" aria-haspopup="true" aria-expanded="false">
+      <span>Daha</span>
+      <svg class="bp-nav-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
+    <div class="bp-nav-more-menu" role="menu">
+      <a href="/portfolio" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
+      <a href="/ozet" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
+      <a href="/karsilastir" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
+      <a href="/hisseler" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
+      <a href="/gucu-yuksek" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Güçlü Trend</a>
+      <div class="bp-nav-sep"></div>
+      <a href="/kripto" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>Kripto</a>
+      <a href="/emtialar" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8"/></svg>Emtialar</a>
+      <a href="/abd" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>ABD</a>
+      <a href="/gundem" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
+      <div class="bp-nav-sep"></div>
+      <a href="/metodoloji" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Metodoloji</a>
+      <a href="/hakkinda" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Hakkında</a>
+      <a href="/iletisim" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>İletişim</a>
+    </div>
   </div>
+</nav>
+
+  <!-- Right actions injected by bp-search.js (header-right uniform) -->
+  <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </button>
 </header>
 
 <!-- Makro Ticker Bandı -->
@@ -1268,31 +1788,116 @@
   </div>
 </div>
 
+<!-- Quick Topic Chips -->
+<nav class="quick-topics" aria-label="Popüler içerikler">
+  <span class="qt-label">Popüler:</span>
+  <a href="/gucu-yuksek" class="qt-chip qt-chip-hot">
+    <span class="qt-chip-pulse"></span>AL Sinyalleri
+  </a>
+  <a href="/tarama" class="qt-chip"><span class="qt-chip-icon">🔍</span>Hisse Tarama</a>
+  <a href="/hisseler" class="qt-chip"><span class="qt-chip-icon">📋</span>Tüm Hisseler</a>
+  <a href="/bilanco-takvimi" class="qt-chip"><span class="qt-chip-icon">📅</span>Bilanço Takvimi</a>
+  <a href="/sektor-harita" class="qt-chip"><span class="qt-chip-icon">🗺️</span>Sektörler</a>
+  <a href="/sinyal-performans" class="qt-chip"><span class="qt-chip-icon">📈</span>Sinyal Performansı</a>
+  <a href="/ozet" class="qt-chip"><span class="qt-chip-icon">📊</span>Günlük Özet</a>
+  <a href="/kripto" class="qt-chip"><span class="qt-chip-icon">₿</span>Kripto</a>
+  <a href="/karsilastir" class="qt-chip"><span class="qt-chip-icon">⚖️</span>Karşılaştır</a>
+</nav>
+
 <!-- Mobile Bottom Navigation -->
-<nav class="mobile-bottom-nav">
+<nav class="mobile-bottom-nav" aria-label="Ana navigasyon">
   <div class="mbn-inner">
-    <a href="/" class="mbn-item active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Sinyaller</span>
+    <a href="/" class="mbn-item" data-route="/">
+      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      <span class="mbn-label">Ana Sayfa</span>
     </a>
-    <a href="/ozet" class="mbn-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Özet</span>
+    <a href="/tarama" class="mbn-item" data-route="/tarama">
+      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <span class="mbn-label">Tarama</span>
     </a>
-    <a href="/sektor-harita" class="mbn-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-      <span>Sektörler</span>
+    <a href="/ozet" class="mbn-item" data-route="/ozet">
+      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+      <span class="mbn-label">Özet</span>
     </a>
-    <a href="/portfolio" class="mbn-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-      <span>Portföy</span>
+    <a href="/sektor-harita" class="mbn-item" data-route="/sektor-harita">
+      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg></span>
+      <span class="mbn-label">Sektörler</span>
     </a>
-    <a href="/bilanco-takvimi" class="mbn-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span>Takvim</span>
-    </a>
+    <button class="mbn-item" type="button" onclick="toggleMbnSheet()" aria-label="Daha fazla menü">
+      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></svg></span>
+      <span class="mbn-label">Daha</span>
+    </button>
   </div>
 </nav>
+
+<!-- "Daha" Bottom Sheet -->
+<div class="mbn-sheet-backdrop" id="mbnSheetBackdrop" onclick="closeMbnSheet()"></div>
+<div class="mbn-sheet" id="mbnSheet" role="dialog" aria-label="Daha fazla menü" aria-modal="true">
+  <div class="mbn-sheet-handle"></div>
+  <div class="mbn-sheet-title">Piyasalar</div>
+  <div class="mbn-sheet-grid">
+    <a href="/kripto" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>
+      <span>Kripto</span>
+    </a>
+    <a href="/emtialar" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8M11 13l2-2"/></svg>
+      <span>Emtialar</span>
+    </a>
+    <a href="/abd" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>
+      <span>ABD</span>
+    </a>
+    <a href="/gundem" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Gündem</span>
+    </a>
+  </div>
+  <div class="mbn-sheet-title" style="margin-top:18px">Araçlar</div>
+  <div class="mbn-sheet-grid">
+    <a href="/portfolio" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      <span>Portföy</span>
+    </a>
+    <a href="/bilanco-takvimi" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Takvim</span>
+    </a>
+    <a href="/sinyal-performans" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Performans</span>
+    </a>
+    <a href="/karsilastir" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Karşılaştır</span>
+    </a>
+  </div>
+  <div class="mbn-sheet-title" style="margin-top:18px">Daha</div>
+  <div class="mbn-sheet-grid">
+    <a href="/blog" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>Blog</span>
+    </a>
+    <a href="/metodoloji" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Metodoloji</span>
+    </a>
+    <a href="/hakkinda" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Hakkında</span>
+    </a>
+    <a href="/iletisim" class="mbn-sheet-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span>İletişim</span>
+    </a>
+  </div>
+</div>
+<script>
+function toggleMbnSheet(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;if(s.classList.contains('open'))closeMbnSheet();else{s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}}
+function closeMbnSheet(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
+(function(){const p=window.location.pathname;document.querySelectorAll('.mbn-item[data-route]').forEach(el=>{const r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r))el.classList.add('active');});})();
+</script>
 
 <!-- ── Ana içerik container ─────────────────────────── -->
 <main class="container">
@@ -1300,25 +1905,8 @@
 <!-- ── Dual Endeks Kartları ── -->
 <div class="dual-endeks">
 
-  <!-- BIST 30 -->
-  <div class="endeks-card active" id="ec30" onclick="selectEndeks('XU030')">
-    <div class="ec-top">
-      <span class="ec-title">BIST 30</span>
-      <svg class="ec-spark" id="spark30" viewBox="0 0 80 32"></svg>
-    </div>
-    <div class="ec-price-row">
-      <span class="ec-price" id="ec30Price"><span class="idx-sk idx-sk-price"></span></span>
-      <span class="ec-chg neu" id="ec30Chg"><span class="idx-sk idx-sk-change"></span></span>
-    </div>
-    <div class="ec-signal-row">
-      <span class="signal-badge signal-BEKLE" id="ec30Signal" style="font-size:11px;opacity:.4">● —</span>
-      <span class="index-sl" id="ec30Sl" style="display:none">SL —</span>
-    </div>
-    <div class="ec-inds" id="ec30Inds"></div>
-  </div>
-
-  <!-- BIST 100 -->
-  <div class="endeks-card" id="ec100" onclick="selectEndeks('XU100')">
+  <!-- BIST 100 (önce — daha yaygın takip edilen endeks) -->
+  <div class="endeks-card active" id="ec100" onclick="selectEndeks('XU100')">
     <div class="ec-top">
       <span class="ec-title">BIST 100</span>
       <svg class="ec-spark" id="spark100" viewBox="0 0 80 32"></svg>
@@ -1328,20 +1916,53 @@
       <span class="ec-chg neu" id="ec100Chg"><span class="idx-sk idx-sk-change"></span></span>
     </div>
     <div class="ec-signal-row">
-      <span class="signal-badge signal-BEKLE" id="ec100Signal" style="font-size:11px;opacity:.4">● —</span>
+      <span class="signal-badge signal-BEKLE" id="ec100Signal" style="font-size:11px">● —</span>
       <span class="index-sl" id="ec100Sl" style="display:none">SL —</span>
     </div>
     <div class="ec-inds" id="ec100Inds"></div>
   </div>
 
+  <!-- BIST 30 -->
+  <div class="endeks-card" id="ec30" onclick="selectEndeks('XU030')">
+    <div class="ec-top">
+      <span class="ec-title">BIST 30</span>
+      <svg class="ec-spark" id="spark30" viewBox="0 0 80 32"></svg>
+    </div>
+    <div class="ec-price-row">
+      <span class="ec-price" id="ec30Price"><span class="idx-sk idx-sk-price"></span></span>
+      <span class="ec-chg neu" id="ec30Chg"><span class="idx-sk idx-sk-change"></span></span>
+    </div>
+    <div class="ec-signal-row">
+      <span class="signal-badge signal-BEKLE" id="ec30Signal" style="font-size:11px">● —</span>
+      <span class="index-sl" id="ec30Sl" style="display:none">SL —</span>
+    </div>
+    <div class="ec-inds" id="ec30Inds"></div>
+  </div>
+
 </div><!-- /dual-endeks -->
 
+<!-- ── Öne Çıkanlar (her zaman görünür) ── -->
+<section class="bp-highlights" aria-label="Öne Çıkan Hisseler">
+  <div class="hp-twin">
+    <div class="hp-section">
+      <div class="hp-title">🟢 Güçlü Trend</div>
+      <div id="hpAlList" class="hp-sk-wrap"></div>
+    </div>
+    <div class="hp-section hp-section-r">
+      <div class="hp-title">🔥 Hareketliler</div>
+      <div id="hpMoverList" class="hp-sk-wrap"></div>
+    </div>
+  </div>
+</section>
+
+
+
 <!-- ── Grafik Accordion ── -->
-<div class="chart-accordion">
+<div class="chart-accordion" style="display:none" aria-hidden="true">
   <div class="chart-acc-header" onclick="toggleChartAcc()">
     <div class="chart-tabs">
-      <button class="chart-tab active" id="ctab-XU030" onclick="event.stopPropagation();switchChartTab('XU030')">BIST 30 Grafik</button>
-      <button class="chart-tab" id="ctab-XU100" onclick="event.stopPropagation();switchChartTab('XU100')">BIST 100 Grafik</button>
+      <button class="chart-tab active" id="ctab-XU100" onclick="event.stopPropagation();switchChartTab('XU100')">BIST 100 Grafik</button>
+      <button class="chart-tab" id="ctab-XU030" onclick="event.stopPropagation();switchChartTab('XU030')">BIST 30 Grafik</button>
     </div>
     <span class="chart-acc-chev" id="chartChev">▼</span>
   </div>
@@ -1362,35 +1983,26 @@
       </div>
     </div>
 
-    <!-- Sağ: Öne Çıkanlar Paneli — yan yana 2 kolon -->
-    <div class="hero-panel" id="heroPanel">
-      <div class="hp-twin">
-        <div class="hp-section">
-          <div class="hp-title">🟢 Güçlü Trend</div>
-          <div id="hpAlList" class="hp-sk-wrap"></div>
-        </div>
-        <div class="hp-section hp-section-r">
-          <div class="hp-title">🔥 Hareketliler</div>
-          <div id="hpMoverList" class="hp-sk-wrap"></div>
-        </div>
-      </div>
-    </div>
   </div>
 </div><!-- /chart-accordion -->
 
   <div class="stats-bar" id="statsBar">
     <div class="stat-card stat-total"><div class="stat-num" id="statTotal"><span class="stat-num-sk"></span></div><div class="stat-label">Toplam</div></div>
-    <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="Güçlü Trend: Supertrend ↑ + ADX ≥25 + EMA12>EMA99. Tıkla: Momentum sıralamasını gör">
+    <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="Güçlü Trend: Algoritmamızın 3 testten geçen yükseliş sinyali. Tıkla: en güçlüleri gör">
       <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7">↗</span></div>
     </a>
-    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=\"SAT\"]'))" title="Supertrend aşağı + ADX güçlü + EMA uyumu → düşüş trendi sinyali. Tıkla: Zayıf Trend sinyallerini filtrele">
+    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=\"SAT\"]'))" title="Zayıf Trend: Algoritmamızın 3 testten geçen düşüş sinyali. Tıkla: Zayıf Trend sinyallerini gör">
       <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Zayıf Trend</div>
     </div>
-    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=\"BEKLE\"]'))" title="3 indikatör henüz hizalanmadı. Trend net değil — izleme listesine alın. Tıkla: Belirsiz hisseleri filtrele">
+    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=\"BEKLE\"]'))" title="Belirsiz: Trend henüz oluşmadı, fırsat bekleniyor. Tıkla: izleme listesine al">
       <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Belirsiz</div>
+    </div>
+    <div class="stat-card stat-premium" style="cursor:pointer" onclick="setFilter('PREMIUM',document.querySelector('.filter-btn.filter-premium'))" title="Premium: Algoritmik AL sinyali + Hacim Onayı. Backtest'te %51 isabet, geri dönüş 4.3x. Tıkla: filtrele">
+      <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
+      <div class="stat-label">⭐ Premium</div>
     </div>
   </div>
 
@@ -1414,46 +2026,47 @@
 
   <!-- ── AI Piyasa Özeti ──────────────────────────── -->
   <!-- visibility:hidden (not display:none) reserves space → prevents CLS when content loads -->
-  <div id="macroSummaryBar" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(31,111,235,.06),rgba(139,92,246,.03));border:1px solid rgba(31,111,235,.15);border-radius:9px;padding:9px 14px;margin-bottom:10px;align-items:flex-start;gap:8px">
+  <div id="macroSummaryBar" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(184,195,255,.06),rgba(139,92,246,.03));border:1px solid rgba(184,195,255,.18);border-radius:9px;padding:9px 14px;margin-bottom:10px;align-items:flex-start;gap:8px">
     <span style="font-size:15px;flex-shrink:0;margin-top:1px">🤖</span>
     <div style="flex:1;min-width:0">
-      <div id="macroSummaryBarText" style="font-size:12.5px;color:#94a3b8;line-height:1.5"></div>
+      <div id="macroSummaryBarText" style="font-size:12.5px;color:var(--bp-text2);line-height:1.5"></div>
     </div>
     <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0;align-self:center">Gündem →</a>
   </div>
 
   <!-- ── İdeal Giriş Şeridi ──────────────────────── -->
-  <div id="idealStrip" style="display:none;background:linear-gradient(135deg,rgba(63,185,80,.06),rgba(59,130,246,.03));
-    border:1px solid rgba(63,185,80,.2);border-radius:10px;padding:9px 14px;margin-bottom:12px;
+  <!-- visibility:hidden reserves space → no CLS when ideal stocks load -->
+  <div id="idealStrip" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(0,226,144,.06),rgba(184,195,255,.03));
+    border:1px solid rgba(0,226,144,.20);border-radius:6px;padding:9px 14px;margin-bottom:12px;
     align-items:center;gap:10px;flex-wrap:wrap">
-    <span style="font-size:11px;color:#3fb950;font-weight:700;white-space:nowrap;flex-shrink:0">✅ İdeal Giriş</span>
+    <span style="font-size:11px;color:#00e290;font-weight:700;white-space:nowrap;flex-shrink:0">✅ İdeal Giriş</span>
     <div id="idealStripItems" style="display:flex;flex-wrap:wrap;gap:6px;flex:1"></div>
-    <a href="/tarama?signal=AL&min_adx=25" style="font-size:11px;color:#3b82f6;text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0">Hepsini gör →</a>
+    <a href="/tarama?signal=AL&min_adx=25" style="font-size:11px;color:#b8c3ff;text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0">Hepsini gör →</a>
   </div>
 
   <!-- Backtest güven rozeti -->
   <!-- visibility:hidden reserves space → no CLS when backtest data arrives (disk-cached, always fast) -->
   <a href="/sinyal-performans" id="btTrustBadge" style="display:flex;visibility:hidden;text-decoration:none;
-    background:linear-gradient(135deg,rgba(63,185,80,.06),rgba(59,130,246,.04));
-    border:1px solid rgba(63,185,80,.18);border-radius:10px;padding:10px 16px;margin-bottom:16px;
+    background:linear-gradient(135deg,rgba(0,226,144,.06),rgba(184,195,255,.04));
+    border:1px solid rgba(0,226,144,.18);border-radius:6px;padding:10px 16px;margin-bottom:16px;
     flex-wrap:wrap;gap:6px 16px;align-items:center;transition:border-color .15s"
-    onmouseover="this.style.borderColor='rgba(63,185,80,.35)'" onmouseout="this.style.borderColor='rgba(63,185,80,.18)'">
-    <span style="font-size:10px;color:#7d8fa4;text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap">📊 2 Yıllık Backtest · 28 Hisse</span>
+    onmouseover="this.style.borderColor='rgba(0,226,144,.35)'" onmouseout="this.style.borderColor='rgba(0,226,144,.18)'">
+    <span style="font-size:10px;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap">📊 2 Yıllık Backtest · 28 Hisse</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
-      <span style="font-size:11px;color:#94a3b8">Sharpe:</span>
-      <span id="btSharpe" style="font-size:15px;font-weight:800;color:#3fb950;letter-spacing:-0.3px"></span>
+      <span style="font-size:11px;color:var(--bp-text2)">Sharpe:</span>
+      <span id="btSharpe" style="font-size:15px;font-weight:800;color:#00e290;letter-spacing:-0.3px"></span>
     </span>
-    <span style="color:#1e2d45">·</span>
+    <span style="color:var(--bp-border)">·</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
-      <span style="font-size:11px;color:#94a3b8">Profit Factor:</span>
-      <span id="btPF" style="font-size:15px;font-weight:800;color:#3fb950;letter-spacing:-0.3px"></span>
+      <span style="font-size:11px;color:var(--bp-text2)">Profit Factor:</span>
+      <span id="btPF" style="font-size:15px;font-weight:800;color:#00e290;letter-spacing:-0.3px"></span>
     </span>
-    <span style="color:#1e2d45">·</span>
+    <span style="color:var(--bp-border)">·</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
-      <span style="font-size:11px;color:#94a3b8">En iyi getiri:</span>
-      <span id="btBest" style="font-size:13px;font-weight:700;color:#3fb950"></span>
+      <span style="font-size:11px;color:var(--bp-text2)">En iyi getiri:</span>
+      <span id="btBest" style="font-size:13px;font-weight:700;color:#00e290"></span>
     </span>
-    <span style="margin-left:auto;font-size:11px;color:#3b82f6;font-weight:600;white-space:nowrap">Performans raporu →</span>
+    <span style="margin-left:auto;font-size:11px;color:#b8c3ff;font-weight:600;white-space:nowrap">Performans raporu →</span>
   </a>
 
   <!-- ── Gündem & Haberler ──────────────────────────── -->
@@ -1483,9 +2096,9 @@
     <div id="gnmPanelMakro">
       <div id="macroNewsList" class="macro-news-list">
         <!-- skeleton -->
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#141416 25%,#1e1e22 50%,#141416 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#141416 25%,#1e1e22 50%,#141416 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,#141416 25%,#1e1e22 50%,#141416 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
       </div>
       <div style="text-align:right;margin-top:8px">
         <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">Piyasa Gündem Merkezi →</a>
@@ -1509,9 +2122,9 @@
         <div class="bilanco-mini-box" id="bilancoMini">
           <div class="bilanco-mini-title">📅 Bilanço Dönemi</div>
           <div id="bilancoMiniBody" style="min-height:60px">
-            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
-            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
-            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#161b22 25%,#1e2530 50%,#161b22 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;width:70%"></div>
+            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#141416 25%,#1e1e22 50%,#141416 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
+            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#141416 25%,#1e1e22 50%,#141416 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
+            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,#141416 25%,#1e1e22 50%,#141416 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;width:70%"></div>
           </div>
           <a href="/bilanco-takvimi" class="bilanco-mini-link">Tüm takvim →</a>
         </div>
@@ -1520,32 +2133,38 @@
   </section>
 
   <!-- ── Bildirim Çubuğu (E-posta + Push) ────────── -->
-  <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(59,130,246,.07),rgba(29,78,216,.04));border:1px solid rgba(59,130,246,.18);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+  <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(184,195,255,.07),rgba(0,67,235,.04));border:1px solid rgba(184,195,255,.18);border-radius:6px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
-      <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:2px">📬 Sinyal Bildirimleri</div>
-      <div style="font-size:11px;color:#64748b">Sinyal değiştiğinde bildirim al — ücretsiz</div>
+      <div style="font-size:13px;font-weight:700;color:var(--bp-text);margin-bottom:2px">📬 Sinyal Bildirimleri</div>
+      <div style="font-size:11px;color:var(--bp-text3)">Sinyal değiştiğinde bildirim al — ücretsiz</div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px" id="subForm">
-      <input id="subEmail" type="email" placeholder="e-posta adresiniz"
-        style="flex:1;background:#111827;border:1px solid #1e2d45;color:#e2e8f0;
-               padding:7px 12px;border-radius:7px;font-size:13px;font-family:inherit;outline:none;
-               transition:border-color .15s;min-width:0"
-        onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#1e2d45'"
+    <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:280px;flex-wrap:wrap" id="subForm">
+      <input id="subName" type="text" placeholder="Adınız"
+        style="flex:1 1 0;min-width:120px;width:0;background:#141416;border:1px solid #2a2a2c;color:#e5e1e4;
+               padding:8px 12px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;
+               box-sizing:border-box;transition:border-color .15s"
+        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
+        onkeydown="if(event.key==='Enter')submitSubscribe()">
+      <input id="subEmail" type="email" placeholder="E-posta"
+        style="flex:1 1 0;min-width:120px;width:0;background:#141416;border:1px solid #2a2a2c;color:#e5e1e4;
+               padding:8px 12px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;
+               box-sizing:border-box;transition:border-color .15s"
+        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
       <button onclick="submitSubscribe()"
-        style="background:#1f6feb;color:#fff;border:none;padding:7px 16px;border-radius:7px;
-               font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;
+        style="background:#b8c3ff;color:#0e0e12;border:none;padding:7px 16px;border-radius:6px;
+               font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
                transition:background .15s"
-        onmouseover="this.style.background='#388bfd'" onmouseout="this.style.background='#1f6feb'">
+        onmouseover="this.style.background='#cdd5ff'" onmouseout="this.style.background='#b8c3ff'">
         Abone Ol
       </button>
     </div>
     <!-- Push bildirim butonu -->
     <button id="pushBtn" onclick="togglePushSubscription()"
-      style="display:none;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);
-             color:#93c5fd;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;
+      style="display:none;background:rgba(184,195,255,.12);border:1px solid rgba(184,195,255,.32);
+             color:#b8c3ff;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;
              cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s"
-      onmouseover="this.style.background='rgba(59,130,246,.2)'" onmouseout="this.style.background='rgba(59,130,246,.1)'"
+      onmouseover="this.style.background='rgba(184,195,255,.2)'" onmouseout="this.style.background='rgba(184,195,255,.12)'"
       title="Tarayıcı push bildirimi">
       🔔 Push Aç
     </button>
@@ -1554,30 +2173,13 @@
       title="Kapat">×</button>
   </div>
 
-  <!-- ── XU030 Endeks Satırı ─────────────────────── -->
-  <div class="index-row-card" id="indexRowCard" style="display:none">
-    <div class="irc-ticker">XU030</div>
-    <div class="irc-divider"></div>
-    <span id="ircPrice" class="irc-price">—</span>
-    <span id="ircChg" class="irc-chg neu">—</span>
-    <span id="ircSignal" class="signal-badge signal-BEKLE">● Belirsiz</span>
-    <div id="ircEntry" class="irc-meta" style="display:none">
-      <span class="irc-meta-label">Giriş</span>
-      <span id="ircSigPrice" class="irc-meta-val">—</span>
-    </div>
-    <div id="ircSlBox" class="irc-meta irc-sl-box" style="display:none">
-      <span class="irc-meta-label" id="ircSlLabel">SL</span>
-      <span id="ircSl" class="irc-meta-val">—</span>
-    </div>
-    <div class="irc-score" id="ircScore"></div>
-    <div class="indicators irc-inds" id="ircInds"></div>
-  </div>
 
   <div class="filters">
     <button class="filter-btn active-all" onclick="setFilter('all', this)" title="Tüm hisseleri göster">Tümü</button>
-    <button class="filter-btn" onclick="setFilter('AL', this)" title="Supertrend ↑ + ADX ≥25 + EMA12>EMA99 — 3 indikatör aynı anda yükseliş yönünde">🟢 Güçlü Trend</button>
-    <button class="filter-btn" onclick="setFilter('SAT', this)" title="Supertrend ↓ + ADX ≥25 + EMA12&lt;EMA99 — 3 indikatör aynı anda düşüş yönünde">🔴 Zayıf Trend</button>
-    <button class="filter-btn" onclick="setFilter('BEKLE', this)" title="Henüz 3 indikatör hizalanmadı — trend belirsiz, yeni sinyal bekleniyor">⚪ Belirsiz</button>
+    <button class="filter-btn" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı">🟢 Güçlü Trend</button>
+    <button class="filter-btn" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı">🔴 Zayıf Trend</button>
+    <button class="filter-btn" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor">⚪ Belirsiz</button>
+    <button class="filter-btn filter-premium" onclick="setFilter('PREMIUM', this)" title="AL sinyali + Hacim Onayı — backtest'te %51 isabet, 4.3x geri dönüş">⭐ Premium</button>
     <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)" title="Bugün ilk kez Güçlü Trend veya Zayıf Trend sinyali oluşan hisseler — taze fırsatlar">⚡ Bugün</button>
     <button class="filter-btn filter-watch" id="filterWatchBtn" onclick="setFilter('WATCH', this)" style="display:none">🔔 Takibim <span id="watchFilterCount"></span></button>
     <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()">⚙️ Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
@@ -1647,11 +2249,21 @@
     <!-- JS tarafından doldurulacak -->
   </div>
 
+  <!-- Aktif filtreler kutusu — chip'lerle her filtreyi tek tıkla temizle -->
+  <div id="activeFiltersBar" class="afb" style="display:none">
+    <span class="afb-label">Aktif:</span>
+    <div class="afb-chips" id="afbChips"></div>
+    <button class="afb-clear-all" onclick="resetFilters()" title="Tüm filtreleri temizle">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Tümünü Temizle
+    </button>
+  </div>
+
   <div class="table-wrap">
     <div id="loadingDiv">
       <table style="width:100%;border-collapse:collapse">
         <thead>
-          <tr style="background:#1c2128;border-bottom:1px solid #30363d">
+          <tr style="background:#1c1b1f;border-bottom:1px solid #2a2a2c">
             <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Hisse</th>
             <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Fiyat (₺)</th>
             <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Değişim</th>
@@ -1686,9 +2298,9 @@
     <div id="mobileCards" class="mobile-card-list"></div>
     <div id="noDataDiv" style="display:none;padding:48px 24px;text-align:center">
       <div style="font-size:36px;margin-bottom:12px">🔍</div>
-      <div style="font-size:16px;font-weight:700;color:#e6edf3;margin-bottom:8px">Sonuç bulunamadı</div>
-      <div style="font-size:13px;color:#8b949e;margin-bottom:20px">Bu kriterlere uyan hisse yok. Filtreleri gevşetin ya da arama terimini değiştirin.</div>
-      <button onclick="resetFilters()" style="background:#1f6feb;color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer">Filtreleri Sıfırla</button>
+      <div style="font-size:16px;font-weight:700;color:var(--bp-text);margin-bottom:8px">Sonuç bulunamadı</div>
+      <div style="font-size:13px;color:var(--bp-text3);margin-bottom:20px">Bu kriterlere uyan hisse yok. Filtreleri gevşetin ya da arama terimini değiştirin.</div>
+      <button onclick="resetFilters()" style="background:#b8c3ff;color:#0e0e12;border:none;border-radius:4px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer">Filtreleri Sıfırla</button>
     </div>
   </div>
 
@@ -1725,7 +2337,10 @@
     <span class="sub-toast-benefit">✓ İstediğin zaman çık</span>
   </div>
   <div class="sub-toast-row" id="subToastForm">
-    <input id="subToastEmail" type="email" class="sub-toast-input" placeholder="e-posta adresiniz"
+    <input id="subToastName" type="text" class="sub-toast-input" placeholder="Adınız"
+      onkeydown="if(event.key==='Enter')document.getElementById('subToastEmail').focus()"
+      aria-label="Ad">
+    <input id="subToastEmail" type="email" class="sub-toast-input" placeholder="E-posta"
       onkeydown="if(event.key==='Enter')submitToastSubscribe()"
       aria-label="E-posta adresi">
     <button class="sub-toast-btn" onclick="submitToastSubscribe()">Abone Ol</button>
@@ -1739,36 +2354,37 @@
     <!-- Logo in footer -->
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
       <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="36" height="36" rx="9" fill="#111827"/>
-        <circle cx="18" cy="18" r="13" stroke="#1e2d45" stroke-width="1"/>
-        <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#3b82f6"/>
-        <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#1e3a62"/>
-        <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#1e3a62"/>
-        <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#1e3a62"/>
-        <circle cx="18" cy="18" r="2.8" fill="#1d4ed8"/>
-        <circle cx="18" cy="18" r="1.4" fill="#bfdbfe"/>
+        <rect width="36" height="36" rx="6" fill="#141416"/>
+        <circle cx="18" cy="18" r="13" stroke="#46464d" stroke-width="1"/>
+        <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#00e290"/>
+        <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#2a2a2c"/>
+        <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#2a2a2c"/>
+        <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#2a2a2c"/>
+        <circle cx="18" cy="18" r="2.8" fill="#b8c3ff"/>
+        <circle cx="18" cy="18" r="1.4" fill="#e5e1e4"/>
       </svg>
-      <span style="font-size:14px;font-weight:700;color:var(--bp-text2)">Borsa<strong style="color:var(--bp-brand)">Pusula</strong></span>
+      <span style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:14px;font-weight:700;color:var(--bp-text2)">Borsa<strong style="color:#00e290">Pusula</strong></span>
     </div>
     <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:12px">
-      <a href="/ozet"             style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Günlük Özet</a>
-      <a href="/gundem"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Gündem</a>
-      <a href="/gucu-yuksek"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Güçlü Trendler</a>
-      <a href="/tarama"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Hisse Tarayıcı</a>
-      <a href="/karsilastir"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Karşılaştır</a>
-      <a href="/kripto"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">🔐 Kripto</a>
-      <a href="/emtialar"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">🥇 Emtialar</a>
-      <a href="/abd"              style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">🇺🇸 ABD</a>
-      <a href="/portfolio"        style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Portföy</a>
-      <a href="/sinyal-performans"style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Sinyal Performansı</a>
-      <a href="/sektor-harita"    style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Sektör Haritası</a>
-      <a href="/bilanco-takvimi"  style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Bilanço Takvimi</a>
-      <a href="/blog"             style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Blog</a>
-      <a href="/metodoloji"       style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Metodoloji</a>
-      <a href="/hakkinda"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Hakkında</a>
-      <a href="/gizlilik"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Gizlilik</a>
-      <a href="/yasal"            style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">Yasal Uyarı</a>
-      <a href="/iletisim"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='var(--bp-text3)'">İletişim</a>
+      <a href="/ozet"             style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Günlük Özet</a>
+      <a href="/gundem"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Gündem</a>
+      <a href="/gucu-yuksek"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Güçlü Trendler</a>
+      <a href="/tarama"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Hisse Tarayıcı</a>
+      <a href="/karsilastir"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Karşılaştır</a>
+      <a href="/kripto"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">🔐 Kripto</a>
+      <a href="/emtialar"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">🥇 Emtialar</a>
+      <a href="/abd"              style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">🇺🇸 ABD</a>
+      <a href="/portfolio"        style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Portföy</a>
+      <a href="/sinyal-performans"style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Sinyal Performansı</a>
+      <a href="/sektor-harita"    style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Sektör Haritası</a>
+      <a href="/hisseler"          style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color=\'var(--bp-text)\'" onmouseout="this.style.color=\'var(--bp-text3)\'">Tüm Hisseler</a>
+      <a href="/bilanco-takvimi"  style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Bilanço Takvimi</a>
+      <a href="/blog"             style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Blog</a>
+      <a href="/metodoloji"       style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Metodoloji</a>
+      <a href="/hakkinda"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Hakkında</a>
+      <a href="/gizlilik"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Gizlilik</a>
+      <a href="/yasal"            style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Yasal Uyarı</a>
+      <a href="/iletisim"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">İletişim</a>
       <a href="https://t.me/borsapusula" target="_blank" rel="noopener"
          style="color:#229ED9;text-decoration:none;transition:opacity .15s;display:inline-flex;align-items:center;gap:4px"
          onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">
@@ -1779,10 +2395,11 @@
     <p style="color:var(--bp-text3);font-size:11px;margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto">
       ⚠️ Bu platform yalnızca bilgilendirme amaçlıdır. Sinyaller <strong style="color:var(--bp-text3)">yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez.
     </p>
-    <p style="color:var(--bp-text3);font-size:11px;margin-top:8px;opacity:0.6">© 2026 borsapusula.com</p>
+    <p style="color:var(--bp-text3);font-size:11px;margin-top:8px">© 2026 borsapusula.com</p>
   </div>
 </footer>
 
+<script src="/static/lightweight-charts.min.js"></script>
 <script>
 /* ── Makro Ticker Bandı ──────────────────────────── */
 (function() {
@@ -1839,7 +2456,11 @@
       </${tag}>`;
     }).join('');
     track.innerHTML = html + html; // çift kopya
-    requestAnimationFrame(() => { const w = track.scrollWidth / 2; if (w > 50) track.style.animationDuration = (w / 50).toFixed(1) + 's'; });
+    requestAnimationFrame(() => {
+      const w = track.scrollWidth / 2;
+      // 90 px/sec target, min 18s, max 50s — anasayfada ve alt sayfalarda EŞIT hız
+      window.bpStartMacroTicker && window.bpStartMacroTicker({track: track, pps: 55});
+    });
   }
 
   async function loadMacro() {
@@ -1856,14 +2477,14 @@
 
 /* ── Sinyal görünen etiketleri ───────────────────── */
 function sigLabel(sig) {
-  return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[sig] || sig;
+  return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Yatay'}[sig] || sig;
 }
 
 /* ── Lightweight Charts v4 ───────────────────────── */
 const LC = LightweightCharts;
 
 const BASE_OPTS = {
-  layout:          { background: { color: '#161b22' }, textColor: '#8b949e' },
+  layout:          { background: { color: '#141416' }, textColor: '#909097' },
   grid:            { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
   crosshair:       { mode: LC.CrosshairMode.Normal },
   rightPriceScale: { borderColor: '#30363d' },
@@ -1978,15 +2599,15 @@ function buildCharts(d) {
   e12Line.setData(d.ema12);
   e12Line.attachPrimitive(new EmaFillPrimitive(
     chartMain, d.ema12, d.ema99,
-    'rgba(63,185,80,0.13)',
+    'rgba(0,226,144,0.13)',
     'rgba(248,81,73,0.11)'
   ));
 
   /* Mum grafik */
   const candle = chartMain.addCandlestickSeries({
-    upColor: '#3fb950', downColor: '#f85149',
-    borderUpColor: '#3fb950', borderDownColor: '#f85149',
-    wickUpColor:   '#3fb950', wickDownColor:   '#f85149',
+    upColor: '#00e290', downColor: '#f85149',
+    borderUpColor: '#00e290', borderDownColor: '#f85149',
+    wickUpColor:   '#00e290', wickDownColor:   '#f85149',
     priceLineVisible: false, lastValueVisible: true,
   });
   candle.setData(d.ohlc);
@@ -2049,11 +2670,18 @@ function renderEndeksCard(sym, s) {
   const chgClass = s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu';
   const chgSign  = s.change_pct > 0 ? '+' : '';
 
+  // Sanity guard: BIST endeksleri en az 1000 üzerinde — düşük değer Yahoo glitch
+  // Sadece valid değerleri ec*Price'a yaz; macro bar fallback olarak günceller
   const priceEl = document.getElementById(pfx + 'Price');
-  if (priceEl) priceEl.textContent = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+  if (priceEl && typeof s.price === 'number' && s.price >= 1000) {
+    priceEl.textContent = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+  }
 
   const chgEl = document.getElementById(pfx + 'Chg');
-  if (chgEl) { chgEl.textContent = chgSign + s.change_pct.toFixed(2) + '%'; chgEl.className = 'ec-chg ' + chgClass; }
+  if (chgEl && typeof s.price === 'number' && s.price >= 1000) {
+    chgEl.textContent = chgSign + s.change_pct.toFixed(2) + '%';
+    chgEl.className = 'ec-chg ' + chgClass;
+  }
 
   const sigEl = document.getElementById(pfx + 'Signal');
   if (sigEl) {
@@ -2097,8 +2725,8 @@ function drawSparkline(id, ohlc) {
   const toX = i => pad + (W - 2*pad) * (i / (pts.length - 1));
 
   const rising = vals.at(-1) >= vals[0];
-  const col    = rising ? '#3fb950' : '#f85149';
-  const fill   = rising ? 'rgba(63,185,80,0.12)' : 'rgba(248,81,73,0.10)';
+  const col    = rising ? '#00e290' : '#f85149';
+  const fill   = rising ? 'rgba(0,226,144,0.12)' : 'rgba(248,81,73,0.10)';
 
   const lineD = pts.map((p,i) => `${i===0?'M':'L'}${toX(i).toFixed(1)},${toY(p.close).toFixed(1)}`).join(' ');
   const areaD = lineD + ` L${toX(pts.length-1).toFixed(1)},${H} L${toX(0).toFixed(1)},${H} Z`;
@@ -2137,7 +2765,7 @@ function toggleChartAcc() {
 }
 
 /* ── Endeks seçimi (kart tıklama) ─────────────────── */
-let _activeSym = 'XU030';
+let _activeSym = 'XU100';
 
 function selectEndeks(sym) {
   _activeSym = sym;
@@ -2178,12 +2806,27 @@ function _rebuildChart(d) {
   requestAnimationFrame(() => buildCharts(d));
 }
 
+/* Sanity check: BIST endeksleri >= 1000 olmalı; aksi Yahoo data glitch */
+function _isValidEndeksData(chart) {
+  if (!chart || !chart.summary || !chart.ohlc || chart.ohlc.length === 0) return false;
+  const lastPrice = chart.summary.price;
+  const lastClose = chart.ohlc[chart.ohlc.length - 1]?.close;
+  // Hem summary hem son OHLC kapanışı 1000+ olmalı
+  return typeof lastPrice === 'number' && lastPrice >= 1000
+      && typeof lastClose === 'number' && lastClose >= 1000;
+}
+
 /* ── XU030 chart yükle ───────────────────────────── */
 async function fetchChart() {
   try {
     const res  = await fetch('/api/chart');
     const json = await res.json();
     if (json.loading || !json.chart) { setTimeout(fetchChart, 4000); return; }
+    if (!_isValidEndeksData(json.chart)) {
+      console.warn('XU030 chart data invalid (scale glitch), retrying...');
+      setTimeout(fetchChart, 8000);
+      return;
+    }
     _chartData.xu030 = json.chart;
     renderEndeksCard('XU030', json.chart.summary);
     drawSparkline('spark30', json.chart.ohlc);
@@ -2199,6 +2842,11 @@ async function fetchChart100() {
     const res  = await fetch('/api/chart/XU100');
     const json = await res.json();
     if (json.loading || !json.chart) { setTimeout(fetchChart100, 5000); return; }
+    if (!_isValidEndeksData(json.chart)) {
+      console.warn('XU100 chart data invalid (scale glitch), retrying...');
+      setTimeout(fetchChart100, 8000);
+      return;
+    }
     _chartData.xu100 = json.chart;
     renderEndeksCard('XU100', json.chart.summary);
     drawSparkline('spark100', json.chart.ohlc);
@@ -2265,7 +2913,7 @@ function applyLivePrices(prices, ts) {
     if (mChangeEl) {
       const sign = d.change_pct >= 0 ? '+' : '';
       mChangeEl.textContent = sign + d.change_pct.toFixed(2) + '%';
-      mChangeEl.style.color = d.change_pct > 0 ? '#3fb950' : d.change_pct < 0 ? '#f85149' : '#8b949e';
+      mChangeEl.style.color = d.change_pct > 0 ? '#00e290' : d.change_pct < 0 ? '#f85149' : '#8b949e';
     }
 
     if (oldPrice && newPrice !== oldPrice) {
@@ -2309,11 +2957,6 @@ function applyLivePrices(prices, ts) {
     const ec30CEl = document.getElementById('ec30Chg');
     if (ec30CEl) { ec30CEl.textContent = fmtC; ec30CEl.className = 'ec-chg ' + cls; }
 
-    // Endeks satırı
-    const ircPriceEl = document.getElementById('ircPrice');
-    if (ircPriceEl) ircPriceEl.textContent = fmtP;
-    const ircChgEl = document.getElementById('ircChg');
-    if (ircChgEl) { ircChgEl.textContent = fmtC; ircChgEl.className = 'irc-chg ' + cls; }
   }
 }
 
@@ -2360,65 +3003,6 @@ function setAdv(key, val, btn) {
   renderTable();
 }
 
-function renderIndexRow(stock) {
-  const card = document.getElementById('indexRowCard');
-  if (!stock) { card.style.display = 'none'; return; }
-  card.style.display = 'flex';
-
-  const chgClass = stock.change_pct > 0 ? 'pos' : stock.change_pct < 0 ? 'neg' : 'neu';
-  const chgSign  = stock.change_pct > 0 ? '+' : '';
-
-  document.getElementById('ircPrice').textContent =
-    stock.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-  const ircChgEl = document.getElementById('ircChg');
-  ircChgEl.textContent = chgSign + stock.change_pct.toFixed(2) + '%';
-  ircChgEl.className   = 'irc-chg ' + chgClass;
-
-  const sigEl = document.getElementById('ircSignal');
-  const icon  = stock.signal === 'AL' ? '▲' : stock.signal === 'SAT' ? '▼' : '●';
-  sigEl.textContent = icon + ' ' + sigLabel(stock.signal);
-  sigEl.className   = 'signal-badge signal-' + stock.signal;
-
-  // Giriş fiyatı
-  const entryBox = document.getElementById('ircEntry');
-  if (stock.signal_price && stock.signal !== 'BEKLE') {
-    document.getElementById('ircSigPrice').textContent =
-      stock.signal_price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-    entryBox.style.display = '';
-  } else {
-    entryBox.style.display = 'none';
-  }
-
-  // SL seviyesi — her zaman göster (BEKLE'de ST destek/direnç seviyesi)
-  const slBox = document.getElementById('ircSlBox');
-  const slLabel = document.getElementById('ircSlLabel');
-  if (stock.sl_level) {
-    const slPct = ((stock.sl_level - stock.price) / stock.price * 100).toFixed(1);
-    document.getElementById('ircSl').textContent =
-      stock.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) +
-      ' (' + slPct + '%)';
-    slLabel.textContent = stock.signal === 'BEKLE' ? 'ST' : 'SL';
-    slBox.style.display = '';
-  } else {
-    slBox.style.display = 'none';
-  }
-
-  // Güç noktaları (max 3)
-  const scoreVal = stock.signal === 'SAT' ? stock.bear_score : stock.bull_score;
-  const dotColor = stock.signal === 'SAT' ? 'filled-bear' : 'filled-bull';
-  document.getElementById('ircScore').innerHTML =
-    Array.from({ length: 3 }, (_, i) =>
-      `<div class="score-dot ${i < scoreVal ? dotColor : 'empty'}"></div>`
-    ).join('');
-
-  // İndikatör badge'leri
-  document.getElementById('ircInds').innerHTML =
-    Object.values(stock.indicators).map(ind => {
-      const ok  = stock.signal === 'AL' ? ind.bull : (stock.signal === 'SAT' ? ind.bear : false);
-      const cls = ok ? (stock.signal === 'SAT' ? 'ind-bear' : 'ind-bull') : 'ind-neutral';
-      return `<span class="ind-badge ${cls}">${ind.label}</span>`;
-    }).join('');
-}
 
 async function fetchData() {
   try {
@@ -2431,17 +3015,14 @@ async function fetchData() {
     checkAlarms(allStocks);  // sinyal değişikliği kontrolü
 
     if (json.updated_at) {
-      document.getElementById('updated').textContent = 'Güncellendi: ' + json.updated_at;
+      const upd = document.getElementById('updated');
+      if (upd) upd.textContent = 'Güncellendi: ' + json.updated_at;  /* Element kaldırılmış olabilir, null guard */
     }
 
     // Sektör butonlarını oluştur (ilk yüklemede)
     if (json.sectors && document.querySelectorAll('.sector-btn').length <= 1) {
       buildSectorButtons(json.sectors);
     }
-
-    // XU030 endeks satırını ayrı göster
-    const xu030 = allStocks.find(s => s.ticker === 'XU030');
-    renderIndexRow(xu030);
 
     updateStats();
     renderTable();
@@ -2491,8 +3072,9 @@ function renderHeroPanel(stocks) {
     ? alList.map(s => row(s, 'hp-bar-al')).join('')
     : '<div class="hp-empty">Şu an güçlü trend yok</div>';
 
-  /* 2. Günün Hareketlileri — |change_pct| desc, max 5 */
-  const movers = [...list]
+  /* 2. Günün Hareketlileri — |change_pct| desc, max 5 (Güçlü Trend'de olanları dışla) */
+  const alSet = new Set(alList.map(s => s.ticker));
+  const movers = list.filter(s => !alSet.has(s.ticker))
     .sort((a, b) => Math.abs(b.change_pct) - Math.abs(a.change_pct))
     .slice(0, 5);
   document.getElementById('hpMoverList').innerHTML = movers.length
@@ -2508,11 +3090,13 @@ function animateCounter(el, target) {
   /* Skeleton span varsa kaldır */
   const sk = el.querySelector('.stat-num-sk');
   if (sk) sk.remove();
-  if (el.classList.contains('revealed')) {
-    el.textContent = target; return;    /* sonraki güncellemelerde direkt yaz */
-  }
+  /* Önce final değeri DİREKT yaz — RAF tetiklenmese bile counter boş kalmasın (FAIL-SAFE) */
+  el.textContent = target;
+  if (el.classList.contains('revealed')) return;  /* sonraki güncellemelerde direkt yaz */
   el.classList.add('revealed');
-  if (target === 0) { el.textContent = '0'; return; }
+  if (target === 0) return;
+  /* Opsiyonel: 0'dan target'a animasyon — RAF varsa görsel iyileştirme */
+  if (typeof requestAnimationFrame !== 'function') return;
   const duration = 520;
   const startTime = performance.now();
   function tick(now) {
@@ -2520,6 +3104,7 @@ function animateCounter(el, target) {
     const eased = 1 - Math.pow(1 - t, 3);
     el.textContent = Math.round(eased * target);
     if (t < 1) requestAnimationFrame(tick);
+    else el.textContent = target;  /* Final değer kesin */
   }
   requestAnimationFrame(tick);
 }
@@ -2528,19 +3113,19 @@ function _updateIdealStrip(stocks) {
   const ideal = stocks.filter(s => s.signal === 'AL' && s.entry_quality === 'IDEAL');
   const strip = document.getElementById('idealStrip');
   const items = document.getElementById('idealStripItems');
-  if (!strip || !items || ideal.length === 0) { if (strip) strip.style.display = 'none'; return; }
+  if (!strip || !items || ideal.length === 0) { if (strip) strip.style.visibility = 'hidden'; return; }
   items.innerHTML = ideal.slice(0, 10).map(s => {
     const ret = s.signal_price ? ((s.price - s.signal_price) / s.signal_price * 100) : null;
     const retHtml = ret !== null
-      ? ` <span style="font-size:10px;font-weight:600;color:${ret >= 0 ? '#3fb950' : '#f85149'}">${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%</span>`
+      ? ` <span style="font-size:10px;font-weight:600;color:${ret >= 0 ? '#00e290' : '#f85149'}">${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%</span>`
       : '';
-    return `<a href="/hisse/${s.ticker}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(63,185,80,.08);
-      border:1px solid rgba(63,185,80,.2);border-radius:6px;padding:3px 8px;text-decoration:none;
+    return `<a href="/hisse/${s.ticker}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,226,144,.08);
+      border:1px solid rgba(0,226,144,.2);border-radius:6px;padding:3px 8px;text-decoration:none;
       font-size:12px;font-weight:700;color:#f0f6fc;transition:background .12s;white-space:nowrap"
-      onmouseover="this.style.background='rgba(63,185,80,.16)'" onmouseout="this.style.background='rgba(63,185,80,.08)'"
+      onmouseover="this.style.background='rgba(0,226,144,.16)'" onmouseout="this.style.background='rgba(0,226,144,.08)'"
       >${s.ticker}${retHtml}</a>`;
   }).join('');
-  strip.style.display = 'flex';
+  strip.style.visibility = 'visible'; /* space already reserved — no CLS */
 }
 
 function updateStats() {
@@ -2549,6 +3134,8 @@ function updateStats() {
   animateCounter(document.getElementById('statAl'),    stocks.filter(s => s.signal === 'AL').length);
   animateCounter(document.getElementById('statSat'),   stocks.filter(s => s.signal === 'SAT').length);
   animateCounter(document.getElementById('statBekle'), stocks.filter(s => s.signal === 'BEKLE').length);
+  const stPremEl = document.getElementById('statPremium');
+  if (stPremEl) animateCounter(stPremEl, stocks.filter(s => s.is_premium === true).length);
   _updateIdealStrip(stocks);
 
   // Market breadth bar
@@ -2566,7 +3153,7 @@ function updateStats() {
     document.getElementById('mbLgSat').textContent = satCnt + ' Zayıf Trend (' + satPct.toFixed(0) + '%)';
     // Sentiment label
     const sent = alPct >= 60 ? '🔥 Güçlü Boğa' : alPct >= 40 ? '📈 Hafif Yükseliş' : satPct >= 30 ? '📉 Baskı Altında' : '⚪ Yatay';
-    const sentColor = alPct >= 60 ? '#3fb950' : alPct >= 40 ? '#86efac' : satPct >= 30 ? '#f85149' : '#8b949e';
+    const sentColor = alPct >= 60 ? '#00e290' : alPct >= 40 ? '#86efac' : satPct >= 30 ? '#f85149' : '#8b949e';
     const sentEl = document.getElementById('mbSentiment');
     sentEl.textContent = sent;
     sentEl.style.color = sentColor;
@@ -2578,6 +3165,7 @@ function getFiltered() {
   return allStocks.filter(s => {
     if (s.ticker === 'XU030') return false;   // endeks satırda gösteriliyor
     const matchFilter = currentFilter === 'all' || s.signal === currentFilter
+                     || (currentFilter === 'PREMIUM' && s.is_premium === true)
                      || (currentFilter === 'TODAY' && s.is_new_signal && s.signal !== 'BEKLE')
                      || (currentFilter === 'WATCH' && watchlist.has(s.ticker));
     const matchSearch = !currentSearch || s.ticker.includes(currentSearch.toUpperCase())
@@ -2602,6 +3190,7 @@ function setSector(sector, btn) {
   document.querySelectorAll('.sector-btn').forEach(b => b.classList.remove('active-sector'));
   if (btn) btn.classList.add('active-sector');
   renderTable();
+  updateActiveFiltersBar();
 }
 
 function buildSectorButtons(sectors) {
@@ -2652,37 +3241,79 @@ function renderTable() {
     else {
       mcList.innerHTML = filtered.map(s => {
         const chgSign  = s.change_pct > 0 ? '+' : '';
-        const chgColor = s.change_pct > 0 ? '#3fb950' : s.change_pct < 0 ? '#f85149' : '#8b949e';
+        const chgColor = s.change_pct > 0 ? '#00e290' : s.change_pct < 0 ? '#f85149' : '#8b949e';
         const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
         const dotColor = s.signal === 'SAT' ? 'filled-bear' : 'filled-bull';
         const dots = Array.from({length:3}, (_,i) =>
           `<div class="score-dot ${i < scoreVal ? dotColor : 'empty'}"></div>`
         ).join('');
         const fmtP = s.price.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
-        const wt = s.weekly_trend === 1 ? '<span style="color:#3fb950;font-size:11px">↑</span>'
+        const wt = s.weekly_trend === 1 ? '<span style="color:#00e290;font-size:11px">↑</span>'
                  : s.weekly_trend === -1 ? '<span style="color:#f85149;font-size:11px">↓</span>' : '';
-        const confIcon = s.confirmed ? `<span style="color:#3fb950;font-size:10px">✓</span>`
+        const confIcon = s.confirmed ? `<span style="color:#00e290;font-size:10px">✓</span>`
                        : (s.signal !== 'BEKLE' ? `<span style="color:#e3b341;font-size:10px">…</span>` : '');
         let entryTxt = '';
         if (s.signal !== 'BEKLE' && s.signal_bars === 1) {
           entryTxt = '<span style="color:#e3b341">⚡ Bugün</span>';
         } else if (s.signal_price && s.signal !== 'BEKLE' && s.signal_bars >= 2) {
           const ret = ((s.price - s.signal_price) / s.signal_price * 100);
-          const rc = ret >= 0 ? '#3fb950' : '#f85149';
+          const rc = ret >= 0 ? '#00e290' : '#f85149';
           entryTxt = `Giriş ${s.signal_price.toLocaleString('tr-TR',{minimumFractionDigits:2})} <span style="color:${rc}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`;
         }
         const secHtml = s.sector && s.sector !== 'Diğer' ? `<div class="mc-sector">${s.sector}</div>` : '';
         const sigIcon = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
-        return `<a class="mc ${s.is_new_signal ? 'mc-new' : ''}" href="/hisse/${s.ticker}">
+        const sigClass = s.signal === 'AL' ? 'mc-al' : s.signal === 'SAT' ? 'mc-sat' : '';
+
+        /* Data strip: GİRİŞ / SL / DÖNEM — only when there's meaningful data */
+        let stripHtml = '';
+        if (s.signal !== 'BEKLE' && (s.signal_price || s.sl_level)) {
+          const entryVal = s.signal_price
+            ? s.signal_price.toLocaleString('tr-TR', {minimumFractionDigits:2})
+            : '—';
+          const slVal = s.sl_level
+            ? s.sl_level.toLocaleString('tr-TR', {minimumFractionDigits:2})
+            : '—';
+          const barsVal = s.signal_bars ? `${s.signal_bars}G` : '—';
+          const entryColor = s.signal_price
+            ? (s.signal === 'AL' ? '#00e290' : '#f85149')
+            : 'var(--bp-text3)';
+          const slColor = s.sl_level ? '#f85149' : 'var(--bp-text3)';
+          stripHtml = `<div class="mc-strip">
+            <div class="mc-cell">
+              <div class="mc-cell-lbl">GİRİŞ</div>
+              <div class="mc-cell-val" style="color:${entryColor}">${entryVal}</div>
+            </div>
+            <div class="mc-cell">
+              <div class="mc-cell-lbl">STOP</div>
+              <div class="mc-cell-val" style="color:${slColor}">${slVal}</div>
+            </div>
+            <div class="mc-cell">
+              <div class="mc-cell-lbl">DÖNEM</div>
+              <div class="mc-cell-val" style="color:var(--bp-text2)">${barsVal}</div>
+            </div>
+          </div>`;
+        }
+
+        const _isWatchingMc = (typeof watchlist !== 'undefined' && watchlist.has(s.ticker));
+        return `<a class="mc ${sigClass} ${s.is_new_signal ? 'mc-new' : ''}" href="/hisse/${s.ticker}">
           <div class="mc-row1">
             <div class="mc-lft">
-              <div class="mc-ticker">${s.ticker} ${wt}</div>${secHtml}
+              <div class="mc-ticker">${s.ticker} ${wt}${s.is_premium ? ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:11px">★</span>' : ''}</div>${secHtml}
             </div>
-            <div class="mc-rgt">
-              <div class="mc-price" id="mlp-${s.ticker}" data-raw="${s.price}">${fmtP}</div>
-              <div style="font-size:12px;color:${chgColor}" id="mlc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</div>
+            <div class="mc-rgt-wrap">
+              <div class="mc-rgt">
+                <div class="mc-price" id="mlp-${s.ticker}" data-raw="${s.price}">${fmtP}</div>
+                <div style="font-size:12px;color:${chgColor}" id="mlc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</div>
+              </div>
+              <button class="mc-bell ${_isWatchingMc ? 'watching' : ''}" id="mcb-${s.ticker}"
+                      type="button" onclick="event.preventDefault();event.stopPropagation();toggleWatch('${s.ticker}')"
+                      title="${_isWatchingMc ? 'Alarm aktif' : 'Sinyal alarmı kur'}"
+                      aria-label="Sinyal alarmı">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              </button>
             </div>
           </div>
+          ${stripHtml}
           <div class="mc-row2">
             <div style="display:flex;align-items:center;gap:7px">
               <span class="signal-badge signal-${s.signal}" style="font-size:10px" onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()">${sigIcon} ${sigLabel(s.signal)}</span>
@@ -2736,21 +3367,21 @@ function renderTable() {
     // Haftalık trend ikon
     const wt = s.weekly_trend;
     const wtHtml = wt === 1
-      ? '<span style="color:#3fb950;font-size:11px" title="Haftalık: Yükselen">↑</span>'
+      ? '<span style="color:#00e290;font-size:11px" title="Haftalık: Yükselen">↑</span>'
       : wt === -1
         ? '<span style="color:#f85149;font-size:11px" title="Haftalık: Düşen">↓</span>'
         : '<span style="color:#8b949e;font-size:11px" title="Haftalık: Belirsiz">–</span>';
 
     // 3-bar onay
     const confHtml = s.confirmed
-      ? '<span style="color:#3fb950;font-size:10px;margin-left:4px" title="3+ bar onaylı">✓</span>'
+      ? '<span style="color:#00e290;font-size:10px;margin-left:4px" title="3+ bar onaylı">✓</span>'
       : (s.signal !== 'BEKLE' ? '<span style="color:#e3b341;font-size:10px;margin-left:4px" title="Oluşuyor">…</span>' : '');
 
     // Giriş değerlendirmesi — tek cümle
     const _eqSafe = s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI';
     const _eqRisky = s.entry_quality === 'DIKKATLI' || s.entry_quality === 'UZAK';
     const eqHtml = (s.signal !== 'BEKLE' && s.entry_quality)
-      ? `<div style="margin-top:3px;font-size:10px;color:${_eqSafe ? '#3fb950' : '#e3b341'}">${_eqSafe ? 'Güvenli' : 'Giriş için riskli bölge'}</div>`
+      ? `<div style="margin-top:3px;font-size:10px;color:${_eqSafe ? '#00e290' : '#e3b341'}">${_eqSafe ? 'Güvenli' : 'Giriş için riskli bölge'}</div>`
       : '';
 
     // Giriş fiyatı — bars=1 için "Bugün" göster, bars>=2 için fiyat + getiri
@@ -2761,7 +3392,7 @@ function renderTable() {
       const ep = s.signal_price;
       const ret = ((s.price - ep) / ep * 100);
       const retSign = ret >= 0 ? '+' : '';
-      const retColor = ret >= 0 ? '#3fb950' : '#f85149';
+      const retColor = ret >= 0 ? '#00e290' : '#f85149';
       sigPriceHtml = `<span class="sig-price">${ep.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>` +
         `<span style="font-size:10px;color:${retColor};margin-left:3px">${retSign}${ret.toFixed(1)}%</span>`;
     } else {
@@ -2781,7 +3412,7 @@ function renderTable() {
 
     const isWatching = watchlist.has(s.ticker);
     return `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
-      <td><span class="ticker">${s.ticker}</span> ${wtHtml}${sectorHtml}</td>
+      <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:12px">★</span>' : ''} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
       <td onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}${eqHtml}</td>
@@ -2803,19 +3434,80 @@ function setFilter(f, btn) {
     let base = 'filter-btn';
     if (b.classList.contains('filter-today')) base += ' filter-today';
     if (b.classList.contains('filter-watch')) base += ' filter-watch';
+    if (b.classList.contains('filter-premium')) base += ' filter-premium';
     b.className = base;
   });
-  const classMap = { all:'active-all', AL:'active-al', SAT:'active-sat', BEKLE:'active-bekle', TODAY:'active-today', WATCH:'active-watch' };
+  const classMap = { all:'active-all', AL:'active-al', SAT:'active-sat', BEKLE:'active-bekle', TODAY:'active-today', WATCH:'active-watch', PREMIUM:'active-premium' };
   if (btn) btn.classList.add(classMap[f] || '');
   renderTable();
+  updateActiveFiltersBar();
 }
 
-function setSearch(v) { currentSearch = v; renderTable(); }
+function setSearch(v) { currentSearch = v; renderTable(); updateActiveFiltersBar(); }
+
+function updateActiveFiltersBar() {
+  const bar = document.getElementById('activeFiltersBar');
+  const chips = document.getElementById('afbChips');
+  if (!bar || !chips) return;
+
+  const filterLabels = {
+    'all': null,
+    'AL': '🟢 Güçlü Trend',
+    'SAT': '🔴 Zayıf Trend',
+    'BEKLE': '⚪ Belirsiz',
+    'PREMIUM': '⭐ Premium',
+    'TODAY': '⚡ Bugün',
+    'WATCH': '🔔 Takibim',
+  };
+
+  const items = [];
+  // Signal filter chip
+  if (currentFilter && currentFilter !== 'all' && filterLabels[currentFilter]) {
+    items.push({ label: filterLabels[currentFilter], onClear: "setFilter('all', document.querySelector('.filter-btn.active-all') || document.querySelector('.filter-btn'))" });
+  }
+  // Sector chip
+  if (currentSector && currentSector !== 'all') {
+    items.push({ label: '📊 ' + currentSector, onClear: "setSector('all', document.querySelector('.sector-btn[onclick*=\\'all\\']') || document.querySelector('.sector-btn'))" });
+  }
+  // Search chip
+  if (currentSearch && currentSearch.trim()) {
+    items.push({ label: '🔍 "' + currentSearch.toUpperCase() + '"', onClear: "setSearch(''); document.querySelector('.search-input').value=''" });
+  }
+  // Advanced filters
+  if (advFilters.adx > 0) {
+    items.push({ label: 'ADX ≥ ' + advFilters.adx, onClear: "applyAdvFilter('adx', 0)" });
+  }
+  if (advFilters.bars > 0) {
+    items.push({ label: 'Bar ≥ ' + advFilters.bars, onClear: "applyAdvFilter('bars', 0)" });
+  }
+  if (advFilters.vol > 0) {
+    items.push({ label: 'Hacim ≥ ' + advFilters.vol + 'x', onClear: "applyAdvFilter('vol', 0)" });
+  }
+  if (advFilters.rsi !== 'all') {
+    const rsiLabel = advFilters.rsi === 'oversold' ? 'RSI Aşırı Satım' : advFilters.rsi === 'overbought' ? 'RSI Aşırı Alım' : advFilters.rsi;
+    items.push({ label: rsiLabel, onClear: "applyAdvFilter('rsi', 'all')" });
+  }
+  if (advFilters.eq !== 'all') {
+    items.push({ label: 'Giriş: ' + advFilters.eq, onClear: "applyAdvFilter('eq', 'all')" });
+  }
+
+  if (items.length === 0) {
+    bar.style.display = 'none';
+    return;
+  }
+
+  bar.style.display = 'flex';
+  chips.innerHTML = items.map(it =>
+    `<span class="afb-chip">${it.label}<button class="afb-chip-x" onclick="${it.onClear};updateActiveFiltersBar()" title="Bu filtreyi kaldır" aria-label="Kaldır">` +
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` +
+    `</button></span>`
+  ).join('');
+}
 
 function resetFilters() {
   currentSearch  = '';
   currentSector  = 'all';
-  advFilters = { adx: 0, bars: 0, vol: 0, rsi: 'all', eq: 'all' };
+  Object.assign(advFilters, { adx: 0, bars: 0, vol: 0, rsi: 'all', eq: 'all' });
   const searchEl = document.querySelector('.search-input');
   if (searchEl) searchEl.value = '';
   document.getElementById('searchAc')?.classList.remove('open');
@@ -2923,6 +3615,11 @@ function toggleWatch(ticker) {
     btn.className   = 'alarm-btn' + (watchlist.has(ticker) ? ' watching' : '');
     btn.title       = watchlist.has(ticker) ? 'Takibi bırak' : 'Sinyal alarmı kur';
   }
+  const mcBtn = document.getElementById('mcb-' + ticker);
+  if (mcBtn) {
+    mcBtn.className = 'mc-bell' + (watchlist.has(ticker) ? ' watching' : '');
+    mcBtn.title = watchlist.has(ticker) ? 'Alarm aktif' : 'Sinyal alarmı kur';
+  }
   updateFabBadge();
 }
 
@@ -2999,7 +3696,7 @@ function renderAlarmPanel() {
       </div>
       <div class="ap-price-alarms">
         <div class="ap-pa-row">
-          <span class="ap-pa-lbl" style="color:#3fb950">▲ Üstü</span>
+          <span class="ap-pa-lbl" style="color:#00e290">▲ Üstü</span>
           <input class="ap-pa-input ${aboveHasAlarm ? 'has-alarm' : ''}" id="${aboveInputId}"
             type="number" step="0.01" min="0"
             placeholder="${aboveHasAlarm ? pa.above : '—'}"
@@ -3167,22 +3864,34 @@ async function submitToastSubscribe() {
     if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
     return;
   }
+  const subToastNameEl_chk = document.getElementById('subToastName');
+  if (subToastNameEl_chk && subToastNameEl_chk.value.trim().length < 2) {
+    subToastNameEl_chk.style.borderColor = '#f85149';
+    subToastNameEl_chk.focus();
+    return;
+  }
   const btn = document.querySelector('#subToastForm button');
   if (btn) { btn.textContent = 'Kaydediliyor…'; btn.disabled = true; }
   try {
+    const subToastNameEl = document.getElementById('subToastName');
+    const subToastName = subToastNameEl ? subToastNameEl.value.trim() : '';
     const res  = await fetch('/api/subscribe', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, name: subToastName }),
     });
     const json = await res.json();
     const toast = document.getElementById('subToast');
     if (json.ok) {
-      if (toast) toast.innerHTML = '<div style="font-size:13px;color:#3fb950;font-weight:600;padding:4px 0">✅ ' + (json.message || 'Abone oldunuz!') + '</div><div style="font-size:11px;color:#64748b;margin-top:4px">Onay e-postası gönderildi.</div>';
+      // Persist subscribe state
+      if (typeof window.bpRecordSubscribe === 'function' && json.token) {
+        window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
+      }
+      if (toast) toast.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600;padding:4px 0">✅ ' + (json.message || 'Abone oldunuz!') + '</div><div style="font-size:11px;color:#64748b;margin-top:4px">Onay e-postası gönderildi.</div>';
       try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) {}
       setTimeout(() => dismissSubToast(), 4000);
       // Ana subscription bar'ı da güncelle
       const bar = document.getElementById('subscribeBar');
-      if (bar) bar.innerHTML = '<div style="font-size:13px;color:#3fb950;font-weight:600">✅ ' + (json.message || 'Abone oldunuz!') + '</div>';
+      if (bar) bar.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600">✅ ' + (json.message || 'Abone oldunuz!') + '</div>';
     } else {
       showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'));
       if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
@@ -3195,8 +3904,14 @@ async function submitToastSubscribe() {
 
 /* ── E-posta Abone Formu ─────────────────────────── */
 async function submitSubscribe() {
+  const nameEl  = document.getElementById('subName');
   const emailEl = document.getElementById('subEmail');
+  const name    = nameEl ? nameEl.value.trim() : '';
   const email   = emailEl.value.trim();
+  if (!name || name.length < 2) {
+    if (nameEl) { nameEl.style.borderColor = '#f85149'; nameEl.focus(); }
+    return;
+  }
   if (!email || !email.includes('@')) {
     emailEl.style.borderColor = '#f85149';
     emailEl.focus();
@@ -3210,12 +3925,17 @@ async function submitSubscribe() {
     const res  = await fetch('/api/subscribe', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email }),
+      body:    JSON.stringify({ email, name }),
     });
     const json = await res.json();
     if (json.ok) {
+      // Persist subscribe state — cookie zaten server'da set edildi, localStorage'a da kaydet
+      if (typeof window.bpRecordSubscribe === 'function' && json.token) {
+        window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
+      }
       document.getElementById('subscribeBar').innerHTML =
-        `<div style="font-size:13px;color:#3fb950;font-weight:600">✅ ${json.message}</div>`;
+        `<div style="font-size:13px;color:#00e290;font-weight:600;flex:1">✅ ${json.message}</div>` +
+        (json.token ? `<a href="/profil?t=${encodeURIComponent(json.token)}" style="color:#b8c3ff;font-size:12px;text-decoration:none;border:1px solid rgba(184,195,255,0.3);padding:5px 11px;border-radius:6px;font-weight:600;flex-shrink:0">Profili Tamamla →</a>` : '');
     } else {
       showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'));
       btn.textContent = origText;
@@ -3258,7 +3978,7 @@ function _renderGnmCard(item) {
   const isSat = item.signal === 'SAT';
   const cardCls  = isAl ? '' : (isSat ? ' gnm-sat' : ' gnm-bekle');
   const badgeCls = isAl ? 'al' : (isSat ? 'sat' : '');
-  const badgeTxt = isAl ? '▲ Güçlü Trend' : (isSat ? '▼ Zayıf Trend' : '● Belirsiz');
+  const badgeTxt = isAl ? '▲ Güçlü Trend' : (isSat ? '▼ Zayıf Trend' : '● Yatay');
   const chgVal   = parseFloat(item.change_pct || 0);
   const chgCls   = chgVal >= 0 ? 'up' : 'dn';
   const chgTxt   = (chgVal >= 0 ? '+' : '') + chgVal.toFixed(2) + '%';
@@ -3525,8 +4245,8 @@ function showSearchAc(val) {
   }
 
   ac.innerHTML = matches.map((s, i) => {
-    const sigColor = s.signal === 'AL' ? '#3fb950' : s.signal === 'SAT' ? '#f85149' : '#8b949e';
-    const sigBg    = s.signal === 'AL' ? 'rgba(63,185,80,.12)' : s.signal === 'SAT' ? 'rgba(248,81,73,.12)' : 'rgba(139,148,158,.1)';
+    const sigColor = s.signal === 'AL' ? '#00e290' : s.signal === 'SAT' ? '#f85149' : '#8b949e';
+    const sigBg    = s.signal === 'AL' ? 'rgba(0,226,144,.12)' : s.signal === 'SAT' ? 'rgba(248,81,73,.12)' : 'rgba(139,148,158,.1)';
     const sigIcon  = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
     const shortName = (s.name || '').replace(' A.Ş.','').replace(' Holding','').substring(0, 24);
     return `<a class="sac-item" href="/hisse/${s.ticker}" data-idx="${i}">
@@ -3593,9 +4313,9 @@ function showSigTip(ticker, ev) {
   const tip = document.getElementById('sigTip');
   if (!s || !tip) return;
 
-  const sigColor = s.signal === 'AL' ? '#3fb950' : s.signal === 'SAT' ? '#f85149' : '#8b949e';
+  const sigColor = s.signal === 'AL' ? '#00e290' : s.signal === 'SAT' ? '#f85149' : '#8b949e';
   const sigIcon  = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
-  const sigName  = s.signal === 'AL' ? 'Güçlü Trend' : s.signal === 'SAT' ? 'Zayıf Trend' : 'Belirsiz';
+  const sigName  = s.signal === 'AL' ? 'Güçlü Trend' : s.signal === 'SAT' ? 'Zayıf Trend' : 'Yatay';
 
   let html = `<div class="sig-tip-head"><span style="color:${sigColor}">${sigIcon} ${sigName}</span></div>`;
 
@@ -3607,7 +4327,7 @@ function showSigTip(ticker, ev) {
     indsList.forEach(ind => {
       const state = ind.bull ? 'bull' : ind.bear ? 'bear' : 'no';
       const icon  = ind.bull ? '↑' : ind.bear ? '↓' : '○';
-      const color = ind.bull ? '#3fb950' : ind.bear ? '#f85149' : '#30363d';
+      const color = ind.bull ? '#00e290' : ind.bear ? '#f85149' : '#30363d';
       html += `<div class="sig-tip-row">
         <span class="sig-tip-ck" style="color:${color}">${icon}</span>
         <span class="sig-tip-lbl">${ind.label}</span>
@@ -3616,7 +4336,7 @@ function showSigTip(ticker, ev) {
     // RSI extreme warnings for BEKLE
     if (s.rsi != null && (s.rsi >= 70 || s.rsi <= 30)) {
       const note = s.rsi >= 70 ? 'aşırı alım bölgesi' : 'aşırı satım bölgesi';
-      const clr  = s.rsi >= 70 ? '#f85149' : '#3fb950';
+      const clr  = s.rsi >= 70 ? '#f85149' : '#00e290';
       html += `<div class="sig-tip-row"><span class="sig-tip-ck" style="color:${clr}">!</span><span class="sig-tip-lbl" style="color:${clr}">RSI ${s.rsi} — ${note}</span></div>`;
     } else if (s.rsi != null) {
       html += `<div class="sig-tip-row"><span class="sig-tip-ck no">○</span><span class="sig-tip-lbl">RSI ${s.rsi}</span></div>`;
@@ -3625,7 +4345,7 @@ function showSigTip(ticker, ev) {
     if (s.vol_ratio != null && s.vol_ratio >= 2) {
       html += `<div class="sig-tip-row"><span class="sig-tip-ck" style="color:#e3b341">!</span><span class="sig-tip-lbl" style="color:#e3b341">Hacim ×${s.vol_ratio} — yükselme takip edilmeli</span></div>`;
     }
-    html += `<div style="color:#8b949e;font-size:11px;margin-top:6px">Henüz 3 indikatör hizalanmadı</div>`;
+    html += `<div style="color:#8b949e;font-size:11px;margin-top:6px">Trend henüz net değil</div>`;
   } else {
     indsList.forEach(ind => {
       const ok = (s.signal === 'AL' && ind.bull) || (s.signal === 'SAT' && ind.bear);
@@ -3655,7 +4375,7 @@ function showSigTip(ticker, ev) {
   }
   if (s.entry_quality && s.signal !== 'BEKLE') {
     const eqMap = { IDEAL: '✓ İdeal giriş bölgesi', IYI: '✓ İyi giriş bölgesi', DIKKATLI: '⚠ Giriş için riskli', UZAK: '✗ Girişten uzak' };
-    const eqColor = (s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI') ? '#3fb950' : '#e3b341';
+    const eqColor = (s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI') ? '#00e290' : '#e3b341';
     html += `<span style="color:${eqColor}">${eqMap[s.entry_quality] || s.entry_quality}</span>`;
   }
   html += '</div>';
@@ -3764,5 +4484,7 @@ document.addEventListener('keydown', e => {
 });
 </script>
 <div class="sig-tip" id="sigTip"></div>
+
+<script src="/static/bp-search.js?v=42" defer></script>
 </body>
 </html>

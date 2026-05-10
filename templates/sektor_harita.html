@@ -29,132 +29,367 @@
 </script>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="manifest" href="/static/manifest.json">
-<meta name="theme-color" content="#0b111f">
+<meta name="theme-color" content="#0e0e12">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <style>
   :root {
-    --bp-bg:#0b111f; --bp-surface:#111827; --bp-surface2:#1a2438;
-    --bp-border:#1e2d45; --bp-border2:#2d4166;
-    --bp-text:#e2e8f0; --bp-text2:#94a3b8; --bp-text3:#64748b;
-    --bp-brand:#3b82f6; --bp-al:#3fb950; --bp-sat:#f85149;
-    --bp-bkl:#8b949e; --bp-gold:#f59e0b; --bp-radius:10px; --bp-radius-sm:6px;
+    --bp-bg:#0e0e12; --bp-surface:#141416; --bp-surface2:#1c1b1f;
+    --bp-border:#2a2a2c; --bp-border2:#46464d;
+    --bp-text:#e5e1e4; --bp-text2:#c7c5cd; --bp-text3:#909097;
+    --bp-brand:#b8c3ff; --bp-al:#00e290; --bp-sat:#f85149;
+    --bp-bkl:#909097; --bp-gold:#f59e0b; --bp-radius:8px; --bp-radius-sm:4px;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; overflow-x:hidden; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
-  .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:6px; background:var(--bp-surface2); }
-  .back-btn:hover { background:var(--bp-surface2); color:var(--bp-text); }
-  .page-title { font-size:20px; font-weight:700; color:#f0f6fc; }
-  .page-sub   { font-size:13px; color:#8b949e; }
+  body { background:#0e0e12; color:#e5e1e4; font-family:'Manrope',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; overflow-x:hidden; }
+  header {
+    background: rgba(14,14,18,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(42,42,44,0.8);
+    padding: 0 24px; height: 60px;
+    display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100;
+  }
+  .logo-link { display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
+  .logo-mark { width:28px; height:28px; flex-shrink:0; }
+  .logo-text { display:flex; flex-direction:column; line-height:1.15; }
+  .logo-name { font-size:16px; font-weight:700; color:#e5e1e4; letter-spacing:-0.3px; font-family:'Space Grotesk',system-ui,sans-serif; }
+  .logo-name strong { color:#00e290; }
+  .page-title { font-size:17px; font-weight:700; color:var(--bp-text); font-family:'Space Grotesk',system-ui,sans-serif; }
+  .page-sub   { font-size:11px; color:var(--bp-text3); }
+  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
+  .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
+  .top-nav-links a.active { background:var(--bp-surface2); color:#b8c3ff; }
+  @media (max-width:780px) { .top-nav-links { display:none; } }
+  /* Mobile Bottom Nav v2 */
+  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: rgba(14,14,18,0.96); backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%); border-top: 1px solid rgba(42,42,44,0.7); padding-bottom: env(safe-area-inset-bottom); }
+  .mbn-inner { display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; max-width: 600px; margin: 0 auto; }
+  .mbn-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: var(--bp-text3); font-size: 10.5px; font-weight: 600; letter-spacing: 0.05px; transition: color .2s ease; font-family: 'Manrope', system-ui, sans-serif; position: relative; background: none; border: none; cursor: pointer; padding: 0; min-height: 48px; -webkit-tap-highlight-color: transparent; }
+  .mbn-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; transition: transform .2s ease; }
+  .mbn-icon svg { width: 22px; height: 22px; stroke-width: 1.85; }
+  .mbn-label { line-height: 1; white-space: nowrap; }
+  .mbn-item:active .mbn-icon { transform: scale(0.85); }
+  .mbn-item.active { color: #00e290; }
+  .mbn-item.active::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 28px; height: 3px; background: #00e290; border-radius: 0 0 3px 3px; box-shadow: 0 0 10px rgba(0,226,144,.55); }
+  .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(0,226,144,.45)); stroke-width: 2.1; }
+  .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 250; opacity: 0; transition: opacity .25s ease; }
+  .mbn-sheet-backdrop.open { display: block; opacity: 1; }
+  .mbn-sheet { position: fixed; bottom: 0; left: 0; right: 0; z-index: 260; background: #141416; border-top: 1px solid #2a2a2c; border-radius: 16px 16px 0 0; transform: translateY(100%); transition: transform .32s cubic-bezier(.32,.72,0,1); padding: 10px 16px calc(20px + env(safe-area-inset-bottom)); max-height: 75vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,.4); }
+  .mbn-sheet.open { transform: translateY(0); }
+  .mbn-sheet-handle { width: 40px; height: 4px; background: #46464d; border-radius: 2px; margin: 4px auto 14px; }
+  .mbn-sheet-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 12px; font-weight: 700; color: #909097; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 4px; }
+  .mbn-sheet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  @media (max-width: 360px) { .mbn-sheet-grid { grid-template-columns: repeat(3, 1fr); } }
+  .mbn-sheet-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; text-decoration: none; color: #e5e1e4; background: #1c1b1f; border: 1px solid #2a2a2c; border-radius: 10px; padding: 14px 6px; font-size: 11px; font-weight: 600; font-family: 'Manrope', system-ui, sans-serif; letter-spacing: 0.1px; min-height: 70px; transition: background .15s, border-color .15s, transform .1s; text-align: center; }
+  .mbn-sheet-item svg { width: 22px; height: 22px; color: #b8c3ff; stroke-width: 1.85; }
+  .mbn-sheet-item:active { transform: scale(0.96); background: #201f21; border-color: #46464d; }
+  @media (max-width: 768px) {
+    .mobile-bottom-nav { display: block; }
+    body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  }
   .container  { max-width:1200px; margin:0 auto; padding:24px; }
 
   /* Heatmap grid */
-  .heatmap { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; margin-bottom:32px; }
+  .heatmap { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; margin-bottom:32px; }
 
   .sector-card {
-    background:#161b22; border:1px solid #30363d; border-radius:12px; padding:16px;
+    background:#141416; border:1px solid #2a2a2c; border-radius:10px; padding:16px;
     cursor:pointer; transition:border-color .15s, transform .1s;
     position:relative; overflow:hidden;
   }
-  .sector-card:hover { border-color:#58a6ff; transform:translateY(-1px); }
+  .sector-card:hover { border-color:#46464d; transform:translateY(-1px); }
   .sector-card::before {
-    content:''; position:absolute; inset:0; opacity:0.07;
-    background:var(--heat-color, #21262d);
+    content:''; position:absolute; inset:0; opacity:0.06;
+    background:var(--heat-color, #1c1b1f);
   }
 
-  .sec-name { font-size:15px; font-weight:700; margin-bottom:10px; position:relative; }
-  .sec-stats { display:flex; gap:8px; margin-bottom:10px; position:relative; }
-  .stat-pill { padding:3px 8px; border-radius:10px; font-size:12px; font-weight:600; }
-  .pill-al   { background:#1a4731; color:#3fb950; border:1px solid #238636; }
-  .pill-sat  { background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
-  .pill-bkl  { background:#21262d; color:#8b949e; border:1px solid #30363d; }
+  .sec-name { font-size:14px; font-weight:700; margin-bottom:10px; position:relative; font-family:'Space Grotesk',system-ui,sans-serif; }
+  .sec-stats { display:flex; gap:6px; margin-bottom:10px; position:relative; flex-wrap:wrap; }
+  .stat-pill { padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; }
+  .pill-al   { background:rgba(0,226,144,.10); color:#00e290; border:1px solid rgba(0,226,144,.28); }
+  .pill-sat  { background:rgba(248,81,73,.12); color:#ff7b72; border:1px solid rgba(248,81,73,.3); }
+  .pill-bkl  { background:rgba(144,144,151,.1); color:#909097; border:1px solid rgba(144,144,151,.2); }
 
   /* Progress bar */
-  .seg-bar { height:6px; border-radius:3px; background:#21262d; display:flex; overflow:hidden; margin-bottom:10px; position:relative; }
-  .seg-al  { background:#3fb950; transition:width .4s; }
+  .seg-bar { height:5px; border-radius:3px; background:#1c1b1f; display:flex; overflow:hidden; margin-bottom:10px; position:relative; }
+  .seg-al  { background:#00e290; transition:width .4s; }
   .seg-sat { background:#f85149; transition:width .4s; }
-  .seg-bkl { background:#30363d; flex:1; }
+  .seg-bkl { background:#2a2a2c; flex:1; }
 
   /* Score meter */
-  .score { font-size:22px; font-weight:800; position:relative; }
+  .score { font-size:20px; font-weight:800; position:relative; font-family:'Space Grotesk',system-ui,sans-serif; }
 
   /* Detail expand */
-  .detail-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; position:relative; }
-  .stock-chip { padding:2px 7px; border-radius:8px; font-size:11px; font-weight:600; text-decoration:none; }
-  .chip-al  { background:#1a4731; color:#3fb950; }
-  .chip-sat { background:#3d0f0f; color:#f85149; }
-  .chip-bkl { background:#21262d; color:#6e7681; }
+  .detail-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; position:relative; }
+  .stock-chip { padding:2px 7px; border-radius:6px; font-size:11px; font-weight:600; text-decoration:none; }
+  .chip-al  { background:rgba(0,226,144,.10); color:#00e290; border:1px solid rgba(0,226,144,.22); }
+  .chip-sat { background:rgba(248,81,73,.12); color:#ff7b72; border:1px solid rgba(248,81,73,.25); }
+  .chip-bkl { background:rgba(144,144,151,.08); color:#909097; border:1px solid rgba(144,144,151,.18); }
 
   /* Legend */
-  .legend { display:flex; gap:20px; align-items:center; margin-bottom:20px; font-size:13px; flex-wrap:wrap; }
-  .legend-dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+  .legend { display:flex; gap:16px; align-items:center; margin-bottom:16px; font-size:12px; flex-wrap:wrap; color:#909097; }
+  .legend-dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:4px; }
 
   /* Summary row */
-  .sum-row { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:24px; }
-  .sum-chip { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:10px 16px; text-align:center; flex:1; min-width:120px; }
-  .sum-num  { font-size:24px; font-weight:800; }
-  .sum-lbl  { font-size:11px; color:#8b949e; text-transform:uppercase; letter-spacing:.4px; }
+  .sum-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+  .sum-chip { background:#141416; border:1px solid #2a2a2c; border-radius:8px; padding:10px 14px; text-align:center; flex:1; min-width:100px; transition:border-color .15s; }
+  .sum-chip:hover { border-color:#46464d; }
+  .sum-num  { font-size:22px; font-weight:800; font-family:'Space Grotesk',system-ui,sans-serif; }
+  .sum-lbl  { font-size:10px; color:#909097; text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
 
   /* Loading */
-  .loading-msg { text-align:center; padding:60px; color:#484f58; font-size:16px; }
+  .loading-msg { text-align:center; padding:60px; color:#909097; font-size:15px; }
 
-  footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
-  footer a { color:#8b949e; text-decoration:none; }
+  footer { text-align:center; padding:20px; font-size:12px; color:#909097; border-top:1px solid #2a2a2c; margin-top:32px; }
+  footer a { color:#909097; text-decoration:none; }
+  footer a:hover { color:#c7c5cd; }
 
-  @media(max-width:600px) { .container{padding:12px;} .heatmap{grid-template-columns:1fr;} }
+  @media(max-width:600px) { .container{padding:12px;} .heatmap{grid-template-columns:1fr 1fr;} }
+  @media(max-width:400px) { .heatmap{grid-template-columns:1fr;} }
 
   /* ── Makro Ticker Bandı ── */
-  .macro-bar { background:#0b111f; border-bottom:1px solid #1e2d45; height:34px; overflow:hidden; position:relative; white-space:nowrap; }
+  .macro-bar { background:#0e0e12; border-bottom:1px solid #2a2a2c; height:34px; overflow:hidden; position:relative; white-space:nowrap; }
   .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2; }
-  .macro-bar::before { left:0; background:linear-gradient(to right,#0b111f,transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,#0b111f,transparent); }
+  .macro-bar::before { left:0; background:linear-gradient(to right,#0e0e12,transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,#0e0e12,transparent); }
   .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #1e2d45; font-size:12px; height:34px; color:inherit; }
-  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
+  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #2a2a2c; font-size:12px; height:34px; color:inherit; }
+  .macro-item-lbl { font-weight:600; color:#c7c5cd; }
+  .mc-pos { color:#00e290; } .mc-neg { color:#f85149; } .mc-neu { color:#909097; }
+
+  /* ── Quick Topic Chips ── */
+  .quick-topics { display: flex; gap: 8px; align-items: center; padding: 9px 24px; background: rgba(20,20,22,0.5); border-bottom: 1px solid var(--bp-border); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; white-space: nowrap; position: relative; z-index: 5; }
+  .quick-topics::-webkit-scrollbar { display: none; }
+  .qt-label { flex-shrink: 0; font-size: 10px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 2px; font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .qt-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; background: rgba(184,195,255,0.04); border: 1px solid var(--bp-border); border-radius: 14px; font-size: 12px; font-weight: 500; color: var(--bp-text2); text-decoration: none; transition: background .15s ease, border-color .15s ease, color .15s ease; font-family: 'Manrope', system-ui, sans-serif; line-height: 1.3; }
+  .qt-chip:hover { background: rgba(184,195,255,0.10); border-color: var(--bp-border2); color: var(--bp-text); }
+  .qt-chip-icon { font-size: 12px; line-height: 1; }
+  .qt-chip-hot { background: rgba(0,226,144,0.07); border-color: rgba(0,226,144,0.28); color: #6fdfb1; }
+  .qt-chip-hot:hover { background: rgba(0,226,144,0.14); border-color: #00e290; color: #00e290; }
+  .qt-chip-hot .qt-chip-pulse { width: 5px; height: 5px; border-radius: 50%; background: #00e290; box-shadow: 0 0 6px rgba(0,226,144,0.7); animation: qtPulse 1.6s ease-in-out infinite; }
+  @keyframes qtPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.7); } }
+  @media (max-width: 768px) { .quick-topics { padding: 8px 12px; } .qt-label { display: none; } }
+
+  /* ── Header Search Button ── */
+  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius: 6px; color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 8px; }
+  .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
+  /* ── Search Overlay ── */
+  .search-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
+  .search-overlay.open { display: flex; }
+  .search-modal { width: min(560px, calc(100vw - 32px)); background: #141416; border: 1px solid var(--bp-border); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
+  .search-input-wrap { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--bp-border); }
+  .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
+  #searchInput { flex: 1; background: none; border: none; outline: none; font-size: 15px; color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }
+  #searchInput::placeholder { color: var(--bp-text3); }
+  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .search-close:hover { background: var(--bp-surface2); color: var(--bp-text); }
+  .search-results { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
+  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: 13px; }
+  .search-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px 6px; }
+  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; transition: background .12s; font-size: 13px; }
+  .search-result:hover, .search-result.sr-selected { background: var(--bp-surface2); }
+  .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: 13px; }
+  .sr-sig.sr-al { color: #00e290; font-weight: 700; }
+  .sr-sig.sr-sat { color: #f85149; font-weight: 700; }
+  .sr-sig.sr-bekle { color: #909097; }
+  .sr-name { color: var(--bp-text2); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .sr-price { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--bp-text2); }
+  .sr-chg { font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600; min-width: 56px; text-align: right; }
+  .sr-chg.pos { color: #00e290; } .sr-chg.neg { color: #f85149; } .sr-chg.neu { color: #909097; }
+  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; font-size: 13px; transition: background .12s; }
+  .search-topic:hover, .search-topic.sr-selected { background: var(--bp-surface2); }
+  @media (max-width: 600px) {
+    .search-overlay { padding-top: 0; align-items: stretch; }
+    .search-modal { width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; border: none; }
+    .search-result { grid-template-columns: 56px 14px 1fr auto; }
+    .sr-price { display: none; }
+  }
+
+  .stat-pill.pill-prem {
+    background: rgba(255,200,80,0.14);
+    color: #ffc850;
+    border: 1px solid rgba(255,200,80,0.45);
+    font-weight: 700;
+  }
+  .sector-card { color: inherit; cursor: pointer; }
+  .sector-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.4); }
 </style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 </head>
 <body>
-<header>
-  <a href="/" class="back-btn">
-    <svg width="20" height="20" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="36" height="36" rx="9" fill="#111827"/>
-      <circle cx="18" cy="18" r="13" stroke="#1e2d45" stroke-width="1"/>
-      <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#3b82f6"/>
-      <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#1e3a62"/>
-      <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#1e3a62"/>
-      <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#1e3a62"/>
-      <circle cx="18" cy="18" r="2.8" fill="#1d4ed8"/>
-      <circle cx="18" cy="18" r="1.4" fill="#bfdbfe"/>
-    </svg>
-    BorsaPusula
-  </a>
-  <div>
-    <h1 class="page-title">🗺️ Sektör Isı Haritası</h1>
-    <div class="page-sub" id="lastUpdate">Veriler yükleniyor...</div>
+<!-- Mobile Bottom Navigation -->
+<nav class="mobile-bottom-nav" aria-label="Ana navigasyon">
+  <div class="mbn-inner">
+    <a href="/" class="mbn-item" data-route="/">
+      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      <span class="mbn-label">Ana Sayfa</span>
+    </a>
+    <a href="/tarama" class="mbn-item" data-route="/tarama">
+      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <span class="mbn-label">Tarama</span>
+    </a>
+    <a href="/ozet" class="mbn-item" data-route="/ozet">
+      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+      <span class="mbn-label">Özet</span>
+    </a>
+    <a href="/sektor-harita" class="mbn-item" data-route="/sektor-harita">
+      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg></span>
+      <span class="mbn-label">Sektörler</span>
+    </a>
+    <button class="mbn-item" type="button" onclick="toggleMbnSheet()" aria-label="Daha fazla menü">
+      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></svg></span>
+      <span class="mbn-label">Daha</span>
+    </button>
   </div>
+</nav>
+
+<div class="mbn-sheet-backdrop" id="mbnSheetBackdrop" onclick="closeMbnSheet()"></div>
+<div class="mbn-sheet" id="mbnSheet" role="dialog" aria-label="Daha fazla menü" aria-modal="true">
+  <div class="mbn-sheet-handle"></div>
+  <div class="mbn-sheet-title">Piyasalar</div>
+  <div class="mbn-sheet-grid">
+    <a href="/kripto" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg><span>Kripto</span></a>
+    <a href="/emtialar" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8M11 13l2-2"/></svg><span>Emtialar</span></a>
+    <a href="/abd" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg><span>ABD</span></a>
+    <a href="/gundem" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Gündem</span></a>
+  </div>
+  <div class="mbn-sheet-title" style="margin-top:18px">Araçlar</div>
+  <div class="mbn-sheet-grid">
+    <a href="/portfolio" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Portföy</span></a>
+    <a href="/bilanco-takvimi" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Takvim</span></a>
+    <a href="/sinyal-performans" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Performans</span></a>
+    <a href="/karsilastir" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Karşılaştır</span></a>
+  </div>
+  <div class="mbn-sheet-title" style="margin-top:18px">Daha</div>
+  <div class="mbn-sheet-grid">
+    <a href="/blog" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Blog</span></a>
+    <a href="/metodoloji" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>Metodoloji</span></a>
+    <a href="/hakkinda" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Hakkında</span></a>
+    <a href="/iletisim" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>İletişim</span></a>
+  </div>
+</div>
+<script>
+function toggleMbnSheet(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;if(s.classList.contains('open'))closeMbnSheet();else{s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}}
+function closeMbnSheet(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
+(function(){const p=window.location.pathname;document.querySelectorAll('.mbn-item[data-route]').forEach(el=>{const r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r))el.classList.add('active');});})();
+</script>
+<header>
+  <a href="/" class="logo-link" aria-label="BorsaPusula — Piyasanın Yönü">
+    <svg class="bp-logo" width="200" height="52" viewBox="0 0 460 120" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bpNeedle" x1="60" y1="22" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#b8c3ff"/>
+          <stop offset="1" stop-color="#00e2a1"/>
+        </linearGradient>
+      </defs>
+      <rect x="14" y="20" width="80" height="80" rx="18" fill="#0f1218" stroke="#28303f"/>
+      <g stroke="#222a37" stroke-width="1">
+        <line x1="22" y1="46" x2="86" y2="46"/>
+        <line x1="22" y1="74" x2="86" y2="74"/>
+        <line x1="40" y1="28" x2="40" y2="92"/>
+        <line x1="68" y1="28" x2="68" y2="92"/>
+      </g>
+      <path d="M54 33 L62 60 L54 55 L46 60 Z" fill="url(#bpNeedle)"/>
+      <path d="M54 87 L60 61 L54 64 L48 61 Z" fill="#2c3445"/>
+      <circle cx="54" cy="60" r="3.5" fill="#eef3f8"/>
+      <circle cx="54" cy="60" r="1.4" fill="#00e2a1"/>
+      <text x="116" y="66" fill="#eef3f8" font-family="'Sora','Manrope',Arial,sans-serif" font-size="34" font-weight="800" letter-spacing="-0.5">Borsa<tspan fill="#00e2a1">Pusula</tspan></text>
+      <line x1="118" y1="78" x2="430" y2="78" stroke="#1e2532" stroke-width="1"/>
+      <text x="118" y="94" fill="#8f98a8" font-family="'Manrope',Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2.4">PİYASANIN YÖNÜ</text>
+    </svg>
+  </a>
+  <div style="margin-left:12px;min-width:0">
+    <h1 class="page-title">Sektör Isı Haritası</h1>
+    <div class="page-sub" id="lastUpdate">Yükleniyor...</div>
+  </div>
+  <nav class="bp-main-nav" aria-label="Ana navigasyon">
+  <a href="/" data-route="/" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Sinyaller</span>
+  </a>
+  <a href="/tarama" data-route="/tarama" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>Tarama</span>
+  </a>
+  <a href="/bilanco-takvimi" data-route="/bilanco-takvimi" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Bilanço</span>
+  </a>
+  <a href="/sektor-harita" data-route="/sektor-harita" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
+    <span>Sektörler</span>
+  </a>
+  <a href="/sinyal-performans" data-route="/sinyal-performans" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span>Performans</span>
+  </a>
+  <a href="/blog" data-route="/blog" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    <span>Blog</span>
+  </a>
+  <div class="bp-nav-more-wrap">
+    <button type="button" class="bp-nav-item bp-nav-more-btn" aria-haspopup="true" aria-expanded="false">
+      <span>Daha</span>
+      <svg class="bp-nav-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="bp-nav-more-menu" role="menu">
+      <a href="/portfolio" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
+      <a href="/ozet" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
+      <a href="/karsilastir" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
+      <a href="/hisseler" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
+      <a href="/gucu-yuksek" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Güçlü Trend</a>
+      <div class="bp-nav-sep"></div>
+      <a href="/kripto" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>Kripto</a>
+      <a href="/emtialar" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8"/></svg>Emtialar</a>
+      <a href="/abd" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>ABD</a>
+      <a href="/gundem" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
+      <div class="bp-nav-sep"></div>
+      <a href="/metodoloji" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Metodoloji</a>
+      <a href="/hakkinda" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Hakkında</a>
+      <a href="/iletisim" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>İletişim</a>
+    </div>
+  </div>
+</nav>
+  <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </button>
 </header>
+<h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Sektör Isı Haritası — BIST</h1>
+
 <!-- Makro Ticker Bandı -->
 <div class="macro-bar"><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+<nav class="quick-topics" aria-label="Popüler içerikler">
+  <span class="qt-label">Popüler:</span>
+  <a href="/gucu-yuksek" class="qt-chip qt-chip-hot"><span class="qt-chip-pulse"></span>AL Sinyalleri</a>
+  <a href="/" class="qt-chip"><span class="qt-chip-icon">🏠</span>Ana Sayfa</a>
+  <a href="/tarama" class="qt-chip"><span class="qt-chip-icon">🔍</span>Hisse Tarama</a>
+  <a href="/bilanco-takvimi" class="qt-chip"><span class="qt-chip-icon">📅</span>Bilanço Takvimi</a>
+  <a href="/ozet" class="qt-chip"><span class="qt-chip-icon">📊</span>Günlük Özet</a>
+  <a href="/sinyal-performans" class="qt-chip"><span class="qt-chip-icon">📈</span>Sinyal Performansı</a>
+  <a href="/kripto" class="qt-chip"><span class="qt-chip-icon">₿</span>Kripto</a>
+  <a href="/karsilastir" class="qt-chip"><span class="qt-chip-icon">⚖️</span>Karşılaştır</a>
+</nav>
 
 <div class="container">
 
   <div class="legend">
-    <span><span class="legend-dot" style="background:#3fb950"></span> Güçlü Trend</span>
+    <span><span class="legend-dot" style="background:#00e290"></span> Güçlü Trend</span>
     <span><span class="legend-dot" style="background:#f85149"></span> Zayıf Trend</span>
-    <span><span class="legend-dot" style="background:#30363d"></span> Belirsiz</span>
-    <span style="color:#8b949e;font-size:12px">Skor: (Güçlü − Zayıf) / Toplam × 100</span>
+    <span><span class="legend-dot" style="background:#2a2a2c"></span> Belirsiz</span>
+    <span>Skor: (Güçlü − Zayıf) / Toplam × 100</span>
   </div>
 
   <div class="sum-row" id="sumRow">
-    <div class="sum-chip"><div class="sum-num" id="sumAl" style="color:#3fb950">—</div><div class="sum-lbl">Güçlü Trend</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumAl" style="color:#00e290">—</div><div class="sum-lbl">Güçlü Trend</div></div>
     <div class="sum-chip"><div class="sum-num" id="sumSat" style="color:#f85149">—</div><div class="sum-lbl">Zayıf Trend</div></div>
-    <div class="sum-chip"><div class="sum-num" id="sumBkl" style="color:#8b949e">—</div><div class="sum-lbl">Belirsiz</div></div>
-    <div class="sum-chip"><div class="sum-num" id="sumTotal" style="color:#58a6ff">—</div><div class="sum-lbl">Toplam Hisse</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumBkl" style="color:#909097">—</div><div class="sum-lbl">Belirsiz</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumTotal" style="color:#b8c3ff">—</div><div class="sum-lbl">Toplam Hisse</div></div>
   </div>
 
   <div class="heatmap" id="heatmap">
@@ -172,16 +407,16 @@ const SECTORS = {};  // ticker → sector (doldurulacak)
 let allStocks  = [];
 
 function sigLabel(sig) {
-  return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Belirsiz'}[sig] || sig;
+  return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Yatay'}[sig] || sig;
 }
 
 function heatColor(score) {
-  // score: -100..+100  →  renk
-  if (score >= 60)  return '#3fb950';
-  if (score >= 30)  return '#56d364';
-  if (score >= 10)  return '#7ee787';
-  if (score >= -10) return '#8b949e';
-  if (score >= -30) return '#f78166';
+  // score: -100..+100  →  renk (Stitch palette)
+  if (score >= 60)  return '#00e290';
+  if (score >= 30)  return '#34d399';
+  if (score >= 10)  return '#6ee7b7';
+  if (score >= -10) return '#909097';
+  if (score >= -30) return '#f97066';
   if (score >= -60) return '#f85149';
   return '#da3633';
 }
@@ -193,7 +428,8 @@ function renderHeatmap(stocks) {
 
   stocks.forEach(s => {
     const sec = s.sector || 'Diğer';
-    if (!secMap[sec]) secMap[sec] = { al:[], sat:[], bkl:[] };
+    if (!secMap[sec]) secMap[sec] = { al:[], sat:[], bkl:[], premium:[] };
+    if (s.is_premium) secMap[sec].premium.push(s);
     if (s.signal === 'AL') { secMap[sec].al.push(s); totalAl++; }
     else if (s.signal === 'SAT') { secMap[sec].sat.push(s); totalSat++; }
     else { secMap[sec].bkl.push(s); totalBkl++; }
@@ -223,14 +459,19 @@ function renderHeatmap(stocks) {
     const bklSample = sec.bkl.slice(0,6).map(s => `<a href="/hisse/${s.ticker}" class="stock-chip chip-bkl">${s.ticker}</a>`).join('');
     const bklMore  = sec.bkl.length > 6 ? `<span class="stock-chip chip-bkl">+${sec.bkl.length-6}</span>` : '';
 
+    const premCount = sec.premium ? sec.premium.length : 0;
+    const premPill  = premCount > 0
+      ? `<span class="stat-pill pill-prem" title="Premium sinyaller (AL + Hacim Onaylı, RVOL ≥ 1.20)">★ ${premCount}</span>`
+      : '';
     return `
-    <div class="sector-card" style="--heat-color:${color}">
+    <div class="sector-card" data-sector="${sec.name}" data-href="/tarama?sector=${encodeURIComponent(sec.name)}" style="--heat-color:${color};cursor:pointer" title="${sec.name} sektöründeki tüm hisseleri taramaya götür" tabindex="0" role="link">
       <div class="sec-name" style="color:${color}">${sec.name}</div>
       <div class="sec-stats">
+        ${premPill}
         <span class="stat-pill pill-al">▲ ${sec.al.length}</span>
         <span class="stat-pill pill-sat">▼ ${sec.sat.length}</span>
         <span class="stat-pill pill-bkl">● ${sec.bkl.length}</span>
-        <span style="margin-left:auto;font-size:11px;color:#8b949e">${sec.total} hisse</span>
+        <span style="margin-left:auto;font-size:11px;color:#909097">${sec.total} hisse</span>
       </div>
       <div class="seg-bar">
         <div class="seg-al"  style="width:${alPct}%"></div>
@@ -239,11 +480,29 @@ function renderHeatmap(stocks) {
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="score" style="color:${color}">${sec.score > 0 ? '+' : ''}${sec.score}</div>
-        <div style="font-size:11px;color:#8b949e">Skor</div>
+        <div style="font-size:11px;color:#909097">Skor</div>
       </div>
       ${alChips || satChips ? `<div class="detail-row">${alChips}${satChips}${bklSample}${bklMore}</div>` : ''}
     </div>`;
   }).join('');
+
+  // Click delegation: card click navigates, BUT inner <a> (stock chip) clicks pass through naturally
+  document.querySelectorAll('.sector-card').forEach(card => {
+    if (card._bpBound) return;
+    card._bpBound = true;
+    card.addEventListener('click', e => {
+      // If a child <a> was clicked, let it handle (browser default)
+      if (e.target.closest('a')) return;
+      const href = card.dataset.href;
+      if (href) window.location.href = href;
+    });
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const href = card.dataset.href;
+        if (href) window.location.href = href;
+      }
+    });
+  });
 }
 
 let _loadAttempts = 0;
@@ -256,7 +515,7 @@ async function load() {
       _loadAttempts++;
       if (_loadAttempts >= 4) {
         document.getElementById('heatmap').innerHTML =
-          '<div class="loading-msg">⚠️ Veriler henüz hazır değil. <a href="javascript:location.reload()" style="color:#58a6ff">Sayfayı yenile</a></div>';
+          '<div class="loading-msg">⚠️ Veriler henüz hazır değil. <a href="javascript:location.reload()" style="color:#b8c3ff">Sayfayı yenile</a></div>';
         document.getElementById('lastUpdate').textContent = 'Veri bekleniyor…';
         return;
       }
@@ -271,7 +530,7 @@ async function load() {
     _loadAttempts++;
     if (_loadAttempts >= 3) {
       document.getElementById('heatmap').innerHTML =
-        '<div class="loading-msg">⚠️ Bağlantı hatası. <a href="javascript:location.reload()" style="color:#58a6ff">Sayfayı yenile</a></div>';
+        '<div class="loading-msg">⚠️ Bağlantı hatası. <a href="javascript:location.reload()" style="color:#b8c3ff">Sayfayı yenile</a></div>';
       return;
     }
     setTimeout(load, 15000);
@@ -284,8 +543,10 @@ setInterval(load, 120000);  // Her 2 dakika yenile
 // Makro Ticker Bandı
 const _ML={USDTRY:'USD/TRY',EURTRY:'EUR/TRY',XU100:'BIST100',XU030:'BIST30',BIST30:'BIST30',BTC:'BTC',ALTIN:'Altın',GUMUS:'Gümüş',SP500:'S&P500',NASDAQ:'NASDAQ'};
 const _MD={USDTRY:4,EURTRY:4,XU100:0,XU030:0,SP500:0,NASDAQ:0,BTC:0};
-async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e){}}
+async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e){}}
 loadMacroBar();setInterval(loadMacroBar,60000);
 </script>
+
+<script src="/static/bp-search.js?v=42" defer></script>
 </body>
 </html>

@@ -1,8 +1,11 @@
-from flask import Flask, jsonify, render_template, Response, request, abort
+from flask import Flask, jsonify, render_template, Response, request, abort, redirect
 import yfinance as yf
 import pandas as pd
 import numpy as np
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
+
+# Türkiye saati: UTC+3, DST yok (2016'dan beri sabit)
+_TZ_TR = timezone(timedelta(hours=3))
 import threading
 import collections
 import logging
@@ -175,6 +178,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger("bist30")
 
+# Delisted/merged BIST hisseleri - 410 Gone
+DELISTED_TICKERS = {
+    "ANACM",  # Anadolu Cam - 2020 Sisecam birlesmesi
+}
+
 # BIST100 hisse listesi (XU030 endeks dahil)
 BIST100 = [
     # ── BIST30 ──────────────────────────────────────────
@@ -201,7 +209,7 @@ BIST100 = [
     "YATAS", "ZOREN",
     # ── BIST100+ genişleme ──────────────────────────────
     "ADEL",  "ADESE", "AKMGY", "AKGRT", "ARSAN",
-    "AYCES", "BASGZ", "BIOEN", "BOSSA", "CEMTS",
+    "AYCES", "BIOEN", "BOSSA", "CEMTS",
     "CEMAS", "CLEBI", "CRDFA", "DENGE", "DNISI",
     "DOGUB", "DURDO", "DYOBY", "ECILC",
     "EDIP",  "EGGUB", "EGPRO", "EMKEL", "ERBOS",
@@ -212,6 +220,23 @@ BIST100 = [
     "KRSTL", "LKMNH", "LUKSK", "MAKTK", "MPARK",
     "MEDTR", "MEGAP", "MTRKS",
     "NATEN", "NIBAS", "NUHCM", "ORGE",
+    # ── Faz 2: Yıldız Pazar genişlemesi (>=200M TL/gün, 2026-05-07) ─
+    "ASTOR", "PEKGY", "PASEU", "MIATK", "CANTE",
+    "KLRHO", "PSGYO", "QUAGR", "IZENR", "EUREN",
+    "ALKLC", "YEOTK", "BINHO", "FZLGY", "SKBNK",
+    "MAGEN", "SURGY", "ESEN", "REEDR", "ALTNY",
+    "ENERY", "BTCIM", "SDTTR", "BURCE", "TUKAS",
+    "MARTI", "FONET", "AGROT", "MRGYO", "TUREX",
+    "LILAK", "TCKRC", "PENGD", "PAPIL", "AYGAZ",
+    "TSKB", "FORTE", "AKFYE", "TEKTU", "LMKDC",
+    "ECZYT", "ARENA", "USAK", "MARKA", "BERA",
+    "LINK", "MERCN", "ARDYZ", "KZBGY", "GMTAS",
+    "AHGAZ",
+    # ── 125M cutoff genişleme (2026-05-07) ──
+    "KAREL", "ARZUM", "AKCNS", "MERKO", "KARSN",
+    "POLHO", "TABGD", "GENTS", "ANELE", "HATSN",
+    "SMART", "PKART", "AYEN", "EDATA", "TMSN",
+    "AYDEM", "SNGYO", "YESIL", "LRSHO", "DERHL",
     # ── Endeks ──────────────────────────────────────────
     "XU030",
 ]
@@ -318,8 +343,8 @@ STOCK_NAMES = {
     "AKMGY": "Akmerkez GYO",
     "AKGRT": "Aksigorta A.Ş.",
     "ARSAN": "Arsan Tekstil",
-    "AYCES": "Ayces Turizm",
-    "BASGZ": "Başgüç Enerji",
+    "AYCES": "Altınyunus Çeşme Turistik",
+    "BASGZ": "Başkent Doğalgaz GMYO",
     "BIOEN": "Biotrend Çevre",
     "BOSSA": "Bossa Ticaret ve Sanayi",
     "CEMTS": "Çemtaş Çelik Makine",
@@ -327,9 +352,9 @@ STOCK_NAMES = {
     "CLEBI": "Çelebi Hava Servisi",
     "CRDFA": "Creditwest Faktoring",
     "DENGE": "Denge Yatırım Holding",
-    "DNISI": "Deniz İnşaat",
+    "DNISI": "Dinamik Isı Makina",
     "DOBUR": "Doğuş Otomotiv Servis",
-    "DOGUB": "Doğuş Holding",
+    "DOGUB": "Doğusan Boru",
     "DURDO": "Duran Doğan Basım",
     "DYOBY": "DYO Boya Fabrikaları",
     "ECILC": "Eczacıbaşı İlaç",
@@ -340,28 +365,28 @@ STOCK_NAMES = {
     "ERBOS": "Erbosan Erciyas Boru",
     "ERSU":  "Ersu Meyve ve Gıda",
     "ESCOM": "Escort Teknoloji",
-    "FMIZP": "Formateks Tekstil",
-    "FORMT": "Formosa Asya Holding",
+    "FMIZP": "Federal-Mogul İzmit Piston",
+    "FORMT": "Formet Metal ve Cam",
     "GESAN": "Gersan Elektrik Ticaret",
     "GSDHO": "GSD Holding",
     "GSRAY": "Galatasaray Sportif",
-    "GOKNR": "Göknel Holding",
+    "GOKNR": "Göknur Gıda",
     "HDFGS": "Hedef Girişim Sermayesi",
     "HLGYO": "Halk GYO",
-    "HTTBT": "Hat Teknoloji",
+    "HTTBT": "Hitit Bilgisayar",
     "IEYHO": "İEYHO İnşaat",
     "IPMAT": "İpek Matbaacılık",
-    "ISKPL": "İş Yapı GYO",
+    "ISKPL": "Işık Plastik",
     "ISFIN": "İş Finansal Kiralama",
     "KAPLM": "Kaplamin Ambalaj",
     "KATMR": "Katmerciler Araç Üstü",
     "KERVT": "Kervansaray Yatırım",
-    "KMPUR": "Kâmpur Enerji",
+    "KMPUR": "Kimteks Poliüretan",
     "KONYA": "Konya Çimento",
     "KRSTL": "Kristal Kola",
     "LKMNH": "Lokman Hekim",
     "LUKSK": "Lüks Kadife",
-    "MAKTK": "Maktek Makine",
+    "MAKTK": "Makina Takım Endüstrisi",
     "MPARK": "Mia Teknoloji (MParKEY)",
     "MEDTR": "Meditera Tıbbi Malzeme",
     "MEGAP": "Mega Polietilen",
@@ -375,6 +400,79 @@ STOCK_NAMES = {
     "ORGE":  "Orge Enerji Elektrik",
     # ── Endeks ──────────────────────────────────────────
     "XU030": "BIST 30 Endeksi",
+    # Faz 2 genişleme
+    "ASTOR":  "Astor Enerji",
+    "PEKGY":  "Peker GMYO",
+    "PASEU":  "Paşabahçe Cam",
+    "MIATK":  "Mia Teknoloji",
+    "CANTE":  "Çan2 Termik",
+    "KLRHO":  "Kiler Holding",
+    "PSGYO":  "Pera GMYO",
+    "QUAGR":  "Qua Granite",
+    "IZENR":  "İzdemir Enerji",
+    "EUREN":  "Eurasia Eurobond",
+    "ALKLC":  "Alkaloid Sağlık",
+    "YEOTK":  "YEO Teknoloji",
+    "BINHO":  "Binbir Holding",
+    "FZLGY":  "Fuzul GMYO",
+    "SKBNK":  "Şekerbank",
+    "MAGEN":  "Margün Enerji",
+    "SURGY":  "Sur GMYO",
+    "ESEN":  "Esenboğa Elektrik",
+    "REEDR":  "Reeder Teknoloji",
+    "ALTNY":  "Altınay Savunma",
+    "ENERY":  "Enerya Enerji",
+    "BTCIM":  "Batıçim Çimento",
+    "SDTTR":  "SDT Uzay ve Savunma",
+    "BURCE":  "Burçelik Vana",
+    "TUKAS":  "Tukaş Gıda",
+    "MARTI":  "Martı Otel",
+    "FONET":  "Fonet Bilgi Tek.",
+    "AGROT":  "Agrotech Yüksek Tek.",
+    "MRGYO":  "Marbaş GMYO",
+    "TUREX":  "Türk Tuborg",
+    "LILAK":  "Lila Kağıt",
+    "TCKRC":  "Türk Tuborg Cyt.",
+    "PENGD":  "Penguen Gıda",
+    "PAPIL":  "Papilon Savunma",
+    "AYGAZ":  "Aygaz",
+    "TSKB":  "Türkiye Sınai Kalkınma Bankası",
+    "FORTE":  "Forte Bilgi İletişim",
+    "AKFYE":  "Akfen Yenilenebilir Enerji",
+    "TEKTU":  "Tek-Art İnşaat",
+    "LMKDC":  "Limak Doğu Anadolu Çimento",
+    "ECZYT":  "Eczacıbaşı Yatırım",
+    "ARENA":  "Arena Bilgisayar",
+    "USAK":  "Uşak Seramik",
+    "MARKA":  "Marka Yatırım",
+    "BERA":  "Bera Holding",
+    "LINK":  "Link Bilgisayar",
+    "MERCN":  "Mercan Kimya",
+    "ARDYZ":  "Ard Bilgi Tek.",
+    "KZBGY":  "Kızılbük GMYO",
+    "GMTAS":  "Gümüş Madencilik",
+    "AHGAZ":  "Ahlatcı Doğal Gaz",
+    # 125M cutoff genişleme
+    "KAREL":  "Karel Elektronik",
+    "ARZUM":  "Arzum Küçük Ev Aletleri",
+    "AKCNS":  "Akçansa Çimento",
+    "MERKO":  "Merko Gıda",
+    "KARSN":  "Karsan Otomotiv",
+    "POLHO":  "Polisan Holding",
+    "TABGD":  "Taze Beyaz Gıda",
+    "GENTS":  "Genel Mobilya",
+    "ANELE":  "Anel Elektrik",
+    "HATSN":  "Hateks",
+    "SMART":  "Smart Solar Tek.",
+    "PKART":  "Plastikkart",
+    "AYEN":  "Ayen Enerji",
+    "EDATA":  "E-Data Teknoloji",
+    "TMSN":  "Tümosan Motor",
+    "AYDEM":  "Aydem Enerji",
+    "SNGYO":  "Sinpaş GMYO",
+    "YESIL":  "Yeşil GMYO",
+    "LRSHO":  "Liderfarma Holding",
+    "DERHL":  "Derindere Holding",
 }
 
 # ── KAP (Kamuyu Aydınlatma Platformu) UUID OID eşleştirme ───────────────────
@@ -500,7 +598,7 @@ def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
         "Content-Type": "application/json",
     }
     from_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
-    to_date   = datetime.now().strftime("%Y-%m-%d")
+    to_date   = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
 
     results = []
     for disc_class in ("ODA", "FR"):
@@ -548,36 +646,53 @@ def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
 # ── Sektör sınıflandırması ────────────────────────────────────────────────────
 SECTORS = {
     "Bankacılık":    ["AKBNK", "GARAN", "HALKB", "ISCTR", "VAKBN", "YKBNK",
-                      "ALBRK", "KLNMA", "ISMEN", "ISFIN", "CRDFA"],
+                      "ALBRK", "KLNMA", "ISMEN", "ISFIN", "CRDFA", "SKBNK", "TSKB"],
     "Holding":       ["KCHOL", "SAHOL", "AGHOL", "ALARK", "DOHOL", "GLYHO",
                       "NTHOL", "TKFEN", "BRYAT", "GSDHO", "DENGE", "HDFGS",
-                      "DOGUB", "DOBUR", "GOKNR"],
+                      "DOGUB", "DOBUR", "KLRHO", "BINHO", "ECZYT", "MARKA", "BERA", "POLHO", "LRSHO", "DERHL"],
     "Sanayi":        ["ARCLK", "ASELS", "EREGL", "FROTO", "KRDMD", "TOASO",
                       "ASUZU", "BRSAN", "DOAS",  "ISDMR", "IZMDC", "JANTS",
                       "KCAER", "KORDS", "OTKAR", "PARSN", "SARKY", "TTRAK",
                       "VESTL", "VESBE", "YATAS", "ARSAN", "BOSSA", "CEMTS",
                       "CEMAS", "EDIP",  "EMKEL", "ERBOS", "EGGUB", "EGPRO",
                       "GESAN", "KAPLM", "KATMR", "LKMNH", "LUKSK", "MAKTK",
-                      "MUTLU", "NIBAS", "NUHCM"],
+                      "MUTLU", "NIBAS", "NUHCM", "PASEU", "QUAGR", "EUREN", "BURCE", "LILAK", "USAK", "GMTAS", "ALTNY", "SDTTR", "PAPIL", "BTCIM", "LMKDC", "TEKTU", "ARZUM", "AKCNS", "KARSN", "GENTS", "ANELE", "HATSN", "PKART", "TMSN"],
     "Enerji":        ["AKSA",  "AKSEN", "ALFAS", "CWENE", "ENJSA", "ENKAI",
                       "EUPWR", "ODAS",  "PRKAB", "SMRTG", "TUPRS", "ZOREN",
-                      "BASGZ", "BIOEN", "NATEN", "ORGE"],
+                      "BASGZ", "BIOEN", "NATEN", "ORGE", "ASTOR", "CANTE", "IZENR", "MAGEN", "ESEN", "ENERY", "AYGAZ", "AKFYE", "AHGAZ", "SMART", "AYEN", "AYDEM"],
     "Perakende":     ["BIMAS", "MGROS", "SOKM",  "MAVI",  "SELEC", "ULKER",
-                      "ADESE", "KRSTL"],
+                      "KRSTL", "TUKAS", "TUREX", "PENGD", "TCKRC", "MERKO", "TABGD"],
     "Teknoloji":     ["INDES", "LOGO",  "NETAS", "KONTR", "ESCOM", "MTRKS",
-                      "HTTBT", "MPARK"],
+                      "HTTBT", "MPARK", "MIATK", "YEOTK", "REEDR", "FONET", "FORTE", "ARENA", "LINK", "ARDYZ", "KAREL", "EDATA"],
     "Telekom":       ["TCELL", "TTKOM"],
-    "Ulaşım":        ["PGSUS", "TAVHL", "THYAO", "RYSAS", "CLEBI", "AYCES"],
-    "GYO":           ["EKGYO", "ALGYO", "ISGYO", "AKMGY", "HLGYO", "ISKPL"],
-    "Kimya/Malzeme": ["ALKIM", "ANACM", "BUCIM", "CIMSA", "GUBRF", "HEKTS",
+    "Ulaşım":        ["PGSUS", "TAVHL", "THYAO", "RYSAS", "CLEBI"],
+    "GYO":           ["EKGYO", "ALGYO", "ISGYO", "AKMGY", "HLGYO", "BASGZ", "PEKGY", "PSGYO", "FZLGY", "SURGY", "MRGYO", "KZBGY", "SNGYO", "YESIL"],
+    "Kimya/Malzeme": ["ALKIM", "ANACM", "ISKPL", "BUCIM", "CIMSA", "GUBRF", "HEKTS",
                       "OYAKC", "PETKM", "SASA",  "SISE",  "TATGD", "AEFES",
                       "CCOLA", "EGEEN", "DYOBY", "ERSU",  "KMPUR", "KONYA",
-                      "MEGAP", "MIPAZ", "MRDIN", "NUHCM"],
+                      "MEGAP", "MIPAZ", "MRDIN", "NUHCM", "MERCN"],
     "Sigorta":       ["ANHYT", "ANSGR", "TURSG", "AKGRT"],
     "Diğer":         ["BJKAS", "FENER", "GENIL", "KARTN", "ADEL",  "DURDO",
                       "ECILC", "FMIZP", "FORMT", "GSRAY", "IEYHO", "IPMAT",
-                      "KERVT", "LKMNH", "MEDTR", "PARSN"],
+                      "KERVT", "LKMNH", "MEDTR", "PARSN", "AGROT", "MARTI"],
 }
+
+def _get_sector(ticker: str) -> str:
+    """Ticker için sektör adını döndürür. Bulunamazsa 'Diğer'."""
+    for sector, tickers in SECTORS.items():
+        if ticker in tickers:
+            return sector
+    return "Diğer"
+
+
+def _enrich_stock(s: dict) -> dict:
+    """Stock dict'ine sector ve name alanlarını ekler (in-place + return)."""
+    if "sector" not in s:
+        s["sector"] = _get_sector(s.get("ticker", ""))
+    if "name" not in s:
+        s["name"] = STOCK_NAMES.get(s.get("ticker", ""), "")
+    return s
+
 
 _cache       = {"data": [], "updated_at": None}
 _live_prices = {}
@@ -860,7 +975,7 @@ def analyze(ticker_base):
             brs = int(sti == -1) + int(ai >= 25 and dim_i > dip_i) + int(ei12 < ei99)
             return "AL" if bs >= 3 else "SAT" if brs >= 3 else "BEKLE"
 
-        today_str   = datetime.now().strftime("%d.%m.%Y")
+        today_str   = datetime.now(_TZ_TR).strftime("%d.%m.%Y")
         signal_date = today_str
         signal_bars = 1
         n = len(close)
@@ -900,7 +1015,7 @@ def analyze(ticker_base):
             _slice    = volume.iloc[max(0, signal_start - 20):signal_start]
             svol_avg  = float(_slice.mean()) if len(_slice) > 0 else svol
             signal_vol_ratio = round(svol / svol_avg, 2) if svol_avg > 0 else 1.0
-            vol_confirmed    = signal_vol_ratio >= 1.5
+            vol_confirmed    = signal_vol_ratio >= 1.7
 
         # ── Giriş Optimizasyonu (Entry Quality) ───────────────────────────────
         # Ölçüt: Fiyat sinyal gününden bu yana kaç ATR hareket etti?
@@ -972,6 +1087,21 @@ def analyze(ticker_base):
                                  f"({atrs_moved:.1f} ATR) — aşırı satım bölgesi, riski yüksek")
                 optimal_entry = round(min(sl_val - atr_now * 0.8, c * 1.05), 2)
 
+        # ── RVOL (Relative Volume) — kalite sinyali ────────────────────────
+        # Son 5 gün ortalama hacmi / Son 20 gün ortalama hacmi.
+        # >= 1.20 → premium sinyal (backtest: Sharpe 1.62 → 2.97, Win Rate 36.7% → 51.5%)
+        rvol = None
+        is_premium = False
+        try:
+            if len(volume) >= 20:
+                v5  = float(volume.iloc[-5:].mean())
+                v20 = float(volume.iloc[-20:].mean())
+                if v20 > 0 and not pd.isna(v20):
+                    rvol = round(v5 / v20, 2)
+                    is_premium = (signal == "AL" and rvol >= 1.20)
+        except Exception:
+            pass
+
         return {
             "ticker":        ticker_base,
             "price":         round(c, 2),
@@ -986,6 +1116,8 @@ def analyze(ticker_base):
             "bull_score":    bull_score,
             "bear_score":    bear_score,
             "weekly_trend":  weekly_dir,
+            "rvol":          rvol,
+            "is_premium":    is_premium,
             "adx":           round(adx_val, 1),  # top-level for SSR/SEO
             "indicators": {
                 "supertrend": {
@@ -1156,107 +1288,328 @@ def send_email(to_email, subject, html_body):
         return False
 
 
-def _email_base(content_html, unsubscribe_url):
-    """Ortak e-posta şablonu."""
+def _email_base(content_html, unsubscribe_url, preheader=""):
+    """Ortak e-posta şablonu — site dark teması, pusula logo, modern footer."""
+    preheader_html = f'''<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#0e0e12;opacity:0">{preheader}</div>''' if preheader else ""
     return f"""<!DOCTYPE html>
 <html lang="tr">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>BorsaPusula</title></head>
-<body style="margin:0;padding:0;background:#0b111f;font-family:-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;color:#e2e8f0">
-<div style="max-width:600px;margin:0 auto;padding:32px 16px">
-  <div style="text-align:center;margin-bottom:28px">
-    <a href="https://borsapusula.com" style="text-decoration:none">
-      <span style="font-size:22px;font-weight:800;color:#e2e8f0">Borsa<span style="color:#3b82f6">Pusula</span></span>
-    </a>
-  </div>
-  {content_html}
-  <div style="border-top:1px solid #1e2d45;padding-top:14px;text-align:center;margin-top:28px">
-    <div style="font-size:11px;color:#374151;margin-bottom:6px">
-      ⚠️ Bu bildirim yatırım tavsiyesi değildir. Algoritmik sinyal bilgilendirmesidir.
-    </div>
-    <a href="{unsubscribe_url}" style="font-size:11px;color:#4b5563;text-decoration:underline">
-      Abonelikten çık
-    </a>
-  </div>
-</div>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="supported-color-schemes" content="dark">
+<title>BorsaPusula</title>
+</head>
+<body style="margin:0;padding:0;background:#0e0e12;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',Arial,sans-serif;color:#e5e1e4;-webkit-font-smoothing:antialiased">
+{preheader_html}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0e0e12">
+  <tr><td align="center" style="padding:32px 16px">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%">
+
+      <!-- Logo header -->
+      <tr><td align="center" style="padding-bottom:24px">
+        <a href="https://borsapusula.com" style="text-decoration:none;display:inline-block">
+          <svg width="220" height="58" viewBox="0 0 460 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="bpEmailNeedle" x1="60" y1="22" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#b8c3ff"/>
+                <stop offset="1" stop-color="#00e2a1"/>
+              </linearGradient>
+            </defs>
+            <rect x="14" y="20" width="80" height="80" rx="18" fill="#0f1218" stroke="#28303f"/>
+            <line x1="22" y1="46" x2="86" y2="46" stroke="#222a37" stroke-width="1"/>
+            <line x1="22" y1="74" x2="86" y2="74" stroke="#222a37" stroke-width="1"/>
+            <line x1="40" y1="28" x2="40" y2="92" stroke="#222a37" stroke-width="1"/>
+            <line x1="68" y1="28" x2="68" y2="92" stroke="#222a37" stroke-width="1"/>
+            <path d="M54 33 L62 60 L54 55 L46 60 Z" fill="url(#bpEmailNeedle)"/>
+            <path d="M54 87 L60 61 L54 64 L48 61 Z" fill="#2c3445"/>
+            <circle cx="54" cy="60" r="3.5" fill="#eef3f8"/>
+            <circle cx="54" cy="60" r="1.4" fill="#00e2a1"/>
+            <text x="116" y="66" fill="#eef3f8" font-family="'Sora','Manrope',Arial,sans-serif" font-size="34" font-weight="800" letter-spacing="-0.5">Borsa<tspan fill="#00e2a1">Pusula</tspan></text>
+            <line x1="118" y1="78" x2="430" y2="78" stroke="#1e2532" stroke-width="1"/>
+            <text x="118" y="94" fill="#8f98a8" font-family="'Manrope',Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2.4">PİYASANIN YÖNÜ</text>
+          </svg>
+        </a>
+      </td></tr>
+
+      <!-- Body content -->
+      <tr><td>{content_html}</td></tr>
+
+      <!-- Footer -->
+      <tr><td style="padding-top:32px">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td style="border-top:1px solid #2a2a2c;padding-top:18px;text-align:center;font-size:11px;color:#5a5a62;line-height:1.6">
+            ⚠️ Bu bildirim <strong style="color:#909097">yatırım tavsiyesi değildir</strong>. Algoritmik sinyal bilgilendirmesidir.<br>
+            Geçmiş performans gelecekteki sonuçların garantisi değildir.
+          </td></tr>
+          <tr><td align="center" style="padding-top:12px">
+            <a href="https://borsapusula.com" style="font-size:11px;color:#909097;text-decoration:none;margin:0 10px">borsapusula.com</a>
+            <span style="color:#3a3a42">·</span>
+            <a href="https://borsapusula.com/iletisim" style="font-size:11px;color:#909097;text-decoration:none;margin:0 10px">iletişim</a>
+            <span style="color:#3a3a42">·</span>
+            <a href="{unsubscribe_url}" style="font-size:11px;color:#909097;text-decoration:underline;margin:0 10px">aboneliği sonlandır</a>
+          </td></tr>
+        </table>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
 </body></html>"""
 
 
-def _build_welcome_email(email, unsubscribe_url):
-    content = f"""
-    <div style="background:#111827;border:1px solid #1e2d45;border-radius:12px;padding:24px;margin-bottom:20px;text-align:center">
-      <div style="font-size:36px;margin-bottom:12px">✅</div>
-      <div style="font-size:18px;font-weight:700;margin-bottom:8px">Abonelik Onaylandı!</div>
-      <div style="font-size:13px;color:#94a3b8;line-height:1.6">
-        <strong style="color:#e2e8f0">{email}</strong> adresi için BIST sinyal bildirimleri aktif edildi.<br>
-        BIST100 hisselerinde Güçlü Trend veya Zayıf Trend sinyali oluştuğunda e-posta alacaksınız.
-      </div>
-    </div>
-    <div style="text-align:center">
-      <a href="https://borsapusula.com" style="display:inline-block;background:#1f6feb;color:#fff;padding:10px 28px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
-        Sinyalleri İncele →
-      </a>
-    </div>"""
-    return _email_base(content, unsubscribe_url)
+def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
+    """Hoş geldin maili — kişisel, motivasyonel, CTA güçlü."""
+    preheader = f"Aboneliğin onaylandı. Premium sinyaller hacim onaylı olarak işaretli."
+    content = f'''
+    <!-- Hero -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:linear-gradient(135deg,rgba(0,226,144,0.08),rgba(184,195,255,0.04));border:1px solid rgba(0,226,144,0.25);border-radius:12px;margin-bottom:20px">
+      <tr><td style="padding:28px 24px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">🎯</div>
+        <div style="font-size:22px;font-weight:800;color:#e5e1e4;margin-bottom:8px;letter-spacing:-0.3px">{("Hoş geldin, " + name.split()[0] + "!") if name else "Hoş geldin!"}</div>
+        <div style="font-size:13px;color:#909097;line-height:1.6">
+          BorsaPusula sinyal bildirimlerine başarıyla abone oldun.<br>
+          <span style="color:#c7c5cd;font-weight:600">{email}</span>
+        </div>
+      </td></tr>
+    </table>
+
+    <!-- Ne alacaksın? -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:16px">
+      <tr><td style="padding:20px 22px">
+        <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:14px">📬 Ne tür mailler alacaksın</div>
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td style="padding:8px 0;vertical-align:top;width:30px;font-size:18px">🟢</td>
+            <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
+              <strong style="color:#e5e1e4">Güçlü Trend sinyali</strong> oluştuğunda — algoritmamız 3 testten geçen yükseliş onayı verdiğinde
+            </td></tr>
+          <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">🔴</td>
+            <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
+              <strong style="color:#e5e1e4">Zayıf Trend sinyali</strong> oluştuğunda — kısa pozisyon fırsatı
+            </td></tr>
+          <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">⭐</td>
+            <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
+              <strong style="color:#ffc850">Premium işaretli</strong> sinyaller — hacim onaylı (RVOL ≥ 1.20). Backtest&apos;te %51 win rate, Sharpe 2.97.
+            </td></tr>
+        </table>
+      </td></tr>
+    </table>
+
+    <!-- Şu an sitede neler var -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:24px">
+      <tr><td style="padding:20px 22px">
+        <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:12px">🎯 Site&apos;de neler var</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📊 215 BIST hissesi günlük analiz</td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">⭐ Premium hacim filtreli sinyaller</td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">🗺️ Sektör ısı haritası</td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📅 Bilanço takvimi</td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📈 2-yıllık backtest performans raporu</td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">⚖️ Hisse karşılaştırma</td></tr>
+        </table>
+      </td></tr>
+    </table>
+
+    <!-- Profil tamamla davet -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(184,195,255,0.06);border:1px solid rgba(184,195,255,0.20);border-radius:10px;margin-bottom:18px">
+      <tr><td style="padding:18px 22px">
+        <div style="font-size:14px;font-weight:700;color:#b8c3ff;margin-bottom:6px">🎯 Sinyalleri sana özelleştir</div>
+        <div style="font-size:12.5px;color:#c7c5cd;line-height:1.55;margin-bottom:12px">
+          30 saniye ayır, yatırım profilini doldur. Sana en uygun sinyal türleri ve mail sıklığını ayarla.
+        </div>
+        <a href="https://borsapusula.com/profil?t={profile_token}" style="display:inline-block;background:rgba(184,195,255,0.14);color:#b8c3ff;border:1px solid rgba(184,195,255,0.45);padding:8px 18px;border-radius:6px;text-decoration:none;font-size:12.5px;font-weight:700;letter-spacing:0.3px">
+          Profili Tamamla →
+        </a>
+      </td></tr>
+    </table>
+
+    <!-- CTA -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td align="center">
+        <a href="https://borsapusula.com" style="display:inline-block;background:#00e290;color:#0e0e12;padding:14px 40px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:0.3px">
+          Sinyal Panelini Aç →
+        </a>
+      </td></tr>
+    </table>
+
+    <p style="text-align:center;font-size:12px;color:#909097;margin-top:18px;line-height:1.5">
+      İlk sinyal mailini sinyal değişimi olduğunda alacaksın.<br>
+      Bekleme süresi yok — site sürekli güncel.
+    </p>
+    '''
+    return _email_base(content, unsubscribe_url, preheader=preheader)
 
 
 def _build_signal_email(changes, unsubscribe_url):
-    """Sinyal değişim e-postası HTML içeriği."""
-    sig_color = {"AL": "#3fb950", "SAT": "#f85149", "BEKLE": "#8b949e"}
-    sig_bg    = {"AL": "#1a4731", "SAT": "#3d0f0f", "BEKLE": "#21262d"}
-    sig_lbl   = {"AL": "Güçlü Trend ▲", "SAT": "Zayıf Trend ▼", "BEKLE": "Belirsiz"}
+    """Sinyal değişim maili — premium-aware, modern card layout."""
+    sig_color  = {"AL": "#00e290", "SAT": "#f85149", "BEKLE": "#909097"}
+    sig_bg     = {"AL": "rgba(0,226,144,0.10)", "SAT": "rgba(248,81,73,0.10)", "BEKLE": "rgba(144,144,151,0.08)"}
+    sig_border = {"AL": "rgba(0,226,144,0.30)", "SAT": "rgba(248,81,73,0.30)", "BEKLE": "rgba(144,144,151,0.20)"}
+    sig_lbl    = {"AL": "▲ Güçlü Trend", "SAT": "▼ Zayıf Trend", "BEKLE": "● Belirsiz"}
 
-    rows = ""
-    for t, old, new, stock in changes[:8]:
-        name  = STOCK_NAMES.get(t, t)
-        price = stock.get("price") or 0
-        col   = sig_color.get(new, "#8b949e")
-        bg    = sig_bg.get(new, "#21262d")
-        lbl   = sig_lbl.get(new, new)
-        rows += f"""
-        <tr>
-          <td style="padding:10px 16px;border-bottom:1px solid #1e2d45">
-            <a href="https://borsapusula.com/hisse/{t}" style="color:#e2e8f0;text-decoration:none;font-weight:700">{t}</a>
-            <div style="font-size:11px;color:#64748b;margin-top:2px">{name}</div>
-          </td>
-          <td style="padding:10px 16px;border-bottom:1px solid #1e2d45;font-size:13px;color:#94a3b8">{price:.2f} ₺</td>
-          <td style="padding:10px 16px;border-bottom:1px solid #1e2d45">
-            <span style="background:{bg};color:{col};border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700">{lbl}</span>
-          </td>
-          <td style="padding:10px 16px;border-bottom:1px solid #1e2d45">
-            <a href="https://borsapusula.com/hisse/{t}" style="color:#3b82f6;font-size:12px">Detay →</a>
-          </td>
-        </tr>"""
+    # Premium ve sayım analizi
+    al_count   = sum(1 for c in changes if c[2] == "AL")
+    sat_count  = sum(1 for c in changes if c[2] == "SAT")
+    prem_count = sum(1 for c in changes if c[3].get("is_premium"))
+    tickers_str = ", ".join(c[0] for c in changes[:4])
+    if len(changes) > 4: tickers_str += f" +{len(changes)-4}"
 
-    content = f"""
-    <div style="background:#111827;border:1px solid #1e2d45;border-radius:12px;overflow:hidden;margin-bottom:20px">
-      <div style="background:#1a2438;padding:10px 16px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">
-        📊 Sinyal Değişimleri — {datetime.now().strftime('%d.%m.%Y %H:%M')}
-      </div>
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr style="background:#0d1117">
-          <th style="padding:8px 16px;text-align:left;font-size:10px;color:#64748b;font-weight:600;letter-spacing:.5px">HİSSE</th>
-          <th style="padding:8px 16px;text-align:left;font-size:10px;color:#64748b;font-weight:600;letter-spacing:.5px">FİYAT</th>
-          <th style="padding:8px 16px;text-align:left;font-size:10px;color:#64748b;font-weight:600;letter-spacing:.5px">SİNYAL</th>
-          <th style="padding:8px 16px"></th>
-        </tr></thead>
-        <tbody>{rows}</tbody>
-      </table>
-    </div>
-    <div style="text-align:center">
-      <a href="https://borsapusula.com" style="display:inline-block;background:#1f6feb;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
-        Tüm Sinyalleri Görüntüle →
-      </a>
-    </div>"""
-    return _email_base(content, unsubscribe_url)
+    preheader = f"{al_count} Güçlü Trend · {sat_count} Zayıf Trend · {prem_count} Premium ⭐ — {tickers_str}"
+
+    # Sinyal kartları
+    cards = ""
+    for t, old, new, stock in changes[:10]:
+        name      = STOCK_NAMES.get(t, t)
+        price     = stock.get("price") or 0
+        sl_level  = stock.get("sl_level")
+        adx       = stock.get("adx") or 0
+        rvol      = stock.get("rvol")
+        is_prem   = stock.get("is_premium", False)
+        col       = sig_color.get(new, "#909097")
+        bg        = sig_bg.get(new, "rgba(144,144,151,0.08)")
+        bd        = sig_border.get(new, "rgba(144,144,151,0.2)")
+        lbl       = sig_lbl.get(new, new)
+
+        prem_badge = ""
+        if is_prem:
+            prem_badge = '''<span style="display:inline-block;background:rgba(255,200,80,0.12);border:1px solid rgba(255,200,80,0.45);color:#ffc850;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:0.4px;margin-left:6px;vertical-align:middle">⭐ PREMIUM</span>'''
+
+        sl_html = f'<span style="color:#909097">SL <strong style="color:#c7c5cd">{sl_level:.2f}₺</strong></span>' if sl_level else ''
+        rvol_html = f'<span style="color:#909097">·  RVOL <strong style="color:{"#ffc850" if is_prem else "#c7c5cd"}">{rvol:.2f}×</strong></span>' if rvol is not None else ''
+
+        cards += f'''
+        <tr><td style="padding:0 0 12px 0">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:{bg};border:1px solid {bd};border-radius:10px">
+            <tr><td style="padding:14px 16px">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="vertical-align:top">
+                    <a href="https://borsapusula.com/hisse/{t}" style="color:#e5e1e4;text-decoration:none;font-size:18px;font-weight:800;letter-spacing:-0.3px">{t}</a>{prem_badge}
+                    <div style="font-size:11.5px;color:#909097;margin-top:3px">{name}</div>
+                  </td>
+                  <td align="right" style="vertical-align:top">
+                    <div style="font-size:15px;font-weight:700;color:#e5e1e4;font-variant-numeric:tabular-nums">{price:.2f} ₺</div>
+                    <div style="background:{bg};color:{col};border:1px solid {bd};border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;display:inline-block;margin-top:4px">{lbl}</div>
+                  </td>
+                </tr>
+                <tr><td colspan="2" style="padding-top:10px;border-top:1px solid rgba(255,255,255,0.04);margin-top:10px">
+                  <div style="font-size:11.5px;color:#909097;line-height:1.7;padding-top:8px">
+                    <span style="color:#909097">Momentum <strong style="color:#c7c5cd">{adx:.0f}</strong></span>
+                    {f"  ·  {sl_html}" if sl_html else ""}
+                    {rvol_html}
+                  </div>
+                  <div style="margin-top:10px">
+                    <a href="https://borsapusula.com/hisse/{t}" style="color:#b8c3ff;font-size:12px;font-weight:600;text-decoration:none">Detay ve grafik →</a>
+                  </div>
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        </td></tr>'''
+
+    # Header summary
+    summary_chips = ""
+    if al_count > 0:
+        summary_chips += f'<span style="display:inline-block;background:rgba(0,226,144,0.10);border:1px solid rgba(0,226,144,0.30);color:#00e290;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">▲ {al_count} Güçlü Trend</span>'
+    if sat_count > 0:
+        summary_chips += f'<span style="display:inline-block;background:rgba(248,81,73,0.10);border:1px solid rgba(248,81,73,0.30);color:#f85149;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">▼ {sat_count} Zayıf Trend</span>'
+    if prem_count > 0:
+        summary_chips += f'<span style="display:inline-block;background:rgba(255,200,80,0.10);border:1px solid rgba(255,200,80,0.40);color:#ffc850;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">⭐ {prem_count} Premium</span>'
+
+    content = f'''
+    <!-- Header -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
+      <tr><td style="padding:18px 22px;text-align:center">
+        <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:8px">📊 Yeni Sinyal Değişimleri</div>
+        <div style="font-size:13px;color:#c7c5cd;margin-bottom:14px">{datetime.now(_TZ_TR).strftime("%d %B %Y · %H:%M")}</div>
+        <div>{summary_chips}</div>
+      </td></tr>
+    </table>
+
+    <!-- Signal cards -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      {cards}
+    </table>
+
+    <!-- CTA -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px">
+      <tr><td align="center">
+        <a href="https://borsapusula.com" style="display:inline-block;background:#00e290;color:#0e0e12;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:0.3px">
+          Tüm Sinyalleri Gör →
+        </a>
+      </td></tr>
+      <tr><td align="center" style="padding-top:10px">
+        <a href="https://borsapusula.com/sinyal-performans" style="display:inline-block;color:#909097;font-size:12px;text-decoration:none;border-bottom:1px solid #3a3a42;padding-bottom:1px">
+          Backtest performansını gör →
+        </a>
+      </td></tr>
+    </table>
+    '''
+    return _email_base(content, unsubscribe_url, preheader=preheader)
+
+
+# Pending changes buffer — günlük/haftalık digest için biriktirir
+_pending_changes_lock = threading.Lock()
+_pending_changes_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pending_changes.json")
+
+
+def _load_pending_changes():
+    if not os.path.exists(_pending_changes_path):
+        return []
+    try:
+        with open(_pending_changes_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+
+def _save_pending_changes(items):
+    try:
+        with open(_pending_changes_path, "w", encoding="utf-8") as f:
+            json.dump(items, f, ensure_ascii=False, default=str)
+    except Exception as e:
+        logger.warning("pending_changes.json yazma hatası: %s", e)
+
+
+def _serialize_change(c):
+    """changes tuple → JSON-serializable dict."""
+    t, old, new, stock = c
+    return {
+        "ticker":    t,
+        "old":       old,
+        "new":       new,
+        "stock":     {
+            "price":      stock.get("price"),
+            "change_pct": stock.get("change_pct"),
+            "sl_level":   stock.get("sl_level"),
+            "adx":        stock.get("adx"),
+            "rvol":       stock.get("rvol"),
+            "is_premium": stock.get("is_premium", False),
+            "name":       STOCK_NAMES.get(t, t),
+        },
+        "ts":        datetime.now().isoformat(),
+    }
+
+
+def _deserialize_change(d):
+    """pending JSON dict → changes tuple."""
+    return (d["ticker"], d["old"], d["new"], d["stock"])
 
 
 def _notify_email_signal_changes(changes):
-    """Aktif abonelere sinyal değişim e-postası gönderir — arka planda çalışır."""
+    """Aktif abonelere sinyal değişim e-postası — mail tercihine göre rota."""
     if not SMTP_HOST or not changes:
         return
 
-    def _send_batch():
+    # 1) Pending buffer'a ekle (günlük/haftalık digest için)
+    with _pending_changes_lock:
+        pending = _load_pending_changes()
+        pending.extend(_serialize_change(c) for c in changes)
+        _save_pending_changes(pending)
+
+    # 2) Anında gönderim — mail_pref=instant olan kullanıcılara
+    def _send_instant():
         with _sub_lock:
             subs = _load_subscribers()
         active = {e: d for e, d in subs.items() if d.get("active", True)}
@@ -1264,22 +1617,138 @@ def _notify_email_signal_changes(changes):
             return
         sent = 0
         for email, data in active.items():
+            mail_pref = data.get("mail_pref") or "daily"
+            # Sadece instant ya da premium-isteyen abonelere anlık
+            if mail_pref not in ("instant", "premium"):
+                continue
             token    = data.get("token", "")
+            name     = data.get("name", "")
             tickers  = data.get("tickers", [])
-            relevant = [c for c in changes if not tickers or c[0] in tickers]
+            # Filter changes by user prefs
+            relevant = list(changes)
+            # Premium-only filter
+            if mail_pref == "premium":
+                relevant = [c for c in relevant if c[3].get("is_premium")]
+            # Watchlist filter
+            if tickers:
+                relevant = [c for c in relevant if c[0] in tickers]
             if not relevant:
                 continue
             unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
-            subject   = "🔔 BorsaPusula — Sinyal Değişimi: " + ", ".join(c[0] for c in relevant[:3])
+            subject_prefix = "⭐ Premium" if mail_pref == "premium" else "🔔 BorsaPusula —"
+            subject = subject_prefix + " Sinyal Değişimi: " + ", ".join(c[0] for c in relevant[:3])
             if len(relevant) > 3:
                 subject += f" +{len(relevant) - 3}"
             if send_email(email, subject, _build_signal_email(relevant, unsub_url)):
                 sent += 1
             time.sleep(0.3)
         if sent:
-            logger.info("E-posta bildirim gönderildi: %d abone", sent)
+            logger.info("Anında sinyal e-postası gönderildi: %d abone", sent)
 
-    threading.Thread(target=_send_batch, daemon=True).start()
+    threading.Thread(target=_send_instant, daemon=True).start()
+
+
+def _send_digest_emails(timeframe="daily"):
+    """Günlük (19:00) veya haftalık (Cuma 19:00) digest gönder.
+    timeframe: 'daily' | 'weekly'"""
+    if not SMTP_HOST:
+        return
+
+    with _pending_changes_lock:
+        pending = _load_pending_changes()
+
+    if not pending:
+        logger.info("Digest skip: pending değişim yok (timeframe=%s)", timeframe)
+        return
+
+    # Reconstruct changes
+    changes = [_deserialize_change(d) for d in pending]
+
+    with _sub_lock:
+        subs = _load_subscribers()
+    active = {e: d for e, d in subs.items() if d.get("active", True)}
+    if not active:
+        return
+
+    target_pref = timeframe  # 'daily' or 'weekly'
+    sent = 0
+    for email, data in active.items():
+        mail_pref = data.get("mail_pref") or "daily"
+        if mail_pref != target_pref:
+            continue
+        token   = data.get("token", "")
+        name    = data.get("name", "")
+        tickers = data.get("tickers", [])
+        # Watchlist filter
+        relevant = list(changes)
+        if tickers:
+            relevant = [c for c in relevant if c[0] in tickers]
+        if not relevant:
+            continue
+        unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
+
+        if timeframe == "daily":
+            today_str = datetime.now(_TZ_TR).strftime("%-d %B")
+            subject = f"📊 {today_str} BIST Sinyalleri"
+        else:
+            subject = f"📊 Haftalık BIST Özeti — {datetime.now(_TZ_TR).strftime('%-d %B')}"
+
+        # Premium count for subject hint
+        prem_count = sum(1 for c in relevant if c[3].get("is_premium"))
+        if prem_count > 0:
+            subject += f" — {prem_count} Premium ⭐"
+
+        if send_email(email, subject, _build_signal_email(relevant, unsub_url)):
+            sent += 1
+        time.sleep(0.3)
+
+    if sent:
+        logger.info("%s digest gönderildi: %d abone (%d hisse)", timeframe, sent, len(changes))
+
+    # Daily digest gönderildiyse buffer temizle
+    if timeframe == "daily":
+        with _pending_changes_lock:
+            _save_pending_changes([])
+        logger.info("Pending changes buffer temizlendi (daily digest sonrası)")
+
+
+def _digest_cron_loop():
+    """Günde bir kez 19:00'da digest gönder. Cuma 19:00'da haftalık."""
+    while True:
+        try:
+            now = datetime.now(_TZ_TR)
+            # 19:00–19:05 arasında ve son 6 saatte gönderilmediyse tetikle
+            if 19 <= now.hour < 20 and now.minute < 10:
+                last_sent_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_digest.txt")
+                today_str = now.strftime("%Y-%m-%d")
+                already_sent = False
+                if os.path.exists(last_sent_path):
+                    try:
+                        with open(last_sent_path) as f:
+                            last_date = f.read().strip()
+                        if last_date == today_str:
+                            already_sent = True
+                    except Exception:
+                        pass
+                if not already_sent:
+                    logger.info("Daily digest cron tetiklendi: %s", today_str)
+                    _send_digest_emails("daily")
+                    # Cuma ise haftalık da gönder
+                    if now.weekday() == 4:  # Friday
+                        logger.info("Weekly digest cron (Cuma)")
+                        _send_digest_emails("weekly")
+                    try:
+                        with open(last_sent_path, "w") as f:
+                            f.write(today_str)
+                    except Exception as e:
+                        logger.warning("last_digest.txt yazma: %s", e)
+        except Exception as e:
+            logger.error("digest_cron_loop: %s", e, exc_info=True)
+        time.sleep(300)  # 5 dakikada bir kontrol
+
+
+threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-cron").start()
+logger.info("Digest cron başlatıldı (her 5 dakikada kontrol, 19:00'da tetikler)")
 
 
 _DISK_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
@@ -1332,6 +1801,8 @@ def _load_cache_from_disk():
         with open(_DISK_CACHE_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
         if data and isinstance(data, list) and len(data) > 0:
+            for s in data:
+                _enrich_stock(s)
             with _lock:
                 _cache["data"] = data
                 _cache["updated_at"] = "disk cache (başlatılıyor…)"
@@ -1356,9 +1827,12 @@ def refresh_data():
 
     _notify_signal_changes(results)
 
+    for s in results:
+        _enrich_stock(s)
+
     with _lock:
         _cache["data"] = results
-        _cache["updated_at"] = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        _cache["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
 
     # Başarılı güncellemeden sonra diske yaz
     _save_cache_to_disk(results)
@@ -1376,7 +1850,7 @@ def fetch_live_prices():
             return
 
         payload = {}
-        now_str  = datetime.now().strftime("%H:%M:%S")
+        now_str  = datetime.now(_TZ_TR).strftime("%H:%M:%S")
 
         for t in BIST30:
             try:
@@ -1446,7 +1920,7 @@ def fetch_global_prices():
             return
 
         payload = {}
-        now_str  = datetime.now().strftime("%H:%M:%S")
+        now_str  = datetime.now(_TZ_TR).strftime("%H:%M:%S")
         # ters harita: yf sembol -> key listesi
         yf_to_keys = {}
         for k, v in _GLOBAL_TICKERS_YF.items():
@@ -1488,13 +1962,19 @@ def fetch_global_prices():
 
 def background_global_prices():
     while True:
-        fetch_global_prices()
+        try:
+            fetch_global_prices()
+        except Exception as e:
+            logger.error("background_global_prices hatası: %s", e, exc_info=True)
         time.sleep(60)
 
 
 def background_live_prices():
     while True:
-        fetch_live_prices()
+        try:
+            fetch_live_prices()
+        except Exception as e:
+            logger.error("background_live_prices hatası: %s", e, exc_info=True)
         time.sleep(30)
 
 
@@ -1538,41 +2018,56 @@ def _purge_stale_chart_caches():
 
 def background_refresh():
     while True:
-        refresh_chart()
-        refresh_xu100_chart()
-        _refresh_varlik_chart("BTC",   _btc_chart_cache)
-        _refresh_varlik_chart("ALTIN", _altin_chart_cache)
-        _refresh_varlik_chart("GUMUS", _gumus_chart_cache)
-        _refresh_varlik_chart("ETH",    _eth_chart_cache)
-        _refresh_varlik_chart("SP500",  _sp500_chart_cache)
-        _refresh_varlik_chart("NASDAQ", _nasdaq_chart_cache)
-        _refresh_varlik_chart("SOL",      _sol_chart_cache)
-        _refresh_varlik_chart("BNB",      _bnb_chart_cache)
-        _refresh_varlik_chart("PETROL",   _petrol_chart_cache)
-        _refresh_varlik_chart("DOGALGAZ", _dogalgaz_chart_cache)
-        refresh_data()
-        _purge_stale_chart_caches()   # Split/split sonrası uyuşmazlık taraması
+        try:
+            refresh_chart()
+            refresh_xu100_chart()
+            _refresh_varlik_chart("BTC",      _btc_chart_cache)
+            _refresh_varlik_chart("ALTIN",    _altin_chart_cache)
+            _refresh_varlik_chart("GUMUS",    _gumus_chart_cache)
+            _refresh_varlik_chart("ETH",      _eth_chart_cache)
+            _refresh_varlik_chart("SP500",    _sp500_chart_cache)
+            _refresh_varlik_chart("NASDAQ",   _nasdaq_chart_cache)
+            _refresh_varlik_chart("SOL",      _sol_chart_cache)
+            _refresh_varlik_chart("BNB",      _bnb_chart_cache)
+            _refresh_varlik_chart("PETROL",   _petrol_chart_cache)
+            _refresh_varlik_chart("DOGALGAZ", _dogalgaz_chart_cache)
+            refresh_data()
+            _purge_stale_chart_caches()
+        except Exception as e:
+            logger.error("background_refresh döngü hatası: %s", e, exc_info=True)
+            # Thread ölmesin — 60s bekle ve devam et
         time.sleep(900)
 
 
 # ── Güvenlik Headerları ───────────────────────────────────────────────────────
 @app.after_request
 def set_security_headers(response):
-    # Cloudflare: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
-    # Flask sadece CSP ekler (Cloudflare bunu eklemez, uygulamaya ozgudur)
-    # CSP — GA4 + Google Fonts + SSE + self-hosted JS/CSS
+    """Security headers — Cloudflare zaten X-Frame/X-CTO/Referrer/Permissions/HSTS ekliyor.
+    Biz sadece CF'in eklemediği header'ları + CSP'yi (CF eklemiyor) ekliyoruz."""
+    # CSP — GA4 + Google Fonts + Cloudflare Insights (HTML only)
     if response.content_type and "text/html" in response.content_type:
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            # GA4 + Cloudflare Insights script icin izin
             "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            # GA4 veri gonderimi + SSE (self) + Cloudflare Insights beacon
-            "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://cloudflareinsights.com; "
+            "connect-src 'self' https://fonts.googleapis.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://cloudflareinsights.com; "
             "img-src 'self' data: https://www.google-analytics.com; "
             "font-src 'self' https://fonts.gstatic.com; "
-            "frame-ancestors 'none';"
+            "frame-ancestors 'none'; "
+            "form-action 'self'; "
+            "base-uri 'self'; "
+            "object-src 'none'; "
+            "upgrade-insecure-requests;"
         )
+    # CF'in EKLEMEDİĞİ header'lar (modern security):
+    response.headers["X-DNS-Prefetch-Control"] = "on"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-site"
+    response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
+    # Server header'ı temizle (info leak)
+    response.headers.pop("Server", None)
+    # NOT: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+    # Cloudflare tarafından ekleniyor — duplicate olmaması için biz eklemiyoruz.
     return response
 
 
@@ -1588,9 +2083,8 @@ def index():
 def api_data():
     with _lock:
         stocks = list(_cache["data"])
-    # Sektör bilgisini ekle + ADX null fix (BUG-C1)
+    # ADX null fix (BUG-C1) — sector/name artık cache yazılırken ekleniyor
     for s in stocks:
-        s["sector"] = _get_sector(s["ticker"])
         # Parse ADX from nested indicators if top-level is null
         if s.get("adx") is None:
             _adx_lbl = (s.get("indicators") or {}).get("adx", {}).get("label", "")
@@ -1824,7 +2318,7 @@ def _do_macro_ai_refresh():
         oil    = _lbl("PETROL")
         btc    = _lbl("BTC")
 
-        today_str = datetime.now().strftime("%d %B %Y")
+        today_str = datetime.now(_TZ_TR).strftime("%d %B %Y")
         lines = []
         if xu100:
             chg_str = ('%+.2f' % xu100c + '%') if xu100c is not None else '—'
@@ -1847,9 +2341,9 @@ def _do_macro_ai_refresh():
         _, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=12)
         if text:
             now = time.time()
-            today_s = datetime.now().strftime("%Y-%m-%d")
+            today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
             _macro_ai_cache.update({"text": text, "ts": now, "date": today_s,
-                                    "generated_at": datetime.now().strftime("%H:%M")})
+                                    "generated_at": datetime.now(_TZ_TR).strftime("%H:%M")})
             logger.info("_do_macro_ai_refresh: tamamlandi")
     except Exception as e:
         logger.warning("_do_macro_ai_refresh: hata — %s", e)
@@ -1863,7 +2357,7 @@ def api_macro_summary():
     """Günlük makro ekonomi özeti — Gemini ile üretilir, 4 saat cache'lenir.
     Stale-while-revalidate: cache varsa anında döner, arka planda yeniler."""
     now     = time.time()
-    today_s = datetime.now().strftime("%Y-%m-%d")
+    today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
     cached  = _macro_ai_cache
 
     cache_fresh = (cached.get("date") == today_s
@@ -1889,7 +2383,7 @@ def api_stream():
     with _lock:
         initial = dict(_live_prices)
     initial_msg = (
-        f"data: {json.dumps({'type': 'prices', 'data': initial, 'ts': datetime.now().strftime('%H:%M:%S')})}\n\n"
+        f"data: {json.dumps({'type': 'prices', 'data': initial, 'ts': datetime.now(_TZ_TR).strftime('%H:%M:%S')})}\n\n"
         if initial else ""
     )
 
@@ -2171,8 +2665,8 @@ def get_ai_news(ticker):
                 return cached.get("text")   # başarısız cache → None döner
 
     name       = STOCK_NAMES.get(ticker, ticker)
-    today_str  = datetime.now().strftime("%d %B %Y")   # ör: "01 Mayıs 2026"
-    today_iso  = datetime.now().strftime("%Y-%m-%d")   # ör: "2026-05-01"
+    today_str  = datetime.now(_TZ_TR).strftime("%d %B %Y")   # ör: "01 Mayıs 2026"
+    today_iso  = datetime.now(_TZ_TR).strftime("%Y-%m-%d")   # ör: "2026-05-01"
     week_ago   = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
     prompt = (
         f"Bugünün tarihi: {today_str} ({today_iso}).\n"
@@ -2609,7 +3103,7 @@ US_SECTORS = {
     "Medya":        ["NFLX"],
     "Finans":       ["JPM","BRKB","V","MA"],
     "Perakende":    ["WMT"],
-    "Sağlık":       ["UNH"],
+    "Sağlık":       ["UNH", "ALKLC"],
     "Enerji":       ["XOM"],
 }
 
@@ -2646,8 +3140,20 @@ def _compute_chart_data(ticker_base, period="2y"):
     WARMUP_MIN   = 150
 
     try:
-        df = yf.download(ticker, period=period, interval="1d",
-                         progress=False, auto_adjust=True, timeout=30)
+        # gevent altinda yf.download bazi semboller icin yanlis scale donerebiliyor.
+        # Endeks ve emtia sembolleri icin Ticker.history daha guvenilir.
+        df = None
+        if ticker_base in ("XU100", "XU030"):
+            try:
+                df = yf.Ticker(ticker).history(period=period, interval="1d", auto_adjust=True)
+                if df is not None and len(df) > 0:
+                    df.index = df.index.tz_localize(None) if df.index.tz else df.index
+            except Exception as _e:
+                logger.warning("%s: Ticker.history fallback (%s)", ticker_base, _e)
+                df = None
+        if df is None or len(df) == 0:
+            df = yf.download(ticker, period=period, interval="1d",
+                             progress=False, auto_adjust=True, timeout=30)
         if df is None or len(df) < WARMUP_MIN:
             return None
 
@@ -2865,18 +3371,27 @@ def refresh_chart():
     if d:
         with _lock:
             _chart_cache["data"] = d
-            _chart_cache["updated_at"] = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+            _chart_cache["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
 
 
 def refresh_xu100_chart():
-    """XU100 grafik verisini günceller — _compute_chart_data wrapper."""
+    """XU100 grafik verisini günceller — sanity guard ile (BIST 100 ≥ 5000)."""
     try:
         d = _compute_chart_data("XU100", "5y")
-        if d:
-            with _lock:
-                _xu100_chart_cache["data"] = d
-                _xu100_chart_cache["updated_at"] = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-            logger.info("XU100 chart cache güncellendi")
+        if not d: return
+        s = d.get("summary", {}) or {}
+        price = s.get("price", 0) or 0
+        if price < 5000:
+            logger.warning("XU100 chart REJECTED: price=%.2f (yfinance scale glitch); cache korunuyor", price)
+            return
+        ohlc = d.get("ohlc", []) or []
+        if ohlc and (ohlc[-1].get("close", 0) or 0) < 5000:
+            logger.warning("XU100 chart REJECTED: last close=%.2f scale invalid", ohlc[-1].get("close"))
+            return
+        with _lock:
+            _xu100_chart_cache["data"] = d
+            _xu100_chart_cache["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+        logger.info("XU100 chart cache güncellendi (price=%.2f)", price)
     except Exception as e:
         logger.error("refresh_xu100_chart: %s", e, exc_info=True)
 
@@ -2909,7 +3424,7 @@ def _refresh_varlik_chart(varlik_key, cache_obj):
         if d:
             with _lock:
                 cache_obj["data"] = d
-                cache_obj["updated_at"] = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+                cache_obj["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
             logger.info("%s chart cache güncellendi", varlik_key)
     except Exception as e:
         logger.error("_refresh_varlik_chart(%s): %s", varlik_key, e, exc_info=True)
@@ -3026,7 +3541,7 @@ def api_chart_us_stock(ticker):
         return safe_json({"chart": cached["data"], "updated_at": cached["updated_at"], "loading": False})
 
     data = _compute_chart_data(ticker, "2y")
-    upd  = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+    upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
     if data:
         with _lock:
             _stock_chart_cache[f"US_{ticker}"] = {"data": data, "ts": now, "updated_at": upd}
@@ -3175,16 +3690,29 @@ def abd_stock_page(ticker):
 
 
 # ── Bireysel Hisse Sayfaları ──────────────────────────────────────────────────
-def _get_sector(ticker):
-    for sector, tickers in SECTORS.items():
-        if ticker in tickers:
-            return sector
-    return "Diğer"
-
 @app.route("/hisse/<ticker>")
 def stock_page(ticker):
     ticker = ticker.upper()
     if ticker not in BIST100:
+        if ticker in DELISTED_TICKERS:
+            from flask import make_response
+            html = (
+                "<!doctype html><html lang='tr'><head><meta charset='utf-8'>"
+                f"<title>{ticker} — Borsadan çekildi | BorsaPusula</title>"
+                "<meta name='robots' content='noindex'>"
+                "<meta http-equiv='refresh' content='5;url=/hisseler'>"
+                "<style>body{background:#0e0e12;color:#e5e1e4;font-family:system-ui;padding:60px 20px;text-align:center}"
+                "a{color:#70b1ff;text-decoration:none;font-weight:600}h1{font-size:24px;margin-bottom:10px}"
+                "p{color:#909097;line-height:1.6}</style></head><body>"
+                f"<h1>{ticker} hissesi artık işlem görmüyor</h1>"
+                "<p>Bu hisse Borsa İstanbul'dan çekildi veya başka bir şirketle birleşti.</p>"
+                "<p><a href='/hisseler'>Tüm aktif BIST hisselerini görüntüle →</a></p>"
+                "<p style='font-size:11px;margin-top:20px'>5 saniye içinde otomatik yönlendirme…</p>"
+                "</body></html>"
+            )
+            r = make_response(html, 410)
+            r.headers['Content-Type'] = 'text/html; charset=utf-8'
+            return r
         return render_template("index.html"), 404
     name   = STOCK_NAMES.get(ticker, ticker)
     sector = _get_sector(ticker)
@@ -3248,10 +3776,18 @@ _FUND_TTL = 3600 * 4  # 4 saat
 # ── Temel analiz sanity sınırları (yfinance Türk hisselerinde bozuk değer üretir) ──
 _FUND_SANITY = {
     "pe_ratio":       (0.0, 150.0),   # P/E > 150 → muhtemelen dolar/lira karışıklığı
+    "forward_pe":     (0.0, 150.0),
     "dividend_yield": (0.0, 50.0),    # %50 üstü → imkânsız (zaten *100 çarpılmış)
     "beta":           (0.10, 5.0),    # 0.06-0.09 beta havacılık için saçma
     "pb_ratio":       (0.0, 50.0),    # P/B > 50 → bozuk
     "roe":            (-100.0, 200.0),# ROE > 200% → bozuk
+    "profit_margin":  (-200.0, 100.0),
+    "operating_margin":(-200.0, 100.0),
+    "earnings_growth":(-500.0, 1000.0),
+    "revenue_growth": (-100.0, 500.0),
+    "debt_to_equity": (0.0, 2000.0),
+    "current_ratio":  (0.0, 50.0),
+    "price_to_sales": (0.0, 100.0),
 }
 
 def _clean_fundamentals(data: dict) -> dict:
@@ -3292,19 +3828,28 @@ def _get_fundamentals(ticker_base):
             return f"{v:,.0f} ₺"
 
         raw = {
-            "pe_ratio":       round(safe("trailingPE", 0), 1) if safe("trailingPE") else None,
-            "pb_ratio":       round(safe("priceToBook", 0), 2) if safe("priceToBook") else None,
-            "eps":            safe("trailingEps"),
-            "market_cap":     fmt_billion(safe("marketCap")),
-            "revenue":        fmt_billion(safe("totalRevenue")),
-            "dividend_yield": round(safe("dividendYield", 0) * 100, 2) if safe("dividendYield") else None,
-            "roe":            round(safe("returnOnEquity", 0) * 100, 1) if safe("returnOnEquity") else None,
-            "beta":           round(safe("beta", 0), 2) if safe("beta") else None,
-            "shares":         fmt_billion(safe("sharesOutstanding")),
-            "52w_high":       safe("fiftyTwoWeekHigh"),
-            "52w_low":        safe("fiftyTwoWeekLow"),
-            "avg_volume":     safe("averageVolume"),
-            "short_name":     safe("shortName"),
+            "pe_ratio":          round(safe("trailingPE", 0), 1) if safe("trailingPE") else None,
+            "forward_pe":        round(safe("forwardPE", 0), 1) if safe("forwardPE") else None,
+            "pb_ratio":          round(safe("priceToBook", 0), 2) if safe("priceToBook") else None,
+            "eps":               safe("trailingEps"),
+            "market_cap":        fmt_billion(safe("marketCap")),
+            "revenue":           fmt_billion(safe("totalRevenue")),
+            "net_income":        fmt_billion(safe("netIncomeToCommon")),
+            "dividend_yield":    round(safe("dividendYield", 0), 2) if safe("dividendYield") else None,
+            "roe":               round(safe("returnOnEquity", 0) * 100, 1) if safe("returnOnEquity") else None,
+            "beta":              round(safe("beta", 0), 2) if safe("beta") else None,
+            "shares":            fmt_billion(safe("sharesOutstanding")),
+            "52w_high":          safe("fiftyTwoWeekHigh"),
+            "52w_low":           safe("fiftyTwoWeekLow"),
+            "avg_volume":        safe("averageVolume"),
+            "short_name":        safe("shortName"),
+            "profit_margin":     round(safe("profitMargins", 0) * 100, 1) if safe("profitMargins") else None,
+            "operating_margin":  round(safe("operatingMargins", 0) * 100, 1) if safe("operatingMargins") else None,
+            "earnings_growth":   round(safe("earningsGrowth", 0) * 100, 1) if safe("earningsGrowth") else None,
+            "revenue_growth":    round(safe("revenueGrowth", 0) * 100, 1) if safe("revenueGrowth") else None,
+            "debt_to_equity":    round(safe("debtToEquity", 0), 2) if safe("debtToEquity") else None,
+            "current_ratio":     round(safe("currentRatio", 0), 2) if safe("currentRatio") else None,
+            "price_to_sales":    round(safe("priceToSalesTrailing12Months", 0), 2) if safe("priceToSalesTrailing12Months") else None,
         }
         data = _clean_fundamentals(raw)
         with _lock:
@@ -3365,7 +3910,7 @@ def api_stock_news(ticker):
 
         # Gerçek KAP bildirimleri → AI sadece özetler, uydurmaz
         name = STOCK_NAMES.get(ticker, ticker)
-        today_str = datetime.now().strftime("%d %B %Y")
+        today_str = datetime.now(_TZ_TR).strftime("%d %B %Y")
         disc_lines = "\n".join([
             f"- {d['date'][:10]}: {d.get('summary') or d.get('subject', '')} [{d['class']}]"
             for d in kap_discs[:8]
@@ -3530,7 +4075,7 @@ def api_signal_explanation(ticker):
         else:
             # Cache yok — hesapla (ilk açılış gecikir ama sonrası cache'den gelir)
             data = _compute_chart_data(ticker, "2y")
-            upd  = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+            upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
             if data and data.get("summary"):
                 with _lock:
                     _stock_chart_cache[f"US_{ticker}"] = {"data": data, "ts": now, "updated_at": upd}
@@ -3697,7 +4242,7 @@ def api_stock_chart(ticker):
     else:
         # Cache yok, bayat veya fiyat uyuşmazlığı → taze hesapla
         data = _compute_chart_data(ticker, period="2y")
-        upd  = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
         if data:
             with _lock:
                 _stock_chart_cache[ticker] = {"data": data, "ts": now, "updated_at": upd}
@@ -3782,11 +4327,20 @@ def api_tarama():
             "signal_bars":   s.get("signal_bars") or 1,
             "entry_quality": s.get("entry_quality",""),
             "vol_ratio":     s.get("vol_ratio") or 1.0,
+            "rvol":          s.get("rvol"),
+            "is_premium":    s.get("is_premium", False),
             "bull_score":    s.get("bull_score") or 0,
             "sl_level":      s.get("sl_level"),
         })
 
-    rev = sort_by in ("adx","price","signal_bars","vol_ratio","bull_score","change_pct")
+    sort_dir = request.args.get("sort_dir", "")  # asc | desc | (default desc)
+    only_premium = request.args.get("only_premium", "") == "1"
+    if only_premium:
+        results = [r for r in results if r.get("is_premium")]
+    if sort_dir in ("asc", "desc"):
+        rev = sort_dir == "desc"
+    else:
+        rev = sort_by in ("adx","price","signal_bars","vol_ratio","bull_score","change_pct")
     results.sort(key=lambda x: (x.get(sort_by) or 0), reverse=rev)
 
     with _lock:
@@ -3838,6 +4392,7 @@ def sitemap():
     pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly"})
     pages.append({"loc": "/sinyal-performans",  "priority": "0.7", "changefreq": "weekly"})
     pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
+    pages.append({"loc": "/hisseler",          "priority": "0.85", "changefreq": "daily"})
     pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "weekly"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly"})
@@ -3860,13 +4415,83 @@ def sitemap():
 
 @app.route("/robots.txt")
 def robots():
-    body = (
-        "User-agent: *\n"
-        "Allow: /\n"
-        "Disallow: /api/\n"
-        "\n"
-        "Sitemap: https://borsapusula.com/sitemap.xml\n"
-    )
+    body = """# borsapusula.com — robots.txt
+# Allow major search engines + reputation crawlers explicitly
+
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+
+User-agent: Yandex
+Allow: /
+Disallow: /api/
+
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /api/
+
+User-agent: Slurp
+Allow: /
+Disallow: /api/
+
+# Reputation/security scanners — explicit allow
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# AI crawlers — allow (we want indexing)
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+
+# Default rule
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+# Aggressive scrapers — explicit deny
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Crawl-delay for politeness
+Crawl-delay: 5
+
+# Sitemaps
+Sitemap: https://borsapusula.com/sitemap.xml
+"""
     return Response(body, mimetype="text/plain")
 
 
@@ -3888,6 +4513,67 @@ def favicon():
         with open(fpath, "rb") as f:
             return Response(f.read(), mimetype="image/svg+xml")
     return "", 404
+
+
+@app.route("/.well-known/security.txt")
+def security_txt():
+    """RFC 9116 — Security Researchers contact channel."""
+    body = """# borsapusula.com — Security Policy (RFC 9116)
+Contact: mailto:security@borsapusula.com
+Contact: mailto:iletisim@borsapusula.com
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: tr, en
+Canonical: https://borsapusula.com/.well-known/security.txt
+Policy: https://borsapusula.com/yasal
+Acknowledgments: https://borsapusula.com/hakkinda
+
+# We welcome responsible disclosure of security vulnerabilities.
+# Please email us with details and we will respond within 5 business days.
+# Out of scope: DoS, social engineering, missing CSP headers, version disclosure.
+"""
+    return Response(body, mimetype="text/plain", headers={
+        "Cache-Control": "public, max-age=86400",
+        "X-Robots-Tag": "noindex, nofollow",
+    })
+
+
+@app.route("/security.txt")
+def security_txt_alias():
+    """Alias for /.well-known/security.txt"""
+    return security_txt()
+
+
+@app.route("/humans.txt")
+def humans_txt():
+    """humanstxt.org — site arkasındaki insanlar."""
+    body = """/* borsapusula.com — humans.txt */
+/* https://humanstxt.org */
+
+/* TEAM */
+    Founder & Product: BorsaPusula Ekibi
+    Site: https://borsapusula.com
+    Contact: iletisim [at] borsapusula.com
+    Location: Istanbul, Türkiye
+
+/* THANKS */
+    Topluluğumuza, geri bildirim veren tüm yatırımcılara teşekkürler.
+
+/* SITE */
+    Last update: 2026/05/08
+    Language: Türkçe (TR)
+    Doctype: HTML5
+    Standards: HTML5, CSS3, ECMAScript 2022
+    Components: Lightweight Charts, Chart.js
+    Software: Python (Flask), JavaScript (Vanilla), Cloudflare CDN
+    Methodology: Algoritmik teknik analiz — Supertrend(10,3) + ADX(14) + EMA12/99
+
+/* MISSION */
+    Türk yatırımcılarına şeffaf, ücretsiz, algoritmik BIST sinyal aracı sunmak.
+    Backtest ile her zaman doğrulanan, açık kaynaklı metodoloji.
+"""
+    return Response(body, mimetype="text/plain; charset=utf-8", headers={
+        "Cache-Control": "public, max-age=86400",
+    })
 
 
 @app.route("/og-image.svg")
@@ -3961,28 +4647,47 @@ def api_karsilastir():
             adx_val = float(adx_label.replace("ADX", "").strip()) if adx_label else None
         except (ValueError, TypeError):
             adx_val = None
+        # Temel analiz verileri (sadece BIST hisseleri ve veri varsa)
+        fund = _get_fundamentals(ticker) if ticker in BIST100 and bool(s) else {}
         results.append({
-            "ticker":        ticker,
-            "name":          STOCK_NAMES.get(ticker, US_STOCK_NAMES.get(ticker, ticker)),
-            "signal":        s.get("signal"),
-            "price":         s.get("price"),
-            "change_pct":    s.get("change_pct"),
-            "adx":           adx_val,
-            "rsi":           s.get("rsi"),
-            "signal_bars":   s.get("signal_bars"),
-            "signal_date":   s.get("signal_date"),
-            "entry_quality": s.get("entry_quality"),
-            "sl_level":      s.get("sl_level"),
-            "tp1":           s.get("tp1"),
-            "tp2":           s.get("tp2"),
-            "rr_ratio":      s.get("rr_ratio"),
-            "bull_score":    s.get("bull_score"),
-            "bear_score":    s.get("bear_score"),
-            "sector":        _get_sector(ticker),
-            "kap_url":       kap_url_for(ticker),
-            "found":         bool(s),
+            "ticker":         ticker,
+            "name":           STOCK_NAMES.get(ticker, US_STOCK_NAMES.get(ticker, ticker)),
+            "signal":         s.get("signal"),
+            "price":          s.get("price"),
+            "change_pct":     s.get("change_pct"),
+            "adx":            adx_val,
+            "rsi":            s.get("rsi"),
+            "signal_bars":    s.get("signal_bars"),
+            "signal_date":    s.get("signal_date"),
+            "entry_quality":  s.get("entry_quality"),
+            "sl_level":       s.get("sl_level"),
+            "tp1":            s.get("tp1"),
+            "tp2":            s.get("tp2"),
+            "rr_ratio":       s.get("rr_ratio"),
+            "bull_score":     s.get("bull_score"),
+            "bear_score":     s.get("bear_score"),
+            "sector":         _get_sector(ticker),
+            "kap_url":        kap_url_for(ticker),
+            # ── Temel analiz ───────────────────────────────
+            "pe_ratio":       fund.get("pe_ratio"),
+            "pb_ratio":       fund.get("pb_ratio"),
+            "market_cap":     fund.get("market_cap"),
+            "roe":            fund.get("roe"),
+            "dividend_yield": fund.get("dividend_yield"),
+            "eps":            fund.get("eps"),
+            "profit_margin":  fund.get("profit_margin"),
+            "found":          bool(s),
         })
     return safe_json({"stocks": results, "count": len(results)})
+
+
+@app.route("/api/stocks/list")
+@limiter.limit("60 per minute")
+def api_stocks_list():
+    """Autocomplete için tüm hisseler: ticker + isim listesi"""
+    result = [{"ticker": t, "name": STOCK_NAMES.get(t, t)}
+              for t in BIST100 if t != "XU030"]
+    return safe_json({"stocks": result})
 
 
 # ── Piyasa Gündem Merkezi ────────────────────────────────────────────────────
@@ -4043,7 +4748,7 @@ def api_gundem():
     return safe_json({
         "new_signals": new_signals,
         "strong_al":   strong_al,
-        "updated_at":  datetime.now().strftime("%d.%m.%Y %H:%M"),
+        "updated_at":  datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
         "signal_summary": {
             "al":    sum(1 for s in stocks if s.get("signal") == "AL"),
             "sat":   sum(1 for s in stocks if s.get("signal") == "SAT"),
@@ -4509,7 +5214,7 @@ def run_backtest():
         "al":          stats(all_episodes["AL"]),
         "sat":         stats(all_episodes["SAT"]),
         "per_ticker":  sorted(per_ticker, key=lambda x: -(x["al_count"] + x["sat_count"])),
-        "computed_at": datetime.now().strftime("%d.%m.%Y %H:%M"),
+        "computed_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
         "tickers_used": len(bt_tickers),
     }
     with _lock:
@@ -4560,6 +5265,68 @@ def api_backtest_run():
     return jsonify({"status": "started"})
 
 
+@app.route("/nasdaq")
+def _redir_nasdaq():
+    return redirect("/abd/nasdaq", code=301)
+
+@app.route("/sp500")
+def _redir_sp500():
+    return redirect("/abd/sp500", code=301)
+
+@app.route("/dow")
+@app.route("/djia")
+def _redir_dow():
+    return redirect("/abd", code=301)
+
+
+@app.route("/hisseler")
+def hisseler_hub():
+    """SEO hub — Tüm BIST hisseleri sektör + alfabetik. SSR ile 215 internal link."""
+    # Sektörlere göre grupla (sadece BIST100 içinde olanlar)
+    bist_set = set(BIST100) - {"XU030", "XU100"}
+    by_sector = {}
+    for sector, tickers in SECTORS.items():
+        active = [t for t in tickers if t in bist_set]
+        if active:
+            # Her sektörde ticker → name çiftleri, alfabetik
+            items = sorted(
+                [(t, STOCK_NAMES.get(t, t)) for t in active],
+                key=lambda x: x[0]
+            )
+            by_sector[sector] = items
+    # Sektörsüz/Diğer
+    in_any = set()
+    for items in by_sector.values():
+        for t, _ in items:
+            in_any.add(t)
+    others = sorted([t for t in bist_set if t not in in_any])
+    if others:
+        by_sector["Diğer"] = [(t, STOCK_NAMES.get(t, t)) for t in others]
+
+    # Alfabetik tam liste (her harf grubu)
+    all_pairs = sorted(
+        [(t, STOCK_NAMES.get(t, t)) for t in bist_set],
+        key=lambda x: x[0]
+    )
+    by_letter = {}
+    for t, n in all_pairs:
+        first = t[0].upper()
+        by_letter.setdefault(first, []).append((t, n))
+    letters_sorted = sorted(by_letter.keys())
+
+    # Sektörler alfabetik
+    sectors_sorted = sorted(by_sector.keys())
+
+    return render_template(
+        "hisseler.html",
+        by_sector=by_sector,
+        sectors_sorted=sectors_sorted,
+        by_letter=by_letter,
+        letters_sorted=letters_sorted,
+        total_count=len(all_pairs),
+    )
+
+
 @app.route("/sektor-harita")
 def sektor_harita():
     return render_template("sektor_harita.html")
@@ -4577,8 +5344,8 @@ _earnings_refreshing = False         # arka plan yenileme kilidi
 # Q3 (Temmuz-Eylül):         Ekim-Kasım
 _BILANCO_PERIODS = [
     # (quarter_label, est_start_mm_dd, est_end_mm_dd, description)
-    ("Q4 2025 (Yıllık)", "2026-03-01", "2026-04-30", "2025 yıl sonu bilanço açıklamaları"),
-    ("Q1 2026",          "2026-05-15", "2026-06-15", "2026 1. çeyrek sonuçları"),
+    ("Q4 2025 (Yıllık)", "2026-03-01", "2026-05-31", "2025 yıl sonu bilanço açıklamaları"),
+    ("Q1 2026",          "2026-04-15", "2026-06-15", "2026 1. çeyrek sonuçları"),
     ("Q2 2026 (H1)",     "2026-08-01", "2026-09-15", "2026 ilk yarıyıl sonuçları"),
     ("Q3 2026",          "2026-10-15", "2026-11-30", "2026 3. çeyrek sonuçları"),
     ("Q4 2026 (Yıllık)", "2027-03-01", "2027-04-30", "2026 yıl sonu bilanço açıklamaları"),
@@ -4674,7 +5441,7 @@ def _earnings_refresh_impl():
 
     data = {
         "periods":    result_periods,
-        "updated_at": datetime.now().strftime("%d.%m.%Y %H:%M"),
+        "updated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
     }
     with _lock:
         _earnings_cache["data"] = data
@@ -4923,12 +5690,17 @@ def api_market_news():
 @app.route("/api/subscribe", methods=["POST"])
 @limiter.limit("5 per hour")
 def api_subscribe():
-    """E-posta abonelik kaydı."""
+    """E-posta abonelik kaydı (name + email)."""
     data  = request.get_json(silent=True) or {}
     email = (data.get("email") or "").strip().lower()
+    name  = (data.get("name") or "").strip()[:80]  # max 80 chars
+
     # Basit e-posta doğrulama
     if not email or "@" not in email or not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
         return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
+    # İsim isteğe bağlı; varsa minimum 2 karakter
+    if name and len(name) < 2:
+        return safe_json({"ok": False, "error": "Ad çok kısa"}), 400
 
     with _sub_lock:
         subs = _load_subscribers()
@@ -4938,32 +5710,192 @@ def api_subscribe():
             # Pasif abonenin kaydını yeniden aktif et
             subs[email]["active"] = True
             subs[email]["subscribed_at"] = datetime.now().isoformat()
+            if name and not subs[email].get("name"):
+                subs[email]["name"] = name
             _save_subscribers(subs)
             token = subs[email].get("token", "")
             unsub = f"https://borsapusula.com/unsubscribe/{token}"
             threading.Thread(target=send_email, args=(
                 email, "✅ BorsaPusula — Abonelik Yenilendi",
-                _build_welcome_email(email, unsub)
+                _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", ""))
             ), daemon=True).start()
-            return safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!"})
+            react_resp = safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!", "token": token, "name": subs[email].get("name", ""), "email": email})
+            react_resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
+            return react_resp
 
         token = secrets.token_hex(24)
         subs[email] = {
             "token":         token,
             "subscribed_at": datetime.now().isoformat(),
+            "name":          name,            # FAZ 3: kullanıcı adı
             "tickers":       [],
             "active":        True,
+            "level":         None,            # FAZ 4: yatırım deneyimi
+            "freq":          None,            # FAZ 4: işlem sıklığı
+            "segments":      [],              # FAZ 4: ilgi alanları
+            "mail_pref":     "daily",         # FAZ 4: mail tercihi (daily|instant|premium|weekly)
+            "profile_done":  False,           # FAZ 4: profil tamamlandı mı
         }
         _save_subscribers(subs)
 
     unsub = f"https://borsapusula.com/unsubscribe/{token}"
     threading.Thread(target=send_email, args=(
         email, "✅ BorsaPusula — Abonelik Onayı",
-        _build_welcome_email(email, unsub)
+        _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", ""))
     ), daemon=True).start()
 
     logger.info("Yeni e-posta abonesi: %s", email)
-    return safe_json({"ok": True, "message": "Abonelik başarılı! Onay e-postası gönderildi."})
+    resp = safe_json({
+        "ok":      True,
+        "message": "Abonelik başarılı! Onay e-postası gönderildi.",
+        "token":   token,
+        "name":    name,
+        "email":   email,
+    })
+    # Cookie set — 1 yıl, SameSite=Lax (CSRF korumalı)
+    resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
+    return resp
+
+
+@app.route("/profil")
+def profil_page():
+    """Profil tamamla sayfası — token ile kullanıcıyı tanı."""
+    token = request.args.get("t", "")
+    if not token:
+        return Response("Geçersiz bağlantı", status=400)
+    with _sub_lock:
+        subs = _load_subscribers()
+        target_email = None
+        for em, info in subs.items():
+            if info.get("token") == token and info.get("active"):
+                target_email = em
+                break
+    if not target_email:
+        return render_template("profil.html", error="Aboneliğiniz bulunamadı veya pasif", email=None, name="", profile=None, token="")
+
+    info = subs[target_email]
+    profile = {
+        "level":     info.get("level"),
+        "freq":      info.get("freq"),
+        "size":      info.get("size"),
+        "segments":  info.get("segments", []),
+        "mail_pref": info.get("mail_pref", "daily"),
+    }
+    return render_template("profil.html",
+                           email=target_email,
+                           name=info.get("name", ""),
+                           profile=profile,
+                           token=token,
+                           done=info.get("profile_done", False))
+
+
+@app.route("/api/profile", methods=["POST"])
+@limiter.limit("10 per hour")
+def api_profile():
+    """Profil verilerini kaydet."""
+    data = request.get_json(silent=True) or {}
+    token = (data.get("token") or "").strip()
+    if not token:
+        return safe_json({"ok": False, "error": "Token eksik"}), 400
+
+    level     = (data.get("level") or "").strip()[:20]
+    freq      = (data.get("freq") or "").strip()[:20]
+    size      = (data.get("size") or "").strip()[:30]
+    segments  = data.get("segments") or []
+    if not isinstance(segments, list): segments = []
+    segments = [str(s).strip()[:30] for s in segments][:10]
+    mail_pref = (data.get("mail_pref") or "daily").strip()[:20]
+    if mail_pref not in ("daily", "instant", "premium", "weekly"):
+        mail_pref = "daily"
+
+    with _sub_lock:
+        subs = _load_subscribers()
+        target = None
+        for em, info in subs.items():
+            if info.get("token") == token and info.get("active"):
+                target = em; break
+        if not target:
+            return safe_json({"ok": False, "error": "Geçersiz token"}), 404
+
+        subs[target]["level"]        = level
+        subs[target]["freq"]         = freq
+        subs[target]["size"]         = size
+        subs[target]["segments"]     = segments
+        subs[target]["mail_pref"]    = mail_pref
+        subs[target]["profile_done"] = True
+        subs[target]["profile_updated_at"] = datetime.now().isoformat()
+        _save_subscribers(subs)
+
+    logger.info("Profil tamamlandı: %s (level=%s, freq=%s, mail=%s)", target, level, freq, mail_pref)
+    return safe_json({"ok": True, "message": "Profil kaydedildi! Sinyaller artık size özel."})
+
+
+@app.route("/api/me")
+def api_me():
+    """Kullanıcı tanıma — token ile abonelik durumu sorgular."""
+    token = request.args.get("t") or request.cookies.get("bp_sub")
+    if not token:
+        return safe_json({"ok": False, "subscribed": False})
+    with _sub_lock:
+        subs = _load_subscribers()
+        for em, info in subs.items():
+            if info.get("token") == token and info.get("active"):
+                return safe_json({
+                    "ok":            True,
+                    "subscribed":    True,
+                    "email":         em,
+                    "name":          info.get("name", ""),
+                    "first_name":    (info.get("name", "").split()[0] if info.get("name") else ""),
+                    "profile_done":  bool(info.get("profile_done")),
+                    "mail_pref":     info.get("mail_pref", "daily"),
+                })
+    return safe_json({"ok": False, "subscribed": False})
+
+
+# In-memory rate limit + dedup for client error reports
+_client_errors_recent = {}   # key: (msg_hash, page), val: timestamp
+_CLIENT_ERROR_DEDUP_WINDOW = 60.0   # aynı hatayı 60s'de bir logla
+_CLIENT_ERROR_RATE_LIMIT  = 50      # tüm IP'ler toplam 50 error/dk üst sınır
+_client_error_count_this_min = {"count": 0, "minute": 0}
+
+
+@app.route("/api/log-error", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_log_error():
+    """Client-side JS hatalarını logger'a yazar. Stealth bug detection."""
+    data = request.get_json(silent=True) or {}
+    msg  = (data.get("msg") or "").strip()[:500]
+    src  = (data.get("src") or "").strip()[:200]
+    line = data.get("line")
+    col  = data.get("col")
+    page = (data.get("page") or "").strip()[:120]
+    stack = (data.get("stack") or "").strip()[:1000]
+    ua   = (request.headers.get("User-Agent") or "")[:200]
+
+    if not msg:
+        return safe_json({"ok": False}), 400
+
+    # Dedup
+    key = (hash(msg) % 1_000_000, page)
+    now_ts = time.time()
+    if key in _client_errors_recent and (now_ts - _client_errors_recent[key]) < _CLIENT_ERROR_DEDUP_WINDOW:
+        return safe_json({"ok": True, "deduped": True})
+    _client_errors_recent[key] = now_ts
+
+    # Rate guard (toplam)
+    cur_min = int(now_ts // 60)
+    if _client_error_count_this_min["minute"] != cur_min:
+        _client_error_count_this_min["minute"] = cur_min
+        _client_error_count_this_min["count"]  = 0
+    _client_error_count_this_min["count"] += 1
+    if _client_error_count_this_min["count"] > _CLIENT_ERROR_RATE_LIMIT:
+        return safe_json({"ok": True, "throttled": True})
+
+    logger.warning(
+        "🐛 CLIENT-JS-ERROR | page=%s | msg=%s | %s:%s:%s | UA=%s | stack=%s",
+        page, msg, src, line, col, ua[:80], stack[:200]
+    )
+    return safe_json({"ok": True})
 
 
 # ── Web Push API ─────────────────────────────────────────────────────────────
@@ -5055,7 +5987,7 @@ def api_telegram_test():
     _send_telegram(
         "🔔 <b>BorsaPusula Test Mesajı</b>\n"
         "Telegram entegrasyonu başarıyla yapılandırıldı!\n"
-        f"<i>Sunucu: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}</i>"
+        f"<i>Sunucu: {datetime.now(_TZ_TR).strftime('%d.%m.%Y %H:%M:%S')}</i>"
     )
     return safe_json({"ok": True, "channel": TELEGRAM_CHANNEL_ID})
 

@@ -12,3 +12,24 @@ subscribers.json
 # Geliştirme araçları
 .claude/
 test_layout.html
+
+# Cache + counters (otomatik olarak yenilenir)
+backtest_cache.json
+health_fail_count.txt
+last_cache.json
+*.bak
+*.bak.*
+
+# Push notification secrets — KESINLIKLE git'e girmesin
+vapid_private.pem
+vapid_public.txt
+push_subs.json
+
+# Runtime state files
+health_state.txt
+last_digest.txt
+health_fail_count.txt
+
+# User data
+portfolios/
+snapshots/

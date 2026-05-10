@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profilini Tamamla — BorsaPusula</title>
+<meta name="description" content="BorsaPusula sinyal mail abonelik profili — yatırım deneyimine göre kişiselleşmiş bildirimler.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#0e0e12">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+  :root {
+    --bp-bg: #0e0e12; --bp-surface: #141416; --bp-surface2: #1c1b1f;
+    --bp-border: #2a2a2c; --bp-border2: #46464d;
+    --bp-text: #e5e1e4; --bp-text2: #c7c5cd; --bp-text3: #909097;
+    --bp-mint: #00e290; --bp-peri: #b8c3ff; --bp-red: #f85149; --bp-gold: #ffc850;
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    margin: 0; padding: 0; background: var(--bp-bg);
+    color: var(--bp-text);
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  header {
+    background: var(--bp-bg);
+    border-bottom: 1px solid var(--bp-border);
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 14px;
+    position: sticky; top: 0; z-index: 100;
+    min-height: 60px; max-height: 60px;
+  }
+  main {
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  .hero {
+    text-align: center; margin-bottom: 32px;
+  }
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px; font-weight: 800;
+    color: var(--bp-text);
+    margin: 0 0 8px;
+    letter-spacing: -0.5px;
+  }
+  .hero p {
+    color: var(--bp-text3);
+    font-size: 14px;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+  .form-card {
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-border);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 18px;
+  }
+  .form-card.success {
+    background: rgba(0,226,144,0.05);
+    border-color: rgba(0,226,144,0.3);
+    text-align: center;
+  }
+  .question {
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--bp-border);
+  }
+  .question:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+  .q-label {
+    font-size: 14px; font-weight: 700;
+    color: var(--bp-text);
+    margin-bottom: 12px;
+    display: block;
+  }
+  .q-help {
+    font-size: 12px; color: var(--bp-text3);
+    margin-top: -8px; margin-bottom: 12px;
+  }
+  .opts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+  }
+  .opts.cols-1 { grid-template-columns: 1fr; }
+  .opts.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .opt {
+    background: var(--bp-surface2);
+    border: 1.5px solid var(--bp-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--bp-text2);
+    transition: all .15s;
+    text-align: left;
+    font-family: inherit;
+    user-select: none;
+  }
+  .opt:hover {
+    border-color: var(--bp-border2);
+    color: var(--bp-text);
+    background: rgba(255,255,255,0.02);
+  }
+  .opt.selected {
+    border-color: var(--bp-peri);
+    background: rgba(184,195,255,0.10);
+    color: var(--bp-peri);
+    font-weight: 600;
+  }
+  .opt.checkbox {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .opt-checkbox-icon {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--bp-border2);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .opt.selected .opt-checkbox-icon {
+    background: var(--bp-peri);
+    border-color: var(--bp-peri);
+    color: #0e0e12;
+  }
+  .submit-row {
+    display: flex; justify-content: center; gap: 12px;
+    margin-top: 24px;
+  }
+  .btn {
+    background: var(--bp-mint);
+    color: #0e0e12;
+    border: none;
+    padding: 13px 36px;
+    border-radius: 8px;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.3px;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary {
+    background: transparent;
+    color: var(--bp-text3);
+    border: 1px solid var(--bp-border);
+  }
+  .alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .alert-error {
+    background: rgba(248,81,73,0.10);
+    border: 1px solid rgba(248,81,73,0.40);
+    color: var(--bp-red);
+  }
+  .alert-success {
+    background: rgba(0,226,144,0.08);
+    border: 1px solid rgba(0,226,144,0.30);
+    color: var(--bp-mint);
+  }
+  .footer-note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--bp-text3);
+    margin-top: 30px;
+    line-height: 1.5;
+  }
+  .footer-note a { color: var(--bp-text2); text-decoration: underline; }
+  @media (max-width: 600px) {
+    main { margin: 20px auto; }
+    .form-card { padding: 20px; }
+    .hero h1 { font-size: 22px; }
+    .opts { grid-template-columns: 1fr; }
+  }
+</style>
+<style id="bp-critical-css">
+header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo-link" aria-label="BorsaPusula" style="display:inline-flex;align-items:center;text-decoration:none">
+    <svg class="bp-logo" width="200" height="52" viewBox="0 0 460 120" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bpNeedle" x1="60" y1="22" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#b8c3ff"/>
+          <stop offset="1" stop-color="#00e2a1"/>
+        </linearGradient>
+      </defs>
+      <rect x="14" y="20" width="80" height="80" rx="18" fill="#0f1218" stroke="#28303f"/>
+      <line x1="22" y1="46" x2="86" y2="46" stroke="#222a37" stroke-width="1"/>
+      <line x1="22" y1="74" x2="86" y2="74" stroke="#222a37" stroke-width="1"/>
+      <line x1="40" y1="28" x2="40" y2="92" stroke="#222a37" stroke-width="1"/>
+      <line x1="68" y1="28" x2="68" y2="92" stroke="#222a37" stroke-width="1"/>
+      <path d="M54 33 L62 60 L54 55 L46 60 Z" fill="url(#bpNeedle)"/>
+      <path d="M54 87 L60 61 L54 64 L48 61 Z" fill="#2c3445"/>
+      <circle cx="54" cy="60" r="3.5" fill="#eef3f8"/>
+      <circle cx="54" cy="60" r="1.4" fill="#00e2a1"/>
+      <text x="116" y="66" fill="#eef3f8" font-family="'Sora','Manrope',Arial,sans-serif" font-size="34" font-weight="800" letter-spacing="-0.5">Borsa<tspan fill="#00e2a1">Pusula</tspan></text>
+      <line x1="118" y1="78" x2="430" y2="78" stroke="#1e2532" stroke-width="1"/>
+      <text x="118" y="94" fill="#8f98a8" font-family="'Manrope',Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2.4">PİYASANIN YÖNÜ</text>
+    </svg>
+  </a>
+</header>
+
+<main>
+
+{% if error %}
+  <div class="alert alert-error">⚠️ {{ error }}</div>
+{% endif %}
+
+{% if email %}
+
+<div class="hero">
+  <h1>{% if name %}Merhaba {{ name.split()[0] }}!{% else %}Profilini Tamamla{% endif %}</h1>
+  <p>Sinyal önerilerini sana özelleştirmek için 30 saniye ayır. Sorulara verdiğin cevaplara göre <strong>en uygun sinyal türleri ve mail sıklığını</strong> ayarlayacağız.</p>
+</div>
+
+{% if done %}
+<div class="alert alert-success">✓ Profilin daha önce tamamlanmış. Aşağıdaki cevapları güncelleyebilirsin.</div>
+{% endif %}
+
+<form class="form-card" id="profileForm" onsubmit="return submitProfile(event)">
+
+  <!-- 1. Yatırım Deneyimi -->
+  <div class="question">
+    <label class="q-label">1. Yatırım deneyimin nedir?</label>
+    <div class="opts">
+      <button type="button" class="opt {% if profile.level == 'yeni' %}selected{% endif %}" data-q="level" data-v="yeni">🌱 Yeni başlıyorum (&lt; 1 yıl)</button>
+      <button type="button" class="opt {% if profile.level == 'orta' %}selected{% endif %}" data-q="level" data-v="orta">📚 Orta seviye (1-3 yıl)</button>
+      <button type="button" class="opt {% if profile.level == 'deneyimli' %}selected{% endif %}" data-q="level" data-v="deneyimli">🎯 Deneyimli (3+ yıl)</button>
+      <button type="button" class="opt {% if profile.level == 'profesyonel' %}selected{% endif %}" data-q="level" data-v="profesyonel">💼 Profesyonel</button>
+    </div>
+  </div>
+
+  <!-- 2. İşlem Sıklığı -->
+  <div class="question">
+    <label class="q-label">2. Genelde nasıl işlem yaparsın?</label>
+    <div class="opts">
+      <button type="button" class="opt {% if profile.freq == 'gunluk' %}selected{% endif %}" data-q="freq" data-v="gunluk">⚡ Günlük (day trader)</button>
+      <button type="button" class="opt {% if profile.freq == 'swing' %}selected{% endif %}" data-q="freq" data-v="swing">📅 Haftada 1-3 (swing)</button>
+      <button type="button" class="opt {% if profile.freq == 'pozisyon' %}selected{% endif %}" data-q="freq" data-v="pozisyon">🗓️ Aylık birkaç (pozisyon)</button>
+      <button type="button" class="opt {% if profile.freq == 'pasif' %}selected{% endif %}" data-q="freq" data-v="pasif">👀 Sadece izlerim, nadiren işlem</button>
+    </div>
+  </div>
+
+  <!-- 3. Pozisyon Büyüklüğü -->
+  <div class="question">
+    <label class="q-label">3. Genelde nasıl pozisyon büyüklüğüyle çalışırsın?</label>
+    <div class="q-help">Opsiyonel — atlayabilirsin. Bu bilgi sinyallerin türünü ayarlamamıza yardım eder.</div>
+    <div class="opts">
+      <button type="button" class="opt {% if profile.size == '0-10k' %}selected{% endif %}" data-q="size" data-v="0-10k">&lt; 10.000 ₺</button>
+      <button type="button" class="opt {% if profile.size == '10-50k' %}selected{% endif %}" data-q="size" data-v="10-50k">10.000 — 50.000 ₺</button>
+      <button type="button" class="opt {% if profile.size == '50-250k' %}selected{% endif %}" data-q="size" data-v="50-250k">50.000 — 250.000 ₺</button>
+      <button type="button" class="opt {% if profile.size == '250k+' %}selected{% endif %}" data-q="size" data-v="250k+">250.000 ₺ üzeri</button>
+    </div>
+  </div>
+
+  <!-- 4. İlgi Alanları (multi-select) -->
+  <div class="question">
+    <label class="q-label">4. Hangi alanlarla ilgileniyorsun? <span style="color:var(--bp-text3);font-weight:normal;font-size:12px">(birden fazla seçebilirsin)</span></label>
+    <div class="opts">
+      <button type="button" class="opt checkbox" data-q="segments" data-v="bist30">
+        <span class="opt-checkbox-icon"></span>BIST 30 (büyük şirketler)
+      </button>
+      <button type="button" class="opt checkbox" data-q="segments" data-v="bist100">
+        <span class="opt-checkbox-icon"></span>BIST 100 (orta-büyük)
+      </button>
+      <button type="button" class="opt checkbox" data-q="segments" data-v="yildiz">
+        <span class="opt-checkbox-icon"></span>Yıldız Pazar (orta-cap)
+      </button>
+      <button type="button" class="opt checkbox" data-q="segments" data-v="bankacilik">
+        <span class="opt-checkbox-icon"></span>Bankacılık
+      </button>
+      <button type="button" class="opt checkbox" data-q="segments" data-v="teknoloji">
+        <span class="opt-checkbox-icon"></span>Teknoloji
+      </button>
+      <button type="button" class="opt checkbox" data-q="segments" data-v="enerji">
+        <span class="opt-checkbox-icon"></span>Enerji
+      </button>
+      <button type="button" class="opt checkbox" data-q="segments" data-v="sanayi">
+        <span class="opt-checkbox-icon"></span>Sanayi
+      </button>
+      <button type="button" class="opt checkbox" data-q="segments" data-v="gyo">
+        <span class="opt-checkbox-icon"></span>GYO
+      </button>
+      <button type="button" class="opt checkbox" data-q="segments" data-v="kripto">
+        <span class="opt-checkbox-icon"></span>Kripto / Altın / Döviz
+      </button>
+    </div>
+  </div>
+
+  <!-- 5. Mail Tercihi -->
+  <div class="question">
+    <label class="q-label">5. Mail tercihin nedir?</label>
+    <div class="opts cols-1">
+      <button type="button" class="opt {% if profile.mail_pref == 'daily' %}selected{% endif %}" data-q="mail_pref" data-v="daily">📰 Günlük özet — her akşam 19:00, 1 mail (önerilir)</button>
+      <button type="button" class="opt {% if profile.mail_pref == 'instant' %}selected{% endif %}" data-q="mail_pref" data-v="instant">⚡ Anında — her sinyal değişimi olduğunda hemen</button>
+      <button type="button" class="opt {% if profile.mail_pref == 'premium' %}selected{% endif %}" data-q="mail_pref" data-v="premium">⭐ Sadece Premium — hacim onaylı sinyaller</button>
+      <button type="button" class="opt {% if profile.mail_pref == 'weekly' %}selected{% endif %}" data-q="mail_pref" data-v="weekly">📊 Haftalık özet — Cuma akşamı, performans + öne çıkanlar</button>
+    </div>
+  </div>
+
+  <div class="submit-row">
+    <button type="submit" class="btn" id="profileSubmit">
+      ✓ Profili Kaydet
+    </button>
+    <a href="/" class="btn btn-secondary">Atla</a>
+  </div>
+</form>
+
+<div class="footer-note">
+  <a href="/">← Sinyal paneline dön</a> &nbsp;·&nbsp;
+  <a href="/iletisim">Yardıma ihtiyacım var</a>
+</div>
+
+{% else %}
+
+<div class="hero">
+  <h1>⚠️ Bağlantı Geçersiz</h1>
+  <p>Profil sayfasına erişmek için hoş geldin mailindeki linki kullan. Eğer mail almadıysan <a href="/" style="color:var(--bp-peri)">ana sayfadan abone ol</a>.</p>
+</div>
+
+{% endif %}
+
+</main>
+
+<script>
+const TOKEN = "{{ token }}";
+const profile = {
+  level:    "{{ profile.level or '' }}",
+  freq:     "{{ profile.freq or '' }}",
+  size:     "{{ profile.size or '' }}",
+  mail_pref:"{{ profile.mail_pref or 'daily' }}",
+  segments: {{ profile.segments|tojson if profile and profile.segments else '[]'|safe }},
+};
+
+document.querySelectorAll('.opt').forEach(btn => {
+  const q = btn.dataset.q;
+  const v = btn.dataset.v;
+  if (q === 'segments') {
+    if (profile.segments.includes(v)) btn.classList.add('selected');
+  }
+  btn.addEventListener('click', () => {
+    if (q === 'segments') {
+      // multi-select
+      btn.classList.toggle('selected');
+    } else {
+      // single-select
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+  });
+});
+
+async function submitProfile(e) {
+  e.preventDefault();
+  const submitBtn = document.getElementById('profileSubmit');
+  const data = { token: TOKEN, segments: [] };
+
+  document.querySelectorAll('.opt.selected').forEach(opt => {
+    const q = opt.dataset.q;
+    const v = opt.dataset.v;
+    if (q === 'segments') data.segments.push(v);
+    else data[q] = v;
+  });
+
+  // Min validation: level + freq + mail_pref required
+  if (!data.level || !data.freq || !data.mail_pref) {
+    alert('1, 2 ve 5. soruyu cevapla lütfen.');
+    return false;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Kaydediliyor…';
+
+  try {
+    const res  = await fetch('/api/profile', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    if (json.ok) {
+      document.getElementById('profileForm').innerHTML =
+        '<div style="text-align:center;padding:30px 0">' +
+        '<div style="font-size:42px;margin-bottom:12px">✓</div>' +
+        '<div style="font-size:18px;font-weight:800;color:var(--bp-mint);margin-bottom:8px">Profilin kaydedildi!</div>' +
+        '<div style="font-size:13px;color:var(--bp-text2);margin-bottom:24px">' + (json.message || 'Sinyaller artık size özel.') + '</div>' +
+        '<a href="/" class="btn">Sinyal Paneline Dön →</a>' +
+        '</div>';
+    } else {
+      alert('⚠️ ' + (json.error || 'Bir hata oluştu'));
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✓ Profili Kaydet';
+    }
+  } catch(e) {
+    alert('Bağlantı hatası, tekrar deneyin.');
+    submitBtn.disabled = false;
+    submitBtn.textContent = '✓ Profili Kaydet';
+  }
+  return false;
+}
+</script>
+
+<script src="/static/bp-search.js?v=42" defer></script>
+
+</body>
+</html>

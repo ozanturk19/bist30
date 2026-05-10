@@ -1,11 +1,12 @@
 {
-  "name": "BorsaPusula",
+  "name": "BorsaPusula — BIST Sinyal Paneli",
   "short_name": "BorsaPusula",
-  "description": "BIST100 algoritmik teknik analiz sinyalleri — Güçlü Trend / Zayıf Trend",
-  "start_url": "/",
+  "description": "Algoritmik BIST teknik analiz sinyalleri — Güçlü Trend / Zayıf Trend",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#161b22",
+  "background_color": "#0e0e12",
+  "theme_color": "#0e0e12",
   "orientation": "portrait-primary",
   "lang": "tr",
   "icons": [
@@ -17,7 +18,8 @@
   ],
   "categories": ["finance"],
   "shortcuts": [
-    { "name": "Günlük Özet", "url": "/ozet", "description": "Bugünkü sinyal özeti" },
-    { "name": "Blog", "url": "/blog", "description": "Teknik analiz rehberleri" }
+    { "name": "AL Sinyalleri", "short_name": "AL", "url": "/?filter=al&source=pwa", "description": "Aktif Güçlü Trend sinyalleri" },
+    { "name": "Günlük Özet", "short_name": "Özet", "url": "/ozet?source=pwa", "description": "Bugünkü sinyal özeti" },
+    { "name": "Tarama", "short_name": "Tara", "url": "/tarama?source=pwa", "description": "Gelişmiş hisse tarama" }
   ]
 }

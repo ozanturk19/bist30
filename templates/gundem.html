@@ -33,8 +33,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bp-bg:#0b111f; --bp-surface:#111827; --bp-surface2:#1a2438;
-    --bp-border:#1e2d45; --bp-border2:#2d4166;
+    --bp-bg:#0e0e12; --bp-surface:#141416; --bp-surface2:#1c1b1f;
+    --bp-border:#2a2a2c; --bp-border2:#46464d;
     --bp-text:#e2e8f0; --bp-text2:#94a3b8; --bp-text3:#64748b;
     --bp-brand:#3b82f6; --bp-al:#3fb950; --bp-sat:#f85149;
     --bp-bkl:#8b949e; --bp-gold:#f59e0b; --bp-radius:10px;
@@ -60,6 +60,11 @@
   .back-btn:hover { color: var(--bp-text); border-color: var(--bp-border2); }
   .page-title { font-size: 20px; font-weight: 700; }
   .page-sub   { font-size: 12px; color: var(--bp-text3); margin-top: 1px; }
+  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
+  .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
+  .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
+  @media (max-width:780px) { .top-nav-links { display:none; } }
 
   .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
 
@@ -189,15 +194,15 @@
   }
   /* ── Makro Ticker Bandı ── */
   .macro-bar {
-    background:#0b111f; border-bottom:1px solid #1e2d45;
+    background:#0e0e12; border-bottom:1px solid #2a2a2c;
     height:34px; overflow:hidden; position:relative; white-space:nowrap;
   }
   .macro-bar::before, .macro-bar::after {
     content:''; position:absolute; top:0; bottom:0; width:60px;
     pointer-events:none; z-index:2;
   }
-  .macro-bar::before { left:0; background:linear-gradient(to right,#0b111f,transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,#0b111f,transparent); }
+  .macro-bar::before { left:0; background:linear-gradient(to right,#0e0e12,transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,#0e0e12,transparent); }
   .macro-track {
     display:inline-flex; align-items:center;
     animation:macroScroll 40s linear infinite; height:34px;
@@ -206,26 +211,96 @@
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
   .macro-item {
     display:inline-flex; align-items:center; gap:8px;
-    padding:0 20px; border-right:1px solid #1e2d45;
+    padding:0 20px; border-right:1px solid #2a2a2c;
     font-size:12px; height:34px; text-decoration:none; color:inherit;
   }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
 </style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 </head>
 <body>
 <header>
-  <a href="/" class="back-btn">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M19 12H5M12 5l-7 7 7 7"/>
+  <a href="/" class="logo-link" aria-label="BorsaPusula — Piyasanın Yönü">
+    <svg class="bp-logo" width="200" height="52" viewBox="0 0 460 120" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bpNeedle" x1="60" y1="22" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#b8c3ff"/>
+          <stop offset="1" stop-color="#00e2a1"/>
+        </linearGradient>
+      </defs>
+      <rect x="14" y="20" width="80" height="80" rx="18" fill="#0f1218" stroke="#28303f"/>
+      <g stroke="#222a37" stroke-width="1">
+        <line x1="22" y1="46" x2="86" y2="46"/>
+        <line x1="22" y1="74" x2="86" y2="74"/>
+        <line x1="40" y1="28" x2="40" y2="92"/>
+        <line x1="68" y1="28" x2="68" y2="92"/>
+      </g>
+      <path d="M54 33 L62 60 L54 55 L46 60 Z" fill="url(#bpNeedle)"/>
+      <path d="M54 87 L60 61 L54 64 L48 61 Z" fill="#2c3445"/>
+      <circle cx="54" cy="60" r="3.5" fill="#eef3f8"/>
+      <circle cx="54" cy="60" r="1.4" fill="#00e2a1"/>
+      <text x="116" y="66" fill="#eef3f8" font-family="'Sora','Manrope',Arial,sans-serif" font-size="34" font-weight="800" letter-spacing="-0.5">Borsa<tspan fill="#00e2a1">Pusula</tspan></text>
+      <line x1="118" y1="78" x2="430" y2="78" stroke="#1e2532" stroke-width="1"/>
+      <text x="118" y="94" fill="#8f98a8" font-family="'Manrope',Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2.4">PİYASANIN YÖNÜ</text>
     </svg>
-    Ana Sayfa
   </a>
   <div>
     <h1 class="page-title">Piyasa Gündem Merkezi</h1>
     <div class="page-sub" id="updatedAt">Yükleniyor…</div>
   </div>
+  <nav class="bp-main-nav" aria-label="Ana navigasyon">
+  <a href="/" data-route="/" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Sinyaller</span>
+  </a>
+  <a href="/tarama" data-route="/tarama" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>Tarama</span>
+  </a>
+  <a href="/bilanco-takvimi" data-route="/bilanco-takvimi" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Bilanço</span>
+  </a>
+  <a href="/sektor-harita" data-route="/sektor-harita" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
+    <span>Sektörler</span>
+  </a>
+  <a href="/sinyal-performans" data-route="/sinyal-performans" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span>Performans</span>
+  </a>
+  <a href="/blog" data-route="/blog" class="bp-nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    <span>Blog</span>
+  </a>
+  <div class="bp-nav-more-wrap">
+    <button type="button" class="bp-nav-item bp-nav-more-btn" aria-haspopup="true" aria-expanded="false">
+      <span>Daha</span>
+      <svg class="bp-nav-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="bp-nav-more-menu" role="menu">
+      <a href="/portfolio" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
+      <a href="/ozet" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
+      <a href="/karsilastir" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
+      <a href="/hisseler" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
+      <a href="/gucu-yuksek" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Güçlü Trend</a>
+      <div class="bp-nav-sep"></div>
+      <a href="/kripto" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>Kripto</a>
+      <a href="/emtialar" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8"/></svg>Emtialar</a>
+      <a href="/abd" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>ABD</a>
+      <a href="/gundem" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
+      <div class="bp-nav-sep"></div>
+      <a href="/metodoloji" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Metodoloji</a>
+      <a href="/hakkinda" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Hakkında</a>
+      <a href="/iletisim" role="menuitem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>İletişim</a>
+    </div>
+  </div>
+</nav>
+  <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)" style="margin-left:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
 </header>
+<h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Gündem & Piyasa Haberleri</h1>
+
 
 <!-- Makro Ticker Bandı -->
 <div class="macro-bar">
@@ -361,7 +436,7 @@ function renderCard(s, isNew) {
   const isAl  = s.signal === 'AL';
   const isSat = s.signal === 'SAT';
   const sigCls  = isAl ? 'al' : isSat ? 'sat' : 'bkl';
-  const badgeTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Zayıf Trend' : '● Belirsiz';
+  const badgeTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Zayıf Trend' : '● Yatay';
   const adx  = adxFromStock(s);
   const chg  = parseFloat(s.change_pct || 0);
   const chgCls = chg >= 0 ? 'up' : 'dn';
@@ -449,7 +524,7 @@ async function loadGundem() {
           const dotClr   = isActive ? '#f59e0b' : '#8b949e';
           const badgeBg  = isActive ? 'rgba(245,158,11,.12)' : 'rgba(139,148,158,.08)';
           const badgeBrd = isActive ? 'rgba(245,158,11,.3)' : 'rgba(139,148,158,.2)';
-          return `<div style="flex:1;min-width:200px;background:#111827;border:1px solid ${badgeBrd};border-radius:8px;padding:12px 14px">
+          return `<div style="flex:1;min-width:200px;background:#141416;border:1px solid ${badgeBrd};border-radius:8px;padding:12px 14px">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
               <span style="width:7px;height:7px;border-radius:50%;background:${dotClr};flex-shrink:0"></span>
               <span style="font-size:12px;font-weight:600;color:#e2e8f0">${p.label}</span>
@@ -476,11 +551,11 @@ async function loadGundem() {
           const isAl  = item.signal === 'AL';
           const isSat = item.signal === 'SAT';
           const sigCls = isAl ? '#3fb950' : isSat ? '#f85149' : '#8b949e';
-          const sigTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Zayıf Trend' : '● Belirsiz';
+          const sigTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Zayıf Trend' : '● Yatay';
           const snippet = (item.snippet||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/^\*\s+/gm,'• ').replace(/^-\s+/gm,'• ').trim();
           const kapHref = item.kap_url ? `<a href="${item.kap_url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP ↗</a>` : '';
-          return `<a href="/hisse/${item.ticker}" style="display:block;text-decoration:none;background:#111827;border:1px solid #1e2d45;border-radius:8px;padding:12px 14px;transition:border-color .15s"
-            onmouseover="this.style.borderColor='#2d4166'" onmouseout="this.style.borderColor='#1e2d45'">
+          return `<a href="/hisse/${item.ticker}" style="display:block;text-decoration:none;background:#141416;border:1px solid #2a2a2c;border-radius:8px;padding:12px 14px;transition:border-color .15s"
+            onmouseover="this.style.borderColor='#46464d'" onmouseout="this.style.borderColor='#2a2a2c'">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
               <span style="font-size:13px;font-weight:700;color:#e2e8f0">${item.ticker}</span>
               <span style="font-size:11px;font-weight:600;color:${sigCls}">${sigTxt}</span>
@@ -522,7 +597,7 @@ async function loadEconCalendar() {
       const duTxt = e.is_today ? '<strong style="color:#f59e0b">Bugün!</strong>'
                    : du === 1  ? '<span style="color:#f59e0b">Yarın</span>'
                    : `<span style="color:#94a3b8">${du} gün sonra</span>`;
-      return `<div style="display:flex;align-items:center;gap:12px;background:#111827;border:1px solid ${e.is_today?'rgba(245,158,11,.3)':'#1e2d45'};border-radius:8px;padding:10px 14px">
+      return `<div style="display:flex;align-items:center;gap:12px;background:#141416;border:1px solid ${e.is_today?'rgba(245,158,11,.3)':'#2a2a2c'};border-radius:8px;padding:10px 14px">
         <span style="font-size:18px;flex-shrink:0">${e.icon||'📅'}</span>
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600;color:#e2e8f0">${e.event}</div>
@@ -551,8 +626,8 @@ async function loadMacroNewsSection() {
     }
     grid.innerHTML = items.slice(0, 8).map(item => {
       return `<a href="${item.url}" target="_blank" rel="noopener"
-        style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:#111827;border:1px solid #1e2d45;border-radius:8px;padding:10px 14px;transition:border-color .15s"
-        onmouseover="this.style.borderColor='#2d4166'" onmouseout="this.style.borderColor='#1e2d45'">
+        style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:#141416;border:1px solid #2a2a2c;border-radius:8px;padding:10px 14px;transition:border-color .15s"
+        onmouseover="this.style.borderColor='#46464d'" onmouseout="this.style.borderColor='#2a2a2c'">
         <span style="font-size:9px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.15);border-radius:4px;padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.source}</span>
         <span style="font-size:12.5px;color:#e2e8f0;line-height:1.4;font-weight:500;flex:1">${item.title}</span>
         <span style="font-size:10px;color:#64748b;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.date_str||item.published||''}</span>
@@ -610,11 +685,12 @@ async function loadMacroBar() {
       return `<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;
     }).join('');
     const mt = document.getElementById('macroTrack');
-    if (mt) { mt.innerHTML = html + html; const w = mt.scrollWidth/2; if(w>50) mt.style.animationDuration=(w/50).toFixed(1)+'s'; }
+    if (mt) { mt.innerHTML = html + html; const w = mt.scrollWidth/2; window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55}); }
   } catch(e) {}
 }
 loadMacroBar();
 setInterval(loadMacroBar, 60000);
 </script>
+<script src="/static/bp-search.js?v=42" defer></script>
 </body>
 </html>

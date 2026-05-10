@@ -1,11 +1,15 @@
-/* BorsaPusula Service Worker v1.1 */
-const CACHE = 'borsapusula-v2';
+/* BorsaPusula Service Worker v2.0 — post-modern redesign */
+const CACHE = 'borsapusula-v18';
 const STATIC = [
   '/static/lightweight-charts.min.js',
   '/static/manifest.json',
+  '/static/icon-192.png',
+  '/static/icon-512.png',
   '/metodoloji',
   '/hakkinda',
   '/blog',
+  /* Google Fonts — Space Grotesk + Manrope */
+  'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap',
 ];
 
 self.addEventListener('install', e => {
