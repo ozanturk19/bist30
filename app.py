@@ -3751,20 +3751,23 @@ def api_chart_us_stock(ticker):
     with _lock:
         cached = _stock_chart_cache.get(f"US_{ticker}")
 
-    # US stock cache için global_prices ile fiyat karşılaştır
+    # US stock cache için _live_prices ile fiyat karşılaştır (split tespiti)
     if cached:
-        chart_price = (cached.get("data") or {}).get("summary", {}).get("price", 0)
-        with _lock:
-            gp = _global_prices_cache.get("prices", {})
-        main_price = gp.get(ticker, {}).get("price", 0) if gp else 0
-        if chart_price > 0 and main_price > 0:
-            ratio = max(chart_price, main_price) / min(chart_price, main_price)
-            if ratio > 1.15:
-                logger.warning(
-                    "Fiyat uyuşmazlığı [US_%s]: chart=%.2f main=%.2f oran=%.2fx — cache iptal",
-                    ticker, chart_price, main_price, ratio
-                )
-                cached = None
+        try:
+            chart_price = (cached.get("data") or {}).get("summary", {}).get("price", 0)
+            with _lock:
+                gp = dict(_live_prices)  # _global_prices_cache yerine _live_prices kullan
+            main_price = (gp.get(ticker) or {}).get("price", 0) if gp else 0
+            if chart_price > 0 and main_price > 0:
+                ratio = max(chart_price, main_price) / min(chart_price, main_price)
+                if ratio > 1.15:
+                    logger.warning(
+                        "Fiyat uyuşmazlığı [US_%s]: chart=%.2f main=%.2f oran=%.2fx — cache iptal",
+                        ticker, chart_price, main_price, ratio
+                    )
+                    cached = None
+        except Exception as _e:
+            logger.debug("US chart price compare skipped: %s", _e)
 
     if cached and (now - cached["ts"]) < _STOCK_CACHE_TTL:
         return safe_json({"chart": cached["data"], "updated_at": cached["updated_at"], "loading": False})
