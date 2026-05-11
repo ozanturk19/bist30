@@ -2338,7 +2338,7 @@ def _do_macro_ai_refresh():
             "GÖREV: Bireysel yatırımcı için 2 cümlelik Türkçe piyasa özeti. "
             "Yatırım tavsiyesi verme. Giriş/kapanış cümlesi ekleme."
         )
-        _, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=12)
+        _, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=12, max_tokens=600, temperature=0.3)
         if text:
             now = time.time()
             today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
@@ -2583,6 +2583,29 @@ _news_cache           = {}   # {ticker: {"text": str|None, "ts": float, "failed"
 _NEWS_CACHE_TTL       = 3600 * 6   # 6 saat — başarılı yanıt
 _NEWS_FAIL_TTL        = 300        # 5 dakika — başarısız yanıt (negatif cache)
 
+def _news_ttl_for(ticker: str) -> int:
+    """Dinamik TTL: aktif sinyalli/hacimli hisseler kısa TTL, durgun hisseler uzun TTL.
+
+    - AL/SAT sinyalli: 6h (aktif iş, sık güncelle)
+    - vol_ratio >= 1.0: 6h (hacimli)
+    - vol_ratio 0.5-1.0: 12h (orta)
+    - vol_ratio < 0.5: 24h (durgun, gemini çağrısını azalt)
+    """
+    with _lock:
+        for s in _cache.get("data", []):
+            if s.get("ticker") == ticker:
+                if s.get("signal") in ("AL", "SAT"):
+                    return _NEWS_CACHE_TTL
+                vr = s.get("vol_ratio") or 1.0
+                if vr < 0.5:
+                    return 3600 * 24
+                if vr < 1.0:
+                    return 3600 * 12
+                return _NEWS_CACHE_TTL
+    return _NEWS_CACHE_TTL
+
+
+
 # On-demand news fetch kuyruğu (market-news endpoint'i tarafından doldurulur)
 _news_fetch_queue     = set()      # tickers waiting for background fetch
 _news_queue_lock      = threading.Lock()
@@ -2603,7 +2626,215 @@ _GEMINI_EXPLAIN_ATTEMPTS = [
 ]
 
 
-def _gemini_call(prompt, attempts, timeout=20):
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# IMPLICIT CACHING — Gemini 2.5 sabit prefix sistem prompt'ları (1024+ token)
+# Aynı prefix tekrar gönderildiğinde input token maliyeti %75 düşer.
+# Bu prompt'lar değişmemeli — her değişiklik cache invalidate eder.
+# ═══════════════════════════════════════════════════════════════════════════
+
+_SYS_NEWS = """KIMLIK: Sen BorsaPusula adlı Türk borsa analiz platformunun haber özet asistanısın. Borsa İstanbul'da işlem gören şirketler hakkındaki resmi açıklamaları, finansal sonuçları, KAP bildirimlerini ve önemli kurumsal gelişmeleri bireysel yatırımcılar için sade Türkçe ile özetlersin. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir. Aşağıdaki kurallara KESİNLİKLE uyacaksın.
+
+═══ KESİN KURALLAR ═══
+
+KURAL 1 — TARİH KISITI:
+YALNIZCA görev mesajında belirtilen tarih aralığındaki olayları yaz. Bu tarih aralığı dışındaki herhangi bir gelişmeyi DAHIL ETME. Bugünün tarihinden sonraki tarihler için ASLA "olacak, planlanıyor, açıklanacak" gibi ifadeler kullanma — gelecek bilinmez.
+
+KURAL 2 — GELECEK YASAĞI:
+Bugünden sonraki tarihlerde olacak olaylar HAKKINDA SPEKÜLASYON YAPMA. Eğer arama sonuçlarında "X şirket yarın bilanço açıklayacak" gibi bir haber bulursan, bunu özete DAHIL ETME. Sadece zaten gerçekleşmiş olayları rapor et. Tahminler, beklentiler ve "olabilir" denenen şeyler de yasaktır.
+
+KURAL 3 — BOŞ KAYNAK YANITI:
+Eğer belirtilen tarih aralığında doğrulanmış bir gelişme bulamadıysan, SADECE şunu yaz: "Son 7 günde kayda değer bir gelişme bulunmuyor." Başka bir ek metin yazma, "bilgim sınırlı" gibi bahane sunma, alternatif öneri sunma.
+
+KURAL 4 — UYDURMA YASAĞI:
+Tarih uydurma, rakam uydurma, isim uydurma, KAP referans numarası uydurma. Spekülasyon yapma. "Olabilir, muhtemelen, görünüyor, sanırım" gibi belirsiz ifadeler kullanma. Sadece arama kaynaklarında doğrulayabildiğin bilgileri yaz. Emin değilsen yazma.
+
+KURAL 5 — GİRİŞ/KAPANIŞ YASAĞI:
+"Aşağıda X şirketinin özetlerini bulabilirsiniz" gibi giriş cümlesi YAZMA. "Umarım faydalı olmuştur, başka sorunuz olursa..." gibi kapanış cümlesi YAZMA. Yalnızca madde madde özet sun, gereksiz dolgu metni ekleme.
+
+═══ FORMAT ═══
+
+• Her madde "•" (madde imi) ile başlasın.
+• Her madde tek konuya odaklansın (1-2 cümle, 30-40 kelimeyi geçmesin).
+• Sayıları Türkçe formatla yaz: 1.234,56 TL (binlik ayraç nokta, ondalık virgül).
+• Yüzdeleri Türkçe formatla yaz: %12,5 büyüme.
+• Tarihleri "DD MMMM YYYY" formatında yaz (örn: 8 Mayıs 2026).
+• En önemli haberi en üste koy (KAP açıklamalarında genelde en yeni tarihli).
+• Teknik finansal jargonu sade dile çevir:
+  - "tahvil itfası" yerine "tahvil geri ödemesi"
+  - "ihraç" yerine "satış / çıkarma"
+  - "iştirak" yerine "bağlı şirket"
+  - "konsolide gelir" yerine "şirket grubunun toplam geliri"
+  - "FAVÖK" yerine "esas faaliyet kârı (FAVÖK)"
+  - "esas faaliyet" yerine "ana iş kolu"
+  - "sermaye artırımı" → açıklayarak yaz: "şirket yeni hisse çıkararak sermayesini artırdı"
+
+═══ İYİ ÖRNEK (referans çıktı) ═══
+
+• 8 Mayıs 2026: Akbank, 2025 yılına ait sürdürülebilirlik raporunu yayınladı. Çevresel ve sosyal hedeflerine ilişkin performansı paylaştı.
+
+• 7 Mayıs 2026: Akbank, vadesi gelen 250 milyon dolarlık tahvilin geri ödemesini tamamladı. Yatırımcılara anapara ve son faiz ödendi.
+
+═══ KÖTÜ ÖRNEKLER (yapma) ═══
+
+❌ "Bilgi sahibi olduğum kadarıyla..." — bilgi yetersizse Kural 3'teki boş kaynak yanıtı kullan.
+❌ "Akbank yarın bilanço açıklayacak" — Kural 2 gelecek yasağı.
+❌ "Hisse fiyatı yükselebilir" — spekülasyon yasağı, sen analist değil özetçisin.
+❌ "Aşağıdaki özetler size yardımcı olacaktır" — Kural 5 giriş yasağı.
+
+═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
+"""
+
+
+_SYS_EXPLAIN = """KIMLIK: Sen BorsaPusula platformunun teknik sinyal açıklama asistanısın. Algoritmik olarak üretilmiş hisse sinyal yorumlarını sade Türkçe ile yeniden ifade edersin. Görevini "bilgili bir borsa abisi" tonunda, anlaşılır ama profesyonel bir üslupla yaparsın. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir.
+
+═══ KESİN KURALLAR ═══
+
+KURAL 1 — ALGORİTMİK METİN KESINLIKLE DOĞRUDUR:
+Sana verilen "DOĞRU ALGORİTMİK ANALİZ" bölümündeki bilgiler matematiksel olarak hesaplanmıştır ve doğrudur. Bu analize ASLA itiraz ETME, "ama bir yandan da" diyerek ters yön belirtme, "fakat dikkat edilmeli" gibi şüphe ekleme. Görevin bu analizi desteklemek ve sade dille açıklamak — yorumlamak değil.
+
+KURAL 2 — SİNYALİN YÖNÜNE SADIK KAL:
+Eğer sinyal "Güçlü Trend" ise yorum YÜKSELİŞ yönünde olsun. "Zayıf Trend" ise DÜŞÜŞ yönünde. "Yatay/Belirsiz" ise kararsız/yan yatay tonu. Sinyalle çelişen kelimeler (yükselişte 'düşüş', düşüşte 'yükseliş') KULLANMA.
+
+KURAL 3 — ÜÇ CÜMLE KURALI:
+Yorumun TAM olarak 3 cümle olsun. Birinci cümle teknik durumu özetlesin, ikinci cümle bu durumun ne anlama geldiğini söylesin, üçüncü cümle MUTLAKA "Yatırım tavsiyesi değildir." şeklinde bitsin. Daha fazla veya daha az cümle yazma.
+
+KURAL 4 — SADE DİL ZORUNLU:
+Teknik göstergeleri sıradan yatırımcı diline çevir:
+  - Supertrend → fiyat trendi göstergesi / trend yönü
+  - ADX → trend gücü
+  - EMA → hareketli ortalama
+  - DI+ / DI- → yön göstergeleri
+  - Stop-Loss → zarar durdurma seviyesi
+  - RSI → momentum göstergesi
+  - Hacim oranı → işlem hacmi karşılaştırması
+
+KURAL 5 — SAYI YAZIM KURALI:
+- Fiyat: TL cinsinden, virgülle ondalık (örn: 32,45 ₺).
+- ADX: tam sayı + parantezle açıklama (örn: "28 - güçlü trend").
+- Yön: net ifade ("yukarı yönlü", "aşağı yönlü", "kararsız").
+- Süre: "X gündür", "yeni başladı".
+- Yüzde: virgülle ondalık (%5,3).
+
+KURAL 6 — YASAKLI İFADELER:
+- ❌ "Bence", "düşünüyorum", "tahminim" → algoritmik metni anlat, kendi görüşünü ekleme.
+- ❌ "Kesin", "mutlaka", "yüzde yüz" → finansta kesinlik yok.
+- ❌ "Al/sat tavsiyesi", "almalısınız", "satın" → tavsiye yasağı.
+- ❌ Başlık, alt başlık (## veya **bold**) → düz paragraf yaz.
+- ❌ Madde işaretleri (- veya •) → düz paragraf, virgüllerle bağla.
+- ❌ "Bu durumda yatırımcılar..." → genel tavsiye yok.
+
+═══ İYİ ÖRNEK ═══
+
+"AKBNK için Güçlü Trend sinyali aktif: hisse fiyatı 32,45 ₺ seviyesinde işlem görüyor, trend göstergesi yukarı yönü işaret ediyor ve trend gücü 28 ile güçlü seviyede. Bu üç koşulun aynı anda oluşması, hissenin son 5 gündür istikrarlı bir yükseliş eğiliminde olduğunu gösteriyor; zarar durdurma seviyesi 30,12 ₺ olarak hesaplanmış durumda. Yatırım tavsiyesi değildir."
+
+═══ KÖTÜ ÖRNEKLER ═══
+
+❌ "Akbank hissesinde yükseliş trendi var, ancak dikkatli olunmalı..." (Kural 1 — itiraz yasağı)
+❌ "Bence şu an alım fırsatı olabilir" (Kural 6 — kişisel görüş)
+❌ "**AKBNK Analizi**" başlık (Kural 6 — formatlama yok)
+❌ "- Trend: Güçlü\n- Yön: Yukarı" (Kural 6 — düz paragraf)
+
+═══ EK BAĞLAM ═══
+
+Algoritmik sinyal motoru üç gösterge kombinasyonu kullanır:
+1. Supertrend — fiyatın trend bandının üstünde mi altında mı?
+2. ADX (Average Directional Index) — trend ne kadar güçlü?
+3. EMA12 vs EMA99 — kısa vade uzun vade hareketli ortalamasının üstünde mi?
+
+Üç koşul da AYNI yönde olursa sinyal aktif olur. Bu nedenle açıklamalar
+çelişkisiz, tek yönde olmalı. Yatırımcıya "bu üç gösterge nedir?" sorusunun
+cevabını sade dille verebilirsin.
+
+Premium sinyal: Eğer hisse "Premium" olarak işaretliyse, bu AL sinyali +
+hacim teyidinin de olduğu anlamına gelir (RVOL ≥ 1.20). Bunu yorumda
+"hacimle desteklenmiş güçlü sinyal" şeklinde belirtmek serbest ama zorunlu değil.
+
+═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
+"""
+
+
+_SYS_KAP = """KIMLIK: Sen BorsaPusula adlı Türk borsa analiz platformunun KAP (Kamuyu Aydınlatma Platformu) bildirim özet asistanısın. Borsa İstanbul'da işlem gören şirketlerin KAP'a yaptıkları resmi bildirimleri bireysel yatırımcılar için sade Türkçe ile özetlersin. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir. Aşağıdaki kurallara KESİNLİKLE uyacaksın.
+
+═══ KESİN KURALLAR ═══
+
+KURAL 1 — SADECE VERİLEN BİLDİRİMLER:
+Sana ham veri olarak verilen KAP bildirimlerinden BAŞKA bilgi katma. Ek araştırma yapma, dış kaynak kullanma, kendi yorumunu ekleme. Görevin sadece verilen bildirimleri Türkçe sadeleştirmek.
+
+KURAL 2 — UYDURMA YASAĞI:
+Tarih uydurma, rakam uydurma, kontrat numarası uydurma. Bildirim metninde olmayan bilgileri YAZMA. "Bu bildirimin anlamı muhtemelen..." gibi yorum kullanma.
+
+KURAL 3 — GİRİŞ/KAPANIŞ YASAĞI:
+"Aşağıda X şirketinin KAP bildirimlerini bulabilirsiniz" gibi giriş cümlesi YAZMA. "Umarım faydalı olmuştur" gibi kapanış cümlesi YAZMA. Yalnızca madde madde özet sun.
+
+KURAL 4 — SADE DİL ZORUNLU:
+KAP'ta kullanılan teknik finansal terimleri sıradan dile çevir:
+  - "tahvil itfası" → "tahvil geri ödemesi" (vade sona erdi)
+  - "ihraç" → "satış / çıkarma"
+  - "iştirak" → "bağlı şirket"
+  - "konsolide finansal sonuçlar" → "şirket grubunun toplam finansal sonuçları"
+  - "FAVÖK" → "esas faaliyet kârı (FAVÖK)"
+  - "ana ortaklığa ait net kâr" → "ana şirkete düşen net kâr"
+  - "yönetim kurulu kararı" → "yönetim kurulu kararı"
+  - "kar payı dağıtımı" → "temettü ödemesi"
+  - "MKK" → "Merkezi Kayıt Kuruluşu (MKK)"
+  - "SPK" → "Sermaye Piyasası Kurulu (SPK)"
+
+═══ FORMAT ═══
+
+• Her madde "•" (madde imi) ile başlasın.
+• Her madde 1-2 cümle olsun, gereksiz uzatma.
+• Tarihi başta yaz: "8 Mayıs 2026: ..."
+• Önemli sayıları belirgin yap: 250 milyon TL, %5 oranında, vb.
+• Yatırımcı için "ne anlama geliyor" kısmını parantezle ekleyebilirsin (kısa, max 5 kelime).
+• Birden fazla bildirim varsa kronolojik (yeni → eski) sırala.
+• Sayıları Türkçe formatla: 1.234,56 TL, %12,5.
+
+═══ İYİ ÖRNEK ═══
+
+• 8 Mayıs 2026: Şirket, 2025 yılı sürdürülebilirlik raporunu yayınladı (çevresel ve sosyal performans verisi).
+
+• 7 Mayıs 2026: 250 milyon TL nominal değerli tahvilin geri ödemesi tamamlandı (vadesi gelen borçlanma kapatıldı).
+
+• 6 Mayıs 2026: Yönetim kurulu, %15 temettü dağıtım kararı aldı; ödeme 15 Mayıs'ta yapılacak.
+
+═══ KÖTÜ ÖRNEKLER ═══
+
+❌ "Aşağıda X şirketinin bildirimlerini bulabilirsiniz" (Kural 3 — giriş yasağı)
+❌ "Bu temettü artışı hissenin yükselmesine neden olabilir" (Kural 2 — yorum yasağı)
+❌ "Sektör genelinde benzer trendler görülüyor" (Kural 1 — ek bilgi yasağı)
+❌ "**KAP Bildirimleri**" başlık (Kural 3 — formatlama yok)
+
+═══ KAP BİLDİRİM TÜRLERİ REFERANSI ═══
+
+Yatırımcılar için en önemli KAP bildirim kategorileri (sadeleştirilmiş açıklama):
+
+• "Finansal Rapor" → çeyrek bilanço açıklaması (3 ayda bir).
+  Yatırımcıya etkisi: net kâr/zarar, satış büyümesi → hisse fiyatına yansır.
+
+• "Esas Sözleşme Değişikliği" → şirket tüzüğünde değişiklik.
+  Yatırımcıya etkisi: yönetişim/oy hakları değişimi olabilir.
+
+• "Genel Kurul Toplantısı" → ortaklar yıllık toplantısı.
+  Yatırımcıya etkisi: temettü dağıtım kararı, yönetim kurulu seçimi.
+
+• "Pay Geri Alımı" (buyback) → şirket kendi hissesini satın alıyor.
+  Yatırımcıya etkisi: hisse arzı azalır → fiyat desteği oluşur.
+
+• "Önemli Olaylar" → satın alma, satış, ortaklık değişikliği, davalar.
+  Yatırımcıya etkisi: olayın boyutuna göre büyük fiyat etkisi olabilir.
+
+• "İhraç Tavanı" → şirket yeni borçlanma izni almış.
+  Yatırımcıya etkisi: borç yükü artabilir, faiz gideri yükselir.
+
+• "Bağımsız Denetim" → yıllık dış denetim sonuçları.
+  Yatırımcıya etkisi: muhasebe doğruluğu teyidi.
+
+═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
+"""
+
+def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
     """Model fallback zinciri ile Gemini API çağrısı yapar.
 
     Args:
@@ -2618,7 +2849,17 @@ def _gemini_call(prompt, attempts, timeout=20):
         return None, None
 
     for model_id, use_search in attempts:
-        body = {"contents": [{"parts": [{"text": prompt}]}]}
+        body = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "maxOutputTokens": int(max_tokens),
+                "temperature": float(temperature),
+                "topP": 0.8,
+                # Gemini 2.5 Flash thinking mode default ON → output budget'i yiyor.
+                # Bizim use-case (özet/çeviri) reasoning gerektirmiyor → kapattık.
+                "thinkingConfig": {"thinkingBudget": 0},
+            },
+        }
         if use_search:
             body["tools"] = [{"google_search": {}}]
         url = (f"https://generativelanguage.googleapis.com/v1beta/"
@@ -2660,7 +2901,7 @@ def get_ai_news(ticker):
     with _lock:
         cached = _news_cache.get(ticker)
         if cached:
-            ttl = _NEWS_FAIL_TTL if cached.get("failed") else _NEWS_CACHE_TTL
+            ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
             if (now - cached["ts"]) < ttl:
                 return cached.get("text")   # başarısız cache → None döner
 
@@ -2668,20 +2909,16 @@ def get_ai_news(ticker):
     today_str  = datetime.now(_TZ_TR).strftime("%d %B %Y")   # ör: "01 Mayıs 2026"
     today_iso  = datetime.now(_TZ_TR).strftime("%Y-%m-%d")   # ör: "2026-05-01"
     week_ago   = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
-    prompt = (
-        f"Bugünün tarihi: {today_str} ({today_iso}).\n"
-        f"KURAL 1: YALNIZCA {today_iso} TARİHİNDEN ÖNCE (veya bu tarihte) gerçekleşmiş "
-        f"olayları yaz. {today_iso} sonrasındaki tarihler YAZMA — gelecek bilinmez.\n"
-        f"KURAL 2: YALNIZCA {week_ago} TARİHİNDEN SONRA olan olayları yaz (son 7 gün).\n"
-        f"KURAL 3: Bu zaman aralığında {ticker} hakkında doğrulanmış bilgin yoksa SADECE "
-        f"şunu yaz: 'Son 7 günde kayda değer bir gelişme bulunmuyor.'\n"
-        f"KURAL 4: Tarih uydurma, tahmin yapma, spekülasyon ekleme.\n\n"
-        f"Görev: {ticker} ({name}) hissesi için {week_ago}–{today_iso} arasındaki "
+    prompt = _SYS_NEWS + (
+        f"\nHisse: {ticker} ({name})\n"
+        f"Tarih aralığı: {week_ago} → {today_iso} (son 7 gün)\n"
+        f"Bugün: {today_str}\n\n"
+        f"Yukarıdaki kurallara göre bu hisse için belirtilen tarih aralığındaki "
         f"gerçek KAP bildirimleri, finansal sonuçlar veya önemli şirket açıklamalarını "
-        f"Türkçe madde madde özetle. Her madde 1-2 cümle. Giriş/kapanış cümlesi ekleme."
+        f"madde madde özetle."
     )
 
-    model_used, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=25)
+    model_used, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=25, max_tokens=400, temperature=0.2)
 
     with _lock:
         if text:
@@ -2793,11 +3030,8 @@ def get_ai_signal_explanation(ticker, signal_data):
     sl_line = f"\n- Stop-Loss seviyesi: {sl:.2f} ₺ (Supertrend alt/üst bandı)" if sl else ""
 
     # ── Directive prompt: AI sadece çeviri/stilize yapıyor ───────────────────
-    prompt = (
-        f"Aşağıdaki algoritmik borsa analizi KESINLIKLE DOĞRUDUR. "
-        f"Görevin bunu olduğu gibi kabul edip sıradan bir yatırımcının anlayacağı, "
-        f"sade ve akıcı Türkçe ile 3 cümleye yeniden yazmak.\n\n"
-        f"=== DOĞRU ALGORİTMİK ANALİZ ===\n"
+    prompt = _SYS_EXPLAIN + (
+        f"\n=== DOĞRU ALGORİTMİK ANALİZ ===\n"
         f"{commentary}\n\n"
         f"=== ARKA PLAN ===\n"
         f"Hisse: {ticker} ({name})\n"
@@ -2808,15 +3042,10 @@ def get_ai_signal_explanation(ticker, signal_data):
         f"DI+: {di_plus:.0f}, DI-: {di_minus:.0f}\n"
         f"  • EMA12 {e12:.0f} {'>' if e12 > e99 else '<'} EMA99 {e99:.0f} ✓\n"
         f"  • Fiyat: {price:.2f} ₺ | Sinyal süresi: {bars} gün{sl_line}\n\n"
-        f"=== KURALLAR ===\n"
-        f"1. Yukarıdaki algoritmik analizi destekle — ASLA çelişme veya 'ama' ile başlayan cümleler kurma\n"
-        f"2. Sinyali '{sig_lbl}' olarak sun, düşünce belirtme\n"
-        f"3. Teknik terimleri sıradan dile çevir (örn. Supertrend→fiyat trendi, ADX→trend gücü)\n"
-        f"4. Son cümle mutlaka: 'Yatırım tavsiyesi değildir.'\n"
-        f"5. Başlık ekleme, yalnızca paragraf yaz\n"
+        f"Yukarıdaki kurallara göre bu sinyali 3 cümlede sade Türkçe ile yeniden ifade et."
     )
 
-    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=20)
+    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=20, max_tokens=250, temperature=0.3)
 
     # ── Validation: sinyalle çelişen metin ürettiyse commentary'ye fall back ─
     if text and opposite_words:
@@ -2884,7 +3113,7 @@ def _prefetch_news_worker():
                     to_fetch.append(ticker)          # hiç denenmemiş
                 elif cached.get("failed"):
                     to_fetch.append(ticker)          # başarısız cache süresi dolmuş
-                elif (now - cached["ts"]) > _NEWS_CACHE_TTL * 0.9:
+                elif (now - cached["ts"]) > _news_ttl_for(ticker) * 0.9:
                     to_fetch.append(ticker)          # cache sona ermek üzere
 
         logger.info("Prefetch: %d/%d AL hisse için haber yüklenecek", len(to_fetch), len(al_tickers))
@@ -3901,7 +4130,7 @@ def api_stock_news(ticker):
         with _lock:
             cached = _news_cache.get(cache_key)
             if cached and not cached.get("failed"):
-                ttl = _NEWS_FAIL_TTL if cached.get("failed") else _NEWS_CACHE_TTL
+                ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
                 if (now_ts - cached["ts"]) < ttl:
                     return safe_json({
                         "news": cached["text"], "source": "kap_ai",
@@ -3916,16 +4145,14 @@ def api_stock_news(ticker):
             for d in kap_discs[:8]
             if d.get('summary') or d.get('subject')
         ])
-        kap_prompt = (
-            f"Bugün {today_str}. Aşağıdakiler {ticker} ({name}) şirketinin "
-            f"son 7 günlük resmi KAP (Kamuyu Aydınlatma Platformu) bildirimleridir:\n\n"
+        kap_prompt = _SYS_KAP + (
+            f"\nHisse: {ticker} ({name})\n"
+            f"Bugün: {today_str}\n\n"
+            f"=== HAM KAP BİLDİRİMLERİ (son 7 gün) ===\n"
             f"{disc_lines}\n\n"
-            f"Bu bildirimleri bireysel yatırımcı için Türkçe madde madde özetle. "
-            f"Her madde 1-2 cümle. Teknik finansal jargonu sade dile çevir. "
-            f"SADECE bu gerçek bildirimlerden hareket et — ek yorum veya tarih ekleme. "
-            f"Giriş/kapanış cümlesi ekleme."
+            f"Yukarıdaki kurallara göre bu KAP bildirimlerini madde madde özetle."
         )
-        model_used, kap_text = _gemini_call(kap_prompt, _GEMINI_NEWS_ATTEMPTS, timeout=20)
+        model_used, kap_text = _gemini_call(kap_prompt, _GEMINI_NEWS_ATTEMPTS, timeout=20, max_tokens=500, temperature=0.2)
         with _lock:
             if kap_text:
                 _news_cache[cache_key] = {"text": kap_text, "ts": now_ts, "failed": False}
