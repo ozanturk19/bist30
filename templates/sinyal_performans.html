@@ -513,6 +513,6 @@ const _MD={USDTRY:4,EURTRY:4,XU100:0,XU030:0,SP500:0,NASDAQ:0,BTC:0};
 async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e){}}
 loadMacroBar();setInterval(loadMacroBar,60000);
 </script>
-<script src="/static/bp-search.js?v=42" defer></script>
+<script src="/static/bp-search.js?v=43" defer></script>
 </body>
 </html>

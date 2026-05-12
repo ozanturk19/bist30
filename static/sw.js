@@ -1,20 +1,22 @@
-/* BorsaPusula Service Worker v2.0 — post-modern redesign */
-const CACHE = 'borsapusula-v18';
+/* BorsaPusula Service Worker v3.0 — HTML asla cache'lenmez (KALICI FIX) */
+const CACHE = 'borsapusula-v20';
+
+/* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz */
 const STATIC = [
   '/static/lightweight-charts.min.js',
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',
-  '/metodoloji',
-  '/hakkinda',
-  '/blog',
-  /* Google Fonts — Space Grotesk + Manrope */
   'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap',
 ];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(STATIC)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then(c => Promise.all(
+        STATIC.map(url => c.add(url).catch(err => console.warn('SW cache miss:', url)))
+      ))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -26,24 +28,49 @@ self.addEventListener('activate', e => {
   );
 });
 
-/* Network-first for API/live data, cache-first for static assets */
+/* Strateji:
+ * - API + SSE: SW bypass (tarayıcı doğrudan çeksin)
+ * - Static asset (/static/, fonts.googleapis.com): stale-while-revalidate
+ * - HTML ve diğer her şey: NETWORK-ONLY (SW geçmez, browser her zaman taze çeker)
+ *
+ * Eski SW (v18) HTML'i de cache'liyordu → kullanıcılar bayat sayfa görüyordu.
+ * v20 ile bu davranış tamamen kaldırıldı. HTML her zaman taze.
+ */
+function isStaticAsset(url) {
+  if (url.pathname.startsWith('/static/')) return true;
+  if (url.hostname === 'fonts.googleapis.com') return true;
+  if (url.hostname === 'fonts.gstatic.com') return true;
+  return false;
+}
+
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
+
+  /* API + SSE: SW return etmez → tarayıcı normal flow */
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/stream')) {
-    return; /* bypass cache for live data */
+    return;
   }
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    fetch(e.request)
-      .then(res => {
-        if (res.ok && url.origin === self.location.origin) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
+
+  /* Static asset: stale-while-revalidate */
+  if (isStaticAsset(url)) {
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        const fetchPromise = fetch(e.request).then(res => {
+          if (res && res.ok &&
+              (url.origin === self.location.origin || url.hostname.startsWith('fonts.'))) {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+          }
+          return res;
+        }).catch(() => cached);
+        return cached || fetchPromise;
       })
-      .catch(() => caches.match(e.request))
-  );
+    );
+    return;
+  }
+
+  /* HTML ve diğer her şey: SW dokunmaz, tarayıcı her zaman taze HTML çeker */
 });
 
 /* Push notification handler */
@@ -68,7 +95,6 @@ self.addEventListener('notificationclick', e => {
   const url = (e.notification.data && e.notification.data.url) || '/';
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(wins => {
-      // Focus existing window if open
       for (const w of wins) {
         if (w.url.includes(self.location.origin) && 'focus' in w) {
           w.focus();
@@ -79,4 +105,17 @@ self.addEventListener('notificationclick', e => {
       return clients.openWindow(url);
     })
   );
+});
+
+/* Debug: manuel cache temizleme (browser console'dan tetiklenebilir) */
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'BP_CLEAR_CACHE') {
+    e.waitUntil(
+      caches.keys()
+        .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+        .then(() => {
+          if (e.ports && e.ports[0]) e.ports[0].postMessage({ ok: true });
+        })
+    );
+  }
 });
