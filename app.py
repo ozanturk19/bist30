@@ -2245,36 +2245,103 @@ def api_refresh():
 
 # ── Makro Veri Bandı ─────────────────────────────────────────────────────────
 _macro_cache = {"data": None, "ts": 0}
+_MACRO_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_macro.json")
+
+def _save_macro_to_disk(data, ts):
+    """Macro cache'i diske yaz — restart sonrası cold start'tan kurtarır."""
+    try:
+        with open(_MACRO_DISK_PATH, "w") as f:
+            import json as _j
+            _j.dump({"data": data, "ts": ts}, f)
+    except Exception as e:
+        logger.debug("_save_macro_to_disk: %s", e)
+
+def _load_macro_from_disk():
+    """Startup'ta diskten macro cache'i yükle — soğuk başlangıç süresini sıfırlar."""
+    try:
+        if os.path.exists(_MACRO_DISK_PATH):
+            with open(_MACRO_DISK_PATH) as f:
+                import json as _j
+                d = _j.load(f)
+            if isinstance(d, dict) and d.get("data"):
+                _macro_cache["data"] = d["data"]
+                _macro_cache["ts"]   = d.get("ts", 0)
+                logger.info("_load_macro_from_disk: %d items loaded", len(d["data"]))
+    except Exception as e:
+        logger.warning("_load_macro_from_disk: %s", e)
+
+
+def _macro_bg_loop():
+    """Background macro refresh thread — her 3 dakika.
+
+    Kullanıcı isteği gelmeden cache hep taze tutulur. yfinance arada bir
+    fail etse bile (401 vs.) eski cache hâlâ servis edilir.
+    """
+    while True:
+        try:
+            items = _fetch_macro()
+            if items:
+                with _lock:
+                    _macro_cache["data"] = items
+                    _macro_cache["ts"]   = time.time()
+                _save_macro_to_disk(items, _macro_cache["ts"])
+                logger.debug("_macro_bg_loop: %d items refreshed", len(items))
+            else:
+                logger.warning("_macro_bg_loop: empty result, eski cache korunur")
+        except Exception as e:
+            logger.warning("_macro_bg_loop: %s", e)
+        time.sleep(180)   # 3 dakika
+
+# Disk load — _fetch_macro tanımlandıktan sonra thread başlatılır (aşağıda)
+_load_macro_from_disk()
+
 _MACRO_TTL   = 300   # 5 dakika cache (stale-while-revalidate)
 
+_MACRO_TICKERS = [
+    ("XU100",  "XU100.IS"),
+    ("XU030",  "XU030.IS"),
+    ("USDTRY", "USDTRY=X"),
+    ("EURTRY", "EURTRY=X"),
+    ("BTC",    "BTC-USD"),
+    ("ALTIN",  "GC=F"),
+    ("GUMUS",  "SI=F"),
+    ("PETROL", "CL=F"),
+    ("SP500",  "^GSPC"),
+    ("NASDAQ", "^IXIC"),
+]
+
+def _fetch_macro_one(label, sym):
+    """Tek bir ticker için fast_info çağrısı — timeout korumalı."""
+    try:
+        tk  = yf.Ticker(sym)
+        fi  = tk.fast_info
+        price  = getattr(fi, "last_price", None) or getattr(fi, "regularMarketPrice", None)
+        prev   = getattr(fi, "previous_close", None)
+        if price is None or prev is None or prev == 0:
+            return None
+        change = round((float(price) - float(prev)) / float(prev) * 100, 2)
+        return {"label": label, "price": round(float(price), 2), "change": change}
+    except Exception as e:
+        logger.debug("_fetch_macro_one %s: %s", label, e)
+        return None
+
+
 def _fetch_macro():
-    """XU100, XU030, BTC, ALTIN, GUMUS, PETROL, USD/TRY, EUR/TRY, S&P500, NASDAQ anlık veri."""
-    tickers = [
-        ("XU100",  "XU100.IS"),
-        ("XU030",  "XU030.IS"),
-        ("USDTRY", "USDTRY=X"),
-        ("EURTRY", "EURTRY=X"),
-        ("BTC",    "BTC-USD"),
-        ("ALTIN",  "GC=F"),
-        ("GUMUS",  "SI=F"),
-        ("PETROL", "CL=F"),
-        ("SP500",  "^GSPC"),
-        ("NASDAQ", "^IXIC"),
-    ]
+    """XU100, XU030, BTC, ALTIN, GUMUS, PETROL, USD/TRY, EUR/TRY, S&P500, NASDAQ anlık veri.
+
+    Her ticker bağımsız try/except — biri hata verse bile diğerleri devam eder.
+    """
     result = []
-    for label, sym in tickers:
-        try:
-            tk  = yf.Ticker(sym)
-            fi  = tk.fast_info
-            price  = getattr(fi, "last_price", None) or getattr(fi, "regularMarketPrice", None)
-            prev   = getattr(fi, "previous_close", None)
-            if price is None or prev is None or prev == 0:
-                continue
-            change = round((float(price) - float(prev)) / float(prev) * 100, 2)
-            result.append({"label": label, "price": round(float(price), 2), "change": change})
-        except Exception as e:
-            logger.debug("_fetch_macro %s: %s", label, e)
+    for label, sym in _MACRO_TICKERS:
+        item = _fetch_macro_one(label, sym)
+        if item:
+            result.append(item)
     return result
+
+
+# Background macro refresh — _fetch_macro DEFINED olduktan SONRA başlat
+threading.Thread(target=_macro_bg_loop, daemon=True, name="macro-bg-loop").start()
+
 
 _macro_refreshing = False
 
@@ -2290,6 +2357,7 @@ def _refresh_macro_bg():
             with _lock:
                 _macro_cache["data"] = items
                 _macro_cache["ts"]   = time.time()
+            _save_macro_to_disk(items, _macro_cache["ts"])
             logger.debug("_refresh_macro_bg: %d items refreshed", len(items))
     except Exception as e:
         logger.warning("_refresh_macro_bg: %s", e)
