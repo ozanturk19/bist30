@@ -2245,7 +2245,7 @@ def api_refresh():
 
 # ── Makro Veri Bandı ─────────────────────────────────────────────────────────
 _macro_cache = {"data": None, "ts": 0}
-_MACRO_TTL   = 60   # 60 saniye cache
+_MACRO_TTL   = 300   # 5 dakika cache (stale-while-revalidate)
 
 def _fetch_macro():
     """XU100, XU030, BTC, ALTIN, GUMUS, PETROL, USD/TRY, EUR/TRY, S&P500, NASDAQ anlık veri."""
@@ -2276,16 +2276,59 @@ def _fetch_macro():
             logger.debug("_fetch_macro %s: %s", label, e)
     return result
 
+_macro_refreshing = False
+
+def _refresh_macro_bg():
+    """Background macro refresh — endpoint'i bloklamaz."""
+    global _macro_refreshing
+    if _macro_refreshing:
+        return
+    _macro_refreshing = True
+    try:
+        items = _fetch_macro()
+        if items:
+            with _lock:
+                _macro_cache["data"] = items
+                _macro_cache["ts"]   = time.time()
+            logger.debug("_refresh_macro_bg: %d items refreshed", len(items))
+    except Exception as e:
+        logger.warning("_refresh_macro_bg: %s", e)
+    finally:
+        _macro_refreshing = False
+
+
 @app.route("/api/macro")
 @limiter.limit("60 per minute")
 def api_macro():
+    """Stale-while-revalidate: cache varsa anında dön, background'da yenile.
+
+    yfinance 401 Invalid Crumb hatası veya yavaşlık durumunda endpoint hâlâ
+    yanıt verir (eski cache ile). Nginx upstream timeout tamamen önlenir.
+    """
     now = time.time()
     with _lock:
-        if _macro_cache["data"] and (now - _macro_cache["ts"]) < _MACRO_TTL:
-            return safe_json({"items": _macro_cache["data"], "cached": True})
-    items = _fetch_macro()
+        cached_items = _macro_cache.get("data")
+        cached_ts    = _macro_cache.get("ts", 0)
+    cache_fresh = cached_items and (now - cached_ts) < _MACRO_TTL
+
+    # Fresh cache → hemen dön
+    if cache_fresh:
+        return safe_json({"items": cached_items, "cached": True})
+
+    # Stale ama var → hemen dön + background yenile
+    if cached_items:
+        if not _macro_refreshing:
+            threading.Thread(target=_refresh_macro_bg, daemon=True, name="macro-refresh").start()
+        return safe_json({"items": cached_items, "cached": True, "stale": True})
+
+    # Cache hiç yok → sync fetch (sadece ilk başlatmada olur)
+    try:
+        items = _fetch_macro()
+    except Exception as e:
+        logger.error("api_macro initial fetch failed: %s", e)
+        items = []
     with _lock:
-        _macro_cache["data"] = items
+        _macro_cache["data"] = items or []
         _macro_cache["ts"]   = now
     return safe_json({"items": items, "cached": False})
 
