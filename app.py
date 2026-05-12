@@ -2283,25 +2283,35 @@ def _load_macro_from_disk():
         logger.warning("_load_macro_from_disk: %s", e)
 
 
+_macro_bg_lock = threading.Lock()   # Tek seferde 1 _fetch_macro garantisi
+
 def _macro_bg_loop():
     """Background macro refresh thread — her 3 dakika.
 
-    Kullanıcı isteği gelmeden cache hep taze tutulur. yfinance arada bir
-    fail etse bile (401 vs.) eski cache hâlâ servis edilir.
+    SADECE bu thread yfinance çağırır (request handler'lar yfinance çağırmaz).
+    Race-safe: _macro_bg_lock ile concurrent _fetch_macro önlenir.
+    yfinance arada bir fail etse bile (401 vs.) eski cache hâlâ servis edilir.
     """
+    # İlk run hemen (cache cold ise warm yapsın)
     while True:
-        try:
-            items = _fetch_macro()
-            if items:
-                with _lock:
-                    _macro_cache["data"] = items
-                    _macro_cache["ts"]   = time.time()
-                _save_macro_to_disk(items, _macro_cache["ts"])
-                logger.debug("_macro_bg_loop: %d items refreshed", len(items))
-            else:
-                logger.warning("_macro_bg_loop: empty result, eski cache korunur")
-        except Exception as e:
-            logger.warning("_macro_bg_loop: %s", e)
+        # acquire(blocking=False): kilit alınmazsa skip — bir önceki cycle hâlâ devam ediyor
+        if _macro_bg_lock.acquire(blocking=False):
+            try:
+                items = _fetch_macro()
+                if items:
+                    with _lock:
+                        _macro_cache["data"] = items
+                        _macro_cache["ts"]   = time.time()
+                    _save_macro_to_disk(items, _macro_cache["ts"])
+                    logger.info("_macro_bg_loop: %d items refreshed", len(items))
+                else:
+                    logger.warning("_macro_bg_loop: empty result, eski cache korunur")
+            except Exception as e:
+                logger.warning("_macro_bg_loop: %s", e)
+            finally:
+                _macro_bg_lock.release()
+        else:
+            logger.debug("_macro_bg_loop: previous cycle still running, skip")
         time.sleep(180)   # 3 dakika
 
 # Disk load — _fetch_macro tanımlandıktan sonra thread başlatılır (aşağıda)
@@ -2355,62 +2365,32 @@ def _fetch_macro():
 threading.Thread(target=_macro_bg_loop, daemon=True, name="macro-bg-loop").start()
 
 
-_macro_refreshing = False
-
-def _refresh_macro_bg():
-    """Background macro refresh — endpoint'i bloklamaz."""
-    global _macro_refreshing
-    if _macro_refreshing:
-        return
-    _macro_refreshing = True
-    try:
-        items = _fetch_macro()
-        if items:
-            with _lock:
-                _macro_cache["data"] = items
-                _macro_cache["ts"]   = time.time()
-            _save_macro_to_disk(items, _macro_cache["ts"])
-            logger.debug("_refresh_macro_bg: %d items refreshed", len(items))
-    except Exception as e:
-        logger.warning("_refresh_macro_bg: %s", e)
-    finally:
-        _macro_refreshing = False
+# Macro refresh — ARTIK SADECE bg loop (request-spawned thread leak'ini önle)
+# _macro_refreshing global flag kaldırıldı (race condition kaynağıydı).
+# Tek refresh path: _macro_bg_loop (module-level, 3dk periyodik).
 
 
 @app.route("/api/macro")
 @limiter.limit("60 per minute")
 def api_macro():
-    """Stale-while-revalidate: cache varsa anında dön, background'da yenile.
+    """Macro endpoint — SADECE cache döner, thread spawn YOK.
 
-    yfinance 401 Invalid Crumb hatası veya yavaşlık durumunda endpoint hâlâ
-    yanıt verir (eski cache ile). Nginx upstream timeout tamamen önlenir.
+    Cache her zaman var (disk persistence + _macro_bg_loop her 3dk yeniler).
+    İlk başlatmada cache boş ise _macro_bg_loop'un ilk run'ını bekler (max 3dk).
+    O sırada [] döner (frontend graceful degrade).
+
+    ARTITEKTÜR: yfinance çağrıları SADECE _macro_bg_loop (module-level thread).
+    Request handler'lar yfinance ÇAĞRMAZ → infinite hang riski sıfır.
     """
-    now = time.time()
     with _lock:
-        cached_items = _macro_cache.get("data")
+        cached_items = _macro_cache.get("data") or []
         cached_ts    = _macro_cache.get("ts", 0)
-    cache_fresh = cached_items and (now - cached_ts) < _MACRO_TTL
-
-    # Fresh cache → hemen dön
-    if cache_fresh:
-        return safe_json({"items": cached_items, "cached": True})
-
-    # Stale ama var → hemen dön + background yenile
-    if cached_items:
-        if not _macro_refreshing:
-            threading.Thread(target=_refresh_macro_bg, daemon=True, name="macro-refresh").start()
-        return safe_json({"items": cached_items, "cached": True, "stale": True})
-
-    # Cache hiç yok → sync fetch (sadece ilk başlatmada olur)
-    try:
-        items = _fetch_macro()
-    except Exception as e:
-        logger.error("api_macro initial fetch failed: %s", e)
-        items = []
-    with _lock:
-        _macro_cache["data"] = items or []
-        _macro_cache["ts"]   = now
-    return safe_json({"items": items, "cached": False})
+    stale = (time.time() - cached_ts) > _MACRO_TTL
+    return safe_json({
+        "items": cached_items,
+        "cached": True,
+        "stale": stale,
+    })
 
 
 # ── Günlük Makro AI Özeti ────────────────────────────────────────────────────
