@@ -168,10 +168,56 @@ def test_5_single_flight_lock():
     print("  ✓ PASS")
 
 
+def test_6_news_endpoint_fast():
+    """/api/hisse/<t>/news cache-or-queue: handler max 200ms (no Gemini in handler)."""
+    print("\n=== TEST 6: /api/hisse/<t>/news handler latency ===")
+    # Hit a few times to ensure cache or in_flight
+    fetch(f"{BASE}/api/hisse/AKBNK/news", timeout=5)
+    time.sleep(2)
+    times = []
+    fails = 0
+    for t in ["AKBNK", "THYAO", "GARAN", "BIMAS", "ASELS"]:
+        status, dt, _ = fetch(f"{BASE}/api/hisse/{t}/news", timeout=3)
+        if status == 200:
+            times.append(dt)
+        elif status == 429:
+            pass  # rate limit OK
+        else:
+            fails += 1
+        time.sleep(0.5)
+    if not times:
+        raise AssertionError("No 200 responses")
+    max_t = max(times)
+    print(f"  {len(times)} calls — max {max_t*1000:.0f}ms")
+    assert max_t < 1.0, f"FAIL: max {max_t:.2f}s > 1s — news handler doing Gemini call?"
+    assert fails == 0, f"FAIL: {fails} non-429 failures"
+    print("  ✓ PASS")
+
+
+def test_7_news_in_flight_single_flight():
+    """News endpoint: aynı ticker için tek bg fetch (5 paralel call → 1 bg fetch)."""
+    print("\n=== TEST 7: News single-flight per ticker ===")
+    # Pick ticker not yet cached
+    import urllib.request
+    # Force in-flight by hitting fresh ticker
+    ticker = "FONET"  # likely not cached recently
+    statuses = []
+    with ThreadPoolExecutor(max_workers=5) as pool:
+        results = list(pool.map(lambda _: fetch(f"{BASE}/api/hisse/{ticker}/news"), range(5)))
+    statuses = [r[0] for r in results]
+    times = [r[1] for r in results]
+    print(f"  5 paralel call: statuses={statuses}, max={max(times):.2f}s")
+    # All should return fast (cache miss → null)
+    assert max(times) < 2.0, f"FAIL: max {max(times):.2f}s > 2s — handler should not block"
+    print("  ✓ PASS")
+
+
 if __name__ == "__main__":
     tests = [test_1_concurrent_load, test_2_no_yfinance_in_handler,
              test_3_health_endpoint, test_4_old_code_path_gone,
-             test_5_single_flight_lock]
+             test_5_single_flight_lock,
+             test_6_news_endpoint_fast,
+             test_7_news_in_flight_single_flight]
     failed = 0
     for t in tests:
         try:

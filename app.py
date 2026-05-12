@@ -4215,73 +4215,62 @@ def api_stock_fundamentals(ticker):
     return safe_json({"fundamentals": data})
 
 
+
+# ─── News endpoint queue pattern ───
+# Pattern: cache hit → return. Miss → push to _news_fetch_queue → return null.
+# _on_demand_news_worker (mevcut, 15s rate-limited) kuyruğu işler.
+# THREAD SPAWN YOK → worker capacity korunur.
+
+
 @app.route("/api/hisse/<ticker>/news")
 @limiter.limit("20 per minute")
 def api_stock_news(ticker):
-    """Gemini AI haber özeti — 6 saatlik cache.
-    Önce son 7 gündeki gerçek KAP bildirimlerini çeker; varsa AI sadece özetler
-    (hallucination sıfır). KAP bildirimi yoksa search-grounded Gemini kullanılır.
+    """News endpoint — ARCHITECTURAL FIX: cache-or-queue pattern.
+
+    Cache hit → return. Cache miss → bg fetch trigger (single-flight per ticker),
+    return {"news": null}. Frontend zaten 8s sonra retry yapar (loadNews retry pattern).
+
+    Request handler İÇİNDE yfinance/Gemini ÇAĞRILMAZ → worker hang riski sıfır.
     """
     ticker = ticker.upper()
     if ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
 
-    # ── KAP tabanlı haber özeti (gerçek kaynak) ──────────────────────────────
     kap_url = kap_url_for(ticker)
+    now_ts  = time.time()
 
-    # KAP cache'den son 7 günlük bildirimleri al (yoksa çek)
-    now_ts = time.time()
+    # 1. KAP cache check (no scrape in handler)
     with _lock:
         kap_hit = _kap_cache.get(ticker)
-    if kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL:
-        kap_discs = kap_hit["data"]
-    else:
-        kap_discs = fetch_kap_disclosures(ticker, days=7)
-        with _lock:
-            _kap_cache[ticker] = {"data": kap_discs, "ts": now_ts}
+    kap_discs = kap_hit["data"] if (kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL) else None
 
-    if kap_discs and GEMINI_API_KEY:
-        # Cache key: ticker + son bildirim tarihi (değişince cache invalidate)
+    # 2. KAP-based news cache check
+    if kap_discs:
         cache_key = f"{ticker}_kap_{kap_discs[0]['date'][:10] if kap_discs else 'none'}"
         with _lock:
             cached = _news_cache.get(cache_key)
-            if cached and not cached.get("failed"):
-                ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
-                if (now_ts - cached["ts"]) < ttl:
-                    return safe_json({
-                        "news": cached["text"], "source": "kap_ai",
-                        "kap_url": kap_url, "kap_count": len(kap_discs)
-                    })
-
-        # Gerçek KAP bildirimleri → AI sadece özetler, uydurmaz
-        name = STOCK_NAMES.get(ticker, ticker)
-        today_str = datetime.now(_TZ_TR).strftime("%d %B %Y")
-        disc_lines = "\n".join([
-            f"- {d['date'][:10]}: {d.get('summary') or d.get('subject', '')} [{d['class']}]"
-            for d in kap_discs[:8]
-            if d.get('summary') or d.get('subject')
-        ])
-        kap_prompt = _SYS_KAP + (
-            f"\nHisse: {ticker} ({name})\n"
-            f"Bugün: {today_str}\n\n"
-            f"=== HAM KAP BİLDİRİMLERİ (son 7 gün) ===\n"
-            f"{disc_lines}\n\n"
-            f"Yukarıdaki kurallara göre bu KAP bildirimlerini madde madde özetle."
-        )
-        model_used, kap_text = _gemini_call(kap_prompt, _GEMINI_NEWS_ATTEMPTS, timeout=20, max_tokens=500, temperature=0.2)
-        with _lock:
-            if kap_text:
-                _news_cache[cache_key] = {"text": kap_text, "ts": now_ts, "failed": False}
+        if cached and not cached.get("failed"):
+            ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
+            if (now_ts - cached["ts"]) < ttl:
                 return safe_json({
-                    "news": kap_text, "source": "kap_ai",
+                    "news": cached["text"], "source": "kap_ai",
                     "kap_url": kap_url, "kap_count": len(kap_discs)
                 })
 
-    # ── Fallback: Search-grounded Gemini (KAP bildirimi yok veya API başarısız) ──
-    text = get_ai_news(ticker)
-    if text:
-        return safe_json({"news": text, "source": "gemini", "kap_url": kap_url})
-    return safe_json({"news": "", "kap_url": kap_url})
+    # 3. Search-grounded cache check (get_ai_news uses _news_cache[ticker])
+    with _lock:
+        gen_cached = _news_cache.get(ticker)
+    if gen_cached and not gen_cached.get("failed"):
+        ttl = _NEWS_FAIL_TTL if gen_cached.get("failed") else _news_ttl_for(ticker)
+        if (now_ts - gen_cached["ts"]) < ttl and gen_cached.get("text"):
+            return safe_json({"news": gen_cached["text"], "source": "gemini", "kap_url": kap_url})
+
+    # 4. CACHE MISS — queue bg fetch (existing _on_demand_news_worker handles it)
+    with _news_queue_lock:
+        _news_fetch_queue.add(ticker)
+
+    # Return placeholder — frontend zaten retry yapacak (loadNews 8s sonra)
+    return safe_json({"news": None, "loading": True, "kap_url": kap_url})
 
 
 def get_signal_story(ticker: str, signal_date: str) -> dict:
