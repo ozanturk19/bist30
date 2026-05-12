@@ -2284,6 +2284,7 @@ def _load_macro_from_disk():
 
 
 _macro_bg_lock = threading.Lock()   # Tek seferde 1 _fetch_macro garantisi
+_macro_bg_stats = {"cycles": 0, "successes": 0, "empty_results": 0, "exceptions": 0, "last_success_ts": 0, "last_error": None, "startup_ts": time.time()}
 
 def _macro_bg_loop():
     """Background macro refresh thread — her 3 dakika.
@@ -2296,6 +2297,7 @@ def _macro_bg_loop():
     while True:
         # acquire(blocking=False): kilit alınmazsa skip — bir önceki cycle hâlâ devam ediyor
         if _macro_bg_lock.acquire(blocking=False):
+            _macro_bg_stats["cycles"] += 1
             try:
                 items = _fetch_macro()
                 if items:
@@ -2303,11 +2305,19 @@ def _macro_bg_loop():
                         _macro_cache["data"] = items
                         _macro_cache["ts"]   = time.time()
                     _save_macro_to_disk(items, _macro_cache["ts"])
-                    logger.info("_macro_bg_loop: %d items refreshed", len(items))
+                    _macro_bg_stats["successes"] += 1
+                    _macro_bg_stats["last_success_ts"] = time.time()
+                    logger.info("_macro_bg_loop heartbeat: cycle=%d items=%d uptime=%ds",
+                                _macro_bg_stats["cycles"], len(items),
+                                int(time.time() - _macro_bg_stats.get("startup_ts", time.time())))
                 else:
-                    logger.warning("_macro_bg_loop: empty result, eski cache korunur")
+                    _macro_bg_stats["empty_results"] += 1
+                    logger.warning("_macro_bg_loop: empty result, eski cache korunur (empty_count=%d)",
+                                   _macro_bg_stats["empty_results"])
             except Exception as e:
-                logger.warning("_macro_bg_loop: %s", e)
+                _macro_bg_stats["exceptions"] += 1
+                _macro_bg_stats["last_error"] = str(e)[:200]
+                logger.warning("_macro_bg_loop exception: %s (total=%d)", e, _macro_bg_stats["exceptions"])
             finally:
                 _macro_bg_lock.release()
         else:
@@ -4686,6 +4696,49 @@ def api_tarama():
 
 # ── SEO: sitemap, robots, favicon ────────────────────────────────────────────
 _sitemap_cache: dict = {}  # {"xml": str, "date": str}
+
+@app.route("/api/health")
+def api_health():
+    """Health + observability endpoint.
+
+    Production monitoring (UptimeRobot, watchdog) için 1dk poll edilebilir.
+    Returns: cache status, bg thread heartbeats, worker uptime.
+    Hızlı (<10ms): hiç external call yapmaz, sadece in-memory state.
+    """
+    now = time.time()
+    with _lock:
+        stocks_count = len(_cache.get("data") or [])
+        cache_loading = _cache.get("loading", True)
+        cache_updated = _cache.get("updated_at", "—")
+        macro_count = len(_macro_cache.get("data") or [])
+        macro_ts = _macro_cache.get("ts", 0)
+
+    macro_age_s = int(now - macro_ts) if macro_ts else None
+    macro_stale = macro_age_s is None or macro_age_s > _MACRO_TTL
+
+    # Status: healthy if cache exists + bg loop has run recently
+    healthy = (
+        stocks_count > 0
+        and macro_count > 0
+        and (macro_age_s is None or macro_age_s < 1800)  # 30dk fresh
+    )
+
+    return safe_json({
+        "ok":            healthy,
+        "stocks": {
+            "count":     stocks_count,
+            "loading":   cache_loading,
+            "updated":   cache_updated,
+        },
+        "macro": {
+            "count":     macro_count,
+            "age_s":     macro_age_s,
+            "stale":     macro_stale,
+        },
+        "macro_bg_loop": _macro_bg_stats,
+        "ts": now,
+    })
+
 
 @app.route("/sitemap.xml")
 def sitemap():
