@@ -3266,6 +3266,8 @@ def _on_demand_news_worker():
         if ticker:
             try:
                 result = get_ai_news(ticker)
+                _news_queue_stats["last_processed_ts"] = time.time()
+                _news_queue_stats["total_processed"] += 1
                 logger.info("On-demand news [%s]: %s", ticker, "OK" if result else "FAIL")
             except Exception as exc:
                 logger.error("On-demand news hatası [%s]: %s", ticker, exc)
@@ -4220,6 +4222,7 @@ def api_stock_fundamentals(ticker):
 # Pattern: cache hit → return. Miss → push to _news_fetch_queue → return null.
 # _on_demand_news_worker (mevcut, 15s rate-limited) kuyruğu işler.
 # THREAD SPAWN YOK → worker capacity korunur.
+_news_queue_stats = {"last_added_ts": 0, "last_processed_ts": 0, "total_added": 0, "total_processed": 0}
 
 
 @app.route("/api/hisse/<ticker>/news")
@@ -4268,6 +4271,8 @@ def api_stock_news(ticker):
     # 4. CACHE MISS — queue bg fetch (existing _on_demand_news_worker handles it)
     with _news_queue_lock:
         _news_fetch_queue.add(ticker)
+    _news_queue_stats["last_added_ts"] = time.time()
+    _news_queue_stats["total_added"] += 1
 
     # Return placeholder — frontend zaten retry yapacak (loadNews 8s sonra)
     return safe_json({"news": None, "loading": True, "kap_url": kap_url})
@@ -4712,8 +4717,11 @@ def api_health():
         and (macro_age_s is None or macro_age_s < 1800)  # 30dk fresh
     )
 
+    macro_last_ts = _macro_bg_stats.get("last_success_ts", 0)
+    news_last_ts  = _news_queue_stats.get("last_processed_ts", 0)
     return safe_json({
-        "ok":            healthy,
+        "ok":                       healthy,
+        "status":                   "OK" if healthy else "DEGRADED",
         "stocks": {
             "count":     stocks_count,
             "loading":   cache_loading,
@@ -4724,7 +4732,12 @@ def api_health():
             "age_s":     macro_age_s,
             "stale":     macro_stale,
         },
-        "macro_bg_loop": _macro_bg_stats,
+        "macro_bg_loop":            _macro_bg_stats,
+        "last_macro_refresh_ts":    macro_last_ts,
+        "last_macro_refresh_age_s": int(now - macro_last_ts) if macro_last_ts else None,
+        "news_queue":               _news_queue_stats,
+        "last_news_queue_ts":       news_last_ts,
+        "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
         "ts": now,
     })
 
