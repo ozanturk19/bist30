@@ -1,3 +1,15 @@
+# ─── CRITICAL: gevent monkey-patch + socket timeout (worker hang prevention) ───
+import sys as _sys
+if 'gevent' in _sys.modules or any('gunicorn' in arg for arg in _sys.argv):
+    try:
+        from gevent import monkey
+        if not monkey.is_module_patched('socket'):
+            monkey.patch_all()
+    except ImportError:
+        pass
+import socket as _socket
+_socket.setdefaulttimeout(20)   # Infinite hang protection (yfinance, Gemini, KAP)
+
 from flask import Flask, jsonify, render_template, Response, request, abort, redirect
 import yfinance as yf
 import pandas as pd
