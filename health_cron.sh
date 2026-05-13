@@ -37,7 +37,7 @@ send_mail_if_allowed() {
 }
 
 # Quick liveness probe (5s timeout) — /api/data should respond fast (cached)
-http_code=$(curl -m 5 -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8003/api/data 2>/dev/null)
+http_code=$(curl -m 15 -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8003/api/health 2>/dev/null)
 
 if [ "$http_code" = "200" ]; then
   prev_state=$(cat "$STATE" 2>/dev/null || echo "OK")
@@ -72,7 +72,7 @@ if [ "$fails" -ge 2 ] && [ "$fails" -lt 5 ]; then
     echo "RECOVERED" > "$STATE"
     sleep 15
     # Verify recovery
-    recovery_code=$(curl -m 5 -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8003/api/data 2>/dev/null)
+    recovery_code=$(curl -m 15 -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8003/api/health 2>/dev/null)
     if [ "$recovery_code" = "200" ]; then
       echo "$(date) AUTO-RESTART success" >> "$LOG"
       # BUG 2 FIX — Başarılı restart sonrası STATE'i derhal "OK" yap
