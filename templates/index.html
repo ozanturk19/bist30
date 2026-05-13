@@ -2965,6 +2965,7 @@ startSSE();
 /* ── Stocks table ────────────────────────────────── */
 let allStocks    = [];
 let currentFilter = 'all';
+let currentPeriod = 'all';       /* MSG-005: 'all' | 'today' | '7d' | '30d' */
 let currentSearch = '';
 let currentSector = 'all';
 let sortKey  = 'signal';
@@ -2973,6 +2974,99 @@ let polling;
 
 /* Gelişmiş filtreler */
 const advFilters = { adx: 0, bars: 0, vol: 0, rsi: 'all', eq: 'all' };
+
+/* MSG-005: Anonim default filter — smart fallback chain
+   - Anonim kullanıcı (localStorage yok): AL + period=today → fallback 7d → 30d
+   - Returning user: localStorage'tan kayıtlı state oku
+   - URL params (paylaşılan link): en yüksek öncelik
+*/
+const _FILTER_STORAGE_KEY = 'bp_filter_state_v1';
+const _FILTER_SIG_FW = { AL: 'bull', SAT: 'bear', BEKLE: 'bekle', PREMIUM: 'premium', TODAY: 'today', WATCH: 'watch' };
+const _FILTER_SIG_RV = { bull: 'AL', bear: 'SAT', bekle: 'BEKLE', premium: 'PREMIUM', today: 'TODAY', watch: 'WATCH' };
+
+function _loadFilterState() {
+  try {
+    const raw = localStorage.getItem(_FILTER_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(_) { return null; }
+}
+
+function _saveFilterState() {
+  try {
+    localStorage.setItem(_FILTER_STORAGE_KEY, JSON.stringify({
+      filter: currentFilter,
+      period: currentPeriod,
+      ts:     Date.now(),
+    }));
+  } catch(_) {}
+}
+
+function _clearFilterState() {
+  try { localStorage.removeItem(_FILTER_STORAGE_KEY); } catch(_) {}
+}
+
+function _getUrlFilterParams() {
+  const p = new URLSearchParams(window.location.search);
+  const sig = (p.get('signal') || '').toLowerCase();
+  return {
+    signal: _FILTER_SIG_RV[sig] || null,
+    period: p.get('period'),
+  };
+}
+
+function _updateUrlFilterState(opts) {
+  opts = opts || {};
+  try {
+    const p = new URLSearchParams(window.location.search);
+    if (currentFilter && currentFilter !== 'all') {
+      p.set('signal', _FILTER_SIG_FW[currentFilter] || currentFilter.toLowerCase());
+    } else { p.delete('signal'); }
+    if (currentPeriod && currentPeriod !== 'all') {
+      p.set('period', currentPeriod);
+    } else { p.delete('period'); }
+    const s = p.toString();
+    const newUrl = window.location.pathname + (s ? '?' + s : '');
+    if (opts.push) history.pushState({ filter: currentFilter, period: currentPeriod }, '', newUrl);
+    else          history.replaceState({ filter: currentFilter, period: currentPeriod }, '', newUrl);
+  } catch(_) {}
+}
+
+/* MSG-005: Back/forward button → URL'den state'i re-load et */
+window.addEventListener('popstate', function(e) {
+  const url = _getUrlFilterParams();
+  currentFilter = url.signal || 'all';
+  currentPeriod = url.period || 'all';
+  _msg005_syncFilterButtonActive();
+  renderTable();
+  updateActiveFiltersBar();
+});
+
+/* Init default state — anonim/returning ayrımı + URL precedence */
+(function _initDefaultFilterState() {
+  // P1: URL params (shared link) — en yüksek öncelik
+  const url = _getUrlFilterParams();
+  if (url.signal) {
+    currentFilter = url.signal;
+    if (url.period) currentPeriod = url.period;
+    // localStorage'a da kaydet (paylaşılan link tıklayan kullanıcı için yeni baseline)
+    _saveFilterState();
+    return;
+  }
+
+  // P2: localStorage (returning user) — mevcut state korunsun
+  const saved = _loadFilterState();
+  if (saved && saved.filter) {
+    currentFilter = saved.filter;
+    currentPeriod = saved.period || 'all';
+    return;
+  }
+
+  // P3: Anonim → smart default: AL + today, fallback chain render sonrasında uygulanır
+  currentFilter = 'AL';
+  currentPeriod = 'today';
+  _updateUrlFilterState();   // ?signal=bull&period=today (paylaşılabilirlik)
+  // Not: localStorage'a daha sonra save edilecek — fallback resolve olduktan sonra
+})();
 
 function toggleAdvPanel() {
   const panel = document.getElementById('advPanel');
@@ -3168,6 +3262,12 @@ function getFiltered() {
                      || (currentFilter === 'PREMIUM' && s.is_premium === true)
                      || (currentFilter === 'TODAY' && s.is_new_signal && s.signal !== 'BEKLE')
                      || (currentFilter === 'WATCH' && watchlist.has(s.ticker));
+    /* MSG-005: period filter (signal_bars baz alınır) */
+    const sigBars = s.signal_bars || 0;
+    let matchPeriod = true;
+    if (currentPeriod === 'today') matchPeriod = sigBars <= 1;
+    else if (currentPeriod === '7d')   matchPeriod = sigBars <= 7;
+    else if (currentPeriod === '30d')  matchPeriod = sigBars <= 30;
     const matchSearch = !currentSearch || s.ticker.includes(currentSearch.toUpperCase())
                      || (s.name && s.name.toLowerCase().includes(currentSearch.toLowerCase()));
     const matchSector = currentSector === 'all' || s.sector === currentSector;
@@ -3181,8 +3281,37 @@ function getFiltered() {
     if (advFilters.rsi === 'overbought') matchRsi = (s.rsi != null && s.rsi >= 70);
     if (advFilters.rsi === 'neutral')    matchRsi = (s.rsi != null && s.rsi > 30 && s.rsi < 70);
     const matchEq = advFilters.eq === 'all' || s.entry_quality === advFilters.eq;
-    return matchFilter && matchSearch && matchSector && matchAdx && matchBars && matchVol && matchRsi && matchEq;
+    return matchFilter && matchPeriod && matchSearch && matchSector && matchAdx && matchBars && matchVol && matchRsi && matchEq;
   });
+}
+
+/* MSG-005: Anonim ilk render sonrası akıllı fallback chain (today → 7d → 30d → all)
+   Sadece anonim kullanıcı + ilk render'da çalışır. Returning user ya da URL state
+   varsa hiç müdahale etmez. */
+let _msg005_fallback_applied = false;
+function _applyAnonymousFallback() {
+  if (_msg005_fallback_applied) return;
+  if (!allStocks || allStocks.length === 0) return;
+  // Sadece anonim default kombinasyon (AL+today) için fallback çalışır
+  if (currentFilter !== 'AL' || currentPeriod !== 'today') {
+    _msg005_fallback_applied = true;
+    return;
+  }
+  // Eğer localStorage'da kayıtlı state varsa returning user — fallback yok
+  if (_loadFilterState()) {
+    _msg005_fallback_applied = true;
+    return;
+  }
+  const chain = ['today', '7d', '30d', 'all'];
+  let idx = chain.indexOf(currentPeriod);
+  while (idx < chain.length - 1) {
+    if (getFiltered().length > 0) break;
+    idx++;
+    currentPeriod = chain[idx];
+  }
+  _updateUrlFilterState();
+  _saveFilterState();    // Anonim için baseline state'i kaydet (artık returning user)
+  _msg005_fallback_applied = true;
 }
 
 function setSector(sector, btn) {
@@ -3228,6 +3357,9 @@ function getSorted(arr) {
 }
 
 function renderTable() {
+  /* MSG-005: İlk render'da (allStocks dolu, fallback henüz çalışmadı) akıllı default uygula */
+  _applyAnonymousFallback();
+
   const filtered = getSorted(getFiltered());
   const tbody    = document.getElementById('tableBody');
 
@@ -3430,6 +3562,10 @@ function renderTable() {
 
 function setFilter(f, btn) {
   currentFilter = f;
+  /* MSG-005: Kullanıcı filter değişimi → period reset 'all'
+     Anonim user yönlendirme period'unu (today/7d/30d) korumayı tercih etmiyoruz,
+     çünkü kullanıcı kendi seçimini yapıyor. */
+  currentPeriod = 'all';
   document.querySelectorAll('.filter-btn').forEach(b => {
     let base = 'filter-btn';
     if (b.classList.contains('filter-today')) base += ' filter-today';
@@ -3439,6 +3575,10 @@ function setFilter(f, btn) {
   });
   const classMap = { all:'active-all', AL:'active-al', SAT:'active-sat', BEKLE:'active-bekle', TODAY:'active-today', WATCH:'active-watch', PREMIUM:'active-premium' };
   if (btn) btn.classList.add(classMap[f] || '');
+  /* MSG-005: localStorage + URL state (user-initiated → pushState for back button) */
+  _saveFilterState();
+  _updateUrlFilterState({ push: true });
+  _msg005_fallback_applied = true;   // kullanıcı manuel seçim yaptı, fallback artık devre dışı
   renderTable();
   updateActiveFiltersBar();
 }
@@ -3507,6 +3647,9 @@ function updateActiveFiltersBar() {
 function resetFilters() {
   currentSearch  = '';
   currentSector  = 'all';
+  /* MSG-005: Manuel reset → period de 'all', localStorage temizle (mevcut davranış korunsun) */
+  currentPeriod  = 'all';
+  _clearFilterState();
   Object.assign(advFilters, { adx: 0, bars: 0, vol: 0, rsi: 'all', eq: 'all' });
   const searchEl = document.querySelector('.search-input');
   if (searchEl) searchEl.value = '';
@@ -3576,6 +3719,22 @@ async function manualRefresh() {
     if (el) el.innerHTML = Array.from({length: 4}, hpSkRow).join('');
   });
 })();
+
+/* MSG-005: İlk render öncesi filter button active state'i senkronize et */
+function _msg005_syncFilterButtonActive() {
+  if (currentFilter === 'all') return;   // default zaten 'active-all'
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    let base = 'filter-btn';
+    if (b.classList.contains('filter-today')) base += ' filter-today';
+    if (b.classList.contains('filter-watch')) base += ' filter-watch';
+    if (b.classList.contains('filter-premium')) base += ' filter-premium';
+    b.className = base;
+  });
+  const classMap = { AL:'active-al', SAT:'active-sat', BEKLE:'active-bekle', TODAY:'active-today', WATCH:'active-watch', PREMIUM:'active-premium' };
+  const btn = document.querySelector(`.filter-btn[onclick*="'${currentFilter}'"]`);
+  if (btn && classMap[currentFilter]) btn.classList.add(classMap[currentFilter]);
+}
+_msg005_syncFilterButtonActive();
 
 fetchData();
 
@@ -4485,6 +4644,6 @@ document.addEventListener('keydown', e => {
 </script>
 <div class="sig-tip" id="sigTip"></div>
 
-<script src="/static/bp-search.js?v=43" defer></script>
+<script src="/static/bp-search.js?v=44" defer></script>
 </body>
 </html>
