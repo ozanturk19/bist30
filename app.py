@@ -2286,6 +2286,43 @@ def api_refresh():
     return jsonify({"status": "refreshing"})
 
 
+# MSG-019B: Daily digest manuel tetikleyici (token korumalı)
+# Pending boş olsa bile force=true ile test mail göndermek için.
+# Sadece localhost + X-Admin-Secret header kombinasyonu kabul edilir.
+@app.route("/admin/send-digest-now", methods=["POST"])
+@limiter.limit("3 per hour")
+def admin_send_digest_now():
+    # Layer 1: ADMIN_SECRET header zorunlu
+    if not ADMIN_SECRET:
+        return jsonify({"error": "ADMIN_SECRET configured değil"}), 503
+    if request.headers.get("X-Admin-Secret") != ADMIN_SECRET:
+        abort(403)
+
+    # Layer 2: sadece localhost erişebilir (nginx X-Forwarded-For kontrolü)
+    # Production'da nginx 127.0.0.1 → app, public requests'te remote_addr farklı olur.
+    # Yine de defense-in-depth için kontrol.
+    remote = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    remote_first = remote.split(",")[0].strip()
+    if remote_first not in ("127.0.0.1", "::1", "localhost"):
+        logger.warning("admin_send_digest_now: non-localhost erişim engellendi (remote=%s)", remote_first)
+        return jsonify({"error": "Sadece localhost'tan erişilebilir"}), 403
+
+    # Params
+    timeframe = (request.args.get("timeframe") or "daily").strip()
+    if timeframe not in ("daily", "weekly"):
+        return jsonify({"error": "timeframe daily|weekly olmalı"}), 400
+    force = (request.args.get("force") or "false").strip().lower() in ("1", "true", "yes")
+
+    logger.info("admin_send_digest_now: timeframe=%s, force=%s tetiklendi", timeframe, force)
+    result = _send_digest_emails(timeframe=timeframe, force=force)
+    return jsonify({
+        "triggered": True,
+        "timeframe": timeframe,
+        "force": force,
+        "result": result,
+    })
+
+
 # ── Makro Veri Bandı ─────────────────────────────────────────────────────────
 _macro_cache = {"data": None, "ts": 0}
 _MACRO_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_macro.json")
