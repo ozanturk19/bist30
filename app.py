@@ -55,6 +55,8 @@ limiter = Limiter(
 
 # ── Admin endpoint koruması ───────────────────────────────────────────────────
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "")
+# MSG-019B: admin endpoint token (mail credential ile decoupled — least privilege)
+ADMIN_TOKEN  = os.environ.get("ADMIN_TOKEN",  "")
 
 # ── VAPID Web Push Bildirimleri ───────────────────────────────────────────────
 _APP_DIR        = os.path.dirname(os.path.abspath(__file__))
@@ -2339,15 +2341,18 @@ def api_refresh():
 
 # MSG-019B: Daily digest manuel tetikleyici (token korumalı)
 # Pending boş olsa bile force=true ile test mail göndermek için.
-# Sadece localhost + X-Admin-Secret header kombinasyonu kabul edilir.
+# Auth: Authorization: Bearer <ADMIN_TOKEN> + localhost-only.
 @app.route("/admin/send-digest-now", methods=["POST"])
 @limiter.limit("3 per hour")
 def admin_send_digest_now():
-    # Layer 1: ADMIN_SECRET header zorunlu
-    if not ADMIN_SECRET:
-        return jsonify({"error": "ADMIN_SECRET configured değil"}), 503
-    if request.headers.get("X-Admin-Secret") != ADMIN_SECRET:
-        abort(403)
+    # Layer 1: ADMIN_TOKEN header zorunlu (Bearer auth)
+    if not ADMIN_TOKEN:
+        return jsonify({"error": "ADMIN_TOKEN configured değil (env eksik)"}), 503
+    auth_header = request.headers.get("Authorization", "")
+    expected = f"Bearer {ADMIN_TOKEN}"
+    if auth_header != expected:
+        logger.warning("admin_send_digest_now: invalid auth header (token mismatch)")
+        abort(401)
 
     # Layer 2: sadece localhost erişebilir (nginx X-Forwarded-For kontrolü)
     # Production'da nginx 127.0.0.1 → app, public requests'te remote_addr farklı olur.
