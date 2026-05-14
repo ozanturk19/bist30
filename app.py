@@ -1612,13 +1612,22 @@ def _deserialize_change(d):
 def _notify_email_signal_changes(changes):
     """Aktif abonelere sinyal değişim e-postası — mail tercihine göre rota."""
     if not SMTP_HOST or not changes:
+        if not changes:
+            logger.debug("_notify_email_signal_changes: changes boş, skip")
         return
+
+    # MSG-019B diag: değişen sinyal sayısı
+    logger.info("_notify_email_signal_changes: %d değişim alındı [%s]",
+                len(changes), ", ".join(c[0] for c in changes[:5]) + ("..." if len(changes) > 5 else ""))
 
     # 1) Pending buffer'a ekle (günlük/haftalık digest için)
     with _pending_changes_lock:
         pending = _load_pending_changes()
+        prev_len = len(pending)
         pending.extend(_serialize_change(c) for c in changes)
         _save_pending_changes(pending)
+        logger.info("Pending buffer: %d → %d (+%d) (file=pending_changes.json)",
+                    prev_len, len(pending), len(changes))
 
     # 2) Anında gönderim — mail_pref=instant olan kullanıcılara
     def _send_instant():
@@ -1660,33 +1669,42 @@ def _notify_email_signal_changes(changes):
     threading.Thread(target=_send_instant, daemon=True).start()
 
 
-def _send_digest_emails(timeframe="daily"):
+def _send_digest_emails(timeframe="daily", force=False):
     """Günlük (19:00) veya haftalık (Cuma 19:00) digest gönder.
-    timeframe: 'daily' | 'weekly'"""
+    timeframe: 'daily' | 'weekly'
+    force: True ise pending boş bile olsa devam (MSG-019B manuel test için)"""
     if not SMTP_HOST:
-        return
+        logger.warning("_send_digest_emails: SMTP_HOST yok, atlandı (timeframe=%s)", timeframe)
+        return {"status": "no_smtp", "sent": 0}
 
     with _pending_changes_lock:
         pending = _load_pending_changes()
 
-    if not pending:
+    # MSG-019B diag: pending durumu
+    logger.info("_send_digest_emails(%s, force=%s): pending=%d items", timeframe, force, len(pending))
+
+    if not pending and not force:
         logger.info("Digest skip: pending değişim yok (timeframe=%s)", timeframe)
-        return
+        return {"status": "empty_pending", "sent": 0}
 
     # Reconstruct changes
-    changes = [_deserialize_change(d) for d in pending]
+    changes = [_deserialize_change(d) for d in pending] if pending else []
 
     with _sub_lock:
         subs = _load_subscribers()
     active = {e: d for e, d in subs.items() if d.get("active", True)}
+    logger.info("Digest: %d aktif abone, %d toplam abone", len(active), len(subs))
     if not active:
-        return
+        return {"status": "no_active_subs", "sent": 0}
 
     target_pref = timeframe  # 'daily' or 'weekly'
     sent = 0
+    # MSG-019B diag: skip nedenleri sayacı
+    skip_reasons = {"pref_mismatch": 0, "watchlist_empty": 0, "send_fail": 0}
     for email, data in active.items():
         mail_pref = data.get("mail_pref") or "daily"
         if mail_pref != target_pref:
+            skip_reasons["pref_mismatch"] += 1
             continue
         token   = data.get("token", "")
         name    = data.get("name", "")
@@ -1696,6 +1714,7 @@ def _send_digest_emails(timeframe="daily"):
         if tickers:
             relevant = [c for c in relevant if c[0] in tickers]
         if not relevant:
+            skip_reasons["watchlist_empty"] += 1
             continue
         unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
 
@@ -1712,16 +1731,28 @@ def _send_digest_emails(timeframe="daily"):
 
         if send_email(email, subject, _build_signal_email(relevant, unsub_url)):
             sent += 1
+        else:
+            skip_reasons["send_fail"] += 1
         time.sleep(0.3)
 
-    if sent:
-        logger.info("%s digest gönderildi: %d abone (%d hisse)", timeframe, sent, len(changes))
+    logger.info("%s digest sonuc: sent=%d, skip_pref=%d, skip_watchlist=%d, skip_sendfail=%d (active=%d, changes=%d)",
+                timeframe, sent, skip_reasons["pref_mismatch"],
+                skip_reasons["watchlist_empty"], skip_reasons["send_fail"],
+                len(active), len(changes))
 
-    # Daily digest gönderildiyse buffer temizle
-    if timeframe == "daily":
+    # Daily digest gönderildiyse buffer temizle (force run'da temizleme)
+    if timeframe == "daily" and not force:
         with _pending_changes_lock:
             _save_pending_changes([])
         logger.info("Pending changes buffer temizlendi (daily digest sonrası)")
+
+    return {
+        "status": "ok",
+        "sent": sent,
+        "active": len(active),
+        "changes": len(changes),
+        "skipped": skip_reasons,
+    }
 
 
 def _digest_cron_loop():
