@@ -1170,6 +1170,37 @@ TELEGRAM_BOT_TOKEN  = os.environ.get("TELEGRAM_BOT_TOKEN",  "")
 TELEGRAM_CHANNEL_ID = os.environ.get("TELEGRAM_CHANNEL_ID", "")
 _prev_signals       = {}   # {ticker: signal}  — bir önceki döngü sinyalleri
 
+# MSG-019B Adım 3: _prev_signals diske persist (worker restart sonrası state korunsun)
+_PREV_SIGNALS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prev_signals.json")
+_prev_signals_lock = threading.Lock()  # disk write atomik
+
+def _load_prev_signals():
+    """App start'ta disk'ten _prev_signals'i yükler."""
+    global _prev_signals
+    try:
+        if os.path.exists(_PREV_SIGNALS_PATH):
+            with open(_PREV_SIGNALS_PATH) as f:
+                import json as _j
+                _prev_signals = _j.load(f) or {}
+                logger.info("_prev_signals diskten yüklendi: %d ticker", len(_prev_signals))
+    except Exception as e:
+        logger.warning("_load_prev_signals: %s — boş dict ile başlanıyor", e)
+        _prev_signals = {}
+
+def _save_prev_signals(sig_map):
+    """_prev_signals'i atomik olarak disk'e yaz (tempfile + rename)."""
+    try:
+        import json as _j
+        tmp = _PREV_SIGNALS_PATH + ".tmp"
+        with open(tmp, "w") as f:
+            _j.dump(sig_map, f)
+        os.replace(tmp, _PREV_SIGNALS_PATH)
+    except Exception as e:
+        logger.warning("_save_prev_signals: %s", e)
+
+# Module load anında disk'ten yükle (her worker bunu yapacak — race condition yok, hep aynı içeriği okur)
+_load_prev_signals()
+
 
 def _send_telegram(text):
     """Telegram kanalına/gruba mesaj gönderir."""
@@ -1190,18 +1221,25 @@ def _send_telegram(text):
 
 
 def _notify_signal_changes(new_results):
-    """Önceki döngüye göre sinyal değişimlerini tespit et ve Telegram'a bildir."""
+    """Önceki döngüye göre sinyal değişimlerini tespit et;
+    Telegram (seans saati + token varsa), Email (her zaman, abone varsa), Web Push (her zaman) — bağımsız rotalar.
+
+    MSG-019B Adım 3 düzeltmesi:
+    - Bug 1 fix: Telegram disable olsa bile email/push çalışsın (önce 'return' vardı)
+    - Bug 2 fix: Seans dışı değişimler de pending buffer'a yazılır (digest sonraki gün gönderir)
+    - State persist: _prev_signals diske yazılır → worker restart sonrası state korunur
+    """
     global _prev_signals
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
-        return
-    # Borsa saatleri dışında bildirim gönderme (UTC+3: 10:00-18:30)
-    now_utc  = datetime.utcnow()
-    now_tr   = now_utc.hour * 60 + now_utc.minute + 180  # UTC+3 dakika
-    if not (600 <= now_tr <= 1110):  # 10:00–18:30
-        return
 
     new_data_map = {r["ticker"]: r for r in new_results if r["ticker"] != "XU030"}
     new_sig_map  = {t: d["signal"] for t, d in new_data_map.items()}
+
+    # MSG-019B diag: state durumu
+    if not _prev_signals:
+        logger.info("_notify_signal_changes: _prev_signals boş (first run veya disk yükleme miss); değişim tespiti atlanacak, snapshot kaydediliyor")
+    else:
+        logger.debug("_notify_signal_changes: %d previous + %d new ticker karşılaştırılıyor", len(_prev_signals), len(new_sig_map))
+
     changes = []
     for t, new_sig in new_sig_map.items():
         old_sig = _prev_signals.get(t)
@@ -1209,9 +1247,18 @@ def _notify_signal_changes(new_results):
             changes.append((t, old_sig, new_sig, new_data_map[t]))
 
     if changes:
+        logger.info("_notify_signal_changes: %d sinyal değişimi tespit edildi [%s]",
+                    len(changes), ", ".join(f"{c[0]}({c[1]}→{c[2]})" for c in changes[:5]))
+
+    # Rota 1: Telegram — sadece seans saatinde + token varsa
+    now_utc  = datetime.utcnow()
+    now_tr_min = now_utc.hour * 60 + now_utc.minute + 180  # UTC+3 dakika
+    in_session = 600 <= now_tr_min <= 1110  # 10:00–18:30 TR
+
+    if changes and TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID and in_session:
         sig_emoji = {"AL": "🟢", "SAT": "🔴", "BEKLE": "⚪"}
         lines = [f"<b>📊 BorsaPusula — Sinyal Değişimi</b>\n"]
-        for t, old, new, stock in changes[:10]:   # max 10 aynı mesajda
+        for t, old, new, stock in changes[:10]:
             e    = sig_emoji.get(new, "")
             name = STOCK_NAMES.get(t, t)
             lbl  = "Güçlü Trend ▲" if new == "AL" else "Zayıf Trend ▼"
@@ -1223,11 +1270,12 @@ def _notify_signal_changes(new_results):
         lines.append("<i>⚠️ Yatırım tavsiyesi değildir.</i>")
         _send_telegram("\n".join(lines))
 
+    # Rota 2: Email — her zaman (seans dışı değişimler de digest'e yazılır)
     if changes:
         _notify_email_signal_changes(changes)
 
-    if changes:
-        # Web push: tek mesaj, en fazla 3 hisse
+    # Rota 3: Web push — seans saatinde, sessizce gönder
+    if changes and in_session:
         _push_changes = changes[:3]
         if len(_push_changes) == 1:
             t, old, new, stock = _push_changes[0]
@@ -1247,7 +1295,10 @@ def _notify_signal_changes(new_results):
             daemon=True
         ).start()
 
-    _prev_signals = new_sig_map
+    # State güncelle + diske persist (worker restart-safe)
+    with _prev_signals_lock:
+        _prev_signals = new_sig_map
+        _save_prev_signals(new_sig_map)
 
 
 # ── E-posta Bildirim Sistemi ──────────────────────────────────────────────────
