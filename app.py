@@ -3960,22 +3960,42 @@ def refresh_xu100_chart():
 
 @app.route("/api/chart")
 def api_chart():
+    # XU030 (BIST30) — MSG-006 macro summary inject
+    return _chart_response_with_macro_summary("XU030", _chart_cache)
+
+
+def _chart_response_with_macro_summary(ticker_base, cache_obj):
+    """MSG-006: Single Source of Truth — chart summary fiyatını _macro_cache ile override.
+
+    Drift fix: chart cache 1h+ stale, macro 90s'de güncel.
+    Macro cold/missing ise chart cache değeri korunur (graceful fallback).
+    Cache mutate edilmez (response için shallow copy + yeni summary dict).
+    """
     with _lock:
-        return safe_json({
-            "chart":      _chart_cache["data"],
-            "updated_at": _chart_cache["updated_at"],
-            "loading":    _chart_cache["data"] is None,
-        })
+        data = cache_obj.get("data")
+        updated_at = cache_obj.get("updated_at")
+    if not data or "summary" not in data:
+        return safe_json({"chart": data, "updated_at": updated_at, "loading": data is None})
+    # Shallow copy + yeni summary dict (cache mutate olmasın)
+    data = dict(data)
+    data["summary"] = dict(data.get("summary", {}))
+    # Macro lookup
+    macro_items = _macro_cache.get("data") or []
+    for item in macro_items:
+        if item.get("label") == ticker_base:
+            price = item.get("price")
+            change = item.get("change")
+            if price is not None:
+                data["summary"]["price"] = price
+            if change is not None:
+                data["summary"]["change_pct"] = change
+            break
+    return safe_json({"chart": data, "updated_at": updated_at, "loading": data is None})
 
 
 @app.route("/api/chart/XU100")
 def api_chart_xu100():
-    with _lock:
-        return safe_json({
-            "chart":      _xu100_chart_cache["data"],
-            "updated_at": _xu100_chart_cache["updated_at"],
-            "loading":    _xu100_chart_cache["data"] is None,
-        })
+    return _chart_response_with_macro_summary("XU100", _xu100_chart_cache)
 
 
 def _refresh_varlik_chart(varlik_key, cache_obj):
@@ -3994,82 +4014,48 @@ def _refresh_varlik_chart(varlik_key, cache_obj):
 
 @app.route("/api/chart/BTC")
 def api_chart_btc():
-    with _lock:
-        return safe_json({
-            "chart":      _btc_chart_cache["data"],
-            "updated_at": _btc_chart_cache["updated_at"],
-            "loading":    _btc_chart_cache["data"] is None,
-        })
+    return _chart_response_with_macro_summary("BTC", _btc_chart_cache)
 
 
 @app.route("/api/chart/ALTIN")
 def api_chart_altin():
-    with _lock:
-        return safe_json({
-            "chart":      _altin_chart_cache["data"],
-            "updated_at": _altin_chart_cache["updated_at"],
-            "loading":    _altin_chart_cache["data"] is None,
-        })
+    return _chart_response_with_macro_summary("ALTIN", _altin_chart_cache)
 
 
 @app.route("/api/chart/GUMUS")
 def api_chart_gumus():
-    with _lock:
-        return safe_json({
-            "chart":      _gumus_chart_cache["data"],
-            "updated_at": _gumus_chart_cache["updated_at"],
-            "loading":    _gumus_chart_cache["data"] is None,
-        })
+    return _chart_response_with_macro_summary("GUMUS", _gumus_chart_cache)
 
 
 @app.route("/api/chart/ETH")
 def api_chart_eth():
-    with _lock:
-        return safe_json({"chart": _eth_chart_cache["data"],
-                          "updated_at": _eth_chart_cache["updated_at"],
-                          "loading": _eth_chart_cache["data"] is None})
+    # ETH macro cache'de yok — sadece chart cache (helper fallback OK)
+    return _chart_response_with_macro_summary("ETH", _eth_chart_cache)
 
 @app.route("/api/chart/SP500")
 def api_chart_sp500():
-    with _lock:
-        return safe_json({"chart": _sp500_chart_cache["data"],
-                          "updated_at": _sp500_chart_cache["updated_at"],
-                          "loading": _sp500_chart_cache["data"] is None})
+    return _chart_response_with_macro_summary("SP500", _sp500_chart_cache)
 
 @app.route("/api/chart/NASDAQ")
 def api_chart_nasdaq():
-    with _lock:
-        return safe_json({"chart": _nasdaq_chart_cache["data"],
-                          "updated_at": _nasdaq_chart_cache["updated_at"],
-                          "loading": _nasdaq_chart_cache["data"] is None})
+    return _chart_response_with_macro_summary("NASDAQ", _nasdaq_chart_cache)
 
 @app.route("/api/chart/SOL")
 def api_chart_sol():
-    with _lock:
-        return safe_json({"chart": _sol_chart_cache["data"],
-                          "updated_at": _sol_chart_cache["updated_at"],
-                          "loading": _sol_chart_cache["data"] is None})
+    return _chart_response_with_macro_summary("SOL", _sol_chart_cache)
 
 @app.route("/api/chart/BNB")
 def api_chart_bnb():
-    with _lock:
-        return safe_json({"chart": _bnb_chart_cache["data"],
-                          "updated_at": _bnb_chart_cache["updated_at"],
-                          "loading": _bnb_chart_cache["data"] is None})
+    return _chart_response_with_macro_summary("BNB", _bnb_chart_cache)
 
 @app.route("/api/chart/PETROL")
 def api_chart_petrol():
-    with _lock:
-        return safe_json({"chart": _petrol_chart_cache["data"],
-                          "updated_at": _petrol_chart_cache["updated_at"],
-                          "loading": _petrol_chart_cache["data"] is None})
+    return _chart_response_with_macro_summary("PETROL", _petrol_chart_cache)
 
 @app.route("/api/chart/DOGALGAZ")
 def api_chart_dogalgaz():
-    with _lock:
-        return safe_json({"chart": _dogalgaz_chart_cache["data"],
-                          "updated_at": _dogalgaz_chart_cache["updated_at"],
-                          "loading": _dogalgaz_chart_cache["data"] is None})
+    # DOGALGAZ macro cache'de yok, fallback chart cache
+    return _chart_response_with_macro_summary("DOGALGAZ", _dogalgaz_chart_cache)
 
 
 @app.route("/api/chart/us/<ticker>")
