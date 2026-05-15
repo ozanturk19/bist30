@@ -1187,6 +1187,43 @@ def analyze(ticker_base):
                 if _risk_now > 0:
                     rr_now = round((c - tp1) / _risk_now, 2)
 
+        # ── SPEC-001 Faz 1: 3-Katmanlı Tier (Standart / Plus / Premium) ─────
+        # AUDIT-004 formülü — kompozit skor 0-100
+        # Standart 35-59 | Plus 60-79 | Premium 80+
+        tier = None
+        tier_score = 0
+        if signal != "BEKLE":
+            try:
+                # Trend force (max 30)
+                if bull_score == 3 or bear_score == 3: tier_score += 30
+                elif bull_score >= 2 or bear_score >= 2: tier_score += 15
+                # ADX strength (max 20)
+                if adx_val >= 35: tier_score += 20
+                elif adx_val >= 25: tier_score += 12
+                # RVOL (max 20)
+                if rvol is not None:
+                    if rvol >= 2.0: tier_score += 20
+                    elif rvol >= 1.5: tier_score += 15
+                    elif rvol >= 1.2: tier_score += 10
+                # RSI zone (max 15)
+                if rsi_zone == "İdeal Giriş Penceresi": tier_score += 15
+                elif rsi_zone in ("Trend Güçleniyor", "Dip Toparlanması"): tier_score += 8
+                # Sinyal yaşı (max 10)
+                if signal_age_label == "Taze": tier_score += 10
+                elif signal_age_label == "Gelişiyor": tier_score += 6
+                # Penalty: düşük likidite (-10)
+                if low_liquidity: tier_score = max(0, tier_score - 10)
+                # Penalty: yakın bilanço (-5)
+                if earnings_warning: tier_score = max(0, tier_score - 5)
+                tier_score = max(0, min(100, tier_score))
+                # Eşikler
+                if tier_score >= 80: tier = "premium"
+                elif tier_score >= 60: tier = "plus"
+                elif tier_score >= 35: tier = "standart"
+            except Exception:
+                tier = None
+                tier_score = 0
+
         # ── Likidite Filtresi (Faz 1) — Günlük TL hacim 20 gün ortalaması ─────
         # < 5M TL → "Düşük Likidite" uyarısı (slippage + manipülasyon riski)
         # Hesap: close × volume 20 gün hareketli ortalama (lots/değer dalgalanması düzleştirilir)
@@ -1218,6 +1255,8 @@ def analyze(ticker_base):
             "weekly_trend":  weekly_dir,
             "rvol":          rvol,
             "is_premium":    is_premium,
+            "tier":          tier,        # SPEC-001 Faz 1: 'standart' | 'plus' | 'premium' | None (BEKLE)
+            "tier_score":    tier_score,  # 0-100 kompozit skor
             "volume_tl_avg20": volume_tl_avg20,
             "low_liquidity": low_liquidity,
             "adx":           round(adx_val, 1),  # top-level for SSR/SEO

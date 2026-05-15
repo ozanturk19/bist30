@@ -654,6 +654,74 @@
   /* Stats bar */
   .stats-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 
+  /* ── SPEC-001 Faz 1: Tier rozet + grup başlığı ── */
+  .tier-badge {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    vertical-align: middle;
+  }
+  .tier-badge-premium {
+    color: #ffc850;
+    background: rgba(255,200,80,.10);
+    border: 1px solid rgba(255,200,80,.45);
+  }
+  .tier-badge-plus {
+    color: #78b4ff;
+    background: rgba(120,180,255,.10);
+    border: 1px solid rgba(120,180,255,.40);
+  }
+  /* Tablo grup başlık satırı (desktop) */
+  tr.tier-group-header td {
+    padding: 14px 12px 6px;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  tr.tier-group-header.tg-premium td { color: #ffc850; }
+  tr.tier-group-header.tg-plus    td { color: #78b4ff; }
+  tr.tier-group-header.tg-standart td { color: var(--bp-text2, #8b949e); }
+  tr.tier-group-header td .tier-count {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 10px;
+    color: var(--bp-text3, #484f58);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  /* Mobile card grubu */
+  .mc-tier-group {
+    margin: 14px 0 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(28,33,40,0.3);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .mc-tier-group.tg-premium { color: #ffc850; border-left: 3px solid #ffc850; }
+  .mc-tier-group.tg-plus    { color: #78b4ff; border-left: 3px solid #78b4ff; }
+  .mc-tier-group.tg-standart { color: var(--bp-text2, #8b949e); border-left: 3px solid var(--bp-border, #30363d); }
+  .mc-tier-group .tier-count {
+    font-size: 10px;
+    color: var(--bp-text3, #484f58);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
   /* ── Feature 1 — Bugünün Özeti hero card (iskelet, Cmt'de finalize) ── */
   .market-summary {
     background: var(--bp-surface, #161b22);
@@ -3555,8 +3623,32 @@ function buildSectorButtons(sectors) {
   wrap.style.display = 'flex';
 }
 
+/* SPEC-001 Faz 1: Tier rozeti — tek noktadan render */
+function tierBadge(s) {
+  if (!s) return '';
+  if (s.tier === 'premium') {
+    return ' <span title="Premium — kompozit skor ≥80" class="tier-badge tier-badge-premium">⭐ PREMIUM</span>';
+  }
+  if (s.tier === 'plus') {
+    return ' <span title="Plus — kompozit skor 60-79" class="tier-badge tier-badge-plus">💎 PLUS</span>';
+  }
+  // standart için inline rozet yok (mevcut UI'da tablo zaten varsayılan)
+  // Backward compat: tier henüz hesaplanmadıysa eski is_premium fallback
+  if (s.is_premium && !s.tier) {
+    return ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:11px">★</span>';
+  }
+  return '';
+}
+
 function getSorted(arr) {
+  // SPEC-001 Faz 1: tier öncelik (premium → plus → standart → null/BEKLE), sonra mevcut sortKey tie-breaker
+  const tierRank = { 'premium': 0, 'plus': 1, 'standart': 2 };
   return [...arr].sort((a, b) => {
+    // Tier first (Premium > Plus > Standart > diğer/null)
+    const ta = tierRank[a.tier] ?? 99;
+    const tb = tierRank[b.tier] ?? 99;
+    if (ta !== tb) return ta - tb;
+    // Aynı tier içinde mevcut sort key
     let va = a[sortKey] ?? '', vb = b[sortKey] ?? '';
     if (sortKey === 'signal_date') {
       const toYMD = s => s ? s.split('.').reverse().join('') : '00000000';
@@ -3577,6 +3669,16 @@ function renderTable() {
 
   document.getElementById('noDataDiv').style.display = filtered.length === 0 ? '' : 'none';
   if (filtered.length === 0) { tbody.innerHTML = ''; return; }
+
+  /* ── SPEC-001 Faz 1: Tier sayım (grup başlığı için) ── */
+  const tierCounts = filtered.reduce((acc, s) => {
+    const t = s.tier || 'other';
+    acc[t] = (acc[t] || 0) + 1;
+    return acc;
+  }, {});
+  const _tierLabels = { premium: '⭐ PREMIUM', plus: '💎 PLUS', standart: '🟢 STANDART' };
+  let _lastTier_mobile = '__init__';
+  let _lastTier_desktop = '__init__';
 
   /* ── Mobile card list ── */
   const mcList = document.getElementById('mobileCards');
@@ -3639,10 +3741,18 @@ function renderTable() {
         }
 
         const _isWatchingMc = (typeof watchlist !== 'undefined' && watchlist.has(s.ticker));
-        return `<a class="mc ${sigClass} ${s.is_new_signal ? 'mc-new' : ''}" href="/hisse/${s.ticker}">
+        // Tier grup başlığı (mobile)
+        let mtHeader = '';
+        const _curTier = s.tier || 'other';
+        if (_curTier !== _lastTier_mobile && _tierLabels[_curTier]) {
+          const cnt = tierCounts[_curTier] || 0;
+          mtHeader = `<div class="mc-tier-group tg-${_curTier}">${_tierLabels[_curTier]} <span class="tier-count">${cnt} hisse</span></div>`;
+        }
+        _lastTier_mobile = _curTier;
+        return mtHeader + `<a class="mc ${sigClass} ${s.is_new_signal ? 'mc-new' : ''}" href="/hisse/${s.ticker}">
           <div class="mc-row1">
             <div class="mc-lft">
-              <div class="mc-ticker">${s.ticker} ${wt}${s.is_premium ? ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:11px">★</span>' : ''}</div>${secHtml}
+              <div class="mc-ticker">${s.ticker} ${wt}${tierBadge(s)}</div>${secHtml}
             </div>
             <div class="mc-rgt-wrap">
               <div class="mc-rgt">
@@ -3760,7 +3870,15 @@ function renderTable() {
       ? `<div style="font-size:10px;color:#8b949e;margin-top:2px">${s.sector}</div>` : '';
 
     const isWatching = watchlist.has(s.ticker);
-    return `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
+    // SPEC-001 Faz 1: Tier grup başlığı satırı (desktop)
+    let _tierHeaderTr = '';
+    const _curTierD = s.tier || 'other';
+    if (_curTierD !== _lastTier_desktop && _tierLabels[_curTierD]) {
+      const cnt = tierCounts[_curTierD] || 0;
+      _tierHeaderTr = `<tr class="tier-group-header tg-${_curTierD}"><td colspan="9">${_tierLabels[_curTierD]} <span class="tier-count">${cnt} hisse</span></td></tr>`;
+    }
+    _lastTier_desktop = _curTierD;
+    return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
       <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:12px">★</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
