@@ -3744,21 +3744,73 @@ _msg005_syncFilterButtonActive();
 fetchData();
 
 /* ── Alarm / Watchlist Sistemi ───────────────────── */
-const WATCH_KEY       = 'bp_watchlist';
+// Watchlist Faz 1 #2 (MSG-032): localStorage key versioning + persistence garantisi
+// Eski key'lerden migrate, corrupt JSON fail-safe, write verify
+const WATCH_KEY       = 'bp_watchlist_v2';    // v2 = versionleme + safe-load
+const WATCH_KEY_LEGACY = 'bp_watchlist';      // v1 (migration kaynağı)
 const SIGNAL_KEY      = 'bp_last_signals';
 const PRICE_ALARM_KEY = 'bp_price_alarms';
 
-let watchlist      = new Set(JSON.parse(localStorage.getItem(WATCH_KEY) || '[]'));
-let lastSignals    = JSON.parse(localStorage.getItem(SIGNAL_KEY) || '{}');
-let priceAlarms    = JSON.parse(localStorage.getItem(PRICE_ALARM_KEY) || '{}');
+/** Faz 1 #2: Safe-load helper — corrupt JSON, missing, type-mismatch → fallback array */
+function _safeLoadJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    if (parsed === null || parsed === undefined) return fallback;
+    return parsed;
+  } catch (e) {
+    console.warn('localStorage corrupt JSON, fallback uyguluyor:', key, e);
+    return fallback;
+  }
+}
+
+/** Faz 1 #2: v1 → v2 migration (idempotent) */
+function _migrateWatchlist() {
+  try {
+    // Eğer v2 zaten varsa migration gereksiz
+    if (localStorage.getItem(WATCH_KEY) !== null) return;
+    // v1 var ve geçerli array ise v2'ye taşı
+    const legacy = _safeLoadJSON(WATCH_KEY_LEGACY, null);
+    if (Array.isArray(legacy) && legacy.length > 0) {
+      localStorage.setItem(WATCH_KEY, JSON.stringify(legacy));
+      console.info('Watchlist v1 → v2 migrate (%d ticker)', legacy.length);
+    }
+  } catch (e) {
+    console.warn('Watchlist migration fail:', e);
+  }
+}
+_migrateWatchlist();
+
+let watchlist      = new Set(_safeLoadJSON(WATCH_KEY, []));
+let lastSignals    = _safeLoadJSON(SIGNAL_KEY, {});
+let priceAlarms    = _safeLoadJSON(PRICE_ALARM_KEY, {});
 let livePrices     = {};   // ticker → latest price from SSE
 let alarmPanelOpen = false;
 
+/** Faz 1 #2: Safe write + read-back verify (sessizce kaybolmayı önler) */
+function _safeWriteJSON(key, value) {
+  try {
+    const json = JSON.stringify(value);
+    localStorage.setItem(key, json);
+    // Read-back verify (quota dolu, private mode → sessizce drop edebilir)
+    const verify = localStorage.getItem(key);
+    if (verify !== json) {
+      console.warn('localStorage write verify FAIL:', key, '(quota? private mode?)');
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn('localStorage write fail:', key, e);
+    return false;
+  }
+}
+
 function saveWatchlist() {
-  localStorage.setItem(WATCH_KEY, JSON.stringify([...watchlist]));
+  _safeWriteJSON(WATCH_KEY, [...watchlist]);
 }
 function savePriceAlarms() {
-  localStorage.setItem(PRICE_ALARM_KEY, JSON.stringify(priceAlarms));
+  _safeWriteJSON(PRICE_ALARM_KEY, priceAlarms);
 }
 
 function toggleWatch(ticker) {
