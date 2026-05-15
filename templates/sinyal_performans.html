@@ -507,10 +507,31 @@ async function triggerBacktest() {
   }, 25000);
 })();
 {% endif %}
-// ── BUG-FIX (MSG-047): Tablo sıralama — perfSortBy fonksiyonu tanımlı değildi ──
-// Onclick handler'lar var, fonksiyon yoktu → ReferenceError, sıralama çalışmıyordu
+// ── SENECA Faz 1 P3: Akıllı default sıralama + localStorage + URL precedence (CPO MSG-062) ──
+// MSG-047 BUG-FIX (perfSortBy) üzerine: URL > localStorage > default eklendi
 (function() {
-  let _sortState = { col: 'aktif_ret', dir: 'desc' };   // default state (DOM sort-active'e uyumlu)
+  // SENECA spec §2: 'aktif_ret desc' default doğru, sadece localStorage ekle
+  const _SORT_KEY = 'bp_perf_sort_v1';
+  let _sortState = { col: 'aktif_ret', dir: 'desc' };   // default
+
+  // Precedence: URL ?sort=col&dir=desc > localStorage > default
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const urlCol = params.get('sort');
+    const urlDir = params.get('dir');
+    if (urlCol) {
+      _sortState.col = urlCol;
+      _sortState.dir = (urlDir === 'asc') ? 'asc' : 'desc';
+    } else {
+      const cached = localStorage.getItem(_SORT_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.col && (parsed.dir === 'asc' || parsed.dir === 'desc')) {
+          _sortState = parsed;
+        }
+      }
+    }
+  } catch(_) {}
 
   function _parseSortVal(v, col) {
     if (v == null || v === '') return null;
@@ -556,6 +577,15 @@ async function triggerBacktest() {
       const arr = th.querySelector('.perf-sort-arr');
       if (arr) arr.textContent = '';
     });
+    // P3: localStorage + URL state (persist user preference)
+    try {
+      localStorage.setItem(_SORT_KEY, JSON.stringify(_sortState));
+      const url = new URL(window.location);
+      url.searchParams.set('sort', _sortState.col);
+      url.searchParams.set('dir', _sortState.dir);
+      window.history.replaceState(null, '', url);
+    } catch(_) {}
+
     const activeTh = document.querySelector(`th[data-sort="${col}"]`);
     if (activeTh) {
       activeTh.classList.add('sort-active');
@@ -563,6 +593,37 @@ async function triggerBacktest() {
       if (arr) arr.textContent = _sortState.dir === 'asc' ? '▲' : '▼';
     }
   };
+
+  // P3 Initial: sayfa açıldığında URL/localStorage'dan gelen state'i uygula
+  // DOM zaten "aktif_ret desc" varsayılan ile render edilmiş (server-side Jinja sort).
+  // Eğer state default değilse perfSortBy çağrısı ile yeniden sırala.
+  document.addEventListener('DOMContentLoaded', function() {
+    if (_sortState.col !== 'aktif_ret' || _sortState.dir !== 'desc') {
+      // Toggle hatası yapmamak için _sortState'i geçici default'a al, sonra çağır
+      const target = { ..._sortState };
+      _sortState = { col: '__none__', dir: 'desc' };
+      window.perfSortBy(target.col);
+      // perfSortBy 'desc' default verir; eğer asc istiyorsak tekrar çağır
+      if (target.dir === 'asc') {
+        window.perfSortBy(target.col);
+      }
+    } else {
+      // Default header arrow (▼) ve sort-active mevcut zaten DOM'da
+      // Sadece localStorage'a default'u yaz (URL share için)
+      try { localStorage.setItem(_SORT_KEY, JSON.stringify(_sortState)); } catch(_) {}
+    }
+  });
+
+  // SENECA spec §2 — Inactive header'lara ▾ ipucu (opacity 0.6)
+  // Tüm sortable th'lar için CSS ile statik göster:
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('th[data-sort] .perf-sort-arr').forEach(arr => {
+      if (!arr.textContent.trim()) {
+        arr.textContent = '▾';
+        arr.style.opacity = '0.4';
+      }
+    });
+  });
 })();
 
 // Makro Ticker Bandı
