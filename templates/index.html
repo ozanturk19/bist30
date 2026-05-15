@@ -961,7 +961,50 @@
     animation: msPulse 2s infinite;
   }
   @keyframes msPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.85); } }
-  .ms-meta { font-size: 11px; color: var(--bp-text3, #484f58); display: flex; align-items: center; gap: 6px; }
+  .ms-meta { font-size: 11px; color: var(--bp-text3, #484f58); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  /* Feature 1 #1C: Reklamsız mikro-badge */
+  .badge-noads {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 7px;
+    background: rgba(63,185,80,0.10);
+    border: 1px solid rgba(63,185,80,0.35);
+    border-radius: 6px;
+    color: #3fb950;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    cursor: help;
+  }
+  /* Footer üstü 3-değer satırı */
+  .value-strip {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 14px 8px 10px;
+    margin: 14px 0 0;
+    border-top: 1px solid rgba(48,54,61,0.5);
+    font-size: 12px;
+    color: var(--bp-text2, #8b949e);
+  }
+  .value-strip .value-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+  }
+  .value-strip .value-item::before {
+    content: '✓';
+    color: #3fb950;
+    font-weight: 700;
+  }
+  .value-strip .value-divider { color: var(--bp-text3, #484f58); }
+  @media (max-width: 480px) {
+    .value-strip { gap: 10px; font-size: 11px; }
+    .value-strip .value-divider { display: none; }
+  }
   .ms-divider { color: var(--bp-text3, #484f58); }
   .ms-link { color: #58a6ff; text-decoration: none; }
   .ms-link:hover { text-decoration: underline; }
@@ -2392,6 +2435,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <span class="ms-meta">
         <span id="msTime">—</span> itibarıyla
         <span class="ms-divider">·</span>
+        <span class="badge-noads" title="Reklamsız platform — Investing.com'da premium feature, BorsaPusula'da default. Yatırım tavsiyesi değil, sinyal paneli.">🛡️ Reklamsız</span>
+        <span class="ms-divider">·</span>
         <a href="/metodoloji" class="ms-link">Metodoloji →</a>
       </span>
     </div>
@@ -2794,6 +2839,14 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
         <svg width="13" height="13" viewBox="0 0 24 24" fill="#229ED9"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.013 9.487c-.143.641-.534.797-1.082.496l-3-2.21-1.447 1.393c-.16.16-.294.294-.603.294l.213-3.053 5.56-5.023c.242-.213-.054-.332-.373-.12l-6.871 4.326-2.962-.924c-.641-.204-.654-.641.136-.949l11.566-4.46c.532-.194 1.001.131.876.743z"/></svg>
         Telegram
       </a>
+    </div>
+    <!-- Feature 1 #1C — Reklamsız value strip (CPO MSG-060) -->
+    <div class="value-strip" role="complementary" aria-label="Platform değerleri">
+      <span class="value-item">Reklamsız</span>
+      <span class="value-divider">·</span>
+      <span class="value-item">Açık erişim</span>
+      <span class="value-divider">·</span>
+      <span class="value-item">Şeffaf metodoloji</span>
     </div>
     <p style="color:var(--bp-text3);font-size:11px;margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto">
       ⚠️ Bu platform yalnızca bilgilendirme amaçlıdır. Sinyaller <strong style="color:var(--bp-text3)">yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez.
