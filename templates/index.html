@@ -675,6 +675,63 @@
     background: rgba(120,180,255,.10);
     border: 1px solid rgba(120,180,255,.40);
   }
+  /* SPEC-001 Faz 2 — Premium soft paywall (locked rows + CTA) */
+  .tier-locked {
+    filter: blur(6px);
+    user-select: none;
+    pointer-events: none;
+    transition: filter .25s ease;
+  }
+  /* Premium CTA banner — satır olarak görünür */
+  tr.premium-cta-row td {
+    padding: 14px 12px;
+    background: linear-gradient(135deg, rgba(255,200,80,.06), rgba(255,200,80,.02)) !important;
+    border-top: 1px dashed rgba(255,200,80,.35);
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    text-align: center;
+  }
+  .premium-cta-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--bp-text2, #8b949e);
+  }
+  .premium-cta-content strong { color: #ffc850; font-weight: 700; }
+  .premium-cta-btn {
+    background: linear-gradient(135deg, #ffc850, #e3b341);
+    color: #1a1a1f;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .premium-cta-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255,200,80,.25);
+  }
+  /* Mobile CTA */
+  .mc-premium-cta {
+    background: linear-gradient(135deg, rgba(255,200,80,.08), rgba(255,200,80,.02));
+    border: 1px dashed rgba(255,200,80,.35);
+    border-radius: 8px;
+    padding: 14px;
+    margin: 6px 0 14px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  .mc-premium-cta .premium-cta-content { color: var(--bp-text, #e6edf3); font-size: 13px; line-height: 1.5; }
+  .mc-premium-cta strong { color: #ffc850; }
+
   /* Tablo grup başlık satırı (desktop) */
   tr.tier-group-header td {
     padding: 14px 12px 6px;
@@ -3623,6 +3680,29 @@ function buildSectorButtons(sectors) {
   wrap.style.display = 'flex';
 }
 
+/* SPEC-001 Faz 2: Premium modal — Adım 3'te tam implement edilecek (email form + Brevo + cookie) */
+function openPremiumModal() {
+  // Adım 3 placeholder — geçici alert
+  // TODO: modal + email input + Brevo subscribe + cookie set
+  alert('Premium erişim için ücretsiz email kaydı (Adım 3 — yakında).');
+}
+
+function _hasPremiumAccess() {
+  try {
+    // 1) bp_premium_trial cookie (30 gün, email submit sonrası set edilir)
+    if (document.cookie.match(/(?:^|;\s*)bp_premium_trial=1/)) return true;
+    // 2) bp_sub_user localStorage (mevcut subscribe pattern — bp-search.js'den)
+    const raw = localStorage.getItem('bp_sub_user');
+    if (raw) {
+      const u = JSON.parse(raw);
+      if (u && u.subscribed) return true;
+    }
+    // 3) Mevcut bp_sub cookie (server-side subscribe)
+    if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return true;
+  } catch (_) {}
+  return false;
+}
+
 /* SPEC-001 Faz 1: Tier rozeti — tek noktadan render */
 function tierBadge(s) {
   if (!s) return '';
@@ -3679,6 +3759,9 @@ function renderTable() {
   const _tierLabels = { premium: '⭐ PREMIUM', plus: '💎 PLUS', standart: '🟢 STANDART' };
   let _lastTier_mobile = '__init__';
   let _lastTier_desktop = '__init__';
+  /* SPEC-001 Faz 2: Premium access — false ise Premium rows blur + CTA */
+  const _premiumLocked = !_hasPremiumAccess();
+  const _premiumCount = tierCounts.premium || 0;
 
   /* ── Mobile card list ── */
   const mcList = document.getElementById('mobileCards');
@@ -3741,15 +3824,23 @@ function renderTable() {
         }
 
         const _isWatchingMc = (typeof watchlist !== 'undefined' && watchlist.has(s.ticker));
-        // Tier grup başlığı (mobile)
+        // Tier grup başlığı (mobile) + Premium CTA (Faz 2)
         let mtHeader = '';
         const _curTier = s.tier || 'other';
         if (_curTier !== _lastTier_mobile && _tierLabels[_curTier]) {
           const cnt = tierCounts[_curTier] || 0;
           mtHeader = `<div class="mc-tier-group tg-${_curTier}">${_tierLabels[_curTier]} <span class="tier-count">${cnt} hisse</span></div>`;
+          // Premium grup başlangıcında CTA göster (sadece locked + count>0)
+          if (_curTier === 'premium' && _premiumLocked && _premiumCount > 0) {
+            mtHeader += `<div class="mc-premium-cta">
+              <div class="premium-cta-content">🔒 Premium sinyalleri görmek için <strong>ücretsiz hesap aç</strong></div>
+              <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">⭐ Premium'u Aç</button>
+            </div>`;
+          }
         }
         _lastTier_mobile = _curTier;
-        return mtHeader + `<a class="mc ${sigClass} ${s.is_new_signal ? 'mc-new' : ''}" href="/hisse/${s.ticker}">
+        const _mcLocked = (_premiumLocked && s.tier === 'premium') ? 'tier-locked' : '';
+        return mtHeader + `<a class="mc ${sigClass} ${s.is_new_signal ? 'mc-new' : ''} ${_mcLocked}" href="/hisse/${s.ticker}">
           <div class="mc-row1">
             <div class="mc-lft">
               <div class="mc-ticker">${s.ticker} ${wt}${tierBadge(s)}</div>${secHtml}
@@ -3870,15 +3961,26 @@ function renderTable() {
       ? `<div style="font-size:10px;color:#8b949e;margin-top:2px">${s.sector}</div>` : '';
 
     const isWatching = watchlist.has(s.ticker);
-    // SPEC-001 Faz 1: Tier grup başlığı satırı (desktop)
+    // SPEC-001 Faz 1: Tier grup başlığı satırı (desktop) + Faz 2 Premium CTA
     let _tierHeaderTr = '';
     const _curTierD = s.tier || 'other';
     if (_curTierD !== _lastTier_desktop && _tierLabels[_curTierD]) {
       const cnt = tierCounts[_curTierD] || 0;
       _tierHeaderTr = `<tr class="tier-group-header tg-${_curTierD}"><td colspan="9">${_tierLabels[_curTierD]} <span class="tier-count">${cnt} hisse</span></td></tr>`;
+      // Premium başlangıcında CTA satırı
+      if (_curTierD === 'premium' && _premiumLocked && _premiumCount > 0) {
+        _tierHeaderTr += `<tr class="premium-cta-row"><td colspan="9">
+          <div class="premium-cta-content">
+            <span>🔒 Premium sinyalleri görmek için</span>
+            <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">⭐ Premium'u Aç</button>
+            <strong>(ücretsiz)</strong>
+          </div>
+        </td></tr>`;
+      }
     }
     _lastTier_desktop = _curTierD;
-    return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
+    const _trLocked = (_premiumLocked && s.tier === 'premium') ? 'tier-locked' : '';
+    return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''} ${_trLocked}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
       <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:12px">★</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
