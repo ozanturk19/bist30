@@ -1116,6 +1116,29 @@ def analyze(ticker_base):
         except Exception:
             pass
 
+        # ── R/R Çift Oran (Faz 1 #2) — bug fix ─────────────────────────────
+        # Önceki kod hard-coded rr_ratio=2.0 veriyordu (anlamsız).
+        # Doğru hesap: TP1 fix bir hedef, iki farklı giriş için R/R farklı:
+        #  - Sinyal başından: entry=signal_price, ideal koşullar (en yüksek R/R)
+        #  - Şu an girersen: entry=current, fiyat yükseldikçe R/R düşer (kovalama riski)
+        rr_signal = None
+        rr_now    = None
+        if tp1 is not None and signal_price is not None and sl_val is not None:
+            if signal == "AL":
+                _risk_sig = signal_price - sl_val
+                _risk_now = c - sl_val
+                if _risk_sig > 0:
+                    rr_signal = round((tp1 - signal_price) / _risk_sig, 2)
+                if _risk_now > 0:
+                    rr_now = round((tp1 - c) / _risk_now, 2)
+            elif signal == "SAT":
+                _risk_sig = sl_val - signal_price
+                _risk_now = sl_val - c
+                if _risk_sig > 0:
+                    rr_signal = round((signal_price - tp1) / _risk_sig, 2)
+                if _risk_now > 0:
+                    rr_now = round((c - tp1) / _risk_now, 2)
+
         # ── Likidite Filtresi (Faz 1) — Günlük TL hacim 20 gün ortalaması ─────
         # < 5M TL → "Düşük Likidite" uyarısı (slippage + manipülasyon riski)
         # Hesap: close × volume 20 gün hareketli ortalama (lots/değer dalgalanması düzleştirilir)
@@ -1178,6 +1201,8 @@ def analyze(ticker_base):
             "tp1":             tp1,
             "tp2":             tp2,
             "rr_ratio":        rr_ratio,
+            "rr_signal":       rr_signal,  # Faz 1 #2: sinyal başından R/R
+            "rr_now":          rr_now,     # Faz 1 #2: şu an girersen R/R
         }
     except Exception as e:
         logger.error("analyze(%s): %s", ticker_base, e, exc_info=True)

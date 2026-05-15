@@ -2208,6 +2208,20 @@ function renderSummary(s, signalData) {
       const sigDir = signalData.signal === 'AL';
       const rrLevelsEl = document.getElementById('rrLevels');
       if (rrLevelsEl) {
+        // Faz 1 #2: Çift R/R — sinyal başından vs şu an girersen
+        const rrSig = signalData.rr_signal;
+        const rrNow = signalData.rr_now;
+        const rrRowsHtml = (rrSig != null || rrNow != null) ? `
+          <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:11px;font-variant-numeric:tabular-nums">
+            ${rrSig != null ? `<div style="display:flex;justify-content:space-between;color:#8b949e">
+              <span>Sinyal başından R/R</span>
+              <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2)}x</strong>
+            </div>` : ''}
+            ${rrNow != null ? `<div style="display:flex;justify-content:space-between;color:#8b949e" title="Mevcut fiyattan giriş yaparsan risk/ödül oranı">
+              <span>Şu an girersen R/R</span>
+              <strong style="color:${rrNow >= 2.0 ? '#3fb950' : rrNow >= 1.0 ? '#d29922' : '#f85149'}">${rrNow.toFixed(2)}x</strong>
+            </div>` : ''}
+          </div>` : '';
         rrLevelsEl.innerHTML = `
           <div class="rr-level-row">
             <div class="rr-lvl" style="color:#f85149">
@@ -2225,7 +2239,7 @@ function renderSummary(s, signalData) {
               <span style="color:#b8c3ff;font-size:10px">TP2 (3R)</span>
               <strong style="color:#b8c3ff;font-size:11px"> ${fmt(tp2)}</strong>
             </div>
-          </div>`;
+          </div>` + rrRowsHtml;
       }
     }
 
