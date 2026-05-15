@@ -654,6 +654,57 @@
   /* Stats bar */
   .stats-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 
+  /* ── Feature 1 #1B — Preset Chips (CPO MSG-060) ── */
+  .preset-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 6px 0 12px;
+    margin-bottom: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .preset-chips::-webkit-scrollbar { display: none; }
+  .preset-chip {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    background: var(--bp-surface, #161b22);
+    border: 1px solid var(--bp-border, #30363d);
+    color: var(--bp-text2, #8b949e);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .preset-chip:hover {
+    background: rgba(28,33,40,0.95);
+    color: var(--bp-text, #e6edf3);
+    border-color: var(--bp-text3, #484f58);
+  }
+  .preset-chip.active {
+    background: rgba(31,111,235,0.15);
+    border-color: #58a6ff;
+    color: #58a6ff;
+    font-weight: 600;
+  }
+  .preset-chip[data-preset="PREMIUM"].active {
+    background: rgba(255,215,0,0.10);
+    border-color: #ffd700;
+    color: #ffd700;
+  }
+  .preset-chip[data-preset="WATCH"].active {
+    background: rgba(184,195,255,0.12);
+    border-color: #b8c3ff;
+    color: #b8c3ff;
+  }
+  @media (max-width: 640px) {
+    .preset-chips { padding: 4px 0 10px; }
+    .preset-chip { font-size: 12px; padding: 6px 12px; }
+  }
+
   /* ── SPEC-001 Faz 1: Tier rozet + grup başlığı ── */
   .tier-badge {
     display: inline-block;
@@ -2368,6 +2419,14 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
   </section>
 
+  <!-- ── Feature 1 #1B — Preset Chips (CPO MSG-060) ── -->
+  <div class="preset-chips" id="presetChips" role="group" aria-label="Hazır filtreler">
+    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)">🔥 Top Kazananlar</button>
+    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)">📊 Hacim Öncüleri</button>
+    <button class="preset-chip" data-preset="PREMIUM" onclick="applyPreset('PREMIUM', this)">🥇 Altın Sinyaller</button>
+    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="applyPreset('WATCH', this)" hidden>⭐ Watchlist'im</button>
+  </div>
+
   <!-- ── AI Piyasa Özeti ──────────────────────────── -->
   <!-- visibility:hidden (not display:none) reserves space → prevents CLS when content loads -->
   <div id="macroSummaryBar" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(184,195,255,.06),rgba(139,92,246,.03));border:1px solid rgba(184,195,255,.18);border-radius:9px;padding:9px 14px;margin-bottom:10px;align-items:flex-start;gap:8px">
@@ -3466,6 +3525,7 @@ async function fetchData() {
     renderTable();
     renderHeroPanel(allStocks);
     renderMarketSummary(allStocks);   /* Feature 1 #1A — Bugünün Özeti iskelet */
+    _initPresetChips();                /* Feature 1 #1B — Preset chips init (URL + watchlist visibility) */
 
     document.getElementById('loadingDiv').style.display  = 'none';
     document.getElementById('mainTable').style.display   = '';
@@ -3696,7 +3756,10 @@ function getFiltered() {
     const matchFilter = currentFilter === 'all' || s.signal === currentFilter
                      || (currentFilter === 'PREMIUM' && s.is_premium === true)
                      || (currentFilter === 'TODAY' && s.is_new_signal && s.signal !== 'BEKLE')
-                     || (currentFilter === 'WATCH' && watchlist.has(s.ticker));
+                     || (currentFilter === 'WATCH' && watchlist.has(s.ticker))
+                     /* Feature 1 #1B presets (CPO MSG-060) */
+                     || (currentFilter === 'TOP_GAINERS' && s.signal === 'AL' && (s.change_pct || 0) > 0)
+                     || (currentFilter === 'VOL_LEADERS' && s.signal === 'AL' && (s.rvol || 0) >= 2.0);
     /* MSG-005: period filter (signal_bars baz alınır) */
     const sigBars = s.signal_bars || 0;
     let matchPeriod = true;
@@ -4190,8 +4253,80 @@ function renderTable() {
   }).join('');
 }
 
+/* Feature 1 #1B: applyPreset — chip click handler (CPO MSG-060)
+   Davranış: tek-aktif (radio), aynı chip ikinci tık → reset to 'all'
+   URL state: ?preset=NAME (paylaşılabilir, bookmark) */
+function applyPreset(preset, btn) {
+  const isActive = btn && btn.classList.contains('active');
+  // Tüm chip'leri deaktive et
+  document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+  if (isActive) {
+    // Aynı chip 2. tık → reset
+    setFilter('all', document.querySelector('.filter-btn.active-all') || document.querySelector('.filter-btn'));
+    try {
+      const url = new URL(window.location);
+      url.searchParams.delete('preset');
+      history.replaceState(null, '', url);
+    } catch(_) {}
+    return;
+  }
+  if (btn) btn.classList.add('active');
+  // Preset → currentFilter
+  const presetToFilter = { TOP_GAINERS: 'TOP_GAINERS', VOL_LEADERS: 'VOL_LEADERS', PREMIUM: 'PREMIUM', WATCH: 'WATCH' };
+  const targetFilter = presetToFilter[preset] || 'all';
+  // Mevcut filter butonlarından eşleştir (PREMIUM/WATCH için filter butonu var)
+  let filterBtn = null;
+  if (targetFilter === 'PREMIUM') filterBtn = document.querySelector('.filter-btn.filter-premium');
+  else if (targetFilter === 'WATCH') filterBtn = document.querySelector('.filter-btn.filter-watch');
+  setFilter(targetFilter, filterBtn);
+  // TOP_GAINERS için ek sort: change_pct desc
+  if (preset === 'TOP_GAINERS') {
+    sortKey = 'change_pct';
+    sortDir = -1;
+    renderTable();
+  } else if (preset === 'VOL_LEADERS') {
+    sortKey = 'vol_ratio';
+    sortDir = -1;
+    renderTable();
+  }
+  // URL state
+  try {
+    const url = new URL(window.location);
+    url.searchParams.set('preset', preset);
+    history.replaceState(null, '', url);
+  } catch(_) {}
+  // Active chip'i yine geri set et (setFilter butonları tarayıp temizlemiş olabilir)
+  if (btn) btn.classList.add('active');
+}
+
+/* Feature 1 #1B: Watchlist chip visibility (boşsa gizle) + URL initial preset */
+function _initPresetChips() {
+  // Watchlist boşsa ⭐ chip gizli
+  const watchChip = document.getElementById('presetWatchChip');
+  if (watchChip) {
+    const visible = (typeof watchlist !== 'undefined' && watchlist.size > 0);
+    watchChip.hidden = !visible;
+  }
+  // URL ?preset=X → otomatik aktive
+  try {
+    const initialPreset = new URLSearchParams(location.search).get('preset');
+    if (initialPreset) {
+      const targetChip = document.querySelector(`.preset-chip[data-preset="${initialPreset}"]`);
+      if (targetChip && !targetChip.hidden) {
+        // İlk render sonrası tetikle (allStocks dolu olmalı)
+        setTimeout(() => targetChip.click(), 150);
+      }
+    }
+  } catch(_) {}
+}
+
 function setFilter(f, btn) {
   currentFilter = f;
+  // Feature 1 #1B: setFilter çağrılınca chip'leri sıfırla (kullanıcı normal filtre seçti)
+  // Eğer çağıran applyPreset ise (preset matches filter), aşağıdaki chip class manuel set ediliyor
+  if (!['TOP_GAINERS','VOL_LEADERS','PREMIUM','WATCH'].includes(f)) {
+    document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+  }
   /* MSG-005: Kullanıcı filter değişimi → period reset 'all'
      Anonim user yönlendirme period'unu (today/7d/30d) korumayı tercih etmiyoruz,
      çünkü kullanıcı kendi seçimini yapıyor. */
@@ -4462,6 +4597,9 @@ function toggleWatch(ticker) {
     mcBtn.title = watchlist.has(ticker) ? 'Alarm aktif' : 'Sinyal alarmı kur';
   }
   updateFabBadge();
+  // Feature 1 #1B: watchlist boşaldıysa ⭐ chip gizle, doluysa göster
+  const watchChip = document.getElementById('presetWatchChip');
+  if (watchChip) watchChip.hidden = watchlist.size === 0;
 }
 
 function updateFabBadge() {
