@@ -1116,6 +1116,18 @@ def analyze(ticker_base):
         except Exception:
             pass
 
+        # ── Bilanço Yakın Riski (Faz 1 #5) — spec Bölüm 6 Filtre C ───────────
+        # Sinyal aktif AL/SAT + 7 gün içinde KESİN bilanço tarihi → uyarı
+        earnings_warning = None
+        if signal != "BEKLE":
+            _e = get_upcoming_earnings_for(ticker_base)
+            if _e:
+                earnings_warning = {
+                    "date": _e["date"],
+                    "days_ahead": _e["days_ahead"],
+                    "message": f"Bilanço {_e['days_ahead']} gün sonra ({_e['date']}) — pozisyon riski yüksek"
+                }
+
         # ── Sinyal Yaşı Yorumu (Faz 1 #4) — spec Bölüm 4.3 ──────────────────
         # 1-3 gün → Taze | 4-7 gün → Gelişiyor | 8-15 gün → Olgunlaşıyor | 15+ → Olgun
         if signal == "BEKLE" or signal_bars is None:
@@ -1230,6 +1242,7 @@ def analyze(ticker_base):
             "rsi_zone":        rsi_zone,  # Faz 1 #3: yorumlanmış bölge etiketi
             "signal_age_label": signal_age_label,  # Faz 1 #4: Taze/Gelişiyor/Olgunlaşıyor/Olgun
             "signal_age_color": signal_age_color,  # green/yellow/orange/red
+            "earnings_warning": earnings_warning,  # Faz 1 #5: 7 gün içinde bilanço uyarısı
             "vol_ratio":       vol_ratio,
             "vol_confirmed":   vol_confirmed,
             "signal_vol_ratio": signal_vol_ratio,
@@ -6039,7 +6052,49 @@ def _earnings_refresh_impl():
     with _lock:
         _earnings_cache["data"] = data
         _earnings_cache["ts"]   = now
+    # Faz 1 #5: flat lookup rebuild (O(1) erişim için)
+    _rebuild_earnings_warning_lookup()
     logger.info("_earnings_refresh_impl: tamamlandi (%d donem)", len(result_periods))
+
+
+# Faz 1 #5: ticker → upcoming earnings flat lookup (O(1) erişim)
+# _earnings_refresh_impl her çalıştığında güncellenir.
+_earnings_warning_lookup = {}  # {ticker: {"date": "YYYY-MM-DD", "days_ahead": int}}
+_earnings_warning_lock = threading.Lock()
+
+def _rebuild_earnings_warning_lookup():
+    """Faz 1 #5: _earnings_cache'ten flat ticker → upcoming earnings dict çıkar.
+    Sadece 7 gün içinde KESİN tarih olanlar dahil ('yaklaşık' atlanır)."""
+    try:
+        cached = _earnings_cache.get("data")
+        if not cached:
+            return
+        today = date.today()
+        new_lookup = {}
+        for period in cached.get("periods", []):
+            for s in period.get("stocks", []):
+                d = s.get("date")
+                t = s.get("ticker")
+                if not t or not d or d == "yaklaşık":
+                    continue
+                try:
+                    e_date = datetime.strptime(d, "%Y-%m-%d").date()
+                    delta = (e_date - today).days
+                    if 0 <= delta <= 7:
+                        new_lookup[t] = {"date": d, "days_ahead": delta}
+                except Exception:
+                    continue
+        with _earnings_warning_lock:
+            _earnings_warning_lookup.clear()
+            _earnings_warning_lookup.update(new_lookup)
+        logger.info("Earnings warning lookup rebuilt: %d ticker", len(new_lookup))
+    except Exception as e:
+        logger.warning("_rebuild_earnings_warning_lookup: %s", e)
+
+
+def get_upcoming_earnings_for(ticker, days=7):
+    """Faz 1 #5: O(1) ticker lookup. days=7 default (parameter ignored, lookup hep 7d)."""
+    return _earnings_warning_lookup.get(ticker)
 
 
 def get_earnings_data():
