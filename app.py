@@ -3665,7 +3665,7 @@ US_SECTORS = {
     "Medya":        ["NFLX"],
     "Finans":       ["JPM","BRKB","V","MA"],
     "Perakende":    ["WMT"],
-    "Sağlık":       ["UNH", "ALKLC"],
+    "Sağlık":       ["UNH"],
     "Enerji":       ["XOM"],
 }
 
