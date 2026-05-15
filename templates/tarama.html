@@ -123,6 +123,10 @@
   .search-clear:hover { color:var(--text2); }
 
   .filter-actions { display:flex; gap:8px; align-items:flex-end; margin-left:auto; }
+  /* T2 — inline spinner (filter reactivity fetch göstergesi) */
+  @keyframes tarSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  #inlineSpinner svg { display: inline-block; }
+
   .btn-apply {
     background:var(--brand); color:#fff; border:none; border-radius:6px;
     padding:8px 20px; font-size:13px; font-weight:600; cursor:pointer;
@@ -385,13 +389,13 @@
 
     <div class="filter-actions">
       <button class="btn-reset" onclick="resetFilters()">Sıfırla</button>
-      <button class="btn-apply" onclick="applyFilters()">Filtrele</button>
+      <button class="btn-apply" onclick="applyFilters()" style="display:none" aria-hidden="true">Filtrele</button>
     </div>
   </div>
 
   <!-- Sonuç başlık -->
   <div class="result-header">
-    <div class="result-count" id="resultCount"><strong>—</strong> sonuç</div>
+    <div class="result-count" id="resultCount"><strong>—</strong> sonuç<span id="inlineSpinner" style="display:none;margin-left:8px;vertical-align:middle"><svg width="14" height="14" viewBox="0 0 24 24" style="animation:tarSpin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke="#58a6ff" stroke-width="2.5" fill="none" stroke-dasharray="50 60"/></svg></span></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:12px;color:var(--text2)">Sırala:</span>
       <select class="sort-select" id="sortSel" onchange="applyFilters()">
@@ -578,12 +582,27 @@ async function applyFilters() {
   });
   if (sig === 'PREMIUM') params.set('only_premium', '1');
   // Remove empty
-  [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999') params.delete(k); });
+  [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999' || v==='0' || v==='all' || v==='adx') params.delete(k); });
 
-  document.getElementById('loadingDiv').style.display  = '';
-  document.getElementById('resultTable').style.display = 'none';
+  // T2: URL state — replaceState ile (history kabarmaz, paylaşılabilir)
+  try {
+    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    const curUrl = window.location.pathname + window.location.search;
+    if (newUrl !== curUrl) window.history.replaceState(null, '', newUrl);
+  } catch(_) {}
+
+  // T2: Bilateral loading state — ilk yüklemede full spinner, sonraki sefer inline
+  const isInitialLoad = !_allRows || _allRows.length === 0;
+  if (isInitialLoad) {
+    document.getElementById('loadingDiv').style.display  = '';
+    document.getElementById('resultTable').style.display = 'none';
+  } else {
+    const rt = document.getElementById('resultTable');
+    if (rt) rt.style.opacity = '0.5';
+    const sp = document.getElementById('inlineSpinner');
+    if (sp) sp.style.display = 'inline-flex';
+  }
   document.getElementById('emptyDiv').style.display    = 'none';
-  document.getElementById('resultCount').innerHTML     = '<strong>—</strong> sonuç';
 
   try {
     const r = await fetch('/api/tarama?' + params);
@@ -596,7 +615,65 @@ async function applyFilters() {
     renderResults(filtered, filtered.length);
   } catch(e) {
     document.getElementById('loadingDiv').innerHTML = '<div style="color:var(--sat);padding:24px">Veri yüklenemedi. Lütfen sayfayı yenileyin.</div>';
+  } finally {
+    // T2: Inline spinner kapat + opacity reset
+    const rt = document.getElementById('resultTable');
+    if (rt) rt.style.opacity = '1';
+    const sp = document.getElementById('inlineSpinner');
+    if (sp) sp.style.display = 'none';
   }
+}
+
+// T2 — Debounce helper + reactive listeners + URL hydration
+function _debounce(fn, ms) {
+  let t;
+  return function(...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), ms);
+  };
+}
+const _applyFiltersDebounced = _debounce(applyFilters, 350);
+
+function _initReactiveFilters() {
+  // Select'ler — anlık (0ms)
+  ['fSignal', 'fSector', 'fEq', 'sortSel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.bpReactive) {
+      el.addEventListener('change', applyFilters);
+      el.dataset.bpReactive = '1';
+    }
+  });
+  // Number input — debounced 350ms
+  ['fMinAdx', 'fMinP', 'fMaxP'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.bpReactive) {
+      el.addEventListener('input', _applyFiltersDebounced);
+      el.dataset.bpReactive = '1';
+    }
+  });
+}
+
+function _hydrateFiltersFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const mapping = {
+      'signal': 'fSignal', 'min_adx': 'fMinAdx', 'sector': 'fSector',
+      'eq': 'fEq', 'min_price': 'fMinP', 'max_price': 'fMaxP',
+      'sort': 'sortSel'
+    };
+    for (const [param, elId] of Object.entries(mapping)) {
+      const val = params.get(param);
+      if (val !== null && val !== '') {
+        const el = document.getElementById(elId);
+        if (el) el.value = val;
+      }
+    }
+    // only_premium=1 → fSignal=PREMIUM (mevcut applyFilters mantığı bunu AL'a çevirir)
+    if (params.get('only_premium') === '1') {
+      const sigEl = document.getElementById('fSignal');
+      if (sigEl) sigEl.value = 'PREMIUM';
+    }
+  } catch(_) {}
 }
 
 function renderResults(rows, count) {
@@ -682,9 +759,13 @@ function resetFilters() {
   applyFilters();
 }
 
-// Başlangıçta yükle
-loadSectors();
-applyFilters();
+// Başlangıçta yükle — T2: URL hydrate → reactive listener → apply
+(async () => {
+  await loadSectors();
+  _hydrateFiltersFromUrl();
+  _initReactiveFilters();
+  applyFilters();
+})();
 </script>
 <script src="/static/bp-search.js?v=44" defer></script>
 </body>
