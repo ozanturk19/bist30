@@ -2134,8 +2134,20 @@ function renderSummary(s, signalData) {
     const date = signalData.signal_date || '—';
     // "⚡ Bugün" yalnızca AL/SAT için — Belirsiz+Bugün çelişkili görünür
     const isNew = signalData.is_new_signal && signalData.signal !== 'BEKLE';
+    // Faz 1 #4: Sinyal yaşı yorumu (Taze/Gelişiyor/Olgunlaşıyor/Olgun)
+    const ageLabel = signalData.signal_age_label;
+    const ageColor = signalData.signal_age_color;
+    const ageEmoji = ageColor === 'green' ? '🟢' :
+                     ageColor === 'yellow' ? '🟡' :
+                     ageColor === 'orange' ? '🟠' :
+                     ageColor === 'red' ? '🔴' : '';
+    const ageHexColor = ageColor === 'green' ? '#3fb950' :
+                        ageColor === 'yellow' ? '#d29922' :
+                        ageColor === 'orange' ? '#f0883e' :
+                        ageColor === 'red' ? '#f85149' : '#8b949e';
+    const ageHtml = ageLabel ? ` <span style="color:${ageHexColor};font-size:11px;margin-left:6px" title="Sinyal yaşı: ${ageLabel}">${ageEmoji} ${ageLabel}</span>` : '';
     document.getElementById('icDate').innerHTML =
-      isNew ? '<span style="color:#e3b341">⚡ Bugün</span>' : date + ' · ' + bars + ' bar';
+      (isNew ? '<span style="color:#e3b341">⚡ Bugün</span>' : date + ' · ' + bars + ' bar') + ageHtml;
     document.getElementById('icBars').textContent = bars;
 
     if (signalData.signal_price && s.signal !== 'BEKLE' && bars >= 2) {

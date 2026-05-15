@@ -1116,6 +1116,24 @@ def analyze(ticker_base):
         except Exception:
             pass
 
+        # ── Sinyal Yaşı Yorumu (Faz 1 #4) — spec Bölüm 4.3 ──────────────────
+        # 1-3 gün → Taze | 4-7 gün → Gelişiyor | 8-15 gün → Olgunlaşıyor | 15+ → Olgun
+        if signal == "BEKLE" or signal_bars is None:
+            signal_age_label = None
+            signal_age_color = None
+        elif signal_bars <= 3:
+            signal_age_label = "Taze"
+            signal_age_color = "green"      # 🟢 İdeal pencere
+        elif signal_bars <= 7:
+            signal_age_label = "Gelişiyor"
+            signal_age_color = "yellow"     # 🟡 Hâlâ değerlendirilebilir
+        elif signal_bars <= 15:
+            signal_age_label = "Olgunlaşıyor"
+            signal_age_color = "orange"     # 🟠 Dikkatli değerlendir
+        else:
+            signal_age_label = "Olgun"
+            signal_age_color = "red"        # 🔴 Yeni giriş için geç
+
         # ── RSI Bölge Rozeti (Faz 1 #3) — spec Bölüm 3.3 ────────────────────
         # 30-45: Dip Toparlanması | 45-60: İdeal Giriş ✅ | 60-70: Trend Güçleniyor
         # 70-80: Dikkatli ⚠️ | 80+: Aşırı Alım 🔴 | <30: Aşırı Satım
@@ -1210,6 +1228,8 @@ def analyze(ticker_base):
             },
             "rsi":             rsi_val,
             "rsi_zone":        rsi_zone,  # Faz 1 #3: yorumlanmış bölge etiketi
+            "signal_age_label": signal_age_label,  # Faz 1 #4: Taze/Gelişiyor/Olgunlaşıyor/Olgun
+            "signal_age_color": signal_age_color,  # green/yellow/orange/red
             "vol_ratio":       vol_ratio,
             "vol_confirmed":   vol_confirmed,
             "signal_vol_ratio": signal_vol_ratio,
