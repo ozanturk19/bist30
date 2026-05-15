@@ -131,7 +131,7 @@
   "featureList": [
     "Algoritmik teknik analiz sinyalleri",
     "Backtest performans raporu",
-    "Premium hacim filtreli sinyaller",
+    "Altın hacim filtreli sinyaller",
     "Sektör ısı haritası",
     "Bilanço takvimi",
     "Hisse karşılaştırma"
@@ -671,9 +671,10 @@
     border: 1px solid rgba(255,200,80,.45);
   }
   .tier-badge-plus {
-    color: #78b4ff;
-    background: rgba(120,180,255,.10);
-    border: 1px solid rgba(120,180,255,.40);
+    /* Gümüş — silver-blue (CPO MSG-056) */
+    color: #9da5b4;
+    background: rgba(157,165,180,.12);
+    border: 1px solid rgba(157,165,180,.45);
   }
   /* SPEC-001 Faz 2 (Adım 3) — Premium modal */
   .premium-modal-backdrop {
@@ -844,9 +845,9 @@
     letter-spacing: .5px;
     text-transform: uppercase;
   }
-  tr.tier-group-header.tg-premium td { color: #ffc850; }
-  tr.tier-group-header.tg-plus    td { color: #78b4ff; }
-  tr.tier-group-header.tg-standart td { color: var(--bp-text2, #8b949e); }
+  tr.tier-group-header.tg-premium td { color: #ffd700; }   /* Altın */
+  tr.tier-group-header.tg-plus    td { color: #9da5b4; }   /* Gümüş */
+  tr.tier-group-header.tg-standart td { color: #cd7f32; }  /* Bronz */
   tr.tier-group-header td .tier-count {
     display: inline-block;
     margin-left: 8px;
@@ -870,9 +871,9 @@
     align-items: center;
     justify-content: space-between;
   }
-  .mc-tier-group.tg-premium { color: #ffc850; border-left: 3px solid #ffc850; }
-  .mc-tier-group.tg-plus    { color: #78b4ff; border-left: 3px solid #78b4ff; }
-  .mc-tier-group.tg-standart { color: var(--bp-text2, #8b949e); border-left: 3px solid var(--bp-border, #30363d); }
+  .mc-tier-group.tg-premium  { color: #ffd700; border-left: 3px solid #ffd700; }   /* Altın */
+  .mc-tier-group.tg-plus     { color: #9da5b4; border-left: 3px solid #9da5b4; }   /* Gümüş */
+  .mc-tier-group.tg-standart { color: #cd7f32; border-left: 3px solid #cd7f32; }   /* Bronz */
   .mc-tier-group .tier-count {
     font-size: 10px;
     color: var(--bp-text3, #484f58);
@@ -1164,9 +1165,9 @@
   .stat-bekle.stat-card { border-top: 2px solid rgba(144,144,151, 0.4); }
   .stat-premium.stat-card { border-top: 2px solid rgba(255,200,80,0.65); }
   .stat-premium .stat-num { color: #ffc850; }
-  /* Premium row indicator: subtle gold border-left */
-  tr[data-ticker]:has(.ticker + span[title*="Premium"]) td:first-child { border-left: 2px solid rgba(255,200,80,0.55); }
-  .mc:has(.mc-ticker > span[title*="Premium"]) { border-left: 2px solid rgba(255,200,80,0.55); }
+  /* Altın row indicator: subtle gold border-left (CPO MSG-056 rename — title'lar Altın oldu, class-based selector daha sağlam) */
+  tr[data-ticker]:has(.tier-badge-premium) td:first-child { border-left: 2px solid rgba(255,215,0,0.55); }
+  .mc:has(.tier-badge-premium) { border-left: 2px solid rgba(255,215,0,0.55); }
   .stat-total.stat-card { border-top: 2px solid rgba(184, 195, 255, 0.5); }
 
   /* Market breadth bar */
@@ -2307,9 +2308,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Belirsiz</div>
     </div>
-    <div class="stat-card stat-premium" style="cursor:pointer" onclick="setFilter('PREMIUM',document.querySelector('.filter-btn.filter-premium'))" title="Premium: Algoritmik AL sinyali + Hacim Onayı. Backtest'te %51 isabet, geri dönüş 4.3x. Tıkla: filtrele">
+    <div class="stat-card stat-premium" style="cursor:pointer" onclick="setFilter('PREMIUM',document.querySelector('.filter-btn.filter-premium'))" title="Altın: Algoritmik AL sinyali + Hacim Onayı. Backtest'te %51 isabet, geri dönüş 4.3x. Tıkla: filtrele">
       <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">⭐ Premium</div>
+      <div class="stat-label">🥇 Altın</div>
     </div>
   </div>
 
@@ -2522,7 +2523,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <button class="filter-btn" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı">🟢 Güçlü Trend</button>
     <button class="filter-btn" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı">🔴 Zayıf Trend</button>
     <button class="filter-btn" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor">⚪ Belirsiz</button>
-    <button class="filter-btn filter-premium" onclick="setFilter('PREMIUM', this)" title="AL sinyali + Hacim Onayı — backtest'te %51 isabet, 4.3x geri dönüş">⭐ Premium</button>
+    <button class="filter-btn filter-premium" onclick="setFilter('PREMIUM', this)" title="AL sinyali + Hacim Onayı — backtest'te %51 isabet, 4.3x geri dönüş">🥇 Altın</button>
     <button class="filter-btn filter-today" onclick="setFilter('TODAY', this)" title="Bugün ilk kez Güçlü Trend veya Zayıf Trend sinyali oluşan hisseler — taze fırsatlar">⚡ Bugün</button>
     <button class="filter-btn filter-watch" id="filterWatchBtn" onclick="setFilter('WATCH', this)" style="display:none">🔔 Takibim <span id="watchFilterCount"></span></button>
     <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()">⚙️ Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
@@ -3793,9 +3794,9 @@ function openPremiumModal() {
       <div class="premium-modal" role="dialog" aria-labelledby="pmTitle" aria-modal="true">
         <button class="premium-modal-close" onclick="closePremiumModal()" aria-label="Kapat">×</button>
         <div class="premium-modal-icon">⭐</div>
-        <h3 id="pmTitle" class="premium-modal-title">Premium Sinyalleri Aç</h3>
+        <h3 id="pmTitle" class="premium-modal-title">Altın Sinyalleri Aç</h3>
         <p class="premium-modal-desc">
-          Premium sinyaller <strong>ücretsiz</strong>. Sadece email'inle giriş yap, 30 gün boyunca tam erişim.
+          Altın sinyaller <strong>ücretsiz</strong>. Sadece email'inle giriş yap, 30 gün boyunca tam erişim.
         </p>
         <form id="premiumModalForm" onsubmit="event.preventDefault();submitPremium();return false;">
           <input type="email" id="pmEmail" placeholder="E-posta adresin" required
@@ -3803,7 +3804,7 @@ function openPremiumModal() {
           <input type="text" id="pmName" placeholder="Adın (opsiyonel)"
                  autocomplete="given-name" maxlength="50">
           <button type="submit" id="pmSubmitBtn" class="premium-modal-submit">
-            ⭐ Premium'u Aç
+            🥇 Altın'ı Aç
           </button>
         </form>
         <div id="pmStatus" class="premium-modal-status" aria-live="polite"></div>
@@ -3868,7 +3869,7 @@ async function submitPremium() {
           }));
         } catch(_) {}
       }
-      if (status) status.innerHTML = '<span style="color:#3fb950">✅ Premium aktif! Sayfa yenileniyor…</span>';
+      if (status) status.innerHTML = '<span style="color:#3fb950">✅ Altın aktif! Sayfa yenileniyor…</span>';
       setTimeout(() => {
         closePremiumModal();
         // In-place reveal — sayfa reload daha güvenli (CSS state senkron)
@@ -3900,19 +3901,19 @@ function _hasPremiumAccess() {
   return false;
 }
 
-/* SPEC-001 Faz 1: Tier rozeti — tek noktadan render */
+/* SPEC-001 Faz 1: Tier rozeti — Bronz/Gümüş/Altın (CPO MSG-056 rename) */
 function tierBadge(s) {
   if (!s) return '';
   if (s.tier === 'premium') {
-    return ' <span title="Premium — kompozit skor ≥80" class="tier-badge tier-badge-premium">⭐ PREMIUM</span>';
+    return ' <span title="Altın — kompozit skor ≥80" class="tier-badge tier-badge-premium">🥇 ALTIN</span>';
   }
   if (s.tier === 'plus') {
-    return ' <span title="Plus — kompozit skor 60-79" class="tier-badge tier-badge-plus">💎 PLUS</span>';
+    return ' <span title="Gümüş — kompozit skor 60-79" class="tier-badge tier-badge-plus">🥈 GÜMÜŞ</span>';
   }
-  // standart için inline rozet yok (mevcut UI'da tablo zaten varsayılan)
+  // Bronz için inline rozet yok (mevcut UI'da tablo zaten varsayılan, görsel kalabalık olmasın)
   // Backward compat: tier henüz hesaplanmadıysa eski is_premium fallback
   if (s.is_premium && !s.tier) {
-    return ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:11px">★</span>';
+    return ' <span title="Altın — Hacim Onaylı" style="color:#ffc850;font-size:11px">★</span>';
   }
   return '';
 }
@@ -3953,7 +3954,7 @@ function renderTable() {
     acc[t] = (acc[t] || 0) + 1;
     return acc;
   }, {});
-  const _tierLabels = { premium: '⭐ PREMIUM', plus: '💎 PLUS', standart: '🟢 STANDART' };
+  const _tierLabels = { premium: '🥇 ALTIN', plus: '🥈 GÜMÜŞ', standart: '🥉 BRONZ' };
   let _lastTier_mobile = '__init__';
   let _lastTier_desktop = '__init__';
   /* SPEC-001 Faz 2: Premium access — false ise Premium rows blur + CTA */
@@ -4030,8 +4031,8 @@ function renderTable() {
           // Premium grup başlangıcında CTA göster (sadece locked + count>0)
           if (_curTier === 'premium' && _premiumLocked && _premiumCount > 0) {
             mtHeader += `<div class="mc-premium-cta">
-              <div class="premium-cta-content">🔒 Premium sinyalleri görmek için <strong>ücretsiz hesap aç</strong></div>
-              <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">⭐ Premium'u Aç</button>
+              <div class="premium-cta-content">🔒 Altın sinyalleri görmek için <strong>ücretsiz hesap aç</strong></div>
+              <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">🥇 Altın'ı Aç</button>
             </div>`;
           }
         }
@@ -4168,8 +4169,8 @@ function renderTable() {
       if (_curTierD === 'premium' && _premiumLocked && _premiumCount > 0) {
         _tierHeaderTr += `<tr class="premium-cta-row"><td colspan="9">
           <div class="premium-cta-content">
-            <span>🔒 Premium sinyalleri görmek için</span>
-            <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">⭐ Premium'u Aç</button>
+            <span>🔒 Altın sinyalleri görmek için</span>
+            <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">🥇 Altın'ı Aç</button>
             <strong>(ücretsiz)</strong>
           </div>
         </td></tr>`;
@@ -4229,7 +4230,7 @@ function updateActiveFiltersBar() {
     'AL': '🟢 Güçlü Trend',
     'SAT': '🔴 Zayıf Trend',
     'BEKLE': '⚪ Belirsiz',
-    'PREMIUM': '⭐ Premium',
+    'PREMIUM': '🥇 Altın',
     'TODAY': '⚡ Bugün',
     'WATCH': '🔔 Takibim',
   };

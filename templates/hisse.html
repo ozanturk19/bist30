@@ -2149,7 +2149,7 @@ function renderSummary(s, signalData) {
 
   /* Sinyal kartı */
   document.getElementById('icSignal').innerHTML = icon + ' ' + sigLabel(s.signal) +
-    (signalData && signalData.is_premium ? ' <span title="Premium — Hacim onaylı algoritmik sinyal. Backtest sonucu %51 isabet oranı + 4.3x getiri" style="display:inline-block;margin-left:4px;font-size:11px;color:#ffc850;background:rgba(255,200,80,.10);padding:1px 6px;border-radius:8px;border:1px solid rgba(255,200,80,.45);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ PREMIUM</span>' : '');
+    (signalData && signalData.is_premium ? ' <span title="Altın — Hacim onaylı algoritmik sinyal. Backtest sonucu %51 isabet oranı + 4.3x getiri" style="display:inline-block;margin-left:4px;font-size:11px;color:#ffd700;background:rgba(255,215,0,.10);padding:1px 6px;border-radius:8px;border:1px solid rgba(255,215,0,.45);font-weight:700;letter-spacing:.3px;vertical-align:middle">🥇 ALTIN</span>' : '');
   const MAX = 3;
   const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
   const dotCls   = s.signal === 'SAT' ? 'dot-bear' : s.signal === 'AL' ? 'dot-bull' : 'dot-empty';
@@ -2302,7 +2302,7 @@ function renderSummary(s, signalData) {
       const cls = isPremium ? 'ok' : (rvolVal >= 1.0 ? 'weak' : 'bad');
       hpRvolVal.className = 'hp-row-val ' + cls;
       hpRvolVal.innerHTML = `${rvolVal.toFixed(2)}×` +
-        (isPremium ? ' <span class="hp-tag premium" title="Hacim ortalamayı geçmiş — premium işaret">⭐ PREMIUM</span>' : '');
+        (isPremium ? ' <span class="hp-tag premium" title="Hacim ortalamayı geçmiş — altın işaret">🥇 ALTIN</span>' : '');
       hpRvolRow.style.display = '';
     }
 
