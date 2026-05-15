@@ -654,6 +654,86 @@
   /* Stats bar */
   .stats-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 
+  /* ── Feature 1 — Bugünün Özeti hero card (iskelet, Cmt'de finalize) ── */
+  .market-summary {
+    background: var(--bp-surface, #161b22);
+    border: 1px solid var(--bp-border, #30363d);
+    border-left: 3px solid var(--accent, #58a6ff);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 4px 0 16px;
+  }
+  .ms-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px; padding-bottom: 10px;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    flex-wrap: wrap; gap: 8px;
+  }
+  .ms-live-indicator {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600;
+    color: var(--bp-text2, #8b949e);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .ms-live-dot {
+    width: 6px; height: 6px;
+    background: #3fb950;
+    border-radius: 50%;
+    animation: msPulse 2s infinite;
+  }
+  @keyframes msPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.85); } }
+  .ms-meta { font-size: 11px; color: var(--bp-text3, #484f58); display: flex; align-items: center; gap: 6px; }
+  .ms-divider { color: var(--bp-text3, #484f58); }
+  .ms-link { color: #58a6ff; text-decoration: none; }
+  .ms-link:hover { text-decoration: underline; }
+
+  .ms-narrative {
+    font-size: 15px; line-height: 1.7;
+    color: var(--bp-text, #e6edf3); margin: 0 0 14px;
+    min-height: 18px;  /* skeleton'a yer aç, CLS önle */
+  }
+  .ms-narrative[hidden] { display: none; }
+  .ms-narrative strong { font-weight: 600; }
+  .ms-narrative a { color: #58a6ff; text-decoration: none; border-bottom: 1px dotted rgba(88,166,255,0.4); }
+  .ms-narrative .delta-up { color: #3fb950; font-weight: 600; }
+  .ms-narrative .delta-down { color: #f85149; font-weight: 600; }
+  .ms-narrative .sector-name { color: #58a6ff; font-weight: 600; }
+
+  .ms-microstats {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    padding-top: 12px; border-top: 1px solid rgba(48,54,61,0.5);
+  }
+  .ms-stat {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 6px;
+    background: rgba(28,33,40,0.6); border: 1px solid rgba(48,54,61,0.5);
+    font-size: 12px; color: var(--bp-text2, #8b949e); text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .ms-stat:hover { background: rgba(28,33,40,0.95); border-color: #58a6ff; color: var(--bp-text, #e6edf3); }
+  .ms-stat-num { color: var(--bp-text, #e6edf3); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ms-stat-bull:hover .ms-stat-num { color: #3fb950; }
+  .ms-stat-bear:hover .ms-stat-num { color: #f85149; }
+  .ms-stat[hidden] { display: none; }
+
+  .ms-skeleton { display: flex; flex-direction: column; gap: 6px; padding: 2px 0; }
+  .ms-skeleton[hidden] { display: none; }
+  .ms-sk-line {
+    height: 18px;
+    background: linear-gradient(90deg, rgba(48,54,61,0.3) 25%, rgba(30,37,48,0.6) 50%, rgba(48,54,61,0.3) 75%);
+    background-size: 200% 100%;
+    animation: msShimmer 1.4s infinite;
+    border-radius: 4px;
+  }
+  @keyframes msShimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+  @media (max-width: 640px) {
+    .market-summary { padding: 14px 16px; }
+    .ms-narrative { font-size: 14px; line-height: 1.6; }
+    .ms-microstats { display: grid; grid-template-columns: 1fr 1fr; }
+    .ms-microstats .ms-stat-watch { grid-column: 1 / -1; }
+  }
+
   /* ── Gündem Kutusu ────────────────────────────────────────── */
   .gundem-section { margin-bottom: 16px; }
   .gundem-header {
@@ -2024,6 +2104,42 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
   </div>
 
+  <!-- ── Feature 1 — Bugünün Özeti (Hero Narratif Card) — İSKELET (data Cmt'de bağlanacak) ── -->
+  <section class="market-summary" id="marketSummary" aria-label="Bugünün Piyasa Özeti">
+    <div class="ms-header">
+      <span class="ms-live-indicator">
+        <span class="ms-live-dot"></span> Bugünün Özeti
+      </span>
+      <span class="ms-meta">
+        <span id="msTime">—</span> itibarıyla
+        <span class="ms-divider">·</span>
+        <a href="/metodoloji" class="ms-link">Metodoloji →</a>
+      </span>
+    </div>
+    <p class="ms-narrative" id="msText" aria-live="polite">
+      <!-- JS doldurur — kural-tabanlı 3 cümle şablon -->
+    </p>
+    <div class="ms-microstats" id="msMicroStats">
+      <a href="/?signal=AL&period=today" class="ms-stat ms-stat-bull">
+        <span class="ms-stat-icon">🔥</span>
+        <span class="ms-stat-num" id="msNewBull">—</span> Yeni Güçlü
+      </a>
+      <a href="/?signal=SAT&period=today" class="ms-stat ms-stat-bear">
+        <span class="ms-stat-icon">↓</span>
+        <span class="ms-stat-num" id="msNewBear">—</span> Zayıfladı
+      </a>
+      <a href="/?signal=WATCH" class="ms-stat ms-stat-watch" id="msWatchStat">
+        <span class="ms-stat-icon">⚡</span>
+        <span class="ms-stat-num" id="msWatchMoved">—</span> İzlemende Hareket
+      </a>
+    </div>
+    <div class="ms-skeleton" id="msSkeleton">
+      <div class="ms-sk-line" style="width:92%"></div>
+      <div class="ms-sk-line" style="width:78%"></div>
+      <div class="ms-sk-line" style="width:64%"></div>
+    </div>
+  </section>
+
   <!-- ── AI Piyasa Özeti ──────────────────────────── -->
   <!-- visibility:hidden (not display:none) reserves space → prevents CLS when content loads -->
   <div id="macroSummaryBar" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(184,195,255,.06),rgba(139,92,246,.03));border:1px solid rgba(184,195,255,.18);border-radius:9px;padding:9px 14px;margin-bottom:10px;align-items:flex-start;gap:8px">
@@ -3121,6 +3237,7 @@ async function fetchData() {
     updateStats();
     renderTable();
     renderHeroPanel(allStocks);
+    renderMarketSummary(allStocks);   /* Feature 1 #1A — Bugünün Özeti iskelet */
 
     document.getElementById('loadingDiv').style.display  = 'none';
     document.getElementById('mainTable').style.display   = '';
@@ -3132,6 +3249,101 @@ async function fetchData() {
 
   } catch(e) {
     setTimeout(fetchData, 5000);
+  }
+}
+
+/* ── Feature 1 #1A — Bugünün Özeti (Hero Narratif Card) iskeleti ─────────────
+   Spec: ops/briefs/sprint-1-developer-brief.md Bölüm 1
+   Mevcut yapı: client-side compute (allStocks içinden newBull / newBear / sector / delta).
+   Backend /api/market-summary Cmt akşam yapılacak — şimdilik client mock.
+*/
+let _msYesterdayBull = null;   // ilk yüklemede null, sonraki render'larda delta için kullanılır
+function renderMarketSummary(stocks) {
+  if (!stocks || !stocks.length) return;
+  try {
+    const section = document.getElementById('marketSummary');
+    const skeleton = document.getElementById('msSkeleton');
+    const text = document.getElementById('msText');
+    if (!section || !text) return;
+
+    // Borsa kapalı kontrolü (basit: hafta sonu veya 18:00 sonrası — backend kontratı Cmt'de finalize)
+    const now = new Date();
+    const day = now.getDay();   // 0=Pzr, 6=Cmt
+    const tr_hour = (now.getUTCHours() + 3) % 24;
+    const marketClosed = (day === 0 || day === 6) || tr_hour < 10 || tr_hour >= 18;
+
+    // Hero card her zaman görünür — kapalıyken bile dünkü özet
+    const allBull = stocks.filter(s => s.signal === 'AL' && s.ticker !== 'XU030');
+    const newBull = allBull.filter(s => s.is_new_signal === true);
+    const newBear = stocks.filter(s => s.is_new_signal === true && s.signal === 'SAT' && s.ticker !== 'XU030');
+
+    // Sektör hottest: change_pct ortalaması en yüksek
+    const sectorMap = {};
+    for (const s of stocks) {
+      if (s.ticker === 'XU030' || !s.sector || s.sector === 'Diğer') continue;
+      if (!sectorMap[s.sector]) sectorMap[s.sector] = { sum: 0, count: 0 };
+      sectorMap[s.sector].sum += (s.change_pct || 0);
+      sectorMap[s.sector].count += 1;
+    }
+    let hottestSector = '—';
+    let sectorChange = 0;
+    let maxAvg = -Infinity;
+    for (const [name, agg] of Object.entries(sectorMap)) {
+      if (agg.count < 2) continue;   // tek hisse sektör guvenilir değil
+      const avg = agg.sum / agg.count;
+      if (avg > maxAvg) { maxAvg = avg; hottestSector = name; sectorChange = +avg.toFixed(1); }
+    }
+
+    // Delta — dünden farkı (placeholder mock; backend Cmt'de gerçek değer dönecek)
+    let delta = 0;
+    if (_msYesterdayBull !== null) delta = allBull.length - _msYesterdayBull;
+    _msYesterdayBull = allBull.length;
+
+    // Watchlist hareketi
+    const watchMoved = stocks.filter(s => (window.watchlist && window.watchlist.has && window.watchlist.has(s.ticker)) && s.is_new_signal === true).length;
+
+    // Cümle 1
+    let s1;
+    if (newBull.length === 0) {
+      s1 = `BIST'de bugün yeni güçlü trende geçen hisse yok.`;
+    } else {
+      const topT = newBull.slice(0, 4).map(s => `<a href="/hisse/${s.ticker}">${s.ticker}</a>`).join(', ');
+      const more = newBull.length > 4 ? ` ve <strong>${newBull.length - 4}</strong> hisse daha` : '';
+      s1 = `<strong>BIST</strong>'de bugün <strong>${newBull.length} hisse</strong> güçlü trende geçti (${topT}${more}).`;
+    }
+    // Cümle 2
+    const ivme = sectorChange >= 0 ? 'en güçlü' : 'en zayıf';
+    const sectorChangeStr = (sectorChange >= 0 ? '+' : '') + sectorChange.toFixed(1);
+    const sectorChangeCls = sectorChange >= 0 ? 'delta-up' : 'delta-down';
+    const s2 = hottestSector === '—'
+      ? `Sektör verisi yetersiz.`
+      : `<span class="sector-name">${hottestSector}</span> sektörü bugün ${ivme} performansta — ortalama <span class="${sectorChangeCls}">%${sectorChangeStr}</span>.`;
+    // Cümle 3
+    const direction = delta >= 0 ? 'güçlü' : 'zayıf';
+    const deltaCls = delta >= 0 ? 'delta-up' : 'delta-down';
+    const deltaStr = (delta >= 0 ? '+' : '') + delta;
+    const s3 = delta === 0
+      ? `Genel sinyal dağılımı dünle aynı.`
+      : `Genel sinyal dağılımı bir önceki taramaya göre <span class="${deltaCls}">${deltaStr} ${direction}</span>.`;
+
+    text.innerHTML = `${s1} ${s2} ${s3}`;
+
+    // Meta + microstats
+    document.getElementById('msTime').textContent = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('msNewBull').textContent = newBull.length;
+    document.getElementById('msNewBear').textContent = newBear.length;
+    if (watchMoved > 0) {
+      document.getElementById('msWatchMoved').textContent = watchMoved;
+      document.getElementById('msWatchStat').hidden = false;
+    } else {
+      document.getElementById('msWatchStat').hidden = true;
+    }
+
+    if (skeleton) skeleton.hidden = true;
+  } catch (e) {
+    console.warn('renderMarketSummary fail:', e);
+    const sect = document.getElementById('marketSummary');
+    if (sect) sect.hidden = true;
   }
 }
 
