@@ -507,6 +507,64 @@ async function triggerBacktest() {
   }, 25000);
 })();
 {% endif %}
+// ── BUG-FIX (MSG-047): Tablo sıralama — perfSortBy fonksiyonu tanımlı değildi ──
+// Onclick handler'lar var, fonksiyon yoktu → ReferenceError, sıralama çalışmıyordu
+(function() {
+  let _sortState = { col: 'aktif_ret', dir: 'desc' };   // default state (DOM sort-active'e uyumlu)
+
+  function _parseSortVal(v, col) {
+    if (v == null || v === '') return null;
+    // Sayısal sütunlar
+    if (col === 'signal_price' || col === 'price' || col === 'aktif_ret' || col === 'signal_bars') {
+      const n = parseFloat(v);
+      return isNaN(n) ? null : n;
+    }
+    // signal_date: dd.mm.yyyy → karşılaştırılabilir ISO YYYY-MM-DD'a çevir
+    if (col === 'signal_date') {
+      const m = String(v).match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+      return m ? `${m[3]}-${m[2]}-${m[1]}` : String(v);
+    }
+    return String(v).toLowerCase();
+  }
+
+  window.perfSortBy = function(col) {
+    if (_sortState.col === col) {
+      _sortState.dir = (_sortState.dir === 'asc') ? 'desc' : 'asc';
+    } else {
+      _sortState.col = col;
+      _sortState.dir = 'desc';  // default desc (en yüksek getiri başta)
+    }
+
+    const tbody = document.getElementById('perfTbody');
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort((a, b) => {
+      const av = _parseSortVal(a.dataset[col], col);
+      const bv = _parseSortVal(b.dataset[col], col);
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;   // null'lar sona
+      if (bv == null) return -1;
+      if (av < bv) return _sortState.dir === 'asc' ? -1 : 1;
+      if (av > bv) return _sortState.dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    rows.forEach(r => tbody.appendChild(r));
+
+    // Header arrow + active state güncelle
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+      th.classList.remove('sort-active');
+      const arr = th.querySelector('.perf-sort-arr');
+      if (arr) arr.textContent = '';
+    });
+    const activeTh = document.querySelector(`th[data-sort="${col}"]`);
+    if (activeTh) {
+      activeTh.classList.add('sort-active');
+      const arr = activeTh.querySelector('.perf-sort-arr');
+      if (arr) arr.textContent = _sortState.dir === 'asc' ? '▲' : '▼';
+    }
+  };
+})();
+
 // Makro Ticker Bandı
 const _ML={USDTRY:'USD/TRY',EURTRY:'EUR/TRY',XU100:'BIST100',XU030:'BIST30',BIST30:'BIST30',BTC:'BTC',ALTIN:'Altın',GUMUS:'Gümüş',SP500:'S&P500',NASDAQ:'NASDAQ'};
 const _MD={USDTRY:4,EURTRY:4,XU100:0,XU030:0,SP500:0,NASDAQ:0,BTC:0};
