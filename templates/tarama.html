@@ -127,6 +127,73 @@
   @keyframes tarSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   #inlineSpinner svg { display: inline-block; }
 
+  /* I1 — Active filter chips (SENECA Faz 1, CPO MSG-062) */
+  .active-chips-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 0 6px;
+    margin: 4px 0 8px;
+    border-bottom: 1px solid var(--border, #21262d);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .active-chips-bar::-webkit-scrollbar { display: none; }
+  .active-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 4px 4px 10px;
+    background: rgba(31,111,235,.10);
+    border: 1px solid rgba(31,111,235,.30);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--text, #e6edf3);
+    white-space: nowrap;
+    line-height: 1;
+    transition: all .15s ease;
+  }
+  .active-chip:hover {
+    background: rgba(31,111,235,.18);
+    border-color: var(--accent, #1f6feb);
+  }
+  .active-chip .chip-x {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    color: var(--text2, #8b949e);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    border-radius: 50%;
+    padding: 0;
+    transition: all .15s;
+  }
+  .active-chip .chip-x:hover {
+    background: rgba(248,81,73,.20);
+    color: #f85149;
+  }
+  .chip-clear-all {
+    background: transparent;
+    border: 0;
+    color: var(--text2, #8b949e);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 16px;
+    transition: all .15s ease;
+  }
+  .chip-clear-all:hover { color: var(--text, #e6edf3); background: rgba(255,255,255,.04); }
+  @media (max-width: 640px) {
+    .active-chips-bar { padding: 8px 0 4px; }
+    .active-chip { font-size: 11px; padding: 3px 3px 3px 9px; }
+  }
+
   .btn-apply {
     background:var(--brand); color:#fff; border:none; border-radius:6px;
     padding:8px 20px; font-size:13px; font-weight:600; cursor:pointer;
@@ -393,6 +460,9 @@
     </div>
   </div>
 
+  <!-- I1 — Active Filter Chips (SENECA Faz 1, CPO MSG-062) -->
+  <div class="active-chips-bar" id="activeChipsBar" style="display:none" role="region" aria-label="Aktif filtreler"></div>
+
   <!-- Sonuç başlık -->
   <div class="result-header">
     <div class="result-count" id="resultCount"><strong>—</strong> sonuç<span id="inlineSpinner" style="display:none;margin-left:8px;vertical-align:middle"><svg width="14" height="14" viewBox="0 0 24 24" style="animation:tarSpin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke="#58a6ff" stroke-width="2.5" fill="none" stroke-dasharray="50 60"/></svg></span></div>
@@ -613,6 +683,8 @@ async function applyFilters() {
       ? _allRows.filter(s => s.ticker.includes(_searchQ) || (s.name && s.name.toUpperCase().includes(_searchQ)))
       : _allRows;
     renderResults(filtered, filtered.length);
+    // I1 — Active filter chips render (her applyFilters sonrası)
+    if (typeof renderActiveFilterChips === 'function') renderActiveFilterChips();
   } catch(e) {
     document.getElementById('loadingDiv').innerHTML = '<div style="color:var(--sat);padding:24px">Veri yüklenemedi. Lütfen sayfayı yenileyin.</div>';
   } finally {
@@ -622,6 +694,68 @@ async function applyFilters() {
     const sp = document.getElementById('inlineSpinner');
     if (sp) sp.style.display = 'none';
   }
+}
+
+// I1 — Active Filter Chips render + remove (SENECA Faz 1, CPO MSG-062)
+function renderActiveFilterChips() {
+  const chips = [];
+  const sig = (document.getElementById('fSignal').value || '').trim();
+  const minAdx = parseFloat(document.getElementById('fMinAdx').value) || 0;
+  const sector = (document.getElementById('fSector').value || '').trim();
+  const eq = (document.getElementById('fEq').value || '').trim();
+  const minP = (document.getElementById('fMinP').value || '').trim();
+  const maxP = (document.getElementById('fMaxP').value || '').trim();
+
+  if (sig) {
+    const labels = { PREMIUM: '🥇 Altın', AL: '▲ Güçlü Trend', SAT: '▼ Zayıf Trend', BEKLE: '● Yatay' };
+    chips.push({ label: labels[sig] || sig, key: 'signal' });
+  }
+  if (minAdx > 0) chips.push({ label: `ADX ≥ ${minAdx}`, key: 'minAdx' });
+  if (sector) chips.push({ label: sector, key: 'sector' });
+  if (eq) {
+    const labels = { IDEAL: '✅ İdeal', IYI: '👍 İyi', DIKKATLI: '⚠️ Dikkatli', UZAK: '🚫 Uzak' };
+    chips.push({ label: `Giriş: ${labels[eq] || eq}`, key: 'eq' });
+  }
+  if (minP && maxP)      chips.push({ label: `₺${minP}–${maxP}`, key: 'price' });
+  else if (minP)         chips.push({ label: `Min ₺${minP}`, key: 'priceMin' });
+  else if (maxP)         chips.push({ label: `Max ₺${maxP}`, key: 'priceMax' });
+  if (_searchQ)          chips.push({ label: `🔍 "${_searchQ}"`, key: 'search' });
+
+  const bar = document.getElementById('activeChipsBar');
+  if (!bar) return;
+  if (chips.length === 0) {
+    bar.style.display = 'none';
+    bar.innerHTML = '';
+    return;
+  }
+  bar.style.display = '';
+  const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  bar.innerHTML =
+    chips.map(c => `<span class="active-chip" data-key="${esc(c.key)}">${esc(c.label)}<button class="chip-x" onclick="removeFilterChip('${esc(c.key)}')" aria-label="Filtreyi kaldır" type="button">×</button></span>`).join('') +
+    `<button class="chip-clear-all" onclick="resetFilters()" type="button">Tümünü Temizle</button>`;
+}
+
+function removeFilterChip(filterKey) {
+  const resetMap = {
+    signal:   () => { document.getElementById('fSignal').value = ''; },
+    minAdx:   () => { document.getElementById('fMinAdx').value = 0; },
+    sector:   () => { document.getElementById('fSector').value = ''; },
+    eq:       () => { document.getElementById('fEq').value = ''; },
+    priceMin: () => { document.getElementById('fMinP').value = ''; },
+    priceMax: () => { document.getElementById('fMaxP').value = ''; },
+    price:    () => {
+      document.getElementById('fMinP').value = '';
+      document.getElementById('fMaxP').value = '';
+    },
+    search:   () => {
+      document.getElementById('fSearch').value = '';
+      _searchQ = '';
+      const x = document.getElementById('searchClearBtn');
+      if (x) x.style.display = 'none';
+    },
+  };
+  if (resetMap[filterKey]) resetMap[filterKey]();
+  applyFilters();
 }
 
 // T2 — Debounce helper + reactive listeners + URL hydration
