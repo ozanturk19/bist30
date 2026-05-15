@@ -1116,6 +1116,24 @@ def analyze(ticker_base):
         except Exception:
             pass
 
+        # ── RSI Bölge Rozeti (Faz 1 #3) — spec Bölüm 3.3 ────────────────────
+        # 30-45: Dip Toparlanması | 45-60: İdeal Giriş ✅ | 60-70: Trend Güçleniyor
+        # 70-80: Dikkatli ⚠️ | 80+: Aşırı Alım 🔴 | <30: Aşırı Satım
+        if rsi_val is None:
+            rsi_zone = None
+        elif rsi_val < 30:
+            rsi_zone = "Aşırı Satım"
+        elif rsi_val < 45:
+            rsi_zone = "Dip Toparlanması"
+        elif rsi_val < 60:
+            rsi_zone = "İdeal Giriş Penceresi"
+        elif rsi_val < 70:
+            rsi_zone = "Trend Güçleniyor"
+        elif rsi_val < 80:
+            rsi_zone = "Dikkatli"
+        else:
+            rsi_zone = "Aşırı Alım"
+
         # ── R/R Çift Oran (Faz 1 #2) — bug fix ─────────────────────────────
         # Önceki kod hard-coded rr_ratio=2.0 veriyordu (anlamsız).
         # Doğru hesap: TP1 fix bir hedef, iki farklı giriş için R/R farklı:
@@ -1191,6 +1209,7 @@ def analyze(ticker_base):
                 },
             },
             "rsi":             rsi_val,
+            "rsi_zone":        rsi_zone,  # Faz 1 #3: yorumlanmış bölge etiketi
             "vol_ratio":       vol_ratio,
             "vol_confirmed":   vol_confirmed,
             "signal_vol_ratio": signal_vol_ratio,

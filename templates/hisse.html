@@ -2339,11 +2339,18 @@ function renderSummary(s, signalData) {
       `<button type="button" class="ind-help" data-tooltip="${(ind.tooltip||'Bu gösterge hakkında detayl\u0131 bilgi i\u00e7in metodolojiye bakın.').replace(/"/g,'&quot;')}" data-link="${ind.blog||''}" aria-label="${ind.label} nedir?">?</button>`;
   }).join('');
 
-  /* RSI14 badge */
+  /* RSI14 badge — Faz 1 #3: 6-zone */
   if (signalData && signalData.rsi != null) {
     const rsi = signalData.rsi;
-    const rsiCls = rsi >= 70 ? 'ind-badge ind-bear' : rsi <= 30 ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
-    const rsiLbl = rsi >= 70 ? '⚠️ Aşırı Alım' : rsi <= 30 ? '✅ Aşırı Satım' : 'Normal';
+    const zone = signalData.rsi_zone || '';
+    // ind-bull yeşil (Aşırı Satım, İdeal Giriş), ind-bear kırmızı (Aşırı Alım), ind-neutral gri
+    const rsiCls = rsi >= 70 ? 'ind-badge ind-bear' :
+                   (rsi < 30 || (rsi >= 45 && rsi < 60)) ? 'ind-badge ind-bull' :
+                   'ind-badge ind-neutral';
+    const rsiIcon = rsi >= 80 ? '🔴' : rsi >= 70 ? '⚠️' :
+                    (rsi >= 45 && rsi < 60) ? '✅' :
+                    rsi < 30 ? '💎' : '';
+    const rsiLbl = rsiIcon ? `${rsiIcon} ${zone}` : zone || 'Normal';
     indHtml += `<span class="${rsiCls}">RSI ${rsi}<span class="ind-detail">${rsiLbl}</span></span>` +
       `<button type="button" class="ind-help" data-tooltip="RSI: 0-100 aras\u0131 momentum g\u00f6stergesi. 70 \u00fczeri \u0027a\u015f\u0131r\u0131 al\u0131m\u0027 (sat\u0131\u015f bask\u0131s\u0131 olabilir), 30 alt\u0131 \u0027a\u015f\u0131r\u0131 sat\u0131m\u0027 (al\u0131m f\u0131rsat\u0131 olabilir)." data-link="/blog/rsi-gostergesi-nedir" aria-label="RSI nedir?">?</button>`;
   }

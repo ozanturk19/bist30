@@ -3470,8 +3470,13 @@ function renderTable() {
     }).join('');
     /* RSI14 badge */
     if (s.rsi != null) {
-      const rCls = s.rsi >= 70 ? 'ind-badge ind-bear' : s.rsi <= 30 ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
-      indHtml += `<span class="${rCls}" title="RSI14">RSI ${s.rsi}</span>`;
+      // Faz 1 #3: RSI bölge rozeti — 6 zone (Aşırı Satım / Dip / İdeal / Trend / Dikkatli / Aşırı Alım)
+      const rCls = s.rsi >= 70 ? 'ind-badge ind-bear' : s.rsi <= 30 ? 'ind-badge ind-bull' :
+                   (s.rsi >= 45 && s.rsi < 60) ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
+      const rIcon = s.rsi >= 80 ? ' 🔴' : s.rsi >= 70 ? ' ⚠️' :
+                    (s.rsi >= 45 && s.rsi < 60) ? ' ✅' : s.rsi < 30 ? ' 💎' : '';
+      const rTitle = s.rsi_zone || 'RSI14';
+      indHtml += `<span class="${rCls}" title="${rTitle}">RSI ${s.rsi}${rIcon}</span>`;
     }
     /* Hacim spike badge — sadece ×1.5+ */
     if (s.vol_ratio != null && s.vol_ratio >= 1.5) {
