@@ -1116,6 +1116,21 @@ def analyze(ticker_base):
         except Exception:
             pass
 
+        # ── Likidite Filtresi (Faz 1) — Günlük TL hacim 20 gün ortalaması ─────
+        # < 5M TL → "Düşük Likidite" uyarısı (slippage + manipülasyon riski)
+        # Hesap: close × volume 20 gün hareketli ortalama (lots/değer dalgalanması düzleştirilir)
+        volume_tl_avg20 = None
+        low_liquidity   = False
+        try:
+            if len(volume) >= 20:
+                tl_series = (close * volume).rolling(20).mean()
+                _avg = float(tl_series.iloc[-1])
+                if not pd.isna(_avg):
+                    volume_tl_avg20 = round(_avg, 0)
+                    low_liquidity   = volume_tl_avg20 < 5_000_000
+        except Exception:
+            pass
+
         return {
             "ticker":        ticker_base,
             "price":         round(c, 2),
@@ -1132,6 +1147,8 @@ def analyze(ticker_base):
             "weekly_trend":  weekly_dir,
             "rvol":          rvol,
             "is_premium":    is_premium,
+            "volume_tl_avg20": volume_tl_avg20,
+            "low_liquidity": low_liquidity,
             "adx":           round(adx_val, 1),  # top-level for SSR/SEO
             "indicators": {
                 "supertrend": {
