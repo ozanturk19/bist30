@@ -2744,6 +2744,102 @@ def api_macro_summary():
     return safe_json({"summary": "", "cached": False})
 
 
+@app.route("/api/market-summary")
+@limiter.limit("60 per minute")
+def api_market_summary():
+    """Feature 1 #1A — Bugünün Özeti hero card data (CPO MSG-054 onayı).
+
+    Sabit 3-cümle şablon için backend compute:
+      Cümle 1: BIST'de bugün N hisse güçlü trende geçti (topTickers)
+      Cümle 2: <hottestSector> sektörü en güçlü ivmesinde, ortalama %X
+      Cümle 3: Genel sinyal dağılımı dünden +N güçlü/zayıf
+
+    Snapshot pattern: _SNAPSHOTS_DIR/<YYYY-MM-DD>.json (mevcut, _save_daily_snapshot kullanılır)
+    """
+    with _lock:
+        stocks = list(_cache.get("data") or [])
+    if not stocks:
+        return jsonify({"loading": True}), 200
+
+    # BIST hisseleri (XU030 hariç)
+    bist = [s for s in stocks if s.get("ticker") != "XU030"]
+    new_bull = [s for s in bist if s.get("is_new_signal") and s.get("signal") == "AL"]
+    new_bear = [s for s in bist if s.get("is_new_signal") and s.get("signal") == "SAT"]
+    all_bull = [s for s in bist if s.get("signal") == "AL"]
+
+    # Top tickers (en taze 4 AL)
+    top_tickers = [s.get("ticker") for s in new_bull[:8] if s.get("ticker")]
+
+    # Hottest sector — change_pct avg max (en az 2 hisse, mock güvenilirlik)
+    sector_agg = {}
+    for s in bist:
+        sec = s.get("sector")
+        if not sec or sec == "Diğer":
+            continue
+        agg = sector_agg.setdefault(sec, {"sum": 0.0, "count": 0})
+        try:
+            agg["sum"] += float(s.get("change_pct") or 0)
+            agg["count"] += 1
+        except Exception:
+            pass
+
+    hottest_sector = None
+    sector_change = 0.0
+    max_avg = float("-inf")
+    for name, agg in sector_agg.items():
+        if agg["count"] < 2:
+            continue
+        avg = agg["sum"] / agg["count"]
+        if avg > max_avg:
+            max_avg = avg
+            hottest_sector = name
+            sector_change = round(avg, 1)
+
+    # Dün snapshot ile delta (al_count fark)
+    delta = 0
+    try:
+        from datetime import timedelta as _td
+        ydate = (datetime.now(_TZ_TR) - _td(days=1)).strftime("%Y-%m-%d")
+        yfile = os.path.join(_SNAPSHOTS_DIR, f"{ydate}.json")
+        if os.path.exists(yfile):
+            with open(yfile, encoding="utf-8") as f:
+                ysnap = json.load(f)
+            delta = len(all_bull) - int(ysnap.get("al_count") or 0)
+    except Exception as e:
+        logger.debug("market-summary delta hesabı: %s", e)
+
+    # Market status (TR saatine göre)
+    now_tr = datetime.now(_TZ_TR)
+    weekday = now_tr.weekday()  # 0=Pzt, 6=Pzr
+    hour = now_tr.hour
+    is_weekend = weekday >= 5
+    market_open_hours = (10 <= hour < 18) and not is_weekend
+    market_status = "open" if market_open_hours else "closed"
+
+    closed_msg = None
+    if not market_open_hours:
+        if is_weekend:
+            closed_msg = "Borsa hafta sonu kapalı. Pazartesi 10:00'da tekrar görüşelim."
+        elif hour < 10:
+            closed_msg = "BIST henüz açılmadı. 10:00'da seans başlar."
+        else:
+            closed_msg = "BIST seansı kapandı. Yarın 10:00'da tekrar görüşelim."
+
+    return jsonify({
+        "asOfTime": now_tr.strftime("%H:%M"),
+        "marketStatus": market_status,
+        "closedMessage": closed_msg,
+        "newBullCount": len(new_bull),
+        "newBearCount": len(new_bear),
+        "topTickers": top_tickers,
+        "hottestSector": hottest_sector,
+        "sectorChange": sector_change,
+        "delta": delta,
+        "totalBullCount": len(all_bull),
+        # watchlistMoved: client-side hesaplanır (watchlist localStorage)
+    })
+
+
 @app.route("/api/stream")
 def api_stream():
     client_queue = collections.deque()
