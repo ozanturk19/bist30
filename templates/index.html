@@ -4844,7 +4844,18 @@ updateFabBadge();
 (function() {
   const KEY = 'bp_sub_dismissed_v2';
   const DELAY_MS = 25000; // 25 saniye
+  function hasNewsletterSub() {
+    // Zaten newsletter abonesi mi? (bp_sub cookie veya bp_sub_user localStorage)
+    try {
+      if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return true;
+      const u = localStorage.getItem('bp_sub_user');
+      if (u && JSON.parse(u).subscribed) return true;
+    } catch (_) {}
+    return false;
+  }
   function shouldShow() {
+    // CPO MSG-092 BUG #1: Zaten abone olan kullanıcıya newsletter modal HİÇ çıkmamalı.
+    if (hasNewsletterSub()) return false;
     try {
       const v = localStorage.getItem(KEY);
       if (!v) return true;
