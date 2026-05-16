@@ -4646,6 +4646,22 @@ function toggleWatch(ticker) {
   // Feature 1 #1B: watchlist boşaldıysa ⭐ chip gizle, doluysa göster
   const watchChip = document.getElementById('presetWatchChip');
   if (watchChip) watchChip.hidden = watchlist.size === 0;
+  // SPEC-006 Faz 2: push aktifse subscription'ın watchlist'ini güncelle
+  _syncPushWatchlist();
+}
+
+/* SPEC-006 Faz 2: watchlist değişince push subscription'ı güncel watchlist ile re-kaydet */
+function _syncPushWatchlist() {
+  if (!_pushSubscription) return;  // push aktif değil → atla
+  try {
+    const payload = _pushSubscription.toJSON();
+    payload.watchlist = watchlist.size ? Array.from(watchlist) : [];
+    fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  } catch(_) {}
 }
 
 function updateFabBadge() {
@@ -5229,10 +5245,16 @@ async function togglePushSubscription() {
         userVisibleOnly: true,
         applicationServerKey: appServerKey,
       });
+      // SPEC-006 Faz 2: subscription'a watchlist ekle — watchlist-aware push
+      const _subPayload = _pushSubscription.toJSON();
+      try {
+        _subPayload.watchlist = (typeof watchlist !== 'undefined' && watchlist.size)
+          ? Array.from(watchlist) : [];
+      } catch(_) { _subPayload.watchlist = []; }
       await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(_pushSubscription.toJSON()),
+        body: JSON.stringify(_subPayload),
       });
     }
     _updatePushBtn();

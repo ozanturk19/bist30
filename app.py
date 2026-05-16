@@ -121,27 +121,48 @@ def _send_one_push(sub_info: dict, payload: str) -> bool | None:
         return None          # Transient error
 
 
-def _broadcast_push(title: str, body: str, url: str = "/"):
-    """Tüm push subscriber'larına bildirim gönder, süresi dolmuşları temizle."""
+def _broadcast_push_changes(changes):
+    """SPEC-006 Faz 2 (CPO MSG-095): Watchlist-aware push.
+    Her subscriber'a SADECE izlediği ticker'ların sinyal değişimi gönderilir.
+    watchlist boş/eksik subscriber → tüm değişimleri alır (backward compat — eski user).
+    changes: [(ticker, old_sig, new_sig, stock_data), ...]"""
     if not _PUSH_ENABLED or not VAPID_PUBLIC or not os.path.exists(VAPID_PRIV_PATH):
         return
     with _push_lock:
         subs_snap = list(_push_subs)
-
-    if not subs_snap:
+    if not subs_snap or not changes:
         return
-
-    payload = json.dumps({
-        "title": title,
-        "body": body,
-        "url": url,
-        "tag": "borsapusula-signal",
-        "icon": "/static/icon-192.png",
-    })
 
     keep = []
     sent = 0
     for sub in subs_snap:
+        wl = sub.get("watchlist") or []
+        # watchlist varsa filtrele, yoksa tüm değişimler (backward compat)
+        relevant = [c for c in changes if c[0] in wl] if wl else list(changes)
+        if not relevant:
+            keep.append(sub)
+            continue
+
+        if len(relevant) == 1:
+            t, old, new, _stock = relevant[0]
+            name = STOCK_NAMES.get(t, t)
+            lbl  = "AL ▲ Güçlü Trend" if new == "AL" else "SAT ▼ Zayıf Trend"
+            title = f"{t} — {lbl}"
+            body  = f"{name} sinyali değişti: {old} → {new}"
+            url   = f"/hisse/{t}"
+        else:
+            tickers_str = ", ".join(c[0] for c in relevant[:3])
+            title = f"Sinyal Değişimi: {tickers_str}"
+            body  = f"{len(relevant)} hissede sinyal değişti"
+            url   = "/"
+
+        payload = json.dumps({
+            "title": title,
+            "body": body,
+            "url": url,
+            "tag": "borsapusula-signal",
+            "icon": "/static/icon-192.png",
+        })
         result = _send_one_push(sub, payload)
         if result is not False:
             keep.append(sub)
@@ -155,7 +176,7 @@ def _broadcast_push(title: str, body: str, url: str = "/"):
             _save_push_subs_locked()
 
     logging.getLogger(__name__).info(
-        "Push broadcast: %d sent, %d expired removed", sent, removed
+        "Push broadcast (watchlist-aware): %d sent, %d expired removed", sent, removed
     )
 
 # ── Sinyal görünen ad eşlemesi (iç değer AL/SAT/BEKLE değişmez) ───────────────
@@ -1439,24 +1460,12 @@ def _notify_signal_changes(new_results):
     if changes:
         _notify_email_signal_changes(changes)
 
-    # Rota 3: Web push — seans saatinde, sessizce gönder
+    # Rota 3: Web push — seans saatinde, watchlist-aware (SPEC-006 Faz 2)
+    # Her subscriber kendi watchlist'indeki ticker'ların değişimini alır.
     if changes and in_session:
-        _push_changes = changes[:3]
-        if len(_push_changes) == 1:
-            t, old, new, stock = _push_changes[0]
-            name = STOCK_NAMES.get(t, t)
-            lbl  = "AL ▲ Güçlü Trend" if new == "AL" else "SAT ▼ Zayıf Trend"
-            push_title = f"{t} — {lbl}"
-            push_body  = f"{name} sinyali değişti: {old} → {new}"
-            push_url   = f"/hisse/{t}"
-        else:
-            tickers_str = ", ".join(t for t, *_ in _push_changes)
-            push_title  = f"Sinyal Değişimi: {tickers_str}"
-            push_body   = f"{len(changes)} hissede sinyal değişti"
-            push_url    = "/"
         threading.Thread(
-            target=_broadcast_push,
-            args=(push_title, push_body, push_url),
+            target=_broadcast_push_changes,
+            args=(changes,),
             daemon=True
         ).start()
 
@@ -6714,14 +6723,20 @@ def api_push_subscribe():
         return safe_json({"error": "Geçersiz subscription"}), 400
 
     with _push_lock:
-        existing = any(s.get("endpoint") == sub["endpoint"] for s in _push_subs)
-        if not existing:
+        # SPEC-006 Faz 2: existing varsa REPLACE — watchlist değişimi yansısın
+        existing_idx = next(
+            (i for i, s in enumerate(_push_subs) if s.get("endpoint") == sub["endpoint"]),
+            None,
+        )
+        if existing_idx is not None:
+            _push_subs[existing_idx] = sub
+        else:
             _push_subs.append(sub)
-            _save_push_subs_locked()
+        _save_push_subs_locked()
         count = len(_push_subs)
 
-    logger.info("Push sub kaydedildi (toplam %d)", count)
-    return safe_json({"ok": True, "subscribed": not existing, "count": count})
+    logger.info("Push sub kaydedildi/güncellendi (toplam %d)", count)
+    return safe_json({"ok": True, "subscribed": existing_idx is None, "count": count})
 
 
 @app.route("/api/push/unsubscribe", methods=["POST"])
