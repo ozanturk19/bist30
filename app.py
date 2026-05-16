@@ -121,6 +121,44 @@ def _send_one_push(sub_info: dict, payload: str) -> bool | None:
         return None          # Transient error
 
 
+_PUSH_RATELIMIT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "push_state.json")
+
+def _can_send_push(endpoint_key, ticker):
+    """SPEC-006 Faz 3 (CPO MSG-106): Push rate limit.
+    - Hisse başına 24h içinde max 1 push
+    - Kullanıcı başına saatlik max 3 push
+    File-based state (push_state.json) + fcntl lock. True → gönderilebilir (state tüketilir).
+    Hata durumunda fail-open (True) — rate limit dosya sorunu push'u tamamen kesmesin."""
+    import fcntl
+    try:
+        now  = time.time()
+        hour = int(now / 3600)
+        with open(_PUSH_RATELIMIT_PATH, "a+") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            f.seek(0)
+            raw   = f.read()
+            state = json.loads(raw) if raw.strip() else {}
+
+            tkey = f"{endpoint_key}:{ticker}"
+            if now - state.get(tkey, 0) < 86400:
+                return False   # aynı hisse 24h içinde zaten gönderilmiş
+            hkey = f"{endpoint_key}:h:{hour}"
+            if state.get(hkey, 0) >= 3:
+                return False   # saatlik global limit (3) doldu
+
+            state[tkey] = now
+            state[hkey] = state.get(hkey, 0) + 1
+            # Eski saat anahtarlarını temizle (dosya şişmesini önle)
+            state = {k: v for k, v in state.items()
+                     if not (":h:" in k and k.rsplit(":", 1)[-1].isdigit()
+                             and int(k.rsplit(":", 1)[-1]) < hour - 1)}
+            f.seek(0); f.truncate()
+            json.dump(state, f)
+        return True
+    except Exception:
+        return True   # fail-open
+
+
 def _broadcast_push_changes(changes):
     """SPEC-006 Faz 2 (CPO MSG-095): Watchlist-aware push.
     Her subscriber'a SADECE izlediği ticker'ların sinyal değişimi gönderilir.
@@ -139,6 +177,13 @@ def _broadcast_push_changes(changes):
         wl = sub.get("watchlist") or []
         # watchlist varsa filtrele, yoksa tüm değişimler (backward compat)
         relevant = [c for c in changes if c[0] in wl] if wl else list(changes)
+        if not relevant:
+            keep.append(sub)
+            continue
+
+        # SPEC-006 Faz 3: rate limit — hisse başına 24h max 1, saatlik global max 3
+        _ep_key  = (sub.get("endpoint") or "")[-40:]
+        relevant = [c for c in relevant if _can_send_push(_ep_key, c[0])]
         if not relevant:
             keep.append(sub)
             continue
