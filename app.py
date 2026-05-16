@@ -1310,6 +1310,26 @@ _prev_signals       = {}   # {ticker: signal}  — bir önceki döngü sinyaller
 _PREV_SIGNALS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prev_signals.json")
 _prev_signals_lock = threading.Lock()  # disk write atomik
 
+# SPEC-006 Faz 1 (CPO MSG-095): Notify-leader lock — gunicorn -w 4 worker'ın
+# her biri background_refresh çalıştırıyor. Bildirim (Telegram/Email/Push) 4×
+# duplikasyonunu önlemek için fcntl.flock ile tek worker "notify leader" olur.
+# refresh_data tüm worker'larda devam eder (in-memory _cache her worker'da güncel kalmalı).
+import fcntl as _fcntl
+_NOTIFY_LOCK_PATH = "/tmp/bp_notify_leader.lock"
+_notify_lock_fh = None
+
+def _is_notify_leader():
+    """Bu worker bildirim gönderme yetkisine sahip mi? fcntl.flock atomik —
+    4 worker'dan yalnızca biri lock'u tutar, diğerleri False alır."""
+    global _notify_lock_fh
+    try:
+        if _notify_lock_fh is None:
+            _notify_lock_fh = open(_NOTIFY_LOCK_PATH, "w")
+        _fcntl.flock(_notify_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+        return True
+    except (BlockingIOError, OSError):
+        return False
+
 def _load_prev_signals():
     """App start'ta disk'ten _prev_signals'i yükler."""
     global _prev_signals
@@ -1369,6 +1389,15 @@ def _notify_signal_changes(new_results):
 
     new_data_map = {r["ticker"]: r for r in new_results if r["ticker"] != "XU030"}
     new_sig_map  = {t: d["signal"] for t, d in new_data_map.items()}
+
+    # SPEC-006 Faz 1 (CPO MSG-095): Sadece notify-leader worker bildirim gönderir.
+    # Non-leader worker'lar state'i günceller (kendi karşılaştırması taze kalsın) ama
+    # Telegram/Email/Push duplikasyonu yapmaz.
+    if not _is_notify_leader():
+        with _prev_signals_lock:
+            _prev_signals = new_sig_map
+            _save_prev_signals(new_sig_map)
+        return
 
     # MSG-019B diag: state durumu
     if not _prev_signals:
