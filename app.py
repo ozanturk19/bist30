@@ -1187,6 +1187,22 @@ def analyze(ticker_base):
                 if _risk_now > 0:
                     rr_now = round((c - tp1) / _risk_now, 2)
 
+        # ── Likidite Filtresi (Faz 1) — Günlük TL hacim 20 gün ortalaması ─────
+        # < 5M TL → "Düşük Likidite" uyarısı (slippage + manipülasyon riski)
+        # Hesap: close × volume 20 gün hareketli ortalama (lots/değer dalgalanması düzleştirilir)
+        # NOT: tier_score bloğundan ÖNCE hesaplanmalı — tier penalty low_liquidity'ye bağlı.
+        volume_tl_avg20 = None
+        low_liquidity   = False
+        try:
+            if len(volume) >= 20:
+                tl_series = (close * volume).rolling(20).mean()
+                _avg = float(tl_series.iloc[-1])
+                if not pd.isna(_avg):
+                    volume_tl_avg20 = round(_avg, 0)
+                    low_liquidity   = volume_tl_avg20 < 5_000_000
+        except Exception:
+            pass
+
         # ── SPEC-001 Faz 1: 3-Katmanlı Tier (Standart / Plus / Premium) ─────
         # AUDIT-004 formülü — kompozit skor 0-100
         # Standart 35-59 | Plus 60-79 | Premium 80+
@@ -1220,30 +1236,9 @@ def analyze(ticker_base):
                 if tier_score >= 80: tier = "premium"
                 elif tier_score >= 60: tier = "plus"
                 elif tier_score >= 35: tier = "standart"
-            except Exception as _tier_exc:
-                try:
-                    import traceback as _tb
-                    with open("/tmp/tier_exc.log", "a") as _f:
-                        _f.write(f"{ticker_base}: {type(_tier_exc).__name__}: {_tier_exc}\n")
-                except Exception:
-                    pass
+            except Exception:
                 tier = None
                 tier_score = 0
-
-        # ── Likidite Filtresi (Faz 1) — Günlük TL hacim 20 gün ortalaması ─────
-        # < 5M TL → "Düşük Likidite" uyarısı (slippage + manipülasyon riski)
-        # Hesap: close × volume 20 gün hareketli ortalama (lots/değer dalgalanması düzleştirilir)
-        volume_tl_avg20 = None
-        low_liquidity   = False
-        try:
-            if len(volume) >= 20:
-                tl_series = (close * volume).rolling(20).mean()
-                _avg = float(tl_series.iloc[-1])
-                if not pd.isna(_avg):
-                    volume_tl_avg20 = round(_avg, 0)
-                    low_liquidity   = volume_tl_avg20 < 5_000_000
-        except Exception:
-            pass
 
         return {
             "ticker":        ticker_base,
