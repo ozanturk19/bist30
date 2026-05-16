@@ -119,6 +119,23 @@
   .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #1e2d45; font-size:12px; height:34px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
+  /* SPEC-007: Premium paywall — blur + CTA banner */
+  tr.tier-locked { filter: blur(5px); user-select: none; pointer-events: none; }
+  .premium-cta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    padding: 11px 16px; margin: 12px 0;
+    background: linear-gradient(135deg, rgba(255,215,0,0.10), rgba(255,215,0,0.04));
+    border: 1px solid rgba(255,215,0,0.32); border-radius: 8px;
+  }
+  .premium-cta-text { font-size: 13px; color: #e6edf3; }
+  .premium-cta-text strong { color: #ffd700; }
+  .premium-cta-btn {
+    display: inline-block; padding: 7px 14px; border-radius: 7px;
+    background: #ffd700; color: #1a1a1a; font-size: 12px; font-weight: 700;
+    text-decoration: none; white-space: nowrap;
+  }
+  .premium-cta-btn:hover { background: #ffe34d; }
 </style>
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 </head>
@@ -397,6 +414,12 @@
     </select>
     <span id="perfFilterCount" style="font-size:12px;color:#8b949e;margin-left:auto"></span>
   </div>
+  {% if not has_premium_access and premium_count > 0 %}
+  <div class="premium-cta-row">
+    <span class="premium-cta-text">🔒 <strong>{{ premium_count }} Premium sinyal</strong> blur'lu — net görmek için Premium'u aç</span>
+    <a href="/" class="premium-cta-btn">💎 Premium'u Aç (ücretsiz)</a>
+  </div>
+  {% endif %}
   <div class="tbl-wrap">
     <table>
       <thead>
@@ -412,7 +435,7 @@
       </thead>
       <tbody id="perfTbody">
         {% for s in aktif|sort(attribute='aktif_ret', reverse=true) %}
-        <tr data-ticker="{{ s.ticker }}" data-signal="{{ s.signal }}" data-signal_price="{{ s.signal_price }}" data-price="{{ s.price }}" data-aktif_ret="{{ s.aktif_ret if s.aktif_ret is not none else 0 }}" data-signal_bars="{{ s.signal_bars }}" data-signal_date="{{ s.signal_date }}">
+        <tr data-ticker="{{ s.ticker }}" data-signal="{{ s.signal }}" data-signal_price="{{ s.signal_price }}" data-price="{{ s.price }}" data-aktif_ret="{{ s.aktif_ret if s.aktif_ret is not none else 0 }}" data-signal_bars="{{ s.signal_bars }}" data-signal_date="{{ s.signal_date }}"{% if s.tier == 'premium' and not has_premium_access %} class="tier-locked"{% endif %}>
           <td><a href="/hisse/{{ s.ticker }}" class="ticker-link">{{ s.ticker }}</a></td>
           <td>
             {% if s.signal == 'AL' %}
