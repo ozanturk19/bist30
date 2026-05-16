@@ -5044,6 +5044,7 @@ def api_tarama():
             "vol_ratio":     s.get("vol_ratio") or 1.0,
             "rvol":          s.get("rvol"),
             "is_premium":    s.get("is_premium", False),
+            "tier":          s.get("tier"),   # SPEC-007: paywall için (premium/plus/standart/None)
             "bull_score":    s.get("bull_score") or 0,
             "sl_level":      s.get("sl_level"),
         })

@@ -307,6 +307,23 @@
 
   footer { text-align:center; padding:20px; font-size:12px; color:var(--text3); border-top:1px solid var(--border2); margin-top:32px; }
   footer a { color:var(--text2); text-decoration:none; }
+  /* SPEC-007: Premium paywall — blur + CTA banner */
+  tr.tier-locked { filter: blur(5px); user-select: none; pointer-events: none; }
+  .premium-cta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    padding: 11px 16px; margin: 12px 0;
+    background: linear-gradient(135deg, rgba(255,215,0,0.10), rgba(255,215,0,0.04));
+    border: 1px solid rgba(255,215,0,0.32); border-radius: 8px;
+  }
+  .premium-cta-text { font-size: 13px; color: var(--text); }
+  .premium-cta-text strong { color: #ffd700; }
+  .premium-cta-btn {
+    display: inline-block; padding: 7px 14px; border-radius: 7px;
+    background: #ffd700; color: #1a1a1a; font-size: 12px; font-weight: 700;
+    text-decoration: none; white-space: nowrap;
+  }
+  .premium-cta-btn:hover { background: #ffe34d; }
 </style>
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 </head>
@@ -486,6 +503,12 @@
         CSV
       </button>
     </div>
+  </div>
+
+  <!-- SPEC-007: Premium paywall CTA banner (renderResults JS ile görünür/gizli) -->
+  <div class="premium-cta-row" id="premiumCtaBar" style="display:none">
+    <span class="premium-cta-text">🔒 Premium sinyaller blur'lu</span>
+    <a href="/" class="premium-cta-btn">💎 Premium'u Aç (ücretsiz)</a>
   </div>
 
   <!-- Tablo -->
@@ -810,6 +833,12 @@ function _hydrateFiltersFromUrl() {
   } catch(_) {}
 }
 
+/* SPEC-007: Premium erişim kontrolü — bp_premium_trial cookie (index.html ile aynı) */
+function _hasPremiumAccess() {
+  try { return !!document.cookie.match(/(?:^|;\s*)bp_premium_trial=1/); }
+  catch(_) { return false; }
+}
+
 function renderResults(rows, count) {
   _csvData = rows;
   document.getElementById('loadingDiv').style.display = 'none';
@@ -823,6 +852,20 @@ function renderResults(rows, count) {
     return;
   }
 
+  // SPEC-007: Premium paywall — anonim user'da premium row blur + CTA banner
+  const _premLocked = !_hasPremiumAccess();
+  const _premCount  = rows.filter(s => s.tier === 'premium').length;
+  const _ctaBar = document.getElementById('premiumCtaBar');
+  if (_ctaBar) {
+    if (_premLocked && _premCount > 0) {
+      _ctaBar.style.display = '';
+      const _txt = _ctaBar.querySelector('.premium-cta-text');
+      if (_txt) _txt.innerHTML = `🔒 <strong>${_premCount} Premium sinyal</strong> blur'lu — net görmek için Premium'u aç`;
+    } else {
+      _ctaBar.style.display = 'none';
+    }
+  }
+
   const tbody = document.getElementById('resultBody');
   tbody.innerHTML = rows.map(s => {
     const chgCls = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
@@ -832,7 +875,8 @@ function renderResults(rows, count) {
       ? `<span class="eq-badge ${eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
       : '—';
     const adxPct  = Math.min(100, (s.adx / 60) * 100);
-    return `<tr>
+    const _locked = (_premLocked && s.tier === 'premium') ? ' class="tier-locked"' : '';
+    return `<tr${_locked}>
       <td>
         <a href="/hisse/${s.ticker}">
           <div class="tk">${s.ticker}${s.is_premium ? ' <span title="Premium (RVOL≥1.20)" style="color:#ffc850;font-size:11px;vertical-align:middle">★</span>' : ''}</div>
