@@ -6522,6 +6522,33 @@ def api_market_news():
     })
 
 
+@app.route("/api/recognize", methods=["POST"])
+@limiter.limit("10 per hour")
+def api_recognize():
+    """MSG-098 soft auth: Eski abone re-recognize — email ile kaydı bul, bp_sub cookie set.
+    Yeni kayıt OLUŞTURMAZ — sadece mevcut aboneyi tanır."""
+    data  = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    if not email or "@" not in email or not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+        return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
+
+    with _sub_lock:
+        subs = _load_subscribers()
+        rec  = subs.get(email)
+
+    if not rec or not rec.get("active", True):
+        return safe_json({"ok": False, "reason": "not_found"}), 404
+
+    token = rec.get("token", "")
+    resp  = safe_json({
+        "ok":            True,
+        "name":          rec.get("name", ""),
+        "subscribed_at": rec.get("subscribed_at", ""),
+    })
+    resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
+    return resp
+
+
 @app.route("/api/subscribe", methods=["POST"])
 @limiter.limit("5 per hour")
 def api_subscribe():

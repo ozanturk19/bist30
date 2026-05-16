@@ -1919,7 +1919,14 @@
     transition:background .15s; margin-top:2px;
   }
   .sub-toast-btn:hover { background:#cdd5ff; }
-  .sub-toast-btn:hover { background:#cdd5ff; }
+  /* MSG-098: 2-button row + ghost (Üye Girişi) */
+  .sub-toast-btnrow { display:flex; gap:8px; margin-top:8px; }
+  .sub-toast-btnrow .sub-toast-btn { flex:1; margin-top:0; text-align:center; }
+  .sub-toast-btn-ghost {
+    background:transparent; color:#b8c3ff; border:1px solid #3a3f55;
+  }
+  .sub-toast-btn-ghost:hover { background:rgba(184,195,255,0.08); }
+  @media (max-width:380px) { .sub-toast-btnrow { flex-direction:column; } }
   .sub-toast-benefits { display:flex; gap:14px; margin-bottom:10px; flex-wrap:wrap; }
   .sub-toast-benefit  { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--bp-text2); }
 
@@ -2791,8 +2798,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <input id="subToastEmail" type="email" class="sub-toast-input" placeholder="E-posta"
       onkeydown="if(event.key==='Enter')submitToastSubscribe()"
       aria-label="E-posta adresi">
-    <button class="sub-toast-btn" onclick="submitToastSubscribe()">Abone Ol</button>
   </div>
+  <div class="sub-toast-btnrow">
+    <button id="subToastSubmitBtn" class="sub-toast-btn" onclick="submitToastSubscribe()">✉ Abone Ol</button>
+    <button id="subToastLoginBtn" class="sub-toast-btn sub-toast-btn-ghost" onclick="submitRecognize()">👤 Üye Girişi</button>
+  </div>
+  <div id="subToastRecogStatus" style="font-size:11px;margin-top:6px;display:none"></div>
 </div>
 
 </main>
@@ -4909,6 +4920,54 @@ function dismissSubToast() {
   try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) {}
 }
 
+/* MSG-098 soft auth: "Üye Girişi" — eski abone email ile re-recognize */
+async function submitRecognize() {
+  const emailEl = document.getElementById('subToastEmail');
+  const email   = emailEl ? emailEl.value.trim() : '';
+  const statusEl = document.getElementById('subToastRecogStatus');
+  if (!email || !email.includes('@')) {
+    if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
+    return;
+  }
+  const btn = document.getElementById('subToastLoginBtn');
+  if (btn) { btn.textContent = 'Kontrol ediliyor…'; btn.disabled = true; }
+  try {
+    const res  = await fetch('/api/recognize', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email }),
+    });
+    const json = await res.json();
+    const toast = document.getElementById('subToast');
+    if (res.ok && json.ok) {
+      try {
+        localStorage.setItem('bp_sub_user', JSON.stringify({
+          subscribed: true, email, name: json.name || '',
+          first_name: (json.name || '').split(' ')[0], cachedAt: Date.now(),
+        }));
+      } catch(_) {}
+      if (toast) toast.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600;padding:4px 0">✅ Hoş geldin' + (json.name ? ' ' + json.name : '') + '!</div><div style="font-size:11px;color:#64748b;margin-top:4px">Giriş yapıldı.</div>';
+      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(_) {}
+      setTimeout(() => dismissSubToast(), 2200);
+    } else if (res.status === 404) {
+      if (statusEl) {
+        statusEl.style.display = '';
+        statusEl.style.color = '#e3b341';
+        statusEl.textContent = '❓ Bu e-posta kayıtlı değil — "✉ Abone Ol" ile kaydolabilirsin.';
+      }
+      if (btn) { btn.textContent = '👤 Üye Girişi'; btn.disabled = false; }
+    } else {
+      if (statusEl) {
+        statusEl.style.display = '';
+        statusEl.style.color = '#f85149';
+        statusEl.textContent = '⚠️ ' + (json.error || 'Bir hata oluştu, tekrar dene.');
+      }
+      if (btn) { btn.textContent = '👤 Üye Girişi'; btn.disabled = false; }
+    }
+  } catch(_) {
+    if (btn) { btn.textContent = '👤 Üye Girişi'; btn.disabled = false; }
+  }
+}
+
 async function submitToastSubscribe() {
   const emailEl = document.getElementById('subToastEmail');
   const email   = emailEl ? emailEl.value.trim() : '';
@@ -4922,7 +4981,7 @@ async function submitToastSubscribe() {
     subToastNameEl_chk.focus();
     return;
   }
-  const btn = document.querySelector('#subToastForm button');
+  const btn = document.getElementById('subToastSubmitBtn');
   if (btn) { btn.textContent = 'Kaydediliyor…'; btn.disabled = true; }
   try {
     const subToastNameEl = document.getElementById('subToastName');
