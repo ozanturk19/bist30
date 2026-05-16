@@ -4482,6 +4482,11 @@ def stock_page(ticker):
     except Exception:
         pass
 
+    # SPEC-007: Premium hisse detay paywall — anonim user'a grafik/geçmiş/indikatör blur
+    premium_locked = bool(
+        ssr_signal and ssr_signal.get("tier") == "premium" and not has_premium_access()
+    )
+
     return render_template("hisse.html",
                            ticker=ticker,
                            name=name,
@@ -4492,7 +4497,8 @@ def stock_page(ticker):
                            kap_url=kap_url_for(ticker),
                            related_blog=related_blog,
                            compare_url=compare_url,
-                           ticker_bt=ticker_bt)
+                           ticker_bt=ticker_bt,
+                           premium_locked=premium_locked)
 
 
 _fundamentals_cache = {}
