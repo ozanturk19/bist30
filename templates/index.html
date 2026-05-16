@@ -3997,17 +3997,10 @@ async function submitPremium() {
 }
 
 function _hasPremiumAccess() {
+  // SPEC-001: Altın erişimi SADECE bp_premium_trial cookie ile verilir.
+  // Newsletter aboneliği (bp_sub / bp_sub_user) Altın erişimi VERMEZ — ayrı opt-in.
   try {
-    // 1) bp_premium_trial cookie (30 gün, email submit sonrası set edilir)
     if (document.cookie.match(/(?:^|;\s*)bp_premium_trial=1/)) return true;
-    // 2) bp_sub_user localStorage (mevcut subscribe pattern — bp-search.js'den)
-    const raw = localStorage.getItem('bp_sub_user');
-    if (raw) {
-      const u = JSON.parse(raw);
-      if (u && u.subscribed) return true;
-    }
-    // 3) Mevcut bp_sub cookie (server-side subscribe)
-    if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return true;
   } catch (_) {}
   return false;
 }
