@@ -707,7 +707,7 @@ function renderActiveFilterChips() {
   const maxP = (document.getElementById('fMaxP').value || '').trim();
 
   if (sig) {
-    const labels = { PREMIUM: '🥇 Altın', AL: '▲ Güçlü Trend', SAT: '▼ Zayıf Trend', BEKLE: '● Yatay' };
+    const labels = { PREMIUM: '💎 Premium', AL: '▲ Güçlü Trend', SAT: '▼ Zayıf Trend', BEKLE: '● Yatay' };
     chips.push({ label: labels[sig] || sig, key: 'signal' });
   }
   if (minAdx > 0) chips.push({ label: `ADX ≥ ${minAdx}`, key: 'minAdx' });
