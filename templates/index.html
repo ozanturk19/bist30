@@ -3777,7 +3777,7 @@ function updateStats() {
   animateCounter(document.getElementById('statSat'),   stocks.filter(s => s.signal === 'SAT').length);
   animateCounter(document.getElementById('statBekle'), stocks.filter(s => s.signal === 'BEKLE').length);
   const stPremEl = document.getElementById('statPremium');
-  if (stPremEl) animateCounter(stPremEl, stocks.filter(s => s.is_premium === true).length);
+  if (stPremEl) animateCounter(stPremEl, stocks.filter(s => s.tier === 'premium').length);
   _updateIdealStrip(stocks);
 
   // Market breadth bar
@@ -3807,7 +3807,7 @@ function getFiltered() {
   return allStocks.filter(s => {
     if (s.ticker === 'XU030') return false;   // endeks satırda gösteriliyor
     const matchFilter = currentFilter === 'all' || s.signal === currentFilter
-                     || (currentFilter === 'PREMIUM' && s.is_premium === true)
+                     || (currentFilter === 'PREMIUM' && s.tier === 'premium')
                      || (currentFilter === 'TODAY' && s.is_new_signal && s.signal !== 'BEKLE')
                      || (currentFilter === 'WATCH' && watchlist.has(s.ticker))
                      /* Feature 1 #1B presets (CPO MSG-060) */

@@ -1205,7 +1205,7 @@ def analyze(ticker_base):
 
         # ── SPEC-001 Faz 1: 3-Katmanlı Tier (Standart / Plus / Premium) ─────
         # AUDIT-004 formülü — kompozit skor 0-100
-        # Standart 35-59 | Plus 60-79 | Premium 80+
+        # Standart 35-49 | Plus 50-69 | Premium 70+ (CPO MSG-076 rebalance)
         tier = None
         tier_score = 0
         if signal != "BEKLE":
@@ -1233,8 +1233,8 @@ def analyze(ticker_base):
                 if earnings_warning: tier_score = max(0, tier_score - 5)
                 tier_score = max(0, min(100, tier_score))
                 # Eşikler
-                if tier_score >= 80: tier = "premium"
-                elif tier_score >= 60: tier = "plus"
+                if tier_score >= 70: tier = "premium"
+                elif tier_score >= 50: tier = "plus"
                 elif tier_score >= 35: tier = "standart"
             except Exception:
                 tier = None
