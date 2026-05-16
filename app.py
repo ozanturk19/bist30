@@ -1220,7 +1220,13 @@ def analyze(ticker_base):
                 if tier_score >= 80: tier = "premium"
                 elif tier_score >= 60: tier = "plus"
                 elif tier_score >= 35: tier = "standart"
-            except Exception:
+            except Exception as _tier_exc:
+                try:
+                    import traceback as _tb
+                    with open("/tmp/tier_exc.log", "a") as _f:
+                        _f.write(f"{ticker_base}: {type(_tier_exc).__name__}: {_tier_exc}\n")
+                except Exception:
+                    pass
                 tier = None
                 tier_score = 0
 
