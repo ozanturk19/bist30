@@ -54,9 +54,18 @@ limiter = Limiter(
 )
 
 # ── Admin endpoint koruması ───────────────────────────────────────────────────
-ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "")
+ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "").strip()
 # MSG-019B: admin endpoint token (mail credential ile decoupled — least privilege)
 ADMIN_TOKEN  = os.environ.get("ADMIN_TOKEN",  "")
+
+def require_admin():
+    """Bulgu 5 (danışman audit) fix: ADMIN_SECRET boşsa endpoint KAPALI (503).
+    Eski 'if ADMIN_SECRET and ...' pattern secret boşken endpoint'i korumasız bırakıyordu."""
+    from flask import abort as _abort
+    if not ADMIN_SECRET:
+        _abort(503)  # secret yapılandırılmamış → endpoint devre dışı (fail-closed)
+    if request.headers.get("X-Admin-Secret", "") != ADMIN_SECRET:
+        _abort(403)
 
 # ── VAPID Web Push Bildirimleri ───────────────────────────────────────────────
 _APP_DIR        = os.path.dirname(os.path.abspath(__file__))
@@ -2550,8 +2559,7 @@ def api_macro_news():
 @app.route("/api/refresh", methods=["POST"])
 @limiter.limit("1 per 5 minutes")
 def api_refresh():
-    if ADMIN_SECRET and request.headers.get("X-Admin-Secret") != ADMIN_SECRET:
-        abort(403)
+    require_admin()
     threading.Thread(target=refresh_data, daemon=True).start()
     return jsonify({"status": "refreshing"})
 
@@ -6097,8 +6105,7 @@ def api_backtest():
 @app.route("/api/backtest/run", methods=["POST"])
 @limiter.limit("1 per 30 minutes")
 def api_backtest_run():
-    if ADMIN_SECRET and request.headers.get("X-Admin-Secret") != ADMIN_SECRET:
-        abort(403)
+    require_admin()
     threading.Thread(target=run_backtest, daemon=True).start()
     return jsonify({"status": "started"})
 
@@ -6897,8 +6904,7 @@ padding:32px 40px;text-align:center;max-width:420px}}</style>
 @limiter.limit("5 per hour")
 def api_telegram_test():
     """Admin: Telegram bağlantısını test et."""
-    if ADMIN_SECRET and request.headers.get("X-Admin-Secret") != ADMIN_SECRET:
-        abort(403)
+    require_admin()
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
         return safe_json({"ok": False, "error": "Telegram env vars eksik (TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID)"})
     _send_telegram(
