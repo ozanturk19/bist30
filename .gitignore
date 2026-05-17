@@ -29,6 +29,14 @@ push_subs.json
 health_state.txt
 last_digest.txt
 health_fail_count.txt
+last_macro.json
+prev_signals.json
+push_state.json
+
+# Operasyonel dosyalar (prod-only, repo'ya girmez)
+DEPLOY_LOG.md
+MIGRATION_PLAN.md
+scripts/
 
 # User data
 portfolios/
