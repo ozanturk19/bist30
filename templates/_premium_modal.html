@@ -74,7 +74,10 @@
     box-shadow: 0 4px 14px rgba(255,200,80,.30);
   }
   .premium-modal-submit:disabled { opacity: .6; cursor: not-allowed; }
+  .premium-modal-buttons { display: flex; gap: 8px; }
+  .premium-modal-buttons .premium-modal-submit { flex: 1; }
   .premium-modal-recognize {
+    flex: 1;
     background: transparent;
     border: 1px solid rgba(255,200,80,.45);
     color: #ffc850;
@@ -83,6 +86,7 @@
     font-family: inherit; transition: background .15s ease;
   }
   .premium-modal-recognize:hover { background: rgba(255,200,80,.08); }
+  @media (max-width: 480px) { .premium-modal-buttons { flex-direction: column; } }
   .premium-modal-status { font-size: 12px; min-height: 18px; margin: 4px 0 8px; }
   .premium-modal-footer {
     color: var(--bp-text3, #484f58);
@@ -128,8 +132,10 @@ if (typeof window.openPremiumModal !== 'function') {
                    autocomplete="email" autocapitalize="off" autocorrect="off">
             <input type="text" id="pmName" placeholder="Adın (opsiyonel)"
                    autocomplete="given-name" maxlength="50">
-            <button type="submit" id="pmSubmitBtn" class="premium-modal-submit">💎 Premium'u Aç</button>
-            <button type="button" class="premium-modal-recognize" onclick="submitPremiumRecognize()">👤 Üye Girişi (eski abone)</button>
+            <div class="premium-modal-buttons">
+              <button type="submit" id="pmSubmitBtn" class="premium-modal-submit">💎 Premium'u Aç</button>
+              <button type="button" class="premium-modal-recognize" onclick="submitPremiumRecognize()">👤 Üye Girişi</button>
+            </div>
           </form>
           <div id="pmStatus" class="premium-modal-status" aria-live="polite"></div>
           <div class="premium-modal-footer">
