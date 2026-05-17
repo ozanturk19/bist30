@@ -99,8 +99,9 @@
   }
 </style>
 <script>
-/* SPEC-007 sitewide premium modal — guard ile çift tanım önlenir (index.html kendi kopyasını taşır) */
-if (typeof window.openPremiumModal !== 'function') {
+/* SPEC-007 sitewide premium modal — window.* atamaları sayfadaki eski kopyayı override eder.
+   index.html dahil tüm sayfalarda bu partial tek kaynak (Option A, CPO MSG-122). */
+{
   window._hasPremiumAccess = function() {
     try { return !!document.cookie.match(/(?:^|;\s*)bp_premium_trial=1/); }
     catch (_) { return false; }
