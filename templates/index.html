@@ -4945,9 +4945,17 @@ async function submitRecognize() {
           first_name: (json.name || '').split(' ')[0], cachedAt: Date.now(),
         }));
       } catch(_) {}
-      if (toast) toast.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600;padding:4px 0">✅ Hoş geldin' + (json.name ? ' ' + json.name : '') + '!</div><div style="font-size:11px;color:#64748b;margin-top:4px">Giriş yapıldı.</div>';
+      const _premMsg = json.premium_unlocked
+        ? '<div style="font-size:11px;color:#ffc850;margin-top:4px">💎 Premium da açıldı — sayfa yenileniyor…</div>'
+        : '<div style="font-size:11px;color:#64748b;margin-top:4px">Giriş yapıldı.</div>';
+      if (toast) toast.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600;padding:4px 0">✅ Hoş geldin' + (json.name ? ' ' + json.name : '') + '!</div>' + _premMsg;
       try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(_) {}
-      setTimeout(() => dismissSubToast(), 2200);
+      // MSG-116 Bug E: premium açıldıysa reload (blur kalksın), yoksa sadece kapat
+      if (json.premium_unlocked) {
+        setTimeout(() => location.reload(), 1600);
+      } else {
+        setTimeout(() => dismissSubToast(), 2200);
+      }
     } else if (res.status === 404) {
       if (statusEl) {
         statusEl.style.display = '';

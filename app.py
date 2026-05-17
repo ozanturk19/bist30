@@ -6586,11 +6586,15 @@ def api_recognize():
 
     token = rec.get("token", "")
     resp  = safe_json({
-        "ok":            True,
-        "name":          rec.get("name", ""),
-        "subscribed_at": rec.get("subscribed_at", ""),
+        "ok":               True,
+        "name":             rec.get("name", ""),
+        "subscribed_at":    rec.get("subscribed_at", ""),
+        "premium_unlocked": True,   # MSG-116 Bug E: üye girişi → premium 30 gün retention bonus
     })
     resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
+    # MSG-116 Bug E: "Üye Girişi" eski aboneye Premium 30 gün açar (retention bonus).
+    # recognize AÇIK aksiyon (buton + email) — pasif bypass değil, MSG-073 kuralıyla uyumlu.
+    resp.set_cookie("bp_premium_trial", "1", max_age=30 * 86400, samesite="Lax", secure=True, httponly=False)
     return resp
 
 
