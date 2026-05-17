@@ -1405,6 +1405,25 @@ def _is_notify_leader():
     except (BlockingIOError, OSError):
         return False
 
+# MSG-140 (notify-leader genişletme): background_refresh tek worker'da çalışsın.
+# 4 worker × yfinance/pandas ağır iş → gevent worker bloke → %40 504 timeout.
+# Leader worker bg çalıştırır + cache'i diske yazar; non-leader 3 worker hafif
+# disk-reload yapar (gevent bloke etmez) → temiz HTTP handler.
+_BG_LOCK_PATH = "/tmp/bp_bg_leader.lock"
+_bg_lock_fh = None
+
+def _is_bg_leader():
+    """Bu worker background_refresh (yfinance ağır iş) yetkisine sahip mi?
+    fcntl.flock — 4 worker'dan yalnızca biri leader."""
+    global _bg_lock_fh
+    try:
+        if _bg_lock_fh is None:
+            _bg_lock_fh = open(_BG_LOCK_PATH, "w")
+        _fcntl.flock(_bg_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+        return True
+    except (BlockingIOError, OSError):
+        return False
+
 def _load_prev_signals():
     """App start'ta disk'ten _prev_signals'i yükler."""
     global _prev_signals
@@ -2339,6 +2358,20 @@ def _purge_stale_chart_caches():
 
 
 def background_refresh():
+    # MSG-140: Sadece leader worker yfinance ağır işi yapar (504 worker hang fix).
+    # Non-leader 3 worker hafif disk-reload — cache leader'dan tazelenir, gevent bloke olmaz.
+    if not _is_bg_leader():
+        logger.info("background_refresh: non-leader worker — hafif disk-reload modu (90s)")
+        while True:
+            try:
+                _load_cache_from_disk()
+                _load_macro_from_disk()
+            except Exception as e:
+                logger.error("background_refresh non-leader reload hatası: %s", e)
+            time.sleep(90)
+        return  # ulaşılmaz
+
+    logger.info("background_refresh: LEADER worker — yfinance refresh modu (900s)")
     while True:
         try:
             refresh_chart()
