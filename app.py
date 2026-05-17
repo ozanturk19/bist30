@@ -1679,7 +1679,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
               <strong style="color:#e5e1e4">Zayıf Trend sinyali</strong> oluştuğunda — kısa pozisyon fırsatı
             </td></tr>
-          <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">⭐</td>
+          <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">💎</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
               <strong style="color:#ffc850">Premium işaretli</strong> sinyaller — hacim onaylı (RVOL ≥ 1.20). Backtest&apos;te %51 win rate, Sharpe 2.97.
             </td></tr>
@@ -1693,7 +1693,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
         <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:12px">🎯 Site&apos;de neler var</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📊 215 BIST hissesi günlük analiz</td></tr>
-          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">⭐ Premium hacim filtreli sinyaller</td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">💎 Premium hacim filtreli sinyaller</td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">🗺️ Sektör ısı haritası</td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📅 Bilanço takvimi</td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📈 2-yıllık backtest performans raporu</td></tr>
@@ -1746,7 +1746,7 @@ def _build_signal_email(changes, unsubscribe_url):
     tickers_str = ", ".join(c[0] for c in changes[:4])
     if len(changes) > 4: tickers_str += f" +{len(changes)-4}"
 
-    preheader = f"{al_count} Güçlü Trend · {sat_count} Zayıf Trend · {prem_count} Premium ⭐ — {tickers_str}"
+    preheader = f"{al_count} Güçlü Trend · {sat_count} Zayıf Trend · {prem_count} Premium 💎 — {tickers_str}"
 
     # Sinyal kartları
     cards = ""
@@ -1764,7 +1764,7 @@ def _build_signal_email(changes, unsubscribe_url):
 
         prem_badge = ""
         if is_prem:
-            prem_badge = '''<span style="display:inline-block;background:rgba(255,200,80,0.12);border:1px solid rgba(255,200,80,0.45);color:#ffc850;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:0.4px;margin-left:6px;vertical-align:middle">⭐ PREMIUM</span>'''
+            prem_badge = '''<span style="display:inline-block;background:rgba(255,200,80,0.12);border:1px solid rgba(255,200,80,0.45);color:#ffc850;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:0.4px;margin-left:6px;vertical-align:middle">💎 PREMIUM</span>'''
 
         sl_html = f'<span style="color:#909097">SL <strong style="color:#c7c5cd">{sl_level:.2f}₺</strong></span>' if sl_level else ''
         rvol_html = f'<span style="color:#909097">·  RVOL <strong style="color:{"#ffc850" if is_prem else "#c7c5cd"}">{rvol:.2f}×</strong></span>' if rvol is not None else ''
@@ -1806,7 +1806,7 @@ def _build_signal_email(changes, unsubscribe_url):
     if sat_count > 0:
         summary_chips += f'<span style="display:inline-block;background:rgba(248,81,73,0.10);border:1px solid rgba(248,81,73,0.30);color:#f85149;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">▼ {sat_count} Zayıf Trend</span>'
     if prem_count > 0:
-        summary_chips += f'<span style="display:inline-block;background:rgba(255,200,80,0.10);border:1px solid rgba(255,200,80,0.40);color:#ffc850;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">⭐ {prem_count} Premium</span>'
+        summary_chips += f'<span style="display:inline-block;background:rgba(255,200,80,0.10);border:1px solid rgba(255,200,80,0.40);color:#ffc850;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">💎 {prem_count} Premium</span>'
 
     content = f'''
     <!-- Header -->
@@ -1935,7 +1935,7 @@ def _notify_email_signal_changes(changes):
             if not relevant:
                 continue
             unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
-            subject_prefix = "⭐ Premium" if mail_pref == "premium" else "🔔 BorsaPusula —"
+            subject_prefix = "💎 Premium" if mail_pref == "premium" else "🔔 BorsaPusula —"
             subject = subject_prefix + " Sinyal Değişimi: " + ", ".join(c[0] for c in relevant[:3])
             if len(relevant) > 3:
                 subject += f" +{len(relevant) - 3}"
@@ -2006,7 +2006,7 @@ def _send_digest_emails(timeframe="daily", force=False):
         # Premium count for subject hint
         prem_count = sum(1 for c in relevant if c[3].get("is_premium"))
         if prem_count > 0:
-            subject += f" — {prem_count} Premium ⭐"
+            subject += f" — {prem_count} Premium 💎"
 
         if send_email(email, subject, _build_signal_email(relevant, unsub_url)):
             sent += 1
