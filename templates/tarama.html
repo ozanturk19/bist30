@@ -508,7 +508,7 @@
   <!-- SPEC-007: Premium paywall CTA banner (renderResults JS ile görünür/gizli) -->
   <div class="premium-cta-row" id="premiumCtaBar" style="display:none">
     <span class="premium-cta-text">🔒 Premium sinyaller blur'lu</span>
-    <a href="/" class="premium-cta-btn">💎 Premium'u Aç (ücretsiz)</a>
+    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
   </div>
 
   <!-- Tablo -->
@@ -946,5 +946,6 @@ function resetFilters() {
 })();
 </script>
 <script src="/static/bp-search.js?v=44" defer></script>
+{% include '_premium_modal.html' %}
 </body>
 </html>

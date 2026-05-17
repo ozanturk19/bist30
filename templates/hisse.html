@@ -1322,7 +1322,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   {% if premium_locked %}
   <div class="premium-cta-row">
     <span class="premium-cta-text">🔒 <strong>{{ ticker }} Premium tier</strong> — grafik, indikatör ve sinyal geçmişi için Premium'u aç</span>
-    <a href="/" class="premium-cta-btn">💎 Premium'u Aç (ücretsiz)</a>
+    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
   </div>
   {% endif %}
   <div class="chart-section{% if premium_locked %} tier-locked{% endif %}">
@@ -3095,5 +3095,6 @@ document.addEventListener('click', function(e) {
   if (!isOpen) btn.classList.add('open');
 });
 </script>
+{% include '_premium_modal.html' %}
 </body>
 </html>

@@ -417,7 +417,7 @@
   {% if not has_premium_access and premium_count > 0 %}
   <div class="premium-cta-row">
     <span class="premium-cta-text">🔒 <strong>{{ premium_count }} Premium sinyal</strong> blur'lu — net görmek için Premium'u aç</span>
-    <a href="/" class="premium-cta-btn">💎 Premium'u Aç (ücretsiz)</a>
+    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
   </div>
   {% endif %}
   <div class="tbl-wrap">
@@ -656,5 +656,6 @@ async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=awai
 loadMacroBar();setInterval(loadMacroBar,60000);
 </script>
 <script src="/static/bp-search.js?v=44" defer></script>
+{% include '_premium_modal.html' %}
 </body>
 </html>
