@@ -74,6 +74,15 @@
     box-shadow: 0 4px 14px rgba(255,200,80,.30);
   }
   .premium-modal-submit:disabled { opacity: .6; cursor: not-allowed; }
+  .premium-modal-recognize {
+    background: transparent;
+    border: 1px solid rgba(255,200,80,.45);
+    color: #ffc850;
+    padding: 10px 14px; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: background .15s ease;
+  }
+  .premium-modal-recognize:hover { background: rgba(255,200,80,.08); }
   .premium-modal-status { font-size: 12px; min-height: 18px; margin: 4px 0 8px; }
   .premium-modal-footer {
     color: var(--bp-text3, #484f58);
@@ -120,6 +129,7 @@ if (typeof window.openPremiumModal !== 'function') {
             <input type="text" id="pmName" placeholder="Adın (opsiyonel)"
                    autocomplete="given-name" maxlength="50">
             <button type="submit" id="pmSubmitBtn" class="premium-modal-submit">💎 Premium'u Aç</button>
+            <button type="button" class="premium-modal-recognize" onclick="submitPremiumRecognize()">👤 Üye Girişi (eski abone)</button>
           </form>
           <div id="pmStatus" class="premium-modal-status" aria-live="polite"></div>
           <div class="premium-modal-footer">
@@ -179,6 +189,42 @@ if (typeof window.openPremiumModal !== 'function') {
     } catch (e) {
       if (status) status.innerHTML = '<span style="color:#f85149">⚠️ Bağlantı hatası, tekrar dene.</span>';
       if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
+    }
+  };
+
+  /* MSG-118 Bug F: Premium modal "Üye Girişi" — eski abone re-recognize */
+  window.submitPremiumRecognize = async function() {
+    const emailEl = document.getElementById('pmEmail');
+    const status  = document.getElementById('pmStatus');
+    const email   = (emailEl?.value || '').trim();
+    if (!email || !email.includes('@')) {
+      if (status) status.innerHTML = '<span style="color:#f85149">⚠️ Geçerli email gerekli.</span>';
+      if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
+      return;
+    }
+    if (status) status.innerHTML = '<span style="color:#8b949e">⏳ Kontrol ediliyor…</span>';
+    try {
+      const res  = await fetch('/api/recognize', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const json = await res.json();
+      if (res.ok && json.ok) {
+        try {
+          localStorage.setItem('bp_sub_user', JSON.stringify({
+            subscribed: true, email, name: json.name || '',
+            first_name: (json.name || '').split(' ')[0], cachedAt: Date.now(),
+          }));
+        } catch(_) {}
+        if (status) status.innerHTML = '<span style="color:#3fb950">✅ Hoş geldin' + (json.name ? ' ' + json.name : '') + '! Premium açıldı, yenileniyor…</span>';
+        setTimeout(() => location.reload(), 1500);
+      } else if (res.status === 404) {
+        if (status) status.innerHTML = '<span style="color:#e3b341">❓ Bu e-posta kayıtlı değil — "💎 Premium\'u Aç" ile kaydol.</span>';
+      } else {
+        if (status) status.innerHTML = '<span style="color:#f85149">⚠️ ' + (json.error || 'Hata') + '</span>';
+      }
+    } catch (e) {
+      if (status) status.innerHTML = '<span style="color:#f85149">⚠️ Bağlantı hatası, tekrar dene.</span>';
     }
   };
 }
