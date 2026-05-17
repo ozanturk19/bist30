@@ -6031,7 +6031,7 @@ def run_backtest():
     result = {
         "al":          stats(all_episodes["AL"]),
         "sat":         stats(all_episodes["SAT"]),
-        "per_ticker":  sorted(per_ticker, key=lambda x: -(x["al_count"] + x["sat_count"])),
+        "per_ticker":  sorted(per_ticker, key=lambda x: (-x["al_count"], -x["sat_count"])),
         "computed_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
         "tickers_used": len(bt_tickers),
     }
