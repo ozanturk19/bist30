@@ -3222,6 +3222,15 @@ _GEMINI_EXPLAIN_ATTEMPTS = [
     ("gemini-2.5-flash-lite", False),  # fallback: Flash 2.5 Lite, stabil
 ]
 
+# ─── Gemini timeout-guard + circuit breaker (SPEC-009 Faz D, 18 May 2026) ───
+# 17:15 watchdog auto-restart kök neden: Gemini 503/ReadTimeout 30s+ → 2 fallback
+# denemesi toplam gunicorn --timeout 45'i aşıyor → worker SIGKILL → /api/health
+# fail → watchdog restart. Sert per-istek timeout cap + circuit breaker zinciri kırar.
+_GEMINI_TIMEOUT_CAP  = 5      # saniye — _gemini_call istek başına sert üst sınır
+_GEMINI_CB_THRESHOLD = 3      # ardışık fail eşiği — devre açılır
+_GEMINI_CB_COOLDOWN  = 300    # saniye — devre açık kalır (5dk Gemini'siz fallback)
+_gemini_cb = {"fails": 0, "open_until": 0.0}   # circuit breaker durumu (worker-local)
+
 
 
 
@@ -3445,6 +3454,17 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
     if not GEMINI_API_KEY:
         return None, None
 
+    # Circuit breaker — devre açıksa Gemini'yi hiç çağırma, anında fallback dön.
+    # Worker'ı bloke eden tekrarlı hang çağrılarını önler (17:15 watchdog restart fix).
+    now = time.time()
+    if now < _gemini_cb["open_until"]:
+        logger.debug("_gemini_call: circuit breaker açık (%.0fs kaldı) — fallback",
+                     _gemini_cb["open_until"] - now)
+        return None, None
+
+    # Sert timeout cap — caller ne geçerse geçsin per-istek üst sınır.
+    eff_timeout = min(timeout, _GEMINI_TIMEOUT_CAP)
+
     for model_id, use_search in attempts:
         body = {
             "contents": [{"parts": [{"text": prompt}]}],
@@ -3462,13 +3482,14 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
         url = (f"https://generativelanguage.googleapis.com/v1beta/"
                f"models/{model_id}:generateContent?key={GEMINI_API_KEY}")
         try:
-            r = requests.post(url, json=body, timeout=timeout)
+            r = requests.post(url, json=body, timeout=eff_timeout)
             r.raise_for_status()
             text = (r.json().get("candidates", [{}])[0]
                             .get("content", {})
                             .get("parts", [{}])[0]
                             .get("text", "")).strip()
             if text:
+                _gemini_cb["fails"] = 0   # başarı → circuit breaker sayacı sıfırla
                 return model_id, text
             # Model yanıt verdi ama boş metin — fallback'e geç
             logger.debug("_gemini_call [%s]: boş yanıt, fallback deneniyor", model_id)
@@ -3478,6 +3499,13 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
                 logger.debug("_gemini_call [%s]: rate-limited (429)", model_id)  # sessiz — log dolmasın
             else:
                 logger.warning("_gemini_call [%s]: %s (HTTP %s)", model_id, type(e).__name__, status)
+            # Circuit breaker — ardışık fail say, eşikte devreyi aç
+            _gemini_cb["fails"] += 1
+            if _gemini_cb["fails"] >= _GEMINI_CB_THRESHOLD:
+                _gemini_cb["open_until"] = time.time() + _GEMINI_CB_COOLDOWN
+                _gemini_cb["fails"] = 0
+                logger.warning("_gemini_call: circuit breaker AÇILDI — %d ardışık fail, "
+                               "%ds boyunca Gemini'siz fallback", _GEMINI_CB_THRESHOLD, _GEMINI_CB_COOLDOWN)
             # 5xx ve 429 → geçici sorun, bir sonraki modeli dene
             # 4xx (400, 403 vb.) → API/key sorunu, fallback da aynı hatayı verir
             if status and 400 <= status < 500 and status != 429:
