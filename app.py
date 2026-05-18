@@ -1424,6 +1424,24 @@ def _is_bg_leader():
     except (BlockingIOError, OSError):
         return False
 
+# SPEC-009 Faz D2 (digest mail leader-lock): _digest_cron_loop her 4 worker'da
+# çalışıyordu → 19:00'da eşzamanlı first-fire (last_digest.txt yazılmadan) → 4×
+# aynı digest mail → Brevo kotası 4× tükeniyor. Ayrı lock — yalnız leader gönderir.
+_DIGEST_LOCK_PATH = "/tmp/bp_digest_leader.lock"
+_digest_lock_fh = None
+
+def _is_digest_leader():
+    """Bu worker digest mail gönderme yetkisine sahip mi? fcntl.flock —
+    4 worker'dan yalnızca biri leader → digest 4× yerine 1× gönderilir."""
+    global _digest_lock_fh
+    try:
+        if _digest_lock_fh is None:
+            _digest_lock_fh = open(_DIGEST_LOCK_PATH, "w")
+        _fcntl.flock(_digest_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+        return True
+    except (BlockingIOError, OSError):
+        return False
+
 def _load_prev_signals():
     """App start'ta disk'ten _prev_signals'i yükler."""
     global _prev_signals
@@ -2060,6 +2078,11 @@ def _digest_cron_loop():
             now = datetime.now(_TZ_TR)
             # 19:00–19:05 arasında ve son 6 saatte gönderilmediyse tetikle
             if 19 <= now.hour < 20 and now.minute < 10:
+                # Leader-lock — yalnız 1 worker digest gönderir. 4 worker eşzamanlı
+                # tetiklenince last_digest.txt yazılmadan 4× mail gidiyordu (Faz D2).
+                if not _is_digest_leader():
+                    time.sleep(300)
+                    continue
                 last_sent_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_digest.txt")
                 today_str = now.strftime("%Y-%m-%d")
                 already_sent = False
