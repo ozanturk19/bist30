@@ -445,7 +445,7 @@ const TICKERS_PARAM = "{{ tickers_param }}";
 const ROW_LABELS = [
   { key: '_sep_tech',     label: '📊 TEKNİK ANALİZ', isSep: true },
   { key: 'signal',        label: 'Sinyal' },
-  { key: 'is_premium',    label: 'Premium ★', help: 'AL sinyali olan VE 5 günlük hacim ortalaması son 20 gün ortalamasının 1.20 katından yüksek olan hisseler. Backtest\'te en güçlü Sharpe oranı bu kategoride.' },
+  { key: 'is_premium',    label: 'Premium 💎', help: 'AL sinyali olan VE 5 günlük hacim ortalaması son 20 gün ortalamasının 1.20 katından yüksek olan hisseler. Backtest\'te en güçlü Sharpe oranı bu kategoride.' },
   { key: 'price',         label: 'Son Fiyat' },
   { key: 'change_pct',    label: 'Günlük Değişim' },
   { key: 'adx',           label: 'ADX (Trend Gücü)' },
@@ -473,7 +473,7 @@ const ROW_LABELS = [
 function renderPremium(s) {
   if (!s) return '<span class="muted">—</span>';
   return s.is_premium
-    ? '<span class="badge" style="background:rgba(255,200,80,.14);color:#ffc850;border:1px solid rgba(255,200,80,.4);font-weight:700">★ Premium</span>'
+    ? '<span class="badge" style="background:rgba(255,200,80,.14);color:#ffc850;border:1px solid rgba(255,200,80,.4);font-weight:700">💎 Premium</span>'
     : '<span class="muted" style="font-size:11px">—</span>';
 }
 

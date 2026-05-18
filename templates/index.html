@@ -4028,7 +4028,7 @@ function tierBadge(s) {
   // Standart için inline rozet yok (mevcut UI'da tablo zaten varsayılan, görsel kalabalık olmasın)
   // Backward compat: tier henüz hesaplanmadıysa eski is_premium fallback
   if (s.is_premium && !s.tier) {
-    return ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:11px">★</span>';
+    return ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:11px">💎</span>';
   }
   return '';
 }
@@ -4294,7 +4294,7 @@ function renderTable() {
     _lastTier_desktop = _curTierD;
     const _trLocked = (_premiumLocked && s.tier === 'premium') ? 'tier-locked' : '';
     return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''} ${_trLocked}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
-      <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:12px">★</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''} ${wtHtml}${sectorHtml}</td>
+      <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:12px">💎</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
       <td onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}${eqHtml}</td>

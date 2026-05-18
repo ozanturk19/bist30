@@ -461,7 +461,7 @@ function renderHeatmap(stocks) {
 
     const premCount = sec.premium ? sec.premium.length : 0;
     const premPill  = premCount > 0
-      ? `<span class="stat-pill pill-prem" title="Premium sinyaller (AL + Hacim Onaylı, RVOL ≥ 1.20)">★ ${premCount}</span>`
+      ? `<span class="stat-pill pill-prem" title="Premium sinyaller (AL + Hacim Onaylı, RVOL ≥ 1.20)">💎 ${premCount}</span>`
       : '';
     return `
     <div class="sector-card" data-sector="${sec.name}" data-href="/tarama?sector=${encodeURIComponent(sec.name)}" style="--heat-color:${color};cursor:pointer" title="${sec.name} sektöründeki tüm hisseleri taramaya götür" tabindex="0" role="link">
