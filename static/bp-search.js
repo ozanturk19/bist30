@@ -556,13 +556,15 @@
     var bar = document.getElementById('subscribeBar');
     if (bar && !bar.dataset.bpUserApplied) {
       bar.dataset.bpUserApplied = '1';
-      var greeting = user.first_name ? ('Merhaba, ' + user.first_name + '!') : 'Hoş geldin!';
-      var profileCta = user.profile_done
-        ? ''
-        : '<a href="/profil?t=' + encodeURIComponent(user.token || readBpSubCookie() || '') + '" style="color:#b8c3ff;font-size:12px;text-decoration:none;border:1px solid rgba(184,195,255,0.3);padding:5px 11px;border-radius:6px;font-weight:600;margin-left:auto;flex-shrink:0">Profili Tamamla →</a>';
-      bar.innerHTML =
-        '<div style="font-size:13px;font-weight:700;color:#00e290;flex:1;min-width:0">✓ ' + greeting + ' Sinyal aboneliğin aktif.</div>' +
-        profileCta;
+      // SPEC-009 Aksiyon 1 ek: "Hoş geldin abonelik aktif" üst banner KALDIRILDI —
+      // alt premium CTA bağlamsal mesajı (B durumu) zaten "Aboneliğin aktif" diyor,
+      // çift banner aynı bilgiyi tekrarlıyordu. Profil eksikse yalnız CTA kalır.
+      if (user.profile_done) {
+        bar.style.display = 'none';
+      } else {
+        bar.innerHTML =
+          '<a href="/profil?t=' + encodeURIComponent(user.token || readBpSubCookie() || '') + '" style="color:#b8c3ff;font-size:12px;text-decoration:none;border:1px solid rgba(184,195,255,0.3);padding:5px 11px;border-radius:6px;font-weight:600;margin-left:auto;flex-shrink:0">Profili Tamamla →</a>';
+      }
     }
 
     // 2) Sub-toast popup'ı kapat (abone ise gösterme)
