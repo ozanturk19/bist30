@@ -2144,10 +2144,16 @@ def _load_cache_from_disk():
         if data and isinstance(data, list) and len(data) > 0:
             for s in data:
                 _enrich_stock(s)
+            # updated_at = disk dosyasının mtime'ı (refresh_data yazımı sonrası).
+            # Non-leader worker refresh_data çalıştırmaz → placeholder string
+            # /api/data updated_at'i parse edilemez bırakıyordu. mtime her zaman parse edilebilir.
+            disk_ts = datetime.fromtimestamp(
+                os.path.getmtime(_DISK_CACHE_PATH), _TZ_TR
+            ).strftime("%d.%m.%Y %H:%M:%S")
             with _lock:
                 _cache["data"] = data
-                _cache["updated_at"] = "disk cache (başlatılıyor…)"
-            logger.info("Disk cache yüklendi: %d hisse (anlık veri bekleniyor)", len(data))
+                _cache["updated_at"] = disk_ts
+            logger.info("Disk cache yüklendi: %d hisse (updated_at=%s)", len(data), disk_ts)
     except Exception as e:
         logger.warning("Disk cache okuma hatası: %s", e)
 
