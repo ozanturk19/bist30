@@ -879,7 +879,7 @@ function renderResults(rows, count) {
     return `<tr${_locked}>
       <td>
         <a href="/hisse/${s.ticker}">
-          <div class="tk">${s.ticker}${s.is_premium ? ' <span title="Premium (RVOL≥1.20)" style="color:#ffc850;font-size:11px;vertical-align:middle">💎</span>' : ''}</div>
+          <div class="tk">${s.ticker}${s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:#ffc850;font-size:11px;vertical-align:middle">💎</span>' : ''}</div>
           <div class="tk-name">${(s.name||'').replace(' A.Ş.','').substring(0,20)}</div>
         </a>
       </td>

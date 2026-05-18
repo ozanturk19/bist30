@@ -429,7 +429,7 @@ function renderHeatmap(stocks) {
   stocks.forEach(s => {
     const sec = s.sector || 'Diğer';
     if (!secMap[sec]) secMap[sec] = { al:[], sat:[], bkl:[], premium:[] };
-    if (s.is_premium) secMap[sec].premium.push(s);
+    if (s.tier === 'premium') secMap[sec].premium.push(s);
     if (s.signal === 'AL') { secMap[sec].al.push(s); totalAl++; }
     else if (s.signal === 'SAT') { secMap[sec].sat.push(s); totalSat++; }
     else { secMap[sec].bkl.push(s); totalBkl++; }
