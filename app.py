@@ -1442,6 +1442,24 @@ def _is_digest_leader():
     except (BlockingIOError, OSError):
         return False
 
+# SPEC-009 Gemini Faz 1: _prefetch_thread her 4 worker'da çalışıyordu → Gemini
+# çağrıları 4× → maliyet patlaması (~60 TL/gün). Ayrı leader-lock — yalnız 1
+# worker bg prefetch yapar (multi-worker cost multiplier fix).
+_GEMINI_LOCK_PATH = "/tmp/bp_gemini_leader.lock"
+_gemini_lock_fh = None
+
+def _is_gemini_leader():
+    """Bu worker Gemini bg prefetch yetkisine sahip mi? fcntl.flock —
+    4 worker'dan yalnızca biri leader → prefetch 4× yerine 1×."""
+    global _gemini_lock_fh
+    try:
+        if _gemini_lock_fh is None:
+            _gemini_lock_fh = open(_GEMINI_LOCK_PATH, "w")
+        _fcntl.flock(_gemini_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+        return True
+    except (BlockingIOError, OSError):
+        return False
+
 def _load_prev_signals():
     """App start'ta disk'ten _prev_signals'i yükler."""
     global _prev_signals
@@ -3809,7 +3827,13 @@ _prefetch_thread = threading.Thread(
     daemon=True,
     name="gemini-prefetch"
 )
-_prefetch_thread.start()
+# SPEC-009 Gemini Faz 1: yalnız leader worker prefetch çalıştırır — 4× Gemini
+# maliyet multiplier fix. Non-leader 3 worker prefetch yapmaz (on-demand cache'ten okur).
+if _is_gemini_leader():
+    _prefetch_thread.start()
+    logger.info("gemini-prefetch: LEADER worker — bg prefetch aktif")
+else:
+    logger.info("gemini-prefetch: non-leader worker — prefetch atlandı (maliyet fix)")
 
 
 def _on_demand_news_worker():
