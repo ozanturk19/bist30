@@ -17,6 +17,7 @@ test_layout.html
 backtest_cache.json
 health_fail_count.txt
 last_cache.json
+pending_changes.json
 *.bak
 *.bak.*
 

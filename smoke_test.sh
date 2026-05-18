@@ -6,9 +6,10 @@
 set -e
 cd /root/bist30
 
-# 1) Service alive
-if ! systemctl is-active --quiet bist30; then
-  echo "❌ FAIL: bist30 service inactive"
+# 1) Service alive — /api/health curl (Bulgu 2: systemctl is-active ExecStartPost
+#    bağlamında 'activating' state'inde false negative veriyordu → restart loop besliyor)
+if ! curl -sf -m 5 http://localhost:8003/api/health -o /dev/null; then
+  echo "❌ FAIL: /api/health unreachable"
   exit 1
 fi
 
