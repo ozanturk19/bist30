@@ -1985,6 +1985,26 @@ def _notify_email_signal_changes(changes):
     threading.Thread(target=_send_instant, daemon=True).start()
 
 
+# SPEC-009 Aksiyon 3 (Trading Day Guard): resmi tatil + hafta sonu digest
+# atlanır — veri oluşmadan mail anlamsız + spam algısı. holidays paketi yoksa
+# defansif: yalnız hafta sonu kontrolü (digest crash etmez, sadece tatil atlamaz).
+try:
+    import holidays as _holidays_lib
+    _tr_holidays = _holidays_lib.Turkey()
+except Exception:
+    _tr_holidays = None
+    logger.warning("holidays paketi yüklü değil — is_trading_day yalnız hafta sonu kontrolü")
+
+def is_trading_day(d=None):
+    """BIST işlem günü mü? Hafta sonu (Cmt/Pzr) veya TR resmi tatil → False."""
+    d = d or datetime.now(_TZ_TR).date()
+    if d.weekday() >= 5:
+        return False
+    if _tr_holidays is not None and d in _tr_holidays:
+        return False
+    return True
+
+
 def _send_digest_emails(timeframe="daily", force=False):
     """Günlük (19:00) veya haftalık (Cuma 19:00) digest gönder.
     timeframe: 'daily' | 'weekly'
@@ -1992,6 +2012,11 @@ def _send_digest_emails(timeframe="daily", force=False):
     if not SMTP_HOST:
         logger.warning("_send_digest_emails: SMTP_HOST yok, atlandı (timeframe=%s)", timeframe)
         return {"status": "no_smtp", "sent": 0}
+
+    # SPEC-009 Aksiyon 3: tatil/hafta sonu daily digest atla (force manuel hariç).
+    if timeframe == "daily" and not force and not is_trading_day():
+        logger.info("digest skipped: işlem günü değil (%s)", datetime.now(_TZ_TR).date())
+        return {"status": "not_trading_day", "sent": 0}
 
     with _pending_changes_lock:
         pending = _load_pending_changes()
