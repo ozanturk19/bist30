@@ -4016,6 +4016,24 @@ function _hasPremiumAccess() {
   return false;
 }
 
+// SPEC-009 Aksiyon 1: Kullanıcı newsletter abonesi mi? (bp_sub cookie / bp_sub_user)
+// 3 durum state machine: A) anonim B) abone-basic C) premium. Premium CTA
+// banner'ı bu duruma göre bağlamsal mesaj gösterir (çelişkili mesaj çifti fix).
+function _isNewsletterSub() {
+  try {
+    if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return true;
+    const u = localStorage.getItem('bp_sub_user');
+    if (u && JSON.parse(u).subscribed) return true;
+  } catch (_) {}
+  return false;
+}
+// Premium CTA banner metni — duruma göre (premium kullanıcıya banner hiç gösterilmez).
+function _premiumCtaText() {
+  return _isNewsletterSub()
+    ? '✅ Aboneliğin aktif — Premium hisseleri de görmek için'   // B) abone-basic
+    : '🔒 Premium hisseleri görmek için';                          // A) anonim
+}
+
 /* SPEC-001 Faz 1: Tier rozeti — Standart/Plus/Premium (CPO MSG-084 D plan) */
 function tierBadge(s) {
   if (!s) return '';
@@ -4146,8 +4164,8 @@ function renderTable() {
           // Premium grup başlangıcında CTA göster (sadece locked + count>0)
           if (_curTier === 'premium' && _premiumLocked && _premiumCount > 0) {
             mtHeader += `<div class="mc-premium-cta">
-              <div class="premium-cta-content">🔒 Premium sinyalleri görmek için <strong>ücretsiz hesap aç</strong></div>
-              <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">💎 Premium'u Aç</button>
+              <div class="premium-cta-content">${_premiumCtaText()}</div>
+              <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
             </div>`;
           }
         }
@@ -4284,7 +4302,7 @@ function renderTable() {
       if (_curTierD === 'premium' && _premiumLocked && _premiumCount > 0) {
         _tierHeaderTr += `<tr class="premium-cta-row"><td colspan="9">
           <div class="premium-cta-content">
-            <span>🔒 Premium sinyalleri görmek için</span>
+            <span>${_premiumCtaText()}</span>
             <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">💎 Premium'u Aç</button>
             <strong>(ücretsiz)</strong>
           </div>
