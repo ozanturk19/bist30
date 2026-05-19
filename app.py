@@ -2935,7 +2935,6 @@ def _do_macro_ai_refresh():
             today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
             _macro_ai_cache.update({"text": text, "ts": now, "date": today_s,
                                     "generated_at": datetime.now(_TZ_TR).strftime("%H:%M")})
-            _save_macro_ai_to_disk()   # SPEC-009 Faz 2 B2: non-leader worker'lar okusun
             logger.info("_do_macro_ai_refresh: tamamlandi")
     except Exception as e:
         logger.warning("_do_macro_ai_refresh: hata — %s", e)
@@ -2955,15 +2954,9 @@ def api_macro_summary():
     cache_fresh = (cached.get("date") == today_s
                    and (now - cached.get("ts", 0)) < _MACRO_AI_TTL)
 
-    # SPEC-009 Faz 2 B2: in-memory stale ise diskten oku — leader yazmış olabilir
-    if not cache_fresh:
-        _load_macro_ai_from_disk()
-        cached = _macro_ai_cache
-        cache_fresh = (cached.get("date") == today_s
-                       and (now - cached.get("ts", 0)) < _MACRO_AI_TTL)
-
     # Stale + bu worker gemini-leader ise → arka planda yenile (4× çağrı fix).
-    # Non-leader yenilemez, diskteki leader cache'ini serve eder.
+    # Non-leader yenilemez; gemini-cache-sync timer thread'i diskteki leader
+    # cache'ini periyodik (90s) yükler → in-memory'den serve eder (inline I/O YOK, #38).
     if not cache_fresh and not _macro_ai_refreshing and _is_gemini_leader():
         threading.Thread(target=_do_macro_ai_refresh, daemon=True,
                          name="macro-ai-refresh").start()
@@ -3664,16 +3657,6 @@ def get_ai_news(ticker):
             if (now - cached["ts"]) < ttl:
                 return cached.get("text")   # başarısız cache → None döner
 
-    # SPEC-009 Faz 2 B2: in-memory miss → diskten oku; başka worker (veya leader
-    # prefetch) bu ticker'ı çekmiş olabilir → tekrar Gemini çağrısı yapma.
-    _load_news_cache_from_disk()
-    with _lock:
-        cached = _news_cache.get(ticker)
-        if cached:
-            ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
-            if (now - cached["ts"]) < ttl:
-                return cached.get("text")
-
     name       = STOCK_NAMES.get(ticker, ticker)
     today_str  = datetime.now(_TZ_TR).strftime("%d %B %Y")   # ör: "01 Mayıs 2026"
     today_iso  = datetime.now(_TZ_TR).strftime("%Y-%m-%d")   # ör: "2026-05-01"
@@ -3696,7 +3679,6 @@ def get_ai_news(ticker):
         else:
             logger.warning("get_ai_news(%s): tüm modeller başarısız → negatif cache 5dk", ticker)
             _news_cache[ticker] = {"text": None, "ts": now, "failed": True}
-    _save_news_cache_to_disk()   # SPEC-009 Faz 2 B2: cross-worker dedup (_lock dışında)
     return text
 
 
@@ -3913,6 +3895,29 @@ if _is_gemini_leader():
     logger.info("gemini-prefetch: LEADER worker — bg prefetch aktif")
 else:
     logger.info("gemini-prefetch: non-leader worker — prefetch atlandı (maliyet fix)")
+
+
+# SPEC-009 Faz 2 (redesign) — gemini-cache-sync: timer-tabanlı disk senkron.
+# #38: disk I/O request/hot-path'te YAPILMAZ (gevent hub kilitler). Bunun yerine
+# 90s'lik bg timer thread — background_refresh non-leader pattern'i birebir.
+# Leader: in-memory cache'i diske yazar. Non-leader: diskten okur. Inline I/O YOK.
+def _gemini_cache_sync_loop():
+    is_leader = _is_gemini_leader()
+    mode = "LEADER (disk yazar)" if is_leader else "non-leader (disk okur)"
+    logger.info("gemini-cache-sync: %s", mode)
+    while True:
+        try:
+            if is_leader:
+                _save_news_cache_to_disk()
+                _save_macro_ai_to_disk()
+            else:
+                _load_news_cache_from_disk()
+                _load_macro_ai_from_disk()
+        except Exception as e:
+            logger.error("gemini-cache-sync hatası: %s", e)
+        time.sleep(90)
+
+threading.Thread(target=_gemini_cache_sync_loop, daemon=True, name="gemini-cache-sync").start()
 
 
 def _on_demand_news_worker():
