@@ -31,7 +31,8 @@ health_state.txt
 last_digest.txt
 health_fail_count.txt
 last_macro.json
-prev_signals.json
+last_macro_ai.json
+last_news_cache.jsonprev_signals.json
 push_state.json
 
 # Operasyonel dosyalar (prod-only, repo'ya girmez)
