@@ -2859,8 +2859,32 @@ def api_macro():
 
 # ── Günlük Makro AI Özeti ────────────────────────────────────────────────────
 _macro_ai_cache: dict = {}   # {"text": str, "ts": float, "date": str}
-_MACRO_AI_TTL   = 14400      # 4 saat
+_MACRO_AI_TTL   = 43200      # SPEC-009 Faz 2 B3: 4h → 12h (Gemini maliyet)
 _macro_ai_refreshing = False  # arka plan yenileme kilidi
+
+# SPEC-009 Faz 2 B2: macro-ai shared disk cache — leader Gemini çağrısını yapıp
+# diske yazar, non-leader worker'lar diskten okur → 4× Gemini çağrısı yerine 1×.
+_MACRO_AI_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_macro_ai.json")
+
+def _save_macro_ai_to_disk():
+    """Leader: macro-ai cache'i diske yazar (non-leader worker'lar okusun)."""
+    try:
+        with open(_MACRO_AI_DISK_PATH, "w", encoding="utf-8") as f:
+            json.dump(_macro_ai_cache, f, ensure_ascii=False)
+    except Exception as e:
+        logger.warning("_save_macro_ai_to_disk hatası: %s", e)
+
+def _load_macro_ai_from_disk():
+    """Non-leader: diskten macro-ai cache yükler (leader yazmış olabilir)."""
+    try:
+        if not os.path.exists(_MACRO_AI_DISK_PATH):
+            return
+        with open(_MACRO_AI_DISK_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict) and data.get("text"):
+            _macro_ai_cache.update(data)
+    except Exception as e:
+        logger.warning("_load_macro_ai_from_disk hatası: %s", e)
 
 
 def _do_macro_ai_refresh():
@@ -2911,6 +2935,7 @@ def _do_macro_ai_refresh():
             today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
             _macro_ai_cache.update({"text": text, "ts": now, "date": today_s,
                                     "generated_at": datetime.now(_TZ_TR).strftime("%H:%M")})
+            _save_macro_ai_to_disk()   # SPEC-009 Faz 2 B2: non-leader worker'lar okusun
             logger.info("_do_macro_ai_refresh: tamamlandi")
     except Exception as e:
         logger.warning("_do_macro_ai_refresh: hata — %s", e)
@@ -2930,8 +2955,16 @@ def api_macro_summary():
     cache_fresh = (cached.get("date") == today_s
                    and (now - cached.get("ts", 0)) < _MACRO_AI_TTL)
 
-    # Stale veya başka gün — arka planda yenile, şimdi var olan cache'i dön
-    if not cache_fresh and not _macro_ai_refreshing:
+    # SPEC-009 Faz 2 B2: in-memory stale ise diskten oku — leader yazmış olabilir
+    if not cache_fresh:
+        _load_macro_ai_from_disk()
+        cached = _macro_ai_cache
+        cache_fresh = (cached.get("date") == today_s
+                       and (now - cached.get("ts", 0)) < _MACRO_AI_TTL)
+
+    # Stale + bu worker gemini-leader ise → arka planda yenile (4× çağrı fix).
+    # Non-leader yenilemez, diskteki leader cache'ini serve eder.
+    if not cache_fresh and not _macro_ai_refreshing and _is_gemini_leader():
         threading.Thread(target=_do_macro_ai_refresh, daemon=True,
                          name="macro-ai-refresh").start()
 
@@ -3274,7 +3307,7 @@ _news_fetch_queue     = set()      # tickers waiting for background fetch
 _news_queue_lock      = threading.Lock()
 
 _signal_explain_cache = {}   # {ticker: {"text": str|None, "sig": str, "ts": float, "failed": bool}}
-_SIG_EXPLAIN_TTL      = 3600 * 4   # 4 saat
+_SIG_EXPLAIN_TTL      = 3600 * 12  # SPEC-009 Faz 2 B3: 4h → 12h (Gemini maliyet)
 _SIG_FAIL_TTL         = 300        # 5 dakika
 
 # Model fallback zinciri: birincil 2.5-flash, yedek 1.5-flash
