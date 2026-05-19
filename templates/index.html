@@ -1465,9 +1465,13 @@
     font-size: 11px; font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
   .adv-chip:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
-  .adv-chip.sel { background: rgba(184,195,255,.15); border-color: rgba(184,195,255,.55); color: var(--bp-brand); }
-  .adv-chip.sel-bull { background: rgba(0,226,144,.10); border-color: rgba(0,226,144,.42); color: var(--bp-al); }
-  .adv-chip.sel-bear { background: rgba(248,81,73,.12); border-color: rgba(248,81,73,.4); color: var(--bp-sat); }
+  /* SPEC-009: seçili chip tek net stil — dolu accent, koyu metin (belirsizlik fix).
+     Eski sel/sel-bull/sel-bear üçlü şeması "hangisi seçili" kafa karışıklığı yaratıyordu. */
+  .adv-chip.adv-active {
+    background: var(--bp-brand, #b8c3ff);
+    border-color: var(--bp-brand, #b8c3ff);
+    color: #0d1117; font-weight: 700;
+  }
   .adv-active-badge {
     display: inline-flex; align-items: center; justify-content: center;
     background: var(--bp-brand); color: #fff; border-radius: 50%;
@@ -2653,7 +2657,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <div class="adv-group">
       <div class="adv-group-label">📊 ADX Gücü</div>
       <div class="adv-chips" id="adv-adx">
-        <button class="adv-chip sel" data-val="0"   onclick="setAdv('adx',0,this)">Tümü</button>
+        <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('adx',0,this)">Tümü</button>
         <button class="adv-chip"    data-val="25"  onclick="setAdv('adx',25,this)">Güçlü ≥25</button>
         <button class="adv-chip"    data-val="35"  onclick="setAdv('adx',35,this)">Çok Güçlü ≥35</button>
         <button class="adv-chip"    data-val="45"  onclick="setAdv('adx',45,this)">Aşırı ≥45</button>
@@ -2662,7 +2666,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <div class="adv-group">
       <div class="adv-group-label">📅 Sinyal Süresi (Bar)</div>
       <div class="adv-chips" id="adv-bars">
-        <button class="adv-chip sel" data-val="0"  onclick="setAdv('bars',0,this)">Tümü</button>
+        <button class="adv-chip adv-active" data-val="0"  onclick="setAdv('bars',0,this)">Tümü</button>
         <button class="adv-chip"     data-val="3"  onclick="setAdv('bars',3,this)">3+ bar</button>
         <button class="adv-chip"     data-val="7"  onclick="setAdv('bars',7,this)">7+ bar</button>
         <button class="adv-chip"     data-val="14" onclick="setAdv('bars',14,this)">14+ bar</button>
@@ -2671,7 +2675,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <div class="adv-group">
       <div class="adv-group-label">📈 Hacim Artışı</div>
       <div class="adv-chips" id="adv-vol">
-        <button class="adv-chip sel" data-val="0"   onclick="setAdv('vol',0,this)">Tümü</button>
+        <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('vol',0,this)">Tümü</button>
         <button class="adv-chip"     data-val="1.5" onclick="setAdv('vol',1.5,this)">×1.5+</button>
         <button class="adv-chip"     data-val="2"   onclick="setAdv('vol',2,this)">×2+</button>
         <button class="adv-chip"     data-val="3"   onclick="setAdv('vol',3,this)">×3+</button>
@@ -2680,16 +2684,16 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <div class="adv-group">
       <div class="adv-group-label">🔢 RSI Durumu</div>
       <div class="adv-chips" id="adv-rsi">
-        <button class="adv-chip sel"      data-val="all"       onclick="setAdv('rsi','all',this)">Tümü</button>
-        <button class="adv-chip sel-bull" data-val="oversold"  onclick="setAdv('rsi','oversold',this)">Aşırı Satım ≤30</button>
-        <button class="adv-chip"          data-val="neutral"   onclick="setAdv('rsi','neutral',this)">Normal 30-70</button>
-        <button class="adv-chip sel-bear" data-val="overbought" onclick="setAdv('rsi','overbought',this)">Aşırı Alım ≥70</button>
+        <button class="adv-chip adv-active" data-val="all"       onclick="setAdv('rsi','all',this)">Tümü</button>
+        <button class="adv-chip"            data-val="oversold"  onclick="setAdv('rsi','oversold',this)">Aşırı Satım ≤30</button>
+        <button class="adv-chip"            data-val="neutral"   onclick="setAdv('rsi','neutral',this)">Normal 30-70</button>
+        <button class="adv-chip"            data-val="overbought" onclick="setAdv('rsi','overbought',this)">Aşırı Alım ≥70</button>
       </div>
     </div>
     <div class="adv-group">
       <div class="adv-group-label">🎯 Giriş Kalitesi</div>
       <div class="adv-chips" id="adv-eq">
-        <button class="adv-chip sel" data-val="all"      onclick="setAdv('eq','all',this)">Tümü</button>
+        <button class="adv-chip adv-active" data-val="all"      onclick="setAdv('eq','all',this)">Tümü</button>
         <button class="adv-chip"     data-val="IDEAL"    onclick="setAdv('eq','IDEAL',this)">✅ İdeal</button>
         <button class="adv-chip"     data-val="IYI"      onclick="setAdv('eq','IYI',this)">👍 İyi</button>
         <button class="adv-chip"     data-val="DIKKATLI" onclick="setAdv('eq','DIKKATLI',this)">⚠️ Dikkatli</button>
@@ -3588,15 +3592,11 @@ function toggleAdvPanel() {
 
 function setAdv(key, val, btn) {
   advFilters[key] = val;
-  /* chip stilini güncelle */
+  /* SPEC-009: seçili chip tek net .adv-active — grup içinde yalnız 1 aktif.
+     Eski sel/sel-bull/sel-bear üçlü şeması "hangisi seçili" belirsizliği yaratıyordu. */
   const group = document.getElementById('adv-' + key);
-  group.querySelectorAll('.adv-chip').forEach(c => {
-    const isDefaultSel = (key === 'rsi')
-      ? (c.dataset.val === 'oversold' || c.dataset.val === 'overbought')
-      : false;
-    c.className = 'adv-chip' + (isDefaultSel ? ' sel-' + (c.dataset.val === 'oversold' ? 'bull' : 'bear') : '');
-  });
-  btn.className = 'adv-chip sel';
+  group.querySelectorAll('.adv-chip').forEach(c => c.classList.remove('adv-active'));
+  if (btn) btn.classList.add('adv-active');
   /* Aktif filtre sayısı badge */
   const active = (advFilters.adx > 0 ? 1 : 0) + (advFilters.bars > 0 ? 1 : 0)
                + (advFilters.vol > 0 ? 1 : 0) + (advFilters.rsi !== 'all' ? 1 : 0)
@@ -3606,6 +3606,16 @@ function setAdv(key, val, btn) {
   badge.style.display = active > 0 ? '' : 'none';
   document.getElementById('advToggle').classList.toggle('active', active > 0 || document.getElementById('advPanel').classList.contains('open'));
   renderTable();
+  updateActiveFiltersBar();   /* SPEC-009: aktif filtre bar senkron — "havada kalıyor" fix */
+}
+
+/* SPEC-009: aktif filtre bar'daki ✕ ile adv filter kaldırma. Önceden tanımsızdı
+   (applyAdvFilter is not defined) → chip kaldırılamıyordu. setAdv'a yönlendirir,
+   dropdown chip görseli de senkronlanır. */
+function applyAdvFilter(key, val) {
+  const group = document.getElementById('adv-' + key);
+  const targetChip = group ? group.querySelector('.adv-chip[data-val="' + val + '"]') : null;
+  setAdv(key, val, targetChip);
 }
 
 
