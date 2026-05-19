@@ -5205,6 +5205,26 @@ def api_stock_mtf(ticker):
     return safe_json(data)
 
 
+# SPEC-008 L1 — Chart Integrity Guard. Bozuk/stale chart fiyatı ana fiyattan
+# saparsa kullanıcıya ASLA bozuk grafik render edilmez (GSDHO 3.08× bug fix).
+_CHART_SUMMARY_TOL_PCT = 3    # summary.price — intraday dalga toleransı
+_CHART_OHLC_TOL_PCT    = 20   # last ohlc close — split tolere
+
+def validate_chart_integrity(ticker, chart_data, main_price):
+    """Chart fiyatı ana cache fiyatıyla tutarlı mı? (valid, reason).
+    main_price/veri yoksa True (graceful — engelleme yok)."""
+    if not chart_data or not main_price or main_price <= 0:
+        return True, None
+    summary_price = (chart_data.get("summary") or {}).get("price")
+    ohlc = chart_data.get("ohlc") or []
+    last_close = ohlc[-1].get("close") if (ohlc and isinstance(ohlc[-1], dict)) else None
+    if summary_price and abs(summary_price - main_price) / main_price * 100 > _CHART_SUMMARY_TOL_PCT:
+        return False, f"summary.price {summary_price} vs main {main_price} (>%{_CHART_SUMMARY_TOL_PCT})"
+    if last_close and abs(last_close - main_price) / main_price * 100 > _CHART_OHLC_TOL_PCT:
+        return False, f"last_ohlc.close {last_close} vs main {main_price} (>%{_CHART_OHLC_TOL_PCT})"
+    return True, None
+
+
 @app.route("/api/hisse/<ticker>/chart")
 def api_stock_chart(ticker):
     ticker = ticker.upper()
@@ -5246,6 +5266,29 @@ def api_stock_chart(ticker):
 
     if not data:
         return safe_json({"chart": None, "loading": True})
+
+    # ── SPEC-008 L1: Chart Integrity Guard ───────────────────────────────────
+    # FINAL doğrulama — bozuk chart ASLA render edilmez. Sapma varsa cache iptal
+    # + recompute; recompute de bozuksa integrity_error döner (frontend skeleton).
+    if main_price > 0:
+        ok, reason = validate_chart_integrity(ticker, data, main_price)
+        if not ok:
+            logger.warning("SPEC-008 chart integrity FAIL [%s]: %s — recompute", ticker, reason)
+            with _lock:
+                _stock_chart_cache.pop(ticker, None)
+            fresh = _compute_chart_data(ticker, period="2y")
+            if fresh:
+                data = fresh
+                upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+                with _lock:
+                    _stock_chart_cache[ticker] = {"data": data, "ts": now, "updated_at": upd}
+                ok2, reason2 = validate_chart_integrity(ticker, data, main_price)
+            else:
+                ok2, reason2 = False, "recompute başarısız (veri yok)"
+            if not ok2:
+                logger.error("SPEC-008 chart integrity recompute de FAIL [%s]: %s → integrity_error",
+                             ticker, reason2)
+                return safe_json({"chart": None, "loading": True, "integrity_error": reason2})
 
     # ── Sinyal senkronizasyonu: ana cache otoritelif kaynaktır ───────────────
     # _compute_chart_data() ve analyze() farklı zamanlarda çalışabilir;
