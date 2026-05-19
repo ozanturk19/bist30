@@ -2518,7 +2518,23 @@ function renderHistory(history, currentPrice) {
 }
 
 /* ── Veri yükle — chart + /api/data paralel ─────────── */
-async function loadChart() {
+/* SPEC-008 L2 — Frontend Fail-Safe: bozuk/eksik chart ASLA render edilmez,
+   sınırlı retry + kullanıcıya görünür durum mesajı. */
+const _MAX_CHART_RETRY = 3;
+function _showChartStatus(msg, withRetryBtn) {
+  const el = document.getElementById('chartLoading');
+  if (!el) return;
+  el.style.display = 'block';
+  document.getElementById('chartsInner').style.display = 'none';
+  el.innerHTML = withRetryBtn
+    ? '<span style="color:#909097">' + msg + '</span> ' +
+      '<button type="button" onclick="loadChart(0)" style="margin-left:8px;background:#1f6feb;' +
+      'color:#fff;border:0;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer">Tekrar dene</button>'
+    : '<div class="spinner"></div> ' + msg;
+}
+
+async function loadChart(retry) {
+  retry = retry || 0;
   try {
     /* Chart endpoint + global data aynı anda isteniyor */
     const [res, res2] = await Promise.all([
@@ -2528,7 +2544,18 @@ async function loadChart() {
     const json  = await res.json();
     const data2 = await res2.json();
 
-    if (json.loading || !json.chart) { setTimeout(loadChart, 4000); return; }
+    if (json.integrity_error) {
+      console.warn('[chart] integrity_error:', json.integrity_error);
+    }
+    if (json.loading || json.integrity_error || !json.chart) {
+      if (retry < _MAX_CHART_RETRY) {
+        _showChartStatus('Grafik verisi yenileniyor, lütfen bekleyin…', false);
+        setTimeout(() => loadChart(retry + 1), 3000);
+      } else {
+        _showChartStatus('Geçici veri problemi — grafik şu an gösterilemiyor.', true);
+      }
+      return;
+    }
 
     buildChart(json.chart);
     renderHistory(json.chart.signal_history, json.chart.summary?.price);
@@ -2576,7 +2603,12 @@ async function loadChart() {
       });
     }
   } catch (e) {
-    setTimeout(loadChart, 5000);
+    if (retry < _MAX_CHART_RETRY) {
+      _showChartStatus('Grafik verisi yenileniyor, lütfen bekleyin…', false);
+      setTimeout(() => loadChart(retry + 1), 3000);
+    } else {
+      _showChartStatus('Bağlantı sorunu — grafik yüklenemedi.', true);
+    }
   }
 }
 
