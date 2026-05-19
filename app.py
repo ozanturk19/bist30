@@ -3279,6 +3279,41 @@ _news_cache           = {}   # {ticker: {"text": str|None, "ts": float, "failed"
 _NEWS_CACHE_TTL       = 3600 * 6   # 6 saat — başarılı yanıt
 _NEWS_FAIL_TTL        = 300        # 5 dakika — başarısız yanıt (negatif cache)
 
+# SPEC-009 Faz 2 B2: news cache shared disk — herhangi worker Gemini'den haber
+# çekince diske yazar; başka worker aynı ticker'ı çekmeden önce diskten okur →
+# 4× Gemini çağrısı yerine ~1× (cross-worker dedup). Leader-gate gerekmez:
+# dedup get_ai_news içindeki disk-check ile olur (her worker kendi isteğini servis eder).
+_NEWS_CACHE_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_news_cache.json")
+
+def _save_news_cache_to_disk():
+    """News cache'i diske yazar (cross-worker dedup). _lock DIŞINDA çağrılmalı."""
+    try:
+        with _lock:
+            snapshot = dict(_news_cache)
+        with open(_NEWS_CACHE_DISK_PATH, "w", encoding="utf-8") as f:
+            json.dump(snapshot, f, ensure_ascii=False)
+    except Exception as e:
+        logger.warning("_save_news_cache_to_disk hatası: %s", e)
+
+def _load_news_cache_from_disk():
+    """Diskten news cache merge — ticker başına en taze (ts) kazanır. _lock DIŞINDA."""
+    try:
+        if not os.path.exists(_NEWS_CACHE_DISK_PATH):
+            return
+        with open(_NEWS_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
+            disk = json.load(f)
+        if not isinstance(disk, dict):
+            return
+        with _lock:
+            for tk, dentry in disk.items():
+                if not isinstance(dentry, dict):
+                    continue
+                mem = _news_cache.get(tk)
+                if not mem or dentry.get("ts", 0) > mem.get("ts", 0):
+                    _news_cache[tk] = dentry
+    except Exception as e:
+        logger.warning("_load_news_cache_from_disk hatası: %s", e)
+
 def _news_ttl_for(ticker: str) -> int:
     """Dinamik TTL: aktif sinyalli/hacimli hisseler kısa TTL, durgun hisseler uzun TTL.
 
@@ -3629,6 +3664,16 @@ def get_ai_news(ticker):
             if (now - cached["ts"]) < ttl:
                 return cached.get("text")   # başarısız cache → None döner
 
+    # SPEC-009 Faz 2 B2: in-memory miss → diskten oku; başka worker (veya leader
+    # prefetch) bu ticker'ı çekmiş olabilir → tekrar Gemini çağrısı yapma.
+    _load_news_cache_from_disk()
+    with _lock:
+        cached = _news_cache.get(ticker)
+        if cached:
+            ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
+            if (now - cached["ts"]) < ttl:
+                return cached.get("text")
+
     name       = STOCK_NAMES.get(ticker, ticker)
     today_str  = datetime.now(_TZ_TR).strftime("%d %B %Y")   # ör: "01 Mayıs 2026"
     today_iso  = datetime.now(_TZ_TR).strftime("%Y-%m-%d")   # ör: "2026-05-01"
@@ -3651,6 +3696,7 @@ def get_ai_news(ticker):
         else:
             logger.warning("get_ai_news(%s): tüm modeller başarısız → negatif cache 5dk", ticker)
             _news_cache[ticker] = {"text": None, "ts": now, "failed": True}
+    _save_news_cache_to_disk()   # SPEC-009 Faz 2 B2: cross-worker dedup (_lock dışında)
     return text
 
 
