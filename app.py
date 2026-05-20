@@ -783,7 +783,7 @@ def _enrich_stock(s: dict) -> dict:
     return s
 
 
-_cache       = {"data": [], "updated_at": None}
+_cache       = {"data": [], "updated_at": None, "last_refresh_ts": 0.0}  # SPEC-008 v1.2 #39
 _live_prices = {}
 _lock        = threading.Lock()
 _sse_clients = []
@@ -2213,12 +2213,14 @@ def _load_cache_from_disk():
             # updated_at = disk dosyasının mtime'ı (refresh_data yazımı sonrası).
             # Non-leader worker refresh_data çalıştırmaz → placeholder string
             # /api/data updated_at'i parse edilemez bırakıyordu. mtime her zaman parse edilebilir.
-            disk_ts = datetime.fromtimestamp(
-                os.path.getmtime(_DISK_CACHE_PATH), _TZ_TR
-            ).strftime("%d.%m.%Y %H:%M:%S")
+            disk_mtime = os.path.getmtime(_DISK_CACHE_PATH)
+            disk_ts = datetime.fromtimestamp(disk_mtime, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
             with _lock:
                 _cache["data"] = data
                 _cache["updated_at"] = disk_ts
+                # SPEC-008 v1.2 #39 — disk mtime = son refresh_data zamanı.
+                # background_refresh tamamlanana kadar grace penceresi açık (>300s ise).
+                _cache["last_refresh_ts"] = disk_mtime
             logger.info("Disk cache yüklendi: %d hisse (updated_at=%s)", len(data), disk_ts)
     except Exception as e:
         logger.warning("Disk cache okuma hatası: %s", e)
@@ -2246,6 +2248,7 @@ def refresh_data():
     with _lock:
         _cache["data"] = results
         _cache["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+        _cache["last_refresh_ts"] = time.time()  # SPEC-008 v1.2 #39 — grace pencere kapanır
 
     # Başarılı güncellemeden sonra diske yaz
     _save_cache_to_disk(results)
@@ -5207,13 +5210,21 @@ def api_stock_mtf(ticker):
 
 # SPEC-008 L1 — Chart Integrity Guard. Bozuk/stale chart fiyatı ana fiyattan
 # saparsa kullanıcıya ASLA bozuk grafik render edilmez (GSDHO 3.08× bug fix).
-_CHART_SUMMARY_TOL_PCT = 3    # summary.price — intraday dalga toleransı
-_CHART_OHLC_TOL_PCT    = 20   # last ohlc close — split tolere
+# SPEC-008 v1.2 #39 — Post-restart grace: main_price referansı henüz fresh
+# değilse (>300s eski veya bilinmiyor) guard graceful skip yapar — restart
+# sonrası FP penceresini elimine eder (AKBNK/THYAO 14:44 FP olayı).
+_CHART_SUMMARY_TOL_PCT  = 3    # summary.price — intraday dalga toleransı
+_CHART_OHLC_TOL_PCT     = 20   # last ohlc close — split tolere
+_CHART_MAIN_GRACE_S     = 300  # main_price 5dk+ eski ise guard ATLA (#39)
 
-def validate_chart_integrity(ticker, chart_data, main_price):
+def validate_chart_integrity(ticker, chart_data, main_price, main_price_age_s=None):
     """Chart fiyatı ana cache fiyatıyla tutarlı mı? (valid, reason).
-    main_price/veri yoksa True (graceful — engelleme yok)."""
+    main_price/veri yoksa True (graceful — engelleme yok).
+    main_price_age_s None veya > 300 → grace skip (referans stale, FP riski)."""
     if not chart_data or not main_price or main_price <= 0:
+        return True, None
+    # #39 — referans tazelik kontrolü
+    if main_price_age_s is None or main_price_age_s > _CHART_MAIN_GRACE_S:
         return True, None
     summary_price = (chart_data.get("summary") or {}).get("price")
     ohlc = chart_data.get("ohlc") or []
@@ -5235,10 +5246,13 @@ def api_stock_chart(ticker):
 
     # ── Otoritelif sinyal kaynağı: ana cache ──────────────────────────────
     with _lock:
-        stocks     = list(_cache["data"])
-        cached     = _stock_chart_cache.get(ticker)
+        stocks          = list(_cache["data"])
+        cached          = _stock_chart_cache.get(ticker)
+        main_refresh_ts = _cache.get("last_refresh_ts", 0.0)  # SPEC-008 v1.2 #39
     main_stock = next((s for s in stocks if s.get("ticker") == ticker), None)
     main_price = main_stock.get("price", 0) if main_stock else 0
+    # main_price yaşı (saniye) — grace penceresi için (>300s → guard atlar)
+    main_price_age_s = (now - main_refresh_ts) if main_refresh_ts > 0 else None
 
     # ── Fiyat uyuşmazlık tespiti: bölünme/split sonrası eski cache'i iptal et ─
     if cached and main_price > 0:
@@ -5271,7 +5285,7 @@ def api_stock_chart(ticker):
     # FINAL doğrulama — bozuk chart ASLA render edilmez. Sapma varsa cache iptal
     # + recompute; recompute de bozuksa integrity_error döner (frontend skeleton).
     if main_price > 0:
-        ok, reason = validate_chart_integrity(ticker, data, main_price)
+        ok, reason = validate_chart_integrity(ticker, data, main_price, main_price_age_s)
         if not ok:
             logger.warning("SPEC-008 chart integrity FAIL [%s]: %s — recompute", ticker, reason)
             with _lock:
@@ -5282,7 +5296,7 @@ def api_stock_chart(ticker):
                 upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
                 with _lock:
                     _stock_chart_cache[ticker] = {"data": data, "ts": now, "updated_at": upd}
-                ok2, reason2 = validate_chart_integrity(ticker, data, main_price)
+                ok2, reason2 = validate_chart_integrity(ticker, data, main_price, main_price_age_s)
             else:
                 ok2, reason2 = False, "recompute başarısız (veri yok)"
             if not ok2:
