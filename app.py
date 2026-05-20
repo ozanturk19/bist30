@@ -5713,8 +5713,40 @@ def og_image():
 # ── Hisse Karşılaştırma ──────────────────────────────────────────────────────
 @app.route("/karsilastir")
 def karsilastir():
-    tickers_param = request.args.get("tickers", "")
-    return render_template("karsilastir.html", tickers_param=tickers_param)
+    """SPEC-011 L1+L2 — Query-param normalize + self-canonical + dinamik meta.
+    `?tickers=` farklı varyasyonları (case/sıra/duplicate) tek canonical URL'e
+    301 ile yönlendirir → Google duplicate dropluyor sorununu çözer (#40)."""
+    raw = request.args.get("tickers", "").strip()
+    base = "https://borsapusula.com"
+    canonical_url    = f"{base}/karsilastir"
+    page_title       = "Hisse Karşılaştırma — BorsaPusula"
+    page_description = ("BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile "
+                        "yan yana karşılaştırın. F/K, ROE, ADX, RSI, R/R ve daha fazlası.")
+    tickers_param    = raw
+
+    if raw:
+        # Normalize: trim + upper + dedup + alfabetik sırala (max 4 — API ile uyumlu)
+        tickers = sorted({t.strip().upper() for t in raw.split(",") if t.strip()})[:4]
+        if tickers:
+            norm = ",".join(tickers)
+            if raw != norm:
+                # Case/sıra/duplicate farkı → 301 canonical'a
+                return redirect(f"/karsilastir?tickers={norm}", code=301)
+            canonical_url = f"{base}/karsilastir?tickers={norm}"
+            tickers_param = norm
+            # Title: 3'e kadar listele, daha fazlası → "X, Y, Z +N daha"
+            if len(tickers) > 3:
+                title_list = ", ".join(tickers[:3]) + f" +{len(tickers)-3} daha"
+            else:
+                title_list = ", ".join(tickers)
+            page_title = f"{title_list} Karşılaştırma — BorsaPusula"
+            page_description = (f"{', '.join(tickers)} hisselerini teknik sinyal, "
+                                f"F/K, ROE, ADX, RSI ve yatırım skoru ile yan yana karşılaştırın.")
+    return render_template("karsilastir.html",
+                           tickers_param=tickers_param,
+                           canonical_url=canonical_url,
+                           page_title=page_title,
+                           page_description=page_description)
 
 
 @app.route("/api/karsilastir")
