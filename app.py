@@ -2862,7 +2862,8 @@ def api_macro():
 
 # ── Günlük Makro AI Özeti ────────────────────────────────────────────────────
 _macro_ai_cache: dict = {}   # {"text": str, "ts": float, "date": str}
-_MACRO_AI_TTL   = 43200      # SPEC-009 Faz 2 B3: 4h → 12h (Gemini maliyet)
+_MACRO_AI_TTL   = 21600      # SPEC-009 Faz 2 B3: 4h→12h; SPEC-011 paketi: 12h→6h
+                             # (makro hızlı değişir — freshness; KPI 245 req/gün stabil)
 _macro_ai_refreshing = False  # arka plan yenileme kilidi
 
 # SPEC-009 Faz 2 B2: macro-ai shared disk cache — leader Gemini çağrısını yapıp
@@ -3309,6 +3310,81 @@ def _load_news_cache_from_disk():
                     _news_cache[tk] = dentry
     except Exception as e:
         logger.warning("_load_news_cache_from_disk hatası: %s", e)
+
+# ── SPEC-011 L4 / SPEC-013 — Şirket AI özeti (LLM referral + bounce reduction) ──
+# Hisse detay sayfasına özgün metin: Gemini ile 2 paragraf şirket özeti.
+# TTL 30 gün (şirket profili nadiren değişir) → ayda ~215 çağrı, marjinal maliyet.
+# Üretim leader-only bg prefetch'te (#30 maliyet pattern); request path'te asla.
+_company_summary_cache = {}              # {ticker: {"text": str, "ts": float}}
+_COMPANY_SUMMARY_TTL   = 30 * 86400      # 30 gün
+_COMPANY_SUMMARY_PATH  = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "last_company_summary.json")
+
+_COMPANY_SUMMARY_PROMPT = (
+    "Sen finansal yazılım için içerik üreticisin. Türkçe BIST hissesi {ticker} "
+    "({name}) hakkında 2 paragraf özet yaz.\n\n"
+    "KURAL:\n"
+    "1. İlk paragraf 2-3 cümle: Şirket ne yapıyor, hangi sektörde, ana iş kolu.\n"
+    "2. İkinci paragraf 2-3 cümle: Pazardaki konumu, yatırımcı için önemli faktörler.\n"
+    "3. Yatırım tavsiyesi YOK, sadece bilgi.\n"
+    "4. Maksimum 150 kelime toplam. Net, kısa cümleler.\n"
+    "5. Sadece düz metin — başlık yok, markdown yok, madde işareti yok.\n\n"
+    "Çıktı: sadece 2 paragraf."
+)
+
+def _save_company_summary_to_disk():
+    """Şirket özeti cache'i diske yazar. _lock DIŞINDA çağrılmalı."""
+    try:
+        with _lock:
+            snapshot = dict(_company_summary_cache)
+        with open(_COMPANY_SUMMARY_PATH, "w", encoding="utf-8") as f:
+            json.dump(snapshot, f, ensure_ascii=False)
+    except Exception as e:
+        logger.warning("_save_company_summary_to_disk hatası: %s", e)
+
+def _load_company_summary_from_disk():
+    """Diskten şirket özeti merge — ticker başına en taze kazanır. _lock DIŞINDA."""
+    try:
+        if not os.path.exists(_COMPANY_SUMMARY_PATH):
+            return
+        with open(_COMPANY_SUMMARY_PATH, "r", encoding="utf-8") as f:
+            disk = json.load(f)
+        if not isinstance(disk, dict):
+            return
+        with _lock:
+            for tk, dentry in disk.items():
+                if not isinstance(dentry, dict):
+                    continue
+                mem = _company_summary_cache.get(tk)
+                if not mem or dentry.get("ts", 0) > mem.get("ts", 0):
+                    _company_summary_cache[tk] = dentry
+    except Exception as e:
+        logger.warning("_load_company_summary_from_disk hatası: %s", e)
+
+def get_company_summary(ticker):
+    """Şirket AI özeti — in-memory cache okur; yoksa/bayatsa None (graceful)."""
+    now = time.time()
+    with _lock:
+        cached = _company_summary_cache.get(ticker)
+    if cached and (now - cached.get("ts", 0)) < _COMPANY_SUMMARY_TTL:
+        return cached.get("text") or None
+    return None
+
+def _generate_company_summary(ticker):
+    """Gemini ile şirket özeti üretir + cache'ler. Yalnız bg thread'den çağrılmalı."""
+    if not GEMINI_API_KEY:
+        return None
+    name = STOCK_NAMES.get(ticker, ticker)
+    prompt = _COMPANY_SUMMARY_PROMPT.format(ticker=ticker, name=name)
+    model, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS,
+                               timeout=20, max_tokens=400, temperature=0.4)
+    if text:
+        with _lock:
+            _company_summary_cache[ticker] = {"text": text.strip(), "ts": time.time()}
+        logger.info("company-summary [%s]: OK [model=%s]", ticker, model)
+        return text.strip()
+    return None
+
 
 def _news_ttl_for(ticker: str) -> int:
     """Dinamik TTL: aktif sinyalli/hacimli hisseler kısa TTL, durgun hisseler uzun TTL.
@@ -3900,6 +3976,53 @@ else:
     logger.info("gemini-prefetch: non-leader worker — prefetch atlandı (maliyet fix)")
 
 
+def _company_summary_prefetch_worker():
+    """SPEC-011 L4 — Şirket AI özetlerini yavaşça doldurur (leader-only).
+    Eksik/bayat özetleri 35s arayla üretir → Gemini rate-limit dostu.
+    Tur sonunda 12h uyur (TTL 30 gün, acele yok)."""
+    time.sleep(180)   # startup + ilk veri yüklemesi
+    while True:
+        try:
+            now = time.time()
+            with _lock:
+                have = set(_company_summary_cache.keys())
+            to_gen = [t for t in BIST100
+                      if t != "XU030" and t not in have]
+            # Bayatları da yenile
+            with _lock:
+                for tk, e in list(_company_summary_cache.items()):
+                    if (now - e.get("ts", 0)) > _COMPANY_SUMMARY_TTL:
+                        to_gen.append(tk)
+            if to_gen:
+                logger.info("company-summary prefetch: %d hisse üretilecek", len(to_gen))
+            done = 0
+            for tk in to_gen:
+                try:
+                    if _generate_company_summary(tk):
+                        done += 1
+                except Exception as e:
+                    logger.error("company-summary prefetch hatası [%s]: %s", tk, e)
+                time.sleep(35)   # rate-limit koruması
+            if to_gen:
+                logger.info("company-summary prefetch tamamlandı: %d/%d", done, len(to_gen))
+        except Exception as e:
+            logger.error("company-summary prefetch worker hatası: %s", e)
+        time.sleep(12 * 3600)   # 12h sonra yeni tur (eksik/bayat kontrolü)
+
+
+_company_summary_thread = threading.Thread(
+    target=_company_summary_prefetch_worker,
+    daemon=True,
+    name="gemini-company-summary"
+)
+# Leader-only — #30 maliyet multiplier fix (4 worker yerine 1)
+if _is_gemini_leader():
+    _company_summary_thread.start()
+    logger.info("gemini-company-summary: LEADER worker — bg prefetch aktif")
+else:
+    logger.info("gemini-company-summary: non-leader worker — prefetch atlandı")
+
+
 # SPEC-009 Faz 2 (redesign) — gemini-cache-sync: timer-tabanlı disk senkron.
 # #38: disk I/O request/hot-path'te YAPILMAZ (gevent hub kilitler). Bunun yerine
 # 90s'lik bg timer thread — background_refresh non-leader pattern'i birebir.
@@ -3913,9 +4036,11 @@ def _gemini_cache_sync_loop():
             if is_leader:
                 _save_news_cache_to_disk()
                 _save_macro_ai_to_disk()
+                _save_company_summary_to_disk()
             else:
                 _load_news_cache_from_disk()
                 _load_macro_ai_from_disk()
+                _load_company_summary_from_disk()
         except Exception as e:
             logger.error("gemini-cache-sync hatası: %s", e)
         time.sleep(90)
@@ -4766,6 +4891,71 @@ def stock_page(ticker):
         ssr_signal and ssr_signal.get("tier") == "premium" and not has_premium_access()
     )
 
+    # ── SPEC-011 L4 + SPEC-013 — İçerik zenginleştirme + AI-optimized data ──────
+    company_summary = get_company_summary(ticker)   # None olabilir → template fallback
+
+    # İlgili hisseler — aynı sektörden 5 hisse (internal linking)
+    related_stocks = [
+        {"ticker": t, "name": STOCK_NAMES.get(t, t)}
+        for t in SECTORS.get(sector, [])
+        if t != ticker and t in BIST100 and t != "XU030"
+    ][:5]
+
+    # Sinyal/skor verileri — JSON-LD schema + SSS için
+    sig      = (ssr_signal or {}).get("signal") or "BEKLE"
+    price    = (ssr_signal or {}).get("price")
+    chg      = (ssr_signal or {}).get("change_pct")
+    rsi_val  = (ssr_signal or {}).get("rsi")
+    rr_val   = (ssr_signal or {}).get("rr_ratio")
+    if sig == "AL":
+        score = (ssr_signal or {}).get("bull_score")
+    elif sig == "SAT":
+        score = (ssr_signal or {}).get("bear_score")
+    else:
+        score = None
+    _inds    = (ssr_signal or {}).get("indicators") or {}
+    _adx_lbl = (_inds.get("adx") or {}).get("label", "")
+    try:
+        adx_val = float(_adx_lbl.replace("ADX", "").strip()) if _adx_lbl else None
+    except (ValueError, TypeError):
+        adx_val = None
+    sig_label = {"AL": "Güçlü Trend (AL)", "SAT": "Zayıf Trend (SAT)",
+                 "BEKLE": "Belirsiz (BEKLE)"}.get(sig, sig)
+
+    # Yatırımcı SSS — deterministik, veri-tabanlı (ekstra Gemini çağrısı YOK)
+    seo_faq = []
+    seo_faq.append({
+        "q": f"{ticker} hissesi al mı sat mı?",
+        "a": (f"{ticker} için güncel algoritmik sinyal: {sig_label}. "
+              f"BorsaPusula teknik göstergeleri (Supertrend, EMA, ADX, MACD) baz alır. "
+              f"Yatırım tavsiyesi değildir."),
+    })
+    if price:
+        _chg_txt = f", günlük değişim %{chg:.2f}" if isinstance(chg, (int, float)) else ""
+        seo_faq.append({
+            "q": f"{ticker} hisse fiyatı ne kadar?",
+            "a": f"{ticker} güncel fiyatı {price} TL{_chg_txt}.",
+        })
+    if adx_val is not None or score is not None:
+        _parts = []
+        if adx_val is not None:
+            _parts.append(f"ADX {adx_val:.0f} (trend gücü)")
+        if score is not None:
+            _parts.append(f"sinyal skoru {score}/100")
+        if isinstance(rr_val, (int, float)) and rr_val:
+            _parts.append(f"R/R oranı {rr_val}")
+        seo_faq.append({
+            "q": f"{ticker} hissesi prim potansiyeli nedir?",
+            "a": "Teknik göstergeler: " + ", ".join(_parts) + ". Yatırım tavsiyesi değildir.",
+        })
+    if company_summary:
+        _first = company_summary.split(".")[0].strip()
+        if _first:
+            seo_faq.append({
+                "q": f"{ticker} ne yapan şirket?",
+                "a": _first + ".",
+            })
+
     return render_template("hisse.html",
                            ticker=ticker,
                            name=name,
@@ -4777,7 +4967,17 @@ def stock_page(ticker):
                            related_blog=related_blog,
                            compare_url=compare_url,
                            ticker_bt=ticker_bt,
-                           premium_locked=premium_locked)
+                           premium_locked=premium_locked,
+                           company_summary=company_summary,
+                           related_stocks=related_stocks,
+                           seo_faq=seo_faq,
+                           seo_signal=sig,
+                           seo_signal_label=sig_label,
+                           seo_price=price,
+                           seo_change=chg,
+                           seo_score=score,
+                           seo_adx=adx_val,
+                           seo_rsi=rsi_val)
 
 
 _fundamentals_cache = {}
@@ -5760,7 +5960,8 @@ def karsilastir():
                            tickers_param=tickers_param,
                            canonical_url=canonical_url,
                            page_title=page_title,
-                           page_description=page_description)
+                           page_description=page_description,
+                           today_iso=date.today().isoformat())
 
 
 @app.route("/api/karsilastir")
@@ -7310,6 +7511,11 @@ def blog_article(slug):
 def _startup():
     # Disk cache'i yükle — anlık veri gelene kadar siteyi hemen dolduran eski veri
     _load_cache_from_disk()
+    # SPEC-011 L4 — şirket özeti cache'i diskten yükle (restart sonrası anında dolu)
+    try:
+        _load_company_summary_from_disk()
+    except Exception as e:
+        logger.warning("Şirket özeti disk yükleme hatası: %s", e)
     # Backtest disk cache'i yükle — restart sonrası hemen sinyal-performans sayfasına veri verir
     try:
         if os.path.exists(_BT_DISK_PATH):

@@ -51,13 +51,20 @@
   "name": "{{ ticker }} ({{ name }}) Teknik Analiz Sinyali",
   "description": "{{ ticker }} hissesi için algoritmik Supertrend(10,3) + ADX + EMA12/99 teknik analiz sinyali. Günlük güncelleme, ücretsiz.",
   "url": "https://borsapusula.com/hisse/{{ ticker }}",
-  "tickerSymbol": "{{ ticker }}",{% if sector %}
+  "tickerSymbol": "{{ ticker }}",
+  "exchange": "BIST",{% if sector %}
   "category": "{{ sector }}",{% endif %}
   "provider": {
     "@type": "Organization",
     "name": "BorsaPusula",
     "url": "https://borsapusula.com"
-  },
+  },{% if seo_signal or seo_score or seo_adx %}
+  "additionalProperty": [
+    {"@type": "PropertyValue", "name": "Sinyal", "value": "{{ seo_signal }}"}{% if seo_score %},
+    {"@type": "PropertyValue", "name": "Sinyal Skoru", "value": "{{ seo_score }}"}{% endif %}{% if seo_adx %},
+    {"@type": "PropertyValue", "name": "ADX", "value": "{{ seo_adx|int }}"}{% endif %}{% if seo_rsi %},
+    {"@type": "PropertyValue", "name": "RSI", "value": "{{ seo_rsi|int }}"}{% endif %}
+  ],{% endif %}
   "inLanguage": "tr"
 }
 </script>
@@ -959,6 +966,78 @@
   }
   .methodology strong { color: #c7c5cd; }
 
+  /* SPEC-011 L4 / SPEC-013 — İçerik zenginleştirme blokları */
+  .content-card {
+    background: #141416;
+    border: 1px solid #2a2a2c;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .content-para {
+    font-size: 13px;
+    color: #c7c5cd;
+    line-height: 1.75;
+    margin: 0 0 10px 0;
+  }
+  .content-para:last-of-type { margin-bottom: 6px; }
+  .content-meta {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 8px;
+  }
+  .faq-list { margin: 4px 0 0 0; }
+  .faq-q {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e5e1e4;
+    margin-top: 14px;
+    padding-left: 18px;
+    position: relative;
+  }
+  .faq-q:first-child { margin-top: 6px; }
+  .faq-q::before {
+    content: "›";
+    position: absolute;
+    left: 4px;
+    color: #b8c3ff;
+    font-weight: 700;
+  }
+  .faq-a {
+    font-size: 12.5px;
+    color: #909097;
+    line-height: 1.65;
+    margin: 5px 0 0 18px;
+  }
+  .related-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .related-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: #1c1b1f;
+    border: 1px solid #2a2a2c;
+    border-radius: 8px;
+    padding: 8px 12px;
+    text-decoration: none;
+    min-width: 110px;
+    transition: border-color .15s, background .15s;
+  }
+  .related-chip:hover { border-color: #b8c3ff; background: #21202b; }
+  .related-ticker { font-size: 13px; font-weight: 700; color: #e5e1e4; }
+  .related-name {
+    font-size: 10.5px;
+    color: #909097;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
+  }
+
   footer {
     text-align: center;
     padding: 20px;
@@ -1652,6 +1731,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
   {% endif %}
 
+  {% if company_summary %}
+  <!-- SPEC-011 L4 — Şirket Hakkında (Gemini AI özet, AI-optimized content) -->
+  <section class="content-card" aria-labelledby="company-summary-heading">
+    <h2 class="section-title" id="company-summary-heading">🏢 {{ ticker }} Hakkında</h2>
+    {% for para in company_summary.split('\n') %}{% if para.strip() %}
+    <p class="content-para">{{ para.strip() }}</p>
+    {% endif %}{% endfor %}
+    <div class="content-meta">Yapay zeka ile derlenen şirket profili · bilgi amaçlıdır</div>
+  </section>
+  {% endif %}
+
   <!-- Metodoloji -->
   <div class="methodology">
     <strong>Sinyal Metodolojisi:</strong>
@@ -1662,6 +1752,34 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <br><br>
     ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
   </div>
+
+  {% if seo_faq %}
+  <!-- SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) -->
+  <section class="content-card faq-card" aria-labelledby="faq-heading">
+    <h2 class="section-title" id="faq-heading">❓ {{ ticker }} — Sıkça Sorulan Sorular</h2>
+    <dl class="faq-list">
+      {% for item in seo_faq %}
+      <dt class="faq-q">{{ item.q }}</dt>
+      <dd class="faq-a">{{ item.a }}</dd>
+      {% endfor %}
+    </dl>
+  </section>
+  {% endif %}
+
+  {% if related_stocks %}
+  <!-- SPEC-011 L4/L5 — İlgili hisseler (internal linking, crawl budget) -->
+  <aside class="content-card" aria-labelledby="related-heading">
+    <h2 class="section-title" id="related-heading">🔗 {{ sector }} Sektöründen Diğer Hisseler</h2>
+    <div class="related-grid">
+      {% for r in related_stocks %}
+      <a href="/hisse/{{ r.ticker }}" class="related-chip">
+        <span class="related-ticker">{{ r.ticker }}</span>
+        <span class="related-name">{{ r.name }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </aside>
+  {% endif %}
 
   <!-- İlgili Blog Makaleleri (T3-4) -->
   {% if related_blog %}
