@@ -2890,8 +2890,12 @@ def _atomic_write_json(path, data):
 
 
 def _save_macro_ai_to_disk():
-    """Leader: macro-ai cache'i diske yazar (non-leader worker'lar okusun)."""
+    """Leader: macro-ai cache'i diske yazar (non-leader worker'lar okusun).
+    Boş cache'i diske YAZMAZ — restart sonrası startup-load yarışı diskteki
+    veriyi silmesin (empty-overwrite guard)."""
     try:
+        if not _macro_ai_cache:
+            return
         _atomic_write_json(_MACRO_AI_DISK_PATH, _macro_ai_cache)
     except Exception as e:
         logger.warning("_save_macro_ai_to_disk hatası: %s", e)
@@ -3305,6 +3309,8 @@ def _save_news_cache_to_disk():
     try:
         with _lock:
             snapshot = dict(_news_cache)
+        if not snapshot:
+            return   # empty-overwrite guard — diskteki veriyi silme
         _atomic_write_json(_NEWS_CACHE_DISK_PATH, snapshot)
     except Exception as e:
         logger.warning("_save_news_cache_to_disk hatası: %s", e)
@@ -3354,6 +3360,8 @@ def _save_company_summary_to_disk():
     try:
         with _lock:
             snapshot = dict(_company_summary_cache)
+        if not snapshot:
+            return   # empty-overwrite guard — restart sonrası 30g cache'i koru
         _atomic_write_json(_COMPANY_SUMMARY_PATH, snapshot)
     except Exception as e:
         logger.warning("_save_company_summary_to_disk hatası: %s", e)
