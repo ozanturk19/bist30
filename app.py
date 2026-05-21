@@ -24,6 +24,7 @@ import logging
 import time
 import json
 import os
+import tempfile
 import re
 import copy
 import secrets
@@ -2191,10 +2192,10 @@ def _save_daily_snapshot(data: list):
 
 
 def _save_cache_to_disk(data):
-    """Son başarılı sinyal datasını diske yazar — restart sonrası hızlı yükleme için."""
+    """Son başarılı sinyal datasını diske yazar — restart sonrası hızlı yükleme için.
+    Madde 1: atomic — non-leader worker yarım dosya okumamalı."""
     try:
-        with open(_DISK_CACHE_PATH, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False)
+        _atomic_write_json(_DISK_CACHE_PATH, data)
         logger.debug("Disk cache yazıldı: %d hisse", len(data))
     except Exception as e:
         logger.warning("Disk cache yazma hatası: %s", e)
@@ -2870,11 +2871,28 @@ _macro_ai_refreshing = False  # arka plan yenileme kilidi
 # diske yazar, non-leader worker'lar diskten okur → 4× Gemini çağrısı yerine 1×.
 _MACRO_AI_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_macro_ai.json")
 
+def _atomic_write_json(path, data):
+    """JSON'u atomic yazar — tempfile + fsync + os.replace (POSIX rename).
+    Ozan/Madde 1: leader yazarken non-leader yarım dosya okumamalı (bozuk JSON
+    / crash riski). os.replace aynı dosya sisteminde atomik."""
+    dir_ = os.path.dirname(os.path.abspath(path))
+    fd, tmp = tempfile.mkstemp(dir=dir_, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)   # atomic
+    except Exception:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        raise
+
+
 def _save_macro_ai_to_disk():
     """Leader: macro-ai cache'i diske yazar (non-leader worker'lar okusun)."""
     try:
-        with open(_MACRO_AI_DISK_PATH, "w", encoding="utf-8") as f:
-            json.dump(_macro_ai_cache, f, ensure_ascii=False)
+        _atomic_write_json(_MACRO_AI_DISK_PATH, _macro_ai_cache)
     except Exception as e:
         logger.warning("_save_macro_ai_to_disk hatası: %s", e)
 
@@ -3287,8 +3305,7 @@ def _save_news_cache_to_disk():
     try:
         with _lock:
             snapshot = dict(_news_cache)
-        with open(_NEWS_CACHE_DISK_PATH, "w", encoding="utf-8") as f:
-            json.dump(snapshot, f, ensure_ascii=False)
+        _atomic_write_json(_NEWS_CACHE_DISK_PATH, snapshot)
     except Exception as e:
         logger.warning("_save_news_cache_to_disk hatası: %s", e)
 
@@ -3333,12 +3350,11 @@ _COMPANY_SUMMARY_PROMPT = (
 )
 
 def _save_company_summary_to_disk():
-    """Şirket özeti cache'i diske yazar. _lock DIŞINDA çağrılmalı."""
+    """Şirket özeti cache'i diske yazar (atomic). _lock DIŞINDA çağrılmalı."""
     try:
         with _lock:
             snapshot = dict(_company_summary_cache)
-        with open(_COMPANY_SUMMARY_PATH, "w", encoding="utf-8") as f:
-            json.dump(snapshot, f, ensure_ascii=False)
+        _atomic_write_json(_COMPANY_SUMMARY_PATH, snapshot)
     except Exception as e:
         logger.warning("_save_company_summary_to_disk hatası: %s", e)
 
