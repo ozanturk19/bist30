@@ -3363,8 +3363,11 @@ _sol_chart_cache     = {"data": None, "updated_at": None}
 _bnb_chart_cache     = {"data": None, "updated_at": None}
 _petrol_chart_cache  = {"data": None, "updated_at": None}
 _dogalgaz_chart_cache= {"data": None, "updated_at": None}
-_stock_chart_cache = {}          # {ticker: {"data": ..., "ts": float, "updated_at": str}}
+_stock_chart_cache = {}          # {ticker: {"data": ..., "ts": float, "updated_at": str, "v": str}}
 _STOCK_CACHE_TTL   = 900         # 15 dakika
+_CHART_CACHE_VERSION = "1.0"     # SPEC-008 L4a — schema bumpu temiz invalidation
+                                 # için. Entry "v" alanı uyuşmuyorsa cache miss say
+                                 # (deploy-zamanı şema değişiminde eski cache yok sayılır).
 
 
 # ── Gemini API — AI haber özeti & sinyal açıklaması ─────────────────────────
@@ -5739,16 +5742,23 @@ def api_stock_chart(ticker):
                 )
                 cached = None   # Taze hesaplamaya zorla
 
+    # SPEC-008 L4a — cache version guard: entry "v" sabite uymuyorsa miss say.
+    if cached and cached.get("v") != _CHART_CACHE_VERSION:
+        logger.info("Chart cache version mismatch [%s]: %r != %r — invalidate",
+                    ticker, cached.get("v"), _CHART_CACHE_VERSION)
+        cached = None
+
     if cached and (now - cached["ts"]) < _STOCK_CACHE_TTL:
         data = cached["data"]
         upd  = cached["updated_at"]
     else:
-        # Cache yok, bayat veya fiyat uyuşmazlığı → taze hesapla
+        # Cache yok, bayat, fiyat uyuşmazlığı veya version mismatch → taze hesapla
         data = _compute_chart_data(ticker, period="2y")
         upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
         if data:
             with _lock:
-                _stock_chart_cache[ticker] = {"data": data, "ts": now, "updated_at": upd}
+                _stock_chart_cache[ticker] = {"data": data, "ts": now,
+                                              "updated_at": upd, "v": _CHART_CACHE_VERSION}
 
     if not data:
         return safe_json({"chart": None, "loading": True})
@@ -5767,7 +5777,8 @@ def api_stock_chart(ticker):
                 data = fresh
                 upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
                 with _lock:
-                    _stock_chart_cache[ticker] = {"data": data, "ts": now, "updated_at": upd}
+                    _stock_chart_cache[ticker] = {"data": data, "ts": now,
+                                                  "updated_at": upd, "v": _CHART_CACHE_VERSION}
                 ok2, reason2 = validate_chart_integrity(ticker, data, main_price, main_price_age_s)
             else:
                 ok2, reason2 = False, "recompute başarısız (veri yok)"
