@@ -4956,7 +4956,7 @@ def build_signal_summary(stock):
     rsi     = stock.get("rsi")
     adx     = stock.get("adx")
     sl      = stock.get("sl_level")
-    weekly  = (stock.get("weekly_trend") or "").lower()
+    weekly  = stock.get("weekly_trend")   # int: 1 = haftalık yukarı, -1 = aşağı
     eq      = stock.get("entry_quality")
     opt     = stock.get("optimal_entry")
 
@@ -5000,11 +5000,11 @@ def build_signal_summary(stock):
         else:
             verdict = "Trend zayıf ve satış sinyali aktif kalmaya devam ediyor."
     else:  # BEKLE
-        if weekly in ("up", "yukarı", "yukari", "bull"):
+        if weekly == 1:
             verdict = ("Net bir alım/satım sinyali yok; göstergeler kararsız ancak "
                        "orta vadeli görünüm hâlâ yukarı yönlü — beklemek şu an daha "
                        "temkinli bir tercih.")
-        elif weekly in ("down", "aşağı", "asagi", "bear"):
+        elif weekly == -1:
             verdict = ("Net bir sinyal yok ve orta vadeli görünüm zayıf — yeni pozisyon "
                        "için acele etmemek, netleşmeyi beklemek daha sağlıklı görünüyor.")
         else:
