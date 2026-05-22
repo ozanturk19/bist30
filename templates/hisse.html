@@ -1397,6 +1397,21 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
 <main class="container">
 
+  <!-- SPEC-014 B3 — Stale banner (veri yaşı >15dk, market saatinde) -->
+  <div id="staleBanner" role="alert"
+       style="display:none;background:rgba(245,201,73,.10);border:1px solid rgba(245,201,73,.4);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#f5c949;line-height:1.5">
+    ⚠️ <span id="staleBannerText">Veriler bir süredir güncellenmedi.</span>
+    Piyasa hareketli olabilir — fiyatlar gerçek zamanlı olmayabilir.
+  </div>
+
+  <!-- SPEC-014 B2 — Veri yaşı göstergesi -->
+  <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+    <span id="dataFreshness" title="" style="display:none;align-items:center;gap:6px;font-size:11px;color:#909097">
+      <span id="freshnessDot" style="width:7px;height:7px;border-radius:50%;background:#909097;display:inline-block;flex-shrink:0"></span>
+      <span id="freshnessText">—</span>
+    </span>
+  </div>
+
   <!-- Grafik -->
   {% if premium_locked %}
   <div class="premium-cta-row">
@@ -2312,6 +2327,47 @@ function buildChart(d) {
 }
 
 /* ── 52-hafta + commentary render ──────────────────── */
+/* ── SPEC-014 B2/B3 — Veri yaşı göstergesi + stale banner ──── */
+function renderFreshness(f) {
+  if (!f) return;
+  const wrap   = document.getElementById('dataFreshness');
+  const dot    = document.getElementById('freshnessDot');
+  const txt    = document.getElementById('freshnessText');
+  const banner = document.getElementById('staleBanner');
+  const bTxt   = document.getElementById('staleBannerText');
+  if (!wrap || !dot || !txt) return;
+
+  const age = f.stocks_age_seconds;
+  if (age == null) { wrap.style.display = 'none'; return; }
+
+  const mins = Math.floor(age / 60);
+  let color, label;
+  if (age < 300) {           /* <5dk yeşil */
+    color = '#00e290'; label = 'Veri canlı';
+  } else if (age < 900) {    /* 5-15dk sarı */
+    color = '#f5c949'; label = `Veri ${mins} dk önce güncellendi`;
+  } else {                   /* >15dk kırmızı */
+    color = '#f85149'; label = `Veri ${mins} dk önce güncellendi`;
+  }
+  dot.style.background = color;
+  txt.textContent = label;
+  txt.style.color = color;
+  if (f.stocks_updated_at) {
+    wrap.title = 'Son güncelleme: ' + f.stocks_updated_at;
+  }
+  wrap.style.display = 'inline-flex';
+
+  /* Stale banner — market saatinde veri yaşı >15dk */
+  if (banner) {
+    if (f.market_open && age > 900) {
+      if (bTxt) bTxt.textContent = `Veriler son ${mins} dakikadır güncellenmedi.`;
+      banner.style.display = 'block';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+}
+
 function renderCommentary(commentary) {
   if (!commentary) return;
   const el = document.getElementById('commentaryText');
@@ -2710,6 +2766,8 @@ async function loadChart(retry) {
     ]);
     const json  = await res.json();
     const data2 = await res2.json();
+
+    renderFreshness(data2.data_freshness);  /* SPEC-014 B2/B3 */
 
     if (json.integrity_error) {
       console.warn('[chart] integrity_error:', json.integrity_error);

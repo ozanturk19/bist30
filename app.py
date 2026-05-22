@@ -2024,6 +2024,42 @@ def is_trading_day(d=None):
     return True
 
 
+# ── SPEC-014 Faz B — Data Freshness SLA ───────────────────────────────────────
+def _market_open(now_tr=None):
+    """BIST seansı açık mı? Hafta içi 10:00-18:00 TR + işlem günü."""
+    now_tr = now_tr or datetime.now(_TZ_TR)
+    if not is_trading_day(now_tr.date()):
+        return False
+    return 10 <= now_tr.hour < 18
+
+
+def build_data_freshness():
+    """SPEC-014 B1 — veri tazeliği meta objesi.
+
+    /api/data ve /api/health response'larına eklenir.
+    is_stale = market_open ve stocks yaşı > 900s (15dk).
+    """
+    now = time.time()
+    with _lock:
+        last_ts    = _cache.get("last_refresh_ts", 0.0) or 0.0
+        updated_at = _cache.get("updated_at")
+    macro_ts = _macro_cache.get("ts", 0) if "_macro_cache" in globals() else 0
+
+    stocks_age = int(now - last_ts) if last_ts else None
+    macro_age  = int(now - macro_ts) if macro_ts else None
+    mkt_open   = _market_open()
+    is_stale   = bool(mkt_open and stocks_age is not None and stocks_age > 900)
+
+    return {
+        "stocks_updated_at":  updated_at,
+        "stocks_age_seconds": stocks_age,
+        "macro_updated_at":   datetime.fromtimestamp(macro_ts, _TZ_TR).isoformat() if macro_ts else None,
+        "macro_age_seconds":  macro_age,
+        "is_stale":           is_stale,
+        "market_open":        mkt_open,
+    }
+
+
 def _send_digest_emails(timeframe="daily", force=False):
     """Günlük (19:00) veya haftalık (Cuma 19:00) digest gönder.
     timeframe: 'daily' | 'weekly'
@@ -2157,6 +2193,42 @@ def _digest_cron_loop():
 
 threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-cron").start()
 logger.info("Digest cron başlatıldı (her 5 dakikada kontrol, 19:00'da tetikler)")
+
+
+# ── SPEC-014 B4 — Freshness monitor (market saatinde veri yaşı > 25dk → Telegram) ──
+_freshness_alert_state = {"last_alert_ts": 0.0}
+
+def _freshness_monitor_loop():
+    """Market seansında veri yaşı > 25dk ise Telegram uyarısı gönderir.
+
+    #22 trading-day + market-hours guard ile false positive önlenir
+    (gece/tatil veri yaşı zaten yüksek olur — alarm yalnız seans içinde).
+    Anti-spam: aynı stale durumda en fazla saatte 1 mesaj.
+    """
+    while True:
+        try:
+            if _market_open():
+                fresh = build_data_freshness()
+                age = fresh.get("stocks_age_seconds")
+                if age is not None and age > 1500:  # 25 dk
+                    now = time.time()
+                    if now - _freshness_alert_state["last_alert_ts"] > 3600:
+                        _freshness_alert_state["last_alert_ts"] = now
+                        mins = age // 60
+                        _send_telegram(
+                            f"⚠️ <b>BorsaPusula veri tazeliği uyarısı</b>\n"
+                            f"BIST seansında hisse verisi <b>{mins} dakikadır</b> "
+                            f"güncellenmedi (eşik 25 dk).\n"
+                            f"Son güncelleme: {fresh.get('stocks_updated_at') or '—'}"
+                        )
+                        logger.warning("Freshness alarm: stocks_age=%ss (>25dk), Telegram gönderildi", age)
+        except Exception as e:
+            logger.error("freshness_monitor_loop: %s", e, exc_info=True)
+        time.sleep(300)  # 5 dakikada bir kontrol
+
+
+threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor").start()
+logger.info("Freshness monitor başlatıldı (her 5 dakikada kontrol, seansda >25dk → Telegram)")
 
 
 _DISK_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
@@ -2533,6 +2605,7 @@ def api_data():
         "updated_at": _cache["updated_at"],
         "loading":    len(stocks) == 0,
         "sectors":    list(SECTORS.keys()),
+        "data_freshness": build_data_freshness(),  # SPEC-014 B1
     })
 
 
@@ -5840,6 +5913,7 @@ def api_health():
         "news_queue":               _news_queue_stats,
         "last_news_queue_ts":       news_last_ts,
         "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
+        "data_freshness":           build_data_freshness(),  # SPEC-014 B1
         "ts": now,
     })
 

@@ -2315,6 +2315,13 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 <!-- ── Ana içerik container ─────────────────────────── -->
 <main class="container">
 
+<!-- SPEC-014 B3 — Stale banner -->
+<div id="staleBanner" role="alert"
+     style="display:none;background:rgba(245,201,73,.10);border:1px solid rgba(245,201,73,.4);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#f5c949;line-height:1.5">
+  ⚠️ <span id="staleBannerText">Veriler bir süredir güncellenmedi.</span>
+  Piyasa hareketli olabilir — fiyatlar gerçek zamanlı olmayabilir.
+</div>
+
 <!-- ── Dual Endeks Kartları ── -->
 <div class="dual-endeks">
 
@@ -3632,6 +3639,20 @@ async function fetchData() {
     if (json.updated_at) {
       const upd = document.getElementById('updated');
       if (upd) upd.textContent = 'Güncellendi: ' + json.updated_at;  /* Element kaldırılmış olabilir, null guard */
+    }
+
+    /* SPEC-014 B3 — stale banner */
+    const f = json.data_freshness;
+    const banner = document.getElementById('staleBanner');
+    if (banner && f) {
+      if (f.market_open && f.stocks_age_seconds != null && f.stocks_age_seconds > 900) {
+        const mins = Math.floor(f.stocks_age_seconds / 60);
+        const bTxt = document.getElementById('staleBannerText');
+        if (bTxt) bTxt.textContent = `Veriler son ${mins} dakikadır güncellenmedi.`;
+        banner.style.display = 'block';
+      } else {
+        banner.style.display = 'none';
+      }
     }
 
     // Sektör butonlarını oluştur (ilk yüklemede)
