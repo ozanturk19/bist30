@@ -19,6 +19,17 @@ FAILS_FILE=/root/bist30/health_fail_count.txt
 LAST_MAIL_FILE=/root/bist30/health_last_mail.txt
 MAIL_COOLDOWN=1800   # 30 dakika
 
+# SPEC-016 K5 (#45 Bulgu 2) — Deploy-lock: servis "activating/deactivating"
+# durumundaysa restart SÜRÜYOR demektir. Bu pencerede /api/health 000 döner;
+# watchdog bunu fail sayıp deploy'un ÜSTÜNE 2. restart basıyordu (deploy-double).
+# ActiveEnterTimestamp restart anında eski kaldığı için #25 grace bu pencereyi
+# korumuyor — durum kontrolü iki yönlü guard sağlar.
+_active_state=$(systemctl is-active bist30 2>/dev/null)
+if [ "$_active_state" != "active" ]; then
+  echo "$(date) DEPLOY-SKIP — servis durumu '$_active_state' (restart sürüyor, kontrol atlandı)" >> "$LOG"
+  exit 0
+fi
+
 # SPEC-009 #25 — Post-restart grace (4dk). Restart sonrası ağır startup burst
 # (warm_*, refresh_data, chart) gevent hub'ı doyurur → /api/health geçici yavaş.
 # Bu pencerede watchdog tetiklenmesi deploy → ekstra restart → 502 churn zinciri

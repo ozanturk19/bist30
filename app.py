@@ -3535,8 +3535,10 @@ _GEMINI_EXPLAIN_ATTEMPTS = [
 # denemesi toplam gunicorn --timeout 45'i aşıyor → worker SIGKILL → /api/health
 # fail → watchdog restart. Sert per-istek timeout cap + circuit breaker zinciri kırar.
 _GEMINI_TIMEOUT_CAP  = 5      # saniye — _gemini_call istek başına sert üst sınır
-_GEMINI_CB_THRESHOLD = 3      # ardışık fail eşiği — devre açılır
-_GEMINI_CB_COOLDOWN  = 300    # saniye — devre açık kalır (5dk Gemini'siz fallback)
+# SPEC-016 K3 — storm-aware: devreyi daha erken aç (3→2), daha uzun kapalı tut
+# (300→600s). Gemini 503/ReadTimeout storm'unda gevent maruziyeti minimize edilir.
+_GEMINI_CB_THRESHOLD = 2      # ardışık fail eşiği — devre açılır
+_GEMINI_CB_COOLDOWN  = 600    # saniye — devre açık kalır (10dk Gemini'siz fallback)
 _gemini_cb = {"fails": 0, "open_until": 0.0}   # circuit breaker durumu (worker-local)
 
 
