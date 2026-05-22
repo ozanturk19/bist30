@@ -2227,8 +2227,13 @@ def _freshness_monitor_loop():
         time.sleep(300)  # 5 dakikada bir kontrol
 
 
-threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor").start()
-logger.info("Freshness monitor başlatıldı (her 5 dakikada kontrol, seansda >25dk → Telegram)")
+# Leader-only — #30 maliyet/spam multiplier fix: 4 worker yerine 1 worker
+# Telegram alarmı gönderir (anti-spam state worker-local olduğu için gate şart).
+if _is_notify_leader():
+    threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor").start()
+    logger.info("Freshness monitor başlatıldı (LEADER — 5dk kontrol, seansda >25dk → Telegram)")
+else:
+    logger.info("Freshness monitor: non-leader worker — atlandı (spam fix)")
 
 
 _DISK_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
