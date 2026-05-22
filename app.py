@@ -3934,6 +3934,7 @@ def get_ai_signal_explanation(ticker, signal_data):
 # ── Arka plan: BIST30 haber ön-yüklemesi ─────────────────────────────────────
 _PREFETCH_MAX    = 8    # Aynı anda en fazla bu kadar hisse prefetch edilir
 _PREFETCH_DELAY  = 30   # İstekler arası bekleme (saniye) — Gemini rate-limit koruması
+_PREFETCH_STARTUP_GRACE_S = 300  # SPEC-016 K1 — restart sonrası prefetch bekleme (soğuk-start storm fix)
 
 
 def _prefetch_news_worker():
@@ -3943,7 +3944,9 @@ def _prefetch_news_worker():
     içerik görür. Yalnızca AL sinyalli hisseler için çalışır (max 8) ve istekler
     arası 30 saniye bekler — Gemini ücretsiz tier rate-limit koruması.
     """
-    time.sleep(120)   # Servis startup'ı ve veri yüklemesi tamamlanana kadar bekle
+    # SPEC-016 K1 — restart-grace: soğuk-start thundering herd fix (#48).
+    # Site oturmadan prefetch Gemini'ye yüklenmesin → 120s → 300s.
+    time.sleep(_PREFETCH_STARTUP_GRACE_S)
     while True:
         now = time.time()
 
@@ -3974,6 +3977,11 @@ def _prefetch_news_worker():
         logger.info("Prefetch: %d/%d AL hisse için haber yüklenecek", len(to_fetch), len(al_tickers))
         fetched = 0
         for ticker in to_fetch:
+            # SPEC-016 K2 — sıralı + leader teyidi: storm sırasında leader
+            # değişirse prefetch'i durdur (çift worker Gemini yükü engellenir).
+            if not _is_gemini_leader():
+                logger.info("Prefetch: leader değil — tur durduruldu")
+                break
             try:
                 result = get_ai_news(ticker)
                 if result:
@@ -4004,7 +4012,7 @@ def _company_summary_prefetch_worker():
     """SPEC-011 L4 — Şirket AI özetlerini yavaşça doldurur (leader-only).
     Eksik/bayat özetleri 35s arayla üretir → Gemini rate-limit dostu.
     Tur sonunda 12h uyur (TTL 30 gün, acele yok)."""
-    time.sleep(180)   # startup + ilk veri yüklemesi
+    time.sleep(_PREFETCH_STARTUP_GRACE_S)   # SPEC-016 K1 — restart-grace (soğuk-start storm fix)
     while True:
         try:
             now = time.time()
