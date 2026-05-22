@@ -4842,6 +4842,162 @@ def abd_stock_page(ticker):
                            chart_api=f"/api/chart/us/{ticker}")
 
 
+# ── SPEC-014 A1 — Sinyal Özeti (deterministik, kural-tabanlı) ─────────────────
+def _fmt_tl(v):
+    """Sayıyı TR formatında TL string'e çevirir."""
+    try:
+        return f"{float(v):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " TL"
+    except (ValueError, TypeError):
+        return "—"
+
+
+def build_signal_summary(stock):
+    """SPEC-014 A1 — Sinyal Özeti.
+
+    Deterministik (Gemini DEĞİL), kural-tabanlı durum matrisi.
+    3 katman döner:
+      verdict — tek cümle, teknik terimsiz kullanıcı sonucu
+      points  — 3 madde "neden böyle söylüyoruz" (trend / giriş riski / risk seviyesi)
+    Tüm AL/SAT/BEKLE durumlarını kapsar.
+    """
+    if not stock:
+        return None
+
+    signal  = (stock.get("signal") or "BEKLE").upper()
+    entry   = stock.get("signal_price")
+    current = stock.get("price")
+    bars    = stock.get("signal_bars") or 0
+    rsi     = stock.get("rsi")
+    adx     = stock.get("adx")
+    sl      = stock.get("sl_level")
+    weekly  = (stock.get("weekly_trend") or "").lower()
+    eq      = stock.get("entry_quality")
+    opt     = stock.get("optimal_entry")
+
+    try:
+        gain_pct = ((float(current) - float(entry)) / float(entry) * 100.0) if (entry and current) else 0.0
+    except (ValueError, TypeError, ZeroDivisionError):
+        gain_pct = 0.0
+
+    rsi_hot  = isinstance(rsi, (int, float)) and rsi > 70
+    rsi_cold = isinstance(rsi, (int, float)) and rsi < 30
+
+    # ── Katman A — tek cümle (durum matrisi) ──────────────────────────────────
+    if signal == "AL":
+        if gain_pct > 50 and rsi_hot:
+            verdict = ("Trend güçlü kalmaya devam ediyor; ancak fiyat sinyal "
+                       "başlangıcına göre ciddi yükseldiği için yeni girişte kovalamak "
+                       "yerine geri çekilme beklemek daha sağlıklı görünüyor.")
+        elif gain_pct > 50:
+            verdict = ("Trend güçlü; fiyat sinyal başından bu yana belirgin yükseldi — "
+                       "mevcut pozisyon için trend korunuyor, yeni giriş için ideal bölge "
+                       "takibi önerilir.")
+        elif gain_pct > 20 and rsi_hot:
+            verdict = ("Trend yukarı yönlü ama fiyat kısa vadede ısınmış; yeni girişte "
+                       "acele etmeden geri çekilmeyi beklemek daha mantıklı görünüyor.")
+        elif bars <= 5:
+            verdict = ("Trend yeni güçlenmiş; sinyal taze ve giriş için nispeten erken "
+                       "bir aşamada görünüyor.")
+        else:
+            verdict = "Trend güçlü ve alış sinyali aktif kalmaya devam ediyor."
+    elif signal == "SAT":
+        if gain_pct < -20 and rsi_cold:
+            verdict = ("Düşüş trendi sürüyor; fiyat sinyal başlangıcına göre belirgin "
+                       "geriledi ve kısa vadede aşırı satım bölgesine yaklaştı — yeni satış "
+                       "için acele etmek yerine tepki ihtimalini izlemek daha sağlıklı.")
+        elif gain_pct < -20:
+            verdict = ("Düşüş trendi güçlü; fiyat sinyal başından bu yana belirgin geriledi, "
+                       "satış baskısı sürüyor görünüyor.")
+        elif bars <= 5:
+            verdict = ("Satış sinyali yeni oluşmuş; trend aşağı yönlü dönmeye başlamış "
+                       "görünüyor.")
+        else:
+            verdict = "Trend zayıf ve satış sinyali aktif kalmaya devam ediyor."
+    else:  # BEKLE
+        if weekly in ("up", "yukarı", "yukari", "bull"):
+            verdict = ("Net bir alım/satım sinyali yok; göstergeler kararsız ancak "
+                       "orta vadeli görünüm hâlâ yukarı yönlü — beklemek şu an daha "
+                       "temkinli bir tercih.")
+        elif weekly in ("down", "aşağı", "asagi", "bear"):
+            verdict = ("Net bir sinyal yok ve orta vadeli görünüm zayıf — yeni pozisyon "
+                       "için acele etmemek, netleşmeyi beklemek daha sağlıklı görünüyor.")
+        else:
+            verdict = ("Şu an net bir alım/satım sinyali yok; göstergeler kararsız, "
+                       "yön belirginleşene kadar beklemek daha mantıklı görünüyor.")
+
+    # ── Katman B — 3 madde ────────────────────────────────────────────────────
+    points = []
+
+    # 1) Trend maddesi
+    adx_txt = ""
+    if isinstance(adx, (int, float)) and adx:
+        if adx >= 25:
+            adx_txt = " (trend gücü belirgin)"
+        elif adx >= 20:
+            adx_txt = " (trend gücü orta)"
+        else:
+            adx_txt = " (trend gücü zayıf)"
+    if signal == "AL":
+        points.append({
+            "text": "Trend yukarı yönlü: orta/uzun vadeli göstergeler alım tarafında" + adx_txt + ".",
+            "tip":  "ADX, EMA ve Supertrend gibi göstergelerin ortak yönü değerlendirilir.",
+        })
+    elif signal == "SAT":
+        points.append({
+            "text": "Trend aşağı yönlü: orta/uzun vadeli göstergeler satış tarafında" + adx_txt + ".",
+            "tip":  "ADX, EMA ve Supertrend gibi göstergelerin ortak yönü değerlendirilir.",
+        })
+    else:
+        points.append({
+            "text": "Trend kararsız: göstergeler net bir yön vermiyor" + adx_txt + ".",
+            "tip":  "ADX, EMA ve Supertrend gibi göstergeler bir arada değerlendirilir.",
+        })
+
+    # 2) Giriş riski maddesi
+    if signal == "AL":
+        if gain_pct > 50:
+            risk_txt = f"Giriş riski yüksek: fiyat sinyal başlangıcına göre ~%{gain_pct:.0f} yukarıda."
+        elif gain_pct > 15:
+            risk_txt = f"Giriş riski arttı: fiyat sinyal başlangıcına göre ~%{gain_pct:.0f} yukarıda."
+        elif gain_pct >= 0:
+            risk_txt = f"Giriş riski sınırlı: fiyat sinyal başlangıcına yakın (~%{gain_pct:.0f})."
+        else:
+            risk_txt = f"Fiyat sinyal başlangıcının ~%{abs(gain_pct):.0f} altında — giriş bölgesine yakın."
+    elif signal == "SAT":
+        risk_txt = (f"Fiyat sinyal başlangıcına göre %{gain_pct:.0f} seviyesinde — "
+                    "satış sinyali bu hareketle uyumlu.")
+    else:
+        risk_txt = "Net sinyal olmadığı için tanımlı bir giriş bölgesi yok."
+    rsi_tip = ""
+    if isinstance(rsi, (int, float)):
+        rsi_tip = f" RSI {rsi:.0f} — 70 üstü aşırı alım, 30 altı aşırı satım bölgesi."
+    points.append({
+        "text": risk_txt,
+        "tip":  "Sinyal başlangıç fiyatı ile güncel fiyat arasındaki fark." + rsi_tip,
+    })
+
+    # 3) Risk seviyesi maddesi
+    if sl:
+        risk_lvl = f"Risk seviyesi: stop bölgesi {_fmt_tl(sl)}."
+    else:
+        risk_lvl = "Risk seviyesi: bu sinyal için tanımlı stop bölgesi bulunmuyor."
+    if opt:
+        risk_lvl += f" İdeal giriş bölgesi {_fmt_tl(opt)} civarı."
+    elif isinstance(eq, str) and eq:
+        risk_lvl += f" Giriş kalitesi: {eq}."
+    points.append({
+        "text": risk_lvl,
+        "tip":  "Stop bölgesi, sinyal geçersiz sayılabilecek fiyat seviyesidir.",
+    })
+
+    return {
+        "signal":   signal,
+        "verdict":  verdict,
+        "points":   points,
+        "gain_pct": round(gain_pct, 1),
+    }
+
+
 # ── Bireysel Hisse Sayfaları ──────────────────────────────────────────────────
 @app.route("/hisse/<ticker>")
 def stock_page(ticker):
@@ -4980,11 +5136,15 @@ def stock_page(ticker):
                 "a": _first + ".",
             })
 
+    # SPEC-014 A1 — Sinyal Özeti (deterministik konsolide kutu)
+    signal_summary = build_signal_summary(ssr_signal)
+
     return render_template("hisse.html",
                            ticker=ticker,
                            name=name,
                            sector=sector,
                            others=others,
+                           signal_summary=signal_summary,
                            stock_names=STOCK_NAMES,
                            ssr_signal=ssr_signal,
                            kap_url=kap_url_for(ticker),

@@ -1431,11 +1431,56 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
   </div>
 
-  <!-- Teknik Yorum -->
+  <!-- SPEC-014 A1 — Sinyal Özeti (konsolide karar kutusu) -->
+  {% if signal_summary %}
+  <div id="signalSummarySection"
+       style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:18px 18px 14px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <h2 class="section-title" style="margin:0">🧭 Sinyal Özeti</h2>
+      <span style="font-size:11px;color:#909097">2 saniyede karar yardımcısı</span>
+    </div>
+
+    <!-- Katman A — tek cümle -->
+    <p style="font-size:15px;line-height:1.65;color:#e5e1e4;margin:0 0 14px;font-weight:500">
+      {{ signal_summary.verdict }}
+    </p>
+
+    <!-- Katman B — 3 madde -->
+    <ul style="list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:8px">
+      {% for p in signal_summary.points %}
+      <li title="{{ p.tip }}"
+          style="display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.55;color:#c7c5cd;cursor:help">
+        <span style="color:{% if signal_summary.signal == 'AL' %}#00e290{% elif signal_summary.signal == 'SAT' %}#f85149{% else %}#909097{% endif %};flex-shrink:0;margin-top:1px">▸</span>
+        <span>{{ p.text }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Katman C — detaylı teknik göstergeler (accordion, kapalı başlar) -->
+    <details id="signalSummaryDetails" style="margin-top:10px;border-top:1px solid #1c1b1f;padding-top:10px">
+      <summary style="cursor:pointer;font-size:12px;color:#b8c3ff;list-style:none;user-select:none;outline:none">
+        ▾ Detaylı teknik göstergeler
+      </summary>
+      <div style="margin-top:10px">
+        <!-- Teknik Görünüm (eski commentary-section — taşındı, silinmedi) -->
+        <div class="commentary-section" id="commentarySection" style="display:none;margin-bottom:6px">
+          <h3 class="section-title" style="margin-bottom:6px;font-size:13px">📊 Teknik Görünüm</h3>
+          <p class="commentary-text" id="commentaryText"></p>
+        </div>
+        <p style="font-size:11px;color:#909097;margin:6px 0 0;line-height:1.5">
+          Göstergeler (ADX, RSI, EMA, DI±, Supertrend) algoritmik sinyalin temelidir.
+          Sinyal kartları ve giriş analizi aşağıda detaylandırılmıştır.
+        </p>
+      </div>
+    </details>
+  </div>
+  {% else %}
+  <!-- Teknik Yorum (signal_summary yoksa fallback) -->
   <div class="commentary-section" id="commentarySection" style="display:none">
     <h2 class="section-title" style="margin-bottom:8px">📊 Teknik Görünüm</h2>
     <p class="commentary-text" id="commentaryText"></p>
   </div>
+  {% endif %}
 
   <!-- Özet kartlar -->
   <div class="info-grid" id="infoGrid">
@@ -1651,12 +1696,16 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </button>
   </div>
 
-  <!-- Sinyalin Hikayesi — Sinyal tarihi etrafındaki KAP bildirimleri -->
+  <!-- Sinyal Dönemindeki Haber Akışı — sinyal tarihi etrafındaki KAP bildirimleri -->
   <div id="storySection" style="display:none;background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:16px 18px;margin-bottom:20px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <h2 class="section-title" style="margin:0">📖 Sinyalin Hikayesi</h2>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <h2 class="section-title" style="margin:0">📰 Sinyal Dönemindeki Haber Akışı</h2>
       <span id="storyWindow" style="font-size:11px;color:#909097"></span>
     </div>
+    <p style="font-size:12px;color:#909097;line-height:1.55;margin:0 0 12px">
+      Bu haberler sinyalin oluştuğu dönem çevresindeki şirket duyurularıdır.
+      Sinyal, haberlerden değil fiyat ve teknik göstergelerden üretilir.
+    </p>
     <div id="storyList"></div>
   </div>
 
@@ -1679,7 +1728,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   <!-- AI Haberler -->
   <div class="news-section" id="newsSection">
-    <h2 class="section-title">🤖 AI Haber Özeti</h2>
+    <h2 class="section-title">🤖 Son Haber Özeti</h2>
     <div class="news-loading" id="newsLoading">
       <div class="spinner"></div> Haberler yükleniyor…
     </div>
