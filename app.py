@@ -5879,14 +5879,9 @@ def api_tarama():
 # ── SEO: sitemap, robots, favicon ────────────────────────────────────────────
 _sitemap_cache: dict = {}  # {"xml": str, "date": str}
 
-@app.route("/api/health")
-def api_health():
-    """Health + observability endpoint.
-
-    Production monitoring (UptimeRobot, watchdog) için 1dk poll edilebilir.
-    Returns: cache status, bg thread heartbeats, worker uptime.
-    Hızlı (<10ms): hiç external call yapmaz, sadece in-memory state.
-    """
+def _compute_health():
+    """Health verisini hesaplar — _lock alır. SPEC-016 K4: yalnız bg thread çağırır,
+    request path'te DEĞİL → /api/health _lock contention'da bloke olmaz."""
     now = time.time()
     with _lock:
         stocks_count = len(_cache.get("data") or [])
@@ -5897,17 +5892,14 @@ def api_health():
 
     macro_age_s = int(now - macro_ts) if macro_ts else None
     macro_stale = macro_age_s is None or macro_age_s > _MACRO_TTL
-
-    # Status: healthy if cache exists + bg loop has run recently
     healthy = (
         stocks_count > 0
         and macro_count > 0
         and (macro_age_s is None or macro_age_s < 1800)  # 30dk fresh
     )
-
     macro_last_ts = _macro_bg_stats.get("last_success_ts", 0)
     news_last_ts  = _news_queue_stats.get("last_processed_ts", 0)
-    return safe_json({
+    return {
         "ok":                       healthy,
         "status":                   "OK" if healthy else "DEGRADED",
         "stocks": {
@@ -5928,7 +5920,36 @@ def api_health():
         "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
         "data_freshness":           build_data_freshness(),  # SPEC-014 B1
         "ts": now,
-    })
+    }
+
+
+# SPEC-016 K4 — /api/health lock-free decouple.
+# Health hesabı (_lock alır) bg thread'de yapılır; endpoint snapshot'ı lock-free
+# okur. _lock contention / gevent yavaşlamasında bile /api/health anında 200 döner
+# → watchdog yanlış HTTP=000 görmez → restart churn döngüsü kırılır (#48 ailesi).
+_health_snapshot = {"ok": True, "status": "STARTING", "ts": 0.0, "note": "warming up"}
+
+def _health_snapshot_loop():
+    global _health_snapshot
+    while True:
+        try:
+            _health_snapshot = _compute_health()   # atomic rebind (GIL)
+        except Exception as e:
+            logger.error("health snapshot loop: %s", e)
+        time.sleep(8)
+
+threading.Thread(target=_health_snapshot_loop, daemon=True, name="health-snapshot").start()
+logger.info("Health snapshot loop başlatıldı (SPEC-016 K4 — /api/health lock-free)")
+
+
+@app.route("/api/health")
+def api_health():
+    """Health + observability endpoint — SPEC-016 K4 lock-free.
+
+    Production monitoring (UptimeRobot, watchdog) için 1dk poll edilebilir.
+    Snapshot bg thread'de güncellenir (8s) → endpoint hiç _lock almaz,
+    contention/gevent yavaşlamasında bile anında yanıt verir."""
+    return safe_json(_health_snapshot)
 
 
 @app.route("/sitemap.xml")
