@@ -2236,6 +2236,12 @@ else:
     logger.info("Freshness monitor: non-leader worker — atlandı (spam fix)")
 
 
+# SPEC-008 L5 — Modül-load-time tanımlama (alarm thread'inden ÖNCE).
+_chart_integrity_errors = {}                   # {ticker: float ts}
+_CHART_INTEGRITY_ALARM_THRESHOLD = 5           # 214 hisseden >N → alarm
+_CHART_INTEGRITY_ALARM_WINDOW_S  = 600         # son 10 dakika
+
+
 def _chart_integrity_count_recent(now=None):
     """Son ALARM_WINDOW içindeki integrity_error ticker sayısı. Pruning dahil."""
     now = now or time.time()
@@ -3408,14 +3414,10 @@ _CHART_CACHE_VERSION = "1.0"     # SPEC-008 L4a — schema bumpu temiz invalidat
                                  # için. Entry "v" alanı uyuşmuyorsa cache miss say
                                  # (deploy-zamanı şema değişiminde eski cache yok sayılır).
 
-# ── SPEC-008 L5 — Watchdog Integrity-Error Rate Alarm ─────────────────────────
-# api_stock_chart integrity_error döndüğünde {ticker: ts} yazılır. Alarm loop
-# 5dk'da bir son 10dk içindeki ticker sayısını kontrol eder; eşiği aşarsa
-# logger.error ile journalctl alarm pattern düşürür (watchdog/manuel takip).
-# Reaktif çıktıyı izleyen, ek HTTP yükü olmayan in-process counter.
-_chart_integrity_errors = {}                   # {ticker: float ts}
-_CHART_INTEGRITY_ALARM_THRESHOLD = 5           # 214 hisseden >N → alarm
-_CHART_INTEGRITY_ALARM_WINDOW_S  = 600         # son 10 dakika
+# SPEC-008 L5 — Sayaçlar yukarıda (modül-load sırası) tanımlandı.
+# Detay: api_stock_chart integrity_error döndüğünde {ticker: ts} yazılır.
+# Alarm loop 5dk'da bir son 10dk içindeki ticker sayısını kontrol eder;
+# eşiği aşarsa logger.error ile journalctl alarm pattern düşürür.
 
 
 # ── Gemini API — AI haber özeti & sinyal açıklaması ─────────────────────────
