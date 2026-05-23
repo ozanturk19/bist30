@@ -340,7 +340,7 @@ Güçlü Trend  →  ST = LONG   AND  ADX ≥ 25  AND  DI+ &gt; DI−  AND  EMA1
 Zayıf Trend  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
 </div>
 
-<h2>1. Supertrend Göstergesi</h2>
+<h2 id="supertrend">1. Supertrend Göstergesi</h2>
 <p>
   Supertrend, <strong>ATR (Average True Range)</strong> tabanlı bir trend takip göstergesidir.
   Parametreler: <code>period=10, multiplier=3</code>.
@@ -352,7 +352,7 @@ Zayıf Trend  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 
 </ul>
 <p>Grafiklerde mavi/yeşil çizgi Güçlü Trend, kırmızı çizgi Zayıf Trend modunu gösterir. Fiyat bandı kırdığında otomatik sinyal değişir.</p>
 
-<h2>2. ADX — Ortalama Yönlü Hareket Endeksi</h2>
+<h2 id="adx">2. ADX — Ortalama Yönlü Hareket Endeksi</h2>
 <p>
   ADX (Average Directional Index), trendin <strong>gücünü</strong> ölçer; yönü değil.
   <code>period=14</code> kullanılır.
@@ -369,7 +369,7 @@ Zayıf Trend  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 
   DI+ > DI− ise alış yönünde; DI− > DI+ ise satış yönünde güç var demektir.
 </p>
 
-<h2>3. EMA12 / EMA99 Kesişimi</h2>
+<h2 id="ema">3. EMA12 / EMA99 Kesişimi</h2>
 <p>
   Üstel Hareketli Ortalama (EMA) çaprazlaması, orta ve uzun dönem trend yönünü teyit eder.
 </p>
@@ -379,7 +379,7 @@ Zayıf Trend  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 
 </ul>
 <p>Grafiklerde EMA12 <span style="color:#58a6ff">mavi</span>, EMA99 <span style="color:#e3b341">sarı</span> renkle gösterilir. İkisi arasındaki dolgu, yön değiştikçe yeşil/kırmızıya döner.</p>
 
-<h2>Haftalık Trend Gate (Filtre)</h2>
+<h2 id="haftalik-trend">Haftalık Trend Gate (Filtre)</h2>
 <p>
   Günlük sinyaller, <strong>haftalık EMA20 yönüyle</strong> filtrelenir.
   Büyük ters trendde (örn. haftalık grafikte düşüş varken günlük Güçlü Trend sinyali) sinyal üretilmez.
