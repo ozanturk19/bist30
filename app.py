@@ -3692,6 +3692,9 @@ KURAL 6 — YASAKLI İFADELER:
 - ❌ "Al/sat tavsiyesi", "almalısınız", "satın" → tavsiye yasağı.
 - ❌ Başlık, alt başlık (## veya **bold**) → düz paragraf yaz.
 - ❌ Madde işaretleri (- veya •) → düz paragraf, virgüllerle bağla.
+- ❌ 1. çoğul fiil ("belirtelim", "ifade edelim", "söyleyebiliriz", "anlayalım") →
+     3. tekil / nesnel kullan ("görünüyor", "durumunda", "seviyesinde",
+     "olarak hesaplanmış"). Mesafeli + bilgilendirici ton (SPEC-014 polish #1).
 - ❌ "Bu durumda yatırımcılar..." → genel tavsiye yok.
 
 ═══ İYİ ÖRNEK ═══

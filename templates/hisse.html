@@ -1459,7 +1459,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       {%- if   _ts >= 70 %}{% set _tc = "#f59e0b" %}{% set _tl = "Altın"    %}
       {%- elif _ts >= 50 %}{% set _tc = "#c0c0c0" %}{% set _tl = "Gümüş"    %}
       {%- elif _ts >= 30 %}{% set _tc = "#cd7f32" %}{% set _tl = "Bronz"    %}
-      {%- else            %}{% set _tc = "#6b7280" %}{% set _tl = "Standart" %}{% endif %}
+      {%- else            %}{% set _tc = "#6b7280" %}{% set _tl = "İzleme" %}{% endif %}
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
            title="Sinyal kalite puanı (0–100). Bronz/Gümüş/Altın tier sınıflandırması bu skora göre.">
         <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100, {{ _tl }} tier">
