@@ -1497,8 +1497,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
     <!-- Katman C — detaylı teknik göstergeler (accordion, kapalı başlar) -->
     <details id="signalSummaryDetails" style="margin-top:10px;border-top:1px solid #1c1b1f;padding-top:10px">
-      <summary style="cursor:pointer;font-size:12px;color:#b8c3ff;list-style:none;user-select:none;outline:none">
-        ▾ Detaylı teknik göstergeler
+      <summary style="cursor:pointer;font-size:12px;color:#b8c3ff;list-style:none;user-select:none;outline:none"
+               title="Aç/kapat — ADX, RSI, EMA, DI±, Supertrend göstergeleri ve metodoloji linkleri">
+        ▾ Detaylı teknik göstergeler <span style="color:#909097;font-weight:normal;font-size:11px">— aç/kapat</span>
       </summary>
       <div style="margin-top:10px">
         <!-- Teknik Görünüm (eski commentary-section — taşındı, silinmedi) -->
@@ -2371,11 +2372,13 @@ function renderFreshness(f) {
 
   const mins = Math.floor(age / 60);
   let color, label;
-  if (age < 300) {           /* <5dk yeşil */
+  if (!f.market_open) {       /* SPEC-014 polish #2: BIST kapalı — yaş yanıltıcı */
+    color = '#909097'; label = 'Piyasa kapalı';
+  } else if (age < 300) {     /* <5dk yeşil */
     color = '#00e290'; label = 'Veri canlı';
-  } else if (age < 900) {    /* 5-15dk sarı */
+  } else if (age < 900) {     /* 5-15dk sarı */
     color = '#f5c949'; label = `Veri ${mins} dk önce güncellendi`;
-  } else {                   /* >15dk kırmızı */
+  } else {                    /* >15dk kırmızı */
     color = '#f85149'; label = `Veri ${mins} dk önce güncellendi`;
   }
   dot.style.background = color;
