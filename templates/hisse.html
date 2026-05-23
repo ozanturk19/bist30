@@ -1177,7 +1177,22 @@
     body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
   }
   /* SPEC-007: Premium paywall — blur + CTA banner */
-  .tier-locked { filter: blur(6px); user-select: none; pointer-events: none; }
+  /* SPEC-012 V3a L5 — yumuşatılmış teaser: hard blur yerine yarı-okunur grayscale.
+     Kullanıcı içeriği "var ama gri" görür → soft upsell; tam blur belirsizliği yerine. */
+  .tier-locked {
+    filter: blur(2px) saturate(.4) brightness(.78);
+    user-select: none; pointer-events: none;
+    position: relative;
+  }
+  .tier-locked::after {
+    content: "💎 Premium içerik";
+    position: absolute; top: 8px; right: 10px;
+    background: rgba(255,215,0,.12); border: 1px solid rgba(255,215,0,.4);
+    color: #ffd700; font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 6px;
+    letter-spacing: .3px; pointer-events: none;
+    backdrop-filter: blur(2px);
+  }
   .premium-cta-row {
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; flex-wrap: wrap;

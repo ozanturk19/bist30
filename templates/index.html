@@ -2322,6 +2322,44 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   Piyasa hareketli olabilir — fiyatlar gerçek zamanlı olmayabilir.
 </div>
 
+<!-- SPEC-012 V3a L4 — Onboarding banner (Öğrenme Modu CTA, dismissible localStorage) -->
+<div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(184,195,255,.10),rgba(29,78,216,.05));border:1px solid rgba(184,195,255,.32);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:13px;color:#e5e1e4;line-height:1.55;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+  <span style="font-size:18px;flex-shrink:0">📚</span>
+  <span style="flex:1;min-width:200px">
+    <strong>İlk kez mi?</strong> <strong style="color:#b8c3ff">Öğrenme Modu</strong>'nu açın —
+    finansal terimlerin yanında <code style="background:rgba(184,195,255,.15);padding:1px 5px;border-radius:3px;color:#b8c3ff">?</code> görünür, tıklayınca anlamı açılır.
+  </span>
+  <button type="button" id="bpOnboardOpen"
+          style="background:#b8c3ff;color:#0e0e12;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">
+    Öğrenme Modu'nu Aç
+  </button>
+  <button type="button" id="bpOnboardDismiss" aria-label="Kapat"
+          style="background:transparent;border:none;color:#909097;cursor:pointer;font-size:18px;padding:2px 8px;line-height:1;flex-shrink:0">×</button>
+</div>
+<script>
+(function(){
+  try {
+    var dismissed = localStorage.getItem('bp_onboard_dismissed') === '1';
+    var alreadyOn = localStorage.getItem('bp_learning_mode') === '1';
+    if (dismissed || alreadyOn) return;
+    var el = document.getElementById('bpOnboardBanner');
+    if (!el) return;
+    el.style.display = 'flex';
+    document.getElementById('bpOnboardDismiss').addEventListener('click', function(){
+      el.style.display = 'none';
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e){}
+    });
+    document.getElementById('bpOnboardOpen').addEventListener('click', function(){
+      if (window.bpLearningMode && window.bpLearningMode.state === false) {
+        window.bpLearningMode.toggle();
+      }
+      el.style.display = 'none';
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e){}
+    });
+  } catch(e){}
+})();
+</script>
+
 <!-- ── Dual Endeks Kartları ── -->
 <div class="dual-endeks">
 
@@ -5685,6 +5723,7 @@ document.addEventListener('keydown', e => {
 <div class="sig-tip" id="sigTip"></div>
 
 <script src="/static/bp-search.js?v=44" defer></script>
+<script src="/static/learning-mode.js?v=1" defer></script>
 {% include '_premium_modal.html' %}
 </body>
 </html>
