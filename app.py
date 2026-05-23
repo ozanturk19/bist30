@@ -2236,6 +2236,45 @@ else:
     logger.info("Freshness monitor: non-leader worker — atlandı (spam fix)")
 
 
+def _chart_integrity_count_recent(now=None):
+    """Son ALARM_WINDOW içindeki integrity_error ticker sayısı. Pruning dahil."""
+    now = now or time.time()
+    win = _CHART_INTEGRITY_ALARM_WINDOW_S
+    with _lock:
+        # Eski kayıtları temizle (in-place)
+        stale = [t for t, ts in _chart_integrity_errors.items() if (now - ts) > win]
+        for t in stale:
+            _chart_integrity_errors.pop(t, None)
+        return len(_chart_integrity_errors)
+
+
+def _chart_integrity_alarm_loop():
+    """SPEC-008 L5 — Son 10dk içindeki chart integrity_error ticker sayısı eşiği
+    aşarsa journalctl'e ALARM düşürür. Anti-spam: aynı durumda 30dk'da 1 mesaj."""
+    last_alarm = 0.0
+    while True:
+        try:
+            n = _chart_integrity_count_recent()
+            if n > _CHART_INTEGRITY_ALARM_THRESHOLD:
+                now = time.time()
+                if now - last_alarm > 1800:   # 30dk anti-spam
+                    last_alarm = now
+                    logger.error("CHART-INTEGRITY-ALARM: son %ddk içinde %d/%d hisse integrity_error "
+                                 "(eşik %d). Watchdog/manuel inceleme gerekli.",
+                                 _CHART_INTEGRITY_ALARM_WINDOW_S // 60, n, len(BIST100) - 1,
+                                 _CHART_INTEGRITY_ALARM_THRESHOLD)
+        except Exception as e:
+            logger.error("chart_integrity_alarm_loop hatası: %s", e)
+        time.sleep(300)  # 5 dakikada bir kontrol
+
+
+# Leader-only — anti-spam state worker-local; 4× duplicate alarm engellenir.
+if _is_notify_leader():
+    threading.Thread(target=_chart_integrity_alarm_loop, daemon=True,
+                     name="chart-integrity-alarm").start()
+    logger.info("Chart-integrity alarm başlatıldı (LEADER — SPEC-008 L5)")
+
+
 _DISK_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
 _BT_DISK_PATH    = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backtest_cache.json")
 _SNAPSHOTS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshots")
@@ -3368,6 +3407,15 @@ _STOCK_CACHE_TTL   = 900         # 15 dakika
 _CHART_CACHE_VERSION = "1.0"     # SPEC-008 L4a — schema bumpu temiz invalidation
                                  # için. Entry "v" alanı uyuşmuyorsa cache miss say
                                  # (deploy-zamanı şema değişiminde eski cache yok sayılır).
+
+# ── SPEC-008 L5 — Watchdog Integrity-Error Rate Alarm ─────────────────────────
+# api_stock_chart integrity_error döndüğünde {ticker: ts} yazılır. Alarm loop
+# 5dk'da bir son 10dk içindeki ticker sayısını kontrol eder; eşiği aşarsa
+# logger.error ile journalctl alarm pattern düşürür (watchdog/manuel takip).
+# Reaktif çıktıyı izleyen, ek HTTP yükü olmayan in-process counter.
+_chart_integrity_errors = {}                   # {ticker: float ts}
+_CHART_INTEGRITY_ALARM_THRESHOLD = 5           # 214 hisseden >N → alarm
+_CHART_INTEGRITY_ALARM_WINDOW_S  = 600         # son 10 dakika
 
 
 # ── Gemini API — AI haber özeti & sinyal açıklaması ─────────────────────────
@@ -5785,6 +5833,9 @@ def api_stock_chart(ticker):
             if not ok2:
                 logger.error("SPEC-008 chart integrity recompute de FAIL [%s]: %s → integrity_error",
                              ticker, reason2)
+                # SPEC-008 L5 — recent integrity-error tracker (alarm loop tarafından okunur)
+                with _lock:
+                    _chart_integrity_errors[ticker] = time.time()
                 return safe_json({"chart": None, "loading": True, "integrity_error": reason2})
 
     # ── Sinyal senkronizasyonu: ana cache otoritelif kaynaktır ───────────────
@@ -5932,6 +5983,7 @@ def _compute_health():
         "last_news_queue_ts":       news_last_ts,
         "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
         "data_freshness":           build_data_freshness(),  # SPEC-014 B1
+        "chart_integrity_recent": _chart_integrity_count_recent(now),  # SPEC-008 L5
         "ts": now,
     }
 
