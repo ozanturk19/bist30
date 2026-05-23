@@ -4156,10 +4156,7 @@ function tierBadge(s) {
     return ' <span title="Plus tier — orta seviye, herkese açık (Premium DEĞİL)" class="tier-badge tier-badge-plus">⭐ PLUS</span>';
   }
   // Standart için inline rozet yok (mevcut UI'da tablo zaten varsayılan, görsel kalabalık olmasın)
-  // Backward compat: tier henüz hesaplanmadıysa eski is_premium fallback
-  if (s.is_premium && !s.tier) {
-    return ' <span title="Premium — Hacim Onaylı" style="color:#ffc850;font-size:11px">💎</span>';
-  }
+  // Madde 3 (b): tier 6+ haftadır canlı → backward-compat is_premium fallback ölü kod, kaldırıldı.
   return '';
 }
 
