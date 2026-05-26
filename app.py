@@ -2323,10 +2323,27 @@ def _save_cache_to_disk(data):
         logger.warning("Disk cache yazma hatası: %s", e)
 
 
+# H3 (#60) — Disk cache mtime guard (26 May 2026, INCIDENT-3/5/6/7 root cause fix)
+# Module-level state: aynı mtime → reload SKIP, gevent hub blocking I/O önlenir.
+# Önceki: background_refresh non-leader 3 worker × 90s döngü = 95 reload/saat (24h 2280).
+# Yeni: file mtime aynıysa hemen return; sadece refresh_data yazımı sonrası reload.
+_disk_cache_mtime = None  # type: Optional[float]
+
+
 def _load_cache_from_disk():
-    """Disk cache'i yükler — servis başlarken ~3 dakikalık boş sayfayı önler."""
+    """Disk cache'i yükler — mtime değişmediyse SKIP (H3 fix, #60).
+
+    Cold start: _disk_cache_mtime=None → ilk mtime ile compare, mismatch → load.
+    İlk yüklemeden sonra: file değişmedikçe in-memory dön, blocking I/O yok.
+    Thread-safety: float/None atomic primitive (Python GIL), ek lock gerekmez.
+    """
+    global _disk_cache_mtime
     try:
         if not os.path.exists(_DISK_CACHE_PATH):
+            return
+        current_mtime = os.path.getmtime(_DISK_CACHE_PATH)
+        # H3 guard: mtime aynı + in-memory veri var → SKIP (1.6 reload/dakika sızıntısı kapanır)
+        if _disk_cache_mtime == current_mtime and _cache.get("data"):
             return
         with open(_DISK_CACHE_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -2336,14 +2353,14 @@ def _load_cache_from_disk():
             # updated_at = disk dosyasının mtime'ı (refresh_data yazımı sonrası).
             # Non-leader worker refresh_data çalıştırmaz → placeholder string
             # /api/data updated_at'i parse edilemez bırakıyordu. mtime her zaman parse edilebilir.
-            disk_mtime = os.path.getmtime(_DISK_CACHE_PATH)
-            disk_ts = datetime.fromtimestamp(disk_mtime, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+            disk_ts = datetime.fromtimestamp(current_mtime, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
             with _lock:
                 _cache["data"] = data
                 _cache["updated_at"] = disk_ts
                 # SPEC-008 v1.2 #39 — disk mtime = son refresh_data zamanı.
                 # background_refresh tamamlanana kadar grace penceresi açık (>300s ise).
-                _cache["last_refresh_ts"] = disk_mtime
+                _cache["last_refresh_ts"] = current_mtime
+            _disk_cache_mtime = current_mtime  # H3: state update sadece load sonrası
             logger.info("Disk cache yüklendi: %d hisse (updated_at=%s)", len(data), disk_ts)
     except Exception as e:
         logger.warning("Disk cache okuma hatası: %s", e)
