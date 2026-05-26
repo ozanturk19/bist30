@@ -2389,8 +2389,8 @@ function renderFreshness(f) {
   let color, label;
   if (!f.market_open) {       /* SPEC-014 polish #2: BIST kapalı — yaş yanıltıcı */
     color = '#909097'; label = 'Piyasa kapalı';
-  } else if (age < 300) {     /* <5dk yeşil */
-    color = '#00e290'; label = 'Veri canlı';
+  } else if (age < 300) {     /* <5dk turuncu — BIST resmi yayın gecikmesi 15dk */
+    color = '#f59e0b'; label = 'BIST ~15dk gecikmeli';
   } else if (age < 900) {     /* 5-15dk sarı */
     color = '#f5c949'; label = `Veri ${mins} dk önce güncellendi`;
   } else {                    /* >15dk kırmızı */
