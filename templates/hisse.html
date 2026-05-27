@@ -1628,6 +1628,87 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="18 15 12 9 6 15"/></svg>
   </button>
 
+  {# SPEC-017 v2 c3 — Bottom Sticky CTA Bar (Watchlist 60% / Alarm 30% / Paylaş icon) #}
+  <style>
+    .bp-bottom-cta {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 450;
+      background: rgba(14,14,18,0.96);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-top: 1px solid rgba(42,42,44,0.7);
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+      display: flex; gap: 8px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(.32,.72,0,1);
+    }
+    .bp-bottom-cta.visible { transform: translateY(0); }
+    .bp-cta-watchlist {
+      flex: 6; height: 44px;
+      background: rgba(0,226,144,0.12);
+      color: #00e290;
+      border: 1px solid rgba(0,226,144,0.35);
+      border-radius: 10px; cursor: pointer;
+      font-family: 'Manrope', system-ui, sans-serif;
+      font-size: 13.5px; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bp-cta-watchlist:active { transform: scale(0.97); }
+    .bp-cta-watchlist.active {
+      background: rgba(0,226,144,0.22);
+      color: #00e290;
+    }
+    .bp-cta-alarm {
+      flex: 3; height: 44px;
+      background: rgba(245,201,73,0.10);
+      color: #f5c949;
+      border: 1px solid rgba(245,201,73,0.30);
+      border-radius: 10px; cursor: pointer;
+      font-family: 'Manrope', system-ui, sans-serif;
+      font-size: 13px; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bp-cta-alarm:active { transform: scale(0.95); }
+    .bp-cta-share {
+      flex: 0 0 44px; height: 44px;
+      background: rgba(184,195,255,0.08);
+      color: #b8c3ff;
+      border: 1px solid rgba(184,195,255,0.25);
+      border-radius: 10px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bp-cta-share:active { transform: scale(0.95); }
+    .bp-cta-share svg { width: 18px; height: 18px; stroke-width: 2.2; }
+    /* Spacer: bottom CTA varken page content alta gizlenmez */
+    .bp-bottom-cta-spacer { height: 64px; }
+    @media (max-width: 480px) {
+      .bp-cta-watchlist { font-size: 13px; }
+      .bp-cta-alarm { font-size: 12px; }
+    }
+  </style>
+  <div class="bp-bottom-cta" id="bpBottomCta" role="toolbar" aria-label="Hisse aksiyonları">
+    <button class="bp-cta-watchlist" id="bpCtaWatch" type="button"
+            onclick="if(typeof toggleHisseWatch==='function')toggleHisseWatch();">
+      <span id="bpCtaWatchIcon">⭐</span>
+      <span id="bpCtaWatchLabel">Takibe Al</span>
+    </button>
+    <button class="bp-cta-alarm" type="button"
+            onclick="var b=document.getElementById('hibBellBtn');if(b)b.click();">
+      🔔 Alarm
+    </button>
+    <button class="bp-cta-share" type="button" aria-label="Paylaş"
+            onclick="var s=document.getElementById('shareSection');if(s){s.style.display='flex';s.scrollIntoView({behavior:'smooth',block:'center'});}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      </svg>
+    </button>
+  </div>
+  <div class="bp-bottom-cta-spacer"></div>
+
   <!-- Grafik -->
   {% if premium_locked %}
   <div class="premium-cta-row">
