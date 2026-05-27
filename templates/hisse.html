@@ -1427,23 +1427,31 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </span>
   </div>
 
-  <!-- SPEC-017 v1 MVP — 4-Segment Sticky Control (27 May 2026, Çar Bayram Günü 1)
-       Anchor-based scroll navigation: Özet (top) · Grafik · AI · Haberler.
-       v2'de tab switch + 3-katmanlı sticky header + hero card + bottom CTA. -->
+  <!-- SPEC-017 v2 — Tab-Switch + Fixed Sticky (28 May 2026 gece, Ozan direktifi)
+       Tab-switch: aktif dışındaki content gizli → sayfa kısa.
+       Fixed positioning: parent overflow:hidden bypass (v1 sticky bug fix). -->
   <style>
     .bp-segments {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(14,14,18,0.94);
-      backdrop-filter: blur(16px) saturate(140%);
-      -webkit-backdrop-filter: blur(16px) saturate(140%);
-      border: 1px solid rgba(42,42,44,0.6);
-      border-radius: 10px;
-      padding: 4px;
-      margin: 0 0 18px;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      background: rgba(14,14,18,0.96);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-bottom: 1px solid rgba(42,42,44,0.7);
+      padding: 8px 12px;
+      display: flex; gap: 6px;
+      justify-content: center;
+    }
+    .bp-segments-inner {
       display: flex; gap: 4px;
       max-width: 480px;
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 4px;
     }
-    .bp-segments a {
+    /* Spacer: fixed nav 56px (8+48+8) — page content push down */
+    .bp-segments-spacer { height: 56px; }
+    .bp-segments-inner a {
       flex: 1; text-align: center;
       padding: 8px 10px;
       border-radius: 7px;
@@ -1453,27 +1461,48 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       transition: background 0.15s ease, color 0.15s ease;
       white-space: nowrap;
       -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
     }
-    .bp-segments a:hover {
-      background: rgba(184,195,255,0.08);
+    .bp-segments-inner a:hover {
+      background: rgba(184,195,255,0.10);
       color: #e5e1e4;
     }
-    .bp-segments a.active {
-      background: rgba(0,226,144,0.12);
+    .bp-segments-inner a.active {
+      background: rgba(0,226,144,0.15);
       color: #00e290;
+      box-shadow: 0 1px 3px rgba(0,226,144,0.15);
     }
     @media (max-width: 480px) {
-      .bp-segments { max-width: 100%; }
-      .bp-segments a { font-size: 11.5px; padding: 8px 6px; }
+      .bp-segments-inner { max-width: 100%; }
+      .bp-segments-inner a { font-size: 11.5px; padding: 8px 6px; }
     }
+    /* FAB "Üste çık" — scroll edildiğinde sağ-alt */
+    .bp-fab-up {
+      position: fixed; bottom: 80px; right: 16px; z-index: 400;
+      width: 44px; height: 44px;
+      background: rgba(0,226,144,0.92);
+      color: #0e0e12; border: none; border-radius: 50%;
+      cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      display: none; align-items: center; justify-content: center;
+      transition: opacity 0.2s, transform 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bp-fab-up.visible { display: flex; }
+    .bp-fab-up:active { transform: scale(0.92); }
+    .bp-fab-up svg { width: 22px; height: 22px; stroke-width: 2.4; }
   </style>
   <nav class="bp-segments" aria-label="Hisse detay segmentleri">
-    <a href="#ozet" class="bp-seg-item active" data-segment="ozet">Özet</a>
-    <a href="#chart-section" class="bp-seg-item" data-segment="grafik">Grafik</a>
-    <a href="#ai-section" class="bp-seg-item" data-segment="ai">AI</a>
-    <a href="#news-section" class="bp-seg-item" data-segment="haberler">Haberler</a>
+    <div class="bp-segments-inner">
+      <a class="bp-seg-item active" data-segment="ozet">Özet</a>
+      <a class="bp-seg-item" data-segment="grafik">Grafik</a>
+      <a class="bp-seg-item" data-segment="ai">AI</a>
+      <a class="bp-seg-item" data-segment="haberler">Haberler</a>
+    </div>
   </nav>
-  <div id="ozet" style="scroll-margin-top:80px"></div>
+  <div class="bp-segments-spacer"></div>
+  <button class="bp-fab-up" id="bpFabUp" aria-label="Üste çık" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
 
   <!-- Grafik -->
   {% if premium_locked %}
@@ -3452,50 +3481,73 @@ document.addEventListener('click', function(e) {
 </script>
 {% include '_premium_modal.html' %}
 <script>
-/* SPEC-017 v1 — Segment active-state scroll-spy + smooth-scroll */
+/* SPEC-017 v2 — Tab-switch (gerçek gizle/göster) — Ozan direktifi 23:55 TR
+ * Anchor scroll yerine: aktif tab dışındaki içerikler display:none → sayfa KISALIR.
+ * Özet (default): chart/ai/news gizli, sadece signal info + mini stats + history görünür.
+ * Grafik/AI/Haberler: sadece o panel görünür.
+ */
 (function(){
-  var segments = document.querySelectorAll('.bp-segments a');
+  var segments = document.querySelectorAll('.bp-segments-inner a');
   if (!segments.length) return;
-  var targets = Array.from(segments).map(function(a){
-    var id = a.getAttribute('href').replace('#','');
-    return { id: id, el: document.getElementById(id), seg: a };
-  }).filter(function(t){ return t.el; });
-  if (!targets.length) return;
 
-  function updateActive() {
-    var scrollY = window.scrollY + 100;  // sticky header offset
-    var found = null;
-    for (var i = targets.length - 1; i >= 0; i--) {
-      if (targets[i].el.offsetTop <= scrollY) {
-        found = targets[i];
-        break;
-      }
-    }
-    if (!found) found = targets[0];
-    segments.forEach(function(s){ s.classList.remove('active'); });
-    found.seg.classList.add('active');
+  // FAB "Üste çık" — scroll>400 görünür
+  var fab = document.getElementById('bpFabUp');
+  if (fab) {
+    fab.addEventListener('click', function(){
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+    var fabT;
+    window.addEventListener('scroll', function(){
+      if (fabT) cancelAnimationFrame(fabT);
+      fabT = requestAnimationFrame(function(){
+        if (window.scrollY > 400) fab.classList.add('visible');
+        else fab.classList.remove('visible');
+      });
+    }, {passive: true});
   }
 
-  // Debounced scroll
-  var t;
-  window.addEventListener('scroll', function(){
-    if (t) cancelAnimationFrame(t);
-    t = requestAnimationFrame(updateActive);
-  }, {passive: true});
+  // Tab → hangi section ID'leri görünür
+  // ALL_PANELS = grafik+ai+haberler section'ları (toggle'a tabi)
+  // Özet tab default: bunların hepsi gizli, kalan içerik (signalSummary + miniStats + history) görünür
+  var ALL_PANELS = ['chart-section', 'sigExplainSection', 'newsSection'];
+  var SHOW_FOR_TAB = {
+    'ozet':     [],  // hepsi gizli → kullanıcı sadece özet görür
+    'grafik':   ['chart-section'],
+    'ai':       ['sigExplainSection'],
+    'haberler': ['newsSection']
+  };
 
-  // Click — smooth scroll
+  function applyTab(tab) {
+    ALL_PANELS.forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    var showList = SHOW_FOR_TAB[tab] || [];
+    showList.forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.style.display = '';
+    });
+    segments.forEach(function(s){
+      s.classList.toggle('active', s.dataset.segment === tab);
+    });
+    // Persist (sayfa yenilense de tab korunur)
+    try { localStorage.setItem('bp_hisse_tab', tab); } catch(e) {}
+  }
+
   segments.forEach(function(s){
     s.addEventListener('click', function(e){
       e.preventDefault();
-      var id = s.getAttribute('href').replace('#','');
-      var el = document.getElementById(id);
-      if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
-      segments.forEach(function(x){ x.classList.remove('active'); });
-      s.classList.add('active');
+      var tab = s.dataset.segment || 'ozet';
+      applyTab(tab);
+      window.scrollTo({top: 0, behavior: 'smooth'});
     });
   });
 
-  updateActive();
+  // İlk yükleme: localStorage veya "ozet" default
+  var initial = 'ozet';
+  try { initial = localStorage.getItem('bp_hisse_tab') || 'ozet'; } catch(e) {}
+  if (!SHOW_FOR_TAB[initial]) initial = 'ozet';
+  applyTab(initial);
 })();
 </script>
 </body>
