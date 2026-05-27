@@ -3622,6 +3622,56 @@ _signal_explain_cache = {}   # {ticker: {"text": str|None, "sig": str, "ts": flo
 _SIG_EXPLAIN_TTL      = 3600 * 12  # SPEC-009 Faz 2 B3: 4h → 12h (Gemini maliyet)
 _SIG_FAIL_TTL         = 300        # 5 dakika
 
+# SPEC-020 Faz 1 — Gemini AI Queue (27 May 2026, INCIDENT-8/10 katalizör fix)
+# Worker-local cache 4 worker × paralel Gemini call sorun: 10 ticker × 4 worker
+# burst = gevent hub 40-50s donar → K6 v2 quorum tetik. Çözüm:
+#   1. Leader-only Gemini call (_is_gemini_leader mevcut)
+#   2. Disk cache shared (workers arası senkron)
+#   3. Non-leader: cache miss → commentary fallback (Gemini call YOK)
+_SIG_EXPLAIN_DISK_PATH = "/root/bist30/_signal_explain_cache.json"
+_sig_disk_mtime = None  # H3 pattern: file mtime guard
+_sig_disk_lock = threading.Lock()
+
+
+def _save_explain_cache_to_disk():
+    """Leader-only — _signal_explain_cache'i atomic disk'e yazar."""
+    try:
+        # In-memory cache snapshot (concurrent mutation güvenli)
+        with _lock:
+            snap = dict(_signal_explain_cache)
+        # Atomic write: tempfile + os.replace
+        tmp = _SIG_EXPLAIN_DISK_PATH + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(snap, f, ensure_ascii=False)
+        os.replace(tmp, _SIG_EXPLAIN_DISK_PATH)
+    except Exception as e:
+        logger.debug("explain cache disk yazma hatası: %s", e)
+
+
+def _load_explain_cache_from_disk():
+    """Non-leader workers — disk cache'i memory'e merge eder (H3 pattern, mtime guard)."""
+    global _sig_disk_mtime
+    try:
+        if not os.path.exists(_SIG_EXPLAIN_DISK_PATH):
+            return
+        current_mtime = os.path.getmtime(_SIG_EXPLAIN_DISK_PATH)
+        # Mtime guard: file değişmemişse skip (gevent hub bloke etme)
+        if _sig_disk_mtime == current_mtime:
+            return
+        with open(_SIG_EXPLAIN_DISK_PATH, "r", encoding="utf-8") as f:
+            disk_data = json.load(f)
+        if not isinstance(disk_data, dict):
+            return
+        # Merge: disk daha taze TS varsa al
+        with _lock:
+            for tk, dv in disk_data.items():
+                mv = _signal_explain_cache.get(tk)
+                if not mv or (dv.get("ts", 0) > mv.get("ts", 0)):
+                    _signal_explain_cache[tk] = dv
+        _sig_disk_mtime = current_mtime
+    except Exception as e:
+        logger.debug("explain cache disk okuma hatası: %s", e)
+
 # Model fallback zinciri: birincil 2.5-flash, yedek 1.5-flash
 # (use_search=False olan denemeler grounding olmadan gider → daha stabil)
 _GEMINI_NEWS_ATTEMPTS = [
@@ -3994,6 +4044,24 @@ def get_ai_signal_explanation(ticker, signal_data):
             if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
                 return cached.get("text")
 
+    # SPEC-020 Faz 1 — Memory miss → DISK cache lazy-load (H3 pattern mtime guard)
+    # Workers arası senkron: leader Gemini yazdığında non-leader buradan okur
+    _load_explain_cache_from_disk()
+    with _lock:
+        cached = _signal_explain_cache.get(ticker)
+        if cached:
+            ttl = _SIG_FAIL_TTL if cached.get("failed") else _SIG_EXPLAIN_TTL
+            if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
+                return cached.get("text")
+
+    # SPEC-020 Faz 1 — Non-leader: cache miss + leader değil → Gemini ÇAĞIRMA
+    # Sadece leader workers gerçek Gemini call yapar → gevent hub donmaz.
+    # Bu, INCIDENT-8 (10 ticker × 4 worker burst) tetik katalizörünü kaldırır.
+    # Non-leader cache miss'inde kısa placeholder dön — leader 60s içinde doldurur,
+    # frontend retry/refresh ile gerçek metni alır.
+    if not _is_gemini_leader():
+        return "Sinyal açıklaması hazırlanıyor… (sayfa otomatik yenilenecek)"
+
     name     = STOCK_NAMES.get(ticker, ticker)
     sig_lbl  = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend", "BEKLE": "Belirsiz"}.get(sig, sig)
 
@@ -4113,6 +4181,12 @@ def get_ai_signal_explanation(ticker, signal_data):
             logger.info("get_ai_signal_explanation(%s): OK [model=%s]", ticker, model_used)
         else:
             logger.info("get_ai_signal_explanation(%s): commentary fallback kullanıldı", ticker)
+
+    # SPEC-020 Faz 1 — Leader yazımı sonrası disk cache senkronu
+    # Non-leader workers _load_explain_cache_from_disk ile mtime guard'a göre
+    # bu güncellemeyi okur, ikinci Gemini call yapmaz.
+    if ai_ok:  # Sadece gerçek AI başarısı disk'e (fallback noise olmaz)
+        _save_explain_cache_to_disk()
 
     return final_text
 
