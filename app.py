@@ -2676,6 +2676,39 @@ def api_data():
     })
 
 
+# ── SPEC-018 BIST Heatmap MVP (Çar 27 May 2026, Ozan-direktif) ──────────────
+# Vanilla squarified treemap için minimal JSON. Boyut = tier_score (market_cap
+# v2'de fundamentals'tan eklenir). Renk = tier (Bronz/Gümüş/Altın) + signal.
+@app.route("/api/heatmap")
+def api_heatmap():
+    with _lock:
+        stocks_raw = list(_cache["data"])
+    out = []
+    for s in stocks_raw:
+        out.append({
+            "ticker":     s.get("ticker"),
+            "name":       s.get("name") or s.get("ticker"),
+            "sector":     s.get("sector") or "Diğer",
+            "signal":     s.get("signal"),       # AL/SAT/BEKLE
+            "tier":       s.get("tier"),         # standart/plus/premium/None
+            "tier_score": s.get("tier_score", 0),
+            "price":      s.get("price"),
+            "change_pct": s.get("change_pct"),
+        })
+    return safe_json({
+        "stocks":     out,
+        "updated_at": _cache["updated_at"],
+        "loading":    len(out) == 0,
+        "sectors":    list(SECTORS.keys()),
+        "data_freshness": build_data_freshness(),
+    })
+
+
+@app.route("/heatmap")
+def heatmap_page():
+    return render_template("heatmap.html")
+
+
 
 # ── Makro Haber RSS ──────────────────────────────────────────────────────────
 import feedparser as _feedparser
