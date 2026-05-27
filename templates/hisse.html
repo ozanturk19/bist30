@@ -1500,6 +1500,130 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
   </nav>
   <div class="bp-segments-spacer"></div>
+
+  {# SPEC-017 v2 — Sinyal Hero Card (28 May 2026 gece) #}
+  {% if ssr_signal %}
+  <style>
+    .bp-hero-card {
+      background: linear-gradient(135deg, rgba(184,195,255,0.08), rgba(29,78,216,0.04));
+      border: 1px solid rgba(184,195,255,0.18);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .bp-hero-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--hero-accent, #00e290), transparent);
+      opacity: 0.7;
+    }
+    .bp-hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-size: 18px; font-weight: 700;
+      color: var(--hero-accent, #00e290);
+      margin-bottom: 14px;
+      letter-spacing: 0.3px;
+    }
+    .bp-hero-badge .bp-hero-icon { font-size: 20px; line-height: 1; }
+    .bp-hero-meta {
+      font-size: 11px; color: #909097; font-weight: 500;
+      margin-left: auto;
+    }
+    .bp-hero-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .bp-hero-power-wrap {
+      margin: 12px 0 14px;
+    }
+    .bp-hero-power-label {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: #909097; margin-bottom: 4px;
+    }
+    .bp-hero-power-label strong { color: #e5e1e4; font-size: 12px; font-weight: 700; }
+    .bp-hero-power-bar {
+      height: 6px; background: rgba(255,255,255,0.06);
+      border-radius: 3px; overflow: hidden;
+    }
+    .bp-hero-power-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--hero-accent, #00e290), var(--hero-accent-2, #16a34a));
+      transition: width 0.6s ease;
+    }
+    .bp-hero-levels {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      font-size: 13px; color: #e5e1e4;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.025);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .bp-hero-levels span strong { color: var(--hero-accent, #00e290); margin-right: 4px; }
+    .bp-hero-explain-link {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12.5px; color: #93c5fd;
+      text-decoration: none; font-weight: 600;
+      padding: 6px 10px; border-radius: 6px;
+      background: rgba(147,197,253,0.08);
+      transition: background 0.15s, color 0.15s;
+      cursor: pointer; border: none; font-family: inherit;
+    }
+    .bp-hero-explain-link:hover {
+      background: rgba(147,197,253,0.15); color: #b8c3ff;
+    }
+    @media (max-width: 480px) {
+      .bp-hero-card { padding: 14px 16px; border-radius: 12px; }
+      .bp-hero-badge { font-size: 16px; }
+      .bp-hero-levels { font-size: 12px; gap: 10px; padding: 8px 10px; }
+    }
+  </style>
+  {%- set _sig = ssr_signal.signal -%}
+  {%- set _score = ssr_signal.tier_score or 0 -%}
+  {%- if _sig == 'AL' -%}
+    {%- if _score >= 70 %}{% set _hc='#16a34a' %}{% set _hc2='#15803d' %}{% set _lbl='GÜÇLÜ TREND' %}{% set _icon='🥇' %}
+    {%- elif _score >= 50 %}{% set _hc='#22c55e' %}{% set _hc2='#16a34a' %}{% set _lbl='ORTA TREND' %}{% set _icon='🥈' %}
+    {%- else %}{% set _hc='#86efac' %}{% set _hc2='#4ade80' %}{% set _lbl='ZAYIF TREND' %}{% set _icon='🥉' %}{% endif -%}
+  {%- elif _sig == 'SAT' -%}
+    {%- if _score >= 70 %}{% set _hc='#dc2626' %}{% set _hc2='#991b1b' %}{% set _lbl='GÜÇLÜ SAT' %}{% set _icon='▼' %}
+    {%- elif _score >= 50 %}{% set _hc='#ef4444' %}{% set _hc2='#dc2626' %}{% set _lbl='ORTA SAT' %}{% set _icon='▼' %}
+    {%- else %}{% set _hc='#fca5a5' %}{% set _hc2='#ef4444' %}{% set _lbl='ZAYIF SAT' %}{% set _icon='▼' %}{% endif -%}
+  {%- else -%}
+    {% set _hc='#9ca3af' %}{% set _hc2='#6b7280' %}{% set _lbl='BEKLE' %}{% set _icon='⏸' %}
+  {%- endif -%}
+  <div class="bp-hero-card" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
+    <div class="bp-hero-header">
+      <div class="bp-hero-badge">
+        <span class="bp-hero-icon">{{ _icon }}</span>
+        <span>{{ _lbl }}</span>
+      </div>
+      <span class="bp-hero-meta">son {{ ssr_signal.signal_bars or 1 }} gün</span>
+    </div>
+    {% if _sig in ('AL', 'SAT') %}
+    <div class="bp-hero-power-wrap">
+      <div class="bp-hero-power-label">
+        <span>Sinyal Gücü</span>
+        <strong>{{ _score|int }}/100</strong>
+      </div>
+      <div class="bp-hero-power-bar">
+        <div class="bp-hero-power-fill" style="width:{{ _score|int }}%"></div>
+      </div>
+    </div>
+    {% endif %}
+    {% if ssr_signal.tp_level or ssr_signal.sl_level %}
+    <div class="bp-hero-levels">
+      {% if ssr_signal.tp_level %}<span><strong>Hedef:</strong>{{ '%.2f'|format(ssr_signal.tp_level) }} ₺</span>{% endif %}
+      {% if ssr_signal.sl_level %}<span><strong>Stop:</strong>{{ '%.2f'|format(ssr_signal.sl_level) }} ₺</span>{% endif %}
+      {% if ssr_signal.entry %}<span><strong>Giriş:</strong>{{ '%.2f'|format(ssr_signal.entry) }} ₺</span>{% endif %}
+    </div>
+    {% endif %}
+    <button type="button" class="bp-hero-explain-link" onclick="(function(){var s=document.querySelector('[data-segment=\'ai\']');if(s)s.click();})()">
+      Neden bu sinyal? ↗
+    </button>
+  </div>
+  {% endif %}
+
   <button class="bp-fab-up" id="bpFabUp" aria-label="Üste çık" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="18 15 12 9 6 15"/></svg>
   </button>
