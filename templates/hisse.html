@@ -1427,6 +1427,54 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </span>
   </div>
 
+  <!-- SPEC-017 v1 MVP — 4-Segment Sticky Control (27 May 2026, Çar Bayram Günü 1)
+       Anchor-based scroll navigation: Özet (top) · Grafik · AI · Haberler.
+       v2'de tab switch + 3-katmanlı sticky header + hero card + bottom CTA. -->
+  <style>
+    .bp-segments {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(14,14,18,0.94);
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      border: 1px solid rgba(42,42,44,0.6);
+      border-radius: 10px;
+      padding: 4px;
+      margin: 0 0 18px;
+      display: flex; gap: 4px;
+      max-width: 480px;
+    }
+    .bp-segments a {
+      flex: 1; text-align: center;
+      padding: 8px 10px;
+      border-radius: 7px;
+      font-family: 'Manrope', system-ui, sans-serif;
+      font-size: 12.5px; font-weight: 600;
+      color: #909097; text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bp-segments a:hover {
+      background: rgba(184,195,255,0.08);
+      color: #e5e1e4;
+    }
+    .bp-segments a.active {
+      background: rgba(0,226,144,0.12);
+      color: #00e290;
+    }
+    @media (max-width: 480px) {
+      .bp-segments { max-width: 100%; }
+      .bp-segments a { font-size: 11.5px; padding: 8px 6px; }
+    }
+  </style>
+  <nav class="bp-segments" aria-label="Hisse detay segmentleri">
+    <a href="#ozet" class="bp-seg-item active" data-segment="ozet">Özet</a>
+    <a href="#chart-section" class="bp-seg-item" data-segment="grafik">Grafik</a>
+    <a href="#ai-section" class="bp-seg-item" data-segment="ai">AI</a>
+    <a href="#news-section" class="bp-seg-item" data-segment="haberler">Haberler</a>
+  </nav>
+  <div id="ozet" style="scroll-margin-top:80px"></div>
+
   <!-- Grafik -->
   {% if premium_locked %}
   <div class="premium-cta-row">
@@ -1434,7 +1482,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
   </div>
   {% endif %}
-  <div class="chart-section{% if premium_locked %} tier-locked{% endif %}">
+  <div id="chart-section" class="chart-section{% if premium_locked %} tier-locked{% endif %}" style="scroll-margin-top:80px">
     <div class="chart-header">
       <span class="chart-label">{{ ticker }} — Günlük Grafik (2 Yıl)</span>
       <span id="emaLegend" style="font-size:11px;color:#909097;margin-left:auto"></span>
@@ -1770,6 +1818,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
 
   <!-- AI Sinyal Açıklaması -->
+  <div id="ai-section" style="scroll-margin-top:80px"></div>
   <div id="sigExplainSection" style="background:linear-gradient(135deg,rgba(184,195,255,0.08),rgba(29,78,216,0.05));border:1px solid rgba(184,195,255,0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="font-size:15px">✨</span>
@@ -1787,6 +1836,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
 
   <!-- AI Haberler -->
+  <div id="news-section" style="scroll-margin-top:80px"></div>
   <div class="news-section" id="newsSection">
     <h2 class="section-title">🤖 Son Haber Özeti</h2>
     <div class="news-loading" id="newsLoading">
@@ -3401,5 +3451,52 @@ document.addEventListener('click', function(e) {
 });
 </script>
 {% include '_premium_modal.html' %}
+<script>
+/* SPEC-017 v1 — Segment active-state scroll-spy + smooth-scroll */
+(function(){
+  var segments = document.querySelectorAll('.bp-segments a');
+  if (!segments.length) return;
+  var targets = Array.from(segments).map(function(a){
+    var id = a.getAttribute('href').replace('#','');
+    return { id: id, el: document.getElementById(id), seg: a };
+  }).filter(function(t){ return t.el; });
+  if (!targets.length) return;
+
+  function updateActive() {
+    var scrollY = window.scrollY + 100;  // sticky header offset
+    var found = null;
+    for (var i = targets.length - 1; i >= 0; i--) {
+      if (targets[i].el.offsetTop <= scrollY) {
+        found = targets[i];
+        break;
+      }
+    }
+    if (!found) found = targets[0];
+    segments.forEach(function(s){ s.classList.remove('active'); });
+    found.seg.classList.add('active');
+  }
+
+  // Debounced scroll
+  var t;
+  window.addEventListener('scroll', function(){
+    if (t) cancelAnimationFrame(t);
+    t = requestAnimationFrame(updateActive);
+  }, {passive: true});
+
+  // Click — smooth scroll
+  segments.forEach(function(s){
+    s.addEventListener('click', function(e){
+      e.preventDefault();
+      var id = s.getAttribute('href').replace('#','');
+      var el = document.getElementById(id);
+      if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
+      segments.forEach(function(x){ x.classList.remove('active'); });
+      s.classList.add('active');
+    });
+  });
+
+  updateActive();
+})();
+</script>
 </body>
 </html>
