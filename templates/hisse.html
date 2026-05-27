@@ -1410,6 +1410,167 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 <!-- Toast feedback -->
 <div class="hib-toast" id="hibToast"></div>
 
+<!-- SPEC-017 v2 c4 — 3-Katmanlı Sticky Header (fixed position, parent overflow bypass)
+     CPO-318/319 direktifi: scroll'da görünür, fiyat tick anim, mobile-first -->
+<style>
+  .bp-sticky-hdr {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 600;
+    background: rgba(14,14,18,0.97);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-bottom: 1px solid rgba(42,42,44,0.7);
+    transform: translateY(-100%);
+    transition: transform 0.22s cubic-bezier(.4,0,.2,1);
+    will-change: transform;
+    pointer-events: none;
+  }
+  .bp-sticky-hdr.visible { transform: translateY(0); pointer-events: auto; }
+  .bp-sh-row { display: flex; align-items: center; padding: 0 12px; gap: 8px; }
+  .bp-sh-row1 { height: 40px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .bp-sh-row2 { height: 56px; transition: height 0.18s ease; }
+  .bp-sh-row3 { height: 32px; border-top: 1px solid rgba(255,255,255,0.04); }
+  .bp-sticky-hdr.compact .bp-sh-row2 { height: 36px; }
+  .bp-sh-back {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(255,255,255,0.05); border: none;
+    color: #e5e1e4; cursor: pointer; font-size: 18px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+  }
+  .bp-sh-back:active { background: rgba(255,255,255,0.1); }
+  .bp-sh-ticker {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 15px; font-weight: 700; color: #e5e1e4;
+    letter-spacing: 0.4px; flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .bp-sh-tier {
+    font-size: 10.5px; font-weight: 700;
+    padding: 3px 8px; border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    color: #909097; letter-spacing: 0.4px;
+    text-transform: uppercase; flex-shrink: 0;
+  }
+  .bp-sh-tier.tier-AL    { background: rgba(0,226,144,0.16); color: #00e290; }
+  .bp-sh-tier.tier-SAT   { background: rgba(255,77,79,0.16); color: #ff7875; }
+  .bp-sh-tier.tier-BEKLE { background: rgba(245,201,73,0.14); color: #f5c949; }
+  .bp-sh-price {
+    font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+    font-size: 26px; font-weight: 700; color: #e5e1e4;
+    letter-spacing: -0.5px; transition: font-size 0.18s ease;
+    padding: 2px 6px; border-radius: 6px;
+  }
+  .bp-sticky-hdr.compact .bp-sh-price { font-size: 18px; }
+  .bp-sh-chg {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; font-weight: 600;
+    padding: 4px 10px; border-radius: 8px; flex-shrink: 0;
+  }
+  .bp-sh-chg.pos { color: #00e290; background: rgba(0,226,144,0.12); }
+  .bp-sh-chg.neg { color: #ff7875; background: rgba(255,77,79,0.12); }
+  .bp-sh-chg.neu { color: #909097; background: rgba(144,144,151,0.10); }
+  .bp-sh-price.tick-up   { animation: bpShTickUp 0.5s ease; }
+  .bp-sh-price.tick-down { animation: bpShTickDown 0.5s ease; }
+  @keyframes bpShTickUp   { 0% { color:#00e290; background:rgba(0,226,144,0.18); } 100% { color:#e5e1e4; background:transparent; } }
+  @keyframes bpShTickDown { 0% { color:#ff7875; background:rgba(255,77,79,0.18); } 100% { color:#e5e1e4; background:transparent; } }
+  .bp-sh-badge {
+    font-size: 11px; font-weight: 700;
+    padding: 4px 10px; border-radius: 999px;
+    letter-spacing: 0.4px; text-transform: uppercase;
+    background: rgba(144,144,151,0.12); color: #909097;
+  }
+  .bp-sh-badge.badge-AL    { background: rgba(0,226,144,0.16); color: #00e290; }
+  .bp-sh-badge.badge-SAT   { background: rgba(255,77,79,0.16); color: #ff7875; }
+  .bp-sh-badge.badge-BEKLE { background: rgba(245,201,73,0.14); color: #f5c949; }
+  /* Segments fixed top, normally 0; pushed down when sticky-hdr visible */
+  body.bp-sticky-on .bp-segments { top: 128px; }
+  body.bp-sticky-on.bp-sh-compact .bp-segments { top: 108px; }
+  @media (max-width: 480px) {
+    .bp-sh-price { font-size: 22px; }
+    .bp-sticky-hdr.compact .bp-sh-price { font-size: 16px; }
+  }
+</style>
+<header class="bp-sticky-hdr" id="bpStickyHdr" aria-hidden="true" role="banner">
+  <div class="bp-sh-row bp-sh-row1">
+    <button class="bp-sh-back" type="button" aria-label="Geri"
+            onclick="if(history.length>1)history.back();else location.href='/';">←</button>
+    <span class="bp-sh-ticker" id="bpShTicker">{{ ticker }}</span>
+    <span class="bp-sh-tier" id="bpShTier">—</span>
+  </div>
+  <div class="bp-sh-row bp-sh-row2">
+    <span class="bp-sh-price" id="bpShPrice">—</span>
+    <span class="bp-sh-chg neu" id="bpShChg">—</span>
+  </div>
+  <div class="bp-sh-row bp-sh-row3">
+    <span class="bp-sh-badge" id="bpShBadge">—</span>
+  </div>
+</header>
+<script>
+(function(){
+  var hdr = document.getElementById('bpStickyHdr');
+  var priceSrc = document.getElementById('hpPrice');
+  var chgSrc   = document.getElementById('hpChg');
+  var sigSrc   = document.getElementById('hpSignal');
+  var shPrice = document.getElementById('bpShPrice');
+  var shChg   = document.getElementById('bpShChg');
+  var shTier  = document.getElementById('bpShTier');
+  var shBadge = document.getElementById('bpShBadge');
+  if (!hdr || !priceSrc) return;
+  var lastPrice = null;
+  function syncFromHeader(){
+    var pTxt = (priceSrc.textContent || '').trim();
+    var cTxt = (chgSrc ? chgSrc.textContent : '').trim();
+    var sTxt = (sigSrc ? sigSrc.textContent : '').trim();
+    if (pTxt && pTxt !== '—' && shPrice.textContent !== pTxt) {
+      var newVal = parseFloat(pTxt.replace(/\./g,'').replace(',','.'));
+      if (lastPrice != null && !isNaN(newVal) && newVal !== lastPrice) {
+        shPrice.classList.remove('tick-up','tick-down');
+        void shPrice.offsetWidth;
+        shPrice.classList.add(newVal > lastPrice ? 'tick-up' : 'tick-down');
+      }
+      if (!isNaN(newVal)) lastPrice = newVal;
+      shPrice.textContent = pTxt;
+    }
+    if (cTxt && shChg.textContent !== cTxt) {
+      shChg.textContent = cTxt;
+      var m = (chgSrc.className||'').match(/\b(pos|neg|neu)\b/);
+      shChg.className = 'bp-sh-chg ' + (m ? m[0] : 'neu');
+    }
+    if (sTxt && sTxt !== '—') {
+      shBadge.textContent = sTxt;
+      var sm = (sigSrc.className||'').match(/signal-(AL|SAT|BEKLE)/);
+      var sigType = sm ? sm[1] : 'BEKLE';
+      shBadge.className = 'bp-sh-badge badge-' + sigType;
+      shTier.textContent = sigType;
+      shTier.className = 'bp-sh-tier tier-' + sigType;
+    }
+  }
+  syncFromHeader();
+  try {
+    var mo = new MutationObserver(syncFromHeader);
+    [priceSrc, chgSrc, sigSrc].forEach(function(el){
+      if (el) mo.observe(el, {childList:true, characterData:true, subtree:true, attributes:true, attributeFilter:['class']});
+    });
+  } catch(e){}
+  var threshold = 80, compactAt = 240, ticking = false;
+  function onScroll(){
+    var y = window.scrollY || window.pageYOffset;
+    var visible = y > threshold;
+    var compact = y > compactAt;
+    hdr.classList.toggle('visible', visible);
+    hdr.classList.toggle('compact', compact);
+    hdr.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    document.body.classList.toggle('bp-sticky-on', visible);
+    document.body.classList.toggle('bp-sh-compact', compact);
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if (!ticking) { window.requestAnimationFrame(onScroll); ticking = true; }
+  }, {passive:true});
+  onScroll();
+})();
+</script>
+
 <main class="container">
 
   <!-- SPEC-014 B3 — Stale banner (veri yaşı >15dk, market saatinde) -->
