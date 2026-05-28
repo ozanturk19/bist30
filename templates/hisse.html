@@ -1787,7 +1787,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       </div>
       <canvas id="bpSpark" class="bp-spark-canvas" height="52"></canvas>
     </div>
-    <button type="button" class="bp-hero-explain-link" onclick="(function(){var s=document.querySelector('[data-segment=\'ai\']');if(s)s.click();})()">
+    <button type="button" class="bp-hero-explain-link" onclick="if(typeof openSignalDrawer==='function')openSignalDrawer();else{var s=document.querySelector('[data-segment=\'ai\']');if(s)s.click();}">
       Neden bu sinyal? ↗
     </button>
   </div>
@@ -4052,6 +4052,234 @@ document.addEventListener('click', function(e) {
   try { initial = localStorage.getItem('bp_hisse_tab') || 'ozet'; } catch(e) {}
   if (!SHOW_FOR_TAB[initial]) initial = 'ozet';
   applyTab(initial);
+})();
+</script>
+
+<!-- SPEC-017 v2 c6 — AI Bottom-Sheet Drawer + Trust Strip (CPO-318/319) -->
+<style>
+  .bp-drawer-backdrop {
+    position: fixed; inset: 0; z-index: 700;
+    background: rgba(0,0,0,0.55);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.22s ease;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  .bp-drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+  .bp-drawer {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 701;
+    height: 85vh; max-height: 85vh;
+    background: #161618;
+    border-top-left-radius: 18px; border-top-right-radius: 18px;
+    box-shadow: 0 -10px 32px rgba(0,0,0,0.6);
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(.32,.72,0,1);
+    display: flex; flex-direction: column;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+  .bp-drawer.open { transform: translateY(0); }
+  .bp-drawer-grab {
+    width: 100%; padding: 10px 0 4px;
+    display: flex; justify-content: center;
+    cursor: grab; user-select: none;
+    flex-shrink: 0;
+  }
+  .bp-drawer-grab span {
+    width: 40px; height: 4px; border-radius: 4px;
+    background: rgba(255,255,255,0.22);
+  }
+  .bp-drawer-head {
+    padding: 4px 18px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #232326; flex-shrink: 0;
+  }
+  .bp-drawer-title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 17px; font-weight: 700; color: #e5e1e4;
+  }
+  .bp-drawer-close {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(255,255,255,0.05); border: none;
+    color: #e5e1e4; cursor: pointer; font-size: 18px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bp-drawer-body {
+    flex: 1; overflow-y: auto;
+    padding: 16px 18px calc(20px + env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Trust strip */
+  .bp-trust-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 18px;
+  }
+  .bp-trust-cell {
+    background: #0e0e12; border: 1px solid #232326;
+    border-radius: 10px; padding: 10px 8px;
+    text-align: center;
+  }
+  .bp-trust-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px; font-weight: 800; color: #e5e1e4;
+    letter-spacing: -0.3px;
+  }
+  .bp-trust-val.pos { color: #00e290; }
+  .bp-trust-val.neg { color: #ff7875; }
+  .bp-trust-lbl {
+    font-size: 10px; color: #909097; margin-top: 4px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .bp-trust-disclaim {
+    font-size: 11px; color: #6b6b73; margin: -10px 0 18px;
+    text-align: center;
+  }
+  .bp-drawer-section-title {
+    font-size: 12px; color: #909097; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .bp-drawer-explain {
+    font-size: 14px; color: #e5e1e4; line-height: 1.65;
+    background: #0e0e12; border: 1px solid #232326;
+    border-radius: 10px; padding: 14px 16px;
+    white-space: pre-wrap;
+  }
+  .bp-drawer-explain-load { color: #909097; font-size: 13px; padding: 18px; text-align: center; }
+  .bp-drawer-explain-err  { color: #ff7875; font-size: 13px; padding: 12px; }
+  .bp-drawer-source {
+    font-size: 11px; color: #6b6b73; margin-top: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .bp-drawer-source-badge {
+    padding: 2px 7px; border-radius: 8px; font-weight: 600;
+    background: rgba(184,195,255,0.10); color: #b8c3ff;
+    font-size: 10px;
+  }
+</style>
+<div class="bp-drawer-backdrop" id="bpDrawerBackdrop" aria-hidden="true"></div>
+<aside class="bp-drawer" id="bpDrawer" role="dialog" aria-modal="true" aria-labelledby="bpDrawerTitle" aria-hidden="true">
+  <div class="bp-drawer-grab" id="bpDrawerGrab"><span></span></div>
+  <div class="bp-drawer-head">
+    <span class="bp-drawer-title" id="bpDrawerTitle">Sinyal Detayı &amp; AI Analizi</span>
+    <button class="bp-drawer-close" type="button" aria-label="Kapat" onclick="closeSignalDrawer()">×</button>
+  </div>
+  <div class="bp-drawer-body">
+    {% if ticker_bt and ticker_bt.al_win_rate is not none %}
+    <div class="bp-trust-strip">
+      <div class="bp-trust-cell">
+        <div class="bp-trust-val {% if ticker_bt.al_win_rate >= 50 %}pos{% else %}neg{% endif %}">%{{ ticker_bt.al_win_rate }}</div>
+        <div class="bp-trust-lbl">Kazanma</div>
+      </div>
+      <div class="bp-trust-cell">
+        <div class="bp-trust-val {% if ticker_bt.al_avg > 0 %}pos{% elif ticker_bt.al_avg < 0 %}neg{% endif %}">{% if ticker_bt.al_avg > 0 %}+{% endif %}{{ ticker_bt.al_avg }}%</div>
+        <div class="bp-trust-lbl">Ort. Getiri</div>
+      </div>
+      <div class="bp-trust-cell">
+        <div class="bp-trust-val">{{ ticker_bt.al_count }}</div>
+        <div class="bp-trust-lbl">Sinyal</div>
+      </div>
+    </div>
+    <div class="bp-trust-disclaim">2 yıllık backtest · Geçmiş gelecek garantisi değil</div>
+    {% endif %}
+    <div class="bp-drawer-section-title">Sinyalin Mantığı</div>
+    <div id="bpDrawerExplainLoad" class="bp-drawer-explain-load">Analiz yükleniyor…</div>
+    <div id="bpDrawerExplainText" class="bp-drawer-explain" style="display:none"></div>
+    <div id="bpDrawerExplainErr" class="bp-drawer-explain-err" style="display:none"></div>
+    <div class="bp-drawer-source" id="bpDrawerSource" style="display:none">
+      Kaynak: <span class="bp-drawer-source-badge" id="bpDrawerSourceBadge">—</span>
+    </div>
+  </div>
+</aside>
+<script>
+(function(){
+  var drawer   = document.getElementById('bpDrawer');
+  var backdrop = document.getElementById('bpDrawerBackdrop');
+  var grab     = document.getElementById('bpDrawerGrab');
+  var explainLoad = document.getElementById('bpDrawerExplainLoad');
+  var explainTxt  = document.getElementById('bpDrawerExplainText');
+  var explainErr  = document.getElementById('bpDrawerExplainErr');
+  var sourceWrap  = document.getElementById('bpDrawerSource');
+  var sourceBadge = document.getElementById('bpDrawerSourceBadge');
+  var _explainCache = null;
+  function loadExplanation(){
+    if (_explainCache) return Promise.resolve(_explainCache);
+    explainLoad.style.display = 'block';
+    explainTxt.style.display  = 'none';
+    explainErr.style.display  = 'none';
+    sourceWrap.style.display  = 'none';
+    var ticker = (typeof TICKER !== 'undefined') ? TICKER : '';
+    return fetch('/api/hisse/' + ticker + '/signal-explanation')
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(d){
+        _explainCache = d;
+        explainLoad.style.display = 'none';
+        if (d.explanation) {
+          explainTxt.textContent = d.explanation;
+          explainTxt.style.display = 'block';
+          if (d.source) {
+            sourceBadge.textContent = d.source === 'gemini' ? 'Gemini AI' : 'Algoritmik';
+            sourceWrap.style.display = 'flex';
+          }
+        } else {
+          explainErr.textContent = 'Analiz şu anda hazır değil.';
+          explainErr.style.display = 'block';
+        }
+        return d;
+      })
+      .catch(function(e){
+        explainLoad.style.display = 'none';
+        explainErr.textContent = 'Analiz yüklenemedi. Tekrar deneyin.';
+        explainErr.style.display = 'block';
+      });
+  }
+  window.openSignalDrawer = function(){
+    drawer.classList.add('open');
+    backdrop.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    backdrop.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    loadExplanation();
+    try { if (typeof gtag === 'function') gtag('event','signal_drawer_open',{ticker: typeof TICKER!=='undefined'?TICKER:''}); } catch(e){}
+  };
+  window.closeSignalDrawer = function(){
+    drawer.classList.remove('open');
+    backdrop.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    backdrop.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+  backdrop.addEventListener('click', window.closeSignalDrawer);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && drawer.classList.contains('open')) window.closeSignalDrawer();
+  });
+  // Swipe-down dismiss via grab handle
+  var startY = null, dy = 0;
+  function onStart(e){
+    startY = (e.touches ? e.touches[0].clientY : e.clientY);
+    dy = 0;
+    drawer.style.transition = 'none';
+  }
+  function onMove(e){
+    if (startY == null) return;
+    var y = (e.touches ? e.touches[0].clientY : e.clientY);
+    dy = Math.max(0, y - startY);
+    drawer.style.transform = 'translateY(' + dy + 'px)';
+  }
+  function onEnd(){
+    if (startY == null) return;
+    drawer.style.transition = '';
+    if (dy > 90) { drawer.style.transform = ''; window.closeSignalDrawer(); }
+    else { drawer.style.transform = ''; }
+    startY = null; dy = 0;
+  }
+  grab.addEventListener('touchstart', onStart, {passive:true});
+  grab.addEventListener('touchmove',  onMove,  {passive:true});
+  grab.addEventListener('touchend',   onEnd);
+  grab.addEventListener('mousedown',  onStart);
+  document.addEventListener('mousemove', function(e){ if(startY!=null) onMove(e); });
+  document.addEventListener('mouseup',   function(){ if(startY!=null) onEnd(); });
 })();
 </script>
 </body>
