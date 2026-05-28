@@ -2015,7 +2015,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
   </div>
   {% endif %}
-  <div id="chart-section" class="chart-section{% if premium_locked %} tier-locked{% endif %}" style="scroll-margin-top:80px">
+  <div id="chart-section" data-tab-content="grafik" class="chart-section{% if premium_locked %} tier-locked{% endif %}" style="scroll-margin-top:80px">
     <div class="chart-header">
       <span class="chart-label">{{ ticker }} — Günlük Grafik (2 Yıl)</span>
       <span id="emaLegend" style="font-size:11px;color:#909097;margin-left:auto"></span>
@@ -2045,6 +2045,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <!-- SPEC-014 A1 — Sinyal Özeti (konsolide karar kutusu) -->
   {% if signal_summary %}
   <div id="signalSummarySection"
+       data-tab-content="ozet"
        style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:18px 18px 14px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <h2 class="section-title" style="margin:0">🧭 Sinyal Özeti</h2>
@@ -2117,14 +2118,14 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
   {% else %}
   <!-- Teknik Yorum (signal_summary yoksa fallback) -->
-  <div class="commentary-section" id="commentarySection" style="display:none">
+  <div class="commentary-section" id="commentarySection" data-tab-content="ozet" style="display:none">
     <h2 class="section-title" style="margin-bottom:8px">📊 Teknik Görünüm</h2>
     <p class="commentary-text" id="commentaryText"></p>
   </div>
   {% endif %}
 
   <!-- Özet kartlar -->
-  <div class="info-grid" id="infoGrid">
+  <div class="info-grid" id="infoGrid" data-tab-content="ozet">
     <div class="info-card">
       <div class="info-card-label">Güncel Sinyal</div>
       <div id="icSignal" class="info-card-value">—</div>
@@ -2149,7 +2150,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
 
   <!-- Giriş Analizi (AL/SAT sinyallerinde gösterilir) -->
-  <div class="entry-analysis-section" id="entryAnalysisSection" style="display:none">
+  <div class="entry-analysis-section" id="entryAnalysisSection" data-tab-content="ozet" style="display:none">
     <h2 class="section-title">🎯 Giriş Analizi</h2>
     <div class="entry-analysis-grid">
 
@@ -2187,7 +2188,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
 
   <!-- İndikatörler -->
-  <div class="indicators-section{% if premium_locked %} tier-locked{% endif %}">
+  <div class="indicators-section{% if premium_locked %} tier-locked{% endif %}" data-tab-content="ozet">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
       <h2 class="section-title" style="margin:0">✓ Algoritmamızın Onayları</h2>
       <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
@@ -2207,7 +2208,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
 
   <!-- Çoklu Zaman Dilimi -->
-  <div style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:16px 18px;margin-bottom:20px" id="mtfSection">
+  <div style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:16px 18px;margin-bottom:20px" id="mtfSection" data-tab-content="ozet">
     <h2 class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="mtfGrid">
       <div style="color:#909097;font-size:13px;grid-column:1/-1">Yükleniyor…</div>
@@ -2215,7 +2216,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
 
   <!-- Sinyal Mini İstatistik Satırı -->
-  <div class="sig-stats-row" id="sigMiniStats">
+  <div class="sig-stats-row" id="sigMiniStats" data-tab-content="ozet">
     <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:36px;margin:auto"></div><div class="sig-stat-lbl">Toplam Sinyal</div></div>
     <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▲ Güçlü Trend</div></div>
     <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Zayıf Trend</div></div>
@@ -2223,7 +2224,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
 
   <!-- Sinyal Geçmişi -->
-  <div class="history-section{% if premium_locked %} tier-locked{% endif %}">
+  <div class="history-section{% if premium_locked %} tier-locked{% endif %}" data-tab-content="ozet">
     <h2 class="section-title">Sinyal Geçmişi
       <span style="font-size:10px;color:#909097;font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
     </h2>
@@ -2243,7 +2244,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
 
   <!-- Temel Analiz -->
-  <div style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;overflow:hidden;margin-bottom:20px" id="fundSection">
+  <div style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;overflow:hidden;margin-bottom:20px" id="fundSection" data-tab-content="ozet">
     <div style="padding:12px 18px;border-bottom:1px solid #1c1b1f;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <h2 class="section-title" style="margin:0">📋 Temel Analiz</h2>
       <span style="font-size:11px;color:#909097">yfinance · 4 saatlik cache</span>
@@ -2272,7 +2273,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   <!-- Geçmiş Sinyal Performansı (backtest) -->
   {% if ticker_bt and ticker_bt.al_win_rate is not none %}
-  <div style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:14px 18px;margin-bottom:20px">
+  <div data-tab-content="ozet" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:14px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <h2 class="section-title" style="margin:0">📊 Geçmiş Sinyal Performansı</h2>
       <a href="/sinyal-performans" style="font-size:11px;color:#b8c3ff;text-decoration:none;font-weight:600">Tüm backtest →</a>
@@ -2338,7 +2339,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
 
   <!-- Sinyal Dönemindeki Haber Akışı — sinyal tarihi etrafındaki KAP bildirimleri -->
-  <div id="storySection" style="display:none;background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:16px 18px;margin-bottom:20px">
+  <div id="storySection" data-tab-content="haberler" style="display:none;background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
       <h2 class="section-title" style="margin:0">📰 Sinyal Dönemindeki Haber Akışı</h2>
       <span id="storyWindow" style="font-size:11px;color:#909097"></span>
@@ -2352,7 +2353,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   <!-- AI Sinyal Açıklaması -->
   <div id="ai-section" style="scroll-margin-top:80px"></div>
-  <div id="sigExplainSection" style="background:linear-gradient(135deg,rgba(184,195,255,0.08),rgba(29,78,216,0.05));border:1px solid rgba(184,195,255,0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px">
+  <div id="sigExplainSection" data-tab-content="ai" style="background:linear-gradient(135deg,rgba(184,195,255,0.08),rgba(29,78,216,0.05));border:1px solid rgba(184,195,255,0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="font-size:15px">✨</span>
       <span style="font-size:13px;font-weight:700;color:#e5e1e4;text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
@@ -2370,7 +2371,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   <!-- AI Haberler -->
   <div id="news-section" style="scroll-margin-top:80px"></div>
-  <div class="news-section" id="newsSection">
+  <div class="news-section" id="newsSection" data-tab-content="haberler">
     <h2 class="section-title">🤖 Son Haber Özeti</h2>
     <div class="news-loading" id="newsLoading">
       <div class="spinner"></div> Haberler yükleniyor…
@@ -2383,7 +2384,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
 
   <!-- KAP Bildirimleri -->
-  <div class="kap-section" id="kapSection">
+  <div class="kap-section" id="kapSection" data-tab-content="haberler">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
       <h2 class="section-title" style="margin:0">📋 KAP Bildirimleri</h2>
       <span style="font-size:11px;color:#909097">Son 90 gün · ODA + Finansal Rapor</span>
