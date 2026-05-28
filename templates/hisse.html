@@ -1425,11 +1425,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     pointer-events: none;
   }
   .bp-sticky-hdr.visible { transform: translateY(0); pointer-events: auto; }
-  .bp-sh-row { display: flex; align-items: center; padding: 0 12px; gap: 8px; }
+  .bp-sh-row { display: flex; align-items: center; padding: 0 12px; gap: 8px; min-width: 0; }
   .bp-sh-row1 { height: 40px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-  .bp-sh-row2 { height: 56px; transition: height 0.18s ease; }
-  .bp-sh-row3 { height: 32px; border-top: 1px solid rgba(255,255,255,0.04); }
-  .bp-sticky-hdr.compact .bp-sh-row2 { height: 36px; }
+  .bp-sh-row2 { height: 56px; transition: height 0.18s ease; justify-content: flex-start; gap: 10px; flex-wrap: nowrap; overflow: hidden; }
+  .bp-sticky-hdr.compact .bp-sh-row2 { height: 40px; }
+  /* SPEC-017 v2 Faz A P0-2: Row3 silindi, badge Row2 içinde — 2-satır layout (40+56=96px), mobile full görünür */
   .bp-sh-back {
     width: 32px; height: 32px; border-radius: 8px;
     background: rgba(255,255,255,0.05); border: none;
@@ -1482,12 +1482,22 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   .bp-sh-badge.badge-AL    { background: rgba(0,226,144,0.16); color: #00e290; }
   .bp-sh-badge.badge-SAT   { background: rgba(255,77,79,0.16); color: #ff7875; }
   .bp-sh-badge.badge-BEKLE { background: rgba(245,201,73,0.14); color: #f5c949; }
-  /* Segments fixed top, normally 0; pushed down when sticky-hdr visible */
-  body.bp-sticky-on .bp-segments { top: 128px; }
-  body.bp-sticky-on.bp-sh-compact .bp-segments { top: 108px; }
+  /* SPEC-017 v2 Faz A P0-2: 2-row sticky = 96px (40+56), compact = 80px (40+40) */
+  body.bp-sticky-on .bp-segments { top: 96px; }
+  body.bp-sticky-on.bp-sh-compact .bp-segments { top: 80px; }
   @media (max-width: 480px) {
-    .bp-sh-price { font-size: 22px; }
+    .bp-sh-price { font-size: 20px; }
     .bp-sticky-hdr.compact .bp-sh-price { font-size: 16px; }
+    .bp-sh-ticker { font-size: 14px; max-width: 90px; }
+    .bp-sh-chg { font-size: 12.5px; padding: 3px 7px; }
+    .bp-sh-badge { font-size: 10px; padding: 3px 7px; }
+    .bp-sh-tier { font-size: 9.5px; padding: 2px 6px; }
+    .bp-sh-row1 { padding: 0 10px; gap: 6px; }
+    .bp-sh-row2 { padding: 0 10px; gap: 6px; }
+  }
+  @media (max-width: 360px) {
+    .bp-sh-price { font-size: 17px; }
+    .bp-sh-badge { display: none; }
   }
 </style>
 <header class="bp-sticky-hdr" id="bpStickyHdr" aria-hidden="true" role="banner">
@@ -1500,9 +1510,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <div class="bp-sh-row bp-sh-row2">
     <span class="bp-sh-price" id="bpShPrice">—</span>
     <span class="bp-sh-chg neu" id="bpShChg">—</span>
-  </div>
-  <div class="bp-sh-row bp-sh-row3">
-    <span class="bp-sh-badge" id="bpShBadge">—</span>
+    <span class="bp-sh-badge" id="bpShBadge" style="margin-left:auto">—</span>
   </div>
 </header>
 <script>
@@ -4048,7 +4056,7 @@ document.addEventListener('click', function(e) {
   var segments = document.querySelectorAll('.bp-segments-inner a');
   if (!segments.length) return;
 
-  // FAB "Üste çık" — scroll>400 görünür
+  // SPEC-017 v2 Faz A P1-5: FAB sadece scrollY > 2×viewport (önceki 400px abluka yarattı)
   var fab = document.getElementById('bpFabUp');
   if (fab) {
     fab.addEventListener('click', function(){
@@ -4058,7 +4066,8 @@ document.addEventListener('click', function(e) {
     window.addEventListener('scroll', function(){
       if (fabT) cancelAnimationFrame(fabT);
       fabT = requestAnimationFrame(function(){
-        if (window.scrollY > 400) fab.classList.add('visible');
+        var threshold = Math.max(600, window.innerHeight * 2);
+        if (window.scrollY > threshold) fab.classList.add('visible');
         else fab.classList.remove('visible');
       });
     }, {passive: true});
