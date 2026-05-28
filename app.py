@@ -5371,9 +5371,10 @@ def stock_page(ticker):
                  "BEKLE": "Belirsiz (BEKLE)"}.get(sig, sig)
 
     # Yatırımcı SSS — deterministik, veri-tabanlı (ekstra Gemini çağrısı YOK)
+    # SPEC-017 Faz B K3: AL/SAT wording yasak — "al mı sat mı" → "güncel teknik sinyali nedir"
     seo_faq = []
     seo_faq.append({
-        "q": f"{ticker} hissesi al mı sat mı?",
+        "q": f"{ticker} hissesinin güncel teknik sinyali nedir?",
         "a": (f"{ticker} için güncel algoritmik sinyal: {sig_label}. "
               f"BorsaPusula teknik göstergeleri (Supertrend, EMA, ADX, MACD) baz alır. "
               f"Yatırım tavsiyesi değildir."),
