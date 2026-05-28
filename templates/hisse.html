@@ -1362,7 +1362,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 <!-- Quick Topic Chips -->
 <nav class="quick-topics" aria-label="Popüler içerikler">
   <span class="qt-label">Popüler:</span>
-  <a href="/gucu-yuksek" class="qt-chip qt-chip-hot"><span class="qt-chip-pulse"></span>AL Sinyalleri</a>
+  <a href="/gucu-yuksek" class="qt-chip qt-chip-hot"><span class="qt-chip-pulse"></span>Güçlü Trend Sinyalleri</a>
   <a href="/" class="qt-chip"><span class="qt-chip-icon">🏠</span>Ana Sayfa</a>
   <a href="/tarama" class="qt-chip"><span class="qt-chip-icon">🔍</span>Hisse Tarama</a>
   <a href="/bilanco-takvimi" class="qt-chip"><span class="qt-chip-icon">📅</span>Bilanço Takvimi</a>
@@ -1502,8 +1502,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 </style>
 <header class="bp-sticky-hdr" id="bpStickyHdr" aria-hidden="true" role="banner">
   <div class="bp-sh-row bp-sh-row1">
-    <button class="bp-sh-back" type="button" aria-label="Geri"
-            onclick="if(history.length>1)history.back();else location.href='/';">←</button>
+    {# SPEC-017 Faz B K2: ← geri tuş kaldırıldı (KALICI_KURALLAR K2 ihlali). Kullanıcı nav bar veya browser back kullanır. #}
     <span class="bp-sh-ticker" id="bpShTicker">{{ ticker }}</span>
     <span class="bp-sh-tier" id="bpShTier">—</span>
   </div>
@@ -2551,30 +2550,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
   {% endif %}
 
-  <!-- Diğer Hisseler — yatay scroll -->
-  <div class="others-section">
-    <h2 class="section-title" style="margin-bottom:10px;padding-right:18px">
-      Tüm BIST100 Hisseleri
-      <span style="font-size:11px;color:#909097;font-weight:400;margin-left:6px">{{ others|length + 1 }} hisse · canlı veriler</span>
-    </h2>
-    <div class="others-scroll" id="othersScroll">
-      <!-- Mevcut hisse (aktif) -->
-      <div class="other-card oc-active">
-        <div class="oc-ticker">{{ ticker }}</div>
-        <div class="oc-sig"><span class="chip-sig chip-bekle" id="chip-sig-{{ ticker }}">●</span></div>
-        <div class="oc-price" id="oc-price-{{ ticker }}">—</div>
-        <div class="oc-chg" id="oc-chg-{{ ticker }}">—</div>
-      </div>
-      {% for t in others %}
-      <a href="/hisse/{{ t }}" class="other-card">
-        <div class="oc-ticker">{{ t }}</div>
-        <div class="oc-sig"><span class="chip-sig chip-bekle" id="chip-sig-{{ t }}">●</span></div>
-        <div class="oc-price" id="oc-price-{{ t }}">—</div>
-        <div class="oc-chg" id="oc-chg-{{ t }}">—</div>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
+  {# SPEC-017 Faz B Bonus: "Tüm BIST100 Hisseleri" yatay scroll alt bar kaldırıldı (Ozan feedback K7 — amatör, sayfa şişiriyor). #}
 
 </div>
 
