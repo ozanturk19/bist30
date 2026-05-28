@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BIST Heatmap — Sinyal Haritası | borsapusula.com</title>
-<meta name="description" content="BIST hisselerinin sinyal tier (Altın/Gümüş/Bronz) renkleriyle sektör bazlı treemap haritası — Türkiye'nin ilk premium fintech heatmap'i.">
+<meta name="description" content="BIST hisselerinin sinyal tier (Premium/Plus/Standart) renkleriyle sektör bazlı treemap haritası — Türkiye'nin ilk premium fintech heatmap'i.">
 <link rel="canonical" href="https://borsapusula.com/heatmap">
 <meta property="og:title"       content="BIST Heatmap — Sinyal Haritası">
 <meta property="og:description" content="BIST hisselerinin sinyal tier renkleriyle sektör bazlı treemap haritası.">
@@ -169,11 +169,12 @@
 
   <div class="legend">
     <span style="color:var(--bp-text3);font-weight:600">Sinyal Tier:</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-gold)"></span>🥇 Altın (AL, güçlü)</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-silver)"></span>🥈 Gümüş (AL, orta)</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-bronze)"></span>🥉 Bronz (AL, zayıf)</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-sat)"></span>SAT</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-bekle)"></span>BEKLE</span>
+    {# SPEC-017 Faz B K9-2 + K3: Bronz/Gümüş/Altın → Premium/Plus/Standart, AL/SAT → Güçlü/Zayıf Trend #}
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-gold)"></span>Premium (Güçlü Trend)</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-silver)"></span>Plus (Orta Güçte)</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-bronze)"></span>Standart (Zayıf)</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-sat)"></span>Zayıf Trend</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-bekle)"></span>Yatay</span>
     <span style="color:var(--bp-text3);margin-left:auto;font-size:11px">Kutu tıkla → hisse detayı</span>
   </div>
 </main>

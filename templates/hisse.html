@@ -2058,12 +2058,13 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       {# SPEC-015 Skor Halka v1 — SVG circular progress (tier_score 0-100) + tier rozeti #}
       {% if ssr_signal and ssr_signal.tier_score is not none %}
       {%- set _ts = ssr_signal.tier_score|int %}
-      {%- if   _ts >= 70 %}{% set _tc = "#f59e0b" %}{% set _tl = "Altın"    %}
-      {%- elif _ts >= 50 %}{% set _tc = "#c0c0c0" %}{% set _tl = "Gümüş"    %}
-      {%- elif _ts >= 30 %}{% set _tc = "#cd7f32" %}{% set _tl = "Bronz"    %}
-      {%- else            %}{% set _tc = "#6b7280" %}{% set _tl = "İzleme" %}{% endif %}
+      {# SPEC-017 Faz B K9-2: Bronz/Gümüş/Altın → Standart/Plus/Premium vocab cleanup #}
+      {%- if   _ts >= 70 %}{% set _tc = "#00e290" %}{% set _tl = "Premium"  %}
+      {%- elif _ts >= 50 %}{% set _tc = "#b8c3ff" %}{% set _tl = "Plus"     %}
+      {%- elif _ts >= 30 %}{% set _tc = "#909097" %}{% set _tl = "Standart" %}
+      {%- else            %}{% set _tc = "#6b7280" %}{% set _tl = "İzleme"  %}{% endif %}
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
-           title="Sinyal kalite puanı (0–100). Bronz/Gümüş/Altın tier sınıflandırması bu skora göre.">
+           title="Sinyal kalite puanı (0–100). Premium/Plus/Standart tier sınıflandırması bu skora göre.">
         <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100, {{ _tl }} tier">
           <circle cx="32" cy="32" r="28" fill="none" stroke="#2a2a2c" stroke-width="6"/>
           <circle cx="32" cy="32" r="28" fill="none" stroke="{{ _tc }}" stroke-width="6"
