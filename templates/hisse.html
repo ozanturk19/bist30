@@ -1779,10 +1779,148 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       {% if ssr_signal.entry %}<span><strong>Giriş:</strong>{{ '%.2f'|format(ssr_signal.entry) }} ₺</span>{% endif %}
     </div>
     {% endif %}
+    {# SPEC-017 v2 c5 — Sparkline 30D (vanilla canvas + long-press crosshair) #}
+    <div class="bp-spark-wrap" id="bpSparkWrap" style="display:none">
+      <div class="bp-spark-label">
+        <span>Son 30 gün</span>
+        <span id="bpSparkVal" class="bp-spark-val">—</span>
+      </div>
+      <canvas id="bpSpark" class="bp-spark-canvas" height="52"></canvas>
+    </div>
     <button type="button" class="bp-hero-explain-link" onclick="(function(){var s=document.querySelector('[data-segment=\'ai\']');if(s)s.click();})()">
       Neden bu sinyal? ↗
     </button>
   </div>
+  <style>
+    .bp-spark-wrap { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .bp-spark-label {
+      display:flex; justify-content:space-between; align-items:baseline;
+      font-size:11px; color:#909097; margin-bottom:4px;
+      font-family: 'Manrope', system-ui, sans-serif;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .bp-spark-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; font-weight: 700; color: #e5e1e4;
+      letter-spacing: -0.2px;
+    }
+    .bp-spark-canvas {
+      display:block; width:100%; height:52px;
+      cursor: crosshair; touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+  <script>
+  (function(){
+    window.bpDrawSparkline = function(ohlc, accent) {
+      var wrap = document.getElementById('bpSparkWrap');
+      var cv   = document.getElementById('bpSpark');
+      var val  = document.getElementById('bpSparkVal');
+      if (!cv || !ohlc || !ohlc.length) return;
+      var data = ohlc.slice(-30).map(function(b){
+        return { t: b.time || b.t, c: +(b.close != null ? b.close : b.c) };
+      }).filter(function(x){ return !isNaN(x.c); });
+      if (data.length < 2) return;
+      wrap.style.display = 'block';
+      var dpr = window.devicePixelRatio || 1;
+      var W = cv.clientWidth || wrap.clientWidth || 280;
+      var H = 52;
+      cv.width = W * dpr; cv.height = H * dpr;
+      var ctx = cv.getContext('2d');
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      var first = data[0].c, last = data[data.length-1].c;
+      var up = last >= first;
+      var color = accent || (up ? '#00e290' : '#ff7875');
+      var min = Infinity, max = -Infinity;
+      data.forEach(function(x){ if(x.c<min)min=x.c; if(x.c>max)max=x.c; });
+      var pad = 4, range = (max - min) || 1;
+      var xs = data.map(function(_,i){ return pad + (W - 2*pad) * i / (data.length-1); });
+      var ys = data.map(function(x){ return pad + (H - 2*pad) * (1 - (x.c - min)/range); });
+      function paint(hi){
+        ctx.clearRect(0,0,W,H);
+        // area fill
+        var grad = ctx.createLinearGradient(0,0,0,H);
+        grad.addColorStop(0, color + '55');
+        grad.addColorStop(1, color + '00');
+        ctx.beginPath(); ctx.moveTo(xs[0], H-pad);
+        for (var i=0;i<xs.length;i++) ctx.lineTo(xs[i], ys[i]);
+        ctx.lineTo(xs[xs.length-1], H-pad); ctx.closePath();
+        ctx.fillStyle = grad; ctx.fill();
+        // line
+        ctx.beginPath();
+        ctx.moveTo(xs[0], ys[0]);
+        for (var j=1;j<xs.length;j++) ctx.lineTo(xs[j], ys[j]);
+        ctx.lineWidth = 1.6; ctx.strokeStyle = color; ctx.stroke();
+        // start + end dots
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(xs[xs.length-1], ys[ys.length-1], 2.6, 0, Math.PI*2); ctx.fill();
+        // crosshair
+        if (hi != null) {
+          var idx = Math.max(0, Math.min(data.length-1, hi));
+          ctx.strokeStyle = 'rgba(229,225,228,0.35)';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(xs[idx], pad); ctx.lineTo(xs[idx], H-pad); ctx.stroke();
+          ctx.fillStyle = '#e5e1e4';
+          ctx.beginPath(); ctx.arc(xs[idx], ys[idx], 3.2, 0, Math.PI*2); ctx.fill();
+          var v = data[idx].c.toLocaleString('tr-TR', {minimumFractionDigits:2});
+          val.textContent = v + ' ₺';
+        } else {
+          var pct = ((last-first)/first*100);
+          var sign = pct >= 0 ? '+' : '';
+          val.textContent = last.toLocaleString('tr-TR',{minimumFractionDigits:2}) + ' ₺ (' + sign + pct.toFixed(1) + '%)';
+          val.style.color = up ? '#00e290' : '#ff7875';
+        }
+      }
+      paint(null);
+      var pressing = false, pressTimer = null;
+      function xToIdx(clientX){
+        var rect = cv.getBoundingClientRect();
+        var rel = (clientX - rect.left) / rect.width * W;
+        var nearest = 0, best = Infinity;
+        for (var i=0;i<xs.length;i++){
+          var dx = Math.abs(xs[i] - rel);
+          if (dx < best) { best = dx; nearest = i; }
+        }
+        return nearest;
+      }
+      cv.addEventListener('pointerdown', function(ev){
+        pressTimer = setTimeout(function(){
+          pressing = true;
+          paint(xToIdx(ev.clientX));
+        }, 220);
+      });
+      cv.addEventListener('pointermove', function(ev){
+        if (pressing) paint(xToIdx(ev.clientX));
+      });
+      function release(){
+        clearTimeout(pressTimer); pressTimer = null;
+        if (pressing) { pressing = false; paint(null); }
+      }
+      cv.addEventListener('pointerup', release);
+      cv.addEventListener('pointercancel', release);
+      cv.addEventListener('pointerleave', release);
+    };
+    // Auto-hook into buildChart: wrap when defined
+    function tryHook(){
+      if (typeof buildChart === 'function' && !buildChart.__bpHooked) {
+        var orig = buildChart;
+        window.buildChart = function(d){
+          var r = orig(d);
+          try { if (d && d.ohlc) window.bpDrawSparkline(d.ohlc); } catch(e){ console.warn('spark', e); }
+          return r;
+        };
+        window.buildChart.__bpHooked = true;
+      } else if (typeof buildChart !== 'function') {
+        setTimeout(tryHook, 200);
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', tryHook);
+    } else {
+      tryHook();
+    }
+  })();
+  </script>
   {% endif %}
 
   <button class="bp-fab-up" id="bpFabUp" aria-label="Üste çık" type="button">
