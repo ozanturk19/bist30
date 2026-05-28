@@ -1430,14 +1430,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   .bp-sh-row2 { height: 56px; transition: height 0.18s ease; justify-content: flex-start; gap: 10px; flex-wrap: nowrap; overflow: hidden; }
   .bp-sticky-hdr.compact .bp-sh-row2 { height: 40px; }
   /* SPEC-017 v2 Faz A P0-2: Row3 silindi, badge Row2 içinde — 2-satır layout (40+56=96px), mobile full görünür */
-  .bp-sh-back {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: rgba(255,255,255,0.05); border: none;
-    color: #e5e1e4; cursor: pointer; font-size: 18px; line-height: 1;
-    display: inline-flex; align-items: center; justify-content: center;
-    flex-shrink: 0; -webkit-tap-highlight-color: transparent;
-  }
-  .bp-sh-back:active { background: rgba(255,255,255,0.1); }
+  /* SPEC-017 Faz B polish: .bp-sh-back CSS ölü kod silindi (K2 — geri tuş HTML kaldırılmıştı, CSS de gitti) */
   .bp-sh-ticker {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: 15px; font-weight: 700; color: #e5e1e4;
@@ -2155,7 +2148,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
   </div>
 
-  <!-- Giriş Analizi (AL/SAT sinyallerinde gösterilir) -->
+  <!-- Giriş Analizi (Güçlü/Zayıf Trend sinyallerinde gösterilir) -->
   <div class="entry-analysis-section" id="entryAnalysisSection" data-tab-content="ozet" style="display:none">
     <h2 class="section-title">🎯 Giriş Analizi</h2>
     <div class="entry-analysis-grid">
