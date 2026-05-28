@@ -4020,8 +4020,12 @@ document.addEventListener('click', function(e) {
     'ai':       ['sigExplainSection'],
     'haberler': ['newsSection']
   };
+  var VALID_TABS = Object.keys(SHOW_FOR_TAB);
 
-  function applyTab(tab) {
+  function applyTab(tab, opts) {
+    opts = opts || {};
+    if (VALID_TABS.indexOf(tab) === -1) tab = 'ozet';
+    // Legacy ID toggle
     ALL_PANELS.forEach(function(id){
       var el = document.getElementById(id);
       if (el) el.style.display = 'none';
@@ -4031,12 +4035,31 @@ document.addEventListener('click', function(e) {
       var el = document.getElementById(id);
       if (el) el.style.display = '';
     });
+    // SPEC-017 v2 Faz A — data-tab-content attribute (true tab-switch)
+    var panes = document.querySelectorAll('[data-tab-content]');
+    panes.forEach(function(p){
+      var owners = (p.getAttribute('data-tab-content') || '').split(/\s+/);
+      var visible = owners.indexOf(tab) !== -1 || owners.indexOf('always') !== -1;
+      p.style.display = visible ? '' : 'none';
+    });
     segments.forEach(function(s){
       s.classList.toggle('active', s.dataset.segment === tab);
     });
-    // Persist (sayfa yenilense de tab korunur)
+    // Persist + URL state (SPEC-017 v2 Faz A P0-1)
     try { localStorage.setItem('bp_hisse_tab', tab); } catch(e) {}
+    if (!opts.skipUrl) {
+      try {
+        var url = new URL(window.location.href);
+        if (url.searchParams.get('tab') !== tab) {
+          url.searchParams.set('tab', tab);
+          history.replaceState({tab: tab}, '', url.toString());
+        }
+      } catch(e) {}
+    }
+    // GA4
+    try { if (typeof gtag === 'function') gtag('event','tab_switch',{ticker: typeof TICKER!=='undefined'?TICKER:'', tab: tab}); } catch(e){}
   }
+  window.applyTab = applyTab;
 
   segments.forEach(function(s){
     s.addEventListener('click', function(e){
@@ -4047,11 +4070,28 @@ document.addEventListener('click', function(e) {
     });
   });
 
-  // İlk yükleme: localStorage veya "ozet" default
+  // Browser back/forward popstate handling
+  window.addEventListener('popstate', function(ev){
+    try {
+      var url = new URL(window.location.href);
+      var t = url.searchParams.get('tab') || 'ozet';
+      if (VALID_TABS.indexOf(t) === -1) t = 'ozet';
+      applyTab(t, {skipUrl: true});
+    } catch(e) {}
+  });
+
+  // İlk yükleme: URL ?tab=X > localStorage > 'ozet'
   var initial = 'ozet';
-  try { initial = localStorage.getItem('bp_hisse_tab') || 'ozet'; } catch(e) {}
-  if (!SHOW_FOR_TAB[initial]) initial = 'ozet';
-  applyTab(initial);
+  try {
+    var urlTab = new URL(window.location.href).searchParams.get('tab');
+    if (urlTab && VALID_TABS.indexOf(urlTab) !== -1) {
+      initial = urlTab;
+    } else {
+      initial = localStorage.getItem('bp_hisse_tab') || 'ozet';
+    }
+  } catch(e) {}
+  if (VALID_TABS.indexOf(initial) === -1) initial = 'ozet';
+  applyTab(initial, {skipUrl: false});
 })();
 </script>
 
