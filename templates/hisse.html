@@ -2296,8 +2296,61 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </div>
   {% endif %}
 
+  <!-- SPEC-017 v2 Faz A c3 — Özet sonu "Detay için" CTA (3 tab) -->
+  <div data-tab-content="ozet" class="bp-detail-cta-wrap">
+    <div class="bp-detail-cta-label">Detay için</div>
+    <div class="bp-detail-cta-grid">
+      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('grafik');else{var s=document.querySelector('[data-segment=grafik]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
+        <span class="bp-detail-cta-icon">📈</span>
+        <span class="bp-detail-cta-text">Grafik <span class="bp-detail-cta-arrow">→</span></span>
+      </button>
+      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('ai');else{var s=document.querySelector('[data-segment=ai]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
+        <span class="bp-detail-cta-icon">🤖</span>
+        <span class="bp-detail-cta-text">AI <span class="bp-detail-cta-arrow">→</span></span>
+      </button>
+      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('haberler');else{var s=document.querySelector('[data-segment=haberler]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
+        <span class="bp-detail-cta-icon">📰</span>
+        <span class="bp-detail-cta-text">Haberler <span class="bp-detail-cta-arrow">→</span></span>
+      </button>
+    </div>
+  </div>
+  <style>
+    .bp-detail-cta-wrap {
+      margin-bottom: 20px; padding: 16px;
+      background: linear-gradient(135deg, rgba(0,226,144,0.06), rgba(0,226,144,0.02));
+      border: 1px solid rgba(0,226,144,0.18);
+      border-radius: 12px;
+    }
+    .bp-detail-cta-label {
+      font-size: 11px; color: #909097; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 10px; text-align: center;
+    }
+    .bp-detail-cta-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    }
+    .bp-detail-cta-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 12px 6px; border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #e5e1e4; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      font-family: 'Manrope', system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bp-detail-cta-btn:hover { background: rgba(0,226,144,0.10); border-color: rgba(0,226,144,0.32); }
+    .bp-detail-cta-btn:active { transform: scale(0.97); }
+    .bp-detail-cta-icon { font-size: 22px; line-height: 1; }
+    .bp-detail-cta-text {
+      font-size: 12.5px; font-weight: 700; letter-spacing: 0.2px;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .bp-detail-cta-arrow { color: #00e290; font-weight: 800; }
+  </style>
+
   <!-- KAP + Dış Linkler -->
-  <div style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+  <div data-tab-content="always" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
     <span style="font-size:12px;color:#909097;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Resmi Kaynaklar</span>
     <a href="{{ kap_url }}" target="_blank" rel="noopener"
        style="display:inline-flex;align-items:center;gap:5px;background:#1c1b1f;border:1px solid #2a2a2c;border-radius:6px;padding:5px 12px;font-size:12px;color:#909097;text-decoration:none;transition:all .15s"
@@ -2403,7 +2456,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   {% if ssr_signal %}
   <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
-  <div style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:16px 18px;margin-bottom:20px">
+  <div data-tab-content="always" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:16px 18px;margin-bottom:20px">
     <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:10px">📊 Teknik Özet</div>
     <p style="font-size:13px;color:#c7c5cd;line-height:1.7;margin:0">
       <strong style="color:#e5e1e4">{{ ticker }} ({{ name }})</strong> hissesi,
@@ -2426,7 +2479,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   {% if company_summary %}
   <!-- SPEC-011 L4 — Şirket Hakkında (Gemini AI özet, AI-optimized content) -->
-  <section class="content-card" aria-labelledby="company-summary-heading">
+  <section class="content-card" data-tab-content="always" aria-labelledby="company-summary-heading">
     <h2 class="section-title" id="company-summary-heading">🏢 {{ ticker }} Hakkında</h2>
     {% for para in company_summary.split('\n') %}{% if para.strip() %}
     <p class="content-para">{{ para.strip() }}</p>
@@ -2436,7 +2489,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   {% endif %}
 
   <!-- Metodoloji -->
-  <div class="methodology">
+  <div class="methodology" data-tab-content="always">
     <strong>Sinyal Metodolojisi:</strong>
     Trend sinyali 3 kriterin tamamının karşılanmasıyla oluşur:
     <strong>Supertrend(10,3)</strong> yön + <strong>ADX ≥ 25</strong> (trend gücü) +
@@ -2448,7 +2501,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   {% if seo_faq %}
   <!-- SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) -->
-  <section class="content-card faq-card" aria-labelledby="faq-heading">
+  <section class="content-card faq-card" data-tab-content="always" aria-labelledby="faq-heading">
     <h2 class="section-title" id="faq-heading">❓ {{ ticker }} — Sıkça Sorulan Sorular</h2>
     <dl class="faq-list">
       {% for item in seo_faq %}
@@ -2461,7 +2514,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   {% if related_stocks %}
   <!-- SPEC-011 L4/L5 — İlgili hisseler (internal linking, crawl budget) -->
-  <aside class="content-card" aria-labelledby="related-heading">
+  <aside class="content-card" data-tab-content="always" aria-labelledby="related-heading">
     <h2 class="section-title" id="related-heading">🔗 {{ sector }} Sektöründen Diğer Hisseler</h2>
     <div class="related-grid">
       {% for r in related_stocks %}
@@ -2476,7 +2529,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   <!-- İlgili Blog Makaleleri (T3-4) -->
   {% if related_blog %}
-  <div style="margin-bottom:16px">
+  <div data-tab-content="always" style="margin-bottom:16px">
     <h2 class="section-title" style="margin-bottom:10px">📖 İlgili Okumalar</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
       {% for b in related_blog %}
