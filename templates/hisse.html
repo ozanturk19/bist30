@@ -2416,9 +2416,15 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <span style="font-size:13px;font-weight:700;color:#e5e1e4;text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
       <span id="sigExplainBadge" style="margin-left:auto;font-size:11px;background:rgba(184,195,255,0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(184,195,255,0.25)">Gemini AI</span>
     </div>
-    <div id="sigExplainLoading" style="display:flex;align-items:center;gap:8px;color:#909097;font-size:13px">
-      <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div>
-      Açıklama hazırlanıyor…
+    <div id="sigExplainLoading" style="display:flex;flex-direction:column;gap:10px;color:#909097;font-size:13px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div>
+        Açıklama hazırlanıyor…
+      </div>
+      {# SPEC-017 Faz C K10: Statik fallback özet — AI cache miss / 429 durumunda kullanıcı boş kalmasın #}
+      <div style="font-size:12px;color:#6b7280;line-height:1.6;padding:8px 10px;background:rgba(255,255,255,0.03);border-left:2px solid rgba(184,195,255,0.3);border-radius:0 6px 6px 0">
+        Algoritmamız <strong style="color:#b8c3ff">Supertrend, EMA (12/26/99), ADX, MACD</strong> indikatörlerini birlikte değerlendirir. <strong style="color:#b8c3ff">Güçlü Trend</strong> sinyali bu göstergelerin pozitif konfirmasyonunu, <strong style="color:#b8c3ff">Zayıf Trend</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#" onclick="window.applyTab&&applyTab('ozet');return false" style="color:#b8c3ff;text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
+      </div>
     </div>
     <p id="sigExplainText" style="display:none;font-size:13px;color:#e5e1e4;line-height:1.75;margin:0"></p>
     <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:11px;color:#475569">
@@ -4094,6 +4100,17 @@ document.addEventListener('click', function(e) {
     }
     // GA4
     try { if (typeof gtag === 'function') gtag('event','tab_switch',{ticker: typeof TICKER!=='undefined'?TICKER:'', tab: tab}); } catch(e){}
+    // SPEC-017 Faz C K10: AI tab açıldığında otomatik fetch + cached değilse retry
+    if (tab === 'ai') {
+      try {
+        var explainText = document.getElementById('sigExplainText');
+        var explainLoad = document.getElementById('sigExplainLoading');
+        var alreadyLoaded = explainText && explainText.style.display !== 'none' && (explainText.textContent || '').trim().length > 20;
+        if (!alreadyLoaded && typeof loadSignalExplanation === 'function') {
+          loadSignalExplanation(0);
+        }
+      } catch(e) {}
+    }
   }
   window.applyTab = applyTab;
 
