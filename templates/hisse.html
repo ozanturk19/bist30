@@ -1622,9 +1622,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
        Fixed positioning: parent overflow:hidden bypass (v1 sticky bug fix). -->
   <style>
     .bp-segments {
-      /* SPEC-017 Faz E: position sticky #67 ihlal — sticky çalışmadı (ancestor containing block sorunu).
-         Geri position: fixed, JS dinamik top sync ile sticky-hdr altına yapışır. */
-      position: fixed; top: 0; left: 0; right: 0; z-index: 90;
+      /* SPEC-017 Faz 3 F2-B2: top: 0 → 70px (header altında inline kalır, kapatılmaz).
+         Faz E pattern korundu (position:fixed, body.bp-sticky-on top:96 shift). */
+      position: fixed; top: 70px; left: 0; right: 0; z-index: 90;
       background: rgba(14,14,18,0.96);
       backdrop-filter: blur(20px) saturate(160%);
       -webkit-backdrop-filter: blur(20px) saturate(160%);
@@ -1633,6 +1633,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       display: flex; gap: 6px;
       justify-content: center;
       transition: top 0.18s ease;
+    }
+    /* Mobile <768px: header daha kompakt, segments üst farkı azalır */
+    @media (max-width: 768px) {
+      .bp-segments { top: 60px; }
     }
     .bp-segments-inner {
       display: flex; gap: 4px;
@@ -2448,13 +2452,13 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <span id="sigExplainBadge" style="margin-left:auto;font-size:11px;background:rgba(184,195,255,0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(184,195,255,0.25)">Gemini AI</span>
     </div>
     <div id="sigExplainLoading" style="display:flex;flex-direction:column;gap:10px;color:#909097;font-size:13px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div>
-        Açıklama hazırlanıyor…
-      </div>
-      {# SPEC-017 Faz C K10: Statik fallback özet — AI cache miss / 429 durumunda kullanıcı boş kalmasın #}
-      <div style="font-size:12px;color:#6b7280;line-height:1.6;padding:8px 10px;background:rgba(255,255,255,0.03);border-left:2px solid rgba(184,195,255,0.3);border-radius:0 6px 6px 0">
+      {# SPEC-017 Faz 3 F2-B3: Statik özet ÖNCE (içerik), spinner SONRA (durum) — kullanıcı boş ekran görmesin #}
+      <div style="font-size:13px;color:#c7c5cd;line-height:1.65;padding:10px 12px;background:rgba(184,195,255,0.06);border-left:3px solid rgba(184,195,255,0.4);border-radius:0 8px 8px 0">
         Algoritmamız <strong style="color:#b8c3ff">Supertrend, EMA (12/26/99), ADX, MACD</strong> indikatörlerini birlikte değerlendirir. <strong style="color:#b8c3ff">Güçlü Trend</strong> sinyali bu göstergelerin pozitif konfirmasyonunu, <strong style="color:#b8c3ff">Zayıf Trend</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#" onclick="window.applyTab&&applyTab('ozet');return false" style="color:#b8c3ff;text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:#6b6b73">
+        <div class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></div>
+        AI yorumu hazırlanıyor…
       </div>
     </div>
     <p id="sigExplainText" style="display:none;font-size:13px;color:#e5e1e4;line-height:1.75;margin:0"></p>
