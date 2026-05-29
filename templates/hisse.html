@@ -1541,7 +1541,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       var sm = (sigSrc.className||'').match(/signal-(AL|SAT|BEKLE)/);
       var sigType = sm ? sm[1] : 'BEKLE';
       shBadge.className = 'bp-sh-badge badge-' + sigType;
-      shTier.textContent = sigType;
+      // SPEC-017 Faz C K3: sticky tier badge "AL"/"SAT"/"BEKLE" yerine kullanıcı-dostu label
+      var tierLabel = {'AL':'Güçlü','SAT':'Zayıf','BEKLE':'Yatay'}[sigType] || sigType;
+      shTier.textContent = tierLabel;
       shTier.className = 'bp-sh-tier tier-' + sigType;
     }
   }
@@ -1742,16 +1744,19 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   </style>
   {%- set _sig = ssr_signal.signal -%}
   {%- set _score = ssr_signal.tier_score or 0 -%}
+  {# SPEC-017 Faz C K3+K6+K9-1: Hero badge tek-vocab — "ORTA TREND"/"GÜÇLÜ SAT" yasaklandı; 🥇🥈🥉 medal kaldırıldı; SAT → "Zayıf Trend" (K3) #}
   {%- if _sig == 'AL' -%}
-    {%- if _score >= 70 %}{% set _hc='#16a34a' %}{% set _hc2='#15803d' %}{% set _lbl='GÜÇLÜ TREND' %}{% set _icon='🥇' %}
-    {%- elif _score >= 50 %}{% set _hc='#22c55e' %}{% set _hc2='#16a34a' %}{% set _lbl='ORTA TREND' %}{% set _icon='🥈' %}
-    {%- else %}{% set _hc='#86efac' %}{% set _hc2='#4ade80' %}{% set _lbl='ZAYIF TREND' %}{% set _icon='🥉' %}{% endif -%}
+    {%- if _score >= 70 %}{% set _hc='#16a34a' %}{% set _hc2='#15803d' %}
+    {%- elif _score >= 50 %}{% set _hc='#22c55e' %}{% set _hc2='#16a34a' %}
+    {%- else %}{% set _hc='#86efac' %}{% set _hc2='#4ade80' %}{% endif -%}
+    {% set _lbl='GÜÇLÜ TREND' %}{% set _icon='▲' %}
   {%- elif _sig == 'SAT' -%}
-    {%- if _score >= 70 %}{% set _hc='#dc2626' %}{% set _hc2='#991b1b' %}{% set _lbl='GÜÇLÜ SAT' %}{% set _icon='▼' %}
-    {%- elif _score >= 50 %}{% set _hc='#ef4444' %}{% set _hc2='#dc2626' %}{% set _lbl='ORTA SAT' %}{% set _icon='▼' %}
-    {%- else %}{% set _hc='#fca5a5' %}{% set _hc2='#ef4444' %}{% set _lbl='ZAYIF SAT' %}{% set _icon='▼' %}{% endif -%}
+    {%- if _score >= 70 %}{% set _hc='#dc2626' %}{% set _hc2='#991b1b' %}
+    {%- elif _score >= 50 %}{% set _hc='#ef4444' %}{% set _hc2='#dc2626' %}
+    {%- else %}{% set _hc='#fca5a5' %}{% set _hc2='#ef4444' %}{% endif -%}
+    {% set _lbl='ZAYIF TREND' %}{% set _icon='▼' %}
   {%- else -%}
-    {% set _hc='#9ca3af' %}{% set _hc2='#6b7280' %}{% set _lbl='BEKLE' %}{% set _icon='⏸' %}
+    {% set _hc='#9ca3af' %}{% set _hc2='#6b7280' %}{% set _lbl='YATAY' %}{% set _icon='⏸' %}
   {%- endif -%}
   <div class="bp-hero-card" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
     <div class="bp-hero-header">
