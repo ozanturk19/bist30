@@ -45,3 +45,7 @@ scripts/
 # User data
 portfolios/
 snapshots/
+test/visual/current/
+test/visual/diff/
+node_modules/
+package-lock.json

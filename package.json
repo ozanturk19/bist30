@@ -1,0 +1,15 @@
+{
+  "name": "borsapusula-visual-test",
+  "version": "1.0.0",
+  "description": "Playwright visual regression test for BorsaPusula (CPO-365 Workflow v2.0)",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test:visual": "node tools/visual-test.js",
+    "test:visual:baseline": "node tools/visual-test.js --update-baseline",
+    "test:diff": "./tools/visual-diff.sh"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}
