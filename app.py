@@ -5367,8 +5367,9 @@ def stock_page(ticker):
         adx_val = float(_adx_lbl.replace("ADX", "").strip()) if _adx_lbl else None
     except (ValueError, TypeError):
         adx_val = None
-    sig_label = {"AL": "Güçlü Trend (AL)", "SAT": "Zayıf Trend (SAT)",
-                 "BEKLE": "Belirsiz (BEKLE)"}.get(sig, sig)
+    # SPEC-017 Faz 3 batch v2 B1: SSS cevabında AL/SAT parantez yasak (K3 wording disiplin)
+    sig_label = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend",
+                 "BEKLE": "Belirsiz"}.get(sig, sig)
 
     # Yatırımcı SSS — deterministik, veri-tabanlı (ekstra Gemini çağrısı YOK)
     # SPEC-017 Faz B K3: AL/SAT wording yasak — "al mı sat mı" → "güncel teknik sinyali nedir"
