@@ -1940,10 +1940,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       border-top: 1px solid rgba(42,42,44,0.7);
       padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
       display: flex; gap: 8px;
-      transform: translateY(100%);
+      /* SPEC-017 Faz D K bug fix: default translateY(0) — varsayılan görünür (önceki "translateY(100%)" + .visible class hiçbir yerde eklenmediği için CTA bar tıklanamaz görünüyordu) */
+      transform: translateY(0);
       transition: transform 0.3s cubic-bezier(.32,.72,0,1);
     }
-    .bp-bottom-cta.visible { transform: translateY(0); }
+    .bp-bottom-cta.hidden { transform: translateY(100%); }
     .bp-cta-watchlist {
       flex: 6; height: 44px;
       background: rgba(0,226,144,0.12);
