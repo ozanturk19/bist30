@@ -5355,12 +5355,13 @@ def stock_page(ticker):
     chg      = (ssr_signal or {}).get("change_pct")
     rsi_val  = (ssr_signal or {}).get("rsi")
     rr_val   = (ssr_signal or {}).get("rr_ratio")
-    if sig == "AL":
-        score = (ssr_signal or {}).get("bull_score")
-    elif sig == "SAT":
-        score = (ssr_signal or {}).get("bear_score")
-    else:
-        score = None
+    # SPEC-017 Faz 3 batch v2 B2: hero card tier_score (0-100) vs SSS score (bull/bear 0-3) tutarsızlığı.
+    # SSS de tier_score kullanmalı (hero ile aynı kaynak) — kullanıcı "skor 3/100 düşük" sanmaz.
+    score = (ssr_signal or {}).get("tier_score")
+    if score is None and sig in ("AL", "SAT"):
+        # Fallback: tier_score yoksa bull/bear x 33 ~ 0-100 normalize
+        raw = (ssr_signal or {}).get("bull_score" if sig == "AL" else "bear_score")
+        score = int(raw * 33) if isinstance(raw, (int, float)) else None
     _inds    = (ssr_signal or {}).get("indicators") or {}
     _adx_lbl = (_inds.get("adx") or {}).get("label", "")
     try:
