@@ -1620,8 +1620,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
        Fixed positioning: parent overflow:hidden bypass (v1 sticky bug fix). -->
   <style>
     .bp-segments {
-      /* SPEC-017 Faz D c3: position fixed → sticky, hero card'ın üstünde inline DOM pozisyon */
-      position: sticky; top: 0; left: 0; right: 0; z-index: 500;
+      /* SPEC-017 Faz E: position sticky #67 ihlal — sticky çalışmadı (ancestor containing block sorunu).
+         Geri position: fixed, JS dinamik top sync ile sticky-hdr altına yapışır. */
+      position: fixed; top: 0; left: 0; right: 0; z-index: 90;
       background: rgba(14,14,18,0.96);
       backdrop-filter: blur(20px) saturate(160%);
       -webkit-backdrop-filter: blur(20px) saturate(160%);
@@ -1629,7 +1630,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       padding: 8px 12px;
       display: flex; gap: 6px;
       justify-content: center;
-      margin: 0 -16px 14px; /* container negative margin ile tam genişlik */
+      transition: top 0.18s ease;
     }
     .bp-segments-inner {
       display: flex; gap: 4px;
@@ -1639,8 +1640,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       border-radius: 10px;
       padding: 4px;
     }
-    /* SPEC-017 Faz D c3: sticky → spacer artık gerekli değil (sticky kendisi normal flow'da yer alır) */
-    .bp-segments-spacer { display: none; }
+    /* SPEC-017 Faz E: position fixed geri döndü — spacer aktif (fixed nav yüksekliği için yer ayır) */
+    .bp-segments-spacer { height: 50px; }
     .bp-segments-inner a {
       flex: 1; text-align: center;
       padding: 8px 10px;
