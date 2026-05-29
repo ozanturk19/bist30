@@ -1,0 +1,27 @@
+#!/bin/bash
+# .githooks/pre-commit
+# KALICI_KURALLAR v1.1 otomatik audit — CPO-359 Tier 0 standardı
+# Bu hook templates/hisse.html değiştiğinde KK audit çalıştırır.
+# Audit FAIL ise commit blokla.
+#
+# Kurulum: git config core.hooksPath .githooks (bir kez)
+
+set -e
+CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^templates/hisse\.html$' || true)
+if [ -z "$CHANGED" ]; then
+  exit 0  # hisse.html değişmedi, audit gereksiz
+fi
+
+echo ""
+echo "🔍 KALICI_KURALLAR v1.1 pre-commit audit..."
+echo ""
+if ./tests/audit/kalici-kurallar-check.sh templates/hisse.html; then
+  echo ""
+  echo "✅ Commit izinli."
+  exit 0
+else
+  echo ""
+  echo "❌ Commit blokladı. KALICI_KURALLAR ihlali var. Düzelt ve tekrar dene."
+  echo "   Geçici by-pass için: git commit --no-verify (önerilmez)"
+  exit 1
+fi
