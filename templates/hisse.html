@@ -171,7 +171,8 @@
     gap: 16px;
     position: sticky;
     top: 0;
-    z-index: 100;
+    /* SPEC-017 Faz F Option C: header z-index 100→600 (sticky-hdr seviyesi). Nav her zaman görünür, sticky-hdr scroll>120'de devreye girer */
+    z-index: 600;
     flex-wrap: wrap;
   }
 
@@ -1579,7 +1580,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       if (el) mo.observe(el, {childList:true, characterData:true, subtree:true, attributes:true, attributeFilter:['class']});
     });
   } catch(e){}
-  var threshold = 80, compactAt = 240, ticking = false;
+  // SPEC-017 Faz F Option C: scroll threshold 80→120 (header tam dışarı çıkınca sticky-hdr aktif)
+  var threshold = 120, compactAt = 280, ticking = false;
   function onScroll(){
     var y = window.scrollY || window.pageYOffset;
     var visible = y > threshold;
@@ -3022,6 +3024,24 @@ function buildChart(d) {
     const w = elMain.clientWidth;
     if (w) chart.applyOptions({ width: w });
   });
+
+  // SPEC-017 Faz F Bug 3: ResizeObserver — tab switch (display:none→block) resize tetikle
+  try {
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => {
+        const w = elMain.clientWidth;
+        if (w && chart) chart.applyOptions({ width: w });
+      });
+      ro.observe(elMain);
+    }
+  } catch(_) {}
+  // applyTab hook: AI/Grafik tab açıldığında chart resize zorla
+  window.bpChartResize = function(){
+    setTimeout(() => {
+      const w = elMain.clientWidth;
+      if (w && chart) chart.applyOptions({ width: w });
+    }, 80);
+  };
 }
 
 /* ── 52-hafta + commentary render ──────────────────── */
@@ -4139,6 +4159,10 @@ document.addEventListener('click', function(e) {
           loadSignalExplanation(0);
         }
       } catch(e) {}
+    }
+    // SPEC-017 Faz F Bug 3: Grafik tab açıldığında chart resize (display:none→block sonrası width sync)
+    if (tab === 'grafik') {
+      try { if (typeof window.bpChartResize === 'function') window.bpChartResize(); } catch(e) {}
     }
   }
   window.applyTab = applyTab;
