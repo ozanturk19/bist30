@@ -1451,40 +1451,41 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     @media (max-width: 768px) {
       .bp-segments { top: 60px; }
     }
+    /* SPEC-017 batch v2 B6 (CPO-378): yüzen pill → TAM GENİŞLİK underline tab bar (TradingView pattern) */
     .bp-segments-inner {
-      display: flex; gap: 4px;
-      max-width: 480px;
+      display: flex; gap: 0;
+      max-width: 1400px;  /* container max-width ile uyumlu */
       width: 100%;
-      background: rgba(255,255,255,0.04);
-      border-radius: 10px;
-      padding: 4px;
+      background: transparent;
+      border-radius: 0;
+      padding: 0;
     }
-    /* SPEC-017 Faz E: position fixed geri döndü — spacer aktif (fixed nav yüksekliği için yer ayır) */
     .bp-segments-spacer { height: 50px; }
     .bp-segments-inner a {
       flex: 1; text-align: center;
-      padding: 8px 10px;
-      border-radius: 7px;
+      padding: 10px 12px 12px;
+      border-radius: 0;
+      border-bottom: 2px solid transparent;
       font-family: 'Manrope', system-ui, sans-serif;
-      font-size: 12.5px; font-weight: 600;
+      font-size: 13px; font-weight: 600;
       color: #909097; text-decoration: none;
-      transition: background 0.15s ease, color 0.15s ease;
+      transition: color 0.15s ease, border-color 0.15s ease;
       white-space: nowrap;
       -webkit-tap-highlight-color: transparent;
       cursor: pointer;
+      letter-spacing: 0.3px;
     }
     .bp-segments-inner a:hover {
-      background: rgba(184,195,255,0.10);
       color: #e5e1e4;
     }
     .bp-segments-inner a.active {
-      background: rgba(0,226,144,0.15);
       color: #00e290;
-      box-shadow: 0 1px 3px rgba(0,226,144,0.15);
+      border-bottom-color: #00e290;
+      background: transparent;
+      box-shadow: none;
     }
     @media (max-width: 480px) {
-      .bp-segments-inner { max-width: 100%; }
-      .bp-segments-inner a { font-size: 11.5px; padding: 8px 6px; }
+      .bp-segments-inner a { font-size: 12px; padding: 8px 6px 10px; letter-spacing: 0.2px; }
     }
     /* FAB "Üste çık" — scroll edildiğinde sağ-alt */
     .bp-fab-up {
