@@ -14,6 +14,13 @@ Restart=always
 RestartSec=10
 User=root
 MemoryMax=512M
+# SPEC-DECOUPLING-v2 (CPO-423): fetcher CPU prio düşürülür. 2-core VPS'te
+# fetcher heavy_cycle CPU spike'ı (yfinance bulk + 215 ticker analyze) render
+# worker'ları ile contention'a giriyordu. Nice 15 + IOSchedulingClass best-effort
+# IOSchedulingPriority 7 (en düşük) ile render request'leri öncelikli olur.
+Nice=15
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
 # Log: systemd journald + dosya
 StandardOutput=append:/var/log/bist30-fetcher.log
 StandardError=append:/var/log/bist30-fetcher.log
