@@ -117,12 +117,33 @@ def _heavy_cycle():
     ]
     for key, cache in macros:
         _safe(f"refresh_varlik_{key}", app._refresh_varlik_chart, key, cache)
-    # 3. Stock chart warm-up — en çok ziyaret edilen 5 ticker
-    warm_tickers = ["THYAO", "AKBNK", "GARAN", "ASELS", "EREGL"]
-    for t in warm_tickers:
-        _safe(f"chart_warm_{t}", app._compute_chart_data, t, "2y")
-    # 4. Fundamentals warm-up
-    for t in warm_tickers[:3]:
+    # 3. Stock chart populate — TÜM BIST100 (worker /api/hisse/X/chart endpoint'i
+    #    cache'ten okusun, yfinance çağırmasın). _compute_chart_data sonucu manuel cache'e yazılır.
+    logger.info("Stock chart populate: %d ticker", len(app.BIST100))
+    chart_ok = 0
+    chart_fail = 0
+    for t in app.BIST100:
+        try:
+            data = app._compute_chart_data(t, "2y")
+            if data:
+                now = time.time()
+                upd = (data.get("summary") or {}).get("updated_at") or ""
+                with app._lock:
+                    app._stock_chart_cache[t] = {
+                        "data": data, "ts": now,
+                        "updated_at": upd, "v": app._CHART_CACHE_VERSION,
+                    }
+                chart_ok += 1
+            else:
+                chart_fail += 1
+            time.sleep(0.05)  # yfinance throttle
+        except Exception as e:
+            chart_fail += 1
+            logger.debug("chart_populate_%s: %s", t, e)
+    logger.info("Stock chart populate tamamlandı: ok=%d fail=%d", chart_ok, chart_fail)
+    # 4. Fundamentals warm-up — 5 en popüler
+    fund_tickers = ["THYAO", "AKBNK", "GARAN", "ASELS", "EREGL"]
+    for t in fund_tickers:
         _safe(f"fundamentals_warm_{t}", app._get_fundamentals, t)
     # 5. TÜM cache'leri diske yaz (chart + live_prices + fundamentals)
     _safe("save_all_fetcher_caches", app._save_all_fetcher_caches)
