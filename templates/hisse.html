@@ -1457,16 +1457,16 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
        Fixed positioning: parent overflow:hidden bypass (v1 sticky bug fix). -->
   <style>
     .bp-segments {
-      /* SPEC-STICKY-HEADER-v3: position fixed → static (header İÇİNDE, header sticky=tek blok).
-         Hardcode top:70 → kaldırıldı (gap matematiği yok). Opak bg (header bg yeterli). */
+      /* SPEC-STICKY-HEADER-v3 fix4: margin-top:8 → padding-top:8 (margin header dışına taşıyordu, macro-bar ile overlap!).
+         Padding header'ın içinde kalır, segments header'ın görsel kutusunun parçası olur. */
       position: static;
       background: transparent;
       border-bottom: none;
       border-top: 1px solid rgba(42,42,44,0.5);
-      padding: 0;
+      padding: 8px 0 0;
+      margin: 0;
       display: flex; gap: 12px;
       align-items: stretch;
-      margin-top: 8px;
       width: 100%;
     }
     .bp-symbol-pill {
