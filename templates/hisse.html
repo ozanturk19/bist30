@@ -1275,6 +1275,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 </script>
 
 <header>
+  {# SPEC-STICKY-HEADER-v3 fix2 (CPO): .bp-header-row sarmalayıcısı eksikti — logo+menü+search tek yatay satır, tablar 2. satır. Overlap/cram giderildi. #}
+  <div class="bp-header-row">
   <a href="/" class="logo-link" aria-label="BorsaPusula — Piyasanın Yönü">
     <svg class="bp-logo" width="200" height="52" viewBox="0 0 460 120" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -1352,6 +1354,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </button>
+  </div>{# /bp-header-row #}
 
   {# SPEC-STICKY-HEADER-v3 (CPO-381/382): bp-segments header İÇİNDE — tek opak sticky blok, gap=0 bleed=0 #}
   <nav class="bp-segments" aria-label="Hisse detay segmentleri">
