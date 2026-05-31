@@ -3137,6 +3137,16 @@ def _load_all_fetcher_caches():
                     with _lock:
                         _live_prices.update(d)
                     _live_prices_mtime = mt
+                    # SPEC-DECOUPLING-v2 SSE bridge: fetcher process _push_sse'i kendi
+                    # _sse_clients list'ine (boş) push'lar, gunicorn worker subscribers ulaşmaz.
+                    # Worker disk-read'de yeni live_prices algıladığında _push_sse'i KENDİ
+                    # _sse_clients list'ine (gerçek subscribers) push'lar → SSE stream restore.
+                    # BIST seansta canlı fiyat akışı için kritik.
+                    if os.getenv("BIST_ROLE") != "fetcher":
+                        try:
+                            _push_sse({"type": "prices", "data": d, "ts": datetime.now(_TZ_TR).strftime("%H:%M:%S")})
+                        except Exception as _ee:
+                            logger.debug("SSE push (live_prices): %s", _ee)
     except Exception as e:
         logger.warning("_load live_prices: %s", e)
     # fundamentals
