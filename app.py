@@ -2284,11 +2284,6 @@ if _is_notify_leader():
 _DISK_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
 _BT_DISK_PATH    = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backtest_cache.json")
 _SNAPSHOTS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshots")
-# SPEC-DECOUPLING-v1 (CPO-387): live_prices shared cache (leader writes, non-leader reads).
-# fetch_live_prices ve fetch_global_prices yfinance fırtına kaynağı — 4 worker × 30s/60s loop.
-# Leader-gate + disk-share ile restart fırtınası bitmiş olur.
-_LIVE_PRICES_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "live_prices_cache.json")
-_live_prices_disk_mtime = None  # type: Optional[float]
 os.makedirs(_SNAPSHOTS_DIR, exist_ok=True)
 
 
@@ -2446,13 +2441,6 @@ def fetch_live_prices():
             with _lock:
                 _live_prices.update(payload)
             _push_sse({"type": "prices", "data": payload, "ts": now_str})
-            # SPEC-DECOUPLING-v1: leader paylaşımlı disk cache'e yazar
-            if _is_bg_leader():
-                try:
-                    with _lock:
-                        _atomic_write_json(_LIVE_PRICES_DISK_PATH, dict(_live_prices))
-                except Exception as _e:
-                    logger.debug("live_prices disk write: %s", _e)
 
     except Exception as e:
         logger.error("fetch_live_prices: %s", e, exc_info=True)
@@ -2523,53 +2511,12 @@ def fetch_global_prices():
             with _lock:
                 _live_prices.update(payload)
             _push_sse({"type": "global_prices", "data": payload, "ts": now_str})
-            # SPEC-DECOUPLING-v1: leader paylaşımlı disk cache'e yazar (global+live aynı dosya)
-            if _is_bg_leader():
-                try:
-                    with _lock:
-                        _atomic_write_json(_LIVE_PRICES_DISK_PATH, dict(_live_prices))
-                except Exception as _e:
-                    logger.debug("live_prices disk write (global): %s", _e)
 
     except Exception as e:
         logger.error("fetch_global_prices: %s", e, exc_info=True)
 
 
-def _load_live_prices_from_disk():
-    """SPEC-DECOUPLING-v1: non-leader worker disk cache'i yükler.
-    mtime guard (H3 pattern) — file değişmedikçe in-memory dön, blocking I/O yok.
-    Thread-safety: float/None atomic primitive (Python GIL)."""
-    global _live_prices_disk_mtime
-    try:
-        if not os.path.exists(_LIVE_PRICES_DISK_PATH):
-            return
-        current_mtime = os.path.getmtime(_LIVE_PRICES_DISK_PATH)
-        if _live_prices_disk_mtime == current_mtime and _live_prices:
-            return
-        with open(_LIVE_PRICES_DISK_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        if data and isinstance(data, dict):
-            with _lock:
-                _live_prices.update(data)
-            _live_prices_disk_mtime = current_mtime
-            logger.debug("live_prices disk yüklendi: %d ticker", len(data))
-    except Exception as e:
-        logger.warning("_load_live_prices_from_disk: %s", e)
-
-
 def background_global_prices():
-    # SPEC-DECOUPLING-v1 (CPO-387): leader fetch, non-leader disk-reload.
-    # Non-leader worker yfinance çağırmaz → 4× burst biter.
-    if not _is_bg_leader():
-        logger.info("background_global_prices: non-leader — disk-reload modu (60s)")
-        while True:
-            try:
-                _load_live_prices_from_disk()
-            except Exception as e:
-                logger.error("background_global_prices non-leader: %s", e)
-            time.sleep(60)
-        return  # ulaşılmaz
-    logger.info("background_global_prices: LEADER — yfinance fetch modu (60s)")
     while True:
         try:
             fetch_global_prices()
@@ -2579,17 +2526,6 @@ def background_global_prices():
 
 
 def background_live_prices():
-    # SPEC-DECOUPLING-v1 (CPO-387): leader fetch, non-leader disk-reload.
-    if not _is_bg_leader():
-        logger.info("background_live_prices: non-leader — disk-reload modu (30s)")
-        while True:
-            try:
-                _load_live_prices_from_disk()
-            except Exception as e:
-                logger.error("background_live_prices non-leader: %s", e)
-            time.sleep(30)
-        return  # ulaşılmaz
-    logger.info("background_live_prices: LEADER — yfinance fetch modu (30s)")
     while True:
         try:
             fetch_live_prices()
@@ -8064,12 +8000,6 @@ def blog_article(slug):
 def _startup():
     # Disk cache'i yükle — anlık veri gelene kadar siteyi hemen dolduran eski veri
     _load_cache_from_disk()
-    # SPEC-DECOUPLING-v1 (CPO-387): startup'ta live_prices disk-load → restart sonrası
-    # non-leader worker hemen veri serv edebilir (background loop 30s sonrasında çalışacak).
-    try:
-        _load_live_prices_from_disk()
-    except Exception as _e:
-        logger.warning("startup live_prices disk-load: %s", _e)
     # SPEC-011 L4 — şirket özeti cache'i diskten yükle (restart sonrası anında dolu)
     try:
         _load_company_summary_from_disk()
