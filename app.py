@@ -2404,6 +2404,10 @@ def fetch_live_prices():
             progress=False, auto_adjust=True, group_by="ticker", timeout=30
         )
         if df is None or df.empty:
+            # SPEC-DECOUPLING-v2 P1 (CPO-420): bulk yf.download tamamen boş döndü
+            # (Yahoo throttle/blocked). Per-ticker fallback DENE.
+            logger.info("fetch_live_prices: bulk df empty/None → per-ticker fallback")
+            _live_prices_per_ticker_fallback()
             return
 
         payload = {}
