@@ -2193,7 +2193,7 @@ def _digest_cron_loop():
 
 if os.getenv("BIST_ROLE") != "fetcher":
     threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-cron").start()
-logger.info("Digest cron başlatıldı (her 5 dakikada kontrol, 19:00'da tetikler)")
+    logger.info("Digest cron başlatıldı (her 5 dakikada kontrol, 19:00'da tetikler)")
 
 
 # ── SPEC-014 B4 — Freshness monitor (market saatinde veri yaşı > 25dk → Telegram) ──
@@ -6256,7 +6256,7 @@ def _health_snapshot_loop():
 
 if os.getenv("BIST_ROLE") != "fetcher":
     threading.Thread(target=_health_snapshot_loop, daemon=True, name="health-snapshot").start()
-logger.info("Health snapshot loop başlatıldı (SPEC-016 K4 — /api/health lock-free)")
+    logger.info("Health snapshot loop başlatıldı (SPEC-016 K4 — /api/health lock-free)")
 
 
 @app.route("/api/health")
