@@ -1,0 +1,22 @@
+[Unit]
+Description=BorsaPusula yfinance fetcher daemon (SPEC-DECOUPLING-v2, CPO-420/421)
+Documentation=https://github.com/ozanturk19/bist30
+After=network.target
+# bist30.service'i etkilemez — sadece sıra önerisi
+Before=bist30.service
+
+[Service]
+Type=simple
+WorkingDirectory=/root/bist30
+Environment="BIST_ROLE=fetcher"
+ExecStart=/root/bist30/venv/bin/python /root/bist30/fetcher.py
+Restart=always
+RestartSec=10
+User=root
+MemoryMax=512M
+# Log: systemd journald + dosya
+StandardOutput=append:/var/log/bist30-fetcher.log
+StandardError=append:/var/log/bist30-fetcher.log
+
+[Install]
+WantedBy=multi-user.target

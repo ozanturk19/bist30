@@ -2191,7 +2191,8 @@ def _digest_cron_loop():
         time.sleep(300)  # 5 dakikada bir kontrol
 
 
-threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-cron").start()
+if os.getenv("BIST_ROLE") != "fetcher":
+    threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-cron").start()
 logger.info("Digest cron başlatıldı (her 5 dakikada kontrol, 19:00'da tetikler)")
 
 
@@ -2774,7 +2775,8 @@ def _macro_news_bg_loop():
             logger.debug("Makro RSS loop: %s", e)
         time.sleep(_MACRO_NEWS_TTL)
 
-threading.Thread(target=_macro_news_bg_loop, daemon=True, name="macro-rss").start()
+if os.getenv("BIST_ROLE") != "fetcher":
+    threading.Thread(target=_macro_news_bg_loop, daemon=True, name="macro-rss").start()
 
 
 # ── Ekonomik Takvim ───────────────────────────────────────────────────────────
@@ -3003,7 +3005,10 @@ def _fetch_macro():
 
 
 # Background macro refresh — _fetch_macro DEFINED olduktan SONRA başlat
-threading.Thread(target=_macro_bg_loop, daemon=True, name="macro-bg-loop").start()
+# SPEC-DECOUPLING-v2: _macro_bg_loop yfinance çağırır → worker'da bloke etmesin.
+# Fetcher process bunu manual cycle (_fetch_macro) ile yapar.
+if os.getenv("BIST_ROLE") != "fetcher":
+    threading.Thread(target=_macro_bg_loop, daemon=True, name="macro-bg-loop").start()
 
 
 # Macro refresh — ARTIK SADECE bg loop (request-spawned thread leak'ini önle)
@@ -3060,6 +3065,119 @@ def _atomic_write_json(path, data):
         if os.path.exists(tmp):
             os.unlink(tmp)
         raise
+
+
+# SPEC-DECOUPLING-v2 (CPO-420/421): fetcher.py daemon → worker disk-share cache'ler.
+# Worker SADECE okur (mtime guard). fetcher SADECE yazar.
+_CHART_XU100_DISK_PATH  = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chart_xu100.json")
+_CHART_MACROS_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chart_macros.json")
+_CHART_STOCKS_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chart_stocks.json")
+_LIVE_PRICES_DISK_PATH  = os.path.join(os.path.dirname(os.path.abspath(__file__)), "live_prices_cache.json")
+_FUNDAMENTALS_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fundamentals_cache.json")
+
+_chart_xu100_mtime = None
+_chart_macros_mtime = None
+_chart_stocks_mtime = None
+_live_prices_mtime = None
+_fundamentals_mtime = None
+
+
+def _save_all_fetcher_caches():
+    """fetcher.py tarafından çağrılır — tüm in-memory cache'leri diske yazar (atomic)."""
+    try:
+        if _xu100_chart_cache.get("data"):
+            _atomic_write_json(_CHART_XU100_DISK_PATH, _xu100_chart_cache)
+        macros = {}
+        for k, c in [("BTC", _btc_chart_cache), ("ETH", _eth_chart_cache), ("SOL", _sol_chart_cache),
+                     ("BNB", _bnb_chart_cache), ("ALTIN", _altin_chart_cache), ("GUMUS", _gumus_chart_cache),
+                     ("PETROL", _petrol_chart_cache), ("DOGALGAZ", _dogalgaz_chart_cache),
+                     ("SP500", _sp500_chart_cache), ("NASDAQ", _nasdaq_chart_cache)]:
+            if c.get("data"):
+                macros[k] = c
+        if macros:
+            _atomic_write_json(_CHART_MACROS_DISK_PATH, macros)
+        if _stock_chart_cache:
+            _atomic_write_json(_CHART_STOCKS_DISK_PATH, _stock_chart_cache)
+        if _live_prices:
+            with _lock:
+                _atomic_write_json(_LIVE_PRICES_DISK_PATH, dict(_live_prices))
+        if _fundamentals_cache:
+            _atomic_write_json(_FUNDAMENTALS_DISK_PATH, _fundamentals_cache)
+    except Exception as e:
+        logger.error("_save_all_fetcher_caches: %s", e, exc_info=True)
+
+
+def _load_all_fetcher_caches():
+    """Worker tarafı: fetcher'ın yazdığı cache'leri yükler (mtime guard, blocking I/O minimum)."""
+    global _chart_xu100_mtime, _chart_macros_mtime, _chart_stocks_mtime, _live_prices_mtime, _fundamentals_mtime
+    # chart_xu100
+    try:
+        if os.path.exists(_CHART_XU100_DISK_PATH):
+            mt = os.path.getmtime(_CHART_XU100_DISK_PATH)
+            if mt != _chart_xu100_mtime:
+                with open(_CHART_XU100_DISK_PATH, encoding="utf-8") as f:
+                    d = json.load(f)
+                if d and isinstance(d, dict) and d.get("data"):
+                    _xu100_chart_cache.update(d)
+                    _chart_xu100_mtime = mt
+    except Exception as e:
+        logger.warning("_load chart_xu100: %s", e)
+    # chart_macros (10 dict)
+    try:
+        if os.path.exists(_CHART_MACROS_DISK_PATH):
+            mt = os.path.getmtime(_CHART_MACROS_DISK_PATH)
+            if mt != _chart_macros_mtime:
+                with open(_CHART_MACROS_DISK_PATH, encoding="utf-8") as f:
+                    d = json.load(f)
+                cache_map = {
+                    "BTC": _btc_chart_cache, "ETH": _eth_chart_cache, "SOL": _sol_chart_cache,
+                    "BNB": _bnb_chart_cache, "ALTIN": _altin_chart_cache, "GUMUS": _gumus_chart_cache,
+                    "PETROL": _petrol_chart_cache, "DOGALGAZ": _dogalgaz_chart_cache,
+                    "SP500": _sp500_chart_cache, "NASDAQ": _nasdaq_chart_cache,
+                }
+                for k, v in d.items():
+                    if k in cache_map and isinstance(v, dict) and v.get("data"):
+                        cache_map[k].update(v)
+                _chart_macros_mtime = mt
+    except Exception as e:
+        logger.warning("_load chart_macros: %s", e)
+    # chart_stocks (lazy per-ticker)
+    try:
+        if os.path.exists(_CHART_STOCKS_DISK_PATH):
+            mt = os.path.getmtime(_CHART_STOCKS_DISK_PATH)
+            if mt != _chart_stocks_mtime:
+                with open(_CHART_STOCKS_DISK_PATH, encoding="utf-8") as f:
+                    d = json.load(f)
+                if d and isinstance(d, dict):
+                    _stock_chart_cache.update(d)
+                    _chart_stocks_mtime = mt
+    except Exception as e:
+        logger.warning("_load chart_stocks: %s", e)
+    # live_prices
+    try:
+        if os.path.exists(_LIVE_PRICES_DISK_PATH):
+            mt = os.path.getmtime(_LIVE_PRICES_DISK_PATH)
+            if mt != _live_prices_mtime:
+                with open(_LIVE_PRICES_DISK_PATH, encoding="utf-8") as f:
+                    d = json.load(f)
+                if d and isinstance(d, dict):
+                    with _lock:
+                        _live_prices.update(d)
+                    _live_prices_mtime = mt
+    except Exception as e:
+        logger.warning("_load live_prices: %s", e)
+    # fundamentals
+    try:
+        if os.path.exists(_FUNDAMENTALS_DISK_PATH):
+            mt = os.path.getmtime(_FUNDAMENTALS_DISK_PATH)
+            if mt != _fundamentals_mtime:
+                with open(_FUNDAMENTALS_DISK_PATH, encoding="utf-8") as f:
+                    d = json.load(f)
+                if d and isinstance(d, dict):
+                    _fundamentals_cache.update(d)
+                    _fundamentals_mtime = mt
+    except Exception as e:
+        logger.warning("_load fundamentals: %s", e)
 
 
 def _save_macro_ai_to_disk():
@@ -4337,7 +4455,8 @@ def _gemini_cache_sync_loop():
             logger.error("gemini-cache-sync hatası: %s", e)
         time.sleep(90)
 
-threading.Thread(target=_gemini_cache_sync_loop, daemon=True, name="gemini-cache-sync").start()
+if os.getenv("BIST_ROLE") != "fetcher":
+    threading.Thread(target=_gemini_cache_sync_loop, daemon=True, name="gemini-cache-sync").start()
 
 
 def _on_demand_news_worker():
@@ -6135,7 +6254,8 @@ def _health_snapshot_loop():
             logger.error("health snapshot loop: %s", e)
         time.sleep(8)
 
-threading.Thread(target=_health_snapshot_loop, daemon=True, name="health-snapshot").start()
+if os.getenv("BIST_ROLE") != "fetcher":
+    threading.Thread(target=_health_snapshot_loop, daemon=True, name="health-snapshot").start()
 logger.info("Health snapshot loop başlatıldı (SPEC-016 K4 — /api/health lock-free)")
 
 
@@ -8109,7 +8229,11 @@ def _startup():
             logger.warning("_warm_earnings: %s", e)
     threading.Thread(target=_warm_earnings, daemon=True).start()
 
-threading.Thread(target=_startup, daemon=True).start()
+# SPEC-DECOUPLING-v2 (CPO-420/421): fetcher.py daemon mode'unda _startup thread'i
+# başlatma — gunicorn worker'da yfinance loop'ları başlatır, fetcher'da gereksiz.
+# BIST_ROLE=fetcher env-var ile fetcher.py app'i temiz import edebilir (sadece fonksiyonlar).
+if os.getenv("BIST_ROLE") != "fetcher":
+    threading.Thread(target=_startup, daemon=True).start()
 
 logger.info("=" * 50)
 logger.info("  BIST30 Sinyal Paneli başlatıldı")
