@@ -161,20 +161,17 @@
 
   /* ── Header (glass) ── */
   header {
-    /* SPEC-STICKY-HEADER-v3 (CPO-381/382): TEK opak sticky blok. Saydamlık/blur kaldırıldı (bleed kaynağı), flex-wrap kaldırıldı (değişken yükseklik). */
+    /* SPEC-STICKY-HEADER-v3 fix5: bp-search.js header'a !important min/max-height:60 + display:flex zorluyor.
+       Burada sadece bg opaklığını + sticky + z-index ayarla. flex-direction:column iptal (bp-search override ediyor).
+       bp-segments artık header DIŞINDA, sticky top:60. */
     background: #0e0e12;
     border-bottom: 1px solid rgba(42,42,44,0.95);
-    padding: 12px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
     position: sticky;
     top: 0;
     z-index: 1000;
   }
   .bp-header-row {
-    display: flex; align-items: center; gap: 16px;
-    flex-wrap: nowrap; min-height: 44px;
+    display: contents;  /* bp-search.js header forced flex:row uses children directly */
   }
 
   .back-btn {
@@ -1355,26 +1352,25 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </button>
   </div>{# /bp-header-row #}
-
-  {# SPEC-STICKY-HEADER-v3 (CPO-381/382): bp-segments header İÇİNDE — tek opak sticky blok, gap=0 bleed=0 #}
-  <nav class="bp-segments" aria-label="Hisse detay segmentleri">
-    {# Kompakt sinyal pill (opsiyonel, ssr_signal varsa) — scroll'da kalıcı görünür #}
-    {% if ssr_signal %}
-    <span class="bp-symbol-pill">
-      <strong>{{ ticker }}</strong>
-      {%- if ssr_signal.signal == 'AL' %} <span style="color:#00e290">▲ Güçlü</span>
-      {%- elif ssr_signal.signal == 'SAT' %} <span style="color:#ff7875">▼ Zayıf</span>
-      {%- else %} <span style="color:#909097">● Yatay</span>{% endif -%}
-    </span>
-    {% endif %}
-    <div class="bp-segments-inner">
-      <a class="bp-seg-item active" data-segment="ozet">Özet</a>
-      <a class="bp-seg-item" data-segment="grafik">Grafik</a>
-      <a class="bp-seg-item" data-segment="ai">AI</a>
-      <a class="bp-seg-item" data-segment="haberler">Haberler</a>
-    </div>
-  </nav>
 </header>
+
+{# SPEC-STICKY-HEADER-v3 fix5: bp-segments header DIŞINDA (header'a bp-search.js !important 60px max-height zorluyor — çocuk overflow ediyordu). Sticky top:60 = header altında sabit. #}
+<nav class="bp-segments" aria-label="Hisse detay segmentleri">
+  {% if ssr_signal %}
+  <span class="bp-symbol-pill">
+    <strong>{{ ticker }}</strong>
+    {%- if ssr_signal.signal == 'AL' %} <span style="color:#00e290">▲ Güçlü</span>
+    {%- elif ssr_signal.signal == 'SAT' %} <span style="color:#ff7875">▼ Zayıf</span>
+    {%- else %} <span style="color:#909097">● Yatay</span>{% endif -%}
+  </span>
+  {% endif %}
+  <div class="bp-segments-inner">
+    <a class="bp-seg-item active" data-segment="ozet">Özet</a>
+    <a class="bp-seg-item" data-segment="grafik">Grafik</a>
+    <a class="bp-seg-item" data-segment="ai">AI</a>
+    <a class="bp-seg-item" data-segment="haberler">Haberler</a>
+  </div>
+</nav>
 
 <!-- Makro Ticker Bandı -->
 <div class="macro-bar" id="macroBar">
@@ -1457,16 +1453,16 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
        Fixed positioning: parent overflow:hidden bypass (v1 sticky bug fix). -->
   <style>
     .bp-segments {
-      /* SPEC-STICKY-HEADER-v3 fix4: margin-top:8 → padding-top:8 (margin header dışına taşıyordu, macro-bar ile overlap!).
-         Padding header'ın içinde kalır, segments header'ın görsel kutusunun parçası olur. */
-      position: static;
-      background: transparent;
-      border-bottom: none;
-      border-top: 1px solid rgba(42,42,44,0.5);
-      padding: 8px 0 0;
+      /* SPEC-STICKY-HEADER-v3 fix5: header DIŞINDA sticky (bp-search.js !important header'ı 60px max-height kilitliyor; içerde overflow ediyordu).
+         Sticky top:60 = header (60px) altında sabit kalır. Macro-bar segments'in altında normal flow. */
+      position: sticky; top: 60px; left: 0; right: 0;
+      z-index: 90;
+      background: #0e0e12;
+      border-bottom: 1px solid rgba(42,42,44,0.8);
+      padding: 6px 16px;
       margin: 0;
       display: flex; gap: 12px;
-      align-items: stretch;
+      align-items: center;
       width: 100%;
     }
     .bp-symbol-pill {
