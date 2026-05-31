@@ -2442,9 +2442,66 @@ def fetch_live_prices():
             with _lock:
                 _live_prices.update(payload)
             _push_sse({"type": "prices", "data": payload, "ts": now_str})
+        else:
+            # SPEC-DECOUPLING-v2 P1 (CPO-420 öneri): bulk yf.download boş döndü
+            # (Yahoo throttle veya piyasa kapalı). Per-ticker fallback dene.
+            _live_prices_per_ticker_fallback()
 
     except Exception as e:
         logger.error("fetch_live_prices: %s", e, exc_info=True)
+
+
+def _live_prices_per_ticker_fallback():
+    """SPEC-DECOUPLING-v2 P1: bulk yf.download fail olduğunda ticker-ticker fetch.
+    Yahoo throttle/genel hata sonrası dayanıklılık. Fetcher process bu fallback'i
+    sessizce çağırır; başarılı olan ticker'lar in-memory + disk cache'e yazılır.
+    ~215 × 0.3s = ~65s, NICE=15 + IO best-effort 7 ile worker'a etki yok."""
+    fallback_payload = {}
+    now_str = datetime.now(_TZ_TR).strftime("%H:%M:%S")
+    fallback_ok = 0
+    fallback_fail = 0
+    for t in BIST30:
+        try:
+            df1 = yf.download(t + ".IS", period="2d", interval="1m",
+                              progress=False, auto_adjust=True, timeout=5)
+            if df1 is None or df1.empty:
+                fallback_fail += 1
+                time.sleep(0.2)
+                continue
+            closes = df1["Close"].dropna() if "Close" in df1.columns else None
+            if closes is None or len(closes) < 2:
+                fallback_fail += 1
+                time.sleep(0.2)
+                continue
+            price = float(closes.iloc[-1])
+            today_date = closes.index[-1].date()
+            prev_bars = closes[closes.index.map(lambda x: x.date()) < today_date]
+            prev = float(prev_bars.iloc[-1]) if len(prev_bars) > 0 else float(closes.iloc[-2])
+            chg = ((price - prev) / prev * 100) if prev else 0
+            fallback_payload[t] = {
+                "price": round(price, 2),
+                "change_pct": round(chg, 2),
+                "updated": now_str,
+            }
+            fallback_ok += 1
+        except Exception:
+            fallback_fail += 1
+        time.sleep(0.3)
+    if fallback_payload:
+        with _lock:
+            _live_prices.update(fallback_payload)
+        # Disk write — fetcher rolünde her zaman, worker rolünde sadece leader
+        if os.getenv("BIST_ROLE") == "fetcher" or _is_bg_leader():
+            try:
+                with _lock:
+                    _atomic_write_json(_LIVE_PRICES_DISK_PATH, dict(_live_prices))
+            except Exception as _e:
+                logger.debug("live_prices fallback disk write: %s", _e)
+        logger.info("live_prices per-ticker fallback: %d ok, %d fail",
+                    fallback_ok, fallback_fail)
+    else:
+        logger.warning("live_prices per-ticker fallback: 0 ok / %d fail — Yahoo throttle veya market kapalı",
+                       fallback_fail)
 
 
 _GLOBAL_TICKERS_YF = {
