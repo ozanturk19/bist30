@@ -2518,21 +2518,16 @@ def fetch_global_prices():
 
 
 def background_global_prices():
-    while True:
-        try:
-            fetch_global_prices()
-        except Exception as e:
-            logger.error("background_global_prices hatası: %s", e, exc_info=True)
-        time.sleep(60)
+    # SPEC-DECOUPLING-v2: yfinance fetch fetcher daemon'a taşındı.
+    # Worker bu loop'u çalıştırmaz — fonksiyon kontratı için iskelet kalır (ileri uyumluluk).
+    logger.info("background_global_prices: WORKER mode — fetcher daemon'a devredildi (loop atlandı)")
+    return
 
 
 def background_live_prices():
-    while True:
-        try:
-            fetch_live_prices()
-        except Exception as e:
-            logger.error("background_live_prices hatası: %s", e, exc_info=True)
-        time.sleep(30)
+    # SPEC-DECOUPLING-v2: yfinance fetch fetcher daemon'a taşındı.
+    logger.info("background_live_prices: WORKER mode — fetcher daemon'a devredildi (loop atlandı)")
+    return
 
 
 def _purge_stale_chart_caches():
@@ -2574,40 +2569,18 @@ def _purge_stale_chart_caches():
 
 
 def background_refresh():
-    # MSG-140: Sadece leader worker yfinance ağır işi yapar (504 worker hang fix).
-    # Non-leader 3 worker hafif disk-reload — cache leader'dan tazelenir, gevent bloke olmaz.
-    if not _is_bg_leader():
-        logger.info("background_refresh: non-leader worker — hafif disk-reload modu (90s)")
-        while True:
-            try:
-                _load_cache_from_disk()
-                _load_macro_from_disk()
-            except Exception as e:
-                logger.error("background_refresh non-leader reload hatası: %s", e)
-            time.sleep(90)
-        return  # ulaşılmaz
-
-    logger.info("background_refresh: LEADER worker — yfinance refresh modu (900s)")
+    # SPEC-DECOUPLING-v2 (CPO-420/421): Worker SADECE disk-read. yfinance fetch
+    # bist30-fetcher daemon'da. Worker burada hiçbir yfinance çağırmaz → leader-overload
+    # yok, /hisse render path bloke olmaz.
+    logger.info("background_refresh: WORKER disk-read modu (60s mtime guard)")
     while True:
         try:
-            refresh_chart()
-            refresh_xu100_chart()
-            _refresh_varlik_chart("BTC",      _btc_chart_cache)
-            _refresh_varlik_chart("ALTIN",    _altin_chart_cache)
-            _refresh_varlik_chart("GUMUS",    _gumus_chart_cache)
-            _refresh_varlik_chart("ETH",      _eth_chart_cache)
-            _refresh_varlik_chart("SP500",    _sp500_chart_cache)
-            _refresh_varlik_chart("NASDAQ",   _nasdaq_chart_cache)
-            _refresh_varlik_chart("SOL",      _sol_chart_cache)
-            _refresh_varlik_chart("BNB",      _bnb_chart_cache)
-            _refresh_varlik_chart("PETROL",   _petrol_chart_cache)
-            _refresh_varlik_chart("DOGALGAZ", _dogalgaz_chart_cache)
-            refresh_data()
-            _purge_stale_chart_caches()
+            _load_cache_from_disk()       # last_cache.json
+            _load_macro_from_disk()       # last_macro.json
+            _load_all_fetcher_caches()    # 5 yeni cache (chart_xu100/macros/stocks/live_prices/fundamentals)
         except Exception as e:
-            logger.error("background_refresh döngü hatası: %s", e, exc_info=True)
-            # Thread ölmesin — 60s bekle ve devam et
-        time.sleep(900)
+            logger.error("background_refresh disk-read hatası: %s", e)
+        time.sleep(60)
 
 
 # ── Güvenlik Headerları ───────────────────────────────────────────────────────
@@ -8139,95 +8112,21 @@ def _startup():
         logger.warning("Backtest disk cache yükleme hatası: %s", e)
     # Push subscribers'ı yükle
     _load_push_subs()
-    refresh_chart()
-    # XU100 + makro varliklari sirali sekilde yukle
-    # Paralel yfinance calisi veri bozulmasina neden olur — sirali calis zorunlu
-    def _serial_chart_refresh():
-        time.sleep(1)
-        refresh_xu100_chart()
-        time.sleep(1)
-        varlik_list = [
-            ("BTC",      _btc_chart_cache),
-            ("ALTIN",    _altin_chart_cache),
-            ("GUMUS",    _gumus_chart_cache),
-            ("ETH",      _eth_chart_cache),
-            ("SP500",    _sp500_chart_cache),
-            ("NASDAQ",   _nasdaq_chart_cache),
-            ("SOL",      _sol_chart_cache),
-            ("BNB",      _bnb_chart_cache),
-            ("PETROL",   _petrol_chart_cache),
-            ("DOGALGAZ", _dogalgaz_chart_cache),
-        ]
-        for key, cache in varlik_list:
-            try:
-                _refresh_varlik_chart(key, cache)
-                time.sleep(0.5)
-            except Exception as exc:
-                logger.warning("serial_chart_refresh %s: %s", key, exc)
-    _serial_done = threading.Event()
-
-    _orig_serial = _serial_chart_refresh
-    def _serial_chart_refresh_with_event():
-        _orig_serial()
-        _serial_done.set()
-        logger.info("serial_chart_refresh tamamlandi, background_refresh baslayabilir")
-
-    def _background_refresh_after_serial():
-        # Baslatma suresince paralel yfinance cagrisi olmasin: serial bitince basla
-        _serial_done.wait(timeout=120)
-        # En çok ziyaret edilen BIST30 hisselerinin chart cache'ini ısıt
-        _warm_tickers = ["THYAO", "AKBNK", "GARAN", "ASELS", "EREGL"]
-        for _t in _warm_tickers:
-            try:
-                _compute_chart_data(_t, "2y")
-                time.sleep(0.5)
-            except Exception as _e:
-                logger.warning("prewarm chart [%s]: %s", _t, _e)
-        # Temel analiz verilerini ısıt (yfinance - hisse başına ~1s)
-        for _t in _warm_tickers[:3]:
-            try:
-                _get_fundamentals(_t)
-                time.sleep(0.3)
-            except Exception as _e:
-                logger.warning("prewarm fundamentals [%s]: %s", _t, _e)
-        background_refresh()
-
-    threading.Thread(target=_serial_chart_refresh_with_event, daemon=True).start()
-    threading.Thread(target=_background_refresh_after_serial,  daemon=True).start()
-    threading.Thread(target=background_live_prices,    daemon=True).start()
-    threading.Thread(target=background_global_prices,  daemon=True).start()
-    # Makro ticker'ları servis başlar başlamaz ilk kez çek (arka planda)
-    def _warm_macro():
-        items = _fetch_macro()
-        with _lock:
-            _macro_cache["data"] = items
-            _macro_cache["ts"]   = time.time()
-        logger.info("_warm_macro: %d sembol hazır", len(items))
-    threading.Thread(target=_warm_macro, daemon=True).start()
-    # Makro AI özetini başlangıçta ısıt (arka planda — _warm_macro bittikten sonra)
-    def _warm_macro_summary():
-        time.sleep(10)   # macro fiyatlarının gelmesini bekle
-        _do_macro_ai_refresh()
-    threading.Thread(target=_warm_macro_summary, daemon=True).start()
-    # Bilanço takvimini arka planda yükle (yfinance çağrıları — ana veri hazır olunca)
-    def _warm_earnings():
-        time.sleep(30)   # ana sinyal datasının gelmesini bekle
-        _do_earnings_refresh()
-    threading.Thread(target=_warm_earnings, daemon=True).start()
-    # Backtest'i arka planda başlat (30 dakika gecikme ile — önce ana veri yüklensin)
-    def _delayed_backtest():
-        time.sleep(1800)   # 30 dakika sonra
-        run_backtest()
-    threading.Thread(target=_delayed_backtest, daemon=True).start()
-    # Bilanco takvimi ilk yuklemesini arkaplanda hazirla (yfinance cagrilari yuzunden yavastir)
-    def _warm_earnings():
-        time.sleep(60)    # Ana veri yüklendikten 60s sonra başla
-        try:
-            get_earnings_data()
-            logger.info("_warm_earnings: bilanço takvimi ön yüklendi")
-        except Exception as e:
-            logger.warning("_warm_earnings: %s", e)
-    threading.Thread(target=_warm_earnings, daemon=True).start()
+    # SPEC-DECOUPLING-v2 (CPO-420/421): worker artık yfinance çağırmaz.
+    # fetcher daemon (bist30-fetcher.service) tüm yfinance + chart + warm + backtest işini
+    # yapar ve disk cache'lere yazar. Worker startup'ta önceki cache'leri yükler + 60s mtime
+    # check loop ile fetcher'ın yazdığı güncellemeleri okur.
+    try:
+        _load_all_fetcher_caches()
+    except Exception as _e:
+        logger.warning("startup _load_all_fetcher_caches: %s", _e)
+    # background_refresh artık disk-read sustained loop (yfinance YOK)
+    threading.Thread(target=background_refresh, daemon=True).start()
+    # NOT: refresh_chart() + _serial_chart_refresh + _background_refresh_after_serial
+    # (warm-up chart+fundamentals) + background_live_prices + background_global_prices
+    # + _warm_macro + _warm_macro_summary + _warm_earnings + _delayed_backtest thread'leri
+    # KALDIRILDI → tümü fetcher daemon'da. Worker gevent hub bloke olmaz, /hisse render
+    # path zaten cache-okur (Phase-1 leader-overload sorunu yapısal çözüldü).
 
 # SPEC-DECOUPLING-v2 (CPO-420/421): fetcher.py daemon mode'unda _startup thread'i
 # başlatma — gunicorn worker'da yfinance loop'ları başlatır, fetcher'da gereksiz.
