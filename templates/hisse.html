@@ -161,19 +161,20 @@
 
   /* ── Header (glass) ── */
   header {
-    background: rgba(14,14,18,0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(42,42,44,0.8);
-    padding: 14px 24px;
+    /* SPEC-STICKY-HEADER-v3 (CPO-381/382): TEK opak sticky blok. Saydamlık/blur kaldırıldı (bleed kaynağı), flex-wrap kaldırıldı (değişken yükseklik). */
+    background: #0e0e12;
+    border-bottom: 1px solid rgba(42,42,44,0.95);
+    padding: 12px 24px;
     display: flex;
-    align-items: center;
-    gap: 16px;
+    flex-direction: column;
+    gap: 0;
     position: sticky;
     top: 0;
-    /* SPEC-017 Faz F Option C: header z-index 100→600 (sticky-hdr seviyesi). Nav her zaman görünür, sticky-hdr scroll>120'de devreye girer */
-    z-index: 600;
-    flex-wrap: wrap;
+    z-index: 1000;
+  }
+  .bp-header-row {
+    display: flex; align-items: center; gap: 16px;
+    flex-wrap: nowrap; min-height: 44px;
   }
 
   .back-btn {
@@ -1054,7 +1055,7 @@
   .flash-down { animation: flashDown 0.6s ease; }
 
   /* ── Responsive ── */
-  /* SPEC-017 Faz D c3: overflow-x:hidden → clip — position:sticky için (bp-segments tab bar) gerekli */
+  /* SPEC-STICKY-HEADER-v3: overflow-x:clip korundu (sticky çocuk elemanlar kırılmasın) */
   body { overflow-x: clip; }
   @media (max-width: 768px) {
     header { gap: 6px; padding: 10px 14px; flex-wrap: nowrap; overflow: hidden; }
@@ -1352,6 +1353,24 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </button>
 
+  {# SPEC-STICKY-HEADER-v3 (CPO-381/382): bp-segments header İÇİNDE — tek opak sticky blok, gap=0 bleed=0 #}
+  <nav class="bp-segments" aria-label="Hisse detay segmentleri">
+    {# Kompakt sinyal pill (opsiyonel, ssr_signal varsa) — scroll'da kalıcı görünür #}
+    {% if ssr_signal %}
+    <span class="bp-symbol-pill">
+      <strong>{{ ticker }}</strong>
+      {%- if ssr_signal.signal == 'AL' %} <span style="color:#00e290">▲ Güçlü</span>
+      {%- elif ssr_signal.signal == 'SAT' %} <span style="color:#ff7875">▼ Zayıf</span>
+      {%- else %} <span style="color:#909097">● Yatay</span>{% endif -%}
+    </span>
+    {% endif %}
+    <div class="bp-segments-inner">
+      <a class="bp-seg-item active" data-segment="ozet">Özet</a>
+      <a class="bp-seg-item" data-segment="grafik">Grafik</a>
+      <a class="bp-seg-item" data-segment="ai">AI</a>
+      <a class="bp-seg-item" data-segment="haberler">Haberler</a>
+    </div>
+  </nav>
 </header>
 
 <!-- Makro Ticker Bandı -->
@@ -1435,21 +1454,28 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
        Fixed positioning: parent overflow:hidden bypass (v1 sticky bug fix). -->
   <style>
     .bp-segments {
-      /* SPEC-017 Faz 3 F2-B2: top: 0 → 70px (header altında inline kalır, kapatılmaz).
-         Faz E pattern korundu (position:fixed, body.bp-sticky-on top:96 shift). */
-      position: fixed; top: 70px; left: 0; right: 0; z-index: 90;
-      background: rgba(14,14,18,0.96);
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
-      border-bottom: 1px solid rgba(42,42,44,0.7);
-      padding: 8px 12px;
-      display: flex; gap: 6px;
-      justify-content: center;
-      transition: top 0.18s ease;
+      /* SPEC-STICKY-HEADER-v3: position fixed → static (header İÇİNDE, header sticky=tek blok).
+         Hardcode top:70 → kaldırıldı (gap matematiği yok). Opak bg (header bg yeterli). */
+      position: static;
+      background: transparent;
+      border-bottom: none;
+      border-top: 1px solid rgba(42,42,44,0.5);
+      padding: 0;
+      display: flex; gap: 12px;
+      align-items: stretch;
+      margin-top: 8px;
+      width: 100%;
     }
-    /* Mobile <768px: header daha kompakt, segments üst farkı azalır */
-    @media (max-width: 768px) {
-      .bp-segments { top: 60px; }
+    .bp-symbol-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
+      font-size: 12px; font-weight: 700;
+      color: #e5e1e4; background: rgba(255,255,255,0.04);
+      border-radius: 6px; white-space: nowrap;
+      letter-spacing: 0.3px; flex-shrink: 0;
+    }
+    @media (max-width: 480px) {
+      .bp-symbol-pill { font-size: 11px; padding: 5px 8px; gap: 4px; }
     }
     /* SPEC-017 batch v2 B6 (CPO-378): yüzen pill → TAM GENİŞLİK underline tab bar (TradingView pattern) */
     .bp-segments-inner {
@@ -1502,15 +1528,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     .bp-fab-up:active { transform: scale(0.92); }
     .bp-fab-up svg { width: 22px; height: 22px; stroke-width: 2.4; }
   </style>
-  <nav class="bp-segments" aria-label="Hisse detay segmentleri">
-    <div class="bp-segments-inner">
-      <a class="bp-seg-item active" data-segment="ozet">Özet</a>
-      <a class="bp-seg-item" data-segment="grafik">Grafik</a>
-      <a class="bp-seg-item" data-segment="ai">AI</a>
-      <a class="bp-seg-item" data-segment="haberler">Haberler</a>
-    </div>
-  </nav>
-  <div class="bp-segments-spacer"></div>
+  {# SPEC-STICKY-HEADER-v3: bp-segments artık <header> İÇİNDE (tek sticky blok). Spacer da gerek yok (sticky header normal flow'da). #}
 
   {# SPEC-017 v2 — Sinyal Hero Card (28 May 2026 gece) #}
   {% if ssr_signal %}
