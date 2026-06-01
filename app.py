@@ -4054,13 +4054,9 @@ def get_ai_signal_explanation(ticker, signal_data):
             if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
                 return cached.get("text")
 
-    # SPEC-020 Faz 1 — Non-leader: cache miss + leader değil → Gemini ÇAĞIRMA
-    # Sadece leader workers gerçek Gemini call yapar → gevent hub donmaz.
-    # Bu, INCIDENT-8 (10 ticker × 4 worker burst) tetik katalizörünü kaldırır.
-    # Non-leader cache miss'inde kısa placeholder dön — leader 60s içinde doldurur,
-    # frontend retry/refresh ile gerçek metni alır.
-    if not _is_gemini_leader():
-        return "Sinyal açıklaması hazırlanıyor… (sayfa otomatik yenilenecek)"
+    # SPEC-AI-EXPLANATION-FIX (CPO-428): Indikatör extraction'ı non-leader check'ten
+    # YUKARI taşı — non-leader path'i de kural-tabanlı commentary üretmek için ihtiyaç.
+    # Graceful fallback: AI tab ASLA boş/takılı kalmasın, Gemini gelince üzerine yazar.
 
     name     = STOCK_NAMES.get(ticker, ticker)
     sig_lbl  = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend", "BEKLE": "Belirsiz"}.get(sig, sig)
@@ -4117,8 +4113,15 @@ def get_ai_signal_explanation(ticker, signal_data):
     sl       = signal_data.get("sl_level")
     bars     = signal_data.get("signal_bars", 1) or 1
 
-    # ── Algoritmik temel metin (her zaman doğru) ─────────────────────────────
+    # ── Algoritmik temel metin (her zaman doğru, AI'dan bağımsız) ────────────
     commentary = _generate_commentary(ticker, sig, bars, None, adx, di_plus, di_minus, e12, e99, st_bull)
+
+    # SPEC-AI-EXPLANATION-FIX (CPO-428): Non-leader path → kural-tabanlı commentary DÖN.
+    # ÖNCEKİ DAVRANIŞ: "Sinyal açıklaması hazırlanıyor…" placeholder (~%50 hissede kalıcı).
+    # YENİ DAVRANIŞ: AI tab ASLA boş/takılı kalmaz; Gemini cache gelince üzerine yazar.
+    # Glass-box + K8 data-trust prensibi.
+    if not _is_gemini_leader():
+        return commentary + " Yatırım tavsiyesi değildir."
 
     # AI yoksa direkt algoritmik metni döndür
     if not GEMINI_API_KEY:
