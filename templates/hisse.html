@@ -3313,16 +3313,13 @@ function _showChartStatus(msg, withRetryBtn) {
 
 async function loadChart(retry) {
   retry = retry || 0;
+  // CPO-434 chart-fix: /api/hisse/X/chart ve /api/data DECOUPLE — Promise.all KALDIRILDI.
+  // /api/data churn'de timeout olsa bile chart kendi healthy endpoint'inden render olur.
+  // Önce chart fetch + render, sonra /api/data ayrı non-blocking (fail-silent).
   try {
-    /* Chart endpoint + global data aynı anda isteniyor */
-    const [res, res2] = await Promise.all([
-      fetch('/api/hisse/' + TICKER + '/chart'),
-      fetch('/api/data'),
-    ]);
-    const json  = await res.json();
-    const data2 = await res2.json();
-
-    renderFreshness(data2.data_freshness);  /* SPEC-014 B2/B3 */
+    /* 1) Chart endpoint — kritik path, hemen render */
+    const res = await fetch('/api/hisse/' + TICKER + '/chart');
+    const json = await res.json();
 
     if (json.integrity_error) {
       console.warn('[chart] integrity_error:', json.integrity_error);
@@ -3337,51 +3334,65 @@ async function loadChart(retry) {
       return;
     }
 
+    /* Chart hemen render — /api/data'ya BAĞLI DEĞİL */
     buildChart(json.chart);
     renderHistory(json.chart.signal_history, json.chart.summary?.price);
     renderCommentary(json.chart.commentary);
+    renderSummary(json.chart.summary, null);  /* sd=null, /api/data sonra enrich edecek */
 
-    /* Özet için /api/data'dan signal_bars/date bilgisi */
-    const sd = (data2.stocks || []).find(s => s.ticker === TICKER);
-    renderSummary(json.chart.summary, sd);
-
-    /* Paylaşım verilerini doldur ve bölümü göster */
+    /* Paylaşım verilerini doldur ve bölümü göster (chart summary yeterli) */
     const sum = json.chart.summary;
     if (sum) {
       _shareData = {
         signal: sum.signal || '',
         price:  sum.price  ? (+sum.price).toLocaleString('tr-TR', {minimumFractionDigits:2}) : '',
         sl:     sum.sl_level ? (+sum.sl_level).toLocaleString('tr-TR', {minimumFractionDigits:2}) : '',
-        entry:  sd && sd.signal_price ? (+sd.signal_price).toLocaleString('tr-TR', {minimumFractionDigits:2}) : '',
+        entry:  '',  /* /api/data fetch başarısında doldurulur */
       };
       const shareSec = document.getElementById('shareSection');
       if (shareSec) shareSec.style.display = 'flex';
     }
 
-    /* Diğer hisselerin sinyallerini + fiyatları kartlara yaz */
-    if (data2.stocks) {
-      data2.stocks.forEach(s => {
-        const sigEl = document.getElementById('chip-sig-' + s.ticker);
-        if (sigEl) {
-          const icon = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
-          const cls  = s.signal === 'AL' ? 'chip-al' : s.signal === 'SAT' ? 'chip-sat' : 'chip-bekle';
-          sigEl.textContent = icon;
-          sigEl.className   = 'chip-sig ' + cls;
+    /* 2) /api/data ayrı non-blocking fetch — fail/timeout → sessiz (chart zaten render) */
+    fetch('/api/data').then(r => r.json()).then(data2 => {
+      renderFreshness(data2.data_freshness);  /* SPEC-014 B2/B3 */
+
+      /* Summary enrichment — signal_bars/date /api/data'dan */
+      const sd = (data2.stocks || []).find(s => s.ticker === TICKER);
+      if (sd) {
+        renderSummary(json.chart.summary, sd);  /* re-render with sd */
+        /* _shareData.entry güncellemesi */
+        if (sd.signal_price && _shareData) {
+          _shareData.entry = (+sd.signal_price).toLocaleString('tr-TR', {minimumFractionDigits:2});
         }
-        // Fiyat
-        const priceEl = document.getElementById('oc-price-' + s.ticker);
-        if (priceEl && s.price) {
-          priceEl.textContent = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-        // Değişim %
-        const chgEl = document.getElementById('oc-chg-' + s.ticker);
-        if (chgEl && s.change_pct != null) {
-          const sign = s.change_pct > 0 ? '+' : '';
-          chgEl.textContent = sign + s.change_pct.toFixed(2) + '%';
-          chgEl.className = 'oc-chg ' + (s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu');
-        }
-      });
-    }
+      }
+
+      /* Diğer hisselerin sinyallerini + fiyatları kartlara yaz */
+      if (data2.stocks) {
+        data2.stocks.forEach(s => {
+          const sigEl = document.getElementById('chip-sig-' + s.ticker);
+          if (sigEl) {
+            const icon = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
+            const cls  = s.signal === 'AL' ? 'chip-al' : s.signal === 'SAT' ? 'chip-sat' : 'chip-bekle';
+            sigEl.textContent = icon;
+            sigEl.className   = 'chip-sig ' + cls;
+          }
+          const priceEl = document.getElementById('oc-price-' + s.ticker);
+          if (priceEl && s.price) {
+            priceEl.textContent = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          }
+          const chgEl = document.getElementById('oc-chg-' + s.ticker);
+          if (chgEl && s.change_pct != null) {
+            const sign = s.change_pct > 0 ? '+' : '';
+            chgEl.textContent = sign + s.change_pct.toFixed(2) + '%';
+            chgEl.className = 'oc-chg ' + (s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu');
+          }
+        });
+      }
+    }).catch(err => {
+      /* /api/data fail → chart yine görünür, sadece enrichment yok. Sessiz fail. */
+      console.warn('[chart] /api/data enrichment fail (chart already rendered):', err);
+    });
   } catch (e) {
     if (retry < _MAX_CHART_RETRY) {
       _showChartStatus('Grafik verisi yenileniyor, lütfen bekleyin…', false);
