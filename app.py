@@ -5974,21 +5974,15 @@ def api_stock_chart(ticker):
         data = cached["data"]
         upd  = cached["updated_at"]
     else:
-        # SPEC-DECOUPLING-v2-PHASE3 (CPO-437): ÖNCE per-ticker disk cache dene.
-        # Fetcher daemon (bist30-fetcher.service) data-staging/charts/chart_<T>.json yazar.
-        # Worker yfinance ÇAĞIRMAZ → gevent hub bloke olmaz → /hisse render path temiz.
+        # SPEC-DECOUPLING-v2-PHASE3 M3 (CPO-449): Worker SADECE per-ticker disk cache okur.
+        # _compute_chart_data ÇAĞRILMAZ — ASLA senkron fetch, ASLA blok (gevent hub temiz).
+        # Cache miss → stale veri yok → loading:true döner (frontend skeleton).
         data, upd = _load_chart_from_disk_per_ticker(ticker)
-        if not data:
-            # Disk cache miss → mevcut lazy fallback (Phase-3 staging hibrit mod, prod read-only sonra).
-            data = _compute_chart_data(ticker, period="2y")
-            upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
-            if data:
-                with _lock:
-                    _stock_chart_cache[ticker] = {"data": data, "ts": now,
-                                                  "updated_at": upd, "v": _CHART_CACHE_VERSION}
+        # Cache miss durumunda fetch YOK — fetcher daemon arkada cache'i doldurur,
+        # frontend retry/refresh ile alacak. Worker render path TAMAMEN BLOK-FREE.
 
     if not data:
-        return safe_json({"chart": None, "loading": True})
+        return safe_json({"chart": None, "loading": True, "reason": "cache_miss_read_only_mode"})
 
     # ── SPEC-008 L1: Chart Integrity Guard ───────────────────────────────────
     # FINAL doğrulama — bozuk chart ASLA render edilmez. Sapma varsa cache iptal
