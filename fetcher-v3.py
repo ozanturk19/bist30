@@ -38,8 +38,9 @@ os.environ["BIST_ROLE"] = "fetcher"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
 
-# Staging cache dizinleri
-CACHE_DIR = os.path.join(BASE_DIR, "data-staging")
+# Cache dizinleri — ENV-aware (app.py _PHASE3_CHART_DIR ile uyumlu)
+# BIST_STAGING=1 → data-staging/, prod → data/
+CACHE_DIR = os.path.join(BASE_DIR, "data-staging" if os.getenv("BIST_STAGING") == "1" else "data")
 CHARTS_DIR = os.path.join(CACHE_DIR, "charts")
 os.makedirs(CHARTS_DIR, exist_ok=True)
 
