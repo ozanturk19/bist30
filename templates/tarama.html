@@ -618,9 +618,9 @@
           <th>Hisse</th>
           <th>Sinyal</th>
           <th onclick="sortBy('adx')" id="th-adx" data-tooltip="ADX 25+ Güçlü, 18-25 Orta, <18 Zayıf">Trend Gücü</th>
-          <th class="hide-mob-narrow">Giriş Kalitesi</th>
-          <th onclick="sortBy('price')" id="th-price">Fiyat</th>
-          <th onclick="sortBy('change_pct')" id="th-chg">Değişim</th>
+          <th>Giriş Kalitesi</th>
+          <th class="hide-mob-narrow" onclick="sortBy('price')" id="th-price">Fiyat</th>
+          <th class="hide-mob-narrow" onclick="sortBy('change_pct')" id="th-chg">Değişim</th>
           <th class="hide-mob" onclick="sortBy('vol_ratio')" id="th-vol" data-tooltip="Bugünkü hacim / 20-gün ortalama">RVOL×</th>
           <th class="hide-mob" onclick="sortBy('signal_bars')" id="th-bars" data-tooltip="Sinyal kaç gün önce oluştu">Tazelik</th>
           <th class="hide-mob hide-tablet">Sektör</th>
@@ -1009,9 +1009,9 @@ function renderResults(rows, count) {
         ${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}
       </span></td>
       <td>${trendCell(s.adx)}</td>
-      <td class="hide-mob-narrow">${eqHtml}</td>
-      <td class="price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})}</td>
-      <td class="${chgCls}">${chgSign}${(s.change_pct||0).toFixed(2)}%</td>
+      <td>${eqHtml}</td>
+      <td class="hide-mob-narrow price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})}</td>
+      <td class="hide-mob-narrow ${chgCls}">${chgSign}${(s.change_pct||0).toFixed(2)}%</td>
       <td class="hide-mob">${rvolCell(s.vol_ratio)}</td>
       <td class="hide-mob">${freshCell(s.signal_bars)}</td>
       <td class="hide-mob hide-tablet"><span class="sector-tag">${s.sector||'—'}</span></td>
