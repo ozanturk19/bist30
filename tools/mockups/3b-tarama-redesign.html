@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarama Kolon Redesign — UX-2 Task #23 Mockup</title>
+<style>
+  :root {
+    --bg-primary: #0d1117;
+    --bg-card: #141416;
+    --bg-hover: #1c2128;
+    --border: #2a2a2c;
+    --border-strong: #30363d;
+    --text1: #e6edf3;
+    --text2: #b1b6bf;
+    --text3: #6e7681;
+    --signal-bull: #3fb950;
+    --signal-bear: #f85149;
+    --signal-neutral: #8b949e;
+    --accent: #1f6feb;
+    --accent-soft: rgba(31, 111, 235, 0.14);
+    --warning: #d29922;
+    --quality-ideal: #00e290;
+    --quality-good: #58a6ff;
+    --quality-mid: #d29922;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg-primary);
+    color: var(--text1);
+    font-family: 'Manrope', 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 24px;
+  }
+  .mockup-header {
+    max-width: 1400px;
+    margin: 0 auto 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mockup-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .mockup-sub {
+    font-size: 12px;
+    color: var(--text3);
+  }
+  .mockup-legend {
+    margin: 12px 0 18px;
+    padding: 12px 14px;
+    background: rgba(31,111,235,0.06);
+    border: 1px solid rgba(31,111,235,0.2);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text2);
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .mockup-legend b { color: var(--text1); }
+  .mockup-legend code {
+    background: rgba(255,255,255,0.05);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+  }
+
+  /* === Tablo === */
+  .tarama-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+  }
+  thead th {
+    background: rgba(255,255,255,0.025);
+    color: var(--text2);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  thead th .sort-arrow {
+    color: var(--text3);
+    margin-left: 4px;
+    font-size: 10px;
+  }
+  tbody td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  tbody tr {
+    transition: background 0.15s ease;
+  }
+  tbody tr:hover {
+    background: var(--bg-hover);
+  }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* === Kolon: Hisse === */
+  .col-ticker {
+    font-weight: 700;
+    color: var(--text1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ticker-chip {
+    font-size: 11px;
+    padding: 2px 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    color: var(--text2);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* === Kolon: Sinyal === */
+  .signal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .signal-badge.bull {
+    background: rgba(63,185,80,0.12);
+    color: var(--signal-bull);
+    border: 1px solid rgba(63,185,80,0.3);
+  }
+  .signal-badge.bear {
+    background: rgba(248,81,73,0.12);
+    color: var(--signal-bear);
+    border: 1px solid rgba(248,81,73,0.3);
+  }
+  .signal-badge.neutral {
+    background: rgba(139,148,158,0.10);
+    color: var(--signal-neutral);
+    border: 1px solid rgba(139,148,158,0.25);
+  }
+
+  /* === Kolon: Trend Gücü (eski ADX) === */
+  .trend-strength {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 90px;
+  }
+  .trend-bar {
+    flex: 0 0 50px;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .trend-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  .trend-bar-fill.strong { background: linear-gradient(90deg, var(--signal-bull), var(--accent)); }
+  .trend-bar-fill.medium { background: var(--accent); }
+  .trend-bar-fill.weak { background: var(--text3); }
+  .trend-label {
+    font-size: 11px;
+    color: var(--text2);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .trend-label.strong { color: var(--signal-bull); }
+  .trend-label.medium { color: var(--text1); }
+  .trend-label.weak { color: var(--text3); }
+
+  /* === Kolon: Giriş Kalitesi === */
+  .quality-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .quality-badge.ideal {
+    background: rgba(0,226,144,0.12);
+    color: var(--quality-ideal);
+    border: 1px solid rgba(0,226,144,0.3);
+  }
+  .quality-badge.good {
+    background: rgba(88,166,255,0.12);
+    color: var(--quality-good);
+    border: 1px solid rgba(88,166,255,0.3);
+  }
+  .quality-badge.mid {
+    background: rgba(210,153,34,0.10);
+    color: var(--quality-mid);
+    border: 1px solid rgba(210,153,34,0.30);
+  }
+
+  /* === Kolon: Fiyat === */
+  .col-price {
+    font-family: 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text1);
+  }
+  .col-change {
+    font-family: 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .col-change.up { color: var(--signal-bull); }
+  .col-change.down { color: var(--signal-bear); }
+
+  /* === Kolon: RVOL × === */
+  .rvol-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .rvol-cell.high { color: var(--signal-bull); }
+  .rvol-cell.normal { color: var(--text1); }
+  .rvol-cell.low { color: var(--text3); }
+  .rvol-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .rvol-dot.high { background: var(--signal-bull); }
+  .rvol-dot.normal { background: var(--accent); }
+  .rvol-dot.low { background: var(--text3); }
+
+  /* === Kolon: Sinyal Tazeliği === */
+  .freshness {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .freshness.today {
+    background: rgba(0,226,144,0.10);
+    color: var(--quality-ideal);
+  }
+  .freshness.yesterday {
+    background: rgba(88,166,255,0.10);
+    color: var(--quality-good);
+  }
+  .freshness.old {
+    background: rgba(139,148,158,0.10);
+    color: var(--text3);
+  }
+  .freshness-dot {
+    font-size: 8px;
+  }
+
+  /* === Kolon: Hedef/Risk R/R === */
+  .rr-cell {
+    font-family: 'JetBrains Mono', 'Menlo', monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .rr-cell.excellent { color: var(--signal-bull); }
+  .rr-cell.good { color: var(--quality-good); }
+  .rr-cell.mid { color: var(--text2); }
+  .rr-suffix {
+    font-size: 10px;
+    color: var(--text3);
+    font-weight: 500;
+    margin-left: 2px;
+  }
+
+  /* === Kolon: Sektör === */
+  .col-sektor {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* === Tooltip === */
+  [data-tooltip] {
+    position: relative;
+    cursor: help;
+  }
+  [data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    background: #1c2128;
+    color: var(--text1);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  [data-tooltip]:hover::after { opacity: 1; }
+
+  /* === Responsive: Tablet ≤768 === */
+  @media (max-width: 768px) {
+    .hide-tablet { display: none !important; }
+    tbody td { padding: 10px 8px; font-size: 12.5px; }
+    thead th { padding: 8px; font-size: 10.5px; }
+    .trend-bar { flex: 0 0 36px; }
+    body { padding: 12px; }
+  }
+  /* === Responsive: Mobile ≤480 === */
+  @media (max-width: 480px) {
+    .hide-mob { display: none !important; }
+    tbody td { padding: 8px 6px; font-size: 12px; }
+    thead th { padding: 6px; font-size: 10px; letter-spacing: 0.2px; }
+    .col-ticker { font-size: 12.5px; gap: 4px; }
+    .ticker-chip { font-size: 10px; padding: 1px 4px; }
+    .signal-badge, .quality-badge { font-size: 10px; padding: 2px 6px; }
+    .col-price, .col-change { font-size: 12px; }
+    .trend-bar { flex: 0 0 28px; }
+    .trend-label { font-size: 10px; }
+    body { padding: 8px; }
+    .mockup-header { padding-bottom: 8px; margin-bottom: 8px; }
+    .mockup-title { font-size: 15px; }
+  }
+
+  /* === Skeleton (yükleme durumu, gösterim) === */
+  .skeleton-row td > div {
+    background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-hover) 50%, var(--bg-card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    height: 14px;
+    border-radius: 3px;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* === Mockup variant switcher === */
+  .variant-switch {
+    max-width: 1400px;
+    margin: 16px auto;
+    padding: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .variant-switch a {
+    display: inline-block;
+    padding: 4px 10px;
+    margin: 0 4px;
+    background: rgba(31,111,235,0.10);
+    color: var(--accent);
+    text-decoration: none;
+    border-radius: 4px;
+    border: 1px solid rgba(31,111,235,0.25);
+  }
+  .variant-switch a:hover { background: rgba(31,111,235,0.18); }
+</style>
+</head>
+<body>
+
+<div class="mockup-header">
+  <h1 class="mockup-title">📊 Tarama Kolon Redesign — Mockup (UX-2 Task #23 / CPO-463/472)</h1>
+  <p class="mockup-sub">Standalone HTML mockup · ADX→Trend Gücü, Giriş Kalitesi öne, RVOL×, Tazelik, R/R · Mobil kolon önceliği</p>
+</div>
+
+<div class="mockup-legend">
+  <b>📐 Yeni Kolon Sırası:</b>
+  <code>Hisse</code> · <code>Sinyal</code> · <code>Trend Gücü</code> (ADX→etiket+bar) · <code>Giriş Kalitesi</code> (IDEAL/İYİ/ORTA) · <code>Fiyat</code> · <code>Değişim</code> · <code>RVOL×</code> · <code>Tazelik</code> · <code>R/R</code> · <code>Sektör</code><br>
+  <b>📱 Mobil görünüm (≤480px):</b> ilk 6 kolon görünür (Hisse, Sinyal, Trend Gücü, Giriş Kalitesi, Fiyat, Değişim)<br>
+  <b>💡 Tooltip:</b> Tabloda <code>?</code> imleciyle hover yapın (ADX değeri, RVOL açıklama, R/R hesap)
+</div>
+
+<div class="tarama-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Hisse</th>
+        <th>Sinyal</th>
+        <th data-tooltip="Trend gücü göstergesi (ADX 25+ güçlü)">Trend Gücü <span class="sort-arrow">⇅</span></th>
+        <th data-tooltip="Sinyal başlangıç anındaki teknik koşulların kalitesi">Giriş Kalitesi <span class="sort-arrow">⇅</span></th>
+        <th>Fiyat</th>
+        <th>Değişim <span class="sort-arrow">⇅</span></th>
+        <th class="hide-mob" data-tooltip="Bugünkü hacim / 20-gün ortalama hacim oranı">RVOL× <span class="sort-arrow">⇅</span></th>
+        <th class="hide-mob" data-tooltip="Sinyal kaç gün önce oluştu">Tazelik <span class="sort-arrow">⇅</span></th>
+        <th class="hide-mob" data-tooltip="Hedef/Risk oranı (Take Profit ÷ Stop Loss)">R/R <span class="sort-arrow">⇅</span></th>
+        <th class="hide-mob hide-tablet">Sektör</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- Row 1: AKBNK - Güçlü Trend IDEAL -->
+      <tr>
+        <td>
+          <div class="col-ticker">
+            AKBNK
+            <span class="ticker-chip">BIST30</span>
+          </div>
+        </td>
+        <td><span class="signal-badge bull">▲ Güçlü Trend</span></td>
+        <td>
+          <div class="trend-strength" data-tooltip="ADX 38 — güçlü trend">
+            <span class="trend-label strong">Güçlü</span>
+            <div class="trend-bar"><div class="trend-bar-fill strong" style="width:76%"></div></div>
+          </div>
+        </td>
+        <td><span class="quality-badge ideal">İdeal</span></td>
+        <td class="col-price">83.55 ₺</td>
+        <td class="col-change up">+2.13%</td>
+        <td class="hide-mob"><div class="rvol-cell high"><span class="rvol-dot high"></span>2.4×</div></td>
+        <td class="hide-mob"><span class="freshness today"><span class="freshness-dot">●</span>Bugün</span></td>
+        <td class="hide-mob"><span class="rr-cell excellent">2.8<span class="rr-suffix">R</span></span></td>
+        <td class="hide-mob hide-tablet col-sektor">Bankacılık</td>
+      </tr>
+
+      <!-- Row 2: THYAO - Zayıf Trend -->
+      <tr>
+        <td>
+          <div class="col-ticker">
+            THYAO
+            <span class="ticker-chip">BIST30</span>
+          </div>
+        </td>
+        <td><span class="signal-badge bear">▼ Zayıf</span></td>
+        <td>
+          <div class="trend-strength" data-tooltip="ADX 31 — güçlü ama satış yönlü">
+            <span class="trend-label strong">Güçlü</span>
+            <div class="trend-bar"><div class="trend-bar-fill strong" style="width:62%"></div></div>
+          </div>
+        </td>
+        <td><span class="quality-badge ideal">İdeal</span></td>
+        <td class="col-price">300.00 ₺</td>
+        <td class="col-change down">-2.92%</td>
+        <td class="hide-mob"><div class="rvol-cell normal"><span class="rvol-dot normal"></span>1.14×</div></td>
+        <td class="hide-mob"><span class="freshness today"><span class="freshness-dot">●</span>Bugün</span></td>
+        <td class="hide-mob"><span class="rr-cell good">2.0<span class="rr-suffix">R</span></span></td>
+        <td class="hide-mob hide-tablet col-sektor">Ulaşım</td>
+      </tr>
+
+      <!-- Row 3: GARAN - Güçlü Trend İYİ -->
+      <tr>
+        <td>
+          <div class="col-ticker">
+            GARAN
+            <span class="ticker-chip">BIST30</span>
+          </div>
+        </td>
+        <td><span class="signal-badge bull">▲ Güçlü Trend</span></td>
+        <td>
+          <div class="trend-strength" data-tooltip="ADX 28 — orta-güçlü">
+            <span class="trend-label medium">Orta</span>
+            <div class="trend-bar"><div class="trend-bar-fill medium" style="width:56%"></div></div>
+          </div>
+        </td>
+        <td><span class="quality-badge good">İyi</span></td>
+        <td class="col-price">115.40 ₺</td>
+        <td class="col-change up">+1.08%</td>
+        <td class="hide-mob"><div class="rvol-cell high"><span class="rvol-dot high"></span>1.8×</div></td>
+        <td class="hide-mob"><span class="freshness yesterday"><span class="freshness-dot">●</span>Dün</span></td>
+        <td class="hide-mob"><span class="rr-cell excellent">3.1<span class="rr-suffix">R</span></span></td>
+        <td class="hide-mob hide-tablet col-sektor">Bankacılık</td>
+      </tr>
+
+      <!-- Row 4: ASELS - Yatay -->
+      <tr>
+        <td>
+          <div class="col-ticker">
+            ASELS
+            <span class="ticker-chip">BIST30</span>
+          </div>
+        </td>
+        <td><span class="signal-badge neutral">● Yatay</span></td>
+        <td>
+          <div class="trend-strength" data-tooltip="ADX 18 — trend zayıf">
+            <span class="trend-label weak">Zayıf</span>
+            <div class="trend-bar"><div class="trend-bar-fill weak" style="width:36%"></div></div>
+          </div>
+        </td>
+        <td><span class="quality-badge mid">Orta</span></td>
+        <td class="col-price">61.85 ₺</td>
+        <td class="col-change down">-0.16%</td>
+        <td class="hide-mob"><div class="rvol-cell normal"><span class="rvol-dot normal"></span>0.92×</div></td>
+        <td class="hide-mob"><span class="freshness old"><span class="freshness-dot">●</span>3 gün</span></td>
+        <td class="hide-mob"><span class="rr-cell mid">1.5<span class="rr-suffix">R</span></span></td>
+        <td class="hide-mob hide-tablet col-sektor">Savunma</td>
+      </tr>
+
+      <!-- Row 5: EREGL - Güçlü Trend İYİ -->
+      <tr>
+        <td>
+          <div class="col-ticker">
+            EREGL
+            <span class="ticker-chip">BIST30</span>
+          </div>
+        </td>
+        <td><span class="signal-badge bull">▲ Güçlü Trend</span></td>
+        <td>
+          <div class="trend-strength" data-tooltip="ADX 33 — güçlü trend">
+            <span class="trend-label strong">Güçlü</span>
+            <div class="trend-bar"><div class="trend-bar-fill strong" style="width:66%"></div></div>
+          </div>
+        </td>
+        <td><span class="quality-badge good">İyi</span></td>
+        <td class="col-price">42.30 ₺</td>
+        <td class="col-change up">+3.42%</td>
+        <td class="hide-mob"><div class="rvol-cell high"><span class="rvol-dot high"></span>3.1×</div></td>
+        <td class="hide-mob"><span class="freshness today"><span class="freshness-dot">●</span>Bugün</span></td>
+        <td class="hide-mob"><span class="rr-cell excellent">2.5<span class="rr-suffix">R</span></span></td>
+        <td class="hide-mob hide-tablet col-sektor">Demir/Çelik</td>
+      </tr>
+
+      <!-- Row 6: TUPRS - Zayıf İYİ -->
+      <tr>
+        <td>
+          <div class="col-ticker">
+            TUPRS
+            <span class="ticker-chip">BIST30</span>
+          </div>
+        </td>
+        <td><span class="signal-badge bear">▼ Zayıf</span></td>
+        <td>
+          <div class="trend-strength" data-tooltip="ADX 22 — orta">
+            <span class="trend-label medium">Orta</span>
+            <div class="trend-bar"><div class="trend-bar-fill medium" style="width:44%"></div></div>
+          </div>
+        </td>
+        <td><span class="quality-badge good">İyi</span></td>
+        <td class="col-price">152.60 ₺</td>
+        <td class="col-change down">-1.27%</td>
+        <td class="hide-mob"><div class="rvol-cell normal"><span class="rvol-dot normal"></span>1.32×</div></td>
+        <td class="hide-mob"><span class="freshness yesterday"><span class="freshness-dot">●</span>Dün</span></td>
+        <td class="hide-mob"><span class="rr-cell good">1.9<span class="rr-suffix">R</span></span></td>
+        <td class="hide-mob hide-tablet col-sektor">Enerji</td>
+      </tr>
+
+      <!-- Row 7: SISE - Güçlü Trend İdeal hot RVOL -->
+      <tr>
+        <td>
+          <div class="col-ticker">
+            SISE
+            <span class="ticker-chip">BIST30</span>
+          </div>
+        </td>
+        <td><span class="signal-badge bull">▲ Güçlü Trend</span></td>
+        <td>
+          <div class="trend-strength" data-tooltip="ADX 45 — çok güçlü trend">
+            <span class="trend-label strong">Güçlü</span>
+            <div class="trend-bar"><div class="trend-bar-fill strong" style="width:90%"></div></div>
+          </div>
+        </td>
+        <td><span class="quality-badge ideal">İdeal</span></td>
+        <td class="col-price">36.80 ₺</td>
+        <td class="col-change up">+4.55%</td>
+        <td class="hide-mob"><div class="rvol-cell high"><span class="rvol-dot high"></span>4.2×</div></td>
+        <td class="hide-mob"><span class="freshness today"><span class="freshness-dot">●</span>Bugün</span></td>
+        <td class="hide-mob"><span class="rr-cell excellent">3.4<span class="rr-suffix">R</span></span></td>
+        <td class="hide-mob hide-tablet col-sektor">Cam</td>
+      </tr>
+
+      <!-- Row 8: ALFAS - Yatay (skeleton-row için son) -->
+      <tr>
+        <td>
+          <div class="col-ticker">
+            ALFAS
+            <span class="ticker-chip">BIST50</span>
+          </div>
+        </td>
+        <td><span class="signal-badge neutral">● Yatay</span></td>
+        <td>
+          <div class="trend-strength" data-tooltip="ADX 15 — trend yok">
+            <span class="trend-label weak">Zayıf</span>
+            <div class="trend-bar"><div class="trend-bar-fill weak" style="width:28%"></div></div>
+          </div>
+        </td>
+        <td><span class="quality-badge mid">Orta</span></td>
+        <td class="col-price">18.92 ₺</td>
+        <td class="col-change up">+0.32%</td>
+        <td class="hide-mob"><div class="rvol-cell low"><span class="rvol-dot low"></span>0.6×</div></td>
+        <td class="hide-mob"><span class="freshness old"><span class="freshness-dot">●</span>3 gün</span></td>
+        <td class="hide-mob"><span class="rr-cell mid">1.2<span class="rr-suffix">R</span></span></td>
+        <td class="hide-mob hide-tablet col-sektor">Holding</td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<div class="variant-switch">
+  <b>Görünüm test:</b>
+  Browser pencereni 480px, 768px, 1280px genişliğe ayarlayarak responsive davranışı gör (mobile-first kolon önceliği).<br>
+  <small style="color:var(--text3)">Mobil ≤480: 6 kolon (Hisse, Sinyal, Trend Gücü, Giriş Kalitesi, Fiyat, Değişim) · Tablet 768: +RVOL+Tazelik+R/R · Desktop 1280: tüm 10 kolon</small>
+</div>
+
+<div class="mockup-legend" style="margin-top:20px">
+  <b>🎨 Tasarım notları (borsapusula-ui-engineer prensipleri):</b><br>
+  • <b>Sinyal hiyerarşisi:</b> AL/SAT badge > Trend Gücü bar > Giriş Kalitesi badge > Fiyat > Meta<br>
+  • <b>Renk semantiği:</b> Yeşil=AL/güçlü/ideal · Kırmızı=SAT/zayıf · Mavi=accent/iyi · Sarı=uyarı/orta · Gri=nötr<br>
+  • <b>Tipografi:</b> Manrope (label), JetBrains Mono (sayılar — fiyat/R/RVOL)<br>
+  • <b>Bar göstergesi:</b> Trend Gücü için 0-100% bar (ADX 25+ "Güçlü", 18-25 "Orta", &lt;18 "Zayıf")<br>
+  • <b>Tooltip:</b> Ham ADX değeri, RVOL açıklama, R/R formülü — eğitim-yatırımcı (Segment 1) için<br>
+  • <b>Tazelik renkleri:</b> Bugün=yeşil (fresh), Dün=mavi (recent), 3+gün=gri (stale)<br>
+  • <b>R/R semantiği:</b> ≥2.5R=yeşil (excellent), 2.0-2.5=mavi (good), &lt;2.0=gri (mid)
+</div>
+
+</body>
+</html>
