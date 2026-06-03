@@ -1367,7 +1367,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <div class="bp-segments-inner">
     <a class="bp-seg-item active" data-segment="ozet">Özet</a>
     <a class="bp-seg-item" data-segment="grafik">Grafik</a>
-    <a class="bp-seg-item" data-segment="ai">AI</a>
+    <a class="bp-seg-item bp-seg-item-ai" data-segment="ai">
+      <svg class="bp-seg-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true" focusable="false">
+        <path d="M12 2.5l1.4 4.1 4.1 1.4-4.1 1.4-1.4 4.1-1.4-4.1-4.1-1.4 4.1-1.4L12 2.5zm6.5 11l.95 2.55 2.55.95-2.55.95-.95 2.55-.95-2.55-2.55-.95 2.55-.95.95-2.55z"/>
+      </svg>
+      AI Analiz
+    </a>
     <a class="bp-seg-item" data-segment="haberler">Haberler</a>
   </div>
 </nav>
@@ -1476,25 +1481,28 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     @media (max-width: 480px) {
       .bp-symbol-pill { font-size: 11px; padding: 5px 8px; gap: 4px; }
     }
-    /* SPEC-017 batch v2 B6 (CPO-378): yüzen pill → TAM GENİŞLİK underline tab bar (TradingView pattern) */
+    /* SPEC-UX-BATCH-2026-06-03 Madde 1A + 2 (CPO-463/464/465):
+       segmented-control, aktif=accent-mavi (#1f6feb) pill. Sinyal renkleri (yeşil/kırmızı) NÖTR sekme barında YOK
+       — accent-mavi marka rezerve. AI tab "AI Analiz" + sparkle simge (SAFETY-CRITICAL: "AI"→"AL" karışıklık riski). */
     .bp-segments-inner {
-      display: flex; gap: 0;
-      max-width: 1400px;  /* container max-width ile uyumlu */
+      display: flex; gap: 4px;
+      max-width: 1400px;
       width: 100%;
-      background: transparent;
-      border-radius: 0;
-      padding: 0;
+      background: rgba(255,255,255,0.025);
+      border-radius: 10px;
+      padding: 4px;
     }
-    .bp-segments-spacer { height: 50px; }
+    .bp-segments-spacer { height: 52px; }
     .bp-segments-inner a {
       flex: 1; text-align: center;
-      padding: 10px 12px 12px;
-      border-radius: 0;
-      border-bottom: 2px solid transparent;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 12px;
+      border-radius: 7px;
+      border: none;
       font-family: 'Manrope', system-ui, sans-serif;
       font-size: 13px; font-weight: 600;
       color: #909097; text-decoration: none;
-      transition: color 0.15s ease, border-color 0.15s ease;
+      transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
       white-space: nowrap;
       -webkit-tap-highlight-color: transparent;
       cursor: pointer;
@@ -1502,15 +1510,25 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     }
     .bp-segments-inner a:hover {
       color: #e5e1e4;
+      background: rgba(255,255,255,0.04);
     }
     .bp-segments-inner a.active {
-      color: #00e290;
-      border-bottom-color: #00e290;
-      background: transparent;
-      box-shadow: none;
+      color: #ffffff;
+      background: #1f6feb;
+      box-shadow: 0 1px 2px rgba(31,111,235,0.35), 0 0 0 1px rgba(31,111,235,0.5) inset;
+    }
+    .bp-segments-inner a.active:hover {
+      background: #1f6feb;
+    }
+    .bp-seg-icon {
+      display: inline-block; flex-shrink: 0;
+      vertical-align: middle;
+      opacity: 0.92;
     }
     @media (max-width: 480px) {
-      .bp-segments-inner a { font-size: 12px; padding: 8px 6px 10px; letter-spacing: 0.2px; }
+      .bp-segments-inner { gap: 2px; padding: 3px; }
+      .bp-segments-inner a { font-size: 12px; padding: 8px 6px; letter-spacing: 0.2px; gap: 4px; }
+      .bp-seg-icon { width: 11px; height: 11px; }
     }
     /* FAB "Üste çık" — scroll edildiğinde sağ-alt */
     .bp-fab-up {
@@ -1797,64 +1815,75 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   {# SPEC-017 v2 c3 — Bottom Sticky CTA Bar (Watchlist 60% / Alarm 30% / Paylaş icon) #}
   <style>
+    /* SPEC-UX-BATCH-2026-06-03 Madde 1B (CPO-464/465): alt bar MİNİMAL kompakt slim.
+       Watchlist=accent-mavi birincil, Alarm=nötr ikincil (sarı tonu kaldırıldı — sinyal/uyarı renk rezerve). Touch ≥44px korunur. */
     .bp-bottom-cta {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 450;
       background: rgba(14,14,18,0.96);
       backdrop-filter: blur(20px) saturate(160%);
       -webkit-backdrop-filter: blur(20px) saturate(160%);
       border-top: 1px solid rgba(42,42,44,0.7);
-      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-      display: flex; gap: 8px;
-      /* SPEC-017 Faz D K bug fix: default translateY(0) — varsayılan görünür (önceki "translateY(100%)" + .visible class hiçbir yerde eklenmediği için CTA bar tıklanamaz görünüyordu) */
+      box-shadow: 0 -4px 18px rgba(0,0,0,0.30);
+      padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+      display: flex; gap: 6px;
       transform: translateY(0);
       transition: transform 0.3s cubic-bezier(.32,.72,0,1);
     }
     .bp-bottom-cta.hidden { transform: translateY(100%); }
     .bp-cta-watchlist {
-      flex: 6; height: 44px;
-      background: rgba(0,226,144,0.12);
-      color: #00e290;
-      border: 1px solid rgba(0,226,144,0.35);
-      border-radius: 10px; cursor: pointer;
-      font-family: 'Manrope', system-ui, sans-serif;
-      font-size: 13.5px; font-weight: 600;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      transition: background 0.15s, border-color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .bp-cta-watchlist:active { transform: scale(0.97); }
-    .bp-cta-watchlist.active {
-      background: rgba(0,226,144,0.22);
-      color: #00e290;
-    }
-    .bp-cta-alarm {
-      flex: 3; height: 44px;
-      background: rgba(245,201,73,0.10);
-      color: #f5c949;
-      border: 1px solid rgba(245,201,73,0.30);
-      border-radius: 10px; cursor: pointer;
+      flex: 6; min-height: 44px;
+      background: rgba(31,111,235,0.14);
+      color: #6ea3ff;
+      border: 1px solid rgba(31,111,235,0.42);
+      border-radius: 9px; cursor: pointer;
       font-family: 'Manrope', system-ui, sans-serif;
       font-size: 13px; font-weight: 600;
-      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
       -webkit-tap-highlight-color: transparent;
+      padding: 0 12px;
     }
+    .bp-cta-watchlist:hover { background: rgba(31,111,235,0.20); }
+    .bp-cta-watchlist:active { transform: scale(0.97); }
+    .bp-cta-watchlist.active {
+      background: rgba(31,111,235,0.28);
+      color: #ffffff;
+      border-color: rgba(31,111,235,0.7);
+    }
+    .bp-cta-alarm {
+      flex: 3; min-height: 44px;
+      background: rgba(255,255,255,0.04);
+      color: #a8acb6;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 9px; cursor: pointer;
+      font-family: 'Manrope', system-ui, sans-serif;
+      font-size: 12.5px; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      padding: 0 10px;
+    }
+    .bp-cta-alarm:hover { background: rgba(255,255,255,0.07); color: #d4d7de; }
     .bp-cta-alarm:active { transform: scale(0.95); }
     .bp-cta-share {
-      flex: 0 0 44px; height: 44px;
-      background: rgba(184,195,255,0.08);
-      color: #b8c3ff;
-      border: 1px solid rgba(184,195,255,0.25);
-      border-radius: 10px; cursor: pointer;
+      flex: 0 0 44px; min-height: 44px;
+      background: rgba(255,255,255,0.04);
+      color: #a8acb6;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 9px; cursor: pointer;
       display: inline-flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s;
       -webkit-tap-highlight-color: transparent;
     }
+    .bp-cta-share:hover { background: rgba(255,255,255,0.07); color: #d4d7de; }
     .bp-cta-share:active { transform: scale(0.95); }
-    .bp-cta-share svg { width: 18px; height: 18px; stroke-width: 2.2; }
-    /* Spacer: bottom CTA varken page content alta gizlenmez */
-    .bp-bottom-cta-spacer { height: 64px; }
+    .bp-cta-share svg { width: 17px; height: 17px; stroke-width: 2.2; }
+    /* Spacer: bottom CTA varken page content alta gizlenmez — yükseklik 64→58 (kompakt) */
+    .bp-bottom-cta-spacer { height: 58px; }
     @media (max-width: 480px) {
-      .bp-cta-watchlist { font-size: 13px; }
-      .bp-cta-alarm { font-size: 12px; }
+      .bp-bottom-cta { padding: 5px 8px calc(5px + env(safe-area-inset-bottom)); gap: 5px; }
+      .bp-cta-watchlist { font-size: 12.5px; padding: 0 8px; }
+      .bp-cta-alarm { font-size: 11.5px; padding: 0 6px; }
     }
   </style>
   <div class="bp-bottom-cta" id="bpBottomCta" role="toolbar" aria-label="Hisse aksiyonları">
@@ -2176,7 +2205,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       </button>
       <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('ai');else{var s=document.querySelector('[data-segment=ai]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
         <span class="bp-detail-cta-icon">🤖</span>
-        <span class="bp-detail-cta-text">AI <span class="bp-detail-cta-arrow">→</span></span>
+        <span class="bp-detail-cta-text">AI Analiz <span class="bp-detail-cta-arrow">→</span></span>
       </button>
       <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('haberler');else{var s=document.querySelector('[data-segment=haberler]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
         <span class="bp-detail-cta-icon">📰</span>
