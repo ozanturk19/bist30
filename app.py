@@ -3459,6 +3459,45 @@ _bnb_chart_cache     = {"data": None, "updated_at": None}
 _petrol_chart_cache  = {"data": None, "updated_at": None}
 _dogalgaz_chart_cache= {"data": None, "updated_at": None}
 _stock_chart_cache = {}          # {ticker: {"data": ..., "ts": float, "updated_at": str, "v": str}}
+
+# SPEC-DECOUPLING-v2-PHASE3 (CPO-437): Per-ticker chart cache disk path.
+# Staging: BIST_STAGING=1 ENV → data-staging/charts/, prod → data/charts/ (Phase-3 sonrası).
+_PHASE3_CHART_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "data-staging" if os.getenv("BIST_STAGING") == "1" else "data",
+    "charts"
+)
+_phase3_chart_mtimes = {}  # {ticker: mtime} — per-ticker mtime guard
+
+
+def _load_chart_from_disk_per_ticker(ticker):
+    """Phase-3: Per-ticker chart_<T>.json disk-read (lazy, mtime guard).
+
+    Returns (data, updated_at) or (None, None) if no cache.
+    """
+    path = os.path.join(_PHASE3_CHART_DIR, f"chart_{ticker}.json")
+    try:
+        if not os.path.exists(path):
+            return None, None
+        mt = os.path.getmtime(path)
+        # In-memory cache hit + mtime aynı → SKIP disk read (mtime guard)
+        cached = _stock_chart_cache.get(ticker)
+        if cached and _phase3_chart_mtimes.get(ticker) == mt:
+            return cached.get("data"), cached.get("updated_at")
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        if not data:
+            return None, None
+        upd = (data.get("summary") or {}).get("updated_at") or datetime.fromtimestamp(mt, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+        with _lock:
+            _stock_chart_cache[ticker] = {
+                "data": data, "ts": mt, "updated_at": upd, "v": _CHART_CACHE_VERSION
+            }
+            _phase3_chart_mtimes[ticker] = mt
+        return data, upd
+    except Exception as e:
+        logger.debug("_load_chart_from_disk_per_ticker %s: %s", ticker, e)
+        return None, None
 _STOCK_CACHE_TTL   = 900         # 15 dakika
 _CHART_CACHE_VERSION = "1.0"     # SPEC-008 L4a — schema bumpu temiz invalidation
                                  # için. Entry "v" alanı uyuşmuyorsa cache miss say
@@ -5935,16 +5974,15 @@ def api_stock_chart(ticker):
         data = cached["data"]
         upd  = cached["updated_at"]
     else:
-        # Cache yok, bayat, fiyat uyuşmazlığı veya version mismatch → taze hesapla
-        data = _compute_chart_data(ticker, period="2y")
-        upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
-        if data:
-            with _lock:
-                _stock_chart_cache[ticker] = {"data": data, "ts": now,
-                                              "updated_at": upd, "v": _CHART_CACHE_VERSION}
+        # SPEC-DECOUPLING-v2-PHASE3 M3 (CPO-449): Worker SADECE per-ticker disk cache okur.
+        # _compute_chart_data ÇAĞRILMAZ — ASLA senkron fetch, ASLA blok (gevent hub temiz).
+        # Cache miss → stale veri yok → loading:true döner (frontend skeleton).
+        data, upd = _load_chart_from_disk_per_ticker(ticker)
+        # Cache miss durumunda fetch YOK — fetcher daemon arkada cache'i doldurur,
+        # frontend retry/refresh ile alacak. Worker render path TAMAMEN BLOK-FREE.
 
     if not data:
-        return safe_json({"chart": None, "loading": True})
+        return safe_json({"chart": None, "loading": True, "reason": "cache_miss_read_only_mode"})
 
     # ── SPEC-008 L1: Chart Integrity Guard ───────────────────────────────────
     # FINAL doğrulama — bozuk chart ASLA render edilmez. Sapma varsa cache iptal

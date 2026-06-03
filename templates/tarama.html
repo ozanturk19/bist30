@@ -107,13 +107,27 @@
   .filter-group select:focus,
   .filter-group input[type=number]:focus,
   .filter-group input[type=text]:focus { border-color:var(--brand); }
+  /* SPEC-UX-BATCH-2026-06-03 Madde 3a (CPO-468): tarama #fSearch sol halka placeholder'a binmesin.
+     Fix: padding-left 30→36 (ikon + nefes); ikon explicit size 14 + transform vertical-center; custom focus ring (default browser glow yerine). */
   .search-group { position:relative; }
-  .search-group input { padding-left:30px; }
-  .search-group .search-icon {
-    /* Label uses ~18px on top, input height ~34px → bottom ~10px puts icon center at input center */
-    position:absolute; left:9px; bottom:10px;
-    color:var(--text3); pointer-events:none;
+  .search-group input {
+    padding-left:36px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
+  .search-group input:focus {
+    outline: none;
+    border-color: rgba(31,111,235,0.55);
+    box-shadow: 0 0 0 2px rgba(31,111,235,0.18);
+  }
+  .search-group .search-icon {
+    /* Label ~18px üstte + input height ~34px → bottom:10px ikonu input dikey ortası civarına oturtur (önceden de bu pattern'di).
+       Width=14px explicit (eski 13'ten +1), left=11px → ikon sağ kenarı 25px, padding-left 36 → 11px nefes (placeholder ile çakışmaz). */
+    position:absolute; left:11px; bottom:10px;
+    width:14px; height:14px;
+    color:var(--text3); pointer-events:none;
+    opacity: 0.85;
+  }
+  .search-group input:focus ~ .search-icon { opacity: 1; color: rgba(31,111,235,0.85); }
   .search-clear {
     position:absolute; right:8px; bottom:7px;
     background:none; border:none; color:var(--text3); cursor:pointer;
