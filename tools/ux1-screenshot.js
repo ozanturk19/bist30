@@ -19,23 +19,25 @@ const VIEWPORTS = [
   { name: '1280', width: 1280, height: 800 },   // desktop
 ];
 
-// Senaryolar — UX-1 madde-spesifik
+// Senaryolar — UX-1 madde-spesifik + CPO-469 scroll-state matrisi (0/300/700)
 const SCENES = [
-  // === Madde 1A + 2: üst sekme bar (her tab × top scroll) ===
-  { name: 'hisse-tab-ozet',      path: '/hisse/THYAO?tab=ozet',     scroll: 0 },
-  { name: 'hisse-tab-grafik',    path: '/hisse/THYAO?tab=grafik',   scroll: 0 },
-  { name: 'hisse-tab-ai',        path: '/hisse/THYAO?tab=ai',       scroll: 0 },
-  { name: 'hisse-tab-haberler',  path: '/hisse/THYAO?tab=haberler', scroll: 0 },
+  // === Madde 1A + 2: üst sekme bar (her tab × scroll=0) ===
+  { name: 'hisse-tab-ozet',         path: '/hisse/THYAO?tab=ozet',     scroll: 0 },
+  { name: 'hisse-tab-grafik',       path: '/hisse/THYAO?tab=grafik',   scroll: 0 },
+  { name: 'hisse-tab-ai',           path: '/hisse/THYAO?tab=ai',       scroll: 0 },
+  { name: 'hisse-tab-haberler',     path: '/hisse/THYAO?tab=haberler', scroll: 0 },
 
-  // === Sticky teyit (scroll-down sırasında tab bar görünür mü) ===
-  { name: 'hisse-scroll-down',   path: '/hisse/THYAO?tab=ozet',     scroll: 600 },
+  // === Sticky scroll-state matrisi (CPO-469 görsel kapı, sticky-header dersi) ===
+  { name: 'hisse-scroll-300',       path: '/hisse/THYAO?tab=ozet',     scroll: 300 },  // ara state
+  { name: 'hisse-scroll-700',       path: '/hisse/THYAO?tab=ozet',     scroll: 700 },  // derin scroll
+  { name: 'hisse-scroll-down',      path: '/hisse/THYAO?tab=ozet',     scroll: 600 },  // (eski 600, koru)
 
-  // === Madde 1B: alt bar (mobil tipik view) ===
-  // bp-bottom-cta zaten fixed, her sayfa view'da görünür → scroll-down ile teyit
+  // === Madde 1B: alt bar (mobil tipik view) — scroll içinde teyit edilir ===
 
-  // === Madde 3a: tarama search (default + focus) ===
-  { name: 'tarama-default',      path: '/tarama',                   scroll: 0 },
-  { name: 'tarama-search-focus', path: '/tarama',                   scroll: 0, focus: '#fSearch' },
+  // === Madde 3a: tarama search (default + focus + scroll-state) ===
+  { name: 'tarama-default',         path: '/tarama',                   scroll: 0 },
+  { name: 'tarama-search-focus',    path: '/tarama',                   scroll: 0,   focus: '#fSearch' },
+  { name: 'tarama-scroll-300',      path: '/tarama',                   scroll: 300 },
 ];
 
 async function ensureDir(d) {
