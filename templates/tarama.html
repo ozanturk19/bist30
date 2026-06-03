@@ -319,6 +319,83 @@
     thead th, tbody td { padding:8px 10px; }
   }
 
+  /* ── SPEC-UX-BATCH-2026-06-03 Task #23 (CPO-475): yeni kolon CSS ── */
+  /* Trend Gücü (eski ADX) — etiket + bar göstergesi */
+  .trend-cell {
+    display:flex; align-items:center; gap:7px; min-width:88px;
+  }
+  .trend-label {
+    font-size:11px; font-weight:700; letter-spacing:0.3px;
+    white-space:nowrap;
+  }
+  .trend-label.strong { color:#3fb950; }
+  .trend-label.medium { color:var(--text); }
+  .trend-label.weak   { color:var(--text3); }
+  .trend-bar {
+    flex:0 0 44px; height:4px;
+    background:rgba(255,255,255,0.08);
+    border-radius:2px; overflow:hidden;
+  }
+  .trend-bar-fill {
+    height:100%; border-radius:2px;
+    transition:width 0.3s ease;
+  }
+  .trend-bar-fill.strong { background:linear-gradient(90deg,#3fb950,#1f6feb); }
+  .trend-bar-fill.medium { background:#1f6feb; }
+  .trend-bar-fill.weak   { background:var(--text3); }
+
+  /* RVOL× — dot + sayı */
+  .rvol-cell {
+    display:inline-flex; align-items:center; gap:6px;
+    font-variant-numeric:tabular-nums; font-weight:600; font-size:12.5px;
+  }
+  .rvol-cell.high   { color:#3fb950; }
+  .rvol-cell.normal { color:var(--text); }
+  .rvol-cell.low    { color:var(--text3); }
+  .rvol-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .rvol-dot.high   { background:#3fb950; }
+  .rvol-dot.normal { background:#1f6feb; }
+  .rvol-dot.low    { background:var(--text3); }
+
+  /* Tazelik (eski Süre) — Bugün/Dün/X gün badges */
+  .fresh-badge {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:2px 8px; border-radius:4px;
+    font-size:11px; font-weight:600;
+  }
+  .fresh-badge.today     { background:rgba(0,226,144,0.10); color:#3fb950; }
+  .fresh-badge.yesterday { background:rgba(88,166,255,0.10); color:#58a6ff; }
+  .fresh-badge.old       { background:rgba(139,148,158,0.10); color:var(--text3); }
+  .fresh-dot { font-size:8px; line-height:1; }
+
+  /* TH tooltip (yeni kolon başlıkları) */
+  thead th[data-tooltip] { position:relative; cursor:help; }
+  thead th[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position:absolute; bottom:100%; left:50%;
+    transform:translateX(-50%) translateY(-6px);
+    background:#1c2128; color:var(--text);
+    border:1px solid var(--border2);
+    border-radius:6px; padding:5px 9px;
+    font-size:11px; font-weight:500;
+    white-space:nowrap; z-index:100;
+    box-shadow:0 4px 12px rgba(0,0,0,0.4);
+    pointer-events:none;
+    text-transform:none; letter-spacing:0;
+  }
+
+  /* Hide tablet ≤768 (yeni: Sektör tablet'te de gizli) */
+  @media (max-width:768px) {
+    .hide-tablet { display:none!important; }
+  }
+  /* Hide mobile narrow ≤480 — gerekirse bazı kolonları daha sıkı gizle */
+  @media (max-width:480px) {
+    .hide-mob-narrow { display:none!important; }
+    .trend-bar { flex:0 0 32px; }
+    .trend-label { font-size:10.5px; }
+    .rvol-cell, .fresh-badge { font-size:11px; }
+  }
+
   footer { text-align:center; padding:20px; font-size:12px; color:var(--text3); border-top:1px solid var(--border2); margin-top:32px; }
   footer a { color:var(--text2); text-decoration:none; }
   /* SPEC-007: Premium paywall — blur + CTA banner */
@@ -533,16 +610,20 @@
     </div>
     <table id="resultTable" style="display:none">
       <thead>
+        {# SPEC-UX-BATCH-2026-06-03 Task #23 (CPO-475): Tarama kolon redesign.
+           Yeni sıra: Hisse / Sinyal / Trend Gücü (eski ADX) / Giriş Kalitesi (öne) / Fiyat / Değişim / RVOL× / Tazelik / Sektör.
+           Mobil ≤480: ilk 6 kolon görünür (Hisse, Sinyal, Trend Gücü, Giriş Kalitesi, Fiyat, Değişim).
+           R/R kolonu Faz 2'ye ertelendi (backend TP veri yok, CPO ile sürüyor). #}
         <tr>
           <th>Hisse</th>
-          <th class="hide-mob">Sektör</th>
           <th>Sinyal</th>
-          <th onclick="sortBy('adx')" id="th-adx">ADX</th>
-          <th onclick="sortBy('price')" id="th-price">Fiyat</th>
-          <th onclick="sortBy('change_pct')" id="th-chg">Değişim</th>
-          <th class="hide-mob" onclick="sortBy('vol_ratio')" id="th-vol">Hacim</th>
-          <th class="hide-mob" onclick="sortBy('signal_bars')" id="th-bars">Süre</th>
-          <th class="hide-mob">Giriş</th>
+          <th onclick="sortBy('adx')" id="th-adx" data-tooltip="ADX 25+ Güçlü, 18-25 Orta, <18 Zayıf">Trend Gücü</th>
+          <th>Giriş Kalitesi</th>
+          <th class="hide-mob-narrow" onclick="sortBy('price')" id="th-price">Fiyat</th>
+          <th class="hide-mob-narrow" onclick="sortBy('change_pct')" id="th-chg">Değişim</th>
+          <th class="hide-mob" onclick="sortBy('vol_ratio')" id="th-vol" data-tooltip="Bugünkü hacim / 20-gün ortalama">RVOL×</th>
+          <th class="hide-mob" onclick="sortBy('signal_bars')" id="th-bars" data-tooltip="Sinyal kaç gün önce oluştu">Tazelik</th>
+          <th class="hide-mob hide-tablet">Sektör</th>
         </tr>
       </thead>
       <tbody id="resultBody"></tbody>
@@ -880,6 +961,34 @@ function renderResults(rows, count) {
     }
   }
 
+  // === Yardımcı fonksiyonlar (UX-2 Task #23, CPO-475) ===
+  // Trend Gücü: ADX 25+ Güçlü, 18-25 Orta, <18 Zayıf (eşikler SPEC'te)
+  const trendCell = (adx) => {
+    const a = adx || 0;
+    let label, cls, pct;
+    if (a >= 25)      { label = 'Güçlü'; cls = 'strong'; pct = Math.min(100, (a/50)*100); }
+    else if (a >= 18) { label = 'Orta';  cls = 'medium'; pct = Math.min(60, (a/50)*100); }
+    else              { label = 'Zayıf'; cls = 'weak';   pct = Math.max(20, (a/50)*100); }
+    return `<div class="trend-cell" title="ADX ${a.toFixed(1)} — ${label.toLowerCase()} trend">
+      <span class="trend-label ${cls}">${label}</span>
+      <div class="trend-bar"><div class="trend-bar-fill ${cls}" style="width:${pct.toFixed(0)}%"></div></div>
+    </div>`;
+  };
+  // RVOL: ≥1.5× yüksek (yeşil), 0.8-1.5× normal (mavi), <0.8× düşük (gri)
+  const rvolCell = (vr) => {
+    if (!vr) return '<span class="rvol-cell low">—</span>';
+    const v = vr;
+    const cls = v >= 1.5 ? 'high' : v >= 0.8 ? 'normal' : 'low';
+    return `<div class="rvol-cell ${cls}"><span class="rvol-dot ${cls}"></span>${v.toFixed(1)}×</div>`;
+  };
+  // Tazelik: bars=1 → Bugün (yeşil), bars=2 → Dün (mavi), bars≥3 → "N gün" (gri)
+  const freshCell = (bars) => {
+    const b = bars || 1;
+    if (b === 1) return '<span class="fresh-badge today"><span class="fresh-dot">●</span>Bugün</span>';
+    if (b === 2) return '<span class="fresh-badge yesterday"><span class="fresh-dot">●</span>Dün</span>';
+    return `<span class="fresh-badge old"><span class="fresh-dot">●</span>${b} gün</span>`;
+  };
+
   const tbody = document.getElementById('resultBody');
   tbody.innerHTML = rows.map(s => {
     const chgCls = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
@@ -888,7 +997,6 @@ function renderResults(rows, count) {
     const eqHtml  = s.entry_quality
       ? `<span class="eq-badge ${eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
       : '—';
-    const adxPct  = Math.min(100, (s.adx / 60) * 100);
     const _locked = (_premLocked && s.tier === 'premium') ? ' class="tier-locked"' : '';
     return `<tr${_locked}>
       <td>
@@ -897,19 +1005,16 @@ function renderResults(rows, count) {
           <div class="tk-name">${(s.name||'').replace(' A.Ş.','').substring(0,20)}</div>
         </a>
       </td>
-      <td class="hide-mob"><span class="sector-tag">${s.sector||'—'}</span></td>
       <td><span class="sig-badge sig-${s.signal}">
         ${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}
       </span></td>
-      <td>
-        <div class="adx-val">${(s.adx||0).toFixed(1)}</div>
-        <div class="adx-bar-bg"><div class="adx-bar-fill" style="width:${adxPct.toFixed(0)}%"></div></div>
-      </td>
-      <td class="price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})}</td>
-      <td class="${chgCls}">${chgSign}${(s.change_pct||0).toFixed(2)}%</td>
-      <td class="hide-mob vol-val">${s.vol_ratio ? '×'+s.vol_ratio.toFixed(1) : '—'}</td>
-      <td class="hide-mob bars-val">${s.signal_bars||1} gün</td>
-      <td class="hide-mob">${eqHtml}</td>
+      <td>${trendCell(s.adx)}</td>
+      <td>${eqHtml}</td>
+      <td class="hide-mob-narrow price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})}</td>
+      <td class="hide-mob-narrow ${chgCls}">${chgSign}${(s.change_pct||0).toFixed(2)}%</td>
+      <td class="hide-mob">${rvolCell(s.vol_ratio)}</td>
+      <td class="hide-mob">${freshCell(s.signal_bars)}</td>
+      <td class="hide-mob hide-tablet"><span class="sector-tag">${s.sector||'—'}</span></td>
     </tr>`;
   }).join('');
 
