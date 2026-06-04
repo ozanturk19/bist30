@@ -5013,31 +5013,26 @@ def api_chart_us_stock(ticker):
 
 
 # ── Makro Varlık Sayfaları (BTC / ETH / Altın / Gümüş) ──────────────────────
+# SPEC-MOBILE-UI-AUDIT-2026-06-04 task #28 (CPO-484/485): Kripto modülü GATE.
+# Veri doğruluğu sorunu (OHLC close 1000x yanlış, BTC $17) — sayfa "Yakında" placeholder.
+# Fix #34 (kök neden + yfinance symbol test) sonrası gate kaldırılacak.
 @app.route("/btc")
 def btc_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "BTC"]
-    return render_template("varlik.html", varlik_key="BTC", meta=_VARLIK_META["BTC"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
+    return render_template("kripto_gate.html")
 
 
 @app.route("/eth")
 def eth_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "ETH"]
-    return render_template("varlik.html", varlik_key="ETH", meta=_VARLIK_META["ETH"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
+    return render_template("kripto_gate.html")
 
 
 @app.route("/sol")
 def sol_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "SOL"]
-    return render_template("varlik.html", varlik_key="SOL", meta=_VARLIK_META["SOL"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
+    return render_template("kripto_gate.html")
 
 @app.route("/bnb")
 def bnb_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "BNB"]
-    return render_template("varlik.html", varlik_key="BNB", meta=_VARLIK_META["BNB"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
+    return render_template("kripto_gate.html")
 
 
 @app.route("/altin")
@@ -5069,12 +5064,8 @@ def dogalgaz_page():
 
 @app.route("/kripto")
 def kripto_page():
-    return render_template("kategori.html",
-        category_key="kripto",
-        title="Kripto Varlıklar", emoji="🔐",
-        desc="Bitcoin ve Ethereum Supertrend + ADX + EMA12/99 teknik analizi",
-        assets=_KRIPTO_PEERS,
-        us_stocks=None)
+    # CPO-484/485 GATE: veri doğruluğu sorunu, "Yakında" placeholder
+    return render_template("kripto_gate.html")
 
 @app.route("/emtialar")
 def emtialar_page():

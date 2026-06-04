@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kripto — Bakımda | borsapusula.com</title>
+<meta name="description" content="Kripto modülü geçici olarak bakımda. Yakında geri dönüyoruz.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<style>
+  :root {
+    --bg-primary: #0d1117;
+    --bg-card: #141416;
+    --border: #2a2a2c;
+    --text1: #e6edf3;
+    --text2: #b1b6bf;
+    --text3: #6e7681;
+    --accent: #1f6feb;
+    --accent-glow: rgba(31,111,235,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg-primary);
+    color: var(--text1);
+    font-family: 'Manrope', 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    line-height: 1.5;
+  }
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px;
+    background: rgba(20,20,22,0.6);
+    backdrop-filter: blur(20px);
+  }
+  header a.logo {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--text1); text-decoration: none;
+    font-weight: 700; font-size: 16px;
+    letter-spacing: 0.2px;
+  }
+  header a.logo svg { width: 22px; height: 22px; }
+  main {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px 16px;
+  }
+  .gate-card {
+    max-width: 440px; width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px 24px;
+    text-align: center;
+  }
+  .gate-icon {
+    width: 56px; height: 56px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--accent-glow);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+  .gate-icon svg { width: 28px; height: 28px; stroke-width: 1.8; }
+  .gate-title {
+    font-size: 19px; font-weight: 700;
+    color: var(--text1);
+    margin-bottom: 8px;
+    letter-spacing: -0.2px;
+  }
+  .gate-sub {
+    font-size: 14px; color: var(--text2);
+    margin-bottom: 18px; line-height: 1.55;
+  }
+  .gate-detail {
+    font-size: 12.5px; color: var(--text3);
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 22px;
+    line-height: 1.5;
+  }
+  .gate-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 18px;
+    background: var(--accent);
+    color: #fff; text-decoration: none;
+    border-radius: 8px;
+    font-size: 13.5px; font-weight: 600;
+    transition: background 0.18s ease;
+  }
+  .gate-cta:hover { background: #2978ff; }
+  .gate-cta svg { width: 14px; height: 14px; }
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 14px 18px;
+    text-align: center;
+    font-size: 12px; color: var(--text3);
+  }
+  footer a { color: var(--text2); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+    BorsaPusula
+  </a>
+</header>
+
+<main>
+  <div class="gate-card">
+    <div class="gate-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <h1 class="gate-title">Kripto Modülü Bakımda</h1>
+    <p class="gate-sub">
+      Bitcoin, Ethereum, Solana ve BNB analiz sayfaları geçici olarak kapalı.
+      Veri doğruluğu için bakım çalışması sürüyor.
+    </p>
+    <p class="gate-detail">
+      📊 BIST hisseleri, sektörler ve ABD piyasaları normal şekilde çalışıyor.
+      Kripto verileri en kısa sürede güncel haliyle geri gelecek.
+    </p>
+    <a href="/" class="gate-cta">
+      Ana Sayfaya Dön
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </a>
+  </div>
+</main>
+
+<footer>
+  <a href="/">Ana Sayfa</a> · <a href="/tarama">Hisse Tarayıcı</a> · <a href="/emtialar">Emtialar</a> · <a href="/abd">ABD</a>
+</footer>
+
+</body>
+</html>
