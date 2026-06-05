@@ -2587,25 +2587,46 @@ def background_refresh():
         return  # ulaşılmaz
 
     logger.info("background_refresh: LEADER worker — yfinance refresh modu (900s)")
+    # CPO-495 FIX (06.06.2026): refresh_data() ÖNCE — chart hang BIST30 sinyal akışını engellemesin.
+    # Önceki sıra: 11 chart refresh → refresh_data — biri hang olunca refresh_data() ASLA çağrılmıyordu
+    # (kanıt: 04.06 21:24'ten beri updated_at donmuş, 5+ saat seans içinde stale veri).
+    # Yeni sıra: refresh_data ÖNCE, sonra her chart refresh AYRI try/except (biri hang diğerlerini bozmaz).
+    _CHART_REFRESH_TASKS = [
+        ("refresh_chart",                  refresh_chart,         ()),
+        ("refresh_xu100_chart",            refresh_xu100_chart,   ()),
+        ("varlik_chart_BTC",      _refresh_varlik_chart, ("BTC",      _btc_chart_cache)),
+        ("varlik_chart_ALTIN",    _refresh_varlik_chart, ("ALTIN",    _altin_chart_cache)),
+        ("varlik_chart_GUMUS",    _refresh_varlik_chart, ("GUMUS",    _gumus_chart_cache)),
+        ("varlik_chart_ETH",      _refresh_varlik_chart, ("ETH",      _eth_chart_cache)),
+        ("varlik_chart_SP500",    _refresh_varlik_chart, ("SP500",    _sp500_chart_cache)),
+        ("varlik_chart_NASDAQ",   _refresh_varlik_chart, ("NASDAQ",   _nasdaq_chart_cache)),
+        ("varlik_chart_SOL",      _refresh_varlik_chart, ("SOL",      _sol_chart_cache)),
+        ("varlik_chart_BNB",      _refresh_varlik_chart, ("BNB",      _bnb_chart_cache)),
+        ("varlik_chart_PETROL",   _refresh_varlik_chart, ("PETROL",   _petrol_chart_cache)),
+        ("varlik_chart_DOGALGAZ", _refresh_varlik_chart, ("DOGALGAZ", _dogalgaz_chart_cache)),
+    ]
     while True:
+        # 1) BIST30 ana refresh — kritik, en önce, isolated try/except
         try:
-            refresh_chart()
-            refresh_xu100_chart()
-            _refresh_varlik_chart("BTC",      _btc_chart_cache)
-            _refresh_varlik_chart("ALTIN",    _altin_chart_cache)
-            _refresh_varlik_chart("GUMUS",    _gumus_chart_cache)
-            _refresh_varlik_chart("ETH",      _eth_chart_cache)
-            _refresh_varlik_chart("SP500",    _sp500_chart_cache)
-            _refresh_varlik_chart("NASDAQ",   _nasdaq_chart_cache)
-            _refresh_varlik_chart("SOL",      _sol_chart_cache)
-            _refresh_varlik_chart("BNB",      _bnb_chart_cache)
-            _refresh_varlik_chart("PETROL",   _petrol_chart_cache)
-            _refresh_varlik_chart("DOGALGAZ", _dogalgaz_chart_cache)
+            logger.info("background_refresh: refresh_data() başlıyor")
             refresh_data()
+            logger.info("background_refresh: refresh_data() tamamlandı")
+        except Exception as e:
+            logger.error("refresh_data() hatası: %s", e, exc_info=True)
+
+        # 2) Stale chart cache purge — refresh_data sonrası, isolated
+        try:
             _purge_stale_chart_caches()
         except Exception as e:
-            logger.error("background_refresh döngü hatası: %s", e, exc_info=True)
-            # Thread ölmesin — 60s bekle ve devam et
+            logger.error("_purge_stale_chart_caches() hatası: %s", e, exc_info=True)
+
+        # 3) Chart refresh'leri — her biri ayrı try/except (biri hang olsa diğerleri çalışsın)
+        for task_name, fn, args in _CHART_REFRESH_TASKS:
+            try:
+                fn(*args)
+            except Exception as e:
+                logger.error("%s hatası: %s", task_name, e, exc_info=True)
+
         time.sleep(900)
 
 
