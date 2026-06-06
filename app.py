@@ -1410,7 +1410,7 @@ def _is_notify_leader():
 # 4 worker × yfinance/pandas ağır iş → gevent worker bloke → %40 504 timeout.
 # Leader worker bg çalıştırır + cache'i diske yazar; non-leader 3 worker hafif
 # disk-reload yapar (gevent bloke etmez) → temiz HTTP handler.
-_BG_LOCK_PATH = "/tmp/bp_bg_leader.lock"
+_BG_LOCK_PATH = os.environ.get("BG_LOCK_PATH", "/tmp/bp_bg_leader.lock")  # staging-prod izolasyon (CPO-505)
 _bg_lock_fh = None
 
 def _is_bg_leader():
@@ -1428,7 +1428,7 @@ def _is_bg_leader():
 # SPEC-009 Faz D2 (digest mail leader-lock): _digest_cron_loop her 4 worker'da
 # çalışıyordu → 19:00'da eşzamanlı first-fire (last_digest.txt yazılmadan) → 4×
 # aynı digest mail → Brevo kotası 4× tükeniyor. Ayrı lock — yalnız leader gönderir.
-_DIGEST_LOCK_PATH = "/tmp/bp_digest_leader.lock"
+_DIGEST_LOCK_PATH = os.environ.get("DIGEST_LOCK_PATH", "/tmp/bp_digest_leader.lock")  # staging-prod izolasyon
 _digest_lock_fh = None
 
 def _is_digest_leader():
@@ -1446,7 +1446,7 @@ def _is_digest_leader():
 # SPEC-009 Gemini Faz 1: _prefetch_thread her 4 worker'da çalışıyordu → Gemini
 # çağrıları 4× → maliyet patlaması (~60 TL/gün). Ayrı leader-lock — yalnız 1
 # worker bg prefetch yapar (multi-worker cost multiplier fix).
-_GEMINI_LOCK_PATH = "/tmp/bp_gemini_leader.lock"
+_GEMINI_LOCK_PATH = os.environ.get("GEMINI_LOCK_PATH", "/tmp/bp_gemini_leader.lock")  # staging-prod izolasyon
 _gemini_lock_fh = None
 
 def _is_gemini_leader():
