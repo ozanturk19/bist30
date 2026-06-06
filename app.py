@@ -2366,10 +2366,40 @@ def _load_cache_from_disk():
         logger.warning("Disk cache okuma hatası: %s", e)
 
 
+# CPO-506 P0 (Pzt 10:00 öncesi): analyze() per-ticker hard-timeout + negatif cache.
+# Watchdog deadlock'u önlüyor ama yfinance yavaşlığını çözmüyor (CPO-501/502 önerisi).
+# Yaklaşım: her ticker için ThreadPoolExecutor + 8s timeout. Timeout'ta skip + 60s negatif cache
+# (sonraki iterasyonda tekrar dene, ardarda hang'i önler). 30 ticker × 8s = max ~240s soft cap.
+import concurrent.futures as _cf_analyze
+_ANALYZE_EXECUTOR    = _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="analyze_wd")
+_ANALYZE_TIMEOUT     = 8     # saniye, yfinance per-ticker hard-cap
+_ANALYZE_NEG_CACHE   = {}    # {ticker: timeout_until_ts} — 60s skip after timeout
+_ANALYZE_NEG_TTL     = 60    # saniye
+
+def _analyze_with_timeout(ticker):
+    """analyze(ticker) çağrısını 8s timeout ile sar. Timeout'ta None döner + 60s negatif cache."""
+    # Negatif cache kontrolü — son 60s içinde timeout aldıysa skip
+    until = _ANALYZE_NEG_CACHE.get(ticker, 0)
+    if until > time.time():
+        return None  # negatif cache geçerli, skip
+
+    future = _ANALYZE_EXECUTOR.submit(analyze, ticker)
+    try:
+        return future.result(timeout=_ANALYZE_TIMEOUT)
+    except _cf_analyze.TimeoutError:
+        _ANALYZE_NEG_CACHE[ticker] = time.time() + _ANALYZE_NEG_TTL
+        logger.warning("ANALYZE_TIMEOUT: %s %ds — neg cache %ds, skip", ticker, _ANALYZE_TIMEOUT, _ANALYZE_NEG_TTL)
+        future.cancel()
+        return None
+    except Exception as e:
+        logger.error("analyze(%s) hatası: %s", ticker, e)
+        return None
+
+
 def refresh_data():
     results = []
     for t in BIST30:
-        r = analyze(t)
+        r = _analyze_with_timeout(t)
         if r:
             results.append(r)
         time.sleep(0.3)
