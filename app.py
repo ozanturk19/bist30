@@ -8,7 +8,7 @@ if 'gevent' in _sys.modules or any('gunicorn' in arg for arg in _sys.argv):
     except ImportError:
         pass
 import socket as _socket
-_socket.setdefaulttimeout(20)   # Infinite hang protection (yfinance, Gemini, KAP)
+_socket.setdefaulttimeout(8)   # CPO-505: 20→8s (uzun yfinance hang -w4 satürasyon yapıyordu)
 
 from flask import Flask, jsonify, render_template, Response, request, abort, redirect
 import yfinance as yf
@@ -2605,27 +2605,45 @@ def background_refresh():
         ("varlik_chart_PETROL",   _refresh_varlik_chart, ("PETROL",   _petrol_chart_cache)),
         ("varlik_chart_DOGALGAZ", _refresh_varlik_chart, ("DOGALGAZ", _dogalgaz_chart_cache)),
     ]
-    while True:
-        # 1) BIST30 ana refresh — kritik, en önce, isolated try/except
-        try:
-            logger.info("background_refresh: refresh_data() başlıyor")
-            refresh_data()
-            logger.info("background_refresh: refresh_data() tamamlandı")
-        except Exception as e:
-            logger.error("refresh_data() hatası: %s", e, exc_info=True)
+    # CPO-505 FIX (06.06.2026 P0): refresh_data() ve chart refresh'leri WATCHDOG ile sarıldı.
+    # 06.06 06:28'de leader thread dondu → updated_at 4h sabit, /hisse flapping DOWN (worker hang).
+    # Watchdog: her ağır iş ThreadPoolExecutor ile timeout-bounded — N dk geçerse skip + sonraki cycle.
+    import concurrent.futures as _cf
+    _REFRESH_DATA_TIMEOUT = 240   # 4 dakika (30 ticker × ~8s yfinance soft-cap)
+    _CHART_TASK_TIMEOUT   = 60    # 1 dakika per chart refresh
+    _executor = _cf.ThreadPoolExecutor(max_workers=2, thread_name_prefix="bg_refresh_wd")
 
-        # 2) Stale chart cache purge — refresh_data sonrası, isolated
+    def _run_with_timeout(name, fn, args=(), timeout=60):
+        """Watchdog wrapper: fn'i ayrı thread'de çalıştır, timeout'ta cancel + log + devam."""
+        future = _executor.submit(fn, *args)
+        try:
+            future.result(timeout=timeout)
+            return True
+        except _cf.TimeoutError:
+            logger.error("WATCHDOG: %s %ds timeout — skip (worker bloke olmasın)", name, timeout)
+            # Future'ı cancel et (zaten çalışıyor ama future referansını bırak)
+            future.cancel()
+            return False
+        except Exception as e:
+            logger.error("%s hatası: %s", name, e, exc_info=True)
+            return False
+
+    while True:
+        # 1) BIST30 ana refresh — watchdog'lu (4dk timeout)
+        logger.info("background_refresh: refresh_data() başlıyor")
+        ok = _run_with_timeout("refresh_data", refresh_data, (), _REFRESH_DATA_TIMEOUT)
+        if ok:
+            logger.info("background_refresh: refresh_data() tamamlandı")
+
+        # 2) Stale chart cache purge — kısa, watchdog'suz (lock-swap only)
         try:
             _purge_stale_chart_caches()
         except Exception as e:
             logger.error("_purge_stale_chart_caches() hatası: %s", e, exc_info=True)
 
-        # 3) Chart refresh'leri — her biri ayrı try/except (biri hang olsa diğerleri çalışsın)
+        # 3) Chart refresh'leri — her biri watchdog'lu (1dk timeout) + isolated
         for task_name, fn, args in _CHART_REFRESH_TASKS:
-            try:
-                fn(*args)
-            except Exception as e:
-                logger.error("%s hatası: %s", task_name, e, exc_info=True)
+            _run_with_timeout(task_name, fn, args, _CHART_TASK_TIMEOUT)
 
         time.sleep(900)
 
