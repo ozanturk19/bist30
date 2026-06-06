@@ -2397,12 +2397,29 @@ def _analyze_with_timeout(ticker):
 
 
 def refresh_data():
+    # CPO-507 P0 refining (Cmt 17:45): SIRALI for loop yerine PARALEL ThreadPoolExecutor.
+    # Önceki: 30 ticker × 8s socket timeout = 240s watchdog timeout (Cmt yfinance throttle ağırlaştı)
+    # Yeni: 4 paralel as_completed → 30/4 ≈ 8 batch × 8s = max ~64s
+    # Per-ticker hard-timeout korunuyor (_analyze_with_timeout içinde)
+    # Toplam timeout 180s soft cap (240s watchdog'un altında)
     results = []
-    for t in BIST30:
-        r = _analyze_with_timeout(t)
-        if r:
-            results.append(r)
-        time.sleep(0.3)
+    with _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="refresh_par") as ex:
+        future_map = {ex.submit(_analyze_with_timeout, t): t for t in BIST30}
+        try:
+            for future in _cf_analyze.as_completed(future_map, timeout=180):
+                try:
+                    r = future.result(timeout=1)  # _analyze_with_timeout zaten 8s döner
+                    if r:
+                        results.append(r)
+                except Exception as e:
+                    logger.warning("refresh_data future hatası (%s): %s", future_map[future], e)
+        except _cf_analyze.TimeoutError:
+            # 180s'de bitmediyse iptal et — gelen sonuçlarla devam (degraded ama YAZAR)
+            done_count = sum(1 for f in future_map if f.done())
+            logger.warning("refresh_data 180s soft cap → %d/30 ticker tamamlandı, degraded yaz", done_count)
+            for f in future_map:
+                if not f.done():
+                    f.cancel()
 
     results.sort(key=lambda x: (
         0 if x.get("is_new_signal") else 1,
