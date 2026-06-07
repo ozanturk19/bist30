@@ -2583,6 +2583,12 @@ def fetch_global_prices():
 
 
 def background_global_prices():
+    # CPO-520 P0 (07.06.2026): _is_macro_leader fcntl ile multi-worker fan-out önlendi
+    # (4 worker × kripto+emtia+ABD multi yfinance download = 25 ticker × 4 = 100 paralel call → deadlock)
+    if not _is_macro_leader():
+        logger.info("background_global_prices: non-leader worker — atlandı")
+        return
+    logger.info("background_global_prices: LEADER worker — fetch modu (60s)")
     while True:
         try:
             fetch_global_prices()
@@ -2592,6 +2598,12 @@ def background_global_prices():
 
 
 def background_live_prices():
+    # CPO-520 P0 (07.06.2026): _is_macro_leader fcntl ile multi-worker fan-out önlendi
+    # (4 worker × BIST30 multi yfinance.download = 30 ticker × 4 = 120 paralel call → deadlock)
+    if not _is_macro_leader():
+        logger.info("background_live_prices: non-leader worker — atlandı")
+        return
+    logger.info("background_live_prices: LEADER worker — fetch modu (30s)")
     while True:
         try:
             fetch_live_prices()
