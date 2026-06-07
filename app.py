@@ -1461,6 +1461,25 @@ def _is_gemini_leader():
     except (BlockingIOError, OSError):
         return False
 
+# CPO-520 KÖK NEDEN P0 (07.06.2026): _macro_bg_loop her worker'da çalışıyordu →
+# 4 worker × 10 ticker × 3dk = 40 paralel yfinance.Ticker.fast_info call →
+# gevent monkey_patch + threading hybrid corruption → /hisse deadlock 20s.
+# Fix: fcntl leader-lock — yalnız 1 worker macro fetch yapar (40× → 10× her 3dk).
+_MACRO_LOCK_PATH = os.environ.get("MACRO_LOCK_PATH", "/tmp/bp_macro_leader.lock")  # staging-prod izolasyon
+_macro_leader_fh = None
+
+def _is_macro_leader():
+    """Bu worker macro bg fetch yetkisine sahip mi? fcntl.flock —
+    4 worker'dan yalnızca biri leader → fast_info 4× yerine 1×."""
+    global _macro_leader_fh
+    try:
+        if _macro_leader_fh is None:
+            _macro_leader_fh = open(_MACRO_LOCK_PATH, "w")
+        _fcntl.flock(_macro_leader_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+        return True
+    except (BlockingIOError, OSError):
+        return False
+
 def _load_prev_signals():
     """App start'ta disk'ten _prev_signals'i yükler."""
     global _prev_signals
@@ -3006,10 +3025,23 @@ _macro_bg_stats = {"cycles": 0, "successes": 0, "empty_results": 0, "exceptions"
 def _macro_bg_loop():
     """Background macro refresh thread — her 3 dakika.
 
-    SADECE bu thread yfinance çağırır (request handler'lar yfinance çağırmaz).
-    Race-safe: _macro_bg_lock ile concurrent _fetch_macro önlenir.
-    yfinance arada bir fail etse bile (401 vs.) eski cache hâlâ servis edilir.
+    CPO-520 FIX (07.06.2026): fcntl leader-lock eklendi.
+    Önceki: 4 worker × _macro_bg_lock (proses-içi, paylaşımsız) → her worker 10 ticker fast_info
+    → 40 paralel yfinance call → gevent+threading hybrid corruption → /hisse 20s deadlock.
+    Yeni: _is_macro_leader() fcntl.flock — yalnız 1 worker macro fetch yapar.
+    Non-leader worker'lar hafif disk-reload modunda (90s aralık).
     """
+    if not _is_macro_leader():
+        logger.info("_macro_bg_loop: non-leader worker — hafif disk-reload modu (90s)")
+        while True:
+            try:
+                _load_macro_from_disk()
+            except Exception as e:
+                logger.error("_macro_bg_loop non-leader reload hatası: %s", e)
+            time.sleep(90)
+        return  # ulaşılmaz
+
+    logger.info("_macro_bg_loop: LEADER worker — yfinance fetch modu (180s)")
     # İlk run hemen (cache cold ise warm yapsın)
     while True:
         # acquire(blocking=False): kilit alınmazsa skip — bir önceki cycle hâlâ devam ediyor
