@@ -925,7 +925,7 @@ def _fill_intraday_gaps(df, ticker):
     yfinance bazen son 1-2 gunun daily barini geciktiriyor."""
     try:
         df5d = yf.download(ticker, period="5d", interval="1m",
-                           progress=False, auto_adjust=True, timeout=20)
+                           progress=False, auto_adjust=True, timeout=20, threads=False)
         if df5d is None or df5d.empty:
             return df
         if isinstance(df5d.columns, pd.MultiIndex):
@@ -972,7 +972,7 @@ def _weekly_trend(ticker: str) -> int:
     """Haftalık EMA20 yönü: +1 yükselen, -1 düşen, 0 belirsiz/hata."""
     try:
         wdf = yf.download(ticker, period="1y", interval="1wk",
-                          progress=False, auto_adjust=True, timeout=20)
+                          progress=False, auto_adjust=True, timeout=20, threads=False)
         if wdf is None or len(wdf) < 25:
             return 0
         if isinstance(wdf.columns, pd.MultiIndex):
@@ -995,7 +995,7 @@ def analyze(ticker_base):
         weekly_dir = _weekly_trend(ticker)
 
         df = yf.download(ticker, period="2y", interval="1d",
-                         progress=False, auto_adjust=True, timeout=30)
+                         progress=False, auto_adjust=True, timeout=30, threads=False)
         if df is None or len(df) < 120:
             return None
 
@@ -2447,7 +2447,7 @@ def fetch_live_prices():
     try:
         df = yf.download(
             tickers_str, period="2d", interval="1m",
-            progress=False, auto_adjust=True, group_by="ticker", timeout=30
+            progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
         )
         if df is None or df.empty:
             return
@@ -2517,7 +2517,7 @@ def fetch_global_prices():
         syms = list(set(_GLOBAL_TICKERS_YF.values()))
         df = yf.download(
             " ".join(syms), period="2d", interval="1m",
-            progress=False, auto_adjust=True, group_by="ticker", timeout=30
+            progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
         )
         if df is None or df.empty:
             return
@@ -4713,7 +4713,7 @@ def _compute_chart_data(ticker_base, period="2y"):
                 df = None
         if df is None or len(df) == 0:
             df = yf.download(ticker, period=period, interval="1d",
-                             progress=False, auto_adjust=True, timeout=30)
+                             progress=False, auto_adjust=True, timeout=30, threads=False)
         if df is None or len(df) < WARMUP_MIN:
             return None
 
@@ -5873,7 +5873,7 @@ def _compute_mtf(ticker):
     def _tf_signal(interval, period, min_bars):
         try:
             df = yf.download(sym, period=period, interval=interval,
-                             progress=False, auto_adjust=True, timeout=25)
+                             progress=False, auto_adjust=True, timeout=25, threads=False)
             if df is None or len(df) < min_bars:
                 return None
             if isinstance(df.columns, pd.MultiIndex):
@@ -5914,7 +5914,7 @@ def _compute_mtf(ticker):
     def _tf_signal_4h(sym):
         try:
             df = yf.download(sym, period="60d", interval="1h",
-                             progress=False, auto_adjust=True, timeout=25)
+                             progress=False, auto_adjust=True, timeout=25, threads=False)
             if df is None or df.empty:
                 return None
             if isinstance(df.columns, pd.MultiIndex):
@@ -7027,7 +7027,7 @@ def backtest_ticker(ticker_base, fwd_days=20):
     ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
     try:
         df = yf.download(ticker, period="2y", interval="1d",
-                         progress=False, auto_adjust=True, timeout=30)
+                         progress=False, auto_adjust=True, timeout=30, threads=False)
         if df is None or len(df) < 120:
             return None
         if isinstance(df.columns, pd.MultiIndex):
