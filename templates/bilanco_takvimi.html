@@ -388,7 +388,7 @@ function render(data) {
           <div class="stock-card sig-${sigClass(s.signal)}" data-ticker="${s.ticker}" onclick="window.location.href='/hisse/' + this.dataset.ticker" role="link" tabindex="0">
             <div class="sc-top">
               <a href="/hisse/${s.ticker}" class="sc-ticker-link" onclick="event.stopPropagation()">
-                <span class="sc-ticker">${s.ticker}${s.is_premium ? ' <span title="Premium — AL + Hacim Onaylı" style="color:#ffc850;font-size:11px;vertical-align:middle">💎</span>' : ''}</span>
+                <span class="sc-ticker">${s.ticker}${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20" style="color:#ffd700;font-size:11px;vertical-align:middle">⭐</span>' : ''}</span>
               </a>
               <span class="sig-badge sig-${sigClass(s.signal)}">${sigLabel(s.signal)}</span>
             </div>

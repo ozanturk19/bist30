@@ -2458,9 +2458,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Belirsiz</div>
     </div>
-    <div class="stat-card stat-premium" style="cursor:pointer" onclick="setFilter('PREMIUM',document.querySelector('.filter-btn.filter-premium'))" title="Premium: Algoritmik AL sinyali + Hacim Onayı. Backtest'te %51 isabet, geri dönüş 4.3x. Tıkla: filtrele">
+    <div class="stat-card stat-premium" style="cursor:pointer" onclick="setFilter('PREMIUM',document.querySelector('.filter-btn.filter-premium'))" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
       <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">💎 Premium</div>
+      <div class="stat-label">⭐ Hacim Onaylı</div>
     </div>
   </div>
 
@@ -2524,7 +2524,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <div class="preset-chips" id="presetChips" role="group" aria-label="Hazır filtreler">
     <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)">🔥 Top Kazananlar</button>
     <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)">📊 Hacim Öncüleri</button>
-    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)">💎 Premium Sinyaller</button>
+    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)">⭐ Hacim Onaylı</button>
     <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden>⭐ Watchlist'im</button>
   </div>
 
@@ -2683,7 +2683,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <button class="filter-btn" data-signal="AL" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı">🟢 Güçlü Trend</button>
     <button class="filter-btn" data-signal="SAT" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı">🔴 Zayıf Trend</button>
     <button class="filter-btn" data-signal="BEKLE" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor">⚪ Belirsiz</button>
-    <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="AL sinyali + Hacim Onayı — diğer filtrelerle birleştirilebilir">💎 Premium</button>
+    <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="RVOL ≥ 1.20 — Hacim Onaylı AL sinyali. Backtest Win Rate %51.5. Diğer filtrelerle birleştirilebilir.">⭐ Hacim Onaylı</button>
     <button class="filter-btn filter-today" data-toggle="today" onclick="toggleChip('today', this)" title="Bugün ilk kez Güçlü/Zayıf Trend sinyali oluşan hisseler — diğer filtrelerle birleştirilebilir">⚡ Bugün</button>
     <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none">🔔 Takibim <span id="watchFilterCount"></span></button>
     <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()">⚙️ Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
@@ -4426,7 +4426,7 @@ function renderTable() {
     _lastTier_desktop = _curTierD;
     const _trLocked = (_premiumLocked && s.tier === 'premium') ? 'tier-locked' : '';
     return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''} ${_trLocked}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
-      <td><span class="ticker">${s.ticker}</span>${s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:#ffc850;font-size:12px">💎</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''} ${wtHtml}${sectorHtml}</td>
+      <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20 (Backtest Win Rate %51.5)" style="color:#ffd700;font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
       <td onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}${eqHtml}</td>

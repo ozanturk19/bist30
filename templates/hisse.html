@@ -1626,16 +1626,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     }
   </style>
   {%- set _sig = ssr_signal.signal -%}
-  {%- set _score = ssr_signal.tier_score or 0 -%}
+  {# CPO-535 #36: signal_strength (compose_score) PRIMARY. tier_score fallback (backward compat) #}
+  {%- set _score = ssr_signal.signal_strength | default(ssr_signal.tier_score | default(0)) -%}
   {# SPEC-017 Faz C K3+K6+K9-1: Hero badge tek-vocab — "ORTA TREND"/"GÜÇLÜ SAT" yasaklandı; 🥇🥈🥉 medal kaldırıldı; SAT → "Zayıf Trend" (K3) #}
   {%- if _sig == 'AL' -%}
-    {%- if _score >= 70 %}{% set _hc='#16a34a' %}{% set _hc2='#15803d' %}
-    {%- elif _score >= 50 %}{% set _hc='#22c55e' %}{% set _hc2='#16a34a' %}
+    {%- if _score >= 75 %}{% set _hc='#16a34a' %}{% set _hc2='#15803d' %}
+    {%- elif _score >= 60 %}{% set _hc='#22c55e' %}{% set _hc2='#16a34a' %}
     {%- else %}{% set _hc='#86efac' %}{% set _hc2='#4ade80' %}{% endif -%}
     {% set _lbl='GÜÇLÜ TREND' %}{% set _icon='▲' %}
   {%- elif _sig == 'SAT' -%}
-    {%- if _score >= 70 %}{% set _hc='#dc2626' %}{% set _hc2='#991b1b' %}
-    {%- elif _score >= 50 %}{% set _hc='#ef4444' %}{% set _hc2='#dc2626' %}
+    {%- if _score >= 75 %}{% set _hc='#dc2626' %}{% set _hc2='#991b1b' %}
+    {%- elif _score >= 60 %}{% set _hc='#ef4444' %}{% set _hc2='#dc2626' %}
     {%- else %}{% set _hc='#fca5a5' %}{% set _hc2='#ef4444' %}{% endif -%}
     {% set _lbl='ZAYIF TREND' %}{% set _icon='▼' %}
   {%- else -%}
@@ -1948,17 +1949,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <h2 class="section-title" style="margin:0">🧭 Sinyal Özeti</h2>
       <span style="font-size:11px;color:#909097">2 saniyede karar yardımcısı</span>
-      {# SPEC-015 Skor Halka v1 — SVG circular progress (tier_score 0-100) + tier rozeti #}
-      {% if ssr_signal and ssr_signal.tier_score is not none %}
-      {%- set _ts = ssr_signal.tier_score|int %}
-      {# SPEC-017 Faz B K9-2: Bronz/Gümüş/Altın → Standart/Plus/Premium vocab cleanup #}
-      {%- if   _ts >= 70 %}{% set _tc = "#00e290" %}{% set _tl = "Premium"  %}
-      {%- elif _ts >= 50 %}{% set _tc = "#b8c3ff" %}{% set _tl = "Plus"     %}
-      {%- elif _ts >= 30 %}{% set _tc = "#909097" %}{% set _tl = "Standart" %}
-      {%- else            %}{% set _tc = "#6b7280" %}{% set _tl = "İzleme"  %}{% endif %}
+      {# CPO-535 #36 Skor Halka — compose_score PRIMARY, tier_score fallback #}
+      {%- set _ts = (ssr_signal.signal_strength | default(ssr_signal.tier_score | default(0))) | int %}
+      {% if ssr_signal and _ts > 0 %}
+      {# Tier eşikleri: 75+ PREMIUM | 60-74 İYİ | 40-59 ORTA | <40 ZAYIF #}
+      {%- if   _ts >= 75 %}{% set _tc = "#00e290" %}{% set _tl = "🏆 PREMIUM" %}
+      {%- elif _ts >= 60 %}{% set _tc = "#b8c3ff" %}{% set _tl = "✅ İYİ"     %}
+      {%- elif _ts >= 40 %}{% set _tc = "#909097" %}{% set _tl = "⚪ ORTA"    %}
+      {%- else            %}{% set _tc = "#6b7280" %}{% set _tl = "⚠️ ZAYIF"  %}{% endif %}
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
-           title="Sinyal kalite puanı (0–100). Premium/Plus/Standart tier sınıflandırması bu skora göre.">
-        <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100, {{ _tl }} tier">
+           title="Sinyal gücü puanı (0–100). ADX, hacim, yön gücü, teyit ve RSI bileşenlerine dayalı.">
+        <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100, {{ _tl }}">
           <circle cx="32" cy="32" r="28" fill="none" stroke="#2a2a2c" stroke-width="6"/>
           <circle cx="32" cy="32" r="28" fill="none" stroke="{{ _tc }}" stroke-width="6"
                   stroke-linecap="round" stroke-dasharray="175.93"
@@ -1968,8 +1969,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
                 fill="#e5e1e4" style="font-weight:700;font-size:18px;font-family:inherit">{{ _ts }}</text>
         </svg>
         <div style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.1">
-          <span style="font-size:11px;color:{{ _tc }};font-weight:700;text-transform:uppercase;letter-spacing:.5px">{{ _tl }}</span>
-          <span style="font-size:10px;color:#909097;margin-top:2px">tier skor</span>
+          <span style="font-size:11px;color:{{ _tc }};font-weight:700;letter-spacing:.4px">{{ _tl }}</span>
+          {%- if ssr_signal.is_premium %}
+          <span style="font-size:10px;color:#ffd700;margin-top:3px;letter-spacing:.2px">⭐ Hacim Onaylı</span>
+          {%- else %}
+          <span style="font-size:10px;color:#909097;margin-top:2px">sinyal gücü</span>
+          {%- endif %}
         </div>
       </div>
       {% endif %}
@@ -2979,7 +2984,8 @@ function renderSummary(s, signalData) {
 
   /* Sinyal kartı */
   document.getElementById('icSignal').innerHTML = icon + ' ' + sigLabel(s.signal) +
-    (signalData && signalData.is_premium ? ' <span title="Premium — Hacim onaylı algoritmik sinyal. Backtest sonucu %51 isabet oranı + 4.3x getiri" style="display:inline-block;margin-left:4px;font-size:11px;color:#ffd700;background:rgba(255,215,0,.10);padding:1px 6px;border-radius:8px;border:1px solid rgba(255,215,0,.45);font-weight:700;letter-spacing:.3px;vertical-align:middle">💎 PREMIUM</span>' : '');
+    /* CPO-535 #36: is_premium (RVOL ≥ 1.20 backtest-onaylı) → "⭐ Hacim Onaylı" chip */
+    (signalData && signalData.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20. Backtest: Win Rate %36.7 → %51.5, 4.3x getiri" style="display:inline-block;margin-left:4px;font-size:11px;color:#ffd700;background:rgba(255,215,0,.10);padding:1px 6px;border-radius:8px;border:1px solid rgba(255,215,0,.45);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
   const MAX = 3;
   const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
   const dotCls   = s.signal === 'SAT' ? 'dot-bear' : s.signal === 'AL' ? 'dot-bull' : 'dot-empty';
@@ -3132,7 +3138,8 @@ function renderSummary(s, signalData) {
       const cls = isPremium ? 'ok' : (rvolVal >= 1.0 ? 'weak' : 'bad');
       hpRvolVal.className = 'hp-row-val ' + cls;
       hpRvolVal.innerHTML = `${rvolVal.toFixed(2)}×` +
-        (isPremium ? ' <span class="hp-tag premium" title="Hacim ortalamayı geçmiş — premium işaret">💎 PREMIUM</span>' : '');
+        /* CPO-535 #36: RVOL onaylı chip → "⭐ Hacim Onaylı" */
+        (isPremium ? ' <span class="hp-tag premium" title="RVOL ≥ 1.20 — Hacim onaylı sinyal. Backtest: Win Rate %51.5">⭐ Hacim Onaylı</span>' : '');
       hpRvolRow.style.display = '';
     }
 
