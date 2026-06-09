@@ -988,6 +988,37 @@ def _weekly_trend(ticker: str) -> int:
         return 0
 
 
+def compose_score(adx: float, vol_ratio: float, bull_score: int,
+                  confirmed: bool, rsi: float) -> int:
+    """Tek skor kaynağı — 0-100 aralığı. CPO-535 spec.
+
+    Güçlü Trend listesi (_mscore) ve hisse detay sayfası (signal_strength)
+    için aynı formül → tutarlı sayı. gucu_yuksek() momentum_score() ve
+    analyze() AUDIT-004 tier_score'un yerine geçer (CPO-531 #36).
+
+    Bileşenler:
+        ADX       : min(adx, 50) / 50 * 30   → max 30
+        Hacim     : min(vol_ratio, 5) / 5 * 25 → max 25
+        Yön gücü  : bull_or_bear_score / 3 * 25 → max 25  (AL → bull, SAT → bear)
+        Teyit     : +10 (signal_bars >= 3)
+        RSI bölge : +10 (50-75) | +5 (>75)   → max 10
+
+    Tier eşikleri (hisse detay badge):
+        75+ → 🏆 PREMIUM | 60-74 → ✅ İYİ | 40-59 → ⚪ ORTA | <40 → ⚠️ ZAYIF
+    """
+    s = 0.0
+    s += min(float(adx or 0), 50) / 50 * 30
+    s += min(float(vol_ratio or 1.0), 5) / 5 * 25
+    s += int(bull_score or 0) / 3 * 25
+    s += 10 if confirmed else 0
+    rsi = float(rsi or 50)
+    if 50 <= rsi <= 75:
+        s += 10
+    elif rsi > 75:
+        s += 5
+    return int(round(s))
+
+
 def analyze(ticker_base):
     ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
 
@@ -1316,6 +1347,20 @@ def analyze(ticker_base):
                 tier = None
                 tier_score = 0
 
+        # ── compose_score → signal_strength (CPO-535, #36) ──────────────────
+        # Tek ve tutarlı skor. hisse detay ↔ Güçlü Trend listesi aynı sayıyı gösterir.
+        # tier_score (AUDIT-004) geriye uyumluluk için korunuyor — DEPRECATED.
+        signal_strength = 0
+        if signal != "BEKLE":
+            _bs = bull_score if signal == "AL" else (bear_score or 0)
+            signal_strength = compose_score(
+                adx=float(adx_val or 0),
+                vol_ratio=float(vol_ratio or 1.0),
+                bull_score=int(_bs or 0),
+                confirmed=bool(confirmed),
+                rsi=float(rsi_val or 50),
+            )
+
         return {
             "ticker":        ticker_base,
             "price":         round(c, 2),
@@ -1332,8 +1377,9 @@ def analyze(ticker_base):
             "weekly_trend":  weekly_dir,
             "rvol":          rvol,
             "is_premium":    is_premium,
-            "tier":          tier,        # SPEC-001 Faz 1: 'standart' | 'plus' | 'premium' | None (BEKLE)
-            "tier_score":    tier_score,  # 0-100 kompozit skor
+            "signal_strength": signal_strength,  # compose_score 0-100 (CPO-535 #36) — PRIMARY display
+            "tier":          tier,        # SPEC-001 Faz 1: 'standart' | 'plus' | 'premium' | None (BEKLE) — DEPRECATED
+            "tier_score":    tier_score,  # AUDIT-004 0-100 — backward compat — DEPRECATED (use signal_strength)
             "volume_tl_avg20": volume_tl_avg20,
             "low_liquidity": low_liquidity,
             "adx":           round(adx_val, 1),  # top-level for SSR/SEO
@@ -6842,30 +6888,22 @@ def gucu_yuksek():
         updated_at = _cache.get("updated_at", "")
         loading = len(stocks) == 0
 
-    # Sadece AL/SAT sinyallerini al; kompozit skor hesapla
-    def momentum_score(s):
-        adx = s.get("adx") or 0
-        try:
-            adx = float(str(adx).replace(",", "."))
-        except Exception:
-            adx = 0
-        vr   = s.get("vol_ratio") or 1.0
-        bs   = s.get("bull_score") if s.get("signal") == "AL" else (s.get("bear_score") or 0)
-        bs   = bs or 0
-        conf = 10 if s.get("confirmed") else 0
-        rsi  = s.get("rsi") or 50
-        rsi_pts = 10 if 50 <= rsi <= 75 else (5 if rsi > 75 else 0)
-        return round(
-            min(adx, 50) / 50 * 30 +
-            min(vr, 5) / 5 * 25 +
-            bs / 3 * 25 +
-            conf +
-            rsi_pts
-        )
-
+    # Sadece AL/SAT sinyallerini al; compose_score ile sırala (CPO-535 #36)
+    # momentum_score() kaldırıldı → compose_score() top-level (tutarlılık: hisse detay ↔ liste)
     active = [s for s in stocks if s.get("signal") in ("AL", "SAT") and s.get("ticker") != "XU030"]
     for s in active:
-        s["_mscore"] = momentum_score(s)
+        _bs = s.get("bull_score") if s.get("signal") == "AL" else (s.get("bear_score") or 0)
+        try:
+            _adx = float(str(s.get("adx") or 0).replace(",", "."))
+        except Exception:
+            _adx = 0.0
+        s["_mscore"] = compose_score(
+            adx=_adx,
+            vol_ratio=float(s.get("vol_ratio") or 1.0),
+            bull_score=int(_bs or 0),
+            confirmed=bool(s.get("confirmed")),
+            rsi=float(s.get("rsi") or 50),
+        )
     active.sort(key=lambda s: s["_mscore"], reverse=True)
 
     today_str = date.today().strftime("%d.%m.%Y")
