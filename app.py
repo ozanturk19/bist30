@@ -2497,6 +2497,25 @@ def refresh_data():
     for s in results:
         _enrich_stock(s)
 
+    # ── prev_cache fallback (CPO-550/551): yfinance no-data/timeout tickerlar ────────
+    # Seans dışında bazı tickerlar yfinance'tan veri gelmez → analyze() None →
+    # results'a girmez → cache kısmi yazılır (örn: 193/215).
+    # Fix: önceki cache'deki eksik tickerları "stale" flag ile koru → 215/215 sustained.
+    with _lock:
+        _prev_data = list(_cache.get("data") or [])
+    _fresh_tickers = {r["ticker"] for r in results}
+    _stale_count = 0
+    for _ps in _prev_data:
+        _pt = _ps.get("ticker")
+        if _pt and _pt not in _fresh_tickers:
+            _fallback = dict(_ps)
+            _fallback["data_quality"] = "stale"
+            results.append(_fallback)
+            _stale_count += 1
+    if _stale_count:
+        logger.info("prev_cache fallback: %d ticker stale ile korundu (toplam %d)", _stale_count, len(results))
+    # ── /prev_cache fallback ─────────────────────────────────────────────────────────
+
     with _lock:
         _cache["data"] = results
         _cache["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
