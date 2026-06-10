@@ -2849,11 +2849,30 @@ def api_data():
             if len(_parts) >= 2:
                 s["di_plus"]  = float(_parts[0])
                 s["di_minus"] = float(_parts[1])
+    # ── Stale-safe fields (CPO-551 Aşama 2) ─────────────────────────────────────
+    with _lock:
+        _lr_ts  = _cache.get("last_refresh_ts", 0) or 0
+        _loading = _cache.get("loading", False)
+    _now      = time.time()
+    _age_s    = int(_now - _lr_ts) if _lr_ts else None
+    _mkt_open = _market_open()
+    if not _mkt_open:
+        _dq = "fresh"
+    elif _age_s is None or _age_s > 1800:
+        _dq = "critical"
+    elif _age_s > 900:
+        _dq = "stale"
+    else:
+        _dq = "fresh"
+    # ── /stale-safe fields ───────────────────────────────────────────────────────
     return safe_json({
-        "stocks":     stocks,
-        "updated_at": _cache["updated_at"],
-        "loading":    len(stocks) == 0,
-        "sectors":    list(SECTORS.keys()),
+        "stocks":       stocks,
+        "updated_at":   _cache["updated_at"],
+        "loading":      len(stocks) == 0,
+        "sectors":      list(SECTORS.keys()),
+        "data_quality": _dq,        # "fresh" | "stale" | "critical" (CPO-551)
+        "stocks_age_s": _age_s,     # seconds since last refresh
+        "refreshing":   _loading,   # True = background refresh aktif
         "data_freshness": build_data_freshness(),  # SPEC-014 B1
     })
 
@@ -6304,36 +6323,93 @@ _sitemap_cache: dict = {}  # {"xml": str, "date": str}
 
 def _compute_health():
     """Health verisini hesaplar — _lock alır. SPEC-016 K4: yalnız bg thread çağırır,
-    request path'te DEĞİL → /api/health _lock contention'da bloke olmaz."""
+    request path'te DEĞİL → /api/health _lock contention'da bloke olmaz.
+
+    CPO-551 Aşama 2: OK/DEGRADED/CRITICAL semantics + components + message.
+    Seans dışında (market_open=False) stocks/macro stale DEGRADED/CRITICAL tetiklemez.
+    Eşikler: stocks 900s=DEGRADED 1800s=CRITICAL; macro 1800s=DEGRADED 3600s=CRITICAL.
+    """
     now = time.time()
     with _lock:
-        stocks_count = len(_cache.get("data") or [])
-        cache_loading = _cache.get("loading", True)
-        cache_updated = _cache.get("updated_at", "—")
-        macro_count = len(_macro_cache.get("data") or [])
-        macro_ts = _macro_cache.get("ts", 0)
+        stocks_count    = len(_cache.get("data") or [])
+        cache_loading   = _cache.get("loading", True)
+        cache_updated   = _cache.get("updated_at", "—")
+        last_refresh_ts = _cache.get("last_refresh_ts", 0) or 0
+        macro_count     = len(_macro_cache.get("data") or [])
+        macro_ts        = _macro_cache.get("ts", 0)
 
-    macro_age_s = int(now - macro_ts) if macro_ts else None
-    macro_stale = macro_age_s is None or macro_age_s > _MACRO_TTL
-    healthy = (
-        stocks_count > 0
-        and macro_count > 0
-        and (macro_age_s is None or macro_age_s < 1800)  # 30dk fresh
-    )
+    mkt_open    = _market_open()
+    stocks_age_s = int(now - last_refresh_ts) if last_refresh_ts else None
+    macro_age_s  = int(now - macro_ts) if macro_ts else None
+    macro_stale  = macro_age_s is None or macro_age_s > _MACRO_TTL
+
+    # ── Component durumları ── (seans dışında stale OK — normal davranış)
+    if stocks_count == 0:
+        stocks_status = "critical"
+    elif not mkt_open:
+        stocks_status = "ok"
+    elif stocks_age_s is None or stocks_age_s > 1800:
+        stocks_status = "critical"
+    elif stocks_age_s > 900:
+        stocks_status = "degraded"
+    else:
+        stocks_status = "ok"
+
+    if macro_count == 0:
+        macro_status = "critical"
+    elif not mkt_open:
+        macro_status = "ok"
+    elif macro_age_s is None or macro_age_s > 3600:
+        macro_status = "critical"
+    elif macro_age_s > 1800:
+        macro_status = "degraded"
+    else:
+        macro_status = "ok"
+
+    # ── Genel status: en kötü component ──
+    if "critical" in (stocks_status, macro_status):
+        status = "CRITICAL"
+    elif "degraded" in (stocks_status, macro_status):
+        status = "DEGRADED"
+    else:
+        status = "OK"
+
+    # ── Mesaj ──
+    msg_parts = []
+    if stocks_status == "critical":
+        msg_parts.append(f"stocks {stocks_age_s}s stale" if stocks_age_s else "stocks data yok")
+    elif stocks_status == "degraded":
+        msg_parts.append(f"stocks {stocks_age_s}s stale")
+    if macro_status == "critical":
+        msg_parts.append(f"macro {macro_age_s}s stale" if macro_age_s else "macro data yok")
+    elif macro_status == "degraded":
+        msg_parts.append(f"macro {macro_age_s}s stale")
+    if not msg_parts:
+        message = "seans dışı" if not mkt_open else "tüm sistemler normal"
+    else:
+        message = "; ".join(msg_parts)
+
     macro_last_ts = _macro_bg_stats.get("last_success_ts", 0)
     news_last_ts  = _news_queue_stats.get("last_processed_ts", 0)
     return {
-        "ok":                       healthy,
-        "status":                   "OK" if healthy else "DEGRADED",
+        "ok":          status == "OK",
+        "status":      status,
+        "message":     message,
+        "market_open": mkt_open,
+        "components": {
+            "stocks": stocks_status,
+            "macro":  macro_status,
+        },
         "stocks": {
-            "count":     stocks_count,
-            "loading":   cache_loading,
-            "updated":   cache_updated,
+            "count":   stocks_count,
+            "loading": cache_loading,
+            "updated": cache_updated,
+            "age_s":   stocks_age_s,
         },
         "macro": {
-            "count":     macro_count,
-            "age_s":     macro_age_s,
-            "stale":     macro_stale,
+            "count": macro_count,
+            "age_s": macro_age_s,
+            "stale": macro_stale,
         },
         "macro_bg_loop":            _macro_bg_stats,
         "last_macro_refresh_ts":    macro_last_ts,
@@ -6342,7 +6418,7 @@ def _compute_health():
         "last_news_queue_ts":       news_last_ts,
         "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
         "data_freshness":           build_data_freshness(),  # SPEC-014 B1
-        "chart_integrity_recent": _chart_integrity_count_recent(now),  # SPEC-008 L5
+        "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
         "ts": now,
     }
 
