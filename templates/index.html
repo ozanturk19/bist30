@@ -3684,14 +3684,23 @@ async function fetchData() {
       if (upd) upd.textContent = 'Güncellendi: ' + json.updated_at;  /* Element kaldırılmış olabilir, null guard */
     }
 
-    /* SPEC-014 B3 — stale banner */
-    const f = json.data_freshness;
+    /* SPEC-014 B3 + CPO-551 A5 — stale banner (data_quality öncelikli) */
     const banner = document.getElementById('staleBanner');
-    if (banner && f) {
-      if (f.market_open && f.stocks_age_seconds != null && f.stocks_age_seconds > 900) {
-        const mins = Math.floor(f.stocks_age_seconds / 60);
-        const bTxt = document.getElementById('staleBannerText');
-        if (bTxt) bTxt.textContent = `Veriler son ${mins} dakikadır güncellenmedi.`;
+    const bTxt   = document.getElementById('staleBannerText');
+    const dq     = json.data_quality;
+    const ageS   = json.stocks_age_s;
+    if (banner) {
+      if (dq === 'critical') {
+        const mins = ageS ? Math.floor(ageS / 60) : '?';
+        if (bTxt) bTxt.textContent = `Veriler ${mins} dakikadır güncellenemiyor. Yenileniyor...`;
+        banner.style.background = 'rgba(248,81,73,0.12)';
+        banner.style.borderColor = '#f85149';
+        banner.style.display = 'block';
+      } else if (dq === 'stale') {
+        const mins = ageS ? Math.floor(ageS / 60) : '?';
+        if (bTxt) bTxt.textContent = `Veriler ${mins} dk önce güncellendi — yenileniyor...`;
+        banner.style.background = '';
+        banner.style.borderColor = '';
         banner.style.display = 'block';
       } else {
         banner.style.display = 'none';

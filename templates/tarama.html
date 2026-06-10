@@ -506,6 +506,13 @@
 
 <div class="container">
 
+  <!-- CPO-551 A5 — Stale banner -->
+  <div id="staleBanner" role="alert"
+       style="display:none;background:rgba(245,201,73,.10);border:1px solid rgba(245,201,73,.4);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#f5c949;line-height:1.5">
+    ⚠️ <span id="staleBannerText">Veriler bir süredir güncellenmedi.</span>
+    Piyasa hareketli olabilir — fiyatlar gerçek zamanlı olmayabilir.
+  </div>
+
   <!-- Filtre Çubuğu -->
   <div class="filter-bar">
 
@@ -1062,6 +1069,26 @@ function resetFilters() {
   _hydrateFiltersFromUrl();
   _initReactiveFilters();
   applyFilters();
+})();
+
+/* CPO-551 A5 — stale banner: /api/health non-blocking */
+(async () => {
+  try {
+    const h = await (await fetch('/api/health', {cache: 'no-store'})).json();
+    const banner = document.getElementById('staleBanner');
+    const bTxt   = document.getElementById('staleBannerText');
+    if (!banner) return;
+    if (h.status === 'CRITICAL') {
+      if (bTxt) bTxt.textContent = 'Veriler kritik gecikme — yenileniyor...';
+      banner.style.background = 'rgba(248,81,73,0.12)';
+      banner.style.borderColor = '#f85149';
+      banner.style.color = '#f85149';
+      banner.style.display = 'block';
+    } else if (h.status === 'DEGRADED') {
+      if (bTxt) bTxt.textContent = 'Veriler bir süredir güncellenmedi — yenileniyor...';
+      banner.style.display = 'block';
+    }
+  } catch (_) {}
 })();
 </script>
 <script src="/static/bp-search.js?v=44" defer></script>
