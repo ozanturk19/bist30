@@ -2716,9 +2716,27 @@ def _purge_stale_chart_caches():
 
 
 def background_refresh():
+    # CPO-551 Aşama 4: REFRESH_WORKER env ile web/refresh service ayrımı.
+    # REFRESH_WORKER=web  → sadece disk-reload (bist30.service web workers)
+    # REFRESH_WORKER=1    → her zaman lider, yfinance yapar (bist30-refresh.service)
+    # REFRESH_WORKER unset → eski davranış: lider seçimi + yfinance (geriye dönük uyumluluk)
+    _rw = os.environ.get("REFRESH_WORKER", "")
+    if _rw == "web":
+        logger.info("background_refresh: REFRESH_WORKER=web — disk-reload only modu")
+        while True:
+            try:
+                _load_cache_from_disk()
+                _load_macro_from_disk()
+            except Exception as e:
+                logger.error("web disk-reload hatası: %s", e)
+            time.sleep(90)
+        return  # ulaşılmaz
+    if _rw == "1":
+        logger.info("background_refresh: REFRESH_WORKER=1 — bist30-refresh.service lider modu")
+        # lider seçimi bypass: refresh.service tek process, her zaman lider
     # MSG-140: Sadece leader worker yfinance ağır işi yapar (504 worker hang fix).
     # Non-leader 3 worker hafif disk-reload — cache leader'dan tazelenir, gevent bloke olmaz.
-    if not _is_bg_leader():
+    if _rw != "1" and not _is_bg_leader():
         logger.info("background_refresh: non-leader worker — hafif disk-reload modu (90s)")
         while True:
             try:
