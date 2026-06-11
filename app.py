@@ -2648,6 +2648,13 @@ def fetch_global_prices():
 
 
 def background_global_prices():
+    # CPO-558 (11.06.2026): REFRESH_WORKER guard — web worker'da yfinance yasak
+    _rw = os.environ.get("REFRESH_WORKER", "")
+    if _rw == "web":
+        logger.info("background_global_prices: REFRESH_WORKER=web — disk-reload only modu")
+        return
+    elif _rw == "1":
+        logger.info("background_global_prices: REFRESH_WORKER=1 — bist30-refresh.service lider modu")
     # CPO-520 P0 (07.06.2026): _is_macro_leader fcntl ile multi-worker fan-out önlendi
     # (4 worker × kripto+emtia+ABD multi yfinance download = 25 ticker × 4 = 100 paralel call → deadlock)
     if not _is_macro_leader():
@@ -2663,6 +2670,13 @@ def background_global_prices():
 
 
 def background_live_prices():
+    # CPO-558 (11.06.2026): REFRESH_WORKER guard — web worker'da yfinance yasak
+    _rw = os.environ.get("REFRESH_WORKER", "")
+    if _rw == "web":
+        logger.info("background_live_prices: REFRESH_WORKER=web — disk-reload only modu")
+        return
+    elif _rw == "1":
+        logger.info("background_live_prices: REFRESH_WORKER=1 — bist30-refresh.service lider modu")
     # CPO-520 P0 (07.06.2026): _is_macro_leader fcntl ile multi-worker fan-out önlendi
     # (4 worker × BIST30 multi yfinance.download = 30 ticker × 4 = 120 paralel call → deadlock)
     if not _is_macro_leader():
@@ -3140,11 +3154,24 @@ def _macro_bg_loop():
     """Background macro refresh thread — her 3 dakika.
 
     CPO-520 FIX (07.06.2026): fcntl leader-lock eklendi.
+    CPO-558 FIX (11.06.2026): REFRESH_WORKER guard eklendi — web worker yfinance yasak.
     Önceki: 4 worker × _macro_bg_lock (proses-içi, paylaşımsız) → her worker 10 ticker fast_info
     → 40 paralel yfinance call → gevent+threading hybrid corruption → /hisse 20s deadlock.
     Yeni: _is_macro_leader() fcntl.flock — yalnız 1 worker macro fetch yapar.
     Non-leader worker'lar hafif disk-reload modunda (90s aralık).
     """
+    _rw = os.environ.get("REFRESH_WORKER", "")
+    if _rw == "web":
+        logger.info("_macro_bg_loop: REFRESH_WORKER=web — disk-reload only modu (90s)")
+        while True:
+            try:
+                _load_macro_from_disk()
+            except Exception as e:
+                logger.error("_macro_bg_loop disk-reload hatası: %s", e)
+            time.sleep(90)
+        return  # ulaşılmaz
+    elif _rw == "1":
+        logger.info("_macro_bg_loop: REFRESH_WORKER=1 — bist30-refresh.service lider modu")
     if not _is_macro_leader():
         logger.info("_macro_bg_loop: non-leader worker — hafif disk-reload modu (90s)")
         while True:
