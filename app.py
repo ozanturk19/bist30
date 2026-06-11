@@ -5807,6 +5807,10 @@ def _get_fundamentals(ticker_base):
         cached = _fundamentals_cache.get(ticker_base)
         if cached and (now - cached["ts"]) < _FUND_TTL:
             return cached["data"]
+    # CPO-558G: web worker'da synchronous yfinance yasak — stale/empty cache dön
+    if os.environ.get("REFRESH_WORKER") == "web":
+        logger.debug("_get_fundamentals(%s): REFRESH_WORKER=web — cache-only", ticker_base)
+        return cached["data"] if cached else {}
     try:
         yf_ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
         info = yf.Ticker(yf_ticker).info
@@ -7726,8 +7730,8 @@ def get_earnings_data():
     if cached and (now - ts) < _EARNINGS_TTL:
         return cached
 
-    # Stale veya yok — arka planda yenile
-    if not _earnings_refreshing:
+    # Stale veya yok — arka planda yenile (CPO-558F: web worker'da yfinance thread yasak)
+    if not _earnings_refreshing and os.environ.get("REFRESH_WORKER") != "web":
         threading.Thread(target=_do_earnings_refresh, daemon=True,
                          name="earnings-refresh").start()
 
@@ -8425,6 +8429,11 @@ def _startup():
 
     _orig_serial = _serial_chart_refresh
     def _serial_chart_refresh_with_event():
+        # CPO-558D: web worker'da yfinance chart download yasak — serial_done hemen set et
+        if os.environ.get("REFRESH_WORKER") == "web":
+            logger.info("_serial_chart_refresh_with_event: REFRESH_WORKER=web — atlandı, serial_done set")
+            _serial_done.set()
+            return
         _orig_serial()
         _serial_done.set()
         logger.info("serial_chart_refresh tamamlandi, background_refresh baslayabilir")
@@ -8470,6 +8479,10 @@ def _startup():
     threading.Thread(target=_warm_macro, daemon=True).start()
     # Makro AI özetini başlangıçta ısıt (arka planda — _warm_macro bittikten sonra)
     def _warm_macro_summary():
+        # CPO-558E: web worker'da Gemini/yfinance yasak
+        if os.environ.get("REFRESH_WORKER") == "web":
+            logger.info("_warm_macro_summary: REFRESH_WORKER=web — atlandı")
+            return
         time.sleep(10)   # macro fiyatlarının gelmesini bekle
         _do_macro_ai_refresh()
     threading.Thread(target=_warm_macro_summary, daemon=True).start()
@@ -8484,6 +8497,10 @@ def _startup():
     threading.Thread(target=_warm_earnings, daemon=True).start()
     # Backtest'i arka planda başlat (30 dakika gecikme ile — önce ana veri yüklensin)
     def _delayed_backtest():
+        # CPO-558H: web worker'da backtest (28 × yfinance.download) yasak
+        if os.environ.get("REFRESH_WORKER") == "web":
+            logger.info("_delayed_backtest: REFRESH_WORKER=web — atlandı")
+            return
         time.sleep(1800)   # 30 dakika sonra
         run_backtest()
     threading.Thread(target=_delayed_backtest, daemon=True).start()
