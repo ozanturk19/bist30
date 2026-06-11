@@ -8395,21 +8395,23 @@ def _startup():
     def _background_refresh_after_serial():
         # Baslatma suresince paralel yfinance cagrisi olmasin: serial bitince basla
         _serial_done.wait(timeout=120)
-        # En çok ziyaret edilen BIST30 hisselerinin chart cache'ini ısıt
-        _warm_tickers = ["THYAO", "AKBNK", "GARAN", "ASELS", "EREGL"]
-        for _t in _warm_tickers:
-            try:
-                _compute_chart_data(_t, "2y")
-                time.sleep(0.5)
-            except Exception as _e:
-                logger.warning("prewarm chart [%s]: %s", _t, _e)
-        # Temel analiz verilerini ısıt (yfinance - hisse başına ~1s)
-        for _t in _warm_tickers[:3]:
-            try:
-                _get_fundamentals(_t)
-                time.sleep(0.3)
-            except Exception as _e:
-                logger.warning("prewarm fundamentals [%s]: %s", _t, _e)
+        # CPO-558B: web worker'da yfinance prewarm yasak
+        if os.environ.get("REFRESH_WORKER") != "web":
+            # En çok ziyaret edilen BIST30 hisselerinin chart cache'ini ısıt
+            _warm_tickers = ["THYAO", "AKBNK", "GARAN", "ASELS", "EREGL"]
+            for _t in _warm_tickers:
+                try:
+                    _compute_chart_data(_t, "2y")
+                    time.sleep(0.5)
+                except Exception as _e:
+                    logger.warning("prewarm chart [%s]: %s", _t, _e)
+            # Temel analiz verilerini ısıt (yfinance - hisse başına ~1s)
+            for _t in _warm_tickers[:3]:
+                try:
+                    _get_fundamentals(_t)
+                    time.sleep(0.3)
+                except Exception as _e:
+                    logger.warning("prewarm fundamentals [%s]: %s", _t, _e)
         background_refresh()
 
     threading.Thread(target=_serial_chart_refresh_with_event, daemon=True).start()
@@ -8418,6 +8420,11 @@ def _startup():
     threading.Thread(target=background_global_prices,  daemon=True).start()
     # Makro ticker'ları servis başlar başlamaz ilk kez çek (arka planda)
     def _warm_macro():
+        # CPO-558B: web worker'da yfinance yasak — disk-reload yeterli
+        if os.environ.get("REFRESH_WORKER") == "web":
+            logger.info("_warm_macro: REFRESH_WORKER=web — disk-reload only, yfinance atlandı")
+            _load_macro_from_disk()
+            return
         items = _fetch_macro()
         with _lock:
             _macro_cache["data"] = items
@@ -8431,6 +8438,10 @@ def _startup():
     threading.Thread(target=_warm_macro_summary, daemon=True).start()
     # Bilanço takvimini arka planda yükle (yfinance çağrıları — ana veri hazır olunca)
     def _warm_earnings():
+        # CPO-558B: web worker'da yfinance yasak — refresh service günceller, disk-reload yeter
+        if os.environ.get("REFRESH_WORKER") == "web":
+            logger.info("_warm_earnings: REFRESH_WORKER=web — yfinance atlandı")
+            return
         time.sleep(30)   # ana sinyal datasının gelmesini bekle
         _do_earnings_refresh()
     threading.Thread(target=_warm_earnings, daemon=True).start()
