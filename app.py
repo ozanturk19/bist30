@@ -2346,8 +2346,9 @@ if _is_notify_leader():
     logger.info("Chart-integrity alarm başlatıldı (LEADER — SPEC-008 L5)")
 
 
-_DISK_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
-_BT_DISK_PATH    = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backtest_cache.json")
+_DISK_CACHE_PATH       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
+_LIVE_PRICES_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_live_prices.json")
+_BT_DISK_PATH          = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backtest_cache.json")
 _SNAPSHOTS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshots")
 os.makedirs(_SNAPSHOTS_DIR, exist_ok=True)
 
@@ -2571,6 +2572,7 @@ def fetch_live_prices():
         if payload:
             with _lock:
                 _live_prices.update(payload)
+            _save_live_prices_to_disk()
             _push_sse({"type": "prices", "data": payload, "ts": now_str})
 
     except Exception as e:
@@ -2641,17 +2643,46 @@ def fetch_global_prices():
         if payload:
             with _lock:
                 _live_prices.update(payload)
+            _save_live_prices_to_disk()
             _push_sse({"type": "global_prices", "data": payload, "ts": now_str})
 
     except Exception as e:
         logger.error("fetch_global_prices: %s", e, exc_info=True)
 
 
+def _save_live_prices_to_disk():
+    """Refresh service: _live_prices'ı diske yazar; web workerlar okusun.
+    Boş dict'i yazmaz — startup'ta var olan disk verisini silmesin."""
+    try:
+        with _lock:
+            snapshot = dict(_live_prices)
+        if not snapshot:
+            return
+        _atomic_write_json(_LIVE_PRICES_DISK_PATH, snapshot)
+    except Exception as e:
+        logger.warning("_save_live_prices_to_disk hatası: %s", e)
+
+
+def _load_live_prices_from_disk():
+    """Web worker: _live_prices'ı diskten yükler (yfinance yapmadan)."""
+    try:
+        if not os.path.exists(_LIVE_PRICES_DISK_PATH):
+            return
+        with open(_LIVE_PRICES_DISK_PATH, "r", encoding="utf-8") as f:
+            d = json.load(f)
+        if isinstance(d, dict) and d:
+            with _lock:
+                _live_prices.update(d)
+            logger.debug("_load_live_prices_from_disk: %d fiyat yüklendi", len(d))
+    except Exception as e:
+        logger.warning("_load_live_prices_from_disk hatası: %s", e)
+
+
 def background_global_prices():
     # CPO-558 (11.06.2026): REFRESH_WORKER guard — web worker'da yfinance yasak
     _rw = os.environ.get("REFRESH_WORKER", "")
     if _rw == "web":
-        logger.info("background_global_prices: REFRESH_WORKER=web — disk-reload only modu")
+        logger.info("background_global_prices: REFRESH_WORKER=web — global fiyatlar background_live_prices disk-reload ile güncellenir")
         return
     elif _rw == "1":
         logger.info("background_global_prices: REFRESH_WORKER=1 — bist30-refresh.service lider modu")
@@ -2673,8 +2704,14 @@ def background_live_prices():
     # CPO-558 (11.06.2026): REFRESH_WORKER guard — web worker'da yfinance yasak
     _rw = os.environ.get("REFRESH_WORKER", "")
     if _rw == "web":
-        logger.info("background_live_prices: REFRESH_WORKER=web — disk-reload only modu")
-        return
+        logger.info("background_live_prices: REFRESH_WORKER=web — disk-reload only modu (30s)")
+        while True:
+            try:
+                _load_live_prices_from_disk()
+            except Exception as e:
+                logger.error("background_live_prices disk-reload hatası: %s", e)
+            time.sleep(30)
+        return  # ulaşılmaz
     elif _rw == "1":
         logger.info("background_live_prices: REFRESH_WORKER=1 — bist30-refresh.service lider modu")
     # CPO-520 P0 (07.06.2026): _is_macro_leader fcntl ile multi-worker fan-out önlendi
@@ -8451,14 +8488,18 @@ def _startup():
         run_backtest()
     threading.Thread(target=_delayed_backtest, daemon=True).start()
     # Bilanco takvimi ilk yuklemesini arkaplanda hazirla (yfinance cagrilari yuzunden yavastir)
-    def _warm_earnings():
+    def _warm_earnings_2():
+        # CPO-558B: web worker'da yfinance yasak
+        if os.environ.get("REFRESH_WORKER") == "web":
+            logger.info("_warm_earnings_2: REFRESH_WORKER=web — yfinance atlandı")
+            return
         time.sleep(60)    # Ana veri yüklendikten 60s sonra başla
         try:
             get_earnings_data()
             logger.info("_warm_earnings: bilanço takvimi ön yüklendi")
         except Exception as e:
             logger.warning("_warm_earnings: %s", e)
-    threading.Thread(target=_warm_earnings, daemon=True).start()
+    threading.Thread(target=_warm_earnings_2, daemon=True).start()
 
 threading.Thread(target=_startup, daemon=True).start()
 
