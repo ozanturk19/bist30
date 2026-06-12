@@ -89,6 +89,7 @@ if not VAPID_PUBLIC and os.path.exists(os.path.join(_APP_DIR, "vapid_public.txt"
 _PUSH_SUBS_FILE = os.path.join(_APP_DIR, "push_subs.json")
 _push_subs: list = []
 _push_lock = threading.Lock()
+_YF_GLOBAL_LOCK = threading.Lock()  # CPO-592: tüm yf.download/Ticker çağrılarını serialize — global state contamination fix
 
 
 def _load_push_subs():
@@ -924,8 +925,9 @@ def _fill_intraday_gaps(df, ticker):
     """Gunluk data eksik gunleri 1m data'dan OHLC sentezleyerek doldur.
     yfinance bazen son 1-2 gunun daily barini geciktiriyor."""
     try:
-        df5d = yf.download(ticker, period="5d", interval="1m",
-                           progress=False, auto_adjust=True, timeout=20, threads=False)
+        with _YF_GLOBAL_LOCK:
+            df5d = yf.download(ticker, period="5d", interval="1m",
+                               progress=False, auto_adjust=True, timeout=20, threads=False)
         if df5d is None or df5d.empty:
             return df
         if isinstance(df5d.columns, pd.MultiIndex):
@@ -971,8 +973,9 @@ def _fill_intraday_gaps(df, ticker):
 def _weekly_trend(ticker: str) -> int:
     """Haftalık EMA20 yönü: +1 yükselen, -1 düşen, 0 belirsiz/hata."""
     try:
-        wdf = yf.download(ticker, period="1y", interval="1wk",
-                          progress=False, auto_adjust=True, timeout=20, threads=False)
+        with _YF_GLOBAL_LOCK:
+            wdf = yf.download(ticker, period="1y", interval="1wk",
+                              progress=False, auto_adjust=True, timeout=20, threads=False)
         if wdf is None or len(wdf) < 25:
             return 0
         if isinstance(wdf.columns, pd.MultiIndex):
@@ -1025,8 +1028,9 @@ def analyze(ticker_base):
     try:
         weekly_dir = _weekly_trend(ticker)
 
-        df = yf.download(ticker, period="2y", interval="1d",
-                         progress=False, auto_adjust=True, timeout=30, threads=False)
+        with _YF_GLOBAL_LOCK:
+            df = yf.download(ticker, period="2y", interval="1d",
+                             progress=False, auto_adjust=True, timeout=30, threads=False)
         if df is None or len(df) < 120:
             return None
 
@@ -2438,7 +2442,7 @@ def _load_cache_from_disk():
 # (sonraki iterasyonda tekrar dene, ardarda hang'i önler). 30 ticker × 8s = max ~240s soft cap.
 import concurrent.futures as _cf_analyze
 _ANALYZE_EXECUTOR    = _cf_analyze.ThreadPoolExecutor(max_workers=2, thread_name_prefix="analyze_wd")  # CPO-583: 4→2 CPU throttle
-_ANALYZE_TIMEOUT     = 8     # saniye, yfinance per-ticker hard-cap
+_ANALYZE_TIMEOUT     = 25    # saniye, CPO-592: _YF_GLOBAL_LOCK bekleme dahil (2 thread × 3 download × ~3s = ~18s + buffer)
 _ANALYZE_NEG_CACHE   = {}    # {ticker: timeout_until_ts} — 60s skip after timeout
 _ANALYZE_NEG_TTL     = 60    # saniye
 
@@ -2530,10 +2534,11 @@ def refresh_data():
 def fetch_live_prices():
     tickers_str = " ".join(t + ".IS" for t in BIST30)
     try:
-        df = yf.download(
-            tickers_str, period="2d", interval="1m",
-            progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
-        )
+        with _YF_GLOBAL_LOCK:
+            df = yf.download(
+                tickers_str, period="2d", interval="1m",
+                progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
+            )
         if df is None or df.empty:
             return
 
@@ -2601,10 +2606,11 @@ def fetch_global_prices():
     """Kripto, emtia ve ABD hisselerinin fiyatlarını çeker, SSE'ye push eder."""
     try:
         syms = list(set(_GLOBAL_TICKERS_YF.values()))
-        df = yf.download(
-            " ".join(syms), period="2d", interval="1m",
-            progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
-        )
+        with _YF_GLOBAL_LOCK:
+            df = yf.download(
+                " ".join(syms), period="2d", interval="1m",
+                progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
+            )
         if df is None or df.empty:
             return
 
@@ -3284,10 +3290,11 @@ _MACRO_TICKERS = [
 def _fetch_macro_one(label, sym):
     """Tek bir ticker için fast_info çağrısı — timeout korumalı."""
     try:
-        tk  = yf.Ticker(sym)
-        fi  = tk.fast_info
-        price  = getattr(fi, "last_price", None) or getattr(fi, "regularMarketPrice", None)
-        prev   = getattr(fi, "previous_close", None)
+        with _YF_GLOBAL_LOCK:
+            tk  = yf.Ticker(sym)
+            fi  = tk.fast_info
+            price  = getattr(fi, "last_price", None) or getattr(fi, "regularMarketPrice", None)
+            prev   = getattr(fi, "previous_close", None)
         if price is None or prev is None or prev == 0:
             return None
         change = round((float(price) - float(prev)) / float(prev) * 100, 2)
@@ -3621,7 +3628,8 @@ def get_chart_data():
     WARMUP_MIN   = 200
 
     try:
-        df = yf.Ticker("XU030.IS").history(period="5y", interval="1d", auto_adjust=True)
+        with _YF_GLOBAL_LOCK:
+            df = yf.Ticker("XU030.IS").history(period="5y", interval="1d", auto_adjust=True)
         if df is None or len(df) < WARMUP_MIN + 50:
             return None
 
@@ -4927,15 +4935,17 @@ def _compute_chart_data(ticker_base, period="2y"):
         df = None
         if ticker_base in ("XU100", "XU030"):
             try:
-                df = yf.Ticker(ticker).history(period=period, interval="1d", auto_adjust=True)
+                with _YF_GLOBAL_LOCK:
+                    df = yf.Ticker(ticker).history(period=period, interval="1d", auto_adjust=True)
                 if df is not None and len(df) > 0:
                     df.index = df.index.tz_localize(None) if df.index.tz else df.index
             except Exception as _e:
                 logger.warning("%s: Ticker.history fallback (%s)", ticker_base, _e)
                 df = None
         if df is None or len(df) == 0:
-            df = yf.download(ticker, period=period, interval="1d",
-                             progress=False, auto_adjust=True, timeout=30, threads=False)
+            with _YF_GLOBAL_LOCK:
+                df = yf.download(ticker, period=period, interval="1d",
+                                 progress=False, auto_adjust=True, timeout=30, threads=False)
         if df is None or len(df) < WARMUP_MIN:
             return None
 
@@ -5825,7 +5835,8 @@ def _get_fundamentals(ticker_base):
         return cached["data"] if cached else {}
     try:
         yf_ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
-        info = yf.Ticker(yf_ticker).info
+        with _YF_GLOBAL_LOCK:
+            info = yf.Ticker(yf_ticker).info
         def safe(key, default=None):
             v = info.get(key)
             return v if v not in (None, "N/A", 0) else default
