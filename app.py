@@ -2437,7 +2437,7 @@ def _load_cache_from_disk():
 # Yaklaşım: her ticker için ThreadPoolExecutor + 8s timeout. Timeout'ta skip + 60s negatif cache
 # (sonraki iterasyonda tekrar dene, ardarda hang'i önler). 30 ticker × 8s = max ~240s soft cap.
 import concurrent.futures as _cf_analyze
-_ANALYZE_EXECUTOR    = _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="analyze_wd")
+_ANALYZE_EXECUTOR    = _cf_analyze.ThreadPoolExecutor(max_workers=2, thread_name_prefix="analyze_wd")  # CPO-583: 4→2 CPU throttle
 _ANALYZE_TIMEOUT     = 8     # saniye, yfinance per-ticker hard-cap
 _ANALYZE_NEG_CACHE   = {}    # {ticker: timeout_until_ts} — 60s skip after timeout
 _ANALYZE_NEG_TTL     = 60    # saniye
@@ -2469,7 +2469,7 @@ def refresh_data():
     # Per-ticker hard-timeout korunuyor (_analyze_with_timeout içinde)
     # Toplam timeout 180s soft cap (240s watchdog'un altında)
     results = []
-    with _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="refresh_par") as ex:
+    with _cf_analyze.ThreadPoolExecutor(max_workers=2, thread_name_prefix="refresh_par") as ex:  # CPO-583: 4→2 CPU throttle
         future_map = {ex.submit(_analyze_with_timeout, t): t for t in BIST30}
         try:
             for future in _cf_analyze.as_completed(future_map, timeout=180):
@@ -2862,6 +2862,7 @@ def background_refresh():
         # 3) Chart refresh'leri — her biri watchdog'lu (1dk timeout) + isolated
         for task_name, fn, args in _CHART_REFRESH_TASKS:
             _run_with_timeout(task_name, fn, args, _CHART_TASK_TIMEOUT)
+            time.sleep(5)  # CPO-583: inter-chart throttle — pandas spike aralarında CPU soğutur
 
         time.sleep(900)
 
