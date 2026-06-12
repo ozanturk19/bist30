@@ -2442,7 +2442,7 @@ def _load_cache_from_disk():
 # (sonraki iterasyonda tekrar dene, ardarda hang'i önler). 30 ticker × 8s = max ~240s soft cap.
 import concurrent.futures as _cf_analyze
 _ANALYZE_EXECUTOR    = _cf_analyze.ThreadPoolExecutor(max_workers=2, thread_name_prefix="analyze_wd")  # CPO-583: 4→2 CPU throttle
-_ANALYZE_TIMEOUT     = 25    # saniye, CPO-592: _YF_GLOBAL_LOCK bekleme dahil (2 thread × 3 download × ~3s = ~18s + buffer)
+_ANALYZE_TIMEOUT     = 40    # saniye, CPO-592v3: fetch_live(12s)+fetch_global(8s)+3_download(11s) = ~31s worst-case
 _ANALYZE_NEG_CACHE   = {}    # {ticker: timeout_until_ts} — 60s skip after timeout
 _ANALYZE_NEG_TTL     = 60    # saniye
 
@@ -2534,10 +2534,11 @@ def refresh_data():
 def fetch_live_prices():
     tickers_str = " ".join(t + ".IS" for t in BIST30)
     try:
-        df = yf.download(
-            tickers_str, period="2d", interval="1m",
-            progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
-        )
+        with _YF_GLOBAL_LOCK:  # CPO-592v3: batch da lock altında — slow_chart_refresh contamination fix
+            df = yf.download(
+                tickers_str, period="2d", interval="1m",
+                progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
+            )
         if df is None or df.empty:
             return
 
@@ -2605,10 +2606,11 @@ def fetch_global_prices():
     """Kripto, emtia ve ABD hisselerinin fiyatlarını çeker, SSE'ye push eder."""
     try:
         syms = list(set(_GLOBAL_TICKERS_YF.values()))
-        df = yf.download(
-            " ".join(syms), period="2d", interval="1m",
-            progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
-        )
+        with _YF_GLOBAL_LOCK:  # CPO-592v3: batch da lock altında
+            df = yf.download(
+                " ".join(syms), period="2d", interval="1m",
+                progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
+            )
         if df is None or df.empty:
             return
 
