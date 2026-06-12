@@ -8468,6 +8468,12 @@ def _startup():
                     time.sleep(0.3)
                 except Exception as _e:
                     logger.warning("prewarm fundamentals [%s]: %s", _t, _e)
+        # CPO-572: REFRESH_WORKER=1 → refresh_worker.py zaten background_refresh() çağırıyor.
+        # Burada da çağırmak iki eş-zamanlı refresh_data() döngüsü yaratır → double cache write
+        # → web worker reload flood → cascade (root cause: 2026-06-12 07:55:41 + 07:56:04 çift yazı).
+        if os.environ.get("REFRESH_WORKER") == "1":
+            logger.info("_background_refresh_after_serial: REFRESH_WORKER=1 — background_refresh() atlandı (refresh_worker.py başlatıyor)")
+            return
         background_refresh()
 
     threading.Thread(target=_serial_chart_refresh_with_event, daemon=True).start()
