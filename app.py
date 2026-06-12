@@ -6288,6 +6288,10 @@ def api_stock_chart(ticker):
         ok, reason = validate_chart_integrity(ticker, data, main_price, main_price_age_s)
         if not ok:
             logger.warning("SPEC-008 chart integrity FAIL [%s]: %s — recompute", ticker, reason)
+            # CPO-565 Bug 2: web worker'da yfinance yasak — fetcher daemon dolduracak
+            if os.environ.get("REFRESH_WORKER") == "web":
+                logger.warning("SPEC-008 integrity recompute [%s]: REFRESH_WORKER=web — loading döner", ticker)
+                return safe_json({"chart": None, "loading": True, "reason": "integrity_fail_web_worker"})
             with _lock:
                 _stock_chart_cache.pop(ticker, None)
             fresh = _compute_chart_data(ticker, period="2y")
@@ -8523,6 +8527,40 @@ def _startup():
         except Exception as e:
             logger.warning("_warm_earnings: %s", e)
     threading.Thread(target=_warm_earnings_2, daemon=True).start()
+
+    def _slow_chart_refresh_daemon():
+        # CPO-565 Bug 1: Per-ticker chart dosyalarını diske yazar.
+        # REFRESH_WORKER=1 (leader) ortamında çalışır; web worker'da atlanır.
+        if os.environ.get("REFRESH_WORKER") == "web":
+            logger.info("_slow_chart_refresh: REFRESH_WORKER=web — atlandı")
+            return
+        time.sleep(300)  # Startup'ta 5dk bekle (refresh_data bitmesini bekle)
+        while True:
+            try:
+                with _lock:
+                    tickers = [s.get("ticker") for s in _cache.get("data", []) if s.get("ticker")]
+                if not tickers:
+                    logger.warning("_slow_chart_refresh: _cache boş, 60s bekle")
+                    time.sleep(60)
+                    continue
+                logger.info("_slow_chart_refresh başladı: %d ticker", len(tickers))
+                done = 0
+                for ticker in tickers:
+                    try:
+                        data = _compute_chart_data(ticker, "2y")
+                        if data:
+                            path = os.path.join(_PHASE3_CHART_DIR, f"chart_{ticker}.json")
+                            _atomic_write_json(path, data)
+                            done += 1
+                    except Exception as e:
+                        logger.warning("_slow_chart_refresh [%s]: %s", ticker, e)
+                    time.sleep(3)
+                logger.info("_slow_chart_refresh tamamlandı: %d/%d ticker diske yazıldı", done, len(tickers))
+            except Exception as e:
+                logger.error("_slow_chart_refresh outer: %s", e)
+            time.sleep(6 * 3600)  # 6 saatte bir tam cycle
+
+    threading.Thread(target=_slow_chart_refresh_daemon, daemon=True).start()
 
 threading.Thread(target=_startup, daemon=True).start()
 
