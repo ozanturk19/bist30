@@ -6068,6 +6068,9 @@ def api_signal_explanation(ticker):
         if cached and cached.get("data") and cached.get("data", {}).get("summary"):
             stock = cached["data"]["summary"]
         else:
+            # CPO-586: web worker'da synchronous yfinance yasak — stale cache yok, no_data
+            if os.environ.get("REFRESH_WORKER") == "web":
+                return safe_json({"explanation": None, "reason": "no_data"})
             # Cache yok — hesapla (ilk açılış gecikir ama sonrası cache'den gelir)
             data = _compute_chart_data(ticker, "2y")
             upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
