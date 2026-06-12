@@ -2774,6 +2774,12 @@ def background_refresh():
     _rw = os.environ.get("REFRESH_WORKER", "")
     if _rw == "web":
         logger.info("background_refresh: REFRESH_WORKER=web — disk-reload only modu")
+        # CPO-565: 4 worker aynı anda mtime değişikliği algılamasın → GIL starvation önlenir.
+        # PID % 4 ile 0/23/46/69s stagger — her worker farklı zaman diliminde reload yapar.
+        _stagger = (os.getpid() % 4) * 23
+        if _stagger:
+            logger.info("background_refresh: worker stagger %ds (pid=%d)", _stagger, os.getpid())
+            time.sleep(_stagger)
         while True:
             try:
                 _load_cache_from_disk()
