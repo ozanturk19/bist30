@@ -2534,11 +2534,10 @@ def refresh_data():
 def fetch_live_prices():
     tickers_str = " ".join(t + ".IS" for t in BIST30)
     try:
-        with _YF_GLOBAL_LOCK:
-            df = yf.download(
-                tickers_str, period="2d", interval="1m",
-                progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
-            )
+        df = yf.download(
+            tickers_str, period="2d", interval="1m",
+            progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
+        )
         if df is None or df.empty:
             return
 
@@ -2606,11 +2605,10 @@ def fetch_global_prices():
     """Kripto, emtia ve ABD hisselerinin fiyatlarını çeker, SSE'ye push eder."""
     try:
         syms = list(set(_GLOBAL_TICKERS_YF.values()))
-        with _YF_GLOBAL_LOCK:
-            df = yf.download(
-                " ".join(syms), period="2d", interval="1m",
-                progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
-            )
+        df = yf.download(
+            " ".join(syms), period="2d", interval="1m",
+            progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
+        )
         if df is None or df.empty:
             return
 
