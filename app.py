@@ -6197,6 +6197,12 @@ def api_stock_mtf(ticker):
         if cached and (now - cached["ts"]) < _MTF_CACHE_TTL:
             return safe_json(cached["data"])
 
+    # CPO-585: web worker'da synchronous yfinance yasak — stale veya boş döner, warmup daemon dolduracak
+    if os.environ.get("REFRESH_WORKER") == "web":
+        with _lock:
+            stale = _mtf_cache.get(ticker)
+        return safe_json(stale["data"] if stale else {})
+
     data = _compute_mtf(ticker)
     with _lock:
         _mtf_cache[ticker] = {"data": data, "ts": now}
@@ -8598,6 +8604,28 @@ if os.environ.get("NOTIFY_SOCKET"):
     logger.info("CPO-576: systemd watchdog heartbeat başlatıldı (30s ping, WatchdogSec=120)")
 
 threading.Thread(target=_startup, daemon=True).start()
+
+# CPO-585: MTF warmup daemon — REFRESH_WORKER=1 only, web worker hang önlenir
+# /api/hisse/<ticker>/mtf cache miss → web worker artık blocking call yapmaz (guard var)
+# Bu daemon 30dk'lık MTF cache'ini proaktif doldurur, cold window kalmaz.
+def _mtf_warmup_daemon():
+    time.sleep(90)  # ilk cycle'dan sonra başla — startup I/O ile çakışma önlenir
+    while True:
+        now = time.time()
+        for _t in BIST30:
+            with _lock:
+                _mc = _mtf_cache.get(_t)
+            if not _mc or (now - _mc["ts"]) > 1500:  # 25dk → 30dk TTL'den önce tazele
+                try:
+                    _compute_mtf(_t)
+                    time.sleep(3)  # yfinance throttle
+                except Exception:
+                    pass
+        time.sleep(1800)
+
+if os.environ.get("REFRESH_WORKER") == "1":
+    threading.Thread(target=_mtf_warmup_daemon, daemon=True, name="mtf-warmup").start()
+    logger.info("CPO-585: MTF warmup daemon başlatıldı (REFRESH_WORKER=1, 30dk interval)")
 
 logger.info("=" * 50)
 logger.info("  BIST30 Sinyal Paneli başlatıldı")
