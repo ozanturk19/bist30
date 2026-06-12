@@ -2698,6 +2698,7 @@ def background_global_prices():
         logger.info("background_global_prices: non-leader worker — atlandı")
         return
     logger.info("background_global_prices: LEADER worker — fetch modu (60s)")
+    time.sleep(60)  # CPO-592v3: startup delay — refresh_data() ilk analyze batch'ini tamamlasın
     while True:
         try:
             fetch_global_prices()
@@ -2726,6 +2727,7 @@ def background_live_prices():
         logger.info("background_live_prices: non-leader worker — atlandı")
         return
     logger.info("background_live_prices: LEADER worker — fetch modu (30s)")
+    time.sleep(30)  # CPO-592v3: startup delay — refresh_data() ilk analyze batch'ini tamamlasın
     while True:
         try:
             fetch_live_prices()
