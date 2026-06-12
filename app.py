@@ -8568,6 +8568,34 @@ def _startup():
 
     threading.Thread(target=_slow_chart_refresh_daemon, daemon=True).start()
 
+# CPO-576: systemd watchdog heartbeat — pure Python, python-systemd gerekmez.
+# NotifyAccess=all + WatchdogSec>0 → systemd NOTIFY_SOCKET'i sağlar.
+# READY=1 (startup), ardından her 30s WATCHDOG=1 → WatchdogSec=120 ile 4x margin.
+def _sd_notify(msg):
+    sock_path = os.environ.get("NOTIFY_SOCKET", "")
+    if not sock_path:
+        return False
+    if sock_path.startswith("@"):
+        sock_path = "\0" + sock_path[1:]
+    try:
+        s = _socket.socket(_socket.AF_UNIX, _socket.SOCK_DGRAM)
+        s.sendto(msg.encode(), sock_path)
+        s.close()
+        return True
+    except Exception:
+        return False
+
+def _systemd_watchdog_thread():
+    _sd_notify("READY=1")
+    while True:
+        time.sleep(30)
+        _sd_notify("WATCHDOG=1")
+
+if os.environ.get("NOTIFY_SOCKET"):
+    _wd_thread = threading.Thread(target=_systemd_watchdog_thread, daemon=True, name="systemd-watchdog")
+    _wd_thread.start()
+    logger.info("CPO-576: systemd watchdog heartbeat başlatıldı (30s ping, WatchdogSec=120)")
+
 threading.Thread(target=_startup, daemon=True).start()
 
 logger.info("=" * 50)
