@@ -2774,11 +2774,11 @@ def background_refresh():
     _rw = os.environ.get("REFRESH_WORKER", "")
     if _rw == "web":
         logger.info("background_refresh: REFRESH_WORKER=web — disk-reload only modu")
-        # CPO-565: 4 worker aynı anda mtime değişikliği algılamasın → GIL starvation önlenir.
-        # PID % 4 ile 0/23/46/69s stagger — her worker farklı zaman diliminde reload yapar.
-        _stagger = (os.getpid() % 4) * 23
+        # CPO-591: PID*7%90 → sequential PID'ler 7s arayla stagger alır (0-89s).
+        # Önceki PID%4*23: iki worker aynı stagger (0) alabiliyordu → eş zamanlı reload.
+        _stagger = (os.getpid() * 7) % 90
+        logger.info("background_refresh: worker stagger %ds (pid=%d)", _stagger, os.getpid())
         if _stagger:
-            logger.info("background_refresh: worker stagger %ds (pid=%d)", _stagger, os.getpid())
             time.sleep(_stagger)
         while True:
             try:
@@ -3206,7 +3206,12 @@ def _macro_bg_loop():
     """
     _rw = os.environ.get("REFRESH_WORKER", "")
     if _rw == "web":
-        logger.info("_macro_bg_loop: REFRESH_WORKER=web — disk-reload only modu (90s)")
+        # CPO-591: PID*7%90 stagger — 4 worker aynı anda reload yapmasın (anti-storm).
+        # Önceki: stagger yoktu → tüm worker'lar eş zamanlı json.load() → GIL burst → 15s blok.
+        _mac_stagger = (os.getpid() * 7) % 90
+        logger.info("_macro_bg_loop: REFRESH_WORKER=web — disk-reload only modu (90s), stagger %ds (pid=%d)", _mac_stagger, os.getpid())
+        if _mac_stagger:
+            time.sleep(_mac_stagger)
         while True:
             try:
                 _load_macro_from_disk()
