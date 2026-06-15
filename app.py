@@ -925,9 +925,13 @@ def _fill_intraday_gaps(df, ticker):
     """Gunluk data eksik gunleri 1m data'dan OHLC sentezleyerek doldur.
     yfinance bazen son 1-2 gunun daily barini geciktiriyor."""
     try:
-        with _YF_GLOBAL_LOCK:
+        if not _YF_GLOBAL_LOCK.acquire(timeout=30):  # CPO-596: deadlock koruması
+            return df
+        try:
             df5d = yf.download(ticker, period="5d", interval="1m",
                                progress=False, auto_adjust=True, timeout=20, threads=False)
+        finally:
+            _YF_GLOBAL_LOCK.release()
         if df5d is None or df5d.empty:
             return df
         if isinstance(df5d.columns, pd.MultiIndex):
@@ -973,9 +977,13 @@ def _fill_intraday_gaps(df, ticker):
 def _weekly_trend(ticker: str) -> int:
     """Haftalık EMA20 yönü: +1 yükselen, -1 düşen, 0 belirsiz/hata."""
     try:
-        with _YF_GLOBAL_LOCK:
+        if not _YF_GLOBAL_LOCK.acquire(timeout=30):  # CPO-596: deadlock koruması
+            return 0
+        try:
             wdf = yf.download(ticker, period="1y", interval="1wk",
                               progress=False, auto_adjust=True, timeout=20, threads=False)
+        finally:
+            _YF_GLOBAL_LOCK.release()
         if wdf is None or len(wdf) < 25:
             return 0
         if isinstance(wdf.columns, pd.MultiIndex):
@@ -1028,9 +1036,15 @@ def analyze(ticker_base):
     try:
         weekly_dir = _weekly_trend(ticker)
 
-        with _YF_GLOBAL_LOCK:
+        # CPO-596: timeout ile acquire — eski thread lock'u tutuyorsa sonsuz bekleme yerine skip
+        if not _YF_GLOBAL_LOCK.acquire(timeout=45):
+            logger.error("analyze(%s): _YF_GLOBAL_LOCK 45s timeout — skip", ticker_base)
+            return None
+        try:
             df = yf.download(ticker, period="2y", interval="1d",
                              progress=False, auto_adjust=True, timeout=30, threads=False)
+        finally:
+            _YF_GLOBAL_LOCK.release()
         if df is None or len(df) < 120:
             return None
 
@@ -2117,7 +2131,7 @@ def build_data_freshness():
     stocks_age = int(now - last_ts) if last_ts else None
     macro_age  = int(now - macro_ts) if macro_ts else None
     mkt_open   = _market_open()
-    is_stale   = bool(mkt_open and stocks_age is not None and stocks_age > 900)
+    is_stale   = bool(stocks_age is not None and stocks_age > 1800)  # CPO-596: market_open'a bağlama, 30dk absolute threshold
 
     return {
         "stocks_updated_at":  updated_at,
@@ -2473,7 +2487,10 @@ def refresh_data():
     # Per-ticker hard-timeout korunuyor (_analyze_with_timeout içinde)
     # Toplam timeout 180s soft cap (240s watchdog'un altında)
     results = []
-    with _cf_analyze.ThreadPoolExecutor(max_workers=2, thread_name_prefix="refresh_par") as ex:  # CPO-583: 4→2 CPU throttle
+    # CPO-596: `with executor` kullanma — __exit__ shutdown(wait=True) çağırır ve hung thread'de
+    # 66 saat bloke kalır. Explicit shutdown(wait=False) ile hung thread'leri bırak, devam et.
+    ex = _cf_analyze.ThreadPoolExecutor(max_workers=2, thread_name_prefix="refresh_par")  # CPO-583: 4→2 CPU throttle
+    try:
         future_map = {ex.submit(_analyze_with_timeout, t): t for t in BIST30}
         try:
             for future in _cf_analyze.as_completed(future_map, timeout=180):
@@ -2490,6 +2507,8 @@ def refresh_data():
             for f in future_map:
                 if not f.done():
                     f.cancel()
+    finally:
+        ex.shutdown(wait=False)  # CPO-596: hung thread'leri bekleme — deadlock önleme
 
     results.sort(key=lambda x: (
         0 if x.get("is_new_signal") else 1,
@@ -2854,7 +2873,22 @@ def background_refresh():
             logger.error("%s hatası: %s", name, e, exc_info=True)
             return False
 
+    # CPO-596: Loop-level watchdog — eğer 30dk'da döngü tamamlanmazsa process çık, systemd restart etsin.
+    _bg_loop_last_ts = [time.time()]
+
+    def _bg_loop_watchdog():
+        while True:
+            time.sleep(120)
+            age = time.time() - _bg_loop_last_ts[0]
+            if age > 1800:  # 30 dakika
+                logger.critical("background_refresh watchdog: loop %ds dondu — process çıkıyor (restart bekleniyor)", int(age))
+                import os as _os; _os._exit(2)
+
+    import threading as _thr
+    _thr.Thread(target=_bg_loop_watchdog, daemon=True, name="bg_refresh_watchdog").start()
+
     while True:
+        _bg_loop_last_ts[0] = time.time()
         # 1) BIST30 ana refresh — watchdog'lu (4dk timeout)
         logger.info("background_refresh: refresh_data() başlıyor")
         ok = _run_with_timeout("refresh_data", refresh_data, (), _REFRESH_DATA_TIMEOUT)
