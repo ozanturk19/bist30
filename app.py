@@ -6576,6 +6576,7 @@ def _compute_health():
         "last_news_queue_ts":       news_last_ts,
         "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
         "data_freshness":           build_data_freshness(),  # SPEC-014 B1
+        "market_data_age_s":         stocks_age_s,                           # CPO-590 madde 4
         "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
         "ts": now,
     }
