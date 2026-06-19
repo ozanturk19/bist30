@@ -8623,7 +8623,7 @@ def _startup():
                             done += 1
                     except Exception as e:
                         logger.warning("_slow_chart_refresh [%s]: %s", ticker, e)
-                    time.sleep(3)
+                    time.sleep(1)  # CPO-620: throttle 3s→1s, 15dk pencereye sigmak icin
                 logger.info("_slow_chart_refresh tamamlandı: %d/%d ticker diske yazıldı", done, len(tickers))
             except Exception as e:
                 logger.error("_slow_chart_refresh outer: %s", e)
