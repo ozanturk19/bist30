@@ -7533,6 +7533,11 @@ def _inject_premium_status():
     return dict(has_premium_access=has_premium_access(), premium_count=pc)
 
 
+@app.route("/sinyaller")
+def redirect_sinyaller():
+    return redirect("/sinyal-performans", 301)
+
+
 @app.route("/sinyal-performans")
 def sinyal_performans():
     with _lock:
@@ -7626,6 +7631,11 @@ def hisseler_hub():
         letters_sorted=letters_sorted,
         total_count=len(all_pairs),
     )
+
+
+@app.route("/sektorler")
+def redirect_sektorler():
+    return redirect("/sektor-harita", 301)
 
 
 @app.route("/sektor-harita")
