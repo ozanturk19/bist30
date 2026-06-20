@@ -2989,7 +2989,7 @@ function renderSummary(s, signalData) {
 
   const sigEl  = document.getElementById('hpSignal');
   const icon   = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
-  sigEl.textContent = icon + ' ' + sigLabel(s.signal);
+  sigEl.textContent = icon;  // label icSignal card'da gosteriliyor
   sigEl.className   = 'signal-badge signal-' + s.signal;
 
   /* Sinyal kartı */
