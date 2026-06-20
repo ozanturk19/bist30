@@ -2990,11 +2990,11 @@ function renderSummary(s, signalData) {
 
   const sigEl  = document.getElementById('hpSignal');
   const icon   = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
-  sigEl.textContent = icon;  // label icSignal card'da gosteriliyor
+  sigEl.textContent = icon;  // icon only — bp-hero-card full label gosteriyor
   sigEl.className   = 'signal-badge signal-' + s.signal;
 
   /* Sinyal kartı */
-  document.getElementById('icSignal').innerHTML = icon + ' ' + sigLabel(s.signal) +
+  document.getElementById('icSignal').innerHTML = icon +  // label bp-hero-card'da gosteriliyor
     /* CPO-535 #36: is_premium (RVOL ≥ 1.20 backtest-onaylı) → "⭐ Hacim Onaylı" chip */
     (signalData && signalData.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20. Backtest: Win Rate %36.7 → %51.5, 4.3x getiri" style="display:inline-block;margin-left:4px;font-size:11px;color:#ffd700;background:rgba(255,215,0,.10);padding:1px 6px;border-radius:8px;border:1px solid rgba(255,215,0,.45);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
   const MAX = 3;
