@@ -195,13 +195,15 @@
   /* ── Header (glass) ── */
   header {
     /* SPEC-STICKY-HEADER-v3 fix5: bp-search.js header'a !important min/max-height:60 + display:flex zorluyor.
-       Burada sadece bg opaklığını + sticky + z-index ayarla. flex-direction:column iptal (bp-search override ediyor).
-       bp-segments artık header DIŞINDA, sticky top:60. */
+       CLS-fix v3.1: CSS'te de aynı değerleri set et → JS'in !important değişikliği layout shift yaratmaz. */
     background: #0e0e12;
     border-bottom: 1px solid rgba(42,42,44,0.95);
     position: sticky;
     top: 0;
     z-index: 1000;
+    display: flex;
+    min-height: 60px;
+    max-height: 60px;
   }
   .bp-header-row {
     display: contents;  /* bp-search.js header forced flex:row uses children directly */
@@ -1717,7 +1719,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
     {% endif %}
     {# SPEC-017 v2 c5 — Sparkline 30D (vanilla canvas + long-press crosshair) #}
-    <div class="bp-spark-wrap" id="bpSparkWrap" style="display:none">
+    <div class="bp-spark-wrap" id="bpSparkWrap" style="visibility:hidden;min-height:76px">
       <div class="bp-spark-label">
         <span>Son 30 gün</span>
         <span id="bpSparkVal" class="bp-spark-val">—</span>
@@ -1756,7 +1758,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
         return { t: b.time || b.t, c: +(b.close != null ? b.close : b.c) };
       }).filter(function(x){ return !isNaN(x.c); });
       if (data.length < 2) return;
-      wrap.style.display = 'block';
+      wrap.style.visibility = 'visible';
       var dpr = window.devicePixelRatio || 1;
       var W = cv.clientWidth || wrap.clientWidth || 280;
       var H = 52;
