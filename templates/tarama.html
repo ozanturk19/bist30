@@ -396,6 +396,27 @@
     .rvol-cell, .fresh-badge { font-size:11px; }
   }
 
+  /* ── Faz4 Madde-3: Mobile card stack ── */
+  #mobileResultCards { display:none; flex-direction:column; gap:10px; padding:4px 0 12px; }
+  @media (max-width:768px) {
+    #resultTable { display:none !important; }
+    #mobileResultCards { display:flex; }
+  }
+  .mr-card {
+    display:block; background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:12px 14px; text-decoration:none; color:inherit;
+    transition:border-color 0.15s;
+  }
+  .mr-card:hover { border-color:var(--accent,#1f6feb); }
+  .mr-card.mr-locked { filter:blur(4px); pointer-events:none; user-select:none; }
+  .mr-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .mr-ticker { font-size:15px; font-weight:700; color:var(--text); letter-spacing:0.5px; }
+  .mr-name   { font-size:11px; color:var(--text3); margin-top:1px; }
+  .mr-bottom { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .mr-metric { display:flex; flex-direction:column; gap:2px; }
+  .mr-metric-label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:0.4px; }
+  .mr-price-val { font-variant-numeric:tabular-nums; font-size:13px; font-weight:600; color:var(--text); }
+
   footer { text-align:center; padding:20px; font-size:12px; color:var(--text3); border-top:1px solid var(--border2); margin-top:32px; }
   footer a { color:var(--text2); text-decoration:none; }
   /* SPEC-007: Premium paywall — blur + CTA banner */
@@ -635,6 +656,7 @@
       </thead>
       <tbody id="resultBody"></tbody>
     </table>
+    <div id="mobileResultCards"></div>
     <div class="empty-state" id="emptyDiv" style="display:none">
       <div class="empty-icon">📭</div>
       <h3>Sonuç bulunamadı</h3>
@@ -951,6 +973,8 @@ function renderResults(rows, count) {
   if (!rows.length) {
     document.getElementById('emptyDiv').style.display   = '';
     document.getElementById('resultTable').style.display = 'none';
+    const _mrlE = document.getElementById('mobileResultCards');
+    if (_mrlE) _mrlE.innerHTML = '';
     return;
   }
 
@@ -1024,6 +1048,34 @@ function renderResults(rows, count) {
       <td class="hide-mob hide-tablet"><span class="sector-tag">${s.sector||'—'}</span></td>
     </tr>`;
   }).join('');
+
+  const _mrl = document.getElementById('mobileResultCards');
+  if (_mrl) {
+    _mrl.innerHTML = rows.map(s => {
+      const _chgCls  = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
+      const _chgSign = s.change_pct > 0 ? '+' : '';
+      const _eqSafe  = s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI';
+      const _eqH     = s.entry_quality
+        ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
+        : '<span style="color:var(--text3)">—</span>';
+      const _lk  = (_premLocked && s.tier === 'premium') ? ' mr-locked' : '';
+      const _prm = s.tier === 'premium' ? ' <span style="color:#ffc850;font-size:11px">💎</span>' : '';
+      const _adx = s.adx || 0;
+      const _tl  = _adx >= 25 ? ['Güçlü','strong'] : _adx >= 18 ? ['Orta','medium'] : ['Zayıf','weak'];
+      return `<a href="/hisse/${s.ticker}" class="mr-card${_lk}">
+        <div class="mr-top">
+          <div><div class="mr-ticker">${s.ticker}${_prm}</div><div class="mr-name">${(s.name||'').replace(' A.Ş.','').substring(0,22)}</div></div>
+          <span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span>
+        </div>
+        <div class="mr-bottom">
+          <div class="mr-metric"><div class="mr-metric-label">Trend</div><span class="trend-label ${_tl[1]}">${_tl[0]}</span></div>
+          <div class="mr-metric"><div class="mr-metric-label">Kalite</div>${_eqH}</div>
+          <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})} ₺</span></div>
+          <div class="mr-metric"><div class="mr-metric-label">Değişim</div><span class="${_chgCls}" style="font-size:13px;font-weight:600">${_chgSign}${(s.change_pct||0).toFixed(2)}%</span></div>
+        </div>
+      </a>`;
+    }).join('');
+  }
 
   document.getElementById('resultTable').style.display = '';
 }
