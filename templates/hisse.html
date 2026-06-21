@@ -123,7 +123,11 @@
 {% endif %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Google Fonts: display=optional → zero CLS (no font-swap after first render) -->
+<!-- woff2 preload: files start downloading before CSS arrives → available within optional block period → no swap → CLS=0 -->
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggmxSvfedN62Zw.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4C_k3HqU.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C_k3HqUtEw.woff2" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts body'ye taşındı (render-blocking kaldırıldı) -->
@@ -134,6 +138,14 @@
     size-adjust: 105%;
     ascent-override: 92%;
     descent-override: 24%;
+    line-gap-override: 0%;
+  }
+  @font-face {
+    font-family: 'SpaceGrotesk-Fallback';
+    src: local('Arial');
+    size-adjust: 97%;
+    ascent-override: 93%;
+    descent-override: 25%;
     line-gap-override: 0%;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -156,7 +168,7 @@
   }
 
   h1, h2, h3, .section-title, .panel-title {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-family: 'Space Grotesk', 'SpaceGrotesk-Fallback', system-ui, sans-serif;
   }
 
   /* ── Header (glass) ── */
