@@ -1112,7 +1112,7 @@
     #liveTs        { display: none; }
     .container { padding: 10px 12px; }
     #chartMain    { height: 240px; }
-    #chartLoading { height: 420px; }  /* CLS-fix v3.4: match chartsInner min-height so swap causes zero net height change */
+    #chartLoading { height: 280px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
     .chart-section { overflow: hidden; }
   }
@@ -1973,6 +1973,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <span class="chart-label">{{ ticker }} — Günlük Grafik (2 Yıl)</span>
       <span id="emaLegend" style="font-size:11px;color:#909097;margin-left:auto"></span>
     </div>
+    <div id="chartBody" style="min-height:420px">
     <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
     <div id="chartsInner" style="position:relative;min-height:420px">
       <div id="chartMain"></div>
@@ -1992,6 +1993,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
           <span>52H Yüksek</span>
         </div>
       </div>
+    </div>
     </div>
   </div>
 
