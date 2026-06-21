@@ -393,11 +393,11 @@
     font-weight: 500;
   }
   #chartLoading {
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    height: 440px;
+    height: 420px;
     color: #909097;
     font-size: 13px;
   }
@@ -410,7 +410,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  #chartsInner { display: block; }
+  #chartsInner { display: none; }
   #chartMain   { height: 340px; }
 
   /* ── 52 Haftalık Bar ── */
@@ -704,7 +704,6 @@
   .sig-stat-lbl  { font-size:10px; color:#909097; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   @keyframes shimmerStat { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
   .stat-sk { background:linear-gradient(90deg,#1c1b1f 25%,#252d3a 50%,#1c1b1f 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:4px; display:inline-block; }
-  .chart-sk { height:360px; background:linear-gradient(90deg,#1c1b1f 25%,#252d3a 50%,#1c1b1f 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:6px; margin-bottom:8px; }
   @media(max-width:500px) { .sig-stats-row{grid-template-columns:repeat(2,1fr);} }
 
   /* ── Sinyal geçmişi ── */
@@ -1923,7 +1922,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
     <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
     <div id="chartsInner" style="position:relative;min-height:420px">
-      <div id="chartSkeleton" class="chart-sk"></div>
       <div id="chartMain"></div>
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
       <div class="week52-bar" id="week52Bar" style="display:none">
@@ -2766,8 +2764,7 @@ const BASE_OPTS = {
 /* ── Grafik kurulumu ─────────────────────────────────── */
 function buildChart(d) {
   document.getElementById('chartLoading').style.display = 'none';
-  document.getElementById('chartSkeleton').style.display = 'none';
-  /* chartsInner always block (Option B) */
+  document.getElementById('chartsInner').style.display  = 'block';
 
   const elMain   = document.getElementById('chartMain');
   const isMobile = window.innerWidth < 768;
@@ -3352,29 +3349,17 @@ const _MAX_CHART_RETRY = 3;
 function _showChartStatus(msg, withRetryBtn) {
   const el = document.getElementById('chartLoading');
   if (!el) return;
-  if (withRetryBtn) {
-    /* Error state: hide skeleton + chartsInner, show chartLoading with retry */
-    const _csEl2 = document.getElementById('chartSkeleton');
-    if (_csEl2) _csEl2.style.display = 'none';
-    document.getElementById('chartsInner').style.display = 'none';
-    el.style.display = 'flex';
-    el.innerHTML = '<span style="color:#909097">' + msg + '</span> ' +
+  el.style.display = 'block';
+  document.getElementById('chartsInner').style.display = 'none';
+  el.innerHTML = withRetryBtn
+    ? '<span style="color:#909097">' + msg + '</span> ' +
       '<button type="button" onclick="loadChart(0)" style="margin-left:8px;background:#1f6feb;' +
-      'color:#fff;border:0;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer">Tekrar dene</button>';
-  } else {
-    /* Loading/retry state: keep skeleton + chartsInner, hide chartLoading */
-    el.style.display = 'none';
-  }
+      'color:#fff;border:0;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer">Tekrar dene</button>'
+    : '<div class="spinner"></div> ' + msg;
 }
 
 async function loadChart(retry) {
   retry = retry || 0;
-  /* skeleton restore on initial load or retry */
-  const _clEl = document.getElementById('chartLoading');
-  const _csEl = document.getElementById('chartSkeleton');
-  if (_clEl) _clEl.style.display = 'none';
-  if (_csEl) _csEl.style.display = 'block';
-  document.getElementById('chartsInner').style.display = 'block';
   // CPO-434 chart-fix: /api/hisse/X/chart ve /api/data DECOUPLE — Promise.all KALDIRILDI.
   // /api/data churn'de timeout olsa bile chart kendi healthy endpoint'inden render olur.
   // Önce chart fetch + render, sonra /api/data ayrı non-blocking (fail-silent).
