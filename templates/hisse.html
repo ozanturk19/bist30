@@ -295,7 +295,7 @@
   }
   /* Mobile: butonlar full-width row haline gelsin (flex-wrap zaten yapar, ama label kısa kalsın) */
   @media (max-width: 720px) {
-    .hib-action-btn { height: 30px; padding: 0 11px; font-size: 11.5px; }
+    .hib-action-btn { height: 44px; padding: 0 11px; font-size: 11.5px; }
     .hib-action-btn svg { width: 14px; height: 14px; }
     .hib-action-bar { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; margin-top: 6px; }
     .hib-action-bar .hib-action-btn { flex: 1 1 auto; justify-content: center; min-width: 130px; }
@@ -1171,6 +1171,7 @@
   /* ── Header Search Button ── */
   .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius: 6px; color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 6px; }
   .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
+  @media (max-width: 768px) { .header-search-btn { min-width: 44px; min-height: 44px; } }
   /* ── Search Overlay ── */
   .search-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
   .search-overlay.open { display: flex; }
