@@ -1154,7 +1154,9 @@
   .macro-chg-neu { color: #909097; }
 
   /* ── Quick Topic Chips ── */
-  .quick-topics { display: flex; gap: 8px; align-items: center; padding: 9px 24px; background: rgba(20,20,22,0.5); border-bottom: 1px solid var(--bp-border); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; white-space: nowrap; position: relative; z-index: 5; }
+  /* CLS-fix v3.3: bp-search.js removes nav.quick-topics via querySelectorAll at runtime.
+     display:none pre-empts the ~40px height that otherwise causes main.container to shift up. */
+  .quick-topics { display: none; }
   .quick-topics::-webkit-scrollbar { display: none; }
   .qt-label { flex-shrink: 0; font-size: 10px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 2px; font-family: 'Space Grotesk', system-ui, sans-serif; }
   .qt-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; background: rgba(184,195,255,0.04); border: 1px solid var(--bp-border); border-radius: 14px; font-size: 12px; font-weight: 500; color: var(--bp-text2); text-decoration: none; transition: background .15s ease, border-color .15s ease, color .15s ease; font-family: 'Manrope', system-ui, sans-serif; line-height: 1.3; }
@@ -1972,7 +1974,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <span id="emaLegend" style="font-size:11px;color:#909097;margin-left:auto"></span>
     </div>
     <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
-    <div id="chartsInner" style="position:relative;min-height:480px">
+    <div id="chartsInner" style="position:relative;min-height:420px">
       <div id="chartMain"></div>
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
       <div class="week52-bar" id="week52Bar" style="display:none">
@@ -1997,7 +1999,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   {% if signal_summary %}
   <div id="signalSummarySection"
        data-tab-content="ozet"
-       style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:18px 18px 14px;margin-bottom:20px;min-height:300px">
+       style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:18px 18px 14px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <h2 class="section-title" style="margin:0">🧭 Sinyal Özeti</h2>
       <span style="font-size:11px;color:#909097">2 saniyede karar yardımcısı</span>
