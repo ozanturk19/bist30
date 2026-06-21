@@ -417,7 +417,7 @@ async function load() {
     render(data);
   } catch(e) {
     document.getElementById('periodsContainer').innerHTML =
-      '<div class="loading-msg">⚠️ Veriler yüklenemedi (' + e.message + '). <a href="javascript:location.reload()" style="color:#58a6ff">Yenile</a></div>';
+      '<div class="loading-msg">⚠️ Veriler yüklenemedi (' + e.message + '). <a href="." onclick="location.reload();return false" style="color:#58a6ff">Yenile</a></div>';
     document.getElementById('lastUpdate').textContent = 'Yüklenemedi';
   }
 }
