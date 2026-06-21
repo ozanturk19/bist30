@@ -127,7 +127,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggmxSuXd.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
-<!-- lightweight-charts body'ye taşındı (render-blocking kaldırıldı) -->
+<!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <style>
   @font-face {
     font-family: 'Inter-Fallback';
@@ -2548,7 +2548,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong>yatırım tavsiyesi değildir</strong>. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
 </footer>
 
-<script src="/static/lightweight-charts.min.js"></script>
 <script>
 /* ── Global nav dropdown ── */
 function toggleNavDd(id, btn) {
@@ -2600,7 +2599,16 @@ function sigLabel(sig) {
   return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Yatay'}[sig] || sig;
 }
 
-const LC      = LightweightCharts;
+let LC = null;
+function _loadChartLib() {
+  if (LC) return Promise.resolve();
+  return new Promise(function(res) {
+    var s = document.createElement('script');
+    s.src = '/static/lightweight-charts.min.js';
+    s.onload = function() { LC = LightweightCharts; res(); };
+    document.head.appendChild(s);
+  });
+}
 
 /* ── Grafik eksen label formatı ─────────────────────────
    Sorunlar çözülüyor:
@@ -2808,13 +2816,15 @@ function shareSignal(platform) {
   }
 }
 
-const BASE_OPTS = {
-  layout:          { background: { color: '#0f1923' }, textColor: '#909097' },
-  grid:            { vertLines: { color: 'rgba(48,54,61,0.5)' }, horzLines: { color: 'rgba(48,54,61,0.5)' } },
-  crosshair:       { mode: LC.CrosshairMode.Normal, vertLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 }, horzLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 } },
-  rightPriceScale: { borderColor: 'rgba(48,54,61,0.6)', scaleMargins: { top: 0.08, bottom: 0.08 } },
-  handleScroll: true, handleScale: true,
-};
+function getBaseOpts() {
+  return {
+    layout:          { background: { color: '#0f1923' }, textColor: '#909097' },
+    grid:            { vertLines: { color: 'rgba(48,54,61,0.5)' }, horzLines: { color: 'rgba(48,54,61,0.5)' } },
+    crosshair:       { mode: LC.CrosshairMode.Normal, vertLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 }, horzLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 } },
+    rightPriceScale: { borderColor: 'rgba(48,54,61,0.6)', scaleMargins: { top: 0.08, bottom: 0.08 } },
+    handleScroll: true, handleScale: true,
+  };
+}
 
 /* ── Grafik kurulumu ─────────────────────────────────── */
 function buildChart(d) {
@@ -2826,7 +2836,7 @@ function buildChart(d) {
   const chartW   = elMain.clientWidth || elMain.parentElement.clientWidth || 900;
 
   const chart = LC.createChart(elMain, {
-    ...BASE_OPTS,
+    ...getBaseOpts(),
     width:     chartW,
     height:    isMobile ? 240 : 340,
     timeScale: { borderColor: '#2a2a2c', timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmt },
@@ -3415,6 +3425,7 @@ function _showChartStatus(msg, withRetryBtn) {
 
 async function loadChart(retry) {
   retry = retry || 0;
+  await _loadChartLib();
   // CPO-434 chart-fix: /api/hisse/X/chart ve /api/data DECOUPLE — Promise.all KALDIRILDI.
   // /api/data churn'de timeout olsa bile chart kendi healthy endpoint'inden render olur.
   // Önce chart fetch + render, sonra /api/data ayrı non-blocking (fail-silent).
@@ -4156,6 +4167,6 @@ document.addEventListener('click', function(e) {
 })();
 </script>
 
-<script src="/static/js/toast.js"></script>
+<script src="/static/js/toast.js" defer></script>
 </body>
 </html>
