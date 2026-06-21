@@ -436,6 +436,11 @@
     text-decoration: none; white-space: nowrap;
   }
   .premium-cta-btn:hover { background: #ffe34d; }
+  /* ── Faz5 Madde-2: Skeleton shimmer ── */
+  @keyframes sk-shimmer { 0%{background-position:-300px 0} 100%{background-position:300px 0} }
+  .sk-cell { height:14px; border-radius:4px; background:linear-gradient(90deg,#1c1b1f 25%,#252d3a 50%,#1c1b1f 75%); background-size:300px 100%; animation:sk-shimmer 1.4s infinite; }
+  .sk-row td { padding:12px 10px; vertical-align:middle; }
+  .mr-sk-card { height:82px; border-radius:10px; background:linear-gradient(90deg,#1c1b1f 25%,#252d3a 50%,#1c1b1f 75%); background-size:300px 100%; animation:sk-shimmer 1.4s infinite; }
 </style>
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 </head>
@@ -636,7 +641,7 @@
       <div class="spinner"></div>
       <span>Veriler yükleniyor…</span>
     </div>
-    <table id="resultTable" style="display:none">
+    <table id="resultTable">
       <thead>
         {# SPEC-UX-BATCH-2026-06-03 Task #23 (CPO-475): Tarama kolon redesign.
            Yeni sıra: Hisse / Sinyal / Trend Gücü (eski ADX) / Giriş Kalitesi (öne) / Fiyat / Değişim / RVOL× / Tazelik / Sektör.
@@ -654,9 +659,9 @@
           <th class="hide-mob hide-tablet">Sektör</th>
         </tr>
       </thead>
-      <tbody id="resultBody"></tbody>
+      <tbody id="resultBody">{% for i in range(12) %}<tr class="sk-row"><td><div class="sk-cell" style="width:52px"></div></td><td><div class="sk-cell" style="width:65px"></div></td><td><div class="sk-cell" style="width:55px"></div></td><td><div class="sk-cell" style="width:70px"></div></td><td class="hide-mob-narrow"><div class="sk-cell" style="width:55px"></div></td><td class="hide-mob-narrow"><div class="sk-cell" style="width:45px"></div></td><td class="hide-mob"><div class="sk-cell" style="width:45px"></div></td><td class="hide-mob"><div class="sk-cell" style="width:40px"></div></td><td class="hide-mob hide-tablet"><div class="sk-cell" style="width:80px"></div></td></tr>{% endfor %}</tbody>
     </table>
-    <div id="mobileResultCards"></div>
+    <div id="mobileResultCards">{% for i in range(8) %}<div class="mr-sk-card"></div>{% endfor %}</div>
     <div class="empty-state" id="emptyDiv" style="display:none">
       <div class="empty-icon">📭</div>
       <h3>Sonuç bulunamadı</h3>
