@@ -1227,7 +1227,7 @@
   .mbn-sheet-item svg { width: 22px; height: 22px; color: #b8c3ff; stroke-width: 1.85; }
   .mbn-sheet-item:active { transform: scale(0.96); background: #201f21; border-color: #46464d; }
   @media (max-width: 768px) {
-    .mobile-bottom-nav { display: block; backdrop-filter: none; -webkit-backdrop-filter: none; }
+    .mobile-bottom-nav { display: block; }
     body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
   }
   /* SPEC-007: Premium paywall — blur + CTA banner */
@@ -1679,9 +1679,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       .bp-hero-badge { font-size: 16px; }
       .bp-hero-levels { font-size: 12px; gap: 10px; padding: 8px 10px; }
     }
-    @media (max-width: 768px) {
-      .bp-hero-badge { font-family: system-ui, -apple-system, sans-serif; }
-    }
   </style>
   {%- set _sig = ssr_signal.signal -%}
   {# CPO-535 #36: signal_strength (compose_score) PRIMARY. tier_score fallback (backward compat) #}
@@ -1879,7 +1876,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     .bp-bottom-cta {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 450;
       background: rgba(14,14,18,0.96);
-      background: rgba(14,14,18,0.98);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
       border-top: 1px solid rgba(42,42,44,0.7);
       box-shadow: 0 -4px 18px rgba(0,0,0,0.30);
       padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
