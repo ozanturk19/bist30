@@ -410,15 +410,9 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    height: 100%;
-    min-height: 420px;
+    height: 420px;
     color: #909097;
     font-size: 13px;
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    background: #141416;
-    z-index: 2;
-    border-radius: inherit;
   }
   .spinner {
     width: 18px; height: 18px;
@@ -429,7 +423,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  #chartsInner { display: block; position: relative; min-height: 420px; }
+  #chartsInner { display: none; }
   #chartMain   { height: 340px; }
 
   /* ── 52 Haftalık Bar ── */
@@ -1081,8 +1075,7 @@
     #liveTs        { display: none; }
     .container { padding: 10px 12px; }
     #chartMain    { height: 240px; }
-    #chartLoading { min-height: 280px; }
-    #chartsInner  { min-height: 280px; }
+    #chartLoading { height: 280px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
     .chart-section { overflow: hidden; }
   }
@@ -1940,8 +1933,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <span class="chart-label">{{ ticker }} — Günlük Grafik (2 Yıl)</span>
       <span id="emaLegend" style="font-size:11px;color:#909097;margin-left:auto"></span>
     </div>
-    <div id="chartsInner">
-      <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
+    <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
+    <div id="chartsInner" style="position:relative;min-height:420px">
       <div id="chartMain"></div>
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
       <div class="week52-bar" id="week52Bar" style="display:none">
@@ -2784,6 +2777,7 @@ const BASE_OPTS = {
 /* ── Grafik kurulumu ─────────────────────────────────── */
 function buildChart(d) {
   document.getElementById('chartLoading').style.display = 'none';
+  document.getElementById('chartsInner').style.display  = 'block';
 
   const elMain   = document.getElementById('chartMain');
   const isMobile = window.innerWidth < 768;
@@ -3369,6 +3363,7 @@ function _showChartStatus(msg, withRetryBtn) {
   const el = document.getElementById('chartLoading');
   if (!el) return;
   el.style.display = 'block';
+  document.getElementById('chartsInner').style.display = 'none';
   el.innerHTML = withRetryBtn
     ? '<span style="color:#909097">' + msg + '</span> ' +
       '<button type="button" onclick="loadChart(0)" style="margin-left:8px;background:#1f6feb;' +
