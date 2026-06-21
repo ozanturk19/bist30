@@ -231,6 +231,7 @@
     align-items: center;
     gap: 14px;
     flex-wrap: wrap;
+    min-height: 85px;
   }
   .hib-ticker {
     font-size: 22px;
@@ -1608,6 +1609,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       margin-bottom: 20px;
       position: relative;
       overflow: hidden;
+      min-height: 267px;
     }
     .bp-hero-card::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
@@ -1719,7 +1721,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
     {% endif %}
     {# SPEC-017 v2 c5 — Sparkline 30D (vanilla canvas + long-press crosshair) #}
-    <div class="bp-spark-wrap" id="bpSparkWrap" style="visibility:hidden;min-height:76px">
+    <div class="bp-spark-wrap" id="bpSparkWrap" style="display:none">
       <div class="bp-spark-label">
         <span>Son 30 gün</span>
         <span id="bpSparkVal" class="bp-spark-val">—</span>
@@ -1758,7 +1760,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
         return { t: b.time || b.t, c: +(b.close != null ? b.close : b.c) };
       }).filter(function(x){ return !isNaN(x.c); });
       if (data.length < 2) return;
-      wrap.style.visibility = 'visible';
+      wrap.style.display = 'block';
       var dpr = window.devicePixelRatio || 1;
       var W = cv.clientWidth || wrap.clientWidth || 280;
       var H = 52;
@@ -1970,7 +1972,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <span id="emaLegend" style="font-size:11px;color:#909097;margin-left:auto"></span>
     </div>
     <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
-    <div id="chartsInner" style="position:relative;min-height:420px">
+    <div id="chartsInner" style="position:relative;min-height:480px">
       <div id="chartMain"></div>
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
       <div class="week52-bar" id="week52Bar" style="display:none">
@@ -1995,7 +1997,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   {% if signal_summary %}
   <div id="signalSummarySection"
        data-tab-content="ozet"
-       style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:18px 18px 14px;margin-bottom:20px">
+       style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:18px 18px 14px;margin-bottom:20px;min-height:300px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <h2 class="section-title" style="margin:0">🧭 Sinyal Özeti</h2>
       <span style="font-size:11px;color:#909097">2 saniyede karar yardımcısı</span>
