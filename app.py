@@ -2944,7 +2944,7 @@ def set_security_headers(response):
 @app.route("/")
 def index():
     resp = app.make_response(render_template("index.html"))
-    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    resp.headers["Cache-Control"] = "no-cache, must-revalidate"
     resp.headers["Pragma"] = "no-cache"
     return resp
 

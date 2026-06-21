@@ -3918,8 +3918,11 @@ loadMTF();
 
 /* ── SSE Canlı Fiyat ──────────────────────────────── */
 let _sseRetry = 1000;
+let _sseEs = null;
 function startSSE() {
+  if (_sseEs) { _sseEs.close(); _sseEs = null; }
   const es = new EventSource('/api/stream');
+  _sseEs = es;
   es.onopen = () => { _sseRetry = 1000; };
   es.onmessage = e => {
     try {
@@ -3953,11 +3956,14 @@ function startSSE() {
   };
   es.onerror = () => {
     es.close();
+    _sseEs = null;
     setTimeout(startSSE, _sseRetry);
     _sseRetry = Math.min(_sseRetry * 2, 30000);
   };
 }
 startSSE();
+window.addEventListener('pagehide', () => { if (_sseEs) { _sseEs.close(); _sseEs = null; } });
+window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
 
 /* ── Diğer Hisseler Accordion ──────────────────── */
 
