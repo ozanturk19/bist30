@@ -704,6 +704,7 @@
   .sig-stat-lbl  { font-size:10px; color:#909097; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   @keyframes shimmerStat { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
   .stat-sk { background:linear-gradient(90deg,#1c1b1f 25%,#252d3a 50%,#1c1b1f 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:4px; display:inline-block; }
+  .loading-sk { background:linear-gradient(90deg,#1c1b1f 25%,#252d3a 50%,#1c1b1f 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:6px; }
   @media(max-width:500px) { .sig-stats-row{grid-template-columns:repeat(2,1fr);} }
 
   /* ── Sinyal geçmişi ── */
@@ -1920,7 +1921,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <span class="chart-label">{{ ticker }} — Günlük Grafik (2 Yıl)</span>
       <span id="emaLegend" style="font-size:11px;color:#909097;margin-left:auto"></span>
     </div>
-    <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
+    <div id="chartLoading" class="loading-sk"><div class="spinner"></div> Grafik yükleniyor…</div>
     <div id="chartsInner" style="position:relative;min-height:420px">
       <div id="chartMain"></div>
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
@@ -3349,7 +3350,8 @@ const _MAX_CHART_RETRY = 3;
 function _showChartStatus(msg, withRetryBtn) {
   const el = document.getElementById('chartLoading');
   if (!el) return;
-  el.style.display = 'block';
+  el.style.display = 'flex';
+  if (withRetryBtn) { el.classList.remove('loading-sk'); } else { el.classList.add('loading-sk'); }
   document.getElementById('chartsInner').style.display = 'none';
   el.innerHTML = withRetryBtn
     ? '<span style="color:#909097">' + msg + '</span> ' +
