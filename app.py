@@ -3000,6 +3000,20 @@ def api_data():
     # CPO-690 Adım 1: xu100_spark — son 30 günlük BIST100 kapanış fiyatları
     with _lock:
         _xu100_ohlc = ((_xu100_chart_cache.get("data") or {}).get("ohlc") or [])[-30:]
+    if not _xu100_ohlc:
+        # Fallback: disk'ten lazy-load (restart sonrası cron henüz çalışmamış olabilir)
+        try:
+            _xu100_disk_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chart_xu100.json")
+            with open(_xu100_disk_path, encoding="utf-8") as _xu100_f:
+                _xu100_disk = json.load(_xu100_f)
+            _xu100_ohlc = ((_xu100_disk.get("data") or {}).get("ohlc") or [])[-30:]
+            if _xu100_ohlc:  # in-memory cache'e yaz — sonraki request'lerde disk hit yok
+                with _lock:
+                    if not _xu100_chart_cache.get("data"):
+                        _xu100_chart_cache.update({"data": _xu100_disk.get("data"),
+                                                   "updated_at": _xu100_disk.get("updated_at", "")})
+        except Exception:
+            _xu100_ohlc = []
     xu100_spark = [round(p["close"], 2) for p in _xu100_ohlc if p.get("close")]
     return safe_json({
         "stocks":       stocks,
