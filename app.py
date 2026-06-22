@@ -1085,6 +1085,12 @@ def analyze(ticker_base):
         prev_c     = v2(close)
         change_pct = ((c - prev_c) / prev_c) * 100 if prev_c != 0 else 0
 
+        # CPO-690 Adım 2: BIST %10 tavan guard — split/corporate action anomalisini önle
+        if abs(change_pct) > 10.5:
+            logger.warning("ANOMAL change_pct: %s %.2f%% (BIST %%10 tavan ihlali — split/veri hatası, prev_cache fallback)",
+                           ticker_base, change_pct)
+            return None  # background_refresh prev_cache fallback'i devreye girer
+
         # ── 3-Kriter Sinyal Motoru: ST + ADX≥25 + EMA12/99 ─────────────
         st_bull  = st_val == 1
         st_bear  = st_val == -1
@@ -2159,6 +2165,14 @@ def _send_digest_emails(timeframe="daily", force=False):
     with _pending_changes_lock:
         pending = _load_pending_changes()
 
+    # CPO-690 Adım 4: sadece bugünkü değişimler (geçmiş buffer birikimini önle)
+    _today_iso = datetime.now(_TZ_TR).date().isoformat()
+    _before    = len(pending)
+    pending    = [d for d in pending if d.get("ts", "")[:10] >= _today_iso]
+    if _before != len(pending):
+        logger.info("pending ts filtresi: %d → %d (today=%s, filtered %d old)",
+                    _before, len(pending), _today_iso, _before - len(pending))
+
     # MSG-019B diag: pending durumu
     logger.info("_send_digest_emails(%s, force=%s): pending=%d items", timeframe, force, len(pending))
 
@@ -2983,6 +2997,10 @@ def api_data():
     else:
         _dq = "fresh"
     # ── /stale-safe fields ───────────────────────────────────────────────────────
+    # CPO-690 Adım 1: xu100_spark — son 30 günlük BIST100 kapanış fiyatları
+    with _lock:
+        _xu100_ohlc = ((_xu100_chart_cache.get("data") or {}).get("ohlc") or [])[-30:]
+    xu100_spark = [round(p["close"], 2) for p in _xu100_ohlc if p.get("close")]
     return safe_json({
         "stocks":       stocks,
         "updated_at":   _cache["updated_at"],
@@ -2992,6 +3010,7 @@ def api_data():
         "stocks_age_s": _age_s,     # seconds since last refresh
         "refreshing":   _loading,   # True = background refresh aktif
         "data_freshness": build_data_freshness(),  # SPEC-014 B1
+        "xu100_spark":  xu100_spark,  # CPO-690: BIST100 sparkline (son 30 gün)
     })
 
 
@@ -3308,7 +3327,7 @@ def _macro_bg_loop():
 # Disk load — _fetch_macro tanımlandıktan sonra thread başlatılır (aşağıda)
 _load_macro_from_disk()
 
-_MACRO_TTL   = 300   # 5 dakika cache (stale-while-revalidate)
+_MACRO_TTL   = 21600  # CPO-690: 6h — off-hours false-stale bastırılır (18:45→10:30 arası kimse macro refresh yapmıyor)
 
 _MACRO_TICKERS = [
     ("XU100",  "XU100.IS"),
