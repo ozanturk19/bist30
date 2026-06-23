@@ -49,6 +49,9 @@ try:
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
     from email_qa         import validate_email_pre_send        as _dqv_email_qa
+    from schema_validator import validate_api_data             as _dqv_sv_data
+    from schema_validator import validate_api_macro            as _dqv_sv_macro
+    from schema_validator import validate_api_hisse_chart      as _dqv_sv_chart
     _DQV_AVAILABLE = True
 except ImportError as _dqv_import_err:
     _DQV_AVAILABLE = False
@@ -3045,7 +3048,7 @@ def api_data():
         except Exception:
             _xu100_ohlc = []
     xu100_spark = [round(p["close"], 2) for p in _xu100_ohlc if p.get("close")]
-    return safe_json({
+    _resp_data = {
         "stocks":       stocks,
         "updated_at":   _cache["updated_at"],
         "loading":      len(stocks) == 0,
@@ -3055,7 +3058,16 @@ def api_data():
         "refreshing":   _loading,   # True = background refresh aktif
         "data_freshness": build_data_freshness(),  # SPEC-014 B1
         "xu100_spark":  xu100_spark,  # CPO-690: BIST100 sparkline (son 30 gün)
-    })
+    }
+    # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
+    if _DQV_AVAILABLE:
+        try:
+            _sv = _dqv_sv_data(_resp_data)
+            if not _sv.get("ok"):
+                logger.warning("DQV_SV_DATA: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
+        except Exception as _e:
+            logger.warning("DQV_SV_DATA exception: %s", _e)
+    return safe_json(_resp_data)
 
 
 # ── SPEC-018 BIST Heatmap MVP (Çar 27 May 2026, Ozan-direktif) ──────────────
@@ -3441,11 +3453,20 @@ def api_macro():
         cached_items = _macro_cache.get("data") or []
         cached_ts    = _macro_cache.get("ts", 0)
     stale = (time.time() - cached_ts) > _MACRO_TTL
-    return safe_json({
+    _resp_macro = {
         "items": cached_items,
         "cached": True,
         "stale": stale,
-    })
+    }
+    # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
+    if _DQV_AVAILABLE:
+        try:
+            _sv = _dqv_sv_macro(_resp_macro)
+            if not _sv.get("ok"):
+                logger.warning("DQV_SV_MACRO: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
+        except Exception as _e:
+            logger.warning("DQV_SV_MACRO exception: %s", _e)
+    return safe_json(_resp_macro)
 
 
 # ── Günlük Makro AI Özeti ────────────────────────────────────────────────────
@@ -6458,7 +6479,16 @@ def api_stock_chart(ticker):
         data["summary"]["sl_level"]    = main_stock.get("sl_level",    data["summary"].get("sl_level"))
         data["summary"]["signal_bars"] = main_stock.get("signal_bars", data["summary"].get("signal_bars", 1))
 
-    return safe_json({"chart": data, "updated_at": upd, "loading": False})
+    _resp_chart = {"chart": data, "updated_at": upd, "loading": False}
+    # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
+    if _DQV_AVAILABLE:
+        try:
+            _sv = _dqv_sv_chart(_resp_chart)
+            if not _sv.get("ok"):
+                logger.warning("DQV_SV_CHART[%s]: flag=%s errors=%s", ticker, _sv.get("flag"), _sv.get("errors"))
+        except Exception as _e:
+            logger.warning("DQV_SV_CHART exception: %s", _e)
+    return safe_json(_resp_chart)
 
 
 # ── Strateji Tarayıcısı ──────────────────────────────────────────────────────
