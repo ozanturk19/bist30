@@ -2374,6 +2374,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <span style="font-size:13px;font-weight:700;color:#e5e1e4;text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
       <span id="sigExplainBadge" style="margin-left:auto;font-size:11px;background:rgba(184,195,255,0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(184,195,255,0.25)">Gemini AI</span>
     </div>
+    {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
+    <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(248,81,73,0.08);border-left:3px solid rgba(248,81,73,0.5);border-radius:0 6px 6px 0;font-size:12px;color:#f87171;line-height:1.6"></div>
     <div id="sigExplainLoading" style="display:flex;flex-direction:column;gap:10px;color:#909097;font-size:13px">
       {# SPEC-017 Faz 3 F2-B3: Statik özet ÖNCE (içerik), spinner SONRA (durum) — kullanıcı boş ekran görmesin #}
       <div style="font-size:13px;color:#c7c5cd;line-height:1.65;padding:10px 12px;background:rgba(184,195,255,0.06);border-left:3px solid rgba(184,195,255,0.4);border-radius:0 8px 8px 0">
@@ -3330,6 +3332,20 @@ function renderSummary(s, signalData) {
   }
 
   document.getElementById('indRow').innerHTML = indHtml;
+
+  /* ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı */
+  const conflictEl = document.getElementById('sigConflictNote');
+  if (conflictEl) {
+    if (signalData && signalData.signal === 'AL' && _dispChg < -3) {
+      const bars = signalData.signal_bars || 1;
+      const barLabel = bars > 1 ? 'Son ' + bars + ' gündür aktif' : 'Bugün oluştu';
+      conflictEl.textContent = barLabel + ' olan Güçlü Trend sinyali sürüyor, ancak bugünkü %' +
+        Math.abs(_dispChg).toFixed(1) + ' düşüş stop loss seviyesine yaklaştırıyor olabilir. Risk yönetimi önemli.';
+      conflictEl.style.display = '';
+    } else {
+      conflictEl.style.display = 'none';
+    }
+  }
 }
 
 /* ── Sinyal mini istatistik satırı ─────────────────── */
