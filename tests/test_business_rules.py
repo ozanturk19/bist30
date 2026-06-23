@@ -95,6 +95,13 @@ def test_future_date_fail():
 def test_none_date_ok():
     assert validate_date_range("AKBNK", None)["ok"] is True
 
+def test_turkish_format_past_date_ok():
+    assert validate_date_range("AKBNK", "22.06.2026")["ok"] is True
+
+def test_turkish_format_future_date_fail():
+    r = validate_date_range("AKBNK", "01.07.2027")
+    assert r["ok"] is False and r["flag"] == "FUTURE_DATE"
+
 
 # ── validate_stocks_list integration ────────────────────────────────────────
 

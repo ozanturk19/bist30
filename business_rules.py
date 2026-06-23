@@ -63,7 +63,12 @@ def validate_date_range(ticker, signal_date):
         return {"ok": True, "ticker": ticker}
     try:
         if isinstance(signal_date, str):
-            sd = datetime.strptime(signal_date[:10], "%Y-%m-%d").date()
+            s = signal_date[:10]
+            # DD.MM.YYYY (uygulama formatı) veya ISO YYYY-MM-DD her ikisini destekle
+            try:
+                sd = datetime.strptime(s, "%d.%m.%Y").date()
+            except ValueError:
+                sd = datetime.strptime(s, "%Y-%m-%d").date()
         elif isinstance(signal_date, datetime):
             sd = signal_date.date()
         elif isinstance(signal_date, date):
