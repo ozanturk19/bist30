@@ -33,13 +33,14 @@ def fetch(ticker: str, period: str, interval: str) -> dict:
         cols = list(df.columns)
 
     # Build data dict: column → list of values
+    # yfinance v0.2+ MultiIndex: df["Close"] may return a single-column DataFrame
+    # instead of a Series; squeeze it to get values.
     data = {}
     for col in set(cols):
         series = df[col]
-        if hasattr(series, "iloc"):
-            data[col] = [None if (v != v) else float(v) for v in series]
-        else:
-            data[col] = []
+        if hasattr(series, "columns"):
+            series = series.iloc[:, 0]
+        data[col] = [None if (v != v) else float(v) for v in series]
 
     return {
         "ticker": ticker,
