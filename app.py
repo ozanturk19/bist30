@@ -2596,6 +2596,22 @@ def refresh_data():
         except Exception as _e:
             logger.warning("DQV_BR exception: %s", _e)
 
+    # ── Faz 12 P2.1 DQV: Cross-Consistency Validation ────────────────────────
+    if _DQV_AVAILABLE:
+        try:
+            with _lock:
+                _charts_map = {
+                    s["ticker"]: ((_stock_chart_cache.get(s["ticker"]) or {}).get("data") or {})
+                                 .get("summary", {}).get("price")
+                    for s in results if s.get("ticker")
+                }
+            _cc = _dqv_cross_consistency(results, _charts_map)
+            if _cc["errors"]:
+                logger.warning("DQV_CROSS: %d inconsistencies, tickers=%s",
+                               len(_cc["errors"]), _cc["failed_tickers"])
+        except Exception as _e:
+            logger.warning("DQV_CROSS exception: %s", _e)
+
 
 def fetch_live_prices():
     tickers_str = " ".join(t + ".IS" for t in BIST30)
