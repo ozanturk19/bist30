@@ -66,7 +66,7 @@ try:
     if _sentry_dsn:
         _sentry_sdk.init(
             dsn=_sentry_dsn,
-            traces_sample_rate=0.0,
+            traces_sample_rate=0.1,
             environment=os.environ.get("FLASK_ENV", "production"),
         )
         _SENTRY_AVAILABLE = True
