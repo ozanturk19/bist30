@@ -4265,6 +4265,11 @@ _GEMINI_CB_THRESHOLD = 2      # ardışık fail eşiği — devre açılır
 _GEMINI_CB_COOLDOWN  = 600    # saniye — devre açık kalır (10dk Gemini'siz fallback)
 _gemini_cb = {"fails": 0, "open_until": 0.0}   # circuit breaker durumu (worker-local)
 
+# Faz 12 P2.6 — Rate limiter: free tier 20 req/dk → 3.5s/call safe margin (~17/dk)
+_GEMINI_RATE_INTERVAL = float(os.environ.get("GEMINI_RATE_INTERVAL", "3.5"))
+_gemini_rate_lock = threading.Lock()
+_gemini_rate_last = [0.0]
+
 
 
 
@@ -4498,6 +4503,13 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
         logger.debug("_gemini_call: circuit breaker açık (%.0fs kaldı) — fallback",
                      _gemini_cb["open_until"] - now)
         return None, None
+
+    # Faz 12 P2.6 — Rate limiter: 3.5s minimum arası (free tier 20 req/dk aşmaz)
+    with _gemini_rate_lock:
+        _wait = _GEMINI_RATE_INTERVAL - (time.time() - _gemini_rate_last[0])
+        if _wait > 0:
+            time.sleep(_wait)
+        _gemini_rate_last[0] = time.time()
 
     # Sert timeout cap — caller ne geçerse geçsin per-istek üst sınır.
     eff_timeout = min(timeout, _GEMINI_TIMEOUT_CAP)
