@@ -2835,6 +2835,28 @@ function buildChart(d) {
   document.getElementById('chartLoading').style.display = 'none';
   document.getElementById('chartsInner').style.display  = 'block';
 
+  /* #18-redux: sequential reindex — tatil/hafta sonu gap yok (TradingView standardı)
+   * OHLC zaten tatilsiz geliyor (backend is_trading_day filtresi).
+   * time field date-string → integer index: her iş günü eşit aralıklı, gap sıfır. */
+  var _idxToDay = d.ohlc.map(function(b){ return b.time; });
+  var _dayToIdx = {};
+  _idxToDay.forEach(function(day, i){ _dayToIdx[day] = i; });
+  function _tickFmtIdx(idx, type) {
+    var dateStr = _idxToDay[Math.round(+idx)];
+    if (!dateStr) return '';
+    var p = dateStr.split('-');
+    var yr = +p[0], mo = +p[1] - 1, dy = +p[2];
+    if (type === 0) return String(yr);
+    if (type === 1) return _MTHS[mo] || '';
+    if (type === 2) return (_MTHS[mo] || '') + ' ' + dy;
+    return '';
+  }
+  d = Object.assign({}, d, {
+    ohlc:  d.ohlc.map(function(b, i){ return Object.assign({}, b, {time: i}); }),
+    ema12: d.ema12.map(function(p){ var i = _dayToIdx[p.time]; return i !== undefined ? Object.assign({}, p, {time: i}) : null; }).filter(Boolean),
+    ema99: d.ema99.map(function(p){ var i = _dayToIdx[p.time]; return i !== undefined ? Object.assign({}, p, {time: i}) : null; }).filter(Boolean)
+  });
+
   const elMain   = document.getElementById('chartMain');
   const isMobile = window.innerWidth < 768;
   const chartW   = elMain.clientWidth || elMain.parentElement.clientWidth || 900;
@@ -2843,7 +2865,7 @@ function buildChart(d) {
     ...getBaseOpts(),
     width:     chartW,
     height:    isMobile ? 240 : 340,
-    timeScale: { borderColor: '#2a2a2c', timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmt },
+    timeScale: { borderColor: '#2a2a2c', timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmtIdx },
   });
 
   /* 52-haftalık bar */
