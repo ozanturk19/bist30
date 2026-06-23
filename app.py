@@ -2612,6 +2612,32 @@ def refresh_data():
         except Exception as _e:
             logger.warning("DQV_CROSS exception: %s", _e)
 
+    # ── Faz 12 P2.2 DQV: Anomaly Detection Validation ───────────────────────
+    if _DQV_AVAILABLE:
+        try:
+            with _lock:
+                _stocks_with_hist = []
+                for _s in results:
+                    _t = _s.get("ticker")
+                    if not _t:
+                        continue
+                    _ohlc = ((_stock_chart_cache.get(_t) or {}).get("data") or {}).get("ohlc") or []
+                    _price_hist = [e["close"] for e in _ohlc[-6:-1] if e.get("close")]
+                    _vol_hist   = [e.get("volume", 0) for e in _ohlc[-6:-1] if e.get("close")]
+                    _stocks_with_hist.append({
+                        "ticker":        _t,
+                        "today_price":   _s.get("price"),
+                        "price_history": _price_hist,
+                        "today_volume":  _s.get("volume"),
+                        "volume_history": _vol_hist,
+                    })
+            _an = _dqv_anomalies(_stocks_with_hist)
+            if _an["errors"]:
+                logger.warning("DQV_ANOMALY: %d flags, tickers=%s",
+                               len(_an["errors"]), _an["failed_tickers"])
+        except Exception as _e:
+            logger.warning("DQV_ANOMALY exception: %s", _e)
+
 
 def fetch_live_prices():
     tickers_str = " ".join(t + ".IS" for t in BIST30)
