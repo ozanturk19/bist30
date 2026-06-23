@@ -128,6 +128,33 @@ def test_subprocess_error_is_valid_json():
     assert isinstance(err, dict)
 
 
+def test_subprocess_timeout_raises():
+    """subprocess.run(timeout=X) raises TimeoutExpired if script hangs.
+    This proves the production isolation pattern: hung yfinance → hard kill,
+    no thread stuck in _YF_GLOBAL_LOCK forever.
+    """
+    # Minimal script that sleeps 10s
+    sleepy_script = tempfile.NamedTemporaryFile(
+        suffix=".py", mode="w", delete=False
+    )
+    sleepy_script.write("import time; time.sleep(10)\n")
+    sleepy_script.close()
+
+    try:
+        raised = False
+        try:
+            subprocess.run(
+                [_VENV_PYTHON, sleepy_script.name],
+                capture_output=True, timeout=0.5,
+            )
+        except subprocess.TimeoutExpired:
+            raised = True
+
+        assert raised, "TimeoutExpired was NOT raised — subprocess timeout broken"
+    finally:
+        os.unlink(sleepy_script.name)
+
+
 # ── _json_to_dataframe helper ─────────────────────────────────────────────────
 
 def test_json_to_dataframe_roundtrip():
@@ -184,6 +211,7 @@ if __name__ == "__main__":
         test_subprocess_missing_args,
         test_subprocess_too_few_args,
         test_subprocess_error_is_valid_json,
+        test_subprocess_timeout_raises,
         test_json_to_dataframe_roundtrip,
         test_json_to_dataframe_error_input,
     ]
