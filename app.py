@@ -43,6 +43,18 @@ try:
 except ImportError:
     _PUSH_ENABLED = False
 
+# ── Faz 12 P1 DQV — Data Quality Validators ───────────────────────────────────
+try:
+    from business_rules   import validate_stocks_list          as _dqv_business_rules
+    from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
+    from anomaly          import validate_anomalies_list        as _dqv_anomalies
+    from email_qa         import validate_email_pre_send        as _dqv_email_qa
+    _DQV_AVAILABLE = True
+except ImportError as _dqv_import_err:
+    _DQV_AVAILABLE = False
+    import logging as _log_tmp
+    _log_tmp.getLogger(__name__).warning("DQV modules unavailable: %s", _dqv_import_err)
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
 
@@ -2040,6 +2052,15 @@ def _notify_email_signal_changes(changes):
             logger.debug("_notify_email_signal_changes: changes boş, skip")
         return
 
+    # Faz 12 P1 DQV: Email QA pre-send guard (monitoring-only, non-blocking)
+    if _DQV_AVAILABLE:
+        try:
+            _qa = _dqv_email_qa(changes, context="instant")
+            if not _qa["ok"]:
+                logger.warning("DQV_EMAIL_QA: %s flag=%s count=%s", _qa.get("flag"), _qa.get("flag"), _qa.get("count"))
+        except Exception as _e:
+            logger.warning("DQV_EMAIL_QA exception: %s", _e)
+
     # MSG-019B diag: değişen sinyal sayısı
     logger.info("_notify_email_signal_changes: %d değişim alındı [%s]",
                 len(changes), ", ".join(c[0] for c in changes[:5]) + ("..." if len(changes) > 5 else ""))
@@ -2562,6 +2583,15 @@ def refresh_data():
     # Başarılı güncellemeden sonra diske yaz
     _save_cache_to_disk(results)
     _save_daily_snapshot(results)   # T2-6: Günlük snapshot (seans sonrası)
+
+    # ── Faz 12 P1 DQV: Business Rules Validation ─────────────────────────────
+    if _DQV_AVAILABLE:
+        try:
+            _br = _dqv_business_rules(results)
+            if _br["errors"]:
+                logger.warning("DQV_BR: %d violations, tickers=%s", len(_br["errors"]), _br["failed_tickers"])
+        except Exception as _e:
+            logger.warning("DQV_BR exception: %s", _e)
 
 
 def fetch_live_prices():
