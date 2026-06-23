@@ -1916,6 +1916,34 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     return _email_base(content, unsubscribe_url, preheader=preheader)
 
 
+def _read_dqv_alerts_24h():
+    """Son 24 saatin DQV alertlerini ALERT.md'den oku. [{ts, tier, detail}]"""
+    try:
+        alert_path = os.environ.get("DQV_ALERT_PATH", "/root/bist30/ALERT.md")
+        if not os.path.exists(alert_path):
+            return []
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+        alerts = []
+        with open(alert_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or not line.startswith("["):
+                    continue
+                try:
+                    ts_str = line[1:line.index("]")]
+                    ts = datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S UTC").replace(tzinfo=timezone.utc)
+                    if ts < cutoff:
+                        continue
+                    rest = line[line.index("]") + 2:]
+                    tier = rest[:2] if len(rest) >= 2 else "P1"
+                    alerts.append({"ts": ts_str, "tier": tier, "detail": rest})
+                except Exception:
+                    continue
+        return alerts
+    except Exception:
+        return []
+
+
 def _build_signal_email(changes, unsubscribe_url):
     """Sinyal değişim maili — premium-aware, modern card layout."""
     sig_color  = {"AL": "#00e290", "SAT": "#f85149", "BEKLE": "#909097"}
@@ -1992,6 +2020,32 @@ def _build_signal_email(changes, unsubscribe_url):
     if prem_count > 0:
         summary_chips += f'<span style="display:inline-block;background:rgba(255,200,80,0.10);border:1px solid rgba(255,200,80,0.40);color:#ffc850;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">💎 {prem_count} Premium</span>'
 
+    # Faz 12 P2.4b — DQV sistem durumu özeti (son 24h ALERT.md)
+    _dqv_24h = _read_dqv_alerts_24h()
+    dqv_block = ""
+    if _dqv_24h:
+        _p0 = sum(1 for a in _dqv_24h if a["tier"] == "P0")
+        _p1 = sum(1 for a in _dqv_24h if a["tier"] == "P1")
+        _scol = "#f85149" if _p0 > 0 else ("#ffc850" if _p1 > 0 else "#3fb950")
+        _stxt = ("⚠ " + str(_p0) + " P0 kritis" if _p0 else "") + (" · " if _p0 and _p1 else "") + ("⚡ " + str(_p1) + " P1" if _p1 else "")
+        _rows = "".join(
+            '<tr><td style="padding:2px 0;font-size:10.5px;color:#909097;line-height:1.5">'
+            '<span style="color:' + ("#f85149" if a["tier"] == "P0" else "#ffc850") + ';font-weight:700;margin-right:4px">' + a["tier"] + '</span>'
+            + a["detail"] + '</td></tr>'
+            for a in _dqv_24h[-5:]
+        )
+        dqv_block = (
+            '\n    <!-- P2.4b DQV durumu -->'
+            '\n    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"'
+            ' style="background:#0e0e12;border:1px solid #2a2a2c;border-radius:6px;margin-top:14px">'
+            '\n      <tr><td style="padding:12px 16px">'
+            '\n        <div style="font-size:9.5px;color:#606068;text-transform:uppercase;letter-spacing:1.3px;margin-bottom:6px">DQV · Sistem Durumu (son 24s)</div>'
+            f'\n        <div style="font-size:11px;font-weight:700;color:{_scol};margin-bottom:8px">{_stxt}</div>'
+            f'\n        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">{_rows}</table>'
+            '\n      </td></tr>'
+            '\n    </table>'
+        )
+
     content = f'''
     <!-- Header -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
@@ -2020,6 +2074,7 @@ def _build_signal_email(changes, unsubscribe_url):
         </a>
       </td></tr>
     </table>
+    {dqv_block}
     '''
     return _email_base(content, unsubscribe_url, preheader=preheader)
 
