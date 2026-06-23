@@ -1,13 +1,16 @@
 """
 Faz 12 P1 — Data Quality Validator: Playwright Smart Visual Checks
 CPO-693: Visual integrity checks — canvas height, hareketliler anomaly, signal count
+P2.10: check_visual_diff — pre-deploy pixel-level regression (threshold 2%)
 """
 
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
 MAX_HAREKETLILER_CHANGE_PCT = 11.0
+DEFAULT_VISUAL_DIFF_THRESHOLD = 0.02  # 2% pixel diff ratio
 
 
 def check_canvas_height(canvas_height):
@@ -157,3 +160,111 @@ def extract_and_check(url, headless=True, timeout_ms=15000):
     except Exception as e:
         logger.error("VISUAL: extract_and_check failed: %s", e)
         return {"ok": False, "flag": "PLAYWRIGHT_ERROR", "error": str(e)}
+
+
+# ── P2.10 Visual Regression ───────────────────────────────────────────────────
+
+def check_visual_diff(before_img, after_img, threshold=DEFAULT_VISUAL_DIFF_THRESHOLD,
+                      diff_path=None, fuzz=0.05):
+    """
+    Pixel-level image diff between two PNG files. Primary: Pillow; fallback: ImageMagick.
+
+    Mirrors visual-diff.sh behaviour (-fuzz 5% / AE metric).
+    threshold: float ratio (0.02 = 2%).
+    diff_path: optional path to write highlighted diff PNG on failure.
+    fuzz: channel tolerance as fraction of 255 (0.05 = 5%, matches shell script).
+
+    Returns dict with keys: ok, diff_ratio, threshold. On failure also: flag, ae, total_pixels.
+    """
+    if not os.path.isfile(before_img):
+        return {"ok": False, "flag": "VISUAL_DIFF_FILE_MISSING", "missing": before_img}
+    if not os.path.isfile(after_img):
+        return {"ok": False, "flag": "VISUAL_DIFF_FILE_MISSING", "missing": after_img}
+
+    try:
+        from PIL import Image
+        import numpy as np
+
+        img_a = Image.open(before_img).convert("RGB")
+        img_b = Image.open(after_img).convert("RGB")
+        if img_a.size != img_b.size:
+            img_b = img_b.resize(img_a.size, Image.LANCZOS)
+
+        arr_a = np.array(img_a, dtype=np.int32)
+        arr_b = np.array(img_b, dtype=np.int32)
+
+        channel_diff = np.max(np.abs(arr_a - arr_b), axis=2)
+        fuzz_px = int(fuzz * 255)
+        ae = int(np.sum(channel_diff > fuzz_px))
+
+        total_pixels = arr_a.shape[0] * arr_a.shape[1]
+        diff_ratio = ae / total_pixels if total_pixels > 0 else 0.0
+
+        if diff_ratio > threshold and diff_path:
+            diff_arr = np.zeros((*arr_a.shape[:2], 3), dtype=np.uint8)
+            diff_arr[channel_diff > fuzz_px] = [255, 0, 0]
+            diff_dir = os.path.dirname(diff_path)
+            if diff_dir:
+                os.makedirs(diff_dir, exist_ok=True)
+            Image.fromarray(diff_arr).save(diff_path)
+
+        if diff_ratio > threshold:
+            logger.warning(
+                "VISUAL_DIFF: %s ratio=%.4f > threshold=%.4f (ae=%d/%d)",
+                os.path.basename(before_img), diff_ratio, threshold, ae, total_pixels,
+            )
+            return {
+                "ok": False, "flag": "VISUAL_DIFF_EXCEEDED",
+                "diff_ratio": round(diff_ratio, 4), "threshold": threshold,
+                "ae": ae, "total_pixels": total_pixels,
+                "diff_path": diff_path,
+            }
+
+        return {
+            "ok": True, "diff_ratio": round(diff_ratio, 4),
+            "threshold": threshold, "ae": ae, "total_pixels": total_pixels,
+        }
+
+    except ImportError:
+        return _check_visual_diff_imagemagick(before_img, after_img, threshold, diff_path, fuzz)
+    except Exception as e:
+        logger.error("VISUAL_DIFF: %s", e)
+        return {"ok": False, "flag": "VISUAL_DIFF_ERROR", "error": str(e)}
+
+
+def _check_visual_diff_imagemagick(before_img, after_img, threshold, diff_path, fuzz):
+    """Fallback to ImageMagick compare (used when Pillow not available)."""
+    import subprocess
+    try:
+        pixels_out = subprocess.run(
+            ["identify", "-format", "%[fx:w*h]", before_img],
+            capture_output=True, text=True, timeout=10,
+        )
+        total_pixels = int(pixels_out.stdout.strip()) if pixels_out.returncode == 0 else 1
+
+        fuzz_pct = f"{int(fuzz * 100)}%"
+        out_arg = diff_path if diff_path else "/dev/null"
+        result = subprocess.run(
+            ["compare", "-metric", "AE", "-fuzz", fuzz_pct, before_img, after_img, out_arg],
+            capture_output=True, text=True, timeout=30,
+        )
+        raw = (result.stderr or result.stdout).strip()
+        try:
+            ae = int(raw.split()[0])
+        except (ValueError, IndexError):
+            ae = 0
+
+        diff_ratio = ae / total_pixels if total_pixels > 0 else 0.0
+        if diff_ratio > threshold:
+            return {
+                "ok": False, "flag": "VISUAL_DIFF_EXCEEDED",
+                "diff_ratio": round(diff_ratio, 4), "threshold": threshold,
+                "ae": ae, "total_pixels": total_pixels,
+            }
+        return {"ok": True, "diff_ratio": round(diff_ratio, 4), "threshold": threshold}
+
+    except FileNotFoundError:
+        return {"ok": False, "flag": "VISUAL_DIFF_NO_BACKEND"}
+    except Exception as e:
+        logger.error("VISUAL_DIFF (imagemagick): %s", e)
+        return {"ok": False, "flag": "VISUAL_DIFF_ERROR", "error": str(e)}
