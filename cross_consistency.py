@@ -72,6 +72,9 @@ def compare_price_across_endpoints(ticker, prices_by_source, tolerance_pct=DEFAU
 
 def validate_data_vs_chart(ticker, data_price, chart_last_close, tolerance_pct=DEFAULT_TOLERANCE_PCT):
     """Shorthand: /api/data price vs /api/hisse/X/chart last close."""
+    if chart_last_close is None:
+        return [{"ok": False, "flag": "CACHE_MISS", "ticker": ticker,
+                 "source": "api_chart", "msg": "chart cache None — cross-check atlandı"}]
     return compare_price_across_endpoints(
         ticker,
         {"api_data": data_price, "api_chart": chart_last_close},

@@ -90,9 +90,15 @@ def test_data_vs_chart_fail():
     errs = validate_data_vs_chart("THYAO", 85.5, 80.0)
     assert len(errs) == 1 and errs[0]["flag"] == "CROSS_INCONSISTENCY"
 
-def test_data_vs_chart_none_chart():
+def test_data_vs_chart_none_chart_cache_miss():
     errs = validate_data_vs_chart("THYAO", 85.5, None)
-    assert errs == []
+    assert len(errs) == 1 and errs[0]["flag"] == "CACHE_MISS"
+
+def test_data_vs_chart_eregl_drift_flagged():
+    # Gerçek dünya: monthly close 5.28, actual price 40.08 — bedelsiz/konsolidasyon drift
+    errs = validate_data_vs_chart("EREGL", 40.08, 5.28)
+    assert len(errs) == 1 and errs[0]["flag"] == "CROSS_INCONSISTENCY"
+    assert errs[0]["pct_diff"] > 80
 
 
 # ── validate_stocks_cross_consistency ───────────────────────────────────────
@@ -117,10 +123,10 @@ def test_one_stock_inconsistent():
     assert "THYAO" not in result["failed_tickers"]
 
 def test_missing_chart_for_ticker():
-    # SISE not in charts_map — should be checked but skip if both None
+    # SISE not in charts_map → chart=None → CACHE_MISS (yeni davranış)
     charts = {"AKBNK": 45.18, "THYAO": 85.46}  # SISE missing
     result = validate_stocks_cross_consistency(STOCKS, charts)
-    assert result["errors"] == []  # SISE has data price, chart=None → skip
+    assert any(e["flag"] == "CACHE_MISS" and e["ticker"] == "SISE" for e in result["errors"])
 
 def test_both_none_not_counted():
     stocks = [{"ticker": "GHOST", "price": None}]
@@ -144,7 +150,8 @@ if __name__ == "__main__":
         test_none_skipped, test_all_none_ok, test_zero_price_flagged,
         test_three_sources_two_inconsistent, test_three_sources_all_consistent,
         test_nan_price_skipped,
-        test_data_vs_chart_ok, test_data_vs_chart_fail, test_data_vs_chart_none_chart,
+        test_data_vs_chart_ok, test_data_vs_chart_fail,
+        test_data_vs_chart_none_chart_cache_miss, test_data_vs_chart_eregl_drift_flagged,
         test_all_stocks_consistent, test_one_stock_inconsistent,
         test_missing_chart_for_ticker, test_both_none_not_counted, test_total_count,
     ]

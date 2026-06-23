@@ -3049,11 +3049,14 @@ function renderCommentary(commentary) {
 function renderSummary(s, signalData) {
   /* Header */
   const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2 }) : '—';
-  document.getElementById('hpPrice').textContent = fmt(s.price);
+  // sd.price (/api/data, her zaman güncel) > chart summary.price (lagged monthly close)
+  const _dispPrice = (signalData && signalData.price != null) ? signalData.price : s.price;
+  document.getElementById('hpPrice').textContent = fmt(_dispPrice);
   const chgEl = document.getElementById('hpChg');
-  const sign  = s.change_pct >= 0 ? '+' : '';
-  chgEl.textContent = sign + s.change_pct.toFixed(2) + '%';
-  chgEl.className   = 'header-chg ' + (s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu');
+  const _dispChg = (signalData && signalData.change_pct != null) ? signalData.change_pct : (s.change_pct || 0);
+  const sign  = _dispChg >= 0 ? '+' : '';
+  chgEl.textContent = sign + _dispChg.toFixed(2) + '%';
+  chgEl.className   = 'header-chg ' + (_dispChg > 0 ? 'pos' : _dispChg < 0 ? 'neg' : 'neu');
 
   const sigEl  = document.getElementById('hpSignal');
   const icon   = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';

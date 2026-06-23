@@ -2695,14 +2695,21 @@ def refresh_data():
                     for s in results if s.get("ticker")
                 }
             _cc = _dqv_cross_consistency(results, _charts_map)
-            if _cc["errors"]:
+            # CACHE_MISS → debug log only (startup/restart expected); real drifts → alert
+            _real_errs = [e for e in _cc["errors"] if e.get("flag") != "CACHE_MISS"]
+            _miss_errs = [e for e in _cc["errors"] if e.get("flag") == "CACHE_MISS"]
+            if _miss_errs:
+                logger.debug("DQV_CROSS CACHE_MISS: %d tickers (chart henüz yüklenmedi)",
+                             len(_miss_errs))
+            if _real_errs:
+                _real_failed = list({e["ticker"] for e in _real_errs})
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_CROSS",
-                               f"{len(_cc['errors'])} inconsistencies tickers={_cc['failed_tickers']}",
+                               f"{len(_real_errs)} inconsistencies tickers={_real_failed}",
                                _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
                 else:
                     logger.warning("DQV_CROSS: %d inconsistencies, tickers=%s",
-                                   len(_cc["errors"]), _cc["failed_tickers"])
+                                   len(_real_errs), _real_failed)
         except Exception as _e:
             logger.warning("DQV_CROSS exception: %s", _e)
 
