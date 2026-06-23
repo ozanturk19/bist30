@@ -1,0 +1,14 @@
+#!/bin/bash
+# Faz 12 P2.5 — Pre-push gate
+# Runs smoke_check.sh before every push. Abort on failure.
+# Bypass (acil durum, CPO onayı şart): git push --no-verify
+
+set -e
+REPO_DIR="$(git rev-parse --show-toplevel)"
+
+if ! "$REPO_DIR/smoke_check.sh"; then
+    echo ""
+    echo "Push aborted by P2.5 pre-deploy gate. Fix the issues above."
+    echo "Emergency bypass (CPO approval required): git push --no-verify"
+    exit 1
+fi
