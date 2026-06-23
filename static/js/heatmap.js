@@ -1,7 +1,7 @@
 /* SPEC-018 BIST Heatmap MVP — Vanilla Squarified Treemap
  * Çar 27 May 2026, Ozan-direktif
  * Algoritma referansı: Bruls/Huijbregts/van Wijk 1999 squarified treemap
- * Boyut: tier_score (v2 market_cap); Renk: tier (Bronz/Gümüş/Altın) + signal
+ * Boyut: tier_score (v2 market_cap); Renk: tier (Standart/Plus/Premium) + signal
  */
 (function () {
   'use strict';
@@ -11,11 +11,11 @@
     var sig = item.signal;
     if (sig === 'SAT') return '#f85149';
     if (sig === 'BEKLE' || sig == null) return '#21262d';
-    // AL: tier_score'a göre Altın/Gümüş/Bronz
+    // AL: tier_score'a göre Premium/Plus/Standart
     var score = item.tier_score || 0;
-    if (score >= 70) return '#FFD700';  // Altın
-    if (score >= 50) return '#9DA5B4';  // Gümüş
-    if (score >= 30) return '#CD7F32';  // Bronz
+    if (score >= 70) return '#FFD700';  // Premium
+    if (score >= 50) return '#9DA5B4';  // Plus
+    if (score >= 30) return '#CD7F32';  // Standart
     return '#46464d';  // Çok zayıf AL (nadir)
   }
 
@@ -24,10 +24,21 @@
     if (sig === 'SAT') return 'SAT';
     if (sig === 'BEKLE' || sig == null) return 'BEKLE';
     var score = item.tier_score || 0;
-    if (score >= 70) return '🥇 Altın';
-    if (score >= 50) return '🥈 Gümüş';
-    if (score >= 30) return '🥉 Bronz';
+    if (score >= 70) return 'Premium';
+    if (score >= 50) return 'Plus';
+    if (score >= 30) return 'Standart';
     return 'AL (zayıf)';
+  }
+
+  function tierOpacity(item) {
+    var sig = item.signal;
+    if (sig === 'SAT') return 1.0;
+    if (sig === 'BEKLE' || sig == null) return 0.40;
+    var score = item.tier_score || 0;
+    if (score >= 70) return 1.0;   // Premium
+    if (score >= 50) return 0.85;  // Plus
+    if (score >= 30) return 0.70;  // Standart
+    return 0.40;
   }
 
   // ── Squarified treemap algoritması ──────────────────────────────────────
@@ -187,6 +198,7 @@
         cell.setAttribute('x', st.x); cell.setAttribute('y', st.y);
         cell.setAttribute('width', st.w); cell.setAttribute('height', st.h);
         cell.setAttribute('fill', tierColor(st));
+        cell.setAttribute('opacity', tierOpacity(st));
         cell.setAttribute('stroke', '#0e0e12');
         cell.setAttribute('stroke-width', '1');
         cell.dataset.ticker = st.ticker;
