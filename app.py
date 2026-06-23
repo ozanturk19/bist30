@@ -73,6 +73,15 @@ try:
 except ImportError:
     pass
 
+# ── Faz 12 P2.4 Multi-tier alerting ──────────────────────────────────────────
+try:
+    from alerting import emit_alert as _dqv_alert
+    _ALERTING_AVAILABLE = True
+except ImportError as _alerting_err:
+    _ALERTING_AVAILABLE = False
+    import logging as _log_tmp
+    _log_tmp.getLogger(__name__).warning("alerting unavailable: %s", _alerting_err)
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
 
@@ -2075,10 +2084,12 @@ def _notify_email_signal_changes(changes):
         try:
             _qa = _dqv_email_qa(changes, context="instant")
             if not _qa["ok"]:
-                logger.warning("DQV_EMAIL_QA: %s flag=%s count=%s", _qa.get("flag"), _qa.get("flag"), _qa.get("count"))
-                if _SENTRY_AVAILABLE:
-                    _sentry_sdk.capture_message(
-                        f"DQV_EMAIL_QA: flag={_qa.get('flag')} count={_qa.get('count')}", level="warning")
+                if _ALERTING_AVAILABLE:
+                    _dqv_alert("DQV_EMAIL_QA",
+                               f"flag={_qa.get('flag')} count={_qa.get('count')}",
+                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                else:
+                    logger.warning("DQV_EMAIL_QA: flag=%s count=%s", _qa.get("flag"), _qa.get("count"))
         except Exception as _e:
             logger.warning("DQV_EMAIL_QA exception: %s", _e)
 
@@ -2610,10 +2621,12 @@ def refresh_data():
         try:
             _br = _dqv_business_rules(results)
             if _br["errors"]:
-                logger.warning("DQV_BR: %d violations, tickers=%s", len(_br["errors"]), _br["failed_tickers"])
-                if _SENTRY_AVAILABLE:
-                    _sentry_sdk.capture_message(
-                        f"DQV_BR: {len(_br['errors'])} violations {_br['failed_tickers']}", level="warning")
+                if _ALERTING_AVAILABLE:
+                    _dqv_alert("DQV_BR",
+                               f"{len(_br['errors'])} violations tickers={_br['failed_tickers']}",
+                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                else:
+                    logger.warning("DQV_BR: %d violations, tickers=%s", len(_br["errors"]), _br["failed_tickers"])
         except Exception as _e:
             logger.warning("DQV_BR exception: %s", _e)
 
@@ -2628,11 +2641,13 @@ def refresh_data():
                 }
             _cc = _dqv_cross_consistency(results, _charts_map)
             if _cc["errors"]:
-                logger.warning("DQV_CROSS: %d inconsistencies, tickers=%s",
-                               len(_cc["errors"]), _cc["failed_tickers"])
-                if _SENTRY_AVAILABLE:
-                    _sentry_sdk.capture_message(
-                        f"DQV_CROSS: {len(_cc['errors'])} inconsistencies {_cc['failed_tickers']}", level="warning")
+                if _ALERTING_AVAILABLE:
+                    _dqv_alert("DQV_CROSS",
+                               f"{len(_cc['errors'])} inconsistencies tickers={_cc['failed_tickers']}",
+                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                else:
+                    logger.warning("DQV_CROSS: %d inconsistencies, tickers=%s",
+                                   len(_cc["errors"]), _cc["failed_tickers"])
         except Exception as _e:
             logger.warning("DQV_CROSS exception: %s", _e)
 
@@ -2657,11 +2672,13 @@ def refresh_data():
                     })
             _an = _dqv_anomalies(_stocks_with_hist)
             if _an["errors"]:
-                logger.warning("DQV_ANOMALY: %d flags, tickers=%s",
-                               len(_an["errors"]), _an["failed_tickers"])
-                if _SENTRY_AVAILABLE:
-                    _sentry_sdk.capture_message(
-                        f"DQV_ANOMALY: {len(_an['errors'])} flags {_an['failed_tickers']}", level="warning")
+                if _ALERTING_AVAILABLE:
+                    _dqv_alert("DQV_ANOMALY",
+                               f"{len(_an['errors'])} flags tickers={_an['failed_tickers']}",
+                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                else:
+                    logger.warning("DQV_ANOMALY: %d flags, tickers=%s",
+                                   len(_an["errors"]), _an["failed_tickers"])
         except Exception as _e:
             logger.warning("DQV_ANOMALY exception: %s", _e)
 
@@ -3133,10 +3150,12 @@ def api_data():
         try:
             _sv = _dqv_sv_data(_resp_data)
             if not _sv.get("ok"):
-                logger.warning("DQV_SV_DATA: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
-                if _SENTRY_AVAILABLE:
-                    _sentry_sdk.capture_message(
-                        f"DQV_SV_DATA: flag={_sv.get('flag')}", level="warning")
+                if _ALERTING_AVAILABLE:
+                    _dqv_alert("DQV_SV_DATA",
+                               f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
+                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                else:
+                    logger.warning("DQV_SV_DATA: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
         except Exception as _e:
             logger.warning("DQV_SV_DATA exception: %s", _e)
     return safe_json(_resp_data)
@@ -3535,10 +3554,12 @@ def api_macro():
         try:
             _sv = _dqv_sv_macro(_resp_macro)
             if not _sv.get("ok"):
-                logger.warning("DQV_SV_MACRO: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
-                if _SENTRY_AVAILABLE:
-                    _sentry_sdk.capture_message(
-                        f"DQV_SV_MACRO: flag={_sv.get('flag')}", level="warning")
+                if _ALERTING_AVAILABLE:
+                    _dqv_alert("DQV_SV_MACRO",
+                               f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
+                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                else:
+                    logger.warning("DQV_SV_MACRO: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
         except Exception as _e:
             logger.warning("DQV_SV_MACRO exception: %s", _e)
     return safe_json(_resp_macro)
@@ -6560,10 +6581,13 @@ def api_stock_chart(ticker):
         try:
             _sv = _dqv_sv_chart(_resp_chart)
             if not _sv.get("ok"):
-                logger.warning("DQV_SV_CHART[%s]: flag=%s errors=%s", ticker, _sv.get("flag"), _sv.get("errors"))
-                if _SENTRY_AVAILABLE:
-                    _sentry_sdk.capture_message(
-                        f"DQV_SV_CHART[{ticker}]: flag={_sv.get('flag')}", level="warning")
+                if _ALERTING_AVAILABLE:
+                    _dqv_alert("DQV_SV_CHART",
+                               f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
+                               ticker=ticker,
+                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                else:
+                    logger.warning("DQV_SV_CHART[%s]: flag=%s errors=%s", ticker, _sv.get("flag"), _sv.get("errors"))
         except Exception as _e:
             logger.warning("DQV_SV_CHART exception: %s", _e)
     return safe_json(_resp_chart)
