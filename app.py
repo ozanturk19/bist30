@@ -131,6 +131,25 @@ _push_lock = threading.Lock()
 _YF_GLOBAL_LOCK = threading.Lock()  # CPO-592: tüm yf.download/Ticker çağrılarını serialize — global state contamination fix
 
 
+def _json_to_dataframe(data: dict):
+    """POC helper: yf_fetch.py JSON output → pandas DataFrame (yfinance format).
+    Used by the subprocess-isolation POC; not yet wired into production paths.
+    """
+    import pandas as pd
+    if not data or data.get("error"):
+        return None
+    try:
+        df = pd.DataFrame(data["data"])
+        df.index = pd.to_datetime(data["index"])
+        df.index.name = "Date"
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        return df
+    except Exception as e:
+        logger.warning("_json_to_dataframe error: %s", e)
+        return None
+
+
 def _load_push_subs():
     global _push_subs
     try:
