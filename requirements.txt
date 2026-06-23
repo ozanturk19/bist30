@@ -6,3 +6,4 @@ gunicorn>=21.0
 gevent>=23.0
 markdown>=3.4.0
 holidays
+jsonschema>=4.0.0

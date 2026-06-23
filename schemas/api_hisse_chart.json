@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "api_hisse_chart",
+  "description": "Schema for /api/hisse/<ticker>/chart response",
+  "type": "object",
+  "required": ["loading"],
+  "additionalProperties": true,
+  "properties": {
+    "loading":    {"type": "boolean"},
+    "chart":      {},
+    "updated_at": {"type": "string"},
+    "reason":     {"type": "string"},
+    "integrity_error": {"type": "string"}
+  }
+}

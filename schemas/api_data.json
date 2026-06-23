@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "api_data",
+  "description": "Schema for /api/data response",
+  "type": "object",
+  "required": ["stocks", "updated_at", "loading", "sectors", "xu100_spark"],
+  "additionalProperties": true,
+  "properties": {
+    "stocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ticker"],
+        "properties": {
+          "ticker":       {"type": "string", "minLength": 1},
+          "price":        {"type": ["number", "null"]},
+          "change_pct":   {"type": ["number", "null"]},
+          "signal":       {"type": ["string", "null"]},
+          "signal_price": {"type": ["number", "null"]},
+          "signal_date":  {"type": ["string", "null"]},
+          "adx":          {"type": ["number", "null"]}
+        }
+      }
+    },
+    "updated_at":   {"type": "string"},
+    "loading":      {"type": "boolean"},
+    "sectors":      {"type": "array", "items": {"type": "string"}},
+    "xu100_spark":  {"type": "array", "items": {"type": "number"}},
+    "data_quality": {"type": "string", "enum": ["fresh", "stale", "critical"]},
+    "stocks_age_s": {"type": ["integer", "null"]},
+    "refreshing":   {"type": "boolean"}
+  }
+}
