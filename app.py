@@ -3938,10 +3938,12 @@ def get_chart_data():
                 out.append({"time": d, "value": round(float(val), 4)})
             return out
 
-        # OHLC
+        # OHLC — tatil/hafta sonu günleri çıkar (ticket #18: düz çizgi fix)
         ohlc = []
         for ts in show_idx:
             try:
+                if not is_trading_day(ts.date()):
+                    continue
                 ohlc.append({
                     "time":  ts.strftime("%Y-%m-%d"),
                     "open":  round(_safe_float(open_[ts]),  2),
@@ -5272,10 +5274,12 @@ def _compute_chart_data(ticker_base, period="2y"):
                 out.append({"time": d, "value": round(float(val), 4)})
             return out
 
-        # OHLC
+        # OHLC — tatil/hafta sonu günleri çıkar (ticket #18: düz çizgi fix)
         ohlc = []
         for ts in show_idx:
             try:
+                if not is_trading_day(ts.date()):
+                    continue
                 ohlc.append({
                     "time":  ts.strftime("%Y-%m-%d"),
                     "open":  round(_safe_float(open_[ts]),  2),
