@@ -2972,8 +2972,8 @@ function buildChart(d) {
       : '';
     legEl.innerHTML =
       datePart +
-      `<span style="color:#b8c3ff">EMA12 ${fmt(l12)}</span>&nbsp;&nbsp;` +
-      `<span style="color:#e3b341">EMA99 ${fmt(l99)}</span>`;
+      `<span style="color:#b8c3ff"><span style="display:inline-block;width:14px;height:2px;background:#b8c3ff;vertical-align:middle;margin-right:3px;border-radius:1px"></span>EMA12 ${fmt(l12)}</span>&nbsp;&nbsp;` +
+      `<span style="color:#e3b341"><span style="display:inline-block;width:14px;height:2px;background:#e3b341;vertical-align:middle;margin-right:3px;border-radius:1px"></span>EMA99 ${fmt(l99)}</span>`;
   }
   updateLeg();
   chart.subscribeCrosshairMove(p => {
