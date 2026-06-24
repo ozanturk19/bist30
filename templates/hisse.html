@@ -2125,7 +2125,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
       <!-- R/R Görsel -->
       <div>
-        <div class="rr-card-label">Risk / Ödül</div>
+        <div class="rr-card-label"><a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)">Risk / Ödül</a></div>
         <div id="rrBarContainer"></div>
         <div id="rrLevels"></div>
       </div>
@@ -3224,11 +3224,11 @@ function renderSummary(s, signalData) {
         const rrRowsHtml = (rrSig != null || rrNow != null) ? `
           <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:11px;font-variant-numeric:tabular-nums">
             ${rrSig != null ? `<div style="display:flex;justify-content:space-between;color:#8b949e">
-              <span>Sinyal başından R/R</span>
+              <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)">R/R</a></span>
               <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2)}x</strong>
             </div>` : ''}
             ${rrNow != null ? `<div style="display:flex;justify-content:space-between;color:#8b949e" title="Mevcut fiyattan giriş yaparsan risk/ödül oranı">
-              <span>Şu an girersen R/R</span>
+              <span>Şu an girersen <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)">R/R</a></span>
               <strong style="color:${rrNow >= 2.0 ? '#3fb950' : rrNow >= 1.0 ? '#d29922' : '#f85149'}">${rrNow.toFixed(2)}x</strong>
             </div>` : ''}
           </div>` : '';
