@@ -19,7 +19,7 @@ def fetch(yf_ticker: str, period: str) -> dict:
     if df is None or df.empty:
         return {"error": "empty", "ticker": yf_ticker}
 
-    ohlc_cols = [c for c in ["Open", "High", "Low", "Close"] if c in df.columns]
+    ohlc_cols = [c for c in ["Open", "High", "Low", "Close", "Volume"] if c in df.columns]
     df = df[ohlc_cols]
 
     data = {}

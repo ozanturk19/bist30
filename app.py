@@ -5374,28 +5374,9 @@ def _compute_chart_data(ticker_base, period="2y"):
     WARMUP_MIN   = 150
 
     try:
-        # gevent altinda yf.download bazi semboller icin yanlis scale donerebiliyor.
-        # Endeks ve emtia sembolleri icin Ticker.history daha guvenilir.
-        df = None
-        if ticker_base in ("XU100", "XU030"):
-            try:
-                with _YF_GLOBAL_LOCK:
-                    df = yf.Ticker(ticker).history(period=period, interval="1d", auto_adjust=True)
-                if df is not None and len(df) > 0:
-                    df.index = df.index.tz_localize(None) if df.index.tz else df.index
-            except Exception as _e:
-                logger.warning("%s: Ticker.history fallback (%s)", ticker_base, _e)
-                df = None
-        if df is None or len(df) == 0:
-            with _YF_GLOBAL_LOCK:
-                df = yf.download(ticker, period=period, interval="1d",
-                                 progress=False, auto_adjust=True, timeout=30, threads=False)
+        df = _fetch_chart_subprocess(ticker, period)  # G24b: lock-free subprocess
         if df is None or len(df) < WARMUP_MIN:
             return None
-
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
-            df = df.loc[:, ~df.columns.duplicated()]
 
         has_volume = "Volume" in df.columns
         cols = ["Open", "High", "Low", "Close"] + (["Volume"] if has_volume else [])
