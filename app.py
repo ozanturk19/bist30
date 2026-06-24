@@ -24,6 +24,7 @@ import logging
 import time
 import json
 import os
+import subprocess
 import tempfile
 import re
 import copy
@@ -147,6 +148,31 @@ def _json_to_dataframe(data: dict):
         return df
     except Exception as e:
         logger.warning("_json_to_dataframe error: %s", e)
+        return None
+
+
+_YF_FETCH_SCRIPT = os.path.join(os.path.dirname(__file__), "yf_fetch.py")
+
+def _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=25):
+    """Lock-free fetch via yf_fetch.py subprocess — CPO-740 Görev 8.
+    Replaces _YF_GLOBAL_LOCK acquire in analyze(). Hard 25s kill vs lock 45s wait.
+    Rollback: revert this function + analyze() lines 1097-1111.
+    """
+    try:
+        result = subprocess.run(
+            [_sys.executable, _YF_FETCH_SCRIPT, ticker_base, period, interval],
+            capture_output=True, text=True, timeout=timeout,
+        )
+        if result.returncode != 0:
+            logger.warning("yf_fetch %s failed: %s", ticker_base, result.stderr[:120])
+            return None
+        data = json.loads(result.stdout)
+        return _json_to_dataframe(data)
+    except subprocess.TimeoutExpired:
+        logger.warning("yf_fetch %s: %ds timeout", ticker_base, timeout)
+        return None
+    except Exception as e:
+        logger.error("yf_fetch %s error: %s", ticker_base, e)
         return None
 
 
@@ -1094,19 +1120,12 @@ def analyze(ticker_base):
     try:
         weekly_dir = _weekly_trend(ticker)
 
-        # CPO-596: timeout ile acquire — eski thread lock'u tutuyorsa sonsuz bekleme yerine skip
-        if not _YF_GLOBAL_LOCK.acquire(timeout=45):
-            logger.error("analyze(%s): _YF_GLOBAL_LOCK 45s timeout — skip", ticker_base)
-            return None
-        try:
-            df = yf.download(ticker, period="2y", interval="1d",
-                             progress=False, auto_adjust=True, timeout=30, threads=False)
-        finally:
-            _YF_GLOBAL_LOCK.release()
+        # CPO-740 Görev 8: lock-free subprocess fetch (yf_fetch.py, 25s hard timeout)
+        df = _fetch_daily_subprocess(ticker_base)
         if df is None or len(df) < 120:
             return None
 
-        if isinstance(df.columns, pd.MultiIndex):
+        if isinstance(df.columns, pd.MultiIndex):  # safety guard for rollback
             df.columns = df.columns.get_level_values(0)
             df = df.loc[:, ~df.columns.duplicated()]
 
