@@ -205,7 +205,6 @@ _MACRO_SLOW_MS = 2000  # CPO-740 Görev 12c: >2s uyarı (macro baseline ~650ms �
 
 def _fetch_macro_one_subprocess(label, sym, timeout=10):
     """Lock-free macro fetch via yf_macro_fetch.py subprocess — CPO-740 Görev 9.
-    Replaces _YF_GLOBAL_LOCK + yf.Ticker(sym).fast_info in _fetch_macro_one().
     Hard 10s kill vs lock contention. Called sequentially from _fetch_macro().
     """
     _t0 = time.perf_counter()
@@ -3646,23 +3645,6 @@ _MACRO_TICKERS = [
     ("SP500",  "^GSPC"),
     ("NASDAQ", "^IXIC"),
 ]
-
-def _fetch_macro_one(label, sym):
-    """Tek bir ticker için fast_info çağrısı — timeout korumalı."""
-    try:
-        with _YF_GLOBAL_LOCK:
-            tk  = yf.Ticker(sym)
-            fi  = tk.fast_info
-            price  = getattr(fi, "last_price", None) or getattr(fi, "regularMarketPrice", None)
-            prev   = getattr(fi, "previous_close", None)
-        if price is None or prev is None or prev == 0:
-            return None
-        change = round((float(price) - float(prev)) / float(prev) * 100, 2)
-        return {"label": label, "price": round(float(price), 2), "change": change}
-    except Exception as e:
-        logger.debug("_fetch_macro_one %s: %s", label, e)
-        return None
-
 
 def _fetch_macro():
     """XU100, XU030, BTC, ALTIN, GUMUS, PETROL, USD/TRY, EUR/TRY, S&P500, NASDAQ anlık veri.
