@@ -2661,6 +2661,7 @@ def _load_cache_from_disk():
                 # SPEC-008 v1.2 #39 — disk mtime = son refresh_data zamanı.
                 # background_refresh tamamlanana kadar grace penceresi açık (>300s ise).
                 _cache["last_refresh_ts"] = current_mtime
+                _cache["loading"] = False  # G25: disk-reload sonrası loading flag sıfırla
             _disk_cache_mtime = current_mtime  # H3: state update sadece load sonrası
             logger.info("Disk cache yüklendi: %d hisse (updated_at=%s)", len(data), disk_ts)
     except Exception as e:
@@ -2761,6 +2762,7 @@ def refresh_data():
         _cache["data"] = results
         _cache["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
         _cache["last_refresh_ts"] = time.time()  # SPEC-008 v1.2 #39 — grace pencere kapanır
+        _cache["loading"] = False  # G25: partial success (ANALYZE_TIMEOUT) dahil loading bitişinde sıfırla
 
     # Başarılı güncellemeden sonra diske yaz
     _save_cache_to_disk(results)
