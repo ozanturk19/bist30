@@ -177,6 +177,20 @@ def _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=25)
         return None
 
 
+def _fetch_weekly_subprocess(ticker_base, timeout=20):
+    """Lock-free 1y/1wk fetch — CPO-740 Görev 11.
+    Replaces _YF_GLOBAL_LOCK + yf.download(period='1y', interval='1wk') in _weekly_trend().
+    """
+    return _fetch_daily_subprocess(ticker_base, period="1y", interval="1wk", timeout=timeout)
+
+
+def _fetch_intraday_subprocess(ticker_base, timeout=20):
+    """Lock-free 5d/1m fetch — CPO-740 Görev 11.
+    Replaces _YF_GLOBAL_LOCK + yf.download(period='5d', interval='1m') in _fill_intraday_gaps().
+    """
+    return _fetch_daily_subprocess(ticker_base, period="5d", interval="1m", timeout=timeout)
+
+
 def _fetch_macro_one_subprocess(label, sym, timeout=10):
     """Lock-free macro fetch via yf_macro_fetch.py subprocess — CPO-740 Görev 9.
     Replaces _YF_GLOBAL_LOCK + yf.Ticker(sym).fast_info in _fetch_macro_one().
@@ -1039,15 +1053,12 @@ def compute_supertrend(high, low, close, period=10, multiplier=3):
 
 def _fill_intraday_gaps(df, ticker):
     """Gunluk data eksik gunleri 1m data'dan OHLC sentezleyerek doldur.
-    yfinance bazen son 1-2 gunun daily barini geciktiriyor."""
+    yfinance bazen son 1-2 gunun daily barini geciktiriyor.
+    CPO-740 Görev 11: lock-free subprocess isolation (yf_fetch.py 5d/1m).
+    """
     try:
-        if not _YF_GLOBAL_LOCK.acquire(timeout=30):  # CPO-596: deadlock koruması
-            return df
-        try:
-            df5d = yf.download(ticker, period="5d", interval="1m",
-                               progress=False, auto_adjust=True, timeout=20, threads=False)
-        finally:
-            _YF_GLOBAL_LOCK.release()
+        ticker_base = ticker[:-3] if ticker.endswith(".IS") else ticker
+        df5d = _fetch_intraday_subprocess(ticker_base)
         if df5d is None or df5d.empty:
             return df
         if isinstance(df5d.columns, pd.MultiIndex):
@@ -1091,15 +1102,12 @@ def _fill_intraday_gaps(df, ticker):
 
 
 def _weekly_trend(ticker: str) -> int:
-    """Haftalık EMA20 yönü: +1 yükselen, -1 düşen, 0 belirsiz/hata."""
+    """Haftalık EMA20 yönü: +1 yükselen, -1 düşen, 0 belirsiz/hata.
+    CPO-740 Görev 11: lock-free subprocess isolation (yf_fetch.py 1y/1wk).
+    """
     try:
-        if not _YF_GLOBAL_LOCK.acquire(timeout=30):  # CPO-596: deadlock koruması
-            return 0
-        try:
-            wdf = yf.download(ticker, period="1y", interval="1wk",
-                              progress=False, auto_adjust=True, timeout=20, threads=False)
-        finally:
-            _YF_GLOBAL_LOCK.release()
+        ticker_base = ticker[:-3] if ticker.endswith(".IS") else ticker
+        wdf = _fetch_weekly_subprocess(ticker_base)
         if wdf is None or len(wdf) < 25:
             return 0
         if isinstance(wdf.columns, pd.MultiIndex):
