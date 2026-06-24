@@ -117,6 +117,25 @@
     font-weight: 700; pointer-events: none;
     text-anchor: middle; dominant-baseline: middle;
   }
+  /* SPEC-021: Piyasa modu — dark bg → light text */
+  body.mode-piyasa .stock-cell-text { fill: #d4d0dc; }
+  /* SPEC-021: Mode toggle */
+  .mode-toggle {
+    display: inline-flex; align-items: center; gap: 2px;
+    background: var(--bp-surface2); border: 1px solid var(--bp-border);
+    border-radius: 8px; padding: 3px; margin-bottom: 14px;
+  }
+  .toggle-btn {
+    padding: 5px 18px; font-size: 12px; font-weight: 600;
+    border: none; border-radius: 6px; cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    background: transparent; color: var(--bp-text3);
+  }
+  .toggle-btn.active {
+    background: var(--bp-surface); color: var(--bp-text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+  }
   /* Tooltip */
   #heatmap-tooltip {
     position: fixed; pointer-events: none;
@@ -157,8 +176,14 @@
 </header>
 
 <main>
-  <h1>BIST Sinyal Haritası</h1>
-  <p class="subtitle">215 hisse — sektör bazlı treemap, sinyal tier renkleri</p>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+    <h1 id="heatmap-title">BIST Sinyal Haritası</h1>
+    <div class="mode-toggle">
+      <button class="toggle-btn active" data-mode="sinyal" id="modeSinyalBtn">Sinyal</button>
+      <button class="toggle-btn" data-mode="piyasa" id="modePiyasaBtn">Piyasa</button>
+    </div>
+  </div>
+  <p class="subtitle" id="heatmap-subtitle">215 hisse — sinyal tier renkleri · sektör bazlı treemap</p>
   <div class="freshness-stamp">
     <span class="freshness-dot"></span>
     <span id="freshness-text">Yükleniyor…</span>
@@ -171,13 +196,24 @@
     </div>
   </div>
 
-  <div class="legend">
+  <div class="legend" id="legendSinyal">
     <span style="color:var(--bp-text3);font-weight:600">Sinyal Tier:</span>
     <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-gold)"></span>🥇 Premium</span>
     <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-silver)"></span>🥈 Plus</span>
     <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-bronze)"></span>🥉 Standart</span>
     <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-sat)"></span>▼ Zayıf Trend</span>
     <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-bekle);border:1px solid #3c3c46"></span>· Yatay</span>
+    <span style="color:var(--bp-text3);margin-left:auto;font-size:11px">Kutu tıkla → hisse detayı</span>
+  </div>
+  <div class="legend" id="legendPiyasa" style="display:none">
+    <span style="color:var(--bp-text3);font-weight:600">Günlük Değişim:</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#7d1e1e"></span>-%5+</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#912525"></span>-%3</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#4a2a2a"></span>-%1</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#252b36;border:1px solid #3c3c46"></span>0%</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#1d4028"></span>+%1</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#207038"></span>+%3</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#2da44e"></span>+%5+</span>
     <span style="color:var(--bp-text3);margin-left:auto;font-size:11px">Kutu tıkla → hisse detayı</span>
   </div>
 </main>

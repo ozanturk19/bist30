@@ -6,6 +6,29 @@
 (function () {
   'use strict';
 
+  // ── SPEC-021: Mode state ─────────────────────────────────────────────────
+  var _urlMode = new URLSearchParams(location.search).get('mode');
+  var currentMode = _urlMode || localStorage.getItem('bp_heatmap_mode') || 'sinyal';
+  var allCellRefs = []; // {rect, item} for quick color update on mode switch
+  var _toggleInited = false;
+
+  // ── SPEC-021: Piyasa modu renk fonksiyonu (diverging gradient) ───────────
+  function piyasaColor(item) {
+    var pct = item.change_pct;
+    if (pct == null) return '#252b36';
+    if (pct <= -5) return '#7d1e1e';
+    if (pct <= -3) return '#912525';
+    if (pct <= -1) return '#6b3030';
+    if (pct < 0)   return '#4a2a2a';
+    if (pct === 0) return '#252b36';
+    if (pct < 1)   return '#1d3020';
+    if (pct < 3)   return '#1d4028';
+    if (pct < 5)   return '#207038';
+    return '#2da44e';
+  }
+
+  function piyasaOpacity() { return 1.0; }
+
   // ── Tier renk fonksiyonu — G16 satürasyon dengeleme ─────────────────────
   function tierColor(item) {
     var sig = item.signal;
@@ -114,6 +137,7 @@
 
   // ── Render ───────────────────────────────────────────────────────────────
   function render(data) {
+    allCellRefs = []; // reset on each re-render (resize)
     var container = document.getElementById('heatmap-container');
     container.innerHTML = '';
 
@@ -206,12 +230,15 @@
         cell.setAttribute('class', 'stock-cell');
         cell.setAttribute('x', st.x); cell.setAttribute('y', st.y);
         cell.setAttribute('width', st.w); cell.setAttribute('height', st.h);
-        cell.setAttribute('fill', tierColor(st));
-        cell.setAttribute('opacity', tierOpacity(st));
+        var cellFill = currentMode === 'piyasa' ? piyasaColor(st) : tierColor(st);
+        var cellOp   = currentMode === 'piyasa' ? piyasaOpacity() : tierOpacity(st);
+        cell.setAttribute('fill', cellFill);
+        cell.setAttribute('opacity', cellOp);
         cell.setAttribute('stroke', '#0e0e12');
         cell.setAttribute('stroke-width', '1');
         cell.setAttribute('rx', '3');  /* G16: border-radius */
         cell.setAttribute('ry', '3');
+        allCellRefs.push({rect: cell, item: st});
         cell.dataset.ticker = st.ticker;
         cell.addEventListener('click', function(){
           window.location.href = '/hisse/' + st.ticker;
@@ -281,6 +308,62 @@
     if (tt) tt.style.display = 'none';
   }
 
+  // ── SPEC-021: Mode switch ─────────────────────────────────────────────────
+  function switchMode(mode) {
+    if (mode === currentMode) return;
+    currentMode = mode;
+    localStorage.setItem('bp_heatmap_mode', mode);
+    history.replaceState(null, '', '?mode=' + mode);
+
+    // Update cell colors in-place (no re-layout)
+    allCellRefs.forEach(function(ref) {
+      ref.rect.setAttribute('fill',    mode === 'piyasa' ? piyasaColor(ref.item) : tierColor(ref.item));
+      ref.rect.setAttribute('opacity', mode === 'piyasa' ? piyasaOpacity() : tierOpacity(ref.item));
+    });
+
+    // Text color via body class
+    document.body.classList.toggle('mode-piyasa', mode === 'piyasa');
+
+    // Toggle button states
+    document.querySelectorAll('.toggle-btn').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+
+    // Title + subtitle + legends
+    var title = document.getElementById('heatmap-title');
+    var sub   = document.getElementById('heatmap-subtitle');
+    if (title) title.textContent = mode === 'piyasa' ? 'BIST Piyasa Haritası' : 'BIST Sinyal Haritası';
+    if (sub)   sub.textContent   = mode === 'piyasa'
+      ? '215 hisse — günlük değişim renkleri · sektör bazlı treemap'
+      : '215 hisse — sinyal tier renkleri · sektör bazlı treemap';
+
+    var lSinyal  = document.getElementById('legendSinyal');
+    var lPiyasa  = document.getElementById('legendPiyasa');
+    if (lSinyal)  lSinyal.style.display  = mode === 'piyasa' ? 'none' : '';
+    if (lPiyasa)  lPiyasa.style.display  = mode === 'piyasa' ? ''     : 'none';
+  }
+
+  function initToggle() {
+    // Apply initial mode class
+    document.body.classList.toggle('mode-piyasa', currentMode === 'piyasa');
+    document.querySelectorAll('.toggle-btn').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.mode === currentMode);
+      btn.addEventListener('click', function() { switchMode(btn.dataset.mode); });
+    });
+    // Apply initial legend visibility
+    var lSinyal = document.getElementById('legendSinyal');
+    var lPiyasa = document.getElementById('legendPiyasa');
+    if (lSinyal) lSinyal.style.display = currentMode === 'piyasa' ? 'none' : '';
+    if (lPiyasa) lPiyasa.style.display = currentMode === 'piyasa' ? ''     : 'none';
+    // Apply initial title/subtitle
+    var title = document.getElementById('heatmap-title');
+    var sub   = document.getElementById('heatmap-subtitle');
+    if (currentMode === 'piyasa') {
+      if (title) title.textContent = 'BIST Piyasa Haritası';
+      if (sub)   sub.textContent   = '215 hisse — günlük değişim renkleri · sektör bazlı treemap';
+    }
+  }
+
   // ── Fetch + init ─────────────────────────────────────────────────────────
   function load() {
     fetch('/api/heatmap', {credentials: 'same-origin'})
@@ -293,6 +376,7 @@
           return;
         }
         render(data);
+        if (!_toggleInited) { initToggle(); _toggleInited = true; }
       })
       .catch(function(err){
         console.error('Heatmap load error:', err);
