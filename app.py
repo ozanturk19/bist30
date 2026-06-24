@@ -154,23 +154,33 @@ def _json_to_dataframe(data: dict):
 _YF_FETCH_SCRIPT = os.path.join(os.path.dirname(__file__), "yf_fetch.py")
 _YF_MACRO_SCRIPT = os.path.join(os.path.dirname(__file__), "yf_macro_fetch.py")
 
+_SUBPROCESS_SLOW_MS = 3000  # CPO-740 Görev 12c: >3s uyarı (baseline ~956ms × 3)
+
 def _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=25):
     """Lock-free fetch via yf_fetch.py subprocess — CPO-740 Görev 8.
     Replaces _YF_GLOBAL_LOCK acquire in analyze(). Hard 25s kill vs lock 45s wait.
     Rollback: revert this function + analyze() lines 1097-1111.
     """
+    _t0 = time.perf_counter()
     try:
         result = subprocess.run(
             [_sys.executable, _YF_FETCH_SCRIPT, ticker_base, period, interval],
             capture_output=True, text=True, timeout=timeout,
         )
+        _ms = (time.perf_counter() - _t0) * 1000
         if result.returncode != 0:
-            logger.warning("yf_fetch %s failed: %s", ticker_base, result.stderr[:120])
+            logger.warning("yf_fetch %s %s/%s FAIL %.0fms: %s", ticker_base, period, interval, _ms, result.stderr[:80])
             return None
         data = json.loads(result.stdout)
-        return _json_to_dataframe(data)
+        df = _json_to_dataframe(data)
+        rows = len(df) if df is not None else 0
+        logger.debug("yf_fetch %s %s/%s: %.0fms %d rows", ticker_base, period, interval, _ms, rows)
+        if _ms > _SUBPROCESS_SLOW_MS:
+            logger.warning("yf_fetch %s %s/%s SLOW: %.0fms (baseline ~956ms)", ticker_base, period, interval, _ms)
+        return df
     except subprocess.TimeoutExpired:
-        logger.warning("yf_fetch %s: %ds timeout", ticker_base, timeout)
+        _ms = (time.perf_counter() - _t0) * 1000
+        logger.warning("yf_fetch %s %s/%s TIMEOUT %ds (%.0fms elapsed)", ticker_base, period, interval, timeout, _ms)
         return None
     except Exception as e:
         logger.error("yf_fetch %s error: %s", ticker_base, e)
@@ -191,31 +201,39 @@ def _fetch_intraday_subprocess(ticker_base, timeout=20):
     return _fetch_daily_subprocess(ticker_base, period="5d", interval="1m", timeout=timeout)
 
 
+_MACRO_SLOW_MS = 2000  # CPO-740 Görev 12c: >2s uyarı (macro baseline ~650ms × 3)
+
 def _fetch_macro_one_subprocess(label, sym, timeout=10):
     """Lock-free macro fetch via yf_macro_fetch.py subprocess — CPO-740 Görev 9.
     Replaces _YF_GLOBAL_LOCK + yf.Ticker(sym).fast_info in _fetch_macro_one().
     Hard 10s kill vs lock contention. Called sequentially from _fetch_macro().
     """
+    _t0 = time.perf_counter()
     try:
         result = subprocess.run(
             [_sys.executable, _YF_MACRO_SCRIPT, sym],
             capture_output=True, text=True, timeout=timeout,
         )
+        _ms = (time.perf_counter() - _t0) * 1000
         if result.returncode != 0:
-            logger.debug("yf_macro_fetch %s failed: %s", sym, result.stderr[:80])
+            logger.debug("yf_macro_fetch %s FAIL %.0fms: %s", sym, _ms, result.stderr[:80])
             return None
         data = json.loads(result.stdout)
         price = data.get("price")
         prev = data.get("prev_close")
         if not price or not prev or prev == 0:
             return None
+        logger.debug("yf_macro_fetch %s: %.0fms", sym, _ms)
+        if _ms > _MACRO_SLOW_MS:
+            logger.warning("yf_macro_fetch %s SLOW: %.0fms (baseline ~650ms)", sym, _ms)
         return {
             "label": label,
             "price": round(float(price), 2),
             "change": round((float(price) - float(prev)) / float(prev) * 100, 2),
         }
     except subprocess.TimeoutExpired:
-        logger.debug("yf_macro_fetch %s: %ds timeout", sym, timeout)
+        _ms = (time.perf_counter() - _t0) * 1000
+        logger.debug("yf_macro_fetch %s TIMEOUT %ds (%.0fms elapsed)", sym, timeout, _ms)
         return None
     except Exception as e:
         logger.debug("yf_macro_fetch %s error: %s", sym, e)
