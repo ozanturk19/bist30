@@ -152,6 +152,7 @@ def _json_to_dataframe(data: dict):
 
 
 _YF_FETCH_SCRIPT = os.path.join(os.path.dirname(__file__), "yf_fetch.py")
+_YF_MACRO_SCRIPT = os.path.join(os.path.dirname(__file__), "yf_macro_fetch.py")
 
 def _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=25):
     """Lock-free fetch via yf_fetch.py subprocess — CPO-740 Görev 8.
@@ -173,6 +174,37 @@ def _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=25)
         return None
     except Exception as e:
         logger.error("yf_fetch %s error: %s", ticker_base, e)
+        return None
+
+
+def _fetch_macro_one_subprocess(label, sym, timeout=10):
+    """Lock-free macro fetch via yf_macro_fetch.py subprocess — CPO-740 Görev 9.
+    Replaces _YF_GLOBAL_LOCK + yf.Ticker(sym).fast_info in _fetch_macro_one().
+    Hard 10s kill vs lock contention. Called sequentially from _fetch_macro().
+    """
+    try:
+        result = subprocess.run(
+            [_sys.executable, _YF_MACRO_SCRIPT, sym],
+            capture_output=True, text=True, timeout=timeout,
+        )
+        if result.returncode != 0:
+            logger.debug("yf_macro_fetch %s failed: %s", sym, result.stderr[:80])
+            return None
+        data = json.loads(result.stdout)
+        price = data.get("price")
+        prev = data.get("prev_close")
+        if not price or not prev or prev == 0:
+            return None
+        return {
+            "label": label,
+            "price": round(float(price), 2),
+            "change": round((float(price) - float(prev)) / float(prev) * 100, 2),
+        }
+    except subprocess.TimeoutExpired:
+        logger.debug("yf_macro_fetch %s: %ds timeout", sym, timeout)
+        return None
+    except Exception as e:
+        logger.debug("yf_macro_fetch %s error: %s", sym, e)
         return None
 
 
@@ -3609,11 +3641,12 @@ def _fetch_macro_one(label, sym):
 def _fetch_macro():
     """XU100, XU030, BTC, ALTIN, GUMUS, PETROL, USD/TRY, EUR/TRY, S&P500, NASDAQ anlık veri.
 
-    Her ticker bağımsız try/except — biri hata verse bile diğerleri devam eder.
+    CPO-740 Görev 9: _YF_GLOBAL_LOCK yerine subprocess isolation.
+    Her ticker bağımsız subprocess (10s hard timeout) — lock contention sıfır.
     """
     result = []
     for label, sym in _MACRO_TICKERS:
-        item = _fetch_macro_one(label, sym)
+        item = _fetch_macro_one_subprocess(label, sym)
         if item:
             result.append(item)
     return result
