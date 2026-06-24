@@ -129,7 +129,7 @@ if not VAPID_PUBLIC and os.path.exists(os.path.join(_APP_DIR, "vapid_public.txt"
 _PUSH_SUBS_FILE = os.path.join(_APP_DIR, "push_subs.json")
 _push_subs: list = []
 _push_lock = threading.Lock()
-_YF_GLOBAL_LOCK = threading.Lock()  # CPO-592: tüm yf.download/Ticker çağrılarını serialize — global state contamination fix
+# _YF_GLOBAL_LOCK removed — G24e: all yf calls now use subprocess isolation (G24a-G24d)
 
 
 def _json_to_dataframe(data: dict):
@@ -155,6 +155,7 @@ _YF_FETCH_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_fetch.py")
 _YF_MACRO_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_macro_fetch.py")
 _YF_FUND_SCRIPT   = os.path.join(os.path.dirname(__file__), "yf_fundamentals_fetch.py")
 _YF_CHART_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_chart_fetch.py")
+_YF_LIVE_SCRIPT   = os.path.join(os.path.dirname(__file__), "yf_live_fetch.py")
 
 _SUBPROCESS_SLOW_MS = 3000  # CPO-740 Görev 12c: >3s uyarı (baseline ~956ms × 3)
 
@@ -308,6 +309,68 @@ def _fetch_chart_subprocess(yf_ticker, period="5y", timeout=40):
         return None
     except Exception as e:
         logger.error("yf_chart_fetch %s error: %s", yf_ticker, e)
+        return None
+
+
+_LIVE_SLOW_MS = 20000  # >20s uyarı (150+ ticker batch baseline ~5-15s)
+
+def _fetch_live_subprocess(tickers_str, timeout=60):
+    """Lock-free BIST batch price fetch via yf_live_fetch.py subprocess — G24d.
+    Replaces _YF_GLOBAL_LOCK + yf.download() in fetch_live_prices().
+    Returns {base_ticker: {price, change_pct}} or None on failure.
+    """
+    _t0 = time.perf_counter()
+    try:
+        result = subprocess.run(
+            [_sys.executable, _YF_LIVE_SCRIPT, "bist", tickers_str],
+            capture_output=True, text=True, timeout=timeout,
+        )
+        _ms = (time.perf_counter() - _t0) * 1000
+        if result.returncode != 0:
+            logger.warning("yf_live_fetch bist FAIL %.0fms: %s", _ms, result.stderr[:120])
+            return None
+        data = json.loads(result.stdout)
+        payload = data.get("payload")
+        logger.debug("yf_live_fetch bist: %.0fms %d tickers", _ms, len(payload) if payload else 0)
+        if _ms > _LIVE_SLOW_MS:
+            logger.warning("yf_live_fetch bist SLOW: %.0fms", _ms)
+        return payload
+    except subprocess.TimeoutExpired:
+        _ms = (time.perf_counter() - _t0) * 1000
+        logger.warning("yf_live_fetch bist TIMEOUT %ds (%.0fms elapsed)", timeout, _ms)
+        return None
+    except Exception as e:
+        logger.error("yf_live_fetch bist error: %s", e)
+        return None
+
+
+def _fetch_global_subprocess(syms, timeout=60):
+    """Lock-free global price fetch via yf_live_fetch.py subprocess — G24d.
+    Replaces _YF_GLOBAL_LOCK + yf.download() in fetch_global_prices().
+    Returns {yf_sym: {price, change_pct}} or None on failure.
+    """
+    _t0 = time.perf_counter()
+    try:
+        result = subprocess.run(
+            [_sys.executable, _YF_LIVE_SCRIPT, "global", json.dumps(syms)],
+            capture_output=True, text=True, timeout=timeout,
+        )
+        _ms = (time.perf_counter() - _t0) * 1000
+        if result.returncode != 0:
+            logger.warning("yf_live_fetch global FAIL %.0fms: %s", _ms, result.stderr[:120])
+            return None
+        data = json.loads(result.stdout)
+        payload = data.get("payload")
+        logger.debug("yf_live_fetch global: %.0fms %d syms", _ms, len(payload) if payload else 0)
+        if _ms > _LIVE_SLOW_MS:
+            logger.warning("yf_live_fetch global SLOW: %.0fms", _ms)
+        return payload
+    except subprocess.TimeoutExpired:
+        _ms = (time.perf_counter() - _t0) * 1000
+        logger.warning("yf_live_fetch global TIMEOUT %ds (%.0fms elapsed)", timeout, _ms)
+        return None
+    except Exception as e:
+        logger.error("yf_live_fetch global error: %s", e)
         return None
 
 
@@ -2917,52 +2980,16 @@ def refresh_data():
 def fetch_live_prices():
     tickers_str = " ".join(t + ".IS" for t in BIST30)
     try:
-        with _YF_GLOBAL_LOCK:  # CPO-592v3: batch da lock altında — slow_chart_refresh contamination fix
-            df = yf.download(
-                tickers_str, period="2d", interval="1m",
-                progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
-            )
-        if df is None or df.empty:
+        result = _fetch_live_subprocess(tickers_str)
+        if not result:
             return
-
-        payload = {}
-        now_str  = datetime.now(_TZ_TR).strftime("%H:%M:%S")
-
-        for t in BIST30:
-            try:
-                sym = t + ".IS"
-                if isinstance(df.columns, pd.MultiIndex):
-                    lvls = df.columns.get_level_values(0)
-                    if sym in lvls:
-                        closes = df[sym]["Close"].dropna()
-                    else:
-                        continue
-                else:
-                    closes = df["Close"].dropna()
-
-                if closes is None or len(closes) < 2:
-                    continue
-
-                price      = float(closes.iloc[-1])
-                today_date = closes.index[-1].date()
-                prev_bars  = closes[closes.index.map(lambda x: x.date()) < today_date]
-                prev       = float(prev_bars.iloc[-1]) if len(prev_bars) > 0 else float(closes.iloc[-2])
-                chg        = ((price - prev) / prev * 100) if prev else 0
-
-                payload[t] = {
-                    "price":      round(price, 2),
-                    "change_pct": round(chg, 2),
-                    "updated":    now_str,
-                }
-            except Exception:
-                continue
-
+        now_str = datetime.now(_TZ_TR).strftime("%H:%M:%S")
+        payload = {t: {**v, "updated": now_str} for t, v in result.items()}
         if payload:
             with _lock:
                 _live_prices.update(payload)
             _save_live_prices_to_disk()
             _push_sse({"type": "prices", "data": payload, "ts": now_str})
-
     except Exception as e:
         logger.error("fetch_live_prices: %s", e, exc_info=True)
 
@@ -2989,52 +3016,25 @@ def fetch_global_prices():
     """Kripto, emtia ve ABD hisselerinin fiyatlarını çeker, SSE'ye push eder."""
     try:
         syms = list(set(_GLOBAL_TICKERS_YF.values()))
-        with _YF_GLOBAL_LOCK:  # CPO-592v3: batch da lock altında
-            df = yf.download(
-                " ".join(syms), period="2d", interval="1m",
-                progress=False, auto_adjust=True, group_by="ticker", timeout=30, threads=False
-            )
-        if df is None or df.empty:
+        result = _fetch_global_subprocess(syms)
+        if not result:
             return
-
-        payload = {}
-        now_str  = datetime.now(_TZ_TR).strftime("%H:%M:%S")
-        # ters harita: yf sembol -> key listesi
+        now_str = datetime.now(_TZ_TR).strftime("%H:%M:%S")
         yf_to_keys = {}
         for k, v in _GLOBAL_TICKERS_YF.items():
             yf_to_keys.setdefault(v, []).append(k)
-
+        payload = {}
         for yf_sym, keys in yf_to_keys.items():
-            try:
-                if isinstance(df.columns, pd.MultiIndex):
-                    lvls = df.columns.get_level_values(0)
-                    if yf_sym not in lvls:
-                        continue
-                    closes = df[yf_sym]["Close"].dropna()
-                else:
-                    closes = df["Close"].dropna()
-
-                if closes is None or len(closes) < 2:
-                    continue
-
-                price      = float(closes.iloc[-1])
-                today_date = closes.index[-1].date()
-                prev_bars  = closes[closes.index.map(lambda x: x.date()) < today_date]
-                prev       = float(prev_bars.iloc[-1]) if len(prev_bars) > 0 else float(closes.iloc[-2])
-                chg        = ((price - prev) / prev * 100) if prev else 0
-
-                entry = {"price": round(price, 6), "change_pct": round(chg, 2), "updated": now_str}
-                for k in keys:
-                    payload[k] = entry
-            except Exception:
+            if yf_sym not in result:
                 continue
-
+            entry = {**result[yf_sym], "updated": now_str}
+            for k in keys:
+                payload[k] = entry
         if payload:
             with _lock:
                 _live_prices.update(payload)
             _save_live_prices_to_disk()
             _push_sse({"type": "global_prices", "data": payload, "ts": now_str})
-
     except Exception as e:
         logger.error("fetch_global_prices: %s", e, exc_info=True)
 
