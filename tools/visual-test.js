@@ -27,6 +27,9 @@ const PAGES = [
   { name: 'hisse-thyao-grafik',   path: '/hisse/THYAO?tab=grafik' },
   { name: 'hisse-thyao-ai',       path: '/hisse/THYAO?tab=ai' },
   { name: 'hisse-thyao-haberler', path: '/hisse/THYAO?tab=haberler' },
+  // AKBNK — #18-redux tatil gap fix baseline (CPO-736 Görev 6)
+  { name: 'hisse-akbnk',         path: '/hisse/AKBNK' },
+  { name: 'hisse-akbnk-grafik',  path: '/hisse/AKBNK?tab=grafik' },
   { name: 'heatmap',      path: '/heatmap' },
   { name: 'tarama',       path: '/tarama' },
   { name: 'gundem',       path: '/gundem' },
@@ -56,7 +59,7 @@ async function ensureDir(d) {
       try {
         const page = await ctx.newPage();
         await page.setViewportSize({ width: vp.width, height: vp.height });
-        await page.goto(BASE + p.path, { waitUntil: 'networkidle', timeout: 15000 });
+        await page.goto(BASE + p.path, { waitUntil: 'load', timeout: 20000 });
         // Sayfa biraz yerleşsin (lazy load, font, animation)
         await page.waitForTimeout(800);
         await page.screenshot({ path: targetPath, fullPage: true });
