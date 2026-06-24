@@ -2513,7 +2513,7 @@
   <!-- Gelişmiş Screener Paneli -->
   <div class="adv-panel" id="advPanel">
     <div class="adv-group">
-      <div class="adv-group-label">📊 ADX Gücü</div>
+      <div class="adv-group-label">📊 <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)">ADX</a> Gücü</div>
       <div class="adv-chips" id="adv-adx">
         <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('adx',0,this)">Tümü</button>
         <button class="adv-chip"    data-val="25"  onclick="setAdv('adx',25,this)">Güçlü ≥25</button>
@@ -2540,7 +2540,7 @@
       </div>
     </div>
     <div class="adv-group">
-      <div class="adv-group-label">🔢 RSI Durumu</div>
+      <div class="adv-group-label">🔢 <a class="jargon-term" data-term="rsi" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)">RSI</a> Durumu</div>
       <div class="adv-chips" id="adv-rsi">
         <button class="adv-chip adv-active" data-val="all"       onclick="setAdv('rsi','all',this)">Tümü</button>
         <button class="adv-chip"            data-val="oversold"  onclick="setAdv('rsi','oversold',this)">Aşırı Satım ≤30</button>
@@ -5363,6 +5363,18 @@ document.addEventListener('click', e => {
   }
 }, true);
 
+// ── Jargon-term helper (SPEC-015 v2) ─────────────────────
+function _jt(term, text) {
+  var anchor = term === 'adx' ? 'adx' : term === 'ema' ? 'ema' : term === 'supertrend' ? 'supertrend' : 'adx';
+  return '<a class="jargon-term" data-term="' + term + '" href="/metodoloji#' + anchor + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.3)">' + text + '</a>';
+}
+function _jtInd(label) {
+  if (label === 'ST') return _jt('supertrend', 'ST');
+  if (/^ADX/.test(label)) return label.replace('ADX', _jt('adx', 'ADX'));
+  if (/^EMA/.test(label)) return label.replace('EMA', _jt('ema', 'EMA'));
+  return label;
+}
+
 // ── Signal Tooltip ────────────────────────────────────────
 function showSigTip(ticker, ev) {
   const s   = allStocks.find(st => st.ticker === ticker);
@@ -5386,16 +5398,16 @@ function showSigTip(ticker, ev) {
       const color = ind.bull ? '#00e290' : ind.bear ? '#f85149' : '#30363d';
       html += `<div class="sig-tip-row">
         <span class="sig-tip-ck" style="color:${color}">${icon}</span>
-        <span class="sig-tip-lbl">${ind.label}</span>
+        <span class="sig-tip-lbl">${_jtInd(ind.label)}</span>
       </div>`;
     });
     // RSI extreme warnings for BEKLE
     if (s.rsi != null && (s.rsi >= 70 || s.rsi <= 30)) {
       const note = s.rsi >= 70 ? 'aşırı alım bölgesi' : 'aşırı satım bölgesi';
       const clr  = s.rsi >= 70 ? '#f85149' : '#00e290';
-      html += `<div class="sig-tip-row"><span class="sig-tip-ck" style="color:${clr}">!</span><span class="sig-tip-lbl" style="color:${clr}">RSI ${s.rsi} — ${note}</span></div>`;
+      html += `<div class="sig-tip-row"><span class="sig-tip-ck" style="color:${clr}">!</span><span class="sig-tip-lbl" style="color:${clr}">${_jt('rsi','RSI')} ${s.rsi} — ${note}</span></div>`;
     } else if (s.rsi != null) {
-      html += `<div class="sig-tip-row"><span class="sig-tip-ck no">○</span><span class="sig-tip-lbl">RSI ${s.rsi}</span></div>`;
+      html += `<div class="sig-tip-row"><span class="sig-tip-ck no">○</span><span class="sig-tip-lbl">${_jt('rsi','RSI')} ${s.rsi}</span></div>`;
     }
     // High volume on BEKLE = watching signal
     if (s.vol_ratio != null && s.vol_ratio >= 2) {
@@ -5407,12 +5419,12 @@ function showSigTip(ticker, ev) {
       const ok = (s.signal === 'AL' && ind.bull) || (s.signal === 'SAT' && ind.bear);
       html += `<div class="sig-tip-row">
         <span class="sig-tip-ck ${ok ? 'ok' : 'no'}">${ok ? '✓' : '○'}</span>
-        <span class="sig-tip-lbl">${ind.label}</span>
+        <span class="sig-tip-lbl">${_jtInd(ind.label)}</span>
       </div>`;
     });
     if (s.rsi != null) {
       const rsiNote = s.rsi >= 70 ? ' · aşırı alım ⚠' : s.rsi <= 30 ? ' · aşırı satım ⚠' : '';
-      html += `<div class="sig-tip-row"><span class="sig-tip-ck no">○</span><span class="sig-tip-lbl">RSI ${s.rsi}${rsiNote}</span></div>`;
+      html += `<div class="sig-tip-row"><span class="sig-tip-ck no">○</span><span class="sig-tip-lbl">${_jt('rsi','RSI')} ${s.rsi}${rsiNote}</span></div>`;
     }
     if (s.vol_ratio != null && s.vol_ratio >= 1.5) {
       html += `<div class="sig-tip-row"><span class="sig-tip-ck ok">✓</span><span class="sig-tip-lbl">Hacim ×${s.vol_ratio} ortalama üstü</span></div>`;
@@ -5430,7 +5442,7 @@ function showSigTip(ticker, ev) {
     html += `<span>Güç: <span style="color:${sigColor}">${filled}</span><span style="color:#30363d">${empty}</span></span>`;
   }
   if (s.entry_quality && s.signal !== 'BEKLE') {
-    const eqMap = { IDEAL: '✓ İdeal giriş bölgesi', IYI: '✓ İyi giriş bölgesi', DIKKATLI: '⚠ Giriş için riskli', UZAK: '✗ Girişten uzak' };
+    const eqMap = { IDEAL: '✓ İdeal giriş bölgesi', IYI: '✓ İyi giriş bölgesi', DIKKATLI: '⚠ ' + _jt('kovalama','Kovalama') + ' riski', UZAK: '✗ Girişten uzak' };
     const eqColor = (s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI') ? '#00e290' : '#e3b341';
     html += `<span style="color:${eqColor}">${eqMap[s.entry_quality] || s.entry_quality}</span>`;
   }
