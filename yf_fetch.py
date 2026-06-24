@@ -51,6 +51,26 @@ def fetch(ticker: str, period: str, interval: str) -> dict:
     }
 
 
+def fetch_with_retry(ticker: str, period: str, interval: str,
+                      max_attempts: int = 2, retry_delay: float = 0.5) -> dict:
+    """fetch() with one retry on network jitter — CPO-740 Görev 12b.
+    Only adds latency on failure path (retry_delay=0.5s). Success path unchanged.
+    """
+    import time as _time
+    last_result = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            result = fetch(ticker, period, interval)
+            if not result.get("error"):
+                return result
+            last_result = result
+        except Exception as e:
+            last_result = {"error": str(e), "ticker": ticker, "type": type(e).__name__, "attempt": attempt}
+        if attempt < max_attempts:
+            _time.sleep(retry_delay)
+    return last_result or {"error": "max_attempts_exhausted", "ticker": ticker}
+
+
 def main():
     if len(sys.argv) < 4:
         err = {"error": "args: ticker period interval", "usage": "yf_fetch.py AKBNK 2y 1d"}
@@ -60,7 +80,7 @@ def main():
     ticker, period, interval = sys.argv[1], sys.argv[2], sys.argv[3]
 
     try:
-        result = fetch(ticker, period, interval)
+        result = fetch_with_retry(ticker, period, interval)
         if result.get("error"):
             print(json.dumps(result), file=sys.stderr)
             sys.exit(1)
