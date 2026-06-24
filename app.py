@@ -2647,7 +2647,7 @@ def _load_cache_from_disk():
 # Yaklaşım: her ticker için ThreadPoolExecutor + 8s timeout. Timeout'ta skip + 60s negatif cache
 # (sonraki iterasyonda tekrar dene, ardarda hang'i önler). 30 ticker × 8s = max ~240s soft cap.
 import concurrent.futures as _cf_analyze
-_ANALYZE_EXECUTOR    = _cf_analyze.ThreadPoolExecutor(max_workers=2, thread_name_prefix="analyze_wd")  # CPO-583: 4→2 CPU throttle
+_ANALYZE_EXECUTOR    = _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="analyze_wd")  # CPO-740 Görev 10: 2→4 (subprocess isolation — no shared yfinance state)
 _ANALYZE_TIMEOUT     = 40    # saniye, CPO-592v3: fetch_live(12s)+fetch_global(8s)+3_download(11s) = ~31s worst-case
 _ANALYZE_NEG_CACHE   = {}    # {ticker: timeout_until_ts} — 60s skip after timeout
 _ANALYZE_NEG_TTL     = 60    # saniye
@@ -2681,7 +2681,7 @@ def refresh_data():
     results = []
     # CPO-596: `with executor` kullanma — __exit__ shutdown(wait=True) çağırır ve hung thread'de
     # 66 saat bloke kalır. Explicit shutdown(wait=False) ile hung thread'leri bırak, devam et.
-    ex = _cf_analyze.ThreadPoolExecutor(max_workers=2, thread_name_prefix="refresh_par")  # CPO-583: 4→2 CPU throttle
+    ex = _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="refresh_par")  # CPO-740 Görev 10: 2→4 (subprocess isolation — no shared yfinance state)
     try:
         future_map = {ex.submit(_analyze_with_timeout, t): t for t in BIST30}
         try:
