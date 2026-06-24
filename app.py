@@ -932,7 +932,7 @@ def _enrich_stock(s: dict) -> dict:
     return s
 
 
-_cache       = {"data": [], "updated_at": None, "last_refresh_ts": 0.0}  # SPEC-008 v1.2 #39
+_cache       = {"data": [], "updated_at": None, "last_refresh_ts": 0.0, "loading": True}  # SPEC-008 v1.2 #39; loading=True cold-start sentinel (G25)
 _live_prices = {}
 _lock        = threading.Lock()
 _sse_clients = []
