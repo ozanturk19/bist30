@@ -3663,8 +3663,7 @@ function setAdv(key, val, btn) {
   badge.textContent = active;
   badge.style.display = active > 0 ? '' : 'none';
   document.getElementById('advToggle').classList.toggle('active', active > 0 || document.getElementById('advPanel').classList.contains('open'));
-  renderTable();
-  updateActiveFiltersBar();   /* SPEC-009: aktif filtre bar senkron — "havada kalıyor" fix */
+  _afterFilterChange({ push: true });  /* #32: _saveFilterState + URL push + full sync */
 }
 
 /* SPEC-009: aktif filtre bar'daki ✕ ile adv filter kaldırma. Önceden tanımsızdı
@@ -4014,8 +4013,7 @@ function setSector(sector, btn) {
   currentSector = sector;
   document.querySelectorAll('.sector-btn').forEach(b => b.classList.remove('active-sector'));
   if (btn) btn.classList.add('active-sector');
-  renderTable();
-  updateActiveFiltersBar();
+  _afterFilterChange({ push: true });  /* #32: _saveFilterState + URL push + full sync */
 }
 
 function buildSectorButtons(sectors) {
@@ -4544,7 +4542,7 @@ function setFilter(f, btn) {
   _afterFilterChange({ push: true });
 }
 
-function setSearch(v) { currentSearch = v; renderTable(); updateActiveFiltersBar(); }
+function setSearch(v) { currentSearch = v; _afterFilterChange({ push: false }); }  /* #32: save+replaceState (no history spam on keystroke) */
 
 function updateActiveFiltersBar() {
   const bar = document.getElementById('activeFiltersBar');
