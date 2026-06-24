@@ -153,6 +153,7 @@ def _json_to_dataframe(data: dict):
 
 _YF_FETCH_SCRIPT = os.path.join(os.path.dirname(__file__), "yf_fetch.py")
 _YF_MACRO_SCRIPT = os.path.join(os.path.dirname(__file__), "yf_macro_fetch.py")
+_YF_FUND_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_fundamentals_fetch.py")
 
 _SUBPROCESS_SLOW_MS = 3000  # CPO-740 Görev 12c: >3s uyarı (baseline ~956ms × 3)
 
@@ -236,6 +237,42 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         return None
     except Exception as e:
         logger.debug("yf_macro_fetch %s error: %s", sym, e)
+        return None
+
+
+_FUND_SLOW_MS = 5000  # >5s uyarı (Ticker.info baseline ~2-3s)
+
+def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
+    """Lock-free fundamentals fetch via yf_fundamentals_fetch.py subprocess — G24c.
+    Replaces _YF_GLOBAL_LOCK + yf.Ticker().info in _get_fundamentals().
+    Hard 30s kill vs lock wait. Returns info subset dict or None on failure.
+    Rollback: revert this function + _get_fundamentals() lines.
+    """
+    yf_ticker = ticker_base + ".IS"
+    _t0 = time.perf_counter()
+    try:
+        result = subprocess.run(
+            [_sys.executable, _YF_FUND_SCRIPT, yf_ticker],
+            capture_output=True, text=True, timeout=timeout,
+        )
+        _ms = (time.perf_counter() - _t0) * 1000
+        if result.returncode != 0:
+            logger.warning("yf_fund_fetch %s FAIL %.0fms: %s", ticker_base, _ms, result.stderr[:80])
+            return None
+        data = json.loads(result.stdout)
+        info = data.get("info")
+        if not info:
+            return None
+        logger.debug("yf_fund_fetch %s: %.0fms", ticker_base, _ms)
+        if _ms > _FUND_SLOW_MS:
+            logger.warning("yf_fund_fetch %s SLOW: %.0fms", ticker_base, _ms)
+        return info
+    except subprocess.TimeoutExpired:
+        _ms = (time.perf_counter() - _t0) * 1000
+        logger.warning("yf_fund_fetch %s TIMEOUT %ds (%.0fms elapsed)", ticker_base, timeout, _ms)
+        return None
+    except Exception as e:
+        logger.error("yf_fund_fetch %s error: %s", ticker_base, e)
         return None
 
 
@@ -6220,9 +6257,9 @@ def _get_fundamentals(ticker_base):
         logger.debug("_get_fundamentals(%s): REFRESH_WORKER=web — cache-only", ticker_base)
         return cached["data"] if cached else {}
     try:
-        yf_ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
-        with _YF_GLOBAL_LOCK:
-            info = yf.Ticker(yf_ticker).info
+        info = _fetch_fundamentals_subprocess(ticker_base)
+        if not info:
+            return {}
         def safe(key, default=None):
             v = info.get(key)
             return v if v not in (None, "N/A", 0) else default
