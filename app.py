@@ -8989,17 +8989,30 @@ def _startup():
                     continue
                 logger.info("_slow_chart_refresh başladı: %d ticker", len(tickers))
                 done = 0
+                skipped_corrupt = 0
                 for ticker in tickers:
                     try:
                         data = _compute_chart_data(ticker, "2y")
                         if data:
-                            path = os.path.join(_PHASE3_CHART_DIR, f"chart_{ticker}.json")
-                            _atomic_write_json(path, data)
-                            done += 1
+                            ohlc_count = len(data.get("ohlc") or [])
+                            if ohlc_count < 100:
+                                # G28-b: yfinance gevent-lock timeout → yanlış interval data → düşük bar sayısı
+                                logger.warning(
+                                    "_slow_chart_refresh [%s]: CORRUPT_CACHE_REDETECTED ohlc=%d < 100 — diske yazılmadı",
+                                    ticker, ohlc_count
+                                )
+                                skipped_corrupt += 1
+                            else:
+                                path = os.path.join(_PHASE3_CHART_DIR, f"chart_{ticker}.json")
+                                _atomic_write_json(path, data)
+                                done += 1
                     except Exception as e:
                         logger.warning("_slow_chart_refresh [%s]: %s", ticker, e)
                     time.sleep(1)  # CPO-620: throttle 3s→1s, 15dk pencereye sigmak icin
-                logger.info("_slow_chart_refresh tamamlandı: %d/%d ticker diske yazıldı", done, len(tickers))
+                logger.info(
+                    "_slow_chart_refresh tamamlandı: %d/%d ticker diske yazıldı, %d corrupt_skipped",
+                    done, len(tickers), skipped_corrupt
+                )
             except Exception as e:
                 logger.error("_slow_chart_refresh outer: %s", e)
             time.sleep(6 * 3600)  # 6 saatte bir tam cycle
