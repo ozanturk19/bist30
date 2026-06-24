@@ -6,17 +6,17 @@
 (function () {
   'use strict';
 
-  // ── Tier renk fonksiyonu ─────────────────────────────────────────────────
+  // ── Tier renk fonksiyonu — G16 satürasyon dengeleme ─────────────────────
   function tierColor(item) {
     var sig = item.signal;
-    if (sig === 'SAT') return '#f85149';
-    if (sig === 'BEKLE' || sig == null) return '#21262d';
+    if (sig === 'SAT') return '#E05550';    // Zayıf Trend: softer kırmızı
+    if (sig === 'BEKLE' || sig == null) return '#252b36';  // Yatay: koyu slate
     // AL: tier_score'a göre Premium/Plus/Standart
     var score = item.tier_score || 0;
-    if (score >= 70) return '#FFD700';  // Premium
-    if (score >= 50) return '#9DA5B4';  // Plus
-    if (score >= 30) return '#CD7F32';  // Standart
-    return '#46464d';  // Çok zayıf AL (nadir)
+    if (score >= 70) return '#F0C240';  // Premium: sıcak denge altın
+    if (score >= 50) return '#88A8C0';  // Plus: mavi-gümüş
+    if (score >= 30) return '#C07838';  // Standart: sıcak bronz
+    return '#50506a';  // Çok zayıf AL (nadir)
   }
 
   function tierLabel(item) {
@@ -155,17 +155,26 @@
       var g = document.createElementNS(SVG_NS, 'g');
       g.setAttribute('class', 'sector-group');
 
-      // Sektör border (subtle)
+      // Sektör border — G16: daha belirgin ayırıcı
       var bg = document.createElementNS(SVG_NS, 'rect');
       bg.setAttribute('x', sec.x); bg.setAttribute('y', sec.y);
       bg.setAttribute('width', sec.w); bg.setAttribute('height', sec.h);
       bg.setAttribute('fill', '#0e0e12');
-      bg.setAttribute('stroke', '#2a2a2c');
-      bg.setAttribute('stroke-width', '2');
+      bg.setAttribute('stroke', '#3c3c46');
+      bg.setAttribute('stroke-width', '3');
       g.appendChild(bg);
 
-      // Sektör başlığı
+      // Sektör başlığı header strip — G16: ayırıcı şerit + metin
       if (sec.w > 60 && sec.h > 30) {
+        // Subtle header background
+        var hdrH = 20;
+        var hdr = document.createElementNS(SVG_NS, 'rect');
+        hdr.setAttribute('x', sec.x + 2); hdr.setAttribute('y', sec.y + 2);
+        hdr.setAttribute('width', sec.w - 4); hdr.setAttribute('height', hdrH);
+        hdr.setAttribute('fill', 'rgba(60,60,72,0.5)');
+        hdr.setAttribute('rx', '2'); hdr.setAttribute('ry', '2');
+        g.appendChild(hdr);
+
         var title = document.createElementNS(SVG_NS, 'text');
         title.setAttribute('class', 'sector-title');
         title.setAttribute('x', sec.x + 6);
@@ -174,8 +183,8 @@
         g.appendChild(title);
       }
 
-      // Hisseleri squarify (sektör içi, başlık alanı düş)
-      var titleH = 18;
+      // Hisseleri squarify (sektör içi, başlık + header strip alanı düş)
+      var titleH = 24;  /* G16: header strip 20px + buffer */
       var inner = {
         x: sec.x + 2,
         y: sec.y + titleH,
@@ -201,6 +210,8 @@
         cell.setAttribute('opacity', tierOpacity(st));
         cell.setAttribute('stroke', '#0e0e12');
         cell.setAttribute('stroke-width', '1');
+        cell.setAttribute('rx', '3');  /* G16: border-radius */
+        cell.setAttribute('ry', '3');
         cell.dataset.ticker = st.ticker;
         cell.addEventListener('click', function(){
           window.location.href = '/hisse/' + st.ticker;

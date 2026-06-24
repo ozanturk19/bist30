@@ -20,13 +20,13 @@
     --bp-text: #e5e1e4;
     --bp-text2: #c7c5cd;
     --bp-text3: #909097;
-    /* Tier renkleri — SENECA-004 brief Bölüm 5 */
-    --tier-gold: #FFD700;
-    --tier-gold-fade: #B89A2E;
-    --tier-silver: #9DA5B4;
-    --tier-bronze: #CD7F32;
-    --tier-sat: #f85149;
-    --tier-bekle: #21262d;
+    /* Tier renkleri — G16 satürasyon dengeleme */
+    --tier-gold: #F0C240;      /* Premium: sıcak altın, #FFD700'den daha dengeli */
+    --tier-gold-fade: #B89A2E; /* Premium eski sinyal: söndürülmüş */
+    --tier-silver: #88A8C0;    /* Plus: mavi-gümüş, bronzdan daha distinct */
+    --tier-bronze: #C07838;    /* Standart: sıcak bronz */
+    --tier-sat: #E05550;       /* Zayıf Trend: softer kırmızı */
+    --tier-bekle: #252b36;     /* Yatay: bg'den ayrışan koyu slate */
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -99,15 +99,19 @@
   /* SVG treemap */
   #heatmap-svg { display: block; width: 100%; height: auto; }
   .sector-group .sector-title {
-    fill: var(--bp-text3); font-size: 11px; font-weight: 600;
+    fill: #c0c0cc; font-size: 10px; font-weight: 700; /* G16: brighter */
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    text-transform: uppercase; letter-spacing: 0.5px;
+    text-transform: uppercase; letter-spacing: 0.6px;
     pointer-events: none;
   }
   .stock-cell {
-    cursor: pointer; transition: opacity 0.15s ease;
+    cursor: pointer;
+    transition: filter 0.15s ease;
   }
-  .stock-cell:hover { opacity: 0.85; }
+  /* #G16: hover lift — brighten + subtle glow instead of darken */
+  .stock-cell:hover {
+    filter: brightness(1.2) saturate(1.08);
+  }
   .stock-cell-text {
     fill: #0e0e12; font-family: 'Space Grotesk', system-ui, sans-serif;
     font-weight: 700; pointer-events: none;
@@ -169,12 +173,11 @@
 
   <div class="legend">
     <span style="color:var(--bp-text3);font-weight:600">Sinyal Tier:</span>
-    {# SPEC-017 Faz B K9-2 + K3: Bronz/Gümüş/Altın → Premium/Plus/Standart, AL/SAT → Güçlü/Zayıf Trend #}
-    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-gold)"></span>Premium</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-silver)"></span>Plus</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-bronze)"></span>Standart</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-sat)"></span>Zayıf Trend</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-bekle)"></span>Yatay</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-gold)"></span>🥇 Premium</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-silver)"></span>🥈 Plus</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-bronze)"></span>🥉 Standart</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-sat)"></span>▼ Zayıf Trend</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--tier-bekle);border:1px solid #3c3c46"></span>· Yatay</span>
     <span style="color:var(--bp-text3);margin-left:auto;font-size:11px">Kutu tıkla → hisse detayı</span>
   </div>
 </main>
