@@ -2835,6 +2835,14 @@ function buildChart(d) {
   document.getElementById('chartLoading').style.display = 'none';
   document.getElementById('chartsInner').style.display  = 'block';
 
+  /* G27: dynamic chart title based on OHLC count (defensive — avoids "Günlük" label on monthly data) */
+  (function() {
+    var n = (d.ohlc || []).length;
+    var period = n > 300 ? 'Günlük' : n > 100 ? 'Haftalık' : 'Aylık';
+    var el = document.querySelector('.chart-label');
+    if (el) el.textContent = '{{ ticker }} — ' + period + ' Grafik (2 Yıl)';
+  })();
+
   /* #18-redux: sequential reindex — tatil/hafta sonu gap yok (TradingView standardı)
    * OHLC zaten tatilsiz geliyor (backend is_trading_day filtresi).
    * time field date-string → integer index: her iş günü eşit aralıklı, gap sıfır. */
