@@ -151,9 +151,10 @@ def _json_to_dataframe(data: dict):
         return None
 
 
-_YF_FETCH_SCRIPT = os.path.join(os.path.dirname(__file__), "yf_fetch.py")
-_YF_MACRO_SCRIPT = os.path.join(os.path.dirname(__file__), "yf_macro_fetch.py")
-_YF_FUND_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_fundamentals_fetch.py")
+_YF_FETCH_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_fetch.py")
+_YF_MACRO_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_macro_fetch.py")
+_YF_FUND_SCRIPT   = os.path.join(os.path.dirname(__file__), "yf_fundamentals_fetch.py")
+_YF_CHART_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_chart_fetch.py")
 
 _SUBPROCESS_SLOW_MS = 3000  # CPO-740 Görev 12c: >3s uyarı (baseline ~956ms × 3)
 
@@ -273,6 +274,40 @@ def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
         return None
     except Exception as e:
         logger.error("yf_fund_fetch %s error: %s", ticker_base, e)
+        return None
+
+
+_CHART_SLOW_MS = 8000  # >8s uyarı (Ticker.history 5y baseline ~3-5s)
+
+def _fetch_chart_subprocess(yf_ticker, period="5y", timeout=40):
+    """Lock-free chart fetch via yf_chart_fetch.py subprocess — G24a.
+    Replaces _YF_GLOBAL_LOCK + yf.Ticker().history() in get_chart_data().
+    Hard 40s kill vs lock wait. Returns DataFrame (OHLC) or None on failure.
+    Rollback: revert this function + get_chart_data() lock block.
+    """
+    _t0 = time.perf_counter()
+    try:
+        result = subprocess.run(
+            [_sys.executable, _YF_CHART_SCRIPT, yf_ticker, period],
+            capture_output=True, text=True, timeout=timeout,
+        )
+        _ms = (time.perf_counter() - _t0) * 1000
+        if result.returncode != 0:
+            logger.warning("yf_chart_fetch %s FAIL %.0fms: %s", yf_ticker, _ms, result.stderr[:80])
+            return None
+        data = json.loads(result.stdout)
+        df = _json_to_dataframe(data)
+        rows = len(df) if df is not None else 0
+        logger.debug("yf_chart_fetch %s %s: %.0fms %d rows", yf_ticker, period, _ms, rows)
+        if _ms > _CHART_SLOW_MS:
+            logger.warning("yf_chart_fetch %s SLOW: %.0fms", yf_ticker, _ms)
+        return df
+    except subprocess.TimeoutExpired:
+        _ms = (time.perf_counter() - _t0) * 1000
+        logger.warning("yf_chart_fetch %s TIMEOUT %ds (%.0fms elapsed)", yf_ticker, timeout, _ms)
+        return None
+    except Exception as e:
+        logger.error("yf_chart_fetch %s error: %s", yf_ticker, e)
         return None
 
 
@@ -4024,8 +4059,7 @@ def get_chart_data():
     WARMUP_MIN   = 200
 
     try:
-        with _YF_GLOBAL_LOCK:
-            df = yf.Ticker("XU030.IS").history(period="5y", interval="1d", auto_adjust=True)
+        df = _fetch_chart_subprocess("XU030.IS", "5y")  # G24a: lock-free subprocess
         if df is None or len(df) < WARMUP_MIN + 50:
             return None
 
