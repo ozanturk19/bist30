@@ -5722,26 +5722,33 @@ def api_chart_us_stock(ticker):
 
 
 # ── Makro Varlık Sayfaları (BTC / ETH / Altın / Gümüş) ──────────────────────
-# SPEC-MOBILE-UI-AUDIT-2026-06-04 task #28 (CPO-484/485): Kripto modülü GATE.
-# Veri doğruluğu sorunu (OHLC close 1000x yanlış, BTC $17) — sayfa "Yakında" placeholder.
-# Fix #34 (kök neden + yfinance symbol test) sonrası gate kaldırılacak.
+# #34 fix: yfinance BTC-USD OHLC 1000x yanlış sorunu çözüldü (yfinance güncellendi).
+# 2y data doğrulandı: BTC min=53949 max=124753, 0 bad row. Gate kaldırıldı Ça 24.06.
 @app.route("/btc")
 def btc_page():
-    return render_template("kripto_gate.html")
+    peers = [p for p in _KRIPTO_PEERS if p["key"] != "BTC"]
+    return render_template("varlik.html", varlik_key="BTC", meta=_VARLIK_META["BTC"],
+                           peers=peers, category_url="/kripto", category_label="Kripto")
 
 
 @app.route("/eth")
 def eth_page():
-    return render_template("kripto_gate.html")
+    peers = [p for p in _KRIPTO_PEERS if p["key"] != "ETH"]
+    return render_template("varlik.html", varlik_key="ETH", meta=_VARLIK_META["ETH"],
+                           peers=peers, category_url="/kripto", category_label="Kripto")
 
 
 @app.route("/sol")
 def sol_page():
-    return render_template("kripto_gate.html")
+    peers = [p for p in _KRIPTO_PEERS if p["key"] != "SOL"]
+    return render_template("varlik.html", varlik_key="SOL", meta=_VARLIK_META["SOL"],
+                           peers=peers, category_url="/kripto", category_label="Kripto")
 
 @app.route("/bnb")
 def bnb_page():
-    return render_template("kripto_gate.html")
+    peers = [p for p in _KRIPTO_PEERS if p["key"] != "BNB"]
+    return render_template("varlik.html", varlik_key="BNB", meta=_VARLIK_META["BNB"],
+                           peers=peers, category_url="/kripto", category_label="Kripto")
 
 
 @app.route("/altin")
@@ -5773,8 +5780,12 @@ def dogalgaz_page():
 
 @app.route("/kripto")
 def kripto_page():
-    # CPO-484/485 GATE: veri doğruluğu sorunu, "Yakında" placeholder
-    return render_template("kripto_gate.html")
+    return render_template("kategori.html",
+        category_key="kripto",
+        title="Kripto Varlıklar", emoji="🔐",
+        desc="Bitcoin ve Ethereum Supertrend + ADX + EMA12/99 teknik analizi",
+        assets=_KRIPTO_PEERS,
+        us_stocks=None)
 
 @app.route("/emtialar")
 def emtialar_page():
