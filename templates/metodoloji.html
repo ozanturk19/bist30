@@ -369,6 +369,22 @@ Zayıf Trend  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 
   DI+ > DI− ise alış yönünde; DI− > DI+ ise satış yönünde güç var demektir.
 </p>
 
+<h2 id="rsi">RSI — Göreceli Güç Endeksi</h2>
+<p>
+  RSI (Relative Strength Index), fiyat hareketlerinin hızını ve büyüklüğünü ölçer.
+  <code>period=14</code> kullanılır. 0–100 arasında değer alır.
+</p>
+<ul>
+  <li><code>RSI &lt; 30</code> → Aşırı satım bölgesi (potansiyel toparlanma)</li>
+  <li><code>RSI 40–60</code> → Nötr bölge</li>
+  <li><code>RSI &gt; 70</code> → Aşırı alım bölgesi (potansiyel düzeltme)</li>
+</ul>
+<p>
+  BorsaPusula'da RSI, <strong>Güç Skoru</strong> hesaplamasında "RSI bölgesi" kriteri olarak kullanılır
+  (40–60 nötr = 5 pt, 60–70 güçlü = 8 pt, &gt;70 aşırı alım = 0 pt).
+  Sinyal motoru ADX+Supertrend+EMA üzerinden çalışır; RSI teyit göstergesi niteliğindedir.
+</p>
+
 <h2 id="ema">3. EMA12 / EMA99 Kesişimi</h2>
 <p>
   Üstel Hareketli Ortalama (EMA) çaprazlaması, orta ve uzun dönem trend yönünü teyit eder.
