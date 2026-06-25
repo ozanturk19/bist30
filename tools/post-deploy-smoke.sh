@@ -23,11 +23,11 @@ echo ""
 
 # ── 1. Health ────────────────────────────────────────────────────────────────
 echo "1/6 Health check..."
-HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$HOST/health" 2>/dev/null || echo "ERR")
+HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$HOST/api/health" 2>/dev/null || echo "ERR")
 if [ "$HTTP" = "200" ]; then
-  ok "GET /health → 200"
+  ok "GET /api/health → 200"
 else
-  fail "GET /health → $HTTP (expected 200)"
+  fail "GET /api/health → $HTTP (expected 200)"
 fi
 
 # ── 2. Ana sayfa yüklenme ─────────────────────────────────────────────────────
@@ -62,43 +62,43 @@ else
   warn "Fundamentals bölümü bulunamadı (subprocess timeout veya soğuk cache)"
 fi
 
-# ── 4. API live prices (subprocess fetch) ────────────────────────────────────
+# ── 4. API live prices (/api/data — stock prices) ────────────────────────────
 echo ""
-echo "4/6 API /api/live-prices (subprocess live fetch)..."
-LIVE_OUT=$(curl -s --max-time 30 "$HOST/api/live-prices" 2>/dev/null || echo "CURL_ERR")
-LIVE_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HOST/api/live-prices" 2>/dev/null || echo "ERR")
+echo "4/6 API /api/data (live stock prices)..."
+LIVE_OUT=$(curl -s --max-time 30 "$HOST/api/data" 2>/dev/null || echo "CURL_ERR")
+LIVE_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HOST/api/data" 2>/dev/null || echo "ERR")
 if [ "$LIVE_HTTP" = "200" ]; then
-  ok "GET /api/live-prices → 200"
+  ok "GET /api/data → 200"
 else
-  fail "GET /api/live-prices → $LIVE_HTTP"
+  fail "GET /api/data → $LIVE_HTTP"
 fi
-if echo "$LIVE_OUT" | python3 -c "import sys,json; d=json.load(sys.stdin); assert len(d)>0" 2>/dev/null; then
-  COUNT=$(echo "$LIVE_OUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d))" 2>/dev/null || echo "?")
-  ok "Live prices JSON: $COUNT sembol"
+if echo "$LIVE_OUT" | python3 -c "import sys,json; d=json.load(sys.stdin); stocks=d.get('stocks',[]); assert len(stocks)>0" 2>/dev/null; then
+  COUNT=$(echo "$LIVE_OUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('stocks',[])))" 2>/dev/null || echo "?")
+  ok "Live stocks JSON: $COUNT sembol"
 else
-  warn "Live prices boş veya parse hatası (soğuk cache window normal)"
+  warn "Stocks boş veya parse hatası (soğuk cache window normal)"
 fi
 
-# ── 5. XU030 chart API (subprocess fetch) ────────────────────────────────────
+# ── 5. BIST30 chart API (/api/chart — XU030 default) ────────────────────────
 echo ""
-echo "5/6 XU030 chart API (subprocess chart fetch)..."
-XU030_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HOST/api/chart/XU030" 2>/dev/null || echo "ERR")
+echo "5/6 BIST30 chart API (XU030 subprocess fetch)..."
+XU030_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HOST/api/chart" 2>/dev/null || echo "ERR")
 if [ "$XU030_HTTP" = "200" ]; then
-  ok "GET /api/chart/XU030 → 200"
+  ok "GET /api/chart → 200"
 elif [ "$XU030_HTTP" = "202" ] || [ "$XU030_HTTP" = "204" ]; then
-  warn "GET /api/chart/XU030 → $XU030_HTTP (loading/cache miss, normal)"
+  warn "GET /api/chart → $XU030_HTTP (loading/cache miss, normal)"
 else
-  fail "GET /api/chart/XU030 → $XU030_HTTP"
+  fail "GET /api/chart → $XU030_HTTP"
 fi
 
-# ── 6. Global prices (subprocess fetch) ──────────────────────────────────────
+# ── 6. Market summary (/api/market-summary — global prices) ──────────────────
 echo ""
-echo "6/6 Global prices API (subprocess global fetch)..."
-GLOBAL_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HOST/api/global-prices" 2>/dev/null || echo "ERR")
+echo "6/6 Market summary API (global prices subprocess)..."
+GLOBAL_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HOST/api/market-summary" 2>/dev/null || echo "ERR")
 if [ "$GLOBAL_HTTP" = "200" ]; then
-  ok "GET /api/global-prices → 200"
+  ok "GET /api/market-summary → 200"
 else
-  warn "GET /api/global-prices → $GLOBAL_HTTP (soğuk cache olabilir)"
+  warn "GET /api/market-summary → $GLOBAL_HTTP (soğuk cache olabilir)"
 fi
 
 # ── Özet ─────────────────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ echo ""
 echo "──────────────────────────────────"
 echo "Süre: ${ELAPSED}s"
 if [ "$FAIL" = "0" ]; then
-  echo "✅ Smoke PASS ($WARN uyarı) — G24 subprocess bundle deploy başarılı."
+  echo "✅ Smoke PASS ($WARN uyarı) — G24 subprocess bundle smoke temiz."
   echo "⚠️  Uyarılar soğuk cache (5-10dk cold window) nedeniyle olabilir. 10dk sonra tekrar çalıştır."
   exit 0
 else
