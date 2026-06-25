@@ -4607,11 +4607,13 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
         return None, None
 
     # Faz 12 P2.6 — Rate limiter: 3.5s minimum arası (free tier 20 req/dk aşmaz)
+    # CPO-837 FIX: sleep lock DIŞINDA — OS daemon thread lock tutarken sleep yapınca
+    # gevent hub tüm HTTP handler greenlet'lerini bloke ediyordu (worker saturation).
     with _gemini_rate_lock:
         _wait = _GEMINI_RATE_INTERVAL - (time.time() - _gemini_rate_last[0])
-        if _wait > 0:
-            time.sleep(_wait)
-        _gemini_rate_last[0] = time.time()
+        _gemini_rate_last[0] = time.time()  # timestamp lock içinde güncelle, sleep dışarıda
+    if _wait > 0:
+        time.sleep(_wait)  # lock serbest — gevent cooperative yield
 
     # Sert timeout cap — caller ne geçerse geçsin per-istek üst sınır.
     eff_timeout = min(timeout, _GEMINI_TIMEOUT_CAP)
