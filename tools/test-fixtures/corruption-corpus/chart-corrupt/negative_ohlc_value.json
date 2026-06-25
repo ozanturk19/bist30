@@ -1,0 +1,14 @@
+{
+  "_fixture_id": "chart-corrupt-004",
+  "_description": "OHLC içinde negatif fiyat — guard: _is_valid_chart() tüm OHLC değerleri > 0 kontrolü",
+  "_guard_ref": "Paket 5 #C4",
+  "ticker": "EREGL",
+  "interval": "1d",
+  "ohlc_count": 3,
+  "ohlc": [
+    {"t": 1718000000, "o": 43.0, "h": 44.5, "l": 42.8, "c": 44.2, "v": 750000},
+    {"t": 1718086400, "o": -1.0, "h": 44.0, "l": -5.0, "c": 43.5, "v": 820000},
+    {"t": 1718172800, "o": 43.5, "h": 45.0, "l": 43.2, "c": 44.8, "v": 690000}
+  ],
+  "last_updated": "2026-06-25T06:00:00Z"
+}

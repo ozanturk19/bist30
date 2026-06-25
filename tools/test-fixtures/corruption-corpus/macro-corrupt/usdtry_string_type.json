@@ -1,0 +1,13 @@
+{
+  "_fixture_id": "macro-corrupt-002",
+  "_description": "USDTRY string tipinde (virgüllü format) — guard: _is_valid_macro() float() cast başarısız → InvalidData",
+  "_guard_ref": "Paket 5 #M2",
+  "timestamp": "2026-06-25T06:00:00Z",
+  "XU030": 10245.80,
+  "XU100": 9842.15,
+  "USDTRY": "38,42",
+  "EURTRY": "41,85",
+  "BRENT": 78.30,
+  "GOLD": 2340.50,
+  "VIX": 14.20
+}

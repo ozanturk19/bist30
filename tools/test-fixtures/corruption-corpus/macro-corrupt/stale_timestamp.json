@@ -1,0 +1,13 @@
+{
+  "_fixture_id": "macro-corrupt-004",
+  "_description": "timestamp 72 saat eski — guard: _is_valid_macro() max_age_hours=24 staleness kontrolü",
+  "_guard_ref": "Paket 5 #M4",
+  "timestamp": "2026-06-22T06:00:00Z",
+  "XU030": 10180.50,
+  "XU100": 9780.20,
+  "USDTRY": 38.10,
+  "EURTRY": 41.50,
+  "BRENT": 77.80,
+  "GOLD": 2320.00,
+  "VIX": 15.10
+}

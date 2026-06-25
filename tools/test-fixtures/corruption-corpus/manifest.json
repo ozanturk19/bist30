@@ -1,0 +1,166 @@
+{
+  "corpus_id": "daemon-corruption-fixture-corpus-v1",
+  "created": "2026-06-25",
+  "spec_ref": "Phase 3 #2 Paket 5 — daemon corruption guard genişletme",
+  "pytest_usage": "pytest tests/test_guards.py --fixture tools/test-fixtures/corruption-corpus/",
+  "total_fixtures": 19,
+  "categories": {
+    "fundamentals-corrupt": {
+      "count": 5,
+      "guard_function": "_is_valid_fundamentals()",
+      "fixtures": [
+        {
+          "id": "fundamentals-corrupt-001",
+          "file": "fundamentals-corrupt/missing_pe_ratio.json",
+          "guard_ref": "Paket 5 #F1",
+          "expected_result": "InvalidData",
+          "description": "PE_ratio field tamamen eksik"
+        },
+        {
+          "id": "fundamentals-corrupt-002",
+          "file": "fundamentals-corrupt/null_eps.json",
+          "guard_ref": "Paket 5 #F2",
+          "expected_result": "InvalidData",
+          "description": "EPS null (sıfıra bölme riski)"
+        },
+        {
+          "id": "fundamentals-corrupt-003",
+          "file": "fundamentals-corrupt/negative_market_cap.json",
+          "guard_ref": "Paket 5 #F3",
+          "expected_result": "InvalidData",
+          "description": "market_cap negatif"
+        },
+        {
+          "id": "fundamentals-corrupt-004",
+          "file": "fundamentals-corrupt/string_price_type.json",
+          "guard_ref": "Paket 5 #F4",
+          "expected_result": "InvalidData",
+          "description": "last_price string tipinde (virgüllü)"
+        },
+        {
+          "id": "fundamentals-corrupt-005",
+          "file": "fundamentals-corrupt/empty_object.json",
+          "guard_ref": "Paket 5 #F5",
+          "expected_result": "InvalidData",
+          "description": "Boş fundamentals objesi"
+        }
+      ]
+    },
+    "chart-corrupt": {
+      "count": 4,
+      "guard_function": "_is_valid_chart()",
+      "fixtures": [
+        {
+          "id": "chart-corrupt-001",
+          "file": "chart-corrupt/low_ohlc_count.json",
+          "guard_ref": "Paket 5 #C1",
+          "expected_result": "InvalidData",
+          "description": "ohlc_count < 100 (42)"
+        },
+        {
+          "id": "chart-corrupt-002",
+          "file": "chart-corrupt/empty_volume_array.json",
+          "guard_ref": "Paket 5 #C2",
+          "expected_result": "InvalidData",
+          "description": "volume array boş / null değerler"
+        },
+        {
+          "id": "chart-corrupt-003",
+          "file": "chart-corrupt/mismatched_timestamps.json",
+          "guard_ref": "Paket 5 #C3",
+          "expected_result": "InvalidData",
+          "description": "Timestamp sırası bozuk (descending)"
+        },
+        {
+          "id": "chart-corrupt-004",
+          "file": "chart-corrupt/negative_ohlc_value.json",
+          "guard_ref": "Paket 5 #C4",
+          "expected_result": "InvalidData",
+          "description": "OHLC içinde negatif fiyat değeri"
+        }
+      ]
+    },
+    "macro-corrupt": {
+      "count": 5,
+      "guard_function": "_is_valid_macro()",
+      "fixtures": [
+        {
+          "id": "macro-corrupt-001",
+          "file": "macro-corrupt/xu030_null.json",
+          "guard_ref": "Paket 5 #M1",
+          "expected_result": "InvalidData",
+          "description": "XU030 null"
+        },
+        {
+          "id": "macro-corrupt-002",
+          "file": "macro-corrupt/usdtry_string_type.json",
+          "guard_ref": "Paket 5 #M2",
+          "expected_result": "InvalidData",
+          "description": "USDTRY string tipinde (virgüllü)"
+        },
+        {
+          "id": "macro-corrupt-003",
+          "file": "macro-corrupt/missing_last_price.json",
+          "guard_ref": "Paket 5 #M3",
+          "expected_result": "InvalidData",
+          "description": "XU030 nested — last_price eksik"
+        },
+        {
+          "id": "macro-corrupt-004",
+          "file": "macro-corrupt/stale_timestamp.json",
+          "guard_ref": "Paket 5 #M4",
+          "expected_result": "StaleData",
+          "description": "timestamp 72 saat eski"
+        },
+        {
+          "id": "macro-corrupt-005",
+          "file": "macro-corrupt/empty_macro.json",
+          "guard_ref": "Paket 5 #M5",
+          "expected_result": "InvalidData",
+          "description": "Macro datası tamamen boş"
+        }
+      ]
+    },
+    "disk-cache-corrupt": {
+      "count": 5,
+      "guard_function": "_is_valid_disk_cache()",
+      "fixtures": [
+        {
+          "id": "disk-cache-corrupt-001",
+          "file": "disk-cache-corrupt/missing_data_field.json",
+          "guard_ref": "Paket 5 #D1",
+          "expected_result": "InvalidData",
+          "description": "Top-level 'data' field eksik"
+        },
+        {
+          "id": "disk-cache-corrupt-002",
+          "file": "disk-cache-corrupt/json_parse_error.txt",
+          "guard_ref": "Paket 5 #D2",
+          "expected_result": "JSONDecodeError",
+          "description": "JSON parse error (truncated)"
+        },
+        {
+          "id": "disk-cache-corrupt-003",
+          "file": "disk-cache-corrupt/partial_write.json",
+          "guard_ref": "Paket 5 #D3",
+          "expected_result": "InvalidData",
+          "description": "Partial write — chart field eksik"
+        },
+        {
+          "id": "disk-cache-corrupt-004",
+          "file": "disk-cache-corrupt/wrong_version.json",
+          "guard_ref": "Paket 5 #D4",
+          "expected_result": "SchemaMismatch",
+          "description": "Cache schema version uyumsuz (1.0 vs 3.x)"
+        },
+        {
+          "id": "disk-cache-corrupt-005",
+          "file": "disk-cache-corrupt/empty_data_value.json",
+          "guard_ref": "Paket 5 #D5",
+          "expected_result": "InvalidData",
+          "description": "'data' field null"
+        }
+      ]
+    }
+  }
+}

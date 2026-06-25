@@ -1,0 +1,14 @@
+{
+  "_fixture_id": "fundamentals-corrupt-002",
+  "_description": "EPS null — guard: _is_valid_fundamentals() None/null EPS reddeder (sıfıra bölme riski)",
+  "_guard_ref": "Paket 5 #F2",
+  "ticker": "THYAO",
+  "last_price": 289.00,
+  "PE_ratio": null,
+  "EPS": null,
+  "market_cap": 95000000000,
+  "revenue": 120000000000,
+  "net_income": null,
+  "book_value": 55.20,
+  "debt_to_equity": 1.82
+}

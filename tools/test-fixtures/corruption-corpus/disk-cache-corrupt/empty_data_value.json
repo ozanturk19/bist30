@@ -1,0 +1,9 @@
+{
+  "_fixture_id": "disk-cache-corrupt-005",
+  "_description": "'data' field mevcut ama değeri null — guard: _is_valid_disk_cache() data is not None and isinstance(data, dict) kontrolü",
+  "_guard_ref": "Paket 5 #D5",
+  "ts": "2026-06-25T05:30:00Z",
+  "version": "3.2",
+  "cache_key": "macro_global",
+  "data": null
+}

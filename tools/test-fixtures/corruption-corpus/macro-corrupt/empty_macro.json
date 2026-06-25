@@ -1,0 +1,5 @@
+{
+  "_fixture_id": "macro-corrupt-005",
+  "_description": "Macro datası tamamen boş dict — guard: _is_valid_macro() required key set kontrolü",
+  "_guard_ref": "Paket 5 #M5"
+}

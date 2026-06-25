@@ -1,0 +1,13 @@
+{
+  "_fixture_id": "chart-corrupt-001",
+  "_description": "ohlc_count < 100 — guard: _is_valid_chart() minimum 100 mum gereksinimi",
+  "_guard_ref": "Paket 5 #C1",
+  "ticker": "AKBNK",
+  "interval": "1d",
+  "ohlc_count": 42,
+  "ohlc": [
+    {"t": 1718000000, "o": 41.0, "h": 42.5, "l": 40.8, "c": 42.1, "v": 1200000},
+    {"t": 1718086400, "o": 42.1, "h": 43.0, "l": 41.9, "c": 42.8, "v": 980000}
+  ],
+  "last_updated": "2026-06-25T06:00:00Z"
+}

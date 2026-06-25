@@ -1,0 +1,10 @@
+{
+  "_fixture_id": "disk-cache-corrupt-002",
+  "_description": "JSON parse error (incomplete/truncated write) — guard: json.loads() try/except JSONDecodeError",
+  "_guard_ref": "Paket 5 #D2",
+  "ts": "2026-06-25T05:00:00Z",
+  "data": {
+    "ticker": "THYAO",
+    "last_price": 289.0,
+    "fundamentals": {
+      "PE_ratio": 12.

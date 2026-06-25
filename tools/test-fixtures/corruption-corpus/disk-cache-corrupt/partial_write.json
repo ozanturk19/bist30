@@ -1,0 +1,17 @@
+{
+  "_fixture_id": "disk-cache-corrupt-003",
+  "_description": "Partial write — data var ama iç alanlar yarım (chart eksik) — guard: nested schema validation",
+  "_guard_ref": "Paket 5 #D3",
+  "ts": "2026-06-25T04:55:00Z",
+  "version": "3.2",
+  "cache_key": "hisse_SISE",
+  "data": {
+    "ticker": "SISE",
+    "last_price": 19.80,
+    "fundamentals": {
+      "PE_ratio": 8.5,
+      "EPS": 2.33,
+      "market_cap": 16000000000
+    }
+  }
+}

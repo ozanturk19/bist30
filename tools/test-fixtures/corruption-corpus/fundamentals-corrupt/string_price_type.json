@@ -1,0 +1,14 @@
+{
+  "_fixture_id": "fundamentals-corrupt-004",
+  "_description": "last_price string tipinde — guard: _is_valid_fundamentals() type assertion, str kabul etmez",
+  "_guard_ref": "Paket 5 #F4",
+  "ticker": "EREGL",
+  "last_price": "43,25",
+  "PE_ratio": 6.2,
+  "EPS": 6.98,
+  "market_cap": 75000000000,
+  "revenue": 55000000000,
+  "net_income": 12500000000,
+  "book_value": 39.10,
+  "debt_to_equity": 0.28
+}

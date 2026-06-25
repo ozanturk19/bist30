@@ -1,0 +1,13 @@
+{
+  "_fixture_id": "fundamentals-corrupt-001",
+  "_description": "PE_ratio field tamamen eksik — guard: _is_valid_fundamentals() PE_ratio key kontrolü",
+  "_guard_ref": "Paket 5 #F1",
+  "ticker": "AKBNK",
+  "last_price": 42.50,
+  "EPS": 3.12,
+  "market_cap": 180000000000,
+  "revenue": 45000000000,
+  "net_income": 12000000000,
+  "book_value": 28.70,
+  "debt_to_equity": 0.45
+}

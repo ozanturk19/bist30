@@ -1,0 +1,13 @@
+{
+  "_fixture_id": "disk-cache-corrupt-004",
+  "_description": "Cache schema version uyumsuz (1.0 vs beklenen 3.x) — guard: _is_valid_disk_cache() version check, eski cache invalidate edilmeli",
+  "_guard_ref": "Paket 5 #D4",
+  "ts": "2026-06-20T12:00:00Z",
+  "version": "1.0",
+  "cache_key": "hisse_EREGL",
+  "data": {
+    "symbol": "EREGL.IS",
+    "price": 43.2,
+    "legacy_field": "bu alan v1'de vardı, v3'te kaldırıldı"
+  }
+}

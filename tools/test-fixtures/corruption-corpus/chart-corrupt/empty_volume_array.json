@@ -1,0 +1,14 @@
+{
+  "_fixture_id": "chart-corrupt-002",
+  "_description": "volume array boş — guard: _is_valid_chart() volume listesi len>0 ve tüm değerler >= 0 kontrolü",
+  "_guard_ref": "Paket 5 #C2",
+  "ticker": "THYAO",
+  "interval": "1d",
+  "ohlc_count": 250,
+  "ohlc": [
+    {"t": 1718000000, "o": 285.0, "h": 292.0, "l": 283.5, "c": 289.0, "v": null},
+    {"t": 1718086400, "o": 289.0, "h": 295.0, "l": 288.0, "c": 291.5, "v": null}
+  ],
+  "volume_array": [],
+  "last_updated": "2026-06-25T06:00:00Z"
+}

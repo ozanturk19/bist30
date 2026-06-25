@@ -1,0 +1,5 @@
+{
+  "_fixture_id": "fundamentals-corrupt-005",
+  "_description": "Boş fundamentals objesi (tüm alanlar eksik) — guard: _is_valid_fundamentals() required key set boş objeyi reddeder",
+  "_guard_ref": "Paket 5 #F5"
+}

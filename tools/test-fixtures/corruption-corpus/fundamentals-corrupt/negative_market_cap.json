@@ -1,0 +1,14 @@
+{
+  "_fixture_id": "fundamentals-corrupt-003",
+  "_description": "market_cap negatif — guard: _is_valid_fundamentals() market_cap > 0 kontrolü",
+  "_guard_ref": "Paket 5 #F3",
+  "ticker": "SISE",
+  "last_price": 19.80,
+  "PE_ratio": 8.5,
+  "EPS": 2.33,
+  "market_cap": -5000000000,
+  "revenue": 18000000000,
+  "net_income": 2100000000,
+  "book_value": 14.10,
+  "debt_to_equity": 0.62
+}

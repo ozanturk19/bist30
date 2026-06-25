@@ -1,0 +1,14 @@
+{
+  "_fixture_id": "macro-corrupt-003",
+  "_description": "XU030 last_price field eksik (nested struct beklenen) — guard: _is_valid_macro() nested key traversal",
+  "_guard_ref": "Paket 5 #M3",
+  "timestamp": "2026-06-25T06:00:00Z",
+  "XU030": {
+    "change_pct": 0.45,
+    "volume": 12500000000
+  },
+  "USDTRY": 38.42,
+  "EURTRY": 41.85,
+  "BRENT": 78.30,
+  "GOLD": 2340.50
+}

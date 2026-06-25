@@ -1,0 +1,13 @@
+{
+  "_fixture_id": "macro-corrupt-001",
+  "_description": "XU030 null — guard: _is_valid_macro() XU030 required ve non-null kontrolü (BIST30 ana index)",
+  "_guard_ref": "Paket 5 #M1",
+  "timestamp": "2026-06-25T06:00:00Z",
+  "XU030": null,
+  "XU100": 9842.15,
+  "USDTRY": 38.42,
+  "EURTRY": 41.85,
+  "BRENT": 78.30,
+  "GOLD": 2340.50,
+  "VIX": 14.20
+}
