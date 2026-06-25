@@ -1,13 +1,13 @@
 #!/bin/bash
 # tools/deploy-bundle.sh
-# Pzt 30 Haz 09:30 TR cutover: 11-commit bundle deploy + smoke + auto-rollback
+# Pzt 30 Haz 09:30 TR cutover: 13-commit bundle deploy + smoke + auto-rollback
 # Kullanım: ./tools/deploy-bundle.sh [--dry-run]
 # Env: TARGET_SHA, ROLLBACK_SHA, SMOKE_SCRIPT, SERVICE, REPO_DIR
 
 set -euo pipefail
 
 # ─── Config ──────────────────────────────────────────────────────────────────
-TARGET_SHA="${TARGET_SHA:-be6aaeb}"
+TARGET_SHA="${TARGET_SHA:-878aa73}"
 ROLLBACK_SHA="${ROLLBACK_SHA:-45f1a2a}"
 SMOKE_SCRIPT="${SMOKE_SCRIPT:-/root/bist30/tools/post-deploy-smoke.sh}"
 SERVICE="${SERVICE:-bist30}"
