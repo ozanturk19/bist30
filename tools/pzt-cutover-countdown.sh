@@ -31,12 +31,12 @@ cat > "$DISPATCH_TMP" << 'REMINDEREOF'
 
 ## Bundle Bilgisi
 - **Commit sayısı:** 15 commit
-- **TARGET_SHA:** d2ac591
+- **TARGET_SHA:** 124c730
 - **ROLLBACK_SHA:** 45f1a2a
 
 ## Deploy Komutu
 ```bash
-TARGET_SHA=d2ac591 ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
+TARGET_SHA=124c730 ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
 ```
 
 ## Dokümantasyon
