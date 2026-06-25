@@ -1,0 +1,204 @@
+/*
+ * SPEC-015 v3 — PageInfoPanel CSS
+ * BorsaPusula dark theme: standalone, template'e eklenecek (Ozan vize sonrası)
+ * Hazırlayan: DEV-823 WWWW [Per 25.06 TR]
+ */
+
+/* ── CSS Custom Properties (BorsaPusula design tokens) ──────────────────── */
+:root {
+  --bp-pi-bg:           rgba(184, 195, 255, 0.06);
+  --bp-pi-border:       rgba(184, 195, 255, 0.14);
+  --bp-pi-text:         rgba(229, 225, 228, 0.80);
+  --bp-pi-text-muted:   rgba(229, 225, 228, 0.45);
+  --bp-pi-accent:       #b8c3ff;
+  --bp-pi-jargon:       #b8c3ff;
+  --bp-pi-jargon-bg:    rgba(184, 195, 255, 0.10);
+  --bp-pi-close-hover:  rgba(229, 225, 228, 0.20);
+  --bp-pi-radius:       6px;
+  --bp-pi-transition:   0.2s ease;
+}
+
+/* ── Panel wrapper ──────────────────────────────────────────────────────── */
+.bp-info-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bp-pi-bg);
+  border: 1px solid var(--bp-pi-border);
+  border-radius: var(--bp-pi-radius);
+  margin: 10px 0 16px;
+  overflow: hidden;
+  transition: border-color var(--bp-pi-transition);
+}
+
+.bp-info-panel:hover {
+  border-color: rgba(184, 195, 255, 0.24);
+}
+
+/* ── Header row ─────────────────────────────────────────────────────────── */
+.bp-info-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.bp-info-panel__icon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: var(--bp-pi-accent);
+  line-height: 1;
+}
+
+.bp-info-panel__title {
+  flex: 1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--bp-pi-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bp-info-panel__toggle {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--bp-pi-text-muted);
+  cursor: pointer;
+  font-size: 0.70rem;
+  padding: 2px 4px;
+  line-height: 1;
+  border-radius: 3px;
+  transition: color var(--bp-pi-transition), background var(--bp-pi-transition);
+}
+
+.bp-info-panel__toggle:hover {
+  color: var(--bp-pi-text);
+  background: var(--bp-pi-close-hover);
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+.bp-info-panel__body {
+  padding: 0 14px;
+  max-height: 400px;
+  opacity: 1;
+  overflow: hidden;
+  transition:
+    max-height var(--bp-pi-transition),
+    opacity var(--bp-pi-transition),
+    padding var(--bp-pi-transition);
+}
+
+.bp-info-panel__body--open {
+  padding-bottom: 12px;
+}
+
+.bp-info-panel__body p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--bp-pi-text);
+}
+
+.bp-info-panel__body p + p {
+  margin-top: 6px;
+}
+
+/* ── Collapsed state ─────────────────────────────────────────────────────── */
+.bp-info-panel--collapsed .bp-info-panel__body {
+  max-height: 0;
+  opacity: 0;
+  padding-bottom: 0;
+}
+
+/* ── Jargon links (reuses SPEC-015 v2 .jargon-term pattern) ─────────────── */
+.bp-info-panel .jargon-term,
+.bp-info-panel .bp-jargon-link {
+  color: var(--bp-pi-jargon);
+  background: var(--bp-pi-jargon-bg);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(184, 195, 255, 0.50);
+  border-radius: 2px;
+  padding: 0 2px;
+  font-size: inherit;
+  transition: background var(--bp-pi-transition), border-color var(--bp-pi-transition);
+}
+
+.bp-info-panel .jargon-term:hover,
+.bp-info-panel .bp-jargon-link:hover {
+  background: rgba(184, 195, 255, 0.18);
+  border-bottom-color: var(--bp-pi-jargon);
+  text-decoration: none;
+}
+
+/* ── "Metodoloji →" more link ─────────────────────────────────────────────── */
+.bp-info-panel__more {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--bp-pi-accent);
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity var(--bp-pi-transition);
+}
+
+.bp-info-panel__more:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ── Mobile responsive (≤ 480px) ────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .bp-info-panel__header {
+    padding: 8px 12px;
+  }
+
+  .bp-info-panel__title {
+    font-size: 0.72rem;
+  }
+
+  .bp-info-panel__body {
+    padding: 0 12px;
+  }
+
+  .bp-info-panel__body p {
+    font-size: 0.80rem;
+    line-height: 1.50;
+  }
+
+  /* On very narrow screens collapse long titles to 2 lines */
+  .bp-info-panel__title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+}
+
+/* ── Very small (≤ 360px) ────────────────────────────────────────────────── */
+@media (max-width: 360px) {
+  .bp-info-panel {
+    margin: 8px 0 12px;
+  }
+
+  .bp-info-panel__body p {
+    font-size: 0.78rem;
+  }
+}
+
+/* ── Optional light theme override (future-proofing) ────────────────────── */
+@media (prefers-color-scheme: light) {
+  .bp-info-panel {
+    --bp-pi-bg:         rgba(100, 100, 200, 0.06);
+    --bp-pi-border:     rgba(100, 100, 200, 0.18);
+    --bp-pi-text:       rgba(20, 20, 40, 0.80);
+    --bp-pi-text-muted: rgba(20, 20, 40, 0.45);
+    --bp-pi-accent:     #4a5bbf;
+    --bp-pi-jargon:     #4a5bbf;
+    --bp-pi-jargon-bg:  rgba(74, 91, 191, 0.08);
+  }
+}
