@@ -58,9 +58,11 @@ SERVICE_STATUS=$(systemctl is-active bist30 2>/dev/null || echo "inactive")
 
 # Ozan dispatch
 REPORT_DIR="/root/ops/cpo-to-ozan"
+REPORT_FILE="${REPORT_DIR}/2026-06-30-0900-CPO-cutover-pre-flight.md"
+DISPATCH_TMP="/tmp/pre-cutover-dispatch.md"
 mkdir -p "$REPORT_DIR"
 
-cat > "$REPORT_DIR/2026-06-30-0900-CPO-cutover-pre-flight.md" << READYEOF
+cat > "$DISPATCH_TMP" << READYEOF
 # Pzt Cutover Pre-Flight Report — 09:00 TR
 
 $TS
@@ -81,10 +83,16 @@ TARGET_SHA=d2ac591 ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
 CPO 30dk icinde dry-run + canli deploy baslayacak.
 READYEOF
 
-cd /root/ops && git add cpo-to-ozan/ && \
-    git -c user.email=ops@borsapusula.com -c user.name=OpsBot commit -q \
-        -m "auto: Pzt cutover pre-flight report" && \
-    git push -q
+if [ "${DRY_RUN:-0}" = "1" ]; then
+    cp "$DISPATCH_TMP" /tmp/cutover-dispatch-test.md
+    log "[DRY-RUN] skip git commit + push, dispatch file at /tmp/cutover-dispatch-test.md"
+else
+    cp "$DISPATCH_TMP" "$REPORT_FILE"
+    cd /root/ops && git add cpo-to-ozan/ && \
+        git -c user.email=ops@borsapusula.com -c user.name=OpsBot commit -q \
+            -m "auto: Pzt cutover pre-flight report" && \
+        git push -q
+    log "Pre-flight report dispatched to ops/cpo-to-ozan/"
+fi
 
-log "Pre-flight report dispatched to ops/cpo-to-ozan/"
 log "=== PRE-CUTOVER HEALTH CHECK COMPLETE ==="

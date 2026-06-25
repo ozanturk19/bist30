@@ -24,7 +24,9 @@ log "Pzt cutover 24h reminder tetiklendi. Health: ${HEALTH_STATUS}"
 
 mkdir -p "$REMINDER_DIR"
 
-cat > "$REMINDER_FILE" << 'REMINDEREOF'
+DISPATCH_TMP="/tmp/cutover-dispatch.md"
+
+cat > "$DISPATCH_TMP" << 'REMINDEREOF'
 # 24h Cutover Reminder — Pzt 30 Haz 09:30 TR
 
 ## Bundle Bilgisi
@@ -61,21 +63,25 @@ TARGET_SHA=d2ac591 ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
 
 REMINDEREOF
 
-# Health durumunu dosyaya ekle
-echo "" >> "$REMINDER_FILE"
-echo "## Health Check (Paz 09:00 TR)" >> "$REMINDER_FILE"
-echo "- Servis durumu: **${HEALTH_STATUS}**" >> "$REMINDER_FILE"
-echo "- Kontrol zamanı: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> "$REMINDER_FILE"
+echo "" >> "$DISPATCH_TMP"
+echo "## Health Check (Paz 09:00 TR)" >> "$DISPATCH_TMP"
+echo "- Servis durumu: **${HEALTH_STATUS}**" >> "$DISPATCH_TMP"
+echo "- Kontrol zamanı: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> "$DISPATCH_TMP"
 
 if [[ "${HEALTH_STATUS}" == "FAIL" ]]; then
-    echo "- ⚠️  UYARI: Health check FAIL — cutover öncesi araştır!" >> "$REMINDER_FILE"
+    echo "- ⚠️  UYARI: Health check FAIL — cutover öncesi araştır!" >> "$DISPATCH_TMP"
 fi
 
-# Ops repo'ya commit + push
-cd "$OPS_DIR"
-git add cpo-to-ozan/
-git commit -m "auto: 24h cutover reminder — Pzt 30 Haz 09:30 TR (health: ${HEALTH_STATUS})"
-git push origin main
+if [ "${DRY_RUN:-0}" = "1" ]; then
+    cp "$DISPATCH_TMP" /tmp/cutover-dispatch-test.md
+    log "[DRY-RUN] skip git commit + push, dispatch file at /tmp/cutover-dispatch-test.md"
+else
+    cp "$DISPATCH_TMP" "$REMINDER_FILE"
+    cd "$OPS_DIR"
+    git add cpo-to-ozan/
+    git commit -m "auto: 24h cutover reminder — Pzt 30 Haz 09:30 TR (health: ${HEALTH_STATUS})"
+    git push origin main
+    log "Reminder dispatched: ${REMINDER_FILE}"
+fi
 
-log "Reminder dispatched: ${REMINDER_FILE}"
 log "Health: ${HEALTH_STATUS} — cutover 24h sonra."
