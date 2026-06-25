@@ -2976,9 +2976,18 @@ function buildChart(d) {
       `<span style="color:#e3b341"><span style="display:inline-block;width:14px;height:2px;background:#e3b341;vertical-align:middle;margin-right:3px;border-radius:1px"></span>EMA99 ${fmt(l99)}</span>`;
   }
   updateLeg();
+
+  /* G26-followup: labelFormatter v4.1.3'te yok → floating div x-ekseninde tarih göster */
+  const _chDateLbl = document.createElement('div');
+  _chDateLbl.style.cssText = 'position:absolute;bottom:0;transform:translateX(-50%);' +
+    'background:#b8c3ff;color:#1c2128;font-size:11px;font-weight:600;' +
+    'padding:1px 5px;border-radius:2px;pointer-events:none;display:none;white-space:nowrap;z-index:20';
+  elMain.style.position = 'relative';
+  elMain.appendChild(_chDateLbl);
+
   chart.subscribeCrosshairMove(p => {
     /* G26: p.time==0 falsy ama geçerli idx — null/undefined ile karşılaştır */
-    if (p?.time == null) { updateLeg(); return; }
+    if (p?.time == null) { updateLeg(); _chDateLbl.style.display = 'none'; return; }
     const raw = _idxToDay[Math.round(+p.time)];
     var fmtDate = '';
     if (raw) {
@@ -2986,6 +2995,13 @@ function buildChart(d) {
       fmtDate = (+pts[2]) + ' ' + (_MTHS[+pts[1]-1] || '') + " '" + pts[0].slice(2);
     }
     updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value, fmtDate);
+    if (fmtDate && p.point?.x != null) {
+      _chDateLbl.textContent = fmtDate;
+      _chDateLbl.style.left  = p.point.x + 'px';
+      _chDateLbl.style.display = 'block';
+    } else {
+      _chDateLbl.style.display = 'none';
+    }
   });
 
   /* Son 1 yılı göster + sağda 10 boş bar boşluk
