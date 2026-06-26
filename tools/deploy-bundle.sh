@@ -23,6 +23,7 @@ for arg in "$@"; do
     *) echo "Unknown arg: $arg"; exit 1 ;;
   esac
 done
+_DL=$( [ "$DRY_RUN" = "1" ] && echo " [DRY-RUN]" || true )
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 log() {
@@ -54,7 +55,7 @@ fail_rollback() {
 }
 
 # ─── 0. Dry-run banner ───────────────────────────────────────────────────────
-log "=== DEPLOY START${DRY_RUN:+ [DRY-RUN]} ==="
+log "=== DEPLOY START${_DL} ==="
 log "Target: $TARGET_SHA | Rollback: $ROLLBACK_SHA | Service: $SERVICE"
 [ "$DRY_RUN" = "1" ] && log "DRY-RUN mode: git pull / systemctl calls are SKIPPED"
 
@@ -178,5 +179,5 @@ else
 fi
 
 # ─── Done ────────────────────────────────────────────────────────────────────
-log "=== DEPLOY SUCCESS${DRY_RUN:+ [DRY-RUN]} — ${TARGET_SHA} stable ==="
+log "=== DEPLOY SUCCESS${_DL} — ${TARGET_SHA} stable ==="
 exit 0
