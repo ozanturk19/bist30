@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # ─── Config ──────────────────────────────────────────────────────────────────
-TARGET_SHA="${TARGET_SHA:-124c730}"
+TARGET_SHA="${TARGET_SHA:-dc8c260}"
 ROLLBACK_SHA="${ROLLBACK_SHA:-45f1a2a}"
 SMOKE_SCRIPT="${SMOKE_SCRIPT:-/root/bist30/tools/post-deploy-smoke.sh}"
 SERVICE="${SERVICE:-bist30}"

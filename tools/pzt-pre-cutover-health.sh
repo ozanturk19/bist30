@@ -44,7 +44,7 @@ fi
 
 # 5. HEAD verify
 HEAD=$(cd /root/bist30 && git rev-parse --short HEAD)
-log "HEAD: $HEAD (beklenen pre-cutover: 45f1a2a)"
+log "HEAD: $HEAD (rollback ref: 45f1a2a — cutover sonrası değişecek)"
 
 # 6. nginx 5xx 24h
 NGINX_5XX=$(awk -v d="$(date -u '+%d/%b/%Y')" '$0 ~ d && $9 ~ /^(502|504)$/' /var/log/nginx/access.log 2>/dev/null | wc -l)
@@ -77,8 +77,9 @@ $TS
 
 **Cutover komutu (09:30 TR):**
 \`\`\`
-TARGET_SHA=d2ac591 ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
+TARGET_SHA=<final-sha> ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
 \`\`\`
+Not: final-sha Pzt 09:00'de belli olur (min: dc8c260, Bundle 17 + F2/F1/F3/Phase3-2B dahil).
 
 CPO 30dk icinde dry-run + canli deploy baslayacak.
 READYEOF
