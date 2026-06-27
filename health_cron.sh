@@ -4,9 +4,10 @@
 # 3 BUG FIX (MSG-007 Task C, 13 May 2026):
 #   1. flock — concurrent cron tick race condition önler
 #   2. AUTO-RESTART success sonrası STATE = "OK" yazılıyor (RESOLVED spam fix)
-#   3. 30 dakika cooldown — mail patlaması engellenir
+#   3. Mail cooldown 30dk, restart cooldown AYRI 10dk (T1.7 fix — 36dk downtime)
 #
-# 2 ardışık fail → AUTO-RESTART bist30 + mail (cooldown'a uyarak)
+# 2 ardışık fail → AUTO-RESTART bist30 (restart cooldown 10dk)
+# AUTO-RESTART fail → mail alarm (mail cooldown 30dk)
 # 5 ardışık fail (5 dk) → CRITICAL alarm
 
 # BUG 1 FIX — Concurrent cron tick'leri engelle
@@ -17,7 +18,9 @@ STATE=/root/bist30/health_state.txt
 LOG=/var/log/bist30_health.log
 FAILS_FILE=/root/bist30/health_fail_count.txt
 LAST_MAIL_FILE=/root/bist30/health_last_mail.txt
-MAIL_COOLDOWN=1800   # 30 dakika
+LAST_RESTART_FILE=/root/bist30/health_last_restart.txt
+MAIL_COOLDOWN=1800     # 30 dakika — mail spam koruması
+RESTART_COOLDOWN=600   # 10 dakika — restart loop koruması (T1.7 fix)
 
 # SPEC-016 K5 (#45 Bulgu 2) — Deploy-lock: servis "activating/deactivating"
 # durumundaysa restart SÜRÜYOR demektir. Bu pencerede /api/health 000 döner;
@@ -42,7 +45,7 @@ if [ "$_started_sec" -gt 0 ] && [ $((_now_sec - _started_sec)) -lt 240 ]; then
   exit 0
 fi
 
-# BUG 3 FIX — Cooldown helper
+# BUG 3 FIX — Mail cooldown helper (30dk)
 send_mail_if_allowed() {
   local mail_type="$1"
   local now_sec=$(date +%s)
@@ -56,6 +59,18 @@ send_mail_if_allowed() {
 
   /root/bist30/venv/bin/python /root/bist30/notify_health.py "$mail_type" 2>/dev/null
   echo "$now_sec" > "$LAST_MAIL_FILE"
+  return 0
+}
+
+# T1.7 fix — Restart cooldown helper (10dk, mail'den bağımsız)
+can_restart() {
+  local now_sec=$(date +%s)
+  local last_restart=$(cat "$LAST_RESTART_FILE" 2>/dev/null || echo "0")
+  local elapsed=$((now_sec - last_restart))
+  if [ "$elapsed" -lt "$RESTART_COOLDOWN" ]; then
+    echo "$(date) RESTART-SKIPPED — restart cooldown (${elapsed}s < ${RESTART_COOLDOWN}s)" >> "$LOG"
+    return 1
+  fi
   return 0
 }
 
@@ -88,11 +103,11 @@ fails=$((fails + 1))
 echo "$fails" > "$FAILS_FILE"
 echo "$(date) FAIL #$fails — HTTP=$http_code" >> "$LOG"
 
-# 2 ardışık fail → AUTO-RESTART
-if [ "$fails" -ge 2 ] && [ "$fails" -lt 5 ]; then
-  prev_state=$(cat "$STATE" 2>/dev/null || echo "OK")
-  if [ "$prev_state" != "RECOVERED" ]; then
+# 2 ardışık fail → AUTO-RESTART (T1.7: restart cooldown 10dk, mail'den bağımsız)
+if [ "$fails" -ge 2 ]; then
+  if can_restart; then
     echo "$(date) AUTO-RESTART triggered after $fails fails" >> "$LOG"
+    date +%s > "$LAST_RESTART_FILE"
     systemctl restart bist30
     echo "RECOVERED" > "$STATE"
     sleep 15
@@ -101,7 +116,6 @@ if [ "$fails" -ge 2 ] && [ "$fails" -lt 5 ]; then
     if [ "$recovery_code" = "200" ]; then
       echo "$(date) AUTO-RESTART success" >> "$LOG"
       # BUG 2 FIX — Başarılı restart sonrası STATE'i derhal "OK" yap
-      # Önceden "RECOVERED" kalıyordu → bir sonraki tick RESOLVED mail spam'liyordu
       echo "OK" > "$STATE"
       echo "0" > "$FAILS_FILE"
     else
