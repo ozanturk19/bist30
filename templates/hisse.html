@@ -2166,12 +2166,19 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <div class="indicators-section{% if premium_locked %} tier-locked{% endif %}" data-tab-content="ozet">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
       <h2 class="section-title" style="margin:0">✓ Algoritmamızın Onayları</h2>
-      <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
-              style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
-              onmouseover="this.style.borderColor='#46464d';this.style.color='#c7c5cd'"
-              onmouseout="this.style.borderColor='#2a2a2c';this.style.color='#909097'">
-        Detaylı göster ▾
-      </button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
+                style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
+                onmouseover="this.style.borderColor='#46464d';this.style.color='#c7c5cd'"
+                onmouseout="this.style.borderColor='#2a2a2c';this.style.color='#909097'"
+                title="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
+        <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
+                style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
+                onmouseover="this.style.borderColor='#46464d';this.style.color='#c7c5cd'"
+                onmouseout="this.style.borderColor='#2a2a2c';this.style.color='#909097'">
+          Detaylı göster ▾
+        </button>
+      </div>
     </div>
     <div class="ind-row" id="indRow">
       <span class="ind-badge ind-neutral">Yükleniyor…</span>
@@ -3339,9 +3346,9 @@ function renderSummary(s, signalData) {
   /* İndikatörler — Sade dil + teknik detay */
   const adxStrength = s.adx >= 30 ? 'Güçlü' : s.adx >= 25 ? 'Orta' : 'Zayıf';
   const _IND_TOOLTIPS = {
-    'Trend Yönü':  'Algoritmamız fiyatın yön belirlemiş olup olmadığını kontrol eder. Yükseliş veya düşüş yönü teyitliyse trend onaylı sayılır.',
-    'Momentum':    'Hareketin gücünü ölçer. Güçlü momentum, fiyatın trend yönünde devam etme olasılığını artırır.',
-    'Vade Uyumu':  'Kısa, orta ve uzun vade hareketli ortalamaların aynı yönde olup olmadığı. Üçü de uyumluysa trend güçlü kabul edilir.',
+    'Trend Yönü':  'Supertrend(10,3) indikatörü fiyatın ATR bazlı dinamik banda göre LONG mu SHORT mu olduğunu belirler. Fiyat üst bandın üzerinde kapanırsa yükseliş, altında kapanırsa düşüş yönü onaylanır. Örnek: 3 ardışık kapanış Supertrend bandı üzerinde → güçlü yükseliş trendi.',
+    'Momentum':    'ADX (Ortalama Yön Endeksi) trendin gücünü 0-100 arası ölçer — yön değil güç verir. ADX > 25 güçlü trend, < 20 zayıf/yatay piyasa anlamına gelir. DI+ > DI− ise alıcılar baskın, DI− > DI+ ise satıcılar baskın.',
+    'Vade Uyumu':  'EMA12 (12 günlük) ve EMA99 (99 günlük) hareketli ortalama karşılaştırılır. EMA12 > EMA99 kısa vadenin uzun vadenin üzerinde olduğunu — yani yükseliş eğilimini — gösterir. Örnek: Her iki EMA aynı yönde ise tüm vadeler uyumlu, sinyal güvenilirliği artar.',
   };
   const inds = [
     {
@@ -3405,6 +3412,7 @@ function renderSummary(s, signalData) {
   }
 
   document.getElementById('indRow').innerHTML = indHtml;
+  window._bpApplyTooltips && window._bpApplyTooltips();
 
   /* ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı */
   const conflictEl = document.getElementById('sigConflictNote');
@@ -4138,6 +4146,27 @@ document.addEventListener('click', function(e) {
   document.querySelectorAll('.ind-help.open').forEach(x => x.classList.remove('open'));
   if (!isOpen) btn.classList.add('open');
 });
+
+/* F3 — Eğitim Tooltip toggle (localStorage bp_show_tooltips) */
+const _TIPS_KEY = 'bp_show_tooltips';
+function _applyTooltipVisibility() {
+  const show = localStorage.getItem(_TIPS_KEY) !== 'false';
+  document.querySelectorAll('.ind-help').forEach(el => { el.style.display = show ? '' : 'none'; });
+  const tb = document.getElementById('tooltipToggle');
+  if (tb) {
+    tb.textContent = show ? '? Kapat' : '? Açıkla';
+    tb.style.color = show ? '#b8c3ff' : '#909097';
+    tb.style.borderColor = show ? 'rgba(184,195,255,0.35)' : '#2a2a2c';
+  }
+}
+function toggleTooltips() {
+  const cur = localStorage.getItem(_TIPS_KEY) !== 'false';
+  localStorage.setItem(_TIPS_KEY, String(!cur));
+  _applyTooltipVisibility();
+}
+_applyTooltipVisibility();
+/* Re-apply after indicators render (called from renderSummary flow) */
+window._bpApplyTooltips = _applyTooltipVisibility;
 </script>
 {% include '_premium_modal.html' %}
 <script>
