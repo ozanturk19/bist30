@@ -638,6 +638,17 @@
     font-size: 10px; font-weight: 600; cursor: default;
     white-space: nowrap;
   }
+  /* F5 — AI Sentiment rozet */
+  .mc-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+  .sentiment-badge {
+    display: inline-flex; align-items: center; gap: 2px;
+    padding: 2px 6px; border-radius: 10px;
+    font-size: 10px; font-weight: 600; cursor: default;
+    white-space: nowrap;
+  }
+  .sentiment-badge.s-positive { background: rgba(0,226,144,0.12); color: #00e290; border: 1px solid rgba(0,226,144,0.3); }
+  .sentiment-badge.s-negative { background: rgba(248,81,73,0.12); color: #f85149; border: 1px solid rgba(248,81,73,0.3); }
+  .sentiment-badge.s-neutral  { background: rgba(139,139,151,0.12); color: #8b8b97; border: 1px solid rgba(139,139,151,0.25); }
   .anomaly-badge-abs {
     position: absolute; top: 8px; right: 8px;
   }
@@ -4171,6 +4182,17 @@ function getSorted(arr) {
   });
 }
 
+/* F5 — AI Sentiment rozet yardımcısı (top-level: kart + tablo her ikisi kullanır) */
+function _sentimentBadge(sent) {
+  if (!sent || sent.score === null || sent.score === undefined) return '';
+  const sc = sent.score;
+  const lbl = sent.label;
+  const sign = sc > 0 ? '+' : '';
+  const cls = lbl === 'positive' ? 's-positive' : lbl === 'negative' ? 's-negative' : 's-neutral';
+  const icon = lbl === 'positive' ? '📈' : lbl === 'negative' ? '📉' : '😐';
+  return `<span class="sentiment-badge ${cls}" title="Son ${sent.news_count} haber sentiment ortalaması (Gemini AI)">${icon} ${sign}${sc}</span>`;
+}
+
 function renderTable() {
   /* MSG-005: İlk render'da (allStocks dolu, fallback henüz çalışmadı) akıllı default uygula */
   _applyAnonymousFallback();
@@ -4222,8 +4244,11 @@ function renderTable() {
         }
         const secHtml = s.sector && s.sector !== 'Diğer' ? `<div class="mc-sector">${s.sector}</div>` : '';
         const anomalyHtml = (s.anomaly && s.anomaly.flag)
-          ? `<span class="anomaly-badge" title="${s.anomaly.reason}" style="margin-top:3px;display:inline-block">⚠ Anomal</span>`
+          ? `<span class="anomaly-badge" title="${s.anomaly.reason}">⚠ Anomal</span>`
           : '';
+        const sentimentHtml = _sentimentBadge(s.sentiment);
+        const badgesHtml = (anomalyHtml || sentimentHtml)
+          ? `<div class="mc-badges">${anomalyHtml}${sentimentHtml}</div>` : '';
         const sigIcon = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
         const sigClass = s.signal === 'AL' ? 'mc-al' : s.signal === 'SAT' ? 'mc-sat' : '';
 
@@ -4277,7 +4302,7 @@ function renderTable() {
         return mtHeader + `<a class="mc ${sigClass} ${s.is_new_signal ? 'mc-new' : ''} ${_mcLocked}" href="/hisse/${s.ticker}">
           <div class="mc-row1">
             <div class="mc-lft">
-              <div class="mc-ticker">${s.ticker} ${wt}${tierBadge(s)}</div>${secHtml}${anomalyHtml}
+              <div class="mc-ticker">${s.ticker} ${wt}${tierBadge(s)}</div>${secHtml}${badgesHtml}
             </div>
             <div class="mc-rgt-wrap">
               <div class="mc-rgt">
@@ -4415,7 +4440,7 @@ function renderTable() {
     _lastTier_desktop = _curTierD;
     const _trLocked = (_premiumLocked && s.tier === 'premium') ? 'tier-locked' : '';
     return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''} ${_trLocked}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
-      <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20 (Backtest Win Rate %51.5)" style="color:#ffd700;font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" title="${s.anomaly.reason}">⚠ Anomal</span>` : ''} ${wtHtml}${sectorHtml}</td>
+      <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20 (Backtest Win Rate %51.5)" style="color:#ffd700;font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" title="${s.anomaly.reason}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
       <td onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}${eqHtml}</td>
