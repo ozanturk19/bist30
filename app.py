@@ -9165,6 +9165,249 @@ def _get_blog_cache():
         logger.info("Blog önbelleği hazırlandı: %d makale", len(_BLOG_NORMALIZED_CACHE))
     return _BLOG_NORMALIZED_CACHE, _BLOG_CAT_COUNTS_CACHE
 
+
+# ── F7 Virtual Paper Trading ───────────────────────────────────────────────────
+import uuid as _uuid_module
+
+_VP_FILE = os.path.join(_APP_DIR, "virtual_portfolio.json")
+_vp_lock = threading.Lock()
+
+def _load_vp():
+    if not os.path.exists(_VP_FILE):
+        return {}
+    try:
+        with open(_VP_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def _save_vp(vp):
+    with open(_VP_FILE, "w", encoding="utf-8") as f:
+        json.dump(vp, f, ensure_ascii=False, indent=2)
+
+_VP_INITIAL_CASH = 100_000.0
+
+def _ensure_vp_user(vp, email):
+    if email not in vp:
+        vp[email] = {
+            "cash": _VP_INITIAL_CASH,
+            "auto_signal": False,
+            "positions": [],
+            "history": [],
+            "equity_points": [],
+        }
+
+def _vp_stock_price(ticker):
+    with _lock:
+        stocks = list(_cache.get("data", []))
+    for s in stocks:
+        if s.get("ticker") == ticker:
+            p = s.get("price")
+            if p:
+                return float(p)
+    return None
+
+def _vp_record_equity(user):
+    pos_val = sum(p["entry_price"] * p["shares"] for p in user.get("positions", []))
+    equity_pct = round(((user["cash"] + pos_val) / _VP_INITIAL_CASH - 1) * 100, 2)
+    today = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
+    pts = user.setdefault("equity_points", [])
+    if pts and pts[-1]["t"] == today:
+        pts[-1]["v"] = equity_pct
+    else:
+        pts.append({"t": today, "v": equity_pct})
+
+
+@app.route("/virtual-portfolio")
+def virtual_portfolio_page():
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return redirect("/?login=1", code=302)
+    import json as _json
+    # Filter to real tickers only (exclude index-like entries)
+    real_tickers = [t for t in BIST30 if not t.startswith("X")]
+    return render_template("virtual_portfolio.html", stocks_json=_json.dumps(real_tickers))
+
+
+@app.route("/api/virtual-portfolio")
+@limiter.limit("60 per minute")
+def api_vp_get():
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    with _vp_lock:
+        vp = _load_vp()
+        _ensure_vp_user(vp, email)
+        user = vp[email]
+
+    positions = []
+    for pos in user.get("positions", []):
+        cur = _vp_stock_price(pos["ticker"]) or pos["entry_price"]
+        cost = pos["entry_price"] * pos["shares"]
+        val  = cur * pos["shares"]
+        pnl  = val - cost
+        positions.append({
+            **pos,
+            "current_price": cur,
+            "value": round(val, 2),
+            "pnl": round(pnl, 2),
+            "pnl_pct": round(pnl / cost * 100, 2) if cost else 0,
+        })
+
+    pos_val   = sum(p["value"] for p in positions)
+    total_val = user["cash"] + pos_val
+    total_pnl = total_val - _VP_INITIAL_CASH
+
+    return safe_json({
+        "ok": True,
+        "cash": round(user["cash"], 2),
+        "auto_signal": user.get("auto_signal", False),
+        "positions": positions,
+        "history": user.get("history", [])[-50:],
+        "equity_points": user.get("equity_points", [])[-120:],
+        "total_value": round(total_val, 2),
+        "total_pnl": round(total_pnl, 2),
+        "total_pnl_pct": round(total_pnl / _VP_INITIAL_CASH * 100, 2),
+    })
+
+
+@app.route("/api/virtual-portfolio/toggle-auto", methods=["POST"])
+@limiter.limit("30 per hour")
+def api_vp_toggle_auto():
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    with _vp_lock:
+        vp = _load_vp()
+        _ensure_vp_user(vp, email)
+        vp[email]["auto_signal"] = not vp[email].get("auto_signal", False)
+        _save_vp(vp)
+        new_state = vp[email]["auto_signal"]
+    return safe_json({"ok": True, "auto_signal": new_state})
+
+
+@app.route("/api/virtual-portfolio/open", methods=["POST"])
+@limiter.limit("60 per hour")
+def api_vp_open():
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    data = request.get_json(silent=True) or {}
+    ticker = (data.get("ticker") or "").upper().strip()
+    try:
+        shares = int(data.get("shares", 0))
+        if shares <= 0:
+            raise ValueError
+    except (ValueError, TypeError):
+        return safe_json({"ok": False, "error": "Geçersiz lot sayısı"}), 400
+    if ticker not in BIST30:
+        return safe_json({"ok": False, "error": "Hisse bulunamadı"}), 400
+
+    price = _vp_stock_price(ticker)
+    if not price:
+        return safe_json({"ok": False, "error": "Fiyat alınamadı"}), 503
+
+    cost = price * shares
+    with _vp_lock:
+        vp = _load_vp()
+        _ensure_vp_user(vp, email)
+        user = vp[email]
+        if user["cash"] < cost:
+            return safe_json({"ok": False, "error": "Yetersiz bakiye"}), 400
+        trade_id = str(_uuid_module.uuid4())[:8]
+        now = datetime.now(_TZ_TR).isoformat()
+        user["cash"] -= cost
+        user["positions"].append({
+            "id": trade_id,
+            "ticker": ticker,
+            "shares": shares,
+            "entry_price": price,
+            "opened_at": now,
+        })
+        user.setdefault("history", []).append({
+            "id": trade_id, "ticker": ticker, "action": "AL",
+            "shares": shares, "price": price, "cost": round(cost, 2),
+            "pnl": None, "at": now,
+        })
+        _vp_record_equity(user)
+        _save_vp(vp)
+    return safe_json({"ok": True, "trade_id": trade_id, "price": price, "cost": round(cost, 2)})
+
+
+@app.route("/api/virtual-portfolio/close", methods=["POST"])
+@limiter.limit("60 per hour")
+def api_vp_close():
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    data = request.get_json(silent=True) or {}
+    trade_id = (data.get("id") or "").strip()
+    if not trade_id:
+        return safe_json({"ok": False, "error": "Pozisyon ID gerekli"}), 400
+    with _vp_lock:
+        vp = _load_vp()
+        user = vp.get(email, {})
+        pos = next((p for p in user.get("positions", []) if p["id"] == trade_id), None)
+        if not pos:
+            return safe_json({"ok": False, "error": "Pozisyon bulunamadı"}), 404
+        price = _vp_stock_price(pos["ticker"])
+        if not price:
+            return safe_json({"ok": False, "error": "Fiyat alınamadı"}), 503
+        proceeds = price * pos["shares"]
+        pnl = proceeds - pos["entry_price"] * pos["shares"]
+        now = datetime.now(_TZ_TR).isoformat()
+        user["cash"] += proceeds
+        user["positions"] = [p for p in user["positions"] if p["id"] != trade_id]
+        user.setdefault("history", []).append({
+            "id": trade_id, "ticker": pos["ticker"], "action": "SAT",
+            "shares": pos["shares"], "price": price, "cost": round(proceeds, 2),
+            "pnl": round(pnl, 2), "at": now,
+        })
+        _vp_record_equity(user)
+        vp[email] = user
+        _save_vp(vp)
+    return safe_json({"ok": True, "price": price, "pnl": round(pnl, 2)})
+
+
+@app.route("/api/virtual-portfolio/backtest")
+@limiter.limit("5 per minute")
+def api_vp_backtest():
+    """Ne olurdu simülasyonu — tek hisse, mevcut strateji."""
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    ticker = (request.args.get("ticker") or "").upper().strip()
+    if not ticker or ticker not in BIST30:
+        return safe_json({"ok": False, "error": "Geçersiz hisse"}), 400
+    period = request.args.get("period", "1y")
+    if period not in ("1y", "2y", "3y"):
+        period = "1y"
+    try:
+        df = _fetch_daily_subprocess(ticker, period=period, timeout=30)
+        if df is None or len(df) < 250:
+            return safe_json({"ok": False, "error": "Yeterli veri yok"}), 503
+        df.columns = [c[0] if isinstance(c, tuple) else c for c in df.columns]
+        from backtest import build_signals, backtest as _bt_run, calc_stats as _calc_stats
+        raw_sig = build_signals(df, "current")
+        trades, equity = _bt_run(df["Close"].dropna(), raw_sig)
+        stats = _calc_stats(trades, equity)
+        simplified = [{
+            "entry_date": str(t["entry_date"])[:10],
+            "exit_date":  str(t["exit_date"])[:10],
+            "direction":  t["direction"],
+            "entry":      round(float(t["entry"]), 2),
+            "exit":       round(float(t["exit"]), 2),
+            "ret_pct":    round(t["ret"] * 100, 2),
+            "bars":       t["bars"],
+        } for t in trades[-20:]]
+        return safe_json({"ok": True, "ticker": ticker, "period": period,
+                          "stats": stats, "trades": simplified,
+                          "equity_len": len(equity)})
+    except Exception as e:
+        logger.error("VP backtest [%s]: %s", ticker, e)
+        return safe_json({"ok": False, "error": "Backtest hesaplanamadı"}), 500
+
+
 @app.route("/blog")
 def blog_index():
     normalized, cat_counts = _get_blog_cache()

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sanal Portföy — BorsaPusula</title>
+<meta name="description" content="Gerçek para harcamadan BorsaPusula sinyalleriyle işlem yap, P&L takip et.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#0e0e12">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+  :root {
+    --bp-bg: #0e0e12; --bp-surface: #141416; --bp-surface2: #1c1b1f;
+    --bp-border: #2a2a2c; --bp-border2: #46464d;
+    --bp-text: #e5e1e4; --bp-text2: #c7c5cd; --bp-text3: #909097;
+    --bp-mint: #00e290; --bp-peri: #b8c3ff; --bp-red: #f85149; --bp-gold: #ffc850;
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    margin: 0; padding: 0; background: var(--bp-bg);
+    color: var(--bp-text);
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--bp-border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  a { color: inherit; text-decoration: none; }
+  .back-link { color: var(--bp-text3); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .back-link:hover { color: var(--bp-text2); }
+
+  main { max-width: 960px; margin: 0 auto; padding: 28px 20px 80px; }
+  h1.page-title {
+    font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700;
+    margin: 0 0 4px; color: var(--bp-text);
+  }
+  .page-sub { font-size: 13px; color: var(--bp-text3); margin: 0 0 28px; }
+
+  /* ── Summary cards ── */
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+  @media(max-width: 600px){ .summary-grid { grid-template-columns: 1fr 1fr; } }
+  .card {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .card-label { font-size: 11px; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+  .card-val { font-size: 22px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+  .card-val.pos { color: var(--bp-mint); }
+  .card-val.neg { color: var(--bp-red); }
+  .card-val.neutral { color: var(--bp-text); }
+
+  /* ── Auto-signal toggle ── */
+  .auto-bar {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: 10px; padding: 12px 18px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .auto-label { font-size: 13px; color: var(--bp-text2); }
+  .auto-label strong { color: var(--bp-text); }
+  .toggle-btn {
+    border: none; border-radius: 20px; padding: 7px 18px; font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: background .15s;
+  }
+  .toggle-btn.off { background: var(--bp-surface2); color: var(--bp-text3); border: 1px solid var(--bp-border); }
+  .toggle-btn.off:hover { background: var(--bp-border); }
+  .toggle-btn.on  { background: var(--bp-mint); color: #000; }
+  .toggle-btn.on:hover { opacity: .88; }
+
+  /* ── Open trade form ── */
+  .trade-form {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;
+  }
+  .trade-form h3 { font-size: 14px; font-weight: 700; margin: 0 0 14px; color: var(--bp-text); }
+  .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 11px; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .7px; }
+  .form-group input, .form-group select {
+    background: var(--bp-surface2); border: 1px solid var(--bp-border);
+    color: var(--bp-text); border-radius: 8px; padding: 8px 12px; font-size: 13px;
+    min-width: 120px;
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--bp-peri); }
+  .btn-al {
+    background: var(--bp-mint); color: #000; border: none; border-radius: 8px;
+    padding: 9px 22px; font-size: 13px; font-weight: 700; cursor: pointer;
+    white-space: nowrap; transition: opacity .15s;
+  }
+  .btn-al:hover { opacity: .85; }
+  #form-msg { font-size: 12px; margin-top: 8px; min-height: 16px; }
+  #form-msg.err { color: var(--bp-red); }
+  #form-msg.ok  { color: var(--bp-mint); }
+
+  /* ── Tables ── */
+  section h3 { font-size: 14px; font-weight: 700; color: var(--bp-text); margin: 0 0 10px; }
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; color: var(--bp-text3); font-size: 11px;
+       text-transform: uppercase; letter-spacing: .6px; border-bottom: 1px solid var(--bp-border); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--bp-border); color: var(--bp-text2); }
+  tr:hover td { background: var(--bp-surface); }
+  .badge { display: inline-block; border-radius: 5px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .badge.al  { background: rgba(0,226,144,.15); color: var(--bp-mint); }
+  .badge.sat { background: rgba(248,81,73,.15);  color: var(--bp-red); }
+  .pos-pnl.pos { color: var(--bp-mint); }
+  .pos-pnl.neg { color: var(--bp-red); }
+  .btn-close-pos {
+    background: rgba(248,81,73,.12); color: var(--bp-red);
+    border: 1px solid rgba(248,81,73,.3); border-radius: 6px;
+    padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-close-pos:hover { background: rgba(248,81,73,.25); }
+  .empty-msg { color: var(--bp-text3); font-size: 13px; padding: 16px 0; }
+
+  /* ── SVG equity chart ── */
+  .chart-section { margin-bottom: 28px; }
+  #equity-svg-wrap {
+    background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius: 12px;
+    padding: 16px; overflow: hidden;
+  }
+  #equity-svg-wrap svg { display: block; width: 100%; }
+
+  /* ── Backtest panel ── */
+  .bt-bar {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: 10px; padding: 12px 18px; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .bt-bar label { font-size: 12px; color: var(--bp-text3); }
+  .bt-bar select, .bt-bar input {
+    background: var(--bp-surface2); border: 1px solid var(--bp-border);
+    color: var(--bp-text); border-radius: 7px; padding: 6px 10px; font-size: 12px;
+  }
+  .btn-bt {
+    background: var(--bp-surface2); color: var(--bp-peri);
+    border: 1px solid var(--bp-border); border-radius: 7px;
+    padding: 7px 16px; font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .btn-bt:hover { border-color: var(--bp-peri); }
+  #bt-result { font-size: 12px; color: var(--bp-text2); margin-top: 10px; }
+  #bt-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+  .bt-stat { background: var(--bp-surface2); border-radius: 8px; padding: 8px 14px; }
+  .bt-stat-label { font-size: 10px; color: var(--bp-text3); text-transform: uppercase; }
+  .bt-stat-val { font-size: 16px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+
+  .section-gap { margin-bottom: 28px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo-link" aria-label="BorsaPusula" style="display:inline-flex;align-items:center;text-decoration:none">
+    <svg class="bp-logo" width="160" height="42" viewBox="0 0 460 120" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bpNeedle2" x1="60" y1="22" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#b8c3ff"/>
+          <stop offset="1" stop-color="#00e2a1"/>
+        </linearGradient>
+      </defs>
+      <rect x="14" y="20" width="80" height="80" rx="18" fill="#0f1218" stroke="#28303f"/>
+      <line x1="22" y1="46" x2="86" y2="46" stroke="#222a37" stroke-width="1"/>
+      <line x1="22" y1="74" x2="86" y2="74" stroke="#222a37" stroke-width="1"/>
+      <line x1="40" y1="28" x2="40" y2="92" stroke="#222a37" stroke-width="1"/>
+      <line x1="68" y1="28" x2="68" y2="92" stroke="#222a37" stroke-width="1"/>
+      <path d="M54 33 L62 60 L54 55 L46 60 Z" fill="url(#bpNeedle2)"/>
+      <path d="M54 87 L60 61 L54 64 L48 61 Z" fill="#2c3445"/>
+      <circle cx="54" cy="60" r="3.5" fill="#eef3f8"/>
+      <circle cx="54" cy="60" r="1.4" fill="#00e2a1"/>
+      <text x="116" y="66" fill="#eef3f8" font-family="'Sora','Manrope',Arial,sans-serif" font-size="34" font-weight="800" letter-spacing="-0.5">Borsa<tspan fill="#00e2a1">Pusula</tspan></text>
+      <line x1="118" y1="78" x2="430" y2="78" stroke="#1e2532" stroke-width="1"/>
+      <text x="118" y="94" fill="#8f98a8" font-family="'Manrope',Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2.4">PİYASANIN YÖNÜ</text>
+    </svg>
+  </a>
+  <a href="/" class="back-link">← Ana Sayfa</a>
+</header>
+
+<main>
+  <h1 class="page-title">Sanal Portföy</h1>
+  <p class="page-sub">100.000 ₺ sanal bütçeyle BorsaPusula sinyallerini dene. Gerçek para yok, gerçek deneyim var.</p>
+
+  <!-- Summary -->
+  <div class="summary-grid" id="summary-grid">
+    <div class="card"><div class="card-label">Nakit</div><div class="card-val neutral" id="s-cash">—</div></div>
+    <div class="card"><div class="card-label">Portföy Değeri</div><div class="card-val neutral" id="s-total">—</div></div>
+    <div class="card"><div class="card-label">Toplam Getiri</div><div class="card-val neutral" id="s-pnl">—</div></div>
+  </div>
+
+  <!-- Auto-signal toggle -->
+  <div class="auto-bar">
+    <div class="auto-label">
+      <strong>Otomatik Sinyal</strong> — BorsaPusula AL/SAT sinyalleri sanal portföye yansıtılsın mı?
+    </div>
+    <button class="toggle-btn off" id="btn-auto" onclick="toggleAuto()">Kapalı</button>
+  </div>
+
+  <!-- Open trade form -->
+  <div class="trade-form">
+    <h3>Manuel Pozisyon Aç</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Hisse</label>
+        <select id="f-ticker"></select>
+      </div>
+      <div class="form-group">
+        <label>Lot (Adet)</label>
+        <input type="number" id="f-shares" min="1" value="10" style="width:90px">
+      </div>
+      <div class="form-group" style="justify-content:flex-end">
+        <label>&nbsp;</label>
+        <button class="btn-al" onclick="openPosition()">AL</button>
+      </div>
+    </div>
+    <div id="form-msg"></div>
+  </div>
+
+  <!-- Equity chart -->
+  <div class="chart-section section-gap">
+    <h3>Portföy Eğrisi</h3>
+    <div id="equity-svg-wrap">
+      <div id="equity-placeholder" style="color:var(--bp-text3);font-size:13px;padding:20px 0;">İlk işlemden sonra eğri oluşacak.</div>
+    </div>
+  </div>
+
+  <!-- Open positions table -->
+  <section class="section-gap">
+    <h3>Açık Pozisyonlar</h3>
+    <div class="tbl-wrap">
+      <table id="pos-table">
+        <thead>
+          <tr>
+            <th>Hisse</th><th>Lot</th><th>Giriş</th><th>Güncel</th><th>P&L</th><th>%</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="pos-body"><tr><td colspan="7" class="empty-msg">Açık pozisyon yok.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- History table -->
+  <section class="section-gap">
+    <h3>İşlem Geçmişi</h3>
+    <div class="tbl-wrap">
+      <table id="hist-table">
+        <thead>
+          <tr><th>Tarih</th><th>İşlem</th><th>Hisse</th><th>Lot</th><th>Fiyat</th><th>P&L</th></tr>
+        </thead>
+        <tbody id="hist-body"><tr><td colspan="6" class="empty-msg">Henüz işlem yok.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Backtest panel -->
+  <section>
+    <h3>Ne Olurdu? — Strateji Simülasyonu</h3>
+    <div class="bt-bar">
+      <label>Hisse</label>
+      <select id="bt-ticker"></select>
+      <label>Dönem</label>
+      <select id="bt-period">
+        <option value="1y">1 Yıl</option>
+        <option value="2y">2 Yıl</option>
+        <option value="3y">3 Yıl</option>
+      </select>
+      <button class="btn-bt" onclick="runBacktest()">Simüle Et</button>
+      <span id="bt-loading" style="display:none;font-size:12px;color:var(--bp-text3)">Hesaplanıyor…</span>
+    </div>
+    <div id="bt-result"></div>
+    <div id="bt-stats"></div>
+  </section>
+</main>
+
+{% include '_mobile_nav_partial.html' %}
+
+<script>
+const STOCKS = {{ stocks_json | safe }};
+
+// Populate ticker selects
+(function(){
+  const tickers = STOCKS;
+  ['f-ticker','bt-ticker'].forEach(id => {
+    const sel = document.getElementById(id);
+    tickers.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = t;
+      sel.appendChild(opt);
+    });
+  });
+  // Default to THYAO
+  document.getElementById('f-ticker').value = 'THYAO';
+  document.getElementById('bt-ticker').value = 'THYAO';
+})();
+
+const fmt = (v, dec=0) => {
+  if(v == null) return '—';
+  return v.toLocaleString('tr-TR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+};
+const fmtTL = (v) => fmt(v, 2) + ' ₺';
+const clr = (v) => v > 0 ? 'pos' : v < 0 ? 'neg' : 'neutral';
+
+async function loadData() {
+  try {
+    const res = await fetch('/api/virtual-portfolio');
+    const d = await res.json();
+    if (!d.ok) return;
+
+    // Summary
+    document.getElementById('s-cash').textContent = fmtTL(d.cash);
+    document.getElementById('s-total').textContent = fmtTL(d.total_value);
+    const pnlEl = document.getElementById('s-pnl');
+    const pnlSign = d.total_pnl >= 0 ? '+' : '';
+    pnlEl.textContent = `${pnlSign}${fmtTL(d.total_pnl)} (${pnlSign}${fmt(d.total_pnl_pct,2)}%)`;
+    pnlEl.className = 'card-val ' + clr(d.total_pnl);
+
+    // Auto toggle button
+    const btn = document.getElementById('btn-auto');
+    btn.textContent = d.auto_signal ? 'Açık' : 'Kapalı';
+    btn.className = 'toggle-btn ' + (d.auto_signal ? 'on' : 'off');
+
+    // Positions
+    const pb = document.getElementById('pos-body');
+    if (d.positions.length === 0) {
+      pb.innerHTML = '<tr><td colspan="7" class="empty-msg">Açık pozisyon yok.</td></tr>';
+    } else {
+      pb.innerHTML = d.positions.map(p => {
+        const pnlCls = clr(p.pnl);
+        return `<tr>
+          <td><strong>${p.ticker}</strong></td>
+          <td>${p.shares}</td>
+          <td>${fmt(p.entry_price,2)} ₺</td>
+          <td>${fmt(p.current_price,2)} ₺</td>
+          <td class="pos-pnl ${pnlCls}">${p.pnl >= 0 ? '+' : ''}${fmtTL(p.pnl)}</td>
+          <td class="pos-pnl ${pnlCls}">${p.pnl_pct >= 0 ? '+' : ''}${fmt(p.pnl_pct,2)}%</td>
+          <td><button class="btn-close-pos" onclick="closePosition('${p.id}')">Kapat</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    // History
+    const hb = document.getElementById('hist-body');
+    const hist = [...d.history].reverse();
+    if (hist.length === 0) {
+      hb.innerHTML = '<tr><td colspan="6" class="empty-msg">Henüz işlem yok.</td></tr>';
+    } else {
+      hb.innerHTML = hist.map(h => {
+        const pnlStr = h.pnl != null ? `<span class="pos-pnl ${clr(h.pnl)}">${h.pnl >= 0 ? '+' : ''}${fmtTL(h.pnl)}</span>` : '—';
+        return `<tr>
+          <td>${(h.at||'').slice(0,10)}</td>
+          <td><span class="badge ${h.action.toLowerCase()}">${h.action}</span></td>
+          <td>${h.ticker}</td>
+          <td>${h.shares}</td>
+          <td>${fmt(h.price,2)} ₺</td>
+          <td>${pnlStr}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Equity chart
+    drawEquityChart(d.equity_points);
+  } catch(e) {
+    console.error('VP load error', e);
+  }
+}
+
+function drawEquityChart(pts) {
+  const wrap = document.getElementById('equity-svg-wrap');
+  const ph = document.getElementById('equity-placeholder');
+  if (!pts || pts.length < 2) {
+    if(ph) ph.style.display = 'block';
+    return;
+  }
+  if(ph) ph.style.display = 'none';
+  const W = 860, H = 180, PAD = {t:10, r:10, b:28, l:48};
+  const vals = pts.map(p => p.v);
+  const minV = Math.min(...vals, 0);
+  const maxV = Math.max(...vals, 0);
+  const range = maxV - minV || 1;
+  const xScale = i => PAD.l + (i / (pts.length - 1)) * (W - PAD.l - PAD.r);
+  const yScale = v => H - PAD.b - ((v - minV) / range) * (H - PAD.t - PAD.b);
+  const zero_y = yScale(0);
+
+  let path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(i).toFixed(1)},${yScale(p.v).toFixed(1)}`).join(' ');
+  const lastX = xScale(pts.length - 1).toFixed(1);
+  const firstX = xScale(0).toFixed(1);
+  let fillPath = `${path} L${lastX},${zero_y.toFixed(1)} L${firstX},${zero_y.toFixed(1)} Z`;
+
+  const isPos = vals[vals.length - 1] >= 0;
+  const lineColor = isPos ? '#00e290' : '#f85149';
+  const fillColor = isPos ? 'rgba(0,226,144,.12)' : 'rgba(248,81,73,.10)';
+
+  // X labels (max 5 evenly spaced)
+  let labels = '';
+  const step = Math.max(1, Math.floor(pts.length / 5));
+  for (let i = 0; i < pts.length; i += step) {
+    labels += `<text x="${xScale(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" fill="#606068" font-size="10">${pts[i].t.slice(5)}</text>`;
+  }
+  // Y axis: 0 line
+  const zeroLabel = `<text x="${PAD.l - 6}" y="${zero_y.toFixed(1)}" text-anchor="end" fill="#606068" font-size="10" dominant-baseline="middle">0%</text>`;
+  const zeroLine = `<line x1="${PAD.l}" y1="${zero_y.toFixed(1)}" x2="${W - PAD.r}" y2="${zero_y.toFixed(1)}" stroke="#2a2a2c" stroke-dasharray="3,3"/>`;
+
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    ${zeroLine}
+    <path d="${fillPath}" fill="${fillColor}"/>
+    <path d="${path}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round"/>
+    ${labels}${zeroLabel}
+  </svg>`;
+}
+
+async function toggleAuto() {
+  const res = await fetch('/api/virtual-portfolio/toggle-auto', {method:'POST', headers:{'Content-Type':'application/json'}});
+  const d = await res.json();
+  if (d.ok) loadData();
+}
+
+async function openPosition() {
+  const ticker = document.getElementById('f-ticker').value;
+  const shares = parseInt(document.getElementById('f-shares').value) || 0;
+  const msg = document.getElementById('form-msg');
+  msg.className = ''; msg.textContent = '';
+  if (shares <= 0) { msg.className = 'err'; msg.textContent = 'Lot sayısı giriniz.'; return; }
+  const res = await fetch('/api/virtual-portfolio/open', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ticker, shares}),
+  });
+  const d = await res.json();
+  if (d.ok) {
+    msg.className = 'ok';
+    msg.textContent = `${ticker} — ${shares} lot @ ${d.price.toLocaleString('tr-TR', {minimumFractionDigits:2})} ₺ alındı.`;
+    loadData();
+  } else {
+    msg.className = 'err';
+    msg.textContent = d.error || 'Hata oluştu.';
+  }
+}
+
+async function closePosition(id) {
+  if (!confirm('Pozisyonu kapatmak istediğinizden emin misiniz?')) return;
+  const res = await fetch('/api/virtual-portfolio/close', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({id}),
+  });
+  const d = await res.json();
+  if (d.ok) {
+    const sign = d.pnl >= 0 ? '+' : '';
+    alert(`Pozisyon kapatıldı. P&L: ${sign}${d.pnl.toLocaleString('tr-TR', {minimumFractionDigits:2})} ₺`);
+    loadData();
+  } else {
+    alert(d.error || 'Hata oluştu.');
+  }
+}
+
+async function runBacktest() {
+  const ticker = document.getElementById('bt-ticker').value;
+  const period = document.getElementById('bt-period').value;
+  const loading = document.getElementById('bt-loading');
+  const result = document.getElementById('bt-result');
+  const stats = document.getElementById('bt-stats');
+  loading.style.display = 'inline';
+  result.textContent = '';
+  stats.innerHTML = '';
+  try {
+    const res = await fetch(`/api/virtual-portfolio/backtest?ticker=${ticker}&period=${period}`);
+    const d = await res.json();
+    loading.style.display = 'none';
+    if (!d.ok) { result.textContent = d.error; return; }
+    const s = d.stats;
+    const fmt2 = v => (v != null ? v.toFixed(2) : '—');
+    stats.innerHTML = [
+      ['İşlem Sayısı', s.n_trades ?? '—'],
+      ['Kazanma Oranı', s.win_rate != null ? `${fmt2(s.win_rate)}%` : '—'],
+      ['Toplam Getiri', s.total_return_pct != null ? `${s.total_return_pct >= 0 ? '+' : ''}${fmt2(s.total_return_pct)}%` : '—'],
+      ['Max Drawdown', s.max_drawdown_pct != null ? `${fmt2(s.max_drawdown_pct)}%` : '—'],
+      ['Sharpe', s.sharpe != null ? fmt2(s.sharpe) : '—'],
+      ['Ort. Kazanç', s.avg_win_pct != null ? `+${fmt2(s.avg_win_pct)}%` : '—'],
+      ['Ort. Kayıp', s.avg_loss_pct != null ? `${fmt2(s.avg_loss_pct)}%` : '—'],
+    ].map(([label, val]) =>
+      `<div class="bt-stat"><div class="bt-stat-label">${label}</div><div class="bt-stat-val">${val}</div></div>`
+    ).join('');
+    result.textContent = `${ticker} — ${period} dönem simülasyonu (mevcut strateji, ${d.equity_len} gün)`;
+  } catch(e) {
+    loading.style.display = 'none';
+    result.textContent = 'Backtest hatası.';
+  }
+}
+
+// Init
+loadData();
+setInterval(loadData, 60000);
+</script>
+</body>
+</html>
