@@ -38,6 +38,11 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from blog_content import ARTICLES, ARTICLES_BY_SLUG, CATEGORIES
 
+# ── Phase 3 #2 Paket 1+4+5 — Sağlamlık modülleri ─────────────────────────────
+from _alerts       import _check_api_stale, _format_alert_md, _should_alert_telegram
+from _health_extras import _extend_health_payload
+from _guards       import _is_valid_fundamentals, _is_valid_chart, _is_valid_macro, _is_valid_disk_cache
+
 # ── Web Push (VAPID) — opsiyonel; eksikse özellik devre dışı ──────────────────
 try:
     from pywebpush import webpush, WebPushException
@@ -1089,6 +1094,14 @@ _anomaly_cache = {}  # ticker -> {score, flag, reason} for UI badge (F2)
 # ws → {"email": str|None, "is_premium": bool, "subscribe": set}
 _ws_clients: dict = {}
 _ws_lock    = threading.Lock()
+
+# ── Phase 3 #2 Paket 1 — api_stale globals ────────────────────────────────────
+_ALERT_MD_PATH     = os.environ.get("DQV_ALERT_PATH", "/root/bist30/ALERT.md")
+_last_stale_alert_ts: "float | None" = None
+_stale_alert_lock  = threading.Lock()
+
+# ── Phase 3 #2 Paket 4 — app startup timestamp ────────────────────────────────
+_APP_STARTUP_TS = time.time()
 
 
 def _push_sse(payload: dict):
@@ -2722,7 +2735,13 @@ def _load_cache_from_disk():
         if _disk_cache_mtime == current_mtime and _cache.get("data"):
             return
         with open(_DISK_CACHE_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            raw_str = f.read()
+        # Paket 5 — disk cache corruption guard
+        _guard_ok, _guard_reason = _is_valid_disk_cache(raw_str)
+        if not _guard_ok:
+            logger.warning("[GUARD] disk_cache geçersiz (%s), yükleme atlandı", _guard_reason)
+            return
+        data = json.loads(raw_str)
         if data and isinstance(data, list) and len(data) > 0:
             for s in data:
                 _enrich_stock(s)
@@ -3223,6 +3242,26 @@ def background_refresh():
         if ok:
             logger.info("background_refresh: refresh_data() tamamlandı")
 
+        # Paket 1 — api_stale alert: refresh sonrası cache_ts kontrol
+        try:
+            global _last_stale_alert_ts
+            _cache_ts = _cache.get("last_refresh_ts") or None
+            _mkt_open = _market_open()
+            _stale = _check_api_stale(_cache_ts, market_open=_mkt_open)
+            if _stale:
+                _alert_line = _format_alert_md(_stale)
+                try:
+                    with open(_ALERT_MD_PATH, "a", encoding="utf-8") as _f:
+                        _f.write(_alert_line + "\n")
+                except OSError as _e:
+                    logger.warning("api_stale ALERT.md yazılamadı: %s", _e)
+                with _stale_alert_lock:
+                    if _should_alert_telegram(_stale, _last_stale_alert_ts):
+                        _send_telegram(_alert_line)
+                        _last_stale_alert_ts = time.time()
+        except Exception as _e:
+            logger.error("Paket 1 api_stale check hatası: %s", _e)
+
         # 2) Stale chart cache purge — kısa, watchdog'suz (lock-swap only)
         try:
             _purge_stale_chart_caches()
@@ -3658,10 +3697,16 @@ def _macro_bg_loop():
             try:
                 items = _fetch_macro()
                 if items:
-                    with _lock:
-                        _macro_cache["data"] = items
-                        _macro_cache["ts"]   = time.time()
-                    _save_macro_to_disk(items, _macro_cache["ts"])
+                    # Paket 5 — macro guard: items'dan XU030 keyed dict oluştur ve validate et
+                    _macro_kv = {i["label"]: i.get("price") for i in items if "label" in i}
+                    _mg_ok, _mg_reason = _is_valid_macro(_macro_kv)
+                    if not _mg_ok:
+                        logger.warning("[GUARD] macro geçersiz (%s), eski cache korunur", _mg_reason)
+                    else:
+                        with _lock:
+                            _macro_cache["data"] = items
+                            _macro_cache["ts"]   = time.time()
+                        _save_macro_to_disk(items, _macro_cache["ts"])
                     _macro_bg_stats["successes"] += 1
                     _macro_bg_stats["last_success_ts"] = time.time()
                     logger.info("_macro_bg_loop heartbeat: cycle=%d items=%d uptime=%ds",
@@ -5785,6 +5830,16 @@ def _compute_chart_data(ticker_base, period="2y"):
 def refresh_chart():
     d = get_chart_data()
     if d:
+        # Paket 5 — chart corruption guard (normalize for _is_valid_chart schema)
+        _chart_check = {
+            "ticker": "XU030",
+            "ohlc_count": len(d.get("ohlc") or []),
+            "ohlc": d.get("ohlc") or [],
+        }
+        _cg_ok, _cg_reason = _is_valid_chart(_chart_check)
+        if not _cg_ok:
+            logger.warning("[GUARD] XU030 chart geçersiz (%s), eski cache korunur", _cg_reason)
+            return
         with _lock:
             _chart_cache["data"] = d
             _chart_cache["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
@@ -7163,7 +7218,7 @@ def _compute_health():
 
     macro_last_ts = _macro_bg_stats.get("last_success_ts", 0)
     news_last_ts  = _news_queue_stats.get("last_processed_ts", 0)
-    return {
+    _health_base = {
         "ok":          status == "OK",
         "status":      status,
         "message":     message,
@@ -7194,6 +7249,14 @@ def _compute_health():
         "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
         "ts": now,
     }
+    # Paket 4 — extend with 6 health extra fields (uptime_sec, cache_age_min, etc.)
+    return _extend_health_payload(
+        _health_base,
+        startup_ts=_APP_STARTUP_TS,
+        last_refresh_ts=last_refresh_ts if last_refresh_ts else None,
+        executor=None,
+        stocks={},
+    )
 
 
 # SPEC-016 K4 — /api/health lock-free decouple.
