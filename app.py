@@ -4574,8 +4574,8 @@ _GEMINI_CB_THRESHOLD = 2      # ardışık fail eşiği — devre açılır
 _GEMINI_CB_COOLDOWN  = 600    # saniye — devre açık kalır (10dk Gemini'siz fallback)
 _gemini_cb = {"fails": 0, "open_until": 0.0}   # circuit breaker durumu (worker-local)
 
-# Faz 12 P2.6 — Rate limiter: free tier 20 req/dk → 3.5s/call safe margin (~17/dk)
-_GEMINI_RATE_INTERVAL = float(os.environ.get("GEMINI_RATE_INTERVAL", "3.5"))
+# Faz 12 P2.6 — Rate limiter: gemini-2.5-flash free tier 10 RPM → 6.5s/call safe margin (~9.2/dk)
+_GEMINI_RATE_INTERVAL = float(os.environ.get("GEMINI_RATE_INTERVAL", "6.5"))
 _gemini_rate_lock = threading.Lock()
 _gemini_rate_last = [0.0]
 
@@ -4859,13 +4859,15 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
                 logger.debug("_gemini_call [%s]: rate-limited (429)", model_id)  # sessiz — log dolmasın
             else:
                 logger.warning("_gemini_call [%s]: %s (HTTP %s)", model_id, type(e).__name__, status)
-            # Circuit breaker — ardışık fail say, eşikte devreyi aç
-            _gemini_cb["fails"] += 1
-            if _gemini_cb["fails"] >= _GEMINI_CB_THRESHOLD:
-                _gemini_cb["open_until"] = time.time() + _GEMINI_CB_COOLDOWN
-                _gemini_cb["fails"] = 0
-                logger.warning("_gemini_call: circuit breaker AÇILDI — %d ardışık fail, "
-                               "%ds boyunca Gemini'siz fallback", _GEMINI_CB_THRESHOLD, _GEMINI_CB_COOLDOWN)
+            # Circuit breaker — 429 rate-limit sayılmaz (servis sağlıklı, sadece hız kısıtı).
+            # Yalnızca gerçek servis arızaları (5xx, timeout) CB fail sayacına girer.
+            if status != 429:
+                _gemini_cb["fails"] += 1
+                if _gemini_cb["fails"] >= _GEMINI_CB_THRESHOLD:
+                    _gemini_cb["open_until"] = time.time() + _GEMINI_CB_COOLDOWN
+                    _gemini_cb["fails"] = 0
+                    logger.warning("_gemini_call: circuit breaker AÇILDI — %d ardışık fail, "
+                                   "%ds boyunca Gemini'siz fallback", _GEMINI_CB_THRESHOLD, _GEMINI_CB_COOLDOWN)
             # 5xx ve 429 → geçici sorun, bir sonraki modeli dene
             # 4xx (400, 403 vb.) → API/key sorunu, fallback da aynı hatayı verir
             if status and 400 <= status < 500 and status != 429:
