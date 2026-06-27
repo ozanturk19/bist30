@@ -30,13 +30,13 @@ cat > "$DISPATCH_TMP" << 'REMINDEREOF'
 # 24h Cutover Reminder — Pzt 30 Haz 09:30 TR
 
 ## Bundle Bilgisi
-- **Commit sayısı:** 15 commit
-- **TARGET_SHA:** 124c730
+- **Commit sayısı:** 16 commit
+- **TARGET_SHA:** b1b7e3d
 - **ROLLBACK_SHA:** 45f1a2a
 
 ## Deploy Komutu
 ```bash
-TARGET_SHA=124c730 ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
+TARGET_SHA=b1b7e3d ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
 ```
 
 ## Dokümantasyon
