@@ -94,16 +94,24 @@ def _is_valid_macro(data: dict, max_age_hours: int = 24) -> tuple[bool, str]:
 
 
 def _is_valid_disk_cache(raw) -> tuple[bool, str]:
-    """Returns (is_valid, reason). raw can be str (JSON string) or dict."""
+    """Returns (is_valid, reason). raw can be str (JSON string), dict, or list."""
     if isinstance(raw, str):
         try:
             data = json.loads(raw)
         except json.JSONDecodeError as e:
             return False, f"JSONDecodeError: {e}"
-    elif isinstance(raw, dict):
+    elif isinstance(raw, (dict, list)):
         data = raw
     else:
         return False, f"unexpected input type: {type(raw).__name__}"
+
+    # Main stocks disk cache format: raw list of stock dicts
+    if isinstance(data, list):
+        if len(data) == 0:
+            return False, "InvalidData: empty list"
+        if not isinstance(data[0], dict):
+            return False, f"InvalidData: list items must be dict, got {type(data[0]).__name__}"
+        return True, "ok"
 
     version = data.get("version")
     if version is not None and not str(version).startswith("3."):
