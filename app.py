@@ -4859,9 +4859,9 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
                 logger.debug("_gemini_call [%s]: rate-limited (429)", model_id)  # sessiz — log dolmasın
             else:
                 logger.warning("_gemini_call [%s]: %s (HTTP %s)", model_id, type(e).__name__, status)
-            # Circuit breaker — 429 rate-limit sayılmaz (servis sağlıklı, sadece hız kısıtı).
-            # Yalnızca gerçek servis arızaları (5xx, timeout) CB fail sayacına girer.
-            if status != 429:
+            # Circuit breaker — 429 ve 5xx sayılmaz (hızlı dönüş, worker bloke etmez).
+            # Yalnızca timeout/network hataları (status=None) CB fail sayacına girer.
+            if status is None or (status and 400 <= status < 500 and status != 429):
                 _gemini_cb["fails"] += 1
                 if _gemini_cb["fails"] >= _GEMINI_CB_THRESHOLD:
                     _gemini_cb["open_until"] = time.time() + _GEMINI_CB_COOLDOWN
@@ -9405,6 +9405,102 @@ def api_vp_backtest():
                           "equity_len": len(equity)})
     except Exception as e:
         logger.error("VP backtest [%s]: %s", ticker, e)
+        return safe_json({"ok": False, "error": "Backtest hesaplanamadı"}), 500
+
+
+@app.route("/backtest")
+def backtest_page():
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return redirect("/giris?next=/backtest")
+    tickers = sorted(BIST30)
+    return render_template("backtest.html", tickers_json=_json.dumps(tickers))
+
+
+_F8_STRATEGIES = [
+    ("Mevcut (5 kriter, thr=4)",  "current"),
+    ("EMA Golden/Death Cross",    "ema_cross_only"),
+    ("Supertrend Flip",           "supertrend_only"),
+    ("Triple EMA (12>26>50)",     "triple_ema"),
+    ("ADX≥25 Trend",              "adx_trend"),
+    ("Supertrend + ADX≥25",       "st_adx"),
+    ("Yüksek Konviksiyon (5/5)",  "high_conviction"),
+    ("Weekly Regime Gate",        "weekly_regime"),
+]
+_F8_VALID_STRATEGIES = {s for _, s in _F8_STRATEGIES}
+
+
+@app.route("/api/backtest/custom", methods=["POST"])
+@limiter.limit("2 per minute")
+def api_backtest_custom():
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+
+    data = request.get_json(silent=True) or {}
+    ticker = (data.get("ticker") or "").upper().strip()
+    strategy = (data.get("strategy") or "current").strip()
+    use_3bar = bool(data.get("use_3bar", False))
+    period = data.get("period", "3y")
+    stop_pct_raw = data.get("stop_pct")
+    trail_pct_raw = data.get("trail_pct")
+
+    if not ticker or ticker not in BIST30:
+        return safe_json({"ok": False, "error": "Geçersiz hisse"}), 400
+    if strategy not in _F8_VALID_STRATEGIES:
+        return safe_json({"ok": False, "error": "Geçersiz strateji"}), 400
+    if period not in ("1y", "2y", "3y"):
+        period = "3y"
+
+    stop_pct = None
+    trail_pct = None
+    try:
+        if stop_pct_raw not in (None, "", 0):
+            stop_pct = float(stop_pct_raw) / 100
+            if not (0.01 <= stop_pct <= 0.50):
+                stop_pct = None
+        if trail_pct_raw not in (None, "", 0):
+            trail_pct = float(trail_pct_raw) / 100
+            if not (0.01 <= trail_pct <= 0.50):
+                trail_pct = None
+    except (ValueError, TypeError):
+        pass
+
+    try:
+        df = _fetch_daily_subprocess(ticker, period=period, timeout=30)
+        if df is None or len(df) < 250:
+            return safe_json({"ok": False, "error": "Yeterli veri yok"}), 503
+        df.columns = [c[0] if isinstance(c, tuple) else c for c in df.columns]
+        from backtest import build_signals, backtest as _bt_run, calc_stats as _calc_stats
+        raw_sig = build_signals(df, strategy)
+        trades, equity = _bt_run(df["Close"].dropna(), raw_sig,
+                                 use_confirm=use_3bar, stop_pct=stop_pct, trail_pct=trail_pct)
+        stats = _calc_stats(trades, equity)
+
+        # Equity curve — downsample to max 300 points for SVG
+        step = max(1, len(equity) // 300)
+        eq_pts = [{"i": i, "v": round((equity[i] - 1.0) * 100, 2)} for i in range(0, len(equity), step)]
+        if eq_pts and eq_pts[-1]["i"] != len(equity) - 1:
+            eq_pts.append({"i": len(equity) - 1, "v": round((equity[-1] - 1.0) * 100, 2)})
+
+        simplified = [{
+            "entry_date": str(t["entry_date"])[:10],
+            "exit_date":  str(t["exit_date"])[:10],
+            "direction":  t["direction"],
+            "entry":      round(float(t["entry"]), 2),
+            "exit":       round(float(t["exit"]), 2),
+            "ret_pct":    round(t["ret"] * 100, 2),
+            "bars":       t["bars"],
+        } for t in trades[-20:]]
+
+        return safe_json({
+            "ok": True, "ticker": ticker, "period": period,
+            "strategy": strategy, "use_3bar": use_3bar,
+            "stop_pct": stop_pct, "trail_pct": trail_pct,
+            "stats": stats, "trades": simplified, "equity": eq_pts,
+        })
+    except Exception as e:
+        logger.error("F8 backtest [%s/%s]: %s", ticker, strategy, e)
         return safe_json({"ok": False, "error": "Backtest hesaplanamadı"}), 500
 
 

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backtest — BorsaPusula</title>
+<meta name="description" content="BIST hisseleri için strateji backtest — farklı sinyal modellerini geçmiş verilerle test et.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#0e0e12">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+  :root {
+    --bp-bg: #0e0e12; --bp-surface: #141416; --bp-surface2: #1c1b1f;
+    --bp-border: #2a2a2c; --bp-border2: #46464d;
+    --bp-text: #e5e1e4; --bp-text2: #c7c5cd; --bp-text3: #909097;
+    --bp-mint: #00e290; --bp-peri: #b8c3ff; --bp-red: #f85149; --bp-gold: #ffc850;
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    margin: 0; padding: 0; background: var(--bp-bg);
+    color: var(--bp-text);
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--bp-border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  a { color: inherit; text-decoration: none; }
+  .back-link { color: var(--bp-text3); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .back-link:hover { color: var(--bp-text2); }
+
+  main { max-width: 960px; margin: 0 auto; padding: 28px 20px 80px; }
+  h1.page-title {
+    font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700;
+    margin: 0 0 4px; color: var(--bp-text);
+  }
+  .page-sub { font-size: 13px; color: var(--bp-text3); margin: 0 0 28px; }
+
+  /* ── Control panel ── */
+  .ctrl-panel {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: 14px; padding: 20px 22px; margin-bottom: 24px;
+  }
+  .ctrl-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  @media(max-width: 640px){ .ctrl-grid { grid-template-columns: 1fr 1fr; } }
+  @media(max-width: 420px){ .ctrl-grid { grid-template-columns: 1fr; } }
+  .ctrl-row-bottom {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 14px;
+  }
+  .ctrl-field label {
+    display: block; font-size: 11px; color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px;
+  }
+  .ctrl-field select, .ctrl-field input[type="number"] {
+    width: 100%; background: var(--bp-surface2); border: 1px solid var(--bp-border2);
+    border-radius: 8px; color: var(--bp-text); font-size: 13px;
+    padding: 8px 10px; outline: none; font-family: inherit;
+  }
+  .ctrl-field select:focus, .ctrl-field input:focus {
+    border-color: var(--bp-peri);
+  }
+  .ctrl-field input[type="number"] { max-width: 110px; }
+
+  .toggle-row { display: flex; align-items: center; gap: 10px; }
+  .toggle-label { font-size: 13px; color: var(--bp-text2); }
+  .chk-toggle { width: 36px; height: 20px; cursor: pointer; accent-color: var(--bp-mint); }
+
+  .run-btn {
+    margin-top: 4px; padding: 10px 28px;
+    background: var(--bp-peri); color: #0e0e12;
+    border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: opacity .15s; font-family: inherit;
+  }
+  .run-btn:hover { opacity: .88; }
+  .run-btn:disabled { opacity: .45; cursor: default; }
+
+  /* ── Stat cards ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  @media(max-width: 640px){ .stats-grid { grid-template-columns: 1fr 1fr; } }
+  .card {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: 12px; padding: 14px 16px;
+  }
+  .card-label { font-size: 11px; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+  .card-val { font-size: 20px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+  .card-val.pos { color: var(--bp-mint); }
+  .card-val.neg { color: var(--bp-red); }
+  .card-val.neutral { color: var(--bp-text); }
+
+  /* ── Equity chart ── */
+  .chart-wrap {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: 14px; padding: 16px 18px; margin-bottom: 24px;
+  }
+  .chart-title { font-size: 13px; color: var(--bp-text2); margin-bottom: 10px; font-weight: 600; }
+  #equity-svg-wrap { width: 100%; overflow: hidden; }
+  #equity-svg-wrap svg { display: block; width: 100%; }
+  .chart-empty { color: var(--bp-text3); font-size: 13px; text-align: center; padding: 40px 0; }
+
+  /* ── Trades table ── */
+  .trades-wrap {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: 14px; overflow: hidden;
+  }
+  .trades-title { font-size: 13px; color: var(--bp-text2); font-weight: 600; padding: 14px 18px; border-bottom: 1px solid var(--bp-border); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 9px 12px; color: var(--bp-text3); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; border-bottom: 1px solid var(--bp-border); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--bp-border); color: var(--bp-text2); }
+  tr:last-child td { border-bottom: none; }
+  .dir-al { color: var(--bp-mint); font-weight: 700; }
+  .dir-sat { color: var(--bp-red); font-weight: 700; }
+  .ret-pos { color: var(--bp-mint); }
+  .ret-neg { color: var(--bp-red); }
+
+  /* ── State ── */
+  #results { display: none; }
+  #error-msg { display: none; color: var(--bp-red); font-size: 13px; padding: 10px 0; }
+  #loading-msg { display: none; color: var(--bp-text3); font-size: 13px; padding: 10px 0; }
+</style>
+</head>
+<body>
+<header>
+  <a href="/" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Ana Sayfa
+  </a>
+  <a href="/" style="display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;">
+    <svg class="bp-logo" width="120" height="32" viewBox="0 0 460 120" xmlns="http://www.w3.org/2000/svg">
+      <rect width="460" height="120" rx="20" fill="#0e0e12"/>
+      <circle cx="60" cy="60" r="44" fill="#1a1a22"/>
+      <path d="M44 42 L44 78 Q44 84 50 84 L68 84 Q82 84 82 70 Q82 62 74 59 Q80 56 80 48 Q80 36 66 36 L50 36 Q44 36 44 42Z" fill="none" stroke="#b8c3ff" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M44 60 L74 60" stroke="#b8c3ff" stroke-width="5"/>
+      <text x="118" y="78" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="52" fill="#e5e1e4">Borsa</text>
+      <text x="118" y="78" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="52" fill="#e5e1e4" dx="153">Pusula</text>
+    </svg>
+  </a>
+</header>
+
+<main>
+  <h1 class="page-title">Backtest</h1>
+  <p class="page-sub">Farklı sinyal stratejilerini BIST30 hisseleri üzerinde geçmiş veriyle test et.</p>
+
+  <!-- Control Panel -->
+  <div class="ctrl-panel">
+    <div class="ctrl-grid">
+      <div class="ctrl-field">
+        <label>Hisse</label>
+        <select id="f-ticker"></select>
+      </div>
+      <div class="ctrl-field">
+        <label>Strateji</label>
+        <select id="f-strategy">
+          <option value="current">Mevcut (5 kriter, thr=4)</option>
+          <option value="ema_cross_only">EMA Golden/Death Cross</option>
+          <option value="supertrend_only">Supertrend Flip</option>
+          <option value="triple_ema">Triple EMA (12&gt;26&gt;50)</option>
+          <option value="adx_trend">ADX≥25 Trend</option>
+          <option value="st_adx">Supertrend + ADX≥25</option>
+          <option value="high_conviction">Yüksek Konviksiyon (5/5)</option>
+          <option value="weekly_regime">Weekly Regime Gate</option>
+        </select>
+      </div>
+      <div class="ctrl-field">
+        <label>Dönem</label>
+        <select id="f-period">
+          <option value="3y" selected>3 Yıl</option>
+          <option value="2y">2 Yıl</option>
+          <option value="1y">1 Yıl</option>
+        </select>
+      </div>
+    </div>
+    <div class="ctrl-row-bottom">
+      <div class="ctrl-field">
+        <label>Stop-Loss (%)</label>
+        <input type="number" id="f-stop" min="0" max="50" step="1" placeholder="0 = kapalı">
+      </div>
+      <div class="ctrl-field">
+        <label>Trailing Stop (%)</label>
+        <input type="number" id="f-trail" min="0" max="50" step="1" placeholder="0 = kapalı">
+      </div>
+      <div class="toggle-row" style="align-self:flex-end;padding-bottom:2px;">
+        <input type="checkbox" id="f-3bar" class="chk-toggle">
+        <label for="f-3bar" class="toggle-label">3-Bar Onayı</label>
+      </div>
+      <div style="align-self:flex-end;">
+        <button class="run-btn" id="run-btn" onclick="runBacktest()">Backtest Çalıştır</button>
+      </div>
+    </div>
+    <div id="loading-msg">Backtest çalışıyor, lütfen bekleyin...</div>
+    <div id="error-msg"></div>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Sermaye Eğrisi (Kümülatif Getiri %)</div>
+      <div id="equity-svg-wrap"><div class="chart-empty">Veri bekleniyor...</div></div>
+    </div>
+
+    <div class="trades-wrap">
+      <div class="trades-title">Son İşlemler</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Yön</th><th>Giriş Tarihi</th><th>Çıkış Tarihi</th>
+            <th>Giriş</th><th>Çıkış</th><th>Getiri %</th><th>Süre (bar)</th>
+          </tr>
+        </thead>
+        <tbody id="trades-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+const TICKERS = {{ tickers_json|safe }};
+
+(function() {
+  const sel = document.getElementById('f-ticker');
+  TICKERS.forEach(t => {
+    const o = document.createElement('option');
+    o.value = o.textContent = t;
+    sel.appendChild(o);
+  });
+  if (TICKERS.includes('THYAO')) sel.value = 'THYAO';
+})();
+
+async function runBacktest() {
+  const btn = document.getElementById('run-btn');
+  const loadMsg = document.getElementById('loading-msg');
+  const errMsg = document.getElementById('error-msg');
+  const results = document.getElementById('results');
+
+  errMsg.style.display = 'none'; errMsg.textContent = '';
+  loadMsg.style.display = 'block';
+  results.style.display = 'none';
+  btn.disabled = true;
+
+  const stopVal = parseFloat(document.getElementById('f-stop').value) || 0;
+  const trailVal = parseFloat(document.getElementById('f-trail').value) || 0;
+
+  try {
+    const res = await fetch('/api/backtest/custom', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        ticker:   document.getElementById('f-ticker').value,
+        strategy: document.getElementById('f-strategy').value,
+        period:   document.getElementById('f-period').value,
+        use_3bar: document.getElementById('f-3bar').checked,
+        stop_pct:  stopVal || null,
+        trail_pct: trailVal || null,
+      })
+    });
+    const d = await res.json();
+    loadMsg.style.display = 'none';
+    btn.disabled = false;
+
+    if (!d.ok) {
+      errMsg.textContent = d.error || 'Backtest başarısız.';
+      errMsg.style.display = 'block';
+      return;
+    }
+
+    renderStats(d.stats, d.ticker, d.period);
+    drawEquityChart(d.equity);
+    renderTrades(d.trades);
+    results.style.display = 'block';
+  } catch(e) {
+    loadMsg.style.display = 'none';
+    btn.disabled = false;
+    errMsg.textContent = 'Bağlantı hatası. Lütfen tekrar deneyin.';
+    errMsg.style.display = 'block';
+  }
+}
+
+function renderStats(s, ticker, period) {
+  if (!s || !s.n_trades) {
+    document.getElementById('stats-grid').innerHTML = '<div class="card" style="grid-column:1/-1"><div class="card-label">Sonuç</div><div class="card-val neutral" style="font-size:14px">Bu dönemde hiç sinyal üretilmedi.</div></div>';
+    return;
+  }
+  const fmt = (v, dec=1) => v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(dec);
+  const cls = v => v == null ? 'neutral' : v > 0 ? 'pos' : v < 0 ? 'neg' : 'neutral';
+  const pf = s.profit_factor === Infinity ? '∞' : (s.profit_factor != null ? s.profit_factor.toFixed(2) : '—');
+  const grid = document.getElementById('stats-grid');
+  grid.innerHTML = `
+    <div class="card"><div class="card-label">Toplam Getiri</div><div class="card-val ${cls(s.total_return_pct)}">${fmt(s.total_return_pct)}%</div></div>
+    <div class="card"><div class="card-label">İşlem Sayısı</div><div class="card-val neutral">${s.n_trades}</div></div>
+    <div class="card"><div class="card-label">Kazanma Oranı</div><div class="card-val ${s.win_rate >= 50 ? 'pos' : 'neg'}">${s.win_rate != null ? s.win_rate.toFixed(1) : '—'}%</div></div>
+    <div class="card"><div class="card-label">Max Drawdown</div><div class="card-val neg">${s.max_drawdown_pct != null ? s.max_drawdown_pct.toFixed(1) : '—'}%</div></div>
+    <div class="card"><div class="card-label">Sharpe</div><div class="card-val ${cls(s.sharpe)}">${s.sharpe != null ? s.sharpe.toFixed(2) : '—'}</div></div>
+    <div class="card"><div class="card-label">Profit Factor</div><div class="card-val ${s.profit_factor > 1 ? 'pos' : 'neg'}">${pf}</div></div>
+    <div class="card"><div class="card-label">Ort. Kazanç</div><div class="card-val pos">${fmt(s.avg_win_pct)}%</div></div>
+    <div class="card"><div class="card-label">Ort. Kayıp</div><div class="card-val neg">${fmt(s.avg_loss_pct)}%</div></div>
+  `;
+}
+
+function drawEquityChart(pts) {
+  const wrap = document.getElementById('equity-svg-wrap');
+  if (!pts || pts.length < 2) {
+    wrap.innerHTML = '<div class="chart-empty">Yeterli veri yok.</div>';
+    return;
+  }
+  const W = 860, H = 180, PAD = {t:10, r:10, b:28, l:52};
+  const vals = pts.map(p => p.v);
+  const minV = Math.min(...vals, 0);
+  const maxV = Math.max(...vals, 0);
+  const range = maxV - minV || 1;
+  const xScale = i => PAD.l + (i / (pts.length - 1)) * (W - PAD.l - PAD.r);
+  const yScale = v => H - PAD.b - ((v - minV) / range) * (H - PAD.t - PAD.b);
+  const zero_y = yScale(0);
+
+  let path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xScale(i).toFixed(1)},${yScale(p.v).toFixed(1)}`).join(' ');
+  const lastX = xScale(pts.length - 1).toFixed(1);
+  const firstX = xScale(0).toFixed(1);
+  let fillPath = `${path} L${lastX},${zero_y.toFixed(1)} L${firstX},${zero_y.toFixed(1)} Z`;
+
+  const finalVal = vals[vals.length - 1];
+  const lineColor = finalVal >= 0 ? '#00e290' : '#f85149';
+  const fillColor = finalVal >= 0 ? 'rgba(0,226,144,.12)' : 'rgba(248,81,73,.10)';
+
+  const step = Math.max(1, Math.floor(pts.length / 5));
+  let labels = '';
+  for (let i = 0; i < pts.length; i += step) {
+    labels += `<text x="${xScale(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" fill="#606068" font-size="10">${i}</text>`;
+  }
+
+  const yLabels = [minV, 0, maxV].filter((v, i, a) => a.indexOf(v) === i).map(v =>
+    `<text x="${PAD.l - 6}" y="${yScale(v).toFixed(1)}" text-anchor="end" fill="#606068" font-size="10" dominant-baseline="middle">${v >= 0 ? '+' : ''}${v.toFixed(0)}%</text>`
+  ).join('');
+  const zeroLine = `<line x1="${PAD.l}" y1="${zero_y.toFixed(1)}" x2="${W - PAD.r}" y2="${zero_y.toFixed(1)}" stroke="#2a2a2c" stroke-dasharray="3,3"/>`;
+
+  const lastLabel = `<text x="${lastX}" y="${yScale(finalVal).toFixed(1)}" dx="4" fill="${lineColor}" font-size="10" dominant-baseline="middle">${finalVal >= 0 ? '+' : ''}${finalVal.toFixed(1)}%</text>`;
+
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    ${zeroLine}
+    <path d="${fillPath}" fill="${fillColor}"/>
+    <path d="${path}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round"/>
+    ${labels}${yLabels}${lastLabel}
+  </svg>`;
+}
+
+function renderTrades(trades) {
+  const tbody = document.getElementById('trades-tbody');
+  if (!trades || !trades.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--bp-text3)">İşlem yok</td></tr>';
+    return;
+  }
+  tbody.innerHTML = [...trades].reverse().map(t => {
+    const dc = t.direction === 'AL' ? 'dir-al' : 'dir-sat';
+    const rc = t.ret_pct > 0 ? 'ret-pos' : t.ret_pct < 0 ? 'ret-neg' : '';
+    const sign = t.ret_pct > 0 ? '+' : '';
+    return `<tr>
+      <td class="${dc}">${t.direction}</td>
+      <td>${t.entry_date}</td><td>${t.exit_date}</td>
+      <td>${t.entry.toFixed(2)}</td><td>${t.exit.toFixed(2)}</td>
+      <td class="${rc}">${sign}${t.ret_pct.toFixed(2)}%</td>
+      <td>${t.bars}</td>
+    </tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
