@@ -629,6 +629,18 @@
     background: rgba(91,160,255,.12);
     border: 1px solid rgba(91,160,255,.45);
   }
+  /* F2 — Anomali rozet */
+  .anomaly-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 10px;
+    background: rgba(217,153,34,0.15);
+    color: #d29922; border: 1px solid rgba(217,153,34,0.3);
+    font-size: 10px; font-weight: 600; cursor: default;
+    white-space: nowrap;
+  }
+  .anomaly-badge-abs {
+    position: absolute; top: 8px; right: 8px;
+  }
   /* SPEC-001 Faz 2 (Adım 3) — Premium modal */
   .premium-modal-backdrop {
     display: none;
@@ -1874,7 +1886,7 @@
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(42,42,44,0.75);
     border-radius: 8px; padding:13px 14px;
-    cursor:pointer;
+    cursor:pointer; position: relative;
     transition: border-color .18s, transform .12s, box-shadow .18s;
     text-decoration:none; display:block;
     -webkit-tap-highlight-color: transparent;
@@ -4055,6 +4067,9 @@ function renderTable() {
           entryTxt = `Giriş ${s.signal_price.toLocaleString('tr-TR',{minimumFractionDigits:2})} <span style="color:${rc}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`;
         }
         const secHtml = s.sector && s.sector !== 'Diğer' ? `<div class="mc-sector">${s.sector}</div>` : '';
+        const anomalyHtml = (s.anomaly && s.anomaly.flag)
+          ? `<span class="anomaly-badge" title="${s.anomaly.reason}" style="margin-top:3px;display:inline-block">⚠ Anomal</span>`
+          : '';
         const sigIcon = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
         const sigClass = s.signal === 'AL' ? 'mc-al' : s.signal === 'SAT' ? 'mc-sat' : '';
 
@@ -4108,7 +4123,7 @@ function renderTable() {
         return mtHeader + `<a class="mc ${sigClass} ${s.is_new_signal ? 'mc-new' : ''} ${_mcLocked}" href="/hisse/${s.ticker}">
           <div class="mc-row1">
             <div class="mc-lft">
-              <div class="mc-ticker">${s.ticker} ${wt}${tierBadge(s)}</div>${secHtml}
+              <div class="mc-ticker">${s.ticker} ${wt}${tierBadge(s)}</div>${secHtml}${anomalyHtml}
             </div>
             <div class="mc-rgt-wrap">
               <div class="mc-rgt">
@@ -4246,7 +4261,7 @@ function renderTable() {
     _lastTier_desktop = _curTierD;
     const _trLocked = (_premiumLocked && s.tier === 'premium') ? 'tier-locked' : '';
     return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''} ${_trLocked}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
-      <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20 (Backtest Win Rate %51.5)" style="color:#ffd700;font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''} ${wtHtml}${sectorHtml}</td>
+      <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20 (Backtest Win Rate %51.5)" style="color:#ffd700;font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" title="${s.anomaly.reason}">⚠ Anomal</span>` : ''} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
       <td onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}${eqHtml}</td>

@@ -417,6 +417,14 @@
   .signal-badge.bear    { background: rgba(248,81,73,.18);    color: #ff7b72; border: 1px solid rgba(248,81,73,.35);  box-shadow: 0 0 6px rgba(248,81,73,.18); }
   .signal-badge.neutral { background: rgba(144,144,151,.15); color: #909097; border: 1px solid rgba(144,144,151,.3); }
 
+  /* F2 — Anomali rozet */
+  .anomaly-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 8px; border-radius: 10px;
+    background: rgba(217,153,34,0.15);
+    color: #d29922; border: 1px solid rgba(217,153,34,0.3);
+    font-size: 11px; font-weight: 600; cursor: default;
+  }
   /* ── Container ── */
   .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
 
@@ -1460,6 +1468,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <span class="header-price" id="hpPrice">—</span>
     <span class="header-chg neu" id="hpChg">—</span>
     <span class="signal-badge signal-BEKLE" id="hpSignal">● Yatay</span>
+    <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge">⚠ Anomal</span>
     <span id="liveTs" style="font-size:11px;color:#909097">○</span>
   </div>
   {% if sector %}
@@ -3562,6 +3571,12 @@ async function loadChart(retry) {
         /* _shareData.entry güncellemesi */
         if (sd.signal_price && _shareData) {
           _shareData.entry = (+sd.signal_price).toLocaleString('tr-TR', {minimumFractionDigits:2});
+        }
+        /* F2 — Anomali rozet */
+        const _ab = document.getElementById('hpAnomalyBadge');
+        if (_ab && sd.anomaly && sd.anomaly.flag) {
+          _ab.title = sd.anomaly.reason || '';
+          _ab.style.display = '';
         }
       }
 

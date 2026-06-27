@@ -104,6 +104,19 @@ def validate_stock_anomaly(stock):
     return errors
 
 
+def compute_stock_anomaly_score(stock, threshold=2.0):
+    """Compute UI anomaly score for a single stock. Returns {score, flag, reason}.
+    Uses lower threshold than DQV alerting (2.0 vs 3.0) for UI badge display.
+    """
+    ticker = stock.get("ticker", "UNKNOWN")
+    r = z_score_check(ticker, stock.get("today_price"), stock.get("price_history", []),
+                      threshold=threshold)
+    if r:
+        return {"score": r["z_score"], "flag": True,
+                "reason": f"z-score {r['z_score']}σ (son 5g std'den sapma)"}
+    return {"score": 0.0, "flag": False, "reason": ""}
+
+
 def validate_anomalies_list(stocks_with_history):
     """
     Run anomaly detection across all stocks.

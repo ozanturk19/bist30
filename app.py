@@ -50,6 +50,7 @@ try:
     from business_rules   import validate_stocks_list          as _dqv_business_rules
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
+    from anomaly          import compute_stock_anomaly_score    as _dqv_ui_anomaly
     from email_qa         import validate_email_pre_send        as _dqv_email_qa
     from schema_validator import validate_api_data             as _dqv_sv_data
     from schema_validator import validate_api_macro            as _dqv_sv_macro
@@ -1074,6 +1075,7 @@ _lock        = threading.Lock()
 _sse_clients = []
 _sse_lock    = threading.Lock()
 _bt_cache    = {"data": None, "computed_at": None}   # backtest cache
+_anomaly_cache = {}  # ticker -> {score, flag, reason} for UI badge (F2)
 
 
 def _push_sse(payload: dict):
@@ -2862,6 +2864,19 @@ def refresh_data():
         except Exception as _e:
             logger.warning("DQV_ANOMALY exception: %s", _e)
 
+    # ── UI Anomaly Badge Cache (z-score > 2.0, frontend rozet) ───────────────
+    if _DQV_AVAILABLE:
+        try:
+            _new_ac = {}
+            for _s in _stocks_with_hist:
+                _t = _s.get("ticker")
+                if _t:
+                    _new_ac[_t] = _dqv_ui_anomaly(_s, threshold=2.0)
+            with _lock:
+                _anomaly_cache.update(_new_ac)
+        except Exception as _e:
+            logger.warning("UI_ANOMALY_CACHE exception: %s", _e)
+
 
 def fetch_live_prices():
     tickers_str = " ".join(t + ".IS" for t in BIST30)
@@ -3203,6 +3218,11 @@ def index():
 def api_data():
     with _lock:
         stocks = list(_cache["data"])
+        _ac_snap = dict(_anomaly_cache)
+    # Annotate stocks with anomaly badge data (F2)
+    _default_anomaly = {"score": 0.0, "flag": False, "reason": ""}
+    for s in stocks:
+        s["anomaly"] = _ac_snap.get(s.get("ticker", ""), _default_anomaly)
     # ADX null fix (BUG-C1) — sector/name artık cache yazılırken ekleniyor
     for s in stocks:
         # Parse ADX from nested indicators if top-level is null
