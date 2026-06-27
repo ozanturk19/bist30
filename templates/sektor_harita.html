@@ -463,6 +463,18 @@ function renderHeatmap(stocks) {
     const premPill  = premCount > 0
       ? `<span class="stat-pill pill-prem" title="Premium sinyaller (AL + Hacim Onaylı, RVOL ≥ 1.20)">💎 ${premCount}</span>`
       : '';
+
+    /* Avg RVOL per sector */
+    const allSec = [...sec.al, ...sec.sat, ...sec.bkl];
+    const rvols  = allSec.map(s => s.rvol).filter(v => v != null && !isNaN(v));
+    const avgRvol = rvols.length > 0 ? (rvols.reduce((a,b) => a+b, 0) / rvols.length) : null;
+    const rvolHtml = avgRvol != null
+      ? (() => {
+          const rc = avgRvol >= 2.0 ? '#00e290' : avgRvol >= 1.3 ? '#e3b341' : '#909097';
+          return `<span style="font-size:10px;color:${rc}" title="Sektör ortalama göreceli hacim (bugün / 20g ort)">Hcm ×${avgRvol.toFixed(1)}</span>`;
+        })()
+      : '';
+
     return `
     <div class="sector-card" data-sector="${sec.name}" data-href="/tarama?sector=${encodeURIComponent(sec.name)}" style="--heat-color:${color};cursor:pointer" title="${sec.name} sektöründeki tüm hisseleri taramaya götür" tabindex="0" role="link">
       <div class="sec-name" style="color:${color}">${sec.name}</div>
@@ -480,7 +492,7 @@ function renderHeatmap(stocks) {
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="score" style="color:${color}">${sec.score > 0 ? '+' : ''}${sec.score}</div>
-        <div style="font-size:11px;color:#909097">Skor</div>
+        <div style="display:flex;align-items:center;gap:8px">${rvolHtml}<span style="font-size:11px;color:#909097">Skor</span></div>
       </div>
       ${alChips || satChips ? `<div class="detail-row">${alChips}${satChips}${bklSample}${bklMore}</div>` : ''}
     </div>`;

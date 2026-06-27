@@ -6974,6 +6974,7 @@ def sitemap():
     pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly"})
     pages.append({"loc": "/sinyal-performans",  "priority": "0.7", "changefreq": "weekly"})
     pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
+    pages.append({"loc": "/sektor",             "priority": "0.7", "changefreq": "daily"})
     pages.append({"loc": "/hisseler",          "priority": "0.85", "changefreq": "daily"})
     pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "weekly"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
@@ -7963,9 +7964,49 @@ def redirect_sektorler():
     return redirect("/sektor-harita", 301)
 
 
+@app.route("/sektor")
+def sektor():
+    return render_template("sektor_harita.html")
+
+
 @app.route("/sektor-harita")
 def sektor_harita():
     return render_template("sektor_harita.html")
+
+
+@app.route("/api/sector-heatmap")
+def api_sector_heatmap():
+    with _lock:
+        stocks = list(_cache["data"])
+    sec_map = {}
+    for s in stocks:
+        tk = s.get("ticker", "")
+        if tk == "XU030":
+            continue
+        sec = s.get("sector") or _get_sector(tk)
+        if sec not in sec_map:
+            sec_map[sec] = {"al": 0, "sat": 0, "bekle": 0, "rvol_vals": []}
+        d = sec_map[sec]
+        sig = s.get("signal", "BEKLE")
+        if sig == "AL":
+            d["al"] += 1
+        elif sig == "SAT":
+            d["sat"] += 1
+        else:
+            d["bekle"] += 1
+        rv = s.get("rvol")
+        if rv is not None:
+            d["rvol_vals"].append(float(rv))
+    result = []
+    for name, d in sec_map.items():
+        total = d["al"] + d["sat"] + d["bekle"]
+        score = round((d["al"] - d["sat"]) / total * 100) if total > 0 else 0
+        rvol_vals = d["rvol_vals"]
+        avg_rvol = round(sum(rvol_vals) / len(rvol_vals), 2) if rvol_vals else None
+        result.append({"name": name, "al": d["al"], "sat": d["sat"], "bekle": d["bekle"],
+                        "total": total, "score": score, "avg_rvol": avg_rvol})
+    result.sort(key=lambda x: x["score"], reverse=True)
+    return safe_json({"sectors": result, "updated_at": _cache.get("updated_at")})
 
 
 # ── Bilanço Takvimi ───────────────────────────────────────────────────────────
