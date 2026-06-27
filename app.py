@@ -45,6 +45,14 @@ try:
 except ImportError:
     _PUSH_ENABLED = False
 
+# ── F9 WebSocket — geventwebsocket opsiyonel ─────────────────────────────────
+try:
+    from geventwebsocket import WebSocketError
+    _WS_AVAILABLE = True
+except ImportError:
+    _WS_AVAILABLE = False
+    WebSocketError = Exception
+
 # ── Faz 12 P1 DQV — Data Quality Validators ───────────────────────────────────
 try:
     from business_rules   import validate_stocks_list          as _dqv_business_rules
@@ -1077,6 +1085,11 @@ _sse_lock    = threading.Lock()
 _bt_cache    = {"data": None, "computed_at": None}   # backtest cache
 _anomaly_cache = {}  # ticker -> {score, flag, reason} for UI badge (F2)
 
+# F9: WebSocket clients — per-worker dict, no cross-process sharing
+# ws → {"email": str|None, "is_premium": bool, "subscribe": set}
+_ws_clients: dict = {}
+_ws_lock    = threading.Lock()
+
 
 def _push_sse(payload: dict):
     msg = f"data: {json.dumps(payload)}\n\n"
@@ -1089,6 +1102,37 @@ def _push_sse(payload: dict):
                 dead.append(q)
         for q in dead:
             _sse_clients.remove(q)
+
+
+def _ws_broadcast():
+    """F9: Push signal update to all WS clients connected to this worker."""
+    if not _WS_AVAILABLE or not _ws_clients:
+        return
+    try:
+        with _lock:
+            data = list(_cache.get("data") or [])
+            updated_at = _cache.get("updated_at", "")
+        if not data:
+            return
+        payload = json.dumps({
+            "type": "signal_update",
+            "updated_at": updated_at,
+            "count": len(data),
+        })
+        dead = []
+        with _ws_lock:
+            clients = list(_ws_clients.keys())
+        for ws in clients:
+            try:
+                ws.send(payload)
+            except Exception:
+                dead.append(ws)
+        if dead:
+            with _ws_lock:
+                for ws in dead:
+                    _ws_clients.pop(ws, None)
+    except Exception as _e:
+        logger.debug("_ws_broadcast hata: %s", _e)
 
 
 def _fill_intraday_gaps(df, ticker):
@@ -2695,6 +2739,8 @@ def _load_cache_from_disk():
                 _cache["loading"] = False  # G25: disk-reload sonrası loading flag sıfırla
             _disk_cache_mtime = current_mtime  # H3: state update sadece load sonrası
             logger.info("Disk cache yüklendi: %d hisse (updated_at=%s)", len(data), disk_ts)
+            # F9: notify WS clients connected to this non-leader worker
+            _ws_broadcast()
     except Exception as e:
         logger.warning("Disk cache okuma hatası: %s", e)
 
@@ -2890,6 +2936,9 @@ def refresh_data():
                 _anomaly_cache.update(_new_ac)
         except Exception as _e:
             logger.warning("UI_ANOMALY_CACHE exception: %s", _e)
+
+    # F9: notify WS clients connected to this worker
+    _ws_broadcast()
 
 
 def fetch_live_prices():
@@ -3973,6 +4022,57 @@ def api_stream():
             "Connection":        "keep-alive",
         },
     )
+
+
+# ── F9 WebSocket: /ws/prices ─────────────────────────────────────────────────
+@app.route("/ws/prices")
+def ws_prices():
+    if not _WS_AVAILABLE:
+        abort(501)
+    ws = request.environ.get("wsgi.websocket")
+    if not ws:
+        return "WebSocket upgrade required", 400
+
+    is_prem = request.cookies.get("bp_premium_trial") == "1"
+    email   = request.cookies.get("bp_sub", "").strip() or None
+    max_conns = 3 if is_prem else 1
+
+    with _ws_lock:
+        if email:
+            user_count = sum(1 for m in _ws_clients.values() if m.get("email") == email)
+            if user_count >= max_conns:
+                try:
+                    ws.close()
+                except Exception:
+                    pass
+                return ""
+        _ws_clients[ws] = {"email": email, "is_premium": is_prem, "subscribe": set()}
+
+    logger.debug("WS bağlandı: email=%s premium=%s toplam=%d", email, is_prem, len(_ws_clients))
+
+    try:
+        # Send current data immediately on connect
+        _ws_broadcast()
+        while True:
+            msg = ws.receive()
+            if msg is None:
+                break
+            try:
+                data = json.loads(msg)
+                if "subscribe" in data:
+                    with _ws_lock:
+                        if ws in _ws_clients:
+                            _ws_clients[ws]["subscribe"] = set(data["subscribe"])
+            except Exception:
+                pass
+    except WebSocketError:
+        pass
+    finally:
+        with _ws_lock:
+            _ws_clients.pop(ws, None)
+        logger.debug("WS ayrıldı: email=%s toplam=%d", email, len(_ws_clients))
+
+    return ""
 
 
 def _safe_float(val):

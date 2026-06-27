@@ -539,6 +539,10 @@
   .header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
   #liveTs { font-size: 11px; font-weight: 600; color: var(--bp-al); letter-spacing: 0.3px; font-variant-numeric: tabular-nums; }
   #updated { font-size: 11px; color: var(--bp-text3); }
+  #ws-status { font-size: 10px; font-weight: 600; letter-spacing: 0.3px; padding: 2px 6px; border-radius: 10px; display: none; }
+  #ws-status.ws-live { display: inline-block; color: var(--bp-al); }
+  #ws-status.ws-connecting { display: inline-block; color: var(--bp-text3); }
+  #ws-status.ws-error { display: inline-block; color: #f85149; }
 
   .btn-refresh {
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
@@ -2139,6 +2143,7 @@
 </nav>
 
   <!-- Right actions injected by bp-search.js (header-right uniform) -->
+  <span id="ws-status" class="ws-connecting" title="WebSocket bağlantı durumu">⬤ WS</span>
   <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </button>
@@ -3338,6 +3343,71 @@ function applyLivePrices(prices, ts) {
 }
 
 startSSE();
+
+/* ── F9 WebSocket Real-time ──────────────────────── */
+(function() {
+  let _wsInst = null;
+  let _wsRetry = 1000;
+  let _wsConnected = false;
+  const _wsStatus = document.getElementById('ws-status');
+
+  function setWsStatus(state) {
+    if (!_wsStatus) return;
+    _wsStatus.className = 'ws-' + state;
+    if (state === 'live')        _wsStatus.textContent = '⬤ WS';
+    else if (state === 'connecting') _wsStatus.textContent = '◌ WS';
+    else                         _wsStatus.textContent = '⬤ WS';
+  }
+
+  function startWS() {
+    if (_wsInst) return;
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const url   = proto + '://' + location.host + '/ws/prices';
+    try {
+      _wsInst = new WebSocket(url);
+    } catch(e) { scheduleReconnect(); return; }
+
+    setWsStatus('connecting');
+
+    _wsInst.onopen = () => {
+      _wsRetry = 1000;
+      _wsConnected = true;
+      setWsStatus('live');
+      /* subscribe to all tickers by default */
+      _wsInst.send(JSON.stringify({subscribe: ['*']}));
+    };
+
+    _wsInst.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'signal_update') {
+          /* clear 60s polling timer and fetch immediately */
+          clearTimeout(polling);
+          fetchData();
+        }
+      } catch(_) {}
+    };
+
+    _wsInst.onerror = () => {};
+
+    _wsInst.onclose = () => {
+      _wsInst = null;
+      _wsConnected = false;
+      if (_wsStatus) _wsStatus.className = '';
+      scheduleReconnect();
+    };
+  }
+
+  function scheduleReconnect() {
+    setTimeout(() => { startWS(); }, _wsRetry);
+    _wsRetry = Math.min(_wsRetry * 2, 30000);
+  }
+
+  window.addEventListener('pagehide', () => { if (_wsInst) { _wsInst.close(); _wsInst = null; } });
+  window.addEventListener('pageshow', (e) => { if (e.persisted && !_wsInst) { _wsRetry = 1000; startWS(); } });
+
+  startWS();
+})();
 
 /* ── Stocks table ────────────────────────────────── */
 let allStocks    = [];

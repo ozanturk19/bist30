@@ -4,6 +4,7 @@ pandas>=2.0.0
 numpy>=1.24.0
 gunicorn>=21.0
 gevent>=23.0
+gevent-websocket>=0.10.1
 markdown>=3.4.0
 holidays
 jsonschema>=4.0.0
