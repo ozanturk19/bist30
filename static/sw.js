@@ -1,12 +1,13 @@
-/* BorsaPusula Service Worker v3.0 — HTML asla cache'lenmez (KALICI FIX) */
-const CACHE = 'borsapusula-v20';
+/* BorsaPusula Service Worker v3.1 — offline fallback + PWA optimize */
+const CACHE = 'borsapusula-v21';
 
-/* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz */
+/* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç) */
 const STATIC = [
   '/static/lightweight-charts.min.js',
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',
+  '/offline',
   'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap',
 ];
 
@@ -70,7 +71,17 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  /* HTML ve diğer her şey: SW dokunmaz, tarayıcı her zaman taze HTML çeker */
+  /* HTML navigation: network-first, /offline fallback when offline */
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).catch(() =>
+        caches.match('/offline').then(r => r || new Response('Offline', { status: 503 }))
+      )
+    );
+    return;
+  }
+
+  /* Diğer her şey: SW dokunmaz */
 });
 
 /* Push notification handler */

@@ -7787,6 +7787,11 @@ def metodoloji():
     return render_template("metodoloji.html")
 
 
+@app.route("/offline")
+def offline_page():
+    return render_template("offline.html")
+
+
 @app.route("/hakkinda")
 def hakkinda():
     return render_template("hakkinda.html")
