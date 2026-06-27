@@ -51,7 +51,7 @@ NGINX_5XX=$(awk -v d="$(date -u '+%d/%b/%Y')" '$0 ~ d && $9 ~ /^(502|504)$/' /va
 log "Nginx 5xx 24h: $NGINX_5XX (beklenen 0)"
 
 # 7. Subprocess pool worker count
-WORKERS=$(ps aux | grep -E 'yf_(fetch|chart|live|macro|fundamentals)' | grep -v grep | wc -l)
+WORKERS=$(ps aux | grep -E 'yf_(fetch|chart|live|macro|fundamentals)' | grep -v grep | wc -l || echo 0)
 log "Subprocess workers: $WORKERS"
 
 SERVICE_STATUS=$(systemctl is-active bist30 2>/dev/null || echo "inactive")
