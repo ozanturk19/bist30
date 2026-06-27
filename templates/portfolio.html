@@ -144,6 +144,18 @@
   footer a { color:#8b949e; text-decoration:none; }
   @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
 
+  /* F6: Sparkline + Sinyal Asistanı + XU030 */
+  .td-spark { width:90px; padding:6px 10px; vertical-align:middle; }
+  .btn-entry {
+    display:inline-block; padding:2px 7px; border-radius:4px; margin-left:5px;
+    font-size:10px; font-weight:700; cursor:pointer; vertical-align:middle;
+    background:rgba(63,185,80,.1); border:1px solid rgba(63,185,80,.3); color:#3fb950;
+    white-space:nowrap; transition:all .15s;
+  }
+  .btn-entry:hover { background:rgba(63,185,80,.2); border-color:#3fb950; }
+  .xu030-compare { font-size:10px; color:#8b949e; margin-top:4px; display:block; }
+  .xu030-above { color:#3fb950; } .xu030-below { color:#f85149; }
+
   /* ── Makro Ticker Bandı ── */
   .macro-bar { background:#0e0e12; border-bottom:1px solid #2a2a2c; height:34px; overflow:hidden; position:relative; white-space:nowrap; }
   .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2; }
@@ -261,6 +273,11 @@
     <div class="sum-card"><div class="sum-num" id="sumPnl">0 ₺</div><div class="sum-lbl">Kâr / Zarar</div></div>
     <div class="sum-card"><div class="sum-num sum-green" id="sumAlCount">0</div><div class="sum-lbl">Güçlü Trend</div></div>
     <div class="sum-card"><div class="sum-num sum-red"  id="sumSatCount">0</div><div class="sum-lbl">Zayıf Trend</div></div>
+    <div class="sum-card" id="sumXu030Card" style="display:none">
+      <div class="sum-num" id="sumXu030Pf">—</div>
+      <div class="sum-lbl">Portföy Getiri</div>
+      <span class="xu030-compare" id="sumXu030Cmp"></span>
+    </div>
   </div>
 
   <!-- Export / Import araçları -->
@@ -364,6 +381,7 @@
           <th>K/Z</th>
           <th>K/Z %</th>
           <th>Sinyal</th>
+          <th class="hm">Trend (30g)</th>
           <th></th>
         </tr>
       </thead>
@@ -382,7 +400,9 @@
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
 let portfolio = JSON.parse(localStorage.getItem(PF_KEY) || '[]');
-let liveData   = {};  // ticker → {price, signal}
+let liveData   = {};  // ticker → {price, signal, signal_price}
+let chartData  = {};  // ticker → [close prices last 30d]
+let xu030Ohlc  = [];  // [{time:"YYYY-MM-DD", close:...}, ...]
 
 /* localStorage uyarı banner */
 function showLsWarning() {
@@ -406,6 +426,60 @@ function fmtM(v) {
 }
 
 function save() { localStorage.setItem(PF_KEY, JSON.stringify(portfolio)); }
+
+/* ── F6: Chart data + Sparkline + XU030 ──────────── */
+async function fetchCharts() {
+  // XU030 OHLC — mevcut /api/chart cache'i reuse
+  try {
+    const r = await fetch('/api/chart');
+    const j = await r.json();
+    if (j.chart && j.chart.ohlc) xu030Ohlc = j.chart.ohlc;
+  } catch(e) {}
+  // Sparkline: portföydeki her benzersiz hisse için son 30g close
+  const tickers = [...new Set(portfolio.map(p => p.ticker))];
+  await Promise.all(tickers.map(async t => {
+    try {
+      const r = await fetch('/api/hisse/' + t + '/chart');
+      const j = await r.json();
+      if (j.chart && j.chart.ohlc && j.chart.ohlc.length) {
+        chartData[t] = j.chart.ohlc.slice(-30).map(d => d.close);
+      }
+    } catch(e) {}
+  }));
+  render();
+}
+
+function svgSparkline(prices) {
+  if (!prices || prices.length < 2) return '<span style="color:#484f58;font-size:11px">—</span>';
+  const W = 80, H = 26;
+  const min = Math.min(...prices), max = Math.max(...prices);
+  const rng = max - min || 1;
+  const pts = prices.map((p, i) => {
+    const x = (i / (prices.length - 1)) * W;
+    const y = H - ((p - min) / rng) * (H - 2) - 1;
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  const up = prices[prices.length - 1] >= prices[0];
+  const col = up ? '#3fb950' : '#f85149';
+  return '<svg width="' + W + '" height="' + H + '" style="display:block;overflow:visible">' +
+    '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '</svg>';
+}
+
+function calcXu030ReturnSince(dateStr) {
+  if (!xu030Ohlc.length || !dateStr) return null;
+  const entry = xu030Ohlc.find(d => d.time >= dateStr) || xu030Ohlc[0];
+  const last  = xu030Ohlc[xu030Ohlc.length - 1];
+  if (!entry || !last || !entry.close || !last.close) return null;
+  return (last.close - entry.close) / entry.close * 100;
+}
+
+function fillEntry(ticker, price) {
+  document.getElementById('addTicker').value = ticker;
+  document.getElementById('addPrice').value  = price;
+  document.getElementById('addLot').focus();
+  document.getElementById('addTicker').dispatchEvent(new Event('input'));
+}
 
 /* ── Export / Import ──────────────────────────────── */
 function showToast(msg, type='ok', ms=3000) {
@@ -542,7 +616,7 @@ async function fetchLive() {
     const r = await fetch('/api/data');
     const j = await r.json();
     if (j.stocks) {
-      j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal }; });
+      j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal, signal_price: s.signal_price }; });
     }
   } catch(e) {}
   render();
@@ -576,9 +650,13 @@ function render() {
     const pnlPctHtml = pnlPct !== null
       ? `<span class="${pnlPct>=0?'pos-pnl':'neg-pnl'}">${pnlPct>=0?'+':''}${fmt(pnlPct,1)}%</span>`
       : '<span class="neu-pnl">—</span>';
+    const entryBtn = (sig === 'AL' && live && live.signal_price)
+      ? `<button class="btn-entry" onclick="fillEntry('${p.ticker}',${live.signal_price})" title="Sinyal giriş fiyatı: ${fmt(live.signal_price)} ₺">Giriş ${fmt(live.signal_price)}₺</button>`
+      : '';
     const sigBadge = sig !== '—'
-      ? `<span class="signal-badge signal-${sig}">${sig==='AL'?'▲':sig==='SAT'?'▼':'●'} ${sigLabel(sig)}</span>`
+      ? `<span class="signal-badge signal-${sig}">${sig==='AL'?'▲':sig==='SAT'?'▼':'●'} ${sigLabel(sig)}</span>${entryBtn}`
       : '<span class="neu-pnl">—</span>';
+    const sparkHtml = svgSparkline(chartData[p.ticker]);
     return `<tr>
       <td><a href="/hisse/${p.ticker}" class="ticker-link">${p.ticker}</a></td>
       <td class="hm" style="color:#8b949e">${p.date}</td>
@@ -590,11 +668,15 @@ function render() {
       <td>${pnlHtml}</td>
       <td>${pnlPctHtml}</td>
       <td>${sigBadge}</td>
+      <td class="hm td-spark">${sparkHtml}</td>
       <td><button class="btn-del" onclick="removePosition(${p.id})" title="Kaldır">✕</button></td>
     </tr>`;
   }).join('');
   tbody.innerHTML = rows;
-  renderSummary({ totalCost, totalVal, pnl: totalVal - totalCost, count: portfolio.length, alCount, satCount });
+  // XU030 kıyaslama: portföydeki en erken tarih baz alınır
+  const earliestDate = portfolio.reduce((mn, p) => (!mn || p.date < mn) ? p.date : mn, '');
+  const xu030Ret = calcXu030ReturnSince(earliestDate);
+  renderSummary({ totalCost, totalVal, pnl: totalVal - totalCost, count: portfolio.length, alCount, satCount, xu030Ret });
 }
 
 function renderSummary(s) {
@@ -605,6 +687,7 @@ function renderSummary(s) {
     document.getElementById('sumPnl').textContent   = '0 ₺';
     document.getElementById('sumAlCount').textContent = '0';
     document.getElementById('sumSatCount').textContent= '0';
+    document.getElementById('sumXu030Card').style.display = 'none';
     return;
   }
   document.getElementById('sumCount').textContent = s.count;
@@ -615,6 +698,21 @@ function renderSummary(s) {
   pnlEl.className   = 'sum-num ' + (s.pnl >= 0 ? 'sum-green' : 'sum-red');
   document.getElementById('sumAlCount').textContent  = s.alCount;
   document.getElementById('sumSatCount').textContent = s.satCount;
+  // XU030 kıyaslama kartı
+  if (s.totalVal && s.totalCost && s.xu030Ret !== null && s.xu030Ret !== undefined) {
+    const pfRet = (s.pnl / s.totalCost) * 100;
+    const diff  = pfRet - s.xu030Ret;
+    const pfEl  = document.getElementById('sumXu030Pf');
+    pfEl.textContent = (pfRet >= 0 ? '+' : '') + fmt(pfRet, 1) + '%';
+    pfEl.className   = 'sum-num ' + (pfRet >= 0 ? 'sum-green' : 'sum-red');
+    const cmpEl = document.getElementById('sumXu030Cmp');
+    const diffSign = diff >= 0 ? '+' : '';
+    cmpEl.textContent = 'vs XU030: ' + diffSign + fmt(diff, 1) + '%';
+    cmpEl.className   = 'xu030-compare ' + (diff >= 0 ? 'xu030-above' : 'xu030-below');
+    document.getElementById('sumXu030Card').style.display = '';
+  } else {
+    document.getElementById('sumXu030Card').style.display = 'none';
+  }
 }
 
 // Enter key on inputs
@@ -627,7 +725,9 @@ document.getElementById('addTicker').addEventListener('input', e => {
 
 render();
 fetchLive();
+fetchCharts();
 setInterval(fetchLive, 60000);
+setInterval(fetchCharts, 300000); // sparkline + XU030 5dk'da bir yenile
 
 /* ── Cloud Sync ───────────────────────────────── */
 const CLOUD_TOKEN_KEY = 'bp_cloud_token';
