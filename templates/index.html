@@ -1757,6 +1757,26 @@
   .alarm-btn { background:none; border:none; cursor:pointer; font-size:14px; padding:2px 4px; opacity:.4; transition:opacity .15s; }
   .alarm-btn:hover { opacity:1; }
   .alarm-btn.watching { opacity:1; }
+  .alert-settings-btn { background:none; border:none; cursor:pointer; font-size:12px; padding:2px 3px; opacity:.35; transition:opacity .15s; vertical-align:middle; }
+  .alert-settings-btn:hover { opacity:1; }
+
+  /* ── F4 Alert Settings Modal ─── */
+  .alert-modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:10001; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .18s; }
+  .alert-modal-backdrop.visible { opacity:1; pointer-events:auto; }
+  .alert-modal { background:var(--bp-surface,#161b22); border:1px solid var(--bp-border,#30363d); border-radius:14px; padding:24px 22px 18px; width:340px; max-width:96vw; position:relative; }
+  .alert-modal-title { font-size:16px; font-weight:700; margin-bottom:14px; color:var(--bp-text,#e6edf3); }
+  .alert-modal-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .alert-modal-row label { flex:1; font-size:13px; color:#8b949e; }
+  .alert-modal-row input[type=number] { width:72px; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#e6edf3; padding:5px 8px; font-size:13px; }
+  .alert-modal-row input[type=number]:focus { outline:none; border-color:#ffc850; }
+  .alert-modal-row input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
+  .alert-modal-save { width:100%; margin-top:14px; padding:9px 0; background:#ffc850; color:#0e0e12; border:none; border-radius:7px; font-weight:700; font-size:14px; cursor:pointer; }
+  .alert-modal-save:hover { background:#ffd875; }
+  .alert-modal-delete { width:100%; margin-top:6px; padding:7px 0; background:none; color:#ef4444; border:1px solid rgba(239,68,68,.4); border-radius:7px; font-size:13px; cursor:pointer; }
+  .alert-modal-delete:hover { background:rgba(239,68,68,.08); }
+  .alert-modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#8b949e; font-size:18px; cursor:pointer; }
+  .alert-modal-login-notice { font-size:12.5px; color:#ffc850; background:rgba(255,200,80,.08); border:1px solid rgba(255,200,80,.25); border-radius:7px; padding:9px 12px; margin-bottom:12px; }
+  .alert-modal-status { font-size:12px; color:#22c55e; margin-top:8px; text-align:center; min-height:18px; }
   .alarm-panel {
     position:fixed; bottom:24px; right:24px; z-index:999;
     background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:12px;
@@ -3900,6 +3920,140 @@ function closePremiumModal() {
   setTimeout(() => { modal.style.display = 'none'; }, 200);
 }
 
+/* ── F4 Watchlist Alert Modal ──────────────────────────────────────────────── */
+
+let _alertModalTicker = null;
+let _userAlerts = {};   // cache: {ticker: {price_pct, signal_change, rsi_threshold, rvol_threshold}}
+
+function _isLoggedIn() {
+  return !!document.cookie.match(/(?:^|;\s*)bp_sub=/);
+}
+
+async function _loadUserAlerts() {
+  if (!_isLoggedIn()) return {};
+  try {
+    const r = await fetch('/api/user-alerts', {credentials: 'same-origin'});
+    if (!r.ok) return {};
+    const d = await r.json();
+    _userAlerts = d.alerts || {};
+  } catch (_) {}
+  return _userAlerts;
+}
+
+async function openAlertModal(ticker) {
+  _alertModalTicker = ticker;
+  let modal = document.getElementById('alertSettingsModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'alertSettingsModal';
+    modal.className = 'alert-modal-backdrop';
+    modal.addEventListener('click', e => { if (e.target === modal) closeAlertModal(); });
+    document.body.appendChild(modal);
+  }
+  const isLoggedIn = _isLoggedIn();
+  const loginNotice = isLoggedIn ? '' : `<div class="alert-modal-login-notice">⚠️ Alert ayarları için BorsaPusula hesabınıza giriş yapmanız gerekiyor.<br><a href="#" onclick="closePremiumModal();openPremiumModal();return false" style="color:#ffc850">Ücretsiz giriş yap →</a></div>`;
+  const cfg = _userAlerts[ticker] || {};
+  modal.innerHTML = `<div class="alert-modal" role="dialog" aria-modal="true">
+    <button class="alert-modal-close" onclick="closeAlertModal()">×</button>
+    <div class="alert-modal-title">🔔 ${ticker} — Alert Ayarları</div>
+    ${loginNotice}
+    <div class="alert-modal-row">
+      <label>📈 Fiyat hareketi eşiği (%)</label>
+      <input type="number" id="am-price-pct" min="0.1" max="20" step="0.5" placeholder="—" value="${cfg.price_pct != null ? cfg.price_pct : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+    </div>
+    <div class="alert-modal-row">
+      <label>🔄 Sinyal değişimi (AL/SAT/BEKLE)</label>
+      <input type="checkbox" id="am-signal-change" ${cfg.signal_change ? 'checked' : ''} ${!isLoggedIn ? 'disabled' : ''}>
+    </div>
+    <div class="alert-modal-row">
+      <label>📉 RSI aşırı satış eşiği (≤)</label>
+      <input type="number" id="am-rsi" min="10" max="50" step="1" placeholder="—" value="${cfg.rsi_threshold != null ? cfg.rsi_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+    </div>
+    <div class="alert-modal-row">
+      <label>📊 RVOL yüksek hacim eşiği (≥x)</label>
+      <input type="number" id="am-rvol" min="1" max="10" step="0.5" placeholder="—" value="${cfg.rvol_threshold != null ? cfg.rvol_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+    </div>
+    ${isLoggedIn ? `<button class="alert-modal-save" onclick="saveAlertSettings()">💾 Kaydet</button>
+    ${_userAlerts[ticker] ? `<button class="alert-modal-delete" onclick="deleteAlertSettings()">🗑 Bu alerti sil</button>` : ''}` : ''}
+    <div id="am-status" class="alert-modal-status"></div>
+  </div>`;
+  modal.style.display = 'flex';
+  setTimeout(() => modal.classList.add('visible'), 10);
+
+  // localStorage migration prompt
+  if (isLoggedIn && !_userAlerts[ticker]) {
+    const pa = priceAlarms[ticker];
+    if (pa && (pa.above || pa.below)) {
+      const st = document.getElementById('am-status');
+      if (st) st.innerHTML = `<span style="color:#ffc850">📦 Eski fiyat alarmı bulundu (${pa.above ? '↑'+pa.above : ''}${pa.below ? ' ↓'+pa.below : ''}). <a href="#" onclick="syncLocalAlarm('${ticker}');return false">Hesabına senkronla →</a></span>`;
+    }
+  }
+}
+
+function closeAlertModal() {
+  const modal = document.getElementById('alertSettingsModal');
+  if (!modal) return;
+  modal.classList.remove('visible');
+  setTimeout(() => { modal.style.display = 'none'; }, 200);
+}
+
+async function saveAlertSettings() {
+  const ticker = _alertModalTicker;
+  if (!ticker) return;
+  const pricePct  = document.getElementById('am-price-pct')?.value.trim();
+  const sigChange = document.getElementById('am-signal-change')?.checked;
+  const rsi       = document.getElementById('am-rsi')?.value.trim();
+  const rvol      = document.getElementById('am-rvol')?.value.trim();
+  const payload = {
+    price_pct:      pricePct     ? parseFloat(pricePct)  : null,
+    signal_change:  !!sigChange,
+    rsi_threshold:  rsi          ? parseFloat(rsi)        : null,
+    rvol_threshold: rvol         ? parseFloat(rvol)       : null,
+  };
+  const st = document.getElementById('am-status');
+  try {
+    const r = await fetch(`/api/user-alerts/${ticker}`, {
+      method: 'POST', credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+    });
+    const d = await r.json();
+    if (d.ok) {
+      _userAlerts[ticker] = payload;
+      if (st) st.textContent = '✅ Alert kaydedildi';
+      setTimeout(() => closeAlertModal(), 1000);
+    } else {
+      if (st) st.textContent = '❌ ' + (d.error || 'Hata');
+    }
+  } catch (_) {
+    if (st) st.textContent = '❌ Bağlantı hatası';
+  }
+}
+
+async function deleteAlertSettings() {
+  const ticker = _alertModalTicker;
+  if (!ticker) return;
+  const st = document.getElementById('am-status');
+  try {
+    await fetch(`/api/user-alerts/${ticker}`, {method: 'DELETE', credentials: 'same-origin'});
+    delete _userAlerts[ticker];
+    if (st) st.textContent = '🗑 Alert silindi';
+    setTimeout(() => closeAlertModal(), 800);
+  } catch (_) {
+    if (st) st.textContent = '❌ Bağlantı hatası';
+  }
+}
+
+async function syncLocalAlarm(ticker) {
+  const pa = priceAlarms[ticker];
+  if (!pa) return;
+  if (pa.above) document.getElementById('am-price-pct').value = '3';
+  await saveAlertSettings();
+}
+
+// Load user alerts on page load if logged in
+if (_isLoggedIn()) _loadUserAlerts();
+
 async function submitPremium() {
   const emailEl = document.getElementById('pmEmail');
   const nameEl  = document.getElementById('pmName');
@@ -4272,7 +4426,7 @@ function renderTable() {
       <td class="hide-mobile"><div class="indicators">${indHtml}</div></td>
       <td><button class="alarm-btn ${isWatching ? 'watching' : ''}" id="ab-${s.ticker}"
           onclick="event.stopPropagation();toggleWatch('${s.ticker}')"
-          title="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}">${isWatching ? '🔔' : '🔕'}</button></td>
+          title="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}">${isWatching ? '🔔' : '🔕'}</button>${isWatching ? `<button class="alert-settings-btn" onclick="event.stopPropagation();openAlertModal('${s.ticker}')" title="Alert ayarları">⚙️</button>` : ''}</td>
     </tr>`;
   }).join('');
 }

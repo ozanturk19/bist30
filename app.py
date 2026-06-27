@@ -2791,6 +2791,12 @@ def refresh_data():
     _save_cache_to_disk(results)
     _save_daily_snapshot(results)   # T2-6: Günlük snapshot (seans sonrası)
 
+    # F4: Watchlist alert check — abone koşullarını kontrol et
+    try:
+        _check_user_alerts(results)
+    except Exception as _e:
+        logger.error("_check_user_alerts exception: %s", _e)
+
     # ── Faz 12 P1 DQV: Business Rules Validation ─────────────────────────────
     if _DQV_AVAILABLE:
         try:
@@ -8600,6 +8606,221 @@ def api_me():
                     "mail_pref":     info.get("mail_pref", "daily"),
                 })
     return safe_json({"ok": False, "subscribed": False})
+
+
+# ── F4 Watchlist Alert API ────────────────────────────────────────────────────
+
+def _get_sub_by_cookie():
+    """bp_sub cookie → (email, record) veya (None, None)."""
+    token = request.cookies.get("bp_sub", "").strip()
+    if not token:
+        return None, None
+    with _sub_lock:
+        subs = _load_subscribers()
+    for em, info in subs.items():
+        if info.get("token") == token and info.get("active"):
+            return em, info
+    return None, None
+
+
+@app.route("/api/user-alerts", methods=["GET"])
+def api_user_alerts_get():
+    """Kullanıcının tüm alert ayarlarını döner."""
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    with _sub_lock:
+        subs = _load_subscribers()
+    rec = subs.get(email, {})
+    return safe_json({"ok": True, "alerts": rec.get("alerts", {})})
+
+
+@app.route("/api/user-alerts/<ticker>", methods=["POST"])
+@limiter.limit("60 per hour")
+def api_user_alerts_set(ticker):
+    """Bir ticker için alert ayarlarını kaydet (upsert)."""
+    ticker = ticker.upper()
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    data = request.get_json(silent=True) or {}
+    price_pct       = data.get("price_pct")
+    signal_change   = bool(data.get("signal_change", False))
+    rsi_threshold   = data.get("rsi_threshold")
+    rvol_threshold  = data.get("rvol_threshold")
+    if price_pct is not None:
+        try:
+            price_pct = float(price_pct)
+            if not (0.1 <= price_pct <= 20):
+                return safe_json({"ok": False, "error": "price_pct 0.1-20 aralığında olmalı"}), 400
+        except (TypeError, ValueError):
+            return safe_json({"ok": False, "error": "price_pct geçersiz"}), 400
+    if rsi_threshold is not None:
+        try:
+            rsi_threshold = float(rsi_threshold)
+            if not (10 <= rsi_threshold <= 50):
+                return safe_json({"ok": False, "error": "rsi_threshold 10-50 aralığında olmalı"}), 400
+        except (TypeError, ValueError):
+            return safe_json({"ok": False, "error": "rsi_threshold geçersiz"}), 400
+    if rvol_threshold is not None:
+        try:
+            rvol_threshold = float(rvol_threshold)
+            if not (1.0 <= rvol_threshold <= 10):
+                return safe_json({"ok": False, "error": "rvol_threshold 1.0-10 aralığında olmalı"}), 400
+        except (TypeError, ValueError):
+            return safe_json({"ok": False, "error": "rvol_threshold geçersiz"}), 400
+    with _sub_lock:
+        subs = _load_subscribers()
+        if email not in subs:
+            return safe_json({"ok": False, "error": "Abone bulunamadı"}), 404
+        if "alerts" not in subs[email]:
+            subs[email]["alerts"] = {}
+        subs[email]["alerts"][ticker] = {
+            "price_pct":      price_pct,
+            "signal_change":  signal_change,
+            "rsi_threshold":  rsi_threshold,
+            "rvol_threshold": rvol_threshold,
+        }
+        _save_subscribers(subs)
+    logger.info("F4 alert set: %s → %s", email, ticker)
+    return safe_json({"ok": True})
+
+
+@app.route("/api/user-alerts/<ticker>", methods=["DELETE"])
+@limiter.limit("60 per hour")
+def api_user_alerts_delete(ticker):
+    """Bir ticker için alert ayarını sil."""
+    ticker = ticker.upper()
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    with _sub_lock:
+        subs = _load_subscribers()
+        if email in subs and "alerts" in subs[email] and ticker in subs[email]["alerts"]:
+            del subs[email]["alerts"][ticker]
+            _save_subscribers(subs)
+    return safe_json({"ok": True})
+
+
+def _check_user_alerts(stocks):
+    """refresh_data() sonrası — her abonenin alert koşullarını kontrol et, mail gönder.
+    Spam koruması: aynı ticker için en fazla 1 mail / 4 saat."""
+    ALERT_COOLDOWN = 4 * 3600
+    now_ts = time.time()
+    stock_map = {s["ticker"]: s for s in stocks if s.get("ticker")}
+    if not stock_map:
+        return
+    try:
+        with _sub_lock:
+            subs = _load_subscribers()
+        subs_copy = dict(subs)
+    except Exception as e:
+        logger.error("_check_user_alerts load error: %s", e)
+        return
+
+    for email, rec in subs_copy.items():
+        if not rec.get("active"):
+            continue
+        alerts = rec.get("alerts") or {}
+        if not alerts:
+            continue
+        last_sent_map = rec.get("alerts_last_sent") or {}
+        triggered = []
+        for ticker, cfg in alerts.items():
+            s = stock_map.get(ticker)
+            if not s:
+                continue
+            last_sent = last_sent_map.get(ticker, 0)
+            if now_ts - last_sent < ALERT_COOLDOWN:
+                continue
+            reasons = []
+            price_pct = cfg.get("price_pct")
+            if price_pct is not None:
+                chg = s.get("change_pct", 0) or 0
+                if abs(chg) >= price_pct:
+                    reasons.append(f"Fiyat hareketi: {chg:+.2f}% (eşik ±{price_pct}%)")
+            rsi_thr = cfg.get("rsi_threshold")
+            if rsi_thr is not None:
+                rsi = s.get("rsi")
+                if rsi is not None and rsi <= rsi_thr:
+                    reasons.append(f"RSI aşırı satış: {rsi:.0f} (eşik ≤{rsi_thr:.0f})")
+            rvol_thr = cfg.get("rvol_threshold")
+            if rvol_thr is not None:
+                rvol = s.get("rvol")
+                if rvol is not None and rvol >= rvol_thr:
+                    reasons.append(f"RVOL yüksek hacim: {rvol:.2f}x (eşik ≥{rvol_thr:.1f}x)")
+            if cfg.get("signal_change"):
+                prev_sig = rec.get("_alert_prev_signals", {}).get(ticker)
+                cur_sig  = s.get("signal")
+                if prev_sig and cur_sig and prev_sig != cur_sig:
+                    reasons.append(f"Sinyal değişimi: {prev_sig} → {cur_sig}")
+            if reasons:
+                triggered.append((ticker, s, reasons))
+        if not triggered:
+            continue
+        try:
+            name = rec.get("name", "").split()[0] if rec.get("name") else "Yatırımcı"
+            rows = ""
+            for tkr, s, reasons in triggered:
+                sig = s.get("signal", "")
+                sig_color = "#22c55e" if sig == "AL" else "#ef4444" if sig == "SAT" else "#888"
+                rows += f"""<tr>
+  <td style="padding:10px 14px;border-bottom:1px solid #222;font-weight:700">{tkr}</td>
+  <td style="padding:10px 14px;border-bottom:1px solid #222;color:{sig_color}">{sig}</td>
+  <td style="padding:10px 14px;border-bottom:1px solid #222">{s.get('price', '—')}</td>
+  <td style="padding:10px 14px;border-bottom:1px solid #222">{'; '.join(reasons)}</td>
+</tr>"""
+            html = f"""<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="background:#0e0e12;color:#e6edf3;font-family:sans-serif;padding:20px">
+<h2 style="color:#ffc850">🔔 BorsaPusula — Watchlist Alarmı</h2>
+<p>Merhaba {name}, takip listendeki hisselerde alarm koşulları tetiklendi:</p>
+<table style="width:100%;border-collapse:collapse;background:#161b22;border-radius:8px">
+<tr style="background:#1f2937;color:#8b949e;font-size:12px">
+  <th style="padding:8px 14px;text-align:left">Hisse</th>
+  <th style="padding:8px 14px;text-align:left">Sinyal</th>
+  <th style="padding:8px 14px;text-align:left">Fiyat</th>
+  <th style="padding:8px 14px;text-align:left">Neden</th>
+</tr>{rows}
+</table>
+<p style="margin-top:16px;font-size:12px;color:#8b949e">
+  <a href="https://borsapusula.com" style="color:#ffc850">BorsaPusula.com</a> — Bu alarmı devre dışı bırakmak için profil ayarlarından alert'i silebilirsiniz.
+</p></body></html>"""
+            send_email(email, f"🔔 BorsaPusula — {len(triggered)} Watchlist Alarmı", html)
+            with _sub_lock:
+                subs2 = _load_subscribers()
+                if email in subs2:
+                    if "alerts_last_sent" not in subs2[email]:
+                        subs2[email]["alerts_last_sent"] = {}
+                    if "_alert_prev_signals" not in subs2[email]:
+                        subs2[email]["_alert_prev_signals"] = {}
+                    for tkr, s, _ in triggered:
+                        subs2[email]["alerts_last_sent"][tkr] = now_ts
+                        subs2[email]["_alert_prev_signals"][tkr] = s.get("signal")
+                    _save_subscribers(subs2)
+            logger.info("F4 alert email sent: %s → %d tickers", email, len(triggered))
+        except Exception as e:
+            logger.error("_check_user_alerts send error (%s): %s", email, e)
+
+    # Signal tracking for all alert users even if not triggered
+    try:
+        with _sub_lock:
+            subs3 = _load_subscribers()
+            changed = False
+            for email, rec in subs3.items():
+                if not rec.get("active") or not rec.get("alerts"):
+                    continue
+                if "_alert_prev_signals" not in rec:
+                    rec["_alert_prev_signals"] = {}
+                    changed = True
+                for ticker in rec.get("alerts", {}):
+                    s = stock_map.get(ticker)
+                    if s and rec["_alert_prev_signals"].get(ticker) != s.get("signal"):
+                        rec["_alert_prev_signals"][ticker] = s.get("signal")
+                        changed = True
+            if changed:
+                _save_subscribers(subs3)
+    except Exception as e:
+        logger.error("_check_user_alerts signal tracking error: %s", e)
 
 
 # In-memory rate limit + dedup for client error reports
