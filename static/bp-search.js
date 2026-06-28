@@ -72,7 +72,7 @@
     /* ── Header consistency: hide page-title/header-name from header so nav stays centered ── */
     + 'header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}'
     /* ── Unified header dimensions: 60px tall, 12px 20px padding (force across all pages) ── */
-    + 'header{padding:10px 20px !important;min-height:60px !important;max-height:60px !important;display:flex !important;align-items:center !important;gap:14px !important;box-sizing:border-box !important}'
+    + 'header{padding:10px 20px !important;min-height:60px !important;max-height:60px !important;display:flex !important;align-items:center !important;gap:14px !important;box-sizing:border-box !important;transform:translateZ(0) !important}'
     + 'header > *{max-height:48px}'
     + 'header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}'
     + 'header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}'

@@ -231,6 +231,7 @@
     top: 0;
     z-index: 100;
     gap: 12px;
+    transform: translateZ(0);
   }
 
   /* ── Makro Ticker Bandı ── */
@@ -539,10 +540,10 @@
   .header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
   #liveTs { font-size: 11px; font-weight: 600; color: var(--bp-al); letter-spacing: 0.3px; font-variant-numeric: tabular-nums; }
   #updated { font-size: 11px; color: var(--bp-text3); }
-  #ws-status { font-size: 10px; font-weight: 600; letter-spacing: 0.3px; padding: 2px 6px; border-radius: 10px; display: none; }
-  #ws-status.ws-live { display: inline-block; color: var(--bp-al); }
-  #ws-status.ws-connecting { display: inline-block; color: var(--bp-text3); }
-  #ws-status.ws-error { display: inline-block; color: #f85149; }
+  #ws-status { font-size: 10px; font-weight: 600; letter-spacing: 0.3px; padding: 2px 6px; border-radius: 10px; display: inline-block; visibility: hidden; min-width: 52px; text-align: center; }
+  #ws-status.ws-live { visibility: visible; color: var(--bp-al); }
+  #ws-status.ws-connecting { visibility: visible; color: var(--bp-text3); }
+  #ws-status.ws-error { visibility: visible; color: #f85149; }
 
   .btn-refresh {
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
