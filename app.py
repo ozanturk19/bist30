@@ -4638,8 +4638,7 @@ def _sentiment_bg_worker():
             except Exception as e:
                 logger.debug("_sentiment_bg_worker [%s]: %s", ticker, e)
 
-        if computed:
-            _save_sentiment_cache_to_disk()
+        _save_sentiment_cache_to_disk()
         time.sleep(180)  # 3dk aralık
 
 
