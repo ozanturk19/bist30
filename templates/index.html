@@ -414,8 +414,27 @@
     border-color: var(--bp-border2);
     color: var(--bp-text);
   }
+  /* F11 — header push bell */
+  #header-push-bell {
+    display: none; /* shown by JS when push is supported */
+    align-items: center; justify-content: center;
+    width: 34px; height: 34px;
+    background: transparent;
+    border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius);
+    color: var(--bp-text2); cursor: pointer;
+    transition: all .15s; flex-shrink: 0; font-size: 16px;
+  }
+  #header-push-bell:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
+  #header-push-bell.push-active {
+    background: rgba(245,158,11,0.12);
+    border-color: rgba(245,158,11,0.45);
+    color: #f59e0b;
+  }
+  #header-push-bell.push-active:hover { background: rgba(245,158,11,0.2); }
   @media (max-width: 768px) {
     .header-search-btn { min-width: 44px; min-height: 44px; }
+    #header-push-bell { min-width: 44px; min-height: 44px; }
     .btn-refresh { min-height: 44px; }
   }
 
@@ -2197,6 +2216,7 @@
   <!-- Right actions injected by bp-search.js (header-right uniform) -->
   <span id="ws-status" class="ws-connecting" title="WebSocket bağlantı durumu">⬤ WS</span>
   <button id="theme-toggle" class="theme-toggle-btn" aria-label="Tema değiştir" title="Tema değiştir"></button>
+  <button id="header-push-bell" onclick="togglePushSubscription()" aria-label="Push bildirimleri" title="Sinyal bildirimi aç/kapat">🔔</button>
   <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </button>
@@ -5532,8 +5552,10 @@ if ('serviceWorker' in navigator) {
 async function _initPushButton() {
   if (!('PushManager' in window) || !('Notification' in window)) return;
   const btn = document.getElementById('pushBtn');
-  if (!btn) return;
-  btn.style.display = '';
+  if (btn) btn.style.display = '';
+  // Show header bell
+  const bell = document.getElementById('header-push-bell');
+  if (bell) bell.style.display = 'inline-flex';
 
   // Check existing subscription
   try {
@@ -5544,15 +5566,13 @@ async function _initPushButton() {
 
 function _updatePushBtn() {
   const btn = document.getElementById('pushBtn');
-  if (!btn) return;
+  const bell = document.getElementById('header-push-bell');
   if (_pushSubscription) {
-    btn.textContent = '🔕 Push Kapat';
-    btn.style.color = '#94a3b8';
-    btn.style.borderColor = 'rgba(100,116,139,.3)';
+    if (btn) { btn.textContent = '🔕 Push Kapat'; btn.style.color = '#94a3b8'; btn.style.borderColor = 'rgba(100,116,139,.3)'; }
+    if (bell) { bell.textContent = '🔕'; bell.classList.add('push-active'); bell.title = 'Sinyal bildirimi açık — kapatmak için tıkla'; }
   } else {
-    btn.textContent = '🔔 Push Aç';
-    btn.style.color = '#93c5fd';
-    btn.style.borderColor = 'rgba(59,130,246,.3)';
+    if (btn) { btn.textContent = '🔔 Push Aç'; btn.style.color = '#93c5fd'; btn.style.borderColor = 'rgba(59,130,246,.3)'; }
+    if (bell) { bell.textContent = '🔔'; bell.classList.remove('push-active'); bell.title = 'Sinyal bildirimi aç'; }
   }
 }
 
