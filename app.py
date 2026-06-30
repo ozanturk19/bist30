@@ -8532,6 +8532,98 @@ def api_sector_heatmap():
     return safe_json({"sectors": result, "updated_at": _cache.get("updated_at")})
 
 
+# ── F12: Sektör Karşılaştırma ─────────────────────────────────────────────────
+
+def _build_sector_map(stocks):
+    """Cache stock listesinden sektör → hisse listesi haritası üretir."""
+    sec_map = {}
+    for s in stocks:
+        tk = s.get("ticker", "")
+        if tk == "XU030":
+            continue
+        sec = s.get("sector") or _get_sector(tk)
+        if sec not in sec_map:
+            sec_map[sec] = []
+        sec_map[sec].append(s)
+    return sec_map
+
+
+@app.route("/api/sektor-summary")
+def api_sektor_summary():
+    """Sektör özet kartları: score, al/sat/bekle, avg_rvol, top 3 AL hisse."""
+    with _lock:
+        stocks = list(_cache["data"])
+    sec_map = _build_sector_map(stocks)
+    result = []
+    for name, items in sec_map.items():
+        al = [s for s in items if s.get("signal") == "AL"]
+        sat = [s for s in items if s.get("signal") == "SAT"]
+        bkl = [s for s in items if s.get("signal") == "BEKLE"]
+        total = len(items)
+        score = round((len(al) - len(sat)) / total * 100) if total > 0 else 0
+        rvol_vals = [float(s["rvol"]) for s in items if s.get("rvol") is not None]
+        avg_rvol = round(sum(rvol_vals) / len(rvol_vals), 2) if rvol_vals else None
+        top_al = sorted(al, key=lambda s: float(s.get("rvol") or 0), reverse=True)[:3]
+        result.append({
+            "name": name,
+            "al": len(al), "sat": len(sat), "bekle": len(bkl), "total": total,
+            "score": score, "avg_rvol": avg_rvol,
+            "top_al": [{"ticker": s.get("ticker"), "price": s.get("price"),
+                        "change_pct": s.get("change_pct"), "rvol": s.get("rvol")}
+                       for s in top_al],
+        })
+    result.sort(key=lambda x: x["score"], reverse=True)
+    return safe_json({"sectors": result, "updated_at": _cache.get("updated_at")})
+
+
+@app.route("/api/sektor-compare")
+def api_sektor_compare():
+    """2-3 sektörü yan yana karşılaştırır. ?s=Bankacılık&s=Teknoloji"""
+    selected = request.args.getlist("s")
+    if not selected:
+        return safe_json({"error": "s parametresi gerekli"}, 400)
+    selected = [s.strip() for s in selected[:3]]  # max 3 sektör
+    with _lock:
+        stocks = list(_cache["data"])
+    sec_map = _build_sector_map(stocks)
+    result = {}
+    for sec_name in selected:
+        items = sec_map.get(sec_name, [])
+        al = [s for s in items if s.get("signal") == "AL"]
+        sat = [s for s in items if s.get("signal") == "SAT"]
+        bkl = [s for s in items if s.get("signal") == "BEKLE"]
+        total = len(items)
+        score = round((len(al) - len(sat)) / total * 100) if total > 0 else 0
+        rvol_vals = [float(s["rvol"]) for s in items if s.get("rvol") is not None]
+        avg_rvol = round(sum(rvol_vals) / len(rvol_vals), 2) if rvol_vals else None
+        avg_chg = None
+        chg_vals = [float(s["change_pct"]) for s in items if s.get("change_pct") is not None]
+        if chg_vals:
+            avg_chg = round(sum(chg_vals) / len(chg_vals), 2)
+        def _stock_row(s):
+            return {
+                "ticker": s.get("ticker"), "name": s.get("name", ""),
+                "signal": s.get("signal", "BEKLE"),
+                "price": s.get("price"), "change_pct": s.get("change_pct"),
+                "rvol": s.get("rvol"),
+            }
+        result[sec_name] = {
+            "name": sec_name,
+            "al": len(al), "sat": len(sat), "bekle": len(bkl), "total": total,
+            "score": score, "avg_rvol": avg_rvol, "avg_chg": avg_chg,
+            "stocks": sorted([_stock_row(s) for s in items],
+                             key=lambda x: (x["signal"] != "AL", x["signal"] != "SAT",
+                                            -(float(x["rvol"] or 0)))),
+        }
+    return safe_json({"compare": result, "selected": selected,
+                      "updated_at": _cache.get("updated_at")})
+
+
+@app.route("/sektor-karsilastir")
+def sektor_karsilastir():
+    return render_template("sektor_karsilastir.html")
+
+
 # ── Bilanço Takvimi ───────────────────────────────────────────────────────────
 _earnings_cache      = {"data": None, "ts": 0}
 _EARNINGS_TTL        = 3600 * 12   # 12 saat
