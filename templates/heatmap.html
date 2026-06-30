@@ -28,6 +28,28 @@
     --tier-sat: #E05550;       /* Zayıf Trend: softer kırmızı */
     --tier-bekle: #252b36;     /* Yatay: bg'den ayrışan koyu slate */
   }
+  /* ── SPEC-018 V2: Altın parıltısı — Premium tier glow pulse ─────────── */
+  @keyframes goldGlow {
+    0%, 100% { filter: drop-shadow(0 0 2px rgba(240,194,64,0.55)); }
+    50%       { filter: drop-shadow(0 0 7px rgba(240,194,64,0.95)) drop-shadow(0 0 14px rgba(240,194,64,0.35)); }
+  }
+  @keyframes goldGlowFade {
+    0%, 100% { filter: drop-shadow(0 0 1px rgba(184,154,46,0.4)); }
+    50%       { filter: drop-shadow(0 0 4px rgba(184,154,46,0.7)); }
+  }
+  .tier-premium      { animation: goldGlow 2.8s ease-in-out infinite; }
+  .tier-premium-fade { animation: goldGlowFade 3.5s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .tier-premium, .tier-premium-fade { animation: none; }
+  }
+  /* Turkey badge */
+  .turkey-first-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    color: #F0C240; background: rgba(240,194,64,0.1);
+    border: 1px solid rgba(240,194,64,0.35); border-radius: 999px;
+    padding: 2px 8px; margin-left: 8px; vertical-align: middle;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bp-bg); color: var(--bp-text);
@@ -183,7 +205,7 @@
       <button class="toggle-btn" data-mode="piyasa" id="modePiyasaBtn">Piyasa</button>
     </div>
   </div>
-  <p class="subtitle" id="heatmap-subtitle">215 hisse — sinyal tier renkleri · sektör bazlı treemap</p>
+  <p class="subtitle" id="heatmap-subtitle">215 hisse — sinyal tier renkleri · sektör bazlı treemap <span class="turkey-first-badge">🥇 Türkiye'nin İlki</span></p>
   <div class="freshness-stamp">
     <span class="freshness-dot"></span>
     <span id="freshness-text">Yükleniyor…</span>

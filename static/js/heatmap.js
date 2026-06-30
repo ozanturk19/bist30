@@ -227,7 +227,13 @@
       stocks.forEach(function(st){
         if (!st.w || !st.h || st.w < 1 || st.h < 1) return;
         var cell = document.createElementNS(SVG_NS, 'rect');
-        cell.setAttribute('class', 'stock-cell');
+        // SPEC-018 V2: tier class for gold glow animation
+        var tierCls = 'stock-cell';
+        if (currentMode !== 'piyasa' && st.signal === 'AL') {
+          var sc = st.tier_score || 0;
+          if (sc >= 70) tierCls += (st.signal_age_days && st.signal_age_days >= 7) ? ' tier-premium-fade' : ' tier-premium';
+        }
+        cell.setAttribute('class', tierCls);
         cell.setAttribute('x', st.x); cell.setAttribute('y', st.y);
         cell.setAttribute('width', st.w); cell.setAttribute('height', st.h);
         var cellFill = currentMode === 'piyasa' ? piyasaColor(st) : tierColor(st);
