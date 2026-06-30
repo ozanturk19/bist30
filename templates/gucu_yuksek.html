@@ -326,6 +326,9 @@
             <span class="sig-badge {% if s.signal == 'AL' %}sig-al{% else %}sig-sat{% endif %}">
               {% if s.signal == 'AL' %}▲ Güçlü{% else %}▼ Zayıf{% endif %}
             </span>
+            {% if s.signal == 'AL' and s.change_pct is not none and s.change_pct < 0 %}
+            <span style="font-size:10px;color:#f85149;font-weight:600;white-space:nowrap" title="Sinyal uzun vadeli, bugün günlük düşüş var">↓{{ '%.1f'|format(s.change_pct|abs) }}%</span>
+            {% endif %}
           </td>
           <td>
             <div class="score-bar-wrap">

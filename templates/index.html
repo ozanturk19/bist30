@@ -1529,6 +1529,7 @@
   .signal-badge.bull    { background: var(--bp-al-bg);  color: var(--bp-al);  border: 1px solid var(--bp-al-bd);  box-shadow: 0 0 8px rgba(0,226,144,.12), inset 0 0 8px rgba(0,226,144,.04); }
   .signal-badge.bear    { background: var(--bp-sat-bg); color: var(--bp-sat); border: 1px solid var(--bp-sat-bd); box-shadow: 0 0 6px rgba(248,81,73,.18); }
   .signal-badge.neutral { background: var(--bp-bkl-bg); color: var(--bp-bkl); border: 1px solid var(--bp-bkl-bd); }
+  .sig-neg-day { font-size: 10px; color: #f85149; opacity: .8; white-space: nowrap; font-weight: 600; }
 
   /* ── Signal Tooltip ─────────────────────────────────── */
   .sig-tip {
@@ -4597,7 +4598,7 @@ function renderTable() {
       <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20 (Backtest Win Rate %51.5)" style="color:#ffd700;font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" title="${s.anomaly.reason}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
-      <td onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${confHtml}${eqHtml}</td>
+      <td onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${s.signal === 'AL' && s.change_pct < 0 ? ` <span class="sig-neg-day" title="Sinyal uzun vadeli, bugün günlük düşüş var">↓${s.change_pct.toFixed(1)}%</span>` : ''}${confHtml}${eqHtml}</td>
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile">${sigPriceHtml}</td>
       <td class="hide-mobile">${slHtml}</td>
