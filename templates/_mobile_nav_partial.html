@@ -1,5 +1,6 @@
-{# Mobile Bottom Navigation Partial — P1 mobil nav fix (26 May 2026, Ozan-dispatch).
-   Source: templates/index.html lines 551-647 (CSS) + 2220-2313 (HTML+JS).
+{# Mobile Bottom Navigation Partial — F14 mobile UX (30 Haz 2026).
+   F11 push bell entegre: 5. slot artık Bildirim butonu.
+   Pull-to-refresh: index.html'de ayrıca eklendi.
    Idempotent: CSS class'ları unique (mbn-*), JS window.toggleMbnSheet / closeMbnSheet
    re-assignment ile çift tanımlama hatası önler. {% include %} ile çağrılır. #}
 <style>
@@ -33,6 +34,18 @@
     box-shadow: 0 0 10px rgba(0,226,144,.55);
   }
   .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(0,226,144,.45)); stroke-width: 2.1; }
+  /* F14: push-active state on bell slot */
+  .mbn-item.push-active { color: #f59e0b; }
+  .mbn-item.push-active::before { background: #f59e0b; box-shadow: 0 0 10px rgba(245,158,11,.55); }
+  .mbn-item.push-active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(245,158,11,.5)); stroke-width: 2.1; }
+  /* Badge dot — shows when push is active */
+  .mbn-badge {
+    position: absolute; top: 6px; right: calc(50% - 18px);
+    width: 8px; height: 8px; background: #f59e0b;
+    border-radius: 50%; border: 1.5px solid #0e0e12;
+    display: none;
+  }
+  .mbn-item.push-active .mbn-badge { display: block; }
   .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 250; opacity: 0; transition: opacity .25s ease; }
   .mbn-sheet-backdrop.open { display: block; opacity: 1; }
   .mbn-sheet {
@@ -62,13 +75,38 @@
   }
   .mbn-sheet-item svg { width: 22px; height: 22px; color: #b8c3ff; stroke-width: 1.85; }
   .mbn-sheet-item:active { transform: scale(0.96); background: #201f21; border-color: #46464d; }
+  /* F14: push toggle row in sheet */
+  .mbn-push-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; margin-bottom: 14px;
+    background: #1c1b1f; border: 1px solid #2a2a2c; border-radius: 10px;
+    min-height: 52px;
+  }
+  .mbn-push-row-left { display: flex; align-items: center; gap: 10px; }
+  .mbn-push-row-icon { font-size: 18px; }
+  .mbn-push-row-text { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 13px; font-weight: 600; color: #e5e1e4; }
+  .mbn-push-row-sub { font-size: 11px; color: #909097; margin-top: 1px; }
+  .mbn-push-toggle {
+    min-width: 44px; min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 8px; color: #93c5fd; font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: 'Space Grotesk', sans-serif;
+    padding: 0 12px; transition: all .15s;
+  }
+  .mbn-push-toggle.push-on {
+    background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3);
+    color: #f59e0b;
+  }
+  .mbn-push-toggle:active { transform: scale(0.96); }
   @media (max-width: 768px) {
     .mobile-bottom-nav { display: block; }
     body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
-    /* Touch target 44px — Faz4 Madde-2 */
+    /* Touch target 44px — F14 */
     .header-search-btn { min-width: 44px; min-height: 44px; }
     .btn-refresh { min-height: 44px; }
     .hib-action-btn { min-height: 44px; }
+    .mc-bell { min-width: 44px; min-height: 44px; }
   }
 </style>
 <nav class="mobile-bottom-nav" aria-label="Ana navigasyon">
@@ -89,15 +127,33 @@
       <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg></span>
       <span class="mbn-label">Sektörler</span>
     </a>
-    <button class="mbn-item" type="button" onclick="toggleMbnSheet()" aria-label="Daha fazla menü">
-      <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></svg></span>
-      <span class="mbn-label">Daha</span>
+    <!-- F14: F11 push bell entegre — 5. slot -->
+    <button id="mbn-bell-btn" class="mbn-item" type="button" onclick="toggleMbnSheet()" aria-label="Bildirimler ve menü">
+      <span class="mbn-badge" id="mbn-bell-badge"></span>
+      <span class="mbn-icon" id="mbn-bell-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </span>
+      <span class="mbn-label" id="mbn-bell-label">Bildirim</span>
     </button>
   </div>
 </nav>
 <div class="mbn-sheet-backdrop" id="mbnSheetBackdrop" onclick="closeMbnSheet()"></div>
 <div class="mbn-sheet" id="mbnSheet" role="dialog" aria-label="Daha fazla menü" aria-modal="true">
   <div class="mbn-sheet-handle"></div>
+  <!-- F14: push toggle at top of sheet -->
+  <div class="mbn-push-row" id="mbnPushRow" style="display:none">
+    <div class="mbn-push-row-left">
+      <span class="mbn-push-row-icon" id="mbnPushIcon">🔔</span>
+      <div>
+        <div class="mbn-push-row-text">Sinyal Bildirimleri</div>
+        <div class="mbn-push-row-sub" id="mbnPushSub">AL/SAT sinyali gelince bildirim al</div>
+      </div>
+    </div>
+    <button class="mbn-push-toggle" id="mbnPushToggle" onclick="mbnTogglePush()" aria-label="Push bildirimi aç/kapat">AÇ</button>
+  </div>
   <div class="mbn-sheet-title">Piyasalar</div>
   <div class="mbn-sheet-grid">
     <a href="/kripto" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg><span>Kripto</span></a>
@@ -125,4 +181,41 @@ window.toggleMbnSheet=function(){const s=document.getElementById('mbnSheet');con
 window.closeMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')window.closeMbnSheet();});
 (function(){const p=window.location.pathname;document.querySelectorAll('.mbn-item[data-route]').forEach(el=>{const r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r))el.classList.add('active');});})();
+
+/* F14: sync bell slot with push subscription state */
+function _mbnSyncBell() {
+  const btn = document.getElementById('mbn-bell-btn');
+  const row = document.getElementById('mbnPushRow');
+  const toggle = document.getElementById('mbnPushToggle');
+  const sub = document.getElementById('mbnPushSub');
+  const icon = document.getElementById('mbnPushIcon');
+  if (!btn) return;
+  const isSupported = ('PushManager' in window) && ('Notification' in window);
+  if (row) row.style.display = isSupported ? '' : 'none';
+  const active = typeof _pushSubscription !== 'undefined' && !!_pushSubscription;
+  btn.classList.toggle('push-active', active);
+  if (toggle) { toggle.textContent = active ? 'KAPAT' : 'AÇ'; toggle.classList.toggle('push-on', active); }
+  if (sub) sub.textContent = active ? 'Bildirimler açık — kapatmak için KAPAT' : 'AL/SAT sinyali gelince bildirim al';
+  if (icon) icon.textContent = active ? '🔕' : '🔔';
+}
+
+async function mbnTogglePush() {
+  if (typeof togglePushSubscription === 'function') {
+    await togglePushSubscription();
+    _mbnSyncBell();
+  }
+}
+
+/* Sync after push state changes — hook into existing _updatePushBtn */
+(function() {
+  const orig = window._updatePushBtn;
+  window._updatePushBtn = function() {
+    if (typeof orig === 'function') orig();
+    _mbnSyncBell();
+  };
+  /* Initial sync after SW ready */
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(_mbnSyncBell, 800);
+  });
+})();
 </script>

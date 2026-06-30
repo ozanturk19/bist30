@@ -5924,6 +5924,82 @@ document.addEventListener('keydown', e => {
 {% include '_premium_modal.html' %}
 <script src="/static/js/toast.js"></script>
 {% include '_mobile_nav_partial.html' %}
+<!-- F14: pull-to-refresh -->
+<style>
+  #ptr-indicator {
+    display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+    justify-content: center; align-items: center; height: 52px;
+    background: rgba(14,14,18,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,226,144,0.25);
+    color: #00e290; font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 13px; font-weight: 600; gap: 8px;
+    transition: transform .2s ease;
+  }
+  #ptr-indicator.ptr-visible { display: flex; }
+  #ptr-spinner {
+    width: 16px; height: 16px; border: 2px solid rgba(0,226,144,.25);
+    border-top-color: #00e290; border-radius: 50%;
+  }
+  #ptr-spinner.spinning { animation: ptrSpin .6s linear infinite; }
+  @keyframes ptrSpin { to { transform: rotate(360deg); } }
+  @media (min-width: 769px) { #ptr-indicator { display: none !important; } }
+</style>
+<div id="ptr-indicator" aria-live="polite">
+  <div id="ptr-spinner"></div>
+  <span id="ptr-text">Yenileniyor…</span>
+</div>
+<script>
+(function() {
+  var startY = 0, pulling = false, triggered = false;
+  var ind = document.getElementById('ptr-indicator');
+  var spinner = document.getElementById('ptr-spinner');
+  var txt = document.getElementById('ptr-text');
+  var THRESHOLD = 70;
+
+  document.addEventListener('touchstart', function(e) {
+    if (window.scrollY > 5) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
+    triggered = false;
+  }, {passive: true});
+
+  document.addEventListener('touchmove', function(e) {
+    if (!pulling) return;
+    var dy = e.touches[0].clientY - startY;
+    if (dy < 20) return;
+    if (window.scrollY > 2) { pulling = false; return; }
+    if (!ind) return;
+    if (dy >= THRESHOLD && !triggered) {
+      txt.textContent = 'Bırak, yenile';
+    } else if (dy < THRESHOLD) {
+      txt.textContent = 'Aşağı çek, yenile';
+    }
+    ind.classList.add('ptr-visible');
+  }, {passive: true});
+
+  document.addEventListener('touchend', function() {
+    if (!pulling || !ind) { pulling = false; return; }
+    pulling = false;
+    if (!triggered && ind.classList.contains('ptr-visible')) {
+      triggered = true;
+      txt.textContent = 'Yenileniyor…';
+      spinner.classList.add('spinning');
+      var done = function() {
+        ind.classList.remove('ptr-visible');
+        spinner.classList.remove('spinning');
+        triggered = false;
+      };
+      if (typeof fetchData === 'function') {
+        fetchData().then(done).catch(done);
+      } else {
+        setTimeout(done, 1200);
+      }
+    } else {
+      ind.classList.remove('ptr-visible');
+    }
+  }, {passive: true});
+})();
+</script>
 <script>
 (function(){
   var STORAGE_KEY='bp-theme';
