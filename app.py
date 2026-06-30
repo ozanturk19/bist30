@@ -2794,6 +2794,9 @@ def _analyze_with_timeout(ticker):
         return None
 
 
+_last_refresh_bad_ticker_count = 0  # M5: stale fallback ticker sayısı → health DEGRADED tetikler
+
+
 def refresh_data():
     # CPO-507 P0 refining (Cmt 17:45): SIRALI for loop yerine PARALEL ThreadPoolExecutor.
     # Önceki: 30 ticker × 8s socket timeout = 240s watchdog timeout (Cmt yfinance throttle ağırlaştı)
@@ -2852,6 +2855,8 @@ def refresh_data():
             _stale_count += 1
     if _stale_count:
         logger.info("prev_cache fallback: %d ticker stale ile korundu (toplam %d)", _stale_count, len(results))
+    global _last_refresh_bad_ticker_count
+    _last_refresh_bad_ticker_count = _stale_count
     # ── /prev_cache fallback ─────────────────────────────────────────────────────────
 
     with _lock:
@@ -4718,10 +4723,41 @@ _GEMINI_CB_THRESHOLD = 2      # ardışık fail eşiği — devre açılır
 _GEMINI_CB_COOLDOWN  = 600    # saniye — devre açık kalır (10dk Gemini'siz fallback)
 _gemini_cb = {"fails": 0, "open_until": 0.0}   # circuit breaker durumu (worker-local)
 
-# Faz 12 P2.6 — Rate limiter: gemini-2.5-flash free tier 10 RPM → 6.5s/call safe margin (~9.2/dk)
+# Fix2 — Gemini global cross-worker rate limiter (slot reservation via flock).
+# Önceki worker-local lock: 4 worker × ~9.2 req/dk = ~36.8 RPM → 429 burst riski.
+# Yeni: paylaşımlı dosya üzerinden atomic slot tahsisi → global ~9.2 RPM (10 RPM altı).
 _GEMINI_RATE_INTERVAL = float(os.environ.get("GEMINI_RATE_INTERVAL", "6.5"))
-_gemini_rate_lock = threading.Lock()
-_gemini_rate_last = [0.0]
+_GEMINI_RATE_PATH = os.environ.get("GEMINI_RATE_PATH", "/tmp/bp_gemini_rate.lock")
+_gemini_rate_fh = None  # worker-local file handle, paylaşımlı dosya global slot tutar
+
+
+def _gemini_rate_acquire() -> float:
+    """Global cross-worker Gemini rate limiter — slot reservation.
+
+    flock ile tek seferde bir worker slot alır; sleep dışarıda kalır (CPO-837 uyumlu).
+    Returns: saniye cinsinden beklenecek süre (≤0 ise beklemeden devam).
+    """
+    global _gemini_rate_fh
+    if _gemini_rate_fh is None:
+        _gemini_rate_fh = open(_GEMINI_RATE_PATH, "a+")
+
+    _fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_EX)
+    try:
+        _gemini_rate_fh.seek(0)
+        raw = _gemini_rate_fh.read().strip()
+        last_slot = float(raw) if raw else 0.0
+
+        now = time.time()
+        my_slot = max(now, last_slot) + _GEMINI_RATE_INTERVAL
+
+        _gemini_rate_fh.seek(0)
+        _gemini_rate_fh.truncate()
+        _gemini_rate_fh.write(f"{my_slot:.6f}")
+        _gemini_rate_fh.flush()
+
+        return my_slot - _GEMINI_RATE_INTERVAL - now  # ≤0 → beklemesiz
+    finally:
+        _fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_UN)
 
 
 
@@ -4957,12 +4993,8 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
                      _gemini_cb["open_until"] - now)
         return None, None
 
-    # Faz 12 P2.6 — Rate limiter: 3.5s minimum arası (free tier 20 req/dk aşmaz)
-    # CPO-837 FIX: sleep lock DIŞINDA — OS daemon thread lock tutarken sleep yapınca
-    # gevent hub tüm HTTP handler greenlet'lerini bloke ediyordu (worker saturation).
-    with _gemini_rate_lock:
-        _wait = _GEMINI_RATE_INTERVAL - (time.time() - _gemini_rate_last[0])
-        _gemini_rate_last[0] = time.time()  # timestamp lock içinde güncelle, sleep dışarıda
+    # Fix2 — global cross-worker slot reservation (CPO-837 pattern: sleep lock dışarıda).
+    _wait = _gemini_rate_acquire()
     if _wait > 0:
         time.sleep(_wait)  # lock serbest — gevent cooperative yield
 
@@ -5882,8 +5914,11 @@ def _chart_response_with_macro_summary(ticker_base, cache_obj):
     with _lock:
         data = cache_obj.get("data")
         updated_at = cache_obj.get("updated_at")
-    if not data or "summary" not in data:
-        return safe_json({"chart": data, "updated_at": updated_at, "loading": data is None})
+    # M4 chart guard: data yoksa veya minimum OHLC barı eksikse loading döner.
+    # Frontend `json.loading || !json.chart` guard ile retry yapar (index.html:3218, hisse.html:3542).
+    _ohlc_bars = len((data or {}).get("ohlc") or []) if data else 0
+    if not data or "summary" not in data or _ohlc_bars < 2:
+        return safe_json({"chart": None, "loading": True, "reason": "insufficient_chart_data"})
     # Shallow copy + yeni summary dict (cache mutate olmasın)
     data = dict(data)
     data["summary"] = dict(data.get("summary", {}))
@@ -7168,6 +7203,7 @@ def _compute_health():
     stocks_age_s = int(now - last_refresh_ts) if last_refresh_ts else None
     macro_age_s  = int(now - macro_ts) if macro_ts else None
     macro_stale  = macro_age_s is None or macro_age_s > _MACRO_TTL
+    bad_ticker_count = _last_refresh_bad_ticker_count  # M5: stale fallback ticker sayısı
 
     # ── Component durumları ── (seans dışında stale OK — normal davranış)
     if stocks_count == 0:
@@ -7177,6 +7213,8 @@ def _compute_health():
     elif stocks_age_s is None or stocks_age_s > 1800:
         stocks_status = "critical"
     elif stocks_age_s > 900:
+        stocks_status = "degraded"
+    elif mkt_open and bad_ticker_count > 5:  # M5: çok ticker stale → data kalitesi bozuk
         stocks_status = "degraded"
     else:
         stocks_status = "ok"
@@ -7205,7 +7243,10 @@ def _compute_health():
     if stocks_status == "critical":
         msg_parts.append(f"stocks {stocks_age_s}s stale" if stocks_age_s else "stocks data yok")
     elif stocks_status == "degraded":
-        msg_parts.append(f"stocks {stocks_age_s}s stale")
+        if bad_ticker_count > 5 and mkt_open:
+            msg_parts.append(f"{bad_ticker_count} ticker stale fallback")
+        else:
+            msg_parts.append(f"stocks {stocks_age_s}s stale")
     if macro_status == "critical":
         msg_parts.append(f"macro {macro_age_s}s stale" if macro_age_s else "macro data yok")
     elif macro_status == "degraded":
@@ -7246,6 +7287,7 @@ def _compute_health():
         "data_freshness":           build_data_freshness(),  # SPEC-014 B1
         "market_data_age_s":         stocks_age_s,                           # CPO-590 madde 4
         "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
+        "bad_ticker_count":         bad_ticker_count,  # M5: stale fallback ticker sayısı
         "ts": now,
     }
     # Paket 4 — extend with 6 health extra fields (uptime_sec, cache_age_min, etc.)
