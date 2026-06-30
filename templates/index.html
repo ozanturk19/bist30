@@ -6013,7 +6013,7 @@ document.addEventListener('keydown', e => {
   function getTheme(){
     var s=localStorage.getItem(STORAGE_KEY);
     if(s) return s;
-    return window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+    return 'dark';
   }
   applyTheme(getTheme());
   var btn=document.getElementById('theme-toggle');
