@@ -2669,6 +2669,65 @@ if _is_notify_leader():
     logger.info("Chart-integrity alarm başlatıldı (LEADER — SPEC-008 L5)")
 
 
+# M6 — Synthetic drift monitor: ardışık refresh döngüleri arasında fiyat drift sayar.
+# Amaç: yfinance batch hatası sonrası toplu anormal fiyat sıçramasını erken yakala.
+# >30 ticker aynı döngüde >%5 drift → DRIFT-ALARM log + health degraded sinyali.
+_DRIFT_THRESHOLD_PCT = 5.0   # tek döngüde %5+ değişim → drift sayılır
+_DRIFT_ALARM_N       = 30    # >30 ticker drift → health DEGRADED sinyali
+_drift_monitor_stats = {
+    "drift_count": 0,
+    "last_check_ts": 0.0,
+    "last_snapshot": {},   # {ticker: price}
+}
+
+
+def _synthetic_drift_monitor():
+    """M6 — ardışık refresh döngüleri arası fiyat drift analizi.
+
+    90s'de bir örnekler (120s refresh interval'ından biraz önce).
+    drift_count > _DRIFT_ALARM_N → DRIFT-ALARM log + /api/health drift_count > 0.
+    """
+    while True:
+        try:
+            time.sleep(90)
+            with _lock:
+                stocks = list(_cache.get("data") or [])
+
+            now = time.time()
+            prev = dict(_drift_monitor_stats.get("last_snapshot") or {})
+            drift_count = 0
+            new_snapshot = {}
+
+            for s in stocks:
+                ticker = s.get("ticker")
+                price = s.get("price")
+                if not ticker or not price or price <= 0:
+                    continue
+                new_snapshot[ticker] = price
+                prev_price = prev.get(ticker)
+                if prev_price and prev_price > 0:
+                    pct = abs(price - prev_price) / prev_price * 100
+                    if pct > _DRIFT_THRESHOLD_PCT:
+                        drift_count += 1
+
+            _drift_monitor_stats["drift_count"] = drift_count
+            _drift_monitor_stats["last_check_ts"] = now
+            _drift_monitor_stats["last_snapshot"] = new_snapshot
+
+            if drift_count > _DRIFT_ALARM_N:
+                logger.warning(
+                    "DRIFT-ALARM: %d ticker bu döngüde >%.1f%% drift (eşik %d) — olası yfinance veri anomalisi",
+                    drift_count, _DRIFT_THRESHOLD_PCT, _DRIFT_ALARM_N,
+                )
+        except Exception as e:
+            logger.error("synthetic_drift_monitor: %s", e)
+
+
+threading.Thread(target=_synthetic_drift_monitor, daemon=True,
+                 name="drift-monitor").start()
+logger.info("Synthetic drift monitor başlatıldı (M6 — her 90s drift analizi)")
+
+
 _DISK_CACHE_PATH       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
 _LIVE_PRICES_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_live_prices.json")
 _BT_DISK_PATH          = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backtest_cache.json")
@@ -7253,10 +7312,14 @@ def _compute_health():
     else:
         macro_status = "ok"
 
+    drift_count = _drift_monitor_stats.get("drift_count", 0)  # M6
+
     # ── Genel status: en kötü component ──
     if "critical" in (stocks_status, macro_status):
         status = "CRITICAL"
     elif "degraded" in (stocks_status, macro_status):
+        status = "DEGRADED"
+    elif mkt_open and drift_count > _DRIFT_ALARM_N:  # M6: toplu drift → data kalitesi şüpheli
         status = "DEGRADED"
     else:
         status = "OK"
@@ -7271,6 +7334,8 @@ def _compute_health():
         msg_parts.append(f"macro {macro_age_s}s stale" if macro_age_s else "macro data yok")
     elif macro_status == "degraded":
         msg_parts.append(f"macro {macro_age_s}s stale")
+    if mkt_open and drift_count > _DRIFT_ALARM_N:
+        msg_parts.append(f"{drift_count} ticker drift anomalisi")
     if not msg_parts:
         message = "seans dışı" if not mkt_open else "tüm sistemler normal"
     else:
@@ -7307,6 +7372,7 @@ def _compute_health():
         "data_freshness":           build_data_freshness(),  # SPEC-014 B1
         "market_data_age_s":         stocks_age_s,                           # CPO-590 madde 4
         "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
+        "drift_count":              drift_count,  # M6: ardışık döngü arası drift ticker sayısı
         "ts": now,
     }
     # Paket 4 — extend with 6 health extra fields (uptime_sec, cache_age_min, etc.)
