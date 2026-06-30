@@ -27,43 +27,46 @@ def _extract_function_body(src, func_name):
     return m.group(0) if m else None
 
 
-# ── refresh_data() kontrolleri ────────────────────────────────────────────────
+# ── refresh_data() / _refresh_data_impl() kontrolleri ────────────────────────
+# M2 (CPO-905): refresh_data() lock wrapper'a dönüştürüldü; gerçek implementasyon
+# _refresh_data_impl() içinde. Testler her iki fonksiyonu birleşik kontrol eder.
+
+def _get_refresh_impl_body(src):
+    """M2 sonrası: _refresh_data_impl() varsa onu, yoksa refresh_data() kullan."""
+    body = _extract_function_body(src, "_refresh_data_impl")
+    if body:
+        return body
+    return _extract_function_body(src, "refresh_data")
+
 
 def test_refresh_data_sets_loading_false():
-    """refresh_data() içinde _cache["loading"] = False satırı olmalı."""
+    """refresh_data() veya _refresh_data_impl() içinde _cache["loading"] = False olmalı."""
     src = _read_app()
-    body = _extract_function_body(src, "refresh_data")
-    assert body, "refresh_data() bulunamadı"
-    # Hem string hem double-quote versiyonu kabul et
+    body = _get_refresh_impl_body(src)
+    assert body, "refresh_data() / _refresh_data_impl() bulunamadı"
     has_loading_false = (
         '_cache["loading"] = False' in body or
         "_cache['loading'] = False" in body
     )
     assert has_loading_false, (
-        'refresh_data() içinde _cache["loading"] = False bulunamadı — '
+        '_cache["loading"] = False bulunamadı — '
         "partial success (ANALYZE_TIMEOUT) dahil loading sıfırlanmıyor"
     )
 
 
 def test_refresh_data_loading_false_in_lock_block():
-    """refresh_data() loading=False cache data yazımıyla aynı with _lock: blokunda olmalı.
-
-    refresh_data() birden fazla with _lock: bloğu içerebilir (read + write).
-    Test: _cache["data"] = results içeren lock bloğunda loading=False da olmalı.
-    """
+    """loading=False cache data yazımıyla aynı with _lock: blokunda olmalı."""
     src = _read_app()
-    body = _extract_function_body(src, "refresh_data")
-    assert body, "refresh_data() bulunamadı"
+    body = _get_refresh_impl_body(src)
+    assert body, "refresh_data() / _refresh_data_impl() bulunamadı"
 
-    # Tüm with _lock: bloklarını bul (lazy match, her blok ayrı yakalanır)
     lock_blocks = re.findall(
         r"with _lock:(.*?)(?=\n {4}(?![ \t])|\Z)",
         body,
         re.DOTALL,
     )
-    assert lock_blocks, "refresh_data() içinde hiç with _lock: bloğu bulunamadı"
+    assert lock_blocks, "refresh_data() / _refresh_data_impl() içinde hiç with _lock: bloğu bulunamadı"
 
-    # _cache["data"] = results içeren bloğu bul
     write_block = None
     for block in lock_blocks:
         if '_cache["data"] = results' in block or "_cache['data'] = results" in block:
@@ -71,7 +74,7 @@ def test_refresh_data_loading_false_in_lock_block():
             break
 
     assert write_block is not None, (
-        "refresh_data() içinde _cache['data'] = results içeren with _lock: bloğu bulunamadı"
+        "_cache['data'] = results içeren with _lock: bloğu bulunamadı"
     )
 
     has_loading_false = (
@@ -79,16 +82,16 @@ def test_refresh_data_loading_false_in_lock_block():
         "_cache['loading'] = False" in write_block
     )
     assert has_loading_false, (
-        "refresh_data() data-write lock bloğunda _cache['loading'] = False bulunamadı — "
+        "data-write lock bloğunda _cache['loading'] = False bulunamadı — "
         "data yazımı ve loading reset AYNI lock bloğunda olmalı (atomik)"
     )
 
 
 def test_refresh_data_loading_false_after_data_write():
-    """refresh_data() loading=False, _cache["data"] yazımından SONRA (veya aynı blokta) olmalı."""
+    """loading=False, _cache["data"] yazımından SONRA (veya aynı blokta) olmalı."""
     src = _read_app()
-    body = _extract_function_body(src, "refresh_data")
-    assert body, "refresh_data() bulunamadı"
+    body = _get_refresh_impl_body(src)
+    assert body, "refresh_data() / _refresh_data_impl() bulunamadı"
 
     data_pos = body.find('_cache["data"] = results')
     if data_pos == -1:
