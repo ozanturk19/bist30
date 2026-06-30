@@ -2,6 +2,9 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
+<script>
+(function(){var t=localStorage.getItem('bp-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();
+</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WXLPNFHYLP"></script>
 <script>
@@ -193,6 +196,54 @@
     --accent:       #b8c3ff;
     --bg2:          #141416;
   }
+
+  /* ── Light theme overrides ─────────────────────────── */
+  html[data-theme="light"] {
+    --bp-bg:        #f5f6fa;
+    --bp-surface:   #ffffff;
+    --bp-surface2:  #eef0f6;
+    --bp-surface3:  #e6e8f0;
+    --bp-border:    #d6d8e4;
+    --bp-border2:   #b8bcd0;
+    --bp-text:      #0e0e18;
+    --bp-text2:     #2e2e42;
+    --bp-text3:     #64647a;
+    --bp-brand:     #3c4fba;
+    --bp-brand-d:   #0035cc;
+    --bp-al:        #008f56;
+    --bp-al-bg:     rgba(0, 143, 86, 0.07);
+    --bp-al-bd:     rgba(0, 143, 86, 0.32);
+    --bp-sat:       #c42020;
+    --bp-sat-bg:    #fde8e8;
+    --bp-sat-bd:    #e05050;
+    --bp-bkl:       #64647a;
+    --bp-bkl-bg:    #eef0f6;
+    --bp-bkl-bd:    #b8bcd0;
+    --bp-gold:      #b86c00;
+    --accent:       #3c4fba;
+    --bg2:          #ffffff;
+  }
+  html[data-theme="light"] header {
+    background: rgba(245,246,250,0.92);
+    border-bottom-color: rgba(214,216,228,0.8);
+  }
+  html[data-theme="light"] .macro-bar { background: #eef0f6; border-bottom-color: #d6d8e4; }
+  html[data-theme="light"] .macro-bar::before { background: linear-gradient(to right, #eef0f6, transparent); }
+  html[data-theme="light"] .macro-bar::after  { background: linear-gradient(to left,  #eef0f6, transparent); }
+  /* Theme toggle button */
+  .theme-toggle-btn {
+    background: var(--bp-surface2);
+    border: 1px solid var(--bp-border);
+    border-radius: 6px;
+    color: var(--bp-text2);
+    width: 32px; height: 32px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+    transition: background 150ms, border-color 150ms;
+  }
+  .theme-toggle-btn:hover { background: var(--bp-surface3); border-color: var(--bp-border2); }
 
 
   body {
@@ -2145,6 +2196,7 @@
 
   <!-- Right actions injected by bp-search.js (header-right uniform) -->
   <span id="ws-status" class="ws-connecting" title="WebSocket bağlantı durumu">⬤ WS</span>
+  <button id="theme-toggle" class="theme-toggle-btn" aria-label="Tema değiştir" title="Tema değiştir"></button>
   <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </button>
@@ -5852,5 +5904,29 @@ document.addEventListener('keydown', e => {
 {% include '_premium_modal.html' %}
 <script src="/static/js/toast.js"></script>
 {% include '_mobile_nav_partial.html' %}
+<script>
+(function(){
+  var STORAGE_KEY='bp-theme';
+  var root=document.documentElement;
+  function applyTheme(theme){
+    if(theme==='light') root.setAttribute('data-theme','light');
+    else root.removeAttribute('data-theme');
+    var btn=document.getElementById('theme-toggle');
+    if(btn) btn.textContent=theme==='light'?'🌙':'☀️';
+  }
+  function getTheme(){
+    var s=localStorage.getItem(STORAGE_KEY);
+    if(s) return s;
+    return window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+  }
+  applyTheme(getTheme());
+  var btn=document.getElementById('theme-toggle');
+  if(btn) btn.addEventListener('click',function(){
+    var cur=root.getAttribute('data-theme')==='light'?'dark':'light';
+    localStorage.setItem(STORAGE_KEY,cur);
+    applyTheme(cur);
+  });
+})();
+</script>
 </body>
 </html>
