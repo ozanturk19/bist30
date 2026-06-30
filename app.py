@@ -2675,6 +2675,50 @@ _BT_DISK_PATH          = os.path.join(os.path.dirname(os.path.abspath(__file__))
 _SNAPSHOTS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshots")
 os.makedirs(_SNAPSHOTS_DIR, exist_ok=True)
 
+# M3 — price sanity guard + last-known-good cache
+_PRICE_SANITY_MIN = 0.01    # fiyat alt sınırı (0 veya negatif = bozuk)
+_PRICE_SANITY_MAX = 1_000_000  # fiyat üst sınırı (1M TL üstü = bozuk veri)
+_PRICE_SANITY_MAX_CHANGE = 0.50  # tek refresh'te %50 değişim → anomali şüphesi
+_last_known_good_cache: list = []  # son geçerli snapshot (M3 fallback)
+_last_known_good_ts: float = 0.0
+
+
+def _validate_price_snapshot(data: list) -> tuple:
+    """Fiyat snapshot'ını sanity kontrolünden geçirir. (valid: bool, reason: str).
+
+    Kontroller:
+    - En az 1 hisse var mı
+    - Her hissenin fiyatı 0.01-1M TL arasında mı
+    - Negatif veya sıfır fiyat var mı
+    Bozuk snapshot → last_known_good ile karşılaştır (büyük anomali varsa uyar).
+    """
+    if not data or not isinstance(data, list) or len(data) == 0:
+        return False, "empty_snapshot"
+
+    bad_prices = []
+    for s in data:
+        price = s.get("price")
+        ticker = s.get("ticker", "?")
+        if price is None:
+            continue  # None fiyat = stale fallback, kabul
+        if not isinstance(price, (int, float)) or price < _PRICE_SANITY_MIN:
+            bad_prices.append(f"{ticker}={price}")
+        elif price > _PRICE_SANITY_MAX:
+            bad_prices.append(f"{ticker}={price}(>max)")
+
+    if len(bad_prices) > 10:  # 10+ bozuk fiyat → toplu anomali, reddet
+        return False, f"bulk_price_anomaly: {bad_prices[:5]}..."
+    return True, "ok"
+
+
+def _keep_known_good_cache(data: list):
+    """Geçerli snapshot'ı last_known_good olarak saklar (M3 fallback için)."""
+    global _last_known_good_cache, _last_known_good_ts
+    ok, _ = _validate_price_snapshot(data)
+    if ok:
+        _last_known_good_cache = list(data)
+        _last_known_good_ts = time.time()
+
 
 def _save_daily_snapshot(data: list):
     """Seans kapandıktan sonra (14:00 UTC = 17:00 TR) günlük snapshot yazar.
@@ -2794,12 +2838,26 @@ def _analyze_with_timeout(ticker):
         return None
 
 
+_refresh_data_lock = threading.Lock()  # M2: concurrent refresh_data() engelle — ikinci çağrı skip
+
+
 def refresh_data():
     # CPO-507 P0 refining (Cmt 17:45): SIRALI for loop yerine PARALEL ThreadPoolExecutor.
     # Önceki: 30 ticker × 8s socket timeout = 240s watchdog timeout (Cmt yfinance throttle ağırlaştı)
     # Yeni: 4 paralel as_completed → 30/4 ≈ 8 batch × 8s = max ~64s
     # Per-ticker hard-timeout korunuyor (_analyze_with_timeout içinde)
     # Toplam timeout 180s soft cap (240s watchdog'un altında)
+    # M2: non-blocking — eş zamanlı ikinci çağrı yinelemeyi önler (watchdog + cron overlap)
+    if not _refresh_data_lock.acquire(blocking=False):
+        logger.warning("refresh_data: önceki çalışma devam ediyor, bu çağrı atlandı (M2 concurrency guard)")
+        return
+    try:
+        _refresh_data_impl()
+    finally:
+        _refresh_data_lock.release()
+
+
+def _refresh_data_impl():
     results = []
     # CPO-596: `with executor` kullanma — __exit__ shutdown(wait=True) çağırır ve hung thread'de
     # 66 saat bloke kalır. Explicit shutdown(wait=False) ile hung thread'leri bırak, devam et.
@@ -2859,6 +2917,9 @@ def refresh_data():
         _cache["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
         _cache["last_refresh_ts"] = time.time()  # SPEC-008 v1.2 #39 — grace pencere kapanır
         _cache["loading"] = False  # G25: partial success (ANALYZE_TIMEOUT) dahil loading bitişinde sıfırla
+
+    # M3: sanity geçen snapshot'ı last_known_good olarak kaydet
+    _keep_known_good_cache(results)
 
     # Başarılı güncellemeden sonra diske yaz
     _save_cache_to_disk(results)
