@@ -156,6 +156,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
+<link rel="stylesheet" href="/static/css/tokens.css">
 <style>
   @font-face {
     font-family: 'Inter-Fallback';
@@ -167,62 +168,7 @@
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* ── Design tokens (Stitch post-modern redesign) ─── */
-  :root {
-    --bp-bg:        #0e0e12;
-    --bp-surface:   #141416;
-    --bp-surface2:  #1c1b1f;
-    --bp-surface3:  #201f21;
-    --bp-border:    #2a2a2c;
-    --bp-border2:   #46464d;
-    --bp-text:      #e5e1e4;
-    --bp-text2:     #c7c5cd;
-    --bp-text3:     #909097;
-    --bp-brand:     #b8c3ff;     /* periwinkle / electric violet */
-    --bp-brand-d:   #0043eb;
-    --bp-al:        #00e290;     /* NEON MINT */
-    --bp-al-bg:     rgba(0, 226, 144, 0.07);
-    --bp-al-bd:     rgba(0, 226, 144, 0.32);
-    --bp-sat:       #f85149;     /* corruption red preserved */
-    --bp-sat-bg:    #3d0f0f;
-    --bp-sat-bd:    #da3633;
-    --bp-bkl:       #909097;
-    --bp-bkl-bg:    #1e293b;
-    --bp-bkl-bd:    #30363d;
-    --bp-gold:      #f59e0b;
-    --bp-radius:    6px;
-    --bp-radius-sm: 3px;
-    /* Compat aliases — eski stil kodlarıyla uyumluluk */
-    --accent:       #b8c3ff;
-    --bg2:          #141416;
-  }
 
-  /* ── Light theme overrides ─────────────────────────── */
-  html[data-theme="light"] {
-    --bp-bg:        #f5f6fa;
-    --bp-surface:   #ffffff;
-    --bp-surface2:  #eef0f6;
-    --bp-surface3:  #e6e8f0;
-    --bp-border:    #d6d8e4;
-    --bp-border2:   #b8bcd0;
-    --bp-text:      #0e0e18;
-    --bp-text2:     #2e2e42;
-    --bp-text3:     #64647a;
-    --bp-brand:     #3c4fba;
-    --bp-brand-d:   #0035cc;
-    --bp-al:        #008f56;
-    --bp-al-bg:     rgba(0, 143, 86, 0.07);
-    --bp-al-bd:     rgba(0, 143, 86, 0.32);
-    --bp-sat:       #c42020;
-    --bp-sat-bg:    #fde8e8;
-    --bp-sat-bd:    #e05050;
-    --bp-bkl:       #64647a;
-    --bp-bkl-bg:    #eef0f6;
-    --bp-bkl-bd:    #b8bcd0;
-    --bp-gold:      #b86c00;
-    --accent:       #3c4fba;
-    --bg2:          #ffffff;
-  }
   html[data-theme="light"] header {
     background: rgba(245,246,250,0.92);
     border-bottom-color: rgba(214,216,228,0.8);

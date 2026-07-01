@@ -11,23 +11,8 @@
 <meta property="og:url"         content="https://borsapusula.com/heatmap">
 <meta property="og:image"       content="https://borsapusula.com/og-image.svg">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="stylesheet" href="/static/css/tokens.css">
 <style>
-  :root {
-    --bp-bg: #0e0e12;
-    --bp-surface: #141416;
-    --bp-surface2: #1c1b1f;
-    --bp-border: #2a2a2c;
-    --bp-text: #e5e1e4;
-    --bp-text2: #c7c5cd;
-    --bp-text3: #909097;
-    /* Tier renkleri — G16 satürasyon dengeleme */
-    --tier-gold: #F0C240;      /* Premium: sıcak altın, #FFD700'den daha dengeli */
-    --tier-gold-fade: #B89A2E; /* Premium eski sinyal: söndürülmüş */
-    --tier-silver: #88A8C0;    /* Plus: mavi-gümüş, bronzdan daha distinct */
-    --tier-bronze: #C07838;    /* Standart: sıcak bronz */
-    --tier-sat: #E05550;       /* Zayıf Trend: softer kırmızı */
-    --tier-bekle: #252b36;     /* Yatay: bg'den ayrışan koyu slate */
-  }
   /* ── SPEC-018 V2: Altın parıltısı — Premium tier glow pulse ─────────── */
   @keyframes goldGlow {
     0%, 100% { filter: drop-shadow(0 0 2px rgba(240,194,64,0.55)); }

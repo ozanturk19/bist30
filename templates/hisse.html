@@ -131,6 +131,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
+<link rel="stylesheet" href="/static/css/tokens.css">
 <style>
   @font-face {
     font-family: 'Inter-Fallback';
@@ -173,21 +174,6 @@
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  :root {
-    --bp-bg:#0e0e12; --bp-surface:#141416; --bp-surface2:#1c1b1f;
-    --bp-border:#2a2a2c; --bp-border2:#46464d;
-    --bp-text:#e5e1e4; --bp-text2:#c7c5cd; --bp-text3:#909097;
-    --bp-brand:#b8c3ff; --bp-al:#00e290; --bp-sat:#f85149;
-    --bp-bkl:#909097; --bp-gold:#f59e0b;
-    --bp-radius-sm: 3px;
-  }
-  html[data-theme="light"] {
-    --bp-bg:#f5f6fa; --bp-surface:#ffffff; --bp-surface2:#eef0f6;
-    --bp-border:#d6d8e4; --bp-border2:#b8bcd0;
-    --bp-text:#0e0e18; --bp-text2:#2e2e42; --bp-text3:#64647a;
-    --bp-brand:#3c4fba; --bp-al:#008f56; --bp-sat:#c42020;
-    --bp-bkl:#64647a; --bp-gold:#b86c00;
-  }
   html[data-theme="light"] header {
     background: rgba(245,246,250,0.92);
     border-bottom-color: rgba(214,216,228,0.8);
