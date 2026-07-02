@@ -29,13 +29,14 @@
   ]
 }
 </script>
+<link rel="stylesheet" href="/static/css/tokens.css">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root {
-    --bg:#0e0e12; --surface:#161b22; --surface2:#1c2128;
+    --bg:var(--bp-bg); --surface:#161b22; --surface2:#1c2128;
     --border:#30363d; --border2:#21262d;
     --text:#e6edf3; --text2:#8b949e; --text3:#484f58;
-    --al:#3fb950; --sat:#f85149; --bkl:#8b949e;
+    --al:#3fb950; --sat:var(--bp-sat); --bkl:#8b949e;
     --brand:#1f6feb; --gold:#e3b341;
     --accent: {{ meta.color }};
   }
@@ -65,14 +66,14 @@
   /* ── Makro Ticker ── */
   .macro-bar {
     min-height: 44px;
-    background:#0e0e12; border-bottom:1px solid var(--border2);
+    background:var(--bp-bg); border-bottom:1px solid var(--border2);
     height:32px; overflow:hidden; position:relative; white-space:nowrap;
   }
   .macro-bar::before,.macro-bar::after {
     content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2;
   }
-  .macro-bar::before { left:0; background:linear-gradient(to right,#0e0e12,transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,#0e0e12,transparent); }
+  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
   .macro-track {
     display:inline-flex; align-items:center;
     animation:macroScroll 40s linear infinite; height:32px;
@@ -290,7 +291,7 @@
   .dd-sep { height: 1px; background: var(--border); margin: 4px 6px; }
   @media (max-width: 900px) { .header-nav { display: none; } }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -732,9 +733,9 @@ function renderChart(data) {
 
   /* OHLC mum */
   const candle = chart.addCandlestickSeries({
-    upColor:'#3fb950', downColor:'#f85149',
-    borderUpColor:'#3fb950', borderDownColor:'#f85149',
-    wickUpColor:'#3fb950', wickDownColor:'#f85149',
+    upColor:'#3fb950', downColor:'var(--bp-sat)',
+    borderUpColor:'#3fb950', borderDownColor:'var(--bp-sat)',
+    wickUpColor:'#3fb950', wickDownColor:'var(--bp-sat)',
     priceLineVisible: false, lastValueVisible: true,
   });
   candle.setData(data.ohlc || []);
@@ -884,7 +885,7 @@ async function loadChart() {
     }
   } catch(e) {
     document.getElementById('varlikChart').innerHTML =
-      '<div class="loading-card" style="color:#f85149">Grafik yüklenemedi. Sayfayı yenileyin.</div>';
+      '<div class="loading-card" style="color:var(--bp-sat)">Grafik yüklenemedi. Sayfayı yenileyin.</div>';
   }
 }
 

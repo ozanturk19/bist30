@@ -108,9 +108,10 @@
 }
 </script>
 {% endif %}
+<link rel="stylesheet" href="/static/css/tokens.css">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0e0e12; color:#e6edf3; font-family:'Segoe UI',system-ui,-apple-system,sans-serif; font-size:14px; line-height:1.7; min-height:100vh; }
+  body { background:var(--bp-bg); color:#e6edf3; font-family:'Segoe UI',system-ui,-apple-system,sans-serif; font-size:14px; line-height:1.7; min-height:100vh; }
   header { background:#161b22; border-bottom:1px solid #30363d; padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
   .back-btn { display:flex; align-items:center; gap:6px; color:#8b949e; font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid #30363d; border-radius:6px; background:#21262d; transition:all .15s; white-space:nowrap; }
   .back-btn:hover { background:#30363d; color:#e6edf3; }
@@ -164,7 +165,7 @@
   .rel-stock-price  { font-family:'Fira Code',monospace; font-size:13px; color:#e6edf3; }
   .rel-stock-sig    { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:700; margin-top:5px; }
   .rel-stock-sig.al    { background:rgba(63,185,80,.12); color:#3fb950; border:1px solid rgba(63,185,80,.25); }
-  .rel-stock-sig.sat   { background:rgba(248,81,73,.12); color:#f85149; border:1px solid rgba(248,81,73,.25); }
+  .rel-stock-sig.sat   { background:rgba(248,81,73,.12); color:var(--bp-sat); border:1px solid rgba(248,81,73,.25); }
   .rel-stock-sig.bekle { background:rgba(139,148,158,.1); color:#8b949e; border:1px solid rgba(139,148,158,.2); }
   @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 
@@ -221,16 +222,16 @@
   @media(max-width:600px) { .container{padding:16px;} .art-title{font-size:22px;} }
 
   /* Makro Ticker */
-  .macro-bar { background:#0e0e12; border-bottom:1px solid #2a2a2c; height:34px; overflow:hidden; position:relative; white-space:nowrap; }
+  .macro-bar { background:var(--bp-bg); border-bottom:1px solid #2a2a2c; height:34px; overflow:hidden; position:relative; white-space:nowrap; }
   .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2; }
-  .macro-bar::before { left:0; background:linear-gradient(to right,#0e0e12,transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,#0e0e12,transparent); }
+  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
   .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
   .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #2a2a2c; font-size:12px; height:34px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
+  .mc-pos { color:#3fb950; } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
 
   /* Reading progress bar */
   .read-progress {
@@ -241,7 +242,7 @@
     transition: width 60ms linear;
   }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 </head>
 <body>
 <div class="read-progress" id="readProgress"></div>
@@ -392,7 +393,7 @@
     </div>
     <div id="artSubForm" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <input id="artSubEmail" type="email" placeholder="e-posta adresiniz"
-        style="background:#0e0e12;border:1px solid #30363d;border-radius:7px;padding:8px 12px;
+        style="background:var(--bp-bg);border:1px solid #30363d;border-radius:7px;padding:8px 12px;
                color:#e6edf3;font-size:13px;outline:none;width:210px;font-family:inherit;"
         onkeydown="if(event.key==='Enter')artSubmitSub()"
         onfocus="this.style.borderColor='#1f6feb'" onblur="this.style.borderColor='#30363d'">
@@ -466,7 +467,7 @@
       const sig    = (s.signal || 'BEKLE').toLowerCase().replace('ü','u');
       const sigLbl = s.signal === 'AL' ? '▲ Güçlü Trend' : s.signal === 'SAT' ? '▼ Zayıf Trend' : '● Belirsiz';
       const chg    = s.change_pct != null ? (s.change_pct >= 0 ? '+' : '') + (+s.change_pct).toFixed(1) + '%' : '';
-      const chgClr = s.change_pct >= 0 ? '#3fb950' : '#f85149';
+      const chgClr = s.change_pct >= 0 ? '#3fb950' : 'var(--bp-sat)';
       const price  = s.price != null ? (+s.price).toLocaleString('tr-TR',{minimumFractionDigits:2}) + ' ₺' : '—';
       return `<a href="/hisse/${t}" class="rel-stock-card" title="${s.name||t}">
         <div class="rel-stock-ticker">${t}</div>
@@ -521,7 +522,7 @@ async function artSubmitSub() {
   if (!emailEl || !formEl) return;
   const email = emailEl.value.trim();
   if (!email || !email.includes('@')) {
-    emailEl.style.borderColor = '#f85149';
+    emailEl.style.borderColor = 'var(--bp-sat)';
     emailEl.placeholder = 'Geçerli bir e-posta girin';
     setTimeout(() => { emailEl.style.borderColor = '#30363d'; emailEl.placeholder = 'e-posta adresiniz'; }, 2500);
     return;
@@ -535,10 +536,10 @@ async function artSubmitSub() {
     if (data.ok) {
       formEl.innerHTML = '<div style="color:#3fb950;font-size:13px;font-weight:600">✅ Abone oldunuz! Teşekkürler.</div>';
     } else {
-      formEl.innerHTML = '<div style="color:#f85149;font-size:13px">' + (data.error || 'Bir hata oluştu.') + '</div>';
+      formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">' + (data.error || 'Bir hata oluştu.') + '</div>';
     }
   } catch(e) {
-    formEl.innerHTML = '<div style="color:#f85149;font-size:13px">Bağlantı hatası, lütfen tekrar deneyin.</div>';
+    formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">Bağlantı hatası, lütfen tekrar deneyin.</div>';
   }
 }
 
