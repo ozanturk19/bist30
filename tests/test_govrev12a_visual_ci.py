@@ -78,9 +78,13 @@ def test_script_has_warn_only():
 
 def test_script_exits_0_on_no_server():
     """Sunucu çalışmıyorsa script exit 0 (warn) ile dönmeli — deploy bloke etmez."""
+    # timeout=60: --skip-capture diffs whatever is already in tests/visual/current/
+    # (gitignored, left over from local visual-test runs). With real screenshots
+    # present (not the empty-dir case), PIL/numpy diffing ~30 PNGs measured at ~35s
+    # on dev hardware — 15s was tuned for the empty/near-empty case and flaked here.
     result = subprocess.run(
         [_VENV_PYTHON, _SCRIPT, "--base=http://localhost:19999", "--skip-capture"],
-        capture_output=True, text=True, timeout=15,
+        capture_output=True, text=True, timeout=60,
     )
     # No server at 19999, but --skip-capture means we use existing current/
     # Either way exit code shouldn't be 2 (screenshot error)
