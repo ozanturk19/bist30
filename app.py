@@ -4197,7 +4197,9 @@ def api_stream():
 # ── F9 WebSocket: /ws/prices ─────────────────────────────────────────────────
 @app.route("/ws/prices")
 def ws_prices():
+    print("DIAG ws_prices ENTERED", flush=True)
     if not _WS_AVAILABLE:
+        print("DIAG _WS_AVAILABLE is False, aborting 501", flush=True)
         abort(501)
     ws = request.environ.get("wsgi.websocket")
     if not ws:
