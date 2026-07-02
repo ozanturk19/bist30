@@ -4197,14 +4197,11 @@ def api_stream():
 # ── F9 WebSocket: /ws/prices ─────────────────────────────────────────────────
 @app.route("/ws/prices")
 def ws_prices():
-    print("DIAG ws_prices ENTERED", flush=True)
     if not _WS_AVAILABLE:
-        print("DIAG _WS_AVAILABLE is False, aborting 501", flush=True)
         abort(501)
     ws = request.environ.get("wsgi.websocket")
     if not ws:
         return "WebSocket upgrade required", 400
-    logger.info("DIAG ws object obtained: %r closed=%s", ws, getattr(ws, "closed", "N/A"))
 
     is_prem = request.cookies.get("bp_premium_trial") == "1"
     email   = request.cookies.get("bp_sub", "").strip() or None
@@ -4221,13 +4218,15 @@ def ws_prices():
                 return ""
         _ws_clients[ws] = {"email": email, "is_premium": is_prem, "subscribe": set()}
 
-    logger.info("DIAG WS bağlandı: email=%s premium=%s toplam=%d", email, is_prem, len(_ws_clients))
+    logger.debug("WS bağlandı: email=%s premium=%s toplam=%d", email, is_prem, len(_ws_clients))
 
-    # CPO-974 Bug2 root cause: nginx Upgrade/Connection header'ları zaten doğruydu
-    # (curl -v ile 101 Switching Protocols doğrulandı) — asıl sorun sinyal güncellemesi
-    # gelene kadar bağlantının tamamen boşta kalması: Cloudflare edge ~100s idle WS
-    # bağlantısını kapatıyor → onclose → reconnect döngüsü → frontend'de flicker.
-    # Kalıcı çözüm: 20s'de bir PING frame gönder, bağlantıyı canlı tut.
+    # CPO-974 Bug2 idle-timeout mitigasyonu: sinyal güncellemesi gelene kadar
+    # bağlantı boşta kalıyor, bazı edge/proxy katmanları idle WS bağlantısını
+    # kapatabilir. 20s'de bir PING frame göndererek bağlantıyı canlı tutuyoruz.
+    # NOT: canlı ortamda ayrıca gunicorn 25.3.0 + gevent-websocket 0.10.1 arasında
+    # WS handshake sonrası bağlantının anında kapandığı (Flask view'a hiç
+    # girilmeden) daha temel bir uyumluluk sorunu tespit edildi — DEV-968 raporuna
+    # bakınız. O sorun çözülene kadar bu ping mekanizması devreye giremiyor.
     ping_greenlet = None
     if _gevent is not None:
         def _ws_ping_loop():
@@ -4241,12 +4240,9 @@ def ws_prices():
 
     try:
         # Send current data immediately on connect
-        logger.info("DIAG pre-broadcast")
         _ws_broadcast()
-        logger.info("DIAG post-broadcast, entering receive loop")
         while True:
             msg = ws.receive()
-            logger.info("DIAG ws.receive() returned: %r", msg)
             if msg is None:
                 break
             try:
@@ -4257,12 +4253,9 @@ def ws_prices():
                             _ws_clients[ws]["subscribe"] = set(data["subscribe"])
             except Exception:
                 pass
-    except WebSocketError as _wse:
-        logger.info("DIAG WebSocketError: %s", _wse)
-    except Exception as _ex:
-        logger.exception("DIAG unexpected exception in ws_prices")
+    except WebSocketError:
+        pass
     finally:
-        logger.info("DIAG finally block reached")
         if ping_greenlet is not None:
             ping_greenlet.kill()
         with _ws_lock:
