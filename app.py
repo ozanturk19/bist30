@@ -53,10 +53,12 @@ except ImportError:
 # ── F9 WebSocket — geventwebsocket opsiyonel ─────────────────────────────────
 try:
     from geventwebsocket import WebSocketError
+    import gevent as _gevent
     _WS_AVAILABLE = True
 except ImportError:
     _WS_AVAILABLE = False
     WebSocketError = Exception
+    _gevent = None
 
 # ── Faz 12 P1 DQV — Data Quality Validators ───────────────────────────────────
 try:
@@ -4218,6 +4220,22 @@ def ws_prices():
 
     logger.debug("WS bağlandı: email=%s premium=%s toplam=%d", email, is_prem, len(_ws_clients))
 
+    # CPO-974 Bug2 root cause: nginx Upgrade/Connection header'ları zaten doğruydu
+    # (curl -v ile 101 Switching Protocols doğrulandı) — asıl sorun sinyal güncellemesi
+    # gelene kadar bağlantının tamamen boşta kalması: Cloudflare edge ~100s idle WS
+    # bağlantısını kapatıyor → onclose → reconnect döngüsü → frontend'de flicker.
+    # Kalıcı çözüm: 20s'de bir PING frame gönder, bağlantıyı canlı tut.
+    ping_greenlet = None
+    if _gevent is not None:
+        def _ws_ping_loop():
+            while True:
+                _gevent.sleep(20)
+                try:
+                    ws.send_frame("", ws.OPCODE_PING)
+                except Exception:
+                    break
+        ping_greenlet = _gevent.spawn(_ws_ping_loop)
+
     try:
         # Send current data immediately on connect
         _ws_broadcast()
@@ -4236,6 +4254,8 @@ def ws_prices():
     except WebSocketError:
         pass
     finally:
+        if ping_greenlet is not None:
+            ping_greenlet.kill()
         with _ws_lock:
             _ws_clients.pop(ws, None)
         logger.debug("WS ayrıldı: email=%s toplam=%d", email, len(_ws_clients))
