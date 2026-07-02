@@ -15,16 +15,17 @@ fi
 
 # 2) API endpoints respond
 for ep in /api/data /api/macro /api/chart /api/chart/XU100; do
-  status=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8003${ep}")
+  status=$(curl -s -m 8 -o /dev/null -w "%{http_code}" "http://localhost:8003${ep}")
   if [ "$status" != "200" ]; then
     echo "❌ FAIL: ${ep} returned ${status}"
     exit 1
   fi
 done
 
-# 3) /api/data has stocks (not empty, not loading)
-loading=$(curl -s 'http://localhost:8003/api/data' | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("loading"))' 2>/dev/null || echo error)
-count=$(curl -s 'http://localhost:8003/api/data' | python3 -c 'import json,sys;d=json.load(sys.stdin);print(len(d.get("stocks",[])))' 2>/dev/null || echo 0)
+# 3) /api/data has stocks (not empty, not loading) — tek fetch, iki kez curl atmıyoruz (CPO-947 timeout RCA)
+data_json=$(curl -s -m 8 'http://localhost:8003/api/data')
+loading=$(echo "$data_json" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("loading"))' 2>/dev/null || echo error)
+count=$(echo "$data_json" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(len(d.get("stocks",[])))' 2>/dev/null || echo 0)
 if [ "$loading" = "True" ]; then
   echo "⚠️  WARN: /api/data still loading (warmup may not be done yet)"
 fi
@@ -34,7 +35,7 @@ if [ "$count" -lt 100 ]; then
 fi
 
 # 4) Chart endpoints scale-sane (XU100 must be > 5000)
-xu100_price=$(curl -s 'http://localhost:8003/api/chart/XU100' | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("chart",{}).get("summary",{}).get("price",0))' 2>/dev/null || echo 0)
+xu100_price=$(curl -s -m 8 'http://localhost:8003/api/chart/XU100' | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("chart",{}).get("summary",{}).get("price",0))' 2>/dev/null || echo 0)
 if python3 -c "import sys;sys.exit(0 if float('${xu100_price}') >= 5000 else 1)" 2>/dev/null; then
   : # OK
 else
@@ -44,7 +45,7 @@ fi
 
 # 5) HTML pages render without 500
 for page in "/" "/hisse/THYAO" "/eth" "/sektor-harita" "/portfolio" "/sinyal-performans" "/blog" "/profil"; do
-  status=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:8003${page}")
+  status=$(curl -s -m 8 -o /dev/null -w "%{http_code}" "http://localhost:8003${page}")
   if [ "$status" != "200" ] && [ "$status" != "400" ]; then  # /profil without token returns 400, OK
     echo "❌ FAIL: ${page} returned ${status}"
     exit 1
