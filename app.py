@@ -4195,13 +4195,28 @@ def api_stream():
 
 
 # ── F9 WebSocket: /ws/prices ─────────────────────────────────────────────────
-@app.route("/ws/prices")
+# DEV-968/969 kök neden: Werkzeug 3.x, Upgrade:websocket header'ı olan istekleri
+# route eşleştirmede websocket=True işaretli kurallarla eşleştirmeye çalışıyor;
+# işaretlenmemiş route'larda NoMatch(websocket_mismatch=True) → WebsocketMismatch
+# (400) fırlatıyor, Flask view'a HİÇ girmeden. gevent-websocket (WSGI seviyesinde
+# environ['wsgi.websocket'] set eden eski/legacy pattern) bu Werkzeug davranışından
+# habersiz. Tek satırlık kalıcı çözüm: route'u websocket=True ile işaretle.
+@app.route("/ws/prices", websocket=True)
 def ws_prices():
     if not _WS_AVAILABLE:
         abort(501)
     ws = request.environ.get("wsgi.websocket")
     if not ws:
         return "WebSocket upgrade required", 400
+    # CPO-505'te yfinance hang'i önlemek için socket.setdefaulttimeout(8) global
+    # set edilmişti (app.py üst kısım) — bu, WS bağlantısının alt soketine de
+    # miras kalıyor ve 8s boşta kalınca socket.timeout ile bağlantı kopuyordu
+    # (ikinci, bağımsız kök neden — Werkzeug routing fix'inden sonra ortaya çıktı).
+    # WS soketi uzun süre boşta kalabileceği için timeout'u kaldırıyoruz.
+    try:
+        ws.handler.socket.settimeout(None)
+    except Exception:
+        pass
 
     is_prem = request.cookies.get("bp_premium_trial") == "1"
     email   = request.cookies.get("bp_sub", "").strip() or None
