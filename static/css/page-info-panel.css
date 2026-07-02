@@ -189,16 +189,3 @@
     font-size: 0.78rem;
   }
 }
-
-/* ── Optional light theme override (future-proofing) ────────────────────── */
-@media (prefers-color-scheme: light) {
-  .bp-info-panel {
-    --bp-pi-bg:         rgba(100, 100, 200, 0.06);
-    --bp-pi-border:     rgba(100, 100, 200, 0.18);
-    --bp-pi-text:       rgba(20, 20, 40, 0.80);
-    --bp-pi-text-muted: rgba(20, 20, 40, 0.45);
-    --bp-pi-accent:     #4a5bbf;
-    --bp-pi-jargon:     #4a5bbf;
-    --bp-pi-jargon-bg:  rgba(74, 91, 191, 0.08);
-  }
-}

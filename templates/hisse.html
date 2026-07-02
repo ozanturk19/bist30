@@ -2,9 +2,6 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<script>
-(function(){var t=localStorage.getItem('bp-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();
-</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WXLPNFHYLP"></script>
 <script>
@@ -174,19 +171,6 @@
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html[data-theme="light"] header {
-    background: rgba(245,246,250,0.92);
-    border-bottom-color: rgba(214,216,228,0.8);
-  }
-  .theme-toggle-btn {
-    background: var(--bp-surface2); border: 1px solid var(--bp-border);
-    border-radius: 6px; color: var(--bp-text2);
-    width: 32px; height: 32px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px; flex-shrink: 0;
-    transition: background 150ms;
-  }
-  .theme-toggle-btn:hover { background: var(--bp-surface2); filter: brightness(1.1); }
 
   body {
     background: var(--bp-bg);
@@ -1420,7 +1404,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
   </div>
 </nav>
-  <button id="theme-toggle" class="theme-toggle-btn" aria-label="Tema değiştir" title="Tema değiştir"></button>
   <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </button>
@@ -4309,32 +4292,5 @@ window._bpApplyTooltips = _applyTooltipVisibility;
 <script src="/static/js/toast.js" defer></script>
 
 {% include '_mobile_nav_partial.html' %}
-<script>
-(function(){
-  var STORAGE_KEY='bp-theme';
-  var root=document.documentElement;
-  var CHART_DARK={layout:{background:{color:'#0e0e12'},textColor:'#909097'},grid:{vertLines:{color:'#2a2a2c'},horzLines:{color:'#2a2a2c'}},crosshair:{vertLine:{color:'#b8c3ff'},horzLine:{color:'#b8c3ff'}}};
-  var CHART_LIGHT={layout:{background:{color:'#f5f6fa'},textColor:'#64647a'},grid:{vertLines:{color:'#d6d8e4'},horzLines:{color:'#d6d8e4'}},crosshair:{vertLine:{color:'#3c4fba'},horzLine:{color:'#3c4fba'}}};
-  function applyTheme(theme){
-    if(theme==='light') root.setAttribute('data-theme','light');
-    else root.removeAttribute('data-theme');
-    var btn=document.getElementById('theme-toggle');
-    if(btn) btn.textContent=theme==='light'?'🌙':'☀️';
-    if(window._bpChart) window._bpChart.applyOptions(theme==='light'?CHART_LIGHT:CHART_DARK);
-  }
-  function getTheme(){
-    var s=localStorage.getItem(STORAGE_KEY);
-    if(s) return s;
-    return 'dark';
-  }
-  applyTheme(getTheme());
-  var btn=document.getElementById('theme-toggle');
-  if(btn) btn.addEventListener('click',function(){
-    var cur=root.getAttribute('data-theme')==='light'?'dark':'light';
-    localStorage.setItem(STORAGE_KEY,cur);
-    applyTheme(cur);
-  });
-})();
-</script>
 </body>
 </html>
