@@ -2900,7 +2900,6 @@ def _analyze_with_timeout(ticker):
 
 
 _refresh_data_lock = threading.Lock()  # M2: concurrent refresh_data() engelle — ikinci çağrı skip
-_last_refresh_bad_ticker_count = 0  # M5: stale fallback ticker sayısı → health DEGRADED tetikler
 
 
 def refresh_data():
@@ -2972,8 +2971,6 @@ def _refresh_data_impl():
             _stale_count += 1
     if _stale_count:
         logger.info("prev_cache fallback: %d ticker stale ile korundu (toplam %d)", _stale_count, len(results))
-    global _last_refresh_bad_ticker_count
-    _last_refresh_bad_ticker_count = _stale_count
     # ── /prev_cache fallback ─────────────────────────────────────────────────────────
 
     with _lock:
@@ -7353,12 +7350,16 @@ def _compute_health():
         last_refresh_ts = _cache.get("last_refresh_ts", 0) or 0
         macro_count     = len(_macro_cache.get("data") or [])
         macro_ts        = _macro_cache.get("ts", 0)
+        # P1c fix: leader-only _last_refresh_bad_ticker_count global her zaman 0 dönüyordu
+        # web process'te (REFRESH_WORKER=web) — sadece _refresh_data_impl() içinde set ediliyor.
+        # Disk-cache'ten yüklenen data_quality alanı her iki process'te de mevcut (stale fallback
+        # yazımı _save_cache_to_disk ile diske geçiyor), o yüzden buradan saymak leader/web ayrımından bağımsız.
+        bad_ticker_count = sum(1 for s in (_cache.get("data") or []) if s.get("data_quality") == "stale")
 
     mkt_open    = _market_open()
     stocks_age_s = int(now - last_refresh_ts) if last_refresh_ts else None
     macro_age_s  = int(now - macro_ts) if macro_ts else None
     macro_stale  = macro_age_s is None or macro_age_s > _MACRO_TTL
-    bad_ticker_count = _last_refresh_bad_ticker_count  # M5: stale fallback ticker sayısı
 
     # ── Component durumları ── (seans dışında stale OK — normal davranış)
     if stocks_count == 0:
