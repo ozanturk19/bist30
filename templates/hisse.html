@@ -2016,11 +2016,15 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       {# CPO-535 #36 Skor Halka — compose_score PRIMARY, tier_score fallback #}
       {%- set _ts = (ssr_signal.signal_strength | default(ssr_signal.tier_score | default(0))) | int %}
       {% if ssr_signal and _ts > 0 %}
-      {# Tier eşikleri: 75+ PREMIUM | 60-74 İYİ | 40-59 ORTA | <40 ZAYIF #}
-      {%- if   _ts >= 75 %}{% set _tc = "#00e290" %}{% set _tl = "🏆 PREMIUM" %}
-      {%- elif _ts >= 60 %}{% set _tc = "#b8c3ff" %}{% set _tl = "✅ İYİ"     %}
-      {%- elif _ts >= 40 %}{% set _tc = "#909097" %}{% set _tl = "⚪ ORTA"    %}
-      {%- else            %}{% set _tc = "#6b7280" %}{% set _tl = "⚠️ ZAYIF"  %}{% endif %}
+      {# CPO-985/986 #8.1+#7: tier etiketi kanonik `ssr_signal.tier` alanından (Premium/Plus/Standart) —
+         önceden _ts kendi eşikleriyle bağımsız "PREMIUM/İYİ/ORTA/ZAYIF" üretiyordu; aynı hisse Tarama'da
+         💎 Premium rozeti gösterirken burada "✅ İYİ" görünebiliyordu (örn. tier_score 75 vs signal_strength 70).
+         Artık halka NUMARASI signal_strength (sinyal gücü, 0-100), ETİKETİ site genelindeki tier alanı — tek vocabulary. #}
+      {%- set _tier = ssr_signal.tier -%}
+      {%- if   _tier == "premium"  %}{% set _tc = "#a855f7" %}{% set _tl = "💎 PREMIUM" %}
+      {%- elif _tier == "plus"     %}{% set _tc = "#1f6feb" %}{% set _tl = "⭐ PLUS"     %}
+      {%- elif _tier == "standart" %}{% set _tc = "#909097" %}{% set _tl = "STANDART"    %}
+      {%- else                     %}{% set _tc = "#6b7280" %}{% set _tl = ""            %}{% endif %}
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
            title="Sinyal gücü puanı (0–100). ADX, hacim, yön gücü, teyit ve RSI bileşenlerine dayalı.">
         <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100, {{ _tl }}">
