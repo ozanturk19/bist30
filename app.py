@@ -1226,9 +1226,11 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
                   confirmed: bool, rsi: float) -> int:
     """Tek skor kaynağı — 0-100 aralığı. CPO-535 spec.
 
-    Güçlü Trend listesi (_mscore) ve hisse detay sayfası (signal_strength)
-    için aynı formül → tutarlı sayı. gucu_yuksek() momentum_score() ve
-    analyze() AUDIT-004 tier_score'un yerine geçer (CPO-531 #36).
+    SADECE analyze() içinde çağrılır, sonucu signal_strength olarak cache'e
+    yazılır (F5 AI Sentiment ±5 ayarıyla birlikte). Güçlü Trend listesi
+    (_mscore) ve hisse detay sayfası ikisi de bu TEK cache alanını okur —
+    ayrı ayrı yeniden hesaplama YASAK (CPO-983 puanlama tutarlılık fix, Site
+    Contract §24). AUDIT-004 tier_score'un yerine geçer (CPO-531 #36).
 
     Bileşenler:
         ADX       : min(adx, 50) / 50 * 30   → max 30
@@ -1626,7 +1628,7 @@ def analyze(ticker_base):
             "rvol":          rvol,
             "is_premium":    is_premium,
             "signal_strength": signal_strength,  # compose_score 0-100 (CPO-535 #36) — PRIMARY display
-            "tier":          tier,        # SPEC-001 Faz 1: 'standart' | 'plus' | 'premium' | None (BEKLE) — DEPRECATED
+            "tier":          tier,        # SPEC-001 Faz 1: 'standart' | 'plus' | 'premium' | None (BEKLE) — LIVE, index.html grup başlıklarının kaynağı
             "tier_score":    tier_score,  # AUDIT-004 0-100 — backward compat — DEPRECATED (use signal_strength)
             "volume_tl_avg20": volume_tl_avg20,
             "low_liquidity": low_liquidity,
@@ -8024,22 +8026,14 @@ def gucu_yuksek():
         updated_at = _cache.get("updated_at", "")
         loading = len(stocks) == 0
 
-    # Sadece AL/SAT sinyallerini al; compose_score ile sırala (CPO-535 #36)
-    # momentum_score() kaldırıldı → compose_score() top-level (tutarlılık: hisse detay ↔ liste)
+    # Sadece AL/SAT sinyallerini al; kanonik cache alanı signal_strength ile sırala
+    # (CPO-983 puanlama tutarlılık fix: eskiden burada kompozit skor canlı yeniden
+    # hesaplanıyordu ve analyze()'daki F5 AI Sentiment ±5 ayarını atlıyordu — bu da
+    # hisse detay sayfasındaki signal_strength'ten farklı bir sayı üretiyordu. Artık
+    # her iki sayfa da AYNI önceden hesaplanmış cache alanını okuyor, tek kaynak.)
     active = [s for s in stocks if s.get("signal") in ("AL", "SAT") and s.get("ticker") != "XU030"]
     for s in active:
-        _bs = s.get("bull_score") if s.get("signal") == "AL" else (s.get("bear_score") or 0)
-        try:
-            _adx = float(str(s.get("adx") or 0).replace(",", "."))
-        except Exception:
-            _adx = 0.0
-        s["_mscore"] = compose_score(
-            adx=_adx,
-            vol_ratio=float(s.get("vol_ratio") or 1.0),
-            bull_score=int(_bs or 0),
-            confirmed=bool(s.get("confirmed")),
-            rsi=float(s.get("rsi") or 50),
-        )
+        s["_mscore"] = s.get("signal_strength") or 0
     active.sort(key=lambda s: s["_mscore"], reverse=True)
 
     today_str = date.today().strftime("%d.%m.%Y")

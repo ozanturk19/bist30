@@ -2120,7 +2120,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <!-- Giriş Analizi (Güçlü/Zayıf Trend sinyallerinde gösterilir) -->
   <div class="entry-analysis-section" id="entryAnalysisSection" data-tab-content="ozet" style="display:none">
     <h2 class="section-title">🎯 Giriş Analizi</h2>
-    <div class="entry-analysis-grid">
+    <div class="entry-analysis-grid" id="entryAnalysisGrid">
 
       <!-- Giriş Değerlendirmesi -->
       <div>
@@ -3197,10 +3197,21 @@ function renderSummary(s, signalData) {
 
   /* ── Giriş Analizi ── */
   (function renderEntryAnalysis() {
-    if (!signalData || (signalData.signal !== 'AL' && signalData.signal !== 'SAT')) return;
-    if (!signalData.entry_quality) return;
-
     const section = document.getElementById('entryAnalysisSection');
+    const hasActiveSignal = signalData && (signalData.signal === 'AL' || signalData.signal === 'SAT') && signalData.entry_quality;
+
+    if (!hasActiveSignal) {
+      /* CPO-983 Opsiyon B: boş kutular yerine anlamlı placeholder — aktif sinyal yok */
+      if (section) {
+        section.style.display = 'block';
+        const grid = document.getElementById('entryAnalysisGrid');
+        if (grid) {
+          grid.innerHTML = '<div style="grid-column:1/-1;color:#909097;font-size:13px;padding:8px 2px;line-height:1.6">Bu hisse için şu an aktif bir sinyal yok, giriş analizi hesaplanmadı. Yeni sinyal oluştuğunda bu bölüm otomatik güncellenir.</div>';
+        }
+      }
+      return;
+    }
+
     if (section) section.style.display = 'block';
 
     /* Giriş Değerlendirmesi */
@@ -3991,6 +4002,12 @@ async function loadMTF() {
     const sigBg    = s => s === 'AL' ? '#1a4731' : s === 'SAT' ? '#3d0f0f' : '#1c1b1f';
     const sigBord  = s => s === 'AL' ? '#238636' : s === 'SAT' ? '#da3633' : '#2a2a2c';
     const sigArrow = s => s === 'AL' ? '▲' : s === 'SAT' ? '▼' : '●';
+
+    /* CPO-983 Opsiyon B: 4 ayrı boş "Veri yok" kutusu yerine tek anlamlı placeholder */
+    if (tfs.every(tf => !json[tf.key])) {
+      grid.innerHTML = '<div style="grid-column:1/-1;background:#0e0e12;border:1px solid #1c1b1f;border-radius:8px;padding:16px;text-align:center;color:#909097;font-size:13px;line-height:1.6">Bu hisse için zaman dilimi verisi henüz yok. Sinyal oluştuğunda burada güncellenir.</div>';
+      return;
+    }
 
     grid.innerHTML = tfs.map(tf => {
       const d = json[tf.key];

@@ -530,10 +530,6 @@
   .header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
   #liveTs { font-size: 11px; font-weight: 600; color: var(--bp-al); letter-spacing: 0.3px; font-variant-numeric: tabular-nums; }
   #updated { font-size: 11px; color: var(--bp-text3); }
-  #ws-status { font-size: 10px; font-weight: 600; letter-spacing: 0.3px; padding: 2px 6px; border-radius: 10px; display: inline-block; visibility: hidden; min-width: 52px; text-align: center; }
-  #ws-status.ws-live { visibility: visible; color: var(--bp-al); }
-  #ws-status.ws-connecting { visibility: visible; color: var(--bp-text3); }
-  #ws-status.ws-error { visibility: visible; color: #f85149; }
 
   .btn-refresh {
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
@@ -2135,7 +2131,7 @@
 </nav>
 
   <!-- Right actions injected by bp-search.js (header-right uniform) -->
-  <span id="ws-status" class="ws-connecting" title="WebSocket bağlantı durumu">⬤ WS</span>
+  <!-- CPO-983: WS ikon UI'dan kaldırıldı (kullanıcıya değer katmıyor, sadece backend health göstergesiydi). Backend WS kanalı aktif kalıyor (setWsStatus null-safe no-op). -->
   <button id="header-push-bell" onclick="togglePushSubscription()" aria-label="Push bildirimleri" title="Sinyal bildirimi aç/kapat">🔔</button>
   <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
