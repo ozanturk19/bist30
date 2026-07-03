@@ -610,15 +610,16 @@
     vertical-align: middle;
   }
   .tier-badge-premium {
-    color: #ffc850;
-    background: rgba(255,200,80,.10);
-    border: 1px solid rgba(255,200,80,.45);
+    /* Premium — mor #a855f7 (CPO-986 #8.1) */
+    color: #c58af9;
+    background: rgba(168,85,247,.14);
+    border: 1px solid rgba(168,85,247,.50);
   }
   .tier-badge-plus {
-    /* Plus — mavi (CPO MSG-084 D plan) */
-    color: #5ba0ff;
-    background: rgba(91,160,255,.12);
-    border: 1px solid rgba(91,160,255,.45);
+    /* Plus — mavi #1f6feb (CPO-986 #8.1) */
+    color: #58a6ff;
+    background: rgba(31,111,235,.14);
+    border: 1px solid rgba(31,111,235,.50);
   }
   /* F2 — Anomali rozet */
   .anomaly-badge {
@@ -812,9 +813,9 @@
     letter-spacing: .5px;
     text-transform: uppercase;
   }
-  tr.tier-group-header.tg-premium td { color: #ffd700; }   /* Premium */
-  tr.tier-group-header.tg-plus    td { color: #5ba0ff; }   /* Plus */
-  tr.tier-group-header.tg-standart td { color: #808080; }  /* Standart */
+  tr.tier-group-header.tg-premium td { color: #a855f7; }   /* Premium — CPO-986 #8.1 mor */
+  tr.tier-group-header.tg-plus    td { color: #1f6feb; }   /* Plus — CPO-986 #8.1 mavi */
+  tr.tier-group-header.tg-standart td { color: #808080; }  /* Standart — nötr */
   tr.tier-group-header td .tier-count {
     display: inline-block;
     margin-left: 8px;
@@ -838,9 +839,9 @@
     align-items: center;
     justify-content: space-between;
   }
-  .mc-tier-group.tg-premium  { color: #ffd700; border-left: 3px solid #ffd700; }   /* Premium */
-  .mc-tier-group.tg-plus     { color: #5ba0ff; border-left: 3px solid #5ba0ff; }   /* Plus */
-  .mc-tier-group.tg-standart { color: #808080; border-left: 3px solid #808080; }   /* Standart */
+  .mc-tier-group.tg-premium  { color: #a855f7; border-left: 3px solid #a855f7; background: rgba(168,85,247,0.12); }   /* Premium — CPO-986 #8.1 mor #a855f7 arka plan */
+  .mc-tier-group.tg-plus     { color: #1f6feb; border-left: 3px solid #1f6feb; }   /* Plus — CPO-986 #8.1 mavi */
+  .mc-tier-group.tg-standart { color: #808080; border-left: 3px solid #808080; }   /* Standart — nötr */
   .mc-tier-group .tier-count {
     font-size: 10px;
     color: var(--bp-text3, #484f58);
@@ -1176,9 +1177,9 @@
   .stat-bekle.stat-card { border-top: 2px solid rgba(144,144,151, 0.4); }
   .stat-premium.stat-card { border-top: 2px solid rgba(255,200,80,0.65); }
   .stat-premium .stat-num { color: #ffc850; }
-  /* Premium row indicator: subtle gold border-left (class-based selector — title rename'den bağımsız sağlam) */
-  tr[data-ticker]:has(.tier-badge-premium) td:first-child { border-left: 2px solid rgba(255,215,0,0.55); }
-  .mc:has(.tier-badge-premium) { border-left: 2px solid rgba(255,215,0,0.55); }
+  /* Premium row indicator: subtle mor border-left (CPO-986 #8.1; class-based selector — title rename'den bağımsız sağlam) */
+  tr[data-ticker]:has(.tier-badge-premium) td:first-child { border-left: 2px solid rgba(168,85,247,0.60); }
+  .mc:has(.tier-badge-premium) { border-left: 2px solid rgba(168,85,247,0.60); }
   .stat-total.stat-card { border-top: 2px solid rgba(184, 195, 255, 0.5); }
 
   /* Market breadth bar */
@@ -4214,7 +4215,7 @@ function renderTable() {
     acc[t] = (acc[t] || 0) + 1;
     return acc;
   }, {});
-  const _tierLabels = { premium: 'PREMIUM', plus: 'PLUS', standart: 'STANDART' };
+  const _tierLabels = { premium: '💎 PREMIUM', plus: '⭐ PLUS', standart: 'STANDART' };  // CPO-986 #8.1: kanonik 💎/⭐
   let _lastTier_mobile = '__init__';
   let _lastTier_desktop = '__init__';
   /* SPEC-001 Faz 2: Premium access — false ise Premium rows blur + CTA */

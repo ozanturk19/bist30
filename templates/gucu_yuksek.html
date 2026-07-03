@@ -312,13 +312,14 @@
         {% for s in stocks %}
         <tr>
           <td class="rank {% if loop.index <= 3 %}top3{% endif %}">
-            {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+            {{ loop.index }}
           </td>
           <td>
             <a href="/hisse/{{ s.ticker }}" class="ticker-cell">
               <div>
-                {# CPO-535 #36: is_premium (RVOL ≥ 1.20) → "⭐ Hacim Onaylı" chip #}
-                <div class="tk">{{ s.ticker }}{% if s.is_premium %} <span title="Hacim Onaylı — RVOL ≥ 1.20 (backtest: Win Rate %51.5)" style="color:#ffc850;font-size:11px;vertical-align:middle">⭐</span>{% endif %}</div>
+                {# CPO-986 #8.1: tier kanonik sembol — 💎 Premium (mor #a855f7) / ⭐ Plus (mavi #1f6feb) / Standart işaretsiz.
+                   is_premium (⭐ Hacim Onaylı, altın #ffc850) tier'dan bağımsız ayrı bir metrik (CPO-535 #36), renkle ayrışır. #}
+                <div class="tk">{{ s.ticker }}{% if s.tier == 'premium' %} <span title="Premium tier" style="color:#a855f7;font-size:11px;vertical-align:middle">💎</span>{% elif s.tier == 'plus' %} <span title="Plus tier" style="color:#1f6feb;font-size:11px;vertical-align:middle">⭐</span>{% endif %}{% if s.is_premium %} <span title="Hacim Onaylı — RVOL ≥ 1.20 (backtest: Win Rate %51.5)" style="color:#ffc850;font-size:11px;vertical-align:middle">⭐</span>{% endif %}</div>
                 <div class="tk-name">{{ stock_names.get(s.ticker, '') | truncate(22, true, '') }}</div>
               </div>
             </a>

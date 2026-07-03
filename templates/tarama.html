@@ -565,13 +565,12 @@
     </div>
 
     <div class="filter-group">
-      <label>Giriş Kalitesi</label>
-      <select id="fEq">
+      <label>Kalite</label>
+      <select id="fTier">
         <option value="">Tümü</option>
-        <option value="IDEAL">✅ İdeal</option>
-        <option value="IYI">👍 İyi</option>
-        <option value="DIKKATLI">⚠️ Dikkatli</option>
-        <option value="UZAK">🚫 Uzak</option>
+        <option value="premium">💎 Premium</option>
+        <option value="plus">⭐ Plus</option>
+        <option value="standart">Standart</option>
       </select>
     </div>
 
@@ -609,12 +608,14 @@
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:12px;color:var(--text2)">Sırala:</span>
       <select class="sort-select" id="sortSel" onchange="applyFilters()">
+        <option value="tier_score">Skor (Yüksek → Düşük)</option>
         <option value="adx">ADX (Güçlü → Zayıf)</option>
-        <option value="change_pct">Değişim%</option>
-        <option value="price">Fiyat</option>
-        <option value="signal_bars">Sinyal Yaşı</option>
-        <option value="vol_ratio">Hacim Oranı</option>
+        <option value="vol_ratio">RVOL (Yüksek → Düşük)</option>
+        <option value="change_pct">Değişim % (Yüksek → Düşük)</option>
+        <option value="signal_bars">Tazelik (Yeni → Eski)</option>
       </select>
+      <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:12px;border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
+        title="Skor: Birleşik kalite (ADX + Hacim + RSI + Teyit) — Premium/Plus/Standart tier bu skordan hesaplanır. En kaliteli hisseler üstte.&#10;ADX: Sadece trend gücü. Premium bir hisse ADX düşük olabilir.&#10;RVOL: Hacim oranı — anormal hareket göstergesi.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
       <button onclick="exportCSV()" title="Sonuçları CSV olarak indir"
         style="background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.3);color:#58a6ff;
                border-radius:6px;padding:5px 11px;font-size:12px;cursor:pointer;font-family:inherit;
@@ -705,7 +706,7 @@
 })();
 
 /* ── Tarama ── */
-let _currentSort = 'adx';
+let _currentSort = 'tier_score';
 let _sectors = [];
 
 function sigLabel(sig) {
@@ -713,6 +714,9 @@ function sigLabel(sig) {
 }
 function eqLabel(eq) {
   return {IDEAL:'İdeal',IYI:'İyi',DIKKATLI:'Dikkatli',UZAK:'Uzak'}[eq]||'';
+}
+function tierLabel(tier) {
+  return {premium:'💎 Premium',plus:'⭐ Plus',standart:'Standart'}[tier]||'';  // CPO-986 #8.1
 }
 
 let _csvData = [];
@@ -789,7 +793,7 @@ async function applyFilters() {
   const sig    = document.getElementById('fSignal').value;
   const minAdx = document.getElementById('fMinAdx').value || 0;
   const sector = document.getElementById('fSector').value;
-  const eq     = document.getElementById('fEq').value;
+  const tier   = document.getElementById('fTier').value;
   const minP   = document.getElementById('fMinP').value || 0;
   const maxP   = document.getElementById('fMaxP').value || 999999;
   const sort   = document.getElementById('sortSel').value;
@@ -797,13 +801,13 @@ async function applyFilters() {
 
   const params = new URLSearchParams({
     signal: (sig === 'PREMIUM' ? 'AL' : sig),
-    min_adx: minAdx, sector, eq,
+    min_adx: minAdx, sector, tier,
     min_price: minP, max_price: maxP, sort,
     sort_dir: _sortDir
   });
   if (sig === 'PREMIUM') params.set('only_premium', '1');
   // Remove empty
-  [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999' || v==='0' || v==='all' || v==='adx') params.delete(k); });
+  [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999' || v==='0' || v==='all' || v==='tier_score') params.delete(k); });
 
   // T2: URL state — replaceState ile (history kabarmaz, paylaşılabilir)
   try {
@@ -853,7 +857,7 @@ function renderActiveFilterChips() {
   const sig = (document.getElementById('fSignal').value || '').trim();
   const minAdx = parseFloat(document.getElementById('fMinAdx').value) || 0;
   const sector = (document.getElementById('fSector').value || '').trim();
-  const eq = (document.getElementById('fEq').value || '').trim();
+  const tier = (document.getElementById('fTier').value || '').trim();
   const minP = (document.getElementById('fMinP').value || '').trim();
   const maxP = (document.getElementById('fMaxP').value || '').trim();
 
@@ -863,10 +867,7 @@ function renderActiveFilterChips() {
   }
   if (minAdx > 0) chips.push({ label: `ADX ≥ ${minAdx}`, key: 'minAdx' });
   if (sector) chips.push({ label: sector, key: 'sector' });
-  if (eq) {
-    const labels = { IDEAL: '✅ İdeal', IYI: '👍 İyi', DIKKATLI: '⚠️ Dikkatli', UZAK: '🚫 Uzak' };
-    chips.push({ label: `Giriş: ${labels[eq] || eq}`, key: 'eq' });
-  }
+  if (tier) chips.push({ label: `Kalite: ${tierLabel(tier)}`, key: 'tier' });
   if (minP && maxP)      chips.push({ label: `₺${minP}–${maxP}`, key: 'price' });
   else if (minP)         chips.push({ label: `Min ₺${minP}`, key: 'priceMin' });
   else if (maxP)         chips.push({ label: `Max ₺${maxP}`, key: 'priceMax' });
@@ -891,7 +892,7 @@ function removeFilterChip(filterKey) {
     signal:   () => { document.getElementById('fSignal').value = ''; },
     minAdx:   () => { document.getElementById('fMinAdx').value = 0; },
     sector:   () => { document.getElementById('fSector').value = ''; },
-    eq:       () => { document.getElementById('fEq').value = ''; },
+    tier:     () => { document.getElementById('fTier').value = ''; },
     priceMin: () => { document.getElementById('fMinP').value = ''; },
     priceMax: () => { document.getElementById('fMaxP').value = ''; },
     price:    () => {
@@ -921,7 +922,7 @@ const _applyFiltersDebounced = _debounce(applyFilters, 350);
 
 function _initReactiveFilters() {
   // Select'ler — anlık (0ms)
-  ['fSignal', 'fSector', 'fEq', 'sortSel'].forEach(id => {
+  ['fSignal', 'fSector', 'fTier', 'sortSel'].forEach(id => {
     const el = document.getElementById(id);
     if (el && !el.dataset.bpReactive) {
       el.addEventListener('change', applyFilters);
@@ -943,7 +944,7 @@ function _hydrateFiltersFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const mapping = {
       'signal': 'fSignal', 'min_adx': 'fMinAdx', 'sector': 'fSector',
-      'eq': 'fEq', 'min_price': 'fMinP', 'max_price': 'fMaxP',
+      'tier': 'fTier', 'min_price': 'fMinP', 'max_price': 'fMaxP',
       'sort': 'sortSel'
     };
     for (const [param, elId] of Object.entries(mapping)) {
@@ -1036,7 +1037,7 @@ function renderResults(rows, count) {
     return `<tr${_locked}>
       <td>
         <a href="/hisse/${s.ticker}">
-          <div class="tk">${s.ticker}${s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:#ffc850;font-size:11px;vertical-align:middle">💎</span>' : ''}</div>
+          <div class="tk">${s.ticker}${s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:#a855f7;font-size:11px;vertical-align:middle">💎</span>' : s.tier === 'plus' ? ' <span title="Plus sinyal" style="color:#1f6feb;font-size:11px;vertical-align:middle">⭐</span>' : ''}</div>
           <div class="tk-name">${(s.name||'').replace(' A.Ş.','').substring(0,20)}</div>
         </a>
       </td>
@@ -1063,7 +1064,7 @@ function renderResults(rows, count) {
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
         : '<span style="color:var(--text3)">—</span>';
       const _lk  = (_premLocked && s.tier === 'premium') ? ' mr-locked' : '';
-      const _prm = s.tier === 'premium' ? ' <span style="color:#ffc850;font-size:11px">💎</span>' : '';
+      const _prm = s.tier === 'premium' ? ' <span style="color:#a855f7;font-size:11px">💎</span>' : s.tier === 'plus' ? ' <span style="color:#1f6feb;font-size:11px">⭐</span>' : '';
       const _adx = s.adx || 0;
       const _tl  = _adx >= 25 ? ['Güçlü','strong'] : _adx >= 18 ? ['Orta','medium'] : ['Zayıf','weak'];
       return `<a href="/hisse/${s.ticker}" class="mr-card${_lk}">
@@ -1109,10 +1110,10 @@ function resetFilters() {
   document.getElementById('fSignal').value = '';
   document.getElementById('fMinAdx').value = 0;
   document.getElementById('fSector').value = '';
-  document.getElementById('fEq').value     = '';
+  document.getElementById('fTier').value   = '';
   document.getElementById('fMinP').value   = '';
   document.getElementById('fMaxP').value   = '';
-  document.getElementById('sortSel').value = 'adx';
+  document.getElementById('sortSel').value = 'tier_score';
   document.getElementById('fSearch').value = '';
   document.getElementById('searchClearBtn').style.display = 'none';
   _searchQ = '';

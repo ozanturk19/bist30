@@ -7270,8 +7270,9 @@ def api_tarama():
     min_p    = float(request.args.get("min_price", 0))
     max_p    = float(request.args.get("max_price", 999999))
     sector   = request.args.get("sector",    "")
-    eq       = request.args.get("eq",        "")   # IDEAL | IYI | DIKKATLI | UZAK
-    sort_by  = request.args.get("sort",      "adx")
+    eq       = request.args.get("eq",        "")   # IDEAL | IYI | DIKKATLI | UZAK — deprecated, "Kalite" filtresi artık tier kullanıyor (CPO-985 #8.4)
+    tier_f   = request.args.get("tier",      "")   # premium | plus | standart (CPO-985 #8.4)
+    sort_by  = request.args.get("sort",      "tier_score")  # CPO-985 #8.2: default artık Skor (tier_score), eskiden adx
 
     with _lock:
         stocks = list(_cache["data"])
@@ -7293,6 +7294,7 @@ def api_tarama():
         if sig    and s.get("signal")              != sig:    continue
         if sector and _get_sector(s.get("ticker","")) != sector: continue
         if eq     and s.get("entry_quality")       != eq:    continue
+        if tier_f and s.get("tier")                != tier_f: continue
         price = s.get("price")  or 0
         adx   = _parse_adx(s)
         if price < min_p or price > max_p: continue
@@ -7311,6 +7313,7 @@ def api_tarama():
             "rvol":          s.get("rvol"),
             "is_premium":    s.get("is_premium", False),
             "tier":          s.get("tier"),   # SPEC-007: paywall için (premium/plus/standart/None)
+            "tier_score":    s.get("tier_score") or 0,  # CPO-985 #8.2: "Skor" sıralama alanı — tier'ı (Premium/Plus/Standart) doğrudan sürükleyen tek sayı
             "bull_score":    s.get("bull_score") or 0,
             "sl_level":      s.get("sl_level"),
         })
@@ -7322,7 +7325,7 @@ def api_tarama():
     if sort_dir in ("asc", "desc"):
         rev = sort_dir == "desc"
     else:
-        rev = sort_by in ("adx","price","signal_bars","vol_ratio","bull_score","change_pct")
+        rev = sort_by in ("adx","price","signal_bars","vol_ratio","bull_score","change_pct","tier_score")
     results.sort(key=lambda x: (x.get(sort_by) or 0), reverse=rev)
 
     with _lock:
