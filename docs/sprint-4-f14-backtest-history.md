@@ -245,4 +245,18 @@ def build_delta(items):
 
 ---
 
-*Spec: DEV-888 | Hedef: Sprint 4 W2*
+## 9. Kullanım Rehberi (Post-Deploy, 4 Temmuz 2026)
+
+Spec'te tasarlanan tüm uç noktalar birebir uygulandı (`app.py:10120-10186`). Kullanıcı akışı:
+
+1. `/backtest` sayfasında bir hisse + strateji + dönem seçip run çalıştır.
+2. Sonuç paneli açılınca **💾 Kaydet** butonu görünür; isteğe bağlı bir etiket (max 40 karakter) girip kaydedebilirsin. `ticker` BIST30 listesinde değilse, strateji/`period` geçersizse ya da sonuçta trade yoksa (`n_trades` boş) kayıt reddedilir (400).
+3. **📋 Geçmiş (N)** paneli o kullanıcının kayıtlı son 50 backtest'ini yeni→eski sırayla listeler (FIFO — 51. kayıt en eskisini düşürür).
+4. Panelde checkbox ile **en fazla 4** kayıt seçip **Karşılaştır**'a basınca `/api/backtest/compare` çağrılır; delta hesabı ilk seçilen kaydı baz alır (`sharpe`, `win_rate`, `total_return_pct`, `max_drawdown_pct`, `avg_bars` — `inf`/`None` değerler delta'dan atlanır).
+5. Bir kaydı silmek için history panelindeki 🗑 ikonu → `DELETE /api/backtest/history/{id}`. ID formatı regex ile doğrulanır (`^bt_\d{8}_\d{6}_[A-Z]{3,6}$`); başka kullanıcının ID'si ile silme denemesi 404 döner (hash'lenmiş dosya farklı olduğu için kayıt hiç bulunamaz).
+
+**Bilinen kısıtlar:** Equity curve saklanmaz (spec §2 gereği) — karşılaştırma yalnızca özet istatistik üzerinden yapılır, overlay chart isteniyorsa backtest yeniden çalıştırılmalı. Tüm endpoint'ler cookie session zorunlu (login olmayan kullanıcı 401 alır).
+
+---
+
+*Spec: DEV-888 | Hedef: Sprint 4 W2 | Deploy: 4 Temmuz 2026 (commit `23dac87`) | Kullanım rehberi: DEV-999*
