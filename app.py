@@ -3410,10 +3410,14 @@ def background_refresh():
                         _f.write(_alert_line + "\n")
                 except OSError as _e:
                     logger.warning("api_stale ALERT.md yazılamadı: %s", _e)
+                # CPO-995/DEV-987: CPO-837 aile — network I/O (_send_telegram) lock
+                # dışına alındı, lock sadece _last_stale_alert_ts state kontrolü/güncellemesini korur.
                 with _stale_alert_lock:
-                    if _should_alert_telegram(_stale, _last_stale_alert_ts):
-                        _send_telegram(_alert_line)
+                    _should_send = _should_alert_telegram(_stale, _last_stale_alert_ts)
+                    if _should_send:
                         _last_stale_alert_ts = time.time()
+                if _should_send:
+                    _send_telegram(_alert_line)
         except Exception as _e:
             logger.error("Paket 1 api_stale check hatası: %s", _e)
 
@@ -4844,7 +4848,6 @@ _SIG_FAIL_TTL         = 300        # 5 dakika
 #   3. Non-leader: cache miss → commentary fallback (Gemini call YOK)
 _SIG_EXPLAIN_DISK_PATH = "/root/bist30/_signal_explain_cache.json"
 _sig_disk_mtime = None  # H3 pattern: file mtime guard
-_sig_disk_lock = threading.Lock()
 
 
 def _save_explain_cache_to_disk():
@@ -4921,6 +4924,10 @@ def _gemini_rate_acquire() -> float:
 
     flock ile tek seferde bir worker slot alır; sleep dışarıda kalır (CPO-837 uyumlu).
     Returns: saniye cinsinden beklenecek süre (≤0 ise beklemeden devam).
+
+    P3 backlog (CPO-994/CPO-995): lock altında tek float write (few bytes, fsync yok) —
+    CPO-992'nin 64MB+fsync repro'suyla aynı şiddette değil, threadpool offload'a gerek
+    görülmedi. Gelecek gunicorn upgrade sonrası tetiklenme ihtimaline karşı not düşüldü.
     """
     global _gemini_rate_fh
     if _gemini_rate_fh is None:
@@ -8129,7 +8136,7 @@ def api_contact():
             msg["Subject"] = f"[BorsaPusula İletişim] {subject}"
             body = f"Gönderen: {name} <{email}>\nKonu: {subject}\n\n{message}"
             msg.attach(MIMEText(body, "plain", "utf-8"))
-            with smtplib.SMTP_SSL(SMTP_HOST, 465) as s:
+            with smtplib.SMTP_SSL(SMTP_HOST, 465, timeout=15) as s:
                 s.login(SMTP_USER, SMTP_PASS)
                 s.sendmail(SMTP_USER, ADMIN_MAIL, msg.as_string())
             logger.info("Contact mail gönderildi: %s <%s>", name, email)
