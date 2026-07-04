@@ -473,7 +473,9 @@ def _can_send_push(endpoint_key, ticker):
     File-based state (push_state.json) + fcntl lock. True → gönderilebilir (state tüketilir).
     Hata durumunda fail-open (True) — rate limit dosya sorunu push'u tamamen kesmesin."""
     import fcntl
-    try:
+    # CPO-994/DEV-986: same CPO-992 disk-I/O-under-lock pattern (fcntl variant) —
+    # routed through the hub threadpool like _tp_read_json/_tp_write_json above.
+    def _do():
         now  = time.time()
         hour = int(now / 3600)
         with open(_PUSH_RATELIMIT_PATH, "a+") as f:
@@ -498,6 +500,10 @@ def _can_send_push(endpoint_key, ticker):
             f.seek(0); f.truncate()
             json.dump(state, f)
         return True
+    try:
+        if _WS_AVAILABLE:
+            return _gevent.get_hub().threadpool.spawn(_do).get()
+        return _do()
     except Exception:
         return True   # fail-open
 
