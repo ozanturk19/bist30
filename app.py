@@ -142,6 +142,40 @@ if not VAPID_PUBLIC and os.path.exists(os.path.join(_APP_DIR, "vapid_public.txt"
     except Exception:
         pass
 
+# ── CPO-992/DEV-983: disk I/O gevent hub threadpool offload ──────────────────
+# gevent monkey.patch_all() cooperatizes socket/subprocess/time.sleep but NOT
+# open()/json.load()/json.dump() (regular file I/O is a direct C-level syscall,
+# never routed through the patched os module). A slow disk read/write executed
+# inline therefore blocks the WHOLE gunicorn worker OS thread — every greenlet
+# on it, including endpoints holding no lock at all — for the syscall's full
+# duration. Isolated repro (port 8998, -w1): baseline /hisse p50=0.6ms; 6
+# concurrent 64MB+fsync writers under a plain threading.Lock() → /hisse
+# p50=1930ms; SAME writers with the lock removed entirely → p50=1937ms
+# (proves the Python lock was never the mechanism); same writers routed
+# through gevent's hub threadpool → p50=349ms. Fix: route all hot-path disk
+# JSON I/O through these two helpers instead of inline open()/json calls.
+def _tp_read_json(path, default=None):
+    def _read():
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    if _WS_AVAILABLE:
+        return _gevent.get_hub().threadpool.spawn(_read).get()
+    return _read()
+
+
+def _tp_write_json(path, data, atomic=False, **json_kwargs):
+    def _write():
+        target = path + ".tmp" if atomic else path
+        with open(target, "w", encoding="utf-8") as f:
+            json.dump(data, f, **json_kwargs)
+        if atomic:
+            os.replace(target, path)
+    if _WS_AVAILABLE:
+        _gevent.get_hub().threadpool.spawn(_write).get()
+    else:
+        _write()
+
+
 # Push subscriber storage
 _PUSH_SUBS_FILE = os.path.join(_APP_DIR, "push_subs.json")
 _push_subs: list = []
@@ -406,8 +440,7 @@ def _load_push_subs():
 def _save_push_subs_locked():
     """Must be called while holding _push_lock."""
     try:
-        with open(_PUSH_SUBS_FILE, "w", encoding="utf-8") as f:
-            json.dump(_push_subs, f)
+        _tp_write_json(_PUSH_SUBS_FILE, _push_subs)
     except Exception:
         pass
 
@@ -1792,11 +1825,7 @@ def _load_prev_signals():
 def _save_prev_signals(sig_map):
     """_prev_signals'i atomik olarak disk'e yaz (tempfile + rename)."""
     try:
-        import json as _j
-        tmp = _PREV_SIGNALS_PATH + ".tmp"
-        with open(tmp, "w") as f:
-            _j.dump(sig_map, f)
-        os.replace(tmp, _PREV_SIGNALS_PATH)
+        _tp_write_json(_PREV_SIGNALS_PATH, sig_map, atomic=True)
     except Exception as e:
         logger.warning("_save_prev_signals: %s", e)
 
@@ -1915,16 +1944,14 @@ def _load_subscribers():
     if not os.path.exists(SUBSCRIBERS_FILE):
         return {}
     try:
-        with open(SUBSCRIBERS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+        return _tp_read_json(SUBSCRIBERS_FILE, default={})
     except Exception:
         return {}
 
 
 def _save_subscribers(subs):
     try:
-        with open(SUBSCRIBERS_FILE, "w", encoding="utf-8") as f:
-            json.dump(subs, f, ensure_ascii=False, indent=2)
+        _tp_write_json(SUBSCRIBERS_FILE, subs, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.error("subscribers.json kaydetme hatası: %s", e)
 
@@ -2275,16 +2302,14 @@ def _load_pending_changes():
     if not os.path.exists(_pending_changes_path):
         return []
     try:
-        with open(_pending_changes_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+        return _tp_read_json(_pending_changes_path, default=[])
     except Exception:
         return []
 
 
 def _save_pending_changes(items):
     try:
-        with open(_pending_changes_path, "w", encoding="utf-8") as f:
-            json.dump(items, f, ensure_ascii=False, default=str)
+        _tp_write_json(_pending_changes_path, items, ensure_ascii=False, default=str)
     except Exception as e:
         logger.warning("pending_changes.json yazma hatası: %s", e)
 
@@ -8143,8 +8168,7 @@ def api_portfolio_new():
     token = str(__import__('uuid').uuid4())
     path  = _pf_path(token)
     with _PF_LOCK:
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump({"positions": [], "created_at": datetime.now().isoformat()}, f)
+        _tp_write_json(path, {"positions": [], "created_at": datetime.now().isoformat()})
     return safe_json({"token": token})
 
 
@@ -8159,8 +8183,7 @@ def api_portfolio_get(token):
         return safe_json({"error": "Portföy bulunamadı"}), 404
     try:
         with _PF_LOCK:
-            with open(path, encoding="utf-8") as f:
-                data = json.load(f)
+            data = _tp_read_json(path)
         return safe_json(data)
     except Exception as e:
         logger.error("Portfolio get [%s]: %s", token, e)
@@ -8222,8 +8245,7 @@ def api_portfolio_save(token):
 
     try:
         with _PF_LOCK:
-            with open(path, "w", encoding="utf-8") as f:
-                json.dump(payload, f, ensure_ascii=False)
+            _tp_write_json(path, payload, ensure_ascii=False)
         return safe_json({"ok": True, "count": len(clean)})
     except Exception as e:
         logger.error("Portfolio save [%s]: %s", token, e)
@@ -9637,14 +9659,12 @@ def _load_vp():
     if not os.path.exists(_VP_FILE):
         return {}
     try:
-        with open(_VP_FILE, encoding="utf-8") as f:
-            return json.load(f)
+        return _tp_read_json(_VP_FILE, default={})
     except Exception:
         return {}
 
 def _save_vp(vp):
-    with open(_VP_FILE, "w", encoding="utf-8") as f:
-        json.dump(vp, f, ensure_ascii=False, indent=2)
+    _tp_write_json(_VP_FILE, vp, ensure_ascii=False, indent=2)
 
 _VP_INITIAL_CASH = 100_000.0
 
