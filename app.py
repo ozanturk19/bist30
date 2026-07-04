@@ -30,6 +30,8 @@ import tempfile
 import re
 import copy
 import secrets
+import hashlib
+import fcntl
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text      import MIMEText
@@ -9908,7 +9910,7 @@ def backtest_page():
     if not email:
         return redirect("/giris?next=/backtest")
     tickers = sorted(BIST30)
-    return render_template("backtest.html", tickers_json=_json.dumps(tickers))
+    return render_template("backtest.html", tickers_json=json.dumps(tickers))
 
 
 _F8_STRATEGIES = [
@@ -9996,6 +9998,209 @@ def api_backtest_custom():
     except Exception as e:
         logger.error("F8 backtest [%s/%s]: %s", ticker, strategy, e)
         return safe_json({"ok": False, "error": "Backtest hesaplanamadı"}), 500
+
+
+# ─── F14: Backtest History & Karşılaştırma ─────────────────────────────────
+# Per-user JSONL dosyası (sha256(email)[:16] adıyla) — CPO-992/994/995 dersi:
+# tek global lock tüm kullanıcıları serileştirip gevent worker'ı bloklar.
+# Burada her kullanıcı kendi dosyasını kilitliyor (fcntl, dosya-bazlı), disk I/O
+# _tp_read_json/_tp_write_json ile aynı desende hub threadpool'a yönlendiriliyor.
+_BT_HISTORY_DIR = os.path.join(_APP_DIR, "bt_history")
+_BT_HISTORY_MAX = 50
+_BT_ID_RE = re.compile(r"^bt_\d{8}_\d{6}_[A-Z]{3,6}$")
+
+
+def _bt_history_path(email):
+    h = hashlib.sha256(email.encode("utf-8")).hexdigest()[:16]
+    return os.path.join(_BT_HISTORY_DIR, f"{h}.jsonl")
+
+
+def _bt_history_load(email):
+    """Kullanıcının kayıtlı backtestlerini dosya sırasıyla (eski→yeni) döner."""
+    path = _bt_history_path(email)
+
+    def _read():
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                fcntl.flock(f, fcntl.LOCK_SH)
+                lines = f.readlines()
+        except FileNotFoundError:
+            return []
+        items = []
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                items.append(json.loads(line))
+            except ValueError:
+                continue
+        return items
+
+    if _WS_AVAILABLE:
+        return _gevent.get_hub().threadpool.spawn(_read).get()
+    return _read()
+
+
+def _bt_history_save(email, record):
+    """Kaydı append eder, FIFO ile max _BT_HISTORY_MAX satıra kırpar."""
+    path = _bt_history_path(email)
+
+    def _write():
+        os.makedirs(_BT_HISTORY_DIR, exist_ok=True)
+        with open(path, "a+", encoding="utf-8") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            f.seek(0)
+            lines = [l.strip() for l in f.readlines() if l.strip()]
+            lines.append(json.dumps(record, ensure_ascii=False))
+            lines = lines[-_BT_HISTORY_MAX:]
+            f.seek(0)
+            f.truncate()
+            f.write("\n".join(lines) + "\n")
+
+    if _WS_AVAILABLE:
+        _gevent.get_hub().threadpool.spawn(_write).get()
+    else:
+        _write()
+
+
+def _bt_history_delete(email, bt_id):
+    """Verilen id'li kaydı siler. Silindiyse True, bulunamadıysa False döner."""
+    path = _bt_history_path(email)
+
+    def _delete():
+        try:
+            f = open(path, "r+", encoding="utf-8")
+        except FileNotFoundError:
+            return False
+        with f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            lines = [l.strip() for l in f.readlines() if l.strip()]
+            kept, removed = [], False
+            for line in lines:
+                try:
+                    rec = json.loads(line)
+                except ValueError:
+                    continue
+                if rec.get("id") == bt_id:
+                    removed = True
+                else:
+                    kept.append(line)
+            if removed:
+                f.seek(0)
+                f.truncate()
+                f.write("\n".join(kept) + ("\n" if kept else ""))
+            return removed
+
+    if _WS_AVAILABLE:
+        return _gevent.get_hub().threadpool.spawn(_delete).get()
+    return _delete()
+
+
+def _bt_build_delta(items):
+    """items[0] baz alınarak diğerlerinin farkını hesaplar (spec §6)."""
+    if len(items) < 2:
+        return {}
+    base = items[0]["stats"]
+    fields = [("sharpe", 3), ("win_rate", 3), ("total_return_pct", 3),
+              ("max_drawdown_pct", 3), ("avg_bars", 1)]
+    delta = {}
+    for item in items[1:]:
+        s = item["stats"]
+        d = {}
+        for key, dec in fields:
+            bv, sv = base.get(key), s.get(key)
+            if bv is None or sv is None or bv in (float("inf"), float("-inf")) or sv in (float("inf"), float("-inf")):
+                continue
+            d[key] = round(sv - bv, dec)
+        delta[item["id"]] = d
+    return delta
+
+
+@app.route("/api/backtest/save", methods=["POST"])
+@limiter.limit("10 per minute")
+def api_backtest_save():
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+
+    data = request.get_json(silent=True) or {}
+    params = data.get("params") or {}
+    stats = data.get("stats") or {}
+    label = (data.get("label") or "").strip()[:40]
+
+    ticker = (params.get("ticker") or "").upper().strip()
+    strategy = (params.get("strategy") or "").strip()
+    period = params.get("period", "3y")
+    if ticker not in BIST30:
+        return safe_json({"ok": False, "error": "Geçersiz hisse"}), 400
+    if strategy not in _F8_VALID_STRATEGIES:
+        return safe_json({"ok": False, "error": "Geçersiz strateji"}), 400
+    if period not in ("1y", "2y", "3y"):
+        return safe_json({"ok": False, "error": "Geçersiz dönem"}), 400
+    if not stats or not stats.get("n_trades"):
+        return safe_json({"ok": False, "error": "Kaydedilecek sonuç yok"}), 400
+
+    bt_id = f"bt_{datetime.now(_TZ_TR).strftime('%Y%m%d_%H%M%S')}_{ticker}"
+    record = {
+        "id": bt_id,
+        "saved_at": datetime.now(_TZ_TR).isoformat(),
+        "label": label,
+        "params": {
+            "ticker": ticker, "strategy": strategy, "period": period,
+            "use_3bar": bool(params.get("use_3bar", False)),
+            "stop_pct": params.get("stop_pct"),
+            "trail_pct": params.get("trail_pct"),
+        },
+        "stats": stats,
+    }
+    _bt_history_save(email, record)
+    return safe_json({"ok": True, "id": bt_id})
+
+
+@app.route("/api/backtest/history", methods=["GET"])
+@limiter.limit("30 per minute")
+def api_backtest_history():
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    items = list(reversed(_bt_history_load(email)))
+    return safe_json({"ok": True, "items": items})
+
+
+@app.route("/api/backtest/history/<bt_id>", methods=["DELETE"])
+@limiter.limit("20 per minute")
+def api_backtest_history_delete(bt_id):
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    if not _BT_ID_RE.match(bt_id):
+        return safe_json({"ok": False, "error": "Geçersiz id"}), 400
+    if not _bt_history_delete(email, bt_id):
+        return safe_json({"ok": False, "error": "Kayıt bulunamadı"}), 404
+    return safe_json({"ok": True})
+
+
+@app.route("/api/backtest/compare", methods=["GET"])
+@limiter.limit("20 per minute")
+def api_backtest_compare():
+    email, _ = _get_sub_by_cookie()
+    if not email:
+        return safe_json({"ok": False, "error": "login_required"}), 401
+    ids = [i.strip() for i in (request.args.get("ids") or "").split(",") if i.strip()]
+    if not ids:
+        return safe_json({"ok": False, "error": "id gerekli"}), 400
+    ids = ids[:4]
+    if not all(_BT_ID_RE.match(i) for i in ids):
+        return safe_json({"ok": False, "error": "Geçersiz id"}), 400
+
+    by_id = {rec["id"]: rec for rec in _bt_history_load(email)}
+    items = [by_id[i] for i in ids if i in by_id]
+    if not items:
+        return safe_json({"ok": False, "error": "Kayıt bulunamadı"}), 404
+
+    delta = _bt_build_delta(items)
+    return safe_json({"ok": True, "items": items, "delta": delta})
 
 
 @app.route("/blog")

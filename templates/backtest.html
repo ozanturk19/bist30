@@ -126,6 +126,61 @@
   #results { display: none; }
   #error-msg { display: none; color: var(--bp-red); font-size: 13px; padding: 10px 0; }
   #loading-msg { display: none; color: var(--bp-text3); font-size: 13px; padding: 10px 0; }
+
+  /* ── F14: Save + History ── */
+  .results-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  .bt-save-row { display: flex; align-items: center; gap: 8px; }
+  .bt-save-row input#bt-save-label {
+    background: var(--bp-surface2); border: 1px solid var(--bp-border2); border-radius: 8px;
+    color: var(--bp-text); font-size: 13px; padding: 7px 10px; font-family: inherit; width: 180px;
+  }
+  .bt-action-btn, .bt-history-btn {
+    background: var(--bp-surface2); border: 1px solid var(--bp-border2); border-radius: 8px;
+    color: var(--bp-text2); font-size: 13px; padding: 7px 14px; cursor: pointer; font-family: inherit;
+    transition: opacity .15s;
+  }
+  .bt-action-btn:hover, .bt-history-btn:hover { opacity: .82; }
+  .bt-action-btn.saved { color: var(--bp-mint); border-color: var(--bp-mint); }
+  .bt-history-panel {
+    background: var(--bp-surface); border: 1px solid var(--bp-border);
+    border-radius: 14px; padding: 16px 18px; margin-bottom: 24px;
+  }
+  .bt-history-panel.hidden { display: none; }
+  .bt-history-empty { color: var(--bp-text3); font-size: 13px; padding: 14px 0; text-align: center; }
+  #bt-history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  #bt-history-table th { text-align: left; padding: 8px 10px; color: var(--bp-text3); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; border-bottom: 1px solid var(--bp-border); }
+  #bt-history-table td { padding: 8px 10px; border-bottom: 1px solid var(--bp-border); color: var(--bp-text2); }
+  #bt-history-table tr:last-child td { border-bottom: none; }
+  .bt-hist-del { background: none; border: none; color: var(--bp-text3); cursor: pointer; font-size: 14px; }
+  .bt-hist-del:hover { color: var(--bp-red); }
+  .bt-compare-bar { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 12px; margin-top: 4px; border-top: 1px solid var(--bp-border); }
+  .bt-compare-bar.hidden { display: none; }
+  #bt-compare-btn {
+    background: var(--bp-peri); color: #0e0e12; border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 700; padding: 8px 18px; cursor: pointer; font-family: inherit;
+  }
+  #bt-compare-btn:disabled { opacity: .4; cursor: default; }
+
+  /* ── Compare modal ── */
+  #bt-compare-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 100;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  #bt-compare-modal.hidden { display: none; }
+  .bt-modal-card {
+    background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius: 14px;
+    padding: 20px 22px; max-width: 720px; width: 100%; max-height: 80vh; overflow: auto;
+  }
+  .bt-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .bt-modal-head h3 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 16px; }
+  .bt-modal-close { background: none; border: none; color: var(--bp-text3); font-size: 20px; cursor: pointer; line-height: 1; }
+  .bt-modal-close:hover { color: var(--bp-text); }
+  #bt-compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  #bt-compare-table th, #bt-compare-table td { padding: 9px 12px; border-bottom: 1px solid var(--bp-border); text-align: left; }
+  #bt-compare-table th { color: var(--bp-text3); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
+  #bt-compare-table td.best { color: var(--bp-mint); font-weight: 700; }
+  .bt-delta-pos { color: var(--bp-mint); font-size: 11px; }
+  .bt-delta-neg { color: var(--bp-red); font-size: 11px; }
 </style>
 </head>
 <body>
@@ -147,8 +202,20 @@
 </header>
 
 <main>
-  <h1 class="page-title">Backtest</h1>
-  <p class="page-sub">Farklı sinyal stratejilerini BIST30 hisseleri üzerinde geçmiş veriyle test et.</p>
+  <div class="results-head">
+    <div>
+      <h1 class="page-title">Backtest</h1>
+      <p class="page-sub" style="margin-bottom:0">Farklı sinyal stratejilerini BIST30 hisseleri üzerinde geçmiş veriyle test et.</p>
+    </div>
+    <button class="bt-history-btn" id="bt-history-toggle" onclick="toggleHistoryPanel()">📋 Geçmiş (<span id="bt-history-count">0</span>)</button>
+  </div>
+
+  <!-- History Panel -->
+  <div class="bt-history-panel hidden" id="bt-history-panel">
+    <div id="bt-history-body">
+      <div class="bt-history-empty">Yükleniyor...</div>
+    </div>
+  </div>
 
   <!-- Control Panel -->
   <div class="ctrl-panel">
@@ -202,6 +269,12 @@
 
   <!-- Results -->
   <div id="results">
+    <div class="results-head">
+      <div class="bt-save-row">
+        <input type="text" id="bt-save-label" maxlength="40" placeholder="İsim (opsiyonel)">
+        <button class="bt-action-btn" id="bt-save-btn" onclick="saveBacktest()">💾 Kaydet</button>
+      </div>
+    </div>
     <div class="stats-grid" id="stats-grid"></div>
 
     <div class="chart-wrap">
@@ -224,8 +297,20 @@
   </div>
 </main>
 
+<!-- Compare Modal -->
+<div id="bt-compare-modal" class="hidden" onclick="if(event.target===this) closeCompareModal()">
+  <div class="bt-modal-card">
+    <div class="bt-modal-head">
+      <h3>Karşılaştırma</h3>
+      <button class="bt-modal-close" onclick="closeCompareModal()">&times;</button>
+    </div>
+    <div id="bt-compare-body"></div>
+  </div>
+</div>
+
 <script>
 const TICKERS = {{ tickers_json|safe }};
+let lastRunResult = null;   // F14: { params, stats } — son çalıştırılan backtest, "Kaydet" için
 
 (function() {
   const sel = document.getElementById('f-ticker');
@@ -250,19 +335,20 @@ async function runBacktest() {
 
   const stopVal = parseFloat(document.getElementById('f-stop').value) || 0;
   const trailVal = parseFloat(document.getElementById('f-trail').value) || 0;
+  const runParams = {
+    ticker:   document.getElementById('f-ticker').value,
+    strategy: document.getElementById('f-strategy').value,
+    period:   document.getElementById('f-period').value,
+    use_3bar: document.getElementById('f-3bar').checked,
+    stop_pct:  stopVal || null,
+    trail_pct: trailVal || null,
+  };
 
   try {
     const res = await fetch('/api/backtest/custom', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        ticker:   document.getElementById('f-ticker').value,
-        strategy: document.getElementById('f-strategy').value,
-        period:   document.getElementById('f-period').value,
-        use_3bar: document.getElementById('f-3bar').checked,
-        stop_pct:  stopVal || null,
-        trail_pct: trailVal || null,
-      })
+      body: JSON.stringify(runParams)
     });
     const d = await res.json();
     loadMsg.style.display = 'none';
@@ -271,6 +357,7 @@ async function runBacktest() {
     if (!d.ok) {
       errMsg.textContent = d.error || 'Backtest başarısız.';
       errMsg.style.display = 'block';
+      lastRunResult = null;
       return;
     }
 
@@ -278,6 +365,13 @@ async function runBacktest() {
     drawEquityChart(d.equity);
     renderTrades(d.trades);
     results.style.display = 'block';
+
+    lastRunResult = (d.stats && d.stats.n_trades) ? { params: runParams, stats: d.stats } : null;
+    const saveBtn = document.getElementById('bt-save-btn');
+    saveBtn.textContent = '💾 Kaydet';
+    saveBtn.classList.remove('saved');
+    saveBtn.disabled = !lastRunResult;
+    document.getElementById('bt-save-label').value = '';
   } catch(e) {
     loadMsg.style.display = 'none';
     btn.disabled = false;
@@ -285,6 +379,208 @@ async function runBacktest() {
     errMsg.style.display = 'block';
   }
 }
+
+// ── F14: Kaydet / Geçmiş / Karşılaştır ──────────────────────────────────
+
+async function saveBacktest() {
+  if (!lastRunResult) return;
+  const btn = document.getElementById('bt-save-btn');
+  const label = document.getElementById('bt-save-label').value.trim();
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/backtest/save', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ label, params: lastRunResult.params, stats: lastRunResult.stats })
+    });
+    const d = await res.json();
+    if (!d.ok) {
+      alert(d.error || 'Kaydedilemedi.');
+      btn.disabled = false;
+      return;
+    }
+    btn.textContent = '✓ Kaydedildi';
+    btn.classList.add('saved');
+    if (!document.getElementById('bt-history-panel').classList.contains('hidden')) {
+      loadHistory();
+    } else {
+      refreshHistoryCount();
+    }
+  } catch (e) {
+    alert('Bağlantı hatası. Lütfen tekrar deneyin.');
+    btn.disabled = false;
+  }
+}
+
+let historyItems = [];
+let compareSelection = new Set();
+
+async function refreshHistoryCount() {
+  try {
+    const res = await fetch('/api/backtest/history');
+    const d = await res.json();
+    if (d.ok) {
+      historyItems = d.items;
+      document.getElementById('bt-history-count').textContent = d.items.length;
+    }
+  } catch (e) { /* sessiz — sadece rozet güncellenmez */ }
+}
+
+function toggleHistoryPanel() {
+  const panel = document.getElementById('bt-history-panel');
+  const hidden = panel.classList.toggle('hidden');
+  if (!hidden) loadHistory();
+}
+
+async function loadHistory() {
+  const body = document.getElementById('bt-history-body');
+  body.innerHTML = '<div class="bt-history-empty">Yükleniyor...</div>';
+  try {
+    const res = await fetch('/api/backtest/history');
+    const d = await res.json();
+    if (!d.ok) {
+      body.innerHTML = '<div class="bt-history-empty">Geçmiş yüklenemedi.</div>';
+      return;
+    }
+    historyItems = d.items;
+    compareSelection = new Set([...compareSelection].filter(id => historyItems.some(i => i.id === id)));
+    document.getElementById('bt-history-count').textContent = historyItems.length;
+    renderHistoryTable();
+  } catch (e) {
+    body.innerHTML = '<div class="bt-history-empty">Bağlantı hatası.</div>';
+  }
+}
+
+function renderHistoryTable() {
+  const body = document.getElementById('bt-history-body');
+  if (!historyItems.length) {
+    body.innerHTML = '<div class="bt-history-empty">Henüz kayıtlı backtest yok. Bir backtest çalıştırıp "Kaydet" ile ekleyebilirsin.</div>';
+    return;
+  }
+  const rows = historyItems.map(item => {
+    const p = item.params, s = item.stats;
+    const name = item.label || p.ticker;
+    const checked = compareSelection.has(item.id) ? 'checked' : '';
+    const retCls = s.total_return_pct > 0 ? 'ret-pos' : s.total_return_pct < 0 ? 'ret-neg' : '';
+    return `<tr>
+      <td><input type="checkbox" data-id="${item.id}" ${checked} onchange="toggleCompareSelect('${item.id}', this.checked)"></td>
+      <td>${name}${item.label ? ` <span style="color:var(--bp-text3)">(${p.ticker})</span>` : ''}</td>
+      <td>${p.period}</td>
+      <td>${s.n_trades}</td>
+      <td>${s.win_rate != null ? s.win_rate.toFixed(1) : '—'}%</td>
+      <td>${s.sharpe != null ? s.sharpe.toFixed(2) : '—'}</td>
+      <td>${s.max_drawdown_pct != null ? s.max_drawdown_pct.toFixed(1) : '—'}%</td>
+      <td class="${retCls}">${s.total_return_pct != null ? (s.total_return_pct >= 0 ? '+' : '') + s.total_return_pct.toFixed(1) : '—'}%</td>
+      <td><button class="bt-hist-del" title="Sil" onclick="deleteHistoryItem('${item.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+  body.innerHTML = `
+    <table id="bt-history-table">
+      <thead>
+        <tr>
+          <th></th><th>İsim / Hisse</th><th>Dönem</th><th>Trades</th>
+          <th>Win%</th><th>Sharpe</th><th>Max DD</th><th>Return</th><th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="bt-compare-bar ${compareSelection.size < 2 ? 'hidden' : ''}" id="bt-compare-bar">
+      <button id="bt-compare-btn" onclick="openCompare()">Karşılaştır (${compareSelection.size} seçili)</button>
+    </div>`;
+}
+
+function toggleCompareSelect(id, checked) {
+  if (checked) {
+    if (compareSelection.size >= 4) {
+      alert('En fazla 4 backtest karşılaştırılabilir.');
+      renderHistoryTable();
+      return;
+    }
+    compareSelection.add(id);
+  } else {
+    compareSelection.delete(id);
+  }
+  const bar = document.getElementById('bt-compare-bar');
+  if (bar) {
+    bar.classList.toggle('hidden', compareSelection.size < 2);
+    const cbtn = document.getElementById('bt-compare-btn');
+    if (cbtn) cbtn.textContent = `Karşılaştır (${compareSelection.size} seçili)`;
+  }
+}
+
+async function deleteHistoryItem(id) {
+  if (!confirm('Bu kaydı silmek istediğine emin misin?')) return;
+  try {
+    const res = await fetch(`/api/backtest/history/${id}`, { method: 'DELETE' });
+    const d = await res.json();
+    if (!d.ok) {
+      alert(d.error || 'Silinemedi.');
+      return;
+    }
+    compareSelection.delete(id);
+    loadHistory();
+  } catch (e) {
+    alert('Bağlantı hatası. Lütfen tekrar deneyin.');
+  }
+}
+
+async function openCompare() {
+  const ids = [...compareSelection];
+  if (ids.length < 2) return;
+  try {
+    const res = await fetch(`/api/backtest/compare?ids=${ids.join(',')}`);
+    const d = await res.json();
+    if (!d.ok) {
+      alert(d.error || 'Karşılaştırma yüklenemedi.');
+      return;
+    }
+    renderCompareModal(d.items, d.delta);
+    document.getElementById('bt-compare-modal').classList.remove('hidden');
+  } catch (e) {
+    alert('Bağlantı hatası. Lütfen tekrar deneyin.');
+  }
+}
+
+function closeCompareModal() {
+  document.getElementById('bt-compare-modal').classList.add('hidden');
+}
+
+function renderCompareModal(items, delta) {
+  const metrics = [
+    { key: 'win_rate',         label: 'Win Rate',   fmt: v => v.toFixed(1) + '%', higherBetter: true },
+    { key: 'sharpe',           label: 'Sharpe',     fmt: v => v.toFixed(2),       higherBetter: true },
+    { key: 'max_drawdown_pct', label: 'Max DD',     fmt: v => v.toFixed(1) + '%', higherBetter: true },
+    { key: 'total_return_pct', label: 'Return',     fmt: v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%', higherBetter: true },
+    { key: 'avg_bars',         label: 'Ort. Süre',  fmt: v => v.toFixed(1) + ' bar', higherBetter: false },
+  ];
+  const headerCells = items.map(it => `<th>${it.label || it.params.ticker}</th>`).join('');
+  const rows = metrics.map(m => {
+    const vals = items.map(it => it.stats[m.key]).filter(v => v != null && isFinite(v));
+    const best = vals.length ? (m.higherBetter ? Math.max(...vals) : Math.min(...vals)) : null;
+    const cells = items.map((it, i) => {
+      const v = it.stats[m.key];
+      if (v == null || !isFinite(v)) return '<td>—</td>';
+      const isBest = best != null && v === best && items.length > 1;
+      let deltaHtml = '';
+      if (i > 0 && delta[it.id] && delta[it.id][m.key] != null) {
+        const dv = delta[it.id][m.key];
+        const improved = m.higherBetter ? dv > 0 : dv < 0;
+        const cls = dv === 0 ? '' : (improved ? 'bt-delta-pos' : 'bt-delta-neg');
+        deltaHtml = ` <span class="${cls}">(${dv >= 0 ? '+' : ''}${dv.toFixed(m.key === 'avg_bars' ? 1 : 3)})</span>`;
+      }
+      return `<td class="${isBest ? 'best' : ''}">${m.fmt(v)}${deltaHtml}</td>`;
+    }).join('');
+    return `<tr><td>${m.label}</td>${cells}</tr>`;
+  }).join('');
+  document.getElementById('bt-compare-body').innerHTML = `
+    <table id="bt-compare-table">
+      <thead><tr><th>Metrik</th>${headerCells}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p style="color:var(--bp-text3);font-size:11px;margin:12px 0 0">Fark, ilk sütun baz alınarak hesaplanır. Yeşil = iyileşme, kırmızı = kötüleşme (yön metriğe göre değişir).</p>`;
+}
+
+refreshHistoryCount();
 
 function renderStats(s, ticker, period) {
   if (!s || !s.n_trades) {
