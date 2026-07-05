@@ -2439,7 +2439,11 @@ def build_data_freshness():
     """SPEC-014 B1 — veri tazeliği meta objesi.
 
     /api/data ve /api/health response'larına eklenir.
-    is_stale = market_open ve stocks yaşı > 900s (15dk).
+    is_stale = market_day ve stocks yaşı > 1800s (30dk) — hafta sonu/tatil
+    günlerinde bist30-refresh zaten çalışmadığından (CPO-919 Hibrit Batch,
+    weekday-only cron) o günlerde is_stale asla true olmaz (DEV-993/CPO
+    weekend-aware stale P3 kararı). CPO-596: saat-bazlı market_open'a
+    bağlama, gün-bazlı market_day yeterli — absolute 30dk threshold korunur.
     """
     now = time.time()
     with _lock:
@@ -2450,7 +2454,8 @@ def build_data_freshness():
     stocks_age = int(now - last_ts) if last_ts else None
     macro_age  = int(now - macro_ts) if macro_ts else None
     mkt_open   = _market_open()
-    is_stale   = bool(stocks_age is not None and stocks_age > 1800)  # CPO-596: market_open'a bağlama, 30dk absolute threshold
+    mkt_day    = is_trading_day()
+    is_stale   = bool(stocks_age is not None and stocks_age > 1800 and mkt_day)
 
     return {
         "stocks_updated_at":  updated_at,
@@ -2459,6 +2464,7 @@ def build_data_freshness():
         "macro_age_seconds":  macro_age,
         "is_stale":           is_stale,
         "market_open":        mkt_open,
+        "market_day":         mkt_day,
     }
 
 
