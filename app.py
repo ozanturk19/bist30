@@ -28,6 +28,7 @@ import os
 import subprocess
 import tempfile
 import re
+import random
 import copy
 import secrets
 import hashlib
@@ -4829,9 +4830,15 @@ def _sentiment_bg_worker():
         time.sleep(180)  # 3dk aralık
 
 
-_signal_explain_cache = {}   # {ticker: {"text": str|None, "sig": str, "ts": float, "failed": bool}}
+_signal_explain_cache = {}   # {ticker: {"text": str|None, "sig": str, "ts": float, "failed": bool, "ttl": float}}
 _SIG_EXPLAIN_TTL      = 3600 * 12  # SPEC-009 Faz 2 B3: 4h → 12h (Gemini maliyet)
+_SIG_EXPLAIN_TTL_JITTER = 3600 * 2  # CPO-1008: ±2h jitter — toplu yazılan cache'lerin aynı anda thundering-herd bitişini önler
 _SIG_FAIL_TTL         = 300        # 5 dakika
+
+# CPO-1008 — /news'teki cache-or-queue pattern'e taşındı. Request path'inde Gemini
+# çağrısı YOK: cache-miss → bg thread kuyruğuna at, algoritmik commentary anında dön.
+_signal_explain_queue      = {}   # {ticker: signal_data} — bg enrichment bekleyen
+_signal_explain_queue_lock = threading.Lock()
 
 # SPEC-020 Faz 1 — Gemini AI Queue (27 May 2026, INCIDENT-8/10 katalizör fix)
 # Worker-local cache 4 worker × paralel Gemini call sorun: 10 ticker × 4 worker
@@ -5278,45 +5285,15 @@ def get_ai_news(ticker):
     return text
 
 
-def get_ai_signal_explanation(ticker, signal_data):
-    """Gemini ile teknik sinyal açıklaması üretir.
+def _compute_signal_commentary(ticker, signal_data):
+    """İndikatörleri çıkarır + algoritmik commentary üretir (Gemini YOK, her zaman hızlı/senkron).
 
-    Strateji:
-    - _generate_commentary() algoritmik metin GERÇEK DOĞRU olarak AI'ya verilir
-    - AI sadece bu metni daha akıcı/anlaşılır dile çevirir, kendi yorumunu YAPAMAZ
-    - Validation: AI sinyalin yönüyle çelişen anahtar kelimeler üretirse commentary fallback
-    - AI tümüyle başarısız olursa commentary direkt döner (null yerine)
-
-    Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite
-    Negatif cache: yalnızca GERÇEK API hatalarında (commentary her zaman var)
+    Hem request path'i (anında dönen fallback) hem bg enrichment worker'ı
+    tarafından kullanılır — tek kaynak, indikatör extraction mantığı tekrarlanmaz.
     """
-    now = time.time()
-    sig = signal_data.get("signal", "BEKLE")
-
-    # Önce cache'i kontrol et
-    with _lock:
-        cached = _signal_explain_cache.get(ticker)
-        if cached:
-            ttl = _SIG_FAIL_TTL if cached.get("failed") else _SIG_EXPLAIN_TTL
-            if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
-                return cached.get("text")
-
-    # SPEC-020 Faz 1 — Memory miss → DISK cache lazy-load (H3 pattern mtime guard)
-    # Workers arası senkron: leader Gemini yazdığında non-leader buradan okur
-    _load_explain_cache_from_disk()
-    with _lock:
-        cached = _signal_explain_cache.get(ticker)
-        if cached:
-            ttl = _SIG_FAIL_TTL if cached.get("failed") else _SIG_EXPLAIN_TTL
-            if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
-                return cached.get("text")
-
-    # SPEC-AI-EXPLANATION-FIX (CPO-428): Indikatör extraction'ı non-leader check'ten
-    # YUKARI taşı — non-leader path'i de kural-tabanlı commentary üretmek için ihtiyaç.
-    # Graceful fallback: AI tab ASLA boş/takılı kalmasın, Gemini gelince üzerine yazar.
-
-    name     = STOCK_NAMES.get(ticker, ticker)
-    sig_lbl  = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend", "BEKLE": "Belirsiz"}.get(sig, sig)
+    sig     = signal_data.get("signal", "BEKLE")
+    name    = STOCK_NAMES.get(ticker, ticker)
+    sig_lbl = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend", "BEKLE": "Belirsiz"}.get(sig, sig)
 
     # ── İndikatör değerlerini çıkar: US hisseleri (düz alan) + BIST (iç içe indicators) ──
     inds = signal_data.get("indicators") or {}
@@ -5373,16 +5350,81 @@ def get_ai_signal_explanation(ticker, signal_data):
     # ── Algoritmik temel metin (her zaman doğru, AI'dan bağımsız) ────────────
     commentary = _generate_commentary(ticker, sig, bars, None, adx, di_plus, di_minus, e12, e99, st_bull)
 
-    # SPEC-AI-EXPLANATION-FIX (CPO-428): Non-leader path → kural-tabanlı commentary DÖN.
-    # ÖNCEKİ DAVRANIŞ: "Sinyal açıklaması hazırlanıyor…" placeholder (~%50 hissede kalıcı).
-    # YENİ DAVRANIŞ: AI tab ASLA boş/takılı kalmaz; Gemini cache gelince üzerine yazar.
-    # Glass-box + K8 data-trust prensibi.
+    return {
+        "sig": sig, "sig_lbl": sig_lbl, "name": name, "commentary": commentary,
+        "adx": adx, "di_plus": di_plus, "di_minus": di_minus,
+        "e12": e12, "e99": e99, "st_bull": st_bull,
+        "price": price, "sl": sl, "bars": bars,
+    }
+
+
+def get_ai_signal_explanation(ticker, signal_data):
+    """Sinyal açıklaması — request path'i ASLA Gemini çağırmaz (CPO-1008).
+
+    Strateji (SPEC-AI-EXPLANATION-FIX + CPO-1008 cache-or-queue):
+    - Cache hit → cache'teki metni (AI zenginleştirilmiş veya commentary) dön
+    - Cache miss → algoritmik commentary'yi ANINDA dön, Gemini zenginleştirmeyi
+      bg thread kuyruğuna at (_on_demand_signal_explain_worker, /news ile aynı desen)
+    - AI tab ASLA boş/takılı kalmaz; Gemini cache gelince üzerine yazar (glass-box)
+
+    Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite
+    Negatif cache: yalnızca GERÇEK API hatalarında (commentary her zaman var)
+    """
+    now = time.time()
+    sig = signal_data.get("signal", "BEKLE")
+
+    # Önce cache'i kontrol et
+    with _lock:
+        cached = _signal_explain_cache.get(ticker)
+        if cached:
+            ttl = _SIG_FAIL_TTL if cached.get("failed") else cached.get("ttl", _SIG_EXPLAIN_TTL)
+            if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
+                return cached.get("text")
+
+    # SPEC-020 Faz 1 — Memory miss → DISK cache lazy-load (H3 pattern mtime guard)
+    # Workers arası senkron: leader Gemini yazdığında non-leader buradan okur
+    _load_explain_cache_from_disk()
+    with _lock:
+        cached = _signal_explain_cache.get(ticker)
+        if cached:
+            ttl = _SIG_FAIL_TTL if cached.get("failed") else cached.get("ttl", _SIG_EXPLAIN_TTL)
+            if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
+                return cached.get("text")
+
+    # SPEC-AI-EXPLANATION-FIX (CPO-428): commentary her zaman hesaplanır —
+    # AI tab ASLA boş/takılı kalmasın, Gemini gelince üzerine yazar.
+    fallback_text = _compute_signal_commentary(ticker, signal_data)["commentary"] + " Yatırım tavsiyesi değildir."
+
+    # Non-leader worker → Gemini call YOK, direkt commentary dön (Glass-box + K8 data-trust)
     if not _is_gemini_leader():
-        return commentary + " Yatırım tavsiyesi değildir."
+        return fallback_text
 
     # AI yoksa direkt algoritmik metni döndür
     if not GEMINI_API_KEY:
-        return commentary + " Yatırım tavsiyesi değildir."
+        return fallback_text
+
+    # CPO-1008 — ARCHITECTURAL FIX: /news'teki cache-or-queue pattern'e taşındı.
+    # ÖNCEKİ DAVRANIŞ: request handler İÇİNDE senkron Gemini call → _gemini_rate_acquire
+    # thundering herd'de saniyelerce sleep döndürüyor → gunicorn worker o süre boyunca
+    # bloke (12-25s response, DEV-1005 log kanıtı). YENİ DAVRANIŞ: request path'inde
+    # Gemini çağrısı SIFIR — commentary anında dön, zenginleştirme bg thread kuyruğunda.
+    with _signal_explain_queue_lock:
+        _signal_explain_queue[ticker] = signal_data
+    return fallback_text
+
+
+def _enrich_signal_explanation(ticker, signal_data):
+    """Bg thread: Gemini çağrısı yapıp cache'i AI metniyle zenginleştirir.
+
+    Yalnızca _on_demand_signal_explain_worker tarafından çağrılır (leader-only,
+    _gemini_rate_acquire üzerinden global rate-limited). Request path'ini bloke etmez.
+    """
+    now = time.time()
+    ctx = _compute_signal_commentary(ticker, signal_data)
+    sig, name, commentary, sig_lbl = ctx["sig"], ctx["name"], ctx["commentary"], ctx["sig_lbl"]
+    adx, di_plus, di_minus = ctx["adx"], ctx["di_plus"], ctx["di_minus"]
+    e12, e99, st_bull      = ctx["e12"], ctx["e99"], ctx["st_bull"]
+    price, sl, bars        = ctx["price"], ctx["sl"], ctx["bars"]
 
     # ── Sinyalin yönü (validation için) ──────────────────────────────────────
     if sig == "AL":
@@ -5421,7 +5463,7 @@ def get_ai_signal_explanation(ticker, signal_data):
         text_lower = text.lower()
         if any(w in text_lower for w in opposite_words):
             logger.warning(
-                "get_ai_signal_explanation(%s): AI sinyalle çelişti [%s→%s], commentary kullanılıyor",
+                "_enrich_signal_explanation(%s): AI sinyalle çelişti [%s→%s], commentary kullanılıyor",
                 ticker, sig, text[:60]
             )
             text = None
@@ -5429,18 +5471,19 @@ def get_ai_signal_explanation(ticker, signal_data):
     final_text = text if text else (commentary + " Yatırım tavsiyesi değildir.")
 
     with _lock:
-        # AI başarılıysa uzun TTL, commentary fallback ise kısa TTL (AI tekrar denensin)
+        # AI başarılıysa uzun TTL (+jitter, thundering-herd önleme), fallback ise kısa TTL
         ai_ok = bool(text)
         _signal_explain_cache[ticker] = {
             "text":   final_text,
             "sig":    sig,
             "ts":     now,
             "failed": not ai_ok,
+            "ttl":    _SIG_EXPLAIN_TTL + random.uniform(-_SIG_EXPLAIN_TTL_JITTER, _SIG_EXPLAIN_TTL_JITTER),
         }
         if ai_ok:
-            logger.info("get_ai_signal_explanation(%s): OK [model=%s]", ticker, model_used)
+            logger.info("_enrich_signal_explanation(%s): OK [model=%s]", ticker, model_used)
         else:
-            logger.info("get_ai_signal_explanation(%s): commentary fallback kullanıldı", ticker)
+            logger.info("_enrich_signal_explanation(%s): commentary fallback kullanıldı", ticker)
 
     # SPEC-020 Faz 1 — Leader yazımı sonrası disk cache senkronu
     # Non-leader workers _load_explain_cache_from_disk ile mtime guard'a göre
@@ -5630,6 +5673,38 @@ _on_demand_thread = threading.Thread(
     name="news-ondemand"
 )
 _on_demand_thread.start()
+
+
+def _on_demand_signal_explain_worker():
+    """CPO-1008: signal-explanation cache-miss talepleri arka planda işlenir.
+
+    _on_demand_news_worker ile birebir desen — kuyruk yalnızca Gemini leader
+    tarafından doldurulur (get_ai_signal_explanation), 15s rate-limited,
+    kuyruk boşsa 5s polling.
+    """
+    while True:
+        item = None
+        with _signal_explain_queue_lock:
+            if _signal_explain_queue:
+                ticker = next(iter(_signal_explain_queue))
+                item = (ticker, _signal_explain_queue.pop(ticker))
+        if item:
+            ticker, signal_data = item
+            try:
+                _enrich_signal_explanation(ticker, signal_data)
+            except Exception as exc:
+                logger.error("On-demand signal-explanation hatası [%s]: %s", ticker, exc)
+            time.sleep(15)   # İstekler arası 15s — rate-limit koruması
+        else:
+            time.sleep(5)    # Kuyruk boşsa 5s bekle
+
+
+_signal_explain_ondemand_thread = threading.Thread(
+    target=_on_demand_signal_explain_worker,
+    daemon=True,
+    name="signal-explain-ondemand"
+)
+_signal_explain_ondemand_thread.start()
 
 
 def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di_m, e12, e99, st_bull):
