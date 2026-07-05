@@ -18,7 +18,7 @@
     'di-': 'Negatif yön göstergesi — aşağı yönlü hareketin gücü. DI+ üstündeyse trend aşağı.',
     'stop loss': 'Pozisyondan çıkış yapılacak fiyat seviyesi. Risk yönetiminin temel taşı.',
     'stop bölgesi': 'Sinyalin geçersiz sayılacağı, pozisyon çıkışına işaret eden fiyat aralığı.',
-    'tier_score': 'Sinyal kalite puanı (0–100). Bronz/Gümüş/Altın sınıflandırması bu skora göre yapılır.',
+    'tier_score': 'Sinyal kalite puanı (0–100). Premium/Plus/Standart sınıflandırması bu skora göre yapılır.',
     'kovalama': 'Fiyat sinyal başlangıcına göre belirgin yükselmişken alım yapma riski. Genelde geri çekilme beklemek daha güvenli.',
     'r/r': 'Risk/Ödül oranı — potansiyel kazanç ÷ kabul edilen risk. 1:2 ve üstü genellikle anlamlı bulunur.',
     'rr_ratio': 'Risk/Ödül oranı — pozisyondan potansiyel kazanç ile stop\'a uzaklığın oranı.'

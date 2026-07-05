@@ -1271,7 +1271,8 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
     yazılır (F5 AI Sentiment ±5 ayarıyla birlikte). Güçlü Trend listesi
     (_mscore) ve hisse detay sayfası ikisi de bu TEK cache alanını okur —
     ayrı ayrı yeniden hesaplama YASAK (CPO-983 puanlama tutarlılık fix, Site
-    Contract §24). AUDIT-004 tier_score'un yerine geçer (CPO-531 #36).
+    Contract §24). AUDIT-004 tier_score'un yerine geçer (CPO-531 #36) — ve
+    SPEC-018 W2'de tier badge ataması da bu skora taşındı (CPO-1004).
 
     Bileşenler:
         ADX       : min(adx, 50) / 50 * 30   → max 30
@@ -1280,8 +1281,9 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
         Teyit     : +10 (signal_bars >= 3)
         RSI bölge : +10 (50-75) | +5 (>75)   → max 10
 
-    Tier eşikleri (hisse detay badge):
-        75+ → 🏆 PREMIUM | 60-74 → ✅ İYİ | 40-59 → ⚪ ORTA | <40 → ⚠️ ZAYIF
+    Tier eşikleri (hisse detay badge — bkz. analyze() tier ataması):
+        75+ → PREMIUM | 60-74 → PLUS | 40-59 → STANDART | <40 → (tier yok)
+        Düşük likidite / yakın bilanço → bir kademe düşürülür (analyze()).
     """
     s = 0.0
     s += min(float(adx or 0), 50) / 50 * 30
@@ -1580,7 +1582,7 @@ def analyze(ticker_base):
         # ── Likidite Filtresi (Faz 1) — Günlük TL hacim 20 gün ortalaması ─────
         # < 5M TL → "Düşük Likidite" uyarısı (slippage + manipülasyon riski)
         # Hesap: close × volume 20 gün hareketli ortalama (lots/değer dalgalanması düzleştirilir)
-        # NOT: tier_score bloğundan ÖNCE hesaplanmalı — tier penalty low_liquidity'ye bağlı.
+        # NOT: tier bloğundan ÖNCE hesaplanmalı — tier penalty low_liquidity'ye bağlı.
         volume_tl_avg20 = None
         low_liquidity   = False
         try:
@@ -1593,46 +1595,8 @@ def analyze(ticker_base):
         except Exception:
             pass
 
-        # ── SPEC-001 Faz 1: 3-Katmanlı Tier (Standart / Plus / Premium) ─────
-        # AUDIT-004 formülü — kompozit skor 0-100
-        # Standart 35-49 | Plus 50-69 | Premium 70+ (CPO MSG-076 rebalance)
-        tier = None
-        tier_score = 0
-        if signal != "BEKLE":
-            try:
-                # Trend force (max 30)
-                if bull_score == 3 or bear_score == 3: tier_score += 30
-                elif bull_score >= 2 or bear_score >= 2: tier_score += 15
-                # ADX strength (max 20)
-                if adx_val >= 35: tier_score += 20
-                elif adx_val >= 25: tier_score += 12
-                # RVOL (max 20)
-                if rvol is not None:
-                    if rvol >= 2.0: tier_score += 20
-                    elif rvol >= 1.5: tier_score += 15
-                    elif rvol >= 1.2: tier_score += 10
-                # RSI zone (max 15)
-                if rsi_zone == "İdeal Giriş Penceresi": tier_score += 15
-                elif rsi_zone in ("Trend Güçleniyor", "Dip Toparlanması"): tier_score += 8
-                # Sinyal yaşı (max 10)
-                if signal_age_label == "Taze": tier_score += 10
-                elif signal_age_label == "Gelişiyor": tier_score += 6
-                # Penalty: düşük likidite (-10)
-                if low_liquidity: tier_score = max(0, tier_score - 10)
-                # Penalty: yakın bilanço (-5)
-                if earnings_warning: tier_score = max(0, tier_score - 5)
-                tier_score = max(0, min(100, tier_score))
-                # Eşikler
-                if tier_score >= 70: tier = "premium"
-                elif tier_score >= 50: tier = "plus"
-                elif tier_score >= 35: tier = "standart"
-            except Exception:
-                tier = None
-                tier_score = 0
-
         # ── compose_score → signal_strength (CPO-535, #36) ──────────────────
         # Tek ve tutarlı skor. hisse detay ↔ Güçlü Trend listesi aynı sayıyı gösterir.
-        # tier_score (AUDIT-004) geriye uyumluluk için korunuyor — DEPRECATED.
         signal_strength = 0
         if signal != "BEKLE":
             _bs = bull_score if signal == "AL" else (bear_score or 0)
@@ -1652,6 +1616,28 @@ def analyze(ticker_base):
                 elif _sent_score <= -50:
                     signal_strength = max(signal_strength - 5, 0)
 
+        # ── SPEC-018 W2: 3-Katmanlı Tier (Standart / Plus / Premium) ─────────
+        # signal_strength'ten türetilir — compose_score() tasarım bantları
+        # (satır ~1280 docstring). AUDIT-004 tier_score (ayrı rvol/RSI-bölge/
+        # sinyal-yaşı feature seti kullanıyordu, n=42 örneklemde signal_strength
+        # ile Spearman≈0 korelasyonluydu — CPO-1004) emekli edildi. Risk
+        # penaltıları (düşük likidite, yakın bilanço) AUDIT-004'ten bir-kademe-
+        # düşür mantığıyla korundu.
+        tier = None
+        if signal != "BEKLE":
+            try:
+                if signal_strength >= 75: tier = "premium"
+                elif signal_strength >= 60: tier = "plus"
+                elif signal_strength >= 40: tier = "standart"
+                if tier:
+                    _demote = (1 if low_liquidity else 0) + (1 if earnings_warning else 0)
+                    if _demote:
+                        _order = ["standart", "plus", "premium"]
+                        _idx = _order.index(tier) - _demote
+                        tier = _order[_idx] if _idx >= 0 else None
+            except Exception:
+                tier = None
+
         return {
             "ticker":        ticker_base,
             "price":         round(c, 2),
@@ -1668,9 +1654,8 @@ def analyze(ticker_base):
             "weekly_trend":  weekly_dir,
             "rvol":          rvol,
             "is_premium":    is_premium,
-            "signal_strength": signal_strength,  # compose_score 0-100 (CPO-535 #36) — PRIMARY display
-            "tier":          tier,        # SPEC-001 Faz 1: 'standart' | 'plus' | 'premium' | None (BEKLE) — LIVE, index.html grup başlıklarının kaynağı
-            "tier_score":    tier_score,  # AUDIT-004 0-100 — backward compat — DEPRECATED (use signal_strength)
+            "signal_strength": signal_strength,  # compose_score 0-100 (CPO-535 #36) — PRIMARY display + tier kaynağı (SPEC-018 W2)
+            "tier":          tier,        # SPEC-018 W2: signal_strength türetilmiş — 'standart' | 'plus' | 'premium' | None (BEKLE) — LIVE, index.html grup başlıklarının kaynağı
             "volume_tl_avg20": volume_tl_avg20,
             "low_liquidity": low_liquidity,
             "adx":           round(adx_val, 1),  # top-level for SSR/SEO
@@ -3572,8 +3557,8 @@ def api_data():
 
 
 # ── SPEC-018 BIST Heatmap MVP (Çar 27 May 2026, Ozan-direktif) ──────────────
-# Vanilla squarified treemap için minimal JSON. Boyut = tier_score (market_cap
-# v2'de fundamentals'tan eklenir). Renk = tier (Bronz/Gümüş/Altın) + signal.
+# Vanilla squarified treemap için minimal JSON. Boyut = signal_strength (market_cap
+# v2'de fundamentals'tan eklenir). Renk = tier (Standart/Plus/Premium) + signal.
 @app.route("/api/heatmap")
 def api_heatmap():
     with _lock:
@@ -3581,14 +3566,14 @@ def api_heatmap():
     out = []
     for s in stocks_raw:
         out.append({
-            "ticker":     s.get("ticker"),
-            "name":       s.get("name") or s.get("ticker"),
-            "sector":     s.get("sector") or "Diğer",
-            "signal":     s.get("signal"),       # AL/SAT/BEKLE
-            "tier":       s.get("tier"),         # standart/plus/premium/None
-            "tier_score": s.get("tier_score", 0),
-            "price":      s.get("price"),
-            "change_pct": s.get("change_pct"),
+            "ticker":          s.get("ticker"),
+            "name":            s.get("name") or s.get("ticker"),
+            "sector":          s.get("sector") or "Diğer",
+            "signal":          s.get("signal"),       # AL/SAT/BEKLE
+            "tier":            s.get("tier"),         # standart/plus/premium/None
+            "signal_strength": s.get("signal_strength", 0),
+            "price":           s.get("price"),
+            "change_pct":      s.get("change_pct"),
         })
     return safe_json({
         "stocks":     out,
@@ -6624,11 +6609,11 @@ def stock_page(ticker):
     chg      = (ssr_signal or {}).get("change_pct")
     rsi_val  = (ssr_signal or {}).get("rsi")
     rr_val   = (ssr_signal or {}).get("rr_ratio")
-    # SPEC-017 Faz 3 batch v2 B2: hero card tier_score (0-100) vs SSS score (bull/bear 0-3) tutarsızlığı.
-    # SSS de tier_score kullanmalı (hero ile aynı kaynak) — kullanıcı "skor 3/100 düşük" sanmaz.
-    score = (ssr_signal or {}).get("tier_score")
+    # SPEC-017 Faz 3 batch v2 B2: hero card signal_strength (0-100) vs SSS score (bull/bear 0-3) tutarsızlığı.
+    # SSS de signal_strength kullanmalı (hero ile aynı kaynak) — kullanıcı "skor 3/100 düşük" sanmaz.
+    score = (ssr_signal or {}).get("signal_strength")
     if score is None and sig in ("AL", "SAT"):
-        # Fallback: tier_score yoksa bull/bear x 33 ~ 0-100 normalize
+        # Fallback: signal_strength yoksa bull/bear x 33 ~ 0-100 normalize
         raw = (ssr_signal or {}).get("bull_score" if sig == "AL" else "bear_score")
         score = int(raw * 33) if isinstance(raw, (int, float)) else None
     _inds    = (ssr_signal or {}).get("indicators") or {}
@@ -7312,7 +7297,7 @@ def api_tarama():
     sector   = request.args.get("sector",    "")
     eq       = request.args.get("eq",        "")   # IDEAL | IYI | DIKKATLI | UZAK — deprecated, "Kalite" filtresi artık tier kullanıyor (CPO-985 #8.4)
     tier_f   = request.args.get("tier",      "")   # premium | plus | standart (CPO-985 #8.4)
-    sort_by  = request.args.get("sort",      "tier_score")  # CPO-985 #8.2: default artık Skor (tier_score), eskiden adx
+    sort_by  = request.args.get("sort",      "signal_strength")  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
 
     with _lock:
         stocks = list(_cache["data"])
@@ -7353,7 +7338,7 @@ def api_tarama():
             "rvol":          s.get("rvol"),
             "is_premium":    s.get("is_premium", False),
             "tier":          s.get("tier"),   # SPEC-007: paywall için (premium/plus/standart/None)
-            "tier_score":    s.get("tier_score") or 0,  # CPO-985 #8.2: "Skor" sıralama alanı — tier'ı (Premium/Plus/Standart) doğrudan sürükleyen tek sayı
+            "signal_strength": s.get("signal_strength") or 0,  # CPO-985 #8.2 + SPEC-018 W2: "Skor" sıralama alanı — tier'ı (Premium/Plus/Standart) doğrudan sürükleyen tek sayı
             "bull_score":    s.get("bull_score") or 0,
             "sl_level":      s.get("sl_level"),
         })
@@ -7365,7 +7350,7 @@ def api_tarama():
     if sort_dir in ("asc", "desc"):
         rev = sort_dir == "desc"
     else:
-        rev = sort_by in ("adx","price","signal_bars","vol_ratio","bull_score","change_pct","tier_score")
+        rev = sort_by in ("adx","price","signal_bars","vol_ratio","bull_score","change_pct","signal_strength")
     results.sort(key=lambda x: (x.get(sort_by) or 0), reverse=rev)
 
     with _lock:

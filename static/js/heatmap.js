@@ -1,7 +1,9 @@
 /* SPEC-018 BIST Heatmap MVP — Vanilla Squarified Treemap
  * Çar 27 May 2026, Ozan-direktif
  * Algoritma referansı: Bruls/Huijbregts/van Wijk 1999 squarified treemap
- * Boyut: tier_score (v2 market_cap); Renk: tier (Standart/Plus/Premium) + signal
+ * Boyut: signal_strength (v2 market_cap); Renk: tier (Standart/Plus/Premium) + signal
+ * SPEC-018 W2: tier_score emekli edildi, sunucudan gelen "tier" alanı (canonical,
+ * signal_strength'ten türetilmiş) doğrudan okunuyor — JS'te eşik tekrarı yok.
  */
 (function () {
   'use strict';
@@ -34,22 +36,20 @@
     var sig = item.signal;
     if (sig === 'SAT') return '#E05550';    // Zayıf Trend: softer kırmızı
     if (sig === 'BEKLE' || sig == null) return '#252b36';  // Yatay: koyu slate
-    // AL: tier_score'a göre Premium/Plus/Standart
-    var score = item.tier_score || 0;
-    if (score >= 70) return '#F0C240';  // Premium: sıcak denge altın
-    if (score >= 50) return '#88A8C0';  // Plus: mavi-gümüş
-    if (score >= 30) return '#C07838';  // Standart: sıcak bronz
-    return '#50506a';  // Çok zayıf AL (nadir)
+    // AL: sunucudan gelen canonical tier alanı (SPEC-018 W2)
+    if (item.tier === 'premium') return '#F0C240';  // Premium: sıcak denge altın
+    if (item.tier === 'plus') return '#88A8C0';     // Plus: mavi-gümüş
+    if (item.tier === 'standart') return '#C07838'; // Standart: sıcak bronz
+    return '#50506a';  // tier yok (nadir — düşük likidite/bilanço demote)
   }
 
   function tierLabel(item) {
     var sig = item.signal;
     if (sig === 'SAT') return 'SAT';
     if (sig === 'BEKLE' || sig == null) return 'BEKLE';
-    var score = item.tier_score || 0;
-    if (score >= 70) return 'Premium';
-    if (score >= 50) return 'Plus';
-    if (score >= 30) return 'Standart';
+    if (item.tier === 'premium') return 'Premium';
+    if (item.tier === 'plus') return 'Plus';
+    if (item.tier === 'standart') return 'Standart';
     return 'AL (zayıf)';
   }
 
@@ -57,10 +57,9 @@
     var sig = item.signal;
     if (sig === 'SAT') return 1.0;
     if (sig === 'BEKLE' || sig == null) return 0.40;
-    var score = item.tier_score || 0;
-    if (score >= 70) return 1.0;   // Premium
-    if (score >= 50) return 0.85;  // Plus
-    if (score >= 30) return 0.70;  // Standart
+    if (item.tier === 'premium') return 1.0;
+    if (item.tier === 'plus') return 0.85;
+    if (item.tier === 'standart') return 0.70;
     return 0.40;
   }
 
@@ -149,12 +148,12 @@
       bySector[sec].push(s);
     });
 
-    // Sektör listesi — her sektör için toplam tier_score
+    // Sektör listesi — her sektör için toplam signal_strength
     var sectors = Object.keys(bySector).map(function(name){
       var stocks = bySector[name];
       var totalScore = stocks.reduce(function(s, st){
         // Minimum boyut için BEKLE'lere de küçük weight
-        return s + Math.max(st.tier_score || 0, 10);
+        return s + Math.max(st.signal_strength || 0, 10);
       }, 0);
       return { name: name, stocks: stocks, _size: totalScore };
     });
@@ -219,7 +218,7 @@
       var stocks = sec.stocks.slice();
       stocks.forEach(function(s){
         // Minimum boyut için BEKLE'lere de weight
-        s._size = Math.max(s.tier_score || 0, 10);
+        s._size = Math.max(s.signal_strength || 0, 10);
       });
       stocks.sort(function(a, b){ return b._size - a._size; });
       squarify(stocks, inner);
@@ -230,8 +229,7 @@
         // SPEC-018 V2: tier class for gold glow animation
         var tierCls = 'stock-cell';
         if (currentMode !== 'piyasa' && st.signal === 'AL') {
-          var sc = st.tier_score || 0;
-          if (sc >= 70) tierCls += (st.signal_age_days && st.signal_age_days >= 7) ? ' tier-premium-fade' : ' tier-premium';
+          if (st.tier === 'premium') tierCls += (st.signal_age_days && st.signal_age_days >= 7) ? ' tier-premium-fade' : ' tier-premium';
         }
         cell.setAttribute('class', tierCls);
         cell.setAttribute('x', st.x); cell.setAttribute('y', st.y);
@@ -290,7 +288,7 @@
       '<div class="tt-name">' + (st.name || '') + '</div>' +
       '<div class="tt-row"><span class="tt-label">Sektör:</span><span>' + (st.sector || '—') + '</span></div>' +
       '<div class="tt-row"><span class="tt-label">Sinyal:</span><span>' + tierLabel(st) + '</span></div>' +
-      '<div class="tt-row"><span class="tt-label">Skor:</span><span>' + (st.tier_score || 0) + '/100</span></div>' +
+      '<div class="tt-row"><span class="tt-label">Skor:</span><span>' + (st.signal_strength || 0) + '/100</span></div>' +
       '<div class="tt-row"><span class="tt-label">Fiyat:</span><span>' + (st.price || '—') + ' ₺</span></div>' +
       '<div class="tt-row"><span class="tt-label">Günlük:</span><span style="color:' + changeColor + '">' + changeStr + '</span></div>';
     tt.style.display = 'block';

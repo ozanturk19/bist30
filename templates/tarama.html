@@ -608,7 +608,7 @@
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:12px;color:var(--text2)">Sırala:</span>
       <select class="sort-select" id="sortSel" onchange="applyFilters()">
-        <option value="tier_score">Skor (Yüksek → Düşük)</option>
+        <option value="signal_strength">Skor (Yüksek → Düşük)</option>
         <option value="adx">ADX (Güçlü → Zayıf)</option>
         <option value="vol_ratio">RVOL (Yüksek → Düşük)</option>
         <option value="change_pct">Değişim % (Yüksek → Düşük)</option>
@@ -706,7 +706,7 @@
 })();
 
 /* ── Tarama ── */
-let _currentSort = 'tier_score';
+let _currentSort = 'signal_strength';
 let _sectors = [];
 
 function sigLabel(sig) {
@@ -807,7 +807,7 @@ async function applyFilters() {
   });
   if (sig === 'PREMIUM') params.set('only_premium', '1');
   // Remove empty
-  [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999' || v==='0' || v==='all' || v==='tier_score') params.delete(k); });
+  [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999' || v==='0' || v==='all' || v==='signal_strength') params.delete(k); });
 
   // T2: URL state — replaceState ile (history kabarmaz, paylaşılabilir)
   try {
@@ -1113,7 +1113,7 @@ function resetFilters() {
   document.getElementById('fTier').value   = '';
   document.getElementById('fMinP').value   = '';
   document.getElementById('fMaxP').value   = '';
-  document.getElementById('sortSel').value = 'tier_score';
+  document.getElementById('sortSel').value = 'signal_strength';
   document.getElementById('fSearch').value = '';
   document.getElementById('searchClearBtn').style.display = 'none';
   _searchQ = '';

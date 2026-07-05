@@ -1684,8 +1684,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     }
   </style>
   {%- set _sig = ssr_signal.signal -%}
-  {# CPO-535 #36: signal_strength (compose_score) PRIMARY. tier_score fallback (backward compat) #}
-  {%- set _score = ssr_signal.signal_strength | default(ssr_signal.tier_score | default(0)) -%}
+  {# CPO-535 #36 / SPEC-018 W2: signal_strength (compose_score) tek kaynak — tier_score emekli #}
+  {%- set _score = ssr_signal.signal_strength | default(0) -%}
   {# SPEC-017 Faz C K3+K6+K9-1: Hero badge tek-vocab — "ORTA TREND"/"GÜÇLÜ SAT" yasaklandı; 🥇🥈🥉 medal kaldırıldı; SAT → "Zayıf Trend" (K3) #}
   {%- if _sig == 'AL' -%}
     {%- if _score >= 75 %}{% set _hc='#16a34a' %}{% set _hc2='#15803d' %}
@@ -2013,13 +2013,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <h2 class="section-title" style="margin:0">🧭 Sinyal Özeti</h2>
       <span style="font-size:11px;color:#909097">2 saniyede karar yardımcısı</span>
-      {# CPO-535 #36 Skor Halka — compose_score PRIMARY, tier_score fallback #}
-      {%- set _ts = (ssr_signal.signal_strength | default(ssr_signal.tier_score | default(0))) | int %}
+      {# CPO-535 #36 Skor Halka — compose_score (signal_strength) tek kaynak #}
+      {%- set _ts = (ssr_signal.signal_strength | default(0)) | int %}
       {% if ssr_signal and _ts > 0 %}
-      {# CPO-985/986 #8.1+#7: tier etiketi kanonik `ssr_signal.tier` alanından (Premium/Plus/Standart) —
-         önceden _ts kendi eşikleriyle bağımsız "PREMIUM/İYİ/ORTA/ZAYIF" üretiyordu; aynı hisse Tarama'da
-         💎 Premium rozeti gösterirken burada "✅ İYİ" görünebiliyordu (örn. tier_score 75 vs signal_strength 70).
-         Artık halka NUMARASI signal_strength (sinyal gücü, 0-100), ETİKETİ site genelindeki tier alanı — tek vocabulary. #}
+      {# CPO-985/986 #8.1+#7 / SPEC-018 W2: tier etiketi kanonik `ssr_signal.tier` alanından (Premium/Plus/Standart),
+         signal_strength'ten türetilir (AUDIT-004 tier_score emekli edildi, CPO-1004).
+         Halka NUMARASI signal_strength (sinyal gücü, 0-100), ETİKETİ tier alanı — tek vocabulary. #}
       {%- set _tier = ssr_signal.tier -%}
       {%- if   _tier == "premium"  %}{% set _tc = "#a855f7" %}{% set _tl = "💎 PREMIUM" %}
       {%- elif _tier == "plus"     %}{% set _tc = "#1f6feb" %}{% set _tl = "⭐ PLUS"     %}
