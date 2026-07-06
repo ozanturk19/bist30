@@ -1311,6 +1311,30 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
     return int(round(s))
 
 
+def _derive_tier(signal, signal_strength, low_liquidity, earnings_warning):
+    """signal_strength → tier bandı (SPEC-018 W2, bkz. compose_score docstring).
+
+    analyze() ve prev_cache stale-fallback (DEV-1034 kök nedeni, CPO-1020) her
+    ikisi de tier'ı BURADAN türetir — iki ayrı yerde tekrar eden bant mantığı
+    zamanla birbirinden sapıp badge/skor tutarsızlığına yol açmıştı.
+    """
+    tier = None
+    if signal != "BEKLE":
+        try:
+            if signal_strength >= 75: tier = "premium"
+            elif signal_strength >= 60: tier = "plus"
+            elif signal_strength >= 40: tier = "standart"
+            if tier:
+                _demote = (1 if low_liquidity else 0) + (1 if earnings_warning else 0)
+                if _demote:
+                    _order = ["standart", "plus", "premium"]
+                    _idx = _order.index(tier) - _demote
+                    tier = _order[_idx] if _idx >= 0 else None
+        except Exception:
+            tier = None
+    return tier
+
+
 def analyze(ticker_base):
     ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
 
@@ -1636,20 +1660,7 @@ def analyze(ticker_base):
         # ile Spearman≈0 korelasyonluydu — CPO-1004) emekli edildi. Risk
         # penaltıları (düşük likidite, yakın bilanço) AUDIT-004'ten bir-kademe-
         # düşür mantığıyla korundu.
-        tier = None
-        if signal != "BEKLE":
-            try:
-                if signal_strength >= 75: tier = "premium"
-                elif signal_strength >= 60: tier = "plus"
-                elif signal_strength >= 40: tier = "standart"
-                if tier:
-                    _demote = (1 if low_liquidity else 0) + (1 if earnings_warning else 0)
-                    if _demote:
-                        _order = ["standart", "plus", "premium"]
-                        _idx = _order.index(tier) - _demote
-                        tier = _order[_idx] if _idx >= 0 else None
-            except Exception:
-                tier = None
+        tier = _derive_tier(signal, signal_strength, low_liquidity, earnings_warning)
 
         return {
             "ticker":        ticker_base,
@@ -3006,6 +3017,15 @@ def _refresh_data_impl():
         if _pt and _pt not in _fresh_tickers:
             _fallback = dict(_ps)
             _fallback["data_quality"] = "stale"
+            # DEV-1034/CPO-1020: eski tier'ı köre kopyalama — carried-over
+            # signal_strength'ten yeniden türet, yoksa badge kalıcı olarak
+            # eski (tier_score bazlı veya bir önceki döngüden kalma) değerde donuyor.
+            _fallback["tier"] = _derive_tier(
+                _fallback.get("signal"),
+                _fallback.get("signal_strength") or 0,
+                _fallback.get("low_liquidity", False),
+                _fallback.get("earnings_warning", False),
+            )
             results.append(_fallback)
             _stale_count += 1
     if _stale_count:
