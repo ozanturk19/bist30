@@ -3780,19 +3780,20 @@ _MACRO_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "las
 def _save_macro_to_disk(data, ts):
     """Macro cache'i diske yaz — restart sonrası cold start'tan kurtarır."""
     try:
-        with open(_MACRO_DISK_PATH, "w") as f:
-            import json as _j
-            _j.dump({"data": data, "ts": ts}, f)
+        _tp_write_json(_MACRO_DISK_PATH, {"data": data, "ts": ts}, atomic=True)
     except Exception as e:
         logger.debug("_save_macro_to_disk: %s", e)
 
 def _load_macro_from_disk():
-    """Startup'ta diskten macro cache'i yükle — soğuk başlangıç süresini sıfırlar."""
+    """Diskten macro cache'i yükle — startup + web-worker 90s reload loop.
+
+    CPO-992/DEV-983 pattern: _tp_read_json ile gevent hub threadpool'a offload.
+    Inline open()/json.load() worker'ı bloke ediyordu — bu fonksiyon tek seferlik
+    startup değil, non-leader worker'larda 90s'de bir tekrar çağrılıyor (background_refresh).
+    """
     try:
         if os.path.exists(_MACRO_DISK_PATH):
-            with open(_MACRO_DISK_PATH) as f:
-                import json as _j
-                d = _j.load(f)
+            d = _tp_read_json(_MACRO_DISK_PATH)
             if isinstance(d, dict) and d.get("data"):
                 _macro_cache["data"] = d["data"]
                 _macro_cache["ts"]   = d.get("ts", 0)
