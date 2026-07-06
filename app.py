@@ -162,7 +162,16 @@ def _tp_read_json(path, default=None):
         with open(path, encoding="utf-8") as f:
             return json.load(f)
     if _WS_AVAILABLE:
-        return _gevent.get_hub().threadpool.spawn(_read).get()
+        # CPO-1017: hub.threadpool sabit boyutlu — bir görev syscall'da asılı
+        # kalırsa .get() süresiz bekliyordu (greenlet + o worker'daki her istek
+        # kilitleniyordu). 10s sınır: pool tıkanırsa caller default'a düşer,
+        # worker'ı süresiz bloke etmez. Diğer istisnalar (bozuk JSON, I/O hatası)
+        # öncekiyle aynı şekilde caller'a propagate olur.
+        try:
+            return _gevent.get_hub().threadpool.spawn(_read).get(timeout=10)
+        except _gevent.Timeout:
+            logger.error("_tp_read_json: 10s threadpool timeout [%s] — hub threadpool tıkanmış olabilir", path)
+            return default
     return _read()
 
 
@@ -174,7 +183,10 @@ def _tp_write_json(path, data, atomic=False, **json_kwargs):
         if atomic:
             os.replace(target, path)
     if _WS_AVAILABLE:
-        _gevent.get_hub().threadpool.spawn(_write).get()
+        try:
+            _gevent.get_hub().threadpool.spawn(_write).get(timeout=10)
+        except _gevent.Timeout:
+            logger.error("_tp_write_json: 10s threadpool timeout [%s] — hub threadpool tıkanmış olabilir", path)
     else:
         _write()
 
