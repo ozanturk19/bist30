@@ -4952,15 +4952,16 @@ _GEMINI_RATE_PATH = os.environ.get("GEMINI_RATE_PATH", "/tmp/bp_gemini_rate.lock
 _gemini_rate_fh = None  # worker-local file handle, paylaşımlı dosya global slot tutar
 
 
-def _gemini_rate_acquire() -> float:
-    """Global cross-worker Gemini rate limiter — slot reservation.
+def _gemini_rate_acquire_blocking() -> float:
+    """flock-korumalı kritik bölüm — _gemini_rate_acquire() içinden çağrılır.
 
-    flock ile tek seferde bir worker slot alır; sleep dışarıda kalır (CPO-837 uyumlu).
-    Returns: saniye cinsinden beklenecek süre (≤0 ise beklemeden devam).
-
-    P3 backlog (CPO-994/CPO-995): lock altında tek float write (few bytes, fsync yok) —
-    CPO-992'nin 64MB+fsync repro'suyla aynı şiddette değil, threadpool offload'a gerek
-    görülmedi. Gelecek gunicorn upgrade sonrası tetiklenme ihtimaline karşı not düşüldü.
+    P3 backlog notundaki varsayım (lock altında tek float write, fsync yok, offload'a
+    gerek yok) DEV-1046/CPO-1017 forensic'inde geçersiz kılındı: `flock(LOCK_EX)`
+    kendisi (disk I/O'dan bağımsız) OS-seviyeli bir bloklayan syscall — gevent onu
+    cooperatize etmiyor. Cross-worker paylaşımlı dosyada bir worker flock'u uzun
+    tutarsa (veya nadir bir OS/disk gecikmesi olursa), aynı flock'u bekleyen her
+    worker'ın TÜM OS thread'i (o worker'daki her greenlet/istek dahil) süresiz
+    bloke olur — `_tp_read_json`'ın çözdüğü sınıfın birebir aynısı.
     """
     global _gemini_rate_fh
     if _gemini_rate_fh is None:
@@ -4983,6 +4984,30 @@ def _gemini_rate_acquire() -> float:
         return my_slot - _GEMINI_RATE_INTERVAL - now  # ≤0 → beklemesiz
     finally:
         _fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_UN)
+
+
+def _gemini_rate_acquire() -> float:
+    """Global cross-worker Gemini rate limiter — slot reservation.
+
+    Returns: saniye cinsinden beklenecek süre (≤0 ise beklemeden devam).
+
+    DEV-1046 forensic (06.07, 16:20-16:41 + tekrarlayan pattern): tüm worker'lar
+    py-spy'da idle görünürken `/`, `/api/data`, `/heatmap` gibi Gemini'siz route'lar
+    dahi 8-40s hang'e düştü — imza CPO-1017'nin `_tp_read_json` öncesi belgelediğiyle
+    birebir aynı. Blocking `flock(LOCK_EX)` (yukarıdaki `_gemini_rate_acquire_blocking`)
+    en güçlü aday kök neden. Fix: `_tp_read_json`/`_tp_write_json` (CPO-1017) ile aynı
+    desen — gevent hub threadpool'a offload + 10s sert tavan. Timeout olursa worker'ı
+    süresiz bloke etmek yerine `_GEMINI_RATE_INTERVAL` (standart bekleme) dönülür —
+    rate-limit güvenliği korunur (agresif hızlı-geç yok), sadece worker artık asılı
+    kalmaz.
+    """
+    if _WS_AVAILABLE:
+        try:
+            return _gevent.get_hub().threadpool.spawn(_gemini_rate_acquire_blocking).get(timeout=10)
+        except _gevent.Timeout:
+            logger.error("_gemini_rate_acquire: 10s threadpool timeout — hub threadpool tıkanmış olabilir, standart interval ile devam")
+            return _GEMINI_RATE_INTERVAL
+    return _gemini_rate_acquire_blocking()
 
 
 
