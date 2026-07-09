@@ -1001,8 +1001,13 @@ def kap_url_for(ticker: str) -> str:
     return f"https://www.kap.org.tr/tr/bildirim-sorgu?q={ticker}"
 
 
-def _get_kap_uuid(ticker: str) -> str | None:
-    """Ticker için KAP UUID OID döner. Cache'de yoksa API'den çeker."""
+def _get_kap_uuid_blocking(ticker: str) -> str | None:
+    """Ticker için KAP UUID OID döner. Cache'de yoksa API'den çeker.
+
+    Sprint 6 SINIF fix (CPO-1032): senkron `requests.post(timeout=8)` kritik
+    bölümü buraya taşındı, `_get_kap_uuid()` bunu gevent hub threadpool'a
+    offload edip 10s sert tavan koyar (_tp_read_json/_gemini_rate_acquire
+    ile aynı desen)."""
     uuid = KAP_UUID_OIDS.get(ticker) or _kap_uuid_runtime.get(ticker)
     if uuid:
         return uuid
@@ -1024,6 +1029,21 @@ def _get_kap_uuid(ticker: str) -> str | None:
     except Exception:
         pass
     return None
+
+
+def _get_kap_uuid(ticker: str) -> str | None:
+    """Ticker için KAP UUID OID döner. — public wrapper.
+
+    `_get_kap_uuid_blocking()`'i gevent hub threadpool'a offload edip 10s
+    tavan koyar. Timeout'ta None (bildirim linki fallback'e düşer) —
+    worker'ı süresiz bloke etmek yerine güvenli varsayılan."""
+    if _WS_AVAILABLE:
+        try:
+            return _gevent.get_hub().threadpool.spawn(_get_kap_uuid_blocking, ticker).get(timeout=10)
+        except _gevent.Timeout:
+            logger.error("_get_kap_uuid: 10s threadpool timeout [%s] — hub threadpool tıkanmış olabilir", ticker)
+            return None
+    return _get_kap_uuid_blocking(ticker)
 
 
 # ── KAP bildirim cache ────────────────────────────────────────────────────────
@@ -1740,9 +1760,16 @@ import fcntl as _fcntl
 _NOTIFY_LOCK_PATH = "/tmp/bp_notify_leader.lock"
 _notify_lock_fh = None
 
-def _is_notify_leader():
+def _is_notify_leader_blocking():
     """Bu worker bildirim gönderme yetkisine sahip mi? fcntl.flock atomik —
-    4 worker'dan yalnızca biri lock'u tutar, diğerleri False alır."""
+    4 worker'dan yalnızca biri lock'u tutar, diğerleri False alır.
+
+    Sprint 6 SINIF fix (CPO-1032): `open()`/`flock()` OS syscall'ları gevent
+    tarafından cooperatize edilmiyor (CPO-1017 `_tp_read_json` / DEV-1102
+    `_gemini_rate_acquire` ile aynı sınıf) — yavaş disk/kontention altında bu
+    kritik bölüm worker'ın TÜM OS thread'ini bloke edebilir. Kritik bölüm bu
+    fonksiyona taşındı, çağrı `_is_notify_leader()` üzerinden threadpool'a
+    offload ediliyor."""
     global _notify_lock_fh
     try:
         if _notify_lock_fh is None:
@@ -1752,6 +1779,22 @@ def _is_notify_leader():
     except (BlockingIOError, OSError):
         return False
 
+
+def _is_notify_leader():
+    """Bu worker bildirim gönderme yetkisine sahip mi? — public wrapper.
+
+    `_is_notify_leader_blocking()`'i gevent hub threadpool'a offload edip 10s
+    tavan koyar (_tp_read_json/_gemini_rate_acquire ile aynı desen). Timeout
+    olursa False (non-leader) döner — bu worker o cycle'ı atlar, ambiguous
+    durumda duplike bildirim göndermek yerine güvenli tarafta kalınır."""
+    if _WS_AVAILABLE:
+        try:
+            return _gevent.get_hub().threadpool.spawn(_is_notify_leader_blocking).get(timeout=10)
+        except _gevent.Timeout:
+            logger.error("_is_notify_leader: 10s threadpool timeout — hub threadpool tıkanmış olabilir, non-leader varsayılıyor")
+            return False
+    return _is_notify_leader_blocking()
+
 # MSG-140 (notify-leader genişletme): background_refresh tek worker'da çalışsın.
 # 4 worker × yfinance/pandas ağır iş → gevent worker bloke → %40 504 timeout.
 # Leader worker bg çalıştırır + cache'i diske yazar; non-leader 3 worker hafif
@@ -1759,9 +1802,13 @@ def _is_notify_leader():
 _BG_LOCK_PATH = os.environ.get("BG_LOCK_PATH", "/tmp/bp_bg_leader.lock")  # staging-prod izolasyon (CPO-505)
 _bg_lock_fh = None
 
-def _is_bg_leader():
+def _is_bg_leader_blocking():
     """Bu worker background_refresh (yfinance ağır iş) yetkisine sahip mi?
-    fcntl.flock — 4 worker'dan yalnızca biri leader."""
+    fcntl.flock — 4 worker'dan yalnızca biri leader.
+
+    Sprint 6 SINIF fix (CPO-1032): open()/flock() gevent'ce cooperatize
+    edilmiyor — kritik bölüm buraya taşındı, `_is_bg_leader()` threadpool'a
+    offload eder."""
     global _bg_lock_fh
     try:
         if _bg_lock_fh is None:
@@ -1771,15 +1818,33 @@ def _is_bg_leader():
     except (BlockingIOError, OSError):
         return False
 
+
+def _is_bg_leader():
+    """Bu worker background_refresh yetkisine sahip mi? — public wrapper.
+
+    `_is_bg_leader_blocking()`'i gevent hub threadpool'a offload edip 10s tavan
+    koyar. Timeout'ta False (non-leader) — güvenli varsayılan."""
+    if _WS_AVAILABLE:
+        try:
+            return _gevent.get_hub().threadpool.spawn(_is_bg_leader_blocking).get(timeout=10)
+        except _gevent.Timeout:
+            logger.error("_is_bg_leader: 10s threadpool timeout — hub threadpool tıkanmış olabilir, non-leader varsayılıyor")
+            return False
+    return _is_bg_leader_blocking()
+
 # SPEC-009 Faz D2 (digest mail leader-lock): _digest_cron_loop her 4 worker'da
 # çalışıyordu → 19:00'da eşzamanlı first-fire (last_digest.txt yazılmadan) → 4×
 # aynı digest mail → Brevo kotası 4× tükeniyor. Ayrı lock — yalnız leader gönderir.
 _DIGEST_LOCK_PATH = os.environ.get("DIGEST_LOCK_PATH", "/tmp/bp_digest_leader.lock")  # staging-prod izolasyon
 _digest_lock_fh = None
 
-def _is_digest_leader():
+def _is_digest_leader_blocking():
     """Bu worker digest mail gönderme yetkisine sahip mi? fcntl.flock —
-    4 worker'dan yalnızca biri leader → digest 4× yerine 1× gönderilir."""
+    4 worker'dan yalnızca biri leader → digest 4× yerine 1× gönderilir.
+
+    Sprint 6 SINIF fix (CPO-1032): open()/flock() gevent'ce cooperatize
+    edilmiyor — kritik bölüm buraya taşındı, `_is_digest_leader()`
+    threadpool'a offload eder."""
     global _digest_lock_fh
     try:
         if _digest_lock_fh is None:
@@ -1788,6 +1853,20 @@ def _is_digest_leader():
         return True
     except (BlockingIOError, OSError):
         return False
+
+
+def _is_digest_leader():
+    """Bu worker digest mail gönderme yetkisine sahip mi? — public wrapper.
+
+    `_is_digest_leader_blocking()`'i gevent hub threadpool'a offload edip 10s
+    tavan koyar. Timeout'ta False (non-leader) — güvenli varsayılan."""
+    if _WS_AVAILABLE:
+        try:
+            return _gevent.get_hub().threadpool.spawn(_is_digest_leader_blocking).get(timeout=10)
+        except _gevent.Timeout:
+            logger.error("_is_digest_leader: 10s threadpool timeout — hub threadpool tıkanmış olabilir, non-leader varsayılıyor")
+            return False
+    return _is_digest_leader_blocking()
 
 # SPEC-009 Gemini Faz 1: _prefetch_thread her 4 worker'da çalışıyordu → Gemini
 # çağrıları 4× → maliyet patlaması (~60 TL/gün). Ayrı leader-lock — yalnız 1
@@ -1814,9 +1893,13 @@ def _is_gemini_leader():
 _MACRO_LOCK_PATH = os.environ.get("MACRO_LOCK_PATH", "/tmp/bp_macro_leader.lock")  # staging-prod izolasyon
 _macro_leader_fh = None
 
-def _is_macro_leader():
+def _is_macro_leader_blocking():
     """Bu worker macro bg fetch yetkisine sahip mi? fcntl.flock —
-    4 worker'dan yalnızca biri leader → fast_info 4× yerine 1×."""
+    4 worker'dan yalnızca biri leader → fast_info 4× yerine 1×.
+
+    Sprint 6 SINIF fix (CPO-1032): open()/flock() gevent'ce cooperatize
+    edilmiyor — kritik bölüm buraya taşındı, `_is_macro_leader()`
+    threadpool'a offload eder."""
     global _macro_leader_fh
     try:
         if _macro_leader_fh is None:
@@ -1825,6 +1908,20 @@ def _is_macro_leader():
         return True
     except (BlockingIOError, OSError):
         return False
+
+
+def _is_macro_leader():
+    """Bu worker macro bg fetch yetkisine sahip mi? — public wrapper.
+
+    `_is_macro_leader_blocking()`'i gevent hub threadpool'a offload edip 10s
+    tavan koyar. Timeout'ta False (non-leader) — güvenli varsayılan."""
+    if _WS_AVAILABLE:
+        try:
+            return _gevent.get_hub().threadpool.spawn(_is_macro_leader_blocking).get(timeout=10)
+        except _gevent.Timeout:
+            logger.error("_is_macro_leader: 10s threadpool timeout — hub threadpool tıkanmış olabilir, non-leader varsayılıyor")
+            return False
+    return _is_macro_leader_blocking()
 
 def _load_prev_signals():
     """App start'ta disk'ten _prev_signals'i yükler."""
