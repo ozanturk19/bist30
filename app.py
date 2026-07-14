@@ -225,17 +225,60 @@ _YF_LIVE_SCRIPT   = os.path.join(os.path.dirname(__file__), "yf_live_fetch.py")
 
 _SUBPROCESS_SLOW_MS = 3000  # CPO-740 Görev 12c: >3s uyarı (baseline ~956ms × 3)
 
+# ─── Yahoo Finance circuit breaker (CPO-1057 backoff PR, DEV-1429 forensic) ───
+# 14 Tem: Yahoo 429 ticker-spesifik değil — bist/global/macro/chart hepsi aynı anda
+# YFRateLimitError alıyor (manuel doğrulandı). Her fail'de subprocess 1-50s boşa
+# harcıyor (refresh cycle 180s soft cap'inin çoğu buna gidiyor, 215 tickerdan
+# sadece ~21'i tamamlanabiliyor). Devre 429 art arda görülünce açılır; açıkken
+# subprocess hiç spawn edilmez, None hemen döner — cycle diğer ticker'a/sonraki
+# cycle'a hızla geçer. Sadece 429 sayılır (timeout/parse gibi farklı kök nedenler
+# devre sayacını etkilemez — Gemini CB'deki 429-hariç mantığın simetriği, çünkü
+# burada 429 asıl hedeflenen hata modu).
+_YAHOO_CB_THRESHOLD = 3          # ardışık 429 eşiği — devre açılır
+_YAHOO_CB_COOLDOWN_BASE = 45     # saniye — ilk açılışta devre kapalı kalır
+_YAHOO_CB_COOLDOWN_CAP = 300     # saniye — üstel artışın tavanı (5dk)
+_yahoo_cb = {"fails": 0, "open_until": 0.0, "opens": 0}   # worker-local, kilitsiz (Gemini CB ile aynı desen)
+
+
+def _yahoo_cb_blocked() -> bool:
+    """True ise devre açık — subprocess spawn etme, hızlı None dön."""
+    return time.time() < _yahoo_cb["open_until"]
+
+
+def _yahoo_cb_record(ok: bool, stderr_text: str = ""):
+    """Her subprocess çağrısından sonra çağrılır. ok=True → sayaç+devre sıfırlanır
+    (Yahoo en az bir kez normal cevap verdi = toparlanma sinyali). ok=False sadece
+    stderr'de 'too many requests' varsa sayılır."""
+    if ok:
+        _yahoo_cb["fails"] = 0
+        _yahoo_cb["opens"] = 0
+        return
+    if not stderr_text or "too many requests" not in stderr_text.lower():
+        return
+    _yahoo_cb["fails"] += 1
+    if _yahoo_cb["fails"] >= _YAHOO_CB_THRESHOLD:
+        cooldown = min(_YAHOO_CB_COOLDOWN_BASE * (2 ** _yahoo_cb["opens"]), _YAHOO_CB_COOLDOWN_CAP)
+        _yahoo_cb["open_until"] = time.time() + cooldown
+        _yahoo_cb["opens"] += 1
+        _yahoo_cb["fails"] = 0
+        logger.warning("_yahoo_cb: circuit breaker AÇILDI — %d ardışık 429, %ds boyunca Yahoo "
+                        "subprocess atlanacak (opens=%d)", _YAHOO_CB_THRESHOLD, cooldown, _yahoo_cb["opens"])
+
+
 def _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=25):
     """Lock-free fetch via yf_fetch.py subprocess — CPO-740 Görev 8.
     Replaces _YF_GLOBAL_LOCK acquire in analyze(). Hard 25s kill vs lock 45s wait.
     Rollback: revert this function + analyze() lines 1097-1111.
     """
+    if _yahoo_cb_blocked():
+        return None
     _t0 = time.perf_counter()
     try:
         result = subprocess.run(
             [_sys.executable, _YF_FETCH_SCRIPT, ticker_base, period, interval],
             capture_output=True, text=True, timeout=timeout,
         )
+        _yahoo_cb_record(result.returncode == 0, result.stderr)
         _ms = (time.perf_counter() - _t0) * 1000
         if result.returncode != 0:
             logger.warning("yf_fetch %s %s/%s FAIL %.0fms: %s", ticker_base, period, interval, _ms, result.stderr[:80])
@@ -276,12 +319,15 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
     """Lock-free macro fetch via yf_macro_fetch.py subprocess — CPO-740 Görev 9.
     Hard 10s kill vs lock contention. Called sequentially from _fetch_macro().
     """
+    if _yahoo_cb_blocked():
+        return None
     _t0 = time.perf_counter()
     try:
         result = subprocess.run(
             [_sys.executable, _YF_MACRO_SCRIPT, sym],
             capture_output=True, text=True, timeout=timeout,
         )
+        _yahoo_cb_record(result.returncode == 0, result.stderr)
         _ms = (time.perf_counter() - _t0) * 1000
         if result.returncode != 0:
             logger.debug("yf_macro_fetch %s FAIL %.0fms: %s", sym, _ms, result.stderr[:80])
@@ -316,6 +362,8 @@ def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
     Hard 30s kill vs lock wait. Returns info subset dict or None on failure.
     Rollback: revert this function + _get_fundamentals() lines.
     """
+    if _yahoo_cb_blocked():
+        return None
     yf_ticker = ticker_base + ".IS"
     _t0 = time.perf_counter()
     try:
@@ -323,6 +371,7 @@ def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
             [_sys.executable, _YF_FUND_SCRIPT, yf_ticker],
             capture_output=True, text=True, timeout=timeout,
         )
+        _yahoo_cb_record(result.returncode == 0, result.stderr)
         _ms = (time.perf_counter() - _t0) * 1000
         if result.returncode != 0:
             logger.warning("yf_fund_fetch %s FAIL %.0fms: %s", ticker_base, _ms, result.stderr[:80])
@@ -352,12 +401,15 @@ def _fetch_chart_subprocess(yf_ticker, period="5y", timeout=40):
     Hard 40s kill vs lock wait. Returns DataFrame (OHLC) or None on failure.
     Rollback: revert this function + get_chart_data() lock block.
     """
+    if _yahoo_cb_blocked():
+        return None
     _t0 = time.perf_counter()
     try:
         result = subprocess.run(
             [_sys.executable, _YF_CHART_SCRIPT, yf_ticker, period],
             capture_output=True, text=True, timeout=timeout,
         )
+        _yahoo_cb_record(result.returncode == 0, result.stderr)
         _ms = (time.perf_counter() - _t0) * 1000
         if result.returncode != 0:
             logger.warning("yf_chart_fetch %s FAIL %.0fms: %s", yf_ticker, _ms, result.stderr[:80])
@@ -385,12 +437,15 @@ def _fetch_live_subprocess(tickers_str, timeout=60):
     Replaces _YF_GLOBAL_LOCK + yf.download() in fetch_live_prices().
     Returns {base_ticker: {price, change_pct}} or None on failure.
     """
+    if _yahoo_cb_blocked():
+        return None
     _t0 = time.perf_counter()
     try:
         result = subprocess.run(
             [_sys.executable, _YF_LIVE_SCRIPT, "bist", tickers_str],
             capture_output=True, text=True, timeout=timeout,
         )
+        _yahoo_cb_record(result.returncode == 0, result.stderr)
         _ms = (time.perf_counter() - _t0) * 1000
         if result.returncode != 0:
             logger.warning("yf_live_fetch bist FAIL %.0fms: %s", _ms, result.stderr[:120])
@@ -415,12 +470,15 @@ def _fetch_global_subprocess(syms, timeout=60):
     Replaces _YF_GLOBAL_LOCK + yf.download() in fetch_global_prices().
     Returns {yf_sym: {price, change_pct}} or None on failure.
     """
+    if _yahoo_cb_blocked():
+        return None
     _t0 = time.perf_counter()
     try:
         result = subprocess.run(
             [_sys.executable, _YF_LIVE_SCRIPT, "global", json.dumps(syms)],
             capture_output=True, text=True, timeout=timeout,
         )
+        _yahoo_cb_record(result.returncode == 0, result.stderr)
         _ms = (time.perf_counter() - _t0) * 1000
         if result.returncode != 0:
             logger.warning("yf_live_fetch global FAIL %.0fms: %s", _ms, result.stderr[:120])
