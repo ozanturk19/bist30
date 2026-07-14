@@ -7735,11 +7735,17 @@ def _compute_health():
 # → watchdog yanlış HTTP=000 görmez → restart churn döngüsü kırılır (#48 ailesi).
 _health_snapshot = {"ok": True, "status": "STARTING", "ts": 0.0, "note": "warming up"}
 
+# §8(b) — health_sidecar.py'nin okuduğu heartbeat dosyası. Ana process tamamen
+# hang olursa bu dosya yazılmayı durur; sidecar bunu stale kabul edip kendi
+# CRITICAL yanıtını döner (bkz. ops/specs/bist30-health-sidecar-PLAN.md §3a).
+_HEALTH_HEARTBEAT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "health_heartbeat.json")
+
 def _health_snapshot_loop():
     global _health_snapshot
     while True:
         try:
             _health_snapshot = _compute_health()   # atomic rebind (GIL)
+            _atomic_write_json(_HEALTH_HEARTBEAT_PATH, _health_snapshot)
         except Exception as e:
             logger.error("health snapshot loop: %s", e)
         time.sleep(8)
