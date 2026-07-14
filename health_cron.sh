@@ -82,6 +82,15 @@ response=$(curl -m 30 -s -w '\n%{http_code}' http://127.0.0.1:8003/api/health 2>
 http_code=$(echo "$response" | tail -n1)
 body=$(echo "$response" | sed '$d')
 
+# DEV-1431 audit-trail fix — önceden başarılı (200 + ok:true) tikler HİÇ log
+# yazmıyordu, bu yüzden 08:20 TR restart'ının gerçek tetikleyicisi geriye dönük
+# doğrulanamadı (forensic boşluk). Her tick'te (başarılı dahil) kompakt bir
+# satır yaz — restart/alarm mantığına dokunmuyor, sadece ek gözlemlenebilirlik.
+_ok_val=$(echo "$body" | grep -oE '"ok": *[a-z]+' | head -1 | sed -E 's/"ok": *//')
+_status_val=$(echo "$body" | grep -oE '"status": *"[^"]*"' | head -1 | sed -E 's/.*"status": *"([^"]*)".*/\1/')
+_bad_ticker_val=$(echo "$body" | grep -oE '"bad_ticker_count": *[0-9]+' | head -1 | sed -E 's/.*: *//')
+echo "$(date) TICK http=$http_code ok=${_ok_val:-?} status=${_status_val:-?} bad_ticker=${_bad_ticker_val:-?}" >> "$LOG"
+
 # CPO-1055 body-check fix — blind spot: HTTP 200 dönebilir ama veri seans
 # içinde taze olmayabilir (13-14 Tem 2026 canlı vaka: Yahoo blok → refresh
 # başarısız → stocks 16sa+ stale, health hâlâ HTTP 200/hızlı döndü, HTTP-kod-only
