@@ -17,6 +17,7 @@ flock -n 200 || exit 0   # başka instance çalışıyorsa sessiz exit
 STATE=/root/bist30/health_state.txt
 LOG=/var/log/bist30_health.log
 FAILS_FILE=/root/bist30/health_fail_count.txt
+STALE_FAILS_FILE=/root/bist30/health_stale_count.txt
 LAST_MAIL_FILE=/root/bist30/health_last_mail.txt
 LAST_RESTART_FILE=/root/bist30/health_last_restart.txt
 MAIL_COOLDOWN=1800     # 30 dakika — mail spam koruması
@@ -77,7 +78,32 @@ can_restart() {
 # Liveness probe — 30s timeout. SPEC-009 #25: bg-refresh cycle (900s) anında
 # leader worker gevent hub'ı yoğunlaşır → /api/health ~15-25s yavaşlayabilir.
 # 30s timeout bu geçici yavaşlığı tolere eder (15s fazla agresifti → churn).
-http_code=$(curl -m 30 -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8003/api/health 2>/dev/null)
+response=$(curl -m 30 -s -w '\n%{http_code}' http://127.0.0.1:8003/api/health 2>/dev/null)
+http_code=$(echo "$response" | tail -n1)
+body=$(echo "$response" | sed '$d')
+
+# CPO-1055 body-check fix — blind spot: HTTP 200 dönebilir ama veri seans
+# içinde taze olmayabilir (13-14 Tem 2026 canlı vaka: Yahoo blok → refresh
+# başarısız → stocks 16sa+ stale, health hâlâ HTTP 200/hızlı döndü, HTTP-kod-only
+# kontrol bunu YAKALAMADI). "ok" alanı is_stale/market_day zaten hesaba katıyor
+# (bkz. weekend-aware stale, commit 990a426) — burada tekrar iş mantığı yazmaya
+# gerek yok, sadece tüketiyoruz. Restart bunu ÇÖZMEZ (Yahoo taraf blok,
+# process-içi değil) — bu yüzden AUTO-RESTART tetiklemez, sadece 3 ardışık
+# dakika sonra mail alarmı atar (aynı STATE/cooldown makinesini paylaşır).
+if [ "$http_code" = "200" ] && echo "$body" | grep -q '"ok": *false'; then
+  stale_fails=$(cat "$STALE_FAILS_FILE" 2>/dev/null || echo "0")
+  stale_fails=$((stale_fails + 1))
+  echo "$stale_fails" > "$STALE_FAILS_FILE"
+  echo "$(date) BODY-STALE #$stale_fails — HTTP 200 ama body ok=false (veri seans içi taze değil)" >> "$LOG"
+  if [ "$stale_fails" -ge 3 ]; then
+    if send_mail_if_allowed ALARM; then
+      echo "$(date) STALE ALARM — $stale_fails ardışık body-stale, restart tetiklenmedi (external cause)" >> "$LOG"
+      echo "ALARM" > "$STATE"
+    fi
+  fi
+  exit 0
+fi
+echo "0" > "$STALE_FAILS_FILE"
 
 if [ "$http_code" = "200" ]; then
   prev_state=$(cat "$STATE" 2>/dev/null || echo "OK")
