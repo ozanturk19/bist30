@@ -52,6 +52,16 @@ def _get_app_version() -> str:
     return _APP_VERSION
 
 
+def _check_health_loop_stall(now: float, last_tick_ts: float, threshold_s: float = 15) -> Optional[float]:
+    """Returns the gap in seconds if it exceeds threshold_s, else None.
+
+    Pure/stateless — caller owns last_tick_ts persistence and logging.
+    CPO-1068 (b) — forensic-only stall detection for _health_snapshot_loop.
+    """
+    gap = now - last_tick_ts
+    return gap if gap > threshold_s else None
+
+
 def _extend_health_payload(
     base: dict,
     startup_ts: float,

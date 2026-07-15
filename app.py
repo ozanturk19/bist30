@@ -43,7 +43,7 @@ from blog_content import ARTICLES, ARTICLES_BY_SLUG, CATEGORIES
 
 # ── Phase 3 #2 Paket 1+4+5 — Sağlamlık modülleri ─────────────────────────────
 from _alerts       import _check_api_stale, _format_alert_md, _should_alert_telegram
-from _health_extras import _extend_health_payload
+from _health_extras import _extend_health_payload, _check_health_loop_stall
 from _guards       import _is_valid_fundamentals, _is_valid_chart, _is_valid_macro, _is_valid_disk_cache
 
 # ── Web Push (VAPID) — opsiyonel; eksikse özellik devre dışı ──────────────────
@@ -7798,9 +7798,18 @@ _health_snapshot = {"ok": True, "status": "STARTING", "ts": 0.0, "note": "warmin
 # CRITICAL yanıtını döner (bkz. ops/specs/bist30-health-sidecar-PLAN.md §3a).
 _HEALTH_HEARTBEAT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "health_heartbeat.json")
 
+_health_loop_last_tick_ts = time.time()
+
 def _health_snapshot_loop():
-    global _health_snapshot
+    global _health_snapshot, _health_loop_last_tick_ts
     while True:
+        now = time.time()
+        stall_gap = _check_health_loop_stall(now, _health_loop_last_tick_ts)
+        if stall_gap is not None:
+            # Saf forensic — aksiyon yok, sadece bir sonraki gerçek Fail-Mode C'de
+            # geriye-dönük kanıt bırakmak için (CPO-1068, DEV-1440 boşluğu).
+            logger.warning("health snapshot loop stall detected: gap=%.1fs (expected ~8s)", stall_gap)
+        _health_loop_last_tick_ts = now
         try:
             _health_snapshot = _compute_health()   # atomic rebind (GIL)
             _atomic_write_json(_HEALTH_HEARTBEAT_PATH, _health_snapshot)
