@@ -98,7 +98,7 @@
       "name": "{{ ticker }} için stop loss nerede?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "{{ ticker }} için mevcut algoritmik stop loss seviyesi {{ '%.2f'|format(ssr_signal.sl_level) }} TL olarak hesaplanmıştır. ATR tabanlı dinamik hesaplanır, Supertrend(10,3) çıkış seviyesini baz alır."
+        "text": "{{ ticker }} için mevcut algoritmik stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺ olarak hesaplanmıştır. ATR tabanlı dinamik hesaplanır, Supertrend(10,3) çıkış seviyesini baz alır."
       }
     },{% endif %}
     {
@@ -1721,9 +1721,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     {% endif %}
     {% if ssr_signal.tp_level or ssr_signal.sl_level %}
     <div class="bp-hero-levels">
-      {% if ssr_signal.tp_level %}<span><strong>Hedef:</strong>{{ '%.2f'|format(ssr_signal.tp_level) }} ₺</span>{% endif %}
-      {% if ssr_signal.sl_level %}<span><strong>Stop:</strong>{{ '%.2f'|format(ssr_signal.sl_level) }} ₺</span>{% endif %}
-      {% if ssr_signal.entry %}<span><strong>Giriş:</strong>{{ '%.2f'|format(ssr_signal.entry) }} ₺</span>{% endif %}
+      {% if ssr_signal.tp_level %}<span><strong>Hedef:</strong>{{ ssr_signal.tp_level|tr_price }} ₺</span>{% endif %}
+      {% if ssr_signal.sl_level %}<span><strong>Stop:</strong>{{ ssr_signal.sl_level|tr_price }} ₺</span>{% endif %}
+      {% if ssr_signal.entry %}<span><strong>Giriş:</strong>{{ ssr_signal.entry|tr_price }} ₺</span>{% endif %}
     </div>
     {% endif %}
     {# SPEC-017 v2 c5 — Sparkline 30D (vanilla canvas + long-press crosshair) #}
@@ -2451,11 +2451,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       {% if ssr_signal.signal == 'AL' %}
         BorsaPusula algoritmasına göre <strong style="color:#00e290">Güçlü Trend</strong> sinyali veriyor.
         {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
-        {% if ssr_signal.sl_level %}Stop loss seviyesi {{ "%.2f"|format(ssr_signal.sl_level) }} ₺.{% endif %}
+        {% if ssr_signal.sl_level %}Stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺.{% endif %}
       {% elif ssr_signal.signal == 'SAT' %}
         BorsaPusula algoritmasına göre <strong style="color:#f85149">Zayıf Trend</strong> sinyali veriyor.
         {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
-        {% if ssr_signal.sl_level %}Stop loss seviyesi {{ "%.2f"|format(ssr_signal.sl_level) }} ₺.{% endif %}
+        {% if ssr_signal.sl_level %}Stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺.{% endif %}
       {% else %}
         şu an <strong style="color:#909097">Belirsiz</strong> bölgesinde; net bir trend sinyali bulunmuyor.
       {% endif %}

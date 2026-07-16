@@ -654,6 +654,17 @@ def signal_label_filter(signal):
     return _SIGNAL_LABELS.get(signal, signal)
 
 
+@app.template_filter('tr_price')
+def tr_price_filter(value):
+    """Sayıyı TR fiyat formatına çevirir: 1234.5 -> '1.234,50' (JS toLocaleString('tr-TR') ile eş)."""
+    if value is None:
+        return value
+    formatted = f"{float(value):,.2f}"
+    integer_part, decimal_part = formatted.split('.')
+    integer_part = integer_part.replace(',', '.')
+    return f"{integer_part},{decimal_part}"
+
+
 def _clean(obj):
     """NaN/Inf değerlerini None'a çevir — JSON'da NaN geçersiz, JS crash yapar."""
     import math

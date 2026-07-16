@@ -439,8 +439,8 @@
               <span class="sig-sat">▼ Zayıf Trend</span>
             {% endif %}
           </td>
-          <td>{{ "%.2f"|format(s.signal_price) }} ₺</td>
-          <td>{{ "%.2f"|format(s.price) }} ₺</td>
+          <td>{{ s.signal_price|tr_price }} ₺</td>
+          <td>{{ s.price|tr_price }} ₺</td>
           <td>
             {% if s.aktif_ret is not none %}
               <span class="{{ 'c-green' if s.aktif_ret >= 0 else 'c-red' }}" style="font-weight:700">
