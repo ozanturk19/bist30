@@ -2251,30 +2251,30 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
   </div>
 
-  <!-- Geçmiş Sinyal Performansı (backtest) -->
-  {% if ticker_bt and ticker_bt.al_win_rate is not none %}
-  <div data-tab-content="ozet" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:14px 18px;margin-bottom:20px">
+  <!-- Geçmiş Sinyal Performansı — CPO-1107 madde 3: artık aynı sinyal geçmişi
+       listesinden (signal_history) hesaplanır; ayrı/bayat backtest cache'i
+       kullanmaz, böylece "Toplam Sinyal" tablosuyla aynı kaynağa dayanır. -->
+  <div id="sigPerfBox" data-tab-content="ozet" style="display:none;background:#141416;border:1px solid #2a2a2c;border-radius:10px;padding:14px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <h2 class="section-title" style="margin:0">📊 Geçmiş Sinyal Performansı</h2>
       <a href="/sinyal-performans" style="font-size:11px;color:#b8c3ff;text-decoration:none;font-weight:600">Tüm backtest →</a>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
       <div style="background:#0e0e12;border:1px solid #1c1b1f;border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div style="font-size:24px;font-weight:800;color:{% if ticker_bt.al_win_rate >= 50 %}#00e290{% else %}#f85149{% endif %}">%{{ ticker_bt.al_win_rate }}</div>
-        <div style="font-size:11px;color:#909097;margin-top:3px">Güçlü Trend Kazanma Oranı</div>
+        <div id="sigPerfWinRate" style="font-size:24px;font-weight:800"></div>
+        <div style="font-size:11px;color:#909097;margin-top:3px">Sinyal Kazanma Oranı</div>
       </div>
       <div style="background:#0e0e12;border:1px solid #1c1b1f;border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div style="font-size:24px;font-weight:800;color:{% if ticker_bt.al_avg > 0 %}#00e290{% elif ticker_bt.al_avg < 0 %}#f85149{% else %}#909097{% endif %}">{% if ticker_bt.al_avg > 0 %}+{% endif %}{{ ticker_bt.al_avg }}%</div>
-        <div style="font-size:11px;color:#909097;margin-top:3px">Ort. Güçlü Trend Getirisi</div>
+        <div id="sigPerfAvg" style="font-size:24px;font-weight:800"></div>
+        <div style="font-size:11px;color:#909097;margin-top:3px">Ort. Sinyal Getirisi</div>
       </div>
       <div style="background:#0e0e12;border:1px solid #1c1b1f;border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div style="font-size:24px;font-weight:800;color:#909097">{{ ticker_bt.al_count }}</div>
+        <div id="sigPerfCount" style="font-size:24px;font-weight:800;color:#909097"></div>
         <div style="font-size:11px;color:#909097;margin-top:3px">Analiz Edilen Sinyal</div>
       </div>
     </div>
-    <div style="margin-top:8px;font-size:11px;color:#909097">2 yıllık backtest · {{ ticker_bt.computed_at[:10] if ticker_bt.computed_at else '' }} · ⚠️ Geçmiş performans gelecek garantisi değildir</div>
+    <div style="margin-top:8px;font-size:11px;color:#909097">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal hariç · ⚠️ Geçmiş performans gelecek garantisi değildir</div>
   </div>
-  {% endif %}
 
   <!-- SPEC-017 v2 Faz A c3 — Özet sonu "Detay için" CTA (3 tab) -->
   <div data-tab-content="ozet" class="bp-detail-cta-wrap">
@@ -3539,6 +3539,42 @@ function renderHistory(history, currentPrice) {
   }).join('');
 }
 
+/* ── Geçmiş Sinyal Performansı — CPO-1107 madde 3 ─────
+   Aynı `history` dizisinden (Sinyal Geçmişi tablosunu besleyen
+   signal_history) hesaplar; ayrı bir backtest cache'i KULLANMAZ.
+   idx=0 (en yeni) her zaman aktif/açık sinyaldir, kazanma/kayıp henüz
+   belirlenmemiştir → sayıma dahil edilmez. Kapanış fiyatı mantığı
+   renderHistory'deki getiri hesabıyla birebir aynıdır. */
+function renderSigPerf(history) {
+  const box = document.getElementById('sigPerfBox');
+  if (!box) return;
+  const closed = [];
+  for (let idx = 1; idx < (history || []).length; idx++) {
+    const h = history[idx];
+    const exitH = history[idx - 1];
+    if (!exitH || !h.price) continue;
+    const ret    = (exitH.price - h.price) / h.price * 100;
+    const isGain = h.signal === 'AL' ? ret > 0 : ret < 0;
+    closed.push({ ret, isGain });
+  }
+  if (closed.length === 0) { box.style.display = 'none'; return; }
+
+  const wins    = closed.filter(c => c.isGain).length;
+  const winRate = Math.round(wins / closed.length * 100);
+  const avgRet  = closed.reduce((a, c) => a + c.ret, 0) / closed.length;
+
+  const wrEl = document.getElementById('sigPerfWinRate');
+  wrEl.textContent = '%' + winRate;
+  wrEl.style.color = winRate >= 50 ? '#00e290' : '#f85149';
+
+  const avgEl = document.getElementById('sigPerfAvg');
+  avgEl.textContent = (avgRet > 0 ? '+' : '') + avgRet.toFixed(1) + '%';
+  avgEl.style.color = avgRet > 0 ? '#00e290' : (avgRet < 0 ? '#f85149' : '#909097');
+
+  document.getElementById('sigPerfCount').textContent = closed.length;
+  box.style.display = '';
+}
+
 /* ── Veri yükle — chart + /api/data paralel ─────────── */
 /* SPEC-008 L2 — Frontend Fail-Safe: bozuk/eksik chart ASLA render edilmez,
    sınırlı retry + kullanıcıya görünür durum mesajı. */
@@ -3582,6 +3618,7 @@ async function loadChart(retry) {
     /* Chart hemen render — /api/data'ya BAĞLI DEĞİL */
     buildChart(json.chart);
     renderHistory(json.chart.signal_history, json.chart.summary?.price);
+    renderSigPerf(json.chart.signal_history);
     renderCommentary(json.chart.commentary);
     renderSummary(json.chart.summary, null);  /* sd=null, /api/data sonra enrich edecek */
 

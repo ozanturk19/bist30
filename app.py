@@ -6862,26 +6862,6 @@ def stock_page(ticker):
         if ticker in a.get("related_tickers", [])
     ][:4]  # max 4 makale
 
-    # Backtest — bu ticker için geçmiş başarı istatistikleri
-    ticker_bt = None
-    try:
-        bt_data = _bt_cache.get("data") or {}
-        per_ticker = bt_data.get("per_ticker", [])
-        for entry in per_ticker:
-            if entry.get("ticker") == ticker:
-                al_cnt  = entry.get("al_count", 0)
-                al_wins = entry.get("al_wins", 0)
-                ticker_bt = {
-                    "al_count":    al_cnt,
-                    "al_wins":     al_wins,
-                    "al_win_rate": round(al_wins / al_cnt * 100) if al_cnt > 0 else None,
-                    "al_avg":      round(entry.get("al_avg", 0) * 100, 1),
-                    "computed_at": bt_data.get("computed_at", ""),
-                }
-                break
-    except Exception:
-        pass
-
     # SPEC-007: Premium hisse detay paywall — anonim user'a grafik/geçmiş/indikatör blur
     premium_locked = bool(
         ssr_signal and ssr_signal.get("tier") == "premium" and not has_premium_access()
@@ -6969,7 +6949,6 @@ def stock_page(ticker):
                            kap_url=kap_url_for(ticker),
                            related_blog=related_blog,
                            compare_url=compare_url,
-                           ticker_bt=ticker_bt,
                            premium_locked=premium_locked,
                            company_summary=company_summary,
                            related_stocks=related_stocks,
