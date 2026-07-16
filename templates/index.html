@@ -598,29 +598,6 @@
     .preset-chip { font-size: 12px; padding: 6px 12px; }
   }
 
-  /* ── SPEC-001 Faz 1: Tier rozet + grup başlığı ── */
-  .tier-badge {
-    display: inline-block;
-    margin-left: 4px;
-    padding: 1px 6px;
-    border-radius: 8px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .3px;
-    vertical-align: middle;
-  }
-  .tier-badge-premium {
-    /* Premium — mor #a855f7 (CPO-986 #8.1) */
-    color: #c58af9;
-    background: rgba(168,85,247,.14);
-    border: 1px solid rgba(168,85,247,.50);
-  }
-  .tier-badge-plus {
-    /* Plus — mavi #1f6feb (CPO-986 #8.1) */
-    color: #58a6ff;
-    background: rgba(31,111,235,.14);
-    border: 1px solid rgba(31,111,235,.50);
-  }
   /* F2 — Anomali rozet */
   .anomaly-badge {
     display: inline-flex; align-items: center; gap: 3px;
@@ -1177,9 +1154,6 @@
   .stat-bekle.stat-card { border-top: 2px solid rgba(144,144,151, 0.4); }
   .stat-premium.stat-card { border-top: 2px solid rgba(255,200,80,0.65); }
   .stat-premium .stat-num { color: #ffc850; }
-  /* Premium row indicator: subtle mor border-left (CPO-986 #8.1; class-based selector — title rename'den bağımsız sağlam) */
-  tr[data-ticker]:has(.tier-badge-premium) td:first-child { border-left: 2px solid rgba(168,85,247,0.60); }
-  .mc:has(.tier-badge-premium) { border-left: 2px solid rgba(168,85,247,0.60); }
   .stat-total.stat-card { border-top: 2px solid rgba(184, 195, 255, 0.5); }
 
   /* Market breadth bar */
@@ -4154,20 +4128,6 @@ function _premiumCtaText() {
     : '🔒 Premium hisseleri görmek için';                          // A) anonim
 }
 
-/* SPEC-001 Faz 1: Tier rozeti — Standart/Plus/Premium (CPO MSG-084 D plan) */
-function tierBadge(s) {
-  if (!s) return '';
-  if (s.tier === 'premium') {
-    return ' <span title="Premium — kompozit skor ≥70" class="tier-badge tier-badge-premium">PREMIUM</span>';
-  }
-  if (s.tier === 'plus') {
-    return ' <span title="Plus tier — orta seviye, herkese açık (Premium DEĞİL)" class="tier-badge tier-badge-plus">PLUS</span>';
-  }
-  // Standart için inline rozet yok (mevcut UI'da tablo zaten varsayılan, görsel kalabalık olmasın)
-  // Madde 3 (b): tier 6+ haftadır canlı → backward-compat is_premium fallback ölü kod, kaldırıldı.
-  return '';
-}
-
 function getSorted(arr) {
   // SPEC-001 Faz 1: tier öncelik (premium → plus → standart → null/BEKLE), sonra mevcut sortKey tie-breaker
   const tierRank = { 'premium': 0, 'plus': 1, 'standart': 2 };
@@ -4308,7 +4268,7 @@ function renderTable() {
         return mtHeader + `<a class="mc ${sigClass} ${s.is_new_signal ? 'mc-new' : ''} ${_mcLocked}" href="/hisse/${s.ticker}">
           <div class="mc-row1">
             <div class="mc-lft">
-              <div class="mc-ticker">${s.ticker} ${wt}${tierBadge(s)}</div>${secHtml}${badgesHtml}
+              <div class="mc-ticker">${s.ticker} ${wt}</div>${secHtml}${badgesHtml}
             </div>
             <div class="mc-rgt-wrap">
               <div class="mc-rgt">

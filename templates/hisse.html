@@ -2019,14 +2019,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       {# CPO-985/986 #8.1+#7 / SPEC-018 W2: tier etiketi kanonik `ssr_signal.tier` alanından (Premium/Plus/Standart),
          signal_strength'ten türetilir (AUDIT-004 tier_score emekli edildi, CPO-1004).
          Halka NUMARASI signal_strength (sinyal gücü, 0-100), ETİKETİ tier alanı — tek vocabulary. #}
+      {# CPO-1107 Faz 0 #1 — tier adı (Premium/Plus/Standart) skor rozetinden kaldırıldı,
+         SADECE paywall bağlamında gösterilir. Halka rengi (_tc) skor bandını nötr biçimde
+         korur, tier ismi metin olarak artık render edilmiyor. #}
       {%- set _tier = ssr_signal.tier -%}
-      {%- if   _tier == "premium"  %}{% set _tc = "#a855f7" %}{% set _tl = "💎 PREMIUM" %}
-      {%- elif _tier == "plus"     %}{% set _tc = "#1f6feb" %}{% set _tl = "⭐ PLUS"     %}
-      {%- elif _tier == "standart" %}{% set _tc = "#909097" %}{% set _tl = "STANDART"    %}
-      {%- else                     %}{% set _tc = "#6b7280" %}{% set _tl = ""            %}{% endif %}
+      {%- if   _tier == "premium"  %}{% set _tc = "#a855f7" %}
+      {%- elif _tier == "plus"     %}{% set _tc = "#1f6feb" %}
+      {%- elif _tier == "standart" %}{% set _tc = "#909097" %}
+      {%- else                     %}{% set _tc = "#6b7280" %}{% endif %}
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
            title="Sinyal gücü puanı (0–100). ADX, hacim, yön gücü, teyit ve RSI bileşenlerine dayalı.">
-        <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100, {{ _tl }}">
+        <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100">
           <circle cx="32" cy="32" r="28" fill="none" stroke="#2a2a2c" stroke-width="6"/>
           <circle cx="32" cy="32" r="28" fill="none" stroke="{{ _tc }}" stroke-width="6"
                   stroke-linecap="round" stroke-dasharray="175.93"
@@ -2036,7 +2039,6 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
                 fill="#e5e1e4" style="font-weight:700;font-size:18px;font-family:inherit">{{ _ts }}</text>
         </svg>
         <div style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.1">
-          <span style="font-size:11px;color:{{ _tc }};font-weight:700;letter-spacing:.4px">{{ _tl }}</span>
           {%- if ssr_signal.is_premium %}
           <span style="font-size:10px;color:#ffd700;margin-top:3px;letter-spacing:.2px">⭐ Hacim Onaylı</span>
           {%- else %}
