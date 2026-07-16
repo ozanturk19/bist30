@@ -64,12 +64,25 @@ send_mail_if_allowed() {
 }
 
 # T1.7 fix — Restart cooldown helper (10dk, mail'den bağımsız)
+# CPO-1106 (16 Tem 21:20 TR çift-restart) — smoke-watch.sh ayrı bir cooldown
+# dosyası kullanıyor (/root/ops/smoke_watch_last_restart.txt), health_cron bunu
+# bilmiyordu. Aynı outage'ı iki watchdog ayrı ayrı restart'lıyordu: health_cron'un
+# curl'ü (30s timeout) smoke-watch'un restart'ından ÖNCE başladığı için GRACE
+# penceresi (ActiveEnterTimestamp) henüz güncellenmemiş görüp atlamıyordu, sonra
+# health_cron kendi 2-fail sayacıyla ikinci (gereksiz) restart'ı tetikliyordu.
+SMOKE_RESTART_FILE=/root/ops/smoke_watch_last_restart.txt
 can_restart() {
   local now_sec=$(date +%s)
   local last_restart=$(cat "$LAST_RESTART_FILE" 2>/dev/null || echo "0")
   local elapsed=$((now_sec - last_restart))
   if [ "$elapsed" -lt "$RESTART_COOLDOWN" ]; then
     echo "$(date) RESTART-SKIPPED — restart cooldown (${elapsed}s < ${RESTART_COOLDOWN}s)" >> "$LOG"
+    return 1
+  fi
+  local smoke_last=$(cat "$SMOKE_RESTART_FILE" 2>/dev/null || echo "0")
+  local smoke_elapsed=$((now_sec - smoke_last))
+  if [ "$smoke_elapsed" -lt "$RESTART_COOLDOWN" ]; then
+    echo "$(date) RESTART-SKIPPED — smoke-watch ${smoke_elapsed}s önce restart etti (<${RESTART_COOLDOWN}s), paylaşımlı cooldown" >> "$LOG"
     return 1
   fi
   return 0
