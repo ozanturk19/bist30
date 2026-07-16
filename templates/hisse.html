@@ -3203,7 +3203,12 @@ function renderSummary(s, signalData) {
   /* ── Giriş Analizi ── */
   (function renderEntryAnalysis() {
     const section = document.getElementById('entryAnalysisSection');
-    const hasActiveSignal = signalData && (signalData.signal === 'AL' || signalData.signal === 'SAT') && signalData.entry_quality;
+    // CPO-1107 Faz0 #2 (TUPRS-sınıfı çelişki): "aktif sinyal yok" kararı header
+    // rozetiyle (s.signal) AYNI kanonik kaynaktan gelmeli — signalData ayrı bir
+    // async fetch'ten (/api/data) geliyor ve ilk çizimde null / gecikmeli olabilir,
+    // bu da üstte "sinyal aktif" alttaki bölümde "aktif sinyal yok" çelişkisine yol açıyordu.
+    const hasActiveSignal = s.signal === 'AL' || s.signal === 'SAT';
+    const hasEntryQuality = hasActiveSignal && signalData && signalData.entry_quality;
 
     if (!hasActiveSignal) {
       /* CPO-983 Opsiyon B: boş kutular yerine anlamlı placeholder — aktif sinyal yok */
@@ -3212,6 +3217,22 @@ function renderSummary(s, signalData) {
         const grid = document.getElementById('entryAnalysisGrid');
         if (grid) {
           grid.innerHTML = '<div style="grid-column:1/-1;color:#909097;font-size:13px;padding:8px 2px;line-height:1.6">Bu hisse için şu an aktif bir sinyal yok, giriş analizi hesaplanmadı. Yeni sinyal oluştuğunda bu bölüm otomatik güncellenir.</div>';
+        }
+      }
+      return;
+    }
+
+    if (!hasEntryQuality) {
+      /* Sinyal aktif ama giriş analizi verisi henüz gelmedi ya da hesaplanamadı —
+         "aktif sinyal yok" demek yanlış olur, header'la çelişir. */
+      if (section) {
+        section.style.display = 'block';
+        const grid = document.getElementById('entryAnalysisGrid');
+        if (grid) {
+          const msg = !signalData
+            ? 'Sinyal aktif — giriş analizi yükleniyor…'
+            : 'Bu sinyal için giriş analizi şu an hesaplanamadı, veri yetersiz.';
+          grid.innerHTML = `<div style="grid-column:1/-1;color:#909097;font-size:13px;padding:8px 2px;line-height:1.6">${msg}</div>`;
         }
       }
       return;
