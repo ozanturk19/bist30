@@ -3728,14 +3728,23 @@ function animateCounter(el, target) {
 }
 
 function _updateIdealStrip(stocks) {
-  const ideal = stocks.filter(s => s.signal === 'AL' && s.entry_quality === 'IDEAL');
+  /* CPO-1107 Faz 0 #7: sinyalden bu yana düşen hisse "İdeal Giriş" olarak
+     gösterilmesin (ör. -11%) — negatif getirili olanlar şeritten ayrılır,
+     kalanlar getiriye göre sıralanır ve "sinyalden beri" ile etiketlenir. */
+  const ideal = stocks
+    .filter(s => s.signal === 'AL' && s.entry_quality === 'IDEAL')
+    .map(s => {
+      const ret = s.signal_price ? ((s.price - s.signal_price) / s.signal_price * 100) : null;
+      return { ...s, _ret: ret };
+    })
+    .filter(s => s._ret === null || s._ret >= 0)
+    .sort((a, b) => (b._ret ?? -Infinity) - (a._ret ?? -Infinity));
   const strip = document.getElementById('idealStrip');
   const items = document.getElementById('idealStripItems');
   if (!strip || !items || ideal.length === 0) { if (strip) strip.style.visibility = 'hidden'; return; }
   items.innerHTML = ideal.slice(0, 10).map(s => {
-    const ret = s.signal_price ? ((s.price - s.signal_price) / s.signal_price * 100) : null;
-    const retHtml = ret !== null
-      ? ` <span style="font-size:10px;font-weight:600;color:${ret >= 0 ? '#00e290' : '#f85149'}">${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%</span>`
+    const retHtml = s._ret !== null
+      ? ` <span style="font-size:10px;font-weight:600;color:#00e290">+${s._ret.toFixed(1)}% <span style="opacity:.65;font-weight:500">sinyalden beri</span></span>`
       : '';
     return `<a href="/hisse/${s.ticker}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,226,144,.08);
       border:1px solid rgba(0,226,144,.2);border-radius:6px;padding:3px 8px;text-decoration:none;
