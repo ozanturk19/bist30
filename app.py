@@ -129,6 +129,22 @@ def require_admin():
     if request.headers.get("X-Admin-Secret", "") != ADMIN_SECRET:
         _abort(403)
 
+# ── CPO-1108 A1/A4: Analytics doğruluk katmanı ────────────────────────────────
+CF_BEACON_TOKEN = os.environ.get("CF_BEACON_TOKEN", "").strip()  # boşsa CF WA beacon basılmaz
+
+_NON_HUMAN_UA_RE = re.compile(
+    r"BorsaPusulaQA|HeadlessChrome|Claude/|curl|python-requests|"
+    r"UptimeRobot|Go-http|\bbot\b|\bspider\b|\bcrawl\b",
+    re.IGNORECASE,
+)
+
+def should_track(req) -> bool:
+    """GA4/CF WA filo kirliliği fix (CPO-1108 A1): QA/bot/headless UA'ları saymaz."""
+    ua = (req.headers.get("User-Agent") or "").casefold()
+    if not ua:
+        return False
+    return not _NON_HUMAN_UA_RE.search(ua)
+
 # ── VAPID Web Push Bildirimleri ───────────────────────────────────────────────
 _APP_DIR        = os.path.dirname(os.path.abspath(__file__))
 VAPID_PUBLIC    = os.environ.get("VAPID_PUBLIC", "")
@@ -8862,6 +8878,15 @@ def _inject_premium_status():
     except Exception:
         pc = 0
     return dict(has_premium_access=has_premium_access(), premium_count=pc)
+
+@app.context_processor
+def _inject_analytics_context():
+    """CPO-1108 A1: _analytics.html partial'inin ihtiyaç duyduğu guard + token."""
+    try:
+        track = should_track(request)
+    except Exception:
+        track = False
+    return dict(should_track=track, cf_beacon_token=CF_BEACON_TOKEN)
 
 
 @app.route("/sinyaller")
