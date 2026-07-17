@@ -22,6 +22,7 @@ _TZ_TR = timezone(timedelta(hours=3))
 import threading
 import collections
 import logging
+import statistics
 import time
 import json
 import os
@@ -2627,6 +2628,31 @@ def _market_open(now_tr=None):
     return 10 <= now_tr.hour < 18
 
 
+def _compute_data_quality(bad_ticker_count, total_count, market_open):
+    """CPO-1114 K2/K3 — tek kanonik aggregate data_quality hesaplayıcı.
+
+    Per-ticker stale ORANINA dayanır (cycle/zaman bazlı DEĞİL) — DEV-1470'te
+    tespit edilen bug'ın kökü, aggregate _dq'nun `last_refresh_ts` (cycle ne
+    zaman ÇALIŞTI) ile hesaplanıp per-ticker gerçek stale sayısından (kaç
+    ticker'a gerçekten taze veri geldi) bağımsız olmasıydı. refresh_data()
+    hiç taze veri almasa bile dönüp durduğu için aggregate hep "fresh"
+    kalıyordu — bu fonksiyon onun yerine geçer.
+
+    market_open=False → her zaman "fresh" (seans dışı stale by-design, yanlış
+    alarm üretmesin — mevcut davranış korunuyor).
+    """
+    if not market_open:
+        return "fresh"
+    if not total_count:
+        return "critical"
+    stale_ratio = bad_ticker_count / total_count
+    if stale_ratio > 0.50:
+        return "critical"
+    if stale_ratio > 0.15:
+        return "stale"
+    return "fresh"
+
+
 def build_data_freshness():
     """SPEC-014 B1 — veri tazeliği meta objesi.
 
@@ -3169,8 +3195,13 @@ def _refresh_data_impl():
 
     _notify_signal_changes(results)
 
+    _fresh_now = time.time()
     for s in results:
         _enrich_stock(s)
+        # CPO-1114/DEV-1469: bu ticker BU cycle'da gerçekten taze veri aldı. Fallback
+        # kopyasında (aşağıda) bu alan DEĞİŞTİRİLMEZ — aggregate updated_at bunun
+        # üzerinden "genuine son-taze-veri zamanı"nı türetir (_compute_data_quality ile).
+        s["last_fresh_ts"] = _fresh_now
 
     # ── prev_cache fallback (CPO-550/551): yfinance no-data/timeout tickerlar ────────
     # Seans dışında bazı tickerlar yfinance'tan veri gelmez → analyze() None →
@@ -3702,21 +3733,28 @@ def api_data():
             if len(_parts) >= 2:
                 s["di_plus"]  = float(_parts[0])
                 s["di_minus"] = float(_parts[1])
-    # ── Stale-safe fields (CPO-551 Aşama 2) ─────────────────────────────────────
+    # ── Stale-safe fields (CPO-551 Aşama 2 → CPO-1114 K1-K3: per-ticker orana dayalı) ──
     with _lock:
-        _lr_ts  = _cache.get("last_refresh_ts", 0) or 0
+        _lr_ts   = _cache.get("last_refresh_ts", 0) or 0
         _loading = _cache.get("loading", False)
-    _now      = time.time()
-    _age_s    = int(_now - _lr_ts) if _lr_ts else None
-    _mkt_open = _market_open()
-    if not _mkt_open:
-        _dq = "fresh"
-    elif _age_s is None or _age_s > 1800:
-        _dq = "critical"
-    elif _age_s > 900:
-        _dq = "stale"
+    _now       = time.time()
+    _mkt_open  = _market_open()
+    _bad_count = sum(1 for s in stocks if s.get("data_quality") == "stale")
+    _dq        = _compute_data_quality(_bad_count, len(stocks), _mkt_open)
+    # CPO-1114 K1/DEV-1469: updated_at artık "refresh_data() son ne zaman ÇALIŞTI"
+    # değil, per-ticker last_fresh_ts medyanı — tipik gösterilen verinin gerçekte
+    # ne zaman taze geldiğini yansıtır. Böylece dq="critical" iken banner "az önce
+    # güncellendi" gibi çelişkili bir zaman damgası göstermez (DEV-1470 bulgusu).
+    _fresh_ts_list = [s["last_fresh_ts"] for s in stocks if s.get("last_fresh_ts")]
+    if _fresh_ts_list:
+        _eff_fresh_ts    = statistics.median(_fresh_ts_list)
+        _age_s           = int(_now - _eff_fresh_ts)
+        _resp_updated_at = datetime.fromtimestamp(_eff_fresh_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
     else:
-        _dq = "fresh"
+        # Geriye dönük uyum: last_fresh_ts alanı henüz hiçbir ticker'da yok (deploy
+        # sonrası ilk cycle'lar, disk cache eski format) — eski davranışa düş.
+        _age_s           = int(_now - _lr_ts) if _lr_ts else None
+        _resp_updated_at = _cache["updated_at"]
     # ── /stale-safe fields ───────────────────────────────────────────────────────
     # CPO-690 Adım 1: xu100_spark — son 30 günlük BIST100 kapanış fiyatları
     with _lock:
@@ -3738,11 +3776,11 @@ def api_data():
     xu100_spark = [round(p["close"], 2) for p in _xu100_ohlc if p.get("close")]
     _resp_data = {
         "stocks":       stocks,
-        "updated_at":   _cache["updated_at"],
+        "updated_at":   _resp_updated_at,  # CPO-1114 K1: last_fresh_ts medyanı (bkz. yukarı)
         "loading":      len(stocks) == 0,
         "sectors":      list(SECTORS.keys()),
-        "data_quality": _dq,        # "fresh" | "stale" | "critical" (CPO-551)
-        "stocks_age_s": _age_s,     # seconds since last refresh
+        "data_quality": _dq,        # "fresh" | "stale" | "critical" (CPO-551 → CPO-1114: per-ticker orana dayalı)
+        "stocks_age_s": _age_s,     # seconds since last GENUINE fresh data (median last_fresh_ts, CPO-1114)
         "refreshing":   _loading,   # True = background refresh aktif
         "data_freshness": build_data_freshness(),  # SPEC-014 B1
         "xu100_spark":  xu100_spark,  # CPO-690: BIST100 sparkline (son 30 gün)
