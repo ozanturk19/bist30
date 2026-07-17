@@ -2669,6 +2669,33 @@ def _compute_data_quality(bad_ticker_count, total_count, market_open):
     return "fresh"
 
 
+def _data_quality_snapshot(stocks):
+    """CPO-1119 §1 / CPO-1121: /api/data ve hafif /api/data-quality'nin PAYLAŞTIĞI
+    tek hesap — data_quality, stocks_age_s, updated_at. İki yüzey de aynı kanonik
+    kaynaktan (bu fonksiyon → _compute_data_quality) besleniyor, farklı hesap YOK."""
+    with _lock:
+        _lr_ts = _cache.get("last_refresh_ts", 0) or 0
+    _now       = time.time()
+    _mkt_open  = _market_open()
+    _bad_count = sum(1 for s in stocks if s.get("data_quality") == "stale")
+    _dq        = _compute_data_quality(_bad_count, len(stocks), _mkt_open)
+    # CPO-1114 K1/DEV-1469: updated_at artık "refresh_data() son ne zaman ÇALIŞTI"
+    # değil, per-ticker last_fresh_ts medyanı — tipik gösterilen verinin gerçekte
+    # ne zaman taze geldiğini yansıtır. Böylece dq="critical" iken banner "az önce
+    # güncellendi" gibi çelişkili bir zaman damgası göstermez (DEV-1470 bulgusu).
+    _fresh_ts_list = [s["last_fresh_ts"] for s in stocks if s.get("last_fresh_ts")]
+    if _fresh_ts_list:
+        _eff_fresh_ts    = statistics.median(_fresh_ts_list)
+        _age_s           = int(_now - _eff_fresh_ts)
+        _resp_updated_at = datetime.fromtimestamp(_eff_fresh_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+    else:
+        # Geriye dönük uyum: last_fresh_ts alanı henüz hiçbir ticker'da yok (deploy
+        # sonrası ilk cycle'lar, disk cache eski format) — eski davranışa düş.
+        _age_s           = int(_now - _lr_ts) if _lr_ts else None
+        _resp_updated_at = _cache["updated_at"]
+    return {"data_quality": _dq, "stocks_age_s": _age_s, "updated_at": _resp_updated_at}
+
+
 def build_data_freshness():
     """SPEC-014 B1 — veri tazeliği meta objesi.
 
@@ -3751,26 +3778,11 @@ def api_data():
                 s["di_minus"] = float(_parts[1])
     # ── Stale-safe fields (CPO-551 Aşama 2 → CPO-1114 K1-K3: per-ticker orana dayalı) ──
     with _lock:
-        _lr_ts   = _cache.get("last_refresh_ts", 0) or 0
         _loading = _cache.get("loading", False)
-    _now       = time.time()
-    _mkt_open  = _market_open()
-    _bad_count = sum(1 for s in stocks if s.get("data_quality") == "stale")
-    _dq        = _compute_data_quality(_bad_count, len(stocks), _mkt_open)
-    # CPO-1114 K1/DEV-1469: updated_at artık "refresh_data() son ne zaman ÇALIŞTI"
-    # değil, per-ticker last_fresh_ts medyanı — tipik gösterilen verinin gerçekte
-    # ne zaman taze geldiğini yansıtır. Böylece dq="critical" iken banner "az önce
-    # güncellendi" gibi çelişkili bir zaman damgası göstermez (DEV-1470 bulgusu).
-    _fresh_ts_list = [s["last_fresh_ts"] for s in stocks if s.get("last_fresh_ts")]
-    if _fresh_ts_list:
-        _eff_fresh_ts    = statistics.median(_fresh_ts_list)
-        _age_s           = int(_now - _eff_fresh_ts)
-        _resp_updated_at = datetime.fromtimestamp(_eff_fresh_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
-    else:
-        # Geriye dönük uyum: last_fresh_ts alanı henüz hiçbir ticker'da yok (deploy
-        # sonrası ilk cycle'lar, disk cache eski format) — eski davranışa düş.
-        _age_s           = int(_now - _lr_ts) if _lr_ts else None
-        _resp_updated_at = _cache["updated_at"]
+    _dqs             = _data_quality_snapshot(stocks)
+    _dq              = _dqs["data_quality"]
+    _age_s           = _dqs["stocks_age_s"]
+    _resp_updated_at = _dqs["updated_at"]
     # ── /stale-safe fields ───────────────────────────────────────────────────────
     # CPO-690 Adım 1: xu100_spark — son 30 günlük BIST100 kapanış fiyatları
     with _lock:
@@ -7875,6 +7887,18 @@ def api_health():
     Snapshot bg thread'de güncellenir (8s) → endpoint hiç _lock almaz,
     contention/gevent yavaşlamasında bile anında yanıt verir."""
     return safe_json(_health_snapshot)
+
+
+@app.route("/api/data-quality")
+def api_data_quality():
+    """CPO-1119 §1 / CPO-1121 APPROVE (3 kısıt) — stale banner'ın 6 yüzeyi için
+    hafif projeksiyon. Read-only: _cache'e yazmaz, refresh tetiklemez,
+    _compute_data_quality()'yi yeniden implemente etmez — /api/data ile AYNI
+    _data_quality_snapshot() çağrısını paylaşır (kanonik kaynak tek).
+    Sadece 3 alan döner: data_quality, stocks_age_s, updated_at."""
+    with _lock:
+        stocks = list(_cache["data"])
+    return safe_json(_data_quality_snapshot(stocks))
 
 
 @app.route("/sitemap.xml")
