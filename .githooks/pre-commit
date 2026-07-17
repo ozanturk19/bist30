@@ -1,26 +1,43 @@
 #!/bin/bash
 # .githooks/pre-commit
 # KALICI_KURALLAR v1.1 otomatik audit — CPO-359 Tier 0 standardı
-# Bu hook templates/hisse.html değiştiğinde KK audit çalıştırır.
+# Bu hook AUDIT_FILES listesindeki dosyalardan biri değiştiğinde KK audit çalıştırır.
 # Audit FAIL ise commit blokla.
+#
+# CPO-1109 madde 3: kapsam sadece hisse.html'di, karsilastir.html'deki 🥇
+# ihlali kaçmıştı. Liste, sinyal/skor/trend metni render eden tüm sayfaları
+# kapsayacak şekilde genişletildi (bkz. DEV-1467).
 #
 # Kurulum: git config core.hooksPath .githooks (bir kez)
 
 set -e
-CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^templates/hisse\.html$' || true)
+AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html"
+
+CHANGED=""
+for f in $AUDIT_FILES; do
+  if git diff --cached --name-only --diff-filter=ACM | grep -qxF "$f"; then
+    CHANGED="$CHANGED $f"
+  fi
+done
 if [ -z "$CHANGED" ]; then
-  exit 0  # hisse.html değişmedi, audit gereksiz
+  exit 0  # audit kapsamındaki dosyalar değişmedi
 fi
 
 echo ""
 echo "🔍 KALICI_KURALLAR v1.1 pre-commit audit..."
 echo ""
-if ./tests/audit/kalici-kurallar-check.sh templates/hisse.html; then
+FAIL=0
+for f in $CHANGED; do
+  if ! ./tests/audit/kalici-kurallar-check.sh "$f"; then
+    FAIL=1
+  fi
   echo ""
+done
+
+if [ "$FAIL" = "0" ]; then
   echo "✅ Commit izinli."
   exit 0
 else
-  echo ""
   echo "❌ Commit blokladı. KALICI_KURALLAR ihlali var. Düzelt ve tekrar dene."
   echo "   Geçici by-pass için: git commit --no-verify (önerilmez)"
   exit 1

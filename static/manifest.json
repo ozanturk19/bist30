@@ -20,7 +20,7 @@
   ],
   "categories": ["finance"],
   "shortcuts": [
-    { "name": "AL Sinyalleri", "short_name": "AL", "url": "/?filter=al&source=pwa", "description": "Aktif Güçlü Trend sinyalleri" },
+    { "name": "Güçlü Trend Sinyalleri", "short_name": "Trend", "url": "/?filter=al&source=pwa", "description": "Aktif Güçlü Trend sinyalleri" },
     { "name": "Günlük Özet", "short_name": "Özet", "url": "/ozet?source=pwa", "description": "Bugünkü sinyal özeti" },
     { "name": "Tarama", "short_name": "Tara", "url": "/tarama?source=pwa", "description": "Gelişmiş hisse tarama" }
   ]

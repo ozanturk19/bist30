@@ -284,7 +284,6 @@
     line-height: 1;
   }
   .score-big small { font-size: 12px; color: var(--bp-text3); font-weight: 500; }
-  .score-trophy { font-size: 18px; }
   .score-bar-wrap {
     width: 110px; height: 6px; border-radius: 3px;
     background: rgba(139,148,158,.2); overflow: hidden;
@@ -662,12 +661,11 @@ function renderScoreCell(s, isWinner) {
   if (!s || !s.found) return '<span class="muted" style="font-size:20px">—</span>';
   const sc = calcScore(s);
   const v  = verdictColor(sc.total);
-  const trophy = isWinner ? '<span class="score-trophy">🥇</span>' : '';
   const winnerCls = isWinner ? ' winner' : '';
   return `
     <div class="score-cell${winnerCls}">
       <div class="score-big" style="color:${v.color}">
-        ${trophy}${sc.total}<small> / 100</small>
+        ${sc.total}<small> / 100</small>
       </div>
       <div class="score-bar-wrap">
         <div class="score-bar-fill" style="width:${sc.total}%"></div>
