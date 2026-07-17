@@ -8,10 +8,17 @@
 # ihlali kaçmıştı. Liste, sinyal/skor/trend metni render eden tüm sayfaları
 # kapsayacak şekilde genişletildi (bkz. DEV-1467).
 #
+# CPO-1111: 4 dosyadan genişletildi — bugün temiz olan sayfaların
+# yarın sessizce kirlenmesini önlemek için (regresyon kapısı kapsamı).
+# heatmap.html CPO-1111'de istenen 5. dosyaydı ama K1 (bp-main-nav) fail
+# veriyor — full-bleed treemap sayfası, standart nav yerine kendi minimal
+# header'ı var (bkz. DEV-1468). Tasarım kararı CPO'ya soruldu, o karara
+# kadar dışarıda tutuldu.
+#
 # Kurulum: git config core.hooksPath .githooks (bir kez)
 
 set -e
-AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html"
+AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/gucu_yuksek.html templates/sinyal_performans.html"
 
 CHANGED=""
 for f in $AUDIT_FILES; do
