@@ -2779,9 +2779,12 @@
     items.forEach(it => {
       if (it.label !== 'XU030' && it.label !== 'XU100') return;
       const pfx = it.label === 'XU030' ? 'ec30' : 'ec100';
+      // renderEndeksCard ile aynı format (2 ondalık) — aksi halde kart 60sn'de bir
+      // ticker'ın 0-ondalık haliyle ezilip görünür değer değişikliğine yol açıyordu
+      if (typeof it.price !== 'number' || it.price < 1000) return;
       const pEl = document.getElementById(pfx + 'Price');
       const cEl = document.getElementById(pfx + 'Chg');
-      if (pEl) pEl.textContent = it.price.toLocaleString('tr-TR', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+      if (pEl) pEl.textContent = it.price.toLocaleString('tr-TR', {minimumFractionDigits: 2});
       if (cEl) {
         const sign = it.change > 0 ? '+' : '';
         cEl.textContent = sign + it.change.toFixed(2) + '%';
