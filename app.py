@@ -8297,6 +8297,8 @@ def ozet_gecmis(tarih):
     for s in stocks:
         if "sector" not in s:
             s["sector"] = _get_sector(s["ticker"])
+    # CPO-1107 Faz0#6: XU030 bir endeks, hisse değil — evren sayısı/liste tek kaynak
+    stocks = [s for s in stocks if s.get("ticker") != "XU030"]
     al_list    = [s for s in stocks if s.get("signal") == "AL"]
     sat_list   = [s for s in stocks if s.get("signal") == "SAT"]
     bekle_list = [s for s in stocks if s.get("signal") == "BEKLE"]
@@ -8332,6 +8334,9 @@ def ozet_page():
         stocks = list(_cache["data"])
         updated_at = _cache.get("updated_at", "")
         loading = len(stocks) == 0
+
+    # CPO-1107 Faz0#6: XU030 bir endeks, hisse değil — evren sayısı/liste tek kaynak
+    stocks = [s for s in stocks if s.get("ticker") != "XU030"]
 
     al_list    = [s for s in stocks if s["signal"] == "AL"]
     sat_list   = [s for s in stocks if s["signal"] == "SAT"]
