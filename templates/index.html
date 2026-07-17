@@ -12,7 +12,7 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | borsapusula.com</title>
-<meta name="description" content="BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı güncel Güçlü/Zayıf/Belirsiz trend sinyalleri. Ücretsiz, canlı güncelleme.">
+<meta name="description" content="BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı güncel Güçlü/Zayıf/Yatay trend sinyalleri. Ücretsiz, canlı güncelleme.">
 <meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, algoritmik borsa, sektör analizi">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <link rel="canonical" href="https://borsapusula.com/">
@@ -92,7 +92,7 @@
   "@id": "https://borsapusula.com/#service",
   "name": "BorsaPusula — BIST Sinyal Servisi",
   "url": "https://borsapusula.com",
-  "description": "Algoritmik BIST hisse senedi teknik analiz sinyalleri. Günlük güncellenmiş Güçlü Trend / Zayıf Trend / Belirsiz sinyalleri, geriye dönük backtest doğrulamasıyla.",
+  "description": "Algoritmik BIST hisse senedi teknik analiz sinyalleri. Günlük güncellenmiş Güçlü Trend / Zayıf Trend / Yatay sinyalleri, geriye dönük backtest doğrulamasıyla.",
   "provider": { "@id": "https://borsapusula.com/#organization" },
   "areaServed": "TR",
   "serviceType": "Teknik Analiz Sinyal Servisi",
@@ -119,7 +119,7 @@
   "@id": "https://borsapusula.com/#webapp",
   "name": "BIST100 Sinyal Paneli",
   "url": "https://borsapusula.com",
-  "description": "BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı ücretsiz Güçlü/Zayıf/Belirsiz trend sinyalleri.",
+  "description": "BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı ücretsiz Güçlü/Zayıf/Yatay trend sinyalleri.",
   "applicationCategory": "FinanceApplication",
   "applicationSubCategory": "Stock Market Analysis",
   "operatingSystem": "Web Browser",
@@ -2279,9 +2279,9 @@
       <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Zayıf Trend</div>
     </div>
-    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=\"BEKLE\"]'))" title="Belirsiz: Trend henüz oluşmadı, fırsat bekleniyor. Tıkla: izleme listesine al">
+    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=\"BEKLE\"]'))" title="Yatay: Trend henüz oluşmadı, fırsat bekleniyor. Tıkla: izleme listesine al">
       <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">Belirsiz</div>
+      <div class="stat-label">Yatay</div>
     </div>
     <div class="stat-card stat-premium" style="cursor:pointer" onclick="setFilter('PREMIUM',document.querySelector('.filter-btn.filter-premium'))" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
       <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
@@ -2518,7 +2518,7 @@
     <button class="filter-btn active-all" data-signal="all" onclick="setFilter('all', this)" title="Tüm hisseleri göster">Tümü</button>
     <button class="filter-btn" data-signal="AL" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı">🟢 Güçlü Trend</button>
     <button class="filter-btn" data-signal="SAT" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı">🔴 Zayıf Trend</button>
-    <button class="filter-btn" data-signal="BEKLE" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor">⚪ Belirsiz</button>
+    <button class="filter-btn" data-signal="BEKLE" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor">⚪ Yatay</button>
     <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="RVOL ≥ 1.20 — Hacim Onaylı AL sinyali. Backtest Win Rate %51.5. Diğer filtrelerle birleştirilebilir.">⭐ Hacim Onaylı</button>
     <button class="filter-btn filter-today" data-toggle="today" onclick="toggleChip('today', this)" title="Bugün ilk kez Güçlü/Zayıf Trend sinyali oluşan hisseler — diğer filtrelerle birleştirilebilir">⚡ Bugün</button>
     <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none">🔔 Takibim</button>
@@ -3767,7 +3767,7 @@ function updateStats() {
     document.getElementById('mbSegAl').style.width  = alPct  + '%';
     document.getElementById('mbSegSat').style.width = satPct + '%';
     document.getElementById('mbLgAl').textContent  = alCnt  + ' Güçlü Trend (' + alPct.toFixed(0)  + '%)';
-    document.getElementById('mbLgBkl').textContent = bklCnt + ' Belirsiz ('   + (bklCnt/total*100).toFixed(0) + '%)';
+    document.getElementById('mbLgBkl').textContent = bklCnt + ' Yatay ('   + (bklCnt/total*100).toFixed(0) + '%)';
     document.getElementById('mbLgSat').textContent = satCnt + ' Zayıf Trend (' + satPct.toFixed(0) + '%)';
     // Sentiment label
     const sent = alPct >= 60 ? '🔥 Güçlü Boğa' : alPct >= 40 ? '📈 Hafif Yükseliş' : satPct >= 30 ? '📉 Baskı Altında' : '⚪ Yatay';
@@ -4335,7 +4335,7 @@ function renderTable() {
 
     const fmtPrice = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    // "⚡ Bugün" badge'i yalnızca AL/SAT için — Belirsiz+Bugün çelişkili görünür
+    // "⚡ Bugün" badge'i yalnızca AL/SAT için — Yatay+Bugün çelişkili görünür
     const isNew   = s.is_new_signal && s.signal !== 'BEKLE';
     const dateTxt = s.signal_date || '—';
     const dateHtml = isNew
@@ -4348,7 +4348,7 @@ function renderTable() {
       ? '<span style="color:#00e290;font-size:11px" title="Haftalık: Yükselen">↑</span>'
       : wt === -1
         ? '<span style="color:#f85149;font-size:11px" title="Haftalık: Düşen">↓</span>'
-        : '<span style="color:#8b949e;font-size:11px" title="Haftalık: Belirsiz">–</span>';
+        : '<span style="color:#8b949e;font-size:11px" title="Haftalık: Yatay">–</span>';
 
     // 3-bar onay
     const confHtml = s.confirmed
@@ -4520,7 +4520,7 @@ function updateActiveFiltersBar() {
   const sigLabels = {
     'AL': '🟢 Güçlü Trend',
     'SAT': '🔴 Zayıf Trend',
-    'BEKLE': '⚪ Belirsiz',
+    'BEKLE': '⚪ Yatay',
   };
 
   const items = [];

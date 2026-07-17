@@ -647,7 +647,7 @@ def _broadcast_push_changes(changes):
     )
 
 # ── Sinyal görünen ad eşlemesi (iç değer AL/SAT/BEKLE değişmez) ───────────────
-_SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Zayıf Trend', 'BEKLE': 'Belirsiz'}
+_SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Zayıf Trend', 'BEKLE': 'Yatay'}
 
 @app.template_filter('signal_label')
 def signal_label_filter(signal):
@@ -755,6 +755,8 @@ BIST100 = [
 ]
 # Geriye dönük uyumluluk için alias
 BIST30 = BIST100
+# CPO-1107 Faz0#6: tek kaynak evren sayısı — XU030 endeks, hisse değil, hariç tutulur
+BIST_STOCK_COUNT = len([t for t in BIST100 if t != "XU030"])
 
 STOCK_NAMES = {
     # ── BIST30 ──────────────────────────────────────────
@@ -1529,7 +1531,7 @@ def analyze(ticker_base):
 
         # is_new_signal: yalnızca AL/SAT sinyalleri için geçerli.
         # BEKLE sinyali bugün başladıysa (eski sinyal sona erdi) "Bugün" gösterme —
-        # kullanıcıya "Belirsiz + Bugün" kombinasyonu çelişkili ve yanıltıcı görünüyor.
+        # kullanıcıya "Yatay + Bugün" kombinasyonu çelişkili ve yanıltıcı görünüyor.
         is_new_signal = (signal_date == today_str and signal != "BEKLE")
         confirmed     = signal != "BEKLE" and signal_bars >= 3
 
@@ -2273,7 +2275,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
       <tr><td style="padding:20px 22px">
         <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:12px">🎯 Site&apos;de neler var</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📊 215 BIST hissesi günlük analiz</td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📊 {BIST_STOCK_COUNT} BIST hissesi günlük analiz</td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">💎 Premium hacim filtreli sinyaller</td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">🗺️ Sektör ısı haritası</td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📅 Bilanço takvimi</td></tr>
@@ -2346,7 +2348,7 @@ def _build_signal_email(changes, unsubscribe_url):
     sig_color  = {"AL": "#00e290", "SAT": "#f85149", "BEKLE": "#909097"}
     sig_bg     = {"AL": "rgba(0,226,144,0.10)", "SAT": "rgba(248,81,73,0.10)", "BEKLE": "rgba(144,144,151,0.08)"}
     sig_border = {"AL": "rgba(0,226,144,0.30)", "SAT": "rgba(248,81,73,0.30)", "BEKLE": "rgba(144,144,151,0.20)"}
-    sig_lbl    = {"AL": "▲ Güçlü Trend", "SAT": "▼ Zayıf Trend", "BEKLE": "● Belirsiz"}
+    sig_lbl    = {"AL": "▲ Güçlü Trend", "SAT": "▼ Zayıf Trend", "BEKLE": "● Yatay"}
 
     # Premium ve sayım analizi
     al_count   = sum(1 for c in changes if c[2] == "AL")
@@ -5245,7 +5247,7 @@ KURAL 1 — ALGORİTMİK METİN KESINLIKLE DOĞRUDUR:
 Sana verilen "DOĞRU ALGORİTMİK ANALİZ" bölümündeki bilgiler matematiksel olarak hesaplanmıştır ve doğrudur. Bu analize ASLA itiraz ETME, "ama bir yandan da" diyerek ters yön belirtme, "fakat dikkat edilmeli" gibi şüphe ekleme. Görevin bu analizi desteklemek ve sade dille açıklamak — yorumlamak değil.
 
 KURAL 2 — SİNYALİN YÖNÜNE SADIK KAL:
-Eğer sinyal "Güçlü Trend" ise yorum YÜKSELİŞ yönünde olsun. "Zayıf Trend" ise DÜŞÜŞ yönünde. "Yatay/Belirsiz" ise kararsız/yan yatay tonu. Sinyalle çelişen kelimeler (yükselişte 'düşüş', düşüşte 'yükseliş') KULLANMA.
+Eğer sinyal "Güçlü Trend" ise yorum YÜKSELİŞ yönünde olsun. "Zayıf Trend" ise DÜŞÜŞ yönünde. "Yatay" ise kararsız/yan yatay tonu. Sinyalle çelişen kelimeler (yükselişte 'düşüş', düşüşte 'yükseliş') KULLANMA.
 
 KURAL 3 — ÜÇ CÜMLE KURALI:
 Yorumun TAM olarak 3 cümle olsun. Birinci cümle teknik durumu özetlesin, ikinci cümle bu durumun ne anlama geldiğini söylesin, üçüncü cümle MUTLAKA "Yatırım tavsiyesi değildir." şeklinde bitsin. Daha fazla veya daha az cümle yazma.
@@ -5517,7 +5519,7 @@ def _compute_signal_commentary(ticker, signal_data):
     """
     sig     = signal_data.get("signal", "BEKLE")
     name    = STOCK_NAMES.get(ticker, ticker)
-    sig_lbl = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend", "BEKLE": "Belirsiz"}.get(sig, sig)
+    sig_lbl = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend", "BEKLE": "Yatay"}.get(sig, sig)
 
     # ── İndikatör değerlerini çıkar: US hisseleri (düz alan) + BIST (iç içe indicators) ──
     inds = signal_data.get("indicators") or {}
@@ -6909,7 +6911,7 @@ def stock_page(ticker):
         adx_val = None
     # SPEC-017 Faz 3 batch v2 B1: SSS cevabında AL/SAT parantez yasak (K3 wording disiplin)
     sig_label = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend",
-                 "BEKLE": "Belirsiz"}.get(sig, sig)
+                 "BEKLE": "Yatay"}.get(sig, sig)
 
     # Yatırımcı SSS — deterministik, veri-tabanlı (ekstra Gemini çağrısı YOK)
     # SPEC-017 Faz B K3: AL/SAT wording yasak — "al mı sat mı" → "güncel teknik sinyali nedir"

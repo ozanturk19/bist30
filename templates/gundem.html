@@ -321,7 +321,7 @@
   <div class="stats-row" id="statsRow">
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Güçlü Trend</div></div>
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Zayıf Trend</div></div>
-    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Belirsiz</div></div>
+    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Yatay</div></div>
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Toplam Hisse</div></div>
   </div>
 
@@ -478,7 +478,7 @@ async function loadGundem() {
     document.getElementById('statsRow').innerHTML = `
       <div class="stat-card"><div class="stat-num num-al">${sm.al||0}</div><div class="stat-lbl">Güçlü Trend</div></div>
       <div class="stat-card"><div class="stat-num num-sat">${sm.sat||0}</div><div class="stat-lbl">Zayıf Trend</div></div>
-      <div class="stat-card"><div class="stat-num num-bkl">${sm.bekle||0}</div><div class="stat-lbl">Belirsiz</div></div>
+      <div class="stat-card"><div class="stat-num num-bkl">${sm.bekle||0}</div><div class="stat-lbl">Yatay</div></div>
       <div class="stat-card"><div class="stat-num num-tot">${sm.total||0}</div><div class="stat-lbl">Toplam Hisse</div></div>
     `;
 

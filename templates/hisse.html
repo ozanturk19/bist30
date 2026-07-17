@@ -90,7 +90,7 @@
       "name": "{{ ticker }} şu an hangi sinyalde?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "{{ ticker }} ({{ name }}) hissesi BorsaPusula algoritmasına göre {% if ssr_signal.signal == 'AL' %}Güçlü Trend{% elif ssr_signal.signal == 'SAT' %}Zayıf Trend{% else %}Belirsiz{% endif %} sinyalinde ({{ ssr_signal.signal_date }}). ADX: {{ (ssr_signal.adx or 0)|int }}, RSI: {{ (ssr_signal.rsi or 0)|int }}."
+        "text": "{{ ticker }} ({{ name }}) hissesi BorsaPusula algoritmasına göre {% if ssr_signal.signal == 'AL' %}Güçlü Trend{% elif ssr_signal.signal == 'SAT' %}Zayıf Trend{% else %}Yatay{% endif %} sinyalinde ({{ ssr_signal.signal_date }}). ADX: {{ (ssr_signal.adx or 0)|int }}, RSI: {{ (ssr_signal.rsi or 0)|int }}."
       }
     },{% if ssr_signal.sl_level %}
     {
@@ -2457,7 +2457,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
         {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
         {% if ssr_signal.sl_level %}Stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺.{% endif %}
       {% else %}
-        şu an <strong style="color:#909097">Belirsiz</strong> bölgesinde; net bir trend sinyali bulunmuyor.
+        şu an <strong style="color:#909097">Yatay</strong> bölgesinde; net bir trend sinyali bulunmuyor.
       {% endif %}
       {% if ssr_signal.adx %}ADX değeri {{ ssr_signal.adx }}.{% endif %}
       Sinyal; <strong>Supertrend(10,3)</strong>, <strong>ADX ≥ 25</strong> ve <strong>EMA12/EMA99</strong> göstergelerinin aynı anda uyum sağlamasıyla oluşur.
@@ -2813,7 +2813,7 @@ function shareSignal(platform) {
   const name   = HISSE_NAME;
   const url    = 'https://borsapusula.com/hisse/' + ticker;
 
-  let emoji = sig === 'AL' ? '🟢 Güçlü Trend' : sig === 'SAT' ? '🔴 Zayıf Trend' : '⚪ Belirsiz';
+  let emoji = sig === 'AL' ? '🟢 Güçlü Trend' : sig === 'SAT' ? '🔴 Zayıf Trend' : '⚪ Yatay';
   let text = ticker + ' (' + name + ') — ' + emoji + '\n';
   if (price) text += '💰 Fiyat: ' + price + ' ₺\n';
   if (entry) text += '🎯 Giriş: ' + entry + ' ₺\n';
@@ -3159,7 +3159,7 @@ function renderSummary(s, signalData) {
   if (signalData) {
     const bars = signalData.signal_bars || 1;
     const date = signalData.signal_date || '—';
-    // "⚡ Bugün" yalnızca AL/SAT için — Belirsiz+Bugün çelişkili görünür
+    // "⚡ Bugün" yalnızca AL/SAT için — Yatay+Bugün çelişkili görünür
     const isNew = signalData.is_new_signal && signalData.signal !== 'BEKLE';
     // Faz 1 #4: Sinyal yaşı yorumu (Taze/Gelişiyor/Olgunlaşıyor/Olgun)
     const ageLabel = signalData.signal_age_label;

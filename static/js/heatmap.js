@@ -13,6 +13,13 @@
   var currentMode = _urlMode || localStorage.getItem('bp_heatmap_mode') || 'sinyal';
   var allCellRefs = []; // {rect, item} for quick color update on mode switch
   var _toggleInited = false;
+  var stockCount = null; // CPO-1107 Faz0#6: sunucudan gelen gerçek sayım (XU030 hariç), hardcode yok
+
+  // ── SPEC-021: Sinyal/piyasa moduna göre alt başlık — tek kaynak stockCount ─
+  function subtitleText(mode) {
+    var n = stockCount != null ? stockCount : '';
+    return n + ' hisse — ' + (mode === 'piyasa' ? 'günlük değişim renkleri' : 'sinyal tier renkleri') + ' · sektör bazlı treemap';
+  }
 
   // ── SPEC-021: Piyasa modu renk fonksiyonu (diverging gradient) ───────────
   function piyasaColor(item) {
@@ -139,6 +146,11 @@
     allCellRefs = []; // reset on each re-render (resize)
     var container = document.getElementById('heatmap-container');
     container.innerHTML = '';
+
+    // CPO-1107 Faz0#6: XU030 bir endeks, hisse değil — evren sayısına dahil etme
+    stockCount = data.stocks.filter(function(s){ return s.ticker !== 'XU030'; }).length;
+    var sub = document.getElementById('heatmap-subtitle-text');
+    if (sub) sub.textContent = subtitleText(currentMode);
 
     // Sektör bazlı grupla
     var bySector = {};
@@ -335,11 +347,9 @@
 
     // Title + subtitle + legends
     var title = document.getElementById('heatmap-title');
-    var sub   = document.getElementById('heatmap-subtitle');
+    var sub   = document.getElementById('heatmap-subtitle-text');
     if (title) title.textContent = mode === 'piyasa' ? 'BIST Piyasa Haritası' : 'BIST Sinyal Haritası';
-    if (sub)   sub.textContent   = mode === 'piyasa'
-      ? '215 hisse — günlük değişim renkleri · sektör bazlı treemap'
-      : '215 hisse — sinyal tier renkleri · sektör bazlı treemap';
+    if (sub)   sub.textContent   = subtitleText(mode);
 
     var lSinyal  = document.getElementById('legendSinyal');
     var lPiyasa  = document.getElementById('legendPiyasa');
@@ -359,12 +369,12 @@
     var lPiyasa = document.getElementById('legendPiyasa');
     if (lSinyal) lSinyal.style.display = currentMode === 'piyasa' ? 'none' : '';
     if (lPiyasa) lPiyasa.style.display = currentMode === 'piyasa' ? ''     : 'none';
-    // Apply initial title/subtitle
+    // Apply initial title/subtitle (piyasa modu için — sinyal modu subtitle'ı render() zaten set etti)
     var title = document.getElementById('heatmap-title');
-    var sub   = document.getElementById('heatmap-subtitle');
     if (currentMode === 'piyasa') {
       if (title) title.textContent = 'BIST Piyasa Haritası';
-      if (sub)   sub.textContent   = '215 hisse — günlük değişim renkleri · sektör bazlı treemap';
+      var sub = document.getElementById('heatmap-subtitle-text');
+      if (sub) sub.textContent = subtitleText('piyasa');
     }
   }
 
