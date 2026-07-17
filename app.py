@@ -8046,15 +8046,22 @@ def humans_txt():
     })
 
 
-@app.route("/og-image.svg")
-def og_image():
-    """Dinamik OG image — 1200×630 SVG (sosyal medya önizlemesi)."""
+def _og_image_stats():
     with _lock:
         stocks = list(_cache["data"])
     al_count  = sum(1 for s in stocks if s["signal"] == "AL" and s["ticker"] != "XU030")
     sat_count = sum(1 for s in stocks if s["signal"] == "SAT" and s["ticker"] != "XU030")
     total     = sum(1 for s in stocks if s["ticker"] != "XU030")
     today_s   = date.today().strftime("%d.%m.%Y")
+    return al_count, sat_count, total, today_s
+
+
+@app.route("/og-image.svg")
+def og_image():
+    """Eski SVG OG image — geri uyumluluk için tutulur (eski paylaşılan linkler).
+    CPO-1107 madde 10: yeni sayfalar /og-image.png kullanır — çoğu sosyal medya
+    platformu (Facebook/WhatsApp/LinkedIn) og:image için SVG render etmiyor."""
+    al_count, sat_count, total, today_s = _og_image_stats()
 
     svg = f'''<svg width="1200" height="630" viewBox="0 0 1200 630"
      xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
@@ -8085,6 +8092,75 @@ def og_image():
   <text x="1080" y="335" font-size="56" text-anchor="middle">📊</text>
 </svg>'''
     return Response(svg, mimetype="image/svg+xml",
+                    headers={"Cache-Control": "public, max-age=3600"})
+
+
+_OG_FONT_DIR = "/usr/share/fonts/truetype/dejavu"
+_og_font_cache = {}
+
+
+def _og_font(size, bold=False):
+    key = (size, bold)
+    if key not in _og_font_cache:
+        from PIL import ImageFont
+        name = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
+        _og_font_cache[key] = ImageFont.truetype(os.path.join(_OG_FONT_DIR, name), size)
+    return _og_font_cache[key]
+
+
+@app.route("/og-image.png")
+def og_image_png():
+    """Dinamik OG image — 1200×630 PNG (sosyal medya önizlemesi).
+    CPO-1107 madde 10: SVG'den PNG'ye geçiş — Facebook/WhatsApp/LinkedIn
+    og:image için SVG render etmiyor, önizleme kartı boş/kırık görünüyordu."""
+    import io
+    from PIL import Image, ImageDraw
+
+    al_count, sat_count, total, today_s = _og_image_stats()
+
+    img  = Image.new("RGB", (1200, 630), "#0d1117")
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([0, 0, 6, 630], fill="#58a6ff")
+
+    f_title = _og_font(64, bold=True)
+    x = 60
+    for text, color in [("BIST", "#f0f6fc"), ("100", "#58a6ff"), (" Sinyal Paneli", "#f0f6fc")]:
+        draw.text((x, 70), text, font=f_title, fill=color)
+        x += draw.textlength(text, font=f_title)
+
+    draw.text((60, 150), f"borsapusula.com · Algoritmik Trend Sinyalleri · {today_s}",
+               font=_og_font(26), fill="#8b949e")
+    draw.line([(60, 195), (1140, 195)], fill="#30363d", width=1)
+
+    f_num = _og_font(72, bold=True)
+    f_lbl = _og_font(22)
+    boxes = [
+        (60,  str(al_count),  "▲ GÜÇLÜ TREND", "#3fb950"),
+        (380, str(sat_count), "▼ ZAYIF TREND", "#f85149"),
+        (700, str(total),     "BIST100 HİSSE", "#58a6ff"),
+    ]
+    for bx, num, label, color in boxes:
+        draw.rounded_rectangle([bx, 230, bx + 280, 390], radius=12, fill="#161b22", outline="#30363d", width=1)
+        w_num = draw.textlength(num, font=f_num)
+        draw.text((bx + 140 - w_num / 2, 268), num, font=f_num, fill=color)
+        w_lbl = draw.textlength(label, font=f_lbl)
+        draw.text((bx + 140 - w_lbl / 2, 350), label, font=f_lbl, fill="#8b949e")
+
+    draw.text((60, 465), "Supertrend · ADX · EMA12/99", font=_og_font(30), fill="#c9d1d9")
+    draw.text((60, 512), "Algoritmik, ücretsiz, canlı güncelleme · Yatırım tavsiyesi değildir.",
+               font=_og_font(22), fill="#484f58")
+
+    # Sağ ikon kutusu — mini bar-chart (emoji yerine, font-bağımsız)
+    draw.rounded_rectangle([1020, 230, 1140, 390], radius=12, fill="#1c2b3a", outline="#1f6feb", width=1)
+    bar_w, bar_gap, base_y = 16, 10, 350
+    bar_x = 1020 + (120 - (3 * bar_w + 2 * bar_gap)) / 2
+    for i, h in enumerate([40, 65, 50]):
+        bx0 = bar_x + i * (bar_w + bar_gap)
+        draw.rectangle([bx0, base_y - h, bx0 + bar_w, base_y], fill="#58a6ff")
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return Response(buf.getvalue(), mimetype="image/png",
                     headers={"Cache-Control": "public, max-age=3600"})
 
 
