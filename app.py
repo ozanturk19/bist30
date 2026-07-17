@@ -8095,6 +8095,11 @@ def karsilastir():
     `?tickers=` farklı varyasyonları (case/sıra/duplicate) tek canonical URL'e
     301 ile yönlendirir → Google duplicate dropluyor sorununu çözer (#40)."""
     raw = request.args.get("tickers", "").strip()
+    if not raw:
+        # CPO-1107 madde 9: bazı paylaşılan/eski linkler ?a=&b= şemasını kullanıyor —
+        # kanonik `tickers=` şemasına normalize edilip aynı 301 akışından geçirilir.
+        ab = [request.args.get(k, "").strip() for k in ("a", "b", "c", "d")]
+        raw = ",".join(t for t in ab if t)
     base = "https://borsapusula.com"
     canonical_url    = f"{base}/karsilastir"
     page_title       = "Hisse Karşılaştırma — BorsaPusula"
