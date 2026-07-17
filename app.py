@@ -8102,7 +8102,7 @@ def karsilastir():
         raw = ",".join(t for t in ab if t)
     base = "https://borsapusula.com"
     canonical_url    = f"{base}/karsilastir"
-    page_title       = "Hisse Karşılaştırma — BorsaPusula"
+    page_title       = "Hisse Karşılaştırma | BorsaPusula"
     page_description = ("BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile "
                         "yan yana karşılaştırın. F/K, ROE, ADX, RSI, R/R ve daha fazlası.")
     tickers_param    = raw
@@ -8122,7 +8122,7 @@ def karsilastir():
                 title_list = ", ".join(tickers[:3]) + f" +{len(tickers)-3} daha"
             else:
                 title_list = ", ".join(tickers)
-            page_title = f"{title_list} Karşılaştırma — BorsaPusula"
+            page_title = f"{title_list} Karşılaştırma | BorsaPusula"
             page_description = (f"{', '.join(tickers)} hisselerini teknik sinyal, "
                                 f"F/K, ROE, ADX, RSI ve yatırım skoru ile yan yana karşılaştırın.")
     return render_template("karsilastir.html",
@@ -9907,7 +9907,7 @@ def unsubscribe_page(token):
                 return f"""<!DOCTYPE html>
 <html lang="tr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Abonelik İptal — BorsaPusula</title>
+<title>Abonelik İptal | BorsaPusula</title>
 <style>body{{margin:0;padding:0;background:#0b111f;color:#e2e8f0;
 font-family:-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;
 display:flex;align-items:center;justify-content:center;min-height:100vh}}
