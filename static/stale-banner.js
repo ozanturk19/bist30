@@ -2,21 +2,29 @@
    Kaynak: index.html'in mevcut renk/metin mantığı (DEV-1474 spec), 6 sayfaya
    merkezileştirildi. Kanonik veri: data_quality + stocks_age_s — /api/health.status
    BANNER'A GİRMEZ (SENECA drift bulgusunun kökü, tarama.html'de düzeltildi).
-   Not: index.html critical metninde "Yenileniyor..." vardı, hisse.html'de yoktu —
-   merkezileşirken index.html'in metni kanonik alındı (iki kopya arası tutarsızlık
-   fix, görsel/renk mantığı değişmedi). */
-function bpUpdateStaleBanner(dq, ageS) {
+   CPO-1151 §3: ageS bilinmediğinde '?' yerine dürüst metin; "Yenileniyor..."
+   yalnız /api/data.refreshing===true iken eklenir (refreshing 3. parametre,
+   /api/data-quality'yi kullanan çağıranlarda undefined → ek metin yok). */
+function bpUpdateStaleBanner(dq, ageS, refreshing) {
   var banner = document.getElementById('staleBanner');
   var bTxt   = document.getElementById('staleBannerText');
   if (!banner) return;
-  var mins = ageS ? Math.floor(ageS / 60) : '?';
+  var hasAge = ageS != null && !isNaN(ageS);
+  var mins   = hasAge ? Math.floor(ageS / 60) : null;
+  var suffix = refreshing === true ? ' Yenileniyor...' : '';
   if (dq === 'critical') {
-    if (bTxt) bTxt.textContent = 'Veriler ' + mins + ' dakikadır güncellenemiyor. Yenileniyor...';
+    var critTxt = hasAge
+      ? 'Veriler ' + mins + ' dakikadır güncellenemiyor.'
+      : 'Veriler güncellenemiyor — son güncelleme zamanı doğrulanamıyor.';
+    if (bTxt) bTxt.textContent = critTxt + suffix;
     banner.style.background  = 'rgba(248,81,73,0.12)';
     banner.style.borderColor = '#f85149';
     banner.style.display     = 'block';
   } else if (dq === 'stale') {
-    if (bTxt) bTxt.textContent = 'Veriler ' + mins + ' dk önce güncellendi — yenileniyor...';
+    var staleTxt = hasAge
+      ? 'Veriler ' + mins + ' dk önce güncellendi.'
+      : 'Veriler güncellendi — son güncelleme zamanı doğrulanamıyor.';
+    if (bTxt) bTxt.textContent = staleTxt + suffix;
     banner.style.background  = '';
     banner.style.borderColor = '';
     banner.style.display     = 'block';

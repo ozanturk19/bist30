@@ -3512,7 +3512,7 @@ async function fetchData() {
     }
 
     /* CPO-1125 İş Kolu B — kanonik banner, static/stale-banner.js */
-    bpUpdateStaleBanner(json.data_quality, json.stocks_age_s);
+    bpUpdateStaleBanner(json.data_quality, json.stocks_age_s, json.refreshing);
 
     // Sektör butonlarını oluştur (ilk yüklemede)
     if (json.sectors && document.querySelectorAll('.sector-btn').length <= 1) {

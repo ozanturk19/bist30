@@ -527,7 +527,7 @@ async function load() {
     _loadAttempts = 0;
     allStocks = j.stocks.filter(s => s.ticker !== 'XU030');
     document.getElementById('lastUpdate').textContent = `Son güncelleme: ${j.updated_at || '—'}`;
-    bpUpdateStaleBanner(j.data_quality, j.stocks_age_s);  /* CPO-1125 İş Kolu B */
+    bpUpdateStaleBanner(j.data_quality, j.stocks_age_s, j.refreshing);  /* CPO-1125 İş Kolu B */
     renderHeatmap(allStocks);
   } catch(e) {
     _loadAttempts++;

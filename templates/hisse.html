@@ -3052,7 +3052,7 @@ function buildChart(d) {
 
 /* ── 52-hafta + commentary render ──────────────────── */
 /* ── SPEC-014 B2/B3 + CPO-551 A5 — Veri yaşı göstergesi + stale banner ──── */
-function renderFreshness(f, dq, ageS) {
+function renderFreshness(f, dq, ageS, refreshing) {
   if (!f) return;
   const wrap   = document.getElementById('dataFreshness');
   const dot    = document.getElementById('freshnessDot');
@@ -3085,7 +3085,7 @@ function renderFreshness(f, dq, ageS) {
      fallback (dq/ageS henüz gelmediyse f.stocks_age_seconds'tan türet) korunur */
   const effDq  = dq || (f.market_open && age > 900 ? 'stale' : 'fresh');
   const effAge = ageS || age;
-  bpUpdateStaleBanner(effDq, effAge);
+  bpUpdateStaleBanner(effDq, effAge, refreshing);
 }
 
 function renderCommentary(commentary) {
@@ -3610,7 +3610,7 @@ async function loadChart(retry) {
 
     /* 2) /api/data ayrı non-blocking fetch — fail/timeout → sessiz (chart zaten render) */
     fetch('/api/data').then(r => r.json()).then(data2 => {
-      renderFreshness(data2.data_freshness, data2.data_quality, data2.stocks_age_s);  /* SPEC-014 B2/B3 + CPO-551 A5 */
+      renderFreshness(data2.data_freshness, data2.data_quality, data2.stocks_age_s, data2.refreshing);  /* SPEC-014 B2/B3 + CPO-551 A5 */
 
       /* Summary enrichment — signal_bars/date /api/data'dan */
       const sd = (data2.stocks || []).find(s => s.ticker === TICKER);
