@@ -3737,8 +3737,15 @@ async function loadNews(retryCount) {
         kapA.textContent = 'KAP ↗';
         sourceEl.appendChild(kapA);
       }
+    } else if (data.unavailable) {
+      // CPO-1153/1154 P0-B(c): backend zaten "başarısız" olarak biliyor (negatif cache/
+      // kota devresi açık) — anlamsız "yeniden deneniyor" simülasyonu YOK, dürüst göster.
+      contentEl.innerHTML     = '<div class="news-error">🤖 '
+        + (data.reason || 'Haber özeti şu an kullanılamıyor')
+        + '. <button class="news-retry-btn" onclick="loadNews(0)">Tekrar dene</button></div>';
+      contentEl.style.display = '';
     } else {
-      // API null döndürdü — hata mesajı göster, section'ı kapatma
+      // API null döndürdü (gerçek cache-miss, ilk kez sorgulanıyor) — hata mesajı göster
       if (retryCount < 2) {
         // Otomatik 8 saniye sonra tekrar dene
         contentEl.innerHTML    = '<div class="news-error">⏳ Haber özeti hazırlanıyor, yeniden deneniyor…</div>';

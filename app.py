@@ -5317,6 +5317,24 @@ _GEMINI_CB_THRESHOLD = 2      # ardışık fail eşiği — devre açılır
 _GEMINI_CB_COOLDOWN  = 600    # saniye — devre açık kalır (10dk Gemini'siz fallback)
 _gemini_cb = {"fails": 0, "open_until": 0.0}   # circuit breaker durumu (worker-local)
 
+# CPO-1153/1154 P0-B — 429 (kota) ayrı bir devre: mevcut _gemini_cb bilinçli olarak
+# 429'u saymıyor (429 hızlı döner, worker'ı bloke etmez — yalnız timeout/network
+# _gemini_cb'ye girer). Ama günlük kota (RPD) tükendiğinde 429 storm'u SESSİZ kalıyordu
+# (debug log + CB dışı + sonsuz "loading" UI) — 6 saat fark edilmeden sürdü. Bu devre
+# ardışık 429'u ayrı sayar, eşiğe ulaşınca gerçek çağrıyı keser + gözlemlenebilir hale
+# getirir (bkz. _gemini_news_degraded, /api/health "news" component).
+_GEMINI_QUOTA_CB_THRESHOLD = 10     # ardışık 429 eşiği — kota muhtemelen tükenmiş
+_GEMINI_QUOTA_CB_COOLDOWN  = 600    # saniye — devre açık kalır (gerçek çağrı yok)
+_gemini_quota_cb = {"consecutive_429": 0, "open_until": 0.0, "quota_exhausted_total": 0}
+
+
+def _gemini_news_degraded() -> bool:
+    """True → kota muhtemelen tükendi, haber özelliği gerçek çağrı yapmıyor.
+
+    /api/health'e ve news endpoint'ine dürüst durum yansıtmak için (CPO-1153 §3).
+    """
+    return time.time() < _gemini_quota_cb["open_until"]
+
 # Fix2 — Gemini global cross-worker rate limiter (slot reservation via flock).
 # Önceki worker-local lock: 4 worker × ~9.2 req/dk = ~36.8 RPM → 429 burst riski.
 # Yeni: paylaşımlı dosya üzerinden atomic slot tahsisi → global ~9.2 RPM (10 RPM altı).
@@ -5635,6 +5653,12 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
                      _gemini_cb["open_until"] - now)
         return None, None
 
+    # CPO-1153/1154 P0-B(b) — kota devresi açıksa gerçek çağrı yapma, anında fallback.
+    if now < _gemini_quota_cb["open_until"]:
+        logger.debug("_gemini_call: kota circuit breaker açık (%.0fs kaldı) — fallback",
+                     _gemini_quota_cb["open_until"] - now)
+        return None, None
+
     # Fix2 — global cross-worker slot reservation (CPO-837 pattern: sleep lock dışarıda).
     _wait = _gemini_rate_acquire()
     if _wait > 0:
@@ -5668,13 +5692,23 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
                             .get("text", "")).strip()
             if text:
                 _gemini_cb["fails"] = 0   # başarı → circuit breaker sayacı sıfırla
+                _gemini_quota_cb["consecutive_429"] = 0   # başarı → kota devresi de sıfırlanır
                 return model_id, text
             # Model yanıt verdi ama boş metin — fallback'e geç
             logger.debug("_gemini_call [%s]: boş yanıt, fallback deneniyor", model_id)
         except Exception as e:
             status = getattr(getattr(e, "response", None), "status_code", None)
             if status == 429:
-                logger.debug("_gemini_call [%s]: rate-limited (429)", model_id)  # sessiz — log dolmasın
+                # CPO-1153 §3(a): debug→warning — 6 saatlik kota kesintisi hiç görünmemişti.
+                logger.warning("_gemini_call [%s]: kota tükendi (429 RESOURCE_EXHAUSTED)", model_id)
+                _gemini_quota_cb["consecutive_429"] += 1
+                _gemini_quota_cb["quota_exhausted_total"] += 1
+                if (_gemini_quota_cb["consecutive_429"] >= _GEMINI_QUOTA_CB_THRESHOLD
+                        and now >= _gemini_quota_cb["open_until"]):
+                    _gemini_quota_cb["open_until"] = time.time() + _GEMINI_QUOTA_CB_COOLDOWN
+                    logger.warning("_gemini_call: KOTA circuit breaker AÇILDI — %d ardışık 429, "
+                                   "%ds boyunca Gemini çağrısı yapılmayacak (news_degraded=true)",
+                                   _GEMINI_QUOTA_CB_THRESHOLD, _GEMINI_QUOTA_CB_COOLDOWN)
             else:
                 logger.warning("_gemini_call [%s]: %s (HTTP %s)", model_id, type(e).__name__, status)
             # Circuit breaker — 429 ve 5xx sayılmaz (hızlı dönüş, worker bloke etmez).
@@ -5697,7 +5731,8 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
 def get_ai_news(ticker):
     """Gemini + Google Search grounding ile Türkçe haber özeti üretir.
 
-    Model fallback: gemini-2.5-flash → gemini-1.5-flash
+    Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite (bkz. _GEMINI_NEWS_ATTEMPTS;
+    gemini-1.5-flash v1beta'da 404 döndüğü için zincirden çıkarılmıştı).
     Negatif cache: tüm modeller başarısız olursa 5 dk boyunca yeniden deneme yapılmaz.
     """
     if not GEMINI_API_KEY:
@@ -7350,10 +7385,22 @@ def api_stock_news(ticker):
     # 3. Search-grounded cache check (get_ai_news uses _news_cache[ticker])
     with _lock:
         gen_cached = _news_cache.get(ticker)
-    if gen_cached and not gen_cached.get("failed"):
-        ttl = _NEWS_FAIL_TTL if gen_cached.get("failed") else _news_ttl_for(ticker)
-        if (now_ts - gen_cached["ts"]) < ttl and gen_cached.get("text"):
-            return safe_json({"news": gen_cached["text"], "source": "gemini", "kap_url": kap_url})
+    if gen_cached:
+        failed = gen_cached.get("failed")
+        ttl = _NEWS_FAIL_TTL if failed else _news_ttl_for(ticker)
+        if (now_ts - gen_cached["ts"]) < ttl:
+            if failed:
+                # CPO-1153/1154 P0-B(c): negatif cache içindeyken tekrar kuyruğa ekleyip
+                # sonsuz "loading:true" dönmek YASAK — 6 saatlik kota kesintisi boyunca
+                # kullanıcı sonsuz spinner görüyordu, hiç hata görmüyordu. Dürüst dön.
+                return safe_json({
+                    "news": None, "loading": False, "unavailable": True,
+                    "reason": "Haber özeti şu an kullanılamıyor",
+                    "news_degraded": _gemini_news_degraded(),
+                    "kap_url": kap_url,
+                })
+            if gen_cached.get("text"):
+                return safe_json({"news": gen_cached["text"], "source": "gemini", "kap_url": kap_url})
 
     # 4. CACHE MISS — queue bg fetch (existing _on_demand_news_worker handles it)
     with _news_queue_lock:
@@ -7999,6 +8046,12 @@ def _compute_health():
         "news_queue":               _news_queue_stats,
         "last_news_queue_ts":       news_last_ts,
         "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
+        # CPO-1153/1154 P0-B(b) — 429 kota tükenmesi artık gözlemlenebilir (önceden
+        # health OK + smoke 5/5 iken özellik 6 saat sessizce ölüydü).
+        "news": {
+            "degraded":              _gemini_news_degraded(),
+            "quota_exhausted_total": _gemini_quota_cb["quota_exhausted_total"],
+        },
         "data_freshness":           build_data_freshness(stocks_list),  # SPEC-014 B1 (CPO-1137: kanonik, aynı stocks)
         "market_data_age_s":         stocks_age_s,                           # CPO-590 madde 4
         "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
