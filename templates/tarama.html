@@ -524,12 +524,7 @@
 
 <div id="main-content" class="container">
 
-  <!-- CPO-551 A5 — Stale banner -->
-  <div id="staleBanner" role="alert"
-       style="display:none;background:rgba(245,201,73,.10);border:1px solid rgba(245,201,73,.4);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#f5c949;line-height:1.5">
-    ⚠️ <span id="staleBannerText">Veriler bir süredir güncellenmedi.</span>
-    Piyasa hareketli olabilir — fiyatlar gerçek zamanlı olmayabilir.
-  </div>
+  {% include '_stale_banner.html' %}
 
   <!-- Filtre Çubuğu -->
   <div class="filter-bar">
@@ -672,6 +667,7 @@
   <a href="/metodoloji">Metodoloji</a>
 </footer>
 
+<script src="/static/stale-banner.js?v=1"></script>
 <script>
 /* ── Makro ticker ── */
 (function() {
@@ -1121,25 +1117,10 @@ function resetFilters() {
   applyFilters();
 })();
 
-/* CPO-551 A5 — stale banner: /api/health non-blocking */
-(async () => {
-  try {
-    const h = await (await fetch('/api/health', {cache: 'no-store'})).json();
-    const banner = document.getElementById('staleBanner');
-    const bTxt   = document.getElementById('staleBannerText');
-    if (!banner) return;
-    if (h.status === 'CRITICAL') {
-      if (bTxt) bTxt.textContent = 'Veriler kritik gecikme — yenileniyor...';
-      banner.style.background = 'rgba(248,81,73,0.12)';
-      banner.style.borderColor = 'var(--bp-sat)';
-      banner.style.color = 'var(--bp-sat)';
-      banner.style.display = 'block';
-    } else if (h.status === 'DEGRADED') {
-      if (bTxt) bTxt.textContent = 'Veriler bir süredir güncellenmedi — yenileniyor...';
-      banner.style.display = 'block';
-    }
-  } catch (_) {}
-})();
+/* CPO-1125 İş Kolu B — kanonik banner (data_quality öncelikli, /api/health.status
+   DEĞİL — SENECA drift bulgusunun kökü buydu), 60s polling (index modeliyle aynı,
+   önceki tek-atım eksikliği burada düzeldi) */
+bpStartDataQualityPolling();
 </script>
 <script src="/static/bp-search.js?v=44" defer></script>
 <script src="/static/learning-mode.js?v=1" defer></script>

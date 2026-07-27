@@ -1488,12 +1488,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
 <main id="main-content" class="container">
 
-  <!-- SPEC-014 B3 — Stale banner (veri yaşı >15dk, market saatinde) -->
-  <div id="staleBanner" role="alert"
-       style="display:none;background:rgba(245,201,73,.10);border:1px solid rgba(245,201,73,.4);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#f5c949;line-height:1.5">
-    ⚠️ <span id="staleBannerText">Veriler bir süredir güncellenmedi.</span>
-    Piyasa hareketli olabilir — fiyatlar gerçek zamanlı olmayabilir.
-  </div>
+  {% include '_stale_banner.html' %}
 
   <!-- SPEC-014 B2 — Veri yaşı göstergesi -->
   <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
@@ -2563,6 +2558,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong>yatırım tavsiyesi değildir</strong>. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
 </footer>
 
+<script src="/static/stale-banner.js?v=1"></script>
 <script>
 /* ── Global nav dropdown ── */
 function toggleNavDd(id, btn) {
@@ -3061,8 +3057,6 @@ function renderFreshness(f, dq, ageS) {
   const wrap   = document.getElementById('dataFreshness');
   const dot    = document.getElementById('freshnessDot');
   const txt    = document.getElementById('freshnessText');
-  const banner = document.getElementById('staleBanner');
-  const bTxt   = document.getElementById('staleBannerText');
   if (!wrap || !dot || !txt) return;
 
   const age = f.stocks_age_seconds;
@@ -3087,25 +3081,11 @@ function renderFreshness(f, dq, ageS) {
   }
   wrap.style.display = 'inline-flex';
 
-  /* CPO-551 A5: data_quality öncelikli banner */
-  if (banner) {
-    const effDq  = dq || (f.market_open && age > 900 ? 'stale' : 'fresh');
-    const effAge = ageS || age;
-    const m      = effAge ? Math.floor(effAge / 60) : '?';
-    if (effDq === 'critical') {
-      if (bTxt) bTxt.textContent = `Veriler ${m} dakikadır güncellenemiyor.`;
-      banner.style.background = 'rgba(248,81,73,0.12)';
-      banner.style.borderColor = '#f85149';
-      banner.style.display = 'block';
-    } else if (effDq === 'stale') {
-      if (bTxt) bTxt.textContent = `Veriler ${m} dk önce güncellendi — yenileniyor...`;
-      banner.style.background = '';
-      banner.style.borderColor = '';
-      banner.style.display = 'block';
-    } else {
-      banner.style.display = 'none';
-    }
-  }
+  /* CPO-1125 İş Kolu B: kanonik banner (static/stale-banner.js), sayfa-özel
+     fallback (dq/ageS henüz gelmediyse f.stocks_age_seconds'tan türet) korunur */
+  const effDq  = dq || (f.market_open && age > 900 ? 'stale' : 'fresh');
+  const effAge = ageS || age;
+  bpUpdateStaleBanner(effDq, effAge);
 }
 
 function renderCommentary(commentary) {

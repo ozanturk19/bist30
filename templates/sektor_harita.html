@@ -365,6 +365,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
 <div class="container">
 
+  {% include '_stale_banner.html' %}
+
   <div class="legend">
     <span><span class="legend-dot" style="background:#00e290"></span> Güçlü Trend</span>
     <span><span class="legend-dot" style="background:#f85149"></span> Zayıf Trend</span>
@@ -389,6 +391,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <div style="margin-top:6px">⚠️ Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
 </footer>
 
+<script src="/static/stale-banner.js?v=1"></script>
 <script>
 const SECTORS = {};  // ticker → sector (doldurulacak)
 let allStocks  = [];
@@ -524,6 +527,7 @@ async function load() {
     _loadAttempts = 0;
     allStocks = j.stocks.filter(s => s.ticker !== 'XU030');
     document.getElementById('lastUpdate').textContent = `Son güncelleme: ${j.updated_at || '—'}`;
+    bpUpdateStaleBanner(j.data_quality, j.stocks_age_s);  /* CPO-1125 İş Kolu B */
     renderHeatmap(allStocks);
   } catch(e) {
     _loadAttempts++;

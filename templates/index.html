@@ -2133,12 +2133,7 @@
 <!-- ── Ana içerik container ─────────────────────────── -->
 <main id="main-content" class="container">
 
-<!-- SPEC-014 B3 — Stale banner -->
-<div id="staleBanner" role="alert"
-     style="display:none;background:rgba(245,201,73,.10);border:1px solid rgba(245,201,73,.4);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#f5c949;line-height:1.5">
-  ⚠️ <span id="staleBannerText">Veriler bir süredir güncellenmedi.</span>
-  Piyasa hareketli olabilir — fiyatlar gerçek zamanlı olmayabilir.
-</div>
+{% include '_stale_banner.html' %}
 
 <!-- SPEC-012 V3a L4 — Onboarding banner (Öğrenme Modu CTA, dismissible localStorage) -->
 <div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(184,195,255,.10),rgba(29,78,216,.05));border:1px solid rgba(184,195,255,.32);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:13px;color:#e5e1e4;line-height:1.55;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -2750,6 +2745,7 @@
 </footer>
 
 <script src="/static/lightweight-charts.min.js"></script>
+<script src="/static/stale-banner.js?v=1"></script>
 <script>
 /* ── Makro Ticker Bandı ──────────────────────────── */
 (function() {
@@ -3515,28 +3511,8 @@ async function fetchData() {
       if (upd) upd.textContent = 'Güncellendi: ' + json.updated_at;  /* Element kaldırılmış olabilir, null guard */
     }
 
-    /* SPEC-014 B3 + CPO-551 A5 — stale banner (data_quality öncelikli) */
-    const banner = document.getElementById('staleBanner');
-    const bTxt   = document.getElementById('staleBannerText');
-    const dq     = json.data_quality;
-    const ageS   = json.stocks_age_s;
-    if (banner) {
-      if (dq === 'critical') {
-        const mins = ageS ? Math.floor(ageS / 60) : '?';
-        if (bTxt) bTxt.textContent = `Veriler ${mins} dakikadır güncellenemiyor. Yenileniyor...`;
-        banner.style.background = 'rgba(248,81,73,0.12)';
-        banner.style.borderColor = '#f85149';
-        banner.style.display = 'block';
-      } else if (dq === 'stale') {
-        const mins = ageS ? Math.floor(ageS / 60) : '?';
-        if (bTxt) bTxt.textContent = `Veriler ${mins} dk önce güncellendi — yenileniyor...`;
-        banner.style.background = '';
-        banner.style.borderColor = '';
-        banner.style.display = 'block';
-      } else {
-        banner.style.display = 'none';
-      }
-    }
+    /* CPO-1125 İş Kolu B — kanonik banner, static/stale-banner.js */
+    bpUpdateStaleBanner(json.data_quality, json.stocks_age_s);
 
     // Sektör butonlarını oluştur (ilk yüklemede)
     if (json.sectors && document.querySelectorAll('.sector-btn').length <= 1) {
