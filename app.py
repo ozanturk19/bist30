@@ -261,15 +261,18 @@ def _yahoo_cb_blocked() -> bool:
     return time.time() < _yahoo_cb["open_until"]
 
 
-def _yahoo_cb_record(ok: bool, stderr_text: str = ""):
+def _yahoo_cb_record(ok: bool, stderr_text: str = "", timeout: bool = False):
     """Her subprocess çağrısından sonra çağrılır. ok=True → sayaç+devre sıfırlanır
-    (Yahoo en az bir kez normal cevap verdi = toparlanma sinyali). ok=False sadece
-    stderr'de 'too many requests' varsa sayılır."""
+    (Yahoo en az bir kez normal cevap verdi = toparlanma sinyali). ok=False sayılır
+    eğer stderr'de 'too many requests' varsa (429) VEYA timeout=True ise (CPO-1140 P1:
+    subprocess.TimeoutExpired dalı önceden bu fonksiyonu hiç çağırmıyordu — yavaşlık
+    kaynaklı timeout'lar CB'ye görünmez kalıyordu. 429 ile ortak sayaç/eşik kullanılıyor,
+    çünkü ikisi de aynı kök nedenin — Yahoo tarafı degradasyonun — belirtisi)."""
     if ok:
         _yahoo_cb["fails"] = 0
         _yahoo_cb["opens"] = 0
         return
-    if not stderr_text or "too many requests" not in stderr_text.lower():
+    if not timeout and (not stderr_text or "too many requests" not in stderr_text.lower()):
         return
     _yahoo_cb["fails"] += 1
     if _yahoo_cb["fails"] >= _YAHOO_CB_THRESHOLD:
@@ -277,8 +280,9 @@ def _yahoo_cb_record(ok: bool, stderr_text: str = ""):
         _yahoo_cb["open_until"] = time.time() + cooldown
         _yahoo_cb["opens"] += 1
         _yahoo_cb["fails"] = 0
-        logger.warning("_yahoo_cb: circuit breaker AÇILDI — %d ardışık 429, %ds boyunca Yahoo "
-                        "subprocess atlanacak (opens=%d)", _YAHOO_CB_THRESHOLD, cooldown, _yahoo_cb["opens"])
+        reason = "timeout" if timeout else "429"
+        logger.warning("_yahoo_cb: circuit breaker AÇILDI — %d ardışık hata (son: %s), %ds boyunca Yahoo "
+                        "subprocess atlanacak (opens=%d)", _YAHOO_CB_THRESHOLD, reason, cooldown, _yahoo_cb["opens"])
 
 
 def _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=25):
@@ -307,6 +311,7 @@ def _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=25)
             logger.warning("yf_fetch %s %s/%s SLOW: %.0fms (baseline ~956ms)", ticker_base, period, interval, _ms)
         return df
     except subprocess.TimeoutExpired:
+        _yahoo_cb_record(False, timeout=True)
         _ms = (time.perf_counter() - _t0) * 1000
         logger.warning("yf_fetch %s %s/%s TIMEOUT %ds (%.0fms elapsed)", ticker_base, period, interval, timeout, _ms)
         return None
@@ -362,6 +367,7 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
             "change": round((float(price) - float(prev)) / float(prev) * 100, 2),
         }
     except subprocess.TimeoutExpired:
+        _yahoo_cb_record(False, timeout=True)
         _ms = (time.perf_counter() - _t0) * 1000
         logger.debug("yf_macro_fetch %s TIMEOUT %ds (%.0fms elapsed)", sym, timeout, _ms)
         return None
@@ -401,6 +407,7 @@ def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
             logger.warning("yf_fund_fetch %s SLOW: %.0fms", ticker_base, _ms)
         return info
     except subprocess.TimeoutExpired:
+        _yahoo_cb_record(False, timeout=True)
         _ms = (time.perf_counter() - _t0) * 1000
         logger.warning("yf_fund_fetch %s TIMEOUT %ds (%.0fms elapsed)", ticker_base, timeout, _ms)
         return None
@@ -438,6 +445,7 @@ def _fetch_chart_subprocess(yf_ticker, period="5y", timeout=40):
             logger.warning("yf_chart_fetch %s SLOW: %.0fms", yf_ticker, _ms)
         return df
     except subprocess.TimeoutExpired:
+        _yahoo_cb_record(False, timeout=True)
         _ms = (time.perf_counter() - _t0) * 1000
         logger.warning("yf_chart_fetch %s TIMEOUT %ds (%.0fms elapsed)", yf_ticker, timeout, _ms)
         return None
@@ -473,6 +481,7 @@ def _fetch_live_subprocess(tickers_str, timeout=60):
             logger.warning("yf_live_fetch bist SLOW: %.0fms", _ms)
         return payload
     except subprocess.TimeoutExpired:
+        _yahoo_cb_record(False, timeout=True)
         _ms = (time.perf_counter() - _t0) * 1000
         logger.warning("yf_live_fetch bist TIMEOUT %ds (%.0fms elapsed)", timeout, _ms)
         return None
@@ -506,6 +515,7 @@ def _fetch_global_subprocess(syms, timeout=60):
             logger.warning("yf_live_fetch global SLOW: %.0fms", _ms)
         return payload
     except subprocess.TimeoutExpired:
+        _yahoo_cb_record(False, timeout=True)
         _ms = (time.perf_counter() - _t0) * 1000
         logger.warning("yf_live_fetch global TIMEOUT %ds (%.0fms elapsed)", timeout, _ms)
         return None
@@ -3257,7 +3267,7 @@ def _refresh_data_impl():
         except _cf_analyze.TimeoutError:
             # 180s'de bitmediyse iptal et — gelen sonuçlarla devam (degraded ama YAZAR)
             done_count = sum(1 for f in future_map if f.done())
-            logger.warning("refresh_data 180s soft cap → %d/30 ticker tamamlandı, degraded yaz", done_count)
+            logger.warning("refresh_data 180s soft cap → %d/%d ticker tamamlandı, degraded yaz", done_count, len(future_map))
             for f in future_map:
                 if not f.done():
                     f.cancel()
