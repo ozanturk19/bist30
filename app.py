@@ -7888,8 +7888,9 @@ def _compute_health():
     # hâlâ None) last_refresh_ts'e (cycle ÇALIŞMA zamanı) düşmüyoruz — gerçek
     # "bilinmiyor" components.stocks'a da yansımalı (aşağıdaki eşik kontrolü
     # stocks_age_s is None'ı zaten "critical" sayıyor).
+    # CPO-1151 §2: None iken ham cache zamanına düşme — age_s:null ile çelişiyordu.
     cache_updated = (datetime.fromtimestamp(_stocks_eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
-                     if _stocks_eff_ts else raw_cache_updated)
+                     if _stocks_eff_ts else None)
     macro_age_s  = int(now - macro_ts) if macro_ts else None
     macro_stale  = macro_age_s is None or macro_age_s > _MACRO_TTL
 
@@ -7966,6 +7967,7 @@ def _compute_health():
             "loading": cache_loading,
             "updated": cache_updated,
             "age_s":   stocks_age_s,
+            "cache_written_at": raw_cache_updated,  # CPO-1151 §2: ham cache yazım zamanı, kanonik değil
         },
         "macro": {
             "count": macro_count,
