@@ -133,6 +133,6 @@ def test_opens_resets_after_true_recovery_window():
         record(False, timeout=True)
     assert ns["_yahoo_cb"]["opens"] == 1
 
-    ns["_yahoo_cb"]["last_open_ts"] = time.time() - 700  # RESET_WINDOW (600s) aşıldı
+    ns["_yahoo_cb"]["last_open_ts"] = time.time() - ns["_YAHOO_CB_RESET_WINDOW"] - 100  # aşıldı
     record(True)
     assert ns["_yahoo_cb"]["opens"] == 0, "uzun sessizlik sonrası başarı gerçek toparlanma sayılmalı"
