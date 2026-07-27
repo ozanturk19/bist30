@@ -36,6 +36,10 @@ last_news_cache.json
 last_company_summary.json
 prev_signals.json
 push_state.json
+_signal_explain_cache.json
+bist30.db
+chart_macros.json
+ALERT.md
 
 # Operasyonel dosyalar (prod-only, repo'ya girmez)
 DEPLOY_LOG.md

@@ -22,7 +22,6 @@ _TZ_TR = timezone(timedelta(hours=3))
 import threading
 import collections
 import logging
-import statistics
 import time
 import json
 import os
@@ -2669,6 +2668,34 @@ def _compute_data_quality(bad_ticker_count, total_count, market_open):
     return "fresh"
 
 
+# CPO-1137: last_fresh_ts hiç yok/0 olan ticker "bilinmiyor" (taze tarafa düşen
+# nötr) değil, "hiç güncellenmedi" sayılır — gerçek eşiklerin (65-67sa gözlenen
+# stale bucket) üzerinde sabit bir sentinel yaş verilir ki p90 hesabında her
+# zaman "en bayat"tan daha kötü sırada dursun, ama görüntülenen tarih 1970
+# (epoch=0) gibi anlamsız bir değere düşmesin.
+_NEVER_FRESH_SENTINEL_S = 7 * 86400  # 7 gün
+
+
+def _canonical_stocks_age(stocks, now=None):
+    """CPO-1137: /api/health, /api/data ve is_stale ÜÇÜNÜN paylaştığı TEK yaş
+    hesabı. En-son-yazım (refresh_data() cycle'ının ÇALIŞMA zamanı) veya medyan
+    yerine per-ticker last_fresh_ts'in p90'ı kullanılır: medyan, azınlıktaki
+    taze ticker'ları çoğunluğun bayatlığını maskelemek için yeter sayıda
+    ağırlıklandırmıyordu (17 Tem + 27 Tem vakaları); p90 tek kalıcı-arızalı
+    ticker'ın banner'ı sonsuza kilitlemesini de önler.
+
+    Dönüş: (age_s, eff_ts) — stocks boşsa (None, None), çağıran last_refresh_ts
+    fallback'ine düşer.
+    """
+    now = now if now is not None else time.time()
+    if not stocks:
+        return None, None
+    ages = sorted(now - (s.get("last_fresh_ts") or (now - _NEVER_FRESH_SENTINEL_S)) for s in stocks)
+    idx = min(len(ages) - 1, int(len(ages) * 0.90))
+    age_s = int(ages[idx])
+    return age_s, now - age_s
+
+
 def _data_quality_snapshot(stocks):
     """CPO-1119 §1 / CPO-1121: /api/data ve hafif /api/data-quality'nin PAYLAŞTIĞI
     tek hesap — data_quality, stocks_age_s, updated_at. İki yüzey de aynı kanonik
@@ -2679,40 +2706,47 @@ def _data_quality_snapshot(stocks):
     _mkt_open  = _market_open()
     _bad_count = sum(1 for s in stocks if s.get("data_quality") == "stale")
     _dq        = _compute_data_quality(_bad_count, len(stocks), _mkt_open)
-    # CPO-1114 K1/DEV-1469: updated_at artık "refresh_data() son ne zaman ÇALIŞTI"
-    # değil, per-ticker last_fresh_ts medyanı — tipik gösterilen verinin gerçekte
-    # ne zaman taze geldiğini yansıtır. Böylece dq="critical" iken banner "az önce
-    # güncellendi" gibi çelişkili bir zaman damgası göstermez (DEV-1470 bulgusu).
-    _fresh_ts_list = [s["last_fresh_ts"] for s in stocks if s.get("last_fresh_ts")]
-    if _fresh_ts_list:
-        _eff_fresh_ts    = statistics.median(_fresh_ts_list)
-        _age_s           = int(_now - _eff_fresh_ts)
-        _resp_updated_at = datetime.fromtimestamp(_eff_fresh_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+    # CPO-1114 K1/DEV-1469/CPO-1137: updated_at "refresh_data() son ne zaman
+    # ÇALIŞTI" değil, per-ticker last_fresh_ts'in kanonik (p90) yaşı — tipik
+    # gösterilen verinin gerçekte ne zaman taze geldiğini yansıtır.
+    _age_s, _eff_ts = _canonical_stocks_age(stocks, _now)
+    if _eff_ts is not None:
+        _resp_updated_at = datetime.fromtimestamp(_eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
     else:
-        # Geriye dönük uyum: last_fresh_ts alanı henüz hiçbir ticker'da yok (deploy
-        # sonrası ilk cycle'lar, disk cache eski format) — eski davranışa düş.
+        # Geriye dönük uyum: stocks boş (deploy sonrası ilk cycle) — eski davranışa düş.
         _age_s           = int(_now - _lr_ts) if _lr_ts else None
         _resp_updated_at = _cache["updated_at"]
     return {"data_quality": _dq, "stocks_age_s": _age_s, "updated_at": _resp_updated_at}
 
 
-def build_data_freshness():
+def build_data_freshness(stocks=None):
     """SPEC-014 B1 — veri tazeliği meta objesi.
 
-    /api/data ve /api/health response'larına eklenir.
-    is_stale = market_day ve stocks yaşı > 1800s (30dk) — hafta sonu/tatil
-    günlerinde bist30-refresh zaten çalışmadığından (CPO-919 Hibrit Batch,
-    weekday-only cron) o günlerde is_stale asla true olmaz (DEV-993/CPO
-    weekend-aware stale P3 kararı). CPO-596: saat-bazlı market_open'a
-    bağlama, gün-bazlı market_day yeterli — absolute 30dk threshold korunur.
+    /api/data, /api/heatmap ve /api/health response'larına eklenir.
+    is_stale = market_day ve stocks yaşı (CPO-1137: kanonik p90, bkz.
+    _canonical_stocks_age) > 1800s (30dk) — hafta sonu/tatil günlerinde
+    bist30-refresh zaten çalışmadığından (CPO-919 Hibrit Batch, weekday-only
+    cron) o günlerde is_stale asla true olmaz (DEV-993/CPO weekend-aware stale
+    P3 kararı). CPO-596: saat-bazlı market_open'a bağlama, gün-bazlı market_day
+    yeterli — absolute 30dk threshold korunur.
+
+    stocks verilmezse (ör. arka plan monitor thread'i) _cache'ten okunur;
+    çağıranda zaten stocks listesi varsa (örn. api_data/api_heatmap) o
+    kullanılır — ekstra _lock alımı önlenir.
     """
     now = time.time()
     with _lock:
-        last_ts    = _cache.get("last_refresh_ts", 0.0) or 0.0
-        updated_at = _cache.get("updated_at")
+        last_ts = _cache.get("last_refresh_ts", 0.0) or 0.0
+        if stocks is None:
+            stocks = list(_cache.get("data") or [])
     macro_ts = _macro_cache.get("ts", 0) if "_macro_cache" in globals() else 0
 
-    stocks_age = int(now - last_ts) if last_ts else None
+    stocks_age, eff_ts = _canonical_stocks_age(stocks, now)
+    if stocks_age is None:
+        stocks_age = int(now - last_ts) if last_ts else None
+        eff_ts     = last_ts if last_ts else None
+    updated_at = (datetime.fromtimestamp(eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+                  if eff_ts else None)
     macro_age  = int(now - macro_ts) if macro_ts else None
     mkt_open   = _market_open()
     mkt_day    = is_trading_day()
@@ -3828,7 +3862,7 @@ def api_data():
         "data_quality": _dq,        # "fresh" | "stale" | "critical" (CPO-551 → CPO-1114: per-ticker orana dayalı)
         "stocks_age_s": _age_s,     # seconds since last GENUINE fresh data (median last_fresh_ts, CPO-1114)
         "refreshing":   _loading,   # True = background refresh aktif
-        "data_freshness": build_data_freshness(),  # SPEC-014 B1
+        "data_freshness": build_data_freshness(stocks),  # SPEC-014 B1 (CPO-1137: kanonik, aynı stocks)
         "xu100_spark":  xu100_spark,  # CPO-690: BIST100 sparkline (son 30 gün)
     }
     # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
@@ -3871,7 +3905,7 @@ def api_heatmap():
         "updated_at": _cache["updated_at"],
         "loading":    len(out) == 0,
         "sectors":    list(SECTORS.keys()),
-        "data_freshness": build_data_freshness(),
+        "data_freshness": build_data_freshness(stocks_raw),  # CPO-1137: kanonik, aynı stocks
     })
 
 
@@ -7751,9 +7785,10 @@ def _compute_health():
     """
     now = time.time()
     with _lock:
-        stocks_count    = len(_cache.get("data") or [])
+        stocks_list     = list(_cache.get("data") or [])
+        stocks_count    = len(stocks_list)
         cache_loading   = _cache.get("loading", True)
-        cache_updated   = _cache.get("updated_at", "—")
+        raw_cache_updated = _cache.get("updated_at", "—")
         last_refresh_ts = _cache.get("last_refresh_ts", 0) or 0
         macro_count     = len(_macro_cache.get("data") or [])
         macro_ts        = _macro_cache.get("ts", 0)
@@ -7761,10 +7796,18 @@ def _compute_health():
         # web process'te (REFRESH_WORKER=web) — sadece _refresh_data_impl() içinde set ediliyor.
         # Disk-cache'ten yüklenen data_quality alanı her iki process'te de mevcut (stale fallback
         # yazımı _save_cache_to_disk ile diske geçiyor), o yüzden buradan saymak leader/web ayrımından bağımsız.
-        bad_ticker_count = sum(1 for s in (_cache.get("data") or []) if s.get("data_quality") == "stale")
+        bad_ticker_count = sum(1 for s in stocks_list if s.get("data_quality") == "stale")
 
-    mkt_open    = _market_open()
-    stocks_age_s = int(now - last_refresh_ts) if last_refresh_ts else None
+    mkt_open = _market_open()
+    # CPO-1137: /api/health'in stocks.updated/age_s'i artık last_refresh_ts (cycle
+    # ÇALIŞMA zamanı) değil, /api/data ve is_stale ile AYNI kanonik p90 yaşı —
+    # üç yüzey artık tek kaynaktan besleniyor, farklı hesap YOK.
+    stocks_age_s, _stocks_eff_ts = _canonical_stocks_age(stocks_list, now)
+    if stocks_age_s is None:
+        stocks_age_s  = int(now - last_refresh_ts) if last_refresh_ts else None
+        _stocks_eff_ts = last_refresh_ts if last_refresh_ts else None
+    cache_updated = (datetime.fromtimestamp(_stocks_eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+                     if _stocks_eff_ts else raw_cache_updated)
     macro_age_s  = int(now - macro_ts) if macro_ts else None
     macro_stale  = macro_age_s is None or macro_age_s > _MACRO_TTL
 
@@ -7853,7 +7896,7 @@ def _compute_health():
         "news_queue":               _news_queue_stats,
         "last_news_queue_ts":       news_last_ts,
         "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
-        "data_freshness":           build_data_freshness(),  # SPEC-014 B1
+        "data_freshness":           build_data_freshness(stocks_list),  # SPEC-014 B1 (CPO-1137: kanonik, aynı stocks)
         "market_data_age_s":         stocks_age_s,                           # CPO-590 madde 4
         "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
         "drift_count":              drift_count,  # M6: ardışık döngü arası drift ticker sayısı
