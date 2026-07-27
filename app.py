@@ -2711,15 +2711,30 @@ def _canonical_stocks_age(stocks, now=None):
     ağırlıklandırmıyordu (17 Tem + 27 Tem vakaları); p90 tek kalıcı-arızalı
     ticker'ın banner'ı sonsuza kilitlemesini de önler.
 
-    Dönüş: (age_s, eff_ts) — stocks boşsa (None, None), çağıran last_refresh_ts
-    fallback'ine düşer.
+    CPO-1147 P0: `_NEVER_FRESH_SENTINEL_S` yalnız PER-TICKER sıralamada "bu
+    ticker en bayat" garantisi için var — hiçbir zaman AGGREGATE age_s/updated_at
+    olarak dışarı sızmamalı. Eskiden p90 endeksi sentinel'e denk geldiğinde
+    (>= %10 ticker'ın last_fresh_ts'i yoksa, ör. bugünkü 183/215 429-kesintisi)
+    `now - (now - 7g) = 7g` sabit ve `now` ile birlikte İLERLEYEN sahte bir
+    "güncel" tarih üretiyordu (604800s çakılı + updated_at her istekte artıyor —
+    27 Tem 18:12 TR canlı kanıt). Artık p90 sentinel bölgesine düşerse (None,
+    None) dönülür; çağıranların zaten sahip olduğu last_refresh_ts fallback'i
+    (gerçek, disk mtime/son cycle çalışma zamanı) devreye girer.
+
+    Dönüş: (age_s, eff_ts) — stocks boşsa VEYA p90 sentinel'e denk gelirse
+    (None, None), çağıran last_refresh_ts fallback'ine düşer.
     """
     now = now if now is not None else time.time()
     if not stocks:
         return None, None
-    ages = sorted(now - (s.get("last_fresh_ts") or (now - _NEVER_FRESH_SENTINEL_S)) for s in stocks)
-    idx = min(len(ages) - 1, int(len(ages) * 0.90))
-    age_s = int(ages[idx])
+    real_ages = sorted(now - s["last_fresh_ts"] for s in stocks if s.get("last_fresh_ts"))
+    n = len(stocks)
+    idx = min(n - 1, int(n * 0.90))
+    if idx >= len(real_ages):
+        # p90'ı taşıyan eleman gerçek last_fresh_ts'i olmayan (sentinel) bir
+        # ticker — bu, aggregate için "bilinmiyor" demektir, "7 gün önce" değil.
+        return None, None
+    age_s = int(real_ages[idx])
     return age_s, now - age_s
 
 

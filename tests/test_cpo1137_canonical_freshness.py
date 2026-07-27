@@ -53,7 +53,14 @@ def test_healthy_case_stays_fresh():
 
 
 def test_cpo1137_2707_scenario_flags_stale():
-    """27 Tem 11:05 TR canlı ölçümü: 14 taze(<10dk) + 18 bayat(~65.5sa) + 183 alan-yok."""
+    """27 Tem 11:05 TR canlı ölçümü: 14 taze(<10dk) + 18 bayat(~65.5sa) + 183 alan-yok.
+
+    CPO-1147 P0 revizyonu (27 Tem 18:12 TR): p90 gerçek last_fresh_ts'i olan
+    yalnız 32 ticker'ı (14+18) geçip alan-yok bölgesine düşüyor — bu artık
+    sabit "~7 gün" sayısı DEĞİL, (None, None) döner (bkz. test_cpo1147_*
+    altta). Bu test artık yalnız "sessizce taze tarafa düşmüyor" invaryantını
+    doğruluyor.
+    """
     now = time.time()
     stocks = (
         [{"last_fresh_ts": now - 300} for _ in range(14)]
@@ -61,9 +68,31 @@ def test_cpo1137_2707_scenario_flags_stale():
         + [{} for _ in range(183)]
     )
     age_s, eff_ts = _canonical_stocks_age(stocks, now)
-    assert age_s > 1800, "medyan/last-write hesabı gibi sessizce taze tarafa düşmemeli"
-    # Sentinel epoch=0 gibi anlamsız (1970) bir tarih üretmemeli — 7 gün sınırında kalmalı.
-    assert 6 * 86400 < age_s <= 7 * 86400 + 5
+    assert age_s is None, "p90 alan-yok bölgesindeyken artık (None, None) döner — sahte sayı üretmemeli"
+    assert eff_ts is None
+
+
+def test_cpo1147_cold_start_majority_missing_returns_unknown_not_synthetic():
+    """27 Tem 18:12 TR CANLI REGRESYON: restart sonrası disk-cache'te 183/215
+    ticker'ın last_fresh_ts'i yok (Yahoo 429 duvarı — sadece 32/215 bu döngüde
+    gerçekten tazelendi). p90 alan-yok bölgesine düşünce eski kod
+    `now - (now - 7g) = 604800` sabit VE `now` ile birlikte İLERLEYEN sahte bir
+    "güncel" tarih üretiyordu — canlıda `updated_at` her istekte artan ama
+    her zaman tam "7 gün önce" gösteren bir değerdi (605800 sabit, tarih
+    ilerliyor). Artık (None, None) dönmeli; çağıran (_data_quality_snapshot,
+    build_data_freshness, _compute_health) zaten sahip olduğu last_refresh_ts
+    fallback'ine düşer — gerçek (disk mtime / son cycle) bir çapa, sentetik
+    bir tarih değil."""
+    now = time.time()
+    stocks = (
+        [{"last_fresh_ts": now - 1848} for _ in range(32)]   # canlı oran: 32/215 gerçekten taze
+        + [{} for _ in range(183)]                            # last_fresh_ts hiç yok
+    )
+    age_s, eff_ts = _canonical_stocks_age(stocks, now)
+    assert age_s is None and eff_ts is None, (
+        "p90 sentinel bölgesine düşerken sahte 'now-7g' üretmemeli — (None, None) ile "
+        "çağıranın gerçek last_refresh_ts fallback'ine düşmesini sağlamalı"
+    )
 
 
 def test_missing_last_fresh_ts_never_reads_as_fresher_than_known_stale():
