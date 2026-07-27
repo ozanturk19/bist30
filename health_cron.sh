@@ -16,6 +16,7 @@ flock -n 200 || exit 0   # başka instance çalışıyorsa sessiz exit
 
 STATE=/root/bist30/health_state.txt
 LOG=/var/log/bist30_health.log
+ALERT=/root/ops/ALERT.md
 FAILS_FILE=/root/bist30/health_fail_count.txt
 STALE_FAILS_FILE=/root/bist30/health_stale_count.txt
 LAST_MAIL_FILE=/root/bist30/health_last_mail.txt
@@ -161,6 +162,17 @@ if [ "$fails" -ge 2 ]; then
     sleep 15
     # Verify recovery
     recovery_code=$(curl -m 30 -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8003/api/health 2>/dev/null)
+
+    # CPO-1128 (4) revize — health_cron restart'ları ALERT.md'de görünmüyordu
+    # (tek üretici smoke-watch.sh idi). smoke-watch.sh formatıyla aynı, kaynağı
+    # ayırt etmek için RESTART-AUTO-HEALTHCRON etiketiyle yazılıyor.
+    _alert_tr_now=$(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M:%S TR')
+    {
+      echo ""
+      echo "### RESTART-AUTO-HEALTHCRON [$_alert_tr_now]"
+      echo "fails=$fails (2 ardışık /api/health fail) -> systemctl restart bist30 | 15s sonrası: $recovery_code"
+    } >> "$ALERT"
+
     if [ "$recovery_code" = "200" ]; then
       echo "$(date) AUTO-RESTART success" >> "$LOG"
       # BUG 2 FIX — Başarılı restart sonrası STATE'i derhal "OK" yap
