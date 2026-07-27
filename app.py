@@ -252,15 +252,18 @@ _SUBPROCESS_SLOW_MS = 3000  # CPO-740 Görev 12c: >3s uyarı (baseline ~956ms ×
 # burada 429 asıl hedeflenen hata modu).
 _YAHOO_CB_THRESHOLD = 3          # ardışık 429 eşiği — devre açılır
 _YAHOO_CB_COOLDOWN_BASE = 45     # saniye — ilk açılışta devre kapalı kalır
-_YAHOO_CB_COOLDOWN_CAP = 300     # saniye — üstel artışın tavanı (5dk)
+_YAHOO_CB_COOLDOWN_CAP = 900     # saniye — üstel artışın tavanı (15dk, CPO-1145 §3: 429 duvarı
+                                 # saatlerce sürüyor, 5dk tavan boşa subprocess spawn ediyordu)
 # CPO-1141 P1: 4 paralel worker aynı _yahoo_cb dict'ini paylaşıyor. Eskiden TEK
 # başarılı çağrı (4 thread'den biri) "opens" seviyesini sıfırlıyordu — kısmi
 # degradasyonda (çoğu 429/timeout, birkaçı başarılı) escalation hiç derinleşemiyordu
 # (canlı kanıt: opens 3→1→2→3→1→2→3→4 döngüsü, CPO-1141). Artık "opens" sadece
 # devrenin gerçekten RESET_WINDOW süresince yeniden açılmadığı durumda sıfırlanır;
 # tek bir başarı yalnız "fails" sayacını temizler (gürültü filtresi olarak kalır).
-_YAHOO_CB_RESET_WINDOW = 600     # saniye — cooldown cap'in 2 katı: bu süre boyunca
+_YAHOO_CB_RESET_WINDOW = 1800    # saniye — cooldown cap'in 2 katı: bu süre boyunca
                                  # devre yeniden açılmadıysa gerçek toparlanma sayılır
+                                 # (CPO-1145 §3: cap 300→900 olunca bu da 600→1800 olmalı,
+                                 # yoksa tepe cooldown'da tek başarı escalation'ı erken sıfırlar)
 _yahoo_cb = {"fails": 0, "open_until": 0.0, "opens": 0, "last_open_ts": 0.0}   # worker-local, kilitsiz (Gemini CB ile aynı desen)
 
 
@@ -279,7 +282,10 @@ def _yahoo_cb_record(ok: bool, stderr_text: str = "", timeout: bool = False):
     kullanılıyor, çünkü ikisi de aynı kök nedenin — Yahoo tarafı degradasyonun — belirtisi)."""
     if ok:
         _yahoo_cb["fails"] = 0
-        if time.time() - _yahoo_cb["last_open_ts"] > _YAHOO_CB_RESET_WINDOW:
+        if _yahoo_cb["opens"] > 0 and time.time() - _yahoo_cb["last_open_ts"] > _YAHOO_CB_RESET_WINDOW:
+            _open_duration = time.time() - _yahoo_cb["last_open_ts"]
+            logger.warning("_yahoo_cb: kapandı, %ds açık kaldı, opens=%d idi",
+                            int(_open_duration), _yahoo_cb["opens"])
             _yahoo_cb["opens"] = 0
         return
     if not timeout and (not stderr_text or "too many requests" not in stderr_text.lower()):
