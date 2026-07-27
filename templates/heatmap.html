@@ -12,16 +12,17 @@
 <meta property="og:url"         content="https://borsapusula.com/heatmap">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260703b">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260727C">
 <style>
-  /* ── SPEC-018 V2: Altın parıltısı — Premium tier glow pulse ─────────── */
+  /* ── CPO-1149/1150 (SENECA): deprecated altın imza → kanonik --bp-premium
+     mor imza (SPEC-018 W2). tokens.css tek kaynak, literal hex burada YOK. */
   @keyframes goldGlow {
-    0%, 100% { filter: drop-shadow(0 0 2px rgba(240,194,64,0.55)); }
-    50%       { filter: drop-shadow(0 0 7px rgba(240,194,64,0.95)) drop-shadow(0 0 14px rgba(240,194,64,0.35)); }
+    0%, 100% { filter: drop-shadow(0 0 2px var(--bp-premium-glow-soft)); }
+    50%       { filter: drop-shadow(0 0 7px var(--bp-premium-glow-strong)) drop-shadow(0 0 14px var(--bp-premium-glow-outer)); }
   }
   @keyframes goldGlowFade {
-    0%, 100% { filter: drop-shadow(0 0 1px rgba(184,154,46,0.4)); }
-    50%       { filter: drop-shadow(0 0 4px rgba(184,154,46,0.7)); }
+    0%, 100% { filter: drop-shadow(0 0 1px var(--bp-premium-glow-fade)); }
+    50%       { filter: drop-shadow(0 0 4px var(--bp-premium-glow-fade2)); }
   }
   .tier-premium      { animation: goldGlow 2.8s ease-in-out infinite; }
   .tier-premium-fade { animation: goldGlowFade 3.5s ease-in-out infinite; }
@@ -32,8 +33,8 @@
   .turkey-first-badge {
     display: inline-flex; align-items: center; gap: 5px;
     font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
-    color: #F0C240; background: rgba(240,194,64,0.1);
-    border: 1px solid rgba(240,194,64,0.35); border-radius: 999px;
+    color: var(--bp-premium); background: var(--bp-premium-bg);
+    border: 1px solid var(--bp-premium-bd); border-radius: 999px;
     padding: 2px 8px; margin-left: 8px; vertical-align: middle;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -184,6 +185,8 @@
 </header>
 
 <main>
+  {% include '_stale_banner.html' %}
+
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px">
     <h1 id="heatmap-title">BIST Sinyal Haritası</h1>
     <div class="mode-toggle">
@@ -206,7 +209,7 @@
 
   <div class="legend" id="legendSinyal">
     <span style="color:var(--bp-text3);font-weight:600">Sinyal Kalitesi:</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:#F0C240"></span>💎 Premium</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--bp-premium)"></span>💎 Premium</span>
     <span class="legend-item"><span class="legend-swatch" style="background:#88A8C0"></span>⭐ Plus</span>
     <span class="legend-item"><span class="legend-swatch" style="background:#C07838"></span>Standart</span>
     <span class="legend-item"><span class="legend-swatch" style="background:#E05550"></span>▼ Zayıf Trend</span>
@@ -230,6 +233,9 @@
 
 {% include '_mobile_nav_partial.html' %}
 
-<script src="/static/js/heatmap.js?v=1" defer></script>
+<script src="/static/stale-banner.js?v=1"></script>
+<script>bpStartDataQualityPolling();</script>
+<script src="/static/js/heatmap.js?v=20260727C" defer></script>
+<script src="/static/learning-mode.js?v=1" defer></script>
 </body>
 </html>

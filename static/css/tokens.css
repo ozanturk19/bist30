@@ -43,6 +43,21 @@
   /* Accent */
   --bp-gold:      #f59e0b;
 
+  /* CPO-1149/1150 (SENECA renk drifti kök nedeni): Hacim Onaylı (RVOL) ve
+     tier/paywall rozetleri farklı eksenler — iki ayrı kanonik renk, elle
+     hex serpiştirmek yerine BURADAN referans verilir. */
+  --bp-volume:    #ffc850;   /* Hacim Onaylı ⭐ (RVOL >= 1.20) — /gucu-yuksek'te zaten canlı */
+  --bp-volume-bg: rgba(255, 200, 80, 0.10);
+  --bp-volume-bd: rgba(255, 200, 80, 0.45);
+  --bp-premium:   #a855f7;   /* tier/paywall (Premium) — SPEC-018 W2 mor imza */
+  --bp-premium-bg: rgba(168, 85, 247, 0.10);
+  --bp-premium-bd: rgba(168, 85, 247, 0.35);
+  --bp-premium-glow-soft: rgba(168, 85, 247, 0.55);
+  --bp-premium-glow-strong: rgba(168, 85, 247, 0.95);
+  --bp-premium-glow-outer: rgba(168, 85, 247, 0.35);
+  --bp-premium-glow-fade: rgba(126, 58, 191, 0.4);
+  --bp-premium-glow-fade2: rgba(126, 58, 191, 0.7);
+
   /* Radius */
   --bp-radius:    6px;
   --bp-radius-sm: 3px;

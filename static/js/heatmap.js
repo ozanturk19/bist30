@@ -44,7 +44,7 @@
     if (sig === 'SAT') return '#E05550';    // Zayıf Trend: softer kırmızı
     if (sig === 'BEKLE' || sig == null) return '#252b36';  // Yatay: koyu slate
     // AL: sunucudan gelen canonical tier alanı (SPEC-018 W2)
-    if (item.tier === 'premium') return '#F0C240';  // Premium: sıcak denge altın
+    if (item.tier === 'premium') return 'var(--bp-premium)';  // CPO-1149/1150: kanonik mor imza (SPEC-018 W2), deprecated altın kaldırıldı
     if (item.tier === 'plus') return '#88A8C0';     // Plus: mavi-gümüş
     if (item.tier === 'standart') return '#C07838'; // Standart: sıcak bronz
     return '#50506a';  // tier yok (nadir — düşük likidite/bilanço demote)

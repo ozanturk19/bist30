@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260703b">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260727C">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -263,6 +263,8 @@
 
 <div class="container">
 
+  {% include '_stale_banner.html' %}
+
   <div class="info-banner">
     ℹ️ <strong>Yaklaşık dönemler gösterilmektedir.</strong> BIST şirketleri çeyrek sonuçlarını genellikle çeyrek bitiminden 45-60 gün içinde KAP'a bildirir.
     Kesin tarihler için her hissenin KAP bağlantısına tıklayın.
@@ -375,7 +377,7 @@ function render(data) {
           <div class="stock-card sig-${sigClass(s.signal)}" data-ticker="${s.ticker}" onclick="window.location.href='/hisse/' + this.dataset.ticker" role="link" tabindex="0">
             <div class="sc-top">
               <a href="/hisse/${s.ticker}" class="sc-ticker-link" onclick="event.stopPropagation()">
-                <span class="sc-ticker">${s.ticker}${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20" style="color:#ffd700;font-size:11px;vertical-align:middle">⭐</span>' : ''}</span>
+                <span class="sc-ticker">${s.ticker}${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20" style="color:var(--bp-volume);font-size:11px;vertical-align:middle">⭐</span>' : ''}</span>
               </a>
               <span class="sig-badge sig-${sigClass(s.signal)}">${sigLabel(s.signal)}</span>
             </div>
@@ -420,6 +422,9 @@ async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=awai
 loadMacroBar();setInterval(loadMacroBar,60000);
 </script>
 <script src="/static/bp-search.js?v=44" defer></script>
+<script src="/static/stale-banner.js?v=1"></script>
+<script>bpStartDataQualityPolling();</script>
+<script src="/static/learning-mode.js?v=1" defer></script>
 {% include '_mobile_nav_partial.html' %}
 </body>
 </html>
