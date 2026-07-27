@@ -28,10 +28,16 @@ def _load_yahoo_cb():
         src = f.read()
 
     const_m = re.search(
-        r"_YAHOO_CB_THRESHOLD = .*?\n_YAHOO_CB_COOLDOWN_BASE = .*?\n_YAHOO_CB_COOLDOWN_CAP = .*?\n_yahoo_cb = .*?\n",
-        src,
+        r"_YAHOO_CB_THRESHOLD = .*?\n_yahoo_cb = \{.*?\}.*?\n",
+        src, re.DOTALL,
     )
     assert const_m, "_yahoo_cb sabitleri/state dict bulunamadı"
+    assert "_YAHOO_CB_RESET_WINDOW" in const_m.group(0), (
+        "_YAHOO_CB_RESET_WINDOW sabiti kaybolmuş — CPO-1141 opens-reset fix'i regresyona uğramış"
+    )
+    assert '"last_open_ts"' in const_m.group(0), (
+        "_yahoo_cb['last_open_ts'] state alanı kaybolmuş — CPO-1141 opens-reset fix'i regresyona uğramış"
+    )
 
     blocked_m = re.search(r"def _yahoo_cb_blocked\(\).*?\n\n\n", src, re.DOTALL)
     assert blocked_m, "_yahoo_cb_blocked() bulunamadı"
@@ -52,6 +58,7 @@ def _fresh_cb_ns():
     ns["_yahoo_cb"]["fails"] = 0
     ns["_yahoo_cb"]["open_until"] = 0.0
     ns["_yahoo_cb"]["opens"] = 0
+    ns["_yahoo_cb"]["last_open_ts"] = 0.0
     return ns
 
 
@@ -98,3 +105,34 @@ def test_success_resets_after_timeouts():
     record(False, timeout=True)
     record(False, timeout=True)
     assert not blocked(), "reset sonrası yeniden 2 hata eşiğin altında kalmalı"
+
+
+def test_lone_success_does_not_collapse_escalation():
+    """CPO-1141 canlı kanıt: 4 paralel worker'dan TEK başarı, devam eden degradasyon
+    sırasında "opens" escalation seviyesini sıfırlamamalı (eski davranış: opens
+    3->1->2->3 döngüsüne giriyordu, backoff hiç derinleşmiyordu)."""
+    ns = _fresh_cb_ns()
+    record = ns["_yahoo_cb_record"]
+    for _ in range(3):
+        record(False, timeout=True)
+    assert ns["_yahoo_cb"]["opens"] == 1
+
+    record(True)  # 4 worker'dan biri şans eseri başarılı oldu
+    assert ns["_yahoo_cb"]["opens"] == 1, "izole başarı escalation seviyesini silmemeli"
+
+    for _ in range(3):
+        record(False, timeout=True)
+    assert ns["_yahoo_cb"]["opens"] == 2, "escalation 1'den devam etmeli, 1'den değil sıfırdan"
+
+
+def test_opens_resets_after_true_recovery_window():
+    """RESET_WINDOW süresi (gerçek toparlanma) geçtikten sonra başarı escalation'ı sıfırlamalı."""
+    ns = _fresh_cb_ns()
+    record = ns["_yahoo_cb_record"]
+    for _ in range(3):
+        record(False, timeout=True)
+    assert ns["_yahoo_cb"]["opens"] == 1
+
+    ns["_yahoo_cb"]["last_open_ts"] = time.time() - 700  # RESET_WINDOW (600s) aşıldı
+    record(True)
+    assert ns["_yahoo_cb"]["opens"] == 0, "uzun sessizlik sonrası başarı gerçek toparlanma sayılmalı"

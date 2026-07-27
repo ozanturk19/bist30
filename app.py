@@ -253,7 +253,15 @@ _SUBPROCESS_SLOW_MS = 3000  # CPO-740 Görev 12c: >3s uyarı (baseline ~956ms ×
 _YAHOO_CB_THRESHOLD = 3          # ardışık 429 eşiği — devre açılır
 _YAHOO_CB_COOLDOWN_BASE = 45     # saniye — ilk açılışta devre kapalı kalır
 _YAHOO_CB_COOLDOWN_CAP = 300     # saniye — üstel artışın tavanı (5dk)
-_yahoo_cb = {"fails": 0, "open_until": 0.0, "opens": 0}   # worker-local, kilitsiz (Gemini CB ile aynı desen)
+# CPO-1141 P1: 4 paralel worker aynı _yahoo_cb dict'ini paylaşıyor. Eskiden TEK
+# başarılı çağrı (4 thread'den biri) "opens" seviyesini sıfırlıyordu — kısmi
+# degradasyonda (çoğu 429/timeout, birkaçı başarılı) escalation hiç derinleşemiyordu
+# (canlı kanıt: opens 3→1→2→3→1→2→3→4 döngüsü, CPO-1141). Artık "opens" sadece
+# devrenin gerçekten RESET_WINDOW süresince yeniden açılmadığı durumda sıfırlanır;
+# tek bir başarı yalnız "fails" sayacını temizler (gürültü filtresi olarak kalır).
+_YAHOO_CB_RESET_WINDOW = 600     # saniye — cooldown cap'in 2 katı: bu süre boyunca
+                                 # devre yeniden açılmadıysa gerçek toparlanma sayılır
+_yahoo_cb = {"fails": 0, "open_until": 0.0, "opens": 0, "last_open_ts": 0.0}   # worker-local, kilitsiz (Gemini CB ile aynı desen)
 
 
 def _yahoo_cb_blocked() -> bool:
@@ -262,15 +270,17 @@ def _yahoo_cb_blocked() -> bool:
 
 
 def _yahoo_cb_record(ok: bool, stderr_text: str = "", timeout: bool = False):
-    """Her subprocess çağrısından sonra çağrılır. ok=True → sayaç+devre sıfırlanır
-    (Yahoo en az bir kez normal cevap verdi = toparlanma sinyali). ok=False sayılır
-    eğer stderr'de 'too many requests' varsa (429) VEYA timeout=True ise (CPO-1140 P1:
-    subprocess.TimeoutExpired dalı önceden bu fonksiyonu hiç çağırmıyordu — yavaşlık
-    kaynaklı timeout'lar CB'ye görünmez kalıyordu. 429 ile ortak sayaç/eşik kullanılıyor,
-    çünkü ikisi de aynı kök nedenin — Yahoo tarafı degradasyonun — belirtisi)."""
+    """Her subprocess çağrısından sonra çağrılır. ok=True → "fails" her zaman sıfırlanır;
+    "opens" (escalation seviyesi) yalnız gerçek toparlanmada (bkz. _YAHOO_CB_RESET_WINDOW,
+    CPO-1141) sıfırlanır — 4 paralel worker'dan tek başarı escalation'ı silmesin diye.
+    ok=False sayılır eğer stderr'de 'too many requests' varsa (429) VEYA timeout=True ise
+    (CPO-1140 P1: subprocess.TimeoutExpired dalı önceden bu fonksiyonu hiç çağırmıyordu —
+    yavaşlık kaynaklı timeout'lar CB'ye görünmez kalıyordu. 429 ile ortak sayaç/eşik
+    kullanılıyor, çünkü ikisi de aynı kök nedenin — Yahoo tarafı degradasyonun — belirtisi)."""
     if ok:
         _yahoo_cb["fails"] = 0
-        _yahoo_cb["opens"] = 0
+        if time.time() - _yahoo_cb["last_open_ts"] > _YAHOO_CB_RESET_WINDOW:
+            _yahoo_cb["opens"] = 0
         return
     if not timeout and (not stderr_text or "too many requests" not in stderr_text.lower()):
         return
@@ -280,6 +290,7 @@ def _yahoo_cb_record(ok: bool, stderr_text: str = "", timeout: bool = False):
         _yahoo_cb["open_until"] = time.time() + cooldown
         _yahoo_cb["opens"] += 1
         _yahoo_cb["fails"] = 0
+        _yahoo_cb["last_open_ts"] = time.time()
         reason = "timeout" if timeout else "429"
         logger.warning("_yahoo_cb: circuit breaker AÇILDI — %d ardışık hata (son: %s), %ds boyunca Yahoo "
                         "subprocess atlanacak (opens=%d)", _YAHOO_CB_THRESHOLD, reason, cooldown, _yahoo_cb["opens"])
