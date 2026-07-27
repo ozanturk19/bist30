@@ -36,7 +36,18 @@ def _load_canonical_stocks_age():
     return ns["_canonical_stocks_age"]
 
 
+def _load_resolve_canonical_age_fallback():
+    with open(_APP_PY, encoding="utf-8") as f:
+        src = f.read()
+    m = re.search(r"def _resolve_canonical_age_fallback\(.*?\n\n\n", src, re.DOTALL)
+    assert m, "_resolve_canonical_age_fallback() app.py'de bulunamadı — fonksiyon adı/imzası değişmiş olabilir"
+    ns = {}
+    exec(m.group(0), ns)
+    return ns["_resolve_canonical_age_fallback"]
+
+
 _canonical_stocks_age = _load_canonical_stocks_age()
+_resolve_canonical_age_fallback = _load_resolve_canonical_age_fallback()
 
 
 def test_empty_stocks_returns_none():
@@ -110,3 +121,58 @@ def test_single_permanently_broken_ticker_does_not_lock_banner_forever():
     stocks = [{"last_fresh_ts": now - 60} for _ in range(214)] + [{}]
     age_s, _ = _canonical_stocks_age(stocks, now)
     assert age_s < 1800
+
+
+# ── CPO-1148 §3 — _resolve_canonical_age_fallback ────────────────────────────
+# (None, None) döndüren _canonical_stocks_age'in İKİ farklı nedeni var: gerçek
+# cold-start (stocks boş) vs. çoğunluk-sinyalsiz (stocks dolu ama p90 sentinel
+# bölgesinde). Önceki kod ikisine de last_refresh_ts (cycle ÇALIŞMA zamanı)
+# fallback'i uyguluyordu — bu, canlıda (27 Tem 19:10 TR) 183/215 ticker'ın
+# hiç tazelik sinyali yokken aggregate'in "17:52:27 / 69dk önce" (iyimser,
+# yanıltıcı) göstermesine yol açtı. Doğru davranış: yalnız gerçek cold-start
+# fallback'e düşsün, çoğunluk-sinyalsiz durum gerçek "bilinmiyor" (None, None)
+# kalsın.
+
+def test_resolve_fallback_known_age_passthrough():
+    """stocks_age zaten biliniyorsa dokunulmaz, unknown_with_signal=False."""
+    result = _resolve_canonical_age_fallback(120, 1000.0, [{"last_fresh_ts": 1}], 500.0, 1200.0)
+    assert result == (120, 1000.0, False)
+
+
+def test_resolve_fallback_true_cold_start_uses_last_refresh_ts():
+    """stocks BOŞ (gerçek cold-start) → last_refresh_ts fallback'i meşru, kullanılır."""
+    now = time.time()
+    fallback_ts = now - 300
+    age, eff, unknown = _resolve_canonical_age_fallback(None, None, [], fallback_ts, now)
+    assert age == 300
+    assert eff == fallback_ts
+    assert unknown is False
+
+
+def test_resolve_fallback_true_cold_start_no_fallback_ts_stays_none():
+    """stocks BOŞ ve fallback_ts de yok (hiç yazılmamış cache) → None, None."""
+    now = time.time()
+    age, eff, unknown = _resolve_canonical_age_fallback(None, None, [], 0.0, now)
+    assert (age, eff, unknown) == (None, None, False)
+
+
+def test_resolve_fallback_majority_sentinel_does_not_use_optimistic_last_refresh_ts():
+    """CPO-1148 §3 CANLI REGRESYON (27 Tem 19:10 TR): 215 ticker, yalnız 32'sinde
+    gerçek last_fresh_ts var (183/215 alan yok) → _canonical_stocks_age zaten
+    (None, None) döner (p90 sentinel bölgesinde). Bu durumda last_refresh_ts
+    (4157s önce çalışan cycle) İYİMSER bir sayı — kullanılmamalı. Doğru
+    davranış: gerçek (None, None) + unknown_with_signal=True, downstream'in
+    (is_stale) bunu 'taze' sanmaması için işaretli."""
+    now = time.time()
+    stocks = (
+        [{"last_fresh_ts": now - 4253} for _ in range(32)]  # canlı kanıt: 32/215 gerçekten taze
+        + [{} for _ in range(183)]
+    )
+    stocks_age, eff_ts = _canonical_stocks_age(stocks, now)
+    assert (stocks_age, eff_ts) == (None, None)  # ön koşul: sentinel bölgesi
+    optimistic_last_refresh_ts = now - 4157  # canlı kanıt: cycle 4157s önce çalıştı
+    age, eff, unknown = _resolve_canonical_age_fallback(
+        stocks_age, eff_ts, stocks, optimistic_last_refresh_ts, now)
+    assert age is None, "183/215 sinyalsizken last_refresh_ts'in iyimser sayısına düşmemeli"
+    assert eff is None
+    assert unknown is True, "downstream (is_stale) bu durumu 'taze' sanmasın diye işaretlenmeli"

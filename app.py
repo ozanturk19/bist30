@@ -2718,11 +2718,22 @@ def _canonical_stocks_age(stocks, now=None):
     `now - (now - 7g) = 7g` sabit ve `now` ile birlikte İLERLEYEN sahte bir
     "güncel" tarih üretiyordu (604800s çakılı + updated_at her istekte artıyor —
     27 Tem 18:12 TR canlı kanıt). Artık p90 sentinel bölgesine düşerse (None,
-    None) dönülür; çağıranların zaten sahip olduğu last_refresh_ts fallback'i
-    (gerçek, disk mtime/son cycle çalışma zamanı) devreye girer.
+    None) dönülür.
+
+    CPO-1148 §3: bu (None, None) dönüşünün İKİ farklı nedeni var ve çağıranlar
+    ikisine AYNI şekilde davranmamalı:
+      1. stocks boş (gerçek cold-start, deploy sonrası ilk cycle) — per-ticker
+         sinyal hiç yok, çağıranın last_refresh_ts (cache son yazım zamanı)
+         fallback'i kullanması meşru.
+      2. stocks DOLU ama p90 sentinel bölgesine denk geldi (ör. 183/215
+         last_fresh_ts'siz) — bu cold-start DEĞİL, "çoğunluğun tazelik sinyali
+         yok" demek. last_refresh_ts'e (cycle ÇALIŞMA zamanı, per-ticker
+         tazelikle ilgisiz) düşmek iyimser/yanıltıcı bir sayı üretir; çağıran
+         `stocks` boş mu diye ayrıca kontrol edip, doluysa gerçek "bilinmiyor"
+         (None/None) döndürmeli, last_refresh_ts'e düşmemeli.
 
     Dönüş: (age_s, eff_ts) — stocks boşsa VEYA p90 sentinel'e denk gelirse
-    (None, None), çağıran last_refresh_ts fallback'ine düşer.
+    (None, None); hangi nedenle olduğunu ayırt etmek çağıranın sorumluluğu.
     """
     now = now if now is not None else time.time()
     if not stocks:
@@ -2738,6 +2749,33 @@ def _canonical_stocks_age(stocks, now=None):
     return age_s, now - age_s
 
 
+def _resolve_canonical_age_fallback(stocks_age, eff_ts, stocks, fallback_ts, now):
+    """CPO-1148 §3: _canonical_stocks_age (None, None) döndüğünde ÜÇ çağıranın
+    (health/data/freshness) AYNI kararı vermesini sağlayan tek fonksiyon —
+    önceden her çağıran kendi kopyasında aynı `if X is None: last_refresh_ts'e
+    düş` mantığını tekrarlıyordu ve bu, iki farklı nedeni (cold-start vs.
+    çoğunluk-sinyalsiz) ayırt edemiyordu.
+
+    - stocks_age zaten biliniyorsa (None değil) dokunma.
+    - stocks BOŞSA (gerçek cold-start, deploy sonrası ilk cycle): fallback_ts
+      (last_refresh_ts / cache son yazım zamanı) meşru bir çapa, kullan.
+    - stocks DOLU ama p90 sentinel bölgesindeyse (ör. 183/215 last_fresh_ts'siz):
+      fallback_ts'e (cycle ÇALIŞMA zamanı, per-ticker tazelikle ilgisiz) düşmek
+      iyimser/yanıltıcı bir sayı üretir — gerçek "bilinmiyor" (None, None) dön.
+
+    Dönüş: (age_s, eff_ts, unknown_with_signal). `unknown_with_signal=True`
+    yalnız üçüncü durumda (stocks dolu, yaş gerçekten bilinmiyor) — downstream
+    kararların (ör. is_stale) bunu "taze" ile karıştırmaması için ayrıca
+    işaretlenir."""
+    if stocks_age is not None:
+        return stocks_age, eff_ts, False
+    if not stocks:
+        age = int(now - fallback_ts) if fallback_ts else None
+        eff = fallback_ts if fallback_ts else None
+        return age, eff, False
+    return None, None, True
+
+
 def _data_quality_snapshot(stocks):
     """CPO-1119 §1 / CPO-1121: /api/data ve hafif /api/data-quality'nin PAYLAŞTIĞI
     tek hesap — data_quality, stocks_age_s, updated_at. İki yüzey de aynı kanonik
@@ -2751,13 +2789,10 @@ def _data_quality_snapshot(stocks):
     # CPO-1114 K1/DEV-1469/CPO-1137: updated_at "refresh_data() son ne zaman
     # ÇALIŞTI" değil, per-ticker last_fresh_ts'in kanonik (p90) yaşı — tipik
     # gösterilen verinin gerçekte ne zaman taze geldiğini yansıtır.
-    _age_s, _eff_ts = _canonical_stocks_age(stocks, _now)
-    if _eff_ts is not None:
-        _resp_updated_at = datetime.fromtimestamp(_eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
-    else:
-        # Geriye dönük uyum: stocks boş (deploy sonrası ilk cycle) — eski davranışa düş.
-        _age_s           = int(_now - _lr_ts) if _lr_ts else None
-        _resp_updated_at = _cache["updated_at"]
+    _age_s, _eff_ts, _ = _resolve_canonical_age_fallback(
+        *_canonical_stocks_age(stocks, _now), stocks, _lr_ts, _now)
+    _resp_updated_at = (datetime.fromtimestamp(_eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+                         if _eff_ts is not None else None)
     return {"data_quality": _dq, "stocks_age_s": _age_s, "updated_at": _resp_updated_at}
 
 
@@ -2783,16 +2818,19 @@ def build_data_freshness(stocks=None):
             stocks = list(_cache.get("data") or [])
     macro_ts = _macro_cache.get("ts", 0) if "_macro_cache" in globals() else 0
 
-    stocks_age, eff_ts = _canonical_stocks_age(stocks, now)
-    if stocks_age is None:
-        stocks_age = int(now - last_ts) if last_ts else None
-        eff_ts     = last_ts if last_ts else None
+    stocks_age, eff_ts, _age_unknown_with_signal = _resolve_canonical_age_fallback(
+        *_canonical_stocks_age(stocks, now), stocks, last_ts, now)
     updated_at = (datetime.fromtimestamp(eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
                   if eff_ts else None)
     macro_age  = int(now - macro_ts) if macro_ts else None
     mkt_open   = _market_open()
     mkt_day    = is_trading_day()
-    is_stale   = bool(stocks_age is not None and stocks_age > 1800 and mkt_day)
+    # CPO-1148 §3+§5: yaş "bilinmiyor" olması (stocks var ama sinyal yok)
+    # "taze" değil, tam tersi — sessizce is_stale=False'a düşürme, aksi halde
+    # tam da CPO'nun bildirdiği 183/215 sinyalsiz senaryo "stale değil" görünür.
+    is_stale = bool(mkt_day and (
+        (stocks_age is not None and stocks_age > 1800) or _age_unknown_with_signal
+    ))
 
     return {
         "stocks_updated_at":  updated_at,
@@ -7844,10 +7882,12 @@ def _compute_health():
     # CPO-1137: /api/health'in stocks.updated/age_s'i artık last_refresh_ts (cycle
     # ÇALIŞMA zamanı) değil, /api/data ve is_stale ile AYNI kanonik p90 yaşı —
     # üç yüzey artık tek kaynaktan besleniyor, farklı hesap YOK.
-    stocks_age_s, _stocks_eff_ts = _canonical_stocks_age(stocks_list, now)
-    if stocks_age_s is None:
-        stocks_age_s  = int(now - last_refresh_ts) if last_refresh_ts else None
-        _stocks_eff_ts = last_refresh_ts if last_refresh_ts else None
+    stocks_age_s, _stocks_eff_ts, _ = _resolve_canonical_age_fallback(
+        *_canonical_stocks_age(stocks_list, now), stocks_list, last_refresh_ts, now)
+    # CPO-1148 §3: stocks_list VAR ama p90 sentinel bölgesindeyse (stocks_age_s
+    # hâlâ None) last_refresh_ts'e (cycle ÇALIŞMA zamanı) düşmüyoruz — gerçek
+    # "bilinmiyor" components.stocks'a da yansımalı (aşağıdaki eşik kontrolü
+    # stocks_age_s is None'ı zaten "critical" sayıyor).
     cache_updated = (datetime.fromtimestamp(_stocks_eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
                      if _stocks_eff_ts else raw_cache_updated)
     macro_age_s  = int(now - macro_ts) if macro_ts else None
