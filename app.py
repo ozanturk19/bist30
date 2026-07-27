@@ -3458,17 +3458,35 @@ def _save_live_prices_to_disk():
         logger.warning("_save_live_prices_to_disk hatası: %s", e)
 
 
+_live_prices_disk_mtime = None  # per-worker; CPO-1135 B1 şart 3 — mtime değişmediyse parse atla
+
+
 def _load_live_prices_from_disk():
-    """Web worker: _live_prices'ı diskten yükler (yfinance yapmadan)."""
+    """Web worker: _live_prices'ı diskten yükler (yfinance yapmadan).
+
+    CPO-1135 B1: leader (REFRESH_WORKER=1) diske yazdığı fiyatları, web worker'lar
+    burada okuyup kendi process-local _sse_clients'ına push eder — cross-process
+    SSE yayını disk-reload'a "iğnelenerek" eklenir, yeni thread/loop yok.
+    Şart 1: diff boşsa push yok. Şart 3: mtime değişmediyse JSON parse atla.
+    """
+    global _live_prices_disk_mtime
     try:
         if not os.path.exists(_LIVE_PRICES_DISK_PATH):
             return
+        mtime = os.path.getmtime(_LIVE_PRICES_DISK_PATH)
+        if _live_prices_disk_mtime is not None and mtime == _live_prices_disk_mtime:
+            return
+        _live_prices_disk_mtime = mtime
         with open(_LIVE_PRICES_DISK_PATH, "r", encoding="utf-8") as f:
             d = json.load(f)
         if isinstance(d, dict) and d:
             with _lock:
+                diff = {k: v for k, v in d.items() if _live_prices.get(k) != v}
                 _live_prices.update(d)
             logger.debug("_load_live_prices_from_disk: %d fiyat yüklendi", len(d))
+            if diff:
+                now_str = datetime.now(_TZ_TR).strftime("%H:%M:%S")
+                _push_sse({"type": "prices", "data": diff, "ts": now_str})
     except Exception as e:
         logger.warning("_load_live_prices_from_disk hatası: %s", e)
 
@@ -4466,12 +4484,19 @@ def api_stream():
     )
 
     def generate():
+        # CPO-1135 A: ~15s'de bir keepalive comment — ölü soket bu sayede
+        # finally bloğunda _sse_clients'tan temizlenir (CF/tarayıcı idle riski kapanır).
+        last_activity = time.monotonic()
         try:
             if initial_msg:
                 yield initial_msg
             while True:
                 while client_queue:
                     yield client_queue.popleft()
+                    last_activity = time.monotonic()
+                if time.monotonic() - last_activity >= 15:
+                    yield ": keepalive\n\n"
+                    last_activity = time.monotonic()
                 time.sleep(0.5)
         finally:
             with _sse_lock:
@@ -7833,6 +7858,7 @@ def _compute_health():
         "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
         "drift_count":              drift_count,  # M6: ardışık döngü arası drift ticker sayısı
         "bad_ticker_count":         bad_ticker_count,  # M5: stale fallback ticker sayısı
+        "sse_clients":              len(_sse_clients),  # CPO-1135 diagnostik — process-local, sızıntı ölçümü için
         "ts": now,
     }
     # Paket 4 — extend with 6 health extra fields (uptime_sec, cache_age_min, etc.)
