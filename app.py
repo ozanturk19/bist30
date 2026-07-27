@@ -5322,11 +5322,27 @@ _gemini_cb = {"fails": 0, "open_until": 0.0}   # circuit breaker durumu (worker-
 # Yeni: paylaşımlı dosya üzerinden atomic slot tahsisi → global ~9.2 RPM (10 RPM altı).
 _GEMINI_RATE_INTERVAL = float(os.environ.get("GEMINI_RATE_INTERVAL", "6.5"))
 _GEMINI_RATE_PATH = os.environ.get("GEMINI_RATE_PATH", "/tmp/bp_gemini_rate.lock")
-_gemini_rate_fh = None  # worker-local file handle, paylaşımlı dosya global slot tutar
+# CPO-1152 P0 kök nedeni (VPS'te gevent+monkey-patch ile canlı doğrulandı,
+# bkz. DEV yanıtı): bu blocking fonksiyon gevent hub threadpool'unda
+# (maxsize=10) GERÇEK OS thread'lerinde çalışır. flock() open file description'a
+# bağlıdır — AYNI fd'yi paylaşan farklı thread'ler arasında MUTUAL EXCLUSION
+# SAĞLAMAZ (yalnız farklı process'ler/farklı open()'lar arasında sağlar). Sonuç:
+# threadpool'daki 2+ thread aynı anda seek+truncate+write'a girip yapışık float
+# üretti (6 saat süren canlı kanıt). Stres testiyle repro edildi (aynı gevent
+# ortamında, kilitsiz 1200 çağrıda anında corruption; threading.Lock eklenince
+# 0/1500). Fix üç katman: (1) threading.Lock — gerçek thread'ler arası intra-
+# process exclusion (flock'un SAĞLAMADIĞI şey), (2) flock — cross-process
+# (worker'lar arası) exclusion (zaten vardı, korunuyor), (3) "r+" + self-heal
+# guard — O_APPEND belirsizliği ve bozuk state'in kalıcılaşması ihtimaline karşı.
+_gemini_rate_lock = threading.Lock()
+if not os.path.exists(_GEMINI_RATE_PATH):
+    open(_GEMINI_RATE_PATH, "a").close()
+_gemini_rate_fh = open(_GEMINI_RATE_PATH, "r+")
 
 
 def _gemini_rate_acquire_blocking() -> float:
-    """flock-korumalı kritik bölüm — _gemini_rate_acquire() içinden çağrılır.
+    """threading.Lock (intra-process) + flock (cross-process) korumalı kritik
+    bölüm — _gemini_rate_acquire() içinden çağrılır.
 
     P3 backlog notundaki varsayım (lock altında tek float write, fsync yok, offload'a
     gerek yok) DEV-1046/CPO-1017 forensic'inde geçersiz kılındı: `flock(LOCK_EX)`
@@ -5336,27 +5352,30 @@ def _gemini_rate_acquire_blocking() -> float:
     worker'ın TÜM OS thread'i (o worker'daki her greenlet/istek dahil) süresiz
     bloke olur — `_tp_read_json`'ın çözdüğü sınıfın birebir aynısı.
     """
-    global _gemini_rate_fh
-    if _gemini_rate_fh is None:
-        _gemini_rate_fh = open(_GEMINI_RATE_PATH, "a+")
+    with _gemini_rate_lock:
+        _fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_EX)
+        try:
+            _gemini_rate_fh.seek(0)
+            raw = _gemini_rate_fh.read().strip()
+            try:
+                last_slot = float(raw) if raw else 0.0
+            except ValueError:
+                # CPO-1152 self-heal guard: bozuk state bir daha 6 saat değil, tek
+                # çağrıda düzelsin — normal akışa 0.0 ile devam et.
+                logger.warning("_gemini_rate_acquire_blocking: bozuk state (%r) — 0.0'a sıfırlanıyor", raw)
+                last_slot = 0.0
 
-    _fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_EX)
-    try:
-        _gemini_rate_fh.seek(0)
-        raw = _gemini_rate_fh.read().strip()
-        last_slot = float(raw) if raw else 0.0
+            now = time.time()
+            my_slot = max(now, last_slot) + _GEMINI_RATE_INTERVAL
 
-        now = time.time()
-        my_slot = max(now, last_slot) + _GEMINI_RATE_INTERVAL
+            _gemini_rate_fh.seek(0)
+            _gemini_rate_fh.truncate()
+            _gemini_rate_fh.write(f"{my_slot:.6f}")
+            _gemini_rate_fh.flush()
 
-        _gemini_rate_fh.seek(0)
-        _gemini_rate_fh.truncate()
-        _gemini_rate_fh.write(f"{my_slot:.6f}")
-        _gemini_rate_fh.flush()
-
-        return my_slot - _GEMINI_RATE_INTERVAL - now  # ≤0 → beklemesiz
-    finally:
-        _fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_UN)
+            return my_slot - _GEMINI_RATE_INTERVAL - now  # ≤0 → beklemesiz
+        finally:
+            _fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_UN)
 
 
 def _gemini_rate_acquire() -> float:

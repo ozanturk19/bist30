@@ -21,6 +21,7 @@ fonksiyonunu izole exec ile davranış olarak doğrular — sunucu/3.10+ import 
 """
 import os
 import re
+import threading
 
 _APP_PY = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
 
@@ -92,21 +93,25 @@ def _load_blocking_fn_isolated():
     ile davranışını doğrular (fcntl gerçek, /tmp'de geçici dosya kullanılır)."""
     import fcntl as real_fcntl
     import time as real_time
+    import threading as real_threading
 
     src = _read_app()
     body = _extract_function_body(src, "_gemini_rate_acquire_blocking")
     assert body, "_gemini_rate_acquire_blocking() bulunamadı"
-    ns = {"_fcntl": real_fcntl, "time": real_time}
+    ns = {"_fcntl": real_fcntl, "time": real_time, "threading": real_threading}
     exec(body, ns)
     return ns["_gemini_rate_acquire_blocking"], ns
 
 
 def test_blocking_helper_behaves_identically_to_pre_fix_version(tmp_path):
-    """Fix öncesi/sonrası math birebir aynı olmalı — sadece nerede çalıştığı değişti."""
+    """Slot-reservation matematiği aynı kalmalı — CPO-1152 sonrası fd artık
+    lazy değil, modül seviyesinde eager açılıyor (TOCTOU fix); harness bunu
+    taklit eder — çağrı öncesi gerçek bir "r+" handle + threading.Lock enjekte eder."""
     fn, ns = _load_blocking_fn_isolated()
     lock_path = str(tmp_path / "gemini_rate_test.lock")
-    ns["_gemini_rate_fh"] = None
-    ns["_GEMINI_RATE_PATH"] = lock_path
+    open(lock_path, "a").close()
+    ns["_gemini_rate_fh"] = open(lock_path, "r+")
+    ns["_gemini_rate_lock"] = threading.Lock()
     ns["_GEMINI_RATE_INTERVAL"] = 6.5
 
     wait1 = fn()
