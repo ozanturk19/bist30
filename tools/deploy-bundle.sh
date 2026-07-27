@@ -12,6 +12,7 @@ ROLLBACK_SHA="${ROLLBACK_SHA:-45f1a2a}"
 SMOKE_SCRIPT="${SMOKE_SCRIPT:-/root/bist30/tools/post-deploy-smoke.sh}"
 SERVICE="${SERVICE:-bist30}"
 REPO_DIR="${REPO_DIR:-/root/bist30}"
+OPS_DIR="${OPS_DIR:-/root/ops}"
 LOG="${LOG:-/var/log/bist30-deploy.log}"
 HEALTH_URL="${HEALTH_URL:-https://borsapusula.com/api/health}"
 DRY_RUN=0
@@ -59,8 +60,37 @@ log "=== DEPLOY START${_DL} ==="
 log "Target: $TARGET_SHA | Rollback: $ROLLBACK_SHA | Service: $SERVICE"
 [ "$DRY_RUN" = "1" ] && log "DRY-RUN mode: git pull / systemctl calls are SKIPPED"
 
+# ─── 0. Pre-flight: mailbox gate (CPO-1148 §2) ──────────────────────────────
+# Mekanik gate — davranışsal taahhüt (mailbox'ı çekmeyi "unutmama" sözü) iki
+# kez tutmadı (bkz. check_mailbox_before_forensic_action / reverify_prod_state
+# geçmişi). git log diff kontrolü koda gömülü: DEV'in son mailbox yanıtından
+# (mailbox/dev-to-cpo.md'ye son commit) SONRA cpo-to-dev.md'ye giden bir
+# commit varsa, işlenmemiş yeni bir CPO mesajı var demektir — deploy durur.
+log "PRE-FLIGHT 0/5: Mailbox gate..."
+if [ -d "$OPS_DIR/.git" ]; then
+  if ! (cd "$OPS_DIR" && git pull --ff-only origin main --quiet); then
+    log "  ERROR: $OPS_DIR git pull --ff-only başarısız — aborting (ops repo'yu elle kontrol et)"
+    exit 1
+  fi
+  LAST_DEV_REPLY_COMMIT=$(cd "$OPS_DIR" && git log -1 --format=%H -- mailbox/dev-to-cpo.md 2>/dev/null || echo "")
+  if [ -n "$LAST_DEV_REPLY_COMMIT" ]; then
+    NEW_CPO_COMMITS=$(cd "$OPS_DIR" && git log --oneline "${LAST_DEV_REPLY_COMMIT}..HEAD" -- mailbox/cpo-to-dev.md 2>/dev/null || echo "")
+  else
+    NEW_CPO_COMMITS=""
+  fi
+  if [ -n "$NEW_CPO_COMMITS" ]; then
+    log "  ERROR: son DEV yanıtından SONRA yeni CPO mesajı var — deploy DURDURULDU:"
+    log "$NEW_CPO_COMMITS"
+    log "  Önce mailbox/cpo-to-dev.md'yi oku, gerekiyorsa deploy hedefini/planını güncelle."
+    exit 1
+  fi
+  log "  OK: son DEV yanıtından sonra yeni CPO mesajı yok"
+else
+  log "  WARN: $OPS_DIR git repo değil — mailbox gate atlandı (kontrol edilemedi)"
+fi
+
 # ─── 1. Pre-flight: service running ─────────────────────────────────────────
-log "PRE-FLIGHT 1/4: Service status..."
+log "PRE-FLIGHT 1/5: Service status..."
 if systemctl is-active --quiet "$SERVICE" 2>/dev/null; then
   log "  OK: $SERVICE is active"
 else
@@ -73,7 +103,7 @@ else
 fi
 
 # ─── 2. Pre-flight: disk space (need >500MB) ────────────────────────────────
-log "PRE-FLIGHT 2/4: Disk space..."
+log "PRE-FLIGHT 2/5: Disk space..."
 AVAIL_KB=$(df -k "$REPO_DIR" 2>/dev/null | awk 'NR==2{print $4}' || echo "0")
 AVAIL_MB=$((AVAIL_KB / 1024))
 if [ "$AVAIL_MB" -gt 500 ]; then
@@ -84,7 +114,7 @@ else
 fi
 
 # ─── 3. Pre-flight: repo on main branch ─────────────────────────────────────
-log "PRE-FLIGHT 3/4: Branch check..."
+log "PRE-FLIGHT 3/5: Branch check..."
 BRANCH=$(cd "$REPO_DIR" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 if [ "$BRANCH" = "main" ]; then
   log "  OK: on branch main"
@@ -94,7 +124,7 @@ else
 fi
 
 # ─── 4. Pre-flight: idempotency check ───────────────────────────────────────
-log "PRE-FLIGHT 4/4: Idempotency check..."
+log "PRE-FLIGHT 4/5: Idempotency check..."
 CURRENT_SHA=$(cd "$REPO_DIR" && git rev-parse HEAD 2>/dev/null || echo "unknown")
 log "  Current: $CURRENT_SHA | Target: $TARGET_SHA"
 if [ "$CURRENT_SHA" = "$TARGET_SHA" ]; then
