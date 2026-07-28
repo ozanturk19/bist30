@@ -22,12 +22,24 @@
         }
       }
     },
-    "updated_at":   {"type": "string"},
+    "updated_at":   {"type": ["string", "null"]},
     "loading":      {"type": "boolean"},
     "sectors":      {"type": "array", "items": {"type": "string"}},
     "xu100_spark":  {"type": "array", "items": {"type": "number"}},
     "data_quality": {"type": "string", "enum": ["fresh", "stale", "critical"]},
     "stocks_age_s": {"type": ["integer", "null"]},
-    "refreshing":   {"type": "boolean"}
+    "refreshing":   {"type": "boolean"},
+    "data_freshness": {
+      "type": "object",
+      "properties": {
+        "stocks_updated_at":  {"type": ["string", "null"]},
+        "stocks_age_seconds": {"type": ["integer", "null"]},
+        "macro_updated_at":   {"type": ["string", "null"]},
+        "macro_age_seconds":  {"type": ["integer", "null"]},
+        "is_stale":           {"type": "boolean"},
+        "market_open":        {"type": "boolean"},
+        "market_day":         {"type": "boolean"}
+      }
+    }
   }
 }

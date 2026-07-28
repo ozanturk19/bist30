@@ -73,6 +73,58 @@ def test_api_data_extra_fields_ok():
     assert r["ok"] is True  # additionalProperties: true
 
 
+# ── CPO-1152/1153/1155 round-trip: updated_at=None + data_freshness null drift ──
+# Kök neden: seans dışı/veri-yok anında app.py _data_quality_snapshot()
+# updated_at=None döndürüyordu (by-design, bkz. app.py:2794) ama şema
+# "type": "string" istiyordu -> her request'te SCHEMA_ERROR/ALERT_P0
+# (704 kayıt/gün). Bu testler o gerçek null-shape payload'ın artık şemadan
+# geçtiğini doğrular.
+
+def test_api_data_null_updated_at_ok():
+    """updated_at=None (seans dışı/last_fresh_ts yok) artık şema-geçerli."""
+    data = {**VALID_DATA, "updated_at": None}
+    r = validate_api_data(data)
+    assert r["ok"] is True
+
+
+def test_api_data_freshness_all_null_ok():
+    """build_data_freshness()'ın seans-dışı gerçek çıktısı (tüm alanlar null)."""
+    data = {**VALID_DATA, "updated_at": None, "data_freshness": {
+        "stocks_updated_at":  None,
+        "stocks_age_seconds": None,
+        "macro_updated_at":   None,
+        "macro_age_seconds":  None,
+        "is_stale":           False,
+        "market_open":        False,
+        "market_day":         False,
+    }}
+    r = validate_api_data(data)
+    assert r["ok"] is True
+
+
+def test_api_data_freshness_populated_ok():
+    """build_data_freshness()'ın taze veriyle dolu çıktısı da geçerli kalmalı."""
+    data = {**VALID_DATA, "data_freshness": {
+        "stocks_updated_at":  "27.07.2026 17:52:27",
+        "stocks_age_seconds": 120,
+        "macro_updated_at":   "2026-07-27T17:59:44+03:00",
+        "macro_age_seconds":  60,
+        "is_stale":           False,
+        "market_open":        True,
+        "market_day":         True,
+    }}
+    r = validate_api_data(data)
+    assert r["ok"] is True
+
+
+def test_api_data_freshness_wrong_type_still_flagged():
+    """data_freshness.is_stale yanlış tipte olursa hâlâ SCHEMA_ERROR üretmeli
+    — nullable'a geçiş validasyonu tamamen devre dışı bırakmamalı."""
+    data = {**VALID_DATA, "data_freshness": {"is_stale": "not-a-bool"}}
+    r = validate_api_data(data)
+    assert r["ok"] is False and r["flag"] == "SCHEMA_ERROR"
+
+
 # ── /api/macro ───────────────────────────────────────────────────────────────
 
 VALID_MACRO = {
@@ -159,6 +211,8 @@ if __name__ == "__main__":
         test_api_data_invalid_data_quality, test_api_data_loading_true_empty_stocks,
         test_api_data_stock_ticker_required, test_api_data_null_price_ok,
         test_api_data_null_stocks_age_ok, test_api_data_extra_fields_ok,
+        test_api_data_null_updated_at_ok, test_api_data_freshness_all_null_ok,
+        test_api_data_freshness_populated_ok, test_api_data_freshness_wrong_type_still_flagged,
         test_api_macro_valid, test_api_macro_missing_items,
         test_api_macro_missing_cached, test_api_macro_empty_items_ok,
         test_api_macro_wrong_cached_type,

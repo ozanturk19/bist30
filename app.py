@@ -3953,7 +3953,8 @@ def api_data():
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_SV_DATA",
                                f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None,
+                               errors=_sv.get("errors"))
                 else:
                     logger.warning("DQV_SV_DATA: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
         except Exception as _e:
@@ -4348,7 +4349,8 @@ def api_macro():
                 if _ALERTING_AVAILABLE:
                     _dqv_alert("DQV_SV_MACRO",
                                f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None,
+                               errors=_sv.get("errors"))
                 else:
                     logger.warning("DQV_SV_MACRO: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
         except Exception as _e:
@@ -7829,7 +7831,8 @@ def api_stock_chart(ticker):
                     _dqv_alert("DQV_SV_CHART",
                                f"flag={_sv.get('flag')} errors={_sv.get('errors')}",
                                ticker=ticker,
-                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None)
+                               _sentry=_sentry_sdk if _SENTRY_AVAILABLE else None,
+                               errors=_sv.get("errors"))
                 else:
                     logger.warning("DQV_SV_CHART[%s]: flag=%s errors=%s", ticker, _sv.get("flag"), _sv.get("errors"))
         except Exception as _e:
