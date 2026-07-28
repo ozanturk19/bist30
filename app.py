@@ -5326,7 +5326,15 @@ _gemini_cb = {"fails": 0, "open_until": 0.0}   # circuit breaker durumu (worker-
 # ardışık 429'u ayrı sayar, eşiğe ulaşınca gerçek çağrıyı keser + gözlemlenebilir hale
 # getirir (bkz. _gemini_news_degraded, /api/health "news" component).
 _GEMINI_QUOTA_CB_THRESHOLD = 10     # ardışık 429 eşiği — kota muhtemelen tükenmiş
-_GEMINI_QUOTA_CB_COOLDOWN  = 600    # saniye — devre açık kalır (gerçek çağrı yok)
+# CPO-1157 §3.1: 600s (10dk) yanlış zaman ekseniydi — kotanın ufku GÜN (RPD, free
+# tier gece yarısı PT reset), breaker'ınki dakikaydı → her 10dk'da bir devre kapanıp
+# ilk çağrı anında 429 yiyip yeniden açılıyordu (ratchet, ölçümle doğrulandı: 90dk'da
+# 22 açılış). Kesin reset saatini hesaplamıyoruz (DST/TZ kırılgan, doğrulanmadı) —
+# bunun yerine PROBE aralığını günlük ölçeğe yaklaştırıyoruz: 3600s (saatte 1 prob).
+# Kullanıcıya yansıyan davranış zaten §3.3 ile bu değerden bağımsız hale getirildi
+# (quota_cb açıkken endpoint deterministik "unavailable" dönüyor) — bu sabit artık
+# yalnız arka planda Gemini'yi ne sıklıkla rahatsız ettiğimizi belirliyor.
+_GEMINI_QUOTA_CB_COOLDOWN  = 3600   # saniye — devre açık kalır (gerçek çağrı yok)
 _gemini_quota_cb = {"consecutive_429": 0, "open_until": 0.0, "quota_exhausted_total": 0}
 
 
@@ -7363,6 +7371,14 @@ def api_stock_news(ticker):
     if ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
 
+    # CPO-1157 §3.4: HEAD (Werkzeug varsayılan olarak GET view'ı çalıştırıp gövdeyi
+    # atar — queue.add() dahil TÜM yan etkiler yine de çalışırdı) ve monitor UA'lar
+    # (nginx access.log kanıtı: UptimeRobot bu endpoint'i ~5dk'da bir HEAD ile
+    # yokluyordu, kota devresinin her açılışını besleyen gerçek kullanıcı değil
+    # kendi monitörümüzdü) hiç cache/queue mantığına girmemeli.
+    if request.method == "HEAD" or "uptimerobot" in (request.headers.get("User-Agent") or "").lower():
+        return safe_json({"news": None, "loading": False})
+
     kap_url = kap_url_for(ticker)
     now_ts  = time.time()
 
@@ -7403,6 +7419,22 @@ def api_stock_news(ticker):
                 })
             if gen_cached.get("text"):
                 return safe_json({"news": gen_cached["text"], "source": "gemini", "kap_url": kap_url})
+
+    # CPO-1157 §3.3: negatif cache (5dk TTL, _NEWS_FAIL_TTL) süresi dolduğunda
+    # kota devresi HÂLÂ açıksa (10dk-1sa ölçekli, günlük kotanın ufkuna göre çok
+    # kısa) endpoint eskiden "cache miss" sayıp loading:true'ya dönüyordu — kota
+    # devresi kapanana kadar bu döngü her birkaç dakikada bir tekrarlıyor, kullanıcı
+    # spinner/dürüst-mesaj arasında salınım görüyordu (canlı kanıt: try1 loading,
+    # try2 unavailable, try3 loading). Kota bilinen şekilde tükenmişken bekleyen bir
+    # sonuç YOK — yeni bir bg-fetch kuyruklamak yalnız kuyruğu ISRAF eder, sonucu
+    # değiştirmez. Cache TTL'inden bağımsız olarak deterministik dön.
+    if _gemini_news_degraded():
+        return safe_json({
+            "news": None, "loading": False, "unavailable": True,
+            "reason": "Haber özeti şu an kullanılamıyor",
+            "news_degraded": True,
+            "kap_url": kap_url,
+        })
 
     # 4. CACHE MISS — queue bg fetch (existing _on_demand_news_worker handles it)
     with _news_queue_lock:
