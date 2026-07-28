@@ -2271,7 +2271,7 @@
       <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Yatay</div>
     </div>
-    <div class="stat-card stat-premium" style="cursor:pointer" onclick="setFilter('PREMIUM',document.querySelector('.filter-btn.filter-premium'))" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
+    <div class="stat-card stat-premium" style="cursor:pointer" onclick="toggleChip('premium',document.querySelector('.filter-btn.filter-premium'))" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
       <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
       <div class="stat-label">⭐ Hacim Onaylı</div>
     </div>
@@ -3317,7 +3317,7 @@ let allStocks    = [];
    mutually-exclusive bug). Sinyal tek-seçim (hisse tek sinyale sahip), premium/
    today/watch bağımsız toggle — AND'lenir. advFilters pattern'i ile tutarlı. */
 let currentSignal = 'all';       /* tek-seçim: 'all' | 'AL' | 'SAT' | 'BEKLE' */
-let filterPremium = false;       /* toggle — s.tier === 'premium' */
+let filterPremium = false;       /* toggle — s.is_premium (RVOL≥1.20 + AL, CPO-1151/BP-1151-A: tier ile karıştırılmasın) */
 let filterToday   = false;       /* toggle — s.is_new_signal && signal !== 'BEKLE' */
 let filterWatch   = false;       /* toggle — watchlist.has(s.ticker) */
 let currentPeriod = 'all';       /* MSG-005: 'all' | 'today' | '7d' | '30d' */
@@ -3731,7 +3731,7 @@ function updateStats() {
   animateCounter(document.getElementById('statSat'),   stocks.filter(s => s.signal === 'SAT').length);
   animateCounter(document.getElementById('statBekle'), stocks.filter(s => s.signal === 'BEKLE').length);
   const stPremEl = document.getElementById('statPremium');
-  if (stPremEl) animateCounter(stPremEl, stocks.filter(s => s.tier === 'premium').length);
+  if (stPremEl) animateCounter(stPremEl, stocks.filter(s => s.is_premium).length);
   _updateIdealStrip(stocks);
 
   // Market breadth bar
@@ -3763,7 +3763,7 @@ function getFiltered() {
     /* SPEC-009 G2: çok-boyutlu AND filtre — sinyal (tek) + premium/today/watch toggle */
     const matchFilter =
          (currentSignal === 'all' || s.signal === currentSignal)
-      && (!filterPremium || s.tier === 'premium')
+      && (!filterPremium || s.is_premium)
       && (!filterToday   || (s.is_new_signal && s.signal !== 'BEKLE'))
       && (!filterWatch   || watchlist.has(s.ticker));
     /* MSG-005: period filter (signal_bars baz alınır) */
