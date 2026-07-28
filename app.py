@@ -6606,6 +6606,15 @@ def _compute_chart_data(ticker_base, period="2y"):
                 "st_bull":    st_bull,  "st_bear":  st_bear,
                 "adx_bull":   adx_bull, "adx_bear": adx_bear,
                 "e12_bull":   e12_bull, "e12_bear": e12_bear,
+                # CPO-1161 §5 D1: seriden türetilmiş gerçek tazelik — ohlc'nin SON
+                # mumunun tarihi. Bu alan olmadan _load_chart_from_disk_per_ticker
+                # (app.py) dosya mtime'ına düşüyordu ("dosya bugün yazıldı" ile
+                # "seri bugüne kadar güncel" farklı şeyler — CPO-1147/1151 ile aynı
+                # optimistic-cache-time ailesinin 3. vakası).
+                "updated_at": (
+                    datetime.strptime(ohlc[-1]["time"], "%Y-%m-%d").strftime("%d.%m.%Y 00:00:00")
+                    if ohlc else None
+                ),
             }
         }
     except Exception as e:
