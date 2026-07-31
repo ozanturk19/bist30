@@ -578,8 +578,8 @@
   }
   .preset-chip[data-preset="PREMIUM"].active {
     background: rgba(255,215,0,0.10);
-    border-color: #ffd700;
-    color: #ffd700;
+    border-color: var(--bp-volume);
+    color: var(--bp-volume);
   }
   .preset-chip[data-preset="WATCH"].active {
     background: rgba(184,195,255,0.12);
@@ -4507,7 +4507,7 @@ function updateActiveFiltersBar() {
     items.push({ label: sigLabels[currentSignal], onClear: "setFilter('all')" });
   }
   // Bağımsız toggle chip'leri (premium/today/watch — AND)
-  if (filterPremium) items.push({ label: '💎 Premium', onClear: "toggleChip('premium')" });
+  if (filterPremium) items.push({ label: '⭐ Hacim Onaylı', onClear: "toggleChip('premium')" });
   if (filterToday)   items.push({ label: '⚡ Bugün',   onClear: "toggleChip('today')" });
   if (filterWatch)   items.push({ label: '🔔 Takibim', onClear: "toggleChip('watch')" });
   // Sector chip
@@ -4582,13 +4582,11 @@ function sortTable(key) {
 }
 
 async function manualRefresh() {
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('spinning');
-  btn.disabled = true;
+  const btn = document.getElementById('bpRefreshBtn');
+  if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
   await fetch('/api/refresh', { method: 'POST' });
   setTimeout(() => {
-    btn.classList.remove('spinning');
-    btn.disabled = false;
+    if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
     fetchData();
   }, 3000);
 }
@@ -5712,7 +5710,7 @@ document.addEventListener('keydown', e => {
 </script>
 <div class="sig-tip" id="sigTip"></div>
 
-<script src="/static/bp-search.js?v=44" defer></script>
+<script src="/static/bp-search.js?v=45" defer></script>
 <script src="/static/learning-mode.js?v=1" defer></script>
 {% include '_premium_modal.html' %}
 <script src="/static/js/toast.js"></script>

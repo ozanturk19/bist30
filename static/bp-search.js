@@ -473,7 +473,14 @@
     var btn = document.getElementById('bpRefreshBtn');
     if (btn) btn.classList.add('spinning');
     if (typeof window.manualRefresh === 'function') {
-      try { window.manualRefresh(); } catch(e) { location.reload(); }
+      try {
+        var result = window.manualRefresh();
+        if (result && typeof result.catch === 'function') {
+          result.catch(function(e) { location.reload(); });
+        }
+      } catch (e) {
+        location.reload();
+      }
       setTimeout(function(){ if (btn) btn.classList.remove('spinning'); }, 1500);
     } else {
       location.reload();
