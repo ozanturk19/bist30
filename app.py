@@ -3302,6 +3302,33 @@ def _analyze_with_timeout(ticker):
 
 _refresh_data_lock = threading.Lock()  # M2: concurrent refresh_data() engelle — ikinci çağrı skip
 
+# CPO-1164 §3.2 LOCK_NB: _refresh_data_lock (yukarıda) tek process İÇİNDE ikinci
+# çağrıyı engelliyordu ama PROCESS'LER ARASI koruma YOKTU. refresh_data() hem
+# bist30-refresh.service (REFRESH_WORKER=1, tek dedicated process) hem de
+# background_refresh() leader-election yoluyla web worker'lardan (REFRESH_WORKER
+# unset senaryosu) çağrılabiliyor; ayrıca systemd Restart=always sırasında eski
+# process tam ölmeden yeni process başlarsa (zombie overlap) iki process aynı
+# anda Yahoo oturumunu paylaşabilir (CPO-1163'ün 28.07 canlı kanıtı: prod +
+# staging refresh_worker.py aynı 60dk'lık pencerede paylaşımlı Yahoo throttling'e
+# maruz kalmıştı). fcntl.flock(LOCK_EX|LOCK_NB) — _is_bg_leader/_is_macro_leader
+# ile birebir aynı desen. refresh_data() zaten kendi ThreadPoolExecutor thread'inde
+# çalışıyor (gevent hub greenlet'i DEĞİL — background_refresh watchdog'u ayrı bir
+# _cf.ThreadPoolExecutor'a submit ediyor), bu yüzden diğer leader-lock'ların
+# aksine threadpool-offload gerekmiyor: flock zaten gevent hub'ı bloke edecek
+# konumda değil.
+#
+# BİLİNÇLİ SAPMA — [[lock_isolation]] kuralı (her ortam için explicit LOCK_PATH):
+# o kural KALICI leader-election lock'ları (_is_bg_leader vb., process ömrü
+# boyunca tutulur) için geçerli — paylaşılan path orada leader'ı KALICI çalar,
+# sessizce cycles=0'a düşürür. Buradaki lock TRANSIENT'tır (yalnız tek refresh
+# cycle'ı boyunca ~1-4dk tutulur, flock OS-seviyesinde process ölümünde otomatik
+# serbest kalır). CPO-1163'ün asıl şikayeti prod+staging'in AYNI ANDA Yahoo'ya
+# çıkması olduğu için varsayılan olarak İZOLE EDİLMEDİ — path bilinçli olarak
+# prod/staging arasında PAYLAŞILIYOR (ikisi de /tmp/bp_refresh_data.lock).
+# İzolasyon istenirse REFRESH_DATA_LOCK_PATH env var'ı ile override edilebilir.
+_REFRESH_DATA_LOCK_PATH = os.environ.get("REFRESH_DATA_LOCK_PATH", "/tmp/bp_refresh_data.lock")
+_refresh_data_flock_fh = None
+
 
 def refresh_data():
     # CPO-507 P0 refining (Cmt 17:45): SIRALI for loop yerine PARALEL ThreadPoolExecutor.
@@ -3311,10 +3338,21 @@ def refresh_data():
     # Toplam timeout 180s soft cap (240s watchdog'un altında)
     # M2: non-blocking — eş zamanlı ikinci çağrı yinelemeyi önler (watchdog + cron overlap)
     if not _refresh_data_lock.acquire(blocking=False):
-        logger.warning("refresh_data: önceki çalışma devam ediyor, bu çağrı atlandı (M2 concurrency guard)")
+        logger.warning("refresh_data: önceki çalışma (bu process içinde) devam ediyor, bu çağrı atlandı (M2 concurrency guard)")
         return
+    global _refresh_data_flock_fh
     try:
-        _refresh_data_impl()
+        if _refresh_data_flock_fh is None:
+            _refresh_data_flock_fh = open(_REFRESH_DATA_LOCK_PATH, "w")
+        try:
+            _fcntl.flock(_refresh_data_flock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+        except (BlockingIOError, OSError):
+            logger.warning("refresh_data: BAŞKA BİR PROCESS zaten çalışıyor (CPO-1164 §3.2 LOCK_NB) — bu çağrı atlandı")
+            return
+        try:
+            _refresh_data_impl()
+        finally:
+            _fcntl.flock(_refresh_data_flock_fh, _fcntl.LOCK_UN)
     finally:
         _refresh_data_lock.release()
 
