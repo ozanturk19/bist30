@@ -42,3 +42,17 @@ node tools/visual-test.js     # 60 PNG screenshot
 - Tier 0 (DEV pre-deploy): Tüm scriptler PASS şart
 - Tier 2 (CPO verify): visual-diff.sh ile bağımsız doğrulama
 - Tier 4 (Ozan visual): Manuel screenshot (her major milestone)
+
+## Computed-Style Baseline (interaktif state, pixel-diff kapsamı dışı)
+
+`tools/visual-test.js` PAGES listesi statik sayfa yükleri çeker — chip/preset gibi
+`.active` state'ler tıklama gerektirdiği için 60 PNG setine dahil değil. Bu tür
+kurallar burada file:line + beklenen değerle kayıt altına alınır (CPO-1171 #3).
+
+| Selector | Kaynak | Beklenen (computed) | Not |
+|---|---|---|---|
+| `.preset-chip[data-preset="PREMIUM"].active` | `templates/index.html:579-582` | `border-color`/`color` → `var(--bp-volume)` = `#ffc850` (`static/css/tokens.css:49`) | S-UI-3 (CPO-1169), `#ffd700` literalinden değiştirildi, commit `d7153f3`. Kardeş kural `WATCH` preset chip (`index.html:584-588`, literal `#b8c3ff`) aynı desenle canlı doğrulandı. |
+
+Bir sonraki VR turunda: PREMIUM preset chip'e tıkla, `getComputedStyle` ile
+`border-color`/`color` değerini `#ffc850`'ye eşitliğini doğrula, pixel kanıtını
+bu tabloya ekle.
