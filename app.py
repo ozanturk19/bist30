@@ -5337,13 +5337,42 @@ _GEMINI_QUOTA_CB_THRESHOLD = 10     # ardışık 429 eşiği — kota muhtemelen
 _GEMINI_QUOTA_CB_COOLDOWN  = 3600   # saniye — devre açık kalır (gerçek çağrı yok)
 _gemini_quota_cb = {"consecutive_429": 0, "open_until": 0.0, "quota_exhausted_total": 0}
 
+# CPO-1164 #5 kök nedeni: _gemini_quota_cb yukarıda salt worker-local bir dict'ti.
+# bist30 -w4 ile çalışıyor (4 ayrı gunicorn process), nginx istekleri bu 4 process
+# arasında dağıtıyor. Her process kendi ardışık-429 sayacını/open_until'ını
+# BAĞIMSIZ tutuyordu → aynı kullanıcı art arda poll ettiğinde farklı worker'a
+# düşüp gerçek haber / loading:true / dürüst "unavailable" arasında salındı
+# (CPO'nun canlı kanıtı: THYAO poll1 haber, poll2/poll3 loading:true — birebir
+# bu imza). "Negatif cache 5dk aktifken bile loading:true" de aynı nedenden:
+# cache de worker-local, poll'lar arası worker değişince cache hiç görülmüyor.
+# Fix: devre durumu paylaşımlı dosyada (_tp_read_json/_tp_write_json, CPO-1017
+# ile aynı gevent-hub-offload deseni). flock GEREKMİYOR — gerçek Gemini çağrıları
+# zaten _gemini_rate_acquire ile tüm worker'lar arasında ≥6.5s aralıklı serileş-
+# tirildiği için concurrent write pratikte imkansız; atomic write (os.replace)
+# torn-read'i zaten engelliyor.
+_GEMINI_QUOTA_CB_PATH = os.environ.get("GEMINI_QUOTA_CB_PATH", "/tmp/bp_gemini_quota_cb.json")
+
+
+def _gemini_quota_cb_sync() -> dict:
+    """Paylaşımlı dosyadan devre durumunu oku, worker-local _gemini_quota_cb'yi
+    güncelle ve döndür. Tüm okuma/karar noktaları bunu çağırmalı."""
+    shared = _tp_read_json(_GEMINI_QUOTA_CB_PATH, default=None)
+    if isinstance(shared, dict) and "open_until" in shared:
+        _gemini_quota_cb.update(shared)
+    return _gemini_quota_cb
+
+
+def _gemini_quota_cb_persist() -> None:
+    _tp_write_json(_GEMINI_QUOTA_CB_PATH, _gemini_quota_cb, atomic=True)
+
 
 def _gemini_news_degraded() -> bool:
     """True → kota muhtemelen tükendi, haber özelliği gerçek çağrı yapmıyor.
 
     /api/health'e ve news endpoint'ine dürüst durum yansıtmak için (CPO-1153 §3).
+    Paylaşımlı dosyadan taze okur — worker-bağımsız tutarlı sonuç (CPO-1164 #5).
     """
-    return time.time() < _gemini_quota_cb["open_until"]
+    return time.time() < _gemini_quota_cb_sync()["open_until"]
 
 # Fix2 — Gemini global cross-worker rate limiter (slot reservation via flock).
 # Önceki worker-local lock: 4 worker × ~9.2 req/dk = ~36.8 RPM → 429 burst riski.
@@ -5664,6 +5693,9 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
         return None, None
 
     # CPO-1153/1154 P0-B(b) — kota devresi açıksa gerçek çağrı yapma, anında fallback.
+    # CPO-1164 #5: paylaşımlı dosyadan sync — başka bir worker devreyi açtıysa bu
+    # worker da anında görsün (worker-local state 4 process arasında tutarsızdı).
+    _gemini_quota_cb_sync()
     if now < _gemini_quota_cb["open_until"]:
         logger.debug("_gemini_call: kota circuit breaker açık (%.0fs kaldı) — fallback",
                      _gemini_quota_cb["open_until"] - now)
@@ -5703,6 +5735,7 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
             if text:
                 _gemini_cb["fails"] = 0   # başarı → circuit breaker sayacı sıfırla
                 _gemini_quota_cb["consecutive_429"] = 0   # başarı → kota devresi de sıfırlanır
+                _gemini_quota_cb_persist()
                 return model_id, text
             # Model yanıt verdi ama boş metin — fallback'e geç
             logger.debug("_gemini_call [%s]: boş yanıt, fallback deneniyor", model_id)
@@ -5711,6 +5744,10 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
             if status == 429:
                 # CPO-1153 §3(a): debug→warning — 6 saatlik kota kesintisi hiç görünmemişti.
                 logger.warning("_gemini_call [%s]: kota tükendi (429 RESOURCE_EXHAUSTED)", model_id)
+                # CPO-1164 #5: artırmadan önce sync — başka worker'ların 429'ları da
+                # sayılsın (eskiden her worker kendi ~1/4'ünü sayıyordu, eşiğe asla
+                # ulaşmıyordu → devre açılmıyor → sonsuz loading:true).
+                _gemini_quota_cb_sync()
                 _gemini_quota_cb["consecutive_429"] += 1
                 _gemini_quota_cb["quota_exhausted_total"] += 1
                 if (_gemini_quota_cb["consecutive_429"] >= _GEMINI_QUOTA_CB_THRESHOLD
@@ -5719,6 +5756,7 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
                     logger.warning("_gemini_call: KOTA circuit breaker AÇILDI — %d ardışık 429, "
                                    "%ds boyunca Gemini çağrısı yapılmayacak (news_degraded=true)",
                                    _GEMINI_QUOTA_CB_THRESHOLD, _GEMINI_QUOTA_CB_COOLDOWN)
+                _gemini_quota_cb_persist()
             else:
                 logger.warning("_gemini_call [%s]: %s (HTTP %s)", model_id, type(e).__name__, status)
             # Circuit breaker — 429 ve 5xx sayılmaz (hızlı dönüş, worker bloke etmez).
