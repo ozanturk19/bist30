@@ -5389,19 +5389,35 @@ _gemini_quota_cb = {"consecutive_429": 0, "open_until": 0.0, "quota_exhausted_to
 # tirildiği için concurrent write pratikte imkansız; atomic write (os.replace)
 # torn-read'i zaten engelliyor.
 _GEMINI_QUOTA_CB_PATH = os.environ.get("GEMINI_QUOTA_CB_PATH", "/tmp/bp_gemini_quota_cb.json")
+# _tp_read_json yalnız _gevent.Timeout'u yakalar — FileNotFoundError/JSONDecodeError
+# caller'a propagate olur (_GEMINI_RATE_PATH'teki gibi module-load'da dosyayı
+# önceden yaratıyoruz ki ilk _gemini_quota_cb_sync() çağrısı patlamasın).
+if not os.path.exists(_GEMINI_QUOTA_CB_PATH):
+    try:
+        with open(_GEMINI_QUOTA_CB_PATH, "w", encoding="utf-8") as _f:
+            json.dump(_gemini_quota_cb, _f)
+    except OSError:
+        pass
 
 
 def _gemini_quota_cb_sync() -> dict:
     """Paylaşımlı dosyadan devre durumunu oku, worker-local _gemini_quota_cb'yi
     güncelle ve döndür. Tüm okuma/karar noktaları bunu çağırmalı."""
-    shared = _tp_read_json(_GEMINI_QUOTA_CB_PATH, default=None)
+    try:
+        shared = _tp_read_json(_GEMINI_QUOTA_CB_PATH, default=None)
+    except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
+        logger.warning("_gemini_quota_cb_sync: paylaşımlı dosya okunamadı (%s) — worker-local state ile devam", e)
+        shared = None
     if isinstance(shared, dict) and "open_until" in shared:
         _gemini_quota_cb.update(shared)
     return _gemini_quota_cb
 
 
 def _gemini_quota_cb_persist() -> None:
-    _tp_write_json(_GEMINI_QUOTA_CB_PATH, _gemini_quota_cb, atomic=True)
+    try:
+        _tp_write_json(_GEMINI_QUOTA_CB_PATH, _gemini_quota_cb, atomic=True)
+    except OSError as e:
+        logger.warning("_gemini_quota_cb_persist: paylaşımlı dosyaya yazılamadı (%s) — worker-local state korunuyor", e)
 
 
 def _gemini_news_degraded() -> bool:
