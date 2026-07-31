@@ -3270,6 +3270,22 @@ def _load_cache_from_disk():
         logger.warning("Disk cache okuma hatası: %s", e)
 
 
+# CPO-1164 §1 / D2 + BP-1151-B ortak yardımcı — "pozisyonel açlık" fix.
+# Kök sorun (reference_bad_ticker_pozisyonel_aclik + D2, DEV-1512'de chart pipeline'da
+# doğrulandı): hem refresh_data() (BIST30/BIST100 sabit liste sırası) hem
+# _slow_chart_refresh_daemon (o anki _cache sırası) ticker'ları HEP AYNI sırada
+# dener. CB/timeout ile geçiş yarım kalırsa (Yahoo günün her saatinde 429
+# üretebiliyor — kronik, istisna değil) hep AYNI kuyruk-sonu ticker'lar sıra
+# alamıyor. Bu rotasyon throughput'u ARTIRMAZ (kök neden ayrı — bkz. CPO-1164
+# yanıtı, worker/pencere/batch ölçümü), yalnız kurbanı her geçişte değiştirir.
+def _staleness_priority_order(tickers, last_fresh_ts_fn):
+    """ticker'ları en-eski-tazelenen (veya hiç tazelenmemiş) ÖNCE gelecek şekilde
+    sırala. `last_fresh_ts_fn(ticker)` → son başarılı tazeleme epoch'u (float)
+    veya None/0 (hiç tazelenmemiş — en yüksek öncelik). Kararlı sort: eşit
+    ts'li ticker'lar arasında orijinal liste sırası korunur."""
+    return sorted(tickers, key=lambda t: last_fresh_ts_fn(t) or 0)
+
+
 # CPO-506 P0 (Pzt 10:00 öncesi): analyze() per-ticker hard-timeout + negatif cache.
 # Watchdog deadlock'u önlüyor ama yfinance yavaşlığını çözmüyor (CPO-501/502 önerisi).
 # Yaklaşım: her ticker için ThreadPoolExecutor + 8s timeout. Timeout'ta skip + 60s negatif cache
@@ -3359,11 +3375,20 @@ def refresh_data():
 
 def _refresh_data_impl():
     results = []
+    # CPO-1164 §1/BP-1151-B: 215 ticker'ı sabit BIST30/BIST100 liste sırasıyla değil,
+    # en-eski-tazelenen ÖNCE olacak şekilde işle. 180s soft cap tümünü bitirmeye
+    # yetmediğinde (bkz. throughput ölçümü, CPO'ya bildirilen kök neden) kurban
+    # HER GEÇİŞTE değişir — sabit bir alt küme (ör. THYAO/GARAN) sürekli açlık çekmez.
+    with _lock:
+        _last_fresh_by_ticker = {
+            s.get("ticker"): s.get("last_fresh_ts") for s in _cache.get("data", []) if s.get("ticker")
+        }
+    _ordered_tickers = _staleness_priority_order(BIST30, _last_fresh_by_ticker.get)
     # CPO-596: `with executor` kullanma — __exit__ shutdown(wait=True) çağırır ve hung thread'de
     # 66 saat bloke kalır. Explicit shutdown(wait=False) ile hung thread'leri bırak, devam et.
     ex = _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="refresh_par")  # CPO-740 Görev 10: 2→4 (subprocess isolation — no shared yfinance state)
     try:
-        future_map = {ex.submit(_analyze_with_timeout, t): t for t in BIST30}
+        future_map = {ex.submit(_analyze_with_timeout, t): t for t in _ordered_tickers}
         try:
             for future in _cf_analyze.as_completed(future_map, timeout=180):
                 try:
@@ -11257,7 +11282,18 @@ def _startup():
                     logger.warning("_slow_chart_refresh: _cache boş, 60s bekle")
                     time.sleep(60)
                     continue
-                logger.info("_slow_chart_refresh başladı: %d ticker", len(tickers))
+                # CPO-1164 §1/D2: sabit _cache sırası yerine en-eski-yazılmış chart
+                # dosyası ÖNCE gelecek şekilde işle (DEV-1512'de doğrulanan pozisyonel
+                # açlık — Yahoo CB her geçişte ~76. ticker civarında açılıyor, sabit
+                # sırada hep aynı kuyruk-sonu ticker'lar sıra alamıyordu). Disk mtime
+                # kullanılıyor — process restart'tan bağımsız kalıcı sinyal.
+                def _chart_mtime(t):
+                    try:
+                        return os.path.getmtime(os.path.join(_PHASE3_CHART_DIR, f"chart_{t}.json"))
+                    except OSError:
+                        return 0
+                tickers = _staleness_priority_order(tickers, _chart_mtime)
+                logger.info("_slow_chart_refresh başladı: %d ticker (staleness-öncelikli sıra)", len(tickers))
                 done = 0
                 skipped_corrupt = 0
                 for ticker in tickers:
