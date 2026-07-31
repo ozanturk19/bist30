@@ -5453,6 +5453,49 @@ def _gemini_news_degraded() -> bool:
     """
     return time.time() < _gemini_quota_cb_sync()["open_until"]
 
+
+def _gemini_cb_retry_after_s() -> int:
+    """Kota devresi kapanana kadar kalan saniye (frontend'e dürüst bekleme süresi
+    göstermek için, CPO-1165 D-NEWS-1). 0 → devre kapalı."""
+    return max(0, int(_gemini_quota_cb_sync()["open_until"] - time.time()))
+
+
+# CPO-1165 D-NEWS-2: "kaç haber isteği OK/FAIL oldu, devre kaç kez açıldı" sorusu
+# önceden yalnız journald grep'iyle cevaplanabiliyordu (CPO'nun 101 FAIL'i elle
+# sayması). _gemini_quota_cb ile birebir aynı desen (paylaşımlı dosya, flock yok —
+# aynı gerekçe: _gemini_rate_acquire zaten çağrıları serileştiriyor). Gün değişince
+# (_TZ_TR takvim günü) sayaçlar sıfırlanır.
+_NEWS_DAILY_STATS_PATH = os.environ.get("NEWS_DAILY_STATS_PATH", "/tmp/bp_news_daily_stats.json")
+_news_daily_stats = {"date": None, "ok": 0, "fail": 0, "cb_opens": 0}
+
+
+def _news_daily_stats_sync() -> dict:
+    """Paylaşımlı dosyadan günlük sayaçları oku; takvim günü değiştiyse sıfırla."""
+    today = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
+    try:
+        shared = _tp_read_json(_NEWS_DAILY_STATS_PATH, default=None)
+    except (FileNotFoundError, json.JSONDecodeError, OSError) as e:
+        logger.warning("_news_daily_stats_sync: paylaşımlı dosya okunamadı (%s) — worker-local state ile devam", e)
+        shared = None
+    if isinstance(shared, dict) and shared.get("date") == today:
+        _news_daily_stats.update(shared)
+    elif _news_daily_stats.get("date") != today:
+        _news_daily_stats.update({"date": today, "ok": 0, "fail": 0, "cb_opens": 0})
+    return _news_daily_stats
+
+
+def _news_daily_stats_persist() -> None:
+    try:
+        _tp_write_json(_NEWS_DAILY_STATS_PATH, _news_daily_stats, atomic=True)
+    except OSError as e:
+        logger.warning("_news_daily_stats_persist: paylaşımlı dosyaya yazılamadı (%s) — worker-local state korunuyor", e)
+
+
+def _news_daily_stats_incr(field: str) -> None:
+    _news_daily_stats_sync()
+    _news_daily_stats[field] = _news_daily_stats.get(field, 0) + 1
+    _news_daily_stats_persist()
+
 # Fix2 — Gemini global cross-worker rate limiter (slot reservation via flock).
 # Önceki worker-local lock: 4 worker × ~9.2 req/dk = ~36.8 RPM → 429 burst riski.
 # Yeni: paylaşımlı dosya üzerinden atomic slot tahsisi → global ~9.2 RPM (10 RPM altı).
@@ -5835,6 +5878,7 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
                     logger.warning("_gemini_call: KOTA circuit breaker AÇILDI — %d ardışık 429, "
                                    "%ds boyunca Gemini çağrısı yapılmayacak (news_degraded=true)",
                                    _GEMINI_QUOTA_CB_THRESHOLD, _GEMINI_QUOTA_CB_COOLDOWN)
+                    _news_daily_stats_incr("cb_opens")  # CPO-1165 D-NEWS-2
                 _gemini_quota_cb_persist()
             else:
                 logger.warning("_gemini_call [%s]: %s (HTTP %s)", model_id, type(e).__name__, status)
@@ -6272,8 +6316,10 @@ def _on_demand_news_worker():
                 _news_queue_stats["last_processed_ts"] = time.time()
                 _news_queue_stats["total_processed"] += 1
                 logger.info("On-demand news [%s]: %s", ticker, "OK" if result else "FAIL")
+                _news_daily_stats_incr("ok" if result else "fail")  # CPO-1165 D-NEWS-2
             except Exception as exc:
                 logger.error("On-demand news hatası [%s]: %s", ticker, exc)
+                _news_daily_stats_incr("fail")  # CPO-1165 D-NEWS-2
             time.sleep(15)   # İstekler arası 15s — rate-limit koruması
         else:
             time.sleep(5)    # Kuyruk boşsa 5s bekle
@@ -7541,6 +7587,7 @@ def api_stock_news(ticker):
                     "news": None, "loading": False, "unavailable": True,
                     "reason": "Haber özeti şu an kullanılamıyor",
                     "news_degraded": _gemini_news_degraded(),
+                    "retry_after_s": _gemini_cb_retry_after_s(),  # CPO-1165 D-NEWS-1
                     "kap_url": kap_url,
                 })
             if gen_cached.get("text"):
@@ -7559,6 +7606,7 @@ def api_stock_news(ticker):
             "news": None, "loading": False, "unavailable": True,
             "reason": "Haber özeti şu an kullanılamıyor",
             "news_degraded": True,
+            "retry_after_s": _gemini_cb_retry_after_s(),  # CPO-1165 D-NEWS-1
             "kap_url": kap_url,
         })
 
@@ -8212,6 +8260,9 @@ def _compute_health():
         "news": {
             "degraded":              _gemini_news_degraded(),
             "quota_exhausted_total": _gemini_quota_cb["quota_exhausted_total"],
+            "retry_after_s":         _gemini_cb_retry_after_s(),  # CPO-1165 D-NEWS-1
+            # CPO-1165 D-NEWS-2 — önceden yalnız journald grep'iyle ölçülebiliyordu
+            **{f"{k}_today": v for k, v in _news_daily_stats_sync().items() if k != "date"},
         },
         "data_freshness":           build_data_freshness(stocks_list),  # SPEC-014 B1 (CPO-1137: kanonik, aynı stocks)
         "market_data_age_s":         stocks_age_s,                           # CPO-590 madde 4
