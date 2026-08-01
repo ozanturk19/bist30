@@ -3288,21 +3288,12 @@ function applyLivePrices(prices, ts) {
   const liveEl = document.getElementById('liveTs');
   if (liveEl) liveEl.textContent = '● CANLI ' + ts;
 
-  // Chart header + endeks satırı — XU030 canlı fiyat
-  if (prices['XU030']) {
-    const s    = prices['XU030'];
-    const sign = s.change_pct >= 0 ? '+' : '';
-    const cls  = s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu';
-    const fmtP = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
-    const fmtC = sign + s.change_pct.toFixed(2) + '%';
-
-    // Endeks kartı canlı güncelle (SSE'den)
-    const ec30PEl = document.getElementById('ec30Price');
-    if (ec30PEl) ec30PEl.textContent = fmtP;
-    const ec30CEl = document.getElementById('ec30Chg');
-    if (ec30CEl) { ec30CEl.textContent = fmtC; ec30CEl.className = 'ec-chg ' + cls; }
-
-  }
+  // CPO-1180 K4 FIX (devam): ec30Price/ec30Chg BURADA DA yazılmıyordu — üçüncü
+  // bağımsız yazan bulundu. /api/stream SSE'si _live_prices['XU030']'u push
+  // ediyordu (fetch_live_prices — gerçek son-işlem fiyatı, ayrı cadence/kaynak,
+  // hafta sonu Cuma kapanışında donuk kalabiliyor: 15.172,02 iken macro/ticker
+  // aynı anda 15.248 gösteriyordu). loadMacro() price/change_pct için TEK yazan
+  // kalsın diye bu blok da kaldırıldı (bkz. renderEndeksCard, ~satır 3017).
 }
 
 startSSE();
