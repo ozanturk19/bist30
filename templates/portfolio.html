@@ -694,7 +694,7 @@ function renderSummary(s) {
     pfEl.className   = 'sum-num ' + (pfRet >= 0 ? 'sum-green' : 'sum-red');
     const cmpEl = document.getElementById('sumXu030Cmp');
     const diffSign = diff >= 0 ? '+' : '';
-    cmpEl.textContent = 'vs XU030: ' + diffSign + fmt(diff, 1) + '%';
+    cmpEl.textContent = 'vs BIST30: ' + diffSign + fmt(diff, 1) + '%';
     cmpEl.className   = 'xu030-compare ' + (diff >= 0 ? 'xu030-above' : 'xu030-below');
     document.getElementById('sumXu030Card').style.display = '';
   } else {

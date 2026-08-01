@@ -2710,7 +2710,7 @@ function togglePortfolio() {
       source:    'hisse-detail-quick',
     });
     localStorage.setItem(HIB_PF_KEY, JSON.stringify(pf));
-    _hibToast(TICKER + ' portföye eklendi (1 lot · ' + price.toFixed(2) + '₺) · /portfolio\'da düzenle', 'success');
+    _hibToast(TICKER + ' portföye eklendi (1 lot · ' + price.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '₺) · /portfolio\'da düzenle', 'success');
   }
   updateHibStarBtn();
 }

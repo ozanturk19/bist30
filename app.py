@@ -2131,7 +2131,7 @@ def _notify_signal_changes(new_results):
             name = STOCK_NAMES.get(t, t)
             lbl  = "Güçlü Trend ▲" if new == "AL" else "Zayıf Trend ▼"
             price = stock.get("price") or ""
-            price_str = f" — {price:.2f} ₺" if price else ""
+            price_str = f" — {tr_price_filter(price)} ₺" if price else ""
             lines.append(f"{e} <b>{t}</b> ({name}){price_str}")
             lines.append(f"   <i>{old} → {lbl}</i>")
         lines.append(f"\n<a href='https://borsapusula.com'>borsapusula.com</a>")
@@ -2420,7 +2420,7 @@ def _build_signal_email(changes, unsubscribe_url):
         if is_prem:
             prem_badge = '''<span style="display:inline-block;background:rgba(255,200,80,0.12);border:1px solid rgba(255,200,80,0.45);color:#ffc850;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:0.4px;margin-left:6px;vertical-align:middle">💎 PREMIUM</span>'''
 
-        sl_html = f'<span style="color:#909097">SL <strong style="color:#c7c5cd">{sl_level:.2f}₺</strong></span>' if sl_level else ''
+        sl_html = f'<span style="color:#909097">SL <strong style="color:#c7c5cd">{tr_price_filter(sl_level)}₺</strong></span>' if sl_level else ''
         rvol_html = f'<span style="color:#909097">·  RVOL <strong style="color:{"#ffc850" if is_prem else "#c7c5cd"}">{rvol:.2f}×</strong></span>' if rvol is not None else ''
 
         cards += f'''
@@ -2434,7 +2434,7 @@ def _build_signal_email(changes, unsubscribe_url):
                     <div style="font-size:11.5px;color:#909097;margin-top:3px">{name}</div>
                   </td>
                   <td align="right" style="vertical-align:top">
-                    <div style="font-size:15px;font-weight:700;color:#e5e1e4;font-variant-numeric:tabular-nums">{price:.2f} ₺</div>
+                    <div style="font-size:15px;font-weight:700;color:#e5e1e4;font-variant-numeric:tabular-nums">{tr_price_filter(price)} ₺</div>
                     <div style="background:{bg};color:{col};border:1px solid {bd};border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;display:inline-block;margin-top:4px">{lbl}</div>
                   </td>
                 </tr>
@@ -6106,7 +6106,7 @@ def _enrich_signal_explanation(ticker, signal_data):
         opposite_words = []
 
     # ── Stop-loss satırı ─────────────────────────────────────────────────────
-    sl_line = f"\n- Stop-Loss seviyesi: {sl:.2f} ₺ (Supertrend alt/üst bandı)" if sl else ""
+    sl_line = f"\n- Stop-Loss seviyesi: {tr_price_filter(sl)} ₺ (Supertrend alt/üst bandı)" if sl else ""
 
     # ── Directive prompt: AI sadece çeviri/stilize yapıyor ───────────────────
     prompt = _SYS_EXPLAIN + (
@@ -6120,7 +6120,7 @@ def _enrich_signal_explanation(ticker, signal_data):
         f"  • ADX: {adx:.0f} {'(güçlü trend ✓)' if adx >= 25 else '(orta)'}, "
         f"DI+: {di_plus:.0f}, DI-: {di_minus:.0f}\n"
         f"  • EMA12 {e12:.0f} {'>' if e12 > e99 else '<'} EMA99 {e99:.0f} ✓\n"
-        f"  • Fiyat: {price:.2f} ₺ | Sinyal süresi: {bars} gün{sl_line}\n\n"
+        f"  • Fiyat: {tr_price_filter(price)} ₺ | Sinyal süresi: {bars} gün{sl_line}\n\n"
         f"Yukarıdaki kurallara göre bu sinyali 3 cümlede sade Türkçe ile yeniden ifade et."
     )
 
@@ -7485,10 +7485,10 @@ def _get_fundamentals(ticker_base):
 
         def fmt_billion(v):
             if v is None: return None
-            if v >= 1e12: return f"{v/1e12:.2f} T₺"
-            if v >= 1e9:  return f"{v/1e9:.2f} Mrd₺"
-            if v >= 1e6:  return f"{v/1e6:.1f} Mn₺"
-            return f"{v:,.0f} ₺"
+            if v >= 1e12: return f"{tr_price_filter(v/1e12)} T₺"
+            if v >= 1e9:  return f"{tr_price_filter(v/1e9)} Mrd₺"
+            if v >= 1e6:  return f"{tr_price_filter(v/1e6)} Mn₺"
+            return f"{tr_price_filter(v)} ₺"
 
         raw = {
             "pe_ratio":          round(safe("trailingPE", 0), 1) if safe("trailingPE") else None,
@@ -10005,7 +10005,7 @@ def api_market_news():
             snippet = (
                 f"{dur.capitalize()} {sig} sinyali aktif"
                 f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
-                f"SL: {sl_val:.2f}₺ | Hedef: {tp_val:.2f}₺"
+                f"SL: {tr_price_filter(sl_val)}₺ | Hedef: {tr_price_filter(tp_val)}₺"
             )
             source = "algorithmic"
 
@@ -10018,7 +10018,7 @@ def api_market_news():
             snippet = (
                 f"{dur.capitalize()} {sig} sinyali aktif"
                 f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
-                f"SL: {sl_val:.2f}₺ | Hedef: {tp_val:.2f}₺"
+                f"SL: {tr_price_filter(sl_val)}₺ | Hedef: {tr_price_filter(tp_val)}₺"
             )
             source = "algorithmic"
 
