@@ -4537,7 +4537,10 @@ def api_macro_summary():
     Stale-while-revalidate: cache varsa anında döner, arka planda yeniler."""
     now     = time.time()
     today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
-    cached  = _macro_ai_cache
+    # Snapshot (dict() kopya) — arka plan refresh thread'i _macro_ai_cache'i
+    # .update() ile mutate ederken bu request'in yarısı eski/yarısı yeni alan
+    # okumasın (torn read: eski text + yeni generated_at gibi tutarsız yanıt).
+    cached  = dict(_macro_ai_cache)
 
     cache_fresh = (cached.get("date") == today_s
                    and (now - cached.get("ts", 0)) < _MACRO_AI_TTL)
