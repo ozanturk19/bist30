@@ -3777,6 +3777,7 @@ def background_refresh():
                 _load_cache_from_disk()
                 _load_macro_from_disk()
                 _load_earnings_cache_from_disk()
+                _load_mtf_cache_from_disk()
             except Exception as e:
                 logger.error("web disk-reload hatası: %s", e)
             time.sleep(90)
@@ -3793,6 +3794,7 @@ def background_refresh():
                 _load_cache_from_disk()
                 _load_macro_from_disk()
                 _load_earnings_cache_from_disk()
+                _load_mtf_cache_from_disk()
             except Exception as e:
                 logger.error("background_refresh non-leader reload hatası: %s", e)
             time.sleep(90)
@@ -7788,6 +7790,43 @@ def api_signal_explanation(ticker):
 _mtf_cache     = {}        # {ticker: {"data": {...}, "ts": float}}
 _MTF_CACHE_TTL = 1800      # 30 dakika (MTF günlük/haftalık/aylık — sık değişmez)
 
+# CPO-1186 D-6 Sıra 1: disk köprüsü — web worker'lar REFRESH_WORKER=web guard'ı
+# nedeniyle _compute_mtf() hiç çağıramıyordu ve _mtf_cache yalnız leader'ın
+# kendi process belleğindeydi → /api/hisse/<X>/mtf web worker'da hep {} dönüyordu.
+_MTF_CACHE_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_mtf_cache.json")
+
+
+def _save_mtf_cache_to_disk():
+    """MTF cache'i diske yazar (cross-worker sync, sentiment deseniyle aynı). _lock DIŞINDA çağrılmalı."""
+    try:
+        with _lock:
+            snapshot = dict(_mtf_cache)
+        if not snapshot:
+            return
+        _atomic_write_json(_MTF_CACHE_DISK_PATH, snapshot)
+    except Exception as e:
+        logger.warning("_save_mtf_cache_to_disk hatası: %s", e)
+
+
+def _load_mtf_cache_from_disk():
+    """Diskten MTF cache merge — ticker başına en taze ts kazanır (web worker — yfinance yasak)."""
+    try:
+        if not os.path.exists(_MTF_CACHE_DISK_PATH):
+            return
+        with open(_MTF_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
+            disk = json.load(f)
+        if not isinstance(disk, dict):
+            return
+        with _lock:
+            for tk, dentry in disk.items():
+                if not isinstance(dentry, dict):
+                    continue
+                mem = _mtf_cache.get(tk)
+                if not mem or dentry.get("ts", 0) > mem.get("ts", 0):
+                    _mtf_cache[tk] = dentry
+    except Exception as e:
+        logger.warning("_load_mtf_cache_from_disk hatası: %s", e)
+
 
 def _compute_mtf(ticker):
     """Tek hisse için çoklu zaman dilimi sinyal hesaplar — cache tarafından çağrılır."""
@@ -11482,10 +11521,17 @@ def _mtf_warmup_daemon():
                 _mc = _mtf_cache.get(_t)
             if not _mc or (now - _mc["ts"]) > 1500:  # 25dk → 30dk TTL'den önce tazele
                 try:
-                    _compute_mtf(_t)
+                    # CPO-1186 D-6 Sıra 1 FIX: önceki haliyle sonuç hesaplanıp
+                    # hiçbir yere yazılmadan atılıyordu (_mtf_cache güncellenmiyordu) —
+                    # daemon her 30dk'da 30 ticker için yfinance çağırıp veriyi
+                    # çöpe atıyordu. api_stock_mtf()'teki yazma mantığıyla eşleştirildi.
+                    _data = _compute_mtf(_t)
+                    with _lock:
+                        _mtf_cache[_t] = {"data": _data, "ts": now}
                     time.sleep(3)  # yfinance throttle
                 except Exception:
                     pass
+        _save_mtf_cache_to_disk()
         time.sleep(1800)
 
 if os.environ.get("REFRESH_WORKER") == "1":
