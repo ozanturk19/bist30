@@ -11553,11 +11553,14 @@ threading.Thread(target=_startup, daemon=True).start()
 # CPO-585: MTF warmup daemon — REFRESH_WORKER=1 only, web worker hang önlenir
 # /api/hisse/<ticker>/mtf cache miss → web worker artık blocking call yapmaz (guard var)
 # Bu daemon 30dk'lık MTF cache'ini proaktif doldurur, cold window kalmaz.
+_MTF_DISK_FLUSH_EVERY_N = 5  # CPO-1187 D-6 Sıra-1 revizyonu: tur-sonu tek yazma yerine
+
 def _mtf_warmup_daemon():
     time.sleep(90)  # ilk cycle'dan sonra başla — startup I/O ile çakışma önlenir
     while True:
         now = time.time()
-        for _t in BIST30:
+        _written_this_round = 0
+        for _i, _t in enumerate(BIST30):
             with _lock:
                 _mc = _mtf_cache.get(_t)
             if not _mc or (now - _mc["ts"]) > 1500:  # 25dk → 30dk TTL'den önce tazele
@@ -11569,6 +11572,13 @@ def _mtf_warmup_daemon():
                     _data = _compute_mtf(_t)
                     with _lock:
                         _mtf_cache[_t] = {"data": _data, "ts": now}
+                    _written_this_round += 1
+                    # CPO-1187 D-6 Sıra-1 revizyonu: tur bitmeden diske ara-yazım —
+                    # Yahoo 40sn/ticker gecikmesiyle tam tur 20dk+ sürebiliyor; tur-sonu
+                    # tek yazma hem fix'i gözlemsiz bırakıyordu hem de tur ortası
+                    # restart'ta (günde birkaç kez oluyor) tüm turu çöpe atıyordu.
+                    if _written_this_round % _MTF_DISK_FLUSH_EVERY_N == 0:
+                        _save_mtf_cache_to_disk()
                     time.sleep(3)  # yfinance throttle
                 except Exception:
                     pass
