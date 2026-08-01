@@ -515,6 +515,8 @@ function goToDate(date) {
 
 <div id="main-content" class="container">
 
+{% include '_stale_banner.html' %}
+
 {% if loading %}
 <div style="text-align:center;padding:60px;color:#8b949e">
   <div style="font-size:32px;margin-bottom:12px">⏳</div>
@@ -856,6 +858,8 @@ async function ozSubmitSub() {
 </script>
 
 <script src="/static/bp-search.js?v=46" defer></script>
+<script src="/static/stale-banner.js?v=1"></script>
+<script>bpStartDataQualityPolling();</script>
 
 {% include '_mobile_nav_partial.html' %}
 </body>

@@ -400,6 +400,9 @@
 </div>
 
 <div id="main-content" class="container">
+
+{% include '_stale_banner.html' %}
+
   <!-- Search Bar -->
   <div class="search-bar">
     <label>Karşılaştırılacak hisseler (2-4 adet)</label>
@@ -965,6 +968,8 @@ loadMacroBar();
 setInterval(loadMacroBar, 60000);
 </script>
 <script src="/static/bp-search.js?v=46" defer></script>
+<script src="/static/stale-banner.js?v=1"></script>
+<script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}
 </body>
 </html>

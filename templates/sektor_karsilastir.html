@@ -171,6 +171,9 @@
 </header>
 
 <div class="container">
+
+{% include '_stale_banner.html' %}
+
   <div class="page-hdr">
     <h1>Sektör Karşılaştırma</h1>
     <p>2 veya 3 sektörü sinyal gücü, hacim ve performans bazında yan yana karşılaştırın.</p>
@@ -385,5 +388,7 @@ function fmtPrice(p) {
 
 loadSectors();
 </script>
+<script src="/static/stale-banner.js?v=1"></script>
+<script>bpStartDataQualityPolling();</script>
 </body>
 </html>

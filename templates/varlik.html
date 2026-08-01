@@ -384,6 +384,8 @@
 
 <div id="main-content" class="container">
 
+{% include '_stale_banner.html' %}
+
   <!-- Kategori ve eş varlıklar -->
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
     <a href="{{ category_url or '/' }}" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2)">
@@ -936,6 +938,8 @@ loadChart();
 })();
 </script>
 <script src="/static/bp-search.js?v=46" defer></script>
+<script src="/static/stale-banner.js?v=1"></script>
+<script>bpStartDataQualityPolling();</script>
 
 {# CPO-511 #29: persistent mobile bottom-nav (altin/gumus/petrol/dogalgaz varlık sayfaları) #}
 {% include '_mobile_nav_partial.html' %}

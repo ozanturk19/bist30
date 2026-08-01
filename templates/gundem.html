@@ -298,6 +298,8 @@
 
 <div id="main-content" class="container">
 
+{% include '_stale_banner.html' %}
+
   <!-- AI Makro Özeti -->
   <div id="macroSummaryBox" style="display:none;background:linear-gradient(135deg,rgba(31,111,235,.07),rgba(139,92,246,.04));border:1px solid rgba(31,111,235,.18);border-radius:10px;padding:12px 16px;margin-bottom:16px">
     <div style="display:flex;align-items:flex-start;gap:10px">
@@ -691,6 +693,8 @@ loadMacroBar();
 setInterval(loadMacroBar, 60000);
 </script>
 <script src="/static/bp-search.js?v=46" defer></script>
+<script src="/static/stale-banner.js?v=1"></script>
+<script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}
 </body>
 </html>
