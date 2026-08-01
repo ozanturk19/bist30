@@ -114,7 +114,9 @@
     + '@keyframes bpRefreshSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}'
     + '.bp-refresh-btn svg{width:12px;height:12px;flex-shrink:0}'
     + '@media (max-width:768px){.bp-live-time{font-size:10px;padding:4px 7px}.bp-live-time .bp-live-time-text{display:none}.bp-refresh-btn .bp-refresh-label{display:none}.bp-refresh-btn{padding:5px 8px}}'
-    + '@media (max-width:480px){.bp-live-time{display:none}}';
+    + '@media (max-width:480px){.bp-live-time{display:none}}'
+    /* CPO-1192 M1/M2: mobil üst bar taşması — Yenile pull-to-refresh'le çözülür, header'da yer kaplamasın */
+    + '@media (max-width:600px){.bp-refresh-btn{display:none}}';
 
   // Inject CSS
   if (!document.getElementById('bp-search-css')) {

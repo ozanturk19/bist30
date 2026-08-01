@@ -49,7 +49,8 @@
       'color:#c7c5cd;font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap}' +
       '.bp-lm-toggle:hover{border-color:#b8c3ff;color:#e5e1e4}' +
       '.bp-lm-toggle .bp-lm-dot{width:7px;height:7px;border-radius:50%;background:#6b7280;display:inline-block}' +
-      'body.learning-on .bp-lm-toggle .bp-lm-dot{background:#00e290}';
+      'body.learning-on .bp-lm-toggle .bp-lm-dot{background:#00e290}' +
+      '@media (max-width:600px){header .bp-lm-toggle{display:none}}';
     var s = document.createElement('style');
     s.id = 'bp-lm-style';
     s.textContent = css;
