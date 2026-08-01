@@ -35,6 +35,16 @@ last_macro_ai.json
 last_news_cache.json
 last_company_summary.json
 last_mtf_cache.json
+last_earnings_cache.json
+last_live_prices.json
+last_sentiment_cache.json
+live_prices_cache.json
+fundamentals_cache.json
+health_heartbeat.json
+health_last_mail.txt
+health_last_restart.txt
+health_stale_count.txt
+render_fail_count.txt
 prev_signals.json
 push_state.json
 _signal_explain_cache.json
