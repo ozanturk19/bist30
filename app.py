@@ -2641,33 +2641,11 @@ def _notify_email_signal_changes(changes):
     threading.Thread(target=_send_instant, daemon=True).start()
 
 
-# SPEC-009 Aksiyon 3 (Trading Day Guard): resmi tatil + hafta sonu digest
-# atlanır — veri oluşmadan mail anlamsız + spam algısı. holidays paketi yoksa
-# defansif: yalnız hafta sonu kontrolü (digest crash etmez, sadece tatil atlamaz).
-try:
-    import holidays as _holidays_lib
-    _tr_holidays = _holidays_lib.Turkey()
-except Exception:
-    _tr_holidays = None
-    logger.warning("holidays paketi yüklü değil — is_trading_day yalnız hafta sonu kontrolü")
-
-def is_trading_day(d=None):
-    """BIST işlem günü mü? Hafta sonu (Cmt/Pzr) veya TR resmi tatil → False."""
-    d = d or datetime.now(_TZ_TR).date()
-    if d.weekday() >= 5:
-        return False
-    if _tr_holidays is not None and d in _tr_holidays:
-        return False
-    return True
-
-
-# ── SPEC-014 Faz B — Data Freshness SLA ───────────────────────────────────────
-def _market_open(now_tr=None):
-    """BIST seansı açık mı? Hafta içi 10:00-18:00 TR + işlem günü."""
-    now_tr = now_tr or datetime.now(_TZ_TR)
-    if not is_trading_day(now_tr.date()):
-        return False
-    return 10 <= now_tr.hour < 18
+# SPEC-009 Aksiyon 3 / CPO-1195 §2: takvim mantığı (hafta içi + TR resmi tatil +
+# 10-18 TR seans penceresi) artık lib/trading_calendar.py'de tek kanonik kaynak —
+# tools/restart-bist30-refresh-conditional.sh de aynı modülden okuyor, iki bağımsız
+# kopya kalmasın diye (CPO-1193 §4'ün açtığı borç).
+from lib.trading_calendar import is_trading_day, market_open as _market_open
 
 
 def _compute_data_quality(bad_ticker_count, total_count, market_open):
@@ -10729,6 +10707,13 @@ def _get_blog_cache():
 @app.route("/backtest")
 def backtest_page():
     return redirect("/sinyal-performans", code=301)
+
+
+# CPO-1191 Karar 6: /virtual-portfolio kaldırıldığında 301 eklenmemişti (CPO-1195 §5) —
+# dış link/bookmark/arama indeksi 404 yiyordu. /backtest ile aynı muamele.
+@app.route("/virtual-portfolio")
+def virtual_portfolio_redirect():
+    return redirect("/portfolio", code=301)
 
 
 @app.route("/blog")

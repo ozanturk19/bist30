@@ -7,30 +7,19 @@
 # bilinçli olarak durdurulan servis, 01.08 deploy'unda sessizce geri
 # açılmıştı (bkz. CPO-1193 §4).
 #
-# Takvim mantığı app.py'nin is_trading_day()/_market_open() ile aynı
-# (hafta içi + `holidays` paketi Turkey() takvimi + 10-18 TR saat
-# penceresi) — app.py'yi import ETMİYORUZ çünkü import başlı başına
+# Takvim mantığı artık lib/trading_calendar.py'de tek kanonik kaynak
+# (CPO-1195 §2) — app.py da buradan okuyor, iki bağımsız kopya kalmadı.
+# app.py'nin kendisini import ETMİYORUZ çünkü onun importu başlı başına
 # tüm background thread'leri (digest-cron, macro-bg-loop, vs.) ayağa
-# kaldırıyor; burada sadece aynı iki kural bağımsız değerlendiriliyor.
+# kaldırıyor; lib/trading_calendar.py yan etkisiz, saf bir modül.
 set -euo pipefail
 
 SERVICE="bist30-refresh"
 PYTHON="${PYTHON:-/root/bist30/venv/bin/python3}"
 [ -x "$PYTHON" ] || PYTHON="python3"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-MARKET_OPEN=$("$PYTHON" -c "
-from datetime import datetime
-from zoneinfo import ZoneInfo
-now = datetime.now(ZoneInfo('Europe/Istanbul'))
-trading_day = now.weekday() < 5
-if trading_day:
-    try:
-        import holidays
-        trading_day = now.date() not in holidays.Turkey()
-    except Exception:
-        pass
-print('1' if (trading_day and 10 <= now.hour < 18) else '0')
-" 2>/dev/null || echo "ERR")
+MARKET_OPEN=$(cd "$REPO_DIR" && "$PYTHON" lib/trading_calendar.py 2>/dev/null || echo "ERR")
 
 TS="$(date '+%Y-%m-%d %H:%M:%S UTC')"
 
