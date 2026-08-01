@@ -27,7 +27,8 @@ if [ "$MARKET_OPEN" = "1" ]; then
   echo "$TS restart-bist30-refresh-conditional: seans içi -> restart"
   systemctl restart "$SERVICE"
 elif [ "$MARKET_OPEN" = "0" ]; then
-  CURRENT=$(systemctl is-active "$SERVICE" 2>/dev/null || echo unknown)
+  CURRENT=$(systemctl is-active "$SERVICE" 2>/dev/null) || true
+  CURRENT="${CURRENT:-unknown}"
   echo "$TS restart-bist30-refresh-conditional: seans dışı -> SKIP (mevcut durum korunuyor: $CURRENT)"
 else
   echo "$TS restart-bist30-refresh-conditional: seans-durumu sorgusu BAŞARISIZ -> güvenli taraf: SKIP, elle kontrol et" >&2
