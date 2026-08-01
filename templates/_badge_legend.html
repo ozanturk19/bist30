@@ -7,8 +7,9 @@
   .bp-badge-legend summary::-webkit-details-marker { display: none; }
   .bp-badge-legend summary::before { content: "▸"; font-size: 10px; transition: transform .15s; }
   .bp-badge-legend[open] summary::before { transform: rotate(90deg); }
-  .bp-badge-legend-body { display: flex; flex-wrap: wrap; gap: 10px 16px; padding: 6px 2px 2px 14px; }
-  .bp-badge-legend-body > div { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .bp-badge-legend-body { display: flex; flex-direction: column; gap: 8px; padding: 6px 2px 2px 14px; }
+  .bp-badge-legend-body > div { white-space: normal; }
+  .bp-badge-legend-body > div > span:first-child { margin-right: 5px; }
 </style>
 <details class="bp-badge-legend">
   <summary>Rozetler ne anlama geliyor?</summary>
