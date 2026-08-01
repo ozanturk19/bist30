@@ -1,6 +1,12 @@
 """
 BIST30 Backtest & Strateji Analizi
 Mevcut sinyal motoru + alternatif stratejiler karşılaştırması
+
+Bağımsız offline araştırma script'i (CLI, `python3 backtest.py`) — 13 strateji
+varyantını karşılaştırır. app.py'nin canlı /api/backtest ve /sinyal-performans
+motoruyla (run_backtest()/stats()) ORTAK KOD PAYLAŞMAZ: farklı amaç (tek sinyal
+değil, alternatif strateji seti), farklı veri modeli (position +1/-1 çift yönlü
+trade listesi). Hiçbir route bunu import etmez.
 """
 
 import warnings

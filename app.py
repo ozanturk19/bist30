@@ -9333,6 +9333,12 @@ def backtest_ticker(ticker_base, fwd_days=20):
         return None
 
 
+def _signed_ret(ep):
+    """Sinyal yönüne göre düzeltilmiş getiri: AL için ham ret_pct, SAT için
+    ters işaretli (kısa pozisyon mantığıyla fiyat düşüşü = kazanç)."""
+    return ep["ret_pct"] if ep["sig"] == "AL" else -ep["ret_pct"]
+
+
 def run_backtest():
     """BIST30 hisseleri için backtest yürüt ve cache'e kaydet."""
     # Sadece BIST30 (ilk 28 hisse) – 130 hisse çok yavaş olur
@@ -9354,10 +9360,10 @@ def run_backtest():
                 "ticker":   t,
                 "al_count": len(t_al),
                 "al_wins":  sum(1 for e in t_al if e["win"]),
-                "al_avg":   round(sum(e["ret_pct"] for e in t_al) / len(t_al), 2) if t_al else None,
+                "al_avg":   round(sum(_signed_ret(e) for e in t_al) / len(t_al), 2) if t_al else None,
                 "sat_count":len(t_sa),
                 "sat_wins": sum(1 for e in t_sa if e["win"]),
-                "sat_avg":  round(sum(e["ret_pct"] for e in t_sa) / len(t_sa), 2) if t_sa else None,
+                "sat_avg":  round(sum(_signed_ret(e) for e in t_sa) / len(t_sa), 2) if t_sa else None,
             })
 
     def stats(eps):
@@ -9367,7 +9373,7 @@ def run_backtest():
             "avg_duration_days": None,
         }
         wins = [e for e in eps if e["win"]]
-        rets = [e["ret_pct"] for e in eps]
+        rets = [_signed_ret(e) for e in eps]
         avg  = sum(rets) / len(rets)
         std  = (sum((r - avg) ** 2 for r in rets) / len(rets)) ** 0.5
 

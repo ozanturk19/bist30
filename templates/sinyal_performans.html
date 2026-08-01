@@ -358,7 +358,7 @@
           </td>
           <td>
             {% if t.sat_avg is not none %}
-              <span class="{{ 'c-red' if t.sat_avg >= 0 else 'c-green' }}">{{ '+' if t.sat_avg >= 0 else '' }}{{ t.sat_avg }}%</span>
+              <span class="{{ 'c-green' if t.sat_avg >= 0 else 'c-red' }}">{{ '+' if t.sat_avg >= 0 else '' }}{{ t.sat_avg }}%</span>
             {% else %}—{% endif %}
           </td>
         </tr>
