@@ -623,6 +623,8 @@
     <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
   </div>
 
+  {% include "_badge_legend.html" %}
+
   <!-- Tablo -->
   <div class="table-wrap" id="tableWrap">
     <div class="loading-overlay" id="loadingDiv">
@@ -1053,7 +1055,7 @@ function renderResults(rows, count) {
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
         : '<span style="color:var(--text3)">—</span>';
       const _lk  = (_premLocked && s.tier === 'premium') ? ' mr-locked' : '';
-      const _prm = s.tier === 'premium' ? ' <span style="color:#a855f7;font-size:11px">💎</span>' : s.tier === 'plus' ? ' <span style="color:#1f6feb;font-size:11px">⭐</span>' : '';
+      const _prm = s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:#a855f7;font-size:11px">💎</span>' : s.tier === 'plus' ? ' <span title="Plus sinyal" style="color:#1f6feb;font-size:11px">⭐</span>' : '';
       const _adx = s.adx || 0;
       const _tl  = _adx >= 25 ? ['Güçlü','strong'] : _adx >= 18 ? ['Orta','medium'] : ['Zayıf','weak'];
       return `<a href="/hisse/${s.ticker}" class="mr-card${_lk}">
