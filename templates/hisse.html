@@ -1571,8 +1571,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       opacity: 0.92;
     }
     @media (max-width: 480px) {
-      .bp-segments-inner { gap: 2px; padding: 3px; }
-      .bp-segments-inner a { font-size: 12px; padding: 8px 6px; letter-spacing: 0.2px; gap: 4px; }
+      .bp-segments-inner {
+        gap: 2px; padding: 3px;
+        overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+      }
+      .bp-segments-inner::-webkit-scrollbar { display: none; }
+      .bp-segments-inner a { flex: 0 0 auto; font-size: 12px; padding: 8px 10px; letter-spacing: 0.2px; gap: 4px; }
       .bp-seg-icon { width: 11px; height: 11px; }
     }
     /* FAB "Üste çık" — scroll edildiğinde sağ-alt */
