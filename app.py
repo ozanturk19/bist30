@@ -4550,8 +4550,18 @@ def api_macro_summary():
                          name="macro-ai-refresh").start()
 
     if cached.get("text"):
+        age_h = (now - cached.get("ts", 0)) / 3600.0
+        gen_date = ""
+        try:
+            if cached.get("date"):
+                gen_date = datetime.strptime(cached["date"], "%Y-%m-%d").strftime("%d.%m")
+        except Exception:
+            gen_date = ""
         return safe_json({"summary": cached["text"], "cached": cache_fresh,
-                          "generated_at": cached.get("generated_at", "")})
+                          "generated_at": cached.get("generated_at", ""),
+                          "generated_date": gen_date,
+                          "stale_warning": 24 <= age_h < 48,
+                          "hidden": age_h >= 48})
     return safe_json({"summary": "", "cached": False})
 
 

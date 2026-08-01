@@ -634,8 +634,20 @@ async function loadMacroSummary() {
     const box  = document.getElementById('macroSummaryBox');
     const el   = document.getElementById('macroSummaryText');
     const tm   = document.getElementById('macroSummaryTime');
+    if (data.hidden) {
+      if (el) el.textContent = 'Özet hazırlanamadı, gündem başlıklarına bakın.';
+      if (tm) tm.textContent = '';
+      if (box) box.style.display = '';
+      return;
+    }
     if (el) el.textContent = txt;
-    if (tm && data.generated_at) tm.textContent = 'Oluşturuldu: ' + data.generated_at;
+    if (tm) {
+      if (data.stale_warning && data.generated_date && data.generated_at) {
+        tm.textContent = '⚠️ Bu özet ' + data.generated_date + ' saat ' + data.generated_at + '\'de üretildi';
+      } else if (data.generated_at) {
+        tm.textContent = 'Oluşturuldu: ' + data.generated_at;
+      }
+    }
     if (box) box.style.display = '';
   } catch(e) {}
 }
