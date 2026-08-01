@@ -8392,6 +8392,47 @@ def api_data_quality():
     return safe_json(_data_quality_snapshot(stocks))
 
 
+@app.route("/api/internal/cache-inventory")
+def api_cache_inventory():
+    """CPO-1186 §3 APPROVE — REFRESH_WORKER guard'lı her cache'in disk-köprü
+    durumu tek yerde. NEVER_WRITTEN (dosya hiç yazılmamış) ile STALE (dosya
+    var ama mtime eski) ayrı sınıflar — dosya yoksa yaş hesaplanamaz, tek
+    sınıfta toplansa tüketici None/Infinity'de patlar."""
+    now = time.time()
+    entries = []
+
+    def _check(name, path, note=""):
+        if not path or not os.path.exists(path):
+            entries.append({"name": name, "disk_path_exists": False,
+                            "last_write_age_s": None, "status": "NEVER_WRITTEN", "note": note})
+            return
+        age = now - os.path.getmtime(path)
+        entries.append({"name": name, "disk_path_exists": True,
+                        "last_write_age_s": round(age, 1),
+                        "status": "FRESH" if age < 3600 else "STALE", "note": note})
+
+    _check("stocks_main", _DISK_CACHE_PATH)
+    _check("live_prices", _LIVE_PRICES_DISK_PATH)
+    _check("macro", _MACRO_DISK_PATH)
+    _check("macro_ai_summary", _MACRO_AI_DISK_PATH, "Gemini kota bağımlı — STALE beklenir")
+    _check("news", _NEWS_CACHE_DISK_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
+    _check("company_summary", _COMPANY_SUMMARY_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
+    _check("sentiment", _SENTIMENT_DISK_PATH)
+    _check("signal_explain", _SIG_EXPLAIN_DISK_PATH, "Gemini kota bağımlı")
+    _check("earnings_calendar", _EARNINGS_CACHE_DISK_PATH)
+    _check("mtf", _MTF_CACHE_DISK_PATH)
+    _check("chart_xu100", os.path.join(os.path.dirname(os.path.abspath(__file__)), "chart_xu100.json"),
+           "orphan — yazan yok, D-4")
+    for _vk in ("btc", "altin", "gumus", "eth", "sp500", "nasdaq", "sol", "bnb", "petrol", "dogalgaz", "xu030"):
+        entries.append({"name": f"chart_{_vk}", "disk_path_exists": False, "last_write_age_s": None,
+                        "status": "NEVER_WRITTEN", "note": "disk köprüsü hiç kurulmamış, D-6 Sıra 3"})
+    entries.append({"name": "fundamentals", "disk_path_exists": False, "last_write_age_s": None,
+                    "status": "NEVER_WRITTEN",
+                    "note": "yalnız 3 ticker tek seferlik _startup()'ta, periyodik daemon yok, D-6 Sıra 2"})
+
+    return safe_json({"generated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"), "caches": entries})
+
+
 @app.route("/sitemap.xml")
 def sitemap():
     today = date.today().isoformat()
