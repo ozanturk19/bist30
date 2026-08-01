@@ -3776,6 +3776,7 @@ def background_refresh():
             try:
                 _load_cache_from_disk()
                 _load_macro_from_disk()
+                _load_earnings_cache_from_disk()
             except Exception as e:
                 logger.error("web disk-reload hatası: %s", e)
             time.sleep(90)
@@ -3791,6 +3792,7 @@ def background_refresh():
             try:
                 _load_cache_from_disk()
                 _load_macro_from_disk()
+                _load_earnings_cache_from_disk()
             except Exception as e:
                 logger.error("background_refresh non-leader reload hatası: %s", e)
             time.sleep(90)
@@ -9597,6 +9599,45 @@ _earnings_cache      = {"data": None, "ts": 0}
 _EARNINGS_TTL        = 3600 * 12   # 12 saat
 _earnings_refreshing = False         # arka plan yenileme kilidi
 
+# CPO-1180 K2 FIX: _earnings_cache in-memory'di, REFRESH_WORKER=1 (bist30-refresh.service)
+# hesaplayıp KENDİ process belleğine yazıyordu; REFRESH_WORKER=web (bist30.service) worker'ları
+# hiç yfinance çağırmıyor (guard) AMA diskten okuma köprüsü de yoktu → /api/bilanco-takvimi
+# hep {"periods": [], "updated_at": "—"} dönüyordu (prices/macro'daki disk-reload paterni eksikti).
+_EARNINGS_CACHE_DISK_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "last_earnings_cache.json")
+
+
+def _save_earnings_cache_to_disk():
+    """Bilanço takvimi cache'ini diske yazar (hesaplayan process — refresh service veya
+    REFRESH_WORKER unset lider). _lock DIŞINDA çağrılmalı."""
+    try:
+        data = _earnings_cache.get("data")
+        if not data:
+            return   # empty-overwrite guard
+        _atomic_write_json(_EARNINGS_CACHE_DISK_PATH, data)
+    except Exception as e:
+        logger.warning("_save_earnings_cache_to_disk hatası: %s", e)
+
+
+def _load_earnings_cache_from_disk():
+    """Diskten bilanço takvimi cache'ini yükler (web worker — yfinance yasak).
+    mtime değişmediyse ve in-memory veri varsa SKIP (H3 patern)."""
+    try:
+        if not os.path.exists(_EARNINGS_CACHE_DISK_PATH):
+            return
+        current_mtime = os.path.getmtime(_EARNINGS_CACHE_DISK_PATH)
+        if _earnings_cache.get("ts") == current_mtime and _earnings_cache.get("data"):
+            return
+        with open(_EARNINGS_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, dict) or "periods" not in data:
+            return
+        _earnings_cache["data"] = data
+        _earnings_cache["ts"]   = current_mtime
+        _rebuild_earnings_warning_lookup()
+    except Exception as e:
+        logger.warning("_load_earnings_cache_from_disk hatası: %s", e)
+
 # BIST'te finansal sonuçlar genellikle şu dönemlerde açıklanır:
 # Q4 (Ekim-Aralık bilanços): Mart-Nisan
 # Q1 (Ocak-Mart bilanços):   Mayıs ortası
@@ -9708,6 +9749,8 @@ def _earnings_refresh_impl():
         _earnings_cache["ts"]   = now
     # Faz 1 #5: flat lookup rebuild (O(1) erişim için)
     _rebuild_earnings_warning_lookup()
+    # CPO-1180 K2: web worker'ların disk-reload ile okuyabilmesi için diske yaz
+    _save_earnings_cache_to_disk()
     logger.info("_earnings_refresh_impl: tamamlandi (%d donem)", len(result_periods))
 
 
@@ -9762,8 +9805,16 @@ def get_earnings_data():
     if cached and (now - ts) < _EARNINGS_TTL:
         return cached
 
-    # Stale veya yok — arka planda yenile (CPO-558F: web worker'da yfinance thread yasak)
-    if not _earnings_refreshing and os.environ.get("REFRESH_WORKER") != "web":
+    # Stale veya yok
+    if os.environ.get("REFRESH_WORKER") == "web":
+        # CPO-1180 K2 FIX: web worker'da yfinance yasak (CPO-558F) — önceden burada
+        # hiçbir şey yapılmıyordu, disk-reload köprüsü yoktu, hep boş dönüyordu.
+        # refresh service'in diske yazdığı veriyi oku (küçük dosya, request-path'te ucuz).
+        _load_earnings_cache_from_disk()
+        cached = _earnings_cache.get("data")
+        if cached:
+            return cached
+    elif not _earnings_refreshing:
         threading.Thread(target=_do_earnings_refresh, daemon=True,
                          name="earnings-refresh").start()
 
