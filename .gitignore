@@ -39,7 +39,11 @@ push_state.json
 _signal_explain_cache.json
 bist30.db
 chart_macros.json
+chart_stocks.json
+chart_xu100.json
 ALERT.md
+data/
+data-staging/
 
 # Operasyonel dosyalar (prod-only, repo'ya girmez)
 DEPLOY_LOG.md
