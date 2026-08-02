@@ -61,6 +61,13 @@ DEPLOY_LOG.md
 MIGRATION_PLAN.md
 scripts/
 
+# CPO-1204 §4.2 — prod-only, canonical kopyası ops/server-config/ altında tutulur
+# (bkz. ops repo). Buraya eklenmemesi bilinçli: git pull'un untracked-file
+# çakışmasıyla sessizce ölmesini önler (bu path'ler git tarafından hiç izlenmez).
+static/maintenance.html
+static/maintenance.html.bak-*
+prometheus-config/
+
 # User data
 portfolios/
 snapshots/
