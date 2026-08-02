@@ -2973,9 +2973,18 @@ def _freshness_monitor_loop():
     #22 trading-day + market-hours guard ile false positive önlenir
     (gece/tatil veri yaşı zaten yüksek olur — alarm yalnız seans içinde).
     Anti-spam: aynı stale durumda en fazla saatte 1 mesaj.
+
+    CPO-1207 §1: leader durumu artık HER TURDA burada değerlendiriliyor —
+    önceden modül-yükleme anında bir kez kontrol edilip thread hiç
+    başlatılmıyordu (reload race'inde kaybeden worker kalıcı olarak ölüydü,
+    sonradan lock boşalsa da hiç yeniden denemiyordu). _digest_cron_loop'taki
+    _is_digest_leader() deseniyle birebir aynı ilke.
     """
     while True:
         try:
+            if not _is_notify_leader():
+                time.sleep(300)
+                continue
             if _market_open():
                 fresh = build_data_freshness()
                 age = fresh.get("stocks_age_seconds")
@@ -2996,13 +3005,11 @@ def _freshness_monitor_loop():
         time.sleep(300)  # 5 dakikada bir kontrol
 
 
-# Leader-only — #30 maliyet/spam multiplier fix: 4 worker yerine 1 worker
-# Telegram alarmı gönderir (anti-spam state worker-local olduğu için gate şart).
-if _is_notify_leader():
-    threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor").start()
-    logger.info("Freshness monitor başlatıldı (LEADER — 5dk kontrol, seansda >25dk → Telegram)")
-else:
-    logger.info("Freshness monitor: non-leader worker — atlandı (spam fix)")
+# #30 maliyet/spam multiplier fix: 4 worker yerine 1 worker Telegram alarmı
+# gönderir (anti-spam state worker-local olduğu için gate şart). CPO-1207 §1:
+# thread artık KOŞULSUZ başlar — leader kontrolü döngü içinde her turda.
+threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor").start()
+logger.info("Freshness monitor başlatıldı (leader durumu döngü içinde her turda — 5dk kontrol, seansda >25dk → Telegram)")
 
 
 # SPEC-008 L5 — Modül-load-time tanımlama (alarm thread'inden ÖNCE).
@@ -3025,10 +3032,16 @@ def _chart_integrity_count_recent(now=None):
 
 def _chart_integrity_alarm_loop():
     """SPEC-008 L5 — Son 10dk içindeki chart integrity_error ticker sayısı eşiği
-    aşarsa journalctl'e ALARM düşürür. Anti-spam: aynı durumda 30dk'da 1 mesaj."""
+    aşarsa journalctl'e ALARM düşürür. Anti-spam: aynı durumda 30dk'da 1 mesaj.
+
+    CPO-1207 §1 (aynı sınıf, Freshness monitor'ün hemen yanında bulundu):
+    leader kontrolü döngü içinde her turda — bkz. _freshness_monitor_loop."""
     last_alarm = 0.0
     while True:
         try:
+            if not _is_notify_leader():
+                time.sleep(300)
+                continue
             n = _chart_integrity_count_recent()
             if n > _CHART_INTEGRITY_ALARM_THRESHOLD:
                 now = time.time()
@@ -3043,11 +3056,11 @@ def _chart_integrity_alarm_loop():
         time.sleep(300)  # 5 dakikada bir kontrol
 
 
-# Leader-only — anti-spam state worker-local; 4× duplicate alarm engellenir.
-if _is_notify_leader():
-    threading.Thread(target=_chart_integrity_alarm_loop, daemon=True,
-                     name="chart-integrity-alarm").start()
-    logger.info("Chart-integrity alarm başlatıldı (LEADER — SPEC-008 L5)")
+# Anti-spam state worker-local; 4× duplicate alarm engellenir. CPO-1207 §1:
+# thread koşulsuz başlar — leader kontrolü döngü içinde her turda.
+threading.Thread(target=_chart_integrity_alarm_loop, daemon=True,
+                 name="chart-integrity-alarm").start()
+logger.info("Chart-integrity alarm başlatıldı (leader durumu döngü içinde her turda — SPEC-008 L5)")
 
 
 # M6 — Synthetic drift monitor: ardışık refresh döngüleri arasında fiyat drift sayar.
@@ -6249,6 +6262,16 @@ def _prefetch_news_worker():
     # Site oturmadan prefetch Gemini'ye yüklenmesin → 120s → 300s.
     time.sleep(_PREFETCH_STARTUP_GRACE_S)
     while True:
+        # CPO-1207 §1: leader kontrolü artık HER TURDA burada — önceden yalnız
+        # modül-yükleme anında (thread'in hiç başlatılıp başlatılmayacağı
+        # kararında) kontrol ediliyordu. Reload race'inde kaybeden worker'ın
+        # thread'i hiç doğmuyordu; kilit sonradan boşalsa (eski leader ölse)
+        # bile o worker bir daha asla denemiyordu (kanıt: lsof ile kilit
+        # sahibi 871107 iken, o worker'ın prefetch thread'i hiç yoktu).
+        if not _is_gemini_leader():
+            time.sleep(_PREFETCH_POLL_S)
+            continue
+
         now = time.time()
 
         last_run = _prefetch_last_run_ts()
@@ -6309,20 +6332,28 @@ _prefetch_thread = threading.Thread(
     name="gemini-prefetch"
 )
 # SPEC-009 Gemini Faz 1: yalnız leader worker prefetch çalıştırır — 4× Gemini
-# maliyet multiplier fix. Non-leader 3 worker prefetch yapmaz (on-demand cache'ten okur).
-if _is_gemini_leader():
-    _prefetch_thread.start()
-    logger.info("gemini-prefetch: LEADER worker — bg prefetch aktif")
-else:
-    logger.info("gemini-prefetch: non-leader worker — prefetch atlandı (maliyet fix)")
+# maliyet multiplier fix (non-leader 3 worker prefetch yapmaz, on-demand
+# cache'ten okur). CPO-1207 §1: thread artık KOŞULSUZ başlar — leader
+# kontrolü döngü içinde her turda (_prefetch_news_worker üstünde).
+_prefetch_thread.start()
+logger.info("gemini-prefetch: thread başlatıldı (leader durumu döngü içinde her turda)")
 
 
 def _company_summary_prefetch_worker():
     """SPEC-011 L4 — Şirket AI özetlerini yavaşça doldurur (leader-only).
     Eksik/bayat özetleri 35s arayla üretir → Gemini rate-limit dostu.
-    Tur sonunda 12h uyur (TTL 30 gün, acele yok)."""
+    Tur sonunda 12h uyur (TTL 30 gün, acele yok).
+
+    CPO-1207 §1: leader kontrolü döngü içinde her turda — bkz.
+    _prefetch_news_worker (aynı sınıf/aynı gerekçe)."""
     time.sleep(_PREFETCH_STARTUP_GRACE_S)   # SPEC-016 K1 — restart-grace (soğuk-start storm fix)
     while True:
+        if not _is_gemini_leader():
+            # 12h'lik tur-sonu uykusu burada UYGULANMAZ — non-leader kısa
+            # aralıkla (_PREFETCH_POLL_S) yeniden dener, kilit boşalınca
+            # 12h'e kadar bekletmez.
+            time.sleep(_PREFETCH_POLL_S)
+            continue
         try:
             now = time.time()
             with _lock:
@@ -6356,12 +6387,10 @@ _company_summary_thread = threading.Thread(
     daemon=True,
     name="gemini-company-summary"
 )
-# Leader-only — #30 maliyet multiplier fix (4 worker yerine 1)
-if _is_gemini_leader():
-    _company_summary_thread.start()
-    logger.info("gemini-company-summary: LEADER worker — bg prefetch aktif")
-else:
-    logger.info("gemini-company-summary: non-leader worker — prefetch atlandı")
+# #30 maliyet multiplier fix (4 worker yerine 1) — CPO-1207 §1: thread artık
+# KOŞULSUZ başlar, leader kontrolü döngü içinde her turda.
+_company_summary_thread.start()
+logger.info("gemini-company-summary: thread başlatıldı (leader durumu döngü içinde her turda)")
 
 
 # SPEC-009 Faz 2 (redesign) — gemini-cache-sync: timer-tabanlı disk senkron.
@@ -6369,17 +6398,25 @@ else:
 # 90s'lik bg timer thread — background_refresh non-leader pattern'i birebir.
 # Leader: in-memory cache'i diske yazar. Non-leader: diskten okur. Inline I/O YOK.
 def _gemini_cache_sync_loop():
-    is_leader = _is_gemini_leader()
-    mode = "LEADER (disk yazar)" if is_leader else "non-leader (disk okur)"
-    logger.info("gemini-cache-sync: %s", mode)
     # CPO-1205 §4-2: leader de boot'ta diski bir kez okusun. Eskiden yalnız
     # non-leader okuyordu — worker recycle sonrası boş açılan yeni leader
     # diski hiç görmeden Gemini'ye 8 hissenin tamamını yeniden soruyordu.
     _load_news_cache_from_disk()
     _load_macro_ai_from_disk()
     _load_company_summary_from_disk()
+    # CPO-1207 §1 (aynı sınıf, bu thread'de bulundu): eskiden is_leader thread
+    # başlangıcında BİR KEZ okunup döngü boyunca sabit kalıyordu — kilit
+    # sonradan boşalıp bu worker leader olsa (veya leaderliğini kaybetse) bile
+    # mod hiç güncellenmiyordu. Artık her turda yeniden değerlendiriliyor;
+    # mod değiştiğinde loglanıyor (her 90s aynı satırı basmasın diye).
+    _last_logged_mode = None
     while True:
         try:
+            is_leader = _is_gemini_leader()
+            mode = "LEADER (disk yazar)" if is_leader else "non-leader (disk okur)"
+            if mode != _last_logged_mode:
+                logger.info("gemini-cache-sync: %s", mode)
+                _last_logged_mode = mode
             if is_leader:
                 _save_news_cache_to_disk()
                 _save_macro_ai_to_disk()
@@ -8405,6 +8442,16 @@ def _compute_health():
         "news_queue_note":         "worker-local — 4 worker'ın her biri ayrı kuyruk/sayaç tutar, global toplam değildir",
         "last_news_queue_ts":       news_last_ts,
         "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
+        # CPO-1207 §2: reload sonrası "prefetch canlı mı" sorusu önceden yalnız
+        # journalctl+lsof+/proc üçlüsüyle cevaplanabiliyordu (§1'deki bulguyu
+        # yakalamak için gereken yol). Worker-local — hangi worker karşılarsa
+        # onun kendi leader/thread durumu, global değil (news_queue_note ile
+        # aynı uyarı geçerli).
+        "leaders": {
+            "gemini":                _is_gemini_leader(),
+            "notify":                _is_notify_leader(),
+            "prefetch_thread_alive": _prefetch_thread.is_alive(),
+        },
         # CPO-1153/1154 P0-B(b) — 429 kota tükenmesi artık gözlemlenebilir (önceden
         # health OK + smoke 5/5 iken özellik 6 saat sessizce ölüydü).
         "news": {
