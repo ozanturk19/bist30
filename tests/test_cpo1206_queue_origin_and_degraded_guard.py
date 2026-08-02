@@ -44,7 +44,7 @@ def test_stock_news_endpoint_tags_origin_stock_news():
     src = _read_app()
     body = _extract_function_body(src, "api_stock_news")
     assert body, "api_stock_news() bulunamadı"
-    assert '_news_fetch_queue[ticker] = "stock_news"' in body, (
+    assert '_news_fetch_queue[ticker] = ("stock_news"' in body, (
         "api_stock_news kuyruğa eklerken gerçek kökenini (stock_news) etiketlemiyor"
     )
 
@@ -53,7 +53,7 @@ def test_market_news_endpoint_tags_origin_and_updates_stats():
     src = _read_app()
     body = _extract_function_body(src, "api_market_news")
     assert body, "api_market_news() bulunamadı"
-    assert '_news_fetch_queue[t] = "market_news"' in body, (
+    assert '_news_fetch_queue[t] = ("market_news"' in body, (
         "api_market_news kuyruğa eklerken gerçek kökenini (market_news) etiketlemiyor — "
         "CPO-1206'nın bulduğu 'üçüncü üretici' burasıydı"
     )
@@ -67,7 +67,7 @@ def test_on_demand_worker_uses_real_origin_not_hardcoded_user():
     src = _read_app()
     body = _extract_function_body(src, "_on_demand_news_worker")
     assert body, "_on_demand_news_worker() bulunamadı"
-    assert 'get_ai_news(ticker, source=origin)' in body, (
+    assert 'get_ai_news(ticker, source=origin, ua_class=ua_class)' in body, (
         "_on_demand_news_worker hâlâ sabit source=\"user\" ile çağırıyor olabilir — "
         "kuyruktan gelen gerçek origin'i kullanmalı (CPO-1206 §3)"
     )

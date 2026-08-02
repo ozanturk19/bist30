@@ -5192,8 +5192,25 @@ def _news_ttl_for(ticker: str) -> int:
 # Kuyruk artık ticker->origin eşlemesi tutuyor ki _on_demand_news_worker gerçek
 # kökeni etiketleyebilsin — önceden ikisi de sabit source="user" ile işleniyordu,
 # "kim çağırdı" hep _on_demand_news_worker'a atfediliyordu, gerçek üretici kayboluyordu.
-_news_fetch_queue     = {}         # {ticker: origin} — origin: "stock_news" | "market_news"
+_news_fetch_queue     = {}         # {ticker: (origin, ua_class)} — origin: "stock_news" | "market_news"
 _news_queue_lock      = threading.Lock()
+
+# CPO-1208 §1(d): "kotayı kim yiyor" zincirinin son doğrulanmamış halkası —
+# recycle-sonrası her poll gerçekten Gemini çağrısına mı dönüşüyor. 24s toplanıp
+# NEWS_MEASURE log satırlarından [ua_class]×[cache hit/miss]×[gemini_call] tablosu
+# çıkarılacak; grep hedefi: `grep "NEWS_MEASURE" <log> | awk ...`.
+def _news_ua_class(req) -> str:
+    ua = req.headers.get("User-Agent") or ""
+    low = ua.lower()
+    if "uptimerobot" in low:
+        return "uptimerobot"
+    if "headlesschrome" in low:
+        return "headless_chrome"
+    if "borsapusulaqa" in low:
+        return "qa_bot"
+    if not ua or _NON_HUMAN_UA_RE.search(ua):   # curl/python-requests/Go-http/bot/spider/crawl (satır ~144)
+        return "other_bot"
+    return "human_or_unclassified"
 
 # ── F5 — AI Haber Sentiment Cache ────────────────────────────────────────────
 _sentiment_cache      = {}   # {ticker: {"score": int, "label": str, "news_count": int, "ts": float}}
@@ -5967,7 +5984,7 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
     return None, None
 
 
-def get_ai_news(ticker, source="user"):
+def get_ai_news(ticker, source="user", ua_class=None):
     """Gemini + Google Search grounding ile Türkçe haber özeti üretir.
 
     Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite (bkz. _GEMINI_NEWS_ATTEMPTS;
@@ -5981,6 +5998,10 @@ def get_ai_news(ticker, source="user"):
     önceden ikisi de sabit "user" ile etiketleniyordu ("hangi worker çağırdı" yerine
     "hangi HTTP endpoint kuyruğa ekledi" bilgisi kayıptı); artık kuyruk kendisi
     {ticker: origin} tutuyor, "user" etiketi gerçek kökeni yansıtmıyordu.
+
+    ua_class: CPO-1208 §1(d) ölçümü için kuyruğa eklendiği andaki istek UA sınıfı
+    ("uptimerobot" | "headless_chrome" | "qa_bot" | "other_bot" | "human_or_unclassified"
+    | "prefetch" | None). Yalnız NEWS_MEASURE log satırında kullanılır, davranışı etkilemez.
     """
     if not GEMINI_API_KEY:
         return None
@@ -5990,7 +6011,11 @@ def get_ai_news(ticker, source="user"):
         if cached:
             ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
             if (now - cached["ts"]) < ttl:
+                # CPO-1208 §1(d) ölçüm: kuyruğa girdiğinde miss'ti, işlenene kadar
+                # başka worker doldurmuş olabilir — bu da tabloya dahil edilmeli.
+                logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=hit gemini_call=no", ticker, ua_class)
                 return cached.get("text")   # başarısız cache → None döner
+    logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=miss gemini_call=yes", ticker, ua_class)
 
     name       = STOCK_NAMES.get(ticker, ticker)
     today_str  = datetime.now(_TZ_TR).strftime("%d %B %Y")   # ör: "01 Mayıs 2026"
@@ -6014,6 +6039,11 @@ def get_ai_news(ticker, source="user"):
         else:
             logger.warning("get_ai_news(%s): tüm modeller başarısız → negatif cache 5dk src=%s", ticker, source)
             _news_cache[ticker] = {"text": None, "ts": now, "failed": True}
+    # CPO-1208 §1e-1: köprü tek yönlüydü — yalnız gemini-cache-sync leader'ı 90s'de
+    # bir yazıyordu, non-leader'ın kendi fetch'lediği ticker diske hiç düşmüyordu.
+    # Worker recycle o ticker'ı sıfırlıyor, sıradaki poll garantili miss. Fetch'i
+    # yapan worker (leader olsun olmasın) kendi sonucunu hemen yazar — çift yönlü.
+    _save_news_cache_to_disk()
     _news_daily_stats_incr("ok" if text else "fail")
     _news_daily_stats_incr(f"{'ok' if text else 'fail'}_{source}")
     return text
@@ -6325,7 +6355,7 @@ def _prefetch_news_worker():
                 logger.info("Prefetch: leader değil — tur durduruldu")
                 break
             try:
-                result = get_ai_news(ticker, source="prefetch")
+                result = get_ai_news(ticker, source="prefetch", ua_class="prefetch")
                 if result:
                     fetched += 1
             except Exception as e:
@@ -6461,12 +6491,13 @@ def _on_demand_news_worker():
             continue
         ticker = None
         origin = "stock_news"
+        ua_class = "unknown"
         with _news_queue_lock:
             if _news_fetch_queue:
-                ticker, origin = _news_fetch_queue.popitem()
+                ticker, (origin, ua_class) = _news_fetch_queue.popitem()
         if ticker:
             try:
-                result = get_ai_news(ticker, source=origin)
+                result = get_ai_news(ticker, source=origin, ua_class=ua_class)
                 _news_queue_stats["last_processed_ts"] = time.time()
                 _news_queue_stats["total_processed"] += 1
                 logger.info("On-demand news [%s]: %s [origin=%s]", ticker, "OK" if result else "FAIL", origin)
@@ -7764,7 +7795,7 @@ def api_stock_news(ticker):
 
     # 4. CACHE MISS — queue bg fetch (existing _on_demand_news_worker handles it)
     with _news_queue_lock:
-        _news_fetch_queue[ticker] = "stock_news"   # CPO-1206 §3 — gerçek köken etiketi
+        _news_fetch_queue[ticker] = ("stock_news", _news_ua_class(request))   # CPO-1206 §3 — gerçek köken etiketi
     _news_queue_stats["last_added_ts"] = time.time()
     _news_queue_stats["total_added"] += 1
 
@@ -10183,7 +10214,7 @@ def api_market_news():
                               (time.time() - news_c.get("ts", 0)) < _NEWS_FAIL_TTL
             if not failed_recently:
                 with _news_queue_lock:
-                    _news_fetch_queue[t] = "market_news"   # CPO-1206 §3 — gerçek köken etiketi
+                    _news_fetch_queue[t] = ("market_news", _news_ua_class(request))   # CPO-1206 §3 — gerçek köken etiketi
                 # CPO-1206 §4 — bu üretici önceden _news_queue_stats'e hiç dokunmuyordu,
                 # health.news_queue "toplam eklenen" sayısı bu yüzden eksik ölçüyordu.
                 _news_queue_stats["last_added_ts"] = time.time()

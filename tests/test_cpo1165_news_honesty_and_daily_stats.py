@@ -72,7 +72,7 @@ def test_daily_stats_incremented_on_demand_worker_ok_and_fail():
     src = _read_app()
     on_demand_body = _extract_function_body(src, "_on_demand_news_worker")
     assert on_demand_body, "_on_demand_news_worker() bulunamadı"
-    assert 'get_ai_news(ticker, source=origin)' in on_demand_body, (
+    assert 'get_ai_news(ticker, source=origin, ua_class=ua_class)' in on_demand_body, (
         "on-demand worker get_ai_news()'i kuyruktaki gerçek origin ile çağırmıyor"
     )
     assert '_news_daily_stats_incr("fail")' in on_demand_body, (
@@ -95,7 +95,7 @@ def test_daily_stats_source_tagged_prefetch_vs_user():
     src = _read_app()
     prefetch_body = _extract_function_body(src, "_prefetch_news_worker")
     assert prefetch_body, "_prefetch_news_worker() bulunamadı"
-    assert 'get_ai_news(ticker, source="prefetch")' in prefetch_body, (
+    assert 'get_ai_news(ticker, source="prefetch", ua_class="prefetch")' in prefetch_body, (
         "prefetch worker get_ai_news()'i source=prefetch ile çağırmıyor — "
         "kaynak ayrımı prefetch tarafında kayıp"
     )
