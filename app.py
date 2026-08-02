@@ -5533,6 +5533,19 @@ def _gemini_cb_retry_after_s() -> int:
     return max(0, int(_gemini_quota_cb_sync()["open_until"] - time.time()))
 
 
+def _next_gemini_quota_reset_ts() -> float:
+    """Ücretsiz tier günlük kota (RPD) gece yarısı Pacific Time'da sıfırlanır.
+    CPO-1210 §2: devre eskiden sabit _GEMINI_QUOTA_CB_COOLDOWN (dakika ölçeği) ile
+    açılıyordu — günlük kota tükendiğinde bu, gerçek sıfırlanma ufkuyla (24 saat)
+    uyumsuzdu: devre ~30dk'da bir kapanıp ilk çağrıda yeniden 429 yiyordu (ölçüm:
+    90dk'da 22 açılış). PT'nin DST kayması olduğundan sabit UTC offset yerine
+    zoneinfo ile hesaplanır."""
+    from zoneinfo import ZoneInfo
+    pt_now = datetime.now(ZoneInfo("America/Los_Angeles"))
+    next_midnight_pt = (pt_now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    return next_midnight_pt.timestamp()
+
+
 # CPO-1165 D-NEWS-2: "kaç haber isteği OK/FAIL oldu, devre kaç kez açıldı" sorusu
 # önceden yalnız journald grep'iyle cevaplanabiliyordu (CPO'nun 101 FAIL'i elle
 # sayması). _gemini_quota_cb ile birebir aynı desen (paylaşımlı dosya, flock yok —
@@ -5959,10 +5972,21 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
                 _gemini_quota_cb["quota_exhausted_total"] += 1
                 if (_gemini_quota_cb["consecutive_429"] >= _GEMINI_QUOTA_CB_THRESHOLD
                         and now >= _gemini_quota_cb["open_until"]):
-                    _gemini_quota_cb["open_until"] = time.time() + _GEMINI_QUOTA_CB_COOLDOWN
+                    # CPO-1210 §2: hata gövdesinde günlük (RPD) kota kimliği ("PerDay")
+                    # varsa devreyi dakika-ölçekli backoff yerine bir sonraki kota
+                    # sıfırlamasına (gece yarısı PT) kadar kapalı tut — retry_after_s
+                    # kullanıcıya dürüst kalsın. Yalnız geçici/dakika kotası ise eski
+                    # sabit cooldown geçerli.
+                    body_text = getattr(getattr(e, "response", None), "text", "") or ""
+                    if "perday" in body_text.lower():
+                        _gemini_quota_cb["open_until"] = _next_gemini_quota_reset_ts()
+                        cooldown_desc = "gece yarısı PT kota sıfırlamasına kadar (PerDay tespit edildi)"
+                    else:
+                        _gemini_quota_cb["open_until"] = time.time() + _GEMINI_QUOTA_CB_COOLDOWN
+                        cooldown_desc = f"{_GEMINI_QUOTA_CB_COOLDOWN}s (PerDay kimliği tespit edilemedi)"
                     logger.warning("_gemini_call: KOTA circuit breaker AÇILDI — %d ardışık 429, "
-                                   "%ds boyunca Gemini çağrısı yapılmayacak (news_degraded=true)",
-                                   _GEMINI_QUOTA_CB_THRESHOLD, _GEMINI_QUOTA_CB_COOLDOWN)
+                                   "devre %s süreyle kapalı (news_degraded=true)",
+                                   _GEMINI_QUOTA_CB_THRESHOLD, cooldown_desc)
                     _news_daily_stats_incr("cb_opens")  # CPO-1165 D-NEWS-2
                 _gemini_quota_cb_persist()
             else:
@@ -7798,6 +7822,11 @@ def api_stock_news(ticker):
     # sonuç YOK — yeni bir bg-fetch kuyruklamak yalnız kuyruğu ISRAF eder, sonucu
     # değiştirmez. Cache TTL'inden bağımsız olarak deterministik dön.
     if _gemini_news_degraded():
+        # CPO-1210 §3: kısa devre dalı ölçüm dışıydı — kota tükenmişken kaç
+        # gerçek talep "kullanılamıyor" yediği hiç sayılamıyordu. NEWS_MEASURE
+        # formatına short_circuit=yes eklenerek ua_class kırılımıyla sayılabilir.
+        logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=n/a gemini_call=no short_circuit=yes",
+                    ticker, _news_ua_class(request))
         return safe_json({
             "news": None, "loading": False, "unavailable": True,
             "reason": "Haber özeti şu an kullanılamıyor",
