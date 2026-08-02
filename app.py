@@ -8044,18 +8044,21 @@ def _load_mtf_cache_from_disk():
 
 
 def _compute_mtf(ticker):
-    """Tek hisse için çoklu zaman dilimi sinyal hesaplar — cache tarafından çağrılır."""
-    sym = ticker + ".IS"
+    """Tek hisse için çoklu zaman dilimi sinyal hesaplar — cache tarafından çağrılır.
+
+    CPO-1217 §2 ek bulgu: backtest_ticker ile AYNI sınıf hub-bloke bug'ı burada da
+    vardı — üstelik burada REFRESH_WORKER=="web" guard'ı (api_stock_mtf, aşağıda)
+    unset ortamda (prod .env'de REFRESH_WORKER hiç tanımlı değil) hiç devreye
+    girmiyor, yani bu senkron doğrudan-yfinance çağrıları herhangi bir kullanıcının
+    cache-miss /api/hisse/<ticker>/mtf isteğiyle 4 worker'ın herhangi birinde
+    doğrudan tetiklenebiliyordu. Aynı _fetch_daily_subprocess izolasyonuna taşındı.
+    """
 
     def _tf_signal(interval, period, min_bars):
         try:
-            df = yf.download(sym, period=period, interval=interval,
-                             progress=False, auto_adjust=True, timeout=25, threads=False)
+            df = _fetch_daily_subprocess(ticker, period=period, interval=interval, timeout=25)
             if df is None or len(df) < min_bars:
                 return None
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = df.columns.get_level_values(0)
-                df = df.loc[:, ~df.columns.duplicated()]
             df    = df.dropna().sort_index()
             close = df["Close"].squeeze()
             high  = df["High"].squeeze()
@@ -8088,15 +8091,11 @@ def _compute_mtf(ticker):
             logger.debug("_tf_signal(%s, %s): %s", ticker, interval, e)
             return None
 
-    def _tf_signal_4h(sym):
+    def _tf_signal_4h(ticker_base):
         try:
-            df = yf.download(sym, period="60d", interval="1h",
-                             progress=False, auto_adjust=True, timeout=25, threads=False)
+            df = _fetch_daily_subprocess(ticker_base, period="60d", interval="1h", timeout=25)
             if df is None or df.empty:
                 return None
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = df.columns.get_level_values(0)
-                df = df.loc[:, ~df.columns.duplicated()]
             df = df.dropna().sort_index()
             df_4h = df.resample("4h").agg({
                 "Open":  "first", "High": "max",
@@ -8128,12 +8127,12 @@ def _compute_mtf(ticker):
                 "bear_score": brs,
             }
         except Exception as e:
-            logger.debug("_tf_signal_4h(%s): %s", sym, e)
+            logger.debug("_tf_signal_4h(%s): %s", ticker_base, e)
             return None
 
     return {
         "ticker":  ticker,
-        "h4":      _tf_signal_4h(sym),
+        "h4":      _tf_signal_4h(ticker),
         "daily":   _tf_signal("1d",  "2y",  80),
         "weekly":  _tf_signal("1wk", "5y",  40),
         "monthly": _tf_signal("1mo", "10y", 12),
@@ -9494,16 +9493,21 @@ def _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, i):
 
 
 def backtest_ticker(ticker_base, fwd_days=20):
-    """Bir hisse için son 2 yıl AL/SAT sinyal performansını hesapla."""
-    ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
+    """Bir hisse için son 2 yıl AL/SAT sinyal performansını hesapla.
+
+    CPO-1217 §2: eskiden burada doğrudan (subprocess-izolasyonsuz) yfinance
+    indirme çağrısı yapılıyordu — yfinance 1.2.0 curl_cffi kullanıyor (gevent
+    monkey.patch_all()'ın kapsamadığı
+    ham libcurl syscall'ı), bu da run_backtest() sırasında worker'ın TÜM
+    gevent hub'ını (dolayısıyla /api/data, /api/macro dahil aynı worker'daki
+    her istek) yfinance'in gerçek ağ süresi kadar (60s+) bloke ediyordu. G24
+    dalgasında (chart/fundamentals/live-prices) uygulanan subprocess-izolasyon
+    deseni backtest_ticker'a hiç taşınmamıştı — tek eksik çağrı noktası buydu.
+    """
     try:
-        df = yf.download(ticker, period="2y", interval="1d",
-                         progress=False, auto_adjust=True, timeout=30, threads=False)
+        df = _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=30)
         if df is None or len(df) < 120:
             return None
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
-            df = df.loc[:, ~df.columns.duplicated()]
         df    = df.dropna().sort_index()
         close = df["Close"].squeeze()
         high  = df["High"].squeeze()
