@@ -1289,6 +1289,14 @@ _live_prices = {}
 _lock        = threading.Lock()
 _sse_clients = []
 _sse_lock    = threading.Lock()
+# CPO-1218 P0(2): SSE bağlantısına mutlak ömür tavanı. Kanıt: istemci/nginx
+# FIN gönderdiğinde generate() bunu writes ile ASLA tespit edemiyordu (CLOSE-WAIT
+# soketine keepalive yazmak hata fırlatmıyor — canlıda 2163s açık kalan tek bir
+# stream ölçüldü, ~144 keepalive hatasız gönderilmiş); worker 100 bağlantı
+# tavanına ulaşınca (worker-connections 100) yeni istek alamıyor, 60s nginx
+# upstream timeout → 504. EventSource istemci tarafında native otomatik
+# reconnect yaptığı için sunucunun kendi tarafından kapatması güvenli.
+_SSE_MAX_LIFETIME_S = 240
 _bt_cache    = {"data": None, "computed_at": None}   # backtest cache
 _anomaly_cache = {}  # ticker -> {score, flag, reason} for UI badge (F2)
 
@@ -4699,10 +4707,17 @@ def api_stream():
         # CPO-1135 A: ~15s'de bir keepalive comment — ölü soket bu sayede
         # finally bloğunda _sse_clients'tan temizlenir (CF/tarayıcı idle riski kapanır).
         last_activity = time.monotonic()
+        stream_start   = time.monotonic()
         try:
             if initial_msg:
                 yield initial_msg
             while True:
+                # CPO-1218 P0(2): mutlak ömür tavanı — keepalive yazmak CLOSE-WAIT
+                # soketinde hata fırlatmıyor, bu döngü tek başına asla çıkmayabilir.
+                # Süre dolunca generator normal biter → yanıt kapanır → fd serbest
+                # kalır. EventSource istemcisi otomatik reconnect eder.
+                if time.monotonic() - stream_start >= _SSE_MAX_LIFETIME_S:
+                    break
                 while client_queue:
                     yield client_queue.popleft()
                     last_activity = time.monotonic()
