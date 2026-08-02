@@ -63,15 +63,52 @@ def test_daily_stats_incremented_on_cb_open():
 
 
 def test_daily_stats_incremented_on_demand_worker_ok_and_fail():
+    """CPO-1205 §4(1): sayaç artık get_ai_news() içinde tekil kaynaktan artıyor
+    (önceden yalnız _on_demand_news_worker artırıyordu, _prefetch_news_worker hiç
+    dokunmuyordu — ok/fail toplamı prefetch'i asla yansıtmıyordu). Bu test artık
+    on-demand worker'ın get_ai_news()'i source="user" ile çağırdığını VE
+    get_ai_news()'in kendi içinde ok/fail'i artırdığını doğruluyor."""
     src = _read_app()
-    body = _extract_function_body(src, "_on_demand_news_worker")
-    assert body, "_on_demand_news_worker() bulunamadı"
-    assert '_news_daily_stats_incr("ok" if result else "fail")' in body, (
-        "on-demand worker başarı/başarısızlığı günlük sayaca yansımıyor"
+    on_demand_body = _extract_function_body(src, "_on_demand_news_worker")
+    assert on_demand_body, "_on_demand_news_worker() bulunamadı"
+    assert 'get_ai_news(ticker, source="user")' in on_demand_body, (
+        "on-demand worker get_ai_news()'i source=user ile çağırmıyor"
     )
-    assert '_news_daily_stats_incr("fail")' in body, (
-        "on-demand worker exception dalı fail sayacına yansımıyor"
+    assert '_news_daily_stats_incr("fail")' in on_demand_body, (
+        "on-demand worker exception dalı (get_ai_news'e hiç girilemedi) fail sayacına yansımıyor"
     )
+
+    get_ai_news_body = _extract_function_body(src, "get_ai_news")
+    assert get_ai_news_body, "get_ai_news() bulunamadı"
+    assert '_news_daily_stats_incr("ok" if text else "fail")' in get_ai_news_body, (
+        "get_ai_news() kendi başarı/başarısızlığını günlük sayaca yansıtmıyor — "
+        "hem prefetch hem on-demand çağıranlar burada birleşiyor"
+    )
+
+
+def test_daily_stats_source_tagged_prefetch_vs_user():
+    """CPO-1205 §4(1) — 28 Tem'den beri ok/fail toplamı yalnız on-demand'dan
+    geliyordu, prefetch hiç sayılmadığı için kaynak ayrımı tahmindi. Artık
+    get_ai_news(source=...) hem log satırında hem ok_<src>/fail_<src>
+    sayaçlarında ayrışıyor."""
+    src = _read_app()
+    prefetch_body = _extract_function_body(src, "_prefetch_news_worker")
+    assert prefetch_body, "_prefetch_news_worker() bulunamadı"
+    assert 'get_ai_news(ticker, source="prefetch")' in prefetch_body, (
+        "prefetch worker get_ai_news()'i source=prefetch ile çağırmıyor — "
+        "kaynak ayrımı prefetch tarafında kayıp"
+    )
+
+    get_ai_news_body = _extract_function_body(src, "get_ai_news")
+    assert 'src=%s' in get_ai_news_body, "get_ai_news() log satırlarında src= etiketi yok"
+    assert '_news_daily_stats_incr(f"{\'ok\' if text else \'fail\'}_{source}")' in get_ai_news_body, (
+        "get_ai_news() kaynak-bazlı sayaç (ok_<src>/fail_<src>) artırmıyor"
+    )
+
+    defaults_idx = src.index("_NEWS_DAILY_STATS_DEFAULTS = {")
+    defaults_window = src[defaults_idx: defaults_idx + 300]
+    for key in ("ok_prefetch", "ok_user", "fail_prefetch", "fail_user"):
+        assert f'"{key}"' in defaults_window, f"{key} varsayılan sayaç tanımında yok"
 
 
 def test_daily_stats_reset_on_calendar_day_change():
@@ -79,7 +116,14 @@ def test_daily_stats_reset_on_calendar_day_change():
     body = _extract_function_body(src, "_news_daily_stats_sync")
     assert body, "_news_daily_stats_sync() bulunamadı"
     assert "_TZ_TR" in body, "gün sınırı TR takvimine göre değil — UTC/naive kaymasına açık"
-    assert '"ok": 0, "fail": 0, "cb_opens": 0' in body, "gün değişince sayaçlar sıfırlanmıyor"
+    assert '{"date": today, **_NEWS_DAILY_STATS_DEFAULTS}' in body, (
+        "gün değişince sayaçlar sıfırlanmıyor"
+    )
+    defaults_idx = src.index("_NEWS_DAILY_STATS_DEFAULTS = {")
+    defaults_window = src[defaults_idx: defaults_idx + 300]
+    assert '"ok": 0' in defaults_window and '"fail": 0' in defaults_window and '"cb_opens": 0' in defaults_window, (
+        "_NEWS_DAILY_STATS_DEFAULTS ok/fail/cb_opens'i sıfırlamıyor"
+    )
 
 
 def test_health_payload_exposes_daily_news_stats_and_retry_after():

@@ -5471,7 +5471,14 @@ def _gemini_cb_retry_after_s() -> int:
 # aynı gerekçe: _gemini_rate_acquire zaten çağrıları serileştiriyor). Gün değişince
 # (_TZ_TR takvim günü) sayaçlar sıfırlanır.
 _NEWS_DAILY_STATS_PATH = os.environ.get("NEWS_DAILY_STATS_PATH", "/tmp/bp_news_daily_stats.json")
-_news_daily_stats = {"date": None, "ok": 0, "fail": 0, "cb_opens": 0}
+# CPO-1205 §4(1): "ok"/"fail" toplamı çağıran-kaynak ayrımı YAPMIYORDU — yalnız
+# _on_demand_news_worker artırıyordu, _prefetch_news_worker hiç dokunmuyordu.
+# ok_prefetch/ok_user/fail_prefetch/fail_user ile kaynak artık tahmin değil.
+_NEWS_DAILY_STATS_DEFAULTS = {
+    "ok": 0, "fail": 0, "cb_opens": 0,
+    "ok_prefetch": 0, "ok_user": 0, "fail_prefetch": 0, "fail_user": 0,
+}
+_news_daily_stats = {"date": None, **_NEWS_DAILY_STATS_DEFAULTS}
 
 
 def _news_daily_stats_sync() -> dict:
@@ -5485,7 +5492,7 @@ def _news_daily_stats_sync() -> dict:
     if isinstance(shared, dict) and shared.get("date") == today:
         _news_daily_stats.update(shared)
     elif _news_daily_stats.get("date") != today:
-        _news_daily_stats.update({"date": today, "ok": 0, "fail": 0, "cb_opens": 0})
+        _news_daily_stats.update({"date": today, **_NEWS_DAILY_STATS_DEFAULTS})
     return _news_daily_stats
 
 
@@ -5904,12 +5911,17 @@ def _gemini_call(prompt, attempts, timeout=20, max_tokens=500, temperature=0.3):
     return None, None
 
 
-def get_ai_news(ticker):
+def get_ai_news(ticker, source="user"):
     """Gemini + Google Search grounding ile Türkçe haber özeti üretir.
 
     Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite (bkz. _GEMINI_NEWS_ATTEMPTS;
     gemini-1.5-flash v1beta'da 404 döndüğü için zincirden çıkarılmıştı).
     Negatif cache: tüm modeller başarısız olursa 5 dk boyunca yeniden deneme yapılmaz.
+
+    source: "prefetch" (_prefetch_news_worker) veya "user" (_on_demand_news_worker,
+    market-news endpoint'inden). CPO-1205 §4(1) — log satırında ve günlük
+    sayaçlarda (ok_prefetch/ok_user/fail_prefetch/fail_user) ayrı izlenir; öncesinde
+    ok/fail toplamı yalnız on-demand'dan geliyordu, prefetch hiç sayılmıyordu.
     """
     if not GEMINI_API_KEY:
         return None
@@ -5938,11 +5950,13 @@ def get_ai_news(ticker):
 
     with _lock:
         if text:
-            logger.info("get_ai_news(%s): OK [model=%s]", ticker, model_used)
+            logger.info("get_ai_news(%s): OK [model=%s] src=%s", ticker, model_used, source)
             _news_cache[ticker] = {"text": text, "ts": now, "failed": False}
         else:
-            logger.warning("get_ai_news(%s): tüm modeller başarısız → negatif cache 5dk", ticker)
+            logger.warning("get_ai_news(%s): tüm modeller başarısız → negatif cache 5dk src=%s", ticker, source)
             _news_cache[ticker] = {"text": None, "ts": now, "failed": True}
+    _news_daily_stats_incr("ok" if text else "fail")
+    _news_daily_stats_incr(f"{'ok' if text else 'fail'}_{source}")
     return text
 
 
@@ -6207,7 +6221,7 @@ def _prefetch_news_worker():
                 logger.info("Prefetch: leader değil — tur durduruldu")
                 break
             try:
-                result = get_ai_news(ticker)
+                result = get_ai_news(ticker, source="prefetch")
                 if result:
                     fetched += 1
             except Exception as e:
@@ -6317,14 +6331,16 @@ def _on_demand_news_worker():
                 ticker = _news_fetch_queue.pop()
         if ticker:
             try:
-                result = get_ai_news(ticker)
+                result = get_ai_news(ticker, source="user")
                 _news_queue_stats["last_processed_ts"] = time.time()
                 _news_queue_stats["total_processed"] += 1
                 logger.info("On-demand news [%s]: %s", ticker, "OK" if result else "FAIL")
-                _news_daily_stats_incr("ok" if result else "fail")  # CPO-1165 D-NEWS-2
+                # CPO-1165 D-NEWS-2 — sayaç artık get_ai_news() içinde tekil kaynaktan
+                # artıyor (CPO-1205 §4(1)); burada tekrar artırmak çift-sayım yapardı.
             except Exception as exc:
                 logger.error("On-demand news hatası [%s]: %s", ticker, exc)
-                _news_daily_stats_incr("fail")  # CPO-1165 D-NEWS-2
+                _news_daily_stats_incr("fail")  # CPO-1165 D-NEWS-2 — get_ai_news'e hiç girilemedi
+                _news_daily_stats_incr("fail_user")
             time.sleep(15)   # İstekler arası 15s — rate-limit koruması
         else:
             time.sleep(5)    # Kuyruk boşsa 5s bekle
