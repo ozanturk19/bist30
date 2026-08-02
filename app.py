@@ -318,6 +318,8 @@ def _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=25)
     Rollback: revert this function + analyze() lines 1097-1111.
     """
     if _yahoo_cb_blocked():
+        logger.warning("yf_fetch %s %s/%s SKIP: yahoo circuit breaker açık (opens=%d)",
+                        ticker_base, period, interval, _yahoo_cb["opens"])
         return None
     _t0 = time.perf_counter()
     try:
@@ -1488,6 +1490,8 @@ def analyze(ticker_base):
         # CPO-740 Görev 8: lock-free subprocess fetch (yf_fetch.py, 25s hard timeout)
         df = _fetch_daily_subprocess(ticker_base)
         if df is None or len(df) < 120:
+            logger.warning("analyze(%s): sessiz None dönüş — df=%s rows=%s (<120 eşiği)",
+                            ticker_base, "None" if df is None else "var", 0 if df is None else len(df))
             return None
 
         if isinstance(df.columns, pd.MultiIndex):  # safety guard for rollback
