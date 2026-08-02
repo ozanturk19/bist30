@@ -7730,9 +7730,22 @@ def api_stock_news(ticker):
     # atar — queue.add() dahil TÜM yan etkiler yine de çalışırdı) ve monitor UA'lar
     # (nginx access.log kanıtı: UptimeRobot bu endpoint'i ~5dk'da bir HEAD ile
     # yokluyordu, kota devresinin her açılışını besleyen gerçek kullanıcı değil
-    # kendi monitörümüzdü) hiç cache/queue mantığına girmemeli.
+    # kendi monitörümüzdü) hiç cache/queue mantığına girmemeli — bu kısa devre
+    # aynen kalır, Gemini/queue'ya 0 çağrı garantisi bundan geliyor.
+    #
+    # CPO-1208 §1(c)/CPO-1209 §2(b): eskiden kısa devre HER ZAMAN sabit
+    # {"news": None, "loading": False} dönüyordu — özellik 6 saat kota-tükenmiş
+    # kalsa bile UptimeRobot hep HTTP 200 görüyordu ("monitör hem sebep hem kör").
+    # Şimdi CB durumunu (_gemini_news_degraded — paylaşımlı dosyadan ucuz okuma,
+    # Gemini çağrısı YOK) gövdeye yansıtıyoruz; UptimeRobot'un keyword-check'i
+    # (panel tarafı Ozan'da) artık gerçek arızayı görebilir.
     if request.method == "HEAD" or "uptimerobot" in (request.headers.get("User-Agent") or "").lower():
-        return safe_json({"news": None, "loading": False})
+        degraded = _gemini_news_degraded()
+        return safe_json({
+            "news": None, "loading": False,
+            "unavailable": degraded,
+            "news_degraded": degraded,
+        })
 
     kap_url = kap_url_for(ticker)
     now_ts  = time.time()

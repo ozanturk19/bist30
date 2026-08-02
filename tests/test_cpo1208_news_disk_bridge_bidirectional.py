@@ -109,3 +109,24 @@ def test_prefetch_worker_tags_ua_class_prefetch():
     body = _extract_function_body(src, "_prefetch_news_worker")
     assert body, "_prefetch_news_worker() bulunamadı"
     assert 'get_ai_news(ticker, source="prefetch", ua_class="prefetch")' in body
+
+
+def test_head_and_monitor_short_circuit_reflects_real_degraded_status():
+    """CPO-1209 §2(b) — monitör kısa devresi artık her zaman sabit 'ok' dönmüyor;
+    gerçek CB durumunu (Gemini çağrısı YAPMADAN, ucuz dosya okumasıyla) yansıtıyor.
+    Hâlâ cache/queue'ya hiç girmiyor — 0 Gemini çağrısı garantisi korunuyor."""
+    src = _read_app()
+    body = _extract_function_body(src, "api_stock_news")
+    assert body, "api_stock_news() bulunamadı"
+    head_idx = body.index('request.method == "HEAD"')
+    short_circuit_window = body[head_idx: head_idx + 500]
+    assert "_gemini_news_degraded()" in short_circuit_window, (
+        "HEAD/monitor kısa devresi gerçek kota-devresi durumunu okumuyor — "
+        "monitör hâlâ özellik kırıkken 200 görür (CPO-1208 'hem sebep hem kör')"
+    )
+    assert '"unavailable": degraded' in short_circuit_window or '"unavailable":degraded' in short_circuit_window, (
+        "kısa devre yanıtı unavailable alanını CB durumuna bağlamıyor"
+    )
+    # Kısa devre hâlâ queue/cache mantığından ÖNCE — 0 Gemini çağrısı garantisi korunmalı.
+    queue_idx = body.index('_news_fetch_queue[ticker] = ("stock_news"')
+    assert head_idx < queue_idx
