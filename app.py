@@ -7787,6 +7787,8 @@ def api_stock_news(ticker):
         if cached and not cached.get("failed"):
             ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
             if (now_ts - cached["ts"]) < ttl:
+                logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=hit gemini_call=no served=yes source=kap_ai",
+                            ticker, _news_ua_class(request))
                 return safe_json({
                     "news": cached["text"], "source": "kap_ai",
                     "kap_url": kap_url, "kap_count": len(kap_discs)
@@ -7803,6 +7805,8 @@ def api_stock_news(ticker):
                 # CPO-1153/1154 P0-B(c): negatif cache içindeyken tekrar kuyruğa ekleyip
                 # sonsuz "loading:true" dönmek YASAK — 6 saatlik kota kesintisi boyunca
                 # kullanıcı sonsuz spinner görüyordu, hiç hata görmüyordu. Dürüst dön.
+                logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=negcache gemini_call=no served=no",
+                            ticker, _news_ua_class(request))
                 return safe_json({
                     "news": None, "loading": False, "unavailable": True,
                     "reason": "Haber özeti şu an kullanılamıyor",
@@ -7811,6 +7815,8 @@ def api_stock_news(ticker):
                     "kap_url": kap_url,
                 })
             if gen_cached.get("text"):
+                logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=hit gemini_call=no served=yes source=gemini",
+                            ticker, _news_ua_class(request))
                 return safe_json({"news": gen_cached["text"], "source": "gemini", "kap_url": kap_url})
 
     # CPO-1157 §3.3: negatif cache (5dk TTL, _NEWS_FAIL_TTL) süresi dolduğunda
