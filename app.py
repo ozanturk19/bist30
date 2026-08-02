@@ -3796,7 +3796,6 @@ def background_refresh():
                 _load_macro_from_disk()
                 _load_earnings_cache_from_disk()
                 _load_mtf_cache_from_disk()
-                _load_varlik_charts_from_disk()
             except Exception as e:
                 logger.error("web disk-reload hatası: %s", e)
             time.sleep(90)
@@ -3814,7 +3813,6 @@ def background_refresh():
                 _load_macro_from_disk()
                 _load_earnings_cache_from_disk()
                 _load_mtf_cache_from_disk()
-                _load_varlik_charts_from_disk()
             except Exception as e:
                 logger.error("background_refresh non-leader reload hatası: %s", e)
             time.sleep(90)
@@ -3961,18 +3959,6 @@ def set_security_headers(response):
     response.headers.pop("Server", None)
     # NOT: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
     # Cloudflare tarafından ekleniyor — duplicate olmaması için biz eklemiyoruz.
-    # CPO-1221 §1: CLOSE-WAIT sızıntısı /api/stream'e özgü değildi (DEV-1562/1563 dar
-    # kapsamlıydı) — nginx'in terk ettiği (499/timeout) HER istek fd bırakabiliyordu, tek
-    # worker'da 95/100 worker-connections tavanına dayanmıştı (%10 istek hang, CPO ölçümü).
-    # Kök neden gevent pywsgi'nin keep-alive bekleme döngüsünde: nginx erken FIN gönderdiğinde
-    # bağlantı EOF'u güvenilir şekilde tespit edilmiyor, soket kapanmadan asılı kalıyor.
-    # keep-alive'ı TÜM response'larda kapatmak, bağlantının o bekleme durumuna hiç girmesini
-    # engeller. Tradeoff: nginx<->gunicorn keepalive pool'u devre dışı — her istek yeni TCP
-    # handshake demek, ama 4 worker'ın CLOSE-WAIT'ten aç kalmasından çok daha ucuz.
-    # /ws/prices hariç — wsgi.websocket set edildiğinde soket geventwebsocket
-    # tarafından hijack edilmiş oluyor, bu header o ham soket üzerinde anlamsız/riskli.
-    if request.environ.get("wsgi.websocket") is None:
-        response.headers["Connection"] = "close"
     return response
 
 
@@ -5013,67 +4999,6 @@ _bnb_chart_cache     = {"data": None, "updated_at": None}
 _petrol_chart_cache  = {"data": None, "updated_at": None}
 _dogalgaz_chart_cache= {"data": None, "updated_at": None}
 _stock_chart_cache = {}          # {ticker: {"data": ..., "ts": float, "updated_at": str, "v": str}}
-
-# CPO-1221 A: disk köprüsü — leader (background_refresh) in-process hesapladığı
-# varlık grafiklerini (_refresh_varlik_chart) diske yazar, web worker'lar (REFRESH_WORKER=web,
-# ayrı process, bellek paylaşmıyor) 90s reload loop'unda diskten okur. Önceden leader
-# başarıyla hesaplasa da web'e HİÇ yansımıyordu (DEV-1564 bulgusu). Şema chart_macros.json
-# ile aynı ({key: {"data":..., "updated_at":...}}) — ileride Karar 3/Seçenek B'ye geçilirse
-# okuyucu (_load_varlik_charts_from_disk) değişmeden, sadece _VARLIK_CHART_DISK_PATH değişir.
-_VARLIK_CHART_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_varlik_charts.json")
-_VARLIK_CHART_CACHES = {
-    "BTC":      _btc_chart_cache,
-    "ALTIN":    _altin_chart_cache,
-    "GUMUS":    _gumus_chart_cache,
-    "ETH":      _eth_chart_cache,
-    "SP500":    _sp500_chart_cache,
-    "NASDAQ":   _nasdaq_chart_cache,
-    "SOL":      _sol_chart_cache,
-    "BNB":      _bnb_chart_cache,
-    "PETROL":   _petrol_chart_cache,
-    "DOGALGAZ": _dogalgaz_chart_cache,
-}
-
-
-def _save_varlik_charts_to_disk():
-    """Leader: tüm varlık grafik cache'lerini diske yazar (web worker'lar okusun).
-    Boş (data=None) girişleri atlar — henüz hesaplanmamış bir varlık, diskteki
-    önceki dolu veriyi ezmesin (empty-overwrite guard, _save_macro_ai_to_disk ile aynı desen)."""
-    try:
-        snapshot = {}
-        for key, cache_obj in _VARLIK_CHART_CACHES.items():
-            with _lock:
-                data = cache_obj.get("data")
-                updated_at = cache_obj.get("updated_at")
-            if data is not None:
-                snapshot[key] = {"data": data, "updated_at": updated_at}
-        if snapshot:
-            _atomic_write_json(_VARLIK_CHART_DISK_PATH, snapshot)
-    except Exception as e:
-        logger.warning("_save_varlik_charts_to_disk hatası: %s", e)
-
-
-def _load_varlik_charts_from_disk():
-    """Web worker: diskten varlık grafik cache'lerini yükle — startup + 90s reload loop."""
-    try:
-        if os.path.exists(_VARLIK_CHART_DISK_PATH):
-            d = _tp_read_json(_VARLIK_CHART_DISK_PATH)
-            if isinstance(d, dict):
-                loaded = 0
-                for key, entry in d.items():
-                    cache_obj = _VARLIK_CHART_CACHES.get(key)
-                    if cache_obj is not None and isinstance(entry, dict) and entry.get("data"):
-                        with _lock:
-                            cache_obj["data"] = entry["data"]
-                            cache_obj["updated_at"] = entry.get("updated_at")
-                        loaded += 1
-                if loaded:
-                    logger.info("_load_varlik_charts_from_disk: %d varlık yüklendi", loaded)
-    except Exception as e:
-        logger.warning("_load_varlik_charts_from_disk: %s", e)
-
-
-_load_varlik_charts_from_disk()
 
 # SPEC-DECOUPLING-v2-PHASE3 (CPO-437): Per-ticker chart cache disk path.
 # Staging: BIST_STAGING=1 ENV → data-staging/charts/, prod → data/charts/ (Phase-3 sonrası).
@@ -7193,7 +7118,6 @@ def _refresh_varlik_chart(varlik_key, cache_obj):
                 cache_obj["data"] = d
                 cache_obj["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
             logger.info("%s chart cache güncellendi", varlik_key)
-            _save_varlik_charts_to_disk()
     except Exception as e:
         logger.error("_refresh_varlik_chart(%s): %s", varlik_key, e, exc_info=True)
 
