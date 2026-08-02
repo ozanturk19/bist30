@@ -4736,7 +4736,13 @@ def api_stream():
         headers={
             "Cache-Control":     "no-cache",
             "X-Accel-Buffering": "no",
-            "Connection":        "keep-alive",
+            # CPO-1218 takip (02.08 20:xx TR): nginx /api/stream'i pool'lu
+            # bist30_upstream'e almıyor (keepalive korunmuyor, CPO-483 notu),
+            # ama burada "keep-alive" demek gunicorn'a soketi bir sonraki
+            # istek için açık tut derdi — o istek hiç gelmiyor, socket
+            # CLOSE-WAIT'te asılı kalıyor (canlı ölçüm: 1 worker'da 44→49,
+            # ~90s'de). "close" ile generate() bitince soket hemen kapanır.
+            "Connection":        "close",
         },
     )
 
