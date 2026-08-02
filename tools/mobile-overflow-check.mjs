@@ -11,8 +11,11 @@
 // Kullanım:
 //   node tools/mobile-overflow-check.mjs [--base=https://borsapusula.com] [--out=path.json]
 //
-// Exit code: 0 = temiz, 1 = taşma bulundu, 2 = ölçüm zemini kirli (harness'ın kendi
-// integrity assert'i FAIL etti — bu durumda "0 taşma" asla yeşil raporlanmaz).
+// Exit code (CPO-1204 §1, üçlü): 0 = temiz, 1 = yalnız allowlisted WARN (pinlenmiş
+// dirty-ground, tam açıklanmış — bkz. DIRTY_GROUND_ALLOWLIST), 2 = FAIL (taşma,
+// yüklenemeyen sayfa veya açıklanmamış/allowlist-dışı kirli ölçüm zemini — bu
+// durumda "0 taşma" asla yeşil raporlanmaz). CI/cron hangi eşikte kırmızıya
+// döneceğini kendi seçer.
 
 import { chromium } from 'playwright';
 import fs from 'node:fs/promises';
@@ -188,10 +191,27 @@ async function checkPage(browser, pageDef, width) {
   return result;
 }
 
+// CPO-1204 §1 — pinlenmiş allowlist: DEV-1547/1548'in bağımsız-doğrulanmış 10
+// integrity-failure'ı (aynı 3 sayfa × 360/390, hepsi scrollbarSlack==rawOverflow
+// && adjustedOverflow==0 — yani kalıntı TAM açıklanmış). Bu kombinasyonlar WARN'a
+// düşer. Listede OLMAYAN yeni bir kirli kombinasyon çıkarsa (açıklanmış olsa
+// bile) FAIL kalır — kirli-zemin kümesinin büyümesi kendi başına regresyon
+// sinyalidir, sessizce WARN'a yutulmaz.
+const DIRTY_GROUND_ALLOWLIST = new Set([
+  'hisse-thyao@360', 'hisse-thyao@390',
+  'hisse-thyao-ozet@360', 'hisse-thyao-ozet@390',
+  'hisse-akbnk@360', 'hisse-akbnk@390',
+]);
+
+function isExplainedDirty(s) {
+  return s.scrollbarSlack === s.rawOverflow && s.overflowPx === 0;
+}
+
 async function main() {
   const browser = await chromium.launch({ headless: true });
   const results = [];
   let integrityFailures = 0;
+  let warnFindings = 0;
   let overflowFindings = 0;
   let loadFailures = 0;
 
@@ -200,16 +220,27 @@ async function main() {
       const r = await checkPage(browser, pageDef, width);
       results.push(r);
       if (r.error) loadFailures++;
+      const allowlisted = DIRTY_GROUND_ALLOWLIST.has(`${pageDef.name}@${width}`);
+      let hasFailDirty = false;
+      let hasWarnDirty = false;
       for (const [stateName, s] of Object.entries(r.states)) {
-        if (!s.measurementClean) integrityFailures++;
+        if (!s.measurementClean) {
+          if (allowlisted && isExplainedDirty(s)) {
+            warnFindings++;
+            hasWarnDirty = true;
+          } else {
+            integrityFailures++;
+            hasFailDirty = true;
+          }
+        }
         if (s.overflowPx > 0) overflowFindings++;
       }
       const findings = Object.entries(r.states)
         .filter(([, s]) => s.overflowPx > 0)
         .map(([name, s]) => `${name}:+${s.overflowPx}px`);
-      const dirty = Object.entries(r.states).some(([, s]) => !s.measurementClean);
       const tag = r.error ? `ERROR ${r.error}` : (findings.length ? `OVERFLOW ${findings.join(',')}` : 'ok');
-      console.log(`[${width}px] ${pageDef.path.padEnd(38)} ${tag}${dirty ? ' [DIRTY-MEASUREMENT]' : ''}`);
+      const dirtyTag = hasFailDirty ? ' [DIRTY-MEASUREMENT]' : (hasWarnDirty ? ' [WARN-DIRTY-ALLOWLISTED]' : '');
+      console.log(`[${width}px] ${pageDef.path.padEnd(38)} ${tag}${dirtyTag}`);
     }
   }
 
@@ -222,6 +253,7 @@ async function main() {
     totalPages: PAGES.length,
     totalChecks: results.length,
     integrityFailures,
+    warnFindings,
     overflowFindings,
     loadFailures,
   };
@@ -231,7 +263,9 @@ async function main() {
   await fs.writeFile(OUT, JSON.stringify(out, null, 2));
   console.log(`\nJSON: ${OUT}`);
   console.log(`Sayfa: ${PAGES.length} x Genişlik: ${WIDTHS.length} = ${results.length} kontrol`);
-  console.log(`Integrity failures: ${integrityFailures} | Overflow findings: ${overflowFindings} | Load failures: ${loadFailures}`);
+  // CPO-1204 §1 kural #4: WARN sayısı sıfır olsa bile her koşumda basılır —
+  // "görünürlük ertelenmez".
+  console.log(`Integrity failures: ${integrityFailures} | Warn (allowlisted dirty-ground): ${warnFindings} | Overflow findings: ${overflowFindings} | Load failures: ${loadFailures}`);
 
   // Yüklenemeyen sayfalar "ölçülmedi" demektir, "0 taşma" değil — bunları
   // integrity failures'tan ayrı ama aynı ciddiyette FAIL ediyoruz. İlk sürümde
@@ -242,11 +276,15 @@ async function main() {
     process.exit(2);
   }
   if (integrityFailures > 0) {
-    console.error('\nFAIL: ölçüm zemini kirli (innerWidth !== clientWidth bir veya daha fazla koşuda). "0 taşma" iddiası GEÇERSİZ — bkz. DIRTY-MEASUREMENT satırları.');
+    console.error('\nFAIL: ölçüm zemini kirli ve ya açıklanmamış ya da allowlist dışı (bkz. DIRTY-MEASUREMENT satırları). "0 taşma" iddiası GEÇERSİZ.');
     process.exit(2);
   }
   if (overflowFindings > 0) {
     console.error('\nFAIL: yatay taşma bulundu.');
+    process.exit(2);
+  }
+  if (warnFindings > 0) {
+    console.warn(`\nWARN: ${warnFindings} ölçüm allowlisted dirty-ground (tam açıklanmış, bkz. WARN-DIRTY-ALLOWLISTED satırları). Taşma yok.`);
     process.exit(1);
   }
   console.log('\nPASS: temiz.');
