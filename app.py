@@ -5163,8 +5163,12 @@ def _news_ttl_for(ticker: str) -> int:
 
 
 
-# On-demand news fetch kuyruğu (market-news endpoint'i tarafından doldurulur)
-_news_fetch_queue     = set()      # tickers waiting for background fetch
+# On-demand news fetch kuyruğu — iki farklı HTTP endpoint'i besler (CPO-1206 §3):
+# api_stock_news (tekil hisse sayfası) ve api_market_news (piyasa haber şeridi).
+# Kuyruk artık ticker->origin eşlemesi tutuyor ki _on_demand_news_worker gerçek
+# kökeni etiketleyebilsin — önceden ikisi de sabit source="user" ile işleniyordu,
+# "kim çağırdı" hep _on_demand_news_worker'a atfediliyordu, gerçek üretici kayboluyordu.
+_news_fetch_queue     = {}         # {ticker: origin} — origin: "stock_news" | "market_news"
 _news_queue_lock      = threading.Lock()
 
 # ── F5 — AI Haber Sentiment Cache ────────────────────────────────────────────
@@ -5497,9 +5501,14 @@ _NEWS_DAILY_STATS_PATH = os.environ.get("NEWS_DAILY_STATS_PATH", "/tmp/bp_news_d
 # CPO-1205 §4(1): "ok"/"fail" toplamı çağıran-kaynak ayrımı YAPMIYORDU — yalnız
 # _on_demand_news_worker artırıyordu, _prefetch_news_worker hiç dokunmuyordu.
 # ok_prefetch/ok_user/fail_prefetch/fail_user ile kaynak artık tahmin değil.
+# CPO-1206 §3: "user" etiketi gerçek kökeni yansıtmıyordu — _on_demand_news_worker
+# hem api_stock_news hem api_market_news kuyruğunu aynı sabit etiketle işliyordu.
+# ok_user/fail_user artık üretilmiyor (geriye dönük uyumluluk için 0 varsayılanı
+# korunuyor) — yerine ok_stock_news/ok_market_news ayrımı geldi.
 _NEWS_DAILY_STATS_DEFAULTS = {
     "ok": 0, "fail": 0, "cb_opens": 0,
     "ok_prefetch": 0, "ok_user": 0, "fail_prefetch": 0, "fail_user": 0,
+    "ok_stock_news": 0, "ok_market_news": 0, "fail_stock_news": 0, "fail_market_news": 0,
 }
 _news_daily_stats = {"date": None, **_NEWS_DAILY_STATS_DEFAULTS}
 
@@ -5941,10 +5950,13 @@ def get_ai_news(ticker, source="user"):
     gemini-1.5-flash v1beta'da 404 döndüğü için zincirden çıkarılmıştı).
     Negatif cache: tüm modeller başarısız olursa 5 dk boyunca yeniden deneme yapılmaz.
 
-    source: "prefetch" (_prefetch_news_worker) veya "user" (_on_demand_news_worker,
-    market-news endpoint'inden). CPO-1205 §4(1) — log satırında ve günlük
-    sayaçlarda (ok_prefetch/ok_user/fail_prefetch/fail_user) ayrı izlenir; öncesinde
-    ok/fail toplamı yalnız on-demand'dan geliyordu, prefetch hiç sayılmıyordu.
+    source: "prefetch" (_prefetch_news_worker) veya _on_demand_news_worker'ın kuyruktan
+    aldığı gerçek köken — "stock_news" (api_stock_news, tekil hisse sayfası) ya da
+    "market_news" (api_market_news, piyasa haber şeridi). CPO-1205 §4(1) — log
+    satırında ve günlük sayaçlarda (ok_<src>/fail_<src>) ayrı izlenir. CPO-1206 §3 —
+    önceden ikisi de sabit "user" ile etiketleniyordu ("hangi worker çağırdı" yerine
+    "hangi HTTP endpoint kuyruğa ekledi" bilgisi kayıptı); artık kuyruk kendisi
+    {ticker: origin} tutuyor, "user" etiketi gerçek kökeni yansıtmıyordu.
     """
     if not GEMINI_API_KEY:
         return None
@@ -6384,28 +6396,38 @@ threading.Thread(target=_gemini_cache_sync_loop, daemon=True, name="gemini-cache
 
 
 def _on_demand_news_worker():
-    """market-news endpoint'inden gelen talep üzerine haber cache'i arka planda doldurur.
+    """İki HTTP endpoint'inden (api_stock_news, api_market_news) gelen kuyruğu
+    arka planda doldurur. Kuyruk artık {ticker: origin} — her ticker gerçek
+    çağıran endpoint'iyle etiketli (CPO-1206 §3), sabit source="user" DEĞİL.
 
     Kuyrukta bekleyen her ticker için get_ai_news() çağırır; istekler arası
     15 saniye bekler (Gemini rate-limit koruması). Kuyruk boşsa 5s polling.
+
+    CPO-1206 §5 — kota devresi açıkken (quota tükenmiş) kuyrukta bekleyen
+    ticker'ları çekmeye devam etmek getirisi sıfır bir israftı; devre açıkken
+    kuyruğu tüketmeden bekle (kuyruk BOŞALTILMAZ, birikir — devre kapanınca işlenir).
     """
     while True:
+        if _gemini_news_degraded():
+            time.sleep(30)
+            continue
         ticker = None
+        origin = "stock_news"
         with _news_queue_lock:
             if _news_fetch_queue:
-                ticker = _news_fetch_queue.pop()
+                ticker, origin = _news_fetch_queue.popitem()
         if ticker:
             try:
-                result = get_ai_news(ticker, source="user")
+                result = get_ai_news(ticker, source=origin)
                 _news_queue_stats["last_processed_ts"] = time.time()
                 _news_queue_stats["total_processed"] += 1
-                logger.info("On-demand news [%s]: %s", ticker, "OK" if result else "FAIL")
+                logger.info("On-demand news [%s]: %s [origin=%s]", ticker, "OK" if result else "FAIL", origin)
                 # CPO-1165 D-NEWS-2 — sayaç artık get_ai_news() içinde tekil kaynaktan
                 # artıyor (CPO-1205 §4(1)); burada tekrar artırmak çift-sayım yapardı.
             except Exception as exc:
-                logger.error("On-demand news hatası [%s]: %s", ticker, exc)
+                logger.error("On-demand news hatası [%s, origin=%s]: %s", ticker, origin, exc)
                 _news_daily_stats_incr("fail")  # CPO-1165 D-NEWS-2 — get_ai_news'e hiç girilemedi
-                _news_daily_stats_incr("fail_user")
+                _news_daily_stats_incr(f"fail_{origin}")
             time.sleep(15)   # İstekler arası 15s — rate-limit koruması
         else:
             time.sleep(5)    # Kuyruk boşsa 5s bekle
@@ -7698,7 +7720,7 @@ def api_stock_news(ticker):
 
     # 4. CACHE MISS — queue bg fetch (existing _on_demand_news_worker handles it)
     with _news_queue_lock:
-        _news_fetch_queue.add(ticker)
+        _news_fetch_queue[ticker] = "stock_news"   # CPO-1206 §3 — gerçek köken etiketi
     _news_queue_stats["last_added_ts"] = time.time()
     _news_queue_stats["total_added"] += 1
 
@@ -8375,7 +8397,12 @@ def _compute_health():
         "macro_bg_loop":            _macro_bg_stats,
         "last_macro_refresh_ts":    macro_last_ts,
         "last_macro_refresh_age_s": int(now - macro_last_ts) if macro_last_ts else None,
-        "news_queue":               _news_queue_stats,
+        # CPO-1206 §4: bu blok GLOBAL DEĞİL — her gunicorn worker'ın kendi
+        # _news_queue_stats'i var (paylaşımlı dosyaya senkron edilmiyor). Health
+        # isteğini hangi worker karşılarsa onun worker-local sayısı dönüyor;
+        # "total_added=0" gerçek kuyruğun boş olduğu anlamına GELMEYEBİLİR.
+        "news_queue_worker_local":  _news_queue_stats,
+        "news_queue_note":         "worker-local — 4 worker'ın her biri ayrı kuyruk/sayaç tutar, global toplam değildir",
         "last_news_queue_ts":       news_last_ts,
         "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
         # CPO-1153/1154 P0-B(b) — 429 kota tükenmesi artık gözlemlenebilir (önceden
@@ -10100,7 +10127,11 @@ def api_market_news():
                               (time.time() - news_c.get("ts", 0)) < _NEWS_FAIL_TTL
             if not failed_recently:
                 with _news_queue_lock:
-                    _news_fetch_queue.add(t)
+                    _news_fetch_queue[t] = "market_news"   # CPO-1206 §3 — gerçek köken etiketi
+                # CPO-1206 §4 — bu üretici önceden _news_queue_stats'e hiç dokunmuyordu,
+                # health.news_queue "toplam eklenen" sayısı bu yüzden eksik ölçüyordu.
+                _news_queue_stats["last_added_ts"] = time.time()
+                _news_queue_stats["total_added"] += 1
 
             # Algoritmik fallback metin (kaynak = "loading" — frontend polling tetikler)
             dur = "bugün" if bars <= 1 else f"son {bars} gündür"

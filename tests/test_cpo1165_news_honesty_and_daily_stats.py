@@ -66,13 +66,14 @@ def test_daily_stats_incremented_on_demand_worker_ok_and_fail():
     """CPO-1205 §4(1): sayaç artık get_ai_news() içinde tekil kaynaktan artıyor
     (önceden yalnız _on_demand_news_worker artırıyordu, _prefetch_news_worker hiç
     dokunmuyordu — ok/fail toplamı prefetch'i asla yansıtmıyordu). Bu test artık
-    on-demand worker'ın get_ai_news()'i source="user" ile çağırdığını VE
-    get_ai_news()'in kendi içinde ok/fail'i artırdığını doğruluyor."""
+    on-demand worker'ın get_ai_news()'i kuyruktan gelen gerçek origin ile çağırdığını
+    (CPO-1206 §3 — sabit source="user" DEĞİL) VE get_ai_news()'in kendi içinde
+    ok/fail'i artırdığını doğruluyor."""
     src = _read_app()
     on_demand_body = _extract_function_body(src, "_on_demand_news_worker")
     assert on_demand_body, "_on_demand_news_worker() bulunamadı"
-    assert 'get_ai_news(ticker, source="user")' in on_demand_body, (
-        "on-demand worker get_ai_news()'i source=user ile çağırmıyor"
+    assert 'get_ai_news(ticker, source=origin)' in on_demand_body, (
+        "on-demand worker get_ai_news()'i kuyruktaki gerçek origin ile çağırmıyor"
     )
     assert '_news_daily_stats_incr("fail")' in on_demand_body, (
         "on-demand worker exception dalı (get_ai_news'e hiç girilemedi) fail sayacına yansımıyor"
