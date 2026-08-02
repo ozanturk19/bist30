@@ -66,5 +66,6 @@ portfolios/
 snapshots/
 test/visual/current/
 test/visual/diff/
+tests/mobile-overflow/
 node_modules/
 package-lock.json
