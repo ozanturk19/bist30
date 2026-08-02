@@ -8,7 +8,7 @@
   'use strict';
 
   var GLOSSARY = {
-    'adx': 'Trend gücü göstergesi (0–100). 25 üstü güçlü trend demek, 20 altı zayıf/yatay piyasa.',
+    'adx': 'Trend gücü göstergesi (0–100). 25 üstü güçlü trend demek, 18 altı zayıf/yatay piyasa, arası orta güçte.',
     'rsi': 'Göreceli Güç Endeksi (0–100). 70 üstü aşırı alım, 30 altı aşırı satım bölgesi sinyali verir.',
     'ema12': 'Üstel hareketli ortalama (12 gün). Kısa vadeli trend yönünü gösterir.',
     'ema99': 'Üstel hareketli ortalama (99 gün). Uzun vadeli trend yönünü gösterir.',

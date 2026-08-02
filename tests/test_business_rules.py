@@ -10,6 +10,7 @@ from business_rules import (
     validate_signal_consistency,
     validate_date_range,
     validate_stocks_list,
+    derive_adx_label,
 )
 from datetime import date
 
@@ -138,6 +139,33 @@ def test_al_missing_signal_price_caught():
     assert "MISSP" in result["failed_tickers"]
 
 
+# ── derive_adx_label (CPO-1196 D0 #4 — tek kaynaklı ADX eşiği) ────────────────
+
+def test_adx_label_zayif():
+    assert derive_adx_label(17.9) == "Zayıf"
+
+def test_adx_label_orta_lower_bound():
+    assert derive_adx_label(18) == "Orta"
+
+def test_adx_label_orta_upper_bound():
+    assert derive_adx_label(24.9) == "Orta"
+
+def test_adx_label_guclu_lower_bound():
+    assert derive_adx_label(25) == "Güçlü"
+
+def test_adx_label_guclu_upper_bound():
+    assert derive_adx_label(39.9) == "Güçlü"
+
+def test_adx_label_cok_guclu():
+    assert derive_adx_label(40) == "Çok Güçlü"
+
+def test_adx_label_none_defaults_zayif():
+    assert derive_adx_label(None) == "Zayıf"
+
+def test_adx_label_invalid_defaults_zayif():
+    assert derive_adx_label("n/a") == "Zayıf"
+
+
 # ── runner ───────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -153,6 +181,9 @@ if __name__ == "__main__":
         test_today_date_ok, test_past_date_ok, test_future_date_fail, test_none_date_ok,
         test_healthy_tickers_pass, test_glyho_selec_sentinel,
         test_negative_price_caught, test_al_missing_signal_price_caught,
+        test_adx_label_zayif, test_adx_label_orta_lower_bound, test_adx_label_orta_upper_bound,
+        test_adx_label_guclu_lower_bound, test_adx_label_guclu_upper_bound, test_adx_label_cok_guclu,
+        test_adx_label_none_defaults_zayif, test_adx_label_invalid_defaults_zayif,
     ]
     passed = failed_list = 0
     fail_names = []

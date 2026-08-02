@@ -3351,10 +3351,13 @@ function renderSummary(s, signalData) {
   })();
 
   /* İndikatörler — Sade dil + teknik detay */
-  const adxStrength = s.adx >= 30 ? 'Güçlü' : s.adx >= 25 ? 'Orta' : 'Zayıf';
+  // Etiket sunucudan gelir (signalData.adx_label, business_rules.derive_adx_label — CPO-1196 D0 #4).
+  // /api/data henüz dönmediyse (ilk render) aynı kanonik eşiklerle geçici fallback.
+  const adxStrength = (signalData && signalData.adx_label) ? signalData.adx_label
+    : (s.adx >= 40 ? 'Çok Güçlü' : s.adx >= 25 ? 'Güçlü' : s.adx >= 18 ? 'Orta' : 'Zayıf');
   const _IND_TOOLTIPS = {
     'Trend Yönü':  'Supertrend(10,3) indikatörü fiyatın ATR bazlı dinamik banda göre LONG mu SHORT mu olduğunu belirler. Fiyat üst bandın üzerinde kapanırsa yükseliş, altında kapanırsa düşüş yönü onaylanır. Örnek: 3 ardışık kapanış Supertrend bandı üzerinde → güçlü yükseliş trendi.',
-    'Momentum':    'ADX (Ortalama Yön Endeksi) trendin gücünü 0-100 arası ölçer — yön değil güç verir. ADX > 25 güçlü trend, < 20 zayıf/yatay piyasa anlamına gelir. DI+ > DI− ise alıcılar baskın, DI− > DI+ ise satıcılar baskın.',
+    'Momentum':    'ADX (Ortalama Yön Endeksi) trendin gücünü 0-100 arası ölçer — yön değil güç verir. ADX ≥ 25 güçlü trend, 18-25 orta, < 18 zayıf/yatay piyasa anlamına gelir. DI+ > DI− ise alıcılar baskın, DI− > DI+ ise satıcılar baskın.',
     'Vade Uyumu':  'EMA12 (12 günlük) ve EMA99 (99 günlük) hareketli ortalama karşılaştırılır. EMA12 > EMA99 kısa vadenin uzun vadenin üzerinde olduğunu — yani yükseliş eğilimini — gösterir. Örnek: Her iki EMA aynı yönde ise tüm vadeler uyumlu, sinyal güvenilirliği artar.',
   };
   const inds = [

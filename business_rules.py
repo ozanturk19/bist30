@@ -136,3 +136,24 @@ def validate_stocks_list(stocks):
                        len(all_errors), len(failed), failed)
 
     return {"total": len(stocks), "errors": all_errors, "failed_tickers": failed}
+
+
+def derive_adx_label(adx):
+    """ADX değerinden tek kaynaklı trend-gücü etiketi (Site Contract v1.2).
+
+    Eşikler: <18 Zayıf · 18-25 Orta · 25-40 Güçlü · >=40 Çok Güçlü.
+    CPO-1196 D0 #4: önceden aynı eşik 6 farklı yüzeyde 6 farklı sayı ile
+    tanımlıydı (app.py 3 yer + tarama/hisse/karsilastir/metodoloji şablonları).
+    Bu fonksiyon tek kaynak; çağıranlar kendi eşiğini tanımlamaz.
+    """
+    try:
+        a = float(adx)
+    except (TypeError, ValueError):
+        return "Zayıf"
+    if a >= 40:
+        return "Çok Güçlü"
+    if a >= 25:
+        return "Güçlü"
+    if a >= 18:
+        return "Orta"
+    return "Zayıf"

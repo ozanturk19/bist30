@@ -640,7 +640,7 @@
         <tr>
           <th>Hisse</th>
           <th>Sinyal</th>
-          <th onclick="sortBy('adx')" id="th-adx" data-tooltip="ADX 25+ Güçlü, 18-25 Orta, <18 Zayıf">Trend Gücü</th>
+          <th onclick="sortBy('adx')" id="th-adx" data-tooltip="ADX 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, <18 Zayıf">Trend Gücü</th>
           <th>Giriş Kalitesi</th>
           <th class="hide-mob-narrow" onclick="sortBy('price')" id="th-price">Fiyat</th>
           <th class="hide-mob-narrow" onclick="sortBy('change_pct')" id="th-chg">Değişim</th>
@@ -989,13 +989,12 @@ function renderResults(rows, count) {
   }
 
   // === Yardımcı fonksiyonlar (UX-2 Task #23, CPO-475) ===
-  // Trend Gücü: ADX 25+ Güçlü, 18-25 Orta, <18 Zayıf (eşikler SPEC'te)
-  const trendCell = (adx) => {
+  // Trend Gücü etiketi sunucudan gelir (business_rules.derive_adx_label, CPO-1196 D0 #4) — burada eşik tekrar tanımlanmaz.
+  const trendCell = (adx, adxLabel) => {
     const a = adx || 0;
-    let label, cls, pct;
-    if (a >= 25)      { label = 'Güçlü'; cls = 'strong'; pct = Math.min(100, (a/50)*100); }
-    else if (a >= 18) { label = 'Orta';  cls = 'medium'; pct = Math.min(60, (a/50)*100); }
-    else              { label = 'Zayıf'; cls = 'weak';   pct = Math.max(20, (a/50)*100); }
+    const label = adxLabel || 'Zayıf';
+    const cls = (label === 'Güçlü' || label === 'Çok Güçlü') ? 'strong' : label === 'Orta' ? 'medium' : 'weak';
+    const pct = cls === 'strong' ? Math.min(100, (a/50)*100) : cls === 'medium' ? Math.min(60, (a/50)*100) : Math.max(20, (a/50)*100);
     return `<div class="trend-cell" title="ADX ${a.toFixed(1)} — ${label.toLowerCase()} trend">
       <span class="trend-label ${cls}">${label}</span>
       <div class="trend-bar"><div class="trend-bar-fill ${cls}" style="width:${pct.toFixed(0)}%"></div></div>
@@ -1035,7 +1034,7 @@ function renderResults(rows, count) {
       <td><span class="sig-badge sig-${s.signal}">
         ${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}
       </span></td>
-      <td>${trendCell(s.adx)}</td>
+      <td>${trendCell(s.adx, s.adx_label)}</td>
       <td>${eqHtml}</td>
       <td class="hide-mob-narrow price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})}</td>
       <td class="hide-mob-narrow ${chgCls}">${chgSign}${(s.change_pct||0).toFixed(2)}%</td>
@@ -1056,8 +1055,8 @@ function renderResults(rows, count) {
         : '<span style="color:var(--text3)">—</span>';
       const _lk  = (_premLocked && s.tier === 'premium') ? ' mr-locked' : '';
       const _prm = s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:#a855f7;font-size:11px">💎</span>' : s.tier === 'plus' ? ' <span title="Plus sinyal" style="color:#1f6feb;font-size:11px">⭐</span>' : '';
-      const _adx = s.adx || 0;
-      const _tl  = _adx >= 25 ? ['Güçlü','strong'] : _adx >= 18 ? ['Orta','medium'] : ['Zayıf','weak'];
+      const _tlbl = s.adx_label || 'Zayıf';
+      const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
       return `<a href="/hisse/${s.ticker}" class="mr-card${_lk}">
         <div class="mr-top">
           <div><div class="mr-ticker">${s.ticker}${_prm}</div><div class="mr-name">${(s.name||'').replace(' A.Ş.','').substring(0,22)}</div></div>

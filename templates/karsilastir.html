@@ -502,11 +502,13 @@ function renderChg(v) {
   return `<span class="${cl} mono">${sign}${n.toFixed(2)}%</span>`;
 }
 
-function renderAdx(v) {
+function renderAdx(v, label) {
   if (v == null) return '<span class="muted">—</span>';
   const n = parseFloat(v);
   const cl = n>=25 ? 'up' : 'muted';
-  const lbl = n>=35 ? 'Çok Güçlü' : n>=25 ? 'Güçlü' : 'Zayıf Trend';
+  // Etiket sunucudan gelir (business_rules.derive_adx_label — CPO-1196 D0 #4); "Trend" eki
+  // kaldırıldı — sinyal etiketiyle (Güçlü Trend/Zayıf Trend) karışıyordu.
+  const lbl = label || 'Zayıf';
   return `<span class="${cl} mono">${n.toFixed(1)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
 }
 
@@ -545,7 +547,7 @@ function renderCell(key, s) {
     case 'is_premium':    return renderPremium(s);
     case 'price':         return renderPrice(v);
     case 'change_pct':    return renderChg(v);
-    case 'adx':           return renderAdx(v);
+    case 'adx':           return renderAdx(v, s.adx_label);
     case 'rsi':           return renderRsi(v);
     case 'signal_bars':   return v ? `<span class="mono">${v} gün</span>` : '<span class="muted">—</span>';
     case 'signal_date':   return v ? `<span style="font-size:12px">${v}</span>` : '<span class="muted">—</span>';

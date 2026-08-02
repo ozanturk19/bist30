@@ -821,7 +821,8 @@ function renderSignalData(summary, history, week52, commentary) {
     // ADX
     const adxEl = document.getElementById('indADX');
     adxEl.textContent = summary.adx ? summary.adx.toFixed(1) : '—';
-    const adxStr = summary.adx>=40?'Çok güçlü trend':summary.adx>=30?'Güçlü trend':summary.adx>=25?'Orta güçte trend':'Zayıf / range';
+    // Eşikler business_rules.derive_adx_label ile aynı (18/25/40) — CPO-1196 D0 #4
+    const adxStr = summary.adx>=40?'Çok güçlü trend':summary.adx>=25?'Güçlü trend':summary.adx>=18?'Orta güçte trend':'Zayıf / range';
     adxEl.className = 'ind-value ' + (summary.adx_bull?'bull':summary.adx_bear?'bear':'neu');
     document.getElementById('indADXSub').textContent = `DI+ ${(summary.di_plus||0).toFixed(0)} / DI- ${(summary.di_minus||0).toFixed(0)} · ${adxStr}`;
     // EMA

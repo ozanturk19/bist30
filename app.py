@@ -66,6 +66,7 @@ except ImportError:
 # ── Faz 12 P1 DQV — Data Quality Validators ───────────────────────────────────
 try:
     from business_rules   import validate_stocks_list          as _dqv_business_rules
+    from business_rules   import derive_adx_label
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
     from anomaly          import compute_stock_anomaly_score    as _dqv_ui_anomaly
@@ -78,6 +79,15 @@ except ImportError as _dqv_import_err:
     _DQV_AVAILABLE = False
     import logging as _log_tmp
     _log_tmp.getLogger(__name__).warning("DQV modules unavailable: %s", _dqv_import_err)
+    def derive_adx_label(adx):  # fallback: bu try bloğu 6 modülü birlikte taşıyor, biri kırılırsa ADX etiketi çökmesin
+        try:
+            a = float(adx)
+        except (TypeError, ValueError):
+            return "Zayıf"
+        if a >= 40: return "Çok Güçlü"
+        if a >= 25: return "Güçlü"
+        if a >= 18: return "Orta"
+        return "Zayıf"
 
 # ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
 _SENTRY_AVAILABLE = False
@@ -1817,6 +1827,7 @@ def analyze(ticker_base):
             "volume_tl_avg20": volume_tl_avg20,
             "low_liquidity": low_liquidity,
             "adx":           round(adx_val, 1),  # top-level for SSR/SEO
+            "adx_label":     derive_adx_label(adx_val),  # CPO-1196 D0 #4: tek kaynaklı Zayıf/Orta/Güçlü/Çok Güçlü
             "indicators": {
                 "supertrend": {
                     "label": "ST",
@@ -6172,7 +6183,7 @@ def _enrich_signal_explanation(ticker, signal_data):
         f"Sinyal: {sig_lbl} — 3 göstergenin TAMAMI {direction_tr} yönünü işaret ediyor\n"
         f"Göstergeler:\n"
         f"  • Supertrend: {'YUKARI ✓' if st_bull else 'AŞAĞI ✓'}\n"
-        f"  • ADX: {adx:.0f} {'(güçlü trend ✓)' if adx >= 25 else '(orta)'}, "
+        f"  • ADX: {adx:.0f} ({'güçlü trend ✓' if derive_adx_label(adx) in ('Güçlü', 'Çok Güçlü') else derive_adx_label(adx).lower()}), "
         f"DI+: {di_plus:.0f}, DI-: {di_minus:.0f}\n"
         f"  • EMA12 {e12:.0f} {'>' if e12 > e99 else '<'} EMA99 {e99:.0f} ✓\n"
         f"  • Fiyat: {tr_price_filter(price)} ₺ | Sinyal süresi: {bars} gün{sl_line}\n\n"
@@ -6522,7 +6533,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         **{k: v for k,v in US_STOCK_NAMES.items()},
     }
     name = STOCK_NAMES.get(ticker) or _varlik_names.get(ticker, ticker)
-    adx_quality = "çok güçlü" if adx >= 40 else "güçlü" if adx >= 30 else "orta güçte" if adx >= 25 else "zayıf"
+    adx_quality = {"Çok Güçlü": "çok güçlü", "Güçlü": "güçlü", "Orta": "orta güçte", "Zayıf": "zayıf"}[derive_adx_label(adx)]
 
     if signal == "AL":
         trend_dir  = "yükseliş"
@@ -7346,12 +7357,8 @@ def build_signal_summary(stock):
     # 1) Trend maddesi
     adx_txt = ""
     if isinstance(adx, (int, float)) and adx:
-        if adx >= 25:
-            adx_txt = " (trend gücü belirgin)"
-        elif adx >= 20:
-            adx_txt = " (trend gücü orta)"
-        else:
-            adx_txt = " (trend gücü zayıf)"
+        _adx_lbl_map = {"Çok Güçlü": "belirgin", "Güçlü": "belirgin", "Orta": "orta", "Zayıf": "zayıf"}
+        adx_txt = f" (trend gücü {_adx_lbl_map[derive_adx_label(adx)]})"
     if signal == "AL":
         points.append({
             "text": "Trend yukarı yönlü: orta/uzun vadeli göstergeler alım tarafında" + adx_txt + ".",
@@ -8280,6 +8287,7 @@ def api_tarama():
             "price":         price,
             "change_pct":    s.get("change_pct") or 0,
             "adx":           adx,
+            "adx_label":     derive_adx_label(adx),  # CPO-1196 D0 #4: yerel `adx` ile aynı kaynaktan, tutarlı
             "signal_bars":   s.get("signal_bars") or 1,
             "entry_quality": s.get("entry_quality",""),
             "vol_ratio":     s.get("vol_ratio") or 1.0,
@@ -8978,10 +8986,10 @@ def api_karsilastir():
     results = []
     for ticker in tickers:
         s = data_map.get(ticker, {})
-        inds      = s.get("indicators") or {}
-        adx_label = (inds.get("adx") or {}).get("label", "")
+        inds        = s.get("indicators") or {}
+        _adx_raw    = (inds.get("adx") or {}).get("label", "")
         try:
-            adx_val = float(adx_label.replace("ADX", "").strip()) if adx_label else None
+            adx_val = float(_adx_raw.replace("ADX", "").strip()) if _adx_raw else None
         except (ValueError, TypeError):
             adx_val = None
         # Temel analiz verileri (sadece BIST hisseleri ve veri varsa)
@@ -8993,6 +9001,7 @@ def api_karsilastir():
             "price":          s.get("price"),
             "change_pct":     s.get("change_pct"),
             "adx":            adx_val,
+            "adx_label":      derive_adx_label(adx_val) if adx_val is not None else None,  # CPO-1196 D0 #4
             "rsi":            s.get("rsi"),
             "signal_bars":    s.get("signal_bars"),
             "signal_date":    s.get("signal_date"),
