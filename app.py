@@ -5012,13 +5012,36 @@ _NEWS_FAIL_TTL        = 300        # 5 dakika — başarısız yanıt (negatif c
 _NEWS_CACHE_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_news_cache.json")
 
 def _save_news_cache_to_disk():
-    """News cache'i diske yazar (cross-worker dedup). _lock DIŞINDA çağrılmalı."""
+    """News cache'i diske yazar (cross-worker dedup). _lock DIŞINDA çağrılmalı.
+
+    CPO-1205 §2(c)/§4-2: recycle sonrası boş açılan leader birkaç ticker
+    fetch'ledikten sonra ilk save'inde diski ezerdi — snapshot dolu ama
+    disk'teki diğer leader'lardan kalma daha zengin kopyadan küçük olabilirdi.
+    Bu yüzden yazmadan önce disk'teki mevcut kaydı okuyup ticker başına en
+    taze (ts) kazanır şekilde birleştiriyoruz; küçük bir snapshot artık
+    büyük bir disk kopyasını asla silemez.
+    """
     try:
         with _lock:
             snapshot = dict(_news_cache)
         if not snapshot:
             return   # empty-overwrite guard — diskteki veriyi silme
-        _atomic_write_json(_NEWS_CACHE_DISK_PATH, snapshot)
+        merged = dict(snapshot)
+        try:
+            if os.path.exists(_NEWS_CACHE_DISK_PATH):
+                with open(_NEWS_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
+                    disk = json.load(f)
+                if isinstance(disk, dict):
+                    for tk, dentry in disk.items():
+                        if not isinstance(dentry, dict):
+                            continue
+                        mem_entry = merged.get(tk)
+                        if not mem_entry or dentry.get("ts", 0) > mem_entry.get("ts", 0):
+                            merged[tk] = dentry
+        except Exception:
+            pass   # disk okunamazsa in-memory snapshot ile devam (eski davranış)
+        _atomic_write_json(_NEWS_CACHE_DISK_PATH, merged)
+        logger.info("_save_news_cache_to_disk: %d anahtar yazıldı (in-memory=%d)", len(merged), len(snapshot))
     except Exception as e:
         logger.warning("_save_news_cache_to_disk hatası: %s", e)
 
@@ -6173,6 +6196,31 @@ def _enrich_signal_explanation(ticker, signal_data):
 _PREFETCH_MAX    = 8    # Aynı anda en fazla bu kadar hisse prefetch edilir
 _PREFETCH_DELAY  = 30   # İstekler arası bekleme (saniye) — Gemini rate-limit koruması
 _PREFETCH_STARTUP_GRACE_S = 300  # SPEC-016 K1 — restart sonrası prefetch bekleme (soğuk-start storm fix)
+_PREFETCH_POLL_S = 300  # tur-arası disk-zaman-damgası kontrol periyodu
+
+# CPO-1205 §4-3: tur, `time.sleep(_NEWS_CACHE_TTL)` ile PROSES ömrüne bağlıydı.
+# `--max-requests 500` recycle'ı worker'ı 6 saatten çok daha sık öldürdüğü için
+# bu sleep neredeyse hiç dolmuyor, her yeni PID sıfırdan başlayıp 8 hissenin
+# tamamını yeniden istiyordu. Son-tur zaman damgasını diske yazıp yeni PID'de
+# oradan okuyarak turu prosesten bağımsız, gerçek saate bağlıyoruz.
+_PREFETCH_LAST_RUN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_news_prefetch_run.json")
+
+
+def _prefetch_last_run_ts():
+    try:
+        if os.path.exists(_PREFETCH_LAST_RUN_PATH):
+            with open(_PREFETCH_LAST_RUN_PATH, "r", encoding="utf-8") as f:
+                return float(json.load(f).get("ts", 0))
+    except Exception as e:
+        logger.warning("_prefetch_last_run_ts hatası: %s", e)
+    return 0.0
+
+
+def _prefetch_mark_run(ts):
+    try:
+        _atomic_write_json(_PREFETCH_LAST_RUN_PATH, {"ts": ts})
+    except Exception as e:
+        logger.warning("_prefetch_mark_run hatası: %s", e)
 
 
 def _prefetch_news_worker():
@@ -6181,12 +6229,22 @@ def _prefetch_news_worker():
     Sunucu yeniden başlatıldıktan sonra kullanıcılar soğuk cache'e düşmeden
     içerik görür. Yalnızca AL sinyalli hisseler için çalışır (max 8) ve istekler
     arası 30 saniye bekler — Gemini ücretsiz tier rate-limit koruması.
+
+    Tur zamanlaması disk'teki son-tur damgasına bağlıdır (_prefetch_last_run_ts),
+    process ömrüne değil — worker recycle olsa da yeni PID gereksiz turu atlar.
     """
     # SPEC-016 K1 — restart-grace: soğuk-start thundering herd fix (#48).
     # Site oturmadan prefetch Gemini'ye yüklenmesin → 120s → 300s.
     time.sleep(_PREFETCH_STARTUP_GRACE_S)
     while True:
         now = time.time()
+
+        last_run = _prefetch_last_run_ts()
+        if last_run and (now - last_run) < _NEWS_CACHE_TTL:
+            # 6 saat henüz dolmadı (başka bir PID'de veya bu PID'de yakın
+            # zamanda tur yapılmış) — kısa aralıklarla tekrar kontrol et.
+            time.sleep(min(_PREFETCH_POLL_S, max(1, _NEWS_CACHE_TTL - (now - last_run))))
+            continue
 
         # Güncel cache'den AL sinyalli hisseleri seç (en fazla _PREFETCH_MAX adet)
         with _lock:
@@ -6197,8 +6255,8 @@ def _prefetch_news_worker():
         ][:_PREFETCH_MAX]
 
         if not al_tickers:
-            # Henüz veri yüklenmemiş — tekrar dene
-            time.sleep(300)
+            # Henüz veri yüklenmemiş — bu bir tamamlanmış tur DEĞİL, damga yazılmaz
+            time.sleep(_PREFETCH_POLL_S)
             continue
 
         to_fetch = []
@@ -6229,7 +6287,8 @@ def _prefetch_news_worker():
             time.sleep(_PREFETCH_DELAY)   # İstekler arası 30 saniye — rate-limit koruması
 
         logger.info("Prefetch tamamlandı: %d/%d başarılı", fetched, len(to_fetch))
-        time.sleep(_NEWS_CACHE_TTL)   # Bir sonraki tur 6 saat sonra
+        _prefetch_mark_run(now)   # tur zaman damgasını diske yaz — process ömründen bağımsız 6h gate
+        time.sleep(_PREFETCH_POLL_S)
 
 
 _prefetch_thread = threading.Thread(
@@ -6301,6 +6360,12 @@ def _gemini_cache_sync_loop():
     is_leader = _is_gemini_leader()
     mode = "LEADER (disk yazar)" if is_leader else "non-leader (disk okur)"
     logger.info("gemini-cache-sync: %s", mode)
+    # CPO-1205 §4-2: leader de boot'ta diski bir kez okusun. Eskiden yalnız
+    # non-leader okuyordu — worker recycle sonrası boş açılan yeni leader
+    # diski hiç görmeden Gemini'ye 8 hissenin tamamını yeniden soruyordu.
+    _load_news_cache_from_disk()
+    _load_macro_ai_from_disk()
+    _load_company_summary_from_disk()
     while True:
         try:
             if is_leader:
