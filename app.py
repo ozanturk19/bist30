@@ -3959,6 +3959,15 @@ def set_security_headers(response):
     response.headers.pop("Server", None)
     # NOT: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
     # Cloudflare tarafından ekleniyor — duplicate olmaması için biz eklemiyoruz.
+    # CPO-1223 §1 (izole retry, DEV-1565/1566): CLOSE-WAIT sızıntısı /api/stream'e özgü
+    # değildi — nginx'in terk ettiği (499/timeout) HER istek fd bırakabiliyordu, tek
+    # worker'da 95/100 worker-connections tavanına dayanmıştı. Kök neden gevent pywsgi'nin
+    # keep-alive bekleme döngüsünde erken FIN'i güvenilir tespit edememesi. keep-alive'ı
+    # TÜM response'larda kapatmak bağlantının o bekleme durumuna hiç girmesini engeller.
+    # /ws/prices hariç — wsgi.websocket set edildiğinde soket hijack edilmiş oluyor.
+    # DEV-1565'ten fark: bu deploy disk köprüsünden AYRI, manuel yük testi YAPILMADAN.
+    if request.environ.get("wsgi.websocket") is None:
+        response.headers["Connection"] = "close"
     return response
 
 
