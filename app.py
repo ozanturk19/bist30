@@ -7821,10 +7821,7 @@ def api_stock_news(ticker):
     # try2 unavailable, try3 loading). Kota bilinen şekilde tükenmişken bekleyen bir
     # sonuç YOK — yeni bir bg-fetch kuyruklamak yalnız kuyruğu ISRAF eder, sonucu
     # değiştirmez. Cache TTL'inden bağımsız olarak deterministik dön.
-    if _gemini_news_degraded():
-        # CPO-1210 §3: kısa devre dalı ölçüm dışıydı — kota tükenmişken kaç
-        # gerçek talep "kullanılamıyor" yediği hiç sayılamıyordu. NEWS_MEASURE
-        # formatına short_circuit=yes eklenerek ua_class kırılımıyla sayılabilir.
+    if _gemini_news_degraded():  # CPO-1210 §3: reddedilen talep artık ölçülüyor
         logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=n/a gemini_call=no short_circuit=yes",
                     ticker, _news_ua_class(request))
         return safe_json({
