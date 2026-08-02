@@ -286,11 +286,10 @@ scp templates/index.html root@135.181.206.109:/root/bist30/templates/
 scp templates/*.html root@135.181.206.109:/root/bist30/templates/
 scp app.py root@135.181.206.109:/root/bist30/
 
-# Python değişikliği varsa restart şart
-ssh root@135.181.206.109 "systemctl restart bist30"
-
-# Template değişikliği için restart (Flask debug=False, şablon cache'i var)
-ssh root@135.181.206.109 "systemctl restart bist30"
+# Python/template değişikliği: reload (graceful HUP, port düşmez) — ExecReload
+# tanımlı (ops/server-config/systemd/bist30.service). CPO-1216 P1: restart YASAK
+# değil ama gereksiz ~25-30s connection-refused penceresi açıyor, reload açmıyor.
+ssh root@135.181.206.109 "systemctl reload bist30 || systemctl restart bist30"
 ```
 
 ### Önerilen İyileştirme — Git Tabanlı Deploy
@@ -302,9 +301,10 @@ git init
 git remote add origin https://github.com/ozanturk19/bist30.git
 git pull origin main
 
-# Gelecekte deploy
+# Gelecekte deploy — kanonik yol: /root/bist30/scripts/post-deploy.sh
+# (git pull sonrası reload-first + smoke + cycle log). Elle deploy edilirse:
 git push origin main
-ssh root@135.181.206.109 "cd /root/bist30 && git pull && systemctl restart bist30"
+ssh root@135.181.206.109 "cd /root/bist30 && git pull && systemctl reload bist30 || systemctl restart bist30"
 ```
 
 ---
@@ -376,8 +376,9 @@ ssh root@135.181.206.109 "systemctl status bist30"
 # Log takibi
 ssh root@135.181.206.109 "journalctl -u bist30 -f"
 
-# Servis restart (deploy sonrası)
-ssh root@135.181.206.109 "systemctl restart bist30"
+# Servis reload (deploy sonrası, graceful — port düşmez); sadece .env/secrets
+# değiştiyse ya da reload takılırsa restart kullan
+ssh root@135.181.206.109 "systemctl reload bist30 || systemctl restart bist30"
 
 # Nginx yeniden yükle
 ssh root@135.181.206.109 "nginx -t && systemctl reload nginx"
