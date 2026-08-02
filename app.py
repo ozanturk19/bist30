@@ -233,7 +233,11 @@ def _json_to_dataframe(data: dict):
         return None
     try:
         df = pd.DataFrame(data["data"])
-        df.index = pd.to_datetime(data["index"])
+        # DEV-1562: futures/endeks ticker'ları (GC=F, SI=F, ^GSPC, ^IXIC, CL=F,
+        # NG=F) DST geçişli borsa saatinden karışık UTC offset'li index dönüyor;
+        # utc=True olmadan pd.to_datetime exception atıyor, _compute_chart_data
+        # bunu sessizce None'a çeviriyor (63 gündür 6 makro grafik boş kalmıştı).
+        df.index = pd.to_datetime(data["index"], utc=True)
         df.index.name = "Date"
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
