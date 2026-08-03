@@ -4337,6 +4337,52 @@ def _load_macro_from_disk():
 _macro_bg_lock = threading.Lock()   # Tek seferde 1 _fetch_macro garantisi
 _macro_bg_stats = {"cycles": 0, "successes": 0, "empty_results": 0, "exceptions": 0, "last_success_ts": 0, "last_error": None, "startup_ts": time.time()}
 
+# CPO-1260-A(b) (03.08.2026): loop-nabzi disk-bridge. LEADER dalı (bist30-refresh.service,
+# REFRESH_WORKER=1) ve bist30.service (REFRESH_WORKER=web) AYRI process'ler, in-memory
+# _macro_bg_stats paylaşılmıyor — web worker'ın /api/health'i leader'ın gerçek cycle
+# sayacını hiç göremiyor (her zaman cycles:0 döner). Bu dosya köprüsü, leader'ın HER
+# iterasyonda (başarı/boş/exception fark etmez) yazdığı, web worker'ın okuduğu tek
+# gerçek "loop yaşıyor mu" sinyalidir — macro_age_s (veri yaşı) ile KARIŞTIRILMAMALI.
+_MACRO_HEARTBEAT_PATH = os.environ.get("MACRO_HEARTBEAT_PATH", "/tmp/bp_macro_bg_heartbeat.json")
+_MACRO_HEARTBEAT_DEGRADED_S = 900    # ~5x beklenen 180s cadence
+_MACRO_HEARTBEAT_CRITICAL_S = 1800   # ~10x — kesin ölüm
+
+def _write_macro_heartbeat():
+    """Leader (_rw != 'web') her iterasyon sonunda çağırır — başarı/boş/exception fark etmez.
+    _atomic_write_json kullanır (Ozan/Madde 1 deseni) — okuyan web worker yarım/bozuk
+    JSON'a denk gelmesin (tempfile+fsync+os.replace, aşağıda tanımlı, ileri-referans sorun değil,
+    thread başlama zamanında modül tam yüklenmiş olur)."""
+    try:
+        _atomic_write_json(_MACRO_HEARTBEAT_PATH, {
+            "ts": time.time(),
+            "cycles": _macro_bg_stats["cycles"],
+            "successes": _macro_bg_stats["successes"],
+            "exceptions": _macro_bg_stats["exceptions"],
+            "last_error": _macro_bg_stats["last_error"],
+            "pid": os.getpid(),
+        })
+    except Exception as e:
+        logger.warning("_write_macro_heartbeat yazım hatası: %s", e)
+
+
+def _read_macro_heartbeat():
+    """web worker (REFRESH_WORKER=web) tarafından okunur — best-effort, dosya yoksa None."""
+    try:
+        with open(_MACRO_HEARTBEAT_PATH) as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def _in_macro_refresh_window(now_ts):
+    """bist30-refresh.service'in cron'la aktif tutulduğu pencere: Pzt-Cum 07:00-15:00 UTC
+    (crontab: '0 7 * * 1-5 systemctl start' / '0 15 * * 1-5 systemctl stop'). Pencere
+    dışında loop zaten ÇALIŞMIYOR OLMALI (tasarım gereği) — orada heartbeat yaşı
+    değerlendirilmez, sahte-alarm üretilmez."""
+    dt = datetime.fromtimestamp(now_ts, timezone.utc)
+    return dt.weekday() < 5 and 7 <= dt.hour < 15
+
+
 def _macro_bg_loop():
     """Background macro refresh thread — her 3 dakika.
 
@@ -4408,6 +4454,7 @@ def _macro_bg_loop():
                 logger.warning("_macro_bg_loop exception: %s (total=%d)", e, _macro_bg_stats["exceptions"])
             finally:
                 _macro_bg_lock.release()
+                _write_macro_heartbeat()   # CPO-1260-A(b): basari/bos/exception fark etmez, her iterasyon
         else:
             logger.debug("_macro_bg_loop: previous cycle still running, skip")
         time.sleep(180)   # 3 dakika
@@ -8516,16 +8563,16 @@ def _compute_health():
     cache_updated = (datetime.fromtimestamp(_stocks_eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
                      if _stocks_eff_ts else None)
     macro_age_s  = int(now - macro_ts) if macro_ts else None
-    # CPO-1258 §2/§3 P0: _macro_bg_loop sabit 180s cadence ile 7/24 çalışır (kendi
-    # döngüsünde mkt_open guard'ı YOK — bkz. _macro_bg_loop). 18.30-20.00 TR
-    # olayında loop 2s05dk sessiz kaldı ama macro_status'un aşağıdaki "seans dışı
-    # kısa devresi" (not mkt_open → ok) + macro.stale'in gevşek 6h TTL'i bunu
-    # TAMAMEN maskeledi (health OK, smoke 5/5, macro.stale=False). Heartbeat kaybı
-    # mkt_open'dan BAĞIMSIZ kontrol edilmeli — loop'un kontratı zaten 7/24.
-    _MACRO_HEARTBEAT_DEGRADED_S = 900    # ~5x beklenen 180s cadence
-    _MACRO_HEARTBEAT_CRITICAL_S = 1800   # ~10x — kesin ölüm
-    macro_heartbeat_dead = macro_age_s is not None and macro_age_s > _MACRO_HEARTBEAT_DEGRADED_S
-    macro_stale  = macro_heartbeat_dead or macro_age_s is None or macro_age_s > _MACRO_TTL
+    # CPO-1260-A(b) DÜZELTME (03.08.2026): ef49fcb §2, macro_age_s'i (veri yaşı)
+    # heartbeat sanmıştı. REFRESH_WORKER=web modunda (bist30.service, prod'un tamamı)
+    # _macro_bg_loop hiç yfinance çekmiyor, sadece diskten okuyor (bkz. _macro_bg_loop
+    # üstündeki CPO-558 guard) — gerçek fetch AYRI process'te (bist30-refresh.service,
+    # cron Pzt-Cum 07:00-15:00 UTC). macro_age_s'i "loop nabzı" sayan eşik hem sahte-
+    # pozitif üretiyordu (her gece 18:30 TR - 10:00 TR + hafta sonu, refresh servisi
+    # tasarım gereği kapalıyken) hem sahte-negatif (seans içi loop ölse bile disk eski
+    # veriyi taze gösterebilirdi). macro_stale ORİJİNAL veri-yaşı tanımına dönüyor;
+    # loop-nabzı artık AYRI eksende, disk-bridge heartbeat ile aşağıda izleniyor.
+    macro_stale  = macro_age_s is None or macro_age_s > _MACRO_TTL
 
     # ── Component durumları ── (seans dışında stale OK — normal davranış)
     if stocks_count == 0:
@@ -8541,12 +8588,22 @@ def _compute_health():
     else:
         stocks_status = "ok"
 
+    # CPO-1260-A(b): loop-nabzı ekseni — disk-bridge heartbeat, SADECE bist30-refresh.service'in
+    # aktif olması gereken pencerede (cron Pzt-Cum 07:00-15:00 UTC) değerlendirilir. Pencere
+    # dışında loop zaten çalışmıyor OLMALI (tasarım gereği) — orada heartbeat yaşı anlamsız,
+    # sahte-alarm üretilmez. Bu, veri-yaşı (macro_stale) ekseninden BAĞIMSIZ ikinci bir eksen.
+    _macro_hb = _read_macro_heartbeat()
+    _macro_hb_age_s = int(now - _macro_hb["ts"]) if _macro_hb and _macro_hb.get("ts") else None
+    _macro_in_refresh_window = _in_macro_refresh_window(now)
+    _macro_loop_dead     = _macro_in_refresh_window and (_macro_hb_age_s is None or _macro_hb_age_s > _MACRO_HEARTBEAT_DEGRADED_S)
+    _macro_loop_critical = _macro_in_refresh_window and (_macro_hb_age_s is None or _macro_hb_age_s > _MACRO_HEARTBEAT_CRITICAL_S)
+
     if macro_count == 0:
         macro_status = "critical"
-    elif macro_age_s is not None and macro_age_s > _MACRO_HEARTBEAT_CRITICAL_S:
-        macro_status = "critical"   # CPO-1258 §2: heartbeat kaybı — mkt_open kısa devresinden ÖNCE
-    elif macro_heartbeat_dead:
-        macro_status = "degraded"   # CPO-1258 §2: heartbeat kaybı — mkt_open kısa devresinden ÖNCE
+    elif _macro_loop_critical:
+        macro_status = "critical"   # CPO-1258 §2 gerçek amacı: pencere İÇİNDE loop nabzı kesin kesildi
+    elif _macro_loop_dead:
+        macro_status = "degraded"   # pencere içinde loop nabzı zayıfladı
     elif not mkt_open:
         macro_status = "ok"
     elif macro_age_s is None or macro_age_s > 3600:
@@ -8610,8 +8667,18 @@ def _compute_health():
             "count": macro_count,
             "age_s": macro_age_s,
             "stale": macro_stale,
+            # CPO-1260-A(b): veri-yaşından AYRI eksen — loop nabzı, sadece
+            # bist30-refresh.service'in aktif olması gereken pencerede (07:00-15:00 UTC,
+            # Pzt-Cum) anlamlıdır. Pencere dışında None/False beklenen, alarma DEĞMEZ.
+            "loop_heartbeat_age_s": _macro_hb_age_s,
+            "loop_dead": _macro_loop_dead,
+            "in_refresh_window": _macro_in_refresh_window,
         },
-        "macro_bg_loop":            _macro_bg_stats,
+        # CPO-1260-A(b): bu process REFRESH_WORKER=web ise (prod'un tamamı) local
+        # _macro_bg_stats hep sıfır kalır — gerçek fetch AYRI process'te (bist30-refresh.service).
+        # Local sayaç hareketsizse disk-bridge heartbeat'ten (_read_macro_heartbeat) fallback.
+        "macro_bg_loop":            (_macro_bg_stats if _macro_bg_stats.get("cycles", 0) > 0
+                                      else (_macro_hb or _macro_bg_stats)),
         "last_macro_refresh_ts":    macro_last_ts,
         "last_macro_refresh_age_s": int(now - macro_last_ts) if macro_last_ts else None,
         # CPO-1206 §4: bu blok GLOBAL DEĞİL — her gunicorn worker'ın kendi
