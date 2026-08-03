@@ -1317,6 +1317,11 @@ _stale_alert_lock  = threading.Lock()
 # ── Phase 3 #2 Paket 4 — app startup timestamp ────────────────────────────────
 _APP_STARTUP_TS = time.time()
 
+# CPO-1227 §2: makro/varlık chart cache'i normal koşullarda başlangıç
+# yenilemesiyle birkaç dakikada dolar (_serial_chart_refresh); bu pencere
+# geçtiyse "loading:true" artık dürüst değil — bkz _chart_response_with_macro_summary.
+_CHART_LOADING_GRACE_S = 300
+
 
 def _push_sse(payload: dict):
     msg = f"data: {json.dumps(payload)}\n\n"
@@ -7098,6 +7103,19 @@ def _chart_response_with_macro_summary(ticker_base, cache_obj):
     # Frontend `json.loading || !json.chart` guard ile retry yapar (index.html:3218, hisse.html:3542).
     _ohlc_bars = len((data or {}).get("ohlc") or []) if data else 0
     if not data or "summary" not in data or _ohlc_bars < 2:
+        # CPO-1227 §2: bazı worker'larda (REFRESH_WORKER=web) bu cache'i dolduran
+        # arka plan yenilemesi hiç çalışmıyor (disk köprüsü henüz yok, bkz
+        # [[project_varlik_chart_disk_bridge_missing]]) — yani "loading:true" bu
+        # worker'lar için asla gerçekleşmeyecek bir vaadi süresiz tekrarlıyordu
+        # (frontend 8s'de bir retry, SENECA 67s'lik süresiz spinner ölçtü).
+        # Normal başlangıç yenilemesi birkaç dakikada tamamlanır; bu pencereyi
+        # aşan bir "loading" artık gerçek değil — /news ucundaki dürüst-
+        # degradasyon kontratıyla aynı şekle dön (loading:false, unavailable:true).
+        if (time.time() - _APP_STARTUP_TS) > _CHART_LOADING_GRACE_S:
+            return safe_json({
+                "chart": None, "loading": False, "unavailable": True,
+                "reason": "Grafik verisi şu an kullanılamıyor",
+            })
         return safe_json({"chart": None, "loading": True, "reason": "insufficient_chart_data"})
     # Shallow copy + yeni summary dict (cache mutate olmasın)
     data = dict(data)

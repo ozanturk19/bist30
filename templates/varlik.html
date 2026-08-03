@@ -210,6 +210,12 @@
     animation:spin .7s linear infinite;
   }
   @keyframes spin { to{transform:rotate(360deg)} }
+  .news-retry-btn {
+    background:none; border:1px solid var(--border); color:var(--brand);
+    padding:3px 10px; border-radius:5px; cursor:pointer; font-size:12px;
+    transition:border-color .15s;
+  }
+  .news-retry-btn:hover { border-color:var(--brand); }
 
   /* ── Responsive ── */
   @media(max-width:768px) {
@@ -866,6 +872,14 @@ async function loadChart() {
   try {
     const r = await fetch(CHART_API);
     const d = await r.json();
+    if(d.unavailable) {
+      // CPO-1227 §2: backend zaten "veri gelmeyecek" olarak biliyor (disk köprüsü
+      // eksik) — süresiz 8s retry YOK, dürüst göster + manuel tekrar dene.
+      document.getElementById('varlikChart').innerHTML =
+        '<div class="loading-card" style="color:var(--bp-sat)">' + (d.reason || 'Grafik verisi şu an kullanılamıyor')
+        + '. <button class="news-retry-btn" onclick="loadChart()">Tekrar dene</button></div>';
+      return;
+    }
     if(d.loading || !d.chart) {
       document.getElementById('varlikChart').innerHTML =
         '<div class="loading-card"><div class="spinner"></div><span>Grafik hesaplanıyor, lütfen bekleyin…</span></div>';
