@@ -46,11 +46,11 @@ def test_save_news_cache_merges_with_existing_disk_copy():
     src = _read_app()
     body = _extract_function_body(src, "_save_news_cache_to_disk")
     assert body, "_save_news_cache_to_disk() bulunamadı"
-    assert "json.load(f)" in body, (
+    assert "_tp_read_json(_NEWS_CACHE_DISK_PATH)" in body, (
         "_save_news_cache_to_disk artık yazmadan önce disk'teki mevcut kaydı okumuyor — "
         "kısmi/az veri disk'teki zengin kopyayı ezme riski sürüyor"
     )
-    assert "_atomic_write_json(_NEWS_CACHE_DISK_PATH, merged)" in body, (
+    assert "_tp_write_json(_NEWS_CACHE_DISK_PATH, merged" in body, (
         "diske yazılan artık ham snapshot değil, disk+memory birleşimi (merged) olmalı"
     )
 

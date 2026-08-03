@@ -4497,7 +4497,11 @@ def _save_macro_ai_to_disk():
     try:
         if not _macro_ai_cache:
             return
-        _atomic_write_json(_MACRO_AI_DISK_PATH, _macro_ai_cache)
+        # DEV-1570/CPO-992-DEV-983 pattern: bu fonksiyon eskiden inline
+        # _atomic_write_json (fsync+replace) kullanıyordu — gemini-cache-sync
+        # 90s loop'unda leader worker'da çalışıp hub'ı bloke ediyordu (bkz
+        # CPO-1218/1226 CLOSE_WAIT sızıntısı, worker-connections tavanına dayandı).
+        _tp_write_json(_MACRO_AI_DISK_PATH, _macro_ai_cache, atomic=True, ensure_ascii=False)
     except Exception as e:
         logger.warning("_save_macro_ai_to_disk hatası: %s", e)
 
@@ -4506,8 +4510,7 @@ def _load_macro_ai_from_disk():
     try:
         if not os.path.exists(_MACRO_AI_DISK_PATH):
             return
-        with open(_MACRO_AI_DISK_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = _tp_read_json(_MACRO_AI_DISK_PATH)
         if isinstance(data, dict) and data.get("text"):
             _macro_ai_cache.update(data)
     except Exception as e:
@@ -5091,8 +5094,7 @@ def _save_news_cache_to_disk():
         merged = dict(snapshot)
         try:
             if os.path.exists(_NEWS_CACHE_DISK_PATH):
-                with open(_NEWS_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
-                    disk = json.load(f)
+                disk = _tp_read_json(_NEWS_CACHE_DISK_PATH)
                 if isinstance(disk, dict):
                     for tk, dentry in disk.items():
                         if not isinstance(dentry, dict):
@@ -5102,7 +5104,10 @@ def _save_news_cache_to_disk():
                             merged[tk] = dentry
         except Exception:
             pass   # disk okunamazsa in-memory snapshot ile devam (eski davranış)
-        _atomic_write_json(_NEWS_CACHE_DISK_PATH, merged)
+        # DEV-1570/CPO-992-DEV-983 pattern: inline _atomic_write_json (fsync+
+        # replace) gemini-cache-sync 90s loop'unda leader worker'ı bloke
+        # ediyordu — bkz CPO-1218/1226 CLOSE_WAIT sızıntısı.
+        _tp_write_json(_NEWS_CACHE_DISK_PATH, merged, atomic=True, ensure_ascii=False)
         logger.info("_save_news_cache_to_disk: %d anahtar yazıldı (in-memory=%d)", len(merged), len(snapshot))
     except Exception as e:
         logger.warning("_save_news_cache_to_disk hatası: %s", e)
@@ -5112,8 +5117,7 @@ def _load_news_cache_from_disk():
     try:
         if not os.path.exists(_NEWS_CACHE_DISK_PATH):
             return
-        with open(_NEWS_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
-            disk = json.load(f)
+        disk = _tp_read_json(_NEWS_CACHE_DISK_PATH)
         if not isinstance(disk, dict):
             return
         with _lock:
@@ -5154,7 +5158,8 @@ def _save_company_summary_to_disk():
             snapshot = dict(_company_summary_cache)
         if not snapshot:
             return   # empty-overwrite guard — restart sonrası 30g cache'i koru
-        _atomic_write_json(_COMPANY_SUMMARY_PATH, snapshot)
+        # DEV-1570/CPO-992-DEV-983 pattern: bkz _save_macro_ai_to_disk üstteki not.
+        _tp_write_json(_COMPANY_SUMMARY_PATH, snapshot, atomic=True, ensure_ascii=False)
     except Exception as e:
         logger.warning("_save_company_summary_to_disk hatası: %s", e)
 
@@ -5163,8 +5168,7 @@ def _load_company_summary_from_disk():
     try:
         if not os.path.exists(_COMPANY_SUMMARY_PATH):
             return
-        with open(_COMPANY_SUMMARY_PATH, "r", encoding="utf-8") as f:
-            disk = json.load(f)
+        disk = _tp_read_json(_COMPANY_SUMMARY_PATH)
         if not isinstance(disk, dict):
             return
         with _lock:
