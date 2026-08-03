@@ -8719,6 +8719,10 @@ def _compute_health():
             "telegram": "configured" if (TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID) else "missing",
             "smtp":     "configured" if (SMTP_HOST and SMTP_USER and SMTP_PASS) else "missing",
         },
+        # CPO-1261 §3 — worker başına aktif greenlet sayısı + worker_connections
+        # doluluk oranı. ~60s'de bir güncellenir (bkz. _health_snapshot_loop),
+        # anlık değil — trend izlemek içindir, forensic kesinlik için SIGUSR2 dump'a bakın.
+        "worker_pool": dict(_worker_pool_metrics, worker_connections_limit=_WORKER_CONNECTIONS_LIMIT),
         # CPO-1153/1154 P0-B(b) — 429 kota tükenmesi artık gözlemlenebilir (önceden
         # health OK + smoke 5/5 iken özellik 6 saat sessizce ölüydü).
         "news": {
@@ -8759,8 +8763,49 @@ _HEALTH_HEARTBEAT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__))
 
 _health_loop_last_tick_ts = time.time()
 
+# CPO-1261 §3 — py-spy sadece OS-thread stack'i gösterir, gevent greenlet'lerini
+# GÖSTERMEZ. `-k GeventWebSocketWorker --worker-connections 400` altında yüzlerce
+# bloke greenlet forensic dump'ta "hepsi idle" gibi görünüp KAYBOLABİLİR (2 gecedir
+# forensic sonuçsuz kalmasının kök nedeni). gunicorn'un base Worker sınıfı SIGUSR2'yi
+# worker seviyesinde varsayılan SIG_IGN yapar (yalnız arbiter re-exec için kullanır,
+# worker'a hiç dokunmaz) — bu handler'ı üzerine yazmak arbiter davranışıyla ÇAKIŞMAZ.
+_WORKER_CONNECTIONS_LIMIT = int(os.environ.get("GUNICORN_WORKER_CONNECTIONS", "400"))
+_worker_pool_metrics = {"active_greenlets": None, "occupancy_pct": None, "ts": 0}
+
+def _active_greenlet_count():
+    """gc heap taraması — pahalı, bu yüzden 8s health loop'ta DEĞİL, ayrı rate-limit'li
+    çağrılır (bkz. _health_snapshot_loop). Tek C-level çağrı, gevent yield noktası
+    değil; kısa sürer ama sık çağrılırsa worker'ı gereksiz yere meşgul eder."""
+    try:
+        import gc
+        from greenlet import greenlet as _greenlet_cls
+        return sum(1 for o in gc.get_objects() if isinstance(o, _greenlet_cls) and not o.dead)
+    except Exception:
+        return None
+
+def _dump_greenlet_info(*_a):
+    """SIGUSR2 handler — gevent.util.format_run_info() çıktısını dosyaya yazar.
+    forensic-snapshot.sh restart'tan ÖNCE bu sinyali worker PID'lerine gönderir."""
+    try:
+        import gevent.util
+        info_lines = gevent.util.format_run_info()
+        out_path = f"/tmp/bp_greenlet_dump_{os.getpid()}.txt"
+        with open(out_path, "w") as f:
+            f.write("\n".join(info_lines))
+        logger.warning("greenlet dump yazildi: %s (%d satir)", out_path, len(info_lines))
+    except Exception as e:
+        logger.error("greenlet dump basarisiz: %s", e)
+
+try:
+    import signal as _signal_mod
+    import gevent as _gevent_sig
+    _gevent_sig.signal_handler(_signal_mod.SIGUSR2, _dump_greenlet_info)
+    logger.info("SIGUSR2 greenlet-dump handler kayitli (CPO-1261 §3)")
+except Exception as e:
+    logger.warning("SIGUSR2 handler kayit basarisiz: %s", e)
+
 def _health_snapshot_loop():
-    global _health_snapshot, _health_loop_last_tick_ts
+    global _health_snapshot, _health_loop_last_tick_ts, _worker_pool_metrics
     while True:
         now = time.time()
         stall_gap = _check_health_loop_stall(now, _health_loop_last_tick_ts)
@@ -8769,6 +8814,15 @@ def _health_snapshot_loop():
             # geriye-dönük kanıt bırakmak için (CPO-1068, DEV-1440 boşluğu).
             logger.warning("health snapshot loop stall detected: gap=%.1fs (expected ~8s)", stall_gap)
         _health_loop_last_tick_ts = now
+        # CPO-1261 §3 — gc taraması pahalı, 8s'lik health tick'in her turunda DEĞİL,
+        # ~60s'de bir (60s ölçüm cadence'iyle aynı ritimde, madde 1 ile hizalı).
+        if now - _worker_pool_metrics["ts"] >= 60:
+            _n = _active_greenlet_count()
+            _worker_pool_metrics = {
+                "active_greenlets": _n,
+                "occupancy_pct": round(100 * _n / _WORKER_CONNECTIONS_LIMIT, 1) if _n is not None else None,
+                "ts": now,
+            }
         try:
             _health_snapshot = _compute_health()   # atomic rebind (GIL)
             _atomic_write_json(_HEALTH_HEARTBEAT_PATH, _health_snapshot)

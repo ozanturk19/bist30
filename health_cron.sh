@@ -105,6 +105,52 @@ _status_val=$(echo "$body" | grep -oE '"status": *"[^"]*"' | head -1 | sed -E 's
 _bad_ticker_val=$(echo "$body" | grep -oE '"bad_ticker_count": *[0-9]+' | head -1 | sed -E 's/.*: *//')
 echo "$(date) TICK http=$http_code ok=${_ok_val:-?} status=${_status_val:-?} bad_ticker=${_bad_ticker_val:-?}" >> "$LOG"
 
+# CPO-1261 madde 2 — /api/health lock-free (bg thread'den önceden hesaplanmış
+# snapshot'ı servis eder, app.py:8783) bu yüzden hub gerçekten bloke olsa bile
+# ANINDA döner (3 Ağustos 23:05 TR outage kanıtı: /api/health 3/3 200 t=0.0016s,
+# AYNI ANDA /api/data 5/5 20s timeout — health_cron o gece TEK FAIL göremedi,
+# tespit 10dk'lik smoke-watch'a kaldı). Bu probe /api/health'in yukarıdaki hiçbir
+# dallanmasına (BODY-STALE exit 0, http_code=200 exit 0) bağlı DEĞİL — her tick'te
+# çalışır. /api/data'nın kendisi lock alıp gerçek veriyi döndürür, bu yüzden
+# hub-bloke sınıfını /api/health'in kaçırdığı yerde yakalar.
+DATA_FAILS_FILE=/root/bist30/health_data_fail_count.txt
+data_response=$(curl -m 15 -s -w '\n%{http_code}' http://127.0.0.1:8003/api/data 2>/dev/null)
+data_http_code=$(echo "$data_response" | tail -n1)
+data_body=$(echo "$data_response" | sed '$d')
+data_probe=$(echo "$data_body" | python3 -c "
+import sys, json
+try:
+    d = json.loads(sys.stdin.read())
+    stocks = d.get('stocks', [])
+    dq = d.get('data_quality', '?')
+    print(f'len={len(stocks)}|dq={dq}')
+except Exception as e:
+    print('PARSE_FAIL:' + str(e)[:40])
+" 2>/dev/null)
+data_stocks_len=$(echo "$data_probe" | sed -n 's/^len=\([0-9]*\)|.*/\1/p')
+echo "$(date) DATA-TICK http=$data_http_code $data_probe" >> "$LOG"
+
+if [ "$data_http_code" = "200" ] && [ -n "$data_stocks_len" ] && [ "$data_stocks_len" -gt 0 ] 2>/dev/null; then
+  echo "0" > "$DATA_FAILS_FILE"
+else
+  data_fails=$(cat "$DATA_FAILS_FILE" 2>/dev/null || echo "0")
+  data_fails=$((data_fails + 1))
+  echo "$data_fails" > "$DATA_FAILS_FILE"
+  echo "$(date) DATA-FAIL #$data_fails — http=$data_http_code $data_probe" >> "$LOG"
+  # 2 ardışık fail'de bir kez ALERT (smoke-watch'un SERVICE_DOWN STREAK==2
+  # deseniyle aynı disiplin — her tick'te tekrar yazıp spam etmez).
+  if [ "$data_fails" -eq 2 ]; then
+    _data_alert_tr_now=$(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M:%S TR')
+    {
+      echo ""
+      echo "### P0-ALERT [$_data_alert_tr_now] /api/data 2 ardışık fail (health hızlı dönerken data hang sınıfı)"
+      echo "Detay: http=$data_http_code $data_probe"
+      echo "Yorum: CPO-1261 madde 2 — /api/health lock-free snapshot olduğu için hub-bloke durumunda bile hızlı döner, bu probe /api/data'nın GERÇEK isteğini test eder."
+      echo "Eylem: Claude session aç -> DEV gör -> forensic-snapshot.sh (SIGUSR2 greenlet dump dahil) incele"
+    } >> "$ALERT"
+  fi
+fi
+
 # CPO-1055 body-check fix — blind spot: HTTP 200 dönebilir ama veri seans
 # içinde taze olmayabilir (13-14 Tem 2026 canlı vaka: Yahoo blok → refresh
 # başarısız → stocks 16sa+ stale, health hâlâ HTTP 200/hızlı döndü, HTTP-kod-only
