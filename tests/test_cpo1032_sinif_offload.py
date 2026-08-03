@@ -1,4 +1,8 @@
-"""CPO-1032 Sprint 6 SINIF fix — 4 leader-election flock + _get_kap_uuid offload.
+"""CPO-1032 Sprint 6 SINIF fix — 5 leader-election flock + _get_kap_uuid offload.
+
+CPO-1228 (03.08 03:10 TR): `_is_gemini_leader` bu setin 5.'si olarak eklendi —
+DEV-1568'in bulduğu, CPO'nun py-spy+cw-leak korelasyonuyla doğruladığı ve
+APPROVE ettiği eksik kalan leader fonksiyonuydu (bkz DEV-1570/1571 mailbox).
 
 Root cause sınıfı (DEV-1046/CPO-1017/DEV-1102 ile aynı): `open()`/`flock()` ve
 senkron `requests.post()` OS-seviyeli syscall'lar — gevent monkey-patch bunları
@@ -25,6 +29,9 @@ LEADER_FUNCS = [
     ("_is_bg_leader", "_is_bg_leader_blocking", "False"),
     ("_is_digest_leader", "_is_digest_leader_blocking", "False"),
     ("_is_macro_leader", "_is_macro_leader_blocking", "False"),
+    # CPO-1228 (03.08 03:10 TR): 4.'sü — desenin eksik kalan 3. leader fonksiyonuydu
+    # (DEV-1568 bulgusu, py-spy + cw leak korelasyonuyla doğrulandı, APPROVE edildi).
+    ("_is_gemini_leader", "_is_gemini_leader_blocking", "False"),
 ]
 
 ALL_FUNCS = LEADER_FUNCS + [("_get_kap_uuid", "_get_kap_uuid_blocking", "None")]
@@ -116,6 +123,7 @@ def _load_fn_isolated(func_name, extra_ns=None):
     ("_is_bg_leader_blocking", "_bg_lock_fh", "_BG_LOCK_PATH"),
     ("_is_digest_leader_blocking", "_digest_lock_fh", "_DIGEST_LOCK_PATH"),
     ("_is_macro_leader_blocking", "_macro_leader_fh", "_MACRO_LOCK_PATH"),
+    ("_is_gemini_leader_blocking", "_gemini_lock_fh", "_GEMINI_LOCK_PATH"),
 ])
 def test_leader_blocking_helper_preserves_original_flock_behavior(tmp_path, blocking_fn, fh_var, path_var):
     """Fix öncesi/sonrası davranış birebir aynı olmalı: ilk çağıran True (leader)

@@ -2020,7 +2020,7 @@ def _is_digest_leader():
 _GEMINI_LOCK_PATH = os.environ.get("GEMINI_LOCK_PATH", "/tmp/bp_gemini_leader.lock")  # staging-prod izolasyon
 _gemini_lock_fh = None
 
-def _is_gemini_leader():
+def _is_gemini_leader_blocking():
     """Bu worker Gemini bg prefetch yetkisine sahip mi? fcntl.flock —
     4 worker'dan yalnızca biri leader → prefetch 4× yerine 1×."""
     global _gemini_lock_fh
@@ -2031,6 +2031,23 @@ def _is_gemini_leader():
         return True
     except (BlockingIOError, OSError):
         return False
+
+
+def _is_gemini_leader():
+    """Bu worker Gemini bg prefetch yetkisine sahip mi? — public wrapper.
+
+    CPO-1032 deseninin 3 leader fonksiyonundan eksik kalan 3.'sü (CPO-1228,
+    03.08 03:10 TR APPROVE) — `_is_digest_leader`/`_is_macro_leader` zaten bu
+    deseni kullanıyordu, bu tek eksikti. `_is_gemini_leader_blocking()`'i
+    gevent hub threadpool'a offload edip 10s tavan koyar. Timeout'ta False
+    (non-leader) — güvenli varsayılan."""
+    if _WS_AVAILABLE:
+        try:
+            return _gevent.get_hub().threadpool.spawn(_is_gemini_leader_blocking).get(timeout=10)
+        except _gevent.Timeout:
+            logger.error("_is_gemini_leader: 10s threadpool timeout — hub threadpool tıkanmış olabilir, non-leader varsayılıyor")
+            return False
+    return _is_gemini_leader_blocking()
 
 # CPO-520 KÖK NEDEN P0 (07.06.2026): _macro_bg_loop her worker'da çalışıyordu →
 # 4 worker × 10 ticker × 3dk = 40 paralel yfinance.Ticker.fast_info call →
