@@ -603,15 +603,22 @@ def _can_send_push(endpoint_key, ticker):
     - Hisse başına 24h içinde max 1 push
     - Kullanıcı başına saatlik max 3 push
     File-based state (push_state.json) + fcntl lock. True → gönderilebilir (state tüketilir).
-    Hata durumunda fail-open (True) — rate limit dosya sorunu push'u tamamen kesmesin."""
+    Hata durumunda fail-open (True) — rate limit dosya sorunu push'u tamamen kesmesin.
+
+    CPO-1258 §1/§5 P0 kök neden fix: bu çağrı `.get()` timeout'suzdu VE içindeki
+    `flock(LOCK_EX)` blocking'ti — codebase'deki diğer 9 hub-threadpool çağrısının
+    (_tp_read_json/_tp_write_json/_get_kap_uuid/_is_*_leader/_gemini_rate_acquire)
+    hiçbirinde bu ikili birlikte yok. Sonuç: bir worker flock'u uzun tutarsa (veya
+    nadir disk gecikmesi olursa) threadpool'daki OS thread'i SÜRESİZ bloke olur —
+    canlı forensic'te (19.13 TR) bu havuz doygunluğu zinciri accept-starvation'a
+    kadar gitti. Fix: flock LOCK_NB (anlık başarısızsa dosyaya hiç dokunmadan
+    fail-open) + dış `.get(timeout=10)` — diğer 9 çağrıyla aynı desen."""
     import fcntl
-    # CPO-994/DEV-986: same CPO-992 disk-I/O-under-lock pattern (fcntl variant) —
-    # routed through the hub threadpool like _tp_read_json/_tp_write_json above.
     def _do():
         now  = time.time()
         hour = int(now / 3600)
         with open(_PUSH_RATELIMIT_PATH, "a+") as f:
-            fcntl.flock(f, fcntl.LOCK_EX)
+            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)   # busy → OSError → dış except fail-open
             f.seek(0)
             raw   = f.read()
             state = json.loads(raw) if raw.strip() else {}
@@ -634,10 +641,10 @@ def _can_send_push(endpoint_key, ticker):
         return True
     try:
         if _WS_AVAILABLE:
-            return _gevent.get_hub().threadpool.spawn(_do).get()
+            return _gevent.get_hub().threadpool.spawn(_do).get(timeout=10)
         return _do()
     except Exception:
-        return True   # fail-open
+        return True   # fail-open (LOCK_NB busy + 10s hub-threadpool timeout dahil)
 
 
 def _broadcast_push_changes(changes):
@@ -8509,7 +8516,16 @@ def _compute_health():
     cache_updated = (datetime.fromtimestamp(_stocks_eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
                      if _stocks_eff_ts else None)
     macro_age_s  = int(now - macro_ts) if macro_ts else None
-    macro_stale  = macro_age_s is None or macro_age_s > _MACRO_TTL
+    # CPO-1258 §2/§3 P0: _macro_bg_loop sabit 180s cadence ile 7/24 çalışır (kendi
+    # döngüsünde mkt_open guard'ı YOK — bkz. _macro_bg_loop). 18.30-20.00 TR
+    # olayında loop 2s05dk sessiz kaldı ama macro_status'un aşağıdaki "seans dışı
+    # kısa devresi" (not mkt_open → ok) + macro.stale'in gevşek 6h TTL'i bunu
+    # TAMAMEN maskeledi (health OK, smoke 5/5, macro.stale=False). Heartbeat kaybı
+    # mkt_open'dan BAĞIMSIZ kontrol edilmeli — loop'un kontratı zaten 7/24.
+    _MACRO_HEARTBEAT_DEGRADED_S = 900    # ~5x beklenen 180s cadence
+    _MACRO_HEARTBEAT_CRITICAL_S = 1800   # ~10x — kesin ölüm
+    macro_heartbeat_dead = macro_age_s is not None and macro_age_s > _MACRO_HEARTBEAT_DEGRADED_S
+    macro_stale  = macro_heartbeat_dead or macro_age_s is None or macro_age_s > _MACRO_TTL
 
     # ── Component durumları ── (seans dışında stale OK — normal davranış)
     if stocks_count == 0:
@@ -8527,6 +8543,10 @@ def _compute_health():
 
     if macro_count == 0:
         macro_status = "critical"
+    elif macro_age_s is not None and macro_age_s > _MACRO_HEARTBEAT_CRITICAL_S:
+        macro_status = "critical"   # CPO-1258 §2: heartbeat kaybı — mkt_open kısa devresinden ÖNCE
+    elif macro_heartbeat_dead:
+        macro_status = "degraded"   # CPO-1258 §2: heartbeat kaybı — mkt_open kısa devresinden ÖNCE
     elif not mkt_open:
         macro_status = "ok"
     elif macro_age_s is None or macro_age_s > 3600:
