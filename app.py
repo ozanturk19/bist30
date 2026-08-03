@@ -1899,6 +1899,13 @@ def analyze(ticker_base):
 # ── Telegram Bildirim ─────────────────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN  = os.environ.get("TELEGRAM_BOT_TOKEN",  "")
 TELEGRAM_CHANNEL_ID = os.environ.get("TELEGRAM_CHANNEL_ID", "")
+if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
+    # CPO-1260-B P1: önceden _send_telegram() sessizce return ediyordu — hiçbir
+    # log/exception/sayaç yoktu, aylarca kanalın ölü olduğu fark edilmedi
+    # (journald'da tek bir gönderim/hata satırı yok, sadece bu startup ilanı vardı).
+    # Artık bir KEZ, süreç başlangıcında, açıkça uyarıyoruz (her çağrıda değil — log spam olmasın).
+    logger.warning("Telegram: DEVRE DIŞI — TELEGRAM_BOT_TOKEN/TELEGRAM_CHANNEL_ID tanımsız, "
+                    "bu kanaldan hiçbir alarm/bildirim GİTMEYECEK (Ozan: secrets.env'e token eklenmeli)")
 _prev_signals       = {}   # {ticker: signal}  — bir önceki döngü sinyalleri
 
 # MSG-019B Adım 3: _prev_signals diske persist (worker restart sonrası state korunsun)
@@ -2118,7 +2125,12 @@ _load_prev_signals()
 
 
 def _send_telegram(text):
-    """Telegram kanalına/gruba mesaj gönderir."""
+    """Telegram kanalına/gruba mesaj gönderir.
+
+    CPO-1260-B P1: token eksikse startup'ta zaten bir kez WARNING loglandı (yukarıda,
+    modül yüklenirken) — burada sessiz return kasıtlı, her çağrıda tekrar loglanmaz.
+    Gönderim SONUCU (başarı dahil) artık HTTP koduyla loglanıyor — önceden sadece
+    başarısızlık loglanıyordu, başarı ile "hiç denenmedi" ayırt edilemiyordu."""
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
         return
     try:
@@ -2130,7 +2142,9 @@ def _send_telegram(text):
             "disable_web_page_preview": True,
         }, timeout=10)
         if not resp.ok:
-            logger.warning("Telegram gönderimi başarısız: %s", resp.text)
+            logger.warning("Telegram gönderimi başarısız: HTTP %d %s", resp.status_code, resp.text[:200])
+        else:
+            logger.info("Telegram gönderimi başarılı: HTTP %d", resp.status_code)
     except Exception as e:
         logger.warning("Telegram hatası: %s", e)
 
@@ -8698,6 +8712,12 @@ def _compute_health():
             "gemini":                _is_gemini_leader(),
             "notify":                _is_notify_leader(),
             "prefetch_thread_alive": _prefetch_thread.is_alive(),
+        },
+        # CPO-1260-B P1: alarm kanallarının KENDİSİ de sağlık yüzeyine girsin —
+        # Telegram token'ı aylarca eksikti ve bunu gösteren hiçbir yüzey yoktu.
+        "alarm_channels": {
+            "telegram": "configured" if (TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID) else "missing",
+            "smtp":     "configured" if (SMTP_HOST and SMTP_USER and SMTP_PASS) else "missing",
         },
         # CPO-1153/1154 P0-B(b) — 429 kota tükenmesi artık gözlemlenebilir (önceden
         # health OK + smoke 5/5 iken özellik 6 saat sessizce ölüydü).
