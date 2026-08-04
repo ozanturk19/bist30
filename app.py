@@ -8865,14 +8865,60 @@ threading.Thread(target=_health_snapshot_loop, daemon=True, name="health-snapsho
 logger.info("Health snapshot loop başlatıldı (SPEC-016 K4 — /api/health lock-free)")
 
 
+# CPO-1269 §6/§7 (04.08, P0 forensic): canlı kanıtla `_lock` (app.py:1300) bazı
+# route'larda süresiz tutuluyor, ama /api/health bunu hiç GÖREMİYOR — endpoint
+# lock-free (yukarıdaki SPEC-016 K4 tasarımı), bu sınıf arızada "IYILIK degil,
+# olcum korlugunun kaynagi" (CPO'nun kendi ifadesi). `_health_snapshot_loop`'a
+# bir probe eklemek YETMEZ: o thread'in kendisi `_compute_health()` içinde AYNI
+# `_lock`'u alıyor (app.py:8582) — `_lock` gerçekten asılı kalırsa o thread de
+# tıkanır ve bir daha HİÇ tick atmaz, probe'u da kendisiyle birlikte gömer.
+# Bu yüzden tamamen AYRI, sadece non-blocking `acquire(blocking=False)` yapan
+# (asla kendisi bloke olamayan) bir thread — `_lock`'un durumu ne olursa olsun
+# her 3s'de bir rapor üretir.
+_lock_probe_state = {"last_free_ts": time.time(), "stuck_s": 0.0}
+
+def _lock_probe_loop():
+    """`_lock`'u periyodik non-blocking dener — asla kendisi asılı kalamaz.
+    30s+ sürekli meşgulse bir kez WARN (spam olmasın diye ~30s'de bir tekrarlanır)."""
+    global _lock_probe_state
+    _last_logged_bucket = -1
+    while True:
+        try:
+            if _lock.acquire(blocking=False):
+                _lock.release()
+                _lock_probe_state = {"last_free_ts": time.time(), "stuck_s": 0.0}
+            else:
+                _stuck = time.time() - _lock_probe_state["last_free_ts"]
+                _lock_probe_state = {"last_free_ts": _lock_probe_state["last_free_ts"], "stuck_s": round(_stuck, 1)}
+                if _stuck >= 30:
+                    _bucket = int(_stuck // 30)
+                    if _bucket != _last_logged_bucket:
+                        _last_logged_bucket = _bucket
+                        logger.error("_lock_probe: %.1fs'dir sürekli meşgul (CPO-1269 P0 sınıfı) — "
+                                     "bir greenlet/thread _lock'u tutuyor ve bırakmıyor", _stuck)
+        except Exception as e:
+            logger.error("_lock_probe_loop: %s", e)
+        time.sleep(3)
+
+threading.Thread(target=_lock_probe_loop, daemon=True, name="lock-probe").start()
+logger.info("_lock probe loop başlatıldı (CPO-1269 §6/§7 — lock-free, asla kendisi asılı kalamaz)")
+
+
 @app.route("/api/health")
 def api_health():
     """Health + observability endpoint — SPEC-016 K4 lock-free.
 
     Production monitoring (UptimeRobot, watchdog) için 1dk poll edilebilir.
     Snapshot bg thread'de güncellenir (8s) → endpoint hiç _lock almaz,
-    contention/gevent yavaşlamasında bile anında yanıt verir."""
-    return safe_json(_health_snapshot)
+    contention/gevent yavaşlamasında bile anında yanıt verir.
+
+    CPO-1269 §6/§7: `lock_probe.stuck_s` — `_lock`'un ne kadar süredir sürekli
+    meşgul olduğu (ayrı, asla bloke olamayan bir thread'den — bkz. yukarısı).
+    Bu alan `_health_snapshot`'ın kendisinden bağımsız güncellenir; health
+    hesaplama döngüsü `_lock` yüzünden tıkansa BİLE bu alan tazeliğini korur."""
+    resp = dict(_health_snapshot)
+    resp["lock_probe"] = _lock_probe_state
+    return safe_json(resp)
 
 
 @app.route("/api/data-quality")
