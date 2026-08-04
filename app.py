@@ -6195,13 +6195,16 @@ def get_ai_news(ticker, source="user", ua_class=None):
     now = time.time()
     with _lock:
         cached = _news_cache.get(ticker)
-        if cached:
-            ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
-            if (now - cached["ts"]) < ttl:
-                # CPO-1208 §1(d) ölçüm: kuyruğa girdiğinde miss'ti, işlenene kadar
-                # başka worker doldurmuş olabilir — bu da tabloya dahil edilmeli.
-                logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=hit gemini_call=no", ticker, ua_class)
-                return cached.get("text")   # başarısız cache → None döner
+    if cached:
+        # CPO-1270 P0-3: _news_ttl_for() de _lock alıyor (non-reentrant) —
+        # burada _lock tutulurken çağrılırsa kalıcı self-deadlock olur, o yüzden
+        # lock bloğunun dışına taşındı.
+        ttl = _NEWS_FAIL_TTL if cached.get("failed") else _news_ttl_for(ticker)
+        if (now - cached["ts"]) < ttl:
+            # CPO-1208 §1(d) ölçüm: kuyruğa girdiğinde miss'ti, işlenene kadar
+            # başka worker doldurmuş olabilir — bu da tabloya dahil edilmeli.
+            logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=hit gemini_call=no", ticker, ua_class)
+            return cached.get("text")   # başarısız cache → None döner
     logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=miss gemini_call=yes", ticker, ua_class)
 
     name       = STOCK_NAMES.get(ticker, ticker)
@@ -6523,15 +6526,19 @@ def _prefetch_news_worker():
             continue
 
         to_fetch = []
+        # CPO-1270 P0-3: _news_ttl_for() de _lock alıyor (non-reentrant) — bu
+        # yüzden snapshot _lock altında alınır, TTL hesabı lock dışında yapılır
+        # (aksi halde kalıcı self-deadlock).
         with _lock:
-            for ticker in al_tickers:
-                cached = _news_cache.get(ticker)
-                if not cached:
-                    to_fetch.append(ticker)          # hiç denenmemiş
-                elif cached.get("failed"):
-                    to_fetch.append(ticker)          # başarısız cache süresi dolmuş
-                elif (now - cached["ts"]) > _news_ttl_for(ticker) * 0.9:
-                    to_fetch.append(ticker)          # cache sona ermek üzere
+            cached_snapshot = {ticker: _news_cache.get(ticker) for ticker in al_tickers}
+        for ticker in al_tickers:
+            cached = cached_snapshot[ticker]
+            if not cached:
+                to_fetch.append(ticker)          # hiç denenmemiş
+            elif cached.get("failed"):
+                to_fetch.append(ticker)          # başarısız cache süresi dolmuş
+            elif (now - cached["ts"]) > _news_ttl_for(ticker) * 0.9:
+                to_fetch.append(ticker)          # cache sona ermek üzere
 
         logger.info("Prefetch: %d/%d AL hisse için haber yüklenecek", len(to_fetch), len(al_tickers))
         fetched = 0
