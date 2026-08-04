@@ -5829,8 +5829,9 @@ def _gemini_rate_acquire() -> float:
     CPO-1267/1268 P0-2 (04.08) EK: bu 10s tavan yalnız BEKLEYEN greenlet'i kurtarıyordu
     — flock gerçekten asılı kalırsa altındaki threadpool thread'i hâlâ sonsuza dek
     kernel'de kilitli kalıp havuza dönmüyordu (CPO-1228 "leak survives offload fix"
-    ile aynı sınıf olabilir). `_gemini_rate_acquire_blocking()` artık LOCK_NB + 8s
-    poll budget kullanıyor — thread artık bu yoldan asla kalıcı sızmıyor.
+    ile aynı sınıf olabilir). `_gemini_rate_acquire_blocking` (yukarıdaki kritik
+    bölüm) artık LOCK_NB + 8s poll budget kullanıyor — thread artık bu yoldan
+    asla kalıcı sızmıyor.
     """
     if _WS_AVAILABLE:
         try:

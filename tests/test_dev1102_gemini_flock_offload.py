@@ -22,6 +22,7 @@ fonksiyonunu izole exec ile davranış olarak doğrular — sunucu/3.10+ import 
 import os
 import re
 import threading
+import time
 
 _APP_PY = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
 
@@ -63,12 +64,25 @@ def test_gemini_rate_acquire_timeout_returns_safe_default_not_zero():
 
 
 def test_blocking_helper_preserves_original_flock_and_math():
+    """CPO-1267/1268 P0-2 (04.08) sonrası GÜNCELLENDİ: kritik bölümün EX/UN +
+    slot-reservation matematiği aynı kalmalı, ama artık flock LOCK_EX|LOCK_NB
+    (sınırlı poll) — çıplak blocking LOCK_EX bilerek kaldırıldı, çünkü offload'un
+    10s tavanı yalnız bekleyen greenlet'i kurtarıyordu; flock gerçekten asılı
+    kalırsa altındaki threadpool thread'i kernel'de süresiz kilitli kalıp
+    havuza dönmüyordu (CPO-1228 leak sınıfıyla aynı risk)."""
     src = _read_app()
     body = _extract_function_body(src, "_gemini_rate_acquire_blocking")
     assert body, "_gemini_rate_acquire_blocking() bulunamadı"
-    # Orijinal flock + slot-reservation mantığı aynen korunmalı — sadece
-    # ÇAĞRILDIĞI YER (worker OS thread → threadpool) değişti, davranış değil
-    assert "_fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_EX)" in body
+    assert "_fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)" in body, (
+        "flock artık LOCK_NB (non-blocking) olmalı — çıplak LOCK_EX kernel'de "
+        "süresiz asılı kalıp gevent hub threadpool thread'ini sızdırabilir"
+    )
+    assert "_fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_EX)\n" not in body, (
+        "çıplak blocking LOCK_EX (LOCK_NB'siz) geri sızmış olmamalı"
+    )
+    assert "_GEMINI_RATE_FLOCK_BUDGET_S" in body, (
+        "poll döngüsü sınırlı bir budget'a bağlı olmalı — aksi halde busy-loop sonsuza dek döner"
+    )
     assert "_fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_UN)" in body
     assert "my_slot = max(now, last_slot) + _GEMINI_RATE_INTERVAL" in body
     assert "return my_slot - _GEMINI_RATE_INTERVAL - now" in body
@@ -94,11 +108,16 @@ def _load_blocking_fn_isolated():
     import fcntl as real_fcntl
     import time as real_time
     import threading as real_threading
+    import logging
 
     src = _read_app()
     body = _extract_function_body(src, "_gemini_rate_acquire_blocking")
     assert body, "_gemini_rate_acquire_blocking() bulunamadı"
-    ns = {"_fcntl": real_fcntl, "time": real_time, "threading": real_threading}
+    ns = {
+        "_fcntl": real_fcntl, "time": real_time, "threading": real_threading,
+        "_GEMINI_RATE_FLOCK_BUDGET_S": 0.3,  # testte hızlı fail — prod 8.0
+        "logger": logging.getLogger("test_dev1102_isolated"),
+    }
     exec(body, ns)
     return ns["_gemini_rate_acquire_blocking"], ns
 
@@ -120,3 +139,39 @@ def test_blocking_helper_behaves_identically_to_pre_fix_version(tmp_path):
     wait2 = fn()
     assert wait2 > 0, "ikinci ardışık çağrı rate-interval kadar beklemeli"
     assert 5.5 <= wait2 <= 6.5, f"beklenen ~6.5s bekleme, gerçek={wait2}"
+
+
+def test_blocking_helper_gives_up_within_budget_when_flock_stuck_elsewhere(tmp_path):
+    """CPO-1267/1268 P0-2 (04.08) regresyon testi — asıl amaç bu: flock BAŞKA
+    bir gerçek OS thread/process tarafından tutuluyorken (örn. asılı kalmış bir
+    worker), fonksiyon kernel'de SONSUZA DEK beklemek yerine budget dolunca
+    pes edip _GEMINI_RATE_INTERVAL dönmeli — thread havuza geri dönebilmeli.
+    Eski (LOCK_EX, LOCK_NB'siz) davranışta bu test SONSUZA DEK asılı kalırdı."""
+    import fcntl as real_fcntl
+
+    fn, ns = _load_blocking_fn_isolated()
+    lock_path = str(tmp_path / "gemini_rate_stuck.lock")
+    open(lock_path, "a").close()
+
+    # "Başka bir worker" simülasyonu: ayrı bir fd üzerinden flock'u tutuyoruz —
+    # aynı süreç içinde bile flock() aynı dosyayı işaret eden FARKLI fd'ler
+    # arasında gerçek (kernel seviyesi) exclusion sağlar.
+    holder_fh = open(lock_path, "r+")
+    real_fcntl.flock(holder_fh, real_fcntl.LOCK_EX)
+    try:
+        ns["_gemini_rate_fh"] = open(lock_path, "r+")
+        ns["_gemini_rate_lock"] = threading.Lock()
+        ns["_GEMINI_RATE_INTERVAL"] = 6.5
+
+        _t0 = time.time()
+        result = fn()
+        elapsed = time.time() - _t0
+
+        assert result == 6.5, f"flock alınamazsa _GEMINI_RATE_INTERVAL dönmeli, gerçek={result}"
+        assert elapsed < 2.0, (
+            f"budget (test: 0.3s) içinde pes etmeli, {elapsed:.2f}s sürdü — "
+            "eski LOCK_EX (blocking) davranışına regresyon riski"
+        )
+    finally:
+        real_fcntl.flock(holder_fh, real_fcntl.LOCK_UN)
+        holder_fh.close()
