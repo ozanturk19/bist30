@@ -5744,6 +5744,7 @@ _GEMINI_RATE_PATH = os.environ.get("GEMINI_RATE_PATH", "/tmp/bp_gemini_rate.lock
 # (worker'lar arası) exclusion (zaten vardı, korunuyor), (3) "r+" + self-heal
 # guard — O_APPEND belirsizliği ve bozuk state'in kalıcılaşması ihtimaline karşı.
 _gemini_rate_lock = threading.Lock()
+_GEMINI_RATE_FLOCK_BUDGET_S = 8.0  # outer .get(timeout=10) altında kalsın diye 2s marj
 if not os.path.exists(_GEMINI_RATE_PATH):
     open(_GEMINI_RATE_PATH, "a").close()
 _gemini_rate_fh = open(_GEMINI_RATE_PATH, "r+")
@@ -5760,9 +5761,32 @@ def _gemini_rate_acquire_blocking() -> float:
     tutarsa (veya nadir bir OS/disk gecikmesi olursa), aynı flock'u bekleyen her
     worker'ın TÜM OS thread'i (o worker'daki her greenlet/istek dahil) süresiz
     bloke olur — `_tp_read_json`'ın çözdüğü sınıfın birebir aynısı.
+
+    CPO-1267/1268 P0-2 forensic (04.08): yukarıdaki analiz doğruydu ama fix eksikti —
+    `_gemini_rate_acquire()`'daki 10s threadpool timeout yalnız BEKLEYEN greenlet'i
+    kurtarıyordu; flock(LOCK_EX) GERÇEKTEN asılı kalırsa altındaki gevent hub
+    threadpool thread'i (maxsize sınırlı, `_tp_read_json`/`_is_*_leader` ile PAYLAŞIMLI)
+    sonsuza dek kernel'de kilitli kalıp havuza asla dönmüyordu — CPO-1228'in
+    "offload fix leak'i durdurmadı" bulgusuyla aynı sınıf, muhtemelen aynı kaynak.
+    Diğer 6 flock sitesiyle (bg/notify/gemini-leader) aynı deseni burada da
+    uyguluyoruz: LOCK_EX|LOCK_NB + sınırlı poll (max 8s) — thread artık hiçbir
+    koşulda kernel'de süresiz takılı kalmıyor, budget dolarsa normal timeout
+    yoluyla (_GEMINI_RATE_INTERVAL) güvenli tarafta devam ediyor.
     """
     with _gemini_rate_lock:
-        _fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_EX)
+        _flock_t0 = time.time()
+        while True:
+            try:
+                _fcntl.flock(_gemini_rate_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+                break
+            except (BlockingIOError, OSError):
+                if time.time() - _flock_t0 > _GEMINI_RATE_FLOCK_BUDGET_S:
+                    logger.error(
+                        "_gemini_rate_acquire_blocking: %.1fs içinde flock alınamadı — "
+                        "başka worker/process kilidi tutuyor (asılı olabilir), standart "
+                        "interval ile devam", _GEMINI_RATE_FLOCK_BUDGET_S)
+                    return _GEMINI_RATE_INTERVAL
+                time.sleep(0.05)
         try:
             _gemini_rate_fh.seek(0)
             raw = _gemini_rate_fh.read().strip()
@@ -5801,6 +5825,12 @@ def _gemini_rate_acquire() -> float:
     süresiz bloke etmek yerine `_GEMINI_RATE_INTERVAL` (standart bekleme) dönülür —
     rate-limit güvenliği korunur (agresif hızlı-geç yok), sadece worker artık asılı
     kalmaz.
+
+    CPO-1267/1268 P0-2 (04.08) EK: bu 10s tavan yalnız BEKLEYEN greenlet'i kurtarıyordu
+    — flock gerçekten asılı kalırsa altındaki threadpool thread'i hâlâ sonsuza dek
+    kernel'de kilitli kalıp havuza dönmüyordu (CPO-1228 "leak survives offload fix"
+    ile aynı sınıf olabilir). `_gemini_rate_acquire_blocking()` artık LOCK_NB + 8s
+    poll budget kullanıyor — thread artık bu yoldan asla kalıcı sızmıyor.
     """
     if _WS_AVAILABLE:
         try:
