@@ -157,3 +157,76 @@ def derive_adx_label(adx):
     if a >= 18:
         return "Orta"
     return "Zayıf"
+
+
+# ── T1.1 (CPO-1321 FAZ 1) — kanonik sözlük evi ──────────────────────────────
+# derive_adx_label ile aynı desen: bu 4 sözlük artık tek kaynak. Önceden aynı
+# etiketler app.py'de N kez ve 10+ şablonda ayrı ayrı (bazen tutarsız) tanımlıydı.
+# Not: SIGNAL_LABELS['SAT'] değeri hâlâ "Zayıf Trend" — "Trend Bozuldu" rename'i
+# T1.2 kapsamında TÜM çağıranlarla birlikte tek commit'te yapılacak, burada değil.
+
+SIGNAL_LABELS = {
+    "AL": "Güçlü Trend",
+    "SAT": "Zayıf Trend",
+    "BEKLE": "Yatay",
+}
+
+# Kod → görünen ad. Kısa form (gundem/karsilastir/tarama şablonlarındaki
+# çoğunluk) kanonik alındı. templates/index.html:5592 farklı, uzun-form bir
+# eşleme kullanıyor (örn. "✓ İdeal giriş bölgesi") — bu sapma T1.3/T1.8
+# sözlük-tekilleştirme adımında index.html'in kısa forma geçirilmesiyle kapanacak.
+ENTRY_QUALITY_LABELS = {
+    "IDEAL": "İdeal",
+    "IYI": "İyi",
+    "DIKKATLI": "Dikkatli",
+    "UZAK": "Uzak",
+}
+
+# app.py:1753-1767'deki signal_bars eşiklerinin görünen adları (renk kodları
+# ayrı tutuldu, bunlar salt metin sözlüğü).
+SIGNAL_AGE_LABELS = {
+    "TAZE": "Taze",
+    "GELISIYOR": "Gelişiyor",
+    "OLGUNLASIYOR": "Olgunlaşıyor",
+    "OLGUN": "Olgun",
+}
+
+
+def derive_signal_age_label(signal_bars, signal=None):
+    """signal_bars eşiğinden tek kaynaklı sinyal-yaşı etiketi (app.py:1753-1767 ile aynı eşik).
+
+    signal="BEKLE" veya signal_bars=None ise etiket yok (None döner) — mevcut davranışla birebir.
+    """
+    if signal == "BEKLE" or signal_bars is None:
+        return None
+    try:
+        b = float(signal_bars)
+    except (TypeError, ValueError):
+        return None
+    if b <= 3:
+        return SIGNAL_AGE_LABELS["TAZE"]
+    if b <= 7:
+        return SIGNAL_AGE_LABELS["GELISIYOR"]
+    if b <= 15:
+        return SIGNAL_AGE_LABELS["OLGUNLASIYOR"]
+    return SIGNAL_AGE_LABELS["OLGUN"]
+
+
+# Hacim etiketleri — iki ayrı ölçüt aynı sözlükte, çağıran hangisini istediğini
+# anahtarla seçer. CONFIRMED = vol_confirmed booleanının (signal_vol_ratio>=1.7,
+# app.py:1652) görünen adı, HIGH/VERY_HIGH = hisse.html:3420'deki ayrı vr eşiği
+# (>=3 çok yüksek) — iki ölçüt birbirini geçersiz kılmaz, farklı bağlamlarda kullanılır.
+VOLUME_LABELS = {
+    "CONFIRMED": "Hacim Onaylı",
+    "HIGH": "Yüksek Hacim",
+    "VERY_HIGH": "Çok Yüksek Hacim",
+}
+
+
+def derive_volume_label(vol_ratio):
+    """vol_ratio eşiğinden tek kaynaklı hacim-büyüklük etiketi (hisse.html:3420 ile aynı eşik)."""
+    try:
+        vr = float(vol_ratio)
+    except (TypeError, ValueError):
+        return None
+    return VOLUME_LABELS["VERY_HIGH"] if vr >= 3 else VOLUME_LABELS["HIGH"]
