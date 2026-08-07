@@ -2416,10 +2416,10 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <table>
 <thead><tr><th>Senaryo</th><th>ST</th><th>ADX</th><th>EMA</th><th>Sonuç</th></tr></thead>
 <tbody>
-<tr><td>Güçlü AL</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &gt; 99</td><td>✅ Pozisyon gir</td></tr>
-<tr><td>Zayıf Onay</td><td>▲ Yeşil</td><td>&lt; 25</td><td>12 &gt; 99</td><td>⚠️ Bekle</td></tr>
-<tr><td>Karışık</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &lt; 99</td><td>⚠️ Bekle</td></tr>
-<tr><td>Güçlü SAT</td><td>▼ Kırmızı</td><td>≥ 25</td><td>12 &lt; 99</td><td>❌ Pozisyondan çık</td></tr>
+<tr><td>Güçlü AL</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &gt; 99</td><td>✅ Güçlü Trend teyidi</td></tr>
+<tr><td>Zayıf Onay</td><td>▲ Yeşil</td><td>&lt; 25</td><td>12 &gt; 99</td><td>⚠️ Yatay, teyit yok</td></tr>
+<tr><td>Karışık</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &lt; 99</td><td>⚠️ Yatay, teyit yok</td></tr>
+<tr><td>Güçlü SAT</td><td>▼ Kırmızı</td><td>≥ 25</td><td>12 &lt; 99</td><td>❌ Trend Bozuldu — çıkış uyarısı</td></tr>
 </tbody>
 </table>
 

@@ -8,6 +8,7 @@
 <meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, R/R ve daha fazlası.') }}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
+{% if tickers_param %}<meta name="robots" content="noindex,follow">{% endif %}
 <meta property="og:title"       content="{{ page_title|default('Hisse Karşılaştırma — BorsaPusula') }}">
 <meta property="og:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, R/R ve daha fazlası.') }}">
 <meta property="og:url"         content="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">

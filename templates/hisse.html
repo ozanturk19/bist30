@@ -2619,7 +2619,7 @@ function _loadChartLib() {
   if (LC) return Promise.resolve();
   return new Promise(function(res) {
     var s = document.createElement('script');
-    s.src = '/static/lightweight-charts.min.js';
+    s.src = '/static/lightweight-charts.min.js?v=1';
     s.onload = function() { LC = LightweightCharts; res(); };
     document.head.appendChild(s);
   });
@@ -4356,7 +4356,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
 })();
 </script>
 
-<script src="/static/js/toast.js" defer></script>
+<script src="/static/js/toast.js?v=1" defer></script>
 
 {% include '_mobile_nav_partial.html' %}
 </body>

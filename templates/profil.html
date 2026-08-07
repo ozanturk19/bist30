@@ -109,9 +109,9 @@
     background: rgba(255,255,255,0.02);
   }
   .opt.selected {
-    border-color: var(--bp-peri);
+    border-color: var(--bp-brand);
     background: rgba(184,195,255,0.10);
-    color: var(--bp-peri);
+    color: var(--bp-brand);
     font-weight: 600;
   }
   .opt.checkbox {
@@ -126,8 +126,8 @@
     transition: all .15s;
   }
   .opt.selected .opt-checkbox-icon {
-    background: var(--bp-peri);
-    border-color: var(--bp-peri);
+    background: var(--bp-brand);
+    border-color: var(--bp-brand);
     color: #0e0e12;
   }
   .submit-row {
@@ -135,7 +135,7 @@
     margin-top: 24px;
   }
   .btn {
-    background: var(--bp-mint);
+    background: var(--bp-al);
     color: #0e0e12;
     border: none;
     padding: 13px 36px;
@@ -163,12 +163,12 @@
   .alert-error {
     background: rgba(248,81,73,0.10);
     border: 1px solid rgba(248,81,73,0.40);
-    color: var(--bp-red);
+    color: var(--bp-sat);
   }
   .alert-success {
     background: rgba(0,226,144,0.08);
     border: 1px solid rgba(0,226,144,0.30);
-    color: var(--bp-mint);
+    color: var(--bp-al);
   }
   .footer-note {
     text-align: center;
@@ -331,7 +331,7 @@ header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{d
 
 <div class="hero">
   <h1>⚠️ Bağlantı Geçersiz</h1>
-  <p>Profil sayfasına erişmek için hoş geldin mailindeki linki kullan. Eğer mail almadıysan <a href="/" style="color:var(--bp-peri)">ana sayfadan abone ol</a>.</p>
+  <p>Profil sayfasına erişmek için hoş geldin mailindeki linki kullan. Eğer mail almadıysan <a href="/" style="color:var(--bp-brand)">ana sayfadan abone ol</a>.</p>
 </div>
 
 {% endif %}
@@ -398,7 +398,7 @@ async function submitProfile(e) {
       document.getElementById('profileForm').innerHTML =
         '<div style="text-align:center;padding:30px 0">' +
         '<div style="font-size:42px;margin-bottom:12px">✓</div>' +
-        '<div style="font-size:18px;font-weight:800;color:var(--bp-mint);margin-bottom:8px">Profilin kaydedildi!</div>' +
+        '<div style="font-size:18px;font-weight:800;color:var(--bp-al);margin-bottom:8px">Profilin kaydedildi!</div>' +
         '<div style="font-size:13px;color:var(--bp-text2);margin-bottom:24px">' + (json.message || 'Sinyaller artık size özel.') + '</div>' +
         '<a href="/" class="btn">Sinyal Paneline Dön →</a>' +
         '</div>';

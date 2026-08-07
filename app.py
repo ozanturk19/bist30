@@ -2392,7 +2392,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
             </td></tr>
           <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">🔴</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
-              <strong style="color:#e5e1e4">Zayıf Trend sinyali</strong> oluştuğunda — kısa pozisyon fırsatı
+              <strong style="color:#e5e1e4">Zayıf Trend sinyali</strong> oluştuğunda — yeni pozisyon önerisi değil, risk/çıkış bilgilendirmesi
             </td></tr>
           <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">💎</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
@@ -7495,12 +7495,14 @@ def abd_tarama_page():
 def abd_sp500_page():
     peers = [p for p in _ABD_INDEX_PEERS if p["key"] != "SP500"]
     return render_template("varlik.html", varlik_key="SP500", meta=_VARLIK_META["SP500"],
+                           canonical_path="/abd/sp500",
                            peers=peers, category_url="/abd", category_label="ABD")
 
 @app.route("/abd/nasdaq")
 def abd_nasdaq_page():
     peers = [p for p in _ABD_INDEX_PEERS if p["key"] != "NASDAQ"]
     return render_template("varlik.html", varlik_key="NASDAQ", meta=_VARLIK_META["NASDAQ"],
+                           canonical_path="/abd/nasdaq",
                            peers=peers, category_url="/abd", category_label="ABD")
 
 @app.route("/abd/<ticker>")
@@ -9044,8 +9046,18 @@ def sitemap():
     pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly"})
     pages.append({"loc": "/sinyal-performans",  "priority": "0.7", "changefreq": "weekly"})
     pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
-    pages.append({"loc": "/sektor",             "priority": "0.7", "changefreq": "daily"})
     pages.append({"loc": "/hisseler",          "priority": "0.85", "changefreq": "daily"})
+    # T0.8 (CPO-1321): /ozet/<tarih> arşivi — günlük büyüyen içerik, indekslenmesi için sitemap'e eklenir
+    try:
+        snapshot_dates = sorted([
+            f.replace(".json", "")
+            for f in os.listdir(_SNAPSHOTS_DIR)
+            if re.match(r"^\d{4}-\d{2}-\d{2}\.json$", f)
+        ], reverse=True)[:90]
+        for d in snapshot_dates:
+            pages.append({"loc": f"/ozet/{d}", "priority": "0.5", "changefreq": "never"})
+    except Exception as e:
+        logger.warning("sitemap: /ozet arsiv listesi okunamadi: %s", e)
     pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "weekly"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly"})
@@ -9074,22 +9086,27 @@ def robots():
 User-agent: Googlebot
 Allow: /
 Disallow: /api/
+Disallow: /karsilastir?tickers=
 
 User-agent: Bingbot
 Allow: /
 Disallow: /api/
+Disallow: /karsilastir?tickers=
 
 User-agent: Yandex
 Allow: /
 Disallow: /api/
+Disallow: /karsilastir?tickers=
 
 User-agent: DuckDuckBot
 Allow: /
 Disallow: /api/
+Disallow: /karsilastir?tickers=
 
 User-agent: Slurp
 Allow: /
 Disallow: /api/
+Disallow: /karsilastir?tickers=
 
 # Reputation/security scanners — explicit allow
 User-agent: facebookexternalhit
@@ -9125,6 +9142,7 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Disallow: /karsilastir?tickers=
 
 # Aggressive scrapers — explicit deny
 User-agent: SemrushBot
@@ -10076,12 +10094,6 @@ def _redir_nasdaq():
 def _redir_sp500():
     return redirect("/abd/sp500", code=301)
 
-@app.route("/dow")
-@app.route("/djia")
-def _redir_dow():
-    return redirect("/abd", code=301)
-
-
 @app.route("/hisseler")
 def hisseler_hub():
     """SEO hub — Tüm BIST hisseleri sektör + alfabetik. SSR ile 215 internal link."""
@@ -10137,7 +10149,7 @@ def redirect_sektorler():
 
 @app.route("/sektor")
 def sektor():
-    return render_template("sektor_harita.html")
+    return redirect("/sektor-harita", 301)
 
 
 @app.route("/sektor-harita")
