@@ -278,7 +278,12 @@ _YAHOO_CB_RESET_WINDOW = 1800    # saniye — cooldown cap'in 2 katı: bu süre 
                                  # devre yeniden açılmadıysa gerçek toparlanma sayılır
                                  # (CPO-1145 §3: cap 300→900 olunca bu da 600→1800 olmalı,
                                  # yoksa tepe cooldown'da tek başarı escalation'ı erken sıfırlar)
-_yahoo_cb = {"fails": 0, "open_until": 0.0, "opens": 0, "last_open_ts": 0.0}   # worker-local, kilitsiz (Gemini CB ile aynı desen)
+_yahoo_cb = {"fails": 0, "open_until": 0.0, "opens": 0, "last_open_ts": 0.0, "window_skips": 0}   # worker-local, kilitsiz (Gemini CB ile aynı desen)
+# CPO-1317 §4(a) APPROVE: "opens" sayacı devrenin kaç kez açıldığını gösteriyor
+# ama ETKİYİ (kaç fetch atlandı) göstermiyor — CPO-1316 §5.3 "opens=1 yanıltıcı"
+# bulgusu. window_skips additive-only sayaç: devre açıkken _yahoo_cb_blocked()
+# nedeniyle atlanan HER fetch çağrısında +1 (6 fonksiyon, aşağıdaki SKIP dalları).
+# Davranış değişmiyor — yalnız kapanışta log satırına eklenip sıfırlanıyor.
 
 
 def _yahoo_cb_blocked() -> bool:
@@ -298,9 +303,10 @@ def _yahoo_cb_record(ok: bool, stderr_text: str = "", timeout: bool = False):
         _yahoo_cb["fails"] = 0
         if _yahoo_cb["opens"] > 0 and time.time() - _yahoo_cb["last_open_ts"] > _YAHOO_CB_RESET_WINDOW:
             _open_duration = time.time() - _yahoo_cb["last_open_ts"]
-            logger.warning("_yahoo_cb: kapandı, %ds açık kaldı, opens=%d idi",
-                            int(_open_duration), _yahoo_cb["opens"])
+            logger.warning("_yahoo_cb: kapandı, %ds açık kaldı, opens=%d idi, window_skips=%d",
+                            int(_open_duration), _yahoo_cb["opens"], _yahoo_cb["window_skips"])
             _yahoo_cb["opens"] = 0
+            _yahoo_cb["window_skips"] = 0
         return
     if not timeout and (not stderr_text or "too many requests" not in stderr_text.lower()):
         return
@@ -322,6 +328,7 @@ def _fetch_daily_subprocess(ticker_base, period="2y", interval="1d", timeout=25)
     Rollback: revert this function + analyze() lines 1097-1111.
     """
     if _yahoo_cb_blocked():
+        _yahoo_cb["window_skips"] += 1
         logger.warning("yf_fetch %s %s/%s SKIP: yahoo circuit breaker açık (opens=%d)",
                         ticker_base, period, interval, _yahoo_cb["opens"])
         return None
@@ -374,6 +381,7 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
     Hard 10s kill vs lock contention. Called sequentially from _fetch_macro().
     """
     if _yahoo_cb_blocked():
+        _yahoo_cb["window_skips"] += 1
         return None
     _t0 = time.perf_counter()
     try:
@@ -418,6 +426,7 @@ def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
     Rollback: revert this function + _get_fundamentals() lines.
     """
     if _yahoo_cb_blocked():
+        _yahoo_cb["window_skips"] += 1
         return None
     yf_ticker = ticker_base + ".IS"
     _t0 = time.perf_counter()
@@ -458,6 +467,7 @@ def _fetch_chart_subprocess(yf_ticker, period="5y", timeout=40):
     Rollback: revert this function + get_chart_data() lock block.
     """
     if _yahoo_cb_blocked():
+        _yahoo_cb["window_skips"] += 1
         return None
     _t0 = time.perf_counter()
     try:
@@ -495,6 +505,7 @@ def _fetch_live_subprocess(tickers_str, timeout=60):
     Returns {base_ticker: {price, change_pct}} or None on failure.
     """
     if _yahoo_cb_blocked():
+        _yahoo_cb["window_skips"] += 1
         return None
     _t0 = time.perf_counter()
     try:
@@ -529,6 +540,7 @@ def _fetch_global_subprocess(syms, timeout=60):
     Returns {yf_sym: {price, change_pct}} or None on failure.
     """
     if _yahoo_cb_blocked():
+        _yahoo_cb["window_skips"] += 1
         return None
     _t0 = time.perf_counter()
     try:

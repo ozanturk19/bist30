@@ -38,6 +38,9 @@ def _load_yahoo_cb():
     assert '"last_open_ts"' in const_m.group(0), (
         "_yahoo_cb['last_open_ts'] state alanı kaybolmuş — CPO-1141 opens-reset fix'i regresyona uğramış"
     )
+    assert '"window_skips"' in const_m.group(0), (
+        "_yahoo_cb['window_skips'] state alanı kaybolmuş — CPO-1317 §4(a) telemetri fix'i regresyona uğramış"
+    )
 
     blocked_m = re.search(r"def _yahoo_cb_blocked\(\).*?\n\n\n", src, re.DOTALL)
     assert blocked_m, "_yahoo_cb_blocked() bulunamadı"
@@ -136,3 +139,37 @@ def test_opens_resets_after_true_recovery_window():
     ns["_yahoo_cb"]["last_open_ts"] = time.time() - ns["_YAHOO_CB_RESET_WINDOW"] - 100  # aşıldı
     record(True)
     assert ns["_yahoo_cb"]["opens"] == 0, "uzun sessizlik sonrası başarı gerçek toparlanma sayılmalı"
+
+
+def test_window_skips_resets_alongside_opens_on_true_recovery():
+    """CPO-1317 §4(a) APPROVE: window_skips (devre açıkken atlanan fetch sayısı,
+    6 fetch fonksiyonunda _yahoo_cb_blocked() dalında artırılır — bu harness'ın
+    dışında, app.py'de) gerçek toparlanmada opens ile BİRLİKTE sıfırlanmalı,
+    aksi halde bir sonraki pencerenin sayacı öncekinden devralınır (yanlış N)."""
+    ns = _fresh_cb_ns()
+    record = ns["_yahoo_cb_record"]
+    for _ in range(3):
+        record(False, timeout=True)
+    assert ns["_yahoo_cb"]["opens"] == 1
+
+    # 6 fetch fonksiyonunun _yahoo_cb_blocked() dalında yapacağı artırımı simüle et
+    ns["_yahoo_cb"]["window_skips"] = 211
+
+    ns["_yahoo_cb"]["last_open_ts"] = time.time() - ns["_YAHOO_CB_RESET_WINDOW"] - 100  # aşıldı
+    record(True)
+    assert ns["_yahoo_cb"]["window_skips"] == 0, (
+        "gerçek toparlanmada window_skips sıfırlanmalı — aksi halde sonraki pencereye sızar"
+    )
+
+
+def test_window_skips_survives_transient_lone_success():
+    """opens gibi window_skips de İZOLE bir başarıyla (RESET_WINDOW dolmadan) silinmemeli —
+    aksi halde 4 paralel worker'dan şans eseri gelen tek başarı sayaçı gerçek dışı sıfırlar."""
+    ns = _fresh_cb_ns()
+    record = ns["_yahoo_cb_record"]
+    for _ in range(3):
+        record(False, timeout=True)
+    ns["_yahoo_cb"]["window_skips"] = 42
+
+    record(True)  # RESET_WINDOW dolmadı — izole başarı
+    assert ns["_yahoo_cb"]["window_skips"] == 42, "izole başarı window_skips'i silmemeli"
