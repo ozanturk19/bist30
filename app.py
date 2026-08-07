@@ -154,6 +154,13 @@ def should_track(req) -> bool:
         return False
     return not _NON_HUMAN_UA_RE.search(ua)
 
+def is_synthetic_client(req) -> bool:
+    """CPO-1320: izleme/QA/bot trafiği — news endpoint'lerinde Gemini çağrısı
+    tetiklemesin. should_track() ile AYNI UA deseni (_NON_HUMAN_UA_RE) paylaşılır,
+    kopya regex yok (tek kaynak, 17-kopya dersi)."""
+    ua = (req.headers.get("User-Agent") or "").casefold()
+    return bool(_NON_HUMAN_UA_RE.search(ua))
+
 # ── VAPID Web Push Bildirimleri ───────────────────────────────────────────────
 _APP_DIR        = os.path.dirname(os.path.abspath(__file__))
 VAPID_PUBLIC    = os.environ.get("VAPID_PUBLIC", "")
@@ -7958,7 +7965,13 @@ def api_stock_news(ticker):
     # Şimdi CB durumunu (_gemini_news_degraded — paylaşımlı dosyadan ucuz okuma,
     # Gemini çağrısı YOK) gövdeye yansıtıyoruz; UptimeRobot'un keyword-check'i
     # (panel tarafı Ozan'da) artık gerçek arızayı görebilir.
-    if request.method == "HEAD" or "uptimerobot" in (request.headers.get("User-Agent") or "").lower():
+    #
+    # CPO-1320: aynı kısa devre BorsaPusulaQA ailesine (rapid/smoke/full) de
+    # genişletildi — is_synthetic_client() aynı _NON_HUMAN_UA_RE'yi paylaşır.
+    # İzleme trafiği artık cache/queue mantığına HİÇ girmiyor, Gemini çağrısı
+    # tetikleyemez. Gerçek-yol testi qa-full timer'ındaki ayrı bütçeli tek
+    # ticker'a bırakıldı (probe tarafı, borsapusula-qa reposu).
+    if request.method == "HEAD" or is_synthetic_client(request):
         degraded = _gemini_news_degraded()
         return safe_json({
             "news": None, "loading": False,
@@ -10592,10 +10605,12 @@ def api_market_news():
             source = "explanation"
 
         if not text:
-            # Haber cache yok → on-demand kuyruğuna ekle (eğer başarısız cache yoksa)
+            # Haber cache yok → on-demand kuyruğuna ekle (eğer başarısız cache yoksa
+            # VE gerçek kullanıcıysa — CPO-1320: izleme/QA trafiği bu kuyruğu asla
+            # beslemez, Gemini çağrısı tetiklemez, algoritmik fallback'e düşer).
             failed_recently = news_c and news_c.get("failed") and \
                               (time.time() - news_c.get("ts", 0)) < _NEWS_FAIL_TTL
-            if not failed_recently:
+            if not failed_recently and not is_synthetic_client(request):
                 with _news_queue_lock:
                     _news_fetch_queue[t] = ("market_news", _news_ua_class(request))   # CPO-1206 §3 — gerçek köken etiketi
                 # CPO-1206 §4 — bu üretici önceden _news_queue_stats'e hiç dokunmuyordu,
