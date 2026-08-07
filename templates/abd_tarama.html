@@ -209,7 +209,7 @@
       <select id="filterSignal">
         <option value="">Tümü</option>
         <option value="AL">Güçlü Trend</option>
-        <option value="SAT">Zayıf Trend</option>
+        <option value="SAT">Trend Bozuldu</option>
         <option value="BEKLE">Yatay</option>
       </select>
     </div>
@@ -318,7 +318,7 @@ function fmtPrice(v){
   const d=v>=1000?0:v>=10?2:4;
   return v.toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
 }
-function sigLabel(s){return{AL:'▲ Güçlü Trend',SAT:'▼ Zayıf Trend',BEKLE:'● Yatay'}[s]||'● Yükleniyor';}
+function sigLabel(s){return{AL:'▲ Güçlü Trend',SAT:'▼ Trend Bozuldu',BEKLE:'● Yatay'}[s]||'● Yükleniyor';}
 
 /* row data cache for filtering */
 const rowData = {};

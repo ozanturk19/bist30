@@ -1,7 +1,7 @@
 {
   "name": "BorsaPusula — BIST Sinyal Paneli",
   "short_name": "BorsaPusula",
-  "description": "Algoritmik BIST teknik analiz sinyalleri — Güçlü Trend / Zayıf Trend",
+  "description": "Algoritmik BIST teknik analiz sinyalleri — Güçlü Trend / Trend Bozuldu",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",

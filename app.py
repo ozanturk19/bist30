@@ -698,7 +698,7 @@ def _broadcast_push_changes(changes):
         if len(relevant) == 1:
             t, old, new, _stock = relevant[0]
             name = STOCK_NAMES.get(t, t)
-            lbl  = "AL ▲ Güçlü Trend" if new == "AL" else "SAT ▼ Zayıf Trend"
+            lbl  = "AL ▲ Güçlü Trend" if new == "AL" else "SAT ▼ Trend Bozuldu"
             title = f"{t} — {lbl}"
             body  = f"{name} sinyali değişti: {old} → {new}"
             url   = f"/hisse/{t}"
@@ -732,7 +732,7 @@ def _broadcast_push_changes(changes):
     )
 
 # ── Sinyal görünen ad eşlemesi (iç değer AL/SAT/BEKLE değişmez) ───────────────
-_SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Zayıf Trend', 'BEKLE': 'Yatay'}
+_SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
 
 @app.template_filter('signal_label')
 def signal_label_filter(signal):
@@ -2218,7 +2218,7 @@ def _notify_signal_changes(new_results):
         for t, old, new, stock in changes[:10]:
             e    = sig_emoji.get(new, "")
             name = STOCK_NAMES.get(t, t)
-            lbl  = "Güçlü Trend ▲" if new == "AL" else "Zayıf Trend ▼"
+            lbl  = "Güçlü Trend ▲" if new == "AL" else "Trend Bozuldu ▼"
             price = stock.get("price") or ""
             price_str = f" — {tr_price_filter(price)} ₺" if price else ""
             lines.append(f"{e} <b>{t}</b> ({name}){price_str}")
@@ -2392,7 +2392,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
             </td></tr>
           <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">🔴</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
-              <strong style="color:#e5e1e4">Zayıf Trend sinyali</strong> oluştuğunda — yeni pozisyon önerisi değil, risk/çıkış bilgilendirmesi
+              <strong style="color:#e5e1e4">Trend Bozuldu sinyali</strong> oluştuğunda — yeni pozisyon önerisi değil, risk/çıkış bilgilendirmesi
             </td></tr>
           <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">💎</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
@@ -2480,7 +2480,7 @@ def _build_signal_email(changes, unsubscribe_url):
     sig_color  = {"AL": "#00e290", "SAT": "#f85149", "BEKLE": "#909097"}
     sig_bg     = {"AL": "rgba(0,226,144,0.10)", "SAT": "rgba(248,81,73,0.10)", "BEKLE": "rgba(144,144,151,0.08)"}
     sig_border = {"AL": "rgba(0,226,144,0.30)", "SAT": "rgba(248,81,73,0.30)", "BEKLE": "rgba(144,144,151,0.20)"}
-    sig_lbl    = {"AL": "▲ Güçlü Trend", "SAT": "▼ Zayıf Trend", "BEKLE": "● Yatay"}
+    sig_lbl    = {"AL": "▲ Güçlü Trend", "SAT": "▼ Trend Bozuldu", "BEKLE": "● Yatay"}
 
     # Premium ve sayım analizi
     al_count   = sum(1 for c in changes if c[2] == "AL")
@@ -2489,7 +2489,7 @@ def _build_signal_email(changes, unsubscribe_url):
     tickers_str = ", ".join(c[0] for c in changes[:4])
     if len(changes) > 4: tickers_str += f" +{len(changes)-4}"
 
-    preheader = f"{al_count} Güçlü Trend · {sat_count} Zayıf Trend · {prem_count} Premium 💎 — {tickers_str}"
+    preheader = f"{al_count} Güçlü Trend · {sat_count} Trend Bozuldu · {prem_count} Premium 💎 — {tickers_str}"
 
     # Sinyal kartları
     cards = ""
@@ -2547,7 +2547,7 @@ def _build_signal_email(changes, unsubscribe_url):
     if al_count > 0:
         summary_chips += f'<span style="display:inline-block;background:rgba(0,226,144,0.10);border:1px solid rgba(0,226,144,0.30);color:#00e290;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">▲ {al_count} Güçlü Trend</span>'
     if sat_count > 0:
-        summary_chips += f'<span style="display:inline-block;background:rgba(248,81,73,0.10);border:1px solid rgba(248,81,73,0.30);color:#f85149;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">▼ {sat_count} Zayıf Trend</span>'
+        summary_chips += f'<span style="display:inline-block;background:rgba(248,81,73,0.10);border:1px solid rgba(248,81,73,0.30);color:#f85149;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">▼ {sat_count} Trend Bozuldu</span>'
     if prem_count > 0:
         summary_chips += f'<span style="display:inline-block;background:rgba(255,200,80,0.10);border:1px solid rgba(255,200,80,0.40);color:#ffc850;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">💎 {prem_count} Premium</span>'
 
@@ -5930,7 +5930,7 @@ KURAL 1 — ALGORİTMİK METİN KESINLIKLE DOĞRUDUR:
 Sana verilen "DOĞRU ALGORİTMİK ANALİZ" bölümündeki bilgiler matematiksel olarak hesaplanmıştır ve doğrudur. Bu analize ASLA itiraz ETME, "ama bir yandan da" diyerek ters yön belirtme, "fakat dikkat edilmeli" gibi şüphe ekleme. Görevin bu analizi desteklemek ve sade dille açıklamak — yorumlamak değil.
 
 KURAL 2 — SİNYALİN YÖNÜNE SADIK KAL:
-Eğer sinyal "Güçlü Trend" ise yorum YÜKSELİŞ yönünde olsun. "Zayıf Trend" ise DÜŞÜŞ yönünde. "Yatay" ise kararsız/yan yatay tonu. Sinyalle çelişen kelimeler (yükselişte 'düşüş', düşüşte 'yükseliş') KULLANMA.
+Eğer sinyal "Güçlü Trend" ise yorum YÜKSELİŞ yönünde olsun. "Trend Bozuldu" ise DÜŞÜŞ yönünde. "Yatay" ise kararsız/yan yatay tonu. Sinyalle çelişen kelimeler (yükselişte 'düşüş', düşüşte 'yükseliş') KULLANMA.
 
 KURAL 3 — ÜÇ CÜMLE KURALI:
 Yorumun TAM olarak 3 cümle olsun. Birinci cümle teknik durumu özetlesin, ikinci cümle bu durumun ne anlama geldiğini söylesin, üçüncü cümle MUTLAKA "Yatırım tavsiyesi değildir." şeklinde bitsin. Daha fazla veya daha az cümle yazma.
@@ -6266,7 +6266,7 @@ def _compute_signal_commentary(ticker, signal_data):
     """
     sig     = signal_data.get("signal", "BEKLE")
     name    = STOCK_NAMES.get(ticker, ticker)
-    sig_lbl = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend", "BEKLE": "Yatay"}.get(sig, sig)
+    sig_lbl = {"AL": "Güçlü Trend", "SAT": "Trend Bozuldu", "BEKLE": "Yatay"}.get(sig, sig)
 
     # ── İndikatör değerlerini çıkar: US hisseleri (düz alan) + BIST (iç içe indicators) ──
     inds = signal_data.get("indicators") or {}
@@ -6797,7 +6797,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         st_text    = "düşüş yönünde"
         ema_text   = f"EMA12 ({e12:.0f} ₺), EMA99 ({e99:.0f} ₺) altında seyrediyor"
         di_text    = f"DI- {di_m:.0f} DI+ {di_p:.0f}'ün üzerinde"
-        dur_text   = f"Son {signal_bars} gündür Zayıf Trend sinyali aktif" if signal_bars > 1 else "Bugün Zayıf Trend sinyali oluştu"
+        dur_text   = f"Son {signal_bars} gündür Trend Bozuldu sinyali aktif" if signal_bars > 1 else "Bugün Trend Bozuldu sinyali oluştu"
         if signal_date:
             dur_text += f" ({signal_date} tarihinden itibaren)" if signal_bars > 1 else ""
         return (
@@ -6814,7 +6814,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         else:
             mixed = "İndikatörler birbirini teyit etmiyor, karmaşık bir görünüm var."
         return (
-            f"{ticker} ({name}) hissesi şu anda net bir Güçlü/Zayıf Trend sinyali üretmiyor. "
+            f"{ticker} ({name}) hissesi şu anda net bir Güçlü Trend / Trend Bozuldu sinyali üretmiyor. "
             f"{mixed} "
             f"ADX {adx:.0f} ({adx_quality}), EMA12 {e12:.0f} / EMA99 {e99:.0f}."
         )
@@ -7762,7 +7762,7 @@ def stock_page(ticker):
     except (ValueError, TypeError):
         adx_val = None
     # SPEC-017 Faz 3 batch v2 B1: SSS cevabında AL/SAT parantez yasak (K3 wording disiplin)
-    sig_label = {"AL": "Güçlü Trend", "SAT": "Zayıf Trend",
+    sig_label = {"AL": "Güçlü Trend", "SAT": "Trend Bozuldu",
                  "BEKLE": "Yatay"}.get(sig, sig)
 
     # Yatırımcı SSS — deterministik, veri-tabanlı (ekstra Gemini çağrısı YOK)
@@ -10637,7 +10637,7 @@ def api_market_news():
                         "Supertrend, ADX ve EMA göstergelerinin tamamı yükseliş yönünü destekliyor.")
                 source = "loading"
             elif sig == "SAT":
-                text = (f"{name} hissesinde {dur} Zayıf Trend sinyali aktif. "
+                text = (f"{name} hissesinde {dur} Trend Bozuldu sinyali aktif. "
                         "Teknik göstergeler düşüş yönünü işaret ediyor.")
                 source = "loading"
             else:

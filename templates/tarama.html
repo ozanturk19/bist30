@@ -535,7 +535,7 @@
         <option value="">Tümü</option>
         <option value="PREMIUM">💎 Premium (AL + Hacim Onaylı)</option>
         <option value="AL">▲ Güçlü Trend</option>
-        <option value="SAT">▼ Zayıf Trend</option>
+        <option value="SAT">▼ Trend Bozuldu</option>
         <option value="BEKLE">● Yatay</option>
       </select>
     </div>
@@ -701,7 +701,7 @@ let _currentSort = 'signal_strength';
 let _sectors = [];
 
 function sigLabel(sig) {
-  return {AL:'Güçlü Trend',SAT:'Zayıf Trend',BEKLE:'Yatay'}[sig]||sig;
+  return {AL:'Güçlü Trend',SAT:'Trend Bozuldu',BEKLE:'Yatay'}[sig]||sig;
 }
 function eqLabel(eq) {
   return {IDEAL:'İdeal',IYI:'İyi',DIKKATLI:'Dikkatli',UZAK:'Uzak'}[eq]||'';
@@ -853,7 +853,7 @@ function renderActiveFilterChips() {
   const maxP = (document.getElementById('fMaxP').value || '').trim();
 
   if (sig) {
-    const labels = { PREMIUM: '💎 Premium', AL: '▲ Güçlü Trend', SAT: '▼ Zayıf Trend', BEKLE: '● Yatay' };
+    const labels = { PREMIUM: '💎 Premium', AL: '▲ Güçlü Trend', SAT: '▼ Trend Bozuldu', BEKLE: '● Yatay' };
     chips.push({ label: labels[sig] || sig, key: 'signal' });
   }
   if (minAdx > 0) chips.push({ label: `ADX ≥ ${minAdx}`, key: 'minAdx' });

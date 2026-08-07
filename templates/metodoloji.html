@@ -288,7 +288,7 @@
     </div>
     <div class="tldr-row tldr-red">
       <span class="tldr-icon">🔴</span>
-      <span class="tldr-label">Zayıf Trend</span>
+      <span class="tldr-label">Trend Bozuldu</span>
       <span class="tldr-eq">=</span>
       <span class="tldr-formula">Supertrend ▼ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; EMA12 &lt; EMA99</span>
     </div>
@@ -306,7 +306,7 @@
 <h2>Nasıl Çalışır?</h2>
 <p>
   BorsaPusula, hisse başına <strong>3 teknik kriteri eş zamanlı</strong> değerlendirir.
-  3 kriterin tamamı aynı yönde sinyallediğinde <strong>Güçlü Trend</strong> veya <strong>Zayıf Trend</strong> kararı üretilir;
+  3 kriterin tamamı aynı yönde sinyallediğinde <strong>Güçlü Trend</strong> veya <strong>Trend Bozuldu</strong> kararı üretilir;
   herhangi bir uyumsuzlukta sinyal <strong>Yatay</strong> olarak kalır.
 </p>
 <p>Bu yaklaşım, sahte sinyal oranını düşürür ve yalnızca <em>güçlü, onaylı trendlerde</em> pozisyon alınmasını sağlar.</p>
@@ -331,7 +331,7 @@
 
 <div class="formula-box">
 Güçlü Trend  →  ST = LONG   AND  ADX ≥ 25  AND  DI+ &gt; DI−  AND  EMA12 &gt; EMA99<br>
-Zayıf Trend  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
+Trend Bozuldu  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
 </div>
 
 <h2 id="supertrend">1. Supertrend Göstergesi</h2>
@@ -344,7 +344,7 @@ Zayıf Trend  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 
   <li>Fiyat Supertrend bandının <strong>altında</strong> → SHORT (düşüş) trendi</li>
   <li>Band aynı zamanda dinamik bir <strong>Stop Loss</strong> seviyesi olarak kullanılır</li>
 </ul>
-<p>Grafiklerde mavi/yeşil çizgi Güçlü Trend, kırmızı çizgi Zayıf Trend modunu gösterir. Fiyat bandı kırdığında otomatik sinyal değişir.</p>
+<p>Grafiklerde mavi/yeşil çizgi Güçlü Trend, kırmızı çizgi Trend Bozuldu modunu gösterir. Fiyat bandı kırdığında otomatik sinyal değişir.</p>
 
 <h2 id="adx">2. ADX — Ortalama Yönlü Hareket Endeksi</h2>
 <p>
@@ -395,8 +395,8 @@ Zayıf Trend  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 
   Büyük ters trendde (örn. haftalık grafikte düşüş varken günlük Güçlü Trend sinyali) sinyal üretilmez.
 </p>
 <ul>
-  <li>Haftalık EMA20 yükselen → Güçlü Trend sinyali geçerli, Zayıf Trend sinyali engellenir</li>
-  <li>Haftalık EMA20 düşen → Zayıf Trend sinyali geçerli, Güçlü Trend sinyali engellenir</li>
+  <li>Haftalık EMA20 yükselen → Güçlü Trend sinyali geçerli, Trend Bozuldu sinyali engellenir</li>
+  <li>Haftalık EMA20 düşen → Trend Bozuldu sinyali geçerli, Güçlü Trend sinyali engellenir</li>
 </ul>
 
 <h2>Sinyal Onayı</h2>
@@ -411,7 +411,7 @@ Zayıf Trend  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 
 </div>
 
 <div class="signal-box sat">
-  <strong style="color:var(--bp-sat)">▼ Zayıf Trend Sinyali</strong> — 3 kriter aynı anda: ST SHORT + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99.<br>
+  <strong style="color:var(--bp-sat)">▼ Trend Bozuldu Sinyali</strong> — 3 kriter aynı anda: ST SHORT + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99.<br>
   <small style="color:#8b949e">Açığa satış veya pozisyon kapatma sinyali. Stop Loss: Supertrend üst bandı.</small>
 </div>
 

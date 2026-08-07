@@ -9,8 +9,8 @@
   {% set _st = ticker ~ ' Güçlü Trend — Teknik Analiz | BorsaPusula' %}
   {% set _sd = ticker ~ ' Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
 {% elif ssr_signal and ssr_signal.signal == 'SAT' %}
-  {% set _st = ticker ~ ' Zayıf Trend — Teknik Analiz | BorsaPusula' %}
-  {% set _sd = ticker ~ ' Zayıf Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
+  {% set _st = ticker ~ ' Trend Bozuldu — Teknik Analiz | BorsaPusula' %}
+  {% set _sd = ticker ~ ' Trend Bozuldu sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
 {% elif ssr_signal %}
   {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
   {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA12/99 tabanlı algoritmik BIST sinyali. Ücretsiz.' %}
@@ -83,7 +83,7 @@
       "name": "{{ ticker }} şu an hangi sinyalde?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "{{ ticker }} ({{ name }}) hissesi BorsaPusula algoritmasına göre {% if ssr_signal.signal == 'AL' %}Güçlü Trend{% elif ssr_signal.signal == 'SAT' %}Zayıf Trend{% else %}Yatay{% endif %} sinyalinde ({{ ssr_signal.signal_date }}). ADX: {{ (ssr_signal.adx or 0)|int }}, RSI: {{ (ssr_signal.rsi or 0)|int }}."
+        "text": "{{ ticker }} ({{ name }}) hissesi BorsaPusula algoritmasına göre {% if ssr_signal.signal == 'AL' %}Güçlü Trend{% elif ssr_signal.signal == 'SAT' %}Trend Bozuldu{% else %}Yatay{% endif %} sinyalinde ({{ ssr_signal.signal_date }}). ADX: {{ (ssr_signal.adx or 0)|int }}, RSI: {{ (ssr_signal.rsi or 0)|int }}."
       }
     },{% if ssr_signal.sl_level %}
     {
@@ -1409,7 +1409,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <span class="bp-symbol-pill">
     <strong>{{ ticker }}</strong>
     {%- if ssr_signal.signal == 'AL' %} <span style="color:#00e290">▲ Güçlü</span>
-    {%- elif ssr_signal.signal == 'SAT' %} <span style="color:#ff7875">▼ Zayıf</span>
+    {%- elif ssr_signal.signal == 'SAT' %} <span style="color:#ff7875">▼ Bozuldu</span>
     {%- else %} <span style="color:#909097">● Yatay</span>{% endif -%}
   </span>
   {% endif %}
@@ -1678,7 +1678,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   {%- set _sig = ssr_signal.signal -%}
   {# CPO-535 #36 / SPEC-018 W2: signal_strength (compose_score) tek kaynak — tier_score emekli #}
   {%- set _score = ssr_signal.signal_strength | default(0) -%}
-  {# SPEC-017 Faz C K3+K6+K9-1: Hero badge tek-vocab — "ORTA TREND"/"GÜÇLÜ SAT" yasaklandı; 🥇🥈🥉 medal kaldırıldı; SAT → "Zayıf Trend" (K3) #}
+  {# SPEC-017 Faz C K3+K6+K9-1: Hero badge tek-vocab — "ORTA TREND"/"GÜÇLÜ SAT" yasaklandı; 🥇🥈🥉 medal kaldırıldı; SAT → "Trend Bozuldu" (K3) #}
   {%- if _sig == 'AL' -%}
     {%- if _score >= 75 %}{% set _hc='#16a34a' %}{% set _hc2='#15803d' %}
     {%- elif _score >= 60 %}{% set _hc='#22c55e' %}{% set _hc2='#16a34a' %}
@@ -2114,7 +2114,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     </div>
   </div>
 
-  <!-- Giriş Analizi (Güçlü/Zayıf Trend sinyallerinde gösterilir) -->
+  <!-- Giriş Analizi (Güçlü Trend / Trend Bozuldu sinyallerinde gösterilir) -->
   <div class="entry-analysis-section" id="entryAnalysisSection" data-tab-content="ozet" style="display:none">
     <h2 class="section-title">🎯 Giriş Analizi</h2>
     <div class="entry-analysis-grid" id="entryAnalysisGrid">
@@ -2191,7 +2191,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <div class="sig-stats-row" id="sigMiniStats" data-tab-content="ozet">
     <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:36px;margin:auto"></div><div class="sig-stat-lbl">Toplam Sinyal</div></div>
     <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▲ Güçlü Trend</div></div>
-    <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Zayıf Trend</div></div>
+    <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Trend Bozuldu</div></div>
     <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:56px;margin:auto"></div><div class="sig-stat-lbl">⏱ Ort. Aralık</div></div>
   </div>
 
@@ -2389,7 +2389,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <div id="sigExplainLoading" style="display:flex;flex-direction:column;gap:10px;color:#909097;font-size:13px">
       {# SPEC-017 Faz 3 F2-B3: Statik özet ÖNCE (içerik), spinner SONRA (durum) — kullanıcı boş ekran görmesin #}
       <div style="font-size:13px;color:#c7c5cd;line-height:1.65;padding:10px 12px;background:rgba(184,195,255,0.06);border-left:3px solid rgba(184,195,255,0.4);border-radius:0 8px 8px 0">
-        Algoritmamız <strong style="color:#b8c3ff">Supertrend, EMA (12/26/99), ADX, MACD</strong> indikatörlerini birlikte değerlendirir. <strong style="color:#00e290">Güçlü Trend</strong> sinyali bu göstergelerin pozitif konfirmasyonunu, <strong style="color:#f85149">Zayıf Trend</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:#b8c3ff;text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
+        Algoritmamız <strong style="color:#b8c3ff">Supertrend, EMA (12/26/99), ADX, MACD</strong> indikatörlerini birlikte değerlendirir. <strong style="color:#00e290">Güçlü Trend</strong> sinyali bu göstergelerin pozitif konfirmasyonunu, <strong style="color:#f85149">Trend Bozuldu</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:#b8c3ff;text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
       <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:#6b6b73">
         <div class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></div>
@@ -2445,7 +2445,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
         {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
         {% if ssr_signal.sl_level %}Stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺.{% endif %}
       {% elif ssr_signal.signal == 'SAT' %}
-        BorsaPusula algoritmasına göre <strong style="color:#f85149">Zayıf Trend</strong> sinyali veriyor.
+        BorsaPusula algoritmasına göre <strong style="color:#f85149">Trend Bozuldu</strong> sinyali veriyor.
         {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
         {% if ssr_signal.sl_level %}Stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺.{% endif %}
       {% else %}
@@ -2611,7 +2611,7 @@ window.toggleIndDetails = function() {
 };
 
 function sigLabel(sig) {
-  return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Yatay'}[sig] || sig;
+  return {'AL':'Güçlü Trend','SAT':'Trend Bozuldu','BEKLE':'Yatay'}[sig] || sig;
 }
 
 let LC = null;
@@ -2806,7 +2806,7 @@ function shareSignal(platform) {
   const name   = HISSE_NAME;
   const url    = 'https://borsapusula.com/hisse/' + ticker;
 
-  let emoji = sig === 'AL' ? '🟢 Güçlü Trend' : sig === 'SAT' ? '🔴 Zayıf Trend' : '⚪ Yatay';
+  let emoji = sig === 'AL' ? '🟢 Güçlü Trend' : sig === 'SAT' ? '🔴 Trend Bozuldu' : '⚪ Yatay';
   let text = ticker + ' (' + name + ') — ' + emoji + '\n';
   if (price) text += '💰 Fiyat: ' + price + ' ₺\n';
   if (entry) text += '🎯 Giriş: ' + entry + ' ₺\n';
@@ -3462,7 +3462,7 @@ function renderMiniStats(history) {
     </div>
     <div class="sig-stat-card">
       <div class="sig-stat-val" style="color:#f85149">${satCount}</div>
-      <div class="sig-stat-lbl">▼ Zayıf Trend</div>
+      <div class="sig-stat-lbl">▼ Trend Bozuldu</div>
     </div>
     <div class="sig-stat-card">
       <div class="sig-stat-val" style="color:#f59e0b">${avgStr}</div>
@@ -4047,7 +4047,7 @@ async function loadMTF() {
       { key: 'monthly', label: '🗓️ Aylık',     short: '1M' },
     ];
 
-    const sigLabel = s => ({'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Yatay'}[s] || s);
+    const sigLabel = s => ({'AL':'Güçlü Trend','SAT':'Trend Bozuldu','BEKLE':'Yatay'}[s] || s);
     const sigColor = s => s === 'AL' ? '#00e290' : s === 'SAT' ? '#f85149' : '#909097';
     const sigBg    = s => s === 'AL' ? '#1a4731' : s === 'SAT' ? '#3d0f0f' : '#1c1b1f';
     const sigBord  = s => s === 'AL' ? '#238636' : s === 'SAT' ? '#da3633' : '#2a2a2c';

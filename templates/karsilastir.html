@@ -488,7 +488,7 @@ function renderSignal(s) {
   if (!s) return '<span class="muted">—</span>';
   const cl = s==='AL'?'al': s==='SAT'?'sat':'bkl';
   const ic = s==='AL'?'▲': s==='SAT'?'▼':'●';
-  const lbl = s==='AL'?'Güçlü Trend': s==='SAT'?'Zayıf Trend':'Yatay';
+  const lbl = s==='AL'?'Güçlü Trend': s==='SAT'?'Trend Bozuldu':'Yatay';
   return `<span class="badge ${cl}">${ic} ${lbl}</span>`;
 }
 
@@ -508,7 +508,7 @@ function renderAdx(v, label) {
   const n = parseFloat(v);
   const cl = n>=25 ? 'up' : 'muted';
   // Etiket sunucudan gelir (business_rules.derive_adx_label — CPO-1196 D0 #4); "Trend" eki
-  // kaldırıldı — sinyal etiketiyle (Güçlü Trend/Zayıf Trend) karışıyordu.
+  // kaldırıldı — sinyal etiketiyle (Güçlü Trend/Trend Bozuldu) karışıyordu.
   const lbl = label || 'Zayıf';
   return `<span class="${cl} mono">${n.toFixed(1)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
 }

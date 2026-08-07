@@ -315,7 +315,7 @@
   <!-- Stats -->
   <div class="stats-row" id="statsRow">
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Güçlü Trend</div></div>
-    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Zayıf Trend</div></div>
+    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Trend Bozuldu</div></div>
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Yatay</div></div>
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Toplam Hisse</div></div>
   </div>
@@ -425,7 +425,7 @@ function renderCard(s, isNew) {
   const isAl  = s.signal === 'AL';
   const isSat = s.signal === 'SAT';
   const sigCls  = isAl ? 'al' : isSat ? 'sat' : 'bkl';
-  const badgeTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Zayıf Trend' : '● Yatay';
+  const badgeTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Trend Bozuldu' : '● Yatay';
   const adx  = adxFromStock(s);
   const chg  = parseFloat(s.change_pct || 0);
   const chgCls = chg >= 0 ? 'up' : 'dn';
@@ -472,7 +472,7 @@ async function loadGundem() {
     const sm = d.signal_summary || {};
     document.getElementById('statsRow').innerHTML = `
       <div class="stat-card"><div class="stat-num num-al">${sm.al||0}</div><div class="stat-lbl">Güçlü Trend</div></div>
-      <div class="stat-card"><div class="stat-num num-sat">${sm.sat||0}</div><div class="stat-lbl">Zayıf Trend</div></div>
+      <div class="stat-card"><div class="stat-num num-sat">${sm.sat||0}</div><div class="stat-lbl">Trend Bozuldu</div></div>
       <div class="stat-card"><div class="stat-num num-bkl">${sm.bekle||0}</div><div class="stat-lbl">Yatay</div></div>
       <div class="stat-card"><div class="stat-num num-tot">${sm.total||0}</div><div class="stat-lbl">Toplam Hisse</div></div>
     `;
@@ -540,7 +540,7 @@ async function loadGundem() {
           const isAl  = item.signal === 'AL';
           const isSat = item.signal === 'SAT';
           const sigCls = isAl ? '#3fb950' : isSat ? '#f85149' : '#8b949e';
-          const sigTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Zayıf Trend' : '● Yatay';
+          const sigTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Trend Bozuldu' : '● Yatay';
           const snippet = (item.snippet||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/^\*\s+/gm,'• ').replace(/^-\s+/gm,'• ').trim();
           const kapHref = item.kap_url ? `<a href="${item.kap_url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP ↗</a>` : '';
           return `<a href="/hisse/${item.ticker}" style="display:block;text-decoration:none;background:#141416;border:1px solid #2a2a2c;border-radius:8px;padding:12px 14px;transition:border-color .15s"

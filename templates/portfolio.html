@@ -261,7 +261,7 @@
     <div class="sum-card"><div class="sum-num sum-blue" id="sumValue">0 ₺</div><div class="sum-lbl">Güncel Değer</div></div>
     <div class="sum-card"><div class="sum-num" id="sumPnl">0 ₺</div><div class="sum-lbl">Kâr / Zarar</div></div>
     <div class="sum-card"><div class="sum-num sum-green" id="sumAlCount">0</div><div class="sum-lbl">Güçlü Trend</div></div>
-    <div class="sum-card"><div class="sum-num sum-red"  id="sumSatCount">0</div><div class="sum-lbl">Zayıf Trend</div></div>
+    <div class="sum-card"><div class="sum-num sum-red"  id="sumSatCount">0</div><div class="sum-lbl">Trend Bozuldu</div></div>
     <div class="sum-card" id="sumXu030Card" style="display:none">
       <div class="sum-num" id="sumXu030Pf">—</div>
       <div class="sum-lbl">Portföy Getiri</div>
@@ -405,7 +405,7 @@ function dismissLsWarning() {
 showLsWarning();
 
 function sigLabel(sig) {
-  return {'AL':'Güçlü Trend','SAT':'Zayıf Trend','BEKLE':'Yatay'}[sig] || sig;
+  return {'AL':'Güçlü Trend','SAT':'Trend Bozuldu','BEKLE':'Yatay'}[sig] || sig;
 }
 function fmt(v, d=2) { return (+v).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}); }
 function fmtM(v) {

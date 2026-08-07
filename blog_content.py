@@ -3016,13 +3016,13 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>BorsaPusula'nın Yaklaşımı</h2>
-<p>BorsaPusula sinyalleri BIST hisseleri için "AL" (Güçlü Trend) veya "SAT" (Zayıf Trend) sinyali üretir. "SAT" sinyali, hissenin <strong>zayıf trend içinde olduğunu</strong> gösterir ve mevcut pozisyondan çıkış/kaçınma için işaret olarak kullanılır — açığa satış pozisyonu açmak için değil. Bu yaklaşım, bireysel yatırımcılara karmaşık açığa satış mekaniklerini öğrenmeden trend takibi yapma imkânı sunar.</p>
+<p>BorsaPusula sinyalleri BIST hisseleri için "AL" (Güçlü Trend) veya "SAT" (Trend Bozuldu) sinyali üretir. "SAT" sinyali, hissenin <strong>zayıf trend içinde olduğunu</strong> gösterir ve mevcut pozisyondan çıkış/kaçınma için işaret olarak kullanılır — açığa satış pozisyonu açmak için değil. Bu yaklaşım, bireysel yatırımcılara karmaşık açığa satış mekaniklerini öğrenmeden trend takibi yapma imkânı sunar.</p>
 """,
     "faqs": [
       {"q": "BIST'te herkes açığa satış yapabilir mi?",
        "a": "Hayır. Açığa satış yalnızca SPK'nın onayladığı sınırlı sayıda hisse için mümkündür ve ödünç pay bulunması gerekir. Bireysel yatırımcılar için pratikte oldukça kısıtlı bir araçtır."},
       {"q": "SAT sinyali gördüğümde açığa satış yapmalı mıyım?",
-       "a": "BorsaPusula'daki SAT (Zayıf Trend) sinyali, açığa satış için tasarlanmamıştır. Bu sinyal, mevcut pozisyondan çıkış veya o hisseden kaçınma işareti olarak değerlendirilmelidir. Açığa satış tamamen farklı risk ve mekanik içerir."},
+       "a": "BorsaPusula'daki SAT (Trend Bozuldu) sinyali, açığa satış için tasarlanmamıştır. Bu sinyal, mevcut pozisyondan çıkış veya o hisseden kaçınma işareti olarak değerlendirilmelidir. Açığa satış tamamen farklı risk ve mekanik içerir."},
       {"q": "Açığa satış yerine VIOP kullanmak daha mı iyi?",
        "a": "BIST bireysel yatırımcıları için düşüş pozisyonu almak istiyorsanız VIOP, açığa satıştan genellikle daha erişilebilir ve likittir. Ancak her iki araç da yüksek risk taşır ve kapsamlı bilgi gerektirir."},
       {"q": "Short squeeze nedir?",

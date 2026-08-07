@@ -338,7 +338,7 @@ function fmtPrice(v, dec) {
   const d = dec!=null ? dec : (v>=1000?0:v>=10?2:4);
   return v.toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
 }
-function sigLabel(s){return {AL:'▲ Güçlü Trend',SAT:'▼ Zayıf Trend',BEKLE:'● Yatay'}[s]||'● —';}
+function sigLabel(s){return {AL:'▲ Güçlü Trend',SAT:'▼ Trend Bozuldu',BEKLE:'● Yatay'}[s]||'● —';}
 
 /* Yüklenen fiyatları sakla (SSE güncellemeleri için) */
 const _loadedPrices = {};

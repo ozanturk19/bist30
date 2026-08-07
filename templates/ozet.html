@@ -565,7 +565,7 @@ function goToDate(date) {
   </div>
   <div class="counter-card">
     <div class="counter-num num-sat">{{ sat_list|length }}</div>
-    <div class="counter-lbl">▼ Zayıf Trend</div>
+    <div class="counter-lbl">▼ Trend Bozuldu</div>
   </div>
   <div class="counter-card">
     <div class="counter-num num-bekle">{{ bekle_list|length }}</div>
@@ -591,7 +591,7 @@ function goToDate(date) {
   <div class="bar-labels">
     <span style="color:#00e290">Güçlü %{{ al_pct }}</span>
     <span style="color:#909097">BIST100 ({{ total }} hisse)</span>
-    <span style="color:#f85149">Zayıf %{{ sat_pct }}</span>
+    <span style="color:#f85149">Bozuldu %{{ sat_pct }}</span>
   </div>
 </div>
 {% endif %}
@@ -693,13 +693,13 @@ function goToDate(date) {
 <!-- SAT Sinyalleri -->
 {% if sat_list %}
 <div class="section-box">
-  <div class="section-title" style="color:#f85149">▼ Zayıf Trend Hisseleri ({{ sat_list|length }})</div>
+  <div class="section-title" style="color:#f85149">▼ Trend Bozuldu Hisseleri ({{ sat_list|length }})</div>
   <div class="stock-grid">
     {% for s in sat_list %}
     <a href="/hisse/{{ s.ticker }}" class="stock-card">
       <div class="sc-ticker">{{ s.ticker }}</div>
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
-      <div class="sc-signal sc-sat">▼ Zayıf Trend</div>
+      <div class="sc-signal sc-sat">▼ Trend Bozuldu</div>
       <div class="sc-meta">{{ s.signal_bars }} gün · {{ s.signal_date }}</div>
       {% if s.signal_price and s.price %}
         {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}

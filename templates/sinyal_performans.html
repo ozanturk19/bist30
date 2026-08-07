@@ -258,12 +258,12 @@
     </div>
     <div class="stat-card">
       <div class="stat-num c-red">{{ bt.sat.win_rate }}%</div>
-      <div class="stat-lbl">▼ Zayıf Trend "Kazanma"</div>
+      <div class="stat-lbl">▼ Trend Bozuldu "Kazanma"</div>
       <div class="stat-sub">{{ bt.sat.count }} sinyal incelendi</div>
     </div>
     <div class="stat-card">
       <div class="stat-num c-red">{{ bt.sat.avg_ret }}%</div>
-      <div class="stat-lbl">▼ Zayıf Trend Ort. Getiri</div>
+      <div class="stat-lbl">▼ Trend Bozuldu Ort. Getiri</div>
       <div class="stat-sub">Max {{ bt.sat.best }}% / Min {{ bt.sat.worst }}%</div>
     </div>
     <div class="stat-card">
@@ -327,9 +327,9 @@
           <th>Güçlü Trend</th>
           <th>Güçlü Kazanma %</th>
           <th>Güçlü Ort. Getiri</th>
-          <th>Zayıf Trend</th>
-          <th>Zayıf Kazanma %</th>
-          <th>Zayıf Ort. Getiri</th>
+          <th>Trend Bozuldu</th>
+          <th>Bozuldu Kazanma %</th>
+          <th>Bozuldu Ort. Getiri</th>
         </tr>
       </thead>
       <tbody>
@@ -395,7 +395,7 @@
     <select id="perfSigFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:13px">
       <option value="">Tüm sinyaller</option>
       <option value="AL">▲ Güçlü Trend</option>
-      <option value="SAT">▼ Zayıf Trend</option>
+      <option value="SAT">▼ Trend Bozuldu</option>
     </select>
     <select id="perfRetFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:13px">
       <option value="">Tüm getiriler</option>
@@ -431,7 +431,7 @@
             {% if s.signal == 'AL' %}
               <span class="sig-al">▲ Güçlü Trend</span>
             {% else %}
-              <span class="sig-sat">▼ Zayıf Trend</span>
+              <span class="sig-sat">▼ Trend Bozuldu</span>
             {% endif %}
           </td>
           <td>{{ s.signal_price|tr_price }} ₺</td>

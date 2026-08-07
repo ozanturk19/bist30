@@ -648,7 +648,7 @@ function _tickFmt(time, type) {
 }
 
 function _sigLabel(sig) {
-  return {AL:'▲ Güçlü Trend', SAT:'▼ Zayıf Trend', BEKLE:'● Yatay'}[sig] || sig;
+  return {AL:'▲ Güçlü Trend', SAT:'▼ Trend Bozuldu', BEKLE:'● Yatay'}[sig] || sig;
 }
 function _sigClass(sig) {
   return 'sig-badge sig-'+(sig||'BEKLE');
@@ -851,7 +851,7 @@ function renderSignalData(summary, history, week52, commentary) {
     if(tbody) {
       const sigBadge = (sig) => {
         const cls = {AL:'sig-AL',SAT:'sig-SAT',BEKLE:'sig-BEKLE'}[sig]||'sig-BEKLE';
-        const lbl = {AL:'▲ Güçlü Trend',SAT:'▼ Zayıf Trend',BEKLE:'● Yatay'}[sig]||sig;
+        const lbl = {AL:'▲ Güçlü Trend',SAT:'▼ Trend Bozuldu',BEKLE:'● Yatay'}[sig]||sig;
         return `<span class="sig-badge ${cls}" style="font-size:10px;padding:2px 8px">${lbl}</span>`;
       };
       tbody.innerHTML = history.map(h =>

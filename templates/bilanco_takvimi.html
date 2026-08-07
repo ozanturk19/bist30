@@ -273,7 +273,7 @@
 
   <div class="summary-row">
     <div class="sum-chip"><div class="sum-num" id="sumAl" style="color:#3fb950">—</div><div class="sum-lbl">Güçlü Trend</div></div>
-    <div class="sum-chip"><div class="sum-num" id="sumSat" style="color:#f85149">—</div><div class="sum-lbl">Zayıf Trend</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumSat" style="color:#f85149">—</div><div class="sum-lbl">Trend Bozuldu</div></div>
     <div class="sum-chip"><div class="sum-num" id="sumBkl" style="color:#8b949e">—</div><div class="sum-lbl">Yatay</div></div>
     <div class="sum-chip"><div class="sum-num" id="sumTotal" style="color:#58a6ff">—</div><div class="sum-lbl">Toplam Hisse</div></div>
   </div>
@@ -282,7 +282,7 @@
     <span style="font-size:12px;color:var(--bp-text3);font-weight:600">Filtre:</span>
     <button class="filter-btn active"   onclick="setFilter('all')"  id="fbtn-all">Tümü</button>
     <button class="filter-btn fal"      onclick="setFilter('AL')"   id="fbtn-AL">▲ Güçlü Trend</button>
-    <button class="filter-btn fsat"     onclick="setFilter('SAT')"  id="fbtn-SAT">▼ Zayıf Trend</button>
+    <button class="filter-btn fsat"     onclick="setFilter('SAT')"  id="fbtn-SAT">▼ Trend Bozuldu</button>
     <button class="filter-btn fbkl"     onclick="setFilter('BEKLE')"id="fbtn-BEKLE">● Yatay</button>
   </div>
 
@@ -301,7 +301,7 @@
 let _allData = null;
 let _filter  = 'all';
 
-const SIG_LABELS = { AL: 'Güçlü Trend', SAT: 'Zayıf Trend', BEKLE: 'Yatay' };
+const SIG_LABELS = { AL: 'Güçlü Trend', SAT: 'Trend Bozuldu', BEKLE: 'Yatay' };
 
 function setFilter(f) {
   _filter = f;
@@ -314,7 +314,7 @@ function sigClass(sig) {
   return sig === 'AL' ? 'al' : sig === 'SAT' ? 'sat' : 'bkl';
 }
 function sigLabel(sig) {
-  return sig === 'AL' ? '▲ Güçlü Trend' : sig === 'SAT' ? '▼ Zayıf Trend' : '● Yatay';
+  return sig === 'AL' ? '▲ Güçlü Trend' : sig === 'SAT' ? '▼ Trend Bozuldu' : '● Yatay';
 }
 
 function render(data) {
@@ -368,7 +368,7 @@ function render(data) {
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span style="font-size:12px;background:rgba(63,185,80,0.12);color:#3fb950;padding:2px 8px;border-radius:8px;border:1px solid rgba(63,185,80,0.2)">${alCount} Güçlü</span>
-          <span style="font-size:12px;background:rgba(248,81,73,0.12);color:#f85149;padding:2px 8px;border-radius:8px;border:1px solid rgba(248,81,73,0.2)">${satCount} Zayıf</span>
+          <span style="font-size:12px;background:rgba(248,81,73,0.12);color:#f85149;padding:2px 8px;border-radius:8px;border:1px solid rgba(248,81,73,0.2)">${satCount} Bozuldu</span>
         </div>
         <div class="period-desc">${period.description}</div>
       </div>
