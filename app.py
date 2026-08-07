@@ -399,7 +399,7 @@ def _fetch_macro_one_subprocess(label, sym, timeout=10):
         _yahoo_cb_record(result.returncode == 0, result.stderr)
         _ms = (time.perf_counter() - _t0) * 1000
         if result.returncode != 0:
-            logger.debug("yf_macro_fetch %s FAIL %.0fms: %s", sym, _ms, result.stderr[:80])
+            logger.warning("yf_macro_fetch %s FAIL %.0fms: %s", sym, _ms, result.stderr[:80])  # CPO-1323: gorunurluk, DEBUG->WARNING
             return None
         data = json.loads(result.stdout)
         price = data.get("price")
