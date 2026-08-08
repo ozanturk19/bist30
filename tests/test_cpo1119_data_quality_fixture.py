@@ -46,7 +46,7 @@ _compute_data_quality = _load_compute_data_quality()
         (108, 216, True,  "stale"),     # ratio=0.50  tam sınır — critical DEĞİL (strict >)
         (109, 216, True,  "critical"),  # ratio=0.501 sınırın hemen üstü
         (205, 216, True,  "critical"),  # ratio=0.95
-        (999, 216, False, "fresh"),     # market_open=False → her zaman fresh (seans dışı by-design)
+        (999, 216, False, "seans_disi"),  # market_open=False → seans dışı by-design (CPO-1338: "fresh" DEĞİL)
         (0,   0,   True,  "critical"),  # total_count=0 → critical (sıfıra bölme guard'ı)
     ],
 )

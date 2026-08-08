@@ -2747,11 +2747,12 @@ def _compute_data_quality(bad_ticker_count, total_count, market_open):
     hiç taze veri almasa bile dönüp durduğu için aggregate hep "fresh"
     kalıyordu — bu fonksiyon onun yerine geçer.
 
-    market_open=False → her zaman "fresh" (seans dışı stale by-design, yanlış
-    alarm üretmesin — mevcut davranış korunuyor).
+    market_open=False → "seans_disi" (CPO-1338: seans dışı stale by-design,
+    yanlış alarm üretmeme davranışı KORUNUYOR — ama "fresh" ile karıştırılmaz,
+    ölçülmemiş bir durumu ölçülmüş gibi beyan etmez).
     """
     if not market_open:
-        return "fresh"
+        return "seans_disi"
     if not total_count:
         return "critical"
     stale_ratio = bad_ticker_count / total_count
@@ -4105,7 +4106,7 @@ def api_data():
         "updated_at":   _resp_updated_at,  # CPO-1114 K1: last_fresh_ts medyanı (bkz. yukarı)
         "loading":      len(stocks) == 0,
         "sectors":      list(SECTORS.keys()),
-        "data_quality": _dq,        # "fresh" | "stale" | "critical" (CPO-551 → CPO-1114: per-ticker orana dayalı)
+        "data_quality": _dq,        # "fresh" | "stale" | "critical" | "seans_disi" (CPO-551 → CPO-1114: per-ticker orana dayalı; CPO-1338: seans dışı)
         "stocks_age_s": _age_s,     # seconds since last GENUINE fresh data (median last_fresh_ts, CPO-1114)
         "refreshing":   _loading,   # True = background refresh aktif
         "data_freshness": build_data_freshness(stocks),  # SPEC-014 B1 (CPO-1137: kanonik, aynı stocks)

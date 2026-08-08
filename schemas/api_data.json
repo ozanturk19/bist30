@@ -26,7 +26,7 @@
     "loading":      {"type": "boolean"},
     "sectors":      {"type": "array", "items": {"type": "string"}},
     "xu100_spark":  {"type": "array", "items": {"type": "number"}},
-    "data_quality": {"type": "string", "enum": ["fresh", "stale", "critical"]},
+    "data_quality": {"type": "string", "enum": ["fresh", "stale", "critical", "seans_disi"]},
     "stocks_age_s": {"type": ["integer", "null"]},
     "refreshing":   {"type": "boolean"},
     "data_freshness": {

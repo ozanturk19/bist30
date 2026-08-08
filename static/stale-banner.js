@@ -28,6 +28,10 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
     banner.style.background  = '';
     banner.style.borderColor = '';
     banner.style.display     = 'block';
+  } else if (dq === 'seans_disi') {
+    /* CPO-1338: seans dışı stale by-design — banner KASITLI gizli (fresh ile
+       karıştığı için değil, bu dal açıkça o kararı veriyor). */
+    banner.style.display = 'none';
   } else {
     banner.style.display = 'none';
   }

@@ -47,6 +47,11 @@ def test_api_data_invalid_data_quality():
     r = validate_api_data(data)
     assert r["ok"] is False and r["flag"] == "SCHEMA_ERROR"
 
+def test_api_data_seans_disi_data_quality():
+    data = {**VALID_DATA, "data_quality": "seans_disi"}
+    r = validate_api_data(data)
+    assert r["ok"] is True
+
 def test_api_data_loading_true_empty_stocks():
     data = {**VALID_DATA, "loading": True, "stocks": []}
     r = validate_api_data(data)
