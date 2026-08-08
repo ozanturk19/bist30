@@ -27,13 +27,21 @@ EXTENDS_RE = re.compile(r"{%-?\s*extends\s+['\"]([^'\"]+)['\"]")
 SHELL = "_base.html"
 
 
+# Jinja yorumu {# ... #} icindeki ornek kod DEDEKTORU YANILTIR: _head.html'in
+# sozlesme notuna ornek olarak yazilan "{% extends '_base.html' %}" satiri
+# partial'i SAYFA saydirdi ve payda 27 -> 28 oldu (olculdu). Yorumlar once
+# soyuluyor. Ayrica alt-cizgiyle baslayan dosya PARTIAL'dir; parca uretir,
+# tam dokuman degil -> kanonik paydaya hicbir kosulda girmez.
+COMMENT_RE = re.compile(r"{#.*?#}", re.S)
+
+
 def head_bearing():
     out = set()
     for f in sorted(TPL_DIR.glob("*.html")):
-        if f.name == SHELL:
+        if f.name.startswith("_"):
             continue
         try:
-            txt = f.read_text(encoding="utf-8", errors="replace")
+            txt = COMMENT_RE.sub("", f.read_text(encoding="utf-8", errors="replace"))
         except OSError:
             continue
         if EXTENDS_RE.search(txt) or "<head>" in txt:
