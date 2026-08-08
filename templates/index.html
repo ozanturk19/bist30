@@ -147,6 +147,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260808A">
+<script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
     font-family: 'Inter-Fallback';
@@ -2753,18 +2754,8 @@
 <script>
 /* ── Makro Ticker Bandı ──────────────────────────── */
 (function() {
-  const LABELS = {
-    XU100:'BIST100', XU030:'BIST30', USDTRY:'USD/TRY', EURTRY:'EUR/TRY',
-    BTC:'BTC', ETH:'ETH', SOL:'SOL', BNB:'BNB',
-    ALTIN:'ALTIN', GUMUS:'GÜMÜŞ', PETROL:'PETROL', DOGALGAZ:'D.GAZ',
-    SP500:'S&P500', NASDAQ:'NASDAQ'
-  };
-  const PRICE_FMT = {
-    XU100:0, XU030:0, USDTRY:4, EURTRY:4,
-    BTC:0, ETH:2, SOL:2, BNB:2,
-    ALTIN:2, GUMUS:2, PETROL:2, DOGALGAZ:3,
-    SP500:0, NASDAQ:0
-  };
+  const LABELS = BP_ASSET_LABELS;
+  const PRICE_FMT = BP_ASSET_DECIMALS;
 
   function renderMacro(items) {
     if (!items || !items.length) return;

@@ -26,6 +26,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260808A">
+<script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -782,8 +783,8 @@ function goToDate(date) {
   ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir. · © 2026 borsapusula.com
 </footer>
 <script>
-const _ML={USDTRY:'USD/TRY',EURTRY:'EUR/TRY',XU100:'BIST100',XU030:'BIST30',BIST30:'BIST30',BTC:'BTC',ALTIN:'Altın',GUMUS:'Gümüş',SP500:'S&P500',NASDAQ:'NASDAQ'};
-const _MD={USDTRY:4,EURTRY:4,XU100:0,XU030:0,SP500:0,NASDAQ:0,BTC:0};
+const _ML = BP_ASSET_LABELS;
+const _MD = BP_ASSET_DECIMALS;
 async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e){}}
 loadMacroBar();setInterval(loadMacroBar,60000);
 

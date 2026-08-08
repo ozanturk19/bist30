@@ -122,6 +122,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260808A">
+<script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
     font-family: 'Inter-Fallback';
@@ -4156,15 +4157,8 @@ window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
 
 /* ── Makro Ticker Bandı ─────────────────────── */
 (function() {
-  const LABELS = {
-    XU100:'BIST100', XU030:'BIST30', BTC:'BTC',
-    ALTIN:'ALTIN', GUMUS:'GÜMÜŞ', USDTRY:'USD/TRY',
-    EURTRY:'EUR/TRY', SP500:'S&P500', NASDAQ:'NASDAQ'
-  };
-  const PRICE_FMT = {
-    XU100:0, XU030:0, BTC:0, ALTIN:2, GUMUS:2,
-    USDTRY:4, EURTRY:4, SP500:0, NASDAQ:0
-  };
+  const LABELS = BP_ASSET_LABELS;
+  const PRICE_FMT = BP_ASSET_DECIMALS;
   async function loadMacro() {
     try {
       const r = await fetch('/api/macro');

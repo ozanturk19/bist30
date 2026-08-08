@@ -16,6 +16,7 @@
 ]}
 </script>
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260808A">
+<script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root {
@@ -274,18 +275,8 @@
 
 <script>
 const ASSETS = {{ assets | tojson }};
-const MACRO_LABELS = {
-  XU100:'BIST100',XU030:'BIST30',USDTRY:'USD/TRY',EURTRY:'EUR/TRY',
-  BTC:'BTC',ETH:'ETH',SOL:'SOL',BNB:'BNB',
-  ALTIN:'ALTIN',GUMUS:'GÜMÜŞ',PETROL:'PETROL',DOGALGAZ:'D.GAZ',
-  SP500:'S&P500',NASDAQ:'NASDAQ'
-};
-const MACRO_DEC = {
-  XU100:0,XU030:0,USDTRY:4,EURTRY:4,
-  BTC:0,ETH:2,SOL:2,BNB:2,
-  ALTIN:2,GUMUS:2,PETROL:2,DOGALGAZ:3,
-  SP500:0,NASDAQ:0
-};
+const MACRO_LABELS = BP_ASSET_LABELS;
+const MACRO_DEC = BP_ASSET_DECIMALS;
 const MACRO_LINKS = {
   BTC:'/btc',ETH:'/eth',SOL:'/sol',BNB:'/bnb',
   ALTIN:'/altin',GUMUS:'/gumus',PETROL:'/petrol',DOGALGAZ:'/dogalgaz',
