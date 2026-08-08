@@ -21,15 +21,7 @@ echo ""
 
 # 1. Jinja parse
 echo "1/5 Jinja parse..."
-if python3 -c "
-import jinja2,sys
-e=jinja2.Environment(loader=jinja2.FileSystemLoader('templates'))
-ok=True
-for f in ['hisse.html','index.html','heatmap.html','tarama.html','gundem.html']:
-  try: e.get_template(f); print(' ✓', f)
-  except Exception as x: print(' ✗', f, x); ok=False
-sys.exit(0 if ok else 1)
-"; then
+if python3 "$(dirname "$0")/_predeploy_jinja_check.py"; then
   echo "  ✓ Jinja parse OK"
 else
   echo "  ✗ Jinja parse FAIL"
