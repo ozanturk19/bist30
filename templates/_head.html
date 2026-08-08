@@ -1,0 +1,11 @@
+{#- KANONIK HEAD UST-BLOGU (T2.1) — tek kaynak.
+    KAPSAM: charset + analytics + viewport.
+    KAPSAM DISI (sablonda KALIR): <title>, description, canonical, og:*, robots,
+      favicon, preconnect/preload, Google Fonts, tokens.css, bp-vocab.js, <style>.
+    PARAMETRELER — include ile AYNI SATIRDA {% set %} ile verilir, hepsi varsayilanli:
+      head_analytics       bool  vars. true  -> false ise _analytics.html basilmaz
+      head_viewport_extra  str   vars. ''    -> viewport content'ine eklenecek son ek
+-#}
+<meta charset="UTF-8">
+{% if head_analytics|default(true) %}{% include '_analytics.html' %}
+{% endif %}<meta name="viewport" content="width=device-width, initial-scale=1.0{{ head_viewport_extra|default('') }}">
