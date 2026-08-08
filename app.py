@@ -4852,8 +4852,23 @@ def api_market_summary():
         else:
             closed_msg = "BIST seansı kapandı. Yarın 10:00'da tekrar görüşelim."
 
+    # CPO-1344 §A ikincil: asOfTime duvar saatiydi (now_tr), veri ne zaman
+    # üretildiğini değil "şu an ne zaman" olduğunu söylüyordu. Kanonik veri
+    # zamanına (_data_quality_snapshot) çeviriyoruz; farklı takvim günündeyse
+    # (hafta sonu/tatil sonrası bayat veri) tarihi de basıyoruz — sadece saat
+    # basmak "bugünmüş gibi" yanıltır.
+    as_of_time = now_tr.strftime("%H:%M")
+    try:
+        _data_updated_at = _data_quality_snapshot(stocks).get("updated_at")
+        if _data_updated_at:
+            _dt = datetime.strptime(_data_updated_at, "%d.%m.%Y %H:%M:%S")
+            as_of_time = (_dt.strftime("%H:%M") if _dt.date() == now_tr.date()
+                          else _dt.strftime("%d.%m %H:%M"))
+    except Exception as e:
+        logger.debug("market-summary asOfTime veri-zamanı hesabı: %s", e)
+
     return jsonify({
-        "asOfTime": now_tr.strftime("%H:%M"),
+        "asOfTime": as_of_time,
         "marketStatus": market_status,
         "closedMessage": closed_msg,
         "newBullCount": len(new_bull),

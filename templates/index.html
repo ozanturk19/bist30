@@ -3550,11 +3550,6 @@ async function renderMarketSummary(stocks) {
       return;
     }
 
-    // Borsa kapalı edge case — closedMessage göster
-    if (d.marketStatus === 'closed' && d.newBullCount === 0 && d.totalBullCount === 0) {
-      // Gerçekten data yoksa kapalı banner — ama veri varsa normal göster
-    }
-
     // Watchlist hareketi — client side (localStorage watchlist)
     let watchMoved = 0;
     try {
@@ -3564,33 +3559,42 @@ async function renderMarketSummary(stocks) {
       }
     } catch (_) {}
 
-    // Cümle 1
-    let s1;
-    if (!d.newBullCount || d.newBullCount === 0) {
-      s1 = `BIST'de bugün yeni güçlü trende geçen hisse yok.`;
+    /* CPO-1344 §A: Borsa kapalıyken dürüst closedMessage göster. Kapı SADECE
+       marketStatus'a bağlı — newBullCount/totalBullCount'a bağlı ESKİ kapı hiç
+       girilmiyordu (totalBullCount hemen her zaman >0), üstelik girse bile gövde
+       boştu. Kapalı gün "veri yok" değil "bugün işlem olmadı" demektir; sayaç
+       sıfır olsun olmasın kapalıysa kapalı mesajı gösterilir. */
+    if (d.marketStatus === 'closed' && d.closedMessage) {
+      text.innerHTML = d.closedMessage;
     } else {
-      const topT = (d.topTickers || []).slice(0, 4).map(t => `<a href="/hisse/${t}">${t}</a>`).join(', ');
-      const more = d.newBullCount > 4 ? ` ve <strong>${d.newBullCount - 4}</strong> hisse daha` : '';
-      s1 = `<strong>BIST</strong>'de bugün <strong>${d.newBullCount} hisse</strong> güçlü trende geçti${topT ? ' (' + topT + more + ')' : ''}.`;
-    }
-    // Cümle 2
-    const sectorChange = d.sectorChange || 0;
-    const ivme = sectorChange >= 0 ? 'en güçlü' : 'en zayıf';
-    const sectorChangeStr = (sectorChange >= 0 ? '+' : '') + sectorChange.toFixed(1);
-    const sectorChangeCls = sectorChange >= 0 ? 'delta-up' : 'delta-down';
-    const s2 = !d.hottestSector
-      ? `Sektör verisi yetersiz.`
-      : `<span class="sector-name">${d.hottestSector}</span> sektörü bugün ${ivme} performansta — ortalama <span class="${sectorChangeCls}">%${sectorChangeStr}</span>.`;
-    // Cümle 3
-    const delta = d.delta || 0;
-    const direction = delta >= 0 ? 'güçlü' : 'zayıf';
-    const deltaCls = delta >= 0 ? 'delta-up' : 'delta-down';
-    const deltaStr = (delta >= 0 ? '+' : '') + delta;
-    const s3 = delta === 0
-      ? `Genel sinyal dağılımı dünle aynı.`
-      : `Genel sinyal dağılımı dünden <span class="${deltaCls}">${deltaStr} ${direction}</span>.`;
+      // Cümle 1
+      let s1;
+      if (!d.newBullCount || d.newBullCount === 0) {
+        s1 = `BIST'de bugün yeni güçlü trende geçen hisse yok.`;
+      } else {
+        const topT = (d.topTickers || []).slice(0, 4).map(t => `<a href="/hisse/${t}">${t}</a>`).join(', ');
+        const more = d.newBullCount > 4 ? ` ve <strong>${d.newBullCount - 4}</strong> hisse daha` : '';
+        s1 = `<strong>BIST</strong>'de bugün <strong>${d.newBullCount} hisse</strong> güçlü trende geçti${topT ? ' (' + topT + more + ')' : ''}.`;
+      }
+      // Cümle 2
+      const sectorChange = d.sectorChange || 0;
+      const ivme = sectorChange >= 0 ? 'en güçlü' : 'en zayıf';
+      const sectorChangeStr = (sectorChange >= 0 ? '+' : '') + sectorChange.toFixed(1);
+      const sectorChangeCls = sectorChange >= 0 ? 'delta-up' : 'delta-down';
+      const s2 = !d.hottestSector
+        ? `Sektör verisi yetersiz.`
+        : `<span class="sector-name">${d.hottestSector}</span> sektörü bugün ${ivme} performansta — ortalama <span class="${sectorChangeCls}">%${sectorChangeStr}</span>.`;
+      // Cümle 3
+      const delta = d.delta || 0;
+      const direction = delta >= 0 ? 'güçlü' : 'zayıf';
+      const deltaCls = delta >= 0 ? 'delta-up' : 'delta-down';
+      const deltaStr = (delta >= 0 ? '+' : '') + delta;
+      const s3 = delta === 0
+        ? `Genel sinyal dağılımı dünle aynı.`
+        : `Genel sinyal dağılımı dünden <span class="${deltaCls}">${deltaStr} ${direction}</span>.`;
 
-    text.innerHTML = `${s1} ${s2} ${s3}`;
+      text.innerHTML = `${s1} ${s2} ${s3}`;
+    }
 
     // Meta + microstats
     if (d.asOfTime) document.getElementById('msTime').textContent = d.asOfTime;
