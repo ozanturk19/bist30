@@ -161,8 +161,8 @@
   /* Makro Ticker */
   .macro-bar{background:#0e0e12;border-bottom:1px solid var(--bp-border);height:32px;overflow:hidden;position:relative;white-space:nowrap;}
   .macro-bar::before,.macro-bar::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:2;}
-  .macro-bar::before{left:0;background:linear-gradient(to right,#0e0e12,transparent);}
-  .macro-bar::after{right:0;background:linear-gradient(to left,#0e0e12,transparent);}
+  .macro-bar::before{left:0;background:linear-gradient(to right,var(--bp-bg),transparent);}
+  .macro-bar::after{right:0;background:linear-gradient(to left,var(--bp-bg),transparent);}
   .macro-track{display:inline-flex;align-items:center;animation:macroScroll 40s linear infinite;height:32px;}
   .macro-bar:hover .macro-track{animation-play-state:paused;}
   @keyframes macroScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}

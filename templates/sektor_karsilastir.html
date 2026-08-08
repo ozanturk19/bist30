@@ -27,13 +27,13 @@
   header { background:rgba(14,14,18,0.92); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-bottom:1px solid rgba(42,42,44,0.8); padding:0 24px; height:60px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
   .logo-link { display:flex; align-items:center; gap:10px; flex-shrink:0; }
   .logo-mark { width:28px; height:28px; flex-shrink:0; }
-  .logo-name { font-size:16px; font-weight:700; color:#e5e1e4; letter-spacing:-0.3px; font-family:'Space Grotesk',system-ui,sans-serif; }
-  .logo-name strong { color:#00e290; }
+  .logo-name { font-size:16px; font-weight:700; color:var(--bp-text); letter-spacing:-0.3px; font-family:'Space Grotesk',system-ui,sans-serif; }
+  .logo-name strong { color:var(--bp-al); }
   .header-title { font-family:'Space Grotesk',system-ui,sans-serif; font-size:15px; font-weight:700; color:var(--bp-text); }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
   .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:var(--bp-text2); transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
-  .top-nav-links a.active { background:var(--bp-surface2); color:#b8c3ff; }
+  .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
   @media (max-width:780px) { .top-nav-links { display:none; } }
 
   /* Container */
@@ -57,9 +57,9 @@
   }
   .chip:hover { border-color:var(--bp-border2); color:var(--bp-text); }
   .chip.selected { background:rgba(184,195,255,0.12); border-color:rgba(184,195,255,0.5); color:#b8c3ff; }
-  .chip.sel-1 { background:rgba(0,226,144,0.1); border-color:rgba(0,226,144,0.45); color:#00e290; }
-  .chip.sel-2 { background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.45); color:#f59e0b; }
-  .chip.sel-3 { background:rgba(248,81,73,0.1); border-color:rgba(248,81,73,0.45); color:#f85149; }
+  .chip.sel-1 { background:rgba(0,226,144,0.1); border-color:rgba(0,226,144,0.45); color:var(--bp-al); }
+  .chip.sel-2 { background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.45); color:var(--bp-gold); }
+  .chip.sel-3 { background:rgba(248,81,73,0.1); border-color:rgba(248,81,73,0.45); color:var(--bp-sat); }
   .selector-hint { font-size:11px; color:var(--bp-text3); margin-top:10px; }
 
   /* Compare button */
@@ -87,9 +87,9 @@
   .sec-col { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:12px; overflow:hidden; }
   .sec-col-header { padding:16px 18px 14px; border-bottom:1px solid var(--bp-border); }
   .sec-col-name { font-family:'Space Grotesk',system-ui,sans-serif; font-size:17px; font-weight:700; margin-bottom:6px; }
-  .col-accent-0 .sec-col-name { color:#00e290; }
-  .col-accent-1 .sec-col-name { color:#f59e0b; }
-  .col-accent-2 .sec-col-name { color:#f85149; }
+  .col-accent-0 .sec-col-name { color:var(--bp-al); }
+  .col-accent-1 .sec-col-name { color:var(--bp-gold); }
+  .col-accent-2 .sec-col-name { color:var(--bp-sat); }
 
   /* Score bar */
   .score-bar-wrap { margin:10px 0 14px; }
@@ -98,16 +98,16 @@
   .score-bar-fill { height:100%; border-radius:3px; transition:width .4s ease; }
   .score-positive { background:linear-gradient(90deg,#00e290,#00c47a); }
   .score-negative { background:linear-gradient(90deg,#f85149,#d03d36); }
-  .score-neutral  { background:#46464d; }
+  .score-neutral  { background:var(--bp-border2); }
 
   /* Stats row */
   .sec-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
   .stat-pill { background:var(--bp-surface2); border-radius:7px; padding:9px 10px; text-align:center; }
   .stat-pill-lbl { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--bp-text3); font-family:'Space Grotesk',sans-serif; margin-bottom:3px; }
   .stat-pill-val { font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; font-family:'Space Grotesk',monospace,sans-serif; }
-  .val-al { color:#00e290; }
-  .val-sat { color:#f85149; }
-  .val-bkl { color:#909097; }
+  .val-al { color:var(--bp-al); }
+  .val-sat { color:var(--bp-sat); }
+  .val-bkl { color:var(--bp-bkl); }
 
   /* Extra metrics */
   .sec-metrics { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
@@ -125,14 +125,14 @@
   .stock-ticker { font-size:13px; font-weight:800; font-family:'Space Grotesk',system-ui,sans-serif; min-width:60px; }
   .stock-sig { font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; font-family:'Space Grotesk',sans-serif; flex-shrink:0; }
   .sig-al  { background:rgba(0,226,144,0.15); color:#00e290; }
-  .sig-sat { background:rgba(248,81,73,0.15); color:#f85149; }
-  .sig-bkl { background:rgba(144,144,151,0.15); color:#909097; }
+  .sig-sat { background:rgba(248,81,73,0.15); color:var(--bp-sat); }
+  .sig-bkl { background:rgba(144,144,151,0.15); color:var(--bp-bkl); }
   .stock-price { font-size:12px; font-variant-numeric:tabular-nums; font-family:'Space Grotesk',monospace,sans-serif; color:var(--bp-text2); margin-left:auto; }
   .stock-chg { font-size:12px; font-variant-numeric:tabular-nums; font-family:'Space Grotesk',monospace,sans-serif; min-width:52px; text-align:right; }
-  .chg-pos { color:#00e290; }
-  .chg-neg { color:#f85149; }
+  .chg-pos { color:var(--bp-al); }
+  .chg-neg { color:var(--bp-sat); }
   .stock-rvol { font-size:11px; color:var(--bp-text3); min-width:38px; text-align:right; }
-  .rvol-high { color:#f59e0b; }
+  .rvol-high { color:var(--bp-gold); }
 
   /* Empty/error state */
   .empty-state { padding:40px 18px; text-align:center; color:var(--bp-text3); }
@@ -148,7 +148,7 @@
   .mbn-item { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; text-decoration:none; color:#909097; font-size:10.5px; font-weight:600; background:none; border:none; cursor:pointer; padding:0; min-height:48px; -webkit-tap-highlight-color:transparent; }
   .mbn-icon { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; }
   .mbn-icon svg { width:22px; height:22px; stroke-width:1.85; }
-  .mbn-item.active { color:#00e290; }
+  .mbn-item.active { color:var(--bp-al); }
   @media (max-width:768px) { .mobile-bottom-nav { display:block; } body { padding-bottom:calc(64px + env(safe-area-inset-bottom)); } }
 </style>
 </head>
@@ -234,7 +234,7 @@ async function loadSectors() {
       if (_selected.length >= 2) runCompare();
     }
   } catch(e) {
-    document.getElementById('sectorChips').innerHTML = '<span style="color:#f85149;font-size:13px">Veriler yüklenemedi.</span>';
+    document.getElementById('sectorChips').innerHTML = '<span style="color:var(--bp-sat);font-size:13px">Veriler yüklenemedi.</span>';
   }
 }
 

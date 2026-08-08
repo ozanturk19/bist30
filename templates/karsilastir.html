@@ -203,8 +203,8 @@
     content:''; position:absolute; top:0; bottom:0; width:60px;
     pointer-events:none; z-index:2;
   }
-  .macro-bar::before { left:0; background:linear-gradient(to right,#0e0e12,transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,#0e0e12,transparent); }
+  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
   .macro-track {
     display:inline-flex; align-items:center;
     animation:macroScroll 40s linear infinite; height:34px;
@@ -213,7 +213,7 @@
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
   .macro-item {
     display:inline-flex; align-items:center; gap:8px;
-    padding:0 20px; border-right:1px solid #2a2a2c;
+    padding:0 20px; border-right:1px solid var(--bp-border);
     font-size:12px; height:34px; text-decoration:none; color:inherit;
   }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }

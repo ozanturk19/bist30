@@ -181,15 +181,15 @@
   }
   /* ── Makro Ticker Bandı ── */
   .macro-bar {
-    background:#0e0e12; border-bottom:1px solid #2a2a2c;
+    background:var(--bp-bg); border-bottom:1px solid var(--bp-border);
     height:34px; overflow:hidden; position:relative; white-space:nowrap;
   }
   .macro-bar::before, .macro-bar::after {
     content:''; position:absolute; top:0; bottom:0; width:60px;
     pointer-events:none; z-index:2;
   }
-  .macro-bar::before { left:0; background:linear-gradient(to right,#0e0e12,transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,#0e0e12,transparent); }
+  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
   .macro-track {
     display:inline-flex; align-items:center;
     animation:macroScroll 40s linear infinite; height:34px;
@@ -198,7 +198,7 @@
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
   .macro-item {
     display:inline-flex; align-items:center; gap:8px;
-    padding:0 20px; border-right:1px solid #2a2a2c;
+    padding:0 20px; border-right:1px solid var(--bp-border);
     font-size:12px; height:34px; text-decoration:none; color:inherit;
   }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
@@ -356,7 +356,7 @@
   <div class="section" id="bilancoBand" style="display:none">
     <div class="section-hdr">
       <div class="section-title">
-        <span class="dot" style="background:#f59e0b"></span>
+        <span class="dot" style="background:var(--bp-gold)"></span>
         Bilanço Takvimi
       </div>
       <a href="/bilanco-takvimi" style="font-size:11px;color:#58a6ff;text-decoration:none">Tümü →</a>
@@ -368,7 +368,7 @@
   <div class="section" id="econCalSection">
     <div class="section-hdr">
       <div class="section-title">
-        <span class="dot" style="background:#f59e0b"></span>
+        <span class="dot" style="background:var(--bp-gold)"></span>
         Ekonomik Takvim
       </div>
       <span class="section-sub">Yaklaşan önemli tarihler</span>
@@ -586,10 +586,10 @@ async function loadEconCalendar() {
     grid.innerHTML = unique.slice(0, 6).map(e => {
       const imp = IMP[e.importance] || IMP.MED;
       const du  = e.days_until;
-      const duTxt = e.is_today ? '<strong style="color:#f59e0b">Bugün!</strong>'
-                   : du === 1  ? '<span style="color:#f59e0b">Yarın</span>'
+      const duTxt = e.is_today ? '<strong style="color:var(--bp-gold)">Bugün!</strong>'
+                   : du === 1  ? '<span style="color:var(--bp-gold)">Yarın</span>'
                    : `<span style="color:#94a3b8">${du} gün sonra</span>`;
-      return `<div style="display:flex;align-items:center;gap:12px;background:#141416;border:1px solid ${e.is_today?'rgba(245,158,11,.3)':'#2a2a2c'};border-radius:8px;padding:10px 14px">
+      return `<div style="display:flex;align-items:center;gap:12px;background:var(--bp-surface);border:1px solid ${e.is_today?'rgba(245,158,11,.3)':'#2a2a2c'};border-radius:8px;padding:10px 14px">
         <span style="font-size:18px;flex-shrink:0">${e.icon||'📅'}</span>
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600;color:#e2e8f0">${e.event}</div>
