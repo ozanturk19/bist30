@@ -41,6 +41,12 @@ print("  app.py ozel filtresi kayitli: %d (%s)" % (len(names), ",".join(sorted(n
 
 ok = True
 n_tpl = n_ref = 0
+asts = {}
+# degisken adi -> o ada atanmis STRING SABITLERI (tum templates/ genelinde)
+atanan = {}
+# (sablon, degisken adi) -> degisken hedefli include'lar
+degisken_include = []
+
 for f in sorted(TPL.glob("*.html")):
     n_tpl += 1
     try:
@@ -50,6 +56,20 @@ for f in sorted(TPL.glob("*.html")):
         print("  HATA %s: %s" % (f.name, x))
         ok = False
         continue
+    asts[f.name] = ast
+
+    # {% set x = 'y.html' %}  ve  {% with x = 'y.html' %} atamalarini topla
+    for node in ast.find_all(nodes.Assign):
+        if isinstance(node.target, nodes.Name) and isinstance(node.node, nodes.Const) \
+                and isinstance(node.node.value, str):
+            atanan.setdefault(node.target.name, set()).add(node.node.value)
+    for node in ast.find_all(nodes.With):
+        for t, v in zip(node.targets, node.values):
+            if isinstance(t, nodes.Name) and isinstance(v, nodes.Const) \
+                    and isinstance(v.value, str):
+                atanan.setdefault(t.name, set()).add(v.value)
+
+for ad, ast in asts.items():
     for node in ast.find_all((nodes.Extends, nodes.Include)):
         tpl = getattr(node, "template", None)
         if isinstance(tpl, nodes.Const) and isinstance(tpl.value, str):
@@ -57,8 +77,33 @@ for f in sorted(TPL.glob("*.html")):
             try:
                 env.get_template(tpl.value)
             except Exception as x:
-                print("  HATA %s -> %s: %s" % (f.name, tpl.value, x))
+                print("  HATA %s -> %s: %s" % (ad, tpl.value, x))
                 ok = False
+        elif isinstance(tpl, nodes.Name):
+            degisken_include.append((ad, tpl.name))
 
-print("  %d sablon derlendi, %d extends/include hedefi cozuldu" % (n_tpl, n_ref))
+# ── DEGISKEN HEDEFLI include (T2.2'de _header.html ile GELDI) ──────────────
+# Eskiden bunlar SESSIZCE atlaniyordu: `isinstance(tpl, nodes.Const)` degilse
+# hicbir sey yapilmiyordu. Olculdu (09.08.2026): _header_asset_price.html
+# silindiginde kapi "GECTI" diyordu, oysa /btc /altin /eth ... calisma aninda
+# TemplateNotFound ile 500 donerdi. Artik degisken hedefi, o degiskene atanmis
+# STRING SABITLERINDEN cozuluyor; hic aday yoksa DOGRULANAMAZ kabul edilir.
+n_dyn = 0
+for ad, degisken in degisken_include:
+    adaylar = sorted(atanan.get(degisken, ()))
+    if not adaylar:
+        print("  HATA %s -> {%% include %s %%}: bu degiskene atanmis hicbir string"
+              " sabiti yok, hedef DOGRULANAMIYOR." % (ad, degisken))
+        ok = False
+        continue
+    for aday in adaylar:
+        n_dyn += 1
+        try:
+            env.get_template(aday)
+        except Exception as x:
+            print("  HATA %s -> {%% include %s %%} = '%s': %s" % (ad, degisken, aday, x))
+            ok = False
+
+print("  %d sablon derlendi, %d sabit + %d degisken include/extends hedefi cozuldu"
+      % (n_tpl, n_ref, n_dyn))
 sys.exit(0 if ok else 1)
