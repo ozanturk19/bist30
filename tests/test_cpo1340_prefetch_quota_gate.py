@@ -78,6 +78,33 @@ def test_prefetch_skipped_quota_counter_in_defaults():
     )
 
 
+def test_fully_skipped_tour_does_not_mark_run():
+    """Tur, tüm ticker'lar kota nedeniyle atlandığı için attempted=0 kaldıysa
+    _prefetch_mark_run() ÇAĞRILMAMALI — aksi halde kota açılsa bile 6h'lik
+    tur-gate yüzünden bir sonraki gerçek deneme gereksiz gecikir (CPO-1340 S1
+    kabul ölçütü: 'retry_after_s == 0 olan ilk pencerede prefetch GERÇEKTEN
+    ateş eder' şartını sağlamak için gerekli)."""
+    src = _read_app()
+    body = _extract_function_body(src, "_prefetch_news_worker")
+    assert body, "_prefetch_news_worker() bulunamadı"
+
+    assert re.search(r"\battempted\s*=\s*0\b", body), (
+        "gerçek deneme sayacı (attempted) yok — tam-atlanan tur ile kısmi/tam "
+        "işlenen tur ayırt edilemez"
+    )
+    assert re.search(r"\battempted\s*\+=\s*1\b", body), (
+        "attempted sayacı get_ai_news() çağrısından önce artmıyor"
+    )
+
+    mark_run_idx = body.find("_prefetch_mark_run(now)")
+    assert mark_run_idx != -1, "_prefetch_mark_run(now) çağrısı bulunamadı"
+    guard_window = body[max(0, mark_run_idx - 150): mark_run_idx]
+    assert "attempted" in guard_window, (
+        "_prefetch_mark_run(now) koşulsuz çağrılıyor — tam-atlanan tur da 6h "
+        "gate'i tetikler, kota açıldıktan sonra bile prefetch gereksiz gecikir"
+    )
+
+
 def test_leader_check_still_precedes_quota_check():
     """Leader olmayan worker zaten prefetch yapmamalı — kota kontrolü bunun
     yerini almamalı, sırası leader kontrolünden SONRA gelmeli."""

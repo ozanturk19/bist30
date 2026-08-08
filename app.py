@@ -6500,10 +6500,7 @@ def _prefetch_mark_run(ts):
 
 
 def _prefetch_news_worker():
-    """AL sinyalli hisselerin haberlerini cache'e önceden yükler; her 6 saatte bir çalışır.
-    Sunucu restart sonrası soğuk cache'e düşmeden içerik görülsün diye AL sinyalli
-    hisseler (max 8, istekler arası 30s) taranır. Tur zamanlaması disk'teki son-tur
-    damgasına bağlıdır (_prefetch_last_run_ts) — worker recycle turu atlamaz."""
+    """AL sinyalli hisselerin (max 8) haberlerini 6 saatte bir cache'e önceden yükler (istekler arası 30s); tur zamanlaması disk'teki son-tur damgasına bağlıdır (_prefetch_last_run_ts), worker recycle turu atlamaz."""
     # SPEC-016 K1 — restart-grace: soğuk-start thundering herd fix (#48).
     # Site oturmadan prefetch Gemini'ye yüklenmesin → 120s → 300s.
     time.sleep(_PREFETCH_STARTUP_GRACE_S)
@@ -6557,6 +6554,7 @@ def _prefetch_news_worker():
 
         logger.info("Prefetch: %d/%d AL hisse için haber yüklenecek", len(to_fetch), len(al_tickers))
         fetched = 0
+        attempted = 0
         for ticker in to_fetch:
             # SPEC-016 K2 — sıralı + leader teyidi: storm sırasında leader
             # değişirse prefetch'i durdur (çift worker Gemini yükü engellenir).
@@ -6567,6 +6565,7 @@ def _prefetch_news_worker():
                 logger.info("Prefetch: kota kapalı (retry_after_s=%ds) — %s atlandı", _gemini_cb_retry_after_s(), ticker)
                 _news_daily_stats_incr("prefetch_skipped_quota")
                 continue
+            attempted += 1
             try:
                 result = get_ai_news(ticker, source="prefetch", ua_class="prefetch")
                 if result:
@@ -6576,7 +6575,8 @@ def _prefetch_news_worker():
             time.sleep(_PREFETCH_DELAY)   # İstekler arası 30 saniye — rate-limit koruması
 
         logger.info("Prefetch tamamlandı: %d/%d başarılı", fetched, len(to_fetch))
-        _prefetch_mark_run(now)   # tur zaman damgasını diske yaz — process ömründen bağımsız 6h gate
+        if attempted or not to_fetch:  # CPO-1340 S1: tam-atlanan tur damgalanmaz — 6h gate erken tetiklenmesin
+            _prefetch_mark_run(now)   # tur zaman damgasını diske yaz — process ömründen bağımsız 6h gate
         time.sleep(_PREFETCH_POLL_S)
 
 
