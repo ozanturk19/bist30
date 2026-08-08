@@ -2,7 +2,12 @@
     KAPSAM: charset + analytics + viewport + PWA meta (manifest/theme-color/apple-touch-icon).
     KAPSAM DISI (sablonda KALIR): <title>, description, canonical, og:*, robots,
       favicon, preconnect/preload, Google Fonts, tokens.css, bp-vocab.js, <style>.
-    PARAMETRELER — include ile AYNI SATIRDA {% set %} ile verilir, hepsi varsayilanli:
+    PARAMETRELER — T2.2'den beri sayfa sablonu bu dosyayi DOGRUDAN include
+    ETMEZ; _base.html eder. Parametre, sayfanin ILK SATIRINDA {% extends %}
+    ile AYNI SATIRDA {% set %} verilerek gecilir (kosturularak dogrulandi):
+      {% extends '_base.html' %}{% set head_theme_color = '#0b111f' %}
+    Ayri satira yazilan {% set %} de calisir; blok ICINE yazilan CALISMAZ
+    ve sessizce yok sayilir. Hepsi varsayilanli:
       head_analytics       bool  vars. true      -> false ise _analytics.html basilmaz
       head_viewport_extra  str   vars. ''        -> viewport content'ine eklenecek son ek
       head_theme_color     str   vars. '#0e0e12' -> sayfaya ozel tarayici kabuk rengi
