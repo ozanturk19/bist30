@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260808D">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260808E">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -117,7 +117,7 @@
     text-transform: uppercase; white-space: nowrap;
   }
   .badge.al  { background: rgba(63,185,80,.12);  color:var(--bp-al);  border:1px solid rgba(63,185,80,.3); }
-  .badge.sat { background: rgba(248,81,73,.12);  color:var(--bp-sat); border:1px solid rgba(248,81,73,.3); }
+  .badge.sat { background: rgba(var(--bp-sat-rgb),.12);  color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .badge.bkl { background: rgba(139,148,158,.1); color:var(--bp-bkl); border:1px solid rgba(139,148,158,.2); }
 
   .sc-metrics {
@@ -143,15 +143,15 @@
     background: rgba(63,185,80,.04);
   }
   .stock-card.new-signal.sat {
-    border-color: rgba(248,81,73,.4);
-    background: rgba(248,81,73,.04);
+    border-color: rgba(var(--bp-sat-rgb),.4);
+    background: rgba(var(--bp-sat-rgb),.04);
   }
   .new-badge {
     display: inline-block; font-size: 9px; font-weight: 700;
     background: rgba(63,185,80,.2); color: var(--bp-al); border-radius: 3px;
     padding: 1px 5px; text-transform: uppercase; letter-spacing: .5px; margin-left: 4px;
   }
-  .sat .new-badge { background: rgba(248,81,73,.2); color: var(--bp-sat); }
+  .sat .new-badge { background: rgba(var(--bp-sat-rgb),.2); color: var(--bp-sat); }
 
   /* ── Empty state ── */
   .empty-box {

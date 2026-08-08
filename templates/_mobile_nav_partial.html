@@ -7,10 +7,10 @@
   .mobile-bottom-nav {
     display: none;
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-    background: rgba(14,14,18,0.96);
+    background: rgba(var(--bp-bg-rgb),0.96);
     backdrop-filter: blur(24px) saturate(140%);
     -webkit-backdrop-filter: blur(24px) saturate(140%);
-    border-top: 1px solid rgba(42,42,44,0.7);
+    border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
     padding-bottom: env(safe-area-inset-bottom);
   }
   .mbn-inner { display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; max-width: 600px; margin: 0 auto; }
@@ -31,13 +31,13 @@
     content: ''; position: absolute; top: 0; left: 50%;
     transform: translateX(-50%); width: 28px; height: 3px;
     background: #00e290; border-radius: 0 0 3px 3px;
-    box-shadow: 0 0 10px rgba(0,226,144,.55);
+    box-shadow: 0 0 10px rgba(var(--bp-al-rgb),.55);
   }
-  .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(0,226,144,.45)); stroke-width: 2.1; }
+  .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); stroke-width: 2.1; }
   /* F14: push-active state on bell slot */
   .mbn-item.push-active { color: #f59e0b; }
   .mbn-item.push-active::before { background: #f59e0b; box-shadow: 0 0 10px rgba(245,158,11,.55); }
-  .mbn-item.push-active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(245,158,11,.5)); stroke-width: 2.1; }
+  .mbn-item.push-active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-gold-rgb),.5)); stroke-width: 2.1; }
   /* Badge dot — shows when push is active */
   .mbn-badge {
     position: absolute; top: 6px; right: calc(50% - 18px);
@@ -95,7 +95,7 @@
     padding: 0 12px; transition: all .15s;
   }
   .mbn-push-toggle.push-on {
-    background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3);
+    background: rgba(var(--bp-gold-rgb),0.12); border-color: rgba(var(--bp-gold-rgb),0.3);
     color: #f59e0b;
   }
   .mbn-push-toggle:active { transform: scale(0.96); }

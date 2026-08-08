@@ -17,13 +17,13 @@
   .premium-modal-backdrop.visible { opacity: 1; }
   .premium-modal {
     background: var(--bp-surface);
-    border: 1px solid rgba(255,200,80,.45);
+    border: 1px solid rgba(var(--bp-volume-rgb),.45);
     border-radius: 12px;
     padding: 28px 24px 20px;
     max-width: 380px;
     width: 100%;
     position: relative;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px rgba(255,200,80,0.10);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px rgba(var(--bp-volume-rgb),0.10);
     text-align: center;
   }
   .premium-modal-close {
@@ -71,7 +71,7 @@
   }
   .premium-modal-submit:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(255,200,80,.30);
+    box-shadow: 0 4px 14px rgba(var(--bp-volume-rgb),.30);
   }
   .premium-modal-submit:disabled { opacity: .6; cursor: not-allowed; }
   .premium-modal-buttons { display: flex; gap: 8px; }
@@ -79,13 +79,13 @@
   .premium-modal-recognize {
     flex: 1;
     background: transparent;
-    border: 1px solid rgba(255,200,80,.45);
+    border: 1px solid rgba(var(--bp-volume-rgb),.45);
     color: #ffc850;
     padding: 10px 14px; border-radius: 6px;
     font-size: 13px; font-weight: 600; cursor: pointer;
     font-family: inherit; transition: background .15s ease;
   }
-  .premium-modal-recognize:hover { background: rgba(255,200,80,.08); }
+  .premium-modal-recognize:hover { background: rgba(var(--bp-volume-rgb),.08); }
   @media (max-width: 480px) { .premium-modal-buttons { flex-direction: column; } }
   .premium-modal-status { font-size: 12px; min-height: 18px; margin: 4px 0 8px; }
   .premium-modal-footer {

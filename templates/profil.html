@@ -15,7 +15,7 @@
 <meta name="theme-color" content="#0e0e12">
 <link rel="apple-touch-icon" href="/static/icon-192.png">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260808D">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260808E">
 <style>
   * { box-sizing: border-box; }
   html { overflow-x: hidden; }
@@ -63,8 +63,8 @@
     margin-bottom: 18px;
   }
   .form-card.success {
-    background: rgba(0,226,144,0.05);
-    border-color: rgba(0,226,144,0.3);
+    background: rgba(var(--bp-al-rgb),0.05);
+    border-color: rgba(var(--bp-al-rgb),0.3);
     text-align: center;
   }
   .question {
@@ -110,7 +110,7 @@
   }
   .opt.selected {
     border-color: var(--bp-brand);
-    background: rgba(184,195,255,0.10);
+    background: rgba(var(--bp-brand-rgb),0.10);
     color: var(--bp-brand);
     font-weight: 600;
   }
@@ -161,13 +161,13 @@
     font-size: 13px;
   }
   .alert-error {
-    background: rgba(248,81,73,0.10);
-    border: 1px solid rgba(248,81,73,0.40);
+    background: rgba(var(--bp-sat-rgb),0.10);
+    border: 1px solid rgba(var(--bp-sat-rgb),0.40);
     color: var(--bp-sat);
   }
   .alert-success {
-    background: rgba(0,226,144,0.08);
-    border: 1px solid rgba(0,226,144,0.30);
+    background: rgba(var(--bp-al-rgb),0.08);
+    border: 1px solid rgba(var(--bp-al-rgb),0.30);
     color: var(--bp-al);
   }
   .footer-note {

@@ -101,7 +101,7 @@
 }
 </script>
 {% endif %}
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260808D">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260808E">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -159,11 +159,11 @@
   .rel-stock-price  { font-family:var(--bp-font-mono); font-size:13px; color:#e6edf3; }
   .rel-stock-sig    { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:700; margin-top:5px; }
   .rel-stock-sig.al    { background:rgba(63,185,80,.12); color:#3fb950; border:1px solid rgba(63,185,80,.25); }
-  .rel-stock-sig.sat   { background:rgba(248,81,73,.12); color:var(--bp-sat); border:1px solid rgba(248,81,73,.25); }
+  .rel-stock-sig.sat   { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.25); }
   .rel-stock-sig.bekle { background:rgba(139,148,158,.1); color:#8b949e; border:1px solid rgba(139,148,158,.2); }
   @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 
-  .disclaimer { background:rgba(248,81,73,.07); border:1px solid rgba(248,81,73,.2); border-radius:8px; padding:14px 16px; color:#c9d1d9; font-size:13px; margin-top:32px; }
+  .disclaimer { background:rgba(var(--bp-sat-rgb),.07); border:1px solid rgba(var(--bp-sat-rgb),.2); border-radius:8px; padding:14px 16px; color:#c9d1d9; font-size:13px; margin-top:32px; }
 
   /* SSS Akordeon */
   .faq-section { margin-top:36px; padding-top:28px; border-top:1px solid #21262d; }

@@ -23,12 +23,11 @@
 
   /* Brand */
   --bp-brand:     #b8c3ff;   /* periwinkle / electric violet */
-  --bp-brand-d:   #0043eb;
 
   /* Signal: AL (buy) — neon mint */
   --bp-al:        #00e290;
-  --bp-al-bg:     rgba(0, 226, 144, 0.07);
-  --bp-al-bd:     rgba(0, 226, 144, 0.32);
+  --bp-al-bg:     rgba(var(--bp-al-rgb), 0.07);
+  --bp-al-bd:     rgba(var(--bp-al-rgb), 0.32);
 
   /* Signal: SAT (sell) — corruption red */
   --bp-sat:       #f85149;
@@ -47,20 +46,51 @@
      tier/paywall rozetleri farklı eksenler — iki ayrı kanonik renk, elle
      hex serpiştirmek yerine BURADAN referans verilir. */
   --bp-volume:    #ffc850;   /* Hacim Onaylı ⭐ (RVOL >= 1.20) — /gucu-yuksek'te zaten canlı */
-  --bp-volume-bg: rgba(255, 200, 80, 0.10);
-  --bp-volume-bd: rgba(255, 200, 80, 0.45);
+  --bp-volume-bg: rgba(var(--bp-volume-rgb), 0.10);
+  --bp-volume-bd: rgba(var(--bp-volume-rgb), 0.45);
   --bp-premium:   #a855f7;   /* tier/paywall (Premium) — SPEC-018 W2 mor imza */
-  --bp-premium-bg: rgba(168, 85, 247, 0.10);
-  --bp-premium-bd: rgba(168, 85, 247, 0.35);
+  --bp-premium-bg: rgba(var(--bp-premium-rgb), 0.10);
+  --bp-premium-bd: rgba(var(--bp-premium-rgb), 0.35);
   --bp-premium-glow-soft: rgba(168, 85, 247, 0.55);
   --bp-premium-glow-strong: rgba(168, 85, 247, 0.95);
-  --bp-premium-glow-outer: rgba(168, 85, 247, 0.35);
+  --bp-premium-glow-outer: rgba(var(--bp-premium-rgb), 0.35);
   --bp-premium-glow-fade: rgba(126, 58, 191, 0.4);
   --bp-premium-glow-fade2: rgba(126, 58, 191, 0.7);
 
   /* Radius */
   --bp-radius:    6px;
   --bp-radius-sm: 3px;
+
+  /* -- KANAL TOKEN'LARI (T1.5a-2) --------------------------------------
+     Ayni renklerin RGB kanallari, alfa'li kullanim icin. Sablonlardaki
+     347 saydam kullanim buraya baglandi: rgba(var(--bp-al-rgb), .18)
+
+     NEDEN boyle ve per-alfa token DEGIL: olcum, --bp-al icin 49 AYRIK alfa
+     basamagi gosterdi (.03 .04 ... .92). Her alfa'ya token uretmek 150+
+     token demekti. Kanal token'i tek kaynagi korur, alfa cagri yerinde kalir.
+
+     NEDEN color-mix() DEGIL: ayni sonucu verirdi ama desteklemeyen
+     tarayicida bildirimin TAMAMINI dusertir -- renk sessizce kaybolur.
+     Bu, 08.08 sabahi iki kez yasanan sinifin ta kendisi. rgba(var(...))
+     ise var() calisan HER yerde calisir, ek ozellik destegi istemez.
+
+     KURAL: bir rengin hex'i degisirse kanal degeri de AYNI commit'te
+     degismeli. Ikisi ayni blokta duruyor ki ayrisamasinlar. */
+  --bp-bg-rgb:       14, 14, 18;
+  --bp-surface-rgb:  20, 20, 22;
+  --bp-surface2-rgb: 28, 27, 31;
+  --bp-surface3-rgb: 32, 31, 33;
+  --bp-border-rgb:   42, 42, 44;
+  --bp-border2-rgb:  70, 70, 77;
+  --bp-text-rgb:     229, 225, 228;
+  --bp-text2-rgb:    199, 197, 205;
+  --bp-text3-rgb:    144, 144, 151;
+  --bp-brand-rgb:    184, 195, 255;
+  --bp-al-rgb:       0, 226, 144;
+  --bp-sat-rgb:      248, 81, 73;
+  --bp-gold-rgb:     245, 158, 11;
+  --bp-volume-rgb:   255, 200, 80;
+  --bp-premium-rgb:  168, 85, 247;
 
   /* Compat aliases — eski stil kodlarıyla uyumluluk */
   --accent:       #b8c3ff;
@@ -184,9 +214,9 @@
 
   /* Anlamsal (sinyal) gölgeler — mevcut canlı değerlerden birebir.
      Renk kaynağı yukarıdaki --bp-al / --bp-sat / --bp-volume. */
-  --bp-shadow-focus-al:     0 0 0 6px rgba(0, 226, 144, 0.55);
-  --bp-shadow-focus-sat:    0 0 0 6px rgba(248, 81, 73, 0.18);
-  --bp-shadow-glow-volume:  0 4px 14px rgba(255, 200, 80, 0.30);
+  --bp-shadow-focus-al:     0 0 0 6px rgba(var(--bp-al-rgb), 0.55);
+  --bp-shadow-focus-sat:    0 0 0 6px rgba(var(--bp-sat-rgb), 0.18);
+  --bp-shadow-glow-volume:  0 4px 14px rgba(var(--bp-volume-rgb), 0.30);
 
   /* ── 6. KATMAN SIRASI (z-index) ───────────────────────────────
      ÖLÇÜM: 22 AYRIK değer, tavan 10001. Kümeler:

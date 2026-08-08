@@ -22,7 +22,7 @@
   ]
 }
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260808D">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260808E">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -107,10 +107,10 @@
     padding:6px 16px; border-radius:20px; font-size:13px; font-weight:700; letter-spacing:.3px;
   }
   .sig-AL   { background:rgba(63,185,80,.12); color:var(--al); border:1px solid rgba(63,185,80,.3); }
-  .sig-SAT  { background:rgba(248,81,73,.12); color:var(--sat); border:1px solid rgba(248,81,73,.3); }
+  .sig-SAT  { background:rgba(var(--bp-sat-rgb),.12); color:var(--sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .sig-BEKLE{ background:rgba(139,148,158,.1); color:var(--bkl); border:1px solid rgba(139,148,158,.2); }
   .sig-badge.bull    { background:rgba(63,185,80,.12);    color:var(--al);  border:1px solid rgba(63,185,80,.3); }
-  .sig-badge.bear    { background:rgba(248,81,73,.12);   color:var(--sat); border:1px solid rgba(248,81,73,.3); }
+  .sig-badge.bear    { background:rgba(var(--bp-sat-rgb),.12);   color:var(--sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .sig-badge.neutral { background:rgba(139,148,158,.1); color:var(--bkl); border:1px solid rgba(139,148,158,.2); }
 
   .sc-meta { display:flex; flex-wrap:wrap; gap:12px; width:100%; padding-top:12px; border-top:1px solid var(--border2); }
@@ -193,7 +193,7 @@
 
   /* ── Disclaimer ── */
   .disclaimer {
-    background:rgba(248,81,73,.07); border:1px solid rgba(248,81,73,.2);
+    background:rgba(var(--bp-sat-rgb),.07); border:1px solid rgba(var(--bp-sat-rgb),.2);
     border-radius:8px; padding:12px 16px; color:var(--text2);
     font-size:12px; margin-bottom:20px; line-height:1.6;
   }

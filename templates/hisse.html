@@ -121,7 +121,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260808D">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260808E">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -184,7 +184,7 @@
     /* SPEC-STICKY-HEADER-v3 fix5: bp-search.js header'a !important min/max-height:60 + display:flex zorluyor.
        CLS-fix v3.1: CSS'te de aynı değerleri set et → JS'in !important değişikliği layout shift yaratmaz. */
     background: var(--bp-bg);
-    border-bottom: 1px solid rgba(42,42,44,0.95);
+    border-bottom: 1px solid rgba(var(--bp-border-rgb),0.95);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -252,8 +252,8 @@
     gap: 4px;
     font-size: 11px;
     font-weight: 600;
-    background: rgba(184,195,255,.1);
-    border: 1px solid rgba(184,195,255,.3);
+    background: rgba(var(--bp-brand-rgb),.1);
+    border: 1px solid rgba(var(--bp-brand-rgb),.3);
     border-radius: 10px;
     padding: 3px 10px;
     color: var(--bp-brand);
@@ -278,7 +278,7 @@
     background: rgba(112,177,255,0.14); border-color: rgba(112,177,255,0.55); color: #70b1ff;
   }
   .hib-action-btn.active-bell {
-    background: rgba(0,226,144,0.14); border-color: rgba(0,226,144,0.55); color: var(--bp-al);
+    background: rgba(var(--bp-al-rgb),0.14); border-color: rgba(var(--bp-al-rgb),0.55); color: var(--bp-al);
   }
   /* Mobile: butonlar full-width row haline gelsin (flex-wrap zaten yapar, ama label kısa kalsın) */
   @media (max-width: 720px) {
@@ -300,9 +300,9 @@
     transition: opacity .25s, transform .25s;
   }
   .hib-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .hib-toast.success { border-color: rgba(0,226,144,0.4); }
-  .hib-toast.warn { border-color: rgba(255,200,80,0.4); }
-  .hib-compare:hover { background: rgba(184,195,255,.2); }
+  .hib-toast.success { border-color: rgba(var(--bp-al-rgb),0.4); }
+  .hib-toast.warn { border-color: rgba(var(--bp-volume-rgb),0.4); }
+  .hib-compare:hover { background: rgba(var(--bp-brand-rgb),.2); }
   .live-dot-pulse {
     width: 6px; height: 6px;
     background: var(--bp-al); border-radius: 50%;
@@ -364,7 +364,7 @@
     transition: all .15s; white-space: nowrap; font-family: inherit;
   }
   .nav-dropdown-btn:hover { background: var(--bp-surface2); color: var(--bp-text); }
-  .nav-dropdown-btn.open { background: rgba(184,195,255,.1); color: var(--bp-brand); }
+  .nav-dropdown-btn.open { background: rgba(var(--bp-brand-rgb),.1); color: var(--bp-brand); }
   .nav-dropdown-btn.open .dd-chev { transform: rotate(180deg); }
   .dd-chev { transition: transform .2s ease; flex-shrink: 0; opacity: .7; }
   .nav-dropdown-menu {
@@ -392,17 +392,17 @@
     letter-spacing: 0.3px;
   }
   .signal-AL   {
-    background: rgba(0,226,144,.10); color: var(--bp-al); border: 1px solid rgba(0,226,144,.35);
-    box-shadow: 0 0 8px rgba(0, 226, 144, 0.18), inset 0 0 8px rgba(0, 226, 144, 0.05);
+    background: rgba(var(--bp-al-rgb),.10); color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.35);
+    box-shadow: 0 0 8px rgba(var(--bp-al-rgb), 0.18), inset 0 0 8px rgba(var(--bp-al-rgb), 0.05);
   }
   .signal-SAT  {
-    background: rgba(248,81,73,.18);  color: #ff7b72; border: 1px solid rgba(248,81,73,.35);
-    box-shadow: 0 0 6px rgba(248, 81, 73, 0.18);
+    background: rgba(var(--bp-sat-rgb),.18);  color: #ff7b72; border: 1px solid rgba(var(--bp-sat-rgb),.35);
+    box-shadow: 0 0 6px rgba(var(--bp-sat-rgb), 0.18);
   }
-  .signal-BEKLE{ background: rgba(144,144,151,.15); color: var(--bp-bkl); border: 1px solid rgba(144,144,151,.3); }
-  .signal-badge.bull    { background: rgba(0,226,144,.10);   color: var(--bp-al); border: 1px solid rgba(0,226,144,.35); box-shadow: 0 0 8px rgba(0,226,144,.18), inset 0 0 8px rgba(0,226,144,.05); }
-  .signal-badge.bear    { background: rgba(248,81,73,.18);    color: #ff7b72; border: 1px solid rgba(248,81,73,.35);  box-shadow: 0 0 6px rgba(248,81,73,.18); }
-  .signal-badge.neutral { background: rgba(144,144,151,.15); color: var(--bp-bkl); border: 1px solid rgba(144,144,151,.3); }
+  .signal-BEKLE{ background: rgba(var(--bp-text3-rgb),.15); color: var(--bp-bkl); border: 1px solid rgba(var(--bp-text3-rgb),.3); }
+  .signal-badge.bull    { background: rgba(var(--bp-al-rgb),.10);   color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.35); box-shadow: 0 0 8px rgba(var(--bp-al-rgb),.18), inset 0 0 8px rgba(var(--bp-al-rgb),.05); }
+  .signal-badge.bear    { background: rgba(var(--bp-sat-rgb),.18);    color: #ff7b72; border: 1px solid rgba(var(--bp-sat-rgb),.35);  box-shadow: 0 0 6px rgba(var(--bp-sat-rgb),.18); }
+  .signal-badge.neutral { background: rgba(var(--bp-text3-rgb),.15); color: var(--bp-bkl); border: 1px solid rgba(var(--bp-text3-rgb),.3); }
 
   /* F2 — Anomali rozet */
   .anomaly-badge {
@@ -644,7 +644,7 @@
   .hacim-profili .hp-row-val.weak { color:var(--bp-bkl); }
   .hacim-profili .hp-row-val.bad { color:var(--bp-sat); }
   .hacim-profili .hp-row-val .hp-tag { font-size:10px; padding:1px 6px; border-radius:8px; margin-left:4px; font-weight:700; letter-spacing:.3px; }
-  .hacim-profili .hp-row-val .hp-tag.premium { color:var(--bp-volume); background:rgba(255,200,80,.10); border:1px solid rgba(255,200,80,.45); }
+  .hacim-profili .hp-row-val .hp-tag.premium { color:var(--bp-volume); background:rgba(var(--bp-volume-rgb),.10); border:1px solid rgba(var(--bp-volume-rgb),.45); }
   .hacim-profili .hp-row-val .hp-tag.confirmed { color:#00e290; background:rgba(0,226,144,.08); border:1px solid rgba(0,226,144,.40); }
   .hacim-profili .hp-row-summary { margin-top:6px; font-size:10.5px; color:var(--bp-text3); font-style:italic; line-height:1.4; }
 
@@ -699,8 +699,8 @@
     font-size: 12px;
     font-weight: 600;
   }
-  .ind-bull    { background: rgba(0,226,144,.15);  color: var(--bp-al); border: 1px solid rgba(0,226,144,.3);  }
-  .ind-bear    { background: rgba(248,81,73,.15);  color: var(--bp-sat); border: 1px solid rgba(248,81,73,.3);  }
+  .ind-bull    { background: rgba(var(--bp-al-rgb),.15);  color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.3);  }
+  .ind-bear    { background: rgba(var(--bp-sat-rgb),.15);  color: var(--bp-sat); border: 1px solid rgba(var(--bp-sat-rgb),.3);  }
   .ind-neutral { background: rgba(139,148,158,.12); color: var(--bp-bkl); border: 1px solid rgba(139,148,158,.25); }
 
   .ind-detail {
@@ -836,7 +836,7 @@
     position: relative;
   }
   .other-card:hover { border-color: var(--bp-border2); background: var(--bp-surface3); transform: translateY(-1px); }
-  .other-card.oc-active { border-color: var(--bp-brand); background: rgba(184,195,255,.06); }
+  .other-card.oc-active { border-color: var(--bp-brand); background: rgba(var(--bp-brand-rgb),.06); }
   .oc-ticker { font-size: 12px; font-weight: 700; color: var(--bp-text); }
   .oc-price  { font-size: 11px; color: var(--bp-text2); font-variant-numeric: tabular-nums; margin-top: 1px; }
   .oc-chg    { font-size: 10px; font-variant-numeric: tabular-nums; font-weight: 600; }
@@ -1154,12 +1154,12 @@
   .quick-topics { display: none; }
   .quick-topics::-webkit-scrollbar { display: none; }
   .qt-label { flex-shrink: 0; font-size: 10px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 2px; font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .qt-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; background: rgba(184,195,255,0.04); border: 1px solid var(--bp-border); border-radius: 14px; font-size: 12px; font-weight: 500; color: var(--bp-text2); text-decoration: none; transition: background .15s ease, border-color .15s ease, color .15s ease; font-family: 'Manrope', system-ui, sans-serif; line-height: 1.3; }
-  .qt-chip:hover { background: rgba(184,195,255,0.10); border-color: var(--bp-border2); color: var(--bp-text); }
+  .qt-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; background: rgba(var(--bp-brand-rgb),0.04); border: 1px solid var(--bp-border); border-radius: 14px; font-size: 12px; font-weight: 500; color: var(--bp-text2); text-decoration: none; transition: background .15s ease, border-color .15s ease, color .15s ease; font-family: 'Manrope', system-ui, sans-serif; line-height: 1.3; }
+  .qt-chip:hover { background: rgba(var(--bp-brand-rgb),0.10); border-color: var(--bp-border2); color: var(--bp-text); }
   .qt-chip-icon { font-size: 12px; line-height: 1; }
-  .qt-chip-hot { background: rgba(0,226,144,0.07); border-color: rgba(0,226,144,0.28); color: #6fdfb1; }
+  .qt-chip-hot { background: rgba(var(--bp-al-rgb),0.07); border-color: rgba(var(--bp-al-rgb),0.28); color: #6fdfb1; }
   .qt-chip-hot:hover { background: rgba(0,226,144,0.14); border-color: #00e290; color: #00e290; }
-  .qt-chip-hot .qt-chip-pulse { width: 5px; height: 5px; border-radius: 50%; background: var(--bp-al); box-shadow: 0 0 6px rgba(0,226,144,0.7); animation: qtPulse 1.6s ease-in-out infinite; }
+  .qt-chip-hot .qt-chip-pulse { width: 5px; height: 5px; border-radius: 50%; background: var(--bp-al); box-shadow: 0 0 6px rgba(var(--bp-al-rgb),0.7); animation: qtPulse 1.6s ease-in-out infinite; }
   @keyframes qtPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.7); } }
   @media (max-width: 768px) { .quick-topics { padding: 8px 12px; } .qt-label { display: none; } }
 
@@ -1200,7 +1200,7 @@
   }
 
   /* Mobile Bottom Nav v2 */
-  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: rgba(14,14,18,0.96); backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%); border-top: 1px solid rgba(42,42,44,0.7); padding-bottom: env(safe-area-inset-bottom); }
+  .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: rgba(var(--bp-bg-rgb),0.96); backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%); border-top: 1px solid rgba(var(--bp-border-rgb),0.7); padding-bottom: env(safe-area-inset-bottom); }
   .mbn-inner { display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; max-width: 600px; margin: 0 auto; }
   .mbn-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: var(--bp-text3); font-size: 10.5px; font-weight: 600; letter-spacing: 0.05px; transition: color .2s ease; font-family: 'Manrope', system-ui, sans-serif; position: relative; background: none; border: none; cursor: pointer; padding: 0; min-height: 48px; -webkit-tap-highlight-color: transparent; }
   .mbn-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; transition: transform .2s ease; }
@@ -1208,8 +1208,8 @@
   .mbn-label { line-height: 1; white-space: nowrap; }
   .mbn-item:active .mbn-icon { transform: scale(0.85); }
   .mbn-item.active { color: var(--bp-al); }
-  .mbn-item.active::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 28px; height: 3px; background: var(--bp-al); border-radius: 0 0 3px 3px; box-shadow: 0 0 10px rgba(0,226,144,.55); }
-  .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(0,226,144,.45)); stroke-width: 2.1; }
+  .mbn-item.active::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 28px; height: 3px; background: var(--bp-al); border-radius: 0 0 3px 3px; box-shadow: 0 0 10px rgba(var(--bp-al-rgb),.55); }
+  .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); stroke-width: 2.1; }
   .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 250; opacity: 0; transition: opacity .25s ease; }
   .mbn-sheet-backdrop.open { display: block; opacity: 1; }
   .mbn-sheet { position: fixed; bottom: 0; left: 0; right: 0; z-index: 260; background: var(--bp-surface); border-top: 1px solid var(--bp-border); border-radius: 16px 16px 0 0; transform: translateY(100%); transition: transform .32s cubic-bezier(.32,.72,0,1); padding: 10px 16px calc(20px + env(safe-area-inset-bottom)); max-height: 75vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,.4); }
@@ -1236,7 +1236,7 @@
   .tier-locked::after {
     content: "💎 Premium içerik";
     position: absolute; top: 8px; right: 10px;
-    background: rgba(168,85,247,.12); border: 1px solid rgba(168,85,247,.4);
+    background: rgba(var(--bp-premium-rgb),.12); border: 1px solid rgba(var(--bp-premium-rgb),.4);
     color: var(--bp-premium); font-size: 11px; font-weight: 700;
     padding: 3px 8px; border-radius: 6px;
     letter-spacing: .3px; pointer-events: none;
@@ -1246,8 +1246,8 @@
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; flex-wrap: wrap;
     padding: 11px 16px; margin: 0 0 16px;
-    background: linear-gradient(135deg, rgba(168,85,247,0.10), rgba(168,85,247,0.04));
-    border: 1px solid rgba(168,85,247,0.32); border-radius: 8px;
+    background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),0.10), rgba(var(--bp-premium-rgb),0.04));
+    border: 1px solid rgba(var(--bp-premium-rgb),0.32); border-radius: 8px;
   }
   .premium-cta-text { font-size: 13px; color: var(--bp-text); }
   .premium-cta-text strong { color: var(--bp-premium); }
@@ -1509,7 +1509,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       position: sticky; top: 60px; left: 0; right: 0;
       z-index: 90;
       background: var(--bp-bg);
-      border-bottom: 1px solid rgba(42,42,44,0.8);
+      border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
       padding: 6px 16px;
       margin: 0;
       display: flex; gap: 12px;
@@ -1584,7 +1584,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     .bp-fab-up {
       position: fixed; bottom: 80px; right: 16px; z-index: 400;
       width: 44px; height: 44px;
-      background: rgba(0,226,144,0.92);
+      background: rgba(var(--bp-al-rgb),0.92);
       color: var(--bp-bg); border: none; border-radius: 50%;
       cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
       display: none; align-items: center; justify-content: center;
@@ -1601,8 +1601,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   {% if ssr_signal %}
   <style>
     .bp-hero-card {
-      background: linear-gradient(135deg, rgba(184,195,255,0.08), rgba(29,78,216,0.04));
-      border: 1px solid rgba(184,195,255,0.18);
+      background: linear-gradient(135deg, rgba(var(--bp-brand-rgb),0.08), rgba(29,78,216,0.04));
+      border: 1px solid rgba(var(--bp-brand-rgb),0.18);
       border-radius: 14px;
       padding: 18px 20px;
       margin-bottom: 20px;
@@ -1873,10 +1873,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
        Watchlist=accent-mavi birincil, Alarm=nötr ikincil (sarı tonu kaldırıldı — sinyal/uyarı renk rezerve). Touch ≥44px korunur. */
     .bp-bottom-cta {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 450;
-      background: rgba(14,14,18,0.96);
+      background: rgba(var(--bp-bg-rgb),0.96);
       backdrop-filter: blur(20px) saturate(160%);
       -webkit-backdrop-filter: blur(20px) saturate(160%);
-      border-top: 1px solid rgba(42,42,44,0.7);
+      border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
       box-shadow: 0 -4px 18px rgba(0,0,0,0.30);
       padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
       display: flex; gap: 6px;
@@ -2073,11 +2073,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
           <p class="commentary-text" id="commentaryText"></p>
         </div>
         <p style="font-size:11px;color:var(--bp-text3);margin:6px 0 0;line-height:1.5">
-          Göstergeler (<a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)" title="Metodoloji — ADX">ADX</a>,
-          <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)" title="Metodoloji — RSI">RSI</a>,
-          <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)" title="Metodoloji — EMA">EMA</a>,
-          <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)" title="Metodoloji — DI±">DI±</a>,
-          <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)" title="Metodoloji — Supertrend">Supertrend</a>)
+          Göstergeler (<a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — ADX">ADX</a>,
+          <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — RSI">RSI</a>,
+          <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — EMA">EMA</a>,
+          <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — DI±">DI±</a>,
+          <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — Supertrend">Supertrend</a>)
           algoritmik sinyalin temelidir.
           Sinyal kartları ve giriş analizi aşağıda detaylandırılmıştır.
         </p>
@@ -2131,7 +2131,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
       <!-- R/R Görsel -->
       <div>
-        <div class="rr-card-label"><a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)">Risk / Ödül</a></div>
+        <div class="rr-card-label"><a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">Risk / Ödül</a></div>
         <div id="rrBarContainer"></div>
         <div id="rrLevels"></div>
       </div>
@@ -2176,7 +2176,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     <div class="ind-row" id="indRow">
       <span class="ind-badge ind-neutral">Yükleniyor…</span>
     </div>
-    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(184,195,255,0.04);border:1px solid rgba(184,195,255,0.12);border-radius:8px;font-size:11.5px;color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',monospace">
+    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:8px;font-size:11.5px;color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',monospace">
       <strong style="color:var(--bp-brand);font-size:10px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Teknik Detaylar</strong>
       <span id="indTechContent">—</span>
     </div>
@@ -2292,8 +2292,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   <style>
     .bp-detail-cta-wrap {
       margin-bottom: 20px; padding: 16px;
-      background: linear-gradient(135deg, rgba(0,226,144,0.06), rgba(0,226,144,0.02));
-      border: 1px solid rgba(0,226,144,0.18);
+      background: linear-gradient(135deg, rgba(var(--bp-al-rgb),0.06), rgba(var(--bp-al-rgb),0.02));
+      border: 1px solid rgba(var(--bp-al-rgb),0.18);
       border-radius: 12px;
     }
     .bp-detail-cta-label {
@@ -2314,7 +2314,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       font-family: 'Manrope', system-ui, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
-    .bp-detail-cta-btn:hover { background: rgba(0,226,144,0.10); border-color: rgba(0,226,144,0.32); }
+    .bp-detail-cta-btn:hover { background: rgba(var(--bp-al-rgb),0.10); border-color: rgba(var(--bp-al-rgb),0.32); }
     .bp-detail-cta-btn:active { transform: scale(0.97); }
     .bp-detail-cta-icon { font-size: 22px; line-height: 1; }
     .bp-detail-cta-text {
@@ -2360,7 +2360,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       X (Twitter)
     </button>
     <button id="shareCopy" onclick="shareSignal('copy')"
-      style="display:inline-flex;align-items:center;gap:5px;background:rgba(184,195,255,.08);border:1px solid rgba(184,195,255,.2);border-radius:6px;padding:5px 12px;font-size:12px;color:#93c5fd;cursor:pointer;font-family:inherit;transition:all .15s"
+      style="display:inline-flex;align-items:center;gap:5px;background:rgba(var(--bp-brand-rgb),.08);border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:6px;padding:5px 12px;font-size:12px;color:#93c5fd;cursor:pointer;font-family:inherit;transition:all .15s"
       onmouseover="this.style.background='rgba(184,195,255,.15)'" onmouseout="this.style.background='rgba(184,195,255,.08)'">
       🔗 Linki Kopyala
     </button>
@@ -2381,17 +2381,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 
   <!-- AI Sinyal Açıklaması -->
   <div id="ai-section" style="scroll-margin-top:80px"></div>
-  <div id="sigExplainSection" data-tab-content="ai" style="background:linear-gradient(135deg,rgba(184,195,255,0.08),rgba(29,78,216,0.05));border:1px solid rgba(184,195,255,0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px">
+  <div id="sigExplainSection" data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="font-size:15px">✨</span>
       <span style="font-size:13px;font-weight:700;color:var(--bp-text);text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
-      <span id="sigExplainBadge" style="margin-left:auto;font-size:11px;background:rgba(184,195,255,0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(184,195,255,0.25)">Gemini AI</span>
+      <span id="sigExplainBadge" style="margin-left:auto;font-size:11px;background:rgba(var(--bp-brand-rgb),0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
     </div>
     {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
-    <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(248,81,73,0.08);border-left:3px solid rgba(248,81,73,0.5);border-radius:0 6px 6px 0;font-size:12px;color:#f87171;line-height:1.6"></div>
+    <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:12px;color:#f87171;line-height:1.6"></div>
     <div id="sigExplainLoading" style="display:flex;flex-direction:column;gap:10px;color:var(--bp-text3);font-size:13px">
       {# SPEC-017 Faz 3 F2-B3: Statik özet ÖNCE (içerik), spinner SONRA (durum) — kullanıcı boş ekran görmesin #}
-      <div style="font-size:13px;color:var(--bp-text2);line-height:1.65;padding:10px 12px;background:rgba(184,195,255,0.06);border-left:3px solid rgba(184,195,255,0.4);border-radius:0 8px 8px 0">
+      <div style="font-size:13px;color:var(--bp-text2);line-height:1.65;padding:10px 12px;background:rgba(var(--bp-brand-rgb),0.06);border-left:3px solid rgba(var(--bp-brand-rgb),0.4);border-radius:0 8px 8px 0">
         Algoritmamız <strong style="color:var(--bp-brand)">Supertrend, EMA (12/26/99), ADX, MACD</strong> indikatörlerini birlikte değerlendirir. <strong style="color:var(--bp-al)">Güçlü Trend</strong> sinyali bu göstergelerin pozitif konfirmasyonunu, <strong style="color:var(--bp-sat)">Trend Bozuldu</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-brand);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
       <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:#6b6b73">
@@ -2531,7 +2531,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
 </div>
 
 <!-- Subscription CTA -->
-<div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(184,195,255,.07),rgba(29,78,216,.04));border:1px solid rgba(184,195,255,.2);border-radius:10px;padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
+<div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(29,78,216,.04));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:10px;padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
   <div style="flex:1;min-width:160px">
     <div style="font-size:13px;font-weight:700;color:var(--bp-text);margin-bottom:1px">📬 {{ ticker }} sinyali değişince bildirim al</div>
     <div style="font-size:11px;color:var(--bp-text3)">Ücretsiz e-posta aboneliği</div>
@@ -3274,11 +3274,11 @@ function renderSummary(s, signalData) {
         const rrRowsHtml = (rrSig != null || rrNow != null) ? `
           <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:11px;font-variant-numeric:tabular-nums">
             ${rrSig != null ? `<div style="display:flex;justify-content:space-between;color:#8b949e">
-              <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)">R/R</a></span>
+              <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">R/R</a></span>
               <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2)}x</strong>
             </div>` : ''}
             ${rrNow != null ? `<div style="display:flex;justify-content:space-between;color:#8b949e" title="Mevcut fiyattan giriş yaparsan risk/ödül oranı">
-              <span>Şu an girersen <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(184,195,255,.45)">R/R</a></span>
+              <span>Şu an girersen <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">R/R</a></span>
               <strong style="color:${rrNow >= 2.0 ? '#3fb950' : rrNow >= 1.0 ? '#d29922' : '#f85149'}">${rrNow.toFixed(2)}x</strong>
             </div>` : ''}
           </div>` : '';
@@ -3941,7 +3941,7 @@ async function loadKapDisclosures() {
     if (items.length > 20) {
       listEl.innerHTML += `<div style="padding:10px 0;text-align:center;font-size:12px;color:var(--bp-text3)">
         +${items.length - 20} daha fazla bildirim —
-        <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q=${TICKER}" target="_blank" rel="noopener" style="color:var(--bp-brand);text-decoration:underline;text-decoration-color:rgba(184,195,255,.45);text-underline-offset:2px">KAP'ta görüntüle ↗</a>
+        <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q=${TICKER}" target="_blank" rel="noopener" style="color:var(--bp-brand);text-decoration:underline;text-decoration-color:rgba(var(--bp-brand-rgb),.45);text-underline-offset:2px">KAP'ta görüntüle ↗</a>
       </div>`;
     }
 

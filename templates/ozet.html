@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260808D">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260808E">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -39,10 +39,10 @@
     overflow-x: hidden;
   }
   header {
-    background: rgba(14,14,18,0.92);
+    background: rgba(var(--bp-bg-rgb),0.92);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(42,42,44,0.8);
+    border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
     padding: 0 24px;
     height: 60px;
     display: flex;
@@ -83,10 +83,10 @@
   /* Mobile Bottom Nav v2 — readable, 64px, top accent */
   .mobile-bottom-nav {
     display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-    background: rgba(14,14,18,0.96);
+    background: rgba(var(--bp-bg-rgb),0.96);
     backdrop-filter: blur(24px) saturate(140%);
     -webkit-backdrop-filter: blur(24px) saturate(140%);
-    border-top: 1px solid rgba(42,42,44,0.7);
+    border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
     padding-bottom: env(safe-area-inset-bottom);
   }
   .mbn-inner { display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; max-width: 600px; margin: 0 auto; }
@@ -107,9 +107,9 @@
     content: ''; position: absolute; top: 0; left: 50%;
     transform: translateX(-50%); width: 28px; height: 3px;
     background: #00e290; border-radius: 0 0 3px 3px;
-    box-shadow: 0 0 10px rgba(0,226,144,.55);
+    box-shadow: 0 0 10px rgba(var(--bp-al-rgb),.55);
   }
-  .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(0,226,144,.45)); stroke-width: 2.1; }
+  .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); stroke-width: 2.1; }
   /* Daha sheet */
   .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 250; opacity: 0; transition: opacity .25s ease; }
   .mbn-sheet-backdrop.open { display: block; opacity: 1; }
@@ -205,14 +205,14 @@
   .sc-name    { font-size: 11px; color: var(--bp-text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
   .sc-al   { background: rgba(0,226,144,.10); color: #00e290; }
-  .sc-sat  { background: rgba(248,81,73,.15);  color: #ff7b72; }
-  .sc-bekle{ background: rgba(144,144,151,.12); color: #a8b2bc; }
+  .sc-sat  { background: rgba(var(--bp-sat-rgb),.15);  color: #ff7b72; }
+  .sc-bekle{ background: rgba(var(--bp-text3-rgb),.12); color: #a8b2bc; }
   .sc-meta { font-size: 11px; color: var(--bp-text3); margin-top: 4px; }
   .sc-new  { font-size: 10px; color: var(--bp-gold); font-weight: 600; }
   .sc-ret  { display: inline-block; font-size: 12px; font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: 4px; font-variant-numeric: tabular-nums; }
   .sc-ret-pos { background: rgba(0,226,144,.10); color: #00e290; }
-  .sc-ret-neg { background: rgba(248,81,73,.15); color: #ff7b72; }
-  .sc-ret-neu { background: rgba(144,144,151,.1); color: #a8b2bc; }
+  .sc-ret-neg { background: rgba(var(--bp-sat-rgb),.15); color: #ff7b72; }
+  .sc-ret-neu { background: rgba(var(--bp-text3-rgb),.1); color: #a8b2bc; }
 
   .empty-msg { color: var(--bp-text3); font-size: 13px; text-align: center; padding: 20px; }
 
@@ -271,15 +271,15 @@
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-bkl); }
 
   /* ── Quick Topic Chips ── */
-  .quick-topics { display: flex; gap: 8px; align-items: center; padding: 9px 24px; background: rgba(20,20,22,0.5); border-bottom: 1px solid var(--bp-border); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; white-space: nowrap; position: relative; z-index: 5; }
+  .quick-topics { display: flex; gap: 8px; align-items: center; padding: 9px 24px; background: rgba(var(--bp-surface-rgb),0.5); border-bottom: 1px solid var(--bp-border); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; white-space: nowrap; position: relative; z-index: 5; }
   .quick-topics::-webkit-scrollbar { display: none; }
   .qt-label { flex-shrink: 0; font-size: 10px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 2px; font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .qt-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; background: rgba(184,195,255,0.04); border: 1px solid var(--bp-border); border-radius: 14px; font-size: 12px; font-weight: 500; color: var(--bp-text2); text-decoration: none; transition: background .15s ease, border-color .15s ease, color .15s ease; font-family: 'Manrope', system-ui, sans-serif; line-height: 1.3; }
-  .qt-chip:hover { background: rgba(184,195,255,0.10); border-color: var(--bp-border2); color: var(--bp-text); }
+  .qt-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; background: rgba(var(--bp-brand-rgb),0.04); border: 1px solid var(--bp-border); border-radius: 14px; font-size: 12px; font-weight: 500; color: var(--bp-text2); text-decoration: none; transition: background .15s ease, border-color .15s ease, color .15s ease; font-family: 'Manrope', system-ui, sans-serif; line-height: 1.3; }
+  .qt-chip:hover { background: rgba(var(--bp-brand-rgb),0.10); border-color: var(--bp-border2); color: var(--bp-text); }
   .qt-chip-icon { font-size: 12px; line-height: 1; }
-  .qt-chip-hot { background: rgba(0,226,144,0.07); border-color: rgba(0,226,144,0.28); color: #6fdfb1; }
-  .qt-chip-hot:hover { background: rgba(0,226,144,0.14); border-color: var(--bp-al); color: var(--bp-al); }
-  .qt-chip-hot .qt-chip-pulse { width: 5px; height: 5px; border-radius: 50%; background: var(--bp-al); box-shadow: 0 0 6px rgba(0,226,144,0.7); animation: qtPulse 1.6s ease-in-out infinite; }
+  .qt-chip-hot { background: rgba(var(--bp-al-rgb),0.07); border-color: rgba(var(--bp-al-rgb),0.28); color: #6fdfb1; }
+  .qt-chip-hot:hover { background: rgba(var(--bp-al-rgb),0.14); border-color: var(--bp-al); color: var(--bp-al); }
+  .qt-chip-hot .qt-chip-pulse { width: 5px; height: 5px; border-radius: 50%; background: var(--bp-al); box-shadow: 0 0 6px rgba(var(--bp-al-rgb),0.7); animation: qtPulse 1.6s ease-in-out infinite; }
   @keyframes qtPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.7); } }
   @media (max-width: 768px) { .quick-topics { padding: 8px 12px; } .qt-label { display: none; } }
 
@@ -545,7 +545,7 @@ function goToDate(date) {
 {% endif %}
 
 <!-- Bilanço Sezonu Uyarısı (JS ile dinamik) -->
-<div id="bilancoBanner" style="display:none;background:rgba(184,195,255,.06);border:1px solid rgba(184,195,255,.18);
+<div id="bilancoBanner" style="display:none;background:rgba(var(--bp-brand-rgb),.06);border:1px solid rgba(var(--bp-brand-rgb),.18);
      border-radius:8px;padding:10px 16px;margin-bottom:16px;align-items:center;gap:10px;flex-wrap:wrap">
   <span style="font-size:18px">📊</span>
   <div style="flex:1;min-width:0">
@@ -600,7 +600,7 @@ function goToDate(date) {
 <!-- İdeal Giriş Noktaları -->
 {% set ideal_al = al_list | selectattr('entry_quality', 'equalto', 'IDEAL') | list %}
 {% if ideal_al %}
-<div class="section-box" style="margin-bottom:16px;border-color:rgba(0,226,144,.2);background:linear-gradient(135deg,rgba(0,226,144,.04),transparent)">
+<div class="section-box" style="margin-bottom:16px;border-color:rgba(var(--bp-al-rgb),.2);background:linear-gradient(135deg,rgba(var(--bp-al-rgb),.04),transparent)">
   <div class="section-title" style="color:var(--bp-al);margin-bottom:10px">🎯 İdeal Giriş Noktası ({{ ideal_al|length }})</div>
   <div style="display:flex;flex-wrap:wrap;gap:8px">
     {% for s in ideal_al %}
@@ -738,8 +738,8 @@ function goToDate(date) {
 
 <!-- E-posta Abonelik CTA -->
 <div style="max-width:800px;margin:0 auto 28px auto;padding:0 20px">
-  <div id="ozSubBar" style="background:linear-gradient(135deg,rgba(184,195,255,.05),rgba(0,226,144,.03));
-       border:1px solid rgba(184,195,255,.18);border-radius:10px;padding:16px 20px;
+  <div id="ozSubBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.05),rgba(var(--bp-al-rgb),.03));
+       border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:10px;padding:16px 20px;
        display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
       <div style="font-size:14px;font-weight:700;color:var(--bp-text);margin-bottom:3px">📬 Günlük Özeti E-postayla Al</div>

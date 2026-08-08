@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260808D">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260808E">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -68,7 +68,7 @@
   }
   .filter-btn:hover, .filter-btn.active { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
   .filter-btn.fal.active   { border-color:var(--bp-al);  background:rgba(63,185,80,0.12);  color:var(--bp-al); }
-  .filter-btn.fsat.active  { border-color:var(--bp-sat); background:rgba(248,81,73,0.12);  color:var(--bp-sat); }
+  .filter-btn.fsat.active  { border-color:var(--bp-sat); background:rgba(var(--bp-sat-rgb),0.12);  color:var(--bp-sat); }
   .filter-btn.fbkl.active  { border-color:var(--bp-bkl); background:rgba(139,148,158,0.12);color:var(--bp-bkl);}
 
   /* Period section */
@@ -105,7 +105,7 @@
   }
   .stock-card:hover { border-color:var(--bp-brand); transform:translateY(-1px); }
   .stock-card.sig-al  { border-color:rgba(63,185,80,0.3); background:rgba(63,185,80,0.05); }
-  .stock-card.sig-sat { border-color:rgba(248,81,73,0.3); background:rgba(248,81,73,0.05); }
+  .stock-card.sig-sat { border-color:rgba(var(--bp-sat-rgb),0.3); background:rgba(var(--bp-sat-rgb),0.05); }
 
   .sc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
   .sc-ticker { font-size:14px; font-weight:700; color:#f0f6fc; }
@@ -114,7 +114,7 @@
     text-transform:uppercase; letter-spacing:.3px;
   }
   .sig-al   { background:rgba(63,185,80,0.15);  color:var(--bp-al);  border:1px solid rgba(63,185,80,0.3); }
-  .sig-sat  { background:rgba(248,81,73,0.15);  color:var(--bp-sat); border:1px solid rgba(248,81,73,0.3); }
+  .sig-sat  { background:rgba(var(--bp-sat-rgb),0.15);  color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),0.3); }
   .sig-bkl  { background:rgba(139,148,158,0.1); color:var(--bp-bkl); border:1px solid rgba(139,148,158,0.2); }
 
   .sc-name  { font-size:11px; color:var(--bp-text3); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -142,7 +142,7 @@
 
   /* Info banner */
   .info-banner {
-    background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2);
+    background:rgba(var(--bp-gold-rgb),0.08); border:1px solid rgba(var(--bp-gold-rgb),0.2);
     border-radius:10px; padding:12px 16px; margin-bottom:20px;
     font-size:12px; color:#fbbf24; line-height:1.6;
   }
