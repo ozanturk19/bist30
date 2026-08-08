@@ -67,3 +67,190 @@
   --bg2:          #141416;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   T1.4 — ÖLÇEK TOKEN'LARI (Master Dönüşüm Programı FAZ 1)
+   ───────────────────────────────────────────────────────────────
+   Bu bloktaki HİÇBİR değer uydurulmadı. Hepsi 32 canlı şablonun
+   fiilî dağılımından türetildi (08.08.2026 ölçümü, templates/*.html,
+   *.bak.* hariç). Her kategorinin başında ölçümün kendisi yazılı ki
+   T1.5'in mekanik migrasyonu bu tabloya bakarak yapılabilsin.
+
+   Ölçüm komutu deseni:
+     grep -hoE '<özellik>: *[0-9.]+px' templates/*.html | sed 's/.*: *//' \
+       | sort -n | uniq -c | sort -rn
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ── 1. BOŞLUK (spacing) ──────────────────────────────────────
+     ÖLÇÜM (padding/margin/gap, 1785 kullanım):
+       8px:315  10px:213  6px:202  12px:162  5px:136  4px:125
+       14px:122 16px:115  2px:112  20px:103  3px:69   7px:48
+       24px:41  1px:41    9px:34   32px:27   28px:22  18px:18
+
+     SAPMA — okunması gereken: Master Program bu ölçeği "4px grid"
+     diye tanımladı. Ölçüm bunu DESTEKLEMİYOR: saf 4px grid
+     6/5/3/7/9px'i dışarıda bırakır ve bu beş değer tek başına 489
+     kullanım taşır (toplamın ~%27'si). Grid'e zorlamak 489 noktada
+     görsel kayma üretirdi. Bu yüzden taban 2px seçildi — mevcut
+     kullanımın %92'si token'a KAYIPSIZ oturuyor, kalan %8 (1px, 9px,
+     11px, 18px, 28px) T1.5'te en yakın basamağa yuvarlanacak.
+     Karar CPO onayına açıktır; sapma bilinçlidir, kaza değil. */
+  --bp-space-0:  0;
+  --bp-space-1:  2px;
+  --bp-space-2:  4px;
+  --bp-space-3:  6px;
+  --bp-space-4:  8px;
+  --bp-space-5:  10px;
+  --bp-space-6:  12px;
+  --bp-space-7:  14px;
+  --bp-space-8:  16px;
+  --bp-space-9:  20px;
+  --bp-space-10: 24px;
+  --bp-space-11: 32px;
+  --bp-space-12: 40px;
+
+  /* ── 2. TİPOGRAFİ ÖLÇEĞİ (font-size) ──────────────────────────
+     ÖLÇÜM (1249 kullanım, 28 ayrık değer):
+       11px:284  13px:271  12px:254  10px:112  14px:84  16px:35
+       18px:34   15px:30   20px:28   22px:20   17px:10
+
+     DRIFT KAYDI: yarım-piksel değerler canlıda mevcut —
+       12.5px:10  11.5px:8  10.5px:8  14.5px:1  13.5px:1  (28 kullanım)
+     Bunlar tasarım kararı değil kopyala-yapıştır artığı; token
+     yok, T1.5'te en yakın tam basamağa çekilecekler.
+
+     Taban 13px (en yoğun gövde boyutu), 11px arayüz etiketi. */
+  --bp-text-2xs:  10px;
+  --bp-text-xs:   11px;
+  --bp-text-sm:   12px;
+  --bp-text-base: 13px;
+  --bp-text-md:   14px;
+  --bp-text-lg:   16px;
+  --bp-text-xl:   18px;
+  --bp-text-2xl:  20px;
+  --bp-text-3xl:  24px;
+
+  /* ── 3. YAZI AĞIRLIĞI (font-weight) ───────────────────────────
+     ÖLÇÜM (556 kullanım): 700:247  600:206  500:55  800:39  400:7
+     `normal`:2 ve `inherit`:1 anahtar-kelime kullanımı da var. */
+  --bp-weight-normal:     400;
+  --bp-weight-medium:     500;
+  --bp-weight-semibold:   600;
+  --bp-weight-bold:       700;
+  --bp-weight-extrabold:  800;
+
+  /* ── 4. SATIR YÜKSEKLİĞİ (line-height) ────────────────────────
+     ÖLÇÜM (154 kullanım): 1:62  1.6:21  1.5:16  1.7:11  1.4:9
+                           1.55:8  1.3:7  1.65:5  1.75:4  1.2:3
+     `1` baskın çünkü rozet/sayaç gibi tek satırlık öğelerde
+     kullanılıyor — gövde metni değil. Gövde kümesi 1.5-1.7. */
+  --bp-leading-none:    1;
+  --bp-leading-tight:   1.2;
+  --bp-leading-snug:    1.4;
+  --bp-leading-normal:  1.5;
+  --bp-leading-relaxed: 1.6;
+  --bp-leading-loose:   1.75;
+
+  /* ── 5. GÖLGE (box-shadow) ────────────────────────────────────
+     ÖLÇÜM: 41 AYRIK box-shadow deseni. En yoğunlar:
+       0 20px 60px rgba(0,0,0,0.6)   :4
+       0 -10px 40px rgba(0,0,0,.4)   :4
+       0 12px 32px rgba(0,0,0,.55)   :3
+       0 8px 24px rgba(0,0,0,0.5)    :2
+     Üç basamağa indirgendi. Renkli/sinyal gölgeleri (mint halka,
+     kırmızı halka, altın parıltı) ölçek değil ANLAM taşır —
+     ölçek token'ına katlanmaz, kendi token'larını alır. */
+  --bp-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.40);
+  --bp-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
+  --bp-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.60);
+
+  /* Anlamsal (sinyal) gölgeler — mevcut canlı değerlerden birebir.
+     Renk kaynağı yukarıdaki --bp-al / --bp-sat / --bp-volume. */
+  --bp-shadow-focus-al:     0 0 0 6px rgba(0, 226, 144, 0.55);
+  --bp-shadow-focus-sat:    0 0 0 6px rgba(248, 81, 73, 0.18);
+  --bp-shadow-glow-volume:  0 4px 14px rgba(255, 200, 80, 0.30);
+
+  /* ── 6. KATMAN SIRASI (z-index) ───────────────────────────────
+     ÖLÇÜM: 22 AYRIK değer, tavan 10001. Kümeler:
+       100:24  2:17  9999:13  200:6  300:5  260:4  250:4
+       999:3   500:3  5:3     1000:3  9998:2  400:2
+     Ara değerler (250/260/450/997/998/9000/10001) katman savaşının
+     izi — anlamı yok, komşusunu geçmek için +1 yazılmış. Altı
+     basamağa indirgendi; T1.5 sonrası ARA DEĞER YAZMAK YASAK,
+     yeni katman gerekiyorsa buraya isimli basamak eklenir. */
+  --bp-z-base:     1;
+  --bp-z-raised:   2;
+  --bp-z-dropdown: 100;
+  --bp-z-sticky:   200;
+  --bp-z-overlay:  300;
+  --bp-z-modal:    1000;
+  --bp-z-toast:    9999;
+
+  /* ── 7. SÜRE + YUMUŞATMA (duration / easing) ──────────────────
+     ÖLÇÜM süre (~300 kullanım): .15s:226  .2s:25  .12s:17  .25s:7
+                                 .4s:8  .32s:4  .18s:6  .1s:9
+     ÖLÇÜM easing: linear:177  ease:80  ease-in-out:7  ease-out:5
+                   cubic-bezier(.32,.72,0,1):5  cubic-bezier(.4,0,.2,1):2
+     `linear`in baskınlığı yanıltıcı — neredeyse tamamı makro şerit
+     kaydırma animasyonundan geliyor (sabit hız DOĞRU seçim orada),
+     arayüz geçişi değil. Arayüz varsayılanı standard eğridir. */
+  --bp-dur-fast:   0.12s;
+  --bp-dur-base:   0.15s;
+  --bp-dur-slow:   0.25s;
+  --bp-dur-slower: 0.40s;
+
+  --bp-ease-standard:  cubic-bezier(0.4, 0, 0.2, 1);
+  --bp-ease-out:       cubic-bezier(0.32, 0.72, 0, 1);
+  --bp-ease-linear:    linear;
+
+  /* ── 8. KÖŞE YARIÇAPI (border-radius) ─────────────────────────
+     ÖLÇÜM (570 kullanım): 6px:149  8px:127  10px:94  4px:44
+                           12px:35  3px:28   7px:27  20px:22
+                           2px:16   14px:13  5px:10  16px:5
+     Mevcut --bp-radius (6px) ve --bp-radius-sm (3px) KORUNDU —
+     yukarıdaki renk bloğunda tanımlılar, 149+28 kullanım onlara
+     bağlı, yeniden tanımlanmıyor. Üstüne basamak eklendi. */
+  --bp-radius-xs:   2px;
+  --bp-radius-md:   8px;
+  --bp-radius-lg:   10px;
+  --bp-radius-xl:   12px;
+  --bp-radius-pill: 999px;
+
+  /* ── 9. KIRILMA NOKTALARI (breakpoint) ────────────────────────
+     ÖLÇÜM (127 @media kuralı): 900px:25  768px:25  600px:22
+       780px:17  480px:14  640px:6  360px:6  720px:5  500px:2
+       400px:2  769px:1  680px:1  380px:1
+
+     ⚠ TEKNİK SINIR — bilinçli, gizlenmiyor: CSS custom property'ler
+     @media sorgusunda ÇALIŞMAZ. `@media (max-width: var(--bp-bp-md))`
+     spec gereği geçersizdir ve sessizce hiçbir şey yapmaz. Yani bu
+     dört token medya sorgusunu KENDİ BAŞINA tekilleştiremez.
+
+     Ne işe yarıyorlar: (a) kanonik değer tablosu — elle yazılan her
+     @media bu dörtten birini kullanmak ZORUNDA, T1.7 format-lint v2
+     bunu guard'layacak; (b) container query ve JS tarafı
+     (getComputedStyle ile okunabilir) için gerçek tekil kaynak.
+
+     780px (17 kullanım) ve 769px (1) 768'in kopyala-yapıştır
+     çatalıdır, 640/720/680 de 600/768'in — T1.5'te dörde indirilecek. */
+  --bp-bp-xs: 480px;
+  --bp-bp-sm: 600px;
+  --bp-bp-md: 768px;
+  --bp-bp-lg: 900px;
+
+  /* ── 10. RENK ──────────────────────────────────────────────────
+     Yukarıdaki ilk blokta tanımlı (arka plan, kenarlık, metin,
+     marka, AL/SAT/BEKLİYOR, hacim, premium). Burada tekrarlanmaz. */
+
+  /* NOT — YAZI TİPİ AİLESİ (--bp-font-*) BİLEREK YOK.
+     Canlıda iki aile yarışıyor: 'Inter' (gövde, 26 şablonda link'li)
+     ve mono yığını 4 farklı yazımla ('Fira Code','Consolas' /
+     'Fira Code',monospace / 'Courier New',monospace / 'Inter-Fallback').
+     Master Program Bölüm 8 bunu Ozan'ın marka kararı olarak
+     işaretliyor (Space Grotesk+Manrope mi, Inter mi). Karar
+     gelmeden token yazmak, sonra 32 şablonda geri almak demektir.
+     CPO'ya soruldu — yanıt gelince bu bloğa --bp-font-sans /
+     --bp-font-mono eklenecek. */
+}
