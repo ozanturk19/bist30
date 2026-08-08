@@ -33,6 +33,7 @@ health_fail_count.txt
 last_macro.json
 last_macro_ai.json
 last_news_cache.json
+news_inflight.json
 last_company_summary.json
 last_mtf_cache.json
 last_earnings_cache.json

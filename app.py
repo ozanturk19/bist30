@@ -4701,8 +4701,8 @@ def _do_macro_ai_refresh():
             chg_str = ('%+.2f' % xu100c + '%') if xu100c is not None else '—'
             lines.append(f"BIST100: {xu100:,.0f} ({chg_str})")
         if usdtry: lines.append(f"USD/TRY: {usdtry:.4f}")
-        if gold:   lines.append(f"Altın: {gold:,.0f} ₺/gr")
-        if oil:    lines.append(f"Brent Petrol: {oil:.2f} USD")
+        if gold:   lines.append(f"Altın (XAU/USD): {gold:,.2f} USD/ons")
+        if oil:    lines.append(f"Ham Petrol (WTI): {oil:.2f} USD")
         if btc:    lines.append(f"BTC: {btc:,.0f} USD")
 
         if not lines:
@@ -5404,6 +5404,80 @@ def _news_ttl_for(ticker: str) -> int:
     return _NEWS_CACHE_TTL
 
 
+# CPO-1350 §2b Sec.1 — cross-process in-flight dedup. Kök neden (CPO-1350/DEV-1659
+# ölçümü): _prefetch_news_worker ve _on_demand_news_worker kararlarını kendi
+# process-local _news_cache'ine göre veriyor; 90s'lik gemini-cache-sync diski bu
+# yarışı kapatamayacak kadar yavaş. Reset anındaki gibi çoklu worker aynı ticker'ı
+# aynı ~saniyelerde miss görürse ikisi de bağımsızca Gemini'ye soruyor (canlı kanıt:
+# aynı 5 hisse, 84s pencerede, 2 farklı PID, 2x gerçek çağrı = %50 israf).
+# _gemini_rate_acquire ile BİREBİR AYNI SINIF: tek paylaşımlı dosya + flock
+# (LOCK_EX|LOCK_NB) + sınırlı poll bütçesi + gevent hub threadpool offload + 10s
+# sert tavan. Kilit alınamazsa (budget/timeout) GÜVENLİ VARSAYILAN "claim başarılı"
+# döner — worker hiçbir koşulda asılı kalmaz/bloklanmaz, en kötü ihtimalle eski
+# (dedup'suz) davranışa döner, asla yeni bir hang sınıfı eklemez.
+_NEWS_INFLIGHT_PATH           = os.environ.get("NEWS_INFLIGHT_PATH",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "news_inflight.json"))
+_NEWS_INFLIGHT_STALE_S        = 60    # gerçekçi üst sınır: 2×_GEMINI_TIMEOUT_CAP(5s) + rate-wait + marj
+_NEWS_INFLIGHT_FLOCK_BUDGET_S = 8.0   # outer .get(timeout=10) altında kalsın diye 2s marj
+_news_inflight_lock = threading.Lock()
+if not os.path.exists(_NEWS_INFLIGHT_PATH):
+    open(_NEWS_INFLIGHT_PATH, "a").close()
+_news_inflight_fh = open(_NEWS_INFLIGHT_PATH, "r+")
+
+
+def _news_inflight_claim_blocking(ticker: str) -> bool:
+    """True → bu ticker'ı BU worker fetch edebilir (claim alındı).
+    False → başka process aynı ticker'ı <_NEWS_INFLIGHT_STALE_S sn içinde claim
+    etmiş — Gemini çağrısı ATLANMALI (sonuç disk-sync/queue retry ile gelecek)."""
+    with _news_inflight_lock:
+        _t0 = time.time()
+        while True:
+            try:
+                _fcntl.flock(_news_inflight_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+                break
+            except (BlockingIOError, OSError):
+                if time.time() - _t0 > _NEWS_INFLIGHT_FLOCK_BUDGET_S:
+                    logger.error(
+                        "_news_inflight_claim: %.1fs içinde flock alınamadı — "
+                        "dedup atlanıyor (güvenli varsayılan)", _NEWS_INFLIGHT_FLOCK_BUDGET_S)
+                    return True
+                time.sleep(0.05)
+        try:
+            _news_inflight_fh.seek(0)
+            raw = _news_inflight_fh.read().strip()
+            try:
+                state = json.loads(raw) if raw else {}
+                if not isinstance(state, dict):
+                    state = {}
+            except ValueError:
+                state = {}
+            now = time.time()
+            claimed_at = state.get(ticker)
+            if claimed_at and (now - claimed_at) < _NEWS_INFLIGHT_STALE_S:
+                return False
+            # Bayat kayıtları temizle (dosya süresiz şişmesin) + bu ticker'ı claim et
+            state = {t: ts for t, ts in state.items() if (now - ts) < _NEWS_INFLIGHT_STALE_S}
+            state[ticker] = now
+            _news_inflight_fh.seek(0)
+            _news_inflight_fh.truncate()
+            _news_inflight_fh.write(json.dumps(state))
+            _news_inflight_fh.flush()
+            return True
+        finally:
+            _fcntl.flock(_news_inflight_fh, _fcntl.LOCK_UN)
+
+
+def _news_inflight_claim(ticker: str) -> bool:
+    """`_gemini_rate_acquire` ile birebir aynı offload deseni — 10s sert tavan,
+    timeout'ta güvenli varsayılan (claim başarılı sayılır, dedup atlanır, hang YOK)."""
+    if _WS_AVAILABLE:
+        try:
+            return _gevent.get_hub().threadpool.spawn(_news_inflight_claim_blocking, ticker).get(timeout=10)
+        except _gevent.Timeout:
+            logger.error("_news_inflight_claim: 10s threadpool timeout — dedup atlanıyor (güvenli varsayılan)")
+            return True
+    return _news_inflight_claim_blocking(ticker)
+
 
 # On-demand news fetch kuyruğu — iki farklı HTTP endpoint'i besler (CPO-1206 §3):
 # api_stock_news (tekil hisse sayfası) ve api_market_news (piyasa haber şeridi).
@@ -5782,6 +5856,9 @@ _NEWS_DAILY_STATS_DEFAULTS = {
     "ok_prefetch": 0, "ok_user": 0, "fail_prefetch": 0, "fail_user": 0,
     "ok_stock_news": 0, "ok_market_news": 0, "fail_stock_news": 0, "fail_market_news": 0,
     "prefetch_skipped_quota": 0,  # CPO-1340 S1: kota kapalıyken atlanan denemeler (fail_prefetch DEĞİL)
+    "dedup_skip": 0, "dedup_skip_prefetch": 0, "dedup_skip_stock_news": 0, "dedup_skip_market_news": 0,
+    # CPO-1350 §2b Sec.1: başka process az önce aynı ticker'ı claim ettiği için
+    # atlanan denemeler (fail/prefetch_skipped_quota DEĞİL — Gemini'ye hiç sorulmadı)
 }
 _news_daily_stats = {"date": None, **_NEWS_DAILY_STATS_DEFAULTS}
 
@@ -6632,6 +6709,11 @@ def _prefetch_news_worker():
                 logger.info("Prefetch: kota kapalı (retry_after_s=%ds) — %s atlandı", _gemini_cb_retry_after_s(), ticker)
                 _news_daily_stats_incr("prefetch_skipped_quota")
                 continue
+            if not _news_inflight_claim(ticker):  # CPO-1350 §2b Sec.1 — cross-process dedup
+                logger.info("Prefetch: %s başka process az önce claim etti — atlandı (dedup)", ticker)
+                _news_daily_stats_incr("dedup_skip")
+                _news_daily_stats_incr("dedup_skip_prefetch")
+                continue
             attempted += 1
             try:
                 result = get_ai_news(ticker, source="prefetch", ua_class="prefetch")
@@ -6777,6 +6859,12 @@ def _on_demand_news_worker():
                 ticker, (origin, ua_class) = _news_fetch_queue.popitem()
         if ticker:
             try:
+                if not _news_inflight_claim(ticker):  # CPO-1350 §2b Sec.1 — cross-process dedup
+                    logger.info("On-demand news [%s]: dedup atlandı (başka process az önce claim etti) [origin=%s]", ticker, origin)
+                    _news_daily_stats_incr("dedup_skip")
+                    _news_daily_stats_incr(f"dedup_skip_{origin}")
+                    time.sleep(15)
+                    continue
                 result = get_ai_news(ticker, source=origin, ua_class=ua_class)
                 _news_queue_stats["last_processed_ts"] = time.time()
                 _news_queue_stats["total_processed"] += 1
