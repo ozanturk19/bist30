@@ -593,7 +593,7 @@ async function loadEconCalendar() {
         <span style="font-size:18px;flex-shrink:0">${e.icon||'📅'}</span>
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600;color:#e2e8f0">${e.event}</div>
-          <div style="font-size:11px;color:#64748b;margin-top:1px">${e.date_fmt} · <span ${imp.cls}>${imp.lbl} Öncelik</span> · ${e.source}</div>
+          <div style="font-size:11px;color:#64748b;margin-top:1px">${e.date_fmt} · <span style="${imp.cls}">${imp.lbl} Öncelik</span> · ${e.source}</div>
         </div>
         <div style="font-size:12px;text-align:right;flex-shrink:0">${duTxt}</div>
       </div>`;
