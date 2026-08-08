@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-{% include '_head.html' %}
-<title>Profilini Tamamla | BorsaPusula</title>
+{% extends '_base.html' %}{% block head %}<title>Profilini Tamamla | BorsaPusula</title>
 <meta name="description" content="BorsaPusula sinyal mail abonelik profili — yatırım deneyimine göre kişiselleşmiş bildirimler.">
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -183,9 +179,7 @@
 <style id="bp-critical-css">
 header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}
 </style>
-</head>
-<body>
-<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 <header>
   <a href="/" class="logo-link" aria-label="BorsaPusula" style="display:inline-flex;align-items:center;text-decoration:none">
@@ -414,5 +408,4 @@ async function submitProfile(e) {
 
 <script src="/static/bp-search.js?v=46" defer></script>
 {% include '_mobile_nav_partial.html' %}
-</body>
-</html>
+{% endblock %}

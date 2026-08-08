@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-{% include '_head.html' %}
-<title>BIST Heatmap — Sinyal Haritası | BorsaPusula</title>
+{% extends '_base.html' %}{% block head %}<title>BIST Heatmap — Sinyal Haritası | BorsaPusula</title>
 <meta name="description" content="BIST hisselerinin sinyal kalitesi (Premium/Plus/Standart) renkleriyle sektör bazlı treemap haritası — Türkiye'nin ilk premium fintech heatmap'i.">
 <link rel="canonical" href="https://borsapusula.com/heatmap">
 <meta property="og:title"       content="BIST Heatmap — Sinyal Haritası">
@@ -173,9 +169,7 @@
     .legend { font-size: 11px; gap: 10px; }
   }
 </style>
-</head>
-<body>
-<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <header>
   <div class="header-title">
     <a href="/">Borsa<span class="accent">Pusula</span></a>
@@ -236,5 +230,4 @@
 <script>bpStartDataQualityPolling();</script>
 <script src="/static/js/heatmap.js?v=20260727C" defer></script>
 <script src="/static/learning-mode.js?v=2" defer></script>
-</body>
-</html>
+{% endblock %}

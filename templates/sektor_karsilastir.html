@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-{% include '_head.html' %}
-<title>Sektör Karşılaştırma | BorsaPusula</title>
+{% extends '_base.html' %}{% block head %}<title>Sektör Karşılaştırma | BorsaPusula</title>
 <meta name="description" content="BIST sektörlerini sinyal gücü, hacim ve performans bazında yan yana karşılaştırın.">
 <link rel="canonical" href="https://borsapusula.com/sektor-karsilastir">
 <meta property="og:title" content="Sektör Karşılaştırma — BorsaPusula">
@@ -147,9 +143,7 @@
   .mbn-item.active { color:var(--bp-al); }
   @media (max-width:768px) { .mobile-bottom-nav { display:block; } body { padding-bottom:calc(64px + env(safe-area-inset-bottom)); } }
 </style>
-</head>
-<body>
-<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <header>
   <a href="/" class="logo-link" aria-label="BorsaPusula">
     <svg class="logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -387,5 +381,4 @@ loadSectors();
 </script>
 <script src="/static/stale-banner.js?v=20260808a"></script>
 <script>bpStartDataQualityPolling();</script>
-</body>
-</html>
+{% endblock %}

@@ -16,15 +16,28 @@ from pathlib import Path
 APP = Path(sys.argv[1] if len(sys.argv) > 1 else "/root/bist30/app.py")
 TPL_DIR = Path(sys.argv[2] if len(sys.argv) > 2 else "/root/bist30/templates")
 
-# <head> tasimayan partial'lar kanonik paydaya girmez (ic ice <head> uretirlerdi)
+# Kanonik payda = TAM DOKUMAN render eden sablonlar. Partial'lar (parca uretir) girmez.
+# T2.2 sonrasi sayfa sablonlarinda artik "<head>" YOK — kabuk _base.html'e tasindi.
+# Bu yuzden olcut IKI FORMU da tanir; aksi halde payda 27 -> 1'e duser ve
+# bundan sonraki her "27/27" iddiasi kirik paydaya karsi olculur.
+#   post-T2.2 : {% extends '_base.html' %}  tasiyan dosya      -> sayfa
+#   pre-T2.2  : "<head>" tasiyan dosya                          -> sayfa
+# _base.html kabugun KENDISI: <head> tasir ama sayfa DEGILDIR -> disarida.
+EXTENDS_RE = re.compile(r"{%-?\s*extends\s+['\"]([^'\"]+)['\"]")
+SHELL = "_base.html"
+
+
 def head_bearing():
     out = set()
     for f in sorted(TPL_DIR.glob("*.html")):
+        if f.name == SHELL:
+            continue
         try:
-            if "<head>" in f.read_text(encoding="utf-8", errors="replace"):
-                out.add(f.name)
+            txt = f.read_text(encoding="utf-8", errors="replace")
         except OSError:
-            pass
+            continue
+        if EXTENDS_RE.search(txt) or "<head>" in txt:
+            out.add(f.name)
     return out
 
 

@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-{% include '_head.html' %}
-<title>Bilanço Takvimi — BIST Finansal Sonuç Tarihleri | BorsaPusula</title>
+{% extends '_base.html' %}{% block head %}<title>Bilanço Takvimi — BIST Finansal Sonuç Tarihleri | BorsaPusula</title>
 <meta name="description" content="BIST100 şirketlerinin çeyreklik finansal sonuç açıklama dönemleri. Trend sinyalleriyle birlikte bilanço takvimini takip edin.">
 <link rel="canonical" href="https://borsapusula.com/bilanco-takvimi">
 <meta property="og:title"       content="Bilanço Takvimi — BIST Finansal Sonuç Tarihleri | BorsaPusula">
@@ -172,9 +168,7 @@
   .sc-ticker-link:hover .sc-ticker { color: #58a6ff; }
 </style>
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
-</head>
-<body>
-<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <header>
   <a href="/" class="logo-link" aria-label="BorsaPusula — Piyasanın Yönü">
     <svg class="bp-logo" width="200" height="52" viewBox="0 0 460 120" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -425,5 +419,4 @@ loadMacroBar();setInterval(loadMacroBar,60000);
 <script>bpStartDataQualityPolling();</script>
 <script src="/static/learning-mode.js?v=2" defer></script>
 {% include '_mobile_nav_partial.html' %}
-</body>
-</html>
+{% endblock %}
