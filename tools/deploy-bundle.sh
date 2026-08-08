@@ -82,8 +82,13 @@ fi
 # 'git rev-parse HEAD' ciktisini 7 karakterlik TARGET_SHA ile '=' karsilastiriyordu
 # -> hicbir zaman esit olamaz, kapi OLU koddu ve her kosu "WARN: HEAD != target"
 # basip devam ediyordu.
-TARGET_SHA=$(cd "$REPO_DIR" && git rev-parse "${TARGET_SHA}^{commit}" 2>/dev/null || echo "")
-ROLLBACK_SHA=$(cd "$REPO_DIR" && git rev-parse "${ROLLBACK_SHA}^{commit}" 2>/dev/null || echo "")
+# --verify --quiet SART. Ciplak `git rev-parse X^{commit}` cozemedigi argumani
+# STDOUT'a AYNEN BASAR ve 128 ile cikar; `2>/dev/null || echo ""` bu yuzden bos
+# string uretmez, capture "deadbeef^{commit}" olur ve -z kontrolu GECER.
+# Olculdu: gecersiz SHA ile script sonuna kadar kosuyordu (EXIT=0).
+# --verify --quiet ise basarisizlikta HICBIR SEY basmaz ve 1 doner.
+TARGET_SHA=$(cd "$REPO_DIR" && git rev-parse --verify --quiet "${TARGET_SHA}^{commit}" || true)
+ROLLBACK_SHA=$(cd "$REPO_DIR" && git rev-parse --verify --quiet "${ROLLBACK_SHA}^{commit}" || true)
 if [ -z "$TARGET_SHA" ] || [ -z "$ROLLBACK_SHA" ]; then
   echo "HATA: verilen TARGET_SHA/ROLLBACK_SHA bu repoda bir commit'e cozulmuyor — abort."
   exit 1
