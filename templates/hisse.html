@@ -1740,7 +1740,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       text-transform: uppercase; letter-spacing: 0.4px;
     }
     .bp-spark-val {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--bp-font-mono);
       font-size: 13px; font-weight: 700; color: #e5e1e4;
       letter-spacing: -0.2px;
     }
@@ -3505,7 +3505,7 @@ function renderHistory(history, currentPrice) {
         const isGain = h.signal === 'AL' ? ret > 0 : ret < 0;
         const clr    = isGain ? '#00e290' : (Math.abs(ret) < 1 ? '#909097' : '#f85149');
         const sign   = ret >= 0 ? '+' : '';
-        retHtml = `<td style="color:${clr};font-weight:600;font-family:monospace;font-size:12px">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:#909097">(aktif)</span></td>`;
+        retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:12px">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:#909097">(aktif)</span></td>`;
       }
     } else {
       // Kapanmış sinyal — history[idx-1] bu sinyali kapatan (daha yeni) sinyaldir
@@ -3515,14 +3515,14 @@ function renderHistory(history, currentPrice) {
         const isGain = h.signal === 'AL' ? ret > 0 : ret < 0;
         const clr    = isGain ? '#00e290' : (Math.abs(ret) < 1 ? '#909097' : '#f85149');
         const sign   = ret >= 0 ? '+' : '';
-        retHtml = `<td style="color:${clr};font-weight:600;font-family:monospace;font-size:12px">${sign}${ret.toFixed(1)}%</td>`;
+        retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:12px">${sign}${ret.toFixed(1)}%</td>`;
       }
     }
 
     return `<tr>
       <td>${h.date}</td>
       <td><span class="signal-badge signal-${h.signal}" style="font-size:11px">${icon} ${sigLabel(h.signal)}</span></td>
-      <td style="font-variant-numeric:tabular-nums;font-family:monospace">${fmt(h.price)} ₺</td>
+      <td style="font-variant-numeric:tabular-nums;font-family:var(--bp-font-mono)">${fmt(h.price)} ₺</td>
       ${retHtml}
     </tr>`;
   }).join('');

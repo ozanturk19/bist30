@@ -244,13 +244,39 @@
      Yukarıdaki ilk blokta tanımlı (arka plan, kenarlık, metin,
      marka, AL/SAT/BEKLİYOR, hacim, premium). Burada tekrarlanmaz. */
 
-  /* NOT — YAZI TİPİ AİLESİ (--bp-font-*) BİLEREK YOK.
-     Canlıda iki aile yarışıyor: 'Inter' (gövde, 26 şablonda link'li)
-     ve mono yığını 4 farklı yazımla ('Fira Code','Consolas' /
-     'Fira Code',monospace / 'Courier New',monospace / 'Inter-Fallback').
-     Master Program Bölüm 8 bunu Ozan'ın marka kararı olarak
-     işaretliyor (Space Grotesk+Manrope mi, Inter mi). Karar
-     gelmeden token yazmak, sonra 32 şablonda geri almak demektir.
-     CPO'ya soruldu — yanıt gelince bu bloğa --bp-font-sans /
-     --bp-font-mono eklenecek. */
+  /* ── 11. YAZI TİPİ AİLESİ ─────────────────────────────────────
+     İKİ AYRI EKSEN var, ölçümle ayrıldı — tek token'a katlanmazlar:
+
+       (a) KOD/FORMÜL ekseni — blog kod blokları, metodoloji formülleri.
+           Canlıda 5 yazımla çatallıydı: 'Fira Code','Consolas',monospace ·
+           'Fira Code',monospace · 'Courier New',monospace ·
+           'JetBrains Mono',monospace · çıplak monospace.
+           HİÇBİRİ indirilmiyor (google font link'i yok) — yazımlar OS
+           varsayılanına düşüyordu, ama AYNI OS'ta bile farklı sonuç veriyordu:
+           Windows'ta 'Consolas' taşıyan yığın Consolas, çıplak monospace
+           tarayıcı varsayılanı, 'Courier New' ise Courier New render ediyordu.
+           CPO-1347 S1a ile tekilleştirme onaylandı; kanonik yığın aşağıda.
+           Consolas BİLEREK korundu: Windows'ta fiilen render edilen font o,
+           listeden çıkarmak görsel kayma olurdu — bu temizlik, redesign değil.
+
+       (b) SAYISAL/TABULAR ekseni — fiyat, ticker, oran. Canlıda
+           'Space Grotesk', monospace, sans-serif yazımıyla ve daima
+           font-variant-numeric:tabular-nums ile birlikte geçiyor.
+           BU EKSEN TOKEN ALMADI — S1b (gövde ailesi) kararına bağlı,
+           Ozan'ın marka kararı. Karar gelince --bp-font-num eklenecek.
+           İkisini tek token'a katlamak fiyatları kod fontuna, kod bloklarını
+           marka fontuna çevirirdi; bu yüzden ayrı tutuldular.
+
+     GÖVDE ailesi (--bp-font-sans) de S1b'de, bilerek yok.
+
+     ÖLÇÜM DÜZELTMESİ (08.08.2026): DEV2-004'te "Inter fiilen kanonik,
+     26 şablonda link'li" yazmıştım — YANLIŞ. grep -l 'Inter' JavaScript'teki
+     setInterval kelimesini yakalıyordu (29 eşleşme). Kelime sınırlı ölçüm:
+       Space Grotesk : 27/32 şablonda KULLANILIYOR, yalnız  6/32'sinde YÜKLÜ
+       Inter         :  7/32 şablonda kullanılıyor, yalnız  5/32'sinde yüklü
+     Yani 21 şablon Space Grotesk'i beyan edip yüklemiyor, sessizce
+     system-ui'ye düşüyor. S1b kararı bu tabloya göre verilmeli. */
+  --bp-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+                  'Liberation Mono', monospace;
+
 }
