@@ -72,13 +72,26 @@
    T1.4 — ÖLÇEK TOKEN'LARI (Master Dönüşüm Programı FAZ 1)
    ───────────────────────────────────────────────────────────────
    Bu bloktaki HİÇBİR değer uydurulmadı. Hepsi 32 canlı şablonun
-   fiilî dağılımından türetildi (08.08.2026 ölçümü, templates/*.html,
-   *.bak.* hariç). Her kategorinin başında ölçümün kendisi yazılı ki
-   T1.5'in mekanik migrasyonu bu tabloya bakarak yapılabilsin.
+   fiilî dağılımından türetildi (08.08.2026 ölçümü; templates dizinindeki
+   .html dosyaları, .bak yedekleri hariç). Her kategorinin başında ölçümün
+   kendisi yazılı ki T1.5'in mekanik migrasyonu bu tabloya bakarak
+   yapılabilsin.
 
-   Ölçüm komutu deseni:
-     grep -hoE '<özellik>: *[0-9.]+px' templates/*.html | sed 's/.*: *//' \
-       | sort -n | uniq -c | sort -rn
+   Ölçüm komutu deseni (yorum içinde güvenli yazımla):
+     grep -hoE '<özellik>: +[0-9.]+px' templates
+       | sed -E 's/^.+: +//' | sort -n | uniq -c | sort -rn
+
+   ⚠ BU YORUM BİR KEZ ÜRÜNÜ KIRDI — tekrarlamayın (08.08.2026, DEV-2):
+   Önceki yazımda ölçüm komutu `sed 's/.*: *//'` içeriyordu. O dizedeki
+   yıldız-eğik ikilisi CSS yorumunu TAM BURADA kapatıyordu; kalan metin
+   üst düzeyde geçersiz CSS oluyor, ayrıştırıcı hata kurtarmaya girip
+   HEMEN AŞAĞIDAKİ :root bloğunun TAMAMINI atıyordu. Sonuç: bu dosyadaki
+   ölçek token'larının 10/10'u canlıda TANIMSIZDI. Dosya HTTP 200
+   dönüyordu, boyutu doğruydu, grep içeride buluyordu — ama tarayıcı
+   hiçbirini tanımıyordu. Kabul ölçütü "dosya sunuluyor mu" değil
+   "token getComputedStyle ile çözülüyor mu" olmalı.
+   T1.7 format-lint v2 buna guard yazacak: CSS yorum gövdesinde kaza
+   eseri yorum-kapatma dizisi = HATA.
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
