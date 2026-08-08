@@ -32,11 +32,11 @@ cat > "$DISPATCH_TMP" << 'REMINDEREOF'
 ## Bundle Bilgisi
 - **Commit sayısı:** 16 commit
 - **TARGET_SHA:** b1b7e3d
-- **ROLLBACK_SHA:** 45f1a2a
+- **ROLLBACK_SHA:** deploy oncesi HEAD (sabit SHA YOK — CPO-1357 K1)
 
 ## Deploy Komutu
 ```bash
-TARGET_SHA=b1b7e3d ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
+TARGET_SHA=b1b7e3d ROLLBACK_SHA=$(git rev-parse HEAD) ./tools/deploy-bundle.sh
 ```
 
 ## Dokümantasyon
@@ -59,7 +59,7 @@ TARGET_SHA=b1b7e3d ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
 ## Notlar
 - Port 8003 → prod; Port 8004 → paper-bot (DOKUNMA)
 - BIST seans 10:00-18:00 TR arası restart YASAK
-- Rollback: 45f1a2a — git reset + systemctl restart bist30
+- Rollback: deploy oncesi HEAD — git reset + systemctl restart bist30
 
 REMINDEREOF
 

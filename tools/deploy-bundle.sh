@@ -7,8 +7,15 @@
 set -euo pipefail
 
 # ─── Config ──────────────────────────────────────────────────────────────────
-TARGET_SHA="${TARGET_SHA:-b1b7e3d}"
-ROLLBACK_SHA="${ROLLBACK_SHA:-45f1a2a}"
+# CPO-1357 §4-1 / K1 — SABIT VARSAYILAN KALDIRILDI.
+# Eskiden: TARGET_SHA=b1b7e3d, ROLLBACK_SHA=45f1a2a. 45f1a2a 2026-06-24 tarihli
+# ve HEAD'e 261 commit / 46 gun uzakti. 'fail_rollback' 4 ayri kosuldan
+# tetiklenip 'git reset --hard 45f1a2a' calistiriyordu — REPO_DIR canli servis
+# dizini ve 'Restart=always' o eski kodu ayaga kaldirirdi. Yani sessiz bir
+# varsayilan, FAZ1+FAZ2'nin tamamini silebilecek kurulu bir tuzakti.
+# Yeni kural: verilmemisse SESSIZCE VARSAYMA, GURULTULU REDDET.
+TARGET_SHA="${TARGET_SHA:-}"
+ROLLBACK_SHA="${ROLLBACK_SHA:-}"
 SMOKE_SCRIPT="${SMOKE_SCRIPT:-/root/bist30/tools/post-deploy-smoke.sh}"
 SERVICE="${SERVICE:-bist30}"
 REPO_DIR="${REPO_DIR:-/root/bist30}"
@@ -44,6 +51,14 @@ dry() {
 fail_rollback() {
   local reason="$1"
   log "ROLLBACK REASON: $reason"
+  # SON SAVUNMA HATTI: hedef bos ise >>git reset --hard<< calistirmak
+  # "bilinmeyen bir yere don" demektir. Reset YERINE abort.
+  if [ -z "$ROLLBACK_SHA" ]; then
+    log "  FATAL: ROLLBACK_SHA bos — >>git reset --hard<< CALISTIRILMADI."
+    log "  Servis mevcut haliyle birakildi; elle mudahale gerekiyor."
+    log "=== ROLLBACK ABORTED (hedef yok) ==="
+    exit 1
+  fi
   log "Initiating rollback to $ROLLBACK_SHA..."
   dry "cd $REPO_DIR && git reset --hard $ROLLBACK_SHA"
   dry "systemctl restart $SERVICE"
@@ -55,7 +70,43 @@ fail_rollback() {
   log "=== ROLLBACK COMPLETE ==="
 }
 
-# ─── 0. Dry-run banner ───────────────────────────────────────────────────────
+# ─── 0. Zorunlu parametreler + emniyet on-kontrolleri ───────────────────────
+if [ -z "$TARGET_SHA" ] || [ -z "$ROLLBACK_SHA" ]; then
+  echo "HATA: TARGET_SHA ve ROLLBACK_SHA acikca verilmeli — varsayilan YOK."
+  echo "  Ornek: TARGET_SHA=\$(git rev-parse HEAD) ROLLBACK_SHA=\$(git rev-parse HEAD) ./tools/deploy-bundle.sh"
+  echo "  ROLLBACK_SHA icin dogru deger DEPLOY ONCESI HEAD'dir."
+  exit 1
+fi
+
+# Kisa SHA'lari TAM SHA'ya cozumle. Gerekce: idempotency kapisi 40 karakterlik
+# 'git rev-parse HEAD' ciktisini 7 karakterlik TARGET_SHA ile '=' karsilastiriyordu
+# -> hicbir zaman esit olamaz, kapi OLU koddu ve her kosu "WARN: HEAD != target"
+# basip devam ediyordu.
+TARGET_SHA=$(cd "$REPO_DIR" && git rev-parse "${TARGET_SHA}^{commit}" 2>/dev/null || echo "")
+ROLLBACK_SHA=$(cd "$REPO_DIR" && git rev-parse "${ROLLBACK_SHA}^{commit}" 2>/dev/null || echo "")
+if [ -z "$TARGET_SHA" ] || [ -z "$ROLLBACK_SHA" ]; then
+  echo "HATA: verilen TARGET_SHA/ROLLBACK_SHA bu repoda bir commit'e cozulmuyor — abort."
+  exit 1
+fi
+
+# TEMIZ AGAC ZORUNLU. Gerekce: fail_rollback >>git reset --hard<< calistirir ve
+# REPO_DIR canli servis dizinidir; kirli agacta tetiklenirse commit'lenmemis is
+# geri donusu OLMADAN silinir. Mevcut 5 on-kontrolun hicbiri buna bakmiyordu.
+# DRY-RUN'DA DA KOSAR: salt-okunur bir kontrol, ve dry-run'in isi zaten
+# "gercek kosu ne yapardi" sorusunu yanitlamak. Dry-run'da atlanirsa dry-run
+# YESIL derken gercek kosu ABORT eder — dry-run'i yalanci yapar.
+if true; then
+  KIRLI=$(cd "$REPO_DIR" && git status --porcelain --untracked-files=no | wc -l)
+  if [ "$KIRLI" != "0" ]; then
+    echo "HATA: $REPO_DIR kirli ($KIRLI izlenen dosya degisik) — deploy DURDURULDU."
+    echo "  Sebep: rollback yolu 'git reset --hard' calistirir; kirli agacta bu"
+    echo "  commit'lenmemis isi geri donusu olmadan siler."
+    (cd "$REPO_DIR" && git status --short --untracked-files=no | head -20)
+    exit 1
+  fi
+fi
+
+# ─── 0b. Dry-run banner ─────────────────────────────────────────────────────
 log "=== DEPLOY START${_DL} ==="
 log "Target: $TARGET_SHA | Rollback: $ROLLBACK_SHA | Service: $SERVICE"
 [ "$DRY_RUN" = "1" ] && log "DRY-RUN mode: git pull / systemctl calls are SKIPPED"

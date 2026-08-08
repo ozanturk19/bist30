@@ -44,7 +44,7 @@ fi
 
 # 5. HEAD verify
 HEAD=$(cd /root/bist30 && git rev-parse --short HEAD)
-log "HEAD: $HEAD (rollback ref: 45f1a2a — cutover sonrası değişecek)"
+log "HEAD: $HEAD (rollback ref: deploy oncesi HEAD — sabit SHA kaldirildi, CPO-1357 K1)"
 
 # 6. nginx 5xx 24h
 NGINX_5XX=$(awk -v d="$(date -u '+%d/%b/%Y')" '$0 ~ d && $9 ~ /^(502|504)$/' /var/log/nginx/access.log 2>/dev/null | wc -l)
@@ -77,7 +77,7 @@ $TS
 
 **Cutover komutu (09:30 TR):**
 \`\`\`
-TARGET_SHA=<final-sha> ROLLBACK_SHA=45f1a2a ./tools/deploy-bundle.sh
+TARGET_SHA=<final-sha> ROLLBACK_SHA=$(git rev-parse HEAD) ./tools/deploy-bundle.sh
 \`\`\`
 Not: final-sha Pzt 09:00'de belli olur (min: dc8c260, Bundle 17 + F2/F1/F3/Phase3-2B dahil).
 
