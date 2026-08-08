@@ -56,11 +56,17 @@ HEDEF = ['tarama','blog','gucu_yuksek','kategori','metodoloji','portfolio','abd_
          'bilanco_takvimi','gizlilik','gundem','hakkinda','iletisim','karsilastir',
          'sinyal_performans','varlik','yasal']
 kalan = []
+# Jinja yorumlari OLCUMDEN ONCE siyrilir. Gerekce: _header.html'in kendi
+# dokuman blogunda bir KULLANIM ORNEGI var ve duz alt-dize sayimi onu gercek
+# bir include sanip 16 yerine 17 sayiyor. Ayni tuzak e4d6c4a'da bir kez daha
+# yasandi (route_map paydasi 27->28). Ucuncu kez yasanmasin diye kanonlastirildi.
+YORUM_RE = re.compile(r'{#.*?#}', re.S)
 for n in HEDEF:
-    s = open('templates/%s.html' % n, encoding='utf-8').read()
+    ham = open('templates/%s.html' % n, encoding='utf-8').read()
+    s = YORUM_RE.sub('', ham)
     if re.search(r'<header\b', s):
         kalan.append(n)
-    if "_header.html" not in s:
+    if "include '_header.html'" not in s:
         fail.append('KAPI3: %s _header.html-i include ETMIYOR' % n)
 print('KAPI3 hedefte kalan inline <header> : %d %s' % (len(kalan), kalan or ''))
 if kalan:
@@ -84,7 +90,7 @@ def olc(getter, etiket):
             src = getter(n)
         except Exception:
             continue
-        ms = re.findall(r'<header\b.*?</header>', src, re.S)
+        ms = re.findall(r'<header\b.*?</header>', re.sub(r'{#.*?#}', '', src, flags=re.S), re.S)
         if ms:
             tasiyan += 1; blok += len(ms)
             for m in ms:

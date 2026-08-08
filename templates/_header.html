@@ -8,13 +8,25 @@
       hdr_title            str  vars. yok  -> verilirse logo ile nav arasina baslik
       hdr_sub              str  vars. yok  -> verilirse baslik+alt-baslik <div> ile sarilir
       hdr_sub_id           str  vars. yok  -> alt-basligin id ozniteligi (JS hedefi)
-      hdr_title_tag        str  vars. 'h1' -> yalniz /abd-tarama 'div' kullanir (bkz. NOT)
+      hdr_title_tag        str  vars. 'h1' -> yalniz 'h1'/'h2'/'div'; baskasi 'h1'e duser
       hdr_trailing_include str  vars. yok  -> </nav> ile arama dugmesi arasina eklenecek partial
+
+    SOZLESME DUZELTMESI: "hepsi opsiyonel" ifadesi yanlis okunabilir.
+    hdr_sub / hdr_sub_id / hdr_title_tag YALNIZCA hdr_title ile birlikte etkilidir;
+    hdr_title verilmeden yazilirlarsa hata da uyari da vermeden SESSIZCE DUSERLER.
+
+    UYARI: hdr_title_tag='div' + hdr_sub YOK kombinasyonu kullanmayin.
+    Ortaya cikan <div class="page-title"> anti-CLS kurallarinin HICBIRINE
+    eslesmez (h1 kurali etiket yuzunden, :has(> .page-sub) kurali sarmalayici
+    olmadigi icin) -> baslik anti-CLS fazinda GORUNUR kalir ve CLS uretir.
     NOT (olculmus, kasitli): abd_tarama.html basligi <div class="page-title">.
-    bp-critical-css anti-CLS kurali >>header h1.page-title<< seciyor; <div> ESLESMIYOR.
-    Sayfanin ayrica gorsel-gizli bir <h1>'i var (abd_tarama.html:182) — <h1>'e
-    cevirmek IKI <h1> yaratir ve anti-CLS davranisini degistirir. Bu tur DEGERI
-    KORUDU, ayri bilet onerildi.
+    ONCEKI GEREKCEM YANLISTI ve olcumle duzeltildi: "anti-CLS davranisini
+    degistirir" demistim; DEGISTIRMEZ. Baslik bir <div> ile sarilmis ve o
+    sarmalayici zaten `header > div:has(> .page-sub)` kuraliyla gizleniyor —
+    yani gorunur davranis <h1>/<div> ayriminda AYNI.
+    <div>'in korunmasinin TEK gecerli nedeni sudur: sayfada zaten gorsel-gizli
+    bir <h1> var (abd_tarama.html:182); etiketi <h1> yapmak IKI <h1> yaratirdi.
+    Bu tur DEGERI KORUDU, ayri bilet onerildi.
 -#}
 <header>
   <a href="/" class="logo-link" aria-label="BorsaPusula — Piyasanın Yönü">
@@ -40,12 +52,14 @@
       <line x1="118" y1="78" x2="430" y2="78" stroke="#1e2532" stroke-width="1"/>
       <text x="118" y="94" fill="#8f98a8" font-family="'Manrope',Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2.4">PİYASANIN YÖNÜ</text>
     </svg>
+{%- set _hdr_tag = hdr_title_tag|default('h1') %}
+{%- set _hdr_tag = _hdr_tag if _hdr_tag in ['h1', 'h2', 'div'] else 'h1' %}
   </a>{% if hdr_title is defined and hdr_title %}
 {% if hdr_sub is defined and hdr_sub %}  <div>
-    <{{ hdr_title_tag|default('h1') }} class="page-title">{{ hdr_title }}</{{ hdr_title_tag|default('h1') }}>
+    <{{ _hdr_tag }} class="page-title">{{ hdr_title }}</{{ _hdr_tag }}>
     <div class="page-sub"{% if hdr_sub_id is defined and hdr_sub_id %} id="{{ hdr_sub_id }}"{% endif %}>{{ hdr_sub }}</div>
   </div>
-{% else %}  <{{ hdr_title_tag|default('h1') }} class="page-title">{{ hdr_title }}</{{ hdr_title_tag|default('h1') }}>
+{% else %}  <{{ _hdr_tag }} class="page-title">{{ hdr_title }}</{{ _hdr_tag }}>
 {% endif %}{% endif %}  <nav class="bp-main-nav" aria-label="Ana navigasyon">
   <a href="/" data-route="/" class="bp-nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>

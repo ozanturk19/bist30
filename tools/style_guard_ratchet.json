@@ -3,6 +3,10 @@
  "token_imzasi": "19:#00e290,#0e0e12,#141416,#1c1b1f,#1e293b,#201f21,#2a2a2c,#30363d",
  "dosyalar": {
   "404.html": 0,
+  "_base.html": 0,
+  "_head.html": 1,
+  "_header.html": 1,
+  "_header_asset_price.html": 0,
   "abd_tarama.html": 1,
   "bilanco_takvimi.html": 6,
   "blog.html": 6,

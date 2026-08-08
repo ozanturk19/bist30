@@ -47,8 +47,14 @@ CSS_DIR = ROOT / "static" / "css"
 RATCHET = ROOT / "tools" / "style_guard_ratchet.json"
 
 # Her sayfaya fiilen giren kabuk partial'lari: buradaki tanimlar tum sayfalarda gecerli.
-KABUK_PARTIALS = ("_base.html", "_head.html")
+# T2.2: _header.html + _header_asset_price.html EKLENDI. Eklenmeden once
+# 16 sayfanin kanonik header-i HICBIR kapida denetlenmiyordu ve ratchet
+# toplami 491->475 dusmus gorunuyordu — borc ODENMEDI, denetlenmeyen bir
+# dosyaya TASINDI. Bu satir olmadan K-A/K-B kapsam iddiasi sahtedir.
+KABUK_PARTIALS = ("_base.html", "_head.html", "_header.html",
+                  "_header_asset_price.html")
 
+COMMENT_RE = re.compile(r"{#.*?#}", re.S)
 TANIM_RE = re.compile(r"(--[A-Za-z0-9_-]+)\s*:")
 VAR_RE = re.compile(r"var\(\s*(--[A-Za-z0-9_-]+)")
 HEX_RE = re.compile(r"#[0-9A-Fa-f]{3,8}\b")
@@ -119,6 +125,29 @@ def denetle():
         if eksik:
             tanimsiz[f.name] = eksik
         hex_sayim[f.name] = hex_say(txt, harita)
+
+    # ── KABUK PARTIAL'LARI DA TARA (T2.2 dersi) ─────────────────────────────
+    # KABUK_PARTIALS su ana kadar YALNIZ global_tanimlar()'da kullaniliyordu,
+    # yani partial'larin TANIMLADIGI token'lar biliniyor ama KULLANDIKLARI
+    # var() ve icerdikleri ham hex HIC SAYILMIYORDU. Olculdu (09.08.2026):
+    # _header.html 12 ham hex tasiyor, 1'i kanonik degerli (#b8c3ff = --bp-brand);
+    # _head.html 4 tasiyor, 1'i kanonik (#0e0e12 = --bp-bg). Bunlar 16 ve 27
+    # sayfaya giriyor ama ratchet'te GORUNMUYORLARDI. 065b6a6'da toplam 491->475
+    # dustu; dususun bir kismi borcun ODENMESI degil, denetlenmeyen bir dosyaya
+    # TASINMASIYDI. Partial'lar her sayfaya girdigi icin K-A'da yerel :root
+    # kurtarmasi YOK — global tanimlara karsi olculurler (en siki olcut).
+    for n in KABUK_PARTIALS:
+        pf = TPL_DIR / n
+        if not pf.exists():
+            continue
+        txt = COMMENT_RE.sub("", _oku(pf))     # dokuman blogu olcume girmez
+        eksik = {}
+        for tok in set(VAR_RE.findall(txt)):
+            if tok not in gtok:
+                eksik[tok] = len(re.findall(r"var\(\s*" + re.escape(tok), txt))
+        if eksik:
+            tanimsiz[n] = eksik
+        hex_sayim[n] = hex_say(txt, harita)
     return gtok, harita, imza, tanimsiz, hex_sayim
 
 
