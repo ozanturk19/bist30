@@ -2748,8 +2748,7 @@ def _compute_data_quality(bad_ticker_count, total_count, market_open):
     kalıyordu — bu fonksiyon onun yerine geçer.
 
     market_open=False → "seans_disi" (CPO-1338: seans dışı stale by-design,
-    yanlış alarm üretmeme davranışı KORUNUYOR — ama "fresh" ile karıştırılmaz,
-    ölçülmemiş bir durumu ölçülmüş gibi beyan etmez).
+    alarm bastırma davranışı KORUNUYOR — ama artık "fresh" ile karıştırılmıyor).
     """
     if not market_open:
         return "seans_disi"
