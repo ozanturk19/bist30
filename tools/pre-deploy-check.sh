@@ -20,7 +20,7 @@ echo "=== Pre-Deploy Check (CPO-359 Tier 0) ==="
 echo ""
 
 # 1. Jinja parse
-echo "1/5 Jinja parse..."
+echo "1/6 Jinja parse..."
 if python3 "$(dirname "$0")/_predeploy_jinja_check.py"; then
   echo "  ✓ Jinja parse OK"
 else
@@ -30,7 +30,7 @@ fi
 
 # 2. Python compile
 echo ""
-echo "2/5 Python compile (app.py)..."
+echo "2/6 Python compile (app.py)..."
 if python3 -c "import ast;ast.parse(open('app.py').read())" 2>/dev/null; then
   echo "  ✓ app.py compile OK"
 else
@@ -40,7 +40,7 @@ fi
 
 # 3. KALICI_KURALLAR audit
 echo ""
-echo "3/5 KALICI_KURALLAR audit..."
+echo "3/6 KALICI_KURALLAR audit..."
 if ./tests/audit/kalici-kurallar-check.sh templates/hisse.html > /dev/null 2>&1; then
   echo "  ✓ KK 11/11 PASS"
 else
@@ -50,7 +50,7 @@ fi
 
 # 4. format-lint
 echo ""
-echo "4/5 format-lint (CPO-1180 K6)..."
+echo "4/6 format-lint (CPO-1180 K6)..."
 if ./tools/format-lint.sh > /dev/null 2>&1; then
   echo "  ✓ format-lint PASS"
 else
@@ -64,12 +64,24 @@ fi
 # donuyordu, boyutu dogruydu, grep iceride buluyordu. Elle calistirilan bir arac bir
 # sonraki kazada yok hukmundedir -- kapiya baglandi.
 echo ""
-echo "5/5 CSS token guard (CPO-1349)..."
+echo "5/6 CSS token guard (CPO-1349)..."
 if python3 tools/css-token-guard.py static/css/*.css > /dev/null 2>&1; then
   echo "  ✓ CSS token guard PASS"
 else
   echo "  ✗ CSS token guard FAIL. Detay: python3 tools/css-token-guard.py static/css/*.css"
   FAIL=$((FAIL + 1))
+fi
+
+echo ""
+# 6. style-guard (T1.7) — css-token-guard YALNIZ static/css/*.css (2 dosya) bakiyor;
+# sablonlarin icindeki ~2300 var(--bp-*) kullanimi HICBIR kapida denetlenmiyordu.
+# K-A tanimsiz var() BLOKLAYICI (taban 0), K-B ham hex RATCHET (yalniz dusebilir).
+echo "6/6 style-guard (T1.7: sablon ici var() + ham hex ratchet)..."
+if python3 tools/style-guard.py > /dev/null 2>&1; then
+  echo "  ✓ style-guard PASS"
+else
+  echo "  ✗ style-guard ihlal var. Detay için: python3 tools/style-guard.py --verbose"
+  FAIL=1
 fi
 
 echo ""

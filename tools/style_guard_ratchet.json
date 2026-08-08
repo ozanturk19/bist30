@@ -1,0 +1,33 @@
+{
+ "_not": "T1.7 style-guard ratchet — kanonik-degerli ham hex, dosya basina TAVAN. Sayim yalniz DUSEBILIR; artis deploy'u bloklar. Yeni token eklenince token_imzasi degisir ve bu dosya --baseline ile yenilenir.",
+ "token_imzasi": "19:#00e290,#0e0e12,#141416,#1c1b1f,#1e293b,#201f21,#2a2a2c,#30363d",
+ "dosyalar": {
+  "404.html": 0,
+  "abd_tarama.html": 1,
+  "bilanco_takvimi.html": 6,
+  "blog.html": 6,
+  "blog_article.html": 13,
+  "gizlilik.html": 3,
+  "gucu_yuksek.html": 8,
+  "gundem.html": 18,
+  "hakkinda.html": 9,
+  "heatmap.html": 1,
+  "hisse.html": 140,
+  "hisseler.html": 15,
+  "iletisim.html": 8,
+  "index.html": 106,
+  "karsilastir.html": 11,
+  "kategori.html": 1,
+  "metodoloji.html": 7,
+  "offline.html": 1,
+  "ozet.html": 25,
+  "portfolio.html": 38,
+  "profil.html": 1,
+  "sektor_harita.html": 11,
+  "sektor_karsilastir.html": 14,
+  "sinyal_performans.html": 24,
+  "tarama.html": 1,
+  "varlik.html": 3,
+  "yasal.html": 4
+ }
+}

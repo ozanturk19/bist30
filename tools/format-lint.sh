@@ -25,19 +25,21 @@ ECHO_RESET='\033[0m'
 printf "${ECHO_HEADER}=== format-lint (CPO-1180 K6) ===${ECHO_RESET}\n\n"
 
 # ── Şablon listesini app.py route tablosundan türet ──────────────────────
-# render_template("x.html", ...) çağrılarındaki TÜM template adlarını topla.
-TEMPLATES=$(grep -oE "render_template\(\s*['\"][a-zA-Z0-9_/]+\.html" app.py \
-  | sed -E "s/render_template\(\s*['\"]//" | sort -u)
-
-TEMPLATE_FILES=""
-for t in $TEMPLATES; do
-  if [ -f "templates/$t" ]; then
-    TEMPLATE_FILES="$TEMPLATE_FILES templates/$t"
-  fi
-done
+# TARİHÇE (T2.2, 09.08.2026): burada TEK SATIRLIK bir `grep render_template(`
+# vardı. Çağrı çok satırlı yazılmışsa şablon adı bir sonraki satırda kalır ve
+# grep onu SESSİZCE düşürür — ölçüldü: 26 taranıyordu, kanonik 27; `hisseler.html`
+# hiçbir kategoride denetlenmiyordu. Kapsam artık AST'den türetiliyor
+# (tools/lint_scope.py). Türetme başarısız olursa körleşerek devam etmek yerine
+# ABORT edilir: eksik kapsamla "PASS" demek, hiç denetlememekten daha kötüdür.
+TEMPLATE_FILES=$(python3 tools/lint_scope.py 2>/dev/null | tr '\n' ' ')
+if [ -z "$TEMPLATE_FILES" ]; then
+  printf "${ECHO_FAIL}HATA: tools/lint_scope.py kapsam üretemedi — format-lint ABORT.${ECHO_RESET}\n"
+  printf "Körleşerek devam etmek yerine durduruldu. Detay: python3 tools/lint_scope.py\n"
+  exit 1
+fi
 
 TCOUNT=$(echo "$TEMPLATE_FILES" | wc -w | tr -d ' ')
-echo "Taranan şablon sayısı (app.py route tablosundan türetildi): $TCOUNT"
+echo "Taranan şablon sayısı (app.py AST'sinden türetildi, tools/lint_scope.py): $TCOUNT"
 echo ""
 
 count_matches() {

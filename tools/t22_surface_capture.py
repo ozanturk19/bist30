@@ -10,9 +10,10 @@ UA_M = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1
 
 ETKILENEN = ['/tarama', '/blog', '/gucu-yuksek', '/kripto', '/metodoloji', '/portfolio',
              '/abd/tarama', '/bilanco-takvimi', '/gizlilik', '/gundem', '/hakkinda',
-             '/iletisim', '/karsilastir', '/sinyal-performans', '/btc', '/yasal']
+             '/iletisim', '/karsilastir', '/sinyal-performans', '/btc', '/yasal',
+             '/altin', '/emtialar']   # /altin -> varlik.html, /emtialar -> kategori.html
 KONTROL   = ['/', '/hisseler', '/ozet', '/sektor-harita', '/hisse/THYAO', '/profil',
-             '/heatmap', '/sektor-karsilastir', '/offline', '/emtialar', '/altin']
+             '/heatmap', '/sektor-karsilastir', '/offline']
 
 def fetch(path, ua):
     req = urllib.request.Request(BASE + path, headers={'User-Agent': ua})
