@@ -34,7 +34,7 @@
   }
   header a.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--bp-text); }
   header .brand-name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; }
-  header .brand-name b { color: var(--bp-brand, #1f6feb); }
+  header .brand-name b { color: var(--bp-brand); }
   main {
     max-width: 640px;
     margin: 64px auto;
@@ -76,9 +76,9 @@
     font-family: inherit;
     text-transform: uppercase;
   }
-  .search-row input:focus { outline: none; border-color: var(--bp-brand, #1f6feb); }
+  .search-row input:focus { outline: none; border-color: var(--bp-brand); }
   .search-row button {
-    background: var(--bp-brand, #1f6feb);
+    background: var(--bp-brand);
     color: #fff; border: none; border-radius: 8px;
     padding: 0 18px; font-size: 14px; font-weight: 700;
     cursor: pointer;
@@ -102,7 +102,7 @@
     font-weight: 600;
     transition: border-color .15s;
   }
-  .popular-grid a:hover { border-color: var(--bp-brand, #1f6feb); color: var(--bp-text); }
+  .popular-grid a:hover { border-color: var(--bp-brand); color: var(--bp-text); }
 </style>
 </head>
 <body>
