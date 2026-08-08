@@ -29,5 +29,11 @@
   "tarama.html": 1,
   "varlik.html": 3,
   "yasal.html": 4
+ },
+ "yerel_root": {
+  "abd_tarama.html": 1,
+  "kategori.html": 1,
+  "tarama.html": 1,
+  "varlik.html": 1
  }
 }

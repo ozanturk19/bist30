@@ -122,6 +122,28 @@ def denetle():
     return gtok, harita, imza, tanimsiz, hex_sayim
 
 
+def yerel_root_sayim():
+    """Sablon-yerel :root bloklarini say (T9.4-d).
+
+    NEDEN BLOKLAYICI DEGIL RATCHET: CSS ozel ozellikleri DOM uzerinden miras
+    alinir, DOSYALAR ARASINDA DEGIL. Bir sablonun kendi :root'u tokens.css'i
+    o sayfada EZER ve hicbir arac bunu fark etmez — grep token adini bulur,
+    tarayici hata vermez. Olculdu (09.08.2026): 4 sablonda yerel :root var ve
+    tanimladiklari 13 token'in 11'i tokens.css'teki karsiligindan FARKLI degerde
+    (ornek: --brand #1f6feb vs --bp-brand #b8c3ff; --text3 #484f58 = 2.09:1
+    kontrast, FAZ 8'in P0 kalemi). Yani /tarama, /kripto, /abd-tarama fiilen
+    BASKA BIR PALETLE render ediliyor. Bunu bu turda DUZELTMEDIM (gorsel karar,
+    marka rengi Ozan'da) ama ARTMASINI engelliyorum.
+    """
+    from lint_scope import sayfa_sablonlari
+    out = {}
+    for f in sayfa_sablonlari():
+        n = f.read_text(encoding="utf-8").count(":root")
+        if n:
+            out[f.name] = n
+    return out
+
+
 def main(argv):
     verbose = "--verbose" in argv
     gtok, harita, imza, tanimsiz, hex_sayim = denetle()
@@ -133,7 +155,8 @@ def main(argv):
                      "Sayim yalniz DUSEBILIR; artis deploy'u bloklar. Yeni token eklenince "
                      "token_imzasi degisir ve bu dosya --baseline ile yenilenir.",
              "token_imzasi": imza,
-             "dosyalar": dict(sorted(hex_sayim.items()))},
+             "dosyalar": dict(sorted(hex_sayim.items())),
+             "yerel_root": dict(sorted(yerel_root_sayim().items()))},
             ensure_ascii=False, indent=1), encoding="utf-8")
         print("baseline yazildi: %d sayfa, toplam %d kanonik-degerli ham hex"
               % (toplam_sayfa, sum(hex_sayim.values())))
@@ -187,6 +210,25 @@ def main(argv):
         toplam = sum(hex_sayim.values())
         tt = sum(taban.values())
         print("  TEMIZ  K-B ham hex ratchet: %d occurrence (taban %d, artis yok)" % (toplam, tt))
+
+    # ── K-C: sablon-yerel :root ratchet — ARTAMAZ ───────────────────────────
+    yr = yerel_root_sayim()
+    yr_taban = ratchet.get("yerel_root")
+    if yr_taban is None:
+        print("  ATLANDI K-C yerel :root: ratchet'te taban yok — `--baseline` calistirin.")
+    else:
+        yr_artan = [(ad, yr_taban.get(ad, 0), n) for ad, n in sorted(yr.items())
+                    if n > yr_taban.get(ad, 0)]
+        if yr_artan:
+            hata = 1
+            print("  KIRIK  K-C sablon-yerel :root ARTTI: %d dosya" % len(yr_artan))
+            for ad, t, n in yr_artan:
+                print("         %-28s %d -> %d" % (ad, t, n))
+            print("         Yerel :root tokens.css'i O SAYFADA sessizce ezer.")
+            print("         Yeni token TANIMI tokens.css'e; sayfaya DEGIL.")
+        else:
+            print("  TEMIZ  K-C yerel :root: %d sablon (taban %d, artis yok)"
+                  % (sum(yr.values()), sum(yr_taban.values())))
 
     if verbose:
         print("\n  %-32s %6s %6s" % ("sablon", "hex", "taban"))
