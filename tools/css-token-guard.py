@@ -17,9 +17,22 @@ Tek kirmizi olcut tarayicidaki getComputedStyle idi.
 Ayni hata, hatayi ACIKLAYAN yorumun icine dizeyi birebir kopyalayarak
 BIR KEZ DAHA uretildi. Bu yuzden guard var.
 
-OLCUT: yorumlar soyulduktan sonra, blok DISINDA kalan metin yalnizca
-selektor/at-kural karakterlerinden olusmali. Turkce dux metin (i, s, g,
-u, o, c ya da cumle noktalamasi) orada goruldugu an dosya kiriktir.
+OLCUT — IKI KATMAN (08.08 aksami duzeltildi, DEV-2):
+
+  K1 (KESIN, birincil): yorumlar soyulduktan sonra kodda ARTIK bir yorum-kapatma
+     dizisi KALMAMALIDIR. Kaza her zaman ayni yapisal imzayi birakir: yorum govde
+     icinde erken kapanir, yazarin KAPATMAK ICIN yazdigi dizi ise oksuz kalir ve
+     kodun icinde gorunur. Gecerli CSS'te oksuz kapanis dizisi olamaz. Bu kural
+     kazanin kendisini olcer, yan etkisini degil.
+
+  K2 (ikincil ag): blok DISINDA kalan metin yalnizca selektor/at-kural
+     karakterlerinden olusmali.
+
+  ⚠ NEDEN K1 EKLENDI: ilk surum yalniz K2'ye dayaniyordu ve K2 bir KARAKTER
+  SINIFI testidir — harf ve bosluk selektorde gecerli oldugu icin DIAKRITIKSIZ
+  duz metin ondan gecer. Gerileme testi bunu gosterdi: ASCII yazilmis Turkce
+  (bu satirdan sonrasi artik yorum DEGIL) kirik dosyayi TEMIZ ilan etti.
+  Guard'in kendisi de kanitlanmali — TEMIZ dedi ile kural dogru ayni sey degil.
 
 Kullanim:  python3 tools/css-token-guard.py static/css/tokens.css [...]
 Cikis:     0 = temiz, 1 = kirik (deploy engellenmeli)
@@ -32,22 +45,36 @@ import pathlib
 SELEKTOR_IZINLI = re.compile(r'^[\sA-Za-z0-9_.#:\[\]()"\'=,>+~*%/^$|@!-]*$')
 
 
+KAPANIS = chr(42) + chr(47)   # yorum-kapatma dizisi; DIZE OLARAK YAZILMAZ (bkz. tokens.css uyarisi)
+ACILIS = chr(47) + chr(42)
+
+
 def yorumlari_soy(s):
-    """CSS yorumlarini soyar. CSS yorumlari IC ICE GECMEZ — /* ilk */ ile kapanir."""
-    out, i, depth = [], 0, 0
+    """CSS yorumlarini soyar ve oksuz kalan kapanislari raporlar.
+
+    CSS yorumlari IC ICE GECMEZ: acilis, ILK kapanista biter. Bu yuzden yazarin
+    "gercek" kapanisi, govdede kazayla bir kapanis varsa, kodun icinde OKSUZ kalir.
+    Oksuz kapanisin satir numarasini dondururuz — kazanin tam yeri orasidir.
+    """
+    out, i, depth, satir = [], 0, 0, 1
+    oksuz = []
     while i < len(s):
-        if depth == 0 and s[i:i + 2] == '/*':
+        if s[i] == chr(10):
+            satir += 1
+        if depth == 0 and s[i:i + 2] == ACILIS:
             depth = 1
             i += 2
             continue
-        if depth == 1 and s[i:i + 2] == '*/':
+        if depth == 1 and s[i:i + 2] == KAPANIS:
             depth = 0
             i += 2
             continue
         if depth == 0:
+            if s[i:i + 2] == KAPANIS:
+                oksuz.append(satir)
             out.append(s[i])
         i += 1
-    return ''.join(out), depth
+    return ''.join(out), depth, oksuz
 
 
 def blok_disi_parcalar(kod):
@@ -79,9 +106,19 @@ def kontrol(yol):
     src = pathlib.Path(yol).read_text(encoding='utf-8')
     hatalar = []
 
-    kod, acik = yorumlari_soy(src)
+    kod, acik, oksuz = yorumlari_soy(src)
     if acik:
-        hatalar.append('kapanmamis yorum blogu (dosya sonunda /* acik kaldi)')
+        hatalar.append('kapanmamis yorum blogu (dosya sonunda acilis dizisi acik kaldi)')
+
+    # K1 — kazanin kesin imzasi. Gecerli CSS'te oksuz kapanis dizisi olamaz.
+    if oksuz:
+        hatalar.append(
+            'satir %s: OKSUZ yorum-kapatma dizisi. Bu, ustteki yorumun GOVDESINDE '
+            'kaza eseri erken kapandiginin kesin isaretidir; aradaki aciklama metni '
+            'ust duzeyde CSS oldu ve hemen ardindaki blok ayristirici tarafindan '
+            'TAMAMEN atilir. Yorum govdesine kapanis dizisi yazmayin (tarif edin).'
+            % ', '.join(str(x) for x in oksuz[:5])
+        )
 
     parcalar, derinlik = blok_disi_parcalar(kod)
     if derinlik != 0:
