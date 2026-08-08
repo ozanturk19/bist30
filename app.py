@@ -5714,6 +5714,7 @@ _NEWS_DAILY_STATS_DEFAULTS = {
     "ok": 0, "fail": 0, "cb_opens": 0,
     "ok_prefetch": 0, "ok_user": 0, "fail_prefetch": 0, "fail_user": 0,
     "ok_stock_news": 0, "ok_market_news": 0, "fail_stock_news": 0, "fail_market_news": 0,
+    "prefetch_skipped_quota": 0,  # CPO-1340 S1: kota kapalıyken atlanan denemeler (fail_prefetch DEĞİL)
 }
 _news_daily_stats = {"date": None, **_NEWS_DAILY_STATS_DEFAULTS}
 
@@ -6500,14 +6501,9 @@ def _prefetch_mark_run(ts):
 
 def _prefetch_news_worker():
     """AL sinyalli hisselerin haberlerini cache'e önceden yükler; her 6 saatte bir çalışır.
-
-    Sunucu yeniden başlatıldıktan sonra kullanıcılar soğuk cache'e düşmeden
-    içerik görür. Yalnızca AL sinyalli hisseler için çalışır (max 8) ve istekler
-    arası 30 saniye bekler — Gemini ücretsiz tier rate-limit koruması.
-
-    Tur zamanlaması disk'teki son-tur damgasına bağlıdır (_prefetch_last_run_ts),
-    process ömrüne değil — worker recycle olsa da yeni PID gereksiz turu atlar.
-    """
+    Sunucu restart sonrası soğuk cache'e düşmeden içerik görülsün diye AL sinyalli
+    hisseler (max 8, istekler arası 30s) taranır. Tur zamanlaması disk'teki son-tur
+    damgasına bağlıdır (_prefetch_last_run_ts) — worker recycle turu atlamaz."""
     # SPEC-016 K1 — restart-grace: soğuk-start thundering herd fix (#48).
     # Site oturmadan prefetch Gemini'ye yüklenmesin → 120s → 300s.
     time.sleep(_PREFETCH_STARTUP_GRACE_S)
@@ -6567,6 +6563,10 @@ def _prefetch_news_worker():
             if not _is_gemini_leader():
                 logger.info("Prefetch: leader değil — tur durduruldu")
                 break
+            if _gemini_news_degraded():  # CPO-1340 S1: kota kapalıyken çağrı garantili fail, atla
+                logger.info("Prefetch: kota kapalı (retry_after_s=%ds) — %s atlandı", _gemini_cb_retry_after_s(), ticker)
+                _news_daily_stats_incr("prefetch_skipped_quota")
+                continue
             try:
                 result = get_ai_news(ticker, source="prefetch", ua_class="prefetch")
                 if result:
