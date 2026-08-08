@@ -6643,8 +6643,26 @@ def _prefetch_mark_run(ts):
         logger.warning("_prefetch_mark_run hatası: %s", e)
 
 
+def _market_box_candidates(stocks):
+    """Ana sayfa Gündem kutusu adayları: top5 AL + top2 SAT (endeks hariç).
+
+    CPO-1353 §4 — kanonik tek kaynak: hem _prefetch_news_worker (yalnızca
+    cache ISITMA amaçlı, listeyi DONDURMAZ) hem api_market_news (serve-time,
+    ticker listesini burada HER ÇAĞRIDA TAZE türetir) aynı seçim mantığını
+    kullanır. Aday listesi hiçbir yerde cache'lenmez — her okuyucu kendi
+    anındaki _cache["data"] üzerinden hesaplar.
+    """
+    al_stocks  = [s for s in stocks
+                  if s.get("signal") == "AL"
+                  and s.get("ticker") not in ("XU030", "XU100")][:5]
+    sat_stocks = [s for s in stocks
+                  if s.get("signal") == "SAT"
+                  and s.get("ticker") not in ("XU030", "XU100")][:2]
+    return al_stocks + sat_stocks
+
+
 def _prefetch_news_worker():
-    """AL sinyalli hisselerin (max 8) haberlerini 6 saatte bir cache'e önceden yükler (istekler arası 30s); tur zamanlaması disk'teki son-tur damgasına bağlıdır (_prefetch_last_run_ts), worker recycle turu atlamaz."""
+    """Gündem kutusu adaylarının (top5 AL + top2 SAT, _market_box_candidates) haberlerini 6 saatte bir cache'e önceden yükler (istekler arası 30s); tur zamanlaması disk'teki son-tur damgasına bağlıdır (_prefetch_last_run_ts), worker recycle turu atlamaz."""
     # SPEC-016 K1 — restart-grace: soğuk-start thundering herd fix (#48).
     # Site oturmadan prefetch Gemini'ye yüklenmesin → 120s → 300s.
     time.sleep(_PREFETCH_STARTUP_GRACE_S)
@@ -6668,15 +6686,16 @@ def _prefetch_news_worker():
             time.sleep(min(_PREFETCH_POLL_S, max(1, _NEWS_CACHE_TTL - (now - last_run))))
             continue
 
-        # Güncel cache'den AL sinyalli hisseleri seç (en fazla _PREFETCH_MAX adet)
+        # CPO-1353 §4 — Gündem kutusu adaylarını (top5 AL + top2 SAT) kanonik
+        # kaynaktan seç; önceden yalnız AL sinyalli hisseler prefetch
+        # ediliyordu, SAT dalı hep reaktif yola düşüyordu.
         with _lock:
             stocks = list(_cache.get("data") or [])
-        al_tickers = [
-            s["ticker"] for s in stocks
-            if s.get("signal") == "AL" and s.get("ticker") not in ("XU030", "XU100")
+        candidate_tickers = [
+            s["ticker"] for s in _market_box_candidates(stocks)
         ][:_PREFETCH_MAX]
 
-        if not al_tickers:
+        if not candidate_tickers:
             # Henüz veri yüklenmemiş — bu bir tamamlanmış tur DEĞİL, damga yazılmaz
             time.sleep(_PREFETCH_POLL_S)
             continue
@@ -6686,8 +6705,8 @@ def _prefetch_news_worker():
         # yüzden snapshot _lock altında alınır, TTL hesabı lock dışında yapılır
         # (aksi halde kalıcı self-deadlock).
         with _lock:
-            cached_snapshot = {ticker: _news_cache.get(ticker) for ticker in al_tickers}
-        for ticker in al_tickers:
+            cached_snapshot = {ticker: _news_cache.get(ticker) for ticker in candidate_tickers}
+        for ticker in candidate_tickers:
             cached = cached_snapshot[ticker]
             if not cached:
                 to_fetch.append(ticker)          # hiç denenmemiş
@@ -6696,7 +6715,7 @@ def _prefetch_news_worker():
             elif (now - cached["ts"]) > _news_ttl_for(ticker) * 0.9:
                 to_fetch.append(ticker)          # cache sona ermek üzere
 
-        logger.info("Prefetch: %d/%d AL hisse için haber yüklenecek", len(to_fetch), len(al_tickers))
+        logger.info("Prefetch: %d/%d Gündem-kutusu hissesi (AL+SAT) için haber yüklenecek", len(to_fetch), len(candidate_tickers))
         fetched = 0
         attempted = 0
         for ticker in to_fetch:
@@ -10740,14 +10759,10 @@ def api_market_news():
     with _lock:
         stocks = list(_cache["data"])
 
-    # Top 5 AL + top 2 SAT (endeks hisseleri hariç)
-    al_stocks  = [s for s in stocks
-                  if s.get("signal") == "AL"
-                  and s.get("ticker") not in ("XU030", "XU100")][:5]
-    sat_stocks = [s for s in stocks
-                  if s.get("signal") == "SAT"
-                  and s.get("ticker") not in ("XU030", "XU100")][:2]
-    candidates = al_stocks + sat_stocks
+    # CPO-1353 §4 — kanonik aday kaynağı (_market_box_candidates); ticker
+    # listesi HER ÇAĞRIDA burada, güncel _cache["data"] üzerinden türetilir
+    # (prefetch'ten DONMUŞ bir liste okunmaz) — ticker her zaman güncel kalır.
+    candidates = _market_box_candidates(stocks)
 
     results = []
     for s in candidates:
