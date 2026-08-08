@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-{% include '_head.html' %}
+{% set head_ios_standalone = true %}{% include '_head.html' %}
 <title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | BorsaPusula</title>
 <meta name="description" content="BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı güncel Güçlü Trend / Trend Bozuldu / Yatay sinyalleri. Ücretsiz, canlı güncelleme.">
 <meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, algoritmik borsa, sektör analizi">
@@ -130,13 +130,6 @@
 }
 </script>
 <!-- PWA -->
-<link rel="manifest" href="/static/manifest.json">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BorsaPusula">
-<meta name="theme-color" content="#0e0e12">
-<link rel="apple-touch-icon" href="/static/icon-192.png">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <!-- Stitch post-modern fonts — Space Grotesk (headings) + Manrope (body) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
