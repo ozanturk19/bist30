@@ -7862,6 +7862,7 @@ def stock_page(ticker):
             from flask import make_response
             html = (
                 "<!doctype html><html lang='tr'><head><meta charset='utf-8'>"
+                "<meta name='viewport' content='width=device-width,initial-scale=1.0'>"
                 f"<title>{ticker} — Borsadan çekildi | BorsaPusula</title>"
                 "<meta name='robots' content='noindex'>"
                 "<meta http-equiv='refresh' content='5;url=/hisseler'>"
@@ -11443,6 +11444,7 @@ def unsubscribe_page(token):
                 return f"""<!DOCTYPE html>
 <html lang="tr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
 <title>Abonelik İptal | BorsaPusula</title>
 <style>body{{margin:0;padding:0;background:#0b111f;color:#e2e8f0;
 font-family:-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;
@@ -11463,7 +11465,30 @@ padding:32px 40px;text-align:center;max-width:420px}}</style>
   </a>
 </div>
 </body></html>"""
-    return "<p style='font-family:sans-serif;color:#888;padding:40px'>Geçersiz veya süresi dolmuş bağlantı.</p>", 404
+    return """<!DOCTYPE html>
+<html lang="tr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Geçersiz Bağlantı | BorsaPusula</title>
+<style>body{margin:0;padding:0;background:#0b111f;color:#e2e8f0;
+font-family:-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;
+display:flex;align-items:center;justify-content:center;min-height:100vh}
+.box{background:#111827;border:1px solid #1e2d45;border-radius:12px;
+padding:32px 40px;text-align:center;max-width:420px}</style>
+</head>
+<body>
+<div class="box">
+  <div style="font-size:40px;margin-bottom:16px">⚠️</div>
+  <h2 style="font-size:18px;margin:0 0 8px;font-weight:700">Geçersiz veya Süresi Dolmuş Bağlantı</h2>
+  <p style="font-size:13px;color:#94a3b8;margin:0 0 20px;line-height:1.6">
+    Bu abonelik iptal bağlantısı artık geçerli değil.
+  </p>
+  <a href="https://borsapusula.com" style="display:inline-block;background:#1f6feb;
+  color:#fff;padding:9px 22px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
+    Ana Sayfaya Dön
+  </a>
+</div>
+</body></html>""", 404
 
 
 @app.route("/api/telegram/test", methods=["POST"])
