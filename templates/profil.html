@@ -185,6 +185,7 @@ header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{d
 </style>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 <header>
   <a href="/" class="logo-link" aria-label="BorsaPusula" style="display:inline-flex;align-items:center;text-decoration:none">
@@ -211,7 +212,7 @@ header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{d
   </a>
 </header>
 
-<main>
+<main id="main-content" tabindex="-1">
 
 {% if error %}
   <div class="alert alert-error">⚠️ {{ error }}</div>
