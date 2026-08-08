@@ -20,6 +20,31 @@ _TEMPLATES_DIR = os.path.join(_ROOT, "templates")
 _SHORT_POSITION_PHRASES = ("kısa pozisyon", "kisa pozisyon")
 
 
+def _signed_ret_block_lines(src):
+    """`_signed_ret` fonksiyonunun satır numaraları (1-tabanlı).
+
+    CPO-1335: bu muafiyet eskiden `i == 9925` diye SABİT bir satır numarasıydı.
+    app.py'ye üstten satır eklendiğinde kayıyor, deploy gate'i alakasız yerden
+    patlatıyordu. Artık fonksiyon kaynaktan bulunuyor — satır numarasından
+    bağımsız. Fonksiyon silinirse küme boşalır, yani test GEVŞEMEZ, sıkılaşır.
+    """
+    lines = src.splitlines()
+    start = None
+    for idx, line in enumerate(lines):
+        if line.startswith("def _signed_ret("):
+            start = idx
+            break
+    if start is None:
+        return set()
+    end = start + 1
+    while end < len(lines):
+        cur = lines[end]
+        if cur.strip() and not cur.startswith((" ", "\t")):
+            break
+        end += 1
+    return set(range(start + 1, end + 1))
+
+
 def _read(path):
     with open(path, encoding="utf-8") as f:
         return f.read()
@@ -28,15 +53,17 @@ def _read(path):
 def test_app_py_no_short_position_language_in_user_facing_strings():
     """entry_note/f-string üretimi kısa-pozisyon dili içermemeli.
 
-    app.py:9925 (_signed_ret docstring) bilinçli olarak muaf: kullanıcıya hiç
-    render edilmeyen dahili backtest yorumu, ürün yüzeyi değil.
+    `_signed_ret` docstring'i bilinçli olarak muaf: kullanıcıya hiç render
+    edilmeyen dahili backtest yorumu, ürün yüzeyi değil. Muafiyet CPO-1335'te
+    sabit satır numarasından (9925) fonksiyon kaynağına taşındı.
     """
     src = _read(_APP_PY)
+    exempt = _signed_ret_block_lines(src)
     violations = []
     for i, line in enumerate(src.splitlines(), start=1):
         low = line.lower()
         if any(p in low for p in _SHORT_POSITION_PHRASES):
-            if i == 9925:  # _signed_ret docstring — dahili, kullanıcıya render edilmiyor
+            if i in exempt:  # _signed_ret — dahili, kullanıcıya render edilmiyor
                 continue
             violations.append((i, line.strip()))
     assert not violations, f"kısa pozisyon dili kullanıcı yüzeyine sızmış: {violations}"

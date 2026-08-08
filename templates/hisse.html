@@ -1698,7 +1698,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
         <span class="bp-hero-icon">{{ _icon }}</span>
         <span>{{ _lbl }}</span>
       </div>
-      <span class="bp-hero-meta">son {{ ssr_signal.signal_bars or 1 }} gün</span>
+      {# CPO-1335: bar sayacı "gün" birimiyle sunuluyordu ve bilinmeyen değer
+         sessizce 1 güne düşüyordu; kaynak artık takvim yaşı (signal_date). #}
+      <span class="bp-hero-meta">{{ ssr_signal.signal_date|signal_age_text }}</span>
     </div>
     {% if _sig in ('AL', 'SAT') %}
     <div class="bp-hero-power-wrap">
@@ -2562,6 +2564,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
   ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong>yatırım tavsiyesi değildir</strong>. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
 </footer>
 
+<script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=20260808a"></script>
 <script>
 /* ── Global nav dropdown ── */
@@ -3134,10 +3137,12 @@ function renderSummary(s, signalData) {
 
   /* Sinyal date/bars — signalData'dan */
   if (signalData) {
-    const bars = signalData.signal_bars || 1;
+    /* CPO-1335: `|| 1` fallback kaldırıldı — bilinmeyen bar sayısı sessizce
+       1 olup "Bugün" bastırıyordu. Göreli etiket artık signal_date'ten. */
+    const bars = signalData.signal_bars;
     const date = signalData.signal_date || '—';
     // "⚡ Bugün" yalnızca AL/SAT için — Yatay+Bugün çelişkili görünür
-    const isNew = signalData.is_new_signal && signalData.signal !== 'BEKLE';
+    const isNew = bpIsSignalFromToday(signalData.signal_date) && signalData.signal !== 'BEKLE';
     // Faz 1 #4: Sinyal yaşı yorumu (Taze/Gelişiyor/Olgunlaşıyor/Olgun)
     const ageLabel = signalData.signal_age_label;
     const ageColor = signalData.signal_age_color;
@@ -3151,17 +3156,18 @@ function renderSummary(s, signalData) {
                         ageColor === 'red' ? '#f85149' : '#8b949e';
     const ageHtml = ageLabel ? ` <span style="color:${ageHexColor};font-size:11px;margin-left:6px" title="Sinyal yaşı: ${ageLabel}">${ageEmoji} ${ageLabel}</span>` : '';
     document.getElementById('icDate').innerHTML =
-      (isNew ? '<span style="color:#e3b341">⚡ Bugün</span>' : date + ' · ' + bars + ' bar') + ageHtml;
-    document.getElementById('icBars').textContent = bars;
+      (isNew ? '<span style="color:#e3b341">⚡ Bugün</span>'
+             : date + ' · ' + bpSignalAgeText(signalData.signal_date)) + ageHtml;
+    document.getElementById('icBars').textContent = (bars == null ? '—' : bars);
 
-    if (signalData.signal_price && s.signal !== 'BEKLE' && bars >= 2) {
+    if (signalData.signal_price && s.signal !== 'BEKLE' && !isNew) {
       const ep = signalData.signal_price;
       const ret = ((s.price - ep) / ep * 100);
       const retSign = ret >= 0 ? '+' : '';
       const retColor = ret >= 0 ? '#00e290' : '#f85149';
       document.getElementById('icEntry').innerHTML =
         fmt(ep) + ` <span style="font-size:11px;color:${retColor}">(${retSign}${ret.toFixed(1)}%)</span>`;
-    } else if (s.signal !== 'BEKLE' && bars === 1) {
+    } else if (s.signal !== 'BEKLE' && isNew) {
       document.getElementById('icEntry').innerHTML = '<span style="color:#e3b341;font-size:12px">⚡ Bugün oluştu</span>';
     } else {
       document.getElementById('icEntry').textContent = '—';
@@ -3428,8 +3434,10 @@ function renderSummary(s, signalData) {
   const conflictEl = document.getElementById('sigConflictNote');
   if (conflictEl) {
     if (signalData && signalData.signal === 'AL' && _dispChg < -3) {
-      const bars = signalData.signal_bars || 1;
-      const barLabel = bars > 1 ? 'Son ' + bars + ' gündür aktif' : 'Bugün oluştu';
+      /* CPO-1335: `|| 1` tuzağı + bar-sayacını-gün-sayma kaldırıldı */
+      const barLabel = bpIsSignalFromToday(signalData.signal_date)
+        ? 'Bugün oluştu'
+        : 'Son ' + bpSignalAgeText(signalData.signal_date) + 'dür aktif';
       conflictEl.textContent = barLabel + ' olan Güçlü Trend sinyali sürüyor, ancak bugünkü %' +
         Math.abs(_dispChg).toFixed(1) + ' düşüş stop loss seviyesine yaklaştırıyor olabilir. Risk yönetimi önemli.';
       conflictEl.style.display = '';

@@ -419,13 +419,13 @@
           <th onclick="perfSortBy('signal_price')" data-sort="signal_price" style="cursor:pointer">Sinyal Başı ₺ <span class="perf-sort-arr"></span></th>
           <th onclick="perfSortBy('price')" data-sort="price" style="cursor:pointer">Güncel ₺ <span class="perf-sort-arr"></span></th>
           <th onclick="perfSortBy('aktif_ret')" data-sort="aktif_ret" style="cursor:pointer" class="sort-active">Getiri % <span class="perf-sort-arr">▼</span></th>
-          <th onclick="perfSortBy('signal_bars')" data-sort="signal_bars" style="cursor:pointer">Süre (gün) <span class="perf-sort-arr"></span></th>
+          <th onclick="perfSortBy('signal_bars')" data-sort="signal_bars" style="cursor:pointer">Süre <span class="perf-sort-arr"></span></th>
           <th class="hm" onclick="perfSortBy('signal_date')" data-sort="signal_date" style="cursor:pointer">Tarih <span class="perf-sort-arr"></span></th>
         </tr>
       </thead>
       <tbody id="perfTbody">
         {% for s in aktif|sort(attribute='aktif_ret', reverse=true) %}
-        <tr data-ticker="{{ s.ticker }}" data-signal="{{ s.signal }}" data-signal_price="{{ s.signal_price }}" data-price="{{ s.price }}" data-aktif_ret="{{ s.aktif_ret if s.aktif_ret is not none else 0 }}" data-signal_bars="{{ s.signal_bars }}" data-signal_date="{{ s.signal_date }}"{% if s.tier == 'premium' and not has_premium_access %} class="tier-locked"{% endif %}>
+        <tr data-ticker="{{ s.ticker }}" data-signal="{{ s.signal }}" data-signal_price="{{ s.signal_price }}" data-price="{{ s.price }}" data-aktif_ret="{{ s.aktif_ret if s.aktif_ret is not none else 0 }}" data-signal_bars="{{ s.signal_date|signal_age_days }}" data-signal_date="{{ s.signal_date }}"{% if s.tier == 'premium' and not has_premium_access %} class="tier-locked"{% endif %}>
           <td><a href="/hisse/{{ s.ticker }}" class="ticker-link">{{ s.ticker }}</a></td>
           <td>
             {% if s.signal == 'AL' %}
@@ -443,7 +443,8 @@
               </span>
             {% else %}—{% endif %}
           </td>
-          <td>{{ s.signal_bars }}</td>
+          {# CPO-1335: "Süre (gün)" sütunu takvim yaşı — sıralama anahtarı da aynı eksende #}
+          <td>{{ s.signal_date|signal_age_text }}</td>
           <td class="hm" style="color:#8b949e">{{ s.signal_date }}</td>
         </tr>
         {% endfor %}

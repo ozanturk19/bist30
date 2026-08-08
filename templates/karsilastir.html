@@ -550,7 +550,8 @@ function renderCell(key, s) {
     case 'change_pct':    return renderChg(v);
     case 'adx':           return renderAdx(v, s.adx_label);
     case 'rsi':           return renderRsi(v);
-    case 'signal_bars':   return v ? `<span class="mono">${v} gün</span>` : '<span class="muted">—</span>';
+    /* CPO-1335: "Sinyal Süresi" bar sayacı değil takvim yaşı */
+    case 'signal_bars':   return `<span class="mono">${bpSignalAgeText(s.signal_date)}</span>`;
     case 'signal_date':   return v ? `<span style="font-size:12px">${v}</span>` : '<span class="muted">—</span>';
     case 'entry_quality': return renderQuality(v);
     case 'sl_level':      return v ? `<span class="dn mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>';
@@ -971,6 +972,7 @@ loadMacroBar();
 setInterval(loadMacroBar, 60000);
 </script>
 <script src="/static/bp-search.js?v=46" defer></script>
+<script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=20260808a"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}

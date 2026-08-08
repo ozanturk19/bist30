@@ -231,3 +231,117 @@ def derive_volume_label(vol_ratio):
     except (TypeError, ValueError):
         return None
     return VOLUME_LABELS["VERY_HIGH"] if vr >= 3 else VOLUME_LABELS["HIGH"]
+
+
+# ── CPO-1335 — göreli tarih etiketi kanonik türetimi ────────────────────────
+# KUSUR: "Bugün"/"Dün" etiketi iki DONMUŞ eksenden türetiliyordu:
+#   (a) signal_bars — veri setindeki bar sayısı. Ticker o gün tazelenmezse son
+#       bar dünün barıdır, dolayısıyla bars=1 "bugün" demek değildir. Canlı
+#       kanıt 08.08.2026 (payda 215): bars=1 hem 07.08 hem 06.08 signal_date'ine
+#       düşüyordu; bars=2 -> 06.08 ve 05.08; bars=3 -> 04.08 ve 05.08. Sapma tek
+#       tip DEĞİL — "hepsini bir gün geri al" düzeltmesi işe yaramaz.
+#   (b) is_new_signal — analyze() içinde (signal_date == today_str) olarak
+#       hesaplanıp payload'a donduruluyor (app.py:1635). Ticker tazelenmezse
+#       eski günün True'su taşınıyor: RYSAS is_new_signal=True, signal_date=
+#       06.08, ölçüm günü 08.08 → anasayfa hero'su "bugün güçlü trende geçti"
+#       diyordu. Bu alan analyze()'ın (DEV1 alanı) çıktısı; BURADA
+#       DEĞİŞTİRİLMİYOR, yalnız TÜKETİM tarafı artık ona güvenmiyor.
+#
+# KANONİK EKSEN: signal_date — payload'da 215/215 dolu, "DD.MM.YYYY", gerçek bar
+# tarihinden türer (app.py:1619/1623). Etiket GERÇEK bugünle (Europe/Istanbul)
+# karşılaştırılarak OKUMA/RENDER ANINDA üretilir.
+#
+# Tarih bilinmiyorsa etiket ÜRETİLMEZ (None) — çağıran nötr bir şey basmalı,
+# ASLA "Bugün"e düşmemeli (eski `bars || 1` deseninin tuzağı buydu).
+#
+# JS aynası: static/bp-format.js (bpSignalDateLabel) — eşikler birebir aynı,
+# tests/test_cpo1335_signal_date_label.py ikisini birlikte kilitler.
+
+SIGNAL_DATE_LABELS = {
+    "TODAY": "Bugün",
+    "YESTERDAY": "Dün",
+}
+
+_TZ_TR_NAME = "Europe/Istanbul"
+
+
+def _today_tr():
+    """Europe/Istanbul takvim günü. zoneinfo yoksa sistem yerel gününe düşer."""
+    try:
+        from zoneinfo import ZoneInfo
+
+        return datetime.now(ZoneInfo(_TZ_TR_NAME)).date()
+    except Exception:
+        return date.today()
+
+
+def parse_signal_date(signal_date):
+    """"DD.MM.YYYY" -> date. Ayrıştırılamazsa None — varsayım YOK."""
+    if isinstance(signal_date, datetime):
+        return signal_date.date()
+    if isinstance(signal_date, date):
+        return signal_date
+    if not isinstance(signal_date, str):
+        return None
+    try:
+        return datetime.strptime(signal_date.strip(), "%d.%m.%Y").date()
+    except (ValueError, TypeError):
+        return None
+
+
+def signal_date_age_days(signal_date, today=None):
+    """signal_date ile bugün arasındaki TAKVİM GÜNÜ farkı. Bilinmiyorsa None.
+
+    Pozitif = geçmiş, 0 = bugün, negatif = gelecek (savunma amaçlı ele alınır).
+    """
+    sd = parse_signal_date(signal_date)
+    if sd is None:
+        return None
+    ref = today if today is not None else _today_tr()
+    if isinstance(ref, datetime):
+        ref = ref.date()
+    if not isinstance(ref, date):
+        return None
+    return (ref - sd).days
+
+
+def is_signal_from_today(signal_date, today=None):
+    """Sinyal GERÇEKTEN bugüne mi ait.
+
+    Donmuş `is_new_signal` bayrağı yerine bunu kullan — o bayrak analiz anında
+    hesaplanıp donuyor, bayat ticker'da eski günün değerini taşıyor.
+    """
+    return signal_date_age_days(signal_date, today) == 0
+
+
+def derive_signal_date_label(signal_date, today=None):
+    """Kanonik göreli tarih etiketi.
+
+    bugün -> "Bugün" · dün -> "Dün" · daha eski VEYA gelecek -> gerçek tarih
+    ("DD.MM.YYYY"). Tarih ayrıştırılamazsa None döner; çağıran nötr bir şey
+    basmalı, "Bugün"e DÜŞMEMELİ.
+    """
+    age = signal_date_age_days(signal_date, today)
+    if age is None:
+        return None
+    if age == 0:
+        return SIGNAL_DATE_LABELS["TODAY"]
+    if age == 1:
+        return SIGNAL_DATE_LABELS["YESTERDAY"]
+    sd = parse_signal_date(signal_date)
+    return sd.strftime("%d.%m.%Y")
+
+
+def derive_signal_date_key(signal_date, today=None):
+    """Rozet/renk sınıfı için ayrık anahtar: today / yesterday / older / unknown.
+
+    static/bp-format.js:bpSignalDateKey() ile birebir aynı.
+    """
+    age = signal_date_age_days(signal_date, today)
+    if age is None:
+        return "unknown"
+    if age == 0:
+        return "today"
+    if age == 1:
+        return "yesterday"
+    return "older"

@@ -67,6 +67,10 @@ except ImportError:
 try:
     from business_rules   import validate_stocks_list          as _dqv_business_rules
     from business_rules   import derive_adx_label
+    from business_rules   import is_signal_from_today          # CPO-1335
+    from business_rules   import derive_signal_date_label      # CPO-1335
+    from business_rules   import derive_signal_date_key        # CPO-1335
+    from business_rules   import signal_date_age_days          # CPO-1335
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
     from anomaly          import compute_stock_anomaly_score    as _dqv_ui_anomaly
@@ -88,6 +92,13 @@ except ImportError as _dqv_import_err:
         if a >= 25: return "Güçlü"
         if a >= 18: return "Orta"
         return "Zayıf"
+    # CPO-1335: sözlük evi yüklenemezse göreli tarih etiketi ÜRETME.
+    # "Bugün" varsayımına düşmektense etiketsiz kal — bu bir dürüstlük
+    # kalemi, sessiz fallback kusurun ta kendisiydi (`bars || 1`).
+    def is_signal_from_today(signal_date, today=None):     return False
+    def derive_signal_date_label(signal_date, today=None): return None
+    def derive_signal_date_key(signal_date, today=None):   return "unknown"
+    def signal_date_age_days(signal_date, today=None):     return None
 
 # ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
 _SENTRY_AVAILABLE = False
@@ -748,6 +759,42 @@ def tr_price_filter(value):
     integer_part, decimal_part = formatted.split('.')
     integer_part = integer_part.replace(',', '.')
     return f"{integer_part},{decimal_part}"
+
+
+# ── CPO-1335: göreli zaman etiketi — SSR şablonlar için kanonik filtreler ────
+# Şablonlar eskiden `{{ s.signal_bars }} gün` yazıyordu. signal_bars bir BAR
+# sayacıdır: hafta sonlarını ve ticker'ın tazelenemediği günleri atlar, bu
+# yüzden "gün" birimiyle sunulduğunda yanlıştı. Kanonik eksen signal_date.
+
+@app.template_filter('signal_date_label')
+def signal_date_label_filter(signal_date):
+    """signal_date -> "Bugün" / "Dün" / gerçek tarih. Bilinmiyorsa "—"."""
+    return derive_signal_date_label(signal_date) or "—"
+
+
+@app.template_filter('signal_age_text')
+def signal_age_text_filter(signal_date):
+    """Sinyalin TAKVİM yaşı: "Bugün" / "Dün" / "N gün". Bilinmiyorsa "—".
+
+    Mutlak tarihin yanında gösterilen yerlerde kullanılır (ozet/karsilastir/
+    gundem/sinyal_performans); tarihin görünmediği yerlerde signal_date_label
+    tercih edilir, çünkü orada gerçek tarihi yazmak gerekir.
+    """
+    age = signal_date_age_days(signal_date)
+    if age is None:
+        return "—"
+    if age == 0:
+        return "Bugün"
+    if age == 1:
+        return "Dün"
+    return f"{age} gün"
+
+
+@app.template_filter('signal_age_days')
+def signal_age_days_filter(signal_date):
+    """Sıralanabilir sayısal takvim yaşı; bilinmiyorsa -1 (sona düşer)."""
+    age = signal_date_age_days(signal_date)
+    return -1 if age is None else age
 
 
 def _clean(obj):
@@ -4738,8 +4785,13 @@ def api_market_summary():
 
     # BIST hisseleri (XU030 hariç)
     bist = [s for s in stocks if s.get("ticker") != "XU030"]
-    new_bull = [s for s in bist if s.get("is_new_signal") and s.get("signal") == "AL"]
-    new_bear = [s for s in bist if s.get("is_new_signal") and s.get("signal") == "SAT"]
+    # CPO-1335: donmuş is_new_signal DEĞİL — okuma anında gerçek tarih kontrolü.
+    # Bayrak analiz anında hesaplanıp payload'a donuyor (app.py:1635); ticker o gün
+    # tazelenmezse eski günün True'su taşınıyor ve hero olmayan bir "bugün"ü anlatıyor.
+    new_bull = [s for s in bist
+                if is_signal_from_today(s.get("signal_date")) and s.get("signal") == "AL"]
+    new_bear = [s for s in bist
+                if is_signal_from_today(s.get("signal_date")) and s.get("signal") == "SAT"]
     all_bull = [s for s in bist if s.get("signal") == "AL"]
 
     # Top tickers (en taze 4 AL)
@@ -8573,7 +8625,14 @@ def api_tarama():
             "change_pct":    s.get("change_pct") or 0,
             "adx":           adx,
             "adx_label":     derive_adx_label(adx),  # CPO-1196 D0 #4: yerel `adx` ile aynı kaynaktan, tutarlı
-            "signal_bars":   s.get("signal_bars") or 1,
+            # CPO-1335: `or 1` kaldırıldı — bilinmeyen/0 bar sessizce 1 olup
+            # tüketicide "Bugün" oluyordu. Bilinmiyorsa None geçsin, tüketici
+            # nötr bassın.
+            "signal_bars":   s.get("signal_bars"),
+            # CPO-1335: tazelik etiketinin KANONİK ekseni. Bu alan payload'da
+            # yoktu; tarama tablosu göreli tarihi bar sayacından türetmek
+            # zorunda kalıyordu ve bir tam gün kayıyordu.
+            "signal_date":   s.get("signal_date"),
             "entry_quality": s.get("entry_quality",""),
             "vol_ratio":     s.get("vol_ratio") or 1.0,
             "rvol":          s.get("rvol"),
@@ -9489,7 +9548,10 @@ def api_gundem():
     with _lock:
         stocks = list(_cache["data"])
 
-    today = date.today().strftime("%d.%m.%Y")
+    # CPO-1335: eksen zaten signal_date (doğru) — yalnız gün sınırı TR'ye
+    # sabitlendi; date.today() sunucu (UTC) günüydü, 00:00-03:00 TR arasında
+    # bir gün geriden geliyordu.
+    today = datetime.now(_TZ_TR).strftime("%d.%m.%Y")
 
     # Bugün sinyal alan hisseler
     new_signals = [s for s in stocks
@@ -9585,7 +9647,11 @@ def ozet_gecmis(tarih):
     al_list    = [s for s in stocks if s.get("signal") == "AL"]
     sat_list   = [s for s in stocks if s.get("signal") == "SAT"]
     bekle_list = [s for s in stocks if s.get("signal") == "BEKLE"]
-    new_signals = [s for s in stocks if s.get("is_new_signal")]
+    # CPO-1335: arşiv sayfası kendi gününe göre değerlendirilir — donmuş
+    # is_new_signal yerine signal_date, referans gün ARŞİV günü (bugün değil).
+    _arsiv_gun = date.fromisoformat(tarih)
+    new_signals = [s for s in stocks
+                   if is_signal_from_today(s.get("signal_date"), today=_arsiv_gun)]
     return render_template("ozet.html",
         stocks=stocks, loading=False,
         updated_at=snap.get("date_tr", tarih),
@@ -9624,9 +9690,10 @@ def ozet_page():
     al_list    = [s for s in stocks if s["signal"] == "AL"]
     sat_list   = [s for s in stocks if s["signal"] == "SAT"]
     bekle_list = [s for s in stocks if s["signal"] == "BEKLE"]
-    new_signals = [s for s in stocks if s.get("is_new_signal")]
+    # CPO-1335: donmuş is_new_signal yerine okuma-anı signal_date kontrolü.
+    new_signals = [s for s in stocks if is_signal_from_today(s.get("signal_date"))]
 
-    today_str = date.today().strftime("%d.%m.%Y")
+    today_str = datetime.now(_TZ_TR).strftime("%d.%m.%Y")  # CPO-1335: TR günü
     return render_template("ozet.html",
         stocks=stocks, loading=loading, updated_at=updated_at,
         al_list=al_list, sat_list=sat_list, bekle_list=bekle_list,
@@ -9653,7 +9720,7 @@ def gucu_yuksek():
         s["_mscore"] = s.get("signal_strength") or 0
     active.sort(key=lambda s: s["_mscore"], reverse=True)
 
-    today_str = date.today().strftime("%d.%m.%Y")
+    today_str = datetime.now(_TZ_TR).strftime("%d.%m.%Y")  # CPO-1335: TR günü
     return render_template("gucu_yuksek.html",
         stocks=active, loading=loading, updated_at=updated_at,
         today_str=today_str, stock_names=STOCK_NAMES)

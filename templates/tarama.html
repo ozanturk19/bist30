@@ -669,6 +669,7 @@
   <a href="/metodoloji">Metodoloji</a>
 </footer>
 
+<script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=20260808a"></script>
 <script>
 /* ── Makro ticker ── */
@@ -742,6 +743,14 @@ function applyTextFilter() {
   renderResults(rows, rows.length);
 }
 
+/* CPO-1335: CSV'nin 'Sinyal Yaşı (gün)' sütunu bar sayacını gün gibi
+   yazıyordu (`s.signal_bars||1` — bilinmeyeni sessizce 1 yapan tuzak da
+   buradaydı). Artık takvim yaşı; bilinmiyorsa boş bırakılır. */
+function bpSignalAgeCsv(signalDate) {
+  const age = bpSignalDateAgeDays(signalDate);
+  return age === null ? '' : age;
+}
+
 function exportCSV() {
   if (!_csvData.length) { alert('Önce filtre uygulayın.'); return; }
   const hdr = ['Hisse','İsim','Sektör','Sinyal','ADX','Fiyat','Değişim%','Hacim Oranı','Sinyal Yaşı (gün)','Giriş Kalitesi'];
@@ -754,7 +763,7 @@ function exportCSV() {
     (s.price||0).toFixed(2),
     (s.change_pct||0).toFixed(2)+'%',
     s.vol_ratio ? '×'+s.vol_ratio.toFixed(1) : '',
-    s.signal_bars||1,
+    bpSignalAgeCsv(s.signal_date),
     s.entry_quality||''
   ].map(v => `"${v}"`).join(','));
   const csv = [hdr.map(h=>`"${h}"`).join(','), ...rows].join('\n');
@@ -1007,12 +1016,17 @@ function renderResults(rows, count) {
     const cls = v >= 1.5 ? 'high' : v >= 0.8 ? 'normal' : 'low';
     return `<div class="rvol-cell ${cls}"><span class="rvol-dot ${cls}"></span>${v.toFixed(1)}×</div>`;
   };
-  // Tazelik: bars=1 → Bugün (yeşil), bars=2 → Dün (mavi), bars≥3 → "N gün" (gri)
-  const freshCell = (bars) => {
-    const b = bars || 1;
-    if (b === 1) return '<span class="fresh-badge today"><span class="fresh-dot">●</span>Bugün</span>';
-    if (b === 2) return '<span class="fresh-badge yesterday"><span class="fresh-dot">●</span>Dün</span>';
-    return `<span class="fresh-badge old"><span class="fresh-dot">●</span>${b} gün</span>`;
+  /* CPO-1335 Tazelik: etiket signal_date'in GERÇEK tarihinden türer.
+     Eski sürüm signal_bars sayacını kullanıyordu; ticker o gün tazelenmezse
+     bars=1 dünün (hatta daha eskisinin) barını gösterdiği için etiket bir tam
+     gün kayıyordu (08.08 ölçümü: bars=1 hem 07.08 hem 06.08'e düşüyordu).
+     `bars || 1` fallback'i de kaldırıldı: tarih bilinmiyorsa "Bugün" DEMEYİZ. */
+  const freshCell = (s) => {
+    const sd  = s && s.signal_date;
+    const key = bpSignalDateKey(sd);
+    if (key === 'unknown') return '<span class="fresh-badge old"><span class="fresh-dot">●</span>—</span>';
+    const cls = key === 'today' ? 'today' : key === 'yesterday' ? 'yesterday' : 'old';
+    return `<span class="fresh-badge ${cls}"><span class="fresh-dot">●</span>${bpSignalDateLabel(sd)}</span>`;
   };
 
   const tbody = document.getElementById('resultBody');
@@ -1039,7 +1053,7 @@ function renderResults(rows, count) {
       <td class="hide-mob-narrow price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})}</td>
       <td class="hide-mob-narrow ${chgCls}">${chgSign}${(s.change_pct||0).toFixed(2)}%</td>
       <td class="hide-mob">${rvolCell(s.vol_ratio)}</td>
-      <td class="hide-mob">${freshCell(s.signal_bars)}</td>
+      <td class="hide-mob">${freshCell(s)}</td>
       <td class="hide-mob hide-tablet"><span class="sector-tag">${s.sector||'—'}</span></td>
     </tr>`;
   }).join('');

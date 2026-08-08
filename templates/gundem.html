@@ -435,7 +435,9 @@ function renderCard(s, isNew) {
   const metrics = [];
   if (adx != null)          metrics.push(`<div class="sc-metric"><span>ADX </span><strong>${adx.toFixed(1)}</strong></div>`);
   if (s.rsi != null)        metrics.push(`<div class="sc-metric"><span>RSI </span><strong>${parseFloat(s.rsi).toFixed(1)}</strong></div>`);
-  if (s.signal_bars)        metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${s.signal_bars}g</strong></div>`);
+  /* CPO-1335: "Süre" bar sayacı değil takvim yaşı */
+  if (bpSignalDateAgeDays(s.signal_date) !== null)
+    metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeShort(s.signal_date)}</strong></div>`);
   if (s.entry_quality)      metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${QUALITY_LABELS[s.entry_quality]||s.entry_quality}</strong></div>`);
   if (s.rr_ratio)           metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_ratio).toFixed(1)}</strong></div>`);
 
@@ -693,6 +695,7 @@ loadMacroBar();
 setInterval(loadMacroBar, 60000);
 </script>
 <script src="/static/bp-search.js?v=46" defer></script>
+<script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=20260808a"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}

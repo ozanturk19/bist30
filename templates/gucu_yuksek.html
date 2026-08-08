@@ -341,7 +341,8 @@
           <td class="hide-mob rsi-val" style="color: {% if s.rsi and s.rsi >= 70 %}var(--bp-sat){% elif s.rsi and s.rsi <= 30 %}#3fb950{% else %}#c9d1d9{% endif %}">
             {{ s.rsi or '—' }}
           </td>
-          <td class="hide-mob bars-val">{{ s.signal_bars or 1 }} gün</td>
+          {# CPO-1335: `or 1` tuzağı + bar-sayacını-gün-sayma kaldırıldı #}
+          <td class="hide-mob bars-val">{{ s.signal_date|signal_age_text }}</td>
           <td class="hide-mob confirm-dot">
             {% if s.confirmed %}<span style="color:#3fb950">✓</span>{% else %}<span style="color:#e3b341">…</span>{% endif %}
           </td>
