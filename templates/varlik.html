@@ -611,6 +611,25 @@ const others = Object.fromEntries(PEER_KEYS.map(k => [k, null]));
 /* ── Chart ── */
 const LC = LightweightCharts;
 
+/* -- CANVAS-GUVENLI TOKEN OKUMA -------------------------------------------
+   lightweight-charts bir CANVAS renderer'idir: verilen renk dizesini dogrudan
+   canvas fillStyle/strokeStyle'a gecirir. Canvas var() KABUL ETMEZ -- gecersiz
+   deger sessizce yok sayilir, onceki fillStyle yerinde kalir ve mum HIC CIZILMEZ.
+   Olculdu (08.08.2026): ayni veri + ayni kutuphane, tek fark renk yazimi;
+   downColor:'var(--bp-sat)' -> bombos siyah grafik, downColor:'#f85149' -> mumlar
+   normal ciziliyor. Kaynak: 5bcc1c1 (02.07.2026) token migrasyonu tirnakli hex'i
+   de mekanik olarak var()'a cevirmis; dusus mumlari 11 varlik sayfasinda 37 gun
+   gorunmezdi.
+
+   Cozum ham hex'e geri donmek DEGIL -- tek kaynak korunmali. Token CSS'ten
+   OKUNUP canvas'a cozulmus deger olarak veriliyor. Yedek deger yalnizca token
+   hic tanimli degilse devreye girer (bkz. tools/css-token-guard.py).
+   KURAL: bu dosyada chart yapilandirmasina ASLA dogrudan var() yazma. */
+function bpToken(ad, yedek) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(ad).trim();
+  return v || yedek;
+}
+
 const BASE_OPTS = {
   layout:          { background: { color: '#0f1923' }, textColor: '#8b949e' },
   grid:            { vertLines: { color: 'rgba(48,54,61,0.5)' }, horzLines: { color: 'rgba(48,54,61,0.5)' } },
@@ -724,10 +743,12 @@ function renderChart(data) {
   }
 
   /* OHLC mum */
+  /* canvas var() alamaz -- bkz. bpToken aciklamasi */
+  const _sat = bpToken('--bp-sat', '#f85149');
   const candle = chart.addCandlestickSeries({
-    upColor:'#3fb950', downColor:'var(--bp-sat)',
-    borderUpColor:'#3fb950', borderDownColor:'var(--bp-sat)',
-    wickUpColor:'#3fb950', wickDownColor:'var(--bp-sat)',
+    upColor:'#3fb950', downColor:_sat,
+    borderUpColor:'#3fb950', borderDownColor:_sat,
+    wickUpColor:'#3fb950', wickDownColor:_sat,
     priceLineVisible: false, lastValueVisible: true,
   });
   candle.setData(data.ohlc || []);
