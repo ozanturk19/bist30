@@ -30,8 +30,8 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: #0e0e12;
-    color: #e5e1e4;
+    background: var(--bp-bg);
+    color: var(--bp-text);
     font-family: 'Manrope', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     font-size: 14px;
@@ -59,7 +59,7 @@
   .logo-mark { width: 28px; height: 28px; flex-shrink: 0; }
   .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
   .logo-name { font-size: 16px; font-weight: 700; color: var(--bp-text); letter-spacing: -0.3px; font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .logo-name strong { color: #00e290; font-weight: 700; }
+  .logo-name strong { color: var(--bp-al); font-weight: 700; }
   .logo-sub { font-size: 10px; color: var(--bp-text3); letter-spacing: 0.2px; }
   .back-btn {
     display: flex; align-items: center; gap: 6px;
@@ -102,11 +102,11 @@
   .mbn-icon svg { width: 22px; height: 22px; stroke-width: 1.85; }
   .mbn-label { line-height: 1; white-space: nowrap; }
   .mbn-item:active .mbn-icon { transform: scale(0.85); }
-  .mbn-item.active { color: #00e290; }
+  .mbn-item.active { color: var(--bp-al); }
   .mbn-item.active::before {
     content: ''; position: absolute; top: 0; left: 50%;
     transform: translateX(-50%); width: 28px; height: 3px;
-    background: #00e290; border-radius: 0 0 3px 3px;
+    background: var(--bp-al); border-radius: 0 0 3px 3px;
     box-shadow: 0 0 10px rgba(var(--bp-al-rgb),.55);
   }
   .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); stroke-width: 2.1; }
@@ -302,7 +302,7 @@
   .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; transition: background .12s; font-size: 13px; }
   .search-result:hover, .search-result.sr-selected { background: var(--bp-surface2); }
   .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: 13px; }
-  .sr-sig.sr-al { color: #00e290; font-weight: 700; }
+  .sr-sig.sr-al { color: var(--bp-al); font-weight: 700; }
   .sr-sig.sr-sat { color: var(--bp-sat); font-weight: 700; }
   .sr-sig.sr-bekle { color: var(--bp-bkl); }
   .sr-name { color: var(--bp-text2); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
@@ -854,7 +854,7 @@ async function ozSubmitSub() {
     }
   } catch(e) {
     const form = document.getElementById('ozSubForm');
-    if (form) form.innerHTML = '<div style="color:#f85149;font-size:13px">Bağlantı hatası. Lütfen tekrar deneyin.</div>';
+    if (form) form.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">Bağlantı hatası. Lütfen tekrar deneyin.</div>';
   }
 }
 </script>

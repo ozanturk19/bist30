@@ -26,23 +26,23 @@
   .mbn-icon svg { width: 22px; height: 22px; stroke-width: 1.85; }
   .mbn-label { line-height: 1; white-space: nowrap; }
   .mbn-item:active .mbn-icon { transform: scale(0.85); }
-  .mbn-item.active { color: #00e290; }
+  .mbn-item.active { color: var(--bp-al); }
   .mbn-item.active::before {
     content: ''; position: absolute; top: 0; left: 50%;
     transform: translateX(-50%); width: 28px; height: 3px;
-    background: #00e290; border-radius: 0 0 3px 3px;
+    background: var(--bp-al); border-radius: 0 0 3px 3px;
     box-shadow: 0 0 10px rgba(var(--bp-al-rgb),.55);
   }
   .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); stroke-width: 2.1; }
   /* F14: push-active state on bell slot */
-  .mbn-item.push-active { color: #f59e0b; }
-  .mbn-item.push-active::before { background: #f59e0b; box-shadow: 0 0 10px rgba(245,158,11,.55); }
+  .mbn-item.push-active { color: var(--bp-gold); }
+  .mbn-item.push-active::before { background: var(--bp-gold); box-shadow: 0 0 10px rgba(245,158,11,.55); }
   .mbn-item.push-active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-gold-rgb),.5)); stroke-width: 2.1; }
   /* Badge dot — shows when push is active */
   .mbn-badge {
     position: absolute; top: 6px; right: calc(50% - 18px);
-    width: 8px; height: 8px; background: #f59e0b;
-    border-radius: 50%; border: 1.5px solid #0e0e12;
+    width: 8px; height: 8px; background: var(--bp-gold);
+    border-radius: 50%; border: 1.5px solid var(--bp-bg);
     display: none;
   }
   .mbn-item.push-active .mbn-badge { display: block; }
@@ -59,7 +59,7 @@
     box-shadow: 0 -10px 40px rgba(0,0,0,.4);
   }
   .mbn-sheet.open { transform: translateY(0); }
-  .mbn-sheet-handle { width: 40px; height: 4px; background: #46464d; border-radius: 2px; margin: 4px auto 14px; }
+  .mbn-sheet-handle { width: 40px; height: 4px; background: var(--bp-border2); border-radius: 2px; margin: 4px auto 14px; }
   .mbn-sheet-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 12px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 4px; }
   .mbn-sheet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   @media (max-width: 360px) { .mbn-sheet-grid { grid-template-columns: repeat(3, 1fr); } }

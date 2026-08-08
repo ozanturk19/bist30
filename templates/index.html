@@ -343,7 +343,7 @@
   #header-push-bell.push-active {
     background: rgba(var(--bp-gold-rgb),0.12);
     border-color: rgba(var(--bp-gold-rgb),0.45);
-    color: #f59e0b;
+    color: var(--bp-gold);
   }
   #header-push-bell.push-active:hover { background: rgba(var(--bp-gold-rgb),0.2); }
   @media (max-width: 768px) {
@@ -1112,7 +1112,7 @@
     font-size: 10px; font-weight: 600; margin-top: 3px;
     display: inline-block; padding: 1px 6px; border-radius: 10px;
   }
-  .bp-days.active   { background: rgba(0,226,144,.10); color: #00e290; }
+  .bp-days.active   { background: rgba(0,226,144,.10); color: var(--bp-al); }
   .bp-days.upcoming { background: rgba(var(--bp-brand-rgb),.12); color: var(--bp-brand); }
   .bilanco-mini-link {
     display: block; text-align: center; font-size: 11px; color: var(--accent);
@@ -1169,13 +1169,13 @@
   .mb-seg { height: 100%; transition: width .7s cubic-bezier(.4,0,.2,1); }
   .mb-seg-al  { background: var(--bp-al); border-radius: 3px 0 0 3px; }
   .mb-seg-sat { background: var(--bp-sat); border-radius: 0 3px 3px 0; }
-  .mb-seg-bkl { background: #46464d; flex: 1; }
+  .mb-seg-bkl { background: var(--bp-border2); flex: 1; }
   .mb-legend { display: flex; gap: 16px; margin-top: 7px; }
   .mb-lg { font-size: 11px; display: flex; align-items: center; gap: 5px; }
   .mb-lg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .mb-lg-al  .mb-lg-dot { background: var(--bp-al); }
   .mb-lg-sat .mb-lg-dot { background: var(--bp-sat); }
-  .mb-lg-bkl .mb-lg-dot { background: #46464d; }
+  .mb-lg-bkl .mb-lg-dot { background: var(--bp-border2); }
   .mb-lg-al  { color: var(--bp-al); }
   .mb-lg-sat { color: var(--bp-sat); }
   .mb-lg-bkl { color: var(--bp-text3); }
@@ -1269,7 +1269,7 @@
   }
   .afb-chip-x:hover {
     background: rgba(var(--bp-sat-rgb),0.20);
-    color: #f85149;
+    color: var(--bp-sat);
   }
   .afb-chip-x svg { width: 10px; height: 10px; }
   .afb-clear-all {
@@ -1277,7 +1277,7 @@
     display: inline-flex; align-items: center; gap: 5px;
     background: transparent;
     border: 1px solid rgba(var(--bp-sat-rgb),0.40);
-    color: #f85149;
+    color: var(--bp-sat);
     font-size: 11px;
     font-weight: 700;
     padding: 5px 12px;
@@ -1290,7 +1290,7 @@
   }
   .afb-clear-all:hover {
     background: rgba(var(--bp-sat-rgb),0.10);
-    border-color: #f85149;
+    border-color: var(--bp-sat);
   }
   @media (max-width: 720px) {
     .afb { padding: 7px 10px; gap: 8px; }
@@ -1572,7 +1572,7 @@
     font-size: 11px;
     background: rgba(var(--bp-sat-rgb),0.12);
     border: 1px solid rgba(var(--bp-sat-rgb),0.3);
-    color: #f85149;
+    color: var(--bp-sat);
     padding: 2px 7px;
     border-radius: 5px;
     font-variant-numeric: tabular-nums;
@@ -1855,13 +1855,13 @@
     font-size:22px; cursor:pointer;
     box-shadow: 0 0 18px rgba(var(--bp-al-rgb),0.22), 0 4px 20px rgba(0,0,0,0.5);
     display:flex; align-items:center; justify-content:center;
-    transition: all .2s; color:#00e290;
+    transition: all .2s; color:var(--bp-al);
     -webkit-tap-highlight-color: transparent;
   }
   .alarm-fab:hover { background: rgba(var(--bp-al-rgb),0.22); transform:scale(1.05); box-shadow: 0 0 24px rgba(var(--bp-al-rgb),0.35), 0 6px 24px rgba(0,0,0,0.5); }
   .alarm-fab:active { transform: scale(0.94); }
   .alarm-fab .fab-badge {
-    position:absolute; top:-4px; right:-4px; background:#f85149;
+    position:absolute; top:-4px; right:-4px; background:var(--bp-sat);
     color:#fff; font-size:10px; font-weight:700; border-radius:50%;
     width:18px; height:18px; display:flex; align-items:center; justify-content:center;
     display:none;
@@ -4065,11 +4065,11 @@ async function submitPremium() {
         renderTable();
       }, 1200);
     } else {
-      if (status) status.innerHTML = `<span style="color:#f85149">⚠️ ${json.message || json.error || 'Hata'}</span>`;
+      if (status) status.innerHTML = `<span style="color:var(--bp-sat)">⚠️ ${json.message || json.error || 'Hata'}</span>`;
       if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
     }
   } catch (e) {
-    if (status) status.innerHTML = '<span style="color:#f85149">⚠️ Bağlantı hatası, tekrar dene.</span>';
+    if (status) status.innerHTML = '<span style="color:var(--bp-sat)">⚠️ Bağlantı hatası, tekrar dene.</span>';
     if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
   }
 }
@@ -4812,7 +4812,7 @@ function renderAlarmPanel() {
       </div>
       <div class="ap-price-alarms">
         <div class="ap-pa-row">
-          <span class="ap-pa-lbl" style="color:#00e290">▲ Üstü</span>
+          <span class="ap-pa-lbl" style="color:var(--bp-al)">▲ Üstü</span>
           <input class="ap-pa-input ${aboveHasAlarm ? 'has-alarm' : ''}" id="${aboveInputId}"
             type="number" step="0.01" min="0"
             placeholder="${aboveHasAlarm ? pa.above : '—'}"
@@ -4823,7 +4823,7 @@ function renderAlarmPanel() {
             : `<button class="ap-pa-set" onclick="setPriceAlarm('${t}','above','${aboveInputId}')">Kur</button>`}
         </div>
         <div class="ap-pa-row">
-          <span class="ap-pa-lbl" style="color:#f85149">▼ Altı</span>
+          <span class="ap-pa-lbl" style="color:var(--bp-sat)">▼ Altı</span>
           <input class="ap-pa-input ${belowHasAlarm ? 'has-alarm' : ''}" id="${belowInputId}"
             type="number" step="0.01" min="0"
             placeholder="${belowHasAlarm ? pa.below : '—'}"
@@ -5117,7 +5117,7 @@ async function submitSubscribe() {
         window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
       }
       document.getElementById('subscribeBar').innerHTML =
-        `<div style="font-size:13px;color:#00e290;font-weight:600;flex:1">✅ ${json.message}</div>` +
+        `<div style="font-size:13px;color:var(--bp-al);font-weight:600;flex:1">✅ ${json.message}</div>` +
         (json.token ? `<a href="/profil?t=${encodeURIComponent(json.token)}" style="color:var(--bp-brand);font-size:12px;text-decoration:none;border:1px solid rgba(var(--bp-brand-rgb),0.3);padding:5px 11px;border-radius:6px;font-weight:600;flex-shrink:0">Profili Tamamla →</a>` : '');
     } else {
       showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'));
@@ -5731,14 +5731,14 @@ document.addEventListener('keydown', e => {
     justify-content: center; align-items: center; height: 52px;
     background: rgba(var(--bp-bg-rgb),0.92); backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(var(--bp-al-rgb),0.25);
-    color: #00e290; font-family: 'Space Grotesk', system-ui, sans-serif;
+    color: var(--bp-al); font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: 13px; font-weight: 600; gap: 8px;
     transition: transform .2s ease;
   }
   #ptr-indicator.ptr-visible { display: flex; }
   #ptr-spinner {
     width: 16px; height: 16px; border: 2px solid rgba(var(--bp-al-rgb),.25);
-    border-top-color: #00e290; border-radius: 50%;
+    border-top-color: var(--bp-al); border-radius: 50%;
   }
   #ptr-spinner.spinning { animation: ptrSpin .6s linear infinite; }
   @keyframes ptrSpin { to { transform: rotate(360deg); } }

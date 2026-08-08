@@ -340,7 +340,7 @@
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
-  .pos { color: #00e290; }
+  .pos { color: var(--bp-al); }
   .neg { color: var(--bp-sat); }
   .neu { color: var(--bp-bkl); }
 
@@ -492,7 +492,7 @@
     position: absolute;
     top: -4px;
     width: 14px; height: 14px;
-    background: #e5e1e4;
+    background: var(--bp-text);
     border: 2px solid var(--bp-surface);
     border-radius: 50%;
     transform: translateX(-50%);
@@ -645,7 +645,7 @@
   .hacim-profili .hp-row-val.bad { color:var(--bp-sat); }
   .hacim-profili .hp-row-val .hp-tag { font-size:10px; padding:1px 6px; border-radius:8px; margin-left:4px; font-weight:700; letter-spacing:.3px; }
   .hacim-profili .hp-row-val .hp-tag.premium { color:var(--bp-volume); background:rgba(var(--bp-volume-rgb),.10); border:1px solid rgba(var(--bp-volume-rgb),.45); }
-  .hacim-profili .hp-row-val .hp-tag.confirmed { color:#00e290; background:rgba(0,226,144,.08); border:1px solid rgba(0,226,144,.40); }
+  .hacim-profili .hp-row-val .hp-tag.confirmed { color:var(--bp-al); background:rgba(0,226,144,.08); border:1px solid rgba(0,226,144,.40); }
   .hacim-profili .hp-row-summary { margin-top:6px; font-size:10.5px; color:var(--bp-text3); font-style:italic; line-height:1.4; }
 
   .vol-status-val {
@@ -957,7 +957,7 @@
     margin-top: 1px;
   }
   .kap-class-badge.oda { background: rgba(88,166,255,.1); color:var(--bp-brand); border:1px solid rgba(88,166,255,.2); }
-  .kap-class-badge.fr  { background: rgba(0,226,144,.1);  color:#00e290; border:1px solid rgba(0,226,144,.2); }
+  .kap-class-badge.fr  { background: rgba(0,226,144,.1);  color:var(--bp-al); border:1px solid rgba(0,226,144,.2); }
   .kap-summary {
     font-size: 13px;
     color: var(--bp-text2);
@@ -1091,7 +1091,7 @@
   }
 
   /* Flash animasyonları */
-  @keyframes flashUp   { 0%,100%{color:inherit} 50%{color:#00e290} }
+  @keyframes flashUp   { 0%,100%{color:inherit} 50%{color:var(--bp-al)} }
   @keyframes flashDown { 0%,100%{color:inherit} 50%{color:var(--bp-sat)} }
   .flash-up   { animation: flashUp   0.6s ease; }
   .flash-down { animation: flashDown 0.6s ease; }
@@ -1612,7 +1612,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
     }
     .bp-hero-card::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--hero-accent, #00e290), transparent);
+      background: linear-gradient(90deg, transparent, var(--hero-accent, var(--bp-al)), transparent);
       opacity: 0.7;
     }
     .bp-hero-badge {
@@ -1984,7 +1984,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       <div class="week52-bar" id="week52Bar" style="display:none">
         <div class="week52-label">
           <span>52 Haftalık Aralık</span>
-          <span><span id="w52low" style="color:#f85149">—</span> — <span id="w52high" style="color:#00e290">—</span></span>
+          <span><span id="w52low" style="color:var(--bp-sat)">—</span> — <span id="w52high" style="color:var(--bp-al)">—</span></span>
         </div>
         <div class="week52-track">
           <div class="week52-fill"  id="w52fill"  style="width:0%"></div>
@@ -2321,7 +2321,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMbnSheet();});
       font-size: 12.5px; font-weight: 700; letter-spacing: 0.2px;
       display: inline-flex; align-items: center; gap: 4px;
     }
-    .bp-detail-cta-arrow { color: #00e290; font-weight: 800; }
+    .bp-detail-cta-arrow { color: var(--bp-al); font-weight: 800; }
   </style>
 
   <!-- KAP + Dış Linkler -->
@@ -3293,7 +3293,7 @@ function renderSummary(s, signalData) {
               <strong>${fmt(cur)}</strong>
             </div>
             <div class="rr-lvl" style="text-align:right">
-              <span style="color:#00e290">TP1 (2R)</span>
+              <span style="color:var(--bp-al)">TP1 (2R)</span>
               <strong style="color:var(--bp-al)">${fmt(tp1)}</strong>
               <br>
               <span style="color:var(--bp-brand);font-size:10px">TP2 (3R)</span>
