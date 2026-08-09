@@ -121,23 +121,39 @@ def main():
             else:
                 dynamic.append((node.name, rules[0]))
 
-    # tekillestir: her sablon icin EN KISA (en az parametreli) rota kanonik ornek
-    best = {}
+    # CPO-1361 §6-1 DUZELTME — eskiden burada `best[tpl]` her sablon icin YALNIZ
+    # en kisa rotayi tutuyordu ve tabloya sablon basina TEK satir basiliyordu.
+    # Sonuc: her kapsam iddiasinin paydasi sistematik olarak KUCUK cikiyordu.
+    # Olculdu: varlik.html tek basina 11 rota tasiyor, tabloda 1 gorunuyordu;
+    # palet sapmasi bu yuzden "3 sayfa" diye cerceveleniyordu.
+    # Yeni davranis: TUM rotalar basilir. Kanonik ornek (en kisa) korunur ama
+    # artik 4. sutundaki etiketle isaretlenir — eski tuketiciler satiri
+    # `split("\t")[:3]` ile ayristirdigi icin 4. sutun onlari KIRMAZ
+    # (dogrulandi: tools/dev2_shell_hash.py:41 — ve o `set()` uyguluyor).
+    per_tpl = {}
     for tpl, rule in rows:
         if tpl not in heads:
             continue
-        cur = best.get(tpl)
-        score = (rule.count("<"), len(rule))
-        if cur is None or score < cur[0]:
-            best[tpl] = (score, rule)
+        per_tpl.setdefault(tpl, set()).add(rule)
 
-    for tpl in sorted(best):
-        rule = best[tpl][1]
-        print(f"{tpl}\t{rule}\t{fill(rule)}")
+    toplam_rota = 0
+    for tpl in sorted(per_tpl):
+        # kanonik = en az parametreli, sonra en kisa
+        kurallar = sorted(per_tpl[tpl], key=lambda r: (r.count("<"), len(r), r))
+        for i, rule in enumerate(kurallar):
+            etiket = "CANONICAL" if i == 0 else "ALT"
+            print(f"{tpl}\t{rule}\t{fill(rule)}\t{etiket}")
+            toplam_rota += 1
 
-    missing = sorted(heads - set(best))
-    print(f"# head_tasiyan={len(heads)} rota_eslesen={len(best)} eslesmeyen={len(missing)}",
+    missing = sorted(heads - set(per_tpl))
+    print(f"# head_tasiyan={len(heads)} sablon_eslesen={len(per_tpl)} "
+          f"TOPLAM_ROTA={toplam_rota} eslesmeyen={len(missing)}",
           file=sys.stderr)
+    coklu = {t: len(r) for t, r in per_tpl.items() if len(r) > 1}
+    if coklu:
+        print("# COK-ROTALI SABLONLAR (eski tablo bunlari 1 sayiyordu): "
+              + " ".join(f"{t}={n}" for t, n in sorted(coklu.items(), key=lambda kv: -kv[1])),
+              file=sys.stderr)
     if missing:
         print(f"# ESLESMEYEN: {' '.join(missing)}", file=sys.stderr)
     if dynamic:
