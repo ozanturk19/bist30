@@ -8746,8 +8746,7 @@ def api_tarama():
     min_p    = float(request.args.get("min_price", 0))
     max_p    = float(request.args.get("max_price", 999999))
     sector   = request.args.get("sector",    "")
-    eq       = request.args.get("eq",        "")   # IDEAL | IYI | DIKKATLI | UZAK — deprecated, "Kalite" filtresi artık tier kullanıyor (CPO-985 #8.4)
-    tier_f   = request.args.get("tier",      "")   # premium | plus | standart (CPO-985 #8.4)
+    eq       = request.args.get("eq",        "")   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
     sort_by  = request.args.get("sort",      "signal_strength")  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
 
     with _lock:
@@ -8770,7 +8769,6 @@ def api_tarama():
         if sig    and s.get("signal")              != sig:    continue
         if sector and _get_sector(s.get("ticker","")) != sector: continue
         if eq     and s.get("entry_quality")       != eq:    continue
-        if tier_f and s.get("tier")                != tier_f: continue
         price = s.get("price")  or 0
         adx   = _parse_adx(s)
         if price < min_p or price > max_p: continue
