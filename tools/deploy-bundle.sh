@@ -3,6 +3,8 @@
 # Pzt 30 Haz 09:30 TR cutover: 13-commit bundle deploy + smoke + auto-rollback
 # Kullanım: ./tools/deploy-bundle.sh [--dry-run]
 # Env: TARGET_SHA, ROLLBACK_SHA, SMOKE_SCRIPT, SERVICE, REPO_DIR
+# Env (opsiyonel): ALLOW_UNPUSHED=1 — origin gorunurluk kapisini bypass eder,
+#   varsayilan YOK, kullanildiginda deploy.log'a kayit dusurur (bkz. PRE-FLIGHT 5/6).
 
 set -euo pipefail
 
@@ -157,7 +159,7 @@ log "Target: $TARGET_SHA | Rollback: $ROLLBACK_SHA | Service: $SERVICE"
 # geçmişi). git log diff kontrolü koda gömülü: DEV'in son mailbox yanıtından
 # (mailbox/dev-to-cpo.md'ye son commit) SONRA cpo-to-dev.md'ye giden bir
 # commit varsa, işlenmemiş yeni bir CPO mesajı var demektir — deploy durur.
-log "PRE-FLIGHT 0/5: Mailbox gate (agent=$DEPLOY_AGENT)..."
+log "PRE-FLIGHT 0/6: Mailbox gate (agent=$DEPLOY_AGENT)..."
 if [ -d "$OPS_DIR/.git" ]; then
   if ! (cd "$OPS_DIR" && git pull --ff-only origin main --quiet); then
     log "  ERROR: $OPS_DIR git pull --ff-only başarısız — aborting (ops repo'yu elle kontrol et)"
@@ -193,7 +195,7 @@ else
 fi
 
 # ─── 1. Pre-flight: service running ─────────────────────────────────────────
-log "PRE-FLIGHT 1/5: Service status..."
+log "PRE-FLIGHT 1/6: Service status..."
 if systemctl is-active --quiet "$SERVICE" 2>/dev/null; then
   log "  OK: $SERVICE is active"
 else
@@ -206,7 +208,7 @@ else
 fi
 
 # ─── 2. Pre-flight: disk space (need >500MB) ────────────────────────────────
-log "PRE-FLIGHT 2/5: Disk space..."
+log "PRE-FLIGHT 2/6: Disk space..."
 AVAIL_KB=$(df -k "$REPO_DIR" 2>/dev/null | awk 'NR==2{print $4}' || echo "0")
 AVAIL_MB=$((AVAIL_KB / 1024))
 if [ "$AVAIL_MB" -gt 500 ]; then
@@ -217,7 +219,7 @@ else
 fi
 
 # ─── 3. Pre-flight: repo on main branch ─────────────────────────────────────
-log "PRE-FLIGHT 3/5: Branch check..."
+log "PRE-FLIGHT 3/6: Branch check..."
 BRANCH=$(cd "$REPO_DIR" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 if [ "$BRANCH" = "main" ]; then
   log "  OK: on branch main"
@@ -227,7 +229,7 @@ else
 fi
 
 # ─── 4. Pre-flight: idempotency check ───────────────────────────────────────
-log "PRE-FLIGHT 4/5: Idempotency check..."
+log "PRE-FLIGHT 4/6: Idempotency check..."
 CURRENT_SHA=$(cd "$REPO_DIR" && git rev-parse HEAD 2>/dev/null || echo "unknown")
 
 # CALISAN kodun SHA'si. Sirayla: kalici state dosyasi -> deploy log'unun
@@ -260,7 +262,47 @@ elif [ "$CURRENT_SHA" = "$TARGET_SHA" ]; then
   SKIP_PULL=1
 fi
 
-# ─── 5. Fetch + verify target SHA reachable ─────────────────────────────────
+# ─── 5. Pre-flight: origin gorunurluk kapisi (CPO-1366) ─────────────────────
+# DEV2-020: idempotency kapisi "repo HEAD" yerine "CALISAN KOD"a bakacak
+# sekilde duzeltilince (yukaridaki 4/6) bir yan kapi actik — SKIP_PULL=1 dalina
+# giren, origin/main'in HENUZ GORMEDIGI (push edilmemis) bir TARGET_SHA da
+# sessizce kabul edilip dogrudan reload ile canliya inebiliyordu. Bu fiilen
+# oldu: 09.08 sabahi origin efbf5af'teyken REPO_DIR'de 6 push'lanmamis commit
+# reload'a kadar gitti (bkz. DEV2-020). Eski kapi bunu YANLIS SEBEPTEN
+# (HEAD==TARGET kor kontrolu) engelliyordu; kor noktayi duzeltince o tesadufi
+# koruma da gitti. Kural: TARGET_SHA origin/main'in atasi degilse GURULTULU
+# REDDET. Uc ayri durum, uc ayri ayirt edici mesaj (log dizesine degil exit
+# koduna gore karar verilecek):
+#   fetch OK   + ancestor EVET  -> EXIT=0  devam
+#   fetch OK   + ancestor HAYIR -> EXIT=1  "hedef SHA origin/main'de YOK"
+#   fetch FAIL                  -> EXIT=1  "origin'e ulasilamadi" (bayat
+#     origin/main'e bakip yanlis sebepten gecirmek/kilitlemekten farkli —
+#     P0 rollback'te origin erisilemezse bu kapi acikca ALLOW_UNPUSHED=1 ister,
+#     sessizce gecmez).
+# Kacis: ALLOW_UNPUSHED=1 — varsayilan YOK (DEPLOY_AGENT deseniyle ayni sinif),
+# kullanildiginda deploy.log'a hedef SHA + tarih + "ALLOW_UNPUSHED ile gecildi"
+# satiri duser; sessizce atlayan bir guard, olmayan guard'dan daha kotudur.
+log "PRE-FLIGHT 5/6: Origin gorunurluk kapisi (TARGET_SHA origin/main'de mi)..."
+ALLOW_UNPUSHED="${ALLOW_UNPUSHED:-}"
+if ! (cd "$REPO_DIR" && git fetch -q origin main); then
+  log "  ERROR: origin'e ulasilamadi, kapi dogrulanamadi (ALLOW_UNPUSHED=1 ile gecilebilir)"
+  if [ "$ALLOW_UNPUSHED" = "1" ]; then
+    log "  ALLOW_UNPUSHED ile gecildi — hedef: $TARGET_SHA  tarih: $(date '+%Y-%m-%d %H:%M:%S TR')"
+  else
+    exit 1
+  fi
+elif (cd "$REPO_DIR" && git merge-base --is-ancestor "$TARGET_SHA" origin/main); then
+  log "  OK: $TARGET_SHA origin/main'de gorunur (push edilmis)"
+else
+  log "  ERROR: hedef SHA origin/main'de YOK — once push et (ALLOW_UNPUSHED=1 ile gecilebilir)"
+  if [ "$ALLOW_UNPUSHED" = "1" ]; then
+    log "  ALLOW_UNPUSHED ile gecildi — hedef: $TARGET_SHA  tarih: $(date '+%Y-%m-%d %H:%M:%S TR')"
+  else
+    exit 1
+  fi
+fi
+
+# ─── 6. Fetch + verify target SHA reachable ─────────────────────────────────
 log "DEPLOY 1/4: Fetching + verifying target SHA..."
 dry "cd $REPO_DIR && git fetch origin main --quiet"
 if [ "$DRY_RUN" = "0" ]; then
@@ -273,7 +315,7 @@ else
   log "  [DRY-RUN] OK: SHA reachability check skipped"
 fi
 
-# ─── 6. Git pull ─────────────────────────────────────────────────────────────
+# ─── 7. Git pull ─────────────────────────────────────────────────────────────
 log "DEPLOY 2/4: Pulling main..."
 if [ "$SKIP_PULL" = "1" ]; then
   log "  SKIP: repo zaten $TARGET_SHA — pull yapilmadi (yalniz reload gerekli)."
@@ -290,7 +332,7 @@ if [ "$DRY_RUN" = "0" ]; then
 fi
 fi
 
-# ─── 7. Reload service ───────────────────────────────────────────────────────
+# ─── 8. Reload service ───────────────────────────────────────────────────────
 log "DEPLOY 3/4: Reloading service..."
 dry "systemctl reload $SERVICE || systemctl restart $SERVICE"
 if [ "$DRY_RUN" = "0" ]; then
@@ -304,7 +346,7 @@ if [ "$DRY_RUN" = "0" ]; then
   fi
 fi
 
-# ─── 8. Smoke test ───────────────────────────────────────────────────────────
+# ─── 9. Smoke test ───────────────────────────────────────────────────────────
 log "DEPLOY 4/4: Smoke test..."
 if [ "$DRY_RUN" = "1" ]; then
   log "  [DRY-RUN] SKIP: smoke test ($SMOKE_SCRIPT)"
@@ -322,7 +364,7 @@ else
   log "  OK: Smoke PASS"
 fi
 
-# ─── 9. Health loop (5x 30s = 2.5min) ───────────────────────────────────────
+# ─── 10. Health loop (5x 30s = 2.5min) ──────────────────────────────────────
 log "HEALTH: Monitoring 5 checks x 30s..."
 if [ "$DRY_RUN" = "1" ]; then
   log "  [DRY-RUN] SKIP: health loop"
