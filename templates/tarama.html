@@ -353,6 +353,22 @@
   .fresh-badge.old       { background:rgba(139,148,158,0.10); color:var(--text3); }
   .fresh-dot { font-size:8px; line-height:1; }
 
+  /* Sinyal Gücü (T3.5, CPO/Master Dönüşüm Programı) — signal_strength (0-100),
+     compose_score kaynaklı, sıralamayı sürükleyen skor. Tier renkleriyle (premium/plus/standart)
+     tutarlı: index.html tg-premium/tg-plus/tg-standart ile aynı palet — yeni görsel dil icat edilmedi. */
+  .score-cell { display:flex; align-items:center; gap:7px; min-width:66px; }
+  .score-val { font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .score-val.premium  { color:var(--bp-premium); }
+  .score-val.plus     { color:#1f6feb; }
+  .score-val.standart { color:#808080; }
+  .score-val.weak     { color:var(--text3); }
+  .score-bar-bg { flex:0 0 40px; height:4px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
+  .score-bar-fill { height:100%; border-radius:2px; }
+  .score-bar-fill.premium  { background:linear-gradient(90deg,#a855f7,var(--bp-premium)); }
+  .score-bar-fill.plus     { background:#1f6feb; }
+  .score-bar-fill.standart { background:#808080; }
+  .score-bar-fill.weak     { background:var(--text3); }
+
   /* TH tooltip (yeni kolon başlıkları) */
   thead th[data-tooltip] { position:relative; cursor:help; }
   thead th[data-tooltip]:hover::after {
@@ -535,12 +551,13 @@
     <table id="resultTable" style="display:none">
       <thead>
         {# SPEC-UX-BATCH-2026-06-03 Task #23 (CPO-475): Tarama kolon redesign.
-           Yeni sıra: Hisse / Sinyal / Trend Gücü (eski ADX) / Giriş Kalitesi (öne) / Fiyat / Değişim / RVOL× / Tazelik / Sektör.
-           Mobil ≤480: ilk 6 kolon görünür (Hisse, Sinyal, Trend Gücü, Giriş Kalitesi, Fiyat, Değişim).
+           Yeni sıra: Hisse / Sinyal / Sinyal Gücü (T3.5, skor — sıralamanın kaynağı) / Trend Gücü (eski ADX) / Giriş Kalitesi (öne) / Fiyat / Değişim / RVOL× / Tazelik / Sektör.
+           ≤768px: table gizlenir, #mobileResultCards devreye girer (bkz. aşağıda kart render'ı).
            R/R kolonu Faz 2'ye ertelendi (backend TP veri yok, CPO ile sürüyor). #}
         <tr>
           <th>Hisse</th>
           <th>Sinyal</th>
+          <th onclick="sortBy('signal_strength')" id="th-score" data-tooltip="Birleşik kalite skoru (ADX + Hacim + RSI + Teyit) — Premium/Plus/Standart bu skordan belirlenir. Varsayılan sıralama.">Sinyal Gücü</th>
           <th onclick="sortBy('adx')" id="th-adx" data-tooltip="ADX 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, <18 Zayıf">Trend Gücü</th>
           <th>Giriş Kalitesi</th>
           <th class="hide-mob-narrow" onclick="sortBy('price')" id="th-price">Fiyat</th>
@@ -892,6 +909,19 @@ function renderResults(rows, count) {
   }
 
   // === Yardımcı fonksiyonlar (UX-2 Task #23, CPO-475) ===
+  // Sinyal Gücü (T3.5): signal_strength 0-100 (compose_score, app.py) — tier bandı ile aynı renk
+  // (index.html tg-premium/tg-plus/tg-standart, CPO-986 #8.1). Eşikler _derive_tier() ile birebir
+  // (app.py ~L1560): >=75 premium, >=60 plus, >=40 standart, altı nötr — burada tekrar tanımlanmaz,
+  // sadece backend'in zaten döndürdüğü s.tier'a göre renklendirilir.
+  const scoreCell = (score, tier) => {
+    const v = score || 0;
+    const cls = tier === 'premium' ? 'premium' : tier === 'plus' ? 'plus' : tier === 'standart' ? 'standart' : 'weak';
+    const pct = Math.max(4, Math.min(100, v));
+    return `<div class="score-cell" title="Sinyal Gücü ${v}/100 — sıralama bu skora göre">
+      <span class="score-val ${cls}">${v}</span>
+      <div class="score-bar-bg"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div>
+    </div>`;
+  };
   // Trend Gücü etiketi sunucudan gelir (business_rules.derive_adx_label, CPO-1196 D0 #4) — burada eşik tekrar tanımlanmaz.
   const trendCell = (adx, adxLabel) => {
     const a = adx || 0;
@@ -942,6 +972,7 @@ function renderResults(rows, count) {
       <td><span class="sig-badge sig-${s.signal}">
         ${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}
       </span></td>
+      <td>${scoreCell(s.signal_strength, s.tier)}</td>
       <td>${trendCell(s.adx, s.adx_label)}</td>
       <td>${eqHtml}</td>
       <td class="hide-mob-narrow price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})}</td>
@@ -965,12 +996,16 @@ function renderResults(rows, count) {
       const _prm = s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:var(--bp-premium);font-size:11px">💎</span>' : s.tier === 'plus' ? ' <span title="Plus sinyal" style="color:#1f6feb;font-size:11px">⭐</span>' : '';
       const _tlbl = s.adx_label || 'Zayıf';
       const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
+      // T3.5: mobil kartta da masaüstüyle aynı skor rengi (tier bazlı) — bkz. scoreCell()
+      const _scv  = s.signal_strength || 0;
+      const _sccls = s.tier === 'premium' ? 'premium' : s.tier === 'plus' ? 'plus' : s.tier === 'standart' ? 'standart' : 'weak';
       return `<a href="/hisse/${s.ticker}" class="mr-card${_lk}">
         <div class="mr-top">
           <div><div class="mr-ticker">${s.ticker}${_prm}</div><div class="mr-name">${(s.name||'').replace(' A.Ş.','').substring(0,22)}</div></div>
           <span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span>
         </div>
         <div class="mr-bottom">
+          <div class="mr-metric"><div class="mr-metric-label">Sinyal Gücü</div><span class="score-val ${_sccls}">${_scv}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Trend</div><span class="trend-label ${_tl[1]}">${_tl[0]}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Kalite</div>${_eqH}</div>
           <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})} ₺</span></div>
@@ -995,7 +1030,7 @@ function sortBy(col) {
   document.getElementById('sortSel').value = col;
   // TH visual update
   document.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc','sort-desc'));
-  const map = {adx:'th-adx', price:'th-price', change_pct:'th-chg', vol_ratio:'th-vol', signal_bars:'th-bars'};
+  const map = {adx:'th-adx', price:'th-price', change_pct:'th-chg', vol_ratio:'th-vol', signal_bars:'th-bars', signal_strength:'th-score'};
   const id = map[col];
   if (id) {
     const el = document.getElementById(id);
