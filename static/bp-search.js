@@ -405,7 +405,7 @@
   // ---- Trend Strip removed (Strategy 1: Hareketliler widget anasayfada bunun yerini alıyor) ----
   function ensureTrendStrip() {
     // Sadece eski static "popüler" chip kalıntılarını ve eski trend strip'i temizle
-    document.querySelectorAll('nav.quick-topics, .bp-trend-strip').forEach(function(el){ el.remove(); });
+    document.querySelectorAll('.bp-trend-strip').forEach(function(el){ el.remove(); });
   }
 
   // ---- Header right actions: live time + refresh button (uniform across all pages) ----
