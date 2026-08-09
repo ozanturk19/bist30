@@ -172,16 +172,9 @@
       <div class="stat-lbl">▲ Güçlü Trend Ort. Getiri</div>
       <div class="stat-sub">Max {{ bt.al.best }}% / Min {{ bt.al.worst }}%</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-num c-red">{{ bt.sat.win_rate }}%</div>
-      <div class="stat-lbl">▼ Trend Bozuldu "Kazanma"</div>
-      <div class="stat-sub">{{ bt.sat.count }} sinyal incelendi</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num c-red">{{ bt.sat.avg_ret }}%</div>
-      <div class="stat-lbl">▼ Trend Bozuldu Ort. Getiri</div>
-      <div class="stat-sub">Max {{ bt.sat.best }}% / Min {{ bt.sat.worst }}%</div>
-    </div>
+    {# T3.7: SAT (short) win_rate/avg_ret KALDIRILDI — ürün long-only, kısa pozisyon açılmadığı için
+       "kazanma oranı"/"ortalama getiri" bu yönde yanıltıcı. bt.sat verisi backend'de duruyor,
+       yalnız burada render edilmiyor. #}
     <div class="stat-card">
       <div class="stat-num c-blue">{{ bt.tickers_used }}</div>
       <div class="stat-lbl">İncelenen Hisse</div>
@@ -244,8 +237,6 @@
           <th>Güçlü Kazanma %</th>
           <th>Güçlü Ort. Getiri</th>
           <th>Trend Bozuldu</th>
-          <th>Bozuldu Kazanma %</th>
-          <th>Bozuldu Ort. Getiri</th>
         </tr>
       </thead>
       <tbody>
@@ -266,17 +257,6 @@
             {% else %}—{% endif %}
           </td>
           <td>{{ t.sat_count }}</td>
-          <td>
-            {% if t.sat_count > 0 %}
-              {% set wr2 = (t.sat_wins / t.sat_count * 100)|round(0)|int %}
-              <span class="{{ 'c-green' if wr2 >= 50 else 'c-red' }}">{{ wr2 }}%</span>
-            {% else %}—{% endif %}
-          </td>
-          <td>
-            {% if t.sat_avg is not none %}
-              <span class="{{ 'c-green' if t.sat_avg >= 0 else 'c-red' }}">{{ '+' if t.sat_avg >= 0 else '' }}{{ t.sat_avg }}%</span>
-            {% else %}—{% endif %}
-          </td>
         </tr>
         {% endfor %}
       </tbody>
