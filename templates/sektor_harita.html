@@ -166,7 +166,7 @@
 
   .stat-pill.pill-prem {
     background: rgba(var(--bp-volume-rgb),0.14);
-    color: #ffc850;
+    color: var(--bp-volume);
     border: 1px solid rgba(var(--bp-volume-rgb),0.45);
     font-weight: 700;
   }
@@ -361,7 +361,7 @@ function renderHeatmap(stocks) {
 
     const premCount = sec.premium ? sec.premium.length : 0;
     const premPill  = premCount > 0
-      ? `<span class="stat-pill pill-prem" title="Premium sinyaller (AL + Hacim Onaylı, RVOL ≥ 1.20)">💎 ${premCount}</span>`
+      ? `<span class="stat-pill pill-prem" title="Hacim Onaylı — AL sinyali + RVOL ≥ 1.20">⭐ ${premCount}</span>`
       : '';
 
     /* Avg RVOL per sector */
