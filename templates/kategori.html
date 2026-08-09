@@ -367,7 +367,7 @@ Promise.all(ASSETS.map(loadAssetCard)).then(() => {
     const text = document.getElementById('dataNoteText');
     if(note && text) {
       text.textContent = incomplete + ' varlık için teknik analiz verisi tamamlanıyor — fiyat bilgisi bazılarında şimdiden canlı, gösterge veri sağlayıcı entegrasyonu bitince eklenecek.';
-      note.style.display = '';
+      note.style.display = 'block';
     }
   }
 });
