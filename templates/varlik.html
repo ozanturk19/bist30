@@ -1,5 +1,12 @@
-{% extends '_base.html' %}{% block head %}<title>{{ meta.name }} Teknik Analiz — Supertrend Sinyali | BorsaPusula</title>
+{% extends '_base.html' %}{% block head %}
+{% set _katman_a = ['ETH','SOL','BNB','DOGALGAZ'] %}
+{% if varlik_key in _katman_a %}
+<title>{{ meta.name }} Fiyatı ve Piyasa Verisi | BorsaPusula</title>
+<meta name="description" content="{{ meta.name }} güncel durumu — teknik analiz özelliği yakında.">
+{% else %}
+<title>{{ meta.name }} Teknik Analiz — Supertrend Sinyali | BorsaPusula</title>
 <meta name="description" content="{{ meta.desc }}">
+{% endif %}
 <link rel="canonical" href="https://borsapusula.com{{ canonical_path or ('/' + varlik_key | lower) }}">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <meta property="og:type"        content="website">
