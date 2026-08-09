@@ -1575,8 +1575,6 @@ def analyze(ticker_base):
     ticker = ticker_base + ".IS" if ticker_base != "XU030" else "XU030.IS"
 
     try:
-        weekly_dir = _weekly_trend(ticker)
-
         # CPO-740 Görev 8: lock-free subprocess fetch (yf_fetch.py, 25s hard timeout)
         df = _fetch_daily_subprocess(ticker_base)
         if df is None or len(df) < 120:
@@ -1584,12 +1582,33 @@ def analyze(ticker_base):
                             ticker_base, "None" if df is None else "var", 0 if df is None else len(df))
             return None
 
+        # CPO-1359 (i): sıralı bütçe 65s->~25-30s. weekly_trend (20s) ve
+        # fill_intraday_gaps (20s) eskiden daily'den ÖNCE/HER ZAMAN çağrılıyordu
+        # — daily başarısız olsa bile 20s zaten harcanmış oluyordu (45s toplam).
+        # Artık ikisi de daily BAŞARILI olduktan SONRA, TEK bir CB kontrolüyle
+        # (deterministik, K3) koşullu çağrılıyor: CB açıksa atla. Atlanan değerler
+        # bu iki fonksiyonun KENDİ hata-yolu fallback'iyle AYNI (weekly_dir=0 —
+        # bkz. _weekly_trend except/None dalı; df değişmeden kalır — bkz.
+        # _fill_intraday_gaps except/None dalı) — yeni bir değer İCAT EDİLMİYOR.
+        # K2 — UI alan haritası: weekly_dir yalnız "signal" gate'ini besler
+        # (AL/SAT/BEKLE, app.py ~1650, cache anahtarı "signal" app.py:1907);
+        # df ise fiyat/gösterge alanlarının tamamını besler (Close/High/Low/
+        # Volume -> EMA/ADX/Supertrend/RSI/vol_ratio, aşağıdaki satırlar).
+        _cb_skip = _yahoo_cb_blocked()
+        if _cb_skip:
+            weekly_dir = 0
+            logger.info("analyze(%s): CB açık, weekly_trend+fill_intraday_gaps atlandı (weekly_dir=0, df=daily-only)",
+                         ticker_base)
+        else:
+            weekly_dir = _weekly_trend(ticker)
+
         if isinstance(df.columns, pd.MultiIndex):  # safety guard for rollback
             df.columns = df.columns.get_level_values(0)
             df = df.loc[:, ~df.columns.duplicated()]
 
         df    = df.dropna()
-        df    = _fill_intraday_gaps(df, ticker)   # yfinance gecikmeli günleri 1m'den tamamla
+        if not _cb_skip:
+            df = _fill_intraday_gaps(df, ticker)   # yfinance gecikmeli günleri 1m'den tamamla
         df    = df.sort_index()
         close = df["Close"].squeeze()
         high  = df["High"].squeeze()
