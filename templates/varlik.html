@@ -106,6 +106,11 @@
   .sig-badge.bull    { background:rgba(63,185,80,.12);    color:var(--al);  border:1px solid rgba(63,185,80,.3); }
   .sig-badge.bear    { background:rgba(var(--bp-sat-rgb),.12);   color:var(--sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .sig-badge.neutral { background:rgba(139,148,158,.1); color:var(--bkl); border:1px solid rgba(139,148,158,.2); }
+  /* T7.5.1 — veri-bekleyen durum rozeti. Bilerek --bkl DEĞİL --text2 kullanır:
+     --bkl artık sig-BEKLE (Yatay sinyal) ile aynı ton, bu ikisi karışmamalı
+     (bkz FAZ 7.5 eki §2a). Kalıcı marka/token kararı bekliyor, şimdilik dokümanın
+     kendi önerdiği --text2 fallback'i. */
+  .sig-badge.state-soon { background:rgba(139,148,158,.08); color:var(--text2); border:1px solid rgba(139,148,158,.16); }
 
   .sc-meta { display:flex; flex-wrap:wrap; gap:12px; width:100%; padding-top:12px; border-top:1px solid var(--border2); }
   .sc-meta-item { display:flex; flex-direction:column; gap:2px; min-width:80px; }
@@ -360,6 +365,7 @@
         <span class="sc-meta-val" id="scW52L">—</span>
       </div>
     </div>
+    <div id="scMetaNote" style="display:none;font-size:11px;color:var(--text2);margin-top:6px;text-align:center">Grafik verisiyle birlikte gelir</div>
   </div>
 
   <!-- Chart -->
@@ -449,6 +455,12 @@ const VARLIK_KEY = '{{ varlik_key }}';
 const VARLIK_UNIT = '{{ meta.unit }}';
 const VARLIK_COLOR = '{{ meta.color }}';
 
+/* T7.5.1 — Katman B: anlik fiyat /api/macro'da zaten var (app.py _MACRO_TICKERS
+   ile birebir), grafik/gösterge yok. Katman A: hicbir yerde canli veri yok.
+   Kaynak: FAZ 7.5 eki §0. */
+const MACRO_COVERED = new Set(['BTC','ALTIN','GUMUS','PETROL','SP500','NASDAQ']);
+let _chartSummaryReceived = false;
+
 /* ── Para birimi formatı ── */
 function fmtPrice(v, decimals) {
   if (v == null || isNaN(v)) return '—';
@@ -489,10 +501,14 @@ const others = Object.fromEntries(PEER_KEYS.map(k => [k, null]));
       /* Other assets quick fill */
       d.forEach(it => { if(it.label in others) others[it.label] = it; });
       Object.entries(others).forEach(([key, it]) => {
-        if(!it) return;
-        const dec = MACRO_DEC[key]??2;
         const priceEl = document.getElementById('ocPrice-'+key);
         const chgEl   = document.getElementById('ocChg-'+key);
+        if(!it) {
+          /* T7.5.1/T7.5.2 — Katman A eş varlık: sonsuz '—' yerine 'Yakında' */
+          if(priceEl && !MACRO_COVERED.has(key)) priceEl.textContent = 'Yakında';
+          return;
+        }
+        const dec = MACRO_DEC[key]??2;
         if(priceEl) priceEl.textContent = it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
         if(chgEl) {
           const s = it.change>0?'+':'';
@@ -501,15 +517,21 @@ const others = Object.fromEntries(PEER_KEYS.map(k => [k, null]));
         }
       });
 
-      /* Header price for active asset */
+      /* T7.5.1 — aktif varlık Katman B ve grafik-özeti henüz gelmediyse (ya da
+         hiç gelmeyecekse, unavailable) signal card fiyatını macro'dan doldur.
+         _chartSummaryReceived true olduysa (renderSignalData çalıştıysa) macro
+         onu EZMEZ — chart-summary kaynağı önceliklidir. */
       const activeIt = d.find(it => it.label === VARLIK_KEY);
-      if(activeIt) {
+      if(activeIt && !_chartSummaryReceived) {
         const dec = MACRO_DEC[VARLIK_KEY]??2;
-        document.getElementById('hPrice').textContent = activeIt.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+        const priceEl = document.getElementById('scPrice');
+        if(priceEl) priceEl.textContent = activeIt.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
         const s = activeIt.change>0?'+':'';
-        const hChgEl = document.getElementById('hChg');
-        hChgEl.textContent = s+activeIt.change.toFixed(2)+'%';
-        hChgEl.className = 'h-chg ' + (activeIt.change>0.05?'chg-pos':activeIt.change<-0.05?'chg-neg':'chg-neu');
+        const chgEl = document.getElementById('scChg');
+        if(chgEl) {
+          chgEl.textContent = s+activeIt.change.toFixed(2)+'%';
+          chgEl.className = 'sc-chg ' + (activeIt.change>0.05?'chg-pos':activeIt.change<-0.05?'chg-neg':'chg-neu');
+        }
       }
     } catch(e){}
   }
@@ -699,6 +721,7 @@ function renderChart(data) {
 }
 
 function renderSignalData(summary, history, week52, commentary) {
+  _chartSummaryReceived = true;  /* T7.5.1 — macro fallback artık scPrice/scChg'yi ezmesin */
   const unit = VARLIK_UNIT;
   const dec  = summary.price >= 1000 ? 0 : summary.price >= 10 ? 2 : 4;
 
@@ -788,6 +811,36 @@ function renderSignalData(summary, history, week52, commentary) {
 
 const CHART_API = '{{ chart_api or ("/api/chart/" + varlik_key) }}';
 
+/* T7.5.1/T7.5.9 — grafik unavailable geldiğinde signal card'ı da dürüst duruma
+   getirir (bkz FAZ 7.5 eki §2a/2c-i). Katman B'de "Tekrar dene" anlamlı kalır
+   (Yahoo yolu ara sıra düzelebilir); Katman A'da hiç gösterilmez — hiçbir zaman
+   sonuç vermeyecek bir buton yanlış umut verir. */
+function _applyUnavailableSignalState(isMacroCovered) {
+  const badge = document.getElementById('sigBadge');
+  if(badge) {
+    badge.textContent = isMacroCovered ? '📊 Teknik analiz bekleniyor' : '🔧 Yakında';
+    badge.className   = 'sig-badge state-soon';
+  }
+  if(!isMacroCovered) {
+    const priceEl = document.getElementById('scPrice');
+    if(priceEl) priceEl.textContent = 'Fiyat verisi henüz yok';
+    const chgEl = document.getElementById('scChg');
+    if(chgEl) { chgEl.textContent = ''; chgEl.className = 'sc-chg chg-neu'; }
+  }
+  if(isMacroCovered) {
+    const scMeta = document.getElementById('scMeta');
+    if(scMeta) {
+      scMeta.style.display = '';
+      ['scSL','scADX','scE12','scE99','scW52H','scW52L'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.textContent = '—';
+      });
+      const note = document.getElementById('scMetaNote');
+      if(note) note.style.display = '';
+    }
+  }
+}
+
 async function loadChart() {
   try {
     const r = await fetch(CHART_API);
@@ -795,9 +848,15 @@ async function loadChart() {
     if(d.unavailable) {
       // CPO-1227 §2: backend zaten "veri gelmeyecek" olarak biliyor (disk köprüsü
       // eksik) — süresiz 8s retry YOK, dürüst göster + manuel tekrar dene.
+      const isMacroCovered = MACRO_COVERED.has(VARLIK_KEY);
+      const extraMsg = isMacroCovered ? '' :
+        ' Bu varlık için veri sağlayıcı entegrasyonu sürüyor. Bağlandığında otomatik görünür.';
+      const retryBtn = isMacroCovered ?
+        ' <button class="news-retry-btn" onclick="loadChart()">Tekrar dene</button>' : '';
       document.getElementById('varlikChart').innerHTML =
         '<div class="loading-card" style="color:var(--bp-sat)">' + (d.reason || 'Grafik verisi şu an kullanılamıyor')
-        + '. <button class="news-retry-btn" onclick="loadChart()">Tekrar dene</button></div>';
+        + '.' + extraMsg + retryBtn + '</div>';
+      _applyUnavailableSignalState(isMacroCovered);
       return;
     }
     if(d.loading || !d.chart) {
