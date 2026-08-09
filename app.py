@@ -7664,25 +7664,6 @@ def abd_page():
         assets=_ABD_INDEX_PEERS,
         us_stocks=us_list)
 
-@app.route("/abd/tarama")
-def abd_tarama_page():
-    """ABD hisseleri tarama sayfası."""
-    all_assets = []
-    # Önce endeksler
-    for p in _ABD_INDEX_PEERS:
-        all_assets.append({**p, "sector": "Endeks", "api": f"/api/chart/{p['key']}"})
-    # Sonra hisseler
-    for t in US_STOCKS:
-        sector = next((s for s,tl in US_SECTORS.items() if t in tl), "Diğer")
-        all_assets.append({
-            "key": t, "name": US_STOCK_NAMES.get(t, t),
-            "href": f"/abd/{t}", "emoji": "🇺🇸",
-            "sector": sector, "api": f"/api/chart/us/{t}"
-        })
-    return render_template("abd_tarama.html",
-        title="ABD Tarama", emoji="🔍",
-        desc="ABD hisseleri ve endeksleri — Supertrend + ADX + EMA sinyal tarayıcısı",
-        assets=all_assets)
 
 @app.route("/abd/sp500")
 def abd_sp500_page():
@@ -9251,7 +9232,6 @@ def sitemap():
         {"loc": "/bnb",             "priority": "0.8", "changefreq": "daily"},
         {"loc": "/petrol",          "priority": "0.8", "changefreq": "daily"},
         {"loc": "/dogalgaz",        "priority": "0.7", "changefreq": "daily"},
-        {"loc": "/abd/tarama",      "priority": "0.7", "changefreq": "daily"},
     ]
     for t in US_STOCKS:
         pages.append({"loc": f"/abd/{t}", "priority": "0.7", "changefreq": "daily"})
