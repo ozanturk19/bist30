@@ -8134,6 +8134,28 @@ def api_stock_fundamentals(ticker):
 _news_queue_stats = {"last_added_ts": 0, "last_processed_ts": 0, "total_added": 0, "total_processed": 0}
 
 
+def _news_coverage_state(ticker: str, now_ts: float) -> str:
+    """CPO-1368: bot/HEAD kısa devresi için Gemini çağrısı yapmadan ucuz cache
+    okuması — 'kapsam dışı' (hiç kuyruğa girmemiş) ile 'kuyruğa girdi ama
+    haberi yok/başarısız' ayrımını görünür kılar. Yan etkisi yok, kota tüketmez.
+    'cached' | 'fetch_failed' | 'not_fetched'."""
+    with _lock:
+        kap_hit = _kap_cache.get(ticker)
+        gen_cached = _news_cache.get(ticker)
+    kap_discs = kap_hit["data"] if (kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL) else None
+    kap_news_cached = None
+    if kap_discs:
+        cache_key = f"{ticker}_kap_{kap_discs[0]['date'][:10]}"
+        with _lock:
+            kap_news_cached = _news_cache.get(cache_key)
+    if (gen_cached and not gen_cached.get("failed") and gen_cached.get("text")) or \
+       (kap_news_cached and not kap_news_cached.get("failed")):
+        return "cached"
+    if (gen_cached and gen_cached.get("failed")) or (kap_news_cached and kap_news_cached.get("failed")):
+        return "fetch_failed"
+    return "not_fetched"
+
+
 @app.route("/api/hisse/<ticker>/news")
 @limiter.limit("20 per minute")
 def api_stock_news(ticker):
@@ -8173,6 +8195,7 @@ def api_stock_news(ticker):
             "news": None, "loading": False,
             "unavailable": degraded,
             "news_degraded": degraded,
+            "coverage": _news_coverage_state(ticker, time.time()),  # CPO-1368
         })
 
     kap_url = kap_url_for(ticker)
