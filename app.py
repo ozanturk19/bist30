@@ -7941,7 +7941,7 @@ def stock_page(ticker):
     seo_faq.append({
         "q": f"{ticker} hissesinin güncel teknik sinyali nedir?",
         "a": (f"{ticker} için güncel algoritmik sinyal: {sig_label}. "
-              f"BorsaPusula teknik göstergeleri (Supertrend, EMA, ADX, MACD) baz alır. "
+              f"BorsaPusula teknik göstergeleri (Supertrend, ADX, EMA12/EMA99) baz alır. "
               f"Yatırım tavsiyesi değildir."),
     })
     if price:
