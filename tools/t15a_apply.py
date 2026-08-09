@@ -71,7 +71,20 @@ def main() -> int:
     exc_path = Path(sys.argv[2])
     dry = "--dry-run" in sys.argv
 
-    data = json.loads(exc_path.read_text(encoding="utf-8")) if exc_path.exists() else {}
+    # CPO-1361 §6-2 — SESSIZ YUTMA KALDIRILDI.
+    # Eskiden: `... if exc_path.exists() else {}`. exclusions.json denetcilerin
+    # "bu satira DOKUNMA" kararlarini tasiyan dosya; yoksa {} ile devam etmek
+    # o kararlarin TAMAMINI dusuruyor ve script yine EXIT=0 doner. Olculdu:
+    # olmayan bir yol verildiginde 14 dosyada 152 ikame onerip basarili cikti.
+    # --dry-run olmadan kosturulsa dislamalari yok sayarak YAZARDI.
+    if not exc_path.exists():
+        print("HATA: exclusions.json bulunamadi: %s" % exc_path, file=sys.stderr)
+        print("  Bu dosya dislama kararlarini tasir; onsuz kosmak TUM dislamalari",
+              file=sys.stderr)
+        print("  sessizce dusurur. Bos dislama istiyorsan ACIKCA bos bir json ver.",
+              file=sys.stderr)
+        return 2
+    data = json.loads(exc_path.read_text(encoding="utf-8"))
     # (dosya, satir) -> ajan dislamasi. Hex bazinda degil satir bazinda uygulanir:
     # bir satirda hem guvenli hem guvensiz kullanim varsa TAMAMI atlanir (muhafazakar).
     agent_excl = {(e["file"].split("/")[-1], int(e["line"])) for e in data.get("exclusions", [])}
@@ -149,6 +162,13 @@ def main() -> int:
     for name, ln, reason, txt in skipped_detail[:40]:
         print(f"  {name}:{ln} [{reason}] {txt}")
 
+    # CPO-1361 §6-2 — KOSULSUZ `return 0` KALDIRILDI.
+    # Sifir ikame "basari" degildir: ya migrasyon zaten uygulanmis, ya dedektor
+    # artik eslesmiyor. Ikisi de cagiranin BILMESI gereken durum.
+    if stats["replaced"] == 0:
+        print("\nUYARI: HICBIR IKAME YAPILMADI — migrasyon zaten uygulanmis ya da"
+              " dedektor eslesmiyor. Sessiz basari yerine EXIT=3.", file=sys.stderr)
+        return 3
     return 0
 
 

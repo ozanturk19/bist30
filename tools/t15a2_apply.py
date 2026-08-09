@@ -50,8 +50,17 @@ def main():
         print("kullanim: t15a2_apply.py <templates_dir> <exclusions.json> [--dry-run]", file=sys.stderr)
         return 2
     tdir = Path(sys.argv[1])
+    exc_path = Path(sys.argv[2])
     dry = "--dry-run" in sys.argv
-    data = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
+    # CPO-1361 §6-2 — kardes script t15a_apply.py sessizce {} ile devam ediyordu;
+    # bu script ise cirilciplak patliyordu (exit 1, izlenmesi zor traceback).
+    # Ikisi de ayni, ACIK davranisa cekildi.
+    if not exc_path.exists():
+        print("HATA: exclusions.json bulunamadi: %s" % exc_path, file=sys.stderr)
+        print("  Dislama kararlari olmadan kosmak yasak. Bos dislama istiyorsan"
+              " ACIKCA bos bir json ver.", file=sys.stderr)
+        return 2
+    data = json.loads(exc_path.read_text(encoding="utf-8"))
     excl = {(e["file"].split("/")[-1], int(e["line"])) for e in data.get("exclusions", [])}
 
     stats = {"replaced": 0, "skip_not_css": 0, "skip_agent": 0, "skip_not_canon": 0}
@@ -109,6 +118,12 @@ def main():
     for k, v in sorted(per_file.items(), key=lambda x: -x[1]):
         print("  %5d  %s" % (v, k))
     print("\nGEREKEN KANAL TOKEN'LARI: %d" % len(per_tok))
+
+    # CPO-1361 §6-2 — KOSULSUZ `return 0` KALDIRILDI (kardes script ile ayni).
+    if stats["replaced"] == 0:
+        print("\nUYARI: HICBIR IKAME YAPILMADI — migrasyon zaten uygulanmis ya da"
+              " dedektor eslesmiyor. Sessiz basari yerine EXIT=3.", file=sys.stderr)
+        return 3
     return 0
 
 
