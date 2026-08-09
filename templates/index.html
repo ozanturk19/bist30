@@ -4085,14 +4085,14 @@ function _premiumCtaText() {
 }
 
 function getSorted(arr) {
-  // SPEC-001 Faz 1: tier öncelik (premium → plus → standart → null/BEKLE), sonra mevcut sortKey tie-breaker
-  const tierRank = { 'premium': 0, 'plus': 1, 'standart': 2 };
+  // T3.6 (Master Dönüşüm Programı): birincil sıralama signal_strength (0-100, compose_score/app.py).
+  // Önceki tierRank (premium/plus/standart) T3.3 ile tier filtresi sökülünce ölü taksonomiye dayanır
+  // hale gelmişti — kaldırıldı. Yüksek sinyal gücü üstte, mevcut sortKey/sortDir ikincil tie-breaker.
   return [...arr].sort((a, b) => {
-    // Tier first (Premium > Plus > Standart > diğer/null)
-    const ta = tierRank[a.tier] ?? 99;
-    const tb = tierRank[b.tier] ?? 99;
-    if (ta !== tb) return ta - tb;
-    // Aynı tier içinde mevcut sort key
+    const sa = a.signal_strength ?? -1;
+    const sb = b.signal_strength ?? -1;
+    if (sa !== sb) return sb - sa;
+    // Aynı sinyal gücünde mevcut sort key
     let va = a[sortKey] ?? '', vb = b[sortKey] ?? '';
     if (sortKey === 'signal_date') {
       const toYMD = s => s ? s.split('.').reverse().join('') : '00000000';
