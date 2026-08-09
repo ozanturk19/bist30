@@ -20,6 +20,21 @@ SMOKE_SCRIPT="${SMOKE_SCRIPT:-/root/bist30/tools/post-deploy-smoke.sh}"
 SERVICE="${SERVICE:-bist30}"
 REPO_DIR="${REPO_DIR:-/root/bist30}"
 OPS_DIR="${OPS_DIR:-/root/ops}"
+
+# CPO-1360 sonrasi olcum: mailbox kapisi HER ZAMAN DEV1'in kanalini okuyordu
+# (cpo-to-dev.md / dev-to-cpo.md). DEV2 deploy ederken bu iki yonlu ariza uretir:
+#   yanlis pozitif  -> DEV2, DEV1'in okunmamis mesaji yuzunden bloklanir
+#   yanlis negatif  -> DEV2'ye giden okunmamis mesaj kapiyi HIC tetiklemez
+# Varsayilan `dev`: DEV1 icin davranis birebir AYNI kalir.
+DEPLOY_AGENT="${DEPLOY_AGENT:-dev}"
+IN_BOX_DIR="mailbox"
+case "$DEPLOY_AGENT" in
+  dev)  IN_BOX="cpo-to-dev.md";  OUT_BOX="dev-to-cpo.md"
+        OTHER_IN="cpo-to-dev2.md"; OTHER_OUT="dev2-to-cpo.md" ;;
+  dev2) IN_BOX="cpo-to-dev2.md"; OUT_BOX="dev2-to-cpo.md"
+        OTHER_IN="cpo-to-dev.md";  OTHER_OUT="dev-to-cpo.md" ;;
+  *) echo "HATA: bilinmeyen DEPLOY_AGENT='$DEPLOY_AGENT' (gecerli: dev | dev2)"; exit 1 ;;
+esac
 LOG="${LOG:-/var/log/bist30-deploy.log}"
 HEALTH_URL="${HEALTH_URL:-https://borsapusula.com/api/health}"
 DRY_RUN=0
@@ -122,25 +137,37 @@ log "Target: $TARGET_SHA | Rollback: $ROLLBACK_SHA | Service: $SERVICE"
 # geçmişi). git log diff kontrolü koda gömülü: DEV'in son mailbox yanıtından
 # (mailbox/dev-to-cpo.md'ye son commit) SONRA cpo-to-dev.md'ye giden bir
 # commit varsa, işlenmemiş yeni bir CPO mesajı var demektir — deploy durur.
-log "PRE-FLIGHT 0/5: Mailbox gate..."
+log "PRE-FLIGHT 0/5: Mailbox gate (agent=$DEPLOY_AGENT)..."
 if [ -d "$OPS_DIR/.git" ]; then
   if ! (cd "$OPS_DIR" && git pull --ff-only origin main --quiet); then
     log "  ERROR: $OPS_DIR git pull --ff-only başarısız — aborting (ops repo'yu elle kontrol et)"
     exit 1
   fi
-  LAST_DEV_REPLY_COMMIT=$(cd "$OPS_DIR" && git log -1 --format=%H -- mailbox/dev-to-cpo.md 2>/dev/null || echo "")
-  if [ -n "$LAST_DEV_REPLY_COMMIT" ]; then
-    NEW_CPO_COMMITS=$(cd "$OPS_DIR" && git log --oneline "${LAST_DEV_REPLY_COMMIT}..HEAD" -- mailbox/cpo-to-dev.md 2>/dev/null || echo "")
-  else
-    NEW_CPO_COMMITS=""
-  fi
-  if [ -n "$NEW_CPO_COMMITS" ]; then
-    log "  ERROR: son DEV yanıtından SONRA yeni CPO mesajı var — deploy DURDURULDU:"
-    log "$NEW_CPO_COMMITS"
-    log "  Önce mailbox/cpo-to-dev.md'yi oku, gerekiyorsa deploy hedefini/planını güncelle."
+  log "  kanal: gelen=$IN_BOX  giden=$OUT_BOX"
+  LAST_REPLY_COMMIT=$(cd "$OPS_DIR" && git log -1 --format=%H -- "$IN_BOX_DIR/$OUT_BOX" 2>/dev/null || echo "")
+  if [ -z "$LAST_REPLY_COMMIT" ]; then
+    # SESSIZ ATLAMA KAPATILDI: eskiden bu dal NEW_CPO_COMMITS="" atayip kapiyi
+    # gecirirdi. Giden kutusunun hic gecmisi yoksa "okundu" DIYEMEYIZ.
+    log "  ERROR: $OUT_BOX icin hic commit yok — kapi karar veremiyor, deploy DURDURULDU."
+    log "  (Eskiden bu durum SESSIZCE gecerdi; belirsizlikte davranis artik RED.)"
     exit 1
   fi
-  log "  OK: son DEV yanıtından sonra yeni CPO mesajı yok"
+  NEW_CPO_COMMITS=$(cd "$OPS_DIR" && git log --oneline "${LAST_REPLY_COMMIT}..HEAD" -- "$IN_BOX_DIR/$IN_BOX" 2>/dev/null || echo "")
+  if [ -n "$NEW_CPO_COMMITS" ]; then
+    log "  ERROR: son $DEPLOY_AGENT yanıtından SONRA yeni CPO mesajı var — deploy DURDURULDU:"
+    log "$NEW_CPO_COMMITS"
+    log "  Önce $IN_BOX'i oku, gerekiyorsa deploy hedefini/planını güncelle."
+    exit 1
+  fi
+  log "  OK: son $DEPLOY_AGENT yanıtından sonra $IN_BOX'e yeni mesaj yok"
+  # DIGER ajanin kanali: BLOKLAMAZ, ama capraz sinyal kaybolmasin diye raporlanir.
+  OTHER_LAST=$(cd "$OPS_DIR" && git log -1 --format=%H -- "$IN_BOX_DIR/$OTHER_OUT" 2>/dev/null || echo "")
+  if [ -n "$OTHER_LAST" ]; then
+    OTHER_NEW=$(cd "$OPS_DIR" && git log --oneline "${OTHER_LAST}..HEAD" -- "$IN_BOX_DIR/$OTHER_IN" 2>/dev/null || echo "")
+    if [ -n "$OTHER_NEW" ]; then
+      log "  NOT (bloklamaz): $OTHER_IN kanalinda islenmemis $(echo "$OTHER_NEW" | wc -l) mesaj var."
+    fi
+  fi
 else
   log "  WARN: $OPS_DIR git repo değil — mailbox gate atlandı (kontrol edilemedi)"
 fi
