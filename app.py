@@ -9397,7 +9397,8 @@ def service_worker():
     fpath = os.path.join(app.root_path, "static", "sw.js")
     with open(fpath, "rb") as f:
         return Response(f.read(), mimetype="application/javascript",
-                        headers={"Service-Worker-Allowed": "/"})
+                        headers={"Service-Worker-Allowed": "/",
+                                 "Cache-Control": "no-cache"})
 
 
 @app.route("/favicon.ico")
