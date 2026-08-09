@@ -51,6 +51,11 @@ case "$DEPLOY_AGENT" in
   *) echo "HATA: bilinmeyen DEPLOY_AGENT='$DEPLOY_AGENT' (gecerli: dev | dev2)"; exit 1 ;;
 esac
 LOG="${LOG:-/var/log/bist30-deploy.log}"
+# CANLIDA NE KOSUYOR — kalici kayit. Deploy log'u logrotate ile donuyor
+# (/etc/logrotate.d/bist30), bu yuzden "son basarili SHA" icin tek basina
+# guvenilir degil. REPO_DIR ve OPS_DIR birer git agaci oldugu icin state
+# dosyasi ikisinin de DISINDA tutulur.
+STATE_SHA="${STATE_SHA:-/var/lib/bist30/deployed_sha}"
 HEALTH_URL="${HEALTH_URL:-https://borsapusula.com/api/health}"
 DRY_RUN=0
 
@@ -224,11 +229,35 @@ fi
 # ─── 4. Pre-flight: idempotency check ───────────────────────────────────────
 log "PRE-FLIGHT 4/5: Idempotency check..."
 CURRENT_SHA=$(cd "$REPO_DIR" && git rev-parse HEAD 2>/dev/null || echo "unknown")
-log "  Current: $CURRENT_SHA | Target: $TARGET_SHA"
-if [ "$CURRENT_SHA" = "$TARGET_SHA" ]; then
-  log "  SKIP: Already at target $TARGET_SHA — deploy not needed."
+
+# CALISAN kodun SHA'si. Sirayla: kalici state dosyasi -> deploy log'unun
+# son GERCEK basari satiri (dry-run satirlari " [DRY-RUN]" etiketi tasir ve
+# bu desene UYMAZ) -> bilinmiyor.
+LIVE_SHA=""
+if [ -r "$STATE_SHA" ]; then
+  LIVE_SHA=$(cat "$STATE_SHA" 2>/dev/null | tr -d '[:space:]')
+fi
+if [ -z "$LIVE_SHA" ]; then
+  LIVE_SHA=$( (cat "$LOG" "$LOG".1 2>/dev/null; zcat "$LOG".*.gz 2>/dev/null) \
+              | grep -oE '=== DEPLOY SUCCESS — [0-9a-f]{40} stable ===' \
+              | tail -1 | grep -oE '[0-9a-f]{40}' || true )
+fi
+log "  Repo HEAD: $CURRENT_SHA"
+log "  Calisan  : ${LIVE_SHA:-BILINMIYOR}"
+log "  Hedef    : $TARGET_SHA"
+
+SKIP_PULL=0
+if [ "$CURRENT_SHA" = "$TARGET_SHA" ] && [ "$LIVE_SHA" = "$TARGET_SHA" ]; then
+  log "  SKIP: hem repo hem CALISAN kod zaten $TARGET_SHA — deploy gereksiz."
   log "=== DEPLOY SKIPPED (idempotent) ==="
   exit 0
+elif [ "$CURRENT_SHA" = "$TARGET_SHA" ]; then
+  # Eski davranis burada `exit 0` idi ve RELOAD'a HIC ULASMIYORDU.
+  # Commit'ler dogrudan prod agacinda atildiginda repo HEAD ilerler ama
+  # calisan kod eski kalir; arac hicbir sey yapmadan "basarili" gorunurdu.
+  # Kapinin olcmesi gereken sey repo degil CALISAN KOD.
+  log "  Repo zaten hedefte AMA calisan kod ${LIVE_SHA:-BILINMIYOR} — pull ATLANACAK, RELOAD GEREKLI."
+  SKIP_PULL=1
 fi
 
 # ─── 5. Fetch + verify target SHA reachable ─────────────────────────────────
@@ -246,6 +275,9 @@ fi
 
 # ─── 6. Git pull ─────────────────────────────────────────────────────────────
 log "DEPLOY 2/4: Pulling main..."
+if [ "$SKIP_PULL" = "1" ]; then
+  log "  SKIP: repo zaten $TARGET_SHA — pull yapilmadi (yalniz reload gerekli)."
+elif true; then
 dry "cd $REPO_DIR && git pull --ff-only origin main --quiet"
 if [ "$DRY_RUN" = "0" ]; then
   NEW_SHA=$(cd "$REPO_DIR" && git rev-parse HEAD)
@@ -255,6 +287,7 @@ if [ "$DRY_RUN" = "0" ]; then
   else
     log "  OK: HEAD matches target"
   fi
+fi
 fi
 
 # ─── 7. Reload service ───────────────────────────────────────────────────────
@@ -307,5 +340,11 @@ else
 fi
 
 # ─── Done ────────────────────────────────────────────────────────────────────
+if [ "$DRY_RUN" = "0" ]; then
+  mkdir -p "$(dirname "$STATE_SHA")" 2>/dev/null || true
+  printf '%s\n' "$TARGET_SHA" > "$STATE_SHA" 2>/dev/null \
+    && log "  Calisan kod kaydi guncellendi: $STATE_SHA" \
+    || log "  UYARI: $STATE_SHA yazilamadi — sonraki kosu log'a dusecek"
+fi
 log "=== DEPLOY SUCCESS${_DL} — ${TARGET_SHA} stable ==="
 exit 0
