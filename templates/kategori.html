@@ -73,6 +73,11 @@
   .sig-AL    { background:rgba(63,185,80,.12); color:var(--al); border:1px solid rgba(63,185,80,.3); }
   .sig-SAT   { background:rgba(var(--bp-sat-rgb),.12); color:var(--sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .sig-BEKLE { background:rgba(139,148,158,.1); color:var(--bkl); border:1px solid rgba(139,148,158,.2); }
+  /* T7.5.3 — veri-bekleyen durum rozeti. Bilerek --bkl DEGIL --text2 (bkz varlik.html
+     ayni yorum, FAZ 7.5 eki SS2a): --bkl zaten sig-BEKLE ile ayni ton. */
+  .sig-badge.state-soon { background:rgba(139,148,158,.08); color:var(--text2); border:1px solid rgba(139,148,158,.16); }
+  .asset-card.state-empty { opacity:.55; }
+  .data-note { font-size:12px; color:var(--text2); background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:8px 12px; margin-bottom:14px; display:none; }
   .ac-adx    { font-size:11px; color:var(--gold); }
   .ac-sl     { font-size:11px; color:var(--text2); }
   .detail-btn { font-size:12px; color:var(--brand); }
@@ -144,6 +149,8 @@
     <div class="cat-hero-title">{{ emoji }} {{ title }}</div>
     <div class="cat-hero-desc">{{ desc }}</div>
   </div>
+
+  <div class="data-note" id="dataNote">ℹ️ <span id="dataNoteText"></span></div>
 
   <!-- Ana varlık kartları -->
   <div class="asset-grid" id="assetGrid">
@@ -243,6 +250,17 @@ const MACRO_LINKS = {
 /* Direkt /api/chart/ endpoint kullanan varlıklar (US hisseleri dışındakiler) */
 const DIRECT_CHART_KEYS = new Set(['BTC','ETH','SOL','BNB','ALTIN','GUMUS','PETROL','DOGALGAZ','SP500','NASDAQ']);
 
+/* T7.5.3 — Katman B: /api/macro'da anlik fiyati zaten var (grafik/gosterge yok).
+   Katman A: hicbir yerde canli veri yok. Kaynak: FAZ 7.5 eki SS0 (varlik.html ile ayni liste). */
+const MACRO_COVERED = new Set(['BTC','ALTIN','GUMUS','PETROL','SP500','NASDAQ']);
+let _macroItemsPromise = null;
+function getMacroItems() {
+  if(!_macroItemsPromise) {
+    _macroItemsPromise = fetch('/api/macro').then(r=>r.json()).then(d=>d.items||[]).catch(()=>[]);
+  }
+  return _macroItemsPromise;
+}
+
 /* Load asset card data */
 function fmtPrice(v, dec) {
   if(v==null||isNaN(v)) return '—';
@@ -254,11 +272,58 @@ function sigLabel(s){return {AL:'▲ Güçlü Trend',SAT:'▼ Trend Bozuldu',BEK
 /* Yüklenen fiyatları sakla (SSE güncellemeleri için) */
 const _loadedPrices = {};
 
+/* T7.5.3/T7.5.9 — unavailable dalinda Katman A/B ayrimi (varlik.html ile ayni mantik).
+   Katman B: /api/macro fiyatini karta yaz, notr "Bekleniyor" rozeti.
+   Katman A: statik "—" + "Yakinda" rozeti + kart soluklastir (opacity), "Tekrar dene" YOK
+   (kart zaten link, tiklaninca detay sayfasinda T7.5.1'in kendi "Tekrar dene"si var). */
+async function _applyUnavailableCard(key) {
+  const priceEl = document.getElementById('price-'+key);
+  const chgEl   = document.getElementById('chg-'+key);
+  const sigEl   = document.getElementById('sig-'+key);
+  const cardEl  = document.getElementById('card-'+key);
+  if(MACRO_COVERED.has(key)) {
+    const items = await getMacroItems();
+    const it = items.find(x => x.label === key);
+    if(priceEl) {
+      priceEl.className = 'ac-price';
+      priceEl.style.width = '';
+      priceEl.style.height = '';
+      if(it) {
+        const dec = MACRO_DEC[key] ?? 2;
+        priceEl.textContent = fmtPrice(it.price, dec);
+        priceEl.dataset.raw = it.price;
+      } else {
+        priceEl.textContent = '—';
+      }
+    }
+    if(chgEl && it) {
+      const sign = it.change>0?'+':'';
+      chgEl.textContent = sign+it.change.toFixed(2)+'%';
+      chgEl.className = 'ac-chg '+(it.change>0.05?'chg-pos':it.change<-0.05?'chg-neg':'chg-neu');
+    }
+    if(sigEl) { sigEl.textContent = '📊 Bekleniyor'; sigEl.className = 'sig-badge state-soon'; }
+  } else {
+    if(priceEl) {
+      priceEl.className = 'ac-price';
+      priceEl.style.width = '';
+      priceEl.style.height = '';
+      priceEl.textContent = '—';
+    }
+    if(chgEl) chgEl.textContent = '';
+    if(sigEl) { sigEl.textContent = 'Yakında'; sigEl.className = 'sig-badge state-soon'; }
+    if(cardEl) cardEl.classList.add('state-empty');
+  }
+}
+
 async function loadAssetCard(asset) {
   const key = asset.key;
   const api = DIRECT_CHART_KEYS.has(key) ? `/api/chart/${key}` : `/api/chart/us/${key}`;
   try {
     const d = await (await fetch(api)).json();
+    if(d.unavailable) {
+      await _applyUnavailableCard(key);
+      return;
+    }
     const c = d.chart;
     if(!c || d.loading) return;
     const s = c.summary || {};
@@ -291,7 +356,21 @@ async function loadAssetCard(asset) {
   } catch(e){}
 }
 
-Promise.all(ASSETS.map(loadAssetCard));
+Promise.all(ASSETS.map(loadAssetCard)).then(() => {
+  /* T7.5.5 — tek seferlik bilgi seridi, N DOM'dan sayilir (hardcode degil). */
+  const incomplete = ASSETS.filter(a => {
+    const sigEl = document.getElementById('sig-'+a.key);
+    return sigEl && sigEl.classList.contains('state-soon');
+  }).length;
+  if(incomplete > 0) {
+    const note = document.getElementById('dataNote');
+    const text = document.getElementById('dataNoteText');
+    if(note && text) {
+      text.textContent = incomplete + ' varlık için teknik analiz verisi tamamlanıyor — fiyat bilgisi bazılarında şimdiden canlı, gösterge veri sağlayıcı entegrasyonu bitince eklenecek.';
+      note.style.display = '';
+    }
+  }
+});
 
 /* SSE — global_prices mesajlarını dinle, fiyat kartlarını canlı güncelle */
 (function(){
