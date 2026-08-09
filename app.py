@@ -7921,11 +7921,6 @@ def stock_page(ticker):
         if ticker in a.get("related_tickers", [])
     ][:4]  # max 4 makale
 
-    # SPEC-007: Premium hisse detay paywall — anonim user'a grafik/geçmiş/indikatör blur
-    premium_locked = bool(
-        ssr_signal and ssr_signal.get("tier") == "premium" and not has_premium_access()
-    )
-
     # ── SPEC-011 L4 + SPEC-013 — İçerik zenginleştirme + AI-optimized data ──────
     company_summary = get_company_summary(ticker)   # None olabilir → template fallback
 
@@ -8008,7 +8003,6 @@ def stock_page(ticker):
                            kap_url=kap_url_for(ticker),
                            related_blog=related_blog,
                            compare_url=compare_url,
-                           premium_locked=premium_locked,
                            company_summary=company_summary,
                            related_stocks=related_stocks,
                            seo_faq=seo_faq,

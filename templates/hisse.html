@@ -1193,38 +1193,6 @@
     .sr-price { display: none; }
   }
 
-  /* SPEC-007: Premium paywall — blur + CTA banner */
-  /* SPEC-012 V3a L5 — yumuşatılmış teaser: hard blur yerine yarı-okunur grayscale.
-     Kullanıcı içeriği "var ama gri" görür → soft upsell; tam blur belirsizliği yerine. */
-  .tier-locked {
-    filter: blur(2px) saturate(.4) brightness(.78);
-    user-select: none; pointer-events: none;
-    position: relative;
-  }
-  .tier-locked::after {
-    content: "💎 Premium içerik";
-    position: absolute; top: 8px; right: 10px;
-    background: rgba(var(--bp-premium-rgb),.12); border: 1px solid rgba(var(--bp-premium-rgb),.4);
-    color: var(--bp-premium); font-size: 11px; font-weight: 700;
-    padding: 3px 8px; border-radius: 6px;
-    letter-spacing: .3px; pointer-events: none;
-    backdrop-filter: blur(2px);
-  }
-  .premium-cta-row {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; flex-wrap: wrap;
-    padding: 11px 16px; margin: 0 0 16px;
-    background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),0.10), rgba(var(--bp-premium-rgb),0.04));
-    border: 1px solid rgba(var(--bp-premium-rgb),0.32); border-radius: 8px;
-  }
-  .premium-cta-text { font-size: 13px; color: var(--bp-text); }
-  .premium-cta-text strong { color: var(--bp-premium); }
-  .premium-cta-btn {
-    display: inline-block; padding: 7px 14px; border-radius: 7px;
-    background: var(--bp-premium); color: #fff; font-size: 12px; font-weight: 700;
-    text-decoration: none; white-space: nowrap;
-  }
-  .premium-cta-btn:hover { background: #c084fc; }
 </style>
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -1875,13 +1843,7 @@
   <div class="bp-bottom-cta-spacer"></div>
 
   <!-- Grafik -->
-  {% if premium_locked %}
-  <div class="premium-cta-row">
-    <span class="premium-cta-text">🔒 <strong>{{ ticker }} Premium</strong> — grafik, indikatör ve sinyal geçmişi için Premium'u aç</span>
-    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
-  </div>
-  {% endif %}
-  <div id="chart-section" data-tab-content="grafik" class="chart-section{% if premium_locked %} tier-locked{% endif %}" style="scroll-margin-top:80px">
+  <div id="chart-section" data-tab-content="grafik" class="chart-section" style="scroll-margin-top:80px">
     <div class="chart-header">
       <span class="chart-label">{{ ticker }} — Günlük Grafik (2 Yıl)</span>
       <span id="emaLegend" style="font-size:11px;color:var(--bp-text3);margin-left:auto"></span>
@@ -2066,7 +2028,7 @@
   </div>
 
   <!-- İndikatörler -->
-  <div class="indicators-section{% if premium_locked %} tier-locked{% endif %}" data-tab-content="ozet">
+  <div class="indicators-section" data-tab-content="ozet">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
       <h2 class="section-title" style="margin:0">✓ Algoritmamızın Onayları</h2>
       <div style="display:flex;gap:6px;align-items:center">
@@ -2109,7 +2071,7 @@
   </div>
 
   <!-- Sinyal Geçmişi -->
-  <div class="history-section{% if premium_locked %} tier-locked{% endif %}" data-tab-content="ozet">
+  <div class="history-section" data-tab-content="ozet">
     <h2 class="section-title">Sinyal Geçmişi
       <span style="font-size:10px;color:var(--bp-text3);font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
     </h2>
