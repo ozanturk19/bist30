@@ -25,8 +25,23 @@ OPS_DIR="${OPS_DIR:-/root/ops}"
 # (cpo-to-dev.md / dev-to-cpo.md). DEV2 deploy ederken bu iki yonlu ariza uretir:
 #   yanlis pozitif  -> DEV2, DEV1'in okunmamis mesaji yuzunden bloklanir
 #   yanlis negatif  -> DEV2'ye giden okunmamis mesaj kapiyi HIC tetiklemez
-# Varsayilan `dev`: DEV1 icin davranis birebir AYNI kalir.
-DEPLOY_AGENT="${DEPLOY_AGENT:-dev}"
+# CPO-1361 §4 KOSUL — SESSIZ VARSAYILAN KALDIRILDI.
+# Eskiden: DEPLOY_AGENT="${DEPLOY_AGENT:-dev}". Olculdu: DEPLOY_AGENT hicbir
+# wrapper/env dosyasi/systemd drop-in'de set EDILMIYOR — yalnizca komut satirinda
+# elle yaziliyordu. Bir kez yazmayi unutan DEV2 icin varsayilan `dev` devreye
+# girer, kapi DEV1'in kanalini okur ve cb452de'de kapatilan YANLIS NEGATIF aynen
+# geri gelir: DEV2'ye dusmus okunmamis CPO mesaji kapiyi HIC tetiklemez, deploy
+# sessizce gecer. Ustelik hata vermeden — fark edilmesi zor.
+# ROLLBACK_SHA ile AYNI SINIF hata: guvenlik karari olan bir degiskenin sessiz
+# varsayilani olmamali. Yeni kural: verilmemisse GURULTULU REDDET (EXIT=1).
+DEPLOY_AGENT="${DEPLOY_AGENT:-}"
+if [ -z "$DEPLOY_AGENT" ]; then
+  echo "HATA: DEPLOY_AGENT acikca verilmeli — varsayilan YOK. (gecerli: dev | dev2)"
+  echo "  Bu degisken mailbox kapisinin HANGI kanali okuyacagini belirler;"
+  echo "  yanlis/eksik deger okunmamis CPO mesajini sessizce atlatir."
+  echo "  Ornek: DEPLOY_AGENT=dev2 TARGET_SHA=\$(git rev-parse HEAD) ROLLBACK_SHA=\$(git rev-parse HEAD) ./tools/deploy-bundle.sh"
+  exit 1
+fi
 IN_BOX_DIR="mailbox"
 case "$DEPLOY_AGENT" in
   dev)  IN_BOX="cpo-to-dev.md";  OUT_BOX="dev-to-cpo.md"
