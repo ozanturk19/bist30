@@ -357,3 +357,10 @@
                   'Liberation Mono', monospace;
 
 }
+
+/* T7.5.6 — veri-bekleyen sayfalar icin nav/footer 'kismi' rozeti.
+   Tek dosya, 0 sablon degisikligi (bkz FAZ 7.5 eki, Bolum 3). */
+nav a[href="/kripto"]::after, nav a[href="/emtialar"]::after, nav a[href="/abd"]::after,
+footer a[href="/kripto"]::after, footer a[href="/emtialar"]::after, footer a[href="/abd"]::after {
+  content: "kısmi"; font-size: 9px; opacity: .6; margin-left: 4px; vertical-align: super;
+}

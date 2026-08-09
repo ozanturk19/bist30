@@ -7637,7 +7637,7 @@ def dogalgaz_page():
 def kripto_page():
     return render_template("kategori.html",
         category_key="kripto",
-        title="Kripto Varlıklar", emoji="🔐",
+        title="Kripto Varlıklar", emoji="🪙",
         desc="Bitcoin ve Ethereum Supertrend + ADX + EMA12/99 teknik analizi",
         assets=_KRIPTO_PEERS,
         us_stocks=None)
