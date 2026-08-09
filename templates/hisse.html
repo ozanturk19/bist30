@@ -2410,7 +2410,7 @@
 </footer>
 
 <script src="/static/bp-format.js?v=20260808a"></script>
-<script src="/static/stale-banner.js?v=20260808a"></script>
+<script src="/static/stale-banner.js?v=20260810B"></script>
 <script>
 /* ── Global nav dropdown ── */
 function toggleNavDd(id, btn) {
@@ -2914,16 +2914,25 @@ function renderFreshness(f, dq, ageS, refreshing) {
   const age = f.stocks_age_seconds;
   if (age == null) { wrap.style.display = 'none'; return; }
 
-  const mins = Math.floor(age / 60);
+  /* CPO-1125 İş Kolu B: kanonik banner (static/stale-banner.js), sayfa-özel
+     fallback (dq/ageS henüz gelmediyse f.stocks_age_seconds'tan türet) korunur */
+  const effDq  = dq || (f.market_open && age > 900 ? 'stale' : 'fresh');
+  const effAge = ageS || age;
+
+  /* T7.2 — çift bildirim: bu chip ile staleBanner aynı cümleyi ("Veri X dk
+     önce güncellendi") aynı ekranda iki kez basıyordu. Banner tetiklendiğinde
+     (effDq stale/critical) burada kısa durum kalır, ayrıntı banner'da. */
   let color, label;
   if (!f.market_open) {
     color = '#909097'; label = 'Piyasa kapalı';
   } else if (age < 300) {
     color = '#f59e0b'; label = 'BIST ~15dk gecikmeli';
-  } else if (age < 900) {
-    color = '#f5c949'; label = `Veri ${mins} dk önce güncellendi`;
+  } else if (effDq === 'critical') {
+    color = '#f85149'; label = 'Veri bayat';
+  } else if (effDq === 'stale') {
+    color = '#f5c949'; label = 'Veri gecikmeli';
   } else {
-    color = '#f85149'; label = `Veri ${mins} dk önce güncellendi`;
+    color = '#f5c949'; label = `Veri ${bpFmtAge(age)} önce güncellendi`;
   }
   dot.style.background = color;
   txt.textContent = label;
@@ -2933,10 +2942,6 @@ function renderFreshness(f, dq, ageS, refreshing) {
   }
   wrap.style.display = 'inline-flex';
 
-  /* CPO-1125 İş Kolu B: kanonik banner (static/stale-banner.js), sayfa-özel
-     fallback (dq/ageS henüz gelmediyse f.stocks_age_seconds'tan türet) korunur */
-  const effDq  = dq || (f.market_open && age > 900 ? 'stale' : 'fresh');
-  const effAge = ageS || age;
   bpUpdateStaleBanner(effDq, effAge, refreshing);
 }
 

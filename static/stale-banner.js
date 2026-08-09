@@ -5,16 +5,30 @@
    CPO-1151 §3: ageS bilinmediğinde '?' yerine dürüst metin; "Yenileniyor..."
    yalnız /api/data.refreshing===true iken eklenir (refreshing 3. parametre,
    /api/data-quality'yi kullanan çağıranlarda undefined → ek metin yok). */
+/* T7.2 — insan dili yaş formatı: <60dk "dk", <48sa "sa dk", ustu "gun sa".
+   Onceki: ham dakika (orn "5115 dakikadir") — coklu-gunluk bayatlikta okunmaz
+   hale geliyordu (bkz FAZ7.5/T7.2 canli olcum, stocks_age_seconds~85 saat). */
+function bpFmtAge(ageS) {
+  var totalMin = Math.floor(ageS / 60);
+  if (totalMin < 60) return totalMin + ' dk';
+  var totalHour = Math.floor(totalMin / 60);
+  var remMin = totalMin % 60;
+  if (totalHour < 48) return totalHour + ' sa ' + remMin + ' dk';
+  var days = Math.floor(totalHour / 24);
+  var remHour = totalHour % 24;
+  return days + ' gün ' + remHour + ' sa';
+}
+
 function bpUpdateStaleBanner(dq, ageS, refreshing) {
   var banner = document.getElementById('staleBanner');
   var bTxt   = document.getElementById('staleBannerText');
   if (!banner) return;
   var hasAge = ageS != null && !isNaN(ageS);
-  var mins   = hasAge ? Math.floor(ageS / 60) : null;
+  var ageTxt = hasAge ? bpFmtAge(ageS) : null;
   var suffix = refreshing === true ? ' Yenileniyor...' : '';
   if (dq === 'critical') {
     var critTxt = hasAge
-      ? 'Veriler ' + mins + ' dakikadır güncellenemiyor.'
+      ? 'Veriler ' + ageTxt + ' boyunca güncellenemiyor.'
       : 'Veriler güncellenemiyor — son güncelleme zamanı doğrulanamıyor.';
     if (bTxt) bTxt.textContent = critTxt + suffix;
     banner.style.background  = 'rgba(248,81,73,0.12)';
@@ -22,7 +36,7 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
     banner.style.display     = 'block';
   } else if (dq === 'stale') {
     var staleTxt = hasAge
-      ? 'Veriler ' + mins + ' dk önce güncellendi.'
+      ? 'Veriler ' + ageTxt + ' önce güncellendi.'
       : 'Veriler güncellendi — son güncelleme zamanı doğrulanamıyor.';
     if (bTxt) bTxt.textContent = staleTxt + suffix;
     banner.style.background  = '';
