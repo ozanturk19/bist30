@@ -24,7 +24,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; overflow-x:hidden; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
-  .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:6px; background:var(--bp-surface2); }
+  .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:var(--bp-radius); background:var(--bp-surface2); }
   .back-btn:hover { background:var(--bp-surface2); color:var(--bp-text); }
   .page-title { font-size:20px; font-weight:700; color:#f0f6fc; }
   .page-sub   { font-size:13px; color:#8b949e; }
@@ -32,7 +32,7 @@
 
   /* Summary cards */
   .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:28px; }
-  .stat-card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px; text-align:center; }
+  .stat-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-xl); padding:20px; text-align:center; }
   .stat-num  { font-size:36px; font-weight:800; line-height:1; }
   .stat-lbl  { font-size:11px; color:#8b949e; margin-top:8px; text-transform:uppercase; letter-spacing:.5px; }
   .stat-sub  { font-size:12px; color:#8b949e; margin-top:4px; }
@@ -43,7 +43,7 @@
   .sec-head span { font-size:12px; color:#8b949e; font-weight:400; }
 
   /* Table */
-  .tbl-wrap { background:#161b22; border:1px solid #30363d; border-radius:10px; overflow:hidden; margin-bottom:24px; }
+  .tbl-wrap { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow:hidden; margin-bottom:24px; }
   table { width:100%; border-collapse:collapse; }
   thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:11px; color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
   tbody tr { border-bottom:1px solid #21262d; }
@@ -54,23 +54,23 @@
   .ticker-link:hover { color:#58a6ff; }
 
   /* Signal badges */
-  .sig-al  { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600; background:#1a4731; color:#3fb950; border:1px solid #238636; }
-  .sig-sat { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600; background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
+  .sig-al  { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:11px; font-weight:600; background:#1a4731; color:#3fb950; border:1px solid #238636; }
+  .sig-sat { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:11px; font-weight:600; background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
 
   /* Bars */
   .bar-wrap { background:#21262d; border-radius:4px; height:8px; width:120px; overflow:hidden; display:inline-block; vertical-align:middle; }
   .bar-fill { height:100%; border-radius:4px; }
 
   /* Computing notice */
-  .computing { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:40px; text-align:center; color:#8b949e; }
+  .computing { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:40px; text-align:center; color:#8b949e; }
   .computing .big { font-size:40px; margin-bottom:12px; }
   .computing p { margin-top:8px; font-size:13px; }
 
   /* Info box */
-  .info-box { background:#161b22; border:1px solid #30363d; border-left:3px solid #58a6ff; border-radius:8px; padding:14px 16px; margin-bottom:24px; font-size:13px; color:#8b949e; line-height:1.6; }
+  .info-box { background:#161b22; border:1px solid #30363d; border-left:3px solid #58a6ff; border-radius:var(--bp-radius-md); padding:14px 16px; margin-bottom:24px; font-size:13px; color:#8b949e; line-height:1.6; }
 
   /* Özet hero bar */
-  .ozet-bar { background:linear-gradient(135deg,#0d1f36 0%,#111827 100%); border:1px solid #1e2d45; border-left:3px solid #3fb950; border-radius:12px; padding:16px 20px; margin-bottom:24px; display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
+  .ozet-bar { background:linear-gradient(135deg,#0d1f36 0%,#111827 100%); border:1px solid #1e2d45; border-left:3px solid #3fb950; border-radius:var(--bp-radius-xl); padding:16px 20px; margin-bottom:24px; display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
   .ozet-metric { flex:1; min-width:140px; text-align:center; padding:10px 16px; position:relative; }
   .ozet-metric+.ozet-metric::before { content:''; position:absolute; left:0; top:15%; height:70%; width:1px; background:#1e2d45; }
   .ozet-metric-val { font-size:34px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
@@ -80,7 +80,7 @@
   @media(max-width:640px) { .ozet-bar{flex-wrap:wrap;gap:0} .ozet-metric{flex:0 0 50%;min-width:0;} .ozet-metric:nth-child(2)::before,.ozet-metric:nth-child(4)::before{display:none} .ozet-metric:nth-child(3),.ozet-metric:nth-child(4){border-top:1px solid #1e2d45;} }
 
   /* Trigger button */
-  .btn-run { background:#1f6feb; border:none; color:#fff; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; margin-left:12px; }
+  .btn-run { background:#1f6feb; border:none; color:#fff; border-radius:var(--bp-radius); padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; margin-left:12px; }
   .btn-run:hover { background:#388bfd; }
   .btn-run:disabled { background:#30363d; color:#8b949e; cursor:not-allowed; }
 
@@ -106,7 +106,7 @@
     gap: 12px; flex-wrap: wrap;
     padding: 11px 16px; margin: 12px 0;
     background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),0.10), rgba(var(--bp-premium-rgb),0.04));
-    border: 1px solid rgba(var(--bp-premium-rgb),0.32); border-radius: 8px;
+    border: 1px solid rgba(var(--bp-premium-rgb),0.32); border-radius:var(--bp-radius-md);
   }
   .premium-cta-text { font-size: 13px; color: #e6edf3; }
   .premium-cta-text strong { color: var(--bp-premium); }
@@ -117,7 +117,7 @@
   }
   .premium-cta-btn:hover { background: #c084fc; }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% with hdr_title = 'Sinyal Performans Analizi' %}{% include '_header.html' %}{% endwith %}
 <!-- Makro Ticker Bandı -->
@@ -286,14 +286,14 @@
     Aktif Sinyaller — Anlık Performans
     <span>(Sinyal başı fiyata göre)</span>
   </div>
-  <div class="perf-filter-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 14px;padding:10px;background:#161b22;border:1px solid #30363d;border-radius:8px">
-    <input type="text" id="perfSearch" placeholder="🔍 Hisse ara…" oninput="perfApplyFilter()" style="flex:1;min-width:140px;padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:13px">
-    <select id="perfSigFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:13px">
+  <div class="perf-filter-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 14px;padding:10px;background:#161b22;border:1px solid #30363d;border-radius:var(--bp-radius-md)">
+    <input type="text" id="perfSearch" placeholder="🔍 Hisse ara…" oninput="perfApplyFilter()" style="flex:1;min-width:140px;padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:13px">
+    <select id="perfSigFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:13px">
       <option value="">Tüm sinyaller</option>
       <option value="AL">▲ Güçlü Trend</option>
       <option value="SAT">▼ Trend Bozuldu</option>
     </select>
-    <select id="perfRetFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:13px">
+    <select id="perfRetFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:13px">
       <option value="">Tüm getiriler</option>
       <option value="pos">Pozitif (kazanan)</option>
       <option value="neg">Negatif (zarar)</option>

@@ -286,7 +286,7 @@
     width: min(560px, calc(100vw - 32px));
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 12px;
+    border-radius:var(--bp-radius-xl);
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0,0,0,0.6);
     max-height: calc(100vh - 120px);
@@ -308,7 +308,7 @@
   .search-close {
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
     color: var(--bp-text2); width: 28px; height: 28px;
-    border-radius: 6px; cursor: pointer;
+    border-radius:var(--bp-radius); cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 14px; flex-shrink: 0;
   }
@@ -329,7 +329,7 @@
     padding: 9px 12px;
     text-decoration: none;
     color: var(--bp-text);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     transition: background .12s;
     font-size: 13px;
   }
@@ -359,7 +359,7 @@
   .search-topic {
     display: block; padding: 9px 12px;
     text-decoration: none; color: var(--bp-text);
-    border-radius: 8px; font-size: 13px;
+    border-radius:var(--bp-radius-md); font-size: 13px;
     transition: background .12s;
   }
   .search-topic:hover, .search-topic.sr-selected { background: var(--bp-surface2); }
@@ -367,7 +367,7 @@
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: 10px; padding: 2px 5px;
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
-    border-radius: 3px; color: var(--bp-text3);
+    border-radius:var(--bp-radius-sm); color: var(--bp-text3);
     margin-left: auto;
   }
   @media (max-width: 600px) {
@@ -430,7 +430,7 @@
   .nav-dropdown-menu {
     display: none; position: absolute; top: calc(100% + 6px); left: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border2);
-    border-radius: 10px; min-width: 178px; padding: 5px;
+    border-radius:var(--bp-radius-lg); min-width: 178px; padding: 5px;
     z-index: 500; box-shadow: 0 12px 32px rgba(0,0,0,.55);
   }
   .nav-dropdown-menu.open { display: block; animation: ddIn .13s ease; }
@@ -438,7 +438,7 @@
     from { opacity: 0; transform: translateY(-5px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .nav-dropdown-menu a { padding: 7px 10px !important; border-radius: 6px; }
+  .nav-dropdown-menu a { padding: 7px 10px !important; border-radius:var(--bp-radius); }
   .dd-sep { height: 1px; background: var(--bp-border); margin: 4px 6px; }
 
   /* Header right actions */
@@ -479,7 +479,7 @@
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
     color: var(--bp-text2);
-    border-radius: 999px;
+    border-radius:var(--bp-radius-pill);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -516,7 +516,7 @@
   /* F2 — Anomali rozet */
   .anomaly-badge {
     display: inline-flex; align-items: center; gap: 3px;
-    padding: 2px 7px; border-radius: 10px;
+    padding: 2px 7px; border-radius:var(--bp-radius-lg);
     background: rgba(217,153,34,0.15);
     color: #d29922; border: 1px solid rgba(217,153,34,0.3);
     font-size: 10px; font-weight: 600; cursor: default;
@@ -526,7 +526,7 @@
   .mc-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
   .sentiment-badge {
     display: inline-flex; align-items: center; gap: 2px;
-    padding: 2px 6px; border-radius: 10px;
+    padding: 2px 6px; border-radius:var(--bp-radius-lg);
     font-size: 10px; font-weight: 600; cursor: default;
     white-space: nowrap;
   }
@@ -553,7 +553,7 @@
   .premium-modal {
     background: var(--bp-surface);
     border: 1px solid rgba(var(--bp-volume-rgb),.45);
-    border-radius: 12px;
+    border-radius:var(--bp-radius-xl);
     padding: 28px 24px 20px;
     max-width: 380px;
     width: 100%;
@@ -597,7 +597,7 @@
     width: 100%;
     background: rgba(28,33,40,.7);
     border: 1px solid var(--bp-border);
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     padding: 10px 12px;
     color: var(--bp-text);
     font-size: 14px;
@@ -611,7 +611,7 @@
     color: #1a1a1f;
     border: none;
     padding: 11px 14px;
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
@@ -668,7 +668,7 @@
     color: #fff;
     border: none;
     padding: 7px 16px;
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: .3px;
@@ -683,7 +683,7 @@
   .mc-premium-cta {
     background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),.08), rgba(var(--bp-premium-rgb),.02));
     border: 1px dashed rgba(var(--bp-premium-rgb),.35);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 14px;
     margin: 6px 0 14px;
     text-align: center;
@@ -721,7 +721,7 @@
   .mc-tier-group {
     margin: 14px 0 6px;
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     background: rgba(28,33,40,0.3);
     font-size: 11px;
     font-weight: 700;
@@ -747,7 +747,7 @@
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
     border-left: 3px solid var(--accent, #58a6ff);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 18px 22px;
     margin: 4px 0 16px;
   }
@@ -780,7 +780,7 @@
     padding: 2px 7px;
     background: rgba(63,185,80,0.10);
     border: 1px solid rgba(63,185,80,0.35);
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     color: #3fb950;
     font-size: 10px;
     font-weight: 600;
@@ -837,7 +837,7 @@
   }
   .ms-stat {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px; border-radius: 6px;
+    padding: 6px 12px; border-radius:var(--bp-radius);
     background: rgba(28,33,40,0.6); border: 1px solid rgba(48,54,61,0.5);
     font-size: 12px; color: var(--bp-text2); text-decoration: none;
     transition: all 0.15s ease;
@@ -884,11 +884,11 @@
   }
   .gundem-cards::-webkit-scrollbar { height: 4px; }
   .gundem-cards::-webkit-scrollbar-track { background: transparent; }
-  .gundem-cards::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+  .gundem-cards::-webkit-scrollbar-thumb { background: #30363d; border-radius:var(--bp-radius-xs); }
 
   .gnm-card {
     background: var(--bg2); border: 1px solid var(--bp-border);
-    border-radius: 10px; padding: 13px 14px;
+    border-radius:var(--bp-radius-lg); padding: 13px 14px;
     min-width: 230px; max-width: 270px; flex: 0 0 auto;
     cursor: pointer; transition: border-color .15s, background .15s;
     text-decoration: none; display: block;
@@ -958,7 +958,7 @@
   }
   .gnm-tab-btn {
     font-size: 12px; font-weight: 600; padding: 4px 12px;
-    border: 1px solid transparent; border-radius: 6px;
+    border: 1px solid transparent; border-radius:var(--bp-radius);
     cursor: pointer; transition: all .15s; color: var(--bp-text3);
     background: none; font-family: inherit;
   }
@@ -972,7 +972,7 @@
   .macro-news-list { display: flex; flex-direction: column; gap: 8px; }
   .macro-news-item {
     display: flex; align-items: flex-start; gap: 10px;
-    padding: 9px 12px; border-radius: 8px;
+    padding: 9px 12px; border-radius:var(--bp-radius-md);
     background: var(--bg2); border: 1px solid var(--bp-border);
     text-decoration: none; transition: border-color .15s, background .15s;
   }
@@ -1003,7 +1003,7 @@
     100% { background-position:  300% 0; }
   }
   .gnm-sk {
-    min-width: 230px; height: 140px; border-radius: 10px; flex: 0 0 auto;
+    min-width: 230px; height: 140px; border-radius:var(--bp-radius-lg); flex: 0 0 auto;
     background: linear-gradient(90deg, #141416 25%, #1e1e22 50%, #141416 75%);
     background-size: 300% 100%;
     animation: gnm-shimmer 1.5s infinite;
@@ -1013,7 +1013,7 @@
   .bilanco-mini-box {
     flex: 0 0 185px; min-width: 170px;
     background: var(--bg2); border: 1px solid var(--bp-border);
-    border-radius: 10px; padding: 12px 13px;
+    border-radius:var(--bp-radius-lg); padding: 12px 13px;
   }
   .bilanco-mini-title {
     font-size: 11px; font-weight: 700; color: var(--bp-text3);
@@ -1032,7 +1032,7 @@
   }
   .bilanco-period .bp-days {
     font-size: 10px; font-weight: 600; margin-top: 3px;
-    display: inline-block; padding: 1px 6px; border-radius: 10px;
+    display: inline-block; padding: 1px 6px; border-radius:var(--bp-radius-lg);
   }
   .bp-days.active   { background: rgba(0,226,144,.10); color: var(--bp-al); }
   .bp-days.upcoming { background: rgba(var(--bp-brand-rgb),.12); color: var(--bp-brand); }
@@ -1077,7 +1077,7 @@
     display: none;
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 10px 14px;
     margin-bottom: 14px;
   }
@@ -1085,7 +1085,7 @@
   .mb-title { font-size: 11px; font-weight: 600; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; margin: 0; }
   .mb-sentiment { font-size: 12px; font-weight: 700; }
   .mb-bar {
-    display: flex; height: 5px; border-radius: 3px; overflow: hidden; gap: 1px;
+    display: flex; height: 5px; border-radius:var(--bp-radius-sm); overflow: hidden; gap: 1px;
     background: var(--bp-surface2);
   }
   .mb-seg { height: 100%; transition: width .7s cubic-bezier(.4,0,.2,1); }
@@ -1144,7 +1144,7 @@
     display: flex; align-items: center; gap: 10px;
     background: rgba(var(--bp-volume-rgb),0.06);
     border: 1px solid rgba(var(--bp-volume-rgb),0.20);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 8px 12px;
     margin-bottom: 12px;
     flex-wrap: wrap;
@@ -1203,7 +1203,7 @@
     font-size: 11px;
     font-weight: 700;
     padding: 5px 12px;
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.4px;
@@ -1234,20 +1234,20 @@
   .search-ac {
     display: none; position: absolute; top: calc(100% + 5px); right: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border2);
-    border-radius: 10px; min-width: 270px; padding: 4px;
+    border-radius:var(--bp-radius-lg); min-width: 270px; padding: 4px;
     z-index: 400; box-shadow: 0 12px 32px rgba(0,0,0,.6);
     max-height: 330px; overflow-y: auto;
   }
   .search-ac.open { display: block; animation: ddIn .13s ease; }
   .sac-item {
     display: flex; align-items: center; gap: 10px;
-    padding: 7px 10px; border-radius: 6px; cursor: pointer;
+    padding: 7px 10px; border-radius:var(--bp-radius); cursor: pointer;
     transition: background .1s; text-decoration: none;
   }
   .sac-item:hover, .sac-item.sac-sel { background: var(--bp-surface2); }
   .sac-ticker { font-size: 13px; font-weight: 700; color: var(--bp-text); min-width: 60px; font-variant-numeric: tabular-nums; }
   .sac-name { font-size: 12px; color: var(--bp-text3); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sac-sig { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+  .sac-sig { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius:var(--bp-radius-lg); white-space: nowrap; flex-shrink: 0; }
   .sac-empty { padding: 10px 12px; font-size: 13px; color: var(--bp-text3); text-align: center; }
 
   /* Gelişmiş Filtre Paneli */
@@ -1260,7 +1260,7 @@
   .adv-toggle:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
   .adv-toggle.active { background: rgba(var(--bp-brand-rgb),.14); border-color: rgba(var(--bp-brand-rgb),.45); color: var(--bp-brand); }
   .adv-panel {
-    background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius: 10px;
+    background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
     padding: 14px 16px; margin-bottom: 14px; display: none; flex-wrap: wrap; gap: 14px;
   }
   .adv-panel.open { display: flex; }
@@ -1268,7 +1268,7 @@
   .adv-group-label { font-size: 10px; font-weight: 600; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; }
   .adv-chips { display: flex; gap: 5px; flex-wrap: wrap; }
   .adv-chip {
-    padding: 3px 10px; border-radius: 12px; border: 1px solid var(--bp-border);
+    padding: 3px 10px; border-radius:var(--bp-radius-xl); border: 1px solid var(--bp-border);
     background: transparent; color: var(--bp-text3); cursor: pointer;
     font-size: 11px; font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
@@ -1341,7 +1341,7 @@
   /* ── Signal Tooltip ─────────────────────────────────── */
   .sig-tip {
     display: none; position: fixed; z-index: 9000;
-    background: #1c2128; border: 1px solid #30363d; border-radius: 10px;
+    background: #1c2128; border: 1px solid #30363d; border-radius:var(--bp-radius-lg);
     padding: 11px 14px; min-width: 200px; max-width: 252px;
     box-shadow: 0 10px 32px rgba(0,0,0,.68);
     pointer-events: none; font-size: 12px; line-height: 1.55; color: #e6edf3;
@@ -1417,7 +1417,7 @@
 
   /* ── Stats bar skeleton + counter reveal ─── */
   .stat-num-sk {
-    display: inline-block; width: 48px; height: 28px; border-radius: 6px;
+    display: inline-block; width: 48px; height: 28px; border-radius:var(--bp-radius);
     background: linear-gradient(90deg, var(--bp-surface2) 25%, var(--bp-surface3) 50%, var(--bp-surface2) 75%);
     background-size: 800px 100%;
     animation: shimmer 1.4s infinite linear;
@@ -1442,15 +1442,15 @@
   /* ── Tick animasyonu — fiyat + değişim flash ─── */
   @keyframes tickUp   { 0%{background:rgba(var(--bp-al-rgb),.18);color:var(--bp-al)} 100%{background:transparent} }
   @keyframes tickDown { 0%{background:rgba(var(--bp-sat-rgb),.18);color:var(--bp-sat)} 100%{background:transparent} }
-  .tick-up-cell   { animation: tickUp   0.7s ease-out; border-radius: 3px; }
-  .tick-down-cell { animation: tickDown 0.7s ease-out; border-radius: 3px; }
+  .tick-up-cell   { animation: tickUp   0.7s ease-out; border-radius:var(--bp-radius-sm); }
+  .tick-down-cell { animation: tickDown 0.7s ease-out; border-radius:var(--bp-radius-sm); }
 
   /* ── Hero panel skeleton rows ─── */
   .hp-sk-row { display: flex; align-items: center; gap: 7px; padding: 5px 6px; }
-  .hp-sk-bar { width: 3px; height: 22px; border-radius: 2px; flex-shrink: 0; background: var(--bp-surface3); animation: shimmer 1.4s infinite linear; background-size: 200px 100%; }
-  .hp-sk-ticker { width: 44px; height: 12px; border-radius: 3px; }
-  .hp-sk-name   { flex: 1; height: 10px; border-radius: 3px; }
-  .hp-sk-chg    { width: 36px; height: 12px; border-radius: 3px; }
+  .hp-sk-bar { width: 3px; height: 22px; border-radius:var(--bp-radius-xs); flex-shrink: 0; background: var(--bp-surface3); animation: shimmer 1.4s infinite linear; background-size: 200px 100%; }
+  .hp-sk-ticker { width: 44px; height: 12px; border-radius:var(--bp-radius-sm); }
+  .hp-sk-name   { flex: 1; height: 10px; border-radius:var(--bp-radius-sm); }
+  .hp-sk-chg    { width: 36px; height: 12px; border-radius:var(--bp-radius-sm); }
 
   footer {
     text-align: center; padding: 24px; color: var(--bp-text3);
@@ -1467,7 +1467,7 @@
   .endeks-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 14px 16px;
     cursor: pointer;
     transition: border-color .15s, box-shadow .15s;
@@ -1504,7 +1504,7 @@
   .chart-accordion {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     overflow: hidden;
     margin-bottom: 16px;
   }
@@ -1525,7 +1525,7 @@
   .chart-tab {
     background: none; border: 1px solid transparent;
     color: var(--bp-text3); font-size: 12px; font-weight: 600;
-    padding: 4px 14px; border-radius: 6px; cursor: pointer;
+    padding: 4px 14px; border-radius:var(--bp-radius); cursor: pointer;
     transition: all .15s; font-family: inherit;
   }
   .chart-tab:hover { background: rgba(255,255,255,.04); color: var(--bp-text); }
@@ -1572,7 +1572,7 @@
   .bp-highlights {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     margin-bottom: 12px;
     padding: 6px 4px;
     min-height: 200px;
@@ -1617,7 +1617,7 @@
   }
   /* renk çizgisi — sinyal rengi solda dar şerit */
   .hp-bar {
-    width: 3px; height: 22px; border-radius: 2px; flex-shrink: 0;
+    width: 3px; height: 22px; border-radius:var(--bp-radius-xs); flex-shrink: 0;
   }
   .hp-bar-al  { background: var(--bp-al); }
   .hp-bar-sat { background: var(--bp-sat); }
@@ -1661,7 +1661,7 @@
   .alert-modal-title { font-size:16px; font-weight:700; margin:0 0 14px; color:var(--bp-text); }
   .alert-modal-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
   .alert-modal-row label { flex:1; font-size:13px; color:#8b949e; }
-  .alert-modal-row input[type=number] { width:72px; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#e6edf3; padding:5px 8px; font-size:13px; }
+  .alert-modal-row input[type=number] { width:72px; background:#0d1117; border:1px solid #30363d; border-radius:var(--bp-radius); color:#e6edf3; padding:5px 8px; font-size:13px; }
   .alert-modal-row input[type=number]:focus { outline:none; border-color:#ffc850; }
   .alert-modal-row input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
   .alert-modal-save { width:100%; margin-top:14px; padding:9px 0; background:#ffc850; color:#0e0e12; border:none; border-radius:7px; font-weight:700; font-size:14px; cursor:pointer; }
@@ -1673,7 +1673,7 @@
   .alert-modal-status { font-size:12px; color:#22c55e; margin-top:8px; text-align:center; min-height:18px; }
   .alarm-panel {
     position:fixed; bottom:24px; right:24px; z-index:999;
-    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:12px;
+    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-xl);
     width:340px; max-height:480px; overflow:hidden;
     box-shadow:0 8px 32px rgba(0,0,0,.6);
     display:flex; flex-direction:column;
@@ -1684,13 +1684,13 @@
   .ap-title  { font-size:13px; font-weight:700; color:var(--bp-text); margin:0; }
   .ap-close  { background:none; border:none; color:var(--bp-text2); cursor:pointer; font-size:18px; line-height:1; }
   .ap-body   { overflow-y:auto; flex:1; padding:6px; }
-  .ap-item   { padding:8px 6px 10px; border-radius:8px; font-size:13px; border-bottom:1px solid var(--bp-border); }
+  .ap-item   { padding:8px 6px 10px; border-radius:var(--bp-radius-md); font-size:13px; border-bottom:1px solid var(--bp-border); }
   .ap-item:last-child { border-bottom:none; }
   .ap-item:hover { background:var(--bp-surface2); }
   .ap-item-top   { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
   .ap-ticker { font-weight:700; color:var(--bp-text); flex:1; }
   .ap-price  { font-size:12px; color:var(--bp-text2); font-weight:500; }
-  .ap-sig    { font-size:11px; font-weight:600; padding:2px 6px; border-radius:10px; }
+  .ap-sig    { font-size:11px; font-weight:600; padding:2px 6px; border-radius:var(--bp-radius-lg); }
   .ap-sig.AL   { background:var(--bp-al-bg);  color:var(--bp-al); }
   .ap-sig.SAT  { background:var(--bp-sat-bg); color:var(--bp-sat); }
   .ap-sig.BEKLE{ background:var(--bp-bkl-bg); color:var(--bp-bkl); }
@@ -1799,7 +1799,7 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(var(--bp-border-rgb),0.75);
-    border-radius: 8px; padding:13px 14px;
+    border-radius:var(--bp-radius-md); padding:13px 14px;
     cursor:pointer; position: relative;
     transition: border-color .18s, transform .12s, box-shadow .18s;
     text-decoration:none; display:block;
@@ -1818,7 +1818,7 @@
   .mc-bell {
     background: rgba(255,255,255,0.04);
     border: 1px solid var(--bp-border);
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     width: 44px; height: 44px;
     display: inline-flex; align-items: center; justify-content: center;
     color: var(--bp-text3); cursor: pointer;
@@ -1937,7 +1937,7 @@
   }
 }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- SEO: visually-hidden h1 — required by search engines; logo already communicates brand visually -->
 <h1 style="position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri</h1>
@@ -2040,14 +2040,14 @@
 {% include '_stale_banner.html' %}
 
 <!-- SPEC-012 V3a L4 — Onboarding banner (Öğrenme Modu CTA, dismissible localStorage) -->
-<div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.10),rgba(29,78,216,.05));border:1px solid rgba(var(--bp-brand-rgb),.32);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:13px;color:var(--bp-text);line-height:1.55;align-items:center;gap:10px;flex-wrap:wrap">
+<div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.10),rgba(29,78,216,.05));border:1px solid rgba(var(--bp-brand-rgb),.32);border-radius:var(--bp-radius-lg);padding:11px 14px;margin-bottom:14px;font-size:13px;color:var(--bp-text);line-height:1.55;align-items:center;gap:10px;flex-wrap:wrap">
   <span style="font-size:18px;flex-shrink:0"><span aria-hidden="true">📚</span></span>
   <span style="flex:1;min-width:200px">
     <strong>İlk kez mi?</strong> <strong style="color:var(--bp-brand)">Öğrenme Modu</strong>'nu açın —
-    finansal terimlerin yanında <code style="background:rgba(var(--bp-brand-rgb),.15);padding:1px 5px;border-radius:3px;color:var(--bp-brand)">?</code> görünür, tıklayınca anlamı açılır.
+    finansal terimlerin yanında <code style="background:rgba(var(--bp-brand-rgb),.15);padding:1px 5px;border-radius:var(--bp-radius-sm);color:var(--bp-brand)">?</code> görünür, tıklayınca anlamı açılır.
   </span>
   <button type="button" id="bpOnboardOpen"
-          style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">
+          style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:var(--bp-radius);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">
     Öğrenme Modu'nu Aç
   </button>
   <button type="button" id="bpOnboardDismiss" aria-label="Kapat"
@@ -2259,7 +2259,7 @@
   <!-- ── İdeal Giriş Şeridi ──────────────────────── -->
   <!-- visibility:hidden reserves space → no CLS when ideal stocks load -->
   <div id="idealStrip" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(var(--bp-al-rgb),.06),rgba(var(--bp-brand-rgb),.03));
-    border:1px solid rgba(var(--bp-al-rgb),.20);border-radius:6px;padding:9px 14px;margin-bottom:12px;
+    border:1px solid rgba(var(--bp-al-rgb),.20);border-radius:var(--bp-radius);padding:9px 14px;margin-bottom:12px;
     align-items:center;gap:10px;flex-wrap:wrap">
     <span style="font-size:11px;color:var(--bp-al);font-weight:700;white-space:nowrap;flex-shrink:0"><span aria-hidden="true">✅</span> İdeal Giriş</span>
     <div id="idealStripItems" style="display:flex;flex-wrap:wrap;gap:6px;flex:1"></div>
@@ -2270,7 +2270,7 @@
   <!-- visibility:hidden reserves space → no CLS when backtest data arrives (disk-cached, always fast) -->
   <a href="/sinyal-performans" id="btTrustBadge" style="display:flex;visibility:hidden;text-decoration:none;
     background:linear-gradient(135deg,rgba(var(--bp-al-rgb),.06),rgba(var(--bp-brand-rgb),.04));
-    border:1px solid rgba(var(--bp-al-rgb),.18);border-radius:6px;padding:10px 16px;margin-bottom:16px;
+    border:1px solid rgba(var(--bp-al-rgb),.18);border-radius:var(--bp-radius);padding:10px 16px;margin-bottom:16px;
     flex-wrap:wrap;gap:6px 16px;align-items:center;transition:border-color .15s"
     onmouseover="this.style.borderColor='rgba(0,226,144,.35)'" onmouseout="this.style.borderColor='rgba(0,226,144,.18)'">
     <span style="font-size:10px;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap"><span aria-hidden="true">📊</span> 2 Yıllık Backtest · 28 Hisse</span>
@@ -2318,9 +2318,9 @@
     <div id="gnmPanelMakro">
       <div id="macroNewsList" class="macro-news-list">
         <!-- skeleton -->
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:var(--bp-radius-md);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:var(--bp-radius-md);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:var(--bp-radius-md);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
       </div>
       <div style="text-align:right;margin-top:8px">
         <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">Piyasa Gündem Merkezi <span aria-hidden="true">→</span></a>
@@ -2355,18 +2355,18 @@
   </section>
 
   <!-- ── PWA Install Banner ──────────────────────── -->
-  <div id="pwaInstallBanner" style="display:none;background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(37,99,235,.06));border:1px solid rgba(59,130,246,.25);border-radius:6px;padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px;flex-wrap:wrap">
+  <div id="pwaInstallBanner" style="display:none;background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(37,99,235,.06));border:1px solid rgba(59,130,246,.25);border-radius:var(--bp-radius);padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px;flex-wrap:wrap">
     <span style="font-size:18px"><span aria-hidden="true">📲</span></span>
     <div style="flex:1;min-width:140px">
       <div style="font-size:13px;font-weight:700;color:var(--bp-text)">BorsaPusula'yı Yükle</div>
       <div style="font-size:11px;color:var(--bp-text3)">Ana ekrana ekle — hızlı erişim</div>
     </div>
-    <button onclick="_pwaInstall()" style="background:#3b82f6;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Yükle</button>
+    <button onclick="_pwaInstall()" style="background:#3b82f6;color:#fff;border:none;padding:7px 16px;border-radius:var(--bp-radius);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Yükle</button>
     <button onclick="document.getElementById('pwaInstallBanner').style.display='none'" style="background:none;border:none;color:#374151;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px" title="Kapat">×</button>
   </div>
 
   <!-- ── Bildirim Çubuğu (E-posta + Push) ────────── -->
-  <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(0,67,235,.04));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:6px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+  <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(0,67,235,.04));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:var(--bp-radius);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
       <div style="font-size:13px;font-weight:700;color:var(--bp-text);margin-bottom:2px"><span aria-hidden="true">📬</span> Sinyal Bildirimleri</div>
       <div style="font-size:11px;color:var(--bp-text3)">Sinyal değiştiğinde bildirim al — ücretsiz</div>
@@ -2374,18 +2374,18 @@
     <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:280px;flex-wrap:wrap" id="subForm">
       <input id="subName" type="text" placeholder="Adınız"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:var(--bp-radius);font-size:13px;font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
         onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
       <input id="subEmail" type="email" placeholder="E-posta"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:var(--bp-radius);font-size:13px;font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
         onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
       <button onclick="submitSubscribe()"
-        style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:7px 16px;border-radius:6px;
+        style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:7px 16px;border-radius:var(--bp-radius);
                font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
                transition:background .15s"
         onmouseover="this.style.background='#cdd5ff'" onmouseout="this.style.background='#b8c3ff'">
@@ -2395,7 +2395,7 @@
     <!-- Push bildirim butonu -->
     <button id="pushBtn" onclick="togglePushSubscription()"
       style="display:none;background:rgba(var(--bp-brand-rgb),.12);border:1px solid rgba(var(--bp-brand-rgb),.32);
-             color:var(--bp-brand);padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;
+             color:var(--bp-brand);padding:7px 14px;border-radius:var(--bp-radius);font-size:12px;font-weight:600;
              cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s"
       onmouseover="this.style.background='rgba(184,195,255,.2)'" onmouseout="this.style.background='rgba(184,195,255,.12)'"
       title="Tarayıcı push bildirimi">
@@ -2589,7 +2589,7 @@
 <footer>
   <div style="max-width:900px;margin:0 auto">
     <!-- Veri kaynağı yasal disclosure (Ozan UX talebi, 26 May 2026) -->
-    <div style="font-size:11px;color:var(--bp-text3);text-align:center;padding:10px 12px;margin-bottom:14px;border:1px solid var(--bp-border);border-radius:8px;background:rgba(var(--bp-gold-rgb),0.04)">
+    <div style="font-size:11px;color:var(--bp-text3);text-align:center;padding:10px 12px;margin-bottom:14px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);background:rgba(var(--bp-gold-rgb),0.04)">
       <span style="color:#f59e0b">⏱</span>
       Veri kaynağı: Yahoo Finance · BIST resmi yayın gecikmesi yaklaşık <strong>15 dakika</strong> · Gerçek-zamanlı işlem verisi değildir
     </div>

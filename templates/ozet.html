@@ -61,7 +61,7 @@
     text-decoration: none;
     padding: 5px 10px;
     border: 1px solid var(--bp-border);
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     background: var(--bp-surface2);
     transition: all 0.15s;
     white-space: nowrap;
@@ -70,7 +70,7 @@
   .page-title { font-size: 17px; font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
   .page-sub   { font-size: 11px; color: var(--bp-text3); margin-top: 1px; }
   .top-nav-links { display:flex; gap:2px; align-items:center; }
-  .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:13px; font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
   .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
   @media (max-width:900px) { .top-nav-links { display:none; } }
@@ -90,7 +90,7 @@
   .counter-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 14px;
     text-align: center;
     transition: border-color .15s;
@@ -107,7 +107,7 @@
   .section-box {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px;
     margin-bottom: 16px;
   }
@@ -128,7 +128,7 @@
   .stock-card {
     background: var(--bp-surface2);
     border: 1px solid var(--bp-border);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 12px 13px;
     text-decoration: none;
     transition: border-color .15s, background .15s;
@@ -155,7 +155,7 @@
   .barometer {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px;
     margin-bottom: 16px;
   }
@@ -207,22 +207,22 @@
 
 
   /* ── Header Search Button ── */
-  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius: 6px; color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 8px; }
+  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius:var(--bp-radius); color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 8px; }
   .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
   /* ── Search Overlay ── */
   .search-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
   .search-overlay.open { display: flex; }
-  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
+  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
   .search-input-wrap { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--bp-border); }
   .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
   #searchInput { flex: 1; background: none; border: none; outline: none; font-size: 15px; color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }
   #searchInput::placeholder { color: var(--bp-text3); }
-  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius:var(--bp-radius); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
   .search-close:hover { background: var(--bp-surface2); color: var(--bp-text); }
   .search-results { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
   .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: 13px; }
   .search-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px 6px; }
-  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; transition: background .12s; font-size: 13px; }
+  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); transition: background .12s; font-size: 13px; }
   .search-result:hover, .search-result.sr-selected { background: var(--bp-surface2); }
   .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: 13px; }
   .sr-sig.sr-al { color: var(--bp-al); font-weight: 700; }
@@ -232,7 +232,7 @@
   .sr-price { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--bp-text2); }
   .sr-chg { font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600; min-width: 56px; text-align: right; }
   .sr-chg.pos { color: var(--bp-al); } .sr-chg.neg { color: var(--bp-sat); } .sr-chg.neu { color: var(--bp-bkl); }
-  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; font-size: 13px; transition: background .12s; }
+  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); font-size: 13px; transition: background .12s; }
   .search-topic:hover, .search-topic.sr-selected { background: var(--bp-surface2); }
   @media (max-width: 600px) {
     .search-overlay { padding-top: 0; align-items: stretch; }
@@ -246,8 +246,8 @@
   .sector-row { display:flex; align-items:center; gap:10px; }
   .sr-name { font-size:12px; color:var(--bp-text2); width:130px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sr-bar-wrap { flex:1; }
-  .sr-bar { height:6px; background:var(--bp-surface2); border-radius:3px; overflow:hidden; }
-  .sr-fill { height:100%; border-radius:3px; transition:width 0.5s ease; }
+  .sr-bar { height:6px; background:var(--bp-surface2); border-radius:var(--bp-radius-sm); overflow:hidden; }
+  .sr-fill { height:100%; border-radius:var(--bp-radius-sm); transition:width 0.5s ease; }
   .sr-stats { width:72px; flex-shrink:0; display:flex; align-items:center; gap:5px; justify-content:flex-end; }
   .sr-pct { font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; }
   .sr-cnt { font-size:10px; color:var(--bp-text3); }
@@ -255,7 +255,7 @@
   .sr-mid-c { color:var(--bp-gold); }
   .sr-low-c { color:var(--bp-sat); }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 <!-- Mobile Bottom Navigation -->
@@ -342,7 +342,7 @@
   <div style="display:flex;align-items:center;gap:8px">
     <select id="dateSelector"
       aria-label="Geçmiş özet tarihi seç"
-      style="background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text3);padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;outline:none"
+      style="background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text3);padding:6px 10px;border-radius:var(--bp-radius);font-size:12px;cursor:pointer;outline:none"
       onchange="goToDate(this.value)">
       <option value=""><span aria-hidden="true">📅</span> Geçmiş Tarih Seç</option>
     </select>
@@ -384,14 +384,14 @@ function goToDate(date) {
 
 {% if historical_date is defined and historical_date %}
 <!-- Geçmiş tarih bandı -->
-<div style="background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.25);border-radius:8px;
+<div style="background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.25);border-radius:var(--bp-radius-md);
      padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
   <span style="font-size:18px"><span aria-hidden="true">🗓</span></span>
   <div style="flex:1;min-width:0">
     <span style="color:#f0a500;font-weight:700;font-size:13px">Geçmiş Görünüm — {{ historical_date }}</span>
     <span style="color:#94a3b8;font-size:12px;margin-left:8px">Bu sayfa o güne ait anlık kaydı göstermektedir.</span>
   </div>
-  <a href="/ozet" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:6px;
+  <a href="/ozet" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);
      padding:5px 12px;font-size:12px;color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
     <span aria-hidden="true">↩</span> Güncel Özete Dön
   </a>
@@ -400,13 +400,13 @@ function goToDate(date) {
 
 <!-- Bilanço Sezonu Uyarısı (JS ile dinamik) -->
 <div id="bilancoBanner" style="display:none;background:rgba(var(--bp-brand-rgb),.06);border:1px solid rgba(var(--bp-brand-rgb),.18);
-     border-radius:8px;padding:10px 16px;margin-bottom:16px;align-items:center;gap:10px;flex-wrap:wrap">
+     border-radius:var(--bp-radius-md);padding:10px 16px;margin-bottom:16px;align-items:center;gap:10px;flex-wrap:wrap">
   <span style="font-size:18px"><span aria-hidden="true">📊</span></span>
   <div style="flex:1;min-width:0">
     <span id="bilancoBannerTitle" style="color:var(--bp-brand);font-weight:700;font-size:13px"></span>
     <span id="bilancoBannerDesc" style="color:var(--bp-text3);font-size:12px;margin-left:8px"></span>
   </div>
-  <a href="/bilanco-takvimi" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:6px;
+  <a href="/bilanco-takvimi" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);
      padding:5px 12px;font-size:12px;color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
     Takvime Bak <span aria-hidden="true">→</span>
   </a>
@@ -593,7 +593,7 @@ function goToDate(date) {
 <!-- E-posta Abonelik CTA -->
 <div style="max-width:800px;margin:0 auto 28px auto;padding:0 20px">
   <div id="ozSubBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.05),rgba(var(--bp-al-rgb),.03));
-       border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:10px;padding:16px 20px;
+       border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:var(--bp-radius-lg);padding:16px 20px;
        display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
       <div style="font-size:14px;font-weight:700;color:var(--bp-text);margin-bottom:3px"><span aria-hidden="true">📬</span> Günlük Özeti E-postayla Al</div>

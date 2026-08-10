@@ -23,7 +23,7 @@
   .logo-name strong { color:var(--bp-al); }
   .header-title { font-family:'Space Grotesk',system-ui,sans-serif; font-size:15px; font-weight:700; color:var(--bp-text); }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:var(--bp-text2); transition:all .15s; white-space:nowrap; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:13px; font-weight:500; color:var(--bp-text2); transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
   .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
   @media (max-width:780px) { .top-nav-links { display:none; } }
@@ -38,7 +38,7 @@
   .page-hdr p { color:var(--bp-text3); font-size:13px; }
 
   /* Sector selector */
-  .selector-wrap { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:10px; padding:16px 18px; margin-bottom:24px; }
+  .selector-wrap { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:16px 18px; margin-bottom:24px; }
   .selector-label { font-family:'Space Grotesk',system-ui,sans-serif; font-size:12px; font-weight:700; color:var(--bp-text3); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
   .sector-chips { display:flex; flex-wrap:wrap; gap:8px; }
   .chip {
@@ -58,7 +58,7 @@
   .compare-btn {
     display:inline-flex; align-items:center; gap:8px;
     padding:10px 22px; background:rgba(var(--bp-brand-rgb),0.12);
-    border:1px solid rgba(var(--bp-brand-rgb),0.35); border-radius:8px;
+    border:1px solid rgba(var(--bp-brand-rgb),0.35); border-radius:var(--bp-radius-md);
     font-family:'Space Grotesk',system-ui,sans-serif; font-size:13px; font-weight:700;
     color:#b8c3ff; cursor:pointer; transition:all .15s; margin-top:14px;
   }
@@ -66,7 +66,7 @@
   .compare-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
   /* Skeleton */
-  .skeleton { background:linear-gradient(90deg,#1c1b1f 25%,#232124 50%,#1c1b1f 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:8px; }
+  .skeleton { background:linear-gradient(90deg,#1c1b1f 25%,#232124 50%,#1c1b1f 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:var(--bp-radius-md); }
   @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
   /* Compare grid */
@@ -76,7 +76,7 @@
   @media (max-width:640px) { .compare-grid.cols-2, .compare-grid.cols-3 { grid-template-columns:1fr; } }
 
   /* Sector column */
-  .sec-col { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:12px; overflow:hidden; }
+  .sec-col { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow:hidden; }
   .sec-col-header { padding:16px 18px 14px; border-bottom:1px solid var(--bp-border); }
   .sec-col-name { font-family:'Space Grotesk',system-ui,sans-serif; font-size:17px; font-weight:700; margin-bottom:6px; }
   .col-accent-0 .sec-col-name { color:var(--bp-al); }
@@ -86,8 +86,8 @@
   /* Score bar */
   .score-bar-wrap { margin:10px 0 14px; }
   .score-bar-label { display:flex; justify-content:space-between; font-size:11px; color:var(--bp-text3); margin-bottom:5px; font-family:'Space Grotesk',sans-serif; }
-  .score-bar-track { height:6px; background:var(--bp-border); border-radius:3px; overflow:hidden; position:relative; }
-  .score-bar-fill { height:100%; border-radius:3px; transition:width .4s ease; }
+  .score-bar-track { height:6px; background:var(--bp-border); border-radius:var(--bp-radius-sm); overflow:hidden; position:relative; }
+  .score-bar-fill { height:100%; border-radius:var(--bp-radius-sm); transition:width .4s ease; }
   .score-positive { background:linear-gradient(90deg,#00e290,#00c47a); }
   .score-negative { background:linear-gradient(90deg,#f85149,#d03d36); }
   .score-neutral  { background:var(--bp-border2); }

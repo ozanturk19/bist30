@@ -28,12 +28,12 @@
   }
   body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; min-height:100vh; }
   header { background:var(--surface); border-bottom:1px solid var(--border); padding:12px 24px; display:flex; align-items:center; gap:14px; position:sticky; top:0; z-index:100; }
-  .back-btn { display:flex; align-items:center; gap:6px; color:var(--text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--border); border-radius:6px; background:var(--surface2); transition:all .15s; }
+  .back-btn { display:flex; align-items:center; gap:6px; color:var(--text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--border); border-radius:var(--bp-radius); background:var(--surface2); transition:all .15s; }
   .back-btn:hover { background:var(--border); color:var(--text); }
   .page-title { font-size:18px; font-weight:700; color:#f0f6fc; }
   .page-sub   { font-size:12px; color:var(--text2); margin-top:1px; }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:var(--text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:13px; font-weight:500; color:var(--text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:var(--surface2); color:var(--text); }
   .top-nav-links a.active { background:var(--surface2); color:var(--brand); }
   @media (max-width:780px) { .top-nav-links { display:none; } }
@@ -54,13 +54,13 @@
   .container { max-width:1100px; margin:0 auto; padding:24px 20px; }
 
   /* Category hero */
-  .cat-hero { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; margin-bottom:20px; }
+  .cat-hero { background:var(--surface); border:1px solid var(--border); border-radius:var(--bp-radius-xl); padding:20px 24px; margin-bottom:20px; }
   .cat-hero-title { font-size:24px; font-weight:800; color:#f0f6fc; margin-bottom:4px; }
   .cat-hero-desc  { font-size:13px; color:var(--text2); }
 
   /* Asset cards */
   .asset-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin-bottom:24px; }
-  .asset-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 20px; text-decoration:none; transition:all .15s; display:block; }
+  .asset-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--bp-radius-xl); padding:18px 20px; text-decoration:none; transition:all .15s; display:block; }
   .asset-card:hover { border-color:var(--brand); transform:translateY(-1px); }
   .ac-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
   .ac-name   { font-size:14px; font-weight:700; color:#f0f6fc; }
@@ -77,7 +77,7 @@
      ayni yorum, FAZ 7.5 eki SS2a): --bkl zaten sig-BEKLE ile ayni ton. */
   .sig-badge.state-soon { background:rgba(139,148,158,.08); color:var(--text2); border:1px solid rgba(139,148,158,.16); }
   .asset-card.state-empty { opacity:.55; }
-  .data-note { font-size:12px; color:var(--text2); background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:8px 12px; margin-bottom:14px; display:none; }
+  .data-note { font-size:12px; color:var(--text2); background:var(--surface2); border:1px solid var(--border2); border-radius:var(--bp-radius-md); padding:8px 12px; margin-bottom:14px; display:none; }
   .ac-adx    { font-size:11px; color:var(--gold); }
   .ac-sl     { font-size:11px; color:var(--text2); }
   .detail-btn { font-size:12px; color:var(--brand); }
@@ -88,7 +88,7 @@
 
   /* US Stocks table */
   .section-title { font-size:14px; font-weight:700; color:#f0f6fc; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border2); }
-  .stocks-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:24px; }
+  .stocks-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--bp-radius-lg); overflow:hidden; margin-bottom:24px; }
   .stocks-wrap table { width:100%; border-collapse:collapse; }
   .stocks-wrap thead th { font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; font-weight:700; padding:10px 14px; border-bottom:1px solid var(--border); background:var(--surface2); text-align:left; white-space:nowrap; }
   .stocks-wrap tbody td { padding:10px 14px; border-bottom:1px solid var(--border2); vertical-align:middle; font-size:13px; }
@@ -97,7 +97,7 @@
   .stocks-wrap a { text-decoration:none; color:inherit; }
   .tk { font-size:14px; font-weight:700; color:#f0f6fc; }
   .tk-name { font-size:11px; color:var(--text2); margin-top:1px; }
-  .sector-tag { font-size:10px; color:var(--text3); background:var(--surface2); border:1px solid var(--border2); border-radius:10px; padding:2px 7px; white-space:nowrap; }
+  .sector-tag { font-size:10px; color:var(--text3); background:var(--surface2); border:1px solid var(--border2); border-radius:var(--bp-radius-lg); padding:2px 7px; white-space:nowrap; }
 
   /* Spinner */
   .spinner { width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--brand); border-radius:50%; animation:spin .7s linear infinite; }
@@ -106,10 +106,10 @@
   /* Canlı fiyat flash animasyonu */
   @keyframes flashUp { 0%{color:#3fb950;background:rgba(63,185,80,.18)} 100%{color:inherit;background:transparent} }
   @keyframes flashDn { 0%{color:var(--bp-sat);background:rgba(var(--bp-sat-rgb),.18)} 100%{color:inherit;background:transparent} }
-  .chg-flash-up { animation:flashUp .7s ease; border-radius:3px; }
-  .chg-flash-dn { animation:flashDn .7s ease; border-radius:3px; }
+  .chg-flash-up { animation:flashUp .7s ease; border-radius:var(--bp-radius-sm); }
+  .chg-flash-dn { animation:flashDn .7s ease; border-radius:var(--bp-radius-sm); }
 
-  .disclaimer { background:rgba(var(--bp-sat-rgb),.07); border:1px solid rgba(var(--bp-sat-rgb),.2); border-radius:8px; padding:12px 16px; color:var(--text2); font-size:12px; margin-bottom:20px; }
+  .disclaimer { background:rgba(var(--bp-sat-rgb),.07); border:1px solid rgba(var(--bp-sat-rgb),.2); border-radius:var(--bp-radius-md); padding:12px 16px; color:var(--text2); font-size:12px; margin-bottom:20px; }
 
   @media(max-width:768px) {
     header { padding:10px 14px; }
@@ -128,7 +128,7 @@
   footer { text-align:center; padding:20px; font-size:12px; color:var(--text3); border-top:1px solid var(--border2); margin-top:16px; }
   footer a { color:var(--text2); text-decoration:none; }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:6px;color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 {% include '_header.html' %}

@@ -28,7 +28,7 @@
     display: inline-flex; align-items: center; gap: 5px;
     font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
     color: var(--bp-premium); background: var(--bp-premium-bg);
-    border: 1px solid var(--bp-premium-bd); border-radius: 999px;
+    border: 1px solid var(--bp-premium-bd); border-radius:var(--bp-radius-pill);
     padding: 2px 8px; margin-left: 8px; vertical-align: middle;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -53,14 +53,14 @@
     display: inline-flex; align-items: center; gap: 6px;
     font-size: 11px; color: var(--bp-text3);
     padding: 4px 10px; background: rgba(var(--bp-gold-rgb),0.06);
-    border: 1px solid rgba(var(--bp-gold-rgb),0.25); border-radius: 999px;
+    border: 1px solid rgba(var(--bp-gold-rgb),0.25); border-radius:var(--bp-radius-pill);
     margin-bottom: 16px;
   }
   .freshness-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bp-gold); }
   #heatmap-container {
     width: 100%; min-height: 600px;
     background: var(--bp-surface); border: 1px solid var(--bp-border);
-    border-radius: 8px; padding: 12px;
+    border-radius:var(--bp-radius-md); padding: 12px;
     position: relative;
   }
   #heatmap-loading {
@@ -77,13 +77,13 @@
   .legend {
     margin-top: 14px; padding: 12px 14px;
     background: var(--bp-surface); border: 1px solid var(--bp-border);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     display: flex; flex-wrap: wrap; gap: 14px;
     font-size: 12px; color: var(--bp-text2);
   }
   .legend-item { display: inline-flex; align-items: center; gap: 6px; }
   .legend-swatch {
-    width: 14px; height: 14px; border-radius: 3px;
+    width: 14px; height: 14px; border-radius:var(--bp-radius-sm);
     border: 1px solid rgba(255,255,255,0.1);
   }
   /* SVG treemap */
@@ -113,11 +113,11 @@
   .mode-toggle {
     display: inline-flex; align-items: center; gap: 2px;
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
-    border-radius: 8px; padding: 3px; margin-bottom: 14px;
+    border-radius:var(--bp-radius-md); padding: 3px; margin-bottom: 14px;
   }
   .toggle-btn {
     padding: 5px 18px; font-size: 12px; font-weight: 600;
-    border: none; border-radius: 6px; cursor: pointer;
+    border: none; border-radius:var(--bp-radius); cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
     font-family: 'Space Grotesk', system-ui, sans-serif;
     background: transparent; color: var(--bp-text3);
@@ -130,7 +130,7 @@
   #heatmap-tooltip {
     position: fixed; pointer-events: none;
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
-    border-radius: 6px; padding: 10px 12px;
+    border-radius:var(--bp-radius); padding: 10px 12px;
     font-size: 12px; color: var(--bp-text);
     box-shadow: 0 6px 18px rgba(0,0,0,0.5);
     z-index: 9999; display: none;
@@ -156,7 +156,7 @@
     .legend { font-size: 11px; gap: 10px; }
   }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:6px;color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% include '_header.html' %}
 <main id="main-content" tabindex="-1">

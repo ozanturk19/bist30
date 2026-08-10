@@ -18,7 +18,7 @@
   .premium-modal {
     background: var(--bp-surface);
     border: 1px solid rgba(var(--bp-volume-rgb),.45);
-    border-radius: 12px;
+    border-radius:var(--bp-radius-xl);
     padding: 28px 24px 20px;
     max-width: 380px;
     width: 100%;
@@ -55,7 +55,7 @@
     width: 100%;
     background: rgba(28,33,40,.7);
     border: 1px solid var(--bp-border);
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     padding: 10px 12px;
     color: var(--bp-text);
     font-size: 14px; font-family: inherit;
@@ -65,7 +65,7 @@
   .premium-modal-submit {
     background: linear-gradient(135deg, #ffc850, #e3b341);
     color: #1a1a1f; border: none;
-    padding: 11px 14px; border-radius: 6px;
+    padding: 11px 14px; border-radius:var(--bp-radius);
     font-size: 14px; font-weight: 700; cursor: pointer;
     transition: transform .15s ease, box-shadow .15s ease;
   }
@@ -81,7 +81,7 @@
     background: transparent;
     border: 1px solid rgba(var(--bp-volume-rgb),.45);
     color: #ffc850;
-    padding: 10px 14px; border-radius: 6px;
+    padding: 10px 14px; border-radius:var(--bp-radius);
     font-size: 13px; font-weight: 600; cursor: pointer;
     font-family: inherit; transition: background .15s ease;
   }

@@ -235,7 +235,7 @@
     font-size: 11px;
     background: var(--bp-surface2);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 2px 9px;
     color: var(--bp-text3);
     white-space: nowrap;
@@ -248,7 +248,7 @@
     font-weight: 600;
     background: rgba(var(--bp-brand-rgb),.1);
     border: 1px solid rgba(var(--bp-brand-rgb),.3);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 3px 10px;
     color: var(--bp-brand);
     text-decoration: none;
@@ -288,7 +288,7 @@
     transform: translateX(-50%) translateY(20px);
     background: #161618; border: 1px solid var(--bp-border);
     color: var(--bp-text); padding: 10px 18px;
-    border-radius: 10px; font-size: 13px; font-weight: 600;
+    border-radius:var(--bp-radius-lg); font-size: 13px; font-weight: 600;
     box-shadow: 0 8px 24px rgba(0,0,0,0.5);
     opacity: 0; pointer-events: none; z-index: 999;
     transition: opacity .25s, transform .25s;
@@ -364,7 +364,7 @@
   .nav-dropdown-menu {
     display: none; position: absolute; top: calc(100% + 6px); left: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border);
-    border-radius: 10px; min-width: 178px; padding: 5px;
+    border-radius:var(--bp-radius-lg); min-width: 178px; padding: 5px;
     z-index: 500; box-shadow: 0 12px 32px rgba(0,0,0,.55);
   }
   .nav-dropdown-menu.open { display: block; animation: ddIn .13s ease; }
@@ -372,7 +372,7 @@
     from { opacity: 0; transform: translateY(-5px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .nav-dropdown-menu a { padding: 7px 10px !important; border-radius: 6px; }
+  .nav-dropdown-menu a { padding: 7px 10px !important; border-radius:var(--bp-radius); }
   .dd-sep { height: 1px; background: var(--bp-border); margin: 4px 6px; }
   @media (max-width: 900px) { .header-nav { display: none; } }
 
@@ -401,7 +401,7 @@
   /* F2 — Anomali rozet */
   .anomaly-badge {
     display: inline-flex; align-items: center; gap: 3px;
-    padding: 2px 8px; border-radius: 10px;
+    padding: 2px 8px; border-radius:var(--bp-radius-lg);
     background: rgba(217,153,34,0.15);
     color: #d29922; border: 1px solid rgba(217,153,34,0.3);
     font-size: 11px; font-weight: 600; cursor: default;
@@ -413,7 +413,7 @@
   .chart-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     overflow: hidden;
     margin-bottom: 20px;
   }
@@ -471,7 +471,7 @@
     position: relative;
     height: 6px;
     background: var(--bp-border);
-    border-radius: 3px;
+    border-radius:var(--bp-radius-sm);
     overflow: visible;
   }
   .week52-fill {
@@ -479,7 +479,7 @@
     left: 0; top: 0;
     height: 100%;
     background: linear-gradient(90deg, #f85149, #e3b341, #00e290);
-    border-radius: 3px;
+    border-radius:var(--bp-radius-sm);
     transition: width 0.4s ease;
   }
   .week52-cursor {
@@ -498,7 +498,7 @@
   .commentary-section {
     background: rgba(88,166,255,0.05);
     border: 1px solid rgba(88,166,255,0.15);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
@@ -520,7 +520,7 @@
   .info-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
   }
   .info-card-label {
@@ -559,7 +559,7 @@
   .entry-analysis-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
@@ -579,7 +579,7 @@
   .eq-badge {
     display: inline-block;
     padding: 5px 12px;
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     font-size: 13px;
     font-weight: 700;
     margin-bottom: 8px;
@@ -637,7 +637,7 @@
   .hacim-profili .hp-row-val.ok { color:var(--bp-al); }
   .hacim-profili .hp-row-val.weak { color:var(--bp-bkl); }
   .hacim-profili .hp-row-val.bad { color:var(--bp-sat); }
-  .hacim-profili .hp-row-val .hp-tag { font-size:10px; padding:1px 6px; border-radius:8px; margin-left:4px; font-weight:700; letter-spacing:.3px; }
+  .hacim-profili .hp-row-val .hp-tag { font-size:10px; padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:4px; font-weight:700; letter-spacing:.3px; }
   .hacim-profili .hp-row-val .hp-tag.premium { color:var(--bp-volume); background:rgba(var(--bp-volume-rgb),.10); border:1px solid rgba(var(--bp-volume-rgb),.45); }
   .hacim-profili .hp-row-val .hp-tag.confirmed { color:var(--bp-al); background:rgba(0,226,144,.08); border:1px solid rgba(0,226,144,.40); }
   .hacim-profili .hp-row-summary { margin-top:6px; font-size:10.5px; color:var(--bp-text3); font-style:italic; line-height:1.4; }
@@ -656,7 +656,7 @@
   .indicators-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
@@ -689,7 +689,7 @@
     align-items: center;
     gap: 5px;
     padding: 5px 12px;
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     font-size: 12px;
     font-weight: 600;
   }
@@ -717,7 +717,7 @@
   .ind-help::after {
     content: attr(data-tooltip);
     position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
-    background: var(--bp-surface2); border: 1px solid var(--bp-border2); border-radius: 8px;
+    background: var(--bp-surface2); border: 1px solid var(--bp-border2); border-radius:var(--bp-radius-md);
     padding: 10px 12px; font-size: 12px; font-weight: 400;
     color: var(--bp-text); line-height: 1.5;
     width: max-content; max-width: 280px; text-align: left;
@@ -737,7 +737,7 @@
 
   /* ── Sinyal mini istatistik satırı ── */
   .sig-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
-  .sig-stat-card { background:var(--bp-surface2); border:1px solid var(--bp-border); border-radius:8px; padding:12px 14px; text-align:center; transition:border-color .15s; }
+  .sig-stat-card { background:var(--bp-surface2); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:12px 14px; text-align:center; transition:border-color .15s; }
   .sig-stat-card:hover { border-color:var(--bp-text3); }
   .sig-stat-val  { font-size:26px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
   .sig-stat-lbl  { font-size:10px; color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
@@ -749,7 +749,7 @@
   .history-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
@@ -781,7 +781,7 @@
   .blog-read-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 12px 14px;
     text-decoration: none;
     display: block;
@@ -797,7 +797,7 @@
   .others-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 14px 0 14px 18px;
     margin-bottom: 20px;
     overflow: hidden;
@@ -814,7 +814,7 @@
   }
   .others-scroll::-webkit-scrollbar { height: 4px; }
   .others-scroll::-webkit-scrollbar-track { background: transparent; }
-  .others-scroll::-webkit-scrollbar-thumb { background: var(--bp-border2); border-radius: 2px; }
+  .others-scroll::-webkit-scrollbar-thumb { background: var(--bp-border2); border-radius:var(--bp-radius-xs); }
   .other-card {
     flex-shrink: 0;
     display: flex;
@@ -823,7 +823,7 @@
     padding: 8px 11px;
     background: var(--bp-surface2);
     border: 1px solid var(--bp-border);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     min-width: 78px;
     text-decoration: none;
     transition: all .15s;
@@ -846,7 +846,7 @@
   .news-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
@@ -914,7 +914,7 @@
     font-size: 10px;
     font-weight: 600;
     padding: 1px 7px;
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     letter-spacing: 0.3px;
   }
 
@@ -922,7 +922,7 @@
   .kap-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
@@ -995,7 +995,7 @@
   .methodology {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 24px;
     font-size: 12px;
@@ -1008,7 +1008,7 @@
   .content-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
@@ -1059,7 +1059,7 @@
     gap: 2px;
     background: var(--bp-surface2);
     border: 1px solid var(--bp-border);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 8px 12px;
     text-decoration: none;
     min-width: 110px;
@@ -1143,23 +1143,23 @@
   .macro-chg-neu { color: var(--bp-bkl); }
 
   /* ── Header Search Button ── */
-  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius: 6px; color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 6px; }
+  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius:var(--bp-radius); color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 6px; }
   .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
   @media (max-width: 768px) { .header-search-btn { min-width: 44px; min-height: 44px; } }
   /* ── Search Overlay ── */
   .search-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
   .search-overlay.open { display: flex; }
-  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
+  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
   .search-input-wrap { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--bp-border); }
   .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
   #searchInput { flex: 1; background: none; border: none; outline: none; font-size: 15px; color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }
   #searchInput::placeholder { color: var(--bp-text3); }
-  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius:var(--bp-radius); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
   .search-close:hover { background: var(--bp-surface2); color: var(--bp-text); }
   .search-results { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
   .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: 13px; }
   .search-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px 6px; }
-  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; transition: background .12s; font-size: 13px; }
+  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); transition: background .12s; font-size: 13px; }
   .search-result:hover, .search-result.sr-selected { background: var(--bp-surface2); }
   .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: 13px; }
   .sr-sig.sr-al { color: var(--bp-al); font-weight: 700; }
@@ -1169,7 +1169,7 @@
   .sr-price { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--bp-text2); }
   .sr-chg { font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600; min-width: 56px; text-align: right; }
   .sr-chg.pos { color: var(--bp-al); } .sr-chg.neg { color: var(--bp-sat); } .sr-chg.neu { color: var(--bp-bkl); }
-  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; font-size: 13px; transition: background .12s; }
+  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); font-size: 13px; transition: background .12s; }
   .search-topic:hover, .search-topic.sr-selected { background: var(--bp-surface2); }
   @media (max-width: 600px) {
     .search-overlay { padding-top: 0; align-items: stretch; }
@@ -1179,7 +1179,7 @@
   }
 
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 <!-- Mobile Bottom Navigation -->
@@ -1371,7 +1371,7 @@
       padding: 6px 12px;
       font-size: 12px; font-weight: 700;
       color: var(--bp-text); background: rgba(255,255,255,0.04);
-      border-radius: 6px; white-space: nowrap;
+      border-radius:var(--bp-radius); white-space: nowrap;
       letter-spacing: 0.3px; flex-shrink: 0;
     }
     @media (max-width: 480px) {
@@ -1385,7 +1385,7 @@
       max-width: 1400px;
       width: 100%;
       background: rgba(255,255,255,0.025);
-      border-radius: 10px;
+      border-radius:var(--bp-radius-lg);
       padding: 4px;
     }
     .bp-segments-spacer { height: 52px; }
@@ -1492,7 +1492,7 @@
     .bp-hero-power-label strong { color: var(--bp-text); font-size: 12px; font-weight: 700; }
     .bp-hero-power-bar {
       height: 6px; background: rgba(255,255,255,0.06);
-      border-radius: 3px; overflow: hidden;
+      border-radius:var(--bp-radius-sm); overflow: hidden;
     }
     .bp-hero-power-fill {
       height: 100%;
@@ -1504,7 +1504,7 @@
       font-size: 13px; color: var(--bp-text);
       padding: 10px 12px;
       background: rgba(255,255,255,0.025);
-      border-radius: 8px;
+      border-radius:var(--bp-radius-md);
       margin-bottom: 12px;
     }
     .bp-hero-levels span strong { color: var(--hero-accent, var(--bp-al)); margin-right: 4px; }
@@ -1512,7 +1512,7 @@
       display: inline-flex; align-items: center; gap: 4px;
       font-size: 12.5px; color: #93c5fd;
       text-decoration: none; font-weight: 600;
-      padding: 6px 10px; border-radius: 6px;
+      padding: 6px 10px; border-radius:var(--bp-radius);
       background: rgba(147,197,253,0.08);
       transition: background 0.15s, color 0.15s;
       cursor: pointer; border: none; font-family: inherit;
@@ -1521,7 +1521,7 @@
       background: rgba(147,197,253,0.15); color: var(--bp-brand);
     }
     @media (max-width: 480px) {
-      .bp-hero-card { padding: 14px 16px; border-radius: 12px; }
+      .bp-hero-card { padding: 14px 16px; border-radius:var(--bp-radius-xl); }
       .bp-hero-badge { font-size: 16px; }
       .bp-hero-levels { font-size: 12px; gap: 10px; padding: 8px 10px; }
     }
@@ -1848,7 +1848,7 @@
   {% if signal_summary %}
   <div id="signalSummarySection"
        data-tab-content="ozet"
-       style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:18px 18px 14px;margin-bottom:20px">
+       style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:18px 18px 14px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">🧭</span> Sinyal Özeti</h2>
       <span style="font-size:11px;color:var(--bp-text3)">2 saniyede karar yardımcısı</span>
@@ -2005,12 +2005,12 @@
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
       <div style="display:flex;gap:6px;align-items:center">
         <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
-                style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
+                style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
                 onmouseover="this.style.borderColor='#46464d';this.style.color='#c7c5cd'"
                 onmouseout="this.style.borderColor='#2a2a2c';this.style.color='#909097'"
                 title="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
         <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
-                style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
+                style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
                 onmouseover="this.style.borderColor='#46464d';this.style.color='#c7c5cd'"
                 onmouseout="this.style.borderColor='#2a2a2c';this.style.color='#909097'">
           Detaylı göster ▾
@@ -2020,14 +2020,14 @@
     <div class="ind-row" id="indRow">
       <span class="ind-badge ind-neutral">Yükleniyor…</span>
     </div>
-    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:8px;font-size:11.5px;color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',monospace">
+    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:var(--bp-radius-md);font-size:11.5px;color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',monospace">
       <strong style="color:var(--bp-brand);font-size:10px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Teknik Detaylar</strong>
       <span id="indTechContent">—</span>
     </div>
   </div>
 
   <!-- Çoklu Zaman Dilimi -->
-  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px;margin-bottom:20px" id="mtfSection" data-tab-content="ozet">
+  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px" id="mtfSection" data-tab-content="ozet">
     <h2 class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="mtfGrid">
       <div style="color:var(--bp-text3);font-size:13px;grid-column:1/-1">Yükleniyor…</div>
@@ -2063,7 +2063,7 @@
   </div>
 
   <!-- Temel Analiz -->
-  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;overflow:hidden;margin-bottom:20px" id="fundSection" data-tab-content="ozet">
+  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);overflow:hidden;margin-bottom:20px" id="fundSection" data-tab-content="ozet">
     <div style="padding:12px 18px;border-bottom:1px solid var(--bp-surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> Temel Analiz</h2>
       <span style="font-size:11px;color:var(--bp-text3)">yfinance · 4 saatlik cache</span>
@@ -2093,21 +2093,21 @@
   <!-- Geçmiş Sinyal Performansı — CPO-1107 madde 3: artık aynı sinyal geçmişi
        listesinden (signal_history) hesaplanır; ayrı/bayat backtest cache'i
        kullanmaz, böylece "Toplam Sinyal" tablosuyla aynı kaynağa dayanır. -->
-  <div id="sigPerfBox" data-tab-content="ozet" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+  <div id="sigPerfBox" data-tab-content="ozet" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📊</span> Geçmiş Sinyal Performansı</h2>
       <a href="/sinyal-performans" style="font-size:11px;color:var(--bp-brand);text-decoration:none;font-weight:600">Tüm backtest <span aria-hidden="true">→</span></a>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
+      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
         <div id="sigPerfWinRate" style="font-size:24px;font-weight:800"></div>
         <div style="font-size:11px;color:var(--bp-text3);margin-top:3px">Sinyal Kazanma Oranı</div>
       </div>
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
+      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
         <div id="sigPerfAvg" style="font-size:24px;font-weight:800"></div>
         <div style="font-size:11px;color:var(--bp-text3);margin-top:3px">Ort. Sinyal Getirisi</div>
       </div>
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
+      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
         <div id="sigPerfCount" style="font-size:24px;font-weight:800;color:var(--bp-text3)"></div>
         <div style="font-size:11px;color:var(--bp-text3);margin-top:3px">Analiz Edilen Sinyal</div>
       </div>
@@ -2138,7 +2138,7 @@
       margin-bottom: 20px; padding: 16px;
       background: linear-gradient(135deg, rgba(var(--bp-al-rgb),0.06), rgba(var(--bp-al-rgb),0.02));
       border: 1px solid rgba(var(--bp-al-rgb),0.18);
-      border-radius: 12px;
+      border-radius:var(--bp-radius-xl);
     }
     .bp-detail-cta-label {
       font-size: 11px; color: var(--bp-text3); font-weight: 600;
@@ -2150,7 +2150,7 @@
     }
     .bp-detail-cta-btn {
       display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 12px 6px; border-radius: 10px;
+      padding: 12px 6px; border-radius:var(--bp-radius-lg);
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--bp-text); cursor: pointer;
@@ -2169,49 +2169,49 @@
   </style>
 
   <!-- KAP + Dış Linkler -->
-  <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+  <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
     <span style="font-size:12px;color:var(--bp-text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Resmi Kaynaklar</span>
     <a href="{{ kap_url }}" target="_blank" rel="noopener"
-       style="display:inline-flex;align-items:center;gap:5px;background:#1c1b1f;border:1px solid #2a2a2c;border-radius:6px;padding:5px 12px;font-size:12px;color:#909097;text-decoration:none;transition:all .15s"
+       style="display:inline-flex;align-items:center;gap:5px;background:#1c1b1f;border:1px solid #2a2a2c;border-radius:var(--bp-radius);padding:5px 12px;font-size:12px;color:#909097;text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
       <span aria-hidden="true">📋</span> KAP Bildirimleri
     </a>
     <a href="https://finance.yahoo.com/quote/{{ ticker }}.IS" target="_blank" rel="noopener"
-       style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--bp-text3);text-decoration:none;transition:all .15s"
+       style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:12px;color:var(--bp-text3);text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
       <span aria-hidden="true">📈</span> Yahoo Finance
     </a>
     <a href="https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/sirket-karti.aspx?hisse={{ ticker }}" target="_blank" rel="noopener"
-       style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--bp-text3);text-decoration:none;transition:all .15s"
+       style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:12px;color:var(--bp-text3);text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
       <span aria-hidden="true">🏦</span> İş Yatırım
     </a>
   </div>
 
   <!-- Sosyal Paylaşım -->
-  <div id="shareSection" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:12px 18px;margin-bottom:20px;align-items:center;flex-wrap:wrap;gap:10px">
+  <div id="shareSection" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:12px 18px;margin-bottom:20px;align-items:center;flex-wrap:wrap;gap:10px">
     <span style="font-size:12px;color:var(--bp-text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Sinyali Paylaş</span>
     <button id="shareWA" onclick="shareSignal('wa')"
-      style="display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:6px;padding:5px 12px;font-size:12px;color:#25D366;cursor:pointer;font-family:inherit;transition:all .15s"
+      style="display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:var(--bp-radius);padding:5px 12px;font-size:12px;color:#25D366;cursor:pointer;font-family:inherit;transition:all .15s"
       onmouseover="this.style.background='rgba(37,211,102,.2)'" onmouseout="this.style.background='rgba(37,211,102,.1)'">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       WhatsApp
     </button>
     <button id="shareX" onclick="shareSignal('x')"
-      style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--bp-text);cursor:pointer;font-family:inherit;transition:all .15s"
+      style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:var(--bp-radius);padding:5px 12px;font-size:12px;color:var(--bp-text);cursor:pointer;font-family:inherit;transition:all .15s"
       onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       X (Twitter)
     </button>
     <button id="shareCopy" onclick="shareSignal('copy')"
-      style="display:inline-flex;align-items:center;gap:5px;background:rgba(var(--bp-brand-rgb),.08);border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:6px;padding:5px 12px;font-size:12px;color:#93c5fd;cursor:pointer;font-family:inherit;transition:all .15s"
+      style="display:inline-flex;align-items:center;gap:5px;background:rgba(var(--bp-brand-rgb),.08);border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius);padding:5px 12px;font-size:12px;color:#93c5fd;cursor:pointer;font-family:inherit;transition:all .15s"
       onmouseover="this.style.background='rgba(184,195,255,.15)'" onmouseout="this.style.background='rgba(184,195,255,.08)'">
       <span aria-hidden="true">🔗</span> Linki Kopyala
     </button>
   </div>
 
   <!-- Sinyal Dönemindeki Haber Akışı — sinyal tarihi etrafındaki KAP bildirimleri -->
-  <div id="storySection" data-tab-content="haberler" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px;margin-bottom:20px">
+  <div id="storySection" data-tab-content="haberler" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📰</span> Sinyal Dönemindeki Haber Akışı</h2>
       <span id="storyWindow" style="font-size:11px;color:var(--bp-text3)"></span>
@@ -2225,11 +2225,11 @@
 
   <!-- AI Sinyal Açıklaması -->
   <div id="ai-section" style="scroll-margin-top:80px"></div>
-  <div id="sigExplainSection" data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px">
+  <div id="sigExplainSection" data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="font-size:15px"><span aria-hidden="true">✨</span></span>
       <span style="font-size:13px;font-weight:700;color:var(--bp-text);text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
-      <span id="sigExplainBadge" style="margin-left:auto;font-size:11px;background:rgba(var(--bp-brand-rgb),0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
+      <span id="sigExplainBadge" style="margin-left:auto;font-size:11px;background:rgba(var(--bp-brand-rgb),0.15);color:#93c5fd;padding:2px 8px;border-radius:var(--bp-radius-lg);border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
     </div>
     {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
     <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:12px;color:#f87171;line-height:1.6"></div>
@@ -2283,7 +2283,7 @@
 
   {% if ssr_signal %}
   <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
-  <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px;margin-bottom:20px">
+  <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
     <div style="font-size:11px;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:10px"><span aria-hidden="true">📊</span> Teknik Özet</div>
     <p style="font-size:13px;color:var(--bp-text2);line-height:1.7;margin:0">
       <strong style="color:var(--bp-text)">{{ ticker }} ({{ name }})</strong> hissesi,
@@ -2375,7 +2375,7 @@
 </div>
 
 <!-- Subscription CTA -->
-<div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(29,78,216,.04));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:10px;padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
+<div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(29,78,216,.04));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius-lg);padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
   <div style="flex:1;min-width:160px">
     <div style="font-size:13px;font-weight:700;color:var(--bp-text);margin-bottom:1px"><span aria-hidden="true">📬</span> {{ ticker }} sinyali değişince bildirim al</div>
     <div style="font-size:11px;color:var(--bp-text3)">Ücretsiz e-posta aboneliği</div>

@@ -41,12 +41,12 @@
     display: flex; align-items: center; gap: 6px;
     color: #8b949e; font-size: 13px; text-decoration: none;
     padding: 5px 10px; border: 1px solid #30363d;
-    border-radius: 6px; background: #21262d; transition: all 0.15s;
+    border-radius:var(--bp-radius); background: #21262d; transition: all 0.15s;
   }
   .back-btn:hover { background: #30363d; color: #e6edf3; }
   .page-title { font-size: 20px; font-weight: 700; color: #f0f6fc; }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:13px; font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
   @media (max-width:780px) { .top-nav-links { display:none; } }
 
@@ -71,7 +71,7 @@
   .hero {
     background: linear-gradient(135deg, rgba(31,111,235,.08) 0%, rgba(63,185,80,.05) 100%);
     border: 1px solid rgba(31,111,235,.2);
-    border-radius: 12px;
+    border-radius:var(--bp-radius-xl);
     padding: 28px 28px 24px;
     margin-bottom: 8px;
   }
@@ -114,7 +114,7 @@
   .stat-box {
     background: #161b22;
     border: 1px solid #30363d;
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 14px 16px;
     text-align: center;
   }
@@ -131,7 +131,7 @@
   .feature-card {
     background: #161b22;
     border: 1px solid #30363d;
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 14px 16px;
     display: flex;
     gap: 12px;
@@ -151,7 +151,7 @@
   .tech-card {
     background: #161b22;
     border: 1px solid #30363d;
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 12px 14px;
   }
   .tech-name { font-size: 13px; font-weight: 700; color: #f0f6fc; }
@@ -167,7 +167,7 @@
   .market-card {
     background: #161b22;
     border: 1px solid #30363d;
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 14px 16px;
   }
   .market-card-title {
@@ -183,7 +183,7 @@
     background: #161b22;
     border: 1px solid #30363d;
     border-left: 3px solid #1f6feb;
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 16px 18px;
     margin: 14px 0;
   }
@@ -221,7 +221,7 @@
   .warning-box {
     background: rgba(210,153,34,.06);
     border: 1px solid rgba(210,153,34,.3);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 16px 18px;
     margin: 14px 0;
   }
@@ -245,7 +245,7 @@
     .hero-title { font-size: 20px; }
   }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:6px;color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 {% with hdr_title = 'Hakkında' %}{% include '_header.html' %}{% endwith %}
