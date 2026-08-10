@@ -2308,9 +2308,9 @@
       </h2>
       <div style="display:flex;align-items:center;gap:10px;">
         <!-- Tabs -->
-        <div class="gnm-tabs" id="gnmTabs">
-          <button class="gnm-tab-btn active" id="tabBtnMakro" onclick="switchGnmTab('makro')"><span aria-hidden="true">🌍</span> Makro</button>
-          <button class="gnm-tab-btn" id="tabBtnHisse" onclick="switchGnmTab('hisse')"><span aria-hidden="true">📈</span> Hisse</button>
+        <div class="gnm-tabs" id="gnmTabs" role="tablist" aria-label="Gündem sekmeleri">
+          <button class="gnm-tab-btn active" id="tabBtnMakro" role="tab" aria-selected="true" aria-controls="gnmPanelMakro" onclick="switchGnmTab('makro')"><span aria-hidden="true">🌍</span> Makro</button>
+          <button class="gnm-tab-btn" id="tabBtnHisse" role="tab" aria-selected="false" aria-controls="gnmPanelHisse" onclick="switchGnmTab('hisse')"><span aria-hidden="true">📈</span> Hisse</button>
         </div>
         <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;">
           Tümü <span aria-hidden="true">→</span>
@@ -2319,8 +2319,8 @@
     </div>
 
     <!-- Tab: Makro Haberler (VARSAYILAN — ilk açılışta görünen) -->
-    <div id="gnmPanelMakro">
-      <div id="macroNewsList" class="macro-news-list">
+    <div id="gnmPanelMakro" role="tabpanel" aria-labelledby="tabBtnMakro" tabindex="0">
+      <div id="macroNewsList" class="macro-news-list" role="list" aria-label="Makro haberler">
         <!-- skeleton -->
         <div style="height:50px;border-radius:var(--bp-radius-md);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
         <div style="height:50px;border-radius:var(--bp-radius-md);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
@@ -2332,7 +2332,7 @@
     </div>
 
     <!-- Tab: Hisse Haberleri (gizli başlar) -->
-    <div id="gnmPanelHisse" style="display:none">
+    <div id="gnmPanelHisse" style="display:none" role="tabpanel" aria-labelledby="tabBtnHisse" tabindex="0">
       <div class="gundem-layout">
         <!-- Sol: haber kartları -->
         <div class="gundem-cards-wrap">
@@ -5563,12 +5563,16 @@ function switchGnmTab(tab) {
   if (tab === 'makro') {
     btnMakro && btnMakro.classList.add('active');
     btnHisse && btnHisse.classList.remove('active');
+    btnMakro && btnMakro.setAttribute('aria-selected', 'true');
+    btnHisse && btnHisse.setAttribute('aria-selected', 'false');
     panelMakro.style.display = 'block';
     panelHisse.style.display = 'none';
     if (!_macroLoaded) loadMacroNews();
   } else {
     btnHisse && btnHisse.classList.add('active');
     btnMakro && btnMakro.classList.remove('active');
+    btnHisse && btnHisse.setAttribute('aria-selected', 'true');
+    btnMakro && btnMakro.setAttribute('aria-selected', 'false');
     panelHisse.style.display = 'block';
     panelMakro.style.display = 'none';
     if (!_hisseLoaded) loadGundem(false);
@@ -5590,7 +5594,7 @@ async function loadMacroNews() {
       const safeSrc   = _esc(item.source || '');
       const safeTitle = _esc(item.title  || '');
       const safeTime  = _esc(item.date_str || '');
-      return `<a href="${safeUrl}" target="_blank" rel="noopener" class="macro-news-item">
+      return `<a href="${safeUrl}" target="_blank" rel="noopener" class="macro-news-item" role="listitem">
         <span class="macro-news-src">${safeSrc}</span>
         <span class="macro-news-title">${safeTitle}</span>
         <span class="macro-news-time">${safeTime}</span>
