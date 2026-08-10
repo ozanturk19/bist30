@@ -2187,7 +2187,7 @@
       <h2 class="mb-title">Piyasa Geneli</h2>
       <span class="mb-sentiment" id="mbSentiment"></span>
     </div>
-    <div class="mb-bar">
+    <div class="mb-bar" aria-hidden="true">
       <div class="mb-seg mb-seg-al"  id="mbSegAl"  style="width:0%"></div>
       <div class="mb-seg mb-seg-bkl" id="mbSegBkl" style="width:100%"></div>
       <div class="mb-seg mb-seg-sat" id="mbSegSat" style="width:0%"></div>
@@ -4162,7 +4162,7 @@ function renderTable() {
           <div class="mc-row2">
             <div style="display:flex;align-items:center;gap:7px">
               <span class="signal-badge signal-${s.signal}" style="font-size:10px" onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()">${sigIcon} ${sigLabel(s.signal)}</span>
-              ${confIcon}<div class="score-bar">${dots}</div>
+              ${confIcon}<div class="score-bar" role="img" aria-label="Güç: ${scoreVal}/3">${dots}</div>
             </div>
             <div class="mc-entry">${entryTxt}</div>
           </div>
@@ -4289,7 +4289,7 @@ function renderTable() {
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile">${sigPriceHtml}</td>
       <td class="hide-mobile">${slHtml}</td>
-      <td class="hide-mobile"><div class="score-bar">${dots}</div></td>
+      <td class="hide-mobile"><div class="score-bar" role="img" aria-label="Güç: ${scoreVal}/${MAX_SCORE}">${dots}</div></td>
       <td class="hide-mobile"><div class="indicators">${indHtml}</div></td>
       <td><button class="alarm-btn ${isWatching ? 'watching' : ''}" id="ab-${s.ticker}"
           onclick="event.stopPropagation();toggleWatch('${s.ticker}')"

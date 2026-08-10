@@ -2980,10 +2980,13 @@ function renderSummary(s, signalData) {
   const MAX = 3;
   const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
   const dotCls   = s.signal === 'SAT' ? 'dot-bear' : s.signal === 'AL' ? 'dot-bull' : 'dot-empty';
-  document.getElementById('icDots').innerHTML =
+  const icDotsEl = document.getElementById('icDots');
+  icDotsEl.innerHTML =
     Array.from({ length: MAX }, (_, i) =>
       `<div class="score-dot ${i < scoreVal ? dotCls : 'dot-empty'}"></div>`
     ).join('');
+  icDotsEl.setAttribute('role', 'img');
+  icDotsEl.setAttribute('aria-label', `Güç: ${scoreVal}/${MAX}`);
 
   /* Sinyal date/bars — signalData'dan */
   if (signalData) {
