@@ -267,6 +267,9 @@
   --bp-z-toast:    9999;
   --bp-z-tooltip:    9000;
   --bp-z-modal-top:  9998;
+  /* Yerel yigin baglami — .macro-pause-btn (16 sablon), global katmanla yarismaz.
+     Deger DEGISTIRILMEDI (3), yalniz isimlendirildi. DEV2-050/053. */
+  --bp-z-local-control: 3;
 
   /* ── 7. SÜRE + YUMUŞATMA (duration / easing) ──────────────────
      ÖLÇÜM süre (~300 kullanım): .15s:226  .2s:25  .12s:17  .25s:7
