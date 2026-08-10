@@ -118,6 +118,20 @@
   }
   .ls-warning-close:hover { color:#e3b341; }
 
+  /* T7.4: canlı veri/grafik fetch hatası banner'ı */
+  .pf-fetch-error {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    background:rgba(var(--bp-sat-rgb),.08); border:1px solid var(--bp-sat-bd);
+    border-radius:10px; padding:12px 16px; margin-bottom:20px;
+    font-size:13px; color:var(--bp-sat);
+  }
+  .pf-fetch-error-retry {
+    background:none; border:1px solid var(--bp-sat-bd); color:var(--bp-sat);
+    border-radius:6px; padding:5px 12px; font-size:12px; font-weight:600;
+    cursor:pointer; transition:background .15s;
+  }
+  .pf-fetch-error-retry:hover { background:rgba(var(--bp-sat-rgb),.12); }
+
   .loading-row td { color:#484f58; font-style:italic; }
 
   footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
@@ -159,6 +173,12 @@
 <div id="main-content" class="container" tabindex="-1">
 
 {% include '_stale_banner.html' %}
+
+  <!-- T7.4: canlı fiyat/grafik verisi çekilemediğinde gösterilen hata banner'ı -->
+  <div class="pf-fetch-error" id="pfFetchError" style="display:none">
+    <span>⚠️ Güncel fiyat ve grafik verileri şu an yüklenemiyor.</span>
+    <button class="pf-fetch-error-retry" onclick="retryPortfolioFetch()">Tekrar dene</button>
+  </div>
 
   <!-- localStorage Uyarı Bandı -->
   <div class="ls-warning" id="lsWarning" style="display:none">
@@ -334,6 +354,18 @@ function fmtM(v) {
 
 function save() { localStorage.setItem(PF_KEY, JSON.stringify(portfolio)); }
 
+/* T7.4: canlı veri (fiyat/sinyal, XU030 kıyas) çekilemediğinde görünür
+   uyarı + retry — hisse bazlı sparkline eksikliği tabloda zaten "—" ile
+   zarifçe düşüyor (svgSparkline), o yüzden ayrı alarm tetiklemiyor.
+   İki bağımsız fetch döngüsü (fetchLive 60sn, fetchCharts 5dk) aynı
+   banner'ı paylaştığı için durum ayrı ayrı izlenir — biri düzelirken
+   diğerinin hatası banner'ı erken kapatmasın diye. */
+const _pfFetchErr = { live: false, chart: false };
+function _updatePfFetchError() {
+  document.getElementById('pfFetchError').style.display = (_pfFetchErr.live || _pfFetchErr.chart) ? 'flex' : 'none';
+}
+function retryPortfolioFetch() { fetchLive(); fetchCharts(); }
+
 /* ── F6: Chart data + Sparkline + XU030 ──────────── */
 async function fetchCharts() {
   // XU030 OHLC — mevcut /api/chart cache'i reuse
@@ -341,7 +373,9 @@ async function fetchCharts() {
     const r = await fetch('/api/chart');
     const j = await r.json();
     if (j.chart && j.chart.ohlc) xu030Ohlc = j.chart.ohlc;
-  } catch(e) {}
+    _pfFetchErr.chart = false;
+  } catch(e) { _pfFetchErr.chart = true; }
+  _updatePfFetchError();
   // Sparkline: portföydeki her benzersiz hisse için son 30g close
   const tickers = [...new Set(portfolio.map(p => p.ticker))];
   await Promise.all(tickers.map(async t => {
@@ -525,7 +559,9 @@ async function fetchLive() {
     if (j.stocks) {
       j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal, signal_price: s.signal_price }; });
     }
-  } catch(e) {}
+    _pfFetchErr.live = false;
+  } catch(e) { _pfFetchErr.live = true; }
+  _updatePfFetchError();
   render();
 }
 

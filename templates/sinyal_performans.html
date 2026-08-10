@@ -374,7 +374,7 @@ async function triggerBacktest() {
     let tries = 0;
     const poll = setInterval(async () => {
       tries++;
-      if (tries > 30) { clearInterval(poll); btn.textContent = '⏱ Zaman aşımı'; return; }
+      if (tries > 30) { clearInterval(poll); btn.textContent = '🔄 Tekrar dene'; btn.disabled = false; return; }
       const r = await fetch('/api/backtest');
       const j = await r.json();
       if (j.al) { clearInterval(poll); window.location.reload(); }
