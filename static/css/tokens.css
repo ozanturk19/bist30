@@ -364,3 +364,17 @@ nav a[href="/kripto"]::after, nav a[href="/emtialar"]::after, nav a[href="/abd"]
 footer a[href="/kripto"]::after, footer a[href="/emtialar"]::after, footer a[href="/abd"]::after {
   content: "kısmi"; font-size: 9px; opacity: .6; margin-left: 4px; vertical-align: super;
 }
+
+/* FAZ8 — prefers-reduced-motion global kural. tokens.css tum sayfalarda
+   yukleniyor, bu yuzden 33 sablonun her birine ayri ayri eklemek yerine
+   burada tek satirla kapsaniyor. Makro seridin duraklat/oynat dugmesi
+   (ayri backlog kalemi) bunun yerine gecmez — bu yalnizca "hareketi
+   fiziksel olarak azalt" kismi, gorunur kontrol UI'si degil. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
