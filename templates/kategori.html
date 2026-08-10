@@ -27,7 +27,7 @@
     --brand:#1f6feb; --gold:#e3b341;
   }
   body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; min-height:100vh; }
-  header { background:var(--surface); border-bottom:1px solid var(--border); padding:12px 24px; display:flex; align-items:center; gap:14px; position:sticky; top:0; z-index:100; }
+  header { background:var(--surface); border-bottom:1px solid var(--border); padding:12px 24px; display:flex; align-items:center; gap:14px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
   .back-btn { display:flex; align-items:center; gap:6px; color:var(--text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--border); border-radius:var(--bp-radius); background:var(--surface2); transition:all .15s; }
   .back-btn:hover { background:var(--border); color:var(--text); }
   .page-title { font-size:18px; font-weight:700; color:#f0f6fc; }
@@ -40,7 +40,7 @@
 
   /* Macro bar */
   .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--border2); height:32px; overflow:hidden; position:relative; white-space:nowrap; }
-  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2; }
+  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
   .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
   .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
   .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:32px; }
