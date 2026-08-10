@@ -178,6 +178,10 @@
   .macro-track{display:inline-flex;align-items:center;animation:macroScroll 40s linear infinite;height:32px;}
   .macro-bar:hover .macro-track{animation-play-state:paused;}
   @keyframes macroScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    .macro-bar { position: relative; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: 3; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: 12px; line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
+  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item{display:inline-flex;align-items:center;gap:7px;padding:0 18px;border-right:1px solid #21262d;font-size:11px;height:32px;}
   .macro-item-lbl{font-weight:600;color:#cbd5e1;}
   .mc-pos{color:#3fb950;}.mc-neg{color:var(--bp-sat);}.mc-neu{color:#8b949e;}
@@ -190,7 +194,7 @@
 
 
 <!-- Makro Ticker -->
-<div class="macro-bar"><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 <div class="container" id="main-content" tabindex="-1">
 
