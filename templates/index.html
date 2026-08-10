@@ -762,6 +762,7 @@
     font-size: 12px; font-weight: 600;
     color: var(--bp-text2);
     text-transform: uppercase; letter-spacing: 0.5px;
+    margin: 0;
   }
   .ms-live-dot {
     width: 6px; height: 6px;
@@ -1016,7 +1017,7 @@
   }
   .bilanco-mini-title {
     font-size: 11px; font-weight: 700; color: var(--bp-text3);
-    text-transform: uppercase; letter-spacing: .6px; margin-bottom: 9px;
+    text-transform: uppercase; letter-spacing: .6px; margin: 0 0 9px;
   }
   .bilanco-period {
     padding: 7px 0;
@@ -1081,7 +1082,7 @@
     margin-bottom: 14px;
   }
   .mb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
-  .mb-title { font-size: 11px; font-weight: 600; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; }
+  .mb-title { font-size: 11px; font-weight: 600; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; margin: 0; }
   .mb-sentiment { font-size: 12px; font-weight: 700; }
   .mb-bar {
     display: flex; height: 5px; border-radius: 3px; overflow: hidden; gap: 1px;
@@ -1597,7 +1598,7 @@
   }
   .hp-title {
     font-size: 10px; font-weight: 700; color: var(--bp-text3);
-    text-transform: uppercase; letter-spacing: .6px; margin-bottom: 5px;
+    text-transform: uppercase; letter-spacing: .6px; margin: 0 0 5px;
   }
   .hp-divider { height: 1px; background: var(--bp-border); flex-shrink: 0; }
 
@@ -1657,7 +1658,7 @@
   .alert-modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:10001; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .18s; }
   .alert-modal-backdrop.visible { opacity:1; pointer-events:auto; }
   .alert-modal { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:14px; padding:24px 22px 18px; width:340px; max-width:96vw; position:relative; }
-  .alert-modal-title { font-size:16px; font-weight:700; margin-bottom:14px; color:var(--bp-text); }
+  .alert-modal-title { font-size:16px; font-weight:700; margin:0 0 14px; color:var(--bp-text); }
   .alert-modal-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
   .alert-modal-row label { flex:1; font-size:13px; color:#8b949e; }
   .alert-modal-row input[type=number] { width:72px; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#e6edf3; padding:5px 8px; font-size:13px; }
@@ -1680,7 +1681,7 @@
   }
   .alarm-panel.hidden { display:none; }
   .ap-header { padding:12px 14px; border-bottom:1px solid var(--bp-border); display:flex; justify-content:space-between; align-items:center; }
-  .ap-title  { font-size:13px; font-weight:700; color:var(--bp-text); }
+  .ap-title  { font-size:13px; font-weight:700; color:var(--bp-text); margin:0; }
   .ap-close  { background:none; border:none; color:var(--bp-text2); cursor:pointer; font-size:18px; line-height:1; }
   .ap-body   { overflow-y:auto; flex:1; padding:6px; }
   .ap-item   { padding:8px 6px 10px; border-radius:8px; font-size:13px; border-bottom:1px solid var(--bp-border); }
@@ -1739,7 +1740,7 @@
     transition:color .15s;
   }
   .sub-toast-close:hover { color:var(--bp-text2); }
-  .sub-toast-title { font-size:13px; font-weight:700; color:var(--bp-text); margin-bottom:3px; }
+  .sub-toast-title { font-size:13px; font-weight:700; color:var(--bp-text); margin:0 0 3px; }
   .sub-toast-sub   { font-size:11px; color:var(--bp-text3); margin-bottom:12px; line-height:1.5; }
   .sub-toast-row   { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
   .sub-toast-input {
@@ -2119,11 +2120,11 @@
 <section class="bp-highlights" aria-label="Öne Çıkan Hisseler">
   <div class="hp-twin">
     <div class="hp-section">
-      <div class="hp-title"><span aria-hidden="true">🟢</span> Güçlü Trend</div>
+      <h2 class="hp-title"><span aria-hidden="true">🟢</span> Güçlü Trend</h2>
       <div id="hpAlList" class="hp-sk-wrap"></div>
     </div>
     <div class="hp-section hp-section-r">
-      <div class="hp-title"><span aria-hidden="true">🔥</span> Hareketliler</div>
+      <h2 class="hp-title"><span aria-hidden="true">🔥</span> Hareketliler</h2>
       <div id="hpMoverList" class="hp-sk-wrap"></div>
     </div>
   </div>
@@ -2183,7 +2184,7 @@
   <!-- Market Breadth Bar -->
   <div class="market-breadth" id="marketBreadth">
     <div class="mb-header">
-      <span class="mb-title">Piyasa Geneli</span>
+      <h2 class="mb-title">Piyasa Geneli</h2>
       <span class="mb-sentiment" id="mbSentiment"></span>
     </div>
     <div class="mb-bar">
@@ -2201,9 +2202,9 @@
   <!-- ── Feature 1 — Bugünün Özeti (Hero Narratif Card) — İSKELET (data Cmt'de bağlanacak) ── -->
   <section class="market-summary" id="marketSummary" aria-label="Bugünün Piyasa Özeti">
     <div class="ms-header">
-      <span class="ms-live-indicator">
+      <h2 class="ms-live-indicator">
         <span class="ms-live-dot"></span> Bugünün Özeti
-      </span>
+      </h2>
       <span class="ms-meta">
         <span id="msTime">—</span> itibarıyla
         <span class="ms-divider">·</span>
@@ -2293,14 +2294,14 @@
   <!-- ── Gündem & Haberler ──────────────────────────── -->
   <section class="gundem-section" id="gundemSec">
     <div class="gundem-header">
-      <span style="font-size:13px;font-weight:700;color:var(--bp-text);display:flex;align-items:center;gap:6px;">
+      <h2 style="font-size:13px;font-weight:700;color:var(--bp-text);display:flex;align-items:center;gap:6px;margin:0;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              style="width:15px;height:15px;flex-shrink:0;opacity:.7">
           <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/>
           <path d="M14 2v4a2 2 0 0 0 2 2h4"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
         </svg>
         Gündem &amp; Haberler
-      </span>
+      </h2>
       <div style="display:flex;align-items:center;gap:10px;">
         <!-- Tabs -->
         <div class="gnm-tabs" id="gnmTabs">
@@ -2341,7 +2342,7 @@
 
         <!-- Sağ: bilanço mini widget -->
         <div class="bilanco-mini-box" id="bilancoMini">
-          <div class="bilanco-mini-title"><span aria-hidden="true">📅</span> Bilanço Dönemi</div>
+          <h3 class="bilanco-mini-title"><span aria-hidden="true">📅</span> Bilanço Dönemi</h3>
           <div id="bilancoMiniBody" style="min-height:60px">
             <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
             <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
@@ -2547,7 +2548,7 @@
 <!-- ── Alarm Panel ── -->
 <div class="alarm-panel hidden" id="alarmPanel">
   <div class="ap-header">
-    <span class="ap-title"><span aria-hidden="true">🔔</span> Takip Listem</span>
+    <h3 class="ap-title"><span aria-hidden="true">🔔</span> Takip Listem</h3>
     <button class="ap-close" onclick="toggleAlarmPanel()">×</button>
   </div>
   <div class="ap-body" id="apBody">
@@ -2561,7 +2562,7 @@
 <!-- ── Sticky Subscription Toast ── -->
 <div class="sub-toast" id="subToast" role="dialog" aria-label="E-posta aboneliği">
   <button class="sub-toast-close" onclick="dismissSubToast()" title="Kapat" aria-label="Kapat">×</button>
-  <div class="sub-toast-title"><span aria-hidden="true">📬</span> Günlük Sinyal Özeti Al</div>
+  <h3 class="sub-toast-title"><span aria-hidden="true">📬</span> Günlük Sinyal Özeti Al</h3>
   <div class="sub-toast-sub">Her gün piyasa kapanışında önemli sinyal değişikliklerini e-posta ile al.</div>
   <div class="sub-toast-benefits">
     <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> Ücretsiz</span>
@@ -3819,7 +3820,7 @@ async function openAlertModal(ticker) {
   const cfg = _userAlerts[ticker] || {};
   modal.innerHTML = `<div class="alert-modal" role="dialog" aria-modal="true">
     <button class="alert-modal-close" onclick="closeAlertModal()">×</button>
-    <div class="alert-modal-title">🔔 ${ticker} — Alert Ayarları</div>
+    <h3 class="alert-modal-title"><span aria-hidden="true">🔔</span> ${ticker} — Alert Ayarları</h3>
     ${loginNotice}
     <div class="alert-modal-row">
       <label>📈 Fiyat hareketi eşiği (%)</label>
