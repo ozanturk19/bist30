@@ -365,9 +365,9 @@
 const TICKERS_PARAM = "{{ tickers_param }}";
 
 const ROW_LABELS = [
-  { key: '_sep_tech',     label: '📊 TEKNİK ANALİZ', isSep: true },
+  { key: '_sep_tech',     label: '<span aria-hidden="true">📊</span> TEKNİK ANALİZ', isSep: true },
   { key: 'signal',        label: 'Sinyal' },
-  { key: 'is_premium',    label: 'Hacim Onaylı ⭐', help: 'AL sinyali olan VE 5 günlük hacim ortalaması son 20 gün ortalamasının 1.20 katından yüksek olan hisseler. Backtest\'te en güçlü Sharpe oranı bu kategoride.' },
+  { key: 'is_premium',    label: 'Hacim Onaylı <span aria-hidden="true">⭐</span>', help: 'AL sinyali olan VE 5 günlük hacim ortalaması son 20 gün ortalamasının 1.20 katından yüksek olan hisseler. Backtest\'te en güçlü Sharpe oranı bu kategoride.' },
   { key: 'price',         label: 'Son Fiyat' },
   { key: 'change_pct',    label: 'Günlük Değişim' },
   { key: 'adx',           label: 'ADX (Trend Gücü)' },
@@ -382,7 +382,7 @@ const ROW_LABELS = [
   { key: 'bull_score',    label: 'Boğa Skoru' },
   { key: 'sector',        label: 'Sektör' },
   // Temel Analiz
-  { key: '_sep_fund',     label: '📋 TEMEL ANALİZ', isSep: true },
+  { key: '_sep_fund',     label: '<span aria-hidden="true">📋</span> TEMEL ANALİZ', isSep: true },
   { key: 'market_cap',     label: 'Piyasa Değeri' },
   { key: 'pe_ratio',       label: 'F/K Oranı' },
   { key: 'pb_ratio',       label: 'F/DD Oranı' },
@@ -395,7 +395,7 @@ const ROW_LABELS = [
 function renderPremium(s) {
   if (!s) return '<span class="muted">—</span>';
   return s.is_premium
-    ? '<span class="badge" style="background:var(--bp-volume-bg);color:var(--bp-volume);border:1px solid var(--bp-volume-bd);font-weight:700">⭐ Hacim Onaylı</span>'
+    ? '<span class="badge" style="background:var(--bp-volume-bg);color:var(--bp-volume);border:1px solid var(--bp-volume-bd);font-weight:700"><span aria-hidden="true">⭐</span> Hacim Onaylı</span>'
     : '<span class="muted" style="font-size:11px">—</span>';
 }
 
@@ -608,7 +608,7 @@ function buildTable(stocks) {
       <a href="/hisse/${s.ticker}" style="text-decoration:none;color:inherit">
         <div class="col-ticker">${s.ticker}</div>
         <div class="col-name">${s.name||''}</div>
-        ${s.kap_url ? `<a href="${s.kap_url}" target="_blank" rel="noopener" class="col-kap">KAP ↗</a>` : ''}
+        ${s.kap_url ? `<a href="${s.kap_url}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
       </a>
     </th>`).join('');
 
@@ -622,7 +622,7 @@ function buildTable(stocks) {
   }).join('');
   const scoreRow = `
     <tr class="score-row">
-      <td class="row-label" style="font-size:12px;color:var(--bp-text2)">🏆 Yatırım<br>Skoru</td>
+      <td class="row-label" style="font-size:12px;color:var(--bp-text2)"><span aria-hidden="true">🏆</span> Yatırım<br>Skoru</td>
       ${scoreCells}
     </tr>
   `;
@@ -660,7 +660,7 @@ async function doCompare() {
       <table class="compare-table" style="min-width:400px">
         <thead><tr><th class="row-label"></th>${inputs.map(t=>`<th class="col-hdr"><a href="/hisse/${t}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${t} detay sayfası">${t}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`).join('')}</tr></thead>
         <tbody>
-          <tr class="score-row"><td class="row-label">🏆 Yatırım Skoru</td>${inputs.map(()=>`<td><div class="skeleton" style="height:60px;width:90px"></div></td>`).join('')}</tr>
+          <tr class="score-row"><td class="row-label"><span aria-hidden="true">🏆</span> Yatırım Skoru</td>${inputs.map(()=>`<td><div class="skeleton" style="height:60px;width:90px"></div></td>`).join('')}</tr>
           ${ROW_LABELS.map(({label, isSep})=>{
             if (isSep) return `<tr class="row-sep"><td colspan="${skelColspan}">${label}</td></tr>`;
             return `<tr><td class="row-label">${label}</td>${inputs.map(()=>`<td><div class="skeleton"></div></td>`).join('')}</tr>`;
@@ -690,7 +690,7 @@ function copyShareUrl(e) {
   const url = window.location.href;
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById('shareBtn');
-    btn.textContent = '✓ Kopyalandı';
+    btn.innerHTML = '<span aria-hidden="true">✓</span> Kopyalandı';
     setTimeout(() => { btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş`; }, 2000);
   });
 }
