@@ -3602,7 +3602,7 @@ async function loadNews(retryCount) {
         kapA.target = '_blank';
         kapA.rel = 'noopener';
         kapA.style.cssText = 'font-size:11px;color:var(--bp-text3);background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.2);border-radius:4px;padding:2px 7px;text-decoration:none;margin-left:auto;white-space:nowrap;';
-        kapA.textContent = 'KAP ↗';
+        kapA.innerHTML = 'KAP <span aria-hidden="true">↗</span>';
         sourceEl.appendChild(kapA);
       }
     } else if (data.unavailable) {

@@ -459,7 +459,7 @@ async function loadGundem() {
           const sigCls = isAl ? '#3fb950' : isSat ? '#f85149' : '#8b949e';
           const sigTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Trend Bozuldu' : '● Yatay';
           const snippet = (item.snippet||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/^\*\s+/gm,'• ').replace(/^-\s+/gm,'• ').trim();
-          const kapHref = item.kap_url ? `<a href="${item.kap_url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP ↗</a>` : '';
+          const kapHref = item.kap_url ? `<a href="${item.kap_url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
           return `<a href="/hisse/${item.ticker}" style="display:block;text-decoration:none;background:#141416;border:1px solid #2a2a2c;border-radius:8px;padding:12px 14px;transition:border-color .15s"
             onmouseover="this.style.borderColor='#46464d'" onmouseout="this.style.borderColor='#2a2a2c'">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">

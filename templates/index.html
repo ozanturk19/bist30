@@ -5089,7 +5089,7 @@ function _renderGnmCard(item) {
   const kapLink = kapUrl
     ? `<a href="${_esc(kapUrl)}" target="_blank" rel="noopener noreferrer"
           class="gnm-kap-link"
-          onclick="event.stopPropagation()">KAP ↗</a>`
+          onclick="event.stopPropagation()">KAP <span aria-hidden="true">↗</span></a>`
     : '';
 
   /* ⚠️ CRITICAL: Outer element MUST be <div>, NOT <a>.
