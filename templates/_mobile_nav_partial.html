@@ -183,7 +183,7 @@
 window.toggleMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;if(s.classList.contains('open'))window.closeMbnSheet();else{s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}};
 window.closeMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')window.closeMbnSheet();});
-(function(){const p=window.location.pathname;document.querySelectorAll('.mbn-item[data-route]').forEach(el=>{const r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r))el.classList.add('active');});})();
+(function(){const p=window.location.pathname;document.querySelectorAll('.mbn-item[data-route]').forEach(el=>{const r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r)){el.classList.add('active');el.setAttribute('aria-current','page');}});})();
 
 /* F14: sync bell slot with push subscription state */
 function _mbnSyncBell() {

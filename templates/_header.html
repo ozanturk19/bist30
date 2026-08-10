@@ -118,3 +118,6 @@
 </nav>
 {% if hdr_trailing_include is defined and hdr_trailing_include %}{% include hdr_trailing_include %}{% endif %}  <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)" style="margin-left:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
 </header>
+<script>
+(function(){var p=window.location.pathname;document.querySelectorAll('.bp-main-nav > .bp-nav-item[data-route]').forEach(function(el){var r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r))el.setAttribute('aria-current','page');});})();
+</script>

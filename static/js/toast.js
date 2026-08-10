@@ -7,6 +7,8 @@
     if (!c) {
       c = document.createElement('div');
       c.id = CONTAINER_ID;
+      c.setAttribute('role', 'status');
+      c.setAttribute('aria-live', 'polite');
       c.style.cssText = 'position:fixed;bottom:24px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none';
       document.body.appendChild(c);
     }
@@ -43,7 +45,7 @@
       'align-items:center',
       'gap:8px'
     ].join(';');
-    el.innerHTML = '<span style="font-size:11px;opacity:0.8">' + col.icon + '</span><span>' + msg + '</span>';
+    el.innerHTML = '<span style="font-size:11px;opacity:0.8" aria-hidden="true">' + col.icon + '</span><span>' + msg + '</span>';
     getContainer().appendChild(el);
     requestAnimationFrame(function() {
       el.style.opacity = '1';
