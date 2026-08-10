@@ -289,7 +289,7 @@
     background: #161618; border: 1px solid var(--bp-border);
     color: var(--bp-text); padding: 10px 18px;
     border-radius:var(--bp-radius-lg); font-size: 13px; font-weight: 600;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    box-shadow: var(--bp-shadow-md);
     opacity: 0; pointer-events: none; z-index: 999;
     transition: opacity .25s, transform .25s;
   }
@@ -365,7 +365,7 @@
     display: none; position: absolute; top: calc(100% + 6px); left: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border);
     border-radius:var(--bp-radius-lg); min-width: 178px; padding: 5px;
-    z-index: 500; box-shadow: 0 12px 32px rgba(0,0,0,.55);
+    z-index: 500; box-shadow: var(--bp-shadow-dropdown);
   }
   .nav-dropdown-menu.open { display: block; animation: ddIn .13s ease; }
   @keyframes ddIn {
@@ -724,7 +724,7 @@
     white-space: normal; pointer-events: none;
     opacity: 0; visibility: hidden;
     transition: opacity .15s; z-index:var(--bp-z-modal);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    box-shadow: var(--bp-shadow-md);
   }
   .ind-help:hover::after, .ind-help:focus::after {
     opacity: 1; visibility: visible;
@@ -1153,7 +1153,7 @@
   /* ── Search Overlay ── */
   .search-overlay { display: none; position: fixed; inset: 0; z-index:var(--bp-z-overlay); background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
   .search-overlay.open { display: flex; }
-  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
+  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow: hidden; box-shadow: var(--bp-shadow-lg); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
   .search-input-wrap { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--bp-border); }
   .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
   #searchInput { flex: 1; background: none; border: none; outline: none; font-size: 15px; color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }

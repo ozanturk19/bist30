@@ -292,7 +292,7 @@
     border: 1px solid var(--bp-border);
     border-radius:var(--bp-radius-xl);
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    box-shadow: var(--bp-shadow-lg);
     max-height: calc(100vh - 120px);
     display: flex; flex-direction: column;
   }
@@ -435,7 +435,7 @@
     display: none; position: absolute; top: calc(100% + 6px); left: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border2);
     border-radius:var(--bp-radius-lg); min-width: 178px; padding: 5px;
-    z-index: 500; box-shadow: 0 12px 32px rgba(0,0,0,.55);
+    z-index: 500; box-shadow: var(--bp-shadow-dropdown);
   }
   .nav-dropdown-menu.open { display: block; animation: ddIn .13s ease; }
   @keyframes ddIn {
@@ -546,7 +546,7 @@
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.65);
     backdrop-filter: blur(4px);
-    z-index: 9998;
+    z-index: var(--bp-z-modal-top);
     align-items: center;
     justify-content: center;
     padding: 20px;
@@ -1344,7 +1344,7 @@
 
   /* ── Signal Tooltip ─────────────────────────────────── */
   .sig-tip {
-    display: none; position: fixed; z-index: 9000;
+    display: none; position: fixed; z-index: var(--bp-z-tooltip);
     background: #1c2128; border: 1px solid #30363d; border-radius:var(--bp-radius-lg);
     padding: 11px 14px; min-width: 200px; max-width: 252px;
     box-shadow: 0 10px 32px rgba(0,0,0,.68);

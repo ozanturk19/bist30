@@ -216,7 +216,7 @@
   /* ── Search Overlay ── */
   .search-overlay { display: none; position: fixed; inset: 0; z-index:var(--bp-z-overlay); background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
   .search-overlay.open { display: flex; }
-  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
+  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow: hidden; box-shadow: var(--bp-shadow-lg); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
   .search-input-wrap { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--bp-border); }
   .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
   #searchInput { flex: 1; background: none; border: none; outline: none; font-size: 15px; color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }

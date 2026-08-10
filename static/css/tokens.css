@@ -242,6 +242,7 @@
   --bp-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.40);
   --bp-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
   --bp-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.60);
+  --bp-shadow-dropdown: 0 12px 32px rgba(0, 0, 0, 0.55);
 
   /* Anlamsal (sinyal) gölgeler — mevcut canlı değerlerden birebir.
      Renk kaynağı yukarıdaki --bp-al / --bp-sat / --bp-volume. */
@@ -264,6 +265,8 @@
   --bp-z-overlay:  300;
   --bp-z-modal:    1000;
   --bp-z-toast:    9999;
+  --bp-z-tooltip:    9000;
+  --bp-z-modal-top:  9998;
 
   /* ── 7. SÜRE + YUMUŞATMA (duration / easing) ──────────────────
      ÖLÇÜM süre (~300 kullanım): .15s:226  .2s:25  .12s:17  .25s:7
