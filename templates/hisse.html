@@ -1305,7 +1305,7 @@
     <span class="header-price" id="hpPrice">—</span>
     <span class="header-chg neu" id="hpChg">—</span>
     <span class="signal-badge signal-BEKLE" id="hpSignal">● Yatay</span>
-    <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge">⚠ Anomal</span>
+    <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge"><span aria-hidden="true">⚠</span> Anomal</span>
     <span id="liveTs" style="font-size:11px;color:#909097">○</span>
   </div>
   {% if sector %}
@@ -1797,12 +1797,12 @@
   <div class="bp-bottom-cta" id="bpBottomCta" role="toolbar" aria-label="Hisse aksiyonları">
     <button class="bp-cta-watchlist" id="bpCtaWatch" type="button"
             onclick="if(typeof toggleHisseWatch==='function')toggleHisseWatch();">
-      <span id="bpCtaWatchIcon">⭐</span>
+      <span id="bpCtaWatchIcon"><span aria-hidden="true">⭐</span></span>
       <span id="bpCtaWatchLabel">Takibe Al</span>
     </button>
     <button class="bp-cta-alarm" type="button"
             onclick="var b=document.getElementById('hibBellBtn');if(b)b.click();">
-      🔔 Alarm
+      <span aria-hidden="true">🔔</span> Alarm
     </button>
     <button class="bp-cta-share" type="button" aria-label="Paylaş"
             onclick="var s=document.getElementById('shareSection');if(s){s.style.display='flex';s.scrollIntoView({behavior:'smooth',block:'center'});}">
@@ -1850,7 +1850,7 @@
        data-tab-content="ozet"
        style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:18px 18px 14px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <h2 class="section-title" style="margin:0">🧭 Sinyal Özeti</h2>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">🧭</span> Sinyal Özeti</h2>
       <span style="font-size:11px;color:var(--bp-text3)">2 saniyede karar yardımcısı</span>
       {# CPO-535 #36 Skor Halka — compose_score (signal_strength) tek kaynak #}
       {%- set _ts = (ssr_signal.signal_strength | default(0)) | int %}
@@ -1879,7 +1879,7 @@
         </svg>
         <div style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.1">
           {%- if ssr_signal.is_premium %}
-          <span style="font-size:10px;color:var(--bp-volume);margin-top:3px;letter-spacing:.2px">⭐ Hacim Onaylı</span>
+          <span style="font-size:10px;color:var(--bp-volume);margin-top:3px;letter-spacing:.2px"><span aria-hidden="true">⭐</span> Hacim Onaylı</span>
           {%- else %}
           <span style="font-size:10px;color:var(--bp-text3);margin-top:2px">sinyal gücü</span>
           {%- endif %}
@@ -1913,7 +1913,7 @@
       <div style="margin-top:10px">
         <!-- Teknik Görünüm (eski commentary-section — taşındı, silinmedi) -->
         <div class="commentary-section" id="commentarySection" style="display:none;margin-bottom:6px">
-          <h3 class="section-title" style="margin-bottom:6px;font-size:13px">📊 Teknik Görünüm</h3>
+          <h3 class="section-title" style="margin-bottom:6px;font-size:13px"><span aria-hidden="true">📊</span> Teknik Görünüm</h3>
           <p class="commentary-text" id="commentaryText"></p>
         </div>
         <p style="font-size:11px;color:var(--bp-text3);margin:6px 0 0;line-height:1.5">
@@ -1931,7 +1931,7 @@
   {% else %}
   <!-- Teknik Yorum (signal_summary yoksa fallback) -->
   <div class="commentary-section" id="commentarySection" data-tab-content="ozet" style="display:none">
-    <h2 class="section-title" style="margin-bottom:8px">📊 Teknik Görünüm</h2>
+    <h2 class="section-title" style="margin-bottom:8px"><span aria-hidden="true">📊</span> Teknik Görünüm</h2>
     <p class="commentary-text" id="commentaryText"></p>
   </div>
   {% endif %}
@@ -1963,7 +1963,7 @@
 
   <!-- Giriş Analizi (Güçlü Trend / Trend Bozuldu sinyallerinde gösterilir) -->
   <div class="entry-analysis-section" id="entryAnalysisSection" data-tab-content="ozet" style="display:none">
-    <h2 class="section-title">🎯 Giriş Analizi</h2>
+    <h2 class="section-title"><span aria-hidden="true">🎯</span> Giriş Analizi</h2>
     <div class="entry-analysis-grid" id="entryAnalysisGrid">
 
       <!-- Giriş Değerlendirmesi -->
@@ -1984,12 +1984,12 @@
       <div class="hacim-profili">
         <div class="vol-status-lbl">Hacim Profili</div>
         <div class="hp-row-line" id="hpRvolRow" style="display:none">
-          <span class="hp-row-icon">📊</span>
+          <span class="hp-row-icon"><span aria-hidden="true">📊</span></span>
           <span class="hp-row-text">Haftalık hacim ivmesi:</span>
           <span class="hp-row-val" id="hpRvolVal">—</span>
         </div>
         <div class="hp-row-line" id="hpSvolRow" style="display:none">
-          <span class="hp-row-icon">💥</span>
+          <span class="hp-row-icon"><span aria-hidden="true">💥</span></span>
           <span class="hp-row-text">Sinyal günü hacim:</span>
           <span class="hp-row-val" id="hpSvolVal">—</span>
         </div>
@@ -2002,7 +2002,7 @@
   <!-- İndikatörler -->
   <div class="indicators-section" data-tab-content="ozet">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-      <h2 class="section-title" style="margin:0">✓ Algoritmamızın Onayları</h2>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
       <div style="display:flex;gap:6px;align-items:center">
         <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
                 style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
@@ -2065,7 +2065,7 @@
   <!-- Temel Analiz -->
   <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;overflow:hidden;margin-bottom:20px" id="fundSection" data-tab-content="ozet">
     <div style="padding:12px 18px;border-bottom:1px solid var(--bp-surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <h2 class="section-title" style="margin:0">📋 Temel Analiz</h2>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> Temel Analiz</h2>
       <span style="font-size:11px;color:var(--bp-text3)">yfinance · 4 saatlik cache</span>
     </div>
     <div id="fundLoading" style="color:var(--bp-text3);font-size:13px;display:flex;align-items:center;gap:8px;padding:20px 18px">
@@ -2074,17 +2074,17 @@
     <div id="fundContent" style="display:none;padding:16px 18px">
       <!-- Değerleme -->
       <div id="fundValuation" style="margin-bottom:16px">
-        <div style="font-size:10px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">💰 Değerleme</div>
+        <div style="font-size:10px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">💰</span> Değerleme</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridVal"></div>
       </div>
       <!-- Kârlılık & Büyüme -->
       <div id="fundProfitability" style="margin-bottom:16px">
-        <div style="font-size:10px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📈 Kârlılık & Büyüme</div>
+        <div style="font-size:10px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">📈</span> Kârlılık & Büyüme</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridProfit"></div>
       </div>
       <!-- Getiri & Risk -->
       <div id="fundReturn">
-        <div style="font-size:10px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎯 Getiri & Risk</div>
+        <div style="font-size:10px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">🎯</span> Getiri & Risk</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridReturn"></div>
       </div>
     </div>
@@ -2095,8 +2095,8 @@
        kullanmaz, böylece "Toplam Sinyal" tablosuyla aynı kaynağa dayanır. -->
   <div id="sigPerfBox" data-tab-content="ozet" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:14px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <h2 class="section-title" style="margin:0">📊 Geçmiş Sinyal Performansı</h2>
-      <a href="/sinyal-performans" style="font-size:11px;color:var(--bp-brand);text-decoration:none;font-weight:600">Tüm backtest →</a>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📊</span> Geçmiş Sinyal Performansı</h2>
+      <a href="/sinyal-performans" style="font-size:11px;color:var(--bp-brand);text-decoration:none;font-weight:600">Tüm backtest <span aria-hidden="true">→</span></a>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
       <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
@@ -2112,7 +2112,7 @@
         <div style="font-size:11px;color:var(--bp-text3);margin-top:3px">Analiz Edilen Sinyal</div>
       </div>
     </div>
-    <div style="margin-top:8px;font-size:11px;color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal hariç · ⚠️ Geçmiş performans gelecek garantisi değildir</div>
+    <div style="margin-top:8px;font-size:11px;color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal hariç · <span aria-hidden="true">⚠️</span> Geçmiş performans gelecek garantisi değildir</div>
   </div>
 
   <!-- SPEC-017 v2 Faz A c3 — Özet sonu "Detay için" CTA (3 tab) -->
@@ -2120,16 +2120,16 @@
     <div class="bp-detail-cta-label">Detay için</div>
     <div class="bp-detail-cta-grid">
       <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('grafik');else{var s=document.querySelector('[data-segment=grafik]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
-        <span class="bp-detail-cta-icon">📈</span>
-        <span class="bp-detail-cta-text">Grafik <span class="bp-detail-cta-arrow">→</span></span>
+        <span class="bp-detail-cta-icon"><span aria-hidden="true">📈</span></span>
+        <span class="bp-detail-cta-text">Grafik <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
       </button>
       <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('ai');else{var s=document.querySelector('[data-segment=ai]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
-        <span class="bp-detail-cta-icon">🤖</span>
-        <span class="bp-detail-cta-text">AI Analiz <span class="bp-detail-cta-arrow">→</span></span>
+        <span class="bp-detail-cta-icon"><span aria-hidden="true">🤖</span></span>
+        <span class="bp-detail-cta-text">AI Analiz <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
       </button>
       <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('haberler');else{var s=document.querySelector('[data-segment=haberler]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
-        <span class="bp-detail-cta-icon">📰</span>
-        <span class="bp-detail-cta-text">Haberler <span class="bp-detail-cta-arrow">→</span></span>
+        <span class="bp-detail-cta-icon"><span aria-hidden="true">📰</span></span>
+        <span class="bp-detail-cta-text">Haberler <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
       </button>
     </div>
   </div>
@@ -2174,17 +2174,17 @@
     <a href="{{ kap_url }}" target="_blank" rel="noopener"
        style="display:inline-flex;align-items:center;gap:5px;background:#1c1b1f;border:1px solid #2a2a2c;border-radius:6px;padding:5px 12px;font-size:12px;color:#909097;text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
-      📋 KAP Bildirimleri
+      <span aria-hidden="true">📋</span> KAP Bildirimleri
     </a>
     <a href="https://finance.yahoo.com/quote/{{ ticker }}.IS" target="_blank" rel="noopener"
        style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--bp-text3);text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
-      📈 Yahoo Finance
+      <span aria-hidden="true">📈</span> Yahoo Finance
     </a>
     <a href="https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/sirket-karti.aspx?hisse={{ ticker }}" target="_blank" rel="noopener"
        style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--bp-text3);text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
-      🏦 İş Yatırım
+      <span aria-hidden="true">🏦</span> İş Yatırım
     </a>
   </div>
 
@@ -2206,14 +2206,14 @@
     <button id="shareCopy" onclick="shareSignal('copy')"
       style="display:inline-flex;align-items:center;gap:5px;background:rgba(var(--bp-brand-rgb),.08);border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:6px;padding:5px 12px;font-size:12px;color:#93c5fd;cursor:pointer;font-family:inherit;transition:all .15s"
       onmouseover="this.style.background='rgba(184,195,255,.15)'" onmouseout="this.style.background='rgba(184,195,255,.08)'">
-      🔗 Linki Kopyala
+      <span aria-hidden="true">🔗</span> Linki Kopyala
     </button>
   </div>
 
   <!-- Sinyal Dönemindeki Haber Akışı — sinyal tarihi etrafındaki KAP bildirimleri -->
   <div id="storySection" data-tab-content="haberler" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <h2 class="section-title" style="margin:0">📰 Sinyal Dönemindeki Haber Akışı</h2>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📰</span> Sinyal Dönemindeki Haber Akışı</h2>
       <span id="storyWindow" style="font-size:11px;color:var(--bp-text3)"></span>
     </div>
     <p style="font-size:12px;color:var(--bp-text3);line-height:1.55;margin:0 0 12px">
@@ -2227,7 +2227,7 @@
   <div id="ai-section" style="scroll-margin-top:80px"></div>
   <div id="sigExplainSection" data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-      <span style="font-size:15px">✨</span>
+      <span style="font-size:15px"><span aria-hidden="true">✨</span></span>
       <span style="font-size:13px;font-weight:700;color:var(--bp-text);text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
       <span id="sigExplainBadge" style="margin-left:auto;font-size:11px;background:rgba(var(--bp-brand-rgb),0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
     </div>
@@ -2245,14 +2245,14 @@
     </div>
     <p id="sigExplainText" style="display:none;font-size:13px;color:var(--bp-text);line-height:1.75;margin:0"></p>
     <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:11px;color:#475569">
-      🤖 Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 4 saatte bir yenilenir
+      <span aria-hidden="true">🤖</span> Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 4 saatte bir yenilenir
     </div>
   </div>
 
   <!-- AI Haberler -->
   <div id="news-section" style="scroll-margin-top:80px"></div>
   <div class="news-section" id="newsSection" data-tab-content="haberler">
-    <h2 class="section-title">🤖 Son Haber Özeti</h2>
+    <h2 class="section-title"><span aria-hidden="true">🤖</span> Son Haber Özeti</h2>
     <div class="news-loading" id="newsLoading">
       <div class="spinner"></div> Haberler yükleniyor…
     </div>
@@ -2266,12 +2266,12 @@
   <!-- KAP Bildirimleri -->
   <div class="kap-section" id="kapSection" data-tab-content="haberler">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <h2 class="section-title" style="margin:0">📋 KAP Bildirimleri</h2>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> KAP Bildirimleri</h2>
       <span style="font-size:11px;color:var(--bp-text3)">Son 90 gün · ODA + Finansal Rapor</span>
       <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q={{ ticker }}" target="_blank" rel="noopener"
          style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#909097;background:#1c1b1f;border:1px solid #2a2a2c;border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
          onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
-        KAP'ta Aç ↗
+        KAP'ta Aç <span aria-hidden="true">↗</span>
       </a>
     </div>
     <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:var(--bp-text3);font-size:13px;padding:6px 0">
@@ -2284,7 +2284,7 @@
   {% if ssr_signal %}
   <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
   <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px;margin-bottom:20px">
-    <div style="font-size:11px;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:10px">📊 Teknik Özet</div>
+    <div style="font-size:11px;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:10px"><span aria-hidden="true">📊</span> Teknik Özet</div>
     <p style="font-size:13px;color:var(--bp-text2);line-height:1.7;margin:0">
       <strong style="color:var(--bp-text)">{{ ticker }} ({{ name }})</strong> hissesi,
       {% if ssr_signal.signal == 'AL' %}
@@ -2307,7 +2307,7 @@
   {% if company_summary %}
   <!-- SPEC-011 L4 — Şirket Hakkında (Gemini AI özet, AI-optimized content) -->
   <section class="content-card" data-tab-content="always" aria-labelledby="company-summary-heading">
-    <h2 class="section-title" id="company-summary-heading">🏢 {{ ticker }} Hakkında</h2>
+    <h2 class="section-title" id="company-summary-heading"><span aria-hidden="true">🏢</span> {{ ticker }} Hakkında</h2>
     {% for para in company_summary.split('\n') %}{% if para.strip() %}
     <p class="content-para">{{ para.strip() }}</p>
     {% endif %}{% endfor %}
@@ -2323,13 +2323,13 @@
     <strong>EMA12 / EMA99</strong> pozisyonu. Haftalık EMA20 gate, büyük ters trendlerde
     sinyal üretimini engeller. Sinyal en az 3 bar devam edince "onaylı" sayılır.
     <br><br>
-    ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
+    <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
   </div>
 
   {% if seo_faq %}
   <!-- SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) -->
   <section class="content-card faq-card" data-tab-content="always" aria-labelledby="faq-heading">
-    <h2 class="section-title" id="faq-heading">❓ {{ ticker }} — Sıkça Sorulan Sorular</h2>
+    <h2 class="section-title" id="faq-heading"><span aria-hidden="true">❓</span> {{ ticker }} — Sıkça Sorulan Sorular</h2>
     <dl class="faq-list">
       {% for item in seo_faq %}
       <dt class="faq-q">{{ item.q }}</dt>
@@ -2342,7 +2342,7 @@
   {% if related_stocks %}
   <!-- SPEC-011 L4/L5 — İlgili hisseler (internal linking, crawl budget) -->
   <aside class="content-card" data-tab-content="always" aria-labelledby="related-heading">
-    <h2 class="section-title" id="related-heading">🔗 {{ sector }} Sektöründen Diğer Hisseler</h2>
+    <h2 class="section-title" id="related-heading"><span aria-hidden="true">🔗</span> {{ sector }} Sektöründen Diğer Hisseler</h2>
     <div class="related-grid">
       {% for r in related_stocks %}
       <a href="/hisse/{{ r.ticker }}" class="related-chip">
@@ -2357,7 +2357,7 @@
   <!-- İlgili Blog Makaleleri (T3-4) -->
   {% if related_blog %}
   <div data-tab-content="always" style="margin-bottom:16px">
-    <h2 class="section-title" style="margin-bottom:10px">📖 İlgili Okumalar</h2>
+    <h2 class="section-title" style="margin-bottom:10px"><span aria-hidden="true">📖</span> İlgili Okumalar</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
       {% for b in related_blog %}
       <a href="/blog/{{ b.slug }}" class="blog-read-card">
@@ -2377,7 +2377,7 @@
 <!-- Subscription CTA -->
 <div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(29,78,216,.04));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:10px;padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
   <div style="flex:1;min-width:160px">
-    <div style="font-size:13px;font-weight:700;color:var(--bp-text);margin-bottom:1px">📬 {{ ticker }} sinyali değişince bildirim al</div>
+    <div style="font-size:13px;font-weight:700;color:var(--bp-text);margin-bottom:1px"><span aria-hidden="true">📬</span> {{ ticker }} sinyali değişince bildirim al</div>
     <div style="font-size:11px;color:var(--bp-text3)">Ücretsiz e-posta aboneliği</div>
   </div>
   <div style="display:flex;gap:7px;align-items:center" id="hisseSubForm">
@@ -2406,7 +2406,7 @@
     <a href="/metodoloji" style="color:var(--bp-text3);text-decoration:none">Metodoloji</a> ·
     <a href="/yasal" style="color:var(--bp-text3);text-decoration:none">Yasal Uyarı</a>
   </div>
-  ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong>yatırım tavsiyesi değildir</strong>. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
+  <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong>yatırım tavsiyesi değildir</strong>. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
 </footer>
 
 <script src="/static/bp-format.js?v=20260808a"></script>

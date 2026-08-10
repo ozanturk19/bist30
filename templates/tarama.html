@@ -538,8 +538,8 @@
 
   <!-- SPEC-007: Premium paywall CTA banner (renderResults JS ile görünür/gizli) -->
   <div class="premium-cta-row" id="premiumCtaBar" style="display:none">
-    <span class="premium-cta-text">🔒 Premium sinyaller blur'lu</span>
-    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
+    <span class="premium-cta-text"><span aria-hidden="true">🔒</span> Premium sinyaller blur'lu</span>
+    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()"><span aria-hidden="true">💎</span> Premium'u Aç (ücretsiz)</button>
   </div>
 
   <!-- Tablo -->
@@ -571,7 +571,7 @@
     </table>
     <div id="mobileResultCards"></div>
     <div class="empty-state" id="emptyDiv" style="display:none">
-      <div class="empty-icon">📭</div>
+      <div class="empty-icon"><span aria-hidden="true">📭</span></div>
       <h3>Sonuç bulunamadı</h3>
       <p style="font-size:13px;margin-top:6px">Filtreleri gevşeterek tekrar deneyin.</p>
       <button class="btn-reset" style="margin-top:14px" onclick="resetFilters()">Filtreleri Sıfırla</button>

@@ -46,7 +46,7 @@
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:6px;color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
-{% with hdr_title = '📬 İletişim' %}{% include '_header.html' %}{% endwith %}
+{% with hdr_icon = '📬', hdr_title = 'İletişim' %}{% include '_header.html' %}{% endwith %}
 <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">İletişim</h1>
 
 
@@ -56,7 +56,7 @@
     <p>Hata bildirimi, öneri veya işbirliği için formu doldurun. Genellikle 1–3 iş günü içinde yanıt veriyoruz.</p>
 
     <div class="contact-row">
-      <div class="contact-icon">📧</div>
+      <div class="contact-icon"><span aria-hidden="true">📧</span></div>
       <div>
         <div class="contact-lbl">E-posta</div>
         <div class="contact-val"><a href="mailto:iletisim@borsapusula.com">iletisim@borsapusula.com</a></div>
@@ -93,7 +93,7 @@
         <textarea id="cfMessage" required rows="5" placeholder="Mesajınızı buraya yazın..." style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none;resize:vertical;font-family:inherit;transition:border-color .15s"></textarea>
       </div>
       <button type="submit" id="cfBtn" style="background:#1f6feb;color:#fff;border:none;border-radius:6px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s">
-        Gönder →
+        Gönder <span aria-hidden="true">→</span>
       </button>
       <div id="cfMsg" style="margin-top:12px;font-size:13px;display:none"></div>
     </form>
@@ -146,7 +146,7 @@ async function submitForm(e) {
 </script>
 
   <div class="disclaimer">
-    ⚠️ <strong>Önemli:</strong> Bu platform algoritmik bir araçtır. Yatırım tavsiyesi verilmez.
+    <span aria-hidden="true">⚠️</span> <strong>Önemli:</strong> Bu platform algoritmik bir araçtır. Yatırım tavsiyesi verilmez.
     Finansal danışmanlık talepleri yanıtlanmaz. Hisse veya piyasa yorumu için lütfen lisanslı
     bir yatırım danışmanına başvurun.
   </div>

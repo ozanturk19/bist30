@@ -2020,7 +2020,7 @@
 
   <!-- Right actions injected by bp-search.js (header-right uniform) -->
   <!-- CPO-984: WS frontend tam kaldırıldı (icon + connection JS). Backend WS kanalı aktif kalıyor (_ws_broadcast, /ws/prices route). -->
-  <button id="header-push-bell" onclick="togglePushSubscription()" aria-label="Push bildirimleri" title="Sinyal bildirimi aç/kapat">🔔</button>
+  <button id="header-push-bell" onclick="togglePushSubscription()" aria-label="Push bildirimleri" title="Sinyal bildirimi aç/kapat"><span aria-hidden="true">🔔</span></button>
   <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </button>
@@ -2040,7 +2040,7 @@
 
 <!-- SPEC-012 V3a L4 — Onboarding banner (Öğrenme Modu CTA, dismissible localStorage) -->
 <div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.10),rgba(29,78,216,.05));border:1px solid rgba(var(--bp-brand-rgb),.32);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:13px;color:var(--bp-text);line-height:1.55;align-items:center;gap:10px;flex-wrap:wrap">
-  <span style="font-size:18px;flex-shrink:0">📚</span>
+  <span style="font-size:18px;flex-shrink:0"><span aria-hidden="true">📚</span></span>
   <span style="flex:1;min-width:200px">
     <strong>İlk kez mi?</strong> <strong style="color:var(--bp-brand)">Öğrenme Modu</strong>'nu açın —
     finansal terimlerin yanında <code style="background:rgba(var(--bp-brand-rgb),.15);padding:1px 5px;border-radius:3px;color:var(--bp-brand)">?</code> görünür, tıklayınca anlamı açılır.
@@ -2119,11 +2119,11 @@
 <section class="bp-highlights" aria-label="Öne Çıkan Hisseler">
   <div class="hp-twin">
     <div class="hp-section">
-      <div class="hp-title">🟢 Güçlü Trend</div>
+      <div class="hp-title"><span aria-hidden="true">🟢</span> Güçlü Trend</div>
       <div id="hpAlList" class="hp-sk-wrap"></div>
     </div>
     <div class="hp-section hp-section-r">
-      <div class="hp-title">🔥 Hareketliler</div>
+      <div class="hp-title"><span aria-hidden="true">🔥</span> Hareketliler</div>
       <div id="hpMoverList" class="hp-sk-wrap"></div>
     </div>
   </div>
@@ -2164,7 +2164,7 @@
     <div class="stat-card stat-total"><div class="stat-num" id="statTotal"><span class="stat-num-sk"></span></div><div class="stat-label">Toplam</div></div>
     <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="Güçlü Trend: Algoritmamızın 3 testten geçen yükseliş sinyali. Tıkla: en güçlüleri gör">
       <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7">↗</span></div>
+      <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7"><span aria-hidden="true">↗</span></span></div>
     </a>
     <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=\"SAT\"]'))" title="Trend Bozuldu: Algoritmamızın 3 testten geçen düşüş sinyali. Tıkla: Trend Bozuldu sinyallerini gör">
       <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>
@@ -2176,7 +2176,7 @@
     </div>
     <div class="stat-card stat-premium" style="cursor:pointer" onclick="toggleChip('premium',document.querySelector('.filter-btn.filter-premium'))" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
       <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">⭐ Hacim Onaylı</div>
+      <div class="stat-label"><span aria-hidden="true">⭐</span> Hacim Onaylı</div>
     </div>
   </div>
 
@@ -2207,9 +2207,9 @@
       <span class="ms-meta">
         <span id="msTime">—</span> itibarıyla
         <span class="ms-divider">·</span>
-        <span class="badge-noads" title="Reklamsız platform — Investing.com'da premium feature, BorsaPusula'da default. Yatırım tavsiyesi değil, sinyal paneli.">🛡️ Reklamsız</span>
+        <span class="badge-noads" title="Reklamsız platform — Investing.com'da premium feature, BorsaPusula'da default. Yatırım tavsiyesi değil, sinyal paneli."><span aria-hidden="true">🛡️</span> Reklamsız</span>
         <span class="ms-divider">·</span>
-        <a href="/metodoloji" class="ms-link">Metodoloji →</a>
+        <a href="/metodoloji" class="ms-link">Metodoloji <span aria-hidden="true">→</span></a>
       </span>
     </div>
     <p class="ms-narrative" id="msText" aria-live="polite">
@@ -2217,15 +2217,15 @@
     </p>
     <div class="ms-microstats" id="msMicroStats">
       <a href="/?signal=AL&period=today" class="ms-stat ms-stat-bull">
-        <span class="ms-stat-icon">🔥</span>
+        <span class="ms-stat-icon"><span aria-hidden="true">🔥</span></span>
         <span class="ms-stat-num" id="msNewBull">—</span> Yeni Güçlü
       </a>
       <a href="/?signal=SAT&period=today" class="ms-stat ms-stat-bear">
-        <span class="ms-stat-icon">↓</span>
+        <span class="ms-stat-icon"><span aria-hidden="true">↓</span></span>
         <span class="ms-stat-num" id="msNewBear">—</span> Zayıfladı
       </a>
       <a href="/?signal=WATCH" class="ms-stat ms-stat-watch" id="msWatchStat">
-        <span class="ms-stat-icon">⚡</span>
+        <span class="ms-stat-icon"><span aria-hidden="true">⚡</span></span>
         <span class="ms-stat-num" id="msWatchMoved">—</span> İzlemende Hareket
       </a>
     </div>
@@ -2238,21 +2238,21 @@
 
   <!-- ── Feature 1 #1B — Preset Chips (CPO MSG-060) ── -->
   <div class="preset-chips" id="presetChips" role="group" aria-label="Hazır filtreler">
-    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)">🔥 Top Kazananlar</button>
-    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)">📊 Hacim Öncüleri</button>
-    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)">⭐ Hacim Onaylı</button>
-    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden>⭐ Watchlist'im</button>
+    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)"><span aria-hidden="true">🔥</span> Top Kazananlar</button>
+    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)"><span aria-hidden="true">📊</span> Hacim Öncüleri</button>
+    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)"><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
+    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden><span aria-hidden="true">⭐</span> Watchlist'im</button>
   </div>
 
   <!-- ── AI Piyasa Özeti ──────────────────────────── -->
   <!-- visibility:hidden (not display:none) reserves space → prevents CLS when content loads -->
   <div id="macroSummaryBar" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.06),rgba(139,92,246,.03));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:9px;padding:9px 14px;margin-bottom:10px;align-items:flex-start;gap:8px">
-    <span style="font-size:15px;flex-shrink:0;margin-top:1px">🤖</span>
+    <span style="font-size:15px;flex-shrink:0;margin-top:1px"><span aria-hidden="true">🤖</span></span>
     <div style="flex:1;min-width:0">
       <div id="macroSummaryBarText" style="font-size:12.5px;color:var(--bp-text2);line-height:1.5"></div>
       <div id="macroSummaryBarTime" style="font-size:10px;color:var(--bp-text3);margin-top:3px"></div>
     </div>
-    <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0;align-self:center">Gündem →</a>
+    <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0;align-self:center">Gündem <span aria-hidden="true">→</span></a>
   </div>
 
   <!-- ── İdeal Giriş Şeridi ──────────────────────── -->
@@ -2260,9 +2260,9 @@
   <div id="idealStrip" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(var(--bp-al-rgb),.06),rgba(var(--bp-brand-rgb),.03));
     border:1px solid rgba(var(--bp-al-rgb),.20);border-radius:6px;padding:9px 14px;margin-bottom:12px;
     align-items:center;gap:10px;flex-wrap:wrap">
-    <span style="font-size:11px;color:var(--bp-al);font-weight:700;white-space:nowrap;flex-shrink:0">✅ İdeal Giriş</span>
+    <span style="font-size:11px;color:var(--bp-al);font-weight:700;white-space:nowrap;flex-shrink:0"><span aria-hidden="true">✅</span> İdeal Giriş</span>
     <div id="idealStripItems" style="display:flex;flex-wrap:wrap;gap:6px;flex:1"></div>
-    <a href="/tarama?signal=AL&min_adx=25" style="font-size:11px;color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0">Hepsini gör →</a>
+    <a href="/tarama?signal=AL&min_adx=25" style="font-size:11px;color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0">Hepsini gör <span aria-hidden="true">→</span></a>
   </div>
 
   <!-- Backtest güven rozeti -->
@@ -2272,7 +2272,7 @@
     border:1px solid rgba(var(--bp-al-rgb),.18);border-radius:6px;padding:10px 16px;margin-bottom:16px;
     flex-wrap:wrap;gap:6px 16px;align-items:center;transition:border-color .15s"
     onmouseover="this.style.borderColor='rgba(0,226,144,.35)'" onmouseout="this.style.borderColor='rgba(0,226,144,.18)'">
-    <span style="font-size:10px;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap">📊 2 Yıllık Backtest · 28 Hisse</span>
+    <span style="font-size:10px;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap"><span aria-hidden="true">📊</span> 2 Yıllık Backtest · 28 Hisse</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
       <span style="font-size:11px;color:var(--bp-text2)">Sharpe:</span>
       <span id="btSharpe" style="font-size:15px;font-weight:800;color:var(--bp-al);letter-spacing:-0.3px"></span>
@@ -2287,7 +2287,7 @@
       <span style="font-size:11px;color:var(--bp-text2)">En iyi getiri:</span>
       <span id="btBest" style="font-size:13px;font-weight:700;color:var(--bp-al)"></span>
     </span>
-    <span style="margin-left:auto;font-size:11px;color:var(--bp-brand);font-weight:600;white-space:nowrap">Performans raporu →</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--bp-brand);font-weight:600;white-space:nowrap">Performans raporu <span aria-hidden="true">→</span></span>
   </a>
 
   <!-- ── Gündem & Haberler ──────────────────────────── -->
@@ -2304,11 +2304,11 @@
       <div style="display:flex;align-items:center;gap:10px;">
         <!-- Tabs -->
         <div class="gnm-tabs" id="gnmTabs">
-          <button class="gnm-tab-btn active" id="tabBtnMakro" onclick="switchGnmTab('makro')">🌍 Makro</button>
-          <button class="gnm-tab-btn" id="tabBtnHisse" onclick="switchGnmTab('hisse')">📈 Hisse</button>
+          <button class="gnm-tab-btn active" id="tabBtnMakro" onclick="switchGnmTab('makro')"><span aria-hidden="true">🌍</span> Makro</button>
+          <button class="gnm-tab-btn" id="tabBtnHisse" onclick="switchGnmTab('hisse')"><span aria-hidden="true">📈</span> Hisse</button>
         </div>
         <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;">
-          Tümü →
+          Tümü <span aria-hidden="true">→</span>
         </a>
       </div>
     </div>
@@ -2322,7 +2322,7 @@
         <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
       </div>
       <div style="text-align:right;margin-top:8px">
-        <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">Piyasa Gündem Merkezi →</a>
+        <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">Piyasa Gündem Merkezi <span aria-hidden="true">→</span></a>
       </div>
     </div>
 
@@ -2341,13 +2341,13 @@
 
         <!-- Sağ: bilanço mini widget -->
         <div class="bilanco-mini-box" id="bilancoMini">
-          <div class="bilanco-mini-title">📅 Bilanço Dönemi</div>
+          <div class="bilanco-mini-title"><span aria-hidden="true">📅</span> Bilanço Dönemi</div>
           <div id="bilancoMiniBody" style="min-height:60px">
             <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
             <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
             <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;width:70%"></div>
           </div>
-          <a href="/bilanco-takvimi" class="bilanco-mini-link">Tüm takvim →</a>
+          <a href="/bilanco-takvimi" class="bilanco-mini-link">Tüm takvim <span aria-hidden="true">→</span></a>
         </div>
       </div>
     </div>
@@ -2355,7 +2355,7 @@
 
   <!-- ── PWA Install Banner ──────────────────────── -->
   <div id="pwaInstallBanner" style="display:none;background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(37,99,235,.06));border:1px solid rgba(59,130,246,.25);border-radius:6px;padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px;flex-wrap:wrap">
-    <span style="font-size:18px">📲</span>
+    <span style="font-size:18px"><span aria-hidden="true">📲</span></span>
     <div style="flex:1;min-width:140px">
       <div style="font-size:13px;font-weight:700;color:var(--bp-text)">BorsaPusula'yı Yükle</div>
       <div style="font-size:11px;color:var(--bp-text3)">Ana ekrana ekle — hızlı erişim</div>
@@ -2367,7 +2367,7 @@
   <!-- ── Bildirim Çubuğu (E-posta + Push) ────────── -->
   <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(0,67,235,.04));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:6px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
-      <div style="font-size:13px;font-weight:700;color:var(--bp-text);margin-bottom:2px">📬 Sinyal Bildirimleri</div>
+      <div style="font-size:13px;font-weight:700;color:var(--bp-text);margin-bottom:2px"><span aria-hidden="true">📬</span> Sinyal Bildirimleri</div>
       <div style="font-size:11px;color:var(--bp-text3)">Sinyal değiştiğinde bildirim al — ücretsiz</div>
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:280px;flex-wrap:wrap" id="subForm">
@@ -2398,7 +2398,7 @@
              cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s"
       onmouseover="this.style.background='rgba(184,195,255,.2)'" onmouseout="this.style.background='rgba(184,195,255,.12)'"
       title="Tarayıcı push bildirimi">
-      🔔 Push Aç
+      <span aria-hidden="true">🔔</span> Push Aç
     </button>
     <button onclick="document.getElementById('subscribeBar').style.display='none'"
       style="background:none;border:none;color:#374151;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px"
@@ -2408,13 +2408,13 @@
 
   <div class="filters">
     <button class="filter-btn active-all" data-signal="all" onclick="setFilter('all', this)" title="Tüm hisseleri göster">Tümü</button>
-    <button class="filter-btn" data-signal="AL" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı">🟢 Güçlü Trend</button>
-    <button class="filter-btn" data-signal="SAT" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı">🔴 Trend Bozuldu</button>
-    <button class="filter-btn" data-signal="BEKLE" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor">⚪ Yatay</button>
-    <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="RVOL ≥ 1.20 — Hacim Onaylı AL sinyali. Backtest Win Rate %51.5. Diğer filtrelerle birleştirilebilir.">⭐ Hacim Onaylı</button>
-    <button class="filter-btn filter-today" data-toggle="today" onclick="toggleChip('today', this)" title="Bugün ilk kez Güçlü Trend / Trend Bozuldu sinyali oluşan hisseler — diğer filtrelerle birleştirilebilir">⚡ Bugün</button>
-    <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none">🔔 Takibim</button>
-    <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()">⚙️ Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
+    <button class="filter-btn" data-signal="AL" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı"><span aria-hidden="true">🟢</span> Güçlü Trend</button>
+    <button class="filter-btn" data-signal="SAT" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı"><span aria-hidden="true">🔴</span> Trend Bozuldu</button>
+    <button class="filter-btn" data-signal="BEKLE" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor"><span aria-hidden="true">⚪</span> Yatay</button>
+    <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="RVOL ≥ 1.20 — Hacim Onaylı AL sinyali. Backtest Win Rate %51.5. Diğer filtrelerle birleştirilebilir."><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
+    <button class="filter-btn filter-today" data-toggle="today" onclick="toggleChip('today', this)" title="Bugün ilk kez Güçlü Trend / Trend Bozuldu sinyali oluşan hisseler — diğer filtrelerle birleştirilebilir"><span aria-hidden="true">⚡</span> Bugün</button>
+    <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none"><span aria-hidden="true">🔔</span> Takibim</button>
+    <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()"><span aria-hidden="true">⚙️</span> Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
     <div class="search-wrap">
       <input class="search-input" type="text" placeholder="Hisse ara… (/)"
              oninput="setSearch(this.value);showSearchAc(this.value)"
@@ -2428,7 +2428,7 @@
   <!-- Gelişmiş Screener Paneli -->
   <div class="adv-panel" id="advPanel">
     <div class="adv-group">
-      <div class="adv-group-label">📊 <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">ADX</a> Gücü</div>
+      <div class="adv-group-label"><span aria-hidden="true">📊</span> <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">ADX</a> Gücü</div>
       <div class="adv-chips" id="adv-adx">
         <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('adx',0,this)">Tümü</button>
         <button class="adv-chip"    data-val="25"  onclick="setAdv('adx',25,this)">Güçlü ≥25</button>
@@ -2437,7 +2437,7 @@
       </div>
     </div>
     <div class="adv-group">
-      <div class="adv-group-label">📅 Sinyal Süresi (Bar)</div>
+      <div class="adv-group-label"><span aria-hidden="true">📅</span> Sinyal Süresi (Bar)</div>
       <div class="adv-chips" id="adv-bars">
         <button class="adv-chip adv-active" data-val="0"  onclick="setAdv('bars',0,this)">Tümü</button>
         <button class="adv-chip"     data-val="3"  onclick="setAdv('bars',3,this)">3+ bar</button>
@@ -2446,7 +2446,7 @@
       </div>
     </div>
     <div class="adv-group">
-      <div class="adv-group-label">📈 Hacim Artışı</div>
+      <div class="adv-group-label"><span aria-hidden="true">📈</span> Hacim Artışı</div>
       <div class="adv-chips" id="adv-vol">
         <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('vol',0,this)">Tümü</button>
         <button class="adv-chip"     data-val="1.5" onclick="setAdv('vol',1.5,this)">×1.5+</button>
@@ -2455,7 +2455,7 @@
       </div>
     </div>
     <div class="adv-group">
-      <div class="adv-group-label">🔢 <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">RSI</a> Durumu</div>
+      <div class="adv-group-label"><span aria-hidden="true">🔢</span> <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">RSI</a> Durumu</div>
       <div class="adv-chips" id="adv-rsi">
         <button class="adv-chip adv-active" data-val="all"       onclick="setAdv('rsi','all',this)">Tümü</button>
         <button class="adv-chip"            data-val="oversold"  onclick="setAdv('rsi','oversold',this)">Aşırı Satım ≤30</button>
@@ -2464,12 +2464,12 @@
       </div>
     </div>
     <div class="adv-group">
-      <div class="adv-group-label">🎯 Giriş Kalitesi</div>
+      <div class="adv-group-label"><span aria-hidden="true">🎯</span> Giriş Kalitesi</div>
       <div class="adv-chips" id="adv-eq">
         <button class="adv-chip adv-active" data-val="all"      onclick="setAdv('eq','all',this)">Tümü</button>
-        <button class="adv-chip"     data-val="IDEAL"    onclick="setAdv('eq','IDEAL',this)">✅ İdeal</button>
-        <button class="adv-chip"     data-val="IYI"      onclick="setAdv('eq','IYI',this)">👍 İyi</button>
-        <button class="adv-chip"     data-val="DIKKATLI" onclick="setAdv('eq','DIKKATLI',this)">⚠️ Dikkatli</button>
+        <button class="adv-chip"     data-val="IDEAL"    onclick="setAdv('eq','IDEAL',this)"><span aria-hidden="true">✅</span> İdeal</button>
+        <button class="adv-chip"     data-val="IYI"      onclick="setAdv('eq','IYI',this)"><span aria-hidden="true">👍</span> İyi</button>
+        <button class="adv-chip"     data-val="DIKKATLI" onclick="setAdv('eq','DIKKATLI',this)"><span aria-hidden="true">⚠️</span> Dikkatli</button>
       </div>
     </div>
   </div>
@@ -2522,14 +2522,14 @@
           <th class="hide-mobile">SL ₺</th>
           <th onclick="sortTable('bull_score')" class="hide-mobile">Güç</th>
           <th class="hide-mobile">İndikatörler</th>
-          <th title="Sinyal değişince bildir">🔔</th>
+          <th title="Sinyal değişince bildir"><span role="img" aria-label="Bildirim">🔔</span></th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
     <div id="mobileCards" class="mobile-card-list"></div>
     <div id="noDataDiv" style="display:none;padding:48px 24px;text-align:center">
-      <div style="font-size:36px;margin-bottom:12px">🔍</div>
+      <div style="font-size:36px;margin-bottom:12px"><span aria-hidden="true">🔍</span></div>
       <div style="font-size:16px;font-weight:700;color:var(--bp-text);margin-bottom:8px">Sonuç bulunamadı</div>
       <div style="font-size:13px;color:var(--bp-text3);margin-bottom:20px">Bu kriterlere uyan hisse yok. Filtreleri gevşetin ya da arama terimini değiştirin.</div>
       <button onclick="resetFilters()" style="background:var(--bp-brand);color:var(--bp-bg);border:none;border-radius:4px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer">Filtreleri Sıfırla</button>
@@ -2540,18 +2540,18 @@
 
 <!-- ── Alarm FAB ── -->
 <button class="alarm-fab" id="alarmFab" onclick="toggleAlarmPanel()" title="Takip listem">
-  🔔
+  <span role="img" aria-label="Takip listem">🔔</span>
   <span class="fab-badge" id="fabBadge">0</span>
 </button>
 
 <!-- ── Alarm Panel ── -->
 <div class="alarm-panel hidden" id="alarmPanel">
   <div class="ap-header">
-    <span class="ap-title">🔔 Takip Listem</span>
+    <span class="ap-title"><span aria-hidden="true">🔔</span> Takip Listem</span>
     <button class="ap-close" onclick="toggleAlarmPanel()">×</button>
   </div>
   <div class="ap-body" id="apBody">
-    <div class="ap-empty">Henüz hisse eklenmedi.<br>Tablodaki 🔔 butonuna tıkla.</div>
+    <div class="ap-empty">Henüz hisse eklenmedi.<br>Tablodaki <span role="img" aria-label="Bildirim">🔔</span> butonuna tıkla.</div>
   </div>
   <div class="ap-footer" id="apFooter">
     Sinyal değişince tarayıcı bildirimi gönderilir.
@@ -2561,12 +2561,12 @@
 <!-- ── Sticky Subscription Toast ── -->
 <div class="sub-toast" id="subToast" role="dialog" aria-label="E-posta aboneliği">
   <button class="sub-toast-close" onclick="dismissSubToast()" title="Kapat" aria-label="Kapat">×</button>
-  <div class="sub-toast-title">📬 Günlük Sinyal Özeti Al</div>
+  <div class="sub-toast-title"><span aria-hidden="true">📬</span> Günlük Sinyal Özeti Al</div>
   <div class="sub-toast-sub">Her gün piyasa kapanışında önemli sinyal değişikliklerini e-posta ile al.</div>
   <div class="sub-toast-benefits">
-    <span class="sub-toast-benefit">✓ Ücretsiz</span>
-    <span class="sub-toast-benefit">✓ Günde 1 e-posta</span>
-    <span class="sub-toast-benefit">✓ İstediğin zaman çık</span>
+    <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> Ücretsiz</span>
+    <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> Günde 1 e-posta</span>
+    <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> İstediğin zaman çık</span>
   </div>
   <div class="sub-toast-row" id="subToastForm">
     <input id="subToastName" type="text" class="sub-toast-input" placeholder="Adınız"
@@ -2577,8 +2577,8 @@
       aria-label="E-posta adresi">
   </div>
   <div class="sub-toast-btnrow">
-    <button id="subToastSubmitBtn" class="sub-toast-btn" onclick="submitToastSubscribe()">✉ Abone Ol</button>
-    <button id="subToastLoginBtn" class="sub-toast-btn sub-toast-btn-ghost" onclick="submitRecognize()">👤 Üye Girişi</button>
+    <button id="subToastSubmitBtn" class="sub-toast-btn" onclick="submitToastSubscribe()"><span aria-hidden="true">✉</span> Abone Ol</button>
+    <button id="subToastLoginBtn" class="sub-toast-btn sub-toast-btn-ghost" onclick="submitRecognize()"><span aria-hidden="true">👤</span> Üye Girişi</button>
   </div>
   <div id="subToastRecogStatus" style="font-size:11px;margin-top:6px;display:none"></div>
 </div>
@@ -2612,8 +2612,8 @@
       <a href="/gucu-yuksek"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Güçlü Trendler</a>
       <a href="/tarama"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Hisse Tarayıcı</a>
       <a href="/karsilastir"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Karşılaştır</a>
-      <a href="/kripto"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">🪙 Kripto</a>
-      <a href="/emtialar"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">🥇 Emtialar</a>
+      <a href="/kripto"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'"><span aria-hidden="true">🪙</span> Kripto</a>
+      <a href="/emtialar"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'"><span aria-hidden="true">🥇</span> Emtialar</a>
       <a href="/abd"              style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">🇺🇸 ABD</a>
       <a href="/portfolio"        style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Portföy</a>
       <a href="/sinyal-performans"style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Sinyal Performansı</a>
@@ -2642,7 +2642,7 @@
       <span class="value-item">Şeffaf metodoloji</span>
     </div>
     <p style="color:var(--bp-text3);font-size:11px;margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto">
-      ⚠️ Bu platform yalnızca bilgilendirme amaçlıdır. Sinyaller <strong style="color:var(--bp-text3)">yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez.
+      <span aria-hidden="true">⚠️</span> Bu platform yalnızca bilgilendirme amaçlıdır. Sinyaller <strong style="color:var(--bp-text3)">yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez.
     </p>
     <p style="color:var(--bp-text3);font-size:11px;margin-top:8px">© 2026 borsapusula.com</p>
   </div>

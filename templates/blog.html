@@ -103,14 +103,14 @@
       <div class="bc-title">{{ a.title }}</div>
       <div class="bc-desc">{{ a.desc }}</div>
       <div class="bc-meta">
-        <span>📅 {{ a.date }}</span>
+        <span><span role="img" aria-label="Yayın tarihi">📅</span> {{ a.date }}</span>
         <span>⏱ {{ a.mins }} dk okuma</span>
       </div>
     </a>
     {% endfor %}
   </div>
   <div class="no-results" id="noResults" style="display:none">
-    <div style="font-size:32px;margin-bottom:10px">🔍</div>
+    <div style="font-size:32px;margin-bottom:10px"><span aria-hidden="true">🔍</span></div>
     <div style="font-size:15px;font-weight:600;color:#c9d1d9;margin-bottom:6px">Makale bulunamadı</div>
     <div>Farklı anahtar kelimeler deneyin veya kategori filtresini kaldırın.</div>
   </div>
@@ -118,7 +118,7 @@
 
 <footer>
   <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/hakkinda">Hakkında</a>
-  <div style="margin-top:8px">⚠️ Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
+  <div style="margin-top:8px"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
 </footer>
 
 <script>

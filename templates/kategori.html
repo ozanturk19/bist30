@@ -169,7 +169,7 @@
           <div class="ac-sl" id="sl-{{ asset.key }}"></div>
           <div class="ac-adx" id="adx-{{ asset.key }}"></div>
         </div>
-        <span class="detail-btn">Detay →</span>
+        <span class="detail-btn">Detay <span aria-hidden="true">→</span></span>
       </div>
     </a>
     {% endfor %}
@@ -197,7 +197,7 @@
             </a>
           </td>
           <td><span class="sector-tag">{{ s.sector }}</span></td>
-          <td><a href="{{ s.href }}" style="color:var(--brand);font-size:12px">Grafik →</a></td>
+          <td><a href="{{ s.href }}" style="color:var(--brand);font-size:12px">Grafik <span aria-hidden="true">→</span></a></td>
         </tr>
         {% endfor %}
       </tbody>
@@ -206,14 +206,14 @@
   {% endif %}
 
   <div class="disclaimer">
-    ⚠️ <strong>Önemli Uyarı:</strong> Bu sayfa algoritmik teknik analiz içerir. Yatırım tavsiyesi değildir.
+    <span aria-hidden="true">⚠️</span> <strong>Önemli Uyarı:</strong> Bu sayfa algoritmik teknik analiz içerir. Yatırım tavsiyesi değildir.
   </div>
 
 </div>
 
 <footer>
   <a href="/">Ana Sayfa</a> · <a href="/kripto">Kripto</a> · <a href="/emtialar">Emtialar</a> · <a href="/abd">ABD</a> · <a href="/tarama">Hisse Tarayıcı</a>
-  <div style="margin-top:8px">⚠️ Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
+  <div style="margin-top:8px"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
 </footer>
 
 <script>

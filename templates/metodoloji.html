@@ -202,19 +202,19 @@
   </div>
   <div class="tldr-rows">
     <div class="tldr-row tldr-green">
-      <span class="tldr-icon">🟢</span>
+      <span class="tldr-icon"><span aria-hidden="true">🟢</span></span>
       <span class="tldr-label">Güçlü Trend</span>
       <span class="tldr-eq">=</span>
       <span class="tldr-formula">Supertrend ▲ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; EMA12 &gt; EMA99</span>
     </div>
     <div class="tldr-row tldr-red">
-      <span class="tldr-icon">🔴</span>
+      <span class="tldr-icon"><span aria-hidden="true">🔴</span></span>
       <span class="tldr-label">Trend Bozuldu</span>
       <span class="tldr-eq">=</span>
       <span class="tldr-formula">Supertrend ▼ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; EMA12 &lt; EMA99</span>
     </div>
     <div class="tldr-row tldr-gray">
-      <span class="tldr-icon">⚪</span>
+      <span class="tldr-icon"><span aria-hidden="true">⚪</span></span>
       <span class="tldr-label">Yatay</span>
       <span class="tldr-eq">=</span>
       <span class="tldr-formula">3 kriterin tamamı aynı yönde değil</span>
@@ -251,8 +251,8 @@
 </div>
 
 <div class="formula-box">
-Güçlü Trend  →  ST = LONG   AND  ADX ≥ 25  AND  DI+ &gt; DI−  AND  EMA12 &gt; EMA99<br>
-Trend Bozuldu  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
+Güçlü Trend  <span role="img" aria-label="anlamına gelir">→</span>  ST = LONG   AND  ADX ≥ 25  AND  DI+ &gt; DI−  AND  EMA12 &gt; EMA99<br>
+Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
 </div>
 
 <h2 id="supertrend">1. Supertrend Göstergesi</h2>
@@ -261,8 +261,8 @@ Trend Bozuldu  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12
   Parametreler: <code>period=10, multiplier=3</code>.
 </p>
 <ul>
-  <li>Fiyat Supertrend bandının <strong>üzerinde</strong> → LONG (yükseliş) trendi</li>
-  <li>Fiyat Supertrend bandının <strong>altında</strong> → SHORT (düşüş) trendi</li>
+  <li>Fiyat Supertrend bandının <strong>üzerinde</strong> <span role="img" aria-label="anlamına gelir">→</span> LONG (yükseliş) trendi</li>
+  <li>Fiyat Supertrend bandının <strong>altında</strong> <span role="img" aria-label="anlamına gelir">→</span> SHORT (düşüş) trendi</li>
   <li>Band aynı zamanda dinamik bir <strong>Stop Loss</strong> seviyesi olarak kullanılır</li>
 </ul>
 <p>Grafiklerde mavi/yeşil çizgi Güçlü Trend, kırmızı çizgi Trend Bozuldu modunu gösterir. Fiyat bandı kırdığında otomatik sinyal değişir.</p>
@@ -273,10 +273,10 @@ Trend Bozuldu  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12
   <code>period=14</code> kullanılır.
 </p>
 <ul>
-  <li><code>ADX &lt; 18</code> → Zayıf, yatay piyasa</li>
-  <li><code>ADX 18–25</code> → Orta güçte trend oluşuyor</li>
-  <li><code>ADX ≥ 25</code> → Güçlü trend ✅ (sinyal üretilir)</li>
-  <li><code>ADX ≥ 40</code> → Çok güçlü trend</li>
+  <li><code>ADX &lt; 18</code> <span role="img" aria-label="anlamına gelir">→</span> Zayıf, yatay piyasa</li>
+  <li><code>ADX 18–25</code> <span role="img" aria-label="anlamına gelir">→</span> Orta güçte trend oluşuyor</li>
+  <li><code>ADX ≥ 25</code> <span role="img" aria-label="anlamına gelir">→</span> Güçlü trend <span aria-hidden="true">✅</span> (sinyal üretilir)</li>
+  <li><code>ADX ≥ 40</code> <span role="img" aria-label="anlamına gelir">→</span> Çok güçlü trend</li>
 </ul>
 <p>
   <strong>DI+ (Positive Directional Index)</strong> yükseliş baskısını,
@@ -290,9 +290,9 @@ Trend Bozuldu  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12
   <code>period=14</code> kullanılır. 0–100 arasında değer alır.
 </p>
 <ul>
-  <li><code>RSI &lt; 30</code> → Aşırı satım bölgesi (potansiyel toparlanma)</li>
-  <li><code>RSI 40–60</code> → Nötr bölge</li>
-  <li><code>RSI &gt; 70</code> → Aşırı alım bölgesi (potansiyel düzeltme)</li>
+  <li><code>RSI &lt; 30</code> <span role="img" aria-label="anlamına gelir">→</span> Aşırı satım bölgesi (potansiyel toparlanma)</li>
+  <li><code>RSI 40–60</code> <span role="img" aria-label="anlamına gelir">→</span> Nötr bölge</li>
+  <li><code>RSI &gt; 70</code> <span role="img" aria-label="anlamına gelir">→</span> Aşırı alım bölgesi (potansiyel düzeltme)</li>
 </ul>
 <p>
   BorsaPusula'da RSI, <strong>Güç Skoru</strong> hesaplamasında "RSI bölgesi" kriteri olarak kullanılır
@@ -305,8 +305,8 @@ Trend Bozuldu  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12
   Üstel Hareketli Ortalama (EMA) çaprazlaması, orta ve uzun dönem trend yönünü teyit eder.
 </p>
 <ul>
-  <li><strong>EMA12 &gt; EMA99</strong> → Kısa dönem momentum uzun dönemin üzerinde → Yükseliş</li>
-  <li><strong>EMA12 &lt; EMA99</strong> → Kısa dönem momentum uzun dönemin altında → Düşüş</li>
+  <li><strong>EMA12 &gt; EMA99</strong> <span role="img" aria-label="anlamına gelir">→</span> Kısa dönem momentum uzun dönemin üzerinde <span role="img" aria-label="anlamına gelir">→</span> Yükseliş</li>
+  <li><strong>EMA12 &lt; EMA99</strong> <span role="img" aria-label="anlamına gelir">→</span> Kısa dönem momentum uzun dönemin altında <span role="img" aria-label="anlamına gelir">→</span> Düşüş</li>
 </ul>
 <p>Grafiklerde EMA12 <span style="color:#58a6ff">mavi</span>, EMA99 <span style="color:#e3b341">sarı</span> renkle gösterilir. İkisi arasındaki dolgu, yön değiştikçe yeşil/kırmızıya döner.</p>
 
@@ -316,8 +316,8 @@ Trend Bozuldu  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12
   Büyük ters trendde (örn. haftalık grafikte düşüş varken günlük Güçlü Trend sinyali) sinyal üretilmez.
 </p>
 <ul>
-  <li>Haftalık EMA20 yükselen → Güçlü Trend sinyali geçerli, Trend Bozuldu sinyali engellenir</li>
-  <li>Haftalık EMA20 düşen → Trend Bozuldu sinyali geçerli, Güçlü Trend sinyali engellenir</li>
+  <li>Haftalık EMA20 yükselen <span role="img" aria-label="anlamına gelir">→</span> Güçlü Trend sinyali geçerli, Trend Bozuldu sinyali engellenir</li>
+  <li>Haftalık EMA20 düşen <span role="img" aria-label="anlamına gelir">→</span> Trend Bozuldu sinyali geçerli, Güçlü Trend sinyali engellenir</li>
 </ul>
 
 <h2>Sinyal Onayı</h2>
@@ -345,7 +345,7 @@ Trend Bozuldu  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12
 <p>Veriler <strong>15 dakikada bir</strong> güncellenir. Canlı fiyatlar SSE (Server-Sent Events) ile 30 saniyede bir yayınlanır.</p>
 
 <div class="disclaimer">
-  ⚠️ <strong>Önemli Uyarı:</strong> Bu platform yalnızca bilgilendirme amaçlıdır.
+  <span aria-hidden="true">⚠️</span> <strong>Önemli Uyarı:</strong> Bu platform yalnızca bilgilendirme amaçlıdır.
   Herhangi bir otomatik emir verilmez. Sinyal geçmişi iyi performans göstermiş olsa da,
   geçmiş getiri gelecek getiriyi garanti etmez. Yatırım kararları kişisel araştırma ve
   profesyonel finansal danışmanlık gerektirmektedir.
@@ -356,7 +356,7 @@ Trend Bozuldu  →  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12
 
 <footer>
   <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/hakkinda">Hakkında</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/gizlilik">Gizlilik</a> · <a href="/iletisim">İletişim</a>
-  <div style="margin-top:8px;font-size:11px;color:#30363d">⚠️ Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
+  <div style="margin-top:8px;font-size:11px;color:#30363d"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
 </footer>
 
 <script>

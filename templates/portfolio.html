@@ -176,13 +176,13 @@
 
   <!-- T7.4: canlı fiyat/grafik verisi çekilemediğinde gösterilen hata banner'ı -->
   <div class="pf-fetch-error" id="pfFetchError" style="display:none">
-    <span>⚠️ Güncel fiyat ve grafik verileri şu an yüklenemiyor.</span>
+    <span><span aria-hidden="true">⚠️</span> Güncel fiyat ve grafik verileri şu an yüklenemiyor.</span>
     <button class="pf-fetch-error-retry" onclick="retryPortfolioFetch()">Tekrar dene</button>
   </div>
 
   <!-- localStorage Uyarı Bandı -->
   <div class="ls-warning" id="lsWarning" style="display:none">
-    <span class="ls-warning-icon">💾</span>
+    <span class="ls-warning-icon"><span aria-hidden="true">💾</span></span>
     <div class="ls-warning-body">
       <div class="ls-warning-title">Veriler bu cihazın tarayıcısında saklanıyor</div>
       Portföyünüz sunucuya gönderilmez — yalnızca bu tarayıcının <strong style="color:#e2e8f0">localStorage</strong>'ında tutulur.
@@ -210,23 +210,23 @@
   <!-- Export / Import araçları -->
   <div class="pf-actions">
     <button class="btn-action" onclick="exportPortfolio()" title="Portföyü JSON dosyası olarak indir">
-      ⬇ JSON
+      <span aria-hidden="true">⬇</span> JSON
     </button>
     <button class="btn-action" onclick="exportCSV()" title="Portföyü Excel/CSV dosyası olarak indir">
-      📊 CSV
+      <span aria-hidden="true">📊</span> CSV
     </button>
     <label class="btn-action" title="Daha önce dışa aktardığın JSON dosyasını yükle">
-      ⬆ İçe Aktar
+      <span aria-hidden="true">⬆</span> İçe Aktar
       <input type="file" id="importFileInput" accept=".json" onchange="importPortfolio(event)">
     </label>
     <button class="btn-action danger" onclick="clearPortfolio()" title="Tüm pozisyonları sil">
-      🗑 Temizle
+      <span aria-hidden="true">🗑</span> Temizle
     </button>
     <!-- Cloud Sync -->
     <button class="btn-action" id="cloudBtn" onclick="openCloudSync()"
       style="margin-left:auto;background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#93c5fd"
       title="Cihazlar arası senkronizasyon">
-      ☁ Cloud Sync
+      <span aria-hidden="true">☁</span> Cloud Sync
     </button>
   </div>
 
@@ -234,7 +234,7 @@
   <div id="cloudModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center">
     <div style="background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;max-width:440px;width:90%;position:relative">
       <button onclick="closeCloudSync()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#8b949e;font-size:18px;cursor:pointer">×</button>
-      <div style="font-size:16px;font-weight:700;color:#f0f6fc;margin-bottom:6px">☁ Cloud Sync</div>
+      <div style="font-size:16px;font-weight:700;color:#f0f6fc;margin-bottom:6px"><span aria-hidden="true">☁</span> Cloud Sync</div>
       <div style="font-size:12px;color:#8b949e;margin-bottom:16px">Portföyünüzü sunucuya kaydedin — farklı cihazlardan erişin veya bağlantıyla paylaşın.</div>
       <!-- Yeni oluştur / var olan token -->
       <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -252,23 +252,23 @@
         <div style="font-size:11px;color:#8b949e;margin-bottom:6px">Aktif Token:</div>
         <div style="display:flex;gap:8px;align-items:center;background:#0d1117;border:1px solid #30363d;border-radius:7px;padding:8px 12px;margin-bottom:12px">
           <code id="cloudActiveToken" style="font-size:12px;color:#58a6ff;flex:1;word-break:break-all"></code>
-          <button onclick="copyCloudLink()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:14px" title="Kopyala">📋</button>
+          <button onclick="copyCloudLink()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:14px" title="Kopyala"><span role="img" aria-label="Kopyala">📋</span></button>
         </div>
         <div style="display:flex;gap:8px">
           <button onclick="saveToCloud()" style="flex:1;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);color:#3fb950;padding:8px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">
-            ⬆ Sunucuya Kaydet
+            <span aria-hidden="true">⬆</span> Sunucuya Kaydet
           </button>
           <button onclick="loadFromCloud()" style="flex:1;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.15);color:#58a6ff;padding:8px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">
-            ⬇ Sunucudan Yükle
+            <span aria-hidden="true">⬇</span> Sunucudan Yükle
           </button>
           <button onclick="forgetCloudToken()" style="background:none;border:1px solid #30363d;color:#8b949e;padding:8px 10px;border-radius:7px;font-size:12px;cursor:pointer" title="Token'ı unut (yerel portföy kalır)">
-            ✕ Unut
+            <span aria-hidden="true">✕</span> Unut
           </button>
         </div>
       </div>
       <div id="cloudMsg" style="font-size:12px;color:#8b949e;margin-top:10px;min-height:18px"></div>
       <div style="font-size:11px;color:#484f58;margin-top:14px;padding-top:10px;border-top:1px solid #21262d">
-        ⚠️ Token herkese açık bir şifre gibidir — paylaşmamanızı öneririz. Kişisel veri kaydedilmez (isim, e-posta yok).
+        <span aria-hidden="true">⚠️</span> Token herkese açık bir şifre gibidir — paylaşmamanızı öneririz. Kişisel veri kaydedilmez (isim, e-posta yok).
       </div>
     </div>
   </div>
@@ -291,7 +291,7 @@
   <!-- Tablo -->
   <div class="pf-table">
     <div id="emptyMsg" class="empty-msg">
-      <div class="em-icon">💼</div>
+      <div class="em-icon"><span aria-hidden="true">💼</span></div>
       <div>Portföyünüz boş.</div>
       <div style="font-size:12px;margin-top:6px">Yukarıdaki formdan hisse ekleyin.</div>
     </div>
@@ -320,7 +320,7 @@
 
 <footer>
   <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/gizlilik">Gizlilik</a>
-  <div style="margin-top:6px">⚠️ Portföy verisi yalnızca tarayıcınızda saklanır. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
+  <div style="margin-top:6px"><span aria-hidden="true">⚠️</span> Portföy verisi yalnızca tarayıcınızda saklanır. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
 </footer>
 
 <script>

@@ -6,6 +6,10 @@
     Parametrelerin HEPSI opsiyonel; hicbiri verilmezse cikti KANONIK header'in
     kendisidir (blog / gucu_yuksek / kategori / metodoloji / portfolio / tarama).
       hdr_title            str  vars. yok  -> verilirse logo ile nav arasina baslik
+      hdr_icon              str  vars. yok  -> hdr_title basina, ayri <span aria-hidden="true">
+                                             ile sarili dekoratif emoji/ikon (T22-a11y).
+                                             hdr_title'in KENDI icine emoji gomme —
+                                             autoescape span'i literal metne cevirir.
       hdr_sub              str  vars. yok  -> verilirse baslik+alt-baslik <div> ile sarilir
       hdr_sub_id           str  vars. yok  -> alt-basligin id ozniteligi (JS hedefi)
       hdr_title_tag        str  vars. 'h1' -> yalniz 'h1'/'h2'/'div'; baskasi 'h1'e duser
@@ -64,10 +68,10 @@
 {%- set _hdr_tag = _hdr_tag if _hdr_tag in ['h1', 'h2', 'div'] else 'h1' %}
   </a>{% if hdr_title is defined and hdr_title %}
 {% if hdr_sub is defined and hdr_sub %}  <div>
-    <{{ _hdr_tag }} class="page-title">{{ hdr_title }}</{{ _hdr_tag }}>
+    <{{ _hdr_tag }} class="page-title">{% if hdr_icon is defined and hdr_icon %}<span aria-hidden="true">{{ hdr_icon }}</span> {% endif %}{{ hdr_title }}</{{ _hdr_tag }}>
     <div class="page-sub"{% if hdr_sub_id is defined and hdr_sub_id %} id="{{ hdr_sub_id }}"{% endif %}>{{ hdr_sub }}</div>
   </div>
-{% else %}  <{{ _hdr_tag }} class="page-title">{{ hdr_title }}</{{ _hdr_tag }}>
+{% else %}  <{{ _hdr_tag }} class="page-title">{% if hdr_icon is defined and hdr_icon %}<span aria-hidden="true">{{ hdr_icon }}</span> {% endif %}{{ hdr_title }}</{{ _hdr_tag }}>
 {% endif %}{% endif %}  <nav class="bp-main-nav" aria-label="Ana navigasyon">
   <a href="/" data-route="/" class="bp-nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>

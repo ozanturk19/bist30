@@ -184,7 +184,7 @@
 <main id="main-content" tabindex="-1">
 
 {% if error %}
-  <div class="alert alert-error">⚠️ {{ error }}</div>
+  <div class="alert alert-error"><span aria-hidden="true">⚠️</span> {{ error }}</div>
 {% endif %}
 
 {% if email %}
@@ -195,7 +195,7 @@
 </div>
 
 {% if done %}
-<div class="alert alert-success">✓ Profilin daha önce tamamlanmış. Aşağıdaki cevapları güncelleyebilirsin.</div>
+<div class="alert alert-success"><span aria-hidden="true">✓</span> Profilin daha önce tamamlanmış. Aşağıdaki cevapları güncelleyebilirsin.</div>
 {% endif %}
 
 <form class="form-card" id="profileForm" onsubmit="return submitProfile(event)">
@@ -204,10 +204,10 @@
   <div class="question">
     <label class="q-label">1. Yatırım deneyimin nedir?</label>
     <div class="opts">
-      <button type="button" class="opt {% if profile.level == 'yeni' %}selected{% endif %}" data-q="level" data-v="yeni">🌱 Yeni başlıyorum (&lt; 1 yıl)</button>
-      <button type="button" class="opt {% if profile.level == 'orta' %}selected{% endif %}" data-q="level" data-v="orta">📚 Orta seviye (1-3 yıl)</button>
-      <button type="button" class="opt {% if profile.level == 'deneyimli' %}selected{% endif %}" data-q="level" data-v="deneyimli">🎯 Deneyimli (3+ yıl)</button>
-      <button type="button" class="opt {% if profile.level == 'profesyonel' %}selected{% endif %}" data-q="level" data-v="profesyonel">💼 Profesyonel</button>
+      <button type="button" class="opt {% if profile.level == 'yeni' %}selected{% endif %}" data-q="level" data-v="yeni"><span aria-hidden="true">🌱</span> Yeni başlıyorum (&lt; 1 yıl)</button>
+      <button type="button" class="opt {% if profile.level == 'orta' %}selected{% endif %}" data-q="level" data-v="orta"><span aria-hidden="true">📚</span> Orta seviye (1-3 yıl)</button>
+      <button type="button" class="opt {% if profile.level == 'deneyimli' %}selected{% endif %}" data-q="level" data-v="deneyimli"><span aria-hidden="true">🎯</span> Deneyimli (3+ yıl)</button>
+      <button type="button" class="opt {% if profile.level == 'profesyonel' %}selected{% endif %}" data-q="level" data-v="profesyonel"><span aria-hidden="true">💼</span> Profesyonel</button>
     </div>
   </div>
 
@@ -215,10 +215,10 @@
   <div class="question">
     <label class="q-label">2. Genelde nasıl işlem yaparsın?</label>
     <div class="opts">
-      <button type="button" class="opt {% if profile.freq == 'gunluk' %}selected{% endif %}" data-q="freq" data-v="gunluk">⚡ Günlük (day trader)</button>
-      <button type="button" class="opt {% if profile.freq == 'swing' %}selected{% endif %}" data-q="freq" data-v="swing">📅 Haftada 1-3 (swing)</button>
-      <button type="button" class="opt {% if profile.freq == 'pozisyon' %}selected{% endif %}" data-q="freq" data-v="pozisyon">🗓️ Aylık birkaç (pozisyon)</button>
-      <button type="button" class="opt {% if profile.freq == 'pasif' %}selected{% endif %}" data-q="freq" data-v="pasif">👀 Sadece izlerim, nadiren işlem</button>
+      <button type="button" class="opt {% if profile.freq == 'gunluk' %}selected{% endif %}" data-q="freq" data-v="gunluk"><span aria-hidden="true">⚡</span> Günlük (day trader)</button>
+      <button type="button" class="opt {% if profile.freq == 'swing' %}selected{% endif %}" data-q="freq" data-v="swing"><span aria-hidden="true">📅</span> Haftada 1-3 (swing)</button>
+      <button type="button" class="opt {% if profile.freq == 'pozisyon' %}selected{% endif %}" data-q="freq" data-v="pozisyon"><span aria-hidden="true">🗓️</span> Aylık birkaç (pozisyon)</button>
+      <button type="button" class="opt {% if profile.freq == 'pasif' %}selected{% endif %}" data-q="freq" data-v="pasif"><span aria-hidden="true">👀</span> Sadece izlerim, nadiren işlem</button>
     </div>
   </div>
 
@@ -272,30 +272,30 @@
   <div class="question">
     <label class="q-label">5. Mail tercihin nedir?</label>
     <div class="opts cols-1">
-      <button type="button" class="opt {% if profile.mail_pref == 'daily' %}selected{% endif %}" data-q="mail_pref" data-v="daily">📰 Günlük özet — her akşam 19:00, 1 mail (önerilir)</button>
-      <button type="button" class="opt {% if profile.mail_pref == 'instant' %}selected{% endif %}" data-q="mail_pref" data-v="instant">⚡ Anında — her sinyal değişimi olduğunda hemen</button>
-      <button type="button" class="opt {% if profile.mail_pref == 'premium' %}selected{% endif %}" data-q="mail_pref" data-v="premium">💎 Sadece Premium — hacim onaylı sinyaller</button>
-      <button type="button" class="opt {% if profile.mail_pref == 'weekly' %}selected{% endif %}" data-q="mail_pref" data-v="weekly">📊 Haftalık özet — Cuma akşamı, performans + öne çıkanlar</button>
+      <button type="button" class="opt {% if profile.mail_pref == 'daily' %}selected{% endif %}" data-q="mail_pref" data-v="daily"><span aria-hidden="true">📰</span> Günlük özet — her akşam 19:00, 1 mail (önerilir)</button>
+      <button type="button" class="opt {% if profile.mail_pref == 'instant' %}selected{% endif %}" data-q="mail_pref" data-v="instant"><span aria-hidden="true">⚡</span> Anında — her sinyal değişimi olduğunda hemen</button>
+      <button type="button" class="opt {% if profile.mail_pref == 'premium' %}selected{% endif %}" data-q="mail_pref" data-v="premium"><span aria-hidden="true">💎</span> Sadece Premium — hacim onaylı sinyaller</button>
+      <button type="button" class="opt {% if profile.mail_pref == 'weekly' %}selected{% endif %}" data-q="mail_pref" data-v="weekly"><span aria-hidden="true">📊</span> Haftalık özet — Cuma akşamı, performans + öne çıkanlar</button>
     </div>
   </div>
 
   <div class="submit-row">
     <button type="submit" class="btn" id="profileSubmit">
-      ✓ Profili Kaydet
+      <span aria-hidden="true">✓</span> Profili Kaydet
     </button>
     <a href="/" class="btn btn-secondary">Atla</a>
   </div>
 </form>
 
 <div class="footer-note">
-  <a href="/">← Sinyal paneline dön</a> &nbsp;·&nbsp;
+  <a href="/"><span aria-hidden="true">←</span> Sinyal paneline dön</a> &nbsp;·&nbsp;
   <a href="/iletisim">Yardıma ihtiyacım var</a>
 </div>
 
 {% else %}
 
 <div class="hero">
-  <h1>⚠️ Bağlantı Geçersiz</h1>
+  <h1><span aria-hidden="true">⚠️</span> Bağlantı Geçersiz</h1>
   <p>Profil sayfasına erişmek için hoş geldin mailindeki linki kullan. Eğer mail almadıysan <a href="/" style="color:var(--bp-brand)">ana sayfadan abone ol</a>.</p>
 </div>
 

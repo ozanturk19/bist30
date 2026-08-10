@@ -140,22 +140,22 @@
   <div class="ozet-bar">
     <div class="ozet-metric">
       <div class="ozet-metric-val c-blue">{{ total_signals }}</div>
-      <div class="ozet-metric-lbl">🔬 Toplam Sinyal</div>
+      <div class="ozet-metric-lbl"><span aria-hidden="true">🔬</span> Toplam Sinyal</div>
       <div class="ozet-metric-sub">{{ bt.tickers_used }} hisse · 2 yıl</div>
     </div>
     <div class="ozet-metric">
       <div class="ozet-metric-val hero-val c-green">%{{ bt.al.win_rate }}</div>
-      <div class="ozet-metric-lbl">✅ Güçlü Trend Başarı Oranı</div>
+      <div class="ozet-metric-lbl"><span aria-hidden="true">✅</span> Güçlü Trend Başarı Oranı</div>
       <div class="ozet-metric-sub">{{ bt.al.count }} Güçlü Trend sinyali</div>
     </div>
     <div class="ozet-metric">
       <div class="ozet-metric-val c-green">{{ '+' if bt.al.avg_ret >= 0 else '' }}{{ bt.al.avg_ret }}%</div>
-      <div class="ozet-metric-lbl">📈 Ort. Getiri (Güçlü Trend)</div>
+      <div class="ozet-metric-lbl"><span aria-hidden="true">📈</span> Ort. Getiri (Güçlü Trend)</div>
       <div class="ozet-metric-sub">Max +{{ bt.al.best }}% · Min {{ bt.al.worst }}%</div>
     </div>
     <div class="ozet-metric">
       <div class="ozet-metric-val" style="color:{{ '#f59e0b' if aktif_count > 0 else '#8b949e' }}">{{ aktif_count }}</div>
-      <div class="ozet-metric-lbl">⚡ Aktif Sinyal</div>
+      <div class="ozet-metric-lbl"><span aria-hidden="true">⚡</span> Aktif Sinyal</div>
       <div class="ozet-metric-sub">Şu an açık pozisyon</div>
     </div>
   </div>
@@ -191,21 +191,21 @@
       <div class="stat-num {% if bt.al.sharpe and bt.al.sharpe >= 1.0 %}c-green{% elif bt.al.sharpe and bt.al.sharpe >= 0 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.sharpe is not none %}{{ bt.al.sharpe }}{% else %}—{% endif %}
       </div>
-      <div class="stat-lbl">📊 Sharpe Ratio</div>
+      <div class="stat-lbl"><span aria-hidden="true">📊</span> Sharpe Ratio</div>
       <div class="stat-sub">&gt;1.0 kabul edilebilir · &gt;2.0 mükemmel</div>
     </div>
     <div class="stat-card" title="Maksimum kümülatif düşüş. Kötü seri döneminde en derin kayıp.">
       <div class="stat-num {% if bt.al.max_drawdown and bt.al.max_drawdown > -15 %}c-green{% elif bt.al.max_drawdown and bt.al.max_drawdown > -30 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.max_drawdown is not none %}{{ bt.al.max_drawdown }}%{% else %}—{% endif %}
       </div>
-      <div class="stat-lbl">📉 Max Drawdown</div>
+      <div class="stat-lbl"><span aria-hidden="true">📉</span> Max Drawdown</div>
       <div class="stat-sub">Ardışık kayıp serisi etkisi</div>
     </div>
     <div class="stat-card" title="Profit Factor: Brüt kazanç / brüt kayıp. >1.5 iyi, >2.0 çok iyi.">
       <div class="stat-num {% if bt.al.profit_factor and bt.al.profit_factor >= 1.5 %}c-green{% elif bt.al.profit_factor and bt.al.profit_factor >= 1.0 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.profit_factor is not none %}{{ bt.al.profit_factor }}{% else %}—{% endif %}
       </div>
-      <div class="stat-lbl">⚖️ Profit Factor</div>
+      <div class="stat-lbl"><span aria-hidden="true">⚖️</span> Profit Factor</div>
       <div class="stat-sub">Kazanç / kayıp oranı</div>
     </div>
     <div class="stat-card" title="Ortalama sinyal süre (gün)">
@@ -217,7 +217,7 @@
     </div>
   </div>
   <div class="info-box" style="margin-bottom:24px">
-    ⚠️ <strong>Not:</strong> Risk metrikleri geçmiş veri üzerinden hesaplanmıştır. Komisyon ve slipaj (%0.1 tahmini) dahil değildir.
+    <span role="img" aria-label="Uyarı">⚠️</span> <strong>Not:</strong> Risk metrikleri geçmiş veri üzerinden hesaplanmıştır. Komisyon ve slipaj (%0.1 tahmini) dahil değildir.
     Sharpe Ratio burada günlük bağımsız işlemler üzerinden hesaplanmış basit bir yaklaşımdır.
     Geçmiş performans gelecek getirileri garanti etmez.
   </div>
@@ -226,7 +226,7 @@
   <div class="sec-head">
     Hisse Bazlı Performans
     <span>(Güçlü Trend sayısına göre sıralı)</span>
-    <button class="btn-run" id="btnRun" onclick="triggerBacktest()">🔄 Yenile</button>
+    <button class="btn-run" id="btnRun" onclick="triggerBacktest()"><span aria-hidden="true">🔄</span> Yenile</button>
   </div>
   <div class="tbl-wrap">
     <table>
@@ -265,7 +265,7 @@
 
   {% else %}
   <div class="computing" id="computingDiv">
-    <div class="big">⚙️</div>
+    <div class="big"><span aria-hidden="true">⚙️</span></div>
     <div style="font-size:16px;font-weight:700;color:#e6edf3" id="computingTitle">Backtest Başlatılıyor…</div>
     <p id="computingMsg" style="margin-top:8px">BIST100 hisseleri için 2 yıllık geçmiş hesaplanıyor.</p>
     <div style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:10px">
@@ -274,7 +274,7 @@
     </div>
     <p style="margin-top:16px;font-size:11px;color:#64748b">~5-10 dakika sürebilir, sayfa otomatik yenilenecek.</p>
     <p style="margin-top:8px">
-      <button class="btn-run" id="btnRun" onclick="triggerBacktest()" style="opacity:0.6;font-size:12px">🔄 Yeniden Başlat</button>
+      <button class="btn-run" id="btnRun" onclick="triggerBacktest()" style="opacity:0.6;font-size:12px"><span aria-hidden="true">🔄</span> Yeniden Başlat</button>
     </p>
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
@@ -302,8 +302,8 @@
   </div>
   {% if not has_premium_access and premium_count > 0 %}
   <div class="premium-cta-row">
-    <span class="premium-cta-text">🔒 <strong>{{ premium_count }} Premium sinyal</strong> blur'lu — net görmek için Premium'u aç</span>
-    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
+    <span class="premium-cta-text"><span role="img" aria-label="Kilitli">🔒</span> <strong>{{ premium_count }} Premium sinyal</strong> blur'lu — net görmek için Premium'u aç</span>
+    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()"><span aria-hidden="true">💎</span> Premium'u Aç (ücretsiz)</button>
   </div>
   {% endif %}
   <div class="tbl-wrap">
@@ -353,7 +353,7 @@
 
 <footer>
   <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/sektor-harita">Sektör Haritası</a> · <a href="/bilanco-takvimi">Bilanço Takvimi</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/yasal">Yasal Uyarı</a>
-  <div style="margin-top:6px">⚠️ Geçmiş performans gelecek getiriyi garanti etmez. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
+  <div style="margin-top:6px"><span role="img" aria-label="Uyarı">⚠️</span> Geçmiş performans gelecek getiriyi garanti etmez. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
 </footer>
 
 <script src="/static/stale-banner.js?v=20260810B"></script>

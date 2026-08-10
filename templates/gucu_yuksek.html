@@ -185,11 +185,11 @@
     <h2>Skor nasıl hesaplanır?</h2>
     <p>Her hisse için <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">ADX</a> (trend gücü), hacim oranı, sinyal skoru ve teyit durumu birleştirilerek 0–100 arası bir momentum skoru oluşturulur. En yüksek skorlu hisseler listenin başındadır.</p>
     <div class="score-formula">
-      <span class="score-pill"><a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">ADX</a> → maks 30 pt</span>
-      <span class="score-pill">Hacim → maks 25 pt</span>
-      <span class="score-pill">Bull Score → maks 25 pt</span>
-      <span class="score-pill">Teyit → 10 pt</span>
-      <span class="score-pill"><a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">RSI</a> bölgesi → 10 pt</span>
+      <span class="score-pill"><a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">ADX</a> <span aria-hidden="true">→</span> maks 30 pt</span>
+      <span class="score-pill">Hacim <span aria-hidden="true">→</span> maks 25 pt</span>
+      <span class="score-pill">Bull Score <span aria-hidden="true">→</span> maks 25 pt</span>
+      <span class="score-pill">Teyit <span aria-hidden="true">→</span> 10 pt</span>
+      <span class="score-pill"><a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">RSI</a> bölgesi <span aria-hidden="true">→</span> 10 pt</span>
     </div>
   </div>
 
@@ -201,7 +201,7 @@
 
   {% elif not stocks %}
   <div class="loading-box">
-    <div style="font-size:36px;margin-bottom:12px">📭</div>
+    <div style="font-size:36px;margin-bottom:12px"><span aria-hidden="true">📭</span></div>
     <div style="font-size:16px;font-weight:700;color:#e6edf3">Şu an aktif sinyal yok</div>
     <div style="font-size:13px;color:#8b949e;margin-top:8px">Piyasa saatlerinde güncellenir.</div>
     <a href="/" style="display:inline-block;margin-top:16px;background:#1f6feb;color:#fff;text-decoration:none;border-radius:6px;padding:8px 20px;font-size:13px;font-weight:600">Ana Sayfaya Dön</a>
@@ -234,7 +234,7 @@
               <div>
                 {# CPO-986 #8.1: tier kanonik sembol — 💎 Premium (mor #a855f7) / ⭐ Plus (mavi #1f6feb) / Standart işaretsiz.
                    is_premium (⭐ Hacim Onaylı, altın #ffc850) tier'dan bağımsız ayrı bir metrik (CPO-535 #36), renkle ayrışır. #}
-                <div class="tk">{{ s.ticker }}{% if s.tier == 'premium' %} <span title="Premium" style="color:var(--bp-premium);font-size:11px;vertical-align:middle">💎</span>{% elif s.tier == 'plus' %} <span title="Plus" style="color:#1f6feb;font-size:11px;vertical-align:middle">⭐</span>{% endif %}{% if s.is_premium %} <span title="Hacim Onaylı — RVOL ≥ 1.20 (backtest: Win Rate %51.5)" style="color:var(--bp-volume);font-size:11px;vertical-align:middle">⭐</span>{% endif %}</div>
+                <div class="tk">{{ s.ticker }}{% if s.tier == 'premium' %} <span title="Premium" style="color:var(--bp-premium);font-size:11px;vertical-align:middle"><span role="img" aria-label="Premium">💎</span></span>{% elif s.tier == 'plus' %} <span title="Plus" style="color:#1f6feb;font-size:11px;vertical-align:middle"><span role="img" aria-label="Plus">⭐</span></span>{% endif %}{% if s.is_premium %} <span title="Hacim Onaylı — RVOL ≥ 1.20 (backtest: Win Rate %51.5)" style="color:var(--bp-volume);font-size:11px;vertical-align:middle"><span role="img" aria-label="Hacim Onaylı">⭐</span></span>{% endif %}</div>
                 <div class="tk-name">{{ stock_names.get(s.ticker, '') | truncate(22, true, '') }}</div>
               </div>
             </a>
@@ -244,7 +244,7 @@
               {% if s.signal == 'AL' %}▲ Güçlü{% else %}▼ Bozuldu{% endif %}
             </span>
             {% if s.signal == 'AL' and s.change_pct is not none and s.change_pct < 0 %}
-            <span style="font-size:10px;color:var(--bp-sat);font-weight:600;white-space:nowrap" title="Sinyal uzun vadeli, bugün günlük düşüş var">↓{{ '%.1f'|format(s.change_pct|abs) }}%</span>
+            <span style="font-size:10px;color:var(--bp-sat);font-weight:600;white-space:nowrap" title="Sinyal uzun vadeli, bugün günlük düşüş var"><span role="img" aria-label="Düşüş">↓</span>{{ '%.1f'|format(s.change_pct|abs) }}%</span>
             {% endif %}
           </td>
           <td>
@@ -263,7 +263,7 @@
           {# CPO-1335: `or 1` tuzağı + bar-sayacını-gün-sayma kaldırıldı #}
           <td class="hide-mob bars-val">{{ s.signal_date|signal_age_text }}</td>
           <td class="hide-mob confirm-dot">
-            {% if s.confirmed %}<span style="color:#3fb950">✓</span>{% else %}<span style="color:#e3b341">…</span>{% endif %}
+            {% if s.confirmed %}<span style="color:#3fb950"><span role="img" aria-label="Onaylandı">✓</span></span>{% else %}<span style="color:#e3b341">…</span>{% endif %}
           </td>
         </tr>
         {% endfor %}
