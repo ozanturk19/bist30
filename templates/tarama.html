@@ -21,7 +21,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   :root {
     --bg:var(--bp-bg); --surface:#161b22; --surface2:#1c2128;
-    --border:#30363d; --border2:#21262d;
+    --border:var(--bp-bkl-bd); --border2:#21262d;
     --text:#e6edf3; --text2:#8b949e; --text3:var(--bp-text3);
     --al:#3fb950; --sat:var(--bp-sat); --bkl:#8b949e;
     --brand:#1f6feb; --gold:#e3b341;
@@ -364,7 +364,7 @@
   .score-val.weak     { color:var(--text3); }
   .score-bar-bg { flex:0 0 40px; height:4px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
   .score-bar-fill { height:100%; border-radius:2px; }
-  .score-bar-fill.premium  { background:linear-gradient(90deg,#a855f7,var(--bp-premium)); }
+  .score-bar-fill.premium  { background:linear-gradient(90deg,var(--bp-premium),var(--bp-premium)); }
   .score-bar-fill.plus     { background:#1f6feb; }
   .score-bar-fill.standart { background:#808080; }
   .score-bar-fill.weak     { background:var(--text3); }
