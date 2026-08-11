@@ -98,7 +98,7 @@
   .import-toast.ok  { border-color: #238636; color: #3fb950; }
   .import-toast.err { border-color: var(--bp-sat-bd); color: var(--bp-sat); }
 
-  .empty-msg { text-align:center; padding:60px; color:#484f58; }
+  .empty-msg { text-align:center; padding:60px; color:var(--bp-text3); }
   .empty-msg .em-icon { font-size:40px; margin-bottom:12px; }
 
   /* localStorage uyarı banner */
@@ -132,9 +132,9 @@
   }
   .pf-fetch-error-retry:hover { background:rgba(var(--bp-sat-rgb),.12); }
 
-  .loading-row td { color:#484f58; font-style:italic; }
+  .loading-row td { color:var(--bp-text3); font-style:italic; }
 
-  footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
+  footer { text-align:center; padding:20px; font-size:12px; color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
   footer a { color:#8b949e; text-decoration:none; }
   @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
 
@@ -271,7 +271,7 @@
         </div>
       </div>
       <div id="cloudMsg" style="font-size:12px;color:#8b949e;margin-top:10px;min-height:18px"></div>
-      <div style="font-size:11px;color:#484f58;margin-top:14px;padding-top:10px;border-top:1px solid #21262d">
+      <div style="font-size:11px;color:var(--bp-text3);margin-top:14px;padding-top:10px;border-top:1px solid #21262d">
         <span aria-hidden="true">⚠️</span> Token herkese açık bir şifre gibidir — paylaşmamanızı öneririz. Kişisel veri kaydedilmez (isim, e-posta yok).
       </div>
     </div>
@@ -395,7 +395,7 @@ async function fetchCharts() {
 }
 
 function svgSparkline(prices) {
-  if (!prices || prices.length < 2) return '<span style="color:#484f58;font-size:11px">—</span>';
+  if (!prices || prices.length < 2) return '<span style="color:var(--bp-text3);font-size:11px">—</span>';
   const W = 80, H = 26;
   const min = Math.min(...prices), max = Math.max(...prices);
   const rng = max - min || 1;
@@ -609,9 +609,9 @@ function render() {
       <td class="hm" style="color:#8b949e">${p.date}</td>
       <td>${fmt(p.lot,0)}</td>
       <td>${fmt(p.price)}</td>
-      <td>${cur ? fmt(cur) + ' ₺' : '<span style="color:#484f58">—</span>'}</td>
+      <td>${cur ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td class="hm" style="color:#8b949e">${fmtM(cost)}</td>
-      <td>${val ? fmtM(val) : '<span style="color:#484f58">—</span>'}</td>
+      <td>${val ? fmtM(val) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${pnlHtml}</td>
       <td>${pnlPctHtml}</td>
       <td>${sigBadge}</td>
