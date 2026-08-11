@@ -179,9 +179,11 @@
     <a href="/iletisim" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>İletişim</span></a>
   </div>
 </div>
+<script src="/static/js/focus-trap.js?v=1"></script>
 <script>
-window.toggleMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;if(s.classList.contains('open'))window.closeMbnSheet();else{s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}};
-window.closeMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';};
+let _mbnRelease=null;
+window.toggleMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;if(s.classList.contains('open'))window.closeMbnSheet();else{s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';if(window.bpTrapFocus)_mbnRelease=window.bpTrapFocus(s);}};
+window.closeMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';if(_mbnRelease){_mbnRelease();_mbnRelease=null;}};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')window.closeMbnSheet();});
 (function(){const p=window.location.pathname;document.querySelectorAll('.mbn-item[data-route]').forEach(el=>{const r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r)){el.classList.add('active');el.setAttribute('aria-current','page');}});})();
 

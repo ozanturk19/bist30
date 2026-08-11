@@ -3806,6 +3806,7 @@ function closePremiumModal() {
 /* ── F4 Watchlist Alert Modal ──────────────────────────────────────────────── */
 
 let _alertModalTicker = null;
+let _alertModalRelease = null;
 let _userAlerts = {};   // cache: {ticker: {price_pct, signal_change, rsi_threshold, rvol_threshold}}
 
 function _isLoggedIn() {
@@ -3862,6 +3863,8 @@ async function openAlertModal(ticker) {
   </div>`;
   modal.style.display = 'flex';
   setTimeout(() => modal.classList.add('visible'), 10);
+  if (_alertModalRelease) { _alertModalRelease(); _alertModalRelease = null; }
+  if (window.bpTrapFocus) _alertModalRelease = window.bpTrapFocus(modal.querySelector('.alert-modal'), closeAlertModal);
 
   // localStorage migration prompt
   if (isLoggedIn && !_userAlerts[ticker]) {
@@ -3878,6 +3881,7 @@ function closeAlertModal() {
   if (!modal) return;
   modal.classList.remove('visible');
   setTimeout(() => { modal.style.display = 'none'; }, 200);
+  if (_alertModalRelease) { _alertModalRelease(); _alertModalRelease = null; }
 }
 
 async function saveAlertSettings() {
@@ -5646,6 +5650,7 @@ document.addEventListener('keydown', e => {
 <script src="/static/learning-mode.js?v=2" defer></script>
 {% include '_premium_modal.html' %}
 <script src="/static/js/toast.js?v=3"></script>
+<script src="/static/js/focus-trap.js?v=1"></script>
 {% include '_mobile_nav_partial.html' %}
 <!-- F14: pull-to-refresh -->
 <style>
