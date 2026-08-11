@@ -2653,7 +2653,6 @@
   </div>
 </footer>
 
-<script src="/static/lightweight-charts.min.js?v=1"></script>
 <script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=20260810B"></script>
 <script>
@@ -2730,16 +2729,30 @@ function sigLabel(sig) {
 }
 
 /* ── Lightweight Charts v4 ───────────────────────── */
-const LC = LightweightCharts;
+/* lazy-load: hisse.html _loadChartLib() ile ayni desen — 160KB script yalniz
+   accordion acilinca / desktop ilk grafik cizilirken cekilir, ana sayfa ilk
+   yuklemede degil (mobilde accordion varsayilan kapali → hic cekilmeyebilir) */
+let LC = null;
+function _loadChartLib() {
+  if (LC) return Promise.resolve();
+  return new Promise(function(res) {
+    var s = document.createElement('script');
+    s.src = '/static/lightweight-charts.min.js?v=1';
+    s.onload = function() { LC = LightweightCharts; res(); };
+    document.head.appendChild(s);
+  });
+}
 
-const BASE_OPTS = {
-  layout:          { background: { color: '#141416' }, textColor: '#909097' },
-  grid:            { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
-  crosshair:       { mode: LC.CrosshairMode.Normal },
-  rightPriceScale: { borderColor: '#30363d' },
-  handleScroll:    true,
-  handleScale:     true,
-};
+function getBaseOpts() {
+  return {
+    layout:          { background: { color: '#141416' }, textColor: '#909097' },
+    grid:            { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
+    crosshair:       { mode: LC.CrosshairMode.Normal },
+    rightPriceScale: { borderColor: '#30363d' },
+    handleScroll:    true,
+    handleScale:     true,
+  };
+}
 
 /* Grafik eksen label formatı: "10" → "Nis 10", crosshair'de "00:00:00" kalkıyor */
 const _MTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
@@ -2764,14 +2777,15 @@ let chartMain;
 
 function mkChart(el, height) {
   return LC.createChart(el, {
-    ...BASE_OPTS,
+    ...getBaseOpts(),
     width:     el.clientWidth || el.parentElement.clientWidth || 900,
     height:    height,
     timeScale: { borderColor: '#30363d', timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmt },
   });
 }
 
-function buildCharts(d) {
+async function buildCharts(d) {
+  await _loadChartLib();
   document.getElementById('chartLoading').style.display  = 'none';
   document.getElementById('chartsInner').style.display   = '';
 
