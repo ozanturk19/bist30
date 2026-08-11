@@ -4191,7 +4191,43 @@ def api_data():
                     logger.warning("DQV_SV_DATA: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
         except Exception as _e:
             logger.warning("DQV_SV_DATA exception: %s", _e)
-    return safe_json(_resp_data)
+    # ── FAZ8 perf: ETag/Cache-Control — degismeyen govdeyi tekrar indirtme ──
+    # no-cache: tarayici her seferinde sunucuya sorar (bayatlik riski yok),
+    # ama govde ayniysa 304 doner — bant genisligi kazanci, veri tazeligi etkilenmez.
+    _resp = safe_json(_resp_data)
+    _etag = hashlib.md5(_resp.get_data()).hexdigest()
+    _resp.headers["Cache-Control"] = "no-cache"
+    _resp.headers["ETag"] = _etag
+    if request.headers.get("If-None-Match") == _etag:
+        return Response(status=304, headers={"Cache-Control": "no-cache", "ETag": _etag})
+    return _resp
+
+
+@app.route("/api/data-lite")
+def api_data_lite():
+    """FAZ8 perf: alan projeksiyonu — blog_article.html gibi tuketiciler icin
+    tam /api/data (~280KB, tum alanlar) yerine yalniz istenen ticker'larin
+    kart-gosterimi icin gereken 5 alani doner. ?tickers=AKBNK,GARAN,THYAO"""
+    _raw = (request.args.get("tickers") or "").upper()
+    _wanted = {t.strip() for t in _raw.split(",") if t.strip()}
+    with _lock:
+        stocks_raw = list(_cache["data"])
+    out = []
+    if _wanted:
+        for s in stocks_raw:
+            if s.get("ticker") not in _wanted:
+                continue
+            out.append({
+                "ticker":     s.get("ticker"),
+                "name":       s.get("name") or s.get("ticker"),
+                "price":      s.get("price"),
+                "change_pct": s.get("change_pct"),
+                "signal":     s.get("signal"),
+            })
+    _resp = safe_json({"stocks": out})
+    _resp.headers["Cache-Control"] = "no-cache"
+    _resp.headers["ETag"] = hashlib.md5(_resp.get_data()).hexdigest()
+    return _resp
 
 
 # ── SPEC-018 BIST Heatmap MVP (Çar 27 May 2026, Ozan-direktif) ──────────────

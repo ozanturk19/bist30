@@ -382,7 +382,7 @@
   const TICKERS = {{ article.related_tickers | tojson }};
   if (!TICKERS || !TICKERS.length) return;
   try {
-    const res  = await fetch('/api/data');
+    const res  = await fetch('/api/data-lite?tickers=' + TICKERS.join(','));
     const json = await res.json();
     const map  = {};
     (json.stocks || []).forEach(s => { map[s.ticker] = s; });
