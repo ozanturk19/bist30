@@ -2380,13 +2380,13 @@
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
                padding:8px 12px;border-radius:var(--bp-radius);font-size:13px;font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
-        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
+        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
       <input id="subEmail" type="email" placeholder="E-posta"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
                padding:8px 12px;border-radius:var(--bp-radius);font-size:13px;font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
-        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
+        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
       <button onclick="submitSubscribe()"
         style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:7px 16px;border-radius:var(--bp-radius);
@@ -2601,11 +2601,11 @@
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
       <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="36" height="36" rx="6" fill="#141416"/>
-        <circle cx="18" cy="18" r="13" stroke="#46464d" stroke-width="1"/>
+        <circle cx="18" cy="18" r="13" stroke="var(--bp-border2)" stroke-width="1"/>
         <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#00e290"/>
-        <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#2a2a2c"/>
-        <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#2a2a2c"/>
-        <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#2a2a2c"/>
+        <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="var(--bp-border)"/>
+        <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="var(--bp-border)"/>
+        <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="var(--bp-border)"/>
         <circle cx="18" cy="18" r="2.8" fill="#b8c3ff"/>
         <circle cx="18" cy="18" r="1.4" fill="#e5e1e4"/>
       </svg>

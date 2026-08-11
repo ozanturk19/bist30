@@ -605,10 +605,10 @@ function goToDate(date) {
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px" id="ozSubForm">
       <input id="ozSubEmail" type="email" placeholder="e-posta adresiniz"
-        style="flex:1;background:#1c1b1f;border:1px solid #2a2a2c;color:#e5e1e4;
+        style="flex:1;background:#1c1b1f;border:1px solid var(--bp-border);color:#e5e1e4;
                padding:8px 12px;border-radius:7px;font-size:13px;font-family:inherit;outline:none;
                transition:border-color .15s;min-width:0"
-        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
+        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')ozSubmitSub()">
       <button onclick="ozSubmitSub()"
         style="background:#b8c3ff;color:#0e0e12;border:none;padding:8px 18px;border-radius:7px;

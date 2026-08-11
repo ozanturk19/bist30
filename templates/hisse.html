@@ -1873,7 +1873,7 @@
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
            title="Sinyal gücü puanı (0–100). ADX, hacim, yön gücü, teyit ve RSI bileşenlerine dayalı.">
         <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100">
-          <circle cx="32" cy="32" r="28" fill="none" stroke="#2a2a2c" stroke-width="6"/>
+          <circle cx="32" cy="32" r="28" fill="none" stroke="var(--bp-border)" stroke-width="6"/>
           <circle cx="32" cy="32" r="28" fill="none" stroke="{{ _tc }}" stroke-width="6"
                   stroke-linecap="round" stroke-dasharray="175.93"
                   stroke-dashoffset="{{ ((175.93 * (100 - _ts)) / 100)|round(2) }}"
@@ -2009,14 +2009,14 @@
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
       <div style="display:flex;gap:6px;align-items:center">
         <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
-                style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
-                onmouseover="this.style.borderColor='#46464d';this.style.color='#c7c5cd'"
-                onmouseout="this.style.borderColor='#2a2a2c';this.style.color='#909097'"
+                style="background:transparent;border:1px solid var(--bp-border);color:#909097;font-size:11px;padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
+                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='#c7c5cd'"
+                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='#909097'"
                 title="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
         <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
-                style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
-                onmouseover="this.style.borderColor='#46464d';this.style.color='#c7c5cd'"
-                onmouseout="this.style.borderColor='#2a2a2c';this.style.color='#909097'">
+                style="background:transparent;border:1px solid var(--bp-border);color:#909097;font-size:11px;padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
+                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='#c7c5cd'"
+                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='#909097'">
           Detaylı göster ▾
         </button>
       </div>
@@ -2176,7 +2176,7 @@
   <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
     <span style="font-size:12px;color:var(--bp-text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Resmi Kaynaklar</span>
     <a href="{{ kap_url }}" target="_blank" rel="noopener"
-       style="display:inline-flex;align-items:center;gap:5px;background:#1c1b1f;border:1px solid #2a2a2c;border-radius:var(--bp-radius);padding:5px 12px;font-size:12px;color:#909097;text-decoration:none;transition:all .15s"
+       style="display:inline-flex;align-items:center;gap:5px;background:#1c1b1f;border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:12px;color:#909097;text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
       <span aria-hidden="true">📋</span> KAP Bildirimleri
     </a>
@@ -2273,7 +2273,7 @@
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> KAP Bildirimleri</h2>
       <span style="font-size:11px;color:var(--bp-text3)">Son 90 gün · ODA + Finansal Rapor</span>
       <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q={{ ticker }}" target="_blank" rel="noopener"
-         style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#909097;background:#1c1b1f;border:1px solid #2a2a2c;border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
+         style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#909097;background:#1c1b1f;border:1px solid var(--bp-border);border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
          onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
         KAP'ta Aç <span aria-hidden="true">↗</span>
       </a>
@@ -2386,8 +2386,8 @@
   </div>
   <div style="display:flex;gap:7px;align-items:center" id="hisseSubForm">
     <input id="hisseSubEmail" type="email" placeholder="e-posta adresiniz"
-      style="background:#141416;border:1px solid #2a2a2c;color:#e5e1e4;padding:6px 11px;border-radius:7px;font-size:12px;font-family:inherit;outline:none;transition:border-color .15s;width:200px"
-      onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
+      style="background:#141416;border:1px solid var(--bp-border);color:#e5e1e4;padding:6px 11px;border-radius:7px;font-size:12px;font-family:inherit;outline:none;transition:border-color .15s;width:200px"
+      onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
       onkeydown="if(event.key==='Enter')hisseSubscribe()">
     <button onclick="hisseSubscribe()"
       style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
@@ -3788,7 +3788,7 @@ async function loadKapDisclosures() {
         </div>
         <div class="kap-meta">
           <span>${dateShort}</span>
-          ${d.subject ? `<span style="color:#2a2a2c">·</span><span style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(d.subject)}">${escHtml(d.subject)}</span>` : ''}
+          ${d.subject ? `<span style="color:var(--bp-border)">·</span><span style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(d.subject)}">${escHtml(d.subject)}</span>` : ''}
           ${d.late ? '<span style="color:#d29922;font-size:10px">⚠ GECİKMELİ</span>' : ''}
         </div>
       </div>`;
@@ -3915,7 +3915,7 @@ async function loadMTF() {
     const sigLabel = s => ({'AL':'Güçlü Trend','SAT':'Trend Bozuldu','BEKLE':'Yatay'}[s] || s);
     const sigColor = s => s === 'AL' ? '#00e290' : s === 'SAT' ? '#f85149' : '#909097';
     const sigBg    = s => s === 'AL' ? '#1a4731' : s === 'SAT' ? '#3d0f0f' : '#1c1b1f';
-    const sigBord  = s => s === 'AL' ? '#238636' : s === 'SAT' ? '#da3633' : '#2a2a2c';
+    const sigBord  = s => s === 'AL' ? '#238636' : s === 'SAT' ? '#da3633' : 'var(--bp-border)';
     const sigArrow = s => s === 'AL' ? '▲' : s === 'SAT' ? '▼' : '●';
 
     /* CPO-983 Opsiyon B: 4 ayrı boş "Veri yok" kutusu yerine tek anlamlı placeholder */
@@ -3939,10 +3939,10 @@ async function loadMTF() {
       const lbl  = sigLabel(d.signal);
       const scoreBar = d.bull_score > 0
         ? `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
-            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bull_score?col:'#2a2a2c'}"></div>`
+            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bull_score?col:'var(--bp-border)'}"></div>`
           ).join('')}</div>`
         : `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
-            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bear_score?'#f85149':'#2a2a2c'}"></div>`
+            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bear_score?'#f85149':'var(--bp-border)'}"></div>`
           ).join('')}</div>`;
 
       return `
@@ -4074,7 +4074,7 @@ function _applyTooltipVisibility() {
   if (tb) {
     tb.textContent = show ? '? Kapat' : '? Açıkla';
     tb.style.color = show ? '#b8c3ff' : '#909097';
-    tb.style.borderColor = show ? 'rgba(184,195,255,0.35)' : '#2a2a2c';
+    tb.style.borderColor = show ? 'rgba(184,195,255,0.35)' : 'var(--bp-border)';
   }
 }
 function toggleTooltips() {
