@@ -432,9 +432,9 @@ async function loadGundem() {
         bilEl.innerHTML = bilPeriods.map(p => {
           const isActive = p.status === 'active';
           const dotClr   = isActive ? '#f59e0b' : '#8b949e';
-          const badgeBg  = isActive ? 'rgba(245,158,11,.12)' : 'rgba(139,148,158,.08)';
-          const badgeBrd = isActive ? 'rgba(245,158,11,.3)' : 'rgba(139,148,158,.2)';
-          return `<div style="flex:1;min-width:200px;background:#141416;border:1px solid ${badgeBrd};border-radius:8px;padding:12px 14px">
+          const badgeBg  = isActive ? 'rgba(var(--bp-gold-rgb),.12)' : 'rgba(139,148,158,.08)';
+          const badgeBrd = isActive ? 'rgba(var(--bp-gold-rgb),.3)' : 'rgba(139,148,158,.2)';
+          return `<div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid ${badgeBrd};border-radius:8px;padding:12px 14px">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
               <span style="width:7px;height:7px;border-radius:50%;background:${dotClr};flex-shrink:0"></span>
               <span style="font-size:12px;font-weight:600;color:#e2e8f0">${p.label}</span>
@@ -464,8 +464,8 @@ async function loadGundem() {
           const sigTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Trend Bozuldu' : '● Yatay';
           const snippet = (item.snippet||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/^\*\s+/gm,'• ').replace(/^-\s+/gm,'• ').trim();
           const kapHref = item.kap_url ? `<a href="${item.kap_url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
-          return `<a href="/hisse/${item.ticker}" style="display:block;text-decoration:none;background:#141416;border:1px solid #2a2a2c;border-radius:8px;padding:12px 14px;transition:border-color .15s"
-            onmouseover="this.style.borderColor='#46464d'" onmouseout="this.style.borderColor='#2a2a2c'">
+          return `<a href="/hisse/${item.ticker}" style="display:block;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:12px 14px;transition:border-color .15s"
+            onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
               <span style="font-size:13px;font-weight:700;color:#e2e8f0">${item.ticker}</span>
               <span style="font-size:11px;font-weight:600;color:${sigCls}">${sigTxt}</span>
@@ -507,7 +507,7 @@ async function loadEconCalendar() {
       const duTxt = e.is_today ? '<strong style="color:var(--bp-gold)">Bugün!</strong>'
                    : du === 1  ? '<span style="color:var(--bp-gold)">Yarın</span>'
                    : `<span style="color:#94a3b8">${du} gün sonra</span>`;
-      return `<div style="display:flex;align-items:center;gap:12px;background:var(--bp-surface);border:1px solid ${e.is_today?'rgba(245,158,11,.3)':'#2a2a2c'};border-radius:8px;padding:10px 14px">
+      return `<div style="display:flex;align-items:center;gap:12px;background:var(--bp-surface);border:1px solid ${e.is_today?'rgba(var(--bp-gold-rgb),.3)':'var(--bp-border)'};border-radius:8px;padding:10px 14px">
         <span style="font-size:18px;flex-shrink:0">${e.icon||'📅'}</span>
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600;color:#e2e8f0">${e.event}</div>
@@ -536,8 +536,8 @@ async function loadMacroNewsSection() {
     }
     grid.innerHTML = items.slice(0, 8).map(item => {
       return `<a href="${item.url}" target="_blank" rel="noopener"
-        style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:#141416;border:1px solid #2a2a2c;border-radius:8px;padding:10px 14px;transition:border-color .15s"
-        onmouseover="this.style.borderColor='#46464d'" onmouseout="this.style.borderColor='#2a2a2c'">
+        style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:10px 14px;transition:border-color .15s"
+        onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
         <span style="font-size:9px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.15);border-radius:4px;padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.source}</span>
         <span style="font-size:12.5px;color:#e2e8f0;line-height:1.4;font-weight:500;flex:1">${item.title}</span>
         <span style="font-size:10px;color:#64748b;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.date_str||item.published||''}</span>
