@@ -2376,13 +2376,13 @@
       <div style="font-size:11px;color:var(--bp-text3)">Sinyal değiştiğinde bildirim al — ücretsiz</div>
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:280px;flex-wrap:wrap" id="subForm">
-      <input id="subName" type="text" placeholder="Adınız"
+      <input id="subName" type="text" placeholder="Adınız" aria-label="Ad"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
                padding:8px 12px;border-radius:var(--bp-radius);font-size:13px;font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
         onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
-      <input id="subEmail" type="email" placeholder="E-posta"
+      <input id="subEmail" type="email" placeholder="E-posta" aria-label="E-posta adresi"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
                padding:8px 12px;border-radius:var(--bp-radius);font-size:13px;font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
@@ -2421,7 +2421,7 @@
     <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none"><span aria-hidden="true">🔔</span> Takibim</button>
     <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()"><span aria-hidden="true">⚙️</span> Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
     <div class="search-wrap">
-      <input class="search-input" type="text" placeholder="Hisse ara… (/)"
+      <input class="search-input" type="text" placeholder="Hisse ara… (/)" aria-label="Hisse ara"
              oninput="setSearch(this.value);showSearchAc(this.value)"
              onkeydown="handleSearchKey(event)"
              onfocus="showSearchAc(this.value)"
@@ -3842,19 +3842,19 @@ async function openAlertModal(ticker) {
     <h3 class="alert-modal-title"><span aria-hidden="true">🔔</span> ${ticker} — Alert Ayarları</h3>
     ${loginNotice}
     <div class="alert-modal-row">
-      <label>📈 Fiyat hareketi eşiği (%)</label>
+      <label for="am-price-pct">📈 Fiyat hareketi eşiği (%)</label>
       <input type="number" id="am-price-pct" min="0.1" max="20" step="0.5" placeholder="—" value="${cfg.price_pct != null ? cfg.price_pct : ''}" ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     <div class="alert-modal-row">
-      <label>🔄 Sinyal değişimi (AL/SAT/BEKLE)</label>
+      <label for="am-signal-change">🔄 Sinyal değişimi (AL/SAT/BEKLE)</label>
       <input type="checkbox" id="am-signal-change" ${cfg.signal_change ? 'checked' : ''} ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     <div class="alert-modal-row">
-      <label>📉 RSI aşırı satış eşiği (≤)</label>
+      <label for="am-rsi">📉 RSI aşırı satış eşiği (≤)</label>
       <input type="number" id="am-rsi" min="10" max="50" step="1" placeholder="—" value="${cfg.rsi_threshold != null ? cfg.rsi_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     <div class="alert-modal-row">
-      <label>📊 RVOL yüksek hacim eşiği (≥x)</label>
+      <label for="am-rvol">📊 RVOL yüksek hacim eşiği (≥x)</label>
       <input type="number" id="am-rvol" min="1" max="10" step="0.5" placeholder="—" value="${cfg.rvol_threshold != null ? cfg.rvol_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     ${isLoggedIn ? `<button class="alert-modal-save" onclick="saveAlertSettings()">💾 Kaydet</button>
@@ -4737,7 +4737,7 @@ function renderAlarmPanel() {
         <div class="ap-pa-row">
           <span class="ap-pa-lbl" style="color:var(--bp-al)">▲ Üstü</span>
           <input class="ap-pa-input ${aboveHasAlarm ? 'has-alarm' : ''}" id="${aboveInputId}"
-            type="number" step="0.01" min="0"
+            type="number" step="0.01" min="0" aria-label="Üstü fiyat alarmı"
             placeholder="${aboveHasAlarm ? pa.above : '—'}"
             value="${aboveHasAlarm ? pa.above : ''}"
             onkeydown="if(event.key==='Enter')setPriceAlarm('${t}','above','${aboveInputId}')">
@@ -4748,7 +4748,7 @@ function renderAlarmPanel() {
         <div class="ap-pa-row">
           <span class="ap-pa-lbl" style="color:var(--bp-sat)">▼ Altı</span>
           <input class="ap-pa-input ${belowHasAlarm ? 'has-alarm' : ''}" id="${belowInputId}"
-            type="number" step="0.01" min="0"
+            type="number" step="0.01" min="0" aria-label="Altı fiyat alarmı"
             placeholder="${belowHasAlarm ? pa.below : '—'}"
             value="${belowHasAlarm ? pa.below : ''}"
             onkeydown="if(event.key==='Enter')setPriceAlarm('${t}','below','${belowInputId}')">

@@ -246,7 +246,7 @@
           + Yeni Oluştur
         </button>
         <div style="flex:2;display:flex;gap:6px">
-          <input id="cloudTokenInput" type="text" placeholder="Token girin (XXXX-XXXX-...)"
+          <input id="cloudTokenInput" type="text" placeholder="Token girin (XXXX-XXXX-...)" aria-label="Senkronizasyon token'ı"
             style="flex:1;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:7px 10px;border-radius:7px;font-size:12px;font-family:var(--bp-font-mono);outline:none;min-width:0">
           <button onclick="loadCloudToken()" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:7px 12px;border-radius:7px;font-size:12px;cursor:pointer">Yükle</button>
         </div>
@@ -283,11 +283,11 @@
   <!-- Hisse ekle -->
   <div class="add-bar">
     <span class="add-lbl">Hisse ekle:</span>
-    <input type="text" id="addTicker" placeholder="THYAO veya Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off">
+    <input type="text" id="addTicker" placeholder="THYAO veya Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu">
     <datalist id="bistTickerList"></datalist>
-    <input type="number" id="addLot" placeholder="Adet" min="1" step="1">
-    <input type="number" id="addPrice" placeholder="Alış fiyatı ₺" min="0" step="0.01">
-    <input type="date" id="addDate">
+    <input type="number" id="addLot" placeholder="Adet" min="1" step="1" aria-label="Adet">
+    <input type="number" id="addPrice" placeholder="Alış fiyatı ₺" min="0" step="0.01" aria-label="Alış fiyatı">
+    <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>
     <span id="addErr" style="color:var(--bp-sat);font-size:12px"></span>
   </div>

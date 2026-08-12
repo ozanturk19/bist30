@@ -70,16 +70,16 @@
     <form id="contactForm" onsubmit="submitForm(event)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
         <div>
-          <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Ad Soyad</label>
+          <label for="cfName" style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Ad Soyad</label>
           <input id="cfName" type="text" required placeholder="Adınız" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:13px;outline:none;transition:border-color .15s">
         </div>
         <div>
-          <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">E-posta</label>
+          <label for="cfEmail" style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">E-posta</label>
           <input id="cfEmail" type="email" required placeholder="ornek@mail.com" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:13px;outline:none;transition:border-color .15s">
         </div>
       </div>
       <div style="margin-bottom:12px">
-        <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Konu</label>
+        <label for="cfSubject" style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Konu</label>
         <select id="cfSubject" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:13px;outline:none">
           <option value="Hata bildirimi">🐛 Hata bildirimi</option>
           <option value="Öneri">💡 Öneri</option>
@@ -89,7 +89,7 @@
         </select>
       </div>
       <div style="margin-bottom:16px">
-        <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Mesaj</label>
+        <label for="cfMessage" style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Mesaj</label>
         <textarea id="cfMessage" required rows="5" placeholder="Mesajınızı buraya yazın..." style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:13px;outline:none;resize:vertical;font-family:inherit;transition:border-color .15s"></textarea>
       </div>
       <button type="submit" id="cfBtn" style="background:#1f6feb;color:#fff;border:none;border-radius:var(--bp-radius);padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s">
