@@ -376,6 +376,21 @@ footer a[href="/kripto"]::after, footer a[href="/emtialar"]::after, footer a[hre
    burada tek satirla kapsaniyor. Makro seridin duraklat/oynat dugmesi
    (ayri backlog kalemi) bunun yerine gecmez — bu yalnizca "hareketi
    fiziksel olarak azalt" kismi, gorunur kontrol UI'si degil. */
+/* ── FAZ8 T5.3 — erisilebilirlik yardimci sinifi ──────────────
+   Ekran okuyucu icin gorunur, gorsel olarak gizli icerik
+   (tablo caption'lari, ikon-only baslik etiketleri). ─────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810D">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810E">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -300,20 +300,21 @@
       <div style="font-size:var(--bp-text-sm);margin-top:6px">Yukarıdaki formdan hisse ekleyin.</div>
     </div>
     <table id="pfTable" style="display:none">
+      <caption class="sr-only">Portföyünüzdeki hisselerin adet, maliyet, güncel değer ve kâr/zarar tablosu</caption>
       <thead>
         <tr>
-          <th>Hisse</th>
-          <th class="hm">Tarih</th>
-          <th>Adet</th>
-          <th>Alış ₺</th>
-          <th>Güncel ₺</th>
-          <th class="hm">Maliyet</th>
-          <th>Değer</th>
-          <th>K/Z</th>
-          <th>K/Z %</th>
-          <th>Sinyal</th>
-          <th class="hm">Trend (30g)</th>
-          <th></th>
+          <th scope="col">Hisse</th>
+          <th scope="col" class="hm">Tarih</th>
+          <th scope="col">Adet</th>
+          <th scope="col">Alış ₺</th>
+          <th scope="col">Güncel ₺</th>
+          <th scope="col" class="hm">Maliyet</th>
+          <th scope="col">Değer</th>
+          <th scope="col">K/Z</th>
+          <th scope="col">K/Z %</th>
+          <th scope="col">Sinyal</th>
+          <th scope="col" class="hm">Trend (30g)</th>
+          <th scope="col"><span class="sr-only">İşlemler</span></th>
         </tr>
       </thead>
       <tbody id="pfBody"></tbody>
