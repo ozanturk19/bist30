@@ -1304,9 +1304,10 @@
     user-select: none; white-space: nowrap; font-family: inherit;
   }
   thead th:hover { color: var(--bp-text2); }
+  thead th.th-sortable { padding: 0; }
   .th-sort-btn {
     all: unset; box-sizing: border-box; display: block; width: 100%;
-    padding: 10px 16px; margin: -10px -16px;
+    padding: 10px 16px;
     font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit;
     cursor: pointer; text-align: inherit; white-space: nowrap;
   }
@@ -2526,14 +2527,14 @@
       <caption class="sr-only">BIST hisseleri sinyal taraması — fiyat, değişim, sinyal, giriş/stop seviyeleri ve teknik güç</caption>
       <thead>
         <tr>
-          <th scope="col" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('ticker')">Hisse</button></th>
-          <th scope="col" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('price')">Fiyat (₺)</button></th>
-          <th scope="col" class="hide-mobile" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('change_pct')">Değişim</button></th>
-          <th scope="col" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal')">Sinyal</button></th>
-          <th scope="col" class="hide-mobile" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal_date')">Tarih</button></th>
+          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('ticker')">Hisse</button></th>
+          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('price')">Fiyat (₺)</button></th>
+          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('change_pct')">Değişim</button></th>
+          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal')">Sinyal</button></th>
+          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal_date')">Tarih</button></th>
           <th scope="col" class="hide-mobile">Giriş ₺</th>
           <th scope="col" class="hide-mobile">SL ₺</th>
-          <th scope="col" class="hide-mobile" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('bull_score')">Güç</button></th>
+          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('bull_score')">Güç</button></th>
           <th scope="col" class="hide-mobile">İndikatörler</th>
           <th scope="col" title="Sinyal değişince bildir"><span role="img" aria-label="Bildirim">🔔</span></th>
         </tr>
