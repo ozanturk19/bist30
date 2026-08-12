@@ -168,12 +168,12 @@
   <div class="stat-grid">
     <div class="stat-card">
       <div class="stat-num c-green">{{ bt.al.win_rate }}%</div>
-      <div class="stat-lbl">▲ Güçlü Trend Kazanma</div>
+      <div class="stat-lbl"><span aria-hidden="true">▲</span> Güçlü Trend Kazanma</div>
       <div class="stat-sub">{{ bt.al.count }} sinyal incelendi</div>
     </div>
     <div class="stat-card">
       <div class="stat-num c-green">{{ bt.al.avg_ret }}%</div>
-      <div class="stat-lbl">▲ Güçlü Trend Ort. Getiri</div>
+      <div class="stat-lbl"><span aria-hidden="true">▲</span> Güçlü Trend Ort. Getiri</div>
       <div class="stat-sub">Max {{ bt.al.best }}% / Min {{ bt.al.worst }}%</div>
     </div>
     {# T3.7: SAT (short) win_rate/avg_ret KALDIRILDI — ürün long-only, kısa pozisyon açılmadığı için
@@ -216,7 +216,7 @@
       <div class="stat-num c-blue">
         {% if bt.al.avg_duration_days is not none %}{{ bt.al.avg_duration_days }}g{% else %}—{% endif %}
       </div>
-      <div class="stat-lbl">⏱ Ort. İşlem Süresi</div>
+      <div class="stat-lbl"><span aria-hidden="true">⏱</span> Ort. İşlem Süresi</div>
       <div class="stat-sub">Gün cinsinden ortalama pozisyon</div>
     </div>
   </div>
@@ -318,7 +318,7 @@
           <th onclick="perfSortBy('signal')" data-sort="signal" style="cursor:pointer">Sinyal <span class="perf-sort-arr"></span></th>
           <th onclick="perfSortBy('signal_price')" data-sort="signal_price" style="cursor:pointer">Sinyal Başı ₺ <span class="perf-sort-arr"></span></th>
           <th onclick="perfSortBy('price')" data-sort="price" style="cursor:pointer">Güncel ₺ <span class="perf-sort-arr"></span></th>
-          <th onclick="perfSortBy('aktif_ret')" data-sort="aktif_ret" style="cursor:pointer" class="sort-active">Getiri % <span class="perf-sort-arr">▼</span></th>
+          <th onclick="perfSortBy('aktif_ret')" data-sort="aktif_ret" style="cursor:pointer" class="sort-active">Getiri % <span class="perf-sort-arr" aria-hidden="true">▼</span></th>
           <th onclick="perfSortBy('signal_bars')" data-sort="signal_bars" style="cursor:pointer">Süre <span class="perf-sort-arr"></span></th>
           <th class="hm" onclick="perfSortBy('signal_date')" data-sort="signal_date" style="cursor:pointer">Tarih <span class="perf-sort-arr"></span></th>
         </tr>
@@ -329,9 +329,9 @@
           <td><a href="/hisse/{{ s.ticker }}" class="ticker-link">{{ s.ticker }}</a></td>
           <td>
             {% if s.signal == 'AL' %}
-              <span class="sig-al">▲ Güçlü Trend</span>
+              <span class="sig-al"><span aria-hidden="true">▲</span> Güçlü Trend</span>
             {% else %}
-              <span class="sig-sat">▼ Trend Bozuldu</span>
+              <span class="sig-sat"><span aria-hidden="true">▼</span> Trend Bozuldu</span>
             {% endif %}
           </td>
           <td>{{ s.signal_price|tr_price }} ₺</td>

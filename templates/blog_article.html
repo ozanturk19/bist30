@@ -247,7 +247,7 @@
     <div class="art-meta" style="justify-content:space-between">
       <div style="display:flex;gap:12px;align-items:center">
         <span><span aria-hidden="true">📅</span> {{ article.date }}</span>
-        <span>⏱ {{ article.mins }} dakika okuma</span>
+        <span><span aria-hidden="true">⏱</span> {{ article.mins }} dakika okuma</span>
       </div>
       <div style="display:flex;gap:6px;align-items:center">
         <button onclick="shareBlogWA()" title="WhatsApp'ta paylaş"
@@ -363,7 +363,7 @@
       <a href="/blog/{{ r.slug }}" class="rel-card">
         <div class="rel-cat">{{ r.cat }}</div>
         <div class="rel-title">{{ r.title }}</div>
-        <div class="rel-mins">⏱ {{ r.mins }} dk</div>
+        <div class="rel-mins"><span aria-hidden="true">⏱</span> {{ r.mins }} dk</div>
       </a>
       {% endfor %}
     </div>

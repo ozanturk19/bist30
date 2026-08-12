@@ -154,7 +154,7 @@
     <div class="cat-hero-desc">{{ desc }}</div>
   </div>
 
-  <div class="data-note" id="dataNote">ℹ️ <span id="dataNoteText"></span></div>
+  <div class="data-note" id="dataNote"><span aria-hidden="true">ℹ️</span> <span id="dataNoteText"></span></div>
 
   <!-- Ana varlık kartları -->
   <div class="asset-grid" id="assetGrid">
@@ -164,7 +164,7 @@
         <div>
           <div class="ac-name">{{ asset.emoji }} {{ asset.name }}</div>
         </div>
-        <span class="sig-badge sig-BEKLE" id="sig-{{ asset.key }}">● —</span>
+        <span class="sig-badge sig-BEKLE" id="sig-{{ asset.key }}"><span aria-hidden="true">●</span> —</span>
       </div>
       <div class="ac-price skeleton" id="price-{{ asset.key }}" style="width:140px;height:32px;border-radius:4px">&nbsp;</div>
       <div class="ac-chg" id="chg-{{ asset.key }}">&nbsp;</div>
@@ -181,7 +181,7 @@
 
   {% if us_stocks %}
   <!-- ABD Hisseleri tablosu -->
-  <div class="section-title">🇺🇸 ABD Hisseleri — Hızlı Erişim</div>
+  <div class="section-title"><span aria-hidden="true">🇺🇸</span> ABD Hisseleri — Hızlı Erişim</div>
   <div class="stocks-wrap">
     <table>
       <thead>
