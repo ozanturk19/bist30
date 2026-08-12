@@ -131,6 +131,8 @@
   .compare-table .col-hdr:last-child { border-right: none; }
   .compare-table td { border-right: 1px solid rgba(30,45,69,.5); }
   .compare-table td:last-child { border-right: none; }
+  .compare-table th.row-label { border-right: 1px solid rgba(30,45,69,.5); }
+  .compare-table tr:last-child th.row-label { border-bottom: none; }
 
   .col-ticker { font-size: var(--bp-text-xl); font-weight: 800; font-family: var(--bp-font-mono); }
   .col-name   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; }
@@ -260,9 +262,10 @@
     background: rgba(31,111,235,.04);
     padding: 16px 12px !important;
   }
-  .score-row td.row-label {
+  .score-row th.row-label {
     background: rgba(31,111,235,.06) !important;
     color: var(--bp-text2);
+    padding: 16px 12px !important;
   }
   .score-cell { display: flex; flex-direction: column; gap: 6px; align-items: center; }
   .score-cell.winner {
@@ -608,7 +611,7 @@ function buildTable(stocks) {
   }
 
   const headers = stocks.map(s => `
-    <th class="col-hdr">
+    <th class="col-hdr" scope="col">
       <a href="/hisse/${s.ticker}" style="text-decoration:none;color:inherit">
         <div class="col-ticker">${s.ticker}</div>
         <div class="col-name">${s.name||''}</div>
@@ -626,7 +629,7 @@ function buildTable(stocks) {
   }).join('');
   const scoreRow = `
     <tr class="score-row">
-      <td class="row-label" style="font-size:12px;color:var(--bp-text2)"><span aria-hidden="true">🏆</span> Yatırım<br>Skoru</td>
+      <th class="row-label" scope="row" style="font-size:12px;color:var(--bp-text2)"><span aria-hidden="true">🏆</span> Yatırım<br>Skoru</th>
       ${scoreCells}
     </tr>
   `;
@@ -638,7 +641,7 @@ function buildTable(stocks) {
     }
     const cells = stocks.map(s => `<td>${renderCell(key, s)}</td>`).join('');
     const helpHtml = help ? ` <span class="help-icon" title="${help}" data-help="${help}">i</span>` : '';
-    return `<tr><td class="row-label">${label}${helpHtml}</td>${cells}</tr>`;
+    return `<tr><th class="row-label" scope="row">${label}${helpHtml}</th>${cells}</tr>`;
   }).join('');
 
   return `<div class="compare-wrap">
@@ -662,12 +665,12 @@ async function doCompare() {
   document.getElementById('compareResult').innerHTML = `
     <div class="compare-wrap">
       <table class="compare-table" style="min-width:400px">
-        <thead><tr><th class="row-label"></th>${inputs.map(t=>`<th class="col-hdr"><a href="/hisse/${t}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${t} detay sayfası">${t}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`).join('')}</tr></thead>
+        <thead><tr><th class="row-label"></th>${inputs.map(t=>`<th class="col-hdr" scope="col"><a href="/hisse/${t}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${t} detay sayfası">${t}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`).join('')}</tr></thead>
         <tbody>
-          <tr class="score-row"><td class="row-label"><span aria-hidden="true">🏆</span> Yatırım Skoru</td>${inputs.map(()=>`<td><div class="skeleton" style="height:60px;width:90px"></div></td>`).join('')}</tr>
+          <tr class="score-row"><th class="row-label" scope="row"><span aria-hidden="true">🏆</span> Yatırım Skoru</th>${inputs.map(()=>`<td><div class="skeleton" style="height:60px;width:90px"></div></td>`).join('')}</tr>
           ${ROW_LABELS.map(({label, isSep})=>{
             if (isSep) return `<tr class="row-sep"><td colspan="${skelColspan}">${label}</td></tr>`;
-            return `<tr><td class="row-label">${label}</td>${inputs.map(()=>`<td><div class="skeleton"></div></td>`).join('')}</tr>`;
+            return `<tr><th class="row-label" scope="row">${label}</th>${inputs.map(()=>`<td><div class="skeleton"></div></td>`).join('')}</tr>`;
           }).join('')}
         </tbody>
       </table>
