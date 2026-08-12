@@ -26,7 +26,7 @@
   /* Turkey badge */
   .turkey-first-badge {
     display: inline-flex; align-items: center; gap: 5px;
-    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    font-size: var(--bp-text-2xs); font-weight: 700; letter-spacing: 0.5px;
     color: var(--bp-premium); background: var(--bp-premium-bg);
     border: 1px solid var(--bp-premium-bd); border-radius:var(--bp-radius-pill);
     padding: 2px 8px; margin-left: 8px; vertical-align: middle;
@@ -35,7 +35,7 @@
   body {
     background: var(--bp-bg); color: var(--bp-text);
     font-family: 'Manrope', system-ui, -apple-system, sans-serif;
-    font-size: 14px; line-height: 1.5;
+    font-size: var(--bp-text-md); line-height: 1.5;
     min-height: 100vh;
   }
   header {
@@ -46,12 +46,12 @@
   main { padding: 16px 20px 80px; max-width: 1600px; margin: 0 auto; }
   h1 {
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: 20px; font-weight: 700; margin-bottom: 4px;
+    font-size: var(--bp-text-2xl); font-weight: 700; margin-bottom: 4px;
   }
-  .subtitle { color: var(--bp-text3); font-size: 13px; margin-bottom: 16px; }
+  .subtitle { color: var(--bp-text3); font-size: var(--bp-text-base); margin-bottom: 16px; }
   .freshness-stamp {
     display: inline-flex; align-items: center; gap: 6px;
-    font-size: 11px; color: var(--bp-text3);
+    font-size: var(--bp-text-xs); color: var(--bp-text3);
     padding: 4px 10px; background: rgba(var(--bp-gold-rgb),0.06);
     border: 1px solid rgba(var(--bp-gold-rgb),0.25); border-radius:var(--bp-radius-pill);
     margin-bottom: 16px;
@@ -79,7 +79,7 @@
     background: var(--bp-surface); border: 1px solid var(--bp-border);
     border-radius:var(--bp-radius-md);
     display: flex; flex-wrap: wrap; gap: 14px;
-    font-size: 12px; color: var(--bp-text2);
+    font-size: var(--bp-text-sm); color: var(--bp-text2);
   }
   .legend-item { display: inline-flex; align-items: center; gap: 6px; }
   .legend-swatch {
@@ -89,7 +89,7 @@
   /* SVG treemap */
   #heatmap-svg { display: block; width: 100%; height: auto; }
   .sector-group .sector-title {
-    fill: #c0c0cc; font-size: 10px; font-weight: 700; /* G16: brighter */
+    fill: #c0c0cc; font-size: var(--bp-text-2xs); font-weight: 700; /* G16: brighter */
     font-family: 'Space Grotesk', system-ui, sans-serif;
     text-transform: uppercase; letter-spacing: 0.6px;
     pointer-events: none;
@@ -116,7 +116,7 @@
     border-radius:var(--bp-radius-md); padding: 3px; margin-bottom: 14px;
   }
   .toggle-btn {
-    padding: 5px 18px; font-size: 12px; font-weight: 600;
+    padding: 5px 18px; font-size: var(--bp-text-sm); font-weight: 600;
     border: none; border-radius:var(--bp-radius); cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
     font-family: 'Space Grotesk', system-ui, sans-serif;
@@ -131,7 +131,7 @@
     position: fixed; pointer-events: none;
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
     border-radius:var(--bp-radius); padding: 10px 12px;
-    font-size: 12px; color: var(--bp-text);
+    font-size: var(--bp-text-sm); color: var(--bp-text);
     box-shadow: 0 6px 18px rgba(0,0,0,0.5);
     z-index:var(--bp-z-toast); display: none;
     min-width: 180px;
@@ -142,7 +142,7 @@
     margin-bottom: 2px;
   }
   #heatmap-tooltip .tt-name {
-    font-size: 11px; color: var(--bp-text3); margin-bottom: 8px;
+    font-size: var(--bp-text-xs); color: var(--bp-text3); margin-bottom: 8px;
   }
   #heatmap-tooltip .tt-row {
     display: flex; justify-content: space-between; gap: 12px;
@@ -152,11 +152,11 @@
   /* Responsive */
   @media (max-width: 768px) {
     main { padding: 12px 12px 80px; }
-    h1 { font-size: 18px; }
-    .legend { font-size: 11px; gap: 10px; }
+    h1 { font-size: var(--bp-text-xl); }
+    .legend { font-size: var(--bp-text-xs); gap: 10px; }
   }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% include '_header.html' %}
 <main id="main-content" tabindex="-1">
@@ -189,7 +189,7 @@
     <span class="legend-item"><span class="legend-swatch" style="background:#C07838"></span>Standart</span>
     <span class="legend-item"><span class="legend-swatch" style="background:#E05550"></span>▼ Trend Bozuldu</span>
     <span class="legend-item"><span class="legend-swatch" style="background:#252b36;border:1px solid #3c3c46"></span>· Yatay</span>
-    <span style="color:var(--bp-text3);margin-left:auto;font-size:11px">Kutu tıkla → hisse detayı</span>
+    <span style="color:var(--bp-text3);margin-left:auto;font-size:var(--bp-text-xs)">Kutu tıkla → hisse detayı</span>
   </div>
   <div class="legend" id="legendPiyasa" style="display:none">
     <span style="color:var(--bp-text3);font-weight:600">Günlük Değişim:</span>
@@ -200,7 +200,7 @@
     <span class="legend-item"><span class="legend-swatch" style="background:#1d4028"></span>+%1</span>
     <span class="legend-item"><span class="legend-swatch" style="background:#207038"></span>+%3</span>
     <span class="legend-item"><span class="legend-swatch" style="background:#2da44e"></span>+%5+</span>
-    <span style="color:var(--bp-text3);margin-left:auto;font-size:11px">Kutu tıkla → hisse detayı</span>
+    <span style="color:var(--bp-text3);margin-left:auto;font-size:var(--bp-text-xs)">Kutu tıkla → hisse detayı</span>
   </div>
 </main>
 

@@ -28,7 +28,7 @@
     color: var(--bp-text);
     font-family: 'Manrope', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
-    font-size: 14px;
+    font-size: var(--bp-text-md);
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -52,12 +52,12 @@
   }
   .logo-mark { width: 28px; height: 28px; flex-shrink: 0; }
   .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
-  .logo-name { font-size: 16px; font-weight: 700; color: var(--bp-text); letter-spacing: -0.3px; font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .logo-name { font-size: var(--bp-text-lg); font-weight: 700; color: var(--bp-text); letter-spacing: -0.3px; font-family: 'Space Grotesk', system-ui, sans-serif; }
   .logo-name strong { color: var(--bp-al); font-weight: 700; }
-  .logo-sub { font-size: 10px; color: var(--bp-text3); letter-spacing: 0.2px; }
+  .logo-sub { font-size: var(--bp-text-2xs); color: var(--bp-text3); letter-spacing: 0.2px; }
   .back-btn {
     display: flex; align-items: center; gap: 6px;
-    color: var(--bp-text2); font-size: 13px;
+    color: var(--bp-text2); font-size: var(--bp-text-base);
     text-decoration: none;
     padding: 5px 10px;
     border: 1px solid var(--bp-border);
@@ -68,9 +68,9 @@
   }
   .back-btn:hover { background: var(--bp-surface2); color: var(--bp-text); }
   .page-title { font-size: 17px; font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .page-sub   { font-size: 11px; color: var(--bp-text3); margin-top: 1px; }
+  .page-sub   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
   .top-nav-links { display:flex; gap:2px; align-items:center; }
-  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:13px; font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
   .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
   @media (max-width:900px) { .top-nav-links { display:none; } }
@@ -97,7 +97,7 @@
   }
   .counter-card:hover { border-color: var(--bp-border2); }
   .counter-num  { font-size: 36px; font-weight: 800; line-height: 1; font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .counter-lbl  { font-size: 11px; color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .counter-lbl  { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
   .num-al    { color: var(--bp-al); }
   .num-sat   { color: var(--bp-sat); }
   .num-bekle { color: var(--bp-bkl); }
@@ -112,7 +112,7 @@
     margin-bottom: 16px;
   }
   .section-title {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-text3);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -136,20 +136,20 @@
     min-width: 0;
   }
   .stock-card:hover { background: var(--bp-surface3); border-color: var(--bp-border2); }
-  .sc-ticker  { font-size: 14px; font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .sc-name    { font-size: 11px; color: var(--bp-text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .sc-ticker  { font-size: var(--bp-text-md); font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .sc-name    { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: var(--bp-text-xs); font-weight: 600; padding: 2px 8px; border-radius: 4px; }
   .sc-al   { background: rgba(0,226,144,.10); color: #00e290; }
   .sc-sat  { background: rgba(var(--bp-sat-rgb),.15);  color: #ff7b72; }
   .sc-bekle{ background: rgba(var(--bp-text3-rgb),.12); color: #a8b2bc; }
-  .sc-meta { font-size: 11px; color: var(--bp-text3); margin-top: 4px; }
-  .sc-new  { font-size: 10px; color: var(--bp-gold); font-weight: 600; }
-  .sc-ret  { display: inline-block; font-size: 12px; font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+  .sc-meta { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 4px; }
+  .sc-new  { font-size: var(--bp-text-2xs); color: var(--bp-gold); font-weight: 600; }
+  .sc-ret  { display: inline-block; font-size: var(--bp-text-sm); font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: 4px; font-variant-numeric: tabular-nums; }
   .sc-ret-pos { background: rgba(0,226,144,.10); color: #00e290; }
   .sc-ret-neg { background: rgba(var(--bp-sat-rgb),.15); color: #ff7b72; }
   .sc-ret-neu { background: rgba(var(--bp-text3-rgb),.1); color: #a8b2bc; }
 
-  .empty-msg { color: var(--bp-text3); font-size: 13px; text-align: center; padding: 20px; }
+  .empty-msg { color: var(--bp-text3); font-size: var(--bp-text-base); text-align: center; padding: 20px; }
 
   /* Piyasa barometresi */
   .barometer {
@@ -169,12 +169,12 @@
   }
   .bar-al  { position: absolute; left: 0; top: 0; height: 100%; background: var(--bp-al); border-radius: 5px 0 0 5px; transition: width .4s; }
   .bar-sat { position: absolute; right: 0; top: 0; height: 100%; background: var(--bp-sat); border-radius: 0 5px 5px 0; transition: width .4s; }
-  .bar-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--bp-text3); }
+  .bar-labels { display: flex; justify-content: space-between; font-size: var(--bp-text-sm); color: var(--bp-text3); }
 
   footer {
     text-align: center;
     padding: 20px;
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text3);
     border-top: 1px solid var(--bp-border);
     margin-top: 20px;
@@ -202,10 +202,10 @@
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
     .macro-bar { position: relative; }
-  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: 12px; line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
   .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:12px; height:34px; color:inherit; }
+  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:34px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-bkl); }
 
@@ -221,22 +221,22 @@
   .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
   #searchInput { flex: 1; background: none; border: none; outline: none; font-size: 15px; color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }
   #searchInput::placeholder { color: var(--bp-text3); }
-  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius:var(--bp-radius); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius:var(--bp-radius); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: var(--bp-text-md); flex-shrink: 0; }
   .search-close:hover { background: var(--bp-surface2); color: var(--bp-text); }
   .search-results { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
-  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: 13px; }
-  .search-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px 6px; }
-  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); transition: background .12s; font-size: 13px; }
+  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: var(--bp-text-base); }
+  .search-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-2xs); font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px 6px; }
+  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); transition: background .12s; font-size: var(--bp-text-base); }
   .search-result:hover, .search-result.sr-selected { background: var(--bp-surface2); }
-  .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: 13px; }
+  .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: var(--bp-text-base); }
   .sr-sig.sr-al { color: var(--bp-al); font-weight: 700; }
   .sr-sig.sr-sat { color: var(--bp-sat); font-weight: 700; }
   .sr-sig.sr-bekle { color: var(--bp-bkl); }
-  .sr-name { color: var(--bp-text2); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-  .sr-price { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--bp-text2); }
-  .sr-chg { font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600; min-width: 56px; text-align: right; }
+  .sr-name { color: var(--bp-text2); font-size: var(--bp-text-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .sr-price { font-variant-numeric: tabular-nums; font-size: var(--bp-text-sm); color: var(--bp-text2); }
+  .sr-chg { font-variant-numeric: tabular-nums; font-size: var(--bp-text-sm); font-weight: 600; min-width: 56px; text-align: right; }
   .sr-chg.pos { color: var(--bp-al); } .sr-chg.neg { color: var(--bp-sat); } .sr-chg.neu { color: var(--bp-bkl); }
-  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); font-size: 13px; transition: background .12s; }
+  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); font-size: var(--bp-text-base); transition: background .12s; }
   .search-topic:hover, .search-topic.sr-selected { background: var(--bp-surface2); }
   @media (max-width: 600px) {
     .search-overlay { padding-top: 0; align-items: stretch; }
@@ -248,18 +248,18 @@
   /* ── Sektör Nabzı ── */
   .sector-nabzi { display:flex; flex-direction:column; gap:7px; }
   .sector-row { display:flex; align-items:center; gap:10px; }
-  .sr-name { font-size:12px; color:var(--bp-text2); width:130px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sr-name { font-size:var(--bp-text-sm); color:var(--bp-text2); width:130px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sr-bar-wrap { flex:1; }
   .sr-bar { height:6px; background:var(--bp-surface2); border-radius:var(--bp-radius-sm); overflow:hidden; }
   .sr-fill { height:100%; border-radius:var(--bp-radius-sm); transition:width 0.5s ease; }
   .sr-stats { width:72px; flex-shrink:0; display:flex; align-items:center; gap:5px; justify-content:flex-end; }
-  .sr-pct { font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; }
-  .sr-cnt { font-size:10px; color:var(--bp-text3); }
+  .sr-pct { font-size:var(--bp-text-sm); font-weight:700; font-variant-numeric:tabular-nums; }
+  .sr-cnt { font-size:var(--bp-text-2xs); color:var(--bp-text3); }
   .sr-al-c  { color:var(--bp-al); }
   .sr-mid-c { color:var(--bp-gold); }
   .sr-low-c { color:var(--bp-sat); }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 <!-- Mobile Bottom Navigation -->
@@ -346,7 +346,7 @@
   <div style="display:flex;align-items:center;gap:8px">
     <select id="dateSelector"
       aria-label="Geçmiş özet tarihi seç"
-      style="background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text3);padding:6px 10px;border-radius:var(--bp-radius);font-size:12px;cursor:pointer;outline:none"
+      style="background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text3);padding:6px 10px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);cursor:pointer;outline:none"
       onchange="goToDate(this.value)">
       <option value=""><span aria-hidden="true">📅</span> Geçmiş Tarih Seç</option>
     </select>
@@ -390,13 +390,13 @@ function goToDate(date) {
 <!-- Geçmiş tarih bandı -->
 <div style="background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.25);border-radius:var(--bp-radius-md);
      padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-  <span style="font-size:18px"><span aria-hidden="true">🗓</span></span>
+  <span style="font-size:var(--bp-text-xl)"><span aria-hidden="true">🗓</span></span>
   <div style="flex:1;min-width:0">
-    <span style="color:#f0a500;font-weight:700;font-size:13px">Geçmiş Görünüm — {{ historical_date }}</span>
-    <span style="color:#94a3b8;font-size:12px;margin-left:8px">Bu sayfa o güne ait anlık kaydı göstermektedir.</span>
+    <span style="color:#f0a500;font-weight:700;font-size:var(--bp-text-base)">Geçmiş Görünüm — {{ historical_date }}</span>
+    <span style="color:#94a3b8;font-size:var(--bp-text-sm);margin-left:8px">Bu sayfa o güne ait anlık kaydı göstermektedir.</span>
   </div>
   <a href="/ozet" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);
-     padding:5px 12px;font-size:12px;color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
+     padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
     <span aria-hidden="true">↩</span> Güncel Özete Dön
   </a>
 </div>
@@ -405,13 +405,13 @@ function goToDate(date) {
 <!-- Bilanço Sezonu Uyarısı (JS ile dinamik) -->
 <div id="bilancoBanner" style="display:none;background:rgba(var(--bp-brand-rgb),.06);border:1px solid rgba(var(--bp-brand-rgb),.18);
      border-radius:var(--bp-radius-md);padding:10px 16px;margin-bottom:16px;align-items:center;gap:10px;flex-wrap:wrap">
-  <span style="font-size:18px"><span aria-hidden="true">📊</span></span>
+  <span style="font-size:var(--bp-text-xl)"><span aria-hidden="true">📊</span></span>
   <div style="flex:1;min-width:0">
-    <span id="bilancoBannerTitle" style="color:var(--bp-brand);font-weight:700;font-size:13px"></span>
-    <span id="bilancoBannerDesc" style="color:var(--bp-text3);font-size:12px;margin-left:8px"></span>
+    <span id="bilancoBannerTitle" style="color:var(--bp-brand);font-weight:700;font-size:var(--bp-text-base)"></span>
+    <span id="bilancoBannerDesc" style="color:var(--bp-text3);font-size:var(--bp-text-sm);margin-left:8px"></span>
   </div>
   <a href="/bilanco-takvimi" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);
-     padding:5px 12px;font-size:12px;color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
+     padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
     Takvime Bak <span aria-hidden="true">→</span>
   </a>
 </div>
@@ -464,16 +464,16 @@ function goToDate(date) {
     {% for s in ideal_al %}
     <a href="/hisse/{{ s.ticker }}" style="display:inline-flex;align-items:center;gap:6px;background:#1c1b1f;border:1px solid rgba(0,226,144,.2);border-radius:7px;padding:5px 10px;text-decoration:none;transition:all .15s"
        onmouseover="this.style.background='#201f21'" onmouseout="this.style.background='#1c1b1f'">
-      <span style="font-size:13px;font-weight:700;color:#f0f6fc">{{ s.ticker }}</span>
+      <span style="font-size:var(--bp-text-base);font-weight:700;color:#f0f6fc">{{ s.ticker }}</span>
       {% if s.signal_price and s.price %}
         {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
-        <span style="font-size:11px;font-weight:600;color:{% if ret >= 0 %}#00e290{% else %}#f85149{% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
+        <span style="font-size:var(--bp-text-xs);font-weight:600;color:{% if ret >= 0 %}#00e290{% else %}#f85149{% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
       {% endif %}
-      <span style="font-size:10px;color:#3fb950;font-weight:600"><span role="img" aria-label="İdeal giriş sinyali">✅</span></span>
+      <span style="font-size:var(--bp-text-2xs);color:#3fb950;font-weight:600"><span role="img" aria-label="İdeal giriş sinyali">✅</span></span>
     </a>
     {% endfor %}
   </div>
-  <div style="font-size:11px;color:var(--bp-text3);margin-top:10px"><span aria-hidden="true">✅</span> İdeal: Supertrend + ADX güçlü + Fiyat giriş bölgesinde · <a href="/" style="color:#58a6ff;text-decoration:none">Detaylı filtrele <span aria-hidden="true">→</span></a></div>
+  <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:10px"><span aria-hidden="true">✅</span> İdeal: Supertrend + ADX güçlü + Fiyat giriş bölgesinde · <a href="/" style="color:#58a6ff;text-decoration:none">Detaylı filtrele <span aria-hidden="true">→</span></a></div>
 </div>
 {% endif %}
 
@@ -600,26 +600,26 @@ function goToDate(date) {
        border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:var(--bp-radius-lg);padding:16px 20px;
        display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
-      <div style="font-size:14px;font-weight:700;color:var(--bp-text);margin-bottom:3px"><span aria-hidden="true">📬</span> Günlük Özeti E-postayla Al</div>
-      <div style="font-size:12px;color:var(--bp-text3)">Her sabah BIST sinyal özeti gelen kutunuzda — ücretsiz, iptal her zaman.</div>
+      <div style="font-size:var(--bp-text-md);font-weight:700;color:var(--bp-text);margin-bottom:3px"><span aria-hidden="true">📬</span> Günlük Özeti E-postayla Al</div>
+      <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Her sabah BIST sinyal özeti gelen kutunuzda — ücretsiz, iptal her zaman.</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px" id="ozSubForm">
       <input id="ozSubEmail" type="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
         style="flex:1;background:#1c1b1f;border:1px solid var(--bp-border);color:#e5e1e4;
-               padding:8px 12px;border-radius:7px;font-size:13px;font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:7px;font-size:var(--bp-text-base);font-family:inherit;outline:none;
                transition:border-color .15s;min-width:0"
         onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')ozSubmitSub()">
       <button onclick="ozSubmitSub()"
         style="background:#b8c3ff;color:#0e0e12;border:none;padding:8px 18px;border-radius:7px;
-               font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
+               font-size:var(--bp-text-base);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
                transition:background .15s"
         onmouseover="this.style.background='#c8d1ff'" onmouseout="this.style.background='#b8c3ff'">
         Abone Ol
       </button>
     </div>
     <button onclick="document.getElementById('ozSubBar').style.display='none'"
-      style="background:none;border:none;color:var(--bp-border2);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;flex-shrink:0"
+      style="background:none;border:none;color:var(--bp-border2);cursor:pointer;font-size:var(--bp-text-xl);line-height:1;padding:2px 6px;flex-shrink:0"
       title="Kapat">×</button>
   </div>
 </div>
