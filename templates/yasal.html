@@ -18,13 +18,13 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260810D">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bp-bg); color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.75; min-height: 100vh; }
+  body { background: var(--bp-bg); color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; font-size: var(--bp-text-md); line-height: 1.75; min-height: 100vh; }
   header { background: #161b22; border-bottom: 1px solid #30363d; padding: 14px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index:var(--bp-z-dropdown); }
-  .back-btn { display: flex; align-items: center; gap: 6px; color: #8b949e; font-size: 13px; text-decoration: none; padding: 5px 10px; border: 1px solid #30363d; border-radius:var(--bp-radius); background: #21262d; transition: all 0.15s; }
+  .back-btn { display: flex; align-items: center; gap: 6px; color: #8b949e; font-size: var(--bp-text-base); text-decoration: none; padding: 5px 10px; border: 1px solid #30363d; border-radius:var(--bp-radius); background: #21262d; transition: all 0.15s; }
   .back-btn:hover { background: #30363d; color: #e6edf3; }
-  .page-title { font-size: 20px; font-weight: 700; color: #f0f6fc; }
+  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: #f0f6fc; }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:13px; font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
   @media (max-width:780px) { .top-nav-links { display:none; } }
 
@@ -39,10 +39,10 @@
     margin-bottom: 32px;
   }
   .warn-banner-title {
-    font-size: 16px; font-weight: 700; color: var(--bp-sat);
+    font-size: var(--bp-text-lg); font-weight: 700; color: var(--bp-sat);
     display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
   }
-  .warn-banner p { color: #c9d1d9; font-size: 13px; margin-bottom: 8px; }
+  .warn-banner p { color: #c9d1d9; font-size: var(--bp-text-base); margin-bottom: 8px; }
   .warn-banner p:last-child { margin-bottom: 0; }
 
   /* Bölüm kartları */
@@ -76,20 +76,20 @@
     flex-shrink: 0; width: 24px; height: 24px;
     background: #21262d; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: #8b949e;
+    font-size: var(--bp-text-xs); font-weight: 700; color: #8b949e;
     margin-top: 1px;
   }
-  .clause-text { color: #c9d1d9; font-size: 13px; line-height: 1.65; }
+  .clause-text { color: #c9d1d9; font-size: var(--bp-text-base); line-height: 1.65; }
 
-  .updated { font-size: 12px; color: var(--bp-text3); margin-bottom: 28px; }
+  .updated { font-size: var(--bp-text-sm); color: var(--bp-text3); margin-bottom: 28px; }
 
-  footer { text-align: center; padding: 20px; font-size: 12px; color: var(--bp-text3); border-top: 1px solid #21262d; margin-top: 32px; }
+  footer { text-align: center; padding: 20px; font-size: var(--bp-text-sm); color: var(--bp-text3); border-top: 1px solid #21262d; margin-top: 32px; }
   footer a { color: #8b949e; text-decoration: none; margin: 0 6px; }
   footer a:hover { color: #e6edf3; }
 
   @media (max-width: 600px) { .container { padding: 16px 14px 32px; } .section-card { padding: 16px; } }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 {% with hdr_icon = '⚖️', hdr_title = 'Yasal Uyarı & SPK Bildirimi' %}{% include '_header.html' %}{% endwith %}
@@ -194,7 +194,7 @@
       <li><strong>E-posta:</strong> <a href="mailto:iletisim@borsapusula.com" style="color:#58a6ff;text-decoration:none">iletisim@borsapusula.com</a></li>
       <li><strong>İletişim sayfası:</strong> <a href="/iletisim" style="color:#58a6ff;text-decoration:none">borsapusula.com/iletisim</a></li>
     </ul>
-    <p style="margin-top:10px;font-size:13px;color:#8b949e">KVKK kapsamındaki veri taleplerinizi de yukarıdaki e-posta adresine iletebilirsiniz. Talepler 30 gün içinde yanıtlanır.</p>
+    <p style="margin-top:10px;font-size:var(--bp-text-base);color:#8b949e">KVKK kapsamındaki veri taleplerinizi de yukarıdaki e-posta adresine iletebilirsiniz. Talepler 30 gün içinde yanıtlanır.</p>
   </div>
 
 </div>

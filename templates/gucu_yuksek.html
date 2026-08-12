@@ -22,7 +22,7 @@
   body {
     background: var(--bp-bg); color: #e6edf3;
     font-family: 'Segoe UI', system-ui, sans-serif;
-    font-size: 14px; line-height: 1.6; min-height: 100vh;
+    font-size: var(--bp-text-md); line-height: 1.6; min-height: 100vh;
   }
   /* ── Makro Ticker Bandı ── */
   .macro-bar {
@@ -41,12 +41,12 @@
   .macro-bar:hover .macro-track { animation-play-state: paused; }
   @keyframes macroScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     .macro-bar { position: relative; }
-  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: 12px; line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
   .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item {
     display: inline-flex; align-items: center; gap: 8px;
-    padding: 0 20px; border-right: 1px solid #21262d; font-size: 12px; height: 34px;
+    padding: 0 20px; border-right: 1px solid #21262d; font-size: var(--bp-text-sm); height: 34px;
   }
   .macro-item-lbl { font-weight: 600; color: #cbd5e1; }
   .macro-chg-pos { color: #3fb950; }
@@ -59,16 +59,16 @@
   }
   .back-btn {
     display: flex; align-items: center; gap: 6px; color: #8b949e;
-    font-size: 13px; text-decoration: none; padding: 5px 10px;
+    font-size: var(--bp-text-base); text-decoration: none; padding: 5px 10px;
     border: 1px solid #30363d; border-radius:var(--bp-radius); background: #21262d;
     transition: all 0.15s; white-space: nowrap;
   }
   .back-btn:hover { background: #30363d; color: #e6edf3; }
-  .page-title { font-size: 18px; font-weight: 700; color: #f0f6fc; }
-  .page-sub   { font-size: 12px; color: #8b949e; margin-top: 2px; }
+  .page-title { font-size: var(--bp-text-xl); font-weight: 700; color: #f0f6fc; }
+  .page-sub   { font-size: var(--bp-text-sm); color: #8b949e; margin-top: 2px; }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
   .top-nav-links a {
-    padding:6px 11px; border-radius:var(--bp-radius); font-size:13px; font-weight:500;
+    padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500;
     color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap;
   }
   .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
@@ -83,14 +83,14 @@
     border-radius:var(--bp-radius-lg); padding: 16px 20px; margin-bottom: 24px;
   }
   .intro-card h2 { font-size: 15px; font-weight: 700; color: #f0f6fc; margin-bottom: 6px; }
-  .intro-card p  { font-size: 12px; color: #8b949e; line-height: 1.6; }
+  .intro-card p  { font-size: var(--bp-text-sm); color: #8b949e; line-height: 1.6; }
   .score-formula {
     display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;
   }
   .score-pill {
     background: rgba(31,111,235,.12); color: #58a6ff;
     border: 1px solid rgba(31,111,235,.25);
-    border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600;
+    border-radius: 20px; padding: 3px 10px; font-size: var(--bp-text-xs); font-weight: 600;
   }
 
   /* Loading state */
@@ -107,7 +107,7 @@
   /* Table */
   .list-table { width: 100%; border-collapse: collapse; }
   .list-table th {
-    font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: .5px;
+    font-size: var(--bp-text-2xs); color: #8b949e; text-transform: uppercase; letter-spacing: .5px;
     font-weight: 600; padding: 8px 12px; border-bottom: 1px solid #30363d;
     text-align: left; white-space: nowrap;
   }
@@ -116,16 +116,16 @@
   .list-table tr:hover td { background: rgba(255,255,255,.02); }
   .list-table a { text-decoration: none; color: inherit; }
 
-  .rank { font-size: 13px; font-weight: 700; color: var(--bp-text3); width: 32px; }
+  .rank { font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text3); width: 32px; }
   .rank.top3 { color: #e3b341; }
 
   .ticker-cell { display: flex; align-items: center; gap: 8px; }
-  .tk  { font-size: 14px; font-weight: 700; color: #f0f6fc; }
-  .tk-name { font-size: 11px; color: #8b949e; }
+  .tk  { font-size: var(--bp-text-md); font-weight: 700; color: #f0f6fc; }
+  .tk-name { font-size: var(--bp-text-xs); color: #8b949e; }
 
   .sig-badge {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    padding: 3px 9px; border-radius: 20px; font-size: var(--bp-text-xs); font-weight: 700;
   }
   .sig-al  { background: rgba(63,185,80,.12); color: #3fb950; border: 1px solid rgba(63,185,80,.3); }
   .sig-sat { background: rgba(var(--bp-sat-rgb),.12); color: var(--bp-sat); border: 1px solid rgba(var(--bp-sat-rgb),.3); }
@@ -141,18 +141,18 @@
     transition: width .3s;
   }
   .score-num {
-    font-size: 13px; font-weight: 700; color: #f0f6fc;
+    font-size: var(--bp-text-base); font-weight: 700; color: #f0f6fc;
     font-variant-numeric: tabular-nums; min-width: 28px;
   }
 
-  .adx-val { font-variant-numeric: tabular-nums; font-size: 13px; color: #e3b341; }
-  .vol-val { font-variant-numeric: tabular-nums; font-size: 13px; color: #58a6ff; }
-  .rsi-val { font-variant-numeric: tabular-nums; font-size: 13px; }
-  .bars-val { font-size: 12px; color: #8b949e; }
+  .adx-val { font-variant-numeric: tabular-nums; font-size: var(--bp-text-base); color: #e3b341; }
+  .vol-val { font-variant-numeric: tabular-nums; font-size: var(--bp-text-base); color: #58a6ff; }
+  .rsi-val { font-variant-numeric: tabular-nums; font-size: var(--bp-text-base); }
+  .bars-val { font-size: var(--bp-text-sm); color: #8b949e; }
 
-  .confirm-dot { font-size: 11px; }
+  .confirm-dot { font-size: var(--bp-text-xs); }
 
-  .updated { font-size: 11px; color: var(--bp-text3); text-align: center; margin-top: 20px; }
+  .updated { font-size: var(--bp-text-xs); color: var(--bp-text3); text-align: center; margin-top: 20px; }
 
   @media (max-width: 768px) {
     .container { padding: 12px; }
@@ -161,13 +161,13 @@
   }
   @media (max-width: 600px) {
     .hide-mob { display: none !important; }
-    .list-table th, .list-table td { padding: 8px 8px; font-size: 12px; }
+    .list-table th, .list-table td { padding: 8px 8px; font-size: var(--bp-text-sm); }
     /* Tablo yatay scroll — taşma yerine kaydırma */
     .list-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .list-table { min-width: 340px; }
   }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 {% include '_header.html' %}
@@ -206,9 +206,9 @@
   {% elif not stocks %}
   <div class="loading-box">
     <div style="font-size:36px;margin-bottom:12px"><span aria-hidden="true">📭</span></div>
-    <div style="font-size:16px;font-weight:700;color:#e6edf3">Şu an aktif sinyal yok</div>
-    <div style="font-size:13px;color:#8b949e;margin-top:8px">Piyasa saatlerinde güncellenir.</div>
-    <a href="/" style="display:inline-block;margin-top:16px;background:#1f6feb;color:#fff;text-decoration:none;border-radius:var(--bp-radius);padding:8px 20px;font-size:13px;font-weight:600">Ana Sayfaya Dön</a>
+    <div style="font-size:var(--bp-text-lg);font-weight:700;color:#e6edf3">Şu an aktif sinyal yok</div>
+    <div style="font-size:var(--bp-text-base);color:#8b949e;margin-top:8px">Piyasa saatlerinde güncellenir.</div>
+    <a href="/" style="display:inline-block;margin-top:16px;background:#1f6feb;color:#fff;text-decoration:none;border-radius:var(--bp-radius);padding:8px 20px;font-size:var(--bp-text-base);font-weight:600">Ana Sayfaya Dön</a>
   </div>
 
   {% else %}
@@ -238,7 +238,7 @@
               <div>
                 {# CPO-986 #8.1: tier kanonik sembol — 💎 Premium (mor #a855f7) / ⭐ Plus (mavi #1f6feb) / Standart işaretsiz.
                    is_premium (⭐ Hacim Onaylı, altın #ffc850) tier'dan bağımsız ayrı bir metrik (CPO-535 #36), renkle ayrışır. #}
-                <div class="tk">{{ s.ticker }}{% if s.tier == 'premium' %} <span title="Premium" style="color:var(--bp-premium);font-size:11px;vertical-align:middle"><span role="img" aria-label="Premium">💎</span></span>{% elif s.tier == 'plus' %} <span title="Plus" style="color:#1f6feb;font-size:11px;vertical-align:middle"><span role="img" aria-label="Plus">⭐</span></span>{% endif %}{% if s.is_premium %} <span title="Hacim Onaylı — RVOL ≥ 1.20 (backtest: Win Rate %51.5)" style="color:var(--bp-volume);font-size:11px;vertical-align:middle"><span role="img" aria-label="Hacim Onaylı">⭐</span></span>{% endif %}</div>
+                <div class="tk">{{ s.ticker }}{% if s.tier == 'premium' %} <span title="Premium" style="color:var(--bp-premium);font-size:var(--bp-text-xs);vertical-align:middle"><span role="img" aria-label="Premium">💎</span></span>{% elif s.tier == 'plus' %} <span title="Plus" style="color:#1f6feb;font-size:var(--bp-text-xs);vertical-align:middle"><span role="img" aria-label="Plus">⭐</span></span>{% endif %}{% if s.is_premium %} <span title="Hacim Onaylı — RVOL ≥ 1.20 (backtest: Win Rate %51.5)" style="color:var(--bp-volume);font-size:var(--bp-text-xs);vertical-align:middle"><span role="img" aria-label="Hacim Onaylı">⭐</span></span>{% endif %}</div>
                 <div class="tk-name">{{ stock_names.get(s.ticker, '') | truncate(22, true, '') }}</div>
               </div>
             </a>
@@ -248,7 +248,7 @@
               {% if s.signal == 'AL' %}<span aria-hidden="true">▲</span> Güçlü{% else %}<span aria-hidden="true">▼</span> Bozuldu{% endif %}
             </span>
             {% if s.signal == 'AL' and s.change_pct is not none and s.change_pct < 0 %}
-            <span style="font-size:10px;color:var(--bp-sat);font-weight:600;white-space:nowrap" title="Sinyal uzun vadeli, bugün günlük düşüş var"><span role="img" aria-label="Düşüş">↓</span>{{ '%.1f'|format(s.change_pct|abs) }}%</span>
+            <span style="font-size:var(--bp-text-2xs);color:var(--bp-sat);font-weight:600;white-space:nowrap" title="Sinyal uzun vadeli, bugün günlük düşüş var"><span role="img" aria-label="Düşüş">↓</span>{{ '%.1f'|format(s.change_pct|abs) }}%</span>
             {% endif %}
           </td>
           <td>
@@ -284,7 +284,7 @@
 
 </div>
 
-<footer style="text-align:center;padding:20px;font-size:12px;color:var(--bp-text3);border-top:1px solid #21262d;margin-top:32px">
+<footer style="text-align:center;padding:20px;font-size:var(--bp-text-sm);color:var(--bp-text3);border-top:1px solid #21262d;margin-top:32px">
   <a href="/" style="color:#8b949e;text-decoration:none">Ana Sayfa</a> ·
   <a href="/ozet" style="color:#8b949e;text-decoration:none">Günlük Özet</a> ·
   <a href="/tarama" style="color:#8b949e;text-decoration:none">Hisse Tarayıcı</a> ·

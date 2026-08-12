@@ -60,14 +60,14 @@
   }
   .mbn-sheet.open { transform: translateY(0); }
   .mbn-sheet-handle { width: 40px; height: 4px; background: var(--bp-border2); border-radius:var(--bp-radius-xs); margin: 4px auto 14px; }
-  .mbn-sheet-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 12px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 4px; }
+  .mbn-sheet-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 4px; }
   .mbn-sheet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   @media (max-width: 360px) { .mbn-sheet-grid { grid-template-columns: repeat(3, 1fr); } }
   .mbn-sheet-item {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 7px; text-decoration: none; color: var(--bp-text);
     background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
-    padding: 14px 6px; font-size: 11px; font-weight: 600;
+    padding: 14px 6px; font-size: var(--bp-text-xs); font-weight: 600;
     font-family: 'Manrope', system-ui, sans-serif;
     letter-spacing: 0.1px; min-height: 70px;
     transition: background .15s, border-color .15s, transform .1s;
@@ -83,14 +83,14 @@
     min-height: 52px;
   }
   .mbn-push-row-left { display: flex; align-items: center; gap: 10px; }
-  .mbn-push-row-icon { font-size: 18px; }
-  .mbn-push-row-text { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 13px; font-weight: 600; color: var(--bp-text); }
-  .mbn-push-row-sub { font-size: 11px; color: var(--bp-text3); margin-top: 1px; }
+  .mbn-push-row-icon { font-size: var(--bp-text-xl); }
+  .mbn-push-row-text { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-base); font-weight: 600; color: var(--bp-text); }
+  .mbn-push-row-sub { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
   .mbn-push-toggle {
     min-width: 44px; min-height: 44px;
     display: flex; align-items: center; justify-content: center;
     background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3);
-    border-radius:var(--bp-radius-md); color: #93c5fd; font-size: 12px; font-weight: 700;
+    border-radius:var(--bp-radius-md); color: #93c5fd; font-size: var(--bp-text-sm); font-weight: 700;
     cursor: pointer; font-family: 'Space Grotesk', sans-serif;
     padding: 0 12px; transition: all .15s;
   }
