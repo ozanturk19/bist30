@@ -178,14 +178,14 @@
 
 
 <!-- Makro Ticker -->
-<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 <div class="container" id="main-content" tabindex="-1">
 
   {% include '_stale_banner.html' %}
 
   <div class="info-banner">
-    ℹ️ <strong>Yaklaşık dönemler gösterilmektedir.</strong> BIST şirketleri çeyrek sonuçlarını genellikle çeyrek bitiminden 45-60 gün içinde KAP'a bildirir.
+    <span aria-hidden="true">ℹ️</span> <strong>Yaklaşık dönemler gösterilmektedir.</strong> BIST şirketleri çeyrek sonuçlarını genellikle çeyrek bitiminden 45-60 gün içinde KAP'a bildirir.
     Kesin tarihler için her hissenin KAP bağlantısına tıklayın.
   </div>
 
@@ -199,13 +199,13 @@
   <div class="filter-bar">
     <span style="font-size:12px;color:var(--bp-text3);font-weight:600">Filtre:</span>
     <button class="filter-btn active"   onclick="setFilter('all')"  id="fbtn-all">Tümü</button>
-    <button class="filter-btn fal"      onclick="setFilter('AL')"   id="fbtn-AL">▲ Güçlü Trend</button>
-    <button class="filter-btn fsat"     onclick="setFilter('SAT')"  id="fbtn-SAT">▼ Trend Bozuldu</button>
-    <button class="filter-btn fbkl"     onclick="setFilter('BEKLE')"id="fbtn-BEKLE">● Yatay</button>
+    <button class="filter-btn fal"      onclick="setFilter('AL')"   id="fbtn-AL"><span aria-hidden="true">▲</span> Güçlü Trend</button>
+    <button class="filter-btn fsat"     onclick="setFilter('SAT')"  id="fbtn-SAT"><span aria-hidden="true">▼</span> Trend Bozuldu</button>
+    <button class="filter-btn fbkl"     onclick="setFilter('BEKLE')"id="fbtn-BEKLE"><span aria-hidden="true">●</span> Yatay</button>
   </div>
 
   <div id="periodsContainer">
-    <div class="loading-msg">⏳ Veriler yükleniyor…</div>
+    <div class="loading-msg"><span aria-hidden="true">⏳</span> Veriler yükleniyor…</div>
   </div>
 
 </div>

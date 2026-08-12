@@ -82,7 +82,7 @@
 <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">BorsaPusula Blog — Yatırım & Teknik Analiz</h1>
 
 <!-- Makro Ticker -->
-<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 <div class="container" id="main-content" tabindex="-1">
   <!-- Blog search -->
@@ -107,8 +107,8 @@
       <div class="bc-title">{{ a.title }}</div>
       <div class="bc-desc">{{ a.desc }}</div>
       <div class="bc-meta">
-        <span><span role="img" aria-label="Yayın tarihi">📅</span> {{ a.date }}</span>
-        <span>⏱ {{ a.mins }} dk okuma</span>
+        <span><span role="img" aria-label="Yayın tarihi"><span aria-hidden="true">📅</span></span> {{ a.date }}</span>
+        <span><span aria-hidden="true">⏱</span> {{ a.mins }} dk okuma</span>
       </div>
     </a>
     {% endfor %}
