@@ -133,7 +133,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810D">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810E">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -2499,35 +2499,37 @@
   <div class="table-wrap">
     <div id="loadingDiv">
       <table style="width:100%;border-collapse:collapse">
+        <caption class="sr-only">Sinyal taraması yükleniyor</caption>
         <thead>
           <tr style="background:var(--bp-surface2);border-bottom:1px solid var(--bp-border)">
-            <th style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Hisse</th>
-            <th style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Fiyat (₺)</th>
-            <th style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Değişim</th>
-            <th style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Sinyal</th>
-            <th style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Tarih</th>
-            <th style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Giriş ₺</th>
-            <th style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">SL ₺</th>
-            <th style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Güç</th>
-            <th style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">İndikatörler</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Hisse</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Fiyat (₺)</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Değişim</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Sinyal</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Tarih</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Giriş ₺</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">SL ₺</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Güç</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">İndikatörler</th>
           </tr>
         </thead>
         <tbody id="skeletonBody"></tbody>
       </table>
     </div>
     <table id="mainTable" style="display:none">
+      <caption class="sr-only">BIST hisseleri sinyal taraması — fiyat, değişim, sinyal, giriş/stop seviyeleri ve teknik güç</caption>
       <thead>
         <tr>
-          <th onclick="sortTable('ticker')">Hisse</th>
-          <th onclick="sortTable('price')">Fiyat (₺)</th>
-          <th onclick="sortTable('change_pct')" class="hide-mobile">Değişim</th>
-          <th onclick="sortTable('signal')">Sinyal</th>
-          <th onclick="sortTable('signal_date')" class="hide-mobile">Tarih</th>
-          <th class="hide-mobile">Giriş ₺</th>
-          <th class="hide-mobile">SL ₺</th>
-          <th onclick="sortTable('bull_score')" class="hide-mobile">Güç</th>
-          <th class="hide-mobile">İndikatörler</th>
-          <th title="Sinyal değişince bildir"><span role="img" aria-label="Bildirim">🔔</span></th>
+          <th scope="col" onclick="sortTable('ticker')">Hisse</th>
+          <th scope="col" onclick="sortTable('price')">Fiyat (₺)</th>
+          <th scope="col" onclick="sortTable('change_pct')" class="hide-mobile">Değişim</th>
+          <th scope="col" onclick="sortTable('signal')">Sinyal</th>
+          <th scope="col" onclick="sortTable('signal_date')" class="hide-mobile">Tarih</th>
+          <th scope="col" class="hide-mobile">Giriş ₺</th>
+          <th scope="col" class="hide-mobile">SL ₺</th>
+          <th scope="col" onclick="sortTable('bull_score')" class="hide-mobile">Güç</th>
+          <th scope="col" class="hide-mobile">İndikatörler</th>
+          <th scope="col" title="Sinyal değişince bildir"><span role="img" aria-label="Bildirim">🔔</span></th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
