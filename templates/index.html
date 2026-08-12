@@ -1304,8 +1304,14 @@
     user-select: none; white-space: nowrap; font-family: inherit;
   }
   thead th:hover { color: var(--bp-text2); }
-  thead th.sorted-asc::after  { content: " ↑"; }
-  thead th.sorted-desc::after { content: " ↓"; }
+  .th-sort-btn {
+    all: unset; box-sizing: border-box; display: block; width: 100%;
+    padding: 10px 16px; margin: -10px -16px;
+    font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit;
+    cursor: pointer; text-align: inherit; white-space: nowrap;
+  }
+  .th-sort-btn.sorted-asc::after  { content: " ↑"; }
+  .th-sort-btn.sorted-desc::after { content: " ↓"; }
 
   tbody tr { border-bottom: 1px solid var(--bp-border); transition: background 0.15s, box-shadow 0.15s; }
   tbody tr:last-child { border-bottom: none; }
@@ -2520,14 +2526,14 @@
       <caption class="sr-only">BIST hisseleri sinyal taraması — fiyat, değişim, sinyal, giriş/stop seviyeleri ve teknik güç</caption>
       <thead>
         <tr>
-          <th scope="col" onclick="sortTable('ticker')">Hisse</th>
-          <th scope="col" onclick="sortTable('price')">Fiyat (₺)</th>
-          <th scope="col" onclick="sortTable('change_pct')" class="hide-mobile">Değişim</th>
-          <th scope="col" onclick="sortTable('signal')">Sinyal</th>
-          <th scope="col" onclick="sortTable('signal_date')" class="hide-mobile">Tarih</th>
+          <th scope="col" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('ticker')">Hisse</button></th>
+          <th scope="col" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('price')">Fiyat (₺)</button></th>
+          <th scope="col" class="hide-mobile" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('change_pct')">Değişim</button></th>
+          <th scope="col" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal')">Sinyal</button></th>
+          <th scope="col" class="hide-mobile" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal_date')">Tarih</button></th>
           <th scope="col" class="hide-mobile">Giriş ₺</th>
           <th scope="col" class="hide-mobile">SL ₺</th>
-          <th scope="col" onclick="sortTable('bull_score')" class="hide-mobile">Güç</th>
+          <th scope="col" class="hide-mobile" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('bull_score')">Güç</button></th>
           <th scope="col" class="hide-mobile">İndikatörler</th>
           <th scope="col" title="Sinyal değişince bildir"><span role="img" aria-label="Bildirim">🔔</span></th>
         </tr>
@@ -4489,13 +4495,17 @@ function resetFilters() {
 function sortTable(key) {
   if (sortKey === key) sortDir *= -1;
   else { sortKey = key; sortDir = 1; }
-  document.querySelectorAll('thead th').forEach(th =>
-    th.classList.remove('sorted-asc', 'sorted-desc')
-  );
+  document.querySelectorAll('#mainTable thead th').forEach(th => {
+    const btn = th.querySelector('.th-sort-btn');
+    if (btn) btn.classList.remove('sorted-asc', 'sorted-desc');
+    th.removeAttribute('aria-sort');
+  });
   const colMap = { ticker:0, price:1, change_pct:2, signal:3, signal_date:4, bull_score:7 };
   if (colMap[key] !== undefined) {
-    document.querySelectorAll('thead th')[colMap[key]]
-      .classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+    const th = document.querySelectorAll('#mainTable thead th')[colMap[key]];
+    const btn = th && th.querySelector('.th-sort-btn');
+    if (btn) btn.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+    if (th) th.setAttribute('aria-sort', sortDir === 1 ? 'ascending' : 'descending');
   }
   renderTable();
 }

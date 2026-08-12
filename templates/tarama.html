@@ -239,8 +239,14 @@
     user-select:none; transition:color .15s;
   }
   thead th:hover { color:var(--text); }
-  thead th.sort-asc::after  { content:' ▲'; color:var(--brand); }
-  thead th.sort-desc::after { content:' ▼'; color:var(--brand); }
+  thead th.th-sortable { padding:0; }
+  .th-sort-btn {
+    all:unset; box-sizing:border-box; display:block; width:100%;
+    padding:10px 14px; cursor:inherit;
+    font:inherit; color:inherit; text-transform:inherit; letter-spacing:inherit; white-space:inherit;
+  }
+  .th-sort-btn.sort-asc::after  { content:' ▲'; color:var(--brand); }
+  .th-sort-btn.sort-desc::after { content:' ▼'; color:var(--brand); }
   tbody td { padding:10px 14px; border-bottom:1px solid var(--border2); vertical-align:middle; }
   tbody tr:last-child td { border-bottom:none; }
   tbody tr:hover td { background:rgba(255,255,255,.02); }
@@ -562,13 +568,13 @@
         <tr>
           <th scope="col">Hisse</th>
           <th scope="col">Sinyal</th>
-          <th scope="col" onclick="sortBy('signal_strength')" id="th-score" data-tooltip="Birleşik kalite skoru (ADX + Hacim + RSI + Teyit) — Premium/Plus/Standart bu skordan belirlenir. Varsayılan sıralama.">Sinyal Gücü</th>
-          <th scope="col" onclick="sortBy('adx')" id="th-adx" data-tooltip="ADX 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, <18 Zayıf">Trend Gücü</th>
+          <th scope="col" class="th-sortable" id="th-score" data-tooltip="Birleşik kalite skoru (ADX + Hacim + RSI + Teyit) — Premium/Plus/Standart bu skordan belirlenir. Varsayılan sıralama." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_strength')">Sinyal Gücü</button></th>
+          <th scope="col" class="th-sortable" id="th-adx" data-tooltip="ADX 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, <18 Zayıf" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('adx')">Trend Gücü</button></th>
           <th scope="col">Giriş Kalitesi</th>
-          <th scope="col" class="hide-mob-narrow" onclick="sortBy('price')" id="th-price">Fiyat</th>
-          <th scope="col" class="hide-mob-narrow" onclick="sortBy('change_pct')" id="th-chg">Değişim</th>
-          <th scope="col" class="hide-mob" onclick="sortBy('vol_ratio')" id="th-vol" data-tooltip="Bugünkü hacim / 20-gün ortalama">RVOL×</th>
-          <th scope="col" class="hide-mob" onclick="sortBy('signal_bars')" id="th-bars" data-tooltip="Sinyal kaç gün önce oluştu">Tazelik</th>
+          <th scope="col" class="hide-mob-narrow th-sortable" id="th-price" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('price')">Fiyat</button></th>
+          <th scope="col" class="hide-mob-narrow th-sortable" id="th-chg" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('change_pct')">Değişim</button></th>
+          <th scope="col" class="hide-mob th-sortable" id="th-vol" data-tooltip="Bugünkü hacim / 20-gün ortalama" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('vol_ratio')">RVOL×</button></th>
+          <th scope="col" class="hide-mob th-sortable" id="th-bars" data-tooltip="Sinyal kaç gün önce oluştu" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_bars')">Tazelik</button></th>
           <th scope="col" class="hide-mob hide-tablet">Sektör</th>
         </tr>
       </thead>
@@ -1034,12 +1040,18 @@ function sortBy(col) {
   }
   document.getElementById('sortSel').value = col;
   // TH visual update
-  document.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc','sort-desc'));
+  document.querySelectorAll('thead th.th-sortable').forEach(th => {
+    const btn = th.querySelector('.th-sort-btn');
+    if (btn) btn.classList.remove('sort-asc','sort-desc');
+    th.setAttribute('aria-sort', 'none');
+  });
   const map = {adx:'th-adx', price:'th-price', change_pct:'th-chg', vol_ratio:'th-vol', signal_bars:'th-bars', signal_strength:'th-score'};
   const id = map[col];
   if (id) {
     const el = document.getElementById(id);
-    if (el) el.classList.add(_sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    const btn = el && el.querySelector('.th-sort-btn');
+    if (btn) btn.classList.add(_sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    if (el) el.setAttribute('aria-sort', _sortDir === 'asc' ? 'ascending' : 'descending');
   }
   applyFilters();
 }

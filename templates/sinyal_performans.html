@@ -46,6 +46,12 @@
   .tbl-wrap { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow:hidden; margin-bottom:24px; }
   table { width:100%; border-collapse:collapse; }
   thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
+  th[data-sort] { padding:0; }
+  .perf-sort-btn {
+    all:unset; box-sizing:border-box; display:flex; align-items:center; gap:4px;
+    width:100%; padding:10px 14px; cursor:pointer;
+    font:inherit; color:inherit; text-transform:inherit; letter-spacing:inherit; white-space:inherit;
+  }
   tbody tr { border-bottom:1px solid #21262d; }
   tbody tr:last-child { border-bottom:none; }
   tbody tr:hover { background:#1c2128; }
@@ -316,13 +322,13 @@
       <caption class="sr-only">Geçmiş sinyallerin hisse bazında performans detayı</caption>
       <thead>
         <tr>
-          <th scope="col" onclick="perfSortBy('ticker')" data-sort="ticker" style="cursor:pointer">Hisse <span class="perf-sort-arr"></span></th>
-          <th scope="col" onclick="perfSortBy('signal')" data-sort="signal" style="cursor:pointer">Sinyal <span class="perf-sort-arr"></span></th>
-          <th scope="col" onclick="perfSortBy('signal_price')" data-sort="signal_price" style="cursor:pointer">Sinyal Başı ₺ <span class="perf-sort-arr"></span></th>
-          <th scope="col" onclick="perfSortBy('price')" data-sort="price" style="cursor:pointer">Güncel ₺ <span class="perf-sort-arr"></span></th>
-          <th scope="col" onclick="perfSortBy('aktif_ret')" data-sort="aktif_ret" style="cursor:pointer" class="sort-active">Getiri % <span class="perf-sort-arr" aria-hidden="true">▼</span></th>
-          <th scope="col" onclick="perfSortBy('signal_bars')" data-sort="signal_bars" style="cursor:pointer">Süre <span class="perf-sort-arr"></span></th>
-          <th scope="col" class="hm" onclick="perfSortBy('signal_date')" data-sort="signal_date" style="cursor:pointer">Tarih <span class="perf-sort-arr"></span></th>
+          <th scope="col" data-sort="ticker" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('ticker')">Hisse <span class="perf-sort-arr"></span></button></th>
+          <th scope="col" data-sort="signal" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('signal')">Sinyal <span class="perf-sort-arr"></span></button></th>
+          <th scope="col" data-sort="signal_price" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('signal_price')">Sinyal Başı ₺ <span class="perf-sort-arr"></span></button></th>
+          <th scope="col" data-sort="price" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('price')">Güncel ₺ <span class="perf-sort-arr"></span></button></th>
+          <th scope="col" data-sort="aktif_ret" class="sort-active" aria-sort="descending"><button type="button" class="perf-sort-btn" onclick="perfSortBy('aktif_ret')">Getiri % <span class="perf-sort-arr" aria-hidden="true">▼</span></button></th>
+          <th scope="col" data-sort="signal_bars" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('signal_bars')">Süre <span class="perf-sort-arr"></span></button></th>
+          <th scope="col" class="hm" data-sort="signal_date" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('signal_date')">Tarih <span class="perf-sort-arr"></span></button></th>
         </tr>
       </thead>
       <tbody id="perfTbody">
@@ -495,6 +501,7 @@ async function triggerBacktest() {
     // Header arrow + active state güncelle
     document.querySelectorAll('th[data-sort]').forEach(th => {
       th.classList.remove('sort-active');
+      th.setAttribute('aria-sort', 'none');
       const arr = th.querySelector('.perf-sort-arr');
       if (arr) arr.textContent = '';
     });
@@ -510,6 +517,7 @@ async function triggerBacktest() {
     const activeTh = document.querySelector(`th[data-sort="${col}"]`);
     if (activeTh) {
       activeTh.classList.add('sort-active');
+      activeTh.setAttribute('aria-sort', _sortState.dir === 'asc' ? 'ascending' : 'descending');
       const arr = activeTh.querySelector('.perf-sort-arr');
       if (arr) arr.textContent = _sortState.dir === 'asc' ? '▲' : '▼';
     }
