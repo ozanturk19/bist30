@@ -55,7 +55,9 @@ const PAGES = [
   { name: 'sinyal-performans', path: '/sinyal-performans' },
   { name: 'nasdaq', path: '/nasdaq' },
   { name: 'sp500', path: '/sp500' },
-  { name: 'dow', path: '/dow' },
+  // 'dow' (/dow) BILEREK YOK: Dow verisi motorda yok, T0.7 kapsaminda route
+  // zaten kaldirilmis (canli kanit: httpStatus=404, T9.1 kosumunda yakalandi).
+  // 'djia' hic PAGES listesinde degildi, ek islem yok.
   { name: 'hisseler', path: '/hisseler' },
   { name: 'sektorler', path: '/sektorler' },
   { name: 'sektor', path: '/sektor' },
@@ -78,7 +80,11 @@ const PAGES = [
   { name: 'petrol', path: '/petrol' },
   { name: 'dogalgaz', path: '/dogalgaz' },
   { name: 'abd', path: '/abd' },
-  { name: 'abd-tarama', path: '/abd/tarama' },
+  // 'abd-tarama' (/abd/tarama) BILEREK YOK: f9e4ac8 (T4.1) ile kaldirildi,
+  // 0 ic link / yetim sayfa, trafik tamami bot/agent idi. Bu harness hic
+  // calistirilmadigi icin kaldirmadan sonra guncellenmemisti (T9.1 kanit:
+  // ilk canli kosuda httpStatus=404 dondu, ama script bunu FAIL SAYMIYORDU
+  // -- asagidaki httpStatus kontrolu bu korlugu da kapatiyor).
   { name: 'abd-sp500', path: '/abd/sp500' },
   { name: 'abd-nasdaq', path: '/abd/nasdaq' },
   { name: 'abd-aapl', path: '/abd/AAPL' },
@@ -144,6 +150,13 @@ async function checkPage(browser, pageDef, width) {
     // 'load' + sabit settle bekleme kullanıyoruz — bu sınıf sayfalarda güvenilir.
     const resp = await page.goto(BASE + pageDef.path, { waitUntil: 'load', timeout: 20000 });
     result.httpStatus = resp ? resp.status() : null;
+    // T9.1: httpStatus ONCEDEN kaydediliyordu ama HICBIR YERDE kontrol
+    // edilmiyordu -- 404/500 donen bir sayfa, tasma olmadigi surece 'ok'
+    // basiyordu (canli kanit: /abd/tarama 404 donuyordu, harness 'ok'
+    // yaziyordu). 4xx/5xx artik yuklenemedi sayilir, olcum atlanir.
+    if (result.httpStatus && result.httpStatus >= 400) {
+      throw new Error('HTTP ' + result.httpStatus);
+    }
     await page.waitForTimeout(1200);
 
     result.states.closed = await measureState(page);
