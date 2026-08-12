@@ -276,7 +276,7 @@
   }
   /* Mobile: butonlar full-width row haline gelsin (flex-wrap zaten yapar, ama label kısa kalsın) */
   @media (max-width: 720px) {
-    .hib-action-btn { height: 44px; padding: 0 11px; font-size: 11.5px; }
+    .hib-action-btn { height: 44px; padding: 0 11px; font-size: var(--bp-text-sm); }
     .hib-action-btn svg { width: 14px; height: 14px; }
     .hib-action-bar { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; margin-top: 6px; }
     .hib-action-bar .hib-action-btn { flex: 1 1 auto; justify-content: center; min-width: 130px; }
@@ -630,7 +630,7 @@
     font-weight: 600;
     margin-bottom: 8px;
   }
-  .hacim-profili .hp-row-line { display:flex; align-items:center; gap:6px; font-size:11.5px; margin-top:4px; line-height:1.4; flex-wrap:wrap; }
+  .hacim-profili .hp-row-line { display:flex; align-items:center; gap:6px; font-size:var(--bp-text-sm); margin-top:4px; line-height:1.4; flex-wrap:wrap; }
   .hacim-profili .hp-row-icon { font-size:var(--bp-text-xs); flex-shrink:0; }
   .hacim-profili .hp-row-text { color:var(--bp-text2); flex-shrink:0; }
   .hacim-profili .hp-row-val { font-weight:700; font-variant-numeric:tabular-nums; }
@@ -640,7 +640,7 @@
   .hacim-profili .hp-row-val .hp-tag { font-size:var(--bp-text-2xs); padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:4px; font-weight:700; letter-spacing:.3px; }
   .hacim-profili .hp-row-val .hp-tag.premium { color:var(--bp-volume); background:rgba(var(--bp-volume-rgb),.10); border:1px solid rgba(var(--bp-volume-rgb),.45); }
   .hacim-profili .hp-row-val .hp-tag.confirmed { color:var(--bp-al); background:rgba(0,226,144,.08); border:1px solid rgba(0,226,144,.40); }
-  .hacim-profili .hp-row-summary { margin-top:6px; font-size:10.5px; color:var(--bp-text3); font-style:italic; line-height:1.4; }
+  .hacim-profili .hp-row-summary { margin-top:6px; font-size:var(--bp-text-sm); color:var(--bp-text3); font-style:italic; line-height:1.4; }
 
   .vol-status-val {
     font-size: var(--bp-text-xl);
@@ -1068,7 +1068,7 @@
   .related-chip:hover { border-color: var(--bp-brand); background: #21202b; }
   .related-ticker { font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text); }
   .related-name {
-    font-size: 10.5px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text3);
     white-space: nowrap;
     overflow: hidden;
@@ -1791,7 +1791,7 @@
     @media (max-width: 480px) {
       .bp-bottom-cta { padding: 5px 8px calc(5px + env(safe-area-inset-bottom)); gap: 5px; }
       .bp-cta-watchlist { font-size: 12.5px; padding: 0 8px; }
-      .bp-cta-alarm { font-size: 11.5px; padding: 0 6px; }
+      .bp-cta-alarm { font-size: var(--bp-text-sm); padding: 0 6px; }
     }
     /* P1: nav z-index fix — action bar yukarı it (768px mobile nav = 64px) */
     @media (max-width: 768px) {
@@ -2024,7 +2024,7 @@
     <div class="ind-row" id="indRow">
       <span class="ind-badge ind-neutral">Yükleniyor…</span>
     </div>
-    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:var(--bp-radius-md);font-size:11.5px;color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',monospace">
+    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:var(--bp-radius-md);font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',monospace">
       <strong style="color:var(--bp-brand);font-size:var(--bp-text-2xs);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Teknik Detaylar</strong>
       <span id="indTechContent">—</span>
     </div>
@@ -2242,7 +2242,7 @@
       <div style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.65;padding:10px 12px;background:rgba(var(--bp-brand-rgb),0.06);border-left:3px solid rgba(var(--bp-brand-rgb),0.4);border-radius:0 8px 8px 0">
         Algoritmamız <strong style="color:var(--bp-brand)">Supertrend(10,3), ADX ≥ 25, EMA12/EMA99</strong> kriterlerinin aynı anda uyum sağlamasını değerlendirir. <strong style="color:var(--bp-al)">Güçlü Trend</strong> sinyali bu kriterlerin pozitif konfirmasyonunu, <strong style="color:var(--bp-sat)">Trend Bozuldu</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-brand);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:#6b6b73">
+      <div style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:#6b6b73">
         <div class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></div>
         AI yorumu hazırlanıyor…
       </div>
