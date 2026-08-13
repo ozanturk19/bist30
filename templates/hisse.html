@@ -115,7 +115,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810E">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810F">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -1440,7 +1440,7 @@
       width: 44px; height: 44px;
       background: rgba(var(--bp-al-rgb),0.92);
       color: var(--bp-bg); border: none; border-radius: 50%;
-      cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      cursor: pointer; box-shadow: var(--bp-shadow-sm);
       display: none; align-items: center; justify-content: center;
       transition: opacity 0.2s, transform 0.2s;
       -webkit-tap-highlight-color: transparent;
@@ -1731,7 +1731,7 @@
       backdrop-filter: blur(20px) saturate(160%);
       -webkit-backdrop-filter: blur(20px) saturate(160%);
       border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
-      box-shadow: 0 -4px 18px rgba(0,0,0,0.30);
+      box-shadow: var(--bp-shadow-up-sm);
       padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
       display: flex; gap: 6px;
       transform: translateY(0);

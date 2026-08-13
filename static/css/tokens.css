@@ -243,6 +243,12 @@
   --bp-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
   --bp-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.60);
   --bp-shadow-dropdown: 0 12px 32px rgba(0, 0, 0, 0.55);
+  /* FAZ8 kutu-golge konsolidasyonu -- alttan-sabit elemanlar (bottom sheet,
+     sticky CTA bar) yukari dogru golge atar, mevcut 4 token'in hicbiri
+     negatif y-offset tasimiyor. Iki yon-varyanti: -sm kucuk sticky bar,
+     -lg genis bottom sheet. Tier'e yeni buyukluk eklemiyor, yon ekliyor. */
+  --bp-shadow-up-sm: 0 -4px 18px rgba(0, 0, 0, 0.40);
+  --bp-shadow-up-lg: 0 -10px 40px rgba(0, 0, 0, 0.50);
 
   /* Anlamsal (sinyal) gölgeler — mevcut canlı değerlerden birebir.
      Renk kaynağı yukarıdaki --bp-al / --bp-sat / --bp-volume. */
