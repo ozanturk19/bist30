@@ -201,6 +201,25 @@
      KASITLI HARİÇ: e-posta istemcileri CSS custom property'yi güvenilir
      render etmiyor (Outlook/bazı mobil mail app), o katman ham px kalır.
 
+     17px KAPANDI (DEV2-079, 14.08.2026): orijinal ölçümdeki 10 kullanım
+     heterojendi. close-ikon (blog_article.html) xl(18)'e yuvarlandı - 3
+     bağımsız emsal (.alert-modal-close/.ap-close/portfolio cloud-close)
+     ile doğrulandı. page-title (ozet.html/sektor_harita.html) ve h2
+     (gizlilik.html) ilk turda numerik yakınlığa göre yuvarlandı (17->18)
+     ama Workflow adversarial-review'in semantic-snap-risk lensi bunun
+     GERÇEK peer-konvansiyonla çeliştiğini kanıtladı: page-title 19
+     şablonun 12'sinde 2xl(20) kullanıyor (xl(18) yalnız 3 şablonda) -
+     yuvarlama page-title'ı azınlık kalıbına kilitliyordu, düzeltildi:
+     2xl(20). h2 emsali yanlış seçilmişti (.faq-section-title gerçek h2
+     değil) - gerçek h2 peer'ları (hakkinda/metodoloji/iletisim) hepsi
+     xl(18) kullanıyor, düzeltildi: xl(18). Geriye kalan 4 kullanım
+     (mc-ticker/mc-price/sec-col-name/header-name) hiçbir mevcut basamağa
+     net oturmuyordu (kanıtsız yuvarlama riskli) - bu 4'ü sıfır görsel
+     değişiklikle --bp-text-17'ye tokenize edildi.
+     19px KAPANDI: premium-modal-title (index.html + duplike
+     _premium_modal.html) 2xl(20)'ye, mobil 480px override'i 17->xl(18)'e
+     yuvarlandı.
+
      Taban 13px (en yoğun gövde boyutu), 11px arayüz etiketi. */
   --bp-text-2xs:  10px;
   --bp-text-xs:   11px;
@@ -209,6 +228,7 @@
   --bp-text-md:   14px;
   --bp-text-15:   15px;  /* DEV2-078: md(14)/lg(16) arasi bosluk - 30 kullanim */
   --bp-text-lg:   16px;
+  --bp-text-17:   17px;  /* DEV2-079: lg(16)/xl(18) arasi, ankor bulunamayan 4 kullanim (mc-ticker/mc-price/sec-col-name/header-name) */
   --bp-text-xl:   18px;
   --bp-text-2xl:  20px;
   --bp-text-22:   22px;  /* DEV2-078: 2xl(20)/3xl(24) arasi bosluk - 19 kullanim */

@@ -133,7 +133,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810G">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810H">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -584,7 +584,7 @@
   }
   .premium-modal-title {
     color: var(--bp-text);
-    font-size: 19px;
+    font-size: var(--bp-text-2xl);
     font-weight: 700;
     margin: 0 0 8px;
   }
@@ -639,7 +639,7 @@
   }
   @media (max-width: 480px) {
     .premium-modal { padding: 22px 18px 16px; }
-    .premium-modal-title { font-size: 17px; }
+    .premium-modal-title { font-size: var(--bp-text-xl); }
   }
 
   /* SPEC-001 Faz 2 — Premium soft paywall (locked rows + CTA) */
@@ -1847,11 +1847,11 @@
   .mc-lft { min-width:0; }
   .mc-rgt { text-align:right; flex-shrink:0; }
   .mc-ticker {
-    font-size:17px; font-weight:800; color: var(--bp-text); line-height:1.2;
+    font-size:var(--bp-text-17); font-weight:800; color: var(--bp-text); line-height:1.2;
     font-family: 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.2px;
   }
   .mc-sector { font-size:var(--bp-text-2xs); color: var(--bp-text3); margin-top:2px; text-transform: uppercase; letter-spacing: 0.4px; font-family: 'Space Grotesk', sans-serif; }
-  .mc-price  { font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; color: var(--bp-text); line-height:1.3; font-family: 'Space Grotesk', monospace, sans-serif; }
+  .mc-price  { font-size:var(--bp-text-17); font-weight:700; font-variant-numeric:tabular-nums; color: var(--bp-text); line-height:1.3; font-family: 'Space Grotesk', monospace, sans-serif; }
 
   /* Data strip — GİRİŞ / SL / DÖNEM */
   .mc-strip {
