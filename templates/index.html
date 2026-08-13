@@ -133,7 +133,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810F">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810G">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -304,7 +304,7 @@
   .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
   #searchInput {
     flex: 1; background: none; border: none; outline: none;
-    font-size: 15px; color: var(--bp-text);
+    font-size: var(--bp-text-15); color: var(--bp-text);
     font-family: 'Manrope', system-ui, sans-serif;
     min-width: 0;
   }
@@ -571,7 +571,7 @@
     background: transparent;
     border: none;
     color: var(--bp-text3);
-    font-size: 22px;
+    font-size: var(--bp-text-22);
     cursor: pointer;
     line-height: 1;
     padding: 4px 8px;
@@ -824,7 +824,7 @@
   .ms-link:hover { text-decoration: underline; }
 
   .ms-narrative {
-    font-size: 15px; line-height: 1.7;
+    font-size: var(--bp-text-15); line-height: 1.7;
     color: var(--bp-text); margin: 0 0 14px;
     min-height: 18px;  /* skeleton'a yer aç, CLS önle */
   }
@@ -990,7 +990,7 @@
     max-width: 80px; overflow: hidden; text-overflow: ellipsis; /* #15: kompakt rozet */
   }
   .macro-news-title {
-    font-size: 12.5px; color: var(--bp-text); line-height: 1.4; font-weight: 500;
+    font-size: var(--bp-text-base); color: var(--bp-text); line-height: 1.4; font-weight: 500;
     flex: 1;
   }
   .macro-news-time {
@@ -1680,7 +1680,7 @@
   .alert-modal-delete { width:100%; margin-top:6px; padding:7px 0; background:none; color:#ef4444; border:1px solid rgba(239,68,68,.4); border-radius:7px; font-size:var(--bp-text-base); cursor:pointer; }
   .alert-modal-delete:hover { background:rgba(239,68,68,.08); }
   .alert-modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#8b949e; font-size:var(--bp-text-xl); cursor:pointer; }
-  .alert-modal-login-notice { font-size:12.5px; color:#ffc850; background:rgba(255,200,80,.08); border:1px solid rgba(255,200,80,.25); border-radius:7px; padding:9px 12px; margin-bottom:12px; }
+  .alert-modal-login-notice { font-size:var(--bp-text-base); color:#ffc850; background:rgba(255,200,80,.08); border:1px solid rgba(255,200,80,.25); border-radius:7px; padding:9px 12px; margin-bottom:12px; }
   .alert-modal-status { font-size:var(--bp-text-sm); color:#22c55e; margin-top:8px; text-align:center; min-height:18px; }
   .alarm-panel {
     position:fixed; bottom:24px; right:24px; z-index:999;
@@ -1785,7 +1785,7 @@
     border: 1px solid rgba(var(--bp-al-rgb),0.45);
     border-radius: 14px;
     width:52px; height:52px;
-    font-size:22px; cursor:pointer;
+    font-size:var(--bp-text-22); cursor:pointer;
     box-shadow: 0 0 18px rgba(var(--bp-al-rgb),0.22), 0 4px 20px rgba(0,0,0,0.5);
     display:flex; align-items:center; justify-content:center;
     transition: all .2s; color:var(--bp-al);
@@ -1887,7 +1887,7 @@
     header { padding: 0 14px; height: 56px; }
     .header-nav { display: none; }
     .logo-sub { display: none; }
-    .logo-name { font-size: 15px; }
+    .logo-name { font-size: var(--bp-text-15); }
     .refresh-label { display: none; }
     /* Dual endeks kartları — mobilde yığılmış */
     .dual-endeks { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
@@ -1909,7 +1909,7 @@
     /* Stats bar → 2×2 grid (was cramped 4-card row) */
     .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .stat-card { padding: 12px 14px; min-width: unset; }
-    .stat-card .stat-num { font-size: 22px; }
+    .stat-card .stat-num { font-size: var(--bp-text-22); }
     td { padding: 8px 10px; }
     .indicators { display: none; }
     th.hide-mobile, td.hide-mobile { display: none; }
@@ -2259,9 +2259,9 @@
   <!-- ── AI Piyasa Özeti ──────────────────────────── -->
   <!-- visibility:hidden (not display:none) reserves space → prevents CLS when content loads -->
   <div id="macroSummaryBar" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.06),rgba(139,92,246,.03));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:9px;padding:9px 14px;margin-bottom:10px;align-items:flex-start;gap:8px">
-    <span style="font-size:15px;flex-shrink:0;margin-top:1px"><span aria-hidden="true">🤖</span></span>
+    <span style="font-size:var(--bp-text-15);flex-shrink:0;margin-top:1px"><span aria-hidden="true">🤖</span></span>
     <div style="flex:1;min-width:0">
-      <div id="macroSummaryBarText" style="font-size:12.5px;color:var(--bp-text2);line-height:1.5"></div>
+      <div id="macroSummaryBarText" style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.5"></div>
       <div id="macroSummaryBarTime" style="font-size:var(--bp-text-2xs);color:var(--bp-text3);margin-top:3px"></div>
     </div>
     <a href="/gundem" style="font-size:var(--bp-text-xs);color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0;align-self:center">Gündem <span aria-hidden="true">→</span></a>
@@ -2287,12 +2287,12 @@
     <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap"><span aria-hidden="true">📊</span> 2 Yıllık Backtest · 28 Hisse</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
       <span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">Sharpe:</span>
-      <span id="btSharpe" style="font-size:15px;font-weight:800;color:var(--bp-al);letter-spacing:-0.3px"></span>
+      <span id="btSharpe" style="font-size:var(--bp-text-15);font-weight:800;color:var(--bp-al);letter-spacing:-0.3px"></span>
     </span>
     <span style="color:var(--bp-border)">·</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
       <span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">Profit Factor:</span>
-      <span id="btPF" style="font-size:15px;font-weight:800;color:var(--bp-al);letter-spacing:-0.3px"></span>
+      <span id="btPF" style="font-size:var(--bp-text-15);font-weight:800;color:var(--bp-al);letter-spacing:-0.3px"></span>
     </span>
     <span style="color:var(--bp-border)">·</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">

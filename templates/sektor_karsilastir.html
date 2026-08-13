@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810F">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810G">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bp-bg); color:var(--bp-text); font-family:'Manrope',system-ui,sans-serif; -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
@@ -21,7 +21,7 @@
   .logo-mark { width:28px; height:28px; flex-shrink:0; }
   .logo-name { font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); letter-spacing:-0.3px; font-family:'Space Grotesk',system-ui,sans-serif; }
   .logo-name strong { color:var(--bp-al); }
-  .header-title { font-family:'Space Grotesk',system-ui,sans-serif; font-size:15px; font-weight:700; color:var(--bp-text); }
+  .header-title { font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-15); font-weight:700; color:var(--bp-text); }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
   .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:var(--bp-text2); transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
@@ -34,7 +34,7 @@
 
   /* Page header */
   .page-hdr { margin-bottom:24px; }
-  .page-hdr h1 { font-family:'Space Grotesk',system-ui,sans-serif; font-size:22px; font-weight:700; margin-bottom:6px; }
+  .page-hdr h1 { font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-22); font-weight:700; margin-bottom:6px; }
   .page-hdr p { color:var(--bp-text3); font-size:var(--bp-text-base); }
 
   /* Sector selector */
@@ -105,7 +105,7 @@
   .sec-metrics { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
   .metric-card { background:var(--bp-surface2); border-radius:7px; padding:9px 12px; }
   .metric-lbl { font-size:var(--bp-text-2xs); font-weight:600; color:var(--bp-text3); text-transform:uppercase; letter-spacing:0.4px; font-family:'Space Grotesk',sans-serif; margin-bottom:3px; }
-  .metric-val { font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; font-family:'Space Grotesk',monospace,sans-serif; }
+  .metric-val { font-size:var(--bp-text-15); font-weight:700; font-variant-numeric:tabular-nums; font-family:'Space Grotesk',monospace,sans-serif; }
 
   /* Stock list */
   .stocks-title { font-size:var(--bp-text-xs); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--bp-text3); font-family:'Space Grotesk',sans-serif; padding:12px 18px 8px; }

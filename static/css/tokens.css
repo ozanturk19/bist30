@@ -193,10 +193,13 @@
        11px:284  13px:271  12px:254  10px:112  14px:84  16px:35
        18px:34   15px:30   20px:28   22px:20   17px:10
 
-     DRIFT KAYDI: yarım-piksel değerler canlıda mevcut —
-       12.5px:10  11.5px:8  10.5px:8  14.5px:1  13.5px:1  (28 kullanım)
-     Bunlar tasarım kararı değil kopyala-yapıştır artığı; token
-     yok, T1.5'te en yakın tam basamağa çekilecekler.
+     DRIFT KAYDI KAPANDI - templates/ (DEV2-078, 13.08.2026): yarım-piksel
+     değerler en yakın tam basamağa çekildi (12.5->base 13.5->md 14.5->15,
+     round-half-up). Ayrıca 15px/22px sistemik boşluk-doldurucu değerler
+     için 2 yeni basamak eklendi (bkz. yukarıdaki --bp-text-15/22).
+     app.py'deki e-posta üretim fonksiyonları (_build_welcome_email vb.)
+     KASITLI HARİÇ: e-posta istemcileri CSS custom property'yi güvenilir
+     render etmiyor (Outlook/bazı mobil mail app), o katman ham px kalır.
 
      Taban 13px (en yoğun gövde boyutu), 11px arayüz etiketi. */
   --bp-text-2xs:  10px;
@@ -204,9 +207,11 @@
   --bp-text-sm:   12px;
   --bp-text-base: 13px;
   --bp-text-md:   14px;
+  --bp-text-15:   15px;  /* DEV2-078: md(14)/lg(16) arasi bosluk - 30 kullanim */
   --bp-text-lg:   16px;
   --bp-text-xl:   18px;
   --bp-text-2xl:  20px;
+  --bp-text-22:   22px;  /* DEV2-078: 2xl(20)/3xl(24) arasi bosluk - 19 kullanim */
   --bp-text-3xl:  24px;
 
   /* ── 3. YAZI AĞIRLIĞI (font-weight) ───────────────────────────
