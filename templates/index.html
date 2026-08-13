@@ -133,7 +133,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810E">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810F">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -1057,7 +1057,7 @@
   .stat-card:hover {
     border-color: var(--bp-border2);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    box-shadow: var(--bp-shadow-md);
   }
   .stat-card .stat-num {
     font-family: 'Space Grotesk', monospace, sans-serif;
@@ -1239,7 +1239,7 @@
     display: none; position: absolute; top: calc(100% + 5px); right: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border2);
     border-radius:var(--bp-radius-lg); min-width: 270px; padding: 4px;
-    z-index: 400; box-shadow: 0 12px 32px rgba(0,0,0,.6);
+    z-index: 400; box-shadow: var(--bp-shadow-dropdown);
     max-height: 330px; overflow-y: auto;
   }
   .search-ac.open { display: block; animation: ddIn .13s ease; }
@@ -1354,7 +1354,7 @@
     display: none; position: fixed; z-index: var(--bp-z-tooltip);
     background: #1c2128; border: 1px solid #30363d; border-radius:var(--bp-radius-lg);
     padding: 11px 14px; min-width: 200px; max-width: 252px;
-    box-shadow: 0 10px 32px rgba(0,0,0,.68);
+    box-shadow: var(--bp-shadow-dropdown);
     pointer-events: none; font-size: var(--bp-text-sm); line-height: 1.55; color: #e6edf3;
   }
   .sig-tip.open { display: block; animation: ddIn .12s ease; }
@@ -1686,7 +1686,7 @@
     position:fixed; bottom:24px; right:24px; z-index:999;
     background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-xl);
     width:340px; max-height:480px; overflow:hidden;
-    box-shadow:0 8px 32px rgba(0,0,0,.6);
+    box-shadow:var(--bp-shadow-dropdown);
     display:flex; flex-direction:column;
     transition: all .2s;
   }

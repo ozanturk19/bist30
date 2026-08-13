@@ -6,7 +6,7 @@
 <meta property="og:url"         content="https://borsapusula.com/heatmap">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810E">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810F">
 <style>
   /* ── CPO-1149/1150 (SENECA): deprecated altın imza → kanonik --bp-premium
      mor imza (SPEC-018 W2). tokens.css tek kaynak, literal hex burada YOK. */
@@ -124,7 +124,7 @@
   }
   .toggle-btn.active {
     background: var(--bp-surface); color: var(--bp-text);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    box-shadow: var(--bp-shadow-sm);
   }
   /* Tooltip */
   #heatmap-tooltip {
@@ -132,7 +132,7 @@
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
     border-radius:var(--bp-radius); padding: 10px 12px;
     font-size: var(--bp-text-sm); color: var(--bp-text);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+    box-shadow: var(--bp-shadow-dropdown);
     z-index:var(--bp-z-toast); display: none;
     min-width: 180px;
   }
