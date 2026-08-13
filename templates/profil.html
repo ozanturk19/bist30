@@ -6,7 +6,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810H">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810I">
 <style>
   * { box-sizing: border-box; }
   html { overflow-x: hidden; }
@@ -35,7 +35,7 @@
   }
   .hero h1 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 28px; font-weight: 800;
+    font-size: var(--bp-text-28); font-weight: 800;
     color: var(--bp-text);
     margin: 0 0 8px;
     letter-spacing: -0.5px;
@@ -362,7 +362,7 @@ async function submitProfile(e) {
     if (json.ok) {
       document.getElementById('profileForm').innerHTML =
         '<div style="text-align:center;padding:30px 0">' +
-        '<div style="font-size:42px;margin-bottom:12px">✓</div>' +
+        '<div style="font-size:var(--bp-text-42);margin-bottom:12px">✓</div>' +
         '<div style="font-size:18px;font-weight:800;color:var(--bp-al);margin-bottom:8px">Profilin kaydedildi!</div>' +
         '<div style="font-size:13px;color:var(--bp-text2);margin-bottom:24px">' + (json.message || 'Sinyaller artık size özel.') + '</div>' +
         '<a href="/" class="btn">Sinyal Paneline Dön →</a>' +

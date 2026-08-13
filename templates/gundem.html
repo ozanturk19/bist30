@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810H">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810I">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -60,7 +60,7 @@
     transition: border-color .15s;
   }
   .stat-card:hover { border-color: var(--bp-border2); }
-  .stat-num  { font-size: 36px; font-weight: 800; line-height: 1; }
+  .stat-num  { font-size: var(--bp-text-36); font-weight: 800; line-height: 1; }
   .stat-lbl  { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: .5px; }
   .num-al  { color: var(--bp-al); }
   .num-sat { color: var(--bp-sat); }
@@ -169,7 +169,7 @@
     header { padding: 12px 16px; }
     .container { padding: 16px; }
     .stats-row { grid-template-columns: repeat(2, 1fr); }
-    .stat-num  { font-size: 28px; }
+    .stat-num  { font-size: var(--bp-text-28); }
     .stock-grid { grid-template-columns: 1fr; }
     .page-title { font-size: var(--bp-text-lg); }
   }
