@@ -234,6 +234,24 @@
   --bp-text-22:   22px;  /* DEV2-078: 2xl(20)/3xl(24) arasi bosluk - 19 kullanim */
   --bp-text-3xl:  24px;
 
+  /* 26-42px "display" ailesi KAPANDI (DEV2-080, 14.08.2026): 3xl(24)
+     ustunde 28 ham kullanim, 8 ayrik deger. Iki alt-aile ayirt edildi:
+     hero-stat/fiyat degerleri (26/28/32/34/36px, ayni class-adi farkli
+     sablonlarda ayni deger - gercek drift yok) ve dekoratif empty-state
+     ikonlari (32/36/40/42px, 8 cagri yerinde 4 farkli deger, kucuk
+     cogunluk yok - snap icin yeterli emsal kaniti bulunamadi). Her iki
+     alt-aile de GORSEL DEGISIKLIK OLMADAN mevcut degerleriyle tokenize
+     edildi; ikon ailesindeki tutarsizlik ayri bir tasarim karari
+     gerektirir, bu turun kapsami degil. */
+  --bp-text-26:   26px;  /* DEV2-080: hero-title/stat-deger, 6 kullanim */
+  --bp-text-28:   28px;  /* DEV2-080: stat-deger/baslik, 6 kullanim */
+  --bp-text-32:   32px;  /* DEV2-080: stat-deger/ikon, 3 kullanim */
+  --bp-text-34:   34px;  /* DEV2-080: stat-deger, 1 kullanim */
+  --bp-text-36:   36px;  /* DEV2-080: stat-deger/ikon, 5 kullanim */
+  --bp-text-38:   38px;  /* DEV2-080: premium-modal-icon (2 kopya), 2 kullanim */
+  --bp-text-40:   40px;  /* DEV2-080: empty-state ikon, 4 kullanim */
+  --bp-text-42:   42px;  /* DEV2-080: JS-injected onay ikonu, 1 kullanim */
+
   /* ── 3. YAZI AĞIRLIĞI (font-weight) ───────────────────────────
      ÖLÇÜM (556 kullanım): 700:247  600:206  500:55  800:39  400:7
      `normal`:2 ve `inherit`:1 anahtar-kelime kullanımı da var. */

@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810H">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810I">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -37,7 +37,7 @@
 
   .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
   .sum-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; text-align:center; }
-  .sum-num  { font-size:28px; font-weight:800; line-height:1; }
+  .sum-num  { font-size:var(--bp-text-28); font-weight:800; line-height:1; }
   .sum-lbl  { font-size:var(--bp-text-xs); color:#8b949e; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   .sum-green{ color:#3fb950; } .sum-red{ color:#f85149; } .sum-blue{ color:#58a6ff; } .sum-gold{ color:#e3b341; }
 
@@ -99,7 +99,7 @@
   .import-toast.err { border-color: var(--bp-sat-bd); color: var(--bp-sat); }
 
   .empty-msg { text-align:center; padding:60px; color:var(--bp-text3); }
-  .empty-msg .em-icon { font-size:40px; margin-bottom:12px; }
+  .empty-msg .em-icon { font-size:var(--bp-text-40); margin-bottom:12px; }
 
   /* localStorage uyarı banner */
   .ls-warning {

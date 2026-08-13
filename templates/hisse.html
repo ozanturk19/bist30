@@ -115,7 +115,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810H">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810I">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -739,7 +739,7 @@
   .sig-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
   .sig-stat-card { background:var(--bp-surface2); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:12px 14px; text-align:center; transition:border-color .15s; }
   .sig-stat-card:hover { border-color:var(--bp-text3); }
-  .sig-stat-val  { font-size:26px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
+  .sig-stat-val  { font-size:var(--bp-text-26); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
   .sig-stat-lbl  { font-size:var(--bp-text-2xs); color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   @keyframes shimmerStat { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
   .stat-sk { background:linear-gradient(90deg,var(--bp-surface2) 25%,#252d3a 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:4px; display:inline-block; }

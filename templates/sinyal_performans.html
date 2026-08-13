@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810H">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810I">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -33,7 +33,7 @@
   /* Summary cards */
   .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:28px; }
   .stat-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-xl); padding:20px; text-align:center; }
-  .stat-num  { font-size:36px; font-weight:800; line-height:1; }
+  .stat-num  { font-size:var(--bp-text-36); font-weight:800; line-height:1; }
   .stat-lbl  { font-size:var(--bp-text-xs); color:#8b949e; margin-top:8px; text-transform:uppercase; letter-spacing:.5px; }
   .stat-sub  { font-size:var(--bp-text-sm); color:#8b949e; margin-top:4px; }
   .c-green { color:#3fb950; } .c-red { color:#f85149; } .c-blue { color:#58a6ff; } .c-gold { color:#f59e0b; }
@@ -69,7 +69,7 @@
 
   /* Computing notice */
   .computing { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:40px; text-align:center; color:#8b949e; }
-  .computing .big { font-size:40px; margin-bottom:12px; }
+  .computing .big { font-size:var(--bp-text-40); margin-bottom:12px; }
   .computing p { margin-top:8px; font-size:var(--bp-text-base); }
 
   /* Info box */
@@ -79,8 +79,8 @@
   .ozet-bar { background:linear-gradient(135deg,#0d1f36 0%,#111827 100%); border:1px solid #1e2d45; border-left:3px solid #3fb950; border-radius:var(--bp-radius-xl); padding:16px 20px; margin-bottom:24px; display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
   .ozet-metric { flex:1; min-width:140px; text-align:center; padding:10px 16px; position:relative; }
   .ozet-metric+.ozet-metric::before { content:''; position:absolute; left:0; top:15%; height:70%; width:1px; background:#1e2d45; }
-  .ozet-metric-val { font-size:34px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
-  .ozet-metric-val.hero-val { font-size:40px; text-shadow:0 0 24px rgba(63,185,80,0.35); }
+  .ozet-metric-val { font-size:var(--bp-text-34); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
+  .ozet-metric-val.hero-val { font-size:var(--bp-text-40); text-shadow:0 0 24px rgba(63,185,80,0.35); }
   .ozet-metric-lbl { font-size:var(--bp-text-2xs); color:#64748b; margin-top:7px; text-transform:uppercase; letter-spacing:.6px; }
   .ozet-metric-sub { font-size:var(--bp-text-xs); color:#8b949e; margin-top:3px; }
   @media(max-width:640px) { .ozet-bar{flex-wrap:wrap;gap:0} .ozet-metric{flex:0 0 50%;min-width:0;} .ozet-metric:nth-child(2)::before,.ozet-metric:nth-child(4)::before{display:none} .ozet-metric:nth-child(3),.ozet-metric:nth-child(4){border-top:1px solid #1e2d45;} }
