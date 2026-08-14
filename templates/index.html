@@ -133,7 +133,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810M">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -920,7 +920,7 @@
   }
   .gnm-badge {
     font-size: var(--bp-text-2xs); font-weight: 700; padding: 2px 7px;
-    border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+    border-radius: var(--bp-radius-20); white-space: nowrap; flex-shrink: 0;
     /* neutral/bekle fallback — always visible regardless of signal type */
     background: rgba(139,148,158,.1); color: var(--bp-text3); border: 1px solid rgba(139,148,158,.2);
   }
@@ -1114,7 +1114,7 @@
     flex-wrap: wrap; align-items: center;
   }
   .filter-btn {
-    padding: 5px 14px; border-radius: 20px; border: 1px solid var(--bp-border);
+    padding: 5px 14px; border-radius: var(--bp-radius-20); border: 1px solid var(--bp-border);
     background: transparent; color: var(--bp-text2); cursor: pointer;
     font-size: var(--bp-text-sm); font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
@@ -1136,7 +1136,7 @@
   }
   .sector-lbl { font-size: var(--bp-text-2xs); color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; font-weight: 500; }
   .sector-btn {
-    padding: 4px 11px; border-radius: 14px; border: 1px solid var(--bp-border);
+    padding: 4px 11px; border-radius: var(--bp-radius-14); border: 1px solid var(--bp-border);
     background: transparent; color: var(--bp-text3); cursor: pointer;
     font-size: var(--bp-text-xs); font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
@@ -1173,7 +1173,7 @@
     background: rgba(var(--bp-brand-rgb),0.10);
     border: 1px solid rgba(var(--bp-brand-rgb),0.30);
     color: var(--bp-text);
-    border-radius: 14px;
+    border-radius: var(--bp-radius-14);
     padding: 3px 4px 3px 10px;
     font-size: var(--bp-text-sm);
     font-weight: 600;
@@ -1256,7 +1256,7 @@
 
   /* Gelişmiş Filtre Paneli */
   .adv-toggle {
-    padding: 5px 12px; border-radius: 20px; border: 1px solid var(--bp-border);
+    padding: 5px 12px; border-radius: var(--bp-radius-20); border: 1px solid var(--bp-border);
     background: transparent; color: var(--bp-text3); cursor: pointer;
     font-size: var(--bp-text-sm); font-weight: 500; font-family: inherit; transition: all 0.15s;
     display: flex; align-items: center; gap: 5px;
@@ -1331,7 +1331,7 @@
 
   .signal-badge {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px; border-radius: 20px;
+    padding: 4px 10px; border-radius: var(--bp-radius-20);
     font-size: var(--bp-text-xs); font-weight: 700; letter-spacing: 0.4px;
     white-space: nowrap;
   }
@@ -1421,7 +1421,7 @@
   .sk-ticker  { width: 60px; }
   .sk-price   { width: 80px; }
   .sk-chg     { width: 55px; }
-  .sk-signal  { width: 70px; height: 22px; border-radius: 11px; }
+  .sk-signal  { width: 70px; height: 22px; border-radius: var(--bp-radius-11); }
   .sk-date    { width: 75px; }
   .sk-wide    { width: 50px; }
   .sk-dots    { width: 40px; }
@@ -1507,7 +1507,7 @@
     border: 1px solid rgba(var(--bp-sat-rgb),0.3);
     color: var(--bp-sat);
     padding: 2px 7px;
-    border-radius: 5px;
+    border-radius: var(--bp-radius-5);
     font-variant-numeric: tabular-nums;
   }
 
@@ -1616,7 +1616,7 @@
   .hp-row {
     display: flex; align-items: center; gap: 7px;
     padding: 4px 6px; text-decoration: none;
-    border-radius: 5px; transition: background .1s; cursor: pointer;
+    border-radius: var(--bp-radius-5); transition: background .1s; cursor: pointer;
     margin: 0 -6px;
   }
   .hp-row:hover { background: rgba(255,255,255,.04); }
@@ -1668,7 +1668,7 @@
   /* ── F4 Alert Settings Modal ─── */
   .alert-modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:var(--bp-z-modal-backdrop); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .18s; }
   .alert-modal-backdrop.visible { opacity:1; pointer-events:auto; }
-  .alert-modal { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:14px; padding:24px 22px 18px; width:340px; max-width:96vw; position:relative; }
+  .alert-modal { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-14); padding:24px 22px 18px; width:340px; max-width:96vw; position:relative; }
   .alert-modal-title { font-size:var(--bp-text-lg); font-weight:700; margin:0 0 14px; color:var(--bp-text); }
   .alert-modal-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
   .alert-modal-row label { flex:1; font-size:var(--bp-text-base); color:#8b949e; }
@@ -1715,7 +1715,7 @@
   .ap-pa-lbl { font-size:var(--bp-text-2xs); color:var(--bp-text3); width:52px; flex-shrink:0; font-weight:500; }
   .ap-pa-input {
     flex:1; background:var(--bp-bg); border:1px solid var(--bp-border); color:var(--bp-text);
-    padding:3px 7px; border-radius:5px; font-size:var(--bp-text-sm); font-family:inherit; outline:none;
+    padding:3px 7px; border-radius:var(--bp-radius-5); font-size:var(--bp-text-sm); font-family:inherit; outline:none;
     transition:border-color .15s;
   }
   .ap-pa-input:focus { border-color:var(--bp-brand); }
@@ -1737,7 +1737,7 @@
     position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px);
     z-index:var(--bp-z-sub-toast); width:min(420px, calc(100vw - 32px));
     background:linear-gradient(135deg,var(--bp-surface),var(--bp-surface2));
-    border:1px solid rgba(var(--bp-brand-rgb),.35); border-radius:14px;
+    border:1px solid rgba(var(--bp-brand-rgb),.35); border-radius:var(--bp-radius-14);
     padding:16px 18px; box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(var(--bp-brand-rgb),.1);
     opacity:0; pointer-events:none;
     transition:opacity .35s ease,transform .35s ease;
@@ -1783,7 +1783,7 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(var(--bp-al-rgb),0.45);
-    border-radius: 14px;
+    border-radius: var(--bp-radius-14);
     width:52px; height:52px;
     font-size:var(--bp-text-22); cursor:pointer;
     box-shadow: 0 0 18px rgba(var(--bp-al-rgb),0.22), 0 4px 20px rgba(0,0,0,0.5);
@@ -3631,7 +3631,7 @@ function _updateIdealStrip(stocks) {
       ? ` <span style="font-size:10px;font-weight:600;color:#00e290">+${s._ret.toFixed(1)}% <span style="opacity:.65;font-weight:500">sinyalden beri</span></span>`
       : '';
     return `<a href="/hisse/${s.ticker}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(var(--bp-al-rgb),.08);
-      border:1px solid rgba(var(--bp-al-rgb),.2);border-radius:6px;padding:3px 8px;text-decoration:none;
+      border:1px solid rgba(var(--bp-al-rgb),.2);border-radius:var(--bp-radius);padding:3px 8px;text-decoration:none;
       font-size:12px;font-weight:700;color:#f0f6fc;transition:background .12s;white-space:nowrap"
       onmouseover="this.style.background='rgba(0,226,144,.16)'" onmouseout="this.style.background='rgba(0,226,144,.08)'"
       >${s.ticker}${retHtml}</a>`;

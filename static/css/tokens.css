@@ -378,6 +378,20 @@
   --bp-radius-xl:   12px;
   --bp-radius-pill: 999px;
 
+  /* ── T1.4 kategori-2 kuyruk (FAZ8, DEV2) — duz <style> blogu, tekil deger,
+     compound/JS-gomulu DEGIL. Deger korunur, yalniz isimlendirilir (ayni
+     yontem: 4px/7px turu). 20px yogunlugu yuksek (18 kullanim) — pill
+     esdegeri olabilir (--bp-radius-pill:999px, kucuk yukseklikte ayni
+     render) ama bu HENUZ per-ornek yukseklik dogrulamasi YAPILMADI, bu
+     yuzden deger DEGISTIRILMEDI, ayri backlog sorusu olarak kaliyor. */
+  --bp-radius-1:    1px;
+  --bp-radius-5:    5px;
+  --bp-radius-9:    9px;
+  --bp-radius-11:  11px;
+  --bp-radius-14:  14px;
+  --bp-radius-16:  16px;
+  --bp-radius-20:  20px;
+
   /* ── 9. KIRILMA NOKTALARI (breakpoint) ────────────────────────
      ÖLÇÜM (127 @media kuralı): 900px:25  768px:25  600px:22
        780px:17  480px:14  640px:6  360px:6  720px:5  500px:2

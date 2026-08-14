@@ -15,7 +15,7 @@
 ]}
 </script>
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810M">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -156,7 +156,7 @@
     padding: 4px 4px 4px 10px;
     background: rgba(31,111,235,.10);
     border: 1px solid rgba(31,111,235,.30);
-    border-radius: 20px;
+    border-radius: var(--bp-radius-20);
     font-size: var(--bp-text-sm);
     color: var(--text, #e6edf3);
     white-space: nowrap;
@@ -194,7 +194,7 @@
     font-size: var(--bp-text-sm);
     cursor: pointer;
     padding: 4px 10px;
-    border-radius: 16px;
+    border-radius: var(--bp-radius-16);
     transition: all .15s ease;
   }
   .chip-clear-all:hover { color: var(--text, #e6edf3); background: rgba(255,255,255,.04); }
@@ -262,7 +262,7 @@
 
   .sig-badge {
     display:inline-flex; align-items:center; gap:3px;
-    padding:3px 9px; border-radius:20px; font-size:var(--bp-text-xs); font-weight:700;
+    padding:3px 9px; border-radius:var(--bp-radius-20); font-size:var(--bp-text-xs); font-weight:700;
   }
   .sig-AL   { background:rgba(63,185,80,.12); color:var(--al); border:1px solid rgba(63,185,80,.3); }
   .sig-SAT  { background:rgba(var(--bp-sat-rgb),.12); color:var(--sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
