@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810K">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810L">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -138,13 +138,13 @@
   .stock-card:hover { background: var(--bp-surface3); border-color: var(--bp-border2); }
   .sc-ticker  { font-size: var(--bp-text-md); font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
   .sc-name    { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: var(--bp-text-xs); font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: var(--bp-text-xs); font-weight: 600; padding: 2px 8px; border-radius: var(--bp-radius-4); }
   .sc-al   { background: rgba(0,226,144,.10); color: #00e290; }
   .sc-sat  { background: rgba(var(--bp-sat-rgb),.15);  color: #ff7b72; }
   .sc-bekle{ background: rgba(var(--bp-text3-rgb),.12); color: #a8b2bc; }
   .sc-meta { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 4px; }
   .sc-new  { font-size: var(--bp-text-2xs); color: var(--bp-gold); font-weight: 600; }
-  .sc-ret  { display: inline-block; font-size: var(--bp-text-sm); font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+  .sc-ret  { display: inline-block; font-size: var(--bp-text-sm); font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: var(--bp-radius-4); font-variant-numeric: tabular-nums; }
   .sc-ret-pos { background: rgba(0,226,144,.10); color: #00e290; }
   .sc-ret-neg { background: rgba(var(--bp-sat-rgb),.15); color: #ff7b72; }
   .sc-ret-neu { background: rgba(var(--bp-text3-rgb),.1); color: #a8b2bc; }
@@ -462,7 +462,7 @@ function goToDate(date) {
   <div class="section-title" style="color:var(--bp-al);margin-bottom:10px"><span aria-hidden="true">🎯</span> İdeal Giriş Noktası ({{ ideal_al|length }})</div>
   <div style="display:flex;flex-wrap:wrap;gap:8px">
     {% for s in ideal_al %}
-    <a href="/hisse/{{ s.ticker }}" style="display:inline-flex;align-items:center;gap:6px;background:#1c1b1f;border:1px solid rgba(0,226,144,.2);border-radius:7px;padding:5px 10px;text-decoration:none;transition:all .15s"
+    <a href="/hisse/{{ s.ticker }}" style="display:inline-flex;align-items:center;gap:6px;background:#1c1b1f;border:1px solid rgba(0,226,144,.2);border-radius:var(--bp-radius-7);padding:5px 10px;text-decoration:none;transition:all .15s"
        onmouseover="this.style.background='#201f21'" onmouseout="this.style.background='#1c1b1f'">
       <span style="font-size:var(--bp-text-base);font-weight:700;color:#f0f6fc">{{ s.ticker }}</span>
       {% if s.signal_price and s.price %}
@@ -606,12 +606,12 @@ function goToDate(date) {
     <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px" id="ozSubForm">
       <input id="ozSubEmail" type="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
         style="flex:1;background:#1c1b1f;border:1px solid var(--bp-border);color:#e5e1e4;
-               padding:8px 12px;border-radius:7px;font-size:var(--bp-text-base);font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-family:inherit;outline:none;
                transition:border-color .15s;min-width:0"
         onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')ozSubmitSub()">
       <button onclick="ozSubmitSub()"
-        style="background:#b8c3ff;color:#0e0e12;border:none;padding:8px 18px;border-radius:7px;
+        style="background:#b8c3ff;color:#0e0e12;border:none;padding:8px 18px;border-radius:var(--bp-radius-7);
                font-size:var(--bp-text-base);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
                transition:background .15s"
         onmouseover="this.style.background='#c8d1ff'" onmouseout="this.style.background='#b8c3ff'">

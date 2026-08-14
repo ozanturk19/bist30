@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810K">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810L">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bp-bg); color:var(--bp-text); font-family:'Manrope',system-ui,sans-serif; -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
@@ -94,7 +94,7 @@
 
   /* Stats row */
   .sec-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
-  .stat-pill { background:var(--bp-surface2); border-radius:7px; padding:9px 10px; text-align:center; }
+  .stat-pill { background:var(--bp-surface2); border-radius:var(--bp-radius-7); padding:9px 10px; text-align:center; }
   .stat-pill-lbl { font-size:var(--bp-text-sm); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--bp-text3); font-family:'Space Grotesk',sans-serif; margin-bottom:3px; }
   .stat-pill-val { font-size:var(--bp-text-lg); font-weight:800; font-variant-numeric:tabular-nums; font-family:'Space Grotesk',monospace,sans-serif; }
   .val-al { color:var(--bp-al); }
@@ -103,7 +103,7 @@
 
   /* Extra metrics */
   .sec-metrics { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
-  .metric-card { background:var(--bp-surface2); border-radius:7px; padding:9px 12px; }
+  .metric-card { background:var(--bp-surface2); border-radius:var(--bp-radius-7); padding:9px 12px; }
   .metric-lbl { font-size:var(--bp-text-2xs); font-weight:600; color:var(--bp-text3); text-transform:uppercase; letter-spacing:0.4px; font-family:'Space Grotesk',sans-serif; margin-bottom:3px; }
   .metric-val { font-size:var(--bp-text-15); font-weight:700; font-variant-numeric:tabular-nums; font-family:'Space Grotesk',monospace,sans-serif; }
 
@@ -115,7 +115,7 @@
   }
   .stock-row:hover { background:var(--bp-surface2); }
   .stock-ticker { font-size:var(--bp-text-base); font-weight:800; font-family:'Space Grotesk',system-ui,sans-serif; min-width:60px; }
-  .stock-sig { font-size:var(--bp-text-2xs); font-weight:700; padding:2px 7px; border-radius:4px; font-family:'Space Grotesk',sans-serif; flex-shrink:0; }
+  .stock-sig { font-size:var(--bp-text-2xs); font-weight:700; padding:2px 7px; border-radius:var(--bp-radius-4); font-family:'Space Grotesk',sans-serif; flex-shrink:0; }
   .sig-al  { background:rgba(0,226,144,0.15); color:var(--bp-al); }
   .sig-sat { background:rgba(var(--bp-sat-rgb),0.15); color:var(--bp-sat); }
   .sig-bkl { background:rgba(var(--bp-text3-rgb),0.15); color:var(--bp-bkl); }

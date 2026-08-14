@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810K">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810L">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -157,7 +157,7 @@
   /* ── Skeleton ── */
   .skeleton {
     background: linear-gradient(90deg, #161b22 25%, #1e2530 50%, #161b22 75%);
-    background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 4px;
+    background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--bp-radius-4);
   }
   @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
   .sk-card { height: 100px; border-radius: var(--bp-radius); }
@@ -538,7 +538,7 @@ async function loadMacroNewsSection() {
       return `<a href="${item.url}" target="_blank" rel="noopener"
         style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:10px 14px;transition:border-color .15s"
         onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
-        <span style="font-size:9px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.15);border-radius:4px;padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.source}</span>
+        <span style="font-size:9px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.15);border-radius:var(--bp-radius-4);padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.source}</span>
         <span style="font-size:var(--bp-text-base);color:#e2e8f0;line-height:1.4;font-weight:500;flex:1">${item.title}</span>
         <span style="font-size:10px;color:#64748b;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.date_str||item.published||''}</span>
       </a>`;

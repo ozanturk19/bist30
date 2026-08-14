@@ -343,9 +343,15 @@
                            2px:16   14px:13  5px:10  16px:5
      Mevcut --bp-radius (6px) ve --bp-radius-sm (3px) KORUNDU —
      yukarıdaki renk bloğunda tanımlılar, 149+28 kullanım onlara
-     bağlı, yeniden tanımlanmıyor. Üstüne basamak eklendi. */
+     bağlı, yeniden tanımlanmıyor. Üstüne basamak eklendi.
+     FAZ8 ek (4px/7px kapatma): 4px:44 ve 7px:27 ilk turda dışarıda
+     kalmıştı (yalnız "yuvarlak" ondalıklar 2/3/6/8/10/12/999
+     kapsanmıştı) — aynı font-size 15/22-17/19-26/42px kapatma
+     desenindeki gibi ikinci turda tamamlandı, DEĞER KORUNDU. */
   --bp-radius-xs:   2px;
+  --bp-radius-4:    4px;
   --bp-radius-md:   8px;
+  --bp-radius-7:    7px;
   --bp-radius-lg:   10px;
   --bp-radius-xl:   12px;
   --bp-radius-pill: 999px;

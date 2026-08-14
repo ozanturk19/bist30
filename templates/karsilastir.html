@@ -36,7 +36,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810K">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810L">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -139,7 +139,7 @@
   .col-kap    {
     display: inline-block; font-size: var(--bp-text-2xs); color: var(--bp-text3);
     background: rgba(139,148,158,.1); border: 1px solid rgba(139,148,158,.2);
-    border-radius: 4px; padding: 1px 5px; text-decoration: none; margin-top: 6px;
+    border-radius: var(--bp-radius-4); padding: 1px 5px; text-decoration: none; margin-top: 6px;
     transition: all .15s;
   }
   .col-kap:hover { color: var(--bp-text); background: rgba(139,148,158,.2); }
@@ -159,7 +159,7 @@
   .muted{ color: var(--bp-text3); }
 
   .quality-badge {
-    padding: 2px 7px; border-radius: 4px; font-size: var(--bp-text-2xs); font-weight: 700;
+    padding: 2px 7px; border-radius: var(--bp-radius-4); font-size: var(--bp-text-2xs); font-weight: 700;
     text-transform: uppercase; letter-spacing: .4px;
   }
   .q-ideal  { background: rgba(63,185,80,.18);  color:#3fb950; }
@@ -183,7 +183,7 @@
   .skeleton {
     background: linear-gradient(90deg, #161b22 25%, #1e2530 50%, #161b22 75%);
     background-size: 200% 100%; animation: shimmer 1.4s infinite;
-    border-radius: 4px; height: 14px; width: 80px; display: inline-block;
+    border-radius: var(--bp-radius-4); height: 14px; width: 80px; display: inline-block;
   }
   @keyframes shimmer {
     0%  { background-position: -200% 0; }

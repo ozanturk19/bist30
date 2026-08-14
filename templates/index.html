@@ -133,7 +133,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810K">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810L">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -575,7 +575,7 @@
     cursor: pointer;
     line-height: 1;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: var(--bp-radius-4);
   }
   .premium-modal-close:hover { color: var(--bp-text); background: rgba(255,255,255,0.05); }
   .premium-modal-icon {
@@ -859,7 +859,7 @@
     background: linear-gradient(90deg, rgba(48,54,61,0.3) 25%, rgba(30,37,48,0.6) 50%, rgba(48,54,61,0.3) 75%);
     background-size: 200% 100%;
     animation: msShimmer 1.4s infinite;
-    border-radius: 4px;
+    border-radius: var(--bp-radius-4);
   }
   @keyframes msShimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
@@ -950,7 +950,7 @@
   .gnm-kap-link {
     font-size: var(--bp-text-2xs); font-weight: 600; color: var(--bp-text3); text-decoration: none;
     background: rgba(139,148,158,0.1); border: 1px solid rgba(139,148,158,0.2);
-    border-radius: 4px; padding: 1px 5px; transition: all .15s;
+    border-radius: var(--bp-radius-4); padding: 1px 5px; transition: all .15s;
   }
   .gnm-kap-link:hover {
     color: var(--bp-text); background: rgba(139,148,158,0.2);
@@ -985,7 +985,7 @@
     font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text3);
     text-transform: uppercase; letter-spacing: .5px;
     background: rgba(139,148,158,.1); border: 1px solid rgba(139,148,158,.15);
-    border-radius: 4px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0;
+    border-radius: var(--bp-radius-4); padding: 1px 5px; white-space: nowrap; flex-shrink: 0;
     margin-top: 2px;
     max-width: 80px; overflow: hidden; text-overflow: ellipsis; /* #15: kompakt rozet */
   }
@@ -1384,7 +1384,7 @@
   }
 
   .indicators { display: flex; gap: 4px; flex-wrap: wrap; }
-  .ind-badge  { padding: 2px 7px; border-radius: 4px; font-size: var(--bp-text-2xs); font-weight: 600; }
+  .ind-badge  { padding: 2px 7px; border-radius: var(--bp-radius-4); font-size: var(--bp-text-2xs); font-weight: 600; }
   .ind-bull   { background: var(--bp-al-bg);  color: var(--bp-al); }
   .ind-bear   { background: var(--bp-sat-bg); color: var(--bp-sat); }
   .ind-neutral{ background: var(--bp-bkl-bg); color: var(--bp-bkl); }
@@ -1413,7 +1413,7 @@
     padding: 12px 16px;
   }
   .skeleton-cell {
-    height: 14px; border-radius: 4px;
+    height: 14px; border-radius: var(--bp-radius-4);
     background: linear-gradient(90deg, var(--bp-surface2) 25%, var(--bp-surface3) 50%, var(--bp-surface2) 75%);
     background-size: 800px 100%;
     animation: shimmer 1.4s infinite linear;
@@ -1442,7 +1442,7 @@
 
   /* ── Index header skeleton ─── */
   .idx-sk {
-    display: inline-block; height: 20px; border-radius: 4px; vertical-align: middle;
+    display: inline-block; height: 20px; border-radius: var(--bp-radius-4); vertical-align: middle;
     background: linear-gradient(90deg, var(--bp-surface2) 25%, var(--bp-surface3) 50%, var(--bp-surface2) 75%);
     background-size: 800px 100%;
     animation: shimmer 1.4s infinite linear;
@@ -1675,12 +1675,12 @@
   .alert-modal-row input[type=number] { width:72px; background:#0d1117; border:1px solid #30363d; border-radius:var(--bp-radius); color:#e6edf3; padding:5px 8px; font-size:var(--bp-text-base); }
   .alert-modal-row input[type=number]:focus { outline:none; border-color:#ffc850; }
   .alert-modal-row input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
-  .alert-modal-save { width:100%; margin-top:14px; padding:9px 0; background:#ffc850; color:#0e0e12; border:none; border-radius:7px; font-weight:700; font-size:var(--bp-text-md); cursor:pointer; }
+  .alert-modal-save { width:100%; margin-top:14px; padding:9px 0; background:#ffc850; color:#0e0e12; border:none; border-radius:var(--bp-radius-7); font-weight:700; font-size:var(--bp-text-md); cursor:pointer; }
   .alert-modal-save:hover { background:#ffd875; }
-  .alert-modal-delete { width:100%; margin-top:6px; padding:7px 0; background:none; color:#ef4444; border:1px solid rgba(239,68,68,.4); border-radius:7px; font-size:var(--bp-text-base); cursor:pointer; }
+  .alert-modal-delete { width:100%; margin-top:6px; padding:7px 0; background:none; color:#ef4444; border:1px solid rgba(239,68,68,.4); border-radius:var(--bp-radius-7); font-size:var(--bp-text-base); cursor:pointer; }
   .alert-modal-delete:hover { background:rgba(239,68,68,.08); }
   .alert-modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#8b949e; font-size:var(--bp-text-xl); cursor:pointer; }
-  .alert-modal-login-notice { font-size:var(--bp-text-base); color:#ffc850; background:rgba(255,200,80,.08); border:1px solid rgba(255,200,80,.25); border-radius:7px; padding:9px 12px; margin-bottom:12px; }
+  .alert-modal-login-notice { font-size:var(--bp-text-base); color:#ffc850; background:rgba(255,200,80,.08); border:1px solid rgba(255,200,80,.25); border-radius:var(--bp-radius-7); padding:9px 12px; margin-bottom:12px; }
   .alert-modal-status { font-size:var(--bp-text-sm); color:#22c55e; margin-top:8px; text-align:center; min-height:18px; }
   .alarm-panel {
     position:fixed; bottom:24px; right:24px; z-index:999;
@@ -1722,7 +1722,7 @@
   .ap-pa-input.has-alarm { border-color:#e3b341; color:#e3b341; }
   .ap-pa-set {
     background:none; border:1px solid var(--bp-border); color:var(--bp-text3); cursor:pointer;
-    font-size:var(--bp-text-2xs); border-radius:4px; padding:2px 6px; font-family:inherit;
+    font-size:var(--bp-text-2xs); border-radius:var(--bp-radius-4); padding:2px 6px; font-family:inherit;
     transition:all .15s; white-space:nowrap;
   }
   .ap-pa-set:hover { border-color:#e3b341; color:#e3b341; }
@@ -1756,12 +1756,12 @@
   .sub-toast-row   { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
   .sub-toast-input {
     width:100%; background:var(--bp-surface2); border:1px solid var(--bp-border); color:var(--bp-text);
-    padding:9px 12px; border-radius:7px; font-size:var(--bp-text-base); outline:none;
+    padding:9px 12px; border-radius:var(--bp-radius-7); font-size:var(--bp-text-base); outline:none;
     font-family:inherit; transition:border-color .15s; box-sizing:border-box;
   }
   .sub-toast-input:focus { border-color:var(--bp-brand); }
   .sub-toast-btn {
-    background:var(--bp-brand); color:var(--bp-bg); border:none; padding:9px 16px; border-radius:7px;
+    background:var(--bp-brand); color:var(--bp-bg); border:none; padding:9px 16px; border-radius:var(--bp-radius-7);
     font-size:var(--bp-text-base); font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap;
     transition:background .15s; margin-top:2px;
   }
@@ -1861,7 +1861,7 @@
   .mc-cell {
     background: rgba(var(--bp-surface3-rgb),0.6);
     border: 1px solid rgba(var(--bp-border-rgb),0.6);
-    border-radius: 4px; padding: 5px 7px;
+    border-radius: var(--bp-radius-4); padding: 5px 7px;
   }
   .mc-cell-lbl {
     font-size: var(--bp-text-sm); font-weight: 600; color: var(--bp-text3);
@@ -2355,9 +2355,9 @@
         <div class="bilanco-mini-box" id="bilancoMini">
           <h3 class="bilanco-mini-title"><span aria-hidden="true">📅</span> Bilanço Dönemi</h3>
           <div id="bilancoMiniBody" style="min-height:60px">
-            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
-            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
-            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;width:70%"></div>
+            <div style="height:12px;border-radius:var(--bp-radius-4);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
+            <div style="height:12px;border-radius:var(--bp-radius-4);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
+            <div style="height:12px;border-radius:var(--bp-radius-4);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;width:70%"></div>
           </div>
           <a href="/bilanco-takvimi" class="bilanco-mini-link">Tüm takvim <span aria-hidden="true">→</span></a>
         </div>
@@ -2546,7 +2546,7 @@
       <div style="font-size:var(--bp-text-36);margin-bottom:12px"><span aria-hidden="true">🔍</span></div>
       <div style="font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-text);margin-bottom:8px">Sonuç bulunamadı</div>
       <div style="font-size:var(--bp-text-base);color:var(--bp-text3);margin-bottom:20px">Bu kriterlere uyan hisse yok. Filtreleri gevşetin ya da arama terimini değiştirin.</div>
-      <button onclick="resetFilters()" style="background:var(--bp-brand);color:var(--bp-bg);border:none;border-radius:4px;padding:8px 20px;font-size:var(--bp-text-base);font-weight:700;cursor:pointer">Filtreleri Sıfırla</button>
+      <button onclick="resetFilters()" style="background:var(--bp-brand);color:var(--bp-bg);border:none;border-radius:var(--bp-radius-4);padding:8px 20px;font-size:var(--bp-text-base);font-weight:700;cursor:pointer">Filtreleri Sıfırla</button>
     </div>
   </div>
 
@@ -2892,7 +2892,7 @@ async function buildCharts(d) {
     'display:flex', 'gap:14px', 'pointer-events:none',
     'font-size:11px', 'font-variant-numeric:tabular-nums',
     'background:rgba(22,27,34,0.75)', 'padding:3px 8px',
-    'border-radius:4px', 'backdrop-filter:blur(2px)',
+    'border-radius:var(--bp-radius-4)', 'backdrop-filter:blur(2px)',
   ].join(';');
   elMain.appendChild(elLegend);
 
@@ -4537,7 +4537,7 @@ async function manualRefresh() {
         <td class="hide-mobile"><div class="skeleton-cell sk-wide"></div></td>
         <td class="hide-mobile"><div class="skeleton-cell sk-wide"></div></td>
         <td class="hide-mobile"><div class="skeleton-cell sk-dots"></div></td>
-        <td class="hide-mobile"><div class="skeleton-cell" style="width:120px;height:14px;border-radius:4px"></div></td>
+        <td class="hide-mobile"><div class="skeleton-cell" style="width:120px;height:14px;border-radius:var(--bp-radius-4)"></div></td>
       </tr>`
     ).join('');
   }

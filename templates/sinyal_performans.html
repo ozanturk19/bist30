@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810K">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810L">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -64,8 +64,8 @@
   .sig-sat { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
 
   /* Bars */
-  .bar-wrap { background:#21262d; border-radius:4px; height:8px; width:120px; overflow:hidden; display:inline-block; vertical-align:middle; }
-  .bar-fill { height:100%; border-radius:4px; }
+  .bar-wrap { background:#21262d; border-radius:var(--bp-radius-4); height:8px; width:120px; overflow:hidden; display:inline-block; vertical-align:middle; }
+  .bar-fill { height:100%; border-radius:var(--bp-radius-4); }
 
   /* Computing notice */
   .computing { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:40px; text-align:center; color:#8b949e; }
@@ -121,7 +121,7 @@
   .premium-cta-text { font-size: var(--bp-text-base); color: #e6edf3; }
   .premium-cta-text strong { color: var(--bp-premium); }
   .premium-cta-btn {
-    display: inline-block; padding: 7px 14px; border-radius: 7px;
+    display: inline-block; padding: 7px 14px; border-radius: var(--bp-radius-7);
     background: var(--bp-premium); color: #fff; font-size: var(--bp-text-sm); font-weight: 700;
     text-decoration: none; white-space: nowrap;
   }
