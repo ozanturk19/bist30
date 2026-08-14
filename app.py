@@ -9884,12 +9884,13 @@ def gucu_yuksek():
         updated_at = _cache.get("updated_at", "")
         loading = len(stocks) == 0
 
-    # Sadece AL/SAT sinyallerini al; kanonik cache alanı signal_strength ile sırala
+    # CPO-DEV2-004 karar #2: yalnız AL (SAT/Trend Bozuldu haric - yeni pozisyon onerisi degil, cikis uyarisi)
+    # kanonik cache alanı signal_strength ile sırala
     # (CPO-983 puanlama tutarlılık fix: eskiden burada kompozit skor canlı yeniden
     # hesaplanıyordu ve analyze()'daki F5 AI Sentiment ±5 ayarını atlıyordu — bu da
     # hisse detay sayfasındaki signal_strength'ten farklı bir sayı üretiyordu. Artık
     # her iki sayfa da AYNI önceden hesaplanmış cache alanını okuyor, tek kaynak.)
-    active = [s for s in stocks if s.get("signal") in ("AL", "SAT") and s.get("ticker") != "XU030"]
+    active = [s for s in stocks if s.get("signal") == "AL" and s.get("ticker") != "XU030"]
     for s in active:
         s["_mscore"] = s.get("signal_strength") or 0
     active.sort(key=lambda s: s["_mscore"], reverse=True)
