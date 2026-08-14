@@ -102,9 +102,11 @@
 /* SPEC-007 sitewide premium modal — window.* atamaları sayfadaki eski kopyayı override eder.
    index.html dahil tüm sayfalarda bu partial tek kaynak (Option A, CPO MSG-122). */
 {
+  let _premiumModalRelease = null;
   window.closePremiumModal = function() {
     const modal = document.getElementById('premiumModal');
     if (!modal) return;
+    if (_premiumModalRelease) { _premiumModalRelease(); _premiumModalRelease = null; }
     modal.classList.remove('visible');
     setTimeout(() => { modal.style.display = 'none'; }, 200);
   };
@@ -125,8 +127,10 @@
           </p>
           <form id="premiumModalForm" onsubmit="event.preventDefault();submitPremium();return false;">
             <input type="email" id="pmEmail" placeholder="E-posta adresin" required
+                   aria-label="E-posta adresin"
                    autocomplete="email" autocapitalize="off" autocorrect="off">
             <input type="text" id="pmName" placeholder="Adın (opsiyonel)"
+                   aria-label="Adın (opsiyonel)"
                    autocomplete="given-name" maxlength="50">
             <div class="premium-modal-buttons">
               <button type="submit" id="pmSubmitBtn" class="premium-modal-submit">💎 Premium'u Aç</button>
@@ -143,6 +147,7 @@
     modal.style.display = 'flex';
     setTimeout(() => {
       modal.classList.add('visible');
+      if (window.bpTrapFocus) _premiumModalRelease = window.bpTrapFocus(modal.querySelector('.premium-modal'), closePremiumModal);
       const e = document.getElementById('pmEmail');
       if (e) e.focus();
     }, 10);
