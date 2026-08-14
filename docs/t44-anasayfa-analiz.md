@@ -133,3 +133,18 @@ Sonuç: bu madde en baştan "çoğunlukla dokümantasyon" olarak işaretlenmişt
 **4-6/6 — Ozan/CPO onayı bekliyor**, DEV2-094'te işaretlendiği gibi.
 
 **Sıradaki:** T4.4'ün DEV2-aksiyonlu kısmı burada tamamlandı. CPO-DEV2-004'te onaylanan bağımsız küçük kalem (`/gucu-yuksek` preset + `gucu_yuksek.html` 900px container, "T4.4'ten sonraki bir turda ele al" notuyla) sırada.
+
+
+---
+
+## 8. DÜZELTME (Bölüm 7'deki "3/6 kod değişikliği yapılmadı" iddiası YANLIŞ — eşzamanlı ikinci bir DEV2 oturumu farklı bir karar verip DEPLOY ETMİŞ)
+
+Bölüm 7'yi yazarken (bu oturumda) mailbox'ı/git log'u tazelemeden karar verdim: aynı görevi çalıştıran **başka bir DEV2 oturumu eşzamanlı olarak** aynı adımı (3/6 Tablo) ele almış, onboarding banner'ı FİİLEN sayfa başından tablo-wrap'in hemen üstüne taşımış ve deploy etmiş (`e33d247`, DEV2-098/099). O oturumun gerekçesi de makul: "onboarding ipucu '?' terim tooltip'lerinden bahsediyor, bu tooltip'ler tabloda/kartlarda görünüyor — banner ilgili olduğu içeriğin yanına gitmeli."
+
+**Gerçek/canlı durum artık şu** (Bölüm 7'deki "KOD DEĞİŞİKLİĞİ YAPILMADI" cümlesini geçersiz kılar):
+- Onboarding banner taşındı (`e33d247`), canlı doğrulandı (DEV2-099: DOM sırası, bounding-box bitişikliği, dismiss/localStorage davranışı testleri PASS).
+- Alarm FAB/Panel: her iki oturum da aynı sonuca vardı (kod değişmedi, yalnız açıklayıcı yorum) — bu kısımda çelişki yok.
+
+Kendi Bölüm 7 analizim (banner taşımanın UX'i kötüleştireceği) bilinçli bir görüş olarak kalsın diye SİLMİYORUM, ama **artık geçerli olan canlı kod `e33d247`'dir** — kendi analizimi "doğru" ilan edip geri almadım, CPO'ya iki bakış açısını da (kendiminki + deploy edilenin gerekçesi) ayrıştırarak bildiriyorum, karar CPO'nun.
+
+**Daha önemlisi — sistemsel bulgu:** Bu, aynı görevi (`borsapusula-dev2-donusum` zamanlanmış görevi) çalıştıran iki ayrı ajan oturumunun **aynı anda, aynı paylaşılan `/root/bist30` çalışma dizininde**, koordinasyonsuz şekilde git işlemleri yaptığını kanıtlıyor. Bu turda şans eseri zincir doğrusal kaldı (git conflict/kayıp commit olmadı, `pre-deploy-check.sh` hâlâ 7/7 PASS) ama bu garanti değil — iki oturum aynı anda `git checkout -b` aynı branch adını denerse, ya da aynı anda push ederse gerçek bir çakışma/veri kaybı riski var. Mailbox'a ayrıca bildiriyorum.
