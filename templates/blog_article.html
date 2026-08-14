@@ -161,7 +161,7 @@
   .faq-section { margin-top:36px; padding-top:28px; border-top:1px solid #21262d; }
   .faq-section-title { font-size:var(--bp-text-lg); font-weight:700; color:#f0f6fc; margin-bottom:14px; }
   .faq-item { border:1px solid #30363d; border-radius:var(--bp-radius-md); margin-bottom:8px; overflow:hidden; transition:border-color .15s; }
-  .faq-item:hover { border-color:#484f58; }
+  .faq-item:hover { border-color:var(--bp-border2); }
   .faq-q {
     width:100%; text-align:left; background:none; border:none; cursor:pointer;
     padding:13px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px;
@@ -169,7 +169,7 @@
     transition:background .12s;
   }
   .faq-q:hover { background:rgba(255,255,255,.03); }
-  .faq-q .faq-chevron { flex-shrink:0; color:#484f58; transition:transform .2s; }
+  .faq-q .faq-chevron { flex-shrink:0; color:var(--bp-text3); transition:transform .2s; }
   .faq-item.open .faq-chevron { transform:rotate(180deg); }
   .faq-a {
     display:none; padding:0 16px 13px; font-size:var(--bp-text-base); color:#8b949e; line-height:1.65;
@@ -334,7 +334,7 @@
     </div>
     <button onclick="document.getElementById('artSubBar').style.display='none'"
       style="position:absolute;top:8px;right:10px;background:none;border:none;
-             color:#484f58;font-size:var(--bp-text-xl);cursor:pointer;line-height:1;padding:2px 4px;"
+             color:var(--bp-text3);font-size:var(--bp-text-xl);cursor:pointer;line-height:1;padding:2px 4px;"
       title="Kapat">×</button>
   </div>
 
