@@ -419,7 +419,6 @@
     transition:border-color 0.15s;
   }
   .mr-card:hover { border-color:var(--accent,#1f6feb); }
-  .mr-card.mr-locked { filter:blur(4px); pointer-events:none; user-select:none; }
   .mr-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
   .mr-ticker { font-size:var(--bp-text-15); font-weight:700; color:var(--text); letter-spacing:0.5px; }
   .mr-name   { font-size:var(--bp-text-xs); color:var(--text3); margin-top:1px; }
@@ -430,23 +429,6 @@
 
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--text3); border-top:1px solid var(--border2); margin-top:32px; }
   footer a { color:var(--text2); text-decoration:none; }
-  /* SPEC-007: Premium paywall — blur + CTA banner */
-  tr.tier-locked { filter: blur(5px); user-select: none; pointer-events: none; }
-  .premium-cta-row {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; flex-wrap: wrap;
-    padding: 11px 16px; margin: 12px 0;
-    background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),0.10), rgba(var(--bp-premium-rgb),0.04));
-    border: 1px solid rgba(var(--bp-premium-rgb),0.32); border-radius:var(--bp-radius-md);
-  }
-  .premium-cta-text { font-size: var(--bp-text-base); color: var(--text); }
-  .premium-cta-text strong { color: var(--bp-premium); }
-  .premium-cta-btn {
-    display: inline-block; padding: 7px 14px; border-radius: var(--bp-radius-7);
-    background: var(--bp-premium); color: #fff; font-size: var(--bp-text-sm); font-weight: 700;
-    text-decoration: none; white-space: nowrap;
-  }
-  .premium-cta-btn:hover { background: #c084fc; }
 </style>
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -544,12 +526,6 @@
         CSV
       </button>
     </div>
-  </div>
-
-  <!-- SPEC-007: Premium paywall CTA banner (renderResults JS ile görünür/gizli) -->
-  <div class="premium-cta-row" id="premiumCtaBar" style="display:none">
-    <span class="premium-cta-text"><span aria-hidden="true">🔒</span> Premium sinyaller blur'lu</span>
-    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()"><span aria-hidden="true">💎</span> Premium'u Aç (ücretsiz)</button>
   </div>
 
   <!-- Tablo -->
@@ -884,12 +860,6 @@ function _hydrateFiltersFromUrl() {
   } catch(_) {}
 }
 
-/* SPEC-007: Premium erişim kontrolü — bp_premium_trial cookie (index.html ile aynı) */
-function _hasPremiumAccess() {
-  try { return !!document.cookie.match(/(?:^|;\s*)bp_premium_trial=1/); }
-  catch(_) { return false; }
-}
-
 function renderResults(rows, count) {
   _csvData = rows;
   document.getElementById('loadingDiv').style.display = 'none';
@@ -903,20 +873,6 @@ function renderResults(rows, count) {
     const _mrlE = document.getElementById('mobileResultCards');
     if (_mrlE) _mrlE.innerHTML = '';
     return;
-  }
-
-  // SPEC-007: Premium paywall — anonim user'da premium row blur + CTA banner
-  const _premLocked = !_hasPremiumAccess();
-  const _premCount  = rows.filter(s => s.tier === 'premium').length;
-  const _ctaBar = document.getElementById('premiumCtaBar');
-  if (_ctaBar) {
-    if (_premLocked && _premCount > 0) {
-      _ctaBar.style.display = '';
-      const _txt = _ctaBar.querySelector('.premium-cta-text');
-      if (_txt) _txt.innerHTML = `🔒 <strong>${_premCount} Premium sinyal</strong> blur'lu — net görmek için Premium'u aç`;
-    } else {
-      _ctaBar.style.display = 'none';
-    }
   }
 
   // === Yardımcı fonksiyonlar (UX-2 Task #23, CPO-475) ===
@@ -972,8 +928,7 @@ function renderResults(rows, count) {
     const eqHtml  = s.entry_quality
       ? `<span class="eq-badge ${eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
       : '—';
-    const _locked = (_premLocked && s.tier === 'premium') ? ' class="tier-locked"' : '';
-    return `<tr${_locked}>
+    return `<tr>
       <td>
         <a href="/hisse/${s.ticker}">
           <div class="tk">${s.ticker}${s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:var(--bp-premium);font-size:11px;vertical-align:middle">💎</span>' : s.tier === 'plus' ? ' <span title="Plus sinyal" style="color:#1f6feb;font-size:11px;vertical-align:middle">⭐</span>' : ''}</div>
@@ -1003,14 +958,13 @@ function renderResults(rows, count) {
       const _eqH     = s.entry_quality
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
         : '<span style="color:var(--text3)">—</span>';
-      const _lk  = (_premLocked && s.tier === 'premium') ? ' mr-locked' : '';
       const _prm = s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:var(--bp-premium);font-size:11px">💎</span>' : s.tier === 'plus' ? ' <span title="Plus sinyal" style="color:#1f6feb;font-size:11px">⭐</span>' : '';
       const _tlbl = s.adx_label || 'Zayıf';
       const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
       // T3.5: mobil kartta da masaüstüyle aynı skor rengi (tier bazlı) — bkz. scoreCell()
       const _scv  = s.signal_strength || 0;
       const _sccls = s.tier === 'premium' ? 'premium' : s.tier === 'plus' ? 'plus' : s.tier === 'standart' ? 'standart' : 'weak';
-      return `<a href="/hisse/${s.ticker}" class="mr-card${_lk}">
+      return `<a href="/hisse/${s.ticker}" class="mr-card">
         <div class="mr-top">
           <div><div class="mr-ticker">${s.ticker}${_prm}</div><div class="mr-name">${(s.name||'').replace(' A.Ş.','').substring(0,22)}</div></div>
           <span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span>
@@ -1084,6 +1038,5 @@ bpStartDataQualityPolling();
 </script>
 <script src="/static/bp-search.js?v=47" defer></script>
 <script src="/static/learning-mode.js?v=2" defer></script>
-{% include '_premium_modal.html' %}
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

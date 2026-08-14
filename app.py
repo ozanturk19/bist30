@@ -10260,25 +10260,6 @@ def run_backtest():
         logger.warning("Backtest disk yazma hatası: %s", e)
 
 
-# ── SPEC-007: Site-wide Premium Paywall — has_premium_access helper ──────────
-def has_premium_access():
-    """Kullanıcının Premium erişimi var mı? bp_premium_trial cookie (email submit sonrası)."""
-    try:
-        return request.cookies.get("bp_premium_trial") == "1"
-    except Exception:
-        return False
-
-@app.context_processor
-def _inject_premium_status():
-    """SPEC-007: Tüm Jinja template'lerinde has_premium_access + premium_count."""
-    try:
-        with _lock:
-            _stocks = list(_cache.get("data") or [])
-        pc = sum(1 for s in _stocks if s.get("tier") == "premium")
-    except Exception:
-        pc = 0
-    return dict(has_premium_access=has_premium_access(), premium_count=pc)
-
 @app.context_processor
 def _inject_analytics_context():
     """CPO-1108 A1: _analytics.html partial'inin ihtiyaç duyduğu guard + token."""
@@ -10995,12 +10976,8 @@ def api_recognize():
         "ok":               True,
         "name":             rec.get("name", ""),
         "subscribed_at":    rec.get("subscribed_at", ""),
-        "premium_unlocked": True,   # MSG-116 Bug E: üye girişi → premium 30 gün retention bonus
     })
     resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
-    # MSG-116 Bug E: "Üye Girişi" eski aboneye Premium 30 gün açar (retention bonus).
-    # recognize AÇIK aksiyon (buton + email) — pasif bypass değil, MSG-073 kuralıyla uyumlu.
-    resp.set_cookie("bp_premium_trial", "1", max_age=30 * 86400, samesite="Lax", secure=True, httponly=False)
     return resp
 
 
