@@ -115,7 +115,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810K">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810L">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -742,7 +742,7 @@
   .sig-stat-val  { font-size:var(--bp-text-26); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
   .sig-stat-lbl  { font-size:var(--bp-text-2xs); color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   @keyframes shimmerStat { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-  .stat-sk { background:linear-gradient(90deg,var(--bp-surface2) 25%,#252d3a 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:4px; display:inline-block; }
+  .stat-sk { background:linear-gradient(90deg,var(--bp-surface2) 25%,#252d3a 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:var(--bp-radius-4); display:inline-block; }
   @media(max-width:500px) { .sig-stats-row{grid-template-columns:repeat(2,1fr);} }
 
   /* ── Sinyal geçmişi ── */
@@ -942,7 +942,7 @@
   .kap-class-badge {
     display: inline-block;
     padding: 1px 7px;
-    border-radius: 4px;
+    border-radius: var(--bp-radius-4);
     font-size: var(--bp-text-2xs);
     font-weight: 700;
     letter-spacing: .3px;
@@ -1397,7 +1397,7 @@
       flex: 1; text-align: center;
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       padding: 9px 12px;
-      border-radius: 7px;
+      border-radius: var(--bp-radius-7);
       border: none;
       font-family: 'Manrope', system-ui, sans-serif;
       font-size: var(--bp-text-base); font-weight: 600;
@@ -2387,11 +2387,11 @@
   </div>
   <div style="display:flex;gap:7px;align-items:center" id="hisseSubForm">
     <input id="hisseSubEmail" type="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
-      style="background:#141416;border:1px solid var(--bp-border);color:#e5e1e4;padding:6px 11px;border-radius:7px;font-size:var(--bp-text-sm);font-family:inherit;outline:none;transition:border-color .15s;width:200px"
+      style="background:#141416;border:1px solid var(--bp-border);color:#e5e1e4;padding:6px 11px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);font-family:inherit;outline:none;transition:border-color .15s;width:200px"
       onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
       onkeydown="if(event.key==='Enter')hisseSubscribe()">
     <button onclick="hisseSubscribe()"
-      style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:7px;font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;white-space:nowrap">
+      style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;white-space:nowrap">
       Abone Ol
     </button>
   </div>
@@ -3606,7 +3606,7 @@ async function loadNews(retryCount) {
         kapA.href = data.kap_url;
         kapA.target = '_blank';
         kapA.rel = 'noopener';
-        kapA.style.cssText = 'font-size:11px;color:var(--bp-text3);background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.2);border-radius:4px;padding:2px 7px;text-decoration:none;margin-left:auto;white-space:nowrap;';
+        kapA.style.cssText = 'font-size:11px;color:var(--bp-text3);background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.2);border-radius:var(--bp-radius-4);padding:2px 7px;text-decoration:none;margin-left:auto;white-space:nowrap;';
         kapA.innerHTML = 'KAP <span aria-hidden="true">↗</span>';
         sourceEl.appendChild(kapA);
       }
@@ -3684,7 +3684,7 @@ async function loadSignalExplanation(retryCount) {
         loadEl.style.display = 'flex';
         setTimeout(() => loadSignalExplanation(retryCount + 1), 6000);
       } else {
-        loadEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
+        loadEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
         loadEl.style.display = 'flex';
       }
     } else {
@@ -3695,7 +3695,7 @@ async function loadSignalExplanation(retryCount) {
     if (retryCount < 2) {
       setTimeout(() => loadSignalExplanation(retryCount + 1), 8000);
     } else {
-      loadEl.innerHTML = 'Açıklama yüklenemedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
+      loadEl.innerHTML = 'Açıklama yüklenemedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
       loadEl.style.display = 'flex';
     }
   }
