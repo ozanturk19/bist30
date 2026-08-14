@@ -23,7 +23,7 @@
   ]
 }
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810M">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -109,7 +109,7 @@
   .sc-signal { text-align:center; }
   .sig-badge {
     display:inline-flex; align-items:center; gap:5px;
-    padding:6px 16px; border-radius:20px; font-size:var(--bp-text-base); font-weight:700; letter-spacing:.3px;
+    padding:6px 16px; border-radius:var(--bp-radius-20); font-size:var(--bp-text-base); font-weight:700; letter-spacing:.3px;
   }
   .sig-AL   { background:rgba(63,185,80,.12); color:var(--al); border:1px solid rgba(63,185,80,.3); }
   .sig-SAT  { background:rgba(var(--bp-sat-rgb),.12); color:var(--sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
@@ -186,7 +186,7 @@
   /* ── Week 52 ── */
   .w52-bar-wrap { background:var(--border2); border-radius:var(--bp-radius-4); height:6px; margin-top:6px; overflow:hidden; position:relative; }
   .w52-bar-fill { height:100%; border-radius:var(--bp-radius-4); background:linear-gradient(90deg,var(--sat),var(--gold),var(--al)); }
-  .w52-marker   { position:absolute; top:-3px; width:2px; height:12px; background:var(--text); border-radius:1px; }
+  .w52-marker   { position:absolute; top:-3px; width:2px; height:12px; background:var(--text); border-radius:var(--bp-radius-1); }
 
   /* ── Other Assets ── */
   .other-assets { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
@@ -223,7 +223,7 @@
   @keyframes spin { to{transform:rotate(360deg)} }
   .news-retry-btn {
     background:none; border:1px solid var(--border); color:var(--brand);
-    padding:3px 10px; border-radius:5px; cursor:pointer; font-size:var(--bp-text-sm);
+    padding:3px 10px; border-radius:var(--bp-radius-5); cursor:pointer; font-size:var(--bp-text-sm);
     transition:border-color .15s;
   }
   .news-retry-btn:hover { border-color:var(--brand); }
