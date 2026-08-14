@@ -114,3 +114,22 @@ Her adım: eski blok geçici olarak `display:none` + İLGİLİ JS HANDLER'LARI D
 6. **ORTA** — Stats Bar/Breadth Bar "aynı veri" iddiası doğrulanmadı
 7. **DÜŞÜK** — Alarm FAB "blok sayılmıyor" kozmetik yeniden-etiketleme, gerçek konsolidasyon değil — öyle raporlanmamalı
 8. **DÜŞÜK** — PWA install banner'ın `beforeinstallprompt` browser-eligibility bağımlılığı ele alınmamış
+
+
+---
+
+## 7. UYGULAMA DURUMU (canlı ilerleme, en son güncelleme Cum 14.08 TR)
+
+**1/6 Filtre birleştirme — CANLI (`57f12c7`).** 5 filtre yüzeyi `.bp-filter-panel`'de birleşti. Kanıt: DEV2-096.
+
+**2/6 Piyasa Nabzı — CANLI (`ffbb2b8`).** Dual-endeks+stats-bar+market-breadth `.bp-market-pulse`'da birleşti, Öne Çıkanlar'ın üzerine alındı. Kanıt: DEV2-097. (Yan-bulgu: aynı turda stat-sat/stat-bekle kartlarının sessiz onclick kırığı bulunup düzeltildi, `1723990`.)
+
+**3/6 Tablo'ya onboarding/alarm bağlama — KOD DEĞİŞİKLİĞİ YAPILMADI, kasıtlı.** Uygulamaya geçmeden önce iki varsayımı doğruladım:
+- **Alarm FAB/Panel:** `.alarm-fab { position:fixed; bottom:24px; right:20px; }` — DOM konumu görsel olarak TAMAMEN ilgisiz, her zaman sağ-alt köşede sabit render ediyor. DOM'da "tabloya yakın" taşımak sıfır görsel etki yaratır — bu yüzden bağımsız eleştirinin 7. bulgusu ("kozmetik yeniden-etiketleme, gerçek konsolidasyon değil") burada da geçerli, kod değişikliği anlamsız olurdu.
+- **Onboarding banner:** şu an sayfanın EN ÜSTÜNDE (stale-banner'dan hemen sonra) — yeni kullanıcıyı İLK ANDA yönlendirmek için kasıtlı bir konum. "Tabloya bağlamak" için tabloya taşımak, Endeks+Piyasa-Nabzı+Öne-Çıkanlar+Bugünün-Özeti+Gündem gibi çok sayıda bloğun ALTINA gömülmesi anlamına gelirdi — bu ilk-kullanım ipucunu daha az görünür kılar, UX'i İYİLEŞTİRMEZ, KÖTÜLEŞTİRİR.
+
+Sonuç: bu madde en baştan "çoğunlukla dokümantasyon" olarak işaretlenmişti (Bölüm 2, madde 4) — gerçek uygulaması da öyle: kod değişikliği YOK, yalnız bu doküman güncellemesi. Zorla bir DOM taşıması yapmak hem sıfır fayda (FAB) hem net zarar (banner) getirirdi.
+
+**4-6/6 — Ozan/CPO onayı bekliyor**, DEV2-094'te işaretlendiği gibi.
+
+**Sıradaki:** T4.4'ün DEV2-aksiyonlu kısmı burada tamamlandı. CPO-DEV2-004'te onaylanan bağımsız küçük kalem (`/gucu-yuksek` preset + `gucu_yuksek.html` 900px container, "T4.4'ten sonraki bir turda ele al" notuyla) sırada.
