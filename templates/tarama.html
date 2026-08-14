@@ -21,7 +21,7 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   :root {
     --bg:var(--bp-bg); --surface:#161b22; --surface2:#1c2128;
-    --border:var(--bp-bkl-bd); --border2:#21262d;
+    --border:var(--bp-bkl-bd);
     --text:#e6edf3; --text2:#8b949e; --text3:var(--bp-text3);
     --al:#3fb950; --sat:var(--bp-sat); --bkl:#8b949e;
     --brand:#1f6feb; --gold:#e3b341;
@@ -54,7 +54,7 @@
 
   /* ── Makro bar ── */
   .macro-bar {
-    background:var(--bp-bg); border-bottom:1px solid var(--border2);
+    background:var(--bp-bg); border-bottom:1px solid var(--bp-border-subtle);
     height:32px; overflow:hidden; position:relative; white-space:nowrap;
   }
   .macro-bar::before,.macro-bar::after {
@@ -74,7 +74,7 @@
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item {
     display:inline-flex; align-items:center; gap:7px;
-    padding:0 18px; border-right:1px solid var(--border2); font-size:var(--bp-text-xs); height:32px;
+    padding:0 18px; border-right:1px solid var(--bp-border-subtle); font-size:var(--bp-text-xs); height:32px;
   }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
@@ -247,7 +247,7 @@
   }
   .th-sort-btn.sort-asc::after  { content:' ▲'; color:var(--brand); }
   .th-sort-btn.sort-desc::after { content:' ▼'; color:var(--brand); }
-  tbody td { padding:10px 14px; border-bottom:1px solid var(--border2); vertical-align:middle; }
+  tbody td { padding:10px 14px; border-bottom:1px solid var(--bp-border-subtle); vertical-align:middle; }
   tbody tr:last-child td { border-bottom:none; }
   tbody tr:hover td { background:rgba(255,255,255,.02); }
   tbody a { text-decoration:none; color:inherit; }
@@ -256,7 +256,7 @@
   .tk-name { font-size:var(--bp-text-xs); color:var(--text2); margin-top:1px; }
   .sector-tag {
     font-size:var(--bp-text-2xs); color:var(--text3); background:var(--surface2);
-    border:1px solid var(--border2); border-radius:var(--bp-radius-lg); padding:2px 7px;
+    border:1px solid var(--bp-border-subtle); border-radius:var(--bp-radius-lg); padding:2px 7px;
     white-space:nowrap;
   }
 
@@ -283,7 +283,7 @@
   .bars-val { font-size:var(--bp-text-sm); color:var(--text2); }
 
   /* ADX mini bar */
-  .adx-bar-bg { width:48px; height:4px; background:var(--border2); border-radius:var(--bp-radius-xs); margin-top:3px; overflow:hidden; }
+  .adx-bar-bg { width:48px; height:4px; background:var(--bp-border-subtle); border-radius:var(--bp-radius-xs); margin-top:3px; overflow:hidden; }
   .adx-bar-fill { height:100%; border-radius:var(--bp-radius-xs); background:linear-gradient(90deg,#e3b341,#f0a500); }
 
   /* ── Boş durum ── */
@@ -386,7 +386,7 @@
     position:absolute; bottom:100%; left:50%;
     transform:translateX(-50%) translateY(-6px);
     background:#1c2128; color:var(--text);
-    border:1px solid var(--border2);
+    border:1px solid var(--bp-border-subtle);
     border-radius:var(--bp-radius); padding:5px 9px;
     font-size:var(--bp-text-xs); font-weight:500;
     white-space:nowrap; z-index:var(--bp-z-dropdown);
@@ -428,7 +428,7 @@
   .mr-metric-label { font-size:var(--bp-text-2xs); color:var(--text3); text-transform:uppercase; letter-spacing:0.4px; }
   .mr-price-val { font-variant-numeric:tabular-nums; font-size:var(--bp-text-base); font-weight:600; color:var(--text); }
 
-  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--text3); border-top:1px solid var(--border2); margin-top:32px; }
+  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--text3); border-top:1px solid var(--bp-border-subtle); margin-top:32px; }
   footer a { color:var(--text2); text-decoration:none; }
   /* SPEC-007: Premium paywall — blur + CTA banner */
   tr.tier-locked { filter: blur(5px); user-select: none; pointer-events: none; }
