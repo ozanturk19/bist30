@@ -102,11 +102,6 @@
 /* SPEC-007 sitewide premium modal — window.* atamaları sayfadaki eski kopyayı override eder.
    index.html dahil tüm sayfalarda bu partial tek kaynak (Option A, CPO MSG-122). */
 {
-  window._hasPremiumAccess = function() {
-    try { return !!document.cookie.match(/(?:^|;\s*)bp_premium_trial=1/); }
-    catch (_) { return false; }
-  };
-
   window.closePremiumModal = function() {
     const modal = document.getElementById('premiumModal');
     if (!modal) return;
@@ -175,8 +170,6 @@
       });
       const json = await res.json();
       if (json.ok) {
-        const exp = new Date(Date.now() + 30 * 86400 * 1000).toUTCString();
-        document.cookie = `bp_premium_trial=1; expires=${exp}; path=/; SameSite=Lax`;
         if (typeof window.bpRecordSubscribe === 'function' && json.token) {
           window.bpRecordSubscribe({ token: json.token, email: json.email || email, name: json.name || name });
         } else {

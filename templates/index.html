@@ -642,63 +642,6 @@
     .premium-modal-title { font-size: var(--bp-text-xl); }
   }
 
-  /* SPEC-001 Faz 2 — Premium soft paywall (locked rows + CTA) */
-  .tier-locked {
-    filter: blur(6px);
-    user-select: none;
-    pointer-events: none;
-    transition: filter .25s ease;
-  }
-  /* Premium CTA banner — satır olarak görünür */
-  tr.premium-cta-row td {
-    padding: 14px 12px;
-    background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),.06), rgba(var(--bp-premium-rgb),.02)) !important;
-    border-top: 1px dashed rgba(var(--bp-premium-rgb),.35);
-    border-bottom: 1px solid rgba(48,54,61,0.5);
-    text-align: center;
-  }
-  .premium-cta-content {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    font-size: var(--bp-text-base);
-    color: var(--bp-text2);
-  }
-  .premium-cta-content strong { color: var(--bp-premium); font-weight: 700; }
-  .premium-cta-btn {
-    background: linear-gradient(135deg, var(--bp-premium), #7c3aed);
-    color: #fff;
-    border: none;
-    padding: 7px 16px;
-    border-radius:var(--bp-radius);
-    font-size: var(--bp-text-sm);
-    font-weight: 700;
-    letter-spacing: .3px;
-    cursor: pointer;
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .premium-cta-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(var(--bp-premium-rgb),.25);
-  }
-  /* Mobile CTA */
-  .mc-premium-cta {
-    background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),.08), rgba(var(--bp-premium-rgb),.02));
-    border: 1px dashed rgba(var(--bp-premium-rgb),.35);
-    border-radius:var(--bp-radius-md);
-    padding: 14px;
-    margin: 6px 0 14px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-  }
-  .mc-premium-cta .premium-cta-content { color: var(--bp-text); font-size: var(--bp-text-base); line-height: 1.5; }
-  .mc-premium-cta strong { color: var(--bp-premium); }
-
   /* Tablo grup başlık satırı (desktop) */
   tr.tier-group-header td {
     padding: 14px 12px 6px;
@@ -3766,52 +3709,6 @@ function buildSectorButtons(sectors) {
   wrap.style.display = 'flex';
 }
 
-/* SPEC-001 Faz 2 (Adım 3): Premium modal — email form + Brevo + cookie + reveal */
-function openPremiumModal() {
-  let modal = document.getElementById('premiumModal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'premiumModal';
-    modal.className = 'premium-modal-backdrop';
-    modal.innerHTML = `
-      <div class="premium-modal" role="dialog" aria-labelledby="pmTitle" aria-modal="true">
-        <button class="premium-modal-close" onclick="closePremiumModal()" aria-label="Kapat">×</button>
-        <div class="premium-modal-icon">⭐</div>
-        <h3 id="pmTitle" class="premium-modal-title">Premium Sinyalleri Aç</h3>
-        <p class="premium-modal-desc">
-          Premium sinyaller <strong>ücretsiz</strong>. Sadece email'inle giriş yap, 30 gün boyunca tam erişim.
-        </p>
-        <form id="premiumModalForm" onsubmit="event.preventDefault();submitPremium();return false;">
-          <input type="email" id="pmEmail" placeholder="E-posta adresin" required
-                 autocomplete="email" autocapitalize="off" autocorrect="off">
-          <input type="text" id="pmName" placeholder="Adın (opsiyonel)"
-                 autocomplete="given-name" maxlength="50">
-          <button type="submit" id="pmSubmitBtn" class="premium-modal-submit">
-            💎 Premium'u Aç
-          </button>
-        </form>
-        <div id="pmStatus" class="premium-modal-status" aria-live="polite"></div>
-        <div class="premium-modal-footer">
-          <small>30 gün ücretsiz erişim · İstediğin zaman çık · Spam yok</small>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-  }
-  modal.style.display = 'flex';
-  setTimeout(() => {
-    modal.classList.add('visible');
-    const e = document.getElementById('pmEmail');
-    if (e) e.focus();
-  }, 10);
-}
-
-function closePremiumModal() {
-  const modal = document.getElementById('premiumModal');
-  if (!modal) return;
-  modal.classList.remove('visible');
-  setTimeout(() => { modal.style.display = 'none'; }, 200);
-}
-
 /* ── F4 Watchlist Alert Modal ──────────────────────────────────────────────── */
 
 let _alertModalTicker = null;
@@ -3950,89 +3847,6 @@ async function syncLocalAlarm(ticker) {
 // Load user alerts on page load if logged in
 if (_isLoggedIn()) _loadUserAlerts();
 
-async function submitPremium() {
-  const emailEl = document.getElementById('pmEmail');
-  const nameEl  = document.getElementById('pmName');
-  const btn     = document.getElementById('pmSubmitBtn');
-  const status  = document.getElementById('pmStatus');
-  const email   = (emailEl?.value || '').trim();
-  const name    = (nameEl?.value || '').trim();
-
-  if (!email || !email.includes('@')) {
-    if (status) status.innerHTML = '<span style="color:#f85149">⚠️ Geçerli email gerekli.</span>';
-    if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
-    return;
-  }
-
-  if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor…'; }
-  if (status) status.innerHTML = '<span style="color:#8b949e">⏳ Kayıt yapılıyor…</span>';
-
-  try {
-    // Mevcut /api/subscribe endpoint reuse (Brevo entegrasyonu zaten var)
-    const res = await fetch('/api/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name, source: 'premium-trial' }),
-    });
-    const json = await res.json();
-    if (json.ok) {
-      // Cookie set: 30 gün premium trial
-      const exp = new Date(Date.now() + 30 * 86400 * 1000).toUTCString();
-      document.cookie = `bp_premium_trial=1; expires=${exp}; path=/; SameSite=Lax`;
-      // Mevcut bp_sub_user cache de güncellensin (bp-search.js patterni)
-      if (typeof window.bpRecordSubscribe === 'function' && json.token) {
-        window.bpRecordSubscribe({ token: json.token, email: json.email || email, name: json.name || name });
-      } else {
-        try {
-          localStorage.setItem('bp_sub_user', JSON.stringify({
-            subscribed: true, email, name, first_name: (name||'').split(' ')[0],
-            token: json.token || '', profile_done: false, cachedAt: Date.now(),
-          }));
-        } catch(_) {}
-      }
-      if (status) status.innerHTML = '<span style="color:#3fb950">✅ Premium aktif! Sayfa yenileniyor…</span>';
-      setTimeout(() => {
-        closePremiumModal();
-        // In-place reveal — sayfa reload daha güvenli (CSS state senkron)
-        renderTable();
-      }, 1200);
-    } else {
-      if (status) status.innerHTML = `<span style="color:var(--bp-sat)">⚠️ ${json.message || json.error || 'Hata'}</span>`;
-      if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
-    }
-  } catch (e) {
-    if (status) status.innerHTML = '<span style="color:var(--bp-sat)">⚠️ Bağlantı hatası, tekrar dene.</span>';
-    if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
-  }
-}
-
-function _hasPremiumAccess() {
-  // SPEC-001: Premium erişimi SADECE bp_premium_trial cookie ile verilir.
-  // Newsletter aboneliği (bp_sub / bp_sub_user) Premium erişimi VERMEZ — ayrı opt-in.
-  try {
-    if (document.cookie.match(/(?:^|;\s*)bp_premium_trial=1/)) return true;
-  } catch (_) {}
-  return false;
-}
-
-// SPEC-009 Aksiyon 1: Kullanıcı newsletter abonesi mi? (bp_sub cookie / bp_sub_user)
-// 3 durum state machine: A) anonim B) abone-basic C) premium. Premium CTA
-// banner'ı bu duruma göre bağlamsal mesaj gösterir (çelişkili mesaj çifti fix).
-function _isNewsletterSub() {
-  try {
-    if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return true;
-    const u = localStorage.getItem('bp_sub_user');
-    if (u && JSON.parse(u).subscribed) return true;
-  } catch (_) {}
-  return false;
-}
-// Premium CTA banner metni — duruma göre (premium kullanıcıya banner hiç gösterilmez).
-function _premiumCtaText() {
-  return _isNewsletterSub()
-    ? '✅ Aboneliğin aktif — Premium hisseleri de görmek için'   // B) abone-basic
-    : '🔒 Premium hisseleri görmek için';                          // A) anonim
-}
-
 function getSorted(arr) {
   // T3.6 (Master Dönüşüm Programı): birincil sıralama signal_strength (0-100, compose_score/app.py).
   // Önceki tierRank (premium/plus/standart) T3.3 ile tier filtresi sökülünce ölü taksonomiye dayanır
@@ -4083,10 +3897,6 @@ function renderTable() {
   const _tierLabels = { premium: '💎 PREMIUM', plus: '⭐ PLUS', standart: 'STANDART' };  // CPO-986 #8.1: kanonik 💎/⭐
   let _lastTier_mobile = '__init__';
   let _lastTier_desktop = '__init__';
-  /* SPEC-001 Faz 2: Premium access — false ise Premium rows blur + CTA */
-  const _premiumLocked = !_hasPremiumAccess();
-  const _premiumCount = tierCounts.premium || 0;
-
   /* ── Mobile card list ── */
   const mcList = document.getElementById('mobileCards');
   if (mcList) {
@@ -4161,17 +3971,9 @@ function renderTable() {
         if (_curTier !== _lastTier_mobile && _tierLabels[_curTier]) {
           const cnt = tierCounts[_curTier] || 0;
           mtHeader = `<div class="mc-tier-group tg-${_curTier}">${_tierLabels[_curTier]} <span class="tier-count">${cnt} hisse</span></div>`;
-          // Premium grup başlangıcında CTA göster (sadece locked + count>0)
-          if (_curTier === 'premium' && _premiumLocked && _premiumCount > 0) {
-            mtHeader += `<div class="mc-premium-cta">
-              <div class="premium-cta-content">${_premiumCtaText()}</div>
-              <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
-            </div>`;
-          }
         }
         _lastTier_mobile = _curTier;
-        const _mcLocked = (_premiumLocked && s.tier === 'premium') ? 'tier-locked' : '';
-        return mtHeader + `<a class="mc ${sigClass} ${bpIsSignalFromToday(s.signal_date) ? 'mc-new' : ''} ${_mcLocked}" href="/hisse/${s.ticker}">
+        return mtHeader + `<a class="mc ${sigClass} ${bpIsSignalFromToday(s.signal_date) ? 'mc-new' : ''}" href="/hisse/${s.ticker}">
           <div class="mc-row1">
             <div class="mc-lft">
               <div class="mc-ticker">${s.ticker} ${wt}</div>${secHtml}${badgesHtml}
@@ -4299,20 +4101,9 @@ function renderTable() {
     if (_curTierD !== _lastTier_desktop && _tierLabels[_curTierD]) {
       const cnt = tierCounts[_curTierD] || 0;
       _tierHeaderTr = `<tr class="tier-group-header tg-${_curTierD}"><td colspan="9">${_tierLabels[_curTierD]} <span class="tier-count">${cnt} hisse</span></td></tr>`;
-      // Premium başlangıcında CTA satırı
-      if (_curTierD === 'premium' && _premiumLocked && _premiumCount > 0) {
-        _tierHeaderTr += `<tr class="premium-cta-row"><td colspan="9">
-          <div class="premium-cta-content">
-            <span>${_premiumCtaText()}</span>
-            <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">💎 Premium'u Aç</button>
-            <strong>(ücretsiz)</strong>
-          </div>
-        </td></tr>`;
-      }
     }
     _lastTier_desktop = _curTierD;
-    const _trLocked = (_premiumLocked && s.tier === 'premium') ? 'tier-locked' : '';
-    return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''} ${_trLocked}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
+    return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
       <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20 (Backtest Win Rate %51.5)" style="color:var(--bp-volume);font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" title="${s.anomaly.reason}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
