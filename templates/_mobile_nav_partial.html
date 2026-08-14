@@ -46,10 +46,10 @@
     display: none;
   }
   .mbn-item.push-active .mbn-badge { display: block; }
-  .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 250; opacity: 0; transition: opacity .25s ease; }
+  .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: var(--bp-z-sheet-backdrop); opacity: 0; transition: opacity .25s ease; }
   .mbn-sheet-backdrop.open { display: block; opacity: 1; }
   .mbn-sheet {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 260;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--bp-z-sheet);
     background: var(--bp-surface); border-top: 1px solid var(--bp-border);
     border-radius: 16px 16px 0 0;
     transform: translateY(100%);

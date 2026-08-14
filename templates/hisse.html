@@ -115,7 +115,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810L">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810M">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -290,7 +290,7 @@
     color: var(--bp-text); padding: 10px 18px;
     border-radius:var(--bp-radius-lg); font-size: var(--bp-text-base); font-weight: 600;
     box-shadow: var(--bp-shadow-md);
-    opacity: 0; pointer-events: none; z-index: 999;
+    opacity: 0; pointer-events: none; z-index: var(--bp-z-page-toast);
     transition: opacity .25s, transform .25s;
   }
   .hib-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -365,7 +365,7 @@
     display: none; position: absolute; top: calc(100% + 6px); left: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border);
     border-radius:var(--bp-radius-lg); min-width: 178px; padding: 5px;
-    z-index: 500; box-shadow: var(--bp-shadow-dropdown);
+    z-index: var(--bp-z-nav-dropdown); box-shadow: var(--bp-shadow-dropdown);
   }
   .nav-dropdown-menu.open { display: block; animation: ddIn .13s ease; }
   @keyframes ddIn {
@@ -1361,7 +1361,7 @@
       /* SPEC-STICKY-HEADER-v3 fix5: header DIŞINDA sticky (bp-search.js !important header'ı 60px max-height kilitliyor; içerde overflow ediyordu).
          Sticky top:60 = header (60px) altında sabit kalır. Macro-bar segments'in altında normal flow. */
       position: sticky; top: 60px; left: 0; right: 0;
-      z-index: 90;
+      z-index: var(--bp-z-sticky-subheader);
       background: var(--bp-bg);
       border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
       padding: 6px 16px;
@@ -1436,7 +1436,7 @@
     }
     /* FAB "Üste çık" — scroll edildiğinde sağ-alt */
     .bp-fab-up {
-      position: fixed; bottom: 80px; right: 16px; z-index: 400;
+      position: fixed; bottom: 80px; right: 16px; z-index: var(--bp-z-fab-up);
       width: 44px; height: 44px;
       background: rgba(var(--bp-al-rgb),0.92);
       color: var(--bp-bg); border: none; border-radius: 50%;
@@ -1726,7 +1726,7 @@
     /* SPEC-UX-BATCH-2026-06-03 Madde 1B (CPO-464/465): alt bar MİNİMAL kompakt slim.
        Watchlist=accent-mavi birincil, Alarm=nötr ikincil (sarı tonu kaldırıldı — sinyal/uyarı renk rezerve). Touch ≥44px korunur. */
     .bp-bottom-cta {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 450;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--bp-z-bottom-cta);
       background: rgba(var(--bp-bg-rgb),0.96);
       backdrop-filter: blur(20px) saturate(160%);
       -webkit-backdrop-filter: blur(20px) saturate(160%);
@@ -2845,7 +2845,7 @@ function buildChart(d) {
   const _chDateLbl = document.createElement('div');
   _chDateLbl.style.cssText = 'position:absolute;bottom:0;transform:translateX(-50%);' +
     'background:var(--bp-brand);color:#1c2128;font-size:11px;font-weight:600;' +
-    'padding:1px 5px;border-radius:2px;pointer-events:none;display:none;white-space:nowrap;z-index:20';
+    'padding:1px 5px;border-radius:2px;pointer-events:none;display:none;white-space:nowrap;z-index:var(--bp-z-chart-date-label)';
   elMain.style.position = 'relative';
   elMain.appendChild(_chDateLbl);
 
