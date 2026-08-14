@@ -372,6 +372,21 @@
   --bp-bp-md: 768px;
   --bp-bp-lg: 900px;
 
+  /* ── 12. KONTEYNER GENISLIGI (container max-width) ─────────────
+     OLCUM (22 sablon, .container{} kurali): 1100px:8  820px:4
+       1200px:4  1400px:2  860px:2  900px:1  680px:1
+     T5.1 kabul olcutu: "tek max-width token seti". 7 deger BILEREK
+     ayri tutuldu (820 vs 860 farkli sablon gruplarinin bilinen
+     genisligi, snap edilmedi) -- yalniz max-width tokenize edildi,
+     margin/padding sablon-ozel kalir (T5.1 kapsami degil). */
+  --bp-container-680:  680px;
+  --bp-container-820:  820px;
+  --bp-container-860:  860px;
+  --bp-container-900:  900px;
+  --bp-container-1100: 1100px;
+  --bp-container-1200: 1200px;
+  --bp-container-1400: 1400px;
+
   /* ── 10. RENK ──────────────────────────────────────────────────
      Yukarıdaki ilk blokta tanımlı (arka plan, kenarlık, metin,
      marka, AL/SAT/BEKLİYOR, hacim, premium). Burada tekrarlanmaz. */
