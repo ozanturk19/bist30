@@ -1424,6 +1424,15 @@
   }
 
   /* ── Dual Endeks Kartları ─────────────────────────── */
+  /* T4.4: Piyasa Nabzı — dual-endeks/stats-bar/market-breadth artık
+     .bp-market-pulse içinde bitişik bir küme; aralarındaki boşluk
+     sıkılaştırıldı ki tek görsel birim gibi okunsun. Kasıtlı: dış
+     çerçeve/arka plan YOK (.endeks-card/.stat-card zaten kendi kart
+     çerçevesini taşıyor — dış çerçeve kutu-içinde-kutu yaratırdı). */
+  .bp-market-pulse { margin-bottom: 14px; }
+  .bp-market-pulse .dual-endeks,
+  .bp-market-pulse .stats-bar { margin-bottom: 8px; }
+
   .dual-endeks {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2042,6 +2051,7 @@
 })();
 </script>
 
+<div class="bp-market-pulse">
 <!-- ── Dual Endeks Kartları ── -->
 <div class="dual-endeks">
 
@@ -2080,6 +2090,45 @@
   </div>
 
 </div><!-- /dual-endeks -->
+
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card stat-total"><div class="stat-num" id="statTotal"><span class="stat-num-sk"></span></div><div class="stat-label">Toplam</div></div>
+    <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="Güçlü Trend: Algoritmamızın 3 testten geçen yükseliş sinyali. Tıkla: en güçlüleri gör">
+      <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>
+      <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7"><span aria-hidden="true">↗</span></span></div>
+    </a>
+    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=\"SAT\"]'))" title="Trend Bozuldu: Algoritmamızın 3 testten geçen düşüş sinyali. Tıkla: Trend Bozuldu sinyallerini gör">
+      <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>
+      <div class="stat-label">Trend Bozuldu</div>
+    </div>
+    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=\"BEKLE\"]'))" title="Yatay: Trend henüz oluşmadı, fırsat bekleniyor. Tıkla: izleme listesine al">
+      <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
+      <div class="stat-label">Yatay</div>
+    </div>
+    <div class="stat-card stat-premium" style="cursor:pointer" onclick="toggleChip('premium',document.querySelector('.filter-btn.filter-premium'))" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
+      <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
+      <div class="stat-label"><span aria-hidden="true">⭐</span> Hacim Onaylı</div>
+    </div>
+  </div>
+
+  <!-- Market Breadth Bar -->
+  <div class="market-breadth" id="marketBreadth">
+    <div class="mb-header">
+      <h2 class="mb-title">Piyasa Geneli</h2>
+      <span class="mb-sentiment" id="mbSentiment"></span>
+    </div>
+    <div class="mb-bar" aria-hidden="true">
+      <div class="mb-seg mb-seg-al"  id="mbSegAl"  style="width:0%"></div>
+      <div class="mb-seg mb-seg-bkl" id="mbSegBkl" style="width:100%"></div>
+      <div class="mb-seg mb-seg-sat" id="mbSegSat" style="width:0%"></div>
+    </div>
+    <div class="mb-legend">
+      <span class="mb-lg mb-lg-al"><span class="mb-lg-dot"></span><span id="mbLgAl">–</span></span>
+      <span class="mb-lg mb-lg-bkl"><span class="mb-lg-dot"></span><span id="mbLgBkl">–</span></span>
+      <span class="mb-lg mb-lg-sat"><span class="mb-lg-dot"></span><span id="mbLgSat">–</span></span>
+    </div>
+  </div>
+</div><!-- /bp-market-pulse -->
 
 <!-- ── Öne Çıkanlar (her zaman görünür) ── -->
 <section class="bp-highlights" aria-label="Öne Çıkan Hisseler">
@@ -2126,43 +2175,7 @@
   </div>
 </div><!-- /chart-accordion -->
 
-  <div class="stats-bar" id="statsBar">
-    <div class="stat-card stat-total"><div class="stat-num" id="statTotal"><span class="stat-num-sk"></span></div><div class="stat-label">Toplam</div></div>
-    <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="Güçlü Trend: Algoritmamızın 3 testten geçen yükseliş sinyali. Tıkla: en güçlüleri gör">
-      <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7"><span aria-hidden="true">↗</span></span></div>
-    </a>
-    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=\"SAT\"]'))" title="Trend Bozuldu: Algoritmamızın 3 testten geçen düşüş sinyali. Tıkla: Trend Bozuldu sinyallerini gör">
-      <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">Trend Bozuldu</div>
-    </div>
-    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=\"BEKLE\"]'))" title="Yatay: Trend henüz oluşmadı, fırsat bekleniyor. Tıkla: izleme listesine al">
-      <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">Yatay</div>
-    </div>
-    <div class="stat-card stat-premium" style="cursor:pointer" onclick="toggleChip('premium',document.querySelector('.filter-btn.filter-premium'))" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
-      <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
-      <div class="stat-label"><span aria-hidden="true">⭐</span> Hacim Onaylı</div>
-    </div>
-  </div>
 
-  <!-- Market Breadth Bar -->
-  <div class="market-breadth" id="marketBreadth">
-    <div class="mb-header">
-      <h2 class="mb-title">Piyasa Geneli</h2>
-      <span class="mb-sentiment" id="mbSentiment"></span>
-    </div>
-    <div class="mb-bar" aria-hidden="true">
-      <div class="mb-seg mb-seg-al"  id="mbSegAl"  style="width:0%"></div>
-      <div class="mb-seg mb-seg-bkl" id="mbSegBkl" style="width:100%"></div>
-      <div class="mb-seg mb-seg-sat" id="mbSegSat" style="width:0%"></div>
-    </div>
-    <div class="mb-legend">
-      <span class="mb-lg mb-lg-al"><span class="mb-lg-dot"></span><span id="mbLgAl">–</span></span>
-      <span class="mb-lg mb-lg-bkl"><span class="mb-lg-dot"></span><span id="mbLgBkl">–</span></span>
-      <span class="mb-lg mb-lg-sat"><span class="mb-lg-dot"></span><span id="mbLgSat">–</span></span>
-    </div>
-  </div>
 
   <!-- ── Feature 1 — Bugünün Özeti (Hero Narratif Card) — İSKELET (data Cmt'de bağlanacak) ── -->
   <section class="market-summary" id="marketSummary" aria-label="Bugünün Piyasa Özeti">
