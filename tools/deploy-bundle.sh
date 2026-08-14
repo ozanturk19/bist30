@@ -332,6 +332,35 @@ if [ "$DRY_RUN" = "0" ]; then
 fi
 fi
 
+# ─── 7b. Pre-deploy code guard (T9.4) ───────────────────────────────────────
+# pre-deploy-check.sh (Jinja parse + py_compile + KALICI_KURALLAR 11/11 +
+# format-lint + CSS token guard + style-guard + lint_scope ratchet) zaten
+# yaziliydi ve calisir durumdaydi ama hicbir deploy yolundan cagirilmiyordu —
+# guard'lar dogruydu, sadece deploy pipeline'ina hic baglanmamisti (Master
+# Program T9.4 acik wiring gap'i, bagimsiz denetimle bulundu 15.08.2026).
+# Bu noktada REPO_DIR (pull sonrasi ya da SKIP_PULL durumunda zaten) TARGET_SHA
+# icerigindedir; kontrol servise HENUZ dokunulmadan (reload'dan ONCE) calisir —
+# basarisizsa reload/restart HIC TETIKLENMEZ, sadece repo ROLLBACK_SHA'ya
+# resetlenir (servis o ana kadar dokunulmadigi icin zaten eski kodu calistirmaya
+# devam ediyordur — bu bir "rollback" degil, kirli/bozuk pull'u geri almak).
+log "DEPLOY 2b/4: Pre-deploy guard (pre-deploy-check.sh, T9.4)..."
+PRE_DEPLOY_CHECK="${PRE_DEPLOY_CHECK:-$REPO_DIR/tools/pre-deploy-check.sh}"
+if [ "$DRY_RUN" = "1" ]; then
+  log "  [DRY-RUN] SKIP: pre-deploy guard ($PRE_DEPLOY_CHECK)"
+elif [ ! -x "$PRE_DEPLOY_CHECK" ]; then
+  log "  ERROR: pre-deploy guard bulunamadi veya calistirilabilir degil: $PRE_DEPLOY_CHECK"
+  (cd "$REPO_DIR" && git reset --hard "$ROLLBACK_SHA") >/dev/null 2>&1 || true
+  log "  Repo $ROLLBACK_SHA'ya resetlendi (servis dokunulmadi, hala eski kod calisiyor)."
+  exit 2
+elif ! (cd "$REPO_DIR" && "$PRE_DEPLOY_CHECK"); then
+  log "  PRE-DEPLOY GUARD FAILED — reload/restart TETIKLENMEDI."
+  (cd "$REPO_DIR" && git reset --hard "$ROLLBACK_SHA") >/dev/null 2>&1 || true
+  log "  Repo $ROLLBACK_SHA'ya resetlendi (servis dokunulmadi, hala eski kod calisiyor)."
+  exit 2
+else
+  log "  OK: pre-deploy guard PASS"
+fi
+
 # ─── 8. Reload service ───────────────────────────────────────────────────────
 log "DEPLOY 3/4: Reloading service..."
 dry "systemctl reload $SERVICE || systemctl restart $SERVICE"
