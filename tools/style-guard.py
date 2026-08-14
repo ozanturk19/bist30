@@ -30,6 +30,27 @@ K-B  KANONIK-DEGERLI HAM HEX — RATCHET, bloklamaz ama ARTAMAZ
      eklenince kanonik deger kumesi buyur ve sayimlar sablon degismeden artabilir.
      O durum ayri bir mesajla raporlanir — sucu sablona atmaz.
 
+K-C  SABLON-YEREL :root — RATCHET, bloklamaz ama ARTAMAZ (T9.4-d, bkz. yerel_root_sayim())
+
+K-D  BOS catch{} — RATCHET, bloklamaz ama ARTAMAZ (T9.4)
+     `catch(e){}` / `catch(_) {}` / `catch{}` — hata sessizce yutulur, ne log ne
+     kullaniciya bildirim. Master Program T9.4'un istedigi "bos catch{} yasak"
+     BLOKLAYICI olarak uygulanamaz: olculdu (14.08.2026), 16 sayfa sablonunda
+     halihazirda 70 occurrence var (cogu localStorage/opsiyonel-widget savunma
+     kodu, gercek hata degil). K-B/K-C ile ayni gerekce: mevcut borc bloklamaz,
+     YENI borc bloklar.
+
+     BILINEN SINIRLAR (Workflow adversarial-review, 14.08.2026, regex izole test
+     edildi): (1) yorum-only govde (`catch(e){/* ignore */}`) YAKALANMAZ — kacis
+     yolu, ratchet'i "yorum ekleyerek" atlatmak mumkun; (2) string/template
+     literal icindeki "catch(e) {}" alt dizesi YANLIS POZITIF uretebilir; (3)
+     `.catch(() => {})` gibi ok-fonksiyonlu Promise-catch yakalanmazken
+     `.catch(function(e){})` yakalanir — tutarsiz; (4) catch parametresinde ic
+     ice parantez varsa (`catch({x = f()})`) tespit tamamen kaybolur. Hepsi
+     duz-regex yaklasiminin bilinen bedeli (K-B/K-C'nin ayni sinif kusurlarina
+     benzer); bir sonraki turda tokenizer/negatif-lookbehind ile daraltilabilir,
+     bugun BLOKLAYICI degil cunku guard zaten BLOKLAYICI degil, RATCHET.
+
 Kullanim:
     python3 tools/style-guard.py             # denetle (deploy kapisi)
     python3 tools/style-guard.py --baseline  # ratchet'i bugunku duruma sabitle
@@ -59,6 +80,7 @@ TANIM_RE = re.compile(r"(--[A-Za-z0-9_-]+)\s*:")
 VAR_RE = re.compile(r"var\(\s*(--[A-Za-z0-9_-]+)")
 HEX_RE = re.compile(r"#[0-9A-Fa-f]{3,8}\b")
 TOKEN_DEGER_RE = re.compile(r"(--[A-Za-z0-9_-]+)\s*:\s*(#[0-9A-Fa-f]{3,8})\s*;")
+BOS_CATCH_RE = re.compile(r"catch\s*(?:\([^)]*\))?\s*\{\s*\}")
 
 sys.path.insert(0, str(ROOT / "tools"))
 try:
@@ -173,6 +195,23 @@ def yerel_root_sayim():
     return out
 
 
+def bos_catch_sayim():
+    """Bos catch{} bloklarini say (T9.4).
+
+    `catch(e){}` hatayi sessizce yutar: ne konsola log ne kullaniciya bildirim.
+    Cogu vaka mesru (localStorage/opsiyonel-widget savunma kodu) ama BLOKLAYICI
+    yapmak bugunku ~26 sayfadaki mevcut borcu bir gecede kirar. K-B/K-C ile ayni
+    desen: mevcut borc dokunulmaz, YENI catch{} eklenmesi engellenir.
+    """
+    from lint_scope import sayfa_sablonlari
+    out = {}
+    for f in sayfa_sablonlari():
+        n = len(BOS_CATCH_RE.findall(f.read_text(encoding="utf-8", errors="replace")))
+        if n:
+            out[f.name] = n
+    return out
+
+
 def main(argv):
     verbose = "--verbose" in argv
     gtok, harita, imza, tanimsiz, hex_sayim = denetle()
@@ -185,7 +224,8 @@ def main(argv):
                      "token_imzasi degisir ve bu dosya --baseline ile yenilenir.",
              "token_imzasi": imza,
              "dosyalar": dict(sorted(hex_sayim.items())),
-             "yerel_root": dict(sorted(yerel_root_sayim().items()))},
+             "yerel_root": dict(sorted(yerel_root_sayim().items())),
+             "bos_catch": dict(sorted(bos_catch_sayim().items()))},
             ensure_ascii=False, indent=1), encoding="utf-8")
         print("baseline yazildi: %d sayfa, toplam %d kanonik-degerli ham hex"
               % (toplam_sayfa, sum(hex_sayim.values())))
@@ -258,6 +298,25 @@ def main(argv):
         else:
             print("  TEMIZ  K-C yerel :root: %d sablon (taban %d, artis yok)"
                   % (sum(yr.values()), sum(yr_taban.values())))
+
+    # ── K-D: bos catch{} ratchet — ARTAMAZ ──────────────────────────────────
+    bc = bos_catch_sayim()
+    bc_taban = ratchet.get("bos_catch")
+    if bc_taban is None:
+        print("  ATLANDI K-D bos catch{}: ratchet'te taban yok — `--baseline` calistirin.")
+    else:
+        bc_artan = [(ad, bc_taban.get(ad, 0), n) for ad, n in sorted(bc.items())
+                    if n > bc_taban.get(ad, 0)]
+        if bc_artan:
+            hata = 1
+            print("  KIRIK  K-D bos catch{} ARTTI: %d dosya" % len(bc_artan))
+            for ad, t, n in bc_artan:
+                print("         %-28s %d -> %d" % (ad, t, n))
+            print("         catch bloğu hatayi sessizce yutuyor. En az console.warn/log ekleyin.")
+            print("         Mevcut borc bloklamaz; YENI borc bloklar (kademeli kapi).")
+        else:
+            print("  TEMIZ  K-D bos catch{}: %d occurrence (taban %d, artis yok)"
+                  % (sum(bc.values()), sum(bc_taban.values())))
 
     if verbose:
         print("\n  %-32s %6s %6s" % ("sablon", "hex", "taban"))
