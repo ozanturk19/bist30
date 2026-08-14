@@ -2013,44 +2013,6 @@
 
 {% include '_stale_banner.html' %}
 
-<!-- SPEC-012 V3a L4 — Onboarding banner (Öğrenme Modu CTA, dismissible localStorage) -->
-<div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.10),rgba(29,78,216,.05));border:1px solid rgba(var(--bp-brand-rgb),.32);border-radius:var(--bp-radius-lg);padding:11px 14px;margin-bottom:14px;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.55;align-items:center;gap:10px;flex-wrap:wrap">
-  <span style="font-size:var(--bp-text-xl);flex-shrink:0"><span aria-hidden="true">📚</span></span>
-  <span style="flex:1;min-width:200px">
-    <strong>İlk kez mi?</strong> <strong style="color:var(--bp-brand)">Öğrenme Modu</strong>'nu açın —
-    finansal terimlerin yanında <code style="background:rgba(var(--bp-brand-rgb),.15);padding:1px 5px;border-radius:var(--bp-radius-sm);color:var(--bp-brand)">?</code> görünür, tıklayınca anlamı açılır.
-  </span>
-  <button type="button" id="bpOnboardOpen"
-          style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">
-    Öğrenme Modu'nu Aç
-  </button>
-  <button type="button" id="bpOnboardDismiss" aria-label="Kapat"
-          style="background:transparent;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-xl);padding:2px 8px;line-height:1;flex-shrink:0">×</button>
-</div>
-<script>
-(function(){
-  try {
-    var dismissed = localStorage.getItem('bp_onboard_dismissed') === '1';
-    var alreadyOn = localStorage.getItem('bp_learning_mode') === '1';
-    if (dismissed || alreadyOn) return;
-    var el = document.getElementById('bpOnboardBanner');
-    if (!el) return;
-    el.style.display = 'flex';
-    document.getElementById('bpOnboardDismiss').addEventListener('click', function(){
-      el.style.display = 'none';
-      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e){}
-    });
-    document.getElementById('bpOnboardOpen').addEventListener('click', function(){
-      if (window.bpLearningMode && window.bpLearningMode.state === false) {
-        window.bpLearningMode.toggle();
-      }
-      el.style.display = 'none';
-      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e){}
-    });
-  } catch(e){}
-})();
-</script>
-
 <div class="bp-market-pulse">
 <!-- ── Dual Endeks Kartları ── -->
 <div class="dual-endeks">
@@ -2473,6 +2435,46 @@
   </div>
   </div>
 
+<!-- T4.4 3/6 — Onboarding banner tabloya taşındı (Öğrenme Modu ipucu, tablo hücrelerindeki '?' terim tooltipleri için) -->
+<!-- SPEC-012 V3a L4 — Onboarding banner (Öğrenme Modu CTA, dismissible localStorage) -->
+<div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.10),rgba(29,78,216,.05));border:1px solid rgba(var(--bp-brand-rgb),.32);border-radius:var(--bp-radius-lg);padding:11px 14px;margin-bottom:14px;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.55;align-items:center;gap:10px;flex-wrap:wrap">
+  <span style="font-size:var(--bp-text-xl);flex-shrink:0"><span aria-hidden="true">📚</span></span>
+  <span style="flex:1;min-width:200px">
+    <strong>İlk kez mi?</strong> <strong style="color:var(--bp-brand)">Öğrenme Modu</strong>'nu açın —
+    finansal terimlerin yanında <code style="background:rgba(var(--bp-brand-rgb),.15);padding:1px 5px;border-radius:var(--bp-radius-sm);color:var(--bp-brand)">?</code> görünür, tıklayınca anlamı açılır.
+  </span>
+  <button type="button" id="bpOnboardOpen"
+          style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">
+    Öğrenme Modu'nu Aç
+  </button>
+  <button type="button" id="bpOnboardDismiss" aria-label="Kapat"
+          style="background:transparent;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-xl);padding:2px 8px;line-height:1;flex-shrink:0">×</button>
+</div>
+<script>
+(function(){
+  try {
+    var dismissed = localStorage.getItem('bp_onboard_dismissed') === '1';
+    var alreadyOn = localStorage.getItem('bp_learning_mode') === '1';
+    if (dismissed || alreadyOn) return;
+    var el = document.getElementById('bpOnboardBanner');
+    if (!el) return;
+    el.style.display = 'flex';
+    document.getElementById('bpOnboardDismiss').addEventListener('click', function(){
+      el.style.display = 'none';
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e){}
+    });
+    document.getElementById('bpOnboardOpen').addEventListener('click', function(){
+      if (window.bpLearningMode && window.bpLearningMode.state === false) {
+        window.bpLearningMode.toggle();
+      }
+      el.style.display = 'none';
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e){}
+    });
+  } catch(e){}
+})();
+</script>
+
+  <!-- ═══ T4.4 adım 3/6: TABLO — ana veri tablosu + üstteki onboarding şeridi + Alarm FAB/Panel (aşağıda, kod değişmedi, aynı fonksiyonel gruba ait) ═══ -->
   <div class="table-wrap">
     <div id="loadingDiv">
       <table style="width:100%;border-collapse:collapse">
@@ -2522,13 +2524,13 @@
 
 </div>
 
-<!-- ── Alarm FAB ── -->
+<!-- ── Alarm FAB — T4.4 adım 3/6 (TABLO) aksiyon katmanı: tablodaki 🔔 ile eklenen takip listesini açar, kod değişmedi ── -->
 <button class="alarm-fab" id="alarmFab" onclick="toggleAlarmPanel()" title="Takip listem">
   <span role="img" aria-label="Takip listem">🔔</span>
   <span class="fab-badge" id="fabBadge">0</span>
 </button>
 
-<!-- ── Alarm Panel ── -->
+<!-- ── Alarm Panel — T4.4 adım 3/6 (TABLO) aksiyon katmanı, kod değişmedi ── -->
 <div class="alarm-panel hidden" id="alarmPanel">
   <div class="ap-header">
     <h3 class="ap-title"><span aria-hidden="true">🔔</span> Takip Listem</h3>
