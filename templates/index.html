@@ -1051,6 +1051,18 @@
 
   /* .index-row-card kaldırıldı */
 
+  /* T4.4: Filtre birleştirme — 5 ayrı yüzeyi (preset/temel/gelişmiş/sektör/
+     aktif-filtre) tek görsel kart altında toplayan sarmalayıcı. İçindeki hiçbir
+     eleman/ID/class değişmedi, yalnız ortak konteyner. */
+  .bp-filter-panel {
+    border: 1px solid var(--bp-border); border-radius: var(--bp-radius-lg);
+    background: var(--bp-surface); padding: 14px 14px 2px; margin-bottom: 14px;
+  }
+  .bp-filter-panel .filters,
+  .bp-filter-panel .preset-chips { margin-bottom: 12px; }
+  .bp-filter-panel .sector-filters,
+  .bp-filter-panel .afb { margin-top: 0; }
+
   /* Filters */
   .filters {
     display: flex; gap: 8px; margin-bottom: 14px;
@@ -2190,14 +2202,6 @@
     </div>
   </section>
 
-  <!-- ── Feature 1 #1B — Preset Chips (CPO MSG-060) ── -->
-  <div class="preset-chips" id="presetChips" role="group" aria-label="Hazır filtreler">
-    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)"><span aria-hidden="true">🔥</span> Top Kazananlar</button>
-    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)"><span aria-hidden="true">📊</span> Hacim Öncüleri</button>
-    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)"><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
-    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden><span aria-hidden="true">⭐</span> Watchlist'im</button>
-  </div>
-
   <!-- ── AI Piyasa Özeti ──────────────────────────── -->
   <!-- visibility:hidden (not display:none) reserves space → prevents CLS when content loads -->
   <div id="macroSummaryBar" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.06),rgba(139,92,246,.03));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:9px;padding:9px 14px;margin-bottom:10px;align-items:flex-start;gap:8px">
@@ -2360,6 +2364,16 @@
   </div>
 
 
+  <!-- ── T4.4: Filtre birleştirme — preset/temel/gelişmiş/sektör/aktif-filtre tek panelde (bkz. docs/t44-anasayfa-analiz.md) ── -->
+  <div class="bp-filter-panel" aria-label="Filtreleme paneli">
+  <!-- ── Feature 1 #1B — Preset Chips (CPO MSG-060) ── -->
+  <div class="preset-chips" id="presetChips" role="group" aria-label="Hazır filtreler">
+    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)"><span aria-hidden="true">🔥</span> Top Kazananlar</button>
+    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)"><span aria-hidden="true">📊</span> Hacim Öncüleri</button>
+    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)"><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
+    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden><span aria-hidden="true">⭐</span> Watchlist'im</button>
+  </div>
+
   <div class="filters">
     <button class="filter-btn active-all" data-signal="all" onclick="setFilter('all', this)" title="Tüm hisseleri göster">Tümü</button>
     <button class="filter-btn" data-signal="AL" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı"><span aria-hidden="true">🟢</span> Güçlü Trend</button>
@@ -2443,6 +2457,7 @@
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       Tümünü Temizle
     </button>
+  </div>
   </div>
 
   <div class="table-wrap">
