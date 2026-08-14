@@ -41,7 +41,7 @@
       'color:#b8c3ff;font-size:10px;font-weight:700;cursor:help;vertical-align:baseline;padding:0;font-family:inherit}' +
       '.bp-lm-btn:hover{background:rgba(184,195,255,.25)}' +
       'body.learning-on .bp-lm-btn{display:inline-block}' +
-      '.bp-lm-pop{position:absolute;z-index:9999;max-width:280px;background:#1c1b1f;border:1px solid #2a2a2c;' +
+      '.bp-lm-pop{position:absolute;z-index:var(--bp-z-toast);max-width:280px;background:#1c1b1f;border:1px solid #2a2a2c;' +
       'border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55;color:#e5e1e4;' +
       'box-shadow:0 6px 24px rgba(0,0,0,.5)}' +
       '.bp-lm-pop b{color:#b8c3ff;display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.6px}' +

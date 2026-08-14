@@ -320,6 +320,28 @@
      Deger DEGISTIRILMEDI (3), yalniz isimlendirildi. DEV2-050/053. */
   --bp-z-local-control: 3;
 
+  /* ── 6.1 T1.5 SONRASI KUYRUK — deger korunarak isimlendirildi (DEV2, FAZ8) ──
+     Yukaridaki yorumun kurali izlendi: ara deger sablonda YAZILMIYOR, burada
+     isimli basamak olarak tanimlaniyor. 19 ham kullanim / 9 sablon + bp-search.js,
+     16 yeni token. Hicbir sayisal deger DEGISTIRILMEDI (T1.4/T5.1/FAZ8 radius ile
+     ayni yontem), yalniz merkezi tek kaynaga tasindi. */
+  --bp-z-nav-dropdown:      500;  /* .nav-dropdown-menu — index/hisse/varlik (3) */
+  --bp-z-search-dropdown:   400;  /* .search-ac — index */
+  --bp-z-fab-up:            400;  /* .bp-fab-up — hisse */
+  --bp-z-modal-backdrop:  10001;  /* .alert-modal-backdrop — index */
+  --bp-z-alarm-panel:       999;  /* .alarm-panel — index */
+  --bp-z-alarm-fab:         998;  /* .alarm-fab — index */
+  --bp-z-sub-toast:         997;  /* .sub-toast — index */
+  --bp-z-page-toast:        999;  /* .hib-toast / .import-toast — hisse+portfolio (2) */
+  --bp-z-local-toast:      1100;  /* #bp-toast (showToast JS) — index */
+  --bp-z-bottom-cta:        450;  /* .bp-bottom-cta — hisse */
+  --bp-z-sticky-subheader:   90;  /* .bp-segments — hisse */
+  --bp-z-sheet:             260;  /* .mbn-sheet — mobile nav partial */
+  --bp-z-sheet-backdrop:    250;  /* .mbn-sheet-backdrop — mobile nav partial */
+  --bp-z-trend-strip:         5;  /* .bp-trend-strip — bp-search.js enjeksiyonu */
+  --bp-z-chart-legend:       30;  /* yerel grafik legend overlay — index (JS) */
+  --bp-z-chart-date-label:   20;  /* yerel grafik tarih etiketi — hisse (JS) */
+
   /* ── 7. SÜRE + YUMUŞATMA (duration / easing) ──────────────────
      ÖLÇÜM süre (~300 kullanım): .15s:226  .2s:25  .12s:17  .25s:7
                                  .4s:8  .32s:4  .18s:6  .1s:9

@@ -133,7 +133,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810L">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810M">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -435,7 +435,7 @@
     display: none; position: absolute; top: calc(100% + 6px); left: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border2);
     border-radius:var(--bp-radius-lg); min-width: 178px; padding: 5px;
-    z-index: 500; box-shadow: var(--bp-shadow-dropdown);
+    z-index: var(--bp-z-nav-dropdown); box-shadow: var(--bp-shadow-dropdown);
   }
   .nav-dropdown-menu.open { display: block; animation: ddIn .13s ease; }
   @keyframes ddIn {
@@ -1239,7 +1239,7 @@
     display: none; position: absolute; top: calc(100% + 5px); right: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border2);
     border-radius:var(--bp-radius-lg); min-width: 270px; padding: 4px;
-    z-index: 400; box-shadow: var(--bp-shadow-dropdown);
+    z-index: var(--bp-z-search-dropdown); box-shadow: var(--bp-shadow-dropdown);
     max-height: 330px; overflow-y: auto;
   }
   .search-ac.open { display: block; animation: ddIn .13s ease; }
@@ -1666,7 +1666,7 @@
   .alert-settings-btn:hover { opacity:1; }
 
   /* ── F4 Alert Settings Modal ─── */
-  .alert-modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:10001; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .18s; }
+  .alert-modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:var(--bp-z-modal-backdrop); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .18s; }
   .alert-modal-backdrop.visible { opacity:1; pointer-events:auto; }
   .alert-modal { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:14px; padding:24px 22px 18px; width:340px; max-width:96vw; position:relative; }
   .alert-modal-title { font-size:var(--bp-text-lg); font-weight:700; margin:0 0 14px; color:var(--bp-text); }
@@ -1683,7 +1683,7 @@
   .alert-modal-login-notice { font-size:var(--bp-text-base); color:#ffc850; background:rgba(255,200,80,.08); border:1px solid rgba(255,200,80,.25); border-radius:var(--bp-radius-7); padding:9px 12px; margin-bottom:12px; }
   .alert-modal-status { font-size:var(--bp-text-sm); color:#22c55e; margin-top:8px; text-align:center; min-height:18px; }
   .alarm-panel {
-    position:fixed; bottom:24px; right:24px; z-index:999;
+    position:fixed; bottom:24px; right:24px; z-index:var(--bp-z-alarm-panel);
     background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-xl);
     width:340px; max-height:480px; overflow:hidden;
     box-shadow:var(--bp-shadow-dropdown);
@@ -1735,7 +1735,7 @@
   /* ── Sticky subscription toast ── */
   .sub-toast {
     position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px);
-    z-index:997; width:min(420px, calc(100vw - 32px));
+    z-index:var(--bp-z-sub-toast); width:min(420px, calc(100vw - 32px));
     background:linear-gradient(135deg,var(--bp-surface),var(--bp-surface2));
     border:1px solid rgba(var(--bp-brand-rgb),.35); border-radius:14px;
     padding:16px 18px; box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(var(--bp-brand-rgb),.1);
@@ -1778,7 +1778,7 @@
   .sub-toast-benefit  { display:flex; align-items:center; gap:5px; font-size:var(--bp-text-xs); color:var(--bp-text2); }
 
   .alarm-fab {
-    position:fixed; bottom:24px; right:20px; z-index:998;
+    position:fixed; bottom:24px; right:20px; z-index:var(--bp-z-alarm-fab);
     background: rgba(var(--bp-al-rgb),0.14);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -2888,7 +2888,7 @@ async function buildCharts(d) {
   elMain.style.position = 'relative';
   const elLegend = document.createElement('div');
   elLegend.style.cssText = [
-    'position:absolute', 'top:8px', 'left:12px', 'z-index:30',
+    'position:absolute', 'top:8px', 'left:12px', 'z-index:var(--bp-z-chart-legend)',
     'display:flex', 'gap:14px', 'pointer-events:none',
     'font-size:11px', 'font-variant-numeric:tabular-nums',
     'background:rgba(22,27,34,0.75)', 'padding:3px 8px',
@@ -4856,7 +4856,7 @@ function showToast(msg) {
   if (!el) {
     el = document.createElement('div');
     el.id = 'bp-toast';
-    el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e3a62;color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:8px;padding:8px 16px;font-size:12px;z-index:1100;transition:opacity .3s;white-space:nowrap';
+    el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e3a62;color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:8px;padding:8px 16px;font-size:12px;z-index:var(--bp-z-local-toast);transition:opacity .3s;white-space:nowrap';
     document.body.appendChild(el);
   }
   el.textContent = msg;
