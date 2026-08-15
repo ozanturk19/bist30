@@ -201,17 +201,17 @@ async function checkPage(browser, pageDef, width) {
   return result;
 }
 
-// CPO-1204 §1 — pinlenmiş allowlist: DEV-1547/1548'in bağımsız-doğrulanmış 10
-// integrity-failure'ı (aynı 3 sayfa × 360/390, hepsi scrollbarSlack==rawOverflow
-// && adjustedOverflow==0 — yani kalıntı TAM açıklanmış). Bu kombinasyonlar WARN'a
-// düşer. Listede OLMAYAN yeni bir kirli kombinasyon çıkarsa (açıklanmış olsa
-// bile) FAIL kalır — kirli-zemin kümesinin büyümesi kendi başına regresyon
-// sinyalidir, sessizce WARN'a yutulmaz.
-const DIRTY_GROUND_ALLOWLIST = new Set([
-  'hisse-thyao@360', 'hisse-thyao@390',
-  'hisse-thyao-ozet@360', 'hisse-thyao-ozet@390',
-  'hisse-akbnk@360', 'hisse-akbnk@390',
-]);
+// CPO-1204 §1 — pinlenmis allowlist (DEV-1547/1548), DEV2-T-MOBOVF-1'de BOSALTILDI.
+// Eski 6 kayit (hisse-thyao/-ozet@360/390, hisse-akbnk@360/390) kok nedeni
+// hisse.html:1095'teki body{overflow-x:clip} guard'inin html'e uygulanmamasi
+// idi (CSS overflow-propagation: html overflow-x:visible kaldigi surece
+// body'nin clip'i viewport'a tasinmiyor, .ind-help::after tooltipi gizliyken
+// bile scrollWidth'e siziyordu). html{overflow-x:clip} eklenince (commit 2e33799)
+// 6 kaydin 6'si da PASS'e dondu (Warn: 12->0, dogrulandi). Mekanizma canli
+// tutulur (gelecekte gercek bir aciklanmis kalinti cikarsa buraya eklenir),
+// ama su an bos - kirli-zemin kumesinin kucculmesi aracin kendi felsefesiyle
+// tutarli (bkz. yukaridaki yorum: buyumesi regresyon sinyali, kucculmesi duzelme).
+const DIRTY_GROUND_ALLOWLIST = new Set([]);
 
 function isExplainedDirty(s) {
   return s.scrollbarSlack === s.rawOverflow && s.overflowPx === 0;
