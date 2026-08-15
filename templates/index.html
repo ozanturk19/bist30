@@ -2461,16 +2461,16 @@
     el.style.display = 'flex';
     document.getElementById('bpOnboardDismiss').addEventListener('click', function(){
       el.style.display = 'none';
-      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e){}
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
     });
     document.getElementById('bpOnboardOpen').addEventListener('click', function(){
       if (window.bpLearningMode && window.bpLearningMode.state === false) {
         window.bpLearningMode.toggle();
       }
       el.style.display = 'none';
-      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e){}
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
     });
-  } catch(e){}
+  } catch(e) { console.warn('onboarding banner init basarisiz', e); }
 })();
 </script>
 
@@ -2697,7 +2697,7 @@
       const r = await fetch('/api/macro');
       const d = await r.json();
       renderMacro(d.items);
-    } catch(e) {}
+    } catch(e) { console.warn('makro ticker yuklenemedi', e); }
   }
 
   loadMacro();
@@ -2893,7 +2893,7 @@ async function buildCharts(d) {
           to:   n - 1 + 10,
         });
       }
-    } catch(_) {}
+    } catch(_) { console.warn('chart gorunur aralik ayari basarisiz', _); }
   });
 }
 
@@ -3039,7 +3039,7 @@ const _chartData = { xu030: null, xu100: null };
 function _rebuildChart(d) {
   if (!_accOpen) return;  // accordion kapalıysa gereksiz
   // Mevcut chartMain nesnesini temizle
-  if (chartMain) { try { chartMain.remove(); } catch(_) {} chartMain = null; }
+  if (chartMain) { try { chartMain.remove(); } catch(_) { /* chartMain.remove() zaten disposed olabilir (hizli sekme degisimi) - chartMain asagida null'laniyor */ } chartMain = null; }
   document.getElementById('chartsInner').style.display = 'none';
   document.getElementById('chartLoading').style.display = '';
   // Kısa gecikme: DOM boyutlandıktan sonra çiz
@@ -3113,7 +3113,7 @@ function startSSE() {
       const msg = JSON.parse(e.data);
       if (msg.type !== 'prices') return;
       applyLivePrices(msg.data, msg.ts);
-    } catch(_) {}
+    } catch(_) { console.warn('SSE fiyat guncelleme hatasi', _); }
   };
   _sseInstance.onerror = () => {
     _sseInstance.close(); _sseInstance = null;
@@ -3238,11 +3238,11 @@ function _saveFilterState() {
       period:  currentPeriod,
       ts:      Date.now(),
     }));
-  } catch(_) {}
+  } catch(_) { console.warn('filtre durumu kaydi basarisiz', _); }
 }
 
 function _clearFilterState() {
-  try { localStorage.removeItem(_FILTER_STORAGE_KEY); } catch(_) {}
+  try { localStorage.removeItem(_FILTER_STORAGE_KEY); } catch(_) { console.warn('filtre durumu temizleme basarisiz', _); }
 }
 
 function _getUrlFilterParams() {
@@ -3286,7 +3286,7 @@ function _updateUrlFilterState(opts) {
     const st = { signal: currentSignal, premium: filterPremium, today: filterToday, watch: filterWatch, period: currentPeriod };
     if (opts.push) history.pushState(st, '', newUrl);
     else           history.replaceState(st, '', newUrl);
-  } catch(_) {}
+  } catch(_) { console.warn('URL filtre durumu senkronizasyonu basarisiz', _); }
 }
 
 /* MSG-005: Back/forward button → URL'den state'i re-load et */
@@ -3457,7 +3457,7 @@ async function renderMarketSummary(stocks) {
         /* CPO-1335: donmuş is_new_signal yerine gerçek tarih kontrolü */
         watchMoved = stocks.filter(s => window.watchlist.has(s.ticker) && bpIsSignalFromToday(s.signal_date)).length;
       }
-    } catch (_) {}
+    } catch(_) { console.warn('watchMoved hesaplama basarisiz', _); }
 
     /* CPO-1344 §A: Borsa kapalıyken dürüst closedMessage göster. Kapı SADECE
        marketStatus'a bağlı — newBullCount/totalBullCount'a bağlı ESKİ kapı hiç
@@ -4495,7 +4495,7 @@ function _syncPushWatchlist() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload),
     }).catch(() => {});
-  } catch(_) {}
+  } catch(_) { console.warn('push takip listesi senkronizasyonu basarisiz', _); }
 }
 
 function updateFabBadge() {
@@ -4697,7 +4697,7 @@ updateFabBadge();
       if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return true;
       const u = localStorage.getItem('bp_sub_user');
       if (u && JSON.parse(u).subscribed) return true;
-    } catch (_) {}
+    } catch(_) { console.warn('hasNewsletterSub: bp_sub_user parse basarisiz', _); }
     return false;
   }
   function shouldShow() {
@@ -4737,7 +4737,7 @@ updateFabBadge();
 function dismissSubToast() {
   const el = document.getElementById('subToast');
   if (el) { el.classList.remove('visible'); }
-  try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) {}
+  try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz', e); }
 }
 
 /* MSG-098 soft auth: "Üye Girişi" — eski abone email ile re-recognize */
@@ -4764,12 +4764,12 @@ async function submitRecognize() {
           subscribed: true, email, name: json.name || '',
           first_name: (json.name || '').split(' ')[0], cachedAt: Date.now(),
         }));
-      } catch(_) {}
+      } catch(_) { console.warn('bp_sub_user onbellek kaydi basarisiz', _); }
       const _premMsg = json.premium_unlocked
         ? '<div style="font-size:11px;color:#ffc850;margin-top:4px">💎 Premium da açıldı — sayfa yenileniyor…</div>'
         : '<div style="font-size:11px;color:#64748b;margin-top:4px">Giriş yapıldı.</div>';
       if (toast) toast.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600;padding:4px 0">✅ Hoş geldin' + (json.name ? ' ' + json.name : '') + '!</div>' + _premMsg;
-      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(_) {}
+      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(_) { console.warn('abonelik toast kapatma kaydi basarisiz (recognize)', _); }
       // MSG-116 Bug E: premium açıldıysa reload (blur kalksın), yoksa sadece kapat
       if (json.premium_unlocked) {
         setTimeout(() => location.reload(), 1600);
@@ -4826,7 +4826,7 @@ async function submitToastSubscribe() {
         window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
       }
       if (toast) toast.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600;padding:4px 0">✅ ' + (json.message || 'Abone oldunuz!') + '</div><div style="font-size:11px;color:#64748b;margin-top:4px">Onay e-postası gönderildi.</div>';
-      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) {}
+      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz (subscribe)', e); }
       setTimeout(() => dismissSubToast(), 4000);
       // Ana subscription bar'ı da güncelle
       const bar = document.getElementById('subscribeBar');
@@ -5056,7 +5056,7 @@ async function loadGundem(newsOnly) {
     if (pfEl)     pfEl.textContent     = d.al.profit_factor != null ? d.al.profit_factor : '—';
     if (bestEl)   bestEl.textContent   = d.al.best != null ? '+' + d.al.best + '%' : '—';
     badge.style.visibility = 'visible'; /* space already reserved — no CLS */
-  } catch(e) {}
+  } catch(e) { console.warn('backtest rozeti yuklenemedi', e); }
 })();
 
 /* ── PWA Install Banner (beforeinstallprompt) ──── */
@@ -5102,7 +5102,7 @@ async function _initPushButton() {
   try {
     _pushSubscription = await _swReg.pushManager.getSubscription();
     _updatePushBtn();
-  } catch(e) {}
+  } catch(e) { console.warn('push abonelik durumu kontrolu basarisiz', e); }
 }
 
 function _updatePushBtn() {
@@ -5396,7 +5396,7 @@ function hideSigTip() {
       }
     }
     if (bar) bar.style.visibility = 'visible'; /* space already reserved — no CLS */
-  } catch(e) {}
+  } catch(e) { console.warn('makro ozet cubugu yuklenemedi', e); }
 })();
 
 // ── Gündem Tab Switcher ─────────────────────────────────

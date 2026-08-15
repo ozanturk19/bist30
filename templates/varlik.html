@@ -545,7 +545,7 @@ const others = Object.fromEntries(PEER_KEYS.map(k => [k, null]));
           chgEl.className = 'sc-chg ' + (activeIt.change>0.05?'chg-pos':activeIt.change<-0.05?'chg-neg':'chg-neu');
         }
       }
-    } catch(e){}
+    } catch(e) { console.error('varlik macro/peer verisi yuklenemedi', e); }
   }
   load(); setInterval(load,180000);
 })();
@@ -723,7 +723,7 @@ function renderChart(data) {
           to:   n - 1 + 10,
         });
       }
-    } catch(_) {}
+    } catch(_) { console.warn('grafik gorunur aralik (zoom) ayarlanamadi', _); }
   });
 
   window.addEventListener('resize', () => {
@@ -932,7 +932,7 @@ loadChart();
             hChgEl.className = 'h-chg ' + (me.change_pct > 0.05 ? 'chg-pos' : me.change_pct < -0.05 ? 'chg-neg' : 'chg-neu');
           }
         }
-      } catch(_) {}
+      } catch(_) { console.error('SSE fiyat guncelleme hatasi', _); }
     };
     es.onerror = () => {
       es.close();

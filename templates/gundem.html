@@ -572,7 +572,7 @@ async function loadMacroSummary() {
       }
     }
     if (box) box.style.display = '';
-  } catch(e) {}
+  } catch(e) { console.error('makro ozet yuklenemedi', e); }
 }
 
 loadGundem();
@@ -604,7 +604,7 @@ async function loadMacroBar() {
     }).join('');
     const mt = document.getElementById('macroTrack');
     if (mt) { mt.innerHTML = html + html; const w = mt.scrollWidth/2; window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55}); }
-  } catch(e) {}
+  } catch(e) { console.error('makro ticker verisi yuklenemedi', e); }
 }
 loadMacroBar();
 setInterval(loadMacroBar, 180000);

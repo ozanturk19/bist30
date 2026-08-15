@@ -385,7 +385,7 @@ async function triggerBacktest() {
     const r = await fetch('/api/backtest');
     const j = await r.json();
     if (j.al) { window.location.reload(); return; }
-  } catch(e) {}
+  } catch(e) { console.warn('mevcut backtest kontrolu basarisiz, otomatik baslatmaya devam ediliyor', e); }
 
   /* Yoksa otomatik başlat */
   if (statusEl) statusEl.textContent = 'Backtest başlatılıyor…';
@@ -407,7 +407,7 @@ async function triggerBacktest() {
       const r = await fetch('/api/backtest');
       const j = await r.json();
       if (j.al) { clearInterval(iv); window.location.reload(); }
-    } catch(e) {}
+    } catch(e) { console.warn('backtest polling basarisiz', e); }
   }, 25000);
 })();
 {% endif %}
@@ -435,7 +435,7 @@ async function triggerBacktest() {
         }
       }
     }
-  } catch(_) {}
+  } catch(_) { /* localStorage okunamazsa/bozuksa varsayilan siralamaya (_sortState init) dusuluyor */ }
 
   function _parseSortVal(v, col) {
     if (v == null || v === '') return null;
@@ -489,7 +489,7 @@ async function triggerBacktest() {
       url.searchParams.set('sort', _sortState.col);
       url.searchParams.set('dir', _sortState.dir);
       window.history.replaceState(null, '', url);
-    } catch(_) {}
+    } catch(_) { /* siralama tercihi kaydi best-effort - tablo zaten dogru sirada */ }
 
     const activeTh = document.querySelector(`th[data-sort="${col}"]`);
     if (activeTh) {
@@ -516,7 +516,7 @@ async function triggerBacktest() {
     } else {
       // Default header arrow (▼) ve sort-active mevcut zaten DOM'da
       // Sadece localStorage'a default'u yaz (URL share için)
-      try { localStorage.setItem(_SORT_KEY, JSON.stringify(_sortState)); } catch(_) {}
+      try { localStorage.setItem(_SORT_KEY, JSON.stringify(_sortState)); } catch(_) { /* varsayilan siralamayi localStorage'a yazma best-effort, gorunur etkisi yok */ }
     }
   });
 
@@ -535,7 +535,7 @@ async function triggerBacktest() {
 // Makro Ticker Bandı
 const _ML = BP_ASSET_LABELS;
 const _MD = BP_ASSET_DECIMALS;
-async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e){}}
+async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e) { console.error('loadMacroBar: /api/macro fetch/render basarisiz', e); }}
 loadMacroBar();setInterval(loadMacroBar,180000);
 </script>
 <script src="/static/bp-search.js?v=47" defer></script>

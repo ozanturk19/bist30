@@ -596,7 +596,7 @@
       const _mt=document.getElementById('macroTrack');
       _mt.innerHTML=h+h;
       requestAnimationFrame(()=>{ const w=_mt.scrollWidth/2; window.bpStartMacroTicker && window.bpStartMacroTicker({track: _mt, pps: 55}); });
-    }catch(e){}
+    }catch(e) { console.error('makro ticker: /api/macro yuklenemedi', e); }
   }
   load(); setInterval(load,180000);
 })();
@@ -687,7 +687,7 @@ async function loadSectors() {
       o.value = s; o.textContent = s;
       sel.appendChild(o);
     });
-  } catch(e) {}
+  } catch(e) { console.error('loadSectors: /api/tarama sektor listesi alinamadi', e); }
 }
 
 async function applyFilters() {
@@ -714,7 +714,7 @@ async function applyFilters() {
     const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
     const curUrl = window.location.pathname + window.location.search;
     if (newUrl !== curUrl) window.history.replaceState(null, '', newUrl);
-  } catch(_) {}
+  } catch(_) { /* URL history.replaceState best-effort - filtreleme (asagidaki /api/tarama cagrisi) buna bagli degil */ }
 
   // T2: Bilateral loading state — ilk yüklemede full spinner, sonraki sefer inline
   const isInitialLoad = !_allRows || _allRows.length === 0;
@@ -856,7 +856,7 @@ function _hydrateFiltersFromUrl() {
       const sigEl = document.getElementById('fSignal');
       if (sigEl) sigEl.value = 'PREMIUM';
     }
-  } catch(_) {}
+  } catch(_) { console.warn('URL filtre parametreleri forma uygulanamadi', _); }
 }
 
 function renderResults(rows, count) {

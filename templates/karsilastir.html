@@ -886,7 +886,7 @@ async function loadMacroBar() {
     }).join('');
     const mt = document.getElementById('macroTrack');
     if (mt) { mt.innerHTML = html + html; const w = mt.scrollWidth/2; window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55}); }
-  } catch(e) {}
+  } catch(e) { console.error('loadMacroBar basarisiz', e); }
 }
 loadMacroBar();
 setInterval(loadMacroBar, 180000);

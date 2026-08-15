@@ -11,13 +11,12 @@
   "blog.html": 9,
   "blog_article.html": 22,
   "gizlilik.html": 6,
-  "gucu_yuksek.html": 14,
   "gundem.html": 8,
   "hakkinda.html": 15,
   "hisse.html": 122,
   "hisseler.html": 23,
   "iletisim.html": 15,
-  "index.html": 103,
+  "index.html": 101,
   "karsilastir.html": 10,
   "kategori.html": 1,
   "metodoloji.html": 13,
@@ -38,21 +37,8 @@
   "varlik.html": 1
  },
  "bos_catch": {
-  "bilanco_takvimi.html": 1,
-  "blog.html": 1,
-  "blog_article.html": 1,
-  "gucu_yuksek.html": 1,
-  "gundem.html": 2,
-  "hisse.html": 16,
-  "index.html": 24,
-  "karsilastir.html": 1,
-  "kategori.html": 3,
-  "metodoloji.html": 1,
-  "ozet.html": 2,
-  "portfolio.html": 3,
-  "sektor_harita.html": 1,
-  "sinyal_performans.html": 6,
-  "tarama.html": 4,
-  "varlik.html": 3
+  "hisse.html": 2,
+  "index.html": 1,
+  "kategori.html": 1
  }
 }

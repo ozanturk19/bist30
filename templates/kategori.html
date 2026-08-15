@@ -247,7 +247,7 @@ const MACRO_LINKS = {
       const _mt=document.getElementById('macroTrack');
       _mt.innerHTML=h+h;
       requestAnimationFrame(()=>{ const w=_mt.scrollWidth/2; window.bpStartMacroTicker && window.bpStartMacroTicker({track: _mt, pps: 55}); });
-    }catch(e){}
+    }catch(e) { console.error('makro ticker: /api/macro yuklenemedi', e); }
   }
   load(); setInterval(load,180000);
 })();
@@ -410,7 +410,7 @@ Promise.all(ASSETS.map(loadAssetCard)).then(() => {
             chgEl.className = 'ac-chg '+(d.change_pct>0.05?'chg-pos':d.change_pct<-0.05?'chg-neg':'chg-neu');
           }
         });
-      } catch(_) {}
+      } catch(_) { /* tek bir SSE mesaji parse edilemezse sessizce atla - akis kesilmez, sonraki mesaj fiyati gunceller */ }
     };
     es.onerror = () => {
       es.close();

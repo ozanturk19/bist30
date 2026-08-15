@@ -390,7 +390,7 @@ async function fetchCharts() {
       if (j.chart && j.chart.ohlc && j.chart.ohlc.length) {
         chartData[t] = j.chart.ohlc.slice(-30).map(d => d.close);
       }
-    } catch(e) {}
+    } catch(e) { console.warn('sparkline verisi alinamadi', e); }
   }));
   render();
 }
@@ -808,7 +808,7 @@ document.getElementById('cloudModal').addEventListener('click', function(e) {
 // Makro Ticker Bandı
 const _ML = BP_ASSET_LABELS;
 const _MD = BP_ASSET_DECIMALS;
-async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e){}}
+async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e) { console.error('makro ticker verisi yuklenemedi', e); }}
 loadMacroBar();setInterval(loadMacroBar,180000);
 </script>
 <script src="/static/bp-search.js?v=47" defer></script>
@@ -826,7 +826,7 @@ loadMacroBar();setInterval(loadMacroBar,180000);
     const dl = document.getElementById('bistTickerList');
     if (!dl) return;
     dl.innerHTML = list.map(s => `<option value="${s.ticker}">${s.name || s.ticker}</option>`).join('');
-  } catch(_) {}
+  } catch(_) { console.warn('ticker autocomplete listesi yuklenemedi', _); }
 })();
 
 /* addPosition: smart ticker resolution — accept ticker code OR company name */

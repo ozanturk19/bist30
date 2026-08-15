@@ -183,7 +183,7 @@
               subscribed: true, email, name, first_name: (name||'').split(' ')[0],
               token: json.token || '', profile_done: false, cachedAt: Date.now(),
             }));
-          } catch(_) {}
+          } catch(_) { /* best-effort onbellek yazimi (private tarama/kota hata verebilir) - reload() asagida sunucudan resync eder */ }
         }
         if (status) status.innerHTML = '<span style="color:#3fb950">✅ Premium aktif! Sayfa yenileniyor…</span>';
         setTimeout(() => { closePremiumModal(); location.reload(); }, 1200);
@@ -220,7 +220,7 @@
             subscribed: true, email, name: json.name || '',
             first_name: (json.name || '').split(' ')[0], cachedAt: Date.now(),
           }));
-        } catch(_) {}
+        } catch(_) { /* best-effort onbellek yazimi (private tarama/kota hata verebilir) - reload() asagida sunucudan resync eder */ }
         if (status) status.innerHTML = '<span style="color:#3fb950">✅ Hoş geldin' + (json.name ? ' ' + json.name : '') + '! Premium açıldı, yenileniyor…</span>';
         setTimeout(() => location.reload(), 1500);
       } else if (res.status === 404) {
