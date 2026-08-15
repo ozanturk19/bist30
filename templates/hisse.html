@@ -1091,7 +1091,13 @@
   .flash-down { animation: flashDown 0.6s ease; }
 
   /* ── Responsive ── */
-  /* SPEC-STICKY-HEADER-v3: overflow-x:clip korundu (sticky çocuk elemanlar kırılmasın) */
+  /* SPEC-STICKY-HEADER-v3: overflow-x:clip korundu (sticky çocuk elemanlar kırılmasın)
+     DEV2-T-MOBOVF-1: body{overflow-x:clip} tek başına viewport'u korumuyor — html (documentElement)
+     overflow-x:visible kaldığı sürece CSS overflow-propagation kuralı body'nin clip'ini
+     viewport'a taşımıyor (yalnız clip DEĞİL değeri propagate olmuyor). html'e de clip eklenince
+     .ind-help::after tooltip (position:absolute, görünmez haldeyken bile scrollWidth'e katkı
+     veriyordu) artık gerçek belge-seviyesi yatay taşmaya (AKBNK/THYAO@375, 3 gün kronik) yol açmıyor. */
+  html { overflow-x: clip; }
   body { overflow-x: clip; }
   @media (max-width: 768px) {
     header { gap: 6px; padding: 10px 14px; }  /* SPEC-STICKY-v3 fix3: overflow:hidden + flex-wrap:nowrap kaldırıldı — bp-segments (header child) clip ediyordu */
