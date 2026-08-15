@@ -4207,7 +4207,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
     } else {
       initial = localStorage.getItem('bp_hisse_tab') || 'ozet';
     }
-  } catch(e) { console.warn('baslangic sekme tespiti basarisiz, 'ozet'e donuluyor', e); }
+  } catch(e) { console.warn('baslangic sekme tespiti basarisiz, ozet varsayilanina donuluyor', e); }
   if (VALID_TABS.indexOf(initial) === -1) initial = 'ozet';
   applyTab(initial, {skipUrl: false});
 })();
