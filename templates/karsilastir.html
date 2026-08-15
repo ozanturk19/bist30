@@ -646,7 +646,8 @@ function buildTable(stocks) {
 
   return `<div class="compare-wrap">
     <table class="compare-table">
-      <thead><tr><th class="row-label" style="background:var(--bp-surface)"></th>${headers}</tr></thead>
+      <caption class="sr-only">Seçilen hisselerin yan yana karşılaştırma tablosu</caption>
+      <thead><tr><th class="row-label" scope="col" style="background:var(--bp-surface)"></th>${headers}</tr></thead>
       <tbody>${scoreRow}${rows}</tbody>
     </table>
   </div>`;
@@ -665,7 +666,8 @@ async function doCompare() {
   document.getElementById('compareResult').innerHTML = `
     <div class="compare-wrap">
       <table class="compare-table" style="min-width:400px">
-        <thead><tr><th class="row-label"></th>${inputs.map(t=>`<th class="col-hdr" scope="col"><a href="/hisse/${t}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${t} detay sayfası">${t}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`).join('')}</tr></thead>
+        <caption class="sr-only">Seçilen hisselerin yan yana karşılaştırma tablosu</caption>
+        <thead><tr><th class="row-label" scope="col"></th>${inputs.map(t=>`<th class="col-hdr" scope="col"><a href="/hisse/${t}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${t} detay sayfası">${t}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`).join('')}</tr></thead>
         <tbody>
           <tr class="score-row"><th class="row-label" scope="row"><span aria-hidden="true">🏆</span> Yatırım Skoru</th>${inputs.map(()=>`<td><div class="skeleton" style="height:60px;width:90px"></div></td>`).join('')}</tr>
           ${ROW_LABELS.map(({label, isSep})=>{
