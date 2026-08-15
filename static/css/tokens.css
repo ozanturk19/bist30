@@ -422,10 +422,11 @@
      ayri tutuldu (820 vs 860 farkli sablon gruplarinin bilinen
      genisligi, snap edilmedi) -- yalniz max-width tokenize edildi,
      margin/padding sablon-ozel kalir (T5.1 kapsami degil).
-     3 ek deger (640/720/1600px) main{} sayfa-sarmalayicilarindan
-     (404/profil/heatmap.html, T5.1'in .container{} secici kapsami
-     disinda kalmisti) ayni mekanik yontemle eklendi -- her biri
-     tek sablonda kullanilir, deger DEGISTIRILMEDI. */
+     2 ek deger (640/720px) main{} sayfa-sarmalayicilarindan
+     (404/profil.html, T5.1'in .container{} secici kapsami disinda
+     kalmisti) ayni mekanik yontemle eklendi -- her biri tek sablonda
+     kullanilir, deger DEGISTIRILMEDI. 1600px token'i T4.1'de
+     heatmap.html ile birlikte kaldirildi (tek tuketicisiydi). */
   --bp-container-640:  640px;
   --bp-container-680:  680px;
   --bp-container-720:  720px;
@@ -435,7 +436,6 @@
   --bp-container-1100: 1100px;
   --bp-container-1200: 1200px;
   --bp-container-1400: 1400px;
-  --bp-container-1600: 1600px;
 
   /* ── 10. RENK ──────────────────────────────────────────────────
      Yukarıdaki ilk blokta tanımlı (arka plan, kenarlık, metin,

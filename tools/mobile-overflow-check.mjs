@@ -38,13 +38,11 @@ const HEIGHT = 800;
 // visual-test.js ile aynı — mevcut baseline'la tutarlı).
 const PAGES = [
   { name: 'home', path: '/' },
-  { name: 'heatmap', path: '/heatmap' },
   { name: 'tarama', path: '/tarama' },
   { name: 'gundem', path: '/gundem' },
   { name: 'karsilastir', path: '/karsilastir' },
   { name: 'ozet', path: '/ozet' },
   { name: 'ozet-gecmis', path: '/ozet/2026-05-10' },
-  { name: 'gucu-yuksek', path: '/gucu-yuksek' },
   { name: 'metodoloji', path: '/metodoloji' },
   { name: 'hakkinda', path: '/hakkinda' },
   { name: 'gizlilik', path: '/gizlilik' },

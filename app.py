@@ -2932,7 +2932,8 @@ def _data_quality_snapshot(stocks):
 def build_data_freshness(stocks=None):
     """SPEC-014 B1 — veri tazeliği meta objesi.
 
-    /api/data, /api/heatmap ve /api/health response'larına eklenir.
+    /api/data ve /api/health response'larına eklenir (T4.1: /api/heatmap
+    yetim sayfayla birlikte kaldırıldı, artık tüketici değil).
     is_stale = market_day ve stocks yaşı (CPO-1137: kanonik p90, bkz.
     _canonical_stocks_age) > 1800s (30dk) — hafta sonu/tatil günlerinde
     bist30-refresh zaten çalışmadığından (CPO-919 Hibrit Batch, weekday-only
@@ -4230,37 +4231,15 @@ def api_data_lite():
     return _resp
 
 
-# ── SPEC-018 BIST Heatmap MVP (Çar 27 May 2026, Ozan-direktif) ──────────────
-# Vanilla squarified treemap için minimal JSON. Boyut = signal_strength (market_cap
-# v2'de fundamentals'tan eklenir). Renk = tier (Standart/Plus/Premium) + signal.
-@app.route("/api/heatmap")
-def api_heatmap():
-    with _lock:
-        stocks_raw = list(_cache["data"])
-    out = []
-    for s in stocks_raw:
-        out.append({
-            "ticker":          s.get("ticker"),
-            "name":            s.get("name") or s.get("ticker"),
-            "sector":          s.get("sector") or "Diğer",
-            "signal":          s.get("signal"),       # AL/SAT/BEKLE
-            "tier":            s.get("tier"),         # standart/plus/premium/None
-            "signal_strength": s.get("signal_strength", 0),
-            "price":           s.get("price"),
-            "change_pct":      s.get("change_pct"),
-        })
-    return safe_json({
-        "stocks":     out,
-        "updated_at": _cache["updated_at"],
-        "loading":    len(out) == 0,
-        "sectors":    list(SECTORS.keys()),
-        "data_freshness": build_data_freshness(stocks_raw),  # CPO-1137: kanonik, aynı stocks
-    })
-
-
+# ── T4.1 (Master Donusum FAZ4 KALDIR): /heatmap tam yetim sayfa idi (0 ic
+# link, sitemap disi, tier/premium taksonomisine bagli, CPO-1191/1197
+# ihlallerinin en yogun oldugu sayfa) - kaldirildi, /api/heatmap'in tek
+# tuketicisi heatmap.js'ti (baska tuketici yok, dogrulandi). 301 hedefi
+# /sektor-harita: ayni "sektor bazli AL/SAT/BEKLE gorsellestirme" islevini
+# gorur, tier kavramina bagli degil.
 @app.route("/heatmap")
 def heatmap_page():
-    return render_template("heatmap.html")
+    return redirect("/sektor-harita", code=301)
 
 
 
