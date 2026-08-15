@@ -9250,7 +9250,6 @@ def sitemap():
         {"loc": "/",            "priority": "1.0", "changefreq": "hourly"},
         {"loc": "/ozet",        "priority": "0.9", "changefreq": "daily"},
         {"loc": "/tarama",      "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/gucu-yuksek", "priority": "0.8", "changefreq": "daily"},
         {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly"},
         {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly"},
         {"loc": "/gizlilik",    "priority": "0.3", "changefreq": "yearly"},
@@ -9875,30 +9874,14 @@ def ozet_page():
         stock_names=STOCK_NAMES)
 
 
-# ── Güçlü Momentum Listesi ────────────────────────────────────────────────────
+# ── Güçlü Momentum Listesi (T4.2: /tarama'ya birlestirildi) ─────────────────
 @app.route("/gucu-yuksek")
 def gucu_yuksek():
-    """En güçlü momentum sinyallerini göster (ADX + hacim + bull_score kompozit skoru)."""
-    with _lock:
-        stocks = list(_cache["data"])
-        updated_at = _cache.get("updated_at", "")
-        loading = len(stocks) == 0
-
-    # CPO-DEV2-004 karar #2: yalnız AL (SAT/Trend Bozuldu haric - yeni pozisyon onerisi degil, cikis uyarisi)
-    # kanonik cache alanı signal_strength ile sırala
-    # (CPO-983 puanlama tutarlılık fix: eskiden burada kompozit skor canlı yeniden
-    # hesaplanıyordu ve analyze()'daki F5 AI Sentiment ±5 ayarını atlıyordu — bu da
-    # hisse detay sayfasındaki signal_strength'ten farklı bir sayı üretiyordu. Artık
-    # her iki sayfa da AYNI önceden hesaplanmış cache alanını okuyor, tek kaynak.)
-    active = [s for s in stocks if s.get("signal") == "AL" and s.get("ticker") != "XU030"]
-    for s in active:
-        s["_mscore"] = s.get("signal_strength") or 0
-    active.sort(key=lambda s: s["_mscore"], reverse=True)
-
-    today_str = datetime.now(_TZ_TR).strftime("%d.%m.%Y")  # CPO-1335: TR günü
-    return render_template("gucu_yuksek.html",
-        stocks=active, loading=loading, updated_at=updated_at,
-        today_str=today_str, stock_names=STOCK_NAMES)
+    """T4.2 (Master Donusum Programi FAZ4): ayri sayfa /tarama AL-sinyal + signal_strength
+    sort preset'ine 301 ile birlesti. Ayni _cache["data"], ayni signal_strength siralamasi
+    -- /tarama zaten ayni isi yapiyordu (CPO-DEV2-010 onayli, kod-degistiren+onay-gerektirmeyen).
+    Skor formulu aciklamasi /metodoloji#sinyal-gucu'ye tasindi."""
+    return redirect("/tarama?signal=AL&sort=signal_strength", code=301)
 
 
 # ── Eğitim Sayfaları ──────────────────────────────────────────────────────────

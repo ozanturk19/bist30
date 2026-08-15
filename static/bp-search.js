@@ -183,7 +183,7 @@
   }
 
   var TOPICS = [
-    { h:'/gucu-yuksek',       i:'⚡', t:'Güçlü Trend Hisseler' },
+    { h:'/tarama?signal=AL&sort=signal_strength', i:'⚡', t:'Güçlü Trend Hisseler' },
     { h:'/tarama',            i:'🔍', t:'Hisse Tarama' },
     { h:'/bilanco-takvimi',   i:'📅', t:'Bilanço Takvimi' },
     { h:'/sektor-harita',     i:'🗺️', t:'Sektör Haritası' },
