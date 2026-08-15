@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
 {% if ssr_signal and ssr_signal.signal == 'AL' %}
   {% set _st = ticker ~ ' Güçlü Trend — Teknik Analiz | BorsaPusula' %}
   {% set _sd = ticker ~ ' Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
@@ -115,7 +115,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810B">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -165,7 +165,7 @@
     color: var(--bp-text);
     font-family: 'Manrope', 'Inter-Fallback', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
-    font-size: 14px;
+    font-size: var(--bp-text-md);
     min-height: 100vh;
   }
 
@@ -181,7 +181,7 @@
     border-bottom: 1px solid rgba(var(--bp-border-rgb),0.95);
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index:var(--bp-z-modal);
     display: flex;
     min-height: 60px;
     max-height: 60px;
@@ -192,7 +192,7 @@
 
   .back-btn {
     display: flex; align-items: center; gap: 6px;
-    color: var(--bp-text2); font-size: 13px;
+    color: var(--bp-text2); font-size: var(--bp-text-base);
     text-decoration: none;
     padding: 5px 10px;
     border: 1px solid var(--bp-border);
@@ -215,7 +215,7 @@
     min-height: 85px;
   }
   .hib-ticker {
-    font-size: 22px;
+    font-size: var(--bp-text-22);
     font-weight: 700;
     color: var(--bp-text);
     letter-spacing: -0.4px;
@@ -223,7 +223,7 @@
     font-family: 'Space Grotesk', 'SF Mono', 'Fira Code', monospace;
   }
   .hib-name {
-    font-size: 13px;
+    font-size: var(--bp-text-base);
     color: var(--bp-text2);
     flex: 1;
     min-width: 0;
@@ -232,10 +232,10 @@
     white-space: nowrap;
   }
   .hib-sector {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     background: var(--bp-surface2);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 2px 9px;
     color: var(--bp-text3);
     white-space: nowrap;
@@ -244,11 +244,11 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     font-weight: 600;
     background: rgba(var(--bp-brand-rgb),.1);
     border: 1px solid rgba(var(--bp-brand-rgb),.3);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 3px 10px;
     color: var(--bp-brand);
     text-decoration: none;
@@ -258,10 +258,10 @@
 
   .hib-action-btn {
     display: inline-flex; align-items: center; gap: 5px;
-    height: 28px; padding: 0 10px; border-radius: 14px;
+    height: 28px; padding: 0 10px; border-radius: var(--bp-radius-14);
     background: rgba(255,255,255,0.04); border: 1px solid var(--bp-border);
     color: var(--bp-text2); cursor: pointer; flex-shrink: 0;
-    font-size: 11px; font-weight: 600; font-family: inherit;
+    font-size: var(--bp-text-xs); font-weight: 600; font-family: inherit;
     line-height: 1; white-space: nowrap;
     transition: all .15s ease;
   }
@@ -276,7 +276,7 @@
   }
   /* Mobile: butonlar full-width row haline gelsin (flex-wrap zaten yapar, ama label kısa kalsın) */
   @media (max-width: 720px) {
-    .hib-action-btn { height: 44px; padding: 0 11px; font-size: 11.5px; }
+    .hib-action-btn { height: 44px; padding: 0 11px; font-size: var(--bp-text-sm); }
     .hib-action-btn svg { width: 14px; height: 14px; }
     .hib-action-bar { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; margin-top: 6px; }
     .hib-action-bar .hib-action-btn { flex: 1 1 auto; justify-content: center; min-width: 130px; }
@@ -288,9 +288,9 @@
     transform: translateX(-50%) translateY(20px);
     background: #161618; border: 1px solid var(--bp-border);
     color: var(--bp-text); padding: 10px 18px;
-    border-radius: 10px; font-size: 13px; font-weight: 600;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    opacity: 0; pointer-events: none; z-index: 999;
+    border-radius:var(--bp-radius-lg); font-size: var(--bp-text-base); font-weight: 600;
+    box-shadow: var(--bp-shadow-md);
+    opacity: 0; pointer-events: none; z-index: var(--bp-z-page-toast);
     transition: opacity .25s, transform .25s;
   }
   .hib-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -309,7 +309,7 @@
   }
     @media (max-width: 768px) {
     .hisse-id-bar { padding: 8px 14px; gap: 10px; }
-    .hib-ticker { font-size: 18px; }
+    .hib-ticker { font-size: var(--bp-text-xl); }
     .hib-name { max-width: 140px; }
   }
   @media (max-width: 480px) {
@@ -324,13 +324,13 @@
     flex-shrink: 0;
   }
   .header-price {
-    font-size: 22px;
+    font-size: var(--bp-text-22);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--bp-text);
   }
   .header-chg {
-    font-size: 14px;
+    font-size: var(--bp-text-md);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
@@ -345,7 +345,7 @@
   .header-nav a {
     display: flex; align-items: center; gap: 5px;
     padding: 6px 11px; border-radius: var(--bp-radius-sm);
-    font-size: 13px; font-weight: 500; color: var(--bp-text2);
+    font-size: var(--bp-text-base); font-weight: 500; color: var(--bp-text2);
     text-decoration: none; transition: all .15s; white-space: nowrap;
   }
   .header-nav a:hover { background: var(--bp-surface2); color: var(--bp-text); }
@@ -353,7 +353,7 @@
   .nav-dropdown-btn {
     display: flex; align-items: center; gap: 5px;
     padding: 6px 11px; border-radius: var(--bp-radius-sm);
-    font-size: 13px; font-weight: 500; color: var(--bp-text2);
+    font-size: var(--bp-text-base); font-weight: 500; color: var(--bp-text2);
     background: none; border: none; cursor: pointer;
     transition: all .15s; white-space: nowrap; font-family: inherit;
   }
@@ -364,15 +364,15 @@
   .nav-dropdown-menu {
     display: none; position: absolute; top: calc(100% + 6px); left: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border);
-    border-radius: 10px; min-width: 178px; padding: 5px;
-    z-index: 500; box-shadow: 0 12px 32px rgba(0,0,0,.55);
+    border-radius:var(--bp-radius-lg); min-width: 178px; padding: 5px;
+    z-index: var(--bp-z-nav-dropdown); box-shadow: var(--bp-shadow-dropdown);
   }
   .nav-dropdown-menu.open { display: block; animation: ddIn .13s ease; }
   @keyframes ddIn {
     from { opacity: 0; transform: translateY(-5px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .nav-dropdown-menu a { padding: 7px 10px !important; border-radius: 6px; }
+  .nav-dropdown-menu a { padding: 7px 10px !important; border-radius:var(--bp-radius); }
   .dd-sep { height: 1px; background: var(--bp-border); margin: 4px 6px; }
   @media (max-width: 900px) { .header-nav { display: none; } }
 
@@ -380,8 +380,8 @@
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
+    border-radius: var(--bp-radius-20);
+    font-size: var(--bp-text-sm);
     font-weight: 600;
     letter-spacing: 0.3px;
   }
@@ -401,19 +401,19 @@
   /* F2 — Anomali rozet */
   .anomaly-badge {
     display: inline-flex; align-items: center; gap: 3px;
-    padding: 2px 8px; border-radius: 10px;
+    padding: 2px 8px; border-radius:var(--bp-radius-lg);
     background: rgba(217,153,34,0.15);
     color: #d29922; border: 1px solid rgba(217,153,34,0.3);
-    font-size: 11px; font-weight: 600; cursor: default;
+    font-size: var(--bp-text-xs); font-weight: 600; cursor: default;
   }
   /* ── Container ── */
-  .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
+  .container { max-width: var(--bp-container-1400); margin: 0 auto; padding: 20px 24px; }
 
   /* ── Grafik bölümü ── */
   .chart-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     overflow: hidden;
     margin-bottom: 20px;
   }
@@ -427,7 +427,7 @@
     flex-wrap: wrap;
   }
   .chart-label {
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text3);
     font-weight: 500;
   }
@@ -438,7 +438,7 @@
     gap: 10px;
     height: 420px;
     color: var(--bp-text3);
-    font-size: 13px;
+    font-size: var(--bp-text-base);
   }
   .spinner {
     width: 18px; height: 18px;
@@ -458,7 +458,7 @@
     border-top: 1px solid var(--bp-surface2);
   }
   .week52-label {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-text3);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -471,7 +471,7 @@
     position: relative;
     height: 6px;
     background: var(--bp-border);
-    border-radius: 3px;
+    border-radius:var(--bp-radius-sm);
     overflow: visible;
   }
   .week52-fill {
@@ -479,7 +479,7 @@
     left: 0; top: 0;
     height: 100%;
     background: linear-gradient(90deg, #f85149, #e3b341, #00e290);
-    border-radius: 3px;
+    border-radius:var(--bp-radius-sm);
     transition: width 0.4s ease;
   }
   .week52-cursor {
@@ -498,12 +498,12 @@
   .commentary-section {
     background: rgba(88,166,255,0.05);
     border: 1px solid rgba(88,166,255,0.15);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
   .commentary-text {
-    font-size: 13px;
+    font-size: var(--bp-text-base);
     color: var(--bp-text2);
     line-height: 1.7;
   }
@@ -520,11 +520,11 @@
   .info-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
   }
   .info-card-label {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-text3);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -532,13 +532,13 @@
     font-weight: 600;
   }
   .info-card-value {
-    font-size: 20px;
+    font-size: var(--bp-text-2xl);
     font-weight: 700;
     color: var(--bp-text);
     font-variant-numeric: tabular-nums;
   }
   .info-card-sub {
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text3);
     margin-top: 4px;
   }
@@ -559,7 +559,7 @@
   .entry-analysis-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
@@ -579,21 +579,21 @@
   .eq-badge {
     display: inline-block;
     padding: 5px 12px;
-    border-radius: 6px;
-    font-size: 13px;
+    border-radius:var(--bp-radius);
+    font-size: var(--bp-text-base);
     font-weight: 700;
     margin-bottom: 8px;
   }
   .eq-safe  { background: rgba(0,226,144,0.12);  color: #00e290; border: 1px solid rgba(0,226,144,0.3); }
   .eq-risky { background: rgba(210,153,34,0.12); color: #e3b341; border: 1px solid rgba(210,153,34,0.3); }
   .eq-note {
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text3);
     line-height: 1.5;
   }
   /* R/R bar */
   .rr-card-label {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-text3);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -603,7 +603,7 @@
   .rr-bar {
     display: flex;
     height: 10px;
-    border-radius: 5px;
+    border-radius: var(--bp-radius-5);
     overflow: hidden;
     margin-bottom: 10px;
   }
@@ -613,7 +613,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
   }
   .rr-lvl {
     display: flex;
@@ -621,34 +621,34 @@
     gap: 2px;
     color: var(--bp-text3);
   }
-  .rr-lvl strong { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--bp-text); }
+  .rr-lvl strong { font-size: var(--bp-text-base); font-variant-numeric: tabular-nums; color: var(--bp-text); }
   .vol-status-lbl {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-text3);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
     margin-bottom: 8px;
   }
-  .hacim-profili .hp-row-line { display:flex; align-items:center; gap:6px; font-size:11.5px; margin-top:4px; line-height:1.4; flex-wrap:wrap; }
-  .hacim-profili .hp-row-icon { font-size:11px; flex-shrink:0; }
+  .hacim-profili .hp-row-line { display:flex; align-items:center; gap:6px; font-size:var(--bp-text-sm); margin-top:4px; line-height:1.4; flex-wrap:wrap; }
+  .hacim-profili .hp-row-icon { font-size:var(--bp-text-xs); flex-shrink:0; }
   .hacim-profili .hp-row-text { color:var(--bp-text2); flex-shrink:0; }
   .hacim-profili .hp-row-val { font-weight:700; font-variant-numeric:tabular-nums; }
   .hacim-profili .hp-row-val.ok { color:var(--bp-al); }
   .hacim-profili .hp-row-val.weak { color:var(--bp-bkl); }
   .hacim-profili .hp-row-val.bad { color:var(--bp-sat); }
-  .hacim-profili .hp-row-val .hp-tag { font-size:10px; padding:1px 6px; border-radius:8px; margin-left:4px; font-weight:700; letter-spacing:.3px; }
+  .hacim-profili .hp-row-val .hp-tag { font-size:var(--bp-text-2xs); padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:4px; font-weight:700; letter-spacing:.3px; }
   .hacim-profili .hp-row-val .hp-tag.premium { color:var(--bp-volume); background:rgba(var(--bp-volume-rgb),.10); border:1px solid rgba(var(--bp-volume-rgb),.45); }
   .hacim-profili .hp-row-val .hp-tag.confirmed { color:var(--bp-al); background:rgba(0,226,144,.08); border:1px solid rgba(0,226,144,.40); }
-  .hacim-profili .hp-row-summary { margin-top:6px; font-size:10.5px; color:var(--bp-text3); font-style:italic; line-height:1.4; }
+  .hacim-profili .hp-row-summary { margin-top:6px; font-size:var(--bp-text-sm); color:var(--bp-text3); font-style:italic; line-height:1.4; }
 
   .vol-status-val {
-    font-size: 18px;
+    font-size: var(--bp-text-xl);
     font-weight: 700;
     margin-bottom: 4px;
   }
   .vol-status-detail {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-text3);
   }
 
@@ -656,12 +656,12 @@
   .indicators-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
   .section-title {
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text3);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -689,8 +689,8 @@
     align-items: center;
     gap: 5px;
     padding: 5px 12px;
-    border-radius: 6px;
-    font-size: 12px;
+    border-radius:var(--bp-radius);
+    font-size: var(--bp-text-sm);
     font-weight: 600;
   }
   .ind-bull    { background: rgba(var(--bp-al-rgb),.15);  color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.3);  }
@@ -698,7 +698,7 @@
   .ind-neutral { background: rgba(139,148,158,.12); color: var(--bp-bkl); border: 1px solid rgba(139,148,158,.25); }
 
   .ind-detail {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: rgba(255,255,255,0.60); /* adequate contrast on tinted badge backgrounds */
     font-weight: 400;
     margin-left: 4px;
@@ -706,7 +706,7 @@
   .ind-help {
     display: inline-flex; align-items: center; justify-content: center;
     width: 16px; height: 16px; border-radius: 50%;
-    background: var(--bp-border); color: var(--bp-text3); font-size: 11px; font-weight: 700;
+    background: var(--bp-border); color: var(--bp-text3); font-size: var(--bp-text-xs); font-weight: 700;
     text-decoration: none; margin-left: 4px; vertical-align: middle;
     transition: all .15s; opacity: .8;
     border: none; cursor: help; padding: 0; position: relative;
@@ -717,14 +717,14 @@
   .ind-help::after {
     content: attr(data-tooltip);
     position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
-    background: var(--bp-surface2); border: 1px solid var(--bp-border2); border-radius: 8px;
-    padding: 10px 12px; font-size: 12px; font-weight: 400;
+    background: var(--bp-surface2); border: 1px solid var(--bp-border2); border-radius:var(--bp-radius-md);
+    padding: 10px 12px; font-size: var(--bp-text-sm); font-weight: 400;
     color: var(--bp-text); line-height: 1.5;
     width: max-content; max-width: 280px; text-align: left;
     white-space: normal; pointer-events: none;
     opacity: 0; visibility: hidden;
-    transition: opacity .15s; z-index: 1000;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    transition: opacity .15s; z-index:var(--bp-z-modal);
+    box-shadow: var(--bp-shadow-md);
   }
   .ind-help:hover::after, .ind-help:focus::after {
     opacity: 1; visibility: visible;
@@ -737,19 +737,19 @@
 
   /* ── Sinyal mini istatistik satırı ── */
   .sig-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
-  .sig-stat-card { background:var(--bp-surface2); border:1px solid var(--bp-border); border-radius:8px; padding:12px 14px; text-align:center; transition:border-color .15s; }
+  .sig-stat-card { background:var(--bp-surface2); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:12px 14px; text-align:center; transition:border-color .15s; }
   .sig-stat-card:hover { border-color:var(--bp-text3); }
-  .sig-stat-val  { font-size:26px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
-  .sig-stat-lbl  { font-size:10px; color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
+  .sig-stat-val  { font-size:var(--bp-text-26); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
+  .sig-stat-lbl  { font-size:var(--bp-text-2xs); color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   @keyframes shimmerStat { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-  .stat-sk { background:linear-gradient(90deg,var(--bp-surface2) 25%,#252d3a 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:4px; display:inline-block; }
+  .stat-sk { background:linear-gradient(90deg,var(--bp-surface2) 25%,#252d3a 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:var(--bp-radius-4); display:inline-block; }
   @media(max-width:500px) { .sig-stats-row{grid-template-columns:repeat(2,1fr);} }
 
   /* ── Sinyal geçmişi ── */
   .history-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
@@ -760,7 +760,7 @@
   }
   .history-table th {
     text-align: left;
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-text3);
     text-transform: uppercase;
     letter-spacing: 0.4px;
@@ -771,7 +771,7 @@
   .history-table td {
     padding: 10px 10px;
     border-bottom: 1px solid var(--bp-surface2);
-    font-size: 13px;
+    font-size: var(--bp-text-base);
     color: var(--bp-text2);
   }
   .history-table tr:last-child td { border-bottom: none; }
@@ -781,7 +781,7 @@
   .blog-read-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 12px 14px;
     text-decoration: none;
     display: block;
@@ -797,7 +797,7 @@
   .others-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 14px 0 14px 18px;
     margin-bottom: 20px;
     overflow: hidden;
@@ -814,7 +814,7 @@
   }
   .others-scroll::-webkit-scrollbar { height: 4px; }
   .others-scroll::-webkit-scrollbar-track { background: transparent; }
-  .others-scroll::-webkit-scrollbar-thumb { background: var(--bp-border2); border-radius: 2px; }
+  .others-scroll::-webkit-scrollbar-thumb { background: var(--bp-border2); border-radius:var(--bp-radius-xs); }
   .other-card {
     flex-shrink: 0;
     display: flex;
@@ -823,7 +823,7 @@
     padding: 8px 11px;
     background: var(--bp-surface2);
     border: 1px solid var(--bp-border);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     min-width: 78px;
     text-decoration: none;
     transition: all .15s;
@@ -831,13 +831,13 @@
   }
   .other-card:hover { border-color: var(--bp-border2); background: var(--bp-surface3); transform: translateY(-1px); }
   .other-card.oc-active { border-color: var(--bp-brand); background: rgba(var(--bp-brand-rgb),.06); }
-  .oc-ticker { font-size: 12px; font-weight: 700; color: var(--bp-text); }
-  .oc-price  { font-size: 11px; color: var(--bp-text2); font-variant-numeric: tabular-nums; margin-top: 1px; }
-  .oc-chg    { font-size: 10px; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .oc-ticker { font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text); }
+  .oc-price  { font-size: var(--bp-text-xs); color: var(--bp-text2); font-variant-numeric: tabular-nums; margin-top: 1px; }
+  .oc-chg    { font-size: var(--bp-text-2xs); font-variant-numeric: tabular-nums; font-weight: 600; }
   .oc-chg.pos { color: var(--bp-al); }
   .oc-chg.neg { color: var(--bp-sat); }
   .oc-chg.neu { color: var(--bp-bkl); }
-  .oc-sig    { font-size: 10px; font-weight: 700; }
+  .oc-sig    { font-size: var(--bp-text-2xs); font-weight: 700; }
   .chip-al   { color: var(--bp-al); }
   .chip-sat  { color: var(--bp-sat); }
   .chip-bekle{ color: var(--bp-bkl); }
@@ -846,16 +846,16 @@
   .news-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
   .news-loading {
     display: flex; align-items: center; gap: 8px;
-    color: var(--bp-text3); font-size: 13px; padding: 8px 0;
+    color: var(--bp-text3); font-size: var(--bp-text-base); padding: 8px 0;
   }
   .news-content {
-    font-size: 13px;
+    font-size: var(--bp-text-base);
     color: var(--bp-text2);
     line-height: 1.75;
   }
@@ -882,7 +882,7 @@
   .news-content a:hover { text-decoration-color: var(--bp-brand); }
   .news-error {
     color: var(--bp-text3);
-    font-size: 13px;
+    font-size: var(--bp-text-base);
     padding: 6px 0;
     display: flex;
     align-items: center;
@@ -893,14 +893,14 @@
     border: 1px solid var(--bp-border);
     color: var(--bp-brand);
     padding: 3px 10px;
-    border-radius: 5px;
+    border-radius: var(--bp-radius-5);
     cursor: pointer;
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     transition: border-color .15s;
   }
   .news-retry-btn:hover { border-color: var(--bp-brand); }
   .news-source {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-text3);
     margin-top: 10px;
     display: flex;
@@ -911,10 +911,10 @@
     background: rgba(88,166,255,0.1);
     border: 1px solid rgba(88,166,255,0.2);
     color: var(--bp-brand);
-    font-size: 10px;
+    font-size: var(--bp-text-2xs);
     font-weight: 600;
     padding: 1px 7px;
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     letter-spacing: 0.3px;
   }
 
@@ -922,7 +922,7 @@
   .kap-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
@@ -942,8 +942,8 @@
   .kap-class-badge {
     display: inline-block;
     padding: 1px 7px;
-    border-radius: 4px;
-    font-size: 10px;
+    border-radius: var(--bp-radius-4);
+    font-size: var(--bp-text-2xs);
     font-weight: 700;
     letter-spacing: .3px;
     white-space: nowrap;
@@ -953,7 +953,7 @@
   .kap-class-badge.oda { background: rgba(88,166,255,.1); color:var(--bp-brand); border:1px solid rgba(88,166,255,.2); }
   .kap-class-badge.fr  { background: rgba(0,226,144,.1);  color:var(--bp-al); border:1px solid rgba(0,226,144,.2); }
   .kap-summary {
-    font-size: 13px;
+    font-size: var(--bp-text-base);
     color: var(--bp-text2);
     line-height: 1.45;
     flex: 1;
@@ -969,7 +969,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-text3);
     padding-left: 0;
   }
@@ -977,7 +977,7 @@
     display: inline-flex;
     align-items: center;
     gap: 3px;
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-brand);
     text-decoration: none;
     opacity: .7;
@@ -985,7 +985,7 @@
   }
   .kap-link-btn:hover { opacity: 1; }
   .kap-empty {
-    font-size: 13px;
+    font-size: var(--bp-text-base);
     color: var(--bp-text3);
     padding: 12px 0;
     text-align: center;
@@ -995,10 +995,10 @@
   .methodology {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 24px;
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text3);
     line-height: 1.6;
   }
@@ -1008,25 +1008,25 @@
   .content-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
   }
   .content-para {
-    font-size: 13px;
+    font-size: var(--bp-text-base);
     color: var(--bp-text2);
     line-height: 1.75;
     margin: 0 0 10px 0;
   }
   .content-para:last-of-type { margin-bottom: 6px; }
   .content-meta {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: #6b7280;
     margin-top: 8px;
   }
   .faq-list { margin: 4px 0 0 0; }
   .faq-q {
-    font-size: 13px;
+    font-size: var(--bp-text-base);
     font-weight: 600;
     color: var(--bp-text);
     margin-top: 14px;
@@ -1042,7 +1042,7 @@
     font-weight: 700;
   }
   .faq-a {
-    font-size: 12.5px;
+    font-size: var(--bp-text-base);
     color: var(--bp-text3);
     line-height: 1.65;
     margin: 5px 0 0 18px;
@@ -1059,16 +1059,16 @@
     gap: 2px;
     background: var(--bp-surface2);
     border: 1px solid var(--bp-border);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 8px 12px;
     text-decoration: none;
     min-width: 110px;
     transition: border-color .15s, background .15s;
   }
   .related-chip:hover { border-color: var(--bp-brand); background: #21202b; }
-  .related-ticker { font-size: 13px; font-weight: 700; color: var(--bp-text); }
+  .related-ticker { font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text); }
   .related-name {
-    font-size: 10.5px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text3);
     white-space: nowrap;
     overflow: hidden;
@@ -1079,7 +1079,7 @@
   footer {
     text-align: center;
     padding: 20px;
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text3);
     border-top: 1px solid var(--bp-surface2);
   }
@@ -1091,13 +1091,19 @@
   .flash-down { animation: flashDown 0.6s ease; }
 
   /* ── Responsive ── */
-  /* SPEC-STICKY-HEADER-v3: overflow-x:clip korundu (sticky çocuk elemanlar kırılmasın) */
+  /* SPEC-STICKY-HEADER-v3: overflow-x:clip korundu (sticky çocuk elemanlar kırılmasın)
+     DEV2-T-MOBOVF-1: body{overflow-x:clip} tek başına viewport'u korumuyor — html (documentElement)
+     overflow-x:visible kaldığı sürece CSS overflow-propagation kuralı body'nin clip'ini
+     viewport'a taşımıyor (yalnız clip DEĞİL değeri propagate olmuyor). html'e de clip eklenince
+     .ind-help::after tooltip (position:absolute, görünmez haldeyken bile scrollWidth'e katkı
+     veriyordu) artık gerçek belge-seviyesi yatay taşmaya (AKBNK/THYAO@375, 3 gün kronik) yol açmıyor. */
+  html { overflow-x: clip; }
   body { overflow-x: clip; }
   @media (max-width: 768px) {
     header { gap: 6px; padding: 10px 14px; }  /* SPEC-STICKY-v3 fix3: overflow:hidden + flex-wrap:nowrap kaldırıldı — bp-segments (header child) clip ediyordu */
-    .header-price  { font-size: 16px; }
+    .header-price  { font-size: var(--bp-text-lg); }
     .header-price-group { gap: 6px; }
-    .signal-badge  { font-size: 11px; padding: 3px 7px; }
+    .signal-badge  { font-size: var(--bp-text-xs); padding: 3px 7px; }
     #liveTs        { display: none; }
     .container { padding: 10px 12px; }
     #chartMain    { height: 240px; }
@@ -1107,12 +1113,12 @@
   }
   @media (max-width: 480px) {
     #hpSignal { display: none; }
-    .header-price  { font-size: 15px; }
+    .header-price  { font-size: var(--bp-text-15); }
   }
   @media (max-width: 360px) {
     #hpChg { display: none; }
-    header .logo-name { font-size: 13px; }
-    .header-name { font-size: 13px; }
+    header .logo-name { font-size: var(--bp-text-base); }
+    .header-name { font-size: var(--bp-text-base); }
   }
   /* ── Makro Ticker Bandı ── */
   .macro-bar {
@@ -1122,7 +1128,7 @@
   }
   .macro-bar::before, .macro-bar::after {
     content: ''; position: absolute; top: 0; bottom: 0; width: 60px;
-    pointer-events: none; z-index: 2;
+    pointer-events: none; z-index:var(--bp-z-raised);
   }
   .macro-bar::before { left: 0; background: linear-gradient(to right, var(--bp-bg), transparent); }
   .macro-bar::after  { right: 0; background: linear-gradient(to left,  var(--bp-bg), transparent); }
@@ -1132,10 +1138,14 @@
   }
   @media (hover: hover) and (pointer: fine) { .macro-bar:hover .macro-track { animation-play-state: paused; } }
   @keyframes macroScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .macro-bar { position: relative; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
+  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 0 20px; border-right: 1px solid var(--bp-border);
-    font-size: 12px; height: 34px;
+    font-size: var(--bp-text-sm); height: 34px;
   }
   .macro-item-lbl { font-weight: 600; color: var(--bp-text); }
   .macro-chg-pos { color: var(--bp-al); }
@@ -1143,33 +1153,33 @@
   .macro-chg-neu { color: var(--bp-bkl); }
 
   /* ── Header Search Button ── */
-  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius: 6px; color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 6px; }
+  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius:var(--bp-radius); color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 6px; }
   .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
   @media (max-width: 768px) { .header-search-btn { min-width: 44px; min-height: 44px; } }
   /* ── Search Overlay ── */
-  .search-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
+  .search-overlay { display: none; position: fixed; inset: 0; z-index:var(--bp-z-overlay); background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
   .search-overlay.open { display: flex; }
-  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
+  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow: hidden; box-shadow: var(--bp-shadow-lg); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
   .search-input-wrap { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--bp-border); }
   .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
-  #searchInput { flex: 1; background: none; border: none; outline: none; font-size: 15px; color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }
+  #searchInput { flex: 1; background: none; border: none; outline: none; font-size: var(--bp-text-15); color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }
   #searchInput::placeholder { color: var(--bp-text3); }
-  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius:var(--bp-radius); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: var(--bp-text-md); flex-shrink: 0; }
   .search-close:hover { background: var(--bp-surface2); color: var(--bp-text); }
   .search-results { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
-  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: 13px; }
-  .search-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px 6px; }
-  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; transition: background .12s; font-size: 13px; }
+  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: var(--bp-text-base); }
+  .search-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-2xs); font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px 6px; }
+  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); transition: background .12s; font-size: var(--bp-text-base); }
   .search-result:hover, .search-result.sr-selected { background: var(--bp-surface2); }
-  .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: 13px; }
+  .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: var(--bp-text-base); }
   .sr-sig.sr-al { color: var(--bp-al); font-weight: 700; }
   .sr-sig.sr-sat { color: var(--bp-sat); font-weight: 700; }
   .sr-sig.sr-bekle { color: var(--bp-bkl); }
-  .sr-name { color: var(--bp-text2); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-  .sr-price { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--bp-text2); }
-  .sr-chg { font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600; min-width: 56px; text-align: right; }
+  .sr-name { color: var(--bp-text2); font-size: var(--bp-text-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .sr-price { font-variant-numeric: tabular-nums; font-size: var(--bp-text-sm); color: var(--bp-text2); }
+  .sr-chg { font-variant-numeric: tabular-nums; font-size: var(--bp-text-sm); font-weight: 600; min-width: 56px; text-align: right; }
   .sr-chg.pos { color: var(--bp-al); } .sr-chg.neg { color: var(--bp-sat); } .sr-chg.neu { color: var(--bp-bkl); }
-  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; font-size: 13px; transition: background .12s; }
+  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); font-size: var(--bp-text-base); transition: background .12s; }
   .search-topic:hover, .search-topic.sr-selected { background: var(--bp-surface2); }
   @media (max-width: 600px) {
     .search-overlay { padding-top: 0; align-items: stretch; }
@@ -1179,7 +1189,7 @@
   }
 
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 <!-- Mobile Bottom Navigation -->
@@ -1222,10 +1232,6 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <span>Tarama</span>
   </a>
-  <a href="/bilanco-takvimi" data-route="/bilanco-takvimi" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    <span>Bilanço</span>
-  </a>
   <a href="/sektor-harita" data-route="/sektor-harita" class="bp-nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
     <span>Sektörler</span>
@@ -1244,17 +1250,20 @@
       <svg class="bp-nav-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div class="bp-nav-more-menu">
-      <a href="/portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
-      <a href="/ozet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
-      <a href="/karsilastir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
-      <a href="/hisseler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
-      <a href="/gucu-yuksek"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Güçlü Trend</a>
-      <div class="bp-nav-sep"></div>
+      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">Piyasalar</div>
       <a href="/kripto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>Kripto</a>
       <a href="/emtialar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8"/></svg>Emtialar</a>
       <a href="/abd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>ABD</a>
-      <a href="/gundem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
       <div class="bp-nav-sep"></div>
+      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">Araçlar</div>
+      <a href="/portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
+      <a href="/karsilastir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
+      <a href="/hisseler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
+      <a href="/bilanco-takvimi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bilanço</a>
+      <div class="bp-nav-sep"></div>
+      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">İçerik</div>
+      <a href="/ozet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
+      <a href="/gundem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
       <a href="/metodoloji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Metodoloji</a>
       <a href="/hakkinda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Hakkında</a>
       <a href="/iletisim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>İletişim</a>
@@ -1291,7 +1300,7 @@
 </nav>
 
 <!-- Makro Ticker Bandı -->
-<div class="macro-bar" id="macroBar">
+<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button>
   <div class="macro-track" id="macroTrack">
     <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
   </div>
@@ -1305,8 +1314,8 @@
     <span class="header-price" id="hpPrice">—</span>
     <span class="header-chg neu" id="hpChg">—</span>
     <span class="signal-badge signal-BEKLE" id="hpSignal">● Yatay</span>
-    <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge">⚠ Anomal</span>
-    <span id="liveTs" style="font-size:11px;color:#909097">○</span>
+    <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge"><span aria-hidden="true">⚠</span> Anomal</span>
+    <span id="liveTs" style="font-size:var(--bp-text-xs);color:#909097">○</span>
   </div>
   {% if sector %}
   <span class="hib-sector">{{ sector }}</span>
@@ -1343,7 +1352,7 @@
 
   <!-- SPEC-014 B2 — Veri yaşı göstergesi -->
   <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-    <span id="dataFreshness" title="" style="display:none;align-items:center;gap:6px;font-size:11px;color:var(--bp-text3)">
+    <span id="dataFreshness" title="" style="display:none;align-items:center;gap:6px;font-size:var(--bp-text-xs);color:var(--bp-text3)">
       <span id="freshnessDot" style="width:7px;height:7px;border-radius:50%;background:var(--bp-bkl);display:inline-block;flex-shrink:0"></span>
       <span id="freshnessText">—</span>
     </span>
@@ -1357,7 +1366,7 @@
       /* SPEC-STICKY-HEADER-v3 fix5: header DIŞINDA sticky (bp-search.js !important header'ı 60px max-height kilitliyor; içerde overflow ediyordu).
          Sticky top:60 = header (60px) altında sabit kalır. Macro-bar segments'in altında normal flow. */
       position: sticky; top: 60px; left: 0; right: 0;
-      z-index: 90;
+      z-index: var(--bp-z-sticky-subheader);
       background: var(--bp-bg);
       border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
       padding: 6px 16px;
@@ -1369,13 +1378,13 @@
     .bp-symbol-pill {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 6px 12px;
-      font-size: 12px; font-weight: 700;
+      font-size: var(--bp-text-sm); font-weight: 700;
       color: var(--bp-text); background: rgba(255,255,255,0.04);
-      border-radius: 6px; white-space: nowrap;
+      border-radius:var(--bp-radius); white-space: nowrap;
       letter-spacing: 0.3px; flex-shrink: 0;
     }
     @media (max-width: 480px) {
-      .bp-symbol-pill { font-size: 11px; padding: 5px 8px; gap: 4px; }
+      .bp-symbol-pill { font-size: var(--bp-text-xs); padding: 5px 8px; gap: 4px; }
     }
     /* SPEC-UX-BATCH-2026-06-03 Madde 1A + 2 (CPO-463/464/465):
        segmented-control, aktif=accent-mavi (#1f6feb) pill. Sinyal renkleri (yeşil/kırmızı) NÖTR sekme barında YOK
@@ -1385,7 +1394,7 @@
       max-width: 1400px;
       width: 100%;
       background: rgba(255,255,255,0.025);
-      border-radius: 10px;
+      border-radius:var(--bp-radius-lg);
       padding: 4px;
     }
     .bp-segments-spacer { height: 52px; }
@@ -1393,10 +1402,10 @@
       flex: 1; text-align: center;
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       padding: 9px 12px;
-      border-radius: 7px;
+      border-radius: var(--bp-radius-7);
       border: none;
       font-family: 'Manrope', system-ui, sans-serif;
-      font-size: 13px; font-weight: 600;
+      font-size: var(--bp-text-base); font-weight: 600;
       color: var(--bp-text3); text-decoration: none;
       transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
       white-space: nowrap;
@@ -1427,16 +1436,16 @@
         overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
       }
       .bp-segments-inner::-webkit-scrollbar { display: none; }
-      .bp-segments-inner a { flex: 0 0 auto; font-size: 12px; padding: 8px 10px; letter-spacing: 0.2px; gap: 4px; }
+      .bp-segments-inner a { flex: 0 0 auto; font-size: var(--bp-text-sm); padding: 8px 10px; letter-spacing: 0.2px; gap: 4px; }
       .bp-seg-icon { width: 11px; height: 11px; }
     }
     /* FAB "Üste çık" — scroll edildiğinde sağ-alt */
     .bp-fab-up {
-      position: fixed; bottom: 80px; right: 16px; z-index: 400;
+      position: fixed; bottom: 80px; right: 16px; z-index: var(--bp-z-fab-up);
       width: 44px; height: 44px;
       background: rgba(var(--bp-al-rgb),0.92);
       color: var(--bp-bg); border: none; border-radius: 50%;
-      cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      cursor: pointer; box-shadow: var(--bp-shadow-sm);
       display: none; align-items: center; justify-content: center;
       transition: opacity 0.2s, transform 0.2s;
       -webkit-tap-highlight-color: transparent;
@@ -1453,7 +1462,7 @@
     .bp-hero-card {
       background: linear-gradient(135deg, rgba(var(--bp-brand-rgb),0.08), rgba(29,78,216,0.04));
       border: 1px solid rgba(var(--bp-brand-rgb),0.18);
-      border-radius: 14px;
+      border-radius: var(--bp-radius-14);
       padding: 18px 20px;
       margin-bottom: 20px;
       position: relative;
@@ -1468,14 +1477,14 @@
     .bp-hero-badge {
       display: inline-flex; align-items: center; gap: 6px;
       font-family: 'Space Grotesk', system-ui, sans-serif;
-      font-size: 18px; font-weight: 700;
+      font-size: var(--bp-text-xl); font-weight: 700;
       color: var(--hero-accent, var(--bp-al));
       margin-bottom: 14px;
       letter-spacing: 0.3px;
     }
-    .bp-hero-badge .bp-hero-icon { font-size: 20px; line-height: 1; }
+    .bp-hero-badge .bp-hero-icon { font-size: var(--bp-text-2xl); line-height: 1; }
     .bp-hero-meta {
-      font-size: 11px; color: var(--bp-text3); font-weight: 500;
+      font-size: var(--bp-text-xs); color: var(--bp-text3); font-weight: 500;
       margin-left: auto;
     }
     .bp-hero-header {
@@ -1487,12 +1496,12 @@
     }
     .bp-hero-power-label {
       display: flex; justify-content: space-between;
-      font-size: 11px; color: var(--bp-text3); margin-bottom: 4px;
+      font-size: var(--bp-text-xs); color: var(--bp-text3); margin-bottom: 4px;
     }
-    .bp-hero-power-label strong { color: var(--bp-text); font-size: 12px; font-weight: 700; }
+    .bp-hero-power-label strong { color: var(--bp-text); font-size: var(--bp-text-sm); font-weight: 700; }
     .bp-hero-power-bar {
       height: 6px; background: rgba(255,255,255,0.06);
-      border-radius: 3px; overflow: hidden;
+      border-radius:var(--bp-radius-sm); overflow: hidden;
     }
     .bp-hero-power-fill {
       height: 100%;
@@ -1501,18 +1510,18 @@
     }
     .bp-hero-levels {
       display: flex; gap: 14px; flex-wrap: wrap;
-      font-size: 13px; color: var(--bp-text);
+      font-size: var(--bp-text-base); color: var(--bp-text);
       padding: 10px 12px;
       background: rgba(255,255,255,0.025);
-      border-radius: 8px;
+      border-radius:var(--bp-radius-md);
       margin-bottom: 12px;
     }
     .bp-hero-levels span strong { color: var(--hero-accent, var(--bp-al)); margin-right: 4px; }
     .bp-hero-explain-link {
       display: inline-flex; align-items: center; gap: 4px;
-      font-size: 12.5px; color: #93c5fd;
+      font-size: var(--bp-text-base); color: #93c5fd;
       text-decoration: none; font-weight: 600;
-      padding: 6px 10px; border-radius: 6px;
+      padding: 6px 10px; border-radius:var(--bp-radius);
       background: rgba(147,197,253,0.08);
       transition: background 0.15s, color 0.15s;
       cursor: pointer; border: none; font-family: inherit;
@@ -1521,9 +1530,9 @@
       background: rgba(147,197,253,0.15); color: var(--bp-brand);
     }
     @media (max-width: 480px) {
-      .bp-hero-card { padding: 14px 16px; border-radius: 12px; }
-      .bp-hero-badge { font-size: 16px; }
-      .bp-hero-levels { font-size: 12px; gap: 10px; padding: 8px 10px; }
+      .bp-hero-card { padding: 14px 16px; border-radius:var(--bp-radius-xl); }
+      .bp-hero-badge { font-size: var(--bp-text-lg); }
+      .bp-hero-levels { font-size: var(--bp-text-sm); gap: 10px; padding: 8px 10px; }
     }
   </style>
   {%- set _sig = ssr_signal.signal -%}
@@ -1585,13 +1594,13 @@
     .bp-spark-wrap { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
     .bp-spark-label {
       display:flex; justify-content:space-between; align-items:baseline;
-      font-size:11px; color:var(--bp-text3); margin-bottom:4px;
+      font-size:var(--bp-text-xs); color:var(--bp-text3); margin-bottom:4px;
       font-family: 'Manrope', system-ui, sans-serif;
       text-transform: uppercase; letter-spacing: 0.4px;
     }
     .bp-spark-val {
       font-family: var(--bp-font-mono);
-      font-size: 13px; font-weight: 700; color: var(--bp-text);
+      font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text);
       letter-spacing: -0.2px;
     }
     .bp-spark-canvas {
@@ -1722,12 +1731,12 @@
     /* SPEC-UX-BATCH-2026-06-03 Madde 1B (CPO-464/465): alt bar MİNİMAL kompakt slim.
        Watchlist=accent-mavi birincil, Alarm=nötr ikincil (sarı tonu kaldırıldı — sinyal/uyarı renk rezerve). Touch ≥44px korunur. */
     .bp-bottom-cta {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 450;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--bp-z-bottom-cta);
       background: rgba(var(--bp-bg-rgb),0.96);
       backdrop-filter: blur(20px) saturate(160%);
       -webkit-backdrop-filter: blur(20px) saturate(160%);
       border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
-      box-shadow: 0 -4px 18px rgba(0,0,0,0.30);
+      box-shadow: var(--bp-shadow-up-sm);
       padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
       display: flex; gap: 6px;
       transform: translateY(0);
@@ -1739,9 +1748,9 @@
       background: rgba(31,111,235,0.14);
       color: #6ea3ff;
       border: 1px solid rgba(31,111,235,0.42);
-      border-radius: 9px; cursor: pointer;
+      border-radius: var(--bp-radius-9); cursor: pointer;
       font-family: 'Manrope', system-ui, sans-serif;
-      font-size: 13px; font-weight: 600;
+      font-size: var(--bp-text-base); font-weight: 600;
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       transition: background 0.15s, border-color 0.15s, color 0.15s;
       -webkit-tap-highlight-color: transparent;
@@ -1759,9 +1768,9 @@
       background: rgba(255,255,255,0.04);
       color: #a8acb6;
       border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 9px; cursor: pointer;
+      border-radius: var(--bp-radius-9); cursor: pointer;
       font-family: 'Manrope', system-ui, sans-serif;
-      font-size: 12.5px; font-weight: 600;
+      font-size: var(--bp-text-base); font-weight: 600;
       display: inline-flex; align-items: center; justify-content: center; gap: 5px;
       transition: background 0.15s, color 0.15s;
       -webkit-tap-highlight-color: transparent;
@@ -1774,7 +1783,7 @@
       background: rgba(255,255,255,0.04);
       color: #a8acb6;
       border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 9px; cursor: pointer;
+      border-radius: var(--bp-radius-9); cursor: pointer;
       display: inline-flex; align-items: center; justify-content: center;
       transition: background 0.15s, color 0.15s;
       -webkit-tap-highlight-color: transparent;
@@ -1786,8 +1795,8 @@
     .bp-bottom-cta-spacer { height: 58px; }
     @media (max-width: 480px) {
       .bp-bottom-cta { padding: 5px 8px calc(5px + env(safe-area-inset-bottom)); gap: 5px; }
-      .bp-cta-watchlist { font-size: 12.5px; padding: 0 8px; }
-      .bp-cta-alarm { font-size: 11.5px; padding: 0 6px; }
+      .bp-cta-watchlist { font-size: var(--bp-text-base); padding: 0 8px; }
+      .bp-cta-alarm { font-size: var(--bp-text-sm); padding: 0 6px; }
     }
     /* P1: nav z-index fix — action bar yukarı it (768px mobile nav = 64px) */
     @media (max-width: 768px) {
@@ -1797,12 +1806,12 @@
   <div class="bp-bottom-cta" id="bpBottomCta" role="toolbar" aria-label="Hisse aksiyonları">
     <button class="bp-cta-watchlist" id="bpCtaWatch" type="button"
             onclick="if(typeof toggleHisseWatch==='function')toggleHisseWatch();">
-      <span id="bpCtaWatchIcon">⭐</span>
+      <span id="bpCtaWatchIcon"><span aria-hidden="true">⭐</span></span>
       <span id="bpCtaWatchLabel">Takibe Al</span>
     </button>
     <button class="bp-cta-alarm" type="button"
             onclick="var b=document.getElementById('hibBellBtn');if(b)b.click();">
-      🔔 Alarm
+      <span aria-hidden="true">🔔</span> Alarm
     </button>
     <button class="bp-cta-share" type="button" aria-label="Paylaş"
             onclick="var s=document.getElementById('shareSection');if(s){s.style.display='flex';s.scrollIntoView({behavior:'smooth',block:'center'});}">
@@ -1818,7 +1827,7 @@
   <div id="chart-section" data-tab-content="grafik" class="chart-section" style="scroll-margin-top:80px">
     <div class="chart-header">
       <span class="chart-label">{{ ticker }} — Günlük Grafik (2 Yıl)</span>
-      <span id="emaLegend" style="font-size:11px;color:var(--bp-text3);margin-left:auto"></span>
+      <span id="emaLegend" style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-left:auto"></span>
     </div>
     <div id="chartBody" style="min-height:420px">
     <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
@@ -1834,7 +1843,7 @@
           <div class="week52-fill"  id="w52fill"  style="width:0%"></div>
           <div class="week52-cursor" id="w52cursor" style="left:0%"></div>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--bp-text3)">
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:var(--bp-text-xs);color:var(--bp-text3)">
           <span>52H Düşük</span>
           <span id="w52cur" style="color:var(--bp-text)">—</span>
           <span>52H Yüksek</span>
@@ -1848,10 +1857,10 @@
   {% if signal_summary %}
   <div id="signalSummarySection"
        data-tab-content="ozet"
-       style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:18px 18px 14px;margin-bottom:20px">
+       style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:18px 18px 14px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <h2 class="section-title" style="margin:0">🧭 Sinyal Özeti</h2>
-      <span style="font-size:11px;color:var(--bp-text3)">2 saniyede karar yardımcısı</span>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">🧭</span> Sinyal Özeti</h2>
+      <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">2 saniyede karar yardımcısı</span>
       {# CPO-535 #36 Skor Halka — compose_score (signal_strength) tek kaynak #}
       {%- set _ts = (ssr_signal.signal_strength | default(0)) | int %}
       {% if ssr_signal and _ts > 0 %}
@@ -1869,19 +1878,19 @@
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
            title="Sinyal gücü puanı (0–100). ADX, hacim, yön gücü, teyit ve RSI bileşenlerine dayalı.">
         <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100">
-          <circle cx="32" cy="32" r="28" fill="none" stroke="#2a2a2c" stroke-width="6"/>
+          <circle cx="32" cy="32" r="28" fill="none" stroke="var(--bp-border)" stroke-width="6"/>
           <circle cx="32" cy="32" r="28" fill="none" stroke="{{ _tc }}" stroke-width="6"
                   stroke-linecap="round" stroke-dasharray="175.93"
                   stroke-dashoffset="{{ ((175.93 * (100 - _ts)) / 100)|round(2) }}"
                   transform="rotate(-90 32 32)"/>
           <text x="32" y="34" text-anchor="middle" dominant-baseline="middle"
-                fill="#e5e1e4" style="font-weight:700;font-size:18px;font-family:inherit">{{ _ts }}</text>
+                fill="#e5e1e4" style="font-weight:700;font-size:var(--bp-text-xl);font-family:inherit">{{ _ts }}</text>
         </svg>
         <div style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.1">
           {%- if ssr_signal.is_premium %}
-          <span style="font-size:10px;color:var(--bp-volume);margin-top:3px;letter-spacing:.2px">⭐ Hacim Onaylı</span>
+          <span style="font-size:var(--bp-text-2xs);color:var(--bp-volume);margin-top:3px;letter-spacing:.2px"><span aria-hidden="true">⭐</span> Hacim Onaylı</span>
           {%- else %}
-          <span style="font-size:10px;color:var(--bp-text3);margin-top:2px">sinyal gücü</span>
+          <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);margin-top:2px">sinyal gücü</span>
           {%- endif %}
         </div>
       </div>
@@ -1889,7 +1898,7 @@
     </div>
 
     <!-- Katman A — tek cümle -->
-    <p style="font-size:15px;line-height:1.65;color:var(--bp-text);margin:0 0 14px;font-weight:500">
+    <p style="font-size:var(--bp-text-15);line-height:1.65;color:var(--bp-text);margin:0 0 14px;font-weight:500">
       {{ signal_summary.verdict }}
     </p>
 
@@ -1897,7 +1906,7 @@
     <ul style="list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:8px">
       {% for p in signal_summary.points %}
       <li title="{{ p.tip }}"
-          style="display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.55;color:var(--bp-text2);cursor:help">
+          style="display:flex;align-items:flex-start;gap:8px;font-size:var(--bp-text-base);line-height:1.55;color:var(--bp-text2);cursor:help">
         <span style="color:{% if signal_summary.signal == 'AL' %}#00e290{% elif signal_summary.signal == 'SAT' %}#f85149{% else %}#909097{% endif %};flex-shrink:0;margin-top:1px">▸</span>
         <span>{{ p.text }}</span>
       </li>
@@ -1906,17 +1915,17 @@
 
     <!-- Katman C — detaylı teknik göstergeler (accordion, kapalı başlar) -->
     <details id="signalSummaryDetails" style="margin-top:10px;border-top:1px solid var(--bp-surface2);padding-top:10px">
-      <summary style="cursor:pointer;font-size:12px;color:var(--bp-brand);list-style:none;user-select:none;outline:none"
+      <summary style="cursor:pointer;font-size:var(--bp-text-sm);color:var(--bp-brand);list-style:none;user-select:none;outline:none"
                title="Aç/kapat — ADX, RSI, EMA, DI±, Supertrend göstergeleri ve metodoloji linkleri">
-        ▾ Detaylı teknik göstergeler <span style="color:var(--bp-text3);font-weight:normal;font-size:11px">— aç/kapat</span>
+        ▾ Detaylı teknik göstergeler <span style="color:var(--bp-text3);font-weight:normal;font-size:var(--bp-text-xs)">— aç/kapat</span>
       </summary>
       <div style="margin-top:10px">
         <!-- Teknik Görünüm (eski commentary-section — taşındı, silinmedi) -->
         <div class="commentary-section" id="commentarySection" style="display:none;margin-bottom:6px">
-          <h3 class="section-title" style="margin-bottom:6px;font-size:13px">📊 Teknik Görünüm</h3>
+          <h3 class="section-title" style="margin-bottom:6px;font-size:var(--bp-text-base)"><span aria-hidden="true">📊</span> Teknik Görünüm</h3>
           <p class="commentary-text" id="commentaryText"></p>
         </div>
-        <p style="font-size:11px;color:var(--bp-text3);margin:6px 0 0;line-height:1.5">
+        <p style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin:6px 0 0;line-height:1.5">
           Göstergeler (<a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — ADX">ADX</a>,
           <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — RSI">RSI</a>,
           <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — EMA">EMA</a>,
@@ -1931,7 +1940,7 @@
   {% else %}
   <!-- Teknik Yorum (signal_summary yoksa fallback) -->
   <div class="commentary-section" id="commentarySection" data-tab-content="ozet" style="display:none">
-    <h2 class="section-title" style="margin-bottom:8px">📊 Teknik Görünüm</h2>
+    <h2 class="section-title" style="margin-bottom:8px"><span aria-hidden="true">📊</span> Teknik Görünüm</h2>
     <p class="commentary-text" id="commentaryText"></p>
   </div>
   {% endif %}
@@ -1963,7 +1972,7 @@
 
   <!-- Giriş Analizi (Güçlü Trend / Trend Bozuldu sinyallerinde gösterilir) -->
   <div class="entry-analysis-section" id="entryAnalysisSection" data-tab-content="ozet" style="display:none">
-    <h2 class="section-title">🎯 Giriş Analizi</h2>
+    <h2 class="section-title"><span aria-hidden="true">🎯</span> Giriş Analizi</h2>
     <div class="entry-analysis-grid" id="entryAnalysisGrid">
 
       <!-- Giriş Değerlendirmesi -->
@@ -1984,12 +1993,12 @@
       <div class="hacim-profili">
         <div class="vol-status-lbl">Hacim Profili</div>
         <div class="hp-row-line" id="hpRvolRow" style="display:none">
-          <span class="hp-row-icon">📊</span>
+          <span class="hp-row-icon"><span aria-hidden="true">📊</span></span>
           <span class="hp-row-text">Haftalık hacim ivmesi:</span>
           <span class="hp-row-val" id="hpRvolVal">—</span>
         </div>
         <div class="hp-row-line" id="hpSvolRow" style="display:none">
-          <span class="hp-row-icon">💥</span>
+          <span class="hp-row-icon"><span aria-hidden="true">💥</span></span>
           <span class="hp-row-text">Sinyal günü hacim:</span>
           <span class="hp-row-val" id="hpSvolVal">—</span>
         </div>
@@ -2002,17 +2011,17 @@
   <!-- İndikatörler -->
   <div class="indicators-section" data-tab-content="ozet">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
-      <h2 class="section-title" style="margin:0">✓ Algoritmamızın Onayları</h2>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
       <div style="display:flex;gap:6px;align-items:center">
         <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
-                style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
-                onmouseover="this.style.borderColor='#46464d';this.style.color='#c7c5cd'"
-                onmouseout="this.style.borderColor='#2a2a2c';this.style.color='#909097'"
+                style="background:transparent;border:1px solid var(--bp-border);color:#909097;font-size:var(--bp-text-xs);padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
+                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='#c7c5cd'"
+                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='#909097'"
                 title="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
         <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
-                style="background:transparent;border:1px solid #2a2a2c;color:#909097;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
-                onmouseover="this.style.borderColor='#46464d';this.style.color='#c7c5cd'"
-                onmouseout="this.style.borderColor='#2a2a2c';this.style.color='#909097'">
+                style="background:transparent;border:1px solid var(--bp-border);color:#909097;font-size:var(--bp-text-xs);padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
+                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='#c7c5cd'"
+                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='#909097'">
           Detaylı göster ▾
         </button>
       </div>
@@ -2020,17 +2029,17 @@
     <div class="ind-row" id="indRow">
       <span class="ind-badge ind-neutral">Yükleniyor…</span>
     </div>
-    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:8px;font-size:11.5px;color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',monospace">
-      <strong style="color:var(--bp-brand);font-size:10px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Teknik Detaylar</strong>
+    <div id="indTechDetails" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(var(--bp-brand-rgb),0.04);border:1px solid rgba(var(--bp-brand-rgb),0.12);border-radius:var(--bp-radius-md);font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.7;font-family:'Space Grotesk',monospace">
+      <strong style="color:var(--bp-brand);font-size:var(--bp-text-2xs);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Teknik Detaylar</strong>
       <span id="indTechContent">—</span>
     </div>
   </div>
 
   <!-- Çoklu Zaman Dilimi -->
-  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px;margin-bottom:20px" id="mtfSection" data-tab-content="ozet">
+  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px" id="mtfSection" data-tab-content="ozet">
     <h2 class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="mtfGrid">
-      <div style="color:var(--bp-text3);font-size:13px;grid-column:1/-1">Yükleniyor…</div>
+      <div style="color:var(--bp-text3);font-size:var(--bp-text-base);grid-column:1/-1">Yükleniyor…</div>
     </div>
   </div>
 
@@ -2045,15 +2054,16 @@
   <!-- Sinyal Geçmişi -->
   <div class="history-section" data-tab-content="ozet">
     <h2 class="section-title">Sinyal Geçmişi
-      <span style="font-size:10px;color:var(--bp-text3);font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
+      <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
     </h2>
     <table class="history-table">
+      <caption class="sr-only">{{ ticker }} hissesi için geçmiş sinyal tablosu — tarih, sinyal türü, giriş fiyatı ve getiri</caption>
       <thead>
         <tr>
-          <th>Tarih</th>
-          <th>Sinyal</th>
-          <th>Giriş Fiyatı</th>
-          <th>Getiri</th>
+          <th scope="col">Tarih</th>
+          <th scope="col">Sinyal</th>
+          <th scope="col">Giriş Fiyatı</th>
+          <th scope="col">Getiri</th>
         </tr>
       </thead>
       <tbody id="historyBody">
@@ -2063,28 +2073,28 @@
   </div>
 
   <!-- Temel Analiz -->
-  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;overflow:hidden;margin-bottom:20px" id="fundSection" data-tab-content="ozet">
+  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);overflow:hidden;margin-bottom:20px" id="fundSection" data-tab-content="ozet">
     <div style="padding:12px 18px;border-bottom:1px solid var(--bp-surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <h2 class="section-title" style="margin:0">📋 Temel Analiz</h2>
-      <span style="font-size:11px;color:var(--bp-text3)">yfinance · 4 saatlik cache</span>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> Temel Analiz</h2>
+      <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">yfinance · 4 saatlik cache</span>
     </div>
-    <div id="fundLoading" style="color:var(--bp-text3);font-size:13px;display:flex;align-items:center;gap:8px;padding:20px 18px">
+    <div id="fundLoading" style="color:var(--bp-text3);font-size:var(--bp-text-base);display:flex;align-items:center;gap:8px;padding:20px 18px">
       <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Yükleniyor…
     </div>
     <div id="fundContent" style="display:none;padding:16px 18px">
       <!-- Değerleme -->
       <div id="fundValuation" style="margin-bottom:16px">
-        <div style="font-size:10px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">💰 Değerleme</div>
+        <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">💰</span> Değerleme</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridVal"></div>
       </div>
       <!-- Kârlılık & Büyüme -->
       <div id="fundProfitability" style="margin-bottom:16px">
-        <div style="font-size:10px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📈 Kârlılık & Büyüme</div>
+        <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">📈</span> Kârlılık & Büyüme</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridProfit"></div>
       </div>
       <!-- Getiri & Risk -->
       <div id="fundReturn">
-        <div style="font-size:10px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎯 Getiri & Risk</div>
+        <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">🎯</span> Getiri & Risk</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridReturn"></div>
       </div>
     </div>
@@ -2093,26 +2103,26 @@
   <!-- Geçmiş Sinyal Performansı — CPO-1107 madde 3: artık aynı sinyal geçmişi
        listesinden (signal_history) hesaplanır; ayrı/bayat backtest cache'i
        kullanmaz, böylece "Toplam Sinyal" tablosuyla aynı kaynağa dayanır. -->
-  <div id="sigPerfBox" data-tab-content="ozet" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+  <div id="sigPerfBox" data-tab-content="ozet" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <h2 class="section-title" style="margin:0">📊 Geçmiş Sinyal Performansı</h2>
-      <a href="/sinyal-performans" style="font-size:11px;color:var(--bp-brand);text-decoration:none;font-weight:600">Tüm backtest →</a>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📊</span> Geçmiş Sinyal Performansı</h2>
+      <a href="/sinyal-performans" style="font-size:var(--bp-text-xs);color:var(--bp-brand);text-decoration:none;font-weight:600">Tüm backtest <span aria-hidden="true">→</span></a>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div id="sigPerfWinRate" style="font-size:24px;font-weight:800"></div>
-        <div style="font-size:11px;color:var(--bp-text3);margin-top:3px">Sinyal Kazanma Oranı</div>
+      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
+        <div id="sigPerfWinRate" style="font-size:var(--bp-text-3xl);font-weight:800"></div>
+        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Sinyal Kazanma Oranı</div>
       </div>
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div id="sigPerfAvg" style="font-size:24px;font-weight:800"></div>
-        <div style="font-size:11px;color:var(--bp-text3);margin-top:3px">Ort. Sinyal Getirisi</div>
+      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
+        <div id="sigPerfAvg" style="font-size:var(--bp-text-3xl);font-weight:800"></div>
+        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Ort. Sinyal Getirisi</div>
       </div>
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div id="sigPerfCount" style="font-size:24px;font-weight:800;color:var(--bp-text3)"></div>
-        <div style="font-size:11px;color:var(--bp-text3);margin-top:3px">Analiz Edilen Sinyal</div>
+      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
+        <div id="sigPerfCount" style="font-size:var(--bp-text-3xl);font-weight:800;color:var(--bp-text3)"></div>
+        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Analiz Edilen Sinyal</div>
       </div>
     </div>
-    <div style="margin-top:8px;font-size:11px;color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal hariç · ⚠️ Geçmiş performans gelecek garantisi değildir</div>
+    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal hariç · <span aria-hidden="true">⚠️</span> Geçmiş performans gelecek garantisi değildir</div>
   </div>
 
   <!-- SPEC-017 v2 Faz A c3 — Özet sonu "Detay için" CTA (3 tab) -->
@@ -2120,16 +2130,16 @@
     <div class="bp-detail-cta-label">Detay için</div>
     <div class="bp-detail-cta-grid">
       <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('grafik');else{var s=document.querySelector('[data-segment=grafik]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
-        <span class="bp-detail-cta-icon">📈</span>
-        <span class="bp-detail-cta-text">Grafik <span class="bp-detail-cta-arrow">→</span></span>
+        <span class="bp-detail-cta-icon"><span aria-hidden="true">📈</span></span>
+        <span class="bp-detail-cta-text">Grafik <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
       </button>
       <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('ai');else{var s=document.querySelector('[data-segment=ai]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
-        <span class="bp-detail-cta-icon">🤖</span>
-        <span class="bp-detail-cta-text">AI Analiz <span class="bp-detail-cta-arrow">→</span></span>
+        <span class="bp-detail-cta-icon"><span aria-hidden="true">🤖</span></span>
+        <span class="bp-detail-cta-text">AI Analiz <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
       </button>
       <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('haberler');else{var s=document.querySelector('[data-segment=haberler]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
-        <span class="bp-detail-cta-icon">📰</span>
-        <span class="bp-detail-cta-text">Haberler <span class="bp-detail-cta-arrow">→</span></span>
+        <span class="bp-detail-cta-icon"><span aria-hidden="true">📰</span></span>
+        <span class="bp-detail-cta-text">Haberler <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
       </button>
     </div>
   </div>
@@ -2138,10 +2148,10 @@
       margin-bottom: 20px; padding: 16px;
       background: linear-gradient(135deg, rgba(var(--bp-al-rgb),0.06), rgba(var(--bp-al-rgb),0.02));
       border: 1px solid rgba(var(--bp-al-rgb),0.18);
-      border-radius: 12px;
+      border-radius:var(--bp-radius-xl);
     }
     .bp-detail-cta-label {
-      font-size: 11px; color: var(--bp-text3); font-weight: 600;
+      font-size: var(--bp-text-xs); color: var(--bp-text3); font-weight: 600;
       text-transform: uppercase; letter-spacing: 0.5px;
       margin-bottom: 10px; text-align: center;
     }
@@ -2150,7 +2160,7 @@
     }
     .bp-detail-cta-btn {
       display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 12px 6px; border-radius: 10px;
+      padding: 12px 6px; border-radius:var(--bp-radius-lg);
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.08);
       color: var(--bp-text); cursor: pointer;
@@ -2160,63 +2170,63 @@
     }
     .bp-detail-cta-btn:hover { background: rgba(var(--bp-al-rgb),0.10); border-color: rgba(var(--bp-al-rgb),0.32); }
     .bp-detail-cta-btn:active { transform: scale(0.97); }
-    .bp-detail-cta-icon { font-size: 22px; line-height: 1; }
+    .bp-detail-cta-icon { font-size: var(--bp-text-22); line-height: 1; }
     .bp-detail-cta-text {
-      font-size: 12.5px; font-weight: 700; letter-spacing: 0.2px;
+      font-size: var(--bp-text-base); font-weight: 700; letter-spacing: 0.2px;
       display: inline-flex; align-items: center; gap: 4px;
     }
     .bp-detail-cta-arrow { color: var(--bp-al); font-weight: 800; }
   </style>
 
   <!-- KAP + Dış Linkler -->
-  <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
-    <span style="font-size:12px;color:var(--bp-text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Resmi Kaynaklar</span>
+  <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+    <span style="font-size:var(--bp-text-sm);color:var(--bp-text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Resmi Kaynaklar</span>
     <a href="{{ kap_url }}" target="_blank" rel="noopener"
-       style="display:inline-flex;align-items:center;gap:5px;background:#1c1b1f;border:1px solid #2a2a2c;border-radius:6px;padding:5px 12px;font-size:12px;color:#909097;text-decoration:none;transition:all .15s"
+       style="display:inline-flex;align-items:center;gap:5px;background:#1c1b1f;border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:#909097;text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
-      📋 KAP Bildirimleri
+      <span aria-hidden="true">📋</span> KAP Bildirimleri
     </a>
     <a href="https://finance.yahoo.com/quote/{{ ticker }}.IS" target="_blank" rel="noopener"
-       style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--bp-text3);text-decoration:none;transition:all .15s"
+       style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-text3);text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
-      📈 Yahoo Finance
+      <span aria-hidden="true">📈</span> Yahoo Finance
     </a>
     <a href="https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/sirket-karti.aspx?hisse={{ ticker }}" target="_blank" rel="noopener"
-       style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--bp-text3);text-decoration:none;transition:all .15s"
+       style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-text3);text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
-      🏦 İş Yatırım
+      <span aria-hidden="true">🏦</span> İş Yatırım
     </a>
   </div>
 
   <!-- Sosyal Paylaşım -->
-  <div id="shareSection" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:12px 18px;margin-bottom:20px;align-items:center;flex-wrap:wrap;gap:10px">
-    <span style="font-size:12px;color:var(--bp-text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Sinyali Paylaş</span>
+  <div id="shareSection" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:12px 18px;margin-bottom:20px;align-items:center;flex-wrap:wrap;gap:10px">
+    <span style="font-size:var(--bp-text-sm);color:var(--bp-text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Sinyali Paylaş</span>
     <button id="shareWA" onclick="shareSignal('wa')"
-      style="display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:6px;padding:5px 12px;font-size:12px;color:#25D366;cursor:pointer;font-family:inherit;transition:all .15s"
+      style="display:inline-flex;align-items:center;gap:5px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:#25D366;cursor:pointer;font-family:inherit;transition:all .15s"
       onmouseover="this.style.background='rgba(37,211,102,.2)'" onmouseout="this.style.background='rgba(37,211,102,.1)'">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       WhatsApp
     </button>
     <button id="shareX" onclick="shareSignal('x')"
-      style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--bp-text);cursor:pointer;font-family:inherit;transition:all .15s"
+      style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-text);cursor:pointer;font-family:inherit;transition:all .15s"
       onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.05)'">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       X (Twitter)
     </button>
     <button id="shareCopy" onclick="shareSignal('copy')"
-      style="display:inline-flex;align-items:center;gap:5px;background:rgba(var(--bp-brand-rgb),.08);border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:6px;padding:5px 12px;font-size:12px;color:#93c5fd;cursor:pointer;font-family:inherit;transition:all .15s"
+      style="display:inline-flex;align-items:center;gap:5px;background:rgba(var(--bp-brand-rgb),.08);border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:#93c5fd;cursor:pointer;font-family:inherit;transition:all .15s"
       onmouseover="this.style.background='rgba(184,195,255,.15)'" onmouseout="this.style.background='rgba(184,195,255,.08)'">
-      🔗 Linki Kopyala
+      <span aria-hidden="true">🔗</span> Linki Kopyala
     </button>
   </div>
 
   <!-- Sinyal Dönemindeki Haber Akışı — sinyal tarihi etrafındaki KAP bildirimleri -->
-  <div id="storySection" data-tab-content="haberler" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px;margin-bottom:20px">
+  <div id="storySection" data-tab-content="haberler" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <h2 class="section-title" style="margin:0">📰 Sinyal Dönemindeki Haber Akışı</h2>
-      <span id="storyWindow" style="font-size:11px;color:var(--bp-text3)"></span>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📰</span> Sinyal Dönemindeki Haber Akışı</h2>
+      <span id="storyWindow" style="font-size:var(--bp-text-xs);color:var(--bp-text3)"></span>
     </div>
-    <p style="font-size:12px;color:var(--bp-text3);line-height:1.55;margin:0 0 12px">
+    <p style="font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.55;margin:0 0 12px">
       Bu haberler sinyalin oluştuğu dönem çevresindeki şirket duyurularıdır.
       Sinyal, haberlerden değil fiyat ve teknik göstergelerden üretilir.
     </p>
@@ -2225,34 +2235,34 @@
 
   <!-- AI Sinyal Açıklaması -->
   <div id="ai-section" style="scroll-margin-top:80px"></div>
-  <div id="sigExplainSection" data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px">
+  <div id="sigExplainSection" data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-      <span style="font-size:15px">✨</span>
-      <span style="font-size:13px;font-weight:700;color:var(--bp-text);text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
-      <span id="sigExplainBadge" style="margin-left:auto;font-size:11px;background:rgba(var(--bp-brand-rgb),0.15);color:#93c5fd;padding:2px 8px;border-radius:10px;border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
+      <span style="font-size:var(--bp-text-15)"><span aria-hidden="true">✨</span></span>
+      <span style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
+      <span id="sigExplainBadge" style="margin-left:auto;font-size:var(--bp-text-xs);background:rgba(var(--bp-brand-rgb),0.15);color:#93c5fd;padding:2px 8px;border-radius:var(--bp-radius-lg);border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
     </div>
     {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
-    <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:12px;color:#f87171;line-height:1.6"></div>
-    <div id="sigExplainLoading" style="display:flex;flex-direction:column;gap:10px;color:var(--bp-text3);font-size:13px">
+    <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:var(--bp-text-sm);color:#f87171;line-height:1.6"></div>
+    <div id="sigExplainLoading" style="display:flex;flex-direction:column;gap:10px;color:var(--bp-text3);font-size:var(--bp-text-base)">
       {# SPEC-017 Faz 3 F2-B3: Statik özet ÖNCE (içerik), spinner SONRA (durum) — kullanıcı boş ekran görmesin #}
-      <div style="font-size:13px;color:var(--bp-text2);line-height:1.65;padding:10px 12px;background:rgba(var(--bp-brand-rgb),0.06);border-left:3px solid rgba(var(--bp-brand-rgb),0.4);border-radius:0 8px 8px 0">
+      <div style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.65;padding:10px 12px;background:rgba(var(--bp-brand-rgb),0.06);border-left:3px solid rgba(var(--bp-brand-rgb),0.4);border-radius:0 8px 8px 0">
         Algoritmamız <strong style="color:var(--bp-brand)">Supertrend(10,3), ADX ≥ 25, EMA12/EMA99</strong> kriterlerinin aynı anda uyum sağlamasını değerlendirir. <strong style="color:var(--bp-al)">Güçlü Trend</strong> sinyali bu kriterlerin pozitif konfirmasyonunu, <strong style="color:var(--bp-sat)">Trend Bozuldu</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-brand);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:#6b6b73">
+      <div style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:#6b6b73">
         <div class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></div>
         AI yorumu hazırlanıyor…
       </div>
     </div>
-    <p id="sigExplainText" style="display:none;font-size:13px;color:var(--bp-text);line-height:1.75;margin:0"></p>
-    <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:11px;color:#475569">
-      🤖 Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 4 saatte bir yenilenir
+    <p id="sigExplainText" style="display:none;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0"></p>
+    <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:var(--bp-text-xs);color:#475569">
+      <span aria-hidden="true">🤖</span> Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 4 saatte bir yenilenir
     </div>
   </div>
 
   <!-- AI Haberler -->
   <div id="news-section" style="scroll-margin-top:80px"></div>
   <div class="news-section" id="newsSection" data-tab-content="haberler">
-    <h2 class="section-title">🤖 Son Haber Özeti</h2>
+    <h2 class="section-title"><span aria-hidden="true">🤖</span> Son Haber Özeti</h2>
     <div class="news-loading" id="newsLoading">
       <div class="spinner"></div> Haberler yükleniyor…
     </div>
@@ -2266,15 +2276,15 @@
   <!-- KAP Bildirimleri -->
   <div class="kap-section" id="kapSection" data-tab-content="haberler">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <h2 class="section-title" style="margin:0">📋 KAP Bildirimleri</h2>
-      <span style="font-size:11px;color:var(--bp-text3)">Son 90 gün · ODA + Finansal Rapor</span>
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> KAP Bildirimleri</h2>
+      <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Son 90 gün · ODA + Finansal Rapor</span>
       <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q={{ ticker }}" target="_blank" rel="noopener"
-         style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#909097;background:#1c1b1f;border:1px solid #2a2a2c;border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
+         style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:var(--bp-text-xs);color:#909097;background:#1c1b1f;border:1px solid var(--bp-border);border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
          onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
-        KAP'ta Aç ↗
+        KAP'ta Aç <span aria-hidden="true">↗</span>
       </a>
     </div>
-    <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:var(--bp-text3);font-size:13px;padding:6px 0">
+    <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:var(--bp-text3);font-size:var(--bp-text-base);padding:6px 0">
       <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div>
       Bildirimler yükleniyor…
     </div>
@@ -2283,9 +2293,9 @@
 
   {% if ssr_signal %}
   <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
-  <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:10px;padding:16px 18px;margin-bottom:20px">
-    <div style="font-size:11px;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:10px">📊 Teknik Özet</div>
-    <p style="font-size:13px;color:var(--bp-text2);line-height:1.7;margin:0">
+  <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
+    <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:10px"><span aria-hidden="true">📊</span> Teknik Özet</div>
+    <p style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.7;margin:0">
       <strong style="color:var(--bp-text)">{{ ticker }} ({{ name }})</strong> hissesi,
       {% if ssr_signal.signal == 'AL' %}
         BorsaPusula algoritmasına göre <strong style="color:var(--bp-al)">Güçlü Trend</strong> sinyali veriyor.
@@ -2307,7 +2317,7 @@
   {% if company_summary %}
   <!-- SPEC-011 L4 — Şirket Hakkında (Gemini AI özet, AI-optimized content) -->
   <section class="content-card" data-tab-content="always" aria-labelledby="company-summary-heading">
-    <h2 class="section-title" id="company-summary-heading">🏢 {{ ticker }} Hakkında</h2>
+    <h2 class="section-title" id="company-summary-heading"><span aria-hidden="true">🏢</span> {{ ticker }} Hakkında</h2>
     {% for para in company_summary.split('\n') %}{% if para.strip() %}
     <p class="content-para">{{ para.strip() }}</p>
     {% endif %}{% endfor %}
@@ -2323,13 +2333,13 @@
     <strong>EMA12 / EMA99</strong> pozisyonu. Haftalık EMA20 gate, büyük ters trendlerde
     sinyal üretimini engeller. Sinyal en az 3 bar devam edince "onaylı" sayılır.
     <br><br>
-    ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
+    <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir.
   </div>
 
   {% if seo_faq %}
   <!-- SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) -->
   <section class="content-card faq-card" data-tab-content="always" aria-labelledby="faq-heading">
-    <h2 class="section-title" id="faq-heading">❓ {{ ticker }} — Sıkça Sorulan Sorular</h2>
+    <h2 class="section-title" id="faq-heading"><span aria-hidden="true">❓</span> {{ ticker }} — Sıkça Sorulan Sorular</h2>
     <dl class="faq-list">
       {% for item in seo_faq %}
       <dt class="faq-q">{{ item.q }}</dt>
@@ -2342,7 +2352,7 @@
   {% if related_stocks %}
   <!-- SPEC-011 L4/L5 — İlgili hisseler (internal linking, crawl budget) -->
   <aside class="content-card" data-tab-content="always" aria-labelledby="related-heading">
-    <h2 class="section-title" id="related-heading">🔗 {{ sector }} Sektöründen Diğer Hisseler</h2>
+    <h2 class="section-title" id="related-heading"><span aria-hidden="true">🔗</span> {{ sector }} Sektöründen Diğer Hisseler</h2>
     <div class="related-grid">
       {% for r in related_stocks %}
       <a href="/hisse/{{ r.ticker }}" class="related-chip">
@@ -2357,13 +2367,13 @@
   <!-- İlgili Blog Makaleleri (T3-4) -->
   {% if related_blog %}
   <div data-tab-content="always" style="margin-bottom:16px">
-    <h2 class="section-title" style="margin-bottom:10px">📖 İlgili Okumalar</h2>
+    <h2 class="section-title" style="margin-bottom:10px"><span aria-hidden="true">📖</span> İlgili Okumalar</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
       {% for b in related_blog %}
       <a href="/blog/{{ b.slug }}" class="blog-read-card">
-        <div style="font-size:11px;color:var(--bp-brand);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">{{ b.cat }}</div>
-        <div style="font-size:13px;font-weight:600;color:var(--bp-text);line-height:1.4">{{ b.title }}</div>
-        <div style="font-size:11px;color:var(--bp-text3);margin-top:5px">⏱ {{ b.mins }} dk okuma</div>
+        <div style="font-size:var(--bp-text-xs);color:var(--bp-brand);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">{{ b.cat }}</div>
+        <div style="font-size:var(--bp-text-base);font-weight:600;color:var(--bp-text);line-height:1.4">{{ b.title }}</div>
+        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:5px">⏱ {{ b.mins }} dk okuma</div>
       </a>
       {% endfor %}
     </div>
@@ -2375,28 +2385,28 @@
 </div>
 
 <!-- Subscription CTA -->
-<div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(29,78,216,.04));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:10px;padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
+<div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(29,78,216,.04));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius-lg);padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
   <div style="flex:1;min-width:160px">
-    <div style="font-size:13px;font-weight:700;color:var(--bp-text);margin-bottom:1px">📬 {{ ticker }} sinyali değişince bildirim al</div>
-    <div style="font-size:11px;color:var(--bp-text3)">Ücretsiz e-posta aboneliği</div>
+    <div style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);margin-bottom:1px"><span aria-hidden="true">📬</span> {{ ticker }} sinyali değişince bildirim al</div>
+    <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Ücretsiz e-posta aboneliği</div>
   </div>
   <div style="display:flex;gap:7px;align-items:center" id="hisseSubForm">
-    <input id="hisseSubEmail" type="email" placeholder="e-posta adresiniz"
-      style="background:#141416;border:1px solid #2a2a2c;color:#e5e1e4;padding:6px 11px;border-radius:7px;font-size:12px;font-family:inherit;outline:none;transition:border-color .15s;width:200px"
-      onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
+    <input id="hisseSubEmail" type="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
+      style="background:#141416;border:1px solid var(--bp-border);color:#e5e1e4;padding:6px 11px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);font-family:inherit;outline:none;transition:border-color .15s;width:200px"
+      onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
       onkeydown="if(event.key==='Enter')hisseSubscribe()">
     <button onclick="hisseSubscribe()"
-      style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+      style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;white-space:nowrap">
       Abone Ol
     </button>
   </div>
   <button onclick="document.getElementById('hisseSubCta').style.display='none'"
-    style="background:none;border:none;color:#374151;cursor:pointer;font-size:16px;padding:2px 4px" aria-label="Kapat">×</button>
+    style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);padding:2px 4px" aria-label="Kapat">×</button>
 </div>
 
 </main>
 
-<footer style="text-align:center;padding:20px;font-size:12px;color:var(--bp-text3);border-top:1px solid var(--bp-surface2);margin-top:20px">
+<footer style="text-align:center;padding:20px;font-size:var(--bp-text-sm);color:var(--bp-text3);border-top:1px solid var(--bp-surface2);margin-top:20px">
   <div style="margin-bottom:8px">
     <a href="/" style="color:var(--bp-text3);text-decoration:none">Ana Sayfa</a> ·
     <a href="/tarama" style="color:var(--bp-text3);text-decoration:none">Tarayıcı</a> ·
@@ -2406,7 +2416,7 @@
     <a href="/metodoloji" style="color:var(--bp-text3);text-decoration:none">Metodoloji</a> ·
     <a href="/yasal" style="color:var(--bp-text3);text-decoration:none">Yasal Uyarı</a>
   </div>
-  ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong>yatırım tavsiyesi değildir</strong>. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
+  <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong>yatırım tavsiyesi değildir</strong>. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
 </footer>
 
 <script src="/static/bp-format.js?v=20260808a"></script>
@@ -2535,7 +2545,7 @@ function _hibCurrentPrice() {
   // signalData global'inde son fiyat var
   try {
     if (typeof signalData !== 'undefined' && signalData && signalData.price) return +signalData.price;
-  } catch(_) {}
+  } catch(_) { /* signalData henuz hazir olmayabilir (sayfa yuklenirken) - DOM fallback asagida devrede */ }
   // Fallback: header'daki gösterilen fiyat
   const txt = document.getElementById('hpPrice')?.textContent || '';
   const num = parseFloat(txt.replace(/\./g,'').replace(',','.'));
@@ -2605,7 +2615,7 @@ function updateHibStarBtn() {
   const btn = document.getElementById('hibStarBtn');
   if (!btn) return;
   let pf = [];
-  try { pf = JSON.parse(localStorage.getItem(HIB_PF_KEY) || '[]'); } catch(_) {}
+  try { pf = JSON.parse(localStorage.getItem(HIB_PF_KEY) || '[]'); } catch(_) { console.warn('updateHibStarBtn: portfoy okunamadi', _); }
   const inPf = Array.isArray(pf) && pf.some(x => x && x.ticker === TICKER);
   const lbl = btn.querySelector('.hib-action-lbl');
   if (inPf) {
@@ -2624,7 +2634,7 @@ function updateHibBellBtn() {
   const btn = document.getElementById('hibBellBtn');
   if (!btn) return;
   let w = [];
-  try { w = JSON.parse(localStorage.getItem(HIB_WATCH_KEY) || '[]'); } catch(_) {}
+  try { w = JSON.parse(localStorage.getItem(HIB_WATCH_KEY) || '[]'); } catch(_) { console.warn('updateHibBellBtn: takip listesi okunamadi', _); }
   const inW = Array.isArray(w) && w.includes(TICKER);
   const lbl = btn.querySelector('.hib-action-lbl');
   if (inW) {
@@ -2840,7 +2850,7 @@ function buildChart(d) {
   const _chDateLbl = document.createElement('div');
   _chDateLbl.style.cssText = 'position:absolute;bottom:0;transform:translateX(-50%);' +
     'background:var(--bp-brand);color:#1c2128;font-size:11px;font-weight:600;' +
-    'padding:1px 5px;border-radius:2px;pointer-events:none;display:none;white-space:nowrap;z-index:20';
+    'padding:1px 5px;border-radius:2px;pointer-events:none;display:none;white-space:nowrap;z-index:var(--bp-z-chart-date-label)';
   elMain.style.position = 'relative';
   elMain.appendChild(_chDateLbl);
 
@@ -2875,7 +2885,7 @@ function buildChart(d) {
           to:   n - 1 + 10,             // son bar + 10 boş slot = sağ boşluk
         });
       }
-    } catch(_) {}
+    } catch(_) { console.warn('chart setVisibleLogicalRange basarisiz', _); }
   });
 
   window.addEventListener('resize', () => {
@@ -2892,7 +2902,7 @@ function buildChart(d) {
       });
       ro.observe(elMain);
     }
-  } catch(_) {}
+  } catch(_) { console.warn('ResizeObserver kurulumu basarisiz (sekme degisince grafik yeniden boyutlanmayacak)', _); }
   // applyTab hook: AI/Grafik tab açıldığında chart resize zorla
   window.bpChartResize = function(){
     setTimeout(() => {
@@ -2980,10 +2990,13 @@ function renderSummary(s, signalData) {
   const MAX = 3;
   const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
   const dotCls   = s.signal === 'SAT' ? 'dot-bear' : s.signal === 'AL' ? 'dot-bull' : 'dot-empty';
-  document.getElementById('icDots').innerHTML =
+  const icDotsEl = document.getElementById('icDots');
+  icDotsEl.innerHTML =
     Array.from({ length: MAX }, (_, i) =>
       `<div class="score-dot ${i < scoreVal ? dotCls : 'dot-empty'}"></div>`
     ).join('');
+  icDotsEl.setAttribute('role', 'img');
+  icDotsEl.setAttribute('aria-label', `Güç: ${scoreVal}/${MAX}`);
 
   /* Sinyal date/bars — signalData'dan */
   if (signalData) {
@@ -3598,8 +3611,8 @@ async function loadNews(retryCount) {
         kapA.href = data.kap_url;
         kapA.target = '_blank';
         kapA.rel = 'noopener';
-        kapA.style.cssText = 'font-size:11px;color:var(--bp-text3);background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.2);border-radius:4px;padding:2px 7px;text-decoration:none;margin-left:auto;white-space:nowrap;';
-        kapA.textContent = 'KAP ↗';
+        kapA.style.cssText = 'font-size:11px;color:var(--bp-text3);background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.2);border-radius:var(--bp-radius-4);padding:2px 7px;text-decoration:none;margin-left:auto;white-space:nowrap;';
+        kapA.innerHTML = 'KAP <span aria-hidden="true">↗</span>';
         sourceEl.appendChild(kapA);
       }
     } else if (data.unavailable) {
@@ -3676,7 +3689,7 @@ async function loadSignalExplanation(retryCount) {
         loadEl.style.display = 'flex';
         setTimeout(() => loadSignalExplanation(retryCount + 1), 6000);
       } else {
-        loadEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
+        loadEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
         loadEl.style.display = 'flex';
       }
     } else {
@@ -3687,7 +3700,7 @@ async function loadSignalExplanation(retryCount) {
     if (retryCount < 2) {
       setTimeout(() => loadSignalExplanation(retryCount + 1), 8000);
     } else {
-      loadEl.innerHTML = 'Açıklama yüklenemedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
+      loadEl.innerHTML = 'Açıklama yüklenemedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
       loadEl.style.display = 'flex';
     }
   }
@@ -3781,7 +3794,7 @@ async function loadKapDisclosures() {
         </div>
         <div class="kap-meta">
           <span>${dateShort}</span>
-          ${d.subject ? `<span style="color:#2a2a2c">·</span><span style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(d.subject)}">${escHtml(d.subject)}</span>` : ''}
+          ${d.subject ? `<span style="color:var(--bp-border)">·</span><span style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(d.subject)}">${escHtml(d.subject)}</span>` : ''}
           ${d.late ? '<span style="color:#d29922;font-size:10px">⚠ GECİKMELİ</span>' : ''}
         </div>
       </div>`;
@@ -3823,7 +3836,7 @@ function _fundCard(lbl, val, color, sub) {
   const subHtml = sub ? `<div style="font-size:10px;color:var(--bp-text3);margin-top:2px">${sub}</div>` : '';
   return `<div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:11px 13px">
     <div style="font-size:10px;color:var(--bp-text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;font-weight:600">${lbl}</div>
-    <div style="font-size:15px;font-weight:700;color:${c};font-variant-numeric:tabular-nums">${val}</div>
+    <div style="font-size:var(--bp-text-15);font-weight:700;color:${c};font-variant-numeric:tabular-nums">${val}</div>
     ${subHtml}
   </div>`;
 }
@@ -3908,7 +3921,7 @@ async function loadMTF() {
     const sigLabel = s => ({'AL':'Güçlü Trend','SAT':'Trend Bozuldu','BEKLE':'Yatay'}[s] || s);
     const sigColor = s => s === 'AL' ? '#00e290' : s === 'SAT' ? '#f85149' : '#909097';
     const sigBg    = s => s === 'AL' ? '#1a4731' : s === 'SAT' ? '#3d0f0f' : '#1c1b1f';
-    const sigBord  = s => s === 'AL' ? '#238636' : s === 'SAT' ? '#da3633' : '#2a2a2c';
+    const sigBord  = s => s === 'AL' ? '#238636' : s === 'SAT' ? '#da3633' : 'var(--bp-border)';
     const sigArrow = s => s === 'AL' ? '▲' : s === 'SAT' ? '▼' : '●';
 
     /* CPO-983 Opsiyon B: 4 ayrı boş "Veri yok" kutusu yerine tek anlamlı placeholder */
@@ -3932,10 +3945,10 @@ async function loadMTF() {
       const lbl  = sigLabel(d.signal);
       const scoreBar = d.bull_score > 0
         ? `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
-            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bull_score?col:'#2a2a2c'}"></div>`
+            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bull_score?col:'var(--bp-border)'}"></div>`
           ).join('')}</div>`
         : `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
-            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bear_score?'#f85149':'#2a2a2c'}"></div>`
+            `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bear_score?'#f85149':'var(--bp-border)'}"></div>`
           ).join('')}</div>`;
 
       return `
@@ -3989,7 +4002,7 @@ function startSSE() {
       const _lt = document.getElementById('liveTs');
       _lt.style.cssText = 'font-size:11px;color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
       _lt.innerHTML = '<span class="live-dot-pulse"></span>' + msg.ts;
-    } catch (_) {}
+    } catch(_) { console.warn('SSE fiyat guncelleme hatasi', _); }
   };
   es.onerror = () => {
     es.close();
@@ -4034,10 +4047,10 @@ window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
       const _mt = document.getElementById('macroTrack');
       _mt.innerHTML = html + html;
       requestAnimationFrame(() => { const w = _mt.scrollWidth / 2; window.bpStartMacroTicker && window.bpStartMacroTicker({track: _mt, pps: 55}); });
-    } catch(e) {}
+    } catch(e) { console.warn('loadMacro basarisiz', e); }
   }
   loadMacro();
-  setInterval(loadMacro, 60000);
+  setInterval(loadMacro, 180000);
 })();
 </script>
 
@@ -4067,7 +4080,7 @@ function _applyTooltipVisibility() {
   if (tb) {
     tb.textContent = show ? '? Kapat' : '? Açıkla';
     tb.style.color = show ? '#b8c3ff' : '#909097';
-    tb.style.borderColor = show ? 'rgba(184,195,255,0.35)' : '#2a2a2c';
+    tb.style.borderColor = show ? 'rgba(184,195,255,0.35)' : 'var(--bp-border)';
   }
 }
 function toggleTooltips() {
@@ -4079,7 +4092,6 @@ _applyTooltipVisibility();
 /* Re-apply after indicators render (called from renderSummary flow) */
 window._bpApplyTooltips = _applyTooltipVisibility;
 </script>
-{% include '_premium_modal.html' %}
 <script>
 /* SPEC-017 v2 — Tab-switch (gerçek gizle/göster) — Ozan direktifi 23:55 TR
  * Anchor scroll yerine: aktif tab dışındaki içerikler display:none → sayfa KISALIR.
@@ -4143,7 +4155,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
       s.classList.toggle('active', s.dataset.segment === tab);
     });
     // Persist + URL state (SPEC-017 v2 Faz A P0-1)
-    try { localStorage.setItem('bp_hisse_tab', tab); } catch(e) {}
+    try { localStorage.setItem('bp_hisse_tab', tab); } catch(e) { /* sekme bu oturumda zaten degisti, sadece bir sonraki ziyarette hatirlanmayabilir (private mod/kota) */ }
     if (!opts.skipUrl) {
       try {
         var url = new URL(window.location.href);
@@ -4151,10 +4163,10 @@ window._bpApplyTooltips = _applyTooltipVisibility;
           url.searchParams.set('tab', tab);
           history.replaceState({tab: tab}, '', url.toString());
         }
-      } catch(e) {}
+      } catch(e) { console.warn('URL sekme durumu senkronizasyonu basarisiz', e); }
     }
     // GA4
-    try { if (typeof gtag === 'function') gtag('event','tab_switch',{ticker: typeof TICKER!=='undefined'?TICKER:'', tab: tab}); } catch(e){}
+    try { if (typeof gtag === 'function') gtag('event','tab_switch',{ticker: typeof TICKER!=='undefined'?TICKER:'', tab: tab}); } catch(e) { /* gtag best-effort analitik - ad-blocker/consent durumunda tanimsiz olabilir, sekme gecisini bozmamali */ }
     // SPEC-017 Faz C K10: AI tab açıldığında otomatik fetch + cached değilse retry
     if (tab === 'ai') {
       try {
@@ -4164,11 +4176,11 @@ window._bpApplyTooltips = _applyTooltipVisibility;
         if (!alreadyLoaded && typeof loadSignalExplanation === 'function') {
           loadSignalExplanation(0);
         }
-      } catch(e) {}
+      } catch(e) { console.warn('AI sekmesi otomatik yukleme (loadSignalExplanation) basarisiz', e); }
     }
     // SPEC-017 Faz F Bug 3: Grafik tab açıldığında chart resize (display:none→block sonrası width sync)
     if (tab === 'grafik') {
-      try { if (typeof window.bpChartResize === 'function') window.bpChartResize(); } catch(e) {}
+      try { if (typeof window.bpChartResize === 'function') window.bpChartResize(); } catch(e) { console.warn('bpChartResize cagrisi basarisiz (grafik sekmesi acilirken)', e); }
     }
   }
   window.applyTab = applyTab;
@@ -4189,7 +4201,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
       var t = url.searchParams.get('tab') || 'ozet';
       if (VALID_TABS.indexOf(t) === -1) t = 'ozet';
       applyTab(t, {skipUrl: true});
-    } catch(e) {}
+    } catch(e) { console.warn('popstate sekme geri yukleme basarisiz', e); }
   });
 
   // İlk yükleme: URL ?tab=X > localStorage > 'ozet'
@@ -4201,13 +4213,13 @@ window._bpApplyTooltips = _applyTooltipVisibility;
     } else {
       initial = localStorage.getItem('bp_hisse_tab') || 'ozet';
     }
-  } catch(e) {}
+  } catch(e) { console.warn('baslangic sekme tespiti basarisiz, ozet varsayilanina donuluyor', e); }
   if (VALID_TABS.indexOf(initial) === -1) initial = 'ozet';
   applyTab(initial, {skipUrl: false});
 })();
 </script>
 
-<script src="/static/js/toast.js?v=1" defer></script>
+<script src="/static/js/toast.js?v=3" defer></script>
 
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% block head %}<title>Piyasa Gündem Merkezi | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>Piyasa Gündem Merkezi | BorsaPusula</title>
 <meta name="description" content="Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/gundem">
@@ -18,36 +18,36 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810B">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     background: var(--bp-bg); color: var(--bp-text);
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    -webkit-font-smoothing: antialiased; font-size: 14px; min-height: 100vh;
+    -webkit-font-smoothing: antialiased; font-size: var(--bp-text-md); min-height: 100vh;
   }
   header {
     background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
     padding: 14px 24px; display: flex; align-items: center; gap: 16px;
-    position: sticky; top: 0; z-index: 100;
+    position: sticky; top: 0; z-index:var(--bp-z-dropdown);
   }
   .back-btn {
     display: flex; align-items: center; gap: 6px; color: var(--bp-text2);
-    font-size: 13px; text-decoration: none; padding: 5px 10px;
-    border: 1px solid var(--bp-border); border-radius: 6px;
+    font-size: var(--bp-text-base); text-decoration: none; padding: 5px 10px;
+    border: 1px solid var(--bp-border); border-radius:var(--bp-radius);
     background: var(--bp-surface2); transition: all 0.15s; white-space: nowrap;
   }
   .back-btn:hover { color: var(--bp-text); border-color: var(--bp-border2); }
-  .page-title { font-size: 20px; font-weight: 700; }
-  .page-sub   { font-size: 12px; color: var(--bp-text3); margin-top: 1px; }
+  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; }
+  .page-sub   { font-size: var(--bp-text-sm); color: var(--bp-text3); margin-top: 1px; }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
   .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
   @media (max-width:780px) { .top-nav-links { display:none; } }
 
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  .container { max-width: var(--bp-container-1100); margin: 0 auto; padding: 24px; }
 
   /* ── Stats Row ── */
   .stats-row {
@@ -60,8 +60,8 @@
     transition: border-color .15s;
   }
   .stat-card:hover { border-color: var(--bp-border2); }
-  .stat-num  { font-size: 36px; font-weight: 800; line-height: 1; }
-  .stat-lbl  { font-size: 11px; color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: .5px; }
+  .stat-num  { font-size: var(--bp-text-36); font-weight: 800; line-height: 1; }
+  .stat-lbl  { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: .5px; }
   .num-al  { color: var(--bp-al); }
   .num-sat { color: var(--bp-sat); }
   .num-bkl { color: var(--bp-bkl); }
@@ -74,7 +74,7 @@
     margin-bottom: 14px;
   }
   .section-title {
-    font-size: 14px; font-weight: 700; color: var(--bp-text);
+    font-size: var(--bp-text-md); font-weight: 700; color: var(--bp-text);
     display: flex; align-items: center; gap: 7px;
   }
   .section-title .dot {
@@ -82,7 +82,7 @@
   }
   .dot-al  { background: var(--bp-al); box-shadow: 0 0 6px rgba(63,185,80,.5); }
   .dot-str { background: var(--accent); box-shadow: 0 0 6px rgba(31,111,235,.5); }
-  .section-sub { font-size: 11px; color: var(--bp-text3); }
+  .section-sub { font-size: var(--bp-text-xs); color: var(--bp-text3); }
 
   /* ── Stock Cards ── */
   .stock-grid {
@@ -102,12 +102,12 @@
   .stock-card:hover { border-color: var(--bp-border2); background: var(--bp-surface2); transform: translateY(-1px); }
 
   .sc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-  .sc-ticker { font-size: 16px; font-weight: 800; font-family: var(--bp-font-mono); }
-  .sc-name   { font-size: 11px; color: var(--bp-text3); margin-top: 1px; }
+  .sc-ticker { font-size: var(--bp-text-lg); font-weight: 800; font-family: var(--bp-font-mono); }
+  .sc-name   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
 
   .badge {
     display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px;
-    border-radius: 20px; font-size: 10px; font-weight: 600; letter-spacing: .3px;
+    border-radius: var(--bp-radius-20); font-size: var(--bp-text-2xs); font-weight: 600; letter-spacing: .3px;
     text-transform: uppercase; white-space: nowrap;
   }
   .badge.al  { background: rgba(63,185,80,.12);  color:var(--bp-al);  border:1px solid rgba(63,185,80,.3); }
@@ -117,7 +117,7 @@
   .sc-metrics {
     display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;
   }
-  .sc-metric { font-size: 11px; color: var(--bp-text3); }
+  .sc-metric { font-size: var(--bp-text-xs); color: var(--bp-text3); }
   .sc-metric strong { color: var(--bp-text2); font-weight: 600; }
   .sc-metric.up-val strong { color: var(--bp-al); }
   .sc-metric.dn-val strong { color: var(--bp-sat); }
@@ -125,11 +125,11 @@
   .sc-footer {
     display: flex; align-items: center; justify-content: space-between; margin-top: 10px;
   }
-  .sc-price { font-size: 14px; font-weight: 700; font-family: var(--bp-font-mono); }
-  .sc-chg   { font-size: 11px; font-weight: 600; }
+  .sc-price { font-size: var(--bp-text-md); font-weight: 700; font-family: var(--bp-font-mono); }
+  .sc-chg   { font-size: var(--bp-text-xs); font-weight: 600; }
   .sc-chg.up { color: var(--bp-al); }
   .sc-chg.dn { color: var(--bp-sat); }
-  .sc-arrow  { font-size: 11px; color: var(--accent); font-weight: 600; }
+  .sc-arrow  { font-size: var(--bp-text-xs); color: var(--accent); font-weight: 600; }
 
   /* ── New signal highlight ── */
   .stock-card.new-signal {
@@ -141,8 +141,8 @@
     background: rgba(var(--bp-sat-rgb),.04);
   }
   .new-badge {
-    display: inline-block; font-size: 9px; font-weight: 700;
-    background: rgba(63,185,80,.2); color: var(--bp-al); border-radius: 3px;
+    display: inline-block; font-size: var(--bp-text-sm); font-weight: 700;
+    background: rgba(63,185,80,.2); color: var(--bp-al); border-radius:var(--bp-radius-sm);
     padding: 1px 5px; text-transform: uppercase; letter-spacing: .5px; margin-left: 4px;
   }
   .sat .new-badge { background: rgba(var(--bp-sat-rgb),.2); color: var(--bp-sat); }
@@ -151,27 +151,27 @@
   .empty-box {
     background: var(--bp-surface); border: 1px solid var(--bp-border);
     border-radius: var(--bp-radius); padding: 28px; text-align: center;
-    color: var(--bp-text3); font-size: 13px;
+    color: var(--bp-text3); font-size: var(--bp-text-base);
   }
 
   /* ── Skeleton ── */
   .skeleton {
     background: linear-gradient(90deg, #161b22 25%, #1e2530 50%, #161b22 75%);
-    background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 4px;
+    background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--bp-radius-4);
   }
   @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
   .sk-card { height: 100px; border-radius: var(--bp-radius); }
 
-  .updated-at { font-size: 11px; color: var(--bp-text3); margin-top: 20px; text-align: right; }
+  .updated-at { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 20px; text-align: right; }
 
   /* ── Responsive ── */
   @media (max-width: 640px) {
     header { padding: 12px 16px; }
     .container { padding: 16px; }
     .stats-row { grid-template-columns: repeat(2, 1fr); }
-    .stat-num  { font-size: 28px; }
+    .stat-num  { font-size: var(--bp-text-28); }
     .stock-grid { grid-template-columns: 1fr; }
-    .page-title { font-size: 16px; }
+    .page-title { font-size: var(--bp-text-lg); }
   }
   /* ── Makro Ticker Bandı ── */
   .macro-bar {
@@ -180,7 +180,7 @@
   }
   .macro-bar::before, .macro-bar::after {
     content:''; position:absolute; top:0; bottom:0; width:60px;
-    pointer-events:none; z-index:2;
+    pointer-events:none; z-index:var(--bp-z-raised);
   }
   .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
   .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
@@ -190,22 +190,26 @@
   }
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+    .macro-bar { position: relative; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
+  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item {
     display:inline-flex; align-items:center; gap:8px;
     padding:0 20px; border-right:1px solid var(--bp-border);
-    font-size:12px; height:34px; text-decoration:none; color:inherit;
+    font-size:var(--bp-text-sm); height:34px; text-decoration:none; color:inherit;
   }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% with hdr_title = 'Piyasa Gündem Merkezi', hdr_sub = 'Yükleniyor…', hdr_sub_id = 'updatedAt' %}{% include '_header.html' %}{% endwith %}
 <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Gündem & Piyasa Haberleri</h1>
 
 
 <!-- Makro Ticker Bandı -->
-<div class="macro-bar">
+<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button>
   <div class="macro-track" id="macroTrack">
     <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
   </div>
@@ -216,13 +220,13 @@
 {% include '_stale_banner.html' %}
 
   <!-- AI Makro Özeti -->
-  <div id="macroSummaryBox" style="display:none;background:linear-gradient(135deg,rgba(31,111,235,.07),rgba(139,92,246,.04));border:1px solid rgba(31,111,235,.18);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+  <div id="macroSummaryBox" style="display:none;background:linear-gradient(135deg,rgba(31,111,235,.07),rgba(139,92,246,.04));border:1px solid rgba(31,111,235,.18);border-radius:var(--bp-radius-lg);padding:12px 16px;margin-bottom:16px">
     <div style="display:flex;align-items:flex-start;gap:10px">
-      <span style="font-size:18px;flex-shrink:0;margin-top:1px">🤖</span>
+      <span style="font-size:var(--bp-text-xl);flex-shrink:0;margin-top:1px"><span aria-hidden="true">🤖</span></span>
       <div>
-        <div style="font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">AI Piyasa Özeti</div>
-        <div id="macroSummaryText" style="font-size:13px;color:#e2e8f0;line-height:1.6"></div>
-        <div id="macroSummaryTime" style="font-size:10px;color:#64748b;margin-top:4px"></div>
+        <div style="font-size:var(--bp-text-xs);font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">AI Piyasa Özeti</div>
+        <div id="macroSummaryText" style="font-size:var(--bp-text-base);color:#e2e8f0;line-height:1.6"></div>
+        <div id="macroSummaryTime" style="font-size:var(--bp-text-2xs);color:#64748b;margin-top:4px"></div>
       </div>
     </div>
   </div>
@@ -273,7 +277,7 @@
         <span class="dot" style="background:var(--bp-gold)"></span>
         Bilanço Takvimi
       </div>
-      <a href="/bilanco-takvimi" style="font-size:11px;color:#58a6ff;text-decoration:none">Tümü →</a>
+      <a href="/bilanco-takvimi" style="font-size:var(--bp-text-xs);color:#58a6ff;text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
     </div>
     <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap"></div>
   </div>
@@ -288,8 +292,8 @@
       <span class="section-sub">Yaklaşan önemli tarihler</span>
     </div>
     <div id="econCalGrid" style="display:flex;flex-direction:column;gap:8px">
-      <div class="skeleton" style="height:48px;border-radius:8px"></div>
-      <div class="skeleton" style="height:48px;border-radius:8px"></div>
+      <div class="skeleton" style="height:48px;border-radius:var(--bp-radius-md)"></div>
+      <div class="skeleton" style="height:48px;border-radius:var(--bp-radius-md)"></div>
     </div>
   </div>
 
@@ -303,9 +307,9 @@
       <span class="section-sub" id="macroNewsUpdatedAt">—</span>
     </div>
     <div id="macroNewsGrid" style="display:flex;flex-direction:column;gap:8px">
-      <div class="skeleton" style="height:52px;border-radius:8px"></div>
-      <div class="skeleton" style="height:52px;border-radius:8px"></div>
-      <div class="skeleton" style="height:52px;border-radius:8px"></div>
+      <div class="skeleton" style="height:52px;border-radius:var(--bp-radius-md)"></div>
+      <div class="skeleton" style="height:52px;border-radius:var(--bp-radius-md)"></div>
+      <div class="skeleton" style="height:52px;border-radius:var(--bp-radius-md)"></div>
     </div>
   </div>
 
@@ -319,8 +323,8 @@
       <span class="section-sub" id="newsUpdatedAt">—</span>
     </div>
     <div id="newsGrid" style="display:flex;flex-direction:column;gap:10px">
-      <div class="skeleton" style="height:80px;border-radius:8px"></div>
-      <div class="skeleton" style="height:80px;border-radius:8px"></div>
+      <div class="skeleton" style="height:80px;border-radius:var(--bp-radius-md)"></div>
+      <div class="skeleton" style="height:80px;border-radius:var(--bp-radius-md)"></div>
     </div>
   </div>
 
@@ -428,9 +432,9 @@ async function loadGundem() {
         bilEl.innerHTML = bilPeriods.map(p => {
           const isActive = p.status === 'active';
           const dotClr   = isActive ? '#f59e0b' : '#8b949e';
-          const badgeBg  = isActive ? 'rgba(245,158,11,.12)' : 'rgba(139,148,158,.08)';
-          const badgeBrd = isActive ? 'rgba(245,158,11,.3)' : 'rgba(139,148,158,.2)';
-          return `<div style="flex:1;min-width:200px;background:#141416;border:1px solid ${badgeBrd};border-radius:8px;padding:12px 14px">
+          const badgeBg  = isActive ? 'rgba(var(--bp-gold-rgb),.12)' : 'rgba(139,148,158,.08)';
+          const badgeBrd = isActive ? 'rgba(var(--bp-gold-rgb),.3)' : 'rgba(139,148,158,.2)';
+          return `<div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid ${badgeBrd};border-radius:8px;padding:12px 14px">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
               <span style="width:7px;height:7px;border-radius:50%;background:${dotClr};flex-shrink:0"></span>
               <span style="font-size:12px;font-weight:600;color:#e2e8f0">${p.label}</span>
@@ -459,9 +463,9 @@ async function loadGundem() {
           const sigCls = isAl ? '#3fb950' : isSat ? '#f85149' : '#8b949e';
           const sigTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Trend Bozuldu' : '● Yatay';
           const snippet = (item.snippet||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/^\*\s+/gm,'• ').replace(/^-\s+/gm,'• ').trim();
-          const kapHref = item.kap_url ? `<a href="${item.kap_url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP ↗</a>` : '';
-          return `<a href="/hisse/${item.ticker}" style="display:block;text-decoration:none;background:#141416;border:1px solid #2a2a2c;border-radius:8px;padding:12px 14px;transition:border-color .15s"
-            onmouseover="this.style.borderColor='#46464d'" onmouseout="this.style.borderColor='#2a2a2c'">
+          const kapHref = item.kap_url ? `<a href="${item.kap_url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
+          return `<a href="/hisse/${item.ticker}" style="display:block;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:12px 14px;transition:border-color .15s"
+            onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
               <span style="font-size:13px;font-weight:700;color:#e2e8f0">${item.ticker}</span>
               <span style="font-size:11px;font-weight:600;color:${sigCls}">${sigTxt}</span>
@@ -503,7 +507,7 @@ async function loadEconCalendar() {
       const duTxt = e.is_today ? '<strong style="color:var(--bp-gold)">Bugün!</strong>'
                    : du === 1  ? '<span style="color:var(--bp-gold)">Yarın</span>'
                    : `<span style="color:#94a3b8">${du} gün sonra</span>`;
-      return `<div style="display:flex;align-items:center;gap:12px;background:var(--bp-surface);border:1px solid ${e.is_today?'rgba(245,158,11,.3)':'#2a2a2c'};border-radius:8px;padding:10px 14px">
+      return `<div style="display:flex;align-items:center;gap:12px;background:var(--bp-surface);border:1px solid ${e.is_today?'rgba(var(--bp-gold-rgb),.3)':'var(--bp-border)'};border-radius:8px;padding:10px 14px">
         <span style="font-size:18px;flex-shrink:0">${e.icon||'📅'}</span>
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600;color:#e2e8f0">${e.event}</div>
@@ -532,10 +536,10 @@ async function loadMacroNewsSection() {
     }
     grid.innerHTML = items.slice(0, 8).map(item => {
       return `<a href="${item.url}" target="_blank" rel="noopener"
-        style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:#141416;border:1px solid #2a2a2c;border-radius:8px;padding:10px 14px;transition:border-color .15s"
-        onmouseover="this.style.borderColor='#46464d'" onmouseout="this.style.borderColor='#2a2a2c'">
-        <span style="font-size:9px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.15);border-radius:4px;padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.source}</span>
-        <span style="font-size:12.5px;color:#e2e8f0;line-height:1.4;font-weight:500;flex:1">${item.title}</span>
+        style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:10px 14px;transition:border-color .15s"
+        onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
+        <span style="font-size:9px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.15);border-radius:var(--bp-radius-4);padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.source}</span>
+        <span style="font-size:var(--bp-text-base);color:#e2e8f0;line-height:1.4;font-weight:500;flex:1">${item.title}</span>
         <span style="font-size:10px;color:#64748b;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.date_str||item.published||''}</span>
       </a>`;
     }).join('');
@@ -568,7 +572,7 @@ async function loadMacroSummary() {
       }
     }
     if (box) box.style.display = '';
-  } catch(e) {}
+  } catch(e) { console.error('makro ozet yuklenemedi', e); }
 }
 
 loadGundem();
@@ -600,10 +604,10 @@ async function loadMacroBar() {
     }).join('');
     const mt = document.getElementById('macroTrack');
     if (mt) { mt.innerHTML = html + html; const w = mt.scrollWidth/2; window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55}); }
-  } catch(e) {}
+  } catch(e) { console.error('makro ticker verisi yuklenemedi', e); }
 }
 loadMacroBar();
-setInterval(loadMacroBar, 60000);
+setInterval(loadMacroBar, 180000);
 </script>
 <script src="/static/bp-search.js?v=47" defer></script>
 <script src="/static/bp-format.js?v=20260808a"></script>

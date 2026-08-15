@@ -116,7 +116,7 @@ class PageInfoPanel {
       .bp-info-panel {
         background: var(--color-surface, #1e2530);
         border: 1px solid var(--color-border, #2d3748);
-        border-radius: 6px;
+        border-radius: var(--bp-radius);
         margin: 12px 0;
         overflow: hidden;
       }

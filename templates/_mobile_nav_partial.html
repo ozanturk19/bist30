@@ -6,7 +6,7 @@
 <style>
   .mobile-bottom-nav {
     display: none;
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index:var(--bp-z-sticky);
     background: rgba(var(--bp-bg-rgb),0.96);
     backdrop-filter: blur(24px) saturate(140%);
     -webkit-backdrop-filter: blur(24px) saturate(140%);
@@ -16,7 +16,7 @@
   .mbn-inner { display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; max-width: 600px; margin: 0 auto; }
   .mbn-item {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 4px; text-decoration: none; color: #909097; font-size: 10.5px; font-weight: 600;
+    gap: 4px; text-decoration: none; color: #909097; font-size: var(--bp-text-sm); font-weight: 600;
     letter-spacing: 0.05px; transition: color .2s ease;
     font-family: 'Manrope', system-ui, sans-serif;
     position: relative; background: none; border: none; cursor: pointer;
@@ -36,7 +36,7 @@
   .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); stroke-width: 2.1; }
   /* F14: push-active state on bell slot */
   .mbn-item.push-active { color: var(--bp-gold); }
-  .mbn-item.push-active::before { background: var(--bp-gold); box-shadow: 0 0 10px rgba(245,158,11,.55); }
+  .mbn-item.push-active::before { background: var(--bp-gold); box-shadow: 0 0 10px rgba(var(--bp-gold-rgb),.55); }
   .mbn-item.push-active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-gold-rgb),.5)); stroke-width: 2.1; }
   /* Badge dot — shows when push is active */
   .mbn-badge {
@@ -46,28 +46,28 @@
     display: none;
   }
   .mbn-item.push-active .mbn-badge { display: block; }
-  .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 250; opacity: 0; transition: opacity .25s ease; }
+  .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: var(--bp-z-sheet-backdrop); opacity: 0; transition: opacity .25s ease; }
   .mbn-sheet-backdrop.open { display: block; opacity: 1; }
   .mbn-sheet {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 260;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--bp-z-sheet);
     background: var(--bp-surface); border-top: 1px solid var(--bp-border);
     border-radius: 16px 16px 0 0;
     transform: translateY(100%);
     transition: transform .32s cubic-bezier(.32,.72,0,1);
     padding: 10px 16px calc(20px + env(safe-area-inset-bottom));
     max-height: 75vh; overflow-y: auto;
-    box-shadow: 0 -10px 40px rgba(0,0,0,.4);
+    box-shadow: var(--bp-shadow-up-lg);
   }
   .mbn-sheet.open { transform: translateY(0); }
-  .mbn-sheet-handle { width: 40px; height: 4px; background: var(--bp-border2); border-radius: 2px; margin: 4px auto 14px; }
-  .mbn-sheet-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 12px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 4px; }
+  .mbn-sheet-handle { width: 40px; height: 4px; background: var(--bp-border2); border-radius:var(--bp-radius-xs); margin: 4px auto 14px; }
+  .mbn-sheet-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 4px; }
   .mbn-sheet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   @media (max-width: 360px) { .mbn-sheet-grid { grid-template-columns: repeat(3, 1fr); } }
   .mbn-sheet-item {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 7px; text-decoration: none; color: var(--bp-text);
-    background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius: 10px;
-    padding: 14px 6px; font-size: 11px; font-weight: 600;
+    background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
+    padding: 14px 6px; font-size: var(--bp-text-xs); font-weight: 600;
     font-family: 'Manrope', system-ui, sans-serif;
     letter-spacing: 0.1px; min-height: 70px;
     transition: background .15s, border-color .15s, transform .1s;
@@ -79,18 +79,18 @@
   .mbn-push-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 14px; margin-bottom: 14px;
-    background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius: 10px;
+    background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
     min-height: 52px;
   }
   .mbn-push-row-left { display: flex; align-items: center; gap: 10px; }
-  .mbn-push-row-icon { font-size: 18px; }
-  .mbn-push-row-text { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 13px; font-weight: 600; color: var(--bp-text); }
-  .mbn-push-row-sub { font-size: 11px; color: var(--bp-text3); margin-top: 1px; }
+  .mbn-push-row-icon { font-size: var(--bp-text-xl); }
+  .mbn-push-row-text { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-base); font-weight: 600; color: var(--bp-text); }
+  .mbn-push-row-sub { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
   .mbn-push-toggle {
     min-width: 44px; min-height: 44px;
     display: flex; align-items: center; justify-content: center;
     background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3);
-    border-radius: 8px; color: #93c5fd; font-size: 12px; font-weight: 700;
+    border-radius:var(--bp-radius-md); color: #93c5fd; font-size: var(--bp-text-sm); font-weight: 700;
     cursor: pointer; font-family: 'Space Grotesk', sans-serif;
     padding: 0 12px; transition: all .15s;
   }
@@ -149,7 +149,7 @@
   <!-- F14: push toggle at top of sheet -->
   <div class="mbn-push-row" id="mbnPushRow" style="display:none">
     <div class="mbn-push-row-left">
-      <span class="mbn-push-row-icon" id="mbnPushIcon">🔔</span>
+      <span class="mbn-push-row-icon" id="mbnPushIcon"><span aria-hidden="true">🔔</span></span>
       <div>
         <div class="mbn-push-row-text">Sinyal Bildirimleri</div>
         <div class="mbn-push-row-sub" id="mbnPushSub">AL/SAT sinyali gelince bildirim al</div>
@@ -179,9 +179,11 @@
     <a href="/iletisim" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>İletişim</span></a>
   </div>
 </div>
+<script src="/static/js/focus-trap.js?v=1"></script>
 <script>
-window.toggleMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;if(s.classList.contains('open'))window.closeMbnSheet();else{s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}};
-window.closeMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';};
+let _mbnRelease=null;
+window.toggleMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;if(s.classList.contains('open'))window.closeMbnSheet();else{s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';if(window.bpTrapFocus)_mbnRelease=window.bpTrapFocus(s);}};
+window.closeMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';if(_mbnRelease){_mbnRelease();_mbnRelease=null;}};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')window.closeMbnSheet();});
 (function(){const p=window.location.pathname;document.querySelectorAll('.mbn-item[data-route]').forEach(el=>{const r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r)){el.classList.add('active');el.setAttribute('aria-current','page');}});})();
 

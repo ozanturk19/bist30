@@ -30,7 +30,6 @@ const PAGES = [
   // AKBNK — #18-redux tatil gap fix baseline (CPO-736 Görev 6)
   { name: 'hisse-akbnk',         path: '/hisse/AKBNK' },
   { name: 'hisse-akbnk-grafik',  path: '/hisse/AKBNK?tab=grafik' },
-  { name: 'heatmap',      path: '/heatmap' },
   { name: 'tarama',       path: '/tarama' },
   { name: 'gundem',       path: '/gundem' },
 ];

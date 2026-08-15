@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% block head %}<title>Hisse Tarayıcı — BIST Sinyal Filtresi | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>Hisse Tarayıcı — BIST Sinyal Filtresi | BorsaPusula</title>
 <meta name="description" content="BIST100 hisselerini sinyal, ADX, sektör ve fiyat kriterlerine göre filtreleyin. Güçlü Trend + ADX ≥ 25 + güvenli giriş kombinasyonlarını anında bulun.">
 <link rel="canonical" href="https://borsapusula.com/tarama">
 <meta property="og:title"       content="Hisse Tarayıcı — BIST Sinyal Filtresi | borsapusula.com">
@@ -15,37 +15,37 @@
 ]}
 </script>
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810B">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root {
     --bg:var(--bp-bg); --surface:#161b22; --surface2:#1c2128;
-    --border:var(--bp-bkl-bd); --border2:#21262d;
+    --border:var(--bp-bkl-bd);
     --text:#e6edf3; --text2:#8b949e; --text3:var(--bp-text3);
     --al:#3fb950; --sat:var(--bp-sat); --bkl:#8b949e;
     --brand:#1f6feb; --gold:#e3b341;
   }
-  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; min-height:100vh; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:var(--bp-text-md); min-height:100vh; }
 
   /* ── Header ── */
   header {
     background:var(--surface); border-bottom:1px solid var(--border);
     padding:12px 24px; display:flex; align-items:center; gap:14px;
-    position:sticky; top:0; z-index:100;
+    position:sticky; top:0; z-index:var(--bp-z-dropdown);
   }
   .back-btn {
     display:flex; align-items:center; gap:6px; color:var(--text2);
-    font-size:13px; text-decoration:none; padding:5px 10px;
-    border:1px solid var(--border); border-radius:6px; background:var(--surface2);
+    font-size:var(--bp-text-base); text-decoration:none; padding:5px 10px;
+    border:1px solid var(--border); border-radius:var(--bp-radius); background:var(--surface2);
     transition:all .15s; white-space:nowrap;
   }
   .back-btn:hover { background:var(--border); color:var(--text); }
-  .page-title { font-size:18px; font-weight:700; color:#f0f6fc; }
-  .page-sub   { font-size:12px; color:var(--text2); margin-top:1px; }
+  .page-title { font-size:var(--bp-text-xl); font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:var(--bp-text-sm); color:var(--text2); margin-top:1px; }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
   .top-nav-links a {
-    padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500;
+    padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500;
     color:var(--text2); text-decoration:none; transition:all .15s; white-space:nowrap;
   }
   .top-nav-links a:hover { background:var(--surface2); color:var(--text); }
@@ -54,11 +54,11 @@
 
   /* ── Makro bar ── */
   .macro-bar {
-    background:var(--bp-bg); border-bottom:1px solid var(--border2);
+    background:var(--bp-bg); border-bottom:1px solid var(--bp-border-subtle);
     height:32px; overflow:hidden; position:relative; white-space:nowrap;
   }
   .macro-bar::before,.macro-bar::after {
-    content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2;
+    content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised);
   }
   .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
   .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
@@ -68,28 +68,32 @@
   }
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .macro-bar { position: relative; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
+  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item {
     display:inline-flex; align-items:center; gap:7px;
-    padding:0 18px; border-right:1px solid var(--border2); font-size:11px; height:32px;
+    padding:0 18px; border-right:1px solid var(--bp-border-subtle); font-size:var(--bp-text-xs); height:32px;
   }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
 
-  .container { max-width:1200px; margin:0 auto; padding:20px 20px; }
+  .container { max-width:var(--bp-container-1200); margin:0 auto; padding:20px 20px; }
 
   /* ── Filtre Çubuğu ── */
   .filter-bar {
     background:var(--surface); border:1px solid var(--border);
-    border-radius:10px; padding:16px 20px; margin-bottom:16px;
+    border-radius:var(--bp-radius-lg); padding:16px 20px; margin-bottom:16px;
     display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;
   }
   .filter-group { display:flex; flex-direction:column; gap:5px; min-width:120px; }
-  .filter-group label { font-size:10px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
+  .filter-group label { font-size:var(--bp-text-2xs); font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
   .filter-group select,
   .filter-group input[type=number],
   .filter-group input[type=text] {
     background:var(--surface2); border:1px solid var(--border);
-    color:var(--text); border-radius:6px; padding:7px 10px; font-size:13px;
+    color:var(--text); border-radius:var(--bp-radius); padding:7px 10px; font-size:var(--bp-text-base);
     font-family:inherit; outline:none; transition:border-color .15s;
     appearance:none; cursor:pointer;
   }
@@ -122,7 +126,7 @@
   .search-clear {
     position:absolute; right:8px; bottom:7px;
     background:none; border:none; color:var(--text3); cursor:pointer;
-    font-size:18px; padding:0; line-height:1; display:none;
+    font-size:var(--bp-text-xl); padding:0; line-height:1; display:none;
     width:20px; height:20px;
   }
   .search-clear:hover { color:var(--text2); }
@@ -152,8 +156,8 @@
     padding: 4px 4px 4px 10px;
     background: rgba(31,111,235,.10);
     border: 1px solid rgba(31,111,235,.30);
-    border-radius: 20px;
-    font-size: 12px;
+    border-radius: var(--bp-radius-20);
+    font-size: var(--bp-text-sm);
     color: var(--text, #e6edf3);
     white-space: nowrap;
     line-height: 1;
@@ -173,7 +177,7 @@
     border: 0;
     color: var(--text2, #8b949e);
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--bp-text-md);
     line-height: 1;
     border-radius: 50%;
     padding: 0;
@@ -187,21 +191,21 @@
     background: transparent;
     border: 0;
     color: var(--text2, #8b949e);
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     cursor: pointer;
     padding: 4px 10px;
-    border-radius: 16px;
+    border-radius: var(--bp-radius-16);
     transition: all .15s ease;
   }
   .chip-clear-all:hover { color: var(--text, #e6edf3); background: rgba(255,255,255,.04); }
   @media (max-width: 640px) {
     .active-chips-bar { padding: 8px 0 4px; }
-    .active-chip { font-size: 11px; padding: 3px 3px 3px 9px; }
+    .active-chip { font-size: var(--bp-text-xs); padding: 3px 3px 3px 9px; }
   }
 
   .btn-reset {
     background:none; color:var(--text2); border:1px solid var(--border);
-    border-radius:6px; padding:8px 14px; font-size:13px; cursor:pointer;
+    border-radius:var(--bp-radius); padding:8px 14px; font-size:var(--bp-text-base); cursor:pointer;
     font-family:inherit; transition:all .15s;
   }
   .btn-reset:hover { border-color:var(--text2); color:var(--text); }
@@ -211,77 +215,83 @@
     display:flex; align-items:center; justify-content:space-between;
     margin-bottom:10px; flex-wrap:wrap; gap:8px;
   }
-  .result-count { font-size:13px; color:var(--text2); }
-  .result-count strong { color:var(--text); font-size:16px; }
+  .result-count { font-size:var(--bp-text-base); color:var(--text2); }
+  .result-count strong { color:var(--text); font-size:var(--bp-text-lg); }
 
   /* Sıralama seçici */
   .sort-select {
     background:var(--surface2); border:1px solid var(--border);
-    color:var(--text2); border-radius:6px; padding:5px 10px; font-size:12px;
+    color:var(--text2); border-radius:var(--bp-radius); padding:5px 10px; font-size:var(--bp-text-sm);
     font-family:inherit; outline:none; cursor:pointer;
   }
 
   /* ── Tablo ── */
-  .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--bp-radius-lg); overflow:hidden; }
   @media(max-width:600px) {
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { min-width: 340px; }
   }
   table { width:100%; border-collapse:collapse; }
   thead th {
-    font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px;
+    font-size:var(--bp-text-2xs); color:var(--text2); text-transform:uppercase; letter-spacing:.5px;
     font-weight:700; padding:10px 14px; border-bottom:1px solid var(--border);
     text-align:left; white-space:nowrap; background:var(--surface2); cursor:pointer;
     user-select:none; transition:color .15s;
   }
   thead th:hover { color:var(--text); }
-  thead th.sort-asc::after  { content:' ▲'; color:var(--brand); }
-  thead th.sort-desc::after { content:' ▼'; color:var(--brand); }
-  tbody td { padding:10px 14px; border-bottom:1px solid var(--border2); vertical-align:middle; }
+  thead th.th-sortable { padding:0; }
+  .th-sort-btn {
+    all:unset; box-sizing:border-box; display:block; width:100%;
+    padding:10px 14px; cursor:inherit;
+    font:inherit; color:inherit; text-transform:inherit; letter-spacing:inherit; white-space:inherit;
+  }
+  .th-sort-btn.sort-asc::after  { content:' ▲'; color:var(--brand); }
+  .th-sort-btn.sort-desc::after { content:' ▼'; color:var(--brand); }
+  tbody td { padding:10px 14px; border-bottom:1px solid var(--bp-border-subtle); vertical-align:middle; }
   tbody tr:last-child td { border-bottom:none; }
   tbody tr:hover td { background:rgba(255,255,255,.02); }
   tbody a { text-decoration:none; color:inherit; }
 
-  .tk { font-size:14px; font-weight:700; color:#f0f6fc; }
-  .tk-name { font-size:11px; color:var(--text2); margin-top:1px; }
+  .tk { font-size:var(--bp-text-md); font-weight:700; color:#f0f6fc; }
+  .tk-name { font-size:var(--bp-text-xs); color:var(--text2); margin-top:1px; }
   .sector-tag {
-    font-size:10px; color:var(--text3); background:var(--surface2);
-    border:1px solid var(--border2); border-radius:10px; padding:2px 7px;
+    font-size:var(--bp-text-2xs); color:var(--text3); background:var(--surface2);
+    border:1px solid var(--bp-border-subtle); border-radius:var(--bp-radius-lg); padding:2px 7px;
     white-space:nowrap;
   }
 
   .sig-badge {
     display:inline-flex; align-items:center; gap:3px;
-    padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700;
+    padding:3px 9px; border-radius:var(--bp-radius-20); font-size:var(--bp-text-xs); font-weight:700;
   }
   .sig-AL   { background:rgba(63,185,80,.12); color:var(--al); border:1px solid rgba(63,185,80,.3); }
   .sig-SAT  { background:rgba(var(--bp-sat-rgb),.12); color:var(--sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .sig-BEKLE{ background:rgba(139,148,158,.1); color:var(--bkl); border:1px solid rgba(139,148,158,.2); }
 
   .eq-badge {
-    font-size:10px; font-weight:600; padding:2px 7px; border-radius:10px;
+    font-size:var(--bp-text-2xs); font-weight:600; padding:2px 7px; border-radius:var(--bp-radius-lg);
   }
   .eq-safe   { background:rgba(63,185,80,.1); color:var(--al); }
   .eq-risky  { background:rgba(227,179,65,.1); color:var(--gold); }
 
-  .adx-val { color:var(--gold); font-variant-numeric:tabular-nums; font-size:13px; }
-  .vol-val { color:#58a6ff; font-size:12px; }
-  .price-val { font-variant-numeric:tabular-nums; font-size:13px; }
-  .chg-pos { color:var(--al); font-variant-numeric:tabular-nums; font-size:12px; font-weight:600; }
-  .chg-neg { color:var(--sat); font-variant-numeric:tabular-nums; font-size:12px; font-weight:600; }
-  .chg-neu { color:var(--text2); font-variant-numeric:tabular-nums; font-size:12px; }
-  .bars-val { font-size:12px; color:var(--text2); }
+  .adx-val { color:var(--gold); font-variant-numeric:tabular-nums; font-size:var(--bp-text-base); }
+  .vol-val { color:#58a6ff; font-size:var(--bp-text-sm); }
+  .price-val { font-variant-numeric:tabular-nums; font-size:var(--bp-text-base); }
+  .chg-pos { color:var(--al); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); font-weight:600; }
+  .chg-neg { color:var(--sat); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); font-weight:600; }
+  .chg-neu { color:var(--text2); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); }
+  .bars-val { font-size:var(--bp-text-sm); color:var(--text2); }
 
   /* ADX mini bar */
-  .adx-bar-bg { width:48px; height:4px; background:var(--border2); border-radius:2px; margin-top:3px; overflow:hidden; }
-  .adx-bar-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,#e3b341,#f0a500); }
+  .adx-bar-bg { width:48px; height:4px; background:var(--bp-border-subtle); border-radius:var(--bp-radius-xs); margin-top:3px; overflow:hidden; }
+  .adx-bar-fill { height:100%; border-radius:var(--bp-radius-xs); background:linear-gradient(90deg,#e3b341,#f0a500); }
 
   /* ── Boş durum ── */
   .empty-state {
     text-align:center; padding:60px 20px; color:var(--text2);
   }
-  .empty-state .empty-icon { font-size:40px; margin-bottom:14px; }
-  .empty-state h3 { font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px; }
+  .empty-state .empty-icon { font-size:var(--bp-text-40); margin-bottom:14px; }
+  .empty-state h3 { font-size:var(--bp-text-lg); font-weight:700; color:var(--text); margin-bottom:6px; }
 
   /* ── Loading ── */
   .loading-overlay {
@@ -310,7 +320,7 @@
     display:flex; align-items:center; gap:7px; min-width:88px;
   }
   .trend-label {
-    font-size:11px; font-weight:700; letter-spacing:0.3px;
+    font-size:var(--bp-text-xs); font-weight:700; letter-spacing:0.3px;
     white-space:nowrap;
   }
   .trend-label.strong { color:#3fb950; }
@@ -319,10 +329,10 @@
   .trend-bar {
     flex:0 0 44px; height:4px;
     background:rgba(255,255,255,0.08);
-    border-radius:2px; overflow:hidden;
+    border-radius:var(--bp-radius-xs); overflow:hidden;
   }
   .trend-bar-fill {
-    height:100%; border-radius:2px;
+    height:100%; border-radius:var(--bp-radius-xs);
     transition:width 0.3s ease;
   }
   .trend-bar-fill.strong { background:linear-gradient(90deg,#3fb950,#1f6feb); }
@@ -332,7 +342,7 @@
   /* RVOL× — dot + sayı */
   .rvol-cell {
     display:inline-flex; align-items:center; gap:6px;
-    font-variant-numeric:tabular-nums; font-weight:600; font-size:12.5px;
+    font-variant-numeric:tabular-nums; font-weight:600; font-size:var(--bp-text-base);
   }
   .rvol-cell.high   { color:#3fb950; }
   .rvol-cell.normal { color:var(--text); }
@@ -345,8 +355,8 @@
   /* Tazelik (eski Süre) — Bugün/Dün/X gün badges */
   .fresh-badge {
     display:inline-flex; align-items:center; gap:4px;
-    padding:2px 8px; border-radius:4px;
-    font-size:11px; font-weight:600;
+    padding:2px 8px; border-radius:var(--bp-radius-4);
+    font-size:var(--bp-text-xs); font-weight:600;
   }
   .fresh-badge.today     { background:rgba(var(--bp-al-rgb),0.10); color:#3fb950; }
   .fresh-badge.yesterday { background:rgba(88,166,255,0.10); color:#58a6ff; }
@@ -357,13 +367,13 @@
      compose_score kaynaklı, sıralamayı sürükleyen skor. Tier renkleriyle (premium/plus/standart)
      tutarlı: index.html tg-premium/tg-plus/tg-standart ile aynı palet — yeni görsel dil icat edilmedi. */
   .score-cell { display:flex; align-items:center; gap:7px; min-width:66px; }
-  .score-val { font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .score-val { font-size:var(--bp-text-base); font-weight:700; font-variant-numeric:tabular-nums; }
   .score-val.premium  { color:var(--bp-premium); }
   .score-val.plus     { color:#1f6feb; }
   .score-val.standart { color:#808080; }
   .score-val.weak     { color:var(--text3); }
-  .score-bar-bg { flex:0 0 40px; height:4px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
-  .score-bar-fill { height:100%; border-radius:2px; }
+  .score-bar-bg { flex:0 0 40px; height:4px; background:rgba(255,255,255,0.08); border-radius:var(--bp-radius-xs); overflow:hidden; }
+  .score-bar-fill { height:100%; border-radius:var(--bp-radius-xs); }
   .score-bar-fill.premium  { background:linear-gradient(90deg,var(--bp-premium),var(--bp-premium)); }
   .score-bar-fill.plus     { background:#1f6feb; }
   .score-bar-fill.standart { background:#808080; }
@@ -376,11 +386,11 @@
     position:absolute; bottom:100%; left:50%;
     transform:translateX(-50%) translateY(-6px);
     background:#1c2128; color:var(--text);
-    border:1px solid var(--border2);
-    border-radius:6px; padding:5px 9px;
-    font-size:11px; font-weight:500;
-    white-space:nowrap; z-index:100;
-    box-shadow:0 4px 12px rgba(0,0,0,0.4);
+    border:1px solid var(--bp-border-subtle);
+    border-radius:var(--bp-radius); padding:5px 9px;
+    font-size:var(--bp-text-xs); font-weight:500;
+    white-space:nowrap; z-index:var(--bp-z-dropdown);
+    box-shadow:var(--bp-shadow-sm);
     pointer-events:none;
     text-transform:none; letter-spacing:0;
   }
@@ -393,8 +403,8 @@
   @media (max-width:480px) {
     .hide-mob-narrow { display:none!important; }
     .trend-bar { flex:0 0 32px; }
-    .trend-label { font-size:10.5px; }
-    .rvol-cell, .fresh-badge { font-size:11px; }
+    .trend-label { font-size:var(--bp-text-sm); }
+    .rvol-cell, .fresh-badge { font-size:var(--bp-text-xs); }
   }
 
   /* ── Faz4 Madde-3: Mobile card stack ── */
@@ -405,40 +415,22 @@
   }
   .mr-card {
     display:block; background:var(--surface); border:1px solid var(--border);
-    border-radius:10px; padding:12px 14px; text-decoration:none; color:inherit;
+    border-radius:var(--bp-radius-lg); padding:12px 14px; text-decoration:none; color:inherit;
     transition:border-color 0.15s;
   }
   .mr-card:hover { border-color:var(--accent,#1f6feb); }
-  .mr-card.mr-locked { filter:blur(4px); pointer-events:none; user-select:none; }
   .mr-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-  .mr-ticker { font-size:15px; font-weight:700; color:var(--text); letter-spacing:0.5px; }
-  .mr-name   { font-size:11px; color:var(--text3); margin-top:1px; }
+  .mr-ticker { font-size:var(--bp-text-15); font-weight:700; color:var(--text); letter-spacing:0.5px; }
+  .mr-name   { font-size:var(--bp-text-xs); color:var(--text3); margin-top:1px; }
   .mr-bottom { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .mr-metric { display:flex; flex-direction:column; gap:2px; }
-  .mr-metric-label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:0.4px; }
-  .mr-price-val { font-variant-numeric:tabular-nums; font-size:13px; font-weight:600; color:var(--text); }
+  .mr-metric-label { font-size:var(--bp-text-2xs); color:var(--text3); text-transform:uppercase; letter-spacing:0.4px; }
+  .mr-price-val { font-variant-numeric:tabular-nums; font-size:var(--bp-text-base); font-weight:600; color:var(--text); }
 
-  footer { text-align:center; padding:20px; font-size:12px; color:var(--text3); border-top:1px solid var(--border2); margin-top:32px; }
+  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--text3); border-top:1px solid var(--bp-border-subtle); margin-top:32px; }
   footer a { color:var(--text2); text-decoration:none; }
-  /* SPEC-007: Premium paywall — blur + CTA banner */
-  tr.tier-locked { filter: blur(5px); user-select: none; pointer-events: none; }
-  .premium-cta-row {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; flex-wrap: wrap;
-    padding: 11px 16px; margin: 12px 0;
-    background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),0.10), rgba(var(--bp-premium-rgb),0.04));
-    border: 1px solid rgba(var(--bp-premium-rgb),0.32); border-radius: 8px;
-  }
-  .premium-cta-text { font-size: 13px; color: var(--text); }
-  .premium-cta-text strong { color: var(--bp-premium); }
-  .premium-cta-btn {
-    display: inline-block; padding: 7px 14px; border-radius: 7px;
-    background: var(--bp-premium); color: #fff; font-size: 12px; font-weight: 700;
-    text-decoration: none; white-space: nowrap;
-  }
-  .premium-cta-btn:hover { background: #c084fc; }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:6px;color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 {% include '_header.html' %}
@@ -446,7 +438,7 @@
 
 
 <!-- Makro Ticker Bandı -->
-<div class="macro-bar">
+<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button>
   <div class="macro-track" id="macroTrack">
     <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
   </div>
@@ -460,7 +452,7 @@
   <div class="filter-bar">
 
     <div class="filter-group">
-      <label>Sinyal</label>
+      <label for="fSignal">Sinyal</label>
       <select id="fSignal">
         <option value="">Tümü</option>
         <option value="PREMIUM">💎 Premium (AL + Hacim Onaylı)</option>
@@ -471,29 +463,29 @@
     </div>
 
     <div class="filter-group">
-      <label>Min <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">ADX</a></label>
+      <label for="fMinAdx">Min <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">ADX</a></label>
       <input type="number" id="fMinAdx" value="0" min="0" max="100" step="5" style="width:90px">
     </div>
 
     <div class="filter-group">
-      <label>Sektör</label>
+      <label for="fSector">Sektör</label>
       <select id="fSector" style="min-width:150px">
         <option value="">Tüm Sektörler</option>
       </select>
     </div>
 
     <div class="filter-group hide-mob">
-      <label>Min Fiyat (₺)</label>
+      <label for="fMinP">Min Fiyat (₺)</label>
       <input type="number" id="fMinP" value="" min="0" step="1" placeholder="—" style="width:100px">
     </div>
 
     <div class="filter-group hide-mob">
-      <label>Max Fiyat (₺)</label>
+      <label for="fMaxP">Max Fiyat (₺)</label>
       <input type="number" id="fMaxP" value="" min="0" step="1" placeholder="—" style="width:100px">
     </div>
 
     <div class="filter-group search-group" style="min-width:160px">
-      <label>Hisse Ara</label>
+      <label for="fSearch">Hisse Ara</label>
       <input type="text" id="fSearch" placeholder="AKBNK veya Akbank…" style="width:175px" oninput="onSearchInput(this.value)" autocomplete="off" spellcheck="false">
       <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
@@ -513,19 +505,19 @@
   <div class="result-header">
     <div class="result-count" id="resultCount"><strong>—</strong> sonuç<span id="inlineSpinner" style="display:none;margin-left:8px;vertical-align:middle"><svg width="14" height="14" viewBox="0 0 24 24" style="animation:tarSpin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke="#58a6ff" stroke-width="2.5" fill="none" stroke-dasharray="50 60"/></svg></span></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <span style="font-size:12px;color:var(--text2)">Sırala:</span>
-      <select class="sort-select" id="sortSel" onchange="applyFilters()">
+      <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
+      <select class="sort-select" id="sortSel" onchange="applyFilters()" aria-label="Sıralama">
         <option value="signal_strength">Skor (Yüksek → Düşük)</option>
         <option value="adx">ADX (Güçlü → Zayıf)</option>
         <option value="vol_ratio">RVOL (Yüksek → Düşük)</option>
         <option value="change_pct">Değişim % (Yüksek → Düşük)</option>
         <option value="signal_bars">Tazelik (Yeni → Eski)</option>
       </select>
-      <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:12px;border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
+      <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:var(--bp-text-sm);border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
         title="Skor: Birleşik kalite (ADX + Hacim + RSI + Teyit) — Premium / Plus / Standart bu skordan belirlenir. En kaliteli hisseler üstte.&#10;ADX: Sadece trend gücü. Premium bir hisse ADX düşük olabilir.&#10;RVOL: Hacim oranı — anormal hareket göstergesi.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
       <button onclick="exportCSV()" title="Sonuçları CSV olarak indir"
         style="background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.3);color:#58a6ff;
-               border-radius:6px;padding:5px 11px;font-size:12px;cursor:pointer;font-family:inherit;
+               border-radius:var(--bp-radius);padding:5px 11px;font-size:var(--bp-text-sm);cursor:pointer;font-family:inherit;
                display:flex;align-items:center;gap:5px;transition:all .15s"
         onmouseover="this.style.background='rgba(31,111,235,.2)'" onmouseout="this.style.background='rgba(31,111,235,.1)'">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -536,12 +528,6 @@
     </div>
   </div>
 
-  <!-- SPEC-007: Premium paywall CTA banner (renderResults JS ile görünür/gizli) -->
-  <div class="premium-cta-row" id="premiumCtaBar" style="display:none">
-    <span class="premium-cta-text">🔒 Premium sinyaller blur'lu</span>
-    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
-  </div>
-
   <!-- Tablo -->
   <div class="table-wrap" id="tableWrap">
     <div class="loading-overlay" id="loadingDiv">
@@ -549,31 +535,32 @@
       <span>Veriler yükleniyor…</span>
     </div>
     <table id="resultTable" style="display:none">
+      <caption class="sr-only">Tarama sonuçları — hisse, sinyal, sinyal gücü, trend gücü ve teknik göstergeler</caption>
       <thead>
         {# SPEC-UX-BATCH-2026-06-03 Task #23 (CPO-475): Tarama kolon redesign.
            Yeni sıra: Hisse / Sinyal / Sinyal Gücü (T3.5, skor — sıralamanın kaynağı) / Trend Gücü (eski ADX) / Giriş Kalitesi (öne) / Fiyat / Değişim / RVOL× / Tazelik / Sektör.
            ≤768px: table gizlenir, #mobileResultCards devreye girer (bkz. aşağıda kart render'ı).
            R/R kolonu Faz 2'ye ertelendi (backend TP veri yok, CPO ile sürüyor). #}
         <tr>
-          <th>Hisse</th>
-          <th>Sinyal</th>
-          <th onclick="sortBy('signal_strength')" id="th-score" data-tooltip="Birleşik kalite skoru (ADX + Hacim + RSI + Teyit) — Premium/Plus/Standart bu skordan belirlenir. Varsayılan sıralama.">Sinyal Gücü</th>
-          <th onclick="sortBy('adx')" id="th-adx" data-tooltip="ADX 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, <18 Zayıf">Trend Gücü</th>
-          <th>Giriş Kalitesi</th>
-          <th class="hide-mob-narrow" onclick="sortBy('price')" id="th-price">Fiyat</th>
-          <th class="hide-mob-narrow" onclick="sortBy('change_pct')" id="th-chg">Değişim</th>
-          <th class="hide-mob" onclick="sortBy('vol_ratio')" id="th-vol" data-tooltip="Bugünkü hacim / 20-gün ortalama">RVOL×</th>
-          <th class="hide-mob" onclick="sortBy('signal_bars')" id="th-bars" data-tooltip="Sinyal kaç gün önce oluştu">Tazelik</th>
-          <th class="hide-mob hide-tablet">Sektör</th>
+          <th scope="col">Hisse</th>
+          <th scope="col">Sinyal</th>
+          <th scope="col" class="th-sortable" id="th-score" data-tooltip="Birleşik kalite skoru (ADX + Hacim + RSI + Teyit) — Premium/Plus/Standart bu skordan belirlenir. Varsayılan sıralama." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_strength')">Sinyal Gücü</button></th>
+          <th scope="col" class="th-sortable" id="th-adx" data-tooltip="ADX 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, <18 Zayıf" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('adx')">Trend Gücü</button></th>
+          <th scope="col">Giriş Kalitesi</th>
+          <th scope="col" class="hide-mob-narrow th-sortable" id="th-price" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('price')">Fiyat</button></th>
+          <th scope="col" class="hide-mob-narrow th-sortable" id="th-chg" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('change_pct')">Değişim</button></th>
+          <th scope="col" class="hide-mob th-sortable" id="th-vol" data-tooltip="Bugünkü hacim / 20-gün ortalama" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('vol_ratio')">RVOL×</button></th>
+          <th scope="col" class="hide-mob th-sortable" id="th-bars" data-tooltip="Sinyal kaç gün önce oluştu" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_bars')">Tazelik</button></th>
+          <th scope="col" class="hide-mob hide-tablet">Sektör</th>
         </tr>
       </thead>
       <tbody id="resultBody"></tbody>
     </table>
     <div id="mobileResultCards"></div>
     <div class="empty-state" id="emptyDiv" style="display:none">
-      <div class="empty-icon">📭</div>
+      <div class="empty-icon"><span aria-hidden="true">📭</span></div>
       <h3>Sonuç bulunamadı</h3>
-      <p style="font-size:13px;margin-top:6px">Filtreleri gevşeterek tekrar deneyin.</p>
+      <p style="font-size:var(--bp-text-base);margin-top:6px">Filtreleri gevşeterek tekrar deneyin.</p>
       <button class="btn-reset" style="margin-top:14px" onclick="resetFilters()">Filtreleri Sıfırla</button>
     </div>
   </div>
@@ -582,7 +569,6 @@
 
 <footer>
   <a href="/">Ana Sayfa</a> ·
-  <a href="/gucu-yuksek">Güçlü Momentum</a> ·
   <a href="/ozet">Sinyal Özeti</a> ·
   <a href="/metodoloji">Metodoloji</a>
 </footer>
@@ -610,9 +596,9 @@
       const _mt=document.getElementById('macroTrack');
       _mt.innerHTML=h+h;
       requestAnimationFrame(()=>{ const w=_mt.scrollWidth/2; window.bpStartMacroTicker && window.bpStartMacroTicker({track: _mt, pps: 55}); });
-    }catch(e){}
+    }catch(e) { console.error('makro ticker: /api/macro yuklenemedi', e); }
   }
-  load(); setInterval(load,60000);
+  load(); setInterval(load,180000);
 })();
 
 /* ── Tarama ── */
@@ -701,7 +687,7 @@ async function loadSectors() {
       o.value = s; o.textContent = s;
       sel.appendChild(o);
     });
-  } catch(e) {}
+  } catch(e) { console.error('loadSectors: /api/tarama sektor listesi alinamadi', e); }
 }
 
 async function applyFilters() {
@@ -728,7 +714,7 @@ async function applyFilters() {
     const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
     const curUrl = window.location.pathname + window.location.search;
     if (newUrl !== curUrl) window.history.replaceState(null, '', newUrl);
-  } catch(_) {}
+  } catch(_) { /* URL history.replaceState best-effort - filtreleme (asagidaki /api/tarama cagrisi) buna bagli degil */ }
 
   // T2: Bilateral loading state — ilk yüklemede full spinner, sonraki sefer inline
   const isInitialLoad = !_allRows || _allRows.length === 0;
@@ -870,13 +856,7 @@ function _hydrateFiltersFromUrl() {
       const sigEl = document.getElementById('fSignal');
       if (sigEl) sigEl.value = 'PREMIUM';
     }
-  } catch(_) {}
-}
-
-/* SPEC-007: Premium erişim kontrolü — bp_premium_trial cookie (index.html ile aynı) */
-function _hasPremiumAccess() {
-  try { return !!document.cookie.match(/(?:^|;\s*)bp_premium_trial=1/); }
-  catch(_) { return false; }
+  } catch(_) { console.warn('URL filtre parametreleri forma uygulanamadi', _); }
 }
 
 function renderResults(rows, count) {
@@ -892,20 +872,6 @@ function renderResults(rows, count) {
     const _mrlE = document.getElementById('mobileResultCards');
     if (_mrlE) _mrlE.innerHTML = '';
     return;
-  }
-
-  // SPEC-007: Premium paywall — anonim user'da premium row blur + CTA banner
-  const _premLocked = !_hasPremiumAccess();
-  const _premCount  = rows.filter(s => s.tier === 'premium').length;
-  const _ctaBar = document.getElementById('premiumCtaBar');
-  if (_ctaBar) {
-    if (_premLocked && _premCount > 0) {
-      _ctaBar.style.display = '';
-      const _txt = _ctaBar.querySelector('.premium-cta-text');
-      if (_txt) _txt.innerHTML = `🔒 <strong>${_premCount} Premium sinyal</strong> blur'lu — net görmek için Premium'u aç`;
-    } else {
-      _ctaBar.style.display = 'none';
-    }
   }
 
   // === Yardımcı fonksiyonlar (UX-2 Task #23, CPO-475) ===
@@ -961,8 +927,7 @@ function renderResults(rows, count) {
     const eqHtml  = s.entry_quality
       ? `<span class="eq-badge ${eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
       : '—';
-    const _locked = (_premLocked && s.tier === 'premium') ? ' class="tier-locked"' : '';
-    return `<tr${_locked}>
+    return `<tr>
       <td>
         <a href="/hisse/${s.ticker}">
           <div class="tk">${s.ticker}${s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:var(--bp-premium);font-size:11px;vertical-align:middle">💎</span>' : s.tier === 'plus' ? ' <span title="Plus sinyal" style="color:#1f6feb;font-size:11px;vertical-align:middle">⭐</span>' : ''}</div>
@@ -992,14 +957,13 @@ function renderResults(rows, count) {
       const _eqH     = s.entry_quality
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
         : '<span style="color:var(--text3)">—</span>';
-      const _lk  = (_premLocked && s.tier === 'premium') ? ' mr-locked' : '';
       const _prm = s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:var(--bp-premium);font-size:11px">💎</span>' : s.tier === 'plus' ? ' <span title="Plus sinyal" style="color:#1f6feb;font-size:11px">⭐</span>' : '';
       const _tlbl = s.adx_label || 'Zayıf';
       const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
       // T3.5: mobil kartta da masaüstüyle aynı skor rengi (tier bazlı) — bkz. scoreCell()
       const _scv  = s.signal_strength || 0;
       const _sccls = s.tier === 'premium' ? 'premium' : s.tier === 'plus' ? 'plus' : s.tier === 'standart' ? 'standart' : 'weak';
-      return `<a href="/hisse/${s.ticker}" class="mr-card${_lk}">
+      return `<a href="/hisse/${s.ticker}" class="mr-card">
         <div class="mr-top">
           <div><div class="mr-ticker">${s.ticker}${_prm}</div><div class="mr-name">${(s.name||'').replace(' A.Ş.','').substring(0,22)}</div></div>
           <span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span>
@@ -1029,12 +993,18 @@ function sortBy(col) {
   }
   document.getElementById('sortSel').value = col;
   // TH visual update
-  document.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc','sort-desc'));
+  document.querySelectorAll('thead th.th-sortable').forEach(th => {
+    const btn = th.querySelector('.th-sort-btn');
+    if (btn) btn.classList.remove('sort-asc','sort-desc');
+    th.setAttribute('aria-sort', 'none');
+  });
   const map = {adx:'th-adx', price:'th-price', change_pct:'th-chg', vol_ratio:'th-vol', signal_bars:'th-bars', signal_strength:'th-score'};
   const id = map[col];
   if (id) {
     const el = document.getElementById(id);
-    if (el) el.classList.add(_sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    const btn = el && el.querySelector('.th-sort-btn');
+    if (btn) btn.classList.add(_sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    if (el) el.setAttribute('aria-sort', _sortDir === 'asc' ? 'ascending' : 'descending');
   }
   applyFilters();
 }
@@ -1067,6 +1037,5 @@ bpStartDataQualityPolling();
 </script>
 <script src="/static/bp-search.js?v=47" defer></script>
 <script src="/static/learning-mode.js?v=2" defer></script>
-{% include '_premium_modal.html' %}
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

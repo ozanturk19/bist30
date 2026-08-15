@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_theme_color = '#0b111f' %}{% block head %}<title>Sinyal Performans Analizi | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_theme_color = '#0b111f' %}{% block head %}<title>Sinyal Performans Analizi | BorsaPusula</title>
 <meta name="description" content="BorsaPusula algoritmik sinyal sisteminin geçmiş başarı oranları, ortalama getiri ve aktif sinyal performansları.">
 <link rel="canonical" href="https://borsapusula.com/sinyal-performans">
 <meta property="og:title"       content="Sinyal Performans Analizi — BorsaPusula">
@@ -18,110 +18,103 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810B">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; overflow-x:hidden; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
-  .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:6px; background:var(--bp-surface2); }
+  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
+  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
+  .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:var(--bp-text-base); text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:var(--bp-radius); background:var(--bp-surface2); }
   .back-btn:hover { background:var(--bp-surface2); color:var(--bp-text); }
-  .page-title { font-size:20px; font-weight:700; color:#f0f6fc; }
-  .page-sub   { font-size:13px; color:#8b949e; }
-  .container  { max-width:1100px; margin:0 auto; padding:24px; }
+  .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:var(--bp-text-base); color:#8b949e; }
+  .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:24px; }
 
   /* Summary cards */
   .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:28px; }
-  .stat-card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px; text-align:center; }
-  .stat-num  { font-size:36px; font-weight:800; line-height:1; }
-  .stat-lbl  { font-size:11px; color:#8b949e; margin-top:8px; text-transform:uppercase; letter-spacing:.5px; }
-  .stat-sub  { font-size:12px; color:#8b949e; margin-top:4px; }
+  .stat-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-xl); padding:20px; text-align:center; }
+  .stat-num  { font-size:var(--bp-text-36); font-weight:800; line-height:1; }
+  .stat-lbl  { font-size:var(--bp-text-xs); color:#8b949e; margin-top:8px; text-transform:uppercase; letter-spacing:.5px; }
+  .stat-sub  { font-size:var(--bp-text-sm); color:#8b949e; margin-top:4px; }
   .c-green { color:#3fb950; } .c-red { color:#f85149; } .c-blue { color:#58a6ff; } .c-gold { color:#f59e0b; }
 
   /* Section header */
-  .sec-head { font-size:16px; font-weight:700; color:#f0f6fc; margin:28px 0 14px; display:flex; align-items:center; gap:8px; }
-  .sec-head span { font-size:12px; color:#8b949e; font-weight:400; }
+  .sec-head { font-size:var(--bp-text-lg); font-weight:700; color:#f0f6fc; margin:28px 0 14px; display:flex; align-items:center; gap:8px; }
+  .sec-head span { font-size:var(--bp-text-sm); color:#8b949e; font-weight:400; }
 
   /* Table */
-  .tbl-wrap { background:#161b22; border:1px solid #30363d; border-radius:10px; overflow:hidden; margin-bottom:24px; }
+  .tbl-wrap { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow:hidden; margin-bottom:24px; }
   table { width:100%; border-collapse:collapse; }
-  thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:11px; color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
+  thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
+  th[data-sort] { padding:0; }
+  .perf-sort-btn {
+    all:unset; box-sizing:border-box; display:flex; align-items:center; gap:4px;
+    width:100%; padding:10px 14px; cursor:pointer;
+    font:inherit; color:inherit; text-transform:inherit; letter-spacing:inherit; white-space:inherit;
+  }
   tbody tr { border-bottom:1px solid #21262d; }
   tbody tr:last-child { border-bottom:none; }
   tbody tr:hover { background:#1c2128; }
-  td { padding:10px 14px; font-size:13px; white-space:nowrap; }
+  td { padding:10px 14px; font-size:var(--bp-text-base); white-space:nowrap; }
   .ticker-link { font-weight:700; color:#f0f6fc; text-decoration:none; }
   .ticker-link:hover { color:#58a6ff; }
 
   /* Signal badges */
-  .sig-al  { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600; background:#1a4731; color:#3fb950; border:1px solid #238636; }
-  .sig-sat { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600; background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
+  .sig-al  { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; background:#1a4731; color:#3fb950; border:1px solid #238636; }
+  .sig-sat { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
 
   /* Bars */
-  .bar-wrap { background:#21262d; border-radius:4px; height:8px; width:120px; overflow:hidden; display:inline-block; vertical-align:middle; }
-  .bar-fill { height:100%; border-radius:4px; }
+  .bar-wrap { background:#21262d; border-radius:var(--bp-radius-4); height:8px; width:120px; overflow:hidden; display:inline-block; vertical-align:middle; }
+  .bar-fill { height:100%; border-radius:var(--bp-radius-4); }
 
   /* Computing notice */
-  .computing { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:40px; text-align:center; color:#8b949e; }
-  .computing .big { font-size:40px; margin-bottom:12px; }
-  .computing p { margin-top:8px; font-size:13px; }
+  .computing { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:40px; text-align:center; color:#8b949e; }
+  .computing .big { font-size:var(--bp-text-40); margin-bottom:12px; }
+  .computing p { margin-top:8px; font-size:var(--bp-text-base); }
 
   /* Info box */
-  .info-box { background:#161b22; border:1px solid #30363d; border-left:3px solid #58a6ff; border-radius:8px; padding:14px 16px; margin-bottom:24px; font-size:13px; color:#8b949e; line-height:1.6; }
+  .info-box { background:#161b22; border:1px solid #30363d; border-left:3px solid #58a6ff; border-radius:var(--bp-radius-md); padding:14px 16px; margin-bottom:24px; font-size:var(--bp-text-base); color:#8b949e; line-height:1.6; }
 
   /* Özet hero bar */
-  .ozet-bar { background:linear-gradient(135deg,#0d1f36 0%,#111827 100%); border:1px solid #1e2d45; border-left:3px solid #3fb950; border-radius:12px; padding:16px 20px; margin-bottom:24px; display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
+  .ozet-bar { background:linear-gradient(135deg,#0d1f36 0%,#111827 100%); border:1px solid #1e2d45; border-left:3px solid #3fb950; border-radius:var(--bp-radius-xl); padding:16px 20px; margin-bottom:24px; display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
   .ozet-metric { flex:1; min-width:140px; text-align:center; padding:10px 16px; position:relative; }
   .ozet-metric+.ozet-metric::before { content:''; position:absolute; left:0; top:15%; height:70%; width:1px; background:#1e2d45; }
-  .ozet-metric-val { font-size:34px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
-  .ozet-metric-val.hero-val { font-size:40px; text-shadow:0 0 24px rgba(63,185,80,0.35); }
-  .ozet-metric-lbl { font-size:10px; color:#64748b; margin-top:7px; text-transform:uppercase; letter-spacing:.6px; }
-  .ozet-metric-sub { font-size:11px; color:#8b949e; margin-top:3px; }
+  .ozet-metric-val { font-size:var(--bp-text-34); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
+  .ozet-metric-val.hero-val { font-size:var(--bp-text-40); text-shadow:0 0 24px rgba(63,185,80,0.35); }
+  .ozet-metric-lbl { font-size:var(--bp-text-2xs); color:#64748b; margin-top:7px; text-transform:uppercase; letter-spacing:.6px; }
+  .ozet-metric-sub { font-size:var(--bp-text-xs); color:#8b949e; margin-top:3px; }
   @media(max-width:640px) { .ozet-bar{flex-wrap:wrap;gap:0} .ozet-metric{flex:0 0 50%;min-width:0;} .ozet-metric:nth-child(2)::before,.ozet-metric:nth-child(4)::before{display:none} .ozet-metric:nth-child(3),.ozet-metric:nth-child(4){border-top:1px solid #1e2d45;} }
 
   /* Trigger button */
-  .btn-run { background:#1f6feb; border:none; color:#fff; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; margin-left:12px; }
+  .btn-run { background:#1f6feb; border:none; color:#fff; border-radius:var(--bp-radius); padding:8px 18px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; margin-left:12px; }
   .btn-run:hover { background:#388bfd; }
   .btn-run:disabled { background:#30363d; color:#8b949e; cursor:not-allowed; }
 
-  footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
+  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
   footer a { color:#8b949e; text-decoration:none; }
   @media(max-width:600px) { .container{padding:12px;} .hm{display:none;} }
 
   /* ── Makro Ticker Bandı ── */
   .macro-bar { background:#0b111f; border-bottom:1px solid #1e2d45; height:34px; overflow:hidden; position:relative; white-space:nowrap; }
-  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2; }
+  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
   .macro-bar::before { left:0; background:linear-gradient(to right,#0b111f,transparent); }
   .macro-bar::after  { right:0; background:linear-gradient(to left,#0b111f,transparent); }
   .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #1e2d45; font-size:12px; height:34px; color:inherit; }
+    .macro-bar { position: relative; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
+  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
+  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #1e2d45; font-size:var(--bp-text-sm); height:34px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
-  /* SPEC-007: Premium paywall — blur + CTA banner */
-  tr.tier-locked { filter: blur(5px); user-select: none; pointer-events: none; }
-  .premium-cta-row {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; flex-wrap: wrap;
-    padding: 11px 16px; margin: 12px 0;
-    background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),0.10), rgba(var(--bp-premium-rgb),0.04));
-    border: 1px solid rgba(var(--bp-premium-rgb),0.32); border-radius: 8px;
-  }
-  .premium-cta-text { font-size: 13px; color: #e6edf3; }
-  .premium-cta-text strong { color: var(--bp-premium); }
-  .premium-cta-btn {
-    display: inline-block; padding: 7px 14px; border-radius: 7px;
-    background: var(--bp-premium); color: #fff; font-size: 12px; font-weight: 700;
-    text-decoration: none; white-space: nowrap;
-  }
-  .premium-cta-btn:hover { background: #c084fc; }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% with hdr_title = 'Sinyal Performans Analizi' %}{% include '_header.html' %}{% endwith %}
 <!-- Makro Ticker Bandı -->
-<div class="macro-bar"><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 <div id="main-content" class="container" tabindex="-1">
 
@@ -140,22 +133,22 @@
   <div class="ozet-bar">
     <div class="ozet-metric">
       <div class="ozet-metric-val c-blue">{{ total_signals }}</div>
-      <div class="ozet-metric-lbl">🔬 Toplam Sinyal</div>
+      <div class="ozet-metric-lbl"><span aria-hidden="true">🔬</span> Toplam Sinyal</div>
       <div class="ozet-metric-sub">{{ bt.tickers_used }} hisse · 2 yıl</div>
     </div>
     <div class="ozet-metric">
       <div class="ozet-metric-val hero-val c-green">%{{ bt.al.win_rate }}</div>
-      <div class="ozet-metric-lbl">✅ Güçlü Trend Başarı Oranı</div>
+      <div class="ozet-metric-lbl"><span aria-hidden="true">✅</span> Güçlü Trend Başarı Oranı</div>
       <div class="ozet-metric-sub">{{ bt.al.count }} Güçlü Trend sinyali</div>
     </div>
     <div class="ozet-metric">
       <div class="ozet-metric-val c-green">{{ '+' if bt.al.avg_ret >= 0 else '' }}{{ bt.al.avg_ret }}%</div>
-      <div class="ozet-metric-lbl">📈 Ort. Getiri (Güçlü Trend)</div>
+      <div class="ozet-metric-lbl"><span aria-hidden="true">📈</span> Ort. Getiri (Güçlü Trend)</div>
       <div class="ozet-metric-sub">Max +{{ bt.al.best }}% · Min {{ bt.al.worst }}%</div>
     </div>
     <div class="ozet-metric">
       <div class="ozet-metric-val" style="color:{{ '#f59e0b' if aktif_count > 0 else '#8b949e' }}">{{ aktif_count }}</div>
-      <div class="ozet-metric-lbl">⚡ Aktif Sinyal</div>
+      <div class="ozet-metric-lbl"><span aria-hidden="true">⚡</span> Aktif Sinyal</div>
       <div class="ozet-metric-sub">Şu an açık pozisyon</div>
     </div>
   </div>
@@ -164,12 +157,12 @@
   <div class="stat-grid">
     <div class="stat-card">
       <div class="stat-num c-green">{{ bt.al.win_rate }}%</div>
-      <div class="stat-lbl">▲ Güçlü Trend Kazanma</div>
+      <div class="stat-lbl"><span aria-hidden="true">▲</span> Güçlü Trend Kazanma</div>
       <div class="stat-sub">{{ bt.al.count }} sinyal incelendi</div>
     </div>
     <div class="stat-card">
       <div class="stat-num c-green">{{ bt.al.avg_ret }}%</div>
-      <div class="stat-lbl">▲ Güçlü Trend Ort. Getiri</div>
+      <div class="stat-lbl"><span aria-hidden="true">▲</span> Güçlü Trend Ort. Getiri</div>
       <div class="stat-sub">Max {{ bt.al.best }}% / Min {{ bt.al.worst }}%</div>
     </div>
     {# T3.7: SAT (short) win_rate/avg_ret KALDIRILDI — ürün long-only, kısa pozisyon açılmadığı için
@@ -191,33 +184,33 @@
       <div class="stat-num {% if bt.al.sharpe and bt.al.sharpe >= 1.0 %}c-green{% elif bt.al.sharpe and bt.al.sharpe >= 0 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.sharpe is not none %}{{ bt.al.sharpe }}{% else %}—{% endif %}
       </div>
-      <div class="stat-lbl">📊 Sharpe Ratio</div>
+      <div class="stat-lbl"><span aria-hidden="true">📊</span> Sharpe Ratio</div>
       <div class="stat-sub">&gt;1.0 kabul edilebilir · &gt;2.0 mükemmel</div>
     </div>
     <div class="stat-card" title="Maksimum kümülatif düşüş. Kötü seri döneminde en derin kayıp.">
       <div class="stat-num {% if bt.al.max_drawdown and bt.al.max_drawdown > -15 %}c-green{% elif bt.al.max_drawdown and bt.al.max_drawdown > -30 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.max_drawdown is not none %}{{ bt.al.max_drawdown }}%{% else %}—{% endif %}
       </div>
-      <div class="stat-lbl">📉 Max Drawdown</div>
+      <div class="stat-lbl"><span aria-hidden="true">📉</span> Max Drawdown</div>
       <div class="stat-sub">Ardışık kayıp serisi etkisi</div>
     </div>
     <div class="stat-card" title="Profit Factor: Brüt kazanç / brüt kayıp. >1.5 iyi, >2.0 çok iyi.">
       <div class="stat-num {% if bt.al.profit_factor and bt.al.profit_factor >= 1.5 %}c-green{% elif bt.al.profit_factor and bt.al.profit_factor >= 1.0 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.profit_factor is not none %}{{ bt.al.profit_factor }}{% else %}—{% endif %}
       </div>
-      <div class="stat-lbl">⚖️ Profit Factor</div>
+      <div class="stat-lbl"><span aria-hidden="true">⚖️</span> Profit Factor</div>
       <div class="stat-sub">Kazanç / kayıp oranı</div>
     </div>
     <div class="stat-card" title="Ortalama sinyal süre (gün)">
       <div class="stat-num c-blue">
         {% if bt.al.avg_duration_days is not none %}{{ bt.al.avg_duration_days }}g{% else %}—{% endif %}
       </div>
-      <div class="stat-lbl">⏱ Ort. İşlem Süresi</div>
+      <div class="stat-lbl"><span aria-hidden="true">⏱</span> Ort. İşlem Süresi</div>
       <div class="stat-sub">Gün cinsinden ortalama pozisyon</div>
     </div>
   </div>
   <div class="info-box" style="margin-bottom:24px">
-    ⚠️ <strong>Not:</strong> Risk metrikleri geçmiş veri üzerinden hesaplanmıştır. Komisyon ve slipaj (%0.1 tahmini) dahil değildir.
+    <span role="img" aria-label="Uyarı">⚠️</span> <strong>Not:</strong> Risk metrikleri geçmiş veri üzerinden hesaplanmıştır. Komisyon ve slipaj (%0.1 tahmini) dahil değildir.
     Sharpe Ratio burada günlük bağımsız işlemler üzerinden hesaplanmış basit bir yaklaşımdır.
     Geçmiş performans gelecek getirileri garanti etmez.
   </div>
@@ -226,17 +219,18 @@
   <div class="sec-head">
     Hisse Bazlı Performans
     <span>(Güçlü Trend sayısına göre sıralı)</span>
-    <button class="btn-run" id="btnRun" onclick="triggerBacktest()">🔄 Yenile</button>
+    <button class="btn-run" id="btnRun" onclick="triggerBacktest()"><span aria-hidden="true">🔄</span> Yenile</button>
   </div>
   <div class="tbl-wrap">
     <table>
+      <caption class="sr-only">Sinyal türlerine göre özet performans — kazanma oranı ve ortalama getiri</caption>
       <thead>
         <tr>
-          <th>Hisse</th>
-          <th>Güçlü Trend</th>
-          <th>Güçlü Kazanma %</th>
-          <th>Güçlü Ort. Getiri</th>
-          <th>Trend Bozuldu</th>
+          <th scope="col">Hisse</th>
+          <th scope="col">Güçlü Trend</th>
+          <th scope="col">Güçlü Kazanma %</th>
+          <th scope="col">Güçlü Ort. Getiri</th>
+          <th scope="col">Trend Bozuldu</th>
         </tr>
       </thead>
       <tbody>
@@ -265,16 +259,16 @@
 
   {% else %}
   <div class="computing" id="computingDiv">
-    <div class="big">⚙️</div>
-    <div style="font-size:16px;font-weight:700;color:#e6edf3" id="computingTitle">Backtest Başlatılıyor…</div>
+    <div class="big"><span aria-hidden="true">⚙️</span></div>
+    <div style="font-size:var(--bp-text-lg);font-weight:700;color:#e6edf3" id="computingTitle">Backtest Başlatılıyor…</div>
     <p id="computingMsg" style="margin-top:8px">BIST100 hisseleri için 2 yıllık geçmiş hesaplanıyor.</p>
     <div style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:10px">
       <div style="width:24px;height:24px;border:3px solid #1e2d45;border-top-color:#3b82f6;border-radius:50%;animation:spin 0.8s linear infinite"></div>
-      <span id="computingStatus" style="font-size:13px;color:#94a3b8">Bağlanıyor…</span>
+      <span id="computingStatus" style="font-size:var(--bp-text-base);color:#94a3b8">Bağlanıyor…</span>
     </div>
-    <p style="margin-top:16px;font-size:11px;color:#64748b">~5-10 dakika sürebilir, sayfa otomatik yenilenecek.</p>
+    <p style="margin-top:16px;font-size:var(--bp-text-xs);color:#64748b">~5-10 dakika sürebilir, sayfa otomatik yenilenecek.</p>
     <p style="margin-top:8px">
-      <button class="btn-run" id="btnRun" onclick="triggerBacktest()" style="opacity:0.6;font-size:12px">🔄 Yeniden Başlat</button>
+      <button class="btn-run" id="btnRun" onclick="triggerBacktest()" style="opacity:0.6;font-size:var(--bp-text-sm)"><span aria-hidden="true">🔄</span> Yeniden Başlat</button>
     </p>
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
@@ -286,48 +280,43 @@
     Aktif Sinyaller — Anlık Performans
     <span>(Sinyal başı fiyata göre)</span>
   </div>
-  <div class="perf-filter-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 14px;padding:10px;background:#161b22;border:1px solid #30363d;border-radius:8px">
-    <input type="text" id="perfSearch" placeholder="🔍 Hisse ara…" oninput="perfApplyFilter()" style="flex:1;min-width:140px;padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:13px">
-    <select id="perfSigFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:13px">
+  <div class="perf-filter-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 14px;padding:10px;background:#161b22;border:1px solid #30363d;border-radius:var(--bp-radius-md)">
+    <input type="text" id="perfSearch" placeholder="🔍 Hisse ara…" oninput="perfApplyFilter()" style="flex:1;min-width:140px;padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:var(--bp-text-base)" aria-label="Hisse ara">
+    <select id="perfSigFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:var(--bp-text-base)" aria-label="Sinyal filtresi">
       <option value="">Tüm sinyaller</option>
       <option value="AL">▲ Güçlü Trend</option>
       <option value="SAT">▼ Trend Bozuldu</option>
     </select>
-    <select id="perfRetFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:13px">
+    <select id="perfRetFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:#0e0e12;border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:var(--bp-text-base)" aria-label="Getiri filtresi">
       <option value="">Tüm getiriler</option>
       <option value="pos">Pozitif (kazanan)</option>
       <option value="neg">Negatif (zarar)</option>
     </select>
-    <span id="perfFilterCount" style="font-size:12px;color:#8b949e;margin-left:auto"></span>
+    <span id="perfFilterCount" style="font-size:var(--bp-text-sm);color:#8b949e;margin-left:auto"></span>
   </div>
-  {% if not has_premium_access and premium_count > 0 %}
-  <div class="premium-cta-row">
-    <span class="premium-cta-text">🔒 <strong>{{ premium_count }} Premium sinyal</strong> blur'lu — net görmek için Premium'u aç</span>
-    <button type="button" class="premium-cta-btn" onclick="openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
-  </div>
-  {% endif %}
   <div class="tbl-wrap">
     <table>
+      <caption class="sr-only">Geçmiş sinyallerin hisse bazında performans detayı</caption>
       <thead>
         <tr>
-          <th onclick="perfSortBy('ticker')" data-sort="ticker" style="cursor:pointer">Hisse <span class="perf-sort-arr"></span></th>
-          <th onclick="perfSortBy('signal')" data-sort="signal" style="cursor:pointer">Sinyal <span class="perf-sort-arr"></span></th>
-          <th onclick="perfSortBy('signal_price')" data-sort="signal_price" style="cursor:pointer">Sinyal Başı ₺ <span class="perf-sort-arr"></span></th>
-          <th onclick="perfSortBy('price')" data-sort="price" style="cursor:pointer">Güncel ₺ <span class="perf-sort-arr"></span></th>
-          <th onclick="perfSortBy('aktif_ret')" data-sort="aktif_ret" style="cursor:pointer" class="sort-active">Getiri % <span class="perf-sort-arr">▼</span></th>
-          <th onclick="perfSortBy('signal_bars')" data-sort="signal_bars" style="cursor:pointer">Süre <span class="perf-sort-arr"></span></th>
-          <th class="hm" onclick="perfSortBy('signal_date')" data-sort="signal_date" style="cursor:pointer">Tarih <span class="perf-sort-arr"></span></th>
+          <th scope="col" data-sort="ticker" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('ticker')">Hisse <span class="perf-sort-arr"></span></button></th>
+          <th scope="col" data-sort="signal" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('signal')">Sinyal <span class="perf-sort-arr"></span></button></th>
+          <th scope="col" data-sort="signal_price" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('signal_price')">Sinyal Başı ₺ <span class="perf-sort-arr"></span></button></th>
+          <th scope="col" data-sort="price" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('price')">Güncel ₺ <span class="perf-sort-arr"></span></button></th>
+          <th scope="col" data-sort="aktif_ret" class="sort-active" aria-sort="descending"><button type="button" class="perf-sort-btn" onclick="perfSortBy('aktif_ret')">Getiri % <span class="perf-sort-arr" aria-hidden="true">▼</span></button></th>
+          <th scope="col" data-sort="signal_bars" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('signal_bars')">Süre <span class="perf-sort-arr"></span></button></th>
+          <th scope="col" class="hm" data-sort="signal_date" aria-sort="none"><button type="button" class="perf-sort-btn" onclick="perfSortBy('signal_date')">Tarih <span class="perf-sort-arr"></span></button></th>
         </tr>
       </thead>
       <tbody id="perfTbody">
         {% for s in aktif|sort(attribute='aktif_ret', reverse=true) %}
-        <tr data-ticker="{{ s.ticker }}" data-signal="{{ s.signal }}" data-signal_price="{{ s.signal_price }}" data-price="{{ s.price }}" data-aktif_ret="{{ s.aktif_ret if s.aktif_ret is not none else 0 }}" data-signal_bars="{{ s.signal_date|signal_age_days }}" data-signal_date="{{ s.signal_date }}"{% if s.tier == 'premium' and not has_premium_access %} class="tier-locked"{% endif %}>
+        <tr data-ticker="{{ s.ticker }}" data-signal="{{ s.signal }}" data-signal_price="{{ s.signal_price }}" data-price="{{ s.price }}" data-aktif_ret="{{ s.aktif_ret if s.aktif_ret is not none else 0 }}" data-signal_bars="{{ s.signal_date|signal_age_days }}" data-signal_date="{{ s.signal_date }}">
           <td><a href="/hisse/{{ s.ticker }}" class="ticker-link">{{ s.ticker }}</a></td>
           <td>
             {% if s.signal == 'AL' %}
-              <span class="sig-al">▲ Güçlü Trend</span>
+              <span class="sig-al"><span aria-hidden="true">▲</span> Güçlü Trend</span>
             {% else %}
-              <span class="sig-sat">▼ Trend Bozuldu</span>
+              <span class="sig-sat"><span aria-hidden="true">▼</span> Trend Bozuldu</span>
             {% endif %}
           </td>
           <td>{{ s.signal_price|tr_price }} ₺</td>
@@ -353,7 +342,7 @@
 
 <footer>
   <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/sektor-harita">Sektör Haritası</a> · <a href="/bilanco-takvimi">Bilanço Takvimi</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/yasal">Yasal Uyarı</a>
-  <div style="margin-top:6px">⚠️ Geçmiş performans gelecek getiriyi garanti etmez. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
+  <div style="margin-top:6px"><span role="img" aria-label="Uyarı">⚠️</span> Geçmiş performans gelecek getiriyi garanti etmez. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
 </footer>
 
 <script src="/static/stale-banner.js?v=20260810B"></script>
@@ -396,7 +385,7 @@ async function triggerBacktest() {
     const r = await fetch('/api/backtest');
     const j = await r.json();
     if (j.al) { window.location.reload(); return; }
-  } catch(e) {}
+  } catch(e) { console.warn('mevcut backtest kontrolu basarisiz, otomatik baslatmaya devam ediliyor', e); }
 
   /* Yoksa otomatik başlat */
   if (statusEl) statusEl.textContent = 'Backtest başlatılıyor…';
@@ -418,7 +407,7 @@ async function triggerBacktest() {
       const r = await fetch('/api/backtest');
       const j = await r.json();
       if (j.al) { clearInterval(iv); window.location.reload(); }
-    } catch(e) {}
+    } catch(e) { console.warn('backtest polling basarisiz', e); }
   }, 25000);
 })();
 {% endif %}
@@ -446,7 +435,7 @@ async function triggerBacktest() {
         }
       }
     }
-  } catch(_) {}
+  } catch(_) { /* localStorage okunamazsa/bozuksa varsayilan siralamaya (_sortState init) dusuluyor */ }
 
   function _parseSortVal(v, col) {
     if (v == null || v === '') return null;
@@ -489,6 +478,7 @@ async function triggerBacktest() {
     // Header arrow + active state güncelle
     document.querySelectorAll('th[data-sort]').forEach(th => {
       th.classList.remove('sort-active');
+      th.setAttribute('aria-sort', 'none');
       const arr = th.querySelector('.perf-sort-arr');
       if (arr) arr.textContent = '';
     });
@@ -499,11 +489,12 @@ async function triggerBacktest() {
       url.searchParams.set('sort', _sortState.col);
       url.searchParams.set('dir', _sortState.dir);
       window.history.replaceState(null, '', url);
-    } catch(_) {}
+    } catch(_) { /* siralama tercihi kaydi best-effort - tablo zaten dogru sirada */ }
 
     const activeTh = document.querySelector(`th[data-sort="${col}"]`);
     if (activeTh) {
       activeTh.classList.add('sort-active');
+      activeTh.setAttribute('aria-sort', _sortState.dir === 'asc' ? 'ascending' : 'descending');
       const arr = activeTh.querySelector('.perf-sort-arr');
       if (arr) arr.textContent = _sortState.dir === 'asc' ? '▲' : '▼';
     }
@@ -525,7 +516,7 @@ async function triggerBacktest() {
     } else {
       // Default header arrow (▼) ve sort-active mevcut zaten DOM'da
       // Sadece localStorage'a default'u yaz (URL share için)
-      try { localStorage.setItem(_SORT_KEY, JSON.stringify(_sortState)); } catch(_) {}
+      try { localStorage.setItem(_SORT_KEY, JSON.stringify(_sortState)); } catch(_) { /* varsayilan siralamayi localStorage'a yazma best-effort, gorunur etkisi yok */ }
     }
   });
 
@@ -544,11 +535,10 @@ async function triggerBacktest() {
 // Makro Ticker Bandı
 const _ML = BP_ASSET_LABELS;
 const _MD = BP_ASSET_DECIMALS;
-async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e){}}
-loadMacroBar();setInterval(loadMacroBar,60000);
+async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e) { console.error('loadMacroBar: /api/macro fetch/render basarisiz', e); }}
+loadMacroBar();setInterval(loadMacroBar,180000);
 </script>
 <script src="/static/bp-search.js?v=47" defer></script>
 <script src="/static/learning-mode.js?v=2" defer></script>
-{% include '_premium_modal.html' %}
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

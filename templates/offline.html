@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_analytics = false %}{% block head %}  <title>BorsaPusula — Çevrimdışı</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_analytics = false %}{% block head %}  <title>BorsaPusula — Çevrimdışı</title>
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -24,7 +24,7 @@
       background:#3b82f6;
       color:#fff;
       border:none;
-      border-radius:8px;
+      border-radius:var(--bp-radius-md);
       font-size:.9rem;
       font-weight:600;
       cursor:pointer;
@@ -37,7 +37,7 @@
       max-width:280px;
     }
   </style>
-{% endblock %}{% block body %}  <div class="icon">📡</div>
+{% endblock %}{% block body %}  <div class="icon"><span aria-hidden="true">📡</span></div>
   <h1>İnternet bağlantısı yok</h1>
   <p>BorsaPusula'ya erişmek için internet bağlantısı gerekiyor. Bağlantı kurulunca sinyaller güncel olarak yüklenecek.</p>
   <button onclick="window.location.reload()">Tekrar Dene</button>

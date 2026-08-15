@@ -59,7 +59,7 @@ def main():
     else:
         print("  Tumu max-width:900px ile hizali (sapma yok).")
 
-    for page in ("templates/heatmap.html", "templates/profil.html"):
+    for page in ("templates/profil.html",):
         with open(page, encoding="utf-8") as f:
             content = f.read()
         has_header_include = "{% include '_header.html' %}" in content

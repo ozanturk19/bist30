@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | BorsaPusula</title>
 <meta name="description" content="BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı güncel Güçlü Trend / Trend Bozuldu / Yatay sinyalleri. Ücretsiz, canlı güncelleme.">
 <meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, algoritmik borsa, sektör analizi">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
@@ -133,7 +133,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810B">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   @font-face {
@@ -151,7 +151,7 @@
     background: var(--bp-bg);
     color: var(--bp-text);
     font-family: 'Manrope', 'Inter-Fallback', system-ui, -apple-system, sans-serif;
-    font-size: 14px;
+    font-size: var(--bp-text-md);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
@@ -181,7 +181,7 @@
     justify-content: space-between;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index:var(--bp-z-dropdown);
     gap: 12px;
     transform: translateZ(0);
   }
@@ -198,7 +198,7 @@
     content: '';
     position: absolute;
     top: 0; bottom: 0; width: 40px;
-    z-index: 2; pointer-events: none;
+    z-index:var(--bp-z-raised); pointer-events: none;
   }
   .macro-bar::before { left: 0;  background: linear-gradient(to right, #0b0b0e, transparent); }
   .macro-bar::after  { right: 0; background: linear-gradient(to left,  #0b0b0e, transparent); }
@@ -215,12 +215,16 @@
     0%   { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
+    .macro-bar { position: relative; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
+  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item {
     display: inline-flex;
     align-items: center;
     gap: 5px;
     padding: 0 18px;
-    font-size: 11.5px;
+    font-size: var(--bp-text-sm);
     font-variant-numeric: tabular-nums;
     border-right: 1px solid #1a1a1c;
     cursor: default;
@@ -258,7 +262,7 @@
     border: 1px solid var(--bp-border);
     border-radius: var(--bp-radius);
     color: var(--bp-text2); cursor: pointer;
-    transition: all .15s; flex-shrink: 0; font-size: 16px;
+    transition: all .15s; flex-shrink: 0; font-size: var(--bp-text-lg);
   }
   #header-push-bell:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
   #header-push-bell.push-active {
@@ -275,7 +279,7 @@
 
   /* ── Search Overlay ── */
   .search-overlay {
-    display: none; position: fixed; inset: 0; z-index: 300;
+    display: none; position: fixed; inset: 0; z-index:var(--bp-z-overlay);
     background: rgba(0,0,0,0.65);
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     align-items: flex-start; justify-content: center;
@@ -286,9 +290,9 @@
     width: min(560px, calc(100vw - 32px));
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 12px;
+    border-radius:var(--bp-radius-xl);
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    box-shadow: var(--bp-shadow-lg);
     max-height: calc(100vh - 120px);
     display: flex; flex-direction: column;
   }
@@ -300,7 +304,7 @@
   .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
   #searchInput {
     flex: 1; background: none; border: none; outline: none;
-    font-size: 15px; color: var(--bp-text);
+    font-size: var(--bp-text-15); color: var(--bp-text);
     font-family: 'Manrope', system-ui, sans-serif;
     min-width: 0;
   }
@@ -308,16 +312,16 @@
   .search-close {
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
     color: var(--bp-text2); width: 28px; height: 28px;
-    border-radius: 6px; cursor: pointer;
+    border-radius:var(--bp-radius); cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 14px; flex-shrink: 0;
+    font-size: var(--bp-text-md); flex-shrink: 0;
   }
   .search-close:hover { background: var(--bp-surface3); color: var(--bp-text); }
   .search-results { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
-  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: 13px; }
+  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: var(--bp-text-base); }
   .search-section-title {
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: 10px; font-weight: 700;
+    font-size: var(--bp-text-2xs); font-weight: 700;
     color: var(--bp-text3);
     text-transform: uppercase; letter-spacing: 0.5px;
     padding: 10px 12px 6px;
@@ -329,28 +333,28 @@
     padding: 9px 12px;
     text-decoration: none;
     color: var(--bp-text);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     transition: background .12s;
-    font-size: 13px;
+    font-size: var(--bp-text-base);
   }
   .search-result:hover, .search-result.sr-selected { background: var(--bp-surface2); }
   .sr-tk {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-weight: 700; color: var(--bp-text);
-    font-size: 13px;
+    font-size: var(--bp-text-base);
   }
   .sr-sig.sr-al { color: var(--bp-al); font-weight: 700; }
   .sr-sig.sr-sat { color: var(--bp-sat); font-weight: 700; }
   .sr-sig.sr-bekle { color: #909097; }
   .sr-name {
-    color: var(--bp-text2); font-size: 12px;
+    color: var(--bp-text2); font-size: var(--bp-text-sm);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     min-width: 0;
   }
-  .sr-price { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--bp-text2); }
+  .sr-price { font-variant-numeric: tabular-nums; font-size: var(--bp-text-sm); color: var(--bp-text2); }
   .sr-chg {
     font-variant-numeric: tabular-nums;
-    font-size: 12px; font-weight: 600;
+    font-size: var(--bp-text-sm); font-weight: 600;
     min-width: 56px; text-align: right;
   }
   .sr-chg.pos { color: var(--bp-al); }
@@ -359,15 +363,15 @@
   .search-topic {
     display: block; padding: 9px 12px;
     text-decoration: none; color: var(--bp-text);
-    border-radius: 8px; font-size: 13px;
+    border-radius:var(--bp-radius-md); font-size: var(--bp-text-base);
     transition: background .12s;
   }
   .search-topic:hover, .search-topic.sr-selected { background: var(--bp-surface2); }
   .search-kbd {
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: 10px; padding: 2px 5px;
+    font-size: var(--bp-text-2xs); padding: 2px 5px;
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
-    border-radius: 3px; color: var(--bp-text3);
+    border-radius:var(--bp-radius-sm); color: var(--bp-text3);
     margin-left: auto;
   }
   @media (max-width: 600px) {
@@ -391,12 +395,12 @@
   .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
   .logo-name {
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: 16px; font-weight: 700; color: var(--bp-text);
+    font-size: var(--bp-text-lg); font-weight: 700; color: var(--bp-text);
     letter-spacing: -0.3px;
   }
   .logo-name strong { color: var(--bp-al); font-weight: 700; }
   .logo-sub {
-    font-size: 10px; font-weight: 500; color: var(--bp-text3);
+    font-size: var(--bp-text-2xs); font-weight: 500; color: var(--bp-text3);
     text-transform: uppercase; letter-spacing: 0.6px;
   }
 
@@ -407,7 +411,7 @@
   .header-nav a {
     display: flex; align-items: center; gap: 5px;
     padding: 6px 11px; border-radius: var(--bp-radius-sm);
-    font-size: 13px; font-weight: 500; color: var(--bp-text2);
+    font-size: var(--bp-text-base); font-weight: 500; color: var(--bp-text2);
     text-decoration: none; transition: all .15s;
     white-space: nowrap;
   }
@@ -419,7 +423,7 @@
   .nav-dropdown-btn {
     display: flex; align-items: center; gap: 5px;
     padding: 6px 11px; border-radius: var(--bp-radius-sm);
-    font-size: 13px; font-weight: 500; color: var(--bp-text2);
+    font-size: var(--bp-text-base); font-weight: 500; color: var(--bp-text2);
     background: none; border: none; cursor: pointer;
     transition: all .15s; white-space: nowrap; font-family: inherit;
   }
@@ -430,33 +434,33 @@
   .nav-dropdown-menu {
     display: none; position: absolute; top: calc(100% + 6px); left: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border2);
-    border-radius: 10px; min-width: 178px; padding: 5px;
-    z-index: 500; box-shadow: 0 12px 32px rgba(0,0,0,.55);
+    border-radius:var(--bp-radius-lg); min-width: 178px; padding: 5px;
+    z-index: var(--bp-z-nav-dropdown); box-shadow: var(--bp-shadow-dropdown);
   }
   .nav-dropdown-menu.open { display: block; animation: ddIn .13s ease; }
   @keyframes ddIn {
     from { opacity: 0; transform: translateY(-5px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .nav-dropdown-menu a { padding: 7px 10px !important; border-radius: 6px; }
+  .nav-dropdown-menu a { padding: 7px 10px !important; border-radius:var(--bp-radius); }
   .dd-sep { height: 1px; background: var(--bp-border); margin: 4px 6px; }
 
   /* Header right actions */
   .header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-  #liveTs { font-size: 11px; font-weight: 600; color: var(--bp-al); letter-spacing: 0.3px; font-variant-numeric: tabular-nums; }
-  #updated { font-size: 11px; color: var(--bp-text3); }
+  #liveTs { font-size: var(--bp-text-xs); font-weight: 600; color: var(--bp-al); letter-spacing: 0.3px; font-variant-numeric: tabular-nums; }
+  #updated { font-size: var(--bp-text-xs); color: var(--bp-text3); }
 
   .btn-refresh {
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
     color: var(--bp-text2); padding: 6px 12px; border-radius: var(--bp-radius-sm);
-    cursor: pointer; font-size: 12px; font-weight: 500; font-family: inherit;
+    cursor: pointer; font-size: var(--bp-text-sm); font-weight: 500; font-family: inherit;
     display: flex; align-items: center; gap: 5px; transition: all 0.15s;
   }
   .btn-refresh:hover { background: var(--bp-surface3); border-color: var(--bp-border2); color: var(--bp-text); }
   .btn-refresh.spinning svg { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
+  .container { max-width: var(--bp-container-1400); margin: 0 auto; padding: 20px 24px; }
 
 
   /* Stats bar */
@@ -479,8 +483,8 @@
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
     color: var(--bp-text2);
-    border-radius: 999px;
-    font-size: 13px;
+    border-radius:var(--bp-radius-pill);
+    font-size: var(--bp-text-base);
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
@@ -510,24 +514,24 @@
   }
   @media (max-width: 640px) {
     .preset-chips { padding: 4px 0 10px; }
-    .preset-chip { font-size: 12px; padding: 6px 12px; }
+    .preset-chip { font-size: var(--bp-text-sm); padding: 6px 12px; }
   }
 
   /* F2 — Anomali rozet */
   .anomaly-badge {
     display: inline-flex; align-items: center; gap: 3px;
-    padding: 2px 7px; border-radius: 10px;
+    padding: 2px 7px; border-radius:var(--bp-radius-lg);
     background: rgba(217,153,34,0.15);
     color: #d29922; border: 1px solid rgba(217,153,34,0.3);
-    font-size: 10px; font-weight: 600; cursor: default;
+    font-size: var(--bp-text-2xs); font-weight: 600; cursor: default;
     white-space: nowrap;
   }
   /* F5 — AI Sentiment rozet */
   .mc-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
   .sentiment-badge {
     display: inline-flex; align-items: center; gap: 2px;
-    padding: 2px 6px; border-radius: 10px;
-    font-size: 10px; font-weight: 600; cursor: default;
+    padding: 2px 6px; border-radius:var(--bp-radius-lg);
+    font-size: var(--bp-text-2xs); font-weight: 600; cursor: default;
     white-space: nowrap;
   }
   .sentiment-badge.s-positive { background: rgba(0,226,144,0.12); color: #00e290; border: 1px solid rgba(0,226,144,0.3); }
@@ -542,7 +546,7 @@
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.65);
     backdrop-filter: blur(4px);
-    z-index: 9998;
+    z-index: var(--bp-z-modal-top);
     align-items: center;
     justify-content: center;
     padding: 20px;
@@ -553,7 +557,7 @@
   .premium-modal {
     background: var(--bp-surface);
     border: 1px solid rgba(var(--bp-volume-rgb),.45);
-    border-radius: 12px;
+    border-radius:var(--bp-radius-xl);
     padding: 28px 24px 20px;
     max-width: 380px;
     width: 100%;
@@ -567,26 +571,26 @@
     background: transparent;
     border: none;
     color: var(--bp-text3);
-    font-size: 22px;
+    font-size: var(--bp-text-22);
     cursor: pointer;
     line-height: 1;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: var(--bp-radius-4);
   }
   .premium-modal-close:hover { color: var(--bp-text); background: rgba(255,255,255,0.05); }
   .premium-modal-icon {
-    font-size: 38px;
+    font-size: var(--bp-text-38);
     margin-bottom: 8px;
   }
   .premium-modal-title {
     color: var(--bp-text);
-    font-size: 19px;
+    font-size: var(--bp-text-2xl);
     font-weight: 700;
     margin: 0 0 8px;
   }
   .premium-modal-desc {
     color: var(--bp-text2);
-    font-size: 13px;
+    font-size: var(--bp-text-base);
     line-height: 1.55;
     margin: 0 0 18px;
   }
@@ -597,10 +601,10 @@
     width: 100%;
     background: rgba(28,33,40,.7);
     border: 1px solid var(--bp-border);
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     padding: 10px 12px;
     color: var(--bp-text);
-    font-size: 14px;
+    font-size: var(--bp-text-md);
     font-family: inherit;
     outline: none;
     transition: border-color .15s ease;
@@ -611,8 +615,8 @@
     color: #1a1a1f;
     border: none;
     padding: 11px 14px;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius:var(--bp-radius);
+    font-size: var(--bp-text-md);
     font-weight: 700;
     cursor: pointer;
     transition: transform .15s ease, box-shadow .15s ease;
@@ -623,84 +627,27 @@
   }
   .premium-modal-submit:disabled { opacity: .6; cursor: not-allowed; }
   .premium-modal-status {
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     min-height: 18px;
     margin: 4px 0 8px;
   }
   .premium-modal-footer {
     color: var(--bp-text3);
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     padding-top: 10px;
     border-top: 1px solid rgba(48,54,61,0.5);
   }
   @media (max-width: 480px) {
     .premium-modal { padding: 22px 18px 16px; }
-    .premium-modal-title { font-size: 17px; }
+    .premium-modal-title { font-size: var(--bp-text-xl); }
   }
-
-  /* SPEC-001 Faz 2 — Premium soft paywall (locked rows + CTA) */
-  .tier-locked {
-    filter: blur(6px);
-    user-select: none;
-    pointer-events: none;
-    transition: filter .25s ease;
-  }
-  /* Premium CTA banner — satır olarak görünür */
-  tr.premium-cta-row td {
-    padding: 14px 12px;
-    background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),.06), rgba(var(--bp-premium-rgb),.02)) !important;
-    border-top: 1px dashed rgba(var(--bp-premium-rgb),.35);
-    border-bottom: 1px solid rgba(48,54,61,0.5);
-    text-align: center;
-  }
-  .premium-cta-content {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    font-size: 13px;
-    color: var(--bp-text2);
-  }
-  .premium-cta-content strong { color: var(--bp-premium); font-weight: 700; }
-  .premium-cta-btn {
-    background: linear-gradient(135deg, var(--bp-premium), #7c3aed);
-    color: #fff;
-    border: none;
-    padding: 7px 16px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .3px;
-    cursor: pointer;
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .premium-cta-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(var(--bp-premium-rgb),.25);
-  }
-  /* Mobile CTA */
-  .mc-premium-cta {
-    background: linear-gradient(135deg, rgba(var(--bp-premium-rgb),.08), rgba(var(--bp-premium-rgb),.02));
-    border: 1px dashed rgba(var(--bp-premium-rgb),.35);
-    border-radius: 8px;
-    padding: 14px;
-    margin: 6px 0 14px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-  }
-  .mc-premium-cta .premium-cta-content { color: var(--bp-text); font-size: 13px; line-height: 1.5; }
-  .mc-premium-cta strong { color: var(--bp-premium); }
 
   /* Tablo grup başlık satırı (desktop) */
   tr.tier-group-header td {
     padding: 14px 12px 6px;
     background: transparent !important;
     border-bottom: 1px solid rgba(48,54,61,0.5);
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     font-weight: 700;
     letter-spacing: .5px;
     text-transform: uppercase;
@@ -711,7 +658,7 @@
   tr.tier-group-header td .tier-count {
     display: inline-block;
     margin-left: 8px;
-    font-size: 10px;
+    font-size: var(--bp-text-2xs);
     color: var(--bp-text3);
     text-transform: none;
     letter-spacing: 0;
@@ -721,9 +668,9 @@
   .mc-tier-group {
     margin: 14px 0 6px;
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     background: rgba(28,33,40,0.3);
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     font-weight: 700;
     letter-spacing: .5px;
     text-transform: uppercase;
@@ -735,7 +682,7 @@
   .mc-tier-group.tg-plus     { color: #1f6feb; border-left: 3px solid #1f6feb; }   /* Plus — CPO-986 #8.1 mavi */
   .mc-tier-group.tg-standart { color: #808080; border-left: 3px solid #808080; }   /* Standart — nötr */
   .mc-tier-group .tier-count {
-    font-size: 10px;
+    font-size: var(--bp-text-2xs);
     color: var(--bp-text3);
     text-transform: none;
     letter-spacing: 0;
@@ -747,7 +694,7 @@
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
     border-left: 3px solid var(--accent, #58a6ff);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 18px 22px;
     margin: 4px 0 16px;
   }
@@ -759,9 +706,10 @@
   }
   .ms-live-indicator {
     display: inline-flex; align-items: center; gap: 6px;
-    font-size: 12px; font-weight: 600;
+    font-size: var(--bp-text-sm); font-weight: 600;
     color: var(--bp-text2);
     text-transform: uppercase; letter-spacing: 0.5px;
+    margin: 0;
   }
   .ms-live-dot {
     width: 6px; height: 6px;
@@ -770,7 +718,7 @@
     animation: msPulse 2s infinite;
   }
   @keyframes msPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.85); } }
-  .ms-meta { font-size: 11px; color: var(--bp-text3); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .ms-meta { font-size: var(--bp-text-xs); color: var(--bp-text3); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   /* Feature 1 #1C: Reklamsız mikro-badge */
   .badge-noads {
     display: inline-flex;
@@ -779,9 +727,9 @@
     padding: 2px 7px;
     background: rgba(63,185,80,0.10);
     border: 1px solid rgba(63,185,80,0.35);
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     color: #3fb950;
-    font-size: 10px;
+    font-size: var(--bp-text-2xs);
     font-weight: 600;
     letter-spacing: 0.2px;
     cursor: help;
@@ -795,7 +743,7 @@
     padding: 14px 8px 10px;
     margin: 14px 0 0;
     border-top: 1px solid rgba(48,54,61,0.5);
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text2);
   }
   .value-strip .value-item {
@@ -811,7 +759,7 @@
   }
   .value-strip .value-divider { color: var(--bp-text3); }
   @media (max-width: 480px) {
-    .value-strip { gap: 10px; font-size: 11px; }
+    .value-strip { gap: 10px; font-size: var(--bp-text-xs); }
     .value-strip .value-divider { display: none; }
   }
   .ms-divider { color: var(--bp-text3); }
@@ -819,7 +767,7 @@
   .ms-link:hover { text-decoration: underline; }
 
   .ms-narrative {
-    font-size: 15px; line-height: 1.7;
+    font-size: var(--bp-text-15); line-height: 1.7;
     color: var(--bp-text); margin: 0 0 14px;
     min-height: 18px;  /* skeleton'a yer aç, CLS önle */
   }
@@ -836,9 +784,9 @@
   }
   .ms-stat {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px; border-radius: 6px;
+    padding: 6px 12px; border-radius:var(--bp-radius);
     background: rgba(28,33,40,0.6); border: 1px solid rgba(48,54,61,0.5);
-    font-size: 12px; color: var(--bp-text2); text-decoration: none;
+    font-size: var(--bp-text-sm); color: var(--bp-text2); text-decoration: none;
     transition: all 0.15s ease;
   }
   .ms-stat:hover { background: rgba(28,33,40,0.95); border-color: #58a6ff; color: var(--bp-text); }
@@ -854,13 +802,13 @@
     background: linear-gradient(90deg, rgba(48,54,61,0.3) 25%, rgba(30,37,48,0.6) 50%, rgba(48,54,61,0.3) 75%);
     background-size: 200% 100%;
     animation: msShimmer 1.4s infinite;
-    border-radius: 4px;
+    border-radius: var(--bp-radius-4);
   }
   @keyframes msShimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
   @media (max-width: 640px) {
     .market-summary { padding: 14px 16px; }
-    .ms-narrative { font-size: 14px; line-height: 1.6; }
+    .ms-narrative { font-size: var(--bp-text-md); line-height: 1.6; }
     .ms-microstats { display: grid; grid-template-columns: 1fr 1fr; }
     .ms-microstats .ms-stat-watch { grid-column: 1 / -1; }
   }
@@ -883,11 +831,11 @@
   }
   .gundem-cards::-webkit-scrollbar { height: 4px; }
   .gundem-cards::-webkit-scrollbar-track { background: transparent; }
-  .gundem-cards::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+  .gundem-cards::-webkit-scrollbar-thumb { background: #30363d; border-radius:var(--bp-radius-xs); }
 
   .gnm-card {
     background: var(--bg2); border: 1px solid var(--bp-border);
-    border-radius: 10px; padding: 13px 14px;
+    border-radius:var(--bp-radius-lg); padding: 13px 14px;
     min-width: 230px; max-width: 270px; flex: 0 0 auto;
     cursor: pointer; transition: border-color .15s, background .15s;
     text-decoration: none; display: block;
@@ -907,22 +855,22 @@
     margin-bottom: 7px; gap: 6px;
   }
   .gnm-ticker {
-    font-size: 13px; font-weight: 800; color: var(--bp-text); letter-spacing: .3px;
+    font-size: var(--bp-text-base); font-weight: 800; color: var(--bp-text); letter-spacing: .3px;
   }
   .gnm-name {
-    font-size: 10px; color: var(--bp-text3); font-weight: 400;
+    font-size: var(--bp-text-2xs); color: var(--bp-text3); font-weight: 400;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px;
   }
   .gnm-badge {
-    font-size: 10px; font-weight: 700; padding: 2px 7px;
-    border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+    font-size: var(--bp-text-2xs); font-weight: 700; padding: 2px 7px;
+    border-radius: var(--bp-radius-20); white-space: nowrap; flex-shrink: 0;
     /* neutral/bekle fallback — always visible regardless of signal type */
     background: rgba(139,148,158,.1); color: var(--bp-text3); border: 1px solid rgba(139,148,158,.2);
   }
   .gnm-badge.al  { background: rgba(var(--bp-al-rgb),.08); color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.28); }
   .gnm-badge.sat { background: rgba(var(--bp-sat-rgb),.12);  color: var(--bp-sat); border: 1px solid rgba(var(--bp-sat-rgb),.3); }
   .gnm-text {
-    font-size: 11.5px; color: var(--bp-text2); line-height: 1.55;
+    font-size: var(--bp-text-sm); color: var(--bp-text2); line-height: 1.55;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     overflow: hidden;
     height: 36px; /* #15: fixed 2-line height — prevents card dalgalanma */
@@ -933,19 +881,19 @@
     margin-top: 2px; /* gnm-text already has margin-bottom:9px */
   }
   .gnm-price {
-    font-size: 12px; font-weight: 700; color: var(--bp-text); font-family: var(--bp-font-mono);
+    font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text); font-family: var(--bp-font-mono);
   }
-  .gnm-chg { font-size: 11px; font-weight: 600; }
+  .gnm-chg { font-size: var(--bp-text-xs); font-weight: 600; }
   .gnm-chg.up { color: var(--bp-al); }
   .gnm-chg.dn { color: var(--bp-sat); }
   .gnm-link {
-    font-size: 11px; color: var(--accent); text-decoration: none; font-weight: 600;
+    font-size: var(--bp-text-xs); color: var(--accent); text-decoration: none; font-weight: 600;
   }
   .gnm-link:hover { text-decoration: underline; }
   .gnm-kap-link {
-    font-size: 10px; font-weight: 600; color: var(--bp-text3); text-decoration: none;
+    font-size: var(--bp-text-2xs); font-weight: 600; color: var(--bp-text3); text-decoration: none;
     background: rgba(139,148,158,0.1); border: 1px solid rgba(139,148,158,0.2);
-    border-radius: 4px; padding: 1px 5px; transition: all .15s;
+    border-radius: var(--bp-radius-4); padding: 1px 5px; transition: all .15s;
   }
   .gnm-kap-link:hover {
     color: var(--bp-text); background: rgba(139,148,158,0.2);
@@ -956,8 +904,8 @@
     display: flex; gap: 2px;
   }
   .gnm-tab-btn {
-    font-size: 12px; font-weight: 600; padding: 4px 12px;
-    border: 1px solid transparent; border-radius: 6px;
+    font-size: var(--bp-text-sm); font-weight: 600; padding: 4px 12px;
+    border: 1px solid transparent; border-radius:var(--bp-radius);
     cursor: pointer; transition: all .15s; color: var(--bp-text3);
     background: none; font-family: inherit;
   }
@@ -971,29 +919,29 @@
   .macro-news-list { display: flex; flex-direction: column; gap: 8px; }
   .macro-news-item {
     display: flex; align-items: flex-start; gap: 10px;
-    padding: 9px 12px; border-radius: 8px;
+    padding: 9px 12px; border-radius:var(--bp-radius-md);
     background: var(--bg2); border: 1px solid var(--bp-border);
     text-decoration: none; transition: border-color .15s, background .15s;
   }
   .macro-news-item:hover { border-color: var(--bp-border2); background: #1c2128; }
   .macro-news-src {
-    font-size: 9px; font-weight: 700; color: var(--bp-text3);
+    font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text3);
     text-transform: uppercase; letter-spacing: .5px;
     background: rgba(139,148,158,.1); border: 1px solid rgba(139,148,158,.15);
-    border-radius: 4px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0;
+    border-radius: var(--bp-radius-4); padding: 1px 5px; white-space: nowrap; flex-shrink: 0;
     margin-top: 2px;
     max-width: 80px; overflow: hidden; text-overflow: ellipsis; /* #15: kompakt rozet */
   }
   .macro-news-title {
-    font-size: 12.5px; color: var(--bp-text); line-height: 1.4; font-weight: 500;
+    font-size: var(--bp-text-base); color: var(--bp-text); line-height: 1.4; font-weight: 500;
     flex: 1;
   }
   .macro-news-time {
-    font-size: 10px; color: var(--bp-text3); white-space: nowrap; flex-shrink: 0;
+    font-size: var(--bp-text-2xs); color: var(--bp-text3); white-space: nowrap; flex-shrink: 0;
     margin-top: 2px;
   }
   .macro-news-empty {
-    font-size: 12px; color: var(--bp-text3); padding: 20px 12px; text-align: center;
+    font-size: var(--bp-text-sm); color: var(--bp-text3); padding: 20px 12px; text-align: center;
   }
 
   /* Skeleton */
@@ -1002,7 +950,7 @@
     100% { background-position:  300% 0; }
   }
   .gnm-sk {
-    min-width: 230px; height: 140px; border-radius: 10px; flex: 0 0 auto;
+    min-width: 230px; height: 140px; border-radius:var(--bp-radius-lg); flex: 0 0 auto;
     background: linear-gradient(90deg, #141416 25%, #1e1e22 50%, #141416 75%);
     background-size: 300% 100%;
     animation: gnm-shimmer 1.5s infinite;
@@ -1012,11 +960,11 @@
   .bilanco-mini-box {
     flex: 0 0 185px; min-width: 170px;
     background: var(--bg2); border: 1px solid var(--bp-border);
-    border-radius: 10px; padding: 12px 13px;
+    border-radius:var(--bp-radius-lg); padding: 12px 13px;
   }
   .bilanco-mini-title {
-    font-size: 11px; font-weight: 700; color: var(--bp-text3);
-    text-transform: uppercase; letter-spacing: .6px; margin-bottom: 9px;
+    font-size: var(--bp-text-xs); font-weight: 700; color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: .6px; margin: 0 0 9px;
   }
   .bilanco-period {
     padding: 7px 0;
@@ -1024,19 +972,19 @@
   }
   .bilanco-period:last-child { border-bottom: none; padding-bottom: 0; }
   .bilanco-period .bp-label {
-    font-size: 12px; font-weight: 700; color: var(--bp-text);
+    font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text);
   }
   .bilanco-period .bp-desc {
-    font-size: 10px; color: var(--bp-text3); margin-top: 2px;
+    font-size: var(--bp-text-2xs); color: var(--bp-text3); margin-top: 2px;
   }
   .bilanco-period .bp-days {
-    font-size: 10px; font-weight: 600; margin-top: 3px;
-    display: inline-block; padding: 1px 6px; border-radius: 10px;
+    font-size: var(--bp-text-2xs); font-weight: 600; margin-top: 3px;
+    display: inline-block; padding: 1px 6px; border-radius:var(--bp-radius-lg);
   }
   .bp-days.active   { background: rgba(0,226,144,.10); color: var(--bp-al); }
   .bp-days.upcoming { background: rgba(var(--bp-brand-rgb),.12); color: var(--bp-brand); }
   .bilanco-mini-link {
-    display: block; text-align: center; font-size: 11px; color: var(--accent);
+    display: block; text-align: center; font-size: var(--bp-text-xs); color: var(--accent);
     text-decoration: none; margin-top: 10px; padding-top: 8px;
     border-top: 1px solid var(--bp-border);
   }
@@ -1052,13 +1000,13 @@
   .stat-card:hover {
     border-color: var(--bp-border2);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    box-shadow: var(--bp-shadow-md);
   }
   .stat-card .stat-num {
     font-family: 'Space Grotesk', monospace, sans-serif;
-    font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.5px;
+    font-size: var(--bp-text-26); font-weight: 700; line-height: 1; letter-spacing: -0.5px;
   }
-  .stat-card .stat-label { font-size: 10px; color: var(--bp-text3); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 500; }
+  .stat-card .stat-label { font-size: var(--bp-text-2xs); color: var(--bp-text3); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 500; }
   .stat-al   .stat-num { color: var(--bp-al); }
   .stat-sat  .stat-num { color: var(--bp-sat); }
   .stat-bekle.stat-num { color: var(--bp-bkl); }
@@ -1076,15 +1024,15 @@
     display: none;
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 10px 14px;
     margin-bottom: 14px;
   }
   .mb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
-  .mb-title { font-size: 11px; font-weight: 600; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; }
-  .mb-sentiment { font-size: 12px; font-weight: 700; }
+  .mb-title { font-size: var(--bp-text-xs); font-weight: 600; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; margin: 0; }
+  .mb-sentiment { font-size: var(--bp-text-sm); font-weight: 700; }
   .mb-bar {
-    display: flex; height: 5px; border-radius: 3px; overflow: hidden; gap: 1px;
+    display: flex; height: 5px; border-radius:var(--bp-radius-sm); overflow: hidden; gap: 1px;
     background: var(--bp-surface2);
   }
   .mb-seg { height: 100%; transition: width .7s cubic-bezier(.4,0,.2,1); }
@@ -1092,7 +1040,7 @@
   .mb-seg-sat { background: var(--bp-sat); border-radius: 0 3px 3px 0; }
   .mb-seg-bkl { background: var(--bp-border2); flex: 1; }
   .mb-legend { display: flex; gap: 16px; margin-top: 7px; }
-  .mb-lg { font-size: 11px; display: flex; align-items: center; gap: 5px; }
+  .mb-lg { font-size: var(--bp-text-xs); display: flex; align-items: center; gap: 5px; }
   .mb-lg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .mb-lg-al  .mb-lg-dot { background: var(--bp-al); }
   .mb-lg-sat .mb-lg-dot { background: var(--bp-sat); }
@@ -1103,15 +1051,27 @@
 
   /* .index-row-card kaldırıldı */
 
+  /* T4.4: Filtre birleştirme — 5 ayrı yüzeyi (preset/temel/gelişmiş/sektör/
+     aktif-filtre) tek görsel kart altında toplayan sarmalayıcı. İçindeki hiçbir
+     eleman/ID/class değişmedi, yalnız ortak konteyner. */
+  .bp-filter-panel {
+    border: 1px solid var(--bp-border); border-radius: var(--bp-radius-lg);
+    background: var(--bp-surface); padding: 14px 14px 2px; margin-bottom: 14px;
+  }
+  .bp-filter-panel .filters,
+  .bp-filter-panel .preset-chips { margin-bottom: 12px; }
+  .bp-filter-panel .sector-filters,
+  .bp-filter-panel .afb { margin-top: 0; }
+
   /* Filters */
   .filters {
     display: flex; gap: 8px; margin-bottom: 14px;
     flex-wrap: wrap; align-items: center;
   }
   .filter-btn {
-    padding: 5px 14px; border-radius: 20px; border: 1px solid var(--bp-border);
+    padding: 5px 14px; border-radius: var(--bp-radius-20); border: 1px solid var(--bp-border);
     background: transparent; color: var(--bp-text2); cursor: pointer;
-    font-size: 12px; font-weight: 500; font-family: inherit; transition: all 0.15s;
+    font-size: var(--bp-text-sm); font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
   .filter-btn:hover { border-color: var(--bp-border2); color: var(--bp-text); }
   .filter-btn.active-all  { background: rgba(var(--bp-brand-rgb),.18); border-color: var(--bp-brand); color: var(--bp-brand); }
@@ -1129,11 +1089,11 @@
     display: flex; gap: 6px; margin-bottom: 14px;
     flex-wrap: wrap; align-items: center;
   }
-  .sector-lbl { font-size: 10px; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; font-weight: 500; }
+  .sector-lbl { font-size: var(--bp-text-2xs); color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; font-weight: 500; }
   .sector-btn {
-    padding: 4px 11px; border-radius: 14px; border: 1px solid var(--bp-border);
+    padding: 4px 11px; border-radius: var(--bp-radius-14); border: 1px solid var(--bp-border);
     background: transparent; color: var(--bp-text3); cursor: pointer;
-    font-size: 11px; font-weight: 500; font-family: inherit; transition: all 0.15s;
+    font-size: var(--bp-text-xs); font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
   .sector-btn:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
   .sector-btn.active-sector { background: rgba(var(--bp-brand-rgb),.14); border-color: rgba(var(--bp-brand-rgb),.45); color: var(--bp-brand); }
@@ -1143,7 +1103,7 @@
     display: flex; align-items: center; gap: 10px;
     background: rgba(var(--bp-volume-rgb),0.06);
     border: 1px solid rgba(var(--bp-volume-rgb),0.20);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 8px 12px;
     margin-bottom: 12px;
     flex-wrap: wrap;
@@ -1154,7 +1114,7 @@
     to { opacity: 1; transform: translateY(0); }
   }
   .afb-label {
-    font-size: 11px; color: var(--bp-text3);
+    font-size: var(--bp-text-xs); color: var(--bp-text3);
     text-transform: uppercase; letter-spacing: 0.7px;
     font-weight: 700;
     flex-shrink: 0;
@@ -1168,9 +1128,9 @@
     background: rgba(var(--bp-brand-rgb),0.10);
     border: 1px solid rgba(var(--bp-brand-rgb),0.30);
     color: var(--bp-text);
-    border-radius: 14px;
+    border-radius: var(--bp-radius-14);
     padding: 3px 4px 3px 10px;
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     font-weight: 600;
     line-height: 1.3;
     transition: background .15s, border-color .15s;
@@ -1199,10 +1159,10 @@
     background: transparent;
     border: 1px solid rgba(var(--bp-sat-rgb),0.40);
     color: var(--bp-sat);
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     font-weight: 700;
     padding: 5px 12px;
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.4px;
@@ -1215,15 +1175,15 @@
   }
   @media (max-width: 720px) {
     .afb { padding: 7px 10px; gap: 8px; }
-    .afb-label { font-size: 10px; }
-    .afb-chip { font-size: 11px; padding: 2px 3px 2px 8px; }
-    .afb-clear-all { font-size: 10px; padding: 4px 9px; }
+    .afb-label { font-size: var(--bp-text-2xs); }
+    .afb-chip { font-size: var(--bp-text-xs); padding: 2px 3px 2px 8px; }
+    .afb-clear-all { font-size: var(--bp-text-2xs); padding: 4px 9px; }
   }
 
   .search-wrap { position: relative; margin-left: auto; }
   .search-input {
     background: var(--bp-bg); border: 1px solid var(--bp-border); color: var(--bp-text);
-    padding: 6px 12px; border-radius: var(--bp-radius-sm); font-size: 13px; font-family: inherit;
+    padding: 6px 12px; border-radius: var(--bp-radius-sm); font-size: var(--bp-text-base); font-family: inherit;
     width: 170px; outline: none; transition: border-color .15s;
   }
   .search-input:focus { border-color: var(--bp-brand); width: 210px; }
@@ -1233,43 +1193,43 @@
   .search-ac {
     display: none; position: absolute; top: calc(100% + 5px); right: 0;
     background: var(--bp-surface); border: 1px solid var(--bp-border2);
-    border-radius: 10px; min-width: 270px; padding: 4px;
-    z-index: 400; box-shadow: 0 12px 32px rgba(0,0,0,.6);
+    border-radius:var(--bp-radius-lg); min-width: 270px; padding: 4px;
+    z-index: var(--bp-z-search-dropdown); box-shadow: var(--bp-shadow-dropdown);
     max-height: 330px; overflow-y: auto;
   }
   .search-ac.open { display: block; animation: ddIn .13s ease; }
   .sac-item {
     display: flex; align-items: center; gap: 10px;
-    padding: 7px 10px; border-radius: 6px; cursor: pointer;
+    padding: 7px 10px; border-radius:var(--bp-radius); cursor: pointer;
     transition: background .1s; text-decoration: none;
   }
   .sac-item:hover, .sac-item.sac-sel { background: var(--bp-surface2); }
-  .sac-ticker { font-size: 13px; font-weight: 700; color: var(--bp-text); min-width: 60px; font-variant-numeric: tabular-nums; }
-  .sac-name { font-size: 12px; color: var(--bp-text3); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sac-sig { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
-  .sac-empty { padding: 10px 12px; font-size: 13px; color: var(--bp-text3); text-align: center; }
+  .sac-ticker { font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text); min-width: 60px; font-variant-numeric: tabular-nums; }
+  .sac-name { font-size: var(--bp-text-sm); color: var(--bp-text3); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sac-sig { font-size: var(--bp-text-2xs); font-weight: 600; padding: 2px 8px; border-radius:var(--bp-radius-lg); white-space: nowrap; flex-shrink: 0; }
+  .sac-empty { padding: 10px 12px; font-size: var(--bp-text-base); color: var(--bp-text3); text-align: center; }
 
   /* Gelişmiş Filtre Paneli */
   .adv-toggle {
-    padding: 5px 12px; border-radius: 20px; border: 1px solid var(--bp-border);
+    padding: 5px 12px; border-radius: var(--bp-radius-20); border: 1px solid var(--bp-border);
     background: transparent; color: var(--bp-text3); cursor: pointer;
-    font-size: 12px; font-weight: 500; font-family: inherit; transition: all 0.15s;
+    font-size: var(--bp-text-sm); font-weight: 500; font-family: inherit; transition: all 0.15s;
     display: flex; align-items: center; gap: 5px;
   }
   .adv-toggle:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
   .adv-toggle.active { background: rgba(var(--bp-brand-rgb),.14); border-color: rgba(var(--bp-brand-rgb),.45); color: var(--bp-brand); }
   .adv-panel {
-    background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius: 10px;
+    background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
     padding: 14px 16px; margin-bottom: 14px; display: none; flex-wrap: wrap; gap: 14px;
   }
   .adv-panel.open { display: flex; }
   .adv-group { display: flex; flex-direction: column; gap: 6px; min-width: 160px; flex: 1; }
-  .adv-group-label { font-size: 10px; font-weight: 600; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; }
+  .adv-group-label { font-size: var(--bp-text-2xs); font-weight: 600; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; }
   .adv-chips { display: flex; gap: 5px; flex-wrap: wrap; }
   .adv-chip {
-    padding: 3px 10px; border-radius: 12px; border: 1px solid var(--bp-border);
+    padding: 3px 10px; border-radius:var(--bp-radius-xl); border: 1px solid var(--bp-border);
     background: transparent; color: var(--bp-text3); cursor: pointer;
-    font-size: 11px; font-weight: 500; font-family: inherit; transition: all 0.15s;
+    font-size: var(--bp-text-xs); font-weight: 500; font-family: inherit; transition: all 0.15s;
   }
   .adv-chip:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
   /* SPEC-009: seçili chip tek net stil — dolu accent, koyu metin (belirsizlik fix).
@@ -1282,7 +1242,7 @@
   .adv-active-badge {
     display: inline-flex; align-items: center; justify-content: center;
     background: var(--bp-brand); color: #fff; border-radius: 50%;
-    width: 16px; height: 16px; font-size: 10px; font-weight: 700;
+    width: 16px; height: 16px; font-size: var(--bp-text-2xs); font-weight: 700;
   }
 
   /* Table */
@@ -1293,14 +1253,21 @@
   table { width: 100%; border-collapse: collapse; }
   thead th {
     background: var(--bp-surface2); padding: 10px 16px; text-align: left;
-    font-size: 10px; font-weight: 600; color: var(--bp-text3);
+    font-size: var(--bp-text-2xs); font-weight: 600; color: var(--bp-text3);
     text-transform: uppercase; letter-spacing: 0.7px;
     border-bottom: 1px solid var(--bp-border); cursor: pointer;
     user-select: none; white-space: nowrap; font-family: inherit;
   }
   thead th:hover { color: var(--bp-text2); }
-  thead th.sorted-asc::after  { content: " ↑"; }
-  thead th.sorted-desc::after { content: " ↓"; }
+  thead th.th-sortable { padding: 0; }
+  .th-sort-btn {
+    all: unset; box-sizing: border-box; display: block; width: 100%;
+    padding: 10px 16px;
+    font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit;
+    cursor: pointer; text-align: inherit; white-space: nowrap;
+  }
+  .th-sort-btn.sorted-asc::after  { content: " ↑"; }
+  .th-sort-btn.sorted-desc::after { content: " ↓"; }
 
   tbody tr { border-bottom: 1px solid var(--bp-border); transition: background 0.15s, box-shadow 0.15s; }
   tbody tr:last-child { border-bottom: none; }
@@ -1310,17 +1277,17 @@
   }
   td { padding: 10px 16px; white-space: nowrap; }
 
-  .ticker { font-weight: 700; font-size: 13px; color: var(--bp-text); letter-spacing: 0.1px; }
+  .ticker { font-weight: 700; font-size: var(--bp-text-base); color: var(--bp-text); letter-spacing: 0.1px; }
   .price  { font-weight: 600; color: var(--bp-text); font-variant-numeric: tabular-nums; }
-  .change-pct { font-weight: 500; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .change-pct { font-weight: 500; font-variant-numeric: tabular-nums; font-size: var(--bp-text-base); }
   .change-pct.pos { color: var(--bp-al); }
   .change-pct.neg { color: var(--bp-sat); }
   .change-pct.neu { color: #909097; }
 
   .signal-badge {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+    padding: 4px 10px; border-radius: var(--bp-radius-20);
+    font-size: var(--bp-text-xs); font-weight: 700; letter-spacing: 0.4px;
     white-space: nowrap;
   }
   .signal-AL   {
@@ -1335,44 +1302,44 @@
   .signal-badge.bull    { background: var(--bp-al-bg);  color: var(--bp-al);  border: 1px solid var(--bp-al-bd);  box-shadow: 0 0 8px rgba(var(--bp-al-rgb),.12), inset 0 0 8px rgba(var(--bp-al-rgb),.04); }
   .signal-badge.bear    { background: var(--bp-sat-bg); color: var(--bp-sat); border: 1px solid var(--bp-sat-bd); box-shadow: 0 0 6px rgba(var(--bp-sat-rgb),.18); }
   .signal-badge.neutral { background: var(--bp-bkl-bg); color: var(--bp-bkl); border: 1px solid var(--bp-bkl-bd); }
-  .sig-neg-day { font-size: 10px; color: #f85149; opacity: .8; white-space: nowrap; font-weight: 600; }
+  .sig-neg-day { font-size: var(--bp-text-2xs); color: #f85149; opacity: .8; white-space: nowrap; font-weight: 600; }
 
   /* ── Signal Tooltip ─────────────────────────────────── */
   .sig-tip {
-    display: none; position: fixed; z-index: 9000;
-    background: #1c2128; border: 1px solid #30363d; border-radius: 10px;
+    display: none; position: fixed; z-index: var(--bp-z-tooltip);
+    background: #1c2128; border: 1px solid #30363d; border-radius:var(--bp-radius-lg);
     padding: 11px 14px; min-width: 200px; max-width: 252px;
-    box-shadow: 0 10px 32px rgba(0,0,0,.68);
-    pointer-events: none; font-size: 12px; line-height: 1.55; color: #e6edf3;
+    box-shadow: var(--bp-shadow-dropdown);
+    pointer-events: none; font-size: var(--bp-text-sm); line-height: 1.55; color: #e6edf3;
   }
   .sig-tip.open { display: block; animation: ddIn .12s ease; }
-  .sig-tip-head { font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .sig-tip-head { font-weight: 700; font-size: var(--bp-text-base); display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
   .sig-tip-sep  { border: none; border-top: 1px solid #21262d; margin: 7px 0; }
   .sig-tip-row  { display: flex; align-items: center; gap: 7px; padding: 1px 0; }
-  .sig-tip-ck   { font-size: 11px; font-weight: 700; min-width: 13px; }
+  .sig-tip-ck   { font-size: var(--bp-text-xs); font-weight: 700; min-width: 13px; }
   .sig-tip-ck.ok { color: #00e290; } .sig-tip-ck.no { color: #30363d; }
-  .sig-tip-lbl  { color: #c9d1d9; font-size: 12px; }
-  .sig-tip-footer { font-size: 11px; color: #8b949e; margin-top: 7px; display: flex; flex-direction: column; gap: 2px; }
+  .sig-tip-lbl  { color: #c9d1d9; font-size: var(--bp-text-sm); }
+  .sig-tip-footer { font-size: var(--bp-text-xs); color: #8b949e; margin-top: 7px; display: flex; flex-direction: column; gap: 2px; }
 
   .sig-price {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     font-variant-numeric: tabular-nums;
     color: #8b949e;
   }
   .sl-val {
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
     color: #f85149;
   }
   .sl-pct {
-    font-size: 10px;
+    font-size: var(--bp-text-2xs);
     color: #8b949e;
     margin-left: 3px;
   }
 
   .indicators { display: flex; gap: 4px; flex-wrap: wrap; }
-  .ind-badge  { padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .ind-badge  { padding: 2px 7px; border-radius: var(--bp-radius-4); font-size: var(--bp-text-2xs); font-weight: 600; }
   .ind-bull   { background: var(--bp-al-bg);  color: var(--bp-al); }
   .ind-bear   { background: var(--bp-sat-bg); color: var(--bp-sat); }
   .ind-neutral{ background: var(--bp-bkl-bg); color: var(--bp-bkl); }
@@ -1390,7 +1357,7 @@
     border: 3px solid var(--bp-border2); border-top-color: var(--bp-brand);
     border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;
   }
-  .no-data { text-align: center; padding: 40px; color: var(--bp-text2); font-size: 13px; }
+  .no-data { text-align: center; padding: 40px; color: var(--bp-text2); font-size: var(--bp-text-base); }
 
   /* Skeleton loader */
   @keyframes shimmer {
@@ -1401,7 +1368,7 @@
     padding: 12px 16px;
   }
   .skeleton-cell {
-    height: 14px; border-radius: 4px;
+    height: 14px; border-radius: var(--bp-radius-4);
     background: linear-gradient(90deg, var(--bp-surface2) 25%, var(--bp-surface3) 50%, var(--bp-surface2) 75%);
     background-size: 800px 100%;
     animation: shimmer 1.4s infinite linear;
@@ -1409,14 +1376,14 @@
   .sk-ticker  { width: 60px; }
   .sk-price   { width: 80px; }
   .sk-chg     { width: 55px; }
-  .sk-signal  { width: 70px; height: 22px; border-radius: 11px; }
+  .sk-signal  { width: 70px; height: 22px; border-radius: var(--bp-radius-11); }
   .sk-date    { width: 75px; }
   .sk-wide    { width: 50px; }
   .sk-dots    { width: 40px; }
 
   /* ── Stats bar skeleton + counter reveal ─── */
   .stat-num-sk {
-    display: inline-block; width: 48px; height: 28px; border-radius: 6px;
+    display: inline-block; width: 48px; height: 28px; border-radius:var(--bp-radius);
     background: linear-gradient(90deg, var(--bp-surface2) 25%, var(--bp-surface3) 50%, var(--bp-surface2) 75%);
     background-size: 800px 100%;
     animation: shimmer 1.4s infinite linear;
@@ -1430,7 +1397,7 @@
 
   /* ── Index header skeleton ─── */
   .idx-sk {
-    display: inline-block; height: 20px; border-radius: 4px; vertical-align: middle;
+    display: inline-block; height: 20px; border-radius: var(--bp-radius-4); vertical-align: middle;
     background: linear-gradient(90deg, var(--bp-surface2) 25%, var(--bp-surface3) 50%, var(--bp-surface2) 75%);
     background-size: 800px 100%;
     animation: shimmer 1.4s infinite linear;
@@ -1441,22 +1408,31 @@
   /* ── Tick animasyonu — fiyat + değişim flash ─── */
   @keyframes tickUp   { 0%{background:rgba(var(--bp-al-rgb),.18);color:var(--bp-al)} 100%{background:transparent} }
   @keyframes tickDown { 0%{background:rgba(var(--bp-sat-rgb),.18);color:var(--bp-sat)} 100%{background:transparent} }
-  .tick-up-cell   { animation: tickUp   0.7s ease-out; border-radius: 3px; }
-  .tick-down-cell { animation: tickDown 0.7s ease-out; border-radius: 3px; }
+  .tick-up-cell   { animation: tickUp   0.7s ease-out; border-radius:var(--bp-radius-sm); }
+  .tick-down-cell { animation: tickDown 0.7s ease-out; border-radius:var(--bp-radius-sm); }
 
   /* ── Hero panel skeleton rows ─── */
   .hp-sk-row { display: flex; align-items: center; gap: 7px; padding: 5px 6px; }
-  .hp-sk-bar { width: 3px; height: 22px; border-radius: 2px; flex-shrink: 0; background: var(--bp-surface3); animation: shimmer 1.4s infinite linear; background-size: 200px 100%; }
-  .hp-sk-ticker { width: 44px; height: 12px; border-radius: 3px; }
-  .hp-sk-name   { flex: 1; height: 10px; border-radius: 3px; }
-  .hp-sk-chg    { width: 36px; height: 12px; border-radius: 3px; }
+  .hp-sk-bar { width: 3px; height: 22px; border-radius:var(--bp-radius-xs); flex-shrink: 0; background: var(--bp-surface3); animation: shimmer 1.4s infinite linear; background-size: 200px 100%; }
+  .hp-sk-ticker { width: 44px; height: 12px; border-radius:var(--bp-radius-sm); }
+  .hp-sk-name   { flex: 1; height: 10px; border-radius:var(--bp-radius-sm); }
+  .hp-sk-chg    { width: 36px; height: 12px; border-radius:var(--bp-radius-sm); }
 
   footer {
     text-align: center; padding: 24px; color: var(--bp-text3);
-    font-size: 12px; border-top: 1px solid var(--bp-border); margin-top: 24px;
+    font-size: var(--bp-text-sm); border-top: 1px solid var(--bp-border); margin-top: 24px;
   }
 
   /* ── Dual Endeks Kartları ─────────────────────────── */
+  /* T4.4: Piyasa Nabzı — dual-endeks/stats-bar/market-breadth artık
+     .bp-market-pulse içinde bitişik bir küme; aralarındaki boşluk
+     sıkılaştırıldı ki tek görsel birim gibi okunsun. Kasıtlı: dış
+     çerçeve/arka plan YOK (.endeks-card/.stat-card zaten kendi kart
+     çerçevesini taşıyor — dış çerçeve kutu-içinde-kutu yaratırdı). */
+  .bp-market-pulse { margin-bottom: 14px; }
+  .bp-market-pulse .dual-endeks,
+  .bp-market-pulse .stats-bar { margin-bottom: 8px; }
+
   .dual-endeks {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1466,7 +1442,7 @@
   .endeks-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 14px 16px;
     cursor: pointer;
     transition: border-color .15s, box-shadow .15s;
@@ -1476,12 +1452,12 @@
   .endeks-card.active { border-color: var(--bp-brand); box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb),.10); }
 
   .ec-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .ec-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; }
+  .ec-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-xs); font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: .5px; }
   .ec-spark { width: 80px; height: 32px; flex-shrink: 0; overflow: visible; }
 
   .ec-price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
-  .ec-price { font-family: 'Space Grotesk', monospace, sans-serif; font-size: 20px; font-weight: 700; color: var(--bp-text); font-variant-numeric: tabular-nums; }
-  .ec-chg   { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ec-price { font-family: 'Space Grotesk', monospace, sans-serif; font-size: var(--bp-text-2xl); font-weight: 700; color: var(--bp-text); font-variant-numeric: tabular-nums; }
+  .ec-chg   { font-size: var(--bp-text-base); font-weight: 600; font-variant-numeric: tabular-nums; }
   .ec-chg.pos { color: var(--bp-al); }
   .ec-chg.neg { color: var(--bp-sat); }
   .ec-chg.neu { color: #909097; }
@@ -1490,12 +1466,12 @@
   .ec-inds { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
 
   .index-sl {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     background: rgba(var(--bp-sat-rgb),0.12);
     border: 1px solid rgba(var(--bp-sat-rgb),0.3);
     color: var(--bp-sat);
     padding: 2px 7px;
-    border-radius: 5px;
+    border-radius: var(--bp-radius-5);
     font-variant-numeric: tabular-nums;
   }
 
@@ -1503,7 +1479,7 @@
   .chart-accordion {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     overflow: hidden;
     margin-bottom: 16px;
   }
@@ -1515,7 +1491,7 @@
   }
   .chart-acc-header:hover { background: rgba(255,255,255,.02); }
   .chart-acc-chev {
-    font-size: 11px; color: var(--bp-text3);
+    font-size: var(--bp-text-xs); color: var(--bp-text3);
     transition: transform .2s ease; display: inline-block;
   }
   .chart-acc-chev.open { transform: rotate(180deg); }
@@ -1523,8 +1499,8 @@
   .chart-tabs { display: flex; gap: 4px; }
   .chart-tab {
     background: none; border: 1px solid transparent;
-    color: var(--bp-text3); font-size: 12px; font-weight: 600;
-    padding: 4px 14px; border-radius: 6px; cursor: pointer;
+    color: var(--bp-text3); font-size: var(--bp-text-sm); font-weight: 600;
+    padding: 4px 14px; border-radius:var(--bp-radius); cursor: pointer;
     transition: all .15s; font-family: inherit;
   }
   .chart-tab:hover { background: rgba(255,255,255,.04); color: var(--bp-text); }
@@ -1558,7 +1534,7 @@
 
   .chart-loading {
     display: flex; align-items: center; justify-content: center;
-    height: 258px; color: #8b949e; font-size: 13px; gap: 10px;
+    height: 258px; color: #8b949e; font-size: var(--bp-text-base); gap: 10px;
   }
 
   /* Sağ: öne çıkanlar paneli — 2 kolon yan yana */
@@ -1571,7 +1547,7 @@
   .bp-highlights {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     margin-bottom: 12px;
     padding: 6px 4px;
     min-height: 200px;
@@ -1596,44 +1572,44 @@
     border-left: 1px solid var(--bp-border);
   }
   .hp-title {
-    font-size: 10px; font-weight: 700; color: var(--bp-text3);
-    text-transform: uppercase; letter-spacing: .6px; margin-bottom: 5px;
+    font-size: var(--bp-text-2xs); font-weight: 700; color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: .6px; margin: 0 0 5px;
   }
   .hp-divider { height: 1px; background: var(--bp-border); flex-shrink: 0; }
 
   .hp-row {
     display: flex; align-items: center; gap: 7px;
     padding: 4px 6px; text-decoration: none;
-    border-radius: 5px; transition: background .1s; cursor: pointer;
+    border-radius: var(--bp-radius-5); transition: background .1s; cursor: pointer;
     margin: 0 -6px;
   }
   .hp-row:hover { background: rgba(255,255,255,.04); }
 
   .hp-ticker {
     font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: 12px; font-weight: 700; color: var(--bp-text);
+    font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text);
     width: 52px; flex-shrink: 0;
   }
   /* renk çizgisi — sinyal rengi solda dar şerit */
   .hp-bar {
-    width: 3px; height: 22px; border-radius: 2px; flex-shrink: 0;
+    width: 3px; height: 22px; border-radius:var(--bp-radius-xs); flex-shrink: 0;
   }
   .hp-bar-al  { background: var(--bp-al); }
   .hp-bar-sat { background: var(--bp-sat); }
-  .hp-bar-neu { background: #484f58; }
+  .hp-bar-neu { background: var(--bp-bkl); }
 
   .hp-name {
-    font-size: 10px; color: var(--bp-text3); flex: 1; min-width: 0;
+    font-size: var(--bp-text-2xs); color: var(--bp-text3); flex: 1; min-width: 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .hp-chg {
-    font-size: 12px; font-weight: 700; flex-shrink: 0;
+    font-size: var(--bp-text-sm); font-weight: 700; flex-shrink: 0;
     font-variant-numeric: tabular-nums;
   }
   .hp-chg.pos { color: var(--bp-al); }
   .hp-chg.neg { color: var(--bp-sat); }
   .hp-chg.neu { color: #909097; }
-  .hp-empty { font-size: 11px; color: var(--bp-text3); padding: 4px 2px; }
+  .hp-empty { font-size: var(--bp-text-xs); color: var(--bp-text3); padding: 4px 2px; }
 
   /* Flash */
   @keyframes flashUp   { 0%{background:rgba(var(--bp-al-rgb),.18)} 100%{background:transparent} }
@@ -1641,91 +1617,91 @@
   .flash-up   { animation: flashUp   0.8s ease-out; color: var(--bp-al) !important; }
   .flash-down { animation: flashDown 0.8s ease-out; color: var(--bp-sat) !important; }
 
-  .sig-date   { font-size: 11px; color: #8b949e; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .new-today  { color: #e3b341; font-weight: 700; font-size: 12px; }
+  .sig-date   { font-size: var(--bp-text-xs); color: #8b949e; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .new-today  { color: #e3b341; font-weight: 700; font-size: var(--bp-text-sm); }
   .row-new-signal { background: rgba(var(--bp-gold-rgb),0.04); }
   #tableBody tr:hover { background: rgba(var(--bp-brand-rgb),0.05); }
 
   /* ── Alarm / Watchlist ─── */
-  .alarm-btn { background:none; border:none; cursor:pointer; font-size:14px; padding:2px 4px; opacity:.4; transition:opacity .15s; }
+  .alarm-btn { background:none; border:none; cursor:pointer; font-size:var(--bp-text-md); padding:2px 4px; opacity:.4; transition:opacity .15s; }
   .alarm-btn:hover { opacity:1; }
   .alarm-btn.watching { opacity:1; }
-  .alert-settings-btn { background:none; border:none; cursor:pointer; font-size:12px; padding:2px 3px; opacity:.35; transition:opacity .15s; vertical-align:middle; }
+  .alert-settings-btn { background:none; border:none; cursor:pointer; font-size:var(--bp-text-sm); padding:2px 3px; opacity:.35; transition:opacity .15s; vertical-align:middle; }
   .alert-settings-btn:hover { opacity:1; }
 
   /* ── F4 Alert Settings Modal ─── */
-  .alert-modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:10001; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .18s; }
+  .alert-modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:var(--bp-z-modal-backdrop); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .18s; }
   .alert-modal-backdrop.visible { opacity:1; pointer-events:auto; }
-  .alert-modal { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:14px; padding:24px 22px 18px; width:340px; max-width:96vw; position:relative; }
-  .alert-modal-title { font-size:16px; font-weight:700; margin-bottom:14px; color:var(--bp-text); }
+  .alert-modal { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-14); padding:24px 22px 18px; width:340px; max-width:96vw; position:relative; }
+  .alert-modal-title { font-size:var(--bp-text-lg); font-weight:700; margin:0 0 14px; color:var(--bp-text); }
   .alert-modal-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-  .alert-modal-row label { flex:1; font-size:13px; color:#8b949e; }
-  .alert-modal-row input[type=number] { width:72px; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#e6edf3; padding:5px 8px; font-size:13px; }
+  .alert-modal-row label { flex:1; font-size:var(--bp-text-base); color:#8b949e; }
+  .alert-modal-row input[type=number] { width:72px; background:#0d1117; border:1px solid #30363d; border-radius:var(--bp-radius); color:#e6edf3; padding:5px 8px; font-size:var(--bp-text-base); }
   .alert-modal-row input[type=number]:focus { outline:none; border-color:#ffc850; }
   .alert-modal-row input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
-  .alert-modal-save { width:100%; margin-top:14px; padding:9px 0; background:#ffc850; color:#0e0e12; border:none; border-radius:7px; font-weight:700; font-size:14px; cursor:pointer; }
+  .alert-modal-save { width:100%; margin-top:14px; padding:9px 0; background:#ffc850; color:#0e0e12; border:none; border-radius:var(--bp-radius-7); font-weight:700; font-size:var(--bp-text-md); cursor:pointer; }
   .alert-modal-save:hover { background:#ffd875; }
-  .alert-modal-delete { width:100%; margin-top:6px; padding:7px 0; background:none; color:#ef4444; border:1px solid rgba(239,68,68,.4); border-radius:7px; font-size:13px; cursor:pointer; }
+  .alert-modal-delete { width:100%; margin-top:6px; padding:7px 0; background:none; color:#ef4444; border:1px solid rgba(239,68,68,.4); border-radius:var(--bp-radius-7); font-size:var(--bp-text-base); cursor:pointer; }
   .alert-modal-delete:hover { background:rgba(239,68,68,.08); }
-  .alert-modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#8b949e; font-size:18px; cursor:pointer; }
-  .alert-modal-login-notice { font-size:12.5px; color:#ffc850; background:rgba(255,200,80,.08); border:1px solid rgba(255,200,80,.25); border-radius:7px; padding:9px 12px; margin-bottom:12px; }
-  .alert-modal-status { font-size:12px; color:#22c55e; margin-top:8px; text-align:center; min-height:18px; }
+  .alert-modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#8b949e; font-size:var(--bp-text-xl); cursor:pointer; }
+  .alert-modal-login-notice { font-size:var(--bp-text-base); color:#ffc850; background:rgba(255,200,80,.08); border:1px solid rgba(255,200,80,.25); border-radius:var(--bp-radius-7); padding:9px 12px; margin-bottom:12px; }
+  .alert-modal-status { font-size:var(--bp-text-sm); color:#22c55e; margin-top:8px; text-align:center; min-height:18px; }
   .alarm-panel {
-    position:fixed; bottom:24px; right:24px; z-index:999;
-    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:12px;
+    position:fixed; bottom:24px; right:24px; z-index:var(--bp-z-alarm-panel);
+    background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-xl);
     width:340px; max-height:480px; overflow:hidden;
-    box-shadow:0 8px 32px rgba(0,0,0,.6);
+    box-shadow:var(--bp-shadow-dropdown);
     display:flex; flex-direction:column;
     transition: all .2s;
   }
   .alarm-panel.hidden { display:none; }
   .ap-header { padding:12px 14px; border-bottom:1px solid var(--bp-border); display:flex; justify-content:space-between; align-items:center; }
-  .ap-title  { font-size:13px; font-weight:700; color:var(--bp-text); }
-  .ap-close  { background:none; border:none; color:var(--bp-text2); cursor:pointer; font-size:18px; line-height:1; }
+  .ap-title  { font-size:var(--bp-text-base); font-weight:700; color:var(--bp-text); margin:0; }
+  .ap-close  { background:none; border:none; color:var(--bp-text2); cursor:pointer; font-size:var(--bp-text-xl); line-height:1; }
   .ap-body   { overflow-y:auto; flex:1; padding:6px; }
-  .ap-item   { padding:8px 6px 10px; border-radius:8px; font-size:13px; border-bottom:1px solid var(--bp-border); }
+  .ap-item   { padding:8px 6px 10px; border-radius:var(--bp-radius-md); font-size:var(--bp-text-base); border-bottom:1px solid var(--bp-border); }
   .ap-item:last-child { border-bottom:none; }
   .ap-item:hover { background:var(--bp-surface2); }
   .ap-item-top   { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
   .ap-ticker { font-weight:700; color:var(--bp-text); flex:1; }
-  .ap-price  { font-size:12px; color:var(--bp-text2); font-weight:500; }
-  .ap-sig    { font-size:11px; font-weight:600; padding:2px 6px; border-radius:10px; }
+  .ap-price  { font-size:var(--bp-text-sm); color:var(--bp-text2); font-weight:500; }
+  .ap-sig    { font-size:var(--bp-text-xs); font-weight:600; padding:2px 6px; border-radius:var(--bp-radius-lg); }
   .ap-sig.AL   { background:var(--bp-al-bg);  color:var(--bp-al); }
   .ap-sig.SAT  { background:var(--bp-sat-bg); color:var(--bp-sat); }
   .ap-sig.BEKLE{ background:var(--bp-bkl-bg); color:var(--bp-bkl); }
-  .ap-remove { background:none; border:none; color:var(--bp-text3); cursor:pointer; font-size:12px; }
+  .ap-remove { background:none; border:none; color:var(--bp-text3); cursor:pointer; font-size:var(--bp-text-sm); }
   .ap-remove:hover { color:var(--bp-sat); }
-  .ap-empty  { color:var(--bp-text3); font-size:12px; text-align:center; padding:20px; }
-  .ap-footer { padding:8px 14px; border-top:1px solid var(--bp-border); font-size:11px; color:var(--bp-text3); }
+  .ap-empty  { color:var(--bp-text3); font-size:var(--bp-text-sm); text-align:center; padding:20px; }
+  .ap-footer { padding:8px 14px; border-top:1px solid var(--bp-border); font-size:var(--bp-text-xs); color:var(--bp-text3); }
   /* Fiyat alarmı satırı */
   .ap-price-alarms { display:flex; flex-direction:column; gap:4px; }
   .ap-pa-row { display:flex; align-items:center; gap:5px; }
-  .ap-pa-lbl { font-size:10px; color:var(--bp-text3); width:52px; flex-shrink:0; font-weight:500; }
+  .ap-pa-lbl { font-size:var(--bp-text-2xs); color:var(--bp-text3); width:52px; flex-shrink:0; font-weight:500; }
   .ap-pa-input {
     flex:1; background:var(--bp-bg); border:1px solid var(--bp-border); color:var(--bp-text);
-    padding:3px 7px; border-radius:5px; font-size:12px; font-family:inherit; outline:none;
+    padding:3px 7px; border-radius:var(--bp-radius-5); font-size:var(--bp-text-sm); font-family:inherit; outline:none;
     transition:border-color .15s;
   }
   .ap-pa-input:focus { border-color:var(--bp-brand); }
   .ap-pa-input.has-alarm { border-color:#e3b341; color:#e3b341; }
   .ap-pa-set {
     background:none; border:1px solid var(--bp-border); color:var(--bp-text3); cursor:pointer;
-    font-size:10px; border-radius:4px; padding:2px 6px; font-family:inherit;
+    font-size:var(--bp-text-2xs); border-radius:var(--bp-radius-4); padding:2px 6px; font-family:inherit;
     transition:all .15s; white-space:nowrap;
   }
   .ap-pa-set:hover { border-color:#e3b341; color:#e3b341; }
   .ap-pa-clear {
     background:none; border:none; color:#e3b341; cursor:pointer;
-    font-size:12px; padding:0 2px; line-height:1;
+    font-size:var(--bp-text-sm); padding:0 2px; line-height:1;
   }
   .ap-pa-clear:hover { color:var(--bp-sat); }
   @media(max-width:400px) { .alarm-panel { width:calc(100vw - 16px); right:8px; } }
   /* ── Sticky subscription toast ── */
   .sub-toast {
     position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px);
-    z-index:997; width:min(420px, calc(100vw - 32px));
+    z-index:var(--bp-z-sub-toast); width:min(420px, calc(100vw - 32px));
     background:linear-gradient(135deg,var(--bp-surface),var(--bp-surface2));
-    border:1px solid rgba(var(--bp-brand-rgb),.35); border-radius:14px;
+    border:1px solid rgba(var(--bp-brand-rgb),.35); border-radius:var(--bp-radius-14);
     padding:16px 18px; box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(var(--bp-brand-rgb),.1);
     opacity:0; pointer-events:none;
     transition:opacity .35s ease,transform .35s ease;
@@ -1735,22 +1711,22 @@
   }
   .sub-toast-close {
     position:absolute; top:10px; right:12px; background:none; border:none;
-    color:var(--bp-text3); font-size:18px; cursor:pointer; line-height:1; padding:2px 4px;
+    color:var(--bp-text3); font-size:var(--bp-text-xl); cursor:pointer; line-height:1; padding:2px 4px;
     transition:color .15s;
   }
   .sub-toast-close:hover { color:var(--bp-text2); }
-  .sub-toast-title { font-size:13px; font-weight:700; color:var(--bp-text); margin-bottom:3px; }
-  .sub-toast-sub   { font-size:11px; color:var(--bp-text3); margin-bottom:12px; line-height:1.5; }
+  .sub-toast-title { font-size:var(--bp-text-base); font-weight:700; color:var(--bp-text); margin:0 0 3px; }
+  .sub-toast-sub   { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-bottom:12px; line-height:1.5; }
   .sub-toast-row   { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
   .sub-toast-input {
     width:100%; background:var(--bp-surface2); border:1px solid var(--bp-border); color:var(--bp-text);
-    padding:9px 12px; border-radius:7px; font-size:13px; outline:none;
+    padding:9px 12px; border-radius:var(--bp-radius-7); font-size:var(--bp-text-base); outline:none;
     font-family:inherit; transition:border-color .15s; box-sizing:border-box;
   }
   .sub-toast-input:focus { border-color:var(--bp-brand); }
   .sub-toast-btn {
-    background:var(--bp-brand); color:var(--bp-bg); border:none; padding:9px 16px; border-radius:7px;
-    font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap;
+    background:var(--bp-brand); color:var(--bp-bg); border:none; padding:9px 16px; border-radius:var(--bp-radius-7);
+    font-size:var(--bp-text-base); font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap;
     transition:background .15s; margin-top:2px;
   }
   .sub-toast-btn:hover { background:#cdd5ff; }
@@ -1763,17 +1739,17 @@
   .sub-toast-btn-ghost:hover { background:rgba(var(--bp-brand-rgb),0.08); }
   @media (max-width:380px) { .sub-toast-btnrow { flex-direction:column; } }
   .sub-toast-benefits { display:flex; gap:14px; margin-bottom:10px; flex-wrap:wrap; }
-  .sub-toast-benefit  { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--bp-text2); }
+  .sub-toast-benefit  { display:flex; align-items:center; gap:5px; font-size:var(--bp-text-xs); color:var(--bp-text2); }
 
   .alarm-fab {
-    position:fixed; bottom:24px; right:20px; z-index:998;
+    position:fixed; bottom:24px; right:20px; z-index:var(--bp-z-alarm-fab);
     background: rgba(var(--bp-al-rgb),0.14);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(var(--bp-al-rgb),0.45);
-    border-radius: 14px;
+    border-radius: var(--bp-radius-14);
     width:52px; height:52px;
-    font-size:22px; cursor:pointer;
+    font-size:var(--bp-text-22); cursor:pointer;
     box-shadow: 0 0 18px rgba(var(--bp-al-rgb),0.22), 0 4px 20px rgba(0,0,0,0.5);
     display:flex; align-items:center; justify-content:center;
     transition: all .2s; color:var(--bp-al);
@@ -1783,7 +1759,7 @@
   .alarm-fab:active { transform: scale(0.94); }
   .alarm-fab .fab-badge {
     position:absolute; top:-4px; right:-4px; background:var(--bp-sat);
-    color:#fff; font-size:10px; font-weight:700; border-radius:50%;
+    color:#fff; font-size:var(--bp-text-2xs); font-weight:700; border-radius:50%;
     width:18px; height:18px; display:flex; align-items:center; justify-content:center;
     display:none;
   }
@@ -1798,7 +1774,7 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(var(--bp-border-rgb),0.75);
-    border-radius: 8px; padding:13px 14px;
+    border-radius:var(--bp-radius-md); padding:13px 14px;
     cursor:pointer; position: relative;
     transition: border-color .18s, transform .12s, box-shadow .18s;
     text-decoration:none; display:block;
@@ -1817,7 +1793,7 @@
   .mc-bell {
     background: rgba(255,255,255,0.04);
     border: 1px solid var(--bp-border);
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     width: 44px; height: 44px;
     display: inline-flex; align-items: center; justify-content: center;
     color: var(--bp-text3); cursor: pointer;
@@ -1835,11 +1811,11 @@
   .mc-lft { min-width:0; }
   .mc-rgt { text-align:right; flex-shrink:0; }
   .mc-ticker {
-    font-size:17px; font-weight:800; color: var(--bp-text); line-height:1.2;
+    font-size:var(--bp-text-17); font-weight:800; color: var(--bp-text); line-height:1.2;
     font-family: 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.2px;
   }
-  .mc-sector { font-size:10px; color: var(--bp-text3); margin-top:2px; text-transform: uppercase; letter-spacing: 0.4px; font-family: 'Space Grotesk', sans-serif; }
-  .mc-price  { font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; color: var(--bp-text); line-height:1.3; font-family: 'Space Grotesk', monospace, sans-serif; }
+  .mc-sector { font-size:var(--bp-text-2xs); color: var(--bp-text3); margin-top:2px; text-transform: uppercase; letter-spacing: 0.4px; font-family: 'Space Grotesk', sans-serif; }
+  .mc-price  { font-size:var(--bp-text-17); font-weight:700; font-variant-numeric:tabular-nums; color: var(--bp-text); line-height:1.3; font-family: 'Space Grotesk', monospace, sans-serif; }
 
   /* Data strip — GİRİŞ / SL / DÖNEM */
   .mc-strip {
@@ -1849,24 +1825,24 @@
   .mc-cell {
     background: rgba(var(--bp-surface3-rgb),0.6);
     border: 1px solid rgba(var(--bp-border-rgb),0.6);
-    border-radius: 4px; padding: 5px 7px;
+    border-radius: var(--bp-radius-4); padding: 5px 7px;
   }
   .mc-cell-lbl {
-    font-size: 9px; font-weight: 600; color: var(--bp-text3);
+    font-size: var(--bp-text-sm); font-weight: 600; color: var(--bp-text3);
     text-transform: uppercase; letter-spacing: 0.5px;
     font-family: 'Space Grotesk', sans-serif;
     margin-bottom: 2px;
   }
   .mc-cell-val {
-    font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
+    font-size: var(--bp-text-base); font-weight: 600; font-variant-numeric: tabular-nums;
     font-family: 'Space Grotesk', monospace, sans-serif;
   }
 
   .mc-row2   { display:flex; align-items:center; justify-content:space-between; margin-top:9px; padding-top:8px; border-top:1px solid rgba(var(--bp-border-rgb),0.6); }
-  .mc-entry  { font-size:11px; color: var(--bp-text3); }
+  .mc-entry  { font-size:var(--bp-text-xs); color: var(--bp-text3); }
 
   /* Refresh label */
-  .refresh-label { font-size: 12px; }
+  .refresh-label { font-size: var(--bp-text-sm); }
 
   /* Responsive */
   body { overflow-x: hidden; }
@@ -1875,12 +1851,12 @@
     header { padding: 0 14px; height: 56px; }
     .header-nav { display: none; }
     .logo-sub { display: none; }
-    .logo-name { font-size: 15px; }
+    .logo-name { font-size: var(--bp-text-15); }
     .refresh-label { display: none; }
     /* Dual endeks kartları — mobilde yığılmış */
     .dual-endeks { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
     .endeks-card { padding: 10px 12px; }
-    .ec-price { font-size: 16px; }
+    .ec-price { font-size: var(--bp-text-lg); }
     .ec-spark { width: 60px; height: 26px; }
     .ec-inds { display: none; }
     /* Accordion body — mobilde dikey */
@@ -1897,7 +1873,7 @@
     /* Stats bar → 2×2 grid (was cramped 4-card row) */
     .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .stat-card { padding: 12px 14px; min-width: unset; }
-    .stat-card .stat-num { font-size: 22px; }
+    .stat-card .stat-num { font-size: var(--bp-text-22); }
     td { padding: 8px 10px; }
     .indicators { display: none; }
     th.hide-mobile, td.hide-mobile { display: none; }
@@ -1936,7 +1912,7 @@
   }
 }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- SEO: visually-hidden h1 — required by search engines; logo already communicates brand visually -->
 <h1 style="position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri</h1>
@@ -1978,10 +1954,6 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <span>Tarama</span>
   </a>
-  <a href="/bilanco-takvimi" data-route="/bilanco-takvimi" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    <span>Bilanço</span>
-  </a>
   <a href="/sektor-harita" data-route="/sektor-harita" class="bp-nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
     <span>Sektörler</span>
@@ -2000,17 +1972,20 @@
       <svg class="bp-nav-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div class="bp-nav-more-menu">
-      <a href="/portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
-      <a href="/ozet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
-      <a href="/karsilastir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
-      <a href="/hisseler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
-      <a href="/gucu-yuksek"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Güçlü Trend</a>
-      <div class="bp-nav-sep"></div>
+      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">Piyasalar</div>
       <a href="/kripto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>Kripto</a>
       <a href="/emtialar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8"/></svg>Emtialar</a>
       <a href="/abd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>ABD</a>
-      <a href="/gundem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
       <div class="bp-nav-sep"></div>
+      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">Araçlar</div>
+      <a href="/portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
+      <a href="/karsilastir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
+      <a href="/hisseler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
+      <a href="/bilanco-takvimi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bilanço</a>
+      <div class="bp-nav-sep"></div>
+      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">İçerik</div>
+      <a href="/ozet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
+      <a href="/gundem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
       <a href="/metodoloji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Metodoloji</a>
       <a href="/hakkinda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Hakkında</a>
       <a href="/iletisim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>İletişim</a>
@@ -2020,14 +1995,14 @@
 
   <!-- Right actions injected by bp-search.js (header-right uniform) -->
   <!-- CPO-984: WS frontend tam kaldırıldı (icon + connection JS). Backend WS kanalı aktif kalıyor (_ws_broadcast, /ws/prices route). -->
-  <button id="header-push-bell" onclick="togglePushSubscription()" aria-label="Push bildirimleri" title="Sinyal bildirimi aç/kapat">🔔</button>
+  <button id="header-push-bell" onclick="togglePushSubscription()" aria-label="Push bildirimleri" title="Sinyal bildirimi aç/kapat"><span aria-hidden="true">🔔</span></button>
   <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </button>
 </header>
 
 <!-- Makro Ticker Bandı -->
-<div class="macro-bar" id="macroBar">
+<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button>
   <div class="macro-track" id="macroTrack">
     <span class="macro-item"><span class="macro-label">Yükleniyor…</span></span>
   </div>
@@ -2038,44 +2013,7 @@
 
 {% include '_stale_banner.html' %}
 
-<!-- SPEC-012 V3a L4 — Onboarding banner (Öğrenme Modu CTA, dismissible localStorage) -->
-<div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.10),rgba(29,78,216,.05));border:1px solid rgba(var(--bp-brand-rgb),.32);border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:13px;color:var(--bp-text);line-height:1.55;align-items:center;gap:10px;flex-wrap:wrap">
-  <span style="font-size:18px;flex-shrink:0">📚</span>
-  <span style="flex:1;min-width:200px">
-    <strong>İlk kez mi?</strong> <strong style="color:var(--bp-brand)">Öğrenme Modu</strong>'nu açın —
-    finansal terimlerin yanında <code style="background:rgba(var(--bp-brand-rgb),.15);padding:1px 5px;border-radius:3px;color:var(--bp-brand)">?</code> görünür, tıklayınca anlamı açılır.
-  </span>
-  <button type="button" id="bpOnboardOpen"
-          style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">
-    Öğrenme Modu'nu Aç
-  </button>
-  <button type="button" id="bpOnboardDismiss" aria-label="Kapat"
-          style="background:transparent;border:none;color:var(--bp-text3);cursor:pointer;font-size:18px;padding:2px 8px;line-height:1;flex-shrink:0">×</button>
-</div>
-<script>
-(function(){
-  try {
-    var dismissed = localStorage.getItem('bp_onboard_dismissed') === '1';
-    var alreadyOn = localStorage.getItem('bp_learning_mode') === '1';
-    if (dismissed || alreadyOn) return;
-    var el = document.getElementById('bpOnboardBanner');
-    if (!el) return;
-    el.style.display = 'flex';
-    document.getElementById('bpOnboardDismiss').addEventListener('click', function(){
-      el.style.display = 'none';
-      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e){}
-    });
-    document.getElementById('bpOnboardOpen').addEventListener('click', function(){
-      if (window.bpLearningMode && window.bpLearningMode.state === false) {
-        window.bpLearningMode.toggle();
-      }
-      el.style.display = 'none';
-      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e){}
-    });
-  } catch(e){}
-})();
-</script>
-
+<div class="bp-market-pulse">
 <!-- ── Dual Endeks Kartları ── -->
 <div class="dual-endeks">
 
@@ -2090,7 +2028,7 @@
       <span class="ec-chg neu" id="ec100Chg"><span class="idx-sk idx-sk-change"></span></span>
     </div>
     <div class="ec-signal-row">
-      <span class="signal-badge signal-BEKLE" id="ec100Signal" style="font-size:11px">● —</span>
+      <span class="signal-badge signal-BEKLE" id="ec100Signal" style="font-size:var(--bp-text-xs)">● —</span>
       <span class="index-sl" id="ec100Sl" style="display:none">SL —</span>
     </div>
     <div class="ec-inds" id="ec100Inds"></div>
@@ -2107,7 +2045,7 @@
       <span class="ec-chg neu" id="ec30Chg"><span class="idx-sk idx-sk-change"></span></span>
     </div>
     <div class="ec-signal-row">
-      <span class="signal-badge signal-BEKLE" id="ec30Signal" style="font-size:11px">● —</span>
+      <span class="signal-badge signal-BEKLE" id="ec30Signal" style="font-size:var(--bp-text-xs)">● —</span>
       <span class="index-sl" id="ec30Sl" style="display:none">SL —</span>
     </div>
     <div class="ec-inds" id="ec30Inds"></div>
@@ -2115,15 +2053,54 @@
 
 </div><!-- /dual-endeks -->
 
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card stat-total"><div class="stat-num" id="statTotal"><span class="stat-num-sk"></span></div><div class="stat-label">Toplam</div></div>
+    <a href="/tarama?signal=AL&sort=signal_strength" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="Güçlü Trend: Algoritmamızın 3 testten geçen yükseliş sinyali. Tıkla: en güçlüleri gör">
+      <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>
+      <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7"><span aria-hidden="true">↗</span></span></div>
+    </a>
+    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=SAT]'))" title="Trend Bozuldu: Algoritmamızın 3 testten geçen düşüş sinyali. Tıkla: Trend Bozuldu sinyallerini gör">
+      <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>
+      <div class="stat-label">Trend Bozuldu</div>
+    </div>
+    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=BEKLE]'))" title="Yatay: Trend henüz oluşmadı, fırsat bekleniyor. Tıkla: izleme listesine al">
+      <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
+      <div class="stat-label">Yatay</div>
+    </div>
+    <div class="stat-card stat-premium" style="cursor:pointer" onclick="toggleChip('premium',document.querySelector('.filter-btn.filter-premium'))" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
+      <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
+      <div class="stat-label"><span aria-hidden="true">⭐</span> Hacim Onaylı</div>
+    </div>
+  </div>
+
+  <!-- Market Breadth Bar -->
+  <div class="market-breadth" id="marketBreadth">
+    <div class="mb-header">
+      <h2 class="mb-title">Piyasa Geneli</h2>
+      <span class="mb-sentiment" id="mbSentiment"></span>
+    </div>
+    <div class="mb-bar" aria-hidden="true">
+      <div class="mb-seg mb-seg-al"  id="mbSegAl"  style="width:0%"></div>
+      <div class="mb-seg mb-seg-bkl" id="mbSegBkl" style="width:100%"></div>
+      <div class="mb-seg mb-seg-sat" id="mbSegSat" style="width:0%"></div>
+    </div>
+    <div class="mb-legend">
+      <span class="mb-lg mb-lg-al"><span class="mb-lg-dot"></span><span id="mbLgAl">–</span></span>
+      <span class="mb-lg mb-lg-bkl"><span class="mb-lg-dot"></span><span id="mbLgBkl">–</span></span>
+      <span class="mb-lg mb-lg-sat"><span class="mb-lg-dot"></span><span id="mbLgSat">–</span></span>
+    </div>
+  </div>
+</div><!-- /bp-market-pulse -->
+
 <!-- ── Öne Çıkanlar (her zaman görünür) ── -->
 <section class="bp-highlights" aria-label="Öne Çıkan Hisseler">
   <div class="hp-twin">
     <div class="hp-section">
-      <div class="hp-title">🟢 Güçlü Trend</div>
+      <h2 class="hp-title"><span aria-hidden="true">🟢</span> Güçlü Trend</h2>
       <div id="hpAlList" class="hp-sk-wrap"></div>
     </div>
     <div class="hp-section hp-section-r">
-      <div class="hp-title">🔥 Hareketliler</div>
+      <h2 class="hp-title"><span aria-hidden="true">🔥</span> Hareketliler</h2>
       <div id="hpMoverList" class="hp-sk-wrap"></div>
     </div>
   </div>
@@ -2160,56 +2137,20 @@
   </div>
 </div><!-- /chart-accordion -->
 
-  <div class="stats-bar" id="statsBar">
-    <div class="stat-card stat-total"><div class="stat-num" id="statTotal"><span class="stat-num-sk"></span></div><div class="stat-label">Toplam</div></div>
-    <a href="/gucu-yuksek" class="stat-card stat-al" style="text-decoration:none;cursor:pointer" title="Güçlü Trend: Algoritmamızın 3 testten geçen yükseliş sinyali. Tıkla: en güçlüleri gör">
-      <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7">↗</span></div>
-    </a>
-    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=\"SAT\"]'))" title="Trend Bozuldu: Algoritmamızın 3 testten geçen düşüş sinyali. Tıkla: Trend Bozuldu sinyallerini gör">
-      <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">Trend Bozuldu</div>
-    </div>
-    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=\"BEKLE\"]'))" title="Yatay: Trend henüz oluşmadı, fırsat bekleniyor. Tıkla: izleme listesine al">
-      <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">Yatay</div>
-    </div>
-    <div class="stat-card stat-premium" style="cursor:pointer" onclick="toggleChip('premium',document.querySelector('.filter-btn.filter-premium'))" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
-      <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
-      <div class="stat-label">⭐ Hacim Onaylı</div>
-    </div>
-  </div>
 
-  <!-- Market Breadth Bar -->
-  <div class="market-breadth" id="marketBreadth">
-    <div class="mb-header">
-      <span class="mb-title">Piyasa Geneli</span>
-      <span class="mb-sentiment" id="mbSentiment"></span>
-    </div>
-    <div class="mb-bar">
-      <div class="mb-seg mb-seg-al"  id="mbSegAl"  style="width:0%"></div>
-      <div class="mb-seg mb-seg-bkl" id="mbSegBkl" style="width:100%"></div>
-      <div class="mb-seg mb-seg-sat" id="mbSegSat" style="width:0%"></div>
-    </div>
-    <div class="mb-legend">
-      <span class="mb-lg mb-lg-al"><span class="mb-lg-dot"></span><span id="mbLgAl">–</span></span>
-      <span class="mb-lg mb-lg-bkl"><span class="mb-lg-dot"></span><span id="mbLgBkl">–</span></span>
-      <span class="mb-lg mb-lg-sat"><span class="mb-lg-dot"></span><span id="mbLgSat">–</span></span>
-    </div>
-  </div>
 
   <!-- ── Feature 1 — Bugünün Özeti (Hero Narratif Card) — İSKELET (data Cmt'de bağlanacak) ── -->
   <section class="market-summary" id="marketSummary" aria-label="Bugünün Piyasa Özeti">
     <div class="ms-header">
-      <span class="ms-live-indicator">
+      <h2 class="ms-live-indicator">
         <span class="ms-live-dot"></span> Bugünün Özeti
-      </span>
+      </h2>
       <span class="ms-meta">
         <span id="msTime">—</span> itibarıyla
         <span class="ms-divider">·</span>
-        <span class="badge-noads" title="Reklamsız platform — Investing.com'da premium feature, BorsaPusula'da default. Yatırım tavsiyesi değil, sinyal paneli.">🛡️ Reklamsız</span>
+        <span class="badge-noads" title="Reklamsız platform — Investing.com'da premium feature, BorsaPusula'da default. Yatırım tavsiyesi değil, sinyal paneli."><span aria-hidden="true">🛡️</span> Reklamsız</span>
         <span class="ms-divider">·</span>
-        <a href="/metodoloji" class="ms-link">Metodoloji →</a>
+        <a href="/metodoloji" class="ms-link">Metodoloji <span aria-hidden="true">→</span></a>
       </span>
     </div>
     <p class="ms-narrative" id="msText" aria-live="polite">
@@ -2217,15 +2158,15 @@
     </p>
     <div class="ms-microstats" id="msMicroStats">
       <a href="/?signal=AL&period=today" class="ms-stat ms-stat-bull">
-        <span class="ms-stat-icon">🔥</span>
+        <span class="ms-stat-icon"><span aria-hidden="true">🔥</span></span>
         <span class="ms-stat-num" id="msNewBull">—</span> Yeni Güçlü
       </a>
       <a href="/?signal=SAT&period=today" class="ms-stat ms-stat-bear">
-        <span class="ms-stat-icon">↓</span>
+        <span class="ms-stat-icon"><span aria-hidden="true">↓</span></span>
         <span class="ms-stat-num" id="msNewBear">—</span> Zayıfladı
       </a>
       <a href="/?signal=WATCH" class="ms-stat ms-stat-watch" id="msWatchStat">
-        <span class="ms-stat-icon">⚡</span>
+        <span class="ms-stat-icon"><span aria-hidden="true">⚡</span></span>
         <span class="ms-stat-num" id="msWatchMoved">—</span> İzlemende Hareket
       </a>
     </div>
@@ -2236,98 +2177,90 @@
     </div>
   </section>
 
-  <!-- ── Feature 1 #1B — Preset Chips (CPO MSG-060) ── -->
-  <div class="preset-chips" id="presetChips" role="group" aria-label="Hazır filtreler">
-    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)">🔥 Top Kazananlar</button>
-    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)">📊 Hacim Öncüleri</button>
-    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)">⭐ Hacim Onaylı</button>
-    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden>⭐ Watchlist'im</button>
-  </div>
-
   <!-- ── AI Piyasa Özeti ──────────────────────────── -->
   <!-- visibility:hidden (not display:none) reserves space → prevents CLS when content loads -->
   <div id="macroSummaryBar" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.06),rgba(139,92,246,.03));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:9px;padding:9px 14px;margin-bottom:10px;align-items:flex-start;gap:8px">
-    <span style="font-size:15px;flex-shrink:0;margin-top:1px">🤖</span>
+    <span style="font-size:var(--bp-text-15);flex-shrink:0;margin-top:1px"><span aria-hidden="true">🤖</span></span>
     <div style="flex:1;min-width:0">
-      <div id="macroSummaryBarText" style="font-size:12.5px;color:var(--bp-text2);line-height:1.5"></div>
-      <div id="macroSummaryBarTime" style="font-size:10px;color:var(--bp-text3);margin-top:3px"></div>
+      <div id="macroSummaryBarText" style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.5"></div>
+      <div id="macroSummaryBarTime" style="font-size:var(--bp-text-2xs);color:var(--bp-text3);margin-top:3px"></div>
     </div>
-    <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0;align-self:center">Gündem →</a>
+    <a href="/gundem" style="font-size:var(--bp-text-xs);color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0;align-self:center">Gündem <span aria-hidden="true">→</span></a>
   </div>
 
   <!-- ── İdeal Giriş Şeridi ──────────────────────── -->
   <!-- visibility:hidden reserves space → no CLS when ideal stocks load -->
   <div id="idealStrip" style="display:flex;visibility:hidden;background:linear-gradient(135deg,rgba(var(--bp-al-rgb),.06),rgba(var(--bp-brand-rgb),.03));
-    border:1px solid rgba(var(--bp-al-rgb),.20);border-radius:6px;padding:9px 14px;margin-bottom:12px;
+    border:1px solid rgba(var(--bp-al-rgb),.20);border-radius:var(--bp-radius);padding:9px 14px;margin-bottom:12px;
     align-items:center;gap:10px;flex-wrap:wrap">
-    <span style="font-size:11px;color:var(--bp-al);font-weight:700;white-space:nowrap;flex-shrink:0">✅ İdeal Giriş</span>
+    <span style="font-size:var(--bp-text-xs);color:var(--bp-al);font-weight:700;white-space:nowrap;flex-shrink:0"><span aria-hidden="true">✅</span> İdeal Giriş</span>
     <div id="idealStripItems" style="display:flex;flex-wrap:wrap;gap:6px;flex:1"></div>
-    <a href="/tarama?signal=AL&min_adx=25" style="font-size:11px;color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0">Hepsini gör →</a>
+    <a href="/tarama?signal=AL&min_adx=25" style="font-size:var(--bp-text-xs);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0">Hepsini gör <span aria-hidden="true">→</span></a>
   </div>
 
   <!-- Backtest güven rozeti -->
   <!-- visibility:hidden reserves space → no CLS when backtest data arrives (disk-cached, always fast) -->
   <a href="/sinyal-performans" id="btTrustBadge" style="display:flex;visibility:hidden;text-decoration:none;
     background:linear-gradient(135deg,rgba(var(--bp-al-rgb),.06),rgba(var(--bp-brand-rgb),.04));
-    border:1px solid rgba(var(--bp-al-rgb),.18);border-radius:6px;padding:10px 16px;margin-bottom:16px;
+    border:1px solid rgba(var(--bp-al-rgb),.18);border-radius:var(--bp-radius);padding:10px 16px;margin-bottom:16px;
     flex-wrap:wrap;gap:6px 16px;align-items:center;transition:border-color .15s"
     onmouseover="this.style.borderColor='rgba(0,226,144,.35)'" onmouseout="this.style.borderColor='rgba(0,226,144,.18)'">
-    <span style="font-size:10px;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap">📊 2 Yıllık Backtest · 28 Hisse</span>
+    <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;white-space:nowrap"><span aria-hidden="true">📊</span> 2 Yıllık Backtest · 28 Hisse</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
-      <span style="font-size:11px;color:var(--bp-text2)">Sharpe:</span>
-      <span id="btSharpe" style="font-size:15px;font-weight:800;color:var(--bp-al);letter-spacing:-0.3px"></span>
+      <span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">Sharpe:</span>
+      <span id="btSharpe" style="font-size:var(--bp-text-15);font-weight:800;color:var(--bp-al);letter-spacing:-0.3px"></span>
     </span>
     <span style="color:var(--bp-border)">·</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
-      <span style="font-size:11px;color:var(--bp-text2)">Profit Factor:</span>
-      <span id="btPF" style="font-size:15px;font-weight:800;color:var(--bp-al);letter-spacing:-0.3px"></span>
+      <span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">Profit Factor:</span>
+      <span id="btPF" style="font-size:var(--bp-text-15);font-weight:800;color:var(--bp-al);letter-spacing:-0.3px"></span>
     </span>
     <span style="color:var(--bp-border)">·</span>
     <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
-      <span style="font-size:11px;color:var(--bp-text2)">En iyi getiri:</span>
-      <span id="btBest" style="font-size:13px;font-weight:700;color:var(--bp-al)"></span>
+      <span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">En iyi getiri:</span>
+      <span id="btBest" style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-al)"></span>
     </span>
-    <span style="margin-left:auto;font-size:11px;color:var(--bp-brand);font-weight:600;white-space:nowrap">Performans raporu →</span>
+    <span style="margin-left:auto;font-size:var(--bp-text-xs);color:var(--bp-brand);font-weight:600;white-space:nowrap">Performans raporu <span aria-hidden="true">→</span></span>
   </a>
 
   <!-- ── Gündem & Haberler ──────────────────────────── -->
   <section class="gundem-section" id="gundemSec">
     <div class="gundem-header">
-      <span style="font-size:13px;font-weight:700;color:var(--bp-text);display:flex;align-items:center;gap:6px;">
+      <h2 style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);display:flex;align-items:center;gap:6px;margin:0;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              style="width:15px;height:15px;flex-shrink:0;opacity:.7">
           <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z"/>
           <path d="M14 2v4a2 2 0 0 0 2 2h4"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
         </svg>
         Gündem &amp; Haberler
-      </span>
+      </h2>
       <div style="display:flex;align-items:center;gap:10px;">
         <!-- Tabs -->
-        <div class="gnm-tabs" id="gnmTabs">
-          <button class="gnm-tab-btn active" id="tabBtnMakro" onclick="switchGnmTab('makro')">🌍 Makro</button>
-          <button class="gnm-tab-btn" id="tabBtnHisse" onclick="switchGnmTab('hisse')">📈 Hisse</button>
+        <div class="gnm-tabs" id="gnmTabs" role="tablist" aria-label="Gündem sekmeleri">
+          <button class="gnm-tab-btn active" id="tabBtnMakro" role="tab" aria-selected="true" aria-controls="gnmPanelMakro" onclick="switchGnmTab('makro')"><span aria-hidden="true">🌍</span> Makro</button>
+          <button class="gnm-tab-btn" id="tabBtnHisse" role="tab" aria-selected="false" aria-controls="gnmPanelHisse" onclick="switchGnmTab('hisse')"><span aria-hidden="true">📈</span> Hisse</button>
         </div>
-        <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;">
-          Tümü →
+        <a href="/gundem" style="font-size:var(--bp-text-xs);color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;">
+          Tümü <span aria-hidden="true">→</span>
         </a>
       </div>
     </div>
 
     <!-- Tab: Makro Haberler (VARSAYILAN — ilk açılışta görünen) -->
-    <div id="gnmPanelMakro">
-      <div id="macroNewsList" class="macro-news-list">
+    <div id="gnmPanelMakro" role="tabpanel" aria-labelledby="tabBtnMakro" tabindex="0">
+      <div id="macroNewsList" class="macro-news-list" role="list" aria-label="Makro haberler">
         <!-- skeleton -->
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
-        <div style="height:50px;border-radius:8px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:var(--bp-radius-md);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:var(--bp-radius-md);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
+        <div style="height:50px;border-radius:var(--bp-radius-md);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;"></div>
       </div>
       <div style="text-align:right;margin-top:8px">
-        <a href="/gundem" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:600;">Piyasa Gündem Merkezi →</a>
+        <a href="/gundem" style="font-size:var(--bp-text-xs);color:var(--accent);text-decoration:none;font-weight:600;">Piyasa Gündem Merkezi <span aria-hidden="true">→</span></a>
       </div>
     </div>
 
     <!-- Tab: Hisse Haberleri (gizli başlar) -->
-    <div id="gnmPanelHisse" style="display:none">
+    <div id="gnmPanelHisse" style="display:none" role="tabpanel" aria-labelledby="tabBtnHisse" tabindex="0">
       <div class="gundem-layout">
         <!-- Sol: haber kartları -->
         <div class="gundem-cards-wrap">
@@ -2341,51 +2274,51 @@
 
         <!-- Sağ: bilanço mini widget -->
         <div class="bilanco-mini-box" id="bilancoMini">
-          <div class="bilanco-mini-title">📅 Bilanço Dönemi</div>
+          <h3 class="bilanco-mini-title"><span aria-hidden="true">📅</span> Bilanço Dönemi</h3>
           <div id="bilancoMiniBody" style="min-height:60px">
-            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
-            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
-            <div style="height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;width:70%"></div>
+            <div style="height:12px;border-radius:var(--bp-radius-4);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:80%"></div>
+            <div style="height:12px;border-radius:var(--bp-radius-4);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;margin-bottom:8px;width:60%"></div>
+            <div style="height:12px;border-radius:var(--bp-radius-4);background:linear-gradient(90deg,var(--bp-surface) 25%,#1e1e22 50%,var(--bp-surface) 75%);background-size:300% 100%;animation:gnm-shimmer 1.5s infinite;width:70%"></div>
           </div>
-          <a href="/bilanco-takvimi" class="bilanco-mini-link">Tüm takvim →</a>
+          <a href="/bilanco-takvimi" class="bilanco-mini-link">Tüm takvim <span aria-hidden="true">→</span></a>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ── PWA Install Banner ──────────────────────── -->
-  <div id="pwaInstallBanner" style="display:none;background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(37,99,235,.06));border:1px solid rgba(59,130,246,.25);border-radius:6px;padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px;flex-wrap:wrap">
-    <span style="font-size:18px">📲</span>
+  <div id="pwaInstallBanner" style="display:none;background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(37,99,235,.06));border:1px solid rgba(59,130,246,.25);border-radius:var(--bp-radius);padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:var(--bp-text-xl)"><span aria-hidden="true">📲</span></span>
     <div style="flex:1;min-width:140px">
-      <div style="font-size:13px;font-weight:700;color:var(--bp-text)">BorsaPusula'yı Yükle</div>
-      <div style="font-size:11px;color:var(--bp-text3)">Ana ekrana ekle — hızlı erişim</div>
+      <div style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text)">BorsaPusula'yı Yükle</div>
+      <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Ana ekrana ekle — hızlı erişim</div>
     </div>
-    <button onclick="_pwaInstall()" style="background:#3b82f6;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Yükle</button>
-    <button onclick="document.getElementById('pwaInstallBanner').style.display='none'" style="background:none;border:none;color:#374151;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px" title="Kapat">×</button>
+    <button onclick="_pwaInstall()" style="background:#3b82f6;color:#fff;border:none;padding:7px 16px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Yükle</button>
+    <button onclick="document.getElementById('pwaInstallBanner').style.display='none'" style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);line-height:1;padding:2px 4px" title="Kapat">×</button>
   </div>
 
   <!-- ── Bildirim Çubuğu (E-posta + Push) ────────── -->
-  <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(0,67,235,.04));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:6px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+  <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(0,67,235,.04));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:var(--bp-radius);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
-      <div style="font-size:13px;font-weight:700;color:var(--bp-text);margin-bottom:2px">📬 Sinyal Bildirimleri</div>
-      <div style="font-size:11px;color:var(--bp-text3)">Sinyal değiştiğinde bildirim al — ücretsiz</div>
+      <div style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);margin-bottom:2px"><span aria-hidden="true">📬</span> Sinyal Bildirimleri</div>
+      <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Sinyal değiştiğinde bildirim al — ücretsiz</div>
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:280px;flex-wrap:wrap" id="subForm">
-      <input id="subName" type="text" placeholder="Adınız"
+      <input id="subName" type="text" placeholder="Adınız" aria-label="Ad"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:var(--bp-radius);font-size:var(--bp-text-base);font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
-        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
+        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
-      <input id="subEmail" type="email" placeholder="E-posta"
+      <input id="subEmail" type="email" placeholder="E-posta" aria-label="E-posta adresi"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:var(--bp-radius);font-size:var(--bp-text-base);font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
-        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
+        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
       <button onclick="submitSubscribe()"
-        style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:7px 16px;border-radius:6px;
-               font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
+        style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:7px 16px;border-radius:var(--bp-radius);
+               font-size:var(--bp-text-base);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
                transition:background .15s"
         onmouseover="this.style.background='#cdd5ff'" onmouseout="this.style.background='#b8c3ff'">
         Abone Ol
@@ -2394,29 +2327,39 @@
     <!-- Push bildirim butonu -->
     <button id="pushBtn" onclick="togglePushSubscription()"
       style="display:none;background:rgba(var(--bp-brand-rgb),.12);border:1px solid rgba(var(--bp-brand-rgb),.32);
-             color:var(--bp-brand);padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;
+             color:var(--bp-brand);padding:7px 14px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:600;
              cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s"
       onmouseover="this.style.background='rgba(184,195,255,.2)'" onmouseout="this.style.background='rgba(184,195,255,.12)'"
       title="Tarayıcı push bildirimi">
-      🔔 Push Aç
+      <span aria-hidden="true">🔔</span> Push Aç
     </button>
     <button onclick="document.getElementById('subscribeBar').style.display='none'"
-      style="background:none;border:none;color:#374151;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px"
+      style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);line-height:1;padding:2px 4px"
       title="Kapat">×</button>
   </div>
 
 
+  <!-- ── T4.4: Filtre birleştirme — preset/temel/gelişmiş/sektör/aktif-filtre tek panelde (bkz. docs/t44-anasayfa-analiz.md) ── -->
+  <div class="bp-filter-panel" aria-label="Filtreleme paneli">
+  <!-- ── Feature 1 #1B — Preset Chips (CPO MSG-060) ── -->
+  <div class="preset-chips" id="presetChips" role="group" aria-label="Hazır filtreler">
+    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)"><span aria-hidden="true">🔥</span> Top Kazananlar</button>
+    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)"><span aria-hidden="true">📊</span> Hacim Öncüleri</button>
+    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)"><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
+    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden><span aria-hidden="true">⭐</span> Watchlist'im</button>
+  </div>
+
   <div class="filters">
     <button class="filter-btn active-all" data-signal="all" onclick="setFilter('all', this)" title="Tüm hisseleri göster">Tümü</button>
-    <button class="filter-btn" data-signal="AL" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı">🟢 Güçlü Trend</button>
-    <button class="filter-btn" data-signal="SAT" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı">🔴 Trend Bozuldu</button>
-    <button class="filter-btn" data-signal="BEKLE" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor">⚪ Yatay</button>
-    <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="RVOL ≥ 1.20 — Hacim Onaylı AL sinyali. Backtest Win Rate %51.5. Diğer filtrelerle birleştirilebilir.">⭐ Hacim Onaylı</button>
-    <button class="filter-btn filter-today" data-toggle="today" onclick="toggleChip('today', this)" title="Bugün ilk kez Güçlü Trend / Trend Bozuldu sinyali oluşan hisseler — diğer filtrelerle birleştirilebilir">⚡ Bugün</button>
-    <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none">🔔 Takibim</button>
-    <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()">⚙️ Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
+    <button class="filter-btn" data-signal="AL" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı"><span aria-hidden="true">🟢</span> Güçlü Trend</button>
+    <button class="filter-btn" data-signal="SAT" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı"><span aria-hidden="true">🔴</span> Trend Bozuldu</button>
+    <button class="filter-btn" data-signal="BEKLE" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor"><span aria-hidden="true">⚪</span> Yatay</button>
+    <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="RVOL ≥ 1.20 — Hacim Onaylı AL sinyali. Backtest Win Rate %51.5. Diğer filtrelerle birleştirilebilir."><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
+    <button class="filter-btn filter-today" data-toggle="today" onclick="toggleChip('today', this)" title="Bugün ilk kez Güçlü Trend / Trend Bozuldu sinyali oluşan hisseler — diğer filtrelerle birleştirilebilir"><span aria-hidden="true">⚡</span> Bugün</button>
+    <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none"><span aria-hidden="true">🔔</span> Takibim</button>
+    <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()"><span aria-hidden="true">⚙️</span> Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
     <div class="search-wrap">
-      <input class="search-input" type="text" placeholder="Hisse ara… (/)"
+      <input class="search-input" type="text" placeholder="Hisse ara… (/)" aria-label="Hisse ara"
              oninput="setSearch(this.value);showSearchAc(this.value)"
              onkeydown="handleSearchKey(event)"
              onfocus="showSearchAc(this.value)"
@@ -2428,7 +2371,7 @@
   <!-- Gelişmiş Screener Paneli -->
   <div class="adv-panel" id="advPanel">
     <div class="adv-group">
-      <div class="adv-group-label">📊 <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">ADX</a> Gücü</div>
+      <div class="adv-group-label"><span aria-hidden="true">📊</span> <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">ADX</a> Gücü</div>
       <div class="adv-chips" id="adv-adx">
         <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('adx',0,this)">Tümü</button>
         <button class="adv-chip"    data-val="25"  onclick="setAdv('adx',25,this)">Güçlü ≥25</button>
@@ -2437,7 +2380,7 @@
       </div>
     </div>
     <div class="adv-group">
-      <div class="adv-group-label">📅 Sinyal Süresi (Bar)</div>
+      <div class="adv-group-label"><span aria-hidden="true">📅</span> Sinyal Süresi (Bar)</div>
       <div class="adv-chips" id="adv-bars">
         <button class="adv-chip adv-active" data-val="0"  onclick="setAdv('bars',0,this)">Tümü</button>
         <button class="adv-chip"     data-val="3"  onclick="setAdv('bars',3,this)">3+ bar</button>
@@ -2446,7 +2389,7 @@
       </div>
     </div>
     <div class="adv-group">
-      <div class="adv-group-label">📈 Hacim Artışı</div>
+      <div class="adv-group-label"><span aria-hidden="true">📈</span> Hacim Artışı</div>
       <div class="adv-chips" id="adv-vol">
         <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('vol',0,this)">Tümü</button>
         <button class="adv-chip"     data-val="1.5" onclick="setAdv('vol',1.5,this)">×1.5+</button>
@@ -2455,7 +2398,7 @@
       </div>
     </div>
     <div class="adv-group">
-      <div class="adv-group-label">🔢 <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">RSI</a> Durumu</div>
+      <div class="adv-group-label"><span aria-hidden="true">🔢</span> <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">RSI</a> Durumu</div>
       <div class="adv-chips" id="adv-rsi">
         <button class="adv-chip adv-active" data-val="all"       onclick="setAdv('rsi','all',this)">Tümü</button>
         <button class="adv-chip"            data-val="oversold"  onclick="setAdv('rsi','oversold',this)">Aşırı Satım ≤30</button>
@@ -2464,12 +2407,12 @@
       </div>
     </div>
     <div class="adv-group">
-      <div class="adv-group-label">🎯 Giriş Kalitesi</div>
+      <div class="adv-group-label"><span aria-hidden="true">🎯</span> Giriş Kalitesi</div>
       <div class="adv-chips" id="adv-eq">
         <button class="adv-chip adv-active" data-val="all"      onclick="setAdv('eq','all',this)">Tümü</button>
-        <button class="adv-chip"     data-val="IDEAL"    onclick="setAdv('eq','IDEAL',this)">✅ İdeal</button>
-        <button class="adv-chip"     data-val="IYI"      onclick="setAdv('eq','IYI',this)">👍 İyi</button>
-        <button class="adv-chip"     data-val="DIKKATLI" onclick="setAdv('eq','DIKKATLI',this)">⚠️ Dikkatli</button>
+        <button class="adv-chip"     data-val="IDEAL"    onclick="setAdv('eq','IDEAL',this)"><span aria-hidden="true">✅</span> İdeal</button>
+        <button class="adv-chip"     data-val="IYI"      onclick="setAdv('eq','IYI',this)"><span aria-hidden="true">👍</span> İyi</button>
+        <button class="adv-chip"     data-val="DIKKATLI" onclick="setAdv('eq','DIKKATLI',this)"><span aria-hidden="true">⚠️</span> Dikkatli</button>
       </div>
     </div>
   </div>
@@ -2490,68 +2433,111 @@
       Tümünü Temizle
     </button>
   </div>
+  </div>
 
+<!-- T4.4 3/6 — Onboarding banner tabloya taşındı (Öğrenme Modu ipucu, tablo hücrelerindeki '?' terim tooltipleri için) -->
+<!-- SPEC-012 V3a L4 — Onboarding banner (Öğrenme Modu CTA, dismissible localStorage) -->
+<div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.10),rgba(29,78,216,.05));border:1px solid rgba(var(--bp-brand-rgb),.32);border-radius:var(--bp-radius-lg);padding:11px 14px;margin-bottom:14px;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.55;align-items:center;gap:10px;flex-wrap:wrap">
+  <span style="font-size:var(--bp-text-xl);flex-shrink:0"><span aria-hidden="true">📚</span></span>
+  <span style="flex:1;min-width:200px">
+    <strong>İlk kez mi?</strong> <strong style="color:var(--bp-brand)">Öğrenme Modu</strong>'nu açın —
+    finansal terimlerin yanında <code style="background:rgba(var(--bp-brand-rgb),.15);padding:1px 5px;border-radius:var(--bp-radius-sm);color:var(--bp-brand)">?</code> görünür, tıklayınca anlamı açılır.
+  </span>
+  <button type="button" id="bpOnboardOpen"
+          style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">
+    Öğrenme Modu'nu Aç
+  </button>
+  <button type="button" id="bpOnboardDismiss" aria-label="Kapat"
+          style="background:transparent;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-xl);padding:2px 8px;line-height:1;flex-shrink:0">×</button>
+</div>
+<script>
+(function(){
+  try {
+    var dismissed = localStorage.getItem('bp_onboard_dismissed') === '1';
+    var alreadyOn = localStorage.getItem('bp_learning_mode') === '1';
+    if (dismissed || alreadyOn) return;
+    var el = document.getElementById('bpOnboardBanner');
+    if (!el) return;
+    el.style.display = 'flex';
+    document.getElementById('bpOnboardDismiss').addEventListener('click', function(){
+      el.style.display = 'none';
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
+    });
+    document.getElementById('bpOnboardOpen').addEventListener('click', function(){
+      if (window.bpLearningMode && window.bpLearningMode.state === false) {
+        window.bpLearningMode.toggle();
+      }
+      el.style.display = 'none';
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
+    });
+  } catch(e) { console.warn('onboarding banner init basarisiz', e); }
+})();
+</script>
+
+  <!-- ═══ T4.4 adım 3/6: TABLO — ana veri tablosu + üstteki onboarding şeridi + Alarm FAB/Panel (aşağıda, kod değişmedi, aynı fonksiyonel gruba ait) ═══ -->
   <div class="table-wrap">
     <div id="loadingDiv">
       <table style="width:100%;border-collapse:collapse">
+        <caption class="sr-only">Sinyal taraması yükleniyor</caption>
         <thead>
           <tr style="background:var(--bp-surface2);border-bottom:1px solid var(--bp-border)">
-            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Hisse</th>
-            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Fiyat (₺)</th>
-            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Değişim</th>
-            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Sinyal</th>
-            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Tarih</th>
-            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Giriş ₺</th>
-            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">SL ₺</th>
-            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Güç</th>
-            <th style="padding:10px 16px;text-align:left;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">İndikatörler</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Hisse</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Fiyat (₺)</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Değişim</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px">Sinyal</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Tarih</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Giriş ₺</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">SL ₺</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Güç</th>
+            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">İndikatörler</th>
           </tr>
         </thead>
         <tbody id="skeletonBody"></tbody>
       </table>
     </div>
     <table id="mainTable" style="display:none">
+      <caption class="sr-only">BIST hisseleri sinyal taraması — fiyat, değişim, sinyal, giriş/stop seviyeleri ve teknik güç</caption>
       <thead>
         <tr>
-          <th onclick="sortTable('ticker')">Hisse</th>
-          <th onclick="sortTable('price')">Fiyat (₺)</th>
-          <th onclick="sortTable('change_pct')" class="hide-mobile">Değişim</th>
-          <th onclick="sortTable('signal')">Sinyal</th>
-          <th onclick="sortTable('signal_date')" class="hide-mobile">Tarih</th>
-          <th class="hide-mobile">Giriş ₺</th>
-          <th class="hide-mobile">SL ₺</th>
-          <th onclick="sortTable('bull_score')" class="hide-mobile">Güç</th>
-          <th class="hide-mobile">İndikatörler</th>
-          <th title="Sinyal değişince bildir">🔔</th>
+          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('ticker')">Hisse</button></th>
+          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('price')">Fiyat (₺)</button></th>
+          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('change_pct')">Değişim</button></th>
+          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal')">Sinyal</button></th>
+          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal_date')">Tarih</button></th>
+          <th scope="col" class="hide-mobile">Giriş ₺</th>
+          <th scope="col" class="hide-mobile">SL ₺</th>
+          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('bull_score')">Güç</button></th>
+          <th scope="col" class="hide-mobile">İndikatörler</th>
+          <th scope="col" title="Sinyal değişince bildir"><span role="img" aria-label="Bildirim">🔔</span></th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
     <div id="mobileCards" class="mobile-card-list"></div>
     <div id="noDataDiv" style="display:none;padding:48px 24px;text-align:center">
-      <div style="font-size:36px;margin-bottom:12px">🔍</div>
-      <div style="font-size:16px;font-weight:700;color:var(--bp-text);margin-bottom:8px">Sonuç bulunamadı</div>
-      <div style="font-size:13px;color:var(--bp-text3);margin-bottom:20px">Bu kriterlere uyan hisse yok. Filtreleri gevşetin ya da arama terimini değiştirin.</div>
-      <button onclick="resetFilters()" style="background:var(--bp-brand);color:var(--bp-bg);border:none;border-radius:4px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer">Filtreleri Sıfırla</button>
+      <div style="font-size:var(--bp-text-36);margin-bottom:12px"><span aria-hidden="true">🔍</span></div>
+      <div style="font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-text);margin-bottom:8px">Sonuç bulunamadı</div>
+      <div style="font-size:var(--bp-text-base);color:var(--bp-text3);margin-bottom:20px">Bu kriterlere uyan hisse yok. Filtreleri gevşetin ya da arama terimini değiştirin.</div>
+      <button onclick="resetFilters()" style="background:var(--bp-brand);color:var(--bp-bg);border:none;border-radius:var(--bp-radius-4);padding:8px 20px;font-size:var(--bp-text-base);font-weight:700;cursor:pointer">Filtreleri Sıfırla</button>
     </div>
   </div>
 
 </div>
 
-<!-- ── Alarm FAB ── -->
+<!-- ── Alarm FAB — T4.4 adım 3/6 (TABLO) aksiyon katmanı: tablodaki 🔔 ile eklenen takip listesini açar, kod değişmedi ── -->
 <button class="alarm-fab" id="alarmFab" onclick="toggleAlarmPanel()" title="Takip listem">
-  🔔
+  <span role="img" aria-label="Takip listem">🔔</span>
   <span class="fab-badge" id="fabBadge">0</span>
 </button>
 
-<!-- ── Alarm Panel ── -->
+<!-- ── Alarm Panel — T4.4 adım 3/6 (TABLO) aksiyon katmanı, kod değişmedi ── -->
 <div class="alarm-panel hidden" id="alarmPanel">
   <div class="ap-header">
-    <span class="ap-title">🔔 Takip Listem</span>
+    <h3 class="ap-title"><span aria-hidden="true">🔔</span> Takip Listem</h3>
     <button class="ap-close" onclick="toggleAlarmPanel()">×</button>
   </div>
   <div class="ap-body" id="apBody">
-    <div class="ap-empty">Henüz hisse eklenmedi.<br>Tablodaki 🔔 butonuna tıkla.</div>
+    <div class="ap-empty">Henüz hisse eklenmedi.<br>Tablodaki <span role="img" aria-label="Bildirim">🔔</span> butonuna tıkla.</div>
   </div>
   <div class="ap-footer" id="apFooter">
     Sinyal değişince tarayıcı bildirimi gönderilir.
@@ -2561,12 +2547,12 @@
 <!-- ── Sticky Subscription Toast ── -->
 <div class="sub-toast" id="subToast" role="dialog" aria-label="E-posta aboneliği">
   <button class="sub-toast-close" onclick="dismissSubToast()" title="Kapat" aria-label="Kapat">×</button>
-  <div class="sub-toast-title">📬 Günlük Sinyal Özeti Al</div>
+  <h3 class="sub-toast-title"><span aria-hidden="true">📬</span> Günlük Sinyal Özeti Al</h3>
   <div class="sub-toast-sub">Her gün piyasa kapanışında önemli sinyal değişikliklerini e-posta ile al.</div>
   <div class="sub-toast-benefits">
-    <span class="sub-toast-benefit">✓ Ücretsiz</span>
-    <span class="sub-toast-benefit">✓ Günde 1 e-posta</span>
-    <span class="sub-toast-benefit">✓ İstediğin zaman çık</span>
+    <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> Ücretsiz</span>
+    <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> Günde 1 e-posta</span>
+    <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> İstediğin zaman çık</span>
   </div>
   <div class="sub-toast-row" id="subToastForm">
     <input id="subToastName" type="text" class="sub-toast-input" placeholder="Adınız"
@@ -2577,10 +2563,10 @@
       aria-label="E-posta adresi">
   </div>
   <div class="sub-toast-btnrow">
-    <button id="subToastSubmitBtn" class="sub-toast-btn" onclick="submitToastSubscribe()">✉ Abone Ol</button>
-    <button id="subToastLoginBtn" class="sub-toast-btn sub-toast-btn-ghost" onclick="submitRecognize()">👤 Üye Girişi</button>
+    <button id="subToastSubmitBtn" class="sub-toast-btn" onclick="submitToastSubscribe()"><span aria-hidden="true">✉</span> Abone Ol</button>
+    <button id="subToastLoginBtn" class="sub-toast-btn sub-toast-btn-ghost" onclick="submitRecognize()"><span aria-hidden="true">👤</span> Üye Girişi</button>
   </div>
-  <div id="subToastRecogStatus" style="font-size:11px;margin-top:6px;display:none"></div>
+  <div id="subToastRecogStatus" style="font-size:var(--bp-text-xs);margin-top:6px;display:none"></div>
 </div>
 
 </main>
@@ -2588,7 +2574,7 @@
 <footer>
   <div style="max-width:900px;margin:0 auto">
     <!-- Veri kaynağı yasal disclosure (Ozan UX talebi, 26 May 2026) -->
-    <div style="font-size:11px;color:var(--bp-text3);text-align:center;padding:10px 12px;margin-bottom:14px;border:1px solid var(--bp-border);border-radius:8px;background:rgba(var(--bp-gold-rgb),0.04)">
+    <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-align:center;padding:10px 12px;margin-bottom:14px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);background:rgba(var(--bp-gold-rgb),0.04)">
       <span style="color:#f59e0b">⏱</span>
       Veri kaynağı: Yahoo Finance · BIST resmi yayın gecikmesi yaklaşık <strong>15 dakika</strong> · Gerçek-zamanlı işlem verisi değildir
     </div>
@@ -2596,25 +2582,25 @@
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
       <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="36" height="36" rx="6" fill="#141416"/>
-        <circle cx="18" cy="18" r="13" stroke="#46464d" stroke-width="1"/>
+        <circle cx="18" cy="18" r="13" stroke="var(--bp-border2)" stroke-width="1"/>
         <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="#00e290"/>
-        <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="#2a2a2c"/>
-        <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="#2a2a2c"/>
-        <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="#2a2a2c"/>
+        <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="var(--bp-border)"/>
+        <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="var(--bp-border)"/>
+        <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="var(--bp-border)"/>
         <circle cx="18" cy="18" r="2.8" fill="#b8c3ff"/>
         <circle cx="18" cy="18" r="1.4" fill="#e5e1e4"/>
       </svg>
-      <span style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:14px;font-weight:700;color:var(--bp-text2)">Borsa<strong style="color:var(--bp-al)">Pusula</strong></span>
+      <span style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-md);font-weight:700;color:var(--bp-text2)">Borsa<strong style="color:var(--bp-al)">Pusula</strong></span>
     </div>
-    <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:12px">
+    <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:var(--bp-text-sm)">
       <a href="/ozet"             style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Günlük Özet</a>
       <a href="/gundem"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Gündem</a>
-      <a href="/gucu-yuksek"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Güçlü Trendler</a>
+      <a href="/tarama?signal=AL&sort=signal_strength"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Güçlü Trendler</a>
       <a href="/tarama"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Hisse Tarayıcı</a>
       <a href="/karsilastir"      style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Karşılaştır</a>
-      <a href="/kripto"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">🪙 Kripto</a>
-      <a href="/emtialar"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">🥇 Emtialar</a>
-      <a href="/abd"              style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">🇺🇸 ABD</a>
+      <a href="/kripto"           style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'"><span aria-hidden="true">🪙</span> Kripto</a>
+      <a href="/emtialar"         style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'"><span aria-hidden="true">🥇</span> Emtialar</a>
+      <a href="/abd"              style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'"><span aria-hidden="true">🇺🇸</span> ABD</a>
       <a href="/portfolio"        style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Portföy</a>
       <a href="/sinyal-performans"style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Sinyal Performansı</a>
       <a href="/sektor-harita"    style="color:var(--bp-text3);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">Sektör Haritası</a>
@@ -2641,14 +2627,13 @@
       <span class="value-divider">·</span>
       <span class="value-item">Şeffaf metodoloji</span>
     </div>
-    <p style="color:var(--bp-text3);font-size:11px;margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto">
-      ⚠️ Bu platform yalnızca bilgilendirme amaçlıdır. Sinyaller <strong style="color:var(--bp-text3)">yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez.
+    <p style="color:var(--bp-text3);font-size:var(--bp-text-xs);margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto">
+      <span aria-hidden="true">⚠️</span> Bu platform yalnızca bilgilendirme amaçlıdır. Sinyaller <strong style="color:var(--bp-text3)">yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez.
     </p>
-    <p style="color:var(--bp-text3);font-size:11px;margin-top:8px">© 2026 borsapusula.com</p>
+    <p style="color:var(--bp-text3);font-size:var(--bp-text-xs);margin-top:8px">© 2026 borsapusula.com</p>
   </div>
 </footer>
 
-<script src="/static/lightweight-charts.min.js?v=1"></script>
 <script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=20260810B"></script>
 <script>
@@ -2712,11 +2697,11 @@
       const r = await fetch('/api/macro');
       const d = await r.json();
       renderMacro(d.items);
-    } catch(e) {}
+    } catch(e) { console.warn('makro ticker yuklenemedi', e); }
   }
 
   loadMacro();
-  setInterval(loadMacro, 60000);
+  setInterval(loadMacro, 180000);
 })();
 
 /* ── Sinyal görünen etiketleri ───────────────────── */
@@ -2725,16 +2710,30 @@ function sigLabel(sig) {
 }
 
 /* ── Lightweight Charts v4 ───────────────────────── */
-const LC = LightweightCharts;
+/* lazy-load: hisse.html _loadChartLib() ile ayni desen — 160KB script yalniz
+   accordion acilinca / desktop ilk grafik cizilirken cekilir, ana sayfa ilk
+   yuklemede degil (mobilde accordion varsayilan kapali → hic cekilmeyebilir) */
+let LC = null;
+function _loadChartLib() {
+  if (LC) return Promise.resolve();
+  return new Promise(function(res) {
+    var s = document.createElement('script');
+    s.src = '/static/lightweight-charts.min.js?v=1';
+    s.onload = function() { LC = LightweightCharts; res(); };
+    document.head.appendChild(s);
+  });
+}
 
-const BASE_OPTS = {
-  layout:          { background: { color: '#141416' }, textColor: '#909097' },
-  grid:            { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
-  crosshair:       { mode: LC.CrosshairMode.Normal },
-  rightPriceScale: { borderColor: '#30363d' },
-  handleScroll:    true,
-  handleScale:     true,
-};
+function getBaseOpts() {
+  return {
+    layout:          { background: { color: '#141416' }, textColor: '#909097' },
+    grid:            { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
+    crosshair:       { mode: LC.CrosshairMode.Normal },
+    rightPriceScale: { borderColor: '#30363d' },
+    handleScroll:    true,
+    handleScale:     true,
+  };
+}
 
 /* Grafik eksen label formatı: "10" → "Nis 10", crosshair'de "00:00:00" kalkıyor */
 const _MTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
@@ -2759,14 +2758,15 @@ let chartMain;
 
 function mkChart(el, height) {
   return LC.createChart(el, {
-    ...BASE_OPTS,
+    ...getBaseOpts(),
     width:     el.clientWidth || el.parentElement.clientWidth || 900,
     height:    height,
     timeScale: { borderColor: '#30363d', timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmt },
   });
 }
 
-function buildCharts(d) {
+async function buildCharts(d) {
+  await _loadChartLib();
   document.getElementById('chartLoading').style.display  = 'none';
   document.getElementById('chartsInner').style.display   = '';
 
@@ -2860,11 +2860,11 @@ function buildCharts(d) {
   elMain.style.position = 'relative';
   const elLegend = document.createElement('div');
   elLegend.style.cssText = [
-    'position:absolute', 'top:8px', 'left:12px', 'z-index:30',
+    'position:absolute', 'top:8px', 'left:12px', 'z-index:var(--bp-z-chart-legend)',
     'display:flex', 'gap:14px', 'pointer-events:none',
     'font-size:11px', 'font-variant-numeric:tabular-nums',
     'background:rgba(22,27,34,0.75)', 'padding:3px 8px',
-    'border-radius:4px', 'backdrop-filter:blur(2px)',
+    'border-radius:var(--bp-radius-4)', 'backdrop-filter:blur(2px)',
   ].join(';');
   elMain.appendChild(elLegend);
 
@@ -2893,7 +2893,7 @@ function buildCharts(d) {
           to:   n - 1 + 10,
         });
       }
-    } catch(_) {}
+    } catch(_) { console.warn('chart gorunur aralik ayari basarisiz', _); }
   });
 }
 
@@ -3039,7 +3039,7 @@ const _chartData = { xu030: null, xu100: null };
 function _rebuildChart(d) {
   if (!_accOpen) return;  // accordion kapalıysa gereksiz
   // Mevcut chartMain nesnesini temizle
-  if (chartMain) { try { chartMain.remove(); } catch(_) {} chartMain = null; }
+  if (chartMain) { try { chartMain.remove(); } catch(_) { /* chartMain.remove() zaten disposed olabilir (hizli sekme degisimi) - chartMain asagida null'laniyor */ } chartMain = null; }
   document.getElementById('chartsInner').style.display = 'none';
   document.getElementById('chartLoading').style.display = '';
   // Kısa gecikme: DOM boyutlandıktan sonra çiz
@@ -3113,7 +3113,7 @@ function startSSE() {
       const msg = JSON.parse(e.data);
       if (msg.type !== 'prices') return;
       applyLivePrices(msg.data, msg.ts);
-    } catch(_) {}
+    } catch(_) { console.warn('SSE fiyat guncelleme hatasi', _); }
   };
   _sseInstance.onerror = () => {
     _sseInstance.close(); _sseInstance = null;
@@ -3238,11 +3238,11 @@ function _saveFilterState() {
       period:  currentPeriod,
       ts:      Date.now(),
     }));
-  } catch(_) {}
+  } catch(_) { console.warn('filtre durumu kaydi basarisiz', _); }
 }
 
 function _clearFilterState() {
-  try { localStorage.removeItem(_FILTER_STORAGE_KEY); } catch(_) {}
+  try { localStorage.removeItem(_FILTER_STORAGE_KEY); } catch(_) { console.warn('filtre durumu temizleme basarisiz', _); }
 }
 
 function _getUrlFilterParams() {
@@ -3286,7 +3286,7 @@ function _updateUrlFilterState(opts) {
     const st = { signal: currentSignal, premium: filterPremium, today: filterToday, watch: filterWatch, period: currentPeriod };
     if (opts.push) history.pushState(st, '', newUrl);
     else           history.replaceState(st, '', newUrl);
-  } catch(_) {}
+  } catch(_) { console.warn('URL filtre durumu senkronizasyonu basarisiz', _); }
 }
 
 /* MSG-005: Back/forward button → URL'den state'i re-load et */
@@ -3457,7 +3457,7 @@ async function renderMarketSummary(stocks) {
         /* CPO-1335: donmuş is_new_signal yerine gerçek tarih kontrolü */
         watchMoved = stocks.filter(s => window.watchlist.has(s.ticker) && bpIsSignalFromToday(s.signal_date)).length;
       }
-    } catch (_) {}
+    } catch(_) { console.warn('watchMoved hesaplama basarisiz', _); }
 
     /* CPO-1344 §A: Borsa kapalıyken dürüst closedMessage göster. Kapı SADECE
        marketStatus'a bağlı — newBullCount/totalBullCount'a bağlı ESKİ kapı hiç
@@ -3603,7 +3603,7 @@ function _updateIdealStrip(stocks) {
       ? ` <span style="font-size:10px;font-weight:600;color:#00e290">+${s._ret.toFixed(1)}% <span style="opacity:.65;font-weight:500">sinyalden beri</span></span>`
       : '';
     return `<a href="/hisse/${s.ticker}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(var(--bp-al-rgb),.08);
-      border:1px solid rgba(var(--bp-al-rgb),.2);border-radius:6px;padding:3px 8px;text-decoration:none;
+      border:1px solid rgba(var(--bp-al-rgb),.2);border-radius:var(--bp-radius);padding:3px 8px;text-decoration:none;
       font-size:12px;font-weight:700;color:#f0f6fc;transition:background .12s;white-space:nowrap"
       onmouseover="this.style.background='rgba(0,226,144,.16)'" onmouseout="this.style.background='rgba(0,226,144,.08)'"
       >${s.ticker}${retHtml}</a>`;
@@ -3738,55 +3738,10 @@ function buildSectorButtons(sectors) {
   wrap.style.display = 'flex';
 }
 
-/* SPEC-001 Faz 2 (Adım 3): Premium modal — email form + Brevo + cookie + reveal */
-function openPremiumModal() {
-  let modal = document.getElementById('premiumModal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'premiumModal';
-    modal.className = 'premium-modal-backdrop';
-    modal.innerHTML = `
-      <div class="premium-modal" role="dialog" aria-labelledby="pmTitle" aria-modal="true">
-        <button class="premium-modal-close" onclick="closePremiumModal()" aria-label="Kapat">×</button>
-        <div class="premium-modal-icon">⭐</div>
-        <h3 id="pmTitle" class="premium-modal-title">Premium Sinyalleri Aç</h3>
-        <p class="premium-modal-desc">
-          Premium sinyaller <strong>ücretsiz</strong>. Sadece email'inle giriş yap, 30 gün boyunca tam erişim.
-        </p>
-        <form id="premiumModalForm" onsubmit="event.preventDefault();submitPremium();return false;">
-          <input type="email" id="pmEmail" placeholder="E-posta adresin" required
-                 autocomplete="email" autocapitalize="off" autocorrect="off">
-          <input type="text" id="pmName" placeholder="Adın (opsiyonel)"
-                 autocomplete="given-name" maxlength="50">
-          <button type="submit" id="pmSubmitBtn" class="premium-modal-submit">
-            💎 Premium'u Aç
-          </button>
-        </form>
-        <div id="pmStatus" class="premium-modal-status" aria-live="polite"></div>
-        <div class="premium-modal-footer">
-          <small>30 gün ücretsiz erişim · İstediğin zaman çık · Spam yok</small>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-  }
-  modal.style.display = 'flex';
-  setTimeout(() => {
-    modal.classList.add('visible');
-    const e = document.getElementById('pmEmail');
-    if (e) e.focus();
-  }, 10);
-}
-
-function closePremiumModal() {
-  const modal = document.getElementById('premiumModal');
-  if (!modal) return;
-  modal.classList.remove('visible');
-  setTimeout(() => { modal.style.display = 'none'; }, 200);
-}
-
 /* ── F4 Watchlist Alert Modal ──────────────────────────────────────────────── */
 
 let _alertModalTicker = null;
+let _alertModalRelease = null;
 let _userAlerts = {};   // cache: {ticker: {price_pct, signal_change, rsi_threshold, rvol_threshold}}
 
 function _isLoggedIn() {
@@ -3819,22 +3774,22 @@ async function openAlertModal(ticker) {
   const cfg = _userAlerts[ticker] || {};
   modal.innerHTML = `<div class="alert-modal" role="dialog" aria-modal="true">
     <button class="alert-modal-close" onclick="closeAlertModal()">×</button>
-    <div class="alert-modal-title">🔔 ${ticker} — Alert Ayarları</div>
+    <h3 class="alert-modal-title"><span aria-hidden="true">🔔</span> ${ticker} — Alert Ayarları</h3>
     ${loginNotice}
     <div class="alert-modal-row">
-      <label>📈 Fiyat hareketi eşiği (%)</label>
+      <label for="am-price-pct">📈 Fiyat hareketi eşiği (%)</label>
       <input type="number" id="am-price-pct" min="0.1" max="20" step="0.5" placeholder="—" value="${cfg.price_pct != null ? cfg.price_pct : ''}" ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     <div class="alert-modal-row">
-      <label>🔄 Sinyal değişimi (AL/SAT/BEKLE)</label>
+      <label for="am-signal-change">🔄 Sinyal değişimi (AL/SAT/BEKLE)</label>
       <input type="checkbox" id="am-signal-change" ${cfg.signal_change ? 'checked' : ''} ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     <div class="alert-modal-row">
-      <label>📉 RSI aşırı satış eşiği (≤)</label>
+      <label for="am-rsi">📉 RSI aşırı satış eşiği (≤)</label>
       <input type="number" id="am-rsi" min="10" max="50" step="1" placeholder="—" value="${cfg.rsi_threshold != null ? cfg.rsi_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     <div class="alert-modal-row">
-      <label>📊 RVOL yüksek hacim eşiği (≥x)</label>
+      <label for="am-rvol">📊 RVOL yüksek hacim eşiği (≥x)</label>
       <input type="number" id="am-rvol" min="1" max="10" step="0.5" placeholder="—" value="${cfg.rvol_threshold != null ? cfg.rvol_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     ${isLoggedIn ? `<button class="alert-modal-save" onclick="saveAlertSettings()">💾 Kaydet</button>
@@ -3843,6 +3798,8 @@ async function openAlertModal(ticker) {
   </div>`;
   modal.style.display = 'flex';
   setTimeout(() => modal.classList.add('visible'), 10);
+  if (_alertModalRelease) { _alertModalRelease(); _alertModalRelease = null; }
+  if (window.bpTrapFocus) _alertModalRelease = window.bpTrapFocus(modal.querySelector('.alert-modal'), closeAlertModal);
 
   // localStorage migration prompt
   if (isLoggedIn && !_userAlerts[ticker]) {
@@ -3859,6 +3816,7 @@ function closeAlertModal() {
   if (!modal) return;
   modal.classList.remove('visible');
   setTimeout(() => { modal.style.display = 'none'; }, 200);
+  if (_alertModalRelease) { _alertModalRelease(); _alertModalRelease = null; }
 }
 
 async function saveAlertSettings() {
@@ -3918,89 +3876,6 @@ async function syncLocalAlarm(ticker) {
 // Load user alerts on page load if logged in
 if (_isLoggedIn()) _loadUserAlerts();
 
-async function submitPremium() {
-  const emailEl = document.getElementById('pmEmail');
-  const nameEl  = document.getElementById('pmName');
-  const btn     = document.getElementById('pmSubmitBtn');
-  const status  = document.getElementById('pmStatus');
-  const email   = (emailEl?.value || '').trim();
-  const name    = (nameEl?.value || '').trim();
-
-  if (!email || !email.includes('@')) {
-    if (status) status.innerHTML = '<span style="color:#f85149">⚠️ Geçerli email gerekli.</span>';
-    if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
-    return;
-  }
-
-  if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor…'; }
-  if (status) status.innerHTML = '<span style="color:#8b949e">⏳ Kayıt yapılıyor…</span>';
-
-  try {
-    // Mevcut /api/subscribe endpoint reuse (Brevo entegrasyonu zaten var)
-    const res = await fetch('/api/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name, source: 'premium-trial' }),
-    });
-    const json = await res.json();
-    if (json.ok) {
-      // Cookie set: 30 gün premium trial
-      const exp = new Date(Date.now() + 30 * 86400 * 1000).toUTCString();
-      document.cookie = `bp_premium_trial=1; expires=${exp}; path=/; SameSite=Lax`;
-      // Mevcut bp_sub_user cache de güncellensin (bp-search.js patterni)
-      if (typeof window.bpRecordSubscribe === 'function' && json.token) {
-        window.bpRecordSubscribe({ token: json.token, email: json.email || email, name: json.name || name });
-      } else {
-        try {
-          localStorage.setItem('bp_sub_user', JSON.stringify({
-            subscribed: true, email, name, first_name: (name||'').split(' ')[0],
-            token: json.token || '', profile_done: false, cachedAt: Date.now(),
-          }));
-        } catch(_) {}
-      }
-      if (status) status.innerHTML = '<span style="color:#3fb950">✅ Premium aktif! Sayfa yenileniyor…</span>';
-      setTimeout(() => {
-        closePremiumModal();
-        // In-place reveal — sayfa reload daha güvenli (CSS state senkron)
-        renderTable();
-      }, 1200);
-    } else {
-      if (status) status.innerHTML = `<span style="color:var(--bp-sat)">⚠️ ${json.message || json.error || 'Hata'}</span>`;
-      if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
-    }
-  } catch (e) {
-    if (status) status.innerHTML = '<span style="color:var(--bp-sat)">⚠️ Bağlantı hatası, tekrar dene.</span>';
-    if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
-  }
-}
-
-function _hasPremiumAccess() {
-  // SPEC-001: Premium erişimi SADECE bp_premium_trial cookie ile verilir.
-  // Newsletter aboneliği (bp_sub / bp_sub_user) Premium erişimi VERMEZ — ayrı opt-in.
-  try {
-    if (document.cookie.match(/(?:^|;\s*)bp_premium_trial=1/)) return true;
-  } catch (_) {}
-  return false;
-}
-
-// SPEC-009 Aksiyon 1: Kullanıcı newsletter abonesi mi? (bp_sub cookie / bp_sub_user)
-// 3 durum state machine: A) anonim B) abone-basic C) premium. Premium CTA
-// banner'ı bu duruma göre bağlamsal mesaj gösterir (çelişkili mesaj çifti fix).
-function _isNewsletterSub() {
-  try {
-    if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return true;
-    const u = localStorage.getItem('bp_sub_user');
-    if (u && JSON.parse(u).subscribed) return true;
-  } catch (_) {}
-  return false;
-}
-// Premium CTA banner metni — duruma göre (premium kullanıcıya banner hiç gösterilmez).
-function _premiumCtaText() {
-  return _isNewsletterSub()
-    ? '✅ Aboneliğin aktif — Premium hisseleri de görmek için'   // B) abone-basic
-    : '🔒 Premium hisseleri görmek için';                          // A) anonim
-}
-
 function getSorted(arr) {
   // T3.6 (Master Dönüşüm Programı): birincil sıralama signal_strength (0-100, compose_score/app.py).
   // Önceki tierRank (premium/plus/standart) T3.3 ile tier filtresi sökülünce ölü taksonomiye dayanır
@@ -4051,10 +3926,6 @@ function renderTable() {
   const _tierLabels = { premium: '💎 PREMIUM', plus: '⭐ PLUS', standart: 'STANDART' };  // CPO-986 #8.1: kanonik 💎/⭐
   let _lastTier_mobile = '__init__';
   let _lastTier_desktop = '__init__';
-  /* SPEC-001 Faz 2: Premium access — false ise Premium rows blur + CTA */
-  const _premiumLocked = !_hasPremiumAccess();
-  const _premiumCount = tierCounts.premium || 0;
-
   /* ── Mobile card list ── */
   const mcList = document.getElementById('mobileCards');
   if (mcList) {
@@ -4129,17 +4000,9 @@ function renderTable() {
         if (_curTier !== _lastTier_mobile && _tierLabels[_curTier]) {
           const cnt = tierCounts[_curTier] || 0;
           mtHeader = `<div class="mc-tier-group tg-${_curTier}">${_tierLabels[_curTier]} <span class="tier-count">${cnt} hisse</span></div>`;
-          // Premium grup başlangıcında CTA göster (sadece locked + count>0)
-          if (_curTier === 'premium' && _premiumLocked && _premiumCount > 0) {
-            mtHeader += `<div class="mc-premium-cta">
-              <div class="premium-cta-content">${_premiumCtaText()}</div>
-              <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">💎 Premium'u Aç (ücretsiz)</button>
-            </div>`;
-          }
         }
         _lastTier_mobile = _curTier;
-        const _mcLocked = (_premiumLocked && s.tier === 'premium') ? 'tier-locked' : '';
-        return mtHeader + `<a class="mc ${sigClass} ${bpIsSignalFromToday(s.signal_date) ? 'mc-new' : ''} ${_mcLocked}" href="/hisse/${s.ticker}">
+        return mtHeader + `<a class="mc ${sigClass} ${bpIsSignalFromToday(s.signal_date) ? 'mc-new' : ''}" href="/hisse/${s.ticker}">
           <div class="mc-row1">
             <div class="mc-lft">
               <div class="mc-ticker">${s.ticker} ${wt}</div>${secHtml}${badgesHtml}
@@ -4161,7 +4024,7 @@ function renderTable() {
           <div class="mc-row2">
             <div style="display:flex;align-items:center;gap:7px">
               <span class="signal-badge signal-${s.signal}" style="font-size:10px" onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()">${sigIcon} ${sigLabel(s.signal)}</span>
-              ${confIcon}<div class="score-bar">${dots}</div>
+              ${confIcon}<div class="score-bar" role="img" aria-label="Güç: ${scoreVal}/3">${dots}</div>
             </div>
             <div class="mc-entry">${entryTxt}</div>
           </div>
@@ -4267,20 +4130,9 @@ function renderTable() {
     if (_curTierD !== _lastTier_desktop && _tierLabels[_curTierD]) {
       const cnt = tierCounts[_curTierD] || 0;
       _tierHeaderTr = `<tr class="tier-group-header tg-${_curTierD}"><td colspan="9">${_tierLabels[_curTierD]} <span class="tier-count">${cnt} hisse</span></td></tr>`;
-      // Premium başlangıcında CTA satırı
-      if (_curTierD === 'premium' && _premiumLocked && _premiumCount > 0) {
-        _tierHeaderTr += `<tr class="premium-cta-row"><td colspan="9">
-          <div class="premium-cta-content">
-            <span>${_premiumCtaText()}</span>
-            <button class="premium-cta-btn" onclick="event.preventDefault();event.stopPropagation();openPremiumModal()">💎 Premium'u Aç</button>
-            <strong>(ücretsiz)</strong>
-          </div>
-        </td></tr>`;
-      }
     }
     _lastTier_desktop = _curTierD;
-    const _trLocked = (_premiumLocked && s.tier === 'premium') ? 'tier-locked' : '';
-    return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''} ${_trLocked}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
+    return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
       <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20 (Backtest Win Rate %51.5)" style="color:var(--bp-volume);font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span title="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" title="${s.anomaly.reason}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
@@ -4288,7 +4140,7 @@ function renderTable() {
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile">${sigPriceHtml}</td>
       <td class="hide-mobile">${slHtml}</td>
-      <td class="hide-mobile"><div class="score-bar">${dots}</div></td>
+      <td class="hide-mobile"><div class="score-bar" role="img" aria-label="Güç: ${scoreVal}/${MAX_SCORE}">${dots}</div></td>
       <td class="hide-mobile"><div class="indicators">${indHtml}</div></td>
       <td><button class="alarm-btn ${isWatching ? 'watching' : ''}" id="ab-${s.ticker}"
           onclick="event.stopPropagation();toggleWatch('${s.ticker}')"
@@ -4464,13 +4316,17 @@ function resetFilters() {
 function sortTable(key) {
   if (sortKey === key) sortDir *= -1;
   else { sortKey = key; sortDir = 1; }
-  document.querySelectorAll('thead th').forEach(th =>
-    th.classList.remove('sorted-asc', 'sorted-desc')
-  );
+  document.querySelectorAll('#mainTable thead th').forEach(th => {
+    const btn = th.querySelector('.th-sort-btn');
+    if (btn) btn.classList.remove('sorted-asc', 'sorted-desc');
+    th.removeAttribute('aria-sort');
+  });
   const colMap = { ticker:0, price:1, change_pct:2, signal:3, signal_date:4, bull_score:7 };
   if (colMap[key] !== undefined) {
-    document.querySelectorAll('thead th')[colMap[key]]
-      .classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+    const th = document.querySelectorAll('#mainTable thead th')[colMap[key]];
+    const btn = th && th.querySelector('.th-sort-btn');
+    if (btn) btn.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+    if (th) th.setAttribute('aria-sort', sortDir === 1 ? 'ascending' : 'descending');
   }
   renderTable();
 }
@@ -4501,7 +4357,7 @@ async function manualRefresh() {
         <td class="hide-mobile"><div class="skeleton-cell sk-wide"></div></td>
         <td class="hide-mobile"><div class="skeleton-cell sk-wide"></div></td>
         <td class="hide-mobile"><div class="skeleton-cell sk-dots"></div></td>
-        <td class="hide-mobile"><div class="skeleton-cell" style="width:120px;height:14px;border-radius:4px"></div></td>
+        <td class="hide-mobile"><div class="skeleton-cell" style="width:120px;height:14px;border-radius:var(--bp-radius-4)"></div></td>
       </tr>`
     ).join('');
   }
@@ -4639,7 +4495,7 @@ function _syncPushWatchlist() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload),
     }).catch(() => {});
-  } catch(_) {}
+  } catch(_) { console.warn('push takip listesi senkronizasyonu basarisiz', _); }
 }
 
 function updateFabBadge() {
@@ -4714,7 +4570,7 @@ function renderAlarmPanel() {
         <div class="ap-pa-row">
           <span class="ap-pa-lbl" style="color:var(--bp-al)">▲ Üstü</span>
           <input class="ap-pa-input ${aboveHasAlarm ? 'has-alarm' : ''}" id="${aboveInputId}"
-            type="number" step="0.01" min="0"
+            type="number" step="0.01" min="0" aria-label="Üstü fiyat alarmı"
             placeholder="${aboveHasAlarm ? pa.above : '—'}"
             value="${aboveHasAlarm ? pa.above : ''}"
             onkeydown="if(event.key==='Enter')setPriceAlarm('${t}','above','${aboveInputId}')">
@@ -4725,7 +4581,7 @@ function renderAlarmPanel() {
         <div class="ap-pa-row">
           <span class="ap-pa-lbl" style="color:var(--bp-sat)">▼ Altı</span>
           <input class="ap-pa-input ${belowHasAlarm ? 'has-alarm' : ''}" id="${belowInputId}"
-            type="number" step="0.01" min="0"
+            type="number" step="0.01" min="0" aria-label="Altı fiyat alarmı"
             placeholder="${belowHasAlarm ? pa.below : '—'}"
             value="${belowHasAlarm ? pa.below : ''}"
             onkeydown="if(event.key==='Enter')setPriceAlarm('${t}','below','${belowInputId}')">
@@ -4820,7 +4676,7 @@ function showToast(msg) {
   if (!el) {
     el = document.createElement('div');
     el.id = 'bp-toast';
-    el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e3a62;color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:8px;padding:8px 16px;font-size:12px;z-index:1100;transition:opacity .3s;white-space:nowrap';
+    el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e3a62;color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:8px;padding:8px 16px;font-size:12px;z-index:var(--bp-z-local-toast);transition:opacity .3s;white-space:nowrap';
     document.body.appendChild(el);
   }
   el.textContent = msg;
@@ -4841,7 +4697,7 @@ updateFabBadge();
       if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return true;
       const u = localStorage.getItem('bp_sub_user');
       if (u && JSON.parse(u).subscribed) return true;
-    } catch (_) {}
+    } catch(_) { console.warn('hasNewsletterSub: bp_sub_user parse basarisiz', _); }
     return false;
   }
   function shouldShow() {
@@ -4881,7 +4737,7 @@ updateFabBadge();
 function dismissSubToast() {
   const el = document.getElementById('subToast');
   if (el) { el.classList.remove('visible'); }
-  try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) {}
+  try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz', e); }
 }
 
 /* MSG-098 soft auth: "Üye Girişi" — eski abone email ile re-recognize */
@@ -4908,12 +4764,12 @@ async function submitRecognize() {
           subscribed: true, email, name: json.name || '',
           first_name: (json.name || '').split(' ')[0], cachedAt: Date.now(),
         }));
-      } catch(_) {}
+      } catch(_) { console.warn('bp_sub_user onbellek kaydi basarisiz', _); }
       const _premMsg = json.premium_unlocked
         ? '<div style="font-size:11px;color:#ffc850;margin-top:4px">💎 Premium da açıldı — sayfa yenileniyor…</div>'
         : '<div style="font-size:11px;color:#64748b;margin-top:4px">Giriş yapıldı.</div>';
       if (toast) toast.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600;padding:4px 0">✅ Hoş geldin' + (json.name ? ' ' + json.name : '') + '!</div>' + _premMsg;
-      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(_) {}
+      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(_) { console.warn('abonelik toast kapatma kaydi basarisiz (recognize)', _); }
       // MSG-116 Bug E: premium açıldıysa reload (blur kalksın), yoksa sadece kapat
       if (json.premium_unlocked) {
         setTimeout(() => location.reload(), 1600);
@@ -4970,7 +4826,7 @@ async function submitToastSubscribe() {
         window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
       }
       if (toast) toast.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600;padding:4px 0">✅ ' + (json.message || 'Abone oldunuz!') + '</div><div style="font-size:11px;color:#64748b;margin-top:4px">Onay e-postası gönderildi.</div>';
-      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) {}
+      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz (subscribe)', e); }
       setTimeout(() => dismissSubToast(), 4000);
       // Ana subscription bar'ı da güncelle
       const bar = document.getElementById('subscribeBar');
@@ -5088,7 +4944,7 @@ function _renderGnmCard(item) {
   const kapLink = kapUrl
     ? `<a href="${_esc(kapUrl)}" target="_blank" rel="noopener noreferrer"
           class="gnm-kap-link"
-          onclick="event.stopPropagation()">KAP ↗</a>`
+          onclick="event.stopPropagation()">KAP <span aria-hidden="true">↗</span></a>`
     : '';
 
   /* ⚠️ CRITICAL: Outer element MUST be <div>, NOT <a>.
@@ -5200,7 +5056,7 @@ async function loadGundem(newsOnly) {
     if (pfEl)     pfEl.textContent     = d.al.profit_factor != null ? d.al.profit_factor : '—';
     if (bestEl)   bestEl.textContent   = d.al.best != null ? '+' + d.al.best + '%' : '—';
     badge.style.visibility = 'visible'; /* space already reserved — no CLS */
-  } catch(e) {}
+  } catch(e) { console.warn('backtest rozeti yuklenemedi', e); }
 })();
 
 /* ── PWA Install Banner (beforeinstallprompt) ──── */
@@ -5246,7 +5102,7 @@ async function _initPushButton() {
   try {
     _pushSubscription = await _swReg.pushManager.getSubscription();
     _updatePushBtn();
-  } catch(e) {}
+  } catch(e) { console.warn('push abonelik durumu kontrolu basarisiz', e); }
 }
 
 function _updatePushBtn() {
@@ -5540,7 +5396,7 @@ function hideSigTip() {
       }
     }
     if (bar) bar.style.visibility = 'visible'; /* space already reserved — no CLS */
-  } catch(e) {}
+  } catch(e) { console.warn('makro ozet cubugu yuklenemedi', e); }
 })();
 
 // ── Gündem Tab Switcher ─────────────────────────────────
@@ -5558,12 +5414,16 @@ function switchGnmTab(tab) {
   if (tab === 'makro') {
     btnMakro && btnMakro.classList.add('active');
     btnHisse && btnHisse.classList.remove('active');
+    btnMakro && btnMakro.setAttribute('aria-selected', 'true');
+    btnHisse && btnHisse.setAttribute('aria-selected', 'false');
     panelMakro.style.display = 'block';
     panelHisse.style.display = 'none';
     if (!_macroLoaded) loadMacroNews();
   } else {
     btnHisse && btnHisse.classList.add('active');
     btnMakro && btnMakro.classList.remove('active');
+    btnHisse && btnHisse.setAttribute('aria-selected', 'true');
+    btnMakro && btnMakro.setAttribute('aria-selected', 'false');
     panelHisse.style.display = 'block';
     panelMakro.style.display = 'none';
     if (!_hisseLoaded) loadGundem(false);
@@ -5585,7 +5445,7 @@ async function loadMacroNews() {
       const safeSrc   = _esc(item.source || '');
       const safeTitle = _esc(item.title  || '');
       const safeTime  = _esc(item.date_str || '');
-      return `<a href="${safeUrl}" target="_blank" rel="noopener" class="macro-news-item">
+      return `<a href="${safeUrl}" target="_blank" rel="noopener" class="macro-news-item" role="listitem">
         <span class="macro-news-src">${safeSrc}</span>
         <span class="macro-news-title">${safeTitle}</span>
         <span class="macro-news-time">${safeTime}</span>
@@ -5622,17 +5482,18 @@ document.addEventListener('keydown', e => {
 <script src="/static/bp-search.js?v=47" defer></script>
 <script src="/static/learning-mode.js?v=2" defer></script>
 {% include '_premium_modal.html' %}
-<script src="/static/js/toast.js?v=1"></script>
+<script src="/static/js/toast.js?v=3"></script>
+<script src="/static/js/focus-trap.js?v=1"></script>
 {% include '_mobile_nav_partial.html' %}
 <!-- F14: pull-to-refresh -->
 <style>
   #ptr-indicator {
-    display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+    display: none; position: fixed; top: 0; left: 0; right: 0; z-index:var(--bp-z-overlay);
     justify-content: center; align-items: center; height: 52px;
     background: rgba(var(--bp-bg-rgb),0.92); backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(var(--bp-al-rgb),0.25);
     color: var(--bp-al); font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: 13px; font-weight: 600; gap: 8px;
+    font-size: var(--bp-text-base); font-weight: 600; gap: 8px;
     transition: transform .2s ease;
   }
   #ptr-indicator.ptr-visible { display: flex; }

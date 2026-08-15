@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% block head %}<title>BIST100 Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>BIST100 Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
 <meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse zayıf trend? Bugün sinyal değişen hisseler.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/ozet">
@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810B">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,7 +28,7 @@
     color: var(--bp-text);
     font-family: 'Manrope', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
-    font-size: 14px;
+    font-size: var(--bp-text-md);
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -44,7 +44,7 @@
     gap: 16px;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index:var(--bp-z-dropdown);
   }
   .logo-link {
     display: flex; align-items: center; gap: 10px;
@@ -52,30 +52,30 @@
   }
   .logo-mark { width: 28px; height: 28px; flex-shrink: 0; }
   .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
-  .logo-name { font-size: 16px; font-weight: 700; color: var(--bp-text); letter-spacing: -0.3px; font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .logo-name { font-size: var(--bp-text-lg); font-weight: 700; color: var(--bp-text); letter-spacing: -0.3px; font-family: 'Space Grotesk', system-ui, sans-serif; }
   .logo-name strong { color: var(--bp-al); font-weight: 700; }
-  .logo-sub { font-size: 10px; color: var(--bp-text3); letter-spacing: 0.2px; }
+  .logo-sub { font-size: var(--bp-text-2xs); color: var(--bp-text3); letter-spacing: 0.2px; }
   .back-btn {
     display: flex; align-items: center; gap: 6px;
-    color: var(--bp-text2); font-size: 13px;
+    color: var(--bp-text2); font-size: var(--bp-text-base);
     text-decoration: none;
     padding: 5px 10px;
     border: 1px solid var(--bp-border);
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     background: var(--bp-surface2);
     transition: all 0.15s;
     white-space: nowrap;
   }
   .back-btn:hover { background: var(--bp-surface2); color: var(--bp-text); }
-  .page-title { font-size: 17px; font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .page-sub   { font-size: 11px; color: var(--bp-text3); margin-top: 1px; }
+  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .page-sub   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
   .top-nav-links { display:flex; gap:2px; align-items:center; }
-  .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
   .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
   @media (max-width:900px) { .top-nav-links { display:none; } }
 
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  .container { max-width: var(--bp-container-1100); margin: 0 auto; padding: 24px; }
 
   /* ── Sayaç kartları ── */
   .counter-grid {
@@ -90,14 +90,14 @@
   .counter-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px 14px;
     text-align: center;
     transition: border-color .15s;
   }
   .counter-card:hover { border-color: var(--bp-border2); }
-  .counter-num  { font-size: 36px; font-weight: 800; line-height: 1; font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .counter-lbl  { font-size: 11px; color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .counter-num  { font-size: var(--bp-text-36); font-weight: 800; line-height: 1; font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .counter-lbl  { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
   .num-al    { color: var(--bp-al); }
   .num-sat   { color: var(--bp-sat); }
   .num-bekle { color: var(--bp-bkl); }
@@ -107,12 +107,12 @@
   .section-box {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px;
     margin-bottom: 16px;
   }
   .section-title {
-    font-size: 11px;
+    font-size: var(--bp-text-xs);
     color: var(--bp-text3);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -128,7 +128,7 @@
   .stock-card {
     background: var(--bp-surface2);
     border: 1px solid var(--bp-border);
-    border-radius: 8px;
+    border-radius:var(--bp-radius-md);
     padding: 12px 13px;
     text-decoration: none;
     transition: border-color .15s, background .15s;
@@ -136,26 +136,26 @@
     min-width: 0;
   }
   .stock-card:hover { background: var(--bp-surface3); border-color: var(--bp-border2); }
-  .sc-ticker  { font-size: 14px; font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .sc-name    { font-size: 11px; color: var(--bp-text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .sc-ticker  { font-size: var(--bp-text-md); font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .sc-name    { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: var(--bp-text-xs); font-weight: 600; padding: 2px 8px; border-radius: var(--bp-radius-4); }
   .sc-al   { background: rgba(0,226,144,.10); color: #00e290; }
   .sc-sat  { background: rgba(var(--bp-sat-rgb),.15);  color: #ff7b72; }
   .sc-bekle{ background: rgba(var(--bp-text3-rgb),.12); color: #a8b2bc; }
-  .sc-meta { font-size: 11px; color: var(--bp-text3); margin-top: 4px; }
-  .sc-new  { font-size: 10px; color: var(--bp-gold); font-weight: 600; }
-  .sc-ret  { display: inline-block; font-size: 12px; font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+  .sc-meta { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 4px; }
+  .sc-new  { font-size: var(--bp-text-2xs); color: var(--bp-gold); font-weight: 600; }
+  .sc-ret  { display: inline-block; font-size: var(--bp-text-sm); font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: var(--bp-radius-4); font-variant-numeric: tabular-nums; }
   .sc-ret-pos { background: rgba(0,226,144,.10); color: #00e290; }
   .sc-ret-neg { background: rgba(var(--bp-sat-rgb),.15); color: #ff7b72; }
   .sc-ret-neu { background: rgba(var(--bp-text3-rgb),.1); color: #a8b2bc; }
 
-  .empty-msg { color: var(--bp-text3); font-size: 13px; text-align: center; padding: 20px; }
+  .empty-msg { color: var(--bp-text3); font-size: var(--bp-text-base); text-align: center; padding: 20px; }
 
   /* Piyasa barometresi */
   .barometer {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius: 10px;
+    border-radius:var(--bp-radius-lg);
     padding: 16px;
     margin-bottom: 16px;
   }
@@ -163,18 +163,18 @@
     position: relative;
     height: 10px;
     background: var(--bp-surface2);
-    border-radius: 5px;
+    border-radius: var(--bp-radius-5);
     overflow: hidden;
     margin: 10px 0;
   }
   .bar-al  { position: absolute; left: 0; top: 0; height: 100%; background: var(--bp-al); border-radius: 5px 0 0 5px; transition: width .4s; }
   .bar-sat { position: absolute; right: 0; top: 0; height: 100%; background: var(--bp-sat); border-radius: 0 5px 5px 0; transition: width .4s; }
-  .bar-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--bp-text3); }
+  .bar-labels { display: flex; justify-content: space-between; font-size: var(--bp-text-sm); color: var(--bp-text3); }
 
   footer {
     text-align: center;
     padding: 20px;
-    font-size: 12px;
+    font-size: var(--bp-text-sm);
     color: var(--bp-text3);
     border-top: 1px solid var(--bp-border);
     margin-top: 20px;
@@ -182,7 +182,7 @@
 
   @media (max-width: 600px) {
     .container { padding: 12px; }
-    .counter-num { font-size: 28px; }
+    .counter-num { font-size: var(--bp-text-28); }
     .stock-grid { grid-template-columns: repeat(2, 1fr); }
     .ozet-table-wrap, .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
     .ozet-table-wrap table, .table-wrap table { min-width:360px; }
@@ -194,45 +194,49 @@
     height:34px; overflow:hidden; position:relative; white-space:nowrap;
   }
   .macro-bar::before,.macro-bar::after {
-    content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2;
+    content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised);
   }
   .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
   .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
   .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:12px; height:34px; color:inherit; }
+    .macro-bar { position: relative; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
+  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
+  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:34px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-bkl); }
 
 
   /* ── Header Search Button ── */
-  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius: 6px; color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 8px; }
+  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius:var(--bp-radius); color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 8px; }
   .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
   /* ── Search Overlay ── */
-  .search-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
+  .search-overlay { display: none; position: fixed; inset: 0; z-index:var(--bp-z-overlay); background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
   .search-overlay.open { display: flex; }
-  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
+  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow: hidden; box-shadow: var(--bp-shadow-lg); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
   .search-input-wrap { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--bp-border); }
   .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
-  #searchInput { flex: 1; background: none; border: none; outline: none; font-size: 15px; color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }
+  #searchInput { flex: 1; background: none; border: none; outline: none; font-size: var(--bp-text-15); color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }
   #searchInput::placeholder { color: var(--bp-text3); }
-  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius:var(--bp-radius); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: var(--bp-text-md); flex-shrink: 0; }
   .search-close:hover { background: var(--bp-surface2); color: var(--bp-text); }
   .search-results { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
-  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: 13px; }
-  .search-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 10px; font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px 6px; }
-  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; transition: background .12s; font-size: 13px; }
+  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: var(--bp-text-base); }
+  .search-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-2xs); font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px 6px; }
+  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); transition: background .12s; font-size: var(--bp-text-base); }
   .search-result:hover, .search-result.sr-selected { background: var(--bp-surface2); }
-  .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: 13px; }
+  .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: var(--bp-text-base); }
   .sr-sig.sr-al { color: var(--bp-al); font-weight: 700; }
   .sr-sig.sr-sat { color: var(--bp-sat); font-weight: 700; }
   .sr-sig.sr-bekle { color: var(--bp-bkl); }
-  .sr-name { color: var(--bp-text2); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-  .sr-price { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--bp-text2); }
-  .sr-chg { font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600; min-width: 56px; text-align: right; }
+  .sr-name { color: var(--bp-text2); font-size: var(--bp-text-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .sr-price { font-variant-numeric: tabular-nums; font-size: var(--bp-text-sm); color: var(--bp-text2); }
+  .sr-chg { font-variant-numeric: tabular-nums; font-size: var(--bp-text-sm); font-weight: 600; min-width: 56px; text-align: right; }
   .sr-chg.pos { color: var(--bp-al); } .sr-chg.neg { color: var(--bp-sat); } .sr-chg.neu { color: var(--bp-bkl); }
-  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius: 8px; font-size: 13px; transition: background .12s; }
+  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); font-size: var(--bp-text-base); transition: background .12s; }
   .search-topic:hover, .search-topic.sr-selected { background: var(--bp-surface2); }
   @media (max-width: 600px) {
     .search-overlay { padding-top: 0; align-items: stretch; }
@@ -244,18 +248,18 @@
   /* ── Sektör Nabzı ── */
   .sector-nabzi { display:flex; flex-direction:column; gap:7px; }
   .sector-row { display:flex; align-items:center; gap:10px; }
-  .sr-name { font-size:12px; color:var(--bp-text2); width:130px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sr-name { font-size:var(--bp-text-sm); color:var(--bp-text2); width:130px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sr-bar-wrap { flex:1; }
-  .sr-bar { height:6px; background:var(--bp-surface2); border-radius:3px; overflow:hidden; }
-  .sr-fill { height:100%; border-radius:3px; transition:width 0.5s ease; }
+  .sr-bar { height:6px; background:var(--bp-surface2); border-radius:var(--bp-radius-sm); overflow:hidden; }
+  .sr-fill { height:100%; border-radius:var(--bp-radius-sm); transition:width 0.5s ease; }
   .sr-stats { width:72px; flex-shrink:0; display:flex; align-items:center; gap:5px; justify-content:flex-end; }
-  .sr-pct { font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; }
-  .sr-cnt { font-size:10px; color:var(--bp-text3); }
+  .sr-pct { font-size:var(--bp-text-sm); font-weight:700; font-variant-numeric:tabular-nums; }
+  .sr-cnt { font-size:var(--bp-text-2xs); color:var(--bp-text3); }
   .sr-al-c  { color:var(--bp-al); }
   .sr-mid-c { color:var(--bp-gold); }
   .sr-low-c { color:var(--bp-sat); }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 <!-- Mobile Bottom Navigation -->
@@ -293,10 +297,6 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <span>Tarama</span>
   </a>
-  <a href="/bilanco-takvimi" data-route="/bilanco-takvimi" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    <span>Bilanço</span>
-  </a>
   <a href="/sektor-harita" data-route="/sektor-harita" class="bp-nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
     <span>Sektörler</span>
@@ -315,17 +315,20 @@
       <svg class="bp-nav-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div class="bp-nav-more-menu">
-      <a href="/portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
-      <a href="/ozet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
-      <a href="/karsilastir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
-      <a href="/hisseler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
-      <a href="/gucu-yuksek"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Güçlü Trend</a>
-      <div class="bp-nav-sep"></div>
+      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">Piyasalar</div>
       <a href="/kripto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>Kripto</a>
       <a href="/emtialar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8"/></svg>Emtialar</a>
       <a href="/abd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>ABD</a>
-      <a href="/gundem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
       <div class="bp-nav-sep"></div>
+      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">Araçlar</div>
+      <a href="/portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
+      <a href="/karsilastir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
+      <a href="/hisseler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
+      <a href="/bilanco-takvimi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bilanço</a>
+      <div class="bp-nav-sep"></div>
+      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">İçerik</div>
+      <a href="/ozet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
+      <a href="/gundem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
       <a href="/metodoloji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Metodoloji</a>
       <a href="/hakkinda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Hakkında</a>
       <a href="/iletisim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>İletişim</a>
@@ -342,14 +345,14 @@
   <div style="display:flex;align-items:center;gap:8px">
     <select id="dateSelector"
       aria-label="Geçmiş özet tarihi seç"
-      style="background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text3);padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;outline:none"
+      style="background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text3);padding:6px 10px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);cursor:pointer;outline:none"
       onchange="goToDate(this.value)">
-      <option value="">📅 Geçmiş Tarih Seç</option>
+      <option value=""><span aria-hidden="true">📅</span> Geçmiş Tarih Seç</option>
     </select>
   </div>
 </div>
 <!-- Makro Ticker Bandı -->
-<div class="macro-bar"><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 <script>
 // Load available snapshot dates for the selector
 fetch('/api/ozet/snapshots').then(r=>r.json()).then(d=>{
@@ -375,7 +378,7 @@ function goToDate(date) {
 
 {% if loading %}
 <div style="text-align:center;padding:60px;color:#8b949e">
-  <div style="font-size:32px;margin-bottom:12px">⏳</div>
+  <div style="font-size:var(--bp-text-32);margin-bottom:12px">⏳</div>
   Sinyal verisi yükleniyor, lütfen bekleyin…
   <br><br>
   <a href="/" style="color:#58a6ff">Ana sayfaya dön</a>
@@ -384,31 +387,31 @@ function goToDate(date) {
 
 {% if historical_date is defined and historical_date %}
 <!-- Geçmiş tarih bandı -->
-<div style="background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.25);border-radius:8px;
+<div style="background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.25);border-radius:var(--bp-radius-md);
      padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-  <span style="font-size:18px">🗓</span>
+  <span style="font-size:var(--bp-text-xl)"><span aria-hidden="true">🗓</span></span>
   <div style="flex:1;min-width:0">
-    <span style="color:#f0a500;font-weight:700;font-size:13px">Geçmiş Görünüm — {{ historical_date }}</span>
-    <span style="color:#94a3b8;font-size:12px;margin-left:8px">Bu sayfa o güne ait anlık kaydı göstermektedir.</span>
+    <span style="color:#f0a500;font-weight:700;font-size:var(--bp-text-base)">Geçmiş Görünüm — {{ historical_date }}</span>
+    <span style="color:#94a3b8;font-size:var(--bp-text-sm);margin-left:8px">Bu sayfa o güne ait anlık kaydı göstermektedir.</span>
   </div>
-  <a href="/ozet" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:6px;
-     padding:5px 12px;font-size:12px;color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
-    ↩ Güncel Özete Dön
+  <a href="/ozet" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);
+     padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
+    <span aria-hidden="true">↩</span> Güncel Özete Dön
   </a>
 </div>
 {% endif %}
 
 <!-- Bilanço Sezonu Uyarısı (JS ile dinamik) -->
 <div id="bilancoBanner" style="display:none;background:rgba(var(--bp-brand-rgb),.06);border:1px solid rgba(var(--bp-brand-rgb),.18);
-     border-radius:8px;padding:10px 16px;margin-bottom:16px;align-items:center;gap:10px;flex-wrap:wrap">
-  <span style="font-size:18px">📊</span>
+     border-radius:var(--bp-radius-md);padding:10px 16px;margin-bottom:16px;align-items:center;gap:10px;flex-wrap:wrap">
+  <span style="font-size:var(--bp-text-xl)"><span aria-hidden="true">📊</span></span>
   <div style="flex:1;min-width:0">
-    <span id="bilancoBannerTitle" style="color:var(--bp-brand);font-weight:700;font-size:13px"></span>
-    <span id="bilancoBannerDesc" style="color:var(--bp-text3);font-size:12px;margin-left:8px"></span>
+    <span id="bilancoBannerTitle" style="color:var(--bp-brand);font-weight:700;font-size:var(--bp-text-base)"></span>
+    <span id="bilancoBannerDesc" style="color:var(--bp-text3);font-size:var(--bp-text-sm);margin-left:8px"></span>
   </div>
-  <a href="/bilanco-takvimi" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:6px;
-     padding:5px 12px;font-size:12px;color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
-    Takvime Bak →
+  <a href="/bilanco-takvimi" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);
+     padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
+    Takvime Bak <span aria-hidden="true">→</span>
   </a>
 </div>
 
@@ -428,7 +431,7 @@ function goToDate(date) {
   </div>
   <div class="counter-card">
     <div class="counter-num num-new">{{ new_signals|length }}</div>
-    <div class="counter-lbl">⚡ Yeni Sinyal</div>
+    <div class="counter-lbl"><span aria-hidden="true">⚡</span> Yeni Sinyal</div>
   </div>
 </div>
 
@@ -455,28 +458,28 @@ function goToDate(date) {
 {% set ideal_al = al_list | selectattr('entry_quality', 'equalto', 'IDEAL') | list %}
 {% if ideal_al %}
 <div class="section-box" style="margin-bottom:16px;border-color:rgba(var(--bp-al-rgb),.2);background:linear-gradient(135deg,rgba(var(--bp-al-rgb),.04),transparent)">
-  <div class="section-title" style="color:var(--bp-al);margin-bottom:10px">🎯 İdeal Giriş Noktası ({{ ideal_al|length }})</div>
+  <div class="section-title" style="color:var(--bp-al);margin-bottom:10px"><span aria-hidden="true">🎯</span> İdeal Giriş Noktası ({{ ideal_al|length }})</div>
   <div style="display:flex;flex-wrap:wrap;gap:8px">
     {% for s in ideal_al %}
-    <a href="/hisse/{{ s.ticker }}" style="display:inline-flex;align-items:center;gap:6px;background:#1c1b1f;border:1px solid rgba(0,226,144,.2);border-radius:7px;padding:5px 10px;text-decoration:none;transition:all .15s"
+    <a href="/hisse/{{ s.ticker }}" style="display:inline-flex;align-items:center;gap:6px;background:#1c1b1f;border:1px solid rgba(0,226,144,.2);border-radius:var(--bp-radius-7);padding:5px 10px;text-decoration:none;transition:all .15s"
        onmouseover="this.style.background='#201f21'" onmouseout="this.style.background='#1c1b1f'">
-      <span style="font-size:13px;font-weight:700;color:#f0f6fc">{{ s.ticker }}</span>
+      <span style="font-size:var(--bp-text-base);font-weight:700;color:#f0f6fc">{{ s.ticker }}</span>
       {% if s.signal_price and s.price %}
         {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
-        <span style="font-size:11px;font-weight:600;color:{% if ret >= 0 %}#00e290{% else %}#f85149{% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
+        <span style="font-size:var(--bp-text-xs);font-weight:600;color:{% if ret >= 0 %}#00e290{% else %}#f85149{% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
       {% endif %}
-      <span style="font-size:10px;color:#3fb950;font-weight:600">✅</span>
+      <span style="font-size:var(--bp-text-2xs);color:#3fb950;font-weight:600"><span role="img" aria-label="İdeal giriş sinyali">✅</span></span>
     </a>
     {% endfor %}
   </div>
-  <div style="font-size:11px;color:var(--bp-text3);margin-top:10px">✅ İdeal: Supertrend + ADX güçlü + Fiyat giriş bölgesinde · <a href="/" style="color:#58a6ff;text-decoration:none">Detaylı filtrele →</a></div>
+  <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:10px"><span aria-hidden="true">✅</span> İdeal: Supertrend + ADX güçlü + Fiyat giriş bölgesinde · <a href="/" style="color:#58a6ff;text-decoration:none">Detaylı filtrele <span aria-hidden="true">→</span></a></div>
 </div>
 {% endif %}
 
 <!-- Sektör Sinyal Nabzı -->
 {% if total > 0 %}
 <div class="section-box" style="margin-bottom:20px">
-  <div class="section-title">🏭 Sektör Sinyal Nabzı</div>
+  <div class="section-title"><span aria-hidden="true">🏭</span> Sektör Sinyal Nabzı</div>
   <div class="sector-nabzi" id="sectorNabzi">
     {% for sector_name, sector_stocks in stocks|groupby('sector') %}
     {% set ns = namespace(al=0) %}
@@ -503,7 +506,7 @@ function goToDate(date) {
 <!-- Bugün sinyal değişenler -->
 {% if new_signals %}
 <div class="section-box">
-  <div class="section-title">⚡ Bugün Sinyal Değişenler</div>
+  <div class="section-title"><span aria-hidden="true">⚡</span> Bugün Sinyal Değişenler</div>
   <div class="stock-grid">
     {% for s in new_signals %}
     <a href="/hisse/{{ s.ticker }}" class="stock-card">
@@ -513,7 +516,7 @@ function goToDate(date) {
         {{ '▲' if s.signal == 'AL' else '▼' if s.signal == 'SAT' else '●' }}
         {{ s.signal|signal_label }}
       </div>
-      <div class="sc-new">⚡ Bugün oluştu</div>
+      <div class="sc-new"><span aria-hidden="true">⚡</span> Bugün oluştu</div>
     </a>
     {% endfor %}
   </div>
@@ -593,29 +596,29 @@ function goToDate(date) {
 <!-- E-posta Abonelik CTA -->
 <div style="max-width:800px;margin:0 auto 28px auto;padding:0 20px">
   <div id="ozSubBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.05),rgba(var(--bp-al-rgb),.03));
-       border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:10px;padding:16px 20px;
+       border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:var(--bp-radius-lg);padding:16px 20px;
        display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
-      <div style="font-size:14px;font-weight:700;color:var(--bp-text);margin-bottom:3px">📬 Günlük Özeti E-postayla Al</div>
-      <div style="font-size:12px;color:var(--bp-text3)">Her sabah BIST sinyal özeti gelen kutunuzda — ücretsiz, iptal her zaman.</div>
+      <div style="font-size:var(--bp-text-md);font-weight:700;color:var(--bp-text);margin-bottom:3px"><span aria-hidden="true">📬</span> Günlük Özeti E-postayla Al</div>
+      <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Her sabah BIST sinyal özeti gelen kutunuzda — ücretsiz, iptal her zaman.</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px" id="ozSubForm">
-      <input id="ozSubEmail" type="email" placeholder="e-posta adresiniz"
-        style="flex:1;background:#1c1b1f;border:1px solid #2a2a2c;color:#e5e1e4;
-               padding:8px 12px;border-radius:7px;font-size:13px;font-family:inherit;outline:none;
+      <input id="ozSubEmail" type="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
+        style="flex:1;background:#1c1b1f;border:1px solid var(--bp-border);color:#e5e1e4;
+               padding:8px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-family:inherit;outline:none;
                transition:border-color .15s;min-width:0"
-        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='#2a2a2c'"
+        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')ozSubmitSub()">
       <button onclick="ozSubmitSub()"
-        style="background:#b8c3ff;color:#0e0e12;border:none;padding:8px 18px;border-radius:7px;
-               font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
+        style="background:#b8c3ff;color:#0e0e12;border:none;padding:8px 18px;border-radius:var(--bp-radius-7);
+               font-size:var(--bp-text-base);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
                transition:background .15s"
         onmouseover="this.style.background='#c8d1ff'" onmouseout="this.style.background='#b8c3ff'">
         Abone Ol
       </button>
     </div>
     <button onclick="document.getElementById('ozSubBar').style.display='none'"
-      style="background:none;border:none;color:var(--bp-border2);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;flex-shrink:0"
+      style="background:none;border:none;color:var(--bp-border2);cursor:pointer;font-size:var(--bp-text-xl);line-height:1;padding:2px 6px;flex-shrink:0"
       title="Kapat">×</button>
   </div>
 </div>
@@ -634,13 +637,13 @@ function goToDate(date) {
     <a href="/gizlilik" style="color:#8b949e">Gizlilik</a> ·
     <a href="/iletisim" style="color:#8b949e">İletişim</a>
   </div>
-  ⚠️ Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir. · © 2026 borsapusula.com
+  <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir. · © 2026 borsapusula.com
 </footer>
 <script>
 const _ML = BP_ASSET_LABELS;
 const _MD = BP_ASSET_DECIMALS;
-async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e){}}
-loadMacroBar();setInterval(loadMacroBar,60000);
+async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e) { console.error('makro ticker verisi yuklenemedi', e); }}
+loadMacroBar();setInterval(loadMacroBar,180000);
 
 // Bilanço sezonu uyarısı — yaklaşan dönem varsa göster
 (async function(){
@@ -672,7 +675,7 @@ loadMacroBar();setInterval(loadMacroBar,60000);
         return;
       }
     }
-  } catch(e) {}
+  } catch(e) { console.warn('bilanco takvimi banner verisi yuklenemedi', e); }
 })();
 
 // Sort sector rows by AL% descending

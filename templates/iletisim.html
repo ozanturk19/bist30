@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% block head %}<title>İletişim | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>İletişim | BorsaPusula</title>
 <meta name="description" content="borsapusula.com iletişim sayfası. Öneri, hata bildirimi veya genel sorularınız için bize ulaşın.">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <link rel="canonical" href="https://borsapusula.com/iletisim">
@@ -15,38 +15,38 @@
   {"@type":"ListItem","position":2,"name":"İletişim","item":"https://borsapusula.com/iletisim"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810B">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bp-bg); color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.7; min-height: 100vh; }
-  header { background: #161b22; border-bottom: 1px solid #30363d; padding: 14px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
-  .back-btn { display: flex; align-items: center; gap: 6px; color: #8b949e; font-size: 13px; text-decoration: none; padding: 5px 10px; border: 1px solid #30363d; border-radius: 6px; background: #21262d; transition: all 0.15s; }
+  body { background: var(--bp-bg); color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; font-size: var(--bp-text-md); line-height: 1.7; min-height: 100vh; }
+  header { background: #161b22; border-bottom: 1px solid #30363d; padding: 14px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index:var(--bp-z-dropdown); }
+  .back-btn { display: flex; align-items: center; gap: 6px; color: #8b949e; font-size: var(--bp-text-base); text-decoration: none; padding: 5px 10px; border: 1px solid #30363d; border-radius:var(--bp-radius); background: #21262d; transition: all 0.15s; }
   .back-btn:hover { background: #30363d; color: #e6edf3; }
-  .page-title { font-size: 20px; font-weight: 700; color: #f0f6fc; }
+  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: #f0f6fc; }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
   @media (max-width:780px) { .top-nav-links { display:none; } }
-  .container { max-width: 680px; margin: 0 auto; padding: 40px 24px; }
-  .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 28px; }
-  h2 { font-size: 18px; font-weight: 700; color: #f0f6fc; margin-bottom: 8px; }
+  .container { max-width: var(--bp-container-680); margin: 0 auto; padding: 40px 24px; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius:var(--bp-radius-xl); padding: 28px; }
+  h2 { font-size: var(--bp-text-xl); font-weight: 700; color: #f0f6fc; margin-bottom: 8px; }
   p  { color: #c9d1d9; margin-bottom: 14px; }
   .contact-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #21262d; }
   .contact-row:last-child { border-bottom: none; }
-  .contact-icon { font-size: 22px; flex-shrink: 0; }
-  .contact-lbl  { font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.4px; }
-  .contact-val  { font-size: 14px; color: #58a6ff; }
+  .contact-icon { font-size: var(--bp-text-22); flex-shrink: 0; }
+  .contact-lbl  { font-size: var(--bp-text-xs); color: #8b949e; text-transform: uppercase; letter-spacing: 0.4px; }
+  .contact-val  { font-size: var(--bp-text-md); color: #58a6ff; }
   .contact-val a { color: #58a6ff; text-decoration: none; }
   .contact-val a:hover { text-decoration: underline; }
-  .disclaimer { background: rgba(var(--bp-sat-rgb),.06); border: 1px solid rgba(var(--bp-sat-rgb),.2); border-radius: 8px; padding: 14px 16px; color: #c9d1d9; font-size: 13px; margin-top: 24px; }
-  footer { text-align: center; padding: 20px; font-size: 12px; color: #484f58; border-top: 1px solid #21262d; margin-top: 32px; }
+  .disclaimer { background: rgba(var(--bp-sat-rgb),.06); border: 1px solid rgba(var(--bp-sat-rgb),.2); border-radius:var(--bp-radius-md); padding: 14px 16px; color: #c9d1d9; font-size: var(--bp-text-base); margin-top: 24px; }
+  footer { text-align: center; padding: 20px; font-size: var(--bp-text-sm); color: var(--bp-text3); border-top: 1px solid #21262d; margin-top: 32px; }
   footer a { color: #8b949e; text-decoration: none; }
   @media (max-width: 600px) { .container { padding: 16px; } }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:6px;color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
-{% with hdr_title = '📬 İletişim' %}{% include '_header.html' %}{% endwith %}
+{% with hdr_icon = '📬', hdr_title = 'İletişim' %}{% include '_header.html' %}{% endwith %}
 <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">İletişim</h1>
 
 
@@ -56,7 +56,7 @@
     <p>Hata bildirimi, öneri veya işbirliği için formu doldurun. Genellikle 1–3 iş günü içinde yanıt veriyoruz.</p>
 
     <div class="contact-row">
-      <div class="contact-icon">📧</div>
+      <div class="contact-icon"><span aria-hidden="true">📧</span></div>
       <div>
         <div class="contact-lbl">E-posta</div>
         <div class="contact-val"><a href="mailto:iletisim@borsapusula.com">iletisim@borsapusula.com</a></div>
@@ -70,17 +70,17 @@
     <form id="contactForm" onsubmit="submitForm(event)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
         <div>
-          <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Ad Soyad</label>
-          <input id="cfName" type="text" required placeholder="Adınız" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none;transition:border-color .15s">
+          <label for="cfName" style="font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Ad Soyad</label>
+          <input id="cfName" type="text" required placeholder="Adınız" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:var(--bp-text-base);outline:none;transition:border-color .15s">
         </div>
         <div>
-          <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">E-posta</label>
-          <input id="cfEmail" type="email" required placeholder="ornek@mail.com" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none;transition:border-color .15s">
+          <label for="cfEmail" style="font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">E-posta</label>
+          <input id="cfEmail" type="email" required placeholder="ornek@mail.com" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:var(--bp-text-base);outline:none;transition:border-color .15s">
         </div>
       </div>
       <div style="margin-bottom:12px">
-        <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Konu</label>
-        <select id="cfSubject" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none">
+        <label for="cfSubject" style="font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Konu</label>
+        <select id="cfSubject" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:var(--bp-text-base);outline:none">
           <option value="Hata bildirimi">🐛 Hata bildirimi</option>
           <option value="Öneri">💡 Öneri</option>
           <option value="Veri hatası">📊 Veri hatası</option>
@@ -89,13 +89,13 @@
         </select>
       </div>
       <div style="margin-bottom:16px">
-        <label style="font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Mesaj</label>
-        <textarea id="cfMessage" required rows="5" placeholder="Mesajınızı buraya yazın..." style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:9px 12px;color:#e6edf3;font-size:13px;outline:none;resize:vertical;font-family:inherit;transition:border-color .15s"></textarea>
+        <label for="cfMessage" style="font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Mesaj</label>
+        <textarea id="cfMessage" required rows="5" placeholder="Mesajınızı buraya yazın..." style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:var(--bp-text-base);outline:none;resize:vertical;font-family:inherit;transition:border-color .15s"></textarea>
       </div>
-      <button type="submit" id="cfBtn" style="background:#1f6feb;color:#fff;border:none;border-radius:6px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s">
-        Gönder →
+      <button type="submit" id="cfBtn" style="background:#1f6feb;color:#fff;border:none;border-radius:var(--bp-radius);padding:10px 24px;font-size:var(--bp-text-base);font-weight:600;cursor:pointer;transition:background .15s">
+        Gönder <span aria-hidden="true">→</span>
       </button>
-      <div id="cfMsg" style="margin-top:12px;font-size:13px;display:none"></div>
+      <div id="cfMsg" style="margin-top:12px;font-size:var(--bp-text-base);display:none"></div>
     </form>
   </div>
 <style>
@@ -127,7 +127,7 @@ async function submitForm(e) {
     const d = await res.json();
     if (d.ok) {
       document.getElementById('contactForm').innerHTML =
-        '<div style="color:#3fb950;padding:24px;text-align:center;font-size:15px;line-height:1.6">✅ Mesajınız iletildi.<br><span style="font-size:13px;color:#8b949e">1–3 iş günü içinde yanıt veriyoruz.</span></div>';
+        '<div style="color:#3fb950;padding:24px;text-align:center;font-size:var(--bp-text-15);line-height:1.6">✅ Mesajınız iletildi.<br><span style="font-size:13px;color:#8b949e">1–3 iş günü içinde yanıt veriyoruz.</span></div>';
     } else {
       msg.style.display = 'block';
       msg.style.color = 'var(--bp-sat)';
@@ -146,7 +146,7 @@ async function submitForm(e) {
 </script>
 
   <div class="disclaimer">
-    ⚠️ <strong>Önemli:</strong> Bu platform algoritmik bir araçtır. Yatırım tavsiyesi verilmez.
+    <span aria-hidden="true">⚠️</span> <strong>Önemli:</strong> Bu platform algoritmik bir araçtır. Yatırım tavsiyesi verilmez.
     Finansal danışmanlık talepleri yanıtlanmaz. Hisse veya piyasa yorumu için lütfen lisanslı
     bir yatırım danışmanına başvurun.
   </div>

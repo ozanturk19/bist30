@@ -9,7 +9,7 @@
       c.id = CONTAINER_ID;
       c.setAttribute('role', 'status');
       c.setAttribute('aria-live', 'polite');
-      c.style.cssText = 'position:fixed;bottom:24px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none';
+      c.style.cssText = 'position:fixed;bottom:24px;right:20px;z-index:var(--bp-z-toast);display:flex;flex-direction:column;gap:8px;pointer-events:none';
       document.body.appendChild(c);
     }
     return c;
@@ -32,7 +32,7 @@
       'border-left:3px solid ' + col.border,
       'color:#e5e1e4',
       'padding:10px 16px',
-      'border-radius:8px',
+      'border-radius:var(--bp-radius-md)',
       'font-size:13px',
       'font-weight:600',
       'box-shadow:0 4px 20px rgba(0,0,0,0.45)',

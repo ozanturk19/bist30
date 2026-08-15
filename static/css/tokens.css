@@ -15,6 +15,7 @@
   /* Borders */
   --bp-border:    #2a2a2c;
   --bp-border2:   #46464d;
+  --bp-border-subtle: #21262d;
 
   /* Text */
   --bp-text:      #e5e1e4;
@@ -193,10 +194,32 @@
        11px:284  13px:271  12px:254  10px:112  14px:84  16px:35
        18px:34   15px:30   20px:28   22px:20   17px:10
 
-     DRIFT KAYDI: yarım-piksel değerler canlıda mevcut —
-       12.5px:10  11.5px:8  10.5px:8  14.5px:1  13.5px:1  (28 kullanım)
-     Bunlar tasarım kararı değil kopyala-yapıştır artığı; token
-     yok, T1.5'te en yakın tam basamağa çekilecekler.
+     DRIFT KAYDI KAPANDI - templates/ (DEV2-078, 13.08.2026): yarım-piksel
+     değerler en yakın tam basamağa çekildi (12.5->base 13.5->md 14.5->15,
+     round-half-up). Ayrıca 15px/22px sistemik boşluk-doldurucu değerler
+     için 2 yeni basamak eklendi (bkz. yukarıdaki --bp-text-15/22).
+     app.py'deki e-posta üretim fonksiyonları (_build_welcome_email vb.)
+     KASITLI HARİÇ: e-posta istemcileri CSS custom property'yi güvenilir
+     render etmiyor (Outlook/bazı mobil mail app), o katman ham px kalır.
+
+     17px KAPANDI (DEV2-079, 14.08.2026): orijinal ölçümdeki 10 kullanım
+     heterojendi. close-ikon (blog_article.html) xl(18)'e yuvarlandı - 3
+     bağımsız emsal (.alert-modal-close/.ap-close/portfolio cloud-close)
+     ile doğrulandı. page-title (ozet.html/sektor_harita.html) ve h2
+     (gizlilik.html) ilk turda numerik yakınlığa göre yuvarlandı (17->18)
+     ama Workflow adversarial-review'in semantic-snap-risk lensi bunun
+     GERÇEK peer-konvansiyonla çeliştiğini kanıtladı: page-title 19
+     şablonun 12'sinde 2xl(20) kullanıyor (xl(18) yalnız 3 şablonda) -
+     yuvarlama page-title'ı azınlık kalıbına kilitliyordu, düzeltildi:
+     2xl(20). h2 emsali yanlış seçilmişti (.faq-section-title gerçek h2
+     değil) - gerçek h2 peer'ları (hakkinda/metodoloji/iletisim) hepsi
+     xl(18) kullanıyor, düzeltildi: xl(18). Geriye kalan 4 kullanım
+     (mc-ticker/mc-price/sec-col-name/header-name) hiçbir mevcut basamağa
+     net oturmuyordu (kanıtsız yuvarlama riskli) - bu 4'ü sıfır görsel
+     değişiklikle --bp-text-17'ye tokenize edildi.
+     19px KAPANDI: premium-modal-title (index.html + duplike
+     _premium_modal.html) 2xl(20)'ye, mobil 480px override'i 17->xl(18)'e
+     yuvarlandı.
 
      Taban 13px (en yoğun gövde boyutu), 11px arayüz etiketi. */
   --bp-text-2xs:  10px;
@@ -204,10 +227,31 @@
   --bp-text-sm:   12px;
   --bp-text-base: 13px;
   --bp-text-md:   14px;
+  --bp-text-15:   15px;  /* DEV2-078: md(14)/lg(16) arasi bosluk - 30 kullanim */
   --bp-text-lg:   16px;
+  --bp-text-17:   17px;  /* DEV2-079: lg(16)/xl(18) arasi, ankor bulunamayan 4 kullanim (mc-ticker/mc-price/sec-col-name/header-name) */
   --bp-text-xl:   18px;
   --bp-text-2xl:  20px;
+  --bp-text-22:   22px;  /* DEV2-078: 2xl(20)/3xl(24) arasi bosluk - 19 kullanim */
   --bp-text-3xl:  24px;
+
+  /* 26-42px "display" ailesi KAPANDI (DEV2-080, 14.08.2026): 3xl(24)
+     ustunde 28 ham kullanim, 8 ayrik deger. Iki alt-aile ayirt edildi:
+     hero-stat/fiyat degerleri (26/28/32/34/36px, ayni class-adi farkli
+     sablonlarda ayni deger - gercek drift yok) ve dekoratif empty-state
+     ikonlari (32/36/40/42px, 8 cagri yerinde 4 farkli deger, kucuk
+     cogunluk yok - snap icin yeterli emsal kaniti bulunamadi). Her iki
+     alt-aile de GORSEL DEGISIKLIK OLMADAN mevcut degerleriyle tokenize
+     edildi; ikon ailesindeki tutarsizlik ayri bir tasarim karari
+     gerektirir, bu turun kapsami degil. */
+  --bp-text-26:   26px;  /* DEV2-080: hero-title/stat-deger, 6 kullanim */
+  --bp-text-28:   28px;  /* DEV2-080: stat-deger/baslik, 6 kullanim */
+  --bp-text-32:   32px;  /* DEV2-080: stat-deger/ikon, 3 kullanim */
+  --bp-text-34:   34px;  /* DEV2-080: stat-deger, 1 kullanim */
+  --bp-text-36:   36px;  /* DEV2-080: stat-deger/ikon, 5 kullanim */
+  --bp-text-38:   38px;  /* DEV2-080: premium-modal-icon (2 kopya), 2 kullanim */
+  --bp-text-40:   40px;  /* DEV2-080: empty-state ikon, 4 kullanim */
+  --bp-text-42:   42px;  /* DEV2-080: JS-injected onay ikonu, 1 kullanim */
 
   /* ── 3. YAZI AĞIRLIĞI (font-weight) ───────────────────────────
      ÖLÇÜM (556 kullanım): 700:247  600:206  500:55  800:39  400:7
@@ -242,6 +286,13 @@
   --bp-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.40);
   --bp-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
   --bp-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.60);
+  --bp-shadow-dropdown: 0 12px 32px rgba(0, 0, 0, 0.55);
+  /* FAZ8 kutu-golge konsolidasyonu -- alttan-sabit elemanlar (bottom sheet,
+     sticky CTA bar) yukari dogru golge atar, mevcut 4 token'in hicbiri
+     negatif y-offset tasimiyor. Iki yon-varyanti: -sm kucuk sticky bar,
+     -lg genis bottom sheet. Tier'e yeni buyukluk eklemiyor, yon ekliyor. */
+  --bp-shadow-up-sm: 0 -4px 18px rgba(0, 0, 0, 0.40);
+  --bp-shadow-up-lg: 0 -10px 40px rgba(0, 0, 0, 0.50);
 
   /* Anlamsal (sinyal) gölgeler — mevcut canlı değerlerden birebir.
      Renk kaynağı yukarıdaki --bp-al / --bp-sat / --bp-volume. */
@@ -264,6 +315,33 @@
   --bp-z-overlay:  300;
   --bp-z-modal:    1000;
   --bp-z-toast:    9999;
+  --bp-z-tooltip:    9000;
+  --bp-z-modal-top:  9998;
+  /* Yerel yigin baglami — .macro-pause-btn (16 sablon), global katmanla yarismaz.
+     Deger DEGISTIRILMEDI (3), yalniz isimlendirildi. DEV2-050/053. */
+  --bp-z-local-control: 3;
+
+  /* ── 6.1 T1.5 SONRASI KUYRUK — deger korunarak isimlendirildi (DEV2, FAZ8) ──
+     Yukaridaki yorumun kurali izlendi: ara deger sablonda YAZILMIYOR, burada
+     isimli basamak olarak tanimlaniyor. 19 ham kullanim / 9 sablon + bp-search.js,
+     16 yeni token. Hicbir sayisal deger DEGISTIRILMEDI (T1.4/T5.1/FAZ8 radius ile
+     ayni yontem), yalniz merkezi tek kaynaga tasindi. */
+  --bp-z-nav-dropdown:      500;  /* .nav-dropdown-menu — index/hisse/varlik (3) */
+  --bp-z-search-dropdown:   400;  /* .search-ac — index */
+  --bp-z-fab-up:            400;  /* .bp-fab-up — hisse */
+  --bp-z-modal-backdrop:  10001;  /* .alert-modal-backdrop — index */
+  --bp-z-alarm-panel:       999;  /* .alarm-panel — index */
+  --bp-z-alarm-fab:         998;  /* .alarm-fab — index */
+  --bp-z-sub-toast:         997;  /* .sub-toast — index */
+  --bp-z-page-toast:        999;  /* .hib-toast / .import-toast — hisse+portfolio (2) */
+  --bp-z-local-toast:      1100;  /* #bp-toast (showToast JS) — index */
+  --bp-z-bottom-cta:        450;  /* .bp-bottom-cta — hisse */
+  --bp-z-sticky-subheader:   90;  /* .bp-segments — hisse */
+  --bp-z-sheet:             260;  /* .mbn-sheet — mobile nav partial */
+  --bp-z-sheet-backdrop:    250;  /* .mbn-sheet-backdrop — mobile nav partial */
+  --bp-z-trend-strip:         5;  /* .bp-trend-strip — bp-search.js enjeksiyonu */
+  --bp-z-chart-legend:       30;  /* yerel grafik legend overlay — index (JS) */
+  --bp-z-chart-date-label:   20;  /* yerel grafik tarih etiketi — hisse (JS) */
 
   /* ── 7. SÜRE + YUMUŞATMA (duration / easing) ──────────────────
      ÖLÇÜM süre (~300 kullanım): .15s:226  .2s:25  .12s:17  .25s:7
@@ -288,12 +366,32 @@
                            2px:16   14px:13  5px:10  16px:5
      Mevcut --bp-radius (6px) ve --bp-radius-sm (3px) KORUNDU —
      yukarıdaki renk bloğunda tanımlılar, 149+28 kullanım onlara
-     bağlı, yeniden tanımlanmıyor. Üstüne basamak eklendi. */
+     bağlı, yeniden tanımlanmıyor. Üstüne basamak eklendi.
+     FAZ8 ek (4px/7px kapatma): 4px:44 ve 7px:27 ilk turda dışarıda
+     kalmıştı (yalnız "yuvarlak" ondalıklar 2/3/6/8/10/12/999
+     kapsanmıştı) — aynı font-size 15/22-17/19-26/42px kapatma
+     desenindeki gibi ikinci turda tamamlandı, DEĞER KORUNDU. */
   --bp-radius-xs:   2px;
+  --bp-radius-4:    4px;
   --bp-radius-md:   8px;
+  --bp-radius-7:    7px;
   --bp-radius-lg:   10px;
   --bp-radius-xl:   12px;
   --bp-radius-pill: 999px;
+
+  /* ── T1.4 kategori-2 kuyruk (FAZ8, DEV2) — duz <style> blogu, tekil deger,
+     compound/JS-gomulu DEGIL. Deger korunur, yalniz isimlendirilir (ayni
+     yontem: 4px/7px turu). 20px yogunlugu yuksek (18 kullanim) — pill
+     esdegeri olabilir (--bp-radius-pill:999px, kucuk yukseklikte ayni
+     render) ama bu HENUZ per-ornek yukseklik dogrulamasi YAPILMADI, bu
+     yuzden deger DEGISTIRILMEDI, ayri backlog sorusu olarak kaliyor. */
+  --bp-radius-1:    1px;
+  --bp-radius-5:    5px;
+  --bp-radius-9:    9px;
+  --bp-radius-11:  11px;
+  --bp-radius-14:  14px;
+  --bp-radius-16:  16px;
+  --bp-radius-20:  20px;
 
   /* ── 9. KIRILMA NOKTALARI (breakpoint) ────────────────────────
      ÖLÇÜM (127 @media kuralı): 900px:25  768px:25  600px:22
@@ -316,6 +414,28 @@
   --bp-bp-sm: 600px;
   --bp-bp-md: 768px;
   --bp-bp-lg: 900px;
+
+  /* ── 12. KONTEYNER GENISLIGI (container max-width) ─────────────
+     OLCUM (22 sablon, .container{} kurali): 1100px:8  820px:4
+       1200px:4  1400px:2  860px:2  900px:1  680px:1
+     T5.1 kabul olcutu: "tek max-width token seti". 7 deger BILEREK
+     ayri tutuldu (820 vs 860 farkli sablon gruplarinin bilinen
+     genisligi, snap edilmedi) -- yalniz max-width tokenize edildi,
+     margin/padding sablon-ozel kalir (T5.1 kapsami degil).
+     2 ek deger (640/720px) main{} sayfa-sarmalayicilarindan
+     (404/profil.html, T5.1'in .container{} secici kapsami disinda
+     kalmisti) ayni mekanik yontemle eklendi -- her biri tek sablonda
+     kullanilir, deger DEGISTIRILMEDI. 1600px token'i T4.1'de
+     heatmap.html ile birlikte kaldirildi (tek tuketicisiydi). */
+  --bp-container-640:  640px;
+  --bp-container-680:  680px;
+  --bp-container-720:  720px;
+  --bp-container-820:  820px;
+  --bp-container-860:  860px;
+  --bp-container-900:  900px;
+  --bp-container-1100: 1100px;
+  --bp-container-1200: 1200px;
+  --bp-container-1400: 1400px;
 
   /* ── 10. RENK ──────────────────────────────────────────────────
      Yukarıdaki ilk blokta tanımlı (arka plan, kenarlık, metin,
@@ -370,6 +490,21 @@ footer a[href="/kripto"]::after, footer a[href="/emtialar"]::after, footer a[hre
    burada tek satirla kapsaniyor. Makro seridin duraklat/oynat dugmesi
    (ayri backlog kalemi) bunun yerine gecmez — bu yalnizca "hareketi
    fiziksel olarak azalt" kismi, gorunur kontrol UI'si degil. */
+/* ── FAZ8 T5.3 — erisilebilirlik yardimci sinifi ──────────────
+   Ekran okuyucu icin gorunur, gorsel olarak gizli icerik
+   (tablo caption'lari, ikon-only baslik etiketleri). ─────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

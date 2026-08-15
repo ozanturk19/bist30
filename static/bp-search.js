@@ -18,7 +18,7 @@
   var CSS = ''
     + '.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer;transition:all .15s;flex-shrink:0;padding:0;font-family:inherit}'
     + '.header-search-btn:hover{background:#1c1b1f;border-color:#46464d;color:#e5e1e4}'
-    + '.bp-search-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding-top:80px}'
+    + '.bp-search-overlay{display:none;position:fixed;inset:0;z-index:var(--bp-z-overlay);background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding-top:80px}'
     + '.bp-search-overlay.open{display:flex}'
     + '.bp-search-modal{width:min(560px,calc(100vw - 32px));background:#141416;border:1px solid #2a2a2c;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);max-height:calc(100vh - 120px);display:flex;flex-direction:column}'
     + '.bp-search-input-wrap{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid #2a2a2c}'
@@ -49,7 +49,7 @@
     /* ── Mobile bottom-nav thumb-friendly: bigger inner + breathing room ── */
     + '@media (max-width:768px){.mbn-inner{height:72px !important;padding-bottom:8px !important}.mbn-item{padding-top:6px !important}body{padding-bottom:calc(72px + 8px + env(safe-area-inset-bottom)) !important}}'
     /* ── Trend Strip (dynamic ticker chips replacing static "Popüler") ── */
-    + '.bp-trend-strip{display:flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(14,14,18,0.85);border-bottom:1px solid #2a2a2c;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;white-space:nowrap;position:relative;z-index:5;min-height:40px}'
+    + '.bp-trend-strip{display:flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(14,14,18,0.85);border-bottom:1px solid #2a2a2c;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;white-space:nowrap;position:relative;z-index:var(--bp-z-trend-strip);min-height:40px}'
     + '.bp-trend-strip::-webkit-scrollbar{display:none}'
     + '.bp-trend-label{flex-shrink:0;font-family:"Space Grotesk",system-ui,sans-serif;font-size:9px;font-weight:700;color:#5a5a62;text-transform:uppercase;letter-spacing:1.2px;margin-right:8px;padding:0;background:none;border:none;display:inline-flex;align-items:center;gap:5px}'
     + '.bp-trend-label::before{content:"";display:inline-block;width:14px;height:1px;background:#3a3a42}'
@@ -90,7 +90,7 @@
     + '.bp-nav-more-btn[aria-expanded="true"] .bp-nav-chev{transform:rotate(180deg);opacity:1}'
     + '.bp-nav-more-btn[aria-expanded="true"]{background:rgba(184,195,255,0.12);color:#b8c3ff}'
     /* Dropdown rendered as fixed/portal to body to escape stacking context */
-    + '.bp-nav-more-menu{display:none;position:fixed;min-width:220px;background:#1c1b1f;border:1px solid #46464d;border-radius:10px;padding:6px;box-shadow:0 14px 50px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04);z-index:9999}'
+    + '.bp-nav-more-menu{display:none;position:fixed;min-width:220px;background:#1c1b1f;border:1px solid #46464d;border-radius:10px;padding:6px;box-shadow:0 14px 50px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04);z-index:var(--bp-z-toast)}'
     + '.bp-nav-more-menu.open{display:block;animation:bpNavMoreIn .15s ease}'
     + '@keyframes bpNavMoreIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}'
     + '.bp-nav-more-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:12px;font-weight:500;letter-spacing:0.3px;text-transform:uppercase;color:#e5e1e4;text-decoration:none;border-radius:6px;transition:background .12s;font-family:"Space Grotesk",system-ui,sans-serif}'
@@ -183,7 +183,7 @@
   }
 
   var TOPICS = [
-    { h:'/gucu-yuksek',       i:'⚡', t:'Güçlü Trend Hisseler' },
+    { h:'/tarama?signal=AL&sort=signal_strength', i:'⚡', t:'Güçlü Trend Hisseler' },
     { h:'/tarama',            i:'🔍', t:'Hisse Tarama' },
     { h:'/bilanco-takvimi',   i:'📅', t:'Bilanço Takvimi' },
     { h:'/sektor-harita',     i:'🗺️', t:'Sektör Haritası' },

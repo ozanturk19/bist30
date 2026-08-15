@@ -2939,7 +2939,8 @@ def _data_quality_snapshot(stocks):
 def build_data_freshness(stocks=None):
     """SPEC-014 B1 — veri tazeliği meta objesi.
 
-    /api/data, /api/heatmap ve /api/health response'larına eklenir.
+    /api/data ve /api/health response'larına eklenir (T4.1: /api/heatmap
+    yetim sayfayla birlikte kaldırıldı, artık tüketici değil).
     is_stale = market_day ve stocks yaşı (CPO-1137: kanonik p90, bkz.
     _canonical_stocks_age) > 1800s (30dk) — hafta sonu/tatil günlerinde
     bist30-refresh zaten çalışmadığından (CPO-919 Hibrit Batch, weekday-only
@@ -4198,40 +4199,54 @@ def api_data():
                     logger.warning("DQV_SV_DATA: flag=%s errors=%s", _sv.get("flag"), _sv.get("errors"))
         except Exception as _e:
             logger.warning("DQV_SV_DATA exception: %s", _e)
-    return safe_json(_resp_data)
+    # ── FAZ8 perf: ETag/Cache-Control — degismeyen govdeyi tekrar indirtme ──
+    # no-cache: tarayici her seferinde sunucuya sorar (bayatlik riski yok),
+    # ama govde ayniysa 304 doner — bant genisligi kazanci, veri tazeligi etkilenmez.
+    _resp = safe_json(_resp_data)
+    _etag = hashlib.md5(_resp.get_data()).hexdigest()
+    _resp.headers["Cache-Control"] = "no-cache"
+    _resp.headers["ETag"] = _etag
+    if request.headers.get("If-None-Match") == _etag:
+        return Response(status=304, headers={"Cache-Control": "no-cache", "ETag": _etag})
+    return _resp
 
 
-# ── SPEC-018 BIST Heatmap MVP (Çar 27 May 2026, Ozan-direktif) ──────────────
-# Vanilla squarified treemap için minimal JSON. Boyut = signal_strength (market_cap
-# v2'de fundamentals'tan eklenir). Renk = tier (Standart/Plus/Premium) + signal.
-@app.route("/api/heatmap")
-def api_heatmap():
+@app.route("/api/data-lite")
+def api_data_lite():
+    """FAZ8 perf: alan projeksiyonu — blog_article.html gibi tuketiciler icin
+    tam /api/data (~280KB, tum alanlar) yerine yalniz istenen ticker'larin
+    kart-gosterimi icin gereken 5 alani doner. ?tickers=AKBNK,GARAN,THYAO"""
+    _raw = (request.args.get("tickers") or "").upper()
+    _wanted = {t.strip() for t in _raw.split(",") if t.strip()}
     with _lock:
         stocks_raw = list(_cache["data"])
     out = []
-    for s in stocks_raw:
-        out.append({
-            "ticker":          s.get("ticker"),
-            "name":            s.get("name") or s.get("ticker"),
-            "sector":          s.get("sector") or "Diğer",
-            "signal":          s.get("signal"),       # AL/SAT/BEKLE
-            "tier":            s.get("tier"),         # standart/plus/premium/None
-            "signal_strength": s.get("signal_strength", 0),
-            "price":           s.get("price"),
-            "change_pct":      s.get("change_pct"),
-        })
-    return safe_json({
-        "stocks":     out,
-        "updated_at": _cache["updated_at"],
-        "loading":    len(out) == 0,
-        "sectors":    list(SECTORS.keys()),
-        "data_freshness": build_data_freshness(stocks_raw),  # CPO-1137: kanonik, aynı stocks
-    })
+    if _wanted:
+        for s in stocks_raw:
+            if s.get("ticker") not in _wanted:
+                continue
+            out.append({
+                "ticker":     s.get("ticker"),
+                "name":       s.get("name") or s.get("ticker"),
+                "price":      s.get("price"),
+                "change_pct": s.get("change_pct"),
+                "signal":     s.get("signal"),
+            })
+    _resp = safe_json({"stocks": out})
+    _resp.headers["Cache-Control"] = "no-cache"
+    _resp.headers["ETag"] = hashlib.md5(_resp.get_data()).hexdigest()
+    return _resp
 
 
+# ── T4.1 (Master Donusum FAZ4 KALDIR): /heatmap tam yetim sayfa idi (0 ic
+# link, sitemap disi, tier/premium taksonomisine bagli, CPO-1191/1197
+# ihlallerinin en yogun oldugu sayfa) - kaldirildi, /api/heatmap'in tek
+# tuketicisi heatmap.js'ti (baska tuketici yok, dogrulandi). 301 hedefi
+# /sektor-harita: ayni "sektor bazli AL/SAT/BEKLE gorsellestirme" islevini
+# gorur, tier kavramina bagli degil.
 @app.route("/heatmap")
 def heatmap_page():
-    return render_template("heatmap.html")
+    return redirect("/sektor-harita", code=301)
 
 
 
@@ -9221,7 +9236,6 @@ def sitemap():
         {"loc": "/",            "priority": "1.0", "changefreq": "hourly"},
         {"loc": "/ozet",        "priority": "0.9", "changefreq": "daily"},
         {"loc": "/tarama",      "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/gucu-yuksek", "priority": "0.8", "changefreq": "daily"},
         {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly"},
         {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly"},
         {"loc": "/gizlilik",    "priority": "0.3", "changefreq": "yearly"},
@@ -9846,29 +9860,14 @@ def ozet_page():
         stock_names=STOCK_NAMES)
 
 
-# ── Güçlü Momentum Listesi ────────────────────────────────────────────────────
+# ── Güçlü Momentum Listesi (T4.2: /tarama'ya birlestirildi) ─────────────────
 @app.route("/gucu-yuksek")
 def gucu_yuksek():
-    """En güçlü momentum sinyallerini göster (ADX + hacim + bull_score kompozit skoru)."""
-    with _lock:
-        stocks = list(_cache["data"])
-        updated_at = _cache.get("updated_at", "")
-        loading = len(stocks) == 0
-
-    # Sadece AL/SAT sinyallerini al; kanonik cache alanı signal_strength ile sırala
-    # (CPO-983 puanlama tutarlılık fix: eskiden burada kompozit skor canlı yeniden
-    # hesaplanıyordu ve analyze()'daki F5 AI Sentiment ±5 ayarını atlıyordu — bu da
-    # hisse detay sayfasındaki signal_strength'ten farklı bir sayı üretiyordu. Artık
-    # her iki sayfa da AYNI önceden hesaplanmış cache alanını okuyor, tek kaynak.)
-    active = [s for s in stocks if s.get("signal") in ("AL", "SAT") and s.get("ticker") != "XU030"]
-    for s in active:
-        s["_mscore"] = s.get("signal_strength") or 0
-    active.sort(key=lambda s: s["_mscore"], reverse=True)
-
-    today_str = datetime.now(_TZ_TR).strftime("%d.%m.%Y")  # CPO-1335: TR günü
-    return render_template("gucu_yuksek.html",
-        stocks=active, loading=loading, updated_at=updated_at,
-        today_str=today_str, stock_names=STOCK_NAMES)
+    """T4.2 (Master Donusum Programi FAZ4): ayri sayfa /tarama AL-sinyal + signal_strength
+    sort preset'ine 301 ile birlesti. Ayni _cache["data"], ayni signal_strength siralamasi
+    -- /tarama zaten ayni isi yapiyordu (CPO-DEV2-010 onayli, kod-degistiren+onay-gerektirmeyen).
+    Skor formulu aciklamasi /metodoloji#sinyal-gucu'ye tasindi."""
+    return redirect("/tarama?signal=AL&sort=signal_strength", code=301)
 
 
 # ── Eğitim Sayfaları ──────────────────────────────────────────────────────────
@@ -10231,25 +10230,6 @@ def run_backtest():
         logger.warning("Backtest disk yazma hatası: %s", e)
 
 
-# ── SPEC-007: Site-wide Premium Paywall — has_premium_access helper ──────────
-def has_premium_access():
-    """Kullanıcının Premium erişimi var mı? bp_premium_trial cookie (email submit sonrası)."""
-    try:
-        return request.cookies.get("bp_premium_trial") == "1"
-    except Exception:
-        return False
-
-@app.context_processor
-def _inject_premium_status():
-    """SPEC-007: Tüm Jinja template'lerinde has_premium_access + premium_count."""
-    try:
-        with _lock:
-            _stocks = list(_cache.get("data") or [])
-        pc = sum(1 for s in _stocks if s.get("tier") == "premium")
-    except Exception:
-        pc = 0
-    return dict(has_premium_access=has_premium_access(), premium_count=pc)
-
 @app.context_processor
 def _inject_analytics_context():
     """CPO-1108 A1: _analytics.html partial'inin ihtiyaç duyduğu guard + token."""
@@ -10491,9 +10471,17 @@ def api_sektor_compare():
                       "updated_at": _cache.get("updated_at")})
 
 
+# T4.2 (BIRLESTIR): /sektor-karsilastir sektor_harita.html'e ikinci tab olarak
+# tasindi (ayni /api/sektor-summary + /api/sektor-compare veri kaynagini
+# kullaniyordu, ayri sayfa gereksizdi). 301 hedefi ?tab=compare ile Karsilastir
+# sekmesini acar; eski ?s=A&s=B deep-link'leri query string olarak korunur.
 @app.route("/sektor-karsilastir")
 def sektor_karsilastir():
-    return render_template("sektor_karsilastir.html")
+    target = "/sektor-harita?tab=compare"
+    qs = request.query_string.decode()
+    if qs:
+        target += "&" + qs
+    return redirect(target, code=301)
 
 
 # ── Bilanço Takvimi ───────────────────────────────────────────────────────────
@@ -10966,12 +10954,8 @@ def api_recognize():
         "ok":               True,
         "name":             rec.get("name", ""),
         "subscribed_at":    rec.get("subscribed_at", ""),
-        "premium_unlocked": True,   # MSG-116 Bug E: üye girişi → premium 30 gün retention bonus
     })
     resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
-    # MSG-116 Bug E: "Üye Girişi" eski aboneye Premium 30 gün açar (retention bonus).
-    # recognize AÇIK aksiyon (buton + email) — pasif bypass değil, MSG-073 kuralıyla uyumlu.
-    resp.set_cookie("bp_premium_trial", "1", max_age=30 * 86400, samesite="Lax", secure=True, httponly=False)
     return resp
 
 
@@ -11463,54 +11447,8 @@ def unsubscribe_page(token):
                 subs[email]["active"] = False
                 _save_subscribers(subs)
                 logger.info("E-posta abonelik iptal: %s", email)
-                return f"""<!DOCTYPE html>
-<html lang="tr">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
-<title>Abonelik İptal | BorsaPusula</title>
-<style>body{{margin:0;padding:0;background:#0b111f;color:#e2e8f0;
-font-family:-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;
-display:flex;align-items:center;justify-content:center;min-height:100vh}}
-.box{{background:#111827;border:1px solid #1e2d45;border-radius:12px;
-padding:32px 40px;text-align:center;max-width:420px}}</style>
-</head>
-<body>
-<div class="box">
-  <div style="font-size:40px;margin-bottom:16px">✅</div>
-  <h2 style="font-size:18px;margin:0 0 8px;font-weight:700">Abonelik İptal Edildi</h2>
-  <p style="font-size:13px;color:#94a3b8;margin:0 0 20px;line-height:1.6">
-    <strong style="color:#e2e8f0">{email}</strong> adresi için bildirimler durduruldu.
-  </p>
-  <a href="https://borsapusula.com" style="display:inline-block;background:#1f6feb;
-  color:#fff;padding:9px 22px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
-    Ana Sayfaya Dön
-  </a>
-</div>
-</body></html>"""
-    return """<!DOCTYPE html>
-<html lang="tr">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
-<title>Geçersiz Bağlantı | BorsaPusula</title>
-<style>body{margin:0;padding:0;background:#0b111f;color:#e2e8f0;
-font-family:-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;
-display:flex;align-items:center;justify-content:center;min-height:100vh}
-.box{background:#111827;border:1px solid #1e2d45;border-radius:12px;
-padding:32px 40px;text-align:center;max-width:420px}</style>
-</head>
-<body>
-<div class="box">
-  <div style="font-size:40px;margin-bottom:16px">⚠️</div>
-  <h2 style="font-size:18px;margin:0 0 8px;font-weight:700">Geçersiz veya Süresi Dolmuş Bağlantı</h2>
-  <p style="font-size:13px;color:#94a3b8;margin:0 0 20px;line-height:1.6">
-    Bu abonelik iptal bağlantısı artık geçerli değil.
-  </p>
-  <a href="https://borsapusula.com" style="display:inline-block;background:#1f6feb;
-  color:#fff;padding:9px 22px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
-    Ana Sayfaya Dön
-  </a>
-</div>
-</body></html>""", 404
+                return render_template("unsubscribe.html", success=True, email=email)
+    return render_template("unsubscribe.html", success=False, email=None), 404
 
 
 @app.route("/api/telegram/test", methods=["POST"])

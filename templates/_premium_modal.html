@@ -7,7 +7,7 @@
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.65);
     backdrop-filter: blur(4px);
-    z-index: 9998;
+    z-index: var(--bp-z-modal-top);
     align-items: center;
     justify-content: center;
     padding: 20px;
@@ -18,7 +18,7 @@
   .premium-modal {
     background: var(--bp-surface);
     border: 1px solid rgba(var(--bp-volume-rgb),.45);
-    border-radius: 12px;
+    border-radius:var(--bp-radius-xl);
     padding: 28px 24px 20px;
     max-width: 380px;
     width: 100%;
@@ -32,21 +32,21 @@
     background: transparent;
     border: none;
     color: var(--bp-text3);
-    font-size: 22px;
+    font-size: var(--bp-text-22);
     cursor: pointer;
     line-height: 1;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: var(--bp-radius-4);
   }
   .premium-modal-close:hover { color: var(--bp-text); background: rgba(255,255,255,0.05); }
-  .premium-modal-icon { font-size: 38px; margin-bottom: 8px; }
+  .premium-modal-icon { font-size: var(--bp-text-38); margin-bottom: 8px; }
   .premium-modal-title {
     color: var(--bp-text);
-    font-size: 19px; font-weight: 700; margin: 0 0 8px;
+    font-size: var(--bp-text-2xl); font-weight: 700; margin: 0 0 8px;
   }
   .premium-modal-desc {
     color: var(--bp-text2);
-    font-size: 13px; line-height: 1.55; margin: 0 0 18px;
+    font-size: var(--bp-text-base); line-height: 1.55; margin: 0 0 18px;
   }
   .premium-modal-desc strong { color: #ffc850; }
   .premium-modal form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
@@ -55,18 +55,18 @@
     width: 100%;
     background: rgba(28,33,40,.7);
     border: 1px solid var(--bp-border);
-    border-radius: 6px;
+    border-radius:var(--bp-radius);
     padding: 10px 12px;
     color: var(--bp-text);
-    font-size: 14px; font-family: inherit;
+    font-size: var(--bp-text-md); font-family: inherit;
     outline: none; transition: border-color .15s ease;
   }
   .premium-modal input:focus { border-color: #ffc850; }
   .premium-modal-submit {
     background: linear-gradient(135deg, #ffc850, #e3b341);
     color: #1a1a1f; border: none;
-    padding: 11px 14px; border-radius: 6px;
-    font-size: 14px; font-weight: 700; cursor: pointer;
+    padding: 11px 14px; border-radius:var(--bp-radius);
+    font-size: var(--bp-text-md); font-weight: 700; cursor: pointer;
     transition: transform .15s ease, box-shadow .15s ease;
   }
   .premium-modal-submit:hover:not(:disabled) {
@@ -81,35 +81,32 @@
     background: transparent;
     border: 1px solid rgba(var(--bp-volume-rgb),.45);
     color: #ffc850;
-    padding: 10px 14px; border-radius: 6px;
-    font-size: 13px; font-weight: 600; cursor: pointer;
+    padding: 10px 14px; border-radius:var(--bp-radius);
+    font-size: var(--bp-text-base); font-weight: 600; cursor: pointer;
     font-family: inherit; transition: background .15s ease;
   }
   .premium-modal-recognize:hover { background: rgba(var(--bp-volume-rgb),.08); }
   @media (max-width: 480px) { .premium-modal-buttons { flex-direction: column; } }
-  .premium-modal-status { font-size: 12px; min-height: 18px; margin: 4px 0 8px; }
+  .premium-modal-status { font-size: var(--bp-text-sm); min-height: 18px; margin: 4px 0 8px; }
   .premium-modal-footer {
     color: var(--bp-text3);
-    font-size: 11px; padding-top: 10px;
+    font-size: var(--bp-text-xs); padding-top: 10px;
     border-top: 1px solid rgba(48,54,61,0.5);
   }
   @media (max-width: 480px) {
     .premium-modal { padding: 22px 18px 16px; }
-    .premium-modal-title { font-size: 17px; }
+    .premium-modal-title { font-size: var(--bp-text-xl); }
   }
 </style>
 <script>
 /* SPEC-007 sitewide premium modal — window.* atamaları sayfadaki eski kopyayı override eder.
    index.html dahil tüm sayfalarda bu partial tek kaynak (Option A, CPO MSG-122). */
 {
-  window._hasPremiumAccess = function() {
-    try { return !!document.cookie.match(/(?:^|;\s*)bp_premium_trial=1/); }
-    catch (_) { return false; }
-  };
-
+  let _premiumModalRelease = null;
   window.closePremiumModal = function() {
     const modal = document.getElementById('premiumModal');
     if (!modal) return;
+    if (_premiumModalRelease) { _premiumModalRelease(); _premiumModalRelease = null; }
     modal.classList.remove('visible');
     setTimeout(() => { modal.style.display = 'none'; }, 200);
   };
@@ -130,8 +127,10 @@
           </p>
           <form id="premiumModalForm" onsubmit="event.preventDefault();submitPremium();return false;">
             <input type="email" id="pmEmail" placeholder="E-posta adresin" required
+                   aria-label="E-posta adresin"
                    autocomplete="email" autocapitalize="off" autocorrect="off">
             <input type="text" id="pmName" placeholder="Adın (opsiyonel)"
+                   aria-label="Adın (opsiyonel)"
                    autocomplete="given-name" maxlength="50">
             <div class="premium-modal-buttons">
               <button type="submit" id="pmSubmitBtn" class="premium-modal-submit">💎 Premium'u Aç</button>
@@ -148,6 +147,7 @@
     modal.style.display = 'flex';
     setTimeout(() => {
       modal.classList.add('visible');
+      if (window.bpTrapFocus) _premiumModalRelease = window.bpTrapFocus(modal.querySelector('.premium-modal'), closePremiumModal);
       const e = document.getElementById('pmEmail');
       if (e) e.focus();
     }, 10);
@@ -175,8 +175,6 @@
       });
       const json = await res.json();
       if (json.ok) {
-        const exp = new Date(Date.now() + 30 * 86400 * 1000).toUTCString();
-        document.cookie = `bp_premium_trial=1; expires=${exp}; path=/; SameSite=Lax`;
         if (typeof window.bpRecordSubscribe === 'function' && json.token) {
           window.bpRecordSubscribe({ token: json.token, email: json.email || email, name: json.name || name });
         } else {
@@ -185,7 +183,7 @@
               subscribed: true, email, name, first_name: (name||'').split(' ')[0],
               token: json.token || '', profile_done: false, cachedAt: Date.now(),
             }));
-          } catch(_) {}
+          } catch(_) { /* best-effort onbellek yazimi (private tarama/kota hata verebilir) - reload() asagida sunucudan resync eder */ }
         }
         if (status) status.innerHTML = '<span style="color:#3fb950">✅ Premium aktif! Sayfa yenileniyor…</span>';
         setTimeout(() => { closePremiumModal(); location.reload(); }, 1200);
@@ -222,7 +220,7 @@
             subscribed: true, email, name: json.name || '',
             first_name: (json.name || '').split(' ')[0], cachedAt: Date.now(),
           }));
-        } catch(_) {}
+        } catch(_) { /* best-effort onbellek yazimi (private tarama/kota hata verebilir) - reload() asagida sunucudan resync eder */ }
         if (status) status.innerHTML = '<span style="color:#3fb950">✅ Hoş geldin' + (json.name ? ' ' + json.name : '') + '! Premium açıldı, yenileniyor…</span>';
         setTimeout(() => location.reload(), 1500);
       } else if (res.status === 404) {

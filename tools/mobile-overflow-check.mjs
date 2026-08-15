@@ -38,13 +38,11 @@ const HEIGHT = 800;
 // visual-test.js ile aynı — mevcut baseline'la tutarlı).
 const PAGES = [
   { name: 'home', path: '/' },
-  { name: 'heatmap', path: '/heatmap' },
   { name: 'tarama', path: '/tarama' },
   { name: 'gundem', path: '/gundem' },
   { name: 'karsilastir', path: '/karsilastir' },
   { name: 'ozet', path: '/ozet' },
   { name: 'ozet-gecmis', path: '/ozet/2026-05-10' },
-  { name: 'gucu-yuksek', path: '/gucu-yuksek' },
   { name: 'metodoloji', path: '/metodoloji' },
   { name: 'hakkinda', path: '/hakkinda' },
   { name: 'gizlilik', path: '/gizlilik' },
@@ -55,12 +53,13 @@ const PAGES = [
   { name: 'sinyal-performans', path: '/sinyal-performans' },
   { name: 'nasdaq', path: '/nasdaq' },
   { name: 'sp500', path: '/sp500' },
-  { name: 'dow', path: '/dow' },
+  // 'dow' (/dow) BILEREK YOK: Dow verisi motorda yok, T0.7 kapsaminda route
+  // zaten kaldirilmis (canli kanit: httpStatus=404, T9.1 kosumunda yakalandi).
+  // 'djia' hic PAGES listesinde degildi, ek islem yok.
   { name: 'hisseler', path: '/hisseler' },
   { name: 'sektorler', path: '/sektorler' },
   { name: 'sektor', path: '/sektor' },
   { name: 'sektor-harita', path: '/sektor-harita' },
-  { name: 'sektor-karsilastir', path: '/sektor-karsilastir' },
   { name: 'bilanco-takvimi', path: '/bilanco-takvimi' },
   { name: 'profil', path: '/profil' },
   { name: 'backtest', path: '/backtest' },
@@ -78,7 +77,11 @@ const PAGES = [
   { name: 'petrol', path: '/petrol' },
   { name: 'dogalgaz', path: '/dogalgaz' },
   { name: 'abd', path: '/abd' },
-  { name: 'abd-tarama', path: '/abd/tarama' },
+  // 'abd-tarama' (/abd/tarama) BILEREK YOK: f9e4ac8 (T4.1) ile kaldirildi,
+  // 0 ic link / yetim sayfa, trafik tamami bot/agent idi. Bu harness hic
+  // calistirilmadigi icin kaldirmadan sonra guncellenmemisti (T9.1 kanit:
+  // ilk canli kosuda httpStatus=404 dondu, ama script bunu FAIL SAYMIYORDU
+  // -- asagidaki httpStatus kontrolu bu korlugu da kapatiyor).
   { name: 'abd-sp500', path: '/abd/sp500' },
   { name: 'abd-nasdaq', path: '/abd/nasdaq' },
   { name: 'abd-aapl', path: '/abd/AAPL' },
@@ -144,6 +147,13 @@ async function checkPage(browser, pageDef, width) {
     // 'load' + sabit settle bekleme kullanıyoruz — bu sınıf sayfalarda güvenilir.
     const resp = await page.goto(BASE + pageDef.path, { waitUntil: 'load', timeout: 20000 });
     result.httpStatus = resp ? resp.status() : null;
+    // T9.1: httpStatus ONCEDEN kaydediliyordu ama HICBIR YERDE kontrol
+    // edilmiyordu -- 404/500 donen bir sayfa, tasma olmadigi surece 'ok'
+    // basiyordu (canli kanit: /abd/tarama 404 donuyordu, harness 'ok'
+    // yaziyordu). 4xx/5xx artik yuklenemedi sayilir, olcum atlanir.
+    if (result.httpStatus && result.httpStatus >= 400) {
+      throw new Error('HTTP ' + result.httpStatus);
+    }
     await page.waitForTimeout(1200);
 
     result.states.closed = await measureState(page);
@@ -191,17 +201,17 @@ async function checkPage(browser, pageDef, width) {
   return result;
 }
 
-// CPO-1204 §1 — pinlenmiş allowlist: DEV-1547/1548'in bağımsız-doğrulanmış 10
-// integrity-failure'ı (aynı 3 sayfa × 360/390, hepsi scrollbarSlack==rawOverflow
-// && adjustedOverflow==0 — yani kalıntı TAM açıklanmış). Bu kombinasyonlar WARN'a
-// düşer. Listede OLMAYAN yeni bir kirli kombinasyon çıkarsa (açıklanmış olsa
-// bile) FAIL kalır — kirli-zemin kümesinin büyümesi kendi başına regresyon
-// sinyalidir, sessizce WARN'a yutulmaz.
-const DIRTY_GROUND_ALLOWLIST = new Set([
-  'hisse-thyao@360', 'hisse-thyao@390',
-  'hisse-thyao-ozet@360', 'hisse-thyao-ozet@390',
-  'hisse-akbnk@360', 'hisse-akbnk@390',
-]);
+// CPO-1204 §1 — pinlenmis allowlist (DEV-1547/1548), DEV2-T-MOBOVF-1'de BOSALTILDI.
+// Eski 6 kayit (hisse-thyao/-ozet@360/390, hisse-akbnk@360/390) kok nedeni
+// hisse.html:1095'teki body{overflow-x:clip} guard'inin html'e uygulanmamasi
+// idi (CSS overflow-propagation: html overflow-x:visible kaldigi surece
+// body'nin clip'i viewport'a tasinmiyor, .ind-help::after tooltipi gizliyken
+// bile scrollWidth'e siziyordu). html{overflow-x:clip} eklenince (commit 2e33799)
+// 6 kaydin 6'si da PASS'e dondu (Warn: 12->0, dogrulandi). Mekanizma canli
+// tutulur (gelecekte gercek bir aciklanmis kalinti cikarsa buraya eklenir),
+// ama su an bos - kirli-zemin kumesinin kucculmesi aracin kendi felsefesiyle
+// tutarli (bkz. yukaridaki yorum: buyumesi regresyon sinyali, kucculmesi duzelme).
+const DIRTY_GROUND_ALLOWLIST = new Set([]);
 
 function isExplainedDirty(s) {
   return s.scrollbarSlack === s.rawOverflow && s.overflowPx === 0;

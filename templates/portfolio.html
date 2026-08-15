@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% block head %}<title>Portföy Takibi | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>Portföy Takibi | BorsaPusula</title>
 <meta name="description" content="BIST hisselerinizi takip edin. Giriş fiyatı, anlık değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/portfolio">
@@ -18,50 +18,50 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810B">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0e0e12; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:14px; min-height:100vh; overflow-x:hidden; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:100; }
-  .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:13px; text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:6px; background:var(--bp-surface2); }
+  body { background:#0e0e12; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
+  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
+  .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:var(--bp-text-base); text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:var(--bp-radius); background:var(--bp-surface2); }
   .back-btn:hover { background:var(--bp-surface2); color:var(--bp-text); }
-  .page-title { font-size:20px; font-weight:700; color:#f0f6fc; }
-  .page-sub   { font-size:13px; color:#8b949e; }
+  .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:var(--bp-text-base); color:#8b949e; }
   .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:6px; font-size:13px; font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
   .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
   .top-nav-links a.active { background:#1c2128; color:#1f6feb; }
   @media (max-width:780px) { .top-nav-links { display:none; } }
-  .container  { max-width:1100px; margin:0 auto; padding:24px; }
+  .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:24px; }
 
   .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
-  .sum-card { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:16px; text-align:center; }
-  .sum-num  { font-size:28px; font-weight:800; line-height:1; }
-  .sum-lbl  { font-size:11px; color:#8b949e; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
+  .sum-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; text-align:center; }
+  .sum-num  { font-size:var(--bp-text-28); font-weight:800; line-height:1; }
+  .sum-lbl  { font-size:var(--bp-text-xs); color:#8b949e; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   .sum-green{ color:#3fb950; } .sum-red{ color:#f85149; } .sum-blue{ color:#58a6ff; } .sum-gold{ color:#e3b341; }
 
-  .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:#161b22; border:1px solid #30363d; border-radius:10px; padding:16px; }
-  .add-bar input, .add-bar select { background:#21262d; border:1px solid #30363d; color:#e6edf3; border-radius:6px; padding:7px 12px; font-size:13px; outline:none; }
+  .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; }
+  .add-bar input, .add-bar select { background:#21262d; border:1px solid #30363d; color:#e6edf3; border-radius:var(--bp-radius); padding:7px 12px; font-size:var(--bp-text-base); outline:none; }
   .add-bar input:focus, .add-bar select:focus { border-color:#58a6ff; }
   .add-bar input { width:140px; }
   .add-bar select { width:160px; }
   .add-bar input[type=number] { width:130px; }
-  .btn-add { background:#1f6feb; border:none; color:#fff; border-radius:6px; padding:7px 16px; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-add { background:#1f6feb; border:none; color:#fff; border-radius:var(--bp-radius); padding:7px 16px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; }
   .btn-add:hover { background:#388bfd; }
-  .add-lbl { font-size:12px; color:#8b949e; }
+  .add-lbl { font-size:var(--bp-text-sm); color:#8b949e; }
 
-  .pf-table { background:#161b22; border:1px solid #30363d; border-radius:10px; overflow:hidden; }
+  .pf-table { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow:hidden; }
   table { width:100%; border-collapse:collapse; }
-  thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:11px; color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
+  thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
   tbody tr { border-bottom:1px solid #21262d; }
   tbody tr:last-child { border-bottom:none; }
   tbody tr:hover { background:#1c2128; }
-  td { padding:10px 14px; white-space:nowrap; font-size:13px; }
+  td { padding:10px 14px; white-space:nowrap; font-size:var(--bp-text-base); }
   .ticker-link { font-weight:700; color:#f0f6fc; text-decoration:none; }
   .ticker-link:hover { color:#58a6ff; }
 
-  .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+  .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; }
   .signal-AL    { background:#1a4731; color:#3fb950; border:1px solid #238636; }
   .signal-SAT   { background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
   .signal-BEKLE { background:#21262d; color:#8b949e; border:1px solid #30363d; }
@@ -70,7 +70,7 @@
   .neg-pnl { color:#f85149; font-weight:600; }
   .neu-pnl { color:#8b949e; }
 
-  .btn-del { background:none; border:none; color:#484f58; cursor:pointer; font-size:14px; padding:2px 6px; }
+  .btn-del { background:none; border:none; color:var(--bp-text3); cursor:pointer; font-size:var(--bp-text-md); padding:2px 6px; }
   .btn-del:hover { color:var(--bp-sat); }
 
   /* Export / Import toolbar */
@@ -81,7 +81,7 @@
   .btn-action {
     display: inline-flex; align-items: center; gap: 5px;
     background: none; border: 1px solid #30363d; color: #8b949e;
-    border-radius: 6px; padding: 5px 12px; font-size: 12px;
+    border-radius:var(--bp-radius); padding: 5px 12px; font-size: var(--bp-text-sm);
     cursor: pointer; transition: all .15s;
   }
   .btn-action:hover { border-color: #58a6ff; color: #58a6ff; }
@@ -91,29 +91,29 @@
   /* Import modal */
   .import-toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: #1c2128; border: 1px solid #30363d; border-radius: 8px;
-    padding: 10px 20px; font-size: 13px; color: #e6edf3;
-    z-index: 999; display: none; box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    background: #1c2128; border: 1px solid #30363d; border-radius:var(--bp-radius-md);
+    padding: 10px 20px; font-size: var(--bp-text-base); color: #e6edf3;
+    z-index: var(--bp-z-page-toast); display: none; box-shadow: var(--bp-shadow-sm);
   }
   .import-toast.ok  { border-color: #238636; color: #3fb950; }
   .import-toast.err { border-color: var(--bp-sat-bd); color: var(--bp-sat); }
 
-  .empty-msg { text-align:center; padding:60px; color:#484f58; }
-  .empty-msg .em-icon { font-size:40px; margin-bottom:12px; }
+  .empty-msg { text-align:center; padding:60px; color:var(--bp-text3); }
+  .empty-msg .em-icon { font-size:var(--bp-text-40); margin-bottom:12px; }
 
   /* localStorage uyarı banner */
   .ls-warning {
     display:flex; align-items:flex-start; gap:12px;
     background:rgba(var(--bp-gold-rgb),.06); border:1px solid rgba(var(--bp-gold-rgb),.2);
-    border-radius:10px; padding:14px 16px; margin-bottom:20px;
-    font-size:13px; color:#94a3b8; line-height:1.6;
+    border-radius:var(--bp-radius-lg); padding:14px 16px; margin-bottom:20px;
+    font-size:var(--bp-text-base); color:#94a3b8; line-height:1.6;
   }
-  .ls-warning-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+  .ls-warning-icon { font-size:var(--bp-text-xl); flex-shrink:0; margin-top:1px; }
   .ls-warning-body { flex:1; }
   .ls-warning-title { font-weight:700; color:#e3b341; margin-bottom:3px; }
   .ls-warning-close {
     background:none; border:none; color:#64748b; cursor:pointer;
-    font-size:16px; padding:0 2px; flex-shrink:0; line-height:1;
+    font-size:var(--bp-text-lg); padding:0 2px; flex-shrink:0; line-height:1;
     transition:color .15s;
   }
   .ls-warning-close:hover { color:#e3b341; }
@@ -122,53 +122,57 @@
   .pf-fetch-error {
     display:flex; align-items:center; gap:12px; flex-wrap:wrap;
     background:rgba(var(--bp-sat-rgb),.08); border:1px solid var(--bp-sat-bd);
-    border-radius:10px; padding:12px 16px; margin-bottom:20px;
-    font-size:13px; color:var(--bp-sat);
+    border-radius:var(--bp-radius-lg); padding:12px 16px; margin-bottom:20px;
+    font-size:var(--bp-text-base); color:var(--bp-sat);
   }
   .pf-fetch-error-retry {
     background:none; border:1px solid var(--bp-sat-bd); color:var(--bp-sat);
-    border-radius:6px; padding:5px 12px; font-size:12px; font-weight:600;
+    border-radius:var(--bp-radius); padding:5px 12px; font-size:var(--bp-text-sm); font-weight:600;
     cursor:pointer; transition:background .15s;
   }
   .pf-fetch-error-retry:hover { background:rgba(var(--bp-sat-rgb),.12); }
 
-  .loading-row td { color:#484f58; font-style:italic; }
+  .loading-row td { color:var(--bp-text3); font-style:italic; }
 
-  footer { text-align:center; padding:20px; font-size:12px; color:#484f58; border-top:1px solid #21262d; margin-top:32px; }
+  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
   footer a { color:#8b949e; text-decoration:none; }
   @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
 
   /* F6: Sparkline + Sinyal Asistanı + XU030 */
   .td-spark { width:90px; padding:6px 10px; vertical-align:middle; }
   .btn-entry {
-    display:inline-block; padding:2px 7px; border-radius:4px; margin-left:5px;
-    font-size:10px; font-weight:700; cursor:pointer; vertical-align:middle;
+    display:inline-block; padding:2px 7px; border-radius:var(--bp-radius-4); margin-left:5px;
+    font-size:var(--bp-text-2xs); font-weight:700; cursor:pointer; vertical-align:middle;
     background:rgba(63,185,80,.1); border:1px solid rgba(63,185,80,.3); color:#3fb950;
     white-space:nowrap; transition:all .15s;
   }
   .btn-entry:hover { background:rgba(63,185,80,.2); border-color:#3fb950; }
-  .xu030-compare { font-size:10px; color:#8b949e; margin-top:4px; display:block; }
+  .xu030-compare { font-size:var(--bp-text-2xs); color:#8b949e; margin-top:4px; display:block; }
   .xu030-above { color:#3fb950; } .xu030-below { color:#f85149; }
 
   /* ── Makro Ticker Bandı ── */
   .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); height:34px; overflow:hidden; position:relative; white-space:nowrap; }
-  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:2; }
+  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
   .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
   .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
   .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:12px; height:34px; color:inherit; }
+    .macro-bar { position: relative; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
+  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
+  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:34px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
 </style>
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:9999;text-decoration:none;font-size:14px;font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% include '_header.html' %}
 <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Portföy Takibi — BIST Hisselerim</h1>
 
 <!-- Makro Ticker Bandı -->
-<div class="macro-bar"><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 <div id="main-content" class="container" tabindex="-1">
 
@@ -176,13 +180,13 @@
 
   <!-- T7.4: canlı fiyat/grafik verisi çekilemediğinde gösterilen hata banner'ı -->
   <div class="pf-fetch-error" id="pfFetchError" style="display:none">
-    <span>⚠️ Güncel fiyat ve grafik verileri şu an yüklenemiyor.</span>
+    <span><span aria-hidden="true">⚠️</span> Güncel fiyat ve grafik verileri şu an yüklenemiyor.</span>
     <button class="pf-fetch-error-retry" onclick="retryPortfolioFetch()">Tekrar dene</button>
   </div>
 
   <!-- localStorage Uyarı Bandı -->
   <div class="ls-warning" id="lsWarning" style="display:none">
-    <span class="ls-warning-icon">💾</span>
+    <span class="ls-warning-icon"><span aria-hidden="true">💾</span></span>
     <div class="ls-warning-body">
       <div class="ls-warning-title">Veriler bu cihazın tarayıcısında saklanıyor</div>
       Portföyünüz sunucuya gönderilmez — yalnızca bu tarayıcının <strong style="color:#e2e8f0">localStorage</strong>'ında tutulur.
@@ -210,65 +214,65 @@
   <!-- Export / Import araçları -->
   <div class="pf-actions">
     <button class="btn-action" onclick="exportPortfolio()" title="Portföyü JSON dosyası olarak indir">
-      ⬇ JSON
+      <span aria-hidden="true">⬇</span> JSON
     </button>
     <button class="btn-action" onclick="exportCSV()" title="Portföyü Excel/CSV dosyası olarak indir">
-      📊 CSV
+      <span aria-hidden="true">📊</span> CSV
     </button>
     <label class="btn-action" title="Daha önce dışa aktardığın JSON dosyasını yükle">
-      ⬆ İçe Aktar
+      <span aria-hidden="true">⬆</span> İçe Aktar
       <input type="file" id="importFileInput" accept=".json" onchange="importPortfolio(event)">
     </label>
     <button class="btn-action danger" onclick="clearPortfolio()" title="Tüm pozisyonları sil">
-      🗑 Temizle
+      <span aria-hidden="true">🗑</span> Temizle
     </button>
     <!-- Cloud Sync -->
     <button class="btn-action" id="cloudBtn" onclick="openCloudSync()"
       style="margin-left:auto;background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:#93c5fd"
       title="Cihazlar arası senkronizasyon">
-      ☁ Cloud Sync
+      <span aria-hidden="true">☁</span> Cloud Sync
     </button>
   </div>
 
   <!-- Cloud Sync Modal -->
-  <div id="cloudModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center">
-    <div style="background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;max-width:440px;width:90%;position:relative">
-      <button onclick="closeCloudSync()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#8b949e;font-size:18px;cursor:pointer">×</button>
-      <div style="font-size:16px;font-weight:700;color:#f0f6fc;margin-bottom:6px">☁ Cloud Sync</div>
-      <div style="font-size:12px;color:#8b949e;margin-bottom:16px">Portföyünüzü sunucuya kaydedin — farklı cihazlardan erişin veya bağlantıyla paylaşın.</div>
+  <div id="cloudModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:var(--bp-z-sticky);align-items:center;justify-content:center">
+    <div id="cloudModalDialog" role="dialog" aria-modal="true" aria-label="Cloud Sync" style="background:#161b22;border:1px solid #30363d;border-radius:var(--bp-radius-xl);padding:24px;max-width:440px;width:90%;position:relative">
+      <button onclick="closeCloudSync()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#8b949e;font-size:var(--bp-text-xl);cursor:pointer">×</button>
+      <div style="font-size:var(--bp-text-lg);font-weight:700;color:#f0f6fc;margin-bottom:6px"><span aria-hidden="true">☁</span> Cloud Sync</div>
+      <div style="font-size:var(--bp-text-sm);color:#8b949e;margin-bottom:16px">Portföyünüzü sunucuya kaydedin — farklı cihazlardan erişin veya bağlantıyla paylaşın.</div>
       <!-- Yeni oluştur / var olan token -->
       <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button onclick="createCloudToken()" style="flex:1;background:#1f6feb;color:#fff;border:none;padding:8px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">
+        <button onclick="createCloudToken()" style="flex:1;background:#1f6feb;color:#fff;border:none;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
           + Yeni Oluştur
         </button>
         <div style="flex:2;display:flex;gap:6px">
-          <input id="cloudTokenInput" type="text" placeholder="Token girin (XXXX-XXXX-...)"
-            style="flex:1;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:7px 10px;border-radius:7px;font-size:12px;font-family:var(--bp-font-mono);outline:none;min-width:0">
-          <button onclick="loadCloudToken()" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:7px 12px;border-radius:7px;font-size:12px;cursor:pointer">Yükle</button>
+          <input id="cloudTokenInput" type="text" placeholder="Token girin (XXXX-XXXX-...)" aria-label="Senkronizasyon token'ı"
+            style="flex:1;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:7px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);font-family:var(--bp-font-mono);outline:none;min-width:0">
+          <button onclick="loadCloudToken()" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:7px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer">Yükle</button>
         </div>
       </div>
       <!-- Aktif token göster -->
       <div id="cloudActiveSection" style="display:none">
-        <div style="font-size:11px;color:#8b949e;margin-bottom:6px">Aktif Token:</div>
-        <div style="display:flex;gap:8px;align-items:center;background:#0d1117;border:1px solid #30363d;border-radius:7px;padding:8px 12px;margin-bottom:12px">
-          <code id="cloudActiveToken" style="font-size:12px;color:#58a6ff;flex:1;word-break:break-all"></code>
-          <button onclick="copyCloudLink()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:14px" title="Kopyala">📋</button>
+        <div style="font-size:var(--bp-text-xs);color:#8b949e;margin-bottom:6px">Aktif Token:</div>
+        <div style="display:flex;gap:8px;align-items:center;background:#0d1117;border:1px solid #30363d;border-radius:var(--bp-radius-7);padding:8px 12px;margin-bottom:12px">
+          <code id="cloudActiveToken" style="font-size:var(--bp-text-sm);color:#58a6ff;flex:1;word-break:break-all"></code>
+          <button onclick="copyCloudLink()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:var(--bp-text-md)" title="Kopyala"><span role="img" aria-label="Kopyala">📋</span></button>
         </div>
         <div style="display:flex;gap:8px">
-          <button onclick="saveToCloud()" style="flex:1;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);color:#3fb950;padding:8px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">
-            ⬆ Sunucuya Kaydet
+          <button onclick="saveToCloud()" style="flex:1;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);color:#3fb950;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+            <span aria-hidden="true">⬆</span> Sunucuya Kaydet
           </button>
-          <button onclick="loadFromCloud()" style="flex:1;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.15);color:#58a6ff;padding:8px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">
-            ⬇ Sunucudan Yükle
+          <button onclick="loadFromCloud()" style="flex:1;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.15);color:#58a6ff;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+            <span aria-hidden="true">⬇</span> Sunucudan Yükle
           </button>
-          <button onclick="forgetCloudToken()" style="background:none;border:1px solid #30363d;color:#8b949e;padding:8px 10px;border-radius:7px;font-size:12px;cursor:pointer" title="Token'ı unut (yerel portföy kalır)">
-            ✕ Unut
+          <button onclick="forgetCloudToken()" style="background:none;border:1px solid #30363d;color:#8b949e;padding:8px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer" title="Token'ı unut (yerel portföy kalır)">
+            <span aria-hidden="true">✕</span> Unut
           </button>
         </div>
       </div>
-      <div id="cloudMsg" style="font-size:12px;color:#8b949e;margin-top:10px;min-height:18px"></div>
-      <div style="font-size:11px;color:#484f58;margin-top:14px;padding-top:10px;border-top:1px solid #21262d">
-        ⚠️ Token herkese açık bir şifre gibidir — paylaşmamanızı öneririz. Kişisel veri kaydedilmez (isim, e-posta yok).
+      <div id="cloudMsg" style="font-size:var(--bp-text-sm);color:#8b949e;margin-top:10px;min-height:18px"></div>
+      <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:14px;padding-top:10px;border-top:1px solid #21262d">
+        <span aria-hidden="true">⚠️</span> Token herkese açık bir şifre gibidir — paylaşmamanızı öneririz. Kişisel veri kaydedilmez (isim, e-posta yok).
       </div>
     </div>
   </div>
@@ -279,37 +283,38 @@
   <!-- Hisse ekle -->
   <div class="add-bar">
     <span class="add-lbl">Hisse ekle:</span>
-    <input type="text" id="addTicker" placeholder="THYAO veya Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off">
+    <input type="text" id="addTicker" placeholder="THYAO veya Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu">
     <datalist id="bistTickerList"></datalist>
-    <input type="number" id="addLot" placeholder="Adet" min="1" step="1">
-    <input type="number" id="addPrice" placeholder="Alış fiyatı ₺" min="0" step="0.01">
-    <input type="date" id="addDate">
+    <input type="number" id="addLot" placeholder="Adet" min="1" step="1" aria-label="Adet">
+    <input type="number" id="addPrice" placeholder="Alış fiyatı ₺" min="0" step="0.01" aria-label="Alış fiyatı">
+    <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>
-    <span id="addErr" style="color:var(--bp-sat);font-size:12px"></span>
+    <span id="addErr" style="color:var(--bp-sat);font-size:var(--bp-text-sm)"></span>
   </div>
 
   <!-- Tablo -->
   <div class="pf-table">
     <div id="emptyMsg" class="empty-msg">
-      <div class="em-icon">💼</div>
+      <div class="em-icon"><span aria-hidden="true">💼</span></div>
       <div>Portföyünüz boş.</div>
-      <div style="font-size:12px;margin-top:6px">Yukarıdaki formdan hisse ekleyin.</div>
+      <div style="font-size:var(--bp-text-sm);margin-top:6px">Yukarıdaki formdan hisse ekleyin.</div>
     </div>
     <table id="pfTable" style="display:none">
+      <caption class="sr-only">Portföyünüzdeki hisselerin adet, maliyet, güncel değer ve kâr/zarar tablosu</caption>
       <thead>
         <tr>
-          <th>Hisse</th>
-          <th class="hm">Tarih</th>
-          <th>Adet</th>
-          <th>Alış ₺</th>
-          <th>Güncel ₺</th>
-          <th class="hm">Maliyet</th>
-          <th>Değer</th>
-          <th>K/Z</th>
-          <th>K/Z %</th>
-          <th>Sinyal</th>
-          <th class="hm">Trend (30g)</th>
-          <th></th>
+          <th scope="col">Hisse</th>
+          <th scope="col" class="hm">Tarih</th>
+          <th scope="col">Adet</th>
+          <th scope="col">Alış ₺</th>
+          <th scope="col">Güncel ₺</th>
+          <th scope="col" class="hm">Maliyet</th>
+          <th scope="col">Değer</th>
+          <th scope="col">K/Z</th>
+          <th scope="col">K/Z %</th>
+          <th scope="col">Sinyal</th>
+          <th scope="col" class="hm">Trend (30g)</th>
+          <th scope="col"><span class="sr-only">İşlemler</span></th>
         </tr>
       </thead>
       <tbody id="pfBody"></tbody>
@@ -320,7 +325,7 @@
 
 <footer>
   <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/portfolio">Portföy</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/gizlilik">Gizlilik</a>
-  <div style="margin-top:6px">⚠️ Portföy verisi yalnızca tarayıcınızda saklanır. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
+  <div style="margin-top:6px"><span aria-hidden="true">⚠️</span> Portföy verisi yalnızca tarayıcınızda saklanır. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
 </footer>
 
 <script>
@@ -385,13 +390,13 @@ async function fetchCharts() {
       if (j.chart && j.chart.ohlc && j.chart.ohlc.length) {
         chartData[t] = j.chart.ohlc.slice(-30).map(d => d.close);
       }
-    } catch(e) {}
+    } catch(e) { console.warn('sparkline verisi alinamadi', e); }
   }));
   render();
 }
 
 function svgSparkline(prices) {
-  if (!prices || prices.length < 2) return '<span style="color:#484f58;font-size:11px">—</span>';
+  if (!prices || prices.length < 2) return '<span style="color:var(--bp-text3);font-size:11px">—</span>';
   const W = 80, H = 26;
   const min = Math.min(...prices), max = Math.max(...prices);
   const rng = max - min || 1;
@@ -605,9 +610,9 @@ function render() {
       <td class="hm" style="color:#8b949e">${p.date}</td>
       <td>${fmt(p.lot,0)}</td>
       <td>${fmt(p.price)}</td>
-      <td>${cur ? fmt(cur) + ' ₺' : '<span style="color:#484f58">—</span>'}</td>
+      <td>${cur ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td class="hm" style="color:#8b949e">${fmtM(cost)}</td>
-      <td>${val ? fmtM(val) : '<span style="color:#484f58">—</span>'}</td>
+      <td>${val ? fmtM(val) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${pnlHtml}</td>
       <td>${pnlPctHtml}</td>
       <td>${sigBadge}</td>
@@ -674,6 +679,7 @@ setInterval(fetchCharts, 300000); // sparkline + XU030 5dk'da bir yenile
 
 /* ── Cloud Sync ───────────────────────────────── */
 const CLOUD_TOKEN_KEY = 'bp_cloud_token';
+let _cloudModalRelease = null;
 
 function openCloudSync() {
   const modal = document.getElementById('cloudModal');
@@ -682,9 +688,11 @@ function openCloudSync() {
   if (saved) _showActiveToken(saved);
   else document.getElementById('cloudActiveSection').style.display = 'none';
   document.getElementById('cloudMsg').textContent = '';
+  if (window.bpTrapFocus) _cloudModalRelease = window.bpTrapFocus(document.getElementById('cloudModalDialog'), closeCloudSync);
 }
 function closeCloudSync() {
   document.getElementById('cloudModal').style.display = 'none';
+  if (_cloudModalRelease) { _cloudModalRelease(); _cloudModalRelease = null; }
 }
 
 function _showActiveToken(token) {
@@ -800,11 +808,12 @@ document.getElementById('cloudModal').addEventListener('click', function(e) {
 // Makro Ticker Bandı
 const _ML = BP_ASSET_LABELS;
 const _MD = BP_ASSET_DECIMALS;
-async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e){}}
-loadMacroBar();setInterval(loadMacroBar,60000);
+async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e) { console.error('makro ticker verisi yuklenemedi', e); }}
+loadMacroBar();setInterval(loadMacroBar,180000);
 </script>
 <script src="/static/bp-search.js?v=47" defer></script>
 <script src="/static/stale-banner.js?v=20260810B"></script>
+<script src="/static/js/focus-trap.js?v=1"></script>
 <script>bpStartDataQualityPolling();</script>
 
 <script>
@@ -817,7 +826,7 @@ loadMacroBar();setInterval(loadMacroBar,60000);
     const dl = document.getElementById('bistTickerList');
     if (!dl) return;
     dl.innerHTML = list.map(s => `<option value="${s.ticker}">${s.name || s.ticker}</option>`).join('');
-  } catch(_) {}
+  } catch(_) { console.warn('ticker autocomplete listesi yuklenemedi', _); }
 })();
 
 /* addPosition: smart ticker resolution — accept ticker code OR company name */

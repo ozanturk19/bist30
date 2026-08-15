@@ -30,6 +30,47 @@ K-B  KANONIK-DEGERLI HAM HEX — RATCHET, bloklamaz ama ARTAMAZ
      eklenince kanonik deger kumesi buyur ve sayimlar sablon degismeden artabilir.
      O durum ayri bir mesajla raporlanir — sucu sablona atmaz.
 
+     T1.7 GENISLETME (15.08.2026, DEV-2): kapsam su ana kadar YALNIZ
+     templates/*.html + kabuk partial'lariydi — `blog_content.py` ve
+     `static/css/*.css` (tokens.css disinda) HICBIR guard'da yoktu. Olculdu:
+     `blog_content.py` blog makalelerinin ic HTML'inde 578 kanonik-degerli ham
+     hex tasiyor (`style="border-top:1px solid #30363d"` gibi inline stiller —
+     GitHub-legacy paletin templates/ disindaki, hicbir S1/S7/T1.5 turunda
+     GORULMEMIS bir kopyasi); `page-info-panel.css` 2 tane tasiyor (#b8c3ff =
+     --bp-brand). Ikisi de EK_HEX_DOSYALARI'na baseline'la eklendi — mevcut
+     borc bloklanmiyor (578 sayisi kendisi bir HATA degil, bir olcum), yalniz
+     ARTISI artik yakalaniyor. Migrasyon (inline style -> class/token) ayri bir
+     karar/is kalemi — bu guard yalniz GORUNURLUK katıyor.
+
+K-C  SABLON-YEREL :root — RATCHET, bloklamaz ama ARTAMAZ (T9.4-d, bkz. yerel_root_sayim())
+
+K-D  BOS catch{} — RATCHET, bloklamaz ama ARTAMAZ (T9.4)
+     `catch(e){}` / `catch(_) {}` / `catch{}` — hata sessizce yutulur, ne log ne
+     kullaniciya bildirim. Master Program T9.4'un istedigi "bos catch{} yasak"
+     BLOKLAYICI olarak uygulanamaz: olculdu (14.08.2026), 16 sayfa sablonunda
+     halihazirda 70 occurrence var (cogu localStorage/opsiyonel-widget savunma
+     kodu, gercek hata degil). K-B/K-C ile ayni gerekce: mevcut borc bloklamaz,
+     YENI borc bloklar.
+
+     T1.7 GENISLETME (15.08.2026, DEV-2): kapsam su ana kadar YALNIZ sayfa
+     sablonlariydi — `static/*.js` + `static/js/*.js` (9 dosya) HICBIR guard'da
+     yoktu, T7.4'un "bos catch{} kapatildi" iddiasi templates/ disindaki gercek
+     JS dosyalarini hic kapsamiyordu. Olculdu: 4 dosyada (bp-search.js x8,
+     learning-mode.js x1, stale-banner.js x1, page-info-panel.js x1) toplam 11
+     occurrence — hepsi ayni sinif (localStorage/opsiyonel-fetch savunma kodu).
+     EK_CATCH_DOSYALARI'na baseline'la eklendi, mevcut borc bloklanmiyor.
+
+     BILINEN SINIRLAR (Workflow adversarial-review, 14.08.2026, regex izole test
+     edildi): (1) yorum-only govde (`catch(e){/* ignore */}`) YAKALANMAZ — kacis
+     yolu, ratchet'i "yorum ekleyerek" atlatmak mumkun; (2) string/template
+     literal icindeki "catch(e) {}" alt dizesi YANLIS POZITIF uretebilir; (3)
+     `.catch(() => {})` gibi ok-fonksiyonlu Promise-catch yakalanmazken
+     `.catch(function(e){})` yakalanir — tutarsiz; (4) catch parametresinde ic
+     ice parantez varsa (`catch({x = f()})`) tespit tamamen kaybolur. Hepsi
+     duz-regex yaklasiminin bilinen bedeli (K-B/K-C'nin ayni sinif kusurlarina
+     benzer); bir sonraki turda tokenizer/negatif-lookbehind ile daraltilabilir,
+     bugun BLOKLAYICI degil cunku guard zaten BLOKLAYICI degil, RATCHET.
+
 Kullanim:
     python3 tools/style-guard.py             # denetle (deploy kapisi)
     python3 tools/style-guard.py --baseline  # ratchet'i bugunku duruma sabitle
@@ -46,6 +87,15 @@ TPL_DIR = ROOT / "templates"
 CSS_DIR = ROOT / "static" / "css"
 RATCHET = ROOT / "tools" / "style_guard_ratchet.json"
 
+# T1.7 GENISLETME (15.08.2026) — K-B'nin templates/ disina taan EK dosyalari.
+# tokens.css HARIC: o token'larin TANIM kaynagi, kendi hex'i "borc" degil.
+EK_HEX_DOSYALARI = [ROOT / "blog_content.py"] + \
+    [f for f in sorted(CSS_DIR.glob("*.css")) if f.name != "tokens.css"]
+
+# T1.7 GENISLETME (15.08.2026) — K-D'nin templates/ disina taan EK dosyalari.
+EK_CATCH_DOSYALARI = sorted((ROOT / "static").glob("*.js")) + \
+    sorted((ROOT / "static" / "js").glob("*.js"))
+
 # Her sayfaya fiilen giren kabuk partial'lari: buradaki tanimlar tum sayfalarda gecerli.
 # T2.2: _header.html + _header_asset_price.html EKLENDI. Eklenmeden once
 # 16 sayfanin kanonik header-i HICBIR kapida denetlenmiyordu ve ratchet
@@ -59,6 +109,7 @@ TANIM_RE = re.compile(r"(--[A-Za-z0-9_-]+)\s*:")
 VAR_RE = re.compile(r"var\(\s*(--[A-Za-z0-9_-]+)")
 HEX_RE = re.compile(r"#[0-9A-Fa-f]{3,8}\b")
 TOKEN_DEGER_RE = re.compile(r"(--[A-Za-z0-9_-]+)\s*:\s*(#[0-9A-Fa-f]{3,8})\s*;")
+BOS_CATCH_RE = re.compile(r"catch\s*(?:\([^)]*\))?\s*\{\s*\}")
 
 sys.path.insert(0, str(ROOT / "tools"))
 try:
@@ -148,6 +199,19 @@ def denetle():
         if eksik:
             tanimsiz[n] = eksik
         hex_sayim[n] = hex_say(txt, harita)
+
+    # ── EK HEX DOSYALARI (T1.7 genisletme, 15.08.2026) ──────────────────────
+    # blog_content.py + static/css/*.css (tokens.css haric) — bunlar K-A
+    # (tanimsiz var()) kapsamina GIRMEZ, cunku ikisi de CSS custom property
+    # tuketen sayfa sablonu degil (biri Python string'i, digeri harici CSS
+    # dosyasi zaten kendi var() kullanimini tokens.css'e karsi kendi icinde
+    # gecerli kilar). Yalniz K-B (ham hex ratchet) icin sayilir — goruculuk,
+    # migrasyon degil. Anahtar carpismasin diye ROOT-relative yol kullanilir.
+    for f in EK_HEX_DOSYALARI:
+        if not f.exists():
+            continue
+        ad = str(f.relative_to(ROOT))
+        hex_sayim[ad] = hex_say(_oku(f), harita)
     return gtok, harita, imza, tanimsiz, hex_sayim
 
 
@@ -173,27 +237,60 @@ def yerel_root_sayim():
     return out
 
 
+def bos_catch_sayim():
+    """Bos catch{} bloklarini say (T9.4).
+
+    `catch(e){}` hatayi sessizce yutar: ne konsola log ne kullaniciya bildirim.
+    Cogu vaka mesru (localStorage/opsiyonel-widget savunma kodu) ama BLOKLAYICI
+    yapmak bugunku ~26 sayfadaki mevcut borcu bir gecede kirar. K-B/K-C ile ayni
+    desen: mevcut borc dokunulmaz, YENI catch{} eklenmesi engellenir.
+    """
+    from lint_scope import sayfa_sablonlari
+    out = {}
+    for f in sayfa_sablonlari():
+        n = len(BOS_CATCH_RE.findall(f.read_text(encoding="utf-8", errors="replace")))
+        if n:
+            out[f.name] = n
+    # T1.7 genisletme (15.08.2026): static/*.js + static/js/*.js — gercek JS
+    # dosyalari, templates/ icindeki inline <script> degil. Anahtar carpismasin
+    # diye ROOT-relative yol kullanilir.
+    for f in EK_CATCH_DOSYALARI:
+        if not f.exists():
+            continue
+        n = len(BOS_CATCH_RE.findall(f.read_text(encoding="utf-8", errors="replace")))
+        if n:
+            out[str(f.relative_to(ROOT))] = n
+    return out
+
+
 def main(argv):
     verbose = "--verbose" in argv
     gtok, harita, imza, tanimsiz, hex_sayim = denetle()
-    toplam_sayfa = len(hex_sayim)
+    # K-A (tanimsiz var()) yalniz gercek sayfa sablonlarini kapsar; K-B (ham
+    # hex) artik EK_HEX_DOSYALARI (blog_content.py + harici css) ile de
+    # genisledigi icin hex_sayim ile K-A'nin sayfa sayisi ARTIK AYNI DEGIL.
+    toplam_sayfa = len(sayfalar()) + len(KABUK_PARTIALS)
+    toplam_hex_dosya = len(hex_sayim)
 
     if "--baseline" in argv:
         RATCHET.write_text(json.dumps(
             {"_not": "T1.7 style-guard ratchet — kanonik-degerli ham hex, dosya basina TAVAN. "
                      "Sayim yalniz DUSEBILIR; artis deploy'u bloklar. Yeni token eklenince "
-                     "token_imzasi degisir ve bu dosya --baseline ile yenilenir.",
+                     "token_imzasi degisir ve bu dosya --baseline ile yenilenir. "
+                     "'dosyalar' anahtari sayfa sablonlarini + EK_HEX_DOSYALARI'ni "
+                     "(blog_content.py, harici css) birlikte tasir.",
              "token_imzasi": imza,
              "dosyalar": dict(sorted(hex_sayim.items())),
-             "yerel_root": dict(sorted(yerel_root_sayim().items()))},
+             "yerel_root": dict(sorted(yerel_root_sayim().items())),
+             "bos_catch": dict(sorted(bos_catch_sayim().items()))},
             ensure_ascii=False, indent=1), encoding="utf-8")
-        print("baseline yazildi: %d sayfa, toplam %d kanonik-degerli ham hex"
-              % (toplam_sayfa, sum(hex_sayim.values())))
+        print("baseline yazildi: %d dosya (K-B), toplam %d kanonik-degerli ham hex"
+              % (toplam_hex_dosya, sum(hex_sayim.values())))
         return 0
 
     hata = 0
-    print("style-guard  (kapsam: %d sayfa sablonu, %d kanonik token degeri)"
-          % (toplam_sayfa, len(harita)))
+    print("style-guard  (kapsam: %d sayfa sablonu / %d dosya K-B, %d kanonik token degeri)"
+          % (toplam_sayfa, toplam_hex_dosya, len(harita)))
 
     # ── K-A: tanimsiz var() — BLOKLAYICI ────────────────────────────────────
     if tanimsiz:
@@ -259,8 +356,27 @@ def main(argv):
             print("  TEMIZ  K-C yerel :root: %d sablon (taban %d, artis yok)"
                   % (sum(yr.values()), sum(yr_taban.values())))
 
+    # ── K-D: bos catch{} ratchet — ARTAMAZ ──────────────────────────────────
+    bc = bos_catch_sayim()
+    bc_taban = ratchet.get("bos_catch")
+    if bc_taban is None:
+        print("  ATLANDI K-D bos catch{}: ratchet'te taban yok — `--baseline` calistirin.")
+    else:
+        bc_artan = [(ad, bc_taban.get(ad, 0), n) for ad, n in sorted(bc.items())
+                    if n > bc_taban.get(ad, 0)]
+        if bc_artan:
+            hata = 1
+            print("  KIRIK  K-D bos catch{} ARTTI: %d dosya" % len(bc_artan))
+            for ad, t, n in bc_artan:
+                print("         %-28s %d -> %d" % (ad, t, n))
+            print("         catch bloğu hatayi sessizce yutuyor. En az console.warn/log ekleyin.")
+            print("         Mevcut borc bloklamaz; YENI borc bloklar (kademeli kapi).")
+        else:
+            print("  TEMIZ  K-D bos catch{}: %d occurrence (taban %d, artis yok)"
+                  % (sum(bc.values()), sum(bc_taban.values())))
+
     if verbose:
-        print("\n  %-32s %6s %6s" % ("sablon", "hex", "taban"))
+        print("\n  %-32s %6s %6s" % ("dosya", "hex", "taban"))
         for ad, n in sorted(hex_sayim.items(), key=lambda kv: -kv[1]):
             print("  %-32s %6d %6s" % (ad, n, taban.get(ad, "-")))
 
