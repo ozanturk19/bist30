@@ -1,5 +1,5 @@
 {
- "_not": "T1.7 style-guard ratchet — kanonik-degerli ham hex, dosya basina TAVAN. Sayim yalniz DUSEBILIR; artis deploy'u bloklar. Yeni token eklenince token_imzasi degisir ve bu dosya --baseline ile yenilenir.",
+ "_not": "T1.7 style-guard ratchet — kanonik-degerli ham hex, dosya basina TAVAN. Sayim yalniz DUSEBILIR; artis deploy'u bloklar. Yeni token eklenince token_imzasi degisir ve bu dosya --baseline ile yenilenir. 'dosyalar' anahtari sayfa sablonlarini + EK_HEX_DOSYALARI'ni (blog_content.py, harici css) birlikte tasir.",
  "token_imzasi": "20:#00e290,#0e0e12,#141416,#1c1b1f,#1e293b,#201f21,#21262d,#2a2a2c",
  "dosyalar": {
   "404.html": 0,
@@ -10,6 +10,7 @@
   "bilanco_takvimi.html": 7,
   "blog.html": 9,
   "blog_article.html": 22,
+  "blog_content.py": 243,
   "gizlilik.html": 6,
   "gundem.html": 8,
   "hakkinda.html": 15,
@@ -26,7 +27,9 @@
   "profil.html": 0,
   "sektor_harita.html": 21,
   "sinyal_performans.html": 27,
+  "static/css/page-info-panel.css": 2,
   "tarama.html": 1,
+  "unsubscribe.html": 0,
   "varlik.html": 3,
   "yasal.html": 9
  },
@@ -38,6 +41,10 @@
  "bos_catch": {
   "hisse.html": 2,
   "index.html": 1,
-  "kategori.html": 1
+  "kategori.html": 1,
+  "static/bp-search.js": 8,
+  "static/js/page-info-panel.js": 1,
+  "static/learning-mode.js": 1,
+  "static/stale-banner.js": 1
  }
 }
