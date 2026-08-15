@@ -60,7 +60,6 @@ const PAGES = [
   { name: 'sektorler', path: '/sektorler' },
   { name: 'sektor', path: '/sektor' },
   { name: 'sektor-harita', path: '/sektor-harita' },
-  { name: 'sektor-karsilastir', path: '/sektor-karsilastir' },
   { name: 'bilanco-takvimi', path: '/bilanco-takvimi' },
   { name: 'profil', path: '/profil' },
   { name: 'backtest', path: '/backtest' },
