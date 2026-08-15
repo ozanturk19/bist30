@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
 {% if ssr_signal and ssr_signal.signal == 'AL' %}
   {% set _st = ticker ~ ' Güçlü Trend — Teknik Analiz | BorsaPusula' %}
   {% set _sd = ticker ~ ' Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}

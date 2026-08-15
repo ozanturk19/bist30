@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% block head %}<title>{{ article.title }} | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>{{ article.title }} | BorsaPusula</title>
 <meta name="description" content="{{ article.desc }}">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <link rel="canonical" href="https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}">

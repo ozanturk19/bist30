@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% block head %}<title>{{ page_title|default('Hisse Karşılaştırma | BorsaPusula') }}</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>{{ page_title|default('Hisse Karşılaştırma | BorsaPusula') }}</title>
 <meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, R/R ve daha fazlası.') }}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
