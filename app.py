@@ -10464,9 +10464,17 @@ def api_sektor_compare():
                       "updated_at": _cache.get("updated_at")})
 
 
+# T4.2 (BIRLESTIR): /sektor-karsilastir sektor_harita.html'e ikinci tab olarak
+# tasindi (ayni /api/sektor-summary + /api/sektor-compare veri kaynagini
+# kullaniyordu, ayri sayfa gereksizdi). 301 hedefi ?tab=compare ile Karsilastir
+# sekmesini acar; eski ?s=A&s=B deep-link'leri query string olarak korunur.
 @app.route("/sektor-karsilastir")
 def sektor_karsilastir():
-    return render_template("sektor_karsilastir.html")
+    target = "/sektor-harita?tab=compare"
+    qs = request.query_string.decode()
+    if qs:
+        target += "&" + qs
+    return redirect(target, code=301)
 
 
 # ── Bilanço Takvimi ───────────────────────────────────────────────────────────
