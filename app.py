@@ -9492,7 +9492,7 @@ def og_image():
   <text x="200" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▲ GÜÇLÜ TREND</text>
   <rect x="380" y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
   <text x="520" y="305" font-size="72" font-weight="800" fill="#f85149" text-anchor="middle">{sat_count}</text>
-  <text x="520" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▼ ZAYIF TREND</text>
+  <text x="520" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▼ TREND BOZULDU</text>
   <rect x="700" y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
   <text x="840" y="305" font-size="72" font-weight="800" fill="#58a6ff" text-anchor="middle">{total}</text>
   <text x="840" y="355" font-size="22" fill="#8b949e" text-anchor="middle">BIST100 HİSSE</text>
@@ -9548,7 +9548,7 @@ def og_image_png():
     f_lbl = _og_font(22)
     boxes = [
         (60,  str(al_count),  "▲ GÜÇLÜ TREND", "#3fb950"),
-        (380, str(sat_count), "▼ ZAYIF TREND", "#f85149"),
+        (380, str(sat_count), "▼ TREND BOZULDU", "#f85149"),
         (700, str(total),     "BIST100 HİSSE", "#58a6ff"),
     ]
     for bx, num, label, color in boxes:

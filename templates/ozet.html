@@ -1,9 +1,9 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>BIST100 Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
-<meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse zayıf trend? Bugün sinyal değişen hisseler.">
+<meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse trend bozulmuş? Bugün sinyal değişen hisseler.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/ozet">
 <meta property="og:title"       content="BIST100 Günlük Sinyal Özeti — {{ today_str }}">
-<meta property="og:description" content="Bugün BIST100'de {{ al_list|length }} güçlü, {{ sat_list|length }} zayıf trend hissesi var.">
+<meta property="og:description" content="Bugün BIST100'de {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
 <meta property="og:url"         content="https://borsapusula.com/ozet">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
