@@ -11440,54 +11440,8 @@ def unsubscribe_page(token):
                 subs[email]["active"] = False
                 _save_subscribers(subs)
                 logger.info("E-posta abonelik iptal: %s", email)
-                return f"""<!DOCTYPE html>
-<html lang="tr">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
-<title>Abonelik İptal | BorsaPusula</title>
-<style>body{{margin:0;padding:0;background:#0b111f;color:#e2e8f0;
-font-family:-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;
-display:flex;align-items:center;justify-content:center;min-height:100vh}}
-.box{{background:#111827;border:1px solid #1e2d45;border-radius:12px;
-padding:32px 40px;text-align:center;max-width:420px}}</style>
-</head>
-<body>
-<div class="box">
-  <div style="font-size:40px;margin-bottom:16px">✅</div>
-  <h2 style="font-size:18px;margin:0 0 8px;font-weight:700">Abonelik İptal Edildi</h2>
-  <p style="font-size:13px;color:#94a3b8;margin:0 0 20px;line-height:1.6">
-    <strong style="color:#e2e8f0">{email}</strong> adresi için bildirimler durduruldu.
-  </p>
-  <a href="https://borsapusula.com" style="display:inline-block;background:#1f6feb;
-  color:#fff;padding:9px 22px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
-    Ana Sayfaya Dön
-  </a>
-</div>
-</body></html>"""
-    return """<!DOCTYPE html>
-<html lang="tr">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
-<title>Geçersiz Bağlantı | BorsaPusula</title>
-<style>body{margin:0;padding:0;background:#0b111f;color:#e2e8f0;
-font-family:-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;
-display:flex;align-items:center;justify-content:center;min-height:100vh}
-.box{background:#111827;border:1px solid #1e2d45;border-radius:12px;
-padding:32px 40px;text-align:center;max-width:420px}</style>
-</head>
-<body>
-<div class="box">
-  <div style="font-size:40px;margin-bottom:16px">⚠️</div>
-  <h2 style="font-size:18px;margin:0 0 8px;font-weight:700">Geçersiz veya Süresi Dolmuş Bağlantı</h2>
-  <p style="font-size:13px;color:#94a3b8;margin:0 0 20px;line-height:1.6">
-    Bu abonelik iptal bağlantısı artık geçerli değil.
-  </p>
-  <a href="https://borsapusula.com" style="display:inline-block;background:#1f6feb;
-  color:#fff;padding:9px 22px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
-    Ana Sayfaya Dön
-  </a>
-</div>
-</body></html>""", 404
+                return render_template("unsubscribe.html", success=True, email=email)
+    return render_template("unsubscribe.html", success=False, email=None), 404
 
 
 @app.route("/api/telegram/test", methods=["POST"])
