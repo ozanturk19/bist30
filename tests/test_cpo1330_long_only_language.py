@@ -69,12 +69,18 @@ def test_app_py_no_short_position_language_in_user_facing_strings():
     assert not violations, f"kısa pozisyon dili kullanıcı yüzeyine sızmış: {violations}"
 
 
+_JINJA_COMMENT_RE = re.compile(r"\{#.*?#\}", re.DOTALL)
+
+
 def test_templates_no_short_position_language():
+    """Jinja `{# ... #}` yorumları tarayıcıya hiç render edilmez — dahili
+    geliştirici notu, ürün yüzeyi değil (bkz. sinyal_performans.html:168,
+    T3.7 kaldırma kararını açıklayan yorum). Taramadan önce çıkarılır."""
     for name in sorted(os.listdir(_TEMPLATES_DIR)):
         if not name.endswith(".html"):
             continue
         path = os.path.join(_TEMPLATES_DIR, name)
-        low = _read(path).lower()
+        low = _JINJA_COMMENT_RE.sub("", _read(path)).lower()
         for p in _SHORT_POSITION_PHRASES:
             assert p not in low, f"{name}: kısa pozisyon dili bulundu"
 

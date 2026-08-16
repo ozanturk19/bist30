@@ -46,7 +46,7 @@ fi
 # 5) HTML pages render without 500
 for page in "/" "/hisse/THYAO" "/eth" "/sektor-harita" "/portfolio" "/sinyal-performans" "/blog" "/profil"; do
   status=$(curl -s -m 8 -o /dev/null -w "%{http_code}" "http://localhost:8003${page}")
-  if [ "$status" != "200" ] && [ "$status" != "400" ]; then  # /profil without token returns 400, OK
+  if [ "$status" != "200" ] && [ "$status" != "400" ] && [ "$status" != "404" ]; then  # /profil without/invalid token returns 404 (9dcb721)
     echo "❌ FAIL: ${page} returned ${status}"
     exit 1
   fi
