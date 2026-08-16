@@ -11028,10 +11028,12 @@ def profil_page():
     token = request.args.get("t", "")
     if not token:
         # CPO-1190 K9: çıplak 400 yerine markalı açıklama sayfası — kullanıcı
-        # bu sayfaya yalnızca e-posta linkiyle (?t=token) gelmeli.
+        # bu sayfaya yalnızca e-posta linkiyle (?t=token) gelmeli. Küçük
+        # temizlik (Master Program, DEV2-139): içerik aynı, yalnız HTTP
+        # status 200->404 (zaten noindex,nofollow, SEO zararı yok).
         return render_template("profil.html",
                                error="Bu sayfaya kişisel e-posta bağlantınız üzerinden ulaşmanız gerekiyor.",
-                               email=None, name="", profile=None, token="")
+                               email=None, name="", profile=None, token=""), 404
     with _sub_lock:
         subs = _load_subscribers()
         target_email = None
@@ -11040,7 +11042,7 @@ def profil_page():
                 target_email = em
                 break
     if not target_email:
-        return render_template("profil.html", error="Aboneliğiniz bulunamadı veya pasif", email=None, name="", profile=None, token="")
+        return render_template("profil.html", error="Aboneliğiniz bulunamadı veya pasif", email=None, name="", profile=None, token=""), 404
 
     info = subs[target_email]
     profile = {
