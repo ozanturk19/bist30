@@ -61,7 +61,11 @@ const PAGES = [
   { name: 'sektor', path: '/sektor' },
   { name: 'sektor-harita', path: '/sektor-harita' },
   { name: 'bilanco-takvimi', path: '/bilanco-takvimi' },
-  { name: 'profil', path: '/profil' },
+  // 'profil' (/profil) BILEREK YOK: Kucuk temizlik (Master Program,
+  // DEV2-139/140) ile tokensiz erisim artik BILEREK 404 donuyor (icerik
+  // ayni markali sayfa, yalniz HTTP status 200->404, zaten noindex,nofollow
+  // tasiyordu). Bu harness tokensiz sabit /profil'i tarardi ve httpStatus>=400
+  // guard'i (T9.1) bunu FAIL sayardi -- 'dow'/'abd-tarama' ile ayni desen.
   { name: 'backtest', path: '/backtest' },
   { name: 'virtual-portfolio', path: '/virtual-portfolio' },
   { name: 'blog', path: '/blog' },

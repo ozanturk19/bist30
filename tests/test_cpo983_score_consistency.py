@@ -31,17 +31,18 @@ def _extract_function_body(src, func_name):
 
 
 def test_gucu_yuksek_reads_cached_signal_strength():
-    """gucu_yuksek() _mscore'u cache'teki signal_strength'ten almalı."""
+    """gucu_yuksek() ayrı bir sayfa/hesap değil — FAZ4-T4.2'de /tarama'ya 301
+    redirect'e konsolide edildi (CPO-DEV2-010 onaylı). Artık kendi _mscore'unu
+    hesaplamıyor; tutarlılık, aynı cache + aynı sort=signal_strength yolunu
+    paylaşan tek sayfa olmasıyla yapısal olarak garanti ediliyor (eski
+    pattern-match testinden daha güçlü bir güvence)."""
     src = _read_app()
     body = _extract_function_body(src, "gucu_yuksek")
     assert body, "gucu_yuksek() bulunamadı"
-    reads_cached = (
-        's["_mscore"] = s.get("signal_strength")' in body or
-        "s['_mscore'] = s.get('signal_strength')" in body
-    )
-    assert reads_cached, (
-        "gucu_yuksek() _mscore'u cache'teki signal_strength alanından okumuyor — "
-        "puanlama tutarlılık regresyonu (CPO-983)"
+    assert '"/tarama?signal=AL&sort=signal_strength"' in body, (
+        "gucu_yuksek() artik /tarama?signal=AL&sort=signal_strength'e redirect "
+        "etmiyor — CPO-983 tutarlilik garantisi (ayni sayfa=ayni skor) bozulmus "
+        "olabilir, inceleyin"
     )
 
 
