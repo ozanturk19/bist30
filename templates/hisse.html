@@ -2553,9 +2553,19 @@ function _hibCurrentPrice() {
 }
 
 function togglePortfolio() {
-  let pf = [];
-  try { pf = JSON.parse(localStorage.getItem(HIB_PF_KEY) || '[]'); } catch(_) {}
-  if (!Array.isArray(pf)) pf = [];
+  let pf;
+  try {
+    pf = JSON.parse(localStorage.getItem(HIB_PF_KEY) || '[]');
+  } catch (e) {
+    console.warn('hisse portfolio read fail, islem iptal (veri korundu):', e);
+    _hibToast('Portföy verisi okunamadı, işlem iptal edildi — mevcut verin korundu', 'warn');
+    return;
+  }
+  if (!Array.isArray(pf)) {
+    console.warn('hisse portfolio beklenmeyen format, islem iptal (veri korundu)');
+    _hibToast('Portföy verisi bozuk görünüyor, işlem iptal edildi — mevcut verin korundu', 'warn');
+    return;
+  }
 
   const idx = pf.findIndex(x => x && x.ticker === TICKER);
   if (idx >= 0) {
@@ -2596,9 +2606,19 @@ function _hibSafeWriteWatch(arr) {
 }
 
 function toggleHisseWatch() {
-  let w = [];
-  try { w = JSON.parse(localStorage.getItem(HIB_WATCH_KEY) || '[]'); } catch(_) {}
-  if (!Array.isArray(w)) w = [];
+  let w;
+  try {
+    w = JSON.parse(localStorage.getItem(HIB_WATCH_KEY) || '[]');
+  } catch (e) {
+    console.warn('hisse watch read fail, islem iptal (veri korundu):', e);
+    _hibToast('Takip listesi okunamadı, işlem iptal edildi — mevcut verin korundu', 'warn');
+    return;
+  }
+  if (!Array.isArray(w)) {
+    console.warn('hisse watch beklenmeyen format, islem iptal (veri korundu)');
+    _hibToast('Takip listesi bozuk görünüyor, işlem iptal edildi — mevcut verin korundu', 'warn');
+    return;
+  }
 
   const idx = w.indexOf(TICKER);
   if (idx >= 0) {

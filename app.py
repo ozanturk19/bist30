@@ -1770,7 +1770,7 @@ def analyze(ticker_base):
 
             if atrs_moved < 1.0:
                 entry_quality = "IDEAL"
-                entry_note    = (f"Zayıf trend taze ({signal_bars} bar), "
+                entry_note    = (f"Trend Bozuldu taze ({signal_bars} bar), "
                                  f"SL yakın — R/R en avantajlı bölge")
             elif atrs_moved < 2.0:
                 entry_quality = "IYI"
