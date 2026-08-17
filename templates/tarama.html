@@ -514,7 +514,7 @@
         <option value="signal_bars">Tazelik (Yeni → Eski)</option>
       </select>
       <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:var(--bp-text-sm);border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
-        title="Skor: Birleşik kalite (ADX + Hacim + RSI + Teyit) — Premium / Plus / Standart bu skordan belirlenir. En kaliteli hisseler üstte.&#10;ADX: Sadece trend gücü. Premium bir hisse ADX düşük olabilir.&#10;RVOL: Hacim oranı — anormal hareket göstergesi.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
+        data-tip="Skor: Birleşik kalite (ADX + Hacim + RSI + Teyit) — Premium / Plus / Standart bu skordan belirlenir. En kaliteli hisseler üstte.&#10;ADX: Sadece trend gücü. Premium bir hisse ADX düşük olabilir.&#10;RVOL: Hacim oranı — anormal hareket göstergesi.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
       <button onclick="exportCSV()" title="Sonuçları CSV olarak indir"
         style="background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.3);color:#58a6ff;
                border-radius:var(--bp-radius);padding:5px 11px;font-size:var(--bp-text-sm);cursor:pointer;font-family:inherit;
@@ -883,7 +883,7 @@ function renderResults(rows, count) {
     const v = score || 0;
     const cls = tier === 'premium' ? 'premium' : tier === 'plus' ? 'plus' : tier === 'standart' ? 'standart' : 'weak';
     const pct = Math.max(4, Math.min(100, v));
-    return `<div class="score-cell" title="Sinyal Gücü ${v}/100 — sıralama bu skora göre">
+    return `<div class="score-cell" tabindex="0" data-tip="Sinyal Gücü ${v}/100 — sıralama bu skora göre">
       <span class="score-val ${cls}">${v}</span>
       <div class="score-bar-bg"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div>
     </div>`;
@@ -894,7 +894,7 @@ function renderResults(rows, count) {
     const label = adxLabel || 'Zayıf';
     const cls = (label === 'Güçlü' || label === 'Çok Güçlü') ? 'strong' : label === 'Orta' ? 'medium' : 'weak';
     const pct = cls === 'strong' ? Math.min(100, (a/50)*100) : cls === 'medium' ? Math.min(60, (a/50)*100) : Math.max(20, (a/50)*100);
-    return `<div class="trend-cell" title="ADX ${a.toFixed(1)} — ${label.toLowerCase()} trend">
+    return `<div class="trend-cell" tabindex="0" data-tip="ADX ${a.toFixed(1)} — ${label.toLowerCase()} trend">
       <span class="trend-label ${cls}">${label}</span>
       <div class="trend-bar"><div class="trend-bar-fill ${cls}" style="width:${pct.toFixed(0)}%"></div></div>
     </div>`;
@@ -930,7 +930,7 @@ function renderResults(rows, count) {
     return `<tr>
       <td>
         <a href="/hisse/${s.ticker}">
-          <div class="tk">${s.ticker}${s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:var(--bp-premium);font-size:11px;vertical-align:middle">💎</span>' : s.tier === 'plus' ? ' <span title="Plus sinyal" style="color:#1f6feb;font-size:11px;vertical-align:middle">⭐</span>' : ''}</div>
+          <div class="tk">${s.ticker}${s.tier === 'premium' ? ' <span tabindex="0" data-tip="Premium sinyal" style="color:var(--bp-premium);font-size:11px;vertical-align:middle">💎</span>' : s.tier === 'plus' ? ' <span tabindex="0" data-tip="Plus sinyal" style="color:#1f6feb;font-size:11px;vertical-align:middle">⭐</span>' : ''}</div>
           <div class="tk-name">${(s.name||'').replace(' A.Ş.','').substring(0,20)}</div>
         </a>
       </td>
@@ -957,7 +957,7 @@ function renderResults(rows, count) {
       const _eqH     = s.entry_quality
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
         : '<span style="color:var(--text3)">—</span>';
-      const _prm = s.tier === 'premium' ? ' <span title="Premium sinyal" style="color:var(--bp-premium);font-size:11px">💎</span>' : s.tier === 'plus' ? ' <span title="Plus sinyal" style="color:#1f6feb;font-size:11px">⭐</span>' : '';
+      const _prm = s.tier === 'premium' ? ' <span tabindex="0" data-tip="Premium sinyal" style="color:var(--bp-premium);font-size:11px">💎</span>' : s.tier === 'plus' ? ' <span tabindex="0" data-tip="Plus sinyal" style="color:#1f6feb;font-size:11px">⭐</span>' : '';
       const _tlbl = s.adx_label || 'Zayıf';
       const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
       // T3.5: mobil kartta da masaüstüyle aynı skor rengi (tier bazlı) — bkz. scoreCell()
@@ -1037,6 +1037,7 @@ bpStartDataQualityPolling();
 </script>
 <script src="/static/bp-search.js?v=50" defer></script>
 <script src="/static/js/focus-trap.js?v=1"></script>
+<script src="/static/js/bp-tooltip.js?v=1"></script>
 <script src="/static/learning-mode.js?v=3" defer></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

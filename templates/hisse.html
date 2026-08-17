@@ -1352,7 +1352,7 @@
 
   <!-- SPEC-014 B2 — Veri yaşı göstergesi -->
   <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-    <span id="dataFreshness" title="" style="display:none;align-items:center;gap:6px;font-size:var(--bp-text-xs);color:var(--bp-text3)">
+    <span id="dataFreshness" data-tip="" tabindex="0" style="display:none;align-items:center;gap:6px;font-size:var(--bp-text-xs);color:var(--bp-text3)">
       <span id="freshnessDot" style="width:7px;height:7px;border-radius:50%;background:var(--bp-bkl);display:inline-block;flex-shrink:0"></span>
       <span id="freshnessText">—</span>
     </span>
@@ -1876,7 +1876,7 @@
       {%- elif _tier == "standart" %}{% set _tc = "#909097" %}
       {%- else                     %}{% set _tc = "#6b7280" %}{% endif %}
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
-           title="Sinyal gücü puanı (0–100). ADX, hacim, yön gücü, teyit ve RSI bileşenlerine dayalı.">
+           data-tip="Sinyal gücü puanı (0–100). ADX, hacim, yön gücü, teyit ve RSI bileşenlerine dayalı." tabindex="0">
         <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100">
           <circle cx="32" cy="32" r="28" fill="none" stroke="var(--bp-border)" stroke-width="6"/>
           <circle cx="32" cy="32" r="28" fill="none" stroke="{{ _tc }}" stroke-width="6"
@@ -1905,7 +1905,7 @@
     <!-- Katman B — 3 madde -->
     <ul style="list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:8px">
       {% for p in signal_summary.points %}
-      <li title="{{ p.tip }}"
+      <li data-tip="{{ p.tip }}" tabindex="0"
           style="display:flex;align-items:flex-start;gap:8px;font-size:var(--bp-text-base);line-height:1.55;color:var(--bp-text2);cursor:help">
         <span style="color:{% if signal_summary.signal == 'AL' %}#00e290{% elif signal_summary.signal == 'SAT' %}#f85149{% else %}#909097{% endif %};flex-shrink:0;margin-top:1px">▸</span>
         <span>{{ p.text }}</span>
@@ -2968,7 +2968,7 @@ function renderFreshness(f, dq, ageS, refreshing) {
   txt.textContent = label;
   txt.style.color = color;
   if (f.stocks_updated_at) {
-    wrap.title = 'Son güncelleme: ' + f.stocks_updated_at;
+    wrap.setAttribute('data-tip', 'Son güncelleme: ' + f.stocks_updated_at);
   }
   wrap.style.display = 'inline-flex';
 
@@ -3006,7 +3006,7 @@ function renderSummary(s, signalData) {
   /* Sinyal kartı */
   document.getElementById('icSignal').innerHTML = icon +  // label bp-hero-card'da gosteriliyor
     /* CPO-535 #36: is_premium (RVOL ≥ 1.20 backtest-onaylı) → "⭐ Hacim Onaylı" chip */
-    (signalData && signalData.is_premium ? ' <span title="Hacim Onaylı — RVOL ≥ 1.20. Backtest: Win Rate %36.7 → %51.5, 4.3x getiri" style="display:inline-block;margin-left:4px;font-size:11px;color:var(--bp-volume);background:var(--bp-volume-bg);padding:1px 6px;border-radius:8px;border:1px solid var(--bp-volume-bd);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
+    (signalData && signalData.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20. Backtest: Win Rate %36.7 → %51.5, 4.3x getiri" tabindex="0" style="display:inline-block;margin-left:4px;font-size:11px;color:var(--bp-volume);background:var(--bp-volume-bg);padding:1px 6px;border-radius:8px;border:1px solid var(--bp-volume-bd);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
   const MAX = 3;
   const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
   const dotCls   = s.signal === 'SAT' ? 'dot-bear' : s.signal === 'AL' ? 'dot-bull' : 'dot-empty';
@@ -3037,7 +3037,7 @@ function renderSummary(s, signalData) {
                         ageColor === 'yellow' ? '#d29922' :
                         ageColor === 'orange' ? '#f0883e' :
                         ageColor === 'red' ? '#f85149' : '#8b949e';
-    const ageHtml = ageLabel ? ` <span style="color:${ageHexColor};font-size:11px;margin-left:6px" title="Sinyal yaşı: ${ageLabel}">${ageEmoji} ${ageLabel}</span>` : '';
+    const ageHtml = ageLabel ? ` <span style="color:${ageHexColor};font-size:11px;margin-left:6px" data-tip="Sinyal yaşı: ${ageLabel}" tabindex="0">${ageEmoji} ${ageLabel}</span>` : '';
     document.getElementById('icDate').innerHTML =
       (isNew ? '<span style="color:#e3b341">⚡ Bugün</span>'
              : date + ' · ' + bpSignalAgeText(signalData.signal_date)) + ageHtml;
@@ -3121,7 +3121,7 @@ function renderSummary(s, signalData) {
     // Faz 1 #5: Bilanço uyarısı (7 gün içinde kesin tarih varsa)
     if (signalData.earnings_warning) {
       const ew = signalData.earnings_warning;
-      noteHtml += `<br><span style="margin-top:8px;display:inline-block;background:rgba(210,153,34,0.12);border:1px solid rgba(210,153,34,0.4);border-radius:6px;padding:5px 10px;color:#d29922;font-size:12px;font-weight:600" title="Bilanço açıklaması fiyatta volatilite yaratabilir, pozisyon önce kapatılması düşünülebilir">⚠️ ${ew.message}</span>`;
+      noteHtml += `<br><span style="margin-top:8px;display:inline-block;background:rgba(210,153,34,0.12);border:1px solid rgba(210,153,34,0.4);border-radius:6px;padding:5px 10px;color:#d29922;font-size:12px;font-weight:600" data-tip="Bilanço açıklaması fiyatta volatilite yaratabilir, pozisyon önce kapatılması düşünülebilir" tabindex="0">⚠️ ${ew.message}</span>`;
     }
     const eqNoteEl = document.getElementById('eqNote');
     if (eqNoteEl) eqNoteEl.innerHTML = noteHtml;
@@ -3159,7 +3159,7 @@ function renderSummary(s, signalData) {
               <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">R/R</a></span>
               <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2)}x</strong>
             </div>` : ''}
-            ${rrNow != null ? `<div style="display:flex;justify-content:space-between;color:#8b949e" title="Mevcut fiyattan giriş yaparsan risk/ödül oranı">
+            ${rrNow != null ? `<div style="display:flex;justify-content:space-between;color:#8b949e" data-tip="Mevcut fiyattan giriş yaparsan risk/ödül oranı" tabindex="0">
               <span>Şu an girersen <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">R/R</a></span>
               <strong style="color:${rrNow >= 2.0 ? '#3fb950' : rrNow >= 1.0 ? '#d29922' : '#f85149'}">${rrNow.toFixed(2)}x</strong>
             </div>` : ''}
@@ -3198,7 +3198,7 @@ function renderSummary(s, signalData) {
       hpRvolVal.className = 'hp-row-val ' + cls;
       hpRvolVal.innerHTML = `${rvolVal.toFixed(2)}×` +
         /* CPO-535 #36: RVOL onaylı chip → "⭐ Hacim Onaylı" */
-        (isPremium ? ' <span class="hp-tag premium" title="RVOL ≥ 1.20 — Hacim onaylı sinyal. Backtest: Win Rate %51.5">⭐ Hacim Onaylı</span>' : '');
+        (isPremium ? ' <span class="hp-tag premium" data-tip="RVOL ≥ 1.20 — Hacim onaylı sinyal. Backtest: Win Rate %51.5" tabindex="0">⭐ Hacim Onaylı</span>' : '');
       hpRvolRow.style.display = '';
     }
 
@@ -3210,7 +3210,7 @@ function renderSummary(s, signalData) {
       const cls = isStrongBreakout ? 'ok' : (vr >= 1.2 ? 'weak' : 'bad');
       hpSvolVal.className = 'hp-row-val ' + cls;
       const tag = isStrongBreakout
-        ? ' <span class="hp-tag confirmed" title="Sinyal günü hacim ortalamayı belirgin geçti">✓ TEYİTLİ</span>'
+        ? ' <span class="hp-tag confirmed" data-tip="Sinyal günü hacim ortalamayı belirgin geçti" tabindex="0">✓ TEYİTLİ</span>'
         : '';
       hpSvolVal.innerHTML = `${vr.toFixed(2)}×${tag}`;
       hpSvolRow.style.display = '';
@@ -3814,7 +3814,7 @@ async function loadKapDisclosures() {
         </div>
         <div class="kap-meta">
           <span>${dateShort}</span>
-          ${d.subject ? `<span style="color:var(--bp-border)">·</span><span style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(d.subject)}">${escHtml(d.subject)}</span>` : ''}
+          ${d.subject ? `<span style="color:var(--bp-border)">·</span><span style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-tip="${escHtml(d.subject)}" tabindex="0">${escHtml(d.subject)}</span>` : ''}
           ${d.late ? '<span style="color:#d29922;font-size:10px">⚠ GECİKMELİ</span>' : ''}
         </div>
       </div>`;
@@ -4076,6 +4076,7 @@ window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
 
 <script src="/static/bp-search.js?v=50" defer></script>
 <script src="/static/js/focus-trap.js?v=1"></script>
+<script src="/static/js/bp-tooltip.js?v=1"></script>
 <script src="/static/learning-mode.js?v=3" defer></script>
 
 <script>
