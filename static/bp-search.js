@@ -139,7 +139,7 @@
         _syms = JSON.parse(c);
         return Promise.resolve(_syms);
       }
-    } catch(e) {}
+    } catch(e) { /* best-effort onbellek okuma (private tarama/quota hata verebilir) - fetch fallback altta devam eder */ }
     return fetch('/api/data', { cache: 'no-store' })
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -149,7 +149,7 @@
         try {
           sessionStorage.setItem('bp_search_cache_v1', JSON.stringify(_syms));
           sessionStorage.setItem('bp_search_t_v1', Date.now().toString());
-        } catch(e) {}
+        } catch(e) { /* best-effort onbellek yazimi (private tarama/quota hata verebilir) */ }
         return _syms;
       })
       .catch(function(){ return []; });
@@ -499,8 +499,8 @@
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify(payload),
             keepalive: true
-          }).catch(function(){});
-    } catch(_) {}
+          }).catch(function(e){ console.error('client hata raporlama basarisiz', e); });
+    } catch(_) { console.error('reportClientError basarisiz'); }
   }
 
   if (typeof window.__bpErrorHooked === 'undefined') {
@@ -551,11 +551,11 @@
   function saveUserCache(user) {
     try {
       localStorage.setItem('bp_sub_user', JSON.stringify(Object.assign({}, user, { cachedAt: Date.now() })));
-    } catch(_) {}
+    } catch(_) { /* best-effort onbellek yazimi (private tarama/quota hata verebilir) - recognizeUser() sunucudan resync eder */ }
   }
 
   function clearUserCache() {
-    try { localStorage.removeItem('bp_sub_user'); } catch(_) {}
+    try { localStorage.removeItem('bp_sub_user'); } catch(_) { /* best-effort onbellek temizligi */ }
   }
 
   function applyKnownUserUI(user) {
@@ -579,7 +579,7 @@
     // 2) Sub-toast popup'ı kapat (abone ise gösterme)
     var toast = document.getElementById('subToast');
     if (toast) toast.style.display = 'none';
-    try { localStorage.setItem('bp_sub_dismissed_v2', String(Date.now())); } catch(_) {}
+    try { localStorage.setItem('bp_sub_dismissed_v2', String(Date.now())); } catch(_) { /* best-effort onbellek yazimi */ }
   }
 
   function recognizeUser() {
@@ -601,7 +601,7 @@
           clearUserCache();
         }
       })
-      .catch(function(){});
+      .catch(function(e){ console.error('kullanici tanima basarisiz', e); });
   }
 
   // Public API: subscribe success'te çağrılır

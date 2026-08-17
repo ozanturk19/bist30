@@ -92,7 +92,7 @@ class PageInfoPanel {
   saveToLocalStorage() {
     try {
       localStorage.setItem(this.storageKey, this.collapsed ? 'collapsed' : 'open');
-    } catch (_) {}
+    } catch (_) { /* best-effort onbellek yazimi (private tarama/quota hata verebilir) */ }
   }
 
   _applyJargonLinks(container) {

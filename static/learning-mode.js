@@ -30,7 +30,7 @@
   })();
 
   function persistState(on) {
-    try { localStorage.setItem(STORAGE_KEY, on ? '1' : '0'); } catch (e) { }
+    try { localStorage.setItem(STORAGE_KEY, on ? '1' : '0'); } catch (e) { /* best-effort onbellek yazimi (private tarama/quota hata verebilir) */ }
   }
 
   function ensureStyles() {

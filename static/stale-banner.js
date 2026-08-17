@@ -57,7 +57,7 @@ function bpPollDataQuality() {
   fetch('/api/data-quality', {cache: 'no-store'})
     .then(function(r) { return r.json(); })
     .then(function(j) { bpUpdateStaleBanner(j.data_quality, j.stocks_age_s); })
-    .catch(function() {});
+    .catch(function(e) { console.error('data-quality polling basarisiz', e); });
 }
 function bpStartDataQualityPolling() {
   bpPollDataQuality();
