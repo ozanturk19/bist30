@@ -16,33 +16,7 @@
 ]}
 </script>
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bp-bg); color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; font-size: var(--bp-text-md); line-height: 1.7; min-height: 100vh; }
-  header { background: #161b22; border-bottom: 1px solid #30363d; padding: 14px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index:var(--bp-z-dropdown); }
-  .back-btn { display: flex; align-items: center; gap: 6px; color: #8b949e; font-size: var(--bp-text-base); text-decoration: none; padding: 5px 10px; border: 1px solid #30363d; border-radius:var(--bp-radius); background: #21262d; transition: all 0.15s; }
-  .back-btn:hover { background: #30363d; color: #e6edf3; }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: #f0f6fc; }
-  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
-  .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
-  @media (max-width:780px) { .top-nav-links { display:none; } }
-  .container { max-width: var(--bp-container-680); margin: 0 auto; padding: 40px 24px; }
-  .card { background: #161b22; border: 1px solid #30363d; border-radius:var(--bp-radius-xl); padding: 28px; }
-  h2 { font-size: var(--bp-text-xl); font-weight: 700; color: #f0f6fc; margin-bottom: 8px; }
-  p  { color: #c9d1d9; margin-bottom: 14px; }
-  .contact-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #21262d; }
-  .contact-row:last-child { border-bottom: none; }
-  .contact-icon { font-size: var(--bp-text-22); flex-shrink: 0; }
-  .contact-lbl  { font-size: var(--bp-text-xs); color: #8b949e; text-transform: uppercase; letter-spacing: 0.4px; }
-  .contact-val  { font-size: var(--bp-text-md); color: #58a6ff; }
-  .contact-val a { color: #58a6ff; text-decoration: none; }
-  .contact-val a:hover { text-decoration: underline; }
-  .disclaimer { background: rgba(var(--bp-sat-rgb),.06); border: 1px solid rgba(var(--bp-sat-rgb),.2); border-radius:var(--bp-radius-md); padding: 14px 16px; color: #c9d1d9; font-size: var(--bp-text-base); margin-top: 24px; }
-  footer { text-align: center; padding: 20px; font-size: var(--bp-text-sm); color: var(--bp-text3); border-top: 1px solid #21262d; margin-top: 32px; }
-  footer a { color: #8b949e; text-decoration: none; }
-  @media (max-width: 600px) { .container { padding: 16px; } }
-</style>
+<link rel="stylesheet" href="/static/css/pages/iletisim.css?v=c8b015db">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -98,14 +72,7 @@
       <div id="cfMsg" style="margin-top:12px;font-size:var(--bp-text-base);display:none"></div>
     </form>
   </div>
-<style>
-  #contactForm input:focus, #contactForm select:focus, #contactForm textarea:focus {
-    border-color: #1f6feb;
-  }
-  @media (max-width: 500px) {
-    #contactForm > div:first-child { grid-template-columns: 1fr !important; }
-  }
-</style>
+
 <script>
 async function submitForm(e) {
   e.preventDefault();

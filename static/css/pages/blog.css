@@ -1,0 +1,60 @@
+/* ==== extracted from templates/blog.html (T2.5) ==== */
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bp-bg); color:#e6edf3; font-family:'Segoe UI',system-ui,-apple-system,sans-serif; font-size:var(--bp-text-md); min-height:100vh; }
+  header { background:#161b22; border-bottom:1px solid #30363d; padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
+  .back-btn { display:flex; align-items:center; gap:6px; color:#8b949e; font-size:var(--bp-text-base); text-decoration:none; padding:5px 10px; border:1px solid #30363d; border-radius:var(--bp-radius); background:#21262d; transition:all .15s; white-space:nowrap; }
+  .back-btn:hover { background:#30363d; color:#e6edf3; }
+  .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:var(--bp-text-base); color:#8b949e; margin-top:1px; }
+  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
+  .top-nav-links a.active { background:#1c2128; color:#1f6feb; }
+  @media (max-width:780px) { .top-nav-links { display:none; } }
+  .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:28px 24px; }
+
+  .cat-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
+  .cat-btn { background:#21262d; border:1px solid #30363d; border-radius:var(--bp-radius-20); padding:5px 14px; font-size:var(--bp-text-sm); color:#8b949e; cursor:pointer; transition:all .15s; }
+  .cat-btn:hover, .cat-btn.active { background:#1f6feb; border-color:#1f6feb; color:#fff; }
+  .blog-search-wrap { position:relative; margin-bottom:20px; }
+  .blog-search {
+    width:100%; background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-md);
+    color:#e6edf3; padding:9px 14px 9px 38px; font-size:var(--bp-text-base); outline:none;
+    transition:border-color .15s; font-family:inherit;
+  }
+  .blog-search:focus { border-color:#1f6feb; }
+  .blog-search::placeholder { color:var(--bp-text3); }
+  .blog-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--bp-text3); pointer-events:none; }
+  .no-results { padding:40px 24px; text-align:center; color:var(--bp-text3); }
+  .bc-new { display:inline-block; background:rgba(63,185,80,.12); border:1px solid rgba(63,185,80,.3); color:#3fb950; font-size:var(--bp-text-sm); font-weight:700; padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:6px; vertical-align:middle; text-transform:uppercase; letter-spacing:.3px; }
+
+  .blog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
+  .blog-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:20px; text-decoration:none; display:block; transition:all .15s; }
+  .blog-card:hover { border-color:#8b949e; background:#1c2128; transform:translateY(-2px); }
+  .bc-cat  { font-size:var(--bp-text-xs); color:#58a6ff; font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+  .bc-title{ font-size:var(--bp-text-lg); font-weight:700; color:#f0f6fc; line-height:1.4; margin-bottom:8px; }
+  .bc-desc { font-size:var(--bp-text-base); color:#8b949e; line-height:1.6; margin-bottom:14px; }
+  .bc-meta { display:flex; align-items:center; gap:12px; font-size:var(--bp-text-xs); color:var(--bp-text3); }
+  .bc-meta span { display:flex; align-items:center; gap:4px; }
+
+  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
+  footer a { color:#8b949e; text-decoration:none; }
+  @media(max-width:600px) { .container{padding:14px;} .blog-grid{grid-template-columns:1fr;} }
+
+  /* Makro Ticker */
+  .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); height:34px; overflow:hidden; position:relative; white-space:nowrap; }
+  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
+  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
+  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
+  .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
+  .macro-bar:hover .macro-track { animation-play-state:paused; }
+  @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+    .macro-bar { position: relative; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
+  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
+  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:34px; color:inherit; }
+  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
+  .mc-pos { color:#3fb950; } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
+
