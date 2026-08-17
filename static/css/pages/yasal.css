@@ -1,0 +1,74 @@
+/* ==== extracted from templates/yasal.html (T2.5) ==== */
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bp-bg); color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; font-size: var(--bp-text-md); line-height: 1.75; min-height: 100vh; }
+  header { background: #161b22; border-bottom: 1px solid #30363d; padding: 14px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index:var(--bp-z-dropdown); }
+  .back-btn { display: flex; align-items: center; gap: 6px; color: #8b949e; font-size: var(--bp-text-base); text-decoration: none; padding: 5px 10px; border: 1px solid #30363d; border-radius:var(--bp-radius); background: #21262d; transition: all 0.15s; }
+  .back-btn:hover { background: #30363d; color: #e6edf3; }
+  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: #f0f6fc; }
+  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
+  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
+  .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
+  @media (max-width:780px) { .top-nav-links { display:none; } }
+
+  .container { max-width: var(--bp-container-820); margin: 0 auto; padding: 36px 24px 48px; }
+
+  /* Büyük uyarı banner */
+  .warn-banner {
+    background: rgba(var(--bp-sat-rgb), 0.08);
+    border: 1.5px solid rgba(var(--bp-sat-rgb), 0.35);
+    border-radius:var(--bp-radius-xl);
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+  .warn-banner-title {
+    font-size: var(--bp-text-lg); font-weight: 700; color: var(--bp-sat);
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .warn-banner p { color: #c9d1d9; font-size: var(--bp-text-base); margin-bottom: 8px; }
+  .warn-banner p:last-child { margin-bottom: 0; }
+
+  /* Bölüm kartları */
+  .section-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius:var(--bp-radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .section-card h2 {
+    font-size: var(--bp-text-15); font-weight: 700; color: #f0f6fc;
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 1px solid #21262d;
+  }
+  .section-card p { color: #c9d1d9; margin-bottom: 10px; }
+  .section-card p:last-child { margin-bottom: 0; }
+  .section-card ul { color: #c9d1d9; margin: 8px 0 10px 18px; }
+  .section-card li { margin-bottom: 5px; }
+  strong { color: #e6edf3; }
+  .highlight { color: var(--bp-sat); font-weight: 600; }
+
+  /* Madde listesi özel stil */
+  .clause {
+    display: flex; gap: 12px; padding: 10px 0;
+    border-bottom: 1px solid #21262d;
+  }
+  .clause:last-child { border-bottom: none; }
+  .clause-num {
+    flex-shrink: 0; width: 24px; height: 24px;
+    background: #21262d; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--bp-text-xs); font-weight: 700; color: #8b949e;
+    margin-top: 1px;
+  }
+  .clause-text { color: #c9d1d9; font-size: var(--bp-text-base); line-height: 1.65; }
+
+  .updated { font-size: var(--bp-text-sm); color: var(--bp-text3); margin-bottom: 28px; }
+
+  footer { text-align: center; padding: 20px; font-size: var(--bp-text-sm); color: var(--bp-text3); border-top: 1px solid #21262d; margin-top: 32px; }
+  footer a { color: #8b949e; text-decoration: none; margin: 0 6px; }
+  footer a:hover { color: #e6edf3; }
+
+  @media (max-width: 600px) { .container { padding: 16px 14px 32px; } .section-card { padding: 16px; } }
+
