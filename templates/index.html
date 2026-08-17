@@ -5046,8 +5046,6 @@ async function loadGundem(newsOnly) {
     const d = await r.json();
     if (d.status === 'computing' || !d.al) return;
     const badge = document.getElementById('btTrustBadge');
-    const wr = document.getElementById('btWinRate');
-    const ar = document.getElementById('btAvgRet');
     const sharpeEl = document.getElementById('btSharpe');
     const pfEl     = document.getElementById('btPF');
     const bestEl   = document.getElementById('btBest');
