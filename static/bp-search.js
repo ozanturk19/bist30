@@ -129,6 +129,7 @@
   // ---- Data layer ----
   var _syms = null;
   var _sel = 0;
+  var _trapRelease = null;
 
   function loadSyms() {
     if (_syms) return Promise.resolve(_syms);
@@ -240,7 +241,7 @@
     var wrap = document.createElement('div');
     wrap.innerHTML = ''
       + '<div class="bp-search-overlay" id="bpSearchOverlay" aria-hidden="true">'
-      +   '<div class="bp-search-modal" role="dialog" aria-label="Site içi arama">'
+      +   '<div class="bp-search-modal" id="bpSearchModal" role="dialog" aria-modal="true" aria-label="Site içi arama">'
       +     '<div class="bp-search-input-wrap">'
       +       '<svg class="bp-search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
       +       '<input id="bpSearchInput" type="text" placeholder="Hisse, sektör veya konu ara…" autocomplete="off" spellcheck="false">'
@@ -271,7 +272,7 @@
   function openSearch() {
     ensureOverlay();
     var ov = document.getElementById('bpSearchOverlay');
-    if (!ov) return;
+    if (!ov || ov.classList.contains('open')) return;
     ov.classList.add('open');
     ov.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -279,6 +280,10 @@
       var inp = document.getElementById('bpSearchInput');
       if (inp && !inp.value) render('');
     });
+    if (typeof window.bpTrapFocus === 'function') {
+      var modal = document.getElementById('bpSearchModal');
+      _trapRelease = window.bpTrapFocus(modal);
+    }
     setTimeout(function(){
       var i = document.getElementById('bpSearchInput');
       if (i) { i.focus(); i.select(); }
@@ -292,6 +297,7 @@
     ov.classList.remove('open');
     ov.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    if (_trapRelease) { _trapRelease(); _trapRelease = null; }
   }
 
   window.bpOpenSearch = openSearch;
