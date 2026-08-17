@@ -426,13 +426,14 @@
      (404/profil.html, T5.1'in .container{} secici kapsami disinda
      kalmisti) ayni mekanik yontemle eklendi -- her biri tek sablonda
      kullanilir, deger DEGISTIRILMEDI. 1600px token'i T4.1'de
-     heatmap.html ile birlikte kaldirildi (tek tuketicisiydi). */
+     heatmap.html ile birlikte kaldirildi (tek tuketicisiydi). 900px
+     token'i 18.08'de gucu_yuksek.html'in T4.2 (562a531) ile /tarama
+     preset'ine donusmesi sonucu tuketicisiz kalinca silindi. */
   --bp-container-640:  640px;
   --bp-container-680:  680px;
   --bp-container-720:  720px;
   --bp-container-820:  820px;
   --bp-container-860:  860px;
-  --bp-container-900:  900px;
   --bp-container-1100: 1100px;
   --bp-container-1200: 1200px;
   --bp-container-1400: 1400px;
