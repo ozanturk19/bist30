@@ -427,7 +427,7 @@ function renderChart(data) {
   const legEl = document.getElementById('emaLegend');
   function updateLeg(v12, v99_) {
     if(!legEl) return;
-    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', {maximumFractionDigits:2}) : '—';
+    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
     const l12 = v12  ?? data.ema12?.at(-1)?.value;
     const l99 = v99_ ?? data.ema99?.at(-1)?.value;
     legEl.innerHTML =

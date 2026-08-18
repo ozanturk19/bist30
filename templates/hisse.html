@@ -1493,7 +1493,7 @@ function buildChart(d) {
   /* EMA legend */
   const legEl = document.getElementById('emaLegend');
   function updateLeg(v12, v99_, dateStr) {
-    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { maximumFractionDigits: 2 }) : '—';
+    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
     const l12 = v12  ?? d.ema12.at(-1)?.value;
     const l99 = v99_ ?? d.ema99.at(-1)?.value;
     const datePart = dateStr
@@ -1699,7 +1699,7 @@ function renderSummary(s, signalData) {
   }
 
   /* SL */
-  if (s.sl_level) {
+  if (s.sl_level && s.price) {
     const slPct = ((s.sl_level - s.price) / s.price * 100).toFixed(1);
     document.getElementById('icSl').textContent = fmt(s.sl_level);
     document.getElementById('icSlPct').textContent =

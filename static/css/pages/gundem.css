@@ -108,6 +108,7 @@
   .sc-chg   { font-size: var(--bp-text-xs); font-weight: 600; }
   .sc-chg.up { color: var(--bp-al); }
   .sc-chg.dn { color: var(--bp-sat); }
+  .sc-chg.neu { color: var(--bp-text3); }
   .sc-arrow  { font-size: var(--bp-text-xs); color: var(--accent); font-weight: 600; }
 
   /* ── New signal highlight ── */
