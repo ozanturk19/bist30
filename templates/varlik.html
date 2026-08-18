@@ -626,8 +626,11 @@ setInterval(loadChart, 180000); // sigBadge/ADX/SL/EMA/commentary'yi tazeler (SS
 /* ── SSE: global_prices ile peer fiyatlarını ve header'ı canlı güncelle ── */
 (function() {
   let _retry = 2000;
+  let _sseEs = null;
   function startSSE() {
+    if (_sseEs) { _sseEs.close(); _sseEs = null; }
     const es = new EventSource('/api/stream');
+    _sseEs = es;
     es.onopen = () => { _retry = 2000; };
     es.onmessage = (e) => {
       try {
@@ -652,7 +655,7 @@ setInterval(loadChart, 180000); // sigBadge/ADX/SL/EMA/commentary'yi tazeler (SS
 
         /* Header fiyatını güncelle (mevcut varlık için) */
         const me = prices[VARLIK_KEY];
-        if (me) {
+        if (me && me.price != null && me.change_pct != null) {
           const dec = MACRO_DEC[VARLIK_KEY] ?? (me.price >= 1000 ? 0 : me.price >= 10 ? 2 : 4);
           const hPriceEl = document.getElementById('hPrice');
           const hChgEl   = document.getElementById('hChg');
@@ -676,11 +679,15 @@ setInterval(loadChart, 180000); // sigBadge/ADX/SL/EMA/commentary'yi tazeler (SS
     };
     es.onerror = () => {
       es.close();
+      _sseEs = null;
       setTimeout(startSSE, _retry);
       _retry = Math.min(_retry * 2, 30000);
     };
   }
   startSSE();
+  /* bfcache: EventSource prevents restoration — close on leave, reopen on restore */
+  window.addEventListener('pagehide', () => { if (_sseEs) { _sseEs.close(); _sseEs = null; } });
+  window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
 })();
 </script>
 <script src="/static/bp-search.js?v=51" defer></script>

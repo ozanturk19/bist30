@@ -272,8 +272,11 @@ Promise.all(ASSETS.map(loadAssetCard)).then(() => {
 /* SSE — global_prices mesajlarını dinle, fiyat kartlarını canlı güncelle */
 (function(){
   let _retry = 2000;
+  let _sseEs = null;
   function startSSE() {
+    if (_sseEs) { _sseEs.close(); _sseEs = null; }
     const es = new EventSource('/api/stream');
+    _sseEs = es;
     es.onopen = () => { _retry = 2000; };
     es.onmessage = (e) => {
       try {
@@ -306,11 +309,15 @@ Promise.all(ASSETS.map(loadAssetCard)).then(() => {
     };
     es.onerror = () => {
       es.close();
+      _sseEs = null;
       setTimeout(startSSE, _retry);
       _retry = Math.min(_retry * 2, 30000);
     };
   }
   startSSE();
+  /* bfcache: EventSource prevents restoration — close on leave, reopen on restore */
+  window.addEventListener('pagehide', () => { if (_sseEs) { _sseEs.close(); _sseEs = null; } });
+  window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
 })();
 </script>
 <script src="/static/bp-search.js?v=51" defer></script>

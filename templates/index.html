@@ -189,11 +189,11 @@
     <span>Blog</span>
   </a>
   <div class="bp-nav-more-wrap">
-    <button type="button" class="bp-nav-item bp-nav-more-btn" aria-haspopup="true" aria-expanded="false">
+    <button type="button" class="bp-nav-item bp-nav-more-btn" aria-haspopup="true" aria-expanded="false" aria-controls="bpNavMoreMenu">
       <span>Daha</span>
       <svg class="bp-nav-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="bp-nav-more-menu">
+    <div class="bp-nav-more-menu" id="bpNavMoreMenu">
       <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">Piyasalar</div>
       <a href="/kripto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>Kripto</a>
       <a href="/emtialar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8"/></svg>Emtialar</a>
@@ -240,7 +240,7 @@
 <div class="dual-endeks">
 
   <!-- BIST 100 (önce — daha yaygın takip edilen endeks) -->
-  <div class="endeks-card active" id="ec100" onclick="selectEndeks('XU100')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEndeks('XU100')}">
+  <div class="endeks-card active" id="ec100" onclick="selectEndeks('XU100')" role="button" tabindex="0" aria-pressed="true" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEndeks('XU100')}">
     <div class="ec-top">
       <span class="ec-title">BIST 100</span>
       <svg class="ec-spark" id="spark100" viewBox="0 0 80 32"></svg>
@@ -257,7 +257,7 @@
   </div>
 
   <!-- BIST 30 -->
-  <div class="endeks-card" id="ec30" onclick="selectEndeks('XU030')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEndeks('XU030')}">
+  <div class="endeks-card" id="ec30" onclick="selectEndeks('XU030')" role="button" tabindex="0" aria-pressed="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEndeks('XU030')}">
     <div class="ec-top">
       <span class="ec-title">BIST 30</span>
       <svg class="ec-spark" id="spark30" viewBox="0 0 80 32"></svg>
@@ -1233,6 +1233,8 @@ function selectEndeks(sym) {
   _activeSym = sym;
   document.getElementById('ec30').classList.toggle('active',  sym === 'XU030');
   document.getElementById('ec100').classList.toggle('active', sym === 'XU100');
+  document.getElementById('ec30').setAttribute('aria-pressed',  sym === 'XU030');
+  document.getElementById('ec100').setAttribute('aria-pressed', sym === 'XU100');
   if (!_accOpen) _setAccordion(true);
   _switchTab(sym);
 }
@@ -1242,6 +1244,8 @@ function switchChartTab(sym) {
   _activeSym = sym;
   document.getElementById('ec30').classList.toggle('active',  sym === 'XU030');
   document.getElementById('ec100').classList.toggle('active', sym === 'XU100');
+  document.getElementById('ec30').setAttribute('aria-pressed',  sym === 'XU030');
+  document.getElementById('ec100').setAttribute('aria-pressed', sym === 'XU100');
   _switchTab(sym);
 }
 
@@ -1349,6 +1353,7 @@ window.addEventListener('pageshow', (e) => { if (e.persisted && !_sseInstance) s
 
 function applyLivePrices(prices, ts) {
   Object.entries(prices).forEach(([ticker, d]) => {
+   try {
     const priceEl  = document.getElementById('lp-' + ticker);
     const changeEl = document.getElementById('lc-' + ticker);
     if (!priceEl) return;
@@ -1400,6 +1405,9 @@ function applyLivePrices(prices, ts) {
     livePrices[ticker] = newPrice;
     const appEl = document.getElementById('app-' + ticker);
     if (appEl) appEl.textContent = newPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' ₺';
+   } catch (_) {
+     console.warn('applyLivePrices: ' + ticker + ' icin hatali veri, atlaniyor', _);
+   }
   });
 
   // CPO-1180 K4 FIX (devam): ec30Price/ec30Chg BURADA DA yazılmıyordu — üçüncü
@@ -2366,7 +2374,7 @@ function renderTable() {
       <td class="hide-mobile"><div class="indicators">${indHtml}</div></td>
       <td><button class="alarm-btn ${isWatching ? 'watching' : ''}" id="ab-${s.ticker}"
           onclick="event.stopPropagation();toggleWatch('${s.ticker}')"
-          title="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}">${isWatching ? '🔔' : '🔕'}</button>${isWatching ? `<button class="alert-settings-btn" onclick="event.stopPropagation();openAlertModal('${s.ticker}')" title="Alert ayarları">⚙️</button>` : ''}</td>
+          title="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}" aria-label="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}">${isWatching ? '🔔' : '🔕'}</button>${isWatching ? `<button class="alert-settings-btn" onclick="event.stopPropagation();openAlertModal('${s.ticker}')" title="Alert ayarları" aria-label="Alert ayarları">⚙️</button>` : ''}</td>
     </tr>`;
   }).join('');
 }
@@ -2799,7 +2807,7 @@ function renderAlarmPanel() {
         <span class="ap-ticker"><a href="/hisse/${t}" style="color:#f0f6fc;text-decoration:none">${t}</a></span>
         <span class="ap-price" id="app-${t}">${curPrice} ₺</span>
         <span class="ap-sig ${sigCls}">${sigLabel(sig)}</span>
-        <button class="ap-remove" onclick="toggleWatch('${t}')" title="Takibi kaldır">✕</button>
+        <button class="ap-remove" onclick="toggleWatch('${t}')" title="Takibi kaldır" aria-label="${t} takibini kaldır">✕</button>
       </div>
       <div class="ap-price-alarms">
         <div class="ap-pa-row">
@@ -2810,7 +2818,7 @@ function renderAlarmPanel() {
             value="${aboveHasAlarm ? pa.above : ''}"
             onkeydown="if(event.key==='Enter')setPriceAlarm('${t}','above','${aboveInputId}')">
           ${aboveHasAlarm
-            ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${t}','above')" title="Alarmı temizle">✕</button>`
+            ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${t}','above')" title="Alarmı temizle" aria-label="${t} üstü fiyat alarmını temizle">✕</button>`
             : `<button class="ap-pa-set" onclick="setPriceAlarm('${t}','above','${aboveInputId}')">Kur</button>`}
         </div>
         <div class="ap-pa-row">
@@ -2821,7 +2829,7 @@ function renderAlarmPanel() {
             value="${belowHasAlarm ? pa.below : ''}"
             onkeydown="if(event.key==='Enter')setPriceAlarm('${t}','below','${belowInputId}')">
           ${belowHasAlarm
-            ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${t}','below')" title="Alarmı temizle">✕</button>`
+            ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${t}','below')" title="Alarmı temizle" aria-label="${t} altı fiyat alarmını temizle">✕</button>`
             : `<button class="ap-pa-set" onclick="setPriceAlarm('${t}','below','${belowInputId}')">Kur</button>`}
         </div>
       </div>
