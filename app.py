@@ -145,12 +145,18 @@ ADMIN_TOKEN  = os.environ.get("ADMIN_TOKEN",  "")
 
 def require_admin():
     """Bulgu 5 (danışman audit) fix: ADMIN_SECRET boşsa endpoint KAPALI (503).
-    Eski 'if ADMIN_SECRET and ...' pattern secret boşken endpoint'i korumasız bırakıyordu."""
-    from flask import abort as _abort
+    Eski 'if ADMIN_SECRET and ...' pattern secret boşken endpoint'i korumasız bırakıyordu.
+    DEV2-176 (5. bug-hunt turu): abort(int) yerine abort(Response) — admin endpoint
+    hatalarında da site geneli JSON konvansiyonu (diğer API route'larla tutarlı)."""
+    from flask import abort as _abort, jsonify as _jsonify
     if not ADMIN_SECRET:
-        _abort(503)  # secret yapılandırılmamış → endpoint devre dışı (fail-closed)
+        resp = _jsonify({"error": "admin endpoint yapılandırılmamış"})
+        resp.status_code = 503
+        _abort(resp)  # secret yapılandırılmamış → endpoint devre dışı (fail-closed)
     if request.headers.get("X-Admin-Secret", "") != ADMIN_SECRET:
-        _abort(403)
+        resp = _jsonify({"error": "unauthorized"})
+        resp.status_code = 403
+        _abort(resp)
 
 # ── CPO-1108 A1/A4: Analytics doğruluk katmanı ────────────────────────────────
 CF_BEACON_TOKEN = os.environ.get("CF_BEACON_TOKEN", "").strip()  # boşsa CF WA beacon basılmaz
@@ -8135,7 +8141,7 @@ def api_stock_fundamentals(ticker):
     """Temel analiz verileri — 4 saatlik cache."""
     ticker = ticker.upper()
     if ticker not in BIST100:
-        return safe_json({"error": "Hisse bulunamadı"}), 404
+        return safe_json({"ok": False, "error": "Hisse bulunamadı"}), 404
     data = _get_fundamentals(ticker)
     return safe_json({"fundamentals": data})
 
@@ -9670,7 +9676,7 @@ def api_karsilastir():
                request.args.get("tickers", "").split(",")
                if t.strip()][:4]
     if not tickers:
-        return safe_json({"error": "tickers parametresi gerekli"}), 400
+        return safe_json({"ok": False, "error": "tickers parametresi gerekli"}), 400
 
     with _lock:
         data_map = {s["ticker"]: s for s in _cache["data"]}
@@ -9814,7 +9820,8 @@ def api_snapshots():
         ], reverse=True)
         return safe_json({"dates": files[:30]})  # son 30 gün
     except Exception as e:
-        return safe_json({"dates": [], "error": str(e)})
+        logger.error("Snapshots list: %s", e)
+        return safe_json({"dates": [], "error": "Sunucu hatası"}), 500
 
 
 @app.route("/ozet/<tarih>")
@@ -10470,7 +10477,7 @@ def api_sektor_compare():
     """2-3 sektörü yan yana karşılaştırır. ?s=Bankacılık&s=Teknoloji"""
     selected = request.args.getlist("s")
     if not selected:
-        return safe_json({"error": "s parametresi gerekli"}, 400)
+        return safe_json({"error": "s parametresi gerekli"}), 400
     selected = [s.strip() for s in selected[:3]]  # max 3 sektör
     with _lock:
         stocks = list(_cache["data"])
@@ -11887,8 +11894,12 @@ logger.info("=" * 50)
 
 
 # CPO-1190 K10: markalı 404 (çıplak Flask sayfası yerine — arama + popüler linkler)
+# DEV2-176 (5. bug-hunt turu): /api/* altında da aynı HTML sayfası dönüyordu —
+# makine-tüketimli uç noktalar için JSON'a ayrıştırıldı.
 @app.errorhandler(404)
 def page_not_found(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Bulunamadı"}), 404
     return render_template("404.html"), 404
 
 
