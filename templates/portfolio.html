@@ -205,7 +205,7 @@ function showLsWarning() {
 }
 function dismissLsWarning() {
   document.getElementById('lsWarning').style.display = 'none';
-  localStorage.setItem(LS_WARN_KEY, '1');
+  try { localStorage.setItem(LS_WARN_KEY, '1'); } catch (e) { /* best-effort - banner bir sonraki ziyarette tekrar gorunebilir */ }
 }
 showLsWarning();
 
@@ -219,7 +219,14 @@ function fmtM(v) {
   return fmt(v) + ' ₺';
 }
 
-function save() { localStorage.setItem(PF_KEY, JSON.stringify(portfolio)); }
+function save() {
+  try {
+    localStorage.setItem(PF_KEY, JSON.stringify(portfolio));
+  } catch (e) {
+    console.warn('portfolio localStorage yazilamadi (kota/private mod):', e);
+    showLsWarning();
+  }
+}
 
 /* T7.4: canlı veri (fiyat/sinyal, XU030 kıyas) çekilemediğinde görünür
    uyarı + retry — hisse bazlı sparkline eksikliği tabloda zaten "—" ile
