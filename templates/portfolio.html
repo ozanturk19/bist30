@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>Portföy Takibi | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Portföy Takibi | BorsaPusula</title>
 <meta name="description" content="BIST hisselerinizi takip edin. Giriş fiyatı, anlık değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/portfolio">
@@ -97,13 +97,13 @@
       <div style="font-size:var(--bp-text-sm);color:#8b949e;margin-bottom:16px">Portföyünüzü sunucuya kaydedin — farklı cihazlardan erişin veya bağlantıyla paylaşın.</div>
       <!-- Yeni oluştur / var olan token -->
       <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button onclick="createCloudToken()" style="flex:1;background:#1f6feb;color:#fff;border:none;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+        <button id="cloudCreateBtn" onclick="createCloudToken()" style="flex:1;background:#1f6feb;color:#fff;border:none;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
           + Yeni Oluştur
         </button>
         <div style="flex:2;display:flex;gap:6px">
           <input id="cloudTokenInput" type="text" placeholder="Token girin (XXXX-XXXX-...)" aria-label="Senkronizasyon token'ı"
             style="flex:1;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:7px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);font-family:var(--bp-font-mono);outline:none;min-width:0">
-          <button onclick="loadCloudToken()" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:7px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer">Yükle</button>
+          <button id="cloudLoadTokenBtn" onclick="loadCloudToken()" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:7px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer">Yükle</button>
         </div>
       </div>
       <!-- Aktif token göster -->
@@ -114,10 +114,10 @@
           <button onclick="copyCloudLink()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:var(--bp-text-md)" title="Kopyala"><span role="img" aria-label="Kopyala">📋</span></button>
         </div>
         <div style="display:flex;gap:8px">
-          <button onclick="saveToCloud()" style="flex:1;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);color:#3fb950;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+          <button id="cloudSaveBtn" onclick="saveToCloud()" style="flex:1;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);color:#3fb950;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
             <span aria-hidden="true">⬆</span> Sunucuya Kaydet
           </button>
-          <button onclick="loadFromCloud()" style="flex:1;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.15);color:#58a6ff;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+          <button id="cloudLoadFromCloudBtn" onclick="loadFromCloud()" style="flex:1;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.15);color:#58a6ff;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
             <span aria-hidden="true">⬇</span> Sunucudan Yükle
           </button>
           <button onclick="forgetCloudToken()" style="background:none;border:1px solid #30363d;color:#8b949e;padding:8px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer" title="Token'ı unut (yerel portföy kalır)">
@@ -572,6 +572,8 @@ function _showActiveToken(token) {
 }
 
 async function createCloudToken() {
+  const btn = document.getElementById('cloudCreateBtn');
+  if (btn) btn.disabled = true;
   _setCloudMsg('Oluşturuluyor…', '#8b949e');
   try {
     const res  = await fetch('/api/portfolio/new', {method:'POST'});
@@ -584,6 +586,8 @@ async function createCloudToken() {
     _setCloudMsg('Token oluşturuldu ve portföy kaydedildi!', '#3fb950');
   } catch(e) {
     _setCloudMsg('Hata: ' + e.message, '#f85149');
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
@@ -591,6 +595,8 @@ async function loadCloudToken() {
   const input = document.getElementById('cloudTokenInput');
   const token = (input.value || '').trim();
   if (!token) { _setCloudMsg('Token girin.', '#f85149'); return; }
+  const btn = document.getElementById('cloudLoadTokenBtn');
+  if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', '#8b949e');
   try {
     const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`);
@@ -609,12 +615,16 @@ async function loadCloudToken() {
     input.value = '';
   } catch(e) {
     _setCloudMsg('Hata: ' + e.message, '#f85149');
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
 async function saveToCloud(silent) {
   const token = localStorage.getItem(CLOUD_TOKEN_KEY);
   if (!token) { _setCloudMsg('Önce token oluşturun.', '#f85149'); return; }
+  const btn = document.getElementById('cloudSaveBtn');
+  if (btn) btn.disabled = true;
   if (!silent) _setCloudMsg('Kaydediliyor…', '#8b949e');
   try {
     const res = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {
@@ -630,12 +640,16 @@ async function saveToCloud(silent) {
     }
   } catch(e) {
     _setCloudMsg('Hata: ' + e.message, '#f85149');
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
 async function loadFromCloud() {
   const token = localStorage.getItem(CLOUD_TOKEN_KEY);
   if (!token) { _setCloudMsg('Önce token oluşturun.', '#f85149'); return; }
+  const btn = document.getElementById('cloudLoadFromCloudBtn');
+  if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', '#8b949e');
   try {
     const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`);
@@ -649,6 +663,8 @@ async function loadFromCloud() {
     _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.`, '#3fb950');
   } catch(e) {
     _setCloudMsg('Hata: ' + e.message, '#f85149');
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 

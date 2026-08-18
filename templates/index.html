@@ -1091,7 +1091,7 @@ async function buildCharts(d) {
   elMain.appendChild(elLegend);
 
   function updateLegend(v12, v99) {
-    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { maximumFractionDigits: 0 }) : '—';
+    const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
     const last12 = v12 ?? d.ema12.at(-1)?.value;
     const last99 = v99 ?? d.ema99.at(-1)?.value;
     elLegend.innerHTML =
@@ -2766,6 +2766,7 @@ function setPriceAlarm(ticker, dir, inputId) {
     el.classList.add('has-alarm');
     showToast(`${ticker} ${dir === 'above' ? '▲ üst' : '▼ alt'} hedefi ₺${val} kuruldu`);
   } else {
+    showToast("Geçerli bir fiyat girin (0'dan büyük bir sayı)");
     el.focus();
   }
   renderAlarmPanel();

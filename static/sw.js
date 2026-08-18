@@ -1,14 +1,16 @@
 /* BorsaPusula Service Worker v3.1 — offline fallback + PWA optimize */
-const CACHE = 'borsapusula-v22';
+const CACHE = 'borsapusula-v23';
 
 /* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç) */
 const STATIC = [
-  '/static/lightweight-charts.min.js',
+  '/static/lightweight-charts.min.js?v=1',
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',
+  '/static/css/shared.css?v=eda70c62',
+  '/static/css/pages/offline.css?v=0babc49c',
   '/offline',
-  'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap',
+  'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional',
 ];
 
 self.addEventListener('install', e => {

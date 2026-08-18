@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}
 {% set _katman_a = ['ETH','SOL','BNB','DOGALGAZ'] %}
 {% if varlik_key in _katman_a %}
 <title>{{ meta.name }} Fiyatı ve Piyasa Verisi | BorsaPusula</title>
