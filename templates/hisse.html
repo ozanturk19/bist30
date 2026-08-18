@@ -1017,8 +1017,6 @@
 
   {# SPEC-017 Faz B Bonus: "Tüm BIST100 Hisseleri" yatay scroll alt bar kaldırıldı (Ozan feedback K7 — amatör, sayfa şişiriyor). #}
 
-</div>
-
 <!-- Subscription CTA -->
 <div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(29,78,216,.04));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius-lg);padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
   <div style="flex:1;min-width:160px">
@@ -1210,11 +1208,12 @@ function togglePortfolio() {
   } else {
     const price = _hibCurrentPrice();
     pf.push({
-      ticker:    TICKER,
-      qty:       1,
-      buy_price: price,
-      added_at:  new Date().toISOString().slice(0, 10),
-      source:    'hisse-detail-quick',
+      ticker: TICKER,
+      lot:    1,
+      price:  price,
+      date:   new Date().toISOString().slice(0, 10),
+      id:     Date.now(),
+      source: 'hisse-detail-quick',
     });
     localStorage.setItem(HIB_PF_KEY, JSON.stringify(pf));
     _hibToast(TICKER + ' portföye eklendi (1 lot · ' + price.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '₺) · /portfolio\'da düzenle', 'success');

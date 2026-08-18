@@ -186,7 +186,14 @@
 <script>
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
-let portfolio = JSON.parse(localStorage.getItem(PF_KEY) || '[]');
+let portfolio;
+try {
+  portfolio = JSON.parse(localStorage.getItem(PF_KEY) || '[]');
+  if (!Array.isArray(portfolio)) throw new Error('not an array');
+} catch (e) {
+  console.warn('portfolio localStorage okunamadi, sifirlaniyor:', e);
+  portfolio = [];
+}
 let liveData   = {};  // ticker → {price, signal, signal_price}
 let chartData  = {};  // ticker → [close prices last 30d]
 let xu030Ohlc  = [];  // [{time:"YYYY-MM-DD", close:...}, ...]
@@ -317,12 +324,12 @@ function exportCSV() {
   const rows = portfolio.map(p => {
     const current  = (window._sigCache && _sigCache[p.ticker]) ? _sigCache[p.ticker].price  : '';
     const sig      = (window._sigCache && _sigCache[p.ticker]) ? _sigCache[p.ticker].signal : '';
-    const pnlVal   = current ? ((current - p.buy_price) * p.lot).toFixed(2) : '';
-    const pnlPct   = current ? (((current - p.buy_price) / p.buy_price) * 100).toFixed(2) : '';
+    const pnlVal   = current ? ((current - p.price) * p.lot).toFixed(2) : '';
+    const pnlPct   = current ? (((current - p.price) / p.price) * 100).toFixed(2) : '';
     return [
       p.ticker,
       p.lot,
-      String(p.buy_price).replace('.', ','),
+      String(p.price).replace('.', ','),
       p.date || '',
       current ? String(current).replace('.', ',') : '',
       sig,
@@ -357,12 +364,12 @@ function importPortfolio(e) {
       if (!positions.length) throw new Error('Boş dosya');
       // Basit validasyon
       positions.forEach(p => {
-        if (!p.ticker || !p.lot || !p.buy_price) throw new Error('Eksik alan: ' + JSON.stringify(p));
+        if (!p.ticker || !p.lot || !p.price) throw new Error('Eksik alan: ' + JSON.stringify(p));
       });
       // Mevcut portföyle birleştir — aynı ticker/tarih yoksa ekle
       let added = 0;
       positions.forEach(p => {
-        const exists = portfolio.some(x => x.ticker === p.ticker && x.date === p.date && x.buy_price === p.buy_price);
+        const exists = portfolio.some(x => x.ticker === p.ticker && x.date === p.date && x.price === p.price);
         if (!exists) {
           portfolio.push({ ...p, id: Date.now() + Math.random() });
           added++;
@@ -585,7 +592,7 @@ async function loadCloudToken() {
     _showActiveToken(token);
     // Merge positions
     data.positions.forEach(p => {
-      const exists = portfolio.some(x => x.ticker === p.ticker && +x.buy_price === +p.buy_price && x.date === p.date);
+      const exists = portfolio.some(x => x.ticker === p.ticker && +x.price === +p.price && x.date === p.date);
       if (!exists) portfolio.push({...p, id: Date.now() + Math.random()});
     });
     save(); render();
