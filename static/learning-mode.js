@@ -105,6 +105,7 @@
       btn.textContent = '?';
       btn.addEventListener('click', function (t, d) {
         return function (ev) {
+          ev.preventDefault();
           ev.stopPropagation();
           showPop(this, t, d);
         };

@@ -1677,9 +1677,9 @@ async function renderMarketSummary(stocks) {
     // Watchlist hareketi — client side (localStorage watchlist)
     let watchMoved = 0;
     try {
-      if (window.watchlist && window.watchlist.has) {
+      if (typeof watchlist !== 'undefined' && watchlist.has) {
         /* CPO-1335: donmuş is_new_signal yerine gerçek tarih kontrolü */
-        watchMoved = stocks.filter(s => window.watchlist.has(s.ticker) && bpIsSignalFromToday(s.signal_date)).length;
+        watchMoved = stocks.filter(s => watchlist.has(s.ticker) && bpIsSignalFromToday(s.signal_date)).length;
       }
     } catch(_) { console.warn('watchMoved hesaplama basarisiz', _); }
 

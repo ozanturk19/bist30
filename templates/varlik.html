@@ -425,8 +425,8 @@ function renderChart(data) {
   function updateLeg(v12, v99_) {
     if(!legEl) return;
     const fmt = v => v != null ? (+v).toLocaleString('tr-TR', {maximumFractionDigits:2}) : '—';
-    const l12 = v12  ?? data.ema12.at(-1)?.value;
-    const l99 = v99_ ?? data.ema99.at(-1)?.value;
+    const l12 = v12  ?? data.ema12?.at(-1)?.value;
+    const l99 = v99_ ?? data.ema99?.at(-1)?.value;
     legEl.innerHTML =
       `<span style="color:#58a6ff">EMA12 ${fmt(l12)}</span>&nbsp;&nbsp;` +
       `<span style="color:#e3b341">EMA99 ${fmt(l99)}</span>`;
@@ -616,6 +616,7 @@ async function loadChart() {
 }
 
 loadChart();
+setInterval(loadChart, 180000); // sigBadge/ADX/SL/EMA/commentary'yi tazeler (SSE bu alanları taşımıyor)
 
 /* ── SSE: global_prices ile peer fiyatlarını ve header'ı canlı güncelle ── */
 (function() {
@@ -655,6 +656,15 @@ loadChart();
             const s = me.change_pct > 0 ? '+' : '';
             hChgEl.textContent = s + me.change_pct.toFixed(2) + '%';
             hChgEl.className = 'h-chg ' + (me.change_pct > 0.05 ? 'chg-pos' : me.change_pct < -0.05 ? 'chg-neg' : 'chg-neu');
+          }
+          /* Signal Card fiyatını da senkron tut (header ile çelişen donuk fiyat olmasın) */
+          const scPriceEl = document.getElementById('scPrice');
+          const scChgEl   = document.getElementById('scChg');
+          if (scPriceEl) scPriceEl.textContent = me.price.toLocaleString('tr-TR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+          if (scChgEl) {
+            const s2 = me.change_pct > 0 ? '+' : '';
+            scChgEl.textContent = s2 + me.change_pct.toFixed(2) + '%';
+            scChgEl.className = 'sc-chg ' + (me.change_pct > 0.05 ? 'chg-pos' : me.change_pct < -0.05 ? 'chg-neg' : 'chg-neu');
           }
         }
       } catch(_) { console.error('SSE fiyat guncelleme hatasi', _); }

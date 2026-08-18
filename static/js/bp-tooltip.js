@@ -4,6 +4,7 @@
   var ID = 'bp-tooltip';
   var activeTarget = null;
   var showTimer = null;
+  var focusShowGuard = false;
   var tip;
 
   function ensureStyle() {
@@ -91,16 +92,21 @@
   }
   function onFocusIn(e) {
     var target = closest(e.target);
-    if (target) show(target);
+    if (target) { show(target); focusShowGuard = true; }
   }
   function onFocusOut(e) {
     var target = closest(e.target);
     if (target === activeTarget) hide();
+    focusShowGuard = false;
   }
   function onClick(e) {
     var target = closest(e.target);
     if (!target) { if (activeTarget) hide(); return; }
-    if (target === activeTarget) { hide(); return; }
+    if (target === activeTarget) {
+      if (focusShowGuard) { focusShowGuard = false; return; }
+      hide();
+      return;
+    }
     e.stopPropagation();
     show(target);
   }

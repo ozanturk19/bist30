@@ -278,7 +278,10 @@ async function loadSectors() {
   } catch(e) { console.error('loadSectors: /api/tarama sektor listesi alinamadi', e); }
 }
 
+let _filtersSeq = 0;
+
 async function applyFilters() {
+  const mySeq = ++_filtersSeq;
   const sig    = document.getElementById('fSignal').value;
   const minAdx = document.getElementById('fMinAdx').value || 0;
   const sector = document.getElementById('fSector').value;
@@ -320,6 +323,7 @@ async function applyFilters() {
   try {
     const r = await fetch('/api/tarama?' + params);
     const d = await r.json();
+    if (mySeq !== _filtersSeq) return; // bayat yanit — daha yeni bir applyFilters cagrisi var, at
     _allRows = d.results || [];
     // Apply text filter on top of server results
     const filtered = _searchQ
@@ -329,8 +333,10 @@ async function applyFilters() {
     // I1 — Active filter chips render (her applyFilters sonrası)
     if (typeof renderActiveFilterChips === 'function') renderActiveFilterChips();
   } catch(e) {
+    if (mySeq !== _filtersSeq) return;
     document.getElementById('loadingDiv').innerHTML = '<div style="color:var(--sat);padding:24px">Veri yüklenemedi. Lütfen sayfayı yenileyin.</div>';
   } finally {
+    if (mySeq !== _filtersSeq) return; // spinner/opacity resetini sadece en guncel cagri yapsin
     // T2: Inline spinner kapat + opacity reset
     const rt = document.getElementById('resultTable');
     if (rt) rt.style.opacity = '1';
