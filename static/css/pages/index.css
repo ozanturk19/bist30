@@ -173,13 +173,16 @@
     min-width: 0;
   }
   #searchInput::placeholder { color: var(--bp-text3); }
+  /* 28px < 44px WCAG dokunma hedefi (bug-hunt) -- gorunur boyutu degistirmeden hit-area genislet */
   .search-close {
     background: var(--bp-surface2); border: 1px solid var(--bp-border);
     color: var(--bp-text2); width: 28px; height: 28px;
     border-radius:var(--bp-radius); cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
     font-size: var(--bp-text-md); flex-shrink: 0;
+    position: relative;
   }
+  .search-close::after { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
   .search-close:hover { background: var(--bp-surface3); color: var(--bp-text); }
   .search-results { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
   .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: var(--bp-text-base); }
@@ -1491,6 +1494,10 @@
     transition: all .2s;
   }
   .alarm-panel.hidden { display:none; }
+  /* Mobil alt navigasyon barı görünürken paneli üstüne it (bug-hunt) */
+  @media (max-width: 768px) {
+    .alarm-panel { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
+  }
   .ap-header { padding:12px 14px; border-bottom:1px solid var(--bp-border); display:flex; justify-content:space-between; align-items:center; }
   .ap-title  { font-size:var(--bp-text-base); font-weight:700; color:var(--bp-text); margin:0; }
   .ap-close  { background:none; border:none; color:var(--bp-text2); cursor:pointer; font-size:var(--bp-text-xl); line-height:1; }
@@ -1541,6 +1548,10 @@
     padding:16px 18px; box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(var(--bp-brand-rgb),.1);
     opacity:0; pointer-events:none;
     transition:opacity .35s ease,transform .35s ease;
+  }
+  /* Mobil alt navigasyon barı görünürken toast'ı üstüne it (bug-hunt) */
+  @media (max-width: 768px) {
+    .sub-toast { bottom: calc(90px + 64px + env(safe-area-inset-bottom)); }
   }
   .sub-toast.visible {
     opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;
@@ -1593,6 +1604,10 @@
   }
   .alarm-fab:hover { background: rgba(var(--bp-al-rgb),0.22); transform:scale(1.05); box-shadow: 0 0 24px rgba(var(--bp-al-rgb),0.35), 0 6px 24px rgba(0,0,0,0.5); }
   .alarm-fab:active { transform: scale(0.94); }
+  /* Mobil alt navigasyon barı görünürken FAB'ı üstüne it (bug-hunt, .bp-bottom-cta ile ayni desen) */
+  @media (max-width: 768px) {
+    .alarm-fab { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
+  }
   .alarm-fab .fab-badge {
     position:absolute; top:-4px; right:-4px; background:var(--bp-sat);
     color:#fff; font-size:var(--bp-text-2xs); font-weight:700; border-radius:50%;
