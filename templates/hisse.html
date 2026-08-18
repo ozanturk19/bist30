@@ -351,7 +351,17 @@
     </div>
     {# SPEC-017 Faz B K10: "Neden bu sinyal?" CTA + drawer SİLİNDİ (Ozan redundant feedback). AI tab + sigExplainSection zaten mevcut. #}
   </div>
-  
+
+  <script>
+    window.BP_REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.bpScrollTop = function(){
+      window.scrollTo({top: 0, behavior: window.BP_REDUCED_MOTION ? 'auto' : 'smooth'});
+    };
+    window.bpScrollIntoView = function(el, opts){
+      if (!el) return;
+      el.scrollIntoView(Object.assign({}, opts, {behavior: window.BP_REDUCED_MOTION ? 'auto' : 'smooth'}));
+    };
+  </script>
   <script>
   (function(){
     window.bpDrawSparkline = function(ohlc, accent) {
@@ -482,7 +492,7 @@
       <span aria-hidden="true">🔔</span> Alarm
     </button>
     <button class="bp-cta-share" type="button" aria-label="Paylaş"
-            onclick="var s=document.getElementById('shareSection');if(s){s.style.display='flex';s.scrollIntoView({behavior:'smooth',block:'center'});}">
+            onclick="var s=document.getElementById('shareSection');if(s){s.style.display='flex';window.bpScrollIntoView(s,{block:'center'});}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
         <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
         <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
@@ -797,15 +807,15 @@
   <div data-tab-content="ozet" class="bp-detail-cta-wrap">
     <div class="bp-detail-cta-label">Detay için</div>
     <div class="bp-detail-cta-grid">
-      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('grafik');else{var s=document.querySelector('[data-segment=grafik]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
+      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('grafik');else{var s=document.querySelector('[data-segment=grafik]');if(s)s.click();}window.bpScrollTop()">
         <span class="bp-detail-cta-icon"><span aria-hidden="true">📈</span></span>
         <span class="bp-detail-cta-text">Grafik <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
       </button>
-      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('ai');else{var s=document.querySelector('[data-segment=ai]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
+      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('ai');else{var s=document.querySelector('[data-segment=ai]');if(s)s.click();}window.bpScrollTop()">
         <span class="bp-detail-cta-icon"><span aria-hidden="true">🤖</span></span>
         <span class="bp-detail-cta-text">AI Analiz <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
       </button>
-      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('haberler');else{var s=document.querySelector('[data-segment=haberler]');if(s)s.click();}window.scrollTo({top:0,behavior:'smooth'})">
+      <button type="button" class="bp-detail-cta-btn" onclick="if(window.applyTab)applyTab('haberler');else{var s=document.querySelector('[data-segment=haberler]');if(s)s.click();}window.bpScrollTop()">
         <span class="bp-detail-cta-icon"><span aria-hidden="true">📰</span></span>
         <span class="bp-detail-cta-text">Haberler <span class="bp-detail-cta-arrow"><span aria-hidden="true">→</span></span></span>
       </button>
@@ -2783,7 +2793,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
   var fab = document.getElementById('bpFabUp');
   if (fab) {
     fab.addEventListener('click', function(){
-      window.scrollTo({top: 0, behavior: 'smooth'});
+      window.bpScrollTop();
     });
     var fabT;
     window.addEventListener('scroll', function(){
@@ -2867,14 +2877,14 @@ window._bpApplyTooltips = _applyTooltipVisibility;
       e.preventDefault();
       var tab = s.dataset.segment || 'ozet';
       applyTab(tab);
-      window.scrollTo({top: 0, behavior: 'smooth'});
+      window.bpScrollTop();
     });
     s.addEventListener('keydown', function(e){
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
         e.preventDefault();
         var tab = s.dataset.segment || 'ozet';
         applyTab(tab);
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        window.bpScrollTop();
       }
     });
   });

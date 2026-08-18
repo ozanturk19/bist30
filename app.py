@@ -4301,12 +4301,13 @@ def _fetch_macro_rss_once() -> list:
                     link  = (entry.get("link")  or "").strip()
                     if not title:
                         continue
+                    pub_tr = pub.replace(tzinfo=timezone.utc).astimezone(_TZ_TR)
                     results.append({
                         "title":     title,
                         "url":       link,
                         "source":    source_name,
-                        "published": pub.strftime("%H:%M"),
-                        "date_str":  pub.strftime("%d.%m"),
+                        "published": pub_tr.strftime("%H:%M"),
+                        "date_str":  pub_tr.strftime("%d.%m"),
                         "pub_ts":    pub.timestamp(),   # gerçek timestamp → doğru sıralama
                         "category":  "makro",
                     })
@@ -4361,7 +4362,7 @@ ECONOMIC_CALENDAR_2026 = [
 @limiter.limit("60 per minute")
 def api_economic_calendar():
     """Ekonomik takvim — yaklaşan ve son 7 günün önemli olayları."""
-    today = datetime.now().date()
+    today = datetime.now(_TZ_TR).date()
     all_events = []
     for e in ECONOMIC_CALENDAR_2026:
         try:
@@ -4390,7 +4391,7 @@ def api_macro_news():
     """Makro ekonomi haberleri — RSS tabanlı."""
     return safe_json({
         "items":      _macro_news_cache,
-        "updated_at": datetime.fromtimestamp(_macro_news_ts).strftime("%H:%M")
+        "updated_at": datetime.fromtimestamp(_macro_news_ts, _TZ_TR).strftime("%H:%M")
                         if _macro_news_ts else "—",
         "count":      len(_macro_news_cache),
     })
@@ -10638,7 +10639,7 @@ def _earnings_refresh_impl():
         time.sleep(0.1)
 
     # Dönemleri bugüne göre filtrele (geçmiş dönemler hariç)
-    today_str = date.today().isoformat()
+    today_str = datetime.now(_TZ_TR).date().isoformat()
     result_periods = []
     for qlabel, start, end, desc in _BILANCO_PERIODS:
         if end < today_str:   # Tamamen geçmiş dönem
