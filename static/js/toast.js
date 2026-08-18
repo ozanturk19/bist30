@@ -45,7 +45,14 @@
       'align-items:center',
       'gap:8px'
     ].join(';');
-    el.innerHTML = '<span style="font-size:11px;opacity:0.8" aria-hidden="true">' + col.icon + '</span><span>' + msg + '</span>';
+    var iconSpan = document.createElement('span');
+    iconSpan.style.cssText = 'font-size:11px;opacity:0.8';
+    iconSpan.setAttribute('aria-hidden', 'true');
+    iconSpan.textContent = col.icon;
+    var msgSpan = document.createElement('span');
+    msgSpan.textContent = msg;
+    el.appendChild(iconSpan);
+    el.appendChild(msgSpan);
     getContainer().appendChild(el);
     requestAnimationFrame(function() {
       el.style.opacity = '1';
