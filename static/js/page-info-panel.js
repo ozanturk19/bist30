@@ -52,6 +52,9 @@ class PageInfoPanel {
     } else {
       document.body.insertBefore(this._el, document.body.firstChild);
     }
+    // DOM'a eklendikten SONRA gercek scrollHeight'a gore max-height uygula
+    // (render() sirasinda element henuz detached oldugu icin scrollHeight guvenilmez)
+    this._setCollapsed(this.collapsed, false);
   }
 
   toggleCollapse() {
