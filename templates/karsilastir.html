@@ -383,7 +383,10 @@ function buildTable(stocks) {
   </div>`;
 }
 
+let _compareSeq = 0;  /* hizli tekrar-cagrida eski istek yenisini ezmesin (bug-hunt) */
+
 async function doCompare() {
+  const mySeq = ++_compareSeq;
   const inputs = ['t1','t2','t3','t4'].map(id => document.getElementById(id).value.trim().toUpperCase()).filter(Boolean);
   if (inputs.length < 2) {
     document.getElementById('compareResult').innerHTML =
@@ -417,8 +420,10 @@ async function doCompare() {
   try {
     const res  = await fetch(`/api/karsilastir?tickers=${inputs.join(',')}`);
     const data = await res.json();
+    if (mySeq !== _compareSeq) return;  // daha yeni bir karsilastirma baslamis, bu yaniti at
     document.getElementById('compareResult').innerHTML = buildTable(data.stocks || []);
   } catch(e) {
+    if (mySeq !== _compareSeq) return;
     document.getElementById('compareResult').innerHTML =
       '<div class="empty-state"><h2>Yükleme hatası</h2><p>Lütfen tekrar deneyin.</p></div>';
   }

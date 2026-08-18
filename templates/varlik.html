@@ -282,6 +282,11 @@ function bpToken(ad, yedek) {
   return v || yedek;
 }
 
+/* 180s periyodik loadChart() -> renderChart() cagrisinda eski chart instance'i ve resize listener'i temizlenmiyordu (unbounded leak,
+   bug-hunt bulgusu) */
+let _chartInstance = null;
+let _chartResizeHandler = null;
+
 const BASE_OPTS = {
   layout:          { background: { color: '#0f1923' }, textColor: '#8b949e' },
   grid:            { vertLines: { color: 'rgba(48,54,61,0.5)' }, horzLines: { color: 'rgba(48,54,61,0.5)' } },
@@ -370,6 +375,14 @@ class EmaFill {
 
 function renderChart(data) {
   const elMain = document.getElementById('varlikChart');
+  if (_chartResizeHandler) {
+    window.removeEventListener('resize', _chartResizeHandler);
+    _chartResizeHandler = null;
+  }
+  if (_chartInstance) {
+    try { _chartInstance.remove(); } catch(_) { console.warn("eski chart instance temizlenemedi", _); }
+    _chartInstance = null;
+  }
   elMain.innerHTML = '';
 
   const isMobile = window.innerWidth < 768;
@@ -436,10 +449,12 @@ function renderChart(data) {
     } catch(_) { console.warn('grafik gorunur aralik (zoom) ayarlanamadi', _); }
   });
 
-  window.addEventListener('resize', () => {
+  _chartInstance = chart;
+  _chartResizeHandler = () => {
     const w = elMain.clientWidth;
     if(w) chart.applyOptions({ width: w });
-  });
+  };
+  window.addEventListener('resize', _chartResizeHandler);
 }
 
 function renderSignalData(summary, history, week52, commentary) {

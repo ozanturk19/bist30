@@ -2282,8 +2282,13 @@ async function loadNews(retryCount) {
 loadNews(0);
 
 /* ── Sinyal Açıklaması ─────────────────────────────── */
+let _sigExplainActive = false;  /* AI tab'a hizli gecis-gecis tekrar tekrar loadSignalExplanation(0) tetikleyip paralel retry zinciri birikmesin (bug-hunt) */
 async function loadSignalExplanation(retryCount) {
   retryCount = retryCount || 0;
+  if (retryCount === 0) {
+    if (_sigExplainActive) return;
+    _sigExplainActive = true;
+  }
   const loadEl   = document.getElementById('sigExplainLoading');
   const textEl   = document.getElementById('sigExplainText');
   const footerEl = document.getElementById('sigExplainFooter');
@@ -2320,6 +2325,7 @@ async function loadSignalExplanation(retryCount) {
       footerEl.innerHTML = isAI
         ? '🤖 Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 4 saatte bir yenilenir'
         : '📐 Algoritmik analiz — sinyal motorundaki göstergeler temel alınmıştır · yatırım tavsiyesi değildir';
+      _sigExplainActive = false;
 
     } else if (data.reason === 'no_data') {
       // Stok verisi yüklenmemişse kısa süre sonra tekrar dene
@@ -2330,9 +2336,11 @@ async function loadSignalExplanation(retryCount) {
       } else {
         loadEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
         loadEl.style.display = 'flex';
+        _sigExplainActive = false;
       }
     } else {
       loadEl.style.display = 'none';
+      _sigExplainActive = false;
     }
 
   } catch(e) {
@@ -2341,6 +2349,7 @@ async function loadSignalExplanation(retryCount) {
     } else {
       loadEl.innerHTML = 'Açıklama yüklenemedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
       loadEl.style.display = 'flex';
+      _sigExplainActive = false;
     }
   }
 }

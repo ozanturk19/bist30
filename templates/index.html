@@ -1429,6 +1429,7 @@ let currentSector = 'all';
 let sortKey  = 'signal';
 let sortDir  = 1;
 let polling;
+let _fetchDataSeq = 0;  /* poll/manualRefresh/pull-to-refresh yaris durumu guard'i (bug-hunt) */
 
 /* Gelişmiş filtreler */
 const advFilters = { adx: 0, bars: 0, vol: 0, rsi: 'all', eq: 'all' };
@@ -1600,9 +1601,11 @@ function applyAdvFilter(key, val) {
 
 
 async function fetchData() {
+  const mySeq = ++_fetchDataSeq;
   try {
     const res  = await fetch('/api/data');
     const json = await res.json();
+    if (mySeq !== _fetchDataSeq) return;  // daha yeni bir fetchData() cagrisi baslamis, bu yaniti at
 
     if (json.loading) { setTimeout(fetchData, 3000); return; }
 

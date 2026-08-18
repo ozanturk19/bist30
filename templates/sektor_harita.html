@@ -287,8 +287,11 @@ function renderHeatmap(stocks) {
 }
 
 let _loadAttempts = 0;
+let _loading = false;  /* retry-zinciri (setTimeout) ile setInterval(load,120000) cakismasin (bug-hunt) */
 
 async function load() {
+  if (_loading) return;
+  _loading = true;
   try {
     const r = await fetch('/api/data');
     const j = await r.json();
@@ -316,6 +319,8 @@ async function load() {
       return;
     }
     setTimeout(load, 15000);
+  } finally {
+    _loading = false;
   }
 }
 
