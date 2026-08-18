@@ -71,6 +71,7 @@ try:
     from business_rules   import derive_signal_date_label      # CPO-1335
     from business_rules   import derive_signal_date_key        # CPO-1335
     from business_rules   import signal_date_age_days          # CPO-1335
+    from business_rules   import SIGNAL_LABELS                 # T1.1 (CPO-1321): tek kaynak
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
     from anomaly          import compute_stock_anomaly_score    as _dqv_ui_anomaly
@@ -99,6 +100,8 @@ except ImportError as _dqv_import_err:
     def derive_signal_date_label(signal_date, today=None): return None
     def derive_signal_date_key(signal_date, today=None):   return "unknown"
     def signal_date_age_days(signal_date, today=None):     return None
+    # T1.1 fallback: business_rules yüklenemezse bugünkü değerlerle aynı sözlük
+    SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
 
 # ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
 _SENTRY_AVAILABLE = False
@@ -743,7 +746,8 @@ def _broadcast_push_changes(changes):
     )
 
 # ── Sinyal görünen ad eşlemesi (iç değer AL/SAT/BEKLE değişmez) ───────────────
-_SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
+# T1.1 (CPO-1321): business_rules.SIGNAL_LABELS tek kaynak, burada yalnız alias
+_SIGNAL_LABELS = SIGNAL_LABELS
 
 @app.template_filter('signal_label')
 def signal_label_filter(signal):
