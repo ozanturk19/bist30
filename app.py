@@ -10257,10 +10257,9 @@ def run_backtest():
         _bt_cache["computed_at"] = result["computed_at"]
     logger.info("Backtest tamamlandı: %d AL, %d SAT episod",
                 result["al"]["count"], result["sat"]["count"])
-    # Diske kaydet — restart sonrası anında yüklenir
+    # Diske kaydet — restart sonrası anında yüklenir (atomic write, DEV2-172 bulgusu)
     try:
-        with open(_BT_DISK_PATH, "w", encoding="utf-8") as f:
-            json.dump(result, f, ensure_ascii=False)
+        _atomic_write_json(_BT_DISK_PATH, result)
         logger.info("Backtest diske kaydedildi: %s", _BT_DISK_PATH)
     except Exception as e:
         logger.warning("Backtest disk yazma hatası: %s", e)
