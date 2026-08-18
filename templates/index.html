@@ -1404,9 +1404,6 @@ function applyLivePrices(prices, ts) {
     if (appEl) appEl.textContent = newPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' ₺';
   });
 
-  const liveEl = document.getElementById('liveTs');
-  if (liveEl) liveEl.textContent = '● CANLI ' + ts;
-
   // CPO-1180 K4 FIX (devam): ec30Price/ec30Chg BURADA DA yazılmıyordu — üçüncü
   // bağımsız yazan bulundu. /api/stream SSE'si _live_prices['XU030']'u push
   // ediyordu (fetch_live_prices — gerçek son-işlem fiyatı, ayrı cadence/kaynak,
@@ -3470,23 +3467,7 @@ function handleSearchKey(e) {
   }
 }
 
-// ── Nav dropdown toggle ──────────────────────────────────
-function toggleNavDd(id, btn) {
-  const menu = document.getElementById(id);
-  const isOpen = menu.classList.contains('open');
-  // Close all open dropdowns first
-  document.querySelectorAll('.nav-dropdown-menu').forEach(m => m.classList.remove('open'));
-  document.querySelectorAll('.nav-dropdown-btn').forEach(b => b.classList.remove('open'));
-  if (!isOpen) {
-    menu.classList.add('open');
-    btn.classList.add('open');
-  }
-}
 document.addEventListener('click', e => {
-  if (!e.target.closest('.nav-dropdown')) {
-    document.querySelectorAll('.nav-dropdown-menu').forEach(m => m.classList.remove('open'));
-    document.querySelectorAll('.nav-dropdown-btn').forEach(b => b.classList.remove('open'));
-  }
   if (!e.target.closest('.search-wrap')) {
     document.getElementById('searchAc')?.classList.remove('open');
   }
@@ -3691,10 +3672,8 @@ document.addEventListener('keydown', e => {
     const s = document.querySelector('.search-input');
     if (s) { s.focus(); s.select(); }
   }
-  // Esc → blur search / close dropdowns
+  // Esc → blur search
   if (e.key === 'Escape') {
-    document.querySelectorAll('.nav-dropdown-menu').forEach(m => m.classList.remove('open'));
-    document.querySelectorAll('.nav-dropdown-btn').forEach(b => b.classList.remove('open'));
     document.activeElement?.blur();
   }
 });

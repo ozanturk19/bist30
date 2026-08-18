@@ -48,21 +48,6 @@
     + '#statsBar,.stats-bar{min-height:78px}'
     /* ── Mobile bottom-nav thumb-friendly: bigger inner + breathing room ── */
     + '@media (max-width:768px){.mbn-inner{height:72px !important;padding-bottom:8px !important}.mbn-item{padding-top:6px !important}body{padding-bottom:calc(72px + 8px + env(safe-area-inset-bottom)) !important}}'
-    /* ── Trend Strip (dynamic ticker chips replacing static "Popüler") ── */
-    + '.bp-trend-strip{display:flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(14,14,18,0.85);border-bottom:1px solid #2a2a2c;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;white-space:nowrap;position:relative;z-index:var(--bp-z-trend-strip);min-height:40px}'
-    + '.bp-trend-strip::-webkit-scrollbar{display:none}'
-    + '.bp-trend-label{flex-shrink:0;font-family:"Space Grotesk",system-ui,sans-serif;font-size:9px;font-weight:700;color:#5a5a62;text-transform:uppercase;letter-spacing:1.2px;margin-right:8px;padding:0;background:none;border:none;display:inline-flex;align-items:center;gap:5px}'
-    + '.bp-trend-label::before{content:"";display:inline-block;width:14px;height:1px;background:#3a3a42}'
-    + '.bp-trend-chip{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:12px;font-size:11.5px;font-weight:600;text-decoration:none;transition:transform .12s,background .15s;font-family:Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums;background:rgba(28,27,31,0.7);border:1px solid #2a2a2c;color:#e5e1e4}'
-    + '.bp-trend-chip:hover{background:#1c1b1f;transform:translateY(-1px)}'
-    + '.bp-trend-chip .tc-tk{font-family:"Space Grotesk",system-ui,sans-serif;font-weight:700;color:#e5e1e4;font-size:11px}'
-    + '.bp-trend-chip .tc-arrow{font-size:9px}'
-    + '.bp-trend-chip .tc-chg{font-size:10.5px;font-weight:600}'
-    + '.bp-trend-chip.up{border-color:rgba(0,226,144,0.32)}'
-    + '.bp-trend-chip.up .tc-arrow,.bp-trend-chip.up .tc-chg{color:#00e290}'
-    + '.bp-trend-chip.down{border-color:rgba(248,81,73,0.32)}'
-    + '.bp-trend-chip.down .tc-arrow,.bp-trend-chip.down .tc-chg{color:#f85149}'
-    + '@media (max-width:768px){.bp-trend-strip{padding:7px 12px}.bp-trend-label{display:none}}'
     /* ── Unified Logo (replaces .back-btn variants across pages) ── */
     + '.logo-link{display:inline-flex;align-items:center;text-decoration:none;flex-shrink:0;padding:0;margin:0;background:none;border:none}'
     + '.logo-link .bp-logo{display:block;width:260px;height:68px;flex-shrink:0}'
@@ -409,8 +394,9 @@
   }
 
   // ---- Trend Strip removed (Strategy 1: Hareketliler widget anasayfada bunun yerini alıyor) ----
+  // Bu fonksiyon artik CSS uretmiyor (dead .bp-trend-strip/.bp-trend-chip kurallari temizlendi,
+  // T9-benzeri envanter turu), yalniz eski cache'lenmis/render edilmis DOM'da kalinti varsa temizler.
   function ensureTrendStrip() {
-    // Sadece eski static "popüler" chip kalıntılarını ve eski trend strip'i temizle
     document.querySelectorAll('.bp-trend-strip').forEach(function(el){ el.remove(); });
   }
 

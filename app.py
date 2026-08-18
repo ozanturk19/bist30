@@ -8741,10 +8741,15 @@ def tarama():
 @limiter.limit("60 per minute")
 def api_tarama():
     """Hisse tarayıcısı — sinyal, ADX, fiyat, hacim, sektör filtresi."""
+    def _qfloat(name, default):
+        try:
+            return float(request.args.get(name, default))
+        except (TypeError, ValueError):
+            return default
     sig      = request.args.get("signal",    "")
-    min_adx  = float(request.args.get("min_adx",   0))
-    min_p    = float(request.args.get("min_price", 0))
-    max_p    = float(request.args.get("max_price", 999999))
+    min_adx  = _qfloat("min_adx",   0)
+    min_p    = _qfloat("min_price", 0)
+    max_p    = _qfloat("max_price", 999999)
     sector   = request.args.get("sector",    "")
     eq       = request.args.get("eq",        "")   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
     sort_by  = request.args.get("sort",      "signal_strength")  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx

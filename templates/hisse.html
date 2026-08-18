@@ -1055,21 +1055,6 @@
 <script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=20260817A"></script>
 <script>
-/* ── Global nav dropdown ── */
-function toggleNavDd(id, btn) {
-  const menu = document.getElementById(id);
-  const isOpen = menu.classList.contains('open');
-  document.querySelectorAll('.nav-dropdown-menu').forEach(m => m.classList.remove('open'));
-  document.querySelectorAll('.nav-dropdown-btn').forEach(b => b.classList.remove('open'));
-  if (!isOpen) { menu.classList.add('open'); btn.classList.add('open'); }
-}
-document.addEventListener('click', e => {
-  if (!e.target.closest('.nav-dropdown')) {
-    document.querySelectorAll('.nav-dropdown-menu').forEach(m => m.classList.remove('open'));
-    document.querySelectorAll('.nav-dropdown-btn').forEach(b => b.classList.remove('open'));
-  }
-}, true);
-
 /* ── Hisse sayfası e-posta aboneliği ── */
 async function hisseSubscribe() {
   const emailEl = document.getElementById('hisseSubEmail');

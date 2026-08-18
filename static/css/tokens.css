@@ -326,7 +326,6 @@
      isimli basamak olarak tanimlaniyor. 19 ham kullanim / 9 sablon + bp-search.js,
      16 yeni token. Hicbir sayisal deger DEGISTIRILMEDI (T1.4/T5.1/FAZ8 radius ile
      ayni yontem), yalniz merkezi tek kaynaga tasindi. */
-  --bp-z-nav-dropdown:      500;  /* .nav-dropdown-menu — index/hisse/varlik (3) */
   --bp-z-search-dropdown:   400;  /* .search-ac — index */
   --bp-z-fab-up:            400;  /* .bp-fab-up — hisse */
   --bp-z-modal-backdrop:  10001;  /* .alert-modal-backdrop — index */
@@ -339,7 +338,6 @@
   --bp-z-sticky-subheader:   90;  /* .bp-segments — hisse */
   --bp-z-sheet:             260;  /* .mbn-sheet — mobile nav partial */
   --bp-z-sheet-backdrop:    250;  /* .mbn-sheet-backdrop — mobile nav partial */
-  --bp-z-trend-strip:         5;  /* .bp-trend-strip — bp-search.js enjeksiyonu */
   --bp-z-chart-legend:       30;  /* yerel grafik legend overlay — index (JS) */
   --bp-z-chart-date-label:   20;  /* yerel grafik tarih etiketi — hisse (JS) */
 
