@@ -9311,6 +9311,8 @@ def sitemap():
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly"})
     for a in ARTICLES:
+        if a.get("canonical_slug"):
+            continue  # deprecated/duplicate slug — canonical hedefi kendi ARTICLES girdisiyle zaten listeleniyor
         pages.append({"loc": f"/blog/{a['slug']}", "priority": "0.7", "changefreq": "monthly"})
     today = date.today().isoformat()
     xml   = ['<?xml version="1.0" encoding="UTF-8"?>',

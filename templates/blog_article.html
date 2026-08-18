@@ -20,10 +20,10 @@
   "datePublished": "{{ article.date }}",
   "dateModified": "{{ article.date }}",
   "inLanguage": "tr",
-  "url": "https://borsapusula.com/blog/{{ article.slug }}",
+  "url": "https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://borsapusula.com/blog/{{ article.slug }}"
+    "@id": "https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}"
   },
   "author": {
     "@type": "Organization",
