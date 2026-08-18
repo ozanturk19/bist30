@@ -8768,10 +8768,14 @@ def tarama():
 def api_tarama():
     """Hisse tarayıcısı — sinyal, ADX, fiyat, hacim, sektör filtresi."""
     def _qfloat(name, default):
+        # DEV2-bughunt-r7: float("nan") exception firlatmiyor -> min_price/max_price/min_adx
+        # filtreleri "nan" degeriyle sessizce devre disi kaliyordu (NaN karsilastirmasi hep False).
+        import math
         try:
-            return float(request.args.get(name, default))
+            v = float(request.args.get(name, default))
         except (TypeError, ValueError):
             return default
+        return v if math.isfinite(v) else default
     # DEV2-r4-input-edge: case-insensitive normalize — buyuk/kucuk harf farki
     # sessizce 0 sonuc donduruyordu (signal/sector/eq) veya siralamayi sessizce
     # iptal ediyordu (sort). Kanonik veri (signal/entry_quality) hep ASCII
@@ -9712,7 +9716,10 @@ def api_karsilastir():
             "bull_score":     s.get("bull_score"),
             "bear_score":     s.get("bear_score"),
             "sector":         _get_sector(ticker),
-            "kap_url":        kap_url_for(ticker),
+            # DEV2-bughunt-r7: bulunamayan (found=False) ticker icin de kap_url_for()
+            # her zaman bir fallback arama linki dondugunden, karsilastir.html olmayan
+            # bir hisse icin sahte/tiklanabilir KAP linki gosteriyordu.
+            "kap_url":        kap_url_for(ticker) if bool(s) else None,
             # ── Temel analiz ───────────────────────────────
             "pe_ratio":       fund.get("pe_ratio"),
             "pb_ratio":       fund.get("pb_ratio"),
@@ -10060,19 +10067,21 @@ def api_portfolio_save(token):
         return safe_json({"error": f"Maksimum {_PF_MAX_ENTRIES} pozisyon izin verilir"}), 400
 
     # Sadece izin verilen alanları kaydet (injection güvenliği)
-    ALLOWED = {"id","ticker","name","buy_price","quantity","date","note","sector"}
+    # DEV2-bughunt-r7: client (templates/portfolio.html) 'lot'/'price' alanlarıyla gönderiyor,
+    # whitelist'te yalnız 'buy_price'/'quantity' vardı -> sessizce siliniyordu (veri kaybı).
+    ALLOWED = {"id","ticker","name","buy_price","quantity","lot","price","date","note","sector"}
     clean = []
     for p in positions:
         if not isinstance(p, dict):
             continue
         entry = {k: v for k, v in p.items() if k in ALLOWED}
-        # Tip güvenliği: fiyat ve miktar sayısal olmalı
-        if "buy_price" in entry:
-            try: entry["buy_price"] = float(entry["buy_price"])
-            except (ValueError, TypeError): entry["buy_price"] = 0.0
-        if "quantity" in entry:
-            try: entry["quantity"] = float(entry["quantity"])
-            except (ValueError, TypeError): entry["quantity"] = 0.0
+        # Tip + aralık güvenliği: fiyat ve miktar sayısal, negatif olmayan, makul üst sınırda olmalı
+        for numeric_key in ("buy_price", "price", "quantity", "lot"):
+            if numeric_key in entry:
+                try:
+                    entry[numeric_key] = min(1e9, max(0.0, float(entry[numeric_key])))
+                except (ValueError, TypeError):
+                    entry[numeric_key] = 0.0
         # String alanları kırp
         for k in ("ticker","name","date","note","sector"):
             if k in entry and isinstance(entry[k], str):

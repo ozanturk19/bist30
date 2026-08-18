@@ -340,14 +340,20 @@ function buildTable(stocks) {
     </div>`;
   }
 
-  const headers = stocks.map(s => `
-    <th class="col-hdr" scope="col">
-      <a href="/hisse/${s.ticker}" style="text-decoration:none;color:inherit">
+  const headers = stocks.map(s => {
+    // DEV2-bughunt-r7: bulunamayan (found=false) ticker icin /hisse/ linki 404'e gidiyordu.
+    const inner = `
         <div class="col-ticker">${s.ticker}</div>
         <div class="col-name">${s.name||''}</div>
         ${s.kap_url ? `<a href="${s.kap_url}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
-      </a>
-    </th>`).join('');
+      `;
+    return `
+    <th class="col-hdr" scope="col">
+      ${s.found
+        ? `<a href="/hisse/${s.ticker}" style="text-decoration:none;color:inherit">${inner}</a>`
+        : `<div style="color:inherit">${inner}</div>`}
+    </th>`;
+  }).join('');
 
   // ── Yatırım Skoru satırı (kazananı belirle) ──
   const scores = stocks.map(s => s.found ? calcScore(s).total : -1);

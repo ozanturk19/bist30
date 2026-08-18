@@ -171,6 +171,19 @@
     init();
   }
 
+  // DEV2-bughunt-r7: cok-sekme senkronu — baska sekmede degisen STORAGE_KEY'i yansit.
+  // persistState() BILEREK cagrilmiyor (zaten diger sekme yazdi, feedback loop olusmasin).
+  window.addEventListener('storage', function (e) {
+    if (e.key !== STORAGE_KEY) return;
+    STATE = e.newValue === '1';
+    applyBody();
+    closePop();
+    var btns = document.querySelectorAll('.bp-lm-toggle');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', STATE ? 'true' : 'false');
+    }
+  });
+
   // Global API
   window.bpLearningMode = { toggle: toggle, get state() { return STATE; } };
 })();

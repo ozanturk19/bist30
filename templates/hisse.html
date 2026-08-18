@@ -2745,7 +2745,10 @@ document.addEventListener('click', function(e) {
 /* F3 — Eğitim Tooltip toggle (localStorage bp_show_tooltips) */
 const _TIPS_KEY = 'bp_show_tooltips';
 function _applyTooltipVisibility() {
-  const show = localStorage.getItem(_TIPS_KEY) !== 'false';
+  // DEV2-bughunt-r7: dosyadaki diger anahtarlarin (bp_hisse_tab vb.) aksine
+  // guardsizdi — private-mode/quota hatasinda throw edip zincirleme kirilirdi.
+  let show = true;
+  try { show = localStorage.getItem(_TIPS_KEY) !== 'false'; } catch (e) { /* varsayilan: goster */ }
   document.querySelectorAll('.ind-help').forEach(el => { el.style.display = show ? '' : 'none'; });
   const tb = document.getElementById('tooltipToggle');
   if (tb) {
@@ -2755,8 +2758,10 @@ function _applyTooltipVisibility() {
   }
 }
 function toggleTooltips() {
-  const cur = localStorage.getItem(_TIPS_KEY) !== 'false';
-  localStorage.setItem(_TIPS_KEY, String(!cur));
+  try {
+    const cur = localStorage.getItem(_TIPS_KEY) !== 'false';
+    localStorage.setItem(_TIPS_KEY, String(!cur));
+  } catch (e) { /* private-mode/quota — sessizce yut, gorsel toggle yine de calissin */ }
   _applyTooltipVisibility();
 }
 _applyTooltipVisibility();

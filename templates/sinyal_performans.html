@@ -275,9 +275,14 @@ async function triggerBacktest() {
     const poll = setInterval(async () => {
       tries++;
       if (tries > 30) { clearInterval(poll); btn.textContent = '🔄 Tekrar dene'; btn.disabled = false; return; }
-      const r = await fetch('/api/backtest');
-      const j = await r.json();
-      if (j.al) { clearInterval(poll); window.location.reload(); }
+      // DEV2-bughunt-r7: guardsizdi, hatali/timeout yanitta tries sayaci hic
+      // ilerlemezdi ve buton 15dk boyunca donuk kalirdi (asagidaki autoStartBacktest'in
+      // ayni fetch'i icin zaten kurulu try/catch deseniyle hizalandi).
+      try {
+        const r = await fetch('/api/backtest');
+        const j = await r.json();
+        if (j.al) { clearInterval(poll); window.location.reload(); }
+      } catch (e) { console.warn('backtest poll basarisiz', e); }
     }, 30000);
   } catch(e) {
     btn.textContent = '❌ Hata';

@@ -2556,7 +2556,17 @@ function sortTable(key) {
 async function manualRefresh() {
   const btn = document.getElementById('bpRefreshBtn');
   if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
-  await fetch('/api/refresh', { method: 'POST' });
+  // DEV2-bughunt-r7: fetch guardsizdi, tek koruma bp-search.js'teki dolayli
+  // bpSmartRefresh sarmalayicisiydi (agirlik: zorunlu tam sayfa reload).
+  // Kendi try/catch'i ile fonksiyon artik bagimsiz da guvenli, ag hatasinda
+  // sadece buton normale doner (reload zorlanmaz).
+  try {
+    await fetch('/api/refresh', { method: 'POST' });
+  } catch (e) {
+    console.warn('manualRefresh basarisiz:', e);
+    if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
+    return;
+  }
   setTimeout(() => {
     if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
     fetchData();
@@ -2676,6 +2686,9 @@ function savePriceAlarms() {
 }
 
 function toggleWatch(ticker) {
+  // DEV2-bughunt-r7: cok-sekme lost-update onlemi — mutate etmeden once localStorage'dan
+  // taze oku (baska sekmede hisse.html'in eklediği/cikardigi degisiklikleri kaybetmemek icin)
+  watchlist = new Set(_safeLoadJSON(WATCH_KEY, []));
   if (watchlist.has(ticker)) {
     watchlist.delete(ticker);
     // fiyat alarmını da temizle

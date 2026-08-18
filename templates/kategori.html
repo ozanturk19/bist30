@@ -244,7 +244,13 @@ async function loadAssetCard(asset) {
     if(slEl && s.sl_level) slEl.textContent = 'SL: '+fmtPrice(s.sl_level,dec);
     const adxEl = document.getElementById('adx-'+key);
     if(adxEl && s.adx) adxEl.textContent = 'ADX '+s.adx.toFixed(1);
-  } catch(e){}
+  } catch(e){
+    // DEV2-bughunt-r7: bos catch karti sonsuza dek skeleton'da birakiyordu
+    // (agir hata/502-503 maintenance sayfasi -> .json() throw). Ayni dosyada
+    // zaten kurulu olan _applyUnavailableCard fallback'ini kullan.
+    console.warn('kategori loadAssetCard basarisiz:', key, e);
+    _applyUnavailableCard(key);
+  }
 }
 
 Promise.all(ASSETS.map(loadAssetCard)).then(() => {
