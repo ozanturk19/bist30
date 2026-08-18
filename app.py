@@ -1354,12 +1354,20 @@ SECTORS = {
                       "KERVT", "LKMNH", "MEDTR", "PARSN", "AGROT", "MARTI"],
 }
 
+# DEV2-r4-perf: SECTORS lineer taramasi yerine bir kez kurulan ters-index.
+# setdefault kritik: SECTORS icinde birden fazla sektorde gecen ticker'lar
+# (PARSN/LKMNH/NUHCM/BASGZ) icin eski davranis (ilk eslesen sektor kazanir,
+# SECTORS.items() sirasina gore) birebir korunur.
+_TICKER_TO_SECTOR = {}
+for _dev2_sector, _dev2_tickers in SECTORS.items():
+    for _dev2_ticker in _dev2_tickers:
+        _TICKER_TO_SECTOR.setdefault(_dev2_ticker, _dev2_sector)
+del _dev2_sector, _dev2_tickers, _dev2_ticker
+
+
 def _get_sector(ticker: str) -> str:
     """Ticker için sektör adını döndürür. Bulunamazsa 'Diğer'."""
-    for sector, tickers in SECTORS.items():
-        if ticker in tickers:
-            return sector
-    return "Diğer"
+    return _TICKER_TO_SECTOR.get(ticker, "Diğer")
 
 
 def _enrich_stock(s: dict) -> dict:
@@ -4832,10 +4840,12 @@ def api_market_summary():
     # CPO-1335: donmuş is_new_signal DEĞİL — okuma anında gerçek tarih kontrolü.
     # Bayrak analiz anında hesaplanıp payload'a donuyor (app.py:1635); ticker o gün
     # tazelenmezse eski günün True'su taşınıyor ve hero olmayan bir "bugün"ü anlatıyor.
+    # DEV2-r4-perf: "bugun" istek boyunca sabit, N+1 yerine bir kez hesapla.
+    _today_ms = datetime.now(_TZ_TR).date()
     new_bull = [s for s in bist
-                if is_signal_from_today(s.get("signal_date")) and s.get("signal") == "AL"]
+                if is_signal_from_today(s.get("signal_date"), today=_today_ms) and s.get("signal") == "AL"]
     new_bear = [s for s in bist
-                if is_signal_from_today(s.get("signal_date")) and s.get("signal") == "SAT"]
+                if is_signal_from_today(s.get("signal_date"), today=_today_ms) and s.get("signal") == "SAT"]
     all_bull = [s for s in bist if s.get("signal") == "AL"]
 
     # Top tickers (en taze 4 AL)
@@ -8756,13 +8766,18 @@ def api_tarama():
             return float(request.args.get(name, default))
         except (TypeError, ValueError):
             return default
-    sig      = request.args.get("signal",    "")
+    # DEV2-r4-input-edge: case-insensitive normalize — buyuk/kucuk harf farki
+    # sessizce 0 sonuc donduruyordu (signal/sector/eq) veya siralamayi sessizce
+    # iptal ediyordu (sort). Kanonik veri (signal/entry_quality) hep ASCII
+    # buyuk harf oldugundan .upper() guvenli; sort_by dict anahtarlariyla
+    # (hepsi lowercase) karsilastirildigi icin .lower() guvenli.
+    sig      = request.args.get("signal",    "").strip().upper()
     min_adx  = _qfloat("min_adx",   0)
     min_p    = _qfloat("min_price", 0)
     max_p    = _qfloat("max_price", 999999)
-    sector   = request.args.get("sector",    "")
-    eq       = request.args.get("eq",        "")   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
-    sort_by  = request.args.get("sort",      "signal_strength")  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
+    sector   = request.args.get("sector",    "").strip()
+    eq       = request.args.get("eq",        "").strip().upper()   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
+    sort_by  = request.args.get("sort",      "signal_strength").strip().lower()  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
 
     with _lock:
         stocks = list(_cache["data"])
@@ -8782,7 +8797,7 @@ def api_tarama():
     for s in stocks:
         if s.get("ticker") in ("XU030", "XU100"): continue
         if sig    and s.get("signal")              != sig:    continue
-        if sector and _get_sector(s.get("ticker","")) != sector: continue
+        if sector and _get_sector(s.get("ticker","")).lower() != sector.lower(): continue
         if eq     and s.get("entry_quality")       != eq:    continue
         price = s.get("price")  or 0
         adx   = _parse_adx(s)
@@ -10063,7 +10078,10 @@ def api_portfolio_save(token):
 
     try:
         with _PF_LOCK:
-            _tp_write_json(path, payload, ensure_ascii=False)
+            # DEV2-r4-concurrency: atomic=True — 4 gunicorn worker'i _PF_LOCK
+            # (process-local) senkronize etmiyor, ayni token'a esanli 2 POST
+            # farkli worker'a duserse tmp+os.replace olmadan dosya bozulabiliyordu.
+            _tp_write_json(path, payload, atomic=True, ensure_ascii=False)
         return safe_json({"ok": True, "count": len(clean)})
     except Exception as e:
         logger.error("Portfolio save [%s]: %s", token, e)
@@ -10479,6 +10497,7 @@ def api_sektor_compare():
             }
         result[sec_name] = {
             "name": sec_name,
+            "found": sec_name in sec_map,  # DEV2-r4-input-edge: bilinmeyen/case-mismatch sektor artik ayirt edilebilir
             "al": len(al), "sat": len(sat), "bekle": len(bkl), "total": total,
             "score": score, "avg_rvol": avg_rvol, "avg_chg": avg_chg,
             "stocks": sorted([_stock_row(s) for s in items],
@@ -10877,7 +10896,6 @@ def api_market_news():
         if bullet_lines:
             lines = bullet_lines[:3]
         # Markdown temizle: bullet prefix, bold markers, italic markers
-        _MD_STRIP_RE = re.compile(r'^\s*[\*\-•–]\s+|\*\*([^*]+)\*\*|\*([^*]+)\*')
         def _clean_md(ln):
             ln = re.sub(r'^\s*[\*\-•–]\s+', '', ln)  # bullet prefix
             ln = re.sub(r'\*\*([^*]+)\*\*', r'\1', ln)  # **bold**

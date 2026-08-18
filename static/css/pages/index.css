@@ -1494,8 +1494,11 @@
     transition: all .2s;
   }
   .alarm-panel.hidden { display:none; }
-  /* Mobil alt navigasyon barı görünürken paneli üstüne it (bug-hunt) */
-  @media (max-width: 768px) {
+  /* Mobil alt navigasyon barı görünürken paneli üstüne it (bug-hunt).
+     DEV2-r4-css-breakpoint: T2.4 (5f85b93) nav görünürlük eşiğini 900px'e
+     taşıdı ama bu temizlik kuralı 768px'te kalmıştı — 769-900px aralığında
+     panel nav'ın arkasında/üstünde çakışıyordu. shared.css:101 kanonik değere hizalandı. */
+  @media (max-width: 900px) {
     .alarm-panel { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
   }
   .ap-header { padding:12px 14px; border-bottom:1px solid var(--bp-border); display:flex; justify-content:space-between; align-items:center; }
@@ -1549,8 +1552,10 @@
     opacity:0; pointer-events:none;
     transition:opacity .35s ease,transform .35s ease;
   }
-  /* Mobil alt navigasyon barı görünürken toast'ı üstüne it (bug-hunt) */
-  @media (max-width: 768px) {
+  /* Mobil alt navigasyon barı görünürken toast'ı üstüne it (bug-hunt).
+     DEV2-r4-css-breakpoint: shared.css:101 kanonik 900px eşiğine hizalandı
+     (bkz. .alarm-panel yorumu). */
+  @media (max-width: 900px) {
     .sub-toast { bottom: calc(90px + 64px + env(safe-area-inset-bottom)); }
   }
   .sub-toast.visible {
@@ -1604,8 +1609,10 @@
   }
   .alarm-fab:hover { background: rgba(var(--bp-al-rgb),0.22); transform:scale(1.05); box-shadow: 0 0 24px rgba(var(--bp-al-rgb),0.35), 0 6px 24px rgba(0,0,0,0.5); }
   .alarm-fab:active { transform: scale(0.94); }
-  /* Mobil alt navigasyon barı görünürken FAB'ı üstüne it (bug-hunt, .bp-bottom-cta ile ayni desen) */
-  @media (max-width: 768px) {
+  /* Mobil alt navigasyon barı görünürken FAB'ı üstüne it (bug-hunt, .bp-bottom-cta ile ayni desen).
+     DEV2-r4-css-breakpoint: shared.css:101 kanonik 900px eşiğine hizalandı
+     (bkz. .alarm-panel yorumu). */
+  @media (max-width: 900px) {
     .alarm-fab { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
   }
   .alarm-fab .fab-badge {

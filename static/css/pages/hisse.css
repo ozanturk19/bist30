@@ -181,7 +181,8 @@
   /* Sabit bottom:80px, safe-area buyudukce (ve mobil nav + .bp-bottom-cta
      ustuste bindiginde) sayfanin kendi CTA barinin arkasinda kayboluyordu
      (bug-hunt). .bp-bottom-cta ile ayni desen: 64px nav + safe-area ekle. */
-  @media (max-width: 768px) {
+  /* DEV2-r4-css-breakpoint: shared.css:101 kanonik 900px esigine hizalandi. */
+  @media (max-width: 900px) {
     .hib-toast { bottom: calc(80px + 64px + env(safe-area-inset-bottom)); }
   }
   .hib-compare:hover { background: rgba(var(--bp-brand-rgb),.2); }
@@ -1148,7 +1149,8 @@
     .bp-fab-up svg { width: 22px; height: 22px; stroke-width: 2.4; }
     /* Sabit bottom:80px, safe-area buyudukce sayfanin kendi CTA barinin
        arkasinda kayboluyordu (bug-hunt), .bp-bottom-cta ile ayni desen */
-    @media (max-width: 768px) {
+    /* DEV2-r4-css-breakpoint: shared.css:101 kanonik 900px esigine hizalandi. */
+    @media (max-width: 900px) {
       .bp-fab-up { bottom: calc(80px + 64px + env(safe-area-inset-bottom)); }
     }
   
@@ -1319,8 +1321,11 @@
       .bp-cta-watchlist { font-size: var(--bp-text-base); padding: 0 8px; }
       .bp-cta-alarm { font-size: var(--bp-text-sm); padding: 0 6px; }
     }
-    /* P1: nav z-index fix — action bar yukarı it (768px mobile nav = 64px) */
-    @media (max-width: 768px) {
+    /* P1: nav z-index fix — action bar yukarı it (mobile nav = 64px).
+       DEV2-r4-css-breakpoint: shared.css:101 kanonik 900px esigine hizalandi
+       (T2.4/5f85b93 nav gorunurlugunu 900px'e tasimisti, bu kural 768px'te
+       kalmisti — 769-900px araliginda CTA bar nav'in tam ustunde kaliyordu). */
+    @media (max-width: 900px) {
       .bp-bottom-cta { bottom: calc(64px + env(safe-area-inset-bottom)); padding-bottom: 6px; border-radius: 12px 12px 0 0; }
     }
   
