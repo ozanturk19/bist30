@@ -47,12 +47,12 @@
   {% for L in letters_sorted %}<a href="#letter-{{ L }}" class="hh-alpha-link" onclick="hhSetMode('alpha')">{{ L }}</a>{% endfor %}
 </div>
 
-<div class="hh-tabs" role="tablist">
-  <button class="hh-tab active" id="tabSector" type="button" onclick="hhSetMode('sector')">Sektörlere Göre</button>
-  <button class="hh-tab" id="tabAlpha" type="button" onclick="hhSetMode('alpha')">Alfabetik</button>
+<div class="hh-tabs" role="tablist" aria-label="Hisse listesi görünümü sekmeleri">
+  <button class="hh-tab active" id="tabSector" type="button" role="tab" aria-selected="true" aria-controls="hhViewSector" onclick="hhSetMode('sector')">Sektörlere Göre</button>
+  <button class="hh-tab" id="tabAlpha" type="button" role="tab" aria-selected="false" aria-controls="hhViewAlpha" onclick="hhSetMode('alpha')">Alfabetik</button>
 </div>
 
-<div id="hhViewSector">
+<div id="hhViewSector" role="tabpanel" aria-labelledby="tabSector">
   {% for sector in sectors_sorted %}
   <section class="hh-section">
     <h2>{{ sector }} <span class="hh-count">{{ by_sector[sector]|length }}</span></h2>
@@ -68,7 +68,7 @@
   {% endfor %}
 </div>
 
-<div id="hhViewAlpha" style="display:none">
+<div id="hhViewAlpha" role="tabpanel" aria-labelledby="tabAlpha" style="display:none">
   {% for L in letters_sorted %}
   <section class="hh-section" id="letter-{{ L }}">
     <h2>{{ L }} <span class="hh-count">{{ by_letter[L]|length }}</span></h2>
@@ -93,6 +93,8 @@ function hhSetMode(mode) {
   document.getElementById('hhViewAlpha').style.display  = (mode === 'alpha')  ? 'block' : 'none';
   document.getElementById('tabSector').classList.toggle('active', mode === 'sector');
   document.getElementById('tabAlpha').classList.toggle('active',  mode === 'alpha');
+  document.getElementById('tabSector').setAttribute('aria-selected', String(mode === 'sector'));
+  document.getElementById('tabAlpha').setAttribute('aria-selected',  String(mode === 'alpha'));
 }
 // Hash kontrolü
 if (location.hash && (location.hash.indexOf('#letter-') === 0 || location.hash === '#alpha')) {

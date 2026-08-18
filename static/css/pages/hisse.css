@@ -1345,3 +1345,11 @@
     }
     .bp-detail-cta-arrow { color: var(--bp-al); font-weight: 800; }
   
+
+/* a11y: #signalSummaryDetails > summary'nin outline:none'i klavye odak
+   halkasini hic olmadan siliyordu, yerine hicbir sey konmamisti (bug-hunt) */
+#signalSummaryDetails summary:focus-visible {
+  outline: 2px solid var(--bp-brand);
+  outline-offset: 2px;
+  border-radius: var(--bp-radius-sm);
+}

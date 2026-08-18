@@ -353,9 +353,13 @@
     function closeMenu(){
       var m = document.querySelector('.bp-nav-more-menu');
       if (!m) return;
+      var hadFocusInside = m.contains(document.activeElement);
       m.classList.remove('open');
       var b = document.querySelector('.bp-nav-more-btn');
-      if (b) b.setAttribute('aria-expanded', 'false');
+      if (b) {
+        b.setAttribute('aria-expanded', 'false');
+        if (hadFocusInside) b.focus();
+      }
     }
 
     document.addEventListener('click', function(e){
@@ -367,6 +371,10 @@
         if (!open) positionMenu();
         menu.classList.toggle('open', !open);
         btn.setAttribute('aria-expanded', !open);
+        if (!open) {
+          var firstLink = menu.querySelector('a');
+          if (firstLink) firstLink.focus();
+        }
         return;
       }
       // Outside click → close (must NOT include menu itself or its descendants)
