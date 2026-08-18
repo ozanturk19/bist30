@@ -242,7 +242,7 @@
 <div class="dual-endeks">
 
   <!-- BIST 100 (önce — daha yaygın takip edilen endeks) -->
-  <div class="endeks-card active" id="ec100" onclick="selectEndeks('XU100')">
+  <div class="endeks-card active" id="ec100" onclick="selectEndeks('XU100')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEndeks('XU100')}">
     <div class="ec-top">
       <span class="ec-title">BIST 100</span>
       <svg class="ec-spark" id="spark100" viewBox="0 0 80 32"></svg>
@@ -259,7 +259,7 @@
   </div>
 
   <!-- BIST 30 -->
-  <div class="endeks-card" id="ec30" onclick="selectEndeks('XU030')">
+  <div class="endeks-card" id="ec30" onclick="selectEndeks('XU030')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEndeks('XU030')}">
     <div class="ec-top">
       <span class="ec-title">BIST 30</span>
       <svg class="ec-spark" id="spark30" viewBox="0 0 80 32"></svg>
@@ -283,15 +283,15 @@
       <div class="stat-num" id="statAl"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Güçlü Trend <span style="font-size:9px;opacity:.7"><span aria-hidden="true">↗</span></span></div>
     </a>
-    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=SAT]'))" title="Trend Bozuldu: Algoritmamızın 3 testten geçen düşüş sinyali. Tıkla: Trend Bozuldu sinyallerini gör">
+    <div class="stat-card stat-sat" style="cursor:pointer" onclick="setFilter('SAT',document.querySelector('.filter-btn[onclick*=SAT]'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setFilter('SAT',document.querySelector('.filter-btn[onclick*=SAT]'))}" role="button" tabindex="0" title="Trend Bozuldu: Algoritmamızın 3 testten geçen düşüş sinyali. Tıkla: Trend Bozuldu sinyallerini gör">
       <div class="stat-num" id="statSat"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Trend Bozuldu</div>
     </div>
-    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=BEKLE]'))" title="Yatay: Trend henüz oluşmadı, fırsat bekleniyor. Tıkla: izleme listesine al">
+    <div class="stat-card stat-bekle" style="cursor:pointer" onclick="setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=BEKLE]'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setFilter('BEKLE',document.querySelector('.filter-btn[onclick*=BEKLE]'))}" role="button" tabindex="0" title="Yatay: Trend henüz oluşmadı, fırsat bekleniyor. Tıkla: izleme listesine al">
       <div class="stat-num" id="statBekle"><span class="stat-num-sk"></span></div>
       <div class="stat-label">Yatay</div>
     </div>
-    <div class="stat-card stat-premium" style="cursor:pointer" onclick="toggleChip('premium',document.querySelector('.filter-btn.filter-premium'))" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
+    <div class="stat-card stat-premium" style="cursor:pointer" onclick="toggleChip('premium',document.querySelector('.filter-btn.filter-premium'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleChip('premium',document.querySelector('.filter-btn.filter-premium'))}" role="button" tabindex="0" title="Hacim Onaylı: RVOL ≥ 1.20 + AL sinyali. Backtest'te %51.5 isabet, 4.3x getiri. Tıkla: filtrele">
       <div class="stat-num" id="statPremium"><span class="stat-num-sk"></span></div>
       <div class="stat-label"><span aria-hidden="true">⭐</span> Hacim Onaylı</div>
     </div>
@@ -334,7 +334,7 @@
 
 <!-- ── Grafik Accordion ── -->
 <div class="chart-accordion" style="display:none" aria-hidden="true">
-  <div class="chart-acc-header" onclick="toggleChartAcc()">
+  <div class="chart-acc-header" onclick="toggleChartAcc()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleChartAcc();}">
     <div class="chart-tabs">
       <button class="chart-tab active" id="ctab-XU100" onclick="event.stopPropagation();switchChartTab('XU100')">BIST 100 Grafik</button>
       <button class="chart-tab" id="ctab-XU030" onclick="event.stopPropagation();switchChartTab('XU030')">BIST 30 Grafik</button>
@@ -2357,7 +2357,7 @@ function renderTable() {
     }
     _lastTier_desktop = _curTierD;
     return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
-      <td><span class="ticker">${s.ticker}</span>${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — RVOL ≥ 1.20 (Backtest Win Rate %51.5)" style="color:var(--bp-volume);font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span tabindex="0" data-tip="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" tabindex="0" data-tip="${s.anomaly.reason}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
+      <td><a href="/hisse/${s.ticker}" style="color:inherit;text-decoration:none"><span class="ticker">${s.ticker}</span></a>${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — RVOL ≥ 1.20 (Backtest Win Rate %51.5)" style="color:var(--bp-volume);font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span tabindex="0" data-tip="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" tabindex="0" data-tip="${s.anomaly.reason}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
       <td onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${s.signal === 'AL' && s.change_pct < 0 ? ` <span class="sig-neg-day" tabindex="0" data-tip="Sinyal uzun vadeli, bugün günlük düşüş var">↓${s.change_pct.toFixed(1)}%</span>` : ''}${confHtml}${eqHtml}</td>

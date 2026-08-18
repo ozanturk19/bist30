@@ -216,15 +216,15 @@
   </span>
   {% endif %}
   <div class="bp-segments-inner">
-    <a class="bp-seg-item active" data-segment="ozet">Özet</a>
-    <a class="bp-seg-item" data-segment="grafik">Grafik</a>
-    <a class="bp-seg-item bp-seg-item-ai" data-segment="ai">
+    <a class="bp-seg-item active" data-segment="ozet" tabindex="0">Özet</a>
+    <a class="bp-seg-item" data-segment="grafik" tabindex="0">Grafik</a>
+    <a class="bp-seg-item bp-seg-item-ai" data-segment="ai" tabindex="0">
       <svg class="bp-seg-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true" focusable="false">
         <path d="M12 2.5l1.4 4.1 4.1 1.4-4.1 1.4-1.4 4.1-1.4-4.1-4.1-1.4 4.1-1.4L12 2.5zm6.5 11l.95 2.55 2.55.95-2.55.95-.95 2.55-.95-2.55-2.55-.95 2.55-.95.95-2.55z"/>
       </svg>
       AI Analiz
     </a>
-    <a class="bp-seg-item" data-segment="haberler">Haberler</a>
+    <a class="bp-seg-item" data-segment="haberler" tabindex="0">Haberler</a>
   </div>
 </nav>
 
@@ -2862,6 +2862,14 @@ window._bpApplyTooltips = _applyTooltipVisibility;
       var tab = s.dataset.segment || 'ozet';
       applyTab(tab);
       window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+    s.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        var tab = s.dataset.segment || 'ozet';
+        applyTab(tab);
+        window.scrollTo({top: 0, behavior: 'smooth'});
+      }
     });
   });
 
