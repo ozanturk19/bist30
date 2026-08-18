@@ -2854,7 +2854,7 @@ function checkAlarms(stocks) {
     lastSignals[s.ticker] = s.signal;
     livePrices[s.ticker]  = s.price;
   });
-  localStorage.setItem(SIGNAL_KEY, JSON.stringify(lastSignals));
+  _safeWriteJSON(SIGNAL_KEY, lastSignals);
   renderAlarmPanel();
 }
 

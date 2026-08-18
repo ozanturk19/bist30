@@ -1,10 +1,11 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>BIST100 Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
 <meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse trend bozulmuş? Bugün sinyal değişen hisseler.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<link rel="canonical" href="https://borsapusula.com/ozet">
+{% set canonical_url = ('https://borsapusula.com/ozet/' ~ historical_date) if historical_date else 'https://borsapusula.com/ozet' %}
+<link rel="canonical" href="{{ canonical_url }}">
 <meta property="og:title"       content="BIST100 Günlük Sinyal Özeti — {{ today_str }}">
 <meta property="og:description" content="Bugün BIST100'de {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
-<meta property="og:url"         content="https://borsapusula.com/ozet">
+<meta property="og:url"         content="{{ canonical_url }}">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height"content="630">
@@ -12,7 +13,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
   {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
-  {"@type":"ListItem","position":2,"name":"Günlük Sinyal Özeti","item":"https://borsapusula.com/ozet"}
+  {"@type":"ListItem","position":2,"name":"Günlük Sinyal Özeti","item":"{{ canonical_url }}"}
 ]}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -227,7 +228,7 @@ function goToDate(date) {
     <a href="/hisse/{{ s.ticker }}" style="display:inline-flex;align-items:center;gap:6px;background:#1c1b1f;border:1px solid rgba(0,226,144,.2);border-radius:var(--bp-radius-7);padding:5px 10px;text-decoration:none;transition:all .15s"
        onmouseover="this.style.background='#201f21'" onmouseout="this.style.background='#1c1b1f'">
       <span style="font-size:var(--bp-text-base);font-weight:700;color:#f0f6fc">{{ s.ticker }}</span>
-      {% if s.signal_price and s.price %}
+      {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
         <span style="font-size:var(--bp-text-xs);font-weight:600;color:{% if ret >= 0 %}#00e290{% else %}#f85149{% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
       {% endif %}
@@ -297,7 +298,7 @@ function goToDate(date) {
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-al">▲ Güçlü Trend</div>
       <div class="sc-meta">{{ s.signal_date|signal_age_text }} · {{ s.signal_date }}</div>
-      {% if s.signal_price and s.price %}
+      {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
           <span class="sc-ret {{ 'sc-ret-pos' if ret >= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
@@ -322,7 +323,7 @@ function goToDate(date) {
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-sat">▼ Trend Bozuldu</div>
       <div class="sc-meta">{{ s.signal_date|signal_age_text }} · {{ s.signal_date }}</div>
-      {% if s.signal_price and s.price %}
+      {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
           <span class="sc-ret {{ 'sc-ret-pos' if ret <= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
@@ -414,18 +415,21 @@ loadMacroBar();setInterval(loadMacroBar,180000);
     const r = await fetch('/api/bilanco-takvimi');
     const d = await r.json();
     const now = new Date();
+    // TR takvim günü olarak yorumla (yalnız-tarih ISO string'i new Date() ile
+    // UTC gece yarısı parse edilir, TR (+3) ile 03:00'a kadar kayıklık yaratır)
+    const trDate = (s) => new Date(s + 'T00:00:00+03:00');
     const banner = document.getElementById('bilancoBanner');
     if (!banner || !d.periods) return;
     for (const p of d.periods) {
-      const start = new Date(p.start);
-      const end   = new Date(p.end);
+      const start = trDate(p.start);
+      const end   = trDate(p.end);
       const daysToStart = Math.ceil((start - now) / 86400000);
       if (daysToStart >= 0 && daysToStart <= 30) {
         // Yaklaşıyor (30 gün içinde)
         document.getElementById('bilancoBannerTitle').textContent =
           `📆 ${p.label} Bilanço Sezonu — ${daysToStart === 0 ? 'Bugün başlıyor!' : daysToStart + ' gün sonra başlıyor'}`;
         document.getElementById('bilancoBannerDesc').textContent =
-          `${p.description} · ${new Date(p.start).toLocaleDateString('tr-TR')} – ${new Date(p.end).toLocaleDateString('tr-TR')}`;
+          `${p.description} · ${trDate(p.start).toLocaleDateString('tr-TR')} – ${trDate(p.end).toLocaleDateString('tr-TR')}`;
         banner.style.display = 'flex';
         return;
       } else if (start <= now && now <= end) {
@@ -433,7 +437,7 @@ loadMacroBar();setInterval(loadMacroBar,180000);
         document.getElementById('bilancoBannerTitle').textContent =
           `📊 ${p.label} Bilanço Sezonu Aktif`;
         document.getElementById('bilancoBannerDesc').textContent =
-          `${p.description} · ${new Date(p.end).toLocaleDateString('tr-TR')} tarihine kadar`;
+          `${p.description} · ${trDate(p.end).toLocaleDateString('tr-TR')} tarihine kadar`;
         banner.style.display = 'flex';
         return;
       }

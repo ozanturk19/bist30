@@ -1188,8 +1188,10 @@ function togglePortfolio() {
   const idx = pf.findIndex(x => x && x.ticker === TICKER);
   if (idx >= 0) {
     pf.splice(idx, 1);
-    localStorage.setItem(HIB_PF_KEY, JSON.stringify(pf));
-    _hibToast(TICKER + ' portföyden çıkarıldı', 'warn');
+    if (_hibSafeWritePortfolio(pf)) {
+      _hibToast(TICKER + ' portföyden çıkarıldı', 'warn');
+      updateHibStarBtn();
+    }
   } else {
     const price = _hibCurrentPrice();
     pf.push({
@@ -1200,10 +1202,29 @@ function togglePortfolio() {
       id:     Date.now(),
       source: 'hisse-detail-quick',
     });
-    localStorage.setItem(HIB_PF_KEY, JSON.stringify(pf));
-    _hibToast(TICKER + ' portföye eklendi (1 lot · ' + price.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '₺) · /portfolio\'da düzenle', 'success');
+    if (_hibSafeWritePortfolio(pf)) {
+      _hibToast(TICKER + ' portföye eklendi (1 lot · ' + price.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '₺) · /portfolio\'da düzenle', 'success');
+      updateHibStarBtn();
+    }
   }
-  updateHibStarBtn();
+}
+
+/* Faz 1 #2: Safe write + read-back verify (bkz. _hibSafeWriteWatch ile aynı desen) */
+function _hibSafeWritePortfolio(arr) {
+  try {
+    const json = JSON.stringify(arr);
+    localStorage.setItem(HIB_PF_KEY, json);
+    if (localStorage.getItem(HIB_PF_KEY) !== json) {
+      console.warn('hisse portfolio write verify FAIL (quota? private mode?)');
+      _hibToast('Portföy kaydedilemedi (tarayıcı kısıtı)', 'warn');
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn('hisse portfolio write fail:', e);
+    _hibToast('Portföy kaydedilemedi', 'warn');
+    return false;
+  }
 }
 
 /* Faz 1 #2: Safe write + read-back verify */

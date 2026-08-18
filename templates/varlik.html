@@ -10,8 +10,13 @@
 <link rel="canonical" href="https://borsapusula.com{{ canonical_path or ('/' + varlik_key | lower) }}">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <meta property="og:type"        content="website">
+{% if varlik_key in _katman_a %}
+<meta property="og:title"       content="{{ meta.name }} Fiyatı ve Piyasa Verisi | borsapusula.com">
+<meta property="og:description" content="{{ meta.name }} güncel durumu — teknik analiz özelliği yakında.">
+{% else %}
 <meta property="og:title"       content="{{ meta.name }} Teknik Analiz | borsapusula.com">
 <meta property="og:description" content="{{ meta.desc }}">
+{% endif %}
 <meta property="og:url"         content="https://borsapusula.com{{ canonical_path or ('/' + varlik_key | lower) }}">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <script type="application/ld+json">

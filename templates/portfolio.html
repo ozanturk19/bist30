@@ -432,6 +432,15 @@ async function fetchLive() {
   render();
 }
 
+function esc(s) {
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+// Cloud Sync ile guvenilmeyen kaynaktan gelebilen ticker, tek-tirnakli JS
+// string literali icine gomulmeden once ayrica kacirilir (bkz. fillEntry onclick)
+function escJsStr(s) {
+  return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+
 function render() {
   const tbody = document.getElementById('pfBody');
   const empty = document.getElementById('emptyMsg');
@@ -448,7 +457,7 @@ function render() {
     const cost   = p.lot * p.price;
     const val    = cur  ? p.lot * cur : null;
     const pnl    = val  ? val - cost  : null;
-    const pnlPct = pnl  ? (pnl / cost * 100) : null;
+    const pnlPct = pnl !== null ? (pnl / cost * 100) : null;
     totalCost += cost;
     if (val) totalVal += val;
     if (sig === 'AL') alCount++;
@@ -461,15 +470,15 @@ function render() {
       ? `<span class="${pnlPct>=0?'pos-pnl':'neg-pnl'}">${pnlPct>=0?'+':''}${fmt(pnlPct,1)}%</span>`
       : '<span class="neu-pnl">—</span>';
     const entryBtn = (sig === 'AL' && live && live.signal_price)
-      ? `<button class="btn-entry" onclick="fillEntry('${p.ticker}',${live.signal_price})" title="Sinyal giriş fiyatı: ${fmt(live.signal_price)} ₺">Giriş ${fmt(live.signal_price)}₺</button>`
+      ? `<button class="btn-entry" onclick="fillEntry('${esc(escJsStr(p.ticker))}',${live.signal_price})" title="Sinyal giriş fiyatı: ${fmt(live.signal_price)} ₺">Giriş ${fmt(live.signal_price)}₺</button>`
       : '';
     const sigBadge = sig !== '—'
       ? `<span class="signal-badge signal-${sig}">${sig==='AL'?'▲':sig==='SAT'?'▼':'●'} ${sigLabel(sig)}</span>${entryBtn}`
       : '<span class="neu-pnl">—</span>';
     const sparkHtml = svgSparkline(chartData[p.ticker]);
     return `<tr>
-      <td><a href="/hisse/${p.ticker}" class="ticker-link">${p.ticker}</a></td>
-      <td class="hm" style="color:#8b949e">${p.date}</td>
+      <td><a href="/hisse/${esc(p.ticker)}" class="ticker-link">${esc(p.ticker)}</a></td>
+      <td class="hm" style="color:#8b949e">${esc(p.date)}</td>
       <td>${fmt(p.lot,0)}</td>
       <td>${fmt(p.price)}</td>
       <td>${cur ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>
@@ -633,7 +642,9 @@ async function loadFromCloud() {
     if (!res.ok) { _setCloudMsg('Token bulunamadı.', '#f85149'); return; }
     const data = await res.json();
     if (!data.positions) { _setCloudMsg('Geçersiz portföy.', '#f85149'); return; }
-    portfolio = data.positions.map(p => ({...p, id: p.id || (Date.now() + Math.random())}));
+    // id her zaman burada uretilir; guvenilmeyen cloud verisindeki p.id'ye
+    // guvenilmiyor (onclick="removePosition(${p.id})" tirnaksiz sayi bekliyor)
+    portfolio = data.positions.map(p => ({...p, id: Date.now() + Math.random()}));
     save(); render();
     _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.`, '#3fb950');
   } catch(e) {

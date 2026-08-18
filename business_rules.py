@@ -75,7 +75,7 @@ def validate_date_range(ticker, signal_date):
             sd = signal_date
         else:
             return {"ok": False, "flag": "INVALID_DATE", "ticker": ticker, "error": f"unknown type {type(signal_date)}"}
-        today = date.today()
+        today = _today_tr()
         if sd > today:
             return {
                 "ok": False,

@@ -759,7 +759,13 @@ def tr_price_filter(value):
     """Sayıyı TR fiyat formatına çevirir: 1234.5 -> '1.234,50' (JS toLocaleString('tr-TR') ile eş)."""
     if value is None:
         return value
-    formatted = f"{float(value):,.2f}"
+    try:
+        fv = float(value)
+    except (TypeError, ValueError):
+        return value
+    if np.isnan(fv) or np.isinf(fv):
+        return "—"
+    formatted = f"{fv:,.2f}"
     integer_part, decimal_part = formatted.split('.')
     integer_part = integer_part.replace(',', '.')
     return f"{integer_part},{decimal_part}"
@@ -4873,12 +4879,12 @@ def api_market_summary():
     except Exception as e:
         logger.debug("market-summary delta hesabı: %s", e)
 
-    # Market status (TR saatine göre)
+    # Market status (TR saatine göre) — kanonik trading_calendar (hafta sonu + resmi tatil)
     now_tr = datetime.now(_TZ_TR)
     weekday = now_tr.weekday()  # 0=Pzt, 6=Pzr
     hour = now_tr.hour
     is_weekend = weekday >= 5
-    market_open_hours = (10 <= hour < 18) and not is_weekend
+    market_open_hours = _market_open(now_tr)
     market_status = "open" if market_open_hours else "closed"
 
     closed_msg = None
@@ -7724,7 +7730,10 @@ def abd_stock_page(ticker):
 def _fmt_tl(v):
     """Sayıyı TR formatında TL string'e çevirir."""
     try:
-        return f"{float(v):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " TL"
+        fv = float(v)
+        if np.isnan(fv) or np.isinf(fv):
+            return "—"
+        return f"{fv:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " TL"
     except (ValueError, TypeError):
         return "—"
 
@@ -8072,9 +8081,10 @@ def _get_fundamentals(ticker_base):
 
         def fmt_billion(v):
             if v is None: return None
-            if v >= 1e12: return f"{tr_price_filter(v/1e12)} T₺"
-            if v >= 1e9:  return f"{tr_price_filter(v/1e9)} Mrd₺"
-            if v >= 1e6:  return f"{tr_price_filter(v/1e6)} Mn₺"
+            av = abs(v)
+            if av >= 1e12: return f"{tr_price_filter(v/1e12)} T₺"
+            if av >= 1e9:  return f"{tr_price_filter(v/1e9)} Mrd₺"
+            if av >= 1e6:  return f"{tr_price_filter(v/1e6)} Mn₺"
             return f"{tr_price_filter(v)} ₺"
 
         raw = {
@@ -9478,7 +9488,7 @@ def _og_image_stats():
     al_count  = sum(1 for s in stocks if s["signal"] == "AL" and s["ticker"] != "XU030")
     sat_count = sum(1 for s in stocks if s["signal"] == "SAT" and s["ticker"] != "XU030")
     total     = sum(1 for s in stocks if s["ticker"] != "XU030")
-    today_s   = date.today().strftime("%d.%m.%Y")
+    today_s   = datetime.now(_TZ_TR).strftime("%d.%m.%Y")
     return al_count, sat_count, total, today_s
 
 
@@ -9671,6 +9681,7 @@ def api_karsilastir():
             "signal_bars":    s.get("signal_bars"),
             "signal_date":    s.get("signal_date"),
             "entry_quality":  s.get("entry_quality"),
+            "is_premium":     s.get("is_premium", False),
             "sl_level":       s.get("sl_level"),
             "tp1":            s.get("tp1"),
             "tp2":            s.get("tp2"),
@@ -9737,8 +9748,8 @@ def api_gundem():
         key=_adx_val, reverse=True
     )[:8]
 
-    # Yaklaşan bilanço dönemleri (gündem için)
-    today_dt  = date.today()
+    # Yaklaşan bilanço dönemleri (gündem için) — TR günü (bkz. yukarıdaki new_signals notu)
+    today_dt  = datetime.now(_TZ_TR).date()
     today_iso = today_dt.isoformat()
     bilanco_upcoming = []
     for qlabel, start, end, desc in _BILANCO_PERIODS:
@@ -10736,7 +10747,7 @@ def api_bilanco_takvimi():
 @limiter.limit("60 per minute")
 def api_bilanco_mini():
     """Ana sayfa mini bilanço widget — yfinance çağrısı yok, sadece dönem bilgisi."""
-    today_dt  = date.today()
+    today_dt  = datetime.now(_TZ_TR).date()
     today_str = today_dt.isoformat()
     items     = []
     for qlabel, start, end, desc in _BILANCO_PERIODS:
