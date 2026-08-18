@@ -8808,7 +8808,12 @@ def api_tarama():
         rev = sort_dir == "desc"
     else:
         rev = sort_by in ("adx","price","signal_bars","vol_ratio","bull_score","change_pct","signal_strength")
-    results.sort(key=lambda x: (x.get(sort_by) or 0), reverse=rev)
+    def _tarama_sort_key(x):
+        v = x.get(sort_by)
+        if v is None:
+            v = 0
+        return (isinstance(v, str), v)
+    results.sort(key=_tarama_sort_key, reverse=rev)
 
     with _lock:
         sectors = sorted(set(_get_sector(s.get("ticker","")) for s in _cache["data"]
