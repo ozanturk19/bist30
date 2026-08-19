@@ -130,6 +130,13 @@ except ImportError as _alerting_err:
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
 
+# P0-SEC-2 (CPO-DEV2-033): nginx CF-Connecting-IP -> real_ip -> tek X-Forwarded-For
+# hop'u app'e iletiyor (bkz /etc/nginx/conf.d/cloudflare-realip.conf). ProxyFix
+# olmadan request.remote_addr her zaman 127.0.0.1 okunuyordu (4 worker paylasimli
+# tek rate-limit sayaci + admin-IP kontrolu kirikti).
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
 # ── Rate Limiter ──────────────────────────────────────────────────────────────
 limiter = Limiter(
     app=app,
@@ -1552,7 +1559,7 @@ def _weekly_trend(ticker: str) -> int:
 
 
 def compose_score(adx: float, vol_ratio: float, bull_score: int,
-                  confirmed: bool, rsi: float) -> int:
+                  confirmed: bool, rsi: float, signal: str = "AL") -> int:
     """Tek skor kaynağı — 0-100 aralığı. CPO-535 spec.
 
     SADECE analyze() içinde çağrılır, sonucu signal_strength olarak cache'e
@@ -1567,7 +1574,11 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
         Hacim     : min(vol_ratio, 5) / 5 * 25 → max 25
         Yön gücü  : bull_or_bear_score / 3 * 25 → max 25  (AL → bull, SAT → bear)
         Teyit     : +10 (signal_bars >= 3)
-        RSI bölge : +10 (50-75) | +5 (>75)   → max 10
+        RSI bölge : AL  → +10 (50-75) | +5 (>75)
+                    SAT → +10 (25-50) | +5 (<25)   → max 10 (P0-2, CPO-DEV2-031/033:
+                    önceki sürüm signal parametresi almıyordu, SAT sinyalinde de AL
+                    bandını uyguluyordu — düşük RSI'lı bir SAT ayı teyidi almadan
+                    bonus alıyor, tier'ı yapay olarak şişiriyordu)
 
     Tier eşikleri (hisse detay badge — bkz. analyze() tier ataması):
         75+ → PREMIUM | 60-74 → PLUS | 40-59 → STANDART | <40 → (tier yok)
@@ -1579,10 +1590,16 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
     s += int(bull_score or 0) / 3 * 25
     s += 10 if confirmed else 0
     rsi = float(rsi or 50)
-    if 50 <= rsi <= 75:
-        s += 10
-    elif rsi > 75:
-        s += 5
+    if signal == "SAT":
+        if 25 <= rsi <= 50:
+            s += 10
+        elif rsi < 25:
+            s += 5
+    else:
+        if 50 <= rsi <= 75:
+            s += 10
+        elif rsi > 75:
+            s += 5
     return int(round(s))
 
 
@@ -1939,6 +1956,7 @@ def analyze(ticker_base):
                 bull_score=int(_bs or 0),
                 confirmed=bool(confirmed),
                 rsi=float(rsi_val or 50),
+                signal=signal,
             )
             # F5 — AI Sentiment boost: ±5 capped at 100
             _sent = _sentiment_cache.get(ticker_base, {})
@@ -4434,11 +4452,10 @@ def admin_send_digest_now():
         logger.warning("admin_send_digest_now: invalid auth header (token mismatch)")
         abort(401)
 
-    # Layer 2: sadece localhost erişebilir (nginx X-Forwarded-For kontrolü)
-    # Production'da nginx 127.0.0.1 → app, public requests'te remote_addr farklı olur.
-    # Yine de defense-in-depth için kontrol.
-    remote = request.headers.get("X-Forwarded-For", request.remote_addr or "")
-    remote_first = remote.split(",")[0].strip()
+    # Layer 2: sadece localhost erişebilir. ProxyFix (P0-SEC-2) kurulduktan sonra
+    # request.remote_addr artik dogrudan gercek client IP'yi veriyor (nginx tek
+    # X-Forwarded-For hop'u ekliyor, ProxyFix onu remote_addr'a tasiyor).
+    remote_first = request.remote_addr or ""
     if remote_first not in ("127.0.0.1", "::1", "localhost"):
         logger.warning("admin_send_digest_now: non-localhost erişim engellendi (remote=%s)", remote_first)
         return jsonify({"error": "Sadece localhost'tan erişilebilir"}), 403
@@ -11005,28 +11022,21 @@ def api_market_news():
 @app.route("/api/recognize", methods=["POST"])
 @limiter.limit("10 per hour")
 def api_recognize():
-    """MSG-098 soft auth: Eski abone re-recognize — email ile kaydı bul, bp_sub cookie set.
-    Yeni kayıt OLUŞTURMAZ — sadece mevcut aboneyi tanır."""
-    data  = request.get_json(silent=True) or {}
-    email = (data.get("email") or "").strip().lower()
-    if not email or "@" not in email or not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
-        return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
+    """P0-SEC-1 (CPO-DEV2-033, 19.08): GECICI DEVRE DISI.
 
-    with _sub_lock:
-        subs = _load_subscribers()
-        rec  = subs.get(email)
-
-    if not rec or not rec.get("active", True):
-        return safe_json({"ok": False, "reason": "not_found"}), 404
-
-    token = rec.get("token", "")
-    resp  = safe_json({
-        "ok":               True,
-        "name":             rec.get("name", ""),
-        "subscribed_at":    rec.get("subscribed_at", ""),
-    })
-    resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
-    return resp
+    Onceki davranis sadece {"email":...} alip sahiplik kaniti olmadan (OTP/
+    magic-link yok) dogrudan 1 yillik bp_sub cookie set ediyordu -> bir
+    kurbanin e-postasini bilen herkes o hesabin alarm ayarlarini
+    gorup/degistirebiliyordu (hesap ele gecirme). Kalici fix (email OTP
+    dogrulamasi + frontend kod-giris adimi) bir sonraki turda geliyor; bu
+    ara donemde acik kapatildi, uc noktalar (index.html toast + premium
+    modal) zaten 404/hata durumunu ele aliyor, kullanici "Abone Ol" ile
+    devam edebiliyor."""
+    return safe_json({
+        "ok": False,
+        "error": "Üye girişi kısa süreliğine bakımda — yeniden abone olarak devam edebilirsiniz.",
+        "maintenance": True,
+    }), 503
 
 
 @app.route("/api/subscribe", methods=["POST"])
@@ -11062,7 +11072,7 @@ def api_subscribe():
                 _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", ""))
             ), daemon=True).start()
             react_resp = safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!", "token": token, "name": subs[email].get("name", ""), "email": email})
-            react_resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
+            react_resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
             return react_resp
 
         token = secrets.token_hex(24)
@@ -11095,7 +11105,7 @@ def api_subscribe():
         "email":   email,
     })
     # Cookie set — 1 yıl, SameSite=Lax (CSRF korumalı)
-    resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
+    resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
     return resp
 
 

@@ -1919,11 +1919,14 @@ function renderSummary(s, signalData) {
     const rsi = signalData.rsi;
     const zone = signalData.rsi_zone || '';
     // ind-bull yeşil (Aşırı Satım, İdeal Giriş), ind-bear kırmızı (Aşırı Alım), ind-neutral gri
+    // P0-2 (CPO-DEV2-031/033): "İdeal Giriş" yeşili sadece AL sinyalinde — SAT'ta
+    // sinyal yönüyle çelişen yanıltıcı yeşil onayı önler.
+    const rIdeal = s.signal === 'AL' && rsi >= 45 && rsi < 60;
     const rsiCls = rsi >= 70 ? 'ind-badge ind-bear' :
-                   (rsi < 30 || (rsi >= 45 && rsi < 60)) ? 'ind-badge ind-bull' :
+                   (rsi < 30 || rIdeal) ? 'ind-badge ind-bull' :
                    'ind-badge ind-neutral';
     const rsiIcon = rsi >= 80 ? '🔴' : rsi >= 70 ? '⚠️' :
-                    (rsi >= 45 && rsi < 60) ? '✅' :
+                    rIdeal ? '✅' :
                     rsi < 30 ? '💎' : '';
     const rsiLbl = rsiIcon ? `${rsiIcon} ${zone}` : zone || 'Normal';
     indHtml += `<span class="${rsiCls}">RSI ${rsi}<span class="ind-detail">${rsiLbl}</span></span>` +

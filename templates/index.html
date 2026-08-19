@@ -2295,10 +2295,13 @@ function renderTable() {
     /* RSI14 badge */
     if (s.rsi != null) {
       // Faz 1 #3: RSI bölge rozeti — 6 zone (Aşırı Satım / Dip / İdeal / Trend / Dikkatli / Aşırı Alım)
+      // P0-2 (CPO-DEV2-031/033): "İdeal Giriş" yeşil rozeti sadece AL sinyalinde
+      // anlamlı — SAT sinyalinde sinyal yönüyle çelişen yanıltıcı yeşil onayı önler.
+      const rIdeal = s.signal === 'AL' && s.rsi >= 45 && s.rsi < 60;
       const rCls = s.rsi >= 70 ? 'ind-badge ind-bear' : s.rsi <= 30 ? 'ind-badge ind-bull' :
-                   (s.rsi >= 45 && s.rsi < 60) ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
+                   rIdeal ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
       const rIcon = s.rsi >= 80 ? ' 🔴' : s.rsi >= 70 ? ' ⚠️' :
-                    (s.rsi >= 45 && s.rsi < 60) ? ' ✅' : s.rsi < 30 ? ' 💎' : '';
+                    rIdeal ? ' ✅' : s.rsi < 30 ? ' 💎' : '';
       const rTitle = s.rsi_zone || 'RSI14';
       indHtml += `<span class="${rCls}" tabindex="0" data-tip="${rTitle}">RSI ${s.rsi}${rIcon}</span>`;
     }
