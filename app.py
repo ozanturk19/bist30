@@ -9297,6 +9297,7 @@ def sitemap():
         {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly"},
         {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly"},
         {"loc": "/gizlilik",    "priority": "0.3", "changefreq": "yearly"},
+        {"loc": "/yasal",       "priority": "0.3", "changefreq": "yearly"},
         {"loc": "/iletisim",    "priority": "0.4", "changefreq": "yearly"},
         {"loc": "/btc",         "priority": "0.8", "changefreq": "daily"},
         {"loc": "/altin",       "priority": "0.8", "changefreq": "daily"},
