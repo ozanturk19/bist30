@@ -456,6 +456,8 @@ async function ozSubmitSub() {
     if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
     return;
   }
+  const btn = document.querySelector('#ozSubForm button');
+  if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor…'; }
   try {
     const res  = await fetch('/api/subscribe', {
       method: 'POST',

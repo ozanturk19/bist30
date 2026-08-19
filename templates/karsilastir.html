@@ -443,10 +443,16 @@ async function doCompare() {
 function copyShareUrl(e) {
   e.preventDefault();
   const url = window.location.href;
+  const _shareBtnDefault = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş`;
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById('shareBtn');
     btn.innerHTML = '<span aria-hidden="true">✓</span> Kopyalandı';
-    setTimeout(() => { btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş`; }, 2000);
+    setTimeout(() => { btn.innerHTML = _shareBtnDefault; }, 2000);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    const btn = document.getElementById('shareBtn');
+    if (btn) { btn.innerHTML = '<span aria-hidden="true">✓</span> Kopyalandı'; setTimeout(() => { btn.innerHTML = _shareBtnDefault; }, 2000); }
   });
 }
 

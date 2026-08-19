@@ -139,11 +139,11 @@
     <div class="faq-section-title"><span aria-hidden="true">❓</span> Sık Sorulan Sorular</div>
     {% for faq in article.faqs %}
     <div class="faq-item" id="faq-{{ loop.index }}">
-      <button class="faq-q" onclick="toggleFaq('faq-{{ loop.index }}')">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-{{ loop.index }}" onclick="toggleFaq('faq-{{ loop.index }}')">
         <span>{{ faq.q }}</span>
         <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
-      <div class="faq-a">{{ faq.a }}</div>
+      <div class="faq-a" id="faq-a-{{ loop.index }}">{{ faq.a }}</div>
     </div>
     {% endfor %}
   </div>
@@ -305,7 +305,9 @@ function shareBlogCopy() {
 function toggleFaq(id) {
   const item = document.getElementById(id);
   if (!item) return;
-  item.classList.toggle('open');
+  const isOpen = item.classList.toggle('open');
+  const btn = item.querySelector('.faq-q');
+  if (btn) btn.setAttribute('aria-expanded', String(isOpen));
 }
 
 // ── E-posta abonelik ────────────────────────────────────
@@ -320,6 +322,8 @@ async function artSubmitSub() {
     setTimeout(() => { emailEl.style.borderColor = '#30363d'; emailEl.placeholder = 'e-posta adresiniz'; }, 2500);
     return;
   }
+  const btn = formEl.querySelector('button');
+  if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor…'; }
   try {
     const res  = await fetch('/api/subscribe', {
       method: 'POST', headers: {'Content-Type': 'application/json'},

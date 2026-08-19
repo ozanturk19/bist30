@@ -126,7 +126,7 @@
         return Promise.resolve(_syms);
       }
     } catch(e) { /* best-effort onbellek okuma (private tarama/quota hata verebilir) - fetch fallback altta devam eder */ }
-    return fetch('/api/data', { cache: 'no-store' })
+    return fetch('/api/data', { cache: 'no-store', signal: AbortSignal.timeout(10000) })
       .then(function(r){ return r.json(); })
       .then(function(d){
         _syms = (d.stocks || [])
@@ -590,7 +590,7 @@
     // Cookie/token varsa server'dan refresh
     var t = readBpSubCookie();
     if (!t) return;
-    fetch('/api/me?cb=' + Date.now(), { credentials: 'include' })
+    fetch('/api/me?cb=' + Date.now(), { credentials: 'include', signal: AbortSignal.timeout(10000) })
       .then(function(r){ return r.json(); })
       .then(function(d){
         if (d && d.ok && d.subscribed) {
