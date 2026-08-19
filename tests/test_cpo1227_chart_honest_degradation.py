@@ -15,12 +15,18 @@ manuel "Tekrar dene" göstersin.
 
 Bu testler kaynak-seviyesinde (statik) doğrular — 3.10+ import gerektirmez
 (feedback_local_mac_no_python310).
+
+Not (20.08): templates/varlik.html DEV2-036 (fee05c1) ile kaldırıldı —
+BTC/ETH/ALTIN/GUMUS/SP500/NASDAQ/SOL/BNB/PETROL/DOGALGAZ tekil sayfaları
+silindi (Ozan kararı, BIST odaklı sadeleşme). Üst kayan makro bar
+(/api/macro, /api/chart/*) dokunulmadı, bu yüzden grace-period kontratını
+doğrulayan ilk iki test hâlâ geçerli. varlik.html'in loadChart() JS'ini
+doğrulayan üçüncü test dosyayla birlikte kaldırıldı.
 """
 import os
 import re
 
-_APP_PY      = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
-_VARLIK_HTML = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "templates", "varlik.html")
+_APP_PY = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
 
 
 def _read(path):
@@ -30,12 +36,6 @@ def _read(path):
 
 def _extract_function_body(src, func_name):
     pattern = rf"def {re.escape(func_name)}\(.*?(?=\ndef |\Z)"
-    m = re.search(pattern, src, re.DOTALL)
-    return m.group(0) if m else None
-
-
-def _extract_js_function_body(src, func_name):
-    pattern = rf"function {re.escape(func_name)}\(.*?\n\}}"
     m = re.search(pattern, src, re.DOTALL)
     return m.group(0) if m else None
 
@@ -70,21 +70,4 @@ def test_chart_response_returns_honest_unavailable_after_grace_period():
     assert unavailable_idx < loading_true_idx, (
         "unavailable dalı loading:True dönüşünden SONRA — asla çalışmaz "
         "(erken return loading:True'da gerçekleşir)"
-    )
-
-
-def test_varlik_html_handles_unavailable_before_infinite_retry():
-    src = _read(_VARLIK_HTML)
-    body = _extract_js_function_body(src, "loadChart")
-    assert body, "loadChart() bulunamadı (templates/varlik.html)"
-    assert "d.unavailable" in body, (
-        "loadChart() backend'in unavailable:true alanını okumuyor — grace "
-        "period sonrası bile setTimeout(loadChart, 8000) ile süresiz retry sürer"
-    )
-    # d.unavailable kontrolü, setTimeout(loadChart, 8000) satırından ÖNCE olmalı.
-    unavailable_idx = body.index("d.unavailable")
-    retry_idx = body.index("setTimeout(loadChart")
-    assert unavailable_idx < retry_idx, (
-        "d.unavailable kontrolü setTimeout retry'den SONRA — unavailable dalına "
-        "hiç ulaşılmadan önce sonsuz retry koluna girilir"
     )
