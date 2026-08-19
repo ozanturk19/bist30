@@ -263,7 +263,7 @@
     document.body.style.overflow = 'hidden';
     loadSyms().then(function(){
       var inp = document.getElementById('bpSearchInput');
-      if (inp && !inp.value) render('');
+      if (inp) render(inp.value);
     });
     if (typeof window.bpTrapFocus === 'function') {
       var modal = document.getElementById('bpSearchModal');

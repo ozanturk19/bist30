@@ -89,7 +89,8 @@ self.addEventListener('fetch', e => {
 
 /* Push notification handler */
 self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : {};
+  let data = {};
+  try { data = e.data ? e.data.json() : {}; } catch (err) { data = {}; }
   e.waitUntil(
     self.registration.showNotification(data.title || 'BorsaPusula', {
       body:             data.body || 'Sinyal değişikliği var.',

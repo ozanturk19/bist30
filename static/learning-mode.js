@@ -61,6 +61,7 @@
 
   function closePop() {
     if (openPop) { openPop.remove(); openPop = null; }
+    document.removeEventListener('click', onceClose, true);
   }
 
   function showPop(anchor, term, def) {
@@ -84,7 +85,6 @@
   function onceClose(e) {
     if (openPop && !openPop.contains(e.target) && !(e.target.classList && e.target.classList.contains('bp-lm-btn'))) {
       closePop();
-      document.removeEventListener('click', onceClose, true);
     }
   }
 
