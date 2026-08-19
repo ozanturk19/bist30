@@ -2437,7 +2437,7 @@ def _login_send_allowed(email):
     aynı e-postaya 3'ten fazla giriş linki gönderilmez."""
     now = time.time()
     with _login_sends_lock:
-        data = _tp_read_json(_LOGIN_SENDS_PATH, default={})
+        data = _tp_read_json(_LOGIN_SENDS_PATH, default={}) if os.path.exists(_LOGIN_SENDS_PATH) else {}
         sends = [t for t in data.get(email, []) if now - t < 3600]
         if len(sends) >= 3:
             return False
