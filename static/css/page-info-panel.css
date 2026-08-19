@@ -10,8 +10,8 @@
   --bp-pi-border:       rgba(184, 195, 255, 0.14);
   --bp-pi-text:         rgba(229, 225, 228, 0.80);
   --bp-pi-text-muted:   rgba(229, 225, 228, 0.45);
-  --bp-pi-accent:       #b8c3ff;
-  --bp-pi-jargon:       #b8c3ff;
+  --bp-pi-accent:       var(--bp-brand);
+  --bp-pi-jargon:       var(--bp-brand);
   --bp-pi-jargon-bg:    rgba(184, 195, 255, 0.10);
   --bp-pi-close-hover:  rgba(229, 225, 228, 0.20);
   --bp-pi-radius:       6px;
@@ -160,6 +160,10 @@
 
   .bp-info-panel__title {
     font-size: 0.72rem;
+    /* On very narrow screens collapse long titles to 2 lines */
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
   }
 
   .bp-info-panel__body {
@@ -169,13 +173,6 @@
   .bp-info-panel__body p {
     font-size: 0.80rem;
     line-height: 1.50;
-  }
-
-  /* On very narrow screens collapse long titles to 2 lines */
-  .bp-info-panel__title {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: unset;
   }
 }
 

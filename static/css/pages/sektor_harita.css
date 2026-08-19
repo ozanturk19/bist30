@@ -90,7 +90,6 @@
   .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-    .macro-bar { position: relative; }
   .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
   .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
@@ -168,7 +167,7 @@
     -webkit-tap-highlight-color:transparent;
   }
   .chip:hover { border-color:var(--bp-border2); color:var(--bp-text); }
-  .chip.selected { background:rgba(184,195,255,0.12); border-color:rgba(184,195,255,0.5); color:#b8c3ff; }
+  .chip.selected { background:rgba(184,195,255,0.12); border-color:rgba(184,195,255,0.5); color:var(--bp-brand); }
   .chip.sel-1 { background:rgba(var(--bp-al-rgb),0.1); border-color:rgba(var(--bp-al-rgb),0.45); color:var(--bp-al); }
   .chip.sel-2 { background:rgba(var(--bp-gold-rgb),0.1); border-color:rgba(var(--bp-gold-rgb),0.45); color:var(--bp-gold); }
   .chip.sel-3 { background:rgba(var(--bp-sat-rgb),0.1); border-color:rgba(var(--bp-sat-rgb),0.45); color:var(--bp-sat); }
@@ -179,7 +178,7 @@
     padding:10px 22px; background:rgba(var(--bp-brand-rgb),0.12);
     border:1px solid rgba(var(--bp-brand-rgb),0.35); border-radius:var(--bp-radius-md);
     font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-base); font-weight:700;
-    color:#b8c3ff; cursor:pointer; transition:all .15s; margin-top:14px;
+    color:var(--bp-brand); cursor:pointer; transition:all .15s; margin-top:14px;
   }
   .compare-btn:hover { background:rgba(var(--bp-brand-rgb),0.2); }
   .compare-btn:disabled { opacity:0.4; cursor:not-allowed; }
