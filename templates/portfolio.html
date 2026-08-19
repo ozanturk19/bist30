@@ -65,6 +65,7 @@
       <span class="xu030-compare" id="sumXu030Cmp"></span>
     </div>
   </div>
+  <div id="pfMissingPriceWarn" style="display:none;margin-top:8px;font-size:13px;color:var(--bp-text3)"></div>
 
   <!-- Export / Import araçları -->
   <div class="pf-actions">
@@ -458,17 +459,23 @@ function render() {
   empty.style.display = 'none';
   table.style.display = '';
 
-  let totalCost=0, totalVal=0, alCount=0, satCount=0;
+  let totalCost=0, totalVal=0, alCount=0, satCount=0, missingPriceCount=0;
   const rows = portfolio.map(p => {
     const live   = liveData[p.ticker];
     const cur    = live ? live.price : null;
     const sig    = live ? live.signal : '—';
     const cost   = p.lot * p.price;
-    const val    = cur  ? p.lot * cur : null;
-    const pnl    = val  ? val - cost  : null;
+    const val    = cur !== null ? p.lot * cur : null;
+    const pnl    = val !== null ? val - cost  : null;
     const pnlPct = pnl !== null ? (pnl / cost * 100) : null;
-    totalCost += cost;
-    if (val) totalVal += val;
+    // P0-MONEY-1: cost/val eslestirilerek toplanir — canli fiyati gelmeyen pozisyonun
+    // MALIYETI toplama girip DEGERI girmezse toplam K/Z olduğundan kotu gorunurdu.
+    if (val !== null) {
+      totalCost += cost;
+      totalVal  += val;
+    } else {
+      missingPriceCount++;
+    }
     if (sig === 'AL') alCount++;
     if (sig === 'SAT') satCount++;
 
@@ -504,11 +511,12 @@ function render() {
   // XU030 kıyaslama: portföydeki en erken tarih baz alınır
   const earliestDate = portfolio.reduce((mn, p) => (!mn || p.date < mn) ? p.date : mn, '');
   const xu030Ret = calcXu030ReturnSince(earliestDate);
-  renderSummary({ totalCost, totalVal, pnl: totalVal - totalCost, count: portfolio.length, alCount, satCount, xu030Ret });
+  renderSummary({ totalCost, totalVal, pnl: totalVal - totalCost, count: portfolio.length, alCount, satCount, xu030Ret, missingPriceCount });
 }
 
 function renderSummary(s) {
   if (!s || s.count === 0) {
+    document.getElementById('pfMissingPriceWarn').style.display = 'none';
     document.getElementById('sumCount').textContent = '0';
     document.getElementById('sumCost').textContent  = '0 ₺';
     document.getElementById('sumValue').textContent = '0 ₺';
@@ -517,6 +525,13 @@ function renderSummary(s) {
     document.getElementById('sumSatCount').textContent= '0';
     document.getElementById('sumXu030Card').style.display = 'none';
     return;
+  }
+  const missWarnEl = document.getElementById('pfMissingPriceWarn');
+  if (s.missingPriceCount > 0) {
+    missWarnEl.style.display = '';
+    missWarnEl.textContent = `⚠ ${s.missingPriceCount} pozisyonun güncel fiyatı şu an gelmedi — Kâr/Zarar bu pozisyon(lar) hariç hesaplandı.`;
+  } else {
+    missWarnEl.style.display = 'none';
   }
   document.getElementById('sumCount').textContent = s.count;
   document.getElementById('sumCost').textContent  = fmtM(s.totalCost);

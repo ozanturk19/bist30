@@ -9301,7 +9301,7 @@ def api_cache_inventory():
 
 @app.route("/sitemap.xml")
 def sitemap():
-    today = date.today().isoformat()
+    today = datetime.now(_TZ_TR).date().isoformat()
     if _sitemap_cache.get("date") == today and _sitemap_cache.get("xml"):
         return Response(_sitemap_cache["xml"], mimetype="application/xml")
     pages = [
@@ -9340,7 +9340,7 @@ def sitemap():
         if a.get("canonical_slug"):
             continue  # deprecated/duplicate slug — canonical hedefi kendi ARTICLES girdisiyle zaten listeleniyor
         pages.append({"loc": f"/blog/{a['slug']}", "priority": "0.7", "changefreq": "monthly"})
-    today = date.today().isoformat()
+    today = datetime.now(_TZ_TR).date().isoformat()
     xml   = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     base  = "https://borsapusula.com"   # Domain eklenince burası güncellenir
@@ -9685,7 +9685,7 @@ def karsilastir():
                            canonical_url=canonical_url,
                            page_title=page_title,
                            page_description=page_description,
-                           today_iso=date.today().isoformat())
+                           today_iso=datetime.now(_TZ_TR).date().isoformat())
 
 
 @app.route("/api/karsilastir")
@@ -10721,7 +10721,7 @@ def _rebuild_earnings_warning_lookup():
         cached = _earnings_cache.get("data")
         if not cached:
             return
-        today = date.today()
+        today = datetime.now(_TZ_TR).date()
         new_lookup = {}
         for period in cached.get("periods", []):
             for s in period.get("stocks", []):
@@ -10987,7 +10987,7 @@ def api_market_news():
             break
 
     has_loading = any(r.get("source") == "loading" for r in results)
-    now = datetime.now()
+    now = datetime.now(_TZ_TR)
     return safe_json({
         "items":       results,
         "updated_at":  now.strftime("%d.%m.%Y %H:%M"),

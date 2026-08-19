@@ -2056,7 +2056,7 @@ BorsaPusula'nın **[makro ticker bandı](/),** USD/TRY kurunu anlık olarak gös
     "slug": "stokastik-osilatoru-nedir",
     "title": "Stokastik Osilatör Nedir? RSI ile Nasıl Birlikte Kullanılır?",
     "cat": "Teknik Analiz",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "read_min": 6,
     "summary": "Stokastik osilatör, fiyatın belirli bir dönemdeki fiyat aralığına göre nerede kapandığını ölçer. Aşırı alım/satım bölgelerini RSI'dan farklı bir perspektifle gösterir. İki göstergeyi birlikte kullanmak sinyal güvenilirliğini artırır.",
     "body": """## Stokastik Osilatör Nedir?
@@ -2143,7 +2143,7 @@ Stokastik osilatörü grafik platformunda ek katman olarak kullanarak, BorsaPusu
     "slug": "kaldirach-ve-marjin-riskleri",
     "title": "Kaldıraç ve Marjin: Borçlanarak Yatırım Yapmanın Riskleri",
     "cat": "Risk Yönetimi",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "read_min": 7,
     "summary": "Kaldıraç, hem kazancınızı hem kaybınızı büyütür. Marjin hesabı nasıl çalışır, marjin çağrısı ne demektir ve kaldıraç neden deneyimsiz yatırımcılar için tehlikelidir? Türkiye piyasaları için kapsamlı rehber.",
     "body": """## Kaldıraç (Leverage) Nedir?
@@ -2233,7 +2233,7 @@ BorsaPusula'nın sinyal sistemi, trend gücünü **confirmed** (3+ bar onaylı) 
     "slug": "dca-duzenli-yatirim-stratejisi",
     "title": "DCA (Düzenli Yatırım) Stratejisi: Ortalama Maliyet Düşürme Nedir?",
     "cat": "Strateji",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "read_min": 6,
     "summary": "Dollar-Cost Averaging (DCA), belirli aralıklarla sabit miktarda yatırım yaparak piyasa zamanlaması riskini azaltan bir stratejidir. BIST'te DCA nasıl uygulanır, avantajları ve sınırlılıkları nelerdir?",
     "body": """## DCA (Dollar-Cost Averaging) Nedir?
@@ -2323,7 +2323,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "slug": "sektor-rotasyonu-nedir",
     "title": "Sektör Rotasyonu Nedir? Hangi Sektöre Ne Zaman Yatırım Yapılır?",
     "cat": "Strateji",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 7,
     "desc": "Ekonomik döngünün farklı evrelerinde hangi sektörlerin öne çıktığını, sektör rotasyonu stratejisini ve BIST'te nasıl uygulandığını öğrenin.",
     "body": """<p>Piyasanın her köşesi aynı anda yükselemez. Faiz döngüsü, ekonomik büyüme ve enflasyon, sektörleri farklı hız ve yönlerde etkiler. Bu gerçeği fırsata dönüştürmenin adı <strong>sektör rotasyonu</strong>'dur.</p>
@@ -2388,7 +2388,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "slug": "trend-takip-stratejisi",
     "title": "Trend Takip Stratejisi: Trende Ortak Olmak Neden İşe Yarar?",
     "cat": "Strateji",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 6,
     "desc": "Trend takip stratejisi, fiyatın mevcut yönünde devam edeceği varsayımıyla çalışır. Supertrend, EMA ve ADX birleşimi güçlü trendleri nasıl yakalar?",
     "body": """<p>"Trend dostunuzdur." Borsa dünyasının en eski ve en sağlam prensiplerinden biri. Ama trendi doğru tanımlamak, zamanında girmek ve doğru çıkış noktasını belirlemek ayrı birer sanattır.</p>
@@ -2460,7 +2460,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "slug": "rsi-uyusmazligi-divergence",
     "title": "RSI Uyuşmazlığı (Divergence): Trend Dönüşünü Erkenden Yakalamak",
     "cat": "Teknik Analiz",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 6,
     "desc": "RSI uyuşmazlığı (divergence), fiyat ve momentum arasındaki ayrışmayı gösterir. Gizli uyuşmazlık, açık uyuşmazlık ve pratik kullanım rehberi.",
     "body": """<p>Fiyat yeni zirve yapıyor, ama RSI yapmıyor. Ya da tam tersi. Bu tutarsızlık, trend dönüşünün habercisi olabilir. İşte <strong>RSI uyuşmazlığı (divergence)</strong> adı verilen güçlü sinyal tekniği.</p>
@@ -2536,7 +2536,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Halka Arz (IPO) Nedir? Nasıl Katılınır?",
     "desc": "Halka arz sürecini, nasıl talep toplama yapıldığını, avantajlarını ve risklerini anlatan kapsamlı rehber. BIST'teki halka arzlara nasıl başvurulur?",
     "cat": "Temel Kavramlar",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 7,
     "body": """
 <p>Halka arz (İPO — Initial Public Offering), bir şirketin hisselerini ilk kez kamuya açık olarak piyasaya sürmesidir. Bu süreç, hem şirket hem yatırımcılar için kritik önem taşır.</p>
@@ -2623,7 +2623,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "ETF / BYF Nedir? Borsa Yatırım Fonu Rehberi",
     "desc": "ETF (Exchange Traded Fund) ve BYF (Borsa Yatırım Fonu) nedir, hisse senedinden farkı nedir, BIST'te işlem gören fonlar ve nasıl yatırım yapılır?",
     "cat": "Temel Kavramlar",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 6,
     "body": """
 <p>ETF (Exchange Traded Fund — Borsa İşlem Gören Fon), Türkçe'de BYF (Borsa Yatırım Fonu) olarak da bilinir. Hisse senetleri gibi borsada alınıp satılabilen, genellikle bir endeksi veya emtiayı takip eden yatırım araçlarıdır.</p>
@@ -2729,7 +2729,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Borsada Vergi: Hisse Senedi Kazancı Nasıl Vergilendirilir? (2026)",
     "desc": "BIST hisse senedi alım satım kazançlarında stopaj, temettü vergisi ve yıllık beyan yükümlülüğü. Türkiye'de borsa vergisi rehberi 2026.",
     "cat": "Temel Kavramlar",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 7,
     "body": """
 <p>Borsa yatırımlarında vergi konusu bireysel yatırımcılar arasında en çok karışıklığa yol açan konulardan biridir. Bu rehber, Türkiye'de BIST hisse senedi işlemlerinde 2026 itibarıyla geçerli vergilendirme kurallarını özetlemektedir.</p>
@@ -2830,7 +2830,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Yatırım Fonu mu, Hisse Senedi mi? Hangisi Daha İyi?",
     "desc": "Yatırım fonu ile hisse senedini karşılaştıran kapsamlı rehber. Başlangıç yatırımcısından deneyimli trader'a kim hangisini tercih etmeli?",
     "cat": "Strateji",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 6,
     "body": """
 <p>Borsaya yeni başlayanların ve portföyünü büyütmek isteyenlerin sıkça sorduğu soru: "Yatırım fonu mu alsam, yoksa direkt hisse senedi mi?" Her iki aracın kendine özgü avantajları, riskleri ve uygun kullandığı yatırımcı profilleri vardır.</p>
@@ -2970,7 +2970,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Açığa Satış (Short Selling) Nedir? BIST'te Mümkün mü?",
     "desc": "Açığa satış nedir, nasıl çalışır, BIST hisse senetlerinde short selling yapılabilir mi? Riskleri ve alternatif stratejiler.",
     "cat": "Strateji",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 6,
     "body": """
 <p>Açığa satış (short selling), sahip olmadığınız bir hisseyi ödünç alıp sattıktan sonra fiyat düştüğünde geri alarak iade ettiğiniz ve bu fiyat farkından kâr ettiğiniz bir yatırım stratejisidir. Kısaca "düşüşten para kazanmak" olarak da tanımlanır.</p>
@@ -3037,7 +3037,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Hisse Bölünmesi (Stock Split) Nedir? Yatırımcıyı Nasıl Etkiler?",
     "desc": "Hisse bölünmesi nedir, şirket neden hisse böler, bölünme sonrası portföy değeri değişir mi? KAP bildirimi ve pratik etkileri.",
     "cat": "Temel Kavramlar",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 5,
     "body": """
 <p>Hisse bölünmesi (stock split), bir şirketin mevcut hisselerini daha küçük birimler halinde bölerek toplam hisse sayısını artırdığı kurumsal bir işlemdir. En yaygın form 1:2 veya 1:5 bölünmedir.</p>
@@ -3132,7 +3132,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Altın mı, Borsa mı, Döviz mi? 2026 Yatırım Karşılaştırması",
     "desc": "Altın, BIST hisseleri ve dolar/euro arasında hangisi daha karlı? Türkiye'de en iyi yatırım aracı nedir? 2026 için kapsamlı karşılaştırma ve strateji rehberi.",
     "cat": "Strateji",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 7,
     "body": """
 <p>Türk yatırımcısının en sık sorduğu soru: "Paramı nereye yatırmalıyım?" Altın, borsa ve döviz — her birinin güçlü ve zayıf yönleri var. Bu rehberde her üç seçeneği çeşitli kriterlerle karşılaştırıyor ve 2026 koşullarında değerlendiriyoruz.</p>
@@ -3243,7 +3243,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "BIST100 Temettü Hisseleri 2026: Düzenli Gelir İçin Rehber",
     "desc": "BIST100'de en yüksek temettü verimine sahip hisseler hangileri? Temettü yatırımı nasıl yapılır, ne zaman alınır, vergi avantajları nelerdir? 2026 rehberi.",
     "cat": "Temel Analiz",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 7,
     "body": """
 <p>Temettü (dividant) yatırımı, hisse senedini yalnızca fiyat artışından değil, düzenli nakit akışından da kazanmak için kullanılan stratejidir. BIST'te bazı şirketler her yıl yüksek oranlarda kâr payı dağıtır; bu da temettü yatırımcısı için önemli bir gelir kaynağı olur.</p>
@@ -3344,7 +3344,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Kripto Para mı, Borsa mı? Risk ve Getiri Karşılaştırması",
     "desc": "Bitcoin vs BIST hisseleri: hangisi daha karlı, hangisi daha riskli? Volatilite, düzenleme, likidite ve vergi açısından kapsamlı karşılaştırma.",
     "cat": "Strateji",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 6,
     "body": """
 <p>Özellikle genç yatırımcılar için "kripto mu, borsa mı?" sorusu giderek daha önemli hale geliyor. Her ikisi de yüksek getiri potansiyeli sunarken çok farklı risk profilleri taşıyor. Bu rehberde iki dünya arasındaki temel farkları ele alıyoruz.</p>
@@ -3454,7 +3454,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Faiz ve Borsa İlişkisi: TCMB Kararları BIST'i Nasıl Etkiler?",
     "desc": "Merkez bankası faiz kararları hisse senetlerini nasıl etkiler? Faiz yükselince borsa neden düşer? Türkiye özelinde TCMB-BIST ilişkisi ve yatırımcı stratejisi.",
     "cat": "Makro Ekonomi",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 7,
     "body": """
 <p>Faiz oranları ile borsa arasındaki ilişki, yatırımcıların en çok merak ettiği makroekonomik konuların başında gelir. Merkez bankası kararları açıklandığında piyasalar neden sert hareket eder? Bu rehberde Türkiye Cumhuriyet Merkez Bankası (TCMB) kararlarının BIST üzerindeki etkisini ve buna göre nasıl pozisyon alınabileceğini ele alıyoruz.</p>
@@ -3584,7 +3584,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Teknik Analiz mi, Temel Analiz mi? Farklar ve Birlikte Kullanım",
     "desc": "Teknik analiz ile temel analiz arasındaki temel farklar nelerdir? Hangi yatırımcı hangisini kullanmalı? BIST hisseleri için en etkili yaklaşım nedir?",
     "cat": "Strateji",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 6,
     "body": """
 <p>Yatırım dünyasındaki en köklü tartışmalardan biri: "Teknik analiz mi yoksa temel analiz mi daha etkili?" Bu sorunun kesin bir cevabı olmasa da her iki yaklaşımı anlamak ve doğru durumda doğru aracı kullanmak, yatırımcıya büyük avantaj sağlar.</p>
@@ -3713,7 +3713,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "S&P500 Nedir? ABD Borsasına Yatırım Rehberi 2026",
     "desc": "S&P500 endeksi nedir, hangi şirketler var, Türkiye'den nasıl yatırım yapılır? Nasdaq ile farkı, ETF seçimi ve kur riski. ABD borsasına yatırım rehberi.",
     "cat": "Temel Kavramlar",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 7,
     "body": """
 <p>S&P500 (Standard & Poor's 500), ABD borsasında işlem gören en büyük 500 şirketin piyasa değeri ağırlıklı endeksidir. Dünyada en çok takip edilen borsa endekslerinden biridir ve küresel ekonominin nabzı olarak kabul edilir.</p>
@@ -3815,7 +3815,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "BES Nedir? Bireysel Emeklilik Sistemi Rehberi 2026",
     "desc": "Bireysel Emeklilik Sistemi (BES) nedir, nasıl çalışır, devlet katkısı ne kadar? BES mi yoksa borsa yatırımı mı daha kazançlı? Kapsamlı 2026 rehberi.",
     "cat": "Temel Kavramlar",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 7,
     "body": """
 <p>Bireysel Emeklilik Sistemi (BES), devlet desteğiyle uzun vadeli birikim yapmanıza olanak tanıyan gönüllü bir emeklilik tasarruf sistemidir. Türkiye'de milyonlarca kişinin katılımıyla en yaygın yatırım araçlarından biri haline gelmiştir.</p>
@@ -3941,7 +3941,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Şirket Bilançosu Nasıl Okunur? Yatırımcı İçin Temel Analiz",
     "desc": "Hisse senedi yatırımında bilanço, gelir tablosu ve nakit akışı tablosu nasıl okunur? F/K, PD/DD, ROE oranları ne anlama gelir? Temel analiz başlangıç rehberi.",
     "cat": "Temel Analiz",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 8,
     "body": """
 <p>Şirketin finansal tablolarını okuyabilmek, değer yatırımcısının en temel becerisidir. Bilanço, gelir tablosu ve nakit akışı tablosu — bu üç belge bir şirketin mali sağlığını tüm boyutlarıyla ortaya koyar.</p>
@@ -4071,7 +4071,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     "title": "Portföy Rebalancing: Kârdaki Hisseyi Ne Zaman Satmalısın?",
     "desc": "Portföy yeniden dengeleme (rebalancing) nedir, ne zaman yapılır, kârdaki pozisyonu azaltmak akıllıca mı? Türk yatırımcısı için pratik rehber.",
     "cat": "Strateji",
-    "date": "01.05.2026",
+    "date": "2026-05-01",
     "mins": 6,
     "body": """
 <p>Portföy rebalancing (yeniden dengeleme), hedef varlık dağılımınızdan sapan portföyünüzü başlangıçtaki hedef ağırlıklarına geri döndürme işlemidir. Uzun vadeli yatırım disiplininin temel taşlarından biridir.</p>
