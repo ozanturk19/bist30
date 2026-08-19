@@ -87,7 +87,7 @@ function _mbnSyncBell() {
   const sub = document.getElementById('mbnPushSub');
   const icon = document.getElementById('mbnPushIcon');
   if (!btn) return;
-  const isSupported = ('PushManager' in window) && ('Notification' in window);
+  const isSupported = ('PushManager' in window) && ('Notification' in window) && (typeof togglePushSubscription === 'function');
   if (row) row.style.display = isSupported ? '' : 'none';
   const active = typeof _pushSubscription !== 'undefined' && !!_pushSubscription;
   btn.classList.toggle('push-active', active);

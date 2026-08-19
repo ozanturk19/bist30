@@ -2292,8 +2292,8 @@ def _notify_signal_changes(new_results):
     # Telegram/Email/Push duplikasyonu yapmaz.
     if not _is_notify_leader():
         with _prev_signals_lock:
-            _prev_signals = new_sig_map
-            _save_prev_signals(new_sig_map)
+            _prev_signals.update(new_sig_map)
+            _save_prev_signals(_prev_signals)
         return
 
     # MSG-019B diag: state durumu
@@ -2347,8 +2347,8 @@ def _notify_signal_changes(new_results):
 
     # State güncelle + diske persist (worker restart-safe)
     with _prev_signals_lock:
-        _prev_signals = new_sig_map
-        _save_prev_signals(new_sig_map)
+        _prev_signals.update(new_sig_map)
+        _save_prev_signals(_prev_signals)
 
 
 # ── E-posta Bildirim Sistemi ──────────────────────────────────────────────────
