@@ -70,9 +70,9 @@ def test_timeout_alone_trips_breaker():
     ns = _fresh_cb_ns()
     record = ns["_yahoo_cb_record"]
     blocked = ns["_yahoo_cb_blocked"]
-    for _ in range(ns["_YAHOO_CB_THRESHOLD"]):
+    for _ in range(3):
         record(False, timeout=True)
-    assert blocked(), "eşik kadar ardışık timeout breaker'ı açmalı (fix öncesi: hiçbir etkisi yoktu)"
+    assert blocked(), "3 ardışık timeout breaker'ı açmalı (fix öncesi: hiçbir etkisi yoktu)"
 
 
 def test_empty_stderr_without_timeout_flag_does_not_count():
@@ -86,17 +86,15 @@ def test_empty_stderr_without_timeout_flag_does_not_count():
 
 
 def test_429_and_timeout_share_same_counter():
-    """429 ile timeout karışık gelse bile ortak eşiğe birlikte sayılmalı."""
+    """429 ile timeout karışık gelse bile ortak eşiğe (3) birlikte sayılmalı."""
     ns = _fresh_cb_ns()
     record = ns["_yahoo_cb_record"]
     blocked = ns["_yahoo_cb_blocked"]
-    threshold = ns["_YAHOO_CB_THRESHOLD"]
     record(False, stderr_text="HTTP Error 429: Too Many Requests")
-    for _ in range(threshold - 2):
-        record(False, timeout=True)
-    assert not blocked(), "eşiğin altında, henüz açılmamalı"
     record(False, timeout=True)
-    assert blocked(), "eşiği tamamlayan hata (kaynağı fark etmeksizin) devreyi açmalı"
+    assert not blocked(), "2 hata eşiğin (3) altında, henüz açılmamalı"
+    record(False, timeout=True)
+    assert blocked(), "3. hata (kaynağı fark etmeksizin) eşiği geçmeli"
 
 
 def test_success_resets_after_timeouts():
@@ -118,14 +116,14 @@ def test_lone_success_does_not_collapse_escalation():
     3->1->2->3 döngüsüne giriyordu, backoff hiç derinleşmiyordu)."""
     ns = _fresh_cb_ns()
     record = ns["_yahoo_cb_record"]
-    for _ in range(ns["_YAHOO_CB_THRESHOLD"]):
+    for _ in range(3):
         record(False, timeout=True)
     assert ns["_yahoo_cb"]["opens"] == 1
 
     record(True)  # 4 worker'dan biri şans eseri başarılı oldu
     assert ns["_yahoo_cb"]["opens"] == 1, "izole başarı escalation seviyesini silmemeli"
 
-    for _ in range(ns["_YAHOO_CB_THRESHOLD"]):
+    for _ in range(3):
         record(False, timeout=True)
     assert ns["_yahoo_cb"]["opens"] == 2, "escalation 1'den devam etmeli, 1'den değil sıfırdan"
 
@@ -134,7 +132,7 @@ def test_opens_resets_after_true_recovery_window():
     """RESET_WINDOW süresi (gerçek toparlanma) geçtikten sonra başarı escalation'ı sıfırlamalı."""
     ns = _fresh_cb_ns()
     record = ns["_yahoo_cb_record"]
-    for _ in range(ns["_YAHOO_CB_THRESHOLD"]):
+    for _ in range(3):
         record(False, timeout=True)
     assert ns["_yahoo_cb"]["opens"] == 1
 
@@ -150,7 +148,7 @@ def test_window_skips_resets_alongside_opens_on_true_recovery():
     aksi halde bir sonraki pencerenin sayacı öncekinden devralınır (yanlış N)."""
     ns = _fresh_cb_ns()
     record = ns["_yahoo_cb_record"]
-    for _ in range(ns["_YAHOO_CB_THRESHOLD"]):
+    for _ in range(3):
         record(False, timeout=True)
     assert ns["_yahoo_cb"]["opens"] == 1
 
@@ -169,7 +167,7 @@ def test_window_skips_survives_transient_lone_success():
     aksi halde 4 paralel worker'dan şans eseri gelen tek başarı sayaçı gerçek dışı sıfırlar."""
     ns = _fresh_cb_ns()
     record = ns["_yahoo_cb_record"]
-    for _ in range(ns["_YAHOO_CB_THRESHOLD"]):
+    for _ in range(3):
         record(False, timeout=True)
     ns["_yahoo_cb"]["window_skips"] = 42
 

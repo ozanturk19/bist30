@@ -299,14 +299,7 @@ _SUBPROCESS_SLOW_MS = 3000  # CPO-740 Görev 12c: >3s uyarı (baseline ~956ms ×
 # cycle'a hızla geçer. Sadece 429 sayılır (timeout/parse gibi farklı kök nedenler
 # devre sayacını etkilemez — Gemini CB'deki 429-hariç mantığın simetriği, çünkü
 # burada 429 asıl hedeflenen hata modu).
-# CPO-1379 hotfix ADAYI (10 Ağu, DEV-1674) — deploy edilMEDİ, Ozan onayı bekliyor.
-# 10 Ağu sabahı canlı teşhis: son 4 CB açılışının hepsi "son: timeout" (429 değil),
-# Yahoo o gün genel olarak 3-9x yavaş (SLOW loglar) ama BLOKE değil — düz curl 429'u
-# eksik User-Agent/crumb'dan kaynaklanan yanlış alarmdı, gerçek yfinance/yf_fetch.py
-# aynı IP'den başarıyla veri çekti. 3 ardışık timeout eşiği, geçici yavaşlık
-# burstlerinde gerçek arıza gibi tetikleniyor. 3→5 ile CB'nin gerçek kalıcı
-# arızada hâlâ açılması korunuyor, geçici 3-timeout burst'lerinde toleransı artıyor.
-_YAHOO_CB_THRESHOLD = 5          # ardışık 429/timeout eşiği — devre açılır (CPO-1379 adayı: 3→5)
+_YAHOO_CB_THRESHOLD = 3          # ardışık 429 eşiği — devre açılır
 _YAHOO_CB_COOLDOWN_BASE = 45     # saniye — ilk açılışta devre kapalı kalır
 _YAHOO_CB_COOLDOWN_CAP = 900     # saniye — üstel artışın tavanı (15dk, CPO-1145 §3: 429 duvarı
                                  # saatlerce sürüyor, 5dk tavan boşa subprocess spawn ediyordu)
