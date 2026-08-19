@@ -54,10 +54,10 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
 /* tarama/hisseler/sinyal_performans — /api/data (216 kayıt) çekmiyorlar, hafif
    /api/data-quality endpoint'ini (CPO-1121 §1) 60s'de bir çekip aynı fonksiyona post eder. */
 function bpPollDataQuality() {
-  fetch('/api/data-quality', {cache: 'no-store'})
+  fetch('/api/data-quality', {cache: 'no-store', signal: AbortSignal.timeout(10000)})
     .then(function(r) { return r.json(); })
     .then(function(j) { bpUpdateStaleBanner(j.data_quality, j.stocks_age_s); })
-    .catch(function() {});
+    .catch(function(e) { console.error('data-quality polling basarisiz', e); });
 }
 function bpStartDataQualityPolling() {
   bpPollDataQuality();

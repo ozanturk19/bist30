@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>Portföy Takibi | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Portföy Takibi | BorsaPusula</title>
 <meta name="description" content="BIST hisselerinizi takip edin. Giriş fiyatı, anlık değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/portfolio">
@@ -18,154 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260819A">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0e0e12; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
-  .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:var(--bp-text-base); text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:var(--bp-radius); background:var(--bp-surface2); }
-  .back-btn:hover { background:var(--bp-surface2); color:var(--bp-text); }
-  .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
-  .page-sub   { font-size:var(--bp-text-base); color:#8b949e; }
-  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
-  .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
-  .top-nav-links a.active { background:#1c2128; color:#1f6feb; }
-  @media (max-width:780px) { .top-nav-links { display:none; } }
-  .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:24px; }
-
-  .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
-  .sum-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; text-align:center; }
-  .sum-num  { font-size:var(--bp-text-28); font-weight:800; line-height:1; }
-  .sum-lbl  { font-size:var(--bp-text-xs); color:#8b949e; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
-  .sum-green{ color:#3fb950; } .sum-red{ color:#f85149; } .sum-blue{ color:#58a6ff; } .sum-gold{ color:#e3b341; }
-
-  .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; }
-  .add-bar input, .add-bar select { background:#21262d; border:1px solid #30363d; color:#e6edf3; border-radius:var(--bp-radius); padding:7px 12px; font-size:var(--bp-text-base); outline:none; }
-  .add-bar input:focus, .add-bar select:focus { border-color:#58a6ff; }
-  .add-bar input { width:140px; }
-  .add-bar select { width:160px; }
-  .add-bar input[type=number] { width:130px; }
-  .btn-add { background:#1f6feb; border:none; color:#fff; border-radius:var(--bp-radius); padding:7px 16px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; }
-  .btn-add:hover { background:#388bfd; }
-  .add-lbl { font-size:var(--bp-text-sm); color:#8b949e; }
-
-  .pf-table { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow:hidden; }
-  table { width:100%; border-collapse:collapse; }
-  thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
-  tbody tr { border-bottom:1px solid #21262d; }
-  tbody tr:last-child { border-bottom:none; }
-  tbody tr:hover { background:#1c2128; }
-  td { padding:10px 14px; white-space:nowrap; font-size:var(--bp-text-base); }
-  .ticker-link { font-weight:700; color:#f0f6fc; text-decoration:none; }
-  .ticker-link:hover { color:#58a6ff; }
-
-  .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; }
-  .signal-AL    { background:#1a4731; color:#3fb950; border:1px solid #238636; }
-  .signal-SAT   { background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
-  .signal-BEKLE { background:#21262d; color:#8b949e; border:1px solid #30363d; }
-
-  .pos-pnl { color:#3fb950; font-weight:600; }
-  .neg-pnl { color:#f85149; font-weight:600; }
-  .neu-pnl { color:#8b949e; }
-
-  .btn-del { background:none; border:none; color:var(--bp-text3); cursor:pointer; font-size:var(--bp-text-md); padding:2px 6px; }
-  .btn-del:hover { color:var(--bp-sat); }
-
-  /* Export / Import toolbar */
-  .pf-actions {
-    display: flex; gap: 8px; align-items: center;
-    margin-bottom: 12px; flex-wrap: wrap;
-  }
-  .btn-action {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: none; border: 1px solid #30363d; color: #8b949e;
-    border-radius:var(--bp-radius); padding: 5px 12px; font-size: var(--bp-text-sm);
-    cursor: pointer; transition: all .15s;
-  }
-  .btn-action:hover { border-color: #58a6ff; color: #58a6ff; }
-  .btn-action.danger:hover { border-color: var(--bp-sat); color: var(--bp-sat); }
-  #importFileInput { display: none; }
-
-  /* Import modal */
-  .import-toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: #1c2128; border: 1px solid #30363d; border-radius:var(--bp-radius-md);
-    padding: 10px 20px; font-size: var(--bp-text-base); color: #e6edf3;
-    z-index: var(--bp-z-page-toast); display: none; box-shadow: var(--bp-shadow-sm);
-  }
-  .import-toast.ok  { border-color: #238636; color: #3fb950; }
-  .import-toast.err { border-color: var(--bp-sat-bd); color: var(--bp-sat); }
-
-  .empty-msg { text-align:center; padding:60px; color:var(--bp-text3); }
-  .empty-msg .em-icon { font-size:var(--bp-text-40); margin-bottom:12px; }
-
-  /* localStorage uyarı banner */
-  .ls-warning {
-    display:flex; align-items:flex-start; gap:12px;
-    background:rgba(var(--bp-gold-rgb),.06); border:1px solid rgba(var(--bp-gold-rgb),.2);
-    border-radius:var(--bp-radius-lg); padding:14px 16px; margin-bottom:20px;
-    font-size:var(--bp-text-base); color:#94a3b8; line-height:1.6;
-  }
-  .ls-warning-icon { font-size:var(--bp-text-xl); flex-shrink:0; margin-top:1px; }
-  .ls-warning-body { flex:1; }
-  .ls-warning-title { font-weight:700; color:#e3b341; margin-bottom:3px; }
-  .ls-warning-close {
-    background:none; border:none; color:#64748b; cursor:pointer;
-    font-size:var(--bp-text-lg); padding:0 2px; flex-shrink:0; line-height:1;
-    transition:color .15s;
-  }
-  .ls-warning-close:hover { color:#e3b341; }
-
-  /* T7.4: canlı veri/grafik fetch hatası banner'ı */
-  .pf-fetch-error {
-    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-    background:rgba(var(--bp-sat-rgb),.08); border:1px solid var(--bp-sat-bd);
-    border-radius:var(--bp-radius-lg); padding:12px 16px; margin-bottom:20px;
-    font-size:var(--bp-text-base); color:var(--bp-sat);
-  }
-  .pf-fetch-error-retry {
-    background:none; border:1px solid var(--bp-sat-bd); color:var(--bp-sat);
-    border-radius:var(--bp-radius); padding:5px 12px; font-size:var(--bp-text-sm); font-weight:600;
-    cursor:pointer; transition:background .15s;
-  }
-  .pf-fetch-error-retry:hover { background:rgba(var(--bp-sat-rgb),.12); }
-
-  .loading-row td { color:var(--bp-text3); font-style:italic; }
-
-  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
-  footer a { color:#8b949e; text-decoration:none; }
-  @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
-
-  /* F6: Sparkline + Sinyal Asistanı + XU030 */
-  .td-spark { width:90px; padding:6px 10px; vertical-align:middle; }
-  .btn-entry {
-    display:inline-block; padding:2px 7px; border-radius:var(--bp-radius-4); margin-left:5px;
-    font-size:var(--bp-text-2xs); font-weight:700; cursor:pointer; vertical-align:middle;
-    background:rgba(63,185,80,.1); border:1px solid rgba(63,185,80,.3); color:#3fb950;
-    white-space:nowrap; transition:all .15s;
-  }
-  .btn-entry:hover { background:rgba(63,185,80,.2); border-color:#3fb950; }
-  .xu030-compare { font-size:var(--bp-text-2xs); color:#8b949e; margin-top:4px; display:block; }
-  .xu030-above { color:#3fb950; } .xu030-below { color:#f85149; }
-
-  /* ── Makro Ticker Bandı ── */
-  .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); height:34px; overflow:hidden; position:relative; white-space:nowrap; }
-  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
-  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
-  .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
-  .macro-bar:hover .macro-track { animation-play-state:paused; }
-  @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-    .macro-bar { position: relative; }
-  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
-  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
-  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:34px; color:inherit; }
-  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
-</style>
+<link rel="stylesheet" href="/static/css/pages/portfolio.css?v=0e789fcd">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% include '_header.html' %}
@@ -210,6 +65,7 @@
       <span class="xu030-compare" id="sumXu030Cmp"></span>
     </div>
   </div>
+  <div id="pfMissingPriceWarn" style="display:none;margin-top:8px;font-size:13px;color:var(--bp-text3)"></div>
 
   <!-- Export / Import araçları -->
   <div class="pf-actions">
@@ -242,13 +98,13 @@
       <div style="font-size:var(--bp-text-sm);color:#8b949e;margin-bottom:16px">Portföyünüzü sunucuya kaydedin — farklı cihazlardan erişin veya bağlantıyla paylaşın.</div>
       <!-- Yeni oluştur / var olan token -->
       <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button onclick="createCloudToken()" style="flex:1;background:#1f6feb;color:#fff;border:none;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+        <button id="cloudCreateBtn" onclick="createCloudToken()" style="flex:1;background:#1f6feb;color:#fff;border:none;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
           + Yeni Oluştur
         </button>
         <div style="flex:2;display:flex;gap:6px">
           <input id="cloudTokenInput" type="text" placeholder="Token girin (XXXX-XXXX-...)" aria-label="Senkronizasyon token'ı"
             style="flex:1;background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:7px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);font-family:var(--bp-font-mono);outline:none;min-width:0">
-          <button onclick="loadCloudToken()" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:7px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer">Yükle</button>
+          <button id="cloudLoadTokenBtn" onclick="loadCloudToken()" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:7px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer">Yükle</button>
         </div>
       </div>
       <!-- Aktif token göster -->
@@ -259,10 +115,10 @@
           <button onclick="copyCloudLink()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:var(--bp-text-md)" title="Kopyala"><span role="img" aria-label="Kopyala">📋</span></button>
         </div>
         <div style="display:flex;gap:8px">
-          <button onclick="saveToCloud()" style="flex:1;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);color:#3fb950;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+          <button id="cloudSaveBtn" onclick="saveToCloud()" style="flex:1;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.2);color:#3fb950;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
             <span aria-hidden="true">⬆</span> Sunucuya Kaydet
           </button>
-          <button onclick="loadFromCloud()" style="flex:1;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.15);color:#58a6ff;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
+          <button id="cloudLoadFromCloudBtn" onclick="loadFromCloud()" style="flex:1;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.15);color:#58a6ff;padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
             <span aria-hidden="true">⬇</span> Sunucudan Yükle
           </button>
           <button onclick="forgetCloudToken()" style="background:none;border:1px solid #30363d;color:#8b949e;padding:8px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer" title="Token'ı unut (yerel portföy kalır)">
@@ -270,7 +126,7 @@
           </button>
         </div>
       </div>
-      <div id="cloudMsg" style="font-size:var(--bp-text-sm);color:#8b949e;margin-top:10px;min-height:18px"></div>
+      <div id="cloudMsg" role="status" aria-live="polite" style="font-size:var(--bp-text-sm);color:#8b949e;margin-top:10px;min-height:18px"></div>
       <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:14px;padding-top:10px;border-top:1px solid #21262d">
         <span aria-hidden="true">⚠️</span> Token herkese açık bir şifre gibidir — paylaşmamanızı öneririz. Kişisel veri kaydedilmez (isim, e-posta yok).
       </div>
@@ -278,7 +134,7 @@
   </div>
 
   <!-- Toast bildirimi -->
-  <div class="import-toast" id="importToast"></div>
+  <div class="import-toast" id="importToast" role="status" aria-live="polite"></div>
 
   <!-- Hisse ekle -->
   <div class="add-bar">
@@ -331,7 +187,14 @@
 <script>
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
-let portfolio = JSON.parse(localStorage.getItem(PF_KEY) || '[]');
+let portfolio;
+try {
+  portfolio = JSON.parse(localStorage.getItem(PF_KEY) || '[]');
+  if (!Array.isArray(portfolio)) throw new Error('not an array');
+} catch (e) {
+  console.warn('portfolio localStorage okunamadi, sifirlaniyor:', e);
+  portfolio = [];
+}
 let liveData   = {};  // ticker → {price, signal, signal_price}
 let chartData  = {};  // ticker → [close prices last 30d]
 let xu030Ohlc  = [];  // [{time:"YYYY-MM-DD", close:...}, ...]
@@ -343,7 +206,7 @@ function showLsWarning() {
 }
 function dismissLsWarning() {
   document.getElementById('lsWarning').style.display = 'none';
-  localStorage.setItem(LS_WARN_KEY, '1');
+  try { localStorage.setItem(LS_WARN_KEY, '1'); } catch (e) { /* best-effort - banner bir sonraki ziyarette tekrar gorunebilir */ }
 }
 showLsWarning();
 
@@ -357,7 +220,14 @@ function fmtM(v) {
   return fmt(v) + ' ₺';
 }
 
-function save() { localStorage.setItem(PF_KEY, JSON.stringify(portfolio)); }
+function save() {
+  try {
+    localStorage.setItem(PF_KEY, JSON.stringify(portfolio));
+  } catch (e) {
+    console.warn('portfolio localStorage yazilamadi (kota/private mod):', e);
+    showLsWarning();
+  }
+}
 
 /* T7.4: canlı veri (fiyat/sinyal, XU030 kıyas) çekilemediğinde görünür
    uyarı + retry — hisse bazlı sparkline eksikliği tabloda zaten "—" ile
@@ -428,12 +298,14 @@ function fillEntry(ticker, price) {
 }
 
 /* ── Export / Import ──────────────────────────────── */
+let _toastTimer = null;
 function showToast(msg, type='ok', ms=3000) {
   const el = document.getElementById('importToast');
   el.textContent = msg;
   el.className = 'import-toast ' + type;
   el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, ms);
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.style.display = 'none'; }, ms);
 }
 
 function exportPortfolio() {
@@ -462,12 +334,12 @@ function exportCSV() {
   const rows = portfolio.map(p => {
     const current  = (window._sigCache && _sigCache[p.ticker]) ? _sigCache[p.ticker].price  : '';
     const sig      = (window._sigCache && _sigCache[p.ticker]) ? _sigCache[p.ticker].signal : '';
-    const pnlVal   = current ? ((current - p.buy_price) * p.lot).toFixed(2) : '';
-    const pnlPct   = current ? (((current - p.buy_price) / p.buy_price) * 100).toFixed(2) : '';
+    const pnlVal   = current ? ((current - p.price) * p.lot).toFixed(2) : '';
+    const pnlPct   = current ? (((current - p.price) / p.price) * 100).toFixed(2) : '';
     return [
       p.ticker,
       p.lot,
-      String(p.buy_price).replace('.', ','),
+      String(p.price).replace('.', ','),
       p.date || '',
       current ? String(current).replace('.', ',') : '',
       sig,
@@ -502,12 +374,12 @@ function importPortfolio(e) {
       if (!positions.length) throw new Error('Boş dosya');
       // Basit validasyon
       positions.forEach(p => {
-        if (!p.ticker || !p.lot || !p.buy_price) throw new Error('Eksik alan: ' + JSON.stringify(p));
+        if (!p.ticker || !p.lot || !p.price) throw new Error('Eksik alan: ' + JSON.stringify(p));
       });
       // Mevcut portföyle birleştir — aynı ticker/tarih yoksa ekle
       let added = 0;
       positions.forEach(p => {
-        const exists = portfolio.some(x => x.ticker === p.ticker && x.date === p.date && x.buy_price === p.buy_price);
+        const exists = portfolio.some(x => x.ticker === p.ticker && x.date === p.date && x.price === p.price);
         if (!exists) {
           portfolio.push({ ...p, id: Date.now() + Math.random() });
           added++;
@@ -570,6 +442,15 @@ async function fetchLive() {
   render();
 }
 
+function esc(s) {
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+// Cloud Sync ile guvenilmeyen kaynaktan gelebilen ticker, tek-tirnakli JS
+// string literali icine gomulmeden once ayrica kacirilir (bkz. fillEntry onclick)
+function escJsStr(s) {
+  return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+
 function render() {
   const tbody = document.getElementById('pfBody');
   const empty = document.getElementById('emptyMsg');
@@ -578,17 +459,23 @@ function render() {
   empty.style.display = 'none';
   table.style.display = '';
 
-  let totalCost=0, totalVal=0, alCount=0, satCount=0;
+  let totalCost=0, totalVal=0, alCount=0, satCount=0, missingPriceCount=0;
   const rows = portfolio.map(p => {
     const live   = liveData[p.ticker];
     const cur    = live ? live.price : null;
     const sig    = live ? live.signal : '—';
     const cost   = p.lot * p.price;
-    const val    = cur  ? p.lot * cur : null;
-    const pnl    = val  ? val - cost  : null;
-    const pnlPct = pnl  ? (pnl / cost * 100) : null;
-    totalCost += cost;
-    if (val) totalVal += val;
+    const val    = cur !== null ? p.lot * cur : null;
+    const pnl    = val !== null ? val - cost  : null;
+    const pnlPct = pnl !== null ? (pnl / cost * 100) : null;
+    // P0-MONEY-1: cost/val eslestirilerek toplanir — canli fiyati gelmeyen pozisyonun
+    // MALIYETI toplama girip DEGERI girmezse toplam K/Z olduğundan kotu gorunurdu.
+    if (val !== null) {
+      totalCost += cost;
+      totalVal  += val;
+    } else {
+      missingPriceCount++;
+    }
     if (sig === 'AL') alCount++;
     if (sig === 'SAT') satCount++;
 
@@ -596,18 +483,18 @@ function render() {
       ? `<span class="${pnl>=0?'pos-pnl':'neg-pnl'}">${pnl>=0?'+':''}${fmtM(pnl)}</span>`
       : '<span class="neu-pnl">—</span>';
     const pnlPctHtml = pnlPct !== null
-      ? `<span class="${pnlPct>=0?'pos-pnl':'neg-pnl'}">${pnlPct>=0?'+':''}${fmt(pnlPct,1)}%</span>`
+      ? `<span class="${pnlPct>=0?'pos-pnl':'neg-pnl'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1)}%</span>`
       : '<span class="neu-pnl">—</span>';
     const entryBtn = (sig === 'AL' && live && live.signal_price)
-      ? `<button class="btn-entry" onclick="fillEntry('${p.ticker}',${live.signal_price})" title="Sinyal giriş fiyatı: ${fmt(live.signal_price)} ₺">Giriş ${fmt(live.signal_price)}₺</button>`
+      ? `<button class="btn-entry" onclick="fillEntry('${esc(escJsStr(p.ticker))}',${live.signal_price})" title="Sinyal giriş fiyatı: ${fmt(live.signal_price)} ₺">Giriş ${fmt(live.signal_price)}₺</button>`
       : '';
     const sigBadge = sig !== '—'
       ? `<span class="signal-badge signal-${sig}">${sig==='AL'?'▲':sig==='SAT'?'▼':'●'} ${sigLabel(sig)}</span>${entryBtn}`
       : '<span class="neu-pnl">—</span>';
     const sparkHtml = svgSparkline(chartData[p.ticker]);
     return `<tr>
-      <td><a href="/hisse/${p.ticker}" class="ticker-link">${p.ticker}</a></td>
-      <td class="hm" style="color:#8b949e">${p.date}</td>
+      <td><a href="/hisse/${esc(p.ticker)}" class="ticker-link">${esc(p.ticker)}</a></td>
+      <td class="hm" style="color:#8b949e">${esc(p.date)}</td>
       <td>${fmt(p.lot,0)}</td>
       <td>${fmt(p.price)}</td>
       <td>${cur ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>
@@ -624,11 +511,12 @@ function render() {
   // XU030 kıyaslama: portföydeki en erken tarih baz alınır
   const earliestDate = portfolio.reduce((mn, p) => (!mn || p.date < mn) ? p.date : mn, '');
   const xu030Ret = calcXu030ReturnSince(earliestDate);
-  renderSummary({ totalCost, totalVal, pnl: totalVal - totalCost, count: portfolio.length, alCount, satCount, xu030Ret });
+  renderSummary({ totalCost, totalVal, pnl: totalVal - totalCost, count: portfolio.length, alCount, satCount, xu030Ret, missingPriceCount });
 }
 
 function renderSummary(s) {
   if (!s || s.count === 0) {
+    document.getElementById('pfMissingPriceWarn').style.display = 'none';
     document.getElementById('sumCount').textContent = '0';
     document.getElementById('sumCost').textContent  = '0 ₺';
     document.getElementById('sumValue').textContent = '0 ₺';
@@ -637,6 +525,13 @@ function renderSummary(s) {
     document.getElementById('sumSatCount').textContent= '0';
     document.getElementById('sumXu030Card').style.display = 'none';
     return;
+  }
+  const missWarnEl = document.getElementById('pfMissingPriceWarn');
+  if (s.missingPriceCount > 0) {
+    missWarnEl.style.display = '';
+    missWarnEl.textContent = `⚠ ${s.missingPriceCount} pozisyonun güncel fiyatı şu an gelmedi — Kâr/Zarar bu pozisyon(lar) hariç hesaplandı.`;
+  } else {
+    missWarnEl.style.display = 'none';
   }
   document.getElementById('sumCount').textContent = s.count;
   document.getElementById('sumCost').textContent  = fmtM(s.totalCost);
@@ -651,11 +546,11 @@ function renderSummary(s) {
     const pfRet = (s.pnl / s.totalCost) * 100;
     const diff  = pfRet - s.xu030Ret;
     const pfEl  = document.getElementById('sumXu030Pf');
-    pfEl.textContent = (pfRet >= 0 ? '+' : '') + fmt(pfRet, 1) + '%';
+    pfEl.textContent = (pfRet >= 0 ? '+' : '') + pfRet.toFixed(1) + '%';
     pfEl.className   = 'sum-num ' + (pfRet >= 0 ? 'sum-green' : 'sum-red');
     const cmpEl = document.getElementById('sumXu030Cmp');
     const diffSign = diff >= 0 ? '+' : '';
-    cmpEl.textContent = 'vs BIST30: ' + diffSign + fmt(diff, 1) + '%';
+    cmpEl.textContent = 'vs BIST30: ' + diffSign + diff.toFixed(1) + '%';
     cmpEl.className   = 'xu030-compare ' + (diff >= 0 ? 'xu030-above' : 'xu030-below');
     document.getElementById('sumXu030Card').style.display = '';
   } else {
@@ -701,9 +596,11 @@ function _showActiveToken(token) {
 }
 
 async function createCloudToken() {
+  const btn = document.getElementById('cloudCreateBtn');
+  if (btn) btn.disabled = true;
   _setCloudMsg('Oluşturuluyor…', '#8b949e');
   try {
-    const res  = await fetch('/api/portfolio/new', {method:'POST'});
+    const res  = await fetch('/api/portfolio/new', {method:'POST', signal: AbortSignal.timeout(15000)});
     const data = await res.json();
     if (!data.token) throw new Error('no token');
     localStorage.setItem(CLOUD_TOKEN_KEY, data.token);
@@ -712,7 +609,9 @@ async function createCloudToken() {
     await saveToCloud(true);
     _setCloudMsg('Token oluşturuldu ve portföy kaydedildi!', '#3fb950');
   } catch(e) {
-    _setCloudMsg('Hata: ' + e.message, '#f85149');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
@@ -720,9 +619,11 @@ async function loadCloudToken() {
   const input = document.getElementById('cloudTokenInput');
   const token = (input.value || '').trim();
   if (!token) { _setCloudMsg('Token girin.', '#f85149'); return; }
+  const btn = document.getElementById('cloudLoadTokenBtn');
+  if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', '#8b949e');
   try {
-    const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`);
+    const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
     if (!res.ok) { _setCloudMsg('Token bulunamadı.', '#f85149'); return; }
     const data = await res.json();
     if (!data.positions) { _setCloudMsg('Geçersiz portföy verisi.', '#f85149'); return; }
@@ -730,26 +631,31 @@ async function loadCloudToken() {
     _showActiveToken(token);
     // Merge positions
     data.positions.forEach(p => {
-      const exists = portfolio.some(x => x.ticker === p.ticker && +x.buy_price === +p.buy_price && x.date === p.date);
+      const exists = portfolio.some(x => x.ticker === p.ticker && +x.price === +p.price && x.date === p.date);
       if (!exists) portfolio.push({...p, id: Date.now() + Math.random()});
     });
     save(); render();
     _setCloudMsg(`Yüklendi! ${data.positions.length} pozisyon.`, '#3fb950');
     input.value = '';
   } catch(e) {
-    _setCloudMsg('Hata: ' + e.message, '#f85149');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
 async function saveToCloud(silent) {
   const token = localStorage.getItem(CLOUD_TOKEN_KEY);
   if (!token) { _setCloudMsg('Önce token oluşturun.', '#f85149'); return; }
+  const btn = document.getElementById('cloudSaveBtn');
+  if (btn) btn.disabled = true;
   if (!silent) _setCloudMsg('Kaydediliyor…', '#8b949e');
   try {
     const res = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({positions: portfolio}),
+      signal: AbortSignal.timeout(15000),
     });
     const data = await res.json();
     if (data.ok) {
@@ -758,24 +664,32 @@ async function saveToCloud(silent) {
       _setCloudMsg('Kayıt hatası: ' + (data.error || '?'), '#f85149');
     }
   } catch(e) {
-    _setCloudMsg('Hata: ' + e.message, '#f85149');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
 async function loadFromCloud() {
   const token = localStorage.getItem(CLOUD_TOKEN_KEY);
   if (!token) { _setCloudMsg('Önce token oluşturun.', '#f85149'); return; }
+  const btn = document.getElementById('cloudLoadFromCloudBtn');
+  if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', '#8b949e');
   try {
-    const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`);
+    const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
     if (!res.ok) { _setCloudMsg('Token bulunamadı.', '#f85149'); return; }
     const data = await res.json();
     if (!data.positions) { _setCloudMsg('Geçersiz portföy.', '#f85149'); return; }
-    portfolio = data.positions.map(p => ({...p, id: p.id || (Date.now() + Math.random())}));
+    // id her zaman burada uretilir; guvenilmeyen cloud verisindeki p.id'ye
+    // guvenilmiyor (onclick="removePosition(${p.id})" tirnaksiz sayi bekliyor)
+    portfolio = data.positions.map(p => ({...p, id: Date.now() + Math.random()}));
     save(); render();
     _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.`, '#3fb950');
   } catch(e) {
-    _setCloudMsg('Hata: ' + e.message, '#f85149');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
@@ -811,8 +725,8 @@ const _MD = BP_ASSET_DECIMALS;
 async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e) { console.error('makro ticker verisi yuklenemedi', e); }}
 loadMacroBar();setInterval(loadMacroBar,180000);
 </script>
-<script src="/static/bp-search.js?v=47" defer></script>
-<script src="/static/stale-banner.js?v=20260810B"></script>
+<script src="/static/bp-search.js?v=51" defer></script>
+<script src="/static/stale-banner.js?v=20260817A"></script>
 <script src="/static/js/focus-trap.js?v=1"></script>
 <script>bpStartDataQualityPolling();</script>
 

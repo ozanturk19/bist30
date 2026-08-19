@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>Gizlilik Politikası | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Gizlilik Politikası | BorsaPusula</title>
 <meta name="description" content="borsapusula.com gizlilik politikası. Kişisel veri toplama, çerez kullanımı ve üçüncü taraf hizmetler hakkında bilgilendirme.">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
 <link rel="canonical" href="https://borsapusula.com/gizlilik">
@@ -15,29 +15,8 @@
   {"@type":"ListItem","position":2,"name":"Gizlilik Politikası","item":"https://borsapusula.com/gizlilik"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bp-bg); color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; font-size: var(--bp-text-md); line-height: 1.7; min-height: 100vh; }
-  header { background: #161b22; border-bottom: 1px solid #30363d; padding: 14px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index:var(--bp-z-dropdown); }
-  .back-btn { display: flex; align-items: center; gap: 6px; color: #8b949e; font-size: var(--bp-text-base); text-decoration: none; padding: 5px 10px; border: 1px solid #30363d; border-radius:var(--bp-radius); background: #21262d; transition: all 0.15s; }
-  .back-btn:hover { background: #30363d; color: #e6edf3; }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: #f0f6fc; }
-  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
-  .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
-  @media (max-width:780px) { .top-nav-links { display:none; } }
-  .container { max-width: var(--bp-container-820); margin: 0 auto; padding: 32px 24px; }
-  h2 { font-size: var(--bp-text-xl); font-weight: 700; color: #f0f6fc; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 1px solid #21262d; }
-  p  { color: #c9d1d9; margin-bottom: 12px; }
-  ul { color: #c9d1d9; margin: 8px 0 12px 20px; }
-  li { margin-bottom: 5px; }
-  strong { color: #f0f6fc; }
-  .updated { font-size: var(--bp-text-sm); color: var(--bp-text3); margin-bottom: 20px; }
-  footer { text-align: center; padding: 20px; font-size: var(--bp-text-sm); color: var(--bp-text3); border-top: 1px solid #21262d; margin-top: 32px; }
-  footer a { color: #8b949e; text-decoration: none; }
-  @media (max-width: 600px) { .container { padding: 16px; } }
-</style>
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260819A">
+<link rel="stylesheet" href="/static/css/pages/gizlilik.css?v=9ca2f1e2">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -91,6 +70,7 @@
   <a href="/">Ana Sayfa</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/iletisim">İletişim</a> · <a href="/hakkinda">Hakkında</a>
 </footer>
 
-<script src="/static/bp-search.js?v=47" defer></script>
+<script src="/static/bp-search.js?v=51" defer></script>
+<script src="/static/js/focus-trap.js?v=1"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

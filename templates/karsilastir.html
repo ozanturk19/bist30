@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>{{ page_title|default('Hisse Karşılaştırma | BorsaPusula') }}</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ page_title|default('Hisse Karşılaştırma | BorsaPusula') }}</title>
 <meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, R/R ve daha fazlası.') }}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
@@ -36,279 +36,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260819A">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--bp-bg); color: var(--bp-text);
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    -webkit-font-smoothing: antialiased; font-size: var(--bp-text-md); min-height: 100vh;
-  }
-  header {
-    background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
-    padding: 14px 24px; display: flex; align-items: center; gap: 16px;
-    position: sticky; top: 0; z-index:var(--bp-z-dropdown);
-  }
-  .back-btn {
-    display: flex; align-items: center; gap: 6px; color: var(--bp-text2);
-    font-size: var(--bp-text-base); text-decoration: none; padding: 5px 10px;
-    border: 1px solid var(--bp-border); border-radius:var(--bp-radius);
-    background: var(--bp-surface2); transition: all 0.15s; white-space: nowrap;
-  }
-  .back-btn:hover { color: var(--bp-text); border-color: var(--bp-border2); }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; }
-  .page-sub   { font-size: var(--bp-text-base); color: var(--bp-text3); }
-  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
-  .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
-  .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
-  @media (max-width:780px) { .top-nav-links { display:none; } }
-
-  .container { max-width: var(--bp-container-1200); margin: 0 auto; padding: 24px; }
-
-  /* ── Search Bar ── */
-  .search-bar {
-    display: flex; gap: 8px; margin-bottom: 28px;
-    background: var(--bp-surface); border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg); padding: 16px;
-    flex-wrap: wrap; align-items: center;
-  }
-  .search-bar label {
-    font-size: var(--bp-text-sm); color: var(--bp-text3); text-transform: uppercase;
-    letter-spacing: 0.5px; font-weight: 600; width: 100%; margin-bottom: 4px;
-  }
-  .ticker-inputs { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
-  .ticker-input {
-    background: var(--bp-bg); border: 1px solid var(--bp-border2);
-    color: var(--bp-text); border-radius:var(--bp-radius); padding: 8px 12px;
-    font-size: var(--bp-text-base); font-family: var(--bp-font-mono); text-transform: uppercase;
-    width: 100px; outline: none; transition: border-color .15s;
-  }
-  .ticker-input:focus { border-color: var(--accent); }
-  .ticker-input::placeholder { color: var(--bp-text3); text-transform: none; font-family: inherit; }
-  .compare-btn {
-    background: var(--accent); color: #fff; border: none; border-radius:var(--bp-radius);
-    padding: 8px 18px; font-size: var(--bp-text-base); font-weight: 600; cursor: pointer;
-    transition: background .15s; white-space: nowrap;
-  }
-  .compare-btn:hover { background: #388bfd; }
-  .share-btn {
-    background: var(--bp-surface2); color: var(--bp-text2); border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius); padding: 8px 14px; font-size: var(--bp-text-sm); cursor: pointer;
-    transition: all .15s; white-space: nowrap; text-decoration: none; display: flex;
-    align-items: center; gap: 5px;
-  }
-  .share-btn:hover { color: var(--bp-text); border-color: var(--bp-border2); }
-
-  /* ── Comparison Table ── */
-  .compare-wrap {
-    overflow-x: auto;
-    border-radius:var(--bp-radius-lg);
-    border: 1px solid var(--bp-border);
-  }
-  table.compare-table {
-    width: 100%; border-collapse: collapse; min-width: 600px;
-  }
-  .compare-table th {
-    background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
-    padding: 0; text-align: center; font-weight: 700; font-size: var(--bp-text-base);
-  }
-  .compare-table td {
-    padding: 12px 16px; border-bottom: 1px solid var(--bp-border);
-    text-align: center; font-size: var(--bp-text-base); vertical-align: middle;
-  }
-  .compare-table tr:last-child td { border-bottom: none; }
-  .compare-table .row-label {
-    text-align: left; color: var(--bp-text3); font-size: var(--bp-text-xs);
-    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
-    padding: 12px 16px; background: rgba(255,255,255,.02);
-    white-space: nowrap; min-width: 130px;
-  }
-  .compare-table .col-hdr {
-    padding: 16px 12px; border-right: 1px solid var(--bp-border);
-  }
-  .compare-table .col-hdr:last-child { border-right: none; }
-  .compare-table td { border-right: 1px solid rgba(30,45,69,.5); }
-  .compare-table td:last-child { border-right: none; }
-  .compare-table th.row-label { border-right: 1px solid rgba(30,45,69,.5); }
-  .compare-table tr:last-child th.row-label { border-bottom: none; }
-
-  .col-ticker { font-size: var(--bp-text-xl); font-weight: 800; font-family: var(--bp-font-mono); }
-  .col-name   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; }
-  .col-kap    {
-    display: inline-block; font-size: var(--bp-text-2xs); color: var(--bp-text3);
-    background: rgba(139,148,158,.1); border: 1px solid rgba(139,148,158,.2);
-    border-radius: var(--bp-radius-4); padding: 1px 5px; text-decoration: none; margin-top: 6px;
-    transition: all .15s;
-  }
-  .col-kap:hover { color: var(--bp-text); background: rgba(139,148,158,.2); }
-
-  .badge {
-    display: inline-flex; align-items: center; gap: 3px; padding: 4px 10px;
-    border-radius: var(--bp-radius-20); font-size: var(--bp-text-xs); font-weight: 600; letter-spacing: .3px;
-    text-transform: uppercase;
-  }
-  .badge.al  { background: rgba(63,185,80,.12); color:#3fb950; border:1px solid rgba(63,185,80,.3); }
-  .badge.sat { background: rgba(248,81,73,.12);  color:#f85149; border:1px solid rgba(248,81,73,.3); }
-  .badge.bkl { background: rgba(139,148,158,.1); color:#8b949e; border:1px solid rgba(139,148,158,.2); }
-
-  .mono { font-family: var(--bp-font-mono); font-size: var(--bp-text-base); }
-  .up   { color: #3fb950; }
-  .dn   { color: #f85149; }
-  .muted{ color: var(--bp-text3); }
-
-  .quality-badge {
-    padding: 2px 7px; border-radius: var(--bp-radius-4); font-size: var(--bp-text-2xs); font-weight: 700;
-    text-transform: uppercase; letter-spacing: .4px;
-  }
-  .q-ideal  { background: rgba(63,185,80,.18);  color:#3fb950; }
-  .q-iyi    { background: rgba(31,111,235,.18);  color:#58a6ff; }
-  .q-dikkat { background: rgba(210,153,34,.18);  color:#d29922; }
-  .q-uzak   { background: rgba(248,81,73,.18);   color:#f85149; }
-  .q-none   { color: var(--bp-text3); }
-
-  .score-pip { display: inline-block; width:8px; height:8px; border-radius:50%; margin: 0 1px; }
-  .pip-filled  { background: #3fb950; }
-  .pip-empty   { background: rgba(139,148,158,.25); }
-  .pip-sat-filled { background: #f85149; }
-
-  /* ── Empty / Loading ── */
-  .empty-state {
-    text-align: center; padding: 60px 24px; color: var(--bp-text3);
-  }
-  .empty-state h2 { font-size: var(--bp-text-lg); font-weight: 600; color: var(--bp-text2); margin-bottom: 8px; }
-  .empty-state p  { font-size: var(--bp-text-base); line-height: 1.6; }
-
-  .skeleton {
-    background: linear-gradient(90deg, #161b22 25%, #1e2530 50%, #161b22 75%);
-    background-size: 200% 100%; animation: shimmer 1.4s infinite;
-    border-radius: var(--bp-radius-4); height: 14px; width: 80px; display: inline-block;
-  }
-  @keyframes shimmer {
-    0%  { background-position: -200% 0; }
-    100%{ background-position:  200% 0; }
-  }
-
-  /* ── Makro Ticker Bandı ── */
-  .macro-bar {
-    background:var(--bp-bg); border-bottom:1px solid var(--bp-border);
-    height:34px; overflow:hidden; position:relative; white-space:nowrap;
-  }
-  .macro-bar::before, .macro-bar::after {
-    content:''; position:absolute; top:0; bottom:0; width:60px;
-    pointer-events:none; z-index:var(--bp-z-raised);
-  }
-  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
-  .macro-track {
-    display:inline-flex; align-items:center;
-    animation:macroScroll 40s linear infinite; height:34px;
-  }
-  .macro-bar:hover .macro-track { animation-play-state:paused; }
-  @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-    .macro-bar { position: relative; }
-  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
-  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
-  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item {
-    display:inline-flex; align-items:center; gap:8px;
-    padding:0 20px; border-right:1px solid var(--bp-border);
-    font-size:var(--bp-text-sm); height:34px; text-decoration:none; color:inherit;
-  }
-  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
-
-  /* ── Autocomplete ── */
-  .ac-wrap { position: relative; display: inline-block; }
-  .ac-dropdown {
-    position: absolute; top: calc(100% + 4px); left: 0;
-    background: var(--bp-surface); border: 1px solid var(--bp-border2);
-    border-radius:var(--bp-radius-md); min-width: 240px; max-height: 280px; overflow-y: auto;
-    z-index:var(--bp-z-modal); box-shadow: var(--bp-shadow-md);
-    display: none;
-  }
-  .ac-dropdown.open { display: block; }
-  .ac-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 12px; cursor: pointer; font-size: var(--bp-text-sm);
-    border-bottom: 1px solid rgba(30,45,69,.5);
-    transition: background .12s;
-  }
-  .ac-item:last-child { border-bottom: none; }
-  .ac-item:hover, .ac-item.active { background: rgba(31,111,235,.18); }
-  .ac-item-ticker {
-    font-family: var(--bp-font-mono); font-size: var(--bp-text-base); font-weight: 700;
-    color: var(--bp-text); letter-spacing: .3px;
-  }
-  .ac-item-name {
-    font-size: var(--bp-text-xs); color: var(--bp-text3);
-    margin-left: 12px; text-align: right; max-width: 160px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .ac-empty {
-    padding: 12px; color: var(--bp-text3); font-size: var(--bp-text-sm); text-align: center;
-  }
-
-  /* ── Score / Verdict styles ── */
-  .row-sep td {
-    background: linear-gradient(90deg, rgba(31,111,235,.12), rgba(31,111,235,.04));
-    color: #58a6ff !important; font-weight: 700; font-size: var(--bp-text-xs);
-    text-transform: uppercase; letter-spacing: 1px;
-    padding: 10px 16px !important; text-align: left !important;
-    border-top: 1px solid rgba(31,111,235,.25);
-  }
-  .score-row td {
-    background: rgba(31,111,235,.04);
-    padding: 16px 12px !important;
-  }
-  .score-row th.row-label {
-    background: rgba(31,111,235,.06) !important;
-    color: var(--bp-text2);
-    padding: 16px 12px !important;
-  }
-  .score-cell { display: flex; flex-direction: column; gap: 6px; align-items: center; }
-  .score-cell.winner {
-    border: 2px solid var(--bp-gold);
-    border-radius:var(--bp-radius-md);
-    padding: 8px 4px;
-    background: rgba(var(--bp-gold-rgb),.06);
-    box-shadow: 0 0 14px rgba(var(--bp-gold-rgb),.18);
-  }
-  .score-big {
-    font-size: var(--bp-text-22); font-weight: 800; font-family: var(--bp-font-mono);
-    line-height: 1;
-  }
-  .score-big small { font-size: var(--bp-text-sm); color: var(--bp-text3); font-weight: 500; }
-  .score-bar-wrap {
-    width: 110px; height: 6px; border-radius:var(--bp-radius-sm);
-    background: rgba(139,148,158,.2); overflow: hidden;
-  }
-  .score-bar-fill {
-    height: 100%; border-radius:var(--bp-radius-sm);
-    background: linear-gradient(90deg, #1f6feb, #3fb950);
-    transition: width .4s ease;
-  }
-  .score-detail {
-    font-size: var(--bp-text-2xs); color: var(--bp-text3); line-height: 1.5;
-    text-align: center;
-  }
-  .score-verdict {
-    font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase;
-    letter-spacing: .5px; margin-top: 2px;
-  }
-
-  /* ── Responsive ── */
-  @media (max-width: 600px) {
-    header { padding: 12px 16px; gap: 10px; }
-    .container { padding: 16px; }
-    .search-bar { padding: 12px; }
-    .ticker-input { width: 80px; }
-    .page-title { font-size: var(--bp-text-lg); }
-    .ac-dropdown { min-width: 200px; }
-    .score-bar-wrap { width: 80px; }
-  }
-</style>
+<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=3af030a8">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% with hdr_title = 'Hisse Karşılaştırma', hdr_sub = '2-4 hisseyi seçin', hdr_sub_id = 'compareSubtitle' %}{% include '_header.html' %}{% endwith %}
@@ -331,20 +61,20 @@
     <label>Karşılaştırılacak hisseler (2-4 adet)</label>
     <div class="ticker-inputs">
       <div class="ac-wrap">
-        <input type="text" class="ticker-input" id="t1" placeholder="AKBNK" maxlength="20" autocomplete="off" aria-label="1. hisse">
-        <div class="ac-dropdown" id="ac1"></div>
+        <input type="text" class="ticker-input" id="t1" placeholder="AKBNK" maxlength="20" autocomplete="off" aria-label="1. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac1">
+        <div class="ac-dropdown" id="ac1" role="listbox"></div>
       </div>
       <div class="ac-wrap">
-        <input type="text" class="ticker-input" id="t2" placeholder="GARAN" maxlength="20" autocomplete="off" aria-label="2. hisse">
-        <div class="ac-dropdown" id="ac2"></div>
+        <input type="text" class="ticker-input" id="t2" placeholder="GARAN" maxlength="20" autocomplete="off" aria-label="2. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac2">
+        <div class="ac-dropdown" id="ac2" role="listbox"></div>
       </div>
       <div class="ac-wrap">
-        <input type="text" class="ticker-input" id="t3" placeholder="ISCTR" maxlength="20" autocomplete="off" aria-label="3. hisse">
-        <div class="ac-dropdown" id="ac3"></div>
+        <input type="text" class="ticker-input" id="t3" placeholder="ISCTR" maxlength="20" autocomplete="off" aria-label="3. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac3">
+        <div class="ac-dropdown" id="ac3" role="listbox"></div>
       </div>
       <div class="ac-wrap">
-        <input type="text" class="ticker-input" id="t4" placeholder="(4. hisse)" maxlength="20" autocomplete="off" aria-label="4. hisse">
-        <div class="ac-dropdown" id="ac4"></div>
+        <input type="text" class="ticker-input" id="t4" placeholder="(4. hisse)" maxlength="20" autocomplete="off" aria-label="4. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac4">
+        <div class="ac-dropdown" id="ac4" role="listbox"></div>
       </div>
     </div>
     <button class="compare-btn" onclick="doCompare()">Karşılaştır</button>
@@ -367,6 +97,11 @@
     </div>
   </div>
 </div>
+
+<footer>
+  <a href="/">Ana Sayfa</a> · <a href="/tarama">Tarayıcı</a> · <a href="/ozet">Günlük Özet</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/yasal">Yasal Uyarı</a>
+  <div style="margin-top:6px"><span aria-hidden="true">⚠️</span> Karşılaştırma verileri yatırım tavsiyesi değildir. Geçmiş performans gelecek getiriyi garanti etmez. © 2026 borsapusula.com</div>
+</footer>
 
 <script>
 const TICKERS_PARAM = "{{ tickers_param }}";
@@ -610,14 +345,20 @@ function buildTable(stocks) {
     </div>`;
   }
 
-  const headers = stocks.map(s => `
-    <th class="col-hdr" scope="col">
-      <a href="/hisse/${s.ticker}" style="text-decoration:none;color:inherit">
+  const headers = stocks.map(s => {
+    // DEV2-bughunt-r7: bulunamayan (found=false) ticker icin /hisse/ linki 404'e gidiyordu.
+    const inner = `
         <div class="col-ticker">${s.ticker}</div>
         <div class="col-name">${s.name||''}</div>
         ${s.kap_url ? `<a href="${s.kap_url}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
-      </a>
-    </th>`).join('');
+      `;
+    return `
+    <th class="col-hdr" scope="col">
+      ${s.found
+        ? `<a href="/hisse/${s.ticker}" style="text-decoration:none;color:inherit">${inner}</a>`
+        : `<div style="color:inherit">${inner}</div>`}
+    </th>`;
+  }).join('');
 
   // ── Yatırım Skoru satırı (kazananı belirle) ──
   const scores = stocks.map(s => s.found ? calcScore(s).total : -1);
@@ -640,7 +381,7 @@ function buildTable(stocks) {
       return `<tr class="row-sep"><td colspan="${colspan}">${label}</td></tr>`;
     }
     const cells = stocks.map(s => `<td>${renderCell(key, s)}</td>`).join('');
-    const helpHtml = help ? ` <span class="help-icon" title="${help}" data-help="${help}">i</span>` : '';
+    const helpHtml = help ? ` <span class="help-icon" tabindex="0" data-tip="${help}" data-help="${help}">i</span>` : '';
     return `<tr><th class="row-label" scope="row">${label}${helpHtml}</th>${cells}</tr>`;
   }).join('');
 
@@ -653,7 +394,10 @@ function buildTable(stocks) {
   </div>`;
 }
 
+let _compareSeq = 0;  /* hizli tekrar-cagrida eski istek yenisini ezmesin (bug-hunt) */
+
 async function doCompare() {
+  const mySeq = ++_compareSeq;
   const inputs = ['t1','t2','t3','t4'].map(id => document.getElementById(id).value.trim().toUpperCase()).filter(Boolean);
   if (inputs.length < 2) {
     document.getElementById('compareResult').innerHTML =
@@ -687,8 +431,10 @@ async function doCompare() {
   try {
     const res  = await fetch(`/api/karsilastir?tickers=${inputs.join(',')}`);
     const data = await res.json();
+    if (mySeq !== _compareSeq) return;  // daha yeni bir karsilastirma baslamis, bu yaniti at
     document.getElementById('compareResult').innerHTML = buildTable(data.stocks || []);
   } catch(e) {
+    if (mySeq !== _compareSeq) return;
     document.getElementById('compareResult').innerHTML =
       '<div class="empty-state"><h2>Yükleme hatası</h2><p>Lütfen tekrar deneyin.</p></div>';
   }
@@ -697,10 +443,16 @@ async function doCompare() {
 function copyShareUrl(e) {
   e.preventDefault();
   const url = window.location.href;
+  const _shareBtnDefault = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş`;
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById('shareBtn');
     btn.innerHTML = '<span aria-hidden="true">✓</span> Kopyalandı';
-    setTimeout(() => { btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş`; }, 2000);
+    setTimeout(() => { btn.innerHTML = _shareBtnDefault; }, 2000);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    const btn = document.getElementById('shareBtn');
+    if (btn) { btn.innerHTML = '<span aria-hidden="true">✓</span> Kopyalandı'; setTimeout(() => { btn.innerHTML = _shareBtnDefault; }, 2000); }
   });
 }
 
@@ -745,21 +497,24 @@ function searchStocks(query, max=6) {
 
 function renderDropdown(inputId, items) {
   const dd = document.getElementById('ac' + inputId.slice(1));
+  const inp = document.getElementById(inputId);
   if (!dd) return;
   if (!items.length) {
     dd.innerHTML = '<div class="ac-empty">Sonuç bulunamadı</div>';
     dd.classList.add('open');
+    if (inp) { inp.setAttribute('aria-expanded', 'true'); inp.removeAttribute('aria-activedescendant'); }
     acState[inputId] = { idx: -1, items: [] };
     return;
   }
   const html = items.map((it, i) => `
-    <div class="ac-item" data-idx="${i}" data-ticker="${it.ticker}">
+    <div class="ac-item" id="${dd.id}-opt-${i}" role="option" aria-selected="false" data-idx="${i}" data-ticker="${it.ticker}">
       <span class="ac-item-ticker">${it.ticker}</span>
       <span class="ac-item-name">${it.name}</span>
     </div>
   `).join('');
   dd.innerHTML = html;
   dd.classList.add('open');
+  if (inp) { inp.setAttribute('aria-expanded', 'true'); inp.removeAttribute('aria-activedescendant'); }
   acState[inputId] = { idx: -1, items };
 
   dd.querySelectorAll('.ac-item').forEach(el => {
@@ -773,7 +528,9 @@ function renderDropdown(inputId, items) {
 
 function closeDropdown(inputId) {
   const dd = document.getElementById('ac' + inputId.slice(1));
+  const inp = document.getElementById(inputId);
   if (dd) dd.classList.remove('open');
+  if (inp) { inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); }
   acState[inputId] = { idx: -1, items: [] };
 }
 
@@ -785,11 +542,19 @@ function selectAcItem(inputId, ticker) {
 
 function setActiveAc(inputId, idx) {
   const dd = document.getElementById('ac' + inputId.slice(1));
+  const inp = document.getElementById(inputId);
   if (!dd) return;
   const items = dd.querySelectorAll('.ac-item');
-  items.forEach((el, i) => el.classList.toggle('active', i === idx));
+  items.forEach((el, i) => {
+    const active = i === idx;
+    el.classList.toggle('active', active);
+    el.setAttribute('aria-selected', String(active));
+  });
   if (idx >= 0 && items[idx]) {
     items[idx].scrollIntoView({ block: 'nearest' });
+    if (inp) inp.setAttribute('aria-activedescendant', items[idx].id);
+  } else if (inp) {
+    inp.removeAttribute('aria-activedescendant');
   }
   if (acState[inputId]) acState[inputId].idx = idx;
 }
@@ -891,9 +656,11 @@ async function loadMacroBar() {
 loadMacroBar();
 setInterval(loadMacroBar, 180000);
 </script>
-<script src="/static/bp-search.js?v=47" defer></script>
+<script src="/static/bp-search.js?v=51" defer></script>
+<script src="/static/js/focus-trap.js?v=1"></script>
+<script src="/static/js/bp-tooltip.js?v=3"></script>
 <script src="/static/bp-format.js?v=20260808a"></script>
-<script src="/static/stale-banner.js?v=20260810B"></script>
+<script src="/static/stale-banner.js?v=20260817A"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

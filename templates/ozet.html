@@ -1,10 +1,11 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>BIST100 Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
 <meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse trend bozulmuş? Bugün sinyal değişen hisseler.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<link rel="canonical" href="https://borsapusula.com/ozet">
+{% set canonical_url = ('https://borsapusula.com/ozet/' ~ historical_date) if historical_date else 'https://borsapusula.com/ozet' %}
+<link rel="canonical" href="{{ canonical_url }}">
 <meta property="og:title"       content="BIST100 Günlük Sinyal Özeti — {{ today_str }}">
 <meta property="og:description" content="Bugün BIST100'de {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
-<meta property="og:url"         content="https://borsapusula.com/ozet">
+<meta property="og:url"         content="{{ canonical_url }}">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height"content="630">
@@ -12,253 +13,16 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
   {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
-  {"@type":"ListItem","position":2,"name":"Günlük Sinyal Özeti","item":"https://borsapusula.com/ozet"}
+  {"@type":"ListItem","position":2,"name":"Günlük Sinyal Özeti","item":"{{ canonical_url }}"}
 ]}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260819A">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--bp-bg);
-    color: var(--bp-text);
-    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    font-size: var(--bp-text-md);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  header {
-    background: rgba(var(--bp-bg-rgb),0.92);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
-    padding: 0 24px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index:var(--bp-z-dropdown);
-  }
-  .logo-link {
-    display: flex; align-items: center; gap: 10px;
-    text-decoration: none; flex-shrink: 0;
-  }
-  .logo-mark { width: 28px; height: 28px; flex-shrink: 0; }
-  .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
-  .logo-name { font-size: var(--bp-text-lg); font-weight: 700; color: var(--bp-text); letter-spacing: -0.3px; font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .logo-name strong { color: var(--bp-al); font-weight: 700; }
-  .logo-sub { font-size: var(--bp-text-2xs); color: var(--bp-text3); letter-spacing: 0.2px; }
-  .back-btn {
-    display: flex; align-items: center; gap: 6px;
-    color: var(--bp-text2); font-size: var(--bp-text-base);
-    text-decoration: none;
-    padding: 5px 10px;
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius);
-    background: var(--bp-surface2);
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .back-btn:hover { background: var(--bp-surface2); color: var(--bp-text); }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .page-sub   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
-  .top-nav-links { display:flex; gap:2px; align-items:center; }
-  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
-  .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
-  .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
-  @media (max-width:900px) { .top-nav-links { display:none; } }
-
-  .container { max-width: var(--bp-container-1100); margin: 0 auto; padding: 24px; }
-
-  /* ── Sayaç kartları ── */
-  .counter-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  @media (max-width: 600px) {
-    .counter-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  .counter-card {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
-    padding: 16px 14px;
-    text-align: center;
-    transition: border-color .15s;
-  }
-  .counter-card:hover { border-color: var(--bp-border2); }
-  .counter-num  { font-size: var(--bp-text-36); font-weight: 800; line-height: 1; font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .counter-lbl  { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .num-al    { color: var(--bp-al); }
-  .num-sat   { color: var(--bp-sat); }
-  .num-bekle { color: var(--bp-bkl); }
-  .num-new   { color: var(--bp-gold); }
-
-  /* ── Sinyaller ── */
-  .section-box {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-  .section-title {
-    font-size: var(--bp-text-xs);
-    color: var(--bp-text3);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-  }
-  .stock-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 8px;
-  }
-  .stock-card {
-    background: var(--bp-surface2);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-md);
-    padding: 12px 13px;
-    text-decoration: none;
-    transition: border-color .15s, background .15s;
-    display: block;
-    min-width: 0;
-  }
-  .stock-card:hover { background: var(--bp-surface3); border-color: var(--bp-border2); }
-  .sc-ticker  { font-size: var(--bp-text-md); font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .sc-name    { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: var(--bp-text-xs); font-weight: 600; padding: 2px 8px; border-radius: var(--bp-radius-4); }
-  .sc-al   { background: rgba(0,226,144,.10); color: #00e290; }
-  .sc-sat  { background: rgba(var(--bp-sat-rgb),.15);  color: #ff7b72; }
-  .sc-bekle{ background: rgba(var(--bp-text3-rgb),.12); color: #a8b2bc; }
-  .sc-meta { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 4px; }
-  .sc-new  { font-size: var(--bp-text-2xs); color: var(--bp-gold); font-weight: 600; }
-  .sc-ret  { display: inline-block; font-size: var(--bp-text-sm); font-weight: 700; margin-top: 5px; padding: 2px 7px; border-radius: var(--bp-radius-4); font-variant-numeric: tabular-nums; }
-  .sc-ret-pos { background: rgba(0,226,144,.10); color: #00e290; }
-  .sc-ret-neg { background: rgba(var(--bp-sat-rgb),.15); color: #ff7b72; }
-  .sc-ret-neu { background: rgba(var(--bp-text3-rgb),.1); color: #a8b2bc; }
-
-  .empty-msg { color: var(--bp-text3); font-size: var(--bp-text-base); text-align: center; padding: 20px; }
-
-  /* Piyasa barometresi */
-  .barometer {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-  .bar-track {
-    position: relative;
-    height: 10px;
-    background: var(--bp-surface2);
-    border-radius: var(--bp-radius-5);
-    overflow: hidden;
-    margin: 10px 0;
-  }
-  .bar-al  { position: absolute; left: 0; top: 0; height: 100%; background: var(--bp-al); border-radius: 5px 0 0 5px; transition: width .4s; }
-  .bar-sat { position: absolute; right: 0; top: 0; height: 100%; background: var(--bp-sat); border-radius: 0 5px 5px 0; transition: width .4s; }
-  .bar-labels { display: flex; justify-content: space-between; font-size: var(--bp-text-sm); color: var(--bp-text3); }
-
-  footer {
-    text-align: center;
-    padding: 20px;
-    font-size: var(--bp-text-sm);
-    color: var(--bp-text3);
-    border-top: 1px solid var(--bp-border);
-    margin-top: 20px;
-  }
-
-  @media (max-width: 600px) {
-    .container { padding: 12px; }
-    .counter-num { font-size: var(--bp-text-28); }
-    .stock-grid { grid-template-columns: repeat(2, 1fr); }
-    .ozet-table-wrap, .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    .ozet-table-wrap table, .table-wrap table { min-width:360px; }
-  }
-
-  /* ── Makro Ticker Bandı ── */
-  .macro-bar {
-    background:var(--bp-bg); border-bottom:1px solid var(--bp-border);
-    height:34px; overflow:hidden; position:relative; white-space:nowrap;
-  }
-  .macro-bar::before,.macro-bar::after {
-    content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised);
-  }
-  .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
-  .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
-  .macro-bar:hover .macro-track { animation-play-state:paused; }
-  @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-    .macro-bar { position: relative; }
-  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
-  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
-  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:34px; color:inherit; }
-  .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
-  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-bkl); }
-
-
-  /* ── Header Search Button ── */
-  .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius:var(--bp-radius); color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 8px; }
-  .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
-  /* ── Search Overlay ── */
-  .search-overlay { display: none; position: fixed; inset: 0; z-index:var(--bp-z-overlay); background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: flex-start; justify-content: center; padding-top: 80px; }
-  .search-overlay.open { display: flex; }
-  .search-modal { width: min(560px, calc(100vw - 32px)); background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow: hidden; box-shadow: var(--bp-shadow-lg); max-height: calc(100vh - 120px); display: flex; flex-direction: column; }
-  .search-input-wrap { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--bp-border); }
-  .search-input-icon { width: 18px; height: 18px; color: var(--bp-text3); flex-shrink: 0; }
-  #searchInput { flex: 1; background: none; border: none; outline: none; font-size: var(--bp-text-15); color: var(--bp-text); font-family: 'Manrope', system-ui, sans-serif; min-width: 0; }
-  #searchInput::placeholder { color: var(--bp-text3); }
-  .search-close { background: var(--bp-surface2); border: 1px solid var(--bp-border); color: var(--bp-text2); width: 28px; height: 28px; border-radius:var(--bp-radius); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: var(--bp-text-md); flex-shrink: 0; }
-  .search-close:hover { background: var(--bp-surface2); color: var(--bp-text); }
-  .search-results { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
-  .search-empty { padding: 24px; text-align: center; color: var(--bp-text3); font-size: var(--bp-text-base); }
-  .search-section-title { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-2xs); font-weight: 700; color: var(--bp-text3); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px 6px; }
-  .search-result { display: grid; grid-template-columns: 64px 14px 1fr auto auto; align-items: center; gap: 8px; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); transition: background .12s; font-size: var(--bp-text-base); }
-  .search-result:hover, .search-result.sr-selected { background: var(--bp-surface2); }
-  .sr-tk { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; color: var(--bp-text); font-size: var(--bp-text-base); }
-  .sr-sig.sr-al { color: var(--bp-al); font-weight: 700; }
-  .sr-sig.sr-sat { color: var(--bp-sat); font-weight: 700; }
-  .sr-sig.sr-bekle { color: var(--bp-bkl); }
-  .sr-name { color: var(--bp-text2); font-size: var(--bp-text-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-  .sr-price { font-variant-numeric: tabular-nums; font-size: var(--bp-text-sm); color: var(--bp-text2); }
-  .sr-chg { font-variant-numeric: tabular-nums; font-size: var(--bp-text-sm); font-weight: 600; min-width: 56px; text-align: right; }
-  .sr-chg.pos { color: var(--bp-al); } .sr-chg.neg { color: var(--bp-sat); } .sr-chg.neu { color: var(--bp-bkl); }
-  .search-topic { display: block; padding: 9px 12px; text-decoration: none; color: var(--bp-text); border-radius:var(--bp-radius-md); font-size: var(--bp-text-base); transition: background .12s; }
-  .search-topic:hover, .search-topic.sr-selected { background: var(--bp-surface2); }
-  @media (max-width: 600px) {
-    .search-overlay { padding-top: 0; align-items: stretch; }
-    .search-modal { width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; border: none; }
-    .search-result { grid-template-columns: 56px 14px 1fr auto; }
-    .sr-price { display: none; }
-  }
-
-  /* ── Sektör Nabzı ── */
-  .sector-nabzi { display:flex; flex-direction:column; gap:7px; }
-  .sector-row { display:flex; align-items:center; gap:10px; }
-  .sr-name { font-size:var(--bp-text-sm); color:var(--bp-text2); width:130px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .sr-bar-wrap { flex:1; }
-  .sr-bar { height:6px; background:var(--bp-surface2); border-radius:var(--bp-radius-sm); overflow:hidden; }
-  .sr-fill { height:100%; border-radius:var(--bp-radius-sm); transition:width 0.5s ease; }
-  .sr-stats { width:72px; flex-shrink:0; display:flex; align-items:center; gap:5px; justify-content:flex-end; }
-  .sr-pct { font-size:var(--bp-text-sm); font-weight:700; font-variant-numeric:tabular-nums; }
-  .sr-cnt { font-size:var(--bp-text-2xs); color:var(--bp-text3); }
-  .sr-al-c  { color:var(--bp-al); }
-  .sr-mid-c { color:var(--bp-gold); }
-  .sr-low-c { color:var(--bp-sat); }
-</style>
+<link rel="stylesheet" href="/static/css/pages/ozet.css?v=015789f5">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -310,16 +74,11 @@
     <span>Blog</span>
   </a>
   <div class="bp-nav-more-wrap">
-    <button type="button" class="bp-nav-item bp-nav-more-btn" aria-haspopup="true" aria-expanded="false">
+    <button type="button" class="bp-nav-item bp-nav-more-btn" aria-haspopup="true" aria-expanded="false" aria-controls="bpNavMoreMenu">
       <span>Daha</span>
       <svg class="bp-nav-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="bp-nav-more-menu">
-      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">Piyasalar</div>
-      <a href="/kripto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h3.5a2 2 0 1 1 0 4h-3.5m0-4v8m0-4h4.5a2 2 0 1 1 0 4h-4.5"/></svg>Kripto</a>
-      <a href="/emtialar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.5 7.5M13 13l8 8M3 21l7.5-7.5M13 11l8-8"/></svg>Emtialar</a>
-      <a href="/abd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>ABD</a>
-      <div class="bp-nav-sep"></div>
+    <div class="bp-nav-more-menu" id="bpNavMoreMenu">
       <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">Araçlar</div>
       <a href="/portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
       <a href="/karsilastir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
@@ -464,7 +223,7 @@ function goToDate(date) {
     <a href="/hisse/{{ s.ticker }}" style="display:inline-flex;align-items:center;gap:6px;background:#1c1b1f;border:1px solid rgba(0,226,144,.2);border-radius:var(--bp-radius-7);padding:5px 10px;text-decoration:none;transition:all .15s"
        onmouseover="this.style.background='#201f21'" onmouseout="this.style.background='#1c1b1f'">
       <span style="font-size:var(--bp-text-base);font-weight:700;color:#f0f6fc">{{ s.ticker }}</span>
-      {% if s.signal_price and s.price %}
+      {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
         <span style="font-size:var(--bp-text-xs);font-weight:600;color:{% if ret >= 0 %}#00e290{% else %}#f85149{% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
       {% endif %}
@@ -534,7 +293,7 @@ function goToDate(date) {
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-al">▲ Güçlü Trend</div>
       <div class="sc-meta">{{ s.signal_date|signal_age_text }} · {{ s.signal_date }}</div>
-      {% if s.signal_price and s.price %}
+      {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
           <span class="sc-ret {{ 'sc-ret-pos' if ret >= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
@@ -559,7 +318,7 @@ function goToDate(date) {
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-sat">▼ Trend Bozuldu</div>
       <div class="sc-meta">{{ s.signal_date|signal_age_text }} · {{ s.signal_date }}</div>
-      {% if s.signal_price and s.price %}
+      {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
           <span class="sc-ret {{ 'sc-ret-pos' if ret <= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
@@ -651,18 +410,21 @@ loadMacroBar();setInterval(loadMacroBar,180000);
     const r = await fetch('/api/bilanco-takvimi');
     const d = await r.json();
     const now = new Date();
+    // TR takvim günü olarak yorumla (yalnız-tarih ISO string'i new Date() ile
+    // UTC gece yarısı parse edilir, TR (+3) ile 03:00'a kadar kayıklık yaratır)
+    const trDate = (s) => new Date(s + 'T00:00:00+03:00');
     const banner = document.getElementById('bilancoBanner');
     if (!banner || !d.periods) return;
     for (const p of d.periods) {
-      const start = new Date(p.start);
-      const end   = new Date(p.end);
+      const start = trDate(p.start);
+      const end   = trDate(p.end);
       const daysToStart = Math.ceil((start - now) / 86400000);
       if (daysToStart >= 0 && daysToStart <= 30) {
         // Yaklaşıyor (30 gün içinde)
         document.getElementById('bilancoBannerTitle').textContent =
           `📆 ${p.label} Bilanço Sezonu — ${daysToStart === 0 ? 'Bugün başlıyor!' : daysToStart + ' gün sonra başlıyor'}`;
         document.getElementById('bilancoBannerDesc').textContent =
-          `${p.description} · ${new Date(p.start).toLocaleDateString('tr-TR')} – ${new Date(p.end).toLocaleDateString('tr-TR')}`;
+          `${p.description} · ${trDate(p.start).toLocaleDateString('tr-TR')} – ${trDate(p.end).toLocaleDateString('tr-TR')}`;
         banner.style.display = 'flex';
         return;
       } else if (start <= now && now <= end) {
@@ -670,7 +432,7 @@ loadMacroBar();setInterval(loadMacroBar,180000);
         document.getElementById('bilancoBannerTitle').textContent =
           `📊 ${p.label} Bilanço Sezonu Aktif`;
         document.getElementById('bilancoBannerDesc').textContent =
-          `${p.description} · ${new Date(p.end).toLocaleDateString('tr-TR')} tarihine kadar`;
+          `${p.description} · ${trDate(p.end).toLocaleDateString('tr-TR')} tarihine kadar`;
         banner.style.display = 'flex';
         return;
       }
@@ -690,15 +452,18 @@ loadMacroBar();setInterval(loadMacroBar,180000);
 async function ozSubmitSub() {
   const emailEl = document.getElementById('ozSubEmail');
   const email   = emailEl ? emailEl.value.trim() : '';
-  if (!email || !email.includes('@')) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
     return;
   }
+  const btn = document.querySelector('#ozSubForm button');
+  if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor…'; }
   try {
     const res  = await fetch('/api/subscribe', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({email})
+      body: JSON.stringify({email}),
+      signal: AbortSignal.timeout(10000)
     });
     const data = await res.json();
     const form = document.getElementById('ozSubForm');
@@ -716,8 +481,9 @@ async function ozSubmitSub() {
 }
 </script>
 
-<script src="/static/bp-search.js?v=47" defer></script>
-<script src="/static/stale-banner.js?v=20260810B"></script>
+<script src="/static/bp-search.js?v=51" defer></script>
+<script src="/static/js/focus-trap.js?v=1"></script>
+<script src="/static/stale-banner.js?v=20260817A"></script>
 <script>bpStartDataQualityPolling();</script>
 
 {% include '_mobile_nav_partial.html' %}

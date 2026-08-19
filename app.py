@@ -27,6 +27,7 @@ import json
 import os
 import subprocess
 import tempfile
+import html as _html
 import re
 import random
 import copy
@@ -71,6 +72,7 @@ try:
     from business_rules   import derive_signal_date_label      # CPO-1335
     from business_rules   import derive_signal_date_key        # CPO-1335
     from business_rules   import signal_date_age_days          # CPO-1335
+    from business_rules   import SIGNAL_LABELS                 # T1.1 (CPO-1321): tek kaynak
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
     from anomaly          import compute_stock_anomaly_score    as _dqv_ui_anomaly
@@ -99,6 +101,8 @@ except ImportError as _dqv_import_err:
     def derive_signal_date_label(signal_date, today=None): return None
     def derive_signal_date_key(signal_date, today=None):   return "unknown"
     def signal_date_age_days(signal_date, today=None):     return None
+    # T1.1 fallback: business_rules yüklenemezse bugünkü değerlerle aynı sözlük
+    SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
 
 # ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
 _SENTRY_AVAILABLE = False
@@ -127,6 +131,13 @@ except ImportError as _alerting_err:
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
 
+# P0-SEC-2 (CPO-DEV2-033): nginx CF-Connecting-IP -> real_ip -> tek X-Forwarded-For
+# hop'u app'e iletiyor (bkz /etc/nginx/conf.d/cloudflare-realip.conf). ProxyFix
+# olmadan request.remote_addr her zaman 127.0.0.1 okunuyordu (4 worker paylasimli
+# tek rate-limit sayaci + admin-IP kontrolu kirikti).
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
 # ── Rate Limiter ──────────────────────────────────────────────────────────────
 limiter = Limiter(
     app=app,
@@ -142,12 +153,18 @@ ADMIN_TOKEN  = os.environ.get("ADMIN_TOKEN",  "")
 
 def require_admin():
     """Bulgu 5 (danışman audit) fix: ADMIN_SECRET boşsa endpoint KAPALI (503).
-    Eski 'if ADMIN_SECRET and ...' pattern secret boşken endpoint'i korumasız bırakıyordu."""
-    from flask import abort as _abort
+    Eski 'if ADMIN_SECRET and ...' pattern secret boşken endpoint'i korumasız bırakıyordu.
+    DEV2-176 (5. bug-hunt turu): abort(int) yerine abort(Response) — admin endpoint
+    hatalarında da site geneli JSON konvansiyonu (diğer API route'larla tutarlı)."""
+    from flask import abort as _abort, jsonify as _jsonify
     if not ADMIN_SECRET:
-        _abort(503)  # secret yapılandırılmamış → endpoint devre dışı (fail-closed)
+        resp = _jsonify({"error": "admin endpoint yapılandırılmamış"})
+        resp.status_code = 503
+        _abort(resp)  # secret yapılandırılmamış → endpoint devre dışı (fail-closed)
     if request.headers.get("X-Admin-Secret", "") != ADMIN_SECRET:
-        _abort(403)
+        resp = _jsonify({"error": "unauthorized"})
+        resp.status_code = 403
+        _abort(resp)
 
 # ── CPO-1108 A1/A4: Analytics doğruluk katmanı ────────────────────────────────
 CF_BEACON_TOKEN = os.environ.get("CF_BEACON_TOKEN", "").strip()  # boşsa CF WA beacon basılmaz
@@ -221,11 +238,11 @@ def _tp_read_json(path, default=None):
 
 def _tp_write_json(path, data, atomic=False, **json_kwargs):
     def _write():
-        target = path + ".tmp" if atomic else path
-        with open(target, "w", encoding="utf-8") as f:
-            json.dump(data, f, **json_kwargs)
         if atomic:
-            os.replace(target, path)
+            _atomic_write_json(path, data, **json_kwargs)
+        else:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, **json_kwargs)
     if _WS_AVAILABLE:
         try:
             _gevent.get_hub().threadpool.spawn(_write).get(timeout=10)
@@ -750,7 +767,8 @@ def _broadcast_push_changes(changes):
     )
 
 # ── Sinyal görünen ad eşlemesi (iç değer AL/SAT/BEKLE değişmez) ───────────────
-_SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
+# T1.1 (CPO-1321): business_rules.SIGNAL_LABELS tek kaynak, burada yalnız alias
+_SIGNAL_LABELS = SIGNAL_LABELS
 
 @app.template_filter('signal_label')
 def signal_label_filter(signal):
@@ -762,7 +780,13 @@ def tr_price_filter(value):
     """Sayıyı TR fiyat formatına çevirir: 1234.5 -> '1.234,50' (JS toLocaleString('tr-TR') ile eş)."""
     if value is None:
         return value
-    formatted = f"{float(value):,.2f}"
+    try:
+        fv = float(value)
+    except (TypeError, ValueError):
+        return value
+    if np.isnan(fv) or np.isinf(fv):
+        return "—"
+    formatted = f"{fv:,.2f}"
     integer_part, decimal_part = formatted.split('.')
     integer_part = integer_part.replace(',', '.')
     return f"{integer_part},{decimal_part}"
@@ -786,6 +810,10 @@ def signal_age_text_filter(signal_date):
     Mutlak tarihin yanında gösterilen yerlerde kullanılır (ozet/karsilastir/
     gundem/sinyal_performans); tarihin görünmediği yerlerde signal_date_label
     tercih edilir, çünkü orada gerçek tarihi yazmak gerekir.
+
+    NOT: negatif age (gelecek tarihli signal_date, veri hatasi/saat dilimi
+    kaymasi) "-1 gün" gibi anlamsiz bir metin basmasin diye
+    derive_signal_date_label ile ayni gecmis/gelecek ayrimina duser.
     """
     age = signal_date_age_days(signal_date)
     if age is None:
@@ -794,14 +822,25 @@ def signal_age_text_filter(signal_date):
         return "Bugün"
     if age == 1:
         return "Dün"
+    if age < 0:
+        return derive_signal_date_label(signal_date) or "—"
     return f"{age} gün"
 
 
 @app.template_filter('signal_age_days')
 def signal_age_days_filter(signal_date):
-    """Sıralanabilir sayısal takvim yaşı; bilinmiyorsa -1 (sona düşer)."""
+    """Sıralanabilir sayısal takvim yaşı; bilinmiyorsa büyük NEGATİF sentinel
+    (-10**6, sinyal_performans.html perfSortBy() varsayılan dir='desc'
+    sıralamasında sona düşer).
+
+    NOT: signal_date_age_days() gerçek negatif değerler (signal_date
+    YARIN/gelecek tarihli anomali) döndürebilir — bunlar GEÇERLİDİR ve
+    "bilinmiyor" sentineliyle KARIŞTIRILMAMALIDIR. Eskiden sentinel -1 idi;
+    bu, age=-1 (gerçek 1-gün-gelecek anomali) ile age=None (bilinmiyor)
+    durumlarını aynı sayıda çakıştırıyordu.
+    """
     age = signal_date_age_days(signal_date)
-    return -1 if age is None else age
+    return -10**6 if age is None else age
 
 
 def _clean(obj):
@@ -1351,12 +1390,20 @@ SECTORS = {
                       "KERVT", "LKMNH", "MEDTR", "PARSN", "AGROT", "MARTI"],
 }
 
+# DEV2-r4-perf: SECTORS lineer taramasi yerine bir kez kurulan ters-index.
+# setdefault kritik: SECTORS icinde birden fazla sektorde gecen ticker'lar
+# (PARSN/LKMNH/NUHCM/BASGZ) icin eski davranis (ilk eslesen sektor kazanir,
+# SECTORS.items() sirasina gore) birebir korunur.
+_TICKER_TO_SECTOR = {}
+for _dev2_sector, _dev2_tickers in SECTORS.items():
+    for _dev2_ticker in _dev2_tickers:
+        _TICKER_TO_SECTOR.setdefault(_dev2_ticker, _dev2_sector)
+del _dev2_sector, _dev2_tickers, _dev2_ticker
+
+
 def _get_sector(ticker: str) -> str:
     """Ticker için sektör adını döndürür. Bulunamazsa 'Diğer'."""
-    for sector, tickers in SECTORS.items():
-        if ticker in tickers:
-            return sector
-    return "Diğer"
+    return _TICKER_TO_SECTOR.get(ticker, "Diğer")
 
 
 def _enrich_stock(s: dict) -> dict:
@@ -1396,6 +1443,19 @@ _stale_alert_lock  = threading.Lock()
 
 # ── Phase 3 #2 Paket 4 — app startup timestamp ────────────────────────────────
 _APP_STARTUP_TS = time.time()
+
+# CPO-DEV2-035 P1-INTEGRITY-1: Sinyal Gecmisi her 15dk GUNCEL kodla yeniden
+# hesaplaniyor (kalici log degil) — algoritma degisince gecmis sessizce
+# degisebilir. Bu commit SHA'si /api/health ve backtest_cache.json'a eklenerek
+# "hangi kod anindan hesaplandi" en azindan gorunur olsun diye (tam birlestirme
+# ayri, dikkatli bir turda — bkz CPO-DEV2-035).
+try:
+    _GIT_SHA = subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=os.path.dirname(os.path.abspath(__file__)), timeout=5,
+    ).decode().strip()
+except Exception:
+    _GIT_SHA = None
 
 # CPO-1227 §2: makro/varlık chart cache'i normal koşullarda başlangıç
 # yenilemesiyle birkaç dakikada dolar (_serial_chart_refresh); bu pencere
@@ -1520,7 +1580,7 @@ def _weekly_trend(ticker: str) -> int:
 
 
 def compose_score(adx: float, vol_ratio: float, bull_score: int,
-                  confirmed: bool, rsi: float) -> int:
+                  confirmed: bool, rsi: float, signal: str = "AL") -> int:
     """Tek skor kaynağı — 0-100 aralığı. CPO-535 spec.
 
     SADECE analyze() içinde çağrılır, sonucu signal_strength olarak cache'e
@@ -1535,7 +1595,11 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
         Hacim     : min(vol_ratio, 5) / 5 * 25 → max 25
         Yön gücü  : bull_or_bear_score / 3 * 25 → max 25  (AL → bull, SAT → bear)
         Teyit     : +10 (signal_bars >= 3)
-        RSI bölge : +10 (50-75) | +5 (>75)   → max 10
+        RSI bölge : AL  → +10 (50-75) | +5 (>75)
+                    SAT → +10 (25-50) | +5 (<25)   → max 10 (P0-2, CPO-DEV2-031/033:
+                    önceki sürüm signal parametresi almıyordu, SAT sinyalinde de AL
+                    bandını uyguluyordu — düşük RSI'lı bir SAT ayı teyidi almadan
+                    bonus alıyor, tier'ı yapay olarak şişiriyordu)
 
     Tier eşikleri (hisse detay badge — bkz. analyze() tier ataması):
         75+ → PREMIUM | 60-74 → PLUS | 40-59 → STANDART | <40 → (tier yok)
@@ -1547,10 +1611,16 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
     s += int(bull_score or 0) / 3 * 25
     s += 10 if confirmed else 0
     rsi = float(rsi or 50)
-    if 50 <= rsi <= 75:
-        s += 10
-    elif rsi > 75:
-        s += 5
+    if signal == "SAT":
+        if 25 <= rsi <= 50:
+            s += 10
+        elif rsi < 25:
+            s += 5
+    else:
+        if 50 <= rsi <= 75:
+            s += 10
+        elif rsi > 75:
+            s += 5
     return int(round(s))
 
 
@@ -1777,7 +1847,7 @@ def analyze(ticker_base):
 
             if atrs_moved < 1.0:
                 entry_quality = "IDEAL"
-                entry_note    = (f"Zayıf trend taze ({signal_bars} bar), "
+                entry_note    = (f"Trend Bozuldu taze ({signal_bars} bar), "
                                  f"SL yakın — R/R en avantajlı bölge")
             elif atrs_moved < 2.0:
                 entry_quality = "IYI"
@@ -1907,6 +1977,7 @@ def analyze(ticker_base):
                 bull_score=int(_bs or 0),
                 confirmed=bool(confirmed),
                 rsi=float(rsi_val or 50),
+                signal=signal,
             )
             # F5 — AI Sentiment boost: ±5 capped at 100
             _sent = _sentiment_cache.get(ticker_base, {})
@@ -2260,8 +2331,8 @@ def _notify_signal_changes(new_results):
     # Telegram/Email/Push duplikasyonu yapmaz.
     if not _is_notify_leader():
         with _prev_signals_lock:
-            _prev_signals = new_sig_map
-            _save_prev_signals(new_sig_map)
+            _prev_signals.update(new_sig_map)
+            _save_prev_signals(_prev_signals)
         return
 
     # MSG-019B diag: state durumu
@@ -2315,8 +2386,8 @@ def _notify_signal_changes(new_results):
 
     # State güncelle + diske persist (worker restart-safe)
     with _prev_signals_lock:
-        _prev_signals = new_sig_map
-        _save_prev_signals(new_sig_map)
+        _prev_signals.update(new_sig_map)
+        _save_prev_signals(_prev_signals)
 
 
 # ── E-posta Bildirim Sistemi ──────────────────────────────────────────────────
@@ -2326,8 +2397,35 @@ SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASS = os.environ.get("SMTP_PASS", "")
 SMTP_FROM = os.environ.get("SMTP_FROM", "BorsaPusula <noreply@borsapusula.com>")
 
+class _CrossProcessLock:
+    """threading.Lock (in-process) + fcntl.flock (cross-process, gunicorn -w 4)
+    tek context manager'da birleşir. P0-DATA-1 (CPO-DEV2-034): subscribers.json/
+    pending_changes.json'a 4 worker eşzamanlı yazabiliyordu (threading.Lock
+    yalnız process-içi korur, kod yorumundaki "disk yazma atomik" notu
+    yanıltıcıydı) — lost-update riski teorik değil, rutindi. `_is_notify_leader_
+    blocking` (yukarıda) ile aynı fcntl.flock deseni, burada LOCK_EX blocking:
+    okuma+değiştirme+yazma kritik bölümünü worker'lar arasında sıraya sokar."""
+    def __init__(self, lock_path):
+        self._thread_lock = threading.Lock()
+        self._lock_path = lock_path
+        self._fh = None
+
+    def __enter__(self):
+        self._thread_lock.acquire()
+        if self._fh is None:
+            self._fh = open(self._lock_path, "w")
+        fcntl.flock(self._fh, fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            fcntl.flock(self._fh, fcntl.LOCK_UN)
+        finally:
+            self._thread_lock.release()
+
+
 SUBSCRIBERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "subscribers.json")
-_sub_lock = threading.Lock()
+_sub_lock = _CrossProcessLock(SUBSCRIBERS_FILE + ".lock")
 
 
 def _load_subscribers():
@@ -2335,15 +2433,41 @@ def _load_subscribers():
         return {}
     try:
         return _tp_read_json(SUBSCRIBERS_FILE, default={})
-    except Exception:
+    except Exception as e:
+        logger.error("subscribers.json okuma hatası (bozuk dosya olabilir): %s", e)
         return {}
 
 
 def _save_subscribers(subs):
     try:
-        _tp_write_json(SUBSCRIBERS_FILE, subs, ensure_ascii=False, indent=2)
+        _tp_write_json(SUBSCRIBERS_FILE, subs, atomic=True, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.error("subscribers.json kaydetme hatası: %s", e)
+
+
+_LOGIN_SENDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "login_sends.json")
+_login_sends_lock = _CrossProcessLock(_LOGIN_SENDS_PATH + ".lock")
+
+
+def _login_send_allowed(email):
+    """OTP/magic-link tasarımı (CPO-DEV2-034): e-posta başına ek disk-tabanlı
+    rate-limit. Flask-Limiter `memory://` storage 4 gunicorn worker'a bölünüyor
+    (P0-SEC-2 ProxyFix gerçek client IP'yi çözdü ama sayaç hâlâ worker-local,
+    IP bazlı limit tek worker'da dolup diğer 3'ünde sıfırdan başlıyor) — email
+    bazlı bu katman worker'lar arası paylaşılan disk state kullanır: 1 saatte
+    aynı e-postaya 3'ten fazla giriş linki gönderilmez."""
+    now = time.time()
+    with _login_sends_lock:
+        data = _tp_read_json(_LOGIN_SENDS_PATH, default={}) if os.path.exists(_LOGIN_SENDS_PATH) else {}
+        sends = [t for t in data.get(email, []) if now - t < 3600]
+        if len(sends) >= 3:
+            return False
+        sends.append(now)
+        data[email] = sends
+        # eski e-postaları da temizle — dosya süresiz büyümesin
+        data = {k: v for k, v in data.items() if v and now - v[-1] < 3600}
+        _tp_write_json(_LOGIN_SENDS_PATH, data, atomic=True, ensure_ascii=False)
+        return True
 
 
 def send_email(to_email, subject, html_body):
@@ -2520,6 +2644,34 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     return _email_base(content, unsubscribe_url, preheader=preheader)
 
 
+def _build_login_email(email, login_url, unsubscribe_url, name=None):
+    """Magic-link giriş maili (OTP tasarımı, CPO-DEV2-034 — P0-SEC-1 kalıcı fix).
+    15dk geçerli, tek kullanımlık link. Kod-girme adımı YOK — link'e tıklamak
+    yeterli (kullanım hacmi düşük, ek brute-force/deneme-sayacı alt sistemi
+    gerekmiyor)."""
+    preheader = "Giriş bağlantın hazır — 15 dakika geçerli"
+    greeting = f"Merhaba {name.split()[0]}," if name else "Merhaba,"
+    content = f'''
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
+      <tr><td style="padding:28px 24px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">🔑</div>
+        <div style="font-size:20px;font-weight:800;color:#e5e1e4;margin-bottom:14px;letter-spacing:-0.3px">{greeting}</div>
+        <p style="font-size:13.5px;color:#c7c5cd;line-height:1.6;margin:0 0 22px">
+          BorsaPusula'ya giriş yapmak için aşağıdaki bağlantıya tıkla.<br>
+          Bağlantı <strong style="color:#e5e1e4">15 dakika</strong> geçerlidir ve yalnızca bir kez kullanılabilir.
+        </p>
+        <a href="{login_url}" style="display:inline-block;background:#00e290;color:#0e0e12;padding:14px 40px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:0.3px">
+          Giriş Yap →
+        </a>
+      </td></tr>
+    </table>
+    <p style="text-align:center;font-size:12px;color:#909097;margin-top:6px;line-height:1.5">
+      Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin — hesabında hiçbir değişiklik yapılmayacak.
+    </p>
+    '''
+    return _email_base(content, unsubscribe_url, preheader=preheader)
+
+
 def _read_dqv_alerts_24h():
     """Son 24 saatin DQV alertlerini ALERT.md'den oku. [{ts, tier, detail}]"""
     try:
@@ -2684,8 +2836,8 @@ def _build_signal_email(changes, unsubscribe_url):
 
 
 # Pending changes buffer — günlük/haftalık digest için biriktirir
-_pending_changes_lock = threading.Lock()
 _pending_changes_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pending_changes.json")
+_pending_changes_lock = _CrossProcessLock(_pending_changes_path + ".lock")
 
 
 def _load_pending_changes():
@@ -2693,13 +2845,14 @@ def _load_pending_changes():
         return []
     try:
         return _tp_read_json(_pending_changes_path, default=[])
-    except Exception:
+    except Exception as e:
+        logger.error("pending_changes.json okuma hatası (bozuk dosya olabilir): %s", e)
         return []
 
 
 def _save_pending_changes(items):
     try:
-        _tp_write_json(_pending_changes_path, items, ensure_ascii=False, default=str)
+        _tp_write_json(_pending_changes_path, items, atomic=True, ensure_ascii=False, default=str)
     except Exception as e:
         logger.warning("pending_changes.json yazma hatası: %s", e)
 
@@ -4284,12 +4437,13 @@ def _fetch_macro_rss_once() -> list:
                     link  = (entry.get("link")  or "").strip()
                     if not title:
                         continue
+                    pub_tr = pub.replace(tzinfo=timezone.utc).astimezone(_TZ_TR)
                     results.append({
                         "title":     title,
                         "url":       link,
                         "source":    source_name,
-                        "published": pub.strftime("%H:%M"),
-                        "date_str":  pub.strftime("%d.%m"),
+                        "published": pub_tr.strftime("%H:%M"),
+                        "date_str":  pub_tr.strftime("%d.%m"),
                         "pub_ts":    pub.timestamp(),   # gerçek timestamp → doğru sıralama
                         "category":  "makro",
                     })
@@ -4344,7 +4498,7 @@ ECONOMIC_CALENDAR_2026 = [
 @limiter.limit("60 per minute")
 def api_economic_calendar():
     """Ekonomik takvim — yaklaşan ve son 7 günün önemli olayları."""
-    today = datetime.now().date()
+    today = datetime.now(_TZ_TR).date()
     all_events = []
     for e in ECONOMIC_CALENDAR_2026:
         try:
@@ -4373,7 +4527,7 @@ def api_macro_news():
     """Makro ekonomi haberleri — RSS tabanlı."""
     return safe_json({
         "items":      _macro_news_cache,
-        "updated_at": datetime.fromtimestamp(_macro_news_ts).strftime("%H:%M")
+        "updated_at": datetime.fromtimestamp(_macro_news_ts, _TZ_TR).strftime("%H:%M")
                         if _macro_news_ts else "—",
         "count":      len(_macro_news_cache),
     })
@@ -4401,11 +4555,10 @@ def admin_send_digest_now():
         logger.warning("admin_send_digest_now: invalid auth header (token mismatch)")
         abort(401)
 
-    # Layer 2: sadece localhost erişebilir (nginx X-Forwarded-For kontrolü)
-    # Production'da nginx 127.0.0.1 → app, public requests'te remote_addr farklı olur.
-    # Yine de defense-in-depth için kontrol.
-    remote = request.headers.get("X-Forwarded-For", request.remote_addr or "")
-    remote_first = remote.split(",")[0].strip()
+    # Layer 2: sadece localhost erişebilir. ProxyFix (P0-SEC-2) kurulduktan sonra
+    # request.remote_addr artik dogrudan gercek client IP'yi veriyor (nginx tek
+    # X-Forwarded-For hop'u ekliyor, ProxyFix onu remote_addr'a tasiyor).
+    remote_first = request.remote_addr or ""
     if remote_first not in ("127.0.0.1", "::1", "localhost"):
         logger.warning("admin_send_digest_now: non-localhost erişim engellendi (remote=%s)", remote_first)
         return jsonify({"error": "Sadece localhost'tan erişilebilir"}), 403
@@ -4669,15 +4822,19 @@ _macro_ai_refreshing = False  # arka plan yenileme kilidi
 # diske yazar, non-leader worker'lar diskten okur → 4× Gemini çağrısı yerine 1×.
 _MACRO_AI_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_macro_ai.json")
 
-def _atomic_write_json(path, data):
+def _atomic_write_json(path, data, **json_kwargs):
     """JSON'u atomic yazar — tempfile + fsync + os.replace (POSIX rename).
     Ozan/Madde 1: leader yazarken non-leader yarım dosya okumamalı (bozuk JSON
-    / crash riski). os.replace aynı dosya sisteminde atomik."""
+    / crash riski). os.replace aynı dosya sisteminde atomik.
+    P0-DATA-1 (CPO-DEV2-034): tek kanonik atomic-write helper — _tp_write_json'ın
+    atomic=True dalı da artık buraya delege eder (eskiden sabit .tmp adı
+    kullanıyordu, eşzamanlı yazarlar aynı geçici dosyada çakışabiliyordu)."""
+    json_kwargs.setdefault("ensure_ascii", False)
     dir_ = os.path.dirname(os.path.abspath(path))
     fd, tmp = tempfile.mkstemp(dir=dir_, suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False)
+            json.dump(data, f, **json_kwargs)
             f.flush()
             os.fsync(f.fileno())
         os.replace(tmp, path)   # atomic
@@ -4829,10 +4986,12 @@ def api_market_summary():
     # CPO-1335: donmuş is_new_signal DEĞİL — okuma anında gerçek tarih kontrolü.
     # Bayrak analiz anında hesaplanıp payload'a donuyor (app.py:1635); ticker o gün
     # tazelenmezse eski günün True'su taşınıyor ve hero olmayan bir "bugün"ü anlatıyor.
+    # DEV2-r4-perf: "bugun" istek boyunca sabit, N+1 yerine bir kez hesapla.
+    _today_ms = datetime.now(_TZ_TR).date()
     new_bull = [s for s in bist
-                if is_signal_from_today(s.get("signal_date")) and s.get("signal") == "AL"]
+                if is_signal_from_today(s.get("signal_date"), today=_today_ms) and s.get("signal") == "AL"]
     new_bear = [s for s in bist
-                if is_signal_from_today(s.get("signal_date")) and s.get("signal") == "SAT"]
+                if is_signal_from_today(s.get("signal_date"), today=_today_ms) and s.get("signal") == "SAT"]
     all_bull = [s for s in bist if s.get("signal") == "AL"]
 
     # Top tickers (en taze 4 AL)
@@ -4876,12 +5035,12 @@ def api_market_summary():
     except Exception as e:
         logger.debug("market-summary delta hesabı: %s", e)
 
-    # Market status (TR saatine göre)
+    # Market status (TR saatine göre) — kanonik trading_calendar (hafta sonu + resmi tatil)
     now_tr = datetime.now(_TZ_TR)
     weekday = now_tr.weekday()  # 0=Pzt, 6=Pzr
     hour = now_tr.hour
     is_weekend = weekday >= 5
-    market_open_hours = (10 <= hour < 18) and not is_weekend
+    market_open_hours = _market_open(now_tr)
     market_status = "open" if market_open_hours else "closed"
 
     closed_msg = None
@@ -7598,136 +7757,35 @@ def api_chart_us_stock(ticker):
     return safe_json({"chart": None, "loading": True})
 
 
-# ── Makro Varlık Sayfaları (BTC / ETH / Altın / Gümüş) ──────────────────────
-# #34 fix: yfinance BTC-USD OHLC 1000x yanlış sorunu çözüldü (yfinance güncellendi).
-# 2y data doğrulandı: BTC min=53949 max=124753, 0 bad row. Gate kaldırıldı Ça 24.06.
-@app.route("/btc")
-def btc_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "BTC"]
-    return render_template("varlik.html", varlik_key="BTC", meta=_VARLIK_META["BTC"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
+# ── Kaldırılan sayfalar (CPO-DEV2-036, Ozan kararı 19.08.2026): BIST odaklı sadeleşme ──
+# Kripto/Emtia/ABD ayrı sayfaları kaldırıldı — üst kayan makro bar (/api/macro) değişmeden kalır.
+# Backlink/bookmark/arama-motoru kayıtları için 404 yerine anasayfaya 301 yönlendirme.
+_REMOVED_ASSET_ROUTES = (
+    "/btc", "/eth", "/sol", "/bnb", "/altin", "/gumus", "/petrol", "/dogalgaz",
+    "/kripto", "/emtialar", "/abd", "/abd/sp500", "/abd/nasdaq",
+)
 
+for _removed_path in _REMOVED_ASSET_ROUTES:
+    def _make_removed_redirect(_p=_removed_path):
+        def _removed_redirect():
+            return redirect("/", code=301)
+        return _removed_redirect
+    app.add_url_rule(_removed_path, endpoint=f"removed_asset_{_removed_path.strip('/').replace('/', '_')}",
+                      view_func=_make_removed_redirect())
 
-@app.route("/eth")
-def eth_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "ETH"]
-    return render_template("varlik.html", varlik_key="ETH", meta=_VARLIK_META["ETH"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
-
-
-@app.route("/sol")
-def sol_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "SOL"]
-    return render_template("varlik.html", varlik_key="SOL", meta=_VARLIK_META["SOL"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
-
-@app.route("/bnb")
-def bnb_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "BNB"]
-    return render_template("varlik.html", varlik_key="BNB", meta=_VARLIK_META["BNB"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
-
-
-@app.route("/altin")
-def altin_page():
-    peers = [p for p in _EMTIA_PEERS if p["key"] != "ALTIN"]
-    return render_template("varlik.html", varlik_key="ALTIN", meta=_VARLIK_META["ALTIN"],
-                           peers=peers, category_url="/emtialar", category_label="Emtialar")
-
-
-@app.route("/gumus")
-def gumus_page():
-    peers = [p for p in _EMTIA_PEERS if p["key"] != "GUMUS"]
-    return render_template("varlik.html", varlik_key="GUMUS", meta=_VARLIK_META["GUMUS"],
-                           peers=peers, category_url="/emtialar", category_label="Emtialar")
-
-
-@app.route("/petrol")
-def petrol_page():
-    peers = [p for p in _EMTIA_PEERS if p["key"] != "PETROL"]
-    return render_template("varlik.html", varlik_key="PETROL", meta=_VARLIK_META["PETROL"],
-                           peers=peers, category_url="/emtialar", category_label="Emtialar")
-
-@app.route("/dogalgaz")
-def dogalgaz_page():
-    peers = [p for p in _EMTIA_PEERS if p["key"] != "DOGALGAZ"]
-    return render_template("varlik.html", varlik_key="DOGALGAZ", meta=_VARLIK_META["DOGALGAZ"],
-                           peers=peers, category_url="/emtialar", category_label="Emtialar")
-
-
-@app.route("/kripto")
-def kripto_page():
-    return render_template("kategori.html",
-        category_key="kripto",
-        title="Kripto Varlıklar", emoji="🪙",
-        desc="Bitcoin ve Ethereum Supertrend + ADX + EMA12/99 teknik analizi",
-        assets=_KRIPTO_PEERS,
-        us_stocks=None)
-
-@app.route("/emtialar")
-def emtialar_page():
-    return render_template("kategori.html",
-        category_key="emtialar",
-        title="Emtialar", emoji="🥇",
-        desc="Altın ve Gümüş Supertrend + ADX + EMA12/99 teknik analizi",
-        assets=_EMTIA_PEERS,
-        us_stocks=None)
-
-@app.route("/abd")
-def abd_page():
-    us_list = [{"key": t, "name": US_STOCK_NAMES.get(t,t),
-                "sector": next((s for s,tl in US_SECTORS.items() if t in tl),"Diğer"),
-                "href": f"/abd/{t}"}
-               for t in US_STOCKS]
-    return render_template("kategori.html",
-        category_key="abd",
-        title="ABD Piyasaları", emoji="🇺🇸",
-        desc="S&P 500, NASDAQ ve ABD büyük şirketleri teknik analizi",
-        assets=_ABD_INDEX_PEERS,
-        us_stocks=us_list)
-
-
-@app.route("/abd/sp500")
-def abd_sp500_page():
-    peers = [p for p in _ABD_INDEX_PEERS if p["key"] != "SP500"]
-    return render_template("varlik.html", varlik_key="SP500", meta=_VARLIK_META["SP500"],
-                           canonical_path="/abd/sp500",
-                           peers=peers, category_url="/abd", category_label="ABD")
-
-@app.route("/abd/nasdaq")
-def abd_nasdaq_page():
-    peers = [p for p in _ABD_INDEX_PEERS if p["key"] != "NASDAQ"]
-    return render_template("varlik.html", varlik_key="NASDAQ", meta=_VARLIK_META["NASDAQ"],
-                           canonical_path="/abd/nasdaq",
-                           peers=peers, category_url="/abd", category_label="ABD")
 
 @app.route("/abd/<ticker>")
 def abd_stock_page(ticker):
-    ticker = ticker.upper()
-    if ticker in ("SP500",): return abd_sp500_page()
-    if ticker in ("NASDAQ",): return abd_nasdaq_page()
-    if ticker not in US_STOCKS:
-        return render_template("index.html"), 404
-    name   = US_STOCK_NAMES.get(ticker, ticker)
-    sector = next((s for s,tl in US_SECTORS.items() if ticker in tl), "Diğer")
-    meta = {
-        "name": f"{ticker} — {name}", "ticker_yf": _TICKER_SYMBOL_MAP.get(ticker, ticker),
-        "unit": "USD", "emoji": "🇺🇸", "color": "#1f6feb",
-        "desc": f"{name} ({ticker}) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period": "2y",
-    }
-    peers = [{"key":t,"name":US_STOCK_NAMES.get(t,t),"href":f"/abd/{t}","emoji":"🇺🇸"}
-             for t in US_STOCKS if t != ticker][:4]
-    return render_template("varlik.html", varlik_key=ticker, meta=meta,
-                           peers=peers, category_url="/abd", category_label="ABD",
-                           chart_api=f"/api/chart/us/{ticker}")
-
+    return redirect("/", code=301)
 
 # ── SPEC-014 A1 — Sinyal Özeti (deterministik, kural-tabanlı) ─────────────────
 def _fmt_tl(v):
     """Sayıyı TR formatında TL string'e çevirir."""
     try:
-        return f"{float(v):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " TL"
+        fv = float(v)
+        if np.isnan(fv) or np.isinf(fv):
+            return "—"
+        return f"{fv:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " TL"
     except (ValueError, TypeError):
         return "—"
 
@@ -8075,9 +8133,10 @@ def _get_fundamentals(ticker_base):
 
         def fmt_billion(v):
             if v is None: return None
-            if v >= 1e12: return f"{tr_price_filter(v/1e12)} T₺"
-            if v >= 1e9:  return f"{tr_price_filter(v/1e9)} Mrd₺"
-            if v >= 1e6:  return f"{tr_price_filter(v/1e6)} Mn₺"
+            av = abs(v)
+            if av >= 1e12: return f"{tr_price_filter(v/1e12)} T₺"
+            if av >= 1e9:  return f"{tr_price_filter(v/1e9)} Mrd₺"
+            if av >= 1e6:  return f"{tr_price_filter(v/1e6)} Mn₺"
             return f"{tr_price_filter(v)} ₺"
 
         raw = {
@@ -8118,7 +8177,7 @@ def api_stock_fundamentals(ticker):
     """Temel analiz verileri — 4 saatlik cache."""
     ticker = ticker.upper()
     if ticker not in BIST100:
-        return safe_json({"error": "Hisse bulunamadı"}), 404
+        return safe_json({"ok": False, "error": "Hisse bulunamadı"}), 404
     data = _get_fundamentals(ticker)
     return safe_json({"fundamentals": data})
 
@@ -8744,13 +8803,27 @@ def tarama():
 @limiter.limit("60 per minute")
 def api_tarama():
     """Hisse tarayıcısı — sinyal, ADX, fiyat, hacim, sektör filtresi."""
-    sig      = request.args.get("signal",    "")
-    min_adx  = float(request.args.get("min_adx",   0))
-    min_p    = float(request.args.get("min_price", 0))
-    max_p    = float(request.args.get("max_price", 999999))
-    sector   = request.args.get("sector",    "")
-    eq       = request.args.get("eq",        "")   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
-    sort_by  = request.args.get("sort",      "signal_strength")  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
+    def _qfloat(name, default):
+        # DEV2-bughunt-r7: float("nan") exception firlatmiyor -> min_price/max_price/min_adx
+        # filtreleri "nan" degeriyle sessizce devre disi kaliyordu (NaN karsilastirmasi hep False).
+        import math
+        try:
+            v = float(request.args.get(name, default))
+        except (TypeError, ValueError):
+            return default
+        return v if math.isfinite(v) else default
+    # DEV2-r4-input-edge: case-insensitive normalize — buyuk/kucuk harf farki
+    # sessizce 0 sonuc donduruyordu (signal/sector/eq) veya siralamayi sessizce
+    # iptal ediyordu (sort). Kanonik veri (signal/entry_quality) hep ASCII
+    # buyuk harf oldugundan .upper() guvenli; sort_by dict anahtarlariyla
+    # (hepsi lowercase) karsilastirildigi icin .lower() guvenli.
+    sig      = request.args.get("signal",    "").strip().upper()
+    min_adx  = _qfloat("min_adx",   0)
+    min_p    = _qfloat("min_price", 0)
+    max_p    = _qfloat("max_price", 999999)
+    sector   = request.args.get("sector",    "").strip()
+    eq       = request.args.get("eq",        "").strip().upper()   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
+    sort_by  = request.args.get("sort",      "signal_strength").strip().lower()  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
 
     with _lock:
         stocks = list(_cache["data"])
@@ -8770,7 +8843,7 @@ def api_tarama():
     for s in stocks:
         if s.get("ticker") in ("XU030", "XU100"): continue
         if sig    and s.get("signal")              != sig:    continue
-        if sector and _get_sector(s.get("ticker","")) != sector: continue
+        if sector and _get_sector(s.get("ticker","")).lower() != sector.lower(): continue
         if eq     and s.get("entry_quality")       != eq:    continue
         price = s.get("price")  or 0
         adx   = _parse_adx(s)
@@ -8811,7 +8884,12 @@ def api_tarama():
         rev = sort_dir == "desc"
     else:
         rev = sort_by in ("adx","price","signal_bars","vol_ratio","bull_score","change_pct","signal_strength")
-    results.sort(key=lambda x: (x.get(sort_by) or 0), reverse=rev)
+    def _tarama_sort_key(x):
+        v = x.get(sort_by)
+        if v is None:
+            v = 0
+        return (isinstance(v, str), v)
+    results.sort(key=_tarama_sort_key, reverse=rev)
 
     with _lock:
         sectors = sorted(set(_get_sector(s.get("ticker","")) for s in _cache["data"]
@@ -9022,6 +9100,7 @@ def _compute_health():
         "drift_count":              drift_count,  # M6: ardışık döngü arası drift ticker sayısı
         "bad_ticker_count":         bad_ticker_count,  # M5: stale fallback ticker sayısı
         "sse_clients":              len(_sse_clients),  # CPO-1135 diagnostik — process-local, sızıntı ölçümü için
+        "git_sha":                  _GIT_SHA,  # CPO-DEV2-035 P1-INTEGRITY-1
         "ts": now,
     }
     # Paket 4 — extend with 6 health extra fields (uptime_sec, cache_age_min, etc.)
@@ -9229,7 +9308,7 @@ def api_cache_inventory():
 
 @app.route("/sitemap.xml")
 def sitemap():
-    today = date.today().isoformat()
+    today = datetime.now(_TZ_TR).date().isoformat()
     if _sitemap_cache.get("date") == today and _sitemap_cache.get("xml"):
         return Response(_sitemap_cache["xml"], mimetype="application/xml")
     pages = [
@@ -9239,23 +9318,9 @@ def sitemap():
         {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly"},
         {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly"},
         {"loc": "/gizlilik",    "priority": "0.3", "changefreq": "yearly"},
+        {"loc": "/yasal",       "priority": "0.3", "changefreq": "yearly"},
         {"loc": "/iletisim",    "priority": "0.4", "changefreq": "yearly"},
-        {"loc": "/btc",         "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/altin",       "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/gumus",       "priority": "0.7", "changefreq": "daily"},
-        {"loc": "/eth",             "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/kripto",          "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/emtialar",        "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/abd",             "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/abd/sp500",       "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/abd/nasdaq",      "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/sol",             "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/bnb",             "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/petrol",          "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/dogalgaz",        "priority": "0.7", "changefreq": "daily"},
     ]
-    for t in US_STOCKS:
-        pages.append({"loc": f"/abd/{t}", "priority": "0.7", "changefreq": "daily"})
     for t in BIST30:
         if t != "XU030":
             pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
@@ -9279,8 +9344,10 @@ def sitemap():
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly"})
     for a in ARTICLES:
+        if a.get("canonical_slug"):
+            continue  # deprecated/duplicate slug — canonical hedefi kendi ARTICLES girdisiyle zaten listeleniyor
         pages.append({"loc": f"/blog/{a['slug']}", "priority": "0.7", "changefreq": "monthly"})
-    today = date.today().isoformat()
+    today = datetime.now(_TZ_TR).date().isoformat()
     xml   = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     base  = "https://borsapusula.com"   # Domain eklenince burası güncellenir
@@ -9471,7 +9538,7 @@ def _og_image_stats():
     al_count  = sum(1 for s in stocks if s["signal"] == "AL" and s["ticker"] != "XU030")
     sat_count = sum(1 for s in stocks if s["signal"] == "SAT" and s["ticker"] != "XU030")
     total     = sum(1 for s in stocks if s["ticker"] != "XU030")
-    today_s   = date.today().strftime("%d.%m.%Y")
+    today_s   = datetime.now(_TZ_TR).strftime("%d.%m.%Y")
     return al_count, sat_count, total, today_s
 
 
@@ -9625,7 +9692,7 @@ def karsilastir():
                            canonical_url=canonical_url,
                            page_title=page_title,
                            page_description=page_description,
-                           today_iso=date.today().isoformat())
+                           today_iso=datetime.now(_TZ_TR).date().isoformat())
 
 
 @app.route("/api/karsilastir")
@@ -9636,7 +9703,7 @@ def api_karsilastir():
                request.args.get("tickers", "").split(",")
                if t.strip()][:4]
     if not tickers:
-        return safe_json({"error": "tickers parametresi gerekli"}), 400
+        return safe_json({"ok": False, "error": "tickers parametresi gerekli"}), 400
 
     with _lock:
         data_map = {s["ticker"]: s for s in _cache["data"]}
@@ -9664,6 +9731,7 @@ def api_karsilastir():
             "signal_bars":    s.get("signal_bars"),
             "signal_date":    s.get("signal_date"),
             "entry_quality":  s.get("entry_quality"),
+            "is_premium":     s.get("is_premium", False),
             "sl_level":       s.get("sl_level"),
             "tp1":            s.get("tp1"),
             "tp2":            s.get("tp2"),
@@ -9671,7 +9739,10 @@ def api_karsilastir():
             "bull_score":     s.get("bull_score"),
             "bear_score":     s.get("bear_score"),
             "sector":         _get_sector(ticker),
-            "kap_url":        kap_url_for(ticker),
+            # DEV2-bughunt-r7: bulunamayan (found=False) ticker icin de kap_url_for()
+            # her zaman bir fallback arama linki dondugunden, karsilastir.html olmayan
+            # bir hisse icin sahte/tiklanabilir KAP linki gosteriyordu.
+            "kap_url":        kap_url_for(ticker) if bool(s) else None,
             # ── Temel analiz ───────────────────────────────
             "pe_ratio":       fund.get("pe_ratio"),
             "pb_ratio":       fund.get("pb_ratio"),
@@ -9730,8 +9801,8 @@ def api_gundem():
         key=_adx_val, reverse=True
     )[:8]
 
-    # Yaklaşan bilanço dönemleri (gündem için)
-    today_dt  = date.today()
+    # Yaklaşan bilanço dönemleri (gündem için) — TR günü (bkz. yukarıdaki new_signals notu)
+    today_dt  = datetime.now(_TZ_TR).date()
     today_iso = today_dt.isoformat()
     bilanco_upcoming = []
     for qlabel, start, end, desc in _BILANCO_PERIODS:
@@ -9779,7 +9850,8 @@ def api_snapshots():
         ], reverse=True)
         return safe_json({"dates": files[:30]})  # son 30 gün
     except Exception as e:
-        return safe_json({"dates": [], "error": str(e)})
+        logger.error("Snapshots list: %s", e)
+        return safe_json({"dates": [], "error": "Sunucu hatası"}), 500
 
 
 @app.route("/ozet/<tarih>")
@@ -9910,27 +9982,21 @@ def api_contact():
     if "@" not in email or "." not in email:
         return jsonify({"ok": False, "error": "Geçersiz e-posta"}), 400
 
-    SMTP_HOST  = os.environ.get("SMTP_HOST", "")
-    SMTP_USER  = os.environ.get("SMTP_USER", "")
-    SMTP_PASS  = os.environ.get("SMTP_PASS", "")
     ADMIN_MAIL = os.environ.get("ADMIN_MAIL", "iletisim@borsapusula.com")
 
-    if SMTP_HOST and SMTP_USER:
-        try:
-            msg = MIMEMultipart()
-            msg["From"]    = SMTP_USER
-            msg["To"]      = ADMIN_MAIL
-            msg["Subject"] = f"[BorsaPusula İletişim] {subject}"
-            body = f"Gönderen: {name} <{email}>\nKonu: {subject}\n\n{message}"
-            msg.attach(MIMEText(body, "plain", "utf-8"))
-            with smtplib.SMTP_SSL(SMTP_HOST, 465, timeout=15) as s:
-                s.login(SMTP_USER, SMTP_PASS)
-                s.sendmail(SMTP_USER, ADMIN_MAIL, msg.as_string())
-            logger.info("Contact mail gönderildi: %s <%s>", name, email)
-        except Exception as ex:
-            logger.error("Contact mail hatası: %s", ex)
-            return jsonify({"ok": False, "error": "Mail gönderilemedi"}), 500
+    # CPO-DEV2-035 P1-CONTACT-1: ozel SMTP_SSL/465 blogu SMTP_PORT'u (.env=587)
+    # hic okumuyordu ve hic canli trafikle sinanmamisti (~15 gunde 0 istek) -
+    # kanonik send_email() (STARTTLS/587, zaten login/digest akislarinda dogrulanmis) kullaniliyor.
+    body_html = (
+        f"<p><b>Gonderen:</b> {_html.escape(name)} &lt;{_html.escape(email)}&gt;</p>"
+        f"<p><b>Konu:</b> {_html.escape(subject)}</p>"
+        f"<p style='white-space:pre-wrap'>{_html.escape(message)}</p>"
+    )
+    if not send_email(ADMIN_MAIL, f"[BorsaPusula Iletisim] {subject}", body_html):
+        logger.error("Contact mail gonderilemedi: %s <%s>", name, email)
+        return jsonify({"ok": False, "error": "Mail gonderilemedi"}), 500
 
+    logger.info("Contact mail gonderildi: %s <%s>", name, email)
     return jsonify({"ok": True})
 
 
@@ -10018,19 +10084,21 @@ def api_portfolio_save(token):
         return safe_json({"error": f"Maksimum {_PF_MAX_ENTRIES} pozisyon izin verilir"}), 400
 
     # Sadece izin verilen alanları kaydet (injection güvenliği)
-    ALLOWED = {"id","ticker","name","buy_price","quantity","date","note","sector"}
+    # DEV2-bughunt-r7: client (templates/portfolio.html) 'lot'/'price' alanlarıyla gönderiyor,
+    # whitelist'te yalnız 'buy_price'/'quantity' vardı -> sessizce siliniyordu (veri kaybı).
+    ALLOWED = {"id","ticker","name","buy_price","quantity","lot","price","date","note","sector"}
     clean = []
     for p in positions:
         if not isinstance(p, dict):
             continue
         entry = {k: v for k, v in p.items() if k in ALLOWED}
-        # Tip güvenliği: fiyat ve miktar sayısal olmalı
-        if "buy_price" in entry:
-            try: entry["buy_price"] = float(entry["buy_price"])
-            except (ValueError, TypeError): entry["buy_price"] = 0.0
-        if "quantity" in entry:
-            try: entry["quantity"] = float(entry["quantity"])
-            except (ValueError, TypeError): entry["quantity"] = 0.0
+        # Tip + aralık güvenliği: fiyat ve miktar sayısal, negatif olmayan, makul üst sınırda olmalı
+        for numeric_key in ("buy_price", "price", "quantity", "lot"):
+            if numeric_key in entry:
+                try:
+                    entry[numeric_key] = min(1e9, max(0.0, float(entry[numeric_key])))
+                except (ValueError, TypeError):
+                    entry[numeric_key] = 0.0
         # String alanları kırp
         for k in ("ticker","name","date","note","sector"):
             if k in entry and isinstance(entry[k], str):
@@ -10045,7 +10113,10 @@ def api_portfolio_save(token):
 
     try:
         with _PF_LOCK:
-            _tp_write_json(path, payload, ensure_ascii=False)
+            # DEV2-r4-concurrency: atomic=True — 4 gunicorn worker'i _PF_LOCK
+            # (process-local) senkronize etmiyor, ayni token'a esanli 2 POST
+            # farkli worker'a duserse tmp+os.replace olmadan dosya bozulabiliyordu.
+            _tp_write_json(path, payload, atomic=True, ensure_ascii=False)
         return safe_json({"ok": True, "count": len(clean)})
     except Exception as e:
         logger.error("Portfolio save [%s]: %s", token, e)
@@ -10215,16 +10286,16 @@ def run_backtest():
         "per_ticker":  sorted(per_ticker, key=lambda x: (-x["al_count"], -x["sat_count"])),
         "computed_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
         "tickers_used": len(bt_tickers),
+        "git_sha":      _GIT_SHA,  # CPO-DEV2-035 P1-INTEGRITY-1 — hangi kod aniyla hesaplandigi
     }
     with _lock:
         _bt_cache["data"]        = result
         _bt_cache["computed_at"] = result["computed_at"]
     logger.info("Backtest tamamlandı: %d AL, %d SAT episod",
                 result["al"]["count"], result["sat"]["count"])
-    # Diske kaydet — restart sonrası anında yüklenir
+    # Diske kaydet — restart sonrası anında yüklenir (atomic write, DEV2-172 bulgusu)
     try:
-        with open(_BT_DISK_PATH, "w", encoding="utf-8") as f:
-            json.dump(result, f, ensure_ascii=False)
+        _atomic_write_json(_BT_DISK_PATH, result)
         logger.info("Backtest diske kaydedildi: %s", _BT_DISK_PATH)
     except Exception as e:
         logger.warning("Backtest disk yazma hatası: %s", e)
@@ -10280,11 +10351,11 @@ def api_backtest_run():
 
 @app.route("/nasdaq")
 def _redir_nasdaq():
-    return redirect("/abd/nasdaq", code=301)
+    return redirect("/", code=301)
 
 @app.route("/sp500")
 def _redir_sp500():
-    return redirect("/abd/sp500", code=301)
+    return redirect("/", code=301)
 
 @app.route("/hisseler")
 def hisseler_hub():
@@ -10433,7 +10504,7 @@ def api_sektor_compare():
     """2-3 sektörü yan yana karşılaştırır. ?s=Bankacılık&s=Teknoloji"""
     selected = request.args.getlist("s")
     if not selected:
-        return safe_json({"error": "s parametresi gerekli"}, 400)
+        return safe_json({"error": "s parametresi gerekli"}), 400
     selected = [s.strip() for s in selected[:3]]  # max 3 sektör
     with _lock:
         stocks = list(_cache["data"])
@@ -10461,6 +10532,7 @@ def api_sektor_compare():
             }
         result[sec_name] = {
             "name": sec_name,
+            "found": sec_name in sec_map,  # DEV2-r4-input-edge: bilinmeyen/case-mismatch sektor artik ayirt edilebilir
             "al": len(al), "sat": len(sat), "bekle": len(bkl), "total": total,
             "score": score, "avg_rvol": avg_rvol, "avg_chg": avg_chg,
             "stocks": sorted([_stock_row(s) for s in items],
@@ -10584,7 +10656,7 @@ def _earnings_refresh_impl():
         time.sleep(0.1)
 
     # Dönemleri bugüne göre filtrele (geçmiş dönemler hariç)
-    today_str = date.today().isoformat()
+    today_str = datetime.now(_TZ_TR).date().isoformat()
     result_periods = []
     for qlabel, start, end, desc in _BILANCO_PERIODS:
         if end < today_str:   # Tamamen geçmiş dönem
@@ -10656,7 +10728,7 @@ def _rebuild_earnings_warning_lookup():
         cached = _earnings_cache.get("data")
         if not cached:
             return
-        today = date.today()
+        today = datetime.now(_TZ_TR).date()
         new_lookup = {}
         for period in cached.get("periods", []):
             for s in period.get("stocks", []):
@@ -10729,7 +10801,7 @@ def api_bilanco_takvimi():
 @limiter.limit("60 per minute")
 def api_bilanco_mini():
     """Ana sayfa mini bilanço widget — yfinance çağrısı yok, sadece dönem bilgisi."""
-    today_dt  = date.today()
+    today_dt  = datetime.now(_TZ_TR).date()
     today_str = today_dt.isoformat()
     items     = []
     for qlabel, start, end, desc in _BILANCO_PERIODS:
@@ -10859,7 +10931,6 @@ def api_market_news():
         if bullet_lines:
             lines = bullet_lines[:3]
         # Markdown temizle: bullet prefix, bold markers, italic markers
-        _MD_STRIP_RE = re.compile(r'^\s*[\*\-•–]\s+|\*\*([^*]+)\*\*|\*([^*]+)\*')
         def _clean_md(ln):
             ln = re.sub(r'^\s*[\*\-•–]\s+', '', ln)  # bullet prefix
             ln = re.sub(r'\*\*([^*]+)\*\*', r'\1', ln)  # **bold**
@@ -10923,7 +10994,7 @@ def api_market_news():
             break
 
     has_loading = any(r.get("source") == "loading" for r in results)
-    now = datetime.now()
+    now = datetime.now(_TZ_TR)
     return safe_json({
         "items":       results,
         "updated_at":  now.strftime("%d.%m.%Y %H:%M"),
@@ -10935,28 +11006,77 @@ def api_market_news():
 @app.route("/api/recognize", methods=["POST"])
 @limiter.limit("10 per hour")
 def api_recognize():
-    """MSG-098 soft auth: Eski abone re-recognize — email ile kaydı bul, bp_sub cookie set.
-    Yeni kayıt OLUŞTURMAZ — sadece mevcut aboneyi tanır."""
+    """OTP/magic-link giriş isteği (CPO-DEV2-034 tasarımı) — P0-SEC-1'in kalıcı
+    fix'i (CPO-DEV2-033'te GEÇİCİ 503/200 devre-dışı bırakma buradaydı).
+
+    Eski davranış sadece {"email":...} alıp sahiplik kanıtı olmadan doğrudan
+    1 yıllık bp_sub cookie set ediyordu -> bir kurbanın e-postasını bilen
+    herkes o hesabın alarm ayarlarını görüp/değiştirebiliyordu (hesap ele
+    geçirme). Yeni akış: e-posta kayıtlıysa 15dk geçerli tek-kullanımlık
+    magic-link gönderilir, cookie yalnız /api/recognize/confirm'de link
+    tıklanınca set edilir. User-enumeration'ı kapatmak için e-posta var/yok
+    ayrımı yapılmadan HER ZAMAN aynı jenerik mesaj dönülür (eski davranış
+    `_premium_modal.html`'de "Bu e-posta kayıtlı değil" ile bunu sızdırıyordu)."""
     data  = request.get_json(silent=True) or {}
     email = (data.get("email") or "").strip().lower()
     if not email or "@" not in email or not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
         return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
 
+    generic_resp = {
+        "ok": True,
+        "message": "Bu e-posta kayıtlıysa giriş bağlantısı gönderildi. Gelen kutunu kontrol et (15 dakika geçerli).",
+    }
+
+    if not _login_send_allowed(email):
+        # Rate-limit aşılsa bile aynı jenerik mesaj — enumeration sızdırmaz.
+        return safe_json(generic_resp)
+
     with _sub_lock:
         subs = _load_subscribers()
-        rec  = subs.get(email)
+        info = subs.get(email)
+        if info and info.get("active", True):
+            login_token = secrets.token_hex(20)
+            info["login_token"]   = login_token
+            info["login_expires"] = time.time() + 900
+            info["login_used"]    = False
+            _save_subscribers(subs)
+            login_url = f"https://borsapusula.com/api/recognize/confirm?t={login_token}"
+            unsub_url = f"https://borsapusula.com/unsubscribe/{info.get('token', '')}"
+            name = info.get("name")
+            threading.Thread(target=send_email, args=(
+                email, "🔑 BorsaPusula — Giriş Bağlantın",
+                _build_login_email(email, login_url, unsub_url, name=name)
+            ), daemon=True).start()
 
-    if not rec or not rec.get("active", True):
-        return safe_json({"ok": False, "reason": "not_found"}), 404
+    return safe_json(generic_resp)
 
-    token = rec.get("token", "")
-    resp  = safe_json({
-        "ok":               True,
-        "name":             rec.get("name", ""),
-        "subscribed_at":    rec.get("subscribed_at", ""),
-    })
-    resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
-    return resp
+
+@app.route("/api/recognize/confirm")
+def api_recognize_confirm():
+    """Magic-link tıklama hedefi — token'ı doğrular, tek kullanımlık cookie
+    verir. Süresi dolmuş/kullanılmış/geçersiz token → sessizce ana sayfaya
+    yönlendirir (kullanıcıya "üye girişi" formunu tekrar denemesi kalır)."""
+    tok = (request.args.get("t") or "").strip()
+    if tok:
+        with _sub_lock:
+            subs = _load_subscribers()
+            target_email = None
+            for em, info in subs.items():
+                stored = info.get("login_token")
+                if stored and secrets.compare_digest(stored, tok):
+                    target_email = em
+                    break
+            if target_email:
+                info    = subs[target_email]
+                expires = info.get("login_expires", 0)
+                used    = info.get("login_used", True)
+                if not used and time.time() < expires:
+                    info["login_used"] = True
+                    _save_subscribers(subs)
+                    resp = redirect("/?login=ok")
+                    resp.set_cookie("bp_sub", info.get("token", ""), max_age=31536000, samesite="Lax", secure=True, httponly=True)
+                    return resp
+    return redirect("/?login=expired")
 
 
 @app.route("/api/subscribe", methods=["POST"])
@@ -10992,7 +11112,7 @@ def api_subscribe():
                 _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", ""))
             ), daemon=True).start()
             react_resp = safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!", "token": token, "name": subs[email].get("name", ""), "email": email})
-            react_resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
+            react_resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
             return react_resp
 
         token = secrets.token_hex(24)
@@ -11025,7 +11145,7 @@ def api_subscribe():
         "email":   email,
     })
     # Cookie set — 1 yıl, SameSite=Lax (CSRF korumalı)
-    resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=False)
+    resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
     return resp
 
 
@@ -11850,8 +11970,12 @@ logger.info("=" * 50)
 
 
 # CPO-1190 K10: markalı 404 (çıplak Flask sayfası yerine — arama + popüler linkler)
+# DEV2-176 (5. bug-hunt turu): /api/* altında da aynı HTML sayfası dönüyordu —
+# makine-tüketimli uç noktalar için JSON'a ayrıştırıldı.
 @app.errorhandler(404)
 def page_not_found(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Bulunamadı"}), 404
     return render_template("404.html"), 404
 
 

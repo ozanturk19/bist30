@@ -90,7 +90,12 @@ RATCHET = ROOT / "tools" / "style_guard_ratchet.json"
 # T1.7 GENISLETME (15.08.2026) — K-B'nin templates/ disina taan EK dosyalari.
 # tokens.css HARIC: o token'larin TANIM kaynagi, kendi hex'i "borc" degil.
 EK_HEX_DOSYALARI = [ROOT / "blog_content.py"] + \
-    [f for f in sorted(CSS_DIR.glob("*.css")) if f.name != "tokens.css"]
+    [f for f in sorted(CSS_DIR.glob("*.css")) if f.name != "tokens.css"] + \
+    [f for f in sorted((CSS_DIR / "pages").glob("*.css"))]
+# T2.5 GENISLETME (18.08.2026) - inline <style> bloklari static/css/pages/*.css'e
+# TASINDI (bp-critical-css HARIC). Ust satir olmadan bu dosyalardaki ham hex
+# K-B'de HIC GORUNMEZ - T2.2'nin ayni dersi (yukarida KABUK_PARTIALS notu),
+# borc denetlenmeyen bir klasore tasinmis olurdu.
 
 # T1.7 GENISLETME (15.08.2026) — K-D'nin templates/ disina taan EK dosyalari.
 EK_CATCH_DOSYALARI = sorted((ROOT / "static").glob("*.js")) + \
@@ -169,6 +174,13 @@ def denetle():
     for f in sayfalar():
         txt = _oku(f)
         yerel = set(TANIM_RE.findall(txt))
+        # T2.5 GENISLETME (18.08.2026) - sayfanin ONCEDEN kendi <style> icinde
+        # tuttugu yerel :root/token tanimlari artik static/css/pages/<ad>.css'te.
+        # Bu satir olmadan K-A o sayfanin KENDI TASIDIGI token'i bile 'tanimsiz'
+        # sanir (yanlis-pozitif) - T2.2'deki KABUK_PARTIALS dersiyle ayni sinif.
+        page_css = CSS_DIR / "pages" / (f.stem + ".css")
+        if page_css.exists():
+            yerel |= set(TANIM_RE.findall(_oku(page_css)))
         eksik = {}
         for tok in set(VAR_RE.findall(txt)):
             if tok not in gtok and tok not in yerel:

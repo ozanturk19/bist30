@@ -1,103 +1,7 @@
 {# SPEC-007 Fix (CPO MSG-114): Premium modal partial — sitewide paywall.
    index.html dışındaki sayfalar (tarama, sinyal_performans, hisse) bunu include eder.
    openPremiumModal + submitPremium + _hasPremiumAccess sitewide erişilebilir olur. #}
-<style>
-  .premium-modal-backdrop {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.65);
-    backdrop-filter: blur(4px);
-    z-index: var(--bp-z-modal-top);
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    opacity: 0;
-    transition: opacity .2s ease;
-  }
-  .premium-modal-backdrop.visible { opacity: 1; }
-  .premium-modal {
-    background: var(--bp-surface);
-    border: 1px solid rgba(var(--bp-volume-rgb),.45);
-    border-radius:var(--bp-radius-xl);
-    padding: 28px 24px 20px;
-    max-width: 380px;
-    width: 100%;
-    position: relative;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px rgba(var(--bp-volume-rgb),0.10);
-    text-align: center;
-  }
-  .premium-modal-close {
-    position: absolute;
-    top: 10px; right: 14px;
-    background: transparent;
-    border: none;
-    color: var(--bp-text3);
-    font-size: var(--bp-text-22);
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px 8px;
-    border-radius: var(--bp-radius-4);
-  }
-  .premium-modal-close:hover { color: var(--bp-text); background: rgba(255,255,255,0.05); }
-  .premium-modal-icon { font-size: var(--bp-text-38); margin-bottom: 8px; }
-  .premium-modal-title {
-    color: var(--bp-text);
-    font-size: var(--bp-text-2xl); font-weight: 700; margin: 0 0 8px;
-  }
-  .premium-modal-desc {
-    color: var(--bp-text2);
-    font-size: var(--bp-text-base); line-height: 1.55; margin: 0 0 18px;
-  }
-  .premium-modal-desc strong { color: #ffc850; }
-  .premium-modal form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
-  .premium-modal input[type=email],
-  .premium-modal input[type=text] {
-    width: 100%;
-    background: rgba(28,33,40,.7);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius);
-    padding: 10px 12px;
-    color: var(--bp-text);
-    font-size: var(--bp-text-md); font-family: inherit;
-    outline: none; transition: border-color .15s ease;
-  }
-  .premium-modal input:focus { border-color: #ffc850; }
-  .premium-modal-submit {
-    background: linear-gradient(135deg, #ffc850, #e3b341);
-    color: #1a1a1f; border: none;
-    padding: 11px 14px; border-radius:var(--bp-radius);
-    font-size: var(--bp-text-md); font-weight: 700; cursor: pointer;
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .premium-modal-submit:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(var(--bp-volume-rgb),.30);
-  }
-  .premium-modal-submit:disabled { opacity: .6; cursor: not-allowed; }
-  .premium-modal-buttons { display: flex; gap: 8px; }
-  .premium-modal-buttons .premium-modal-submit { flex: 1; }
-  .premium-modal-recognize {
-    flex: 1;
-    background: transparent;
-    border: 1px solid rgba(var(--bp-volume-rgb),.45);
-    color: #ffc850;
-    padding: 10px 14px; border-radius:var(--bp-radius);
-    font-size: var(--bp-text-base); font-weight: 600; cursor: pointer;
-    font-family: inherit; transition: background .15s ease;
-  }
-  .premium-modal-recognize:hover { background: rgba(var(--bp-volume-rgb),.08); }
-  @media (max-width: 480px) { .premium-modal-buttons { flex-direction: column; } }
-  .premium-modal-status { font-size: var(--bp-text-sm); min-height: 18px; margin: 4px 0 8px; }
-  .premium-modal-footer {
-    color: var(--bp-text3);
-    font-size: var(--bp-text-xs); padding-top: 10px;
-    border-top: 1px solid rgba(48,54,61,0.5);
-  }
-  @media (max-width: 480px) {
-    .premium-modal { padding: 22px 18px 16px; }
-    .premium-modal-title { font-size: var(--bp-text-xl); }
-  }
-</style>
+
 <script>
 /* SPEC-007 sitewide premium modal — window.* atamaları sayfadaki eski kopyayı override eder.
    index.html dahil tüm sayfalarda bu partial tek kaynak (Option A, CPO MSG-122). */
@@ -134,7 +38,7 @@
                    autocomplete="given-name" maxlength="50">
             <div class="premium-modal-buttons">
               <button type="submit" id="pmSubmitBtn" class="premium-modal-submit">💎 Premium'u Aç</button>
-              <button type="button" class="premium-modal-recognize" onclick="submitPremiumRecognize()">👤 Üye Girişi</button>
+              <button type="button" id="pmLoginBtn" class="premium-modal-recognize" onclick="submitPremiumRecognize()">👤 Üye Girişi</button>
             </div>
           </form>
           <div id="pmStatus" class="premium-modal-status" aria-live="polite"></div>
@@ -172,6 +76,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, name, source: 'premium-trial' }),
+        signal: AbortSignal.timeout(10000),
       });
       const json = await res.json();
       if (json.ok) {
@@ -197,40 +102,50 @@
     }
   };
 
-  /* MSG-118 Bug F: Premium modal "Üye Girişi" — eski abone re-recognize */
+  /* MSG-118 Bug F: Premium modal "Üye Girişi" — eski abone re-recognize.
+     OTP/magic-link tasarımı (CPO-DEV2-034, P0-SEC-1 kalıcı fix): /api/recognize
+     artık senkron cookie DÖNMÜYOR — kayıtlı e-postaya 15dk geçerli giriş linki
+     gönderiliyor. Enumeration kapatıldığı için backend her koşulda aynı jenerik
+     mesajı dönüyor (res.status===404 dalı — "kayıtlı değil" — sızıntıydı, kaldırıldı). */
   window.submitPremiumRecognize = async function() {
     const emailEl = document.getElementById('pmEmail');
     const status  = document.getElementById('pmStatus');
+    const btn     = document.getElementById('pmLoginBtn');
     const email   = (emailEl?.value || '').trim();
     if (!email || !email.includes('@')) {
       if (status) status.innerHTML = '<span style="color:#f85149">⚠️ Geçerli email gerekli.</span>';
       if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
       return;
     }
-    if (status) status.innerHTML = '<span style="color:#8b949e">⏳ Kontrol ediliyor…</span>';
+    if (btn && btn.disabled) return;
+    if (status) status.innerHTML = '<span style="color:#8b949e">⏳ Gönderiliyor…</span>';
     try {
       const res  = await fetch('/api/recognize', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
+        signal: AbortSignal.timeout(10000),
       });
       const json = await res.json();
-      if (res.ok && json.ok) {
-        try {
-          localStorage.setItem('bp_sub_user', JSON.stringify({
-            subscribed: true, email, name: json.name || '',
-            first_name: (json.name || '').split(' ')[0], cachedAt: Date.now(),
-          }));
-        } catch(_) { /* best-effort onbellek yazimi (private tarama/kota hata verebilir) - reload() asagida sunucudan resync eder */ }
-        if (status) status.innerHTML = '<span style="color:#3fb950">✅ Hoş geldin' + (json.name ? ' ' + json.name : '') + '! Premium açıldı, yenileniyor…</span>';
-        setTimeout(() => location.reload(), 1500);
-      } else if (res.status === 404) {
-        if (status) status.innerHTML = '<span style="color:#e3b341">❓ Bu e-posta kayıtlı değil — "💎 Premium\'u Aç" ile kaydol.</span>';
-      } else {
-        if (status) status.innerHTML = '<span style="color:#f85149">⚠️ ' + (json.error || 'Hata') + '</span>';
-      }
+      const ok = !!(json && json.ok);
+      if (status) status.innerHTML = '<span style="color:' + (ok ? '#3fb950' : '#f85149') + '">' + (ok ? '✉️ ' : '⚠️ ') + ((json && (json.message || json.error)) || 'Bir hata oluştu, tekrar dene.') + '</span>';
+      _pmStartLoginCooldown(btn);
     } catch (e) {
       if (status) status.innerHTML = '<span style="color:#f85149">⚠️ Bağlantı hatası, tekrar dene.</span>';
+      if (btn) { btn.disabled = false; }
     }
   };
+
+  function _pmStartLoginCooldown(btn) {
+    if (!btn) return;
+    let remain = 60;
+    btn.disabled = true;
+    const tick = () => {
+      if (remain <= 0) { btn.textContent = '👤 Üye Girişi'; btn.disabled = false; return; }
+      btn.textContent = `Tekrar gönder (${remain}s)`;
+      remain -= 1;
+      setTimeout(tick, 1000);
+    };
+    tick();
+  }
 }
 </script>

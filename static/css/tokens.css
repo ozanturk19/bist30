@@ -253,27 +253,6 @@
   --bp-text-40:   40px;  /* DEV2-080: empty-state ikon, 4 kullanim */
   --bp-text-42:   42px;  /* DEV2-080: JS-injected onay ikonu, 1 kullanim */
 
-  /* ── 3. YAZI AĞIRLIĞI (font-weight) ───────────────────────────
-     ÖLÇÜM (556 kullanım): 700:247  600:206  500:55  800:39  400:7
-     `normal`:2 ve `inherit`:1 anahtar-kelime kullanımı da var. */
-  --bp-weight-normal:     400;
-  --bp-weight-medium:     500;
-  --bp-weight-semibold:   600;
-  --bp-weight-bold:       700;
-  --bp-weight-extrabold:  800;
-
-  /* ── 4. SATIR YÜKSEKLİĞİ (line-height) ────────────────────────
-     ÖLÇÜM (154 kullanım): 1:62  1.6:21  1.5:16  1.7:11  1.4:9
-                           1.55:8  1.3:7  1.65:5  1.75:4  1.2:3
-     `1` baskın çünkü rozet/sayaç gibi tek satırlık öğelerde
-     kullanılıyor — gövde metni değil. Gövde kümesi 1.5-1.7. */
-  --bp-leading-none:    1;
-  --bp-leading-tight:   1.2;
-  --bp-leading-snug:    1.4;
-  --bp-leading-normal:  1.5;
-  --bp-leading-relaxed: 1.6;
-  --bp-leading-loose:   1.75;
-
   /* ── 5. GÖLGE (box-shadow) ────────────────────────────────────
      ÖLÇÜM: 41 AYRIK box-shadow deseni. En yoğunlar:
        0 20px 60px rgba(0,0,0,0.6)   :4
@@ -326,7 +305,6 @@
      isimli basamak olarak tanimlaniyor. 19 ham kullanim / 9 sablon + bp-search.js,
      16 yeni token. Hicbir sayisal deger DEGISTIRILMEDI (T1.4/T5.1/FAZ8 radius ile
      ayni yontem), yalniz merkezi tek kaynaga tasindi. */
-  --bp-z-nav-dropdown:      500;  /* .nav-dropdown-menu — index/hisse/varlik (3) */
   --bp-z-search-dropdown:   400;  /* .search-ac — index */
   --bp-z-fab-up:            400;  /* .bp-fab-up — hisse */
   --bp-z-modal-backdrop:  10001;  /* .alert-modal-backdrop — index */
@@ -339,7 +317,6 @@
   --bp-z-sticky-subheader:   90;  /* .bp-segments — hisse */
   --bp-z-sheet:             260;  /* .mbn-sheet — mobile nav partial */
   --bp-z-sheet-backdrop:    250;  /* .mbn-sheet-backdrop — mobile nav partial */
-  --bp-z-trend-strip:         5;  /* .bp-trend-strip — bp-search.js enjeksiyonu */
   --bp-z-chart-legend:       30;  /* yerel grafik legend overlay — index (JS) */
   --bp-z-chart-date-label:   20;  /* yerel grafik tarih etiketi — hisse (JS) */
 
@@ -426,13 +403,14 @@
      (404/profil.html, T5.1'in .container{} secici kapsami disinda
      kalmisti) ayni mekanik yontemle eklendi -- her biri tek sablonda
      kullanilir, deger DEGISTIRILMEDI. 1600px token'i T4.1'de
-     heatmap.html ile birlikte kaldirildi (tek tuketicisiydi). */
+     heatmap.html ile birlikte kaldirildi (tek tuketicisiydi). 900px
+     token'i 18.08'de gucu_yuksek.html'in T4.2 (562a531) ile /tarama
+     preset'ine donusmesi sonucu tuketicisiz kalinca silindi. */
   --bp-container-640:  640px;
   --bp-container-680:  680px;
   --bp-container-720:  720px;
   --bp-container-820:  820px;
   --bp-container-860:  860px;
-  --bp-container-900:  900px;
   --bp-container-1100: 1100px;
   --bp-container-1200: 1200px;
   --bp-container-1400: 1400px;

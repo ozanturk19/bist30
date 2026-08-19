@@ -1,1 +1,1 @@
-23  # kanonik sayfa sablonu sayisi — YENI SAYFA eklenince bilincli yukselt
+22  # kanonik sayfa sablonu sayisi — YENI SAYFA eklenince bilincli yukselt

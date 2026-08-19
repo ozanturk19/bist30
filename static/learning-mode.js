@@ -30,7 +30,7 @@
   })();
 
   function persistState(on) {
-    try { localStorage.setItem(STORAGE_KEY, on ? '1' : '0'); } catch (e) { }
+    try { localStorage.setItem(STORAGE_KEY, on ? '1' : '0'); } catch (e) { /* best-effort onbellek yazimi (private tarama/quota hata verebilir) */ }
   }
 
   function ensureStyles() {
@@ -61,6 +61,7 @@
 
   function closePop() {
     if (openPop) { openPop.remove(); openPop = null; }
+    document.removeEventListener('click', onceClose, true);
   }
 
   function showPop(anchor, term, def) {
@@ -84,7 +85,6 @@
   function onceClose(e) {
     if (openPop && !openPop.contains(e.target) && !(e.target.classList && e.target.classList.contains('bp-lm-btn'))) {
       closePop();
-      document.removeEventListener('click', onceClose, true);
     }
   }
 
@@ -105,6 +105,7 @@
       btn.textContent = '?';
       btn.addEventListener('click', function (t, d) {
         return function (ev) {
+          ev.preventDefault();
           ev.stopPropagation();
           showPop(this, t, d);
         };
@@ -169,6 +170,19 @@
   } else {
     init();
   }
+
+  // DEV2-bughunt-r7: cok-sekme senkronu — baska sekmede degisen STORAGE_KEY'i yansit.
+  // persistState() BILEREK cagrilmiyor (zaten diger sekme yazdi, feedback loop olusmasin).
+  window.addEventListener('storage', function (e) {
+    if (e.key !== STORAGE_KEY) return;
+    STATE = e.newValue === '1';
+    applyBody();
+    closePop();
+    var btns = document.querySelectorAll('.bp-lm-toggle');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', STATE ? 'true' : 'false');
+    }
+  });
 
   // Global API
   window.bpLearningMode = { toggle: toggle, get state() { return STATE; } };

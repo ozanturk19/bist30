@@ -110,6 +110,7 @@ function bpSignalAgeText(signalDate) {
   if (age === null) return '—';
   if (age === 0) return BP_SIGNAL_DATE_LABELS.TODAY;
   if (age === 1) return BP_SIGNAL_DATE_LABELS.YESTERDAY;
+  if (age < 0) return bpFormatTrDate(signalDate);
   return age + ' gün';
 }
 

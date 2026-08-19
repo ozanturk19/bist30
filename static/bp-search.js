@@ -48,21 +48,6 @@
     + '#statsBar,.stats-bar{min-height:78px}'
     /* ── Mobile bottom-nav thumb-friendly: bigger inner + breathing room ── */
     + '@media (max-width:768px){.mbn-inner{height:72px !important;padding-bottom:8px !important}.mbn-item{padding-top:6px !important}body{padding-bottom:calc(72px + 8px + env(safe-area-inset-bottom)) !important}}'
-    /* ── Trend Strip (dynamic ticker chips replacing static "Popüler") ── */
-    + '.bp-trend-strip{display:flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(14,14,18,0.85);border-bottom:1px solid #2a2a2c;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;white-space:nowrap;position:relative;z-index:var(--bp-z-trend-strip);min-height:40px}'
-    + '.bp-trend-strip::-webkit-scrollbar{display:none}'
-    + '.bp-trend-label{flex-shrink:0;font-family:"Space Grotesk",system-ui,sans-serif;font-size:9px;font-weight:700;color:#5a5a62;text-transform:uppercase;letter-spacing:1.2px;margin-right:8px;padding:0;background:none;border:none;display:inline-flex;align-items:center;gap:5px}'
-    + '.bp-trend-label::before{content:"";display:inline-block;width:14px;height:1px;background:#3a3a42}'
-    + '.bp-trend-chip{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:12px;font-size:11.5px;font-weight:600;text-decoration:none;transition:transform .12s,background .15s;font-family:Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums;background:rgba(28,27,31,0.7);border:1px solid #2a2a2c;color:#e5e1e4}'
-    + '.bp-trend-chip:hover{background:#1c1b1f;transform:translateY(-1px)}'
-    + '.bp-trend-chip .tc-tk{font-family:"Space Grotesk",system-ui,sans-serif;font-weight:700;color:#e5e1e4;font-size:11px}'
-    + '.bp-trend-chip .tc-arrow{font-size:9px}'
-    + '.bp-trend-chip .tc-chg{font-size:10.5px;font-weight:600}'
-    + '.bp-trend-chip.up{border-color:rgba(0,226,144,0.32)}'
-    + '.bp-trend-chip.up .tc-arrow,.bp-trend-chip.up .tc-chg{color:#00e290}'
-    + '.bp-trend-chip.down{border-color:rgba(248,81,73,0.32)}'
-    + '.bp-trend-chip.down .tc-arrow,.bp-trend-chip.down .tc-chg{color:#f85149}'
-    + '@media (max-width:768px){.bp-trend-strip{padding:7px 12px}.bp-trend-label{display:none}}'
     /* ── Unified Logo (replaces .back-btn variants across pages) ── */
     + '.logo-link{display:inline-flex;align-items:center;text-decoration:none;flex-shrink:0;padding:0;margin:0;background:none;border:none}'
     + '.logo-link .bp-logo{display:block;width:260px;height:68px;flex-shrink:0}'
@@ -72,7 +57,7 @@
     /* ── Header consistency: hide page-title/header-name from header so nav stays centered ── */
     + 'header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}'
     /* ── Unified header dimensions: 60px tall, 12px 20px padding (force across all pages) ── */
-    + 'header{padding:10px 20px !important;min-height:60px !important;max-height:60px !important;display:flex !important;align-items:center !important;gap:14px !important;box-sizing:border-box !important;transform:translateZ(0) !important}'
+    + 'header{padding:calc(10px + env(safe-area-inset-top)) 20px 10px !important;min-height:calc(60px + env(safe-area-inset-top)) !important;max-height:calc(60px + env(safe-area-inset-top)) !important;display:flex !important;align-items:center !important;gap:14px !important;box-sizing:border-box !important;transform:translateZ(0) !important}'
     + 'header > *{max-height:48px}'
     + 'header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}'
     + 'header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}'
@@ -129,6 +114,7 @@
   // ---- Data layer ----
   var _syms = null;
   var _sel = 0;
+  var _trapRelease = null;
 
   function loadSyms() {
     if (_syms) return Promise.resolve(_syms);
@@ -139,8 +125,8 @@
         _syms = JSON.parse(c);
         return Promise.resolve(_syms);
       }
-    } catch(e) {}
-    return fetch('/api/data', { cache: 'no-store' })
+    } catch(e) { /* best-effort onbellek okuma (private tarama/quota hata verebilir) - fetch fallback altta devam eder */ }
+    return fetch('/api/data', { cache: 'no-store', signal: AbortSignal.timeout(10000) })
       .then(function(r){ return r.json(); })
       .then(function(d){
         _syms = (d.stocks || [])
@@ -149,7 +135,7 @@
         try {
           sessionStorage.setItem('bp_search_cache_v1', JSON.stringify(_syms));
           sessionStorage.setItem('bp_search_t_v1', Date.now().toString());
-        } catch(e) {}
+        } catch(e) { /* best-effort onbellek yazimi (private tarama/quota hata verebilir) */ }
         return _syms;
       })
       .catch(function(){ return []; });
@@ -240,10 +226,10 @@
     var wrap = document.createElement('div');
     wrap.innerHTML = ''
       + '<div class="bp-search-overlay" id="bpSearchOverlay" aria-hidden="true">'
-      +   '<div class="bp-search-modal" role="dialog" aria-label="Site içi arama">'
+      +   '<div class="bp-search-modal" id="bpSearchModal" role="dialog" aria-modal="true" aria-label="Site içi arama">'
       +     '<div class="bp-search-input-wrap">'
       +       '<svg class="bp-search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
-      +       '<input id="bpSearchInput" type="text" placeholder="Hisse, sektör veya konu ara…" autocomplete="off" spellcheck="false">'
+      +       '<input id="bpSearchInput" type="text" placeholder="Hisse, sektör veya konu ara…" aria-label="Hisse, sektör veya konu ara" autocomplete="off" spellcheck="false">'
       +       '<button class="bp-search-close" type="button" id="bpSearchClose" aria-label="Kapat">✕</button>'
       +     '</div>'
       +     '<div class="bp-search-results" id="bpSearchResults"></div>'
@@ -271,14 +257,18 @@
   function openSearch() {
     ensureOverlay();
     var ov = document.getElementById('bpSearchOverlay');
-    if (!ov) return;
+    if (!ov || ov.classList.contains('open')) return;
     ov.classList.add('open');
     ov.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     loadSyms().then(function(){
       var inp = document.getElementById('bpSearchInput');
-      if (inp && !inp.value) render('');
+      if (inp) render(inp.value);
     });
+    if (typeof window.bpTrapFocus === 'function') {
+      var modal = document.getElementById('bpSearchModal');
+      _trapRelease = window.bpTrapFocus(modal);
+    }
     setTimeout(function(){
       var i = document.getElementById('bpSearchInput');
       if (i) { i.focus(); i.select(); }
@@ -292,6 +282,7 @@
     ov.classList.remove('open');
     ov.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    if (_trapRelease) { _trapRelease(); _trapRelease = null; }
   }
 
   window.bpOpenSearch = openSearch;
@@ -362,9 +353,13 @@
     function closeMenu(){
       var m = document.querySelector('.bp-nav-more-menu');
       if (!m) return;
+      var hadFocusInside = m.contains(document.activeElement);
       m.classList.remove('open');
       var b = document.querySelector('.bp-nav-more-btn');
-      if (b) b.setAttribute('aria-expanded', 'false');
+      if (b) {
+        b.setAttribute('aria-expanded', 'false');
+        if (hadFocusInside) b.focus();
+      }
     }
 
     document.addEventListener('click', function(e){
@@ -376,6 +371,10 @@
         if (!open) positionMenu();
         menu.classList.toggle('open', !open);
         btn.setAttribute('aria-expanded', !open);
+        if (!open) {
+          var firstLink = menu.querySelector('a');
+          if (firstLink) firstLink.focus();
+        }
         return;
       }
       // Outside click → close (must NOT include menu itself or its descendants)
@@ -403,8 +402,9 @@
   }
 
   // ---- Trend Strip removed (Strategy 1: Hareketliler widget anasayfada bunun yerini alıyor) ----
+  // Bu fonksiyon artik CSS uretmiyor (dead .bp-trend-strip/.bp-trend-chip kurallari temizlendi,
+  // T9-benzeri envanter turu), yalniz eski cache'lenmis/render edilmis DOM'da kalinti varsa temizler.
   function ensureTrendStrip() {
-    // Sadece eski static "popüler" chip kalıntılarını ve eski trend strip'i temizle
     document.querySelectorAll('.bp-trend-strip').forEach(function(el){ el.remove(); });
   }
 
@@ -499,8 +499,8 @@
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify(payload),
             keepalive: true
-          }).catch(function(){});
-    } catch(_) {}
+          }).catch(function(e){ console.error('client hata raporlama basarisiz', e); });
+    } catch(_) { console.error('reportClientError basarisiz'); }
   }
 
   if (typeof window.__bpErrorHooked === 'undefined') {
@@ -551,11 +551,11 @@
   function saveUserCache(user) {
     try {
       localStorage.setItem('bp_sub_user', JSON.stringify(Object.assign({}, user, { cachedAt: Date.now() })));
-    } catch(_) {}
+    } catch(_) { /* best-effort onbellek yazimi (private tarama/quota hata verebilir) - recognizeUser() sunucudan resync eder */ }
   }
 
   function clearUserCache() {
-    try { localStorage.removeItem('bp_sub_user'); } catch(_) {}
+    try { localStorage.removeItem('bp_sub_user'); } catch(_) { /* best-effort onbellek temizligi */ }
   }
 
   function applyKnownUserUI(user) {
@@ -579,7 +579,7 @@
     // 2) Sub-toast popup'ı kapat (abone ise gösterme)
     var toast = document.getElementById('subToast');
     if (toast) toast.style.display = 'none';
-    try { localStorage.setItem('bp_sub_dismissed_v2', String(Date.now())); } catch(_) {}
+    try { localStorage.setItem('bp_sub_dismissed_v2', String(Date.now())); } catch(_) { /* best-effort onbellek yazimi */ }
   }
 
   function recognizeUser() {
@@ -590,7 +590,7 @@
     // Cookie/token varsa server'dan refresh
     var t = readBpSubCookie();
     if (!t) return;
-    fetch('/api/me?cb=' + Date.now(), { credentials: 'include' })
+    fetch('/api/me?cb=' + Date.now(), { credentials: 'include', signal: AbortSignal.timeout(10000) })
       .then(function(r){ return r.json(); })
       .then(function(d){
         if (d && d.ok && d.subscribed) {
@@ -601,7 +601,7 @@
           clearUserCache();
         }
       })
-      .catch(function(){});
+      .catch(function(e){ console.error('kullanici tanima basarisiz', e); });
   }
 
   // Public API: subscribe success'te çağrılır

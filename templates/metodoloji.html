@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% block head %}<title>Sinyal Metodolojisi — Supertrend, ADX, EMA Nasıl Kullanılır | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Sinyal Metodolojisi — Supertrend, ADX, EMA Nasıl Kullanılır | BorsaPusula</title>
 <meta name="description" content="BorsaPusula'nın kullandığı algoritmik teknik analiz metodolojisi. Supertrend(10,3), ADX≥25 ve EMA12/99 göstergelerinin nasıl çalıştığı ve nasıl yorumlandığı açıklanıyor.">
 <meta name="keywords" content="supertrend nasıl kullanılır, ADX indikatörü nedir, EMA crossover stratejisi, BIST teknik analiz, algoritmik borsa sinyali">
 <link rel="icon" type="image/svg+xml" href="/favicon.ico">
@@ -16,176 +16,9 @@
   {"@type":"ListItem","position":2,"name":"Metodoloji","item":"https://borsapusula.com/metodoloji"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260819A">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--bp-bg);
-    color: #e6edf3;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    font-size: var(--bp-text-md);
-    line-height: 1.7;
-    min-height: 100vh;
-  }
-  header {
-    background: #161b22;
-    border-bottom: 1px solid #30363d;
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index:var(--bp-z-dropdown);
-  }
-  .back-btn {
-    display: flex; align-items: center; gap: 6px;
-    color: #8b949e; font-size: var(--bp-text-base); text-decoration: none;
-    padding: 5px 10px; border: 1px solid #30363d;
-    border-radius:var(--bp-radius); background: #21262d; transition: all 0.15s;
-  }
-  .back-btn:hover { background: #30363d; color: #e6edf3; }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: #f0f6fc; }
-  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:#8b949e; text-decoration:none; transition:all .15s; white-space:nowrap; }
-  .top-nav-links a:hover { background:#1c2128; color:#e6edf3; }
-  @media (max-width:780px) { .top-nav-links { display:none; } }
-
-  .container { max-width: var(--bp-container-820); margin: 0 auto; padding: 32px 24px; }
-
-  .prose h2 {
-    font-size: var(--bp-text-xl);
-    font-weight: 700;
-    color: #f0f6fc;
-    margin: 32px 0 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #21262d;
-  }
-  .prose h3 {
-    font-size: var(--bp-text-15);
-    font-weight: 600;
-    color: #c9d1d9;
-    margin: 20px 0 8px;
-  }
-  .prose p  { color: #c9d1d9; margin-bottom: 12px; }
-  .prose ul { color: #c9d1d9; margin: 8px 0 12px 20px; }
-  .prose li { margin-bottom: 6px; }
-  .prose strong { color: #f0f6fc; }
-  .prose code {
-    background: #21262d;
-    color: #79c0ff;
-    padding: 2px 6px;
-    border-radius: var(--bp-radius-4);
-    font-family: var(--bp-font-mono);
-    font-size: var(--bp-text-base);
-  }
-
-  .signal-box {
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius:var(--bp-radius-lg);
-    padding: 20px;
-    margin: 16px 0;
-  }
-  .signal-box.al  { border-color: rgba(63,185,80,.4); background: rgba(63,185,80,.05); }
-  .signal-box.sat { border-color: rgba(var(--bp-sat-rgb),.4); background: rgba(var(--bp-sat-rgb),.05); }
-
-  .criteria-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 14px;
-    margin: 16px 0;
-  }
-  .criterion {
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius:var(--bp-radius-md);
-    padding: 16px;
-  }
-  .crit-num   { font-size: var(--bp-text-28); font-weight: 800; color: #58a6ff; line-height: 1; }
-  .crit-name  { font-size: var(--bp-text-md); font-weight: 600; color: #f0f6fc; margin: 6px 0 4px; }
-  .crit-desc  { font-size: var(--bp-text-sm); color: #8b949e; }
-
-  .formula-box {
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-left: 3px solid #58a6ff;
-    border-radius:var(--bp-radius);
-    padding: 16px 18px;
-    margin: 16px 0;
-    font-family: var(--bp-font-mono);
-    font-size: var(--bp-text-base);
-    color: #79c0ff;
-  }
-
-  /* TL;DR Özet Kart */
-  .tldr-card {
-    background: linear-gradient(135deg, rgba(59,130,246,.06), rgba(29,78,216,.04));
-    border: 1px solid rgba(59,130,246,.22);
-    border-radius:var(--bp-radius-xl);
-    padding: 20px 24px;
-    margin-bottom: 28px;
-  }
-  .tldr-title {
-    font-size: var(--bp-text-base); font-weight: 700; color: #94a3b8;
-    text-transform: uppercase; letter-spacing: .6px; margin-bottom: 14px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .tldr-rows { display: flex; flex-direction: column; gap: 8px; }
-  .tldr-row {
-    display: flex; align-items: center; gap: 10px;
-    background: rgba(0,0,0,.2); border-radius:var(--bp-radius-md); padding: 10px 14px;
-    font-size: var(--bp-text-base); font-weight: 500;
-  }
-  .tldr-icon { font-size: var(--bp-text-lg); flex-shrink: 0; }
-  .tldr-label { font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; min-width: 90px; }
-  .tldr-eq { color: #64748b; font-size: var(--bp-text-sm); margin: 0 4px; }
-  .tldr-formula { color: #e2e8f0; font-family: var(--bp-font-mono); font-size: var(--bp-text-sm); }
-  .tldr-green .tldr-label { color: #3fb950; }
-  .tldr-red   .tldr-label { color: var(--bp-sat); }
-  .tldr-gray  .tldr-label { color: #8b949e; }
-
-  .disclaimer {
-    background: rgba(var(--bp-sat-rgb),.07);
-    border: 1px solid rgba(var(--bp-sat-rgb),.2);
-    border-radius:var(--bp-radius-md);
-    padding: 16px;
-    color: #c9d1d9;
-    font-size: var(--bp-text-base);
-    margin-top: 32px;
-  }
-
-  footer {
-    text-align: center;
-    padding: 20px;
-    font-size: var(--bp-text-sm);
-    color: var(--bp-text3);
-    border-top: 1px solid #21262d;
-    margin-top: 32px;
-  }
-  footer a { color: #8b949e; text-decoration: none; }
-
-  @media (max-width: 600px) {
-    .container { padding: 16px; }
-  }
-
-  /* Makro Ticker */
-  .macro-bar{background:var(--bp-bg);border-bottom:1px solid #21262d;height:32px;overflow:hidden;position:relative;white-space:nowrap;}
-  .macro-bar::before,.macro-bar::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised);}
-  .macro-bar::before{left:0;background:linear-gradient(to right,var(--bp-bg),transparent);}
-  .macro-bar::after{right:0;background:linear-gradient(to left,var(--bp-bg),transparent);}
-  .macro-track{display:inline-flex;align-items:center;animation:macroScroll 40s linear infinite;height:32px;}
-  .macro-bar:hover .macro-track{animation-play-state:paused;}
-  @keyframes macroScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-    .macro-bar { position: relative; }
-  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
-  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
-  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item{display:inline-flex;align-items:center;gap:7px;padding:0 18px;border-right:1px solid #21262d;font-size:var(--bp-text-xs);height:32px;}
-  .macro-item-lbl{font-weight:600;color:#cbd5e1;}
-  .mc-pos{color:#3fb950;}.mc-neg{color:var(--bp-sat);}.mc-neu{color:#8b949e;}
-</style>
+<link rel="stylesheet" href="/static/css/pages/metodoloji.css?v=c7ab5e24">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -299,9 +132,10 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   <li><code>RSI &gt; 70</code> <span role="img" aria-label="anlamına gelir">→</span> Aşırı alım bölgesi (potansiyel düzeltme)</li>
 </ul>
 <p>
-  BorsaPusula'da RSI, <strong>Güç Skoru</strong> hesaplamasında "RSI bölgesi" kriteri olarak kullanılır
-  (40–60 nötr = 5 pt, 60–70 güçlü = 8 pt, &gt;70 aşırı alım = 0 pt).
-  Sinyal motoru ADX+Supertrend+EMA üzerinden çalışır; RSI teyit göstergesi niteliğindedir.
+  BorsaPusula'da RSI, <strong>Güç Skoru</strong> hesaplamasında sinyal yönüne göre değerlendirilir:
+  AL sinyalinde RSI 50–75 arası +10 puan, 75 üzeri +5 puan; SAT sinyalinde RSI 25–50 arası
+  +10 puan, 25 altı +5 puan (maksimum katkı 10 puan). Sinyal motoru ADX+Supertrend+EMA
+  üzerinden çalışır; RSI teyit göstergesi niteliğindedir.
 </p>
 
 <h2 id="ema">3. EMA12 / EMA99 Kesişimi</h2>
@@ -380,6 +214,7 @@ async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=awai
 loadMacroBar();setInterval(loadMacroBar,180000);
 </script>
 
-<script src="/static/bp-search.js?v=47" defer></script>
+<script src="/static/bp-search.js?v=51" defer></script>
+<script src="/static/js/focus-trap.js?v=1"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_theme_color = '#0b111f' %}{% block head %}<title>Sinyal Performans Analizi | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% set head_theme_color = '#0b111f' %}{% block head %}<title>Sinyal Performans Analizi | BorsaPusula</title>
 <meta name="description" content="BorsaPusula algoritmik sinyal sisteminin geçmiş başarı oranları, ortalama getiri ve aktif sinyal performansları.">
 <link rel="canonical" href="https://borsapusula.com/sinyal-performans">
 <meta property="og:title"       content="Sinyal Performans Analizi — BorsaPusula">
@@ -18,98 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260810N">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260819A">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
-  .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:var(--bp-text-base); text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:var(--bp-radius); background:var(--bp-surface2); }
-  .back-btn:hover { background:var(--bp-surface2); color:var(--bp-text); }
-  .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
-  .page-sub   { font-size:var(--bp-text-base); color:#8b949e; }
-  .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:24px; }
-
-  /* Summary cards */
-  .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:28px; }
-  .stat-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-xl); padding:20px; text-align:center; }
-  .stat-num  { font-size:var(--bp-text-36); font-weight:800; line-height:1; }
-  .stat-lbl  { font-size:var(--bp-text-xs); color:#8b949e; margin-top:8px; text-transform:uppercase; letter-spacing:.5px; }
-  .stat-sub  { font-size:var(--bp-text-sm); color:#8b949e; margin-top:4px; }
-  .c-green { color:#3fb950; } .c-red { color:#f85149; } .c-blue { color:#58a6ff; } .c-gold { color:#f59e0b; }
-
-  /* Section header */
-  .sec-head { font-size:var(--bp-text-lg); font-weight:700; color:#f0f6fc; margin:28px 0 14px; display:flex; align-items:center; gap:8px; }
-  .sec-head span { font-size:var(--bp-text-sm); color:#8b949e; font-weight:400; }
-
-  /* Table */
-  .tbl-wrap { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow:hidden; margin-bottom:24px; }
-  table { width:100%; border-collapse:collapse; }
-  thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
-  th[data-sort] { padding:0; }
-  .perf-sort-btn {
-    all:unset; box-sizing:border-box; display:flex; align-items:center; gap:4px;
-    width:100%; padding:10px 14px; cursor:pointer;
-    font:inherit; color:inherit; text-transform:inherit; letter-spacing:inherit; white-space:inherit;
-  }
-  tbody tr { border-bottom:1px solid #21262d; }
-  tbody tr:last-child { border-bottom:none; }
-  tbody tr:hover { background:#1c2128; }
-  td { padding:10px 14px; font-size:var(--bp-text-base); white-space:nowrap; }
-  .ticker-link { font-weight:700; color:#f0f6fc; text-decoration:none; }
-  .ticker-link:hover { color:#58a6ff; }
-
-  /* Signal badges */
-  .sig-al  { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; background:#1a4731; color:#3fb950; border:1px solid #238636; }
-  .sig-sat { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
-
-  /* Bars */
-  .bar-wrap { background:#21262d; border-radius:var(--bp-radius-4); height:8px; width:120px; overflow:hidden; display:inline-block; vertical-align:middle; }
-  .bar-fill { height:100%; border-radius:var(--bp-radius-4); }
-
-  /* Computing notice */
-  .computing { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:40px; text-align:center; color:#8b949e; }
-  .computing .big { font-size:var(--bp-text-40); margin-bottom:12px; }
-  .computing p { margin-top:8px; font-size:var(--bp-text-base); }
-
-  /* Info box */
-  .info-box { background:#161b22; border:1px solid #30363d; border-left:3px solid #58a6ff; border-radius:var(--bp-radius-md); padding:14px 16px; margin-bottom:24px; font-size:var(--bp-text-base); color:#8b949e; line-height:1.6; }
-
-  /* Özet hero bar */
-  .ozet-bar { background:linear-gradient(135deg,#0d1f36 0%,#111827 100%); border:1px solid #1e2d45; border-left:3px solid #3fb950; border-radius:var(--bp-radius-xl); padding:16px 20px; margin-bottom:24px; display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
-  .ozet-metric { flex:1; min-width:140px; text-align:center; padding:10px 16px; position:relative; }
-  .ozet-metric+.ozet-metric::before { content:''; position:absolute; left:0; top:15%; height:70%; width:1px; background:#1e2d45; }
-  .ozet-metric-val { font-size:var(--bp-text-34); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
-  .ozet-metric-val.hero-val { font-size:var(--bp-text-40); text-shadow:0 0 24px rgba(63,185,80,0.35); }
-  .ozet-metric-lbl { font-size:var(--bp-text-2xs); color:#64748b; margin-top:7px; text-transform:uppercase; letter-spacing:.6px; }
-  .ozet-metric-sub { font-size:var(--bp-text-xs); color:#8b949e; margin-top:3px; }
-  @media(max-width:640px) { .ozet-bar{flex-wrap:wrap;gap:0} .ozet-metric{flex:0 0 50%;min-width:0;} .ozet-metric:nth-child(2)::before,.ozet-metric:nth-child(4)::before{display:none} .ozet-metric:nth-child(3),.ozet-metric:nth-child(4){border-top:1px solid #1e2d45;} }
-
-  /* Trigger button */
-  .btn-run { background:#1f6feb; border:none; color:#fff; border-radius:var(--bp-radius); padding:8px 18px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; margin-left:12px; }
-  .btn-run:hover { background:#388bfd; }
-  .btn-run:disabled { background:#30363d; color:#8b949e; cursor:not-allowed; }
-
-  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
-  footer a { color:#8b949e; text-decoration:none; }
-  @media(max-width:600px) { .container{padding:12px;} .hm{display:none;} }
-
-  /* ── Makro Ticker Bandı ── */
-  .macro-bar { background:#0b111f; border-bottom:1px solid #1e2d45; height:34px; overflow:hidden; position:relative; white-space:nowrap; }
-  .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
-  .macro-bar::before { left:0; background:linear-gradient(to right,#0b111f,transparent); }
-  .macro-bar::after  { right:0; background:linear-gradient(to left,#0b111f,transparent); }
-  .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite; height:34px; }
-  .macro-bar:hover .macro-track { animation-play-state:paused; }
-  @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
-    .macro-bar { position: relative; }
-  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
-  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
-  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #1e2d45; font-size:var(--bp-text-sm); height:34px; color:inherit; }
-  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
-</style>
+<link rel="stylesheet" href="/static/css/pages/sinyal_performans.css?v=9ad7f5c7">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% with hdr_title = 'Sinyal Performans Analizi' %}{% include '_header.html' %}{% endwith %}
@@ -180,28 +91,28 @@
     Risk Metrikleri <span>(Güçlü Trend sinyalleri)</span>
   </div>
   <div class="stat-grid" style="margin-bottom:28px">
-    <div class="stat-card" title="Sharpe Ratio: Ortalama getirinin oynaklığa oranı. >1.0 iyi, >2.0 çok iyi.">
+    <div class="stat-card" tabindex="0" data-tip="Sharpe Ratio: Ortalama getirinin oynaklığa oranı. >1.0 iyi, >2.0 çok iyi.">
       <div class="stat-num {% if bt.al.sharpe and bt.al.sharpe >= 1.0 %}c-green{% elif bt.al.sharpe and bt.al.sharpe >= 0 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.sharpe is not none %}{{ bt.al.sharpe }}{% else %}—{% endif %}
       </div>
       <div class="stat-lbl"><span aria-hidden="true">📊</span> Sharpe Ratio</div>
       <div class="stat-sub">&gt;1.0 kabul edilebilir · &gt;2.0 mükemmel</div>
     </div>
-    <div class="stat-card" title="Maksimum kümülatif düşüş. Kötü seri döneminde en derin kayıp.">
+    <div class="stat-card" tabindex="0" data-tip="Maksimum kümülatif düşüş. Kötü seri döneminde en derin kayıp.">
       <div class="stat-num {% if bt.al.max_drawdown and bt.al.max_drawdown > -15 %}c-green{% elif bt.al.max_drawdown and bt.al.max_drawdown > -30 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.max_drawdown is not none %}{{ bt.al.max_drawdown }}%{% else %}—{% endif %}
       </div>
       <div class="stat-lbl"><span aria-hidden="true">📉</span> Max Drawdown</div>
       <div class="stat-sub">Ardışık kayıp serisi etkisi</div>
     </div>
-    <div class="stat-card" title="Profit Factor: Brüt kazanç / brüt kayıp. >1.5 iyi, >2.0 çok iyi.">
+    <div class="stat-card" tabindex="0" data-tip="Profit Factor: Brüt kazanç / brüt kayıp. >1.5 iyi, >2.0 çok iyi.">
       <div class="stat-num {% if bt.al.profit_factor and bt.al.profit_factor >= 1.5 %}c-green{% elif bt.al.profit_factor and bt.al.profit_factor >= 1.0 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.profit_factor is not none %}{{ bt.al.profit_factor }}{% else %}—{% endif %}
       </div>
       <div class="stat-lbl"><span aria-hidden="true">⚖️</span> Profit Factor</div>
       <div class="stat-sub">Kazanç / kayıp oranı</div>
     </div>
-    <div class="stat-card" title="Ortalama sinyal süre (gün)">
+    <div class="stat-card" tabindex="0" data-tip="Ortalama sinyal süre (gün)">
       <div class="stat-num c-blue">
         {% if bt.al.avg_duration_days is not none %}{{ bt.al.avg_duration_days }}g{% else %}—{% endif %}
       </div>
@@ -271,7 +182,7 @@
       <button class="btn-run" id="btnRun" onclick="triggerBacktest()" style="opacity:0.6;font-size:var(--bp-text-sm)"><span aria-hidden="true">🔄</span> Yeniden Başlat</button>
     </p>
   </div>
-  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  
   {% endif %}
 
   <!-- Aktif sinyaller anlık performans -->
@@ -345,7 +256,7 @@
   <div style="margin-top:6px"><span role="img" aria-label="Uyarı">⚠️</span> Geçmiş performans gelecek getiriyi garanti etmez. Yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
 </footer>
 
-<script src="/static/stale-banner.js?v=20260810B"></script>
+<script src="/static/stale-banner.js?v=20260817A"></script>
 <script>
 /* CPO-1125 İş Kolu B — /api/backtest farklı domain, kanonik veri kalitesi
    /api/data-quality'den ayrı poll edilir */
@@ -357,16 +268,21 @@ async function triggerBacktest() {
   btn.disabled = true;
   btn.textContent = '⏳ Başlatılıyor...';
   try {
-    await fetch('/api/backtest/run', { method: 'POST' });
+    await fetch('/api/backtest/run', { method: 'POST', signal: AbortSignal.timeout(15000) });
     btn.textContent = '✓ Çalışıyor, lütfen bekleyin...';
     // Her 30 saniyede sayfayı yenile
     let tries = 0;
     const poll = setInterval(async () => {
       tries++;
       if (tries > 30) { clearInterval(poll); btn.textContent = '🔄 Tekrar dene'; btn.disabled = false; return; }
-      const r = await fetch('/api/backtest');
-      const j = await r.json();
-      if (j.al) { clearInterval(poll); window.location.reload(); }
+      // DEV2-bughunt-r7: guardsizdi, hatali/timeout yanitta tries sayaci hic
+      // ilerlemezdi ve buton 15dk boyunca donuk kalirdi (asagidaki autoStartBacktest'in
+      // ayni fetch'i icin zaten kurulu try/catch deseniyle hizalandi).
+      try {
+        const r = await fetch('/api/backtest');
+        const j = await r.json();
+        if (j.al) { clearInterval(poll); window.location.reload(); }
+      } catch (e) { console.warn('backtest poll basarisiz', e); }
     }, 30000);
   } catch(e) {
     btn.textContent = '❌ Hata';
@@ -538,7 +454,9 @@ const _MD = BP_ASSET_DECIMALS;
 async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=_ML[it.label]||it.label;const dec=_MD[it.label]??2;const price=it.price.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec});const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;if(w>50)mt.style.animationDuration=(w/50).toFixed(1)+'s';}}catch(e) { console.error('loadMacroBar: /api/macro fetch/render basarisiz', e); }}
 loadMacroBar();setInterval(loadMacroBar,180000);
 </script>
-<script src="/static/bp-search.js?v=47" defer></script>
-<script src="/static/learning-mode.js?v=2" defer></script>
+<script src="/static/bp-search.js?v=51" defer></script>
+<script src="/static/js/focus-trap.js?v=1"></script>
+<script src="/static/js/bp-tooltip.js?v=3"></script>
+<script src="/static/learning-mode.js?v=5" defer></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}
