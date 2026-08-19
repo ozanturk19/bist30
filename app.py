@@ -974,7 +974,7 @@ STOCK_NAMES = {
     "ANSGR": "Anadolu Sigorta",
     "ASUZU": "Anadolu Isuzu",
     "BJKAS": "Beşiktaş JK",
-    "BRSAN": "Borçelik Çelik Sanayii",
+    "BRSAN": "Borusan Mannesmann Boru",
     "BRYAT": "BR Yatırım Holding",
     "BUCIM": "Bursa Çimento",
     "CCOLA": "Coca-Cola İçecek A.Ş.",
@@ -4078,6 +4078,7 @@ def background_refresh():
                 _load_macro_from_disk()
                 _load_earnings_cache_from_disk()
                 _load_mtf_cache_from_disk()
+                _load_fundamentals_cache_from_disk()
             except Exception as e:
                 logger.error("web disk-reload hatası: %s", e)
             time.sleep(90)
@@ -4095,6 +4096,7 @@ def background_refresh():
                 _load_macro_from_disk()
                 _load_earnings_cache_from_disk()
                 _load_mtf_cache_from_disk()
+                _load_fundamentals_cache_from_disk()
             except Exception as e:
                 logger.error("background_refresh non-leader reload hatası: %s", e)
             time.sleep(90)
@@ -8078,7 +8080,7 @@ _FUND_SANITY = {
     "forward_pe":     (0.0, 150.0),
     "dividend_yield": (0.0, 50.0),    # %50 üstü → imkânsız (zaten *100 çarpılmış)
     "beta":           (0.10, 5.0),    # 0.06-0.09 beta havacılık için saçma
-    "pb_ratio":       (0.0, 50.0),    # P/B > 50 → bozuk
+    "pb_ratio":       (0.0, 15.0),    # P/B > 15 → bozuk (BIST tipik 0.3-5x, CPO-DEV2-038)
     "roe":            (-100.0, 200.0),# ROE > 200% → bozuk
     "profit_margin":  (-200.0, 100.0),
     "operating_margin":(-200.0, 100.0),
@@ -8103,6 +8105,49 @@ def _clean_fundamentals(data: dict) -> dict:
         else:
             cleaned[k] = v
     return cleaned
+
+
+# CPO-DEV2-038 P1-DATA-1: disk köprüsü — REFRESH_WORKER=web worker'ları (asıl siteyi
+# servis eden 4 worker) senkron yfinance çekemiyor (guard aşağıda), REFRESH_WORKER=1
+# (leader/refresh) prewarm yapıyordu ama SADECE kendi process belleğine yazıyordu →
+# web worker'larda /api/hisse/<X>/fundamentals hep {} dönüyordu. MTF/earnings ile
+# aynı desen: leader diske yazar, web worker periyodik olarak diskten okur.
+_FUNDAMENTALS_CACHE_DISK_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "last_fundamentals_cache.json")
+
+
+def _save_fundamentals_cache_to_disk():
+    """Temel analiz cache'ini diske yazar (cross-worker sync, MTF/earnings deseniyle aynı).
+    _lock DIŞINDA çağrılmalı."""
+    try:
+        with _lock:
+            snapshot = dict(_fundamentals_cache)
+        if not snapshot:
+            return
+        _atomic_write_json(_FUNDAMENTALS_CACHE_DISK_PATH, snapshot)
+    except Exception as e:
+        logger.warning("_save_fundamentals_cache_to_disk hatası: %s", e)
+
+
+def _load_fundamentals_cache_from_disk():
+    """Diskten temel analiz cache merge — ticker başına en taze ts kazanır
+    (web worker — yfinance yasak)."""
+    try:
+        if not os.path.exists(_FUNDAMENTALS_CACHE_DISK_PATH):
+            return
+        with open(_FUNDAMENTALS_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
+            disk = json.load(f)
+        if not isinstance(disk, dict):
+            return
+        with _lock:
+            for tk, dentry in disk.items():
+                if not isinstance(dentry, dict):
+                    continue
+                mem = _fundamentals_cache.get(tk)
+                if not mem or dentry.get("ts", 0) > mem.get("ts", 0):
+                    _fundamentals_cache[tk] = dentry
+    except Exception as e:
+        logger.warning("_load_fundamentals_cache_from_disk hatası: %s", e)
 
 
 def _get_fundamentals(ticker_base):
@@ -11754,13 +11799,9 @@ def _startup():
                     time.sleep(0.5)
                 except Exception as _e:
                     logger.warning("prewarm chart [%s]: %s", _t, _e)
-            # Temel analiz verilerini ısıt (yfinance - hisse başına ~1s)
-            for _t in _warm_tickers[:3]:
-                try:
-                    _get_fundamentals(_t)
-                    time.sleep(0.3)
-                except Exception as _e:
-                    logger.warning("prewarm fundamentals [%s]: %s", _t, _e)
+            # Temel analiz verilerini ısıtma artık _fundamentals_warmup_daemon'da
+            # (CPO-DEV2-038 — tüm BIST kapsar + disk köprüsü var; eskiden burada sadece
+            # 3 hisse tek seferlik ısıtılıp hiçbir yere yazılmıyordu)
         # CPO-572: REFRESH_WORKER=1 → refresh_worker.py zaten background_refresh() çağırıyor.
         # Burada da çağırmak iki eş-zamanlı refresh_data() döngüsü yaratır → double cache write
         # → web worker reload flood → cascade (root cause: 2026-06-12 07:55:41 + 07:56:04 çift yazı).
@@ -11955,6 +11996,37 @@ def _mtf_warmup_daemon():
 if os.environ.get("REFRESH_WORKER") == "1":
     threading.Thread(target=_mtf_warmup_daemon, daemon=True, name="mtf-warmup").start()
     logger.info("CPO-585: MTF warmup daemon başlatıldı (REFRESH_WORKER=1, 30dk interval)")
+
+_FUND_DISK_FLUSH_EVERY_N = 10  # MTF'nin 5'lik aralığından seyrek — fundamentals TTL daha uzun (4s)
+
+def _fundamentals_warmup_daemon():
+    """CPO-DEV2-038 P1-DATA-1: fundamentals disk köprüsü + tam BIST kapsamı.
+    Öncesinde REFRESH_WORKER=1 sadece 3 hisseyi (THYAO/AKBNK/GARAN) tek seferlik ısıtıyordu
+    ve hiçbir yere yazmıyordu — web worker'lar (REFRESH_WORKER=web) /api/hisse/<X>/fundamentals'ta
+    hep {} dönüyordu. MTF warmup daemon paterniyle aynı: tüm BIST listesini döner, periyodik diske yazar.
+    """
+    time.sleep(120)  # MTF daemon'dan sonra başla — startup I/O ile çakışma önlenir
+    while True:
+        now = time.time()
+        _written_this_round = 0
+        for _t in BIST30:
+            with _lock:
+                _fc = _fundamentals_cache.get(_t)
+            if not _fc or (now - _fc["ts"]) > (_FUND_TTL - 1800):  # TTL'den 30dk önce tazele
+                try:
+                    _get_fundamentals(_t)
+                    _written_this_round += 1
+                    if _written_this_round % _FUND_DISK_FLUSH_EVERY_N == 0:
+                        _save_fundamentals_cache_to_disk()
+                    time.sleep(1)  # yfinance throttle
+                except Exception:
+                    pass
+        _save_fundamentals_cache_to_disk()
+        time.sleep(1800)
+
+if os.environ.get("REFRESH_WORKER") == "1":
+    threading.Thread(target=_fundamentals_warmup_daemon, daemon=True, name="fundamentals-warmup").start()
+    logger.info("CPO-DEV2-038: fundamentals warmup daemon başlatıldı (REFRESH_WORKER=1, tüm BIST kapsam, disk köprülü)")
 
 logger.info("=" * 50)
 logger.info("  BIST30 Sinyal Paneli başlatıldı")
