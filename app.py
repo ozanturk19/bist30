@@ -27,6 +27,7 @@ import json
 import os
 import subprocess
 import tempfile
+import html as _html
 import re
 import random
 import copy
@@ -1435,6 +1436,19 @@ _stale_alert_lock  = threading.Lock()
 
 # ── Phase 3 #2 Paket 4 — app startup timestamp ────────────────────────────────
 _APP_STARTUP_TS = time.time()
+
+# CPO-DEV2-035 P1-INTEGRITY-1: Sinyal Gecmisi her 15dk GUNCEL kodla yeniden
+# hesaplaniyor (kalici log degil) — algoritma degisince gecmis sessizce
+# degisebilir. Bu commit SHA'si /api/health ve backtest_cache.json'a eklenerek
+# "hangi kod anindan hesaplandi" en azindan gorunur olsun diye (tam birlestirme
+# ayri, dikkatli bir turda — bkz CPO-DEV2-035).
+try:
+    _GIT_SHA = subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=os.path.dirname(os.path.abspath(__file__)), timeout=5,
+    ).decode().strip()
+except Exception:
+    _GIT_SHA = None
 
 # CPO-1227 §2: makro/varlık chart cache'i normal koşullarda başlangıç
 # yenilemesiyle birkaç dakikada dolar (_serial_chart_refresh); bu pencere
@@ -9183,6 +9197,7 @@ def _compute_health():
         "drift_count":              drift_count,  # M6: ardışık döngü arası drift ticker sayısı
         "bad_ticker_count":         bad_ticker_count,  # M5: stale fallback ticker sayısı
         "sse_clients":              len(_sse_clients),  # CPO-1135 diagnostik — process-local, sızıntı ölçümü için
+        "git_sha":                  _GIT_SHA,  # CPO-DEV2-035 P1-INTEGRITY-1
         "ts": now,
     }
     # Paket 4 — extend with 6 health extra fields (uptime_sec, cache_age_min, etc.)
@@ -10079,27 +10094,21 @@ def api_contact():
     if "@" not in email or "." not in email:
         return jsonify({"ok": False, "error": "Geçersiz e-posta"}), 400
 
-    SMTP_HOST  = os.environ.get("SMTP_HOST", "")
-    SMTP_USER  = os.environ.get("SMTP_USER", "")
-    SMTP_PASS  = os.environ.get("SMTP_PASS", "")
     ADMIN_MAIL = os.environ.get("ADMIN_MAIL", "iletisim@borsapusula.com")
 
-    if SMTP_HOST and SMTP_USER:
-        try:
-            msg = MIMEMultipart()
-            msg["From"]    = SMTP_USER
-            msg["To"]      = ADMIN_MAIL
-            msg["Subject"] = f"[BorsaPusula İletişim] {subject}"
-            body = f"Gönderen: {name} <{email}>\nKonu: {subject}\n\n{message}"
-            msg.attach(MIMEText(body, "plain", "utf-8"))
-            with smtplib.SMTP_SSL(SMTP_HOST, 465, timeout=15) as s:
-                s.login(SMTP_USER, SMTP_PASS)
-                s.sendmail(SMTP_USER, ADMIN_MAIL, msg.as_string())
-            logger.info("Contact mail gönderildi: %s <%s>", name, email)
-        except Exception as ex:
-            logger.error("Contact mail hatası: %s", ex)
-            return jsonify({"ok": False, "error": "Mail gönderilemedi"}), 500
+    # CPO-DEV2-035 P1-CONTACT-1: ozel SMTP_SSL/465 blogu SMTP_PORT'u (.env=587)
+    # hic okumuyordu ve hic canli trafikle sinanmamisti (~15 gunde 0 istek) -
+    # kanonik send_email() (STARTTLS/587, zaten login/digest akislarinda dogrulanmis) kullaniliyor.
+    body_html = (
+        f"<p><b>Gonderen:</b> {_html.escape(name)} &lt;{_html.escape(email)}&gt;</p>"
+        f"<p><b>Konu:</b> {_html.escape(subject)}</p>"
+        f"<p style='white-space:pre-wrap'>{_html.escape(message)}</p>"
+    )
+    if not send_email(ADMIN_MAIL, f"[BorsaPusula Iletisim] {subject}", body_html):
+        logger.error("Contact mail gonderilemedi: %s <%s>", name, email)
+        return jsonify({"ok": False, "error": "Mail gonderilemedi"}), 500
 
+    logger.info("Contact mail gonderildi: %s <%s>", name, email)
     return jsonify({"ok": True})
 
 
@@ -10389,6 +10398,7 @@ def run_backtest():
         "per_ticker":  sorted(per_ticker, key=lambda x: (-x["al_count"], -x["sat_count"])),
         "computed_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
         "tickers_used": len(bt_tickers),
+        "git_sha":      _GIT_SHA,  # CPO-DEV2-035 P1-INTEGRITY-1 — hangi kod aniyla hesaplandigi
     }
     with _lock:
         _bt_cache["data"]        = result
