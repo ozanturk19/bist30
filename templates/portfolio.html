@@ -297,12 +297,14 @@ function fillEntry(ticker, price) {
 }
 
 /* ── Export / Import ──────────────────────────────── */
+let _toastTimer = null;
 function showToast(msg, type='ok', ms=3000) {
   const el = document.getElementById('importToast');
   el.textContent = msg;
   el.className = 'import-toast ' + type;
   el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, ms);
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.style.display = 'none'; }, ms);
 }
 
 function exportPortfolio() {
@@ -638,6 +640,7 @@ async function saveToCloud(silent) {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({positions: portfolio}),
+      signal: AbortSignal.timeout(15000),
     });
     const data = await res.json();
     if (data.ok) {
@@ -646,7 +649,7 @@ async function saveToCloud(silent) {
       _setCloudMsg('Kayıt hatası: ' + (data.error || '?'), '#f85149');
     }
   } catch(e) {
-    _setCloudMsg('Hata: ' + e.message, '#f85149');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
   } finally {
     if (btn) btn.disabled = false;
   }

@@ -268,7 +268,7 @@ async function triggerBacktest() {
   btn.disabled = true;
   btn.textContent = '⏳ Başlatılıyor...';
   try {
-    await fetch('/api/backtest/run', { method: 'POST' });
+    await fetch('/api/backtest/run', { method: 'POST', signal: AbortSignal.timeout(15000) });
     btn.textContent = '✓ Çalışıyor, lütfen bekleyin...';
     // Her 30 saniyede sayfayı yenile
     let tries = 0;
