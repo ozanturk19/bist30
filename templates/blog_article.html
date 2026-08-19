@@ -15,8 +15,8 @@
 {
   "@context": "https://schema.org",
   "@type": "Article",
-  "headline": "{{ article.title }}",
-  "description": "{{ article.desc }}",
+  "headline": {{ article.title|tojson }},
+  "description": {{ article.desc|tojson }},
   "datePublished": "{{ article.date }}",
   "dateModified": "{{ article.date }}",
   "inLanguage": "tr",
@@ -69,8 +69,8 @@
     {
       "@type": "ListItem",
       "position": 3,
-      "name": "{{ article.title }}",
-      "item": "https://borsapusula.com/blog/{{ article.slug }}"
+      "name": {{ article.title|tojson }},
+      "item": "https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}"
     }
   ]
 }

@@ -66,44 +66,22 @@
   ]
 }
 </script>
-{% if ssr_signal %}
+{% if seo_faq %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
+    {% for item in seo_faq %}
     {
       "@type": "Question",
-      "name": "{{ ticker }} şu an hangi sinyalde?",
+      "name": {{ item.q|tojson }},
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "{{ ticker }} ({{ name }}) hissesi BorsaPusula algoritmasına göre {% if ssr_signal.signal == 'AL' %}Güçlü Trend{% elif ssr_signal.signal == 'SAT' %}Trend Bozuldu{% else %}Yatay{% endif %} sinyalinde ({{ ssr_signal.signal_date }}). ADX: {{ (ssr_signal.adx or 0)|int }}, RSI: {{ (ssr_signal.rsi or 0)|int }}."
+        "text": {{ item.a|tojson }}
       }
-    },{% if ssr_signal.sl_level %}
-    {
-      "@type": "Question",
-      "name": "{{ ticker }} için stop loss nerede?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "{{ ticker }} için mevcut algoritmik stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺ olarak hesaplanmıştır. ATR tabanlı dinamik hesaplanır, Supertrend(10,3) çıkış seviyesini baz alır."
-      }
-    },{% endif %}
-    {
-      "@type": "Question",
-      "name": "{{ ticker }} teknik analizi nasıl hesaplanıyor?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "{{ ticker }} sinyali 3 kriterin eş zamanlı karşılanmasıyla oluşur: Supertrend(10,3) yön, ADX 25 ve üzeri trend gücü, EMA12 ve EMA99 pozisyonu. Sinyal en az 3 bar devam edince onaylı sayılır. Haftalık EMA20 filtresi büyük ters trendlerde sinyal üretimini engeller."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "{{ ticker }} borsapusula.com sinyali ücretsiz mi?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Evet. BorsaPusula.com'daki tüm BIST100 teknik analiz sinyalleri tamamen ücretsizdir, kayıt gerekmez ve her işlem gününün sonunda otomatik güncellenir."
-      }
-    }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
   ]
 }
 </script>

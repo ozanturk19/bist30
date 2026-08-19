@@ -753,7 +753,7 @@
 </button>
 
 <!-- ── Alarm Panel — T4.4 adım 3/6 (TABLO) aksiyon katmanı, kod değişmedi ── -->
-<div class="alarm-panel hidden" id="alarmPanel">
+<div class="alarm-panel hidden" id="alarmPanel" role="dialog" aria-modal="true" aria-label="Takip Listem">
   <div class="ap-header">
     <h3 class="ap-title"><span aria-hidden="true">🔔</span> Takip Listem</h3>
     <button class="ap-close" onclick="toggleAlarmPanel()">×</button>
@@ -2686,6 +2686,7 @@ let lastSignals    = _safeLoadJSON(SIGNAL_KEY, {});
 let priceAlarms    = _safeLoadJSON(PRICE_ALARM_KEY, {});
 let livePrices     = {};   // ticker → latest price from SSE
 let alarmPanelOpen = false;
+let _alarmPanelRelease = null;
 
 /** Faz 1 #2: Safe write + read-back verify (sessizce kaybolmayı önler) */
 function _safeWriteJSON(key, value) {
@@ -2869,8 +2870,15 @@ function renderAlarmPanel() {
 function toggleAlarmPanel() {
   alarmPanelOpen = !alarmPanelOpen;
   document.getElementById('alarmPanel').classList.toggle('hidden', !alarmPanelOpen);
-  document.getElementById('alarmFab').style.display = alarmPanelOpen ? 'none' : 'flex';
-  if (alarmPanelOpen) renderAlarmPanel();
+  if (alarmPanelOpen) {
+    renderAlarmPanel();
+    if (_alarmPanelRelease) { _alarmPanelRelease(); _alarmPanelRelease = null; }
+    if (window.bpTrapFocus) _alarmPanelRelease = window.bpTrapFocus(document.getElementById('alarmPanel'), toggleAlarmPanel);
+    document.getElementById('alarmFab').style.display = 'none';
+  } else {
+    document.getElementById('alarmFab').style.display = 'flex';
+    if (_alarmPanelRelease) { _alarmPanelRelease(); _alarmPanelRelease = null; }
+  }
 }
 
 function requestNotifPermission() {
