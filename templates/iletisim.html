@@ -78,6 +78,13 @@ async function submitForm(e) {
   e.preventDefault();
   const btn = document.getElementById('cfBtn');
   const msg = document.getElementById('cfMsg');
+  const emailEl = document.getElementById('cfEmail');
+  const email = emailEl.value.trim();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    emailEl.style.borderColor = 'var(--bp-sat)';
+    emailEl.focus();
+    return;
+  }
   btn.disabled = true;
   btn.textContent = 'Gönderiliyor…';
   try {
@@ -86,10 +93,11 @@ async function submitForm(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name:    document.getElementById('cfName').value.trim(),
-        email:   document.getElementById('cfEmail').value.trim(),
+        email:   email,
         subject: document.getElementById('cfSubject').value,
         message: document.getElementById('cfMessage').value.trim()
-      })
+      }),
+      signal: AbortSignal.timeout(10000)
     });
     const d = await res.json();
     if (d.ok) {

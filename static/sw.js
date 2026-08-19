@@ -7,6 +7,7 @@ const STATIC = [
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',
+  '/static/css/tokens.css?v=20260810O',
   '/static/css/shared.css?v=eda70c62',
   '/static/css/pages/offline.css?v=0babc49c',
   '/offline',

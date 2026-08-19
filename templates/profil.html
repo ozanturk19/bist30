@@ -188,7 +188,8 @@ async function submitProfile(e) {
     const res  = await fetch('/api/profile', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      signal: AbortSignal.timeout(10000)
     });
     const json = await res.json();
     if (json.ok) {

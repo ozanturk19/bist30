@@ -2588,7 +2588,7 @@ async function manualRefresh() {
   // Kendi try/catch'i ile fonksiyon artik bagimsiz da guvenli, ag hatasinda
   // sadece buton normale doner (reload zorlanmaz).
   try {
-    await fetch('/api/refresh', { method: 'POST' });
+    await fetch('/api/refresh', { method: 'POST', signal: AbortSignal.timeout(10000) });
   } catch (e) {
     console.warn('manualRefresh basarisiz:', e);
     if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
@@ -3392,7 +3392,8 @@ async function togglePushSubscription() {
       await fetch('/api/push/unsubscribe', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({endpoint: _pushSubscription.endpoint})
+        body: JSON.stringify({endpoint: _pushSubscription.endpoint}),
+        signal: AbortSignal.timeout(10000)
       });
       await _pushSubscription.unsubscribe();
       _pushSubscription = null;
@@ -3404,7 +3405,7 @@ async function togglePushSubscription() {
         return;
       }
       // Get VAPID key
-      const keyRes = await fetch('/api/push/vapid-public-key');
+      const keyRes = await fetch('/api/push/vapid-public-key', { signal: AbortSignal.timeout(10000) });
       const {publicKey} = await keyRes.json();
       if (!publicKey) { if (btn) btn.disabled = false; return; }
 
@@ -3424,6 +3425,7 @@ async function togglePushSubscription() {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(_subPayload),
+        signal: AbortSignal.timeout(10000)
       });
     }
     _updatePushBtn();
