@@ -237,11 +237,11 @@ def _tp_read_json(path, default=None):
 
 def _tp_write_json(path, data, atomic=False, **json_kwargs):
     def _write():
-        target = path + ".tmp" if atomic else path
-        with open(target, "w", encoding="utf-8") as f:
-            json.dump(data, f, **json_kwargs)
         if atomic:
-            os.replace(target, path)
+            _atomic_write_json(path, data, **json_kwargs)
+        else:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, **json_kwargs)
     if _WS_AVAILABLE:
         try:
             _gevent.get_hub().threadpool.spawn(_write).get(timeout=10)
@@ -2376,8 +2376,35 @@ SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASS = os.environ.get("SMTP_PASS", "")
 SMTP_FROM = os.environ.get("SMTP_FROM", "BorsaPusula <noreply@borsapusula.com>")
 
+class _CrossProcessLock:
+    """threading.Lock (in-process) + fcntl.flock (cross-process, gunicorn -w 4)
+    tek context manager'da birleşir. P0-DATA-1 (CPO-DEV2-034): subscribers.json/
+    pending_changes.json'a 4 worker eşzamanlı yazabiliyordu (threading.Lock
+    yalnız process-içi korur, kod yorumundaki "disk yazma atomik" notu
+    yanıltıcıydı) — lost-update riski teorik değil, rutindi. `_is_notify_leader_
+    blocking` (yukarıda) ile aynı fcntl.flock deseni, burada LOCK_EX blocking:
+    okuma+değiştirme+yazma kritik bölümünü worker'lar arasında sıraya sokar."""
+    def __init__(self, lock_path):
+        self._thread_lock = threading.Lock()
+        self._lock_path = lock_path
+        self._fh = None
+
+    def __enter__(self):
+        self._thread_lock.acquire()
+        if self._fh is None:
+            self._fh = open(self._lock_path, "w")
+        fcntl.flock(self._fh, fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            fcntl.flock(self._fh, fcntl.LOCK_UN)
+        finally:
+            self._thread_lock.release()
+
+
 SUBSCRIBERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "subscribers.json")
-_sub_lock = threading.Lock()
+_sub_lock = _CrossProcessLock(SUBSCRIBERS_FILE + ".lock")
 
 
 def _load_subscribers():
@@ -2385,13 +2412,14 @@ def _load_subscribers():
         return {}
     try:
         return _tp_read_json(SUBSCRIBERS_FILE, default={})
-    except Exception:
+    except Exception as e:
+        logger.error("subscribers.json okuma hatası (bozuk dosya olabilir): %s", e)
         return {}
 
 
 def _save_subscribers(subs):
     try:
-        _tp_write_json(SUBSCRIBERS_FILE, subs, ensure_ascii=False, indent=2)
+        _tp_write_json(SUBSCRIBERS_FILE, subs, atomic=True, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.error("subscribers.json kaydetme hatası: %s", e)
 
@@ -2734,8 +2762,8 @@ def _build_signal_email(changes, unsubscribe_url):
 
 
 # Pending changes buffer — günlük/haftalık digest için biriktirir
-_pending_changes_lock = threading.Lock()
 _pending_changes_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pending_changes.json")
+_pending_changes_lock = _CrossProcessLock(_pending_changes_path + ".lock")
 
 
 def _load_pending_changes():
@@ -2743,13 +2771,14 @@ def _load_pending_changes():
         return []
     try:
         return _tp_read_json(_pending_changes_path, default=[])
-    except Exception:
+    except Exception as e:
+        logger.error("pending_changes.json okuma hatası (bozuk dosya olabilir): %s", e)
         return []
 
 
 def _save_pending_changes(items):
     try:
-        _tp_write_json(_pending_changes_path, items, ensure_ascii=False, default=str)
+        _tp_write_json(_pending_changes_path, items, atomic=True, ensure_ascii=False, default=str)
     except Exception as e:
         logger.warning("pending_changes.json yazma hatası: %s", e)
 
@@ -4719,15 +4748,19 @@ _macro_ai_refreshing = False  # arka plan yenileme kilidi
 # diske yazar, non-leader worker'lar diskten okur → 4× Gemini çağrısı yerine 1×.
 _MACRO_AI_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_macro_ai.json")
 
-def _atomic_write_json(path, data):
+def _atomic_write_json(path, data, **json_kwargs):
     """JSON'u atomic yazar — tempfile + fsync + os.replace (POSIX rename).
     Ozan/Madde 1: leader yazarken non-leader yarım dosya okumamalı (bozuk JSON
-    / crash riski). os.replace aynı dosya sisteminde atomik."""
+    / crash riski). os.replace aynı dosya sisteminde atomik.
+    P0-DATA-1 (CPO-DEV2-034): tek kanonik atomic-write helper — _tp_write_json'ın
+    atomic=True dalı da artık buraya delege eder (eskiden sabit .tmp adı
+    kullanıyordu, eşzamanlı yazarlar aynı geçici dosyada çakışabiliyordu)."""
+    json_kwargs.setdefault("ensure_ascii", False)
     dir_ = os.path.dirname(os.path.abspath(path))
     fd, tmp = tempfile.mkstemp(dir=dir_, suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False)
+            json.dump(data, f, **json_kwargs)
             f.flush()
             os.fsync(f.fileno())
         os.replace(tmp, path)   # atomic
@@ -11034,7 +11067,7 @@ def api_recognize():
     devam edebiliyor."""
     return safe_json({
         "ok": False,
-        "error": "Üye girişi kısa süreliğine bakımda — yeniden abone olarak devam edebilirsiniz.",
+        "error": "Üye girişi özelliği geçici bakımda, yakında döner. Yeni hesap için \"Abone Ol\" kullanabilirsiniz.",
         "maintenance": True,
     }), 503
 

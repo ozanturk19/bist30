@@ -756,7 +756,7 @@
 <div class="alarm-panel hidden" id="alarmPanel" role="dialog" aria-modal="true" aria-label="Takip Listem">
   <div class="ap-header">
     <h3 class="ap-title"><span aria-hidden="true">🔔</span> Takip Listem</h3>
-    <button class="ap-close" onclick="toggleAlarmPanel()">×</button>
+    <button class="ap-close" onclick="toggleAlarmPanel()" aria-label="Kapat">×</button>
   </div>
   <div class="ap-body" id="apBody">
     <div class="ap-empty">Henüz hisse eklenmedi.<br>Tablodaki <span role="img" aria-label="Bildirim">🔔</span> butonuna tıkla.</div>
@@ -2004,7 +2004,7 @@ async function openAlertModal(ticker) {
   const loginNotice = isLoggedIn ? '' : `<div class="alert-modal-login-notice">⚠️ Alert ayarları için BorsaPusula hesabınıza giriş yapmanız gerekiyor.<br><a href="#" onclick="closePremiumModal();openPremiumModal();return false" style="color:#ffc850">Ücretsiz giriş yap →</a></div>`;
   const cfg = _userAlerts[ticker] || {};
   modal.innerHTML = `<div class="alert-modal" role="dialog" aria-modal="true">
-    <button class="alert-modal-close" onclick="closeAlertModal()">×</button>
+    <button class="alert-modal-close" onclick="closeAlertModal()" aria-label="Kapat">×</button>
     <h3 class="alert-modal-title"><span aria-hidden="true">🔔</span> ${ticker} — Alert Ayarları</h3>
     ${loginNotice}
     <div class="alert-modal-row">

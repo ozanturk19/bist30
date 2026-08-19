@@ -229,7 +229,7 @@
       +   '<div class="bp-search-modal" id="bpSearchModal" role="dialog" aria-modal="true" aria-label="Site içi arama">'
       +     '<div class="bp-search-input-wrap">'
       +       '<svg class="bp-search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
-      +       '<input id="bpSearchInput" type="text" placeholder="Hisse, sektör veya konu ara…" autocomplete="off" spellcheck="false">'
+      +       '<input id="bpSearchInput" type="text" placeholder="Hisse, sektör veya konu ara…" aria-label="Hisse, sektör veya konu ara" autocomplete="off" spellcheck="false">'
       +       '<button class="bp-search-close" type="button" id="bpSearchClose" aria-label="Kapat">✕</button>'
       +     '</div>'
       +     '<div class="bp-search-results" id="bpSearchResults"></div>'
