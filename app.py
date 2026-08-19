@@ -11064,12 +11064,26 @@ def api_recognize():
     dogrulamasi + frontend kod-giris adimi) bir sonraki turda geliyor; bu
     ara donemde acik kapatildi, uc noktalar (index.html toast + premium
     modal) zaten 404/hata durumunu ele aliyor, kullanici "Abone Ol" ile
-    devam edebiliyor."""
+    devam edebiliyor.
+
+    P2-COPY-1 (CPO-DEV2-034) ek bulgu: bu route HTTP 503 donuyordu, ama
+    nginx'te site-genelinde `proxy_intercept_errors on` + `error_page 503
+    /static/maintenance.html` var (SEO9 #4, CPO-1194/1201 — gercek backend-
+    down senaryosu icin kasitli). Sonuc: bu route'un JSON govdesi (duzeltilmis
+    mesaj dahil) canli domain uzerinden HICBIR ZAMAN tarayiciya ulasmiyordu,
+    nginx onu statik bakim sayfasiyla degistiriyordu (localhost:8003 dogrudan
+    test edildiginde JSON gorunuyordu, bu yuzden onceki turda kacmisti).
+    Frontend `res.json()` bu HTML'i parse edemeyip catch bloguna dusuyor,
+    kullaniciya jenerik "Baglanti hatasi" gosteriyordu. Fix: HTTP 200 dondur
+    (app seviyesinde nginx'in 5xx kesme kuralina hic girmiyor) — frontend zaten
+    `json.ok`/`json.maintenance` alanlarina bakiyor, status kontrol etmiyor
+    (index.html/`_premium_modal.html` submitRecognize `else` dali `json.error`
+    metnini dogru gosteriyor, dogrulandi)."""
     return safe_json({
         "ok": False,
         "error": "Üye girişi özelliği geçici bakımda, yakında döner. Yeni hesap için \"Abone Ol\" kullanabilirsiniz.",
         "maintenance": True,
-    }), 503
+    }), 200
 
 
 @app.route("/api/subscribe", methods=["POST"])
