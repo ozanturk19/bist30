@@ -7750,130 +7750,26 @@ def api_chart_us_stock(ticker):
     return safe_json({"chart": None, "loading": True})
 
 
-# ── Makro Varlık Sayfaları (BTC / ETH / Altın / Gümüş) ──────────────────────
-# #34 fix: yfinance BTC-USD OHLC 1000x yanlış sorunu çözüldü (yfinance güncellendi).
-# 2y data doğrulandı: BTC min=53949 max=124753, 0 bad row. Gate kaldırıldı Ça 24.06.
-@app.route("/btc")
-def btc_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "BTC"]
-    return render_template("varlik.html", varlik_key="BTC", meta=_VARLIK_META["BTC"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
+# ── Kaldırılan sayfalar (CPO-DEV2-036, Ozan kararı 19.08.2026): BIST odaklı sadeleşme ──
+# Kripto/Emtia/ABD ayrı sayfaları kaldırıldı — üst kayan makro bar (/api/macro) değişmeden kalır.
+# Backlink/bookmark/arama-motoru kayıtları için 404 yerine anasayfaya 301 yönlendirme.
+_REMOVED_ASSET_ROUTES = (
+    "/btc", "/eth", "/sol", "/bnb", "/altin", "/gumus", "/petrol", "/dogalgaz",
+    "/kripto", "/emtialar", "/abd", "/abd/sp500", "/abd/nasdaq",
+)
 
+for _removed_path in _REMOVED_ASSET_ROUTES:
+    def _make_removed_redirect(_p=_removed_path):
+        def _removed_redirect():
+            return redirect("/", code=301)
+        return _removed_redirect
+    app.add_url_rule(_removed_path, endpoint=f"removed_asset_{_removed_path.strip('/').replace('/', '_')}",
+                      view_func=_make_removed_redirect())
 
-@app.route("/eth")
-def eth_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "ETH"]
-    return render_template("varlik.html", varlik_key="ETH", meta=_VARLIK_META["ETH"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
-
-
-@app.route("/sol")
-def sol_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "SOL"]
-    return render_template("varlik.html", varlik_key="SOL", meta=_VARLIK_META["SOL"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
-
-@app.route("/bnb")
-def bnb_page():
-    peers = [p for p in _KRIPTO_PEERS if p["key"] != "BNB"]
-    return render_template("varlik.html", varlik_key="BNB", meta=_VARLIK_META["BNB"],
-                           peers=peers, category_url="/kripto", category_label="Kripto")
-
-
-@app.route("/altin")
-def altin_page():
-    peers = [p for p in _EMTIA_PEERS if p["key"] != "ALTIN"]
-    return render_template("varlik.html", varlik_key="ALTIN", meta=_VARLIK_META["ALTIN"],
-                           peers=peers, category_url="/emtialar", category_label="Emtialar")
-
-
-@app.route("/gumus")
-def gumus_page():
-    peers = [p for p in _EMTIA_PEERS if p["key"] != "GUMUS"]
-    return render_template("varlik.html", varlik_key="GUMUS", meta=_VARLIK_META["GUMUS"],
-                           peers=peers, category_url="/emtialar", category_label="Emtialar")
-
-
-@app.route("/petrol")
-def petrol_page():
-    peers = [p for p in _EMTIA_PEERS if p["key"] != "PETROL"]
-    return render_template("varlik.html", varlik_key="PETROL", meta=_VARLIK_META["PETROL"],
-                           peers=peers, category_url="/emtialar", category_label="Emtialar")
-
-@app.route("/dogalgaz")
-def dogalgaz_page():
-    peers = [p for p in _EMTIA_PEERS if p["key"] != "DOGALGAZ"]
-    return render_template("varlik.html", varlik_key="DOGALGAZ", meta=_VARLIK_META["DOGALGAZ"],
-                           peers=peers, category_url="/emtialar", category_label="Emtialar")
-
-
-@app.route("/kripto")
-def kripto_page():
-    return render_template("kategori.html",
-        category_key="kripto",
-        title="Kripto Varlıklar", emoji="🪙",
-        desc="Bitcoin ve Ethereum Supertrend + ADX + EMA12/99 teknik analizi",
-        assets=_KRIPTO_PEERS,
-        us_stocks=None)
-
-@app.route("/emtialar")
-def emtialar_page():
-    return render_template("kategori.html",
-        category_key="emtialar",
-        title="Emtialar", emoji="🥇",
-        desc="Altın ve Gümüş Supertrend + ADX + EMA12/99 teknik analizi",
-        assets=_EMTIA_PEERS,
-        us_stocks=None)
-
-@app.route("/abd")
-def abd_page():
-    us_list = [{"key": t, "name": US_STOCK_NAMES.get(t,t),
-                "sector": next((s for s,tl in US_SECTORS.items() if t in tl),"Diğer"),
-                "href": f"/abd/{t}"}
-               for t in US_STOCKS]
-    return render_template("kategori.html",
-        category_key="abd",
-        title="ABD Piyasaları", emoji="🇺🇸",
-        desc="S&P 500, NASDAQ ve ABD büyük şirketleri teknik analizi",
-        assets=_ABD_INDEX_PEERS,
-        us_stocks=us_list)
-
-
-@app.route("/abd/sp500")
-def abd_sp500_page():
-    peers = [p for p in _ABD_INDEX_PEERS if p["key"] != "SP500"]
-    return render_template("varlik.html", varlik_key="SP500", meta=_VARLIK_META["SP500"],
-                           canonical_path="/abd/sp500",
-                           peers=peers, category_url="/abd", category_label="ABD")
-
-@app.route("/abd/nasdaq")
-def abd_nasdaq_page():
-    peers = [p for p in _ABD_INDEX_PEERS if p["key"] != "NASDAQ"]
-    return render_template("varlik.html", varlik_key="NASDAQ", meta=_VARLIK_META["NASDAQ"],
-                           canonical_path="/abd/nasdaq",
-                           peers=peers, category_url="/abd", category_label="ABD")
 
 @app.route("/abd/<ticker>")
 def abd_stock_page(ticker):
-    ticker = ticker.upper()
-    if ticker in ("SP500",): return abd_sp500_page()
-    if ticker in ("NASDAQ",): return abd_nasdaq_page()
-    if ticker not in US_STOCKS:
-        return render_template("index.html"), 404
-    name   = US_STOCK_NAMES.get(ticker, ticker)
-    sector = next((s for s,tl in US_SECTORS.items() if ticker in tl), "Diğer")
-    meta = {
-        "name": f"{ticker} — {name}", "ticker_yf": _TICKER_SYMBOL_MAP.get(ticker, ticker),
-        "unit": "USD", "emoji": "🇺🇸", "color": "#1f6feb",
-        "desc": f"{name} ({ticker}) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period": "2y",
-    }
-    peers = [{"key":t,"name":US_STOCK_NAMES.get(t,t),"href":f"/abd/{t}","emoji":"🇺🇸"}
-             for t in US_STOCKS if t != ticker][:4]
-    return render_template("varlik.html", varlik_key=ticker, meta=meta,
-                           peers=peers, category_url="/abd", category_label="ABD",
-                           chart_api=f"/api/chart/us/{ticker}")
-
+    return redirect("/", code=301)
 
 # ── SPEC-014 A1 — Sinyal Özeti (deterministik, kural-tabanlı) ─────────────────
 def _fmt_tl(v):
@@ -9417,22 +9313,7 @@ def sitemap():
         {"loc": "/gizlilik",    "priority": "0.3", "changefreq": "yearly"},
         {"loc": "/yasal",       "priority": "0.3", "changefreq": "yearly"},
         {"loc": "/iletisim",    "priority": "0.4", "changefreq": "yearly"},
-        {"loc": "/btc",         "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/altin",       "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/gumus",       "priority": "0.7", "changefreq": "daily"},
-        {"loc": "/eth",             "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/kripto",          "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/emtialar",        "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/abd",             "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/abd/sp500",       "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/abd/nasdaq",      "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/sol",             "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/bnb",             "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/petrol",          "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/dogalgaz",        "priority": "0.7", "changefreq": "daily"},
     ]
-    for t in US_STOCKS:
-        pages.append({"loc": f"/abd/{t}", "priority": "0.7", "changefreq": "daily"})
     for t in BIST30:
         if t != "XU030":
             pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
@@ -10463,11 +10344,11 @@ def api_backtest_run():
 
 @app.route("/nasdaq")
 def _redir_nasdaq():
-    return redirect("/abd/nasdaq", code=301)
+    return redirect("/", code=301)
 
 @app.route("/sp500")
 def _redir_sp500():
-    return redirect("/abd/sp500", code=301)
+    return redirect("/", code=301)
 
 @app.route("/hisseler")
 def hisseler_hub():
