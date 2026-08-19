@@ -8,6 +8,8 @@ venv/
 
 # Kişisel veriler — ASLA git'e girmesin
 subscribers.json
+login_sends.json
+*.json.lock
 
 # Geliştirme araçları
 .claude/
