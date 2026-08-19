@@ -3063,7 +3063,7 @@ async function submitRecognize() {
 async function submitToastSubscribe() {
   const emailEl = document.getElementById('subToastEmail');
   const email   = emailEl ? emailEl.value.trim() : '';
-  if (!email || !email.includes('@')) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
     return;
   }

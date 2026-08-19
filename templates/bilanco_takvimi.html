@@ -152,7 +152,7 @@ function render(data) {
             </div>
             <div class="sc-name">${s.name}</div>
             ${s.price ? `<div class="sc-price">${s.price.toLocaleString('tr-TR', {minimumFractionDigits:2})} ₺</div>` : ''}
-            <div class="sc-date">📅 ${s.date === 'yaklaşık' ? 'Dönem: ' + period.label : s.date}</div>
+            <div class="sc-date">📅 ${s.date === 'yaklaşık' ? 'Dönem: ' + period.label : s.date.split('-').reverse().join('.')}</div>
             <a href="${s.kap_url}" target="_blank" rel="noopener"
                class="sc-kap" onclick="event.stopPropagation()">
               📋 KAP bildirimleri ↗
