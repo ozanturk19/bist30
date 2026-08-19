@@ -18,13 +18,17 @@ def validate_change_pct(ticker, change_pct):
     """BIST ±10% tavan kuralı — split/corporate action anomali detection."""
     if change_pct is None or (isinstance(change_pct, float) and math.isnan(change_pct)):
         return {"ok": False, "flag": "ANOMAL_NULL_CHANGE_PCT", "ticker": ticker, "value": change_pct}
-    if abs(change_pct) > BIST_DAILY_LIMIT_PCT:
+    try:
+        cp = float(change_pct)
+    except (TypeError, ValueError):
+        return {"ok": False, "flag": "INVALID_CHANGE_PCT", "ticker": ticker, "value": change_pct}
+    if abs(cp) > BIST_DAILY_LIMIT_PCT:
         return {
             "ok": False,
             "flag": "ANOMAL",
             "ticker": ticker,
             "value": change_pct,
-            "msg": f"change_pct {change_pct:.2f}% BIST %10 tavan ihlali",
+            "msg": f"change_pct {cp:.2f}% BIST %10 tavan ihlali",
         }
     return {"ok": True, "ticker": ticker, "value": change_pct}
 
@@ -45,7 +49,7 @@ def validate_price(ticker, price, field="price"):
 
 def validate_signal_consistency(ticker, signal, signal_price):
     """AL sinyali için signal_price zorunlu."""
-    if signal and signal.upper() == "AL":
+    if isinstance(signal, str) and signal.upper() == "AL":
         if signal_price is None or (isinstance(signal_price, float) and math.isnan(signal_price)):
             return {
                 "ok": False,
@@ -271,7 +275,11 @@ def _today_tr():
         from zoneinfo import ZoneInfo
 
         return datetime.now(ZoneInfo(_TZ_TR_NAME)).date()
-    except Exception:
+    except Exception as e:
+        logger.warning(
+            "BRV: zoneinfo/tzdata Europe/Istanbul kullanilamiyor (%s), sistem yerel gunune dusuluyor",
+            e,
+        )
         return date.today()
 
 

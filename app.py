@@ -795,6 +795,10 @@ def signal_age_text_filter(signal_date):
     Mutlak tarihin yanında gösterilen yerlerde kullanılır (ozet/karsilastir/
     gundem/sinyal_performans); tarihin görünmediği yerlerde signal_date_label
     tercih edilir, çünkü orada gerçek tarihi yazmak gerekir.
+
+    NOT: negatif age (gelecek tarihli signal_date, veri hatasi/saat dilimi
+    kaymasi) "-1 gün" gibi anlamsiz bir metin basmasin diye
+    derive_signal_date_label ile ayni gecmis/gelecek ayrimina duser.
     """
     age = signal_date_age_days(signal_date)
     if age is None:
@@ -803,14 +807,25 @@ def signal_age_text_filter(signal_date):
         return "Bugün"
     if age == 1:
         return "Dün"
+    if age < 0:
+        return derive_signal_date_label(signal_date) or "—"
     return f"{age} gün"
 
 
 @app.template_filter('signal_age_days')
 def signal_age_days_filter(signal_date):
-    """Sıralanabilir sayısal takvim yaşı; bilinmiyorsa -1 (sona düşer)."""
+    """Sıralanabilir sayısal takvim yaşı; bilinmiyorsa büyük NEGATİF sentinel
+    (-10**6, sinyal_performans.html perfSortBy() varsayılan dir='desc'
+    sıralamasında sona düşer).
+
+    NOT: signal_date_age_days() gerçek negatif değerler (signal_date
+    YARIN/gelecek tarihli anomali) döndürebilir — bunlar GEÇERLİDİR ve
+    "bilinmiyor" sentineliyle KARIŞTIRILMAMALIDIR. Eskiden sentinel -1 idi;
+    bu, age=-1 (gerçek 1-gün-gelecek anomali) ile age=None (bilinmiyor)
+    durumlarını aynı sayıda çakıştırıyordu.
+    """
     age = signal_date_age_days(signal_date)
-    return -1 if age is None else age
+    return -10**6 if age is None else age
 
 
 def _clean(obj):
