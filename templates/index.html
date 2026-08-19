@@ -2053,17 +2053,35 @@ function closeAlertModal() {
 async function saveAlertSettings() {
   const ticker = _alertModalTicker;
   if (!ticker) return;
-  const pricePct  = document.getElementById('am-price-pct')?.value.trim();
+  const pricePctEl = document.getElementById('am-price-pct');
+  const rsiEl      = document.getElementById('am-rsi');
+  const rvolEl     = document.getElementById('am-rvol');
+  const pricePct  = pricePctEl?.value.trim();
   const sigChange = document.getElementById('am-signal-change')?.checked;
-  const rsi       = document.getElementById('am-rsi')?.value.trim();
-  const rvol      = document.getElementById('am-rvol')?.value.trim();
+  const rsi       = rsiEl?.value.trim();
+  const rvol      = rvolEl?.value.trim();
+  const st = document.getElementById('am-status');
+  // isNaN + aralik guard - setPriceAlarm() ile ayni desen (bughunt-r13/FV-1)
+  const _fields = [
+    { raw: pricePct, el: pricePctEl, label: 'Fiyat hareketi eşiği', min: 0.1, max: 20 },
+    { raw: rsi,      el: rsiEl,      label: 'RSI eşiği',            min: 10,  max: 50 },
+    { raw: rvol,     el: rvolEl,     label: 'RVOL eşiği',           min: 1,   max: 10 },
+  ];
+  for (const f of _fields) {
+    if (!f.raw) continue;
+    const val = parseFloat(f.raw);
+    if (isNaN(val) || val < f.min || val > f.max) {
+      if (st) st.textContent = `❌ ${f.label}: ${f.min}-${f.max} aralığında geçerli bir sayı girin`;
+      f.el?.focus();
+      return;
+    }
+  }
   const payload = {
     price_pct:      pricePct     ? parseFloat(pricePct)  : null,
     signal_change:  !!sigChange,
     rsi_threshold:  rsi          ? parseFloat(rsi)        : null,
     rvol_threshold: rvol         ? parseFloat(rvol)       : null,
   };
-  const st = document.getElementById('am-status');
   try {
     const r = await fetch(`/api/user-alerts/${ticker}`, {
       method: 'POST', credentials: 'same-origin',
@@ -2990,7 +3008,7 @@ async function submitRecognize() {
   const emailEl = document.getElementById('subToastEmail');
   const email   = emailEl ? emailEl.value.trim() : '';
   const statusEl = document.getElementById('subToastRecogStatus');
-  if (!email || !email.includes('@')) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
     return;
   }
@@ -3098,7 +3116,7 @@ async function submitSubscribe() {
     if (nameEl) { nameEl.style.borderColor = '#f85149'; nameEl.focus(); }
     return;
   }
-  if (!email || !email.includes('@')) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     emailEl.style.borderColor = '#f85149';
     emailEl.focus();
     return;
@@ -3112,6 +3130,7 @@ async function submitSubscribe() {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email, name }),
+      signal:  AbortSignal.timeout(10000),
     });
     const json = await res.json();
     if (json.ok) {

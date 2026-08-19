@@ -76,6 +76,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, name, source: 'premium-trial' }),
+        signal: AbortSignal.timeout(10000),
       });
       const json = await res.json();
       if (json.ok) {

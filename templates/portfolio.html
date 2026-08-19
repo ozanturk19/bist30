@@ -585,7 +585,7 @@ async function createCloudToken() {
   if (btn) btn.disabled = true;
   _setCloudMsg('Oluşturuluyor…', '#8b949e');
   try {
-    const res  = await fetch('/api/portfolio/new', {method:'POST'});
+    const res  = await fetch('/api/portfolio/new', {method:'POST', signal: AbortSignal.timeout(15000)});
     const data = await res.json();
     if (!data.token) throw new Error('no token');
     localStorage.setItem(CLOUD_TOKEN_KEY, data.token);
@@ -594,7 +594,7 @@ async function createCloudToken() {
     await saveToCloud(true);
     _setCloudMsg('Token oluşturuldu ve portföy kaydedildi!', '#3fb950');
   } catch(e) {
-    _setCloudMsg('Hata: ' + e.message, '#f85149');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -608,7 +608,7 @@ async function loadCloudToken() {
   if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', '#8b949e');
   try {
-    const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`);
+    const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
     if (!res.ok) { _setCloudMsg('Token bulunamadı.', '#f85149'); return; }
     const data = await res.json();
     if (!data.positions) { _setCloudMsg('Geçersiz portföy verisi.', '#f85149'); return; }
@@ -623,7 +623,7 @@ async function loadCloudToken() {
     _setCloudMsg(`Yüklendi! ${data.positions.length} pozisyon.`, '#3fb950');
     input.value = '';
   } catch(e) {
-    _setCloudMsg('Hata: ' + e.message, '#f85149');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -662,7 +662,7 @@ async function loadFromCloud() {
   if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', '#8b949e');
   try {
-    const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`);
+    const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
     if (!res.ok) { _setCloudMsg('Token bulunamadı.', '#f85149'); return; }
     const data = await res.json();
     if (!data.positions) { _setCloudMsg('Geçersiz portföy.', '#f85149'); return; }
@@ -672,7 +672,7 @@ async function loadFromCloud() {
     save(); render();
     _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.`, '#3fb950');
   } catch(e) {
-    _setCloudMsg('Hata: ' + e.message, '#f85149');
+    _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
   } finally {
     if (btn) btn.disabled = false;
   }
