@@ -3014,7 +3014,12 @@ function dismissSubToast() {
   try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz', e); }
 }
 
-/* MSG-098 soft auth: "Üye Girişi" — eski abone email ile re-recognize */
+/* MSG-098 soft auth: "Üye Girişi" — eski abone email ile re-recognize.
+   OTP/magic-link tasarımı (CPO-DEV2-034, P0-SEC-1 kalıcı fix): /api/recognize
+   artık senkron cookie DÖNMÜYOR — e-posta kayıtlıysa 15dk geçerli giriş
+   bağlantısı mail ile gönderiliyor, cookie yalnız link tıklanınca set edilir.
+   Enumeration kapatıldığı için backend her zaman aynı jenerik başarı mesajını
+   dönüyor (res.status===404 dalı artık anlamsız, kaldırıldı). */
 async function submitRecognize() {
   const emailEl = document.getElementById('subToastEmail');
   const email   = emailEl ? emailEl.value.trim() : '';
@@ -3024,7 +3029,8 @@ async function submitRecognize() {
     return;
   }
   const btn = document.getElementById('subToastLoginBtn');
-  if (btn) { btn.textContent = 'Kontrol ediliyor…'; btn.disabled = true; }
+  if (btn && btn.disabled) return;
+  if (btn) { btn.textContent = 'Gönderiliyor…'; btn.disabled = true; }
   try {
     const res  = await fetch('/api/recognize', {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -3032,43 +3038,34 @@ async function submitRecognize() {
       signal: AbortSignal.timeout(10000),
     });
     const json = await res.json();
-    const toast = document.getElementById('subToast');
-    if (res.ok && json.ok) {
-      try {
-        localStorage.setItem('bp_sub_user', JSON.stringify({
-          subscribed: true, email, name: json.name || '',
-          first_name: (json.name || '').split(' ')[0], cachedAt: Date.now(),
-        }));
-      } catch(_) { console.warn('bp_sub_user onbellek kaydi basarisiz', _); }
-      const _premMsg = json.premium_unlocked
-        ? '<div style="font-size:11px;color:#ffc850;margin-top:4px">💎 Premium da açıldı — sayfa yenileniyor…</div>'
-        : '<div style="font-size:11px;color:#64748b;margin-top:4px">Giriş yapıldı.</div>';
-      if (toast) toast.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600;padding:4px 0">✅ Hoş geldin' + (json.name ? ' ' + _esc(json.name) : '') + '!</div>' + _premMsg;
-      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(_) { console.warn('abonelik toast kapatma kaydi basarisiz (recognize)', _); }
-      // MSG-116 Bug E: premium açıldıysa reload (blur kalksın), yoksa sadece kapat
-      if (json.premium_unlocked) {
-        setTimeout(() => location.reload(), 1600);
-      } else {
-        setTimeout(() => dismissSubToast(), 2200);
-      }
-    } else if (res.status === 404) {
-      if (statusEl) {
-        statusEl.style.display = '';
-        statusEl.style.color = '#e3b341';
-        statusEl.textContent = '❓ Bu e-posta kayıtlı değil — "✉ Abone Ol" ile kaydolabilirsin.';
-      }
-      if (btn) { btn.textContent = '👤 Üye Girişi'; btn.disabled = false; }
-    } else {
-      if (statusEl) {
-        statusEl.style.display = '';
-        statusEl.style.color = '#f85149';
-        statusEl.textContent = '⚠️ ' + (json.error || 'Bir hata oluştu, tekrar dene.');
-      }
-      if (btn) { btn.textContent = '👤 Üye Girişi'; btn.disabled = false; }
+    if (statusEl) {
+      statusEl.style.display = '';
+      statusEl.style.color = json && json.ok ? '#00e290' : '#f85149';
+      statusEl.textContent = (json && json.ok ? '✉️ ' : '⚠️ ') + ((json && (json.message || json.error)) || 'Bir hata oluştu, tekrar dene.');
     }
+    _startRecognizeCooldown(btn, '👤 Üye Girişi');
   } catch(_) {
+    if (statusEl) {
+      statusEl.style.display = '';
+      statusEl.style.color = '#f85149';
+      statusEl.textContent = '⚠️ Bağlantı hatası, tekrar dene.';
+    }
     if (btn) { btn.textContent = '👤 Üye Girişi'; btn.disabled = false; }
   }
+}
+
+/* OTP tasarımı: spam'i önlemek için başarı/hata fark etmeksizin 60s cooldown */
+function _startRecognizeCooldown(btn, idleLabel) {
+  if (!btn) return;
+  let remain = 60;
+  btn.disabled = true;
+  const tick = () => {
+    if (remain <= 0) { btn.textContent = idleLabel; btn.disabled = false; return; }
+    btn.textContent = `Tekrar gönder (${remain}s)`;
+    remain -= 1;
+    setTimeout(tick, 1000);
+  };
+  tick();
 }
 
 async function submitToastSubscribe() {

@@ -2424,6 +2424,31 @@ def _save_subscribers(subs):
         logger.error("subscribers.json kaydetme hatası: %s", e)
 
 
+_LOGIN_SENDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "login_sends.json")
+_login_sends_lock = _CrossProcessLock(_LOGIN_SENDS_PATH + ".lock")
+
+
+def _login_send_allowed(email):
+    """OTP/magic-link tasarımı (CPO-DEV2-034): e-posta başına ek disk-tabanlı
+    rate-limit. Flask-Limiter `memory://` storage 4 gunicorn worker'a bölünüyor
+    (P0-SEC-2 ProxyFix gerçek client IP'yi çözdü ama sayaç hâlâ worker-local,
+    IP bazlı limit tek worker'da dolup diğer 3'ünde sıfırdan başlıyor) — email
+    bazlı bu katman worker'lar arası paylaşılan disk state kullanır: 1 saatte
+    aynı e-postaya 3'ten fazla giriş linki gönderilmez."""
+    now = time.time()
+    with _login_sends_lock:
+        data = _tp_read_json(_LOGIN_SENDS_PATH, default={})
+        sends = [t for t in data.get(email, []) if now - t < 3600]
+        if len(sends) >= 3:
+            return False
+        sends.append(now)
+        data[email] = sends
+        # eski e-postaları da temizle — dosya süresiz büyümesin
+        data = {k: v for k, v in data.items() if v and now - v[-1] < 3600}
+        _tp_write_json(_LOGIN_SENDS_PATH, data, atomic=True, ensure_ascii=False)
+        return True
+
+
 def send_email(to_email, subject, html_body):
     """SMTP üzerinden HTML e-posta gönderir. Config eksikse sessizce atlar."""
     if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
@@ -2593,6 +2618,34 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     <p style="text-align:center;font-size:12px;color:#909097;margin-top:18px;line-height:1.5">
       İlk sinyal mailini sinyal değişimi olduğunda alacaksın.<br>
       Bekleme süresi yok — site sürekli güncel.
+    </p>
+    '''
+    return _email_base(content, unsubscribe_url, preheader=preheader)
+
+
+def _build_login_email(email, login_url, unsubscribe_url, name=None):
+    """Magic-link giriş maili (OTP tasarımı, CPO-DEV2-034 — P0-SEC-1 kalıcı fix).
+    15dk geçerli, tek kullanımlık link. Kod-girme adımı YOK — link'e tıklamak
+    yeterli (kullanım hacmi düşük, ek brute-force/deneme-sayacı alt sistemi
+    gerekmiyor)."""
+    preheader = "Giriş bağlantın hazır — 15 dakika geçerli"
+    greeting = f"Merhaba {name.split()[0]}," if name else "Merhaba,"
+    content = f'''
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
+      <tr><td style="padding:28px 24px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">🔑</div>
+        <div style="font-size:20px;font-weight:800;color:#e5e1e4;margin-bottom:14px;letter-spacing:-0.3px">{greeting}</div>
+        <p style="font-size:13.5px;color:#c7c5cd;line-height:1.6;margin:0 0 22px">
+          BorsaPusula'ya giriş yapmak için aşağıdaki bağlantıya tıkla.<br>
+          Bağlantı <strong style="color:#e5e1e4">15 dakika</strong> geçerlidir ve yalnızca bir kez kullanılabilir.
+        </p>
+        <a href="{login_url}" style="display:inline-block;background:#00e290;color:#0e0e12;padding:14px 40px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:0.3px">
+          Giriş Yap →
+        </a>
+      </td></tr>
+    </table>
+    <p style="text-align:center;font-size:12px;color:#909097;margin-top:6px;line-height:1.5">
+      Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin — hesabında hiçbir değişiklik yapılmayacak.
     </p>
     '''
     return _email_base(content, unsubscribe_url, preheader=preheader)
@@ -11055,35 +11108,77 @@ def api_market_news():
 @app.route("/api/recognize", methods=["POST"])
 @limiter.limit("10 per hour")
 def api_recognize():
-    """P0-SEC-1 (CPO-DEV2-033, 19.08): GECICI DEVRE DISI.
+    """OTP/magic-link giriş isteği (CPO-DEV2-034 tasarımı) — P0-SEC-1'in kalıcı
+    fix'i (CPO-DEV2-033'te GEÇİCİ 503/200 devre-dışı bırakma buradaydı).
 
-    Onceki davranis sadece {"email":...} alip sahiplik kaniti olmadan (OTP/
-    magic-link yok) dogrudan 1 yillik bp_sub cookie set ediyordu -> bir
-    kurbanin e-postasini bilen herkes o hesabin alarm ayarlarini
-    gorup/degistirebiliyordu (hesap ele gecirme). Kalici fix (email OTP
-    dogrulamasi + frontend kod-giris adimi) bir sonraki turda geliyor; bu
-    ara donemde acik kapatildi, uc noktalar (index.html toast + premium
-    modal) zaten 404/hata durumunu ele aliyor, kullanici "Abone Ol" ile
-    devam edebiliyor.
+    Eski davranış sadece {"email":...} alıp sahiplik kanıtı olmadan doğrudan
+    1 yıllık bp_sub cookie set ediyordu -> bir kurbanın e-postasını bilen
+    herkes o hesabın alarm ayarlarını görüp/değiştirebiliyordu (hesap ele
+    geçirme). Yeni akış: e-posta kayıtlıysa 15dk geçerli tek-kullanımlık
+    magic-link gönderilir, cookie yalnız /api/recognize/confirm'de link
+    tıklanınca set edilir. User-enumeration'ı kapatmak için e-posta var/yok
+    ayrımı yapılmadan HER ZAMAN aynı jenerik mesaj dönülür (eski davranış
+    `_premium_modal.html`'de "Bu e-posta kayıtlı değil" ile bunu sızdırıyordu)."""
+    data  = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    if not email or "@" not in email or not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+        return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
 
-    P2-COPY-1 (CPO-DEV2-034) ek bulgu: bu route HTTP 503 donuyordu, ama
-    nginx'te site-genelinde `proxy_intercept_errors on` + `error_page 503
-    /static/maintenance.html` var (SEO9 #4, CPO-1194/1201 — gercek backend-
-    down senaryosu icin kasitli). Sonuc: bu route'un JSON govdesi (duzeltilmis
-    mesaj dahil) canli domain uzerinden HICBIR ZAMAN tarayiciya ulasmiyordu,
-    nginx onu statik bakim sayfasiyla degistiriyordu (localhost:8003 dogrudan
-    test edildiginde JSON gorunuyordu, bu yuzden onceki turda kacmisti).
-    Frontend `res.json()` bu HTML'i parse edemeyip catch bloguna dusuyor,
-    kullaniciya jenerik "Baglanti hatasi" gosteriyordu. Fix: HTTP 200 dondur
-    (app seviyesinde nginx'in 5xx kesme kuralina hic girmiyor) — frontend zaten
-    `json.ok`/`json.maintenance` alanlarina bakiyor, status kontrol etmiyor
-    (index.html/`_premium_modal.html` submitRecognize `else` dali `json.error`
-    metnini dogru gosteriyor, dogrulandi)."""
-    return safe_json({
-        "ok": False,
-        "error": "Üye girişi özelliği geçici bakımda, yakında döner. Yeni hesap için \"Abone Ol\" kullanabilirsiniz.",
-        "maintenance": True,
-    }), 200
+    generic_resp = {
+        "ok": True,
+        "message": "Bu e-posta kayıtlıysa giriş bağlantısı gönderildi. Gelen kutunu kontrol et (15 dakika geçerli).",
+    }
+
+    if not _login_send_allowed(email):
+        # Rate-limit aşılsa bile aynı jenerik mesaj — enumeration sızdırmaz.
+        return safe_json(generic_resp)
+
+    with _sub_lock:
+        subs = _load_subscribers()
+        info = subs.get(email)
+        if info and info.get("active", True):
+            login_token = secrets.token_hex(20)
+            info["login_token"]   = login_token
+            info["login_expires"] = time.time() + 900
+            info["login_used"]    = False
+            _save_subscribers(subs)
+            login_url = f"https://borsapusula.com/api/recognize/confirm?t={login_token}"
+            unsub_url = f"https://borsapusula.com/unsubscribe/{info.get('token', '')}"
+            name = info.get("name")
+            threading.Thread(target=send_email, args=(
+                email, "🔑 BorsaPusula — Giriş Bağlantın",
+                _build_login_email(email, login_url, unsub_url, name=name)
+            ), daemon=True).start()
+
+    return safe_json(generic_resp)
+
+
+@app.route("/api/recognize/confirm")
+def api_recognize_confirm():
+    """Magic-link tıklama hedefi — token'ı doğrular, tek kullanımlık cookie
+    verir. Süresi dolmuş/kullanılmış/geçersiz token → sessizce ana sayfaya
+    yönlendirir (kullanıcıya "üye girişi" formunu tekrar denemesi kalır)."""
+    tok = (request.args.get("t") or "").strip()
+    if tok:
+        with _sub_lock:
+            subs = _load_subscribers()
+            target_email = None
+            for em, info in subs.items():
+                stored = info.get("login_token")
+                if stored and secrets.compare_digest(stored, tok):
+                    target_email = em
+                    break
+            if target_email:
+                info    = subs[target_email]
+                expires = info.get("login_expires", 0)
+                used    = info.get("login_used", True)
+                if not used and time.time() < expires:
+                    info["login_used"] = True
+                    _save_subscribers(subs)
+                    resp = redirect("/?login=ok")
+                    resp.set_cookie("bp_sub", info.get("token", ""), max_age=31536000, samesite="Lax", secure=True, httponly=True)
+                    return resp
+    return redirect("/?login=expired")
 
 
 @app.route("/api/subscribe", methods=["POST"])
