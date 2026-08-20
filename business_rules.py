@@ -187,6 +187,8 @@ ENTRY_QUALITY_LABELS = {
     "UZAK": "Uzak",
 }
 
+# KULLANILMIYOR (ölü kod) — app.py/template'ler bu fonksiyonu çağırmıyor, kendi
+# bağımsız kopyalarını kullanıyor: app.py:1917-1931 ve hisse.html:1937-1938.
 # app.py:1753-1767'deki signal_bars eşiklerinin görünen adları (renk kodları
 # ayrı tutuldu, bunlar salt metin sözlüğü).
 SIGNAL_AGE_LABELS = {
@@ -198,9 +200,11 @@ SIGNAL_AGE_LABELS = {
 
 
 def derive_signal_age_label(signal_bars, signal=None):
-    """signal_bars eşiğinden tek kaynaklı sinyal-yaşı etiketi (app.py:1753-1767 ile aynı eşik).
+    """KULLANILMIYOR (ölü kod) — app.py:1917-1931 ve hisse.html:1937-1938 kendi
+    bağımsız kopyalarını kullanıyor, "tek kaynak" iddiası fiilen yanlış.
 
-    signal="BEKLE" veya signal_bars=None ise etiket yok (None döner) — mevcut davranışla birebir.
+    signal_bars eşiğinden sinyal-yaşı etiketi türetir (app.py:1753-1767 ile aynı eşik).
+    signal="BEKLE" veya signal_bars=None ise etiket yok (None döner).
     """
     if signal == "BEKLE" or signal_bars is None:
         return None
@@ -217,6 +221,8 @@ def derive_signal_age_label(signal_bars, signal=None):
     return SIGNAL_AGE_LABELS["OLGUN"]
 
 
+# KULLANILMIYOR (ölü kod) — app.py/hisse.html bu fonksiyonu çağırmıyor, kendi
+# bağımsız kopyalarını kullanıyor: app.py:1917-1931 ve hisse.html:1937-1938.
 # Hacim etiketleri — iki ayrı ölçüt aynı sözlükte, çağıran hangisini istediğini
 # anahtarla seçer. CONFIRMED = vol_confirmed booleanının (signal_vol_ratio>=1.7,
 # app.py:1652) görünen adı, HIGH/VERY_HIGH = hisse.html:3420'deki ayrı vr eşiği
@@ -229,7 +235,11 @@ VOLUME_LABELS = {
 
 
 def derive_volume_label(vol_ratio):
-    """vol_ratio eşiğinden tek kaynaklı hacim-büyüklük etiketi (hisse.html:3420 ile aynı eşik)."""
+    """KULLANILMIYOR (ölü kod) — app.py:1917-1931 ve hisse.html:1937-1938 kendi
+    bağımsız kopyalarını kullanıyor, "tek kaynak" iddiası fiilen yanlış.
+
+    vol_ratio eşiğinden hacim-büyüklük etiketi türetir (hisse.html:3420 ile aynı eşik).
+    """
     try:
         vr = float(vol_ratio)
     except (TypeError, ValueError):

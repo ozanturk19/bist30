@@ -1485,13 +1485,14 @@
 
   }
 
-/* Item 11 fix: mobile hareketliler centering */
+/* Item 11 fix: mobile hareketliler centering — .hp-twin display:flex, grid-template-columns no-op'tu, flex-direction override edilerek gercek dikey istif yapildi */
 @media (max-width: 720px) {
   .hp-twin {
-    grid-template-columns: 1fr !important;
+    flex-direction: column !important;
     gap: 10px !important;
   }
   .hp-section {
+    flex: 1 1 auto !important;
     width: 100%;
     margin: 0;
   }

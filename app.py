@@ -30,6 +30,7 @@ import tempfile
 import html as _html
 import re
 import random
+from urllib.parse import quote
 import copy
 import secrets
 import hashlib
@@ -2507,6 +2508,7 @@ def send_email(to_email, subject, html_body):
             srv.starttls()
             srv.login(SMTP_USER, SMTP_PASS)
             srv.sendmail(SMTP_USER, [to_email], msg.as_string())
+        logger.info("E-posta gönderildi: %s (konu: %s)", to_email, subject)
         return True
     except Exception as e:
         logger.error("E-posta gönderilemedi (%s): %s", to_email, e)
@@ -9419,7 +9421,7 @@ def sitemap():
     for a in ARTICLES:
         if a.get("canonical_slug"):
             continue  # deprecated/duplicate slug — canonical hedefi kendi ARTICLES girdisiyle zaten listeleniyor
-        pages.append({"loc": f"/blog/{a['slug']}", "priority": "0.7", "changefreq": "monthly"})
+        pages.append({"loc": f"/blog/{quote(a['slug'])}", "priority": "0.7", "changefreq": "monthly"})
     today = datetime.now(_TZ_TR).date().isoformat()
     xml   = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']

@@ -886,7 +886,7 @@ Histogram = MACD − Sinyal</pre>
     "desc": "BorsaPusula'nın üçlü filtre sistemi, haftalık trend gate, sinyal onayı ve piyasa barometresi nasıl çalışır?",
     "date": "2026-04-22",
     "mins": 6,
-    "cat": "BorsaPusula",
+    "cat": "Teknik Analiz",
     "body": """
 <p>BorsaPusula, 90 BIST100 hissesini her gün algoritmik olarak analiz eder ve her hisse için AL, SAT veya BEKLE kararı üretir. Bu makalede bu sistemin arka planını anlıyoruz.</p>
 
@@ -1779,7 +1779,7 @@ Her sinyal öncesi şunları kontrol edin:
   {
     "slug": "guclu-momentum-hisseleri-nasil-tespit-edilir",
     "title": "Güçlü Momentum Hisseleri Nasıl Tespit Edilir?",
-    "cat": "Trading Stratejileri",
+    "cat": "Strateji",
     "read_min": 6,
     "summary": "Momentum yatırımcıları, güçlü trend içindeki hisseleri erken tespit ederek üstün getiri elde eder. ADX, Supertrend ve hacim kombinasyonuyla güçlü momentum hisseleri nasıl bulunur?",
     "body": """## Momentum Nedir?
@@ -1995,7 +1995,7 @@ BorsaPusula'nın sinyal algoritması doğrudan mum formasyonlarına bakmaz; Supe
   {
     "slug": "dolar-tl-borsa-iliskisi",
     "title": "Dolar/TL ve BIST İlişkisi: Kur Yükselince Ne Olur?",
-    "cat": "Makro Analiz",
+    "cat": "Makro Ekonomi",
     "read_min": 5,
     "summary": "Türk yatırımcılar için en kritik makro faktörlerden biri kur hareketleridir. USD/TRY artışı BIST'i nasıl etkiler? Hangi sektörler kurdan kazanır, hangisi kaybeder?",
     "body": """## Kur-Borsa İlişkisi Neden Önemli?
@@ -3268,7 +3268,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "Dolar almak hâlâ mantıklı mı?",
        "a": "Dolar TL değer kaybına karşı koruma sağlar ama uzun vadede enflasyon etkisi doların reel değerini de aşındırır. Döviz tutmak bir koruma aracı olarak mantıklıdır; ancak yalnızca dövizde durmak uzun vadede reel getiri açısından zayıf kalabilir."},
       {"q": "BorsaPusula bu kararımda nasıl yardımcı olur?",
-       "a": "BorsaPusula portföyünüzün BIST hissesi bölümü için algoritmik sinyal üretir. Altın ve döviz fiyatlarını makro ticker'da, altın ve gümüş teknik analizini /emtialar sayfasında bulabilirsiniz. Kripto varlıklar /kripto sayfasında takip edilmektedir."}
+       "a": "BorsaPusula portföyünüzün BIST hissesi bölümü için algoritmik sinyal üretir. Altın ve döviz fiyatlarını ana sayfadaki makro ticker'dan takip edebilirsiniz."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'KCHOL']
   },
@@ -3468,8 +3468,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 <p>Bu dağılım kişisel risk toleransına ve yatırım ufkuna göre önemli ölçüde farklılaşabilir.</p>
 
-<h2>BorsaPusula Kripto Teknik Analizi</h2>
-<p>BorsaPusula'nın /kripto sayfasında Bitcoin, Ethereum, BNB ve Solana için algoritmik Supertrend + ADX + EMA12/99 sinyalleri takip edilebilir.</p>
+<h2>BorsaPusula BIST Sinyalleri</h2>
+<p>BorsaPusula, BIST100 hisseleri için algoritmik Supertrend + ADX + EMA sinyalleri üretir. Kripto pozisyonunuzu ayrı bir platformda takip ederken, portföyünüzün BIST bölümünü BorsaPusula ile yönetebilirsiniz.</p>
 """,
     "faqs": [
       {"q": "Bitcoin mi BIST hisseleri mi daha karlı?",
@@ -3479,7 +3479,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "Kripto borsası güvenli mi?",
        "a": "Merkezi kripto borsaları (Binance, Bitfinex gibi) SPK denetiminde değildir ve siz borsanın iflas riskini taşırsınız. FTX iflasında milyonlarca kullanıcı fonuna erişemedi. Donanım cüzdan kullanmak, güvenilir platformlar seçmek ve yatırım miktarını sınırlandırmak risk azaltmanın yollarıdır."},
       {"q": "BorsaPusula kripto sinyalleri veriyor mu?",
-       "a": "Evet. BorsaPusula /kripto sayfasında Bitcoin (BTC), Ethereum (ETH), BNB ve Solana (SOL) için algoritmik Supertrend + ADX + EMA12/99 teknik analiz sinyalleri sunulmaktadır."}
+       "a": "Hayır, BorsaPusula yalnızca BIST100 hisseleri için algoritmik teknik analiz sinyalleri üretir. Kripto varlıklar için ayrı bir platform kullanmanız gerekir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'KCHOL']
   },
@@ -3829,8 +3829,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <p style="margin:8px 0 0 0">TL'de değer kaybı varsa USD cinsinden aynı kalan bir yatırım TL bazında "artmış" görünür. Bu getiri yanıltıcı olabilir. Gerçek değerlendirme için ABD enflasyonu ve TL/USD paritesini birlikte değerlendirin.</p>
 </div>
 
-<h2>BorsaPusula'da ABD Hisse Sinyalleri</h2>
-<p>BorsaPusula'nın /abd bölümünde S&P500 ve Nasdaq'tan 144 büyük ABD hissesi için algoritmik teknik analiz sinyalleri bulunmaktadır. AAPL, MSFT, NVDA, AMZN gibi hisseler için Supertrend + ADX + EMA sinyalleri takip edilebilir.</p>
+<h2>BorsaPusula BIST Sinyalleri</h2>
+<p>BorsaPusula, BIST100 hisseleri için algoritmik Supertrend + ADX + EMA sinyalleri üretir. ABD borsası pozisyonlarınızı ayrı bir platformda takip ederken, portföyünüzün BIST bölümünü BorsaPusula ile yönetebilirsiniz.</p>
 """,
     "faqs": [
       {"q": "S&P500'e yatırım yapmak güvenli mi?",
@@ -3842,7 +3842,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "ABD borsası gece açık olduğunda Türklerden işlem yapılabilir mi?",
        "a": "Evet. NYSE ve Nasdaq'ın işlem saatleri Türkiye saatiyle 16:30-23:00 (yaz) veya 17:30-00:00 (kış) arasındadır. Bu saatlerde aracı kurumunuzun platformu üzerinden işlem yapabilirsiniz."}
     ],
-    "related_tickers": ['AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOGL']
+    "related_tickers": []
   },
 
   # ── ARTICLE 54 ─────────────────────────────────────────────────────────────
@@ -5331,7 +5331,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "desc": "Day trading (gün içi alım satım) ne demek? Bireysel yatırımcılar için day trading neden risklidir? Swing trading ve uzun vadeli yatırımla karşılaştırma.",
     "date": "2026-05-01",
     "mins": 6,
-    "cat": "Trading Stratejileri",
+    "cat": "Strateji",
     "body": """
 <p>Sosyal medyada "günde 1.000₺ kazan" vaatleriyle popülerleşen day trading, en çok yanlış anlaşılan yatırım yöntemidir. Gerçekte ise day trading, kurumsal yatırımcıların bile büyük çoğunluğunun başarısız olduğu, yüksek risk ve bilgi gerektiren bir alandır.</p>
 
@@ -6088,7 +6088,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     "desc": "Scalping ve kısa vadeli trade stratejileri: ne zaman işe yarar, riskleri nelerdir? BIST'e özgü koşullar ve günlük trader için pratik rehber.",
     "date": "2026-05-02",
     "mins": 6,
-    "cat": "Trading Stratejileri",
+    "cat": "Strateji",
     "body": """
 <p>Scalp trading, pozisyonların dakikalar hatta saniyeler içinde açılıp kapandığı, küçük fiyat hareketlerinden sık sık kâr almayı hedefleyen yoğun bir işlem stratejisidir. Uzun vadeli yatırımcılığın tam tersi ucundadır: Şirketi analiz etmek yerine anlık fiyat hareketine odaklanılır.</p>
 
