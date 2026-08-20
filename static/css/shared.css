@@ -12,7 +12,7 @@
   .mbn-inner { display: grid; grid-template-columns: repeat(5, 1fr); height: 64px; max-width: 600px; margin: 0 auto; }
   .mbn-item {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 4px; text-decoration: none; color: #909097; font-size: var(--bp-text-sm); font-weight: 600;
+    gap: 4px; text-decoration: none; color: var(--bp-text3); font-size: var(--bp-text-sm); font-weight: 600;
     letter-spacing: 0.05px; transition: color .2s ease;
     font-family: 'Manrope', system-ui, sans-serif;
     position: relative; background: none; border: none; cursor: pointer;
@@ -92,7 +92,7 @@
   }
   .mbn-push-toggle.push-on {
     background: rgba(var(--bp-gold-rgb),0.12); border-color: rgba(var(--bp-gold-rgb),0.3);
-    color: #f59e0b;
+    color: var(--bp-gold);
   }
   .mbn-push-toggle:active { transform: scale(0.96); }
   /* T2.4 — kanonik kirilim 900px'te TEK (eskiden 768px, .bp-main-nav'in

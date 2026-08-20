@@ -30,7 +30,7 @@
       'background:#161618',
       'border:1px solid ' + col.border,
       'border-left:3px solid ' + col.border,
-      'color:#e5e1e4',
+      'color:var(--bp-text)',
       'padding:10px 16px',
       'border-radius:var(--bp-radius-md)',
       'font-size:13px',

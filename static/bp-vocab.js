@@ -29,7 +29,7 @@
       Bu bir marka/zevk kararı değil tutarlılık kararı olduğu için
       dur-ve-sor listesine alınmadı; CPO aksini isterse tek satır.
 
-   2. Ondalık kümesi 14-anahtarlı üst kümedir. Hiçbir mevcut değeri
+   2. Ondalık kümesi 15-anahtarlı üst kümedir. Hiçbir mevcut değeri
       DEĞİŞTİRMEZ — yalnız eksik anahtarları açık hale getirir.
 
    3. Anahtar bilinmiyorsa etiket olarak ham anahtar döner (şeridin

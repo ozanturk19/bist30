@@ -60,6 +60,7 @@
     clearTimeout(showTimer);
     var t = getTip();
     t.textContent = text;
+    if (activeTarget && activeTarget !== target) activeTarget.removeAttribute('aria-describedby');
     activeTarget = target;
     target.setAttribute('aria-describedby', ID);
     t.style.left = '-9999px';

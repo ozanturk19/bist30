@@ -39,8 +39,8 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
       ? 'Veriler ' + ageTxt + ' önce güncellendi.'
       : 'Veriler güncellendi — son güncelleme zamanı doğrulanamıyor.';
     if (bTxt) bTxt.textContent = staleTxt + suffix;
-    banner.style.background  = '';
-    banner.style.borderColor = '';
+    banner.style.background  = 'rgba(245,201,73,.10)';
+    banner.style.borderColor = 'rgba(245,201,73,.4)';
     banner.style.display     = 'block';
   } else if (dq === 'seans_disi') {
     /* CPO-1338: seans dışı stale by-design — banner KASITLI gizli (fresh ile
