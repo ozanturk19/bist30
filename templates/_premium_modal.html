@@ -7,15 +7,19 @@
    index.html dahil tüm sayfalarda bu partial tek kaynak (Option A, CPO MSG-122). */
 {
   let _premiumModalRelease = null;
+  let _pmHideTimer = null;
   window.closePremiumModal = function() {
     const modal = document.getElementById('premiumModal');
     if (!modal) return;
     if (_premiumModalRelease) { _premiumModalRelease(); _premiumModalRelease = null; }
     modal.classList.remove('visible');
-    setTimeout(() => { modal.style.display = 'none'; }, 200);
+    clearTimeout(_pmHideTimer);
+    _pmHideTimer = setTimeout(() => { modal.style.display = 'none'; _pmHideTimer = null; }, 200);
   };
 
   window.openPremiumModal = function() {
+    clearTimeout(_pmHideTimer);
+    _pmHideTimer = null;
     let modal = document.getElementById('premiumModal');
     if (!modal) {
       modal = document.createElement('div');
@@ -47,6 +51,7 @@
           </div>
         </div>`;
       document.body.appendChild(modal);
+      modal.addEventListener('click', e => { if (e.target === modal) closePremiumModal(); });
     }
     modal.style.display = 'flex';
     setTimeout(() => {

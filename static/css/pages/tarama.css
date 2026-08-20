@@ -16,23 +16,8 @@
     padding:12px 24px; display:flex; align-items:center; gap:14px;
     position:sticky; top:0; z-index:var(--bp-z-dropdown);
   }
-  .back-btn {
-    display:flex; align-items:center; gap:6px; color:var(--text2);
-    font-size:var(--bp-text-base); text-decoration:none; padding:5px 10px;
-    border:1px solid var(--border); border-radius:var(--bp-radius); background:var(--surface2);
-    transition:all .15s; white-space:nowrap;
-  }
-  .back-btn:hover { background:var(--border); color:var(--text); }
   .page-title { font-size:var(--bp-text-xl); font-weight:700; color:#f0f6fc; }
   .page-sub   { font-size:var(--bp-text-sm); color:var(--text2); margin-top:1px; }
-  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a {
-    padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500;
-    color:var(--text2); text-decoration:none; transition:all .15s; white-space:nowrap;
-  }
-  .top-nav-links a:hover { background:var(--surface2); color:var(--text); }
-  .top-nav-links a.active { background:var(--surface2); color:var(--brand); }
-  @media (max-width:780px) { .top-nav-links { display:none; } }
 
   /* ── Makro bar ── */
   .macro-bar {
@@ -208,9 +193,6 @@
 
   /* ── Tablo ── */
   .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  @media(max-width:600px) {
-    table { min-width: 340px; }
-  }
   table { width:100%; border-collapse:collapse; }
   thead th {
     font-size:var(--bp-text-2xs); color:var(--text2); text-transform:uppercase; letter-spacing:.5px;
@@ -361,7 +343,8 @@
 
   /* TH tooltip (yeni kolon başlıkları) */
   thead th[data-tooltip] { position:relative; cursor:help; }
-  thead th[data-tooltip]:hover::after {
+  thead th[data-tooltip]:hover::after,
+  thead th[data-tooltip]:focus-within::after {
     content: attr(data-tooltip);
     position:absolute; top:100%; left:50%;
     transform:translateX(-50%) translateY(6px);

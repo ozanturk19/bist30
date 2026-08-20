@@ -90,7 +90,15 @@ function _mbnSyncBell() {
   btn.classList.toggle('push-active', active);
   if (toggle) { toggle.textContent = active ? 'KAPAT' : 'AÇ'; toggle.classList.toggle('push-on', active); }
   if (sub) sub.textContent = active ? 'Bildirimler açık — kapatmak için KAPAT' : 'AL/SAT sinyali gelince bildirim al';
-  if (icon) icon.textContent = active ? '🔕' : '🔔';
+  if (icon) {
+    let inner = icon.querySelector('[aria-hidden]');
+    if (!inner) {
+      inner = document.createElement('span');
+      inner.setAttribute('aria-hidden', 'true');
+      icon.appendChild(inner);
+    }
+    inner.textContent = active ? '🔕' : '🔔';
+  }
 }
 
 async function mbnTogglePush() {

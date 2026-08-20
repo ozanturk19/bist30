@@ -294,6 +294,8 @@ async function applyFilters() {
     _sortDir = _sortDefaultDir[sort] || 'desc';
   }
   _currentSort = sort;
+  _resetSortTHVisuals();
+  _applySortTHVisual(sort);
 
   const params = new URLSearchParams({
     signal: (sig === 'PREMIUM' ? 'AL' : sig),
@@ -417,8 +419,9 @@ function _debounce(fn, ms) {
 const _applyFiltersDebounced = _debounce(applyFilters, 350);
 
 function _initReactiveFilters() {
-  // Select'ler — anlık (0ms)
-  ['fSignal', 'fSector', 'sortSel'].forEach(id => {
+  // Select'ler — anlık (0ms). sortSel'in zaten satır 97'de inline onchange'i var,
+  // ikinci bir addEventListener çift applyFilters() tetiklemesin diye listeye alınmadı.
+  ['fSignal', 'fSector'].forEach(id => {
     const el = document.getElementById(id);
     if (el && !el.dataset.bpReactive) {
       el.addEventListener('change', applyFilters);

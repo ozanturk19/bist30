@@ -8962,7 +8962,9 @@ def api_tarama():
     def _tarama_sort_key(x):
         v = x.get(sort_by)
         if v is None:
-            v = 0
+            # signal_bars icin None 0'a degil sonsuza esitlenir: bilinmeyen tazelik
+            # listenin basina degil sonuna dusmeli (frontend de bunu 'eski/bilinmiyor' gosterir)
+            v = float('inf') if sort_by == 'signal_bars' else 0
         return (isinstance(v, str), v)
     results.sort(key=_tarama_sort_key, reverse=rev)
 
@@ -10049,7 +10051,7 @@ def offline_page():
 
 @app.route("/hakkinda")
 def hakkinda():
-    return render_template("hakkinda.html", bist_count=len(BIST100))
+    return render_template("hakkinda.html", bist_count=BIST_STOCK_COUNT)
 
 
 @app.route("/gizlilik")
@@ -10073,7 +10075,7 @@ def api_contact():
 
     if not all([name, email, message]):
         return jsonify({"ok": False, "error": "Eksik alan"}), 400
-    if "@" not in email or "." not in email:
+    if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
         return jsonify({"ok": False, "error": "Geçersiz e-posta"}), 400
 
     ADMIN_MAIL = os.environ.get("ADMIN_MAIL", "iletisim@borsapusula.com")
@@ -11283,12 +11285,23 @@ def api_profile():
     if not token:
         return safe_json({"ok": False, "error": "Token eksik"}), 400
 
+    _ALLOWED_LEVEL = ("yeni", "orta", "deneyimli", "profesyonel")
+    _ALLOWED_FREQ = ("gunluk", "swing", "pozisyon", "pasif")
+    _ALLOWED_SIZE = ("0-10k", "10-50k", "50-250k", "250k+")
+    _ALLOWED_SEGMENTS = ("bist30", "bist100", "yildiz", "bankacilik", "teknoloji", "enerji", "sanayi", "gyo")
+
     level     = (data.get("level") or "").strip()[:20]
+    if level not in _ALLOWED_LEVEL:
+        level = ""
     freq      = (data.get("freq") or "").strip()[:20]
+    if freq not in _ALLOWED_FREQ:
+        freq = ""
     size      = (data.get("size") or "").strip()[:30]
+    if size not in _ALLOWED_SIZE:
+        size = ""
     segments  = data.get("segments") or []
     if not isinstance(segments, list): segments = []
-    segments = [str(s).strip()[:30] for s in segments][:10]
+    segments = [str(s).strip()[:30] for s in segments if str(s).strip() in _ALLOWED_SEGMENTS][:10]
     mail_pref = (data.get("mail_pref") or "daily").strip()[:20]
     if mail_pref not in ("daily", "instant", "premium", "weekly"):
         mail_pref = "daily"
@@ -12095,6 +12108,14 @@ def page_not_found(e):
     if request.path.startswith("/api/"):
         return jsonify({"error": "Bulunamadı"}), 404
     return render_template("404.html"), 404
+
+
+# DEV2 bug-hunt r29: Flask-Limiter varsayilan 429 gövdesi text/html idi,
+# tüm rate-limitli route'lar /api/* veya /admin/* (bkz. @limiter.limit greplemesi) —
+# form JS'leri res.json() ile SyntaxError'a düşüp kullanıcıya yanlış "bağlantı hatası" gösteriyordu.
+@app.errorhandler(429)
+def rate_limit_exceeded(e):
+    return jsonify({"ok": False, "error": "Çok fazla istek, lütfen biraz sonra tekrar deneyin."}), 429
 
 
 if __name__ == "__main__":
