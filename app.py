@@ -809,7 +809,7 @@ def signal_date_label_filter(signal_date):
 
 
 @app.template_filter('signal_age_text')
-def signal_age_text_filter(signal_date):
+def signal_age_text_filter(signal_date, today=None):
     """Sinyalin TAKVİM yaşı: "Bugün" / "Dün" / "N gün". Bilinmiyorsa "—".
 
     Mutlak tarihin yanında gösterilen yerlerde kullanılır (ozet/karsilastir/
@@ -819,8 +819,18 @@ def signal_age_text_filter(signal_date):
     NOT: negatif age (gelecek tarihli signal_date, veri hatasi/saat dilimi
     kaymasi) "-1 gün" gibi anlamsiz bir metin basmasin diye
     derive_signal_date_label ile ayni gecmis/gelecek ayrimina duser.
+
+    `today`: bug-hunt r27 — opsiyonel referans gün (date veya ISO string).
+    /ozet/<tarih> arşiv sayfası is_signal_from_today() ile aynı ilkeyle
+    (referans gün ARŞİV günü, gerçek bugün değil) yaş hesaplamak için geçer;
+    diğer çağıranlar (hisse/sinyal_performans) vermez, davranış aynı kalır.
     """
-    age = signal_date_age_days(signal_date)
+    if today and not isinstance(today, date):
+        try:
+            today = date.fromisoformat(today)
+        except (ValueError, TypeError):
+            today = None
+    age = signal_date_age_days(signal_date, today=today or None)
     if age is None:
         return "—"
     if age == 0:
@@ -9755,6 +9765,10 @@ def karsilastir():
             page_title = f"{title_list} Karşılaştırma | BorsaPusula"
             page_description = (f"{', '.join(tickers)} hisselerini teknik sinyal, "
                                 f"F/K, ROE, ADX, RSI ve yatırım skoru ile yan yana karşılaştırın.")
+        else:
+            # bug-hunt r27: raw dolu ama hiçbir segment whitelist'i geçmedi —
+            # tickers_param'ı da resetle, yoksa ham/geçersiz girdi meta+JS'e sızıyor
+            tickers_param = ""
     return render_template("karsilastir.html",
                            tickers_param=tickers_param,
                            canonical_url=canonical_url,
@@ -9767,9 +9781,12 @@ def karsilastir():
 @limiter.limit("30 per minute")
 def api_karsilastir():
     """2-4 hisseyi yan yana karşılaştır — tüm sinyal metrikleri."""
+    # bug-hunt r27: sayfa route'u (/karsilastir) ^[A-Z0-9]{1,10}$ whitelist uyguluyor,
+    # bu endpoint uygulamıyordu — doğrulamasız string JSON'a (ticker/name alanı) yansıyıp
+    # karsilastir.html buildTable()'da kaçışsız innerHTML'e akıyordu (defense-in-depth)
     tickers = [t.strip().upper() for t in
                request.args.get("tickers", "").split(",")
-               if t.strip()][:4]
+               if re.match(r"^[A-Z0-9]{1,10}$", t.strip().upper())][:4]
     if not tickers:
         return safe_json({"ok": False, "error": "tickers parametresi gerekli"}), 400
 
@@ -10450,7 +10467,10 @@ def hisseler_hub():
             in_any.add(t)
     others = sorted([t for t in bist_set if t not in in_any])
     if others:
-        by_sector["Diğer"] = [(t, STOCK_NAMES.get(t, t)) for t in others]
+        by_sector.setdefault("Diğer", []).extend(
+            (t, STOCK_NAMES.get(t, t)) for t in others
+        )
+        by_sector["Diğer"].sort(key=lambda x: x[0])
 
     # Alfabetik tam liste (her harf grubu)
     all_pairs = sorted(

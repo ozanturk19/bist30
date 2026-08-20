@@ -1,10 +1,10 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
-<meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse trend bozulmuş? Bugün sinyal değişen hisseler.">
+<meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse trend bozulmuş? {% if historical_date %}O gün sinyal değişen hisseler.{% else %}Bugün sinyal değişen hisseler.{% endif %}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 {% set canonical_url = ('https://borsapusula.com/ozet/' ~ historical_date) if historical_date else 'https://borsapusula.com/ozet' %}
 <link rel="canonical" href="{{ canonical_url }}">
 <meta property="og:title"       content="BIST100 Günlük Sinyal Özeti — {{ today_str }}">
-<meta property="og:description" content="Bugün BIST100'de {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
+<meta property="og:description" content="{% if historical_date %}{{ today_str }} tarihinde{% else %}Bugün{% endif %} BIST100'de {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
 <meta property="og:url"         content="{{ canonical_url }}">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
@@ -104,6 +104,7 @@
   <div style="display:flex;align-items:center;gap:8px">
     <select id="dateSelector"
       aria-label="Geçmiş özet tarihi seç"
+      data-current="{{ historical_date if historical_date else '' }}"
       style="background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text3);padding:6px 10px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);cursor:pointer;outline:none"
       onchange="goToDate(this.value)">
       <option value="">📅 Geçmiş Tarih Seç</option>
@@ -125,6 +126,8 @@ fetch('/api/ozet/snapshots').then(r=>r.json()).then(d=>{
     o.textContent = `${dd}.${m}.${y}`;
     sel.appendChild(o);
   });
+  // bug-hunt r27: sayfa /ozet/<tarih> arşiv görünümündeyken seçici placeholder'a dönüyordu
+  if (sel.dataset.current) sel.value = sel.dataset.current;
 }).catch(()=>{});
 function goToDate(date) {
   if (date) window.location.href = '/ozet/' + date;
@@ -224,7 +227,7 @@ function goToDate(date) {
        onmouseover="this.style.background='#201f21'" onmouseout="this.style.background='#1c1b1f'">
       <span style="font-size:var(--bp-text-base);font-weight:700;color:#f0f6fc">{{ s.ticker }}</span>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
-        {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
+        {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <span style="font-size:var(--bp-text-xs);font-weight:600;color:{% if ret >= 0 %}#00e290{% else %}#f85149{% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
       {% endif %}
       <span style="font-size:var(--bp-text-2xs);color:#3fb950;font-weight:600"><span role="img" aria-label="İdeal giriş sinyali">✅</span></span>
@@ -292,9 +295,9 @@ function goToDate(date) {
       <div class="sc-ticker">{{ s.ticker }}</div>
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-al">▲ Güçlü Trend</div>
-      <div class="sc-meta">{{ s.signal_date|signal_age_text }} · {{ s.signal_date }}</div>
+      <div class="sc-meta">{{ s.signal_date|signal_age_text(historical_date) }} · {{ s.signal_date }}</div>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
-        {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
+        {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
           <span class="sc-ret {{ 'sc-ret-pos' if ret >= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
         </div>
@@ -317,9 +320,9 @@ function goToDate(date) {
       <div class="sc-ticker">{{ s.ticker }}</div>
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-sat">▼ Trend Bozuldu</div>
-      <div class="sc-meta">{{ s.signal_date|signal_age_text }} · {{ s.signal_date }}</div>
+      <div class="sc-meta">{{ s.signal_date|signal_age_text(historical_date) }} · {{ s.signal_date }}</div>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
-        {% set ret = ((s.price - s.signal_price) / s.signal_price * 100) | round(1) %}
+        {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
           <span class="sc-ret {{ 'sc-ret-pos' if ret <= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
         </div>
