@@ -93,7 +93,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260819A">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260820A">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=cf24764f">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
@@ -1631,7 +1631,7 @@ function renderSummary(s, signalData) {
   /* Sinyal kartı */
   document.getElementById('icSignal').innerHTML = icon +  // label bp-hero-card'da gosteriliyor
     /* CPO-535 #36: is_premium (RVOL ≥ 1.20 backtest-onaylı) → "⭐ Hacim Onaylı" chip */
-    (signalData && signalData.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20. Backtest: Win Rate %36.7 → %51.5, 4.3x getiri" tabindex="0" style="display:inline-block;margin-left:4px;font-size:11px;color:var(--bp-volume);background:var(--bp-volume-bg);padding:1px 6px;border-radius:8px;border:1px solid var(--bp-volume-bd);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
+    (signalData && signalData.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="display:inline-block;margin-left:4px;font-size:11px;color:var(--bp-volume);background:var(--bp-volume-bg);padding:1px 6px;border-radius:8px;border:1px solid var(--bp-volume-bd);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
   const MAX = 3;
   const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
   const dotCls   = s.signal === 'SAT' ? 'dot-bear' : s.signal === 'AL' ? 'dot-bull' : 'dot-empty';
@@ -1823,7 +1823,7 @@ function renderSummary(s, signalData) {
       hpRvolVal.className = 'hp-row-val ' + cls;
       hpRvolVal.innerHTML = `${rvolVal.toFixed(2)}×` +
         /* CPO-535 #36: RVOL onaylı chip → "⭐ Hacim Onaylı" */
-        (isPremium ? ' <span class="hp-tag premium" data-tip="RVOL ≥ 1.20 — Hacim onaylı sinyal. Backtest: Win Rate %51.5" tabindex="0">⭐ Hacim Onaylı</span>' : '');
+        (isPremium ? ' <span class="hp-tag premium" data-tip="RVOL ≥ 1.20 — Hacim onaylı sinyal" tabindex="0">⭐ Hacim Onaylı</span>' : '');
       hpRvolRow.style.display = '';
     }
 

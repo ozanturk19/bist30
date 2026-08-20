@@ -15,7 +15,7 @@
   {"@type":"ListItem","position":2,"name":"Hakkında","item":"https://borsapusula.com/hakkinda"}
 ]}
 </script>
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260819A">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260820A">
 <link rel="stylesheet" href="/static/css/pages/hakkinda.css?v=53180e2c">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -47,7 +47,7 @@
 <!-- ── SAYILARLA PLATFORM ─────────────────────────────────────── -->
 <div class="stats-row">
   <div class="stat-box">
-    <div class="stat-num">~145</div>
+    <div class="stat-num">{{ bist_count }}</div>
     <div class="stat-lbl">Takip edilen BIST hissesi</div>
   </div>
   <div class="stat-box">
@@ -59,7 +59,7 @@
     <div class="stat-lbl">Sinyal indikatörü (ST+ADX+EMA)</div>
   </div>
   <div class="stat-box">
-    <div class="stat-num">500+</div>
+    <div class="stat-num">2 yıl</div>
     <div class="stat-lbl">Günlük bar geçmişi</div>
   </div>
 </div>
@@ -103,7 +103,7 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
   <div class="market-card">
     <div class="market-card-title"><span aria-hidden="true">🇹🇷</span> BIST100</div>
     <ul>
-      <li>~145 hisse, sektör filtreleri</li>
+      <li>{{ bist_count }} hisse, sektör filtreleri</li>
       <li>BIST30 ve BIST100 endeks grafikleri</li>
       <li>Canlı fiyat akışı (SSE)</li>
       <li>KAP bildirim entegrasyonu</li>
@@ -126,7 +126,7 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
     <div class="feature-icon"><span aria-hidden="true">📈</span></div>
     <div>
       <div class="feature-title">Hisse Detay Sayfası</div>
-      <div class="feature-desc">Bireysel grafik (500 gün), Supertrend + EMA çakıştırması, sinyal geçmişi, KAP haberleri, AI haber özeti.</div>
+      <div class="feature-desc">Bireysel grafik (2 yıl geçmiş), Supertrend + EMA çakıştırması, sinyal geçmişi, KAP haberleri, AI haber özeti.</div>
     </div>
   </div>
   <div class="feature-card">
@@ -244,7 +244,7 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
   <li><strong>Fiyat verisi:</strong> Yahoo Finance (yfinance) — ücretsiz, ~15 dakika gecikmeli</li>
   <li><strong>Sinyal hesaplama:</strong> Her 15 dakikada bir sunucu tarafında yenilenir</li>
   <li><strong>Canlı fiyat:</strong> SSE ile yaklaşık 30 saniyede bir tarayıcıya iletilir</li>
-  <li><strong>BIST kapsamı:</strong> ~145 hisse (BIST100 + ek hisseler), 12 sektör</li>
+  <li><strong>BIST kapsamı:</strong> {{ bist_count }} hisse (BIST100 + ek hisseler), 12 sektör</li>
   <li><strong>KAP haberleri:</strong> Anlık KAP bildirimleri hisse sayfalarında gösterilir</li>
   <li><strong>AI haberleri:</strong> Gemini 2.0 Flash — Gemini 429 rate limit nedeniyle önbellek kullanılır</li>
 </ul>
@@ -254,7 +254,7 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
 <ul class="roadmap-list">
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>BIST100 sinyal motoru (Supertrend + ADX + EMA)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>BIST30 / BIST100 endeks grafikleri</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Bireysel hisse sayfaları (~145 hisse)</span></li>
+  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Bireysel hisse sayfaları ({{ bist_count }} hisse)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Canlı fiyat akışı (SSE, ~30 sn)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Sinyal geçmişi tablosu</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Hacim grafiği + 52-hafta aralık barı</span></li>
@@ -271,8 +271,8 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Sinyal Performans Analizi (backtest istatistikleri)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Blog — teknik analiz içerikleri</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>PWA (Service Worker, çevrimdışı destek)</span></li>
+  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Kişisel fiyat alarmları</span></li>
   <li><span class="rl-wip"><span role="img" aria-label="Yapım aşamasında"><span aria-hidden="true">🔜</span></span></span> <span>Telegram sinyal botu</span></li>
-  <li><span class="rl-wip"><span role="img" aria-label="Yapım aşamasında"><span aria-hidden="true">🔜</span></span></span> <span>Kişisel fiyat alarmları (breakout bildirimi)</span></li>
   <li><span class="rl-wip"><span role="img" aria-label="Yapım aşamasında"><span aria-hidden="true">🔜</span></span></span> <span>Genişletilmiş backtest arayüzü (parametre testi)</span></li>
   <li><span class="rl-todo"><span role="img" aria-label="Planlanan"><span aria-hidden="true">💡</span></span></span> <span>Sosyal paylaşım (sinyal kartı görseli)</span></li>
 </ul>

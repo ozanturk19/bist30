@@ -6,6 +6,8 @@
 
 /* ── Dark theme (default) ──────────────────────────────────── */
 :root {
+  color-scheme: dark;
+
   /* Backgrounds */
   --bp-bg:        #0e0e12;
   --bp-surface:   #141416;
@@ -96,6 +98,14 @@
   /* Compat aliases — eski stil kodlarıyla uyumluluk */
   --accent:       #b8c3ff;
   --bg2:          #141416;
+}
+
+/* CPO-DEV2-042 P1-UX-3: html arka planı yoksa iOS Safari rubber-band
+   overscroll'da WebKit'in varsayılan (açık) rengine düşüp beyaz flash
+   yaratıyordu — body'nin ayrı ayrı her sayfada set ettiği arka planın
+   önüne, dokümanın kendisine tek noktadan garanti. */
+html {
+  background: var(--bp-bg);
 }
 
 

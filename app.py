@@ -10023,7 +10023,7 @@ def offline_page():
 
 @app.route("/hakkinda")
 def hakkinda():
-    return render_template("hakkinda.html")
+    return render_template("hakkinda.html", bist_count=len(BIST100))
 
 
 @app.route("/gizlilik")
