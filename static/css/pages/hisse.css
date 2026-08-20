@@ -254,12 +254,12 @@
     box-shadow: 0 0 8px rgba(var(--bp-al-rgb), 0.18), inset 0 0 8px rgba(var(--bp-al-rgb), 0.05);
   }
   .signal-SAT  {
-    background: rgba(var(--bp-sat-rgb),.18);  color: #ff7b72; border: 1px solid rgba(var(--bp-sat-rgb),.35);
+    background: rgba(var(--bp-sat-rgb),.18);  color: var(--bp-sat); border: 1px solid rgba(var(--bp-sat-rgb),.35);
     box-shadow: 0 0 6px rgba(var(--bp-sat-rgb), 0.18);
   }
   .signal-BEKLE{ background: rgba(var(--bp-text3-rgb),.15); color: var(--bp-bkl); border: 1px solid rgba(var(--bp-text3-rgb),.3); }
   .signal-badge.bull    { background: rgba(var(--bp-al-rgb),.10);   color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.35); box-shadow: 0 0 8px rgba(var(--bp-al-rgb),.18), inset 0 0 8px rgba(var(--bp-al-rgb),.05); }
-  .signal-badge.bear    { background: rgba(var(--bp-sat-rgb),.18);    color: #ff7b72; border: 1px solid rgba(var(--bp-sat-rgb),.35);  box-shadow: 0 0 6px rgba(var(--bp-sat-rgb),.18); }
+  .signal-badge.bear    { background: rgba(var(--bp-sat-rgb),.18);    color: var(--bp-sat); border: 1px solid rgba(var(--bp-sat-rgb),.35);  box-shadow: 0 0 6px rgba(var(--bp-sat-rgb),.18); }
   .signal-badge.neutral { background: rgba(var(--bp-text3-rgb),.15); color: var(--bp-bkl); border: 1px solid rgba(var(--bp-text3-rgb),.3); }
 
   /* F2 — Anomali rozet */
@@ -506,16 +506,6 @@
   .hacim-profili .hp-row-val .hp-tag.confirmed { color:var(--bp-al); background:rgba(0,226,144,.08); border:1px solid rgba(0,226,144,.40); }
   .hacim-profili .hp-row-summary { margin-top:6px; font-size:var(--bp-text-sm); color:var(--bp-text3); font-style:italic; line-height:1.4; }
 
-  .vol-status-val {
-    font-size: var(--bp-text-xl);
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-  .vol-status-detail {
-    font-size: var(--bp-text-xs);
-    color: var(--bp-text3);
-  }
-
   /* ── İndikatör badges ── */
   .indicators-section {
     background: var(--bp-surface);
@@ -655,55 +645,6 @@
     background: var(--bp-surface2);
     transform: translateY(-1px);
   }
-
-  /* ── Diğer hisseler ── */
-  .others-section {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
-    padding: 14px 0 14px 18px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-  .others-scroll {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-right: 18px;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--bp-border2) transparent;
-  }
-  .others-scroll::-webkit-scrollbar { height: 4px; }
-  .others-scroll::-webkit-scrollbar-track { background: transparent; }
-  .others-scroll::-webkit-scrollbar-thumb { background: var(--bp-border2); border-radius:var(--bp-radius-xs); }
-  .other-card {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 8px 11px;
-    background: var(--bp-surface2);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-md);
-    min-width: 78px;
-    text-decoration: none;
-    transition: all .15s;
-    position: relative;
-  }
-  .other-card:hover { border-color: var(--bp-border2); background: var(--bp-surface3); transform: translateY(-1px); }
-  .other-card.oc-active { border-color: var(--bp-brand); background: rgba(var(--bp-brand-rgb),.06); }
-  .oc-ticker { font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text); }
-  .oc-price  { font-size: var(--bp-text-xs); color: var(--bp-text2); font-variant-numeric: tabular-nums; margin-top: 1px; }
-  .oc-chg    { font-size: var(--bp-text-2xs); font-variant-numeric: tabular-nums; font-weight: 600; }
-  .oc-chg.pos { color: var(--bp-al); }
-  .oc-chg.neg { color: var(--bp-sat); }
-  .oc-chg.neu { color: var(--bp-bkl); }
-  .oc-sig    { font-size: var(--bp-text-2xs); font-weight: 700; }
-  .chip-al   { color: var(--bp-al); }
-  .chip-sat  { color: var(--bp-sat); }
-  .chip-bekle{ color: var(--bp-bkl); }
 
   /* ── AI Haberler ── */
   .news-section {
@@ -1056,7 +997,6 @@
       border-radius:var(--bp-radius-lg);
       padding: 4px;
     }
-    .bp-segments-spacer { height: 52px; }
     .bp-segments-inner a {
       flex: 1; text-align: center;
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;

@@ -137,7 +137,6 @@
   @media (max-width: 768px) {
     .header-search-btn { min-width: 44px; min-height: 44px; }
     #header-push-bell { min-width: 44px; min-height: 44px; }
-    .btn-refresh { min-height: 44px; }
   }
 
   /* Logo */
@@ -145,47 +144,11 @@
     display: flex; align-items: center; gap: 10px;
     text-decoration: none; flex-shrink: 0;
   }
-  .logo-mark {
-    width: 36px; height: 36px; flex-shrink: 0;
-  }
-  .logo-text { display: flex; flex-direction: column; line-height: 1.15; }
-  .logo-name {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    font-size: var(--bp-text-lg); font-weight: 700; color: var(--bp-text);
-    letter-spacing: -0.3px;
-  }
-  .logo-name strong { color: var(--bp-al); font-weight: 700; }
-  .logo-sub {
-    font-size: var(--bp-text-2xs); font-weight: 500; color: var(--bp-text3);
-    text-transform: uppercase; letter-spacing: 0.6px;
-  }
-
-  /* Header nav */
-  .header-nav {
-    display: flex; gap: 4px; align-items: center; margin-left: 8px;
-  }
-  .header-nav a {
-    display: flex; align-items: center; gap: 5px;
-    padding: 6px 11px; border-radius: var(--bp-radius-sm);
-    font-size: var(--bp-text-base); font-weight: 500; color: var(--bp-text2);
-    text-decoration: none; transition: all .15s;
-    white-space: nowrap;
-  }
-  .header-nav a:hover { background: var(--bp-surface2); color: var(--bp-text); }
-  .header-nav a.active { background: var(--bp-surface2); color: var(--bp-brand); }
 
   /* Header right actions */
   .header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
   #updated { font-size: var(--bp-text-xs); color: var(--bp-text3); }
 
-  .btn-refresh {
-    background: var(--bp-surface2); border: 1px solid var(--bp-border);
-    color: var(--bp-text2); padding: 6px 12px; border-radius: var(--bp-radius-sm);
-    cursor: pointer; font-size: var(--bp-text-sm); font-weight: 500; font-family: inherit;
-    display: flex; align-items: center; gap: 5px; transition: all 0.15s;
-  }
-  .btn-refresh:hover { background: var(--bp-surface3); border-color: var(--bp-border2); color: var(--bp-text); }
-  .btn-refresh.spinning svg { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .container { max-width: var(--bp-container-1400); margin: 0 auto; padding: 20px 24px; }
@@ -265,10 +228,6 @@
   .sentiment-badge.s-positive { background: rgba(0,226,144,0.12); color: #00e290; border: 1px solid rgba(0,226,144,0.3); }
   .sentiment-badge.s-negative { background: rgba(248,81,73,0.12); color: #f85149; border: 1px solid rgba(248,81,73,0.3); }
   .sentiment-badge.s-neutral  { background: rgba(139,139,151,0.12); color: #8b8b97; border: 1px solid rgba(139,139,151,0.25); }
-  .anomaly-badge-abs {
-    position: absolute; top: 8px; right: 8px;
-  }
-
   /* Tablo grup başlık satırı (desktop) */
   tr.tier-group-header td {
     padding: 14px 12px 6px;
@@ -1165,12 +1124,6 @@
   }
 
   /* Sağ: öne çıkanlar paneli — 2 kolon yan yana */
-  .hero-panel {
-    flex: 1; min-width: 0;
-    display: flex; flex-direction: column;
-    overflow: hidden;
-    position: relative;
-  }
   .bp-highlights {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
@@ -1202,8 +1155,6 @@
     font-size: var(--bp-text-2xs); font-weight: 700; color: var(--bp-text3);
     text-transform: uppercase; letter-spacing: .6px; margin: 0 0 5px;
   }
-  .hp-divider { height: 1px; background: var(--bp-border); flex-shrink: 0; }
-
   .hp-row {
     display: flex; align-items: center; gap: 7px;
     padding: 4px 6px; text-decoration: none;
@@ -1487,18 +1438,11 @@
   .mc-row2   { display:flex; align-items:center; justify-content:space-between; margin-top:9px; padding-top:8px; border-top:1px solid rgba(var(--bp-border-rgb),0.6); }
   .mc-entry  { font-size:var(--bp-text-xs); color: var(--bp-text3); }
 
-  /* Refresh label */
-  .refresh-label { font-size: var(--bp-text-sm); }
-
   /* Responsive */
   body { overflow-x: hidden; }
   @media (max-width: 768px) {
     .container { padding: 12px; }
     header { padding: 0 14px; height: 56px; }
-    .header-nav { display: none; }
-    .logo-sub { display: none; }
-    .logo-name { font-size: var(--bp-text-15); }
-    .refresh-label { display: none; }
     /* Dual endeks kartları — mobilde yığılmış */
     .dual-endeks { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
     .endeks-card { padding: 10px 12px; }

@@ -52,13 +52,6 @@
   --bp-volume-bg: rgba(var(--bp-volume-rgb), 0.10);
   --bp-volume-bd: rgba(var(--bp-volume-rgb), 0.45);
   --bp-premium:   #a855f7;   /* tier/paywall (Premium) — SPEC-018 W2 mor imza */
-  --bp-premium-bg: rgba(var(--bp-premium-rgb), 0.10);
-  --bp-premium-bd: rgba(var(--bp-premium-rgb), 0.35);
-  --bp-premium-glow-soft: rgba(168, 85, 247, 0.55);
-  --bp-premium-glow-strong: rgba(168, 85, 247, 0.95);
-  --bp-premium-glow-outer: rgba(var(--bp-premium-rgb), 0.35);
-  --bp-premium-glow-fade: rgba(126, 58, 191, 0.4);
-  --bp-premium-glow-fade2: rgba(126, 58, 191, 0.7);
 
   /* Radius */
   --bp-radius:    6px;
@@ -466,12 +459,9 @@ html {
 
 }
 
-/* T7.5.6 — veri-bekleyen sayfalar icin nav/footer 'kismi' rozeti.
-   Tek dosya, 0 sablon degisikligi (bkz FAZ 7.5 eki, Bolum 3). */
-nav a[href="/kripto"]::after, nav a[href="/emtialar"]::after, nav a[href="/abd"]::after,
-footer a[href="/kripto"]::after, footer a[href="/emtialar"]::after, footer a[href="/abd"]::after {
-  content: "kısmi"; font-size: 9px; opacity: .6; margin-left: 4px; vertical-align: super;
-}
+/* bughunt-r28: T7.5.6 nav/footer "kismi" rozeti kurali kaldirildi — hedefledigi
+   /kripto, /emtialar, /abd rotalari 19.08 BIST Odakli Sadelesme (CPO-DEV2-036)
+   ile kaldirildi, hicbir sablon bu href'leri artik uretmiyor (kural olu). */
 
 /* FAZ8 — prefers-reduced-motion global kural. tokens.css tum sayfalarda
    yukleniyor, bu yuzden 33 sablonun her birine ayri ayri eklemek yerine

@@ -149,13 +149,16 @@
 
   function filter(q) {
     if (!_syms) return [];
-    var Q = q.toLowerCase().trim();
+    // bughunt-r28: toLowerCase() Turkce buyuk 'I'/'i' icin locale-bagimsiz calisiyor,
+    // 'I' -> 'i' + BIRLESTIRICI NOKTA (U+0307) uretip aramayi kiriyor (Is Bankasi vb.
+    // "I" ile baslayan/iceren ~10 hisse kucuk harfle araninca hic bulunamiyordu).
+    var Q = q.toLocaleLowerCase('tr').trim();
     if (!Q) return [];
     var out = [];
     for (var i = 0; i < _syms.length; i++) {
       var s = _syms[i];
-      var t = s.t.toLowerCase();
-      var n = (s.n || '').toLowerCase();
+      var t = s.t.toLocaleLowerCase('tr');
+      var n = (s.n || '').toLocaleLowerCase('tr');
       var score = 0;
       if (t === Q) score = 100;
       else if (t.indexOf(Q) === 0) score = 60;

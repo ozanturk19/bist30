@@ -1307,16 +1307,19 @@ BIST hisseleri günde %5-15 hareket edebilir. Swing trader bu dalgalanmalardan y
 
 ### 1. Supertrend
 Swing traderin en iyi arkadaşı. Trendin yönünü ve döndüğü noktayı net olarak gösterir:
+
 - **Yeşil Supertrend:** Uzun pozisyon tutmak için uygun
 - **Kırmızı Supertrend:** Düşüş trendinde çıkmak gerekir
 
 ### 2. ADX (Average Directional Index)
 Trendin **gücünü** ölçer (yönünü değil):
+
 - ADX > 25 → Güçlü trend var, swing fırsatı yüksek
 - ADX < 20 → Yatay piyasa, swing yapmak riskli
 
 ### 3. RSI (Relative Strength Index)
 Giriş/çıkış zamanlaması için:
+
 - RSI 35-40 bölgesinde geri çekilme → Potansiyel alım fırsatı
 - RSI 70+ bölgesinde fiyat → Kar alım bölgesi
 
@@ -1348,15 +1351,18 @@ Swing traderde sermayeyi korumak kritiktir:
 ## BIST'te Swing Trading: Dikkat Edilecekler
 
 **Makro faktörler önemli:**
+
 - Dolar/TL hareketi BIST'i direkt etkiler
 - TCMB kararları, enflasyon verileri sert hareketler yaratabilir
 - Bu haberleri takip et, stop-loss'unu koruyun
 
 **Likiditeye dikkat:**
+
 - BIST30 hisseleri swing için uygundur — likiditesi yüksek
 - Küçük hisselerde alım/satım spreadi swing karı yiyebilir
 
 **Piyasa saatleri:**
+
 - BIST 10:00-18:00 arası açık
 - İlk 30 dakika (10:00-10:30) ve son 30 dakika (17:30-18:00) en volatil
 
@@ -1423,6 +1429,7 @@ Pozisyon Trade için: ATR × 2.0-3.0
 ```
 
 **Örnek:** AKBNK ATR = 2.5 TL, giriş 85 TL
+
 - Stop = 85 - (2.5 × 1.5) = 85 - 3.75 = **81.25 TL**
 
 Bu yaklaşım, hissenin volatilitesine göre dinamik stop belirler.
@@ -1502,6 +1509,7 @@ Yüksek ATR dönemlerinde sinyaller daha geniş stop ile gelir, bu normaldir ve 
 **MACD (Hareketli Ortalama Yakınsama/Iraksama)**, iki üstel hareketli ortalamanın (EMA) farkına dayanan bir momentum indikatörüdür. 1979'da Gerald Appel tarafından geliştirilmiştir.
 
 MACD üç bileşenden oluşur:
+
 - **MACD Hattı** = EMA(12) − EMA(26)
 - **Sinyal Hattı** = EMA(9) of MACD
 - **Histogram** = MACD − Sinyal Hattı
@@ -1518,12 +1526,14 @@ MACD üç bileşenden oluşur:
 
 ### 3. Histogram Yorumu
 Histogram büyürse momentum güçleniyor, küçülürse zayıflıyor demektir:
+
 - Pozitif histogram büyüyorsa: Güçlenen yükseliş
 - Pozitif histogram küçülüyorsa: Yükseliş yoruluyor, dikkat
 - Negatif histogram küçülüyorsa: Düşüş yavaşlıyor, toparlanma beklentisi
 
 ### 4. Uyumsuzluk (Divergence)
 MACD'nin en güçlü sinyali **uyumsuzluk**tur:
+
 - **Boğa uyumsuzluğu:** Fiyat yeni dip yaparken MACD yeni dip yapmaz → Dönüş sinyali
 - **Ayı uyumsuzluğu:** Fiyat yeni zirve yaparken MACD yeni zirve yapmaz → Düzeltme sinyali
 
@@ -1534,6 +1544,7 @@ BIST hisselerinde MACD kullanırken dikkat edilmesi gerekenler:
 **Haftalık grafikte daha güvenilir.** Günlük MACD çok gürültülüdür, haftalık MACD daha kaliteli sinyal üretir.
 
 **Trend yönüyle kullanın.** MACD'yi yalnız kullanmak yerine EMA veya Supertrend gibi trend filtresiyle birleştirin:
+
 - Trend yukarıysa (EMA12 > EMA99) → yalnızca MACD alım sinyallerini değerlendirin
 - Trend aşağıysa → yalnızca satış sinyallerini değerlendirin
 
@@ -1575,6 +1586,7 @@ BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA12/99 kombinasyonunu kullan
 **Destek seviyesi**, fiyatın düşerken *durduğu* veya *geri döndüğü* fiyat bölgesidir. Teknik açıdan bakıldığında, bu seviyede alıcılar satıcıları bastırır ve fiyat düşmeyi durdurur.
 
 Destek seviyelerini oluşturan faktörler:
+
 - Önceki dip noktaları
 - Yuvarlak sayılar (100 TL, 50 TL gibi)
 - Hareketli ortalamalar (EMA50, EMA200)
@@ -1586,6 +1598,7 @@ Destek seviyelerini oluşturan faktörler:
 **Direnç seviyesi**, fiyatın yükselirken *durduğu* veya *geri döndüğü* fiyat bölgesidir. Bu bölgede satıcılar alıcıları bastırır.
 
 Direnç seviyelerini oluşturan faktörler:
+
 - Önceki zirve noktaları
 - Yuvarlak sayılar
 - Uzun vadeli hareketli ortalamalar (EMA200)
@@ -1604,12 +1617,14 @@ Fiyat 90 TL direncini yukarı kırarsa → 90 TL artık destek olur
 
 ### Test Sayısı = Güvenilirlik
 Bir seviye ne kadar çok test edilip tutunursa, o kadar güçlüdür:
+
 - 2 kez test → zayıf seviye
 - 3-4 kez test → güçlü seviye
 - 5+ kez test → çok güçlü, kırılması halinde büyük hareket beklenebilir
 
 ### Hacim Teyidi
 Destek/direnç bölgesine yaklaşırken hacim artışı önemlidir:
+
 - Desteğe inerken hacim artarsa → Alıcılar devreye giriyor, güçlü destek
 - Desteği kırarken hacim artarsa → Güçlü kırılım, sahte değil
 
@@ -1680,10 +1695,12 @@ Temel kural: **Hacim trendin arkasında ise trend güvenilirdir.**
 
 ### Kural 1: Kırılım + Hacim = Güçlü Sinyal
 Fiyat önemli bir direnç seviyesini kırıyorsa ve hacim normalden %50+ fazlaysa:
+
 - Bu **gerçek bir kırılım** olma ihtimali yüksektir
 - Kurumsal yatırımcılar devreye girmiş demektir
 
 Fiyat kırılıyor ama hacim normalin altındaysa:
+
 - **Sahte kırılım** ihtimali yüksektir
 - Fiyat çok geçmeden geri dönebilir
 
@@ -1704,12 +1721,14 @@ Fiyat yeni dip yapıyor ama hacim azalıyorsa → düşüş güç kaybediyor, to
 
 ### Ortalama Hacim Referansı
 BorsaPusula, her hisse için 20 günlük ortalama hacmi referans alır. Günlük hacim bu ortalamanın:
+
 - **2x üzerinde:** Yüksek hacim — sinyal güvenilirliği artar
 - **1-2x arası:** Normal hacim
 - **0.5x altında:** Düşük hacim — sinyaller daha az güvenilir
 
 ### Supertrend + Hacim Teyidi
 BorsaPusula sinyallerinde hacim teyidi önemli rol oynar:
+
 - AL sinyali + yüksek hacim = **Güçlü AL**, giriş kalitesi yüksek
 - AL sinyali + düşük hacim = **Zayıf AL**, kırılım sahte olabilir
 
@@ -1719,17 +1738,20 @@ Hisse sayfasında "Volume Teyidi" bölümü bu bilgiyi otomatik gösterir.
 
 ### Climax Volume (Doruk Hacim)
 Uzun bir trendin sonunda normalin 3-5 katı hacim oluşur. Bu genellikle trendin bitmekte olduğunu gösterir:
+
 - Güçlü yükseliş + rekor hacim → kurumsal satış başlamış olabilir
 - Güçlü düşüş + rekor hacim → paniksel satışlar bitiyor, dip olabilir
 
 ### Volume Dry-Up (Hacim Kuruması)
 Trend devam ederken hacim azalır. Bu konsolidasyon döneminin sinyal olabilir:
+
 - Konsolidasyon süresince hacim kurur → kırılım hazırlanıyor
 - Kırılım geldiğinde güçlü hacim eşlik etmeli
 
 ## Hacim İndikatörleri
 
 En yaygın kullanılanlar:
+
 - **OBV (On-Balance Volume):** Yükselen günlerde hacim ekler, düşende çıkarır. Uyumsuzluklar için kullanılır.
 - **Chaikin Money Flow:** Hacim para akışını ölçer. +0.25 üstü güçlü alım baskısı, -0.25 altı güçlü satım baskısı.
 - **Volume MA:** 20 günlük hacim ortalaması, referans için kullanılır.
@@ -1785,6 +1807,7 @@ ADX, trendin *yönünü değil, gücünü* ölçer:
 ### 2. Supertrend İndikatörü
 
 Supertrend hem yönü hem de dinamik stop seviyesini gösterir:
+
 - **Yeşil çizgi** (fiyatın altında) = yükseliş momentumu aktif
 - **Kırmızı çizgi** (fiyatın üstünde) = düşüş momentumu aktif
 
@@ -1793,12 +1816,14 @@ Fiyat Supertrend çizgisinin üzerinde ve çizgi uzaklaşıyorsa momentum güçl
 ### 3. EMA Hizalaması
 
 Güçlü yükseliş momentumunda:
+
 - EMA 12 > EMA 50 > EMA 200 (tüm kısa vadeli ortalamar uzun vadeliyi geçmiş)
 - EMA'lar arasındaki mesafe artıyorsa momentum güçleniyor
 
 ### 4. Hacim Teyidi
 
 Güçlü momentum için hacim şart:
+
 - Yükseliş günlerinde hacim ortalamanın **üzerinde** olmalı
 - Düşüş günlerinde hacim ortalamanın **altında** olmalı
 - "Vol Ratio" ≥ 1.5 güçlü alıcı ilgisine işaret eder
@@ -1817,6 +1842,7 @@ Bu kriterlerin tamamını sağlayan hisseler en güçlü momentum adaylarıdır.
 ## BorsaPusula'da Momentum Taraması
 
 [BorsaPusula'nın tarama sayfası](/tarama) bu kriterlerin tamamını uygular:
+
 - "Güçlü Trend" filtresi → Supertrend AL + ADX uyumlu
 - "ADX ≥ 25" gelişmiş filtresi → trend gücü doğrulaması
 - "Vol Ratio" filtresi → hacim teyidi
@@ -1866,6 +1892,7 @@ Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir."""
 **Mum grafik (Candlestick)**, her dönem için dört fiyat noktasını görselleştirir: Açılış, Kapanış, En Yüksek, En Düşük. 17. yüzyılda Japon pirinç tüccarları tarafından geliştirilmiş olan bu sistem, günümüzde en yaygın kullanılan grafik türüdür.
 
 Her mum:
+
 - **Gövde (Body):** Açılış ve kapanış arasındaki fark
 - **Fitil (Shadow/Wick):** Gövdenin dışındaki yüksek ve düşük noktalar
 - **Renk:** Yeşil/beyaz = kapanış > açılış (yükseliş), Kırmızı/siyah = kapanış < açılış (düşüş)
@@ -1993,6 +2020,7 @@ Gelirleri dolar/euro bazlı ama maliyetleri TL olan şirketler kur artışından
 ### 2. Turizm Şirketleri (Dolaylı) 🟡
 
 Kur yükseldiğinde Türkiye yabancı turistler için ucuzlar, talep artar:
+
 - Otel şirketleri, havacılık (THYAO özellikle)
 
 **Not:** THYAO yakıt maliyeti USD bazlı olduğu için net etki karmaşıktır.
@@ -2006,6 +2034,7 @@ Bankalar hem TL hem döviz varlık/yükümlülüklerine sahiptir. Kısa vadede b
 ### 1. İthalata Bağımlı Şirketler 🔴
 
 Hammaddesi veya ürünleri USD/EUR bazlı olan şirketler:
+
 - **Enerji şirketleri:** Petrol fiyatı USD bazlı → artan maliyet
 - **İlaç sektörü:** Bileşenler çoğunlukla ithal
 - **Teknoloji dağıtıcıları:** Ürün maliyetleri dolar bazlı
@@ -2020,6 +2049,7 @@ USD borcu olan şirketlerin borç yükü TL cinsinden artar. Bu şirketlerin kur
 BIST nominal (TL bazında) çok iyi görünse bile, dolar bazında değerlendirildiğinde farklı bir tablo çıkabilir.
 
 **Örnek hesaplama:**
+
 - BIST endeksi +50% yükseldi (TL bazında)
 - Aynı dönemde USD/TRY +40% arttı
 - Dolar bazında BIST getirisi: ≈ +7% (50% ÷ 1.4 − 1)
@@ -2037,6 +2067,7 @@ Türkiye'de para politikası ve kur arasındaki ilişki özellikle kritiktir:
 ## BorsaPusula'da Kur Takibi
 
 BorsaPusula'nın **[makro ticker bandı](/),** USD/TRY kurunu anlık olarak gösterir. Kur hareketlerine göre sektör filtresi kullanarak:
+
 - Kur yükselişinde: FROTO, EREGL gibi ihracatçı hisselerin sinyallerini takip edin
 - Kur düşüşünde: İthalatçı şirketler ve tüketici sektörü sinyallerini değerlendirin
 
@@ -2081,6 +2112,7 @@ Standart parametre: **%K(14), %D(3)** — yani 14 günlük fiyat aralığı.
 | %K < %D | Düşüş momentumu |
 
 **Kesişim sinyalleri:**
+
 - %K, %D'yi aşağıdan yukarıya keser → Potansiyel **alım** sinyali
 - %K, %D'yi yukarıdan aşağıya keser → Potansiyel **satım** sinyali
 
@@ -2192,6 +2224,7 @@ Türkiye'de aracı kurumlar, BIST hisselerinde marjin kredisi sunar. Yasal çer�
 
 ### Türev Piyasalar (VİOP)
 Vadeli işlem sözleşmelerinde kaldıraç çok daha yüksektir:
+
 - **BIST30 vadeli:** ~10:1 kaldıraç
 - **Döviz vadeli:** ~20-50:1 kaldıraç
 - **Kripto:** Bazı platformlarda 100:1'e kadar
@@ -2241,6 +2274,7 @@ BorsaPusula'nın sinyal sistemi, trend gücünü **confirmed** (3+ bar onaylı) 
 **Düzenli Yatırım Stratejisi** (DCA — Dollar-Cost Averaging), piyasanın nerede olduğundan bağımsız olarak **belirli aralıklarla sabit bir miktar yatırım** yapma yöntemidir.
 
 Örneğin:
+
 - Her ay 1.000 ₺ BIST30 endeks fonu veya seçili bir hisse alırsınız
 - Fiyat düşükse daha fazla lot, yüksekse daha az lot alırsınız
 - Zaman içinde ortalama maliyetiniz, piyasanın ortalamasına yaklaşır
@@ -2293,11 +2327,13 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 ## Uygulama Önerileri
 
 **Başlangıç için:**
+
 - Aylık gelirin %10-20'sini ayır
 - İlk hedef: 12 aylık düzenli alım
 - Endeks fonu + 1-2 sektör lideri hisse kombinasyonu
 
 **İleri seviye:**
+
 - BorsaPusula'da [AL sinyalinde olan hisselere](/tarama) odaklan
 - Yüksek ADX + uzun süredir aktif sinyal → DCA için tercih et
 - Quarterly rebalancing: Her çeyrekte portföy dağılımını gözden geçir
