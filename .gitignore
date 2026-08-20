@@ -18,6 +18,7 @@ test_layout.html
 # Cache + counters (otomatik olarak yenilenir)
 backtest_cache.json
 health_fail_count.txt
+health_data_fail_count.txt
 last_cache.json
 pending_changes.json
 *.bak
@@ -35,6 +36,7 @@ health_fail_count.txt
 last_macro.json
 last_macro_ai.json
 last_news_cache.json
+last_news_prefetch_run.json
 news_inflight.json
 last_company_summary.json
 last_mtf_cache.json
