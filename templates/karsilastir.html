@@ -398,7 +398,7 @@ let _compareSeq = 0;  /* hizli tekrar-cagrida eski istek yenisini ezmesin (bug-h
 
 async function doCompare() {
   const mySeq = ++_compareSeq;
-  const inputs = ['t1','t2','t3','t4'].map(id => document.getElementById(id).value.trim().toUpperCase()).filter(Boolean);
+  const inputs = [...new Set(['t1','t2','t3','t4'].map(id => document.getElementById(id).value.trim().toUpperCase()).filter(Boolean))];
   if (inputs.length < 2) {
     document.getElementById('compareResult').innerHTML =
       '<div class="empty-state"><h2>En az 2 hisse giriniz</h2><p>Karşılaştırma için 2 ila 4 hisse sembolü girin.</p></div>';

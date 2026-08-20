@@ -258,7 +258,7 @@ function renderHeatmap(stocks) {
         <div class="score" style="color:${color}">${sec.score > 0 ? '+' : ''}${sec.score}</div>
         <div style="display:flex;align-items:center;gap:8px">${rvolHtml}<span style="font-size:11px;color:var(--bp-text3)">Skor</span></div>
       </div>
-      ${alChips || satChips ? `<div class="detail-row">${alChips}${satChips}${bklSample}${bklMore}</div>` : ''}
+      ${alChips || satChips || bklSample ? `<div class="detail-row">${alChips}${satChips}${bklSample}${bklMore}</div>` : ''}
     </div>`;
   }).join('');
 

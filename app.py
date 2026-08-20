@@ -11617,15 +11617,19 @@ def api_push_unsubscribe():
 
 @app.route("/unsubscribe/<token>")
 def unsubscribe_page(token):
-    """Tek tıkla abonelik iptali."""
+    """Tek tıkla abonelik iptali (KVKK: kayıt tamamen silinir — push unsubscribe ile aynı desen)."""
     with _sub_lock:
         subs = _load_subscribers()
+        match_email = None
         for email, data in subs.items():
             if data.get("token") == token:
-                subs[email]["active"] = False
-                _save_subscribers(subs)
-                logger.info("E-posta abonelik iptal: %s", email)
-                return render_template("unsubscribe.html", success=True, email=email)
+                match_email = email
+                break
+        if match_email:
+            del subs[match_email]
+            _save_subscribers(subs)
+            logger.info("E-posta abonelik iptal (kayit silindi): %s", match_email)
+            return render_template("unsubscribe.html", success=True, email=match_email)
     return render_template("unsubscribe.html", success=False, email=None), 404
 
 
