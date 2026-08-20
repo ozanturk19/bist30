@@ -1,7 +1,7 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Sinyal Metodolojisi — Supertrend, ADX, EMA Nasıl Kullanılır | BorsaPusula</title>
 <meta name="description" content="BorsaPusula'nın kullandığı algoritmik teknik analiz metodolojisi. Supertrend(10,3), ADX≥25 ve EMA12/99 göstergelerinin nasıl çalıştığı ve nasıl yorumlandığı açıklanıyor.">
 <meta name="keywords" content="supertrend nasıl kullanılır, ADX indikatörü nedir, EMA crossover stratejisi, BIST teknik analiz, algoritmik borsa sinyali">
-<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/metodoloji">
 <meta property="og:title"       content="Sinyal Metodolojisi — Supertrend + ADX + EMA12/99 | borsapusula.com">
 <meta property="og:description" content="BorsaPusula sinyal motorunun teknik temeli: 3 kriter aynı anda yeşil olduğunda trend sinyali üretilir.">
@@ -204,7 +204,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 
 <footer>
   <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/hakkinda">Hakkında</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/gizlilik">Gizlilik</a> · <a href="/iletisim">İletişim</a>
-  <div style="margin-top:8px;font-size:var(--bp-text-xs);color:#30363d"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
+  <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
 </footer>
 
 <script>
@@ -216,5 +216,6 @@ loadMacroBar();setInterval(loadMacroBar,180000);
 
 <script src="/static/bp-search.js?v=52" defer></script>
 <script src="/static/js/focus-trap.js?v=1"></script>
+<script src="/static/learning-mode.js?v=5" defer></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

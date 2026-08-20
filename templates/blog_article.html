@@ -1,6 +1,6 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ article.title }} | BorsaPusula</title>
 <meta name="description" content="{{ article.desc }}">
-<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}">
 <meta property="og:type"        content="article">
 <meta property="og:title"       content="{{ article.title }} | borsapusula.com">
@@ -37,8 +37,8 @@
     "logo": {
       "@type": "ImageObject",
       "url": "https://borsapusula.com/static/logo.svg",
-      "width": 200,
-      "height": 60
+      "width": 36,
+      "height": 36
     }
   },
   "image": {
@@ -103,7 +103,7 @@
 <div class="read-progress" id="readProgress"></div>
 {% include '_header.html' %}
 <!-- Makro Ticker -->
-<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
 <div class="container" id="main-content" tabindex="-1">
   <div class="article-header">

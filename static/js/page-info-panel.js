@@ -35,7 +35,6 @@ class PageInfoPanel {
     panel.appendChild(body);
 
     this._applyJargonLinks(body);
-    this._injectStyles();
     this._el = panel;
 
     const savedCollapsed = this.loadFromLocalStorage();
@@ -109,61 +108,6 @@ class PageInfoPanel {
         link.classList.add('bp-jargon-link');
       }
     });
-  }
-
-  _injectStyles() {
-    if (document.getElementById('bp-info-panel-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'bp-info-panel-styles';
-    style.textContent = `
-      .bp-info-panel {
-        background: var(--color-surface, #1e2530);
-        border: 1px solid var(--color-border, #2d3748);
-        border-radius: var(--bp-radius);
-        margin: 12px 0;
-        overflow: hidden;
-      }
-      .bp-info-panel__header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 14px;
-        cursor: pointer;
-        user-select: none;
-      }
-      .bp-info-panel__title {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: var(--color-text-secondary, #a0aec0);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-      .bp-info-panel__toggle {
-        background: none;
-        border: none;
-        color: var(--color-text-muted, #718096);
-        cursor: pointer;
-        font-size: 0.75rem;
-        padding: 2px 4px;
-        line-height: 1;
-      }
-      .bp-info-panel__body {
-        padding: 0 14px;
-        max-height: 600px;
-        opacity: 1;
-        overflow: hidden;
-        transition: max-height 0.2s ease, opacity 0.2s ease, padding 0.2s ease;
-      }
-      .bp-info-panel__body > *:first-child { margin-top: 0; padding-top: 10px; }
-      .bp-info-panel__body > *:last-child { margin-bottom: 0; padding-bottom: 10px; }
-      .bp-jargon-link {
-        color: var(--color-accent, #f6c90e);
-        text-decoration: none;
-        border-bottom: 1px dashed currentColor;
-      }
-      .bp-jargon-link:hover { text-decoration: underline; }
-    `;
-    document.head.appendChild(style);
   }
 }
 

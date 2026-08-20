@@ -3433,7 +3433,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>Bu dağılım kişisel risk toleransına ve yatırım ufkuna göre önemli ölçüde farklılaşabilir.</p>
 
 <h2>BorsaPusula Kripto Teknik Analizi</h2>
-<p>BorsaPusula'nın <a href="/kripto">/kripto</a> sayfasında Bitcoin, Ethereum, BNB ve Solana için algoritmik Supertrend + ADX + EMA12/99 sinyalleri takip edilebilir.</p>
+<p>BorsaPusula'nın /kripto sayfasında Bitcoin, Ethereum, BNB ve Solana için algoritmik Supertrend + ADX + EMA12/99 sinyalleri takip edilebilir.</p>
 """,
     "faqs": [
       {"q": "Bitcoin mi BIST hisseleri mi daha karlı?",
@@ -3794,7 +3794,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </div>
 
 <h2>BorsaPusula'da ABD Hisse Sinyalleri</h2>
-<p>BorsaPusula'nın <a href="/abd">/abd</a> bölümünde S&P500 ve Nasdaq'tan 144 büyük ABD hissesi için algoritmik teknik analiz sinyalleri bulunmaktadır. AAPL, MSFT, NVDA, AMZN gibi hisseler için Supertrend + ADX + EMA sinyalleri takip edilebilir.</p>
+<p>BorsaPusula'nın /abd bölümünde S&P500 ve Nasdaq'tan 144 büyük ABD hissesi için algoritmik teknik analiz sinyalleri bulunmaktadır. AAPL, MSFT, NVDA, AMZN gibi hisseler için Supertrend + ADX + EMA sinyalleri takip edilebilir.</p>
 """,
     "faqs": [
       {"q": "S&P500'e yatırım yapmak güvenli mi?",
@@ -4664,7 +4664,7 @@ Toplam ≈ 13.003,90₺
 
 <h2>Altın: Klasik Enflasyon Koruması</h2>
 <p>Altın, TL bazında değerlendiğinde uzun vadede enflasyonu genellikle aşar çünkü iki faktör birden altın fiyatını yukarı taşır: hem küresel altın fiyatındaki artış hem de TL'nin USD karşısında değer kaybı.</p>
-<p>Fiziksel altın yerine borsa üzerinden işlem gören <a href="/altin">altın</a> takip etmek daha pratiktir. BIST'te gram altın, çeyrek altın ve altın BYF işlem görür.</p>
+<p>Fiziksel altın yerine borsa üzerinden işlem gören altın takip etmek daha pratiktir. BIST'te gram altın, çeyrek altın ve altın BYF işlem görür.</p>
 
 <h2>Hisse Senedi: Uzun Vadede Enflasyonun Üzerinde</h2>
 <p>BIST hisseleri uzun vadede —özellikle güçlü piyasa koşullarında— enflasyonu geçmiştir. Ancak bu uzun vadeli bir ilişkidir; kısa vadede hisseler enflasyondan bağımsız hareket edebilir. Özellikle:</p>
@@ -5643,7 +5643,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Hisse senetleriyle düşük/negatif korelasyon (kriz döneminde hisseler düşerken altın yükselir)</li>
   <li>TL bazında hem global altın fiyatından hem de TL değer kaybından yararlanır</li>
 </ul>
-<p>BorsaPusula üzerinden <a href="/altin">altın</a> ve <a href="/gumus">gümüş</a> fiyatlarını ve teknik sinyallerini takip edebilirsiniz.</p>
+<p>BorsaPusula üzerinden altın ve gümüş fiyatlarını ve teknik sinyallerini takip edebilirsiniz.</p>
 
 <h3>2. ABD Doları (USD)</h3>
 <p>Dünya rezerv para birimi olması nedeniyle global krizlerde USD güçlenir. Türk yatırımcılar için TL'nin tarihi değer kaybından dolayı USD tutmak çift koruma sağlar: hem kriz koruması hem TL erimesinden korunma.</p>

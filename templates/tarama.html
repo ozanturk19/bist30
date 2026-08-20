@@ -14,7 +14,7 @@
   {"@type":"ListItem","position":2,"name":"Hisse Tarayıcı","item":"https://borsapusula.com/tarama"}
 ]}
 </script>
-<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260819A">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <link rel="stylesheet" href="/static/css/pages/tarama.css?v=b315feeb">
@@ -170,7 +170,7 @@
 (function() {
   const L = BP_ASSET_LABELS;
   const F = BP_ASSET_DECIMALS;
-  const ML={BTC:'/btc',ALTIN:'/altin',GUMUS:'/gumus'};
+  const ML={};
   async function load() {
     try {
       const d=(await (await fetch('/api/macro')).json()).items||[];

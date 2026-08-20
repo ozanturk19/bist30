@@ -15,7 +15,7 @@
 <title>{{ _st }}</title>
 <meta name="description" content="{{ _sd }}">
 <meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} sinyal, {{ ticker }} al sat, {{ ticker }} supertrend, {{ name }} borsa analiz, {{ name }} teknik, BIST100 sinyalleri{% if sector %}, {{ sector }} hisseleri{% endif %}, {{ ticker }} stop loss, {{ ticker }} RSI ADX">
-<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/hisse/{{ ticker }}">
 <!-- Open Graph -->
 <meta property="og:type"        content="website">
@@ -2684,7 +2684,7 @@ window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
       const d = await r.json();
       const items = d.items || [];
       if (!items.length) return;
-      const MACRO_LINKS = {BTC:'/btc', ALTIN:'/altin', GUMUS:'/gumus'};
+      const MACRO_LINKS = {};
       const html = items.map(it => {
         const label = LABELS[it.label] || it.label;
         const dec   = PRICE_FMT[it.label] ?? 2;

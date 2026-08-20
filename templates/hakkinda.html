@@ -1,9 +1,9 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hakkında | BorsaPusula</title>
-<meta name="description" content="BorsaPusula hakkında: BIST100, ABD piyasaları ve kripto için algoritmik teknik analiz platformu. Supertrend, ADX, EMA tabanlı sinyaller. Proje amacı, teknolojiler ve yol haritası.">
-<link rel="icon" type="image/svg+xml" href="/favicon.ico">
+<meta name="description" content="BorsaPusula hakkında: BIST100 için algoritmik teknik analiz platformu. Supertrend, ADX, EMA tabanlı sinyaller. Proje amacı, teknolojiler ve yol haritası.">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/hakkinda">
 <meta property="og:title"       content="Hakkında — borsapusula.com">
-<meta property="og:description" content="Türkiye'nin algoritmik, ücretsiz çok varlıklı teknik analiz platformu. BIST100, ABD hisseleri, BTC, altın.">
+<meta property="og:description" content="Türkiye'nin algoritmik, ücretsiz BIST teknik analiz platformu.">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:url"         content="https://borsapusula.com/hakkinda">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
@@ -31,8 +31,8 @@
 <div class="hero">
   <div class="hero-title">Borsa<span>Pusula</span></div>
   <p class="hero-sub">
-    Türkiye'nin algoritmik, ücretsiz çok varlıklı teknik analiz platformu.
-    BIST100, ABD hisseleri, kripto ve emtialar için sade ve hızlı sinyal paneli.
+    Türkiye'nin algoritmik, ücretsiz BIST teknik analiz platformu.
+    BIST100 hisseleri için sade ve hızlı sinyal paneli.
   </p>
   <div class="hero-tags">
     <span class="hero-tag"><span aria-hidden="true">🇹🇷</span> Türkçe</span>
@@ -68,9 +68,9 @@
 <h2>Proje Amacı</h2>
 <p>
   Borsa teknik analizi, birçok platform tarafından ya çok karmaşık, ya çok pahalı
-  ya da yabancı dilde sunuluyor. Bu proje, <strong>BIST100 hisseleri başta olmak üzere
-  ABD piyasaları, kripto ve emtialar</strong> için algoritmik trend sinyallerini
-  <strong>sade, hızlı ve ücretsiz</strong> bir arayüzde herkesin erişimine sunmayı hedefliyor.
+  ya da yabancı dilde sunuluyor. Bu proje, <strong>BIST100 hisseleri</strong> için
+  algoritmik trend sinyallerini <strong>sade, hızlı ve ücretsiz</strong> bir arayüzde
+  herkesin erişimine sunmayı hedefliyor.
 </p>
 <p>
   Herhangi bir insan yorumu içermez — her sinyal <strong>tamamen algoritmik</strong> olarak
@@ -108,24 +108,6 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
       <li>Canlı fiyat akışı (SSE)</li>
       <li>KAP bildirim entegrasyonu</li>
       <li>Bilanço takvimi</li>
-    </ul>
-  </div>
-  <div class="market-card">
-    <div class="market-card-title"><span aria-hidden="true">🇺🇸</span> ABD Piyasaları</div>
-    <ul>
-      <li>S&amp;P 500 endeks analizi</li>
-      <li>NASDAQ Composite analizi</li>
-      <li>Büyük ABD hisseleri (Apple, Tesla, NVDA…)</li>
-      <li>Aynı algoritmik sinyal sistemi</li>
-    </ul>
-  </div>
-  <div class="market-card">
-    <div class="market-card-title"><span aria-hidden="true">₿</span> Kripto &amp; Emtia</div>
-    <ul>
-      <li>Bitcoin (BTC/USD)</li>
-      <li>Ethereum (ETH/USD)</li>
-      <li>Altın (XAU/USD)</li>
-      <li>Gümüş (XAG/USD)</li>
     </ul>
   </div>
 </div>
@@ -263,7 +245,6 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
   <li><strong>Sinyal hesaplama:</strong> Her 15 dakikada bir sunucu tarafında yenilenir</li>
   <li><strong>Canlı fiyat:</strong> SSE ile yaklaşık 30 saniyede bir tarayıcıya iletilir</li>
   <li><strong>BIST kapsamı:</strong> ~145 hisse (BIST100 + ek hisseler), 12 sektör</li>
-  <li><strong>ABD / Kripto / Emtia:</strong> Aynı yfinance altyapısı, günlük güncelleme</li>
   <li><strong>KAP haberleri:</strong> Anlık KAP bildirimleri hisse sayfalarında gösterilir</li>
   <li><strong>AI haberleri:</strong> Gemini 2.0 Flash — Gemini 429 rate limit nedeniyle önbellek kullanılır</li>
 </ul>
@@ -286,8 +267,6 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Güçlü Momentum Listesi (ADX sıralamalı)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Portföy Takibi (localStorage)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Bilanço Takvimi (çeyreklik finansal sonuç tarihleri)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>ABD Hisseleri — S&amp;P 500, NASDAQ, büyük hisseler</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Kripto &amp; Emtia — BTC, ETH, Altın, Gümüş</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Hisse Karşılaştırma (yan yana teknik metrikler)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Sinyal Performans Analizi (backtest istatistikleri)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Blog — teknik analiz içerikleri</span></li>
