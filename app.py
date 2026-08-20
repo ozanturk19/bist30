@@ -9734,7 +9734,12 @@ def karsilastir():
 
     if raw:
         # Normalize: trim + upper + dedup + alfabetik sırala (max 4 — API ile uyumlu)
-        tickers = sorted({t.strip().upper() for t in raw.split(",") if t.strip()})[:4]
+        # bug-hunt r23: charset whitelist — '&'/'#'/'=' gibi karakterler redirect/canonical
+        # query-string'ini ve JSON-LD'yi bozuyordu (ör. tickers=A%26C -> Location query'si kırılıyordu)
+        tickers = sorted({
+            t.strip().upper() for t in raw.split(",")
+            if re.match(r"^[A-Z0-9]{1,10}$", t.strip().upper())
+        })[:4]
         if tickers:
             norm = ",".join(tickers)
             if raw != norm:

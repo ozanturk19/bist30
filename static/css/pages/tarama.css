@@ -46,7 +46,7 @@
   .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
   .macro-track {
     display:inline-flex; align-items:center;
-    animation:macroScroll 40s linear infinite; height:32px;
+    animation:macroScroll 40s linear infinite;will-change:transform; height:32px;
   }
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }

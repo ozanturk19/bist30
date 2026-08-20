@@ -636,11 +636,15 @@
     track.style.willChange = 'transform';
 
     var offset = 0, last = 0, paused = false;
+    var bar = track.closest('.macro-bar');
     track.addEventListener('mouseenter', function(){ paused = true; });
     track.addEventListener('mouseleave', function(){ paused = false; });
 
     function step(now) {
-      if (last && !paused && !document.hidden) {
+      // bug-hunt r23: macro-pause-btn (data-paused) daha once RAF dongusune hic
+      // baglanmiyordu — buton "duraklatildi" gorunup serit fiilen kaymaya devam ediyordu
+      var btnPaused = bar && bar.getAttribute('data-paused') === 'true';
+      if (last && !paused && !btnPaused && !document.hidden) {
         var dt = (now - last) / 1000;       // saniye
         if (dt > 0.1) dt = 0.1;             // tab değiştirme jump'ını önle
         offset += pps * dt;
