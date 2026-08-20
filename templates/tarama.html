@@ -212,7 +212,7 @@ function onSearchInput(val) {
   document.getElementById('searchClearBtn').style.display = q ? 'block' : 'none';
   clearTimeout(_searchTimer);
   _searchTimer = setTimeout(() => {
-    _searchQ = q.toUpperCase();
+    _searchQ = q.toLocaleUpperCase('tr-TR');
     applyTextFilter();
   }, 180);
 }
@@ -229,7 +229,7 @@ function applyTextFilter() {
   const rows = _searchQ
     ? _allRows.filter(s =>
         s.ticker.includes(_searchQ) ||
-        (s.name && s.name.toUpperCase().includes(_searchQ)))
+        (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)))
     : _allRows;
   renderResults(rows, rows.length);
 }
@@ -290,6 +290,9 @@ async function applyFilters() {
   const minP   = document.getElementById('fMinP').value || 0;
   const maxP   = document.getElementById('fMaxP').value || 999999;
   const sort   = document.getElementById('sortSel').value;
+  if (sort !== _currentSort) {
+    _sortDir = _sortDefaultDir[sort] || 'desc';
+  }
   _currentSort = sort;
 
   const params = new URLSearchParams({
@@ -329,7 +332,7 @@ async function applyFilters() {
     _allRows = d.results || [];
     // Apply text filter on top of server results
     const filtered = _searchQ
-      ? _allRows.filter(s => s.ticker.includes(_searchQ) || (s.name && s.name.toUpperCase().includes(_searchQ)))
+      ? _allRows.filter(s => s.ticker.includes(_searchQ) || (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)))
       : _allRows;
     renderResults(filtered, filtered.length);
     // I1 — Active filter chips render (her applyFilters sonrası)
@@ -579,6 +582,7 @@ function renderResults(rows, count) {
 }
 
 let _sortDir = 'desc';  // 'desc' | 'asc'
+const _sortDefaultDir = { signal_bars: 'asc' };  // signal_bars: 1=en taze, artinca eskir -> "Yeni->Eski" = artan (asc)
 
 function _resetSortTHVisuals() {
   document.querySelectorAll('thead th.th-sortable').forEach(th => {
@@ -603,7 +607,7 @@ function sortBy(col) {
     _sortDir = (_sortDir === 'desc') ? 'asc' : 'desc';
   } else {
     _currentSort = col;
-    _sortDir = 'desc';  // İlk tıklamada azalan (büyükten küçüğe)
+    _sortDir = _sortDefaultDir[col] || 'desc';  // kolona ozel varsayilan yon (ilk tiklamada)
   }
   document.getElementById('sortSel').value = col;
   _resetSortTHVisuals();

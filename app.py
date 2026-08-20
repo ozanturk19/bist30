@@ -9846,6 +9846,9 @@ def api_gundem():
     with _lock:
         stocks = list(_cache["data"])
 
+    # CPO-1107 Faz0#6: XU030 bir endeks, hisse değil — evren sayısı/liste tek kaynak
+    stocks = [s for s in stocks if s.get("ticker") != "XU030"]
+
     # CPO-1335: eksen zaten signal_date (doğru) — yalnız gün sınırı TR'ye
     # sabitlendi; date.today() sunucu (UTC) günüydü, 00:00-03:00 TR arasında
     # bir gün geriden geliyordu.
@@ -10749,12 +10752,13 @@ def _earnings_refresh_impl():
 
             if in_period:
                 stocks_in_period.append({
-                    "ticker":   t,
-                    "name":     STOCK_NAMES.get(t, t),
-                    "signal":   sig_data.get("signal", "BEKLE"),
-                    "price":    sig_data.get("price"),
-                    "date":     date_label,
-                    "kap_url":  f"https://www.kap.org.tr/tr/Bildirim/Ara?ara={t}&tip=MAL&kategori=2",
+                    "ticker":      t,
+                    "name":        STOCK_NAMES.get(t, t),
+                    "signal":      sig_data.get("signal", "BEKLE"),
+                    "price":       sig_data.get("price"),
+                    "is_premium":  sig_data.get("is_premium", False),
+                    "date":        date_label,
+                    "kap_url":     f"https://www.kap.org.tr/tr/Bildirim/Ara?ara={t}&tip=MAL&kategori=2",
                 })
         # Sinyal önceliği: AL → SAT → BEKLE, içinde alfabetik
         stocks_in_period.sort(key=lambda x: (

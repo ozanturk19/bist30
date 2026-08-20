@@ -118,8 +118,8 @@ function render(data) {
     if (filtered.length === 0) return '';
 
     const isCurrent = period.is_current;
-    const alCount   = filtered.filter(s => s.signal === 'AL').length;
-    const satCount  = filtered.filter(s => s.signal === 'SAT').length;
+    const alCount   = period.stocks.filter(s => s.signal === 'AL').length;
+    const satCount  = period.stocks.filter(s => s.signal === 'SAT').length;
 
     const startFmt = period.start.split('-').reverse().join('.');
     const endFmt   = period.end.split('-').reverse().join('.');

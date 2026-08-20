@@ -1854,8 +1854,9 @@ function updateStats() {
     document.getElementById('mbLgBkl').textContent = bklCnt + ' Yatay ('   + (bklCnt/total*100).toFixed(0) + '%)';
     document.getElementById('mbLgSat').textContent = satCnt + ' Trend Bozuldu (' + satPct.toFixed(0) + '%)';
     // Sentiment label
-    const sent = alPct >= 60 ? '🔥 Güçlü Boğa' : alPct >= 40 ? '📈 Hafif Yükseliş' : satPct >= 30 ? '📉 Baskı Altında' : '⚪ Yatay';
-    const sentColor = alPct >= 60 ? '#00e290' : alPct >= 40 ? '#86efac' : satPct >= 30 ? '#f85149' : '#8b949e';
+    const sentDown = satPct >= 30 && (satPct > alPct || alPct < 40);
+    const sent = alPct >= 60 ? '🔥 Güçlü Boğa' : sentDown ? '📉 Baskı Altında' : alPct >= 40 ? '📈 Hafif Yükseliş' : '⚪ Yatay';
+    const sentColor = alPct >= 60 ? '#00e290' : sentDown ? '#f85149' : alPct >= 40 ? '#86efac' : '#8b949e';
     const sentEl = document.getElementById('mbSentiment');
     sentEl.textContent = sent;
     sentEl.style.color = sentColor;
@@ -2273,7 +2274,7 @@ function renderTable() {
   tbody.innerHTML = filtered.map(s => {
     const chgClass = s.change_pct > 0 ? 'pos' : s.change_pct < 0 ? 'neg' : 'neu';
     const chgSign  = s.change_pct > 0 ? '+' : '';
-    const inds     = s.indicators;
+    const inds     = s.indicators || {};
 
     let indHtml = Object.values(inds).map(ind => {
       const ok = (s.signal === 'AL' && ind.bull) || (s.signal === 'SAT' && ind.bear);
@@ -2286,7 +2287,7 @@ function renderTable() {
       // P0-2 (CPO-DEV2-031/033): "İdeal Giriş" yeşil rozeti sadece AL sinyalinde
       // anlamlı — SAT sinyalinde sinyal yönüyle çelişen yanıltıcı yeşil onayı önler.
       const rIdeal = s.signal === 'AL' && s.rsi >= 45 && s.rsi < 60;
-      const rCls = s.rsi >= 70 ? 'ind-badge ind-bear' : s.rsi <= 30 ? 'ind-badge ind-bull' :
+      const rCls = s.rsi >= 70 ? 'ind-badge ind-bear' : s.rsi < 30 ? 'ind-badge ind-bull' :
                    rIdeal ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
       const rIcon = s.rsi >= 80 ? ' 🔴' : s.rsi >= 70 ? ' ⚠️' :
                     rIdeal ? ' ✅' : s.rsi < 30 ? ' 💎' : '';

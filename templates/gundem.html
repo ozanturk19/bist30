@@ -319,7 +319,7 @@ async function loadEconCalendar() {
     const events = [...(d.today || []), ...(d.upcoming || [])];
     const unique = [];
     const seen = new Set();
-    events.forEach(e => { if (!seen.has(e.date)) { seen.add(e.date); unique.push(e); } });
+    events.forEach(e => { const key = e.date + '|' + (e.event || ''); if (!seen.has(key)) { seen.add(key); unique.push(e); } });
     if (!unique.length) {
       grid.innerHTML = '<div class="empty-box">Yaklaşan önemli ekonomik olay bulunamadı.</div>';
       return;

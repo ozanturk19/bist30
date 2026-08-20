@@ -266,6 +266,16 @@
   
   {# SPEC-STICKY-HEADER-v3: bp-segments artık <header> İÇİNDE (tek sticky blok). Spacer da gerek yok (sticky header normal flow'da). #}
 
+  <script>
+    window.BP_REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.bpScrollTop = function(){
+      window.scrollTo({top: 0, behavior: window.BP_REDUCED_MOTION ? 'auto' : 'smooth'});
+    };
+    window.bpScrollIntoView = function(el, opts){
+      if (!el) return;
+      el.scrollIntoView(Object.assign({}, opts, {behavior: window.BP_REDUCED_MOTION ? 'auto' : 'smooth'}));
+    };
+  </script>
   {# SPEC-017 v2 — Sinyal Hero Card (28 May 2026 gece) #}
   {% if ssr_signal %}
   
@@ -325,16 +335,6 @@
     {# SPEC-017 Faz B K10: "Neden bu sinyal?" CTA + drawer SİLİNDİ (Ozan redundant feedback). AI tab + sigExplainSection zaten mevcut. #}
   </div>
 
-  <script>
-    window.BP_REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.bpScrollTop = function(){
-      window.scrollTo({top: 0, behavior: window.BP_REDUCED_MOTION ? 'auto' : 'smooth'});
-    };
-    window.bpScrollIntoView = function(el, opts){
-      if (!el) return;
-      el.scrollIntoView(Object.assign({}, opts, {behavior: window.BP_REDUCED_MOTION ? 'auto' : 'smooth'}));
-    };
-  </script>
   <script>
   (function(){
     window.bpDrawSparkline = function(ohlc, accent) {
@@ -918,11 +918,11 @@
       <strong style="color:var(--bp-text)">{{ ticker }} ({{ name }})</strong> hissesi,
       {% if ssr_signal.signal == 'AL' %}
         BorsaPusula algoritmasına göre <strong style="color:var(--bp-al)">Güçlü Trend</strong> sinyali veriyor.
-        {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
+        {{ ssr_signal.signal_date|signal_age_text }} aktif.
         {% if ssr_signal.sl_level %}Stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺.{% endif %}
       {% elif ssr_signal.signal == 'SAT' %}
         BorsaPusula algoritmasına göre <strong style="color:var(--bp-sat)">Trend Bozuldu</strong> sinyali veriyor.
-        {{ ssr_signal.signal_date }} tarihinden itibaren {{ ssr_signal.signal_bars }} gündür aktif.
+        {{ ssr_signal.signal_date|signal_age_text }} aktif.
         {% if ssr_signal.sl_level %}Stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺.{% endif %}
       {% else %}
         şu an <strong style="color:var(--bp-bkl)">Yatay</strong> bölgesinde; net bir trend sinyali bulunmuyor.
@@ -1145,10 +1145,10 @@ function _hibToast(msg, type) {
 }
 
 function _hibCurrentPrice() {
-  // signalData global'inde son fiyat var
+  // window._bpLastSignalData — renderSummary() en son çağrıldığında set edilir (bkz. renderSummary)
   try {
-    if (typeof signalData !== 'undefined' && signalData && signalData.price) return +signalData.price;
-  } catch(_) { /* signalData henuz hazir olmayabilir (sayfa yuklenirken) - DOM fallback asagida devrede */ }
+    if (window._bpLastSignalData && window._bpLastSignalData.price != null && isFinite(+window._bpLastSignalData.price)) return +window._bpLastSignalData.price;
+  } catch(_) { /* henuz hazir olmayabilir (sayfa yuklenirken) - DOM fallback asagida devrede */ }
   // Fallback: header'daki gösterilen fiyat
   const txt = document.getElementById('hpPrice')?.textContent || '';
   const num = parseFloat(txt.replace(/\./g,'').replace(',','.'));
@@ -1580,12 +1580,12 @@ function renderFreshness(f, dq, ageS, refreshing) {
   let color, label;
   if (!f.market_open) {
     color = '#909097'; label = 'Piyasa kapalı';
-  } else if (age < 300) {
-    color = '#f59e0b'; label = 'BIST ~15dk gecikmeli';
   } else if (effDq === 'critical') {
     color = '#f85149'; label = 'Veri bayat';
   } else if (effDq === 'stale') {
     color = '#f5c949'; label = 'Veri gecikmeli';
+  } else if (age < 300) {
+    color = '#f59e0b'; label = 'BIST ~15dk gecikmeli';
   } else {
     color = '#f5c949'; label = `Veri ${bpFmtAge(age)} önce güncellendi`;
   }
@@ -1612,6 +1612,7 @@ function renderCommentary(commentary) {
 
 /* ── Özet kartları doldur ──────────────────────────── */
 function renderSummary(s, signalData) {
+  window._bpLastSignalData = signalData || null;   // _hibCurrentPrice() icin
   /* Header */
   const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2 }) : '—';
   // sd.price (/api/data, her zaman güncel) > chart summary.price (lagged monthly close)

@@ -332,8 +332,9 @@ function exportCSV() {
   if (!portfolio.length) { showToast('Portföy boş — önce hisse ekleyin.', 'err'); return; }
   const headers = ['Hisse','Lot','Alış Fiyatı (₺)','Alış Tarihi','Güncel Fiyat (₺)','Sinyal','P&L (₺)','P&L (%)'];
   const rows = portfolio.map(p => {
-    const current  = (window._sigCache && _sigCache[p.ticker]) ? _sigCache[p.ticker].price  : '';
-    const sig      = (window._sigCache && _sigCache[p.ticker]) ? _sigCache[p.ticker].signal : '';
+    const live     = liveData[p.ticker];
+    const current  = live ? live.price  : '';
+    const sig      = live ? live.signal : '';
     const pnlVal   = current ? ((current - p.price) * p.lot).toFixed(2) : '';
     const pnlPct   = current ? (((current - p.price) / p.price) * 100).toFixed(2) : '';
     return [
@@ -534,7 +535,7 @@ function renderSummary(s) {
     missWarnEl.style.display = 'none';
   }
   document.getElementById('sumCount').textContent = s.count;
-  document.getElementById('sumCost').textContent  = fmtM(s.totalCost);
+  document.getElementById('sumCost').textContent  = s.totalCost ? fmtM(s.totalCost) : '—';
   document.getElementById('sumValue').textContent = s.totalVal ? fmtM(s.totalVal) : '—';
   const pnlEl = document.getElementById('sumPnl');
   pnlEl.textContent = s.totalVal ? (s.pnl >= 0 ? '+' : '') + fmtM(s.pnl) : '—';
