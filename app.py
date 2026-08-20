@@ -174,7 +174,7 @@ def require_admin():
         resp = _jsonify({"error": "admin endpoint yapılandırılmamış"})
         resp.status_code = 503
         _abort(resp)  # secret yapılandırılmamış → endpoint devre dışı (fail-closed)
-    if request.headers.get("X-Admin-Secret", "") != ADMIN_SECRET:
+    if not secrets.compare_digest(request.headers.get("X-Admin-Secret", ""), ADMIN_SECRET):
         resp = _jsonify({"error": "unauthorized"})
         resp.status_code = 403
         _abort(resp)
@@ -7757,47 +7757,10 @@ def api_chart_dogalgaz():
     return _chart_response_with_macro_summary("DOGALGAZ", _dogalgaz_chart_cache)
 
 
-@app.route("/api/chart/us/<ticker>")
-def api_chart_us_stock(ticker):
-    """ABD hissesi grafik verisi — lazy cache (15 dakika TTL).
-    Fiyat uyuşmazlığı tespit edilirse (split vb.) cache otomatik iptal edilir.
-    """
-    ticker = ticker.upper()
-    if ticker not in US_STOCKS and ticker not in ("SP500","NASDAQ","SOL","BNB","PETROL","DOGALGAZ"):
-        return safe_json({"error": "Hisse bulunamadı"}), 404
-    now  = time.time()
-    with _lock:
-        cached = _stock_chart_cache.get(f"US_{ticker}")
-
-    # US stock cache için _live_prices ile fiyat karşılaştır (split tespiti)
-    if cached:
-        try:
-            chart_price = (cached.get("data") or {}).get("summary", {}).get("price", 0)
-            with _lock:
-                gp = dict(_live_prices)  # _global_prices_cache yerine _live_prices kullan
-            main_price = (gp.get(ticker) or {}).get("price", 0) if gp else 0
-            if chart_price > 0 and main_price > 0:
-                ratio = max(chart_price, main_price) / min(chart_price, main_price)
-                if ratio > 1.15:
-                    logger.warning(
-                        "Fiyat uyuşmazlığı [US_%s]: chart=%.2f main=%.2f oran=%.2fx — cache iptal",
-                        ticker, chart_price, main_price, ratio
-                    )
-                    cached = None
-        except Exception as _e:
-            logger.debug("US chart price compare skipped: %s", _e)
-
-    if cached and (now - cached["ts"]) < _STOCK_CACHE_TTL:
-        return safe_json({"chart": cached["data"], "updated_at": cached["updated_at"], "loading": False})
-
-    data = _compute_chart_data(ticker, "2y")
-    upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
-    if data:
-        with _lock:
-            _stock_chart_cache[f"US_{ticker}"] = {"data": data, "ts": now, "updated_at": upd}
-        return safe_json({"chart": data, "updated_at": upd, "loading": False})
-    return safe_json({"chart": None, "loading": True})
-
+# DEV2-232 (bughunt-r30): /api/chart/us/<ticker> kaldırıldı — /abd/<ticker> sayfası
+# 19.08'de (CPO-DEV2-036) kaldırılıp /hisse/<ticker> yalnız BIST100'e gate'lendiğinden
+# bu route hiçbir canlı sayfadan tetiklenemeyen öksüz kod yoluydu (yalnız doğrudan
+# URL/bot erişiminde 2y OHLC'yi senkron hesaplayıp Yahoo bütçesini boşa tüketiyordu).
 
 # ── Kaldırılan sayfalar (CPO-DEV2-036, Ozan kararı 19.08.2026): BIST odaklı sadeleşme ──
 # Kripto/Emtia/ABD ayrı sayfaları kaldırıldı — üst kayan makro bar (/api/macro) değişmeden kalır.
@@ -8524,42 +8487,16 @@ def api_stock_kap(ticker):
 def api_signal_explanation(ticker):
     """Sinyal açıklaması — AI varsa AI, yoksa algoritmik metin döner. Her zaman dolu.
     BIST hisseleri için _cache["data"] kullanılır.
-    US hisseleri için _stock_chart_cache["US_{ticker}"]["data"]["summary"] kullanılır.
     """
     ticker = ticker.upper()
-    is_bist = ticker in BIST100
-    is_us   = ticker in US_STOCKS
-
-    if not is_bist and not is_us:
+    if ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
 
-    if is_bist:
-        # BIST hissesi — anlık sinyal datasını cache'den al
-        with _lock:
-            stocks = list(_cache.get("data") or _cache.get("stocks") or [])
-        stock = next((s for s in stocks if s.get("ticker") == ticker), None)
-        if not stock:
-            return safe_json({"explanation": None, "reason": "no_data"})
-    else:
-        # US hissesi — chart cache'inden "summary" al (lazy hesapla)
-        now = time.time()
-        with _lock:
-            cached = _stock_chart_cache.get(f"US_{ticker}")
-        if cached and cached.get("data") and cached.get("data", {}).get("summary"):
-            stock = cached["data"]["summary"]
-        else:
-            # CPO-586: web worker'da synchronous yfinance yasak — stale cache yok, no_data
-            if os.environ.get("REFRESH_WORKER") == "web":
-                return safe_json({"explanation": None, "reason": "no_data"})
-            # Cache yok — hesapla (ilk açılış gecikir ama sonrası cache'den gelir)
-            data = _compute_chart_data(ticker, "2y")
-            upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
-            if data and data.get("summary"):
-                with _lock:
-                    _stock_chart_cache[f"US_{ticker}"] = {"data": data, "ts": now, "updated_at": upd}
-                stock = data["summary"]
-            else:
-                return safe_json({"explanation": None, "reason": "no_data"})
+    with _lock:
+        stocks = list(_cache.get("data") or _cache.get("stocks") or [])
+    stock = next((s for s in stocks if s.get("ticker") == ticker), None)
+    if not stock:
+        return safe_json({"explanation": None, "reason": "no_data"})
 
     text = get_ai_signal_explanation(ticker, stock)
     source = "gemini" if GEMINI_API_KEY else "algorithmic"
@@ -9353,11 +9290,13 @@ def api_data_quality():
 
 
 @app.route("/api/internal/cache-inventory")
+@limiter.limit("20 per minute")
 def api_cache_inventory():
     """CPO-1186 §3 APPROVE — REFRESH_WORKER guard'lı her cache'in disk-köprü
     durumu tek yerde. NEVER_WRITTEN (dosya hiç yazılmamış) ile STALE (dosya
     var ama mtime eski) ayrı sınıflar — dosya yoksa yaş hesaplanamaz, tek
     sınıfta toplansa tüketici None/Infinity'de patlar."""
+    require_admin()
     now = time.time()
     entries = []
 
@@ -10205,6 +10144,12 @@ def api_portfolio_save(token):
                     entry[numeric_key] = min(1e9, max(0.0, float(entry[numeric_key])))
                 except (ValueError, TypeError):
                     entry[numeric_key] = 0.0
+        # price/lot (veya buy_price/quantity) 0 veya altıysa pozisyon anlamsız —
+        # sessizce kaydetmeyi reddet (client tarafta cost=0 -> pnlPct=NaN render edilmesini önler)
+        price_val = entry.get("price", entry.get("buy_price"))
+        lot_val = entry.get("lot", entry.get("quantity"))
+        if (price_val is not None and price_val <= 0) or (lot_val is not None and lot_val <= 0):
+            continue
         # String alanları kırp
         for k in ("ticker","name","date","note","sector"):
             if k in entry and isinstance(entry[k], str):
@@ -11580,6 +11525,7 @@ _client_errors_recent = {}   # key: (msg_hash, page), val: timestamp
 _CLIENT_ERROR_DEDUP_WINDOW = 60.0   # aynı hatayı 60s'de bir logla
 _CLIENT_ERROR_RATE_LIMIT  = 50      # tüm IP'ler toplam 50 error/dk üst sınır
 _client_error_count_this_min = {"count": 0, "minute": 0}
+_LOG_CTRL_CHARS_RE = re.compile(r"[\r\n\x00-\x1f]")   # log injection/forging koruması
 
 
 @app.route("/api/log-error", methods=["POST"])
@@ -11587,13 +11533,13 @@ _client_error_count_this_min = {"count": 0, "minute": 0}
 def api_log_error():
     """Client-side JS hatalarını logger'a yazar. Stealth bug detection."""
     data = request.get_json(silent=True) or {}
-    msg  = (data.get("msg") or "").strip()[:500]
-    src  = (data.get("src") or "").strip()[:200]
+    msg  = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("msg") or "").strip())[:500]
+    src  = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("src") or "").strip())[:200]
     line = data.get("line")
     col  = data.get("col")
-    page = (data.get("page") or "").strip()[:120]
-    stack = (data.get("stack") or "").strip()[:1000]
-    ua   = (request.headers.get("User-Agent") or "")[:200]
+    page = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("page") or "").strip())[:120]
+    stack = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("stack") or "").strip())[:1000]
+    ua   = _LOG_CTRL_CHARS_RE.sub(" ", (request.headers.get("User-Agent") or ""))[:200]
 
     if not msg:
         return safe_json({"ok": False}), 400

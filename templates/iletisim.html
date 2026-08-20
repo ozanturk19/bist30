@@ -82,9 +82,17 @@ async function submitForm(e) {
   const email = emailEl.value.trim();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     emailEl.style.borderColor = 'var(--bp-sat)';
+    emailEl.setAttribute('aria-invalid', 'true');
+    emailEl.setAttribute('aria-describedby', 'cfMsg');
+    msg.style.display = 'block';
+    msg.style.color = 'var(--bp-sat)';
+    msg.textContent = '❌ Geçerli bir e-posta adresi girin.';
     emailEl.focus();
     return;
   }
+  emailEl.removeAttribute('aria-invalid');
+  emailEl.removeAttribute('aria-describedby');
+  msg.style.display = 'none';
   btn.disabled = true;
   btn.textContent = 'Gönderiliyor…';
   try {
