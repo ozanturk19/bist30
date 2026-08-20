@@ -4507,6 +4507,9 @@ ECONOMIC_CALENDAR_2026 = [
     {"date": "2026-05-22", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
     {"date": "2026-06-26", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
     {"date": "2026-07-23", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
+    {"date": "2026-09-10", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
+    {"date": "2026-10-22", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
+    {"date": "2026-12-10", "event": "TCMB Para Politikası Kurulu", "importance": "HIGH", "source": "TCMB", "icon": "🏦"},
     # TUIK Enflasyon Verileri
     {"date": "2026-05-05", "event": "TÜFE Nisan 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
     {"date": "2026-06-03", "event": "TÜFE Mayıs 2026", "importance": "HIGH", "source": "TUIK", "icon": "📊"},
@@ -4515,6 +4518,9 @@ ECONOMIC_CALENDAR_2026 = [
     {"date": "2026-05-07", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
     {"date": "2026-06-18", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
     {"date": "2026-07-30", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
+    {"date": "2026-09-16", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
+    {"date": "2026-10-28", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
+    {"date": "2026-12-09", "event": "Fed Faiz Kararı", "importance": "HIGH", "source": "FED", "icon": "🇺🇸"},
     # Bilanço Dönemleri
     {"date": "2026-05-15", "event": "1Ç 2026 Bilanço Son Günü (ilk açıklamalar)", "importance": "MED", "source": "KAP", "icon": "📋"},
     {"date": "2026-08-14", "event": "2Ç 2026 Bilanço Son Günü", "importance": "MED", "source": "KAP", "icon": "📋"},
@@ -4545,6 +4551,10 @@ def api_economic_calendar():
     upcoming = sorted([e for e in all_events if not e["is_past"]], key=lambda x: x["days_until"])
     recent   = sorted([e for e in all_events if e["is_past"] and e["days_until"] >= -7],
                        key=lambda x: x["days_until"], reverse=True)
+    if not upcoming:
+        # DEV2 bug-hunt r29: ECONOMIC_CALENDAR_2026 hardcoded liste tukendiginde
+        # sessizce bos donmesin - erken uyari icin logla (P0-CONTENT sinifinda degil ama takip edilsin)
+        logger.warning("ECONOMIC_CALENDAR_2026 tukendi: yaklasan olay kalmadi, listeye yeni tarih eklenmeli")
     return safe_json({
         "upcoming": upcoming[:6],
         "recent":   recent[:3],
