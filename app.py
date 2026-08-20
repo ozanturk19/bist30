@@ -1740,9 +1740,16 @@ def analyze(ticker_base):
         bear_score = int(st_bear) + int(adx_bear) + int(e12_bear)  # max 3
 
         # Haftalık gate: büyük ters trendde sinyal üretme
-        if bull_score >= 3 and weekly_dir != -1:
+        # CPO-DEV2-039/040 P1-SIGNAL-1: CB açıkken weekly_dir=0 GERÇEK bir
+        # "yatay trend" ölçümü değil, _weekly_trend() hiç çağrılmadığı için
+        # (satır ~1683) yapay bir doldurma değeri — bu durumda weekly_dir=0'ı
+        # gate'in her iki yönde de "geçti" sayması fail-open bir mantık
+        # hatasıydı (veri kalitesi en düşükken ana-trend filtresi devre
+        # dışı kalıyordu). CB açıkken haftalık gate artık fail-closed:
+        # weekly_dir gerçekten hesaplanmadıysa (_cb_skip) sinyal üretilmez.
+        if bull_score >= 3 and weekly_dir != -1 and not _cb_skip:
             signal = "AL"
-        elif bear_score >= 3 and weekly_dir != 1:
+        elif bear_score >= 3 and weekly_dir != 1 and not _cb_skip:
             signal = "SAT"
         else:
             signal = "BEKLE"
