@@ -42,6 +42,18 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from blog_content import ARTICLES, ARTICLES_BY_SLUG, CATEGORIES
 
+# Sunucu locale'i (en_US) strftime("%B")'yi İngilizce basar — locale-bağımsız TR ay adları
+_TR_MONTHS = {
+    1: "Ocak", 2: "Şubat", 3: "Mart", 4: "Nisan", 5: "Mayıs", 6: "Haziran",
+    7: "Temmuz", 8: "Ağustos", 9: "Eylül", 10: "Ekim", 11: "Kasım", 12: "Aralık",
+}
+
+
+def _tr_month(dt):
+    """dt.month için locale-bağımsız Türkçe ay adı döner."""
+    return _TR_MONTHS[dt.month]
+
+
 # ── Phase 3 #2 Paket 1+4+5 — Sağlamlık modülleri ─────────────────────────────
 from _alerts       import _check_api_stale, _format_alert_md, _should_alert_telegram
 from _health_extras import _extend_health_payload, _check_health_loop_stall
@@ -2722,6 +2734,7 @@ def _build_signal_email(changes, unsubscribe_url):
         bg        = sig_bg.get(new, "rgba(144,144,151,0.08)")
         bd        = sig_border.get(new, "rgba(144,144,151,0.2)")
         lbl       = sig_lbl.get(new, new)
+        old_lbl   = sig_lbl.get(old, old)
 
         prem_badge = ""
         if is_prem:
@@ -2742,7 +2755,8 @@ def _build_signal_email(changes, unsubscribe_url):
                   </td>
                   <td align="right" style="vertical-align:top">
                     <div style="font-size:15px;font-weight:700;color:#e5e1e4;font-variant-numeric:tabular-nums">{tr_price_filter(price)} ₺</div>
-                    <div style="background:{bg};color:{col};border:1px solid {bd};border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;display:inline-block;margin-top:4px">{lbl}</div>
+                    <div style="font-size:9.5px;color:#909097;margin-top:4px;letter-spacing:0.2px">{old_lbl} <span style="opacity:0.6">→</span></div>
+                    <div style="background:{bg};color:{col};border:1px solid {bd};border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;display:inline-block;margin-top:2px">{lbl}</div>
                   </td>
                 </tr>
                 <tr><td colspan="2" style="padding-top:10px;border-top:1px solid rgba(255,255,255,0.04);margin-top:10px">
@@ -2795,12 +2809,13 @@ def _build_signal_email(changes, unsubscribe_url):
             '\n    </table>'
         )
 
+    _now_tr = datetime.now(_TZ_TR)
     content = f'''
     <!-- Header -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
       <tr><td style="padding:18px 22px;text-align:center">
         <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:8px">📊 Yeni Sinyal Değişimleri</div>
-        <div style="font-size:13px;color:#c7c5cd;margin-bottom:14px">{datetime.now(_TZ_TR).strftime("%d %B %Y · %H:%M")}</div>
+        <div style="font-size:13px;color:#c7c5cd;margin-bottom:14px">{_now_tr.strftime("%d")} {_tr_month(_now_tr)} {_now_tr.strftime("%Y · %H:%M")}</div>
         <div>{summary_chips}</div>
       </td></tr>
     </table>
@@ -3192,11 +3207,12 @@ def _send_digest_emails(timeframe="daily", force=False):
             continue
         unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
 
+        _subj_now = datetime.now(_TZ_TR)
+        _subj_date = f"{_subj_now.strftime('%-d')} {_tr_month(_subj_now)}"
         if timeframe == "daily":
-            today_str = datetime.now(_TZ_TR).strftime("%-d %B")
-            subject = f"📊 {today_str} BIST Sinyalleri"
+            subject = f"📊 {_subj_date} BIST Sinyalleri"
         else:
-            subject = f"📊 Haftalık BIST Özeti — {datetime.now(_TZ_TR).strftime('%-d %B')}"
+            subject = f"📊 Haftalık BIST Özeti — {_subj_date}"
 
         # Premium count for subject hint
         prem_count = sum(1 for c in relevant if c[3].get("is_premium"))
@@ -4888,7 +4904,8 @@ def _do_macro_ai_refresh():
         oil    = _lbl("PETROL")
         btc    = _lbl("BTC")
 
-        today_str = datetime.now(_TZ_TR).strftime("%d %B %Y")
+        _today_now = datetime.now(_TZ_TR)
+        today_str = f"{_today_now.strftime('%d')} {_tr_month(_today_now)} {_today_now.strftime('%Y')}"
         lines = []
         if xu100:
             chg_str = ('%+.2f' % xu100c + '%') if xu100c is not None else '—'
@@ -6567,8 +6584,9 @@ def get_ai_news(ticker, source="user", ua_class=None):
     logger.info("NEWS_MEASURE ticker=%s ua_class=%s cache=miss gemini_call=yes", ticker, ua_class)
 
     name       = STOCK_NAMES.get(ticker, ticker)
-    today_str  = datetime.now(_TZ_TR).strftime("%d %B %Y")   # ör: "01 Mayıs 2026"
-    today_iso  = datetime.now(_TZ_TR).strftime("%Y-%m-%d")   # ör: "2026-05-01"
+    _news_now  = datetime.now(_TZ_TR)
+    today_str  = f"{_news_now.strftime('%d')} {_tr_month(_news_now)} {_news_now.strftime('%Y')}"   # ör: "01 Mayıs 2026"
+    today_iso  = _news_now.strftime("%Y-%m-%d")   # ör: "2026-05-01"
     week_ago   = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
     prompt = _SYS_NEWS + (
         f"\nHisse: {ticker} ({name})\n"
