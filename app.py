@@ -9823,6 +9823,10 @@ def api_karsilastir():
             "rr_ratio":       s.get("rr_ratio"),
             "bull_score":     s.get("bull_score"),
             "bear_score":     s.get("bear_score"),
+            # CPO-DEV2-043: kanonik puan (compose_score, /hisse ve /tarama'nin kaynagi) —
+            # karsilastir.html'in kendi calcScore()'u bagimsiz/farkli bir skor uretiyordu,
+            # additive alan (frontend bu turda degismiyor, sadece backend kaynagi acildi)
+            "signal_strength": s.get("signal_strength"),
             "sector":         _get_sector(ticker),
             # DEV2-bughunt-r7: bulunamayan (found=False) ticker icin de kap_url_for()
             # her zaman bir fallback arama linki dondugunden, karsilastir.html olmayan
@@ -10449,28 +10453,17 @@ def _redir_sp500():
 def hisseler_hub():
     """SEO hub — Tüm BIST hisseleri sektör + alfabetik. SSR ile 215 internal link."""
     # Sektörlere göre grupla (sadece BIST100 içinde olanlar)
+    # CPO-DEV2-043: SECTORS.items() üzerinde ham döngü, birden fazla sektörde
+    # geçen ticker'ları (PARSN/LKMNH/NUHCM/BASGZ) HER sektörde ayrı kart olarak
+    # gösteriyordu. _get_sector() zaten /hisse/<ticker> detay sayfasının kullandığı
+    # kanonik tek-sektör kaynağı (_TICKER_TO_SECTOR reverse-index) — hub da aynısını
+    # kullanınca her ticker tam olarak bir sektörde görünür, dup kart/şişmiş sayaç kalkar.
     bist_set = set(BIST100) - {"XU030", "XU100"}
     by_sector = {}
-    for sector, tickers in SECTORS.items():
-        active = [t for t in tickers if t in bist_set]
-        if active:
-            # Her sektörde ticker → name çiftleri, alfabetik
-            items = sorted(
-                [(t, STOCK_NAMES.get(t, t)) for t in active],
-                key=lambda x: x[0]
-            )
-            by_sector[sector] = items
-    # Sektörsüz/Diğer
-    in_any = set()
+    for t in bist_set:
+        by_sector.setdefault(_get_sector(t), []).append((t, STOCK_NAMES.get(t, t)))
     for items in by_sector.values():
-        for t, _ in items:
-            in_any.add(t)
-    others = sorted([t for t in bist_set if t not in in_any])
-    if others:
-        by_sector.setdefault("Diğer", []).extend(
-            (t, STOCK_NAMES.get(t, t)) for t in others
-        )
-        by_sector["Diğer"].sort(key=lambda x: x[0])
+        items.sort(key=lambda x: x[0])
 
     # Alfabetik tam liste (her harf grubu)
     all_pairs = sorted(

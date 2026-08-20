@@ -268,7 +268,7 @@ function goToDate(date) {
 <!-- Bugün sinyal değişenler -->
 {% if new_signals %}
 <div class="section-box">
-  <div class="section-title"><span aria-hidden="true">⚡</span> Bugün Sinyal Değişenler</div>
+  <div class="section-title"><span aria-hidden="true">⚡</span> {% if historical_date %}{{ today_str }} Sinyal Değişenler{% else %}Bugün Sinyal Değişenler{% endif %}</div>
   <div class="stock-grid">
     {% for s in new_signals %}
     <a href="/hisse/{{ s.ticker }}" class="stock-card">
@@ -278,7 +278,7 @@ function goToDate(date) {
         {{ '▲' if s.signal == 'AL' else '▼' if s.signal == 'SAT' else '●' }}
         {{ s.signal|signal_label }}
       </div>
-      <div class="sc-new"><span aria-hidden="true">⚡</span> Bugün oluştu</div>
+      <div class="sc-new"><span aria-hidden="true">⚡</span> {% if historical_date %}{{ today_str }} oluştu{% else %}Bugün oluştu{% endif %}</div>
     </a>
     {% endfor %}
   </div>
