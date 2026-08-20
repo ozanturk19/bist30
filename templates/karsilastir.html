@@ -631,8 +631,6 @@ if (TICKERS_PARAM) {
 }
 
 // Makro Ticker Bandı
-const MACRO_LABELS = BP_ASSET_LABELS;
-const MACRO_DEC = BP_ASSET_DECIMALS;
 async function loadMacroBar() {
   try {
     const r = await fetch('/api/macro');
@@ -640,9 +638,8 @@ async function loadMacroBar() {
     const items = d.items || [];
     if (!items.length) return;
     const html = items.map(it => {
-      const lbl   = MACRO_LABELS[it.label] || it.label;
-      const dec   = MACRO_DEC[it.label] ?? 2;
-      const price = it.price.toLocaleString('tr-TR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+      const lbl   = bpAssetLabel(it.label);
+      const price = bpFormatAssetPrice(it.label, it.price);
       const chg   = it.change;
       const sign  = chg > 0 ? '+' : '';
       const cls   = chg > 0.05 ? 'mc-pos' : chg < -0.05 ? 'mc-neg' : 'mc-neu';
