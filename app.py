@@ -10181,6 +10181,26 @@ def api_portfolio_save(token):
         return safe_json({"error": "Sunucu hatası"}), 500
 
 
+@app.route("/api/portfolio/<token>", methods=["DELETE"])
+@limiter.limit("30 per minute")
+def api_portfolio_delete(token):
+    """Token'a ait portfoyu sunucudan tamamen sil (CPO-DEV2-049 madde 5 --
+    clearPortfolio() oncesi yalnizca localStorage'i temizliyordu, sunucudaki
+    dosya dokunulmadan kaliyordu -- kullaniciya 'silindi' hissi veren ama
+    gercekte silmeyen bir UI)."""
+    path = _pf_path(token)
+    if not path:
+        return safe_json({"error": "Gecersiz token"}), 400
+    try:
+        with _PF_LOCK:
+            if os.path.exists(path):
+                os.remove(path)
+        return safe_json({"ok": True})
+    except Exception as e:
+        logger.error("Portfolio delete [%s]: %s", token, e)
+        return safe_json({"error": "Sunucu hatasi"}), 500
+
+
 # ── Backtest / Sinyal Performansı ─────────────────────────────────────────────
 def _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, i):
     """i. bar için sinyal hesapla."""

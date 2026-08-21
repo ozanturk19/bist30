@@ -397,12 +397,20 @@ function importPortfolio(e) {
   reader.readAsText(file);
 }
 
-function clearPortfolio() {
+async function clearPortfolio() {
   if (!portfolio.length) { showToast('Portföy zaten boş.', 'err'); return; }
   if (!confirm(`Portföydeki ${portfolio.length} pozisyon silinecek. Önce dışa aktarmanız önerilir. Devam?`)) return;
   portfolio = [];
   save();
   render();
+  // CPO-DEV2-049 madde 5: sadece localStorage degil, sunucudaki bulut kopyasi da silinsin
+  // (aksi halde kullaniciya 'silindi' hissi veren ama gercekte silmeyen bir UI olur).
+  const _cloudToken = localStorage.getItem(CLOUD_TOKEN_KEY);
+  if (_cloudToken) {
+    try {
+      await fetch(`/api/portfolio/${encodeURIComponent(_cloudToken)}`, {method: 'DELETE', signal: AbortSignal.timeout(15000)});
+    } catch (e) { /* sunucu silme basarisiz olsa da yerel portfoy zaten temizlendi */ }
+  }
   showToast('🗑 Portföy temizlendi.', 'ok');
 }
 

@@ -91,14 +91,14 @@
     Risk Metrikleri <span>(Güçlü Trend sinyalleri)</span>
   </div>
   <div class="stat-grid" style="margin-bottom:28px">
-    <div class="stat-card" tabindex="0" data-tip="Sharpe Ratio: Ortalama getirinin oynaklığa oranı. >1.0 iyi, >2.0 çok iyi.">
+    <div class="stat-card" tabindex="0" data-tip="Sharpe Ratio: Ortalama getirinin oynaklığa oranı. >1.0 iyi, >2.0 çok iyi. Bu değer birden fazla hissenin işlemlerini birleştirilmiş biçimde yaklaşık hesaplar, gerçek sıralı tek bir portföy eğrisi değildir.">
       <div class="stat-num {% if bt.al.sharpe is not none and bt.al.sharpe >= 1.0 %}c-green{% elif bt.al.sharpe is not none and bt.al.sharpe >= 0 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.sharpe is not none %}{{ bt.al.sharpe }}{% else %}—{% endif %}
       </div>
       <div class="stat-lbl"><span aria-hidden="true">📊</span> Sharpe Ratio</div>
       <div class="stat-sub">&gt;1.0 kabul edilebilir · &gt;2.0 mükemmel</div>
     </div>
-    <div class="stat-card" tabindex="0" data-tip="Maksimum kümülatif düşüş. Kötü seri döneminde en derin kayıp.">
+    <div class="stat-card" tabindex="0" data-tip="Maksimum kümülatif düşüş. Kötü seri döneminde en derin kayıp. Bu değer N farklı hissenin işlemlerini birleştirilmiş biçimde yaklaşık gösterir, gerçek sıralı tek bir portföy eğrisi değildir.">
       <div class="stat-num {% if bt.al.max_drawdown is not none and bt.al.max_drawdown > -15 %}c-green{% elif bt.al.max_drawdown is not none and bt.al.max_drawdown > -30 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.max_drawdown is not none %}{{ bt.al.max_drawdown }}%{% else %}—{% endif %}
       </div>
@@ -123,6 +123,7 @@
   <div class="info-box" style="margin-bottom:24px">
     <span role="img" aria-label="Uyarı">⚠️</span> <strong>Not:</strong> Risk metrikleri geçmiş veri üzerinden hesaplanmıştır. Komisyon ve slipaj (%0.1 tahmini) dahil değildir.
     Sharpe Ratio burada günlük bağımsız işlemler üzerinden hesaplanmış basit bir yaklaşımdır.
+    Max Drawdown ve Sharpe, incelenen hisselerin işlemlerini birleştirilmiş (uç uca eklenmiş) biçimde yaklaşık hesaplar — gerçek sıralı, tek bir portföy eğrisini yansıtmaz.
     Geçmiş performans gelecek getirileri garanti etmez.
   </div>
 
@@ -268,7 +269,14 @@ async function triggerBacktest() {
   btn.disabled = true;
   btn.textContent = '⏳ Başlatılıyor...';
   try {
-    await fetch('/api/backtest/run', { method: 'POST', signal: AbortSignal.timeout(15000) });
+    const runRes = await fetch('/api/backtest/run', { method: 'POST', signal: AbortSignal.timeout(15000) });
+    if (!runRes.ok) {
+      // CPO-DEV2-049 madde 2: 403 (admin-only) onceden basari sanilip kalici
+      // 'hesaplaniyor' kilidine dusuluyordu -- artik durum aciklikla gosteriliyor.
+      btn.textContent = runRes.status === 403 ? '🔒 Yetkiniz yok' : '❌ Hata';
+      btn.disabled = false;
+      return;
+    }
     btn.textContent = '✓ Çalışıyor, lütfen bekleyin...';
     // Her 30 saniyede sayfayı yenile
     let tries = 0;
@@ -306,11 +314,20 @@ async function triggerBacktest() {
   /* Yoksa otomatik başlat */
   if (statusEl) statusEl.textContent = 'Backtest başlatılıyor…';
   try {
-    await fetch('/api/backtest/run', { method: 'POST' });
+    const runRes = await fetch('/api/backtest/run', { method: 'POST' });
+    if (!runRes.ok) {
+      // CPO-DEV2-049 madde 2: 403 (admin-only) onceden basari sanilip 15-20dk
+      // bosuna polling yapip 'zaman asimi' ile pes ediliyordu.
+      if (statusEl) statusEl.textContent = runRes.status === 403
+        ? 'Bu işlem için yetki gerekiyor — lütfen daha sonra tekrar deneyin.'
+        : 'Başlatılamadı — Yeniden Başlat butonunu kullanın.';
+      return;
+    }
     if (statusEl) statusEl.textContent = 'Hesaplanıyor, lütfen bekleyin…';
     if (titleEl)  titleEl.textContent  = 'Backtest Çalışıyor';
   } catch(e) {
     if (statusEl) statusEl.textContent = 'Başlatılamadı — Yeniden Başlat butonunu kullanın.';
+    return;
   }
 
   /* Her 25 saniyede kontrol et, tamamlanınca yenile */
