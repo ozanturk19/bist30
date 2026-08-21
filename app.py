@@ -10324,6 +10324,9 @@ def sinyal_performans():
             s["aktif_ret"] = round(raw_ret if s["signal"] == "AL" else -raw_ret, 2)
         else:
             s["aktif_ret"] = None
+    # r39: None-guvenli sirala (Jinja sort(attribute=...) None/float TypeError atip
+    # sayfayi 500'e dusuruyordu -- None'lar sona, kalan buyukten kucuge).
+    aktif.sort(key=lambda s: (s["aktif_ret"] is None, -(s["aktif_ret"] if s["aktif_ret"] is not None else 0)))
     return render_template("sinyal_performans.html", bt=bt, aktif=aktif)
 
 
@@ -11105,7 +11108,7 @@ def api_recognize_confirm():
 def api_subscribe():
     """E-posta abonelik kaydı (name + email)."""
     data  = request.get_json(silent=True) or {}
-    email = (data.get("email") or "").strip().lower()
+    email = (data.get("email") or "").strip().lower()[:200]
     name  = (data.get("name") or "").strip()[:80]  # max 80 chars
 
     # Basit e-posta doğrulama
@@ -11684,8 +11687,8 @@ _BLOG_SLUG_REDIRECTS = {
     "supertrend-nedir":              "supertrend-indikatoru-nedir",
     "supertrend":                    "supertrend-indikatoru-nedir",
     "adx-nedir":                     "adx-indikatoru-nedir",
-    "ema-nedir":                     "ema-nedir-nasil-hesaplanir",
-    "rsi-nedir":                     "rsi-gosterge-analizi",
+    "ema-nedir":                     "ema-hareketli-ortalama-nedir",
+    "rsi-nedir":                     "rsi-gostergesi-nedir",
     "bist30-nedir":                  "bist100-nedir",
     "supertrend-vs-macd-karsilastirma": "supertrend-vs-macd",
 }

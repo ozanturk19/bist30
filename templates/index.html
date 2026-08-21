@@ -715,7 +715,7 @@
           <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal_date')">Tarih</button></th>
           <th scope="col" class="hide-mobile">Giriş ₺</th>
           <th scope="col" class="hide-mobile">SL ₺</th>
-          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('bull_score')">Güç</button></th>
+          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal_strength')">Güç</button></th>
           <th scope="col" class="hide-mobile">İndikatörler</th>
           <th scope="col" tabindex="0" data-tip="Sinyal değişince bildir"><span role="img" aria-label="Bildirim">🔔</span></th>
         </tr>
@@ -2579,7 +2579,7 @@ function sortTable(key) {
     if (btn) btn.classList.remove('sorted-asc', 'sorted-desc');
     th.removeAttribute('aria-sort');
   });
-  const colMap = { ticker:0, price:1, change_pct:2, signal:3, signal_date:4, bull_score:7 };
+  const colMap = { ticker:0, price:1, change_pct:2, signal:3, signal_date:4, signal_strength:7 };
   if (colMap[key] !== undefined) {
     const th = document.querySelectorAll('#mainTable thead th')[colMap[key]];
     const btn = th && th.querySelector('.th-sort-btn');

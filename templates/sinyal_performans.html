@@ -221,7 +221,7 @@
         </tr>
       </thead>
       <tbody id="perfTbody">
-        {% for s in aktif|sort(attribute='aktif_ret', reverse=true) %}
+        {% for s in aktif %}
         <tr data-ticker="{{ s.ticker }}" data-signal="{{ s.signal }}" data-signal_price="{{ s.signal_price }}" data-price="{{ s.price }}" data-aktif_ret="{{ s.aktif_ret if s.aktif_ret is not none else 0 }}" data-signal_bars="{{ s.signal_date|signal_age_days }}" data-signal_date="{{ s.signal_date }}">
           <td><a href="/hisse/{{ s.ticker }}" class="ticker-link">{{ s.ticker }}</a></td>
           <td>
