@@ -157,6 +157,17 @@
 <script>
 const QUALITY_LABELS = {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Uzak'};
 
+/* karsilastir.html'deki ile ayni desen (r27 bug-hunt) — defense-in-depth,
+   API verisi (haber/ekonomik takvim) HTML sink'lerine kacissiz yazilmasin. */
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+function safeHref(url) {
+  return /^https?:\/\//i.test(url || '') ? escapeHtml(url) : '#';
+}
+
 function adxFromStock(s) {
   const inds = s.indicators || {};
   const lbl  = (inds.adx || {}).label || '';
@@ -186,11 +197,12 @@ function renderCard(s, isNew) {
 
   const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';
 
-  return `<a href="/hisse/${s.ticker}" class="stock-card ${sigCls}${isNew?' new-signal':''}">
+  const etTicker = escapeHtml(s.ticker);
+  return `<a href="/hisse/${etTicker}" class="stock-card ${sigCls}${isNew?' new-signal':''}">
     <div class="sc-top">
       <div>
-        <div class="sc-ticker">${s.ticker}${newMark}</div>
-        <div class="sc-name">${(s.name||'').replace(' A.Ş.','').replace(' T.A.Ş.','')}</div>
+        <div class="sc-ticker">${etTicker}${newMark}</div>
+        <div class="sc-name">${escapeHtml((s.name||'').replace(' A.Ş.','').replace(' T.A.Ş.',''))}</div>
       </div>
       <span class="badge ${sigCls}">${badgeTxt}</span>
     </div>
@@ -212,6 +224,9 @@ async function loadGundem() {
       fetch('/api/market-news'),
     ]);
     const d = await gundemRes.json();
+    if (!gundemRes.ok || d.ok === false) {
+      throw new Error('HTTP ' + gundemRes.status + (d && d.error ? ': ' + d.error : ''));
+    }
 
     // Stats
     const sm = d.signal_summary || {};
@@ -286,14 +301,15 @@ async function loadGundem() {
           const isSat = item.signal === 'SAT';
           const sigCls = isAl ? '#3fb950' : isSat ? '#f85149' : '#8b949e';
           const sigTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Trend Bozuldu' : '● Yatay';
-          const snippet = (item.snippet||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/^\*\s+/gm,'• ').replace(/^-\s+/gm,'• ').trim();
-          const kapHref = item.kap_url ? `<a href="${item.kap_url}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
-          return `<a href="/hisse/${item.ticker}" style="display:block;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:12px 14px;transition:border-color .15s"
+          const snippet = escapeHtml((item.snippet||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/^\*\s+/gm,'• ').replace(/^-\s+/gm,'• ').trim());
+          const kapHref = item.kap_url ? `<a href="${safeHref(item.kap_url)}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
+          const etTicker = escapeHtml(item.ticker);
+          return `<a href="/hisse/${etTicker}" style="display:block;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:12px 14px;transition:border-color .15s"
             onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-              <span style="font-size:13px;font-weight:700;color:#e2e8f0">${item.ticker}</span>
+              <span style="font-size:13px;font-weight:700;color:#e2e8f0">${etTicker}</span>
               <span style="font-size:11px;font-weight:600;color:${sigCls}">${sigTxt}</span>
-              <span style="font-size:11px;color:#64748b;margin-left:auto">${item.name||''}</span>
+              <span style="font-size:11px;color:#64748b;margin-left:auto">${escapeHtml(item.name||'')}</span>
               ${kapHref}
             </div>
             <div style="font-size:12px;color:#94a3b8;line-height:1.5">${snippet}</div>
@@ -334,8 +350,8 @@ async function loadEconCalendar() {
       return `<div style="display:flex;align-items:center;gap:12px;background:var(--bp-surface);border:1px solid ${e.is_today?'rgba(var(--bp-gold-rgb),.3)':'var(--bp-border)'};border-radius:8px;padding:10px 14px">
         <span style="font-size:18px;flex-shrink:0">${e.icon||'📅'}</span>
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:#e2e8f0">${e.event}</div>
-          <div style="font-size:11px;color:#64748b;margin-top:1px">${e.date_fmt} · <span style="${imp.cls}">${imp.lbl} Öncelik</span> · ${e.source}</div>
+          <div style="font-size:13px;font-weight:600;color:#e2e8f0">${escapeHtml(e.event)}</div>
+          <div style="font-size:11px;color:#64748b;margin-top:1px">${escapeHtml(e.date_fmt)} · <span style="${imp.cls}">${imp.lbl} Öncelik</span> · ${escapeHtml(e.source)}</div>
         </div>
         <div style="font-size:12px;text-align:right;flex-shrink:0">${duTxt}</div>
       </div>`;
@@ -359,12 +375,12 @@ async function loadMacroNewsSection() {
       return;
     }
     grid.innerHTML = items.slice(0, 8).map(item => {
-      return `<a href="${item.url}" target="_blank" rel="noopener"
+      return `<a href="${safeHref(item.url)}" target="_blank" rel="noopener"
         style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:10px 14px;transition:border-color .15s"
         onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
-        <span style="font-size:9px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.15);border-radius:var(--bp-radius-4);padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.source}</span>
-        <span style="font-size:var(--bp-text-base);color:#e2e8f0;line-height:1.4;font-weight:500;flex:1">${item.title}</span>
-        <span style="font-size:10px;color:#64748b;white-space:nowrap;flex-shrink:0;margin-top:2px">${item.date_str||item.published||''}</span>
+        <span style="font-size:9px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.15);border-radius:var(--bp-radius-4);padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(item.source)}</span>
+        <span style="font-size:var(--bp-text-base);color:#e2e8f0;line-height:1.4;font-weight:500;flex:1">${escapeHtml(item.title)}</span>
+        <span style="font-size:10px;color:#64748b;white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(item.date_str||item.published||'')}</span>
       </a>`;
     }).join('');
   } catch(e) {

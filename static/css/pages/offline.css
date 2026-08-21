@@ -32,7 +32,7 @@
     button:hover{background:#2563eb}
     .signal-note{
       font-size:.8rem;
-      color:#475569;
+      color:var(--bp-text3);
       max-width:280px;
     }
   

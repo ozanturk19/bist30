@@ -424,7 +424,7 @@ async function doCompare() {
     <div class="compare-wrap">
       <table class="compare-table" style="min-width:400px">
         <caption class="sr-only">Seçilen hisselerin yan yana karşılaştırma tablosu</caption>
-        <thead><tr><th class="row-label" scope="col"></th>${inputs.map(t=>`<th class="col-hdr" scope="col"><a href="/hisse/${t}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${t} detay sayfası">${t}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`).join('')}</tr></thead>
+        <thead><tr><th class="row-label" scope="col"></th>${inputs.map(t=>{const et=escapeHtml(t); return `<th class="col-hdr" scope="col"><a href="/hisse/${et}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${et} detay sayfası">${et}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`;}).join('')}</tr></thead>
         <tbody>
           <tr class="score-row"><th class="row-label" scope="row"><span aria-hidden="true">🏆</span> Yatırım Skoru</th>${inputs.map(()=>`<td><div class="skeleton" style="height:60px;width:90px"></div></td>`).join('')}</tr>
           ${ROW_LABELS.map(({label, isSep})=>{
@@ -445,6 +445,14 @@ async function doCompare() {
     const res  = await fetch(`/api/karsilastir?tickers=${inputs.join(',')}`);
     const data = await res.json();
     if (mySeq !== _compareSeq) return;  // daha yeni bir karsilastirma baslamis, bu yaniti at
+    if (!res.ok || data.ok === false) {
+      const msg = res.status === 429
+        ? 'Çok fazla istek gönderildi. Lütfen birazdan tekrar deneyin.'
+        : (data.error || 'Karşılaştırma yüklenemedi. Lütfen tekrar deneyin.');
+      document.getElementById('compareResult').innerHTML =
+        `<div class="empty-state"><h2>Hata</h2><p>${escapeHtml(msg)}</p></div>`;
+      return;
+    }
     document.getElementById('compareResult').innerHTML = buildTable(data.stocks || []);
   } catch(e) {
     if (mySeq !== _compareSeq) return;
@@ -520,9 +528,9 @@ function renderDropdown(inputId, items) {
     return;
   }
   const html = items.map((it, i) => `
-    <div class="ac-item" id="${dd.id}-opt-${i}" role="option" aria-selected="false" data-idx="${i}" data-ticker="${it.ticker}">
-      <span class="ac-item-ticker">${it.ticker}</span>
-      <span class="ac-item-name">${it.name}</span>
+    <div class="ac-item" id="${dd.id}-opt-${i}" role="option" aria-selected="false" data-idx="${i}" data-ticker="${escapeHtml(it.ticker)}">
+      <span class="ac-item-ticker">${escapeHtml(it.ticker)}</span>
+      <span class="ac-item-name">${escapeHtml(it.name)}</span>
     </div>
   `).join('');
   dd.innerHTML = html;
