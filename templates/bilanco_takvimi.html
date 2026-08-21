@@ -84,6 +84,14 @@ function sigClass(sig) {
 function sigLabel(sig) {
   return sig === 'AL' ? '▲ Güçlü Trend' : sig === 'SAT' ? '▼ Trend Bozuldu' : '● Yatay';
 }
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+function safeHref(url) {
+  return /^https?:\/\//i.test(url || '') ? escapeHtml(url) : '#';
+}
 
 function render(data) {
   const periods = data.periods;
@@ -131,29 +139,29 @@ function render(data) {
           ${isCurrent ? '● Aktif Dönem' : '○ Yaklaşan'}
         </span>
         <div>
-          <div class="period-label">${period.label}</div>
+          <div class="period-label">${escapeHtml(period.label)}</div>
           <div class="period-dates">${startFmt} – ${endFmt}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span style="font-size:12px;background:rgba(63,185,80,0.12);color:#3fb950;padding:2px 8px;border-radius:8px;border:1px solid rgba(63,185,80,0.2)">${alCount} Güçlü</span>
           <span style="font-size:12px;background:rgba(248,81,73,0.12);color:#f85149;padding:2px 8px;border-radius:8px;border:1px solid rgba(248,81,73,0.2)">${satCount} Bozuldu</span>
         </div>
-        <div class="period-desc">${period.description}</div>
+        <div class="period-desc">${escapeHtml(period.description)}</div>
       </div>
 
       <div class="stocks-grid">
         ${filtered.map(s => `
-          <div class="stock-card sig-${sigClass(s.signal)}" data-ticker="${s.ticker}" onclick="window.location.href='/hisse/' + this.dataset.ticker" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='/hisse/'+this.dataset.ticker}" role="link" tabindex="0">
+          <div class="stock-card sig-${sigClass(s.signal)}" data-ticker="${escapeHtml(s.ticker)}" onclick="window.location.href='/hisse/' + this.dataset.ticker" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='/hisse/'+this.dataset.ticker}" role="link" tabindex="0">
             <div class="sc-top">
-              <a href="/hisse/${s.ticker}" class="sc-ticker-link" onclick="event.stopPropagation()">
-                <span class="sc-ticker">${s.ticker}${s.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="color:var(--bp-volume);font-size:11px;vertical-align:middle">⭐</span>' : ''}</span>
+              <a href="/hisse/${escapeHtml(s.ticker)}" class="sc-ticker-link" onclick="event.stopPropagation()">
+                <span class="sc-ticker">${escapeHtml(s.ticker)}${s.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="color:var(--bp-volume);font-size:11px;vertical-align:middle">⭐</span>' : ''}</span>
               </a>
               <span class="sig-badge sig-${sigClass(s.signal)}">${sigLabel(s.signal)}</span>
             </div>
-            <div class="sc-name">${s.name}</div>
+            <div class="sc-name">${escapeHtml(s.name)}</div>
             ${s.price ? `<div class="sc-price">${s.price.toLocaleString('tr-TR', {minimumFractionDigits:2})} ₺</div>` : ''}
-            <div class="sc-date">📅 ${s.date === 'yaklaşık' ? 'Dönem: ' + period.label : s.date.split('-').reverse().join('.')}</div>
-            <a href="${s.kap_url}" target="_blank" rel="noopener"
+            <div class="sc-date">📅 ${s.date === 'yaklaşık' ? 'Dönem: ' + escapeHtml(period.label) : escapeHtml(s.date.split('-').reverse().join('.'))}</div>
+            <a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener"
                class="sc-kap" onclick="event.stopPropagation()">
               📋 KAP bildirimleri ↗
             </a>

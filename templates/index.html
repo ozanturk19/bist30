@@ -1751,7 +1751,7 @@ function renderHeroPanel(stocks) {
   /* 1. Güçlü Trend — AL sinyali, bull_score desc, max 5 */
   const alList = list
     .filter(s => s.signal === 'AL')
-    .sort((a, b) => (b.bull_score || 0) - (a.bull_score || 0))
+    .sort((a, b) => (b.signal_strength || 0) - (a.signal_strength || 0))
     .slice(0, 5);
   document.getElementById('hpAlList').innerHTML = alList.length
     ? alList.map(s => row(s, 'hp-bar-al')).join('')

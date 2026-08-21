@@ -9857,6 +9857,7 @@ def ozet_gecmis(tarih):
 
 
 @app.route("/api/ozet/snapshots")
+@limiter.limit("30 per minute")
 def api_ozet_snapshots():
     """Mevcut geçmiş özet tarihlerini listele."""
     try:
@@ -10103,7 +10104,7 @@ def api_portfolio_delete(token):
     gercekte silmeyen bir UI)."""
     path = _pf_path(token)
     if not path:
-        return safe_json({"error": "Gecersiz token"}), 400
+        return safe_json({"error": "Geçersiz token"}), 400
     try:
         with _PF_LOCK:
             if os.path.exists(path):
@@ -10111,7 +10112,7 @@ def api_portfolio_delete(token):
         return safe_json({"ok": True})
     except Exception as e:
         logger.error("Portfolio delete [%s]: %s", token, e)
-        return safe_json({"error": "Sunucu hatasi"}), 500
+        return safe_json({"error": "Sunucu hatası"}), 500
 
 
 # ── Backtest / Sinyal Performansı ─────────────────────────────────────────────

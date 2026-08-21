@@ -770,7 +770,7 @@ loadMacroBar();setInterval(loadMacroBar,180000);
     const list = j.results || [];
     const dl = document.getElementById('bistTickerList');
     if (!dl) return;
-    dl.innerHTML = list.map(s => `<option value="${s.ticker}">${s.name || s.ticker}</option>`).join('');
+    dl.innerHTML = list.map(s => `<option value="${esc(s.ticker)}">${esc(s.name || s.ticker)}</option>`).join('');
   } catch(_) { console.warn('ticker autocomplete listesi yuklenemedi', _); }
 })();
 

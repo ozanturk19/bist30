@@ -330,6 +330,7 @@ async function applyFilters() {
   try {
     const r = await fetch('/api/tarama?' + params);
     const d = await r.json();
+    if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
     if (mySeq !== _filtersSeq) return; // bayat yanit — daha yeni bir applyFilters cagrisi var, at
     _allRows = d.results || [];
     // Apply text filter on top of server results
