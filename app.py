@@ -11477,11 +11477,12 @@ def _check_user_alerts(stocks):
   <td style="padding:10px 14px;border-bottom:1px solid #222">{s.get('price', '—')}</td>
   <td style="padding:10px 14px;border-bottom:1px solid #222">{'; '.join(reasons)}</td>
 </tr>"""
-            html = f"""<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-<body style="background:#0e0e12;color:#e6edf3;font-family:sans-serif;padding:20px">
-<h2 style="color:#ffc850">🔔 BorsaPusula — Watchlist Alarmı</h2>
-<p>Merhaba {name}, takip listendeki hisselerde alarm koşulları tetiklendi:</p>
-<table style="width:100%;border-collapse:collapse;background:#161b22;border-radius:8px">
+            # CPO-DEV2-047 madde 5: diger tum transactional maillerin (welcome/login/signal)
+            # zorunlu tuttugu _email_base() deseni bu mail tipine de getirildi — yasal
+            # disclaimer + gercek (tiklanabilir) unsubscribe linki artik var.
+            content = f"""<h2 style="margin:0 0 12px;font-size:20px;color:#e5e1e4">🔔 Watchlist Alarmı</h2>
+<p style="margin:0 0 16px;color:#c7c9d1;font-size:14px;line-height:1.6">Merhaba {name}, takip listendeki hisselerde alarm koşulları tetiklendi:</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;background:#161b22;border-radius:8px;overflow:hidden">
 <tr style="background:#1f2937;color:#8b949e;font-size:12px">
   <th style="padding:8px 14px;text-align:left">Hisse</th>
   <th style="padding:8px 14px;text-align:left">Sinyal</th>
@@ -11489,9 +11490,12 @@ def _check_user_alerts(stocks):
   <th style="padding:8px 14px;text-align:left">Neden</th>
 </tr>{rows}
 </table>
-<p style="margin-top:16px;font-size:12px;color:#8b949e">
-  <a href="https://borsapusula.com" style="color:#ffc850">BorsaPusula.com</a> — Bu alarmı devre dışı bırakmak için profil ayarlarından alert'i silebilirsiniz.
-</p></body></html>"""
+<p style="margin-top:20px;font-size:13px;color:#8b949e;line-height:1.6">
+  Bu alarmı devre dışı bırakmak için <a href="https://borsapusula.com/profil" style="color:#00e2a1">profil sayfandan</a> ilgili takibi silebilirsin.
+</p>"""
+            preheader = f"Takip listendeki {len(triggered)} hissede alarm koşulu tetiklendi."
+            unsub_url = f"https://borsapusula.com/unsubscribe/{rec.get('token', '')}"
+            html = _email_base(content, unsub_url, preheader=preheader)
             send_email(email, f"🔔 BorsaPusula — {len(triggered)} Watchlist Alarmı", html)
             with _sub_lock:
                 subs2 = _load_subscribers()
@@ -11650,8 +11654,12 @@ def api_push_unsubscribe():
 
 
 @app.route("/unsubscribe/<token>")
+@limiter.limit("5 per hour", key_func=lambda: request.view_args.get("token", ""))
 def unsubscribe_page(token):
-    """Tek tıkla abonelik iptali (KVKK: kayıt tamamen silinir — push unsubscribe ile aynı desen)."""
+    """Tek tıkla abonelik iptali (KVKK: kayıt tamamen silinir — push unsubscribe ile aynı desen).
+    CPO-DEV2-046: token-bazlı rate-limit — kurumsal mail güvenlik tarayıcısı/link-prefetch'in
+    veya otomatik tekrar tıklamanın erken/toplu tetiklenme riskini azaltır. GET→POST'a taşıma
+    (RFC 8058, onay adımı) kararı Ozan'a soruluyor, bu turda dokunulmadı."""
     with _sub_lock:
         subs = _load_subscribers()
         match_email = None

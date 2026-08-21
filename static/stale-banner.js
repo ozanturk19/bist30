@@ -37,7 +37,7 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
   } else if (dq === 'stale') {
     var staleTxt = hasAge
       ? 'Veriler ' + ageTxt + ' önce güncellendi.'
-      : 'Veriler güncellendi — son güncelleme zamanı doğrulanamıyor.';
+      : 'Veriler bayat olabilir — son güncelleme zamanı doğrulanamıyor.';
     if (bTxt) bTxt.textContent = staleTxt + suffix;
     banner.style.background  = 'rgba(245,201,73,.10)';
     banner.style.borderColor = 'rgba(245,201,73,.4)';

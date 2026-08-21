@@ -1,10 +1,16 @@
-{# SPEC-007 Fix (CPO MSG-114): Premium modal partial — sitewide paywall.
-   index.html dışındaki sayfalar (tarama, sinyal_performans, hisse) bunu include eder.
-   openPremiumModal + submitPremium + _hasPremiumAccess sitewide erişilebilir olur. #}
+{# SPEC-007 Fix (CPO MSG-114): Premium modal partial.
+   DÜZELTME (CPO-DEV2-047, 21.08): bu partial şu an SADECE index.html tarafından include
+   ediliyor — tarama/sinyal_performans/hisse dahil değil. "Sitewide" hedefi (Option A,
+   CPO MSG-122) henüz gerçekleştirilmedi: gerçek sitewide yapmak CSS'in shared.css'e
+   taşınmasını VE paylaşımlı referans-sayaçlı bir scroll-lock mimarisini (bkz.
+   _mobile_nav_partial.html, bp-search.js ile çakışma riski, DEV2-234) gerektiriyor —
+   ayrı bir onay bekliyor. Bu partial'i başka bir sayfaya include edersen modal
+   stilsiz render olur (CSS index.css'te, shared.css'te değil). #}
 
 <script>
-/* SPEC-007 sitewide premium modal — window.* atamaları sayfadaki eski kopyayı override eder.
-   index.html dahil tüm sayfalarda bu partial tek kaynak (Option A, CPO MSG-122). */
+/* SPEC-007 premium modal — window.* atamaları sayfadaki eski kopyayı override eder.
+   Şu an sadece index.html'de kullanılıyor (yukarıdaki not). "index.html dahil tüm
+   sayfalarda tek kaynak" hedefi henüz gerçek değil, bkz. üstteki düzeltme notu. */
 {
   let _premiumModalRelease = null;
   let _pmHideTimer = null;
