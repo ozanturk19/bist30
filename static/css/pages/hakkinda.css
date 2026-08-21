@@ -140,12 +140,13 @@
   .tech-name { font-size: var(--bp-text-base); font-weight: 700; color: #f0f6fc; }
   .tech-desc { font-size: var(--bp-text-sm); color: #8b949e; margin-top: 3px; }
 
-  /* Market coverage */
+  /* Market coverage — tek kart (BIST100) kaldı, r33: repeat(auto-fill) boş grid sütunu bırakıyordu */
   .market-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: 1fr;
     gap: 10px;
     margin: 14px 0;
+    max-width: 420px;
   }
   .market-card {
     background: #161b22;

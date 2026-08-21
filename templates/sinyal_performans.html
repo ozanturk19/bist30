@@ -92,21 +92,21 @@
   </div>
   <div class="stat-grid" style="margin-bottom:28px">
     <div class="stat-card" tabindex="0" data-tip="Sharpe Ratio: Ortalama getirinin oynaklığa oranı. >1.0 iyi, >2.0 çok iyi.">
-      <div class="stat-num {% if bt.al.sharpe and bt.al.sharpe >= 1.0 %}c-green{% elif bt.al.sharpe and bt.al.sharpe >= 0 %}c-gold{% else %}c-red{% endif %}">
+      <div class="stat-num {% if bt.al.sharpe is not none and bt.al.sharpe >= 1.0 %}c-green{% elif bt.al.sharpe is not none and bt.al.sharpe >= 0 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.sharpe is not none %}{{ bt.al.sharpe }}{% else %}—{% endif %}
       </div>
       <div class="stat-lbl"><span aria-hidden="true">📊</span> Sharpe Ratio</div>
       <div class="stat-sub">&gt;1.0 kabul edilebilir · &gt;2.0 mükemmel</div>
     </div>
     <div class="stat-card" tabindex="0" data-tip="Maksimum kümülatif düşüş. Kötü seri döneminde en derin kayıp.">
-      <div class="stat-num {% if bt.al.max_drawdown and bt.al.max_drawdown > -15 %}c-green{% elif bt.al.max_drawdown and bt.al.max_drawdown > -30 %}c-gold{% else %}c-red{% endif %}">
+      <div class="stat-num {% if bt.al.max_drawdown is not none and bt.al.max_drawdown > -15 %}c-green{% elif bt.al.max_drawdown is not none and bt.al.max_drawdown > -30 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.max_drawdown is not none %}{{ bt.al.max_drawdown }}%{% else %}—{% endif %}
       </div>
       <div class="stat-lbl"><span aria-hidden="true">📉</span> Max Drawdown</div>
       <div class="stat-sub">Ardışık kayıp serisi etkisi</div>
     </div>
     <div class="stat-card" tabindex="0" data-tip="Profit Factor: Brüt kazanç / brüt kayıp. >1.5 iyi, >2.0 çok iyi.">
-      <div class="stat-num {% if bt.al.profit_factor and bt.al.profit_factor >= 1.5 %}c-green{% elif bt.al.profit_factor and bt.al.profit_factor >= 1.0 %}c-gold{% else %}c-red{% endif %}">
+      <div class="stat-num {% if bt.al.profit_factor is not none and bt.al.profit_factor >= 1.5 %}c-green{% elif bt.al.profit_factor is not none and bt.al.profit_factor >= 1.0 %}c-gold{% else %}c-red{% endif %}">
         {% if bt.al.profit_factor is not none %}{{ bt.al.profit_factor }}{% else %}—{% endif %}
       </div>
       <div class="stat-lbl"><span aria-hidden="true">⚖️</span> Profit Factor</div>

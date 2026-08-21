@@ -9,7 +9,7 @@
   <div class="box-icon" aria-hidden="true">{{ '✅' if success else '⚠️' }}</div>
   <h1>{{ 'Abonelik İptal Edildi' if success else 'Geçersiz veya Süresi Dolmuş Bağlantı' }}</h1>
   {% if success %}
-  <p><strong>{{ email }}</strong> adresi için bildirimler durduruldu.</p>
+  <p><strong>{{ email }}</strong> adresi için bildirimler durduruldu ve kayıtlı verileriniz sistemden tamamen silindi.</p>
   {% else %}
   <p>Bu abonelik iptal bağlantısı artık geçerli değil.</p>
   {% endif %}

@@ -10067,6 +10067,7 @@ _PF_DIR = os.path.join(_APP_DIR, "portfolios")
 os.makedirs(_PF_DIR, exist_ok=True)
 
 _PF_MAX_ENTRIES  = 100     # Token başına maksimum pozisyon
+_ALERT_MAX_ENTRIES = 50    # Kullanıcı başına maksimum alert (ticker) sayısı — subscribers.json paylaşımlı dosya, kontrolsüz büyüme engellenir
 _PF_MAX_BYTES    = 65536   # 64KB — saldırı hafifletme
 _PF_LOCK         = threading.Lock()
 
@@ -11362,6 +11363,7 @@ def _get_sub_by_cookie():
 
 
 @app.route("/api/user-alerts", methods=["GET"])
+@limiter.limit("60 per hour")
 def api_user_alerts_get():
     """Kullanıcının tüm alert ayarlarını döner."""
     email, _ = _get_sub_by_cookie()
@@ -11378,6 +11380,8 @@ def api_user_alerts_get():
 def api_user_alerts_set(ticker):
     """Bir ticker için alert ayarlarını kaydet (upsert)."""
     ticker = ticker.upper()
+    if not re.match(r'^[A-Z0-9]{2,10}$', ticker):
+        return safe_json({"ok": False, "error": "Geçersiz ticker formatı"}), 400
     email, _ = _get_sub_by_cookie()
     if not email:
         return safe_json({"ok": False, "error": "login_required"}), 401
@@ -11413,6 +11417,8 @@ def api_user_alerts_set(ticker):
             return safe_json({"ok": False, "error": "Abone bulunamadı"}), 404
         if "alerts" not in subs[email]:
             subs[email]["alerts"] = {}
+        if ticker not in subs[email]["alerts"] and len(subs[email]["alerts"]) >= _ALERT_MAX_ENTRIES:
+            return safe_json({"ok": False, "error": f"Maksimum {_ALERT_MAX_ENTRIES} alert izin verilir"}), 400
         subs[email]["alerts"][ticker] = {
             "price_pct":      price_pct,
             "signal_change":  signal_change,
@@ -11429,6 +11435,8 @@ def api_user_alerts_set(ticker):
 def api_user_alerts_delete(ticker):
     """Bir ticker için alert ayarını sil."""
     ticker = ticker.upper()
+    if not re.match(r'^[A-Z0-9]{2,10}$', ticker):
+        return safe_json({"ok": False, "error": "Geçersiz ticker formatı"}), 400
     email, _ = _get_sub_by_cookie()
     if not email:
         return safe_json({"ok": False, "error": "login_required"}), 401
@@ -11751,10 +11759,27 @@ def virtual_portfolio_redirect():
     return redirect("/portfolio", code=301)
 
 
+BLOG_NEW_BADGE_DAYS = 14  # r33: "Yeni" rozeti için eşik — yayın tarihinden itibaren kaç gün
+
 @app.route("/blog")
 def blog_index():
     normalized, cat_counts = _get_blog_cache()
-    return render_template("blog.html", articles=normalized, cat_counts=cat_counts)
+    # r33: "Yeni" rozeti eskiden listenin son 3 pozisyonuna (tarihten bağımsız)
+    # basılıyordu — yayın tarihi ne olursa olsun süresiz "Yeni" kalıyordu.
+    # Artık gerçek yayın tarihine göre, her istekte taze hesaplanıyor
+    # (cache'lenmiş normalized listenin kopyası üzerinde — _BLOG_NORMALIZED_CACHE
+    # değişmiyor, bayrak sunucu restart zamanına değil request anına göre doğru olur).
+    today = datetime.now(_TZ_TR).date()
+    articles = []
+    for a in normalized:
+        a2 = dict(a)
+        try:
+            pub_date = datetime.strptime(a["date"], "%Y-%m-%d").date()
+            a2["is_new"] = (today - pub_date).days <= BLOG_NEW_BADGE_DAYS
+        except (ValueError, TypeError, KeyError):
+            a2["is_new"] = False
+        articles.append(a2)
+    return render_template("blog.html", articles=articles, cat_counts=cat_counts)
 
 
 # Eski / kısa slug'lar → doğru slug 301 yönlendirme tablosu
