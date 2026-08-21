@@ -23,7 +23,7 @@
 
 <div class="hero">
   <h1>{% if name %}Merhaba {{ name.split()[0] }}!{% else %}Profilini Tamamla{% endif %}</h1>
-  <p>Sinyal önerilerini sana özelleştirmek için 30 saniye ayır. Sorulara verdiğin cevaplara göre <strong>en uygun sinyal türleri ve mail sıklığını</strong> ayarlayacağız.</p>
+  <p>Sana en uygun bildirim deneyimini kurmak için 30 saniye ayır. Sorulara verdiğin cevaplara göre <strong>mail bildirim sıklığını</strong> ayarlayacağız.</p>
 </div>
 
 {% if done %}
@@ -200,7 +200,7 @@ async function submitProfile(e) {
         '<div style="text-align:center;padding:30px 0">' +
         '<div style="font-size:var(--bp-text-42);margin-bottom:12px">✓</div>' +
         '<div style="font-size:18px;font-weight:800;color:var(--bp-al);margin-bottom:8px">Profilin kaydedildi!</div>' +
-        '<div style="font-size:13px;color:var(--bp-text2);margin-bottom:24px">' + (json.message || 'Sinyaller artık size özel.') + '</div>' +
+        '<div style="font-size:13px;color:var(--bp-text2);margin-bottom:24px">' + (json.message || 'Mail tercihleriniz güncellendi.') + '</div>' +
         '<a href="/" class="btn">Sinyal Paneline Dön →</a>' +
         '</div>';
     } else {

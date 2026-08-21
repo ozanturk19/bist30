@@ -30,6 +30,14 @@
 
   // Karar yok — DOM hazır olunca onay bandını göster (head'de body henüz yok).
   document.addEventListener('DOMContentLoaded', function() {
+    // r35 bug-hunt: bandın sabit bottom:0'ı, ≤900px'te (mobil alt navigasyon
+    // .mobile-bottom-nav, shared.css) z-index üstünlüğüyle (toast=9999 >
+    // sticky=200) 64px'lik nav'ı görsel+tıklama olarak kapatıyordu. Medya
+    // sorgusuyla mobilde nav yüksekliği kadar ofset ekleniyor.
+    var offsetStyle = document.createElement('style');
+    offsetStyle.textContent = '@media (max-width:900px){ #ga-consent-banner{bottom:calc(64px + env(safe-area-inset-bottom,0px)) !important} }';
+    document.head.appendChild(offsetStyle);
+
     var banner = document.createElement('div');
     banner.id = 'ga-consent-banner';
     banner.setAttribute('role', 'region');

@@ -11391,7 +11391,11 @@ def api_profile():
         _save_subscribers(subs)
 
     logger.info("Profil tamamlandı: %s (level=%s, freq=%s, mail=%s)", target, level, freq, mail_pref)
-    return safe_json({"ok": True, "message": "Profil kaydedildi! Sinyaller artık size özel."})
+    # r35 bug-hunt: "Sinyaller artık size özel" yanlıştı — level/freq/segments/size
+    # sadece bu formu tekrar render ederken geri gösteriliyor, mail dağıtımını
+    # mail_pref dışında hiçbir alan filtrelemiyor. Mesaj gerçekte ne değiştiğini
+    # yansıtacak şekilde düzeltildi.
+    return safe_json({"ok": True, "message": "Profil kaydedildi! Mail tercihleriniz güncellendi."})
 
 
 @app.route("/api/me")

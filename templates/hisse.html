@@ -1738,7 +1738,14 @@ function renderSummary(s, signalData) {
     // (bu rakamlar uygulanamaz bir vaat) ve backtest SAT'ı AL kadar güvenilir
     // bulmuyor. Sinyal üretim mantığına (compose_score/gate) dokunulmadı, sadece
     // SAT için bu bölümün gösterimi nötr/bilgilendirici bir tona çevrildi.
-    if (signalData.signal === 'SAT') {
+    // r35 bug-hunt: hasActiveSignal/header rozeti hep s.signal'a bakiyor (chart
+    // endpoint'inden, hemen render edilir) ama bu dal signalData.signal'a bakiyordu
+    // (ayri, non-blocking /api/data fetch'inden, chart'tan SONRA gelir) - arka plan
+    // refresh sinyali degistirirse aradaki dar pencerede header ile bu blok
+    // celisebiliyordu (SAT sinyalinde AL rakamlari gorunmesi riski dahil). s.signal
+    // ile hizalandi - fonksiyonun geri kalani zaten s.signal'i kanonik kaynak
+    // olarak kullaniyor.
+    if (s.signal === 'SAT') {
       const eqBadgeEl = document.getElementById('eqBadge');
       if (eqBadgeEl) eqBadgeEl.innerHTML = `<span class="eq-badge eq-risky">📉 Zayıflama sinyali</span>`;
       const eqNoteEl = document.getElementById('eqNote');
