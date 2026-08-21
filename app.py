@@ -10657,12 +10657,21 @@ def _load_earnings_cache_from_disk():
 # Q1 (Ocak-Mart bilanços):   Mayıs ortası
 # Q2/H1 (Nisan-Haziran):     Ağustos-Eylül
 # Q3 (Temmuz-Eylül):         Ekim-Kasım
+#
+# CPO-DEV2-048 (21.08): aralıklar çakışmasız + bitişik olacak şekilde düzeltildi
+# (eski hâlde Q4 2025/Q1 2026 arası 47 gün çakışıyordu, Q1→Q2 ve Q2→Q3 arası
+# haftalarca boşluk vardı — bir ticker'ın yfinance tarihi 2 döneme birden
+# girebiliyor ya da hiçbirine girmeyip kayboluyordu). Q3 2026 → Q4 2026 (Yıllık)
+# arasındaki boşluk (Aralık-Şubat) kasıtlı bırakıldı — bu dönemde BIST'te
+# tipik olarak bilanço açıklaması olmuyor (bkz. yukarıdaki sezon notu); bu
+# boşluğa denk gelen kesin bir yfinance tarihi olursa _earnings_refresh_impl
+# onu en yakın gelecek döneme (Q4 2026 Yıllık) düşürür, kaybolmaz.
 _BILANCO_PERIODS = [
     # (quarter_label, est_start_mm_dd, est_end_mm_dd, description)
-    ("Q4 2025 (Yıllık)", "2026-03-01", "2026-05-31", "2025 yıl sonu bilanço açıklamaları"),
-    ("Q1 2026",          "2026-04-15", "2026-06-15", "2026 1. çeyrek sonuçları"),
-    ("Q2 2026 (H1)",     "2026-08-01", "2026-09-15", "2026 ilk yarıyıl sonuçları"),
-    ("Q3 2026",          "2026-10-15", "2026-11-30", "2026 3. çeyrek sonuçları"),
+    ("Q4 2025 (Yıllık)", "2026-03-01", "2026-05-08", "2025 yıl sonu bilanço açıklamaları"),
+    ("Q1 2026",          "2026-05-09", "2026-07-08", "2026 1. çeyrek sonuçları"),
+    ("Q2 2026 (H1)",     "2026-07-09", "2026-09-30", "2026 ilk yarıyıl sonuçları"),
+    ("Q3 2026",          "2026-10-01", "2026-11-30", "2026 3. çeyrek sonuçları"),
     ("Q4 2026 (Yıllık)", "2027-03-01", "2027-04-30", "2026 yıl sonu bilanço açıklamaları"),
 ]
 
@@ -10709,38 +10718,61 @@ def _earnings_refresh_impl():
 
     # Dönemleri bugüne göre filtrele (geçmiş dönemler hariç)
     today_str = datetime.now(_TZ_TR).date().isoformat()
-    result_periods = []
-    for qlabel, start, end, desc in _BILANCO_PERIODS:
-        if end < today_str:   # Tamamen geçmiş dönem
+
+    # CPO-DEV2-048: ticker-merkezli TEK-atama modeli — eski dönem-merkezli döngü
+    # her ticker'ı bağımsız her döneme karşı test ediyordu; aralıklar çakışıyor/
+    # boşluk bırakıyordu ve "yaklaşık" tickerlar HER aktif dönemde tekrar
+    # ediyordu (186 ticker'ın 3 dönemde birebir aynı kümeyle görünmesinin nedeni
+    # buydu). Artık her ticker'a önce tek bir period index atanıyor, sonra
+    # dönemler bu atamaya göre dolduruluyor — bir ticker asla 2 dönemde aynı
+    # anda görünmüyor, "Toplam" sayacı kart sayısıyla birebir eşleşiyor.
+    active_periods = [p for p in _BILANCO_PERIODS if p[2] >= today_str]  # p=(qlabel,start,end,desc)
+
+    def _nearest_future_period_idx():
+        future = [(i, p[1]) for i, p in enumerate(active_periods) if p[1] >= today_str]
+        if future:
+            return min(future, key=lambda x: x[1])[0]
+        return len(active_periods) - 1 if active_periods else None
+
+    # assigned[ticker] = (period_idx, date_label)
+    assigned = {}
+    for t in BIST100:
+        if t == "XU030":
             continue
-        # Bu döneme giren hisseleri al (yfinance tarih varsa + yaklaşık olarak hepsini)
+        yf_date = yf_dates.get(t)
+        if yf_date:
+            # Kesin tarih: bu aralığa giren TEK dönemi bul (artık çakışmasız → en fazla 1 eşleşme)
+            match_idx = next((i for i, p in enumerate(active_periods) if p[1] <= yf_date <= p[2]), None)
+            if match_idx is None:
+                # Hiçbir aktif döneme girmiyor (geçmişte kaldı ya da sezon-dışı
+                # boşluğa denk geldi) → en yakın GELECEK döneme düş, kaybolmasın
+                match_idx = _nearest_future_period_idx()
+            if match_idx is not None:
+                assigned[t] = (match_idx, yf_date)
+        else:
+            # Yaklaşık: TEK bir varsayılan dönem — güncel dönem varsa o, yoksa en yakın gelecek
+            cur_idx = next((i for i, p in enumerate(active_periods) if p[1] <= today_str <= p[2]), None)
+            if cur_idx is None:
+                cur_idx = _nearest_future_period_idx()
+            if cur_idx is not None:
+                assigned[t] = (cur_idx, "yaklaşık")
+
+    result_periods = []
+    for i, (qlabel, start, end, desc) in enumerate(active_periods):
         stocks_in_period = []
-        for t in BIST100:
-            if t == "XU030":
+        for t, (pidx, date_label) in assigned.items():
+            if pidx != i:
                 continue
             sig_data = sig_map.get(t, {})
-            yf_date  = yf_dates.get(t)
-            # yfinance tarihi bu döneme giriyorsa → kesin; girmiyor/yoksa → yaklaşık
-            in_period = False
-            date_label = "yaklaşık"
-            if yf_date and start <= yf_date <= end:
-                in_period  = True
-                date_label = yf_date
-            elif not yf_date:
-                # Yaklaşık — dönem içinde göster
-                in_period  = True
-                date_label = "yaklaşık"
-
-            if in_period:
-                stocks_in_period.append({
-                    "ticker":      t,
-                    "name":        STOCK_NAMES.get(t, t),
-                    "signal":      sig_data.get("signal", "BEKLE"),
-                    "price":       sig_data.get("price"),
-                    "is_premium":  sig_data.get("is_premium", False),
-                    "date":        date_label,
-                    "kap_url":     f"https://www.kap.org.tr/tr/Bildirim/Ara?ara={t}&tip=MAL&kategori=2",
-                })
+            stocks_in_period.append({
+                "ticker":      t,
+                "name":        STOCK_NAMES.get(t, t),
+                "signal":      sig_data.get("signal", "BEKLE"),
+                "price":       sig_data.get("price"),
+                "is_premium":  sig_data.get("is_premium", False),
+                "date":        date_label,
+                "kap_url":     f"https://www.kap.org.tr/tr/Bildirim/Ara?ara={t}&tip=MAL&kategori=2",
+            })
         # Sinyal önceliği: AL → SAT → BEKLE, içinde alfabetik
         stocks_in_period.sort(key=lambda x: (
             0 if x["signal"] == "AL" else 1 if x["signal"] == "SAT" else 2,
