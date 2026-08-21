@@ -2087,7 +2087,14 @@ async function deleteAlertSettings() {
   if (!ticker) return;
   const st = document.getElementById('am-status');
   try {
-    await fetch(`/api/user-alerts/${ticker}`, {method: 'DELETE', credentials: 'same-origin'});
+    // r37 bug-hunt: r.ok kontrolsüz idi — 401/429/500'de fetch() reddetmez,
+    // istemci sahte "silindi" gösterip _userAlerts'ten düşürüyordu, sunucudaki
+    // alert canlı kalmaya devam ediyor ve kullanıcı bunu göremiyordu.
+    const r = await fetch(`/api/user-alerts/${ticker}`, {method: 'DELETE', credentials: 'same-origin'});
+    if (!r.ok) {
+      if (st) st.textContent = '❌ Silme başarısız, tekrar deneyin';
+      return;
+    }
     delete _userAlerts[ticker];
     if (st) st.textContent = '🗑 Alert silindi';
     setTimeout(() => closeAlertModal(), 800);

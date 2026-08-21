@@ -199,6 +199,20 @@ let liveData   = {};  // ticker → {price, signal, signal_price}
 let chartData  = {};  // ticker → [close prices last 30d]
 let xu030Ohlc  = [];  // [{time:"YYYY-MM-DD", close:...}, ...]
 
+// r37 bug-hunt: portfolio sadece sayfa yüklenirken bir kez localStorage'dan
+// okunuyordu, sonrasında bellek-içi tutuluyordu — iki sekme açıkken birinde
+// pozisyon eklenip diğerinde silinirse, ikinci sekmenin save()'i eski (stale)
+// diziyi geri yazıp ilk sekmenin eklediği pozisyonu sessizce siliyordu.
+// storage event'i diğer sekmenin yazdığı güncel veriyi bu sekmenin belleğine
+// senkronize eder, artık sonraki save() eski veriyi ezmiyor.
+window.addEventListener('storage', e => {
+  if (e.key !== PF_KEY) return;
+  try {
+    const next = JSON.parse(e.newValue || '[]');
+    if (Array.isArray(next)) { portfolio = next; render(); }
+  } catch (_) { /* diğer sekme geçici olarak bozuk yazmış olabilir, bu sekme kendi state'ini korur */ }
+});
+
 /* localStorage uyarı banner */
 function showLsWarning() {
   if (localStorage.getItem(LS_WARN_KEY)) return;   // daha önce kapatıldıysa gösterme
@@ -373,9 +387,19 @@ function importPortfolio(e) {
       // Hem eski format (düz dizi) hem yeni format (obje) desteklenir
       const positions = Array.isArray(data) ? data : (data.positions || []);
       if (!positions.length) throw new Error('Boş dosya');
-      // Basit validasyon
+      // r37 bug-hunt: truthy-only kontrol (!p.lot/!p.price) sayısal olmayan
+      // veya negatif değerleri geçiriyordu — NaN, portfolio genelindeki
+      // toplam maliyet/değer toplamını zehirleyip TÜM özet kutularını
+      // sessizce "—" gösteriyordu (NaN falsy olduğu için); negatif değerler
+      // ise K/Z yüzdesinin işaretini tersine çeviriyordu. Sunucu tarafı
+      // (/api/portfolio POST) zaten lot/price>0 zorunlu tutuyor, bu yerel-only
+      // import yolunu da aynı standarda getirir.
       positions.forEach(p => {
-        if (!p.ticker || !p.lot || !p.price) throw new Error('Eksik alan: ' + JSON.stringify(p));
+        const lot = Number(p.lot), price = Number(p.price);
+        if (!p.ticker || !Number.isFinite(lot) || lot <= 0 || !Number.isFinite(price) || price <= 0) {
+          throw new Error('Eksik/geçersiz alan: ' + JSON.stringify(p));
+        }
+        p.lot = lot; p.price = price;
       });
       // Mevcut portföyle birleştir — aynı ticker/tarih yoksa ekle
       let added = 0;

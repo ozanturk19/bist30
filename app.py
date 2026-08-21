@@ -8088,6 +8088,7 @@ def _get_fundamentals(ticker_base):
 
 
 @app.route("/api/hisse/<ticker>/fundamentals")
+@limiter.limit("30 per minute")  # r37 bug-hunt: aynı /api/hisse/<ticker>/* ailesindeki kardeşlerle (news/kap/signal-story 20-30/min) tutarlılık, eksikti
 def api_stock_fundamentals(ticker):
     """Temel analiz verileri — 4 saatlik cache."""
     ticker = ticker.upper()
@@ -8508,6 +8509,7 @@ def _compute_mtf(ticker):
 
 
 @app.route("/api/hisse/<ticker>/mtf")
+@limiter.limit("30 per minute")  # r37 bug-hunt: kardeş route'larla tutarlılık, eksikti
 def api_stock_mtf(ticker):
     """Hisse için çoklu zaman dilimi sinyal analizi (Günlük / Haftalık / Aylık) — 30 dk cache."""
     ticker = ticker.upper()
@@ -8561,6 +8563,7 @@ def validate_chart_integrity(ticker, chart_data, main_price, main_price_age_s=No
 
 
 @app.route("/api/hisse/<ticker>/chart")
+@limiter.limit("30 per minute")  # r37 bug-hunt: kardeş route'larla tutarlılık, eksikti
 def api_stock_chart(ticker):
     ticker = ticker.upper()
     if ticker not in BIST30:
@@ -10808,6 +10811,7 @@ def bilanco_takvimi():
 
 
 @app.route("/api/bilanco-takvimi")
+@limiter.limit("60 per minute")  # r37 bug-hunt: kardeş /api/bilanco-mini ile aynı limit, eksikti
 def api_bilanco_takvimi():
     data = get_earnings_data()
     return safe_json(data)
@@ -11345,6 +11349,11 @@ def api_user_alerts_set(ticker):
                 return safe_json({"ok": False, "error": "rvol_threshold 1.0-10 aralığında olmalı"}), 400
         except (TypeError, ValueError):
             return safe_json({"ok": False, "error": "rvol_threshold geçersiz"}), 400
+    # r37 bug-hunt: koşulsuz (tüm alanlar boş) bir alert config'i sessizce kabul
+    # edip _ALERT_MAX_ENTRIES kotasını tüketiyordu — hiçbir koşulu olmayan bir
+    # kayıt _check_user_alerts()'te asla tetiklenemez, kalıcı bir ölü giriş olurdu.
+    if price_pct is None and not signal_change and rsi_threshold is None and rvol_threshold is None:
+        return safe_json({"ok": False, "error": "En az bir alert koşulu belirtmelisiniz"}), 400
     with _sub_lock:
         subs = _load_subscribers()
         if email not in subs:
@@ -11487,6 +11496,11 @@ def _check_user_alerts(stocks):
             logger.error("_check_user_alerts send error (%s): %s", email, e)
 
     # Signal tracking for all alert users even if not triggered
+    # r37 bug-hunt (2026-08-22): cooldown'daki bir ticker için bu döngü koşulsuz
+    # ilerliyordu — üstteki ana döngü aynı ticker'ı cooldown nedeniyle atlayınca
+    # (satır ~11414), signal_change baseline'ı burada sessizce güncelleniyor,
+    # cooldown penceresinde gerçekleşen sinyal geçişleri hiç mail'e dönüşmeden
+    # kayboluyordu. Fix: aynı cooldown kapısını burada da uygula.
     try:
         with _sub_lock:
             subs3 = _load_subscribers()
@@ -11497,7 +11511,10 @@ def _check_user_alerts(stocks):
                 if "_alert_prev_signals" not in rec:
                     rec["_alert_prev_signals"] = {}
                     changed = True
+                last_sent_map3 = rec.get("alerts_last_sent") or {}
                 for ticker in rec.get("alerts", {}):
+                    if now_ts - last_sent_map3.get(ticker, 0) < ALERT_COOLDOWN:
+                        continue
                     s = stock_map.get(ticker)
                     if s and rec["_alert_prev_signals"].get(ticker) != s.get("signal"):
                         rec["_alert_prev_signals"][ticker] = s.get("signal")
