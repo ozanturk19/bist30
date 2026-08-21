@@ -202,6 +202,15 @@ function renderBullScore(v, signal, bearV) {
   return `${pips} <span class="mono" style="font-size:12px">${score}/3</span>`;
 }
 
+// CPO-DEV2-052 #1 (Ozan karari): SAT sinyalinde somut giris/hedef/stop rakami
+// gosterilmiyor — BIST'te bireysel yatirimci aciga satamiyor (uygulanamaz vaat)
+// ve backtest SAT'i AL kadar guvenilir bulmuyor. Sinyal uretim mantigina
+// (compose_score/gate) dokunmuyoruz, sadece bu 5 sutunun SAT satirindaki
+// gosterimini notrluyoruz.
+function _naForSat(tip) {
+  return `<span class="muted" style="font-size:11px" data-tip="${tip}" tabindex="0">—</span>`;
+}
+
 function renderCell(key, s) {
   if (!s || !s.found) return '<span class="muted" style="font-size:20px">—</span>';
   const v = s[key];
@@ -215,11 +224,11 @@ function renderCell(key, s) {
     /* CPO-1335: "Sinyal Süresi" bar sayacı değil takvim yaşı */
     case 'signal_bars':   return `<span class="mono">${bpSignalAgeText(s.signal_date)}</span>`;
     case 'signal_date':   return v ? `<span style="font-size:12px">${v}</span>` : '<span class="muted">—</span>';
-    case 'entry_quality': return renderQuality(v);
-    case 'sl_level':      return v ? `<span class="dn mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>';
-    case 'tp1':           return v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>';
-    case 'tp2':           return v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>';
-    case 'rr_ratio':      return v ? `<span class="mono" style="color:#58a6ff">1 : ${parseFloat(v).toFixed(1)}</span>` : '<span class="muted">—</span>';
+    case 'entry_quality': return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde giriş değerlendirmesi gösterilmez') : renderQuality(v);
+    case 'sl_level':      return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde somut stop seviyesi gösterilmez') : (v ? `<span class="dn mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
+    case 'tp1':           return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
+    case 'tp2':           return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
+    case 'rr_ratio':      return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde risk/ödül oranı gösterilmez') : (v ? `<span class="mono" style="color:#58a6ff">1 : ${parseFloat(v).toFixed(1)}</span>` : '<span class="muted">—</span>');
     case 'bull_score':    return renderBullScore(v, s.signal, s.bear_score);
     case 'sector':        return v ? `<span style="font-size:11px;color:var(--bp-text2)">${v}</span>` : '<span class="muted">—</span>';
     // ── Temel analiz ──

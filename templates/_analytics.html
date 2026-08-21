@@ -1,11 +1,63 @@
 {% if should_track %}
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-WXLPNFHYLP"></script>
+<!-- Google tag (gtag.js) — CPO-DEV2-052 #2 (Ozan kararı, Seçenek A): GA4 kullanıcı
+     onayı olmadan YÜKLENMEZ/ÇALIŞMAZ. gtag.js script'i sayfa yüklenirken doğrudan
+     eklenmiyor; sadece kullanıcı bandaki "Kabul Et"e basınca dinamik enjekte edilir.
+     Tercih localStorage'a yazılır (CONSENT_KEY), bir sonraki ziyarette banner tekrar
+     çıkmaz. "Reddet"/banner kapatma = GA4 hiç yüklenmez (varsayılan gizlilik-lehine). -->
 <script>
+(function() {
+  var CONSENT_KEY = 'bp_ga_consent';
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag("js", new Date());
-  gtag("config", "G-WXLPNFHYLP");
+  function gtag(){ dataLayer.push(arguments); }
+  window.gtag = gtag;
+
+  function loadGA4() {
+    if (window._bpGA4Loaded) return;
+    window._bpGA4Loaded = true;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-WXLPNFHYLP';
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', 'G-WXLPNFHYLP');
+  }
+
+  var consent = null;
+  try { consent = localStorage.getItem(CONSENT_KEY); } catch (e) {}
+
+  if (consent === 'granted') { loadGA4(); return; }
+  if (consent === 'denied') { return; }
+
+  // Karar yok — DOM hazır olunca onay bandını göster (head'de body henüz yok).
+  document.addEventListener('DOMContentLoaded', function() {
+    var banner = document.createElement('div');
+    banner.id = 'ga-consent-banner';
+    banner.setAttribute('role', 'region');
+    banner.setAttribute('aria-label', 'Analytics onayı');
+    banner.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:var(--bp-z-toast,9999);'
+      + 'background:var(--bp-surface2,#1c1b1f);border-top:1px solid var(--bp-border,#2a2a2c);'
+      + 'color:var(--bp-text2,#c7c5cd);font-size:13px;line-height:1.5;'
+      + 'padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px)) 16px;'
+      + 'display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;'
+      + 'box-shadow:0 -2px 12px rgba(0,0,0,.35)';
+    banner.innerHTML =
+      '<span style="flex:1 1 240px;min-width:0">Bu site deneyimi iyileştirmek için analytics kullanır. Kabul ediyor musunuz? '
+      + '<a href="/gizlilik" style="color:var(--bp-brand,#b8c3ff)">Detay</a></span>'
+      + '<span style="display:flex;gap:8px;flex-shrink:0">'
+      + '<button type="button" id="ga-consent-accept" style="background:var(--bp-brand,#b8c3ff);color:#0e0e12;border:none;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer">Kabul Et</button>'
+      + '<button type="button" id="ga-consent-reject" style="background:transparent;color:var(--bp-text3,#909097);border:1px solid var(--bp-border,#2a2a2c);border-radius:6px;padding:7px 14px;font-size:13px;cursor:pointer">Reddet</button>'
+      + '</span>';
+    document.body.appendChild(banner);
+
+    function decide(value) {
+      try { localStorage.setItem(CONSENT_KEY, value); } catch (e) {}
+      if (value === 'granted') loadGA4();
+      banner.remove();
+    }
+    document.getElementById('ga-consent-accept').addEventListener('click', function () { decide('granted'); });
+    document.getElementById('ga-consent-reject').addEventListener('click', function () { decide('denied'); });
+  });
+})();
 </script>
 {% if cf_beacon_token %}
 <!-- Cloudflare Web Analytics --><script type='module'

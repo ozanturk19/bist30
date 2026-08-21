@@ -1,19 +1,26 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ 'Abonelik İptal Edildi' if success else 'Geçersiz Bağlantı' }} | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ 'Abonelik İptal Edildi' if success else ('Aboneliği İptal Et' if confirm else 'Geçersiz Bağlantı') }} | BorsaPusula</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260820B">
-<link rel="stylesheet" href="/static/css/pages/unsubscribe.css?v=82620fd2">
+<link rel="stylesheet" href="/static/css/pages/unsubscribe.css?v=9bd240dd">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <main id="main-content" tabindex="-1">
 <div class="box">
-  <div class="box-icon" aria-hidden="true">{{ '✅' if success else '⚠️' }}</div>
-  <h1>{{ 'Abonelik İptal Edildi' if success else 'Geçersiz veya Süresi Dolmuş Bağlantı' }}</h1>
+  <div class="box-icon" aria-hidden="true">{{ '✅' if success else ('❓' if confirm else '⚠️') }}</div>
+  <h1>{{ 'Abonelik İptal Edildi' if success else ('Aboneliğinizi İptal Etmek İstediğinize Emin Misiniz?' if confirm else 'Geçersiz veya Süresi Dolmuş Bağlantı') }}</h1>
   {% if success %}
   <p><strong>{{ email }}</strong> adresi için bildirimler durduruldu ve kayıtlı verileriniz sistemden tamamen silindi.</p>
+  <a href="/" class="btn">Ana Sayfaya Dön</a>
+  {% elif confirm %}
+  <p><strong>{{ email }}</strong> adresi için tüm bildirimler durdurulacak ve kayıtlı verileriniz sistemden tamamen silinecek. Bu işlem geri alınamaz.</p>
+  <form method="post" action="/unsubscribe/{{ token }}" style="display:flex;flex-direction:column;gap:10px;align-items:center">
+    <button type="submit" class="btn">Evet, aboneliği iptal et</button>
+    <a href="/" class="btn btn-secondary">Vazgeç, ana sayfaya dön</a>
+  </form>
   {% else %}
   <p>Bu abonelik iptal bağlantısı artık geçerli değil.</p>
-  {% endif %}
   <a href="/" class="btn">Ana Sayfaya Dön</a>
+  {% endif %}
   <p style="margin:16px 0 0;font-size:var(--bp-text-xs)"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir · <a href="/yasal" style="color:var(--bp-text3);text-decoration:underline">Yasal Uyarı</a></p>
 </div>
 </main>

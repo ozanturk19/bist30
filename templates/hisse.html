@@ -1732,79 +1732,95 @@ function renderSummary(s, signalData) {
 
     if (section) section.style.display = 'block';
 
-    /* Giriş Değerlendirmesi */
-    const eq = signalData.entry_quality;
-    const isSafe = (eq === 'IDEAL' || eq === 'IYI');
-    const eqBadgeEl = document.getElementById('eqBadge');
-    if (eqBadgeEl) {
-      const label = isSafe ? 'Güvenli' : 'Giriş için riskli bölge';
-      eqBadgeEl.innerHTML = `<span class="eq-badge ${isSafe ? 'eq-safe' : 'eq-risky'}">${label}</span>`;
-    }
-    let noteHtml = signalData.entry_note ? `<span>${signalData.entry_note}</span>` : '';
-    if (signalData.optimal_entry && !isSafe) {
-      noteHtml += `<br><span style="margin-top:6px;display:inline-block">İdeal bölge: <strong style="color:var(--bp-text);font-variant-numeric:tabular-nums">${fmt(signalData.optimal_entry)} ₺</strong></span>`;
-    }
-    // Faz 1 #5: Bilanço uyarısı (7 gün içinde kesin tarih varsa)
-    if (signalData.earnings_warning) {
-      const ew = signalData.earnings_warning;
-      noteHtml += `<br><span style="margin-top:8px;display:inline-block;background:rgba(210,153,34,0.12);border:1px solid rgba(210,153,34,0.4);border-radius:6px;padding:5px 10px;color:#d29922;font-size:12px;font-weight:600" data-tip="Bilanço açıklaması fiyatta volatilite yaratabilir, pozisyon önce kapatılması düşünülebilir" tabindex="0">⚠️ ${ew.message}</span>`;
-    }
-    const eqNoteEl = document.getElementById('eqNote');
-    if (eqNoteEl) eqNoteEl.innerHTML = noteHtml;
-
-    /* R/R bar görsel */
-    const tp1 = signalData.tp1;
-    const tp2 = signalData.tp2;
-    const sl  = s.sl_level;
-    const cur = s.price;
-    if (tp1 && tp2 && sl && cur) {
-      const risk   = Math.abs(cur - sl);
-      const reward = Math.abs(tp2 - cur);
-      const total  = risk + reward || 1;
-      const riskW  = Math.round(risk / total * 100);
-      const rewW   = 100 - riskW;
-
+    // CPO-DEV2-052 #1 (Ozan kararı): SAT sinyalinde AL'daki gibi somut bir "trade
+    // yapısı" (giriş kalitesi rozeti, ideal giriş bölgesi, SL/TP1/TP2 rakamları,
+    // rr_signal) gösterilmiyor — BIST'te bireysel yatırımcı genelde açığa satamıyor
+    // (bu rakamlar uygulanamaz bir vaat) ve backtest SAT'ı AL kadar güvenilir
+    // bulmuyor. Sinyal üretim mantığına (compose_score/gate) dokunulmadı, sadece
+    // SAT için bu bölümün gösterimi nötr/bilgilendirici bir tona çevrildi.
+    if (signalData.signal === 'SAT') {
+      const eqBadgeEl = document.getElementById('eqBadge');
+      if (eqBadgeEl) eqBadgeEl.innerHTML = `<span class="eq-badge eq-risky">📉 Zayıflama sinyali</span>`;
+      const eqNoteEl = document.getElementById('eqNote');
+      if (eqNoteEl) eqNoteEl.innerHTML = `<span>Trend aşağı yönlü — somut giriş/hedef seviyesi bu sinyal tipinde gösterilmez.</span>`;
       const rrBarEl = document.getElementById('rrBarContainer');
-      if (rrBarEl) {
-        rrBarEl.innerHTML = `
-          <div class="rr-bar">
-            <div class="rr-risk-seg" style="width:${riskW}%"></div>
-            <div class="rr-reward-seg" style="width:${rewW}%"></div>
-          </div>`;
-      }
-
-      const sigDir = signalData.signal === 'AL';
+      if (rrBarEl) rrBarEl.innerHTML = '';
       const rrLevelsEl = document.getElementById('rrLevels');
-      if (rrLevelsEl) {
-        // CPO-DEV2-045 #1: "Şu an girersen R/R" (rr_now) kaldırıldı — TP1=entry+risk*2
-        // sabit formülü yüzünden cebirsel olarak HER ZAMAN 2.0 çıkıyordu (totoloji),
-        // entry_quality/kovalama uyarısıyla çelişebiliyordu. Sadece sinyal başından R/R kalıyor.
-        const rrSig = signalData.rr_signal;
-        const rrRowsHtml = (rrSig != null) ? `
-          <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:11px;font-variant-numeric:tabular-nums">
-            <div style="display:flex;justify-content:space-between;color:#8b949e">
-              <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">R/R</a></span>
-              <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2)}x</strong>
-            </div>
-          </div>` : '';
-        rrLevelsEl.innerHTML = `
-          <div class="rr-level-row">
-            <div class="rr-lvl" style="color:var(--bp-sat)">
-              <span>SL</span>
-              <strong style="color:var(--bp-sat)">${fmt(sl)}</strong>
-            </div>
-            <div class="rr-lvl" style="text-align:center">
-              <span>Şimdi</span>
-              <strong>${fmt(cur)}</strong>
-            </div>
-            <div class="rr-lvl" style="text-align:right">
-              <span style="color:var(--bp-al)">TP1 (2R)</span>
-              <strong style="color:var(--bp-al)">${fmt(tp1)}</strong>
-              <br>
-              <span style="color:var(--bp-brand);font-size:10px">TP2 (3R)</span>
-              <strong style="color:var(--bp-brand);font-size:11px"> ${fmt(tp2)}</strong>
-            </div>
-          </div>` + rrRowsHtml;
+      if (rrLevelsEl) rrLevelsEl.innerHTML = `<div style="color:var(--bp-text3);font-size:12px;padding:2px 0;line-height:1.5">BIST'te açığa satış pratikte uygulanamadığı için SAT sinyalinde somut giriş/hedef/stop seviyeleri gösterilmiyor.</div>`;
+    } else {
+      /* Giriş Değerlendirmesi */
+      const eq = signalData.entry_quality;
+      const isSafe = (eq === 'IDEAL' || eq === 'IYI');
+      const eqBadgeEl = document.getElementById('eqBadge');
+      if (eqBadgeEl) {
+        const label = isSafe ? 'Güvenli' : 'Giriş için riskli bölge';
+        eqBadgeEl.innerHTML = `<span class="eq-badge ${isSafe ? 'eq-safe' : 'eq-risky'}">${label}</span>`;
+      }
+      let noteHtml = signalData.entry_note ? `<span>${signalData.entry_note}</span>` : '';
+      if (signalData.optimal_entry && !isSafe) {
+        noteHtml += `<br><span style="margin-top:6px;display:inline-block">İdeal bölge: <strong style="color:var(--bp-text);font-variant-numeric:tabular-nums">${fmt(signalData.optimal_entry)} ₺</strong></span>`;
+      }
+      // Faz 1 #5: Bilanço uyarısı (7 gün içinde kesin tarih varsa)
+      if (signalData.earnings_warning) {
+        const ew = signalData.earnings_warning;
+        noteHtml += `<br><span style="margin-top:8px;display:inline-block;background:rgba(210,153,34,0.12);border:1px solid rgba(210,153,34,0.4);border-radius:6px;padding:5px 10px;color:#d29922;font-size:12px;font-weight:600" data-tip="Bilanço açıklaması fiyatta volatilite yaratabilir, pozisyon önce kapatılması düşünülebilir" tabindex="0">⚠️ ${ew.message}</span>`;
+      }
+      const eqNoteEl = document.getElementById('eqNote');
+      if (eqNoteEl) eqNoteEl.innerHTML = noteHtml;
+
+      /* R/R bar görsel */
+      const tp1 = signalData.tp1;
+      const tp2 = signalData.tp2;
+      const sl  = s.sl_level;
+      const cur = s.price;
+      if (tp1 && tp2 && sl && cur) {
+        const risk   = Math.abs(cur - sl);
+        const reward = Math.abs(tp2 - cur);
+        const total  = risk + reward || 1;
+        const riskW  = Math.round(risk / total * 100);
+        const rewW   = 100 - riskW;
+
+        const rrBarEl = document.getElementById('rrBarContainer');
+        if (rrBarEl) {
+          rrBarEl.innerHTML = `
+            <div class="rr-bar">
+              <div class="rr-risk-seg" style="width:${riskW}%"></div>
+              <div class="rr-reward-seg" style="width:${rewW}%"></div>
+            </div>`;
+        }
+
+        const rrLevelsEl = document.getElementById('rrLevels');
+        if (rrLevelsEl) {
+          // CPO-DEV2-045 #1: "Şu an girersen R/R" (rr_now) kaldırıldı — TP1=entry+risk*2
+          // sabit formülü yüzünden cebirsel olarak HER ZAMAN 2.0 çıkıyordu (totoloji),
+          // entry_quality/kovalama uyarısıyla çelişebiliyordu. Sadece sinyal başından R/R kalıyor.
+          const rrSig = signalData.rr_signal;
+          const rrRowsHtml = (rrSig != null) ? `
+            <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:11px;font-variant-numeric:tabular-nums">
+              <div style="display:flex;justify-content:space-between;color:#8b949e">
+                <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">R/R</a></span>
+                <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2)}x</strong>
+              </div>
+            </div>` : '';
+          rrLevelsEl.innerHTML = `
+            <div class="rr-level-row">
+              <div class="rr-lvl" style="color:var(--bp-sat)">
+                <span>SL</span>
+                <strong style="color:var(--bp-sat)">${fmt(sl)}</strong>
+              </div>
+              <div class="rr-lvl" style="text-align:center">
+                <span>Şimdi</span>
+                <strong>${fmt(cur)}</strong>
+              </div>
+              <div class="rr-lvl" style="text-align:right">
+                <span style="color:var(--bp-al)">TP1 (2R)</span>
+                <strong style="color:var(--bp-al)">${fmt(tp1)}</strong>
+                <br>
+                <span style="color:var(--bp-brand);font-size:10px">TP2 (3R)</span>
+                <strong style="color:var(--bp-brand);font-size:11px"> ${fmt(tp2)}</strong>
+              </div>
+            </div>` + rrRowsHtml;
+        }
       }
     }
 

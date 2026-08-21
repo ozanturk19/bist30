@@ -11792,13 +11792,20 @@ def api_push_unsubscribe():
     return safe_json({"ok": True, "removed": removed})
 
 
-@app.route("/unsubscribe/<token>")
+@app.route("/unsubscribe/<token>", methods=["GET", "POST"])
 @limiter.limit("5 per hour", key_func=lambda: request.view_args.get("token", ""))
 def unsubscribe_page(token):
-    """Tek tıkla abonelik iptali (KVKK: kayıt tamamen silinir — push unsubscribe ile aynı desen).
+    """Abonelik iptali (KVKK: kayıt tamamen silinir — push unsubscribe ile aynı desen).
     CPO-DEV2-046: token-bazlı rate-limit — kurumsal mail güvenlik tarayıcısı/link-prefetch'in
-    veya otomatik tekrar tıklamanın erken/toplu tetiklenme riskini azaltır. GET→POST'a taşıma
-    (RFC 8058, onay adımı) kararı Ozan'a soruluyor, bu turda dokunulmadı."""
+    veya otomatik tekrar tıklamanın erken/toplu tetiklenme riskini azaltır (hem GET hem POST'a
+    aynı şekilde uygulanır).
+    CPO-DEV2-052 #3 (Ozan kararı): GET artık DOĞRUDAN silmiyor — önce bir onay sayfası
+    gösteriyor, gerçek silme kullanıcının o sayfadaki tek butona tıklayıp POST atmasıyla
+    gerçekleşiyor. Bu, güvenlik tarayıcısı/link-prefetch'in (GET-only) linki otomatik açıp
+    kullanıcıyı istemeden abonelikten düşürmesini engeller. Not: RFC 8058'in makine-okunur
+    List-Unsubscribe-Post header mekanizması bundan AYRI bir kanaldır (mail istemcisinin
+    kendisi kullanır, kullanıcının gördüğü footer linkiyle aynı şey değildir) — bu değişiklik
+    onunla çakışmaz."""
     with _sub_lock:
         subs = _load_subscribers()
         match_email = None
@@ -11806,12 +11813,17 @@ def unsubscribe_page(token):
             if data.get("token") == token:
                 match_email = email
                 break
-        if match_email:
-            del subs[match_email]
-            _save_subscribers(subs)
-            logger.info("E-posta abonelik iptal (kayit silindi): %s", match_email)
-            return render_template("unsubscribe.html", success=True, email=match_email)
-    return render_template("unsubscribe.html", success=False, email=None), 404
+
+        if not match_email:
+            return render_template("unsubscribe.html", success=False, confirm=False, email=None), 404
+
+        if request.method == "GET":
+            return render_template("unsubscribe.html", success=False, confirm=True, email=match_email, token=token)
+
+        del subs[match_email]
+        _save_subscribers(subs)
+        logger.info("E-posta abonelik iptal (kayit silindi): %s", match_email)
+        return render_template("unsubscribe.html", success=True, confirm=False, email=match_email)
 
 
 @app.route("/api/telegram/test", methods=["POST"])
