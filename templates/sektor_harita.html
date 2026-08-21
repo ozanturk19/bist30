@@ -218,9 +218,9 @@ function renderHeatmap(stocks) {
     const alPct  = sec.total > 0 ? (sec.al.length  / sec.total * 100).toFixed(0) : 0;
     const satPct = sec.total > 0 ? (sec.sat.length / sec.total * 100).toFixed(0) : 0;
 
-    const alChips  = sec.al.map(s  => `<a href="/hisse/${s.ticker}" class="stock-chip chip-al">${s.ticker}</a>`).join('');
-    const satChips = sec.sat.map(s => `<a href="/hisse/${s.ticker}" class="stock-chip chip-sat">${s.ticker}</a>`).join('');
-    const bklSample = sec.bkl.slice(0,6).map(s => `<a href="/hisse/${s.ticker}" class="stock-chip chip-bkl">${s.ticker}</a>`).join('');
+    const alChips  = sec.al.map(s  => `<a href="/hisse/${esc(s.ticker)}" class="stock-chip chip-al">${esc(s.ticker)}</a>`).join('');
+    const satChips = sec.sat.map(s => `<a href="/hisse/${esc(s.ticker)}" class="stock-chip chip-sat">${esc(s.ticker)}</a>`).join('');
+    const bklSample = sec.bkl.slice(0,6).map(s => `<a href="/hisse/${esc(s.ticker)}" class="stock-chip chip-bkl">${esc(s.ticker)}</a>`).join('');
     const bklMore  = sec.bkl.length > 6 ? `<span class="stock-chip chip-bkl">+${sec.bkl.length-6}</span>` : '';
 
     const premCount = sec.premium ? sec.premium.length : 0;
@@ -240,8 +240,8 @@ function renderHeatmap(stocks) {
       : '';
 
     return `
-    <div class="sector-card" data-sector="${sec.name}" data-href="/tarama?sector=${encodeURIComponent(sec.name)}" style="--heat-color:${color};cursor:pointer" title="${sec.name} sektöründeki tüm hisseleri taramaya götür" tabindex="0" role="link">
-      <div class="sec-name" style="color:${color}">${sec.name}</div>
+    <div class="sector-card" data-sector="${esc(sec.name)}" data-href="/tarama?sector=${encodeURIComponent(sec.name)}" style="--heat-color:${color};cursor:pointer" title="${esc(sec.name)} sektöründeki tüm hisseleri taramaya götür" tabindex="0" role="link">
+      <div class="sec-name" style="color:${color}">${esc(sec.name)}</div>
       <div class="sec-stats">
         ${premPill}
         <span class="stat-pill pill-al">▲ ${sec.al.length}</span>

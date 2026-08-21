@@ -110,7 +110,7 @@ function render(data) {
     return;
   }
 
-  container.innerHTML = periods.map(period => {
+  const sectionsHtml = periods.map(period => {
     const filtered = _filter === 'all'
       ? period.stocks
       : period.stocks.filter(s => s.signal === _filter);
@@ -162,6 +162,10 @@ function render(data) {
       </div>
     </div>`;
   }).join('');
+
+  container.innerHTML = sectionsHtml.trim() === ''
+    ? '<div class="loading-msg">Bu filtreye uyan hisse bulunamadı.</div>'
+    : sectionsHtml;
 }
 
 async function load() {

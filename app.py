@@ -2588,15 +2588,20 @@ def _email_base(content_html, unsubscribe_url, preheader=""):
 def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     """Hoş geldin maili — kişisel, motivasyonel, CTA güçlü."""
     preheader = f"Aboneliğin onaylandı. Premium sinyaller hacim onaylı olarak işaretli."
+    # CPO-DEV2-r31: name/email /api/subscribe'da karakter filtresiz kabul ediliyor
+    # (sadece 80 karaktere kirpiliyor) — HTML-escape edilmeden e-posta govdesine
+    # yazilirsa keyfi HTML enjekte edilebilir (ayni desen /api/contact'ta zaten var).
+    _safe_name  = _html.escape(name.split()[0]) if name else None
+    _safe_email = _html.escape(email)
     content = f'''
     <!-- Hero -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:linear-gradient(135deg,rgba(0,226,144,0.08),rgba(184,195,255,0.04));border:1px solid rgba(0,226,144,0.25);border-radius:12px;margin-bottom:20px">
       <tr><td style="padding:28px 24px;text-align:center">
         <div style="font-size:32px;margin-bottom:8px">🎯</div>
-        <div style="font-size:22px;font-weight:800;color:#e5e1e4;margin-bottom:8px;letter-spacing:-0.3px">{("Hoş geldin, " + name.split()[0] + "!") if name else "Hoş geldin!"}</div>
+        <div style="font-size:22px;font-weight:800;color:#e5e1e4;margin-bottom:8px;letter-spacing:-0.3px">{("Hoş geldin, " + _safe_name + "!") if _safe_name else "Hoş geldin!"}</div>
         <div style="font-size:13px;color:#909097;line-height:1.6">
           BorsaPusula sinyal bildirimlerine başarıyla abone oldun.<br>
-          <span style="color:#c7c5cd;font-weight:600">{email}</span>
+          <span style="color:#c7c5cd;font-weight:600">{_safe_email}</span>
         </div>
       </td></tr>
     </table>
@@ -2674,7 +2679,8 @@ def _build_login_email(email, login_url, unsubscribe_url, name=None):
     yeterli (kullanım hacmi düşük, ek brute-force/deneme-sayacı alt sistemi
     gerekmiyor)."""
     preheader = "Giriş bağlantın hazır — 15 dakika geçerli"
-    greeting = f"Merhaba {name.split()[0]}," if name else "Merhaba,"
+    # CPO-DEV2-r31: _build_welcome_email ile ayni escape-eksikligi, ayni fix.
+    greeting = f"Merhaba {_html.escape(name.split()[0])}," if name else "Merhaba,"
     content = f'''
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
       <tr><td style="padding:28px 24px;text-align:center">
@@ -11459,7 +11465,8 @@ def _check_user_alerts(stocks):
         if not triggered:
             continue
         try:
-            name = rec.get("name", "").split()[0] if rec.get("name") else "Yatırımcı"
+            # CPO-DEV2-r31: welcome/login mailleriyle ayni escape-eksikligi ayni fix.
+            name = _html.escape(rec.get("name", "").split()[0]) if rec.get("name") else "Yatırımcı"
             rows = ""
             for tkr, s, reasons in triggered:
                 sig = s.get("signal", "")
