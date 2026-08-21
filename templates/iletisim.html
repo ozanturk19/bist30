@@ -116,14 +116,14 @@ async function submitForm(e) {
       msg.style.color = 'var(--bp-sat)';
       msg.textContent = '❌ Hata: ' + (d.error || 'Bilinmeyen hata');
       btn.disabled = false;
-      btn.textContent = 'Gönder →';
+      btn.innerHTML = 'Gönder <span aria-hidden="true">→</span>';
     }
   } catch(err) {
     msg.style.display = 'block';
     msg.style.color = 'var(--bp-sat)';
     msg.textContent = '❌ Bağlantı hatası. Lütfen tekrar deneyin.';
     btn.disabled = false;
-    btn.textContent = 'Gönder →';
+    btn.innerHTML = 'Gönder <span aria-hidden="true">→</span>';
   }
 }
 </script>

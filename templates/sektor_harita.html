@@ -363,6 +363,7 @@ async function loadSectors() {
   try {
     var res = await fetch('/api/sektor-summary');
     var json = await res.json();
+    if (!res.ok || json.ok === false) throw new Error(json.error || ('HTTP ' + res.status));
     _sectors = json.sectors || [];
     renderChips();
     // URL'den on-yukleme (eski /sektor-karsilastir?s=...&s=... deep-link'leri icin)
@@ -435,6 +436,7 @@ async function runCompare() {
     var qs = _selected.map(function(s){return 's=' + encodeURIComponent(s);}).join('&');
     var res = await fetch('/api/sektor-compare?' + qs);
     var json = await res.json();
+    if (!res.ok || json.ok === false) throw new Error(json.error || ('HTTP ' + res.status));
     overlay.classList.remove('visible');
     renderCompare(json);
   } catch(e) {

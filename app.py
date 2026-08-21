@@ -3418,6 +3418,37 @@ def _load_cache_from_disk():
         if data and isinstance(data, list) and len(data) > 0:
             for s in data:
                 _enrich_stock(s)
+                # CPO-DEV2-053/055 + r36 bug-hunt (2026-08-22, kritik canlı bulgu):
+                # disk cache, compose_score()/_derive_tier() formül/eşik değişikliğinden
+                # SONRA da eski değerleri taşıyabilir — worker restart analyze() çalıştırmıyor,
+                # sadece diskten yüklüyor. Kanıt: 3-katmanlı (premium/plus/standart) sözlükten
+                # 2-katmanlıya (guclu_sinyal/standart) geçişte, hafta sonu refresh döngüsü
+                # durduğu için 54 aktif sinyalin TAMAMI eski tier string'ini/skalasını
+                # gösteriyordu — hisse.html gri rozete düşüyordu, tarama.html güçlü sinyalleri
+                # (skor 74) rozetsiz gösteriyordu, bazı zayıf sinyaller (skor 53-54) yanlışlıkla
+                # "Standart" rozeti taşıyordu (string tesadüfen eşleşiyor, değer geçersiz).
+                # Fix: her disk-yüklemede tier+signal_strength'i mevcut ham göstergelerden
+                # (compose_score girişleri) yeniden türet — formül/eşik ileride tekrar
+                # değişirse de restart-arası tutarlılık otomatik garanti edilir. F5 AI
+                # sentiment ayarı (analyze() içindeki ±5) burada UYGULANMAZ (sentiment cache
+                # bu path'ten erişilebilir değil) — bir sonraki gerçek analyze() döngüsü tam
+                # değeri yazar, bu sadece restart-arası küçük bir yaklaşık-değer köprüsü.
+                if s.get("signal") and s.get("signal") != "BEKLE":
+                    try:
+                        s["signal_strength"] = compose_score(
+                            adx=float(s.get("adx") or 0),
+                            vol_ratio=float(s.get("vol_ratio") or 1.0),
+                            bull_score=int(s.get("bull_score") or 0),
+                            confirmed=bool(s.get("confirmed")),
+                            rsi=float(s.get("rsi") or 50),
+                            signal=s.get("signal"),
+                        )
+                        s["tier"] = _derive_tier(
+                            s.get("signal"), s["signal_strength"],
+                            s.get("low_liquidity", False), s.get("earnings_warning", False),
+                        )
+                    except Exception:
+                        pass
             # updated_at = disk dosyasının mtime'ı (refresh_data yazımı sonrası).
             # Non-leader worker refresh_data çalıştırmaz → placeholder string
             # /api/data updated_at'i parse edilemez bırakıyordu. mtime her zaman parse edilebilir.
