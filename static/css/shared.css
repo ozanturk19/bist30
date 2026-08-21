@@ -30,18 +30,13 @@
     box-shadow: 0 0 10px rgba(var(--bp-al-rgb),.55);
   }
   .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); stroke-width: 2.1; }
-  /* F14: push-active state on bell slot */
-  .mbn-item.push-active { color: var(--bp-gold); }
-  .mbn-item.push-active::before { background: var(--bp-gold); box-shadow: 0 0 10px rgba(var(--bp-gold-rgb),.55); }
-  .mbn-item.push-active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-gold-rgb),.5)); stroke-width: 2.1; }
-  /* Badge dot — shows when push is active */
+  /* Badge dot — CPO-DEV2-054 Faz 1: push kaldırıldı, hiçbir JS artık göstermiyor, kalıcı gizli */
   .mbn-badge {
     position: absolute; top: 6px; right: calc(50% - 18px);
     width: 8px; height: 8px; background: var(--bp-gold);
     border-radius: 50%; border: 1.5px solid var(--bp-bg);
     display: none;
   }
-  .mbn-item.push-active .mbn-badge { display: block; }
   .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: var(--bp-z-sheet-backdrop); opacity: 0; transition: opacity .25s ease; }
   .mbn-sheet-backdrop.open { display: block; opacity: 1; }
   .mbn-sheet {
@@ -71,30 +66,6 @@
   }
   .mbn-sheet-item svg { width: 22px; height: 22px; color: var(--bp-brand); stroke-width: 1.85; }
   .mbn-sheet-item:active { transform: scale(0.96); background: var(--bp-surface3); border-color: var(--bp-border2); }
-  /* F14: push toggle row in sheet */
-  .mbn-push-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 14px; margin-bottom: 14px;
-    background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-lg);
-    min-height: 52px;
-  }
-  .mbn-push-row-left { display: flex; align-items: center; gap: 10px; }
-  .mbn-push-row-icon { font-size: var(--bp-text-xl); }
-  .mbn-push-row-text { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: var(--bp-text-base); font-weight: 600; color: var(--bp-text); }
-  .mbn-push-row-sub { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
-  .mbn-push-toggle {
-    min-width: 44px; min-height: 44px;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3);
-    border-radius:var(--bp-radius-md); color: #93c5fd; font-size: var(--bp-text-sm); font-weight: 700;
-    cursor: pointer; font-family: 'Space Grotesk', sans-serif;
-    padding: 0 12px; transition: all .15s;
-  }
-  .mbn-push-toggle.push-on {
-    background: rgba(var(--bp-gold-rgb),0.12); border-color: rgba(var(--bp-gold-rgb),0.3);
-    color: var(--bp-gold);
-  }
-  .mbn-push-toggle:active { transform: scale(0.96); }
   /* T2.4 — kanonik kirilim 900px'te TEK (eskiden 768px, .bp-main-nav'in
      900px esiginden farkliydi; 769-900px araliginda IKI nav da gizliydi,
      bkz. master-donusum-programi §5 satir 4 / DEV2-021). */

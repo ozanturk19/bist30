@@ -326,19 +326,18 @@
   .fresh-dot { font-size:8px; line-height:1; }
 
   /* Sinyal Gücü (T3.5, CPO/Master Dönüşüm Programı) — signal_strength (0-100),
-     compose_score kaynaklı, sıralamayı sürükleyen skor. Tier renkleriyle (premium/plus/standart)
-     tutarlı: index.html tg-premium/tg-plus/tg-standart ile aynı palet — yeni görsel dil icat edilmedi. */
+     compose_score kaynaklı, sıralamayı sürükleyen skor. Tier renkleriyle (guclu_sinyal=premium
+     sınıf/mor, standart=plus sınıf/mavi — CPO-DEV2-053/055, eski .premium/.plus sınıf adları
+     korundu) tutarlı: index.html tg-premium/tg-plus ile aynı palet. */
   .score-cell { display:flex; align-items:center; gap:7px; min-width:66px; }
   .score-val { font-size:var(--bp-text-base); font-weight:700; font-variant-numeric:tabular-nums; }
   .score-val.premium  { color:var(--bp-premium); }
   .score-val.plus     { color:#1f6feb; }
-  .score-val.standart { color:#808080; }
   .score-val.weak     { color:var(--text3); }
   .score-bar-bg { flex:0 0 40px; height:4px; background:rgba(255,255,255,0.08); border-radius:var(--bp-radius-xs); overflow:hidden; }
   .score-bar-fill { height:100%; border-radius:var(--bp-radius-xs); }
   .score-bar-fill.premium  { background:linear-gradient(90deg,var(--bp-premium),var(--bp-premium)); }
   .score-bar-fill.plus     { background:#1f6feb; }
-  .score-bar-fill.standart { background:#808080; }
   .score-bar-fill.weak     { background:var(--text3); }
 
   /* TH tooltip (yeni kolon başlıkları) */

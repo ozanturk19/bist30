@@ -116,27 +116,8 @@
     border-color: var(--bp-border2);
     color: var(--bp-text);
   }
-  /* F11 — header push bell */
-  #header-push-bell {
-    display: none; /* shown by JS when push is supported */
-    align-items: center; justify-content: center;
-    width: 34px; height: 34px;
-    background: transparent;
-    border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius);
-    color: var(--bp-text2); cursor: pointer;
-    transition: all .15s; flex-shrink: 0; font-size: var(--bp-text-lg);
-  }
-  #header-push-bell:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
-  #header-push-bell.push-active {
-    background: rgba(var(--bp-gold-rgb),0.12);
-    border-color: rgba(var(--bp-gold-rgb),0.45);
-    color: var(--bp-gold);
-  }
-  #header-push-bell.push-active:hover { background: rgba(var(--bp-gold-rgb),0.2); }
   @media (max-width: 768px) {
     .header-search-btn { min-width: 44px; min-height: 44px; }
-    #header-push-bell { min-width: 44px; min-height: 44px; }
   }
 
   /* Logo */
@@ -238,9 +219,8 @@
     letter-spacing: .5px;
     text-transform: uppercase;
   }
-  tr.tier-group-header.tg-premium td { color: var(--bp-premium); }   /* Premium — CPO-986 #8.1 mor */
-  tr.tier-group-header.tg-plus    td { color: #1f6feb; }   /* Plus — CPO-986 #8.1 mavi */
-  tr.tier-group-header.tg-standart td { color: #808080; }  /* Standart — nötr */
+  tr.tier-group-header.tg-premium td { color: var(--bp-premium); }   /* Güçlü Sinyal — CPO-DEV2-053/055, eski .tg-premium sınıf adı korundu */
+  tr.tier-group-header.tg-plus    td { color: #1f6feb; }   /* Standart — CPO-DEV2-053/055, eski .tg-plus sınıf adı korundu */
   tr.tier-group-header td .tier-count {
     display: inline-block;
     margin-left: 8px;
@@ -264,9 +244,8 @@
     align-items: center;
     justify-content: space-between;
   }
-  .mc-tier-group.tg-premium  { color: var(--bp-premium); border-left: 3px solid var(--bp-premium); background: rgba(var(--bp-premium-rgb),0.12); }   /* Premium — CPO-986 #8.1 mor #a855f7 arka plan */
-  .mc-tier-group.tg-plus     { color: #1f6feb; border-left: 3px solid #1f6feb; }   /* Plus — CPO-986 #8.1 mavi */
-  .mc-tier-group.tg-standart { color: #808080; border-left: 3px solid #808080; }   /* Standart — nötr */
+  .mc-tier-group.tg-premium  { color: var(--bp-premium); border-left: 3px solid var(--bp-premium); background: rgba(var(--bp-premium-rgb),0.12); }   /* Güçlü Sinyal — CPO-DEV2-053/055, eski .tg-premium sınıf adı korundu */
+  .mc-tier-group.tg-plus     { color: #1f6feb; border-left: 3px solid #1f6feb; }   /* Standart — CPO-DEV2-053/055, eski .tg-plus sınıf adı korundu */
   .mc-tier-group .tier-count {
     font-size: var(--bp-text-2xs);
     color: var(--bp-text3);

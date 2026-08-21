@@ -249,10 +249,6 @@
     background: linear-gradient(90deg, #1f6feb, #3fb950);
     transition: width .4s ease;
   }
-  .score-detail {
-    font-size: var(--bp-text-2xs); color: var(--bp-text3); line-height: 1.5;
-    text-align: center;
-  }
   .score-verdict {
     font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase;
     letter-spacing: .5px; margin-top: 2px;
