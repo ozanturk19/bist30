@@ -215,7 +215,7 @@
   <div class="header-price-group">
     <span class="header-price" id="hpPrice">—</span>
     <span class="header-chg neu" id="hpChg">—</span>
-    <span class="signal-badge signal-BEKLE" id="hpSignal">● Yatay</span>
+    <span class="signal-badge signal-BEKLE" id="hpSignal" title="Yükleniyor">⋯</span>
     <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge"><span aria-hidden="true">⚠</span> Anomal</span>
     <span id="liveTs" style="font-size:var(--bp-text-xs);color:#909097">○</span>
   </div>
@@ -1776,19 +1776,16 @@ function renderSummary(s, signalData) {
       const sigDir = signalData.signal === 'AL';
       const rrLevelsEl = document.getElementById('rrLevels');
       if (rrLevelsEl) {
-        // Faz 1 #2: Çift R/R — sinyal başından vs şu an girersen
+        // CPO-DEV2-045 #1: "Şu an girersen R/R" (rr_now) kaldırıldı — TP1=entry+risk*2
+        // sabit formülü yüzünden cebirsel olarak HER ZAMAN 2.0 çıkıyordu (totoloji),
+        // entry_quality/kovalama uyarısıyla çelişebiliyordu. Sadece sinyal başından R/R kalıyor.
         const rrSig = signalData.rr_signal;
-        const rrNow = signalData.rr_now;
-        const rrRowsHtml = (rrSig != null || rrNow != null) ? `
+        const rrRowsHtml = (rrSig != null) ? `
           <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:11px;font-variant-numeric:tabular-nums">
-            ${rrSig != null ? `<div style="display:flex;justify-content:space-between;color:#8b949e">
+            <div style="display:flex;justify-content:space-between;color:#8b949e">
               <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">R/R</a></span>
               <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2)}x</strong>
-            </div>` : ''}
-            ${rrNow != null ? `<div style="display:flex;justify-content:space-between;color:#8b949e" data-tip="Mevcut fiyattan giriş yaparsan risk/ödül oranı" tabindex="0">
-              <span>Şu an girersen <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">R/R</a></span>
-              <strong style="color:${rrNow >= 2.0 ? '#3fb950' : rrNow >= 1.0 ? '#d29922' : '#f85149'}">${rrNow.toFixed(2)}x</strong>
-            </div>` : ''}
+            </div>
           </div>` : '';
         rrLevelsEl.innerHTML = `
           <div class="rr-level-row">
@@ -2089,6 +2086,16 @@ function _showChartStatus(msg, withRetryBtn) {
       '<button type="button" onclick="loadChart(0)" style="margin-left:8px;background:#1f6feb;' +
       'color:#fff;border:0;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer">Tekrar dene</button>'
     : '<div class="spinner"></div> ' + msg;
+  // CPO-DEV2-045 #3: nihai hata (retry tükendi) — hpSignal placeholder'ı
+  // gerçek bir sinyalmiş gibi ("● Yatay") kalmasın diye görünür "veri yok" işaretine çevir.
+  if (withRetryBtn) {
+    const sigEl = document.getElementById('hpSignal');
+    if (sigEl) {
+      sigEl.textContent = '?';
+      sigEl.title = 'Sinyal verisi yüklenemedi';
+      sigEl.className = 'signal-badge signal-BEKLE';
+    }
+  }
 }
 
 async function loadChart(retry) {

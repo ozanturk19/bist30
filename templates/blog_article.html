@@ -18,7 +18,7 @@
   "headline": {{ article.title|tojson }},
   "description": {{ article.desc|tojson }},
   "datePublished": "{{ article.date }}",
-  "dateModified": "{{ article.date }}",
+  "dateModified": "{{ article.updated if article.updated else article.date }}",
   "inLanguage": "tr",
   "url": "https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}",
   "mainEntityOfPage": {

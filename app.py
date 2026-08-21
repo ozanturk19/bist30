@@ -30,7 +30,7 @@ import tempfile
 import html as _html
 import re
 import random
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 import copy
 import secrets
 import hashlib
@@ -7963,7 +7963,7 @@ def stock_page(ticker):
             r = make_response(html, 410)
             r.headers['Content-Type'] = 'text/html; charset=utf-8'
             return r
-        return render_template("index.html"), 404
+        return render_template("404.html"), 404
     name   = STOCK_NAMES.get(ticker, ticker)
     sector = _get_sector(ticker)
     others = [t for t in BIST100 if t != ticker and t != "XU030"]
@@ -10377,7 +10377,10 @@ def sinyal_performans():
     aktif = [s for s in stocks if s["signal"] in ("AL", "SAT") and s.get("signal_price")]
     for s in aktif:
         if s.get("signal_price") and s.get("price"):
-            s["aktif_ret"] = round((s["price"] - s["signal_price"]) / s["signal_price"] * 100, 2)
+            raw_ret = (s["price"] - s["signal_price"]) / s["signal_price"] * 100
+            # CPO-DEV2-045 P0: SAT icin yon duzeltmesi (_signed_ret() ile ayni mantik —
+            # kisa pozisyonda fiyat dususu = kazanc), oncesinde AL/SAT ayni formulu kullaniyordu.
+            s["aktif_ret"] = round(raw_ret if s["signal"] == "AL" else -raw_ret, 2)
         else:
             s["aktif_ret"] = None
     return render_template("sinyal_performans.html", bt=bt, aktif=aktif)
@@ -11575,6 +11578,28 @@ def api_push_vapid_key():
     return safe_json({"publicKey": VAPID_PUBLIC})
 
 
+
+# CPO-DEV2-045 #6: push su an dormant (pywebpush kurulu degil) ama endpoint
+# host dogrulamasi olmadan diske yaziliyordu — ileride push aktive edilirse
+# SSRF riski. Bilinen web-push servis saglayicilarinin host'lariyla sinirla.
+_PUSH_ENDPOINT_ALLOWED_HOSTS = (
+    "fcm.googleapis.com",
+    "updates.push.services.mozilla.com",
+    "notify.windows.com",
+)
+
+
+def _push_endpoint_host_allowed(endpoint):
+    try:
+        host = urlparse(endpoint).hostname or ""
+    except Exception:
+        return False
+    host = host.lower()
+    return host.endswith("push.apple.com") or any(
+        host == h or host.endswith("." + h) for h in _PUSH_ENDPOINT_ALLOWED_HOSTS
+    )
+
+
 @app.route("/api/push/subscribe", methods=["POST"])
 @limiter.limit("20 per hour")
 def api_push_subscribe():
@@ -11582,6 +11607,8 @@ def api_push_subscribe():
     sub = request.get_json(silent=True)
     if not sub or "endpoint" not in sub:
         return safe_json({"error": "Geçersiz subscription"}), 400
+    if not _push_endpoint_host_allowed(sub["endpoint"]):
+        return safe_json({"error": "Geçersiz push endpoint"}), 400
 
     with _push_lock:
         # SPEC-006 Faz 2: existing varsa REPLACE — watchlist değişimi yansısın
