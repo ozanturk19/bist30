@@ -60,13 +60,6 @@ from _alerts       import _check_api_stale, _format_alert_md, _should_alert_tele
 from _health_extras import _extend_health_payload, _check_health_loop_stall
 from _guards       import _is_valid_fundamentals, _is_valid_chart, _is_valid_macro, _is_valid_disk_cache
 
-# ── Web Push (VAPID) — opsiyonel; eksikse özellik devre dışı ──────────────────
-try:
-    from pywebpush import webpush, WebPushException
-    _PUSH_ENABLED = True
-except ImportError:
-    _PUSH_ENABLED = False
-
 # ── F9 WebSocket — geventwebsocket opsiyonel ─────────────────────────────────
 try:
     from geventwebsocket import WebSocketError
@@ -202,22 +195,7 @@ def is_synthetic_client(req) -> bool:
     ua = (req.headers.get("User-Agent") or "").casefold()
     return bool(_NON_HUMAN_UA_RE.search(ua))
 
-# ── VAPID Web Push Bildirimleri ───────────────────────────────────────────────
-_APP_DIR        = os.path.dirname(os.path.abspath(__file__))
-VAPID_PUBLIC    = os.environ.get("VAPID_PUBLIC", "")
-VAPID_PRIV_PATH = os.environ.get(
-    "VAPID_PRIVATE_PATH",
-    os.path.join(_APP_DIR, "vapid_private.pem")
-)
-VAPID_CLAIMS    = {"sub": "mailto:hello@borsapusula.com"}
-
-# Auto-load VAPID public key from file if env var not set
-if not VAPID_PUBLIC and os.path.exists(os.path.join(_APP_DIR, "vapid_public.txt")):
-    try:
-        with open(os.path.join(_APP_DIR, "vapid_public.txt")) as _f:
-            VAPID_PUBLIC = _f.read().strip()
-    except Exception:
-        pass
+_APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ── CPO-992/DEV-983: disk I/O gevent hub threadpool offload ──────────────────
 # gevent monkey.patch_all() cooperatizes socket/subprocess/time.sleep but NOT
@@ -265,10 +243,6 @@ def _tp_write_json(path, data, atomic=False, **json_kwargs):
         _write()
 
 
-# Push subscriber storage
-_PUSH_SUBS_FILE = os.path.join(_APP_DIR, "push_subs.json")
-_push_subs: list = []
-_push_lock = threading.Lock()
 # _YF_GLOBAL_LOCK removed — G24e: all yf calls now use subprocess isolation (G24a-G24d)
 
 
@@ -616,161 +590,6 @@ def _fetch_global_subprocess(syms, timeout=60):
         logger.error("yf_live_fetch global error: %s", e)
         return None
 
-
-def _load_push_subs():
-    global _push_subs
-    try:
-        if os.path.exists(_PUSH_SUBS_FILE):
-            with open(_PUSH_SUBS_FILE, encoding="utf-8") as f:
-                _push_subs = json.load(f)
-            logger = logging.getLogger(__name__)
-            logger.info("Push subscribers yüklendi: %d", len(_push_subs))
-    except Exception as e:
-        pass  # logger not yet set up at import time
-
-
-def _save_push_subs_locked():
-    """Must be called while holding _push_lock."""
-    try:
-        _tp_write_json(_PUSH_SUBS_FILE, _push_subs)
-    except Exception:
-        pass
-
-
-def _send_one_push(sub_info: dict, payload: str) -> bool | None:
-    """Tek subscriber'a push gönder. False=expired, True=ok, None=error."""
-    if not _PUSH_ENABLED:
-        return None
-    try:
-        webpush(
-            subscription_info=sub_info,
-            data=payload,
-            vapid_private_key=VAPID_PRIV_PATH,
-            vapid_claims=VAPID_CLAIMS,
-        )
-        return True
-    except Exception as exc:
-        s = str(exc)
-        if "410" in s or "404" in s or "unsubscribed" in s.lower():
-            return False     # Expired subscription
-        return None          # Transient error
-
-
-_PUSH_RATELIMIT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "push_state.json")
-
-def _can_send_push(endpoint_key, ticker):
-    """SPEC-006 Faz 3 (CPO MSG-106): Push rate limit.
-    - Hisse başına 24h içinde max 1 push
-    - Kullanıcı başına saatlik max 3 push
-    File-based state (push_state.json) + fcntl lock. True → gönderilebilir (state tüketilir).
-    Hata durumunda fail-open (True) — rate limit dosya sorunu push'u tamamen kesmesin.
-
-    CPO-1258 §1/§5 P0 kök neden fix: bu çağrı `.get()` timeout'suzdu VE içindeki
-    `flock(LOCK_EX)` blocking'ti — codebase'deki diğer 9 hub-threadpool çağrısının
-    (_tp_read_json/_tp_write_json/_get_kap_uuid/_is_*_leader/_gemini_rate_acquire)
-    hiçbirinde bu ikili birlikte yok. Sonuç: bir worker flock'u uzun tutarsa (veya
-    nadir disk gecikmesi olursa) threadpool'daki OS thread'i SÜRESİZ bloke olur —
-    canlı forensic'te (19.13 TR) bu havuz doygunluğu zinciri accept-starvation'a
-    kadar gitti. Fix: flock LOCK_NB (anlık başarısızsa dosyaya hiç dokunmadan
-    fail-open) + dış `.get(timeout=10)` — diğer 9 çağrıyla aynı desen."""
-    import fcntl
-    def _do():
-        now  = time.time()
-        hour = int(now / 3600)
-        with open(_PUSH_RATELIMIT_PATH, "a+") as f:
-            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)   # busy → OSError → dış except fail-open
-            f.seek(0)
-            raw   = f.read()
-            state = json.loads(raw) if raw.strip() else {}
-
-            tkey = f"{endpoint_key}:{ticker}"
-            if now - state.get(tkey, 0) < 86400:
-                return False   # aynı hisse 24h içinde zaten gönderilmiş
-            hkey = f"{endpoint_key}:h:{hour}"
-            if state.get(hkey, 0) >= 3:
-                return False   # saatlik global limit (3) doldu
-
-            state[tkey] = now
-            state[hkey] = state.get(hkey, 0) + 1
-            # Eski saat anahtarlarını temizle (dosya şişmesini önle)
-            state = {k: v for k, v in state.items()
-                     if not (":h:" in k and k.rsplit(":", 1)[-1].isdigit()
-                             and int(k.rsplit(":", 1)[-1]) < hour - 1)}
-            f.seek(0); f.truncate()
-            json.dump(state, f)
-        return True
-    try:
-        if _WS_AVAILABLE:
-            return _gevent.get_hub().threadpool.spawn(_do).get(timeout=10)
-        return _do()
-    except Exception:
-        return True   # fail-open (LOCK_NB busy + 10s hub-threadpool timeout dahil)
-
-
-def _broadcast_push_changes(changes):
-    """SPEC-006 Faz 2 (CPO MSG-095): Watchlist-aware push.
-    Her subscriber'a SADECE izlediği ticker'ların sinyal değişimi gönderilir.
-    watchlist boş/eksik subscriber → tüm değişimleri alır (backward compat — eski user).
-    changes: [(ticker, old_sig, new_sig, stock_data), ...]"""
-    if not _PUSH_ENABLED or not VAPID_PUBLIC or not os.path.exists(VAPID_PRIV_PATH):
-        return
-    with _push_lock:
-        subs_snap = list(_push_subs)
-    if not subs_snap or not changes:
-        return
-
-    keep = []
-    sent = 0
-    for sub in subs_snap:
-        wl = sub.get("watchlist") or []
-        # watchlist varsa filtrele, yoksa tüm değişimler (backward compat)
-        relevant = [c for c in changes if c[0] in wl] if wl else list(changes)
-        if not relevant:
-            keep.append(sub)
-            continue
-
-        # SPEC-006 Faz 3: rate limit — hisse başına 24h max 1, saatlik global max 3
-        _ep_key  = (sub.get("endpoint") or "")[-40:]
-        relevant = [c for c in relevant if _can_send_push(_ep_key, c[0])]
-        if not relevant:
-            keep.append(sub)
-            continue
-
-        if len(relevant) == 1:
-            t, old, new, _stock = relevant[0]
-            name = STOCK_NAMES.get(t, t)
-            lbl  = "AL ▲ Güçlü Trend" if new == "AL" else "SAT ▼ Trend Bozuldu"
-            title = f"{t} — {lbl}"
-            body  = f"{name} sinyali değişti: {old} → {new}"
-            url   = f"/hisse/{t}"
-        else:
-            tickers_str = ", ".join(c[0] for c in relevant[:3])
-            title = f"Sinyal Değişimi: {tickers_str}"
-            body  = f"{len(relevant)} hissede sinyal değişti"
-            url   = "/"
-
-        payload = json.dumps({
-            "title": title,
-            "body": body,
-            "url": url,
-            "tag": "borsapusula-signal",
-            "icon": "/static/icon-192.png",
-        })
-        result = _send_one_push(sub, payload)
-        if result is not False:
-            keep.append(sub)
-        if result is True:
-            sent += 1
-
-    removed = len(subs_snap) - len(keep)
-    if removed > 0:
-        with _push_lock:
-            _push_subs[:] = keep
-            _save_push_subs_locked()
-
-    logging.getLogger(__name__).info(
-        "Push broadcast (watchlist-aware): %d sent, %d expired removed", sent, removed
-    )
 
 # ── Sinyal görünen ad eşlemesi (iç değer AL/SAT/BEKLE değişmez) ───────────────
 # T1.1 (CPO-1321): business_rules.SIGNAL_LABELS tek kaynak, burada yalnız alias
@@ -2410,14 +2229,9 @@ def _notify_signal_changes(new_results):
     if changes:
         _notify_email_signal_changes(changes)
 
-    # Rota 3: Web push — seans saatinde, watchlist-aware (SPEC-006 Faz 2)
-    # Her subscriber kendi watchlist'indeki ticker'ların değişimini alır.
-    if changes and in_session:
-        threading.Thread(
-            target=_broadcast_push_changes,
-            args=(changes,),
-            daemon=True
-        ).start()
+    # Rota 3 (Web push) CPO-DEV2-054 Faz 1 ile kaldırıldı — gerçek abone hiç
+    # olmamıştı (14+ günlük subscribe log'u tamamen curl/test kaynaklıydı),
+    # e-posta tabanlı tek bildirim mekanizmasına geçildi.
 
     # State güncelle + diske persist (worker restart-safe)
     with _prev_signals_lock:
@@ -11710,112 +11524,10 @@ def api_log_error():
     return safe_json({"ok": True})
 
 
-# ── Web Push API ─────────────────────────────────────────────────────────────
-
-@app.route("/api/push/vapid-public-key")
-def api_push_vapid_key():
-    """Frontend'in subscription için ihtiyaç duyduğu VAPID public key."""
-    return safe_json({"publicKey": VAPID_PUBLIC})
-
-
-
-# CPO-DEV2-045 #6: push su an dormant (pywebpush kurulu degil) ama endpoint
-# host dogrulamasi olmadan diske yaziliyordu — ileride push aktive edilirse
-# SSRF riski. Bilinen web-push servis saglayicilarinin host'lariyla sinirla.
-_PUSH_ENDPOINT_ALLOWED_HOSTS = (
-    "fcm.googleapis.com",
-    "updates.push.services.mozilla.com",
-    "notify.windows.com",
-)
-
-
-def _push_endpoint_host_allowed(endpoint):
-    try:
-        host = urlparse(endpoint).hostname or ""
-    except Exception:
-        return False
-    host = host.lower()
-    return host.endswith("push.apple.com") or any(
-        host == h or host.endswith("." + h) for h in _PUSH_ENDPOINT_ALLOWED_HOSTS
-    )
-
-
-@app.route("/api/push/subscribe", methods=["POST"])
-@limiter.limit("20 per hour")
-def api_push_subscribe():
-    """Browser push subscription'ı kaydet."""
-    # CPO-DEV2-r34: content-length guard — portfolio/user-alerts ile ayni desen,
-    # daha once burada hic yoktu (Flask MAX_CONTENT_LENGTH da tanimli degil).
-    cl = request.content_length
-    if cl and cl > 8192:
-        return safe_json({"error": "Veri çok büyük"}), 413
-
-    sub = request.get_json(silent=True)
-    if not sub or "endpoint" not in sub:
-        return safe_json({"error": "Geçersiz subscription"}), 400
-    if not _push_endpoint_host_allowed(sub["endpoint"]):
-        return safe_json({"error": "Geçersiz push endpoint"}), 400
-
-    # CPO-DEV2-r34: oncesinde `sub` objesi TAMAMEN filtresiz diske yaziliyordu —
-    # ne alan whitelist'i ne watchlist format/entry-limit'i vardi (portfolio/user-alerts
-    # endpoint'lerinde zaten uygulanan standardin gerisindeydi). keys.p256dh/auth
-    # webpush()'un subscription_info olarak ihtiyaç duyduğu zorunlu alanlar.
-    keys = sub.get("keys")
-    if not isinstance(keys, dict) or not keys.get("p256dh") or not keys.get("auth"):
-        return safe_json({"error": "Geçersiz subscription anahtarları"}), 400
-
-    raw_watchlist = sub.get("watchlist") or []
-    if not isinstance(raw_watchlist, list):
-        return safe_json({"error": "Geçersiz watchlist"}), 400
-    clean_watchlist = [
-        t for t in raw_watchlist
-        if isinstance(t, str) and re.match(r'^[A-Z0-9]{2,10}$', t)
-    ][:_ALERT_MAX_ENTRIES]
-
-    clean_sub = {
-        "endpoint": sub["endpoint"],
-        "keys": {"p256dh": str(keys["p256dh"])[:512], "auth": str(keys["auth"])[:512]},
-        "watchlist": clean_watchlist,
-    }
-    if "expirationTime" in sub:
-        clean_sub["expirationTime"] = sub["expirationTime"]
-
-    with _push_lock:
-        # SPEC-006 Faz 2: existing varsa REPLACE — watchlist değişimi yansısın
-        existing_idx = next(
-            (i for i, s in enumerate(_push_subs) if s.get("endpoint") == clean_sub["endpoint"]),
-            None,
-        )
-        if existing_idx is not None:
-            _push_subs[existing_idx] = clean_sub
-        else:
-            _push_subs.append(clean_sub)
-        _save_push_subs_locked()
-        count = len(_push_subs)
-
-    logger.info("Push sub kaydedildi/güncellendi (toplam %d)", count)
-    return safe_json({"ok": True, "subscribed": existing_idx is None, "count": count})
-
-
-@app.route("/api/push/unsubscribe", methods=["POST"])
-@limiter.limit("20 per hour")
-def api_push_unsubscribe():
-    """Push subscription'ı iptal et."""
-    data     = request.get_json(silent=True) or {}
-    endpoint = data.get("endpoint", "")
-    with _push_lock:
-        before = len(_push_subs)
-        _push_subs[:] = [s for s in _push_subs if s.get("endpoint") != endpoint]
-        removed = before - len(_push_subs)
-        if removed:
-            _save_push_subs_locked()
-    return safe_json({"ok": True, "removed": removed})
-
-
 @app.route("/unsubscribe/<token>", methods=["GET", "POST"])
 @limiter.limit("5 per hour", key_func=lambda: request.view_args.get("token", ""), methods=["POST"])
 def unsubscribe_page(token):
-    """Abonelik iptali (KVKK: kayıt tamamen silinir — push unsubscribe ile aynı desen).
+    """Abonelik iptali (KVKK: kayıt tamamen silinir).
     CPO-DEV2-046: token-bazlı rate-limit — kurumsal mail güvenlik tarayıcısı/link-prefetch'in
     veya otomatik tekrar tıklamanın erken/toplu tetiklenme riskini azaltır.
     CPO-DEV2-052 #3 (Ozan kararı): GET artık DOĞRUDAN silmiyor — önce bir onay sayfası
@@ -12003,8 +11715,6 @@ def _startup():
                             bt_data["al"].get("count"), bt_data.get("computed_at"))
     except Exception as e:
         logger.warning("Backtest disk cache yükleme hatası: %s", e)
-    # Push subscribers'ı yükle
-    _load_push_subs()
     refresh_chart()
     # XU100 + makro varliklari sirali sekilde yukle
     # Paralel yfinance calisi veri bozulmasina neden olur — sirali calis zorunlu

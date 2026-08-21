@@ -87,41 +87,6 @@ self.addEventListener('fetch', e => {
   /* Diğer her şey: SW dokunmaz */
 });
 
-/* Push notification handler */
-self.addEventListener('push', e => {
-  let data = {};
-  try { data = e.data ? e.data.json() : {}; } catch (err) { data = {}; }
-  e.waitUntil(
-    self.registration.showNotification(data.title || 'BorsaPusula', {
-      body:             data.body || 'Sinyal değişikliği var.',
-      icon:             '/static/icon-192.png',
-      badge:            '/static/icon-192.png',
-      tag:              data.tag || 'borsapusula-signal',
-      renotify:         true,
-      requireInteraction: false,
-      vibrate:          [200, 100, 200],
-      data:             { url: data.url || '/' },
-    })
-  );
-});
-
-self.addEventListener('notificationclick', e => {
-  e.notification.close();
-  const url = (e.notification.data && e.notification.data.url) || '/';
-  e.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(wins => {
-      for (const w of wins) {
-        if (w.url.includes(self.location.origin) && 'focus' in w) {
-          w.focus();
-          if (url !== '/') w.navigate(url);
-          return;
-        }
-      }
-      return clients.openWindow(url);
-    })
-  );
-});
-
 /* Debug: manuel cache temizleme (browser console'dan tetiklenebilir) */
 self.addEventListener('message', e => {
   if (e.data && e.data.type === 'BP_CLEAR_CACHE') {

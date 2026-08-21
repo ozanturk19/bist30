@@ -212,7 +212,7 @@
 
   <!-- Right actions injected by bp-search.js (header-right uniform) -->
   <!-- CPO-984: WS frontend tam kaldırıldı (icon + connection JS). Backend WS kanalı aktif kalıyor (_ws_broadcast, /ws/prices route). -->
-  <button id="header-push-bell" onclick="togglePushSubscription()" aria-label="Push bildirimleri" title="Sinyal bildirimi aç/kapat"><span aria-hidden="true">🔔</span></button>
+  <!-- CPO-DEV2-054 Faz 1: push zili kaldırıldı (web-push tamamen kaldırıldı, gerçek abone yoktu) -->
   <button class="header-search-btn" type="button" onclick="bpOpenSearch()" aria-label="Ara — Cmd+K" title="Ara (Cmd+K)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   </button>
@@ -514,7 +514,7 @@
     <button onclick="document.getElementById('pwaInstallBanner').style.display='none'" style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);line-height:1;padding:2px 4px" title="Kapat" aria-label="Kapat">×</button>
   </div>
 
-  <!-- ── Bildirim Çubuğu (E-posta + Push) ────────── -->
+  <!-- ── Bildirim Çubuğu (E-posta) ────────── -->
   <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(0,67,235,.04));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:var(--bp-radius);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <div style="flex:1;min-width:180px">
       <div style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);margin-bottom:2px"><span aria-hidden="true">📬</span> Sinyal Bildirimleri</div>
@@ -541,15 +541,6 @@
         Abone Ol
       </button>
     </div>
-    <!-- Push bildirim butonu -->
-    <button id="pushBtn" onclick="togglePushSubscription()"
-      style="display:none;background:rgba(var(--bp-brand-rgb),.12);border:1px solid rgba(var(--bp-brand-rgb),.32);
-             color:var(--bp-brand);padding:7px 14px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:600;
-             cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s"
-      onmouseover="this.style.background='rgba(184,195,255,.2)'" onmouseout="this.style.background='rgba(184,195,255,.12)'"
-      title="Tarayıcı push bildirimi">
-      <span aria-hidden="true">🔔</span> Push Aç
-    </button>
     <button onclick="document.getElementById('subscribeBar').style.display='none'"
       style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);line-height:1;padding:2px 4px"
       title="Kapat" aria-label="Kapat">×</button>
@@ -2757,22 +2748,6 @@ function toggleWatch(ticker) {
   // Feature 1 #1B: watchlist boşaldıysa ⭐ chip gizle, doluysa göster
   const watchChip = document.getElementById('presetWatchChip');
   if (watchChip) watchChip.hidden = watchlist.size === 0;
-  // SPEC-006 Faz 2: push aktifse subscription'ın watchlist'ini güncelle
-  _syncPushWatchlist();
-}
-
-/* SPEC-006 Faz 2: watchlist değişince push subscription'ı güncel watchlist ile re-kaydet */
-function _syncPushWatchlist() {
-  if (!_pushSubscription) return;  // push aktif değil → atla
-  try {
-    const payload = _pushSubscription.toJSON();
-    payload.watchlist = watchlist.size ? Array.from(watchlist) : [];
-    fetch('/api/push/subscribe', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload),
-    }).catch(() => {});
-  } catch(_) { console.warn('push takip listesi senkronizasyonu basarisiz', _); }
 }
 
 function updateFabBadge() {
@@ -3372,107 +3347,13 @@ function _pwaInstall() {
   });
 }
 
-/* ── PWA Service Worker + Push ──────────────────── */
-let _swReg = null;
-let _pushSubscription = null;
-
+/* ── PWA Service Worker (offline cache) ─────────── */
+/* CPO-DEV2-054 Faz 1: web-push (VAPID) altyapısı tamamen kaldırıldı — gerçek
+   abone hiç olmamıştı (14+ günlük subscribe log'u tamamen curl/test kaynaklıydı).
+   SW kaydı offline önbellek için hâlâ gerekli, sadece push kısmı gitti. */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js', { scope: '/' })
-    .then(reg => {
-      _swReg = reg;
-      _initPushButton();
-    })
     .catch(e => console.warn('SW register fail:', e));
-}
-
-async function _initPushButton() {
-  if (!('PushManager' in window) || !('Notification' in window)) return;
-  const btn = document.getElementById('pushBtn');
-  if (btn) btn.style.display = '';
-  // Show header bell
-  const bell = document.getElementById('header-push-bell');
-  if (bell) bell.style.display = 'inline-flex';
-
-  // Check existing subscription
-  try {
-    _pushSubscription = await _swReg.pushManager.getSubscription();
-    _updatePushBtn();
-  } catch(e) { console.warn('push abonelik durumu kontrolu basarisiz', e); }
-}
-
-function _updatePushBtn() {
-  const btn = document.getElementById('pushBtn');
-  const bell = document.getElementById('header-push-bell');
-  if (_pushSubscription) {
-    if (btn) { btn.textContent = '🔕 Push Kapat'; btn.style.color = '#94a3b8'; btn.style.borderColor = 'rgba(100,116,139,.3)'; }
-    if (bell) { bell.textContent = '🔕'; bell.classList.add('push-active'); bell.title = 'Sinyal bildirimi açık — kapatmak için tıkla'; }
-  } else {
-    if (btn) { btn.textContent = '🔔 Push Aç'; btn.style.color = '#93c5fd'; btn.style.borderColor = 'rgba(59,130,246,.3)'; }
-    if (bell) { bell.textContent = '🔔'; bell.classList.remove('push-active'); bell.title = 'Sinyal bildirimi aç'; }
-  }
-}
-
-async function togglePushSubscription() {
-  if (!_swReg) return;
-  const btn = document.getElementById('pushBtn');
-  if (btn) btn.disabled = true;
-
-  try {
-    if (_pushSubscription) {
-      // Unsubscribe
-      await fetch('/api/push/unsubscribe', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({endpoint: _pushSubscription.endpoint}),
-        signal: AbortSignal.timeout(10000)
-      });
-      await _pushSubscription.unsubscribe();
-      _pushSubscription = null;
-    } else {
-      // Request permission
-      const perm = await Notification.requestPermission();
-      if (perm !== 'granted') {
-        if (btn) btn.disabled = false;
-        return;
-      }
-      // Get VAPID key
-      const keyRes = await fetch('/api/push/vapid-public-key', { signal: AbortSignal.timeout(10000) });
-      const {publicKey} = await keyRes.json();
-      if (!publicKey) { if (btn) btn.disabled = false; return; }
-
-      // Subscribe
-      const appServerKey = _urlBase64ToUint8Array(publicKey);
-      _pushSubscription = await _swReg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: appServerKey,
-      });
-      // SPEC-006 Faz 2: subscription'a watchlist ekle — watchlist-aware push
-      const _subPayload = _pushSubscription.toJSON();
-      try {
-        _subPayload.watchlist = (typeof watchlist !== 'undefined' && watchlist.size)
-          ? Array.from(watchlist) : [];
-      } catch(_) { _subPayload.watchlist = []; }
-      await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(_subPayload),
-        signal: AbortSignal.timeout(10000)
-      });
-    }
-    _updatePushBtn();
-  } catch(e) {
-    console.warn('Push toggle error:', e);
-  }
-  if (btn) btn.disabled = false;
-}
-
-function _urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const raw     = window.atob(base64);
-  const arr     = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
-  return arr;
 }
 
 // ── Search autocomplete ──────────────────────────────────

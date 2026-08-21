@@ -1,5 +1,7 @@
 {# Mobile Bottom Navigation Partial — F14 mobile UX (30 Haz 2026).
-   F11 push bell entegre: 5. slot artık Bildirim butonu.
+   5. slot "Bildirim/Menü" sheet açar (Piyasalar/Araçlar/Daha linkleri).
+   CPO-DEV2-054 Faz 1: push-özel senkronizasyon (F11) kaldırıldı — web-push
+   tamamen kaldırıldı, gerçek abone hiç olmamıştı.
    Pull-to-refresh: index.html'de ayrıca eklendi.
    Idempotent: CSS class'ları unique (mbn-*), JS window.toggleMbnSheet / closeMbnSheet
    re-assignment ile çift tanımlama hatası önler. {% include %} ile çağrılır. #}
@@ -22,7 +24,7 @@
       <span class="mbn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg></span>
       <span class="mbn-label">Sektörler</span>
     </a>
-    <!-- F14: F11 push bell entegre — 5. slot -->
+    <!-- F14: 5. slot — Bildirim/Menü sheet -->
     <button id="mbn-bell-btn" class="mbn-item" type="button" onclick="toggleMbnSheet()" aria-label="Bildirimler ve menü">
       <span class="mbn-badge" id="mbn-bell-badge"></span>
       <span class="mbn-icon" id="mbn-bell-icon">
@@ -38,17 +40,6 @@
 <div class="mbn-sheet-backdrop" id="mbnSheetBackdrop" onclick="closeMbnSheet()"></div>
 <div class="mbn-sheet" id="mbnSheet" role="dialog" aria-label="Daha fazla menü" aria-modal="true">
   <div class="mbn-sheet-handle"></div>
-  <!-- F14: push toggle at top of sheet -->
-  <div class="mbn-push-row" id="mbnPushRow" style="display:none">
-    <div class="mbn-push-row-left">
-      <span class="mbn-push-row-icon" id="mbnPushIcon"><span aria-hidden="true">🔔</span></span>
-      <div>
-        <div class="mbn-push-row-text">Sinyal Bildirimleri</div>
-        <div class="mbn-push-row-sub" id="mbnPushSub">AL/SAT sinyali gelince bildirim al</div>
-      </div>
-    </div>
-    <button class="mbn-push-toggle" id="mbnPushToggle" onclick="mbnTogglePush()" aria-label="Push bildirimi aç/kapat">AÇ</button>
-  </div>
   <div class="mbn-sheet-title">Piyasalar</div>
   <div class="mbn-sheet-grid">
     <a href="/gundem" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Gündem</span></a>
@@ -75,49 +66,4 @@ window.toggleMbnSheet=function(){const s=document.getElementById('mbnSheet');con
 window.closeMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');if(!s||!b)return;s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';if(_mbnRelease){_mbnRelease();_mbnRelease=null;}};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')window.closeMbnSheet();});
 (function(){const p=window.location.pathname;document.querySelectorAll('.mbn-item[data-route]').forEach(el=>{const r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r)){el.classList.add('active');el.setAttribute('aria-current','page');}});})();
-
-/* F14: sync bell slot with push subscription state */
-function _mbnSyncBell() {
-  const btn = document.getElementById('mbn-bell-btn');
-  const row = document.getElementById('mbnPushRow');
-  const toggle = document.getElementById('mbnPushToggle');
-  const sub = document.getElementById('mbnPushSub');
-  const icon = document.getElementById('mbnPushIcon');
-  if (!btn) return;
-  const isSupported = ('PushManager' in window) && ('Notification' in window) && (typeof togglePushSubscription === 'function');
-  if (row) row.style.display = isSupported ? '' : 'none';
-  const active = typeof _pushSubscription !== 'undefined' && !!_pushSubscription;
-  btn.classList.toggle('push-active', active);
-  if (toggle) { toggle.textContent = active ? 'KAPAT' : 'AÇ'; toggle.classList.toggle('push-on', active); }
-  if (sub) sub.textContent = active ? 'Bildirimler açık — kapatmak için KAPAT' : 'AL/SAT sinyali gelince bildirim al';
-  if (icon) {
-    let inner = icon.querySelector('[aria-hidden]');
-    if (!inner) {
-      inner = document.createElement('span');
-      inner.setAttribute('aria-hidden', 'true');
-      icon.appendChild(inner);
-    }
-    inner.textContent = active ? '🔕' : '🔔';
-  }
-}
-
-async function mbnTogglePush() {
-  if (typeof togglePushSubscription === 'function') {
-    await togglePushSubscription();
-    _mbnSyncBell();
-  }
-}
-
-/* Sync after push state changes — hook into existing _updatePushBtn */
-(function() {
-  const orig = window._updatePushBtn;
-  window._updatePushBtn = function() {
-    if (typeof orig === 'function') orig();
-    _mbnSyncBell();
-  };
-  /* Initial sync after SW ready */
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(_mbnSyncBell, 800);
-  });
-})();
 </script>
