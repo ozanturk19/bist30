@@ -2105,9 +2105,22 @@ async function deleteAlertSettings() {
 }
 
 async function syncLocalAlarm(ticker) {
+  // CPO-DEV2-051 (r34 madde 2): eski localStorage alarmı bir MUTLAK fiyat hedefi
+  // (priceAlarms[ticker].above/below), sunucu tarafı alert ise GÜNLÜK % değişim
+  // eşiği (price_pct, app.py:_check_user_alerts) — ikisi aynı şey değil, bu yüzden
+  // migrasyon her zaman bir yaklaşıklama. Önceden below-only alarmlar hiç
+  // taşınmıyordu (sadece pa.above kontrol ediliyordu) ve above her zaman sabit
+  // %3'e yuvarlanıyordu. Artık güncel fiyata (livePrices) göre gerçek yüzde
+  // mesafe hesaplanıyor, above/below ayrımı yapılmadan (server modeli yönsüz).
   const pa = priceAlarms[ticker];
   if (!pa) return;
-  if (pa.above) document.getElementById('am-price-pct').value = '3';
+  const target = pa.above != null ? pa.above : (pa.below != null ? pa.below : null);
+  const pctEl = document.getElementById('am-price-pct');
+  if (pctEl && target != null) {
+    const cur = livePrices[ticker];
+    const pct = (cur > 0) ? Math.abs((target - cur) / cur * 100) : 3;
+    pctEl.value = Math.min(20, Math.max(0.1, pct)).toFixed(1);
+  }
   await saveAlertSettings();
 }
 
@@ -3759,8 +3772,10 @@ document.addEventListener('keydown', e => {
   var ind = document.getElementById('ptr-indicator');
   var spinner = document.getElementById('ptr-spinner');
   var txt = document.getElementById('ptr-text');
-  var THRESHOLD = 70;
-
+  // CPO-DEV2-051 (r34 madde 1): fiili tetikleme eşiği 20px (asağıdaki dy<20
+  // erken-dönüşü) — touchend'de indikatör görünür olan HER bırakışta refresh
+  // tetikleniyor, ayrı bir "70px'e kadar çek" ara-eşiği fiilen yoktu. Metin artık
+  // gerçek davranışı yansıtıyor: 20px'i geçince direkt "Bırak, yenile" gösterilir.
   document.addEventListener('touchstart', function(e) {
     if (window.scrollY > 5) return;
     startY = e.touches[0].clientY;
@@ -3774,11 +3789,7 @@ document.addEventListener('keydown', e => {
     if (dy < 20) return;
     if (window.scrollY > 2) { pulling = false; return; }
     if (!ind) return;
-    if (dy >= THRESHOLD && !triggered) {
-      txt.textContent = 'Bırak, yenile';
-    } else if (dy < THRESHOLD) {
-      txt.textContent = 'Aşağı çek, yenile';
-    }
+    txt.textContent = 'Bırak, yenile';
     ind.classList.add('ptr-visible');
   }, {passive: true});
 

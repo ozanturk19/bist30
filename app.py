@@ -4260,6 +4260,10 @@ def background_refresh():
 def set_security_headers(response):
     """Security headers — Cloudflare zaten X-Frame/X-CTO/Referrer/Permissions/HSTS ekliyor.
     Biz sadece CF'in eklemediği header'ları + CSP'yi (CF eklemiyor) ekliyoruz."""
+    # CPO-DEV2-051 madde 2 — her istek burada tamamlanır, bu yüzden "son dispatch
+    # zaman damgası" heartbeat'i için en ucuz yer (bkz. _last_dispatch_ts tanımı).
+    global _last_dispatch_ts
+    _last_dispatch_ts = time.time()
     # CSP — GA4 + Google Fonts + Cloudflare Insights (HTML only)
     if response.content_type and "text/html" in response.content_type:
         response.headers["Content-Security-Policy"] = (
@@ -9156,6 +9160,16 @@ _HEALTH_HEARTBEAT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__))
 
 _health_loop_last_tick_ts = time.time()
 
+# CPO-DEV2-051 (CPO-DEV2-050 madde 2) — health loop'un kendi tick'i, request-handling
+# greenlet'lerin CANLI olduğunu KANITLAMAZ: health loop ayrı bir bg thread, istekleri
+# işleyen greenlet'ler tamamen tıkansa bile (ör. bir C-extension/GIL blokajı) bu loop
+# tik atmaya devam edebilir. `_last_dispatch_ts` her HTTP yanıtı tamamlandığında
+# (set_security_headers/after_request, aşağıda) güncellenir — bir worker gerçekten
+# donarsa bu zaman damgası donduğu anda kalır, tam greenlet dump'tan çok daha ucuz
+# bir "son ne zaman canlıydı" sinyali verir.
+_last_dispatch_ts = time.time()
+_DISPATCH_HEARTBEAT_PATH = f"/tmp/bp_last_dispatch_{os.getpid()}.json"
+
 # CPO-1261 §3 — py-spy sadece OS-thread stack'i gösterir, gevent greenlet'lerini
 # GÖSTERMEZ. `-k GeventWebSocketWorker --worker-connections 400` altında yüzlerce
 # bloke greenlet forensic dump'ta "hepsi idle" gibi görünüp KAYBOLABİLİR (2 gecedir
@@ -9178,16 +9192,39 @@ def _active_greenlet_count():
 
 def _dump_greenlet_info(*_a):
     """SIGUSR2 handler — gevent.util.format_run_info() çıktısını dosyaya yazar.
-    forensic-snapshot.sh restart'tan ÖNCE bu sinyali worker PID'lerine gönderir."""
+    forensic-snapshot.sh restart'tan ÖNCE bu sinyali worker PID'lerine gönderir.
+
+    CPO-DEV2-050/051: 21.08 çift-restart olayında 4 worker'dan 2'si bu fonksiyonda
+    "'Hub' object has no attribute '_resolver'" ile patladı ve dump'ın TAMAMI
+    kayboldu. Hata gevent.util.format_run_info() → _format_thread_info()'nin
+    gevent'in kendi monitoring-thread'ini repr()'lerken henüz __init__ tamamlanmamış
+    bir Hub nesnesine rastlamasından geliyor (gevent 25.9.1 iç detayı, bizim
+    kontrolümüzde değil). Üst-seviye çağrıyı düzeltmek yerine, başarısız olursa
+    sys._current_frames() ile ham thread stack'lerine (hub repr'i olmadan) DÜŞÜYORUZ
+    — bir sonraki olayda kanıtın yarısı yerine en azından tamamına yakınını
+    kaybetmemek için."""
+    out_path = f"/tmp/bp_greenlet_dump_{os.getpid()}.txt"
     try:
         import gevent.util
         info_lines = gevent.util.format_run_info()
-        out_path = f"/tmp/bp_greenlet_dump_{os.getpid()}.txt"
         with open(out_path, "w") as f:
             f.write("\n".join(info_lines))
         logger.warning("greenlet dump yazildi: %s (%d satir)", out_path, len(info_lines))
+        return
     except Exception as e:
-        logger.error("greenlet dump basarisiz: %s", e)
+        logger.error("greenlet dump (format_run_info) basarisiz: %s — ham stack fallback deneniyor", e)
+    try:
+        import traceback as _tb
+        lines = ["* format_run_info basarisiz, ham thread stack fallback (hub repr yok) *"]
+        for thread_ident, frame in sys._current_frames().items():
+            lines.append("*" * 40)
+            lines.append("Thread 0x%x" % thread_ident)
+            lines.append("".join(_tb.format_stack(frame)))
+        with open(out_path, "w") as f:
+            f.write("\n".join(lines))
+        logger.warning("greenlet dump (fallback) yazildi: %s (%d satir)", out_path, len(lines))
+    except Exception as e2:
+        logger.error("greenlet dump basarisiz (fallback da basarisiz): %s", e2)
 
 try:
     import signal as _signal_mod
@@ -9221,6 +9258,18 @@ def _health_snapshot_loop():
             _atomic_write_json(_HEALTH_HEARTBEAT_PATH, _health_snapshot)
         except Exception as e:
             logger.error("health snapshot loop: %s", e)
+        try:
+            # CPO-DEV2-051 madde 2 — request-dispatch heartbeat, health tick'inden
+            # BAĞIMSIZ (bkz. _last_dispatch_ts tanımı yukarıda). Aynı 8s tik'e
+            # piggyback ediliyor, ayrı bir thread/ek I/O maliyeti yok.
+            _atomic_write_json(_DISPATCH_HEARTBEAT_PATH, {
+                "pid": os.getpid(),
+                "last_dispatch_ts": _last_dispatch_ts,
+                "age_s": round(now - _last_dispatch_ts, 1),
+                "written_ts": now,
+            })
+        except Exception as e:
+            logger.error("dispatch heartbeat write: %s", e)
         time.sleep(8)
 
 threading.Thread(target=_health_snapshot_loop, daemon=True, name="health-snapshot").start()
