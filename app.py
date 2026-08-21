@@ -11675,22 +11675,52 @@ def _push_endpoint_host_allowed(endpoint):
 @limiter.limit("20 per hour")
 def api_push_subscribe():
     """Browser push subscription'ı kaydet."""
+    # CPO-DEV2-r34: content-length guard — portfolio/user-alerts ile ayni desen,
+    # daha once burada hic yoktu (Flask MAX_CONTENT_LENGTH da tanimli degil).
+    cl = request.content_length
+    if cl and cl > 8192:
+        return safe_json({"error": "Veri çok büyük"}), 413
+
     sub = request.get_json(silent=True)
     if not sub or "endpoint" not in sub:
         return safe_json({"error": "Geçersiz subscription"}), 400
     if not _push_endpoint_host_allowed(sub["endpoint"]):
         return safe_json({"error": "Geçersiz push endpoint"}), 400
 
+    # CPO-DEV2-r34: oncesinde `sub` objesi TAMAMEN filtresiz diske yaziliyordu —
+    # ne alan whitelist'i ne watchlist format/entry-limit'i vardi (portfolio/user-alerts
+    # endpoint'lerinde zaten uygulanan standardin gerisindeydi). keys.p256dh/auth
+    # webpush()'un subscription_info olarak ihtiyaç duyduğu zorunlu alanlar.
+    keys = sub.get("keys")
+    if not isinstance(keys, dict) or not keys.get("p256dh") or not keys.get("auth"):
+        return safe_json({"error": "Geçersiz subscription anahtarları"}), 400
+
+    raw_watchlist = sub.get("watchlist") or []
+    if not isinstance(raw_watchlist, list):
+        return safe_json({"error": "Geçersiz watchlist"}), 400
+    clean_watchlist = [
+        t for t in raw_watchlist
+        if isinstance(t, str) and re.match(r'^[A-Z0-9]{2,10}$', t)
+    ][:_ALERT_MAX_ENTRIES]
+
+    clean_sub = {
+        "endpoint": sub["endpoint"],
+        "keys": {"p256dh": str(keys["p256dh"])[:512], "auth": str(keys["auth"])[:512]},
+        "watchlist": clean_watchlist,
+    }
+    if "expirationTime" in sub:
+        clean_sub["expirationTime"] = sub["expirationTime"]
+
     with _push_lock:
         # SPEC-006 Faz 2: existing varsa REPLACE — watchlist değişimi yansısın
         existing_idx = next(
-            (i for i, s in enumerate(_push_subs) if s.get("endpoint") == sub["endpoint"]),
+            (i for i, s in enumerate(_push_subs) if s.get("endpoint") == clean_sub["endpoint"]),
             None,
         )
         if existing_idx is not None:
-            _push_subs[existing_idx] = sub
+            _push_subs[existing_idx] = clean_sub
         else:
-            _push_subs.append(sub)
+            _push_subs.append(clean_sub)
         _save_push_subs_locked()
         count = len(_push_subs)
 

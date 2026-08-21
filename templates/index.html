@@ -511,7 +511,7 @@
       <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Ana ekrana ekle — hızlı erişim</div>
     </div>
     <button onclick="_pwaInstall()" style="background:#3b82f6;color:#fff;border:none;padding:7px 16px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Yükle</button>
-    <button onclick="document.getElementById('pwaInstallBanner').style.display='none'" style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);line-height:1;padding:2px 4px" title="Kapat">×</button>
+    <button onclick="document.getElementById('pwaInstallBanner').style.display='none'" style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);line-height:1;padding:2px 4px" title="Kapat" aria-label="Kapat">×</button>
   </div>
 
   <!-- ── Bildirim Çubuğu (E-posta + Push) ────────── -->
@@ -552,7 +552,7 @@
     </button>
     <button onclick="document.getElementById('subscribeBar').style.display='none'"
       style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);line-height:1;padding:2px 4px"
-      title="Kapat">×</button>
+      title="Kapat" aria-label="Kapat">×</button>
   </div>
 
 
@@ -2712,6 +2712,10 @@ function toggleWatch(ticker) {
   if (watchlist.has(ticker)) {
     watchlist.delete(ticker);
     // fiyat alarmını da temizle
+    // CPO-DEV2-r34: cok-sekme lost-update onlemi (toggleWatch'taki watchlist ile
+    // ayni desen, DEV2-bughunt-r7'de watchlist icin yapilmis ama priceAlarms'a
+    // yansitilmamisti) — mutate etmeden once localStorage'dan taze oku.
+    priceAlarms = _safeLoadJSON(PRICE_ALARM_KEY, {});
     delete priceAlarms[ticker];
     savePriceAlarms();
   } else {
@@ -2772,6 +2776,10 @@ function setPriceAlarm(ticker, dir, inputId) {
   const el  = document.getElementById(inputId);
   const val = parseFloat(el.value.replace(',', '.'));
   if (!isNaN(val) && val > 0) {
+    // CPO-DEV2-r34: cok-sekme lost-update onlemi (toggleWatch'taki watchlist ile
+    // ayni desen, DEV2-bughunt-r7'de watchlist icin yapilmis ama priceAlarms'a
+    // yansitilmamisti) — mutate etmeden once localStorage'dan taze oku.
+    priceAlarms = _safeLoadJSON(PRICE_ALARM_KEY, {});
     if (!priceAlarms[ticker]) priceAlarms[ticker] = {};
     priceAlarms[ticker][dir] = val;
     savePriceAlarms();
@@ -2785,6 +2793,10 @@ function setPriceAlarm(ticker, dir, inputId) {
 }
 
 function clearPriceAlarm(ticker, dir) {
+    // CPO-DEV2-r34: cok-sekme lost-update onlemi (toggleWatch'taki watchlist ile
+    // ayni desen, DEV2-bughunt-r7'de watchlist icin yapilmis ama priceAlarms'a
+    // yansitilmamisti) — mutate etmeden once localStorage'dan taze oku.
+    priceAlarms = _safeLoadJSON(PRICE_ALARM_KEY, {});
   if (priceAlarms[ticker]) {
     delete priceAlarms[ticker][dir];
     if (!priceAlarms[ticker].above && !priceAlarms[ticker].below) {
@@ -2899,6 +2911,10 @@ function checkAlarms(stocks) {
 
 /* Canlı fiyat alarmı kontrolü (SSE'den çağrılır) */
 function checkPriceAlarms(ticker, newPrice, oldPrice) {
+    // CPO-DEV2-r34: cok-sekme lost-update onlemi (toggleWatch'taki watchlist ile
+    // ayni desen, DEV2-bughunt-r7'de watchlist icin yapilmis ama priceAlarms'a
+    // yansitilmamisti) — mutate etmeden once localStorage'dan taze oku.
+    priceAlarms = _safeLoadJSON(PRICE_ALARM_KEY, {});
   const pa = priceAlarms[ticker];
   if (!pa) return;
   if (pa.above != null && oldPrice < pa.above && newPrice >= pa.above) {

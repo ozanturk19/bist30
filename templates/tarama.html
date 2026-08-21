@@ -453,6 +453,14 @@ function _hydrateFiltersFromUrl() {
         if (el) el.value = val;
       }
     }
+    // CPO-DEV2-r34: sort_dir URL'e yaziliyordu (applyFilters, T2 yorum satiri: 'paylasilabilir')
+    // ama hic geri okunmuyordu -- applyFilters() ilk calistiginda 'kolon degisti' sanip
+    // yonu kolonun varsayilanina sifirliyordu, paylasilan/yenilenen ?sort_dir=asc URL'leri
+    // sessizce desc'e donuyordu. _currentSort'u burada senkronize ediyoruz ki applyFilters()
+    // bu sort_dir'i ezmesin (bkz. applyFilters: `if (sort !== _currentSort) _sortDir = ...`).
+    _currentSort = document.getElementById('sortSel').value;
+    const sd = params.get('sort_dir');
+    if (sd === 'asc' || sd === 'desc') _sortDir = sd;
     // only_premium=1 → fSignal=PREMIUM (mevcut applyFilters mantığı bunu AL'a çevirir)
     if (params.get('only_premium') === '1') {
       const sigEl = document.getElementById('fSignal');

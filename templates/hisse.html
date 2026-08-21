@@ -2205,7 +2205,10 @@ function mdToHtml(text) {
   const lines = text.split('\n');
   let html = '', inList = false;
   for (let line of lines) {
-    line = line.trim();
+    // CPO-DEV2-r34: Gemini AI ozeti (Google Search grounding, harici web icerigi)
+    // onceden escape edilmeden innerHTML'e basiliyordu -- ayni dosyadaki storyList/
+    // kapList icin zaten kullanilan escHtml() deseniyle hizalandi (HTML/script injection).
+    line = escHtml(line.trim());
     // Bold **text**
     line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     if (!line) {
