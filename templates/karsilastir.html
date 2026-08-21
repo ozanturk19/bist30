@@ -252,100 +252,38 @@ function renderCell(key, s) {
   }
 }
 
-// ── Yatırım Skoru Hesaplama ──────────────────────────────
-function calcScore(s) {
-  if (!s || !s.found) return { tech: 0, fund: 0, total: 0 };
-  let tech = 0, fund = 0;
+// ── Yatırım Skoru — kanonik signal_strength + tier (CPO-DEV2-053/055) ──────
+// Önceden bu dosyanın kendi bağımsız calcScore() fonksiyonu vardı (tech+fund, 0-100,
+// signal/ADX/R-R/bull_score+temel veriden yeniden hesaplıyordu) — /hisse ve /tarama'nın
+// gösterdiği compose_score()'tan TAMAMEN farklı bir sayı üretiyordu (kanıt: BJKAS aynı an
+// hisse.html'de 95/Güçlü Sinyal, karsilastir.html'de 65/İyi gösteriyordu, "kazanan" 🏆
+// işaretini de bu sahte skor belirliyordu — CPO-DEV2-053 raporu). Artık backend'in
+// analyze()'de zaten hesapladığı signal_strength+tier alanları doğrudan gösteriliyor,
+// ikinci bir skor icat edilmiyor. Temel analiz verileri (F/K, ROE, F/DD, temettü) ayrı
+// satırlar olarak tabloda kalmaya devam ediyor, ama artık skora/kazanana karışmıyorlar.
+const TIER_META = {
+  guclu_sinyal: { color: '#a855f7', label: 'Güçlü Sinyal' },
+  standart:     { color: '#1f6feb', label: 'Standart' },
+};
 
-  // ── Teknik Skor (max 60) ──
-  // Sinyal: AL=25, BEKLE=5, SAT=0
-  if (s.signal === 'AL')          tech += 25;
-  else if (s.signal === 'BEKLE')  tech += 5;
-
-  // ADX
-  const adx = s.adx != null ? parseFloat(s.adx) : null;
-  if (adx != null) {
-    if (adx >= 35)      tech += 15;
-    else if (adx >= 25) tech += 10;
-    else if (adx >= 20) tech += 5;
-  }
-
-  // R/R
-  const rr = s.rr_ratio != null ? parseFloat(s.rr_ratio) : null;
-  if (rr != null) {
-    if (rr >= 3)        tech += 12;
-    else if (rr >= 2)   tech += 8;
-    else if (rr >= 1.5) tech += 4;
-  }
-
-  // Bull Score
-  const bs = s.bull_score != null ? parseInt(s.bull_score, 10) : null;
-  if (bs != null) {
-    if (bs === 3)      tech += 8;
-    else if (bs === 2) tech += 5;
-    else if (bs === 1) tech += 2;
-  }
-
-  // ── Temel Skor (max 40) ──
-  // F/K (düşük iyi)
-  const pe = s.pe_ratio;
-  if (pe == null)        fund += 5;
-  else if (pe < 12)      fund += 15;
-  else if (pe <= 20)     fund += 12;
-  else if (pe <= 35)     fund += 7;
-  else                   fund += 2;
-
-  // ROE (yüksek iyi)
-  const roe = s.roe;
-  if (roe == null)       fund += 4;
-  else if (roe > 25)     fund += 12;
-  else if (roe >= 15)    fund += 9;
-  else if (roe >= 7)     fund += 5;
-  else                   fund += 1;
-
-  // F/DD (düşük iyi)
-  const pb = s.pb_ratio;
-  if (pb == null)        fund += 3;
-  else if (pb < 1)       fund += 8;
-  else if (pb <= 2)      fund += 6;
-  else if (pb <= 4)      fund += 3;
-  else                   fund += 1;
-
-  // Temettü
-  const dy = s.dividend_yield;
-  if (dy == null || dy === 0) fund += 0;
-  else if (dy > 4)            fund += 5;
-  else if (dy >= 2)           fund += 3;
-  else                        fund += 1;
-
-  return { tech, fund, total: tech + fund };
-}
-
-function verdictColor(total) {
-  if (total >= 75) return { color: '#3fb950', label: 'Güçlü' };
-  if (total >= 55) return { color: '#f59e0b', label: 'İyi' };
-  if (total >= 35) return { color: '#8b949e', label: 'Nötr' };
-  return            { color: '#f85149', label: 'Zayıf' };
+function verdictFor(tier) {
+  return TIER_META[tier] || { color: '#8b949e', label: 'Nötr' };
 }
 
 function renderScoreCell(s, isWinner) {
   if (!s || !s.found) return '<span class="muted" style="font-size:20px">—</span>';
-  const sc = calcScore(s);
-  const v  = verdictColor(sc.total);
+  const total = s.signal_strength || 0;
+  const v = verdictFor(s.tier);
   const winnerCls = isWinner ? ' winner' : '';
   return `
     <div class="score-cell${winnerCls}">
       <div class="score-big" style="color:${v.color}">
-        ${sc.total}<small> / 100</small>
+        ${total}<small> / 100</small>
       </div>
       <div class="score-bar-wrap">
-        <div class="score-bar-fill" style="width:${sc.total}%"></div>
+        <div class="score-bar-fill" style="width:${total}%"></div>
       </div>
       <div class="score-verdict" style="color:${v.color}">${v.label}</div>
-      <div class="score-detail">
-        Teknik: <strong>${sc.tech}</strong>/60<br>
-        Temel: <strong>${sc.fund}</strong>/40
-      </div>
     </div>
   `;
 }
@@ -382,8 +320,8 @@ function buildTable(stocks) {
     </th>`;
   }).join('');
 
-  // ── Yatırım Skoru satırı (kazananı belirle) ──
-  const scores = stocks.map(s => s.found ? calcScore(s).total : -1);
+  // ── Yatırım Skoru satırı (kazananı belirle, kanonik signal_strength) ──
+  const scores = stocks.map(s => s.found ? (s.signal_strength || 0) : -1);
   const maxScore = Math.max(...scores);
   const winnerIdx = maxScore > 0 ? scores.indexOf(maxScore) : -1;
   const scoreCells = stocks.map((s, i) => {

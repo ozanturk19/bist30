@@ -515,19 +515,18 @@
       {# CPO-535 #36 Skor Halka — compose_score (signal_strength) tek kaynak #}
       {%- set _ts = (ssr_signal.signal_strength | default(0)) | int %}
       {% if ssr_signal and _ts > 0 %}
-      {# CPO-985/986 #8.1+#7 / SPEC-018 W2: tier etiketi kanonik `ssr_signal.tier` alanından (Premium/Plus/Standart),
+      {# CPO-985/986 #8.1+#7 / SPEC-018 W2: tier etiketi kanonik `ssr_signal.tier` alanından (Güçlü Sinyal/Standart),
          signal_strength'ten türetilir (AUDIT-004 tier_score emekli edildi, CPO-1004).
          Halka NUMARASI signal_strength (sinyal gücü, 0-100), ETİKETİ tier alanı — tek vocabulary. #}
-      {# CPO-1107 Faz 0 #1 — tier adı (Premium/Plus/Standart) skor rozetinden kaldırıldı,
-         SADECE paywall bağlamında gösterilir. Halka rengi (_tc) skor bandını nötr biçimde
-         korur, tier ismi metin olarak artık render edilmiyor. #}
+      {# CPO-1107 Faz 0 #1 — tier adı skor rozetinden kaldırıldı, SADECE paywall bağlamında
+         gösterilir. Halka rengi (_tc) skor bandını nötr biçimde korur, tier ismi metin olarak
+         artık render edilmiyor. CPO-DEV2-053/055: 3→2 katman, "Premium" adı kaldırıldı. #}
       {%- set _tier = ssr_signal.tier -%}
-      {%- if   _tier == "premium"  %}{% set _tc = "#a855f7" %}
-      {%- elif _tier == "plus"     %}{% set _tc = "#1f6feb" %}
-      {%- elif _tier == "standart" %}{% set _tc = "#909097" %}
-      {%- else                     %}{% set _tc = "#6b7280" %}{% endif %}
+      {%- if   _tier == "guclu_sinyal" %}{% set _tc = "#a855f7" %}
+      {%- elif _tier == "standart"     %}{% set _tc = "#1f6feb" %}
+      {%- else                         %}{% set _tc = "#6b7280" %}{% endif %}
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
-           data-tip="Sinyal gücü puanı (0–100). ADX, hacim, yön gücü, teyit ve RSI bileşenlerine dayalı." tabindex="0">
+           data-tip="Sinyal gücü puanı (0–100). ADX, hacim, teyit ve RSI bileşenlerine dayalı." tabindex="0">
         <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100">
           <circle cx="32" cy="32" r="28" fill="none" stroke="var(--bp-border)" stroke-width="6"/>
           <circle cx="32" cy="32" r="28" fill="none" stroke="{{ _tc }}" stroke-width="6"

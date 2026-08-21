@@ -186,7 +186,23 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   oluşturulur (tarama tablosundaki "Sinyal Gücü" kolonu). En yüksek skorlu hisseler AL filtresinde
   listenin başında yer alır — bu skor, eski "Güçlü Momentum Listesi" (/gucu-yuksek) sayfasının
   kullandığı sıralamayla aynıdır; o sayfa artık <a href="/tarama?signal=AL&amp;sort=signal_strength">/tarama</a>'nın
-  AL + Sinyal Gücü ön-ayarına yönleniyor.
+  AL + Sinyal Gücü ön-ayarına yönleniyor. Bu skor sitede <strong>tek kaynaktan</strong> hesaplanır —
+  hisse detay sayfası, tarama tablosu ve karşılaştırma sayfası aynı sayıyı gösterir, hiçbir sayfa
+  kendi ayrı skorunu üretmez.
+</p>
+<p>Formülün bileşenleri (ham puan üzerinden, toplamı 0-100'e ölçeklenir):</p>
+<ul>
+  <li><strong>ADX</strong> <span role="img" aria-label="anlamına gelir">→</span> trend gücü, en fazla 30 puan katkı</li>
+  <li><strong>Hacim oranı (RVOL)</strong> <span role="img" aria-label="anlamına gelir">→</span> en fazla 25 puan katkı</li>
+  <li><strong>Teyit</strong> <span role="img" aria-label="anlamına gelir">→</span> sinyal en az 3 bar sürdüyse +10 puan</li>
+  <li><strong>RSI bölgesi</strong> <span role="img" aria-label="anlamına gelir">→</span> sinyal yönüne göre en fazla 10 puan (yukarıdaki RSI bölümüne bakın)</li>
+</ul>
+<p>
+  Skora göre her aktif sinyale (AL veya SAT) bir <strong>rozet</strong> atanır: <strong>70 ve üzeri
+  → "Güçlü Sinyal"</strong>, <strong>56–69 → "Standart"</strong>, 56 altı rozetsiz. Düşük likidite
+  (20 günlük ortalama hacim 5M TL altında) veya yaklaşan bilanço tarihi gibi risk uyarıları varsa
+  rozet bir kademe düşürülür. Bu rozet, sitedeki ücretli abonelik ("Premium") kavramından bağımsızdır
+  — sinyal kalitesini gösterir, paket/fiyatlandırma ile ilgisi yoktur.
 </p>
 
 <h2>Veri Kaynağı</h2>

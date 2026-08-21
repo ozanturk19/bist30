@@ -102,7 +102,7 @@
         <option value="signal_bars">Tazelik (Yeni → Eski)</option>
       </select>
       <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:var(--bp-text-sm);border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
-        data-tip="Skor: Birleşik kalite (ADX + Hacim + RSI + Teyit) — Premium / Plus / Standart bu skordan belirlenir. En kaliteli hisseler üstte.&#10;ADX: Sadece trend gücü. Premium bir hisse ADX düşük olabilir.&#10;RVOL: Hacim oranı — anormal hareket göstergesi.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
+        data-tip="Skor: Birleşik kalite (ADX + Hacim + RSI + Teyit) — Güçlü Sinyal / Standart bu skordan belirlenir. En kaliteli hisseler üstte.&#10;ADX: Sadece trend gücü. Güçlü Sinyal rozetli bir hisse ADX düşük olabilir.&#10;RVOL: Hacim oranı — anormal hareket göstergesi.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
       <button onclick="exportCSV()" title="Sonuçları CSV olarak indir"
         style="background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.3);color:#58a6ff;
                border-radius:var(--bp-radius);padding:5px 11px;font-size:var(--bp-text-sm);cursor:pointer;font-family:inherit;
@@ -132,7 +132,7 @@
         <tr>
           <th scope="col">Hisse</th>
           <th scope="col">Sinyal</th>
-          <th scope="col" class="th-sortable" id="th-score" data-tooltip="Birleşik kalite skoru (ADX + Hacim + RSI + Teyit) — Premium/Plus/Standart bu skordan belirlenir. Varsayılan sıralama." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_strength')">Sinyal Gücü</button></th>
+          <th scope="col" class="th-sortable" id="th-score" data-tooltip="Birleşik kalite skoru (ADX + Hacim + RSI + Teyit) — Güçlü Sinyal/Standart bu skordan belirlenir. Varsayılan sıralama." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_strength')">Sinyal Gücü</button></th>
           <th scope="col" class="th-sortable" id="th-adx" data-tooltip="ADX 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, <18 Zayıf" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('adx')">Trend Gücü</button></th>
           <th scope="col">Giriş Kalitesi</th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-price" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('price')">Fiyat</button></th>
@@ -486,12 +486,15 @@ function renderResults(rows, count) {
 
   // === Yardımcı fonksiyonlar (UX-2 Task #23, CPO-475) ===
   // Sinyal Gücü (T3.5): signal_strength 0-100 (compose_score, app.py) — tier bandı ile aynı renk
-  // (index.html tg-premium/tg-plus/tg-standart, CPO-986 #8.1). Eşikler _derive_tier() ile birebir
-  // (app.py ~L1560): >=75 premium, >=60 plus, >=40 standart, altı nötr — burada tekrar tanımlanmaz,
-  // sadece backend'in zaten döndürdüğü s.tier'a göre renklendirilir.
+  // (index.html tg-premium/tg-plus, CPO-986 #8.1). Eşikler _derive_tier() ile birebir
+  // (app.py ~L1560): >=70 guclu_sinyal, >=56 standart, altı rozet-yok — burada tekrar tanımlanmaz,
+  // sadece backend'in zaten döndürdüğü s.tier'a göre renklendirilir. CPO-DEV2-053/055: 3→2 katman —
+  // "premium"/"plus" CSS sınıf adları korundu (sadece iç isimlendirme, kullanıcıya görünmez),
+  // yeni "standart" tier'i eski "plus" (mavi) rengine eşlendi — hisse.html skor halkasıyla
+  // aynı renk sözlüğü (guclu_sinyal=mor, standart=mavi, rozet-yok=nötr).
   const scoreCell = (score, tier) => {
     const v = score || 0;
-    const cls = tier === 'premium' ? 'premium' : tier === 'plus' ? 'plus' : tier === 'standart' ? 'standart' : 'weak';
+    const cls = tier === 'guclu_sinyal' ? 'premium' : tier === 'standart' ? 'plus' : 'weak';
     const pct = Math.max(4, Math.min(100, v));
     return `<div class="score-cell" tabindex="0" data-tip="Sinyal Gücü ${v}/100 — sıralama bu skora göre">
       <span class="score-val ${cls}">${v}</span>
@@ -540,7 +543,7 @@ function renderResults(rows, count) {
     return `<tr>
       <td>
         <a href="/hisse/${s.ticker}">
-          <div class="tk">${s.ticker}${s.tier === 'premium' ? ' <span tabindex="0" data-tip="Premium sinyal" style="color:var(--bp-premium);font-size:11px;vertical-align:middle">💎</span>' : s.tier === 'plus' ? ' <span tabindex="0" data-tip="Plus sinyal" style="color:#1f6feb;font-size:11px;vertical-align:middle">⭐</span>' : ''}</div>
+          <div class="tk">${s.ticker}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Güçlü Sinyal" style="color:var(--bp-premium);font-size:11px;vertical-align:middle">💎</span>' : ''}</div>
           <div class="tk-name">${(s.name||'').replace(' A.Ş.','').substring(0,20)}</div>
         </a>
       </td>
@@ -567,12 +570,12 @@ function renderResults(rows, count) {
       const _eqH     = s.entry_quality
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
         : '<span style="color:var(--text3)">—</span>';
-      const _prm = s.tier === 'premium' ? ' <span tabindex="0" data-tip="Premium sinyal" style="color:var(--bp-premium);font-size:11px">💎</span>' : s.tier === 'plus' ? ' <span tabindex="0" data-tip="Plus sinyal" style="color:#1f6feb;font-size:11px">⭐</span>' : '';
+      const _prm = s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Güçlü Sinyal" style="color:var(--bp-premium);font-size:11px">💎</span>' : '';
       const _tlbl = s.adx_label || 'Zayıf';
       const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
       // T3.5: mobil kartta da masaüstüyle aynı skor rengi (tier bazlı) — bkz. scoreCell()
       const _scv  = s.signal_strength || 0;
-      const _sccls = s.tier === 'premium' ? 'premium' : s.tier === 'plus' ? 'plus' : s.tier === 'standart' ? 'standart' : 'weak';
+      const _sccls = s.tier === 'guclu_sinyal' ? 'premium' : s.tier === 'standart' ? 'plus' : 'weak';
       return `<a href="/hisse/${s.ticker}" class="mr-card">
         <div class="mr-top">
           <div><div class="mr-ticker">${s.ticker}${_prm}</div><div class="mr-name">${(s.name||'').replace(' A.Ş.','').substring(0,22)}</div></div>

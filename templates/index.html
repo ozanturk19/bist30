@@ -2174,7 +2174,12 @@ function renderTable() {
     acc[t] = (acc[t] || 0) + 1;
     return acc;
   }, {});
-  const _tierLabels = { premium: '💎 PREMIUM', plus: '⭐ PLUS', standart: 'STANDART' };  // CPO-986 #8.1: kanonik 💎/⭐
+  // CPO-DEV2-053/055: 3→2 katman, "Premium" adı paywall çakışması nedeniyle kaldırıldı.
+  // _tierCss eski CSS sınıf adlarını (tg-premium mor, tg-plus mavi) yeniden kullanır —
+  // sadece iç isimlendirme, kullanıcıya görünmez. "standart" yeni tier eski "plus" (mavi)
+  // rengine eşlendi — hisse.html/tarama.html ile aynı renk sözlüğü.
+  const _tierLabels = { guclu_sinyal: '💎 GÜÇLÜ SİNYAL', standart: 'STANDART' };
+  const _tierCss    = { guclu_sinyal: 'tg-premium', standart: 'tg-plus' };
   let _lastTier_mobile = '__init__';
   let _lastTier_desktop = '__init__';
   /* ── Mobile card list ── */
@@ -2245,12 +2250,12 @@ function renderTable() {
         }
 
         const _isWatchingMc = (typeof watchlist !== 'undefined' && watchlist.has(s.ticker));
-        // Tier grup başlığı (mobile) + Premium CTA (Faz 2)
+        // Tier grup başlığı (mobile)
         let mtHeader = '';
         const _curTier = s.tier || 'other';
         if (_curTier !== _lastTier_mobile && _tierLabels[_curTier]) {
           const cnt = tierCounts[_curTier] || 0;
-          mtHeader = `<div class="mc-tier-group tg-${_curTier}">${_tierLabels[_curTier]} <span class="tier-count">${cnt} hisse</span></div>`;
+          mtHeader = `<div class="mc-tier-group ${_tierCss[_curTier] || ''}">${_tierLabels[_curTier]} <span class="tier-count">${cnt} hisse</span></div>`;
         }
         _lastTier_mobile = _curTier;
         return mtHeader + `<a class="mc ${sigClass} ${bpIsSignalFromToday(s.signal_date) ? 'mc-new' : ''}" href="/hisse/${s.ticker}">
@@ -2378,12 +2383,12 @@ function renderTable() {
       ? `<div style="font-size:10px;color:#8b949e;margin-top:2px">${s.sector}</div>` : '';
 
     const isWatching = watchlist.has(s.ticker);
-    // SPEC-001 Faz 1: Tier grup başlığı satırı (desktop) + Faz 2 Premium CTA
+    // SPEC-001 Faz 1: Tier grup başlığı satırı (desktop)
     let _tierHeaderTr = '';
     const _curTierD = s.tier || 'other';
     if (_curTierD !== _lastTier_desktop && _tierLabels[_curTierD]) {
       const cnt = tierCounts[_curTierD] || 0;
-      _tierHeaderTr = `<tr class="tier-group-header tg-${_curTierD}"><td colspan="9">${_tierLabels[_curTierD]} <span class="tier-count">${cnt} hisse</span></td></tr>`;
+      _tierHeaderTr = `<tr class="tier-group-header ${_tierCss[_curTierD] || ''}"><td colspan="9">${_tierLabels[_curTierD]} <span class="tier-count">${cnt} hisse</span></td></tr>`;
     }
     _lastTier_desktop = _curTierD;
     return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">

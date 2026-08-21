@@ -1606,10 +1606,17 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
     Contract §24). AUDIT-004 tier_score'un yerine geçer (CPO-531 #36) — ve
     SPEC-018 W2'de tier badge ataması da bu skora taşındı (CPO-1004).
 
-    Bileşenler:
+    CPO-DEV2-053 (2026-08-22): "Yön gücü" bileşeni (bull_or_bear_score/3*25)
+    kaldırıldı — 54 aktif sinyalin tamamında bull_score/bear_score istisnasız
+    =3 olduğu kanıtlandı (sinyal gate'i zaten 3/3 oybirliği şart koşuyor, ara
+    değer hiç yayınlanamıyor), yani bu bileşen aktif bir sinyal için hiçbir
+    ayrıştırıcı bilgi taşımıyordu — sabit +25 puanlık bir taban gibi
+    davranıyordu. bull_score parametresi imza uyumluluğu için tutuldu ama
+    artık skora katkısı yok.
+
+    Bileşenler (ham max 75, 100/75 ile 0-100'e yeniden ölçeklenir):
         ADX       : min(adx, 50) / 50 * 30   → max 30
         Hacim     : min(vol_ratio, 5) / 5 * 25 → max 25
-        Yön gücü  : bull_or_bear_score / 3 * 25 → max 25  (AL → bull, SAT → bear)
         Teyit     : +10 (signal_bars >= 3)
         RSI bölge : AL  → +10 (50-75) | +5 (>75)
                     SAT → +10 (25-50) | +5 (<25)   → max 10 (P0-2, CPO-DEV2-031/033:
@@ -1617,14 +1624,13 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
                     bandını uyguluyordu — düşük RSI'lı bir SAT ayı teyidi almadan
                     bonus alıyor, tier'ı yapay olarak şişiriyordu)
 
-    Tier eşikleri (hisse detay badge — bkz. analyze() tier ataması):
-        75+ → PREMIUM | 60-74 → PLUS | 40-59 → STANDART | <40 → (tier yok)
+    Tier eşikleri (bkz. _derive_tier — CPO-DEV2-053/055, 70/56 kesim):
+        70+ → Güçlü Sinyal | 56-69 → Standart | <56 → (rozet yok)
         Düşük likidite / yakın bilanço → bir kademe düşürülür (analyze()).
     """
     s = 0.0
     s += min(float(adx or 0), 50) / 50 * 30
     s += min(float(vol_ratio or 1.0), 5) / 5 * 25
-    s += int(bull_score or 0) / 3 * 25
     s += 10 if confirmed else 0
     rsi = float(rsi or 50)
     if signal == "SAT":
@@ -1637,7 +1643,7 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
             s += 10
         elif rsi > 75:
             s += 5
-    return int(round(s))
+    return int(round(s * 100 / 75))
 
 
 def _derive_tier(signal, signal_strength, low_liquidity, earnings_warning):
@@ -1646,17 +1652,22 @@ def _derive_tier(signal, signal_strength, low_liquidity, earnings_warning):
     analyze() ve prev_cache stale-fallback (DEV-1034 kök nedeni, CPO-1020) her
     ikisi de tier'ı BURADAN türetir — iki ayrı yerde tekrar eden bant mantığı
     zamanla birbirinden sapıp badge/skor tutarsızlığına yol açmıştı.
+
+    CPO-DEV2-053/055 (2026-08-22): 3 katman (Standart/Plus/Premium) yerine
+    2 katman + rozet-yok — "Premium" kelimesi paywall/abonelik kavramıyla
+    çakışıyordu. Yeni eşikler (70/56), 54 aktif sinyalin yeniden ölçeklenmiş
+    dağılımındaki doğal boşluklara göre kalibre edildi ve CPO tarafından
+    onaylandı (üstteki 6 ve alttaki 5 hissenin eski sınırları korunuyor).
     """
     tier = None
     if signal != "BEKLE":
         try:
-            if signal_strength >= 75: tier = "premium"
-            elif signal_strength >= 60: tier = "plus"
-            elif signal_strength >= 40: tier = "standart"
+            if signal_strength >= 70: tier = "guclu_sinyal"
+            elif signal_strength >= 56: tier = "standart"
             if tier:
                 _demote = (1 if low_liquidity else 0) + (1 if earnings_warning else 0)
                 if _demote:
-                    _order = ["standart", "plus", "premium"]
+                    _order = ["standart", "guclu_sinyal"]
                     _idx = _order.index(tier) - _demote
                     tier = _order[_idx] if _idx >= 0 else None
         except Exception:
@@ -2011,13 +2022,14 @@ def analyze(ticker_base):
                 elif _sent_score <= -50:
                     signal_strength = max(signal_strength - 5, 0)
 
-        # ── SPEC-018 W2: 3-Katmanlı Tier (Standart / Plus / Premium) ─────────
+        # ── SPEC-018 W2: 2-Katmanlı Tier (Standart / Güçlü Sinyal) ────────────
         # signal_strength'ten türetilir — compose_score() tasarım bantları
         # (satır ~1280 docstring). AUDIT-004 tier_score (ayrı rvol/RSI-bölge/
         # sinyal-yaşı feature seti kullanıyordu, n=42 örneklemde signal_strength
         # ile Spearman≈0 korelasyonluydu — CPO-1004) emekli edildi. Risk
         # penaltıları (düşük likidite, yakın bilanço) AUDIT-004'ten bir-kademe-
-        # düşür mantığıyla korundu.
+        # düşür mantığıyla korundu. CPO-DEV2-053/055: "Premium" adı paywall
+        # çakışması nedeniyle kaldırıldı, 3→2 katman + rozet-yok.
         tier = _derive_tier(signal, signal_strength, low_liquidity, earnings_warning)
 
         return {
@@ -2037,7 +2049,7 @@ def analyze(ticker_base):
             "rvol":          rvol,
             "is_premium":    is_premium,
             "signal_strength": signal_strength,  # compose_score 0-100 (CPO-535 #36) — PRIMARY display + tier kaynağı (SPEC-018 W2)
-            "tier":          tier,        # SPEC-018 W2: signal_strength türetilmiş — 'standart' | 'plus' | 'premium' | None (BEKLE) — LIVE, index.html grup başlıklarının kaynağı
+            "tier":          tier,        # SPEC-018 W2: signal_strength türetilmiş — 'standart' | 'guclu_sinyal' | None (BEKLE/rozet-yok) — LIVE, index.html grup başlıklarının kaynağı (CPO-DEV2-053/055)
             "volume_tl_avg20": volume_tl_avg20,
             "low_liquidity": low_liquidity,
             "adx":           round(adx_val, 1),  # top-level for SSR/SEO
@@ -8902,8 +8914,8 @@ def api_tarama():
             "vol_ratio":     s.get("vol_ratio") or 1.0,
             "rvol":          s.get("rvol"),
             "is_premium":    s.get("is_premium", False),
-            "tier":          s.get("tier"),   # SPEC-007: paywall için (premium/plus/standart/None)
-            "signal_strength": s.get("signal_strength") or 0,  # CPO-985 #8.2 + SPEC-018 W2: "Skor" sıralama alanı — tier'ı (Premium/Plus/Standart) doğrudan sürükleyen tek sayı
+            "tier":          s.get("tier"),   # SPEC-007: paywall için (guclu_sinyal/standart/None, CPO-DEV2-053/055)
+            "signal_strength": s.get("signal_strength") or 0,  # CPO-985 #8.2 + SPEC-018 W2: "Skor" sıralama alanı — tier'ı (Güçlü Sinyal/Standart) doğrudan sürükleyen tek sayı
             "bull_score":    s.get("bull_score") or 0,
             "sl_level":      s.get("sl_level"),
         })
@@ -9835,6 +9847,10 @@ def api_karsilastir():
             # karsilastir.html'in kendi calcScore()'u bagimsiz/farkli bir skor uretiyordu,
             # additive alan (frontend bu turda degismiyor, sadece backend kaynagi acildi)
             "signal_strength": s.get("signal_strength"),
+            # CPO-DEV2-053/055: kanonik tier ('guclu_sinyal'|'standart'|None) — karsilastir.html
+            # artik kendi calcScore()'unu degil bu alani gosterir (BJKAS 95/Premium vs 65/Iyi
+            # celiskisini kapatir, bkz. CPO-DEV2-053 raporu)
+            "tier":           s.get("tier"),
             "sector":         _get_sector(ticker),
             # DEV2-bughunt-r7: bulunamayan (found=False) ticker icin de kap_url_for()
             # her zaman bir fallback arama linki dondugunden, karsilastir.html olmayan
@@ -11797,19 +11813,24 @@ def api_push_unsubscribe():
 
 
 @app.route("/unsubscribe/<token>", methods=["GET", "POST"])
-@limiter.limit("5 per hour", key_func=lambda: request.view_args.get("token", ""))
+@limiter.limit("5 per hour", key_func=lambda: request.view_args.get("token", ""), methods=["POST"])
 def unsubscribe_page(token):
     """Abonelik iptali (KVKK: kayıt tamamen silinir — push unsubscribe ile aynı desen).
     CPO-DEV2-046: token-bazlı rate-limit — kurumsal mail güvenlik tarayıcısı/link-prefetch'in
-    veya otomatik tekrar tıklamanın erken/toplu tetiklenme riskini azaltır (hem GET hem POST'a
-    aynı şekilde uygulanır).
+    veya otomatik tekrar tıklamanın erken/toplu tetiklenme riskini azaltır.
     CPO-DEV2-052 #3 (Ozan kararı): GET artık DOĞRUDAN silmiyor — önce bir onay sayfası
     gösteriyor, gerçek silme kullanıcının o sayfadaki tek butona tıklayıp POST atmasıyla
     gerçekleşiyor. Bu, güvenlik tarayıcısı/link-prefetch'in (GET-only) linki otomatik açıp
     kullanıcıyı istemeden abonelikten düşürmesini engeller. Not: RFC 8058'in makine-okunur
     List-Unsubscribe-Post header mekanizması bundan AYRI bir kanaldır (mail istemcisinin
     kendisi kullanır, kullanıcının gördüğü footer linkiyle aynı şey değildir) — bu değişiklik
-    onunla çakışmaz."""
+    onunla çakışmaz.
+    CPO-DEV2-055 r35 #1: GET (onay sayfası, artık silmiyor) ile POST (gerçek silme) aynı
+    "5/saat" kotasını paylaşıyordu — kurumsal mail güvenlik tarayıcısının GET'i tekrar
+    taraması, gerçek kullanıcının POST'unu rate-limit'e takıp KVKK "verileriniz tamamen
+    silinir" vaadini fiilen engelleyebiliyordu. methods=["POST"] ile limit SADECE gerçek
+    silme isteğine uygulanır, GET (onay sayfası) artık sınırsız — güvenlik amacı (asıl
+    tehlike olan silme işleminin sınırlı olması) korunuyor."""
     with _sub_lock:
         subs = _load_subscribers()
         match_email = None
