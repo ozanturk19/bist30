@@ -9508,9 +9508,14 @@ def api_karsilastir():
     # bug-hunt r27: sayfa route'u (/karsilastir) ^[A-Z0-9]{1,10}$ whitelist uyguluyor,
     # bu endpoint uygulamıyordu — doğrulamasız string JSON'a (ticker/name alanı) yansıyıp
     # karsilastir.html buildTable()'da kaçışsız innerHTML'e akıyordu (defense-in-depth)
-    tickers = [t.strip().upper() for t in
-               request.args.get("tickers", "").split(",")
-               if re.match(r"^[A-Z0-9]{1,10}$", t.strip().upper())][:4]
+    # bug-hunt r92: sayfa route'u (/karsilastir) sorted(set(...)) ile dedup yapiyordu,
+    # bu endpoint yapmiyordu -- ayni ticker tekrar tekrar gonderilirse (ör. tickers=AKBNK,AKBNK,AKBNK,AKBNK,GARAN)
+    # gecerli farkli bir ticker (GARAN) 4'luk limitten sessizce disariya dusuyordu.
+    tickers = list(dict.fromkeys(
+        t.strip().upper() for t in
+        request.args.get("tickers", "").split(",")
+        if re.match(r"^[A-Z0-9]{1,10}$", t.strip().upper())
+    ))[:4]
     if not tickers:
         return safe_json({"ok": False, "error": "tickers parametresi gerekli"}), 400
 

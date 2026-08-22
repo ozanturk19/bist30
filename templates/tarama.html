@@ -202,7 +202,7 @@ function sigLabel(sig) {
   return {AL:'Güçlü Trend',SAT:'Trend Bozuldu',BEKLE:'Yatay'}[sig]||sig;
 }
 function eqLabel(eq) {
-  return {IDEAL:'İdeal',IYI:'İyi',DIKKATLI:'Dikkatli',UZAK:'Uzak'}[eq]||'';
+  return {IDEAL:'İdeal',IYI:'İyi',DIKKATLI:'Dikkatli',UZAK:'Uzak'}[eq]||eq;
 }
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, c => ({
