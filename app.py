@@ -9848,6 +9848,8 @@ _PF_MAX_ENTRIES  = 100     # Token başına maksimum pozisyon
 _ALERT_MAX_ENTRIES = 50    # Kullanıcı başına maksimum alert (ticker) sayısı — subscribers.json paylaşımlı dosya, kontrolsüz büyüme engellenir
 _PF_MAX_BYTES    = 65536   # 64KB — saldırı hafifletme
 _PF_LOCK         = threading.Lock()
+# CPO-DEV2-069: bilinmeyen semboller portföye kalıcı ölü ağırlık pozisyon olarak eklenmesin
+_PF_VALID_TICKERS = {t for t in BIST100 if t != "XU030"}
 
 
 def _pf_path(token: str) -> str | None:
@@ -9912,6 +9914,14 @@ def api_portfolio_save(token):
         return safe_json({"error": "positions listesi gerekli"}), 400
     if len(positions) > _PF_MAX_ENTRIES:
         return safe_json({"error": f"Maksimum {_PF_MAX_ENTRIES} pozisyon izin verilir"}), 400
+
+    # CPO-DEV2-069: bilinmeyen ticker sessizce kalıcı bozuk kayıt oluşturmasın —
+    # kullanıcı yanlış yazarsa anında net bir hata görsün.
+    for p in positions:
+        if isinstance(p, dict):
+            t = p.get("ticker")
+            if isinstance(t, str) and t.strip().upper() not in _PF_VALID_TICKERS:
+                return safe_json({"error": "Bilinmeyen hisse sembolü"}), 400
 
     # Sadece izin verilen alanları kaydet (injection güvenliği)
     # DEV2-bughunt-r7: client (templates/portfolio.html) 'lot'/'price' alanlarıyla gönderiyor,
