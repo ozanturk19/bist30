@@ -11236,6 +11236,11 @@ def api_user_alerts_set(ticker):
     ticker = ticker.upper()
     if not re.match(r'^[A-Z0-9]{2,10}$', ticker):
         return safe_json({"ok": False, "error": "Geçersiz ticker formatı"}), 400
+    # DEV2-bughunt-r100: CPO-DEV2-069'daki portfolio whitelist korumasıyla aynı desen —
+    # uydurma ticker için oluşan alert _check_user_alerts()'te asla tetiklenmez,
+    # kotayı (_ALERT_MAX_ENTRIES) tüketen kalıcı ölü kayıt olur.
+    if ticker not in _PF_VALID_TICKERS:
+        return safe_json({"ok": False, "error": "Bilinmeyen hisse sembolü"}), 400
     email, _ = _get_sub_by_cookie()
     if not email:
         return safe_json({"ok": False, "error": "login_required"}), 401
