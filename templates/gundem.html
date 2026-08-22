@@ -338,6 +338,7 @@ async function loadEconCalendar() {
   try {
     const res = await fetch('/api/economic-calendar');
     const d   = await res.json();
+    if (!res.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + res.status));
     const events = [...(d.today || []), ...(d.upcoming || [])];
     const unique = [];
     const seen = new Set();
@@ -374,6 +375,7 @@ async function loadMacroNewsSection() {
   try {
     const res  = await fetch('/api/macro-news');
     const data = await res.json();
+    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
     if (upEl && data.updated_at) upEl.textContent = 'Güncellendi: ' + data.updated_at;
     const items = data.items || [];
     if (!items.length) {
@@ -398,6 +400,7 @@ async function loadMacroSummary() {
   try {
     const res  = await fetch('/api/macro-summary');
     const data = await res.json();
+    if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
     const txt  = (data.summary || '').trim();
     if (!txt) return;
     const box  = document.getElementById('macroSummaryBox');
@@ -434,6 +437,7 @@ async function loadMacroBar() {
   try {
     const r = await fetch('/api/macro');
     const d = await r.json();
+    if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
     const items = d.items || [];
     if (!items.length) return;
     const html = items.map(it => {

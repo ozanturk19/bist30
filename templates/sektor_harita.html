@@ -386,6 +386,7 @@ function renderChips() {
     chip.className = 'chip';
     chip.textContent = sec.name;
     chip.dataset.name = sec.name;
+    chip.setAttribute('aria-pressed', 'false');
     chip.onclick = function() { toggleChip(sec.name); };
     wrap.appendChild(chip);
   });
@@ -409,6 +410,7 @@ function updateChipStyles() {
     var si = _selected.indexOf(name);
     c.className = 'chip';
     if (si >= 0) c.classList.add('sel-' + (si + 1));
+    c.setAttribute('aria-pressed', String(si >= 0));
   });
 }
 
@@ -426,8 +428,10 @@ function updateHint() {
   history.replaceState(null, '', url.toString());
 }
 
+var _cmpReqId = 0;
 async function runCompare() {
   if (_selected.length < 2) return;
+  var myReqId = ++_cmpReqId;
   var overlay = document.getElementById('cmpLoadingOverlay');
   var result = document.getElementById('compareResult');
   overlay.classList.add('visible');
@@ -437,9 +441,11 @@ async function runCompare() {
     var res = await fetch('/api/sektor-compare?' + qs);
     var json = await res.json();
     if (!res.ok || json.ok === false) throw new Error(json.error || ('HTTP ' + res.status));
+    if (myReqId !== _cmpReqId) return; // bayat yanit — daha yeni bir runCompare cagrisi var
     overlay.classList.remove('visible');
     renderCompare(json);
   } catch(e) {
+    if (myReqId !== _cmpReqId) return;
     overlay.classList.remove('visible');
     result.innerHTML = '<div class="cmp-empty-state">Karşılaştırma verisi yüklenemedi.</div>';
   }
@@ -514,7 +520,7 @@ function renderCompare(json) {
 }
 
 function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function fmtPrice(p) {

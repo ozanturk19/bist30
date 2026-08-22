@@ -342,6 +342,10 @@ function exportPortfolio() {
   showToast('✅ Portföy indirildi.', 'ok');
 }
 
+function csvSafe(v) {
+  v = String(v);
+  return /^[=+\-@]/.test(v) ? "'" + v : v;
+}
 function exportCSV() {
   if (!portfolio.length) { showToast('Portföy boş — önce hisse ekleyin.', 'err'); return; }
   const headers = ['Hisse','Lot','Alış Fiyatı (₺)','Alış Tarihi','Güncel Fiyat (₺)','Sinyal','P&L (₺)','P&L (%)'];
@@ -352,10 +356,10 @@ function exportCSV() {
     const pnlVal   = current ? ((current - p.price) * p.lot).toFixed(2) : '';
     const pnlPct   = current ? (((current - p.price) / p.price) * 100).toFixed(2) : '';
     return [
-      p.ticker,
+      csvSafe(p.ticker),
       p.lot,
       String(p.price).replace('.', ','),
-      p.date || '',
+      csvSafe(p.date || ''),
       current ? String(current).replace('.', ',') : '',
       sig,
       pnlVal ? String(pnlVal).replace('.', ',') : '',
@@ -532,9 +536,9 @@ function render() {
       <td class="hm" style="color:#8b949e">${esc(p.date)}</td>
       <td>${fmt(p.lot,0)}</td>
       <td>${fmt(p.price)}</td>
-      <td>${cur ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>
+      <td>${cur !== null ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td class="hm" style="color:#8b949e">${fmtM(cost)}</td>
-      <td>${val ? fmtM(val) : '<span style="color:var(--bp-text3)">—</span>'}</td>
+      <td>${val !== null ? fmtM(val) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${pnlHtml}</td>
       <td>${pnlPctHtml}</td>
       <td>${sigBadge}</td>
