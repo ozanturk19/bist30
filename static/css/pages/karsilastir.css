@@ -23,7 +23,7 @@
     border-radius:var(--bp-radius-lg); padding: 16px;
     flex-wrap: wrap; align-items: center;
   }
-  .search-bar label {
+  .search-bar .search-bar-label {
     font-size: var(--bp-text-sm); color: var(--bp-text3); text-transform: uppercase;
     letter-spacing: 0.5px; font-weight: 600; width: 100%; margin-bottom: 4px;
   }

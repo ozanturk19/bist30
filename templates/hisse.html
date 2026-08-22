@@ -37,9 +37,7 @@
   "@type": "FinancialProduct",
   "name": "{{ ticker }} ({{ name }}) Teknik Analiz Sinyali",
   "description": "{{ ticker }} hissesi için algoritmik Supertrend(10,3) + ADX + EMA12/99 teknik analiz sinyali. Günlük güncelleme, ücretsiz.",
-  "url": "https://borsapusula.com/hisse/{{ ticker }}",
-  "tickerSymbol": "{{ ticker }}",
-  "exchange": "BIST",{% if sector %}
+  "url": "https://borsapusula.com/hisse/{{ ticker }}",{% if sector %}
   "category": "{{ sector }}",{% endif %}
   "provider": {
     "@type": "Organization",

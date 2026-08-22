@@ -83,7 +83,6 @@
   "provider": { "@id": "https://borsapusula.com/#organization" },
   "areaServed": "TR",
   "serviceType": "Teknik Analiz Sinyal Servisi",
-  "category": "FinancialService",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -2977,7 +2976,7 @@ function showNotification(ticker, body, url) {
     tag: 'alarm-' + ticker + '-' + Date.now(),
     requireInteraction: false,
   });
-  n.onclick = () => { window.open(url, '_blank'); n.close(); };
+  n.onclick = () => { window.open(url, '_blank', 'noopener'); n.close(); };
   setTimeout(() => n.close(), 12000);
 }
 
