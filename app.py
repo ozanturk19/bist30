@@ -9444,7 +9444,8 @@ def security_txt_alias():
 @app.route("/humans.txt")
 def humans_txt():
     """humanstxt.org — site arkasındaki insanlar."""
-    body = """/* borsapusula.com — humans.txt */
+    _last_update = datetime.now(_TZ_TR).strftime("%Y/%m/%d")
+    body = f"""/* borsapusula.com — humans.txt */
 /* https://humanstxt.org */
 
 /* TEAM */
@@ -9457,7 +9458,7 @@ def humans_txt():
     Topluluğumuza, geri bildirim veren tüm yatırımcılara teşekkürler.
 
 /* SITE */
-    Last update: 2026/05/08
+    Last update: {_last_update}
     Language: Türkçe (TR)
     Doctype: HTML5
     Standards: HTML5, CSS3, ECMAScript 2022

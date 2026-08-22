@@ -199,9 +199,15 @@ function sigLabel(sig) {
 function eqLabel(eq) {
   return {IDEAL:'İdeal',IYI:'İyi',DIKKATLI:'Dikkatli',UZAK:'Uzak'}[eq]||'';
 }
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
 
 let _csvData = [];
 let _allRows  = [];      // full server result before text-search filter
+let _hasLoadedOnce = false;  // r47: _allRows.length===0 hem 'hic yuklenmedi' hem 'filtre 0 sonuc döndürdü' durumunu ayirt edemiyordu
 let _searchQ  = '';
 let _searchTimer;
 
@@ -313,7 +319,7 @@ async function applyFilters() {
   } catch(_) { /* URL history.replaceState best-effort - filtreleme (asagidaki /api/tarama cagrisi) buna bagli degil */ }
 
   // T2: Bilateral loading state — ilk yüklemede full spinner, sonraki sefer inline
-  const isInitialLoad = !_allRows || _allRows.length === 0;
+  const isInitialLoad = !_hasLoadedOnce;
   if (isInitialLoad) {
     document.getElementById('loadingDiv').style.display  = '';
     document.getElementById('resultTable').style.display = 'none';
@@ -331,6 +337,7 @@ async function applyFilters() {
     if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
     if (mySeq !== _filtersSeq) return; // bayat yanit — daha yeni bir applyFilters cagrisi var, at
     _allRows = d.results || [];
+    _hasLoadedOnce = true;
     // Apply text filter on top of server results
     const filtered = _searchQ
       ? _allRows.filter(s => s.ticker.includes(_searchQ) || (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)))
@@ -357,8 +364,10 @@ function renderActiveFilterChips() {
   const sig = (document.getElementById('fSignal').value || '').trim();
   const minAdx = parseFloat(document.getElementById('fMinAdx').value) || 0;
   const sector = (document.getElementById('fSector').value || '').trim();
-  const minP = (document.getElementById('fMinP').value || '').trim();
-  const maxP = (document.getElementById('fMaxP').value || '').trim();
+  const minPRaw = (document.getElementById('fMinP').value || '').trim();
+  const maxPRaw = (document.getElementById('fMaxP').value || '').trim();
+  const minP = (parseFloat(minPRaw) > 0) ? minPRaw : '';
+  const maxP = (parseFloat(maxPRaw) > 0) ? maxPRaw : '';
 
   if (sig) {
     const labels = { PREMIUM: '💎 Premium', AL: '▲ Güçlü Trend', SAT: '▼ Trend Bozuldu', BEKLE: '● Yatay' };
@@ -541,9 +550,9 @@ function renderResults(rows, count) {
       : '—';
     return `<tr>
       <td>
-        <a href="/hisse/${s.ticker}">
-          <div class="tk">${s.ticker}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Güçlü Sinyal" style="color:var(--bp-premium);font-size:11px;vertical-align:middle">💎</span>' : ''}</div>
-          <div class="tk-name">${(s.name||'').replace(' A.Ş.','').substring(0,20)}</div>
+        <a href="/hisse/${escapeHtml(s.ticker)}">
+          <div class="tk">${escapeHtml(s.ticker)}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Güçlü Sinyal" style="color:var(--bp-premium);font-size:11px;vertical-align:middle">💎</span>' : ''}</div>
+          <div class="tk-name">${escapeHtml((s.name||'').replace(' A.Ş.','').substring(0,20))}</div>
         </a>
       </td>
       <td><span class="sig-badge sig-${s.signal}">
@@ -556,7 +565,7 @@ function renderResults(rows, count) {
       <td class="hide-mob-narrow ${chgCls}">${chgSign}${(s.change_pct||0).toFixed(2)}%</td>
       <td class="hide-mob">${rvolCell(s.vol_ratio)}</td>
       <td class="hide-mob">${freshCell(s)}</td>
-      <td class="hide-mob hide-tablet"><span class="sector-tag">${s.sector||'—'}</span></td>
+      <td class="hide-mob hide-tablet"><span class="sector-tag">${escapeHtml(s.sector||'—')}</span></td>
     </tr>`;
   }).join('');
 
@@ -575,9 +584,9 @@ function renderResults(rows, count) {
       // T3.5: mobil kartta da masaüstüyle aynı skor rengi (tier bazlı) — bkz. scoreCell()
       const _scv  = s.signal_strength || 0;
       const _sccls = s.tier === 'guclu_sinyal' ? 'premium' : s.tier === 'standart' ? 'plus' : 'weak';
-      return `<a href="/hisse/${s.ticker}" class="mr-card">
+      return `<a href="/hisse/${escapeHtml(s.ticker)}" class="mr-card">
         <div class="mr-top">
-          <div><div class="mr-ticker">${s.ticker}${_prm}</div><div class="mr-name">${(s.name||'').replace(' A.Ş.','').substring(0,22)}</div></div>
+          <div><div class="mr-ticker">${escapeHtml(s.ticker)}${_prm}</div><div class="mr-name">${escapeHtml((s.name||'').replace(' A.Ş.','').substring(0,22))}</div></div>
           <span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span>
         </div>
         <div class="mr-bottom">

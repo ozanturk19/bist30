@@ -74,7 +74,6 @@
     body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
     /* Touch target 44px — F14 */
     .header-search-btn { min-width: 44px; min-height: 44px; }
-    .btn-refresh { min-height: 44px; }
     .hib-action-btn { min-height: 44px; }
     .mc-bell { min-width: 44px; min-height: 44px; }
   }
