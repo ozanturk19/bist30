@@ -439,6 +439,11 @@ async function runCompare() {
   var myReqId = ++_cmpReqId;
   var overlay = document.getElementById('cmpLoadingOverlay');
   var result = document.getElementById('compareResult');
+  var btn = document.getElementById('compareBtn');
+  // bug-hunt r95: karsilastir.html'in doCompare()'inin aksine buton istek surerken
+  // disable edilmiyordu (sadece _cmpReqId bayat-render koruması vardi, istegin
+  // kendisini engellemiyordu) -- cift-tiklama/hizli-ardisik-istek korumasi eklendi.
+  if (btn) btn.disabled = true;
   overlay.classList.add('visible');
   result.innerHTML = '';
   try {
@@ -453,6 +458,8 @@ async function runCompare() {
     if (myReqId !== _cmpReqId) return;
     overlay.classList.remove('visible');
     result.innerHTML = '<div class="cmp-empty-state">Karşılaştırma verisi yüklenemedi.</div>';
+  } finally {
+    if (myReqId === _cmpReqId && btn) btn.disabled = _selected.length < 2;
   }
 }
 

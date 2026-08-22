@@ -244,6 +244,10 @@ function applyTextFilter() {
         (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)))
     : _allRows;
   renderResults(rows, rows.length);
+  // bug-hunt r95: applyFilters() her zaman chip bar'i yeniliyordu ama bu fonksiyon
+  // (arama yazma + arama temizleme yolu) hic yenilemiyordu -- chip bar arama TEK
+  // aktif filtreyken hic gorunmuyordu, temizleme sonrasi ise hayalet chip kaliyordu.
+  if (typeof renderActiveFilterChips === 'function') renderActiveFilterChips();
 }
 
 /* CPO-1335: CSV'nin 'Sinyal Yaşı (gün)' sütunu bar sayacını gün gibi
@@ -317,7 +321,11 @@ async function applyFilters() {
   });
   if (sig === 'PREMIUM') params.set('only_premium', '1');
   // Remove empty
-  [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999' || v==='0' || v==='all' || v==='signal_strength') params.delete(k); });
+  // bug-hunt r95: sort_dir'in varsayilan yonu icin bir kural yoktu, 'Filtreleri Sifirla'
+  // sonrasi URL her zaman gereksiz '?sort_dir=desc' tasiyordu (kolona ozel varsayilan
+  // signal_bars icin 'asc', digerleri icin 'desc' -- _sortDefaultDir ile ayni mantik).
+  const _defaultSortDir = _sortDefaultDir[sort] || 'desc';
+  [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999' || v==='0' || v==='all' || v==='signal_strength' || (k==='sort_dir' && v===_defaultSortDir)) params.delete(k); });
 
   // T2: URL state — replaceState ile (history kabarmaz, paylaşılabilir)
   try {

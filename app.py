@@ -10356,6 +10356,7 @@ def api_sektor_summary():
 
 
 @app.route("/api/sektor-compare")
+@limiter.limit("30 per minute")
 def api_sektor_compare():
     """2-3 sektörü yan yana karşılaştırır. ?s=Bankacılık&s=Teknoloji"""
     selected = request.args.getlist("s")
