@@ -10215,7 +10215,7 @@ def sinyal_performans():
         if s.get("signal_price") and s.get("price"):
             raw_ret = (s["price"] - s["signal_price"]) / s["signal_price"] * 100
             # CPO-DEV2-045 P0: SAT icin yon duzeltmesi (_signed_ret() ile ayni mantik —
-            # kisa pozisyonda fiyat dususu = kazanc), oncesinde AL/SAT ayni formulu kullaniyordu.
+            # SAT sinyalinde fiyat dususu getiriyi pozitif yapar), oncesinde AL/SAT ayni formulu kullaniyordu.
             s["aktif_ret"] = round(raw_ret if s["signal"] == "AL" else -raw_ret, 2)
         else:
             s["aktif_ret"] = None

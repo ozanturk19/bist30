@@ -107,12 +107,13 @@ def _load_fn_isolated(func_name, extra_ns=None):
     izole exec sadece davranışı doğruladığı için imza/annotation önemsiz, testte
     kaldırılır."""
     import fcntl as real_fcntl
+    import logging as real_logging
 
     src = _read_app()
     body = _extract_function_body(src, func_name)
     assert body, f"{func_name}() bulunamadı"
     body = re.sub(rf"(def {re.escape(func_name)}\([^)]*\))\s*->\s*[^:]+:", r"\1:", body, count=1)
-    ns = {"_fcntl": real_fcntl}
+    ns = {"_fcntl": real_fcntl, "logger": real_logging.getLogger("test_isolated")}
     ns.update(extra_ns or {})
     exec(body, ns)
     return ns[func_name], ns
