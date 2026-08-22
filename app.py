@@ -10550,7 +10550,13 @@ def _earnings_refresh_impl():
                 ed = cal.get("Earnings Date")
                 if ed is not None:
                     if hasattr(ed, "iloc"):
+                        # pandas Series/Index gibi davranan tipler
                         ed = ed.iloc[0] if len(ed) > 0 else None
+                    elif isinstance(ed, (list, tuple)):
+                        # Gözlemlenen gerçek format: düz Python list[date]
+                        # (bkz. CPO-1447 — bu dal hiç ele alınmadığı için
+                        # str(list(...))[:10] "[datetime." gibi çiğ repr üretiyordu)
+                        ed = ed[0] if len(ed) > 0 else None
                     if ed is not None:
                         yf_dates[t] = str(ed)[:10]
         except Exception:
