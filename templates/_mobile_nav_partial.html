@@ -59,7 +59,7 @@
     <a href="/iletisim" class="mbn-sheet-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>İletişim</span></a>
   </div>
 </div>
-<script src="/static/js/focus-trap.js?v=1"></script>
+<script src="/static/js/focus-trap.js?v=2"></script>
 <script>
 let _mbnRelease=null;
 window.toggleMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');const btn=document.getElementById('mbn-bell-btn');if(!s||!b)return;if(s.classList.contains('open'))window.closeMbnSheet();else{s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';if(btn)btn.setAttribute('aria-expanded','true');if(window.bpTrapFocus)_mbnRelease=window.bpTrapFocus(s);}};

@@ -8094,7 +8094,7 @@ def api_stock_fundamentals(ticker):
     """Temel analiz verileri — 4 saatlik cache."""
     ticker = ticker.upper()
     if ticker not in BIST100:
-        return safe_json({"ok": False, "error": "Hisse bulunamadı"}), 404
+        return safe_json({"error": "Hisse bulunamadı"}), 404
     data = _get_fundamentals(ticker)
     return safe_json({"fundamentals": data})
 
@@ -9937,7 +9937,9 @@ def iletisim():
 @app.route("/api/contact", methods=["POST"])
 @limiter.limit("3 per hour")
 def api_contact():
-    data    = request.get_json(silent=True) or {}
+    data    = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        data = {}
     name    = str(data.get("name",    "")).strip()[:100]
     email   = str(data.get("email",   "")).strip()[:200]
     subject = str(data.get("subject", "")).strip()[:200]
@@ -11042,7 +11044,9 @@ def api_recognize():
     tıklanınca set edilir. User-enumeration'ı kapatmak için e-posta var/yok
     ayrımı yapılmadan HER ZAMAN aynı jenerik mesaj dönülür (eski davranış
     `_premium_modal.html`'de "Bu e-posta kayıtlı değil" ile bunu sızdırıyordu)."""
-    data  = request.get_json(silent=True) or {}
+    data  = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        data = {}
     email = (data.get("email") or "").strip().lower()
     if not email or "@" not in email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
         return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
@@ -11108,7 +11112,9 @@ def api_recognize_confirm():
 @limiter.limit("5 per hour")
 def api_subscribe():
     """E-posta abonelik kaydı (name + email)."""
-    data  = request.get_json(silent=True) or {}
+    data  = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        data = {}
     email = (data.get("email") or "").strip().lower()[:200]
     name  = (data.get("name") or "").strip()[:80]  # max 80 chars
 
@@ -11216,7 +11222,9 @@ def profil_page():
 @limiter.limit("10 per hour")
 def api_profile():
     """Profil verilerini kaydet."""
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        data = {}
     token = (data.get("token") or "").strip()
     if not token:
         return safe_json({"ok": False, "error": "Token eksik"}), 400
@@ -11328,7 +11336,9 @@ def api_user_alerts_set(ticker):
     email, _ = _get_sub_by_cookie()
     if not email:
         return safe_json({"ok": False, "error": "login_required"}), 401
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        data = {}
     price_pct       = data.get("price_pct")
     signal_change   = bool(data.get("signal_change", False))
     rsi_threshold   = data.get("rsi_threshold")
@@ -11542,7 +11552,9 @@ _LOG_CTRL_CHARS_RE = re.compile(r"[\r\n\x00-\x1f]")   # log injection/forging ko
 @limiter.limit("30 per minute")
 def api_log_error():
     """Client-side JS hatalarını logger'a yazar. Stealth bug detection."""
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        data = {}
     msg  = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("msg") or "").strip())[:500]
     src  = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("src") or "").strip())[:200]
     line = data.get("line")

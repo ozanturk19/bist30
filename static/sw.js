@@ -61,7 +61,7 @@ self.addEventListener('fetch', e => {
     e.respondWith(
       caches.match(e.request).then(cached => {
         const fetchPromise = fetch(e.request).then(res => {
-          if (res && res.ok &&
+          if (res && (res.ok || res.type === 'opaque') &&
               (url.origin === self.location.origin || url.hostname.startsWith('fonts.'))) {
             const clone = res.clone();
             caches.open(CACHE).then(c => c.put(e.request, clone));

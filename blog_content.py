@@ -6192,7 +6192,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Pratik kural: BIST'te bireysel yatırımcı için 5-12 hisse, en az 3-4 farklı sektörden, ideal aralık.</p>
 
 <h2>BorsaPusula ile Çeşitlendirme Takibi</h2>
-<p>BorsaPusula'nın ana sayfasında tüm BIST30 hisselerinin sinyal durumunu tek ekranda görebilirsiniz. Sektörel filtreleme özelliğiyle belirli bir sektördeki hisseleri izole edebilir ve portföyünüzün sektörel dağılımını optimize edebilirsiniz. Güçlü AL sinyali veren hisseler farklı sektörlerden seçildiğinde hem kâr potansiyeli hem risk yönetimi dengesi sağlanmış olur.</p>
+<p>BorsaPusula'nın ana sayfasında tüm BIST30 hisselerinin sinyal durumunu tek ekranda görebilirsiniz. Sektörel filtreleme özelliğiyle belirli bir sektördeki hisseleri izole edebilir ve portföyünüzün sektörel dağılımını optimize edebilirsiniz. AL sinyali veren hisseler farklı sektörlerden seçildiğinde hem kâr potansiyeli hem risk yönetimi dengesi sağlanmış olur.</p>
 """,
     "faqs": [
       {"q": "Kaç hisse ile portföy oluşturulmalı?",

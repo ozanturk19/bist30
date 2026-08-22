@@ -13,7 +13,8 @@
   window.bpTrapFocus = function(container, onEscape) {
     if (!container) return function() {};
     var returnEl = document.activeElement;
-    if (!container.hasAttribute('tabindex')) container.setAttribute('tabindex', '-1');
+    var addedTabindex = !container.hasAttribute('tabindex');
+    if (addedTabindex) container.setAttribute('tabindex', '-1');
 
     var list = focusables(container);
     (list[0] || container).focus();
@@ -37,6 +38,7 @@
 
     return function release() {
       container.removeEventListener('keydown', onKeydown);
+      if (addedTabindex) container.removeAttribute('tabindex');
       if (returnEl && typeof returnEl.focus === 'function') returnEl.focus();
     };
   };
