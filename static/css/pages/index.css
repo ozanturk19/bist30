@@ -79,7 +79,7 @@
     0%   { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
-  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
   .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item {
@@ -1173,10 +1173,10 @@
   #tableBody tr:hover { background: rgba(var(--bp-brand-rgb),0.05); }
 
   /* ── Alarm / Watchlist ─── */
-  .alarm-btn { background:none; border:none; cursor:pointer; font-size:var(--bp-text-md); padding:2px 4px; opacity:.4; transition:opacity .15s; }
+  .alarm-btn { background:none; border:none; cursor:pointer; font-size:var(--bp-text-md); padding:8px 10px; opacity:.4; transition:opacity .15s; }
   .alarm-btn:hover { opacity:1; }
   .alarm-btn.watching { opacity:1; }
-  .alert-settings-btn { background:none; border:none; cursor:pointer; font-size:var(--bp-text-sm); padding:2px 3px; opacity:.35; transition:opacity .15s; vertical-align:middle; }
+  .alert-settings-btn { background:none; border:none; cursor:pointer; font-size:var(--bp-text-sm); padding:8px 9px; opacity:.35; transition:opacity .15s; vertical-align:middle; }
   .alert-settings-btn:hover { opacity:1; }
 
   /* ── F4 Alert Settings Modal ─── */
@@ -1194,6 +1194,7 @@
   .alert-modal-delete { width:100%; margin-top:6px; padding:7px 0; background:none; color:#ef4444; border:1px solid rgba(239,68,68,.4); border-radius:var(--bp-radius-7); font-size:var(--bp-text-base); cursor:pointer; }
   .alert-modal-delete:hover { background:rgba(239,68,68,.08); }
   .alert-modal-close { position:absolute; top:12px; right:14px; background:none; border:none; color:#8b949e; font-size:var(--bp-text-xl); cursor:pointer; }
+  .alert-modal-close::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
   .alert-modal-login-notice { font-size:var(--bp-text-base); color:#ffc850; background:rgba(255,200,80,.08); border:1px solid rgba(255,200,80,.25); border-radius:var(--bp-radius-7); padding:9px 12px; margin-bottom:12px; }
   .alert-modal-status { font-size:var(--bp-text-sm); color:#22c55e; margin-top:8px; text-align:center; min-height:18px; }
   .alarm-panel {
@@ -1277,6 +1278,7 @@
     color:var(--bp-text3); font-size:var(--bp-text-xl); cursor:pointer; line-height:1; padding:2px 4px;
     transition:color .15s;
   }
+  .sub-toast-close::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
   .sub-toast-close:hover { color:var(--bp-text2); }
   .sub-toast-title { font-size:var(--bp-text-base); font-weight:700; color:var(--bp-text); margin:0 0 3px; }
   .sub-toast-sub   { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-bottom:12px; line-height:1.5; }
@@ -1532,6 +1534,7 @@
     padding: 4px 8px;
     border-radius: var(--bp-radius-4);
   }
+  .premium-modal-close::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
   .premium-modal-close:hover { color: var(--bp-text); background: rgba(255,255,255,0.05); }
   .premium-modal-icon { font-size: var(--bp-text-38); margin-bottom: 8px; }
   .premium-modal-title {

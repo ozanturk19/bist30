@@ -30,7 +30,7 @@
 <div class="alert alert-success"><span aria-hidden="true">✓</span> Profilin daha önce tamamlanmış. Aşağıdaki cevapları güncelleyebilirsin.</div>
 {% endif %}
 
-<form class="form-card" id="profileForm" onsubmit="return submitProfile(event)">
+<form class="form-card" id="profileForm" role="status" aria-live="polite" onsubmit="return submitProfile(event)">
 
   <!-- 1. Yatırım Deneyimi -->
   <div class="question">
