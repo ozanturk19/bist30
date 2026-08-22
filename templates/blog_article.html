@@ -322,6 +322,9 @@ async function artSubmitSub() {
   }
   const btn = formEl.querySelector('button');
   if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor…'; }
+  function _escSub(s) {
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
   try {
     const res  = await fetch('/api/subscribe', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -330,9 +333,9 @@ async function artSubmitSub() {
     });
     const data = await res.json();
     if (data.ok) {
-      formEl.innerHTML = '<div style="color:#3fb950;font-size:13px;font-weight:600">✅ Abone oldunuz! Teşekkürler.</div>';
+      formEl.innerHTML = '<div style="color:#3fb950;font-size:13px;font-weight:600">✅ ' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
     } else {
-      formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">' + (data.error || data.message || 'Bir hata oluştu.') + '</div>';
+      formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">' + _escSub(data.error || data.message || 'Bir hata oluştu.') + '</div>';
     }
   } catch(e) {
     formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</div>';

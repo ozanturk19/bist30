@@ -466,15 +466,18 @@ async function ozSubmitSub() {
       body: JSON.stringify({email}),
       signal: AbortSignal.timeout(10000)
     });
+    function _escSub(v) {
+      return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
     const data = await res.json();
     const form = document.getElementById('ozSubForm');
     if (form) {
       if (data.ok) {
-        form.innerHTML = '<div style="color:#3fb950;font-size:13px;font-weight:600">✅ ' + (data.message || 'Abone oldunuz!') + '</div>';
+        form.innerHTML = '<div style="color:#3fb950;font-size:13px;font-weight:600">✅ ' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
       } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
-        form.innerHTML = '<div style="color:var(--bp-text3);font-size:13px">ℹ️ ' + data.message + '</div>';
+        form.innerHTML = '<div style="color:var(--bp-text3);font-size:13px">ℹ️ ' + _escSub(data.message) + '</div>';
       } else {
-        form.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">' + (data.error || 'Bir hata oluştu.') + '</div>';
+        form.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">' + _escSub(data.error || 'Bir hata oluştu.') + '</div>';
       }
     }
   } catch(e) {

@@ -1769,10 +1769,10 @@ function renderHeroPanel(stocks) {
   /* Tek satır: renkli şerit + ticker + hisse adı (kısaltılmış) + % değişim */
   const row = (s, barCls) => {
     const shortName = (s.name || '').replace(' A.Ş.','').replace(' Holding','').substring(0, 16);
-    return `<a href="/hisse/${s.ticker}" class="hp-row">
+    return `<a href="/hisse/${_esc(s.ticker)}" class="hp-row">
       <div class="hp-bar ${barCls}"></div>
-      <span class="hp-ticker">${s.ticker}</span>
-      <span class="hp-name">${shortName}</span>
+      <span class="hp-ticker">${_esc(s.ticker)}</span>
+      <span class="hp-name">${_esc(shortName)}</span>
       ${fmtChg(s.change_pct)}
     </a>`;
   };
@@ -1842,11 +1842,11 @@ function _updateIdealStrip(stocks) {
     const retHtml = s._ret !== null
       ? ` <span style="font-size:10px;font-weight:600;color:var(--bp-al)">+${s._ret.toFixed(1)}% <span style="opacity:.65;font-weight:500">sinyalden beri</span></span>`
       : '';
-    return `<a href="/hisse/${s.ticker}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(var(--bp-al-rgb),.08);
+    return `<a href="/hisse/${_escJsStr(s.ticker)}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(var(--bp-al-rgb),.08);
       border:1px solid rgba(var(--bp-al-rgb),.2);border-radius:var(--bp-radius);padding:3px 8px;text-decoration:none;
       font-size:12px;font-weight:700;color:#f0f6fc;transition:background .12s;white-space:nowrap"
       onmouseover="this.style.background='rgba(0,226,144,.16)'" onmouseout="this.style.background='rgba(0,226,144,.08)'"
-      >${s.ticker}${retHtml}</a>`;
+      >${_escJsStr(s.ticker)}${retHtml}</a>`;
   }).join('');
   strip.style.visibility = 'visible'; /* space already reserved — no CLS */
 }
@@ -2015,7 +2015,7 @@ async function openAlertModal(ticker) {
   const cfg = _userAlerts[ticker] || {};
   modal.innerHTML = `<div class="alert-modal" role="dialog" aria-modal="true">
     <button class="alert-modal-close" onclick="closeAlertModal()" aria-label="Kapat">×</button>
-    <h3 class="alert-modal-title"><span aria-hidden="true">🔔</span> ${ticker} — Alert Ayarları</h3>
+    <h3 class="alert-modal-title"><span aria-hidden="true">🔔</span> ${_esc(ticker)} — Alert Ayarları</h3>
     ${loginNotice}
     <div class="alert-modal-row">
       <label for="am-price-pct">📈 Fiyat hareketi eşiği (%)</label>
@@ -2047,7 +2047,7 @@ async function openAlertModal(ticker) {
     const pa = priceAlarms[ticker];
     if (pa && (pa.above || pa.below)) {
       const st = document.getElementById('am-status');
-      if (st) st.innerHTML = `<span style="color:var(--bp-volume)">📦 Eski fiyat alarmı bulundu (${pa.above ? '↑'+pa.above : ''}${pa.below ? ' ↓'+pa.below : ''}). <a href="#" onclick="syncLocalAlarm('${ticker}');return false">Hesabına senkronla →</a></span>`;
+      if (st) st.innerHTML = `<span style="color:var(--bp-volume)">📦 Eski fiyat alarmı bulundu (${pa.above ? '↑'+pa.above : ''}${pa.below ? ' ↓'+pa.below : ''}). <a href="#" onclick="syncLocalAlarm('${_escJsStr(ticker)}');return false">Hesabına senkronla →</a></span>`;
     }
   }
 }
@@ -2231,9 +2231,9 @@ function renderTable() {
           const rc = ret >= 0 ? '#00e290' : '#f85149';
           entryTxt = `Giriş ${s.signal_price.toLocaleString('tr-TR',{minimumFractionDigits:2})} <span style="color:${rc}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`;
         }
-        const secHtml = s.sector && s.sector !== 'Diğer' ? `<div class="mc-sector">${s.sector}</div>` : '';
+        const secHtml = s.sector && s.sector !== 'Diğer' ? `<div class="mc-sector">${_esc(s.sector)}</div>` : '';
         const anomalyHtml = (s.anomaly && s.anomaly.flag)
-          ? `<span class="anomaly-badge" tabindex="0" data-tip="${s.anomaly.reason}">⚠ Anomal</span>`
+          ? `<span class="anomaly-badge" tabindex="0" data-tip="${_esc(s.anomaly.reason)}">⚠ Anomal</span>`
           : '';
         const sentimentHtml = _sentimentBadge(s.sentiment);
         const badgesHtml = (anomalyHtml || sentimentHtml)
@@ -2281,18 +2281,18 @@ function renderTable() {
           mtHeader = `<div class="mc-tier-group ${_tierCss[_curTier] || ''}">${_tierLabels[_curTier]} <span class="tier-count">${cnt} hisse</span></div>`;
         }
         _lastTier_mobile = _curTier;
-        return mtHeader + `<a class="mc ${sigClass} ${bpIsSignalFromToday(s.signal_date) ? 'mc-new' : ''}" href="/hisse/${s.ticker}">
+        return mtHeader + `<a class="mc ${sigClass} ${bpIsSignalFromToday(s.signal_date) ? 'mc-new' : ''}" href="/hisse/${_escJsStr(s.ticker)}">
           <div class="mc-row1">
             <div class="mc-lft">
-              <div class="mc-ticker">${s.ticker} ${wt}</div>${secHtml}${badgesHtml}
+              <div class="mc-ticker">${_escJsStr(s.ticker)} ${wt}</div>${secHtml}${badgesHtml}
             </div>
             <div class="mc-rgt-wrap">
               <div class="mc-rgt">
-                <div class="mc-price" id="mlp-${s.ticker}" data-raw="${s.price}">${fmtP}</div>
-                <div style="font-size:12px;color:${chgColor}" id="mlc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</div>
+                <div class="mc-price" id="mlp-${_escJsStr(s.ticker)}" data-raw="${s.price}">${fmtP}</div>
+                <div style="font-size:12px;color:${chgColor}" id="mlc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2)}%</div>
               </div>
-              <button class="mc-bell ${_isWatchingMc ? 'watching' : ''}" id="mcb-${s.ticker}"
-                      type="button" onclick="event.preventDefault();event.stopPropagation();toggleWatch('${s.ticker}')"
+              <button class="mc-bell ${_isWatchingMc ? 'watching' : ''}" id="mcb-${_escJsStr(s.ticker)}"
+                      type="button" onclick="event.preventDefault();event.stopPropagation();toggleWatch('${_escJsStr(s.ticker)}')"
                       title="${_isWatchingMc ? 'Alarm aktif' : 'Sinyal alarmı kur'}"
                       aria-label="Sinyal alarmı">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -2302,7 +2302,7 @@ function renderTable() {
           ${stripHtml}
           <div class="mc-row2">
             <div style="display:flex;align-items:center;gap:7px">
-              <span class="signal-badge signal-${s.signal}" style="font-size:10px" onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()">${sigIcon} ${sigLabel(s.signal)}</span>
+              <span class="signal-badge signal-${s.signal}" style="font-size:10px" onmouseenter="showSigTip('${_escJsStr(s.ticker)}',event)" onmouseleave="hideSigTip()">${sigIcon} ${sigLabel(s.signal)}</span>
               ${confIcon}
             </div>
             <div class="mc-entry">${entryTxt}</div>
@@ -2395,7 +2395,7 @@ function renderTable() {
     }
 
     const sectorHtml = s.sector && s.sector !== 'Diğer'
-      ? `<div style="font-size:10px;color:#8b949e;margin-top:2px">${s.sector}</div>` : '';
+      ? `<div style="font-size:10px;color:#8b949e;margin-top:2px">${_esc(s.sector)}</div>` : '';
 
     const isWatching = watchlist.has(s.ticker);
     // SPEC-001 Faz 1: Tier grup başlığı satırı (desktop)
@@ -2406,18 +2406,18 @@ function renderTable() {
       _tierHeaderTr = `<tr class="tier-group-header ${_tierCss[_curTierD] || ''}"><td colspan="9">${_tierLabels[_curTierD]} <span class="tier-count">${cnt} hisse</span></td></tr>`;
     }
     _lastTier_desktop = _curTierD;
-    return _tierHeaderTr + `<tr data-ticker="${s.ticker}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${s.ticker}'">
-      <td><a href="/hisse/${s.ticker}" style="color:inherit;text-decoration:none"><span class="ticker">${s.ticker}</span></a>${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — RVOL ≥ 1.20" style="color:var(--bp-volume);font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span tabindex="0" data-tip="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" tabindex="0" data-tip="${s.anomaly.reason}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
-      <td><span class="price" id="lp-${s.ticker}" data-raw="${s.price}">${fmtPrice}</span></td>
-      <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${s.ticker}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
-      <td onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${s.signal === 'AL' && s.change_pct < 0 ? ` <span class="sig-neg-day" tabindex="0" data-tip="Sinyal uzun vadeli, bugün günlük düşüş var">↓${s.change_pct.toFixed(1)}%</span>` : ''}${confHtml}${eqHtml}</td>
+    return _tierHeaderTr + `<tr data-ticker="${_escJsStr(s.ticker)}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${_escJsStr(s.ticker)}'">
+      <td><a href="/hisse/${_escJsStr(s.ticker)}" style="color:inherit;text-decoration:none"><span class="ticker">${_escJsStr(s.ticker)}</span></a>${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — RVOL ≥ 1.20" style="color:var(--bp-volume);font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span tabindex="0" data-tip="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" tabindex="0" data-tip="${_esc(s.anomaly.reason)}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
+      <td><span class="price" id="lp-${_escJsStr(s.ticker)}" data-raw="${s.price}">${fmtPrice}</span></td>
+      <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
+      <td onmouseenter="showSigTip('${_escJsStr(s.ticker)}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${s.signal === 'AL' && s.change_pct < 0 ? ` <span class="sig-neg-day" tabindex="0" data-tip="Sinyal uzun vadeli, bugün günlük düşüş var">↓${s.change_pct.toFixed(1)}%</span>` : ''}${confHtml}${eqHtml}</td>
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile">${sigPriceHtml}</td>
       <td class="hide-mobile">${slHtml}</td>
       <td class="hide-mobile"><div class="indicators">${indHtml}</div></td>
-      <td><button class="alarm-btn ${isWatching ? 'watching' : ''}" id="ab-${s.ticker}"
-          onclick="event.stopPropagation();toggleWatch('${s.ticker}')"
-          title="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}" aria-label="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}">${isWatching ? '🔔' : '🔕'}</button>${isWatching ? `<button class="alert-settings-btn" onclick="event.stopPropagation();openAlertModal('${s.ticker}')" title="Alert ayarları" aria-label="Alert ayarları">⚙️</button>` : ''}</td>
+      <td><button class="alarm-btn ${isWatching ? 'watching' : ''}" id="ab-${_escJsStr(s.ticker)}"
+          onclick="event.stopPropagation();toggleWatch('${_escJsStr(s.ticker)}')"
+          title="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}" aria-label="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}">${isWatching ? '🔔' : '🔕'}</button>${isWatching ? `<button class="alert-settings-btn" onclick="event.stopPropagation();openAlertModal('${_escJsStr(s.ticker)}')" title="Alert ayarları" aria-label="Alert ayarları">⚙️</button>` : ''}</td>
     </tr>`;
   }).join('');
 }
@@ -3136,12 +3136,12 @@ async function submitToastSubscribe() {
       if (typeof window.bpRecordSubscribe === 'function' && json.token) {
         window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
       }
-      if (toast) toast.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + (json.message || 'Abone oldunuz!') + '</div><div style="font-size:11px;color:#64748b;margin-top:4px">Onay e-postası gönderildi.</div>';
+      if (toast) toast.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + _esc(json.message || 'Abone oldunuz!') + '</div>';
       try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz (subscribe)', e); }
       setTimeout(() => dismissSubToast(), 4000);
       // Ana subscription bar'ı da güncelle
       const bar = document.getElementById('subscribeBar');
-      if (bar) bar.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600">✅ ' + (json.message || 'Abone oldunuz!') + '</div>';
+      if (bar) bar.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600">✅ ' + _esc(json.message || 'Abone oldunuz!') + '</div>';
     } else {
       showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'), 'error');
       if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
@@ -3211,6 +3211,13 @@ function _esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+/** Tek-tirnakli JS string literali (onclick="fn('...')") icine gomulmeden once
+    guvenilmeyen degeri kacir — HTML-entity kacisi (_esc) tek basina bunu saglamaz,
+    cunku tarayici HTML attribute degerini JS'e vermeden once entity'leri decode eder. */
+function _escJsStr(str) {
+  return _esc(String(str == null ? '' : str).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
 }
 
 /** Haber metni: * ve ** markdown işaretlerini temizle, bullet → • */

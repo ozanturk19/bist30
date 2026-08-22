@@ -104,7 +104,7 @@
         if (status) status.innerHTML = '<span style="color:#3fb950">✅ Premium aktif! Sayfa yenileniyor…</span>';
         setTimeout(() => { closePremiumModal(); location.reload(); }, 1200);
       } else {
-        if (status) status.innerHTML = `<span style="color:var(--bp-sat)">⚠️ ${json.message || json.error || 'Hata'}</span>`;
+        if (status) status.innerHTML = `<span style="color:var(--bp-sat)">⚠️ ${_esc(json.message || json.error || 'Hata')}</span>`;
         if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
       }
     } catch (e) {
@@ -138,7 +138,7 @@
       });
       const json = await res.json();
       const ok = !!(json && json.ok);
-      if (status) status.innerHTML = '<span style="color:' + (ok ? '#3fb950' : 'var(--bp-sat)') + '">' + (ok ? '✉️ ' : '⚠️ ') + ((json && (json.message || json.error)) || 'Bir hata oluştu, tekrar dene.') + '</span>';
+      if (status) status.innerHTML = '<span style="color:' + (ok ? '#3fb950' : 'var(--bp-sat)') + '">' + (ok ? '✉️ ' : '⚠️ ') + _esc((json && (json.message || json.error)) || 'Bir hata oluştu, tekrar dene.') + '</span>';
       _pmStartLoginCooldown(btn);
     } catch (e) {
       if (status) status.innerHTML = '<span style="color:var(--bp-sat)">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</span>';

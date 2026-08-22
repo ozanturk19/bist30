@@ -1051,7 +1051,7 @@ async function hisseSubscribe() {
     const j = await r.json();
     const cta = document.getElementById('hisseSubCta');
     if (j.ok) {
-      cta.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + (j.message||'Kaydınız alındı!') + '</div>';
+      cta.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + escHtml(j.message||'Kaydınız alındı!') + '</div>';
       setTimeout(() => { if(cta) cta.style.display='none'; }, 4000);
     } else {
       btn.textContent = 'Abone Ol'; btn.disabled = false;
