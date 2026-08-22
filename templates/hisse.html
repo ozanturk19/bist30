@@ -1058,7 +1058,7 @@ async function hisseSubscribe() {
       emailEl.style.borderColor = '#f85149';
       if (window.showToast) showToast('⚠️ ' + (j.message || j.error || 'Bir hata oluştu'), 'error');
     }
-  } catch(e) { btn.textContent = 'Abone Ol'; btn.disabled = false; if (window.showToast) showToast('Bağlantı hatası, tekrar deneyin.', 'error'); }
+  } catch(e) { btn.textContent = 'Abone Ol'; btn.disabled = false; if (window.showToast) showToast('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'error'); }
 }
 
 /* ── Sinyal görünen etiketleri ───────────────────── */
@@ -2304,7 +2304,7 @@ async function loadNews(retryCount) {
     }
   } catch(e) {
     loadingEl.style.display = 'none';
-    contentEl.innerHTML    = '<div class="news-error">Bağlantı hatası. <button class="news-retry-btn" onclick="loadNews(0)">Tekrar dene</button></div>';
+    contentEl.innerHTML    = '<div class="news-error">Bağlantı hatası — lütfen daha sonra tekrar deneyin. <button class="news-retry-btn" onclick="loadNews(0)">Tekrar dene</button></div>';
     contentEl.style.display = '';
     _newsActive = false;
   }

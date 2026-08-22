@@ -310,7 +310,7 @@ async function load() {
     _loadAttempts++;
     if (_loadAttempts >= 3) {
       document.getElementById('heatmap').innerHTML =
-        '<div class="loading-msg">⚠️ Bağlantı hatası. <a href="." onclick="location.reload();return false" style="color:var(--bp-brand)">Sayfayı yenile</a></div>';
+        '<div class="loading-msg">Bağlantı hatası — lütfen daha sonra tekrar deneyin. <a href="." onclick="location.reload();return false" style="color:var(--bp-brand)">Sayfayı yenile</a></div>';
       return;
     }
     setTimeout(load, 15000);

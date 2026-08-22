@@ -335,7 +335,7 @@ async function artSubmitSub() {
       formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">' + (data.error || data.message || 'Bir hata oluştu.') + '</div>';
     }
   } catch(e) {
-    formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">Bağlantı hatası, lütfen tekrar deneyin.</div>';
+    formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</div>';
   }
 }
 

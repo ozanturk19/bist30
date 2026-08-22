@@ -108,7 +108,7 @@
         if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
       }
     } catch (e) {
-      if (status) status.innerHTML = '<span style="color:var(--bp-sat)">⚠️ Bağlantı hatası, tekrar dene.</span>';
+      if (status) status.innerHTML = '<span style="color:var(--bp-sat)">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</span>';
       if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
     }
   };
@@ -141,7 +141,7 @@
       if (status) status.innerHTML = '<span style="color:' + (ok ? '#3fb950' : 'var(--bp-sat)') + '">' + (ok ? '✉️ ' : '⚠️ ') + ((json && (json.message || json.error)) || 'Bir hata oluştu, tekrar dene.') + '</span>';
       _pmStartLoginCooldown(btn);
     } catch (e) {
-      if (status) status.innerHTML = '<span style="color:var(--bp-sat)">⚠️ Bağlantı hatası, tekrar dene.</span>';
+      if (status) status.innerHTML = '<span style="color:var(--bp-sat)">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</span>';
       if (btn) { btn.disabled = false; }
     }
   };

@@ -2107,7 +2107,7 @@ async function saveAlertSettings() {
       if (st) st.textContent = '❌ ' + (d.error || 'Hata');
     }
   } catch (_) {
-    if (st) st.textContent = '❌ Bağlantı hatası';
+    if (st) st.textContent = 'Bağlantı hatası — lütfen daha sonra tekrar deneyin.';
   }
 }
 
@@ -2128,7 +2128,7 @@ async function deleteAlertSettings() {
     if (st) st.textContent = '🗑 Alert silindi';
     setTimeout(() => closeAlertModal(), 800);
   } catch (_) {
-    if (st) st.textContent = '❌ Bağlantı hatası';
+    if (st) st.textContent = 'Bağlantı hatası — lütfen daha sonra tekrar deneyin.';
   }
 }
 
@@ -2623,6 +2623,7 @@ async function manualRefresh() {
     await fetch('/api/refresh', { method: 'POST', signal: AbortSignal.timeout(10000) });
   } catch (e) {
     console.warn('manualRefresh basarisiz:', e);
+    if (window.showToast) showToast('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'error');
     if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
     return;
   }
@@ -3085,7 +3086,7 @@ async function submitRecognize() {
     if (statusEl) {
       statusEl.style.display = '';
       statusEl.style.color = '#f85149';
-      statusEl.textContent = '⚠️ Bağlantı hatası, tekrar dene.';
+      statusEl.textContent = 'Bağlantı hatası — lütfen daha sonra tekrar deneyin.';
     }
     if (btn) { btn.textContent = '👤 Üye Girişi'; btn.disabled = false; }
   }
@@ -3146,7 +3147,7 @@ async function submitToastSubscribe() {
       if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
     }
   } catch(e) {
-    showToast('Bağlantı hatası, tekrar deneyin.', 'error');
+    showToast('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'error');
     if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
   }
 }
@@ -3192,7 +3193,7 @@ async function submitSubscribe() {
       btn.disabled    = false;
     }
   } catch (e) {
-    showToast('Bağlantı hatası, tekrar deneyin.', 'error');
+    showToast('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'error');
     btn.textContent = origText;
     btn.disabled    = false;
   }

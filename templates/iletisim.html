@@ -121,7 +121,7 @@ async function submitForm(e) {
   } catch(err) {
     msg.style.display = 'block';
     msg.style.color = 'var(--bp-sat)';
-    msg.textContent = '❌ Bağlantı hatası. Lütfen tekrar deneyin.';
+    msg.textContent = 'Bağlantı hatası — lütfen daha sonra tekrar deneyin.';
     btn.disabled = false;
     btn.innerHTML = 'Gönder <span aria-hidden="true">→</span>';
   }
