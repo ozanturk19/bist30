@@ -4249,7 +4249,8 @@ def api_data():
                     if not _xu100_chart_cache.get("data"):
                         _xu100_chart_cache.update({"data": _xu100_disk.get("data"),
                                                    "updated_at": _xu100_disk.get("updated_at", "")})
-        except Exception:
+        except Exception as e:
+            logger.warning("XU100 disk fallback okunamadı: %s", e)
             _xu100_ohlc = []
     xu100_spark = [round(p["close"], 2) for p in _xu100_ohlc if p.get("close")]
     _resp_data = {
@@ -5148,8 +5149,8 @@ def ws_prices():
                     with _ws_lock:
                         if ws in _ws_clients:
                             _ws_clients[ws]["subscribe"] = set(data["subscribe"])
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("WS subscribe mesajı parse edilemedi: %s", e)
     except WebSocketError:
         pass
     finally:

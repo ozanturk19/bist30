@@ -113,6 +113,7 @@
 
   // ---- Data layer ----
   var _syms = null;
+  var _loadFailed = false;
   var _sel = 0;
   var _trapRelease = null;
 
@@ -138,7 +139,7 @@
         } catch(e) { /* best-effort onbellek yazimi (private tarama/quota hata verebilir) */ }
         return _syms;
       })
-      .catch(function(){ return []; });
+      .catch(function(){ _loadFailed = true; return []; });
   }
 
   function escHtml(s){
@@ -147,19 +148,23 @@
     });
   }
 
+  // bughunt-r85: toLocaleLowerCase('tr') Turkce buyuk 'İ'yi doğru 'i' yapar ama ASCII
+  // buyuk 'I'yi noktasiz 'ı' yapar (Turkce locale kurali) -- kullanicinin klavyeden
+  // yazdigi kucuk 'i' HER ZAMAN noktali 'i' uretir, boylece SISE/ISCTR/BIMAS gibi ASCII
+  // 'I' iceren 33/215 ticker kucuk harfle asla eslesmiyordu. Hem 'İ' hem 'I'yi 'i'ye
+  // katlayan ozel fold, r28'in cozdugu sorunu da korur.
+  function trFold(s) { return String(s || '').replace(/İ/g, 'i').replace(/I/g, 'i').toLowerCase(); }
+
   function filter(q) {
     if (!_syms) return [];
-    // bughunt-r28: toLowerCase() Turkce buyuk 'I'/'i' icin locale-bagimsiz calisiyor,
-    // 'I' -> 'i' + BIRLESTIRICI NOKTA (U+0307) uretip aramayi kiriyor (Is Bankasi vb.
-    // "I" ile baslayan/iceren ~10 hisse kucuk harfle araninca hic bulunamiyordu).
-    var Q = q.toLocaleLowerCase('tr').trim();
+    var Q = trFold(q).trim();
     if (!Q) return [];
     var out = [];
     for (var i = 0; i < _syms.length; i++) {
       var s = _syms[i];
-      var t = s.t.toLocaleLowerCase('tr');
-      var n = (s.n || '').toLocaleLowerCase('tr');
-      var sec = (s.sec || '').toLocaleLowerCase('tr');
+      var t = trFold(s.t);
+      var n = trFold(s.n || '');
+      var sec = trFold(s.sec || '');
       var score = 0;
       if (t === Q) score = 100;
       else if (t.indexOf(Q) === 0) score = 60;
@@ -196,7 +201,9 @@
     }
     var m = filter(q);
     if (!m.length) {
-      res.innerHTML = '<div class="bp-search-empty">Hiç eşleşme yok. Farklı bir kelime deneyin.</div>';
+      res.innerHTML = _loadFailed
+        ? '<div class="bp-search-empty">Arama verisi yüklenemedi, lütfen tekrar deneyin.</div>'
+        : '<div class="bp-search-empty">Hiç eşleşme yok. Farklı bir kelime deneyin.</div>';
       _sel = -1;
       return;
     }
