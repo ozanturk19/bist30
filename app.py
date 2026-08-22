@@ -10214,9 +10214,15 @@ def sinyal_performans():
     for s in aktif:
         if s.get("signal_price") and s.get("price"):
             raw_ret = (s["price"] - s["signal_price"]) / s["signal_price"] * 100
-            # CPO-DEV2-045 P0: SAT icin yon duzeltmesi (_signed_ret() ile ayni mantik —
-            # SAT sinyalinde fiyat dususu getiriyi pozitif yapar), oncesinde AL/SAT ayni formulu kullaniyordu.
-            s["aktif_ret"] = round(raw_ret if s["signal"] == "AL" else -raw_ret, 2)
+            # CPO-DEV2-074: CPO-DEV2-045'teki ters-cevirme (-raw_ret) SAT icin fiyat
+            # dususunu yesil "kazanc" gibi gosteriyordu — urun long-only, kullanici
+            # gercekte kisa pozisyon acamadigi icin bu yanilticiydi (T3.7'de backtest
+            # ozetinden SAT win-rate/getiri kaldirma kararinin ayni gerekcesi, bkz
+            # [[project_long_only_ihlali_sat_dali]]). Artik AL/SAT ayni ham (ters-
+            # cevrilmemis) fiyat hareketini tasiyor; SAT satirlari render tarafinda
+            # (templates/sinyal_performans.html) notr/gri renkte gosterilir ve
+            # "getiri" degil ham fiyat hareketi olarak sunulur.
+            s["aktif_ret"] = round(raw_ret, 2)
         else:
             s["aktif_ret"] = None
     # r39: None-guvenli sirala (Jinja sort(attribute=...) None/float TypeError atip

@@ -13,7 +13,7 @@
   .stat-num  { font-size:var(--bp-text-36); font-weight:800; line-height:1; }
   .stat-lbl  { font-size:var(--bp-text-xs); color:#8b949e; margin-top:8px; text-transform:uppercase; letter-spacing:.5px; }
   .stat-sub  { font-size:var(--bp-text-sm); color:#8b949e; margin-top:4px; }
-  .c-green { color:#3fb950; } .c-red { color:#f85149; } .c-blue { color:#58a6ff; } .c-gold { color:var(--bp-gold); }
+  .c-green { color:#3fb950; } .c-red { color:#f85149; } .c-blue { color:#58a6ff; } .c-gold { color:var(--bp-gold); } .c-gray { color:#8b949e; }
 
   /* Section header */
   .sec-head { font-size:var(--bp-text-lg); font-weight:700; color:#f0f6fc; margin:28px 0 14px; display:flex; align-items:center; gap:8px; }

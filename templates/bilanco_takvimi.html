@@ -97,6 +97,14 @@ function escapeHtml(str) {
 function safeHref(url) {
   return /^https?:\/\//i.test(url || '') ? escapeHtml(url) : '#';
 }
+// CPO-1447: yfinance bazen beklenmedik bir format dönüyor (kök neden DEV1'de
+// düzeltiliyor); burada render tarafında savunma — s.date "yaklaşık" ya da
+// YYYY-MM-DD değilse ham veriyi basmak yerine nötr bir metin göster.
+function formatEarningsDate(s, periodLabel) {
+  if (s.date === 'yaklaşık') return 'Dönem: ' + escapeHtml(periodLabel);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s.date || '')) return escapeHtml(s.date.split('-').reverse().join('.'));
+  return 'Tarih bekleniyor';
+}
 
 function render(data) {
   const periods = data.periods;
@@ -165,7 +173,7 @@ function render(data) {
             </div>
             <div class="sc-name">${escapeHtml(s.name)}</div>
             ${s.price ? `<div class="sc-price">${s.price.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2})} ₺</div>` : ''}
-            <div class="sc-date">📅 ${s.date === 'yaklaşık' ? 'Dönem: ' + escapeHtml(period.label) : escapeHtml(s.date.split('-').reverse().join('.'))}</div>
+            <div class="sc-date">📅 ${formatEarningsDate(s, period.label)}</div>
             <a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener"
                class="sc-kap" onclick="event.stopPropagation()">
               📋 KAP bildirimleri ↗
