@@ -1131,7 +1131,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
     "faqs": [
       {"q": "Çok sayıda AL sinyali arasından nasıl seçim yapılır?", "a": "Teknik puanlama: sinyal kaç gündür sürüyor, ADX değeri, MTF uyumu. Temel puanlama: F/K, ROE, temettü. Piyasa bağlamı: genel AL oranı. Bu üç boyutu birleştirerek en yüksek puanlı hisseyi seçin."},
       {"q": "ADX değeri hisse seçiminde ne kadar önemlidir?", "a": "ADX 25 üzeri trend güçlü, ADX 35 üzeri çok güçlü demektir. Aynı sinyal gücünde iki hisse arasında seçimde ADX değeri yüksek olan daha güvenilir trend gösterir ve tercih edilmelidir."},
-      {"q": "Giriş kalitesi IDEAL/IYI/DIKKATLI/UZAK neye göre belirlenir?", "a": "BorsaPusula giriş kalitesi güncel fiyatın Supertrend'e olan mesafesine göre belirlenir. IDEAL fiyat Supertrend'e çok yakın (az risk), IYI makul mesafede, DIKKATLI nispeten uzak, UZAK çok uzak ve yüksek risk anlamına gelir."}
+      {"q": "Giriş kalitesi İdeal/İyi/Dikkatli/Uzak neye göre belirlenir?", "a": "BorsaPusula giriş kalitesi güncel fiyatın Supertrend'e olan mesafesine göre belirlenir. İdeal fiyat Supertrend'e çok yakın (az risk), İyi makul mesafede, Dikkatli nispeten uzak, Uzak çok uzak ve yüksek risk anlamına gelir."}
     ],
     "related_tickers": ['ASELS', 'THYAO', 'AKBNK']
   },
@@ -1260,7 +1260,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <ol>
   <li><strong>Aktif sinyal:</strong> AL sinyali var mı, kaç gündür sürüyor?</li>
   <li><strong>Trend gücü:</strong> ADX değeri 25'in üzerinde mi?</li>
-  <li><strong>Giriş kalitesi:</strong> Fiyat Supertrend'e yakın mı (IDEAL/İYİ)?</li>
+  <li><strong>Giriş kalitesi:</strong> Fiyat Supertrend'e yakın mı (İdeal/İyi)?</li>
   <li><strong>Risk/Ödül:</strong> R/R oranı en az 1:2 mi?</li>
   <li><strong>Sektör bağlamı:</strong> Sektörde genel trend yukarı mı?</li>
 </ol>
@@ -1732,7 +1732,7 @@ BorsaPusula sinyallerinde hacim teyidi önemli rol oynar:
 - AL sinyali + yüksek hacim = **Güçlü AL**, giriş kalitesi yüksek
 - AL sinyali + düşük hacim = **Zayıf AL**, kırılım sahte olabilir
 
-Hisse sayfasında "Volume Teyidi" bölümü bu bilgiyi otomatik gösterir.
+Hisse sayfasında "Hacim Profili" bölümü bu bilgiyi (⭐ Hacim Onaylı / ✓ TEYİTLİ rozetleriyle) otomatik gösterir.
 
 ## Dikkat Edilmesi Gereken Hacim Kalıpları
 
@@ -2243,7 +2243,7 @@ Kaldıraç, belirli koşullar altında ve **çok küçük miktarlarda** değerle
 
 ## BorsaPusula Kullanıcıları İçin Not
 
-BorsaPusula'nın sinyal sistemi, trend gücünü **confirmed** (3+ bar onaylı) ve **entry_quality** metrikleriyle değerlendirir. "IDEAL" veya "İYİ" giriş kalitesi olan, yüksek ADX'li sinyaller bile kaldıraçsız kullanıldığında daha güvenlidir.
+BorsaPusula'nın sinyal sistemi, trend gücünü **confirmed** (3+ bar onaylı) ve **entry_quality** metrikleriyle değerlendirir. "İdeal" veya "İyi" giriş kalitesi olan, yüksek ADX'li sinyaller bile kaldıraçsız kullanıldığında daha güvenlidir.
 
 > **Altın kural:** Kaldıraç, kazancınızı artırmak için değil, yalnızca çok emin olduğunuz işlemleri *biraz* büyütmek için kullanın. Emin olmak için önce kaldıraçsız deneyin.""",
     "faqs": [
@@ -3052,7 +3052,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>BorsaPusula'nın Yaklaşımı</h2>
-<p>BorsaPusula sinyalleri BIST hisseleri için "AL" (Güçlü Trend) veya "SAT" (Trend Bozuldu) sinyali üretir. "SAT" sinyali, hissenin <strong>zayıf trend içinde olduğunu</strong> gösterir ve mevcut pozisyondan çıkış/kaçınma için işaret olarak kullanılır — açığa satış pozisyonu açmak için değil. Bu yaklaşım, bireysel yatırımcılara karmaşık açığa satış mekaniklerini öğrenmeden trend takibi yapma imkânı sunar.</p>
+<p>BorsaPusula sinyalleri BIST hisseleri için "AL" (Güçlü Trend) veya "SAT" (Trend Bozuldu) sinyali üretir. "SAT" sinyali, hissenin <strong>trendinin bozulduğunu/sona erdiğini</strong> gösterir ve mevcut pozisyondan çıkış/kaçınma için işaret olarak kullanılır — açığa satış pozisyonu açmak için değil. Bu yaklaşım, bireysel yatırımcılara karmaşık açığa satış mekaniklerini öğrenmeden trend takibi yapma imkânı sunar.</p>
 """,
     "faqs": [
       {"q": "BIST'te herkes açığa satış yapabilir mi?",
@@ -4897,7 +4897,7 @@ Toplam ≈ 13.003,90₺
 </ul>
 
 <h2>BorsaPusula'yı Küçük Sermayeyle Kullanmak</h2>
-<p>Sinyal takip sistemi küçük sermayeli yatırımcılara da tam hizmet verir. <a href="/tarama">Hisse Tarayıcı</a>'da AL sinyali + IDEAL giriş kalitesi filtreleyerek en uygun giriş noktalarındaki hisseleri görüntüleyebilirsiniz. Her hissenin stop loss ve hedef fiyatını görerek risk/ödül oranını hesaplamak kolaylaşır.</p>
+<p>Sinyal takip sistemi küçük sermayeli yatırımcılara da tam hizmet verir. <a href="/tarama">Hisse Tarayıcı</a>'da AL sinyali + İdeal giriş kalitesi filtreleyerek en uygun giriş noktalarındaki hisseleri görüntüleyebilirsiniz. Her hissenin stop loss ve hedef fiyatını görerek risk/ödül oranını hesaplamak kolaylaşır.</p>
 """,
     "faqs": [
       {"q": "Borsaya başlamak için minimum ne kadar para gerekir?",
@@ -5464,7 +5464,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>BorsaPusula sinyali çerçevesinde şu durumlarda çıkış düşünülmelidir:</p>
 <ul>
   <li>AL sinyali → BEKLE veya SAT'a döndüğünde</li>
-  <li>Giriş kalitesi IDEAL/IYI'dan DIKKATLI/UZAK'a düştüğünde (pozisyon genişletme değil, değerlendirme)</li>
+  <li>Giriş kalitesi İdeal/İyi'dan Dikkatli/Uzak'a düştüğünde (pozisyon genişletme değil, değerlendirme)</li>
   <li>ADX 25'in altına düştüğünde (trend zayıflıyor)</li>
   <li>Hisse TP1 veya TP2 seviyesine ulaştığında</li>
 </ul>
@@ -5638,7 +5638,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 </ul>
 
 <h2>Bankacılık Hisselerinde Teknik + Temel Analiz Kombinasyonu</h2>
-<p>BorsaPusula bankacılık hisselerini teknik sinyal sistemiyle izler. Güçlü sinyal (AL + IDEAL + ADX yüksek) olduğunda:</p>
+<p>BorsaPusula bankacılık hisselerini teknik sinyal sistemiyle izler. Güçlü sinyal (AL + İdeal + ADX yüksek) olduğunda:</p>
 <ul>
   <li>Temel analiz katmanı ekleyin: ROE > %15, NPL < %4, P/B < 1.5 gibi filtreler uygulayın</li>
   <li>Makro bağlama bakın: TCMB sıkılaştırma mı, gevşetme mi?</li>

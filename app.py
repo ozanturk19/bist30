@@ -688,12 +688,34 @@ def _clean(obj):
     return obj
 
 
+def _nocache_html(rendered, status=200):
+    """render_template ciktisina no-cache header ekler (bug-hunt r58: /profil kisisel
+    abone verisi -e-posta/isim- icerdigi halde bu korumadan yoksundu, index()'in
+    zaten kullandigi desenle ayni)."""
+    resp = app.make_response(rendered)
+    resp.status_code = status
+    resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    return resp
+
+
 def safe_json(data):
     """NaN-temizlenmiş JSON Response döner."""
     return Response(
         json.dumps(_clean(data)),
         mimetype="application/json",
     )
+
+
+def _private_json(data, vary_cookie=False):
+    """safe_json + kisisel/oturum-bagimli veri icin Cache-Control: private, no-store
+    (bug-hunt r58: /api/me, /api/user-alerts, /api/portfolio/<token> bu korumadan
+    yoksundu, bir ara-katman/shared-cache bu yaniti farkli bir kullaniciya sunabilirdi)."""
+    resp = safe_json(data)
+    resp.headers["Cache-Control"] = "private, no-store"
+    if vary_cookie:
+        resp.headers["Vary"] = "Cookie"
+    return resp
 
 logging.basicConfig(
     level=logging.INFO,
@@ -9243,7 +9265,8 @@ def api_cache_inventory():
 def sitemap():
     today = datetime.now(_TZ_TR).date().isoformat()
     if _sitemap_cache.get("date") == today and _sitemap_cache.get("xml"):
-        return Response(_sitemap_cache["xml"], mimetype="application/xml")
+        return Response(_sitemap_cache["xml"], mimetype="application/xml",
+                         headers={"Cache-Control": "public, max-age=3600"})
     pages = [
         {"loc": "/",            "priority": "1.0", "changefreq": "hourly"},
         {"loc": "/ozet",        "priority": "0.9", "changefreq": "daily"},
@@ -9292,7 +9315,8 @@ def sitemap():
     xml.append("</urlset>")
     xml_str = "\n".join(xml)
     _sitemap_cache.update({"xml": xml_str, "date": today})
-    return Response(xml_str, mimetype="application/xml")
+    return Response(xml_str, mimetype="application/xml",
+                     headers={"Cache-Control": "public, max-age=3600"})
 
 
 @app.route("/robots.txt")
@@ -9461,7 +9485,7 @@ def humans_txt():
     Türk yatırımcılarına şeffaf, ücretsiz, algoritmik BIST sinyal aracı sunmak.
     Backtest ile her zaman doğrulanan, açık kaynaklı metodoloji.
 """
-    return Response(body, mimetype="text/plain; charset=utf-8", headers={
+    return Response(body, mimetype="text/plain", headers={
         "Cache-Control": "public, max-age=86400",
     })
 
@@ -10003,16 +10027,16 @@ def api_portfolio_get(token):
     """Token'a ait portföyü getir."""
     path = _pf_path(token)
     if not path:
-        return safe_json({"error": "Geçersiz token"}), 400
+        return _private_json({"error": "Geçersiz token"}), 400
     if not os.path.exists(path):
-        return safe_json({"error": "Portföy bulunamadı"}), 404
+        return _private_json({"error": "Portföy bulunamadı"}), 404
     try:
         with _PF_LOCK:
             data = _tp_read_json(path)
-        return safe_json(data)
+        return _private_json(data)
     except Exception as e:
         logger.error("Portfolio get [%s]: %s", token, e)
-        return safe_json({"error": "Sunucu hatası"}), 500
+        return _private_json({"error": "Sunucu hatası"}), 500
 
 
 @app.route("/api/portfolio/<token>", methods=["POST"])
@@ -11179,9 +11203,9 @@ def profil_page():
         # bu sayfaya yalnızca e-posta linkiyle (?t=token) gelmeli. Küçük
         # temizlik (Master Program, DEV2-139): içerik aynı, yalnız HTTP
         # status 200->404 (zaten noindex,nofollow, SEO zararı yok).
-        return render_template("profil.html",
+        return _nocache_html(render_template("profil.html",
                                error="Bu sayfaya kişisel e-posta bağlantınız üzerinden ulaşmanız gerekiyor.",
-                               email=None, name="", profile=None, token=""), 404
+                               email=None, name="", profile=None, token=""), 404)
     with _sub_lock:
         subs = _load_subscribers()
         target_email = None
@@ -11190,7 +11214,7 @@ def profil_page():
                 target_email = em
                 break
     if not target_email:
-        return render_template("profil.html", error="Aboneliğiniz bulunamadı veya pasif", email=None, name="", profile=None, token=""), 404
+        return _nocache_html(render_template("profil.html", error="Aboneliğiniz bulunamadı veya pasif", email=None, name="", profile=None, token=""), 404)
 
     info = subs[target_email]
     profile = {
@@ -11200,12 +11224,12 @@ def profil_page():
         "segments":  info.get("segments", []),
         "mail_pref": info.get("mail_pref", "daily"),
     }
-    return render_template("profil.html",
+    return _nocache_html(render_template("profil.html",
                            email=target_email,
                            name=info.get("name", ""),
                            profile=profile,
                            token=token,
-                           done=info.get("profile_done", False))
+                           done=info.get("profile_done", False)))
 
 
 @app.route("/api/profile", methods=["POST"])
@@ -11274,12 +11298,12 @@ def api_me():
     """Kullanıcı tanıma — token ile abonelik durumu sorgular."""
     token = request.args.get("t") or request.cookies.get("bp_sub")
     if not token:
-        return safe_json({"ok": False, "subscribed": False})
+        return _private_json({"ok": False, "subscribed": False}, vary_cookie=True)
     with _sub_lock:
         subs = _load_subscribers()
         for em, info in subs.items():
             if secrets.compare_digest(info.get("token") or "", token or "") and info.get("active"):
-                return safe_json({
+                return _private_json({
                     "ok":            True,
                     "subscribed":    True,
                     "email":         em,
@@ -11287,8 +11311,8 @@ def api_me():
                     "first_name":    (info.get("name", "").split()[0] if info.get("name") else ""),
                     "profile_done":  bool(info.get("profile_done")),
                     "mail_pref":     info.get("mail_pref", "daily"),
-                })
-    return safe_json({"ok": False, "subscribed": False})
+                }, vary_cookie=True)
+    return _private_json({"ok": False, "subscribed": False}, vary_cookie=True)
 
 
 # ── F4 Watchlist Alert API ────────────────────────────────────────────────────
@@ -11312,11 +11336,11 @@ def api_user_alerts_get():
     """Kullanıcının tüm alert ayarlarını döner."""
     email, _ = _get_sub_by_cookie()
     if not email:
-        return safe_json({"ok": False, "error": "login_required"}), 401
+        return _private_json({"ok": False, "error": "login_required"}, vary_cookie=True), 401
     with _sub_lock:
         subs = _load_subscribers()
     rec = subs.get(email, {})
-    return safe_json({"ok": True, "alerts": rec.get("alerts", {})})
+    return _private_json({"ok": True, "alerts": rec.get("alerts", {})}, vary_cookie=True)
 
 
 @app.route("/api/user-alerts/<ticker>", methods=["POST"])
