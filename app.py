@@ -138,6 +138,15 @@ except ImportError as _alerting_err:
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(32))
+# bug-hunt r65: Flask session hic kullanilmiyor (bp_sub cookie'si elle set_cookie ile
+# secure/httponly/samesite kullanarak yonetiliyor), bu ayar su an inert -- ileride
+# session eklenirse Flask varsayilanlarina (SECURE=False, SAMESITE=None) dusulmesin
+# diye guvenlik agi.
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+)
 
 # P0-SEC-2 (CPO-DEV2-033): nginx CF-Connecting-IP -> real_ip -> tek X-Forwarded-For
 # hop'u app'e iletiyor (bkz /etc/nginx/conf.d/cloudflare-realip.conf). ProxyFix
