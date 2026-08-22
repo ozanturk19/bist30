@@ -338,7 +338,8 @@ function buildTable(stocks) {
 
 let _compareSeq = 0;  /* hizli tekrar-cagrida eski istek yenisini ezmesin (bug-hunt) */
 
-async function doCompare() {
+async function doCompare(opts) {
+  const skipUrl = !!(opts && opts.skipUrl);
   const mySeq = ++_compareSeq;
   const inputs = [...new Set(['t1','t2','t3','t4'].map(id => document.getElementById(id).value.trim().toUpperCase()).filter(Boolean))];
   if (inputs.length < 2) {
@@ -365,9 +366,11 @@ async function doCompare() {
     </div>`;
 
   // Update URL
-  const url = new URL(window.location.href);
-  url.searchParams.set('tickers', inputs.join(','));
-  window.history.pushState({}, '', url.toString());
+  if (!skipUrl) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('tickers', inputs.join(','));
+    window.history.pushState({}, '', url.toString());
+  }
   document.getElementById('compareSubtitle').textContent = inputs.join(' · ');
 
   try {
@@ -583,8 +586,30 @@ if (TICKERS_PARAM) {
     const el = document.getElementById('t' + (i+1));
     if (el) el.value = t.trim().toUpperCase();
   });
-  doCompare();
+  doCompare({skipUrl: true});
 }
+
+// bug-hunt r94: URL pushState ile guncelleniyordu ama popstate dinleyicisi yoktu —
+// Geri/Ileri tusuna basinca adres cubugu degisiyor, ekran (tablo + t1-t4 input'lari)
+// eski state'te donuk kaliyordu (hisse.html'deki ayni desenle hizalandi).
+window.addEventListener('popstate', function() {
+  try {
+    const url = new URL(window.location.href);
+    const raw = url.searchParams.get('tickers') || '';
+    const parts = raw.split(',').map(t => t.trim().toUpperCase()).filter(Boolean).slice(0,4);
+    ['t1','t2','t3','t4'].forEach((id,i) => {
+      const el = document.getElementById(id);
+      if (el) el.value = parts[i] || '';
+    });
+    if (parts.length >= 2) {
+      doCompare({skipUrl: true});
+    } else {
+      document.getElementById('compareResult').innerHTML =
+        '<div class="empty-state"><h2>Karşılaştırma Aracı</h2><p>En az 2 hisse sembolü girin ve karşılaştırın.<br>ADX, RSI, Stop-Loss, Hedef Fiyat ve daha fazlası yan yana.</p></div>';
+      document.getElementById('compareSubtitle').textContent = '';
+    }
+  } catch(e) { console.warn('popstate karsilastirma geri yukleme basarisiz', e); }
+});
 
 // Makro Ticker Bandı
 async function loadMacroBar() {

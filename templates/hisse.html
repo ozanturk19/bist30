@@ -1575,7 +1575,7 @@ function renderFreshness(f, dq, ageS, refreshing) {
   /* CPO-1125 İş Kolu B: kanonik banner (static/stale-banner.js), sayfa-özel
      fallback (dq/ageS henüz gelmediyse f.stocks_age_seconds'tan türet) korunur */
   const effDq  = dq || (f.market_open && age > 900 ? 'stale' : 'fresh');
-  const effAge = ageS || age;
+  const effAge = (ageS != null && !isNaN(ageS)) ? ageS : age;
 
   /* T7.2 — çift bildirim: bu chip ile staleBanner aynı cümleyi ("Veri X dk
      önce güncellendi") aynı ekranda iki kez basıyordu. Banner tetiklendiğinde
