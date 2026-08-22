@@ -746,7 +746,7 @@
     <div class="ap-empty">Henüz hisse eklenmedi.<br>Tablodaki <span role="img" aria-label="Bildirim">🔔</span> butonuna tıkla.</div>
   </div>
   <div class="ap-footer" id="apFooter">
-    Sinyal değişince tarayıcı bildirimi gönderilir.
+    Sinyal değişince tarayıcı bildirimi gönderilir (bu sekme açıkken, izin verirsen).
   </div>
 </div>
 
@@ -2876,7 +2876,7 @@ function setPriceAlarm(ticker, dir, inputId) {
     el.classList.add('has-alarm');
     const _curPrice  = livePrices[ticker];
     const _alreadyHit = _curPrice != null && (dir === 'above' ? _curPrice >= val : _curPrice <= val);
-    const _canNotify = ('Notification' in window) && Notification.permission === 'granted';
+    const _canNotify = _notifyPermGranted();
     if (_alreadyHit) {
       showAlarmToast(`${ticker} hedefi (₺${val}) zaten geçilmiş durumda — yalnızca fiyat tekrar hareket ederse bildirim alacaksın`);
     } else {
@@ -2906,11 +2906,20 @@ function clearPriceAlarm(ticker, dir) {
   renderAlarmPanel();
 }
 
+// r101 bug-hunt: alarm paneli footer'ı 3 yerde koşulsuz "bildirim gönderilir"
+// diyordu, ama gerçek teslimat tarayıcı izni + bu sekmenin açık olmasına bağlı
+// (sw.js'te push handler yok, setPriceAlarm()'daki _canNotify deseniyle aynı
+// gerceği burada da yansıtıyoruz — izin yoksa tek başına metin yanıltıcıydı).
+function _notifyPermGranted() {
+  return ('Notification' in window) && Notification.permission === 'granted';
+}
+
 function renderAlarmPanel() {
   const body = document.getElementById('apBody');
+  const _permSuffix = _notifyPermGranted() ? ' (bu sekme açıkken)' : ' — bildirim almak için tarayıcı izni ver';
   if (watchlist.size === 0) {
     body.innerHTML = '<div class="ap-empty">Henüz hisse eklenmedi.<br>Tablodaki 🔕 butonuna tıkla.</div>';
-    document.getElementById('apFooter').textContent = 'Sinyal veya fiyat değişince bildirim gönderilir.';
+    document.getElementById('apFooter').textContent = 'Sinyal veya fiyat değişince bildirim gönderilir' + _permSuffix + '.';
     return;
   }
 
@@ -2966,8 +2975,8 @@ function renderAlarmPanel() {
     acc + (v.above != null ? 1 : 0) + (v.below != null ? 1 : 0), 0);
   document.getElementById('apFooter').textContent =
     paCount > 0
-      ? `${paCount} aktif fiyat hedefi · Sinyal değişince de bildirim gönderilir.`
-      : 'Sinyal veya fiyat hedefi değişince bildirim gönderilir.';
+      ? `${paCount} aktif fiyat hedefi · Sinyal değişince de bildirim gönderilir${_permSuffix}.`
+      : `Sinyal veya fiyat hedefi değişince bildirim gönderilir${_permSuffix}.`;
 }
 
 function toggleAlarmPanel() {

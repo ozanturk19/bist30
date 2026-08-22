@@ -101,10 +101,14 @@ function hhSetMode(mode) {
   document.getElementById('tabSector').setAttribute('aria-selected', String(mode === 'sector'));
   document.getElementById('tabAlpha').setAttribute('aria-selected',  String(mode === 'alpha'));
 }
-// Hash kontrolü
-if (location.hash && (location.hash.indexOf('#letter-') === 0 || location.hash === '#alpha')) {
-  hhSetMode('alpha');
+// Hash kontrolü — r101 bug-hunt: sadece ilk yüklemede okunuyordu, hashchange/
+// popstate dinleyicisi yoktu; harf linkine tıklayıp (hash değişir) sonra Geri
+// tuşuna basınca URL hash'i boşalıyor ama görünüm Alfabetik'te takılı kalıyordu.
+function hhApplyHashMode() {
+  hhSetMode((location.hash && (location.hash.indexOf('#letter-') === 0 || location.hash === '#alpha')) ? 'alpha' : 'sector');
 }
+hhApplyHashMode();
+window.addEventListener('hashchange', hhApplyHashMode);
 /* CPO-1125 İş Kolu B — statik server-render sayfa, hiç fetch yoktu; kanonik
    hafif /api/data-quality endpoint'i ile banner artık burada da çalışıyor */
 bpStartDataQualityPolling();

@@ -32,10 +32,17 @@
   document.addEventListener('DOMContentLoaded', function() {
     // r35 bug-hunt: bandın sabit bottom:0'ı, ≤900px'te (mobil alt navigasyon
     // .mobile-bottom-nav, shared.css) z-index üstünlüğüyle (toast=9999 >
-    // sticky=200) 64px'lik nav'ı görsel+tıklama olarak kapatıyordu. Medya
+    // sticky=200) nav'ı görsel+tıklama olarak kapatıyordu. Medya
     // sorgusuyla mobilde nav yüksekliği kadar ofset ekleniyor.
+    // r101 bug-hunt: tek 64px sabiti sadece 769-900px aralığında dogruydu —
+    // bp-search.js'in .mbn-inner kuralı ≤768px'te nav yüksekliğini 72px+8px
+    // padding = 80px'e çıkarıyor (shared.css'teki taban 64px'i override
+    // ediyor), banner o aralıkta 9px nav'ın üstünü kaplıyordu. İki dosya
+    // birbirinden bağımsız, senkronize olmayan sabitler taşıyordu — banner
+    // artık aynı 768px kırılma noktasını izliyor, her iki aralıkta da doğru.
     var offsetStyle = document.createElement('style');
-    offsetStyle.textContent = '@media (max-width:900px){ #ga-consent-banner{bottom:calc(64px + env(safe-area-inset-bottom,0px)) !important} }';
+    offsetStyle.textContent = '@media (max-width:900px){ #ga-consent-banner{bottom:calc(64px + env(safe-area-inset-bottom,0px)) !important} }'
+      + '@media (max-width:768px){ #ga-consent-banner{bottom:calc(80px + env(safe-area-inset-bottom,0px)) !important} }';
     document.head.appendChild(offsetStyle);
 
     var banner = document.createElement('div');
