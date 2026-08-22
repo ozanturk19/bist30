@@ -38,7 +38,7 @@
 <!-- Makro Ticker -->
 <div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
-<div class="container" id="main-content" tabindex="-1">
+<main class="container" id="main-content" tabindex="-1">
 
 <!-- TL;DR Özet Kart -->
 <div class="tldr-card">
@@ -226,7 +226,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 </div>
 
 </article>
-</div>
+</main>
 
 <footer>
   <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/hakkinda">Hakkında</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/gizlilik">Gizlilik</a> · <a href="/iletisim">İletişim</a>

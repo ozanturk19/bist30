@@ -31,7 +31,7 @@
 <!-- Makro Ticker -->
 <div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
-<div class="container" id="main-content" tabindex="-1">
+<main class="container" id="main-content" tabindex="-1">
   <!-- Blog search -->
   <div class="blog-search-wrap">
     <svg class="blog-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -65,7 +65,7 @@
     <div style="font-size:var(--bp-text-15);font-weight:600;color:#c9d1d9;margin-bottom:6px">Makale bulunamadı</div>
     <div>Farklı anahtar kelimeler deneyin veya kategori filtresini kaldırın.</div>
   </div>
-</div>
+</main>
 
 <footer>
   <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/yasal">Yasal Uyarı</a> · <a href="/hakkinda">Hakkında</a>
