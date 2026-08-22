@@ -79,6 +79,7 @@ try:
     from business_rules   import signal_date_age_days          # CPO-1335
     from business_rules   import SIGNAL_LABELS                 # T1.1 (CPO-1321): tek kaynak
     from business_rules   import ENTRY_QUALITY_LABELS          # r42: build_signal_summary icin
+    from business_rules   import SIGNAL_DATE_LABELS            # r53: signal_age_text_filter icin kanonik kaynak
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
     from anomaly          import compute_stock_anomaly_score    as _dqv_ui_anomaly
@@ -109,6 +110,7 @@ except ImportError as _dqv_import_err:
     # T1.1 fallback: business_rules yüklenemezse bugünkü değerlerle aynı sözlük
     SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
     ENTRY_QUALITY_LABELS = {'IDEAL': 'İdeal', 'IYI': 'İyi', 'DIKKATLI': 'Dikkatli', 'UZAK': 'Uzak'}
+    SIGNAL_DATE_LABELS = {'TODAY': 'Bugün', 'YESTERDAY': 'Dün'}
 
 # ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
 _SENTRY_AVAILABLE = False
@@ -650,9 +652,9 @@ def signal_age_text_filter(signal_date, today=None):
     if age is None:
         return "—"
     if age == 0:
-        return "Bugün"
+        return SIGNAL_DATE_LABELS["TODAY"]
     if age == 1:
-        return "Dün"
+        return SIGNAL_DATE_LABELS["YESTERDAY"]
     if age < 0:
         return derive_signal_date_label(signal_date, today=today) or "—"
     return f"{age} gün"
@@ -4454,7 +4456,7 @@ def admin_send_digest_now():
         return jsonify({"error": "ADMIN_TOKEN configured değil (env eksik)"}), 503
     auth_header = request.headers.get("Authorization", "")
     expected = f"Bearer {ADMIN_TOKEN}"
-    if auth_header != expected:
+    if not secrets.compare_digest(auth_header, expected):
         logger.warning("admin_send_digest_now: invalid auth header (token mismatch)")
         abort(401)
 
@@ -9930,7 +9932,7 @@ def api_contact():
         data = {}
     name    = str(data.get("name",    "")).strip()[:100]
     email   = str(data.get("email",   "")).strip()[:200]
-    subject = str(data.get("subject", "")).strip()[:200]
+    subject = _LOG_CTRL_CHARS_RE.sub(" ", str(data.get("subject", "")).strip())[:200]
     message = str(data.get("message", "")).strip()[:2000]
 
     if not all([name, email, message]):

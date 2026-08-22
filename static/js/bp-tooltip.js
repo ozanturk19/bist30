@@ -91,9 +91,9 @@
     showTimer = setTimeout(function() { show(target); }, 120);
   }
   function onLeave(e) {
+    clearTimeout(showTimer);
     var target = closest(e.target);
     if (!target || target !== activeTarget) return;
-    clearTimeout(showTimer);
     hide();
   }
   function onFocusIn(e) {
@@ -113,7 +113,6 @@
       hide();
       return;
     }
-    e.stopPropagation();
     show(target);
   }
   function onKeydown(e) {

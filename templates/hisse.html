@@ -2486,7 +2486,7 @@ async function loadKapDisclosures() {
 
 function escHtml(s) {
   if (!s) return '';
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function safeHref(url) {
   return /^https?:\/\//i.test(url || '') ? escHtml(url) : '#';
@@ -2721,7 +2721,7 @@ window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
 
 <script src="/static/bp-search.js?v=53" defer></script>
 <script src="/static/js/focus-trap.js?v=2"></script>
-<script src="/static/js/bp-tooltip.js?v=3"></script>
+<script src="/static/js/bp-tooltip.js?v=4"></script>
 <script src="/static/learning-mode.js?v=5" defer></script>
 
 <script>
