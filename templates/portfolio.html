@@ -490,7 +490,7 @@ async function fetchLive() {
 }
 
 function esc(s) {
-  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 // Cloud Sync ile guvenilmeyen kaynaktan gelebilen ticker, tek-tirnakli JS
 // string literali icine gomulmeden once ayrica kacirilir (bkz. fillEntry onclick)
@@ -769,7 +769,7 @@ document.getElementById('cloudModal').addEventListener('click', function(e) {
 });
 
 // Makro Ticker Bandı
-async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=bpAssetLabel(it.label);const price=bpFormatAssetPrice(it.label,it.price);const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e) { console.error('makro ticker verisi yuklenemedi', e); }}
+async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();if(!r.ok||d.ok===false)throw new Error(d.error||('HTTP '+r.status));const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=bpAssetLabel(it.label);const price=bpFormatAssetPrice(it.label,it.price);const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e) { console.error('makro ticker verisi yuklenemedi', e); }}
 loadMacroBar();setInterval(loadMacroBar,180000);
 </script>
 <script src="/static/bp-search.js?v=54" defer></script>

@@ -585,6 +585,7 @@ async function loadMacroBar() {
   try {
     const r = await fetch('/api/macro');
     const d = await r.json();
+    if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
     const items = d.items || [];
     if (!items.length) return;
     const html = items.map(it => {
