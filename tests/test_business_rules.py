@@ -71,8 +71,9 @@ def test_al_without_signal_price_fail():
     r = validate_signal_consistency("THYAO", "AL", None)
     assert r["ok"] is False and r["flag"] == "MISSING_SIGNAL_PRICE"
 
-def test_sat_without_signal_price_ok():
-    assert validate_signal_consistency("THYAO", "SAT", None)["ok"] is True
+def test_sat_without_signal_price_fail():
+    r = validate_signal_consistency("THYAO", "SAT", None)
+    assert r["ok"] is False and r["flag"] == "MISSING_SIGNAL_PRICE"
 
 def test_bekle_without_signal_price_ok():
     assert validate_signal_consistency("THYAO", "BEKLE", None)["ok"] is True
@@ -108,7 +109,7 @@ def test_turkish_format_future_date_fail():
 
 HEALTHY_TICKERS = [
     {"ticker": "AKBNK", "price": 45.2,  "change_pct": 1.5,   "signal": "AL",    "signal_price": 44.0,  "signal_date": "2026-06-23"},
-    {"ticker": "THYAO", "price": 85.5,  "change_pct": -0.8,  "signal": "SAT",   "signal_price": None,  "signal_date": "2026-06-20"},
+    {"ticker": "THYAO", "price": 85.5,  "change_pct": -0.8,  "signal": "SAT",   "signal_price": 87.0,  "signal_date": "2026-06-20"},
     {"ticker": "SISE",  "price": 32.1,  "change_pct": 2.1,   "signal": "BEKLE", "signal_price": None,  "signal_date": None},
     {"ticker": "KCHOL", "price": 120.0, "change_pct": 0.5,   "signal": "AL",    "signal_price": 119.0, "signal_date": "2026-06-23"},
     {"ticker": "SAHOL", "price": 55.7,  "change_pct": -1.2,  "signal": "BEKLE", "signal_price": None,  "signal_date": None},
@@ -176,7 +177,7 @@ if __name__ == "__main__":
         test_valid_price, test_zero_price_fail, test_negative_price_fail,
         test_none_price_fail, test_small_valid_price,
         test_al_with_signal_price_ok, test_al_without_signal_price_fail,
-        test_sat_without_signal_price_ok, test_bekle_without_signal_price_ok,
+        test_sat_without_signal_price_fail, test_bekle_without_signal_price_ok,
         test_none_signal_ok,
         test_today_date_ok, test_past_date_ok, test_future_date_fail, test_none_date_ok,
         test_healthy_tickers_pass, test_glyho_selec_sentinel,

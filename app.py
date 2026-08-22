@@ -10019,7 +10019,7 @@ def api_portfolio_new():
     token = str(__import__('uuid').uuid4())
     path  = _pf_path(token)
     with _PF_LOCK:
-        _tp_write_json(path, {"positions": [], "created_at": datetime.now().isoformat()})
+        _tp_write_json(path, {"positions": [], "created_at": datetime.now(_TZ_TR).isoformat()})
     return safe_json({"token": token})
 
 
@@ -10098,7 +10098,7 @@ def api_portfolio_save(token):
 
     payload = {
         "positions":   clean,
-        "updated_at":  datetime.now().isoformat(),
+        "updated_at":  datetime.now(_TZ_TR).isoformat(),
         "count":       len(clean),
     }
 
@@ -11149,7 +11149,7 @@ def api_subscribe():
                 return safe_json({"ok": False, "message": "Bu e-posta zaten kayıtlı."})
             # Pasif abonenin kaydını yeniden aktif et
             subs[email]["active"] = True
-            subs[email]["subscribed_at"] = datetime.now().isoformat()
+            subs[email]["subscribed_at"] = datetime.now(_TZ_TR).isoformat()
             if name and not subs[email].get("name"):
                 subs[email]["name"] = name
             _save_subscribers(subs)
@@ -11166,7 +11166,7 @@ def api_subscribe():
         token = secrets.token_hex(24)
         subs[email] = {
             "token":         token,
-            "subscribed_at": datetime.now().isoformat(),
+            "subscribed_at": datetime.now(_TZ_TR).isoformat(),
             "name":          name,            # FAZ 3: kullanıcı adı
             "tickers":       [],
             "active":        True,
@@ -11285,7 +11285,7 @@ def api_profile():
         subs[target]["segments"]     = segments
         subs[target]["mail_pref"]    = mail_pref
         subs[target]["profile_done"] = True
-        subs[target]["profile_updated_at"] = datetime.now().isoformat()
+        subs[target]["profile_updated_at"] = datetime.now(_TZ_TR).isoformat()
         _save_subscribers(subs)
 
     logger.info("Profil tamamlandı: %s (level=%s, freq=%s, mail=%s)", target, level, freq, mail_pref)

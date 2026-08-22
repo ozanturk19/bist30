@@ -48,8 +48,8 @@ def validate_price(ticker, price, field="price"):
 
 
 def validate_signal_consistency(ticker, signal, signal_price):
-    """AL sinyali için signal_price zorunlu."""
-    if isinstance(signal, str) and signal.upper() == "AL":
+    """AL/SAT sinyali için signal_price zorunlu (CPO-DEV2-062: SAT AL ile aynı kapsama alındı)."""
+    if isinstance(signal, str) and signal.upper() in ("AL", "SAT"):
         if signal_price is None or (isinstance(signal_price, float) and math.isnan(signal_price)):
             return {
                 "ok": False,
@@ -57,7 +57,7 @@ def validate_signal_consistency(ticker, signal, signal_price):
                 "ticker": ticker,
                 "signal": signal,
                 "value": signal_price,
-                "msg": f"signal=AL ama signal_price={signal_price!r}",
+                "msg": f"signal={signal} ama signal_price={signal_price!r}",
             }
     return {"ok": True, "ticker": ticker, "signal": signal}
 
@@ -116,6 +116,13 @@ def validate_stock(stock_dict):
     if not r["ok"]:
         logger.warning("BRV_FAIL %s: %s signal=%s", ticker, r["flag"], stock_dict.get("signal"))
         errors.append(r)
+
+    # CPO-DEV2-062: signal_price None degilse (validate_signal_consistency zaten None/NaN zorunlulugunu kontrol ediyor) negatif/sifir/bozuk degeri de yakala.
+    if stock_dict.get("signal_price") is not None:
+        r = validate_price(ticker, stock_dict.get("signal_price"), field="signal_price")
+        if not r["ok"]:
+            logger.warning("BRV_FAIL %s: %s signal_price=%s", ticker, r["flag"], stock_dict.get("signal_price"))
+            errors.append(r)
 
     r = validate_date_range(ticker, stock_dict.get("signal_date"))
     if not r["ok"]:
