@@ -2769,7 +2769,7 @@ function saveWatchlist() {
   return _safeWriteJSON(WATCH_KEY, [...watchlist]);
 }
 function savePriceAlarms() {
-  _safeWriteJSON(PRICE_ALARM_KEY, priceAlarms);
+  return _safeWriteJSON(PRICE_ALARM_KEY, priceAlarms);
 }
 
 function toggleWatch(ticker) {
@@ -2833,7 +2833,11 @@ function setPriceAlarm(ticker, dir, inputId) {
     priceAlarms = _safeLoadObject(PRICE_ALARM_KEY, {});
     if (!priceAlarms[ticker]) priceAlarms[ticker] = {};
     priceAlarms[ticker][dir] = val;
-    savePriceAlarms();
+    if (!savePriceAlarms()) {
+      showAlarmToast('Fiyat alarmı kaydedilemedi (tarayıcı kısıtı)');
+      renderAlarmPanel();
+      return;
+    }
     el.classList.add('has-alarm');
     const _curPrice  = livePrices[ticker];
     const _alreadyHit = _curPrice != null && (dir === 'above' ? _curPrice >= val : _curPrice <= val);

@@ -6545,7 +6545,7 @@ def _compute_signal_commentary(ticker, signal_data):
     """
     sig     = signal_data.get("signal", "BEKLE")
     name    = STOCK_NAMES.get(ticker, ticker)
-    sig_lbl = {"AL": "Güçlü Trend", "SAT": "Trend Bozuldu", "BEKLE": "Yatay"}.get(sig, sig)
+    sig_lbl = _SIGNAL_LABELS.get(sig, sig)
 
     # ── İndikatör değerlerini çıkar: US hisseleri (düz alan) + BIST (iç içe indicators) ──
     inds = signal_data.get("indicators") or {}
@@ -7744,8 +7744,7 @@ def stock_page(ticker):
     except (ValueError, TypeError):
         adx_val = None
     # SPEC-017 Faz 3 batch v2 B1: SSS cevabında AL/SAT parantez yasak (K3 wording disiplin)
-    sig_label = {"AL": "Güçlü Trend", "SAT": "Trend Bozuldu",
-                 "BEKLE": "Yatay"}.get(sig, sig)
+    sig_label = _SIGNAL_LABELS.get(sig, sig)
 
     # Yatırımcı SSS — deterministik, veri-tabanlı (ekstra Gemini çağrısı YOK)
     # SPEC-017 Faz B K3: AL/SAT wording yasak — "al mı sat mı" → "güncel teknik sinyali nedir"
@@ -11528,9 +11527,14 @@ def _get_blog_cache():
     global _BLOG_NORMALIZED_CACHE, _BLOG_CAT_COUNTS_CACHE
     if _BLOG_NORMALIZED_CACHE is None:
         from collections import Counter
-        _counts = Counter(a["cat"] for a in ARTICLES)
+        # r95: canonical_slug'lu girdiler eski/tekrar slug'lar (_BLOG_SLUG_REDIRECTS
+        # ile kendi route'larından 301'e düşüyorlar) — sitemap üretici bunları zaten
+        # atlıyordu, blog index de aynı filtreyi uygulamalı (aksi halde tıklanamayan
+        # "hayalet" kart + şişirilmiş kategori sayısı ortaya çıkıyor).
+        _live_articles = [a for a in ARTICLES if not a.get("canonical_slug")]
+        _counts = Counter(a["cat"] for a in _live_articles)
         _BLOG_CAT_COUNTS_CACHE = sorted(_counts.items())
-        _BLOG_NORMALIZED_CACHE = [_normalize_article(a) for a in ARTICLES]
+        _BLOG_NORMALIZED_CACHE = [_normalize_article(a) for a in _live_articles]
         logger.info("Blog önbelleği hazırlandı: %d makale", len(_BLOG_NORMALIZED_CACHE))
     return _BLOG_NORMALIZED_CACHE, _BLOG_CAT_COUNTS_CACHE
 

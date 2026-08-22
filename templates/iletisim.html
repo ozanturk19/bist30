@@ -110,7 +110,7 @@ async function submitForm(e) {
         subject: document.getElementById('cfSubject').value,
         message: document.getElementById('cfMessage').value.trim()
       }),
-      signal: AbortSignal.timeout(10000)
+      signal: AbortSignal.timeout(15000)
     });
     const d = await res.json();
     if (d.ok) {
