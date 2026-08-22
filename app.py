@@ -606,7 +606,7 @@ def signal_label_filter(signal):
 def tr_price_filter(value):
     """Sayıyı TR fiyat formatına çevirir: 1234.5 -> '1.234,50' (JS toLocaleString('tr-TR') ile eş)."""
     if value is None:
-        return value
+        return "—"
     try:
         fv = float(value)
     except (TypeError, ValueError):

@@ -2696,6 +2696,13 @@ function _safeLoadJSON(key, fallback) {
   }
 }
 
+/** bug-hunt r56: _safeLoadJSON array bekleyen cagri yerlerine tip garantisi vermiyordu —
+    gecerli-ama-array-olmayan JSON (ör. '{}'/'42') new Set()'e gidip TypeError firlatabiliyordu. */
+function _safeLoadArray(key) {
+  const v = _safeLoadJSON(key, []);
+  return Array.isArray(v) ? v : [];
+}
+
 /** Faz 1 #2: v1 → v2 migration (idempotent) */
 function _migrateWatchlist() {
   try {
@@ -2713,7 +2720,7 @@ function _migrateWatchlist() {
 }
 _migrateWatchlist();
 
-let watchlist      = new Set(_safeLoadJSON(WATCH_KEY, []));
+let watchlist      = new Set(_safeLoadArray(WATCH_KEY));
 let lastSignals    = _safeLoadJSON(SIGNAL_KEY, {});
 let priceAlarms    = _safeLoadJSON(PRICE_ALARM_KEY, {});
 let livePrices     = {};   // ticker → latest price from SSE
@@ -2748,7 +2755,7 @@ function savePriceAlarms() {
 function toggleWatch(ticker) {
   // DEV2-bughunt-r7: cok-sekme lost-update onlemi — mutate etmeden once localStorage'dan
   // taze oku (baska sekmede hisse.html'in eklediği/cikardigi degisiklikleri kaybetmemek icin)
-  watchlist = new Set(_safeLoadJSON(WATCH_KEY, []));
+  watchlist = new Set(_safeLoadArray(WATCH_KEY));
   if (watchlist.has(ticker)) {
     watchlist.delete(ticker);
     // fiyat alarmını da temizle

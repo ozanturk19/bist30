@@ -295,7 +295,7 @@ function goToDate(date) {
       <div class="sc-ticker">{{ s.ticker }}</div>
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-al">▲ Güçlü Trend</div>
-      <div class="sc-meta">{{ s.signal_date|signal_age_text(historical_date) }} · {{ s.signal_date }}</div>
+      <div class="sc-meta">{{ s.signal_date|signal_age_text(historical_date) }} · {{ s.signal_date or '—' }}</div>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
@@ -320,7 +320,7 @@ function goToDate(date) {
       <div class="sc-ticker">{{ s.ticker }}</div>
       <div class="sc-name">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-sat">▼ Trend Bozuldu</div>
-      <div class="sc-meta">{{ s.signal_date|signal_age_text(historical_date) }} · {{ s.signal_date }}</div>
+      <div class="sc-meta">{{ s.signal_date|signal_age_text(historical_date) }} · {{ s.signal_date or '—' }}</div>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺

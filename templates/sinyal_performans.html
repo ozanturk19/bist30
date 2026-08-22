@@ -231,7 +231,7 @@
               <span class="sig-sat"><span aria-hidden="true">▼</span> Trend Bozuldu</span>
             {% endif %}
           </td>
-          <td>{{ s.signal_price|tr_price }} ₺</td>
+          <td>{% if s.signal_price is not none %}{{ s.signal_price|tr_price }} ₺{% else %}—{% endif %}</td>
           <td>{% if s.price is not none %}{{ s.price|tr_price }} ₺{% else %}—{% endif %}</td>
           <td>
             {% if s.aktif_ret is not none %}
