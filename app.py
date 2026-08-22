@@ -9437,7 +9437,8 @@ def favicon():
     fpath = os.path.join(app.root_path, "static", "favicon.svg")
     if os.path.exists(fpath):
         with open(fpath, "rb") as f:
-            return Response(f.read(), mimetype="image/svg+xml")
+            return Response(f.read(), mimetype="image/svg+xml",
+                            headers={"Cache-Control": "public, max-age=86400"})
     return "", 404
 
 
@@ -11739,6 +11740,9 @@ _BLOG_SLUG_REDIRECTS = {
     "rsi-nedir":                     "rsi-gostergesi-nedir",
     "bist30-nedir":                  "bist100-nedir",
     "supertrend-vs-macd-karsilastirma": "supertrend-vs-macd",
+    "destek-direnc-seviyeleri":      "destek-direnc-seviyeleri-nedir",
+    "macd-gostergesi-nedir":         "macd-indikatoru-nedir",
+    "hacim-analizi":                 "hacim-analizi-nedir",
 }
 
 def _normalize_article(a):
