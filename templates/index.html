@@ -1370,13 +1370,15 @@ function applyLivePrices(prices, ts) {
       priceEl.classList.remove('flash-up', 'flash-down', 'tick-up-cell', 'tick-down-cell');
       void priceEl.offsetWidth;
       priceEl.classList.add(newPrice > oldPrice ? 'flash-up' : 'flash-down');
-      setTimeout(() => priceEl.classList.remove('flash-up', 'flash-down'), 800);
+      clearTimeout(priceEl._flashTimer);
+      priceEl._flashTimer = setTimeout(() => priceEl.classList.remove('flash-up', 'flash-down'), 800);
       /* Değişim hücresi flash */
       if (changeEl) {
         changeEl.classList.remove('tick-up-cell', 'tick-down-cell');
         void changeEl.offsetWidth;
         changeEl.classList.add(tickCls);
-        setTimeout(() => changeEl.classList.remove(tickCls), 700);
+        clearTimeout(changeEl._flashTimer);
+        changeEl._flashTimer = setTimeout(() => changeEl.classList.remove(tickCls), 700);
       }
       /* Fiyat alarmı kontrolü */
       if (watchlist.has(ticker)) checkPriceAlarms(ticker, newPrice, oldPrice);
@@ -1594,7 +1596,7 @@ async function fetchData() {
     const json = await res.json();
     if (mySeq !== _fetchDataSeq) return;  // daha yeni bir fetchData() cagrisi baslamis, bu yaniti at
 
-    if (json.loading) { setTimeout(fetchData, 3000); return; }
+    if (json.loading) { clearTimeout(polling); polling = setTimeout(fetchData, 3000); return; }
 
     allStocks = json.stocks;
     checkAlarms(allStocks);  // sinyal değişikliği kontrolü
@@ -1627,7 +1629,8 @@ async function fetchData() {
     polling = setTimeout(fetchData, 60000);
 
   } catch(e) {
-    setTimeout(fetchData, 5000);
+    clearTimeout(polling);
+    polling = setTimeout(fetchData, 5000);
   }
 }
 
@@ -3520,7 +3523,7 @@ function showSigTip(ticker, ev) {
     html += `<span>Güç: <span style="color:${sigColor}">${filled}</span><span style="color:#30363d">${empty}</span></span>`;
   }
   if (s.entry_quality && s.signal !== 'BEKLE') {
-    const eqMap = { IDEAL: '✓ İdeal giriş bölgesi', IYI: '✓ İyi giriş bölgesi', DIKKATLI: '⚠ ' + _jt('kovalama','Kovalama') + ' riski', UZAK: '✗ Girişten uzak' };
+    const eqMap = { IDEAL: '✓ İdeal', IYI: '✓ İyi', DIKKATLI: '⚠ Dikkatli', UZAK: '✗ Uzak' };
     const eqColor = (s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI') ? '#00e290' : '#e3b341';
     html += `<span style="color:${eqColor}">${eqMap[s.entry_quality] || s.entry_quality}</span>`;
   }

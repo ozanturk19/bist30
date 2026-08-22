@@ -9944,7 +9944,7 @@ def api_contact():
 
     if not all([name, email, message]):
         return jsonify({"ok": False, "error": "Eksik alan"}), 400
-    if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+    if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
         return jsonify({"ok": False, "error": "Geçersiz e-posta"}), 400
 
     ADMIN_MAIL = os.environ.get("ADMIN_MAIL", "iletisim@borsapusula.com")
@@ -11043,7 +11043,7 @@ def api_recognize():
     `_premium_modal.html`'de "Bu e-posta kayıtlı değil" ile bunu sızdırıyordu)."""
     data  = request.get_json(silent=True) or {}
     email = (data.get("email") or "").strip().lower()
-    if not email or "@" not in email or not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+    if not email or "@" not in email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
         return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
 
     generic_resp = {
@@ -11112,7 +11112,7 @@ def api_subscribe():
     name  = (data.get("name") or "").strip()[:80]  # max 80 chars
 
     # Basit e-posta doğrulama
-    if not email or "@" not in email or not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+    if not email or "@" not in email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
         return safe_json({"ok": False, "error": "Geçersiz e-posta adresi"}), 400
     # İsim isteğe bağlı; varsa minimum 2 karakter
     if name and len(name) < 2:
@@ -11565,6 +11565,9 @@ def api_log_error():
     if _client_error_count_this_min["minute"] != cur_min:
         _client_error_count_this_min["minute"] = cur_min
         _client_error_count_this_min["count"]  = 0
+        # r41: periyodik temizlik -- _client_errors_recent hicbir zaman expire olmuyordu (sinirsiz buyume)
+        for _k in [k for k, ts in _client_errors_recent.items() if now_ts - ts > _CLIENT_ERROR_DEDUP_WINDOW]:
+            del _client_errors_recent[_k]
     _client_error_count_this_min["count"] += 1
     if _client_error_count_this_min["count"] > _CLIENT_ERROR_RATE_LIMIT:
         return safe_json({"ok": True, "throttled": True})

@@ -412,6 +412,7 @@ function importPortfolio(e) {
       });
       save();
       render();
+      fetchCharts();
       showToast(`✅ ${added} pozisyon içe aktarıldı (${positions.length - added} zaten vardı).`, 'ok', 4000);
     } catch(err) {
       showToast('❌ Geçersiz dosya: ' + err.message, 'err', 5000);
@@ -454,6 +455,7 @@ function addPosition() {
   document.getElementById('addLot').value    = '';
   document.getElementById('addPrice').value  = '';
   render();
+  fetchCharts();
 }
 
 function removePosition(id) {

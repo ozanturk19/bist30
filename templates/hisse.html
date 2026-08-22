@@ -409,6 +409,7 @@
         return nearest;
       }
       cv.addEventListener('pointerdown', function(ev){
+        clearTimeout(pressTimer);
         pressTimer = setTimeout(function(){
           pressing = true;
           paint(xToIdx(ev.clientX));
@@ -2685,7 +2686,8 @@ function startSSE() {
         priceEl.classList.remove('flash-up', 'flash-down');
         void priceEl.offsetWidth;
         priceEl.classList.add(d.price > old ? 'flash-up' : 'flash-down');
-        setTimeout(() => priceEl.classList.remove('flash-up', 'flash-down'), 600);
+        clearTimeout(priceEl._flashTimer);
+        priceEl._flashTimer = setTimeout(() => priceEl.classList.remove('flash-up', 'flash-down'), 600);
       }
 
       const sign = d.change_pct >= 0 ? '+' : '';

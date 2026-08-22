@@ -219,10 +219,14 @@ function renderCard(s, isNew) {
 
 async function loadGundem() {
   try {
-    const [gundemRes, newsRes] = await Promise.all([
+    // r41: iki bagimsiz kaynak ayri ele alinir -- market-news ag hatasi gundem verisini dusurmemeli
+    const [gundemSettled, newsSettled] = await Promise.allSettled([
       fetch('/api/gundem'),
       fetch('/api/market-news'),
     ]);
+    if (gundemSettled.status === 'rejected') throw gundemSettled.reason;
+    const gundemRes = gundemSettled.value;
+    const newsRes = newsSettled.status === 'fulfilled' ? newsSettled.value : null;
     const d = await gundemRes.json();
     if (!gundemRes.ok || d.ok === false) {
       throw new Error('HTTP ' + gundemRes.status + (d && d.error ? ': ' + d.error : ''));
@@ -288,6 +292,7 @@ async function loadGundem() {
 
     // Market news
     try {
+      if (!newsRes) throw new Error('market-news fetch failed (network)');
       const newsData = await newsRes.json();
       if (!newsRes.ok || newsData.ok === false) throw new Error(newsData.error || ('HTTP ' + newsRes.status));
       const items = newsData.items || [];
