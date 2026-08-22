@@ -34,7 +34,7 @@
 {% include '_stale_banner.html' %}
 
   <!-- T7.4: canlı fiyat/grafik verisi çekilemediğinde gösterilen hata banner'ı -->
-  <div class="pf-fetch-error" id="pfFetchError" style="display:none">
+  <div class="pf-fetch-error" id="pfFetchError" role="status" aria-live="polite" style="display:none">
     <span><span aria-hidden="true">⚠️</span> Güncel fiyat ve grafik verileri şu an yüklenemiyor.</span>
     <button class="pf-fetch-error-retry" onclick="retryPortfolioFetch()">Tekrar dene</button>
   </div>
@@ -65,7 +65,7 @@
       <span class="xu030-compare" id="sumXu030Cmp"></span>
     </div>
   </div>
-  <div id="pfMissingPriceWarn" style="display:none;margin-top:8px;font-size:13px;color:var(--bp-text3)"></div>
+  <div id="pfMissingPriceWarn" role="status" aria-live="polite" style="display:none;margin-top:8px;font-size:13px;color:var(--bp-text3)"></div>
 
   <!-- Export / Import araçları -->
   <div class="pf-actions">
@@ -145,7 +145,7 @@
     <input type="number" id="addPrice" placeholder="Alış fiyatı ₺" min="0" step="0.01" aria-label="Alış fiyatı">
     <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>
-    <span id="addErr" style="color:var(--bp-sat);font-size:var(--bp-text-sm)"></span>
+    <span id="addErr" role="alert" style="color:var(--bp-sat);font-size:var(--bp-text-sm)"></span>
   </div>
 
   <!-- Tablo -->
