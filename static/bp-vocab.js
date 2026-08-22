@@ -43,8 +43,11 @@
      XU100 XU030 USDTRY EURTRY BTC ALTIN GUMUS PETROL SP500 NASDAQ
    Haritada bunlara ek olarak ETH, SOL, BNB, DOGALGAZ ve BIST30 var.
    Bunlar payload'da YOK — 4 şablondaki eski kopyalardan devralındı.
-   Silmek yerine tutuldu çünkü /varlik rotaları (ETH/SOL/BNB) bu adları
-   başka bağlamda kullanıyor; şeritte render edilmedikleri için zararsız.
+   ESKİ GEREKÇE GEÇERSİZ (CPO-DEV2-065, 22.08): /varlik rotaları (ETH/SOL/BNB/
+   DOGALGAZ, /api/chart/<VARLIK>) 19.08 CPO-DEV2-036 sayfa kaldırmasının
+   unutulmuş bir parçasıydı, artık tamamen kaldırıldı. Bu 4 anahtar burada hâlâ
+   zararsız duruyor (şeritte render edilmiyor) ama artık hiçbir aktif rotaya
+   atıfta bulunmuyorlar — sadece tarihsel kalıntı.
    BIST30 anahtarı XU030'un ölü ikizidir (payload asla BIST30 göndermez).
 
    Kardeş dosya: static/bp-format.js (tarih/etiket biçimlendirme, CPO-1335).

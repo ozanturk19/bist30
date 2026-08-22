@@ -4040,16 +4040,6 @@ def background_refresh():
     _CHART_REFRESH_TASKS = [
         ("refresh_chart",                  refresh_chart,         ()),
         ("refresh_xu100_chart",            refresh_xu100_chart,   ()),
-        ("varlik_chart_BTC",      _refresh_varlik_chart, ("BTC",      _btc_chart_cache)),
-        ("varlik_chart_ALTIN",    _refresh_varlik_chart, ("ALTIN",    _altin_chart_cache)),
-        ("varlik_chart_GUMUS",    _refresh_varlik_chart, ("GUMUS",    _gumus_chart_cache)),
-        ("varlik_chart_ETH",      _refresh_varlik_chart, ("ETH",      _eth_chart_cache)),
-        ("varlik_chart_SP500",    _refresh_varlik_chart, ("SP500",    _sp500_chart_cache)),
-        ("varlik_chart_NASDAQ",   _refresh_varlik_chart, ("NASDAQ",   _nasdaq_chart_cache)),
-        ("varlik_chart_SOL",      _refresh_varlik_chart, ("SOL",      _sol_chart_cache)),
-        ("varlik_chart_BNB",      _refresh_varlik_chart, ("BNB",      _bnb_chart_cache)),
-        ("varlik_chart_PETROL",   _refresh_varlik_chart, ("PETROL",   _petrol_chart_cache)),
-        ("varlik_chart_DOGALGAZ", _refresh_varlik_chart, ("DOGALGAZ", _dogalgaz_chart_cache)),
     ]
     # CPO-505 FIX (06.06.2026 P0): refresh_data() ve chart refresh'leri WATCHDOG ile sarıldı.
     # 06.06 06:28'de leader thread dondu → updated_at 4h sabit, /hisse flapping DOWN (worker hang).
@@ -5323,16 +5313,6 @@ def get_chart_data():
 
 _chart_cache       = {"data": None, "updated_at": None}
 _xu100_chart_cache = {"data": None, "updated_at": None}
-_btc_chart_cache   = {"data": None, "updated_at": None}
-_altin_chart_cache = {"data": None, "updated_at": None}
-_gumus_chart_cache = {"data": None, "updated_at": None}
-_eth_chart_cache    = {"data": None, "updated_at": None}
-_sp500_chart_cache  = {"data": None, "updated_at": None}
-_nasdaq_chart_cache  = {"data": None, "updated_at": None}
-_sol_chart_cache     = {"data": None, "updated_at": None}
-_bnb_chart_cache     = {"data": None, "updated_at": None}
-_petrol_chart_cache  = {"data": None, "updated_at": None}
-_dogalgaz_chart_cache= {"data": None, "updated_at": None}
 _stock_chart_cache = {}          # {ticker: {"data": ..., "ts": float, "updated_at": str, "v": str}}
 
 # SPEC-DECOUPLING-v2-PHASE3 (CPO-437): Per-ticker chart cache disk path.
@@ -7142,79 +7122,6 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         )
 
 
-# ── Makro varlık tanımları (BTC / Altın / Gümüş) ──────────────────────────────
-_VARLIK_META = {
-    "BTC": {
-        "name":       "Bitcoin",
-        "ticker_yf":  "BTC-USD",
-        "unit":       "USD",
-        "emoji":      "₿",
-        "color":      "#f7931a",
-        "desc":       "Bitcoin (BTC) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period":     "2y",
-    },
-    "ALTIN": {
-        "name":       "Altın (XAU/USD)",
-        "ticker_yf":  "GC=F",
-        "unit":       "USD/oz",
-        "emoji":      "🥇",
-        "color":      "#e3b341",
-        "desc":       "Altın (XAU/USD) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period":     "2y",
-    },
-    "GUMUS": {
-        "name":       "Gümüş (XAG/USD)",
-        "ticker_yf":  "SI=F",
-        "unit":       "USD/oz",
-        "emoji":      "🥈",
-        "color":      "#8b949e",
-        "desc":       "Gümüş (XAG/USD) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period":     "2y",
-    },
-    "ETH": {
-        "name": "Ethereum", "ticker_yf": "ETH-USD", "unit": "USD",
-        "emoji": "⟠", "color": "#627eea",
-        "desc": "Ethereum (ETH) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period": "2y",
-    },
-    "SP500": {
-        "name": "S&P 500", "ticker_yf": "^GSPC", "unit": "USD",
-        "emoji": "📈", "color": "#3fb950",
-        "desc": "S&P 500 endeksi teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period": "2y",
-    },
-    "NASDAQ": {
-        "name": "NASDAQ Composite", "ticker_yf": "^IXIC", "unit": "USD",
-        "emoji": "💹", "color": "#58a6ff",
-        "desc": "NASDAQ Composite endeksi teknik analizi",
-        "period": "2y",
-    },
-    "SOL": {
-        "name": "Solana", "ticker_yf": "SOL-USD", "unit": "USD",
-        "emoji": "◎", "color": "#9945ff",
-        "desc": "Solana (SOL) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period": "2y",
-    },
-    "BNB": {
-        "name": "BNB (Binance)", "ticker_yf": "BNB-USD", "unit": "USD",
-        "emoji": "⬡", "color": "#f3ba2f",
-        "desc": "BNB (Binance Coin) teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period": "2y",
-    },
-    "PETROL": {
-        "name": "Ham Petrol (WTI)", "ticker_yf": "CL=F", "unit": "USD/bbl",
-        "emoji": "🛢️", "color": "#d4870b",
-        "desc": "Ham Petrol (WTI) vadeli işlem teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period": "2y",
-    },
-    "DOGALGAZ": {
-        "name": "Doğal Gaz", "ticker_yf": "NG=F", "unit": "USD/MMBtu",
-        "emoji": "🔥", "color": "#ef5a2a",
-        "desc": "Doğal Gaz vadeli işlem teknik analizi — Supertrend, ADX ve EMA sinyalleri",
-        "period": "2y",
-    },
-}
-
 # yfinance sembol eşleme tablosu
 _TICKER_SYMBOL_MAP = {
     "XU030": "XU030.IS",
@@ -7583,66 +7490,6 @@ def _chart_response_with_macro_summary(ticker_base, cache_obj):
 @app.route("/api/chart/XU100")
 def api_chart_xu100():
     return _chart_response_with_macro_summary("XU100", _xu100_chart_cache)
-
-
-def _refresh_varlik_chart(varlik_key, cache_obj):
-    """BTC / ALTIN / GUMUS grafik verisini günceller."""
-    meta = _VARLIK_META.get(varlik_key, {})
-    try:
-        d = _compute_chart_data(varlik_key, meta.get("period", "2y"))
-        if d:
-            with _lock:
-                cache_obj["data"] = d
-                cache_obj["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
-            logger.info("%s chart cache güncellendi", varlik_key)
-    except Exception as e:
-        logger.error("_refresh_varlik_chart(%s): %s", varlik_key, e, exc_info=True)
-
-
-@app.route("/api/chart/BTC")
-def api_chart_btc():
-    return _chart_response_with_macro_summary("BTC", _btc_chart_cache)
-
-
-@app.route("/api/chart/ALTIN")
-def api_chart_altin():
-    return _chart_response_with_macro_summary("ALTIN", _altin_chart_cache)
-
-
-@app.route("/api/chart/GUMUS")
-def api_chart_gumus():
-    return _chart_response_with_macro_summary("GUMUS", _gumus_chart_cache)
-
-
-@app.route("/api/chart/ETH")
-def api_chart_eth():
-    # ETH macro cache'de yok — sadece chart cache (helper fallback OK)
-    return _chart_response_with_macro_summary("ETH", _eth_chart_cache)
-
-@app.route("/api/chart/SP500")
-def api_chart_sp500():
-    return _chart_response_with_macro_summary("SP500", _sp500_chart_cache)
-
-@app.route("/api/chart/NASDAQ")
-def api_chart_nasdaq():
-    return _chart_response_with_macro_summary("NASDAQ", _nasdaq_chart_cache)
-
-@app.route("/api/chart/SOL")
-def api_chart_sol():
-    return _chart_response_with_macro_summary("SOL", _sol_chart_cache)
-
-@app.route("/api/chart/BNB")
-def api_chart_bnb():
-    return _chart_response_with_macro_summary("BNB", _bnb_chart_cache)
-
-@app.route("/api/chart/PETROL")
-def api_chart_petrol():
-    return _chart_response_with_macro_summary("PETROL", _petrol_chart_cache)
-
-@app.route("/api/chart/DOGALGAZ")
-def api_chart_dogalgaz():
-    # DOGALGAZ macro cache'de yok, fallback chart cache
-    return _chart_response_with_macro_summary("DOGALGAZ", _dogalgaz_chart_cache)
 
 
 # DEV2-232 (bughunt-r30): /api/chart/us/<ticker> kaldırıldı — /abd/<ticker> sayfası
@@ -11809,30 +11656,12 @@ def _startup():
     except Exception as e:
         logger.warning("Backtest disk cache yükleme hatası: %s", e)
     refresh_chart()
-    # XU100 + makro varliklari sirali sekilde yukle
-    # Paralel yfinance calisi veri bozulmasina neden olur — sirali calis zorunlu
+    # XU100 sirali sekilde yukle (CPO-DEV2-065: 10 oksuz varlik-chart rotasi
+    # -kripto/emtia/ABD, 19.08 CPO-DEV2-036 sayfa kaldirmasinin unutulmus parcasi-
+    # ve bu dongudeki karsiliklari kaldirildi; /api/macro ust serit BAGIMSIZ kalir).
     def _serial_chart_refresh():
         time.sleep(1)
         refresh_xu100_chart()
-        time.sleep(1)
-        varlik_list = [
-            ("BTC",      _btc_chart_cache),
-            ("ALTIN",    _altin_chart_cache),
-            ("GUMUS",    _gumus_chart_cache),
-            ("ETH",      _eth_chart_cache),
-            ("SP500",    _sp500_chart_cache),
-            ("NASDAQ",   _nasdaq_chart_cache),
-            ("SOL",      _sol_chart_cache),
-            ("BNB",      _bnb_chart_cache),
-            ("PETROL",   _petrol_chart_cache),
-            ("DOGALGAZ", _dogalgaz_chart_cache),
-        ]
-        for key, cache in varlik_list:
-            try:
-                _refresh_varlik_chart(key, cache)
-                time.sleep(0.5)
-            except Exception as exc:
-                logger.warning("serial_chart_refresh %s: %s", key, exc)
     _serial_done = threading.Event()
 
     _orig_serial = _serial_chart_refresh
