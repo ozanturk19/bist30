@@ -3028,6 +3028,7 @@ function showAlarmToast(msg) {
 updateFabBadge();
 
 /* ── Sticky Subscription Toast ──────────────────── */
+let _subToastRelease = null;
 (function() {
   const KEY = 'bp_sub_dismissed_v2';
   const DELAY_MS = 25000; // 25 saniye
@@ -3057,7 +3058,10 @@ updateFabBadge();
       if (shown) return;
       shown = true;
       const el = document.getElementById('subToast');
-      if (el) { el.classList.add('visible'); }
+      if (el) {
+        el.classList.add('visible');
+        if (window.bpTrapFocus) _subToastRelease = window.bpTrapFocus(el, dismissSubToast);
+      }
     };
     // Zamanlayıcı ile göster
     const timer = setTimeout(show, DELAY_MS);
@@ -3077,6 +3081,7 @@ updateFabBadge();
 function dismissSubToast() {
   const el = document.getElementById('subToast');
   if (el) { el.classList.remove('visible'); }
+  if (_subToastRelease) { _subToastRelease(); _subToastRelease = null; }
   try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz', e); }
 }
 

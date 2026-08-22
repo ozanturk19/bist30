@@ -720,6 +720,7 @@ async function loadCloudToken() {
 async function saveToCloud(silent) {
   const token = localStorage.getItem(CLOUD_TOKEN_KEY);
   if (!token) { _setCloudMsg('Önce token oluşturun.', '#f85149'); return; }
+  if (!silent && !confirm('Bu, sunucudaki mevcut veriyi değiştirecek, devam edilsin mi?')) return;
   const btn = document.getElementById('cloudSaveBtn');
   if (btn) btn.disabled = true;
   if (!silent) _setCloudMsg('Kaydediliyor…', '#8b949e');
