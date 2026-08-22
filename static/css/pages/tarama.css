@@ -4,8 +4,8 @@
   :root {
     --bg:var(--bp-bg); --surface:#161b22; --surface2:#1c2128;
     --border:var(--bp-bkl-bd);
-    --text:#e6edf3; --text2:#8b949e; --text3:var(--bp-text3);
-    --al:#3fb950; --sat:var(--bp-sat); --bkl:#8b949e;
+    --text:#e6edf3; --text2:var(--bp-text2); --text3:var(--bp-text3);
+    --al:var(--bp-al); --sat:var(--bp-sat); --bkl:var(--bp-bkl);
     --brand:#1f6feb; --gold:#e3b341;
   }
   body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:var(--bp-text-md); min-height:100vh; }

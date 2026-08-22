@@ -33,7 +33,7 @@
   .ticker-link:hover { color:#58a6ff; }
 
   .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; }
-  .signal-AL    { background:#1a4731; color:#3fb950; border:1px solid #238636; }
+  .signal-AL    { background:#1a4731; color:var(--bp-al); border:1px solid #238636; }
   .signal-SAT   { background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
   .signal-BEKLE { background:#21262d; color:#8b949e; border:1px solid #30363d; }
 

@@ -278,7 +278,7 @@
   }
   .ms-live-dot {
     width: 6px; height: 6px;
-    background: #3fb950;
+    background: var(--bp-al);
     border-radius: 50%;
     animation: msPulse 2s infinite;
   }
@@ -293,7 +293,7 @@
     background: rgba(63,185,80,0.10);
     border: 1px solid rgba(63,185,80,0.35);
     border-radius:var(--bp-radius);
-    color: #3fb950;
+    color: var(--bp-al);
     font-size: var(--bp-text-2xs);
     font-weight: 600;
     letter-spacing: 0.2px;
@@ -339,7 +339,7 @@
   .ms-narrative[hidden] { display: none; }
   .ms-narrative strong { font-weight: 600; }
   .ms-narrative a { color: #58a6ff; text-decoration: none; border-bottom: 1px dotted rgba(88,166,255,0.4); }
-  .ms-narrative .delta-up { color: #3fb950; font-weight: 600; }
+  .ms-narrative .delta-up { color: var(--bp-al); font-weight: 600; }
   .ms-narrative .delta-down { color: var(--bp-sat); font-weight: 600; }
   .ms-narrative .sector-name { color: #58a6ff; font-weight: 600; }
 
@@ -356,7 +356,7 @@
   }
   .ms-stat:hover { background: rgba(28,33,40,0.95); border-color: #58a6ff; color: var(--bp-text); }
   .ms-stat-num { color: var(--bp-text); font-weight: 700; font-variant-numeric: tabular-nums; }
-  .ms-stat-bull:hover .ms-stat-num { color: #3fb950; }
+  .ms-stat-bull:hover .ms-stat-num { color: var(--bp-al); }
   .ms-stat-bear:hover .ms-stat-num { color: var(--bp-sat); }
   .ms-stat[hidden] { display: none; }
 

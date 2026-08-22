@@ -2493,8 +2493,8 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     </table>
 
     <p style="text-align:center;font-size:12px;color:#909097;margin-top:18px;line-height:1.5">
-      İlk sinyal mailini sinyal değişimi olduğunda alacaksın.<br>
-      Bekleme süresi yok — site sürekli güncel.
+      İlk özet mailini bu akşam alacaksın (günlük özet — varsayılan tercih).<br>
+      Anlık bildirim istersen profilinden "Anında" seçeneğini seçebilirsin.
     </p>
     '''
     return _email_base(content, unsubscribe_url, preheader=preheader)
