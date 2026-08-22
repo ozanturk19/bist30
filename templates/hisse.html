@@ -1619,7 +1619,7 @@ function renderSummary(s, signalData) {
   document.getElementById('hpPrice').textContent = fmt(_dispPrice);
   const chgEl = document.getElementById('hpChg');
   const _dispChg = (signalData && signalData.change_pct != null) ? signalData.change_pct : (s.change_pct || 0);
-  const sign  = _dispChg >= 0 ? '+' : '';
+  const sign  = _dispChg > 0 ? '+' : '';
   chgEl.textContent = sign + _dispChg.toFixed(2) + '%';
   chgEl.className   = 'header-chg ' + (_dispChg > 0 ? 'pos' : _dispChg < 0 ? 'neg' : 'neu');
 
@@ -2676,7 +2676,7 @@ function startSSE() {
         priceEl._flashTimer = setTimeout(() => priceEl.classList.remove('flash-up', 'flash-down'), 600);
       }
 
-      const sign = d.change_pct >= 0 ? '+' : '';
+      const sign = d.change_pct > 0 ? '+' : '';
       chgEl.textContent = sign + d.change_pct.toFixed(2) + '%';
       chgEl.className   = 'header-chg ' + (d.change_pct > 0 ? 'pos' : d.change_pct < 0 ? 'neg' : 'neu');
 

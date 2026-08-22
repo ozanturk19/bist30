@@ -126,7 +126,7 @@
   .q-ideal  { background: rgba(63,185,80,.18);  color:#3fb950; }
   .q-iyi    { background: rgba(31,111,235,.18);  color:#58a6ff; }
   .q-dikkat { background: rgba(210,153,34,.18);  color:#d29922; }
-  .q-uzak   { background: rgba(248,81,73,.18);   color:#f85149; }
+  .q-uzak   { background: rgba(210,153,34,.18);  color:#d29922; }
   .q-none   { color: var(--bp-text3); }
 
 
