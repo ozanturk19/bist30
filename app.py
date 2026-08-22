@@ -7829,7 +7829,6 @@ def stock_page(ticker):
         return render_template("404.html"), 404
     name   = STOCK_NAMES.get(ticker, ticker)
     sector = _get_sector(ticker)
-    others = [t for t in BIST100 if t != ticker and t != "XU030"]
 
     # Sektör karşılaştırma URL'i — aynı sektördeki ilk 2 peer ile
     _sector_peers = [t for t in SECTORS.get(sector, []) if t != ticker and t in BIST100][:2]
@@ -7925,9 +7924,7 @@ def stock_page(ticker):
                            ticker=ticker,
                            name=name,
                            sector=sector,
-                           others=others,
                            signal_summary=signal_summary,
-                           stock_names=STOCK_NAMES,
                            ssr_signal=ssr_signal,
                            kap_url=kap_url_for(ticker),
                            related_blog=related_blog,
@@ -7936,9 +7933,6 @@ def stock_page(ticker):
                            related_stocks=related_stocks,
                            seo_faq=seo_faq,
                            seo_signal=sig,
-                           seo_signal_label=sig_label,
-                           seo_price=price,
-                           seo_change=chg,
                            seo_score=score,
                            seo_adx=adx_val,
                            seo_rsi=rsi_val)
@@ -9846,7 +9840,6 @@ def ozet_gecmis(tarih):
                    if is_signal_from_today(s.get("signal_date"), today=_arsiv_gun)]
     return render_template("ozet.html",
         stocks=stocks, loading=False,
-        updated_at=snap.get("date_tr", tarih),
         al_list=al_list, sat_list=sat_list, bekle_list=bekle_list,
         new_signals=new_signals, today_str=snap.get("date_tr", tarih),
         stock_names=STOCK_NAMES,
@@ -9874,7 +9867,6 @@ def api_ozet_snapshots():
 def ozet_page():
     with _lock:
         stocks = list(_cache["data"])
-        updated_at = _cache.get("updated_at", "")
         loading = len(stocks) == 0
 
     # CPO-1107 Faz0#6: XU030 bir endeks, hisse değil — evren sayısı/liste tek kaynak
@@ -9888,7 +9880,7 @@ def ozet_page():
 
     today_str = datetime.now(_TZ_TR).strftime("%d.%m.%Y")  # CPO-1335: TR günü
     return render_template("ozet.html",
-        stocks=stocks, loading=loading, updated_at=updated_at,
+        stocks=stocks, loading=loading,
         al_list=al_list, sat_list=sat_list, bekle_list=bekle_list,
         new_signals=new_signals, today_str=today_str,
         stock_names=STOCK_NAMES)

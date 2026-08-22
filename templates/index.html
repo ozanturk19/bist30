@@ -134,7 +134,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260820B">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <link rel="stylesheet" href="/static/css/pages/index.css?v=684b0607">
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- SEO: visually-hidden h1 — required by search engines; logo already communicates brand visually -->
 <h1 style="position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri</h1>
@@ -782,7 +782,7 @@
   <div style="max-width:900px;margin:0 auto">
     <!-- Veri kaynağı yasal disclosure (Ozan UX talebi, 26 May 2026) -->
     <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-align:center;padding:10px 12px;margin-bottom:14px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);background:rgba(var(--bp-gold-rgb),0.04)">
-      <span style="color:#f59e0b">⏱</span>
+      <span style="color:var(--bp-gold)">⏱</span>
       Veri kaynağı: Yahoo Finance · BIST resmi yayın gecikmesi yaklaşık <strong>15 dakika</strong> · Gerçek-zamanlı işlem verisi değildir
     </div>
     <!-- Logo in footer -->
@@ -1441,6 +1441,9 @@ function _saveFilterState() {
       today:   filterToday,
       watch:   filterWatch,
       period:  currentPeriod,
+      sector:  currentSector,
+      search:  currentSearch,
+      adv:     advFilters,
       ts:      Date.now(),
     }));
   } catch(_) { console.warn('filtre durumu kaydi basarisiz', _); }
@@ -1469,6 +1472,16 @@ function _getUrlFilterParams() {
     period:     p.get('period'),
     legacy:     !!legacy,
     sortPreset: lSort,
+    sector:     p.get('sector') || null,
+    search:     p.get('q') || '',
+    adv: {
+      adx:  p.get('adx')  ? Number(p.get('adx'))  : 0,
+      bars: p.get('bars') ? Number(p.get('bars')) : 0,
+      vol:  p.get('vol')  ? Number(p.get('vol'))  : 0,
+      rsi:  p.get('rsi')  || 'all',
+      eq:   p.get('eq')   || 'all',
+    },
+    hasAdv:     p.has('adx') || p.has('bars') || p.has('vol') || p.has('rsi') || p.has('eq'),
   };
 }
 
@@ -1486,9 +1499,17 @@ function _updateUrlFilterState(opts) {
     if (currentPeriod && currentPeriod !== 'all') {
       p.set('period', currentPeriod);
     } else { p.delete('period'); }
+    if (currentSector && currentSector !== 'all') { p.set('sector', currentSector); } else { p.delete('sector'); }
+    if (currentSearch && currentSearch.trim())    { p.set('q', currentSearch); }      else { p.delete('q'); }
+    if (advFilters.adx)  p.set('adx', advFilters.adx);   else p.delete('adx');
+    if (advFilters.bars) p.set('bars', advFilters.bars); else p.delete('bars');
+    if (advFilters.vol)  p.set('vol', advFilters.vol);   else p.delete('vol');
+    if (advFilters.rsi && advFilters.rsi !== 'all') p.set('rsi', advFilters.rsi); else p.delete('rsi');
+    if (advFilters.eq  && advFilters.eq  !== 'all') p.set('eq', advFilters.eq);   else p.delete('eq');
     const s = p.toString();
     const newUrl = window.location.pathname + (s ? '?' + s : '');
-    const st = { signal: currentSignal, premium: filterPremium, today: filterToday, watch: filterWatch, period: currentPeriod };
+    const st = { signal: currentSignal, premium: filterPremium, today: filterToday, watch: filterWatch, period: currentPeriod,
+                 sector: currentSector, search: currentSearch, adv: advFilters };
     if (opts.push) history.pushState(st, '', newUrl);
     else           history.replaceState(st, '', newUrl);
   } catch(_) { console.warn('URL filtre durumu senkronizasyonu basarisiz', _); }
@@ -1502,6 +1523,11 @@ window.addEventListener('popstate', function(e) {
   filterToday   = url.today;
   filterWatch   = url.watch;
   currentPeriod = url.period || 'all';
+  currentSector = url.sector || 'all';
+  currentSearch = url.search || '';
+  if (url.hasAdv) Object.assign(advFilters, url.adv);
+  const searchEl = document.querySelector('.search-input');
+  if (searchEl) searchEl.value = currentSearch;
   _syncFilterChips();
   renderTable();
   updateActiveFiltersBar();
@@ -1511,13 +1537,16 @@ window.addEventListener('popstate', function(e) {
 (function _initDefaultFilterState() {
   // P1: URL params (shared link) — en yüksek öncelik. Legacy ?preset=X de migrate.
   const url = _getUrlFilterParams();
-  const urlHasFilter = url.signal || url.premium || url.today || url.watch || url.sortPreset;
+  const urlHasFilter = url.signal || url.premium || url.today || url.watch || url.sortPreset || url.sector || url.search || url.hasAdv;
   if (urlHasFilter) {
     currentSignal = url.signal || (url.sortPreset ? 'AL' : 'all');
     filterPremium = url.premium;
     filterToday   = url.today;
     filterWatch   = url.watch;
     if (url.period) currentPeriod = url.period;
+    if (url.sector) currentSector = url.sector;
+    if (url.search) currentSearch = url.search;
+    if (url.hasAdv) Object.assign(advFilters, url.adv);
     _updateUrlFilterState();   // legacy ?preset → yeni format'a normalize
     _saveFilterState();
     return;
@@ -1538,6 +1567,9 @@ window.addEventListener('popstate', function(e) {
       filterWatch   = saved.filter === 'WATCH';
     }
     currentPeriod = saved.period || 'all';
+    if (saved.sector) currentSector = saved.sector;
+    if (saved.search) currentSearch = saved.search;
+    if (saved.adv)    Object.assign(advFilters, saved.adv);
     return;
   }
 
@@ -2448,6 +2480,7 @@ function applyPreset(preset, btn) {
   currentSignal = 'AL';
   if      (preset === 'TOP_GAINERS') { sortKey = 'change_pct'; sortDir = -1; }
   else if (preset === 'VOL_LEADERS') { sortKey = 'vol_ratio';  sortDir = -1; }
+  _syncSortHeaderUI();
   _afterFilterChange({ push: true });
   if (btn) btn.classList.add('active');   // preset cosmetic active (state'te tutulmaz)
 }
@@ -2547,6 +2580,9 @@ function resetFilters() {
   currentPeriod  = 'all';
   _clearFilterState();
   Object.assign(advFilters, { adx: 0, bars: 0, vol: 0, rsi: 'all', eq: 'all' });
+  sortKey = 'signal';
+  sortDir = 1;
+  _syncSortHeaderUI();
   const searchEl = document.querySelector('.search-input');
   if (searchEl) searchEl.value = '';
   document.getElementById('searchAc')?.classList.remove('open');
@@ -2554,21 +2590,25 @@ function resetFilters() {
   _afterFilterChange({ push: true });
 }
 
-function sortTable(key) {
-  if (sortKey === key) sortDir *= -1;
-  else { sortKey = key; sortDir = 1; }
+function _syncSortHeaderUI() {
   document.querySelectorAll('#mainTable thead th').forEach(th => {
     const btn = th.querySelector('.th-sort-btn');
     if (btn) btn.classList.remove('sorted-asc', 'sorted-desc');
     th.removeAttribute('aria-sort');
   });
   const colMap = { ticker:0, price:1, change_pct:2, signal:3, signal_date:4, signal_strength:7 };
-  if (colMap[key] !== undefined) {
-    const th = document.querySelectorAll('#mainTable thead th')[colMap[key]];
+  if (colMap[sortKey] !== undefined) {
+    const th = document.querySelectorAll('#mainTable thead th')[colMap[sortKey]];
     const btn = th && th.querySelector('.th-sort-btn');
     if (btn) btn.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
     if (th) th.setAttribute('aria-sort', sortDir === 1 ? 'ascending' : 'descending');
   }
+}
+
+function sortTable(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = 1; }
+  _syncSortHeaderUI();
   renderTable();
 }
 
