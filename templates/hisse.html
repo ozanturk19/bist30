@@ -408,23 +408,26 @@
         }
         return nearest;
       }
-      cv.addEventListener('pointerdown', function(ev){
-        clearTimeout(pressTimer);
-        pressTimer = setTimeout(function(){
-          pressing = true;
-          paint(xToIdx(ev.clientX));
-        }, 220);
-      });
-      cv.addEventListener('pointermove', function(ev){
-        if (pressing) paint(xToIdx(ev.clientX));
-      });
-      function release(){
-        clearTimeout(pressTimer); pressTimer = null;
-        if (pressing) { pressing = false; paint(null); }
+      if (!cv._bpSparkBound) {
+        cv.addEventListener('pointerdown', function(ev){
+          clearTimeout(pressTimer);
+          pressTimer = setTimeout(function(){
+            pressing = true;
+            paint(xToIdx(ev.clientX));
+          }, 220);
+        });
+        cv.addEventListener('pointermove', function(ev){
+          if (pressing) paint(xToIdx(ev.clientX));
+        });
+        function release(){
+          clearTimeout(pressTimer); pressTimer = null;
+          if (pressing) { pressing = false; paint(null); }
+        }
+        cv.addEventListener('pointerup', release);
+        cv.addEventListener('pointercancel', release);
+        cv.addEventListener('pointerleave', release);
+        cv._bpSparkBound = true;
       }
-      cv.addEventListener('pointerup', release);
-      cv.addEventListener('pointercancel', release);
-      cv.addEventListener('pointerleave', release);
     };
     // Auto-hook into buildChart: wrap when defined
     function tryHook(){

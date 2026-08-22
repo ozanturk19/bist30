@@ -9817,7 +9817,7 @@ def api_gundem():
     return safe_json({
         "new_signals": new_signals,
         "strong_al":   strong_al,
-        "updated_at":  datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
+        "updated_at":  _data_quality_snapshot(stocks).get("updated_at"),
         "signal_summary": {
             "al":    sum(1 for s in stocks if s.get("signal") == "AL"),
             "sat":   sum(1 for s in stocks if s.get("signal") == "SAT"),
