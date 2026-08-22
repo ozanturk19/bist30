@@ -272,7 +272,7 @@ async function fetchCharts() {
   const tickers = [...new Set(portfolio.map(p => p.ticker))];
   await Promise.all(tickers.map(async t => {
     try {
-      const r = await fetch('/api/hisse/' + t + '/chart');
+      const r = await fetch('/api/hisse/' + encodeURIComponent(t) + '/chart');
       const j = await r.json();
       if (j.chart && j.chart.ohlc && j.chart.ohlc.length) {
         chartData[t] = j.chart.ohlc.slice(-30).map(d => d.close);

@@ -862,7 +862,7 @@
     </div>
     {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
     <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:var(--bp-text-sm);color:#f87171;line-height:1.6"></div>
-    <div id="sigExplainLoading" style="display:flex;flex-direction:column;gap:10px;color:var(--bp-text3);font-size:var(--bp-text-base)">
+    <div id="sigExplainLoading" role="status" aria-live="polite" style="display:flex;flex-direction:column;gap:10px;color:var(--bp-text3);font-size:var(--bp-text-base)">
       {# SPEC-017 Faz 3 F2-B3: Statik özet ÖNCE (içerik), spinner SONRA (durum) — kullanıcı boş ekran görmesin #}
       <div style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.65;padding:10px 12px;background:rgba(var(--bp-brand-rgb),0.06);border-left:3px solid rgba(var(--bp-brand-rgb),0.4);border-radius:0 8px 8px 0">
         Algoritmamız <strong style="color:var(--bp-brand)">Supertrend(10,3), ADX ≥ 25, EMA12/EMA99</strong> kriterlerinin aynı anda uyum sağlamasını değerlendirir. <strong style="color:var(--bp-al)">Güçlü Trend</strong> sinyali bu kriterlerin pozitif konfirmasyonunu, <strong style="color:var(--bp-sat)">Trend Bozuldu</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-brand);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
@@ -872,7 +872,7 @@
         AI yorumu hazırlanıyor…
       </div>
     </div>
-    <p id="sigExplainText" style="display:none;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0"></p>
+    <p id="sigExplainText" role="status" aria-live="polite" style="display:none;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0"></p>
     <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:var(--bp-text-xs);color:#475569">
       <span aria-hidden="true">🤖</span> Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 4 saatte bir yenilenir
     </div>
@@ -882,10 +882,10 @@
   <div id="news-section" style="scroll-margin-top:80px"></div>
   <div class="news-section" id="newsSection" data-tab-content="haberler">
     <h2 class="section-title"><span aria-hidden="true">🤖</span> Son Haber Özeti</h2>
-    <div class="news-loading" id="newsLoading">
+    <div class="news-loading" id="newsLoading" role="status" aria-live="polite">
       <div class="spinner"></div> Haberler yükleniyor…
     </div>
-    <div class="news-content" id="newsContent" style="display:none"></div>
+    <div class="news-content" id="newsContent" role="status" aria-live="polite" style="display:none"></div>
     <div class="news-source" id="newsSource" style="display:none">
       <span class="news-badge">Gemini AI</span>
       <span>Google Search ile desteklenen yapay zeka özeti · 6 saatte bir güncellenir</span>
