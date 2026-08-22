@@ -3071,6 +3071,12 @@ let _subToastRelease = null;
     const show = () => {
       if (shown) return;
       shown = true;
+      // bug-hunt r98: onScroll sadece scroll-tetiklemesinde kendini kaldiriyordu —
+      // timer once dolarsa (kullanici scroll etmeden) listener sayfanin geri kalan
+      // omru boyunca window uzerinde kalici kaliyordu (her scroll'da no-op calisan
+      // "zombi" listener). show() hangi yoldan tetiklenirse tetiklensin temizle.
+      clearTimeout(timer);
+      window.removeEventListener('scroll', onScroll);
       const el = document.getElementById('subToast');
       if (el) {
         el.classList.add('visible');
@@ -3082,11 +3088,7 @@ let _subToastRelease = null;
     // Veya %40 scroll ile göster
     const onScroll = () => {
       const h = document.documentElement.scrollHeight - window.innerHeight;
-      if (h > 0 && window.scrollY / h >= 0.4) {
-        clearTimeout(timer);
-        show();
-        window.removeEventListener('scroll', onScroll);
-      }
+      if (h > 0 && window.scrollY / h >= 0.4) show();
     };
     window.addEventListener('scroll', onScroll, { passive: true });
   }
