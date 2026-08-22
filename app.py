@@ -7261,24 +7261,6 @@ _TICKER_SYMBOL_MAP.update({
     "WMT":"WMT","V":"V","MA":"MA","UNH":"UNH","XOM":"XOM",
 })
 
-# ── Varlık eş grupları (kategori sayfaları için) ──────────────────────────────
-_KRIPTO_PEERS = [
-    {"key":"BTC",  "name":"Bitcoin",  "href":"/btc",  "emoji":"₿"},
-    {"key":"ETH",  "name":"Ethereum", "href":"/eth",  "emoji":"⟠"},
-    {"key":"SOL",  "name":"Solana",   "href":"/sol",  "emoji":"◎"},
-    {"key":"BNB",  "name":"BNB",      "href":"/bnb",  "emoji":"⬡"},
-]
-_EMTIA_PEERS = [
-    {"key":"ALTIN",    "name":"Altın",     "href":"/altin",    "emoji":"🥇"},
-    {"key":"GUMUS",    "name":"Gümüş",     "href":"/gumus",    "emoji":"🥈"},
-    {"key":"PETROL",   "name":"Petrol",    "href":"/petrol",   "emoji":"🛢️"},
-    {"key":"DOGALGAZ", "name":"Doğal Gaz", "href":"/dogalgaz", "emoji":"🔥"},
-]
-_ABD_INDEX_PEERS = [
-    {"key":"SP500", "name":"S&P 500","href":"/abd/sp500", "emoji":"📈"},
-    {"key":"NASDAQ","name":"NASDAQ", "href":"/abd/nasdaq","emoji":"💹"},
-]
-
 # ── Ortak grafik verisi hesaplama (XU030 + bireysel hisseler + makro varlıklar) ─
 def _compute_chart_data(ticker_base, period="2y"):
     """Herhangi bir hisse / varlık için grafik verisi hesaplar (OHLC, EMA, ST, sinyal geçmişi)."""

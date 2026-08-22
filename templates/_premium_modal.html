@@ -75,7 +75,7 @@
     const status  = document.getElementById('pmStatus');
     const email   = (emailEl?.value || '').trim();
     const name    = (nameEl?.value || '').trim();
-    if (!email || !email.includes('@')) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       if (status) status.innerHTML = '<span style="color:var(--bp-sat)">⚠️ Geçerli email gerekli.</span>';
       if (emailEl) { emailEl.style.borderColor = 'var(--bp-sat)'; emailEl.focus(); }
       return;
@@ -123,7 +123,7 @@
     const status  = document.getElementById('pmStatus');
     const btn     = document.getElementById('pmLoginBtn');
     const email   = (emailEl?.value || '').trim();
-    if (!email || !email.includes('@')) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       if (status) status.innerHTML = '<span style="color:var(--bp-sat)">⚠️ Geçerli email gerekli.</span>';
       if (emailEl) { emailEl.style.borderColor = 'var(--bp-sat)'; emailEl.focus(); }
       return;
