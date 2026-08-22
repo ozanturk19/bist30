@@ -93,6 +93,9 @@ except ImportError as _dqv_import_err:
     import logging as _log_tmp
     _log_tmp.getLogger(__name__).warning("DQV modules unavailable: %s", _dqv_import_err)
     def derive_adx_label(adx):  # fallback: bu try bloğu 6 modülü birlikte taşıyor, biri kırılırsa ADX etiketi çökmesin
+        # bug-hunt r66: esikler (18/25/40) business_rules.py:derive_adx_label ile BIREBIR AYNI
+        # kalmali (business_rules import edilemedigi ANDA devreye giren kopya) -- birini
+        # degistirirsen digerini de guncelle, iki dosya arasinda otomatik kilit YOK.
         try:
             a = float(adx)
         except (TypeError, ValueError):
@@ -8607,7 +8610,7 @@ def api_stock_chart(ticker):
 
     # ── Fiyat uyuşmazlık tespiti: bölünme/split sonrası eski cache'i iptal et ─
     if cached and main_price > 0:
-        chart_price = (cached.get("data") or {}).get("summary", {}).get("price", 0)
+        chart_price = ((cached.get("data") or {}).get("summary") or {}).get("price", 0)
         if chart_price > 0:
             ratio = max(chart_price, main_price) / min(chart_price, main_price)
             if ratio > 1.15:   # %15 üstü fiyat sapması → hisse bölünmesi veya veri hatası

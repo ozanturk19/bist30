@@ -1879,6 +1879,8 @@ function renderSummary(s, signalData) {
   /* İndikatörler — Sade dil + teknik detay */
   // Etiket sunucudan gelir (signalData.adx_label, business_rules.derive_adx_label — CPO-1196 D0 #4).
   // /api/data henüz dönmediyse (ilk render) aynı kanonik eşiklerle geçici fallback.
+  // bug-hunt r66: esikler (18/25/40) business_rules.py:derive_adx_label ile BIREBIR AYNI kalmali,
+  // orada degisirse burasi da elle guncellenmeli (otomatik kilit yok).
   const adxStrength = (signalData && signalData.adx_label) ? signalData.adx_label
     : (s.adx >= 40 ? 'Çok Güçlü' : s.adx >= 25 ? 'Güçlü' : s.adx >= 18 ? 'Orta' : 'Zayıf');
   const _IND_TOOLTIPS = {

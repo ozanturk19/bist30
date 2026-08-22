@@ -150,6 +150,8 @@ def validate_stocks_list(stocks):
     return {"total": len(stocks), "errors": all_errors, "failed_tickers": failed}
 
 
+# bug-hunt r66: bu esikler (18/25/40) app.py:~96 icindeki ImportError-fallback kopyasi
+# ve templates/hisse.html:~1880 icindeki JS ilk-render fallback'iyle BIREBIR AYNI kalmali.
 def derive_adx_label(adx):
     """ADX değerinden tek kaynaklı trend-gücü etiketi (Site Contract v1.2).
 
