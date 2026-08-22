@@ -269,16 +269,21 @@ async function fetchCharts() {
   } catch(e) { _pfFetchErr.chart = true; }
   _updatePfFetchError();
   // Sparkline: portföydeki her benzersiz hisse için son 30g close
+  // r83-CPO-067: sinirsiz esZamanli fan-out onlemek icin 15'lik batch'ler halinde cek
   const tickers = [...new Set(portfolio.map(p => p.ticker))];
-  await Promise.all(tickers.map(async t => {
-    try {
-      const r = await fetch('/api/hisse/' + encodeURIComponent(t) + '/chart');
-      const j = await r.json();
-      if (j.chart && j.chart.ohlc && j.chart.ohlc.length) {
-        chartData[t] = j.chart.ohlc.slice(-30).map(d => d.close);
-      }
-    } catch(e) { console.warn('sparkline verisi alinamadi', e); }
-  }));
+  const PF_CHART_BATCH_SIZE = 15;
+  for (let i = 0; i < tickers.length; i += PF_CHART_BATCH_SIZE) {
+    const batch = tickers.slice(i, i + PF_CHART_BATCH_SIZE);
+    await Promise.all(batch.map(async t => {
+      try {
+        const r = await fetch('/api/hisse/' + encodeURIComponent(t) + '/chart');
+        const j = await r.json();
+        if (j.chart && j.chart.ohlc && j.chart.ohlc.length) {
+          chartData[t] = j.chart.ohlc.slice(-30).map(d => d.close);
+        }
+      } catch(e) { console.warn('sparkline verisi alinamadi', e); }
+    }));
+  }
   render();
   _fetchChartsBusy = false;
 }
@@ -385,16 +390,25 @@ function exportCSV() {
   showToast('✅ CSV indirildi — Excel ile açabilirsiniz.', 'ok');
 }
 
+const PF_IMPORT_MAX_BYTES   = 200 * 1024; // guvenlik payi -- 100 pozisyonluk gercek bir export'un cok uzerinde
+const PF_IMPORT_MAX_ENTRIES = 100;        // app.py _PF_MAX_ENTRIES ile ayni sinir
+
 function importPortfolio(e) {
   const file = e.target.files[0];
   if (!file) return;
+  if (file.size > PF_IMPORT_MAX_BYTES) {
+    showToast(`❌ Dosya çok büyük (maks. ${Math.round(PF_IMPORT_MAX_BYTES/1024)}KB).`, 'err', 5000);
+    e.target.value = '';
+    return;
+  }
   const reader = new FileReader();
   reader.onload = function(ev) {
     try {
       const data = JSON.parse(ev.target.result);
       // Hem eski format (düz dizi) hem yeni format (obje) desteklenir
       const positions = Array.isArray(data) ? data : (data.positions || []);
-      if (!positions.length) throw new Error('Boş dosya');
+      if (!positions.length) throw new Error('EMPTY');
+      if (positions.length > PF_IMPORT_MAX_ENTRIES) throw new Error('TOO_MANY');
       // r37 bug-hunt: truthy-only kontrol (!p.lot/!p.price) sayısal olmayan
       // veya negatif değerleri geçiriyordu — NaN, portfolio genelindeki
       // toplam maliyet/değer toplamını zehirleyip TÜM özet kutularını
@@ -405,7 +419,7 @@ function importPortfolio(e) {
       positions.forEach(p => {
         const lot = Number(p.lot), price = Number(p.price);
         if (!p.ticker || !Number.isFinite(lot) || lot <= 0 || !Number.isFinite(price) || price <= 0) {
-          throw new Error('Eksik/geçersiz alan: ' + JSON.stringify(p));
+          throw new Error('INVALID_FIELD');
         }
         p.lot = lot; p.price = price;
       });
@@ -423,7 +437,13 @@ function importPortfolio(e) {
       fetchCharts();
       showToast(`✅ ${added} pozisyon içe aktarıldı (${positions.length - added} zaten vardı).`, 'ok', 4000);
     } catch(err) {
-      showToast('❌ Geçersiz dosya: ' + err.message, 'err', 5000);
+      const _pfImportMsgMap = {
+        EMPTY:         'Dosyada pozisyon bulunamadı.',
+        TOO_MANY:      `Dosyada çok fazla pozisyon var (maks. ${PF_IMPORT_MAX_ENTRIES}).`,
+        INVALID_FIELD: 'Bazı pozisyonlarda hisse/lot/fiyat eksik veya geçersiz.',
+      };
+      console.warn('importPortfolio başarısız:', err);
+      showToast('❌ ' + (_pfImportMsgMap[err.message] || 'Dosya okunamadı — geçerli bir JSON dosyası olduğundan emin olun.'), 'err', 5000);
     }
     e.target.value = '';   // Aynı dosyayı tekrar seçebilsin
   };
@@ -756,7 +776,7 @@ function copyCloudLink() {
   const token = localStorage.getItem(CLOUD_TOKEN_KEY);
   if (!token) return;
   navigator.clipboard.writeText(token).then(
-    () => _setCloudMsg('Token kopyalandı!', '#3fb950'),
+    () => _setCloudMsg('✓ Kopyalandı', '#3fb950'),
     () => _setCloudMsg('Kopyalama başarısız.', '#f85149')
   );
 }

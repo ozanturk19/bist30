@@ -2826,7 +2826,10 @@ function setPriceAlarm(ticker, dir, inputId) {
     priceAlarms[ticker][dir] = val;
     savePriceAlarms();
     el.classList.add('has-alarm');
-    showAlarmToast(`${ticker} ${dir === 'above' ? '▲ üst' : '▼ alt'} hedefi ₺${val} kuruldu`);
+    const _canNotify = ('Notification' in window) && Notification.permission === 'granted';
+    showAlarmToast(_canNotify
+      ? `${ticker} ${dir === 'above' ? '▲ üst' : '▼ alt'} hedefi ₺${val} kuruldu`
+      : `${ticker} hedefi kaydedildi — bildirim almak için tarayıcı izni gerekiyor`);
   } else {
     showAlarmToast("Geçerli bir fiyat girin (0'dan büyük bir sayı)");
     el.focus();

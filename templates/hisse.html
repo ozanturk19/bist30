@@ -1251,7 +1251,10 @@ function toggleHisseWatch() {
     if (_hibSafeWriteWatch(w)) _hibToast(TICKER + ' alarmı kapatıldı', 'warn');
   } else {
     w.push(TICKER);
-    if (_hibSafeWriteWatch(w)) _hibToast(TICKER + ' alarmı açıldı — sinyal değişiminde bildirim alacaksın', 'success');
+    if (_hibSafeWriteWatch(w)) {
+      const _loggedIn = !!document.cookie.match(/(?:^|;\s*)bp_sub=/);
+      _hibToast(TICKER + ' takibe eklendi' + (_loggedIn ? ' — e-posta bildirimi için Ana Sayfa\'dan Alert Ayarları\'nı aç' : ''), 'success');
+    }
   }
   updateHibBellBtn();
 }
@@ -1324,12 +1327,12 @@ function shareSignal(platform) {
   } else if (platform === 'copy') {
     navigator.clipboard.writeText(url).then(() => {
       const btn = document.getElementById('shareCopy');
-      if (btn) { const t = btn.textContent; btn.textContent = '✅ Kopyalandı!'; setTimeout(() => btn.textContent = t, 2000); }
+      if (btn) { const t = btn.textContent; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.textContent = t, 2000); }
     }).catch(() => {
       const ta = document.createElement('textarea');
       ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
       const btn = document.getElementById('shareCopy');
-      if (btn) { const t = btn.textContent; btn.textContent = '✅ Kopyalandı!'; setTimeout(() => btn.textContent = t, 2000); }
+      if (btn) { const t = btn.textContent; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.textContent = t, 2000); }
     });
   }
 }
