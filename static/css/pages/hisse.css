@@ -406,19 +406,6 @@
     color: var(--bp-text3);
     margin-top: 4px;
   }
-  .score-dots {
-    display: flex;
-    gap: 5px;
-    margin-top: 6px;
-  }
-  .score-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-  }
-  .dot-bull  { background: var(--bp-al); }
-  .dot-bear  { background: var(--bp-sat); }
-  .dot-empty { background: var(--bp-border); }
-
   /* ── Giriş Analizi section ── */
   .entry-analysis-section {
     background: var(--bp-surface);

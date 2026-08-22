@@ -159,12 +159,15 @@
       var s = _syms[i];
       var t = s.t.toLocaleLowerCase('tr');
       var n = (s.n || '').toLocaleLowerCase('tr');
+      var sec = (s.sec || '').toLocaleLowerCase('tr');
       var score = 0;
       if (t === Q) score = 100;
       else if (t.indexOf(Q) === 0) score = 60;
       else if (n.indexOf(Q) === 0) score = 40;
       else if (t.indexOf(Q) >= 0) score = 25;
       else if (n.indexOf(Q) >= 0) score = 15;
+      else if (sec.indexOf(Q) === 0) score = 12;
+      else if (sec.indexOf(Q) >= 0) score = 8;
       if (score) out.push({ s: s, score: score });
     }
     out.sort(function(a,b){ return b.score - a.score; });
@@ -210,7 +213,7 @@
       html += '<a href="/hisse/' + escHtml(s.t) + '" class="bp-search-result ' + (i===0?'bp-sel':'') + '" data-idx="' + i + '">'
             + '<span class="bp-sr-tk">' + escHtml(s.t) + '</span>'
             + '<span class="bp-sr-sig ' + sigCls + '">' + arr + '</span>'
-            + '<span class="bp-sr-name">' + escHtml(s.n) + '</span>'
+            + '<span class="bp-sr-name">' + escHtml(s.n) + (s.sec ? ' <span style="color:var(--bp-text3);font-weight:400">· ' + escHtml(s.sec) + '</span>' : '') + '</span>'
             + '<span class="bp-sr-price">' + priceStr + '</span>'
             + '<span class="bp-sr-chg ' + cCls + '">' + cSign + '</span>'
             + '</a>';

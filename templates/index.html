@@ -697,7 +697,6 @@
             <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Tarih</th>
             <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Giriş ₺</th>
             <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">SL ₺</th>
-            <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">Güç</th>
             <th scope="col" style="padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px" class="hide-mobile">İndikatörler</th>
           </tr>
         </thead>
@@ -715,7 +714,6 @@
           <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal_date')">Tarih</button></th>
           <th scope="col" class="hide-mobile">Giriş ₺</th>
           <th scope="col" class="hide-mobile">SL ₺</th>
-          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal_strength')">Güç</button></th>
           <th scope="col" class="hide-mobile">İndikatörler</th>
           <th scope="col" tabindex="0" data-tip="Sinyal değişince bildir"><span role="img" aria-label="Bildirim">🔔</span></th>
         </tr>
@@ -2192,11 +2190,6 @@ function renderTable() {
       mcList.innerHTML = filtered.map(s => {
         const chgSign  = s.change_pct > 0 ? '+' : '';
         const chgColor = s.change_pct > 0 ? '#00e290' : s.change_pct < 0 ? '#f85149' : '#8b949e';
-        const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
-        const dotColor = s.signal === 'SAT' ? 'filled-bear' : 'filled-bull';
-        const dots = Array.from({length:3}, (_,i) =>
-          `<div class="score-dot ${i < scoreVal ? dotColor : 'empty'}"></div>`
-        ).join('');
         const fmtP = s.price.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
         const wt = s.weekly_trend === 1 ? '<span style="color:#00e290;font-size:11px">↑</span>'
                  : s.weekly_trend === -1 ? '<span style="color:var(--bp-sat);font-size:11px">↓</span>' : '';
@@ -2282,7 +2275,7 @@ function renderTable() {
           <div class="mc-row2">
             <div style="display:flex;align-items:center;gap:7px">
               <span class="signal-badge signal-${s.signal}" style="font-size:10px" onmouseenter="showSigTip('${s.ticker}',event)" onmouseleave="hideSigTip()">${sigIcon} ${sigLabel(s.signal)}</span>
-              ${confIcon}<div class="score-bar" role="img" aria-label="Güç: ${scoreVal}/3">${dots}</div>
+              ${confIcon}
             </div>
             <div class="mc-entry">${entryTxt}</div>
           </div>
@@ -2319,14 +2312,6 @@ function renderTable() {
       const vCls = s.vol_ratio >= 3 ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
       indHtml += `<span class="${vCls}" tabindex="0" data-tip="Hacim × ortalama">Hcm ×${s.vol_ratio}</span>`;
     }
-
-    // Güç noktaları — max 3
-    const MAX_SCORE = 3;
-    const scoreVal  = s.signal === 'SAT' ? s.bear_score : s.bull_score;
-    const dotColor  = s.signal === 'SAT' ? 'filled-bear' : 'filled-bull';
-    const dots = Array.from({ length: MAX_SCORE }, (_, i) =>
-      `<div class="score-dot ${i < scoreVal ? dotColor : 'empty'}"></div>`
-    ).join('');
 
     const fmtPrice = s.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -2401,7 +2386,6 @@ function renderTable() {
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile">${sigPriceHtml}</td>
       <td class="hide-mobile">${slHtml}</td>
-      <td class="hide-mobile"><div class="score-bar" role="img" aria-label="Güç: ${scoreVal}/${MAX_SCORE}">${dots}</div></td>
       <td class="hide-mobile"><div class="indicators">${indHtml}</div></td>
       <td><button class="alarm-btn ${isWatching ? 'watching' : ''}" id="ab-${s.ticker}"
           onclick="event.stopPropagation();toggleWatch('${s.ticker}')"
@@ -3515,12 +3499,6 @@ function showSigTip(ticker, ev) {
   /* CPO-1335: "N gün aktif" bar sayacından değil takvim yaşından */
   if (s.signal !== 'BEKLE' && bpSignalDateAgeDays(s.signal_date) !== null) {
     html += `<span>${bpSignalAgeText(s.signal_date)} aktif</span>`;
-  }
-  const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
-  if (scoreVal != null) {
-    const filled = '●'.repeat(scoreVal);
-    const empty  = '○'.repeat(Math.max(0, 3 - scoreVal));
-    html += `<span>Güç: <span style="color:${sigColor}">${filled}</span><span style="color:#30363d">${empty}</span></span>`;
   }
   if (s.entry_quality && s.signal !== 'BEKLE') {
     const eqMap = { IDEAL: '✓ İdeal', IYI: '✓ İyi', DIKKATLI: '⚠ Dikkatli', UZAK: '✗ Uzak' };

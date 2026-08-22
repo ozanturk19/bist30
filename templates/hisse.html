@@ -525,7 +525,7 @@
       {%- set _tier = ssr_signal.tier -%}
       {%- if   _tier == "guclu_sinyal" %}{% set _tc = "#a855f7" %}
       {%- elif _tier == "standart"     %}{% set _tc = "#1f6feb" %}
-      {%- else                         %}{% set _tc = "#6b7280" %}{% endif %}
+      {%- else                         %}{% set _tc = "var(--bp-text3)" %}{% endif %}
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
            data-tip="Sinyal gücü puanı (0–100). ADX, hacim, teyit ve RSI bileşenlerine dayalı." tabindex="0">
         <svg width="52" height="52" viewBox="0 0 64 64" aria-label="Sinyal skoru {{ _ts }} / 100">
@@ -601,7 +601,6 @@
     <div class="info-card">
       <div class="info-card-label">Güncel Sinyal</div>
       <div id="icSignal" class="info-card-value">—</div>
-      <div class="score-dots" id="icDots"></div>
       <div class="info-card-sub" id="icDate">—</div>
     </div>
     <div class="info-card">
@@ -1633,17 +1632,6 @@ function renderSummary(s, signalData) {
   document.getElementById('icSignal').innerHTML = icon +  // label bp-hero-card'da gosteriliyor
     /* CPO-535 #36: is_premium (RVOL ≥ 1.20 backtest-onaylı) → "⭐ Hacim Onaylı" chip */
     (signalData && signalData.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="display:inline-block;margin-left:4px;font-size:11px;color:var(--bp-volume);background:var(--bp-volume-bg);padding:1px 6px;border-radius:8px;border:1px solid var(--bp-volume-bd);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
-  const MAX = 3;
-  const scoreVal = s.signal === 'SAT' ? s.bear_score : s.bull_score;
-  const dotCls   = s.signal === 'SAT' ? 'dot-bear' : s.signal === 'AL' ? 'dot-bull' : 'dot-empty';
-  const icDotsEl = document.getElementById('icDots');
-  icDotsEl.innerHTML =
-    Array.from({ length: MAX }, (_, i) =>
-      `<div class="score-dot ${i < scoreVal ? dotCls : 'dot-empty'}"></div>`
-    ).join('');
-  icDotsEl.setAttribute('role', 'img');
-  icDotsEl.setAttribute('aria-label', `Güç: ${scoreVal}/${MAX}`);
-
   /* Sinyal date/bars — signalData'dan */
   if (signalData) {
     /* CPO-1335: `|| 1` fallback kaldırıldı — bilinmeyen bar sayısı sessizce

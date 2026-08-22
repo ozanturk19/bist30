@@ -129,10 +129,6 @@
   .q-uzak   { background: rgba(248,81,73,.18);   color:#f85149; }
   .q-none   { color: var(--bp-text3); }
 
-  .score-pip { display: inline-block; width:8px; height:8px; border-radius:50%; margin: 0 1px; }
-  .pip-filled  { background: #3fb950; }
-  .pip-empty   { background: rgba(139,148,158,.25); }
-  .pip-sat-filled { background: #f85149; }
 
   /* ── Empty / Loading ── */
   .empty-state {

@@ -909,11 +909,6 @@
   .ind-bear   { background: var(--bp-sat-bg); color: var(--bp-sat); }
   .ind-neutral{ background: var(--bp-bkl-bg); color: var(--bp-bkl); }
 
-  .score-bar  { display: flex; gap: 3px; align-items: center; }
-  .score-dot  { width: 8px; height: 8px; border-radius: 50%; }
-  .score-dot.filled-bull { background: var(--bp-al); }
-  .score-dot.filled-bear { background: var(--bp-sat); }
-  .score-dot.empty       { background: var(--bp-border2); }
 
   /* Loading */
   .loading-overlay { text-align: center; padding: 60px 20px; color: var(--bp-text2); }

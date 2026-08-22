@@ -469,8 +469,10 @@ async function ozSubmitSub() {
     const data = await res.json();
     const form = document.getElementById('ozSubForm');
     if (form) {
-      if (data.ok || data.message) {
+      if (data.ok) {
         form.innerHTML = '<div style="color:#3fb950;font-size:13px;font-weight:600">✅ ' + (data.message || 'Abone oldunuz!') + '</div>';
+      } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
+        form.innerHTML = '<div style="color:var(--bp-text3);font-size:13px">ℹ️ ' + data.message + '</div>';
       } else {
         form.innerHTML = '<div style="color:#f85149;font-size:13px">' + (data.error || 'Bir hata oluştu.') + '</div>';
       }

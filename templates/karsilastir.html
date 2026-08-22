@@ -121,7 +121,6 @@ const ROW_LABELS = [
   { key: 'tp1',           label: 'Hedef 1 (TP1)' },
   { key: 'tp2',           label: 'Hedef 2 (TP2)' },
   { key: 'rr_ratio',      label: 'Risk/Ödül (R/R)' },
-  { key: 'bull_score',    label: 'Sinyal Gücü' },
   { key: 'sector',        label: 'Sektör' },
   // Temel Analiz
   { key: '_sep_fund',     label: '<span aria-hidden="true">📋</span> TEMEL ANALİZ', isSep: true },
@@ -186,22 +185,6 @@ function renderQuality(v) {
   return `<span class="quality-badge ${cls}">${lbl[v]||v}</span>`;
 }
 
-function renderBullScore(v, signal, bearV) {
-  if (v == null) return '<span class="muted">—</span>';
-  const max = 3;
-  // CPO-DEV2-043: AL ve SAT ayni yonde (soldan saga dolu) gosterilsin —
-  // eskiden SAT icin 3-bullScore ile ayna/ters pip hesaplaniyordu ve etiket
-  // yanlislikla bullScore'u basiyordu (ör. tam bear conviction'da "0/3" yaziyordu).
-  // Artik SAT icin dogrudan bearScore kullaniliyor, ayna gosterim yok.
-  const score = signal === 'SAT' ? (bearV != null ? bearV : (3 - v)) : v;
-  const pips = Array.from({length:max}, (_,i) => {
-    const filled = i < score;
-    const cls = signal==='SAT' && filled ? 'pip-sat-filled' : filled ? 'pip-filled' : 'pip-empty';
-    return `<span class="score-pip ${cls}"></span>`;
-  }).join('');
-  return `${pips} <span class="mono" style="font-size:12px">${score}/3</span>`;
-}
-
 // CPO-DEV2-052 #1 (Ozan karari): SAT sinyalinde somut giris/hedef/stop rakami
 // gosterilmiyor — BIST'te bireysel yatirimci aciga satamiyor (uygulanamaz vaat)
 // ve backtest SAT'i AL kadar guvenilir bulmuyor. Sinyal uretim mantigina
@@ -229,7 +212,6 @@ function renderCell(key, s) {
     case 'tp1':           return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
     case 'tp2':           return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
     case 'rr_ratio':      return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde risk/ödül oranı gösterilmez') : (v ? `<span class="mono" style="color:#58a6ff">1 : ${parseFloat(v).toFixed(1)}</span>` : '<span class="muted">—</span>');
-    case 'bull_score':    return renderBullScore(v, s.signal, s.bear_score);
     case 'sector':        return v ? `<span style="font-size:11px;color:var(--bp-text2)">${v}</span>` : '<span class="muted">—</span>';
     // ── Temel analiz ──
     case 'market_cap':    return v ? `<span class="mono" style="font-size:13px">${v}</span>` : '<span class="muted">—</span>';
@@ -267,7 +249,7 @@ const TIER_META = {
 };
 
 function verdictFor(tier) {
-  return TIER_META[tier] || { color: '#8b949e', label: 'Nötr' };
+  return TIER_META[tier] || { color: 'var(--bp-text3)', label: 'Nötr' };
 }
 
 function renderScoreCell(s, isWinner) {
