@@ -22,8 +22,8 @@
   }
 
   /* Section / panel headings — Space Grotesk (sharp, machined look) */
-  .section-title, .panel-title, .chart-label,
-  .ec-title, .hp-title, .mb-title, .gnm-title,
+  .section-title,
+  .ec-title, .hp-title, .mb-title,
   .bilanco-mini-title, h1, h2, h3 {
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }
@@ -911,7 +911,6 @@
 
 
   /* Loading */
-  .loading-overlay { text-align: center; padding: 60px 20px; color: var(--bp-text2); }
   .spinner {
     display: inline-block; width: 28px; height: 28px;
     border: 3px solid var(--bp-border2); border-top-color: var(--bp-brand);
@@ -1429,7 +1428,6 @@
     .charts-wrap { padding: 4px 12px 8px; }
     #chartMain { height: 250px; }
     .chart-loading { height: 250px; }
-    .hero-panel { min-height: 110px; }
     .hp-twin { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .hp-section { flex: 0 0 140px; min-width: 0; padding: 8px 10px; overflow-y: visible; }
     .hp-section-r { border-left: 1px solid var(--bp-border); }
@@ -1444,7 +1442,6 @@
     .search-input { width: 120px; }
     .search-input:focus { width: 120px; }
     .search-ac { min-width: 200px; right: 0; left: auto; }
-    .irc-inds { display: none; }
     #updated { display: none; }
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     #mainTable { display: none !important; }

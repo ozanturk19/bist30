@@ -104,8 +104,6 @@
   .sc-ret-pos { background: rgba(0,226,144,.10); color: #00e290; }
   .sc-ret-neg { background: rgba(var(--bp-sat-rgb),.15); color: var(--bp-sat); }
 
-  .empty-msg { color: var(--bp-text3); font-size: var(--bp-text-base); text-align: center; padding: 20px; }
-
   /* Piyasa barometresi */
   .barometer {
     background: var(--bp-surface);
@@ -139,8 +137,6 @@
     .container { padding: 12px; }
     .counter-num { font-size: var(--bp-text-28); }
     .stock-grid { grid-template-columns: repeat(2, 1fr); }
-    .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    .table-wrap table { min-width:360px; }
   }
 
   /* ── Makro Ticker Bandı ── */

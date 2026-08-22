@@ -233,9 +233,6 @@
     box-shadow: 0 0 6px rgba(var(--bp-sat-rgb), 0.18);
   }
   .signal-BEKLE{ background: rgba(var(--bp-text3-rgb),.15); color: var(--bp-bkl); border: 1px solid rgba(var(--bp-text3-rgb),.3); }
-  .signal-badge.bull    { background: rgba(var(--bp-al-rgb),.10);   color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.35); box-shadow: 0 0 8px rgba(var(--bp-al-rgb),.18), inset 0 0 8px rgba(var(--bp-al-rgb),.05); }
-  .signal-badge.bear    { background: rgba(var(--bp-sat-rgb),.18);    color: var(--bp-sat); border: 1px solid rgba(var(--bp-sat-rgb),.35);  box-shadow: 0 0 6px rgba(var(--bp-sat-rgb),.18); }
-  .signal-badge.neutral { background: rgba(var(--bp-text3-rgb),.15); color: var(--bp-bkl); border: 1px solid rgba(var(--bp-text3-rgb),.3); }
 
   /* F2 — Anomali rozet */
   .anomaly-badge {
@@ -883,7 +880,6 @@
   }
   @media (max-width: 360px) {
     #hpChg { display: none; }
-    header .logo-name { font-size: var(--bp-text-base); }
     .header-name { font-size: var(--bp-text-base); }
   }
   /* ── Makro Ticker Bandı ── */

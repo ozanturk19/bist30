@@ -11,10 +11,6 @@
     display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown);
   }
   .logo-link { display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
-  .logo-mark { width:28px; height:28px; flex-shrink:0; }
-  .logo-text { display:flex; flex-direction:column; line-height:1.15; }
-  .logo-name { font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); letter-spacing:-0.3px; font-family:'Space Grotesk',system-ui,sans-serif; }
-  .logo-name strong { color:var(--bp-al); }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:var(--bp-text); font-family:'Space Grotesk',system-ui,sans-serif; }
   .page-sub   { font-size:var(--bp-text-xs); color:var(--bp-text3); }
   .container  { max-width:var(--bp-container-1200); margin:0 auto; padding:24px; }
