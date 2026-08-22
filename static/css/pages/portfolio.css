@@ -11,7 +11,7 @@
   .sum-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; text-align:center; }
   .sum-num  { font-size:var(--bp-text-28); font-weight:800; line-height:1; }
   .sum-lbl  { font-size:var(--bp-text-xs); color:#8b949e; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
-  .sum-green{ color:#3fb950; } .sum-red{ color:#f85149; } .sum-blue{ color:#58a6ff; } .sum-gold{ color:#e3b341; }
+  .sum-green{ color:#3fb950; } .sum-red{ color:#f85149; } .sum-blue{ color:#58a6ff; }
 
   .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; }
   .add-bar input { background:#21262d; border:1px solid #30363d; color:#e6edf3; border-radius:var(--bp-radius); padding:7px 12px; font-size:var(--bp-text-base); outline:none; }
@@ -102,8 +102,6 @@
     cursor:pointer; transition:background .15s;
   }
   .pf-fetch-error-retry:hover { background:rgba(var(--bp-sat-rgb),.12); }
-
-  .loading-row td { color:var(--bp-text3); font-style:italic; }
 
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
   footer a { color:#8b949e; text-decoration:none; }

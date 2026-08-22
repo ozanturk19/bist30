@@ -11,20 +11,8 @@
     padding: 14px 24px; display: flex; align-items: center; gap: 16px;
     position: sticky; top: 0; z-index:var(--bp-z-dropdown);
   }
-  .back-btn {
-    display: flex; align-items: center; gap: 6px; color: var(--bp-text2);
-    font-size: var(--bp-text-base); text-decoration: none; padding: 5px 10px;
-    border: 1px solid var(--bp-border); border-radius:var(--bp-radius);
-    background: var(--bp-surface2); transition: all 0.15s; white-space: nowrap;
-  }
-  .back-btn:hover { color: var(--bp-text); border-color: var(--bp-border2); }
   .page-title { font-size: var(--bp-text-2xl); font-weight: 700; }
   .page-sub   { font-size: var(--bp-text-sm); color: var(--bp-text3); margin-top: 1px; }
-  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
-  .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
-  .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
-  @media (max-width:780px) { .top-nav-links { display:none; } }
 
   .container { max-width: var(--bp-container-1100); margin: 0 auto; padding: 24px; }
 
@@ -98,8 +86,6 @@
   }
   .sc-metric { font-size: var(--bp-text-xs); color: var(--bp-text3); }
   .sc-metric strong { color: var(--bp-text2); font-weight: 600; }
-  .sc-metric.up-val strong { color: var(--bp-al); }
-  .sc-metric.dn-val strong { color: var(--bp-sat); }
 
   .sc-footer {
     display: flex; align-items: center; justify-content: space-between; margin-top: 10px;
@@ -141,8 +127,6 @@
   }
   @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
   .sk-card { height: 100px; border-radius: var(--bp-radius); }
-
-  .updated-at { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 20px; text-align: right; }
 
   /* ── Responsive ── */
   @media (max-width: 640px) {

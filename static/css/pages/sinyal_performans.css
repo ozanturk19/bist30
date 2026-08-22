@@ -3,8 +3,6 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
-  .back-btn { display:flex; align-items:center; gap:6px; color:var(--bp-text2); font-size:var(--bp-text-base); text-decoration:none; padding:5px 10px; border:1px solid var(--bp-border); border-radius:var(--bp-radius); background:var(--bp-surface2); }
-  .back-btn:hover { background:var(--bp-surface2); color:var(--bp-text); }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
   .page-sub   { font-size:var(--bp-text-base); color:#8b949e; }
   .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:24px; }

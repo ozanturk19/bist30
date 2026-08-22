@@ -1165,7 +1165,7 @@ def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Content-Type": "application/json",
     }
-    from_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+    from_date = (datetime.now(_TZ_TR) - timedelta(days=days)).strftime("%Y-%m-%d")
     to_date   = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
 
     results = []

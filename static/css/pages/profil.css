@@ -73,7 +73,6 @@
     gap: 8px;
   }
   .opts.cols-1 { grid-template-columns: 1fr; }
-  .opts.cols-2 { grid-template-columns: repeat(2, 1fr); }
   .opt {
     background: var(--bp-surface2);
     border: 1.5px solid var(--bp-border);

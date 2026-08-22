@@ -17,11 +17,6 @@
   .logo-name strong { color:var(--bp-al); }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:var(--bp-text); font-family:'Space Grotesk',system-ui,sans-serif; }
   .page-sub   { font-size:var(--bp-text-xs); color:var(--bp-text3); }
-  .top-nav-links { display:flex; gap:2px; align-items:center; margin-left:auto; }
-  .top-nav-links a { padding:6px 11px; border-radius:var(--bp-radius); font-size:var(--bp-text-base); font-weight:500; color:var(--bp-text2); text-decoration:none; transition:all .15s; white-space:nowrap; }
-  .top-nav-links a:hover { background:var(--bp-surface2); color:var(--bp-text); }
-  .top-nav-links a.active { background:var(--bp-surface2); color:var(--bp-brand); }
-  @media (max-width:780px) { .top-nav-links { display:none; } }
   .container  { max-width:var(--bp-container-1200); margin:0 auto; padding:24px; }
 
   /* Heatmap grid */

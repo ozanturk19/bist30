@@ -3,8 +3,6 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bp-bg); color:#e6edf3; font-family:'Segoe UI',system-ui,-apple-system,sans-serif; font-size:var(--bp-text-md); line-height:1.7; min-height:100vh; }
   header { background:#161b22; border-bottom:1px solid #30363d; padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
-  .back-btn { display:flex; align-items:center; gap:6px; color:#8b949e; font-size:var(--bp-text-base); text-decoration:none; padding:5px 10px; border:1px solid #30363d; border-radius:var(--bp-radius); background:#21262d; transition:all .15s; white-space:nowrap; }
-  .back-btn:hover { background:#30363d; color:#e6edf3; }
   .page-sub   { font-size:var(--bp-text-sm); color:#8b949e; margin-top:1px; }
 
   .container { max-width:var(--bp-container-820); margin:0 auto; padding:32px 24px; }

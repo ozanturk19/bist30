@@ -236,18 +236,10 @@
   .eq-safe   { background:rgba(63,185,80,.1); color:var(--al); }
   .eq-risky  { background:rgba(227,179,65,.1); color:var(--gold); }
 
-  .adx-val { color:var(--gold); font-variant-numeric:tabular-nums; font-size:var(--bp-text-base); }
-  .vol-val { color:#58a6ff; font-size:var(--bp-text-sm); }
   .price-val { font-variant-numeric:tabular-nums; font-size:var(--bp-text-base); }
   .chg-pos { color:var(--al); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); font-weight:600; }
   .chg-neg { color:var(--sat); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); font-weight:600; }
   .chg-neu { color:var(--text2); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); }
-  .bars-val { font-size:var(--bp-text-sm); color:var(--text2); }
-
-  /* ADX mini bar */
-  .adx-bar-bg { width:48px; height:4px; background:var(--bp-border-subtle); border-radius:var(--bp-radius-xs); margin-top:3px; overflow:hidden; }
-  .adx-bar-fill { height:100%; border-radius:var(--bp-radius-xs); background:linear-gradient(90deg,#e3b341,#f0a500); }
-
   /* ── Boş durum ── */
   .empty-state {
     text-align:center; padding:60px 20px; color:var(--text2);

@@ -917,8 +917,6 @@
     border: 3px solid var(--bp-border2); border-top-color: var(--bp-brand);
     border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;
   }
-  .no-data { text-align: center; padding: 40px; color: var(--bp-text2); font-size: var(--bp-text-base); }
-
   /* Skeleton loader */
   @keyframes shimmer {
     0%   { background-position: -800px 0; }
