@@ -79,6 +79,7 @@ try:
     from business_rules   import derive_signal_date_key        # CPO-1335
     from business_rules   import signal_date_age_days          # CPO-1335
     from business_rules   import SIGNAL_LABELS                 # T1.1 (CPO-1321): tek kaynak
+    from business_rules   import ENTRY_QUALITY_LABELS          # r42: build_signal_summary icin
     from cross_consistency import validate_stocks_cross_consistency as _dqv_cross_consistency
     from anomaly          import validate_anomalies_list        as _dqv_anomalies
     from anomaly          import compute_stock_anomaly_score    as _dqv_ui_anomaly
@@ -7791,7 +7792,7 @@ def build_signal_summary(stock):
     if opt:
         risk_lvl += f" İdeal giriş bölgesi {_fmt_tl(opt)} civarı."
     elif isinstance(eq, str) and eq:
-        risk_lvl += f" Giriş kalitesi: {eq}."
+        risk_lvl += f" Giriş kalitesi: {ENTRY_QUALITY_LABELS.get(eq, eq)}."
     points.append({
         "text": risk_lvl,
         "tip":  "Stop bölgesi, sinyal geçersiz sayılabilecek fiyat seviyesidir.",

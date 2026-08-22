@@ -2418,10 +2418,10 @@ async function loadSignalStory() {
       return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--bp-surface2)">
         <span style="font-size:10px;color:${clr};background:rgba(0,0,0,.15);border:1px solid currentColor;border-radius:3px;padding:1px 5px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escHtml(ev.class)}</span>
         <div style="flex:1;min-width:0">
-          <a href="${ev.url || '#'}" target="_blank" rel="noopener" style="font-size:13px;color:var(--bp-text2);text-decoration:underline;text-decoration-color:rgba(201,209,217,.3);text-underline-offset:2px;line-height:1.4;display:block">${escHtml(summary)}</a>
+          <a href="${safeHref(ev.url)}" target="_blank" rel="noopener" style="font-size:13px;color:var(--bp-text2);text-decoration:underline;text-decoration-color:rgba(201,209,217,.3);text-underline-offset:2px;line-height:1.4;display:block">${escHtml(summary)}</a>
           <div style="font-size:11px;color:var(--bp-text3);margin-top:2px">${ev.date.substring(0,10)} · <span style="color:${delta <= 0 ? '#909097' : '#b8c3ff'}">${deltaStr}</span></div>
         </div>
-        ${ev.url ? `<a href="${ev.url}" target="_blank" rel="noopener" aria-label="Haberi aç" style="font-size:11px;color:var(--bp-brand);opacity:.6;flex-shrink:0;margin-top:2px">↗</a>` : ''}
+        ${ev.url ? `<a href="${safeHref(ev.url)}" target="_blank" rel="noopener" aria-label="Haberi aç" style="font-size:11px;color:var(--bp-brand);opacity:.6;flex-shrink:0;margin-top:2px">↗</a>` : ''}
       </div>`;
     }).join('');
 
@@ -2464,13 +2464,13 @@ async function loadKapDisclosures() {
       const dateShort = d.date ? d.date.substring(0, 16) : '';
       const summaryText = escHtml(d.summary || '');
       const summaryHtml = (d.url && summaryText)
-        ? `<a href="${d.url}" target="_blank" rel="noopener" aria-label="${summaryText}">${summaryText}</a>`
+        ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" aria-label="${summaryText}">${summaryText}</a>`
         : summaryText;
       return `<div class="kap-item">
         <div class="kap-item-top">
           <span class="kap-class-badge ${cls}">${lbl}</span>
           <span class="kap-summary">${summaryHtml}</span>
-          ${d.url ? `<a href="${d.url}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" title="KAP'ta aç" aria-label="KAP'ta aç">↗</a>` : ''}
+          ${d.url ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" title="KAP'ta aç" aria-label="KAP'ta aç">↗</a>` : ''}
         </div>
         <div class="kap-meta">
           <span>${dateShort}</span>
@@ -2505,6 +2505,9 @@ async function loadKapDisclosures() {
 function escHtml(s) {
   if (!s) return '';
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function safeHref(url) {
+  return /^https?:\/\//i.test(url || '') ? escHtml(url) : '#';
 }
 
 loadKapDisclosures();
