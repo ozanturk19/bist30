@@ -58,7 +58,7 @@
   .ozet-metric+.ozet-metric::before { content:''; position:absolute; left:0; top:15%; height:70%; width:1px; background:#1e2d45; }
   .ozet-metric-val { font-size:var(--bp-text-34); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
   .ozet-metric-val.hero-val { font-size:var(--bp-text-40); text-shadow:0 0 24px rgba(63,185,80,0.35); }
-  .ozet-metric-lbl { font-size:var(--bp-text-2xs); color:#64748b; margin-top:7px; text-transform:uppercase; letter-spacing:.6px; }
+  .ozet-metric-lbl { font-size:var(--bp-text-2xs); color:var(--bp-text3); margin-top:7px; text-transform:uppercase; letter-spacing:.6px; }
   .ozet-metric-sub { font-size:var(--bp-text-xs); color:#8b949e; margin-top:3px; }
   @media(max-width:640px) { .ozet-bar{flex-wrap:wrap;gap:0} .ozet-metric{flex:0 0 50%;min-width:0;} .ozet-metric:nth-child(2)::before,.ozet-metric:nth-child(4)::before{display:none} .ozet-metric:nth-child(3),.ozet-metric:nth-child(4){border-top:1px solid #1e2d45;} }
 

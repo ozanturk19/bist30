@@ -787,7 +787,7 @@
   .content-para:last-of-type { margin-bottom: 6px; }
   .content-meta {
     font-size: var(--bp-text-xs);
-    color: #6b7280;
+    color: var(--bp-text3);
     margin-top: 8px;
   }
   .faq-list { margin: 4px 0 0 0; }

@@ -84,7 +84,7 @@
   .ls-warning-body { flex:1; }
   .ls-warning-title { font-weight:700; color:#e3b341; margin-bottom:3px; }
   .ls-warning-close {
-    position:relative; background:none; border:none; color:#64748b; cursor:pointer;
+    position:relative; background:none; border:none; color:var(--bp-text3); cursor:pointer;
     font-size:var(--bp-text-lg); padding:0 2px; flex-shrink:0; line-height:1;
     transition:color .15s;
   }
