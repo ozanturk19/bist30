@@ -525,7 +525,7 @@ function renderResults(rows, count) {
     if (vr == null) return '<span class="rvol-cell low">—</span>';
     const v = vr;
     const cls = v >= 1.5 ? 'high' : v >= 0.8 ? 'normal' : 'low';
-    return `<div class="rvol-cell ${cls}"><span class="rvol-dot ${cls}"></span>${v.toFixed(1)}×</div>`;
+    return `<div class="rvol-cell ${cls}"><span class="rvol-dot ${cls}"></span>${v.toFixed(2)}×</div>`;
   };
   /* CPO-1335 Tazelik: etiket signal_date'in GERÇEK tarihinden türer.
      Eski sürüm signal_bars sayacını kullanıyordu; ticker o gün tazelenmezse
