@@ -30,7 +30,7 @@ import tempfile
 import html as _html
 import re
 import random
-from urllib.parse import quote, urlparse
+from urllib.parse import quote
 import copy
 import secrets
 import hashlib
@@ -41,7 +41,7 @@ from email.mime.text      import MIMEText
 import requests
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from blog_content import ARTICLES, ARTICLES_BY_SLUG, CATEGORIES
+from blog_content import ARTICLES, ARTICLES_BY_SLUG
 
 # Sunucu locale'i (en_US) strftime("%B")'yi İngilizce basar — locale-bağımsız TR ay adları
 _TR_MONTHS = {

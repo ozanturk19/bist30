@@ -527,7 +527,7 @@
                box-sizing:border-box;transition:border-color .15s"
         onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
-      <input id="subEmail" type="email" placeholder="E-posta" aria-label="E-posta adresi"
+      <input id="subEmail" type="email" required autocomplete="email" placeholder="E-posta" aria-label="E-posta adresi"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
                padding:8px 12px;border-radius:var(--bp-radius);font-size:var(--bp-text-base);font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
@@ -765,7 +765,7 @@
     <input id="subToastName" type="text" class="sub-toast-input" placeholder="Adınız"
       onkeydown="if(event.key==='Enter')document.getElementById('subToastEmail').focus()"
       aria-label="Ad">
-    <input id="subToastEmail" type="email" class="sub-toast-input" placeholder="E-posta"
+    <input id="subToastEmail" type="email" class="sub-toast-input" required autocomplete="email" placeholder="E-posta"
       onkeydown="if(event.key==='Enter')submitToastSubscribe()"
       aria-label="E-posta adresi">
   </div>
