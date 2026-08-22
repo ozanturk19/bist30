@@ -1955,8 +1955,12 @@ function renderSummary(s, signalData) {
   if (conflictEl) {
     if (signalData && signalData.signal === 'AL' && _dispChg < -3) {
       /* CPO-1335: `|| 1` tuzağı + bar-sayacını-gün-sayma kaldırıldı */
+      /* CPO-DEV2-059 r50: 'Dün'/gelecek-tarih dallarında 'X dür aktif' eki dilbilgisel olarak bozuk metin üretiyordu */
+      const _sigAge = bpSignalDateAgeDays(signalData.signal_date);
       const barLabel = bpIsSignalFromToday(signalData.signal_date)
         ? 'Bugün oluştu'
+        : _sigAge === 1 ? 'Dünden beri aktif'
+        : (_sigAge !== null && _sigAge < 0) ? bpSignalAgeText(signalData.signal_date)
         : 'Son ' + bpSignalAgeText(signalData.signal_date) + 'dür aktif';
       conflictEl.textContent = barLabel + ' olan Güçlü Trend sinyali sürüyor, ancak bugünkü %' +
         Math.abs(_dispChg).toFixed(1) + ' düşüş stop loss seviyesine yaklaştırıyor olabilir. Risk yönetimi önemli.';

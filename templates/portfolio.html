@@ -713,6 +713,7 @@ async function saveToCloud(silent) {
 async function loadFromCloud() {
   const token = localStorage.getItem(CLOUD_TOKEN_KEY);
   if (!token) { _setCloudMsg('Önce token oluşturun.', '#f85149'); return; }
+  if (portfolio.length && !confirm(`Bulut kopyası yerel portföyünüzün (${portfolio.length} pozisyon) üzerine yazılacak. Devam edilsin mi?`)) return;
   const btn = document.getElementById('cloudLoadFromCloudBtn');
   if (btn) btn.disabled = true;
   _setCloudMsg('Yükleniyor…', '#8b949e');

@@ -76,7 +76,6 @@ try:
     from business_rules   import derive_adx_label
     from business_rules   import is_signal_from_today          # CPO-1335
     from business_rules   import derive_signal_date_label      # CPO-1335
-    from business_rules   import derive_signal_date_key        # CPO-1335
     from business_rules   import signal_date_age_days          # CPO-1335
     from business_rules   import SIGNAL_LABELS                 # T1.1 (CPO-1321): tek kaynak
     from business_rules   import ENTRY_QUALITY_LABELS          # r42: build_signal_summary icin
@@ -106,7 +105,6 @@ except ImportError as _dqv_import_err:
     # kalemi, sessiz fallback kusurun ta kendisiydi (`bars || 1`).
     def is_signal_from_today(signal_date, today=None):     return False
     def derive_signal_date_label(signal_date, today=None): return None
-    def derive_signal_date_key(signal_date, today=None):   return "unknown"
     def signal_date_age_days(signal_date, today=None):     return None
     # T1.1 fallback: business_rules yüklenemezse bugünkü değerlerle aynı sözlük
     SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
@@ -624,10 +622,6 @@ def tr_price_filter(value):
 # sayacıdır: hafta sonlarını ve ticker'ın tazelenemediği günleri atlar, bu
 # yüzden "gün" birimiyle sunulduğunda yanlıştı. Kanonik eksen signal_date.
 
-@app.template_filter('signal_date_label')
-def signal_date_label_filter(signal_date):
-    """signal_date -> "Bugün" / "Dün" / gerçek tarih. Bilinmiyorsa "—"."""
-    return derive_signal_date_label(signal_date) or "—"
 
 
 @app.template_filter('signal_age_text')
@@ -12090,7 +12084,12 @@ def page_not_found(e):
 # form JS'leri res.json() ile SyntaxError'a düşüp kullanıcıya yanlış "bağlantı hatası" gösteriyordu.
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
-    return jsonify({"ok": False, "error": "Çok fazla istek, lütfen biraz sonra tekrar deneyin."}), 429
+    # CPO-DEV2-059 r48 madde 2: sadece /api/* JSON alsin (fetch/XHR tuketicileri
+    # etkilenmesin) -- diger TUM rotalar (orn. /unsubscribe/<token> gibi tarayici
+    # navigasyonuyla acilan sayfalar) artik ciplak JSON degil basit bir HTML mesaji alir.
+    if request.path.startswith("/api/"):
+        return jsonify({"ok": False, "error": "Çok fazla istek, lütfen biraz sonra tekrar deneyin."}), 429
+    return "<h1>429 Çok Fazla İstek</h1><p>Çok fazla istek gönderdiniz, lütfen biraz sonra tekrar deneyin.</p>", 429
 
 
 # r44 bug-hunt: 404/429 icin yapilan "/api/* -> JSON" ayristirmasi 500e hic
