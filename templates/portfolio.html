@@ -452,7 +452,7 @@ function importPortfolio(e) {
 
 async function clearPortfolio() {
   if (!portfolio.length) { showToast('Portföy zaten boş.', 'err'); return; }
-  if (!confirm(`Portföydeki ${portfolio.length} pozisyon silinecek. Önce dışa aktarmanız önerilir. Devam?`)) return;
+  if (!confirm(`Portföydeki ${portfolio.length} pozisyon silinecek. Önce dışa aktarmanız önerilir. Devam edilsin mi?`)) return;
   portfolio = [];
   save();
   render();
