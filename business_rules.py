@@ -164,8 +164,11 @@ def derive_adx_label(adx):
 
 
 # ── T1.1 (CPO-1321 FAZ 1) — kanonik sözlük evi ──────────────────────────────
-# derive_adx_label ile aynı desen: bu 4 sözlük artık tek kaynak. Önceden aynı
-# etiketler app.py'de N kez ve 10+ şablonda ayrı ayrı (bazen tutarsız) tanımlıydı.
+# derive_adx_label ile aynı desen. NOT (r53 bug-hunt + CPO-DEV2-060 düzeltmesi):
+# bu 4 sözlük app.py için tek kaynak ama templates/*.html HÂLÂ kendi bağımsız
+# kopyalarını tutuyor (ENTRY_QUALITY_LABELS 3+, SIGNAL_LABELS 14+ yerde) — değerler
+# şu an senkron ama gerçek 'tek kaynağa taşıma' refactor'ü henüz yapılmadı. Yeni bir
+# etiket eklerken/değiştirirken template kopyalarını da elle güncellemeyi unutma.
 # T1.2 (CPO-1321): SIGNAL_LABELS['SAT'] eski SAT etiketinden "Trend Bozuldu"ya
 # app.py, business_rules.py, blog_content.py, manifest.json ve 18 şablonda
 # tek commit'te yeniden adlandırıldı (bkz. tests/test_cpo1321_faz1_t1_2_trend_bozuldu_rename.py).
