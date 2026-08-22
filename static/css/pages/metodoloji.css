@@ -153,5 +153,5 @@
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item{display:inline-flex;align-items:center;gap:7px;padding:0 18px;border-right:1px solid #21262d;font-size:var(--bp-text-xs);height:32px;}
   .macro-item-lbl{font-weight:600;color:#cbd5e1;}
-  .mc-pos{color:#3fb950;}.mc-neg{color:var(--bp-sat);}.mc-neu{color:#8b949e;}
+  .mc-pos{color:var(--bp-al);}.mc-neg{color:var(--bp-sat);}.mc-neu{color:#8b949e;}
 

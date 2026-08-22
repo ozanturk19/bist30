@@ -84,6 +84,6 @@
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid #1e2d45; font-size:var(--bp-text-sm); height:34px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
+  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
 
 @keyframes spin{to{transform:rotate(360deg)}}

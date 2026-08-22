@@ -99,8 +99,8 @@
     text-transform: uppercase;
   }
   .badge.al  { background: rgba(63,185,80,.12); color:var(--bp-al); border:1px solid rgba(63,185,80,.3); }
-  .badge.sat { background: rgba(248,81,73,.12);  color:#f85149; border:1px solid rgba(248,81,73,.3); }
-  .badge.bkl { background: rgba(139,148,158,.1); color:#8b949e; border:1px solid rgba(139,148,158,.2); }
+  .badge.sat { background: rgba(248,81,73,.12);  color:var(--bp-sat); border:1px solid rgba(248,81,73,.3); }
+  .badge.bkl { background: rgba(139,148,158,.1); color:var(--bp-bkl); border:1px solid rgba(139,148,158,.2); }
 
   .mono { font-family: var(--bp-font-mono); font-size: var(--bp-text-base); }
   .up   { color: #3fb950; }
@@ -161,7 +161,7 @@
     font-size:var(--bp-text-sm); height:34px; text-decoration:none; color:inherit;
   }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
+  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
 
   /* ── Autocomplete ── */
   .ac-wrap { position: relative; display: inline-block; }

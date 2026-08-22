@@ -97,7 +97,7 @@
 {% endif %}
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260820B">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
-<link rel="stylesheet" href="/static/css/pages/blog_article.css?v=1135c509">
+<link rel="stylesheet" href="/static/css/pages/blog_article.css?v=030f33d9">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="read-progress" id="readProgress"></div>
@@ -206,8 +206,8 @@
 
   {% if article.related_tickers %}
   <!-- İlgili Hisseler — canlı sinyal kartları -->
-  <div class="related" id="relatedStocks">
-    <div class="related-title">İlgili Hisseler — Güncel Sinyal</div>
+  <aside class="related" id="relatedStocks" aria-labelledby="related-stocks-heading">
+    <h2 class="related-title" id="related-stocks-heading">İlgili Hisseler — Güncel Sinyal</h2>
     <div id="relStockCards" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
       {% for t in article.related_tickers %}
       <div class="rel-stock-skeleton" data-ticker="{{ t }}" style="
@@ -218,12 +218,12 @@
       </div>
       {% endfor %}
     </div>
-  </div>
+  </aside>
   {% endif %}
 
   {% if related %}
-  <div class="related">
-    <div class="related-title">İlgili Makaleler</div>
+  <aside class="related" aria-labelledby="related-articles-heading">
+    <h2 class="related-title" id="related-articles-heading">İlgili Makaleler</h2>
     <div class="related-grid">
       {% for r in related %}
       <a href="/blog/{{ r.slug }}" class="rel-card">

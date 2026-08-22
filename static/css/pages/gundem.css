@@ -163,5 +163,5 @@
     font-size:var(--bp-text-sm); height:34px; text-decoration:none; color:inherit;
   }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:#3fb950; } .mc-neg { color:#f85149; } .mc-neu { color:#8b949e; }
+  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
 
