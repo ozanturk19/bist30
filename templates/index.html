@@ -2747,7 +2747,7 @@ function _safeWriteJSON(key, value) {
 }
 
 function saveWatchlist() {
-  _safeWriteJSON(WATCH_KEY, [...watchlist]);
+  return _safeWriteJSON(WATCH_KEY, [...watchlist]);
 }
 function savePriceAlarms() {
   _safeWriteJSON(PRICE_ALARM_KEY, priceAlarms);
@@ -2770,7 +2770,7 @@ function toggleWatch(ticker) {
     watchlist.add(ticker);
     requestNotifPermission();
   }
-  saveWatchlist();
+  if (!saveWatchlist()) showAlarmToast('Takip listesi kaydedilemedi (tarayıcı kısıtı)');
   renderAlarmPanel();
   const btn = document.getElementById('ab-' + ticker);
   if (btn) {
@@ -3439,9 +3439,9 @@ function showSearchAc(val) {
     const sigBg    = s.signal === 'AL' ? 'rgba(0,226,144,.12)' : s.signal === 'SAT' ? 'rgba(248,81,73,.12)' : 'rgba(139,148,158,.1)';
     const sigIcon  = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
     const shortName = (s.name || '').replace(' A.Ş.','').replace(' Holding','').substring(0, 24);
-    return `<a class="sac-item" href="/hisse/${s.ticker}" data-idx="${i}">
-      <span class="sac-ticker">${s.ticker}</span>
-      <span class="sac-name">${shortName}</span>
+    return `<a class="sac-item" href="/hisse/${_esc(s.ticker)}" data-idx="${i}">
+      <span class="sac-ticker">${_esc(s.ticker)}</span>
+      <span class="sac-name">${_esc(shortName)}</span>
       <span class="sac-sig" style="color:${sigColor};background:${sigBg}">${sigIcon} ${sigLabel(s.signal)}</span>
     </a>`;
   }).join('');

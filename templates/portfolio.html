@@ -654,8 +654,8 @@ async function createCloudToken() {
     localStorage.setItem(CLOUD_TOKEN_KEY, data.token);
     _showActiveToken(data.token);
     // Auto-save current portfolio
-    await saveToCloud(true);
-    _setCloudMsg('Token oluşturuldu ve portföy kaydedildi!', '#3fb950');
+    const saved = await saveToCloud(true);
+    if (saved) _setCloudMsg('Token oluşturuldu ve portföy kaydedildi!', '#3fb950');
   } catch(e) {
     _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
   } finally {
@@ -708,11 +708,14 @@ async function saveToCloud(silent) {
     const data = await res.json();
     if (data.ok) {
       if (!silent) _setCloudMsg(`Kaydedildi! ${data.count} pozisyon.`, '#3fb950');
+      return true;
     } else {
       _setCloudMsg('Kayıt hatası: ' + (data.error || '?'), '#f85149');
+      return false;
     }
   } catch(e) {
     _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
+    return false;
   } finally {
     if (btn) btn.disabled = false;
   }
