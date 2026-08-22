@@ -30,7 +30,7 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
     var critTxt = hasAge
       ? 'Veriler ' + ageTxt + ' boyunca güncellenemiyor.'
       : 'Veriler güncellenemiyor — son güncelleme zamanı doğrulanamıyor.';
-    if (bTxt) bTxt.textContent = critTxt + suffix;
+    if (bTxt) { bTxt.textContent = critTxt + suffix; bTxt.style.color = '#f85149'; }
     banner.style.background  = 'rgba(248,81,73,0.12)';
     banner.style.borderColor = '#f85149';
     banner.style.display     = 'block';
@@ -38,7 +38,7 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
     var staleTxt = hasAge
       ? 'Veriler ' + ageTxt + ' önce güncellendi.'
       : 'Veriler bayat olabilir — son güncelleme zamanı doğrulanamıyor.';
-    if (bTxt) bTxt.textContent = staleTxt + suffix;
+    if (bTxt) { bTxt.textContent = staleTxt + suffix; bTxt.style.color = '#f5c949'; }
     banner.style.background  = 'rgba(245,201,73,.10)';
     banner.style.borderColor = 'rgba(245,201,73,.4)';
     banner.style.display     = 'block';

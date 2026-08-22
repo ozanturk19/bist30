@@ -11562,8 +11562,8 @@ def api_log_error():
         data = {}
     msg  = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("msg") or "").strip())[:500]
     src  = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("src") or "").strip())[:200]
-    line = data.get("line")
-    col  = data.get("col")
+    line = _LOG_CTRL_CHARS_RE.sub(" ", str(data.get("line") or "")).strip()[:20]
+    col  = _LOG_CTRL_CHARS_RE.sub(" ", str(data.get("col") or "")).strip()[:20]
     page = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("page") or "").strip())[:120]
     stack = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("stack") or "").strip())[:1000]
     ua   = _LOG_CTRL_CHARS_RE.sub(" ", (request.headers.get("User-Agent") or ""))[:200]
