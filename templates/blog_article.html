@@ -112,7 +112,7 @@
     <div class="art-desc">{{ article.desc }}</div>
     <div class="art-meta" style="justify-content:space-between">
       <div style="display:flex;gap:12px;align-items:center">
-        <span><span aria-hidden="true">📅</span> {{ article.date }}</span>
+        <span><span aria-hidden="true">📅</span> {{ article.date_fmt or article.date }}</span>
         <span><span aria-hidden="true">⏱</span> {{ article.mins }} dakika okuma</span>
       </div>
       <div style="display:flex;gap:6px;align-items:center">

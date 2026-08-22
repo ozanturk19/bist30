@@ -11588,6 +11588,15 @@ def _normalize_article(a):
     # date: yoksa varsayılan
     if not art.get("date"):
         art["date"] = "2026-05-01"
+    # date_fmt: kullaniciya gosterilen insan-okunur TR tarih (DD.MM.YYYY) —
+    # ISO 'date' alani JSON-LD datePublished/dateModified icin oldugu gibi kalir,
+    # sitenin geri kalaniyla (bilanco takvimi, veri damgalari) tutarli olmasi icin
+    # sadece goruntuleme amacli ayri bir alan uretiliyor (bug-hunt r90).
+    try:
+        from datetime import datetime as _dt
+        art["date_fmt"] = _dt.strptime(art["date"], "%Y-%m-%d").strftime("%d.%m.%Y")
+    except (ValueError, TypeError):
+        art["date_fmt"] = art["date"]
     # body: markdown ise HTML'e çevir
     body = art.get("body", "")
     if body and not body.strip().startswith("<"):
@@ -11948,7 +11957,9 @@ def rate_limit_exceeded(e):
 def internal_server_error(e):
     if request.path.startswith("/api/"):
         return jsonify({"ok": False, "error": "Sunucu hatası"}), 500
-    return "<h1>500 Internal Server Error</h1>", 500
+    # bug-hunt r90: 404/429 markali+Turkce iken 500 ciplak Flask ciktisi (Ingilizce,
+    # markasiz) donuyordu -- 404 ile ayni desene getirildi.
+    return render_template("500.html"), 500
 
 
 if __name__ == "__main__":

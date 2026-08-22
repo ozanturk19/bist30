@@ -51,7 +51,7 @@
     min-height: 100vh;
   }
 
-  h1, h2, h3, .section-title, .panel-title {
+  h1, h2, h3, .section-title {
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }
 
@@ -178,6 +178,11 @@
     width: 6px; height: 6px;
     background: var(--bp-al); border-radius: 50%;
     animation: hissePulse 2s ease-in-out infinite;
+    display: inline-block; flex-shrink: 0;
+  }
+  .live-dot-idle {
+    width: 6px; height: 6px;
+    background: var(--bp-text3); border-radius: 50%;
     display: inline-block; flex-shrink: 0;
   }
   @keyframes hissePulse {

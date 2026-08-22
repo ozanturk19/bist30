@@ -132,7 +132,7 @@
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260820B">
 <script src="/static/bp-vocab.js?v=20260822A"></script>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=5bb00668">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=a7b48355">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- SEO: visually-hidden h1 — required by search engines; logo already communicates brand visually -->
@@ -2714,6 +2714,15 @@ function _safeLoadArray(key) {
   return Array.isArray(v) ? v : [];
 }
 
+/** bug-hunt r90: _safeLoadArray'in nesne karsiligi — priceAlarms/lastSignals gibi obje
+    bekleyen cagri yerlerine tip garantisi vermiyordu, gecerli-ama-obje-olmayan JSON
+    (ör. '42'/'"x"') sloppy-mode property atamasinda TypeError firlatabiliyor veya
+    sessizce no-op oluyordu. */
+function _safeLoadObject(key, fallback) {
+  const v = _safeLoadJSON(key, fallback);
+  return (typeof v === 'object' && v !== null && !Array.isArray(v)) ? v : fallback;
+}
+
 /** Faz 1 #2: v1 → v2 migration (idempotent) */
 function _migrateWatchlist() {
   try {
@@ -2732,8 +2741,8 @@ function _migrateWatchlist() {
 _migrateWatchlist();
 
 let watchlist      = new Set(_safeLoadArray(WATCH_KEY));
-let lastSignals    = _safeLoadJSON(SIGNAL_KEY, {});
-let priceAlarms    = _safeLoadJSON(PRICE_ALARM_KEY, {});
+let lastSignals    = _safeLoadObject(SIGNAL_KEY, {});
+let priceAlarms    = _safeLoadObject(PRICE_ALARM_KEY, {});
 let livePrices     = {};   // ticker → latest price from SSE
 let alarmPanelOpen = false;
 let _alarmPanelRelease = null;
@@ -2773,7 +2782,7 @@ function toggleWatch(ticker) {
     // CPO-DEV2-r34: cok-sekme lost-update onlemi (toggleWatch'taki watchlist ile
     // ayni desen, DEV2-bughunt-r7'de watchlist icin yapilmis ama priceAlarms'a
     // yansitilmamisti) — mutate etmeden once localStorage'dan taze oku.
-    priceAlarms = _safeLoadJSON(PRICE_ALARM_KEY, {});
+    priceAlarms = _safeLoadObject(PRICE_ALARM_KEY, {});
     delete priceAlarms[ticker];
     savePriceAlarms();
   } else {
@@ -2821,7 +2830,7 @@ function setPriceAlarm(ticker, dir, inputId) {
     // CPO-DEV2-r34: cok-sekme lost-update onlemi (toggleWatch'taki watchlist ile
     // ayni desen, DEV2-bughunt-r7'de watchlist icin yapilmis ama priceAlarms'a
     // yansitilmamisti) — mutate etmeden once localStorage'dan taze oku.
-    priceAlarms = _safeLoadJSON(PRICE_ALARM_KEY, {});
+    priceAlarms = _safeLoadObject(PRICE_ALARM_KEY, {});
     if (!priceAlarms[ticker]) priceAlarms[ticker] = {};
     priceAlarms[ticker][dir] = val;
     savePriceAlarms();
@@ -2847,7 +2856,7 @@ function clearPriceAlarm(ticker, dir) {
     // CPO-DEV2-r34: cok-sekme lost-update onlemi (toggleWatch'taki watchlist ile
     // ayni desen, DEV2-bughunt-r7'de watchlist icin yapilmis ama priceAlarms'a
     // yansitilmamisti) — mutate etmeden once localStorage'dan taze oku.
-    priceAlarms = _safeLoadJSON(PRICE_ALARM_KEY, {});
+    priceAlarms = _safeLoadObject(PRICE_ALARM_KEY, {});
   if (priceAlarms[ticker]) {
     delete priceAlarms[ticker][dir];
     if (!priceAlarms[ticker].above && !priceAlarms[ticker].below) {
@@ -2966,7 +2975,7 @@ function checkPriceAlarms(ticker, newPrice, oldPrice) {
     // CPO-DEV2-r34: cok-sekme lost-update onlemi (toggleWatch'taki watchlist ile
     // ayni desen, DEV2-bughunt-r7'de watchlist icin yapilmis ama priceAlarms'a
     // yansitilmamisti) — mutate etmeden once localStorage'dan taze oku.
-    priceAlarms = _safeLoadJSON(PRICE_ALARM_KEY, {});
+    priceAlarms = _safeLoadObject(PRICE_ALARM_KEY, {});
   const pa = priceAlarms[ticker];
   if (!pa) return;
   if (pa.above != null && oldPrice < pa.above && newPrice >= pa.above) {

@@ -1,0 +1,43 @@
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Sunucu Hatası | BorsaPusula</title>
+<meta name="robots" content="noindex,follow">
+<meta name="description" content="Beklenmeyen bir sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.">
+<meta property="og:title"       content="Sunucu Hatası — borsapusula.com">
+<meta property="og:description" content="Beklenmeyen bir sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.">
+<meta property="og:url"         content="https://borsapusula.com/500">
+<meta property="og:image"       content="https://borsapusula.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name"   content="borsapusula.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260820B">
+<link rel="stylesheet" href="/static/css/pages/404.css?v=3c9753ac">
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+<header>
+  <a class="brand" href="/">
+    <img src="/static/favicon.svg" alt="" width="26" height="26">
+    <span class="brand-name">Borsa<b>Pusula</b></span>
+  </a>
+</header>
+<main id="main-content" tabindex="-1">
+  <div class="code">500</div>
+  <h1>Beklenmeyen bir sunucu hatası oluştu</h1>
+  <p class="lead">Sorun bizde — ekibimiz bilgilendirildi. Lütfen birkaç dakika sonra tekrar deneyin.</p>
+
+  <div class="popular">
+    <h2>Popüler Sayfalar</h2>
+    <div class="popular-grid">
+      <a href="/">Ana Sayfa</a>
+      <a href="/tarama">Tarama</a>
+      <a href="/bilanco-takvimi">Bilanço Takvimi</a>
+      <a href="/sektor-harita">Sektörler</a>
+      <a href="/sinyal-performans">Performans</a>
+      <a href="/blog">Blog</a>
+    </div>
+  </div>
+</main>
+{% include '_mobile_nav_partial.html' %}
+{% endblock %}

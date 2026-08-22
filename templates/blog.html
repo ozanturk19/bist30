@@ -54,7 +54,7 @@
       <div class="bc-title">{{ a.title }}</div>
       <div class="bc-desc">{{ a.desc }}</div>
       <div class="bc-meta">
-        <span><span role="img" aria-label="Yayın tarihi"><span aria-hidden="true">📅</span></span> {{ a.date }}</span>
+        <span><span role="img" aria-label="Yayın tarihi"><span aria-hidden="true">📅</span></span> {{ a.date_fmt or a.date }}</span>
         <span><span aria-hidden="true">⏱</span> {{ a.mins }} dk okuma</span>
       </div>
     </a>
