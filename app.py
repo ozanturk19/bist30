@@ -11197,7 +11197,7 @@ def profil_page():
         subs = _load_subscribers()
         target_email = None
         for em, info in subs.items():
-            if info.get("token") == token and info.get("active"):
+            if secrets.compare_digest(info.get("token") or "", token or "") and info.get("active"):
                 target_email = em
                 break
     if not target_email:
@@ -11239,26 +11239,26 @@ def api_profile():
     _ALLOWED_SEGMENTS = ("bist30", "bist100", "yildiz", "bankacilik", "teknoloji", "enerji", "sanayi", "gyo")
 
     level     = _safe_str(data.get("level"))[:20]
-    if level not in _ALLOWED_LEVEL:
-        level = ""
+    if level and level not in _ALLOWED_LEVEL:
+        return safe_json({"ok": False, "error": "Geçersiz level değeri"}), 400
     freq      = _safe_str(data.get("freq"))[:20]
-    if freq not in _ALLOWED_FREQ:
-        freq = ""
+    if freq and freq not in _ALLOWED_FREQ:
+        return safe_json({"ok": False, "error": "Geçersiz freq değeri"}), 400
     size      = _safe_str(data.get("size"))[:30]
-    if size not in _ALLOWED_SIZE:
-        size = ""
+    if size and size not in _ALLOWED_SIZE:
+        return safe_json({"ok": False, "error": "Geçersiz size değeri"}), 400
     segments  = data.get("segments") or []
     if not isinstance(segments, list): segments = []
     segments = [str(s).strip()[:30] for s in segments if str(s).strip() in _ALLOWED_SEGMENTS][:10]
     mail_pref = _safe_str(data.get("mail_pref"), "daily")[:20]
     if mail_pref not in ("daily", "instant", "premium", "weekly"):
-        mail_pref = "daily"
+        return safe_json({"ok": False, "error": "Geçersiz mail_pref değeri"}), 400
 
     with _sub_lock:
         subs = _load_subscribers()
         target = None
         for em, info in subs.items():
-            if info.get("token") == token and info.get("active"):
+            if secrets.compare_digest(info.get("token") or "", token or "") and info.get("active"):
                 target = em; break
         if not target:
             return safe_json({"ok": False, "error": "Geçersiz token"}), 404
@@ -11289,7 +11289,7 @@ def api_me():
     with _sub_lock:
         subs = _load_subscribers()
         for em, info in subs.items():
-            if info.get("token") == token and info.get("active"):
+            if secrets.compare_digest(info.get("token") or "", token or "") and info.get("active"):
                 return safe_json({
                     "ok":            True,
                     "subscribed":    True,
@@ -11312,7 +11312,7 @@ def _get_sub_by_cookie():
     with _sub_lock:
         subs = _load_subscribers()
     for em, info in subs.items():
-        if info.get("token") == token and info.get("active"):
+        if secrets.compare_digest(info.get("token") or "", token or "") and info.get("active"):
             return em, info
     return None, None
 
@@ -11619,7 +11619,7 @@ def unsubscribe_page(token):
         subs = _load_subscribers()
         match_email = None
         for email, data in subs.items():
-            if data.get("token") == token:
+            if secrets.compare_digest(data.get("token") or "", token or ""):
                 match_email = email
                 break
 
