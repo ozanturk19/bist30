@@ -79,12 +79,7 @@
     </div>
     <button class="compare-btn" onclick="doCompare()">Karşılaştır</button>
     <a id="shareBtn" class="share-btn" href="." onclick="copyShareUrl(event);return false">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-      </svg>
-      Paylaş
+      <span aria-hidden="true">🔗</span> Linki Kopyala
     </a>
   </div>
 
@@ -393,7 +388,7 @@ async function doCompare() {
 function copyShareUrl(e) {
   e.preventDefault();
   const url = window.location.href;
-  const _shareBtnDefault = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Paylaş`;
+  const _shareBtnDefault = '<span aria-hidden="true">🔗</span> Linki Kopyala';
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById('shareBtn');
     btn.innerHTML = '<span aria-hidden="true">✓</span> Kopyalandı';
