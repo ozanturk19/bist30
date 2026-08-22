@@ -2707,11 +2707,24 @@ startSSE();
 window.addEventListener('pagehide', () => { if (_sseEs) { _sseEs.close(); _sseEs = null; } });
 window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
 
+/* CPO-DEV2-072 r98: Page Visibility — sekme arka plandayken duraklat.
+   Veri doğruluğuna dokunmuyor, sadece NE ZAMAN çektiğini değiştiriyor.
+   Sekme gizliyken SSE kapanır; görünür olunca hemen bir kez tazelenip devam eder. */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (_sseEs) { _sseEs.close(); _sseEs = null; }
+  } else {
+    if (!_sseEs) startSSE();
+    if (window._bpResumeMacro) window._bpResumeMacro();
+  }
+});
+
 /* ── Diğer Hisseler Accordion ──────────────────── */
 
 /* ── Makro Ticker Bandı ─────────────────────── */
 (function() {
   async function loadMacro() {
+    if (document.hidden) return; /* CPO-DEV2-072 r98: sekme arka plandayken çekme */
     try {
       const r = await fetch('/api/macro');
       const d = await r.json();
@@ -2740,6 +2753,7 @@ window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
   }
   loadMacro();
   setInterval(loadMacro, 180000);
+  window._bpResumeMacro = loadMacro; /* r98: sekme görünür olunca visibilitychange'den tetiklenir */
 })();
 </script>
 

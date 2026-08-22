@@ -888,6 +888,7 @@
   }
 
   async function loadMacro() {
+    if (document.hidden) return; /* CPO-DEV2-072 r98: sekme arka plandayken çekme */
     try {
       const r = await fetch('/api/macro');
       const d = await r.json();
@@ -897,6 +898,7 @@
 
   loadMacro();
   setInterval(loadMacro, 180000);
+  window._bpResumeMacro = loadMacro; /* r98: sekme görünür olunca visibilitychange'den tetiklenir */
 })();
 
 /* ── Sinyal görünen etiketleri ───────────────────── */
@@ -2684,6 +2686,22 @@ _syncFilterChips();
 
 
 fetchData();
+
+/* ── CPO-DEV2-072 r98: Page Visibility — sekme arka plandayken duraklat ──
+   Veri doğruluğuna dokunmuyor, sadece NE ZAMAN çektiğini değiştiriyor.
+   Sekme gizliyken: bekleyen fetchData polling'i iptal et + SSE'yi kapat
+   (gereksiz ağ/CPU trafiği). Sekme görünür olunca: hemen bir kez tazele,
+   sonra normal kadansla devam et. */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearTimeout(polling);
+    if (_sseInstance) { _sseInstance.close(); _sseInstance = null; }
+  } else {
+    fetchData();
+    if (window._bpResumeMacro) window._bpResumeMacro();
+    if (!_sseInstance) startSSE();
+  }
+});
 
 /* ── Alarm / Watchlist Sistemi ───────────────────── */
 // Watchlist Faz 1 #2 (MSG-032): localStorage key versioning + persistence garantisi
