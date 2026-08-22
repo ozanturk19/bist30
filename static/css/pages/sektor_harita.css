@@ -42,7 +42,7 @@
   .sec-stats { display:flex; gap:6px; margin-bottom:10px; position:relative; flex-wrap:wrap; }
   .stat-pill { padding:2px 8px; border-radius:var(--bp-radius-lg); font-size:var(--bp-text-xs); font-weight:600; }
   .pill-al   { background:rgba(0,226,144,.10); color:#00e290; border:1px solid rgba(0,226,144,.28); }
-  .pill-sat  { background:rgba(var(--bp-sat-rgb),.12); color:#ff7b72; border:1px solid rgba(var(--bp-sat-rgb),.3); }
+  .pill-sat  { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .pill-bkl  { background:rgba(var(--bp-text3-rgb),.1); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.2); }
 
   /* Progress bar */
@@ -58,7 +58,7 @@
   .detail-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; position:relative; }
   .stock-chip { padding:2px 7px; border-radius:var(--bp-radius); font-size:var(--bp-text-xs); font-weight:600; text-decoration:none; }
   .chip-al  { background:rgba(0,226,144,.10); color:#00e290; border:1px solid rgba(0,226,144,.22); }
-  .chip-sat { background:rgba(var(--bp-sat-rgb),.12); color:#ff7b72; border:1px solid rgba(var(--bp-sat-rgb),.25); }
+  .chip-sat { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.25); }
   .chip-bkl { background:rgba(var(--bp-text3-rgb),.08); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.18); }
 
   /* Legend */

@@ -2562,7 +2562,7 @@ def _build_signal_email(changes, unsubscribe_url):
     sig_color  = {"AL": "#00e290", "SAT": "#f85149", "BEKLE": "#909097"}
     sig_bg     = {"AL": "rgba(0,226,144,0.10)", "SAT": "rgba(248,81,73,0.10)", "BEKLE": "rgba(144,144,151,0.08)"}
     sig_border = {"AL": "rgba(0,226,144,0.30)", "SAT": "rgba(248,81,73,0.30)", "BEKLE": "rgba(144,144,151,0.20)"}
-    sig_lbl    = {"AL": "▲ Güçlü Trend", "SAT": "▼ Trend Bozuldu", "BEKLE": "● Yatay"}
+    sig_lbl    = {k: {"AL": "▲ ", "SAT": "▼ ", "BEKLE": "● "}[k] + v for k, v in _SIGNAL_LABELS.items()}
 
     # Premium ve sayım analizi
     al_count   = sum(1 for c in changes if c[2] == "AL")
@@ -11462,7 +11462,7 @@ def _check_user_alerts(stocks):
                 rows += f"""<tr>
   <td style="padding:10px 14px;border-bottom:1px solid #222;font-weight:700">{tkr}</td>
   <td style="padding:10px 14px;border-bottom:1px solid #222;color:{sig_color}">{sig}</td>
-  <td style="padding:10px 14px;border-bottom:1px solid #222">{s.get('price', '—')}</td>
+  <td style="padding:10px 14px;border-bottom:1px solid #222">{s.get('price') or '—'}</td>
   <td style="padding:10px 14px;border-bottom:1px solid #222">{'; '.join(reasons)}</td>
 </tr>"""
             # CPO-DEV2-047 madde 5: diger tum transactional maillerin (welcome/login/signal)

@@ -298,7 +298,7 @@ function svgSparkline(prices) {
 
 function calcXu030ReturnSince(dateStr) {
   if (!xu030Ohlc.length || !dateStr) return null;
-  const entry = xu030Ohlc.find(d => d.time >= dateStr) || xu030Ohlc[0];
+  const entry = xu030Ohlc.find(d => d.time >= dateStr) || xu030Ohlc[xu030Ohlc.length - 1];
   const last  = xu030Ohlc[xu030Ohlc.length - 1];
   if (!entry || !last || !entry.close || !last.close) return null;
   return (last.close - entry.close) / entry.close * 100;
