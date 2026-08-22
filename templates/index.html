@@ -2070,6 +2070,8 @@ async function saveAlertSettings() {
   const sigChange = document.getElementById('am-signal-change')?.checked;
   const rsi       = rsiEl?.value.trim();
   const rvol      = rvolEl?.value.trim();
+  const btn = document.querySelector('.alert-modal-save');
+  if (btn && btn.disabled) return;
   const st = document.getElementById('am-status');
   // isNaN + aralik guard - setPriceAlarm() ile ayni desen (bughunt-r13/FV-1)
   const _fields = [
@@ -2092,6 +2094,7 @@ async function saveAlertSettings() {
     rsi_threshold:  rsi          ? parseFloat(rsi)        : null,
     rvol_threshold: rvol         ? parseFloat(rvol)       : null,
   };
+  if (btn) btn.disabled = true;
   try {
     const r = await fetch(`/api/user-alerts/${ticker}`, {
       method: 'POST', credentials: 'same-origin',
@@ -2108,12 +2111,17 @@ async function saveAlertSettings() {
     }
   } catch (_) {
     if (st) st.textContent = 'Bağlantı hatası — lütfen daha sonra tekrar deneyin.';
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
 async function deleteAlertSettings() {
   const ticker = _alertModalTicker;
   if (!ticker) return;
+  const btn = document.querySelector('.alert-modal-delete');
+  if (btn && btn.disabled) return;
+  if (btn) btn.disabled = true;
   const st = document.getElementById('am-status');
   try {
     // r37 bug-hunt: r.ok kontrolsüz idi — 401/429/500'de fetch() reddetmez,
@@ -2129,6 +2137,8 @@ async function deleteAlertSettings() {
     setTimeout(() => closeAlertModal(), 800);
   } catch (_) {
     if (st) st.textContent = 'Bağlantı hatası — lütfen daha sonra tekrar deneyin.';
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 

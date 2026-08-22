@@ -129,6 +129,7 @@
       return;
     }
     if (btn && btn.disabled) return;
+    if (btn) btn.disabled = true;
     if (status) status.innerHTML = '<span style="color:#8b949e">⏳ Gönderiliyor…</span>';
     try {
       const res  = await fetch('/api/recognize', {
