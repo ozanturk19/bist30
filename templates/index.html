@@ -1202,6 +1202,11 @@ function _setAccordion(open) {
 
 function toggleChartAcc() {
   _setAccordion(!_accOpen);
+  // Mobilde varsayilan kapali -> fetchChart/fetchChart100 veriyi cekip _chartData'ya
+  // yazdi ama _accOpen o an false oldugu icin buildCharts() hic tetiklenmedi. Header'a
+  // dokunup ilk kez acildiginda chartMain henuz yoksa, aktif sekmeyi yeniden tetikle
+  // (cache varsa direkt rebuild, yoksa fetch) ki "Grafik yukleniyor" sonsuza kalmasin.
+  if (_accOpen && !chartMain) _switchTab(_activeSym);
 }
 
 /* ── Endeks seçimi (kart tıklama) ─────────────────── */
