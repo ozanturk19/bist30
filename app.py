@@ -4312,8 +4312,13 @@ def api_data_lite():
                 "signal":     s.get("signal"),
             })
     _resp = safe_json({"stocks": out})
+    _etag = hashlib.md5(_resp.get_data()).hexdigest()
     _resp.headers["Cache-Control"] = "no-cache"
-    _resp.headers["ETag"] = hashlib.md5(_resp.get_data()).hexdigest()
+    _resp.headers["ETag"] = _etag
+    # bug-hunt r93: /api/data ile ayni ETag deseni set ediliyordu ama If-None-Match
+    # hic kontrol edilmiyordu -- 304 kisa-devresi hicbir zaman calismiyordu.
+    if request.headers.get("If-None-Match") == _etag:
+        return Response(status=304, headers={"Cache-Control": "no-cache", "ETag": _etag})
     return _resp
 
 
@@ -7510,14 +7515,12 @@ def abd_stock_page(ticker):
 
 # ── SPEC-014 A1 — Sinyal Özeti (deterministik, kural-tabanlı) ─────────────────
 def _fmt_tl(v):
-    """Sayıyı TR formatında TL string'e çevirir."""
-    try:
-        fv = float(v)
-        if np.isnan(fv) or np.isinf(fv):
-            return "—"
-        return f"{fv:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " TL"
-    except (ValueError, TypeError):
-        return "—"
+    """Sayiyi TR formatinda TL stringe cevirir."""
+    # bug-hunt r93: kanonik tr_price_filter (satir ~616) ile ayni TR-format
+    # mantigini farkli bir algoritmayla (comma/X/dot swap-chain) tekrar
+    # implemente ediyordu -- iki kod yolu sessizce birbirinden sapabilirdi.
+    _s = tr_price_filter(v)
+    return _s if _s == "—" else _s + " TL"
 
 
 def build_signal_summary(stock):
@@ -10358,7 +10361,9 @@ def api_sektor_compare():
     selected = request.args.getlist("s")
     if not selected:
         return safe_json({"error": "s parametresi gerekli"}), 400
-    selected = [s.strip() for s in selected[:3]]  # max 3 sektör
+    # bug-hunt r93: dedup yoktu -- ayni sektor tekrar tekrar (?s=X&s=X&s=X) gonderilirse
+    # renderCompare() ayni sektoru N ayri sutunda (farkli accent renkleriyle) tekrar ciziyordu.
+    selected = list(dict.fromkeys(s.strip() for s in selected))[:3]  # max 3 sektor, dedup sira-koruyarak
     with _lock:
         stocks = list(_cache["data"])
     sec_map = _build_sector_map(stocks)
