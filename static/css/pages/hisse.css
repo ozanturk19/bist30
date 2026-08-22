@@ -314,7 +314,7 @@
     position: absolute;
     left: 0; top: 0;
     height: 100%;
-    background: linear-gradient(90deg, #f85149, #e3b341, #00e290);
+    background: linear-gradient(90deg, #f85149, #e3b341, var(--bp-al));
     border-radius:var(--bp-radius-sm);
     transition: width 0.4s ease;
   }
@@ -407,7 +407,7 @@
     font-weight: 700;
     margin-bottom: 8px;
   }
-  .eq-safe  { background: rgba(0,226,144,0.12);  color: #00e290; border: 1px solid rgba(0,226,144,0.3); }
+  .eq-safe  { background: rgba(var(--bp-al-rgb),0.12);  color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),0.3); }
   .eq-risky { background: rgba(210,153,34,0.12); color: #e3b341; border: 1px solid rgba(210,153,34,0.3); }
   .eq-note {
     font-size: var(--bp-text-sm);
@@ -462,7 +462,7 @@
   .hacim-profili .hp-row-val.bad { color:var(--bp-sat); }
   .hacim-profili .hp-row-val .hp-tag { font-size:var(--bp-text-2xs); padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:4px; font-weight:700; letter-spacing:.3px; }
   .hacim-profili .hp-row-val .hp-tag.premium { color:var(--bp-volume); background:rgba(var(--bp-volume-rgb),.10); border:1px solid rgba(var(--bp-volume-rgb),.45); }
-  .hacim-profili .hp-row-val .hp-tag.confirmed { color:var(--bp-al); background:rgba(0,226,144,.08); border:1px solid rgba(0,226,144,.40); }
+  .hacim-profili .hp-row-val .hp-tag.confirmed { color:var(--bp-al); background:rgba(var(--bp-al-rgb),.08); border:1px solid rgba(var(--bp-al-rgb),.40); }
   .hacim-profili .hp-row-summary { margin-top:6px; font-size:var(--bp-text-sm); color:var(--bp-text3); font-style:italic; line-height:1.4; }
 
   /* ── İndikatör badges ── */
@@ -714,7 +714,7 @@
     margin-top: 1px;
   }
   .kap-class-badge.oda { background: rgba(88,166,255,.1); color:var(--bp-brand); border:1px solid rgba(88,166,255,.2); }
-  .kap-class-badge.fr  { background: rgba(0,226,144,.1);  color:var(--bp-al); border:1px solid rgba(0,226,144,.2); }
+  .kap-class-badge.fr  { background: rgba(var(--bp-al-rgb),.1);  color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.2); }
   .kap-summary {
     font-size: var(--bp-text-base);
     color: var(--bp-text2);

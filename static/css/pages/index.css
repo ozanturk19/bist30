@@ -206,7 +206,7 @@
     font-size: var(--bp-text-2xs); font-weight: 600; cursor: default;
     white-space: nowrap;
   }
-  .sentiment-badge.s-positive { background: rgba(0,226,144,0.12); color: #00e290; border: 1px solid rgba(0,226,144,0.3); }
+  .sentiment-badge.s-positive { background: rgba(var(--bp-al-rgb),0.12); color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),0.3); }
   .sentiment-badge.s-negative { background: rgba(248,81,73,0.12); color: #f85149; border: 1px solid rgba(248,81,73,0.3); }
   .sentiment-badge.s-neutral  { background: rgba(139,139,151,0.12); color: #8b8b97; border: 1px solid rgba(139,139,151,0.25); }
   /* Tablo grup başlık satırı (desktop) */
@@ -410,7 +410,7 @@
   .gnm-card::before {
     content: ''; position: absolute; top: 0; left: 0; bottom: 0;
     width: 3px; border-radius: 10px 0 0 10px;
-    background: var(--gnm-accent, #00e290);
+    background: var(--gnm-accent, var(--bp-al));
   }
   .gnm-card.gnm-sat::before { --gnm-accent: #f85149; }
   .gnm-card.gnm-bekle::before { --gnm-accent: #909097; }
@@ -546,7 +546,7 @@
     font-size: var(--bp-text-2xs); font-weight: 600; margin-top: 3px;
     display: inline-block; padding: 1px 6px; border-radius:var(--bp-radius-lg);
   }
-  .bp-days.active   { background: rgba(0,226,144,.10); color: var(--bp-al); }
+  .bp-days.active   { background: rgba(var(--bp-al-rgb),.10); color: var(--bp-al); }
   .bp-days.upcoming { background: rgba(var(--bp-brand-rgb),.12); color: var(--bp-brand); }
   .bilanco-mini-link {
     display: block; text-align: center; font-size: var(--bp-text-xs); color: var(--accent);
@@ -882,7 +882,7 @@
   .sig-tip-sep  { border: none; border-top: 1px solid #21262d; margin: 7px 0; }
   .sig-tip-row  { display: flex; align-items: center; gap: 7px; padding: 1px 0; }
   .sig-tip-ck   { font-size: var(--bp-text-xs); font-weight: 700; min-width: 13px; }
-  .sig-tip-ck.ok { color: #00e290; } .sig-tip-ck.no { color: #30363d; }
+  .sig-tip-ck.ok { color: var(--bp-al); } .sig-tip-ck.no { color: #30363d; }
   .sig-tip-lbl  { color: #c9d1d9; font-size: var(--bp-text-sm); }
   .sig-tip-footer { font-size: var(--bp-text-xs); color: #8b949e; margin-top: 7px; display: flex; flex-direction: column; gap: 2px; }
 

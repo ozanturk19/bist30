@@ -32,13 +32,13 @@
   .sec-name { font-size:var(--bp-text-md); font-weight:700; margin-bottom:10px; position:relative; font-family:'Space Grotesk',system-ui,sans-serif; }
   .sec-stats { display:flex; gap:6px; margin-bottom:10px; position:relative; flex-wrap:wrap; }
   .stat-pill { padding:2px 8px; border-radius:var(--bp-radius-lg); font-size:var(--bp-text-xs); font-weight:600; }
-  .pill-al   { background:rgba(0,226,144,.10); color:#00e290; border:1px solid rgba(0,226,144,.28); }
+  .pill-al   { background:rgba(var(--bp-al-rgb),.10); color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.28); }
   .pill-sat  { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .pill-bkl  { background:rgba(var(--bp-text3-rgb),.1); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.2); }
 
   /* Progress bar */
   .seg-bar { height:5px; border-radius:var(--bp-radius-sm); background:var(--bp-surface2); display:flex; overflow:hidden; margin-bottom:10px; position:relative; }
-  .seg-al  { background:#00e290; transition:width .4s; }
+  .seg-al  { background:var(--bp-al); transition:width .4s; }
   .seg-sat { background:var(--bp-sat); transition:width .4s; }
   .seg-bkl { background:var(--bp-border); flex:1; }
 
@@ -48,7 +48,7 @@
   /* Detail expand */
   .detail-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; position:relative; }
   .stock-chip { padding:2px 7px; border-radius:var(--bp-radius); font-size:var(--bp-text-xs); font-weight:600; text-decoration:none; }
-  .chip-al  { background:rgba(0,226,144,.10); color:#00e290; border:1px solid rgba(0,226,144,.22); }
+  .chip-al  { background:rgba(var(--bp-al-rgb),.10); color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.22); }
   .chip-sat { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.25); }
   .chip-bkl { background:rgba(var(--bp-text3-rgb),.08); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.18); }
 
@@ -159,7 +159,7 @@
   .score-bar-label { display:flex; justify-content:space-between; font-size:var(--bp-text-xs); color:var(--bp-text3); margin-bottom:5px; font-family:'Space Grotesk',sans-serif; }
   .score-bar-track { height:6px; background:var(--bp-border); border-radius:var(--bp-radius-sm); overflow:hidden; position:relative; }
   .score-bar-fill { height:100%; border-radius:var(--bp-radius-sm); transition:width .4s ease; }
-  .score-positive { background:linear-gradient(90deg,#00e290,#00c47a); }
+  .score-positive { background:linear-gradient(90deg,var(--bp-al),#00c47a); }
   .score-negative { background:linear-gradient(90deg,#f85149,#d03d36); }
   .score-neutral  { background:var(--bp-border2); }
 
@@ -185,7 +185,7 @@
   .cmp-stock-row:hover { background:var(--bp-surface2); }
   .cmp-stock-ticker { font-size:var(--bp-text-base); font-weight:800; font-family:'Space Grotesk',system-ui,sans-serif; min-width:60px; }
   .cmp-stock-sig { font-size:var(--bp-text-2xs); font-weight:700; padding:2px 7px; border-radius:var(--bp-radius-4); font-family:'Space Grotesk',sans-serif; flex-shrink:0; }
-  .cmp-sig-al  { background:rgba(0,226,144,0.15); color:var(--bp-al); }
+  .cmp-sig-al  { background:rgba(var(--bp-al-rgb),0.15); color:var(--bp-al); }
   .cmp-sig-sat { background:rgba(var(--bp-sat-rgb),0.15); color:var(--bp-sat); }
   .cmp-sig-bkl { background:rgba(var(--bp-text3-rgb),0.15); color:var(--bp-bkl); }
   .cmp-stock-price { font-size:var(--bp-text-sm); font-variant-numeric:tabular-nums; font-family:'Space Grotesk',monospace,sans-serif; color:var(--bp-text2); margin-left:auto; }
