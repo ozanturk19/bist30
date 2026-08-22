@@ -3111,11 +3111,11 @@ async function submitToastSubscribe() {
       const bar = document.getElementById('subscribeBar');
       if (bar) bar.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600">✅ ' + (json.message || 'Abone oldunuz!') + '</div>';
     } else {
-      showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'));
+      showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'), 'error');
       if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
     }
   } catch(e) {
-    showToast('Bağlantı hatası, tekrar deneyin.');
+    showToast('Bağlantı hatası, tekrar deneyin.', 'error');
     if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
   }
 }
@@ -3156,12 +3156,12 @@ async function submitSubscribe() {
         `<div style="font-size:13px;color:var(--bp-al);font-weight:600;flex:1">✅ ${json.message}</div>` +
         (json.token ? `<a href="/profil?t=${encodeURIComponent(json.token)}" style="color:var(--bp-brand);font-size:12px;text-decoration:none;border:1px solid rgba(var(--bp-brand-rgb),0.3);padding:5px 11px;border-radius:6px;font-weight:600;flex-shrink:0">Profili Tamamla →</a>` : '');
     } else {
-      showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'));
+      showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'), 'error');
       btn.textContent = origText;
       btn.disabled    = false;
     }
   } catch (e) {
-    showToast('Bağlantı hatası, tekrar deneyin.');
+    showToast('Bağlantı hatası, tekrar deneyin.', 'error');
     btn.textContent = origText;
     btn.disabled    = false;
   }

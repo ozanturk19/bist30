@@ -1055,9 +1055,9 @@ async function hisseSubscribe() {
     } else {
       btn.textContent = 'Abone Ol'; btn.disabled = false;
       emailEl.style.borderColor = '#f85149';
-      if (window.showToast) showToast('⚠️ ' + (j.message || j.error || 'Bir hata oluştu'));
+      if (window.showToast) showToast('⚠️ ' + (j.message || j.error || 'Bir hata oluştu'), 'error');
     }
-  } catch(e) { btn.textContent = 'Abone Ol'; btn.disabled = false; if (window.showToast) showToast('Bağlantı hatası, tekrar deneyin.'); }
+  } catch(e) { btn.textContent = 'Abone Ol'; btn.disabled = false; if (window.showToast) showToast('Bağlantı hatası, tekrar deneyin.', 'error'); }
 }
 
 /* ── Sinyal görünen etiketleri ───────────────────── */
@@ -2134,7 +2134,7 @@ async function loadChart(retry) {
     if (json.integrity_error) {
       console.warn('[chart] integrity_error:', json.integrity_error);
     }
-    if (json.loading || json.integrity_error || !json.chart) {
+    if (!res.ok || json.loading || json.integrity_error || !json.chart) {
       if (retry < _MAX_CHART_RETRY) {
         _showChartStatus('Grafik verisi yenileniyor, lütfen bekleyin…', false);
         setTimeout(() => loadChart(retry + 1), 3000);
@@ -2540,6 +2540,7 @@ function _pbColor(v) { return v == null ? '#e5e1e4' : v < 1 ? '#00e290' : v < 3 
 async function loadFundamentals() {
   try {
     const res  = await fetch('/api/hisse/' + TICKER + '/fundamentals');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     document.getElementById('fundLoading').style.display = 'none';
     const f = json.fundamentals;
@@ -2598,6 +2599,7 @@ loadFundamentals();
 async function loadMTF() {
   try {
     const res  = await fetch('/api/hisse/' + TICKER + '/mtf');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     const grid = document.getElementById('mtfGrid');
     if (!grid) return;
