@@ -254,10 +254,10 @@ function exportCSV() {
     (s.name||'').replace(/"/g,"'"),
     s.sector||'',
     sigLabel(s.signal),
-    (s.adx||0).toFixed(1),
-    (s.price||0).toFixed(2),
-    (s.change_pct||0).toFixed(2)+'%',
-    s.vol_ratio ? '×'+s.vol_ratio.toFixed(1) : '',
+    (s.adx||0).toFixed(1).replace('.', ','),
+    (s.price||0).toFixed(2).replace('.', ','),
+    (s.change_pct||0).toFixed(2).replace('.', ',')+'%',
+    s.vol_ratio ? '×'+s.vol_ratio.toFixed(1).replace('.', ',') : '',
     bpSignalAgeCsv(s.signal_date),
     s.entry_quality||''
   ].map(v => `"${v}"`).join(','));

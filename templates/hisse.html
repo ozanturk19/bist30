@@ -2545,7 +2545,7 @@ async function loadFundamentals() {
       _fundCard('F/K Oranı', f.pe_ratio != null ? f.pe_ratio.toFixed(1) + 'x' : null, _peColor(f.pe_ratio), f.pe_ratio < 12 ? 'Ucuz' : f.pe_ratio < 25 ? 'Makul' : 'Pahalı'),
       _fundCard('İleriye Dönük F/K', f.forward_pe != null ? f.forward_pe.toFixed(1) + 'x' : null, _peColor(f.forward_pe)),
       _fundCard('F/DD Oranı', f.pb_ratio != null ? f.pb_ratio.toFixed(2) + 'x' : null, _pbColor(f.pb_ratio)),
-      _fundCard('HBK (EPS)', f.eps != null ? f.eps.toFixed(2) + ' ₺' : null, '#e5e1e4'),
+      _fundCard('HBK (EPS)', f.eps != null ? f.eps.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : null, '#e5e1e4'),
       _fundCard('F/S Oranı', f.price_to_sales != null ? f.price_to_sales.toFixed(2) + 'x' : null, '#e5e1e4'),
     ].filter(Boolean).join('');
 
