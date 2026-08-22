@@ -1,6 +1,7 @@
 """
-Faz 12 P1 — Data Quality Validator: Business Rules
-CPO-693: BIST-specific business rule validation for stock data
+Faz 12 P1 — Data Quality Validator (CPO-693): BIST business-rule doğrulama
++ Kanonik Etiket/Tarih-Türetme Kütüphanesi (CPO-1196/1321/1335): ADX/sinyal/
+giriş-kalitesi etiketleri ve sinyal-tarihi türetme fonksiyonlarının tek kaynağı.
 """
 
 import math
@@ -63,7 +64,12 @@ def validate_signal_consistency(ticker, signal, signal_price):
 
 
 def validate_date_range(ticker, signal_date):
-    """Sinyal tarihi bugün veya geçmişte olmalı (future date = veri hatası)."""
+    """Sinyal tarihi ayrıştırılabilir olmalı VE bugün-veya-geçmiş olmalı.
+
+    Tip/format hatası (beklenmeyen tip, ya da DD.MM.YYYY/YYYY-MM-DD dışı bir
+    string) -> flag=INVALID_DATE. Ayrıştırma başarılı ama tarih gelecekte ise
+    -> flag=FUTURE_DATE.
+    """
     if signal_date is None:
         return {"ok": True, "ticker": ticker}
     try:
@@ -158,7 +164,9 @@ def derive_adx_label(adx):
     Eşikler: <18 Zayıf · 18-25 Orta · 25-40 Güçlü · >=40 Çok Güçlü.
     CPO-1196 D0 #4: önceden aynı eşik 6 farklı yüzeyde 6 farklı sayı ile
     tanımlıydı (app.py 3 yer + tarama/hisse/karsilastir/metodoloji şablonları).
-    Bu fonksiyon tek kaynak; çağıranlar kendi eşiğini tanımlamaz.
+    Bu fonksiyon kanonik kaynaktır; ancak app.py'nin ImportError-fallback'i ve
+    templates/hisse.html'in JS ilk-render fallback'i eşikleri kendi kopyalarında
+    tutar (otomatik senkron kilidi yok, elle eşitlenmeli — bkz. üstteki yorum).
     """
     try:
         a = float(adx)
