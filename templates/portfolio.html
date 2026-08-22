@@ -256,7 +256,10 @@ function _updatePfFetchError() {
 function retryPortfolioFetch() { fetchLive(); fetchCharts(); }
 
 /* ── F6: Chart data + Sparkline + XU030 ──────────── */
+let _fetchChartsBusy = false;
 async function fetchCharts() {
+  if (_fetchChartsBusy) return;
+  _fetchChartsBusy = true;
   // XU030 OHLC — mevcut /api/chart cache'i reuse
   try {
     const r = await fetch('/api/chart');
@@ -277,6 +280,7 @@ async function fetchCharts() {
     } catch(e) { console.warn('sparkline verisi alinamadi', e); }
   }));
   render();
+  _fetchChartsBusy = false;
 }
 
 function svgSparkline(prices) {
@@ -468,7 +472,10 @@ function removePosition(id) {
   render();
 }
 
+let _fetchLiveBusy = false;
 async function fetchLive() {
+  if (_fetchLiveBusy) return;
+  _fetchLiveBusy = true;
   try {
     const r = await fetch('/api/data');
     const j = await r.json();
@@ -479,6 +486,7 @@ async function fetchLive() {
   } catch(e) { _pfFetchErr.live = true; }
   _updatePfFetchError();
   render();
+  _fetchLiveBusy = false;
 }
 
 function esc(s) {

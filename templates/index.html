@@ -3606,7 +3606,7 @@ function switchGnmTab(tab) {
     btnHisse && btnHisse.setAttribute('aria-selected', 'false');
     panelMakro.style.display = 'block';
     panelHisse.style.display = 'none';
-    if (!_macroLoaded) loadMacroNews();
+    if (!_macroLoaded) { _macroLoaded = true; loadMacroNews(); }
   } else {
     btnHisse && btnHisse.classList.add('active');
     btnMakro && btnMakro.classList.remove('active');
@@ -3614,7 +3614,7 @@ function switchGnmTab(tab) {
     btnMakro && btnMakro.setAttribute('aria-selected', 'false');
     panelHisse.style.display = 'block';
     panelMakro.style.display = 'none';
-    if (!_hisseLoaded) loadGundem(false);
+    if (!_hisseLoaded) { _hisseLoaded = true; loadGundem(false); }
   }
 }
 

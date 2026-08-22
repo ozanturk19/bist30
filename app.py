@@ -11630,7 +11630,7 @@ def api_telegram_test():
     """Admin: Telegram bağlantısını test et."""
     require_admin()
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
-        return safe_json({"ok": False, "error": "Telegram env vars eksik (TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID)"})
+        return safe_json({"ok": False, "error": "Telegram env vars eksik (TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID)"}), 503
     _send_telegram(
         "🔔 <b>BorsaPusula Test Mesajı</b>\n"
         "Telegram entegrasyonu başarıyla yapılandırıldı!\n"
@@ -12069,7 +12069,7 @@ logger.info("=" * 50)
 @app.errorhandler(404)
 def page_not_found(e):
     if request.path.startswith("/api/"):
-        return jsonify({"error": "Bulunamadı"}), 404
+        return jsonify({"ok": False, "error": "Bulunamadı"}), 404
     return render_template("404.html"), 404
 
 
@@ -12092,7 +12092,7 @@ def rate_limit_exceeded(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     if request.path.startswith("/api/"):
-        return jsonify({"error": "Sunucu hatası"}), 500
+        return jsonify({"ok": False, "error": "Sunucu hatası"}), 500
     return "<h1>500 Internal Server Error</h1>", 500
 
 

@@ -583,7 +583,7 @@
   .sig-stat-lbl  { font-size:var(--bp-text-2xs); color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   @keyframes shimmerStat { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
   .stat-sk { background:linear-gradient(90deg,var(--bp-surface2) 25%,#252d3a 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:var(--bp-radius-4); display:inline-block; }
-  @media(max-width:500px) { .sig-stats-row{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:600px) { .sig-stats-row{grid-template-columns:repeat(2,1fr);} }
 
   /* ── Sinyal geçmişi ── */
   .history-section {
