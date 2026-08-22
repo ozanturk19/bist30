@@ -2785,6 +2785,16 @@ function toggleWatch(ticker) {
     priceAlarms = _safeLoadObject(PRICE_ALARM_KEY, {});
     delete priceAlarms[ticker];
     savePriceAlarms();
+    // bug-hunt r96: sunucu-tarafli e-posta alarmi (⚙️ Alert Ayarlari ile kurulan)
+    // burada hic silinmiyordu — kullanici "takibi birak" dedikten sonra ⚙️ butonu
+    // kayboluyordu ama sunucu o ticker icin sinirsiz e-posta gondermeye devam
+    // ediyordu, kullanicinin bunu gorup kapatabilecegi hicbir yuzey yoktu.
+    if (_isLoggedIn() && _userAlerts[ticker]) {
+      const _delTicker = ticker;
+      fetch(`/api/user-alerts/${_delTicker}`, {method: 'DELETE', credentials: 'same-origin'})
+        .then(r => { if (r.ok) delete _userAlerts[_delTicker]; })
+        .catch(e => console.warn('takipten cikarken sunucu alerti silinemedi:', e));
+    }
   } else {
     watchlist.add(ticker);
     requestNotifPermission();

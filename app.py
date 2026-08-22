@@ -11501,7 +11501,12 @@ def unsubscribe_page(token):
         del subs[match_email]
         _save_subscribers(subs)
         logger.info("E-posta abonelik iptal (kayit silindi): %s", match_email)
-        return render_template("unsubscribe.html", success=True, confirm=False, email=match_email)
+        resp = app.make_response(render_template("unsubscribe.html", success=True, confirm=False, email=match_email))
+        # bug-hunt r96: kayit sunucudan silinse de bp_sub cookie'si tarayicida 1 yillik
+        # max_age ile kalmaya devam ediyordu (delete_cookie hic cagrilmiyordu) -- set_cookie
+        # ile ayni ozniteliklerle (secure/httponly/samesite=Lax) temizleniyor.
+        resp.delete_cookie("bp_sub", samesite="Lax", secure=True, httponly=True)
+        return resp
 
 
 @app.route("/api/telegram/test", methods=["POST"])
