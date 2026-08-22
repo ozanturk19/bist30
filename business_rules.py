@@ -177,75 +177,15 @@ SIGNAL_LABELS = {
 }
 
 # Kod → görünen ad. Kısa form (gundem/karsilastir/tarama şablonlarındaki
-# çoğunluk) kanonik alındı. templates/index.html:5592 farklı, uzun-form bir
-# eşleme kullanıyor (örn. "✓ İdeal giriş bölgesi") — bu sapma T1.3/T1.8
-# sözlük-tekilleştirme adımında index.html'in kısa forma geçirilmesiyle kapanacak.
+# çoğunluk) kanonik alındı. templates/index.html eskiden farklı, uzun-form bir
+# eşleme kullanıyordu (örn. "✓ İdeal giriş bölgesi") — bu sapma r41'de (22.08,
+# commit fd4d9f5) index.html'in kısa forma geçirilmesiyle kapatıldı.
 ENTRY_QUALITY_LABELS = {
     "IDEAL": "İdeal",
     "IYI": "İyi",
     "DIKKATLI": "Dikkatli",
     "UZAK": "Uzak",
 }
-
-# KULLANILMIYOR (ölü kod) — app.py/template'ler bu fonksiyonu çağırmıyor, kendi
-# bağımsız kopyalarını kullanıyor: app.py:1917-1931 ve hisse.html:1937-1938.
-# app.py:1753-1767'deki signal_bars eşiklerinin görünen adları (renk kodları
-# ayrı tutuldu, bunlar salt metin sözlüğü).
-SIGNAL_AGE_LABELS = {
-    "TAZE": "Taze",
-    "GELISIYOR": "Gelişiyor",
-    "OLGUNLASIYOR": "Olgunlaşıyor",
-    "OLGUN": "Olgun",
-}
-
-
-def derive_signal_age_label(signal_bars, signal=None):
-    """KULLANILMIYOR (ölü kod) — app.py:1917-1931 ve hisse.html:1937-1938 kendi
-    bağımsız kopyalarını kullanıyor, "tek kaynak" iddiası fiilen yanlış.
-
-    signal_bars eşiğinden sinyal-yaşı etiketi türetir (app.py:1753-1767 ile aynı eşik).
-    signal="BEKLE" veya signal_bars=None ise etiket yok (None döner).
-    """
-    if signal == "BEKLE" or signal_bars is None:
-        return None
-    try:
-        b = float(signal_bars)
-    except (TypeError, ValueError):
-        return None
-    if b <= 3:
-        return SIGNAL_AGE_LABELS["TAZE"]
-    if b <= 7:
-        return SIGNAL_AGE_LABELS["GELISIYOR"]
-    if b <= 15:
-        return SIGNAL_AGE_LABELS["OLGUNLASIYOR"]
-    return SIGNAL_AGE_LABELS["OLGUN"]
-
-
-# KULLANILMIYOR (ölü kod) — app.py/hisse.html bu fonksiyonu çağırmıyor, kendi
-# bağımsız kopyalarını kullanıyor: app.py:1917-1931 ve hisse.html:1937-1938.
-# Hacim etiketleri — iki ayrı ölçüt aynı sözlükte, çağıran hangisini istediğini
-# anahtarla seçer. CONFIRMED = vol_confirmed booleanının (signal_vol_ratio>=1.7,
-# app.py:1652) görünen adı, HIGH/VERY_HIGH = hisse.html:3420'deki ayrı vr eşiği
-# (>=3 çok yüksek) — iki ölçüt birbirini geçersiz kılmaz, farklı bağlamlarda kullanılır.
-VOLUME_LABELS = {
-    "CONFIRMED": "Hacim Onaylı",
-    "HIGH": "Yüksek Hacim",
-    "VERY_HIGH": "Çok Yüksek Hacim",
-}
-
-
-def derive_volume_label(vol_ratio):
-    """KULLANILMIYOR (ölü kod) — app.py:1917-1931 ve hisse.html:1937-1938 kendi
-    bağımsız kopyalarını kullanıyor, "tek kaynak" iddiası fiilen yanlış.
-
-    vol_ratio eşiğinden hacim-büyüklük etiketi türetir (hisse.html:3420 ile aynı eşik).
-    """
-    try:
-        vr = float(vol_ratio)
-    except (TypeError, ValueError):
-        return None
-    return VOLUME_LABELS["VERY_HIGH"] if vr >= 3 else VOLUME_LABELS["HIGH"]
-
 
 # ── CPO-1335 — göreli tarih etiketi kanonik türetimi ────────────────────────
 # KUSUR: "Bugün"/"Dün" etiketi iki DONMUŞ eksenden türetiliyordu:

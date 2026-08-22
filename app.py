@@ -11225,7 +11225,10 @@ def api_profile():
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         data = {}
-    token = (data.get("token") or "").strip()
+    def _safe_str(x, default=""):
+        return x.strip() if isinstance(x, str) and x else default
+
+    token = _safe_str(data.get("token"))
     if not token:
         return safe_json({"ok": False, "error": "Token eksik"}), 400
 
@@ -11234,19 +11237,19 @@ def api_profile():
     _ALLOWED_SIZE = ("0-10k", "10-50k", "50-250k", "250k+")
     _ALLOWED_SEGMENTS = ("bist30", "bist100", "yildiz", "bankacilik", "teknoloji", "enerji", "sanayi", "gyo")
 
-    level     = (data.get("level") or "").strip()[:20]
+    level     = _safe_str(data.get("level"))[:20]
     if level not in _ALLOWED_LEVEL:
         level = ""
-    freq      = (data.get("freq") or "").strip()[:20]
+    freq      = _safe_str(data.get("freq"))[:20]
     if freq not in _ALLOWED_FREQ:
         freq = ""
-    size      = (data.get("size") or "").strip()[:30]
+    size      = _safe_str(data.get("size"))[:30]
     if size not in _ALLOWED_SIZE:
         size = ""
     segments  = data.get("segments") or []
     if not isinstance(segments, list): segments = []
     segments = [str(s).strip()[:30] for s in segments if str(s).strip() in _ALLOWED_SEGMENTS][:10]
-    mail_pref = (data.get("mail_pref") or "daily").strip()[:20]
+    mail_pref = _safe_str(data.get("mail_pref"), "daily")[:20]
     if mail_pref not in ("daily", "instant", "premium", "weekly"):
         mail_pref = "daily"
 
