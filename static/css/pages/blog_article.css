@@ -33,7 +33,6 @@
   .prose table { width:100%; border-collapse:collapse; margin:14px 0; }
   .prose th, .prose td { padding:8px 10px; text-align:left; border-top:1px solid #30363d; font-size:var(--bp-text-base); }
   .prose th { background:#21262d; font-weight:600; color:#f0f6fc; }
-  .prose span[style] { }  /* allow inline color spans */
 
   .related { margin-top:40px; padding-top:28px; border-top:1px solid #21262d; }
   .related-title { font-size:var(--bp-text-base); color:#8b949e; text-transform:uppercase; letter-spacing:.5px; font-weight:600; margin-bottom:14px; }
