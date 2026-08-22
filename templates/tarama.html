@@ -39,6 +39,8 @@
 
 <main id="main-content" class="container" tabindex="-1">
 
+  <div class="import-toast" id="csvToast" role="status" aria-live="polite"></div>
+
   {% include '_stale_banner.html' %}
 
   <!-- Filtre Çubuğu -->
@@ -258,8 +260,18 @@ function bpSignalAgeCsv(signalDate) {
   return age === null ? '' : age;
 }
 
+let _csvToastTimer = null;
+function showToast(msg, type='err', ms=3500) {
+  const el = document.getElementById('csvToast');
+  el.textContent = msg;
+  el.className = 'import-toast ' + type;
+  el.style.display = 'block';
+  clearTimeout(_csvToastTimer);
+  _csvToastTimer = setTimeout(() => { el.style.display = 'none'; }, ms);
+}
+
 function exportCSV() {
-  if (!_csvData.length) { alert('Önce filtre uygulayın.'); return; }
+  if (!_csvData.length) { showToast('Filtrelerinize uygun sonuç yok, CSV boş olur.', 'err'); return; }
   const hdr = ['Hisse','İsim','Sektör','Sinyal','ADX','Fiyat','Değişim%','Hacim Oranı','Sinyal Yaşı (gün)','Giriş Kalitesi'];
   const rows = _csvData.map(s => [
     s.ticker,

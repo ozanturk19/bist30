@@ -384,3 +384,13 @@
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--text3); border-top:1px solid var(--bp-border-subtle); margin-top:32px; }
   footer a { color:var(--text2); text-decoration:none; }
 
+  /* ── CSV export uyarı toast'ı (portfolio.html .import-toast ile ayni desen, token'lastirilmis) ── */
+  .import-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-md);
+    padding: 10px 20px; font-size: var(--bp-text-base); color: var(--bp-text);
+    z-index: var(--bp-z-page-toast); display: none; box-shadow: var(--bp-shadow-sm);
+  }
+  .import-toast.ok  { border-color: var(--bp-al-bd); color: var(--bp-al); }
+  .import-toast.err { border-color: var(--bp-sat-bd); color: var(--bp-sat); }
+

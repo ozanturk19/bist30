@@ -325,8 +325,8 @@
 
 
 <!-- ── Grafik Accordion ── -->
-<div class="chart-accordion" style="display:none" aria-hidden="true">
-  <div class="chart-acc-header" onclick="toggleChartAcc()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleChartAcc();}">
+<div class="chart-accordion">
+  <div class="chart-acc-header" id="chartAccHeader" onclick="toggleChartAcc()" role="button" tabindex="0" aria-expanded="false" aria-controls="chartAccBody" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleChartAcc();}">
     <div class="chart-tabs">
       <button class="chart-tab active" id="ctab-XU100" onclick="event.stopPropagation();switchChartTab('XU100')">BIST 100 Grafik</button>
       <button class="chart-tab" id="ctab-XU030" onclick="event.stopPropagation();switchChartTab('XU030')">BIST 30 Grafik</button>
@@ -1181,6 +1181,8 @@ function _setAccordion(open) {
   _accOpen = open;
   const body = document.getElementById('chartAccBody');
   const chev = document.getElementById('chartChev');
+  const header = document.getElementById('chartAccHeader');
+  if (header) header.setAttribute('aria-expanded', String(open));
   if (open) {
     body.classList.add('open');
     chev.classList.add('open');
