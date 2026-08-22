@@ -56,7 +56,8 @@ def validate_signal_consistency(ticker, signal, signal_price):
                 "flag": "MISSING_SIGNAL_PRICE",
                 "ticker": ticker,
                 "signal": signal,
-                "msg": "signal=AL ama signal_price=None",
+                "value": signal_price,
+                "msg": f"signal=AL ama signal_price={signal_price!r}",
             }
     return {"ok": True, "ticker": ticker, "signal": signal}
 

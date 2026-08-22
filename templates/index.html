@@ -2035,7 +2035,7 @@ async function openAlertModal(ticker) {
     </div>
     ${isLoggedIn ? `<button class="alert-modal-save" onclick="saveAlertSettings()">💾 Kaydet</button>
     ${_userAlerts[ticker] ? `<button class="alert-modal-delete" onclick="deleteAlertSettings()">🗑 Bu alerti sil</button>` : ''}` : ''}
-    <div id="am-status" class="alert-modal-status"></div>
+    <div id="am-status" class="alert-modal-status" role="status" aria-live="polite"></div>
   </div>`;
   modal.style.display = 'flex';
   setTimeout(() => modal.classList.add('visible'), 10);
