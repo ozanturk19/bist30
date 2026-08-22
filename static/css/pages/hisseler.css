@@ -267,7 +267,7 @@
   .hh-tab.active { color: #f0f6fc; border-bottom-color: #58a6ff; }
   .hh-tab:hover { color: #e6edf3; }
 
-  .hh-section { padding: 16px 0 8px; border-top: 1px solid #1c2128; }
+  .hh-section { padding: 16px 0 8px; border-top: 1px solid #1c2128; scroll-margin-top: 68px; }
   .hh-section:first-child { border-top: none; }
   .hh-section h2 {
     font-size: var(--bp-text-15); font-weight: 700; color: #f0f6fc;

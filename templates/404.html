@@ -30,7 +30,7 @@
   <div class="search-card">
     <label for="q404">Hisse kodu ile ara (ör. THYAO)</label>
     <form class="search-row" onsubmit="event.preventDefault(); var v=document.getElementById('q404').value.trim().toUpperCase(); if(v) window.location.href='/hisse/'+encodeURIComponent(v);">
-      <input id="q404" type="text" maxlength="10" placeholder="THYAO, GARAN, ASELS...">
+      <input id="q404" name="q" type="text" maxlength="10" placeholder="THYAO, GARAN, ASELS...">
       <button type="submit">Git</button>
     </form>
   </div>

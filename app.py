@@ -110,6 +110,7 @@ except ImportError as _dqv_import_err:
     def signal_date_age_days(signal_date, today=None):     return None
     # T1.1 fallback: business_rules yüklenemezse bugünkü değerlerle aynı sözlük
     SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
+    ENTRY_QUALITY_LABELS = {'IDEAL': 'İdeal', 'IYI': 'İyi', 'DIKKATLI': 'Dikkatli', 'UZAK': 'Uzak'}
 
 # ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
 _SENTRY_AVAILABLE = False
@@ -659,7 +660,7 @@ def signal_age_text_filter(signal_date, today=None):
     if age == 1:
         return "Dün"
     if age < 0:
-        return derive_signal_date_label(signal_date) or "—"
+        return derive_signal_date_label(signal_date, today=today) or "—"
     return f"{age} gün"
 
 
