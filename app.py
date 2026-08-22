@@ -11733,14 +11733,15 @@ def blog_article(slug):
     # Bilinen eski slug → doğru slug 301 yönlendirme
     if slug in _BLOG_SLUG_REDIRECTS:
         return redirect(url_for("blog_article", slug=_BLOG_SLUG_REDIRECTS[slug]), code=301)
-    raw_article = ARTICLES_BY_SLUG.get(slug)
-    if not raw_article:
+    normalized, _cat_counts = _get_blog_cache()
+    article = next((a for a in normalized if a["slug"] == slug), None)
+    if not article:
         abort(404)
-    article = _normalize_article(raw_article)
-    # İlgili makaleler: aynı kategori, max 3
-    related = [_normalize_article(a) for a in ARTICLES if a["cat"] == article["cat"] and a["slug"] != slug][:3]
+    # İlgili makaleler: aynı kategori, max 3 (zaten normalize edilmiş cache üzerinden --
+    # tekrar markdown parse yok, sonucu template'te zaten kullanılmayan body dahil)
+    related = [a for a in normalized if a["cat"] == article["cat"] and a["slug"] != slug][:3]
     if len(related) < 3:
-        extras = [_normalize_article(a) for a in ARTICLES if a["cat"] != article["cat"] and a["slug"] != slug]
+        extras = [a for a in normalized if a["cat"] != article["cat"] and a["slug"] != slug]
         related += extras[:3 - len(related)]
     return render_template("blog_article.html", article=article, related=related)
 
@@ -12073,6 +12074,16 @@ def page_not_found(e):
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
     return jsonify({"ok": False, "error": "Çok fazla istek, lütfen biraz sonra tekrar deneyin."}), 429
+
+
+# r44 bug-hunt: 404/429 icin yapilan "/api/* -> JSON" ayristirmasi 500e hic
+# uygulanmamisti -- yakalanmamis bir exception /api/* altinda HTML donup
+# frontend res.json()te SyntaxErrora dusuyordu (429daki ayni sinif hata).
+@app.errorhandler(500)
+def internal_server_error(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Sunucu hatası"}), 500
+    return "<h1>500 Internal Server Error</h1>", 500
 
 
 if __name__ == "__main__":

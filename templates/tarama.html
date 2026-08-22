@@ -168,20 +168,18 @@
 <script>
 /* ── Makro ticker ── */
 (function() {
-  const L = BP_ASSET_LABELS;
-  const F = BP_ASSET_DECIMALS;
   const ML={};
   async function load() {
     try {
       const d=(await (await fetch('/api/macro')).json()).items||[];
       if(!d.length) return;
       const h=d.map(it=>{
-        const p=it.price.toLocaleString('tr-TR',{minimumFractionDigits:F[it.label]??2,maximumFractionDigits:F[it.label]??2});
+        const p=bpFormatAssetPrice(it.label, it.price);
         const c=it.change;const s=c>0?'+':'';
         const cls=c>0.05?'mc-pos':c<-0.05?'mc-neg':'mc-neu';
         const href=ML[it.label]?` href="${ML[it.label]}"`:'';
         const tag=href?'a':'span';
-        return `<${tag} class="macro-item"${href} style="text-decoration:none;color:inherit"><span class="macro-item-lbl">${L[it.label]||it.label}</span><span>${p}</span><span class="${cls}">${c>0.05?'▲':c<-0.05?'▼':'●'} ${s}${c.toFixed(2)}%</span></${tag}>`;
+        return `<${tag} class="macro-item"${href} style="text-decoration:none;color:inherit"><span class="macro-item-lbl">${bpAssetLabel(it.label)}</span><span>${p}</span><span class="${cls}">${c>0.05?'▲':c<-0.05?'▼':'●'} ${s}${c.toFixed(2)}%</span></${tag}>`;
       }).join('');
       const _mt=document.getElementById('macroTrack');
       _mt.innerHTML=h+h;

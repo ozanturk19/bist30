@@ -2705,8 +2705,6 @@ window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
 
 /* ── Makro Ticker Bandı ─────────────────────── */
 (function() {
-  const LABELS = BP_ASSET_LABELS;
-  const PRICE_FMT = BP_ASSET_DECIMALS;
   async function loadMacro() {
     try {
       const r = await fetch('/api/macro');
@@ -2715,9 +2713,8 @@ window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
       if (!items.length) return;
       const MACRO_LINKS = {};
       const html = items.map(it => {
-        const label = LABELS[it.label] || it.label;
-        const dec   = PRICE_FMT[it.label] ?? 2;
-        const price = it.price.toLocaleString('tr-TR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+        const label = bpAssetLabel(it.label);
+        const price = bpFormatAssetPrice(it.label, it.price);
         const chg   = it.change;
         const sign  = chg > 0 ? '+' : '';
         const cls   = chg > 0.05 ? 'macro-chg-pos' : chg < -0.05 ? 'macro-chg-neg' : 'macro-chg-neu';

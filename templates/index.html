@@ -732,7 +732,7 @@
 </div>
 
 <!-- ── Alarm FAB — T4.4 adım 3/6 (TABLO) aksiyon katmanı: tablodaki 🔔 ile eklenen takip listesini açar, kod değişmedi ── -->
-<button class="alarm-fab" id="alarmFab" onclick="toggleAlarmPanel()" title="Takip listem">
+<button class="alarm-fab" id="alarmFab" onclick="toggleAlarmPanel()" title="Takip listem" aria-haspopup="dialog" aria-controls="alarmPanel" aria-expanded="false">
   <span role="img" aria-label="Takip listem">🔔</span>
   <span class="fab-badge" id="fabBadge">0</span>
 </button>
@@ -843,9 +843,6 @@
 <script>
 /* ── Makro Ticker Bandı ──────────────────────────── */
 (function() {
-  const LABELS = BP_ASSET_LABELS;
-  const PRICE_FMT = BP_ASSET_DECIMALS;
-
   function renderMacro(items) {
     if (!items || !items.length) return;
     // Endeks kartı fiyatlarını güncelle (makro API'den — chart yüklenmeden önce de çalışır)
@@ -869,9 +866,8 @@
     // İki kopya — sonsuz kaydırma için
     const MACRO_LINKS = {};
     const html = items.map(it => {
-      const label  = LABELS[it.label] || it.label;
-      const decimals = PRICE_FMT[it.label] ?? 2;
-      const price  = it.price.toLocaleString('tr-TR', {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
+      const label  = bpAssetLabel(it.label);
+      const price  = bpFormatAssetPrice(it.label, it.price);
       const chg    = it.change;
       const sign   = chg > 0 ? '+' : '';
       const cls    = chg > 0.05 ? 'macro-chg-pos' : chg < -0.05 ? 'macro-chg-neg' : 'macro-chg-neu';
@@ -2862,6 +2858,7 @@ function renderAlarmPanel() {
 function toggleAlarmPanel() {
   alarmPanelOpen = !alarmPanelOpen;
   document.getElementById('alarmPanel').classList.toggle('hidden', !alarmPanelOpen);
+  document.getElementById('alarmFab').setAttribute('aria-expanded', String(alarmPanelOpen));
   if (alarmPanelOpen) {
     renderAlarmPanel();
     if (_alarmPanelRelease) { _alarmPanelRelease(); _alarmPanelRelease = null; }
@@ -3429,7 +3426,7 @@ document.addEventListener('click', e => {
 
 // ── Jargon-term helper (SPEC-015 v2) ─────────────────────
 function _jt(term, text) {
-  var anchor = term === 'adx' ? 'adx' : term === 'ema' ? 'ema' : term === 'supertrend' ? 'supertrend' : 'adx';
+  var anchor = term;
   return '<a class="jargon-term" data-term="' + term + '" href="/metodoloji#' + anchor + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.3)">' + text + '</a>';
 }
 function _jtInd(label) {
