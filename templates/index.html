@@ -1996,7 +1996,7 @@ async function _loadUserAlerts() {
     if (!r.ok) return {};
     const d = await r.json();
     _userAlerts = d.alerts || {};
-  } catch (_) {}
+  } catch (e) { console.warn('_loadUserAlerts basarisiz:', e); }
   return _userAlerts;
 }
 

@@ -7139,26 +7139,15 @@ _TICKER_SYMBOL_MAP = {
 }
 
 # ── ABD Hisseleri ─────────────────────────────────────────────────────────────
-US_STOCKS = [
-    "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA",
-    "NFLX","JPM","BRKB","WMT","V","MA","UNH","XOM",
-]
+# NOT (r77 bug-hunt): US_STOCKS ve US_SECTORS 19.08 CPO-DEV2-036 temizliginin
+# unutulmus parcasiydi (hicbir tuketicisi kalmamisti), kaldirildi. US_STOCK_NAMES
+# KORUNDU: /api/karsilastir hala CANLI olarak US ticker isimleri icin kullaniyor.
 US_STOCK_NAMES = {
     "AAPL":"Apple","MSFT":"Microsoft","NVDA":"NVIDIA",
     "GOOGL":"Alphabet (Google)","AMZN":"Amazon","META":"Meta Platforms",
     "TSLA":"Tesla","NFLX":"Netflix","JPM":"JPMorgan Chase",
     "BRKB":"Berkshire Hathaway","WMT":"Walmart","V":"Visa",
     "MA":"Mastercard","UNH":"UnitedHealth","XOM":"ExxonMobil",
-}
-US_SECTORS = {
-    "Teknoloji":    ["AAPL","MSFT","NVDA","GOOGL","META"],
-    "E-Ticaret":    ["AMZN"],
-    "Otomotiv":     ["TSLA"],
-    "Medya":        ["NFLX"],
-    "Finans":       ["JPM","BRKB","V","MA"],
-    "Perakende":    ["WMT"],
-    "Sağlık":       ["UNH"],
-    "Enerji":       ["XOM"],
 }
 
 # US stocks için yfinance sembol eşleme (_TICKER_SYMBOL_MAP'a ekle)
