@@ -255,8 +255,13 @@ async function loadGundem() {
     const newSigs = d.new_signals || [];
     document.getElementById('newSigCount').textContent = newSigs.length > 0 ? `${newSigs.length} hisse` : '';
     if (newSigs.length === 0) {
+      // CPO-DEV2-072 r97(b): piyasa kapalıyken (hafta sonu/tatil/seans dışı)
+      // "gün içinde güncellenir" vaadi yanıltıcı — sunucunun ayırt ettiği mesajı kullan.
+      const emptyMsg = (d.market_open === false && d.closed_message)
+        ? d.closed_message
+        : 'Bugün henüz sinyal değişimi yok. Piyasa sinyalleri gün içinde güncellenir.';
       document.getElementById('newSignalsGrid').innerHTML =
-        '<div class="empty-box">Bugün henüz sinyal değişimi yok. Piyasa sinyalleri gün içinde güncellenir.</div>';
+        '<div class="empty-box">' + emptyMsg + '</div>';
     } else {
       document.getElementById('newSignalsGrid').innerHTML = newSigs.map(s => renderCard(s, true)).join('');
     }

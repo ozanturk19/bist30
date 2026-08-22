@@ -9650,6 +9650,21 @@ def api_gundem():
         if len(bilanco_upcoming) >= 2:
             break
 
+    # CPO-DEV2-072 r97(b): "Bugün henüz sinyal yok" boş-durum metni hafta
+    # sonu/resmi tatilde yanıltıcıydı (piyasa zaten kapalıyken "gün içinde
+    # güncellenir" vaadi veriyordu) — kanonik trading_calendar ile ayırt et.
+    _now_tr    = datetime.now(_TZ_TR)
+    _is_td     = is_trading_day(_now_tr.date())
+    _mkt_open  = _market_open(_now_tr)
+    gundem_closed_msg = None
+    if not _mkt_open:
+        if not _is_td:
+            gundem_closed_msg = "Bugün BIST işlem günü değil (hafta sonu/resmi tatil) — yeni sinyal beklenmiyor."
+        elif _now_tr.hour < 10:
+            gundem_closed_msg = "BIST henüz açılmadı, seans 10:00'da başlıyor."
+        else:
+            gundem_closed_msg = "BIST seansı kapandı — yarınki seansta yeni sinyaller görünecek."
+
     return safe_json({
         "new_signals": new_signals,
         "strong_al":   strong_al,
@@ -9661,6 +9676,8 @@ def api_gundem():
             "total": len(stocks),
         },
         "bilanco_upcoming": bilanco_upcoming,
+        "market_open":     _mkt_open,
+        "closed_message":  gundem_closed_msg,
     })
 
 
