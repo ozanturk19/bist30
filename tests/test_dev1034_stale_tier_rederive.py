@@ -72,22 +72,21 @@ def test_stale_fallback_rederives_tier():
 
 def test_derive_tier_bands_match_compose_score_thresholds():
     derive_tier = _load_derive_tier()
-    assert derive_tier("AL", 75, False, False) == "premium"
-    assert derive_tier("AL", 60, False, False) == "plus"
-    assert derive_tier("AL", 40, False, False) == "standart"
-    assert derive_tier("AL", 39, False, False) is None
+    assert derive_tier("AL", 75, False, False) == "guclu_sinyal"
+    assert derive_tier("AL", 60, False, False) == "standart"
+    assert derive_tier("AL", 55, False, False) is None
     assert derive_tier("BEKLE", 90, False, False) is None
 
 
 def test_derive_tier_demote_on_risk_flags():
     derive_tier = _load_derive_tier()
-    # tek risk bayrağı: bir kademe düşür
-    assert derive_tier("AL", 78, True, False) == "plus"
-    assert derive_tier("AL", 78, False, True) == "plus"
-    # iki risk bayrağı: iki kademe düşür
-    assert derive_tier("AL", 78, True, True) == "standart"
-    # standart'tan iki kademe düşerse tier kaybolur (None), hata fırlatmaz
-    assert derive_tier("AL", 45, True, True) is None
+    # tek risk bayrağı: bir kademe düşür (guclu_sinyal -> standart)
+    assert derive_tier("AL", 78, True, False) == "standart"
+    assert derive_tier("AL", 78, False, True) == "standart"
+    # iki risk bayrağı: iki kademe düşür, sadece 2 katman olduğundan tier kaybolur
+    assert derive_tier("AL", 78, True, True) is None
+    # standart'tan iki kademe düşerse de tier kaybolur (None), hata fırlatmaz
+    assert derive_tier("AL", 60, True, True) is None
 
 
 def test_derive_tier_handles_falsy_signal_strength_without_crash():

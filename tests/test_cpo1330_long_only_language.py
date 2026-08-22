@@ -56,6 +56,12 @@ def test_app_py_no_short_position_language_in_user_facing_strings():
     `_signed_ret` docstring'i bilinçli olarak muaf: kullanıcıya hiç render
     edilmeyen dahili backtest yorumu, ürün yüzeyi değil. Muafiyet CPO-1335'te
     sabit satır numarasından (9925) fonksiyon kaynağına taşındı.
+
+    Saf `#` yorum satırları da aynı gerekçeyle muaf (2026-08-23): kod yorumu
+    hiçbir zaman kullanıcıya render edilmez — testin amacı sadece entry_note/
+    f-string gibi gerçekten render edilen string üretimini yakalamak (bkz.
+    app.py:10217-10224, CPO-DEV2-074 gerekçe yorumu — bu satırlar da hedef
+    dışı, ilk örnekle aynı sınıf).
     """
     src = _read(_APP_PY)
     exempt = _signed_ret_block_lines(src)
@@ -64,6 +70,8 @@ def test_app_py_no_short_position_language_in_user_facing_strings():
         low = line.lower()
         if any(p in low for p in _SHORT_POSITION_PHRASES):
             if i in exempt:  # _signed_ret — dahili, kullanıcıya render edilmiyor
+                continue
+            if line.strip().startswith("#"):  # saf yorum satırı — render edilmiyor
                 continue
             violations.append((i, line.strip()))
     assert not violations, f"kısa pozisyon dili kullanıcı yüzeyine sızmış: {violations}"

@@ -81,10 +81,18 @@ def test_compose_score_called_only_in_analyze():
                 break
         return current
 
+    # _load_cache_from_disk() muaf: CPO-DEV2-053/055 (2026-08-22) — worker
+    # restart'ta diskteki AYNI ham göstergelerden (adx/vol_ratio/bull_score/
+    # confirmed/rsi) tier'ı yeniden türeten dar bir restart-arası tutarlılık
+    # köprüsü, bağımsız/farklı bir skor mantığı değil (bkz. app.py içindeki
+    # CPO-DEV2-053/055+r36 yorumu). _signed_ret için kullanılan muafiyet
+    # deseniyle aynı ruh (bkz. test_cpo1330_long_only_language.py).
     callers = {_enclosing_func(pos) for pos in call_positions}
-    assert callers == {"analyze"}, (
-        f"compose_score() beklenmedik fonksiyon(lar)dan çağrılıyor: {callers - {'analyze'}} — "
-        "sadece analyze() çağırmalı, diğer sayfalar cache'teki signal_strength'i okumalı "
+    allowed = {"analyze", "_load_cache_from_disk"}
+    assert callers <= allowed, (
+        f"compose_score() beklenmedik fonksiyon(lar)dan çağrılıyor: {callers - allowed} — "
+        "sadece analyze() (kanonik) ve _load_cache_from_disk() (restart-arası köprü, muaf) "
+        "çağırmalı, diğer sayfalar cache'teki signal_strength'i okumalı "
         "(CPO-983 kanonik skor kuralı, Site Contract §24)"
     )
 
