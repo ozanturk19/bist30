@@ -1130,8 +1130,8 @@ def _get_kap_uuid_blocking(ticker: str) -> str | None:
                     uuid = items[0]["memberOrFundOid"]
                     _kap_uuid_runtime[ticker] = uuid
                     return uuid
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("_get_kap_uuid_blocking(%s): %s", ticker, e)
     return None
 
 
@@ -4433,7 +4433,8 @@ def api_economic_calendar():
             e2["is_today"]   = (delta == 0)
             e2["is_past"]    = (delta < 0)
             all_events.append(e2)
-        except Exception:
+        except Exception as exc:
+            logger.warning("api_economic_calendar: malformed kayıt atlandı: %r (%s)", e, exc)
             continue
     upcoming = sorted([e for e in all_events if not e["is_past"]], key=lambda x: x["days_until"])
     recent   = sorted([e for e in all_events if e["is_past"] and e["days_until"] >= -7],
@@ -9846,7 +9847,8 @@ def ozet_gecmis(tarih):
     try:
         with open(fname, encoding="utf-8") as f:
             snap = json.load(f)
-    except Exception:
+    except Exception as e:
+        logger.error("ozet_gecmis(%s) snapshot okuma hatası: %s", tarih, e)
         abort(404)
 
     stocks     = snap.get("stocks", [])
@@ -10315,8 +10317,9 @@ def _inject_analytics_context():
     """CPO-1108 A1: _analytics.html partial'inin ihtiyaç duyduğu guard + token."""
     try:
         track = should_track(request)
-    except Exception:
+    except Exception as e:
         track = False
+        logger.warning("_inject_analytics_context: should_track hatası: %s", e)
     return dict(should_track=track, cf_beacon_token=CF_BEACON_TOKEN)
 
 

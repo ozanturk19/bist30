@@ -2,7 +2,7 @@
    BorsaPusula Site Search v1.0 — self-contained module
    ------------------------------------------------------------
    • Auto-injects CSS + overlay HTML on first run
-   • Exposes: window.bpOpenSearch(), window.bpCloseSearch()
+   • Exposes: window.bpOpenSearch()
    • Trigger: any element with class "header-search-btn" OR
               any element with onclick="bpOpenSearch()"
    • Keyboard: Cmd/Ctrl+K opens, Esc closes, ↑↓ Enter navigate
@@ -292,7 +292,6 @@
   }
 
   window.bpOpenSearch = openSearch;
-  window.bpCloseSearch = closeSearch;
 
   // ---- Keyboard shortcuts ----
   document.addEventListener('keydown', function(e){

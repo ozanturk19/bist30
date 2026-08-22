@@ -485,7 +485,7 @@ function renderCompare(json) {
       '</div>' +
       '<div class="sec-metrics">' +
         '<div class="metric-card"><div class="metric-lbl">Ort. RVOL</div><div class="metric-val">' + (d.avg_rvol != null ? d.avg_rvol + 'x' : '—') + '</div></div>' +
-        '<div class="metric-card"><div class="metric-lbl">Ort. Değişim</div><div class="metric-val" style="color:' + (d.avg_chg > 0 ? '#00e290' : d.avg_chg < 0 ? '#f85149' : 'inherit') + '">' + (d.avg_chg != null ? (d.avg_chg > 0 ? '+' : '') + d.avg_chg + '%' : '—') + '</div></div>' +
+        '<div class="metric-card"><div class="metric-lbl">Ort. Değişim</div><div class="metric-val" style="color:' + (d.avg_chg > 0 ? 'var(--bp-al)' : d.avg_chg < 0 ? 'var(--bp-sat)' : 'inherit') + '">' + (d.avg_chg != null ? (d.avg_chg > 0 ? '+' : '') + d.avg_chg + '%' : '—') + '</div></div>' +
       '</div>' +
     '</div>';
 
@@ -537,7 +537,7 @@ function fmtPrice(p) {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=53" defer></script>
+<script src="/static/bp-search.js?v=54" defer></script>
 <script src="/static/js/focus-trap.js?v=2"></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 

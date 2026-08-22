@@ -41,7 +41,7 @@
 
   <div class="summary-row">
     <div class="sum-chip"><div class="sum-num" id="sumAl" style="color:#3fb950">—</div><div class="sum-lbl">Güçlü Trend</div></div>
-    <div class="sum-chip"><div class="sum-num" id="sumSat" style="color:#f85149">—</div><div class="sum-lbl">Trend Bozuldu</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumSat" style="color:var(--bp-sat)">—</div><div class="sum-lbl">Trend Bozuldu</div></div>
     <div class="sum-chip"><div class="sum-num" id="sumBkl" style="color:#8b949e">—</div><div class="sum-lbl">Yatay</div></div>
     <div class="sum-chip"><div class="sum-num" id="sumTotal" style="color:#58a6ff">—</div><div class="sum-lbl">Toplam Hisse</div></div>
   </div>
@@ -144,7 +144,7 @@ function render(data) {
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span style="font-size:12px;background:rgba(63,185,80,0.12);color:#3fb950;padding:2px 8px;border-radius:8px;border:1px solid rgba(63,185,80,0.2)">${alCount} Güçlü</span>
-          <span style="font-size:12px;background:rgba(248,81,73,0.12);color:#f85149;padding:2px 8px;border-radius:8px;border:1px solid rgba(248,81,73,0.2)">${satCount} Bozuldu</span>
+          <span style="font-size:12px;background:rgba(var(--bp-sat-rgb),0.12);color:var(--bp-sat);padding:2px 8px;border-radius:8px;border:1px solid rgba(var(--bp-sat-rgb),0.2)">${satCount} Bozuldu</span>
         </div>
         <div class="period-desc">${escapeHtml(period.description)}</div>
       </div>
@@ -200,7 +200,7 @@ setInterval(load, 1800000);
 async function loadMacroBar(){try{const r=await fetch('/api/macro');const d=await r.json();const items=d.items||[];if(!items.length)return;const html=items.map(it=>{const lbl=bpAssetLabel(it.label);const price=bpFormatAssetPrice(it.label,it.price);const chg=it.change;const sign=chg>0?'+':'';const cls=chg>0.05?'mc-pos':chg<-0.05?'mc-neg':'mc-neu';const arrow=chg>0.05?'▲':chg<-0.05?'▼':'●';return`<span class="macro-item"><span class="macro-item-lbl">${lbl}</span><span>${price}</span><span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span></span>`;}).join('');const mt=document.getElementById('macroTrack');if(mt){mt.innerHTML=html+html;const w=mt.scrollWidth/2;window.bpStartMacroTicker && window.bpStartMacroTicker({track: mt, pps: 55});}}catch(e) { console.error('loadMacroBar basarisiz', e); }}
 loadMacroBar();setInterval(loadMacroBar,180000);
 </script>
-<script src="/static/bp-search.js?v=53" defer></script>
+<script src="/static/bp-search.js?v=54" defer></script>
 <script src="/static/js/focus-trap.js?v=2"></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 <script src="/static/stale-banner.js?v=ad6aaba3"></script>
