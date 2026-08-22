@@ -4175,8 +4175,14 @@ def set_security_headers(response):
     response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
     # Server header'ı temizle (info leak)
     response.headers.pop("Server", None)
-    # NOT: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
-    # Cloudflare tarafından ekleniyor — duplicate olmaması için biz eklemiyoruz.
+    # bug-hunt r65 + CPO-DEV2-063: Cloudflare bu 4 header'i zaten ekliyor ama origin (:8003)
+    # ufw'de dogrudan internete acik (CF bypass edilebiliyor) -- savunma-derinligi icin
+    # kosulsuz ekleniyor, CF zaten ekliyorsa duplicate olmasi zararsiz. HSTS haric (app.py
+    # TLS terminasyonu yapmadigi icin HSTS burada anlamsiz, nginx/443 katmaninda eklenmeli).
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     # CPO-1223 §1 (izole retry, DEV-1565/1566): CLOSE-WAIT sızıntısı /api/stream'e özgü
     # değildi — nginx'in terk ettiği (499/timeout) HER istek fd bırakabiliyordu, tek
     # worker'da 95/100 worker-connections tavanına dayanmıştı. Kök neden gevent pywsgi'nin

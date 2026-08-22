@@ -82,7 +82,7 @@ function sigClass(sig) {
   return sig === 'AL' ? 'al' : sig === 'SAT' ? 'sat' : 'bkl';
 }
 function sigLabel(sig) {
-  return sig === 'AL' ? '▲ Güçlü Trend' : sig === 'SAT' ? '▼ Trend Bozuldu' : '● Yatay';
+  return sig === 'AL' ? '▲ Güçlü Trend' : sig === 'SAT' ? '▼ Trend Bozuldu' : sig === 'BEKLE' ? '● Yatay' : sig;
 }
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, c => ({
