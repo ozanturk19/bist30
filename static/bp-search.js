@@ -180,9 +180,7 @@
     { h:'/bilanco-takvimi',   i:'📅', t:'Bilanço Takvimi' },
     { h:'/sektor-harita',     i:'🗺️', t:'Sektör Haritası' },
     { h:'/sinyal-performans', i:'📈', t:'Sinyal Performansı' },
-    { h:'/karsilastir',       i:'⚖️', t:'Hisse Karşılaştır' },
-    { h:'/kripto',            i:'₿',  t:'Kripto Piyasaları' },
-    { h:'/abd',               i:'🌍', t:'ABD Piyasaları' }
+    { h:'/karsilastir',       i:'⚖️', t:'Hisse Karşılaştır' }
   ];
 
   function render(q) {
