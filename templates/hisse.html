@@ -385,12 +385,12 @@
           ctx.beginPath(); ctx.moveTo(xs[idx], pad); ctx.lineTo(xs[idx], H-pad); ctx.stroke();
           ctx.fillStyle = '#e5e1e4';
           ctx.beginPath(); ctx.arc(xs[idx], ys[idx], 3.2, 0, Math.PI*2); ctx.fill();
-          var v = data[idx].c.toLocaleString('tr-TR', {minimumFractionDigits:2});
+          var v = data[idx].c.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2});
           val.textContent = v + ' ₺';
         } else {
           var pct = ((last-first)/first*100);
           var sign = pct >= 0 ? '+' : '';
-          val.textContent = last.toLocaleString('tr-TR',{minimumFractionDigits:2}) + ' ₺ (' + sign + pct.toFixed(1) + '%)';
+          val.textContent = last.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺ (' + sign + pct.toFixed(1) + '%)';
           val.style.color = up ? '#00e290' : '#ff7875';
         }
       }
@@ -1188,7 +1188,7 @@ function togglePortfolio() {
       source: 'hisse-detail-quick',
     });
     if (_hibSafeWritePortfolio(pf)) {
-      _hibToast(TICKER + ' portföye eklendi (1 lot · ' + price.toLocaleString('tr-TR', {minimumFractionDigits:2}) + '₺) · /portfolio\'da düzenle', 'success');
+      _hibToast(TICKER + ' portföye eklendi (1 lot · ' + price.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2}) + '₺) · /portfolio\'da düzenle', 'success');
       updateHibStarBtn();
     }
   }
@@ -1401,7 +1401,7 @@ function buildChart(d) {
     const lo = d.week52.low, hi = d.week52.high;
     const cur = d.summary.price;
     const pct = hi > lo ? Math.round(((cur - lo) / (hi - lo)) * 100) : 0;
-    const fmt = v => v.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+    const fmt = v => v.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     document.getElementById('w52low').textContent    = fmt(lo) + ' ₺';
     document.getElementById('w52high').textContent   = fmt(hi) + ' ₺';
     document.getElementById('w52cur').textContent    = fmt(cur) + ' ₺';
@@ -1617,7 +1617,7 @@ function renderCommentary(commentary) {
 function renderSummary(s, signalData) {
   window._bpLastSignalData = signalData || null;   // _hibCurrentPrice() icin
   /* Header */
-  const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2 }) : '—';
+  const fmt = v => v != null ? (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
   // sd.price (/api/data, her zaman güncel) > chart summary.price (lagged monthly close)
   const _dispPrice = (signalData && signalData.price != null) ? signalData.price : s.price;
   document.getElementById('hpPrice').textContent = fmt(_dispPrice);
@@ -2017,7 +2017,7 @@ function renderHistory(history, currentPrice) {
     return;
   }
   renderMiniStats(history);
-  const fmt = v => (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+  const fmt = v => (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   // Getiri hesabı:
   //   history[0] = en yeni (aktif) sinyal → anlık fiyatla karşılaştır
@@ -2158,8 +2158,8 @@ async function loadChart(retry) {
     if (sum) {
       _shareData = {
         signal: sum.signal || '',
-        price:  sum.price  ? (+sum.price).toLocaleString('tr-TR', {minimumFractionDigits:2}) : '',
-        sl:     sum.sl_level ? (+sum.sl_level).toLocaleString('tr-TR', {minimumFractionDigits:2}) : '',
+        price:  sum.price  ? (+sum.price).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2}) : '',
+        sl:     sum.sl_level ? (+sum.sl_level).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2}) : '',
         entry:  '',  /* /api/data fetch başarısında doldurulur */
       };
       const shareSec = document.getElementById('shareSection');
@@ -2176,7 +2176,7 @@ async function loadChart(retry) {
         renderSummary(json.chart.summary, sd);  /* re-render with sd */
         /* _shareData.entry güncellemesi */
         if (sd.signal_price && _shareData) {
-          _shareData.entry = (+sd.signal_price).toLocaleString('tr-TR', {minimumFractionDigits:2});
+          _shareData.entry = (+sd.signal_price).toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2});
         }
         /* F2 — Anomali rozet */
         const _ab = document.getElementById('hpAnomalyBadge');
@@ -2672,7 +2672,7 @@ function startSSE() {
       const old = parseFloat(priceEl.dataset.raw || '0');
 
       priceEl.dataset.raw = d.price;
-      priceEl.textContent = d.price.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+      priceEl.textContent = d.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
       if (old && d.price !== old) {
         priceEl.classList.remove('flash-up', 'flash-down');

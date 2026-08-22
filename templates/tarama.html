@@ -565,7 +565,7 @@ function renderResults(rows, count) {
       <td>${scoreCell(s.signal_strength, s.tier)}</td>
       <td>${trendCell(s.adx, s.adx_label)}</td>
       <td>${eqHtml}</td>
-      <td class="hide-mob-narrow price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})}</td>
+      <td class="hide-mob-narrow price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
       <td class="hide-mob-narrow ${chgCls}">${chgSign}${(s.change_pct||0).toFixed(2)}%</td>
       <td class="hide-mob">${rvolCell(s.vol_ratio)}</td>
       <td class="hide-mob">${freshCell(s)}</td>
@@ -597,7 +597,7 @@ function renderResults(rows, count) {
           <div class="mr-metric"><div class="mr-metric-label">Sinyal Gücü</div><span class="score-val ${_sccls}">${_scv}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Trend</div><span class="trend-label ${_tl[1]}">${_tl[0]}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Kalite</div>${_eqH}</div>
-          <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2})} ₺</span></div>
+          <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${(s.price||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Değişim</div><span class="${_chgCls}" style="font-size:13px;font-weight:600">${_chgSign}${(s.change_pct||0).toFixed(2)}%</span></div>
         </div>
       </a>`;

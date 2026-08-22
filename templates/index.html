@@ -853,7 +853,7 @@
       if (typeof it.price !== 'number' || it.price < 1000) return;
       const pEl = document.getElementById(pfx + 'Price');
       const cEl = document.getElementById(pfx + 'Chg');
-      if (pEl) pEl.textContent = it.price.toLocaleString('tr-TR', {minimumFractionDigits: 2});
+      if (pEl) pEl.textContent = it.price.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       if (cEl) {
         const sign = it.change > 0 ? '+' : '';
         cEl.textContent = sign + it.change.toFixed(2) + '%';
@@ -1130,7 +1130,7 @@ function renderEndeksCard(sym, s) {
   const slEl = document.getElementById(pfx + 'Sl');
   if (slEl) {
     if (s.sl_level && s.signal !== 'BEKLE') {
-      slEl.textContent = 'SL ' + s.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+      slEl.textContent = 'SL ' + s.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       slEl.style.display = '';
     } else { slEl.style.display = 'none'; }
   }
@@ -1336,7 +1336,7 @@ function applyLivePrices(prices, ts) {
     const newPrice = d.price;
 
     priceEl.dataset.raw  = newPrice;
-    priceEl.textContent  = newPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+    priceEl.textContent  = newPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     if (changeEl) {
       const sign = d.change_pct > 0 ? '+' : '';
@@ -1349,7 +1349,7 @@ function applyLivePrices(prices, ts) {
     const mChangeEl = document.getElementById('mlc-' + ticker);
     if (mPriceEl) {
       mPriceEl.dataset.raw = newPrice;
-      mPriceEl.textContent = newPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+      mPriceEl.textContent = newPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
     if (mChangeEl) {
       const sign = d.change_pct > 0 ? '+' : '';
@@ -1380,7 +1380,7 @@ function applyLivePrices(prices, ts) {
     /* Alarm panelindeki canlı fiyatı güncelle */
     livePrices[ticker] = newPrice;
     const appEl = document.getElementById('app-' + ticker);
-    if (appEl) appEl.textContent = newPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + ' ₺';
+    if (appEl) appEl.textContent = newPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
    } catch (_) {
      console.warn('applyLivePrices: ' + ticker + ' icin hatali veri, atlaniyor', _);
    }
@@ -2239,7 +2239,7 @@ function renderTable() {
         } else if (s.signal_price && s.signal !== 'BEKLE' && !bpIsSignalFromToday(s.signal_date)) {
           const ret = ((s.price - s.signal_price) / s.signal_price * 100);
           const rc = ret >= 0 ? '#00e290' : '#f85149';
-          entryTxt = `Giriş ${s.signal_price.toLocaleString('tr-TR',{minimumFractionDigits:2})} <span style="color:${rc}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`;
+          entryTxt = `Giriş ${s.signal_price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} <span style="color:${rc}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`;
         }
         const secHtml = s.sector && s.sector !== 'Diğer' ? `<div class="mc-sector">${_esc(s.sector)}</div>` : '';
         const anomalyHtml = (s.anomaly && s.anomaly.flag)
@@ -2255,10 +2255,10 @@ function renderTable() {
         let stripHtml = '';
         if (s.signal !== 'BEKLE' && (s.signal_price || s.sl_level)) {
           const entryVal = s.signal_price
-            ? s.signal_price.toLocaleString('tr-TR', {minimumFractionDigits:2})
+            ? s.signal_price.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2})
             : '—';
           const slVal = s.sl_level
-            ? s.sl_level.toLocaleString('tr-TR', {minimumFractionDigits:2})
+            ? s.sl_level.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2})
             : '—';
           /* CPO-1335: takvim yaşı (bar sayacı değil) */
           const barsVal = bpSignalAgeShort(s.signal_date);
@@ -2390,7 +2390,7 @@ function renderTable() {
       const ret = ((s.price - ep) / ep * 100);
       const retSign = ret >= 0 ? '+' : '';
       const retColor = ret >= 0 ? '#00e290' : '#f85149';
-      sigPriceHtml = `<span class="sig-price">${ep.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>` +
+      sigPriceHtml = `<span class="sig-price">${ep.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>` +
         `<span style="font-size:10px;color:${retColor};margin-left:3px">${retSign}${ret.toFixed(1)}%</span>`;
     } else {
       sigPriceHtml = '<span style="color:#8b949e">—</span>';
@@ -2400,7 +2400,7 @@ function renderTable() {
     let slHtml = '<span style="color:#8b949e">—</span>';
     if (s.sl_level && s.price && s.signal !== 'BEKLE') {
       const slPct = ((s.sl_level - s.price) / s.price * 100).toFixed(1);
-      slHtml = `<span class="sl-val">${s.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>` +
+      slHtml = `<span class="sl-val">${s.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>` +
                `<span class="sl-pct">${slPct}%</span>`;
     }
 
@@ -2864,7 +2864,7 @@ function renderAlarmPanel() {
     const sig     = lastSignals[t] || 'BEKLE';
     const sigCls  = sig === 'AL' ? 'AL' : sig === 'SAT' ? 'SAT' : 'BEKLE';
     const curPrice = livePrices[t]
-      ? livePrices[t].toLocaleString('tr-TR', { minimumFractionDigits: 2 })
+      ? livePrices[t].toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
       : '—';
     const pa    = priceAlarms[t] || {};
     const aboveInputId = 'pa-above-' + t;
@@ -2876,7 +2876,7 @@ function renderAlarmPanel() {
       <div class="ap-item-top">
         <span class="ap-ticker"><a href="/hisse/${t}" style="color:#f0f6fc;text-decoration:none">${t}</a></span>
         <span class="ap-price" id="app-${t}">${curPrice} ₺</span>
-        <span class="ap-sig ${sigCls}">${sigLabel(sig)}</span>
+        <span class="ap-sig ${sigCls}">${sig === 'AL' ? '▲' : sig === 'SAT' ? '▼' : '●'} ${sigLabel(sig)}</span>
         <button class="ap-remove" onclick="toggleWatch('${t}')" title="Takibi kaldır" aria-label="${t} takibini kaldır">✕</button>
       </div>
       <div class="ap-price-alarms">
@@ -2965,7 +2965,7 @@ function checkPriceAlarms(ticker, newPrice, oldPrice) {
   if (!pa) return;
   if (pa.above != null && oldPrice < pa.above && newPrice >= pa.above) {
     showNotification(ticker,
-      `${ticker} ₺${pa.above} üst hedefine ulaştı! (Şu an ₺${newPrice.toLocaleString('tr-TR',{minimumFractionDigits:2})})`,
+      `${ticker} ₺${pa.above} üst hedefine ulaştı! (Şu an ₺${newPrice.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})})`,
       '/hisse/' + ticker);
     delete pa.above;
     if (!pa.below) delete priceAlarms[ticker];
@@ -2974,7 +2974,7 @@ function checkPriceAlarms(ticker, newPrice, oldPrice) {
   }
   if (pa.below != null && oldPrice > pa.below && newPrice <= pa.below) {
     showNotification(ticker,
-      `${ticker} ₺${pa.below} alt hedefine ulaştı! (Şu an ₺${newPrice.toLocaleString('tr-TR',{minimumFractionDigits:2})})`,
+      `${ticker} ₺${pa.below} alt hedefine ulaştı! (Şu an ₺${newPrice.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})})`,
       '/hisse/' + ticker);
     delete pa.below;
     if (!pa.above) delete priceAlarms[ticker];
