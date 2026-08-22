@@ -411,8 +411,14 @@ let ALL_STOCKS = [];
 let acState = {};  // { t1: {idx, items}, ... }
 
 function _normalize(s) {
-  return (s || '').toString().toLocaleLowerCase('tr-TR')
-    .replace(/[İI]/g, 'i').replace(/[Ğğ]/g, 'g')
+  // bughunt-r86: toLocaleLowerCase('tr-TR') ASCII 'I'yi 'i' DEGIL noktasiz 'ı'ya
+  // cevirir, sonraki replace(/[İI]/g,...) artik bulunamayan buyuk harfleri arar ve
+  // HICBIR SEY DEGISTIRMEZ -- ASCII 'I' iceren 33 hisse (SISE/ISCTR/BIMAS vb.)
+  // kucuk harfle bulunamiyordu. Once ASCII/Turkce I/İ'yi elle 'i'ye katla, SONRA kuculr.
+  return (s || '').toString()
+    .replace(/İ/g, 'i').replace(/I/g, 'i')
+    .toLocaleLowerCase('tr-TR')
+    .replace(/[Ğğ]/g, 'g')
     .replace(/[Üü]/g, 'u').replace(/[Şş]/g, 's')
     .replace(/[Öö]/g, 'o').replace(/[Çç]/g, 'c');
 }

@@ -10357,6 +10357,11 @@ def api_sektor_compare():
     with _lock:
         stocks = list(_cache["data"])
     sec_map = _build_sector_map(stocks)
+    # bug-hunt r86: /api/karsilastir'deki tickers whitelist deseniyle tutarli
+    # defense-in-depth -- dogrulanmamis sec_name JSON yanitina aynen yaziliyordu.
+    selected = [s for s in selected if s in sec_map]
+    if not selected:
+        return safe_json({"error": "geçerli sektör bulunamadı"}), 400
     result = {}
     for sec_name in selected:
         items = sec_map.get(sec_name, [])

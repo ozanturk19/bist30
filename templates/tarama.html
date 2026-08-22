@@ -209,6 +209,7 @@ let _csvData = [];
 let _allRows  = [];      // full server result before text-search filter
 let _hasLoadedOnce = false;  // r47: _allRows.length===0 hem 'hic yuklenmedi' hem 'filtre 0 sonuc döndürdü' durumunu ayirt edemiyordu
 let _searchQ  = '';
+let _searchQAscii = ''; // bughunt-r86: ticker karsilastirmasi icin locale-bagimsiz ASCII buyuk harf
 let _searchTimer;
 
 function onSearchInput(val) {
@@ -217,6 +218,7 @@ function onSearchInput(val) {
   clearTimeout(_searchTimer);
   _searchTimer = setTimeout(() => {
     _searchQ = q.toLocaleUpperCase('tr-TR');
+    _searchQAscii = q.toUpperCase();
     applyTextFilter();
   }, 180);
 }
@@ -225,6 +227,7 @@ function clearSearch() {
   document.getElementById('fSearch').value = '';
   document.getElementById('searchClearBtn').style.display = 'none';
   _searchQ = '';
+  _searchQAscii = '';
   applyTextFilter();
 }
 
@@ -232,7 +235,7 @@ function applyTextFilter() {
   if (!_allRows.length) return;
   const rows = _searchQ
     ? _allRows.filter(s =>
-        s.ticker.includes(_searchQ) ||
+        s.ticker.includes(_searchQAscii) ||
         (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)))
     : _allRows;
   renderResults(rows, rows.length);
@@ -340,7 +343,7 @@ async function applyFilters() {
     _hasLoadedOnce = true;
     // Apply text filter on top of server results
     const filtered = _searchQ
-      ? _allRows.filter(s => s.ticker.includes(_searchQ) || (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)))
+      ? _allRows.filter(s => s.ticker.includes(_searchQAscii) || (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)))
       : _allRows;
     renderResults(filtered, filtered.length);
     // I1 — Active filter chips render (her applyFilters sonrası)
@@ -408,6 +411,7 @@ function removeFilterChip(filterKey) {
     search:   () => {
       document.getElementById('fSearch').value = '';
       _searchQ = '';
+      _searchQAscii = '';
       const x = document.getElementById('searchClearBtn');
       if (x) x.style.display = 'none';
     },
@@ -647,6 +651,7 @@ function resetFilters() {
   document.getElementById('fSearch').value = '';
   document.getElementById('searchClearBtn').style.display = 'none';
   _searchQ = '';
+  _searchQAscii = '';
   _currentSort = 'signal_strength';
   _sortDir = 'desc';
   _resetSortTHVisuals();
