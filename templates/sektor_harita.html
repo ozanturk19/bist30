@@ -497,7 +497,7 @@ function renderCompare(json) {
       '</div>' +
       '<div class="sec-metrics">' +
         '<div class="metric-card"><div class="metric-lbl">Ort. RVOL</div><div class="metric-val">' + (d.avg_rvol != null ? d.avg_rvol.toFixed(2) + 'x' : '—') + '</div></div>' +
-        '<div class="metric-card"><div class="metric-lbl">Ort. Değişim</div><div class="metric-val" style="color:' + (d.avg_chg > 0 ? 'var(--bp-al)' : d.avg_chg < 0 ? 'var(--bp-sat)' : 'inherit') + '">' + (d.avg_chg != null ? (d.avg_chg > 0 ? '+' : '') + d.avg_chg + '%' : '—') + '</div></div>' +
+        '<div class="metric-card"><div class="metric-lbl">Ort. Değişim</div><div class="metric-val" style="color:' + (d.avg_chg > 0 ? 'var(--bp-al)' : d.avg_chg < 0 ? 'var(--bp-sat)' : 'inherit') + '">' + (d.avg_chg != null ? (d.avg_chg > 0 ? '+' : '') + d.avg_chg.toFixed(2) + '%' : '—') + '</div></div>' +
       '</div>' +
     '</div>';
 
@@ -512,7 +512,7 @@ function renderCompare(json) {
       row.className = 'cmp-stock-row';
       row.href = '/hisse/' + s.ticker;
       var sigCls = s.signal === 'AL' ? 'cmp-sig-al' : (s.signal === 'SAT' ? 'cmp-sig-sat' : 'cmp-sig-bkl');
-      var chgVal = s.change_pct != null ? ((s.change_pct > 0 ? '+' : '') + s.change_pct + '%') : '—';
+      var chgVal = s.change_pct != null ? ((s.change_pct > 0 ? '+' : '') + s.change_pct.toFixed(2) + '%') : '—';
       var chgCls = s.change_pct > 0 ? 'cmp-chg-pos' : (s.change_pct < 0 ? 'cmp-chg-neg' : '');
       var rvolVal = s.rvol != null ? s.rvol.toFixed(2) + 'x' : '';
       var rvolCls = s.rvol >= 2 ? 'cmp-rvol-high' : '';

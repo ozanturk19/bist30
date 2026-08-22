@@ -49,7 +49,7 @@
   <div class="blog-grid" id="grid">
     {% for a in articles %}
     <a href="/blog/{{ a.slug }}" class="blog-card" data-cat="{{ a.cat }}"
-       data-title="{{ a.title|lower }}" data-desc="{{ a.desc|lower }}">
+       data-title="{{ a.title }}" data-desc="{{ a.desc }}">
       <div class="bc-cat">{{ a.cat }}{% if a.is_new %}<span class="bc-new">Yeni</span>{% endif %}</div>
       <div class="bc-title">{{ a.title }}</div>
       <div class="bc-desc">{{ a.desc }}</div>
@@ -82,14 +82,21 @@ function filterCat(cat, btn) {
   filterBlog();
 }
 
+/* DEV2-bughunt-r99: Türkçe büyük İ, düz .toLowerCase() ile 'i'+U+0307 (birleştirici
+   nokta) iki-kod-noktalı diziye dönüşüp arama eşleşmesini kırıyordu (bkz. bp-search.js
+   trFold() — aynı kök-neden, r28/r85'te başka yerlerde düzeltilmiş, blog.html'in kendi
+   bağımsız filterBlog()'una hiç taşınmamıştı). İ/I'yı toLowerCase()'den ÖNCE düz 'i'ye
+   çevirerek kaçının. */
+function trFold(s) { return String(s || '').replace(/İ/g, 'i').replace(/I/g, 'i').toLowerCase(); }
+
 function filterBlog() {
-  const q = (document.getElementById('blogSearch').value || '').toLowerCase().trim();
+  const q = trFold(document.getElementById('blogSearch').value).trim();
   const cards = document.querySelectorAll('.blog-card');
   let visible = 0;
   cards.forEach(card => {
     const catMatch = _activeCat === 'Tümü' || card.dataset.cat === _activeCat;
-    const textMatch = !q || card.dataset.title.includes(q) || card.dataset.desc.includes(q)
-                       || card.dataset.cat.toLowerCase().includes(q);
+    const textMatch = !q || trFold(card.dataset.title).includes(q) || trFold(card.dataset.desc).includes(q)
+                       || trFold(card.dataset.cat).includes(q);
     const show = catMatch && textMatch;
     card.style.display = show ? 'block' : 'none';
     if (show) visible++;

@@ -9818,8 +9818,11 @@ def api_contact():
     data    = request.get_json(silent=True)
     if not isinstance(data, dict):
         data = {}
-    name    = str(data.get("name",    "")).strip()[:100]
-    email   = str(data.get("email",   "")).strip()[:200]
+    # DEV2-bughunt-r99: subject zaten log-injection'a karsi temizleniyordu (CR/LF vb.
+    # kontrol karakteri), name/email ayni korumadan gecmiyordu - /api/contact JSON POST
+    # kabul ettigi icin web formunu atlayip loglara serbest metin enjekte edilebilirdi.
+    name    = _LOG_CTRL_CHARS_RE.sub(" ", str(data.get("name",    "")).strip())[:100]
+    email   = _LOG_CTRL_CHARS_RE.sub(" ", str(data.get("email",   "")).strip())[:200]
     subject = _LOG_CTRL_CHARS_RE.sub(" ", str(data.get("subject", "")).strip())[:200]
     message = str(data.get("message", "")).strip()[:2000]
 

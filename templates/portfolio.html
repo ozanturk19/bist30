@@ -369,7 +369,7 @@ function exportCSV() {
   const rows = portfolio.map(p => {
     const live     = liveData[p.ticker];
     const current  = live ? live.price  : '';
-    const sig      = live ? live.signal : '';
+    const sig      = live ? sigLabel(live.signal) : '';
     const pnlVal   = current ? ((current - p.price) * p.lot).toFixed(2) : '';
     const pnlPct   = current ? (((current - p.price) / p.price) * 100).toFixed(2) : '';
     return [
