@@ -96,7 +96,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260820B">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=66c47486">
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
 <!-- Mobile Bottom Navigation -->
@@ -217,7 +217,7 @@
     <span class="header-chg neu" id="hpChg">—</span>
     <span class="signal-badge signal-BEKLE" id="hpSignal" title="Yükleniyor">⋯</span>
     <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge"><span aria-hidden="true">⚠</span> Anomal</span>
-    <span id="liveTs" style="font-size:var(--bp-text-xs);color:#909097">○</span>
+    <span id="liveTs" style="font-size:var(--bp-text-xs);color:var(--bp-text3)">○</span>
   </div>
   {% if sector %}
   <span class="hib-sector">{{ sector }}</span>
@@ -664,12 +664,12 @@
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
       <div style="display:flex;gap:6px;align-items:center">
         <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
-                style="background:transparent;border:1px solid var(--bp-border);color:#909097;font-size:var(--bp-text-xs);padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
+                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
                 onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='#c7c5cd'"
                 onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='#909097'"
                 title="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
         <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
-                style="background:transparent;border:1px solid var(--bp-border);color:#909097;font-size:var(--bp-text-xs);padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
+                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
                 onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='#c7c5cd'"
                 onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='#909097'">
           Detaylı göster ▾
@@ -800,7 +800,7 @@
   <div data-tab-content="always" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
     <span style="font-size:var(--bp-text-sm);color:var(--bp-text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Resmi Kaynaklar</span>
     <a href="{{ kap_url }}" target="_blank" rel="noopener"
-       style="display:inline-flex;align-items:center;gap:5px;background:#1c1b1f;border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:#909097;text-decoration:none;transition:all .15s"
+       style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-text3);text-decoration:none;transition:all .15s"
        onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
       <span aria-hidden="true">📋</span> KAP Bildirimleri
     </a>
@@ -897,7 +897,7 @@
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> KAP Bildirimleri</h2>
       <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Son 90 gün · ODA + Finansal Rapor</span>
       <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q={{ ticker }}" target="_blank" rel="noopener"
-         style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:var(--bp-text-xs);color:#909097;background:#1c1b1f;border:1px solid var(--bp-border);border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
+         style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:var(--bp-text-xs);color:var(--bp-text3);background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
          onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
         KAP'ta Aç <span aria-hidden="true">↗</span>
       </a>

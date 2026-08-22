@@ -134,7 +134,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=20260820B">
 <script src="/static/bp-vocab.js?v=20260808A"></script>
 <link rel="stylesheet" href="/static/css/pages/index.css?v=684b0607">
-<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:#c7c5cd;text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:#c7c5cd;cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid #2a2a2c;border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- SEO: visually-hidden h1 — required by search engines; logo already communicates brand visually -->
 <h1 style="position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri</h1>
@@ -1808,7 +1808,7 @@ function _updateIdealStrip(stocks) {
   if (!strip || !items || ideal.length === 0) { if (strip) strip.style.visibility = 'hidden'; return; }
   items.innerHTML = ideal.slice(0, 10).map(s => {
     const retHtml = s._ret !== null
-      ? ` <span style="font-size:10px;font-weight:600;color:#00e290">+${s._ret.toFixed(1)}% <span style="opacity:.65;font-weight:500">sinyalden beri</span></span>`
+      ? ` <span style="font-size:10px;font-weight:600;color:var(--bp-al)">+${s._ret.toFixed(1)}% <span style="opacity:.65;font-weight:500">sinyalden beri</span></span>`
       : '';
     return `<a href="/hisse/${s.ticker}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(var(--bp-al-rgb),.08);
       border:1px solid rgba(var(--bp-al-rgb),.2);border-radius:var(--bp-radius);padding:3px 8px;text-decoration:none;
@@ -1979,7 +1979,7 @@ async function openAlertModal(ticker) {
     document.body.appendChild(modal);
   }
   const isLoggedIn = _isLoggedIn();
-  const loginNotice = isLoggedIn ? '' : `<div class="alert-modal-login-notice">⚠️ Alert ayarları için BorsaPusula hesabınıza giriş yapmanız gerekiyor.<br><a href="#" onclick="closePremiumModal();openPremiumModal();return false" style="color:#ffc850">Ücretsiz giriş yap →</a></div>`;
+  const loginNotice = isLoggedIn ? '' : `<div class="alert-modal-login-notice">⚠️ Alert ayarları için BorsaPusula hesabınıza giriş yapmanız gerekiyor.<br><a href="#" onclick="closePremiumModal();openPremiumModal();return false" style="color:var(--bp-volume)">Ücretsiz giriş yap →</a></div>`;
   const cfg = _userAlerts[ticker] || {};
   modal.innerHTML = `<div class="alert-modal" role="dialog" aria-modal="true">
     <button class="alert-modal-close" onclick="closeAlertModal()" aria-label="Kapat">×</button>
@@ -2015,7 +2015,7 @@ async function openAlertModal(ticker) {
     const pa = priceAlarms[ticker];
     if (pa && (pa.above || pa.below)) {
       const st = document.getElementById('am-status');
-      if (st) st.innerHTML = `<span style="color:#ffc850">📦 Eski fiyat alarmı bulundu (${pa.above ? '↑'+pa.above : ''}${pa.below ? ' ↓'+pa.below : ''}). <a href="#" onclick="syncLocalAlarm('${ticker}');return false">Hesabına senkronla →</a></span>`;
+      if (st) st.innerHTML = `<span style="color:var(--bp-volume)">📦 Eski fiyat alarmı bulundu (${pa.above ? '↑'+pa.above : ''}${pa.below ? ' ↓'+pa.below : ''}). <a href="#" onclick="syncLocalAlarm('${ticker}');return false">Hesabına senkronla →</a></span>`;
     }
   }
 }
@@ -2187,9 +2187,9 @@ function renderTable() {
         const chgSign  = s.change_pct > 0 ? '+' : '';
         const chgColor = s.change_pct > 0 ? '#00e290' : s.change_pct < 0 ? '#f85149' : '#8b949e';
         const fmtP = s.price.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
-        const wt = s.weekly_trend === 1 ? '<span style="color:#00e290;font-size:11px">↑</span>'
+        const wt = s.weekly_trend === 1 ? '<span style="color:var(--bp-al);font-size:11px">↑</span>'
                  : s.weekly_trend === -1 ? '<span style="color:var(--bp-sat);font-size:11px">↓</span>' : '';
-        const confIcon = s.confirmed ? `<span style="color:#00e290;font-size:10px">✓</span>`
+        const confIcon = s.confirmed ? `<span style="color:var(--bp-al);font-size:10px">✓</span>`
                        : (s.signal !== 'BEKLE' ? `<span style="color:#e3b341;font-size:10px">…</span>` : '');
         let entryTxt = '';
         if (s.signal !== 'BEKLE' && bpIsSignalFromToday(s.signal_date)) {
@@ -3088,12 +3088,12 @@ async function submitToastSubscribe() {
       if (typeof window.bpRecordSubscribe === 'function' && json.token) {
         window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
       }
-      if (toast) toast.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600;padding:4px 0">✅ ' + (json.message || 'Abone oldunuz!') + '</div><div style="font-size:11px;color:#64748b;margin-top:4px">Onay e-postası gönderildi.</div>';
+      if (toast) toast.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + (json.message || 'Abone oldunuz!') + '</div><div style="font-size:11px;color:#64748b;margin-top:4px">Onay e-postası gönderildi.</div>';
       try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz (subscribe)', e); }
       setTimeout(() => dismissSubToast(), 4000);
       // Ana subscription bar'ı da güncelle
       const bar = document.getElementById('subscribeBar');
-      if (bar) bar.innerHTML = '<div style="font-size:13px;color:#00e290;font-weight:600">✅ ' + (json.message || 'Abone oldunuz!') + '</div>';
+      if (bar) bar.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600">✅ ' + (json.message || 'Abone oldunuz!') + '</div>';
     } else {
       showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'), 'error');
       if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
