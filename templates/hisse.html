@@ -559,7 +559,7 @@
       {% for p in signal_summary.points %}
       <li data-tip="{{ p.tip }}" tabindex="0"
           style="display:flex;align-items:flex-start;gap:8px;font-size:var(--bp-text-base);line-height:1.55;color:var(--bp-text2);cursor:help">
-        <span style="color:{% if signal_summary.signal == 'AL' %}#00e290{% elif signal_summary.signal == 'SAT' %}#f85149{% else %}#909097{% endif %};flex-shrink:0;margin-top:1px">▸</span>
+        <span style="color:{% if signal_summary.signal == 'AL' %}var(--bp-al){% elif signal_summary.signal == 'SAT' %}var(--bp-sat){% else %}var(--bp-bkl){% endif %};flex-shrink:0;margin-top:1px">▸</span>
         <span>{{ p.text }}</span>
       </li>
       {% endfor %}

@@ -228,7 +228,7 @@ function goToDate(date) {
       <span style="font-size:var(--bp-text-base);font-weight:700;color:#f0f6fc">{{ s.ticker }}</span>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
-        <span style="font-size:var(--bp-text-xs);font-weight:600;color:{% if ret >= 0 %}#00e290{% else %}#f85149{% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
+        <span style="font-size:var(--bp-text-xs);font-weight:600;color:{% if ret >= 0 %}var(--bp-al){% else %}var(--bp-sat){% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
       {% endif %}
       <span style="font-size:var(--bp-text-2xs);color:#3fb950;font-weight:600"><span role="img" aria-label="İdeal giriş sinyali">✅</span></span>
     </a>
@@ -252,7 +252,7 @@ function goToDate(date) {
       <div class="sr-name">{{ sector_name }}</div>
       <div class="sr-bar-wrap">
         <div class="sr-bar">
-          <div class="sr-fill" style="width:{{ al_pct }}%;background:{% if al_pct >= 50 %}#00e290{% elif al_pct >= 30 %}#f59e0b{% else %}#f85149{% endif %}"></div>
+          <div class="sr-fill" style="width:{{ al_pct }}%;background:{% if al_pct >= 50 %}var(--bp-al){% elif al_pct >= 30 %}var(--bp-gold){% else %}var(--bp-sat){% endif %}"></div>
         </div>
       </div>
       <div class="sr-stats">

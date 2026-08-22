@@ -1623,6 +1623,7 @@ async function fetchData() {
 
     if (json.loading) { clearTimeout(polling); polling = setTimeout(fetchData, 3000); return; }
 
+    if (!res.ok || !Array.isArray(json.stocks)) { throw new Error('HTTP ' + res.status); }
     allStocks = json.stocks;
     checkAlarms(allStocks);  // sinyal değişikliği kontrolü
 
@@ -2638,7 +2639,7 @@ async function manualRefresh() {
   const tbody = document.getElementById('skeletonBody');
   if (tbody) {
     tbody.innerHTML = Array.from({ length: 12 }, () =>
-      `<tr class="skeleton-row" style="border-bottom:1px solid #21262d">
+      `<tr class="skeleton-row" style="border-bottom:1px solid var(--bp-border-subtle)">
         <td><div class="skeleton-cell sk-ticker"></div></td>
         <td><div class="skeleton-cell sk-price"></div></td>
         <td class="hide-mobile"><div class="skeleton-cell sk-chg"></div></td>
