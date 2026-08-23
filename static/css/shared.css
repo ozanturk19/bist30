@@ -70,5 +70,7 @@
     .header-search-btn { min-width: 44px; min-height: 44px; }
     .hib-action-btn { min-height: 44px; }
     .mc-bell { min-width: 44px; min-height: 44px; }
+    /* r110 bug-hunt: .filter-btn 28.5px yukseklikteydi (index.html + bilanco_takvimi.html, 11 buton) */
+    .filter-btn { min-height: 44px; }
   }
 

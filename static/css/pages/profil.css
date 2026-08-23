@@ -63,10 +63,6 @@
     margin-bottom: 12px;
     display: block;
   }
-  .q-help {
-    font-size: var(--bp-text-sm); color: var(--bp-text3);
-    margin-top: -8px; margin-bottom: 12px;
-  }
   .opts {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -99,19 +95,6 @@
   }
   .opt.checkbox {
     display: flex; align-items: center; gap: 10px;
-  }
-  .opt-checkbox-icon {
-    width: 18px; height: 18px;
-    border: 1.5px solid var(--bp-border2);
-    border-radius: var(--bp-radius-4);
-    flex-shrink: 0;
-    display: inline-flex; align-items: center; justify-content: center;
-    transition: all .15s;
-  }
-  .opt.selected .opt-checkbox-icon {
-    background: var(--bp-brand);
-    border-color: var(--bp-brand);
-    color: var(--bp-bg);
   }
   .submit-row {
     display: flex; justify-content: center; gap: 12px;

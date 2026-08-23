@@ -3749,7 +3749,7 @@ async function loadMacroNews() {
       return;
     }
     list.innerHTML = data.items.slice(0, 8).map(item => {
-      const safeUrl   = _esc(item.url   || '#');
+      const safeUrl   = safeHref(item.url);
       const safeSrc   = _esc(item.source || '');
       const safeTitle = _esc(item.title  || '');
       const safeTime  = _esc(item.date_str || '');

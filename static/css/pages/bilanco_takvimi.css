@@ -84,6 +84,7 @@
     font-size:var(--bp-text-2xs); color:var(--bp-brand); text-decoration:none;
     background:rgba(59,130,246,0.08); padding:2px 7px; border-radius:var(--bp-radius);
     border:1px solid rgba(59,130,246,0.15);
+    min-height:44px; /* r110 bug-hunt: 20.5px idi, WCAG 2.5.5 dokunma hedefi altinda (214 kart) */
   }
   .sc-kap:hover { background:rgba(59,130,246,0.15); }
 
