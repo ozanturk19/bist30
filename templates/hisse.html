@@ -2170,11 +2170,14 @@ async function loadChart(retry) {
     fetch('/api/data').then(r => r.json()).then(data2 => {
       renderFreshness(data2.data_freshness, data2.data_quality, data2.stocks_age_s, data2.refreshing);  /* SPEC-014 B2/B3 + CPO-551 A5 */
 
-      /* CPO-DEV2-076 (A): piyasa kapalıyken SSE'yi kapat, pulse yerine statik gösterge */
+      /* CPO-DEV2-076 (A): piyasa kapalıyken SSE'yi kapat, pulse yerine statik gösterge --
+         _sseEs kontrolünden BAĞIMSIZ (baglanti hic acilmamis olsa bile -- ör. sayfa
+         arka planda acilmissa -- gösterge yine de "Piyasa kapalı" olmalı, varsayilan
+         nötr işaretçide (○) kalmamalı). */
       if (data2.data_freshness && typeof data2.data_freshness.market_open === 'boolean') {
         _marketOpenNow = data2.data_freshness.market_open;
-        if (!_marketOpenNow && _sseEs) {
-          _sseEs.close(); _sseEs = null;
+        if (!_marketOpenNow) {
+          if (_sseEs) { _sseEs.close(); _sseEs = null; }
           const _lt0 = document.getElementById('liveTs');
           if (_lt0) {
             _lt0.style.cssText = 'font-size:11px;color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
