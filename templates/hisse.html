@@ -91,7 +91,7 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=20260823A">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260823B">
 <script src="/static/bp-vocab.js?v=20260823C"></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=0c8d960e">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
@@ -579,11 +579,11 @@
           <p class="commentary-text" id="commentaryText"></p>
         </div>
         <p style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin:6px 0 0;line-height:1.5">
-          Göstergeler (<a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — ADX">ADX</a>,
-          <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — RSI">RSI</a>,
-          <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — EMA">EMA</a>,
-          <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — DI±">DI±</a>,
-          <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)" title="Metodoloji — Supertrend">Supertrend</a>)
+          Göstergeler (<a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" title="Metodoloji — ADX">ADX</a>,
+          <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" title="Metodoloji — RSI">RSI</a>,
+          <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" title="Metodoloji — EMA">EMA</a>,
+          <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" title="Metodoloji — DI±">DI±</a>,
+          <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" title="Metodoloji — Supertrend">Supertrend</a>)
           algoritmik sinyalin temelidir.
           Sinyal kartları ve giriş analizi aşağıda detaylandırılmıştır.
         </p>
@@ -636,7 +636,7 @@
 
       <!-- R/R Görsel -->
       <div>
-        <div class="rr-card-label"><a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">Risk / Ödül</a></div>
+        <div class="rr-card-label"><a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">Risk / Ödül</a></div>
         <div id="rrBarContainer"></div>
         <div id="rrLevels"></div>
       </div>
@@ -1807,7 +1807,7 @@ function renderSummary(s, signalData) {
           const rrRowsHtml = (rrSig != null) ? `
             <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:11px;font-variant-numeric:tabular-nums">
               <div style="display:flex;justify-content:space-between;color:#8b949e">
-                <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)">R/R</a></span>
+                <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">R/R</a></span>
                 <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2)}x</strong>
               </div>
             </div>` : '';

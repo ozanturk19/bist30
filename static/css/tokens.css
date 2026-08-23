@@ -471,6 +471,8 @@ html {
 /* ── FAZ8 T5.3 — erisilebilirlik yardimci sinifi ──────────────
    Ekran okuyucu icin gorunur, gorsel olarak gizli icerik
    (tablo caption'lari, ikon-only baslik etiketleri). ─────────── */
+.jargon-term{color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)}
+
 .sr-only {
   position: absolute;
   width: 1px;
