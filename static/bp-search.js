@@ -687,7 +687,15 @@
       var d = await r.json();
       if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
       var items = d.items || [];
-      if (!items.length) return;
+      if (!items.length) {
+        // CPO-DEV2-084 #1: backend gecerli-ama-bos donerse de kalici "Yukleniyor..."
+        // yerine durust notr mesaj goster - ama sadece bu track daha once hic
+        // gercek veri render etmemisse (onceki basarili yuklemeyi silme).
+        if (!track.querySelector('.macro-item')) {
+          track.innerHTML = '<span class="macro-item"><span class="macro-item-lbl">Piyasa verisi şu an alınamıyor</span></span>';
+        }
+        return;
+      }
       if (typeof onItems === 'function') onItems(items);
       var html = items.map(function(it) {
         var lbl   = bpAssetLabel(it.label);
@@ -702,6 +710,11 @@
       window.bpStartMacroTicker({ track: track, pps: 55 });
     } catch (e) {
       console.error('loadMacroBar basarisiz', e);
+      // CPO-DEV2-084 #1: fetch/parse hatasinda da ayni notr-mesaj kurali -
+      // onceden basarili render varsa (stale ama gercek veri) dokunma, yoksa goster.
+      if (!track.querySelector('.macro-item')) {
+        track.innerHTML = '<span class="macro-item"><span class="macro-item-lbl">Piyasa verisi şu an alınamıyor</span></span>';
+      }
     }
   };
 

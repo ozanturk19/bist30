@@ -2403,6 +2403,11 @@ function renderTable() {
       ? `<div style="font-size:10px;color:#8b949e;margin-top:2px">${_esc(s.sector)}</div>` : '';
 
     const isWatching = watchlist.has(s.ticker);
+    // CPO-DEV2-084 #2: ⚙️ butonu artik SADECE isWatching (iyimser local-state)
+    // degil, gercek sunucu-taraflı alert varligini da (_userAlerts) hesaba katiyor -
+    // toggleWatch() DELETE basarisiz olursa _userAlerts[ticker] silinmez, dolayisiyla
+    // buton gorunur kalir ve kullanici tekrar deneyebilir (sahte 'kapali' izlenimi yok).
+    const hasAlertAccess = isWatching || !!_userAlerts[s.ticker];
     // SPEC-001 Faz 1: Tier grup başlığı satırı (desktop)
     let _tierHeaderTr = '';
     const _curTierD = s.tier || 'other';
@@ -2422,7 +2427,7 @@ function renderTable() {
       <td class="hide-mobile"><div class="indicators">${indHtml}</div></td>
       <td><button class="alarm-btn ${isWatching ? 'watching' : ''}" id="ab-${_escJsStr(s.ticker)}"
           onclick="event.stopPropagation();toggleWatch('${_escJsStr(s.ticker)}')"
-          title="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}" aria-label="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}">${isWatching ? '🔔' : '🔕'}</button>${isWatching ? `<button class="alert-settings-btn" onclick="event.stopPropagation();openAlertModal('${_escJsStr(s.ticker)}')" title="Alert ayarları" aria-label="Alert ayarları">⚙️</button>` : ''}</td>
+          title="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}" aria-label="${isWatching ? 'Takibi bırak' : 'Sinyal alarmı kur'}">${isWatching ? '🔔' : '🔕'}</button>${hasAlertAccess ? `<button class="alert-settings-btn" onclick="event.stopPropagation();openAlertModal('${_escJsStr(s.ticker)}')" title="Alert ayarları" aria-label="Alert ayarları">⚙️</button>` : ''}</td>
     </tr>`;
   }).join('');
 }
@@ -2802,9 +2807,18 @@ function toggleWatch(ticker) {
     // ediyordu, kullanicinin bunu gorup kapatabilecegi hicbir yuzey yoktu.
     if (_isLoggedIn() && _userAlerts[ticker]) {
       const _delTicker = ticker;
+      // CPO-DEV2-084 #2: deleteAlertSettings() emsaliyle ayni ilke - basarisiz silme
+      // sessiz kalmasin. _userAlerts SADECE r.ok'ta silinir, boylece basarisizlikta
+      // ⚙️ butonu (hasAlertAccess kosulu) bir sonraki render'da gorunur kalir.
       fetch(`/api/user-alerts/${_delTicker}`, {method: 'DELETE', credentials: 'same-origin'})
-        .then(r => { if (r.ok) delete _userAlerts[_delTicker]; })
-        .catch(e => console.warn('takipten cikarken sunucu alerti silinemedi:', e));
+        .then(r => {
+          if (r.ok) { delete _userAlerts[_delTicker]; }
+          else { showAlarmToast(`${_delTicker} e-posta alerti silinemedi, sunucuda aktif kalmaya devam ediyor — ⚙️ ile tekrar dene`); }
+        })
+        .catch(e => {
+          console.warn('takipten cikarken sunucu alerti silinemedi:', e);
+          showAlarmToast(`${_delTicker} e-posta alerti silinemedi (bağlantı hatası) — ⚙️ ile tekrar dene`);
+        });
     }
   } else {
     watchlist.add(ticker);
@@ -2864,10 +2878,10 @@ function setPriceAlarm(ticker, dir, inputId) {
     const _alreadyHit = _curPrice != null && (dir === 'above' ? _curPrice >= val : _curPrice <= val);
     const _canNotify = _notifyPermGranted();
     if (_alreadyHit) {
-      showAlarmToast(`${ticker} hedefi (₺${val}) zaten geçilmiş durumda — yalnızca fiyat tekrar hareket ederse bildirim alacaksın`);
+      showAlarmToast(`${ticker} hedefi (${val} ₺) zaten geçilmiş durumda — yalnızca fiyat tekrar hareket ederse bildirim alacaksın`);
     } else {
       showAlarmToast(_canNotify
-        ? `${ticker} ${dir === 'above' ? '▲ üst' : '▼ alt'} hedefi ₺${val} kuruldu`
+        ? `${ticker} ${dir === 'above' ? '▲ üst' : '▼ alt'} hedefi ${val} ₺ kuruldu`
         : `${ticker} hedefi kaydedildi — bildirim almak için tarayıcı izni gerekiyor`);
     }
   } else {
@@ -3014,7 +3028,7 @@ function checkPriceAlarms(ticker, newPrice, oldPrice) {
   if (!pa) return;
   if (pa.above != null && oldPrice < pa.above && newPrice >= pa.above) {
     showNotification(ticker,
-      `${ticker} ₺${pa.above} üst hedefine ulaştı! (Şu an ₺${newPrice.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})})`,
+      `${ticker} ${pa.above} ₺ üst hedefine ulaştı! (Şu an ${newPrice.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺)`,
       '/hisse/' + ticker);
     delete pa.above;
     if (!pa.below) delete priceAlarms[ticker];
@@ -3023,7 +3037,7 @@ function checkPriceAlarms(ticker, newPrice, oldPrice) {
   }
   if (pa.below != null && oldPrice > pa.below && newPrice <= pa.below) {
     showNotification(ticker,
-      `${ticker} ₺${pa.below} alt hedefine ulaştı! (Şu an ₺${newPrice.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})})`,
+      `${ticker} ${pa.below} ₺ alt hedefine ulaştı! (Şu an ${newPrice.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺)`,
       '/hisse/' + ticker);
     delete pa.below;
     if (!pa.above) delete priceAlarms[ticker];
