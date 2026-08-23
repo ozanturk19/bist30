@@ -519,7 +519,7 @@ function renderResults(rows, count) {
     const label = adxLabel || 'Zayıf';
     const cls = (label === 'Güçlü' || label === 'Çok Güçlü') ? 'strong' : label === 'Orta' ? 'medium' : 'weak';
     const pct = cls === 'strong' ? Math.min(100, (a/50)*100) : cls === 'medium' ? Math.min(60, (a/50)*100) : Math.max(20, (a/50)*100);
-    return `<div class="trend-cell" tabindex="0" data-tip="ADX ${a.toFixed(1)} — ${label.toLowerCase()} trend">
+    return `<div class="trend-cell" tabindex="0" data-tip="ADX ${a.toFixed(1).replace('.', ',')} — ${label.toLowerCase()} trend">
       <span class="trend-label ${cls}">${label}</span>
       <div class="trend-bar"><div class="trend-bar-fill ${cls}" style="width:${pct.toFixed(0)}%"></div></div>
     </div>`;
@@ -529,7 +529,7 @@ function renderResults(rows, count) {
     if (vr == null) return '<span class="rvol-cell low">—</span>';
     const v = vr;
     const cls = v >= 1.5 ? 'high' : v >= 0.8 ? 'normal' : 'low';
-    return `<div class="rvol-cell ${cls}"><span class="rvol-dot ${cls}"></span>${v.toFixed(2)}×</div>`;
+    return `<div class="rvol-cell ${cls}"><span class="rvol-dot ${cls}"></span>${v.toFixed(2).replace('.', ',')}×</div>`;
   };
   /* CPO-1335 Tazelik: etiket signal_date'in GERÇEK tarihinden türer.
      Eski sürüm signal_bars sayacını kullanıyordu; ticker o gün tazelenmezse
@@ -566,7 +566,7 @@ function renderResults(rows, count) {
       <td>${trendCell(s.adx, s.adx_label)}</td>
       <td>${eqHtml}</td>
       <td class="hide-mob-narrow price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'}</td>
-      <td class="hide-mob-narrow ${chgCls}">${s.change_pct != null ? chgSign + s.change_pct.toFixed(2) + '%' : '—'}</td>
+      <td class="hide-mob-narrow ${chgCls}">${s.change_pct != null ? chgSign + s.change_pct.toFixed(2).replace('.', ',') + '%' : '—'}</td>
       <td class="hide-mob">${rvolCell(s.vol_ratio)}</td>
       <td class="hide-mob">${freshCell(s)}</td>
       <td class="hide-mob hide-tablet"><span class="sector-tag">${escapeHtml(s.sector||'—')}</span></td>
@@ -598,7 +598,7 @@ function renderResults(rows, count) {
           <div class="mr-metric"><div class="mr-metric-label">Trend</div><span class="trend-label ${_tl[1]}">${_tl[0]}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Kalite</div>${_eqH}</div>
           <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—'}</span></div>
-          <div class="mr-metric"><div class="mr-metric-label">Değişim</div><span class="${_chgCls}" style="font-size:13px;font-weight:600">${s.change_pct != null ? _chgSign + s.change_pct.toFixed(2) + '%' : '—'}</span></div>
+          <div class="mr-metric"><div class="mr-metric-label">Değişim</div><span class="${_chgCls}" style="font-size:13px;font-weight:600">${s.change_pct != null ? _chgSign + s.change_pct.toFixed(2).replace('.', ',') + '%' : '—'}</span></div>
         </div>
       </a>`;
     }).join('');

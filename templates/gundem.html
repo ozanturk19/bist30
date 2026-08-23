@@ -177,17 +177,17 @@ function renderCard(s, isNew) {
   const adx  = adxFromStock(s);
   const chg  = s.change_pct != null ? parseFloat(s.change_pct) : null;
   const chgCls = chg > 0 ? 'up' : chg < 0 ? 'dn' : 'neu';
-  const chgTxt = chg != null ? (chg>0?'+':'') + chg.toFixed(2) + '%' : '';
+  const chgTxt = chg != null ? (chg>0?'+':'') + chg.toFixed(2).replace('.', ',') + '%' : '';
   const priceStr = s.price ? parseFloat(s.price).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '';
 
   const metrics = [];
-  if (adx != null)          metrics.push(`<div class="sc-metric"><span>ADX </span><strong>${adx.toFixed(1)}</strong></div>`);
-  if (s.rsi != null)        metrics.push(`<div class="sc-metric"><span>RSI </span><strong>${parseFloat(s.rsi).toFixed(1)}</strong></div>`);
+  if (adx != null)          metrics.push(`<div class="sc-metric"><span>ADX </span><strong>${adx.toFixed(1).replace('.', ',')}</strong></div>`);
+  if (s.rsi != null)        metrics.push(`<div class="sc-metric"><span>RSI </span><strong>${parseFloat(s.rsi).toFixed(1).replace('.', ',')}</strong></div>`);
   /* CPO-1335: "Süre" bar sayacı değil takvim yaşı */
   if (bpSignalDateAgeDays(s.signal_date) !== null)
     metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeShort(s.signal_date)}</strong></div>`);
   if (s.entry_quality)      metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${eqLabel(s.entry_quality)}</strong></div>`);
-  if (s.rr_ratio)           metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_ratio).toFixed(1)}</strong></div>`);
+  if (s.rr_ratio)           metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_ratio).toFixed(1).replace('.', ',')}</strong></div>`);
 
   const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';
 

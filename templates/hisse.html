@@ -390,7 +390,7 @@
         } else {
           var pct = ((last-first)/first*100);
           var sign = pct >= 0 ? '+' : '';
-          val.textContent = last.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺ (' + sign + pct.toFixed(1) + '%)';
+          val.textContent = last.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺ (' + sign + pct.toFixed(1).replace('.', ',') + '%)';
           val.style.color = up ? '#00e290' : '#ff7875';
         }
       }
@@ -1630,7 +1630,7 @@ function renderSummary(s, signalData) {
   const _dispChg = (signalData && signalData.change_pct != null) ? signalData.change_pct : s.change_pct;
   if (_dispChg != null) {
     const sign  = _dispChg > 0 ? '+' : '';
-    chgEl.textContent = sign + _dispChg.toFixed(2) + '%';
+    chgEl.textContent = sign + _dispChg.toFixed(2).replace('.', ',') + '%';
     chgEl.className   = 'header-chg ' + (_dispChg > 0 ? 'pos' : _dispChg < 0 ? 'neg' : 'neu');
   } else {
     chgEl.textContent = '—';
@@ -1677,7 +1677,7 @@ function renderSummary(s, signalData) {
       const retSign = ret >= 0 ? '+' : '';
       const retColor = ret >= 0 ? '#00e290' : '#f85149';
       document.getElementById('icEntry').innerHTML =
-        fmt(ep) + ` <span style="font-size:11px;color:${retColor}">(${retSign}${ret.toFixed(1)}%)</span>`;
+        fmt(ep) + ` <span style="font-size:11px;color:${retColor}">(${retSign}${ret.toFixed(1).replace('.', ',')}%)</span>`;
     } else if (s.signal !== 'BEKLE' && isNew) {
       document.getElementById('icEntry').innerHTML = '<span style="color:#e3b341;font-size:12px">⚡ Bugün oluştu</span>';
     } else {
@@ -1688,7 +1688,7 @@ function renderSummary(s, signalData) {
 
   /* SL */
   if (s.sl_level && s.price) {
-    const slPct = ((s.sl_level - s.price) / s.price * 100).toFixed(1);
+    const slPct = ((s.sl_level - s.price) / s.price * 100).toFixed(1).replace('.', ',');
     document.getElementById('icSl').textContent = fmt(s.sl_level);
     document.getElementById('icSlPct').textContent =
       (s.signal !== 'BEKLE' ? 'Riske uzaklık: ' : 'ST desteği: ') + slPct + '%';
@@ -1808,7 +1808,7 @@ function renderSummary(s, signalData) {
             <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:11px;font-variant-numeric:tabular-nums">
               <div style="display:flex;justify-content:space-between;color:#8b949e">
                 <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">R/R</a></span>
-                <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2)}x</strong>
+                <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2).replace('.', ',')}x</strong>
               </div>
             </div>` : '';
           rrLevelsEl.innerHTML = `
@@ -1844,7 +1844,7 @@ function renderSummary(s, signalData) {
     if (hpRvolRow && hpRvolVal && rvolVal != null) {
       const cls = isPremium ? 'ok' : (rvolVal >= 1.0 ? 'weak' : 'bad');
       hpRvolVal.className = 'hp-row-val ' + cls;
-      hpRvolVal.innerHTML = `${rvolVal.toFixed(2)}×` +
+      hpRvolVal.innerHTML = `${rvolVal.toFixed(2).replace('.', ',')}×` +
         /* CPO-535 #36: RVOL onaylı chip → "⭐ Hacim Onaylı" */
         (isPremium ? ' <span class="hp-tag premium" data-tip="RVOL ≥ 1.20 — Hacim onaylı sinyal" tabindex="0">⭐ Hacim Onaylı</span>' : '');
       hpRvolRow.style.display = '';
@@ -1860,7 +1860,7 @@ function renderSummary(s, signalData) {
       const tag = isStrongBreakout
         ? ' <span class="hp-tag confirmed" data-tip="Sinyal günü hacim ortalamayı belirgin geçti" tabindex="0">✓ TEYİTLİ</span>'
         : '';
-      hpSvolVal.innerHTML = `${vr.toFixed(2)}×${tag}`;
+      hpSvolVal.innerHTML = `${vr.toFixed(2).replace('.', ',')}×${tag}`;
       hpSvolRow.style.display = '';
     }
 
@@ -1909,7 +1909,7 @@ function renderSummary(s, signalData) {
     },
     {
       label: 'Momentum',
-      detail: adxStrength + (s.adx ? ' (' + Number(s.adx).toFixed(1) + ')' : ''),
+      detail: adxStrength + (s.adx ? ' (' + Number(s.adx).toFixed(1).replace('.', ',') + ')' : ''),
       techDetail: 'ADX(14): ' + s.adx + ' · DI+: ' + s.di_plus + ' · DI−: ' + s.di_minus,
       ok: s.signal === 'SAT' ? s.adx_bear : s.adx_bull,
       blog: '/blog/adx-indikatoru-nedir'
@@ -1979,7 +1979,7 @@ function renderSummary(s, signalData) {
         : (_sigAge !== null && _sigAge < 0) ? bpSignalAgeText(signalData.signal_date)
         : 'Son ' + bpSignalAgeText(signalData.signal_date) + 'dür aktif';
       conflictEl.textContent = barLabel + ' olan Güçlü Trend sinyali sürüyor, ancak bugünkü %' +
-        Math.abs(_dispChg).toFixed(1) + ' düşüş stop loss seviyesine yaklaştırıyor olabilir. Risk yönetimi önemli.';
+        Math.abs(_dispChg).toFixed(1).replace('.', ',') + ' düşüş stop loss seviyesine yaklaştırıyor olabilir. Risk yönetimi önemli.';
       conflictEl.style.display = '';
     } else {
       conflictEl.style.display = 'none';
@@ -2737,7 +2737,7 @@ function startSSE() {
       }
 
       const sign = d.change_pct > 0 ? '+' : '';
-      chgEl.textContent = sign + d.change_pct.toFixed(2) + '%';
+      chgEl.textContent = sign + d.change_pct.toFixed(2).replace('.', ',') + '%';
       chgEl.className   = 'header-chg ' + (d.change_pct > 0 ? 'pos' : d.change_pct < 0 ? 'neg' : 'neu');
 
       const _lt = document.getElementById('liveTs');

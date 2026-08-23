@@ -260,7 +260,7 @@
       if (!s) return '';
       const sig    = (s.signal || 'BEKLE').toLowerCase().replace('ü','u');
       const sigLbl = s.signal === 'AL' ? '▲ Güçlü Trend' : s.signal === 'SAT' ? '▼ Trend Bozuldu' : '● Yatay';
-      const chg    = s.change_pct != null ? (s.change_pct >= 0 ? '+' : '') + (+s.change_pct).toFixed(2) + '%' : '';
+      const chg    = s.change_pct != null ? (s.change_pct >= 0 ? '+' : '') + (+s.change_pct).toFixed(2).replace('.', ',') + '%' : '';
       const chgClr = s.change_pct >= 0 ? '#3fb950' : 'var(--bp-sat)';
       const price  = s.price != null ? (+s.price).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—';
       return `<a href="/hisse/${t}" class="rel-stock-card" title="${s.name||t}">

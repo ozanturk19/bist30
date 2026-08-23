@@ -858,7 +858,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (pEl) pEl.textContent = it.price.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       if (cEl) {
         var sign = it.change > 0 ? '+' : '';
-        cEl.textContent = sign + it.change.toFixed(2) + '%';
+        cEl.textContent = sign + it.change.toFixed(2).replace('.', ',') + '%';
         cEl.className = 'ec-chg ' + (it.change > 0.05 ? 'pos' : it.change < -0.05 ? 'neg' : 'neu');
       }
     });
@@ -1321,7 +1321,7 @@ function applyLivePrices(prices, ts) {
 
     if (changeEl) {
       const sign = d.change_pct > 0 ? '+' : '';
-      changeEl.textContent = sign + d.change_pct.toFixed(2) + '%';
+      changeEl.textContent = sign + d.change_pct.toFixed(2).replace('.', ',') + '%';
       changeEl.className   = 'change-pct ' + (d.change_pct > 0 ? 'pos' : d.change_pct < 0 ? 'neg' : 'neu');
     }
 
@@ -1711,7 +1711,7 @@ async function renderMarketSummary(stocks) {
       // Cümle 2
       const sectorChange = d.sectorChange || 0;
       const ivme = sectorChange >= 0 ? 'en güçlü' : 'en zayıf';
-      const sectorChangeStr = (sectorChange >= 0 ? '+' : '') + sectorChange.toFixed(1);
+      const sectorChangeStr = (sectorChange >= 0 ? '+' : '') + sectorChange.toFixed(1).replace('.', ',');
       const sectorChangeCls = sectorChange >= 0 ? 'delta-up' : 'delta-down';
       const s2 = !d.hottestSector
         ? `Sektör verisi yetersiz.`
@@ -1755,7 +1755,7 @@ function renderHeroPanel(stocks) {
   const fmtChg = (v) => {
     const sign = v > 0 ? '+' : '';
     const cls  = v > 0 ? 'pos' : v < 0 ? 'neg' : 'neu';
-    return `<span class="hp-chg ${cls}">${sign}${v.toFixed(2)}%</span>`;
+    return `<span class="hp-chg ${cls}">${sign}${v.toFixed(2).replace('.', ',')}%</span>`;
   };
 
   /* Tek satır: renkli şerit + ticker + hisse adı (kısaltılmış) + % değişim */
@@ -2395,7 +2395,7 @@ function renderTable() {
     // SL seviyesi + risk yüzdesi
     let slHtml = '<span class="bp-text-muted">—</span>';
     if (s.sl_level && s.price && s.signal !== 'BEKLE') {
-      const slPct = ((s.sl_level - s.price) / s.price * 100).toFixed(1);
+      const slPct = ((s.sl_level - s.price) / s.price * 100).toFixed(1).replace('.', ',');
       slHtml = `<span class="sl-val">${s.sl_level.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>` +
                `<span class="sl-pct">${slPct}%</span>`;
     }
@@ -2420,8 +2420,8 @@ function renderTable() {
     return _tierHeaderTr + `<tr data-ticker="${_escJsStr(s.ticker)}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${_escJsStr(s.ticker)}'">
       <td><a href="/hisse/${_escJsStr(s.ticker)}" style="color:inherit;text-decoration:none"><span class="ticker">${_escJsStr(s.ticker)}</span></a>${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — RVOL ≥ 1.20" style="color:var(--bp-volume);font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span tabindex="0" data-tip="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" tabindex="0" data-tip="${_esc(s.anomaly.reason)}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${_escJsStr(s.ticker)}" data-raw="${s.price}">${fmtPrice}</span></td>
-      <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
-      <td tabindex="0" onmouseenter="showSigTip('${_escJsStr(s.ticker)}',event)" onmouseleave="hideSigTip()" onfocus="showSigTip('${_escJsStr(s.ticker)}',event)" onblur="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${s.signal === 'AL' && s.change_pct < 0 ? ` <span class="sig-neg-day" tabindex="0" data-tip="Sinyal uzun vadeli, ${_marketOpenNow ? 'bugün günlük düşüş var' : 'son kapanışta düşüş var'}">↓${s.change_pct.toFixed(1)}%</span>` : ''}${confHtml}${eqHtml}</td>
+      <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2).replace('.', ',')}%</span></td>
+      <td tabindex="0" onmouseenter="showSigTip('${_escJsStr(s.ticker)}',event)" onmouseleave="hideSigTip()" onfocus="showSigTip('${_escJsStr(s.ticker)}',event)" onblur="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${s.signal === 'AL' && s.change_pct < 0 ? ` <span class="sig-neg-day" tabindex="0" data-tip="Sinyal uzun vadeli, ${_marketOpenNow ? 'bugün günlük düşüş var' : 'son kapanışta düşüş var'}">↓${s.change_pct.toFixed(1).replace('.', ',')}%</span>` : ''}${confHtml}${eqHtml}</td>
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile">${sigPriceHtml}</td>
       <td class="hide-mobile">${slHtml}</td>
@@ -3325,7 +3325,7 @@ function _renderGnmCard(item) {
   const badgeTxt = isAl ? '▲ Güçlü Trend' : (isSat ? '▼ Trend Bozuldu' : '● Yatay');
   const chgVal   = parseFloat(item.change_pct || 0);
   const chgCls   = chgVal >= 0 ? 'up' : 'dn';
-  const chgTxt   = (chgVal >= 0 ? '+' : '') + chgVal.toFixed(2) + '%';
+  const chgTxt   = (chgVal >= 0 ? '+' : '') + chgVal.toFixed(2).replace('.', ',') + '%';
   const priceStr = item.price ? parseFloat(item.price).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
   const snippet   = _esc(_parseNewsText((item.snippet || '').trim()));
   const isLoading = item.source === 'loading';

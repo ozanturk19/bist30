@@ -562,7 +562,7 @@ function render() {
       ? `<span class="${pnl>=0?'pos-pnl':'neg-pnl'}">${pnl>=0?'+':''}${fmtM(pnl)}</span>`
       : '<span class="neu-pnl">—</span>';
     const pnlPctHtml = pnlPct !== null
-      ? `<span class="${pnlPct>=0?'pos-pnl':'neg-pnl'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1)}%</span>`
+      ? `<span class="${pnlPct>=0?'pos-pnl':'neg-pnl'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1).replace('.', ',')}%</span>`
       : '<span class="neu-pnl">—</span>';
     const entryBtn = (sig === 'AL' && live && live.signal_price)
       ? `<button class="btn-entry" onclick="fillEntry('${esc(escJsStr(p.ticker))}',${live.signal_price})" title="Sinyal giriş fiyatı: ${fmt(live.signal_price)} ₺">Giriş ${fmt(live.signal_price)}₺</button>`
@@ -625,11 +625,11 @@ function renderSummary(s) {
     const pfRet = (s.pnl / s.totalCost) * 100;
     const diff  = pfRet - s.xu030Ret;
     const pfEl  = document.getElementById('sumXu030Pf');
-    pfEl.textContent = (pfRet >= 0 ? '+' : '') + pfRet.toFixed(1) + '%';
+    pfEl.textContent = (pfRet >= 0 ? '+' : '') + pfRet.toFixed(1).replace('.', ',') + '%';
     pfEl.className   = 'sum-num ' + (pfRet >= 0 ? 'sum-green' : 'sum-red');
     const cmpEl = document.getElementById('sumXu030Cmp');
     const diffSign = diff >= 0 ? '+' : '';
-    cmpEl.textContent = 'vs BIST30: ' + diffSign + diff.toFixed(1) + '%';
+    cmpEl.textContent = 'vs BIST30: ' + diffSign + diff.toFixed(1).replace('.', ',') + '%';
     cmpEl.className   = 'xu030-compare ' + (diff >= 0 ? 'xu030-above' : 'xu030-below');
     document.getElementById('sumXu030Card').style.display = '';
   } else {

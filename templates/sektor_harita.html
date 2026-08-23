@@ -236,7 +236,7 @@ function renderHeatmap(stocks) {
     const rvolHtml = avgRvol != null
       ? (() => {
           const rc = avgRvol >= 2.0 ? '#00e290' : avgRvol >= 1.3 ? '#e3b341' : '#909097';
-          return `<span style="font-size:10px;color:${rc}" data-tip="Sektör ortalama göreceli hacim (5g hacim ort / 20g hacim ort)" tabindex="0">Hcm ×${avgRvol.toFixed(2)}</span>`;
+          return `<span style="font-size:10px;color:${rc}" data-tip="Sektör ortalama göreceli hacim (5g hacim ort / 20g hacim ort)" tabindex="0">Hcm ×${avgRvol.toFixed(2).replace('.', ',')}</span>`;
         })()
       : '';
 
@@ -491,8 +491,8 @@ function renderCompare(json) {
         '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">BEKLE</div><div class="cmp-stat-pill-val val-bkl">' + d.bekle + '</div></div>' +
       '</div>' +
       '<div class="sec-metrics">' +
-        '<div class="metric-card"><div class="metric-lbl">Ort. RVOL</div><div class="metric-val">' + (d.avg_rvol != null ? d.avg_rvol.toFixed(2) + 'x' : '—') + '</div></div>' +
-        '<div class="metric-card"><div class="metric-lbl">Ort. Değişim</div><div class="metric-val" style="color:' + (d.avg_chg > 0 ? 'var(--bp-al)' : d.avg_chg < 0 ? 'var(--bp-sat)' : 'inherit') + '">' + (d.avg_chg != null ? (d.avg_chg > 0 ? '+' : '') + d.avg_chg.toFixed(2) + '%' : '—') + '</div></div>' +
+        '<div class="metric-card"><div class="metric-lbl">Ort. RVOL</div><div class="metric-val">' + (d.avg_rvol != null ? d.avg_rvol.toFixed(2).replace('.', ',') + 'x' : '—') + '</div></div>' +
+        '<div class="metric-card"><div class="metric-lbl">Ort. Değişim</div><div class="metric-val" style="color:' + (d.avg_chg > 0 ? 'var(--bp-al)' : d.avg_chg < 0 ? 'var(--bp-sat)' : 'inherit') + '">' + (d.avg_chg != null ? (d.avg_chg > 0 ? '+' : '') + d.avg_chg.toFixed(2).replace('.', ',') + '%' : '—') + '</div></div>' +
       '</div>' +
     '</div>';
 
@@ -507,9 +507,9 @@ function renderCompare(json) {
       row.className = 'cmp-stock-row';
       row.href = '/hisse/' + s.ticker;
       var sigCls = s.signal === 'AL' ? 'cmp-sig-al' : (s.signal === 'SAT' ? 'cmp-sig-sat' : 'cmp-sig-bkl');
-      var chgVal = s.change_pct != null ? ((s.change_pct > 0 ? '+' : '') + s.change_pct.toFixed(2) + '%') : '—';
+      var chgVal = s.change_pct != null ? ((s.change_pct > 0 ? '+' : '') + s.change_pct.toFixed(2).replace('.', ',') + '%') : '—';
       var chgCls = s.change_pct > 0 ? 'cmp-chg-pos' : (s.change_pct < 0 ? 'cmp-chg-neg' : '');
-      var rvolVal = s.rvol != null ? s.rvol.toFixed(2) + 'x' : '';
+      var rvolVal = s.rvol != null ? s.rvol.toFixed(2).replace('.', ',') + 'x' : '';
       var rvolCls = s.rvol >= 2 ? 'cmp-rvol-high' : '';
       row.innerHTML = '<span class="cmp-stock-ticker">' + esc(s.ticker) + '</span>' +
         '<span class="cmp-stock-sig ' + sigCls + '">' + sigLabel(s.signal) + '</span>' +
