@@ -133,3 +133,51 @@ var BP_SIG_LABELS = { AL: 'Güçlü Trend', SAT: 'Trend Bozuldu', BEKLE: 'Yatay'
 function sigLabel(sig) {
   return BP_SIG_LABELS[sig] || sig;
 }
+
+/* Giris kalitesi etiketi — kanonik harita, 3 sablonda (gundem/karsilastir/
+   tarama) ayri ayri kopyalanmisti (105. bagimsiz bug-hunt turu bulgusu).
+   index.html'in kendi ikon-onekli (?/?/?) varyanti KASITLI bir tasarim
+   farki (r41, commit fd4d9f5, tooltip baglaminda) — buraya TASINMADI,
+   dokunulmadi. Global 'eqLabel' adiyla expose ediyoruz ki cagiran
+   sablonlarin mevcut kullanimlari degismesin. */
+var BP_EQ_LABELS = { IDEAL: 'İdeal', IYI: 'İyi', DIKKATLI: 'Dikkatli', UZAK: 'Uzak' };
+function eqLabel(code) {
+  return BP_EQ_LABELS[code] || code;
+}
+
+/* HTML escape + guvenli href — kanonik, 4 sablonda (bilanco_takvimi/
+   gundem/karsilastir/tarama) birebir ayni kopyalanmisti (105. bagimsiz
+   bug-hunt turu bulgusu). hisse.html kendi 'escHtml' adiyla ayri bir
+   fonksiyon kullaniyor (8+ call site farkli isim) — buraya TASINMADI,
+   ayri/dusuk-oncelikli konu. Global 'escapeHtml'/'safeHref' adiyla expose
+   ediyoruz ki cagiran sablonlarin mevcut call site'lari degismesin. */
+function escapeHtml(str) {
+  return String(str).replace(/[&<>]/g, function(c) {
+    return { 
+
+
+/* Giris kalitesi etiketi — kanonik harita, 3 sablonda (gundem/karsilastir/
+   tarama) ayri ayri kopyalanmisti (105. bagimsiz bug-hunt turu bulgusu).
+   index.html'in kendi ikon-onekli varyanti KASITLI bir tasarim farki
+   (r41, commit fd4d9f5, tooltip baglaminda) — buraya TASINMADI, dokunulmadi.
+   Global 'eqLabel' adiyla expose ediyoruz ki cagiran sablonlarin mevcut
+   kullanimlari degismesin. */
+var BP_EQ_LABELS = { IDEAL: 'İdeal', IYI: 'İyi', DIKKATLI: 'Dikkatli', UZAK: 'Uzak' };
+function eqLabel(code) {
+  return BP_EQ_LABELS[code] || code;
+}
+
+/* HTML escape + guvenli href — kanonik, 4 sablonda (bilanco_takvimi/
+   gundem/karsilastir/tarama) birebir ayni kopyalanmisti (105. bagimsiz
+   bug-hunt turu bulgusu). hisse.html kendi 'escHtml' adiyla ayri bir
+   fonksiyon kullaniyor (8+ call site farkli isim) — buraya TASINMADI,
+   ayri/dusuk-oncelikli konu. Global 'escapeHtml'/'safeHref' adiyla expose
+   ediyoruz ki cagiran sablonlarin mevcut call site'lari degismesin. */
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+function safeHref(url) {
+  return /^https?:\/\//i.test(url || '') ? escapeHtml(url) : '#';
+}
