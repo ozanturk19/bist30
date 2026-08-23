@@ -1313,8 +1313,10 @@ fetchChart100();
 /* ── SSE Canlı Fiyat ─────────────────────────────── */
 let _sseRetry = 1000;
 let _sseInstance = null; /* track instance for bf-cache cleanup */
+let _marketOpenNow = true; /* CPO-DEV2-076 (A): fetchData() ilk yanıttan önce burada olmalı — startSSE() henüz sayfa yüklenirken çağrılıyor */
 
 function startSSE() {
+  if (!_marketOpenNow || document.hidden) return; /* CPO-DEV2-076 (A): piyasa kapalıyken sahte "canlı" bağlantı açma */
   _sseInstance = new EventSource('/api/stream');
   _sseInstance.onopen = () => { _sseRetry = 1000; };
   _sseInstance.onmessage = (e) => {
@@ -1407,7 +1409,7 @@ startSSE();
 
 /* ── Stocks table ────────────────────────────────── */
 let allStocks    = [];
-let _marketOpenNow = true;  /* r102: data_freshness.market_open, fetchData()'da guncellenir — "bugun" metinlerini piyasa-kapali durumunda bastirmak icin */
+/* r102: _marketOpenNow tanimi yukari, SSE bölümüne taşındı (CPO-DEV2-076 A) — startSSE() ilk çağrıldığında zaten var olması gerekiyordu */
 /* SPEC-009 G2: filtre state çok-boyutlu (önceki tek skaler currentFilter →
    mutually-exclusive bug). Sinyal tek-seçim (hisse tek sinyale sahip), premium/
    today/watch bağımsız toggle — AND'lenir. advFilters pattern'i ile tutarlı. */
@@ -1636,7 +1638,14 @@ async function fetchData() {
     if (!res.ok || !Array.isArray(json.stocks)) { throw new Error('HTTP ' + res.status); }
     allStocks = json.stocks;
     if (json.data_freshness && typeof json.data_freshness.market_open === 'boolean') {
+      const _wasMarketOpen = _marketOpenNow;
       _marketOpenNow = json.data_freshness.market_open;
+      /* CPO-DEV2-076 (A): piyasa açık↔kapalı geçişinde SSE'yi duruma göre kapat/aç */
+      if (_wasMarketOpen && !_marketOpenNow && _sseInstance) {
+        _sseInstance.close(); _sseInstance = null;
+      } else if (!_wasMarketOpen && _marketOpenNow && !_sseInstance && !document.hidden) {
+        startSSE();
+      }
     }
     checkAlarms(allStocks);  // sinyal değişikliği kontrolü
 

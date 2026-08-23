@@ -2170,6 +2170,19 @@ async function loadChart(retry) {
     fetch('/api/data').then(r => r.json()).then(data2 => {
       renderFreshness(data2.data_freshness, data2.data_quality, data2.stocks_age_s, data2.refreshing);  /* SPEC-014 B2/B3 + CPO-551 A5 */
 
+      /* CPO-DEV2-076 (A): piyasa kapalıyken SSE'yi kapat, pulse yerine statik gösterge */
+      if (data2.data_freshness && typeof data2.data_freshness.market_open === 'boolean') {
+        _marketOpenNow = data2.data_freshness.market_open;
+        if (!_marketOpenNow && _sseEs) {
+          _sseEs.close(); _sseEs = null;
+          const _lt0 = document.getElementById('liveTs');
+          if (_lt0) {
+            _lt0.style.cssText = 'font-size:11px;color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
+            _lt0.innerHTML = '<span class="live-dot-idle"></span>Piyasa kapalı';
+          }
+        }
+      }
+
       /* Summary enrichment — signal_bars/date /api/data'dan */
       const sd = (data2.stocks || []).find(s => s.ticker === TICKER);
       if (sd) {
@@ -2655,7 +2668,9 @@ loadMTF();
 /* ── SSE Canlı Fiyat ──────────────────────────────── */
 let _sseRetry = 1000;
 let _sseEs = null;
+let _marketOpenNow = true; /* CPO-DEV2-076 (A): startSSE() ilk çağrıldığında (sayfa yüklenirken) henüz /api/data yanıtı gelmemiş olabilir, iyimser varsayılan */
 function startSSE() {
+  if (!_marketOpenNow || document.hidden) return; /* CPO-DEV2-076 (A): piyasa kapalıyken sahte "canlı" bağlantı açma */
   if (_sseEs) { _sseEs.close(); _sseEs = null; }
   const es = new EventSource('/api/stream');
   _sseEs = es;

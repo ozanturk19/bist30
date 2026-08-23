@@ -2351,6 +2351,34 @@ def _login_send_allowed(email):
         return True
 
 
+_MAIL_ROUTE_SENDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mail_route_sends.json")
+_mail_route_sends_lock = _CrossProcessLock(_MAIL_ROUTE_SENDS_PATH + ".lock")
+
+
+def _mail_route_allowed(bucket, key, max_count, window_sec):
+    """CPO-DEV2-076 (C): _login_send_allowed ile ayni gerekce (Flask-Limiter
+    memory:// storage 4 gunicorn worker'a bolunuyor, IP bazli limit tek worker'da
+    dolup digerlerinde sifirdan basliyor) -- mail gonderen route'lar (contact/
+    subscribe) icin worker'lar arasi paylasilan disk-tabanli sayac. bucket=route
+    adi, key=istemci IP -- @limiter.limit ile AYNI yapilandirilmis limiti (dar
+    kapsam, sadece mail-tetikleyen route'lar) worker'lar arasinda gercekten
+    uygular; IP spoofing'e karsi degil (bu ayri konu, bkz. CPO-1449)."""
+    now = time.time()
+    with _mail_route_sends_lock:
+        data = _tp_read_json(_MAIL_ROUTE_SENDS_PATH, default={}) if os.path.exists(_MAIL_ROUTE_SENDS_PATH) else {}
+        bucket_data = data.get(bucket, {})
+        sends = [t for t in bucket_data.get(key, []) if now - t < window_sec]
+        if len(sends) >= max_count:
+            return False
+        sends.append(now)
+        bucket_data[key] = sends
+        # eski girdileri temizle -- dosya suresiz buyumesin
+        bucket_data = {k: v for k, v in bucket_data.items() if v and now - v[-1] < window_sec}
+        data[bucket] = bucket_data
+        _tp_write_json(_MAIL_ROUTE_SENDS_PATH, data, atomic=True, ensure_ascii=False)
+        return True
+
+
 def send_email(to_email, subject, html_body):
     """SMTP üzerinden HTML e-posta gönderir. Config eksikse sessizce atlar."""
     if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
@@ -9755,6 +9783,22 @@ def api_ozet_snapshots():
 # ── Günlük Özet Sayfası ───────────────────────────────────────────────────────
 @app.route("/ozet")
 def ozet_page():
+    # CPO-DEV2-076 (B) / DEV2-328 r102: bugün gerçek işlem günü değilse (hafta
+    # sonu/tatil) canlı _cache ile bugünün tarihini basıyorduk ama veri donmuş
+    # son işlem gününe (ör. Cuma) aitti -- SEO title/meta yanıltıcıydı. Zaten
+    # var olan arşiv mekanizmasını (historical_date, /ozet/<tarih>) en son
+    # mevcut snapshot gününe tetikleyerek aynı tek kaynağa çeviriyoruz.
+    if not is_trading_day():
+        try:
+            _files = sorted([
+                f.replace(".json", "")
+                for f in os.listdir(_SNAPSHOTS_DIR)
+                if re.match(r"^\d{4}-\d{2}-\d{2}\.json$", f)
+            ], reverse=True)
+            if _files:
+                return ozet_gecmis(_files[0])
+        except Exception as e:
+            logger.debug("ozet_page tatil-fallback hatasi: %s", e)
     with _lock:
         stocks = list(_cache["data"])
         loading = len(stocks) == 0
@@ -9830,6 +9874,10 @@ def api_contact():
         return jsonify({"ok": False, "error": "Eksik alan"}), 400
     if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
         return jsonify({"ok": False, "error": "Geçersiz e-posta"}), 400
+    # CPO-DEV2-076 (C): worker-local Flask-Limiter sayacini disk-tabanli
+    # cross-process kilitle guclendir -- ayni yapilandirilmis limit (3/saat).
+    if not _mail_route_allowed("contact", get_remote_address(), 3, 3600):
+        return jsonify({"ok": False, "error": "Çok fazla istek, lütfen daha sonra tekrar deneyin"}), 429
 
     ADMIN_MAIL = os.environ.get("ADMIN_MAIL", "iletisim@borsapusula.com")
 
@@ -11036,6 +11084,10 @@ def api_subscribe():
     # İsim isteğe bağlı; varsa minimum 2 karakter
     if name and len(name) < 2:
         return safe_json({"ok": False, "error": "Ad çok kısa"}), 400
+    # CPO-DEV2-076 (C): worker-local Flask-Limiter sayacini disk-tabanli
+    # cross-process kilitle guclendir -- ayni yapilandirilmis limit (5/saat).
+    if not _mail_route_allowed("subscribe", get_remote_address(), 5, 3600):
+        return safe_json({"ok": False, "error": "Çok fazla istek, lütfen daha sonra tekrar deneyin"}), 429
 
     with _sub_lock:
         subs = _load_subscribers()
