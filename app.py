@@ -9964,6 +9964,8 @@ def api_portfolio_get(token):
     try:
         with _PF_LOCK:
             data = _tp_read_json(path)
+        if isinstance(data, dict):
+            data = {"ok": True, **data}
         return _private_json(data)
     except Exception as e:
         logger.error("Portfolio get [%s]: %s", token, e)
