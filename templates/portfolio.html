@@ -373,8 +373,8 @@ function exportCSV() {
     const pnlPct   = current ? (((current - p.price) / p.price) * 100).toFixed(2) : '';
     return [
       csvSafe(p.ticker),
-      p.lot,
-      String(p.price).replace('.', ','),
+      csvSafe(p.lot),
+      csvSafe(String(p.price).replace('.', ',')),
       csvSafe(p.date || ''),
       current ? String(current).replace('.', ',') : '',
       sig,

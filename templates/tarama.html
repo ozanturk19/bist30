@@ -241,21 +241,25 @@ function showToast(msg, type='err', ms=3500) {
   _csvToastTimer = setTimeout(() => { el.style.display = 'none'; }, ms);
 }
 
+function csvSafe(v) {
+  v = String(v);
+  return /^[=+\-@]/.test(v) ? "'" + v : v;
+}
 function exportCSV() {
   if (!_csvData.length) { showToast('Filtrelerinize uygun sonuç yok, CSV boş olur.', 'err'); return; }
   const hdr = ['Hisse','İsim','Sektör','Sinyal','ADX','Fiyat','Değişim%','Hacim Oranı','Sinyal Yaşı (gün)','Giriş Kalitesi'];
   const rows = _csvData.map(s => [
-    s.ticker,
-    (s.name||'').replace(/"/g,"'"),
-    s.sector||'',
+    csvSafe(s.ticker),
+    csvSafe(s.name||''),
+    csvSafe(s.sector||''),
     sigLabel(s.signal),
     (s.adx||0).toFixed(1).replace('.', ','),
     s.price != null ? s.price.toFixed(2).replace('.', ',') : '',
     s.change_pct != null ? s.change_pct.toFixed(2).replace('.', ',')+'%' : '',
     s.vol_ratio ? '×'+s.vol_ratio.toFixed(1).replace('.', ',') : '',
     bpSignalAgeCsv(s.signal_date),
-    s.entry_quality||''
-  ].map(v => `"${v}"`).join(';'));
+    csvSafe(s.entry_quality||'')
+  ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'));
   const csv = [hdr.map(h=>`"${h}"`).join(';'), ...rows].join('\n');
   const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
@@ -374,9 +378,9 @@ function renderActiveFilterChips() {
   }
   if (minAdx > 0) chips.push({ label: `ADX ≥ ${minAdx}`, key: 'minAdx' });
   if (sector) chips.push({ label: sector, key: 'sector' });
-  if (minP && maxP)      chips.push({ label: `₺${minP}–${maxP}`, key: 'price' });
-  else if (minP)         chips.push({ label: `Min ₺${minP}`, key: 'priceMin' });
-  else if (maxP)         chips.push({ label: `Max ₺${maxP}`, key: 'priceMax' });
+  if (minP && maxP)      chips.push({ label: `${minP}–${maxP} ₺`, key: 'price' });
+  else if (minP)         chips.push({ label: `Min ${minP} ₺`, key: 'priceMin' });
+  else if (maxP)         chips.push({ label: `Max ${maxP} ₺`, key: 'priceMax' });
   if (_searchQ)          chips.push({ label: `🔍 "${_searchQ}"`, key: 'search' });
 
   const bar = document.getElementById('activeChipsBar');
