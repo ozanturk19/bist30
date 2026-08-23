@@ -328,6 +328,8 @@ async function loadGundem() {
     ['newSignalsGrid','strongAlGrid'].forEach(id => {
       document.getElementById(id).innerHTML = '<div class="empty-box">Veri yüklenemedi. Sayfayı yenileyin.</div>';
     });
+    const upd = document.getElementById('updatedAt');
+    if (upd) upd.textContent = 'Güncellenemedi';
   }
 }
 

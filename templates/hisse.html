@@ -2144,6 +2144,12 @@ function _showChartStatus(msg, withRetryBtn) {
       sigEl.title = 'Sinyal verisi yüklenemedi';
       sigEl.className = 'signal-badge signal-BEKLE';
     }
+    const historyBody = document.getElementById('historyBody');
+    if (historyBody) historyBody.innerHTML = '<tr><td colspan="4" style="color:var(--bp-text3);text-align:center;padding:20px">Veri yüklenemedi.</td></tr>';
+    const indRow = document.getElementById('indRow');
+    if (indRow) indRow.innerHTML = '<span class="ind-badge ind-neutral">Veri yüklenemedi</span>';
+    const sigMiniStats = document.getElementById('sigMiniStats');
+    if (sigMiniStats) sigMiniStats.innerHTML = '<div style="color:var(--bp-text3);font-size:var(--bp-text-base);grid-column:1/-1">Veri yüklenemedi</div>';
   }
 }
 

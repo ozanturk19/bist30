@@ -312,6 +312,7 @@ async function load() {
     if (_loadAttempts >= 3) {
       document.getElementById('heatmap').innerHTML =
         '<div class="loading-msg">Bağlantı hatası — lütfen daha sonra tekrar deneyin. <a href="." onclick="location.reload();return false" style="color:var(--bp-brand)">Sayfayı yenile</a></div>';
+      document.getElementById('lastUpdate').textContent = 'Yüklenemedi';
       return;
     }
     setTimeout(load, 15000);

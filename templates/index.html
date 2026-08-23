@@ -1,5 +1,5 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | BorsaPusula</title>
-<meta name="description" content="BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı güncel Güçlü Trend / Trend Bozuldu / Yatay sinyalleri. Ücretsiz, canlı güncelleme.">
+<meta name="description" content="BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 tabanlı Güçlü Trend / Trend Bozuldu sinyalleri. Ücretsiz, canlı güncelleme.">
 <meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, algoritmik borsa, sektör analizi">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/">
@@ -563,10 +563,10 @@
     <button class="filter-btn" data-signal="AL" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı"><span aria-hidden="true">🟢</span> Güçlü Trend</button>
     <button class="filter-btn" data-signal="SAT" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı"><span aria-hidden="true">🔴</span> Trend Bozuldu</button>
     <button class="filter-btn" data-signal="BEKLE" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor"><span aria-hidden="true">⚪</span> Yatay</button>
-    <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="RVOL ≥ 1.20 — Hacim Onaylı AL sinyali. Diğer filtrelerle birleştirilebilir."><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
-    <button class="filter-btn filter-today" data-toggle="today" onclick="toggleChip('today', this)" title="Bugün ilk kez Güçlü Trend / Trend Bozuldu sinyali oluşan hisseler — diğer filtrelerle birleştirilebilir"><span aria-hidden="true">⚡</span> Bugün</button>
-    <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none"><span aria-hidden="true">🔔</span> Takibim</button>
-    <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()"><span aria-hidden="true">⚙️</span> Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
+    <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="RVOL ≥ 1.20 — Hacim Onaylı AL sinyali. Diğer filtrelerle birleştirilebilir." aria-pressed="false"><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
+    <button class="filter-btn filter-today" data-toggle="today" onclick="toggleChip('today', this)" title="Bugün ilk kez Güçlü Trend / Trend Bozuldu sinyali oluşan hisseler — diğer filtrelerle birleştirilebilir" aria-pressed="false"><span aria-hidden="true">⚡</span> Bugün</button>
+    <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none" aria-pressed="false"><span aria-hidden="true">🔔</span> Takibim</button>
+    <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()" aria-expanded="false" aria-controls="advPanel"><span aria-hidden="true">⚙️</span> Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
     <div class="search-wrap">
       <input class="search-input" type="text" placeholder="Hisse ara… (/)" aria-label="Hisse ara"
              oninput="setSearch(this.value);showSearchAc(this.value)"
@@ -1566,6 +1566,7 @@ function toggleAdvPanel() {
   const btn   = document.getElementById('advToggle');
   panel.classList.toggle('open');
   btn.classList.toggle('active');
+  btn.setAttribute('aria-expanded', panel.classList.contains('open') ? 'true' : 'false');
 }
 
 function setAdv(key, val, btn) {
@@ -1649,6 +1650,14 @@ async function fetchData() {
   } catch(e) {
     clearTimeout(polling);
     polling = setTimeout(fetchData, 5000);
+    const ld = document.getElementById('loadingDiv');
+    if (ld && ld.style.display !== 'none' && !document.getElementById('bpDataFailMsg')) {
+      const msg = document.createElement('div');
+      msg.id = 'bpDataFailMsg';
+      msg.style.cssText = 'padding:16px;text-align:center;color:var(--bp-text3);font-size:13px';
+      msg.textContent = 'Veriler yüklenemedi, yeniden deneniyor…';
+      ld.appendChild(msg);
+    }
   }
 }
 
@@ -2462,6 +2471,9 @@ function _syncFilterChips() {
   if (filterPremium) document.querySelector('.filter-btn[data-toggle="premium"]')?.classList.add('active-premium');
   if (filterToday)   document.querySelector('.filter-btn[data-toggle="today"]')?.classList.add('active-today');
   if (filterWatch)   document.querySelector('.filter-btn[data-toggle="watch"]')?.classList.add('active-watch');
+  document.querySelector('.filter-btn[data-toggle="premium"]')?.setAttribute('aria-pressed', String(filterPremium));
+  document.querySelector('.filter-btn[data-toggle="today"]')?.setAttribute('aria-pressed', String(filterToday));
+  document.querySelector('.filter-btn[data-toggle="watch"]')?.setAttribute('aria-pressed', String(filterWatch));
   document.querySelectorAll('.preset-chip').forEach(c => {
     const p = c.dataset.preset;
     if (p === 'PREMIUM')    c.classList.toggle('active', filterPremium);

@@ -351,6 +351,7 @@ async function applyFilters() {
   } catch(e) {
     if (mySeq !== _filtersSeq) return;
     document.getElementById('loadingDiv').innerHTML = '<div style="color:var(--sat);padding:24px">Veri yüklenemedi. Lütfen sayfayı yenileyin.</div>';
+    showToast('Filtre uygulanamadı — bağlantı hatası. Tekrar deneyin.', 'err');
   } finally {
     if (mySeq !== _filtersSeq) return; // spinner/opacity resetini sadece en guncel cagri yapsin
     // T2: Inline spinner kapat + opacity reset
