@@ -76,12 +76,12 @@
     const email   = (emailEl?.value || '').trim();
     const name    = (nameEl?.value || '').trim();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      if (status) status.innerHTML = '<span style="color:var(--bp-sat)">⚠️ Geçerli email gerekli.</span>';
+      if (status) status.innerHTML = '<span class="bp-sat-text">⚠️ Geçerli email gerekli.</span>';
       if (emailEl) { emailEl.style.borderColor = 'var(--bp-sat)'; emailEl.focus(); }
       return;
     }
     if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor…'; }
-    if (status) status.innerHTML = '<span style="color:#8b949e">⏳ Kayıt yapılıyor…</span>';
+    if (status) status.innerHTML = '<span class="bp-text-muted">⏳ Kayıt yapılıyor…</span>';
     try {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
@@ -104,11 +104,11 @@
         if (status) status.innerHTML = '<span style="color:#3fb950">✅ Premium aktif! Sayfa yenileniyor…</span>';
         setTimeout(() => { closePremiumModal(); location.reload(); }, 1200);
       } else {
-        if (status) status.innerHTML = `<span style="color:var(--bp-sat)">⚠️ ${_esc(json.message || json.error || 'Hata')}</span>`;
+        if (status) status.innerHTML = `<span class="bp-sat-text">⚠️ ${_esc(json.message || json.error || 'Hata')}</span>`;
         if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
       }
     } catch (e) {
-      if (status) status.innerHTML = '<span style="color:var(--bp-sat)">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</span>';
+      if (status) status.innerHTML = '<span class="bp-sat-text">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</span>';
       if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
     }
   };
@@ -124,13 +124,13 @@
     const btn     = document.getElementById('pmLoginBtn');
     const email   = (emailEl?.value || '').trim();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      if (status) status.innerHTML = '<span style="color:var(--bp-sat)">⚠️ Geçerli email gerekli.</span>';
+      if (status) status.innerHTML = '<span class="bp-sat-text">⚠️ Geçerli email gerekli.</span>';
       if (emailEl) { emailEl.style.borderColor = 'var(--bp-sat)'; emailEl.focus(); }
       return;
     }
     if (btn && btn.disabled) return;
     if (btn) btn.disabled = true;
-    if (status) status.innerHTML = '<span style="color:#8b949e">⏳ Gönderiliyor…</span>';
+    if (status) status.innerHTML = '<span class="bp-text-muted">⏳ Gönderiliyor…</span>';
     try {
       const res  = await fetch('/api/recognize', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -142,7 +142,7 @@
       if (status) status.innerHTML = '<span style="color:' + (ok ? '#3fb950' : 'var(--bp-sat)') + '">' + (ok ? '✉️ ' : '⚠️ ') + _esc((json && (json.message || json.error)) || 'Bir hata oluştu, tekrar dene.') + '</span>';
       _pmStartLoginCooldown(btn);
     } catch (e) {
-      if (status) status.innerHTML = '<span style="color:var(--bp-sat)">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</span>';
+      if (status) status.innerHTML = '<span class="bp-sat-text">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</span>';
       if (btn) { btn.disabled = false; }
     }
   };

@@ -472,6 +472,15 @@ html {
    Ekran okuyucu icin gorunur, gorsel olarak gizli icerik
    (tablo caption'lari, ikon-only baslik etiketleri). ─────────── */
 .jargon-term{color:inherit;text-decoration:none;border-bottom:1px dotted rgba(var(--bp-brand-rgb),.45)}
+/* CPO-DEV2-085(3)(4)(5)(6) dedike tur: tekrarlanan tek-ozellikli inline
+   style'lar icin paylasilan siniflar. .bp-text-muted BILEREK var(--bp-text3)
+   DEGIL literal #8b949e kullanir -- ikisi ayni deger degil (text3=#909097),
+   token'a birlestirmek gorsel degisiklik olurdu; bu sadece DRY, deger CPO
+   onayi olmadan degistirilmedi (mailbox'ta ayrica bildirildi). */
+.bp-al-text{color:var(--bp-al)}
+.bp-sat-text{color:var(--bp-sat)}
+.bp-text-muted{color:#8b949e}
+.bp-nav-cat-label{font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none}
 
 .sr-only {
   position: absolute;

@@ -1591,3 +1591,6 @@
     .premium-modal-title { font-size: var(--bp-text-xl); }
   }
 
+
+/* CPO-DEV2-085(4): 8 th hucresi ayni style'i tekrarliyordu (bughunt-r114 ailesi) */
+.bp-th-label{padding:10px 16px;text-align:left;font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.5px}

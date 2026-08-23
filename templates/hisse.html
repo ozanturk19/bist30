@@ -155,13 +155,13 @@
       <svg class="bp-nav-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div class="bp-nav-more-menu" id="bpNavMoreMenu">
-      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">Araçlar</div>
+      <div class="bp-nav-cat-label">Araçlar</div>
       <a href="/portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Portföy</a>
       <a href="/karsilastir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Karşılaştır</a>
       <a href="/hisseler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>Tüm Hisseler</a>
       <a href="/bilanco-takvimi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bilanço</a>
       <div class="bp-nav-sep"></div>
-      <div class="bp-nav-cat-label" style="font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none">İçerik</div>
+      <div class="bp-nav-cat-label">İçerik</div>
       <a href="/ozet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Günlük Özet</a>
       <a href="/gundem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Gündem</a>
       <a href="/metodoloji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Metodoloji</a>
@@ -181,7 +181,7 @@
   {% if ssr_signal %}
   <span class="bp-symbol-pill">
     <strong>{{ ticker }}</strong>
-    {%- if ssr_signal.signal == 'AL' %} <span style="color:var(--bp-al)">▲ Güçlü</span>
+    {%- if ssr_signal.signal == 'AL' %} <span class="bp-al-text">▲ Güçlü</span>
     {%- elif ssr_signal.signal == 'SAT' %} <span style="color:#ff7875">▼ Bozuldu</span>
     {%- else %} <span style="color:var(--bp-bkl)">● Yatay</span>{% endif -%}
   </span>
@@ -490,7 +490,7 @@
       <div class="week52-bar" id="week52Bar" style="display:none">
         <div class="week52-label">
           <span>52 Haftalık Aralık</span>
-          <span><span id="w52low" style="color:var(--bp-sat)">—</span> — <span id="w52high" style="color:var(--bp-al)">—</span></span>
+          <span><span id="w52low" class="bp-sat-text">—</span> — <span id="w52high" class="bp-al-text">—</span></span>
         </div>
         <div class="week52-track">
           <div class="week52-fill"  id="w52fill"  style="width:0%"></div>
@@ -867,7 +867,7 @@
     <div id="sigExplainLoading" role="status" aria-live="polite" style="display:flex;flex-direction:column;gap:10px;color:var(--bp-text3);font-size:var(--bp-text-base)">
       {# SPEC-017 Faz 3 F2-B3: Statik özet ÖNCE (içerik), spinner SONRA (durum) — kullanıcı boş ekran görmesin #}
       <div style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.65;padding:10px 12px;background:rgba(var(--bp-brand-rgb),0.06);border-left:3px solid rgba(var(--bp-brand-rgb),0.4);border-radius:0 8px 8px 0">
-        Algoritmamız <strong style="color:var(--bp-brand)">Supertrend(10,3), ADX ≥ 25, EMA12/EMA99</strong> kriterlerinin aynı anda uyum sağlamasını değerlendirir. <strong style="color:var(--bp-al)">Güçlü Trend</strong> sinyali bu kriterlerin pozitif konfirmasyonunu, <strong style="color:var(--bp-sat)">Trend Bozuldu</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-brand);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
+        Algoritmamız <strong style="color:var(--bp-brand)">Supertrend(10,3), ADX ≥ 25, EMA12/EMA99</strong> kriterlerinin aynı anda uyum sağlamasını değerlendirir. <strong class="bp-al-text">Güçlü Trend</strong> sinyali bu kriterlerin pozitif konfirmasyonunu, <strong class="bp-sat-text">Trend Bozuldu</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-brand);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
       <div style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:#6b6b73">
         <div class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></div>
@@ -921,11 +921,11 @@
     <p style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.7;margin:0">
       <strong style="color:var(--bp-text)">{{ ticker }} ({{ name }})</strong> hissesi,
       {% if ssr_signal.signal == 'AL' %}
-        BorsaPusula algoritmasına göre <strong style="color:var(--bp-al)">Güçlü Trend</strong> sinyali veriyor.
+        BorsaPusula algoritmasına göre <strong class="bp-al-text">Güçlü Trend</strong> sinyali veriyor.
         {{ ssr_signal.signal_date|signal_age_text }} aktif.
         {% if ssr_signal.sl_level %}Stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺.{% endif %}
       {% elif ssr_signal.signal == 'SAT' %}
-        BorsaPusula algoritmasına göre <strong style="color:var(--bp-sat)">Trend Bozuldu</strong> sinyali veriyor.
+        BorsaPusula algoritmasına göre <strong class="bp-sat-text">Trend Bozuldu</strong> sinyali veriyor.
         {{ ssr_signal.signal_date|signal_age_text }} aktif.
         {% if ssr_signal.sl_level %}Stop loss seviyesi {{ ssr_signal.sl_level|tr_price }} ₺.{% endif %}
       {% else %}
@@ -1813,17 +1813,17 @@ function renderSummary(s, signalData) {
             </div>` : '';
           rrLevelsEl.innerHTML = `
             <div class="rr-level-row">
-              <div class="rr-lvl" style="color:var(--bp-sat)">
+              <div class="rr-lvl bp-sat-text">
                 <span>SL</span>
-                <strong style="color:var(--bp-sat)">${fmt(sl)}</strong>
+                <strong class="bp-sat-text">${fmt(sl)}</strong>
               </div>
               <div class="rr-lvl" style="text-align:center">
                 <span>Şimdi</span>
                 <strong>${fmt(cur)}</strong>
               </div>
               <div class="rr-lvl" style="text-align:right">
-                <span style="color:var(--bp-al)">TP1 (2R)</span>
-                <strong style="color:var(--bp-al)">${fmt(tp1)}</strong>
+                <span class="bp-al-text">TP1 (2R)</span>
+                <strong class="bp-al-text">${fmt(tp1)}</strong>
                 <br>
                 <span style="color:var(--bp-brand);font-size:10px">TP2 (3R)</span>
                 <strong style="color:var(--bp-brand);font-size:11px"> ${fmt(tp2)}</strong>
@@ -2005,11 +2005,11 @@ function renderMiniStats(history) {
       <div class="sig-stat-lbl">📊 Toplam Sinyal</div>
     </div>
     <div class="sig-stat-card">
-      <div class="sig-stat-val" style="color:var(--bp-al)">${alCount}</div>
+      <div class="sig-stat-val bp-al-text">${alCount}</div>
       <div class="sig-stat-lbl">▲ Güçlü Trend</div>
     </div>
     <div class="sig-stat-card">
-      <div class="sig-stat-val" style="color:var(--bp-sat)">${satCount}</div>
+      <div class="sig-stat-val bp-sat-text">${satCount}</div>
       <div class="sig-stat-lbl">▼ Trend Bozuldu</div>
     </div>
     <div class="sig-stat-card">

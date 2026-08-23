@@ -10038,6 +10038,12 @@ def api_portfolio_save(token):
         lot_val = entry.get("lot", entry.get("quantity"))
         if (price_val is not None and price_val <= 0) or (lot_val is not None and lot_val <= 0):
             continue
+        # CPO-DEV2-085(1): client (portfolio.html) Number.isInteger ile kesirli lot'u
+        # reddediyor ama sunucu sadece float'a cevirip clamp'liyordu -> dogrudan API
+        # cagrisiyla kesirli adet (orn. 0.37) kalici yazilabiliyordu. Client kurali
+        # sunucuya da tasindi (ayni "kanonik kural sunucuda" ilkesi, bkz. ticker whitelist).
+        if lot_val is not None and lot_val != int(lot_val):
+            continue
         # String alanları kırp
         for k in ("ticker","name","date","note","sector"):
             if k in entry and isinstance(entry[k], str):

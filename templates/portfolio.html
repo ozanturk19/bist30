@@ -573,11 +573,11 @@ function render() {
     const sparkHtml = svgSparkline(chartData[p.ticker]);
     return `<tr>
       <td><a href="/hisse/${esc(p.ticker)}" class="ticker-link">${esc(p.ticker)}</a></td>
-      <td class="hm" style="color:#8b949e">${esc(p.date)}</td>
+      <td class="hm bp-text-muted">${esc(p.date)}</td>
       <td>${fmt(p.lot,0)}</td>
       <td>${fmt(p.price)}</td>
       <td>${cur !== null ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>
-      <td class="hm" style="color:#8b949e">${fmtM(cost)}</td>
+      <td class="hm bp-text-muted">${fmtM(cost)}</td>
       <td>${val !== null ? fmtM(val) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${pnlHtml}</td>
       <td>${pnlPctHtml}</td>
