@@ -14,6 +14,12 @@
 # temiz kesildigi dogrulanmis - {{ }} -> '0' placeholder, {% %} -> silinir)
 # soyar, `node --check` ile sozdizimini dogrular. Jinja soyma yontemi TUM
 # mevcut sablonlarda 0 yanlis-pozitif verecek sekilde test edilmistir.
+#
+# DEV2-340 (23.08, r105 hotfix sonrasi): kapsam static/**/*.js dosyalarini
+# KAPSAMIYORDU (yalnizca sablon-ici inline <script>) — bp-vocab.js'e yapilan
+# bozuk bir ekleme (cat >> shell tirnak-kacis hatasi) bu bosluktan gecip
+# canliya SyntaxError olarak deploy oldu (~7dk kisa prod olayi, dc287d4).
+# Jinja soyma gerekmiyor (bu dosyalar duz JS), dogrudan `node --check <path>`.
 import re
 import subprocess
 import sys
@@ -51,9 +57,18 @@ def check_file(path):
     return errors
 
 
+def check_js_file(path):
+    proc = subprocess.run(
+        ['node', '--check', path],
+        capture_output=True, text=True,
+    )
+    if proc.returncode != 0:
+        return proc.stderr.strip().splitlines()[0] if proc.stderr else 'bilinmeyen hata'
+    return None
+
+
 def main():
     files = sorted(glob.glob('templates/*.html'))
-    total_scripts = 0
     fail = 0
     for f in files:
         errs = check_file(f)
@@ -61,11 +76,20 @@ def main():
             fail += 1
             for line_no, idx, msg in errs:
                 print(f'  ✗ {f}:~{line_no} (script #{idx}) — {msg}')
-    if fail == 0:
-        print(f'  ✓ node-syntax-check PASS ({len(files)} sablon tarandi)')
+
+    js_files = sorted(glob.glob('static/**/*.js', recursive=True))
+    js_fail = 0
+    for jf in js_files:
+        err = check_js_file(jf)
+        if err:
+            js_fail += 1
+            print(f'  ✗ {jf} — {err}')
+
+    if fail == 0 and js_fail == 0:
+        print(f'  ✓ node-syntax-check PASS ({len(files)} sablon + {len(js_files)} static JS dosyasi tarandi)')
         return 0
     else:
-        print(f'  ✗ node-syntax-check FAIL — {fail} sablonda sozdizimi hatasi')
+        print(f'  ✗ node-syntax-check FAIL — {fail} sablonda + {js_fail} static JS dosyasinda sozdizimi hatasi')
         return 1
 
 

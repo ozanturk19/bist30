@@ -775,7 +775,7 @@
         <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Analiz Edilen Sinyal</div>
       </div>
     </div>
-    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal hariç · <span aria-hidden="true">⚠️</span> Geçmiş performans gelecek garantisi değildir</div>
+    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal ve SAT sinyalleri hariç, yalnızca AL sinyalleri · <span aria-hidden="true">⚠️</span> Geçmiş performans gelecek garantisi değildir</div>
   </div>
 
   <!-- SPEC-017 v2 Faz A c3 — Özet sonu "Detay için" CTA (3 tab) -->
@@ -2023,6 +2023,11 @@ function renderHistory(history, currentPrice) {
   // Getiri hesabı:
   //   history[0] = en yeni (aktif) sinyal → anlık fiyatla karşılaştır
   //   history[idx] için kapanış fiyatı = history[idx-1].price (onu kapatan daha yeni sinyal)
+  // CPO-DEV2-080(2): SAT sinyalleri long-only üründe kazanç/kayıp gibi yeşil/
+  // kırmızı gösterilmez ([[project_long_only_ihlali_sat_dali]], aynı desen
+  // CPO-DEV2-074#2'de sinyal_performans.html'e uygulanmıştı) — gerçek (ters
+  // çevrilmemiş) fiyat hareketi nötr gri renkte gösterilir, gizlenmez.
+  const _SAT_TIP = 'SAT sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez';
   tbody.innerHTML = history.map((h, idx) => {
     const icon = h.signal === 'AL' ? '▲' : '▼';
     let retHtml = '<td style="color:var(--bp-text3);font-size:11px">—</td>';
@@ -2031,21 +2036,29 @@ function renderHistory(history, currentPrice) {
       // Aktif sinyal — API'den gelen anlık fiyatla karşılaştır
       const curP = parseFloat(currentPrice) || 0;
       if (curP && h.price) {
-        const ret    = ((curP - h.price) / h.price * 100);
-        const isGain = h.signal === 'AL' ? ret > 0 : ret < 0;
-        const clr    = isGain ? '#00e290' : (Math.abs(ret) < 1 ? '#909097' : '#f85149');
-        const sign   = ret >= 0 ? '+' : '';
-        retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:12px">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span></td>`;
+        const ret  = ((curP - h.price) / h.price * 100);
+        const sign = ret >= 0 ? '+' : '';
+        if (h.signal === 'SAT') {
+          retHtml = `<td style="color:#909097;font-weight:600;font-family:var(--bp-font-mono);font-size:12px" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span></td>`;
+        } else {
+          const isGain = ret > 0;
+          const clr    = isGain ? '#00e290' : (Math.abs(ret) < 1 ? '#909097' : '#f85149');
+          retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:12px">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span></td>`;
+        }
       }
     } else {
       // Kapanmış sinyal — history[idx-1] bu sinyali kapatan (daha yeni) sinyaldir
       const exitH = history[idx - 1];
       if (exitH && h.price) {
-        const ret    = ((exitH.price - h.price) / h.price * 100);
-        const isGain = h.signal === 'AL' ? ret > 0 : ret < 0;
-        const clr    = isGain ? '#00e290' : (Math.abs(ret) < 1 ? '#909097' : '#f85149');
-        const sign   = ret >= 0 ? '+' : '';
-        retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:12px">${sign}${ret.toFixed(1)}%</td>`;
+        const ret  = ((exitH.price - h.price) / h.price * 100);
+        const sign = ret >= 0 ? '+' : '';
+        if (h.signal === 'SAT') {
+          retHtml = `<td style="color:#909097;font-weight:600;font-family:var(--bp-font-mono);font-size:12px" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1)}%</td>`;
+        } else {
+          const isGain = ret > 0;
+          const clr    = isGain ? '#00e290' : (Math.abs(ret) < 1 ? '#909097' : '#f85149');
+          retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:12px">${sign}${ret.toFixed(1)}%</td>`;
+        }
       }
     }
 
@@ -2063,18 +2076,23 @@ function renderHistory(history, currentPrice) {
    signal_history) hesaplar; ayrı bir backtest cache'i KULLANMAZ.
    idx=0 (en yeni) her zaman aktif/açık sinyaldir, kazanma/kayıp henüz
    belirlenmemiştir → sayıma dahil edilmez. Kapanış fiyatı mantığı
-   renderHistory'deki getiri hesabıyla birebir aynıdır. */
+   renderHistory'deki getiri hesabıyla birebir aynıdır.
+   CPO-DEV2-080(2): SAT sinyalleri kazanma/getiri sayımına dahil edilmez —
+   T3.7'de backtest özetine uygulanan aynı long-only ilkesi (SAT'ı ayrı yön-
+   düzeltmesiyle "kazanç" gibi göstermek yanıltıcı). Bu ayrıca eski winRate
+   (yön-düzeltmeli) / avgRet (ham ret) iç tutarsızlığını da kökten kapatır:
+   AL için yön düzeltmesi zaten ret>0 ile özdeş. */
 function renderSigPerf(history) {
   const box = document.getElementById('sigPerfBox');
   if (!box) return;
   const closed = [];
   for (let idx = 1; idx < (history || []).length; idx++) {
     const h = history[idx];
+    if (h.signal !== 'AL') continue;
     const exitH = history[idx - 1];
     if (!exitH || !h.price) continue;
-    const ret    = (exitH.price - h.price) / h.price * 100;
-    const isGain = h.signal === 'AL' ? ret > 0 : ret < 0;
-    closed.push({ ret, isGain });
+    const ret = (exitH.price - h.price) / h.price * 100;
+    closed.push({ ret, isGain: ret > 0 });
   }
   if (closed.length === 0) { box.style.display = 'none'; return; }
 
