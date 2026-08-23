@@ -1,11 +1,11 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ article.title }} | BorsaPusula</title>
 <meta name="description" content="{{ article.desc }}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<link rel="canonical" href="https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}">
+<link rel="canonical" href="https://borsapusula.com/blog/{{ (article.canonical_slug if article.canonical_slug else article.slug) | urlencode }}">
 <meta property="og:type"        content="article">
 <meta property="og:title"       content="{{ article.title }} | borsapusula.com">
 <meta property="og:description" content="{{ article.desc }}">
-<meta property="og:url"         content="https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}">
+<meta property="og:url"         content="https://borsapusula.com/blog/{{ (article.canonical_slug if article.canonical_slug else article.slug) | urlencode }}">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <meta name="twitter:card"        content="summary_large_image">
@@ -20,10 +20,10 @@
   "datePublished": "{{ article.date }}",
   "dateModified": "{{ article.updated if article.updated else article.date }}",
   "inLanguage": "tr",
-  "url": "https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}",
+  "url": "https://borsapusula.com/blog/{{ (article.canonical_slug if article.canonical_slug else article.slug) | urlencode }}",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}"
+    "@id": "https://borsapusula.com/blog/{{ (article.canonical_slug if article.canonical_slug else article.slug) | urlencode }}"
   },
   "author": {
     "@type": "Organization",
@@ -70,7 +70,7 @@
       "@type": "ListItem",
       "position": 3,
       "name": {{ article.title|tojson }},
-      "item": "https://borsapusula.com/blog/{{ article.canonical_slug if article.canonical_slug else article.slug }}"
+      "item": "https://borsapusula.com/blog/{{ (article.canonical_slug if article.canonical_slug else article.slug) | urlencode }}"
     }
   ]
 }

@@ -452,6 +452,11 @@ function importPortfolio(e) {
     }
     e.target.value = '';   // Aynı dosyayı tekrar seçebilsin
   };
+  reader.onerror = function() {
+    console.warn('importPortfolio dosya okuma hatası:', reader.error);
+    showToast('❌ Dosya okunamadı — geçerli bir JSON dosyası olduğundan emin olun.', 'err', 5000);
+    e.target.value = '';
+  };
   reader.readAsText(file);
 }
 
@@ -482,7 +487,7 @@ function addPosition() {
   if (!lot || lot <= 0 || !Number.isInteger(lot)) { err.textContent = 'Geçerli (tam sayı) adet girin.'; return; }
   if (!price || price <= 0) { err.textContent = 'Geçerli fiyat girin.'; return; }
   err.textContent = '';
-  portfolio.push({ ticker, lot, price, date: date || new Date().toISOString().slice(0,10), id: Date.now() });
+  portfolio.push({ ticker, lot, price, date: date || new Intl.DateTimeFormat('en-CA', {timeZone: 'Europe/Istanbul'}).format(new Date()), id: Date.now() });
   save();
   document.getElementById('addTicker').value = '';
   document.getElementById('addLot').value    = '';

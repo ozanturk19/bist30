@@ -28,7 +28,7 @@ ARTICLES = [
 
 <h2>BIST100'ü Takip Etmenin Yolları</h2>
 <ul>
-  <li>BorsaPusula'da 90 BIST100 hissesinin anlık sinyalini izleyin.</li>
+  <li>BorsaPusula'da 214 hissenin (BIST100 + ek hisseler) anlık sinyalini izleyin.</li>
   <li>Günlük <a href="/ozet">Sinyal Özeti</a> sayfasından piyasa genelinin durumunu görün.</li>
   <li>Endeks bileşenlerinin tamamı Borsa İstanbul resmi sitesinde yayınlanır.</li>
 </ul>
@@ -496,7 +496,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <ul>
   <li>Algoritmanın tutarlılığı + insanın bağlamsal değerlendirmesi</li>
   <li>Temel analiz, haberler veya makro faktörleri entegre etme imkânı</li>
-  <li>Sistematik bir tarama — 90 hisseyi manuel incelemenize gerek yok</li>
+  <li>Sistematik bir tarama — 214 hisseyi manuel incelemenize gerek yok</li>
 </ul>
 
 <h2>Backtesting ve Gerçekçi Beklentiler</h2>
@@ -506,7 +506,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Kendi algo sisteminizi kurmak için programlama bilgisi gerekir. Ancak BorsaPusula gibi platformlar aracılığıyla algoritmaların ürettiği sinyalleri kullanmak için teknik bilgiye ihtiyaç yoktur. Önemli olan sistemi <em>anlamak</em> ve kurallara uymaktır.</p>
 """,
     "faqs": [
-      {"q": "Algoritmik trading bireysel yatırımcı için nasıl faydalıdır?", "a": "BorsaPusula gibi platformlar sayesinde programlama bilgisi olmadan algoritmik sinyallerden yararlanılabilir. Platform 145 hisseyi tarar ve AL/SAT/BEKLE kararı üretir; siz sadece değerlendirip karar verirsiniz."},
+      {"q": "Algoritmik trading bireysel yatırımcı için nasıl faydalıdır?", "a": "BorsaPusula gibi platformlar sayesinde programlama bilgisi olmadan algoritmik sinyallerden yararlanılabilir. Platform 214 hisseyi tarar ve AL/SAT/BEKLE kararı üretir; siz sadece değerlendirip karar verirsiniz."},
       {"q": "Algoritmik sistemler her zaman başarılı mı olur?", "a": "Hayır. Algoritmik sistemler istatistiksel olasılıklar üzerinde çalışır, kesinlik garantisi vermez. Piyasa rejimleri değişebilir ve sistemi periyodik olarak gözden geçirmek önemlidir."},
       {"q": "BorsaPusula tam otomatik işlem yapıyor mu?", "a": "Hayır. BorsaPusula algoritmik sinyal üretir ancak emir vermez. Bu yarı otomatik model algoritmanın tutarlılığını insanın bağlamsal değerlendirmesiyle birleştirir."}
     ],
@@ -888,7 +888,7 @@ Histogram = MACD − Sinyal</pre>
     "mins": 6,
     "cat": "Teknik Analiz",
     "body": """
-<p>BorsaPusula, 90 BIST100 hissesini her gün algoritmik olarak analiz eder ve her hisse için AL, SAT veya BEKLE kararı üretir. Bu makalede bu sistemin arka planını anlıyoruz.</p>
+<p>BorsaPusula, 214 hisseyi (BIST100 + ek hisseler) her gün algoritmik olarak analiz eder ve her hisse için AL, SAT veya BEKLE kararı üretir. Bu makalede bu sistemin arka planını anlıyoruz.</p>
 
 <h2>Üçlü Filtre Mantığı</h2>
 <p>Tek bir gösterge sahte sinyal üretebilir. Üç göstergenin aynı anda aynı yönü göstermesi, yanlış sinyal olasılığını dramatik şekilde düşürür. BorsaPusula'nın üç kriteri:</p>

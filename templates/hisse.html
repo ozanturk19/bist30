@@ -225,14 +225,14 @@
   </a>
   {% endif %}
   <span class="hib-action-bar">
-    <button class="hib-action-btn" id="hibStarBtn" type="button" onclick="togglePortfolio()" title="Portföye ekle / çıkar" aria-label="Portföye ekle">
+    <button class="hib-action-btn" id="hibStarBtn" type="button" onclick="togglePortfolio()" title="Portföye ekle / çıkar" aria-label="Portföye ekle" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
         <line x1="12" y1="5" x2="12" y2="19"/>
         <line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
       <span class="hib-action-lbl">Portföye ekle</span>
     </button>
-    <button class="hib-action-btn" id="hibBellBtn" type="button" onclick="toggleHisseWatch()" title="Sinyal değişiminde bildirim al" aria-label="Sinyal alarmı">
+    <button class="hib-action-btn" id="hibBellBtn" type="button" onclick="toggleHisseWatch()" title="Sinyal değişiminde bildirim al" aria-label="Sinyal alarmı" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
         <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -243,7 +243,7 @@
 </div>
 
 <!-- Toast feedback -->
-<div class="hib-toast" id="hibToast"></div>
+<div class="hib-toast" id="hibToast" role="status" aria-live="polite"></div>
 
 
 <main id="main-content" class="container" tabindex="-1">
@@ -1277,6 +1277,8 @@ function updateHibStarBtn() {
     btn.title = 'Portföye ekle';
     if (lbl) lbl.textContent = 'Portföye ekle';
   }
+  btn.setAttribute('aria-pressed', String(inPf));
+  btn.setAttribute('aria-label', inPf ? 'Portföyden çıkar' : 'Portföye ekle');
 }
 
 function updateHibBellBtn() {
@@ -1295,6 +1297,8 @@ function updateHibBellBtn() {
     btn.title = 'Sinyal değişiminde bildirim al';
     if (lbl) lbl.textContent = 'Bildirim al';
   }
+  btn.setAttribute('aria-pressed', String(inW));
+  btn.setAttribute('aria-label', inW ? 'Alarmı kapat' : 'Sinyal alarmı');
 }
 
 // Init when DOM ready
