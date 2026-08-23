@@ -186,16 +186,16 @@
     {%- else %} <span style="color:var(--bp-bkl)">● Yatay</span>{% endif -%}
   </span>
   {% endif %}
-  <div class="bp-segments-inner">
-    <a class="bp-seg-item active" data-segment="ozet" tabindex="0">Özet</a>
-    <a class="bp-seg-item" data-segment="grafik" tabindex="0">Grafik</a>
-    <a class="bp-seg-item bp-seg-item-ai" data-segment="ai" tabindex="0">
+  <div class="bp-segments-inner" role="tablist" aria-label="Hisse detay segmentleri">
+    <a class="bp-seg-item active" data-segment="ozet" id="tab-ozet" role="tab" aria-selected="true" aria-controls="panel-ozet" tabindex="0">Özet</a>
+    <a class="bp-seg-item" data-segment="grafik" id="tab-grafik" role="tab" aria-selected="false" aria-controls="chart-section" tabindex="-1">Grafik</a>
+    <a class="bp-seg-item bp-seg-item-ai" data-segment="ai" id="tab-ai" role="tab" aria-selected="false" aria-controls="sigExplainSection" tabindex="-1">
       <svg class="bp-seg-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true" focusable="false">
         <path d="M12 2.5l1.4 4.1 4.1 1.4-4.1 1.4-1.4 4.1-1.4-4.1-4.1-1.4 4.1-1.4L12 2.5zm6.5 11l.95 2.55 2.55.95-2.55.95-.95 2.55-.95-2.55-2.55-.95 2.55-.95.95-2.55z"/>
       </svg>
       AI Analiz
     </a>
-    <a class="bp-seg-item" data-segment="haberler" tabindex="0">Haberler</a>
+    <a class="bp-seg-item" data-segment="haberler" id="tab-haberler" role="tab" aria-selected="false" aria-controls="storySection panel-haberler-main" tabindex="-1">Haberler</a>
   </div>
 </nav>
 
@@ -477,7 +477,7 @@
   <div class="bp-bottom-cta-spacer"></div>
 
   <!-- Grafik -->
-  <div id="chart-section" data-tab-content="grafik" class="chart-section" style="scroll-margin-top:80px">
+  <div id="chart-section" data-tab-content="grafik" class="chart-section" role="tabpanel" aria-labelledby="tab-grafik" tabindex="0" style="scroll-margin-top:80px">
     <div class="chart-header">
       <span class="chart-label">{{ ticker }} — Günlük Grafik (2 Yıl)</span>
       <span id="emaLegend" style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-left:auto"></span>
@@ -506,6 +506,7 @@
     </div>
   </div>
 
+  <div id="panel-ozet" role="tabpanel" aria-labelledby="tab-ozet" tabindex="0">
   <!-- SPEC-014 A1 — Sinyal Özeti (konsolide karar kutusu) -->
   {% if signal_summary %}
   <div id="signalSummarySection"
@@ -795,6 +796,7 @@
       </button>
     </div>
   </div>
+  </div><!-- /panel-ozet -->
   
 
   <!-- KAP + Dış Linkler -->
@@ -840,7 +842,7 @@
   </div>
 
   <!-- Sinyal Dönemindeki Haber Akışı — sinyal tarihi etrafındaki KAP bildirimleri -->
-  <div id="storySection" data-tab-content="haberler" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
+  <div id="storySection" data-tab-content="haberler" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📰</span> Sinyal Dönemindeki Haber Akışı</h2>
       <span id="storyWindow" style="font-size:var(--bp-text-xs);color:var(--bp-text3)"></span>
@@ -854,7 +856,7 @@
 
   <!-- AI Sinyal Açıklaması -->
   <div id="ai-section" style="scroll-margin-top:80px"></div>
-  <div id="sigExplainSection" data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
+  <div id="sigExplainSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="font-size:var(--bp-text-15)"><span aria-hidden="true">✨</span></span>
       <span style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
@@ -880,6 +882,7 @@
 
   <!-- AI Haberler -->
   <div id="news-section" style="scroll-margin-top:80px"></div>
+  <div id="panel-haberler-main" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0">
   <div class="news-section" id="newsSection" data-tab-content="haberler">
     <h2 class="section-title"><span aria-hidden="true">🤖</span> Son Haber Özeti</h2>
     <div class="news-loading" id="newsLoading" role="status" aria-live="polite">
@@ -909,6 +912,7 @@
     </div>
     <div id="kapList" style="display:none"></div>
   </div>
+  </div><!-- /panel-haberler-main -->
 
   {% if ssr_signal %}
   <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
@@ -2880,7 +2884,10 @@ window._bpApplyTooltips = _applyTooltipVisibility;
       p.style.display = visible ? '' : 'none';
     });
     segments.forEach(function(s){
-      s.classList.toggle('active', s.dataset.segment === tab);
+      var isActive = s.dataset.segment === tab;
+      s.classList.toggle('active', isActive);
+      s.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      s.tabIndex = isActive ? 0 : -1;
     });
     // Persist + URL state (SPEC-017 v2 Faz A P0-1)
     try { localStorage.setItem('bp_hisse_tab', tab); } catch(e) { /* sekme bu oturumda zaten degisti, sadece bir sonraki ziyarette hatirlanmayabilir (private mod/kota) */ }
@@ -2926,6 +2933,20 @@ window._bpApplyTooltips = _applyTooltipVisibility;
         var tab = s.dataset.segment || 'ozet';
         applyTab(tab);
         window.bpScrollTop();
+        return;
+      }
+      // CPO-DEV2-078(A): ARIA APG tablist roving-focus — ok tuslari SADECE odagi
+      // tasir, aktive etmez (aktivasyon icerik-agir: AI fetch/chart resize tetikler,
+      // bu yuzden manual-activation deseni bilinçli tercih)
+      var idx = Array.prototype.indexOf.call(segments, s);
+      var nextIdx = -1;
+      if (e.key === 'ArrowRight') nextIdx = (idx + 1) % segments.length;
+      else if (e.key === 'ArrowLeft') nextIdx = (idx - 1 + segments.length) % segments.length;
+      else if (e.key === 'Home') nextIdx = 0;
+      else if (e.key === 'End') nextIdx = segments.length - 1;
+      if (nextIdx !== -1) {
+        e.preventDefault();
+        segments[nextIdx].focus();
       }
     });
   });
