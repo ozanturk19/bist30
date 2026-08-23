@@ -20,7 +20,7 @@
   .sec-head span { font-size:var(--bp-text-sm); color:#8b949e; font-weight:400; }
 
   /* Table */
-  .tbl-wrap { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow:hidden; margin-bottom:24px; }
+  .tbl-wrap { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; margin-bottom:24px; } /* FAZ6 C7: overflow:hidden veriyi kirpiyordu, portfolio.css .pf-table ile ayni desen */
   table { width:100%; border-collapse:collapse; }
   thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; }
   th[data-sort] { padding:0; }
