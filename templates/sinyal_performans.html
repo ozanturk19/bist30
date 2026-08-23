@@ -498,8 +498,11 @@ async function triggerBacktest() {
       let ok = true;
       if (q && !ticker.includes(q)) ok = false;
       if (ok && sig && r.dataset.signal !== sig) ok = false;
-      if (ok && ret === 'pos' && !(retVal > 0)) ok = false;
-      if (ok && ret === 'neg' && !(retVal < 0)) ok = false;
+      // CPO-DEV2-081(A): SAT satirlari long-only urunde ne "kazanan" ne "zarar"
+      // kutusuna girer (tablo hucresi zaten bu ayrimi _naForSat ailesiyle yapiyor,
+      // filtre de ayni mantigi izlemeli) - pos/neg filtresi aktifken SAT disarida.
+      if (ok && ret === 'pos' && (r.dataset.signal === 'SAT' || !(retVal > 0))) ok = false;
+      if (ok && ret === 'neg' && (r.dataset.signal === 'SAT' || !(retVal < 0))) ok = false;
       r.style.display = ok ? '' : 'none';
       if (ok) visible++;
     });
