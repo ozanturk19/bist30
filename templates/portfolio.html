@@ -524,6 +524,14 @@ async function fetchLive() {
 function esc(s) {
   return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
+// bug-hunt r117: portfolio.date ISO (yyyy-mm-dd, native <input type=date> / en-CA
+// fallback) sitenin diger her yerindeki dd.mm.yyyy TR-format disipliniyle celisiyordu.
+// earliestDate string karsilastirmasi ISO'ya bagli oldugu icin ham deger degismiyor,
+// sadece goruntuleme donusturuluyor.
+function fmtDate(s) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s == null ? '' : s));
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : esc(s);
+}
 // Cloud Sync ile guvenilmeyen kaynaktan gelebilen ticker, tek-tirnakli JS
 // string literali icine gomulmeden once ayrica kacirilir (bkz. fillEntry onclick)
 function escJsStr(s) {
@@ -573,7 +581,7 @@ function render() {
     const sparkHtml = svgSparkline(chartData[p.ticker]);
     return `<tr>
       <td><a href="/hisse/${esc(p.ticker)}" class="ticker-link">${esc(p.ticker)}</a></td>
-      <td class="hm bp-text-muted">${esc(p.date)}</td>
+      <td class="hm bp-text-muted">${fmtDate(p.date)}</td>
       <td>${fmt(p.lot,0)}</td>
       <td>${fmt(p.price)}</td>
       <td>${cur !== null ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>

@@ -61,15 +61,7 @@
   "name": "BorsaPusula",
   "description": "BIST teknik analiz sinyalleri ve piyasa gözlem platformu",
   "inLanguage": "tr-TR",
-  "publisher": { "@id": "https://borsapusula.com/#organization" },
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": {
-      "@type": "EntryPoint",
-      "urlTemplate": "https://borsapusula.com/hisse/{search_term_string}"
-    },
-    "query-input": "required name=search_term_string"
-  }
+  "publisher": { "@id": "https://borsapusula.com/#organization" }
 }
 </script>
 
@@ -1287,17 +1279,19 @@ let _marketOpenNow = true; /* CPO-DEV2-076 (A): fetchData() ilk yanıttan önce 
 
 function startSSE() {
   if (!_marketOpenNow || document.hidden) return; /* CPO-DEV2-076 (A): piyasa kapalıyken sahte "canlı" bağlantı açma */
-  _sseInstance = new EventSource('/api/stream');
-  _sseInstance.onopen = () => { _sseRetry = 1000; };
-  _sseInstance.onmessage = (e) => {
+  if (_sseInstance) { _sseInstance.close(); _sseInstance = null; }
+  const es = new EventSource('/api/stream');
+  _sseInstance = es;
+  es.onopen = () => { _sseRetry = 1000; };
+  es.onmessage = (e) => {
     try {
       const msg = JSON.parse(e.data);
       if (msg.type !== 'prices') return;
       applyLivePrices(msg.data, msg.ts);
     } catch(_) { console.warn('SSE fiyat guncelleme hatasi', _); }
   };
-  _sseInstance.onerror = () => {
-    _sseInstance.close(); _sseInstance = null;
+  es.onerror = () => {
+    es.close(); _sseInstance = null;
     setTimeout(startSSE, _sseRetry);
     _sseRetry = Math.min(_sseRetry * 2, 30000);
   };

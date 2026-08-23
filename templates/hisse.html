@@ -58,9 +58,8 @@
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    {"@type": "ListItem", "position": 1, "name": "Ana Sayfa",       "item": "https://borsapusula.com/"},
-    {"@type": "ListItem", "position": 2, "name": "BIST Sinyalleri", "item": "https://borsapusula.com/"},
-    {"@type": "ListItem", "position": 3, "name": "{{ ticker }} — {{ name }}", "item": "https://borsapusula.com/hisse/{{ ticker }}"}
+    {"@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": "https://borsapusula.com/"},
+    {"@type": "ListItem", "position": 2, "name": "{{ ticker }} — {{ name }}", "item": "https://borsapusula.com/hisse/{{ ticker }}"}
   ]
 }
 </script>
@@ -1994,7 +1993,7 @@ function renderMiniStats(history) {
   const alCount  = history.filter(h => h.signal === 'AL').length;
   const satCount = history.filter(h => h.signal === 'SAT').length;
   let avgStr = '—';
-  const dates = history.map(h => new Date(h.date)).filter(d => !isNaN(d)).sort((a,b) => a-b);
+  const dates = history.map(h => { const p = bpParseTrDate(h.date); return p ? new Date(Date.UTC(p.y, p.m - 1, p.d)) : null; }).filter(d => d && !isNaN(d)).sort((a,b) => a-b);
   if (dates.length > 1) {
     const totalDays = (dates[dates.length-1] - dates[0]) / 86400000;
     avgStr = Math.round(totalDays / (dates.length - 1)) + ' gün';
