@@ -673,15 +673,22 @@
   // kaynak burada. Cagiran sablon DOMContentLoaded'i bekleyerek cagirir, boylece
   // bu script (defer) her zaman calismis ve bpStartMacroTicker tanimli olur —
   // gundem.html'deki inline-erken-cagri/defer-gec-yukleme yaris durumu kapanir.
-  window.bpLoadMacroBar = async function() {
+  // CPO-DEV2-081(C): hisse.html/index.html/tarama.html'deki kalan 3 bagimsiz
+  // kopya da buraya tasindi. document.hidden guard'i (eskiden yalniz hisse/index'te,
+  // CPO-DEV2-072/r98) artik tum cagiranlar icin gecerli — sekme arka plandayken
+  // /api/macro cekilmez. onItems, index.html'in ec30/ec100 endeks karti guncellemesi
+  // gibi sablon-ozel yan etkiler icin opsiyonel callback (items render'dan once cagrilir).
+  window.bpLoadMacroBar = async function(onItems) {
     var track = document.getElementById('macroTrack');
     if (!track) return;
+    if (document.hidden) return;
     try {
       var r = await fetch('/api/macro');
       var d = await r.json();
       if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
       var items = d.items || [];
       if (!items.length) return;
+      if (typeof onItems === 'function') onItems(items);
       var html = items.map(function(it) {
         var lbl   = bpAssetLabel(it.label);
         var price = bpFormatAssetPrice(it.label, it.price);

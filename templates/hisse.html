@@ -2763,40 +2763,12 @@ document.addEventListener('visibilitychange', () => {
 
 /* ── Diğer Hisseler Accordion ──────────────────── */
 
-/* ── Makro Ticker Bandı ─────────────────────── */
-(function() {
-  async function loadMacro() {
-    if (document.hidden) return; /* CPO-DEV2-072 r98: sekme arka plandayken çekme */
-    try {
-      const r = await fetch('/api/macro');
-      const d = await r.json();
-      const items = d.items || [];
-      if (!items.length) return;
-      const MACRO_LINKS = {};
-      const html = items.map(it => {
-        const label = bpAssetLabel(it.label);
-        const price = bpFormatAssetPrice(it.label, it.price);
-        const chg   = it.change;
-        const sign  = chg > 0 ? '+' : '';
-        const cls   = chg > 0.05 ? 'macro-chg-pos' : chg < -0.05 ? 'macro-chg-neg' : 'macro-chg-neu';
-        const arrow = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
-        const href  = MACRO_LINKS[it.label] ? ` href="${MACRO_LINKS[it.label]}"` : '';
-        const tag   = href ? 'a' : 'span';
-        return `<${tag} class="macro-item"${href} style="text-decoration:none;color:inherit">
-          <span class="macro-item-lbl">${label}</span>
-          <span>${price}</span>
-          <span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span>
-        </${tag}>`;
-      }).join('');
-      const _mt = document.getElementById('macroTrack');
-      _mt.innerHTML = html + html;
-      requestAnimationFrame(() => { const w = _mt.scrollWidth / 2; window.bpStartMacroTicker && window.bpStartMacroTicker({track: _mt, pps: 55}); });
-    } catch(e) { console.warn('loadMacro basarisiz', e); }
-  }
-  loadMacro();
-  setInterval(loadMacro, 180000);
-  window._bpResumeMacro = loadMacro; /* r98: sekme görünür olunca visibilitychange'den tetiklenir */
-})();
+/* ── Makro Ticker Bandı — merkezi bpLoadMacroBar (bp-search.js), CPO-DEV2-081(C) ── */
+document.addEventListener('DOMContentLoaded', function() {
+  window.bpLoadMacroBar();
+  setInterval(window.bpLoadMacroBar, 180000);
+  window._bpResumeMacro = window.bpLoadMacroBar; /* r98: sekme görünür olunca visibilitychange'den tetiklenir */
+});
 </script>
 
 <script src="/static/bp-search.js?v=57" defer></script>

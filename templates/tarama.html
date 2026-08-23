@@ -173,28 +173,11 @@
 <script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=ad6aaba3"></script>
 <script>
-/* ── Makro ticker ── */
-(function() {
-  const ML={};
-  async function load() {
-    try {
-      const d=(await (await fetch('/api/macro')).json()).items||[];
-      if(!d.length) return;
-      const h=d.map(it=>{
-        const p=bpFormatAssetPrice(it.label, it.price);
-        const c=it.change;const s=c>0?'+':'';
-        const cls=c>0.05?'mc-pos':c<-0.05?'mc-neg':'mc-neu';
-        const href=ML[it.label]?` href="${ML[it.label]}"`:'';
-        const tag=href?'a':'span';
-        return `<${tag} class="macro-item"${href} style="text-decoration:none;color:inherit"><span class="macro-item-lbl">${bpAssetLabel(it.label)}</span><span>${p}</span><span class="${cls}">${c>0.05?'▲':c<-0.05?'▼':'●'} ${s}${c.toFixed(2)}%</span></${tag}>`;
-      }).join('');
-      const _mt=document.getElementById('macroTrack');
-      _mt.innerHTML=h+h;
-      requestAnimationFrame(()=>{ const w=_mt.scrollWidth/2; window.bpStartMacroTicker && window.bpStartMacroTicker({track: _mt, pps: 55}); });
-    }catch(e) { console.error('makro ticker: /api/macro yuklenemedi', e); }
-  }
-  load(); setInterval(load,180000);
-})();
+/* ── Makro ticker — merkezi bpLoadMacroBar (bp-search.js), CPO-DEV2-081(C) ── */
+document.addEventListener('DOMContentLoaded', function() {
+  window.bpLoadMacroBar();
+  setInterval(window.bpLoadMacroBar, 180000);
+});
 
 /* ── Tarama ── */
 let _currentSort = 'signal_strength';

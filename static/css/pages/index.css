@@ -91,13 +91,12 @@
     font-variant-numeric: tabular-nums;
     border-right: 1px solid #1a1a1c;
     cursor: default;
-    color: var(--bp-text2);
+    color: var(--bp-text); /* CPO-DEV2-081(C): merkezi bpLoadMacroBar fiyat span'ini classsiz birakiyor, eski .macro-price ile ayni gorunum icin buradan miras aliniyor */
   }
-  .macro-label { font-weight: 600; color: var(--bp-text); letter-spacing: 0.2px; }
-  .macro-price { color: var(--bp-text); }
-  .macro-chg-pos { color: var(--bp-al); }
-  .macro-chg-neg { color: var(--bp-sat); }
-  .macro-chg-neu { color: #909097; }
+  .macro-item-lbl { font-weight: 600; color: var(--bp-text); letter-spacing: 0.2px; }
+  .mc-pos { color: var(--bp-al); }
+  .mc-neg { color: var(--bp-sat); }
+  .mc-neu { color: #909097; }
 
 
   /* ── Header Search Button ── */

@@ -220,7 +220,7 @@
 <!-- Makro Ticker Bandı -->
 <div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button>
   <div class="macro-track" id="macroTrack">
-    <span class="macro-item"><span class="macro-label">Yükleniyor…</span></span>
+    <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
   </div>
 </div>
 
@@ -840,66 +840,31 @@
 <script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=ad6aaba3"></script>
 <script>
-/* ── Makro Ticker Bandı ──────────────────────────── */
-(function() {
-  function renderMacro(items) {
-    if (!items || !items.length) return;
-    // Endeks kartı fiyatlarını güncelle (makro API'den — chart yüklenmeden önce de çalışır)
-    items.forEach(it => {
+/* ── Makro Ticker Bandı — merkezi bpLoadMacroBar (bp-search.js), CPO-DEV2-081(C) ──
+   ec30/ec100 endeks karti guncellemesi (makro API'den, chart yuklenmeden once de
+   calisir) sablon-ozel yan etki oldugundan onItems callback'i olarak kaldi. */
+document.addEventListener('DOMContentLoaded', function() {
+  function _bpUpdateEndeksCards(items) {
+    items.forEach(function(it) {
       if (it.label !== 'XU030' && it.label !== 'XU100') return;
-      const pfx = it.label === 'XU030' ? 'ec30' : 'ec100';
+      var pfx = it.label === 'XU030' ? 'ec30' : 'ec100';
       // renderEndeksCard ile aynı format (2 ondalık) — aksi halde kart 60sn'de bir
       // ticker'ın 0-ondalık haliyle ezilip görünür değer değişikliğine yol açıyordu
       if (typeof it.price !== 'number' || it.price < 1000) return;
-      const pEl = document.getElementById(pfx + 'Price');
-      const cEl = document.getElementById(pfx + 'Chg');
+      var pEl = document.getElementById(pfx + 'Price');
+      var cEl = document.getElementById(pfx + 'Chg');
       if (pEl) pEl.textContent = it.price.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       if (cEl) {
-        const sign = it.change > 0 ? '+' : '';
+        var sign = it.change > 0 ? '+' : '';
         cEl.textContent = sign + it.change.toFixed(2) + '%';
         cEl.className = 'ec-chg ' + (it.change > 0.05 ? 'pos' : it.change < -0.05 ? 'neg' : 'neu');
       }
     });
-    const track = document.getElementById('macroTrack');
-    if (!track) return;
-    // İki kopya — sonsuz kaydırma için
-    const MACRO_LINKS = {};
-    const html = items.map(it => {
-      const label  = bpAssetLabel(it.label);
-      const price  = bpFormatAssetPrice(it.label, it.price);
-      const chg    = it.change;
-      const sign   = chg > 0 ? '+' : '';
-      const cls    = chg > 0.05 ? 'macro-chg-pos' : chg < -0.05 ? 'macro-chg-neg' : 'macro-chg-neu';
-      const arrow  = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
-      const href   = MACRO_LINKS[it.label] ? ` href="${MACRO_LINKS[it.label]}"` : '';
-      const tag    = href ? 'a' : 'span';
-      return `<${tag} class="macro-item"${href} style="text-decoration:none;color:inherit">
-        <span class="macro-label">${label}</span>
-        <span class="macro-price">${price}</span>
-        <span class="${cls}">${arrow} ${sign}${chg.toFixed(2)}%</span>
-      </${tag}>`;
-    }).join('');
-    track.innerHTML = html + html; // çift kopya
-    requestAnimationFrame(() => {
-      const w = track.scrollWidth / 2;
-      // 90 px/sec target, min 18s, max 50s — anasayfada ve alt sayfalarda EŞIT hız
-      window.bpStartMacroTicker && window.bpStartMacroTicker({track: track, pps: 55});
-    });
   }
-
-  async function loadMacro() {
-    if (document.hidden) return; /* CPO-DEV2-072 r98: sekme arka plandayken çekme */
-    try {
-      const r = await fetch('/api/macro');
-      const d = await r.json();
-      renderMacro(d.items);
-    } catch(e) { console.warn('makro ticker yuklenemedi', e); }
-  }
-
-  loadMacro();
-  setInterval(loadMacro, 180000);
-  window._bpResumeMacro = loadMacro; /* r98: sekme görünür olunca visibilitychange'den tetiklenir */
-})();
+  window.bpLoadMacroBar(_bpUpdateEndeksCards);
+  setInterval(window.bpLoadMacroBar, 180000, _bpUpdateEndeksCards);
+  window._bpResumeMacro = function() { window.bpLoadMacroBar(_bpUpdateEndeksCards); }; /* r98: sekme görünür olunca visibilitychange'den tetiklenir */
+});
 
 /* ── Lightweight Charts v4 ───────────────────────── */
 /* lazy-load: hisse.html _loadChartLib() ile ayni desen — 160KB script yalniz

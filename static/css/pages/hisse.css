@@ -914,9 +914,9 @@
     font-size: var(--bp-text-sm); height: 34px;
   }
   .macro-item-lbl { font-weight: 600; color: var(--bp-text); }
-  .macro-chg-pos { color: var(--bp-al); }
-  .macro-chg-neg { color: var(--bp-sat); }
-  .macro-chg-neu { color: var(--bp-bkl); }
+  .mc-pos { color: var(--bp-al); }
+  .mc-neg { color: var(--bp-sat); }
+  .mc-neu { color: var(--bp-bkl); }
 
   /* ── Header Search Button ── */
   .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius:var(--bp-radius); color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 6px; }
