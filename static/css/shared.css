@@ -31,12 +31,6 @@
   }
   .mbn-item.active .mbn-icon svg { filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); stroke-width: 2.1; }
   /* Badge dot — CPO-DEV2-054 Faz 1: push kaldırıldı, hiçbir JS artık göstermiyor, kalıcı gizli */
-  .mbn-badge {
-    position: absolute; top: 6px; right: calc(50% - 18px);
-    width: 8px; height: 8px; background: var(--bp-gold);
-    border-radius: 50%; border: 1.5px solid var(--bp-bg);
-    display: none;
-  }
   .mbn-sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: var(--bp-z-sheet-backdrop); opacity: 0; transition: opacity .25s ease; }
   .mbn-sheet-backdrop.open { display: block; opacity: 1; }
   .mbn-sheet {
