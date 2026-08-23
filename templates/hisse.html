@@ -2383,11 +2383,14 @@ async function loadSignalExplanation(retryCount) {
 
   try {
     const res  = await fetch('/api/hisse/' + TICKER + '/signal-explanation');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+    let data = null;
+    try { data = await res.json(); } catch(parseErr) { console.warn('signal-explanation JSON parse hatasi:', parseErr); }
+    /* CPO-DEV2-083: backend artik gecerli-ama-veri-eksik durumda 503 donuyor (once 200'du).
+       reason==='no_data' govdesi varsa mevcut ozel retry akisini koru, aksi halde eskisi gibi at. */
+    if (!res.ok && !(data && data.reason === 'no_data')) throw new Error('HTTP ' + res.status);
     loadEl.style.display = 'none';
 
-    if (data.explanation) {
+    if (data && data.explanation) {
       textEl.textContent = data.explanation;
       textEl.style.display = '';
       footerEl.style.display = '';
@@ -2410,7 +2413,7 @@ async function loadSignalExplanation(retryCount) {
         : '📐 Algoritmik analiz — sinyal motorundaki göstergeler temel alınmıştır · yatırım tavsiyesi değildir';
       _sigExplainActive = false;
 
-    } else if (data.reason === 'no_data') {
+    } else if (data && data.reason === 'no_data') {
       // Stok verisi yüklenmemişse kısa süre sonra tekrar dene
       if (retryCount < 3) {
         loadEl.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Sinyal verisi yükleniyor…';

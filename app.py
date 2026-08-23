@@ -8255,7 +8255,10 @@ def api_signal_explanation(ticker):
         stocks = list(_cache.get("data") or _cache.get("stocks") or [])
     stock = next((s for s in stocks if s.get("ticker") == ticker), None)
     if not stock:
-        return safe_json({"explanation": None, "reason": "no_data"})
+        # CPO-DEV2-083: gecerli ticker ama _cache henuz doldurulmamis (soguk baslangic/
+        # refresh arasi) -> gecersiz ticker'in 404'unden ayirt edilebilir olsun diye 503.
+        # hisse.html loadSignalExplanation() bu durumu reason=="no_data" ile ayri okur.
+        return safe_json({"explanation": None, "reason": "no_data"}), 503
 
     text = get_ai_signal_explanation(ticker, stock)
     source = "gemini" if GEMINI_API_KEY else "algorithmic"
