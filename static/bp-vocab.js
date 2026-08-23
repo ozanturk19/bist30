@@ -123,3 +123,13 @@ function bpFormatAssetPrice(key, price) {
     maximumFractionDigits: dec
   });
 }
+
+/* Sinyal etiketi — kanonik harita, 6 sablonda (hisse/index/portfolio/
+   sektor_harita/tarama/bilanco_takvimi) ayri ayri kopyalanmisti
+   (DEV2-r104 takip bulgusu, CPO-DEV2-078 ailesi). Global 'sigLabel' adiyla
+   expose ediyoruz ki cagiran sablonlarin mevcut sigLabel(...) call site'lari
+   HIC degismesin — sadece yerel tanimlar kaldirildi. */
+var BP_SIG_LABELS = { AL: 'Güçlü Trend', SAT: 'Trend Bozuldu', BEKLE: 'Yatay' };
+function sigLabel(sig) {
+  return BP_SIG_LABELS[sig] || sig;
+}
