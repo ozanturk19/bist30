@@ -175,9 +175,9 @@ function renderCard(s, isNew) {
   const sigCls  = isAl ? 'al' : isSat ? 'sat' : 'bkl';
   const badgeTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Trend Bozuldu' : '● Yatay';
   const adx  = adxFromStock(s);
-  const chg  = parseFloat(s.change_pct || 0);
+  const chg  = s.change_pct != null ? parseFloat(s.change_pct) : null;
   const chgCls = chg > 0 ? 'up' : chg < 0 ? 'dn' : 'neu';
-  const chgTxt = (chg>0?'+':'') + chg.toFixed(2) + '%';
+  const chgTxt = chg != null ? (chg>0?'+':'') + chg.toFixed(2) + '%' : '';
   const priceStr = s.price ? parseFloat(s.price).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '';
 
   const metrics = [];
@@ -204,7 +204,7 @@ function renderCard(s, isNew) {
     <div class="sc-footer">
       <div style="display:flex;align-items:center;gap:8px">
         <span class="sc-price">${priceStr}</span>
-        ${priceStr ? `<span class="sc-chg ${chgCls}">${chgTxt}</span>` : ''}
+        ${priceStr && chgTxt ? `<span class="sc-chg ${chgCls}">${chgTxt}</span>` : ''}
       </div>
       <span class="sc-arrow">Detay →</span>
     </div>

@@ -8619,7 +8619,8 @@ def api_tarama():
         if sig    and s.get("signal")              != sig:    continue
         if sector and _get_sector(s.get("ticker","")).lower() != sector.lower(): continue
         if eq     and s.get("entry_quality")       != eq:    continue
-        price = s.get("price")  or 0
+        raw_price = s.get("price")
+        price = raw_price if raw_price is not None else 0  # SADECE min_p/max_p filtresi icin
         adx   = _parse_adx(s)
         if price < min_p or price > max_p: continue
         if adx < min_adx: continue
@@ -8628,8 +8629,12 @@ def api_tarama():
             "name":          STOCK_NAMES.get(s.get("ticker",""), s.get("ticker","")),
             "sector":        _get_sector(s.get("ticker","")),
             "signal":        s.get("signal",""),
-            "price":         price,
-            "change_pct":    s.get("change_pct") or 0,
+            # bughunt-r107: coerce edilmemis raw_price/change_pct client'a gidiyor -
+            # bilinmeyen fiyat artik sessizce 0 (gercek sifir degisimle ayirt
+            # edilemez) degil, None olarak tasiniyor; tuketici (tarama.html/
+            # hisse.html) nötr "-" basiyor. CPO-1335'teki signal_bars ile ayni desen.
+            "price":         raw_price,
+            "change_pct":    s.get("change_pct"),
             "adx":           adx,
             "adx_label":     derive_adx_label(adx),  # CPO-1196 D0 #4: yerel `adx` ile aynı kaynaktan, tutarlı
             # CPO-1335: `or 1` kaldırıldı — bilinmeyen/0 bar sessizce 1 olup

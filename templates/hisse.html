@@ -1627,10 +1627,15 @@ function renderSummary(s, signalData) {
   const _dispPrice = (signalData && signalData.price != null) ? signalData.price : s.price;
   document.getElementById('hpPrice').textContent = fmt(_dispPrice);
   const chgEl = document.getElementById('hpChg');
-  const _dispChg = (signalData && signalData.change_pct != null) ? signalData.change_pct : (s.change_pct || 0);
-  const sign  = _dispChg > 0 ? '+' : '';
-  chgEl.textContent = sign + _dispChg.toFixed(2) + '%';
-  chgEl.className   = 'header-chg ' + (_dispChg > 0 ? 'pos' : _dispChg < 0 ? 'neg' : 'neu');
+  const _dispChg = (signalData && signalData.change_pct != null) ? signalData.change_pct : s.change_pct;
+  if (_dispChg != null) {
+    const sign  = _dispChg > 0 ? '+' : '';
+    chgEl.textContent = sign + _dispChg.toFixed(2) + '%';
+    chgEl.className   = 'header-chg ' + (_dispChg > 0 ? 'pos' : _dispChg < 0 ? 'neg' : 'neu');
+  } else {
+    chgEl.textContent = '—';
+    chgEl.className   = 'header-chg neu';
+  }
 
   const sigEl  = document.getElementById('hpSignal');
   const icon   = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
