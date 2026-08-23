@@ -53,10 +53,10 @@
 
   <div class="filter-bar">
     <span style="font-size:var(--bp-text-sm);color:var(--bp-text3);font-weight:600">Filtre:</span>
-    <button class="filter-btn active"   onclick="setFilter('all')"  id="fbtn-all">Tümü</button>
-    <button class="filter-btn fal"      onclick="setFilter('AL')"   id="fbtn-AL"><span aria-hidden="true">▲</span> Güçlü Trend</button>
-    <button class="filter-btn fsat"     onclick="setFilter('SAT')"  id="fbtn-SAT"><span aria-hidden="true">▼</span> Trend Bozuldu</button>
-    <button class="filter-btn fbkl"     onclick="setFilter('BEKLE')"id="fbtn-BEKLE"><span aria-hidden="true">●</span> Yatay</button>
+    <button class="filter-btn active"   onclick="setFilter('all')"  id="fbtn-all"    aria-pressed="true">Tümü</button>
+    <button class="filter-btn fal"      onclick="setFilter('AL')"   id="fbtn-AL"     aria-pressed="false"><span aria-hidden="true">▲</span> Güçlü Trend</button>
+    <button class="filter-btn fsat"     onclick="setFilter('SAT')"  id="fbtn-SAT"    aria-pressed="false"><span aria-hidden="true">▼</span> Trend Bozuldu</button>
+    <button class="filter-btn fbkl"     onclick="setFilter('BEKLE')"id="fbtn-BEKLE"  aria-pressed="false"><span aria-hidden="true">●</span> Yatay</button>
   </div>
 
   <div id="periodsContainer" role="status" aria-live="polite">
@@ -78,16 +78,21 @@ const SIG_LABELS = { AL: 'Güçlü Trend', SAT: 'Trend Bozuldu', BEKLE: 'Yatay' 
 
 function setFilter(f) {
   _filter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('fbtn-' + (f === 'all' ? 'all' : f)).classList.add('active');
+  document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+  const active = document.getElementById('fbtn-' + (f === 'all' ? 'all' : f));
+  active.classList.add('active');
+  active.setAttribute('aria-pressed', 'true');
   if (_allData) render(_allData);
 }
 
 function sigClass(sig) {
   return sig === 'AL' ? 'al' : sig === 'SAT' ? 'sat' : 'bkl';
 }
+function sigIcon(sig) {
+  return sig === 'AL' ? '▲' : sig === 'SAT' ? '▼' : sig === 'BEKLE' ? '●' : '';
+}
 function sigLabel(sig) {
-  return sig === 'AL' ? '▲ Güçlü Trend' : sig === 'SAT' ? '▼ Trend Bozuldu' : sig === 'BEKLE' ? '● Yatay' : sig;
+  return SIG_LABELS[sig] || sig;
 }
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, c => ({
@@ -169,7 +174,7 @@ function render(data) {
               <a href="/hisse/${escapeHtml(s.ticker)}" class="sc-ticker-link" onclick="event.stopPropagation()">
                 <span class="sc-ticker">${escapeHtml(s.ticker)}${s.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="color:var(--bp-volume);font-size:11px;vertical-align:middle">⭐</span>' : ''}</span>
               </a>
-              <span class="sig-badge sig-${sigClass(s.signal)}">${sigLabel(s.signal)}</span>
+              <span class="sig-badge sig-${sigClass(s.signal)}">${sigIcon(s.signal)} ${sigLabel(s.signal)}</span>
             </div>
             <div class="sc-name">${escapeHtml(s.name)}</div>
             ${s.price ? `<div class="sc-price">${s.price.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2})} ₺</div>` : ''}

@@ -9985,11 +9985,17 @@ def api_portfolio_save(token):
 
     # CPO-DEV2-069: bilinmeyen ticker sessizce kalıcı bozuk kayıt oluşturmasın —
     # kullanıcı yanlış yazarsa anında net bir hata görsün.
+    # DEV2-bughunt-r103: string olmayan ticker (int/list/dict/None) eski kontrolü
+    # (isinstance(t,str) and ...) atlayıp kabul ediliyordu; ayrıca geçerli ama
+    # küçük harfli ticker'lar normalize edilmeden diske yazılıp /api/data'daki
+    # büyük-harf liveData anahtarlarıyla kalıcı eşleşmiyordu. İkisi tek kontrolde kapatıldı.
     for p in positions:
         if isinstance(p, dict):
             t = p.get("ticker")
-            if isinstance(t, str) and t.strip().upper() not in _PF_VALID_TICKERS:
-                return safe_json({"error": "Bilinmeyen hisse sembolü"}), 400
+            if t is not None:
+                if not isinstance(t, str) or t.strip().upper() not in _PF_VALID_TICKERS:
+                    return safe_json({"error": "Bilinmeyen hisse sembolü"}), 400
+                p["ticker"] = t.strip().upper()
 
     # Sadece izin verilen alanları kaydet (injection güvenliği)
     # DEV2-bughunt-r7: client (templates/portfolio.html) 'lot'/'price' alanlarıyla gönderiyor,

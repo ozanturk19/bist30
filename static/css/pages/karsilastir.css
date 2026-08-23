@@ -219,6 +219,12 @@
     background: rgba(var(--bp-gold-rgb),.06);
     box-shadow: 0 0 14px rgba(var(--bp-gold-rgb),.18);
   }
+  .winner-badge {
+    font-size: var(--bp-text-xs);
+    font-weight: 700;
+    color: var(--bp-gold);
+    letter-spacing: .02em;
+  }
   .score-big {
     font-size: var(--bp-text-22); font-weight: 800; font-family: var(--bp-font-mono);
     line-height: 1;
