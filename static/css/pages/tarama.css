@@ -393,4 +393,7 @@
   }
   .import-toast.ok  { border-color: var(--bp-al-bd); color: var(--bp-al); }
   .import-toast.err { border-color: var(--bp-sat-bd); color: var(--bp-sat); }
+  @media (max-width: 900px) {
+    .import-toast { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
+  }
 

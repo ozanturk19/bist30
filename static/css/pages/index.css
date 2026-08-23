@@ -1490,7 +1490,7 @@
   }
   #ptr-spinner.spinning { animation: ptrSpin .6s linear infinite; }
   @keyframes ptrSpin { to { transform: rotate(360deg); } }
-  @media (min-width: 769px) { #ptr-indicator { display: none !important; } }
+  @media (min-width: 901px) { #ptr-indicator { display: none !important; } }
 
 /* ==== extracted from templates/_premium_modal.html (T2.5) ==== */
 

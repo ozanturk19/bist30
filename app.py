@@ -6626,9 +6626,10 @@ def _compute_signal_commentary(ticker, signal_data):
     price    = signal_data.get("price", 0) or 0
     sl       = signal_data.get("sl_level")
     bars     = signal_data.get("signal_bars", 1) or 1
+    sig_date = signal_data.get("signal_date")
 
     # ── Algoritmik temel metin (her zaman doğru, AI'dan bağımsız) ────────────
-    commentary = _generate_commentary(ticker, sig, bars, None, adx, di_plus, di_minus, e12, e99, st_bull)
+    commentary = _generate_commentary(ticker, sig, bars, sig_date, adx, di_plus, di_minus, e12, e99, st_bull)
 
     return {
         "sig": sig, "sig_lbl": sig_lbl, "name": name, "commentary": commentary,
@@ -7120,9 +7121,13 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         st_text    = "yükseliş yönünde"
         ema_text   = f"EMA12 ({e12:.0f} ₺), EMA99 ({e99:.0f} ₺) üzerinde seyrediyor"
         di_text    = f"DI+ {di_p:.0f} DI- {di_m:.0f}'i geçmiş durumda"
-        dur_text   = f"Son {signal_bars} gündür Güçlü Trend sinyali aktif" if signal_bars > 1 else "Bugün Güçlü Trend sinyali oluştu"
-        if signal_date:
-            dur_text += f" ({signal_date} tarihinden itibaren)" if signal_bars > 1 else ""
+        if signal_date and not is_signal_from_today(signal_date):
+            dur_label = derive_signal_date_label(signal_date) or signal_date
+            dur_text  = f"{dur_label} Güçlü Trend sinyali oluştu" if signal_bars <= 1 else f"Son {signal_bars} gündür Güçlü Trend sinyali aktif ({signal_date} tarihinden itibaren)"
+        elif signal_bars > 1:
+            dur_text = f"Son {signal_bars} gündür Güçlü Trend sinyali aktif"
+        else:
+            dur_text = "Bugün Güçlü Trend sinyali oluştu"
         return (
             f"{ticker} ({name}) hissesi {dur_text}. "
             f"Supertrend göstergesi {st_text}, ADX {adx:.0f} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
@@ -7133,9 +7138,13 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         st_text    = "düşüş yönünde"
         ema_text   = f"EMA12 ({e12:.0f} ₺), EMA99 ({e99:.0f} ₺) altında seyrediyor"
         di_text    = f"DI- {di_m:.0f} DI+ {di_p:.0f}'ün üzerinde"
-        dur_text   = f"Son {signal_bars} gündür Trend Bozuldu sinyali aktif" if signal_bars > 1 else "Bugün Trend Bozuldu sinyali oluştu"
-        if signal_date:
-            dur_text += f" ({signal_date} tarihinden itibaren)" if signal_bars > 1 else ""
+        if signal_date and not is_signal_from_today(signal_date):
+            dur_label = derive_signal_date_label(signal_date) or signal_date
+            dur_text  = f"{dur_label} Trend Bozuldu sinyali oluştu" if signal_bars <= 1 else f"Son {signal_bars} gündür Trend Bozuldu sinyali aktif ({signal_date} tarihinden itibaren)"
+        elif signal_bars > 1:
+            dur_text = f"Son {signal_bars} gündür Trend Bozuldu sinyali aktif"
+        else:
+            dur_text = "Bugün Trend Bozuldu sinyali oluştu"
         return (
             f"{ticker} ({name}) hissesi {dur_text}. "
             f"Supertrend göstergesi {st_text}, ADX {adx:.0f} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
