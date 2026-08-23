@@ -318,7 +318,7 @@ html {
   --bp-z-local-toast:      1100;  /* #bp-toast (showToast JS) — index */
   --bp-z-bottom-cta:        450;  /* .bp-bottom-cta — hisse */
   --bp-z-sticky-subheader:   90;  /* .bp-segments — hisse */
-  --bp-z-sheet:             1050;  /* .mbn-sheet — mobile nav partial. bughunt-r109: eskiden 260, sayfa-yerel sabit-alt bilesenlerin (bp-z-bottom-cta 450, bp-z-alarm-fab 998, bp-z-alarm-panel/page-toast 999) USTUNE cikarildi - --bp-z-modal(1000) tanimli ama hicbir yerde kullanilmiyor, cakisma yok */
+  --bp-z-sheet:             1050;  /* .mbn-sheet — mobile nav partial. bughunt-r109: eskiden 260, sayfa-yerel sabit-alt bilesenlerin (bp-z-bottom-cta 450, bp-z-alarm-fab 998, bp-z-alarm-panel/page-toast 999) USTUNE cikarildi - --bp-z-modal(1000) .ind-help tooltip (hisse.css:544), .ac-dropdown (karsilastir.css) ve #cloudModal (portfolio.html) tarafindan kullaniliyor (bughunt-r113), cakisma yok */
   --bp-z-sheet-backdrop:    1040;  /* .mbn-sheet-backdrop — mobile nav partial. sheet'in az altinda, ayni sabit-alt bilesenlerin ustunde */
   --bp-z-chart-legend:       30;  /* yerel grafik legend overlay — index (JS) */
   --bp-z-chart-date-label:   20;  /* yerel grafik tarih etiketi — hisse (JS) */
