@@ -908,10 +908,11 @@
 let LC = null;
 function _loadChartLib() {
   if (LC) return Promise.resolve();
-  return new Promise(function(res) {
+  return new Promise(function(res, rej) {
     var s = document.createElement('script');
     s.src = '/static/lightweight-charts.min.js?v=1';
-    s.onload = function() { LC = LightweightCharts; res(); };
+    s.onload  = function() { LC = LightweightCharts; res(); };
+    s.onerror = function() { s.remove(); rej(new Error('lightweight-charts yuklenemedi')); };
     document.head.appendChild(s);
   });
 }
@@ -958,7 +959,14 @@ function mkChart(el, height) {
 }
 
 async function buildCharts(d) {
-  await _loadChartLib();
+  try {
+    await _loadChartLib();
+  } catch (e) {
+    console.warn('[chart] lightweight-charts yuklenemedi', e);
+    const el = document.getElementById('chartLoading');
+    if (el) el.innerHTML = '<span style="color:var(--bp-text3)">Grafik kütüphanesi yüklenemedi, sayfayı yenileyin.</span>';
+    return;
+  }
   document.getElementById('chartLoading').style.display  = 'none';
   document.getElementById('chartsInner').style.display   = '';
 
