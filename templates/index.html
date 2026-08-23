@@ -1934,7 +1934,11 @@ function getFiltered() {
                      || (s.name && s.name.toLocaleUpperCase('tr-TR').includes(currentSearch.toLocaleUpperCase('tr-TR')));
     const matchSector = currentSector === 'all' || s.sector === currentSector;
     /* Gelişmiş filtreler */
-    const adxVal  = parseFloat((s.indicators?.adx?.label || '').replace('ADX ', '')) || 0;
+    /* bughunt-r106: indicators.adx.label goruntu icin 0-ondalikli yuvarlanmis
+       (backend f"ADX {adx_val:.0f}") - sinir degerlerde (orn. 24.6 -> "ADX 25")
+       derive_adx_label()'in kullandigi hassas s.adx (top-level, zaten mevcut)
+       ile CELISIYORDU. Kanonik esik kaynagiyla ayni alani kullan. */
+    const adxVal  = s.adx ?? 0;
     const matchAdx  = advFilters.adx === 0 || adxVal >= advFilters.adx;
     const matchBars = advFilters.bars === 0 || (s.signal_bars || 0) >= advFilters.bars;
     const matchVol  = advFilters.vol === 0  || (s.vol_ratio || 0) >= advFilters.vol;
@@ -2337,7 +2341,7 @@ function renderTable() {
           ${stripHtml}
           <div class="mc-row2">
             <div style="display:flex;align-items:center;gap:7px">
-              <span class="signal-badge signal-${s.signal}" style="font-size:10px" onmouseenter="showSigTip('${_escJsStr(s.ticker)}',event)" onmouseleave="hideSigTip()">${sigIcon} ${sigLabel(s.signal)}</span>
+              <span class="signal-badge signal-${s.signal}" style="font-size:10px" tabindex="0" onmouseenter="showSigTip('${_escJsStr(s.ticker)}',event)" onmouseleave="hideSigTip()" onfocus="showSigTip('${_escJsStr(s.ticker)}',event)" onblur="hideSigTip()">${sigIcon} ${sigLabel(s.signal)}</span>
               ${confIcon}
             </div>
             <div class="mc-entry">${entryTxt}</div>
@@ -2445,7 +2449,7 @@ function renderTable() {
       <td><a href="/hisse/${_escJsStr(s.ticker)}" style="color:inherit;text-decoration:none"><span class="ticker">${_escJsStr(s.ticker)}</span></a>${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — RVOL ≥ 1.20" style="color:var(--bp-volume);font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span tabindex="0" data-tip="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" tabindex="0" data-tip="${_esc(s.anomaly.reason)}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${_escJsStr(s.ticker)}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2)}%</span></td>
-      <td onmouseenter="showSigTip('${_escJsStr(s.ticker)}',event)" onmouseleave="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${s.signal === 'AL' && s.change_pct < 0 ? ` <span class="sig-neg-day" tabindex="0" data-tip="Sinyal uzun vadeli, ${_marketOpenNow ? 'bugün günlük düşüş var' : 'son kapanışta düşüş var'}">↓${s.change_pct.toFixed(1)}%</span>` : ''}${confHtml}${eqHtml}</td>
+      <td tabindex="0" onmouseenter="showSigTip('${_escJsStr(s.ticker)}',event)" onmouseleave="hideSigTip()" onfocus="showSigTip('${_escJsStr(s.ticker)}',event)" onblur="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${s.signal === 'AL' && s.change_pct < 0 ? ` <span class="sig-neg-day" tabindex="0" data-tip="Sinyal uzun vadeli, ${_marketOpenNow ? 'bugün günlük düşüş var' : 'son kapanışta düşüş var'}">↓${s.change_pct.toFixed(1)}%</span>` : ''}${confHtml}${eqHtml}</td>
       <td class="hide-mobile">${dateHtml}</td>
       <td class="hide-mobile">${sigPriceHtml}</td>
       <td class="hide-mobile">${slHtml}</td>
@@ -3675,18 +3679,40 @@ function showSigTip(ticker, ev) {
 
   tip.innerHTML = html;
 
-  // Smart positioning — avoid viewport edges
+  // Smart positioning — element-ankorlu (bp-tooltip.js'deki position() deseniyle
+  // ayni yontem): hem mouse hem klavye/focus tetiklemesinde calisir. Focus
+  // event'lerinde ev.clientX/clientY tanimsizdir, bu yuzden tetikleyici
+  // elemanin getBoundingClientRect()'i kullanilir.
+  const target = ev && (ev.currentTarget || ev.target);
   const tw = 240, th = 180;
-  const left = ev.clientX + 16 + tw > window.innerWidth  ? ev.clientX - tw - 10 : ev.clientX + 16;
-  const top  = ev.clientY + 10 + th > window.innerHeight ? ev.clientY - th - 10 : ev.clientY + 10;
+  let left, top;
+  if (target && target.getBoundingClientRect) {
+    const r = target.getBoundingClientRect();
+    left = r.right + 8 + tw > window.innerWidth  ? r.left - tw - 8 : r.right + 8;
+    top  = r.top + th > window.innerHeight ? Math.max(8, window.innerHeight - th - 10) : r.top;
+  } else {
+    left = ev.clientX + 16 + tw > window.innerWidth  ? ev.clientX - tw - 10 : ev.clientX + 16;
+    top  = ev.clientY + 10 + th > window.innerHeight ? ev.clientY - th - 10 : ev.clientY + 10;
+  }
   tip.style.left = left + 'px';
   tip.style.top  = top  + 'px';
   tip.classList.add('open');
+  tip.setAttribute('aria-hidden', 'false');
 }
 
 function hideSigTip() {
-  document.getElementById('sigTip')?.classList.remove('open');
+  const tip = document.getElementById('sigTip');
+  if (tip) { tip.classList.remove('open'); tip.setAttribute('aria-hidden', 'true'); }
 }
+
+/* bughunt-r106: Escape ile sigTip'i kapat — bp-tooltip.js'teki onKeydown
+   deseniyle ayni erisilebilirlik beklentisi. */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const tip = document.getElementById('sigTip');
+    if (tip && tip.classList.contains('open')) hideSigTip();
+  }
+});
 
 // ── AI Piyasa Özeti (Ana Sayfa) ──────────────────────────
 (async function() {
