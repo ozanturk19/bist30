@@ -244,11 +244,11 @@
                 {# CPO-DEV2-074: long-only urunde SAT icin gercek kazanc/zarar yok —
                    ham fiyat hareketi notr/gri gosterilir, "getiri" cercevesinde sunulmaz. #}
                 <span class="c-gray" style="font-weight:700" title="BIST'te açığa satış pratikte uygulanamadığı için bu bir kazanç/zarar değil, sinyal sonrası ham fiyat hareketidir.">
-                  {{ '+' if s.aktif_ret >= 0 else '' }}{{ "%.1f"|format(s.aktif_ret) }}%
+                  {{ '+' if s.aktif_ret >= 0 else '' }}{{ s.aktif_ret|round(1)|tr_num }}%
                 </span>
               {% else %}
                 <span class="{{ 'c-green' if s.aktif_ret >= 0 else 'c-red' }}" style="font-weight:700">
-                  {{ '+' if s.aktif_ret >= 0 else '' }}{{ "%.1f"|format(s.aktif_ret) }}%
+                  {{ '+' if s.aktif_ret >= 0 else '' }}{{ s.aktif_ret|round(1)|tr_num }}%
                 </span>
               {% endif %}
             {% else %}—{% endif %}
