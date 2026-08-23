@@ -512,7 +512,7 @@ function renderCompare(json) {
       var rvolVal = s.rvol != null ? s.rvol.toFixed(2) + 'x' : '';
       var rvolCls = s.rvol >= 2 ? 'cmp-rvol-high' : '';
       row.innerHTML = '<span class="cmp-stock-ticker">' + esc(s.ticker) + '</span>' +
-        '<span class="cmp-stock-sig ' + sigCls + '">' + s.signal + '</span>' +
+        '<span class="cmp-stock-sig ' + sigCls + '">' + sigLabel(s.signal) + '</span>' +
         '<span class="cmp-stock-price">' + (s.price != null ? fmtPrice(s.price) : '') + '</span>' +
         '<span class="cmp-stock-chg ' + chgCls + '">' + chgVal + '</span>' +
         '<span class="cmp-stock-rvol ' + rvolCls + '">' + rvolVal + '</span>';

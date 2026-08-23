@@ -223,7 +223,9 @@ window.addEventListener('storage', e => {
 
 /* localStorage uyarı banner */
 function showLsWarning() {
-  if (localStorage.getItem(LS_WARN_KEY)) return;   // daha önce kapatıldıysa gösterme
+  try {
+    if (localStorage.getItem(LS_WARN_KEY)) return;   // daha önce kapatıldıysa gösterme
+  } catch (e) { /* localStorage erisilemez - banner yine de gosterilsin */ }
   document.getElementById('lsWarning').style.display = 'flex';
 }
 function dismissLsWarning() {
