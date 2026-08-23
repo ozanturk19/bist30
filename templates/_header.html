@@ -68,7 +68,7 @@
   </a>{% if hdr_title is defined and hdr_title %}
 {% if hdr_sub is defined and hdr_sub %}  <div>
     <{{ _hdr_tag }} class="page-title">{% if hdr_icon is defined and hdr_icon %}<span aria-hidden="true">{{ hdr_icon }}</span> {% endif %}{{ hdr_title }}</{{ _hdr_tag }}>
-    <div class="page-sub"{% if hdr_sub_id is defined and hdr_sub_id %} id="{{ hdr_sub_id }}"{% endif %}>{{ hdr_sub }}</div>
+    <div class="page-sub"{% if hdr_sub_id is defined and hdr_sub_id %} id="{{ hdr_sub_id }}" role="status" aria-live="polite"{% endif %}>{{ hdr_sub }}</div>
   </div>
 {% else %}  <{{ _hdr_tag }} class="page-title">{% if hdr_icon is defined and hdr_icon %}<span aria-hidden="true">{{ hdr_icon }}</span> {% endif %}{{ hdr_title }}</{{ _hdr_tag }}>
 {% endif %}{% endif %}  <nav class="bp-main-nav" aria-label="Ana navigasyon">

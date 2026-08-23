@@ -98,7 +98,7 @@
 
   <!-- Sonuç başlık -->
   <div class="result-header">
-    <div class="result-count" id="resultCount"><strong>—</strong> sonuç<span id="inlineSpinner" style="display:none;margin-left:8px;vertical-align:middle"><svg width="14" height="14" viewBox="0 0 24 24" style="animation:tarSpin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke="#58a6ff" stroke-width="2.5" fill="none" stroke-dasharray="50 60"/></svg></span></div>
+    <div class="result-count" id="resultCount" role="status" aria-live="polite"><strong>—</strong> sonuç<span id="inlineSpinner" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><svg width="14" height="14" viewBox="0 0 24 24" style="animation:tarSpin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke="#58a6ff" stroke-width="2.5" fill="none" stroke-dasharray="50 60"/></svg></span></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
       <select class="sort-select" id="sortSel" onchange="applyFilters()" aria-label="Sıralama">
@@ -152,7 +152,7 @@
       <tbody id="resultBody"></tbody>
     </table>
     <div id="mobileResultCards"></div>
-    <div class="empty-state" id="emptyDiv" style="display:none">
+    <div class="empty-state" id="emptyDiv" style="display:none" role="status" aria-live="polite">
       <div class="empty-icon"><span aria-hidden="true">📭</span></div>
       <h3>Sonuç bulunamadı</h3>
       <p style="font-size:var(--bp-text-base);margin-top:6px">Filtreleri gevşeterek tekrar deneyin.</p>

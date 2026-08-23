@@ -2137,6 +2137,7 @@ function _showChartStatus(msg, withRetryBtn) {
   // CPO-DEV2-045 #3: nihai hata (retry tükendi) — hpSignal placeholder'ı
   // gerçek bir sinyalmiş gibi ("● Yatay") kalmasın diye görünür "veri yok" işaretine çevir.
   if (withRetryBtn) {
+    if (window.showToast) showToast(msg, 'error');
     const sigEl = document.getElementById('hpSignal');
     if (sigEl) {
       sigEl.textContent = '?';
