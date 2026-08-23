@@ -11047,6 +11047,7 @@ def api_recognize():
 
 
 @app.route("/api/recognize/confirm")
+@limiter.limit("60 per minute")
 def api_recognize_confirm():
     """Magic-link tıklama hedefi — token'ı doğrular, tek kullanımlık cookie
     verir. Süresi dolmuş/kullanılmış/geçersiz token → sessizce ana sayfaya

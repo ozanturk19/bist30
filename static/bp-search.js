@@ -668,6 +668,36 @@
     requestAnimationFrame(step);
   };
 
+  // ── loadMacroBar — merkezi orkestrasyon (DEV2-r103/CPO-DEV2-078: 10 sablonda
+  // birebir kopyaydi, 3 farkli hata mesaji varyantina ayrismisti; artik tek
+  // kaynak burada. Cagiran sablon DOMContentLoaded'i bekleyerek cagirir, boylece
+  // bu script (defer) her zaman calismis ve bpStartMacroTicker tanimli olur —
+  // gundem.html'deki inline-erken-cagri/defer-gec-yukleme yaris durumu kapanir.
+  window.bpLoadMacroBar = async function() {
+    var track = document.getElementById('macroTrack');
+    if (!track) return;
+    try {
+      var r = await fetch('/api/macro');
+      var d = await r.json();
+      if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
+      var items = d.items || [];
+      if (!items.length) return;
+      var html = items.map(function(it) {
+        var lbl   = bpAssetLabel(it.label);
+        var price = bpFormatAssetPrice(it.label, it.price);
+        var chg   = it.change;
+        var sign  = chg > 0 ? '+' : '';
+        var cls   = chg > 0.05 ? 'mc-pos' : chg < -0.05 ? 'mc-neg' : 'mc-neu';
+        var arrow = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
+        return '<span class="macro-item"><span class="macro-item-lbl">' + lbl + '</span><span>' + price + '</span><span class="' + cls + '">' + arrow + ' ' + sign + chg.toFixed(2) + '%</span></span>';
+      }).join('');
+      track.innerHTML = html + html;
+      window.bpStartMacroTicker({ track: track, pps: 55 });
+    } catch (e) {
+      console.error('loadMacroBar basarisiz', e);
+    }
+  };
+
 
   // ── View Transitions API + perceived performance polish ──
   function bpEnableTransitions() {
