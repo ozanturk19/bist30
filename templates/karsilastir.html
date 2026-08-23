@@ -156,7 +156,7 @@ function renderPrice(v) {
 function renderChg(v) {
   if (v == null) return '<span class="muted">—</span>';
   const n = parseFloat(v), cl = n>=0?'up':'dn', sign = n>=0?'+':'';
-  return `<span class="${cl} mono">${sign}${n.toFixed(2)}%</span>`;
+  return `<span class="${cl} mono">${sign}${n.toFixed(2).replace('.', ',')}%</span>`;
 }
 
 function renderAdx(v, label) {
@@ -166,7 +166,7 @@ function renderAdx(v, label) {
   // Etiket sunucudan gelir (business_rules.derive_adx_label — CPO-1196 D0 #4); "Trend" eki
   // kaldırıldı — sinyal etiketiyle (Güçlü Trend/Trend Bozuldu) karışıyordu.
   const lbl = label || 'Zayıf';
-  return `<span class="${cl} mono">${n.toFixed(1)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
+  return `<span class="${cl} mono">${n.toFixed(1).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
 }
 
 function renderRsi(v) {
@@ -174,7 +174,7 @@ function renderRsi(v) {
   const n = parseFloat(v);
   const cl = n>70 ? 'dn' : n<30 ? 'up' : '';
   const lbl = n>70 ? '(Aşırı Alım)' : n<30 ? '(Aşırı Satım)' : '';
-  return `<span class="${cl} mono">${n.toFixed(1)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
+  return `<span class="${cl} mono">${n.toFixed(1).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
 }
 
 function renderQuality(v) {
@@ -210,24 +210,24 @@ function renderCell(key, s) {
     case 'sl_level':      return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde somut stop seviyesi gösterilmez') : (v ? `<span class="dn mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
     case 'tp1':           return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
     case 'tp2':           return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
-    case 'rr_ratio':      return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde risk/ödül oranı gösterilmez') : (v ? `<span class="mono" style="color:#58a6ff">1 : ${parseFloat(v).toFixed(1)}</span>` : '<span class="muted">—</span>');
+    case 'rr_ratio':      return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde risk/ödül oranı gösterilmez') : (v ? `<span class="mono" style="color:#58a6ff">1 : ${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>');
     case 'sector':        return v ? `<span style="font-size:11px;color:var(--bp-text2)">${v}</span>` : '<span class="muted">—</span>';
     // ── Temel analiz ──
     case 'market_cap':    return v ? `<span class="mono" style="font-size:13px">${v}</span>` : '<span class="muted">—</span>';
-    case 'pe_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(1)}</span>` : '<span class="muted">—</span>';
-    case 'pb_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(2)}</span>` : '<span class="muted">—</span>';
+    case 'pe_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>';
+    case 'pb_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(2).replace('.', ',')}</span>` : '<span class="muted">—</span>';
     case 'eps':           return v != null ? `<span class="mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>';
     case 'roe': {
       if (v == null) return '<span class="muted">—</span>';
       const n = parseFloat(v);
       const cl = n >= 15 ? 'up' : n < 7 ? 'dn' : '';
-      return `<span class="${cl} mono">%${n.toFixed(1)}</span>`;
+      return `<span class="${cl} mono">%${n.toFixed(1).replace('.', ',')}</span>`;
     }
     case 'dividend_yield': {
       if (v == null || v === 0) return '<span class="muted">—</span>';
       const n = parseFloat(v);
       const cl = n >= 4 ? 'up' : '';
-      return `<span class="${cl} mono">%${n.toFixed(2)}</span>`;
+      return `<span class="${cl} mono">%${n.toFixed(2).replace('.', ',')}</span>`;
     }
     default:              return v != null ? String(v) : '<span class="muted">—</span>';
   }

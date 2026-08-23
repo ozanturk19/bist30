@@ -631,6 +631,25 @@ def tr_price_filter(value):
     return f"{integer_part},{decimal_part}"
 
 
+@app.template_filter('tr_num')
+def tr_num_filter(value):
+    """bughunt-r115: round() ile zaten sinirlanmis hassasiyeti KORUYARAK '.'->','
+    cevirir (tr_price'tan farkli olarak sabit 2 ondalik ZORLAMAZ — win_rate/
+    avg_ret/max_drawdown gibi degiskien-hassasiyetli yuzde/oran alanlari icin)."""
+    if value is None:
+        return "—"
+    try:
+        fv = float(value)
+    except (TypeError, ValueError):
+        return value
+    if np.isnan(fv) or np.isinf(fv):
+        return "—"
+    s = str(fv)
+    if s.endswith('.0'):
+        s = s[:-2]
+    return s.replace('.', ',')
+
+
 # ── CPO-1335: göreli zaman etiketi — SSR şablonlar için kanonik filtreler ────
 # Şablonlar eskiden `{{ s.signal_bars }} gün` yazıyordu. signal_bars bir BAR
 # sayacıdır: hafta sonlarını ve ticker'ın tazelenemediği günleri atlar, bu
@@ -7706,6 +7725,10 @@ def build_signal_summary(stock):
 # ── Bireysel Hisse Sayfaları ──────────────────────────────────────────────────
 @app.route("/hisse/<ticker>")
 def stock_page(ticker):
+    if ticker != ticker.upper():
+        # bughunt-r115: /karsilastir (#40) ile ayni sinif fix - kucuk/karisik harfli
+        # path'ler 200 donup canonical/og:url ile celisiyordu (duplicate content).
+        return redirect(f"/hisse/{ticker.upper()}", code=301)
     ticker = ticker.upper()
     if ticker not in BIST100:
         if ticker in DELISTED_TICKERS:

@@ -53,14 +53,14 @@
       <div class="ozet-metric-sub">{{ bt.tickers_used }} hisse · 2 yıl</div>
     </div>
     <div class="ozet-metric">
-      <div class="ozet-metric-val hero-val c-green">%{{ bt.al.win_rate }}</div>
+      <div class="ozet-metric-val hero-val c-green">%{{ bt.al.win_rate|tr_num }}</div>
       <div class="ozet-metric-lbl"><span aria-hidden="true">✅</span> Güçlü Trend Başarı Oranı</div>
       <div class="ozet-metric-sub">{{ bt.al.count }} Güçlü Trend sinyali</div>
     </div>
     <div class="ozet-metric">
-      <div class="ozet-metric-val c-green">{{ '+' if bt.al.avg_ret >= 0 else '' }}{{ bt.al.avg_ret }}%</div>
+      <div class="ozet-metric-val c-green">{{ '+' if bt.al.avg_ret >= 0 else '' }}{{ bt.al.avg_ret|tr_num }}%</div>
       <div class="ozet-metric-lbl"><span aria-hidden="true">📈</span> Ort. Getiri (Güçlü Trend)</div>
-      <div class="ozet-metric-sub">Max +{{ bt.al.best }}% · Min {{ bt.al.worst }}%</div>
+      <div class="ozet-metric-sub">Max +{{ bt.al.best|tr_num }}% · Min {{ bt.al.worst|tr_num }}%</div>
     </div>
     <div class="ozet-metric">
       <div class="ozet-metric-val" style="color:{{ '#f59e0b' if aktif_count > 0 else '#8b949e' }}">{{ aktif_count }}</div>
@@ -72,14 +72,14 @@
   <!-- Özet kartlar -->
   <div class="stat-grid">
     <div class="stat-card">
-      <div class="stat-num c-green">%{{ bt.al.win_rate }}</div>
+      <div class="stat-num c-green">%{{ bt.al.win_rate|tr_num }}</div>
       <div class="stat-lbl"><span aria-hidden="true">▲</span> Güçlü Trend Kazanma</div>
       <div class="stat-sub">{{ bt.al.count }} sinyal incelendi</div>
     </div>
     <div class="stat-card">
-      <div class="stat-num c-green">{{ bt.al.avg_ret }}%</div>
+      <div class="stat-num c-green">{{ bt.al.avg_ret|tr_num }}%</div>
       <div class="stat-lbl"><span aria-hidden="true">▲</span> Güçlü Trend Ort. Getiri</div>
-      <div class="stat-sub">Max {{ bt.al.best }}% / Min {{ bt.al.worst }}%</div>
+      <div class="stat-sub">Max {{ bt.al.best|tr_num }}% / Min {{ bt.al.worst|tr_num }}%</div>
     </div>
     {# T3.7: SAT (short) win_rate/avg_ret KALDIRILDI — ürün long-only, kısa pozisyon açılmadığı için
        "kazanma oranı"/"ortalama getiri" bu yönde yanıltıcı. bt.sat verisi backend'de duruyor,
@@ -105,7 +105,7 @@
     </div>
     <div class="stat-card" tabindex="0" data-tip="Maksimum kümülatif düşüş. Kötü seri döneminde en derin kayıp. Bu değer N farklı hissenin işlemlerini birleştirilmiş biçimde yaklaşık gösterir, gerçek sıralı tek bir portföy eğrisi değildir.">
       <div class="stat-num {% if bt.al.max_drawdown is not none and bt.al.max_drawdown > -15 %}c-green{% elif bt.al.max_drawdown is not none and bt.al.max_drawdown > -30 %}c-gold{% else %}c-red{% endif %}">
-        {% if bt.al.max_drawdown is not none %}{{ bt.al.max_drawdown }}%{% else %}—{% endif %}
+        {% if bt.al.max_drawdown is not none %}{{ bt.al.max_drawdown|tr_num }}%{% else %}—{% endif %}
       </div>
       <div class="stat-lbl"><span aria-hidden="true">📉</span> Max Drawdown</div>
       <div class="stat-sub">Ardışık kayıp serisi etkisi</div>
@@ -136,7 +136,7 @@
   <div class="sec-head">
     Hisse Bazlı Performans
     <span>(Güçlü Trend sayısına göre sıralı)</span>
-    <button class="btn-run" id="btnRun" onclick="triggerBacktest()"><span aria-hidden="true">🔄</span> Yenile</button>
+    <button class="btn-run" id="btnRun" onclick="triggerBacktest(this)"><span aria-hidden="true">🔄</span> Yenile</button>
   </div>
   <div class="tbl-wrap">
     <table>
@@ -164,7 +164,7 @@
           </td>
           <td>
             {% if t.al_avg is not none %}
-              <span class="{{ 'c-green' if t.al_avg >= 0 else 'c-red' }}">{{ '+' if t.al_avg >= 0 else '' }}{{ t.al_avg }}%</span>
+              <span class="{{ 'c-green' if t.al_avg >= 0 else 'c-red' }}">{{ '+' if t.al_avg >= 0 else '' }}{{ t.al_avg|tr_num }}%</span>
             {% else %}—{% endif %}
           </td>
           <td>{{ t.sat_count }}</td>
@@ -185,7 +185,7 @@
     </div>
     <p style="margin-top:16px;font-size:var(--bp-text-xs);color:#64748b">~5-10 dakika sürebilir, sayfa otomatik yenilenecek.</p>
     <p style="margin-top:8px">
-      <button class="btn-run" id="btnRun" onclick="triggerBacktest()" style="opacity:0.6;font-size:var(--bp-text-sm)"><span aria-hidden="true">🔄</span> Yeniden Başlat</button>
+      <button class="btn-run" id="btnRunRetry" onclick="triggerBacktest(this)" style="opacity:0.6;font-size:var(--bp-text-sm)"><span aria-hidden="true">🔄</span> Yeniden Başlat</button>
     </p>
   </div>
   
@@ -276,8 +276,7 @@
    /api/data-quality'den ayrı poll edilir */
 bpStartDataQualityPolling();
 
-async function triggerBacktest() {
-  const btn = document.getElementById('btnRun');
+async function triggerBacktest(btn) {
   if (!btn) return;
   btn.disabled = true;
   btn.textContent = '⏳ Başlatılıyor...';

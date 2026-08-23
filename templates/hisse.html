@@ -592,9 +592,9 @@
   </div>
   {% else %}
   <!-- Teknik Yorum (signal_summary yoksa fallback) -->
-  <div class="commentary-section" id="commentarySection" data-tab-content="ozet" style="display:none">
+  <div class="commentary-section" id="commentarySectionFallback" data-tab-content="ozet" style="display:none">
     <h2 class="section-title" style="margin-bottom:8px"><span aria-hidden="true">📊</span> Teknik Görünüm</h2>
-    <p class="commentary-text" id="commentaryText"></p>
+    <p class="commentary-text" id="commentaryTextFallback"></p>
   </div>
   {% endif %}
 
@@ -1610,8 +1610,8 @@ function renderFreshness(f, dq, ageS, refreshing) {
 
 function renderCommentary(commentary) {
   if (!commentary) return;
-  const el = document.getElementById('commentaryText');
-  const sec = document.getElementById('commentarySection');
+  const el = document.getElementById('commentaryText') || document.getElementById('commentaryTextFallback');
+  const sec = document.getElementById('commentarySection') || document.getElementById('commentarySectionFallback');
   if (el && sec) {
     el.textContent = commentary;
     sec.style.display = '';
