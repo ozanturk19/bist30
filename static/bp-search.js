@@ -345,6 +345,7 @@
       var route = el.getAttribute('data-route');
       if (route === '/' ? path === '/' : path.indexOf(route) === 0) {
         el.classList.add('active');
+        el.setAttribute('aria-current', 'page');
       }
     });
   }
