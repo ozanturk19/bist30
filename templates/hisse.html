@@ -343,6 +343,8 @@
         return { t: b.time || b.t, c: +(b.close != null ? b.close : b.c) };
       }).filter(function(x){ return isFinite(x.c) && x.c > 0; });
       if (data.length < 2) return;
+      cv._bpSparkLastOhlc = ohlc;
+      cv._bpSparkLastAccent = accent;
       wrap.style.display = 'block';
       var dpr = window.devicePixelRatio || 1;
       var W = cv.clientWidth || wrap.clientWidth || 280;
@@ -445,6 +447,21 @@
     } else {
       tryHook();
     }
+
+    var _sparkResizeTimer = null;
+    function _bpSparkRedraw(){
+      var cv2 = document.getElementById('bpSpark');
+      if (!cv2 || !cv2._bpSparkLastOhlc) return;
+      window.bpDrawSparkline(cv2._bpSparkLastOhlc, cv2._bpSparkLastAccent);
+    }
+    window.addEventListener('resize', function(){
+      clearTimeout(_sparkResizeTimer);
+      _sparkResizeTimer = setTimeout(_bpSparkRedraw, 150);
+    });
+    window.addEventListener('orientationchange', function(){
+      clearTimeout(_sparkResizeTimer);
+      _sparkResizeTimer = setTimeout(_bpSparkRedraw, 150);
+    });
   })();
   </script>
   {% endif %}

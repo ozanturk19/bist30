@@ -338,7 +338,18 @@ async function load() {
 }
 
 load();
-setInterval(load, 120000);  // Her 2 dakika yenile
+let _sectorLoadInt = setInterval(load, 120000);  // Her 2 dakika yenile
+
+/* Page Visibility - sekme arka plandayken duraklat (index.html/gundem.html'deki
+   ayni ilke), sekme tekrar gorunur oldugunda hemen tazele */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(_sectorLoadInt);
+  } else {
+    load();
+    _sectorLoadInt = setInterval(load, 120000);
+  }
+});
 
 // Makro Ticker Bandı
 document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); });

@@ -197,9 +197,32 @@ async function load() {
   }
 }
 
+let _btInterval = null;
+
+function _btStartInterval() {
+  if (_btInterval) return;
+  _btInterval = setInterval(load, 1800000);
+}
+
+function _btStopInterval() {
+  if (_btInterval) {
+    clearInterval(_btInterval);
+    _btInterval = null;
+  }
+}
+
 load();
-// Her 30 dakika yenile
-setInterval(load, 1800000);
+// Her 30 dakika yenile (sekme arka plandayken duraklat, on plana donunce hemen yenile)
+_btStartInterval();
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    _btStopInterval();
+  } else {
+    load();
+    _btStartInterval();
+  }
+});
 
 // Makro Ticker
 document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); });

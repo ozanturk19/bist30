@@ -514,7 +514,7 @@
       <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Sinyal değiştiğinde bildirim al — ücretsiz</div>
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:280px;flex-wrap:wrap" id="subForm">
-      <input id="subName" type="text" placeholder="Adınız" aria-label="Ad"
+      <input id="subName" type="text" autocomplete="given-name" placeholder="Adınız" aria-label="Ad"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
                padding:8px 12px;border-radius:var(--bp-radius);font-size:var(--bp-text-base);font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
@@ -755,7 +755,7 @@
     <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> İstediğin zaman çık</span>
   </div>
   <div class="sub-toast-row" id="subToastForm">
-    <input id="subToastName" type="text" class="sub-toast-input" placeholder="Adınız"
+    <input id="subToastName" type="text" class="sub-toast-input" placeholder="Adınız" autocomplete="name"
       onkeydown="if(event.key==='Enter')document.getElementById('subToastEmail').focus()"
       aria-label="Ad">
     <input id="subToastEmail" type="email" class="sub-toast-input" required autocomplete="email" placeholder="E-posta"
@@ -2993,23 +2993,25 @@ function renderAlarmPanel() {
   }
 
   const rows = [...watchlist].map(t => {
+    const tEsc = _esc(t);
+    const tJs  = _escJsStr(t);
     const sig     = lastSignals[t] || 'BEKLE';
     const sigCls  = sig === 'AL' ? 'AL' : sig === 'SAT' ? 'SAT' : 'BEKLE';
     const curPrice = livePrices[t]
       ? livePrices[t].toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
       : '—';
     const pa    = priceAlarms[t] || {};
-    const aboveInputId = 'pa-above-' + t;
-    const belowInputId = 'pa-below-' + t;
+    const aboveInputId = 'pa-above-' + tJs;
+    const belowInputId = 'pa-below-' + tJs;
     const aboveHasAlarm = pa.above != null;
     const belowHasAlarm = pa.below != null;
 
     return `<div class="ap-item">
       <div class="ap-item-top">
-        <span class="ap-ticker"><a href="/hisse/${t}" style="color:#f0f6fc;text-decoration:none">${t}</a></span>
-        <span class="ap-price" id="app-${t}">${curPrice} ₺</span>
+        <span class="ap-ticker"><a href="/hisse/${tEsc}" style="color:#f0f6fc;text-decoration:none">${tEsc}</a></span>
+        <span class="ap-price" id="app-${tEsc}">${curPrice} ₺</span>
         <span class="ap-sig ${sigCls}">${sig === 'AL' ? '▲' : sig === 'SAT' ? '▼' : '●'} ${sigLabel(sig)}</span>
-        <button class="ap-remove" onclick="toggleWatch('${t}')" title="Takibi kaldır" aria-label="${t} takibini kaldır">✕</button>
+        <button class="ap-remove" onclick="toggleWatch('${tJs}')" title="Takibi kaldır" aria-label="${tEsc} takibini kaldır">✕</button>
       </div>
       <div class="ap-price-alarms">
         <div class="ap-pa-row">
@@ -3018,10 +3020,10 @@ function renderAlarmPanel() {
             type="number" step="0.01" min="0" aria-label="Üstü fiyat alarmı"
             placeholder="${aboveHasAlarm ? pa.above : '—'}"
             value="${aboveHasAlarm ? pa.above : ''}"
-            onkeydown="if(event.key==='Enter')setPriceAlarm('${t}','above','${aboveInputId}')">
+            onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','above','${aboveInputId}')">
           ${aboveHasAlarm
-            ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${t}','above')" title="Alarmı temizle" aria-label="${t} üstü fiyat alarmını temizle">✕</button>`
-            : `<button class="ap-pa-set" onclick="setPriceAlarm('${t}','above','${aboveInputId}')">Kur</button>`}
+            ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${tJs}','above')" title="Alarmı temizle" aria-label="${tEsc} üstü fiyat alarmını temizle">✕</button>`
+            : `<button class="ap-pa-set" onclick="setPriceAlarm('${tJs}','above','${aboveInputId}')">Kur</button>`}
         </div>
         <div class="ap-pa-row">
           <span class="ap-pa-lbl bp-sat-text">▼ Altı</span>
@@ -3029,10 +3031,10 @@ function renderAlarmPanel() {
             type="number" step="0.01" min="0" aria-label="Altı fiyat alarmı"
             placeholder="${belowHasAlarm ? pa.below : '—'}"
             value="${belowHasAlarm ? pa.below : ''}"
-            onkeydown="if(event.key==='Enter')setPriceAlarm('${t}','below','${belowInputId}')">
+            onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','below','${belowInputId}')">
           ${belowHasAlarm
-            ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${t}','below')" title="Alarmı temizle" aria-label="${t} altı fiyat alarmını temizle">✕</button>`
-            : `<button class="ap-pa-set" onclick="setPriceAlarm('${t}','below','${belowInputId}')">Kur</button>`}
+            ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${tJs}','below')" title="Alarmı temizle" aria-label="${tEsc} altı fiyat alarmını temizle">✕</button>`
+            : `<button class="ap-pa-set" onclick="setPriceAlarm('${tJs}','below','${belowInputId}')">Kur</button>`}
         </div>
       </div>
     </div>`;
