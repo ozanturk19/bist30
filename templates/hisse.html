@@ -1672,7 +1672,10 @@ function renderSummary(s, signalData) {
 
     if (signalData.signal_price && s.signal !== 'BEKLE' && !isNew) {
       const ep = signalData.signal_price;
-      const ret = ((s.price - ep) / ep * 100);
+      // bughunt-r120 number-rounding-display-mismatch: header _dispPrice (guncel
+      // fiyat) kullanirken bu hesap ham s.price (bayat chart-summary fiyati)
+      // kullaniyordu - ayni ekranda iki tutarsiz fiyat kaynagi.
+      const ret = ((_dispPrice - ep) / ep * 100);
       const retSign = ret >= 0 ? '+' : '';
       const retColor = ret >= 0 ? '#00e290' : '#f85149';
       document.getElementById('icEntry').innerHTML =
@@ -1687,7 +1690,7 @@ function renderSummary(s, signalData) {
 
   /* SL */
   if (s.sl_level && s.price) {
-    const slPct = ((s.sl_level - s.price) / s.price * 100).toFixed(1).replace('.', ',');
+    const slPct = ((s.sl_level - _dispPrice) / _dispPrice * 100).toFixed(1).replace('.', ',');
     document.getElementById('icSl').textContent = fmt(s.sl_level);
     document.getElementById('icSlPct').textContent =
       (s.signal !== 'BEKLE' ? 'Riske uzaklık: ' : 'ST desteği: ') + slPct + '%';

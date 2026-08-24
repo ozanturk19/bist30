@@ -10515,7 +10515,7 @@ def api_sektor_compare():
     """2-3 sektörü yan yana karşılaştırır. ?s=Bankacılık&s=Teknoloji"""
     selected = request.args.getlist("s")
     if not selected:
-        return safe_json({"error": "s parametresi gerekli"}), 400
+        return safe_json({"ok": False, "error": "s parametresi gerekli"}), 400
     # bug-hunt r93: dedup yoktu -- ayni sektor tekrar tekrar (?s=X&s=X&s=X) gonderilirse
     # renderCompare() ayni sektoru N ayri sutunda (farkli accent renkleriyle) tekrar ciziyordu.
     selected = list(dict.fromkeys(s.strip() for s in selected))[:3]  # max 3 sektor, dedup sira-koruyarak
@@ -10526,7 +10526,7 @@ def api_sektor_compare():
     # defense-in-depth -- dogrulanmamis sec_name JSON yanitina aynen yaziliyordu.
     selected = [s for s in selected if s in sec_map]
     if not selected:
-        return safe_json({"error": "geçerli sektör bulunamadı"}), 400
+        return safe_json({"ok": False, "error": "geçerli sektör bulunamadı"}), 400
     result = {}
     for sec_name in selected:
         items = sec_map.get(sec_name, [])
@@ -11165,7 +11165,11 @@ def api_subscribe():
         subs = _load_subscribers()
         if email in subs:
             if subs[email].get("active", True):
-                return safe_json({"ok": False, "message": "Bu e-posta zaten kayıtlı."})
+                # bughunt-r120 json-error-shape: diger tum hata dallari "error" anahtari
+                # kullaniyor, bu dal "message" kullaniyordu - ozet.html substring-esleme
+                # ile bu metne bagimliydi. "message" korunuyor (mevcut tuketiciler bozulmaz),
+                # "error" additive eklendi (sema tutarliligi).
+                return safe_json({"ok": False, "error": "Bu e-posta zaten kayıtlı.", "message": "Bu e-posta zaten kayıtlı."})
             # Pasif abonenin kaydını yeniden aktif et
             subs[email]["active"] = True
             subs[email]["subscribed_at"] = datetime.now(_TZ_TR).isoformat()

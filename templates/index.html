@@ -2430,7 +2430,7 @@ function renderTable() {
       _tierHeaderTr = `<tr class="tier-group-header ${_tierCss[_curTierD] || ''}"><td colspan="9">${_tierLabels[_curTierD]} <span class="tier-count">${cnt} hisse</span></td></tr>`;
     }
     _lastTier_desktop = _curTierD;
-    return _tierHeaderTr + `<tr data-ticker="${_escJsStr(s.ticker)}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" onclick="window.location='/hisse/${_escJsStr(s.ticker)}'">
+    return _tierHeaderTr + `<tr data-ticker="${_escJsStr(s.ticker)}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" role="link" tabindex="0" onclick="window.location='/hisse/${_escJsStr(s.ticker)}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location='/hisse/${_escJsStr(s.ticker)}'}">
       <td><a href="/hisse/${_escJsStr(s.ticker)}" style="color:inherit;text-decoration:none"><span class="ticker">${_escJsStr(s.ticker)}</span></a>${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — RVOL ≥ 1.20" style="color:var(--bp-volume);font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span tabindex="0" data-tip="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" tabindex="0" data-tip="${_esc(s.anomaly.reason)}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${_escJsStr(s.ticker)}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2).replace('.', ',')}%</span></td>

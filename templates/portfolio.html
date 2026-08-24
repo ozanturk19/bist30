@@ -471,12 +471,21 @@ async function clearPortfolio() {
   // CPO-DEV2-049 madde 5: sadece localStorage degil, sunucudaki bulut kopyasi da silinsin
   // (aksi halde kullaniciya 'silindi' hissi veren ama gercekte silmeyen bir UI olur).
   const _cloudToken = localStorage.getItem(CLOUD_TOKEN_KEY);
+  let _cloudDeleteFailed = false;
   if (_cloudToken) {
     try {
-      await fetch(`/api/portfolio/${encodeURIComponent(_cloudToken)}`, {method: 'DELETE', signal: AbortSignal.timeout(15000)});
-    } catch (e) { /* sunucu silme basarisiz olsa da yerel portfoy zaten temizlendi */ }
+      const _delRes = await fetch(`/api/portfolio/${encodeURIComponent(_cloudToken)}`, {method: 'DELETE', signal: AbortSignal.timeout(15000)});
+      if (!_delRes.ok) _cloudDeleteFailed = true;
+    } catch (e) { _cloudDeleteFailed = true; }
   }
-  showToast('🗑 Portföy temizlendi.', 'ok');
+  // bughunt-r120 optimistic-ui-rollback-missing: DELETE basarisiz olursa yerel
+  // "temizlendi" mesaji kullaniciyi yanlis bilgilendirir (bulut kopyasi hala duruyor
+  // olabilir) - deleteAlertSettings()/toggleWatch() ile ayni ilke.
+  if (_cloudDeleteFailed) {
+    showToast('⚠️ Yerel portföy temizlendi ama bulut kopyası silinemedi — tekrar deneyin.', 'err', 5000);
+  } else {
+    showToast('🗑 Portföy temizlendi.', 'ok');
+  }
 }
 
 function addPosition() {

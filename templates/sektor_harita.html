@@ -175,6 +175,18 @@
 const SECTORS = {};  // ticker → sector (doldurulacak)
 let allStocks  = [];
 
+// bughunt-r120 number-rounding-display-mismatch: Python 3 round() (round-half-to-even)
+// esdegeri - JS Math.round yarimi hep yukari yuvarlar, /api/sektor-compare ayni skoru
+// Python round() ile hesapliyor, kucuk sektorlerde (.5 sinirinda) heatmap karti ile
+// Karsilastir paneli farkli sayi gosterebiliyordu.
+function _pyRound(x) {
+  const floor = Math.floor(x);
+  const diff = x - floor;
+  if (diff < 0.5) return floor;
+  if (diff > 0.5) return floor + 1;
+  return (floor % 2 === 0) ? floor : floor + 1;
+}
+
 function heatColor(score) {
   // score: -100..+100  →  renk (Stitch palette)
   if (score >= 60)  return '#00e290';
@@ -209,7 +221,7 @@ function renderHeatmap(stocks) {
   // Sektörleri skor'a göre sırala
   const sectors = Object.entries(secMap).map(([name, d]) => {
     const total = d.al.length + d.sat.length + d.bkl.length;
-    const score = total > 0 ? Math.round((d.al.length - d.sat.length) / total * 100) : 0;
+    const score = total > 0 ? _pyRound((d.al.length - d.sat.length) / total * 100) : 0;
     return { name, ...d, total, score };
   }).sort((a, b) => b.score - a.score);
 
