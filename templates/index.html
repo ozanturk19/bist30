@@ -2039,7 +2039,7 @@ async function openAlertModal(ticker) {
     ${loginNotice}
     <div class="alert-modal-row">
       <label for="am-price-pct">📈 Fiyat hareketi eşiği (%)</label>
-      <input type="number" id="am-price-pct" min="0.1" max="20" step="0.5" placeholder="—" value="${cfg.price_pct != null ? cfg.price_pct : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+      <input type="number" id="am-price-pct" min="0.1" max="20" step="0.5" inputmode="decimal" placeholder="—" value="${cfg.price_pct != null ? cfg.price_pct : ''}" ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     <div class="alert-modal-row">
       <label for="am-signal-change">🔄 Sinyal değişimi (AL/SAT/BEKLE)</label>
@@ -2047,11 +2047,11 @@ async function openAlertModal(ticker) {
     </div>
     <div class="alert-modal-row">
       <label for="am-rsi">📉 RSI aşırı satış eşiği (≤)</label>
-      <input type="number" id="am-rsi" min="10" max="50" step="1" placeholder="—" value="${cfg.rsi_threshold != null ? cfg.rsi_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+      <input type="number" id="am-rsi" min="10" max="50" step="1" inputmode="numeric" placeholder="—" value="${cfg.rsi_threshold != null ? cfg.rsi_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     <div class="alert-modal-row">
       <label for="am-rvol">📊 RVOL yüksek hacim eşiği (≥x)</label>
-      <input type="number" id="am-rvol" min="1" max="10" step="0.5" placeholder="—" value="${cfg.rvol_threshold != null ? cfg.rvol_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+      <input type="number" id="am-rvol" min="1" max="10" step="0.5" inputmode="decimal" placeholder="—" value="${cfg.rvol_threshold != null ? cfg.rvol_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
     </div>
     ${isLoggedIn ? `<button class="alert-modal-save" onclick="saveAlertSettings()">💾 Kaydet</button>
     ${_userAlerts[ticker] ? `<button class="alert-modal-delete" onclick="deleteAlertSettings()">🗑 Bu alerti sil</button>` : ''}` : ''}
@@ -3020,7 +3020,7 @@ function renderAlarmPanel() {
         <div class="ap-pa-row">
           <span class="ap-pa-lbl bp-al-text">▲ Üstü</span>
           <input class="ap-pa-input ${aboveHasAlarm ? 'has-alarm' : ''}" id="${aboveInputId}"
-            type="number" step="0.01" min="0" aria-label="Üstü fiyat alarmı"
+            type="number" step="0.01" min="0" inputmode="decimal" aria-label="Üstü fiyat alarmı"
             placeholder="${aboveHasAlarm ? pa.above : '—'}"
             value="${aboveHasAlarm ? pa.above : ''}"
             onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','above','${aboveInputId}')">
@@ -3031,7 +3031,7 @@ function renderAlarmPanel() {
         <div class="ap-pa-row">
           <span class="ap-pa-lbl bp-sat-text">▼ Altı</span>
           <input class="ap-pa-input ${belowHasAlarm ? 'has-alarm' : ''}" id="${belowInputId}"
-            type="number" step="0.01" min="0" aria-label="Altı fiyat alarmı"
+            type="number" step="0.01" min="0" inputmode="decimal" aria-label="Altı fiyat alarmı"
             placeholder="${belowHasAlarm ? pa.below : '—'}"
             value="${belowHasAlarm ? pa.below : ''}"
             onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','below','${belowInputId}')">

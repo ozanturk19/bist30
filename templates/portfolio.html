@@ -149,8 +149,8 @@
     <span class="add-lbl">Hisse ekle:</span>
     <input type="text" id="addTicker" placeholder="THYAO veya Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu">
     <datalist id="bistTickerList"></datalist>
-    <input type="number" id="addLot" placeholder="Adet" min="1" step="1" aria-label="Adet">
-    <input type="number" id="addPrice" placeholder="Alış fiyatı ₺" min="0" step="0.01" aria-label="Alış fiyatı">
+    <input type="number" id="addLot" placeholder="Adet" min="1" step="1" inputmode="numeric" aria-label="Adet">
+    <input type="number" id="addPrice" placeholder="Alış fiyatı ₺" min="0" step="0.01" inputmode="decimal" aria-label="Alış fiyatı">
     <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>
     <span id="addErr" role="alert" style="color:var(--bp-sat);font-size:var(--bp-text-sm)"></span>
@@ -370,7 +370,7 @@ function exportCSV() {
   const rows = portfolio.map(p => {
     const live     = liveData[p.ticker];
     const current  = live ? live.price  : '';
-    const sig      = live ? sigLabel(live.signal) : '';
+    const sig      = live ? csvSafe(sigLabel(live.signal)) : '';
     const pnlVal   = current ? ((current - p.price) * p.lot).toFixed(2) : '';
     const pnlPct   = current ? (((current - p.price) / p.price) * 100).toFixed(2) : '';
     return [
