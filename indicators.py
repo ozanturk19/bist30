@@ -43,6 +43,8 @@ def compute_atr(high, low, close, period=14):
     """ATR(14) — Wilder smoothing. Bağımsız helper; giriş optimizasyonu için kullanılır."""
     hi = high.values; lo = low.values; cl = close.values
     n  = len(cl)
+    if n == 0:
+        return pd.Series(dtype=float, index=close.index)
     tr      = np.empty(n)
     tr[0]   = hi[0] - lo[0]
     tr[1:]  = np.maximum(hi[1:] - lo[1:],
@@ -64,6 +66,9 @@ def compute_supertrend(high, low, close, period=10, multiplier=3):
     hi  = high.values
     lo  = low.values
     n   = len(cl)
+    if n == 0:
+        empty = pd.Series(dtype=float, index=close.index)
+        return empty, empty
 
     # True Range
     tr_arr      = np.empty(n)

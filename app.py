@@ -1399,6 +1399,8 @@ def _fill_intraday_gaps(df, ticker):
     CPO-740 Görev 11: lock-free subprocess isolation (yf_fetch.py 5d/1m).
     """
     try:
+        if df is None or df.empty:
+            return df
         ticker_base = ticker[:-3] if ticker.endswith(".IS") else ticker
         df5d = _fetch_intraday_subprocess(ticker_base)
         if df5d is None or df5d.empty:
@@ -1498,11 +1500,20 @@ def compose_score(adx: float, vol_ratio: float, bull_score: int,
         70+ → Güçlü Sinyal | 56-69 → Standart | <56 → (rozet yok)
         Düşük likidite / yakın bilanço → bir kademe düşürülür (analyze()).
     """
+    import math
+
+    def _finite(v, default):
+        try:
+            v = float(v)
+        except (TypeError, ValueError):
+            return default
+        return v if math.isfinite(v) else default
+
     s = 0.0
-    s += min(float(adx or 0), 50) / 50 * 30
-    s += min(float(vol_ratio or 1.0), 5) / 5 * 25
+    s += min(_finite(adx, 0), 50) / 50 * 30
+    s += min(_finite(vol_ratio, 1.0), 5) / 5 * 25
     s += 10 if confirmed else 0
-    rsi = float(rsi or 50)
+    rsi = _finite(rsi, 50)
     if signal == "SAT":
         if 25 <= rsi <= 50:
             s += 10
@@ -1777,7 +1788,7 @@ def analyze(ticker_base):
             if len(volume) >= 20:
                 v5  = float(volume.iloc[-5:].mean())
                 v20 = float(volume.iloc[-20:].mean())
-                if v20 > 0 and not pd.isna(v20):
+                if v20 > 0 and not pd.isna(v20) and not pd.isna(v5):
                     rvol = round(v5 / v20, 2)
                     is_premium = (signal == "AL" and rvol >= 1.20)
         except Exception:
@@ -4560,7 +4571,7 @@ def admin_send_digest_now():
 
     logger.info("admin_send_digest_now: timeframe=%s, force=%s tetiklendi", timeframe, force)
     result = _send_digest_emails(timeframe=timeframe, force=force)
-    return jsonify({
+    return safe_json({
         "triggered": True,
         "timeframe": timeframe,
         "force": force,
@@ -5061,7 +5072,7 @@ def api_market_summary():
     except Exception as e:
         logger.debug("market-summary asOfTime veri-zamanı hesabı: %s", e)
 
-    return jsonify({
+    return safe_json({
         "asOfTime": as_of_time,
         "marketStatus": market_status,
         "closedMessage": closed_msg,
@@ -5240,6 +5251,8 @@ def get_chart_data():
         df    = df[["Open", "High", "Low", "Close"]].dropna()
         df    = _fill_intraday_gaps(df, "XU030.IS")   # eksik günleri tamamla
         df    = df.sort_index()
+        if len(df) < WARMUP_MIN + 50:
+            return None
         close = df["Close"]
         high  = df["High"]
         low   = df["Low"]
@@ -8732,8 +8745,8 @@ def api_tarama():
         sectors = sorted(set(_get_sector(s.get("ticker","")) for s in _cache["data"]
                              if s.get("ticker") not in ("XU030","XU100")))
 
-    return jsonify({"results": results, "sectors": sectors,
-                    "count": len(results), "updated_at": upd})
+    return safe_json({"results": results, "sectors": sectors,
+                      "count": len(results), "updated_at": upd})
 
 
 # ── SEO: sitemap, robots, favicon ────────────────────────────────────────────
