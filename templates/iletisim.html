@@ -46,7 +46,7 @@
   <!-- İletişim Formu -->
   <div class="card" style="margin-top:16px">
     <h2 style="margin-bottom:16px">Mesaj Gönder</h2>
-    <form id="contactForm" onsubmit="submitForm(event)">
+    <form id="contactForm" onsubmit="submitForm(event)" novalidate>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
         <div>
           <label for="cfName" style="font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Ad Soyad</label>
@@ -83,8 +83,24 @@ async function submitForm(e) {
   e.preventDefault();
   const btn = document.getElementById('cfBtn');
   const msg = document.getElementById('cfMsg');
+  const nameEl = document.getElementById('cfName');
   const emailEl = document.getElementById('cfEmail');
+  const messageEl = document.getElementById('cfMessage');
+  const name = nameEl.value.trim();
   const email = emailEl.value.trim();
+  const message = messageEl.value.trim();
+  if (!name) {
+    nameEl.style.borderColor = 'var(--bp-sat)';
+    nameEl.setAttribute('aria-invalid', 'true');
+    nameEl.setAttribute('aria-describedby', 'cfMsg');
+    msg.style.display = 'block';
+    msg.style.color = 'var(--bp-sat)';
+    msg.textContent = '❌ Ad Soyad alanı zorunlu.';
+    nameEl.focus();
+    return;
+  }
+  nameEl.removeAttribute('aria-invalid');
+  nameEl.removeAttribute('aria-describedby');
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     emailEl.style.borderColor = 'var(--bp-sat)';
     emailEl.setAttribute('aria-invalid', 'true');
@@ -97,6 +113,18 @@ async function submitForm(e) {
   }
   emailEl.removeAttribute('aria-invalid');
   emailEl.removeAttribute('aria-describedby');
+  if (!message) {
+    messageEl.style.borderColor = 'var(--bp-sat)';
+    messageEl.setAttribute('aria-invalid', 'true');
+    messageEl.setAttribute('aria-describedby', 'cfMsg');
+    msg.style.display = 'block';
+    msg.style.color = 'var(--bp-sat)';
+    msg.textContent = '❌ Mesaj alanı zorunlu.';
+    messageEl.focus();
+    return;
+  }
+  messageEl.removeAttribute('aria-invalid');
+  messageEl.removeAttribute('aria-describedby');
   msg.style.display = 'none';
   btn.disabled = true;
   btn.textContent = 'Gönderiliyor…';
@@ -105,10 +133,10 @@ async function submitForm(e) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name:    document.getElementById('cfName').value.trim(),
+        name:    name,
         email:   email,
         subject: document.getElementById('cfSubject').value,
-        message: document.getElementById('cfMessage').value.trim()
+        message: message
       }),
       signal: AbortSignal.timeout(15000)
     });
@@ -157,6 +185,6 @@ window.addEventListener('pageshow', (ev) => {
   <div style="margin-top:8px"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
 </footer>
 
-<script src="/static/bp-search.js?v=61" defer></script>
+<script src="/static/bp-search.js?v=62" defer></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

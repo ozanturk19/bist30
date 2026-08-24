@@ -60,6 +60,8 @@
   }
   .mbn-sheet-item svg { width: 22px; height: 22px; color: var(--bp-brand); stroke-width: 1.85; }
   .mbn-sheet-item:active { transform: scale(0.96); background: var(--bp-surface3); border-color: var(--bp-border2); }
+  .mbn-sheet-item.active { border-color: var(--bp-al); color: var(--bp-al); }
+  .mbn-sheet-item.active svg { color: var(--bp-al); filter: drop-shadow(0 0 4px rgba(var(--bp-al-rgb),.45)); }
   /* T2.4 — kanonik kirilim 900px'te TEK (eskiden 768px, .bp-main-nav'in
      900px esiginden farkliydi; 769-900px araliginda IKI nav da gizliydi,
      bkz. master-donusum-programi §5 satir 4 / DEV2-021). */

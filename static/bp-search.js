@@ -81,6 +81,8 @@
     + '.bp-nav-more-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:12px;font-weight:500;letter-spacing:0.3px;text-transform:uppercase;color:#e5e1e4;text-decoration:none;border-radius:6px;transition:background .12s;font-family:"Space Grotesk",system-ui,sans-serif}'
     + '.bp-nav-more-menu a:hover{background:#1c1b1f}'
     + '.bp-nav-more-menu a svg{width:14px;height:14px;opacity:0.7;flex-shrink:0}'
+    + '.bp-nav-more-menu a.active{background:rgba(0,226,144,0.12);color:#00e290}'
+    + '.bp-nav-more-menu a.active svg{opacity:1}'
     + '.bp-nav-sep{height:1px;background:#2a2a2c;margin:5px 8px}'
     /* On wider screens: bump up padding/font slightly */
     + '@media (min-width:1500px){.bp-nav-item{padding:9px 16px;font-size:11.5px;letter-spacing:0.7px;gap:7px}.bp-main-nav{gap:6px}}'
@@ -340,7 +342,7 @@
   // ---- Nav: auto-activate current route + Daha dropdown ----
   function activateNav() {
     var path = location.pathname;
-    var items = document.querySelectorAll('.bp-nav-item[data-route]');
+    var items = document.querySelectorAll('.bp-nav-item[data-route], .bp-nav-more-menu a[data-route]');
     items.forEach(function(el){
       var route = el.getAttribute('data-route');
       if (route === '/' ? path === '/' : path.indexOf(route) === 0) {
