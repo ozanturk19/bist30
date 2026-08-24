@@ -861,6 +861,16 @@ document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(
   } catch(_) { console.warn('ticker autocomplete listesi yuklenemedi', _); }
 })();
 
+// r121 bug-hunt: duz toUpperCase() Turkce kucuk i/ı harflerini ASCII 'I'ya katliyordu,
+// ama datalist'teki gercek sirket adlari noktali buyuk 'İ' (U+0130) iceriyor —
+// "iş bankası" gibi kucuk harfle yazilan aramalar hicbir zaman eslesmiyordu.
+// duzeltme: 'val' zaten ust satirda .toUpperCase() gecmis (plain, locale-siz) --
+// bu, dotless 'ı'yi ASCII 'I'ya cevirir (orn. "bankası" -> "BANKASI"), sonra
+// asagidaki fold onu 'i'ye katlar. Ama datalist'teki kaynak metin hic
+// toUpperCase() gormedi, kendi dotless 'ı'sini korur -- [Iı] regex'i olmadan
+// "bankasi" (ASCII i, val'den) ile "bankası" (gercek ı, kaynaktan) hic eslesmezdi.
+function _pfFold(s) { return String(s || '').replace(/İ/g, 'i').replace(/[Iı]/g, 'i').toLowerCase(); }
+
 /* addPosition: smart ticker resolution — accept ticker code OR company name */
 window._origAddPosition = window.addPosition;
 window.addPosition = async function() {
@@ -870,7 +880,8 @@ window.addPosition = async function() {
   const dl = document.getElementById('bistTickerList');
   if (dl && val.length >= 3 && !/^[A-Z0-9]+$/.test(val.replace(/\s/g, ''))) {
     const opts = Array.from(dl.querySelectorAll('option'));
-    const match = opts.find(o => (o.textContent || '').toUpperCase().includes(val) || o.value.toUpperCase().includes(val));
+    const valF = _pfFold(val);
+    const match = opts.find(o => _pfFold(o.textContent || '').includes(valF) || _pfFold(o.value).includes(valF));
     if (match) {
       inp.value = match.value;
     }

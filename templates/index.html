@@ -1910,8 +1910,13 @@ function getFiltered() {
     if (currentPeriod === 'today')     matchPeriod = sigAge === 0;
     else if (currentPeriod === '7d')   matchPeriod = sigAge !== null && sigAge <= 7;
     else if (currentPeriod === '30d')  matchPeriod = sigAge !== null && sigAge <= 30;
-    const matchSearch = !currentSearch || s.ticker.includes(currentSearch.toLocaleUpperCase('tr-TR'))
-                     || (s.name && s.name.toLocaleUpperCase('tr-TR').includes(currentSearch.toLocaleUpperCase('tr-TR')));
+    // r121 bug-hunt: showSearchAc() zaten _normalize() (r55/r86, Turkce I/i katlama
+    // duzeltmesi) kullanirken matchSearch hala duz toLocaleUpperCase('tr-TR')
+    // kullaniyordu -- ayni tus vurusunda dropdown ISCTR/SISE/BIMAS gibi ASCII 'I'
+    // iceren 33 hisseyi buluyordu ama alttaki tablo filtresi bulamiyordu.
+    const _matchSearchQ = _normalize(currentSearch);
+    const matchSearch = !currentSearch || _normalize(s.ticker).includes(_matchSearchQ)
+                     || (s.name && _normalize(s.name).includes(_matchSearchQ));
     const matchSector = currentSector === 'all' || s.sector === currentSector;
     /* Gelişmiş filtreler */
     /* bughunt-r106: indicators.adx.label goruntu icin 0-ondalikli yuvarlanmis
