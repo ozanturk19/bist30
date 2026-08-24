@@ -506,6 +506,7 @@ function addPosition() {
   document.getElementById('addTicker').value = '';
   document.getElementById('addLot').value    = '';
   document.getElementById('addPrice').value  = '';
+  document.getElementById('addDate').value   = '';
   render();
   fetchCharts();
   if (btn) setTimeout(() => { btn.disabled = false; }, 0);

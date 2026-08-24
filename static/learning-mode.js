@@ -62,6 +62,13 @@
   function closePop() {
     if (openPop) { openPop.remove(); openPop = null; }
     document.removeEventListener('click', onceClose, true);
+    document.removeEventListener('keydown', onKeydownClose, true);
+  }
+
+  function onKeydownClose(e) {
+    if (e.key === 'Escape' || e.keyCode === 27) {
+      closePop();
+    }
   }
 
   function showPop(anchor, term, def) {
@@ -79,6 +86,7 @@
     openPop = pop;
     setTimeout(function () {
       document.addEventListener('click', onceClose, true);
+      document.addEventListener('keydown', onKeydownClose, true);
     }, 0);
   }
 
