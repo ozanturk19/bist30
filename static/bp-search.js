@@ -55,12 +55,12 @@
     + '@media (max-width:768px){.logo-link .bp-logo{width:200px;height:52px}}'
     + '@media (max-width:420px){.logo-link .bp-logo{width:170px;height:44px}}'
     /* ── Header consistency: hide page-title/header-name from header so nav stays centered ── */
-    + 'header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}'
+    + 'header h1.page-title,header div.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}'
     /* ── Unified header dimensions: 60px tall, 12px 20px padding (force across all pages) ── */
     + 'header{padding:calc(10px + env(safe-area-inset-top)) 20px 10px !important;min-height:calc(60px + env(safe-area-inset-top)) !important;max-height:calc(60px + env(safe-area-inset-top)) !important;display:flex !important;align-items:center !important;gap:14px !important;box-sizing:border-box !important;transform:translateZ(0) !important}'
     + 'header > *{max-height:48px}'
-    + 'header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}'
-    + 'header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}'
+    + 'header > .header-info,header > div:has(> h1.page-title),header > div:has(> div.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}'
+    + 'header div[style]:has(> h1.page-title),header div[style]:has(> div.page-title),header div[style]:has(> h1.header-name){display:none !important}'
     /* ── Unified Nav (bp-main-nav) — v2.1: UPPERCASE, safe-center, scaled ── */
     + '.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex-wrap:nowrap;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}'
     + '.bp-main-nav::-webkit-scrollbar{display:none}'
