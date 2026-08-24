@@ -1386,11 +1386,13 @@ function shareSignal(platform) {
       ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
       const btn = document.getElementById('shareCopy');
       if (btn) { const t = btn.textContent; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.textContent = t, 2000); }
+      _hibToast('Link kopyalandı', 'success');
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(() => {
         const btn = document.getElementById('shareCopy');
         if (btn) { const t = btn.textContent; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.textContent = t, 2000); }
+        _hibToast('Link kopyalandı', 'success');
       }).catch(copyFallback);
     } else {
       copyFallback();

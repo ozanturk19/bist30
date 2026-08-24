@@ -86,6 +86,7 @@
     <a id="shareBtn" class="share-btn" href="." onclick="copyShareUrl(event);return false">
       <span aria-hidden="true">🔗</span> Linki Kopyala
     </a>
+    <span id="shareCopyStatus" class="sr-only" role="status" aria-live="polite"></span>
   </div>
 
   <!-- Results -->
@@ -397,6 +398,8 @@ function copyShareUrl(e) {
   const _showCopied = () => {
     const btn = document.getElementById('shareBtn');
     if (btn) { btn.innerHTML = '<span aria-hidden="true">✓</span> Kopyalandı'; setTimeout(() => { btn.innerHTML = _shareBtnDefault; }, 2000); }
+    const status = document.getElementById('shareCopyStatus');
+    if (status) status.textContent = 'Bağlantı kopyalandı';
   };
   const _fallbackCopy = () => {
     const ta = document.createElement('textarea');

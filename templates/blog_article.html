@@ -290,11 +290,24 @@ function shareBlogWA() {
   window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank', 'noopener');
 }
 function shareBlogCopy() {
+  function announceCopy() {
+    let status = document.getElementById('blogCopyStatus');
+    if (!status) {
+      status = document.createElement('span');
+      status.id = 'blogCopyStatus';
+      status.className = 'sr-only';
+      status.setAttribute('role', 'status');
+      status.setAttribute('aria-live', 'polite');
+      document.body.appendChild(status);
+    }
+    status.textContent = 'Bağlantı kopyalandı';
+  }
   function fallbackCopy() {
     const ta = document.createElement('textarea');
     ta.value = _BLOG_URL; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
     const btn = document.getElementById('blogCopyBtn');
     if (btn) { const t = btn.innerHTML; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.innerHTML = t, 2000); }
+    announceCopy();
   }
   if (!navigator.clipboard || !navigator.clipboard.writeText) {
     fallbackCopy();
@@ -303,6 +316,7 @@ function shareBlogCopy() {
   navigator.clipboard.writeText(_BLOG_URL).then(() => {
     const btn = document.getElementById('blogCopyBtn');
     if (btn) { const t = btn.innerHTML; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.innerHTML = t, 2000); }
+    announceCopy();
   }).catch(fallbackCopy);
 }
 
