@@ -10191,6 +10191,15 @@ def backtest_ticker(ticker_base, fwd_days=20):
             if sig in ("AL", "SAT"):
                 entry_i     = i
                 entry_price = float(close.iloc[i])
+                if entry_price <= 0:
+                    # Bozuk/sifir kapanis bari (veri kaynagi glitch'i) - sadece bu
+                    # barı atla, ZeroDivisionError'in tum ticker'in backtest'ini
+                    # (fonksiyon-geneli except Exception uzerinden) sessizce
+                    # dusurmesine izin verme.
+                    logger.warning("backtest_ticker(%s): entry_price<=0 @ %s, bar atlandi",
+                                    ticker_base, close.index[i])
+                    i += 1
+                    continue
                 # Sinyal bitmesini bekle (max fwd_days bar)
                 j = i + 1
                 while j < n and j < i + fwd_days + 1 and signals[j] == sig:

@@ -392,16 +392,20 @@ function copyShareUrl(e) {
   e.preventDefault();
   const url = window.location.href;
   const _shareBtnDefault = '<span aria-hidden="true">🔗</span> Linki Kopyala';
-  navigator.clipboard.writeText(url).then(() => {
-    const btn = document.getElementById('shareBtn');
-    btn.innerHTML = '<span aria-hidden="true">✓</span> Kopyalandı';
-    setTimeout(() => { btn.innerHTML = _shareBtnDefault; }, 2000);
-  }).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  const _showCopied = () => {
     const btn = document.getElementById('shareBtn');
     if (btn) { btn.innerHTML = '<span aria-hidden="true">✓</span> Kopyalandı'; setTimeout(() => { btn.innerHTML = _shareBtnDefault; }, 2000); }
-  });
+  };
+  const _fallbackCopy = () => {
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    _showCopied();
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(_showCopied).catch(_fallbackCopy);
+  } else {
+    _fallbackCopy();
+  }
 }
 
 // ── Autocomplete: ticker ve şirket adına göre arama ──

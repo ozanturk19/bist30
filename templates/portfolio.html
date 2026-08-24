@@ -375,7 +375,7 @@ function exportCSV() {
       csvSafe(p.ticker),
       csvSafe(p.lot),
       csvSafe(String(p.price).replace('.', ',')),
-      csvSafe(p.date || ''),
+      csvSafe(fmtDate(p.date)),
       current ? String(current).replace('.', ',') : '',
       sig,
       pnlVal ? String(pnlVal).replace('.', ',') : '',
@@ -825,9 +825,29 @@ function forgetCloudToken() {
 function copyCloudLink() {
   const token = localStorage.getItem(CLOUD_TOKEN_KEY);
   if (!token) return;
+  function fallbackCopy() {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = token;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) _setCloudMsg('✓ Kopyalandı', '#3fb950');
+      else _setCloudMsg('Kopyalama başarısız.', '#f85149');
+    } catch (e) {
+      _setCloudMsg('Kopyalama başarısız.', '#f85149');
+    }
+  }
+  if (!navigator.clipboard || !navigator.clipboard.writeText) {
+    fallbackCopy();
+    return;
+  }
   navigator.clipboard.writeText(token).then(
     () => _setCloudMsg('✓ Kopyalandı', '#3fb950'),
-    () => _setCloudMsg('Kopyalama başarısız.', '#f85149')
+    () => fallbackCopy()
   );
 }
 

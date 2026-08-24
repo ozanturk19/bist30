@@ -341,7 +341,7 @@
       if (!cv || !ohlc || !ohlc.length) return;
       var data = ohlc.slice(-30).map(function(b){
         return { t: b.time || b.t, c: +(b.close != null ? b.close : b.c) };
-      }).filter(function(x){ return !isNaN(x.c); });
+      }).filter(function(x){ return isFinite(x.c) && x.c > 0; });
       if (data.length < 2) return;
       wrap.style.display = 'block';
       var dpr = window.devicePixelRatio || 1;
@@ -1354,15 +1354,20 @@ function shareSignal(platform) {
     const tweet = ticker + ' ' + emoji + (entry ? ' Giriş:' + entry + '₺' : '') + (sl ? ' SL:' + sl + '₺' : '') + ' ' + url;
     window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweet), '_blank', 'noopener');
   } else if (platform === 'copy') {
-    navigator.clipboard.writeText(url).then(() => {
-      const btn = document.getElementById('shareCopy');
-      if (btn) { const t = btn.textContent; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.textContent = t, 2000); }
-    }).catch(() => {
+    const copyFallback = () => {
       const ta = document.createElement('textarea');
       ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
       const btn = document.getElementById('shareCopy');
       if (btn) { const t = btn.textContent; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.textContent = t, 2000); }
-    });
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('shareCopy');
+        if (btn) { const t = btn.textContent; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.textContent = t, 2000); }
+      }).catch(copyFallback);
+    } else {
+      copyFallback();
+    }
   }
 }
 
@@ -1714,7 +1719,7 @@ function renderSummary(s, signalData) {
   }
 
   /* SL */
-  if (s.sl_level && s.price) {
+  if (s.sl_level && _dispPrice) {
     const slPct = ((s.sl_level - _dispPrice) / _dispPrice * 100).toFixed(1).replace('.', ',');
     document.getElementById('icSl').textContent = fmt(s.sl_level);
     document.getElementById('icSlPct').textContent =
