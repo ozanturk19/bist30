@@ -1405,6 +1405,10 @@ function getBaseOpts() {
     crosshair:       { mode: LC.CrosshairMode.Normal, vertLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 }, horzLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 } },
     rightPriceScale: { borderColor: 'rgba(48,54,61,0.6)', scaleMargins: { top: 0.08, bottom: 0.08 } },
     handleScroll: true, handleScale: true,
+    localization: {
+      locale: 'tr-TR',
+      priceFormatter: v => (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    },
   };
 }
 
