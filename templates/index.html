@@ -14,8 +14,8 @@
 <meta property="og:image:height" content="630">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="BIST100 Sinyal Paneli | borsapusula.com">
-<meta name="twitter:description" content="Algoritmik BIST100 teknik analiz — Supertrend + ADX + EMA12/99">
+<meta name="twitter:title"       content="BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri">
+<meta name="twitter:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST100 teknik analiz sinyalleri. Ücretsiz ve canlı.">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <script type="application/ld+json">
 {
@@ -1310,7 +1310,13 @@ function startSSE() {
 }
 /* bfcache: EventSource prevents restoration — close on leave, reopen on restore */
 window.addEventListener('pagehide', () => { if (_sseInstance) { _sseInstance.close(); _sseInstance = null; } });
-window.addEventListener('pageshow', (e) => { if (e.persisted && !_sseInstance) startSSE(); });
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) {
+    if (!_sseInstance) startSSE();
+    const b = document.getElementById('bpRefreshBtn');
+    if (b) { b.classList.remove('spinning'); b.disabled = false; }
+  }
+});
 
 function applyLivePrices(prices, ts) {
   Object.entries(prices).forEach(([ticker, d]) => {

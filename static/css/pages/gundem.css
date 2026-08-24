@@ -69,8 +69,9 @@
   .stock-card:hover { border-color: var(--bp-border2); background: var(--bp-surface2); transform: translateY(-1px); }
 
   .sc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .sc-top > div:first-child { min-width: 0; }
   .sc-ticker { font-size: var(--bp-text-lg); font-weight: 800; font-family: var(--bp-font-mono); }
-  .sc-name   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; }
+  .sc-name   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   .badge {
     display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px;

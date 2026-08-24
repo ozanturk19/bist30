@@ -709,6 +709,7 @@ function closeCloudSync() {
   document.getElementById('cloudModal').style.display = 'none';
   if (_cloudModalRelease) { _cloudModalRelease(); _cloudModalRelease = null; }
 }
+window.addEventListener('pageshow', function(e) { if (e.persisted) closeCloudSync(); });
 
 function _showActiveToken(token) {
   document.getElementById('cloudActiveToken').textContent = token;

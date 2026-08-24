@@ -68,5 +68,6 @@ let _mbnRelease=null;
 window.toggleMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');const btn=document.getElementById('mbn-bell-btn');if(!s||!b)return;if(s.classList.contains('open'))window.closeMbnSheet();else{s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';if(btn)btn.setAttribute('aria-expanded','true');if(window.bpTrapFocus)_mbnRelease=window.bpTrapFocus(s);}};
 window.closeMbnSheet=function(){const s=document.getElementById('mbnSheet');const b=document.getElementById('mbnSheetBackdrop');const btn=document.getElementById('mbn-bell-btn');if(!s||!b)return;s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';if(btn)btn.setAttribute('aria-expanded','false');if(_mbnRelease){_mbnRelease();_mbnRelease=null;}};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')window.closeMbnSheet();});
+window.addEventListener('pageshow',e=>{if(e.persisted)window.closeMbnSheet();});
 (function(){const p=window.location.pathname;document.querySelectorAll('.mbn-item[data-route]').forEach(el=>{const r=el.dataset.route;if(r==='/'?p==='/':p.startsWith(r)){el.classList.add('active');el.setAttribute('aria-current','page');}});})();
 </script>

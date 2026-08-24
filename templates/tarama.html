@@ -532,7 +532,8 @@ function renderResults(rows, count) {
     if (vr == null) return '<span class="rvol-cell low">—</span>';
     const v = vr;
     const cls = v >= 1.5 ? 'high' : v >= 0.8 ? 'normal' : 'low';
-    return `<div class="rvol-cell ${cls}"><span class="rvol-dot ${cls}"></span>${v.toFixed(2).replace('.', ',')}×</div>`;
+    const rvolLabel = cls === 'high' ? 'Yüksek hacim (≥1,5×)' : cls === 'normal' ? 'Normal hacim (0,8–1,5×)' : 'Düşük hacim (<0,8×)';
+    return `<div class="rvol-cell ${cls}" tabindex="0" data-tip="${rvolLabel}"><span class="rvol-dot ${cls}"></span>${v.toFixed(2).replace('.', ',')}×</div>`;
   };
   /* CPO-1335 Tazelik: etiket signal_date'in GERÇEK tarihinden türer.
      Eski sürüm signal_bars sayacını kullanıyordu; ticker o gün tazelenmezse

@@ -351,6 +351,15 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted) {
+    var overlay = document.getElementById('cmpLoadingOverlay');
+    if (overlay) overlay.classList.remove('visible');
+    var btn = document.getElementById('compareBtn');
+    if (btn) btn.disabled = _selected.length < 2;
+  }
+});
+
 // Makro Ticker Bandı
 document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); });
 

@@ -157,5 +157,15 @@
     };
     tick();
   }
+
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    const modal = document.getElementById('premiumModal');
+    if (modal && modal.style.display !== 'none') {
+      closePremiumModal();
+    }
+    const btn = document.getElementById('pmSubmitBtn');
+    if (btn) { btn.disabled = false; btn.textContent = "💎 Premium'u Aç"; }
+  });
 }
 </script>
