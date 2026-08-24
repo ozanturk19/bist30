@@ -1248,7 +1248,24 @@ function toggleHisseWatch() {
   const idx = w.indexOf(TICKER);
   if (idx >= 0) {
     w.splice(idx, 1);
-    if (_hibSafeWriteWatch(w)) _hibToast(TICKER + ' alarmı kapatıldı', 'warn');
+    if (_hibSafeWriteWatch(w)) {
+      _hibToast(TICKER + ' alarmı kapatıldı', 'warn');
+      // r103 bug-hunt: index.html toggleWatch()'daki (bug-hunt r96) ayni temizlik
+      // hisse.html'in bagimsiz uygulamasina hic tasinmamisti — takip kaldirilinca
+      // fiyat alarmi + sunucu-taraflı e-posta alarmi yetim kalip sessizce yasamaya
+      // devam ediyordu.
+      try {
+        const pa = JSON.parse(localStorage.getItem('bp_price_alarms') || '{}');
+        if (pa && typeof pa === 'object' && TICKER in pa) {
+          delete pa[TICKER];
+          localStorage.setItem('bp_price_alarms', JSON.stringify(pa));
+        }
+      } catch (e) { console.warn('hisse fiyat alarmi temizligi basarisiz:', e); }
+      if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) {
+        fetch(`/api/user-alerts/${TICKER}`, { method: 'DELETE', credentials: 'same-origin' })
+          .catch(e => console.warn('takipten cikarken sunucu alerti silinemedi:', e));
+      }
+    }
   } else {
     w.push(TICKER);
     if (_hibSafeWriteWatch(w)) {
@@ -2792,7 +2809,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/static/bp-search.js?v=58" defer></script>
+<script src="/static/bp-search.js?v=59" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 <script src="/static/learning-mode.js?v=5" defer></script>
 

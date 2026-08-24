@@ -400,6 +400,18 @@
         if (menu && menu.classList.contains('open')) closeMenu();
       }
     });
+    // r103 bug-hunt: klavye ile Tab ederek menuden cikinca (fare disi-tik olmadan)
+    // menu acik kaliyordu — outside-click korumasi Tab-out'u kapsamiyordu.
+    document.addEventListener('focusout', function(e){
+      var menu = document.querySelector('.bp-nav-more-menu');
+      if (!menu || !menu.classList.contains('open')) return;
+      setTimeout(function(){
+        var next = document.activeElement;
+        var insideWrapOrMenu = next && next.closest &&
+          (next.closest('.bp-nav-more-wrap') || next.closest('.bp-nav-more-menu'));
+        if (!insideWrapOrMenu) closeMenu();
+      }, 0);
+    });
     // Reposition on resize/scroll while open
     window.addEventListener('resize', function(){
       var m = document.querySelector('.bp-nav-more-menu');

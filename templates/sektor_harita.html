@@ -368,6 +368,27 @@ function switchSektorTab(tab) {
   history.replaceState(null, '', url.toString());
 }
 
+// r103 bug-hunt: role="tab" sekmelerinde ok-tuşu navigasyonu yoktu (APG tab
+// deseni gereği ArrowLeft/ArrowRight/Home/End odağı+seçimi taşımalı, sadece
+// Tab+Enter/tık değil).
+document.addEventListener('DOMContentLoaded', function(){
+  var tabs = document.getElementById('sektTabs');
+  if (!tabs) return;
+  tabs.addEventListener('keydown', function(e){
+    if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+    var btnHm = document.getElementById('sektTabBtnHm');
+    var btnCmp = document.getElementById('sektTabBtnCmp');
+    if (!btnHm || !btnCmp) return;
+    e.preventDefault();
+    var target = (e.key === 'Home') ? btnHm
+      : (e.key === 'End') ? btnCmp
+      : (document.activeElement === btnHm) ? btnCmp : btnHm;
+    var tab = (target === btnCmp) ? 'compare' : 'heatmap';
+    switchSektorTab(tab);
+    target.focus();
+  });
+});
+
 // ── T4.2: Sektör Karşılaştırma (eski /sektor-karsilastir, sektor_karsilastir.html'den taşındı) ──
 var _selected = [];
 var _sectors = [];
@@ -557,7 +578,7 @@ function fmtPrice(p) {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=58" defer></script>
+<script src="/static/bp-search.js?v=59" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 
 {% include '_mobile_nav_partial.html' %}
