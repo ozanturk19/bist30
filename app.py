@@ -6559,7 +6559,7 @@ def get_ai_news(ticker, source="user", ua_class=None):
     _news_now  = datetime.now(_TZ_TR)
     today_str  = f"{_news_now.strftime('%d')} {_tr_month(_news_now)} {_news_now.strftime('%Y')}"   # ör: "01 Mayıs 2026"
     today_iso  = _news_now.strftime("%Y-%m-%d")   # ör: "2026-05-01"
-    week_ago   = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    week_ago   = (_news_now - timedelta(days=7)).strftime("%Y-%m-%d")
     prompt = _SYS_NEWS + (
         f"\nHisse: {ticker} ({name})\n"
         f"Tarih aralığı: {week_ago} → {today_iso} (son 7 gün)\n"

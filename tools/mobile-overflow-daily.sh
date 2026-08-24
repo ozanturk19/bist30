@@ -20,7 +20,7 @@ LOG="/var/log/bist30-mobile-overflow.log"
 STATE="/var/log/bist30-mobile-overflow.laststatus"
 MAILBOX="/root/ops/mailbox/dev2-to-cpo.md"
 LOCK="/var/lock/bist30-mobile-overflow.lock"
-TS="$(date '+%Y-%m-%d %H:%M:%S TR')"
+TS="$(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M:%S TR')"
 
 exec 200>"$LOCK"
 flock -n 200 || { echo "$TS SKIP — onceki kosum hala calisiyor" >> "$LOG"; exit 0; }

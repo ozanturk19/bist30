@@ -130,9 +130,16 @@
     return fetch('/api/data', { cache: 'no-store', signal: AbortSignal.timeout(10000) })
       .then(function(r){ return r.json(); })
       .then(function(d){
-        _syms = (d.stocks || [])
+        var syms = (d.stocks || [])
           .filter(function(s){ return s.ticker && s.ticker !== 'XU030' && s.ticker !== 'XU100'; })
           .map(function(s){ return { t:s.ticker, n:s.name||'', sec:s.sector||'', sig:s.signal, p:s.price, c:s.change_pct }; });
+        if (d.loading) {
+          /* soguk-baslangic: backend _cache["data"] henuz dolmadi (app.py "loading": len(stocks)==0),
+             bu stocks=[] gercek bir "sonuc yok" durumu degil - _syms/sessionStorage'a yazma,
+             bir sonraki loadSyms() cagrisi (5dk TTL'i beklemeden) tekrar fetch etsin */
+          return syms;
+        }
+        _syms = syms;
         try {
           sessionStorage.setItem('bp_search_cache_v1', JSON.stringify(_syms));
           sessionStorage.setItem('bp_search_t_v1', Date.now().toString());

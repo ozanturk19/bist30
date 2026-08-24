@@ -22,7 +22,7 @@ FAIL=0
 WARN=0
 RESULTS=()
 LOG_FILE="/tmp/spec015-test-output.txt"
-START_TS=$(date '+%Y-%m-%d %H:%M:%S TR')
+START_TS=$(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M:%S TR')
 
 log()  { [[ $JSON_MODE -eq 0 ]] && echo "$*" | tee -a "$LOG_FILE" || true; }
 ok()   { PASS=$((PASS+1)); RESULTS+=("PASS|$1"); [[ $JSON_MODE -eq 0 ]] && echo "  ✓ $1" | tee -a "$LOG_FILE"; }
@@ -132,7 +132,7 @@ fi
 log ""
 
 # ── Sonuç ─────────────────────────────────────────────────────────────────────
-END_TS=$(date '+%Y-%m-%d %H:%M:%S TR')
+END_TS=$(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M:%S TR')
 TOTAL=$((PASS+FAIL+WARN))
 
 if [[ $JSON_MODE -eq 1 ]]; then

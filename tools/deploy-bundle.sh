@@ -72,7 +72,7 @@ _DL=$( [ "$DRY_RUN" = "1" ] && echo " [DRY-RUN]" || true )
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 log() {
-  local msg="$(date '+%Y-%m-%d %H:%M:%S TR') $*"
+  local msg="$(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M:%S TR') $*"
   echo "$msg"
   echo "$msg" >> "$LOG" 2>/dev/null || true
 }
@@ -287,7 +287,7 @@ ALLOW_UNPUSHED="${ALLOW_UNPUSHED:-}"
 if ! (cd "$REPO_DIR" && git fetch -q origin main); then
   log "  ERROR: origin'e ulasilamadi, kapi dogrulanamadi (ALLOW_UNPUSHED=1 ile gecilebilir)"
   if [ "$ALLOW_UNPUSHED" = "1" ]; then
-    log "  ALLOW_UNPUSHED ile gecildi — hedef: $TARGET_SHA  tarih: $(date '+%Y-%m-%d %H:%M:%S TR')"
+    log "  ALLOW_UNPUSHED ile gecildi — hedef: $TARGET_SHA  tarih: $(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M:%S TR')"
   else
     exit 1
   fi
@@ -296,7 +296,7 @@ elif (cd "$REPO_DIR" && git merge-base --is-ancestor "$TARGET_SHA" origin/main);
 else
   log "  ERROR: hedef SHA origin/main'de YOK — once push et (ALLOW_UNPUSHED=1 ile gecilebilir)"
   if [ "$ALLOW_UNPUSHED" = "1" ]; then
-    log "  ALLOW_UNPUSHED ile gecildi — hedef: $TARGET_SHA  tarih: $(date '+%Y-%m-%d %H:%M:%S TR')"
+    log "  ALLOW_UNPUSHED ile gecildi — hedef: $TARGET_SHA  tarih: $(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M:%S TR')"
   else
     exit 1
   fi

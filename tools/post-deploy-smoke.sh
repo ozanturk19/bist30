@@ -18,7 +18,7 @@ warn() { echo "  ⚠ WARN: $*"; WARN=$((WARN+1)); }
 
 echo "=== Post-Deploy Smoke — G24 Subprocess Bundle ==="
 echo "Host: $HOST"
-echo "$(date '+%Y-%m-%d %H:%M:%S TR')"
+echo "$(TZ='Europe/Istanbul' date '+%Y-%m-%d %H:%M:%S TR')"
 echo ""
 
 # ── 1. Health ────────────────────────────────────────────────────────────────

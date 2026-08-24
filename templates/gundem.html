@@ -321,13 +321,25 @@ async function loadGundem() {
           </a>`;
         }).join('');
       }
-    } catch(ne) { /* market-news hata — sessiz */ }
+    } catch(ne) {
+      const newsEl = document.getElementById('newsGrid');
+      if (newsEl) newsEl.innerHTML = '<div class="empty-box">Haberler yüklenemedi. Sayfayı yenileyin.</div>';
+    }
 
   } catch(e) {
     console.error('loadGundem error:', e);
     ['newSignalsGrid','strongAlGrid'].forEach(id => {
       document.getElementById(id).innerHTML = '<div class="empty-box">Veri yüklenemedi. Sayfayı yenileyin.</div>';
     });
+    const statsEl = document.getElementById('statsRow');
+    if (statsEl) {
+      statsEl.innerHTML = `
+        <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Güçlü Trend</div></div>
+        <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Trend Bozuldu</div></div>
+        <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Yatay</div></div>
+        <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Toplam Hisse</div></div>
+      `;
+    }
     const upd = document.getElementById('updatedAt');
     if (upd) upd.textContent = 'Güncellenemedi';
   }

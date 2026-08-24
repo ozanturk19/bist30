@@ -260,8 +260,8 @@ function exportCSV() {
     bpSignalAgeCsv(s.signal_date),
     csvSafe(s.entry_quality||'')
   ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'));
-  const csv = [hdr.map(h=>`"${h}"`).join(';'), ...rows].join('\n');
-  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+  const csv = [hdr.map(h=>`"${h}"`).join(';'), ...rows].join('\r\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = 'borsapusula-tarama-' + new Date().toISOString().slice(0,10) + '.csv';
