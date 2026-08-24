@@ -2925,7 +2925,7 @@ function updateFabBadge() {
 function setPriceAlarm(ticker, dir, inputId) {
   const el  = document.getElementById(inputId);
   const val = parseFloat(el.value.replace(',', '.'));
-  if (!isNaN(val) && val > 0) {
+  if (isFinite(val) && val > 0) {
     // CPO-DEV2-r34: cok-sekme lost-update onlemi (toggleWatch'taki watchlist ile
     // ayni desen, DEV2-bughunt-r7'de watchlist icin yapilmis ama priceAlarms'a
     // yansitilmamisti) — mutate etmeden once localStorage'dan taze oku.

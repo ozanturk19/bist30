@@ -497,8 +497,8 @@ function addPosition() {
   const date   = document.getElementById('addDate').value;
   const err    = document.getElementById('addErr');
   if (!ticker) { err.textContent = 'Hisse kodu girin.'; return; }
-  if (!lot || lot <= 0 || !Number.isInteger(lot)) { err.textContent = 'Geçerli (tam sayı) adet girin.'; return; }
-  if (!price || price <= 0) { err.textContent = 'Geçerli fiyat girin.'; return; }
+  if (!Number.isFinite(lot) || lot <= 0 || !Number.isInteger(lot)) { err.textContent = 'Geçerli (tam sayı) adet girin.'; return; }
+  if (!Number.isFinite(price) || price <= 0 || price > 1e9) { err.textContent = 'Geçerli fiyat girin.'; return; }
   err.textContent = '';
   if (btn) btn.disabled = true;
   portfolio.push({ ticker, lot, price, date: date || new Intl.DateTimeFormat('en-CA', {timeZone: 'Europe/Istanbul'}).format(new Date()), id: Date.now() });
