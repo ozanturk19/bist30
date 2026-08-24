@@ -139,6 +139,16 @@ async function submitProfile(e) {
   }
   return false;
 }
+
+// bfcache donuk-state: bkz. iletisim.html ayni desen.
+window.addEventListener('pageshow', (ev) => {
+  if (!ev.persisted) return;
+  const btn = document.getElementById('profileSubmit');
+  if (btn && btn.disabled) {
+    btn.disabled = false;
+    btn.textContent = '✓ Profili Kaydet';
+  }
+});
 </script>
 
 <script src="/static/bp-search.js?v=60" defer></script>

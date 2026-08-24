@@ -84,7 +84,7 @@
   .compare-table tr:last-child th.row-label { border-bottom: none; }
 
   .col-ticker { font-size: var(--bp-text-xl); font-weight: 800; font-family: var(--bp-font-mono); }
-  .col-name   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; }
+  .col-name   { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; margin-right: auto; }
   .col-kap    {
     display: inline-block; font-size: var(--bp-text-2xs); color: var(--bp-text3);
     background: rgba(139,148,158,.1); border: 1px solid rgba(139,148,158,.2);

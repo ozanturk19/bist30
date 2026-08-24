@@ -311,6 +311,27 @@ async function triggerBacktest(btn) {
   }
 }
 
+// bfcache donuk-state: bkz. iletisim.html ayni desen (in-flight istek geri
+// tusuyla donuste iptal edilmis olabilir). Ama burada gercek bir sunucu-taraflı
+// backtest calismasi soz konusu oldugu icin korlemesine reset ETMIYORUZ (yinelenen
+// tetikleme riski) — pageshow'da /api/backtest'ten taze durumu sorup ona gore karar
+// veriyoruz: sonuc hazirsa yenile, degilse guvenli varsayilan olarak tekrar denemeye izin ver.
+window.addEventListener('pageshow', (ev) => {
+  if (!ev.persisted) return;
+  const btnRun = document.getElementById('btnRun');
+  const btnRunRetry = document.getElementById('btnRunRetry');
+  const btn = (btnRun && btnRun.disabled) ? btnRun : (btnRunRetry && btnRunRetry.disabled) ? btnRunRetry : null;
+  if (!btn) return;
+  fetch('/api/backtest').then(r => r.json()).then(j => {
+    if (j.al) { window.location.reload(); return; }
+    btn.textContent = '🔄 Tekrar dene';
+    btn.disabled = false;
+  }).catch(() => {
+    btn.textContent = '🔄 Tekrar dene';
+    btn.disabled = false;
+  });
+});
+
 {% if not bt %}
 /* ── Backtest yok → Otomatik başlat ───────────────── */
 (async function autoStartBacktest() {

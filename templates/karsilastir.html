@@ -221,13 +221,15 @@ function renderCell(key, s) {
       if (v == null) return '<span class="muted">—</span>';
       const n = parseFloat(v);
       const cl = n >= 15 ? 'up' : n < 7 ? 'dn' : '';
-      return `<span class="${cl} mono">%${n.toFixed(1).replace('.', ',')}</span>`;
+      const lbl = n >= 15 ? 'İyi' : n < 7 ? 'Zayıf' : 'Orta';
+      return `<span class="${cl} mono">%${n.toFixed(1).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
     }
     case 'dividend_yield': {
       if (v == null || v === 0) return '<span class="muted">—</span>';
       const n = parseFloat(v);
       const cl = n >= 4 ? 'up' : '';
-      return `<span class="${cl} mono">%${n.toFixed(2).replace('.', ',')}</span>`;
+      const lbl = n >= 4 ? 'Yüksek' : '';
+      return `<span class="${cl} mono">%${n.toFixed(2).replace('.', ',')}</span>${lbl ? ` <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>` : ''}`;
     }
     default:              return v != null ? String(v) : '<span class="muted">—</span>';
   }
@@ -286,7 +288,7 @@ function buildTable(stocks) {
     // DEV2-bughunt-r7: bulunamayan (found=false) ticker icin /hisse/ linki 404'e gidiyordu.
     const inner = `
         <div class="col-ticker">${escapeHtml(s.ticker)}</div>
-        <div class="col-name">${escapeHtml(s.name||'')}</div>
+        <div class="col-name" title="${escapeHtml(s.name||'')}">${escapeHtml(s.name||'')}</div>
         ${s.kap_url ? `<a href="${s.kap_url}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
       `;
     return `

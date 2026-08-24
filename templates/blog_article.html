@@ -349,6 +349,17 @@ async function artSubmitSub() {
   }
 }
 
+// bfcache donuk-state: bkz. iletisim.html ayni desen.
+window.addEventListener('pageshow', (ev) => {
+  if (!ev.persisted) return;
+  const formEl = document.getElementById('artSubForm');
+  const btn = formEl ? formEl.querySelector('button') : null;
+  if (btn && btn.disabled) {
+    btn.disabled = false;
+    btn.textContent = 'Abone Ol';
+  }
+});
+
 // ── Reading progress bar ─────────────────────────────────
 (function() {
   const bar = document.getElementById('readProgress');

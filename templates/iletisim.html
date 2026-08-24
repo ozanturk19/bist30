@@ -131,6 +131,18 @@ async function submitForm(e) {
     btn.innerHTML = 'Gönder <span aria-hidden="true">→</span>';
   }
 }
+
+// bfcache donuk-state: sayfa bfcache'den geri gelirse (Geri tusu), in-flight
+// istek tarayici tarafindan iptal edildigi icin then/catch hic tetiklenmeyip
+// buton kalici "Gonderiliyor..." disabled durumunda kalabiliyordu.
+window.addEventListener('pageshow', (ev) => {
+  if (!ev.persisted) return;
+  const btn = document.getElementById('cfBtn');
+  if (btn && btn.disabled) {
+    btn.disabled = false;
+    btn.innerHTML = 'Gönder <span aria-hidden="true">→</span>';
+  }
+});
 </script>
 
   <div class="disclaimer">

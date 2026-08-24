@@ -495,6 +495,17 @@ async function ozSubmitSub() {
     if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
   }
 }
+
+// bfcache donuk-state: bkz. iletisim.html ayni desen — geri tusuyla donulunce
+// in-flight istek iptal edilmis olabilir, buton kalici disabled kalmasin.
+window.addEventListener('pageshow', (ev) => {
+  if (!ev.persisted) return;
+  const btn = document.querySelector('#ozSubForm button');
+  if (btn && btn.disabled) {
+    btn.disabled = false;
+    btn.textContent = 'Abone Ol';
+  }
+});
 </script>
 
 <script src="/static/bp-search.js?v=60" defer></script>
