@@ -293,6 +293,7 @@ async function triggerBacktest(btn) {
     // Her 30 saniyede sayfayı yenile
     let tries = 0;
     const poll = setInterval(async () => {
+      if (document.hidden) return;
       tries++;
       if (tries > 30) { clearInterval(poll); btn.textContent = '🔄 Tekrar dene'; btn.disabled = false; return; }
       // DEV2-bughunt-r7: guardsizdi, hatali/timeout yanitta tries sayaci hic
@@ -345,6 +346,7 @@ async function triggerBacktest(btn) {
   /* Her 25 saniyede kontrol et, tamamlanınca yenile */
   let tries = 0;
   const iv = setInterval(async () => {
+    if (document.hidden) return;
     tries++;
     if (statusEl) statusEl.textContent = `Hesaplanıyor… (${tries * 25}s)`;
     if (tries > 48) { clearInterval(iv); if (statusEl) statusEl.textContent = 'Zaman aşımı — sayfayı yenileyin.'; return; }

@@ -489,6 +489,7 @@
     // Tick live time every second
     var tickEl = document.getElementById('bpLiveTimeText');
     function tick() {
+      if (document.hidden) return;
       var d = new Date();
       var hh = String(d.getHours()).padStart(2, '0');
       var mm = String(d.getMinutes()).padStart(2, '0');

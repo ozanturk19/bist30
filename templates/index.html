@@ -907,6 +907,16 @@ function _tickFmt(time, type) {
 }
 
 let chartMain;
+let _chartMainRO = null;   // ResizeObserver referansı (rebuild'lerde disconnect edilecek)
+
+function _syncMainChart() {
+  const elMain = document.getElementById('chartMain');
+  if (!elMain || !chartMain) return;
+  const w = elMain.clientWidth;
+  if (!w) return;
+  const isMob = window.innerWidth < 768;
+  chartMain.applyOptions({ width: w, height: isMob ? 220 : 258 });
+}
 
 function mkChart(el, height) {
   return LC.createChart(el, {
@@ -930,8 +940,15 @@ async function buildCharts(d) {
   document.getElementById('chartsInner').style.display   = '';
 
   if (chartMain) { try { chartMain.remove(); } catch(_) { console.warn('eski chart instance temizlenemedi', _); } chartMain = null; }
+  if (_chartMainRO) { try { _chartMainRO.disconnect(); } catch(_) { /* zaten disconnect olabilir */ } _chartMainRO = null; }
   const elMain = document.getElementById('chartMain');
   chartMain = mkChart(elMain, 230);
+  try {
+    if (typeof ResizeObserver !== 'undefined') {
+      _chartMainRO = new ResizeObserver(() => _syncMainChart());
+      _chartMainRO.observe(elMain);
+    }
+  } catch(_) { console.warn('ResizeObserver kurulumu basarisiz (chartMain)', _); }
 
   /* EMA bantları arası dolgu — custom primitive */
   class EmaFillPrimitive {
@@ -1058,15 +1075,7 @@ async function buildCharts(d) {
 }
 
 /* Tek global resize handler (rebuild her çağrıldığında eklenmez) */
-window.addEventListener('resize', () => {
-  const elMain = document.getElementById('chartMain');
-  if (elMain && chartMain) {
-    const w = elMain.clientWidth;
-    const isMob = window.innerWidth < 768;
-    const h = isMob ? 220 : 258;
-    if (w) chartMain.applyOptions({ width: w, height: h });
-  }
-});
+window.addEventListener('resize', _syncMainChart);
 
 /* ── Endeks kartı render ─────────────────────────── */
 function renderEndeksCard(sym, s) {
@@ -1148,14 +1157,8 @@ function _setAccordion(open) {
   if (open) {
     body.classList.add('open');
     chev.classList.add('open');
-    // LightweightCharts genişliği yeniden hesapla
-    requestAnimationFrame(() => {
-      const elMain = document.getElementById('chartMain');
-      if (elMain && chartMain) {
-        const w = elMain.clientWidth;
-        if (w) chartMain.applyOptions({ width: w });
-      }
-    });
+    // LightweightCharts genişliği+yüksekliğini yeniden hesapla
+    requestAnimationFrame(_syncMainChart);
   } else {
     body.classList.remove('open');
     chev.classList.remove('open');

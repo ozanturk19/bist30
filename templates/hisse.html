@@ -1597,27 +1597,25 @@ function buildChart(d) {
     } catch(_) { console.warn('chart setVisibleLogicalRange basarisiz', _); }
   });
 
-  window.addEventListener('resize', () => {
+  function _syncChartSize() {
     const w = elMain.clientWidth;
-    if (w) chart.applyOptions({ width: w });
-  });
+    if (!w || !chart) return;
+    const isMob = window.innerWidth < 768;
+    chart.applyOptions({ width: w, height: isMob ? 240 : 340 });
+  }
+
+  window.addEventListener('resize', _syncChartSize);
 
   // SPEC-017 Faz F Bug 3: ResizeObserver — tab switch (display:none→block) resize tetikle
   try {
     if (typeof ResizeObserver !== 'undefined') {
-      const ro = new ResizeObserver(() => {
-        const w = elMain.clientWidth;
-        if (w && chart) chart.applyOptions({ width: w });
-      });
+      const ro = new ResizeObserver(_syncChartSize);
       ro.observe(elMain);
     }
   } catch(_) { console.warn('ResizeObserver kurulumu basarisiz (sekme degisince grafik yeniden boyutlanmayacak)', _); }
   // applyTab hook: AI/Grafik tab açıldığında chart resize zorla
   window.bpChartResize = function(){
-    setTimeout(() => {
-      const w = elMain.clientWidth;
-      if (w && chart) chart.applyOptions({ width: w });
-    }, 80);
+    setTimeout(_syncChartSize, 80);
   };
 }
 
