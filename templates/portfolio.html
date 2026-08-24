@@ -660,8 +660,24 @@ document.getElementById('addTicker').addEventListener('input', e => {
 render();
 fetchLive();
 fetchCharts();
-setInterval(fetchLive, 60000);
-setInterval(fetchCharts, 300000); // sparkline + XU030 5dk'da bir yenile
+let _pfLiveInt   = setInterval(fetchLive, 60000);
+let _pfChartsInt = setInterval(fetchCharts, 300000); // sparkline + XU030 5dk'da bir yenile
+
+/* ── CPO-DEV2-087(1) r120: Page Visibility — sekme arka plandayken duraklat ──
+   index.html/hisse.html'deki CPO-DEV2-072 r98 deseniyle aynı ilke; bu sayfa
+   setInterval kullandığı için (setTimeout polling değil) clearInterval +
+   yeniden setInterval ile uygulanıyor. */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(_pfLiveInt);
+    clearInterval(_pfChartsInt);
+  } else {
+    fetchLive();
+    fetchCharts();
+    _pfLiveInt   = setInterval(fetchLive, 60000);
+    _pfChartsInt = setInterval(fetchCharts, 300000);
+  }
+});
 
 /* ── Cloud Sync ───────────────────────────────── */
 const CLOUD_TOKEN_KEY = 'bp_cloud_token';

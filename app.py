@@ -7603,16 +7603,25 @@ def build_signal_summary(stock):
     opt     = stock.get("optimal_entry")
 
     try:
-        gain_pct = ((float(current) - float(entry)) / float(entry) * 100.0) if (entry and current) else 0.0
+        if entry and current:
+            gain_pct = (float(current) - float(entry)) / float(entry) * 100.0
+            gain_pct_known = True
+        else:
+            gain_pct = 0.0
+            gain_pct_known = False
     except (ValueError, TypeError, ZeroDivisionError):
         gain_pct = 0.0
+        gain_pct_known = False
 
     rsi_hot  = isinstance(rsi, (int, float)) and rsi > 70
     rsi_cold = isinstance(rsi, (int, float)) and rsi < 30
 
     # ── Katman A — tek cümle (durum matrisi) ──────────────────────────────────
     if signal == "AL":
-        if gain_pct > 50 and rsi_hot:
+        if not gain_pct_known:
+            verdict = ("Alış sinyali aktif ancak fiyat değişim verisi şu an hesaplanamıyor; "
+                       "trend gücü ve giriş zamanlaması için ek göstergelere bakılması öneriliyor.")
+        elif gain_pct > 50 and rsi_hot:
             verdict = ("Trend güçlü kalmaya devam ediyor; ancak fiyat sinyal "
                        "başlangıcına göre ciddi yükseldiği için yeni girişte kovalamak "
                        "yerine geri çekilme beklemek daha sağlıklı görünüyor.")
@@ -7629,7 +7638,10 @@ def build_signal_summary(stock):
         else:
             verdict = "Trend güçlü ve alış sinyali aktif kalmaya devam ediyor."
     elif signal == "SAT":
-        if gain_pct < -20 and rsi_cold:
+        if not gain_pct_known:
+            verdict = ("Satış sinyali aktif ancak fiyat değişim verisi şu an hesaplanamıyor; "
+                       "trend yönü için ek göstergelere bakılması öneriliyor.")
+        elif gain_pct < -20 and rsi_cold:
             verdict = ("Düşüş trendi sürüyor; fiyat sinyal başlangıcına göre belirgin "
                        "geriledi ve kısa vadede aşırı satım bölgesine yaklaştı — yeni satış "
                        "için acele etmek yerine tepki ihtimalini izlemek daha sağlıklı.")
@@ -7679,7 +7691,9 @@ def build_signal_summary(stock):
 
     # 2) Giriş riski maddesi
     if signal == "AL":
-        if gain_pct > 50:
+        if not gain_pct_known:
+            risk_txt = "Giriş riski değerlendirilemiyor: sinyal başlangıç fiyatı verisi eksik."
+        elif gain_pct > 50:
             risk_txt = f"Giriş riski yüksek: fiyat sinyal başlangıcına göre ~%{gain_pct:.0f} yukarıda."
         elif gain_pct > 15:
             risk_txt = f"Giriş riski arttı: fiyat sinyal başlangıcına göre ~%{gain_pct:.0f} yukarıda."
@@ -7688,8 +7702,11 @@ def build_signal_summary(stock):
         else:
             risk_txt = f"Fiyat sinyal başlangıcının ~%{abs(gain_pct):.0f} altında — giriş bölgesine yakın."
     elif signal == "SAT":
-        risk_txt = (f"Fiyat sinyal başlangıcına göre %{gain_pct:.0f} seviyesinde — "
-                    "satış sinyali bu hareketle uyumlu.")
+        if not gain_pct_known:
+            risk_txt = "Giriş riski değerlendirilemiyor: sinyal başlangıç fiyatı verisi eksik."
+        else:
+            risk_txt = (f"Fiyat sinyal başlangıcına göre %{gain_pct:.0f} seviyesinde — "
+                        "satış sinyali bu hareketle uyumlu.")
     else:
         risk_txt = "Net sinyal olmadığı için tanımlı bir giriş bölgesi yok."
     rsi_tip = ""

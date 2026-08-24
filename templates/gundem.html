@@ -430,8 +430,24 @@ loadEconCalendar();
 loadMacroNewsSection();
 loadMacroSummary();
 // 5 dakikada bir otomatik yenile
-setInterval(loadGundem, 5 * 60 * 1000);
-setInterval(loadMacroNewsSection, 30 * 60 * 1000);
+let _gdGundemInt = setInterval(loadGundem, 5 * 60 * 1000);
+let _gdNewsInt    = setInterval(loadMacroNewsSection, 30 * 60 * 1000);
+
+/* ── CPO-DEV2-087(1) r120: Page Visibility — sekme arka plandayken duraklat ──
+   loadMacroNewsSection ozellikle onemli: dar Gemini/haber kotasini sekme
+   arka planda acik unutuldugunda gereksiz tuketmesin diye duraklatiliyor.
+   index.html/hisse.html'deki CPO-DEV2-072 r98 deseniyle ayni ilke. */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(_gdGundemInt);
+    clearInterval(_gdNewsInt);
+  } else {
+    loadGundem();
+    loadMacroNewsSection();
+    _gdGundemInt = setInterval(loadGundem, 5 * 60 * 1000);
+    _gdNewsInt    = setInterval(loadMacroNewsSection, 30 * 60 * 1000);
+  }
+});
 
 /* ── Makro Ticker ── */
 document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); });
