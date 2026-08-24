@@ -51,7 +51,7 @@ else
   fail "GET /hisse/THYAO → $HTTP_HISSE"
 fi
 # İçerik kontrolleri
-if echo "$HISSE_OUT" | grep -q "chart-container\|chartData\|ohlcData" 2>/dev/null; then
+if echo "$HISSE_OUT" | grep -q 'id="chartMain"\|lightweight-charts' 2>/dev/null; then
   ok "Chart container/data mevcut"
 else
   warn "Chart data bulunamadı (soğuk cache olabilir)"
