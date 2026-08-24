@@ -60,12 +60,10 @@
       modal.addEventListener('click', e => { if (e.target === modal) closePremiumModal(); });
     }
     modal.style.display = 'flex';
-    setTimeout(() => {
-      modal.classList.add('visible');
-      if (window.bpTrapFocus) _premiumModalRelease = window.bpTrapFocus(modal.querySelector('.premium-modal'), closePremiumModal);
-      const e = document.getElementById('pmEmail');
-      if (e) e.focus();
-    }, 10);
+    setTimeout(() => { modal.classList.add('visible'); }, 10);
+    if (window.bpTrapFocus) _premiumModalRelease = window.bpTrapFocus(modal.querySelector('.premium-modal'), closePremiumModal);
+    const e = document.getElementById('pmEmail');
+    if (e) e.focus();
   };
 
   window.submitPremium = async function() {

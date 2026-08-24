@@ -1206,6 +1206,8 @@ function _switchTab(sym) {
 
 /* ── Chart veri deposu ───────────────────────────── */
 const _chartData = { xu030: null, xu100: null };
+let _chart100Seq = 0;      /* hizli sekme degisiminde bayat fetchChart100() yanitini at (bug-hunt r119) */
+let _xu100FetchActive = false;  /* _switchTab hizli sekme gecisinde fetchChart100() paralel retry zinciri birikmesin (bug-hunt r119, bkz sektor_harita.html _loading / hisse.html _sigExplainActive ile ayni desen) */
 
 function _rebuildChart(d) {
   if (!_accOpen) return;  // accordion kapalıysa gereksiz
@@ -1248,22 +1250,30 @@ async function fetchChart() {
 }
 
 /* ── XU100 chart yükle ───────────────────────────── */
-async function fetchChart100() {
+async function fetchChart100(isRetry) {
+  if (!isRetry) {
+    if (_xu100FetchActive) return;  // zaten bir zincir suruyor, _switchTab tekrar tetiklemesin
+    _xu100FetchActive = true;
+  }
+  const mySeq = ++_chart100Seq;
   try {
     const res  = await fetch('/api/chart/XU100');
     const json = await res.json();
-    if (json.loading || !json.chart) { setTimeout(fetchChart100, 5000); return; }
+    if (mySeq !== _chart100Seq) return;  // daha yeni bir fetchChart100() cagrisi baslamis, bayat yaniti at
+    if (json.loading || !json.chart) { setTimeout(() => fetchChart100(true), 5000); return; }
     if (!_isValidEndeksData(json.chart)) {
       console.warn('XU100 chart data invalid (scale glitch), retrying...');
-      setTimeout(fetchChart100, 8000);
+      setTimeout(() => fetchChart100(true), 8000);
       return;
     }
     _chartData.xu100 = json.chart;
     renderEndeksCard('XU100', json.chart.summary);
     drawSparkline('spark100', json.chart.ohlc);
     if (_activeSym === 'XU100' && _accOpen) buildCharts(json.chart);
+    _xu100FetchActive = false;
   } catch(e) {
-    setTimeout(fetchChart100, 6000);
+    if (mySeq !== _chart100Seq) return;
+    setTimeout(() => fetchChart100(true), 6000);
   }
 }
 
@@ -3801,9 +3811,12 @@ document.addEventListener('keydown', e => {
     const s = document.querySelector('.search-input');
     if (s) { s.focus(); s.select(); }
   }
-  // Esc → blur search
+  // Esc → blur search (sadece arama input'u odaklıyken — bpTrapFocus'un senkron
+  // odak-iadesiyle yarışıp modal/panel kapanışında tetikleyici butonu blur etmesin,
+  // bkz. focus-trap.js Escape dalı stopPropagation çağırmıyor — bug-hunt r119)
   if (e.key === 'Escape') {
-    document.activeElement?.blur();
+    const active = document.activeElement;
+    if (active && active.matches && active.matches('.search-input')) active.blur();
   }
 });
 </script>

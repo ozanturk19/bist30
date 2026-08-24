@@ -480,6 +480,8 @@ async function clearPortfolio() {
 }
 
 function addPosition() {
+  const btn = document.querySelector('.btn-add');
+  if (btn && btn.disabled) return;
   const ticker = document.getElementById('addTicker').value.trim().toUpperCase();
   const lot    = parseFloat(document.getElementById('addLot').value);
   const price  = parseFloat(document.getElementById('addPrice').value);
@@ -489,6 +491,7 @@ function addPosition() {
   if (!lot || lot <= 0 || !Number.isInteger(lot)) { err.textContent = 'Geçerli (tam sayı) adet girin.'; return; }
   if (!price || price <= 0) { err.textContent = 'Geçerli fiyat girin.'; return; }
   err.textContent = '';
+  if (btn) btn.disabled = true;
   portfolio.push({ ticker, lot, price, date: date || new Intl.DateTimeFormat('en-CA', {timeZone: 'Europe/Istanbul'}).format(new Date()), id: Date.now() });
   save();
   document.getElementById('addTicker').value = '';
@@ -496,6 +499,7 @@ function addPosition() {
   document.getElementById('addPrice').value  = '';
   render();
   fetchCharts();
+  if (btn) setTimeout(() => { btn.disabled = false; }, 0);
 }
 
 function removePosition(id) {

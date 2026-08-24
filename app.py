@@ -7958,7 +7958,7 @@ def _get_fundamentals(ticker_base):
             return {}
         def safe(key, default=None):
             v = info.get(key)
-            return v if v not in (None, "N/A", 0) else default
+            return v if v not in (None, "N/A") else default
 
         def fmt_billion(v):
             if v is None: return None
@@ -7969,28 +7969,28 @@ def _get_fundamentals(ticker_base):
             return f"{tr_price_filter(v)} ₺"
 
         raw = {
-            "pe_ratio":          round(safe("trailingPE", 0), 1) if safe("trailingPE") else None,
-            "forward_pe":        round(safe("forwardPE", 0), 1) if safe("forwardPE") else None,
-            "pb_ratio":          round(safe("priceToBook", 0), 2) if safe("priceToBook") else None,
+            "pe_ratio":          round(safe("trailingPE", 0), 1) if safe("trailingPE") is not None else None,
+            "forward_pe":        round(safe("forwardPE", 0), 1) if safe("forwardPE") is not None else None,
+            "pb_ratio":          round(safe("priceToBook", 0), 2) if safe("priceToBook") is not None else None,
             "eps":               safe("trailingEps"),
             "market_cap":        fmt_billion(safe("marketCap")),
             "revenue":           fmt_billion(safe("totalRevenue")),
             "net_income":        fmt_billion(safe("netIncomeToCommon")),
-            "dividend_yield":    round(safe("dividendYield", 0), 2) if safe("dividendYield") else None,
-            "roe":               round(safe("returnOnEquity", 0) * 100, 1) if safe("returnOnEquity") else None,
-            "beta":              round(safe("beta", 0), 2) if safe("beta") else None,
+            "dividend_yield":    round(safe("dividendYield", 0), 2) if safe("dividendYield") is not None else None,
+            "roe":               round(safe("returnOnEquity", 0) * 100, 1) if safe("returnOnEquity") is not None else None,
+            "beta":              round(safe("beta", 0), 2) if safe("beta") is not None else None,
             "shares":            fmt_billion(safe("sharesOutstanding")),
             "52w_high":          safe("fiftyTwoWeekHigh"),
             "52w_low":           safe("fiftyTwoWeekLow"),
             "avg_volume":        safe("averageVolume"),
             "short_name":        safe("shortName"),
-            "profit_margin":     round(safe("profitMargins", 0) * 100, 1) if safe("profitMargins") else None,
-            "operating_margin":  round(safe("operatingMargins", 0) * 100, 1) if safe("operatingMargins") else None,
-            "earnings_growth":   round(safe("earningsGrowth", 0) * 100, 1) if safe("earningsGrowth") else None,
-            "revenue_growth":    round(safe("revenueGrowth", 0) * 100, 1) if safe("revenueGrowth") else None,
-            "debt_to_equity":    round(safe("debtToEquity", 0), 2) if safe("debtToEquity") else None,
-            "current_ratio":     round(safe("currentRatio", 0), 2) if safe("currentRatio") else None,
-            "price_to_sales":    round(safe("priceToSalesTrailing12Months", 0), 2) if safe("priceToSalesTrailing12Months") else None,
+            "profit_margin":     round(safe("profitMargins", 0) * 100, 1) if safe("profitMargins") is not None else None,
+            "operating_margin":  round(safe("operatingMargins", 0) * 100, 1) if safe("operatingMargins") is not None else None,
+            "earnings_growth":   round(safe("earningsGrowth", 0) * 100, 1) if safe("earningsGrowth") is not None else None,
+            "revenue_growth":    round(safe("revenueGrowth", 0) * 100, 1) if safe("revenueGrowth") is not None else None,
+            "debt_to_equity":    round(safe("debtToEquity", 0), 2) if safe("debtToEquity") is not None else None,
+            "current_ratio":     round(safe("currentRatio", 0), 2) if safe("currentRatio") is not None else None,
+            "price_to_sales":    round(safe("priceToSalesTrailing12Months", 0), 2) if safe("priceToSalesTrailing12Months") is not None else None,
         }
         data = _clean_fundamentals(raw)
         with _lock:
