@@ -190,6 +190,9 @@
     color:var(--text2); border-radius:var(--bp-radius); padding:5px 10px; font-size:var(--bp-text-sm);
     font-family:inherit; outline:none; cursor:pointer;
   }
+  /* r122 bug-hunt: outline:none klavye kullanicisi icin gorunmez focus birakiyordu,
+     .filter-group select:focus'taki ayni token/desen burada da uygulandi. */
+  .sort-select:focus-visible { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(31,111,235,.35); }
 
   /* ── Tablo ── */
   .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }

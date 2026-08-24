@@ -1783,9 +1783,12 @@ function renderHeroPanel(stocks) {
   };
 
   /* 1. Güçlü Trend — AL sinyali, bull_score desc, max 5 */
+  // r122 bug-hunt: esit signal_strength'te tiebreak yoktu, backend cache sirasina
+  // (surekli degisen bull_score'a gore) sizip top-5 iceki #3/#4 sirasi refresh
+  // arasinda kayabiliyordu (canli TKFEN/FORTE=72 esitligiyle dogrulandi).
   const alList = list
     .filter(s => s.signal === 'AL')
-    .sort((a, b) => (b.signal_strength || 0) - (a.signal_strength || 0))
+    .sort((a, b) => (b.signal_strength || 0) - (a.signal_strength || 0) || (a.ticker < b.ticker ? -1 : a.ticker > b.ticker ? 1 : 0))
     .slice(0, 5);
   document.getElementById('hpAlList').innerHTML = alList.length
     ? alList.map(s => row(s, 'hp-bar-al')).join('')
@@ -2195,7 +2198,14 @@ function getSorted(arr) {
     } else if (typeof va === 'string') {
       va = va.toLowerCase(); vb = vb.toLowerCase();
     }
-    return (va < vb ? -1 : va > vb ? 1 : 0) * sortDir;
+    const primary = (va < vb ? -1 : va > vb ? 1 : 0) * sortDir;
+    if (primary !== 0) return primary;
+    // r122 bug-hunt: signal_strength + sortKey de esitse comparator 0 donuyordu,
+    // sadece backend cache'in (surekli degisen bull_score/bear_score'a gore
+    // yeniden siralanan) o anki sirasini koruyordu - esit satirlar refresh
+    // arasinda goze carpar sekilde yer degistirebiliyordu. Deterministik ticker
+    // tiebreak.
+    return (a.ticker || '') < (b.ticker || '') ? -1 : (a.ticker || '') > (b.ticker || '') ? 1 : 0;
   });
 }
 

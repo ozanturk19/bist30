@@ -349,7 +349,7 @@ async function doCompare(opts) {
     <div class="compare-wrap">
       <table class="compare-table" style="min-width:400px">
         <caption class="sr-only">Seçilen hisselerin yan yana karşılaştırma tablosu</caption>
-        <thead><tr><th class="row-label" scope="col"></th>${inputs.map(t=>{const et=escapeHtml(t); return `<th class="col-hdr" scope="col"><a href="/hisse/${et}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${et} detay sayfası">${et}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`;}).join('')}</tr></thead>
+        <thead><tr><th class="row-label" scope="col"></th>${inputs.map(t=>{const et=escapeHtml(t); const eu=encodeURIComponent(t); return `<th class="col-hdr" scope="col"><a href="/hisse/${eu}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${et} detay sayfası">${et}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`;}).join('')}</tr></thead>
         <tbody>
           <tr class="score-row"><th class="row-label" scope="row"><span aria-hidden="true">🏆</span> Yatırım Skoru</th>${inputs.map(()=>`<td><div class="skeleton" style="height:60px;width:90px"></div></td>`).join('')}</tr>
           ${ROW_LABELS.map(({label, isSep})=>{

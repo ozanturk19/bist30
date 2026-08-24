@@ -219,11 +219,15 @@ function renderHeatmap(stocks) {
   document.getElementById('sumTotal').textContent = stocks.length;
 
   // Sektörleri skor'a göre sırala
+  // r122 bug-hunt: esit skorlu sektorlerde tiebreak yoktu, secMap'in anahtar
+  // sirasi (stocks dizisinin backend cache sirasi -> surekli degisen
+  // bull_score/bear_score'a bagli) sizip esit-skorlu sektorlerin sirasi
+  // refresh arasinda kayabiliyordu. Alfabetik tiebreak deterministik yapar.
   const sectors = Object.entries(secMap).map(([name, d]) => {
     const total = d.al.length + d.sat.length + d.bkl.length;
     const score = total > 0 ? _pyRound((d.al.length - d.sat.length) / total * 100) : 0;
     return { name, ...d, total, score };
-  }).sort((a, b) => b.score - a.score);
+  }).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'tr'));
 
   const hm = document.getElementById('heatmap');
   hm.innerHTML = sectors.map(sec => {
