@@ -4946,10 +4946,14 @@ def api_macro_summary():
                 gen_date = datetime.strptime(cached["date"], "%Y-%m-%d").strftime("%d.%m")
         except Exception:
             gen_date = ""
+        # DEV2-r103 (bughunt): stale_warning yalnizca saat farkina bakiyordu, takvim
+        # gunu degistiginde (ornegin cumartesi/pazar sonrasi pazartesi sabahi, 24s
+        # esigi henuz dolmadan) "Bugun ..." diyen metin sessizce "taze" isaretleniyordu.
+        date_changed = bool(cached.get("date")) and cached.get("date") != today_s
         return safe_json({"summary": cached["text"], "cached": cache_fresh,
                           "generated_at": cached.get("generated_at", ""),
                           "generated_date": gen_date,
-                          "stale_warning": 24 <= age_h < 48,
+                          "stale_warning": (24 <= age_h < 48) or date_changed,
                           "hidden": age_h >= 48})
     return safe_json({"summary": "", "cached": False})
 
@@ -9432,6 +9436,7 @@ def _og_image_stats():
 
 
 @app.route("/og-image.svg")
+@limiter.limit("30 per minute")  # DEV2-r103 (bughunt): ozel limit yoktu, global 300/dk worker-local zayif, PIL/SVG render her istekte tekrarlaniyor
 def og_image():
     """Eski SVG OG image — geri uyumluluk için tutulur (eski paylaşılan linkler).
     CPO-1107 madde 10: yeni sayfalar /og-image.png kullanır — çoğu sosyal medya
@@ -9484,6 +9489,7 @@ def _og_font(size, bold=False):
 
 
 @app.route("/og-image.png")
+@limiter.limit("30 per minute")  # DEV2-r103 (bughunt): ozel limit yoktu, global 300/dk worker-local zayif, PIL render (5 font+encode) her istekte tekrarlaniyor
 def og_image_png():
     """Dinamik OG image — 1200×630 PNG (sosyal medya önizlemesi).
     CPO-1107 madde 10: SVG'den PNG'ye geçiş — Facebook/WhatsApp/LinkedIn

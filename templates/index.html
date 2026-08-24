@@ -3528,14 +3528,10 @@ function _pwaInstall() {
   });
 }
 
-/* ── PWA Service Worker (offline cache) ─────────── */
-/* CPO-DEV2-054 Faz 1: web-push (VAPID) altyapısı tamamen kaldırıldı — gerçek
-   abone hiç olmamıştı (14+ günlük subscribe log'u tamamen curl/test kaynaklıydı).
-   SW kaydı offline önbellek için hâlâ gerekli, sadece push kısmı gitti. */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js', { scope: '/' })
-    .catch(e => console.warn('SW register fail:', e));
-}
+/* PWA Service Worker kaydi DEV2-r103 (bughunt) ile templates/_head.html'e
+   tasindi -- eskiden sadece index.html'de vardi, 29/30 sablon (ozellikle SEO-
+   agirlikli /hisse/<ticker>) hic kaydetmiyordu, "cevrimdisi destek" vaadi
+   (hakkinda.html) yalniz anasayfa-girisli kullanicilar icin dogruydu. */
 
 // ── Search autocomplete ──────────────────────────────────
 let _acIdx = -1;
