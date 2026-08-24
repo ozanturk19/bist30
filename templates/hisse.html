@@ -1140,8 +1140,11 @@ function _hibToast(msg, type) {
   if (!t) return;
   t.textContent = msg;
   t.className = 'hib-toast show' + (type ? ' ' + type : '');
+  // CPO-DEV2-090: kanonik toast suresi - basari/standart=3000ms, hata=4000ms (2 kategori);
+  // 'warn' bu dosyada hep basarisizlik/hata mesajlari icin kullaniliyor (kaydedilemedi/okunamadi)
+  const ms = (type === 'warn') ? 4000 : 3000;
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.classList.remove('show'); }, 2500);
+  t._timer = setTimeout(() => { t.classList.remove('show'); }, ms);
 }
 
 function _hibCurrentPrice() {

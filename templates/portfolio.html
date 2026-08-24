@@ -329,7 +329,9 @@ function fillEntry(ticker, price) {
 
 /* ── Export / Import ──────────────────────────────── */
 let _toastTimer = null;
-function showToast(msg, type='ok', ms=3000) {
+function showToast(msg, type='ok', ms) {
+  // CPO-DEV2-090: kanonik toast suresi - basari/standart=3000ms, hata=4000ms (2 kategori)
+  if (ms === undefined) ms = (type === 'err') ? 4000 : 3000;
   const el = document.getElementById('importToast');
   el.textContent = msg;
   el.className = 'import-toast ' + type;
@@ -404,7 +406,7 @@ function importPortfolio(e) {
   const file = e.target.files[0];
   if (!file) return;
   if (file.size > PF_IMPORT_MAX_BYTES) {
-    showToast(`❌ Dosya çok büyük (maks. ${Math.round(PF_IMPORT_MAX_BYTES/1024)}KB).`, 'err', 5000);
+    showToast(`❌ Dosya çok büyük (maks. ${Math.round(PF_IMPORT_MAX_BYTES/1024)}KB).`, 'err');
     e.target.value = '';
     return;
   }
@@ -442,7 +444,7 @@ function importPortfolio(e) {
       save();
       render();
       fetchCharts();
-      showToast(`✅ ${added} pozisyon içe aktarıldı (${positions.length - added} zaten vardı).`, 'ok', 4000);
+      showToast(`✅ ${added} pozisyon içe aktarıldı (${positions.length - added} zaten vardı).`, 'ok');
     } catch(err) {
       const _pfImportMsgMap = {
         EMPTY:         'Dosyada pozisyon bulunamadı.',
@@ -450,13 +452,13 @@ function importPortfolio(e) {
         INVALID_FIELD: 'Bazı pozisyonlarda hisse/lot/fiyat eksik veya geçersiz.',
       };
       console.warn('importPortfolio başarısız:', err);
-      showToast('❌ ' + (_pfImportMsgMap[err.message] || 'Dosya okunamadı — geçerli bir JSON dosyası olduğundan emin olun.'), 'err', 5000);
+      showToast('❌ ' + (_pfImportMsgMap[err.message] || 'Dosya okunamadı — geçerli bir JSON dosyası olduğundan emin olun.'), 'err');
     }
     e.target.value = '';   // Aynı dosyayı tekrar seçebilsin
   };
   reader.onerror = function() {
     console.warn('importPortfolio dosya okuma hatası:', reader.error);
-    showToast('❌ Dosya okunamadı — geçerli bir JSON dosyası olduğundan emin olun.', 'err', 5000);
+    showToast('❌ Dosya okunamadı — geçerli bir JSON dosyası olduğundan emin olun.', 'err');
     e.target.value = '';
   };
   reader.readAsText(file);
@@ -482,7 +484,7 @@ async function clearPortfolio() {
   // "temizlendi" mesaji kullaniciyi yanlis bilgilendirir (bulut kopyasi hala duruyor
   // olabilir) - deleteAlertSettings()/toggleWatch() ile ayni ilke.
   if (_cloudDeleteFailed) {
-    showToast('⚠️ Yerel portföy temizlendi ama bulut kopyası silinemedi — tekrar deneyin.', 'err', 5000);
+    showToast('⚠️ Yerel portföy temizlendi ama bulut kopyası silinemedi — tekrar deneyin.', 'err');
   } else {
     showToast('🗑 Portföy temizlendi.', 'ok');
   }

@@ -2881,18 +2881,18 @@ function toggleWatch(ticker) {
       fetch(`/api/user-alerts/${_delTicker}`, {method: 'DELETE', credentials: 'same-origin'})
         .then(r => {
           if (r.ok) { delete _userAlerts[_delTicker]; }
-          else { showAlarmToast(`${_delTicker} e-posta alerti silinemedi, sunucuda aktif kalmaya devam ediyor — ⚙️ ile tekrar dene`); }
+          else { showAlarmToast(`${_delTicker} e-posta alerti silinemedi, sunucuda aktif kalmaya devam ediyor — ⚙️ ile tekrar dene`, 'err'); }
         })
         .catch(e => {
           console.warn('takipten cikarken sunucu alerti silinemedi:', e);
-          showAlarmToast(`${_delTicker} e-posta alerti silinemedi (bağlantı hatası) — ⚙️ ile tekrar dene`);
+          showAlarmToast(`${_delTicker} e-posta alerti silinemedi (bağlantı hatası) — ⚙️ ile tekrar dene`, 'err');
         });
     }
   } else {
     watchlist.add(ticker);
     requestNotifPermission();
   }
-  if (!saveWatchlist()) showAlarmToast('Takip listesi kaydedilemedi (tarayıcı kısıtı)');
+  if (!saveWatchlist()) showAlarmToast('Takip listesi kaydedilemedi (tarayıcı kısıtı)', 'err');
   renderAlarmPanel();
   const btn = document.getElementById('ab-' + ticker);
   if (btn) {
@@ -2938,7 +2938,7 @@ function setPriceAlarm(ticker, dir, inputId) {
     if (!priceAlarms[ticker]) priceAlarms[ticker] = {};
     priceAlarms[ticker][dir] = val;
     if (!savePriceAlarms()) {
-      showAlarmToast('Fiyat alarmı kaydedilemedi (tarayıcı kısıtı)');
+      showAlarmToast('Fiyat alarmı kaydedilemedi (tarayıcı kısıtı)', 'err');
       renderAlarmPanel();
       return;
     }
@@ -2954,7 +2954,7 @@ function setPriceAlarm(ticker, dir, inputId) {
         : `${ticker} hedefi kaydedildi — bildirim almak için tarayıcı izni gerekiyor`);
     }
   } else {
-    showAlarmToast("Geçerli bir fiyat girin (0'dan büyük bir sayı)");
+    showAlarmToast("Geçerli bir fiyat girin (0'dan büyük bir sayı)", 'err');
     el.focus();
   }
   renderAlarmPanel();
@@ -3128,7 +3128,7 @@ function showNotification(ticker, body, url) {
 }
 
 /* Toast helper */
-function showAlarmToast(msg) {
+function showAlarmToast(msg, type='ok') {
   let el = document.getElementById('bp-toast');
   if (!el) {
     el = document.createElement('div');
@@ -3141,7 +3141,8 @@ function showAlarmToast(msg) {
   el.textContent = msg;
   el.style.opacity = '1';
   clearTimeout(el._t);
-  el._t = setTimeout(() => el.style.opacity = '0', 2800);
+  // CPO-DEV2-090: kanonik toast suresi - basari/standart=3000ms, hata=4000ms (2 kategori)
+  el._t = setTimeout(() => el.style.opacity = '0', type === 'err' ? 4000 : 3000);
 }
 
 updateFabBadge();

@@ -232,7 +232,9 @@ function bpSignalAgeCsv(signalDate) {
 }
 
 let _csvToastTimer = null;
-function showToast(msg, type='err', ms=3500) {
+function showToast(msg, type='err', ms) {
+  // CPO-DEV2-090: kanonik toast suresi - basari/standart=3000ms, hata=4000ms (2 kategori)
+  if (ms === undefined) ms = (type === 'err') ? 4000 : 3000;
   const el = document.getElementById('csvToast');
   el.textContent = msg;
   el.className = 'import-toast ' + type;
