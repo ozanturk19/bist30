@@ -2780,6 +2780,38 @@ let livePrices     = {};   // ticker → latest price from SSE
 let alarmPanelOpen = false;
 let _alarmPanelRelease = null;
 
+// CPO-DEV2-088(A) / r121: cok-sekme senkronizasyonu — portfolio.html'deki storage
+// event deseniyle ayni ilke (bkz. o dosyadaki r37 yorumu). toggleWatch/setPriceAlarm/
+// checkPriceAlarms zaten mutate etmeden once localStorage'dan taze okuyordu (DEV2-r34/r7),
+// ama bu SADECE o fonksiyonlar cagrildiginda gecerliydi. Asil bug: checkPriceAlarms()
+// SSE'den her fiyat tikinde `watchlist.has(ticker)` kapisiyla cagriliyor (bkz. asagida
+// ~1362. satir) — bu kapi bellek-ici (stale) Set'e bakiyordu, dolayisiyla bir sekmede
+// eklenen takip diger acik sekmede localStorage'a yazilsa bile o sekmenin SSE dongusu
+// hicbir zaman checkPriceAlarms()'i tetiklemiyordu (alarm sessizce hic calismiyordu).
+window.addEventListener('storage', e => {
+  if (e.key === WATCH_KEY) {
+    watchlist = new Set(_safeLoadArray(WATCH_KEY));
+    updateFabBadge();
+    if (alarmPanelOpen) renderAlarmPanel();
+    document.querySelectorAll('[id^="ab-"]').forEach(btn => {
+      const t = btn.id.slice(3);
+      btn.textContent = watchlist.has(t) ? '🔔' : '🔕';
+      btn.className   = 'alarm-btn' + (watchlist.has(t) ? ' watching' : '');
+      btn.title       = watchlist.has(t) ? 'Takibi bırak' : 'Sinyal alarmı kur';
+    });
+    document.querySelectorAll('[id^="mcb-"]').forEach(btn => {
+      const t = btn.id.slice(4);
+      btn.className = 'mc-bell' + (watchlist.has(t) ? ' watching' : '');
+      btn.title     = watchlist.has(t) ? 'Alarm aktif' : 'Sinyal alarmı kur';
+    });
+    const watchChip = document.getElementById('presetWatchChip');
+    if (watchChip) watchChip.hidden = watchlist.size === 0;
+  } else if (e.key === PRICE_ALARM_KEY) {
+    priceAlarms = _safeLoadObject(PRICE_ALARM_KEY, {});
+    if (alarmPanelOpen) renderAlarmPanel();
+  }
+});
+
 /** Faz 1 #2: Safe write + read-back verify (sessizce kaybolmayı önler) */
 function _safeWriteJSON(key, value) {
   try {

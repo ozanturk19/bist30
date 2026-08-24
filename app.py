@@ -9338,9 +9338,14 @@ def service_worker():
     import os
     fpath = os.path.join(app.root_path, "static", "sw.js")
     with open(fpath, "rb") as f:
+        # CPO-DEV2-088(B): CF edge origin'in "no-cache" niyetini gormezden gelip
+        # max-age=14400'e cevirdigi canli dogrulandi (DEV2-375 bulgusu B). Asil fix
+        # CF panelinde (DEV1/CPO), burada dusuk riskli tamamlayici header - CF bu
+        # basligi desteklemiyorsa no-op.
         return Response(f.read(), mimetype="application/javascript",
                         headers={"Service-Worker-Allowed": "/",
-                                 "Cache-Control": "no-cache"})
+                                 "Cache-Control": "no-cache",
+                                 "CDN-Cache-Control": "no-store"})
 
 
 @app.route("/favicon.ico")

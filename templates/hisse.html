@@ -1317,6 +1317,14 @@ function updateHibBellBtn() {
   btn.setAttribute('aria-label', inW ? 'Alarmı kapat' : 'Sinyal alarmı');
 }
 
+// CPO-DEV2-088(A) / r121: cok-sekme senkronizasyonu — index.html'deki storage event
+// deseniyle ayni ilke, portfolio.html'deki r37 yorumundaki asil kaynak. Bu sayfada
+// updateHibBellBtn() zaten cagrildiginda localStorage'dan taze okuyor (mutate yok,
+// sadece render) — eksik olan tek sey diger sekme yazinca bu render'i tetiklemekti.
+window.addEventListener('storage', e => {
+  if (e.key === HIB_WATCH_KEY) updateHibBellBtn();
+});
+
 // Init when DOM ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => { updateHibStarBtn(); updateHibBellBtn(); });
