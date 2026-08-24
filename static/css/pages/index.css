@@ -389,7 +389,7 @@
   .gundem-cards-wrap { flex: 1; min-width: 0; overflow: hidden; }
   .gundem-cards {
     display: flex; gap: 10px;
-    overflow-x: auto; padding-bottom: 6px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px;
     scroll-snap-type: x mandatory;
     scrollbar-width: thin; scrollbar-color: #30363d transparent;
   }
@@ -711,6 +711,14 @@
     transition: background .12s, color .12s;
     padding: 0;
     margin-left: 2px;
+    position: relative;
+  }
+  .afb-chip-x::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 32px; height: 32px;
+    transform: translate(-50%, -50%);
   }
   .afb-chip-x:hover {
     background: rgba(var(--bp-sat-rgb),0.20);
@@ -1213,7 +1221,8 @@
   }
   .ap-header { padding:12px 14px; border-bottom:1px solid var(--bp-border); display:flex; justify-content:space-between; align-items:center; }
   .ap-title  { font-size:var(--bp-text-base); font-weight:700; color:var(--bp-text); margin:0; }
-  .ap-close  { background:none; border:none; color:var(--bp-text2); cursor:pointer; font-size:var(--bp-text-xl); line-height:1; }
+  .ap-close  { position:relative; background:none; border:none; color:var(--bp-text2); cursor:pointer; font-size:var(--bp-text-xl); line-height:1; }
+  .ap-close::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
   .ap-body   { overflow-y:auto; flex:1; padding:6px; }
   .ap-item   { padding:8px 6px 10px; border-radius:var(--bp-radius-md); font-size:var(--bp-text-base); border-bottom:1px solid var(--bp-border); }
   .ap-item:last-child { border-bottom:none; }
@@ -1278,6 +1287,15 @@
   }
   .sub-toast-close::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
   .sub-toast-close:hover { color:var(--bp-text2); }
+  .bp-banner-close {
+    background:none; border:none; color:#374151; cursor:pointer;
+    font-size:var(--bp-text-lg); line-height:1; padding:2px 4px;
+    position:relative;
+  }
+  .bp-banner-close::before {
+    content:''; position:absolute; top:50%; left:50%;
+    width:44px; height:44px; transform:translate(-50%,-50%);
+  }
   .sub-toast-title { font-size:var(--bp-text-base); font-weight:700; color:var(--bp-text); margin:0 0 3px; }
   .sub-toast-sub   { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-bottom:12px; line-height:1.5; }
   .sub-toast-row   { display:flex; flex-direction:column; gap:6px; align-items:stretch; }

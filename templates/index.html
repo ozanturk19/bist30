@@ -504,7 +504,7 @@
       <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Ana ekrana ekle — hızlı erişim</div>
     </div>
     <button onclick="_pwaInstall()" style="background:#3b82f6;color:#fff;border:none;padding:7px 16px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Yükle</button>
-    <button onclick="document.getElementById('pwaInstallBanner').style.display='none'" style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);line-height:1;padding:2px 4px" title="Kapat" aria-label="Kapat">×</button>
+    <button class="bp-banner-close" onclick="document.getElementById('pwaInstallBanner').style.display='none'" title="Kapat" aria-label="Kapat">×</button>
   </div>
 
   <!-- ── Bildirim Çubuğu (E-posta) ────────── -->
@@ -534,8 +534,7 @@
         Abone Ol
       </button>
     </div>
-    <button onclick="document.getElementById('subscribeBar').style.display='none'"
-      style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);line-height:1;padding:2px 4px"
+    <button class="bp-banner-close" onclick="document.getElementById('subscribeBar').style.display='none'"
       title="Kapat" aria-label="Kapat">×</button>
   </div>
 
@@ -3457,6 +3456,8 @@ function _renderGnmCard(item) {
 }
 
 async function loadGundem(newsOnly) {
+  if (_hisseLoading) return;
+  _hisseLoading = true;
   try {
     const fetches = newsOnly
       ? [fetch('/api/market-news'), Promise.resolve(null)]
@@ -3515,6 +3516,8 @@ async function loadGundem(newsOnly) {
     console.warn('loadGundem error:', e);
     const c = document.getElementById('gundemCards');
     if (c) c.innerHTML = '<div style="color:var(--bp-text3);font-size:12px;padding:12px 0;">Gündem yüklenemedi.</div>';
+  } finally {
+    _hisseLoading = false;
   }
 }
 
@@ -3799,6 +3802,8 @@ document.addEventListener('keydown', function(e) {
 // Varsayılan: Makro açık (HTML'de de Makro paneli gizlenmiş değil)
 let _macroLoaded = false;
 let _hisseLoaded = false;
+let _macroLoading = false;   // fetch in-flight iken tekrar tetiklenmeyi engeller
+let _hisseLoading = false;   // fetch in-flight iken tekrar tetiklenmeyi engeller
 
 function switchGnmTab(tab) {
   const btnHisse   = document.getElementById('tabBtnHisse');
@@ -3814,7 +3819,7 @@ function switchGnmTab(tab) {
     btnHisse && btnHisse.setAttribute('aria-selected', 'false');
     panelMakro.style.display = 'block';
     panelHisse.style.display = 'none';
-    if (!_macroLoaded) { _macroLoaded = true; loadMacroNews(); }
+    if (!_macroLoaded && !_macroLoading) { _macroLoaded = true; loadMacroNews(); }
   } else {
     btnHisse && btnHisse.classList.add('active');
     btnMakro && btnMakro.classList.remove('active');
@@ -3822,13 +3827,15 @@ function switchGnmTab(tab) {
     btnMakro && btnMakro.setAttribute('aria-selected', 'false');
     panelHisse.style.display = 'block';
     panelMakro.style.display = 'none';
-    if (!_hisseLoaded) { _hisseLoaded = true; loadGundem(false); }
+    if (!_hisseLoaded && !_hisseLoading) { _hisseLoaded = true; loadGundem(false); }
   }
 }
 
 async function loadMacroNews() {
+  if (_macroLoading) return;
+  _macroLoading = true;
   const list = document.getElementById('macroNewsList');
-  if (!list) return;
+  if (!list) { _macroLoading = false; return; }
   try {
     const res  = await fetch('/api/macro-news');
     const data = await res.json();
@@ -3850,6 +3857,8 @@ async function loadMacroNews() {
     _macroLoaded = true;
   } catch(e) {
     list.innerHTML = '<div class="macro-news-empty">Haberler yüklenemedi.</div>';
+  } finally {
+    _macroLoading = false;
   }
 }
 

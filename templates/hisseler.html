@@ -100,6 +100,15 @@ function hhSetMode(mode) {
   document.getElementById('tabAlpha').classList.toggle('active',  mode === 'alpha');
   document.getElementById('tabSector').setAttribute('aria-selected', String(mode === 'sector'));
   document.getElementById('tabAlpha').setAttribute('aria-selected',  String(mode === 'alpha'));
+  // r-fix: buton ile seçilen mod da hash'e yazılsın, aksi halde reload/bfcache-miss
+  // geri navigasyonunda mod sessizce 'sector'a döner (hash tek kaynak-of-truth idi
+  // ama sadece harf linkleri hash bırakıyordu, buton bırakmıyordu).
+  var hashIsAlpha = location.hash && (location.hash.indexOf('#letter-') === 0 || location.hash === '#alpha');
+  if (mode === 'alpha' && !hashIsAlpha) {
+    history.replaceState(null, '', '#alpha');
+  } else if (mode === 'sector' && hashIsAlpha) {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
 }
 // Hash kontrolü — r101 bug-hunt: sadece ilk yüklemede okunuyordu, hashchange/
 // popstate dinleyicisi yoktu; harf linkine tıklayıp (hash değişir) sonra Geri
