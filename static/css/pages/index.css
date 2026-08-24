@@ -755,9 +755,9 @@
   .search-wrap { position: relative; margin-left: auto; }
   .search-input {
     background: var(--bp-bg); border: 1px solid var(--bp-border); color: var(--bp-text);
-    padding: 6px 12px; border-radius: var(--bp-radius-sm); font-size: var(--bp-text-base); font-family: inherit;
+    padding: 6px 12px; border-radius: var(--bp-radius-sm); font-size: 16px; font-family: inherit;
     width: 170px; outline: none; transition: border-color .15s;
-  }
+  } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
   .search-input:focus { border-color: var(--bp-brand); width: 210px; }
   .search-input::placeholder { color: var(--bp-text3); }
 
@@ -1301,9 +1301,9 @@
   .sub-toast-row   { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
   .sub-toast-input {
     width:100%; background:var(--bp-surface2); border:1px solid var(--bp-border); color:var(--bp-text);
-    padding:9px 12px; border-radius:var(--bp-radius-7); font-size:var(--bp-text-base); outline:none;
+    padding:9px 12px; border-radius:var(--bp-radius-7); font-size:16px; outline:none;
     font-family:inherit; transition:border-color .15s; box-sizing:border-box;
-  }
+  } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
   .sub-toast-input:focus { border-color:var(--bp-brand); }
   .sub-toast-btn {
     background:var(--bp-brand); color:var(--bp-bg); border:none; padding:9px 16px; border-radius:var(--bp-radius-7);
@@ -1569,9 +1569,9 @@
     border-radius:var(--bp-radius);
     padding: 10px 12px;
     color: var(--bp-text);
-    font-size: var(--bp-text-md); font-family: inherit;
+    font-size: 16px; font-family: inherit;
     outline: none; transition: border-color .15s ease;
-  }
+  } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
   .premium-modal input:focus { border-color: #ffc850; }
   .premium-modal-submit {
     background: linear-gradient(135deg, #ffc850, #e3b341);

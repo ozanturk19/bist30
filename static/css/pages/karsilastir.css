@@ -31,9 +31,9 @@
   .ticker-input {
     background: var(--bp-bg); border: 1px solid var(--bp-border2);
     color: var(--bp-text); border-radius:var(--bp-radius); padding: 8px 12px;
-    font-size: var(--bp-text-base); font-family: var(--bp-font-mono); text-transform: uppercase;
+    font-size: 16px; font-family: var(--bp-font-mono); text-transform: uppercase;
     width: 100px; outline: none; transition: border-color .15s;
-  }
+  } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
   .ticker-input:focus { border-color: var(--accent); }
   .ticker-input::placeholder { color: var(--bp-text3); text-transform: none; font-family: inherit; }
   .compare-btn {

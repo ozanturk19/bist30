@@ -59,10 +59,10 @@
   .filter-group input[type=number],
   .filter-group input[type=text] {
     background:var(--surface2); border:1px solid var(--border);
-    color:var(--text); border-radius:var(--bp-radius); padding:7px 10px; font-size:var(--bp-text-base);
+    color:var(--text); border-radius:var(--bp-radius); padding:7px 10px; font-size:16px;
     font-family:inherit; outline:none; transition:border-color .15s;
     appearance:none; cursor:pointer;
-  }
+  } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
   .filter-group select:focus,
   .filter-group input[type=number]:focus,
   .filter-group input[type=text]:focus { border-color:var(--brand); }
