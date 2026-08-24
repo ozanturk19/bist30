@@ -231,7 +231,7 @@
       </svg>
       <span class="hib-action-lbl">Portföye ekle</span>
     </button>
-    <button class="hib-action-btn" id="hibBellBtn" type="button" onclick="toggleHisseWatch()" title="Sinyal değişiminde bildirim al" aria-label="Sinyal alarmı" aria-pressed="false">
+    <button class="hib-action-btn" id="hibBellBtn" type="button" onclick="toggleHisseWatch()" title="Sinyal değişiminde bildirim al" aria-label="Bildirim al" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
         <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -1321,7 +1321,7 @@ function updateHibStarBtn() {
     if (lbl) lbl.textContent = 'Portföye ekle';
   }
   btn.setAttribute('aria-pressed', String(inPf));
-  btn.setAttribute('aria-label', inPf ? 'Portföyden çıkar' : 'Portföye ekle');
+  btn.setAttribute('aria-label', inPf ? 'Portföyde' : 'Portföye ekle');
 }
 
 function updateHibBellBtn() {
@@ -1341,7 +1341,7 @@ function updateHibBellBtn() {
     if (lbl) lbl.textContent = 'Bildirim al';
   }
   btn.setAttribute('aria-pressed', String(inW));
-  btn.setAttribute('aria-label', inW ? 'Alarmı kapat' : 'Sinyal alarmı');
+  btn.setAttribute('aria-label', inW ? 'Alarm aktif' : 'Bildirim al');
 }
 
 // CPO-DEV2-088(A) / r121: cok-sekme senkronizasyonu — index.html'deki storage event
