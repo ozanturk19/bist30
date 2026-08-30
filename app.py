@@ -12204,6 +12204,23 @@ def _startup():
             logger.warning("_warm_earnings: %s", e)
     threading.Thread(target=_warm_earnings_2, daemon=True).start()
 
+    # Temettü takvimi ilk yüklemesini arka planda hazırla (bilanço takvimiyle aynı
+    # desen — bu warm-up olmadan _dividend_cache hiç dolmaz: get_dividend_data()'nın
+    # lazy-TTL dalı sadece web-dışı bir process'e /api/temettu-takvimi isteği
+    # geldiğinde tetiklenir, ama refresh service'e böyle bir istek hiç gelmiyor).
+    def _warm_dividend():
+        # CPO-558B ile aynı guard: web worker'da yfinance yasak
+        if os.environ.get("REFRESH_WORKER") == "web":
+            logger.info("_warm_dividend: REFRESH_WORKER=web — yfinance atlandı")
+            return
+        time.sleep(90)    # bilanço/macro warm-up'lardan sonra başla, yfinance rate-limit'i paylaş
+        try:
+            get_dividend_data()
+            logger.info("_warm_dividend: temettü takvimi ön yüklendi")
+        except Exception as e:
+            logger.warning("_warm_dividend: %s", e)
+    threading.Thread(target=_warm_dividend, daemon=True).start()
+
     def _slow_chart_refresh_daemon():
         # CPO-565 Bug 1: Per-ticker chart dosyalarını diske yazar.
         # REFRESH_WORKER=1 (leader) ortamında çalışır; web worker'da atlanır.
