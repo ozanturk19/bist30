@@ -11822,7 +11822,20 @@ _BLOG_SLUG_REDIRECTS = {
     "supertrend-vs-macd-karsilastirma": "supertrend-vs-macd",
     "destek-direnc-seviyeleri":      "destek-direnc-seviyeleri-nedir",
     "macd-gostergesi-nedir":         "macd-indikatoru-nedir",
-    "hacim-analizi":                 "hacim-analizi-nedir",
+    # CPO-DEV2-097: hacim-analizi (kisa slug) dogrudan nihai kanonige - eski
+    # hedefi (hacim-analizi-nedir) artik kendisi de deprecated, zincir 301
+    # olusturmamak icin dogrudan guncellendi.
+    "hacim-analizi":                 "hacim-analizi-borsa-volume",
+    # CPO-DEV2-097: SEO keyword-cannibalization birlestirmeleri (workflow ile
+    # 10 aday cift dogrulandi, 8 gercek duplicate confirmed, 2 farkli-aci
+    # oldugu icin AYRI tutuldu - rsi-gostergesi-nedir/nasil-kullanilir ve
+    # stop-loss-nedir/emirleri-nereye-konulur, bkz mailbox).
+    "destek-ve-direnc-seviyeleri-nasil-belirlenir": "destek-direnc-seviyeleri-nedir",
+    "hacim-analizi-nedir":           "hacim-analizi-borsa-volume",
+    "fibonacci-seviyeleri":          "fibonacci-geri-cekilme-seviyeleri",
+    "kap-bildirimleri-nedir":        "kap-bildirimleri-nasil-takip-edilir",
+    "sektor-rotasyonu-nedir":        "bist-sektor-rotasyonu-hangi-donemde-hangi-sektor",
+    "mum-grafik-formasyonlari":      "mum-formasyonlari-teknik-analiz-rehberi",
 }
 
 def _normalize_article(a):

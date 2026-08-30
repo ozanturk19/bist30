@@ -666,6 +666,7 @@ Histogram = MACD − Sinyal</pre>
   },
   {
     "slug": "fibonacci-seviyeleri",
+    "canonical_slug": "fibonacci-geri-cekilme-seviyeleri",
     "title": "Fibonacci Geri Çekilme Seviyeleri Nedir?",
     "desc": "Fibonacci oranları borsa analizinde nasıl kullanılır? %38.2, %50, %61.8 seviyeleri neden önemlidir?",
     "date": "2026-04-17",
@@ -1138,6 +1139,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 
   {
     "slug": "kap-bildirimleri-nedir",
+    "canonical_slug": "kap-bildirimleri-nasil-takip-edilir",
     "title": "KAP Bildirimleri Nedir? Yatırımcı İçin Rehber",
     "desc": "KAP (Kamuyu Aydınlatma Platformu) bildirimleri nelerdir, nasıl okunur ve sinyal üzerindeki etkisi ne anlama gelir?",
     "date": "2026-05-01",
@@ -1681,6 +1683,7 @@ Bu yaklaşım, klasik statik destek/direnç yerine piyasanın volatilitesine oto
   # ── Makale 34 ──────────────────────────────────────────────────────
   {
     "slug": "hacim-analizi-nedir",
+    "canonical_slug": "hacim-analizi-borsa-volume",
     "title": "Hacim Analizi: Fiyatı Hacimle Doğrulama",
     "cat": "Teknik Analiz",
     "read_min": 5,
@@ -1883,6 +1886,7 @@ Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir."""
   # ── Makale 36 ──────────────────────────────────────────────────────
   {
     "slug": "mum-grafik-formasyonlari",
+    "canonical_slug": "mum-formasyonlari-teknik-analiz-rehberi",
     "title": "Mum Grafik Formasyonları: 10 Kritik Sinyal",
     "cat": "Teknik Analiz",
     "read_min": 8,
@@ -2357,6 +2361,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   # ── Makale 41 ──────────────────────────────────────────────────────
   {
     "slug": "sektor-rotasyonu-nedir",
+    "canonical_slug": "bist-sektor-rotasyonu-hangi-donemde-hangi-sektor",
     "title": "Sektör Rotasyonu Nedir? Hangi Sektöre Ne Zaman Yatırım Yapılır?",
     "cat": "Strateji",
     "date": "2026-05-01",
@@ -6800,6 +6805,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   # ── ARTICLE 93 ──
   {
     "slug": "destek-ve-direnc-seviyeleri-nasil-belirlenir",
+    "canonical_slug": "destek-direnc-seviyeleri-nedir",
     "title": "Teknik Analizde Destek ve Direnç Seviyeleri Nasıl Belirlenir?",
     "desc": "Destek ve direnç seviyeleri nedir? Yatay seviyeler, trend çizgileri, dinamik destek ve BIST hisselerinde pratik destek-direnç analizi rehberi.",
     "date": "2026-05-05",
