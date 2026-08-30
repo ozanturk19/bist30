@@ -2025,7 +2025,24 @@ def _is_notify_leader():
     `_is_notify_leader_blocking()`'i gevent hub threadpool'a offload edip 10s
     tavan koyar (_tp_read_json/_gemini_rate_acquire ile aynı desen). Timeout
     olursa False (non-leader) döner — bu worker o cycle'ı atlar, ambiguous
-    durumda duplike bildirim göndermek yerine güvenli tarafta kalınır."""
+    durumda duplike bildirim göndermek yerine güvenli tarafta kalınır.
+
+    CPO-1456 P0 KÖK NEDEN FIX (30.08.2026): _NOTIFY_LOCK_PATH tek paylaşımlı
+    dosya (/tmp/bp_notify_leader.lock) — hem gerçek sinyal-değişim bildirimi
+    (_notify_signal_changes, sadece REFRESH_WORKER=1 process'inden çağrılır)
+    hem de HER worker'da (web dahil) koşulsuz başlayan freshness-monitor/
+    chart-integrity-alarm thread'leri hem de health endpoint diagnostic alanı
+    aynı flock'u talep ediyordu. flock asla unlock edilmediği için (kalıcı
+    leader-election deseni), 4 web worker'dan biri bu kilidi ilk kazandığında
+    onu (kendi ömrü boyunca) sonsuza kadar tutuyor — REFRESH_WORKER=1 process'i
+    (bist30-refresh.service, günde 1 kez 07:00 UTC'de başlar) asla leader
+    olamıyordu. Sonuç: gerçek AL/SAT geçişleri pending_changes.json'a hiç
+    yazılmadı, digest/anlık mail 10+ gündür sessizce kırıktı. Fix: web worker
+    (REFRESH_WORKER=web) bu kilidi hiçbir zaman TALEP ETMESİN — flock'a hiç
+    girmeden False dönsün, sadece REFRESH_WORKER=1 (veya legacy unset fallback)
+    process'i yarışsın."""
+    if os.environ.get("REFRESH_WORKER", "") == "web":
+        return False
     if _WS_AVAILABLE:
         try:
             return _gevent.get_hub().threadpool.spawn(_is_notify_leader_blocking).get(timeout=10)
