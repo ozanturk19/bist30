@@ -132,6 +132,77 @@
     Geçmiş performans gelecek getirileri garanti etmez.
   </div>
 
+  <!-- E-posta Abonelik CTA — CPO-DEV2-094 #1: kanit (Sharpe/Profit Factor/Drawdown) hemen altinda
+       donusum cagrisi. Var olan /api/subscribe akisina (ozet.html ozSubForm ile ayni backend/mini-form
+       deseni) baglaniyor, yeni bir mekanizma icat edilmedi. -->
+  <div id="btSubBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.06),rgba(0,67,235,.04));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <div style="font-size:var(--bp-text-md);font-weight:700;color:var(--bp-text);margin-bottom:3px"><span aria-hidden="true">📬</span> Bu Sonuçları Takip Et</div>
+      <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Yeni sinyal oluştuğunda e-postayla haberin olsun — ücretsiz, iptal her zaman.</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex:1.6;min-width:240px" id="btSubForm" role="status" aria-live="polite">
+      <input id="btSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
+        style="flex:1;background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text);
+               padding:8px 12px;border-radius:var(--bp-radius-7);font-size:16px;font-family:inherit;outline:none;
+               transition:border-color .15s;min-width:0"
+        onfocus="this.style.borderColor='var(--bp-brand)'" onblur="this.style.borderColor='var(--bp-border)'"
+        onkeydown="if(event.key==='Enter')btSubmitSub()">
+      <button onclick="btSubmitSub()"
+        style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:8px 18px;border-radius:var(--bp-radius-7);
+               font-size:var(--bp-text-base);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">
+        Abone Ol
+      </button>
+      <span id="btSubMsg" style="font-size:12px"></span>
+    </div>
+  </div>
+  <script>
+  async function btSubmitSub() {
+    const emailEl = document.getElementById('btSubEmail');
+    const email = emailEl ? emailEl.value.trim() : '';
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
+      return;
+    }
+    const btn = document.querySelector('#btSubForm button');
+    if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor…'; }
+    function _escBtSub(v) {
+      return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email}), signal: AbortSignal.timeout(10000)
+      });
+      const data = await res.json();
+      const form = document.getElementById('btSubForm');
+      const msg = document.getElementById('btSubMsg');
+      if (data.ok) {
+        if (form) form.innerHTML = '<div style="color:var(--bp-al);font-size:13px;font-weight:600">✅ ' + _escBtSub(data.message || 'Abone oldunuz!') + '</div>';
+      } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
+        if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">ℹ️ ' + _escBtSub(data.message) + '</span>';
+        if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
+      } else {
+        if (msg) msg.innerHTML = '<span class="bp-sat-text">' + _escBtSub(data.error || 'Bir hata oluştu.') + '</span>';
+        if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
+      }
+    } catch(e) {
+      const msg = document.getElementById('btSubMsg');
+      if (msg) msg.innerHTML = '<span class="bp-sat-text">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</span>';
+      if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
+    }
+  }
+  // Ayri/bagimsiz pageshow listener: yukaridaki btnRun/btnRunRetry listener'i
+  // gercek sunucu-tarafli backtest durumunu sorguluyor (kasitli), bu ise
+  // sadece UI-state (buton disabled/"Kaydediliyor...") icin kor reset -
+  // ozet.html ozSubmitSub ile ayni desen, iki listener'i birlestirmek
+  // farkli semantikleri karistirirdi.
+  window.addEventListener('pageshow', (ev) => {
+    if (!ev.persisted) return;
+    const btn = document.querySelector('#btSubForm button');
+    if (btn && btn.disabled) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
+  });
+  </script>
+
   <!-- Hisse bazlı performans -->
   <div class="sec-head">
     Hisse Bazlı Performans

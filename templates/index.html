@@ -347,7 +347,95 @@
   </div>
 </div><!-- /chart-accordion -->
 
-
+  <!-- ── Hero E-posta Abonelik Şeridi — CPO-DEV2-094 #2: girişsiz kullanıcı icin ikinci,
+       hero/üst-bölge email-yakalama noktası (mevcut tek nokta alert-modaliydi). Ayni
+       /api/subscribe backend'i, ayni bpRecordSubscribe/dismiss deseni kullanilir - yeni
+       mekanizma icat edilmedi. bpOnboardBanner (asagida) ile ayni dismiss-once localStorage
+       stili: bir kez kapatilinca/abone olununca bir daha gorunmez, zaten abone olana da
+       (bp_sub cookie) hic gosterilmez. ── -->
+  <div id="heroSubBanner" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.09),rgba(0,67,235,.05));border:1px solid rgba(var(--bp-brand-rgb),.22);border-radius:var(--bp-radius-lg);padding:10px 14px;margin-bottom:14px;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:var(--bp-text-xl);flex-shrink:0"><span aria-hidden="true">📬</span></span>
+    <div style="flex:1;min-width:170px">
+      <div style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text)">Sinyal değişince haberin olsun</div>
+      <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Ücretsiz e-posta bildirimi — istediğin zaman çık</div>
+    </div>
+    <div id="heroSubForm" style="display:flex;gap:6px;align-items:center;flex:1.4;min-width:230px;flex-wrap:wrap" role="status" aria-live="polite">
+      <input id="heroSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
+        style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
+               padding:7px 11px;border-radius:var(--bp-radius);font-size:16px;font-family:inherit;outline:none;
+               box-sizing:border-box;transition:border-color .15s"
+        onfocus="this.style.borderColor='var(--bp-brand)'" onblur="this.style.borderColor='var(--bp-border)'"
+        onkeydown="if(event.key==='Enter')heroSubmitSub()">
+      <button onclick="heroSubmitSub()"
+        style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:7px 14px;border-radius:var(--bp-radius);
+               font-size:var(--bp-text-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">
+        Abone Ol
+      </button>
+      <span id="heroSubMsg" style="font-size:11px;width:100%"></span>
+    </div>
+    <button type="button" id="heroSubDismiss"
+      style="background:transparent;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-xl);padding:2px 6px;line-height:1;flex-shrink:0" title="Kapat" aria-label="Kapat">×</button>
+  </div>
+  <script>
+  (function(){
+    try {
+      if (localStorage.getItem('bp_hero_sub_dismissed') === '1') return;
+      if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return;
+      var el = document.getElementById('heroSubBanner');
+      if (!el) return;
+      el.style.display = 'flex';
+      var dbtn = document.getElementById('heroSubDismiss');
+      if (dbtn) dbtn.addEventListener('click', function(){
+        el.style.display = 'none';
+        try { localStorage.setItem('bp_hero_sub_dismissed', '1'); } catch(e) { console.warn('bp_hero_sub_dismissed kaydi basarisiz', e); }
+      });
+    } catch(e) { console.warn('hero abonelik seridi init basarisiz', e); }
+  })();
+  function _escHeroSub(v) {
+    return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  async function heroSubmitSub() {
+    const emailEl = document.getElementById('heroSubEmail');
+    const email = emailEl ? emailEl.value.trim() : '';
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
+      return;
+    }
+    const btn = document.querySelector('#heroSubForm button');
+    if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor…'; }
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({email}), signal: AbortSignal.timeout(10000)
+      });
+      const data = await res.json();
+      const form = document.getElementById('heroSubForm');
+      const msg = document.getElementById('heroSubMsg');
+      if (data.ok) {
+        if (typeof window.bpRecordSubscribe === 'function' && data.token) {
+          window.bpRecordSubscribe({ token: data.token, email: data.email, name: data.name });
+        }
+        if (form) form.innerHTML = '<div style="color:var(--bp-al);font-size:13px;font-weight:600">✅ ' + _escHeroSub(data.message || 'Abone oldunuz!') + '</div>';
+        try { localStorage.setItem('bp_hero_sub_dismissed', '1'); } catch(e) { console.warn('bp_hero_sub_dismissed kaydi basarisiz (subscribe)', e); }
+      } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
+        if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">ℹ️ ' + _escHeroSub(data.message) + '</span>';
+        if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
+      } else {
+        if (msg) msg.innerHTML = '<span class="bp-sat-text">' + _escHeroSub(data.error || 'Bir hata oluştu.') + '</span>';
+        if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
+      }
+    } catch(e) {
+      const msg = document.getElementById('heroSubMsg');
+      if (msg) msg.innerHTML = '<span class="bp-sat-text">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</span>';
+      if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
+    }
+  }
+  window.addEventListener('pageshow', (ev) => {
+    if (!ev.persisted) return;
+    const btn = document.querySelector('#heroSubForm button');
+    if (btn && btn.disabled) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
+  });
+  </script>
 
   <!-- ── Feature 1 — Bugünün Özeti (Hero Narratif Card) — İSKELET (data Cmt'de bağlanacak) ── -->
   <section class="market-summary" id="marketSummary" aria-label="Bugünün Piyasa Özeti">
