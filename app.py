@@ -10943,6 +10943,184 @@ def api_bilanco_mini():
     return safe_json({"periods": items})
 
 
+# ── Temettü Takvimi ───────────────────────────────────────────────────────────
+# CPO-1457 madde 3: bilanco-takvimi'ndeki disk-cache köprü deseni (CPO-1180 K2)
+# birebir tekrarlanıyor — REFRESH_WORKER=1 (bist30-refresh.service) hesaplar ve
+# diske yazar, REFRESH_WORKER=web worker'lar yfinance'e hiç gitmeden diskten okur.
+_dividend_cache       = {"data": None, "ts": 0}
+_DIVIDEND_TTL         = 3600 * 12   # 12 saat
+_dividend_refreshing  = False         # arka plan yenileme kilidi
+
+_DIVIDEND_CACHE_DISK_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "last_dividend_cache.json")
+
+
+def _save_dividend_cache_to_disk():
+    """Temettü takvimi cache'ini diske yazar (hesaplayan process). _lock DIŞINDA çağrılmalı."""
+    try:
+        data = _dividend_cache.get("data")
+        if not data:
+            return   # empty-overwrite guard — restart sonrası diskteki geçerli veriyi silme
+        _atomic_write_json(_DIVIDEND_CACHE_DISK_PATH, data)
+    except Exception as e:
+        logger.warning("_save_dividend_cache_to_disk hatası: %s", e)
+
+
+def _load_dividend_cache_from_disk():
+    """Diskten temettü takvimi cache'ini yükler (web worker — yfinance yasak, CPO-558F)."""
+    try:
+        if not os.path.exists(_DIVIDEND_CACHE_DISK_PATH):
+            return
+        current_mtime = os.path.getmtime(_DIVIDEND_CACHE_DISK_PATH)
+        if _dividend_cache.get("ts") == current_mtime and _dividend_cache.get("data"):
+            return
+        with open(_DIVIDEND_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, dict) or "stocks" not in data:
+            return
+        _dividend_cache["data"] = data
+        _dividend_cache["ts"]   = current_mtime
+    except Exception as e:
+        logger.warning("_load_dividend_cache_from_disk hatası: %s", e)
+
+
+def _unwrap_yf_scalar(val):
+    """yfinance calendar alanları farklı tiplerde dönebilir (list[date], pandas Series/Index,
+    çıplak datetime.date) — CPO-1447'de aynı hata sınıfı yaşandı: tip kontrolsüz str()
+    ham repr üretip API'den kullanıcıya sızdı. Aynı unwrap zincirini burada da uyguluyoruz."""
+    if val is None:
+        return None
+    if hasattr(val, "iloc"):
+        val = val.iloc[0] if len(val) > 0 else None
+    elif isinstance(val, (list, tuple)):
+        val = val[0] if len(val) > 0 else None
+    if val is None:
+        return None
+    return str(val)[:10]
+
+
+def _do_dividend_refresh():
+    """Temettü takvimi yfinance verilerini arka planda yeniler — endpoint'i bloklamaz."""
+    global _dividend_refreshing
+    if _dividend_refreshing:
+        return
+    _dividend_refreshing = True
+    try:
+        _dividend_refresh_impl()
+    except Exception as e:
+        logger.warning("_do_dividend_refresh: hata — %s", e)
+    finally:
+        _dividend_refreshing = False
+
+
+def _dividend_refresh_impl():
+    """Gerçek yfinance çağrılarını yapar, temettü cache'ini günceller.
+
+    yfinance'in "Ex-Dividend Date" calendar alanı ileri-projeksiyon garantisi
+    vermiyor (canlı doğrulandı: THYAO/GARAN'da bugünden ESKİ bir tarih dönebiliyor,
+    son gerçekleşmiş ex-div tarihini yansıtıyor) — bu yüzden sadece bugünden
+    SONRAKİ tarihler "yaklaşan" (next_ex_date) sayılır; geçmişte kalan tarih atılır,
+    gerçek geçmiş bilgi zaten `Ticker.dividends` serisinden (last_div_date) geliyor.
+    """
+    now = time.time()
+    today_str = datetime.now(_TZ_TR).date().isoformat()
+
+    with _lock:
+        stocks = list(_cache["data"])
+    sig_map = {s["ticker"]: s for s in stocks}
+
+    sample_tickers = BIST100[:28]   # bilanco-takvimi ile aynı örneklem (hız/rate-limit)
+    result_stocks = []
+    for t in sample_tickers:
+        try:
+            tk  = yf.Ticker(t + ".IS")
+            cal = tk.calendar
+            next_ex = None
+            if cal is not None and isinstance(cal, dict):
+                next_ex = _unwrap_yf_scalar(cal.get("Ex-Dividend Date"))
+                if next_ex and next_ex <= today_str:
+                    next_ex = None
+
+            last_div_date   = None
+            last_div_amount = None
+            divs = tk.dividends
+            if divs is not None and len(divs) > 0:
+                last_amt = divs.iloc[-1]
+                if pd.notna(last_amt):
+                    last_div_date   = divs.index[-1].strftime("%Y-%m-%d")
+                    last_div_amount = round(float(last_amt), 4)
+
+            if next_ex or last_div_date:
+                sig_data = sig_map.get(t, {})
+                result_stocks.append({
+                    "ticker":          t,
+                    "name":            STOCK_NAMES.get(t, t),
+                    "signal":          sig_data.get("signal", "BEKLE"),
+                    "price":           sig_data.get("price"),
+                    "is_premium":      sig_data.get("is_premium", False),
+                    "next_ex_date":    next_ex,
+                    "last_div_date":   last_div_date,
+                    "last_div_amount": last_div_amount,
+                    "kap_url":         f"https://www.kap.org.tr/tr/Bildirim/Ara?ara={t}&tip=MAL&kategori=2",
+                })
+        except Exception:
+            pass
+        time.sleep(0.1)
+
+    # Sıralama: yaklaşan ex-div tarihi olanlar önce (en yakın ilk),
+    # sonra sadece geçmiş temettü verisi olanlar (en yeni ilk)
+    with_next    = sorted((s for s in result_stocks if s["next_ex_date"]),
+                          key=lambda s: s["next_ex_date"])
+    without_next = sorted((s for s in result_stocks if not s["next_ex_date"]),
+                          key=lambda s: s["last_div_date"] or "", reverse=True)
+    result_stocks = with_next + without_next
+
+    data = {
+        "stocks":     result_stocks,
+        "updated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M"),
+    }
+    with _lock:
+        _dividend_cache["data"] = data
+        _dividend_cache["ts"]   = now
+    _save_dividend_cache_to_disk()
+    logger.info("_dividend_refresh_impl: tamamlandi (%d hisse)", len(result_stocks))
+
+
+def get_dividend_data():
+    """Temettü takvimi verisi — cache'den döner, stale ise arka planda yeniler."""
+    now = time.time()
+    cached = _dividend_cache.get("data")
+    ts     = _dividend_cache.get("ts", 0)
+
+    if cached and (now - ts) < _DIVIDEND_TTL:
+        return cached
+
+    if os.environ.get("REFRESH_WORKER") == "web":
+        _load_dividend_cache_from_disk()
+        cached = _dividend_cache.get("data")
+        if cached:
+            return cached
+    elif not _dividend_refreshing:
+        threading.Thread(target=_do_dividend_refresh, daemon=True,
+                         name="dividend-refresh").start()
+
+    if cached:
+        return cached
+    return {"stocks": [], "updated_at": "—"}
+
+
+@app.route("/temettu-takvimi")
+def temettu_takvimi():
+    return render_template("temettu_takvimi.html")
+
+
+@app.route("/api/temettu-takvimi")
+@limiter.limit("60 per minute")
+def api_temettu_takvimi():
+    data = get_dividend_data()
+    return safe_json(data)
+
+
 @app.route("/api/market-news")
 @limiter.limit("30 per minute")
 def api_market_news():

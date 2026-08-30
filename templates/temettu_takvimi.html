@@ -1,0 +1,204 @@
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Temettü Takvimi — BIST Temettü Tarihleri ve Tutarları | BorsaPusula</title>
+<meta name="description" content="BIST100 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları. Trend sinyalleriyle birlikte temettü takvimini takip edin.">
+<link rel="canonical" href="https://borsapusula.com/temettu-takvimi">
+<meta property="og:title"       content="Temettü Takvimi — BIST Temettü Tarihleri ve Tutarları | BorsaPusula">
+<meta property="og:description" content="BIST100 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları.">
+<meta property="og:url"         content="https://borsapusula.com/temettu-takvimi">
+<meta property="og:image"       content="https://borsapusula.com/og-image.png">
+<!-- Twitter Card -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="Temettü Takvimi — BIST Temettü Tarihleri ve Tutarları | BorsaPusula">
+<meta name="twitter:description" content="BIST100 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları.">
+<meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name"   content="borsapusula.com">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+  {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
+  {"@type":"ListItem","position":2,"name":"Temettü Takvimi","item":"https://borsapusula.com/temettu-takvimi"}
+]}
+</script>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/tokens.css?v=20260823C">
+<script src="/static/bp-vocab.js?v=20260823C"></script>
+<link rel="stylesheet" href="/static/css/pages/temettu_takvimi.css?v=1">
+<style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header div.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> div.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> div.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
+{% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
+{% with hdr_icon = '💰', hdr_title = 'Temettü Takvimi', hdr_sub = 'Veriler yükleniyor…', hdr_sub_id = 'lastUpdate', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+<h1 class="sr-only">BIST Temettü (Ex-Dividend) Takvimi</h1>
+
+
+<!-- Makro Ticker -->
+<div class="macro-bar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
+
+<main class="container" id="main-content" tabindex="-1">
+
+  {% include '_stale_banner.html' %}
+
+  <div class="info-banner">
+    <span aria-hidden="true">ℹ️</span> <strong>Temettü verileri yfinance kaynaklıdır.</strong> Şirketler ex-temettü tarihini genellikle genel kurul sonrası netleştirir.
+    Kesin tarih ve tutarlar için KAP bağlantısına tıklayın.
+  </div>
+
+  <div class="summary-row">
+    <div class="sum-chip"><div class="sum-num" id="sumUpcoming" style="color:#58a6ff">—</div><div class="sum-lbl">Yaklaşan Ex-Temettü</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumAl" style="color:#3fb950">—</div><div class="sum-lbl">Güçlü Trend</div></div>
+    <div class="sum-chip"><div class="sum-num bp-sat-text" id="sumSat">—</div><div class="sum-lbl">Trend Bozuldu</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumTotal" style="color:#58a6ff">—</div><div class="sum-lbl">Toplam Hisse</div></div>
+  </div>
+
+  <div class="filter-bar">
+    <span style="font-size:var(--bp-text-sm);color:var(--bp-text3);font-weight:600">Filtre:</span>
+    <button class="filter-btn active" onclick="setFilter('all')"      id="fbtn-all"      aria-pressed="true">Tümü</button>
+    <button class="filter-btn"        onclick="setFilter('upcoming')" id="fbtn-upcoming" aria-pressed="false"><span aria-hidden="true">📅</span> Yaklaşan</button>
+    <button class="filter-btn fal"    onclick="setFilter('AL')"       id="fbtn-AL"       aria-pressed="false"><span aria-hidden="true">▲</span> Güçlü Trend</button>
+    <button class="filter-btn fsat"   onclick="setFilter('SAT')"      id="fbtn-SAT"      aria-pressed="false"><span aria-hidden="true">▼</span> Trend Bozuldu</button>
+  </div>
+
+  <div id="stocksContainer" role="status" aria-live="polite">
+    <div class="loading-msg"><span aria-hidden="true">⏳</span> Veriler yükleniyor…</div>
+  </div>
+
+</main>
+
+<footer>
+  <a href="/">Ana Sayfa</a> · <a href="/ozet">Günlük Özet</a> · <a href="/bilanco-takvimi">Bilanço Takvimi</a> · <a href="/sektor-harita">Sektör Haritası</a> · <a href="/yasal">Yasal Uyarı</a>
+  <div style="margin-top:6px"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir. Temettü tarihleri/tutarları tahminidir, KAP'tan doğrulanmalıdır. © 2026 borsapusula.com</div>
+</footer>
+
+<script>
+let _allData = null;
+let _filter  = 'all';
+
+function setFilter(f) {
+  _filter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+  const active = document.getElementById('fbtn-' + f);
+  active.classList.add('active');
+  active.setAttribute('aria-pressed', 'true');
+  if (_allData) render(_allData);
+}
+
+function sigClass(sig) {
+  return sig === 'AL' ? 'al' : sig === 'SAT' ? 'sat' : 'bkl';
+}
+function sigIcon(sig) {
+  return sig === 'AL' ? '▲' : sig === 'SAT' ? '▼' : sig === 'BEKLE' ? '●' : '';
+}
+
+function formatDividendInfo(s) {
+  const parts = [];
+  if (s.next_ex_date && /^\d{4}-\d{2}-\d{2}$/.test(s.next_ex_date)) {
+    parts.push('Ex-Temettü: ' + escapeHtml(s.next_ex_date.split('-').reverse().join('.')));
+  }
+  if (s.last_div_date && /^\d{4}-\d{2}-\d{2}$/.test(s.last_div_date)) {
+    const amt = (typeof s.last_div_amount === 'number')
+      ? s.last_div_amount.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:4}) + ' ₺/hisse'
+      : '';
+    parts.push('Son ödeme: ' + escapeHtml(s.last_div_date.split('-').reverse().join('.')) + (amt ? ' (' + escapeHtml(amt) + ')' : ''));
+  }
+  return parts.length ? parts.join(' · ') : 'Veri bekleniyor';
+}
+
+function render(data) {
+  const stocks = data.stocks || [];
+
+  const totalUpcoming = stocks.filter(s => s.next_ex_date).length;
+  const totalAl    = stocks.filter(s => s.signal === 'AL').length;
+  const totalSat   = stocks.filter(s => s.signal === 'SAT').length;
+  document.getElementById('sumUpcoming').textContent = totalUpcoming;
+  document.getElementById('sumAl').textContent        = totalAl;
+  document.getElementById('sumSat').textContent       = totalSat;
+  document.getElementById('sumTotal').textContent     = stocks.length;
+
+  const container = document.getElementById('stocksContainer');
+  if (stocks.length === 0) {
+    container.innerHTML = '<div class="loading-msg">Temettü verisi bulunamadı.</div>';
+    return;
+  }
+
+  const filtered = stocks.filter(s => {
+    if (_filter === 'all') return true;
+    if (_filter === 'upcoming') return !!s.next_ex_date;
+    return s.signal === _filter;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="loading-msg">Bu filtreye uyan hisse bulunamadı.</div>';
+    return;
+  }
+
+  container.innerHTML = `<div class="stocks-grid">${filtered.map(s => `
+    <div class="stock-card sig-${sigClass(s.signal)}" data-ticker="${escapeHtml(s.ticker)}" onclick="window.location.href='/hisse/' + this.dataset.ticker" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='/hisse/'+this.dataset.ticker}" role="link" tabindex="0">
+      <div class="sc-top">
+        <a href="/hisse/${escapeHtml(s.ticker)}" class="sc-ticker-link" onclick="event.stopPropagation()">
+          <span class="sc-ticker">${escapeHtml(s.ticker)}${s.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="color:var(--bp-volume);font-size:11px;vertical-align:middle">⭐</span>' : ''}</span>
+        </a>
+        <span class="sig-badge sig-${sigClass(s.signal)}">${sigIcon(s.signal)} ${sigLabel(s.signal)}</span>
+      </div>
+      <div class="sc-name">${escapeHtml(s.name)}</div>
+      ${s.price ? `<div class="sc-price">${s.price.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2})} ₺</div>` : ''}
+      <div class="sc-date">💰 ${formatDividendInfo(s)}</div>
+      <a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener"
+         class="sc-kap" onclick="event.stopPropagation()">
+        📋 KAP bildirimleri ↗
+      </a>
+    </div>
+  `).join('')}</div>`;
+}
+
+async function load() {
+  try {
+    const res  = await fetch('/api/temettu-takvimi');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    _allData = data;
+    document.getElementById('lastUpdate').textContent = `Son güncelleme: ${data.updated_at || '—'}`;
+    render(data);
+  } catch(e) {
+    document.getElementById('stocksContainer').innerHTML =
+      '<div class="loading-msg">⚠️ Veriler yüklenemedi (' + e.message + '). <a href="." onclick="location.reload();return false" style="color:#58a6ff">Yenile</a></div>';
+    document.getElementById('lastUpdate').textContent = 'Yüklenemedi';
+  }
+}
+
+let _dtInterval = null;
+
+function _dtStartInterval() {
+  if (_dtInterval) return;
+  _dtInterval = setInterval(load, 1800000);
+}
+
+function _dtStopInterval() {
+  if (_dtInterval) {
+    clearInterval(_dtInterval);
+    _dtInterval = null;
+  }
+}
+
+load();
+// Her 30 dakika yenile (sekme arka plandayken duraklat, on plana donunce hemen yenile)
+_dtStartInterval();
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    _dtStopInterval();
+  } else {
+    load();
+    _dtStartInterval();
+  }
+});
+
+// Makro Ticker
+document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); });
+</script>
+<script src="/static/bp-search.js?v=62" defer></script>
+<script src="/static/js/bp-tooltip.js?v=4"></script>
+<script src="/static/stale-banner.js?v=ad6aaba3"></script>
+<script>bpStartDataQualityPolling();</script>
+{% include '_mobile_nav_partial.html' %}
+{% endblock %}

@@ -1,0 +1,140 @@
+/* ==== extracted from templates/bilanco_takvimi.html (T2.5) ==== */
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bp-bg); color:var(--bp-text);
+    font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh;
+    overflow-x:hidden;
+  }
+  header {
+    background:var(--bp-surface); border-bottom:1px solid var(--bp-border);
+    padding:14px 24px; display:flex; align-items:center; gap:16px;
+    position:sticky; top:0; z-index:var(--bp-z-dropdown);
+  }
+  .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
+  .page-sub   { font-size:var(--bp-text-base); color:#8b949e; }
+  .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:24px; }
+
+  /* Filter bar */
+  .filter-bar {
+    display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; align-items:center;
+  }
+  .filter-btn {
+    padding:6px 14px; border-radius:var(--bp-radius-20); border:1px solid var(--bp-border);
+    background:var(--bp-surface2); color:var(--bp-text2); cursor:pointer;
+    font-size:var(--bp-text-sm); font-weight:600; transition:all .15s; font-family:inherit;
+  }
+  .filter-btn:hover, .filter-btn.active { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
+  .filter-btn.fal.active   { border-color:var(--bp-al);  background:rgba(63,185,80,0.12);  color:var(--bp-al); }
+  .filter-btn.fsat.active  { border-color:var(--bp-sat); background:rgba(var(--bp-sat-rgb),0.12);  color:var(--bp-sat); }
+  .filter-btn.fbkl.active  { border-color:var(--bp-bkl); background:rgba(139,148,158,0.12);color:var(--bp-bkl);}
+
+  /* Period section */
+  .period-section { margin-bottom:32px; }
+  .period-header {
+    display:flex; align-items:center; gap:12px; margin-bottom:14px;
+    padding:14px 18px; border-radius:var(--bp-radius-lg);
+    background:var(--bp-surface); border:1px solid var(--bp-border);
+  }
+  .period-header.current-period {
+    background:rgba(59,130,246,0.08); border-color:rgba(59,130,246,0.25);
+  }
+  .period-badge {
+    font-size:var(--bp-text-xs); font-weight:700; padding:2px 10px; border-radius:var(--bp-radius-lg);
+    text-transform:uppercase; letter-spacing:.4px;
+  }
+  .badge-current { background:rgba(59,130,246,0.2); color:#93c5fd; }
+  .badge-upcoming { background:rgba(139,148,158,0.15); color:#8b949e; }
+  .period-label { font-size:var(--bp-text-lg); font-weight:700; color:#f0f6fc; }
+  .period-dates { font-size:var(--bp-text-sm); color:var(--bp-text3); }
+  .period-desc  { font-size:var(--bp-text-sm); color:var(--bp-text2); margin-left:auto; }
+
+  /* Stock cards grid */
+  .stocks-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px;
+  }
+  .stock-card {
+    background:var(--bp-surface); border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius-lg); padding:12px 14px;
+    text-decoration:none; color:inherit;
+    transition:border-color .15s, transform .1s;
+    display:block;
+    min-width:0;
+  }
+  .stock-card:hover { border-color:var(--bp-brand); transform:translateY(-1px); }
+  .stock-card.sig-al  { border-color:rgba(63,185,80,0.3); background:rgba(63,185,80,0.05); }
+  .stock-card.sig-sat { border-color:rgba(var(--bp-sat-rgb),0.3); background:rgba(var(--bp-sat-rgb),0.05); }
+
+  .sc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .sc-ticker { font-size:var(--bp-text-md); font-weight:700; color:#f0f6fc; }
+  .sig-badge {
+    font-size:var(--bp-text-2xs); font-weight:700; padding:2px 7px; border-radius:var(--bp-radius-md);
+    text-transform:uppercase; letter-spacing:.3px;
+  }
+  .sig-al   { background:rgba(63,185,80,0.15);  color:var(--bp-al);  border:1px solid rgba(63,185,80,0.3); }
+  .sig-sat  { background:rgba(var(--bp-sat-rgb),0.15);  color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),0.3); }
+  .sig-bkl  { background:rgba(139,148,158,0.1); color:var(--bp-bkl); border:1px solid rgba(139,148,158,0.2); }
+
+  .sc-name  { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sc-price { font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text2); }
+  .sc-date  { font-size:var(--bp-text-2xs); color:var(--bp-text3); margin-top:4px; }
+  .sc-kap   {
+    display:inline-flex; align-items:center; gap:4px; margin-top:6px;
+    font-size:var(--bp-text-2xs); color:var(--bp-brand); text-decoration:none;
+    background:rgba(59,130,246,0.08); padding:2px 7px; border-radius:var(--bp-radius);
+    border:1px solid rgba(59,130,246,0.15);
+    min-height:44px; /* r110 bug-hunt: 20.5px idi, WCAG 2.5.5 dokunma hedefi altinda (214 kart) */
+  }
+  .sc-kap:hover { background:rgba(59,130,246,0.15); }
+
+  /* Summary row */
+  .summary-row {
+    display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px;
+  }
+  .sum-chip {
+    background:var(--bp-surface); border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius-md); padding:10px 16px; text-align:center;
+    flex:1; min-width:110px;
+  }
+  .sum-num  { font-size:var(--bp-text-22); font-weight:800; }
+  .sum-lbl  { font-size:var(--bp-text-xs); color:#8b949e; text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
+
+  /* Info banner */
+  .info-banner {
+    background:rgba(var(--bp-gold-rgb),0.08); border:1px solid rgba(var(--bp-gold-rgb),0.2);
+    border-radius:var(--bp-radius-lg); padding:12px 16px; margin-bottom:20px;
+    font-size:var(--bp-text-sm); color:#fbbf24; line-height:1.6;
+  }
+
+  .loading-msg { text-align:center; padding:60px; color:var(--bp-text3); font-size:var(--bp-text-lg); }
+
+  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
+  footer a { color:#8b949e; text-decoration:none; }
+
+  @media(max-width:600px) {
+    .container{padding:12px;}
+    .stocks-grid{grid-template-columns:1fr 1fr;}
+    .period-desc{display:none;}
+  }
+
+  /* Makro Ticker */
+  .macro-bar{background:var(--bp-bg);border-bottom:1px solid var(--bp-border);height:32px;overflow:hidden;position:relative;white-space:nowrap;}
+  .macro-bar::before,.macro-bar::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised);}
+  .macro-bar::before{left:0;background:linear-gradient(to right,var(--bp-bg),transparent);}
+  .macro-bar::after{right:0;background:linear-gradient(to left,var(--bp-bg),transparent);}
+  .macro-track{display:inline-flex;align-items:center;animation:macroScroll 40s linear infinite;will-change:transform;height:32px;}
+  .macro-bar:hover .macro-track{animation-play-state:paused;}
+  @keyframes macroScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
+  .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
+  .macro-item{display:inline-flex;align-items:center;gap:7px;padding:0 18px;border-right:1px solid var(--bp-border);font-size:var(--bp-text-xs);height:32px;}
+  .macro-item-lbl{font-weight:600;color:#cbd5e1;}
+  .mc-pos{color:var(--bp-al);}.mc-neg{color:var(--bp-sat);}.mc-neu{color:#8b949e;}
+
+  .stock-card { cursor: pointer; }
+  .stock-card:focus { outline: 2px solid #58a6ff; outline-offset: 2px; }
+  .sc-ticker-link { text-decoration: none; color: inherit; }
+  .sc-ticker-link:hover .sc-ticker { color: #58a6ff; }
+
