@@ -1659,6 +1659,28 @@ BorsaPusula'nın sinyalleri, Supertrend çizgisini dinamik destek/direnç olarak
 
 Bu yaklaşım, klasik statik destek/direnç yerine piyasanın volatilitesine otomatik adapte olur.
 
+## Neden Bazı Seviyeler Sürekli Tutunur? (Psikoloji)
+
+Destek ve direncin işe yaramasının nedeni sadece rakamlar değil, kendi kendini doğrulayan bir yatırımcı psikolojisidir. Bir hisse belirli bir seviyeden daha önce sert şekilde dönmüşse, yatırımcılar bu seviyeyi hatırlar ve fiyat tekrar oraya yaklaştığında aynı davranışı sergiler: aynı bölgede alım veya satım emri verirler. Bu toplu hafıza, seviyeyi teknik bir zorunluluk olmasa bile güçlü kılar.
+
+## Trend Çizgileri: Dinamik Destek ve Direnç
+
+Yatay seviyelerin yanında, eğik **trend çizgileri** de dinamik destek/direnç görevi görür:
+
+- **Yükselen trendde:** Ardışık dip noktalarını birleştiren çizgi **dinamik destek** oluşturur.
+- **Düşen trendde:** Ardışık zirve noktalarını birleştiren çizgi **dinamik direnç** oluşturur.
+- İki paralel trend çizgisi birlikte çizildiğinde bir **kanal** oluşur; fiyat genellikle bu kanalın içinde hareket eder.
+
+## Fibonacci ve Konfluence (Çakışma)
+
+Fibonacci geri çekilme seviyelerinde en çok izlenen oranlar **%38.2**, **%50** ve **%61.8**'dir. Bu seviyeler tek başına destek/direnç işlevi görebilir, ancak asıl güç **konfluence (çakışma)** durumunda ortaya çıkar: bir Fibonacci seviyesi, EMA200 gibi bir hareketli ortalama ve önceki bir yatay destek/direnç aynı fiyat bölgesinde üst üste bindiğinde, o seviye çok daha güvenilir hale gelir.
+
+## Kırılım Sonrası Retest (Geri Test)
+
+Bir destek veya direnç kırıldıktan sonra fiyat çoğu zaman kırılan seviyeye geri döner ve buradan tepki verir; buna **retest (geri test)** denir. Retest'in başarılı olması — kırılan direncin artık destek, kırılan desteğin artık direnç olarak tutması — kırılımı teyit eder ve daha güvenli bir giriş noktası sunar.
+
+Not: Bir seviye ne kadar çok test edilirse o kadar güçlenir, ama bu aynı zamanda kırılma riskini de artırır — 3-4. dokunuşta gerçekleşen kırılımlar genellikle daha sert ve hızlı olur.
+
 ## Yaygın Hatalar
 
 ❌ **Tek bir çizgi olarak düşünmek** — Destek/direnç bir çizgi değil, bir *bölge*dir. ±%1-2 tolerans bırakın.
@@ -6648,6 +6670,14 @@ ROA = Net Kâr / Toplam Aktifler × 100
 
 <h2>BorsaPusula ile Sektör Rotasyonu</h2>
 <p>BorsaPusula ana sayfasındaki sektör filtresi, belirli bir sektördeki tüm hisselerin sinyal durumunu tek seferde görmenizi sağlar. Bir sektörde AL sinyalleri yoğunlaşıyorsa sektörel momentum güçleniyor demektir. Birden fazla sektörü karşılaştırarak hangi sektörün sinyal kalitesinin daha güçlü olduğunu analiz edebilirsiniz.</p>
+
+<h2>Sektöre Özel Takip Edilecek Göstergeler</h2>
+<p>Rotasyon kararını güçlendirmek için bazı sektörlerde ek göstergelere bakmak faydalıdır:</p>
+<ul>
+  <li><strong>GYO (Gayrimenkul Yatırım Ortaklıkları):</strong> Yüksek enflasyon döneminde gayrimenkul değer kazanır, bu da GYO hisselerini avantajlı konuma taşır. Ancak faiz artışları GYO değerlemelerini baskılar — net etki enflasyon-faiz dengesine bağlıdır.</li>
+  <li><strong>Bankacılık:</strong> Sektör rotasyonunda bankacılığı değerlendirirken Net Faiz Marjı (NIM) ve kredi büyüme oranı en somut iki göstergedir. NIM genişliyor ve kredi büyümesi hızlanıyorsa sektör lehine bir sinyal oluşur; tersi durumda dikkatli olunmalıdır.</li>
+  <li><strong>Sektör ETF alternatifi:</strong> BIST'te sektörel ETF seçeneği sınırlıdır. Bu nedenle çoğu yatırımcı doğrudan sektör ETF'i almak yerine, ilgili sektördeki lider hisselere küçük pozisyonlar dağıtarak fiilen sektör rotasyonu uygular.</li>
+</ul>
 """,
     "faqs": [
       {"q": "Sektör rotasyonu bireysel yatırımcı için uygun mu?",
@@ -6914,6 +6944,22 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>BorsaPusula'nın haber ve bilanço takvim sayfasını güncel tutun</li>
 </ul>
 <p>Önemli not: KAP bildirimleri resmi kaynak olmakla birlikte yorumlanması zaman ve deneyim gerektirir. Olumlu görünen bir açıklama beklentilerle kıyaslandığında hayal kırıklığı yaratabilir; olumsuz görünen bir açıklama bazen çoktan fiyatlanmış olabilir. Bildirim + piyasa beklentisi + teknik görünüm üçgenine bakmak en sağlıklı yaklaşımdır.</p>
+
+<h2>KAP Bildirimi ve Teknik Sinyalin Birleşimi</h2>
+<p>Bir hissede AL sinyali ile güçlü bir KAP bildirimi (örneğin büyük bir sözleşme kazanımı) aynı anda gerçekleştiğinde, bu genellikle güçlü bir katalizör oluşturur — teknik görünüm ile temel haber akışı aynı yönde birleşir. BorsaPusula hisse sayfasındaki "KAP Bildirimleri" sekmesi son 90 günün bildirimlerini listeler; "Sinyalin Hikayesi" bölümünde ise sinyal tarihi etrafında yayımlanan KAP bildirimleri birlikte gösterilir, böylece bir sinyalin arkasında haber akışı olup olmadığını görebilirsiniz.</p>
+<p><strong>Sık yapılan hatalar:</strong></p>
+<ul>
+  <li>KAP bildirimi çıkar çıkmaz panikle işlem yapmak — haber çoğu zaman piyasa tarafından zaten fiyatlanmıştır.</li>
+  <li>Her finansal rapor veya sözleşme bildirimini otomatik olarak olumlu saymak.</li>
+  <li>KAP bildirimine güvenip teknik sinyali göz ardı etmek.</li>
+</ul>
+<p>Bir özel durum açıklamasının (ÖDA) gerçek önemini değerlendirmek için şu dört soruyu sormak faydalıdır:</p>
+<ul>
+  <li><strong>Büyüklük:</strong> Açıklanan tutar şirketin yıllık cirosuna oranla ne kadar büyük?</li>
+  <li><strong>Yinelenebilirlik:</strong> Bu tek seferlik bir gelişme mi yoksa tekrarlanabilir bir kazanç kaynağı mı?</li>
+  <li><strong>Piyasanın beklentisi:</strong> Bu haber zaten fiyatlanmış mıydı, yoksa gerçek bir sürpriz mi?</li>
+  <li><strong>Teknik sinyal ile uyum:</strong> Haber, mevcut teknik sinyal yönüyle aynı doğrultuda mı?</li>
+</ul>
 """,
     "faqs": [
       {"q": "KAP'a nasıl ulaşılır?",
@@ -6975,6 +7021,26 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Ortalama günlük işlem hacmi düşük olan hisseler için hacim analizi daha az güvenilirdir — birkaç büyük emir hacmi manipüle edebilir</li>
 </ul>
 <p>BorsaPusula sinyalleri, hacim verilerini otomatik olarak değerlendirir. AL sinyallerinin hacimsiz kırılım dönemlerinde değil güçlü hacimlerin eşliğinde oluşması, sinyal güvenilirliğini artıran faktörler arasında yer alır.</p>
+
+<h2>Chaikin Money Flow (CMF) ile Para Akışını Ölçmek</h2>
+<p>Chaikin Money Flow (CMF), belirli bir dönemdeki (genellikle 20 gün) kapanış fiyatının mum aralığındaki konumunu hacimle ağırlıklandırarak alım-satım baskısını tek bir çizgide özetler. -1 ile +1 arasında salınır:</p>
+<ul>
+  <li><strong>+0.25 üzeri:</strong> Güçlü alım baskısı — fiyat mumların üst kısımlarında kapanıyor ve hacim bunu destekliyor.</li>
+  <li><strong>-0.25 altı:</strong> Güçlü satım baskısı — kapanışlar mumların alt kısımlarında ve hacim satış tarafında yoğunlaşıyor.</li>
+  <li>Bu iki eşik arasındaki bölge genellikle kararsız/dengeli para akışı olarak yorumlanır.</li>
+</ul>
+<p>CMF'nin OBV'den farkı, sadece kapanışın önceki kapanışa göre yönüne değil, kapanışın günün range'i içindeki konumuna bakmasıdır — bu da fitili uzun günlerde daha hassas bir okuma sağlar.</p>
+
+<h2>BorsaPusula'da Hacim Profili ve Teyit Rozetleri</h2>
+<p>BorsaPusula hisse sayfalarındaki "Hacim Profili" bölümü, güncel hacmi tarihsel ortalamayla otomatik olarak kıyaslar ve sinyalin hacim tarafından desteklenip desteklenmediğini görsel olarak özetler. Bir sinyal güçlü hacimle örtüştüğünde sayfada <strong>"⭐ Hacim Onaylı"</strong> rozeti, daha ölçülü ama yine de yeterli katılım görüldüğünde <strong>"✓ TEYİTLİ"</strong> rozeti görünür. Bu rozetler, kullanıcıların hacim tablolarını tek tek incelemeden sinyal kalitesini hızlıca değerlendirmesini sağlar.</p>
+
+<h2>MACD Kesişimi ve Hacim Teyidini Birlikte Okumak</h2>
+<p>MACD kesişimleri (MACD çizgisinin sinyal çizgisini yukarı veya aşağı kesmesi) tek başına değerlendirildiğinde yanıltıcı olabilir; hacimle birlikte okunduğunda güvenilirliği belirgin şekilde artar:</p>
+<ul>
+  <li><strong>MACD kesişti + hacim arttı:</strong> Güçlü sinyal — momentum değişimi geniş katılımla destekleniyor.</li>
+  <li><strong>MACD kesişti ama hacim yok:</strong> Sahte sinyal riski yüksektir — kesişim teknik olarak gerçekleşmiş olsa da arkasında yeterli işlem hacmi olmadığından kısa sürede geri dönebilir.</li>
+</ul>
+<p>Bu nedenle MACD sinyallerini değerlendirirken CMF ve Hacim Profili'ne birlikte bakmak, tek göstergeye dayanan yorumdan daha sağlam bir tablo ortaya koyar.</p>
 """,
     "faqs": [
       {"q": "Hacim ne kadar yüksek olursa kırılım o kadar güçlü müdür?",
@@ -7085,6 +7151,12 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p><strong>Gece Yıldızı (Evening Star):</strong> Sabah yıldızının tersi. Yükselen trend → büyük yeşil mum → küçük gövdeli belirsizlik → büyük kırmızı mum. Tepe dönüş sinyali.</p>
 <p><strong>Üç Karga (Three Black Crows):</strong> Üst üste üç düşük kapanışlı büyük kırmızı mum. Güçlü düşüş trendi başlangıcı.</p>
 <p><strong>Üç Asker (Three White Soldiers):</strong> Üst üste üç yüksek kapanışlı büyük yeşil mum. Güçlü yükseliş başlangıcı.</p>
+
+<h2>Diğer Önemli Mum Formasyonları</h2>
+<p><strong>Karanlık Bulut Örtüsü (Dark Cloud Cover):</strong> İki mumluk bir yükseliş dönüş formasyonudur. Güçlü bir yeşil mumun ardından, önceki mumun üzerinde açılıp gövdenin ortasının altında kapanan bir kırmızı mum gelir. Alıcı hakimiyetinin aniden satıcılara geçtiğini gösterir.</p>
+<p><strong>Marubozu:</strong> Fitilsiz veya çok kısa fitilli, güçlü ve kararlı bir mumdur. Yeşil marubozu alıcıların tam hakimiyetine, kırmızı marubozu ise satıcıların tam hakimiyetine işaret eder ve genellikle trendin aynı yönde devam edeceğine dair güçlü bir sinyal verir.</p>
+<p><strong>Spinning Top (Topaç):</strong> Küçük gövde ve her iki yönde uzun fitilden oluşur. Alıcı ile satıcı arasındaki dengeyi ve piyasadaki kararsızlığı yansıtır; doji gibi kesin bir yön belirtmez ama dikkatli izlenmesi gereken bir sinyaldir.</p>
+<p>İstatistiksel olarak, bir dönüş formasyonu yüksek işlem hacmiyle birlikte oluştuğunda güvenilirliği yaklaşık iki katına çıkar — bu nedenle hacim teyidi, formasyon yorumlamasının ayrılmaz bir parçası olmalıdır.</p>
 
 <h2>Mum Formasyonlarını Doğru Kullanmak</h2>
 <p>Mum formasyonları tek başına yeterli değildir. Güvenilirliği artırmak için:</p>
