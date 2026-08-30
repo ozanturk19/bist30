@@ -676,8 +676,15 @@
     </div>
   </div>
 
+  <details class="bp-detail-toggle" id="ozetDetailToggle" data-tab-content="ozet">
+    <summary class="bp-detail-toggle-summary">
+      <span class="bp-detail-toggle-label"><span aria-hidden="true">📊</span> Detaylı Analiz</span>
+      <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
+    </summary>
+    <div class="bp-detail-toggle-body">
+
   <!-- İndikatörler -->
-  <div class="indicators-section" data-tab-content="ozet">
+  <div class="indicators-section">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
       <div style="display:flex;gap:6px;align-items:center">
@@ -704,7 +711,7 @@
   </div>
 
   <!-- Çoklu Zaman Dilimi -->
-  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px" id="mtfSection" data-tab-content="ozet">
+  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px" id="mtfSection">
     <h2 class="section-title" style="margin-bottom:12px">⏱️ Çoklu Zaman Dilimi</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px" id="mtfGrid">
       <div style="color:var(--bp-text3);font-size:var(--bp-text-base);grid-column:1/-1">Yükleniyor…</div>
@@ -712,7 +719,7 @@
   </div>
 
   <!-- Sinyal Mini İstatistik Satırı -->
-  <div class="sig-stats-row" id="sigMiniStats" data-tab-content="ozet">
+  <div class="sig-stats-row" id="sigMiniStats">
     <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:36px;margin:auto"></div><div class="sig-stat-lbl">Toplam Sinyal</div></div>
     <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▲ Güçlü Trend</div></div>
     <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Trend Bozuldu</div></div>
@@ -720,7 +727,7 @@
   </div>
 
   <!-- Sinyal Geçmişi -->
-  <div class="history-section" data-tab-content="ozet">
+  <div class="history-section">
     <h2 class="section-title">Sinyal Geçmişi
       <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:400;margin-left:8px">Getiri = sonraki sinyal kapanışına kadar</span>
     </h2>
@@ -742,7 +749,7 @@
   </div>
 
   <!-- Temel Analiz -->
-  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);overflow:hidden;margin-bottom:20px" id="fundSection" data-tab-content="ozet">
+  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);overflow:hidden;margin-bottom:20px" id="fundSection">
     <div style="padding:12px 18px;border-bottom:1px solid var(--bp-surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> Temel Analiz</h2>
       <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">yfinance · 4 saatlik cache</span>
@@ -772,7 +779,7 @@
   <!-- Geçmiş Sinyal Performansı — CPO-1107 madde 3: artık aynı sinyal geçmişi
        listesinden (signal_history) hesaplanır; ayrı/bayat backtest cache'i
        kullanmaz, böylece "Toplam Sinyal" tablosuyla aynı kaynağa dayanır. -->
-  <div id="sigPerfBox" data-tab-content="ozet" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px">
+  <div id="sigPerfBox" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📊</span> Geçmiş Sinyal Performansı</h2>
       <a href="/sinyal-performans" style="font-size:var(--bp-text-xs);color:var(--bp-brand);text-decoration:none;font-weight:600">Tüm backtest <span aria-hidden="true">→</span></a>
@@ -793,6 +800,9 @@
     </div>
     <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal ve SAT sinyalleri hariç, yalnızca AL sinyalleri · <span aria-hidden="true">⚠️</span> Geçmiş performans gelecek garantisi değildir</div>
   </div>
+
+    </div>
+  </details>
 
   <!-- SPEC-017 v2 Faz A c3 — Özet sonu "Detay için" CTA (3 tab) -->
   <div data-tab-content="ozet" class="bp-detail-cta-wrap">
@@ -2474,7 +2484,10 @@ async function loadSignalStory() {
     }).join('');
 
     list.querySelector('div:last-child')?.style?.setProperty('border-bottom', 'none');
-    sec.style.display = '';
+    /* CPO-DEV2-098: sec.style.display='' BURADA KALDIRILDI - applyTab()'in
+       data-tab-content="haberler" gorunurluk yonetimini eziyordu (Özet
+       sekmesindeyken bile async yuklenince storySection aciliyordu). Veri DOM'a
+       yazildi, gorunurluk applyTab()'e birakiliyor. */
   } catch(e) { /* sessiz hata */ }
 }
 
