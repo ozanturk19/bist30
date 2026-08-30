@@ -254,6 +254,7 @@
     border-radius:var(--bp-radius-lg);
     overflow: hidden;
     margin-bottom: 20px;
+    box-shadow: var(--bp-shadow-sm);
   }
 
   .chart-header {
@@ -288,7 +289,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   #chartsInner { display: none; }
-  #chartMain   { height: 340px; }
+  #chartMain   { height: 340px; margin: 8px 14px 10px; }
 
   /* ── 52 Haftalık Bar ── */
   .week52-bar {
@@ -871,7 +872,7 @@
     .signal-badge  { font-size: var(--bp-text-xs); padding: 3px 7px; }
     #liveTs        { display: none; }
     .container { padding: 10px 12px; }
-    #chartMain    { height: 240px; }
+    #chartMain    { height: 224px; margin: 6px 10px 8px; }
     #chartLoading { height: 280px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
     .chart-section { overflow: hidden; }

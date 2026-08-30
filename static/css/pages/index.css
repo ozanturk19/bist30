@@ -1043,6 +1043,7 @@
     border-radius:var(--bp-radius-lg);
     overflow: hidden;
     margin-bottom: 16px;
+    box-shadow: var(--bp-shadow-sm);
   }
   .chart-acc-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -1073,15 +1074,16 @@
   .chart-acc-body.open {
     display: flex;
     align-items: stretch;
-    height: 262px;   /* chart 258px + charts-wrap padding 4px */
+    height: 276px;   /* chart 258px + #chartMain nefes-payi margin 14px + charts-wrap padding 4px */
     overflow: hidden;
   }
 
-  /* Sol: grafik kolonu */
+  /* CPO-DEV2-096: eskiden #chartCol tek cocuktu ama flex:0 0 62% ile
+     genisligin %38'i kullanilmadan bos kaliyordu (kardes kolon T4/redesign
+     sirasinda kaldirilmis, bu kisitlama artik-kalinti idi) - tam genislik. */
   #chartCol {
-    flex: 0 0 62%; max-width: 62%;
+    flex: 1 1 100%; max-width: 100%;
     display: flex; flex-direction: column;
-    border-right: 1px solid var(--bp-border);
     min-width: 0;
   }
   .charts-wrap {
@@ -1091,11 +1093,11 @@
     min-width: 0;
   }
   .chart-pane  { position: relative; flex: 1; min-height: 0; }
-  #chartMain   { height: 258px; }
+  #chartMain   { height: 258px; margin: 6px 12px 8px; }
 
   .chart-loading {
     display: flex; align-items: center; justify-content: center;
-    height: 258px; color: #8b949e; font-size: var(--bp-text-base); gap: 10px;
+    height: 276px; color: #8b949e; font-size: var(--bp-text-base); gap: 10px;
   }
 
   /* Sağ: öne çıkanlar paneli — 2 kolon yan yana */
@@ -1438,10 +1440,10 @@
     .ec-inds { display: none; }
     /* Accordion body — mobilde dikey */
     .chart-acc-body.open { flex-direction: column; height: auto; overflow: visible; }
-    #chartCol { flex: none !important; max-width: 100% !important; width: 100%; border-right: none; border-bottom: 1px solid var(--bp-border); }
+    #chartCol { flex: none !important; max-width: 100% !important; width: 100%; }
     .charts-wrap { padding: 4px 12px 8px; }
-    #chartMain { height: 250px; }
-    .chart-loading { height: 250px; }
+    #chartMain { height: 232px; margin: 4px 10px 6px; }
+    .chart-loading { height: 232px; }
     .hp-twin { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .hp-section { flex: 0 0 140px; min-width: 0; padding: 8px 10px; overflow-y: visible; }
     .hp-section-r { border-left: 1px solid var(--bp-border); }

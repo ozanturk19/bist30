@@ -1400,20 +1400,6 @@ function shareSignal(platform) {
   }
 }
 
-function getBaseOpts() {
-  return {
-    layout:          { background: { color: '#141416' }, textColor: '#909097' },
-    grid:            { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
-    crosshair:       { mode: LC.CrosshairMode.Normal, vertLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 }, horzLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 } },
-    rightPriceScale: { borderColor: 'rgba(48,54,61,0.6)', scaleMargins: { top: 0.08, bottom: 0.08 } },
-    handleScroll: true, handleScale: true,
-    localization: {
-      locale: 'tr-TR',
-      priceFormatter: v => (+v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-    },
-  };
-}
-
 /* ── Grafik kurulumu ─────────────────────────────────── */
 function buildChart(d) {
   document.getElementById('chartLoading').style.display = 'none';
@@ -1443,10 +1429,19 @@ function buildChart(d) {
     if (type === 2) return (_MTHS[mo] || '') + ' ' + dy;
     return '';
   }
+  /* Kısa "10 Nis '25" biçimi — EMA legend'in eski date-label'ı ve yeni OHLC
+     tooltip'i AYNI biçimi kullanır (r137 öncesi de bu sıradaydı). */
+  function _fmtDateShort(idx) {
+    var raw = _idxToDay[Math.round(+idx)];
+    if (!raw) return '';
+    var pts = raw.split('-');
+    return (+pts[2]) + ' ' + (_MTHS[+pts[1]-1] || '') + " '" + pts[0].slice(2);
+  }
   d = Object.assign({}, d, {
-    ohlc:  d.ohlc.map(function(b, i){ return Object.assign({}, b, {time: i}); }),
-    ema12: d.ema12.map(function(p){ var i = _dayToIdx[p.time]; return i !== undefined ? Object.assign({}, p, {time: i}) : null; }).filter(Boolean),
-    ema99: d.ema99.map(function(p){ var i = _dayToIdx[p.time]; return i !== undefined ? Object.assign({}, p, {time: i}) : null; }).filter(Boolean)
+    ohlc:   d.ohlc.map(function(b, i){ return Object.assign({}, b, {time: i}); }),
+    ema12:  d.ema12.map(function(p){ var i = _dayToIdx[p.time]; return i !== undefined ? Object.assign({}, p, {time: i}) : null; }).filter(Boolean),
+    ema99:  d.ema99.map(function(p){ var i = _dayToIdx[p.time]; return i !== undefined ? Object.assign({}, p, {time: i}) : null; }).filter(Boolean),
+    volume: (d.volume || []).map(function(v){ var i = _dayToIdx[v.time]; return i !== undefined ? Object.assign({}, v, {time: i}) : null; }).filter(Boolean)
   });
 
   const elMain   = document.getElementById('chartMain');
@@ -1454,12 +1449,12 @@ function buildChart(d) {
   const chartW   = elMain.clientWidth || elMain.parentElement.clientWidth || 900;
 
   const chart = LC.createChart(elMain, {
-    ...getBaseOpts(),
+    ...BPChart.baseOpts(LC, true),
     width:     chartW,
     height:    isMobile ? 240 : 340,
     timeScale: { borderColor: '#2a2a2c', timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmtIdx },
     /* G26: sequential index time → crosshair x-label shows Unix epoch "01 Oca '70".
-       labelVisible:false hides the erroneous label; date shown in EMA legend instead. */
+       labelVisible:false hides the erroneous label; date shown in EMA legend + tooltip instead. */
     crosshair: { mode: LC.CrosshairMode.Normal, vertLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0, labelVisible: false }, horzLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 } },
   });
 
@@ -1477,73 +1472,18 @@ function buildChart(d) {
     document.getElementById('week52Bar').style.display = '';
   }
 
-  /* EMA fill primitive */
-  class EmaFill {
-    constructor(chart, e12data, e99data, bc, rc) {
-      this._chart = chart;
-      this._e12   = Object.fromEntries(e12data.map(p => [p.time, p.value]));
-      this._e99   = Object.fromEntries(e99data.map(p => [p.time, p.value]));
-      this._times = e12data.filter(p => this._e99[p.time] !== undefined).map(p => p.time);
-      this._bc = bc; this._rc = rc; this._series = null;
-    }
-    attached({ series }) { this._series = series; }
-    detached()           { this._series = null; }
-    updateAllViews() {}
-    paneViews() {
-      const self = this;
-      return [{
-        renderer() {
-          return {
-            draw(target) {
-              if (!self._series) return;
-              target.useBitmapCoordinateSpace(sc => {
-                const ctx = sc.context;
-                const hr  = sc.horizontalPixelRatio;
-                const vr  = sc.verticalPixelRatio;
-                const ts  = self._chart.timeScale();
-                const p1 = [], p2 = [];
-                for (const t of self._times) {
-                  const x  = ts.timeToCoordinate(t);
-                  const y1 = self._series.priceToCoordinate(self._e12[t]);
-                  const y2 = self._series.priceToCoordinate(self._e99[t]);
-                  if (x == null || y1 == null || y2 == null) continue;
-                  p1.push({ x: x*hr, y: y1*vr, v: self._e12[t] });
-                  p2.push({ x: x*hr, y: y2*vr, v: self._e99[t] });
-                }
-                if (p1.length < 2) return;
-                ctx.save();
-                for (let i = 1; i < p1.length; i++) {
-                  const a1=p1[i-1], b1=p1[i], a2=p2[i-1], b2=p2[i];
-                  ctx.fillStyle = b1.v > b2.v ? self._bc : self._rc;
-                  ctx.beginPath();
-                  ctx.moveTo(a1.x,a1.y); ctx.lineTo(b1.x,b1.y);
-                  ctx.lineTo(b2.x,b2.y); ctx.lineTo(a2.x,a2.y);
-                  ctx.closePath(); ctx.fill();
-                }
-                ctx.restore();
-              });
-            }
-          };
-        }
-      }];
-    }
-  }
+  /* EMA12/EMA99 çizgileri + bull/bear dolgu primitive — bp-chart-common.js (BPChart.addEmaPair) */
+  const emaPair = BPChart.addEmaPair(chart, d.ema12, d.ema99);
+  const e12 = emaPair.e12, e99 = emaPair.e99;
 
-  const e99 = chart.addLineSeries({ color: '#e3b341', lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false });
-  e99.setData(d.ema99);
-
-  const e12 = chart.addLineSeries({ color: '#b8c3ff', lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false });
-  e12.setData(d.ema12);
-  e12.attachPrimitive(new EmaFill(chart, d.ema12, d.ema99,
-    'rgba(0,226,144,0.13)', 'rgba(248,81,73,0.11)'));
-
-  const candle = chart.addCandlestickSeries({
-    upColor: '#00e290', downColor: '#f85149',
-    borderUpColor: '#00e290', borderDownColor: '#f85149',
-    wickUpColor:   '#00e290', wickDownColor:   '#f85149',
-    priceLineVisible: false, lastValueVisible: true,
-  });
+  const candle = BPChart.addCandleSeries(chart);
   candle.setData(d.ohlc);
+
+  /* CPO-DEV2-096: hacim subplot — backend zaten renklendirilmis {time,value,color}
+     donduruyordu, hic tuketilmiyordu. Sequential index'e reindex edilmis (yukarida). */
+  if (d.volume && d.volume.length) {
+    BPChart.addVolumeSeries(chart).setData(d.volume);
+  }
 
   /* EMA legend */
   const legEl = document.getElementById('emaLegend');
@@ -1561,36 +1501,16 @@ function buildChart(d) {
   }
   updateLeg();
 
-  /* G26-followup: labelFormatter v4.1.3'te yok → floating div x-ekseninde tarih göster */
-  const _chDateLbl = document.createElement('div');
-  _chDateLbl.style.cssText = 'position:absolute;bottom:0;transform:translateX(-50%);' +
-    'background:var(--bp-brand);color:#1c2128;font-size:11px;font-weight:600;' +
-    'padding:1px 5px;border-radius:2px;pointer-events:none;display:none;white-space:nowrap;z-index:var(--bp-z-chart-date-label)';
-  elMain.style.position = 'relative';
-  elMain.appendChild(_chDateLbl);
-
   chart.subscribeCrosshairMove(p => {
     /* G26: p.time==0 falsy ama geçerli idx — null/undefined ile karşılaştır */
-    if (p?.time == null) { updateLeg(); _chDateLbl.style.display = 'none'; return; }
-    const raw = _idxToDay[Math.round(+p.time)];
-    var fmtDate = '';
-    if (raw) {
-      var pts = raw.split('-');
-      fmtDate = (+pts[2]) + ' ' + (_MTHS[+pts[1]-1] || '') + " '" + pts[0].slice(2);
-    }
-    updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value, fmtDate);
-    if (fmtDate && p.point?.x != null) {
-      _chDateLbl.textContent = fmtDate;
-      _chDateLbl.style.display = 'block';
-      /* r137: sag kenara yakinken .chart-section'in overflow:hidden'i etiketi
-         kirpiyordu (kanit dogrulandi) - konteyner sinirlari icinde kelepcele */
-      const _half = (_chDateLbl.offsetWidth / 2) || 30;
-      const _x = Math.min(Math.max(p.point.x, _half), elMain.clientWidth - _half);
-      _chDateLbl.style.left = _x + 'px';
-    } else {
-      _chDateLbl.style.display = 'none';
-    }
+    if (p?.time == null) { updateLeg(); return; }
+    updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value, _fmtDateShort(p.time));
   });
+
+  /* CPO-DEV2-096: OHLC hover tooltip — eskiden yalnizca alt-kenarda tarih etiketi vardi,
+     acilis/yuksek/dusuk/kapanis hicbir yerde okunmuyordu. Eski _chDateLbl mekanizmasi
+     bunun yerine gecti (tarih artik tooltip icinde, legend'deki datePart ile birlikte). */
+  BPChart.attachOhlcTooltip(chart, candle, elMain, (time) => _fmtDateShort(time));
 
   /* Son 1 yılı göster + sağda 10 boş bar boşluk
      NOT: setVisibleLogicalRange kullanıyoruz çünkü setVisibleRange rightOffset'i eziyor */
@@ -2863,6 +2783,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script src="/static/bp-search.js?v=62" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
+<script src="/static/js/bp-chart-common.js?v=1"></script>
 <script src="/static/learning-mode.js?v=5" defer></script>
 
 <script>

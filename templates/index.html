@@ -963,35 +963,8 @@ function _loadChartLib() {
   });
 }
 
-function getBaseOpts() {
-  return {
-    layout:          { background: { color: '#141416' }, textColor: '#909097' },
-    grid:            { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
-    crosshair:       { mode: LC.CrosshairMode.Normal },
-    rightPriceScale: { borderColor: '#30363d' },
-    handleScroll:    true,
-    handleScale:     true,
-  };
-}
-
-/* Grafik eksen label formatı: "10" → "Nis 10", crosshair'de "00:00:00" kalkıyor */
-const _MTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-function _tickFmt(time, type) {
-  let yr, mo, dy;
-  if (typeof time === 'string') {
-    const p = time.split('-');
-    yr = +p[0]; mo = +p[1] - 1; dy = +p[2];
-  } else if (typeof time === 'number') {
-    const d = new Date(time * 1000);
-    yr = d.getUTCFullYear(); mo = d.getUTCMonth(); dy = d.getUTCDate();
-  } else if (time && typeof time === 'object') {
-    yr = time.year; mo = (time.month || 1) - 1; dy = time.day;
-  } else { return ''; }
-  if (type === 0) return String(yr);
-  if (type === 1) return _MTHS[mo] || '';
-  if (type === 2) return (_MTHS[mo] || '') + ' ' + dy;
-  return '';
-}
+/* Grafik eksen label formatı — bp-chart-common.js'e taşındı (BPChart.fmtTickDate) */
+function _tickFmt(time, type) { return BPChart.fmtTickDate(time, type); }
 
 let chartMain;
 let _chartMainRO = null;   // ResizeObserver referansı (rebuild'lerde disconnect edilecek)
@@ -1007,7 +980,7 @@ function _syncMainChart() {
 
 function mkChart(el, height) {
   return LC.createChart(el, {
-    ...getBaseOpts(),
+    ...BPChart.baseOpts(LC, true),
     width:     el.clientWidth || el.parentElement.clientWidth || 900,
     height:    height,
     timeScale: { borderColor: '#30363d', timeVisible: false, visible: true, rightOffset: 8, tickMarkFormatter: _tickFmt },
@@ -1037,88 +1010,20 @@ async function buildCharts(d) {
     }
   } catch(_) { console.warn('ResizeObserver kurulumu basarisiz (chartMain)', _); }
 
-  /* EMA bantları arası dolgu — custom primitive */
-  class EmaFillPrimitive {
-    constructor(chart, e12data, e99data, bullCol, bearCol) {
-      this._chart   = chart;
-      this._e12     = Object.fromEntries(e12data.map(p => [p.time, p.value]));
-      this._e99     = Object.fromEntries(e99data.map(p => [p.time, p.value]));
-      this._times   = e12data.filter(p => this._e99[p.time] !== undefined).map(p => p.time);
-      this._bullCol = bullCol;
-      this._bearCol = bearCol;
-      this._series  = null;
-    }
-    attached({ series }) { this._series = series; }
-    detached()           { this._series = null;   }
-    updateAllViews()     {}
-    paneViews() {
-      const self = this;
-      return [{
-        renderer() {
-          return {
-            draw(target) {
-              if (!self._series) return;
-              target.useBitmapCoordinateSpace(scope => {
-                const ctx = scope.context;
-                const hr  = scope.horizontalPixelRatio;
-                const vr  = scope.verticalPixelRatio;
-                const ts  = self._chart.timeScale();
-                const pts1 = [], pts2 = [];
-                for (const t of self._times) {
-                  const x  = ts.timeToCoordinate(t);
-                  const y1 = self._series.priceToCoordinate(self._e12[t]);
-                  const y2 = self._series.priceToCoordinate(self._e99[t]);
-                  if (x == null || y1 == null || y2 == null) continue;
-                  pts1.push({ x: x * hr, y: y1 * vr, v: self._e12[t] });
-                  pts2.push({ x: x * hr, y: y2 * vr, v: self._e99[t] });
-                }
-                if (pts1.length < 2) return;
-                ctx.save();
-                for (let i = 1; i < pts1.length; i++) {
-                  const a1 = pts1[i-1], b1 = pts1[i];
-                  const a2 = pts2[i-1], b2 = pts2[i];
-                  ctx.fillStyle = b1.v > b2.v ? self._bullCol : self._bearCol;
-                  ctx.beginPath();
-                  ctx.moveTo(a1.x, a1.y); ctx.lineTo(b1.x, b1.y);
-                  ctx.lineTo(b2.x, b2.y); ctx.lineTo(a2.x, a2.y);
-                  ctx.closePath(); ctx.fill();
-                }
-                ctx.restore();
-              });
-            }
-          };
-        }
-      }];
-    }
-  }
-
-  /* EMA99 çizgisi (turuncu) */
-  const e99Line = chartMain.addLineSeries({
-    color: '#e3b341', lineWidth: 1.5,
-    priceLineVisible: false, lastValueVisible: false,
-  });
-  e99Line.setData(d.ema99);
-
-  /* EMA12 çizgisi (mavi) + fill primitive */
-  const e12Line = chartMain.addLineSeries({
-    color: '#58a6ff', lineWidth: 1.5,
-    priceLineVisible: false, lastValueVisible: false,
-  });
-  e12Line.setData(d.ema12);
-  e12Line.attachPrimitive(new EmaFillPrimitive(
-    chartMain, d.ema12, d.ema99,
-    'rgba(0,226,144,0.13)',
-    'rgba(248,81,73,0.11)'
-  ));
+  /* EMA12/EMA99 çizgileri + bull/bear dolgu primitive — bp-chart-common.js (BPChart.addEmaPair) */
+  const emaPair = BPChart.addEmaPair(chartMain, d.ema12, d.ema99);
+  const e12Line = emaPair.e12, e99Line = emaPair.e99;
 
   /* Mum grafik */
-  const candle = chartMain.addCandlestickSeries({
-    upColor: '#00e290', downColor: '#f85149',
-    borderUpColor: '#00e290', borderDownColor: '#f85149',
-    wickUpColor:   '#00e290', wickDownColor:   '#f85149',
-    priceLineVisible: false, lastValueVisible: true,
-  });
+  const candle = BPChart.addCandleSeries(chartMain);
   candle.setData(d.ohlc);
+
+  /* CPO-DEV2-096: hacim subplot — backend (_compute_chart_data) her bar icin
+     onceden renklendirilmis {time,value,color} zaten donduruyordu, hic
+     tuketilmiyordu. Kendi (gizli) fiyat eksenine, alt %18'e sikistirilmis. */
+  if (d.volume && d.volume.length) {
+    BPChart.addVolumeSeries(chartMain).setData(d.volume);
+  }
 
   /* Sol üst EMA legend */
   elMain.style.position = 'relative';
@@ -1137,13 +1042,21 @@ async function buildCharts(d) {
     const last12 = v12 ?? d.ema12.at(-1)?.value;
     const last99 = v99 ?? d.ema99.at(-1)?.value;
     elLegend.innerHTML =
-      `<span style="color:#58a6ff">EMA12 ${fmt(last12)}</span>` +
-      `<span style="color:#e3b341">EMA99 ${fmt(last99)}</span>`;
+      `<span style="color:#b8c3ff"><span style="display:inline-block;width:12px;height:2px;background:#b8c3ff;vertical-align:middle;margin-right:3px;border-radius:1px"></span>EMA12 ${fmt(last12)}</span>` +
+      `<span style="color:#e3b341"><span style="display:inline-block;width:12px;height:2px;background:#e3b341;vertical-align:middle;margin-right:3px;border-radius:1px"></span>EMA99 ${fmt(last99)}</span>`;
   }
   updateLegend();
   chartMain.subscribeCrosshairMove(p => {
     if (!p?.time) { updateLegend(); return; }
     updateLegend(p.seriesData?.get(e12Line)?.value, p.seriesData?.get(e99Line)?.value);
+  });
+
+  /* CPO-DEV2-096: OHLC hover tooltip — eskiden crosshair sadece cizgi+EMA legend
+     gosteriyordu, hicbir yerde acilis/yuksek/dusuk/kapanis okunmuyordu. */
+  BPChart.attachOhlcTooltip(chartMain, candle, elMain, (time) => {
+    const dy = _tickFmt(time, 2);
+    const yr = _tickFmt(time, 0);
+    return dy ? `${dy} '${yr.slice(2)}` : '';
   });
 
   /* Son 1 yılı göster + sağda 10 boş bar boşluk */
@@ -3992,6 +3905,7 @@ document.addEventListener('keydown', e => {
 {% include '_premium_modal.html' %}
 <script src="/static/js/toast.js?v=5"></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
+<script src="/static/js/bp-chart-common.js?v=1"></script>
 {% include '_mobile_nav_partial.html' %}
 <!-- F14: pull-to-refresh -->
 
