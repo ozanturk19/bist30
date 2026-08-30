@@ -1002,6 +1002,7 @@ async function buildCharts(d) {
   if (chartMain) { try { chartMain.remove(); } catch(_) { console.warn('eski chart instance temizlenemedi', _); } chartMain = null; }
   if (_chartMainRO) { try { _chartMainRO.disconnect(); } catch(_) { /* zaten disconnect olabilir */ } _chartMainRO = null; }
   const elMain = document.getElementById('chartMain');
+  elMain.innerHTML = '';   // r140: onceki render'in orphan legend/tooltip div'leri birikmesin (chartMain.remove() sadece kutuphanenin kendi DOM'unu temizliyor)
   chartMain = mkChart(elMain, 230);
   try {
     if (typeof ResizeObserver !== 'undefined') {

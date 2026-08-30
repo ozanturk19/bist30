@@ -1393,10 +1393,19 @@ function shareSignal(platform) {
   } else if (platform === 'copy') {
     const copyFallback = () => {
       const ta = document.createElement('textarea');
-      ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      ta.value = url; document.body.appendChild(ta); ta.select();
+      // r140: execCommand donus degeri kontrol edilmiyordu, sessizce false donse
+      // bile kullanici kosulsuz 'Kopyalandi' toast'i goruyordu.
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch(_) { ok = false; }
+      document.body.removeChild(ta);
       const btn = document.getElementById('shareCopy');
-      if (btn) { const t = btn.textContent; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.textContent = t, 2000); }
-      _hibToast('Link kopyalandı', 'success');
+      if (ok) {
+        if (btn) { const t = btn.textContent; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.textContent = t, 2000); }
+        _hibToast('Link kopyalandı', 'success');
+      } else {
+        _hibToast('Kopyalama başarısız, linki manuel kopyalayın', 'warn');
+      }
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(() => {
@@ -1411,7 +1420,14 @@ function shareSignal(platform) {
 }
 
 /* ── Grafik kurulumu ─────────────────────────────────── */
+let _hisseChart = null;        // r140: onceki instance/RO/listener temizligi icin (index.html chartMain deseniyle simetrik)
+let _hisseChartRO = null;
+let _hisseResizeHandler = null;
+
 function buildChart(d) {
+  if (_hisseChart) { try { _hisseChart.remove(); } catch(_) { console.warn('eski chart instance temizlenemedi', _); } _hisseChart = null; }
+  if (_hisseChartRO) { try { _hisseChartRO.disconnect(); } catch(_) { /* zaten disconnect olabilir */ } _hisseChartRO = null; }
+  if (_hisseResizeHandler) { window.removeEventListener('resize', _hisseResizeHandler); _hisseResizeHandler = null; }
   document.getElementById('chartLoading').style.display = 'none';
   document.getElementById('chartsInner').style.display  = 'block';
 
@@ -1455,10 +1471,11 @@ function buildChart(d) {
   });
 
   const elMain   = document.getElementById('chartMain');
+  elMain.innerHTML = '';   // r140: onceki render'in orphan tooltip div'i (varsa) temizlensin
   const isMobile = window.innerWidth < 768;
   const chartW   = elMain.clientWidth || elMain.parentElement.clientWidth || 900;
 
-  const chart = LC.createChart(elMain, {
+  const chart = _hisseChart = LC.createChart(elMain, {
     ...BPChart.baseOpts(LC, true),
     width:     chartW,
     height:    isMobile ? 240 : 340,
@@ -1544,13 +1561,14 @@ function buildChart(d) {
     chart.applyOptions({ width: w, height: isMob ? 240 : 340 });
   }
 
-  window.addEventListener('resize', _syncChartSize);
+  _hisseResizeHandler = _syncChartSize;
+  window.addEventListener('resize', _hisseResizeHandler);
 
   // SPEC-017 Faz F Bug 3: ResizeObserver — tab switch (display:none→block) resize tetikle
   try {
     if (typeof ResizeObserver !== 'undefined') {
-      const ro = new ResizeObserver(_syncChartSize);
-      ro.observe(elMain);
+      _hisseChartRO = new ResizeObserver(_syncChartSize);
+      _hisseChartRO.observe(elMain);
     }
   } catch(_) { console.warn('ResizeObserver kurulumu basarisiz (sekme degisince grafik yeniden boyutlanmayacak)', _); }
   // applyTab hook: AI/Grafik tab açıldığında chart resize zorla

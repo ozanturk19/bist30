@@ -401,10 +401,21 @@ function copyShareUrl(e) {
     const status = document.getElementById('shareCopyStatus');
     if (status) status.textContent = 'Bağlantı kopyalandı';
   };
+  const _showCopyFailed = () => {
+    const btn = document.getElementById('shareBtn');
+    if (btn) { btn.innerHTML = '<span aria-hidden="true">✗</span> Kopyalanamadı'; setTimeout(() => { btn.innerHTML = _shareBtnDefault; }, 2000); }
+    const status = document.getElementById('shareCopyStatus');
+    if (status) status.textContent = 'Bağlantı kopyalanamadı, lütfen manuel kopyalayın';
+  };
   const _fallbackCopy = () => {
     const ta = document.createElement('textarea');
-    ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-    _showCopied();
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    // r140: execCommand donus degeri kontrol edilmiyordu, sessizce false donse
+    // bile kullanici kosulsuz 'Kopyalandi' goruyordu.
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch(_) { ok = false; }
+    document.body.removeChild(ta);
+    if (ok) _showCopied(); else _showCopyFailed();
   };
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(_showCopied).catch(_fallbackCopy);

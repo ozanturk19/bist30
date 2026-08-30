@@ -8761,6 +8761,14 @@ def api_tarama():
             # listenin basina degil sonuna dusmeli (frontend de bunu 'eski/bilinmiyor' gosterir)
             v = float('inf') if sort_by == 'signal_bars' else 0
         return (isinstance(v, str), v)
+    # r140: esit degerli satirlarda deterministik tiebreak yoktu -- temel liste
+    # (_cache['data']) her refresh'te as_completed() zamanlamasina gore yeniden
+    # doldugu icin esit satirlarin sirasi kullanici hicbir sey yapmadan
+    # degisebiliyordu (index.html getSorted()'daki r122 duzeltmesiyle ayni kok
+    # neden). Onceden ticker'a gore siralayip sonra asil anahtarla stable sort
+    # yapmak, reverse=True olsa bile esitlerde HER ZAMAN ticker artan sirada
+    # kalmasini saglar (Python sort() reverse=True'da bile stable).
+    results.sort(key=lambda x: x.get('ticker') or '')
     results.sort(key=_tarama_sort_key, reverse=rev)
 
     with _lock:

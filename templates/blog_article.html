@@ -290,7 +290,7 @@ function shareBlogWA() {
   window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank', 'noopener');
 }
 function shareBlogCopy() {
-  function announceCopy() {
+  function announceCopy(msg) {
     let status = document.getElementById('blogCopyStatus');
     if (!status) {
       status = document.createElement('span');
@@ -300,14 +300,24 @@ function shareBlogCopy() {
       status.setAttribute('aria-live', 'polite');
       document.body.appendChild(status);
     }
-    status.textContent = 'Bağlantı kopyalandı';
+    status.textContent = msg;
   }
   function fallbackCopy() {
     const ta = document.createElement('textarea');
-    ta.value = _BLOG_URL; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    ta.value = _BLOG_URL; document.body.appendChild(ta); ta.select();
+    // r140: execCommand donus degeri kontrol edilmiyordu, WebView/kisitli baglamda
+    // sessizce false donse bile kullanici kosulsuz 'Kopyalandi' goruyordu.
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch(_) { ok = false; }
+    document.body.removeChild(ta);
     const btn = document.getElementById('blogCopyBtn');
-    if (btn) { const t = btn.innerHTML; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.innerHTML = t, 2000); }
-    announceCopy();
+    if (ok) {
+      if (btn) { const t = btn.innerHTML; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.innerHTML = t, 2000); }
+      announceCopy('Bağlantı kopyalandı');
+    } else {
+      if (btn) { const t = btn.innerHTML; btn.textContent = '✗ Kopyalanamadı'; setTimeout(() => btn.innerHTML = t, 2000); }
+      announceCopy('Bağlantı kopyalanamadı, lütfen manuel kopyalayın');
+    }
   }
   if (!navigator.clipboard || !navigator.clipboard.writeText) {
     fallbackCopy();
@@ -316,7 +326,7 @@ function shareBlogCopy() {
   navigator.clipboard.writeText(_BLOG_URL).then(() => {
     const btn = document.getElementById('blogCopyBtn');
     if (btn) { const t = btn.innerHTML; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.innerHTML = t, 2000); }
-    announceCopy();
+    announceCopy('Bağlantı kopyalandı');
   }).catch(fallbackCopy);
 }
 
