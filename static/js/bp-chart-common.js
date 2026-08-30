@@ -73,6 +73,8 @@
       priceFormat: { type: 'volume' },
       priceScaleId: '',
       scaleMargins: { top: 0.82, bottom: 0 },
+      priceLineVisible: false,
+      lastValueVisible: false,
     });
   }
 
