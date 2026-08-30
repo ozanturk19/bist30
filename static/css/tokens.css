@@ -101,6 +101,15 @@ html {
   background: var(--bp-bg);
 }
 
+/* CPO-DEV2-095: kanonik body kabugu - TEK KAYNAK. Sayfa CSS'leri (static/css/pages/*.css)
+   artik kendi background/color/font-family bildirmiyor, buraya devrediyor - 19 sayfanin
+   her biri ayri ayri (bazen hatali/eski hex, bazen Segoe UI/Inter ilk sirada) tekrarliyordu. */
+body {
+  background: var(--bp-bg);
+  color: var(--bp-text);
+  font-family: 'Space Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
+}
+
 
 /* ═══════════════════════════════════════════════════════════════
    T1.4 — ÖLÇEK TOKEN'LARI (Master Dönüşüm Programı FAZ 1)

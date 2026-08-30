@@ -43,9 +43,6 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: var(--bp-bg);
-    color: var(--bp-text);
-    font-family: 'Manrope', 'Inter-Fallback', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     font-size: var(--bp-text-md);
     min-height: 100vh;

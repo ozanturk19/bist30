@@ -1,7 +1,7 @@
 /* ==== extracted from templates/iletisim.html (T2.5) ==== */
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bp-bg); color: #e6edf3; font-family: 'Segoe UI', system-ui, sans-serif; font-size: var(--bp-text-md); line-height: 1.7; min-height: 100vh; }
+  body { font-size: var(--bp-text-md); line-height: 1.7; min-height: 100vh; }
   header { background: #161b22; border-bottom: 1px solid #30363d; padding: 14px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index:var(--bp-z-dropdown); }
   .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: #f0f6fc; }
   .container { max-width: var(--bp-container-680); margin: 0 auto; padding: 40px 24px; }

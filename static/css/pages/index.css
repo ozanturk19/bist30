@@ -12,9 +12,6 @@
 
 
   body {
-    background: var(--bp-bg);
-    color: var(--bp-text);
-    font-family: 'Manrope', 'Inter-Fallback', system-ui, -apple-system, sans-serif;
     font-size: var(--bp-text-md);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;

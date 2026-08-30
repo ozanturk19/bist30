@@ -1,7 +1,7 @@
 /* ==== extracted from templates/sinyal_performans.html (T2.5) ==== */
 
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0b111f; color:#e6edf3; font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
+  body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
   .page-sub   { font-size:var(--bp-text-base); color:#8b949e; }

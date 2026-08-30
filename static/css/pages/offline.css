@@ -2,9 +2,6 @@
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{
-      background:#0e0e12;
-      color:#e2e8f0;
-      font-family:'Segoe UI',system-ui,sans-serif;
       min-height:100dvh;
       display:flex;
       flex-direction:column;
