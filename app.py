@@ -1782,6 +1782,11 @@ def analyze(ticker_base):
         # ── RVOL (Relative Volume) — kalite sinyali ────────────────────────
         # Son 5 gün ortalama hacmi / Son 20 gün ortalama hacmi.
         # >= 1.20 → premium sinyal (backtest: Sharpe 1.62 → 2.97, Win Rate 36.7% → 51.5%)
+        # CPO-1457 (30.08.2026): orijinal iddiayı üreten script kod tabanında
+        # bulunamamıştı — tools/verify_premium_badge_backtest.py ile bağımsız
+        # yeniden üretildi, yön/oran doğrulandı (bkz. script docstring'i için
+        # güncel sayılar), rozet iddiası gerçek. Gelecekte yeniden denetlerken
+        # o script'i çalıştır, sıfırdan araştırma yapma.
         rvol = None
         is_premium = False
         try:
