@@ -584,7 +584,7 @@
 
     <!-- Katman C — detaylı teknik göstergeler (accordion, kapalı başlar) -->
     <details id="signalSummaryDetails" style="margin-top:10px;border-top:1px solid var(--bp-surface2);padding-top:10px">
-      <summary style="cursor:pointer;font-size:var(--bp-text-sm);color:var(--bp-brand);list-style:none;user-select:none;outline:none"
+      <summary style="cursor:pointer;font-size:var(--bp-text-sm);color:var(--bp-brand);list-style:none;user-select:none"
                title="Aç/kapat — ADX, RSI, EMA, DI±, Supertrend göstergeleri ve metodoloji linkleri">
         ▾ Detaylı teknik göstergeler <span style="color:var(--bp-text3);font-weight:normal;font-size:var(--bp-text-xs)">— aç/kapat</span>
       </summary>
@@ -1581,8 +1581,12 @@ function buildChart(d) {
     updateLeg(p.seriesData?.get(e12)?.value, p.seriesData?.get(e99)?.value, fmtDate);
     if (fmtDate && p.point?.x != null) {
       _chDateLbl.textContent = fmtDate;
-      _chDateLbl.style.left  = p.point.x + 'px';
       _chDateLbl.style.display = 'block';
+      /* r137: sag kenara yakinken .chart-section'in overflow:hidden'i etiketi
+         kirpiyordu (kanit dogrulandi) - konteyner sinirlari icinde kelepcele */
+      const _half = (_chDateLbl.offsetWidth / 2) || 30;
+      const _x = Math.min(Math.max(p.point.x, _half), elMain.clientWidth - _half);
+      _chDateLbl.style.left = _x + 'px';
     } else {
       _chDateLbl.style.display = 'none';
     }

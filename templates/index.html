@@ -2646,7 +2646,15 @@ function setFilter(f, btn) {
   _afterFilterChange({ push: true });
 }
 
-function setSearch(v) { currentSearch = v; _afterFilterChange({ push: false }); }  /* #32: save+replaceState (no history spam on keystroke) */
+let _searchDebounceTimer = null;
+function setSearch(v) {
+  currentSearch = v;
+  /* r137: renderTable() agir DOM-render zinciri her tus vurusunda debounce'suz
+     tetikleniyordu (kanit dogrulandi) - tarama.html'deki 180ms emsaliyle hizalandi.
+     showSearchAc() ayri/hafif oldugu icin anlik kalmaya devam eder (oninput'ta). */
+  clearTimeout(_searchDebounceTimer);
+  _searchDebounceTimer = setTimeout(() => { _afterFilterChange({ push: false }); }, 180);
+}  /* #32: save+replaceState (no history spam on keystroke) */
 
 function updateActiveFiltersBar() {
   const bar = document.getElementById('activeFiltersBar');
