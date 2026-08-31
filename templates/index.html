@@ -379,16 +379,29 @@
   <script>
   (function(){
     try {
-      if (localStorage.getItem('bp_hero_sub_dismissed') === '1') return;
-      if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return;
       var el = document.getElementById('heroSubBanner');
       if (!el) return;
-      el.style.display = 'flex';
       var dbtn = document.getElementById('heroSubDismiss');
       if (dbtn) dbtn.addEventListener('click', function(){
         el.style.display = 'none';
         try { localStorage.setItem('bp_hero_sub_dismissed', '1'); } catch(e) { console.warn('bp_hero_sub_dismissed kaydi basarisiz', e); }
       });
+      // CPO-DEV2-103: bpOnboardBanner ile karsilikli dislama - ilk ziyaretci
+      // (onboarding hic gorulmemis) once onboarding'i gorsun, abone-ol CTA'si
+      // ancak onboarding kapatildiktan/acildiktan SONRA (veya donen ziyaretcide) gorunur.
+      // window._bpTryHeroSub bpOnboardBanner'in kendi kapat/ac handler'larindan da cagrilir
+      // (ayni oturumda onboarding gorulur gorulmez hero banner'i gec-gostermek icin).
+      window._bpTryHeroSub = function(){
+        try {
+          if (el.style.display === 'flex') return;
+          if (localStorage.getItem('bp_hero_sub_dismissed') === '1') return;
+          if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return;
+          var onboardSeen = localStorage.getItem('bp_onboard_dismissed') === '1' || localStorage.getItem('bp_learning_mode') === '1';
+          if (!onboardSeen) return;
+          el.style.display = 'flex';
+        } catch(e) { console.warn('hero abonelik seridi gec-gosterim basarisiz', e); }
+      };
+      window._bpTryHeroSub();
     } catch(e) { console.warn('hero abonelik seridi init basarisiz', e); }
   })();
   function _escHeroSub(v) {
@@ -751,6 +764,7 @@
     document.getElementById('bpOnboardDismiss').addEventListener('click', function(){
       el.style.display = 'none';
       try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
+      if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
     });
     document.getElementById('bpOnboardOpen').addEventListener('click', function(){
       if (window.bpLearningMode && window.bpLearningMode.state === false) {
@@ -758,6 +772,7 @@
       }
       el.style.display = 'none';
       try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
+      if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
     });
   } catch(e) { console.warn('onboarding banner init basarisiz', e); }
 })();
@@ -2893,6 +2908,7 @@ window.addEventListener('storage', e => {
   } else if ((e.key === 'bp_onboard_dismissed' && e.newValue === '1') || (e.key === 'bp_learning_mode' && e.newValue === '1')) {
     const onboardEl = document.getElementById('bpOnboardBanner');
     if (onboardEl) onboardEl.style.display = 'none';
+    if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
   } else if (e.key === 'bp_sub_dismissed_v2' || e.key === 'bp_sub_user') {
     if (typeof _hideSubToastCrossTab === 'function') _hideSubToastCrossTab();
   }

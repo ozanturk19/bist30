@@ -31,6 +31,10 @@
   .bc-meta { display:flex; align-items:center; gap:12px; font-size:var(--bp-text-xs); color:var(--bp-text3); }
   .bc-meta span { display:flex; align-items:center; gap:4px; }
 
+  .blog-loadmore-wrap { text-align:center; margin-top:24px; }
+  .blog-loadmore-btn { background:#21262d; border:1px solid #30363d; border-radius:var(--bp-radius-md); color:#e6edf3; padding:10px 26px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; transition:all .15s; font-family:inherit; }
+  .blog-loadmore-btn:hover { background:#1f6feb; border-color:#1f6feb; color:#fff; }
+
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
   footer a { color:#8b949e; text-decoration:none; }
   @media(max-width:600px) { .container{padding:14px;} .blog-grid{grid-template-columns:1fr;} }
