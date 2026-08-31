@@ -91,9 +91,6 @@
     color: var(--bp-brand);
     font-weight: 600;
   }
-  .opt.checkbox {
-    display: flex; align-items: center; gap: 10px;
-  }
   .submit-row {
     display: flex; justify-content: center; gap: 12px;
     margin-top: 24px;
