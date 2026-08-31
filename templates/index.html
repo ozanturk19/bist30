@@ -3526,7 +3526,7 @@ function _renderGnmCard(item) {
   // KAP URL: only allow kap.org.tr URLs to prevent open-redirect injection
   const rawKap = item.kap_url || '';
   const kapUrl = /^https:\/\/www\.kap\.org\.tr\//i.test(rawKap) ? rawKap : '';
-  const dest    = '/hisse/' + _esc(item.ticker);
+  const dest    = '/hisse/' + _escJsStr(item.ticker);
 
   const snippetEl = isLoading
     ? `<div class="gnm-text" style="color:var(--bp-text3);font-style:italic;display:flex;align-items:center;gap:5px;">
