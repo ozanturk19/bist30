@@ -164,3 +164,26 @@
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
 
+  /* CPO-DEV2-104: ikincil/arşiv icerik toggle — hisse.css'teki (CPO-DEV2-098)
+     .bp-detail-toggle deseniyle birebir ayni class adlari, sayfalar-arasi tutarlilik */
+  .bp-detail-toggle { margin-bottom: 20px; }
+  .bp-detail-toggle-summary {
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; list-style: none;
+    padding: 14px 18px;
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius-lg);
+    font-size: var(--bp-text-base);
+    font-weight: 700;
+    color: var(--bp-text);
+    user-select: none;
+    transition: border-color .15s, background .15s;
+  }
+  .bp-detail-toggle-summary::-webkit-details-marker { display: none; }
+  .bp-detail-toggle-summary::marker { content: ""; }
+  .bp-detail-toggle-summary:hover { border-color: var(--bp-border2); background: rgba(255,255,255,.02); }
+  .bp-detail-toggle-chev { color: var(--bp-text3); font-size: var(--bp-text-sm); transition: transform .2s ease; }
+  .bp-detail-toggle[open] .bp-detail-toggle-chev { transform: rotate(180deg); }
+  .bp-detail-toggle-body { padding-top: 16px; }
+
