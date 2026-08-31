@@ -94,6 +94,7 @@
     background:var(--bp-surface2); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md);
     color:var(--bp-text2); padding:9px 22px; font-size:var(--bp-text-sm); font-weight:600;
     cursor:pointer; transition:all .15s; font-family:inherit;
+    min-height:44px; display:inline-flex; align-items:center; justify-content:center; /* WCAG 2.5.5 dokunma hedefi, bkz. .sc-kap r110 emsali */
   }
   .bt-loadmore-btn:hover { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
 
