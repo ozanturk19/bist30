@@ -162,8 +162,8 @@ function render(data) {
           <div class="period-dates">${startFmt} – ${endFmt}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
-          <span style="font-size:12px;background:rgba(63,185,80,0.12);color:#3fb950;padding:2px 8px;border-radius:8px;border:1px solid rgba(63,185,80,0.2)">${alCount} Güçlü</span>
-          <span style="font-size:12px;background:rgba(var(--bp-sat-rgb),0.12);color:var(--bp-sat);padding:2px 8px;border-radius:8px;border:1px solid rgba(var(--bp-sat-rgb),0.2)">${satCount} Bozuldu</span>
+          <span style="font-size:var(--bp-text-sm);background:rgba(63,185,80,0.12);color:#3fb950;padding:2px 8px;border-radius:8px;border:1px solid rgba(63,185,80,0.2)">${alCount} Güçlü</span>
+          <span style="font-size:var(--bp-text-sm);background:rgba(var(--bp-sat-rgb),0.12);color:var(--bp-sat);padding:2px 8px;border-radius:8px;border:1px solid rgba(var(--bp-sat-rgb),0.2)">${satCount} Bozuldu</span>
         </div>
         <div class="period-desc">${escapeHtml(period.description)}</div>
       </div>
@@ -173,7 +173,7 @@ function render(data) {
           <div class="stock-card sig-${sigClass(s.signal)}" data-ticker="${escapeHtml(s.ticker)}" onclick="window.location.href='/hisse/' + this.dataset.ticker" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='/hisse/'+this.dataset.ticker}" role="link" tabindex="0">
             <div class="sc-top">
               <a href="/hisse/${escapeHtml(s.ticker)}" class="sc-ticker-link" onclick="event.stopPropagation()">
-                <span class="sc-ticker">${escapeHtml(s.ticker)}${s.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="color:var(--bp-volume);font-size:11px;vertical-align:middle">⭐</span>' : ''}</span>
+                <span class="sc-ticker">${escapeHtml(s.ticker)}${s.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="color:var(--bp-volume);font-size:var(--bp-text-xs);vertical-align:middle">⭐</span>' : ''}</span>
               </a>
               <span class="sig-badge sig-${sigClass(s.signal)}">${sigIcon(s.signal)} ${sigLabel(s.signal)}</span>
             </div>

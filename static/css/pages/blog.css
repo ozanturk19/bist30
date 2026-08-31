@@ -13,7 +13,7 @@
   .blog-search-wrap { position:relative; margin-bottom:20px; }
   .blog-search {
     width:100%; background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-md);
-    color:#e6edf3; padding:9px 14px 9px 38px; font-size:16px; outline:none;
+    color:#e6edf3; padding:9px 14px 9px 38px; font-size:var(--bp-text-lg); outline:none;
     transition:border-color .15s; font-family:inherit;
   } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
   .blog-search:focus { border-color:#1f6feb; }

@@ -264,7 +264,7 @@ function renderHeatmap(stocks) {
         <span class="stat-pill pill-al">▲ ${sec.al.length}</span>
         <span class="stat-pill pill-sat">▼ ${sec.sat.length}</span>
         <span class="stat-pill pill-bkl">● ${sec.bkl.length}</span>
-        <span style="margin-left:auto;font-size:11px;color:var(--bp-text3)">${sec.total} hisse</span>
+        <span style="margin-left:auto;font-size:var(--bp-text-xs);color:var(--bp-text3)">${sec.total} hisse</span>
       </div>
       <div class="seg-bar">
         <div class="seg-al"  style="width:${alPct}%"></div>
@@ -273,7 +273,7 @@ function renderHeatmap(stocks) {
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div class="score" style="color:${color}">${sec.score > 0 ? '+' : ''}${sec.score}</div>
-        <div style="display:flex;align-items:center;gap:8px">${rvolHtml}<span style="font-size:11px;color:var(--bp-text3)">Skor</span></div>
+        <div style="display:flex;align-items:center;gap:8px">${rvolHtml}<span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Skor</span></div>
       </div>
       ${alChips || satChips || bklSample ? `<div class="detail-row">${alChips}${satChips}${bklSample}${bklMore}</div>` : ''}
     </div>`;
@@ -438,7 +438,7 @@ async function loadSectors() {
       if (_selected.length >= 2) runCompare();
     }
   } catch(e) {
-    document.getElementById('sectorChips').innerHTML = '<span style="color:var(--bp-sat);font-size:13px">Veriler yüklenemedi.</span>';
+    document.getElementById('sectorChips').innerHTML = '<span style="color:var(--bp-sat);font-size:var(--bp-text-base)">Veriler yüklenemedi.</span>';
   }
 }
 

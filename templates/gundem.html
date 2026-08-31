@@ -295,11 +295,11 @@ async function loadGundem() {
           return `<div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid ${badgeBrd};border-radius:8px;padding:12px 14px">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
               <span style="width:7px;height:7px;border-radius:50%;background:${dotClr};flex-shrink:0"></span>
-              <span style="font-size:12px;font-weight:600;color:#e2e8f0">${p.label}</span>
+              <span style="font-size:var(--bp-text-sm);font-weight:600;color:#e2e8f0">${p.label}</span>
               <span style="font-size:10px;padding:1px 7px;border-radius:10px;background:${badgeBg};border:1px solid ${badgeBrd};color:${dotClr};margin-left:auto">${isActive ? 'Aktif' : 'Yaklaşıyor'}</span>
             </div>
-            <div style="font-size:11px;color:#94a3b8;margin-bottom:3px">${p.desc}</div>
-            <div style="font-size:11px;color:${dotClr};font-weight:500">${p.days_label}</div>
+            <div style="font-size:var(--bp-text-xs);color:#94a3b8;margin-bottom:3px">${p.desc}</div>
+            <div style="font-size:var(--bp-text-xs);color:${dotClr};font-weight:500">${p.days_label}</div>
           </div>`;
         }).join('');
       }
@@ -324,17 +324,17 @@ async function loadGundem() {
           const sigCls = isAl ? '#3fb950' : isSat ? '#f85149' : '#8b949e';
           const sigTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Trend Bozuldu' : '● Yatay';
           const snippet = escapeHtml((item.snippet||'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/^\*\s+/gm,'• ').replace(/^-\s+/gm,'• ').trim());
-          const kapHref = item.kap_url ? `<a href="${safeHref(item.kap_url)}" target="_blank" rel="noopener" style="font-size:11px;color:#58a6ff;text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
+          const kapHref = item.kap_url ? `<a href="${safeHref(item.kap_url)}" target="_blank" rel="noopener" style="font-size:var(--bp-text-xs);color:#58a6ff;text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
           const etTicker = escapeHtml(item.ticker);
           return `<a href="/hisse/${etTicker}" style="display:block;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:12px 14px;transition:border-color .15s"
             onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-              <span style="font-size:13px;font-weight:700;color:#e2e8f0">${etTicker}</span>
-              <span style="font-size:11px;font-weight:600;color:${sigCls}">${sigTxt}</span>
-              <span style="font-size:11px;color:#64748b;margin-left:auto">${escapeHtml(item.name||'')}</span>
+              <span style="font-size:var(--bp-text-base);font-weight:700;color:#e2e8f0">${etTicker}</span>
+              <span style="font-size:var(--bp-text-xs);font-weight:600;color:${sigCls}">${sigTxt}</span>
+              <span style="font-size:var(--bp-text-xs);color:#64748b;margin-left:auto">${escapeHtml(item.name||'')}</span>
               ${kapHref}
             </div>
-            <div style="font-size:12px;color:#94a3b8;line-height:1.5">${snippet}</div>
+            <div style="font-size:var(--bp-text-sm);color:#94a3b8;line-height:1.5">${snippet}</div>
           </a>`;
         }).join('');
       }
@@ -388,10 +388,10 @@ async function loadEconCalendar() {
       return `<div style="display:flex;align-items:center;gap:12px;background:var(--bp-surface);border:1px solid ${e.is_today?'rgba(var(--bp-gold-rgb),.3)':'var(--bp-border)'};border-radius:8px;padding:10px 14px">
         <span style="font-size:18px;flex-shrink:0">${e.icon||'📅'}</span>
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:#e2e8f0">${escapeHtml(e.event)}</div>
-          <div style="font-size:11px;color:#64748b;margin-top:1px">${escapeHtml(e.date_fmt)} · <span style="${imp.cls}">${imp.lbl} Öncelik</span> · ${escapeHtml(e.source)}</div>
+          <div style="font-size:var(--bp-text-base);font-weight:600;color:#e2e8f0">${escapeHtml(e.event)}</div>
+          <div style="font-size:var(--bp-text-xs);color:#64748b;margin-top:1px">${escapeHtml(e.date_fmt)} · <span style="${imp.cls}">${imp.lbl} Öncelik</span> · ${escapeHtml(e.source)}</div>
         </div>
-        <div style="font-size:12px;text-align:right;flex-shrink:0">${duTxt}</div>
+        <div style="font-size:var(--bp-text-sm);text-align:right;flex-shrink:0">${duTxt}</div>
       </div>`;
     }).join('');
   } catch(e) {

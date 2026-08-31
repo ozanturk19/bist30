@@ -125,7 +125,7 @@
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=b1e2a745">
 <script src="/static/bp-vocab.js?v=20260823C"></script>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=854c21d3">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=c66ce677">
 <style id="bp-critical-css">
 .bp-footer-link{color:var(--bp-text3);text-decoration:none;transition:color .15s}.bp-footer-link:hover{color:var(--bp-text)}/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -362,7 +362,7 @@
     <div id="heroSubForm" style="display:flex;gap:6px;align-items:center;flex:1.4;min-width:230px;flex-wrap:wrap" role="status" aria-live="polite">
       <input id="heroSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:7px 11px;border-radius:var(--bp-radius);font-size:16px;font-family:inherit;outline:none;
+               padding:7px 11px;border-radius:var(--bp-radius);font-size:var(--bp-text-lg);font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
         onfocus="this.style.borderColor='var(--bp-brand)'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')heroSubmitSub()">
@@ -371,7 +371,7 @@
                font-size:var(--bp-text-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">
         Abone Ol
       </button>
-      <span id="heroSubMsg" style="font-size:11px;width:100%"></span>
+      <span id="heroSubMsg" style="font-size:var(--bp-text-xs);width:100%"></span>
     </div>
     <button type="button" id="heroSubDismiss"
       style="background:transparent;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-xl);padding:2px 6px;line-height:1;flex-shrink:0" title="Kapat" aria-label="Kapat">×</button>
@@ -428,7 +428,7 @@
         if (typeof window.bpRecordSubscribe === 'function' && data.token) {
           window.bpRecordSubscribe({ token: data.token, email: data.email, name: data.name });
         }
-        if (form) form.innerHTML = '<div style="color:var(--bp-al);font-size:13px;font-weight:600">✅ ' + _escHeroSub(data.message || 'Abone oldunuz!') + '</div>';
+        if (form) form.innerHTML = '<div style="color:var(--bp-al);font-size:var(--bp-text-base);font-weight:600">✅ ' + _escHeroSub(data.message || 'Abone oldunuz!') + '</div>';
         try { localStorage.setItem('bp_hero_sub_dismissed', '1'); } catch(e) { console.warn('bp_hero_sub_dismissed kaydi basarisiz (subscribe)', e); }
       } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
         if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">ℹ️ ' + _escHeroSub(data.message) + '</span>';
@@ -617,13 +617,13 @@
     <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:280px;flex-wrap:wrap" id="subForm">
       <input id="subName" type="text" autocomplete="given-name" placeholder="Adınız" aria-label="Ad"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:var(--bp-radius);font-size:16px;font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:var(--bp-radius);font-size:var(--bp-text-lg);font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
         onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
       <input id="subEmail" type="email" required autocomplete="email" placeholder="E-posta" aria-label="E-posta adresi"
         style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:var(--bp-radius);font-size:16px;font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:var(--bp-radius);font-size:var(--bp-text-lg);font-family:inherit;outline:none;
                box-sizing:border-box;transition:border-color .15s"
         onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')submitSubscribe()">
@@ -1040,7 +1040,7 @@ async function buildCharts(d) {
   elLegend.style.cssText = [
     'position:absolute', 'top:8px', 'left:12px', 'z-index:var(--bp-z-chart-legend)',
     'display:flex', 'gap:14px', 'pointer-events:none',
-    'font-size:11px', 'font-variant-numeric:tabular-nums',
+    'font-size:var(--bp-text-xs)', 'font-variant-numeric:tabular-nums',
     'background:rgba(22,27,34,0.75)', 'padding:3px 8px',
     'border-radius:var(--bp-radius-4)', 'backdrop-filter:blur(2px)',
   ].join(';');
@@ -1254,7 +1254,7 @@ function _showIndexChartError(msg, retryFnName) {
   el.style.display = '';
   el.innerHTML = '<span style="color:var(--bp-text3)">' + msg + '</span> ' +
     '<button type="button" onclick="' + retryFnName + '()" style="margin-left:8px;background:#1f6feb;' +
-    'color:#fff;border:0;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer">Tekrar dene</button>';
+    'color:#fff;border:0;border-radius:6px;padding:4px 12px;font-size:var(--bp-text-sm);cursor:pointer">Tekrar dene</button>';
 }
 function _retryChart30() { _chart30ErrCount = 0; fetchChart(); }
 function _retryChart100() { _chart100ErrCount = 0; fetchChart100(true); }
@@ -1712,7 +1712,7 @@ async function fetchData() {
     if (ld && ld.style.display !== 'none' && !document.getElementById('bpDataFailMsg')) {
       const msg = document.createElement('div');
       msg.id = 'bpDataFailMsg';
-      msg.style.cssText = 'padding:16px;text-align:center;color:var(--bp-text3);font-size:13px';
+      msg.style.cssText = 'padding:16px;text-align:center;color:var(--bp-text3);font-size:var(--bp-text-base)';
       msg.textContent = 'Veriler yüklenemedi, yeniden deneniyor…';
       ld.appendChild(msg);
     }
@@ -1912,7 +1912,7 @@ function _updateIdealStrip(stocks) {
       : '';
     return `<a href="/hisse/${_escJsStr(s.ticker)}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(var(--bp-al-rgb),.08);
       border:1px solid rgba(var(--bp-al-rgb),.2);border-radius:var(--bp-radius);padding:3px 8px;text-decoration:none;
-      font-size:12px;font-weight:700;color:#f0f6fc;transition:background .12s;white-space:nowrap"
+      font-size:var(--bp-text-sm);font-weight:700;color:#f0f6fc;transition:background .12s;white-space:nowrap"
       onmouseover="this.style.background='rgba(0,226,144,.16)'" onmouseout="this.style.background='rgba(0,226,144,.08)'"
       >${_escJsStr(s.ticker)}${retHtml}</a>`;
   }).join('');
@@ -2313,8 +2313,8 @@ function renderTable() {
         const chgSign  = s.change_pct > 0 ? '+' : '';
         const chgColor = s.change_pct > 0 ? '#00e290' : s.change_pct < 0 ? '#f85149' : '#8b949e';
         const fmtP = s.price.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
-        const wt = s.weekly_trend === 1 ? '<span style="color:var(--bp-al);font-size:11px">↑</span>'
-                 : s.weekly_trend === -1 ? '<span style="color:var(--bp-sat);font-size:11px">↓</span>' : '';
+        const wt = s.weekly_trend === 1 ? '<span style="color:var(--bp-al);font-size:var(--bp-text-xs)">↑</span>'
+                 : s.weekly_trend === -1 ? '<span style="color:var(--bp-sat);font-size:var(--bp-text-xs)">↓</span>' : '';
         const confIcon = s.confirmed ? `<span style="color:var(--bp-al);font-size:10px">✓</span>`
                        : (s.signal !== 'BEKLE' ? `<span style="color:#e3b341;font-size:10px">…</span>` : '');
         let entryTxt = '';
@@ -2383,7 +2383,7 @@ function renderTable() {
             <div class="mc-rgt-wrap">
               <div class="mc-rgt">
                 <div class="mc-price" id="mlp-${_escJsStr(s.ticker)}" data-raw="${s.price}">${fmtP}</div>
-                <div style="font-size:12px;color:${chgColor}" id="mlc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2)}%</div>
+                <div style="font-size:var(--bp-text-sm);color:${chgColor}" id="mlc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2)}%</div>
               </div>
               <button class="mc-bell ${_isWatchingMc ? 'watching' : ''}" id="mcb-${_escJsStr(s.ticker)}"
                       type="button" onclick="event.preventDefault();event.stopPropagation();toggleWatch('${_escJsStr(s.ticker)}')"
@@ -2448,10 +2448,10 @@ function renderTable() {
     // Haftalık trend ikon
     const wt = s.weekly_trend;
     const wtHtml = wt === 1
-      ? '<span style="color:var(--bp-al);font-size:11px" tabindex="0" data-tip="Haftalık: Yükselen">↑</span>'
+      ? '<span style="color:var(--bp-al);font-size:var(--bp-text-xs)" tabindex="0" data-tip="Haftalık: Yükselen">↑</span>'
       : wt === -1
-        ? '<span style="color:var(--bp-sat);font-size:11px" tabindex="0" data-tip="Haftalık: Düşen">↓</span>'
-        : '<span style="color:#8b949e;font-size:11px" tabindex="0" data-tip="Haftalık: Yatay">–</span>';
+        ? '<span style="color:var(--bp-sat);font-size:var(--bp-text-xs)" tabindex="0" data-tip="Haftalık: Düşen">↓</span>'
+        : '<span style="color:#8b949e;font-size:var(--bp-text-xs)" tabindex="0" data-tip="Haftalık: Yatay">–</span>';
 
     // 3-bar onay
     const confHtml = s.confirmed
@@ -2468,7 +2468,7 @@ function renderTable() {
     // Giriş fiyatı — bars=1 için "Bugün" göster, bars>=2 için fiyat + getiri
     let sigPriceHtml;
     if (s.signal !== 'BEKLE' && bpIsSignalFromToday(s.signal_date)) {
-      sigPriceHtml = '<span style="color:#e3b341;font-size:11px">⚡ Bugün</span>';
+      sigPriceHtml = '<span style="color:#e3b341;font-size:var(--bp-text-xs)">⚡ Bugün</span>';
     } else if (s.signal_price && s.signal !== 'BEKLE' && !bpIsSignalFromToday(s.signal_date)) {
       const ep = s.signal_price;
       const ret = ((s.price - ep) / ep * 100);
@@ -2506,7 +2506,7 @@ function renderTable() {
     }
     _lastTier_desktop = _curTierD;
     return _tierHeaderTr + `<tr data-ticker="${_escJsStr(s.ticker)}" class="${isNew ? 'row-new-signal' : ''}" style="cursor:pointer" role="link" tabindex="0" onclick="window.location='/hisse/${_escJsStr(s.ticker)}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location='/hisse/${_escJsStr(s.ticker)}'}">
-      <td><a href="/hisse/${_escJsStr(s.ticker)}" style="color:inherit;text-decoration:none"><span class="ticker">${_escJsStr(s.ticker)}</span></a>${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — RVOL ≥ 1.20" style="color:var(--bp-volume);font-size:12px">⭐</span>' : ''}${s.low_liquidity ? ' <span tabindex="0" data-tip="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:11px">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" tabindex="0" data-tip="${_esc(s.anomaly.reason)}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
+      <td><a href="/hisse/${_escJsStr(s.ticker)}" style="color:inherit;text-decoration:none"><span class="ticker">${_escJsStr(s.ticker)}</span></a>${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — RVOL ≥ 1.20" style="color:var(--bp-volume);font-size:var(--bp-text-sm)">⭐</span>' : ''}${s.low_liquidity ? ' <span tabindex="0" data-tip="Düşük Likidite — 20 günlük ortalama hacim 5M TL altında, slippage ve manipülasyon riski yüksek" style="color:#d29922;font-size:var(--bp-text-xs)">⚠️ Düşük Likidite</span>' : ''}${s.anomaly && s.anomaly.flag ? ` <span class="anomaly-badge" tabindex="0" data-tip="${_esc(s.anomaly.reason)}">⚠ Anomal</span>` : ''}${_sentimentBadge(s.sentiment)} ${wtHtml}${sectorHtml}</td>
       <td><span class="price" id="lp-${_escJsStr(s.ticker)}" data-raw="${s.price}">${fmtPrice}</span></td>
       <td class="hide-mobile"><span class="change-pct ${chgClass}" id="lc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2).replace('.', ',')}%</span></td>
       <td tabindex="0" onmouseenter="showSigTip('${_escJsStr(s.ticker)}',event)" onmouseleave="hideSigTip()" onfocus="showSigTip('${_escJsStr(s.ticker)}',event)" onblur="hideSigTip()"><span class="signal-badge signal-${s.signal}">${s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●'} ${sigLabel(s.signal)}</span>${s.signal === 'AL' && s.change_pct < 0 ? ` <span class="sig-neg-day" tabindex="0" data-tip="Sinyal uzun vadeli, ${_marketOpenNow ? 'bugün günlük düşüş var' : 'son kapanışta düşüş var'}">↓${s.change_pct.toFixed(1).replace('.', ',')}%</span>` : ''}${confHtml}${eqHtml}</td>
@@ -3236,7 +3236,7 @@ function showAlarmToast(msg, type='ok') {
     el.id = 'bp-toast';
     el.setAttribute('role', 'status');
     el.setAttribute('aria-live', 'polite');
-    el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e3a62;color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:8px;padding:8px 16px;font-size:12px;z-index:var(--bp-z-local-toast);transition:opacity .3s;white-space:nowrap';
+    el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1e3a62;color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:8px;padding:8px 16px;font-size:var(--bp-text-sm);z-index:var(--bp-z-local-toast);transition:opacity .3s;white-space:nowrap';
     document.body.appendChild(el);
   }
   el.textContent = msg;
@@ -3406,12 +3406,12 @@ async function submitToastSubscribe() {
       if (typeof window.bpRecordSubscribe === 'function' && json.token) {
         window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
       }
-      if (toast) toast.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + _esc(json.message || 'Abone oldunuz!') + '</div>';
+      if (toast) toast.innerHTML = '<div style="font-size:var(--bp-text-base);color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + _esc(json.message || 'Abone oldunuz!') + '</div>';
       try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz (subscribe)', e); }
       setTimeout(() => dismissSubToast(), 4000);
       // Ana subscription bar'ı da güncelle
       const bar = document.getElementById('subscribeBar');
-      if (bar) bar.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600">✅ ' + _esc(json.message || 'Abone oldunuz!') + '</div>';
+      if (bar) bar.innerHTML = '<div style="font-size:var(--bp-text-base);color:var(--bp-al);font-weight:600">✅ ' + _esc(json.message || 'Abone oldunuz!') + '</div>';
       // subToast(role=dialog) ve subscribeBar aria-live degil — ekran okuyucuya
       // duyurmak icin kanonik showToast() (aria-live=polite) ile de bildir
       showToast('✅ ' + (json.message || 'Abone oldunuz!'), 'success');
@@ -3458,8 +3458,8 @@ async function submitSubscribe() {
         window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
       }
       document.getElementById('subscribeBar').innerHTML =
-        `<div style="font-size:13px;color:var(--bp-al);font-weight:600;flex:1">✅ ${json.message}</div>` +
-        (json.token ? `<a href="/profil?t=${encodeURIComponent(json.token)}" style="color:var(--bp-brand);font-size:12px;text-decoration:none;border:1px solid rgba(var(--bp-brand-rgb),0.3);padding:5px 11px;border-radius:6px;font-weight:600;flex-shrink:0">Profili Tamamla →</a>` : '');
+        `<div style="font-size:var(--bp-text-base);color:var(--bp-al);font-weight:600;flex:1">✅ ${json.message}</div>` +
+        (json.token ? `<a href="/profil?t=${encodeURIComponent(json.token)}" style="color:var(--bp-brand);font-size:var(--bp-text-sm);text-decoration:none;border:1px solid rgba(var(--bp-brand-rgb),0.3);padding:5px 11px;border-radius:6px;font-weight:600;flex-shrink:0">Profili Tamamla →</a>` : '');
     } else {
       showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'), 'error');
       btn.textContent = origText;
@@ -3586,7 +3586,7 @@ async function loadGundem(newsOnly) {
     if (!cardsEl) return;
     const items = Array.isArray(newsData?.items) ? newsData.items : [];
     if (items.length === 0) {
-      cardsEl.innerHTML = '<div style="color:var(--bp-text3);font-size:12px;padding:12px 0;">Şu an güncel haber bulunamadı.</div>';
+      cardsEl.innerHTML = '<div style="color:var(--bp-text3);font-size:var(--bp-text-sm);padding:12px 0;">Şu an güncel haber bulunamadı.</div>';
     } else {
       // render each card defensively — one broken item must not abort all cards
       const cardHtmls = items.map(item => {
@@ -3602,7 +3602,7 @@ async function loadGundem(newsOnly) {
       const bodyEl  = document.getElementById('bilancoMiniBody');
       if (!bodyEl) { /* ok */ }
       else if (periods.length === 0) {
-        bodyEl.innerHTML = '<div style="font-size:11px;color:var(--bp-text3)">Yaklaşan dönem bulunamadı.</div>';
+        bodyEl.innerHTML = '<div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Yaklaşan dönem bulunamadı.</div>';
       } else {
         bodyEl.innerHTML = periods.slice(0,3).map(p => {
           const isActive = p.status === 'active';
@@ -3629,7 +3629,7 @@ async function loadGundem(newsOnly) {
   } catch(e) {
     console.warn('loadGundem error:', e);
     const c = document.getElementById('gundemCards');
-    if (c) c.innerHTML = '<div style="color:var(--bp-text3);font-size:12px;padding:12px 0;">Gündem yüklenemedi.</div>';
+    if (c) c.innerHTML = '<div style="color:var(--bp-text3);font-size:var(--bp-text-sm);padding:12px 0;">Gündem yüklenemedi.</div>';
   } finally {
     _hisseLoading = false;
   }
@@ -3817,7 +3817,7 @@ function showSigTip(ticker, ev) {
     if (s.vol_ratio != null && s.vol_ratio >= 2) {
       html += `<div class="sig-tip-row"><span class="sig-tip-ck" style="color:#e3b341">!</span><span class="sig-tip-lbl" style="color:#e3b341">Hacim ×${s.vol_ratio} — yükselme takip edilmeli</span></div>`;
     }
-    html += `<div style="color:#8b949e;font-size:11px;margin-top:6px">Trend henüz net değil</div>`;
+    html += `<div style="color:#8b949e;font-size:var(--bp-text-xs);margin-top:6px">Trend henüz net değil</div>`;
   } else {
     indsList.forEach(ind => {
       const ok = (s.signal === 'AL' && ind.bull) || (s.signal === 'SAT' && ind.bear);

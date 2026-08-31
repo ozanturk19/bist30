@@ -54,7 +54,7 @@
     border-radius:var(--bp-radius-md);
     padding: 10px 12px;
     color: var(--bp-text);
-    font-size: 16px;
+    font-size: var(--bp-text-lg);
     font-family: inherit;
     text-transform: uppercase;
   } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */

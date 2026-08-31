@@ -14,7 +14,7 @@
   .sum-green{ color:#3fb950; } .sum-red{ color:#f85149; } .sum-blue{ color:#58a6ff; }
 
   .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; }
-  .add-bar input { background:#21262d; border:1px solid #30363d; color:#e6edf3; border-radius:var(--bp-radius); padding:7px 12px; font-size:16px; outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
+  .add-bar input { background:#21262d; border:1px solid #30363d; color:#e6edf3; border-radius:var(--bp-radius); padding:7px 12px; font-size:var(--bp-text-lg); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
   .add-bar input:focus { border-color:#58a6ff; }
   .add-bar input { width:140px; }
   .add-bar input[type=number] { width:130px; }

@@ -190,7 +190,7 @@
     <div id="artSubForm" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <input id="artSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
         style="background:var(--bp-bg);border:1px solid var(--bp-bkl-bd);border-radius:var(--bp-radius-7);padding:8px 12px;
-               color:#e6edf3;font-size:16px;outline:none;width:210px;font-family:inherit;"
+               color:#e6edf3;font-size:var(--bp-text-lg);outline:none;width:210px;font-family:inherit;"
         onkeydown="if(event.key==='Enter')artSubmitSub()"
         onfocus="this.style.borderColor='#1f6feb'" onblur="this.style.borderColor='var(--bp-bkl-bd)'">
       <button onclick="artSubmitSub()"
@@ -267,7 +267,7 @@
       const price  = s.price != null ? (+s.price).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—';
       return `<a href="/hisse/${t}" class="rel-stock-card" title="${escapeHtml(s.name||t)}">
         <div class="rel-stock-ticker">${t}</div>
-        <div class="rel-stock-price">${price} <span style="color:${chgClr};font-size:11px">${chg}</span></div>
+        <div class="rel-stock-price">${price} <span style="color:${chgClr};font-size:var(--bp-text-xs)">${chg}</span></div>
         <span class="rel-stock-sig ${sig}">${sigLbl}</span>
       </a>`;
     }).filter(Boolean).join('');
@@ -364,12 +364,12 @@ async function artSubmitSub() {
     });
     const data = await res.json();
     if (data.ok) {
-      formEl.innerHTML = '<div style="color:#3fb950;font-size:13px;font-weight:600">✅ ' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
+      formEl.innerHTML = '<div style="color:#3fb950;font-size:var(--bp-text-base);font-weight:600">✅ ' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
     } else {
-      formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">' + _escSub(data.error || data.message || 'Bir hata oluştu.') + '</div>';
+      formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:var(--bp-text-base)">' + _escSub(data.error || data.message || 'Bir hata oluştu.') + '</div>';
     }
   } catch(e) {
-    formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:13px">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</div>';
+    formEl.innerHTML = '<div style="color:var(--bp-sat);font-size:var(--bp-text-base)">Bağlantı hatası — lütfen daha sonra tekrar deneyin.</div>';
   }
 }
 

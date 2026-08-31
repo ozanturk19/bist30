@@ -1039,7 +1039,7 @@
   </div>
   <div style="display:flex;gap:7px;align-items:center" id="hisseSubForm">
     <input id="hisseSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
-      style="background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);padding:6px 11px;border-radius:var(--bp-radius-7);font-size:16px;font-family:inherit;outline:none;transition:border-color .15s;width:200px"
+      style="background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);padding:6px 11px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-lg);font-family:inherit;outline:none;transition:border-color .15s;width:200px"
       onfocus="this.style.borderColor='var(--bp-brand)'" onblur="this.style.borderColor='var(--bp-border)'"
       onkeydown="if(event.key==='Enter')hisseSubscribe()">
     <button onclick="hisseSubscribe()"
@@ -1081,7 +1081,7 @@ async function hisseSubscribe() {
     const j = await r.json();
     const cta = document.getElementById('hisseSubCta');
     if (j.ok) {
-      cta.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + escHtml(j.message||'Kaydınız alındı!') + '</div>';
+      cta.innerHTML = '<div style="font-size:var(--bp-text-base);color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + escHtml(j.message||'Kaydınız alındı!') + '</div>';
       setTimeout(() => { if(cta) cta.style.display='none'; }, 4000);
     } else {
       btn.textContent = 'Abone Ol'; btn.disabled = false;
@@ -1547,7 +1547,7 @@ function buildChart(d) {
     const l12 = v12  ?? d.ema12.at(-1)?.value;
     const l99 = v99_ ?? d.ema99.at(-1)?.value;
     const datePart = dateStr
-      ? `<span style="color:var(--bp-text3);margin-right:8px;font-size:11px">${dateStr}</span>`
+      ? `<span style="color:var(--bp-text3);margin-right:8px;font-size:var(--bp-text-xs)">${dateStr}</span>`
       : '';
     legEl.innerHTML =
       datePart +
@@ -1685,7 +1685,7 @@ function renderSummary(s, signalData) {
   /* Sinyal kartı */
   document.getElementById('icSignal').innerHTML = icon +  // label bp-hero-card'da gosteriliyor
     /* CPO-535 #36: is_premium (RVOL ≥ 1.20 backtest-onaylı) → "⭐ Hacim Onaylı" chip */
-    (signalData && signalData.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="display:inline-block;margin-left:4px;font-size:11px;color:var(--bp-volume);background:var(--bp-volume-bg);padding:1px 6px;border-radius:8px;border:1px solid var(--bp-volume-bd);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
+    (signalData && signalData.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="display:inline-block;margin-left:4px;font-size:var(--bp-text-xs);color:var(--bp-volume);background:var(--bp-volume-bg);padding:1px 6px;border-radius:8px;border:1px solid var(--bp-volume-bd);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
   /* Sinyal date/bars — signalData'dan */
   if (signalData) {
     /* CPO-1335: `|| 1` fallback kaldırıldı — bilinmeyen bar sayısı sessizce
@@ -1705,7 +1705,7 @@ function renderSummary(s, signalData) {
                         ageColor === 'yellow' ? '#d29922' :
                         ageColor === 'orange' ? '#f0883e' :
                         ageColor === 'red' ? '#f85149' : '#8b949e';
-    const ageHtml = ageLabel ? ` <span style="color:${ageHexColor};font-size:11px;margin-left:6px" data-tip="Sinyal yaşı: ${ageLabel}" tabindex="0">${ageEmoji} ${ageLabel}</span>` : '';
+    const ageHtml = ageLabel ? ` <span style="color:${ageHexColor};font-size:var(--bp-text-xs);margin-left:6px" data-tip="Sinyal yaşı: ${ageLabel}" tabindex="0">${ageEmoji} ${ageLabel}</span>` : '';
     document.getElementById('icDate').innerHTML =
       (isNew ? '<span style="color:#e3b341">⚡ Bugün</span>'
              : date + ' · ' + bpSignalAgeText(signalData.signal_date)) + ageHtml;
@@ -1720,9 +1720,9 @@ function renderSummary(s, signalData) {
       const retSign = ret >= 0 ? '+' : '';
       const retColor = ret >= 0 ? '#00e290' : '#f85149';
       document.getElementById('icEntry').innerHTML =
-        fmt(ep) + ` <span style="font-size:11px;color:${retColor}">(${retSign}${ret.toFixed(1).replace('.', ',')}%)</span>`;
+        fmt(ep) + ` <span style="font-size:var(--bp-text-xs);color:${retColor}">(${retSign}${ret.toFixed(1).replace('.', ',')}%)</span>`;
     } else if (s.signal !== 'BEKLE' && isNew) {
-      document.getElementById('icEntry').innerHTML = '<span style="color:#e3b341;font-size:12px">⚡ Bugün oluştu</span>';
+      document.getElementById('icEntry').innerHTML = '<span style="color:#e3b341;font-size:var(--bp-text-sm)">⚡ Bugün oluştu</span>';
     } else {
       document.getElementById('icEntry').textContent = '—';
       document.getElementById('icEntryLbl').textContent = 'Aktif sinyal yok';
@@ -1753,7 +1753,7 @@ function renderSummary(s, signalData) {
         section.style.display = 'block';
         const grid = document.getElementById('entryAnalysisGrid');
         if (grid) {
-          grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:13px;padding:8px 2px;line-height:1.6">Bu hisse için şu an aktif bir sinyal yok, giriş analizi hesaplanmadı. Yeni sinyal oluştuğunda bu bölüm otomatik güncellenir.</div>';
+          grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">Bu hisse için şu an aktif bir sinyal yok, giriş analizi hesaplanmadı. Yeni sinyal oluştuğunda bu bölüm otomatik güncellenir.</div>';
         }
       }
       return;
@@ -1769,7 +1769,7 @@ function renderSummary(s, signalData) {
           const msg = !signalData
             ? 'Sinyal aktif — giriş analizi yükleniyor…'
             : 'Bu sinyal için giriş analizi şu an hesaplanamadı, veri yetersiz.';
-          grid.innerHTML = `<div style="grid-column:1/-1;color:var(--bp-text3);font-size:13px;padding:8px 2px;line-height:1.6">${msg}</div>`;
+          grid.innerHTML = `<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">${msg}</div>`;
         }
       }
       return;
@@ -1798,7 +1798,7 @@ function renderSummary(s, signalData) {
       const rrBarEl = document.getElementById('rrBarContainer');
       if (rrBarEl) rrBarEl.innerHTML = '';
       const rrLevelsEl = document.getElementById('rrLevels');
-      if (rrLevelsEl) rrLevelsEl.innerHTML = `<div style="color:var(--bp-text3);font-size:12px;padding:2px 0;line-height:1.5">BIST'te açığa satış pratikte uygulanamadığı için SAT sinyalinde somut giriş/hedef/stop seviyeleri gösterilmiyor.</div>`;
+      if (rrLevelsEl) rrLevelsEl.innerHTML = `<div style="color:var(--bp-text3);font-size:var(--bp-text-sm);padding:2px 0;line-height:1.5">BIST'te açığa satış pratikte uygulanamadığı için SAT sinyalinde somut giriş/hedef/stop seviyeleri gösterilmiyor.</div>`;
     } else {
       /* Giriş Değerlendirmesi */
       const eq = signalData.entry_quality;
@@ -1815,7 +1815,7 @@ function renderSummary(s, signalData) {
       // Faz 1 #5: Bilanço uyarısı (7 gün içinde kesin tarih varsa)
       if (signalData.earnings_warning) {
         const ew = signalData.earnings_warning;
-        noteHtml += `<br><span style="margin-top:8px;display:inline-block;background:rgba(210,153,34,0.12);border:1px solid rgba(210,153,34,0.4);border-radius:6px;padding:5px 10px;color:#d29922;font-size:12px;font-weight:600" data-tip="Bilanço açıklaması fiyatta volatilite yaratabilir, pozisyon önce kapatılması düşünülebilir" tabindex="0">⚠️ ${ew.message}</span>`;
+        noteHtml += `<br><span style="margin-top:8px;display:inline-block;background:rgba(210,153,34,0.12);border:1px solid rgba(210,153,34,0.4);border-radius:6px;padding:5px 10px;color:#d29922;font-size:var(--bp-text-sm);font-weight:600" data-tip="Bilanço açıklaması fiyatta volatilite yaratabilir, pozisyon önce kapatılması düşünülebilir" tabindex="0">⚠️ ${ew.message}</span>`;
       }
       const eqNoteEl = document.getElementById('eqNote');
       if (eqNoteEl) eqNoteEl.innerHTML = noteHtml;
@@ -1848,7 +1848,7 @@ function renderSummary(s, signalData) {
           // entry_quality/kovalama uyarısıyla çelişebiliyordu. Sadece sinyal başından R/R kalıyor.
           const rrSig = signalData.rr_signal;
           const rrRowsHtml = (rrSig != null) ? `
-            <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:11px;font-variant-numeric:tabular-nums">
+            <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:var(--bp-text-xs);font-variant-numeric:tabular-nums">
               <div style="display:flex;justify-content:space-between;color:#8b949e">
                 <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">R/R</a></span>
                 <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2).replace('.', ',')}x</strong>
@@ -1869,7 +1869,7 @@ function renderSummary(s, signalData) {
                 <strong class="bp-al-text">${fmt(tp1)}</strong>
                 <br>
                 <span style="color:var(--bp-brand);font-size:10px">TP2 (3R)</span>
-                <strong style="color:var(--bp-brand);font-size:11px"> ${fmt(tp2)}</strong>
+                <strong style="color:var(--bp-brand);font-size:var(--bp-text-xs)"> ${fmt(tp2)}</strong>
               </div>
             </div>` + rrRowsHtml;
         }
@@ -2082,7 +2082,7 @@ function renderHistory(history, currentPrice) {
   const _SAT_TIP = 'SAT sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez';
   tbody.innerHTML = history.map((h, idx) => {
     const icon = h.signal === 'AL' ? '▲' : '▼';
-    let retHtml = '<td style="color:var(--bp-text3);font-size:11px">—</td>';
+    let retHtml = '<td style="color:var(--bp-text3);font-size:var(--bp-text-xs)">—</td>';
 
     if (idx === 0) {
       // Aktif sinyal — API'den gelen anlık fiyatla karşılaştır
@@ -2091,11 +2091,11 @@ function renderHistory(history, currentPrice) {
         const ret  = ((curP - h.price) / h.price * 100);
         const sign = ret >= 0 ? '+' : '';
         if (h.signal === 'SAT') {
-          retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-family:var(--bp-font-mono);font-size:12px" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span></td>`;
+          retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span></td>`;
         } else {
           const isGain = ret > 0;
           const clr    = isGain ? 'var(--bp-al)' : (Math.abs(ret) < 1 ? 'var(--bp-text3)' : 'var(--bp-sat)');
-          retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:12px">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span></td>`;
+          retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)">${sign}${ret.toFixed(1)}% <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span></td>`;
         }
       }
     } else {
@@ -2105,18 +2105,18 @@ function renderHistory(history, currentPrice) {
         const ret  = ((exitH.price - h.price) / h.price * 100);
         const sign = ret >= 0 ? '+' : '';
         if (h.signal === 'SAT') {
-          retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-family:var(--bp-font-mono);font-size:12px" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1)}%</td>`;
+          retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1)}%</td>`;
         } else {
           const isGain = ret > 0;
           const clr    = isGain ? 'var(--bp-al)' : (Math.abs(ret) < 1 ? 'var(--bp-text3)' : 'var(--bp-sat)');
-          retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:12px">${sign}${ret.toFixed(1)}%</td>`;
+          retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)">${sign}${ret.toFixed(1)}%</td>`;
         }
       }
     }
 
     return `<tr>
       <td>${h.date}</td>
-      <td><span class="signal-badge signal-${h.signal}" style="font-size:11px">${icon} ${sigLabel(h.signal)}</span></td>
+      <td><span class="signal-badge signal-${h.signal}" style="font-size:var(--bp-text-xs)">${icon} ${sigLabel(h.signal)}</span></td>
       <td style="font-variant-numeric:tabular-nums;font-family:var(--bp-font-mono)">${fmt(h.price)} ₺</td>
       ${retHtml}
     </tr>`;
@@ -2176,7 +2176,7 @@ function _showChartStatus(msg, withRetryBtn) {
   el.innerHTML = withRetryBtn
     ? '<span style="color:var(--bp-text3)">' + msg + '</span> ' +
       '<button type="button" onclick="loadChart(0)" style="margin-left:8px;background:#1f6feb;' +
-      'color:#fff;border:0;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer">Tekrar dene</button>'
+      'color:#fff;border:0;border-radius:6px;padding:4px 12px;font-size:var(--bp-text-sm);cursor:pointer">Tekrar dene</button>'
     : '<div class="spinner"></div> ' + msg;
   // CPO-DEV2-045 #3: nihai hata (retry tükendi) — hpSignal placeholder'ı
   // gerçek bir sinyalmiş gibi ("● Yatay") kalmasın diye görünür "veri yok" işaretine çevir.
@@ -2264,7 +2264,7 @@ async function loadChart(retry) {
           if (_sseEs) { _sseEs.close(); _sseEs = null; }
           const _lt0 = document.getElementById('liveTs');
           if (_lt0) {
-            _lt0.style.cssText = 'font-size:11px;color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
+            _lt0.style.cssText = 'font-size:var(--bp-text-xs);color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
             _lt0.innerHTML = '<span class="live-dot-idle"></span>Piyasa kapalı';
           }
         }
@@ -2380,7 +2380,7 @@ async function loadNews(retryCount) {
         kapA.href = data.kap_url;
         kapA.target = '_blank';
         kapA.rel = 'noopener';
-        kapA.style.cssText = 'font-size:11px;color:var(--bp-text3);background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.2);border-radius:var(--bp-radius-4);padding:2px 7px;text-decoration:none;margin-left:auto;white-space:nowrap;';
+        kapA.style.cssText = 'font-size:var(--bp-text-xs);color:var(--bp-text3);background:rgba(139,148,158,.1);border:1px solid rgba(139,148,158,.2);border-radius:var(--bp-radius-4);padding:2px 7px;text-decoration:none;margin-left:auto;white-space:nowrap;';
         kapA.innerHTML = 'KAP <span aria-hidden="true">↗</span>';
         sourceEl.appendChild(kapA);
       }
@@ -2470,7 +2470,7 @@ async function loadSignalExplanation(retryCount) {
         loadEl.style.display = 'flex';
         setTimeout(() => loadSignalExplanation(retryCount + 1), 6000);
       } else {
-        loadEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
+        loadEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:var(--bp-text-sm);margin-left:6px">Tekrar dene</button>';
         loadEl.style.display = 'flex';
         _sigExplainActive = false;
       }
@@ -2483,7 +2483,7 @@ async function loadSignalExplanation(retryCount) {
     if (retryCount < 2) {
       setTimeout(() => loadSignalExplanation(retryCount + 1), 8000);
     } else {
-      loadEl.innerHTML = 'Açıklama yüklenemedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:12px;margin-left:6px">Tekrar dene</button>';
+      loadEl.innerHTML = 'Açıklama yüklenemedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:var(--bp-text-sm);margin-left:6px">Tekrar dene</button>';
       loadEl.style.display = 'flex';
       _sigExplainActive = false;
     }
@@ -2522,10 +2522,10 @@ async function loadSignalStory() {
       return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--bp-surface2)">
         <span style="font-size:10px;color:${clr};background:rgba(0,0,0,.15);border:1px solid currentColor;border-radius:3px;padding:1px 5px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escHtml(ev.class)}</span>
         <div style="flex:1;min-width:0">
-          <a href="${safeHref(ev.url)}" target="_blank" rel="noopener" style="font-size:13px;color:var(--bp-text2);text-decoration:underline;text-decoration-color:rgba(201,209,217,.3);text-underline-offset:2px;line-height:1.4;display:block">${escHtml(summary)}</a>
-          <div style="font-size:11px;color:var(--bp-text3);margin-top:2px">${ev.date.substring(0,10)} · <span style="color:${delta <= 0 ? 'var(--bp-text3)' : 'var(--bp-brand)'}">${deltaStr}</span></div>
+          <a href="${safeHref(ev.url)}" target="_blank" rel="noopener" style="font-size:var(--bp-text-base);color:var(--bp-text2);text-decoration:underline;text-decoration-color:rgba(201,209,217,.3);text-underline-offset:2px;line-height:1.4;display:block">${escHtml(summary)}</a>
+          <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:2px">${ev.date.substring(0,10)} · <span style="color:${delta <= 0 ? 'var(--bp-text3)' : 'var(--bp-brand)'}">${deltaStr}</span></div>
         </div>
-        ${ev.url ? `<a href="${safeHref(ev.url)}" target="_blank" rel="noopener" aria-label="Haberi aç" style="font-size:11px;color:var(--bp-brand);opacity:.6;flex-shrink:0;margin-top:2px">↗</a>` : ''}
+        ${ev.url ? `<a href="${safeHref(ev.url)}" target="_blank" rel="noopener" aria-label="Haberi aç" style="font-size:var(--bp-text-xs);color:var(--bp-brand);opacity:.6;flex-shrink:0;margin-top:2px">↗</a>` : ''}
       </div>`;
     }).join('');
 
@@ -2588,7 +2588,7 @@ async function loadKapDisclosures() {
     }).join('');
 
     if (items.length > 20) {
-      listEl.innerHTML += `<div style="padding:10px 0;text-align:center;font-size:12px;color:var(--bp-text3)">
+      listEl.innerHTML += `<div style="padding:10px 0;text-align:center;font-size:var(--bp-text-sm);color:var(--bp-text3)">
         +${items.length - 20} daha fazla bildirim —
         <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q=${TICKER}" target="_blank" rel="noopener" style="color:var(--bp-brand);text-decoration:underline;text-decoration-color:rgba(var(--bp-brand-rgb),.45);text-underline-offset:2px">KAP'ta görüntüle ↗</a>
       </div>`;
@@ -2609,7 +2609,7 @@ async function loadKapDisclosures() {
     }
 
   } catch(e) {
-    loadEl.innerHTML = '<span style="font-size:12px;color:var(--bp-text3)">KAP bildirimleri yüklenemedi.</span>';
+    loadEl.innerHTML = '<span style="font-size:var(--bp-text-sm);color:var(--bp-text3)">KAP bildirimleri yüklenemedi.</span>';
   }
 }
 
@@ -2721,7 +2721,7 @@ async function loadMTF() {
 
     /* CPO-983 Opsiyon B: 4 ayrı boş "Veri yok" kutusu yerine tek anlamlı placeholder */
     if (tfs.every(tf => !json[tf.key])) {
-      grid.innerHTML = '<div style="grid-column:1/-1;background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:16px;text-align:center;color:var(--bp-text3);font-size:13px;line-height:1.6">Bu hisse için zaman dilimi verisi henüz yok. Sinyal oluştuğunda burada güncellenir.</div>';
+      grid.innerHTML = '<div style="grid-column:1/-1;background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:16px;text-align:center;color:var(--bp-text3);font-size:var(--bp-text-base);line-height:1.6">Bu hisse için zaman dilimi verisi henüz yok. Sinyal oluştuğunda burada güncellenir.</div>';
       return;
     }
 
@@ -2729,8 +2729,8 @@ async function loadMTF() {
       const d = json[tf.key];
       if (!d) return `
         <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:14px;text-align:center">
-          <div style="font-size:12px;color:var(--bp-text3);margin-bottom:6px">${tf.label}</div>
-          <div style="font-size:12px;color:var(--bp-text3)">Veri yok</div>
+          <div style="font-size:var(--bp-text-sm);color:var(--bp-text3);margin-bottom:6px">${tf.label}</div>
+          <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Veri yok</div>
         </div>`;
 
       const bg   = sigBg(d.signal);
@@ -2748,15 +2748,15 @@ async function loadMTF() {
 
       return `
         <div style="background:${bg};border:1px solid ${bord};border-radius:8px;padding:14px;text-align:center">
-          <div style="font-size:12px;color:#b8b8c0;margin-bottom:8px">${tf.label}</div>
+          <div style="font-size:var(--bp-text-sm);color:#b8b8c0;margin-bottom:8px">${tf.label}</div>
           <div style="font-size:20px;font-weight:800;color:${col}">${arr} ${lbl}</div>
-          <div style="font-size:12px;color:#b8b8c0;margin-top:4px">ADX ${d.adx}</div>
+          <div style="font-size:var(--bp-text-sm);color:#b8b8c0;margin-top:4px">ADX ${d.adx}</div>
           ${scoreBar}
         </div>`;
     }).join('');
   } catch(e) {
     const grid = document.getElementById('mtfGrid');
-    if (grid) grid.innerHTML = '<div style="color:var(--bp-text3);font-size:12px">Yüklenemedi</div>';
+    if (grid) grid.innerHTML = '<div style="color:var(--bp-text3);font-size:var(--bp-text-sm)">Yüklenemedi</div>';
   }
 }
 loadMTF();
@@ -2798,7 +2798,7 @@ function startSSE() {
       chgEl.className   = 'header-chg ' + (d.change_pct > 0 ? 'pos' : d.change_pct < 0 ? 'neg' : 'neu');
 
       const _lt = document.getElementById('liveTs');
-      _lt.style.cssText = 'font-size:11px;color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
+      _lt.style.cssText = 'font-size:var(--bp-text-xs);color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
       _lt.innerHTML = '<span class="live-dot-pulse"></span>' + msg.ts;
     } catch(_) { console.warn('SSE fiyat guncelleme hatasi', _); }
   };
@@ -2807,7 +2807,7 @@ function startSSE() {
     _sseEs = null;
     const _lt = document.getElementById('liveTs');
     if (_lt) {
-      _lt.style.cssText = 'font-size:11px;color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
+      _lt.style.cssText = 'font-size:var(--bp-text-xs);color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
       _lt.innerHTML = '<span class="live-dot-idle"></span>bağlantı koptu — yeniden bağlanılıyor…';
     }
     setTimeout(startSSE, _sseRetry);

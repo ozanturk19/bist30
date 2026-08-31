@@ -381,7 +381,7 @@ function goToDate(date) {
     <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px" id="ozSubForm" role="status" aria-live="polite">
       <input id="ozSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
         style="flex:1;background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:var(--bp-radius-7);font-size:16px;font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-lg);font-family:inherit;outline:none;
                transition:border-color .15s;min-width:0"
         onfocus="this.style.borderColor='var(--bp-brand)'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')ozSubmitSub()">
@@ -392,7 +392,7 @@ function goToDate(date) {
         onmouseover="this.style.background='#c8d1ff'" onmouseout="this.style.background='#b8c3ff'">
         Abone Ol
       </button>
-      <span id="ozSubMsg" style="font-size:12px"></span>
+      <span id="ozSubMsg" style="font-size:var(--bp-text-sm)"></span>
     </div>
     <button onclick="document.getElementById('ozSubBar').style.display='none'"
       style="background:none;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-xl);line-height:1;padding:2px 6px;flex-shrink:0"
@@ -487,7 +487,7 @@ async function ozSubmitSub() {
     const form = document.getElementById('ozSubForm');
     const msg  = document.getElementById('ozSubMsg');
     if (data.ok) {
-      if (form) form.innerHTML = '<div style="color:#3fb950;font-size:13px;font-weight:600">✅ ' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
+      if (form) form.innerHTML = '<div style="color:#3fb950;font-size:var(--bp-text-base);font-weight:600">✅ ' + _escSub(data.message || 'Abone oldunuz!') + '</div>';
     } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
       if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">ℹ️ ' + _escSub(data.message) + '</span>';
       if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }

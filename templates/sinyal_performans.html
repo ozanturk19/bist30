@@ -143,7 +143,7 @@
     <div style="display:flex;gap:8px;align-items:center;flex:1.6;min-width:240px" id="btSubForm" role="status" aria-live="polite">
       <input id="btSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
         style="flex:1;background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:var(--bp-radius-7);font-size:16px;font-family:inherit;outline:none;
+               padding:8px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-lg);font-family:inherit;outline:none;
                transition:border-color .15s;min-width:0"
         onfocus="this.style.borderColor='var(--bp-brand)'" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')btSubmitSub()">
@@ -152,7 +152,7 @@
                font-size:var(--bp-text-base);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">
         Abone Ol
       </button>
-      <span id="btSubMsg" style="font-size:12px"></span>
+      <span id="btSubMsg" style="font-size:var(--bp-text-sm)"></span>
     </div>
   </div>
   <script>
@@ -177,7 +177,7 @@
       const form = document.getElementById('btSubForm');
       const msg = document.getElementById('btSubMsg');
       if (data.ok) {
-        if (form) form.innerHTML = '<div style="color:var(--bp-al);font-size:13px;font-weight:600">✅ ' + _escBtSub(data.message || 'Abone oldunuz!') + '</div>';
+        if (form) form.innerHTML = '<div style="color:var(--bp-al);font-size:var(--bp-text-base);font-weight:600">✅ ' + _escBtSub(data.message || 'Abone oldunuz!') + '</div>';
       } else if (data.message && data.message.indexOf('zaten kayıtlı') !== -1) {
         if (msg) msg.innerHTML = '<span style="color:var(--bp-text3)">ℹ️ ' + _escBtSub(data.message) + '</span>';
         if (btn) { btn.disabled = false; btn.textContent = 'Abone Ol'; }
@@ -269,13 +269,13 @@
     <span>(Sinyal başı fiyata göre)</span>
   </div>
   <div class="perf-filter-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 14px;padding:10px;background:#161b22;border:1px solid #30363d;border-radius:var(--bp-radius-md)">
-    <input type="text" id="perfSearch" placeholder="🔍 Hisse ara…" oninput="perfApplyFilter()" style="flex:1;min-width:140px;padding:6px 10px;background:var(--bp-bg);border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:16px" aria-label="Hisse ara">
-    <select id="perfSigFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:var(--bp-bg);border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:16px" aria-label="Sinyal filtresi">
+    <input type="text" id="perfSearch" placeholder="🔍 Hisse ara…" oninput="perfApplyFilter()" style="flex:1;min-width:140px;padding:6px 10px;background:var(--bp-bg);border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:var(--bp-text-lg)" aria-label="Hisse ara">
+    <select id="perfSigFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:var(--bp-bg);border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:var(--bp-text-lg)" aria-label="Sinyal filtresi">
       <option value="">Tüm sinyaller</option>
       <option value="AL">▲ Güçlü Trend</option>
       <option value="SAT">▼ Trend Bozuldu</option>
     </select>
-    <select id="perfRetFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:var(--bp-bg);border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:16px" aria-label="Getiri filtresi">
+    <select id="perfRetFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:var(--bp-bg);border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:var(--bp-text-lg)" aria-label="Getiri filtresi">
       <option value="">Tüm getiriler</option>
       <option value="pos">Pozitif (kazanan)</option>
       <option value="neg">Negatif (zarar)</option>
