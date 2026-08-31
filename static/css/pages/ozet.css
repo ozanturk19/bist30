@@ -151,7 +151,6 @@
     padding: 20px;
     font-size: var(--bp-text-sm);
     color: var(--bp-text3);
-    border-top: 1px solid var(--bp-border);
     margin-top: 20px;
   }
 

@@ -60,7 +60,7 @@
 
   .updated { font-size: var(--bp-text-sm); color: var(--bp-text3); margin-bottom: 28px; }
 
-  footer { text-align: center; padding: 20px; font-size: var(--bp-text-sm); color: var(--bp-text3); border-top: 1px solid #21262d; margin-top: 32px; }
+  footer { text-align: center; padding: 20px; font-size: var(--bp-text-sm); color: var(--bp-text3); margin-top: 32px; }
   footer a { color: #8b949e; text-decoration: none; margin: 0 6px; }
   footer a:hover { color: #e6edf3; }
 

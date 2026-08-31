@@ -294,7 +294,6 @@
   /* ── 52 Haftalık Bar ── */
   .week52-bar {
     padding: 10px 18px 14px;
-    border-top: 1px solid var(--bp-surface2);
   }
   .week52-label {
     font-size: var(--bp-text-xs);
@@ -871,7 +870,6 @@
     padding: 20px;
     font-size: var(--bp-text-sm);
     color: var(--bp-text3);
-    border-top: 1px solid var(--bp-surface2);
   }
 
   /* Flash animasyonları */

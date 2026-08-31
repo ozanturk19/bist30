@@ -114,7 +114,7 @@
   }
   .pf-fetch-error-retry:hover { background:rgba(var(--bp-sat-rgb),.12); }
 
-  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
+  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); margin-top:32px; }
   footer a { color:#8b949e; text-decoration:none; }
   @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
 

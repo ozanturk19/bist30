@@ -36,7 +36,7 @@
     max-width: 540px;
     margin: 0 auto;
   }
-  footer { text-align: center; padding: 20px; font-size: var(--bp-text-sm); color: var(--bp-text3); border-top: 1px solid var(--bp-border-subtle); margin-top: 32px; }
+  footer { text-align: center; padding: 20px; font-size: var(--bp-text-sm); color: var(--bp-text3); margin-top: 32px; }
   .form-card {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);

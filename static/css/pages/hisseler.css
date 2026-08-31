@@ -27,7 +27,6 @@
     padding: 20px;
     font-size: var(--bp-text-sm);
     color: #6e7681;
-    border-top: 1px solid #21262d;
     margin-top: 32px;
   }
   footer a { color: #8b949e; text-decoration: none; }
@@ -78,8 +77,7 @@
   .hh-tab.active { color: #f0f6fc; border-bottom-color: #58a6ff; }
   .hh-tab:hover { color: #e6edf3; }
 
-  .hh-section { padding: 16px 0 8px; border-top: 1px solid #1c2128; scroll-margin-top: 68px; }
-  .hh-section:first-child { border-top: none; }
+  .hh-section { padding: 16px 0 8px; scroll-margin-top: 68px; }
   .hh-section h2 {
     font-size: var(--bp-text-15); font-weight: 700; color: #f0f6fc;
     margin: 0 0 12px; display: flex; align-items: center; gap: 10px;

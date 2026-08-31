@@ -11,7 +11,7 @@
   .art-cat  { font-size:var(--bp-text-sm); color:#58a6ff; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
   .art-title{ font-size:var(--bp-text-28); font-weight:800; color:#f0f6fc; line-height:1.3; margin:10px 0 12px; }
   .art-desc { font-size:var(--bp-text-15); color:#8b949e; line-height:1.6; margin-bottom:14px; }
-  .art-meta { display:flex; gap:16px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; padding-top:12px; }
+  .art-meta { display:flex; gap:16px; font-size:var(--bp-text-sm); color:var(--bp-text3); padding-top:12px; }
 
   .prose { color:#c9d1d9; }
   .prose h2 { font-size:var(--bp-text-xl); font-weight:700; color:#f0f6fc; margin:32px 0 12px; padding-bottom:8px; border-bottom:1px solid #21262d; }
@@ -34,7 +34,7 @@
   .prose th, .prose td { padding:8px 10px; text-align:left; border-top:1px solid #30363d; font-size:var(--bp-text-base); }
   .prose th { background:#21262d; font-weight:600; color:#f0f6fc; }
 
-  .related { margin-top:40px; padding-top:28px; border-top:1px solid #21262d; }
+  .related { margin-top:40px; padding-top:28px; }
   .related-title { font-size:var(--bp-text-base); color:#8b949e; text-transform:uppercase; letter-spacing:.5px; font-weight:600; margin-bottom:14px; }
   .related-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
   .rel-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-md); padding:14px; text-decoration:none; display:block; transition:all .15s; }
@@ -57,7 +57,7 @@
   .disclaimer { background:rgba(var(--bp-sat-rgb),.07); border:1px solid rgba(var(--bp-sat-rgb),.2); border-radius:var(--bp-radius-md); padding:14px 16px; color:#c9d1d9; font-size:var(--bp-text-base); margin-top:32px; }
 
   /* SSS Akordeon */
-  .faq-section { margin-top:36px; padding-top:28px; border-top:1px solid #21262d; }
+  .faq-section { margin-top:36px; padding-top:28px; }
   .faq-section-title { font-size:var(--bp-text-lg); font-weight:700; color:#f0f6fc; margin-bottom:14px; }
   .faq-item { border:1px solid #30363d; border-radius:var(--bp-radius-md); margin-bottom:8px; overflow:hidden; transition:border-color .15s; }
   .faq-item:hover { border-color:var(--bp-border2); }
@@ -102,7 +102,7 @@
   }
   .cta-btn-secondary:hover { background:rgba(59,130,246,.18); }
 
-  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
+  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); margin-top:32px; }
   footer a { color:#8b949e; text-decoration:none; }
   @media(max-width:600px) { .container{padding:16px;} .art-title{font-size:var(--bp-text-22);} }
 

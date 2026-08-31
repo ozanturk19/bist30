@@ -303,7 +303,6 @@
     flex-wrap: wrap;
     padding: 14px 8px 10px;
     margin: 14px 0 0;
-    border-top: 1px solid rgba(48,54,61,0.5);
     font-size: var(--bp-text-sm);
     color: var(--bp-text2);
   }
@@ -981,7 +980,7 @@
 
   footer {
     text-align: center; padding: 24px; color: var(--bp-text3);
-    font-size: var(--bp-text-sm); border-top: 1px solid var(--bp-border); margin-top: 24px;
+    font-size: var(--bp-text-sm); margin-top: 24px;
   }
 
   /* ── Dual Endeks Kartları ─────────────────────────── */
