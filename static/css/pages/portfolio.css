@@ -23,6 +23,12 @@
   .add-lbl { font-size:var(--bp-text-sm); color:#8b949e; }
 
   .pf-table { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  /* CPO-DEV2-100: overflow-x:auto kosulsuz uygulanmisti, geregi olmayan genislikte bile
+     thead sticky referansini bozuyordu. >=900px'te tablo viewport'a sigar (mobilde
+     zaten #pfMobileCards devrede, table gizli) - scroll ihtiyaci kalmiyor. */
+  @media (min-width:900px) {
+    .pf-table { overflow-x: visible; }
+  }
   table { width:100%; border-collapse:collapse; }
   thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; position:sticky; top:60px; z-index:var(--bp-z-dropdown); }
   tbody tr { border-bottom:1px solid #21262d; }
@@ -111,6 +117,33 @@
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); border-top:1px solid #21262d; margin-top:32px; }
   footer a { color:#8b949e; text-decoration:none; }
   @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
+
+  /* ── CPO-DEV2-100: Yol A - mobilde tablo yerine kart listesi (tarama.html
+     #mobileResultCards ile ayni desen - <=768px'te tablo tamamen gizlenir,
+     kart listesi devreye girer; sticky-header masaüstü fix'i (yukarida) bu
+     yuzden sadece 769-899px "tablet" araligini kapsiyor). ── */
+  #pfMobileCards { display:none; flex-direction:column; gap:10px; padding:4px 0 12px; }
+  @media (max-width:768px) {
+    #pfTable { display:none !important; }
+    #pfMobileCards { display:flex; }
+  }
+  .pf-mcard {
+    background:#161b22; border:1px solid var(--bp-bkl-bd); border-radius:var(--bp-radius-lg);
+    padding:12px 14px;
+  }
+  .pf-mtop { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px; }
+  .pf-mticker { font-size:var(--bp-text-15); font-weight:700; color:#f0f6fc; text-decoration:none; }
+  .pf-mticker:hover { color:#58a6ff; }
+  .pf-mtop-right { display:flex; align-items:center; gap:8px; }
+  .pf-mprice-row, .pf-mdetail-row { display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; }
+  .pf-mprice-row { margin-bottom:10px; }
+  .pf-mdetail-row { padding-top:10px; border-top:1px solid var(--bp-border-subtle); }
+  .pf-metric { display:flex; flex-direction:column; gap:2px; }
+  .pf-metric-label { font-size:var(--bp-text-2xs); color:#8b949e; text-transform:uppercase; letter-spacing:.4px; }
+  .pf-mprice-row .pf-metric span { font-size:var(--bp-text-base); font-weight:600; }
+  .pf-mdate { font-size:var(--bp-text-sm); color:#8b949e; }
+  .pf-mspark { margin-top:10px; }
+  .pf-mentry { margin-top:8px; }
 
   /* F6: Sparkline + Sinyal Asistanı + XU030 */
   .td-spark { width:90px; padding:6px 10px; vertical-align:middle; }

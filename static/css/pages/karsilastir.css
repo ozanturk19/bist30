@@ -54,6 +54,13 @@
     border-radius:var(--bp-radius-lg);
     border: 1px solid var(--bp-border);
   }
+  /* CPO-DEV2-100: overflow-x:auto kosulsuz uygulanmisti, geregi olmayan genislikte bile
+     thead sticky referansini bozuyordu. >=900px'te ana icerik sutunu .compare-table'in
+     min-width:600px'inden genis - scroll ihtiyaci kalmiyor (karsilastir 2-4 hisse
+     matrisi oldugu icin dar/mobil genislikte hala kasitli yatay scroll gerekiyor). */
+  @media (min-width:900px) {
+    .compare-wrap { overflow-x: visible; }
+  }
   table.compare-table {
     width: 100%; border-collapse: collapse; min-width: 600px;
   }

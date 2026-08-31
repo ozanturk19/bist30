@@ -196,6 +196,12 @@
 
   /* ── Tablo ── */
   .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  /* CPO-DEV2-100: overflow-x:auto kosulsuz uygulanmisti, geregi olmayan genislikte bile
+     thead sticky referansini bozuyordu. >=900px'te tablo zaten viewport'a sigar (mobilde
+     zaten #mobileResultCards devrede, table gizli) - scroll ihtiyaci kalmiyor. */
+  @media (min-width:900px) {
+    .table-wrap { overflow-x: visible; }
+  }
   table { width:100%; border-collapse:collapse; }
   thead th {
     font-size:var(--bp-text-2xs); color:var(--text2); text-transform:uppercase; letter-spacing:.5px;

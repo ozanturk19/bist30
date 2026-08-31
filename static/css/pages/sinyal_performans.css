@@ -36,6 +36,45 @@
   .ticker-link { font-weight:700; color:#f0f6fc; text-decoration:none; }
   .ticker-link:hover { color:#58a6ff; }
 
+  /* CPO-DEV2-100: overflow-x:auto kosulsuz uygulanmisti, geregi olmayan genislikte
+     bile thead sticky referansini bozuyordu. >=900px'te tablo viewport'a sigar
+     (mobilde zaten kart goruntusune geciliyor, asagida). */
+  @media (min-width:900px) {
+    .tbl-wrap { overflow-x: visible; }
+  }
+
+  /* CPO-DEV2-100: Yol A - mobilde tablo satirlari yerine kart listesi. Perf tablosunun
+     (perfTbody) siralama/filtre JS'i (perfSortBy/perfApplyFilter) gercek <tr> elemanlarini
+     tasiyip gizliyor - o mantigi bozmamak icin ayri bir kart listesi kurmak yerine ayni
+     <tr>/<td> CSS ile karta donusturulur (data-label ile etiketlenir). thead, dokunma
+     alani (sort butonlari) kaybolmasin diye yatay kaydirilabilir kompakt bir seride kalir. */
+  @media (max-width:768px) {
+    .tbl-wrap table, .tbl-wrap tbody, .tbl-wrap tr, .tbl-wrap td { display:block; }
+    .tbl-wrap thead {
+      display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap;
+      border-bottom:1px solid var(--bp-bkl-bd); position:static;
+    }
+    .tbl-wrap thead tr { display:flex; }
+    .tbl-wrap thead th {
+      display:inline-flex; flex-shrink:0; position:static; white-space:nowrap;
+    }
+    .tbl-wrap tbody tr {
+      border:1px solid var(--bp-bkl-bd); border-radius:var(--bp-radius-lg); background:#161b22;
+      padding:8px 12px; margin:10px; margin-bottom:0;
+    }
+    .tbl-wrap tbody tr:last-child { margin-bottom:10px; }
+    .tbl-wrap tbody tr:hover { background:#161b22; }
+    .tbl-wrap td {
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:7px 2px; border-bottom:1px solid var(--bp-border-subtle); white-space:normal; text-align:right;
+    }
+    .tbl-wrap td:last-child { border-bottom:none; }
+    .tbl-wrap td::before {
+      content:attr(data-label); font-size:var(--bp-text-2xs); color:#8b949e;
+      text-transform:uppercase; letter-spacing:.4px; text-align:left; flex-shrink:0;
+    }
+  }
+
   /* Signal badges */
   .sig-al  { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; background:#1a4731; color:var(--bp-al); border:1px solid #238636; }
   .sig-sat { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
