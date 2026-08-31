@@ -4315,23 +4315,12 @@ def api_data():
     _resp_updated_at = _dqs["updated_at"]
     # ── /stale-safe fields ───────────────────────────────────────────────────────
     # CPO-690 Adım 1: xu100_spark — son 30 günlük BIST100 kapanış fiyatları
+    # CPO-1461: mtime-guard'lı disk-reload — web worker'da _xu100_chart_cache
+    # yfinance ile hiç güncellenmiyor (REFRESH_WORKER=web guard), tek kaynak
+    # leader'ın (refresh_xu100_chart) yazdığı chart_xu100.json.
+    _load_xu100_chart_from_disk()
     with _lock:
         _xu100_ohlc = ((_xu100_chart_cache.get("data") or {}).get("ohlc") or [])[-30:]
-    if not _xu100_ohlc:
-        # Fallback: disk'ten lazy-load (restart sonrası cron henüz çalışmamış olabilir)
-        try:
-            _xu100_disk_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chart_xu100.json")
-            with open(_xu100_disk_path, encoding="utf-8") as _xu100_f:
-                _xu100_disk = json.load(_xu100_f)
-            _xu100_ohlc = ((_xu100_disk.get("data") or {}).get("ohlc") or [])[-30:]
-            if _xu100_ohlc:  # in-memory cache'e yaz — sonraki request'lerde disk hit yok
-                with _lock:
-                    if not _xu100_chart_cache.get("data"):
-                        _xu100_chart_cache.update({"data": _xu100_disk.get("data"),
-                                                   "updated_at": _xu100_disk.get("updated_at", "")})
-        except Exception as e:
-            logger.warning("XU100 disk fallback okunamadı: %s", e)
-            _xu100_ohlc = []
     xu100_spark = [round(p["close"], 2) for p in _xu100_ohlc if p.get("close")]
     _resp_data = {
         "stocks":       stocks,
@@ -5406,6 +5395,34 @@ def get_chart_data():
 _chart_cache       = {"data": None, "updated_at": None}
 _xu100_chart_cache = {"data": None, "updated_at": None}
 _stock_chart_cache = {}          # {ticker: {"data": ..., "ts": float, "updated_at": str, "v": str}}
+
+# CPO-1461: XU100 disk köprüsü. REFRESH_WORKER=web worker'lar yfinance ile
+# XU100 grafiğini hiç çekmiyor (bkz _serial_chart_refresh_with_event guard) —
+# tek kaynak leader'ın (REFRESH_WORKER=1, refresh_xu100_chart) yazdığı bu
+# dosya. Önceden hiç yazılmıyordu: dosya 31 Mayıs'ta bir kereliğine oluşmuş,
+# _xu100_chart_cache o zamandan beri hep aynı bayat snapshot'a kilitleniyordu.
+_XU100_DISK_PATH   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chart_xu100.json")
+_xu100_disk_mtime  = 0.0
+
+
+def _load_xu100_chart_from_disk():
+    """Diskten XU100 chart cache'i yükle — mtime guard (değişmemişse I/O yok)."""
+    global _xu100_disk_mtime
+    try:
+        if not os.path.exists(_XU100_DISK_PATH):
+            return
+        mt = os.path.getmtime(_XU100_DISK_PATH)
+        if mt == _xu100_disk_mtime:
+            return
+        d = _tp_read_json(_XU100_DISK_PATH)
+        if not d or not d.get("data"):
+            return
+        with _lock:
+            _xu100_chart_cache["data"]       = d["data"]
+            _xu100_chart_cache["updated_at"] = d.get("updated_at", "")
+        _xu100_disk_mtime = mt
+    except Exception as e:
+        logger.warning("_load_xu100_chart_from_disk: %s", e)
 
 # SPEC-DECOUPLING-v2-PHASE3 (CPO-437): Per-ticker chart cache disk path.
 # Staging: BIST_STAGING=1 ENV → data-staging/charts/, prod → data/charts/ (Phase-3 sonrası).
@@ -7518,9 +7535,16 @@ def refresh_xu100_chart():
         if ohlc and (ohlc[-1].get("close", 0) or 0) < 5000:
             logger.warning("XU100 chart REJECTED: last close=%.2f scale invalid", ohlc[-1].get("close"))
             return
+        _updated_at = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
         with _lock:
             _xu100_chart_cache["data"] = d
-            _xu100_chart_cache["updated_at"] = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
+            _xu100_chart_cache["updated_at"] = _updated_at
+        # CPO-1461: web worker'lara (REFRESH_WORKER=web) ulaşan tek kanal —
+        # onlar bu fonksiyonu hiç çağırmıyor, _load_xu100_chart_from_disk ile okuyor.
+        try:
+            _tp_write_json(_XU100_DISK_PATH, {"data": d, "updated_at": _updated_at}, atomic=True)
+        except Exception as e:
+            logger.warning("refresh_xu100_chart: disk yazımı başarısız: %s", e)
         logger.info("XU100 chart cache güncellendi (price=%.2f)", price)
     except Exception as e:
         logger.error("refresh_xu100_chart: %s", e, exc_info=True)
@@ -7579,6 +7603,9 @@ def _chart_response_with_macro_summary(ticker_base, cache_obj):
 
 @app.route("/api/chart/XU100")
 def api_chart_xu100():
+    # CPO-1461: her istekte mtime-guard'lı disk-reload — leader'ın en son
+    # yazdığı XU100 verisini bu web worker'a taşıyan tek kanal (bkz yukarı).
+    _load_xu100_chart_from_disk()
     return _chart_response_with_macro_summary("XU100", _xu100_chart_cache)
 
 
