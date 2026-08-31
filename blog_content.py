@@ -6495,7 +6495,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   {
     "slug": "borsada-vergi-rehberi-hisse-kazanci",
     "title": "Borsada Vergi Rehberi: Hisse Senedi Kazancı Nasıl Vergilendirilir?",
-    "desc": "BIST'te hisse senedi alım-satım kazancı vergisi, iki yıl muafiyeti, temettü vergisi ve 2025-2026 güncel vergi kuralları rehberi.",
+    "desc": "BIST'te hisse senedi alım-satım kazancı vergisi, temettü vergisi ve genel vergi kuralları hakkında rehber. Güncel oranlar için mali müşavirinize danışın.",
     "date": "2026-05-03",
     "mins": 6,
     "cat": "Temel Kavramlar",
@@ -6503,26 +6503,10 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Borsa kazançları vergilendiriliyor mu? Bu soru, BIST'e yeni katılan yatırımcıların en sık sorduğu sorular arasındadır. Cevap hem evet hem hayır — detaylar önemli. Türkiye'de hisse senedi vergi kuralları karmaşık görünse de birkaç temel prensip anlaşıldığında netleşir.</p>
 
 <h2>Hisse Senedi Alım-Satım Kazancı Vergisi</h2>
-<p>2024-2025 itibarıyla geçerli temel kural:</p>
-<p><strong>BIST'te işlem gören hisse senetleri için:</strong> Hisse senedini aldıktan 2 yıl sonra satarsanız alım-satım kârından gelir vergisi ödenmez. Bu "iki yıl muafiyeti" veya "hisse senedi istisnası" olarak bilinir.</p>
-<p>Ancak 2 yıl dolmadan satılırsa kâr, beyan sınırını aşıyorsa yıllık gelir vergisi beyannamesiyle beyan edilmeli ve vergilendirilmelidir.</p>
-
-<h2>İki Yıl Kuralı Detayları</h2>
-<p>Uygulamada dikkat edilmesi gereken noktalar:</p>
-<ul>
-  <li>İki yıl hesabı alım tarihinden itibaren, hisse bazında tutulur (FIFO — ilk giren ilk çıkar).</li>
-  <li>Aynı hisseden birden fazla alım yapıldıysa her alımın kendi 2 yıllık süresi vardır.</li>
-  <li>Halka arz (IPO) hisseleri için farklı kurallar uygulanabilir — güncel mevzuatı kontrol edin.</li>
-  <li>Vadeli işlem ve kaldıraçlı ürünler hisse senedinden farklı şekilde vergilendirilir.</li>
-</ul>
+<p>BIST'te işlem gören hisse senetlerinin alım-satım kazancı vergilendirmesi, elde tutma süresi ve mevzuattaki güncel istisnalara göre değişebilir. Mevzuat zaman içinde değiştiğinden burada somut bir oran veya süre şartı iddia etmiyoruz — güncel kuralları aracı kurumunuzdan veya bir mali müşavirden teyit edin.</p>
 
 <h2>Temettü Vergisi</h2>
-<p>Hisse senedi alım-satım kârından farklı olarak, temettü geliri vergiye tabidir:</p>
-<ul>
-  <li>Türkiye mukimi gerçek kişiler için tam mükellef Türk kurumlarından alınan temettünün %50'si gelir vergisinden muaf tutulur.</li>
-  <li>Kalan %50 üzerinden stopaj (kaynakta kesinti) uygulanır. 2025 itibarıyla bu oran %10'dur.</li>
-  <li>Stopaj, genellikle aracı kurum veya şirket tarafından otomatik kesilir.</li>
-</ul>
+<p>Hisse senedi alım-satım kârından farklı olarak, temettü geliri ayrı bir vergilendirme rejimine tabidir ve stopaj oranı zaman içinde değişebilir. Güncel oran ve beyan eşiği için aracı kurumunuzdan veya Gelir İdaresi Başkanlığı'ndan (gib.gov.tr) güncel bilgi alın.</p>
 
 <h2>Kâr-Zarar Mahsubu</h2>
 <p>Aynı takvim yılı içinde bazı hisselerden kâr, bazılarından zarar ettiyseniz:</p>
@@ -6541,9 +6525,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 """,
     "faqs": [
       {"q": "BIST hisse kazancı her zaman vergiden muaf mı?",
-       "a": "Hayır. İki yılı doldurmadan satılan hisse senetlerinden elde edilen kâr vergilendirilir. İki yılı dolduran hisselerden elde edilen alım-satım kârı ise gelir vergisinden muaf tutulur. Temettü geliri ise iki yıl kuralına tabi değildir ve ayrı bir vergilendirme rejimine tabidir."},
-      {"q": "İki yıl dolmadan hisse satarsam ne olur?",
-       "a": "İki yıl dolmadan satıştan elde ettiğiniz kâr, diğer menkul kıymet gelirleriyle birlikte yıllık gelir vergisi beyan sınırını aşıyorsa beyan edilip vergilendirilmesi gerekebilir. Kesintisiz elde tutma süresi 2 yılı doldurana kadar bu vergi sorumluluğu devam eder."},
+       "a": "Vergi durumu elde tutma süresi, işlem hacmi ve mevzuattaki güncel istisnalara göre değişebilir. Kesin ve güncel bilgi için aracı kurumunuzdan veya bir mali müşavirden teyit alın."},
       {"q": "Zarar eden hissemi vergi için yıl sonunda satsam faydalı mı?",
        "a": "Vergi optimizasyonu açısından yıl içinde zararlı pozisyonları kapatarak kâr eden pozisyonlarla mahsup etmek vergi yükünü azaltabilir. Ancak bu kararı vermeden önce söz konusu hissenin gerçek yatırım değerini, likidasyon maliyetini ve geri alım olasılığını değerlendirmeniz gerekir. Saf vergi optimizasyonu amacıyla iyi bir hisseyi satmak uzun vadeli getiriye zarar verebilir."},
       {"q": "Temettü vergisi nasıl ödenir?",
@@ -7106,7 +7088,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Rebalancing ne sıklıkla yapılmalı?",
        "a": "Araştırmalar, çok sık rebalancing (aylık) ile çok seyrek rebalancing (yıllık üzeri) arasında optimal nokta olarak 3-6 aylık aralıkları işaret ediyor. Eşik bazlı yaklaşımla birleştirildiğinde piyasa hareketi büyük olduğunda otomatik müdahale, sakin dönemlerde ise gereksiz işlem yapılmaz."},
       {"q": "Rebalancing vergi yükümlülüğü doğurur mu?",
-       "a": "Türkiye'de hisse satışı durumunda iki yıl kuralı geçerliyse vergi yükümlülüğü oluşabilir (iki yılı dolmamış hisseler için). Bu nedenle vergi avantajlı rebalancing için uzun süre tutulan pozisyonlardan çıkmak tercih edilebilir. Yatırım fonu veya ETF üzerinden rebalancing daha düşük vergi yüküyle yapılabilir."},
+       "a": "Hisse satışının vergi yükümlülüğü doğurup doğurmayacağı elde tutma süresi ve güncel mevzuata göre değişebilir; kesin bir kural varsaymadan önce mali müşavirinizden teyit alın. Yatırım fonu veya ETF üzerinden rebalancing bazı durumlarda daha düşük işlem/vergi yüküyle yapılabilir."},
       {"q": "Rebalancing yerine yeni para ekleyerek dengelemek mümkün mü?",
        "a": "Evet — 'katkıyla yeniden dengeleme' (contribution-based rebalancing) işlem maliyetini ve vergi yükümlülüğünü sıfırlar. Yeni para eklendiğinde, az ağırlıklı olan varlığa yatırım yapılır. Portföye düzenli katkı yapan yatırımcılar için en verimli yöntemdir."},
       {"q": "Portföyde kaç farklı hisse tutmak ideali?",
