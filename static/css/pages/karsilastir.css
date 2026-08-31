@@ -264,6 +264,47 @@
   }
   .help-icon:hover, .help-icon:focus-visible { color: var(--bp-text); border-color: var(--bp-border2); }
 
+  /* ── CPO-DEV2-101: mobilde matris yerine per-ticker kart listesi (tarama/portfolio
+     ile ayni <=768px esigi — 769-899px "tablet" araliginda hala yatay-kaydirilabilir
+     matris gosterilir, cunku o genislikte matris zaten sigar/kullanilabilir). ── */
+  .cmp-mcards { display: none; flex-direction: column; gap: 12px; }
+  @media (max-width: 768px) {
+    .compare-wrap { display: none !important; }
+    .cmp-mcards { display: flex; }
+  }
+  .cmp-mcard {
+    background: var(--bp-surface); border: 1px solid var(--bp-bkl-bd);
+    border-radius: var(--bp-radius-lg); padding: 14px 16px;
+  }
+  .cmp-mcard-winner {
+    border: 2px solid var(--bp-gold);
+    box-shadow: 0 0 14px rgba(var(--bp-gold-rgb),.18);
+  }
+  .cmp-mcard-notfound { opacity: .6; }
+  .cmp-mtop {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+    margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--bp-border-subtle);
+  }
+  .cmp-mticker-link { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+  .cmp-mticker { font-size: var(--bp-text-xl); font-weight: 800; font-family: var(--bp-font-mono); color: var(--bp-text); }
+  .cmp-mname { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; }
+  .cmp-mscore { display: flex; justify-content: center; padding: 4px 0 14px; }
+  .cmp-msep {
+    font-size: var(--bp-text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: #58a6ff; background: linear-gradient(90deg, rgba(31,111,235,.12), rgba(31,111,235,.04));
+    padding: 8px 10px; margin: 10px -16px 6px; border-top: 1px solid rgba(31,111,235,.25);
+  }
+  .cmp-mrow {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 7px 0; border-bottom: 1px solid var(--bp-border-subtle); font-size: var(--bp-text-sm);
+  }
+  .cmp-mrow:last-child { border-bottom: none; }
+  .cmp-mrow-label {
+    color: var(--bp-text3); font-size: var(--bp-text-xs); text-transform: uppercase;
+    letter-spacing: .4px; flex-shrink: 0;
+  }
+  .cmp-mrow-val { text-align: right; }
+
   /* ── Responsive ── */
   @media (max-width: 600px) {
     header { padding: 12px 16px; gap: 10px; }

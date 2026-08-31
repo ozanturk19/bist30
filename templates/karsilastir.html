@@ -334,6 +334,46 @@ function buildTable(stocks) {
   </div>`;
 }
 
+// CPO-DEV2-101: karsilastir bir SUTUN=hisse matrisi oldugu icin tarama/portfolio'daki
+// "satir=hisse" kart deseni burada dogrudan uygulanamaz — bunun yerine her hisse kendi
+// karti olur, karti icinde TUM metrikler (ROW_LABELS) dikey liste halinde gosterilir.
+// Ayni renderCell/renderScoreCell/ROW_LABELS kullanilir, ikinci bir veri/etiket kaynagi
+// icat edilmez. Masaustunde gizli (bkz. karsilastir.css @media max-width:768px).
+function buildMobileCards(stocks) {
+  const active = stocks.filter(s => s.found);
+  if (active.length === 0) return '';
+
+  const scores = stocks.map(s => s.found ? (s.signal_strength || 0) : -1);
+  const maxScore = Math.max(...scores);
+  const winnerIdx = maxScore > 0 ? scores.indexOf(maxScore) : -1;
+
+  const cards = stocks.map((s, i) => {
+    if (!s.found) {
+      return `<div class="cmp-mcard cmp-mcard-notfound">
+        <div class="cmp-mtop"><span class="cmp-mticker">${escapeHtml(s.ticker)}</span><span class="muted" style="font-size:12px">Bulunamadı</span></div>
+      </div>`;
+    }
+    const isWinner = (i === winnerIdx) && active.length > 1;
+    const header = `
+      <div class="cmp-mtop">
+        <a href="/hisse/${s.ticker}" class="cmp-mticker-link">
+          <span class="cmp-mticker">${escapeHtml(s.ticker)}</span>
+          <span class="cmp-mname">${escapeHtml(s.name||'')}</span>
+        </a>
+        ${s.kap_url ? `<a href="${s.kap_url}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
+      </div>`;
+    const scoreHtml = `<div class="cmp-mscore">${renderScoreCell(s, isWinner)}</div>`;
+    const rowsHtml = ROW_LABELS.map(({key, label, isSep, help}) => {
+      if (isSep) return `<div class="cmp-msep">${label}</div>`;
+      const helpHtml = help ? ` <span class="help-icon" tabindex="0" data-tip="${help}">i</span>` : '';
+      return `<div class="cmp-mrow"><span class="cmp-mrow-label">${label}${helpHtml}</span><span class="cmp-mrow-val">${renderCell(key, s)}</span></div>`;
+    }).join('');
+    return `<div class="cmp-mcard${isWinner ? ' cmp-mcard-winner' : ''}">${header}${scoreHtml}${rowsHtml}</div>`;
+  }).join('');
+
+  return `<div class="cmp-mcards" role="list" aria-label="Karşılaştırma sonuçları, hisse başına kart">${cards}</div>`;
+}
+
 let _compareSeq = 0;  /* hizli tekrar-cagrida eski istek yenisini ezmesin (bug-hunt) */
 
 async function doCompare(opts) {
@@ -383,7 +423,7 @@ async function doCompare(opts) {
         `<div class="empty-state"><h2>Hata</h2><p>${escapeHtml(msg)}</p></div>`;
       return;
     }
-    document.getElementById('compareResult').innerHTML = buildTable(data.stocks || []);
+    document.getElementById('compareResult').innerHTML = buildTable(data.stocks || []) + buildMobileCards(data.stocks || []);
   } catch(e) {
     if (mySeq !== _compareSeq) return;
     document.getElementById('compareResult').innerHTML =
