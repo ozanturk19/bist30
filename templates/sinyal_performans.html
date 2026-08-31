@@ -68,28 +68,10 @@
       <div class="ozet-metric-sub">Şu an açık pozisyon</div>
     </div>
   </div>
-
-  <!-- Özet kartlar -->
-  <div class="stat-grid">
-    <div class="stat-card">
-      <div class="stat-num c-green">%{{ bt.al.win_rate|tr_num }}</div>
-      <div class="stat-lbl"><span aria-hidden="true">▲</span> Güçlü Trend Kazanma</div>
-      <div class="stat-sub">{{ bt.al.count }} sinyal incelendi</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num c-green">{{ bt.al.avg_ret|tr_num }}%</div>
-      <div class="stat-lbl"><span aria-hidden="true">▲</span> Güçlü Trend Ort. Getiri</div>
-      <div class="stat-sub">Max {{ bt.al.best|tr_num }}% / Min {{ bt.al.worst|tr_num }}%</div>
-    </div>
-    {# T3.7: SAT (short) win_rate/avg_ret KALDIRILDI — ürün long-only, kısa pozisyon açılmadığı için
-       "kazanma oranı"/"ortalama getiri" bu yönde yanıltıcı. bt.sat verisi backend'de duruyor,
-       yalnız burada render edilmiyor. #}
-    <div class="stat-card">
-      <div class="stat-num c-blue">{{ bt.tickers_used }}</div>
-      <div class="stat-lbl">İncelenen Hisse</div>
-      <div class="stat-sub">{{ bt.computed_at }}</div>
-    </div>
-  </div>
+  <div class="stat-sub" style="text-align:center;margin:-4px 0 24px">Son hesaplama: {{ bt.computed_at }}</div>
+  {# T3.7: SAT (short) win_rate/avg_ret KALDIRILDI — ürün long-only, kısa pozisyon açılmadığı için
+     "kazanma oranı"/"ortalama getiri" bu yönde yanıltıcı. bt.sat verisi backend'de duruyor,
+     yalnız burada render edilmiyor. #}
 
   <!-- Risk Metrikleri -->
   <div class="sec-head">
