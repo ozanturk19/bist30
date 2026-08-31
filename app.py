@@ -10130,7 +10130,7 @@ def api_portfolio_save(token):
         # sessizce kaydetmeyi reddet (client tarafta cost=0 -> pnlPct=NaN render edilmesini önler)
         price_val = entry.get("price", entry.get("buy_price"))
         lot_val = entry.get("lot", entry.get("quantity"))
-        if (price_val is not None and price_val <= 0) or (lot_val is not None and lot_val <= 0):
+        if price_val is None or price_val <= 0 or lot_val is None or lot_val <= 0:
             continue
         # CPO-DEV2-085(1): client (portfolio.html) Number.isInteger ile kesirli lot'u
         # reddediyor ama sunucu sadece float'a cevirip clamp'liyordu -> dogrudan API
@@ -11464,7 +11464,7 @@ def api_subscribe():
 @app.route("/profil")
 def profil_page():
     """Profil tamamla sayfası — token ile kullanıcıyı tanı."""
-    token = request.args.get("t", "")
+    token = request.args.get("t") or request.cookies.get("bp_sub", "")
     if not token:
         # CPO-1190 K9: çıplak 400 yerine markalı açıklama sayfası — kullanıcı
         # bu sayfaya yalnızca e-posta linkiyle (?t=token) gelmeli. Küçük

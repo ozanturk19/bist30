@@ -1575,12 +1575,18 @@ window.addEventListener('popstate', function(e) {
   // Not: localStorage'a daha sonra save edilecek — fallback resolve olduktan sonra
 })();
 
+let _advPanelRelease = null;
 function toggleAdvPanel() {
   const panel = document.getElementById('advPanel');
   const btn   = document.getElementById('advToggle');
+  const opening = !panel.classList.contains('open');
   panel.classList.toggle('open');
   btn.classList.toggle('active');
   btn.setAttribute('aria-expanded', panel.classList.contains('open') ? 'true' : 'false');
+  if (_advPanelRelease) { _advPanelRelease(); _advPanelRelease = null; }
+  if (opening && window.bpTrapFocus) {
+    _advPanelRelease = window.bpTrapFocus(panel, toggleAdvPanel);
+  }
 }
 
 function setAdv(key, val, btn) {

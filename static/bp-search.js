@@ -605,7 +605,7 @@
         bar.style.display = 'none';
       } else {
         bar.innerHTML =
-          '<a href="/profil?t=' + encodeURIComponent(user.token || readBpSubCookie() || '') + '" style="color:#b8c3ff;font-size:12px;text-decoration:none;border:1px solid rgba(184,195,255,0.3);padding:5px 11px;border-radius:6px;font-weight:600;margin-left:auto;flex-shrink:0">Profili Tamamla →</a>';
+          '<a href="/profil" style="color:#b8c3ff;font-size:12px;text-decoration:none;border:1px solid rgba(184,195,255,0.3);padding:5px 11px;border-radius:6px;font-weight:600;margin-left:auto;flex-shrink:0">Profili Tamamla →</a>';
       }
     }
 
