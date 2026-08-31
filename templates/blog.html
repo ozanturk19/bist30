@@ -36,7 +36,7 @@
   <div class="blog-search-wrap">
     <svg class="blog-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input class="blog-search" id="blogSearch" type="text" placeholder="Makale ara… (başlık, konu, kategori)" aria-label="Makale ara"
-           oninput="filterBlog()" autocomplete="off" spellcheck="false">
+           oninput="blogSearchInput()" autocomplete="off" spellcheck="false">
   </div>
 
   <div class="cat-filters">
@@ -103,6 +103,15 @@ function loadMoreBlog() {
    bağımsız filterBlog()'una hiç taşınmamıştı). İ/I'yı toLowerCase()'den ÖNCE düz 'i'ye
    çevirerek kaçının. */
 function trFold(s) { return String(s || '').replace(/İ/g, 'i').replace(/I/g, 'i').toLowerCase(); }
+
+// bug-hunt r149: blogSearch input debounce'suzdu (tarama.html fSearch/
+// index.html setSearch emsalleriyle tutarsiz) - 180ms debounce eklendi,
+// kategori tiklama/DOMContentLoaded/loadMore filterBlog() cagrilari anlik kalir.
+let _blogSearchTimer;
+function blogSearchInput() {
+  clearTimeout(_blogSearchTimer);
+  _blogSearchTimer = setTimeout(filterBlog, 180);
+}
 
 function filterBlog() {
   const q = trFold(document.getElementById('blogSearch').value).trim();

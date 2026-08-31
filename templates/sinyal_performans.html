@@ -269,7 +269,7 @@
     <span>(Sinyal başı fiyata göre)</span>
   </div>
   <div class="perf-filter-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 14px;padding:10px;background:#161b22;border:1px solid #30363d;border-radius:var(--bp-radius-md)">
-    <input type="text" id="perfSearch" placeholder="🔍 Hisse ara…" oninput="perfApplyFilter()" style="flex:1;min-width:140px;padding:6px 10px;background:var(--bp-bg);border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:var(--bp-text-lg)" aria-label="Hisse ara">
+    <input type="text" id="perfSearch" placeholder="🔍 Hisse ara…" oninput="perfSearchInput()" style="flex:1;min-width:140px;padding:6px 10px;background:var(--bp-bg);border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:var(--bp-text-lg)" aria-label="Hisse ara">
     <select id="perfSigFilter" onchange="perfApplyFilter()" style="padding:6px 10px;background:var(--bp-bg);border:1px solid #30363d;border-radius:var(--bp-radius);color:#e6edf3;font-size:var(--bp-text-lg)" aria-label="Sinyal filtresi">
       <option value="">Tüm sinyaller</option>
       <option value="AL">▲ Güçlü Trend</option>
@@ -573,6 +573,14 @@ window.addEventListener('pageshow', (ev) => {
   // bug-hunt r23: perfSearch/perfSigFilter/perfRetFilter hicbir yerde tanimli degildi
   // (ReferenceError, filtreler hic calismiyordu) — perfSortBy ile ayni dataset okuma
   // desenini kullanan calisan bir uygulama eklendi.
+  // bug-hunt r149: perfSearch input debounce'suzdu (tarama.html fSearch/
+  // index.html setSearch emsalleriyle tutarsiz) - 180ms debounce eklendi,
+  // select onchange'ler (perfSigFilter/perfRetFilter) hala anlik cagiriyor.
+  let _perfSearchTimer;
+  window.perfSearchInput = function() {
+    clearTimeout(_perfSearchTimer);
+    _perfSearchTimer = setTimeout(window.perfApplyFilter, 180);
+  };
   window.perfApplyFilter = function() {
     const searchEl = document.getElementById('perfSearch');
     const sigEl = document.getElementById('perfSigFilter');
