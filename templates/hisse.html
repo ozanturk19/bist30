@@ -1307,7 +1307,17 @@ function toggleHisseWatch() {
         _pending = true;
         _hibWatchToggleInFlight = true;
         fetch(`/api/user-alerts/${TICKER}`, { method: 'DELETE', credentials: 'same-origin' })
-          .catch(e => console.warn('takipten cikarken sunucu alerti silinemedi:', e))
+          .then(r => {
+            // r147 bug-hunt: r.ok kontrolu yoktu, 4xx/5xx sessizce yutuluyordu (fetch
+            // sadece network-level red'de reject eder) - sunucudaki e-posta alerti
+            // silinmemis halde yetim kalabiliyordu, kullanici hic haberdar olmuyordu.
+            // index.html toggleWatch() (bug-hunt r96) emsaliyle ayni ilke.
+            if (!r.ok) _hibToast(TICKER + ' e-posta alerti silinemedi, sunucuda aktif kalmaya devam ediyor', 'warn');
+          })
+          .catch(e => {
+            console.warn('takipten cikarken sunucu alerti silinemedi:', e);
+            _hibToast(TICKER + ' e-posta alerti silinemedi (bağlantı hatası)', 'warn');
+          })
           .finally(() => {
             _hibWatchToggleInFlight = false;
             const _hibBtn2 = document.getElementById('hibBellBtn');
