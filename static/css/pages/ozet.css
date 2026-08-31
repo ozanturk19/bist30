@@ -78,6 +78,31 @@
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 8px;
   }
+
+  /* CPO-DEV2-102: Yatay (bekle) listesi varsayilan daralti — hisse.css'teki
+     (CPO-DEV2-098) .bp-detail-toggle deseniyle tutarli, ayni class adlari */
+  .bp-detail-toggle { margin-bottom: 16px; }
+  .bp-detail-toggle-summary {
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; list-style: none;
+    padding: 14px 16px;
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius-lg);
+    font-size: var(--bp-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: var(--bp-text3);
+    user-select: none;
+    transition: border-color .15s, background .15s;
+  }
+  .bp-detail-toggle-summary::-webkit-details-marker { display: none; }
+  .bp-detail-toggle-summary::marker { content: ""; }
+  .bp-detail-toggle-summary:hover { border-color: var(--bp-border2); background: rgba(255,255,255,.02); }
+  .bp-detail-toggle-chev { color: var(--bp-text3); font-size: var(--bp-text-sm); transition: transform .2s ease; }
+  .bp-detail-toggle[open] .bp-detail-toggle-chev { transform: rotate(180deg); }
+  .bp-detail-toggle-body { padding-top: 16px; }
   .stock-card {
     background: var(--bp-surface2);
     border: 1px solid var(--bp-border);
