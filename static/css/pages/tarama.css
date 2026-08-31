@@ -342,8 +342,10 @@
   .score-bar-fill.plus     { background:#1f6feb; }
   .score-bar-fill.weak     { background:var(--text3); }
 
-  /* TH tooltip (yeni kolon başlıkları) */
-  thead th[data-tooltip] { position:relative; cursor:help; }
+  /* TH tooltip (yeni kolon başlıkları) — position:relative eklemiyoruz,
+     thead th zaten position:sticky (CPO-DEV2-108: relative top:60px'i
+     kalitim alip basligi 60px asagi, ilk satirin ustune itiyordu) */
+  thead th[data-tooltip] { cursor:help; }
   thead th[data-tooltip]:hover::after,
   thead th[data-tooltip]:focus-within::after {
     content: attr(data-tooltip);
