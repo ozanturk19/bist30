@@ -1349,22 +1349,33 @@ function updateHibStarBtn() {
 
 function updateHibBellBtn() {
   const btn = document.getElementById('hibBellBtn');
-  if (!btn) return;
   let w = [];
   try { w = JSON.parse(localStorage.getItem(HIB_WATCH_KEY) || '[]'); } catch(_) { console.warn('updateHibBellBtn: takip listesi okunamadi', _); }
   const inW = Array.isArray(w) && w.includes(TICKER);
-  const lbl = btn.querySelector('.hib-action-lbl');
-  if (inW) {
-    btn.classList.add('active-bell');
-    btn.title = 'Alarm aktif — kapatmak için tıkla';
-    if (lbl) lbl.textContent = 'Alarm aktif ✓';
-  } else {
-    btn.classList.remove('active-bell');
-    btn.title = 'Sinyal değişiminde bildirim al';
-    if (lbl) lbl.textContent = 'Bildirim al';
+  if (btn) {
+    const lbl = btn.querySelector('.hib-action-lbl');
+    if (inW) {
+      btn.classList.add('active-bell');
+      btn.title = 'Alarm aktif — kapatmak için tıkla';
+      if (lbl) lbl.textContent = 'Alarm aktif ✓';
+    } else {
+      btn.classList.remove('active-bell');
+      btn.title = 'Sinyal değişiminde bildirim al';
+      if (lbl) lbl.textContent = 'Bildirim al';
+    }
+    btn.setAttribute('aria-pressed', String(inW));
+    btn.setAttribute('aria-label', inW ? 'Alarm aktif' : 'Bildirim al');
   }
-  btn.setAttribute('aria-pressed', String(inW));
-  btn.setAttribute('aria-label', inW ? 'Alarm aktif' : 'Bildirim al');
+  // r145: alt sabit CTA çubuğundaki (SPEC-017 v2 c3) bpCtaWatch aynı HIB_WATCH_KEY'i
+  // paylaşıyor ama hiçbir yerde güncellenmiyordu — hem aynı-sekme hem çapraz-sekme
+  // (storage event) senkronu bu eksik yüzünden hiç çalışmıyordu.
+  const ctaBtn = document.getElementById('bpCtaWatch');
+  if (ctaBtn) {
+    const ctaLbl = document.getElementById('bpCtaWatchLabel');
+    ctaBtn.classList.toggle('active', inW);
+    ctaBtn.setAttribute('aria-pressed', String(inW));
+    if (ctaLbl) ctaLbl.textContent = inW ? 'Takipte ✓' : 'Takibe Al';
+  }
 }
 
 // CPO-DEV2-088(A) / r121: cok-sekme senkronizasyonu — index.html'deki storage event

@@ -1233,6 +1233,24 @@ function _isValidEndeksData(chart) {
       && typeof lastClose === 'number' && lastClose >= 1000;
 }
 
+/* r145: gercek fetch hatasi (500/timeout/ag) ile normal ilk-yukleme ayni "Grafik
+   yukleniyor..." spinner'ini sonsuza dek gosteriyordu - kullanici arizayla yavas
+   yuklemeyi ayirt edemiyordu. hisse.html'deki _showChartStatus/_MAX_CHART_RETRY
+   desenine benzer, sinirli-retry + gorunur-hata-mesaji eklendi (SPEC-008 L2 ile ayni ilke). */
+const _MAX_INDEX_CHART_ERR = 3;
+let _chart30ErrCount = 0;
+let _chart100ErrCount = 0;
+function _showIndexChartError(msg, retryFnName) {
+  const el = document.getElementById('chartLoading');
+  if (!el) return;
+  el.style.display = '';
+  el.innerHTML = '<span style="color:var(--bp-text3)">' + msg + '</span> ' +
+    '<button type="button" onclick="' + retryFnName + '()" style="margin-left:8px;background:#1f6feb;' +
+    'color:#fff;border:0;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer">Tekrar dene</button>';
+}
+function _retryChart30() { _chart30ErrCount = 0; fetchChart(); }
+function _retryChart100() { _chart100ErrCount = 0; fetchChart100(true); }
+
 /* ── XU030 chart yükle ───────────────────────────── */
 async function fetchChart() {
   try {
@@ -1244,11 +1262,17 @@ async function fetchChart() {
       setTimeout(fetchChart, 8000);
       return;
     }
+    _chart30ErrCount = 0;
     _chartData.xu030 = json.chart;
     renderEndeksCard('XU030', json.chart.summary);
     drawSparkline('spark30', json.chart.ohlc);
     if (_activeSym === 'XU030' && _accOpen) buildCharts(json.chart);
   } catch(e) {
+    _chart30ErrCount++;
+    if (_chart30ErrCount > _MAX_INDEX_CHART_ERR && _activeSym === 'XU030' && _accOpen) {
+      _showIndexChartError('Grafik şu an yüklenemiyor.', '_retryChart30');
+      return;
+    }
     setTimeout(fetchChart, 5000);
   }
 }
@@ -1270,6 +1294,7 @@ async function fetchChart100(isRetry) {
       setTimeout(() => fetchChart100(true), 8000);
       return;
     }
+    _chart100ErrCount = 0;
     _chartData.xu100 = json.chart;
     renderEndeksCard('XU100', json.chart.summary);
     drawSparkline('spark100', json.chart.ohlc);
@@ -1277,6 +1302,11 @@ async function fetchChart100(isRetry) {
     _xu100FetchActive = false;
   } catch(e) {
     if (mySeq !== _chart100Seq) return;
+    _chart100ErrCount++;
+    if (_chart100ErrCount > _MAX_INDEX_CHART_ERR && _activeSym === 'XU100' && _accOpen) {
+      _showIndexChartError('Grafik şu an yüklenemiyor.', '_retryChart100');
+      return;
+    }
     setTimeout(() => fetchChart100(true), 6000);
   }
 }
@@ -1706,8 +1736,14 @@ async function renderMarketSummary(stocks) {
         return;
       }
     } catch (fetchErr) {
+      // r145: gercek fetch hatasi ile "0 yeni sinyal" (gecerli-bos) durumu ayni
+      // sekilde ele alinamaz - eskiden karti tamamen gizliyordu (en az bilgi veren
+      // hal), sessiz-degil-bos durum ise gorunur cumle basiyordu. Simdi hata da
+      // gorunur ama notr bir mesajla kaliyor, bir sonraki fetchData() dongusunde
+      // (60sn) otomatik kendini duzeltir.
       console.warn('market-summary fetch fail:', fetchErr);
-      if (section) section.hidden = true;
+      if (skeleton) skeleton.hidden = true;
+      if (text) text.innerHTML = 'Bugünün özeti şu an yüklenemedi.';
       return;
     }
 
