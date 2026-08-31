@@ -1540,12 +1540,6 @@ function buildChart(d) {
   const candle = BPChart.addCandleSeries(chart);
   candle.setData(d.ohlc);
 
-  /* CPO-DEV2-096: hacim subplot — backend zaten renklendirilmis {time,value,color}
-     donduruyordu, hic tuketilmiyordu. Sequential index'e reindex edilmis (yukarida). */
-  if (d.volume && d.volume.length) {
-    BPChart.addVolumeSeries(chart).setData(d.volume);
-  }
-
   /* EMA legend */
   const legEl = document.getElementById('emaLegend');
   function updateLeg(v12, v99_, dateStr) {

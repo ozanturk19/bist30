@@ -1034,13 +1034,6 @@ async function buildCharts(d) {
   const candle = BPChart.addCandleSeries(chartMain);
   candle.setData(d.ohlc);
 
-  /* CPO-DEV2-096: hacim subplot — backend (_compute_chart_data) her bar icin
-     onceden renklendirilmis {time,value,color} zaten donduruyordu, hic
-     tuketilmiyordu. Kendi (gizli) fiyat eksenine, alt %18'e sikistirilmis. */
-  if (d.volume && d.volume.length) {
-    BPChart.addVolumeSeries(chartMain).setData(d.volume);
-  }
-
   /* Sol üst EMA legend */
   elMain.style.position = 'relative';
   const elLegend = document.createElement('div');
