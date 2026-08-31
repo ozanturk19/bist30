@@ -1260,10 +1260,15 @@ function _hibSafeWriteWatch(arr) {
   }
 }
 
+let _hibWatchToggleInFlight = false;
 function toggleHisseWatch() {
-  // bug-hunt-r126: hizli ardisik tiklamada ayni tur icinde ikinci tetiklemeyi engelle
+  // bug-hunt-r126/r143: eski guard DELETE istegi sonucunu beklemeden ayni senkron
+  // cagri icinde disabled=false'a donuyordu — art arda iki ayri click/tap'e karsi
+  // hicbir koruma saglamiyordu, sunucu alerti sessizce silinebilirken UI 'takipte'
+  // gostermeye devam edebiliyordu. Artik gercek async guard: DELETE tamamlanana
+  // kadar ikinci cagri no-op.
+  if (_hibWatchToggleInFlight) return;
   const _hibBtn = document.getElementById('hibBellBtn');
-  if (_hibBtn && _hibBtn.disabled) return;
   if (_hibBtn) _hibBtn.disabled = true;
   let w;
   try {
@@ -1282,6 +1287,7 @@ function toggleHisseWatch() {
   }
 
   const idx = w.indexOf(TICKER);
+  let _pending = false;
   if (idx >= 0) {
     w.splice(idx, 1);
     if (_hibSafeWriteWatch(w)) {
@@ -1298,8 +1304,15 @@ function toggleHisseWatch() {
         }
       } catch (e) { console.warn('hisse fiyat alarmi temizligi basarisiz:', e); }
       if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) {
+        _pending = true;
+        _hibWatchToggleInFlight = true;
         fetch(`/api/user-alerts/${TICKER}`, { method: 'DELETE', credentials: 'same-origin' })
-          .catch(e => console.warn('takipten cikarken sunucu alerti silinemedi:', e));
+          .catch(e => console.warn('takipten cikarken sunucu alerti silinemedi:', e))
+          .finally(() => {
+            _hibWatchToggleInFlight = false;
+            const _hibBtn2 = document.getElementById('hibBellBtn');
+            if (_hibBtn2) _hibBtn2.disabled = false;
+          });
       }
     }
   } else {
@@ -1310,7 +1323,7 @@ function toggleHisseWatch() {
     }
   }
   updateHibBellBtn();
-  if (_hibBtn) _hibBtn.disabled = false;
+  if (_hibBtn && !_pending) _hibBtn.disabled = false;
 }
 
 function updateHibStarBtn() {

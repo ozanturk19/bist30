@@ -142,8 +142,14 @@ async function submitForm(e) {
     });
     const d = await res.json();
     if (d.ok) {
-      document.getElementById('contactForm').innerHTML =
-        '<div style="color:#3fb950;padding:24px;text-align:center;font-size:var(--bp-text-15);line-height:1.6">✅ Mesajınız iletildi.<br><span style="font-size:13px;color:#8b949e">1–3 iş günü içinde yanıt veriyoruz.</span></div>';
+      nameEl.disabled = true;
+      emailEl.disabled = true;
+      messageEl.disabled = true;
+      document.getElementById('cfSubject').disabled = true;
+      btn.style.display = 'none';
+      msg.style.display = 'block';
+      msg.style.color = '#3fb950';
+      msg.innerHTML = '✅ Mesajınız iletildi.<br><span style="font-size:13px;color:#8b949e">1–3 iş günü içinde yanıt veriyoruz.</span>';
     } else {
       msg.style.display = 'block';
       msg.style.color = 'var(--bp-sat)';

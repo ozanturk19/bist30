@@ -378,6 +378,7 @@ function switchSektorTab(tab) {
     btnHm && btnHm.setAttribute('aria-selected', 'false');
     panelCmp.style.display = 'block';
     panelHm.style.display = 'none';
+    clearInterval(_sectorLoadInt);
     if (!_cmpLoaded) { _cmpLoaded = true; loadSectors(); }
   } else {
     btnHm && btnHm.classList.add('active');
@@ -386,6 +387,11 @@ function switchSektorTab(tab) {
     btnCmp && btnCmp.setAttribute('aria-selected', 'false');
     panelHm.style.display = 'block';
     panelCmp.style.display = 'none';
+    if (!document.hidden) {
+      clearInterval(_sectorLoadInt);
+      load();
+      _sectorLoadInt = setInterval(load, 120000);
+    }
   }
   const url = new URL(location.href);
   url.searchParams.set('tab', tab);

@@ -2876,14 +2876,23 @@ function savePriceAlarms() {
   return _safeWriteJSON(PRICE_ALARM_KEY, priceAlarms);
 }
 
+const _watchToggleInFlight = new Set();
 function toggleWatch(ticker) {
-  // bug-hunt-r126: hizli ardisik tiklamada ayni tur icinde ikinci tetiklemeyi engelle
+  // bug-hunt-r126/r143: hizli ardisik tiklamada ikinci tetiklemeyi engelle.
+  // r143 duzeltmesi: eski guard disabled bayragini DELETE fetch'i beklemeden
+  // (ayni senkron cagri icinde) geri aciyordu, yani art arda iki ayri click
+  // event'ine karsi hicbir koruma saglamiyordu — sunucudaki e-posta alerti
+  // sessizce silinip UI 'takipte' gostermeye devam edebiliyordu. Artik gercek
+  // async guard: DELETE tamamlanana kadar ayni ticker icin ikinci cagri no-op.
+  if (_watchToggleInFlight.has(ticker)) return;
   const _abBtn = document.getElementById('ab-' + ticker);
-  if (_abBtn && _abBtn.disabled) return;
+  const _mcBtn = document.getElementById('mcb-' + ticker);
   if (_abBtn) _abBtn.disabled = true;
+  if (_mcBtn) _mcBtn.disabled = true;
   // DEV2-bughunt-r7: cok-sekme lost-update onlemi — mutate etmeden once localStorage'dan
   // taze oku (baska sekmede hisse.html'in eklediği/cikardigi degisiklikleri kaybetmemek icin)
   watchlist = new Set(_safeLoadArray(WATCH_KEY));
+  let _pendingDelete = false;
   if (watchlist.has(ticker)) {
     watchlist.delete(ticker);
     // fiyat alarmını da temizle
@@ -2898,6 +2907,8 @@ function toggleWatch(ticker) {
     // kayboluyordu ama sunucu o ticker icin sinirsiz e-posta gondermeye devam
     // ediyordu, kullanicinin bunu gorup kapatabilecegi hicbir yuzey yoktu.
     if (_isLoggedIn() && _userAlerts[ticker]) {
+      _pendingDelete = true;
+      _watchToggleInFlight.add(ticker);
       const _delTicker = ticker;
       // CPO-DEV2-084 #2: deleteAlertSettings() emsaliyle ayni ilke - basarisiz silme
       // sessiz kalmasin. _userAlerts SADECE r.ok'ta silinir, boylece basarisizlikta
@@ -2910,6 +2921,13 @@ function toggleWatch(ticker) {
         .catch(e => {
           console.warn('takipten cikarken sunucu alerti silinemedi:', e);
           showAlarmToast(`${_delTicker} e-posta alerti silinemedi (bağlantı hatası) — ⚙️ ile tekrar dene`, 'err');
+        })
+        .finally(() => {
+          _watchToggleInFlight.delete(_delTicker);
+          const _abBtn2 = document.getElementById('ab-' + _delTicker);
+          if (_abBtn2) _abBtn2.disabled = false;
+          const _mcBtn2 = document.getElementById('mcb-' + _delTicker);
+          if (_mcBtn2) _mcBtn2.disabled = false;
         });
     }
   } else {
@@ -2923,12 +2941,13 @@ function toggleWatch(ticker) {
     btn.textContent = watchlist.has(ticker) ? '🔔' : '🔕';
     btn.className   = 'alarm-btn' + (watchlist.has(ticker) ? ' watching' : '');
     btn.title       = watchlist.has(ticker) ? 'Takibi bırak' : 'Sinyal alarmı kur';
-    btn.disabled    = false;
+    btn.disabled    = _pendingDelete;
   }
   const mcBtn = document.getElementById('mcb-' + ticker);
   if (mcBtn) {
     mcBtn.className = 'mc-bell' + (watchlist.has(ticker) ? ' watching' : '');
     mcBtn.title = watchlist.has(ticker) ? 'Alarm aktif' : 'Sinyal alarmı kur';
+    mcBtn.disabled = _pendingDelete;
   }
   updateFabBadge();
   // Feature 1 #1B: watchlist boşaldıysa ⭐ chip gizle, doluysa göster
@@ -3323,6 +3342,9 @@ async function submitToastSubscribe() {
       // Ana subscription bar'ı da güncelle
       const bar = document.getElementById('subscribeBar');
       if (bar) bar.innerHTML = '<div style="font-size:13px;color:var(--bp-al);font-weight:600">✅ ' + _esc(json.message || 'Abone oldunuz!') + '</div>';
+      // subToast(role=dialog) ve subscribeBar aria-live degil — ekran okuyucuya
+      // duyurmak icin kanonik showToast() (aria-live=polite) ile de bildir
+      showToast('✅ ' + (json.message || 'Abone oldunuz!'), 'success');
     } else {
       showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'), 'error');
       if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
