@@ -198,7 +198,8 @@ function renderCard(s, isNew) {
   if (bpSignalDateAgeDays(s.signal_date) !== null)
     metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeShort(s.signal_date)}</strong></div>`);
   if (s.entry_quality)      metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${eqLabel(s.entry_quality)}</strong></div>`);
-  if (s.rr_ratio)           metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_ratio).toFixed(1).replace('.', ',')}</strong></div>`);
+  /* DEV-1763: sabit rr_ratio(=2.0) yerine sinyal başından gerçek R/R (rr_signal) */
+  if (s.rr_signal)          metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_signal).toFixed(1).replace('.', ',')}</strong></div>`);
 
   const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';
 
