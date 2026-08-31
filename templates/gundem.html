@@ -211,7 +211,10 @@ function renderCard(s, isNew) {
   </a>`;
 }
 
+let _gundemSeq = 0;  /* r144: visibilitychange her odaklanmada loadGundem'i yeniden tetikliyordu,
+   hizli sekme-degistir'de eski yanit yeniyi ezebilirdi (bkz. karsilastir.html _compareSeq) */
 async function loadGundem() {
+  const mySeq = ++_gundemSeq;
   try {
     // r41: iki bagimsiz kaynak ayri ele alinir -- market-news ag hatasi gundem verisini dusurmemeli
     const [gundemSettled, newsSettled] = await Promise.allSettled([
@@ -225,6 +228,7 @@ async function loadGundem() {
     if (!gundemRes.ok || d.ok === false) {
       throw new Error('HTTP ' + gundemRes.status + (d && d.error ? ': ' + d.error : ''));
     }
+    if (mySeq !== _gundemSeq) return;  // daha yeni bir loadGundem baslamis, bu yaniti at
 
     // Stats
     const sm = d.signal_summary || {};
@@ -294,6 +298,7 @@ async function loadGundem() {
       if (!newsRes) throw new Error('market-news fetch failed (network)');
       const newsData = await newsRes.json();
       if (!newsRes.ok || newsData.ok === false) throw new Error(newsData.error || ('HTTP ' + newsRes.status));
+      if (mySeq !== _gundemSeq) return;  // daha yeni bir loadGundem baslamis, bu yaniti at
       const items = newsData.items || [];
       const newsEl = document.getElementById('newsGrid');
       const newsUpEl = document.getElementById('newsUpdatedAt');
@@ -327,6 +332,7 @@ async function loadGundem() {
     }
 
   } catch(e) {
+    if (mySeq !== _gundemSeq) return;  // eski cagrinin hatasi, daha yeni bir basarili yaniti ezmesin
     console.error('loadGundem error:', e);
     ['newSignalsGrid','strongAlGrid'].forEach(id => {
       document.getElementById(id).innerHTML = '<div class="empty-box">Veri yüklenemedi. Sayfayı yenileyin.</div>';
@@ -381,14 +387,17 @@ async function loadEconCalendar() {
   }
 }
 
+let _macroNewsSeq = 0;  /* r144: gundem.html ile ayni visibilitychange-race deseni */
 async function loadMacroNewsSection() {
   const grid = document.getElementById('macroNewsGrid');
   const upEl = document.getElementById('macroNewsUpdatedAt');
   if (!grid) return;
+  const mySeq = ++_macroNewsSeq;
   try {
     const res  = await fetch('/api/macro-news');
     const data = await res.json();
     if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
+    if (mySeq !== _macroNewsSeq) return;  // daha yeni bir cagri baslamis, bu yaniti at
     if (upEl && data.updated_at) upEl.textContent = 'Güncellendi: ' + data.updated_at;
     const items = data.items || [];
     if (!items.length) {
@@ -405,6 +414,7 @@ async function loadMacroNewsSection() {
       </a>`;
     }).join('');
   } catch(e) {
+    if (mySeq !== _macroNewsSeq) return;  // eski cagrinin hatasi, daha yeni bir basarili yaniti ezmesin
     grid.innerHTML = '<div class="empty-box">Makro haberler yüklenemedi.</div>';
   }
 }

@@ -181,16 +181,21 @@ function render(data) {
     : sectionsHtml;
 }
 
+let _btLoadSeq = 0;  /* r144: visibilitychange her odaklanmada load()'u yeniden tetikliyordu,
+   hizli sekme-degistir'de eski yanit yeniyi ezebilirdi (bkz. karsilastir.html _compareSeq) */
 async function load() {
+  const mySeq = ++_btLoadSeq;
   try {
     const res  = await fetch('/api/bilanco-takvimi');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (!data.periods || data.periods.length === 0) throw new Error('Boş veri');
+    if (mySeq !== _btLoadSeq) return;  // daha yeni bir load() baslamis, bu yaniti at
     _allData = data;
     document.getElementById('lastUpdate').textContent = `Son güncelleme: ${data.updated_at || '—'}`;
     render(data);
   } catch(e) {
+    if (mySeq !== _btLoadSeq) return;  // eski cagrinin hatasi, daha yeni bir basarili yaniti ezmesin
     document.getElementById('periodsContainer').innerHTML =
       '<div class="loading-msg">⚠️ Veriler yüklenemedi (' + e.message + '). <a href="." onclick="location.reload();return false" style="color:#58a6ff">Yenile</a></div>';
     document.getElementById('lastUpdate').textContent = 'Yüklenemedi';
