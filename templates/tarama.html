@@ -364,6 +364,11 @@ async function applyFilters() {
   }
 }
 
+/** HTML özel karakterleri güvenli biçimde kaçır — XSS/yapı bozulması önlemi */
+function _esc(str) {
+  return String(str == null ? '' : str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 // I1 — Active Filter Chips render + remove (SENECA Faz 1, CPO MSG-062)
 function renderActiveFilterChips() {
   const chips = [];
@@ -394,9 +399,8 @@ function renderActiveFilterChips() {
     return;
   }
   bar.style.display = '';
-  const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   bar.innerHTML =
-    chips.map(c => `<span class="active-chip" data-key="${esc(c.key)}">${esc(c.label)}<button class="chip-x" onclick="removeFilterChip('${esc(c.key)}')" aria-label="Filtreyi kaldır" type="button">×</button></span>`).join('') +
+    chips.map(c => `<span class="active-chip" data-key="${_esc(c.key)}">${_esc(c.label)}<button class="chip-x" onclick="removeFilterChip('${_esc(c.key)}')" aria-label="Filtreyi kaldır" type="button">×</button></span>`).join('') +
     `<button class="chip-clear-all" onclick="resetFilters()" type="button">Filtreleri Sıfırla</button>`;
 }
 
@@ -488,7 +492,7 @@ function renderResults(rows, count) {
   _csvData = rows;
   document.getElementById('loadingDiv').style.display = 'none';
   document.getElementById('resultCount').innerHTML = _searchQ
-    ? `<strong>${count}</strong> sonuç <span style="font-size:11px;color:var(--text3)">(arama: "${_searchQ.toLowerCase()}")</span>`
+    ? `<strong>${count}</strong> sonuç <span style="font-size:11px;color:var(--text3)">(arama: "${_esc(_searchQ.toLowerCase())}")</span>`
     : `<strong>${count}</strong> sonuç`;
 
   if (!rows.length) {
