@@ -125,7 +125,7 @@
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=b1e2a745">
 <script src="/static/bp-vocab.js?v=20260823C"></script>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=7147e264">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=854c21d3">
 <style id="bp-critical-css">
 .bp-footer-link{color:var(--bp-text3);text-decoration:none;transition:color .15s}.bp-footer-link:hover{color:var(--bp-text)}/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -2884,6 +2884,17 @@ window.addEventListener('storage', e => {
   } else if (e.key === PRICE_ALARM_KEY) {
     priceAlarms = _safeLoadObject(PRICE_ALARM_KEY, {});
     if (alarmPanelOpen) renderAlarmPanel();
+  } else if (e.key === 'bp_hero_sub_dismissed' && e.newValue === '1') {
+    // r146 bug-hunt: baska sekmede kapatilan/abone-olunan hero seridi bu sekmede
+    // sayfa yenilenene kadar gorunur kaliyordu (WATCH_KEY/PRICE_ALARM_KEY'deki
+    // ayni cross-tab desen CPO-DEV2-094'ten sonra eklenen bu bannera hic uygulanmamisti).
+    const heroEl = document.getElementById('heroSubBanner');
+    if (heroEl) heroEl.style.display = 'none';
+  } else if ((e.key === 'bp_onboard_dismissed' && e.newValue === '1') || (e.key === 'bp_learning_mode' && e.newValue === '1')) {
+    const onboardEl = document.getElementById('bpOnboardBanner');
+    if (onboardEl) onboardEl.style.display = 'none';
+  } else if (e.key === 'bp_sub_dismissed_v2' || e.key === 'bp_sub_user') {
+    if (typeof _hideSubToastCrossTab === 'function') _hideSubToastCrossTab();
   }
 });
 
@@ -3230,6 +3241,21 @@ updateFabBadge();
 
 /* ── Sticky Subscription Toast ──────────────────── */
 let _subToastRelease = null;
+let _subToastTimer = null;
+let _subToastOnScroll = null;
+let _subToastShown = false;
+function _hideSubToastCrossTab() {
+  // r146 bug-hunt: baska sekmede dismiss/abone-olma gerceklesti. Henuz
+  // gosterilmemisse zamanlayiciyi/scroll dinleyicisini iptal et (bir daha hic
+  // gosterme), zaten gosterilmisse gizle - WATCH_KEY/PRICE_ALARM_KEY'deki ayni
+  // cross-tab desen bu bilesene hic uygulanmamisti.
+  if (_subToastTimer) { clearTimeout(_subToastTimer); _subToastTimer = null; }
+  if (_subToastOnScroll) { window.removeEventListener('scroll', _subToastOnScroll); _subToastOnScroll = null; }
+  _subToastShown = true;
+  const el = document.getElementById('subToast');
+  if (el) el.classList.remove('visible');
+  if (_subToastRelease) { _subToastRelease(); _subToastRelease = null; }
+}
 (function() {
   const KEY = 'bp_sub_dismissed_v2';
   const DELAY_MS = 25000; // 25 saniye
@@ -3254,16 +3280,15 @@ let _subToastRelease = null;
     } catch(e) { return false; }
   }
   if (shouldShow()) {
-    let shown = false;
     const show = () => {
-      if (shown) return;
-      shown = true;
+      if (_subToastShown) return;
+      _subToastShown = true;
       // bug-hunt r98: onScroll sadece scroll-tetiklemesinde kendini kaldiriyordu —
       // timer once dolarsa (kullanici scroll etmeden) listener sayfanin geri kalan
       // omru boyunca window uzerinde kalici kaliyordu (her scroll'da no-op calisan
       // "zombi" listener). show() hangi yoldan tetiklenirse tetiklensin temizle.
-      clearTimeout(timer);
-      window.removeEventListener('scroll', onScroll);
+      clearTimeout(_subToastTimer);
+      if (_subToastOnScroll) window.removeEventListener('scroll', _subToastOnScroll);
       const el = document.getElementById('subToast');
       if (el) {
         el.classList.add('visible');
@@ -3271,13 +3296,13 @@ let _subToastRelease = null;
       }
     };
     // Zamanlayıcı ile göster
-    const timer = setTimeout(show, DELAY_MS);
+    _subToastTimer = setTimeout(show, DELAY_MS);
     // Veya %40 scroll ile göster
-    const onScroll = () => {
+    _subToastOnScroll = () => {
       const h = document.documentElement.scrollHeight - window.innerHeight;
       if (h > 0 && window.scrollY / h >= 0.4) show();
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', _subToastOnScroll, { passive: true });
   }
 })();
 
