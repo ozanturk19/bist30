@@ -86,6 +86,17 @@
   }
   .sc-kap:hover { background:rgba(59,130,246,0.15); }
 
+  /* CPO-DEV2-106: 193 kart tek periyotta sayfalama olmadan render ediliyordu (~6385px,
+     masaustunde ~9 ekran kaydirma) - blog.html'deki kanitlanmis "Daha Fazla Yukle"
+     deseni (24-luk parti, filtre aktifken bypass) buraya da uygulandi. */
+  .bt-loadmore-wrap { text-align:center; margin-top:14px; }
+  .bt-loadmore-btn {
+    background:var(--bp-surface2); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md);
+    color:var(--bp-text2); padding:9px 22px; font-size:var(--bp-text-sm); font-weight:600;
+    cursor:pointer; transition:all .15s; font-family:inherit;
+  }
+  .bt-loadmore-btn:hover { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
+
   /* Summary row */
   .summary-row {
     display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px;
