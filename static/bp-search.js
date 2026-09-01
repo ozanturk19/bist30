@@ -701,13 +701,16 @@
   // CPO-DEV2-072/r98) artik tum cagiranlar icin gecerli — sekme arka plandayken
   // /api/macro cekilmez. onItems, index.html'in ec30/ec100 endeks karti guncellemesi
   // gibi sablon-ozel yan etkiler icin opsiyonel callback (items render'dan once cagrilir).
+  var _bpMacroSeq = 0;  // DOMContentLoaded + setInterval(180s) + visibilitychange ust uste binerse yaris durumu guard'i (r153 bug-hunt)
   window.bpLoadMacroBar = async function(onItems) {
     var track = document.getElementById('macroTrack');
     if (!track) return;
     if (document.hidden) return;
+    var mySeq = ++_bpMacroSeq;
     try {
       var r = await fetch('/api/macro');
       var d = await r.json();
+      if (mySeq !== _bpMacroSeq) return;  // daha yeni bir bpLoadMacroBar() cagrisi baslamis, bu yaniti at
       if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
       var items = d.items || [];
       if (!items.length) {
@@ -727,12 +730,13 @@
         var sign  = chg > 0 ? '+' : '';
         var cls   = chg > 0.05 ? 'mc-pos' : chg < -0.05 ? 'mc-neg' : 'mc-neu';
         var arrow = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
-        return '<span class="macro-item"><span class="macro-item-lbl">' + lbl + '</span><span>' + price + '</span><span class="' + cls + '">' + arrow + ' ' + sign + chg.toFixed(2) + '%</span></span>';
+        return '<span class="macro-item"><span class="macro-item-lbl">' + lbl + '</span><span>' + price + '</span><span class="' + cls + '">' + arrow + ' ' + sign + chg.toFixed(2).replace('.', ',') + '%</span></span>';
       }).join('');
       track.innerHTML = html + html;
       window.bpStartMacroTicker({ track: track, pps: 55 });
     } catch (e) {
       console.error('loadMacroBar basarisiz', e);
+      if (mySeq !== _bpMacroSeq) return;  // bayat hata mesajiyla daha yeni bir basarili render'in ustune yazma
       // CPO-DEV2-084 #1: fetch/parse hatasinda da ayni notr-mesaj kurali -
       // onceden basarili render varsa (stale ama gercek veri) dokunma, yoksa goster.
       if (!track.querySelector('.macro-item')) {

@@ -1670,8 +1670,10 @@ async function fetchData() {
              delta (dün snapshot karşılaştırması), marketStatus, asOfTime
    - Client: watchlistMoved (localStorage watchlist + is_new_signal sayım)
 */
+let _msSeq = 0;  /* fetchData() 60sn poll + visibilitychange ust uste binerse yaris durumu guard'i (r153 bug-hunt) */
 async function renderMarketSummary(stocks) {
   if (!stocks || !stocks.length) return;
+  const mySeq = ++_msSeq;
   try {
     const section = document.getElementById('marketSummary');
     const skeleton = document.getElementById('msSkeleton');
@@ -1684,6 +1686,7 @@ async function renderMarketSummary(stocks) {
       const r = await fetch('/api/market-summary', { credentials: 'same-origin' });
       if (!r.ok) throw new Error('summary fetch failed');
       d = await r.json();
+      if (mySeq !== _msSeq) return;  // daha yeni bir renderMarketSummary() cagrisi baslamis, bu yaniti at
       if (d.loading) {
         if (skeleton) skeleton.hidden = false;
         return;
@@ -1695,6 +1698,7 @@ async function renderMarketSummary(stocks) {
       // gorunur ama notr bir mesajla kaliyor, bir sonraki fetchData() dongusunde
       // (60sn) otomatik kendini duzeltir.
       console.warn('market-summary fetch fail:', fetchErr);
+      if (mySeq !== _msSeq) return;  // daha yeni bir cagri zaten kazandi/kaybetti, bayat hata mesajiyla ustune yazma
       if (skeleton) skeleton.hidden = true;
       if (text) text.innerHTML = 'Bugünün özeti şu an yüklenemedi.';
       return;
@@ -3719,7 +3723,7 @@ document.addEventListener('keydown', e => {
 </script>
 <div class="sig-tip" id="sigTip"></div>
 
-<script src="/static/bp-search.js?v=62" defer></script>
+<script src="/static/bp-search.js?v=63" defer></script>
 <script src="/static/learning-mode.js?v=5" defer></script>
 {% include '_premium_modal.html' %}
 <script src="/static/js/toast.js?v=5"></script>
