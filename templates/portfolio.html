@@ -584,8 +584,8 @@ function render() {
     const trHtml = `<tr>
       <td><a href="/hisse/${esc(p.ticker)}" class="ticker-link">${esc(p.ticker)}</a></td>
       <td class="hm bp-text-muted">${fmtDate(p.date)}</td>
-      <td>${fmt(p.lot,0)}</td>
-      <td>${fmt(p.price)}</td>
+      <td>${Number.isFinite(p.lot) ? fmt(p.lot,0) : '<span style="color:var(--bp-text3)">—</span>'}</td>
+      <td>${Number.isFinite(p.price) ? fmt(p.price) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${cur !== null ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td class="hm bp-text-muted">${cost !== null ? fmtM(cost) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${val !== null ? fmtM(val) : '<span style="color:var(--bp-text3)">—</span>'}</td>
@@ -611,8 +611,8 @@ function render() {
         <div class="pf-metric"><div class="pf-metric-label">K/Z %</div>${pnlPctHtml}</div>
       </div>
       <div class="pf-mdetail-row">
-        <div class="pf-metric"><div class="pf-metric-label">Adet</div><span>${fmt(p.lot,0)}</span></div>
-        <div class="pf-metric"><div class="pf-metric-label">Alış ₺</div><span>${fmt(p.price)}</span></div>
+        <div class="pf-metric"><div class="pf-metric-label">Adet</div><span>${Number.isFinite(p.lot) ? fmt(p.lot,0) : '—'}</span></div>
+        <div class="pf-metric"><div class="pf-metric-label">Alış ₺</div><span>${Number.isFinite(p.price) ? fmt(p.price) : '—'}</span></div>
         <div class="pf-metric"><div class="pf-metric-label">Maliyet</div><span>${cost !== null ? fmtM(cost) : '—'}</span></div>
         <div class="pf-metric"><div class="pf-metric-label">Değer</div><span>${val !== null ? fmtM(val) : '—'}</span></div>
         <div class="pf-metric"><div class="pf-metric-label">Tarih</div><span class="pf-mdate">${fmtDate(p.date)}</span></div>
