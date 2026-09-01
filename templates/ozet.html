@@ -439,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(
         document.getElementById('bilancoBannerTitle').textContent =
           `📆 ${p.label} Bilanço Sezonu — ${daysToStart === 0 ? 'Bugün başlıyor!' : daysToStart + ' gün sonra başlıyor'}`;
         document.getElementById('bilancoBannerDesc').textContent =
-          `${p.description} · ${trDate(p.start).toLocaleDateString('tr-TR')} – ${trDate(p.end).toLocaleDateString('tr-TR')}`;
+          `${p.description} · ${trDate(p.start).toLocaleDateString('tr-TR', {timeZone:'Europe/Istanbul'})} – ${trDate(p.end).toLocaleDateString('tr-TR', {timeZone:'Europe/Istanbul'})}`;
         banner.style.display = 'flex';
         return;
       } else if (start <= now && now <= end) {
@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(
         document.getElementById('bilancoBannerTitle').textContent =
           `📊 ${p.label} Bilanço Sezonu Aktif`;
         document.getElementById('bilancoBannerDesc').textContent =
-          `${p.description} · ${trDate(p.end).toLocaleDateString('tr-TR')} tarihine kadar`;
+          `${p.description} · ${trDate(p.end).toLocaleDateString('tr-TR', {timeZone:'Europe/Istanbul'})} tarihine kadar`;
         banner.style.display = 'flex';
         return;
       }
