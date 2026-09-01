@@ -263,7 +263,7 @@ async function loadGundem() {
       // CPO-DEV2-072 r97(b): piyasa kapalıyken (hafta sonu/tatil/seans dışı)
       // "gün içinde güncellenir" vaadi yanıltıcı — sunucunun ayırt ettiği mesajı kullan.
       const emptyMsg = (d.market_open === false && d.closed_message)
-        ? d.closed_message
+        ? escapeHtml(d.closed_message)
         : 'Bugün henüz sinyal değişimi yok. Piyasa sinyalleri gün içinde güncellenir.';
       document.getElementById('newSignalsGrid').innerHTML =
         '<div class="empty-box">' + emptyMsg + '</div>';

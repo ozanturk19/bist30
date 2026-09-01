@@ -1726,7 +1726,7 @@ async function renderMarketSummary(stocks) {
       if (!d.newBullCount || d.newBullCount === 0) {
         s1 = `BIST'de bugün yeni güçlü trende geçen hisse yok.`;
       } else {
-        const topT = (d.topTickers || []).slice(0, 4).map(t => `<a href="/hisse/${t}">${t}</a>`).join(', ');
+        const topT = (d.topTickers || []).slice(0, 4).map(t => `<a href="/hisse/${_esc(t)}">${_esc(t)}</a>`).join(', ');
         const more = d.newBullCount > 4 ? ` ve <strong>${d.newBullCount - 4}</strong> hisse daha` : '';
         s1 = `<strong>BIST</strong>'de bugün <strong>${d.newBullCount} hisse</strong> güçlü trende geçti${topT ? ' (' + topT + more + ')' : ''}.`;
       }

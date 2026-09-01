@@ -2388,7 +2388,7 @@ async function loadNews(retryCount) {
       // CPO-1153/1154 P0-B(c): backend zaten "başarısız" olarak biliyor (negatif cache/
       // kota devresi açık) — anlamsız "yeniden deneniyor" simülasyonu YOK, dürüst göster.
       contentEl.innerHTML     = '<div class="news-error">🤖 '
-        + (data.reason || 'Haber özeti şu an kullanılamıyor')
+        + escHtml(data.reason || 'Haber özeti şu an kullanılamıyor')
         + '. <button class="news-retry-btn" onclick="loadNews(0)">Tekrar dene</button></div>';
       contentEl.style.display = '';
       _newsActive = false;

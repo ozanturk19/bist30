@@ -290,12 +290,12 @@ function buildTable(stocks) {
     const inner = `
         <div class="col-ticker">${escapeHtml(s.ticker)}</div>
         <div class="col-name" title="${escapeHtml(s.name||'')}">${escapeHtml(s.name||'')}</div>
-        ${s.kap_url ? `<a href="${s.kap_url}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
+        ${s.kap_url ? `<a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
       `;
     return `
     <th class="col-hdr" scope="col">
       ${s.found
-        ? `<a href="/hisse/${s.ticker}" style="text-decoration:none;color:inherit">${inner}</a>`
+        ? `<a href="/hisse/${escapeHtml(s.ticker)}" style="text-decoration:none;color:inherit">${inner}</a>`
         : `<div style="color:inherit">${inner}</div>`}
     </th>`;
   }).join('');
@@ -356,11 +356,11 @@ function buildMobileCards(stocks) {
     const isWinner = (i === winnerIdx) && active.length > 1;
     const header = `
       <div class="cmp-mtop">
-        <a href="/hisse/${s.ticker}" class="cmp-mticker-link">
+        <a href="/hisse/${escapeHtml(s.ticker)}" class="cmp-mticker-link">
           <span class="cmp-mticker">${escapeHtml(s.ticker)}</span>
           <span class="cmp-mname">${escapeHtml(s.name||'')}</span>
         </a>
-        ${s.kap_url ? `<a href="${s.kap_url}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
+        ${s.kap_url ? `<a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
       </div>`;
     const scoreHtml = `<div class="cmp-mscore">${renderScoreCell(s, isWinner)}</div>`;
     const rowsHtml = ROW_LABELS.map(({key, label, isSep, help}) => {
