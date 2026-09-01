@@ -2765,6 +2765,7 @@ loadMTF();
 /* ── SSE Canlı Fiyat ──────────────────────────────── */
 let _sseRetry = 1000;
 let _sseEs = null;
+let _sseRetryTimer = null; /* r159: bekleyen reconnect setTimeout id'si, pagehide/hidden'da clearTimeout edilir (leftover timer -> gereksiz reconnect churn) */
 let _marketOpenNow = true; /* CPO-DEV2-076 (A): startSSE() ilk çağrıldığında (sayfa yüklenirken) henüz /api/data yanıtı gelmemiş olabilir, iyimser varsayılan */
 function startSSE() {
   if (!_marketOpenNow || document.hidden) return; /* CPO-DEV2-076 (A): piyasa kapalıyken sahte "canlı" bağlantı açma */
@@ -2813,12 +2814,12 @@ function startSSE() {
       _lt.style.cssText = 'font-size:var(--bp-text-xs);color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
       _lt.innerHTML = '<span class="live-dot-idle"></span>bağlantı koptu — yeniden bağlanılıyor…';
     }
-    setTimeout(startSSE, _sseRetry);
+    _sseRetryTimer = setTimeout(startSSE, _sseRetry);
     _sseRetry = Math.min(_sseRetry * 2, 30000);
   };
 }
 startSSE();
-window.addEventListener('pagehide', () => { if (_sseEs) { _sseEs.close(); _sseEs = null; } });
+window.addEventListener('pagehide', () => { clearTimeout(_sseRetryTimer); if (_sseEs) { _sseEs.close(); _sseEs = null; } });
 window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
 
 /* CPO-DEV2-072 r98: Page Visibility — sekme arka plandayken duraklat.
@@ -2826,6 +2827,7 @@ window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
    Sekme gizliyken SSE kapanır; görünür olunca hemen bir kez tazelenip devam eder. */
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
+    clearTimeout(_sseRetryTimer);
     if (_sseEs) { _sseEs.close(); _sseEs = null; }
   } else {
     if (!_sseEs) startSSE();

@@ -1268,6 +1268,7 @@ fetchChart100();
 /* ── SSE Canlı Fiyat ─────────────────────────────── */
 let _sseRetry = 1000;
 let _sseInstance = null; /* track instance for bf-cache cleanup */
+let _sseRetryTimer = null; /* r159: bekleyen reconnect setTimeout id'si, pagehide/hidden'da clearTimeout edilir (leftover timer -> gereksiz reconnect churn) */
 let _marketOpenNow = true; /* CPO-DEV2-076 (A): fetchData() ilk yanıttan önce burada olmalı — startSSE() henüz sayfa yüklenirken çağrılıyor */
 
 function startSSE() {
@@ -1285,12 +1286,12 @@ function startSSE() {
   };
   es.onerror = () => {
     es.close(); _sseInstance = null;
-    setTimeout(startSSE, _sseRetry);
+    _sseRetryTimer = setTimeout(startSSE, _sseRetry);
     _sseRetry = Math.min(_sseRetry * 2, 30000);
   };
 }
 /* bfcache: EventSource prevents restoration — close on leave, reopen on restore */
-window.addEventListener('pagehide', () => { if (_sseInstance) { _sseInstance.close(); _sseInstance = null; } });
+window.addEventListener('pagehide', () => { clearTimeout(_sseRetryTimer); if (_sseInstance) { _sseInstance.close(); _sseInstance = null; } });
 window.addEventListener('pageshow', (e) => {
   if (e.persisted) {
     if (!_sseInstance) startSSE();
@@ -2745,6 +2746,7 @@ fetchData();
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     clearTimeout(polling);
+    clearTimeout(_sseRetryTimer);
     if (_sseInstance) { _sseInstance.close(); _sseInstance = null; }
   } else {
     fetchData();
