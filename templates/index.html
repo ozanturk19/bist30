@@ -1579,19 +1579,12 @@ function toggleAdvPanel() {
 
 function setAdv(key, val, btn) {
   advFilters[key] = val;
-  /* SPEC-009: seçili chip tek net .adv-active — grup içinde yalnız 1 aktif.
-     Eski sel/sel-bull/sel-bear üçlü şeması "hangisi seçili" belirsizliği yaratıyordu. */
-  const group = document.getElementById('adv-' + key);
-  group.querySelectorAll('.adv-chip').forEach(c => c.classList.remove('adv-active'));
-  if (btn) btn.classList.add('adv-active');
-  /* Aktif filtre sayısı badge */
-  const active = (advFilters.adx > 0 ? 1 : 0) + (advFilters.bars > 0 ? 1 : 0)
-               + (advFilters.vol > 0 ? 1 : 0) + (advFilters.rsi !== 'all' ? 1 : 0)
-               + (advFilters.eq !== 'all' ? 1 : 0);
-  const badge = document.getElementById('advBadge');
-  badge.textContent = active;
-  badge.style.display = active > 0 ? '' : 'none';
-  document.getElementById('advToggle').classList.toggle('active', active > 0 || document.getElementById('advPanel').classList.contains('open'));
+  /* r161-bughunt history-back-stale-state: chip/badge/toggle görsel senkronu artik
+     _syncFilterChips() icinde (advFilters'tan tek kaynakli re-derive) — burada tekrar
+     etmiyoruz, _afterFilterChange() zaten _syncFilterChips()'i cagiriyor. Eskiden bu
+     senkron SADECE burada (dogrudan tiklamada) oluyordu; popstate/URL-hydration/
+     localStorage-restore/resetFilters gibi advFilters'i programatik degistiren yollarda
+     panel gorseli "Tumu" secili gibi kalip tablo sessizce filtreli kaliyordu. */
   _afterFilterChange({ push: true });  /* #32: _saveFilterState + URL push + full sync */
 }
 
@@ -2514,6 +2507,25 @@ function _syncFilterChips() {
     if (p === 'PREMIUM')    c.classList.toggle('active', filterPremium);
     else if (p === 'WATCH') c.classList.toggle('active', filterWatch);
   });
+  /* r161-bughunt history-back-stale-state: adv-chip (adx/bars/vol/rsi/eq) + #advBadge +
+     #advToggle artik burada advFilters'tan tek kaynakli re-derive ediliyor (setAdv'daki
+     eski inline blok kaldirildi). Bu fonksiyonun zaten cagirildigi 3 nokta (popstate,
+     _afterFilterChange -> resetFilters/toggleChip/setAdv/setSearch, init sonrasi) artik
+     panel gorselini de dogru tutuyor. */
+  Object.keys(advFilters).forEach(key => {
+    const group = document.getElementById('adv-' + key);
+    if (!group) return;
+    group.querySelectorAll('.adv-chip').forEach(c => {
+      c.classList.toggle('adv-active', String(c.dataset.val) === String(advFilters[key]));
+    });
+  });
+  const advActive = (advFilters.adx > 0 ? 1 : 0) + (advFilters.bars > 0 ? 1 : 0)
+                  + (advFilters.vol > 0 ? 1 : 0) + (advFilters.rsi !== 'all' ? 1 : 0)
+                  + (advFilters.eq !== 'all' ? 1 : 0);
+  const advBadge = document.getElementById('advBadge');
+  if (advBadge) { advBadge.textContent = advActive; advBadge.style.display = advActive > 0 ? '' : 'none'; }
+  const advToggleBtn = document.getElementById('advToggle');
+  if (advToggleBtn) advToggleBtn.classList.toggle('active', advActive > 0 || document.getElementById('advPanel')?.classList.contains('open'));
 }
 
 /* SPEC-009 G2: premium/today/watch bağımsız toggle — diğerlerini etkilemez (AND). */

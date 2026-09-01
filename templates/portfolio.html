@@ -25,7 +25,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/tokens.css?v=b1e2a745">
 <script src="/static/bp-vocab.js?v=20260823C"></script>
-<link rel="stylesheet" href="/static/css/pages/portfolio.css?v=7aac0504">
+<link rel="stylesheet" href="/static/css/pages/portfolio.css?v=09549634">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% include '_header.html' %}
@@ -149,7 +149,7 @@
     <input type="text" id="addTicker" placeholder="THYAO veya Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu">
     <datalist id="bistTickerList"></datalist>
     <input type="number" id="addLot" placeholder="Adet" min="1" step="1" inputmode="numeric" aria-label="Adet">
-    <input type="number" id="addPrice" placeholder="Alış fiyatı ₺" min="0" step="0.01" inputmode="decimal" aria-label="Alış fiyatı">
+    <input type="text" id="addPrice" placeholder="Alış fiyatı ₺" inputmode="decimal" aria-label="Alış fiyatı">
     <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>
     <span id="addErr" role="alert" style="color:var(--bp-sat);font-size:var(--bp-text-sm)"></span>
@@ -470,12 +470,23 @@ async function clearPortfolio() {
   }
 }
 
+// r161-bughunt tr-comma-input: addPrice artik type=text (type=number TR binlik-nokta+
+// ondalik-virgul girisini — ör. "1.234,56" — sessizce "1.23456"e bozuyordu). hisse.html:1184
+// ile ayni TR-format parse deseni: virgul varsa once binlik noktalari sil, sonra virgulu
+// ondalik noktaya cevir; virgul yoksa (zaten "1234.56" gibi) dokunma.
+function parseTRPrice(raw) {
+  raw = String(raw).trim();
+  if (!raw) return NaN;
+  if (raw.includes(',')) raw = raw.replace(/\./g, '').replace(',', '.');
+  return parseFloat(raw);
+}
+
 function addPosition() {
   const btn = document.querySelector('.btn-add');
   if (btn && btn.disabled) return;
   const ticker = document.getElementById('addTicker').value.trim().toUpperCase();
   const lot    = parseFloat(document.getElementById('addLot').value);
-  const price  = parseFloat(document.getElementById('addPrice').value);
+  const price  = parseTRPrice(document.getElementById('addPrice').value);
   const date   = document.getElementById('addDate').value;
   const err    = document.getElementById('addErr');
   if (!ticker) { err.textContent = 'Hisse kodu girin.'; return; }
@@ -596,7 +607,7 @@ function render() {
       <td><button class="btn-del" onclick="removePosition(${p.id})" title="Kaldır" aria-label="${esc(p.ticker)} pozisyonunu kaldır">✕</button></td>
     </tr>`;
     // CPO-DEV2-100: Yol A - tarama.html #mobileResultCards ile ayni desen,
-    // <=768px'te tabloyla ayni veri kart formatinda gosterilir.
+    // <=899px'te tabloyla ayni veri kart formatinda gosterilir.
     const cardHtml = `<div class="pf-mcard">
       <div class="pf-mtop">
         <a href="/hisse/${esc(p.ticker)}" class="pf-mticker">${esc(p.ticker)}</a>

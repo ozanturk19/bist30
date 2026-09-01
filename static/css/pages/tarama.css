@@ -377,9 +377,16 @@
     .rvol-cell, .fresh-badge { font-size:var(--bp-text-xs); }
   }
 
-  /* ── Faz4 Madde-3: Mobile card stack ── */
+  /* ── Faz4 Madde-3: Mobile card stack ──
+     r161-bughunt zindex-sticky-overlap: esik 768->899px (CPO-DEV2-100/108 sticky-thead
+     fix'i sadece >=900px'te overflow-x:visible yapiyor; 769-899px araliginda .table-wrap
+     overflow-x:auto olarak kaliyor ve CSS'in "bir eksen visible degilse digeri de auto
+     sayilir" kurali geregi overflow-y de auto oluyor - bu da thead'in sticky referansini
+     viewport'tan .table-wrap'in kendi (hic kaymayan) scrollport'una kaydirip sticky'yi
+     tamamen kirıyor, canli olcumle dogrulandi. T2.4/DEV2-021 emsaliyle (nav esik hizalama)
+     ayni cozum: kart-gorunumu esigini sticky-fix esigiyle (900px) hizala, boslugu kapat. */
   #mobileResultCards { display:none; flex-direction:column; gap:10px; padding:4px 0 12px; }
-  @media (max-width:768px) {
+  @media (max-width:899px) {
     #resultTable { display:none !important; }
     #mobileResultCards { display:flex; }
   }

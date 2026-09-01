@@ -48,7 +48,10 @@
      tasiyip gizliyor - o mantigi bozmamak icin ayri bir kart listesi kurmak yerine ayni
      <tr>/<td> CSS ile karta donusturulur (data-label ile etiketlenir). thead, dokunma
      alani (sort butonlari) kaybolmasin diye yatay kaydirilabilir kompakt bir seride kalir. */
-  @media (max-width:768px) {
+  /* r161-bughunt zindex-sticky-overlap: esik 768->899px, tarama.css ile ayni gerekce
+     (769-899px araliginda sticky thead .tbl-wrap'in overflow-x:auto'su yuzunden kiriliyordu,
+     canli olcumle dogrulandi) - T2.4/DEV2-021 esik-hizalama emsali. */
+  @media (max-width:899px) {
     .tbl-wrap table, .tbl-wrap tbody, .tbl-wrap tr, .tbl-wrap td { display:block; }
     .tbl-wrap thead {
       display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap;
