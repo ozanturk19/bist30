@@ -1571,6 +1571,9 @@ function toggleAdvPanel() {
   if (opening) {
     _advPanelEscHandler = (e) => { if (e.key === 'Escape') toggleAdvPanel(); };
     document.addEventListener('keydown', _advPanelEscHandler);
+  } else {
+    /* r160-bughunt: WCAG 2.4.3 - panel kapaninca odak tetikleyiciye geri donmeli (disclosure pattern) */
+    btn.focus();
   }
 }
 
