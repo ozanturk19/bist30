@@ -322,7 +322,6 @@ body {
   --bp-z-modal-backdrop:  10001;  /* .alert-modal-backdrop — index */
   --bp-z-alarm-panel:       999;  /* .alarm-panel — index */
   --bp-z-alarm-fab:         998;  /* .alarm-fab — index */
-  --bp-z-sub-toast:         997;  /* .sub-toast — index */
   --bp-z-page-toast:        999;  /* .hib-toast / .import-toast — hisse+portfolio (2) */
   --bp-z-local-toast:      1100;  /* #bp-toast (showToast JS) — index */
   --bp-z-bottom-cta:        450;  /* .bp-bottom-cta — hisse */

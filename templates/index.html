@@ -302,6 +302,191 @@
   </div>
 </div><!-- /bp-market-pulse -->
 
+  <!-- ── T4.4: Filtre birleştirme — preset/temel/gelişmiş/sektör/aktif-filtre tek panelde (bkz. docs/t44-anasayfa-analiz.md) ── -->
+  <div class="bp-filter-panel" aria-label="Filtreleme paneli">
+  <!-- ── Feature 1 #1B — Preset Chips (CPO MSG-060) ── -->
+  <div class="preset-chips" id="presetChips" role="group" aria-label="Hazır filtreler">
+    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)"><span aria-hidden="true">🔥</span> Top Kazananlar</button>
+    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)"><span aria-hidden="true">📊</span> Hacim Öncüleri</button>
+    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)"><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
+    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden><span aria-hidden="true">⭐</span> Watchlist'im</button>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active-all" data-signal="all" onclick="setFilter('all', this)" title="Tüm hisseleri göster">Tümü</button>
+    <button class="filter-btn" data-signal="AL" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı"><span aria-hidden="true">🟢</span> Güçlü Trend</button>
+    <button class="filter-btn" data-signal="SAT" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı"><span aria-hidden="true">🔴</span> Trend Bozuldu</button>
+    <button class="filter-btn" data-signal="BEKLE" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor"><span aria-hidden="true">⚪</span> Yatay</button>
+    <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="RVOL ≥ 1.20 — Hacim Onaylı AL sinyali. Diğer filtrelerle birleştirilebilir." aria-pressed="false"><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
+    <button class="filter-btn filter-today" data-toggle="today" onclick="toggleChip('today', this)" title="Bugün ilk kez Güçlü Trend / Trend Bozuldu sinyali oluşan hisseler — diğer filtrelerle birleştirilebilir" aria-pressed="false"><span aria-hidden="true">⚡</span> Bugün</button>
+    <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none" aria-pressed="false"><span aria-hidden="true">🔔</span> Takibim</button>
+    <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()" aria-expanded="false" aria-controls="advPanel"><span aria-hidden="true">⚙️</span> Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
+    <div class="search-wrap">
+      <input class="search-input" type="text" placeholder="Hisse ara… (/)" aria-label="Hisse ara"
+             oninput="setSearch(this.value);showSearchAc(this.value)"
+             onkeydown="handleSearchKey(event)"
+             onfocus="showSearchAc(this.value)"
+             autocomplete="off" spellcheck="false">
+      <div class="search-ac" id="searchAc"></div>
+    </div>
+  </div>
+
+  <!-- Gelişmiş Screener Paneli -->
+  <div class="adv-panel" id="advPanel">
+    <div class="adv-group">
+      <div class="adv-group-label"><span aria-hidden="true">📊</span> <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener">ADX</a> Gücü</div>
+      <div class="adv-chips" id="adv-adx">
+        <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('adx',0,this)">Tümü</button>
+        <button class="adv-chip"    data-val="25"  onclick="setAdv('adx',25,this)">Güçlü ≥25</button>
+        <button class="adv-chip"    data-val="40"  onclick="setAdv('adx',40,this)">Çok Güçlü ≥40</button>
+        <button class="adv-chip"    data-val="45"  onclick="setAdv('adx',45,this)">Aşırı ≥45</button>
+      </div>
+    </div>
+    <div class="adv-group">
+      <div class="adv-group-label"><span aria-hidden="true">📅</span> Sinyal Süresi (Bar)</div>
+      <div class="adv-chips" id="adv-bars">
+        <button class="adv-chip adv-active" data-val="0"  onclick="setAdv('bars',0,this)">Tümü</button>
+        <button class="adv-chip"     data-val="3"  onclick="setAdv('bars',3,this)">3+ bar</button>
+        <button class="adv-chip"     data-val="7"  onclick="setAdv('bars',7,this)">7+ bar</button>
+        <button class="adv-chip"     data-val="14" onclick="setAdv('bars',14,this)">14+ bar</button>
+      </div>
+    </div>
+    <div class="adv-group">
+      <div class="adv-group-label"><span aria-hidden="true">📈</span> Hacim Artışı</div>
+      <div class="adv-chips" id="adv-vol">
+        <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('vol',0,this)">Tümü</button>
+        <button class="adv-chip"     data-val="1.5" onclick="setAdv('vol',1.5,this)">×1.5+</button>
+        <button class="adv-chip"     data-val="2"   onclick="setAdv('vol',2,this)">×2+</button>
+        <button class="adv-chip"     data-val="3"   onclick="setAdv('vol',3,this)">×3+</button>
+      </div>
+    </div>
+    <div class="adv-group">
+      <div class="adv-group-label"><span aria-hidden="true">🔢</span> <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener">RSI</a> Durumu</div>
+      <div class="adv-chips" id="adv-rsi">
+        <button class="adv-chip adv-active" data-val="all"       onclick="setAdv('rsi','all',this)">Tümü</button>
+        <button class="adv-chip"            data-val="oversold"  onclick="setAdv('rsi','oversold',this)">Aşırı Satım ≤30</button>
+        <button class="adv-chip"            data-val="neutral"   onclick="setAdv('rsi','neutral',this)">Normal 30-70</button>
+        <button class="adv-chip"            data-val="overbought" onclick="setAdv('rsi','overbought',this)">Aşırı Alım ≥70</button>
+      </div>
+    </div>
+    <div class="adv-group">
+      <div class="adv-group-label"><span aria-hidden="true">🎯</span> Giriş Kalitesi</div>
+      <div class="adv-chips" id="adv-eq">
+        <button class="adv-chip adv-active" data-val="all"      onclick="setAdv('eq','all',this)">Tümü</button>
+        <button class="adv-chip"     data-val="IDEAL"    onclick="setAdv('eq','IDEAL',this)"><span aria-hidden="true">✅</span> İdeal</button>
+        <button class="adv-chip"     data-val="IYI"      onclick="setAdv('eq','IYI',this)"><span aria-hidden="true">👍</span> İyi</button>
+        <button class="adv-chip"     data-val="DIKKATLI" onclick="setAdv('eq','DIKKATLI',this)"><span aria-hidden="true">⚠️</span> Dikkatli</button>
+        <button class="adv-chip"     data-val="UZAK"     onclick="setAdv('eq','UZAK',this)"><span aria-hidden="true">✗</span> Uzak</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sektör filtreleri (dinamik olarak JS ile doldurulur) -->
+  <div class="sector-filters" id="sectorFilters" style="display:none">
+    <span class="sector-lbl">Sektör:</span>
+    <button class="sector-btn active-sector" onclick="setSector('all', this)">Tümü</button>
+    <!-- JS tarafından doldurulacak -->
+  </div>
+
+  <!-- Aktif filtreler kutusu — chip'lerle her filtreyi tek tıkla temizle -->
+  <div id="activeFiltersBar" class="afb" style="display:none">
+    <span class="afb-label">Aktif:</span>
+    <div class="afb-chips" id="afbChips"></div>
+    <button class="afb-clear-all" onclick="resetFilters()" title="Tüm filtreleri temizle">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Filtreleri Sıfırla
+    </button>
+  </div>
+  </div>
+
+<!-- T4.4 3/6 — Onboarding banner tabloya taşındı (Öğrenme Modu ipucu, tablo hücrelerindeki '?' terim tooltipleri için) -->
+<!-- SPEC-012 V3a L4 — Onboarding banner (Öğrenme Modu CTA, dismissible localStorage) -->
+<div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.10),rgba(29,78,216,.05));border:1px solid rgba(var(--bp-brand-rgb),.32);border-radius:var(--bp-radius-lg);padding:11px 14px;margin-bottom:14px;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.55;align-items:center;gap:10px;flex-wrap:wrap">
+  <span style="font-size:var(--bp-text-xl);flex-shrink:0"><span aria-hidden="true">📚</span></span>
+  <span style="flex:1;min-width:200px">
+    <strong>İlk kez mi?</strong> <strong style="color:var(--bp-brand)">Öğrenme Modu</strong>'nu açın —
+    finansal terimlerin yanında <code style="background:rgba(var(--bp-brand-rgb),.15);padding:1px 5px;border-radius:var(--bp-radius-sm);color:var(--bp-brand)">?</code> görünür, tıklayınca anlamı açılır.
+  </span>
+  <button type="button" id="bpOnboardOpen"
+          style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">
+    Öğrenme Modu'nu Aç
+  </button>
+  <button type="button" id="bpOnboardDismiss" aria-label="Kapat"
+          style="background:transparent;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-xl);padding:2px 8px;line-height:1;flex-shrink:0">×</button>
+</div>
+<script>
+(function(){
+  try {
+    var dismissed = localStorage.getItem('bp_onboard_dismissed') === '1';
+    var alreadyOn = localStorage.getItem('bp_learning_mode') === '1';
+    if (dismissed || alreadyOn) return;
+    var el = document.getElementById('bpOnboardBanner');
+    if (!el) return;
+    el.style.display = 'flex';
+    document.getElementById('bpOnboardDismiss').addEventListener('click', function(){
+      el.style.display = 'none';
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
+      if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
+    });
+    document.getElementById('bpOnboardOpen').addEventListener('click', function(){
+      if (window.bpLearningMode && window.bpLearningMode.state === false) {
+        window.bpLearningMode.toggle();
+      }
+      el.style.display = 'none';
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
+      if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
+    });
+  } catch(e) { console.warn('onboarding banner init basarisiz', e); }
+})();
+</script>
+
+  <!-- ═══ T4.4 adım 3/6: TABLO — ana veri tablosu + üstteki onboarding şeridi + Alarm FAB/Panel (aşağıda, kod değişmedi, aynı fonksiyonel gruba ait) ═══ -->
+  <div class="table-wrap">
+    <div id="loadingDiv" role="status" aria-live="polite">
+      <table style="width:100%;border-collapse:collapse">
+        <caption class="sr-only">Sinyal taraması yükleniyor</caption>
+        <thead>
+          <tr style="background:var(--bp-surface2);border-bottom:1px solid var(--bp-border)">
+            <th scope="col" class="bp-th-label">Hisse</th>
+            <th scope="col" class="bp-th-label">Fiyat (₺)</th>
+            <th scope="col" class="bp-th-label hide-mobile">Değişim</th>
+            <th scope="col" class="bp-th-label">Sinyal</th>
+            <th scope="col" class="bp-th-label hide-mobile">Tarih</th>
+            <th scope="col" class="bp-th-label hide-mobile">Giriş ₺</th>
+            <th scope="col" class="bp-th-label hide-mobile">SL ₺</th>
+            <th scope="col" class="bp-th-label hide-mobile">İndikatörler</th>
+          </tr>
+        </thead>
+        <tbody id="skeletonBody"></tbody>
+      </table>
+    </div>
+    <table id="mainTable" style="display:none">
+      <caption class="sr-only">BIST hisseleri sinyal taraması — fiyat, değişim, sinyal, giriş/stop seviyeleri ve teknik güç</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('ticker')">Hisse</button></th>
+          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('price')">Fiyat (₺)</button></th>
+          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('change_pct')">Değişim</button></th>
+          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal')">Sinyal</button></th>
+          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal_date')">Tarih</button></th>
+          <th scope="col" class="hide-mobile">Giriş ₺</th>
+          <th scope="col" class="hide-mobile">SL ₺</th>
+          <th scope="col" class="hide-mobile">İndikatörler</th>
+          <th scope="col" tabindex="0" data-tip="Sinyal değişince bildir"><span role="img" aria-label="Bildirim">🔔</span></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="mobileCards" class="mobile-card-list"></div>
+    <div id="noDataDiv" style="display:none;padding:48px 24px;text-align:center" role="status" aria-live="polite">
+      <div style="font-size:var(--bp-text-36);margin-bottom:12px"><span aria-hidden="true">🔍</span></div>
+      <div style="font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-text);margin-bottom:8px">Sonuç bulunamadı</div>
+      <div style="font-size:var(--bp-text-base);color:var(--bp-text3);margin-bottom:20px">Bu kriterlere uyan hisse yok. Filtreleri gevşetin ya da arama terimini değiştirin.</div>
+      <button onclick="resetFilters()" style="background:var(--bp-brand);color:var(--bp-bg);border:none;border-radius:var(--bp-radius-4);padding:8px 20px;font-size:var(--bp-text-base);font-weight:700;cursor:pointer">Filtreleri Sıfırla</button>
+    </div>
+  </div>
+
+
 <!-- ── Öne Çıkanlar (her zaman görünür) ── -->
 <section class="bp-highlights" aria-label="Öne Çıkan Hisseler">
   <div class="hp-twin">
@@ -606,225 +791,6 @@
     <button onclick="_pwaInstall()" style="background:#3b82f6;color:#fff;border:none;padding:7px 16px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Yükle</button>
     <button class="bp-banner-close" onclick="document.getElementById('pwaInstallBanner').style.display='none'" title="Kapat" aria-label="Kapat">×</button>
   </div>
-
-  <!-- ── Bildirim Çubuğu (E-posta) ────────── -->
-  <div id="subscribeBar" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(0,67,235,.04));border:1px solid rgba(var(--bp-brand-rgb),.18);border-radius:var(--bp-radius);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    <div style="flex:1;min-width:180px">
-      <div style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);margin-bottom:2px"><span aria-hidden="true">📬</span> Sinyal Bildirimleri</div>
-      <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Sinyal değiştiğinde bildirim al — ücretsiz</div>
-    </div>
-    <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:280px;flex-wrap:wrap" id="subForm">
-      <input id="subName" type="text" autocomplete="given-name" placeholder="Adınız" aria-label="Ad"
-        style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:var(--bp-radius);font-size:var(--bp-text-lg);font-family:inherit;outline:none;
-               box-sizing:border-box;transition:border-color .15s"
-        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
-        onkeydown="if(event.key==='Enter')submitSubscribe()">
-      <input id="subEmail" type="email" required autocomplete="email" placeholder="E-posta" aria-label="E-posta adresi"
-        style="flex:1 1 0;min-width:120px;width:0;background:var(--bp-surface);border:1px solid var(--bp-border);color:var(--bp-text);
-               padding:8px 12px;border-radius:var(--bp-radius);font-size:var(--bp-text-lg);font-family:inherit;outline:none;
-               box-sizing:border-box;transition:border-color .15s"
-        onfocus="this.style.borderColor='#b8c3ff'" onblur="this.style.borderColor='var(--bp-border)'"
-        onkeydown="if(event.key==='Enter')submitSubscribe()">
-      <button onclick="submitSubscribe()"
-        style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:7px 16px;border-radius:var(--bp-radius);
-               font-size:var(--bp-text-base);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;
-               transition:background .15s"
-        onmouseover="this.style.background='#cdd5ff'" onmouseout="this.style.background='#b8c3ff'">
-        Abone Ol
-      </button>
-    </div>
-    <button class="bp-banner-close" onclick="document.getElementById('subscribeBar').style.display='none'"
-      title="Kapat" aria-label="Kapat">×</button>
-  </div>
-
-
-  <!-- ── T4.4: Filtre birleştirme — preset/temel/gelişmiş/sektör/aktif-filtre tek panelde (bkz. docs/t44-anasayfa-analiz.md) ── -->
-  <div class="bp-filter-panel" aria-label="Filtreleme paneli">
-  <!-- ── Feature 1 #1B — Preset Chips (CPO MSG-060) ── -->
-  <div class="preset-chips" id="presetChips" role="group" aria-label="Hazır filtreler">
-    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)"><span aria-hidden="true">🔥</span> Top Kazananlar</button>
-    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)"><span aria-hidden="true">📊</span> Hacim Öncüleri</button>
-    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)"><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
-    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden><span aria-hidden="true">⭐</span> Watchlist'im</button>
-  </div>
-
-  <div class="filters">
-    <button class="filter-btn active-all" data-signal="all" onclick="setFilter('all', this)" title="Tüm hisseleri göster">Tümü</button>
-    <button class="filter-btn" data-signal="AL" onclick="setFilter('AL', this)" title="Algoritmamızın 3 testten geçen yükseliş sinyali — momentum onaylı"><span aria-hidden="true">🟢</span> Güçlü Trend</button>
-    <button class="filter-btn" data-signal="SAT" onclick="setFilter('SAT', this)" title="Algoritmamızın 3 testten geçen düşüş sinyali — momentum onaylı"><span aria-hidden="true">🔴</span> Trend Bozuldu</button>
-    <button class="filter-btn" data-signal="BEKLE" onclick="setFilter('BEKLE', this)" title="Trend henüz net değil — yeni sinyal bekleniyor"><span aria-hidden="true">⚪</span> Yatay</button>
-    <button class="filter-btn filter-premium" data-toggle="premium" onclick="toggleChip('premium', this)" title="RVOL ≥ 1.20 — Hacim Onaylı AL sinyali. Diğer filtrelerle birleştirilebilir." aria-pressed="false"><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
-    <button class="filter-btn filter-today" data-toggle="today" onclick="toggleChip('today', this)" title="Bugün ilk kez Güçlü Trend / Trend Bozuldu sinyali oluşan hisseler — diğer filtrelerle birleştirilebilir" aria-pressed="false"><span aria-hidden="true">⚡</span> Bugün</button>
-    <button class="filter-btn filter-watch" id="filterWatchBtn" data-toggle="watch" onclick="toggleChip('watch', this)" style="display:none" aria-pressed="false"><span aria-hidden="true">🔔</span> Takibim</button>
-    <button class="adv-toggle" id="advToggle" onclick="toggleAdvPanel()" aria-expanded="false" aria-controls="advPanel"><span aria-hidden="true">⚙️</span> Filtreler <span id="advBadge" style="display:none" class="adv-active-badge">0</span></button>
-    <div class="search-wrap">
-      <input class="search-input" type="text" placeholder="Hisse ara… (/)" aria-label="Hisse ara"
-             oninput="setSearch(this.value);showSearchAc(this.value)"
-             onkeydown="handleSearchKey(event)"
-             onfocus="showSearchAc(this.value)"
-             autocomplete="off" spellcheck="false">
-      <div class="search-ac" id="searchAc"></div>
-    </div>
-  </div>
-
-  <!-- Gelişmiş Screener Paneli -->
-  <div class="adv-panel" id="advPanel">
-    <div class="adv-group">
-      <div class="adv-group-label"><span aria-hidden="true">📊</span> <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener">ADX</a> Gücü</div>
-      <div class="adv-chips" id="adv-adx">
-        <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('adx',0,this)">Tümü</button>
-        <button class="adv-chip"    data-val="25"  onclick="setAdv('adx',25,this)">Güçlü ≥25</button>
-        <button class="adv-chip"    data-val="40"  onclick="setAdv('adx',40,this)">Çok Güçlü ≥40</button>
-        <button class="adv-chip"    data-val="45"  onclick="setAdv('adx',45,this)">Aşırı ≥45</button>
-      </div>
-    </div>
-    <div class="adv-group">
-      <div class="adv-group-label"><span aria-hidden="true">📅</span> Sinyal Süresi (Bar)</div>
-      <div class="adv-chips" id="adv-bars">
-        <button class="adv-chip adv-active" data-val="0"  onclick="setAdv('bars',0,this)">Tümü</button>
-        <button class="adv-chip"     data-val="3"  onclick="setAdv('bars',3,this)">3+ bar</button>
-        <button class="adv-chip"     data-val="7"  onclick="setAdv('bars',7,this)">7+ bar</button>
-        <button class="adv-chip"     data-val="14" onclick="setAdv('bars',14,this)">14+ bar</button>
-      </div>
-    </div>
-    <div class="adv-group">
-      <div class="adv-group-label"><span aria-hidden="true">📈</span> Hacim Artışı</div>
-      <div class="adv-chips" id="adv-vol">
-        <button class="adv-chip adv-active" data-val="0"   onclick="setAdv('vol',0,this)">Tümü</button>
-        <button class="adv-chip"     data-val="1.5" onclick="setAdv('vol',1.5,this)">×1.5+</button>
-        <button class="adv-chip"     data-val="2"   onclick="setAdv('vol',2,this)">×2+</button>
-        <button class="adv-chip"     data-val="3"   onclick="setAdv('vol',3,this)">×3+</button>
-      </div>
-    </div>
-    <div class="adv-group">
-      <div class="adv-group-label"><span aria-hidden="true">🔢</span> <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener">RSI</a> Durumu</div>
-      <div class="adv-chips" id="adv-rsi">
-        <button class="adv-chip adv-active" data-val="all"       onclick="setAdv('rsi','all',this)">Tümü</button>
-        <button class="adv-chip"            data-val="oversold"  onclick="setAdv('rsi','oversold',this)">Aşırı Satım ≤30</button>
-        <button class="adv-chip"            data-val="neutral"   onclick="setAdv('rsi','neutral',this)">Normal 30-70</button>
-        <button class="adv-chip"            data-val="overbought" onclick="setAdv('rsi','overbought',this)">Aşırı Alım ≥70</button>
-      </div>
-    </div>
-    <div class="adv-group">
-      <div class="adv-group-label"><span aria-hidden="true">🎯</span> Giriş Kalitesi</div>
-      <div class="adv-chips" id="adv-eq">
-        <button class="adv-chip adv-active" data-val="all"      onclick="setAdv('eq','all',this)">Tümü</button>
-        <button class="adv-chip"     data-val="IDEAL"    onclick="setAdv('eq','IDEAL',this)"><span aria-hidden="true">✅</span> İdeal</button>
-        <button class="adv-chip"     data-val="IYI"      onclick="setAdv('eq','IYI',this)"><span aria-hidden="true">👍</span> İyi</button>
-        <button class="adv-chip"     data-val="DIKKATLI" onclick="setAdv('eq','DIKKATLI',this)"><span aria-hidden="true">⚠️</span> Dikkatli</button>
-        <button class="adv-chip"     data-val="UZAK"     onclick="setAdv('eq','UZAK',this)"><span aria-hidden="true">✗</span> Uzak</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sektör filtreleri (dinamik olarak JS ile doldurulur) -->
-  <div class="sector-filters" id="sectorFilters" style="display:none">
-    <span class="sector-lbl">Sektör:</span>
-    <button class="sector-btn active-sector" onclick="setSector('all', this)">Tümü</button>
-    <!-- JS tarafından doldurulacak -->
-  </div>
-
-  <!-- Aktif filtreler kutusu — chip'lerle her filtreyi tek tıkla temizle -->
-  <div id="activeFiltersBar" class="afb" style="display:none">
-    <span class="afb-label">Aktif:</span>
-    <div class="afb-chips" id="afbChips"></div>
-    <button class="afb-clear-all" onclick="resetFilters()" title="Tüm filtreleri temizle">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      Filtreleri Sıfırla
-    </button>
-  </div>
-  </div>
-
-<!-- T4.4 3/6 — Onboarding banner tabloya taşındı (Öğrenme Modu ipucu, tablo hücrelerindeki '?' terim tooltipleri için) -->
-<!-- SPEC-012 V3a L4 — Onboarding banner (Öğrenme Modu CTA, dismissible localStorage) -->
-<div id="bpOnboardBanner" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.10),rgba(29,78,216,.05));border:1px solid rgba(var(--bp-brand-rgb),.32);border-radius:var(--bp-radius-lg);padding:11px 14px;margin-bottom:14px;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.55;align-items:center;gap:10px;flex-wrap:wrap">
-  <span style="font-size:var(--bp-text-xl);flex-shrink:0"><span aria-hidden="true">📚</span></span>
-  <span style="flex:1;min-width:200px">
-    <strong>İlk kez mi?</strong> <strong style="color:var(--bp-brand)">Öğrenme Modu</strong>'nu açın —
-    finansal terimlerin yanında <code style="background:rgba(var(--bp-brand-rgb),.15);padding:1px 5px;border-radius:var(--bp-radius-sm);color:var(--bp-brand)">?</code> görünür, tıklayınca anlamı açılır.
-  </span>
-  <button type="button" id="bpOnboardOpen"
-          style="background:var(--bp-brand);color:var(--bp-bg);border:none;padding:6px 14px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">
-    Öğrenme Modu'nu Aç
-  </button>
-  <button type="button" id="bpOnboardDismiss" aria-label="Kapat"
-          style="background:transparent;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-xl);padding:2px 8px;line-height:1;flex-shrink:0">×</button>
-</div>
-<script>
-(function(){
-  try {
-    var dismissed = localStorage.getItem('bp_onboard_dismissed') === '1';
-    var alreadyOn = localStorage.getItem('bp_learning_mode') === '1';
-    if (dismissed || alreadyOn) return;
-    var el = document.getElementById('bpOnboardBanner');
-    if (!el) return;
-    el.style.display = 'flex';
-    document.getElementById('bpOnboardDismiss').addEventListener('click', function(){
-      el.style.display = 'none';
-      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
-      if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
-    });
-    document.getElementById('bpOnboardOpen').addEventListener('click', function(){
-      if (window.bpLearningMode && window.bpLearningMode.state === false) {
-        window.bpLearningMode.toggle();
-      }
-      el.style.display = 'none';
-      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
-      if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
-    });
-  } catch(e) { console.warn('onboarding banner init basarisiz', e); }
-})();
-</script>
-
-  <!-- ═══ T4.4 adım 3/6: TABLO — ana veri tablosu + üstteki onboarding şeridi + Alarm FAB/Panel (aşağıda, kod değişmedi, aynı fonksiyonel gruba ait) ═══ -->
-  <div class="table-wrap">
-    <div id="loadingDiv" role="status" aria-live="polite">
-      <table style="width:100%;border-collapse:collapse">
-        <caption class="sr-only">Sinyal taraması yükleniyor</caption>
-        <thead>
-          <tr style="background:var(--bp-surface2);border-bottom:1px solid var(--bp-border)">
-            <th scope="col" class="bp-th-label">Hisse</th>
-            <th scope="col" class="bp-th-label">Fiyat (₺)</th>
-            <th scope="col" class="bp-th-label hide-mobile">Değişim</th>
-            <th scope="col" class="bp-th-label">Sinyal</th>
-            <th scope="col" class="bp-th-label hide-mobile">Tarih</th>
-            <th scope="col" class="bp-th-label hide-mobile">Giriş ₺</th>
-            <th scope="col" class="bp-th-label hide-mobile">SL ₺</th>
-            <th scope="col" class="bp-th-label hide-mobile">İndikatörler</th>
-          </tr>
-        </thead>
-        <tbody id="skeletonBody"></tbody>
-      </table>
-    </div>
-    <table id="mainTable" style="display:none">
-      <caption class="sr-only">BIST hisseleri sinyal taraması — fiyat, değişim, sinyal, giriş/stop seviyeleri ve teknik güç</caption>
-      <thead>
-        <tr>
-          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('ticker')">Hisse</button></th>
-          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('price')">Fiyat (₺)</button></th>
-          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('change_pct')">Değişim</button></th>
-          <th scope="col" class="th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal')">Sinyal</button></th>
-          <th scope="col" class="hide-mobile th-sortable" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortTable('signal_date')">Tarih</button></th>
-          <th scope="col" class="hide-mobile">Giriş ₺</th>
-          <th scope="col" class="hide-mobile">SL ₺</th>
-          <th scope="col" class="hide-mobile">İndikatörler</th>
-          <th scope="col" tabindex="0" data-tip="Sinyal değişince bildir"><span role="img" aria-label="Bildirim">🔔</span></th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-    <div id="mobileCards" class="mobile-card-list"></div>
-    <div id="noDataDiv" style="display:none;padding:48px 24px;text-align:center" role="status" aria-live="polite">
-      <div style="font-size:var(--bp-text-36);margin-bottom:12px"><span aria-hidden="true">🔍</span></div>
-      <div style="font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-text);margin-bottom:8px">Sonuç bulunamadı</div>
-      <div style="font-size:var(--bp-text-base);color:var(--bp-text3);margin-bottom:20px">Bu kriterlere uyan hisse yok. Filtreleri gevşetin ya da arama terimini değiştirin.</div>
-      <button onclick="resetFilters()" style="background:var(--bp-brand);color:var(--bp-bg);border:none;border-radius:var(--bp-radius-4);padding:8px 20px;font-size:var(--bp-text-base);font-weight:700;cursor:pointer">Filtreleri Sıfırla</button>
-    </div>
-  </div>
-
-</div>
-
 <!-- ── Alarm FAB — T4.4 adım 3/6 (TABLO) aksiyon katmanı: tablodaki 🔔 ile eklenen takip listesini açar, kod değişmedi ── -->
 <button class="alarm-fab" id="alarmFab" onclick="toggleAlarmPanel()" title="Takip listem" aria-haspopup="dialog" aria-controls="alarmPanel" aria-expanded="false">
   <span role="img" aria-label="Takip listem">🔔</span>
@@ -843,31 +809,6 @@
   <div class="ap-footer" id="apFooter">
     Sinyal değişince tarayıcı bildirimi gönderilir (bu sekme açıkken, izin verirsen).
   </div>
-</div>
-
-<!-- ── Sticky Subscription Toast ── -->
-<div class="sub-toast" id="subToast" role="dialog" aria-label="E-posta aboneliği">
-  <button class="sub-toast-close" onclick="dismissSubToast()" title="Kapat" aria-label="Kapat">×</button>
-  <h3 class="sub-toast-title"><span aria-hidden="true">📬</span> Günlük Sinyal Özeti Al</h3>
-  <div class="sub-toast-sub">Her gün piyasa kapanışında önemli sinyal değişikliklerini e-posta ile al.</div>
-  <div class="sub-toast-benefits">
-    <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> Ücretsiz</span>
-    <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> Günde 1 e-posta</span>
-    <span class="sub-toast-benefit"><span aria-hidden="true">✓</span> İstediğin zaman çık</span>
-  </div>
-  <div class="sub-toast-row" id="subToastForm">
-    <input id="subToastName" type="text" class="sub-toast-input" placeholder="Adınız" autocomplete="name"
-      onkeydown="if(event.key==='Enter')document.getElementById('subToastEmail').focus()"
-      aria-label="Ad">
-    <input id="subToastEmail" type="email" class="sub-toast-input" required autocomplete="email" placeholder="E-posta"
-      onkeydown="if(event.key==='Enter')submitToastSubscribe()"
-      aria-label="E-posta adresi">
-  </div>
-  <div class="sub-toast-btnrow">
-    <button id="subToastSubmitBtn" class="sub-toast-btn" onclick="submitToastSubscribe()"><span aria-hidden="true">✉</span> Abone Ol</button>
-    <button id="subToastLoginBtn" class="sub-toast-btn sub-toast-btn-ghost" onclick="submitRecognize()"><span aria-hidden="true">👤</span> Üye Girişi</button>
-  </div>
-  <div id="subToastRecogStatus" role="status" aria-live="polite" style="font-size:var(--bp-text-xs);margin-top:6px;display:none"></div>
 </div>
 
 </main>
@@ -1944,9 +1885,9 @@ function updateStats() {
     const satPct = satCnt / total * 100;
     document.getElementById('mbSegAl').style.width  = alPct  + '%';
     document.getElementById('mbSegSat').style.width = satPct + '%';
-    document.getElementById('mbLgAl').textContent  = alCnt  + ' Güçlü Trend (' + alPct.toFixed(0)  + '%)';
-    document.getElementById('mbLgBkl').textContent = bklCnt + ' Yatay ('   + (bklCnt/total*100).toFixed(0) + '%)';
-    document.getElementById('mbLgSat').textContent = satCnt + ' Trend Bozuldu (' + satPct.toFixed(0) + '%)';
+    document.getElementById('mbLgAl').textContent  = 'Güçlü Trend %' + alPct.toFixed(0);
+    document.getElementById('mbLgBkl').textContent = 'Yatay %' + (bklCnt/total*100).toFixed(0);
+    document.getElementById('mbLgSat').textContent = 'Trend Bozuldu %' + satPct.toFixed(0);
     // Sentiment label
     const sentDown = satPct >= 30 && (satPct > alPct || alPct < 40);
     const sent = alPct >= 60 ? '🔥 Güçlü Boğa' : sentDown ? '📉 Baskı Altında' : alPct >= 40 ? '📈 Hafif Yükseliş' : '⚪ Yatay';
@@ -2907,8 +2848,6 @@ window.addEventListener('storage', e => {
     const onboardEl = document.getElementById('bpOnboardBanner');
     if (onboardEl) onboardEl.style.display = 'none';
     if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
-  } else if (e.key === 'bp_sub_dismissed_v2' || e.key === 'bp_sub_user') {
-    if (typeof _hideSubToastCrossTab === 'function') _hideSubToastCrossTab();
   }
 });
 
@@ -3252,230 +3191,6 @@ function showAlarmToast(msg, type='ok') {
 }
 
 updateFabBadge();
-
-/* ── Sticky Subscription Toast ──────────────────── */
-let _subToastRelease = null;
-let _subToastTimer = null;
-let _subToastOnScroll = null;
-let _subToastShown = false;
-function _hideSubToastCrossTab() {
-  // r146 bug-hunt: baska sekmede dismiss/abone-olma gerceklesti. Henuz
-  // gosterilmemisse zamanlayiciyi/scroll dinleyicisini iptal et (bir daha hic
-  // gosterme), zaten gosterilmisse gizle - WATCH_KEY/PRICE_ALARM_KEY'deki ayni
-  // cross-tab desen bu bilesene hic uygulanmamisti.
-  if (_subToastTimer) { clearTimeout(_subToastTimer); _subToastTimer = null; }
-  if (_subToastOnScroll) { window.removeEventListener('scroll', _subToastOnScroll); _subToastOnScroll = null; }
-  _subToastShown = true;
-  const el = document.getElementById('subToast');
-  if (el) el.classList.remove('visible');
-  if (_subToastRelease) { _subToastRelease(); _subToastRelease = null; }
-}
-(function() {
-  const KEY = 'bp_sub_dismissed_v2';
-  const DELAY_MS = 25000; // 25 saniye
-  function hasNewsletterSub() {
-    // Zaten newsletter abonesi mi? (bp_sub cookie veya bp_sub_user localStorage)
-    try {
-      if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return true;
-      const u = localStorage.getItem('bp_sub_user');
-      if (u && JSON.parse(u).subscribed) return true;
-    } catch(_) { console.warn('hasNewsletterSub: bp_sub_user parse basarisiz', _); }
-    return false;
-  }
-  function shouldShow() {
-    // CPO MSG-092 BUG #1: Zaten abone olan kullanıcıya newsletter modal HİÇ çıkmamalı.
-    if (hasNewsletterSub()) return false;
-    try {
-      const v = localStorage.getItem(KEY);
-      if (!v) return true;
-      const ts = parseInt(v, 10);
-      // 7 gün sonra tekrar göster
-      return (Date.now() - ts) > 7 * 24 * 3600 * 1000;
-    } catch(e) { return false; }
-  }
-  if (shouldShow()) {
-    const show = () => {
-      if (_subToastShown) return;
-      _subToastShown = true;
-      // bug-hunt r98: onScroll sadece scroll-tetiklemesinde kendini kaldiriyordu —
-      // timer once dolarsa (kullanici scroll etmeden) listener sayfanin geri kalan
-      // omru boyunca window uzerinde kalici kaliyordu (her scroll'da no-op calisan
-      // "zombi" listener). show() hangi yoldan tetiklenirse tetiklensin temizle.
-      clearTimeout(_subToastTimer);
-      if (_subToastOnScroll) window.removeEventListener('scroll', _subToastOnScroll);
-      const el = document.getElementById('subToast');
-      if (el) {
-        el.classList.add('visible');
-        if (window.bpTrapFocus) _subToastRelease = window.bpTrapFocus(el, dismissSubToast);
-      }
-    };
-    // Zamanlayıcı ile göster
-    _subToastTimer = setTimeout(show, DELAY_MS);
-    // Veya %40 scroll ile göster
-    _subToastOnScroll = () => {
-      const h = document.documentElement.scrollHeight - window.innerHeight;
-      if (h > 0 && window.scrollY / h >= 0.4) show();
-    };
-    window.addEventListener('scroll', _subToastOnScroll, { passive: true });
-  }
-})();
-
-function dismissSubToast() {
-  const el = document.getElementById('subToast');
-  if (el) { el.classList.remove('visible'); }
-  if (_subToastRelease) { _subToastRelease(); _subToastRelease = null; }
-  try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz', e); }
-}
-
-/* MSG-098 soft auth: "Üye Girişi" — eski abone email ile re-recognize.
-   OTP/magic-link tasarımı (CPO-DEV2-034, P0-SEC-1 kalıcı fix): /api/recognize
-   artık senkron cookie DÖNMÜYOR — e-posta kayıtlıysa 15dk geçerli giriş
-   bağlantısı mail ile gönderiliyor, cookie yalnız link tıklanınca set edilir.
-   Enumeration kapatıldığı için backend her zaman aynı jenerik başarı mesajını
-   dönüyor (res.status===404 dalı artık anlamsız, kaldırıldı). */
-async function submitRecognize() {
-  const emailEl = document.getElementById('subToastEmail');
-  const email   = emailEl ? emailEl.value.trim() : '';
-  const statusEl = document.getElementById('subToastRecogStatus');
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
-    return;
-  }
-  const btn = document.getElementById('subToastLoginBtn');
-  if (btn && btn.disabled) return;
-  if (btn) { btn.textContent = 'Gönderiliyor…'; btn.disabled = true; }
-  try {
-    const res  = await fetch('/api/recognize', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email }),
-      signal: AbortSignal.timeout(10000),
-    });
-    const json = await res.json();
-    if (statusEl) {
-      statusEl.style.display = '';
-      statusEl.style.color = json && json.ok ? '#00e290' : '#f85149';
-      statusEl.textContent = (json && json.ok ? '✉️ ' : '⚠️ ') + ((json && (json.message || json.error)) || 'Bir hata oluştu, tekrar dene.');
-    }
-    _startRecognizeCooldown(btn, '👤 Üye Girişi');
-  } catch(_) {
-    if (statusEl) {
-      statusEl.style.display = '';
-      statusEl.style.color = '#f85149';
-      statusEl.textContent = 'Bağlantı hatası — lütfen daha sonra tekrar deneyin.';
-    }
-    if (btn) { btn.textContent = '👤 Üye Girişi'; btn.disabled = false; }
-  }
-}
-
-/* OTP tasarımı: spam'i önlemek için başarı/hata fark etmeksizin 60s cooldown */
-function _startRecognizeCooldown(btn, idleLabel) {
-  if (!btn) return;
-  let remain = 60;
-  btn.disabled = true;
-  const tick = () => {
-    if (remain <= 0) { btn.textContent = idleLabel; btn.disabled = false; return; }
-    btn.textContent = `Tekrar gönder (${remain}s)`;
-    remain -= 1;
-    setTimeout(tick, 1000);
-  };
-  tick();
-}
-
-async function submitToastSubscribe() {
-  const emailEl = document.getElementById('subToastEmail');
-  const email   = emailEl ? emailEl.value.trim() : '';
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
-    return;
-  }
-  const subToastNameEl_chk = document.getElementById('subToastName');
-  if (subToastNameEl_chk && subToastNameEl_chk.value.trim().length < 2) {
-    subToastNameEl_chk.style.borderColor = '#f85149';
-    subToastNameEl_chk.focus();
-    return;
-  }
-  const btn = document.getElementById('subToastSubmitBtn');
-  if (btn) { btn.textContent = 'Kaydediliyor…'; btn.disabled = true; }
-  try {
-    const subToastNameEl = document.getElementById('subToastName');
-    const subToastName = subToastNameEl ? subToastNameEl.value.trim() : '';
-    const res  = await fetch('/api/subscribe', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, name: subToastName }),
-      signal: AbortSignal.timeout(10000),
-    });
-    const json = await res.json();
-    const toast = document.getElementById('subToast');
-    if (json.ok) {
-      // Persist subscribe state
-      if (typeof window.bpRecordSubscribe === 'function' && json.token) {
-        window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
-      }
-      if (toast) toast.innerHTML = '<div style="font-size:var(--bp-text-base);color:var(--bp-al);font-weight:600;padding:4px 0">✅ ' + _esc(json.message || 'Abone oldunuz!') + '</div>';
-      try { localStorage.setItem('bp_sub_dismissed_v2', Date.now().toString()); } catch(e) { console.warn('abonelik toast kapatma kaydi basarisiz (subscribe)', e); }
-      setTimeout(() => dismissSubToast(), 4000);
-      // Ana subscription bar'ı da güncelle
-      const bar = document.getElementById('subscribeBar');
-      if (bar) bar.innerHTML = '<div style="font-size:var(--bp-text-base);color:var(--bp-al);font-weight:600">✅ ' + _esc(json.message || 'Abone oldunuz!') + '</div>';
-      // subToast(role=dialog) ve subscribeBar aria-live degil — ekran okuyucuya
-      // duyurmak icin kanonik showToast() (aria-live=polite) ile de bildir
-      showToast('✅ ' + (json.message || 'Abone oldunuz!'), 'success');
-    } else {
-      showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'), 'error');
-      if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
-    }
-  } catch(e) {
-    showToast('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'error');
-    if (btn) { btn.textContent = 'Abone Ol'; btn.disabled = false; }
-  }
-}
-
-/* ── E-posta Abone Formu ─────────────────────────── */
-async function submitSubscribe() {
-  const nameEl  = document.getElementById('subName');
-  const emailEl = document.getElementById('subEmail');
-  const name    = nameEl ? nameEl.value.trim() : '';
-  const email   = emailEl.value.trim();
-  if (!name || name.length < 2) {
-    if (nameEl) { nameEl.style.borderColor = '#f85149'; nameEl.focus(); }
-    return;
-  }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    emailEl.style.borderColor = '#f85149';
-    emailEl.focus();
-    return;
-  }
-  const btn = document.querySelector('#subForm button');
-  const origText = btn.textContent;
-  btn.textContent = 'Kaydediliyor…';
-  btn.disabled    = true;
-  try {
-    const res  = await fetch('/api/subscribe', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email, name }),
-      signal:  AbortSignal.timeout(10000),
-    });
-    const json = await res.json();
-    if (json.ok) {
-      // Persist subscribe state — cookie zaten server'da set edildi, localStorage'a da kaydet
-      if (typeof window.bpRecordSubscribe === 'function' && json.token) {
-        window.bpRecordSubscribe({ token: json.token, email: json.email, name: json.name });
-      }
-      document.getElementById('subscribeBar').innerHTML =
-        `<div style="font-size:var(--bp-text-base);color:var(--bp-al);font-weight:600;flex:1">✅ ${json.message}</div>` +
-        (json.token ? `<a href="/profil?t=${encodeURIComponent(json.token)}" style="color:var(--bp-brand);font-size:var(--bp-text-sm);text-decoration:none;border:1px solid rgba(var(--bp-brand-rgb),0.3);padding:5px 11px;border-radius:6px;font-weight:600;flex-shrink:0">Profili Tamamla →</a>` : '');
-    } else {
-      showToast('⚠️ ' + (json.message || json.error || 'Bir hata oluştu'), 'error');
-      btn.textContent = origText;
-      btn.disabled    = false;
-    }
-  } catch (e) {
-    showToast('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'error');
-    btn.textContent = origText;
-    btn.disabled    = false;
-  }
-}
 
 /* ── Gündem & Haberler ───────────────────────────── */
 let _gundemRetryTimer = null;

@@ -1263,32 +1263,6 @@
   }
   .ap-pa-clear:hover { color:var(--bp-sat); }
   @media(max-width:400px) { .alarm-panel { width:calc(100vw - 16px); right:8px; } }
-  /* ── Sticky subscription toast ── */
-  .sub-toast {
-    position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px);
-    z-index:var(--bp-z-sub-toast); width:min(420px, calc(100vw - 32px));
-    background:linear-gradient(135deg,var(--bp-surface),var(--bp-surface2));
-    border:1px solid rgba(var(--bp-brand-rgb),.35); border-radius:var(--bp-radius-14);
-    padding:16px 18px; box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(var(--bp-brand-rgb),.1);
-    opacity:0; pointer-events:none;
-    transition:opacity .35s ease,transform .35s ease;
-  }
-  /* Mobil alt navigasyon barı görünürken toast'ı üstüne it (bug-hunt).
-     DEV2-r4-css-breakpoint: shared.css:101 kanonik 900px eşiğine hizalandı
-     (bkz. .alarm-panel yorumu). */
-  @media (max-width: 900px) {
-    .sub-toast { bottom: calc(90px + 64px + env(safe-area-inset-bottom)); }
-  }
-  .sub-toast.visible {
-    opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;
-  }
-  .sub-toast-close {
-    position:absolute; top:10px; right:12px; background:none; border:none;
-    color:var(--bp-text3); font-size:var(--bp-text-xl); cursor:pointer; line-height:1; padding:2px 4px;
-    transition:color .15s;
-  }
-  .sub-toast-close::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
-  .sub-toast-close:hover { color:var(--bp-text2); }
   .bp-banner-close {
     background:none; border:none; color:#374151; cursor:pointer;
     font-size:var(--bp-text-lg); line-height:1; padding:2px 4px;
@@ -1298,32 +1272,6 @@
     content:''; position:absolute; top:50%; left:50%;
     width:44px; height:44px; transform:translate(-50%,-50%);
   }
-  .sub-toast-title { font-size:var(--bp-text-base); font-weight:700; color:var(--bp-text); margin:0 0 3px; }
-  .sub-toast-sub   { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-bottom:12px; line-height:1.5; }
-  .sub-toast-row   { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
-  .sub-toast-input {
-    width:100%; background:var(--bp-surface2); border:1px solid var(--bp-border); color:var(--bp-text);
-    padding:9px 12px; border-radius:var(--bp-radius-7); font-size:var(--bp-text-lg); outline:none;
-    font-family:inherit; transition:border-color .15s; box-sizing:border-box;
-  } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
-  .sub-toast-input:focus { border-color:var(--bp-brand); }
-  .sub-toast-btn {
-    background:var(--bp-brand); color:var(--bp-bg); border:none; padding:9px 16px; border-radius:var(--bp-radius-7);
-    font-size:var(--bp-text-base); font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap;
-    transition:background .15s; margin-top:2px;
-  }
-  .sub-toast-btn:hover { background:#cdd5ff; }
-  /* MSG-098: 2-button row + ghost (Üye Girişi) */
-  .sub-toast-btnrow { display:flex; gap:8px; margin-top:8px; }
-  .sub-toast-btnrow .sub-toast-btn { flex:1; margin-top:0; text-align:center; }
-  .sub-toast-btn-ghost {
-    background:transparent; color:var(--bp-brand); border:1px solid #3a3f55;
-  }
-  .sub-toast-btn-ghost:hover { background:rgba(var(--bp-brand-rgb),0.08); }
-  @media (max-width:380px) { .sub-toast-btnrow { flex-direction:column; } }
-  .sub-toast-benefits { display:flex; gap:14px; margin-bottom:10px; flex-wrap:wrap; }
-  .sub-toast-benefit  { display:flex; align-items:center; gap:5px; font-size:var(--bp-text-xs); color:var(--bp-text2); }
-
   .alarm-fab {
     position:fixed; bottom:24px; right:20px; z-index:var(--bp-z-alarm-fab);
     background: rgba(var(--bp-al-rgb),0.14);
