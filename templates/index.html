@@ -923,6 +923,7 @@ function _tickFmt(time, type) { return BPChart.fmtTickDate(time, type); }
 
 let chartMain;
 let _chartMainRO = null;   // ResizeObserver referansı (rebuild'lerde disconnect edilecek)
+let _mainResizeT = null;   // r157: resize debounce (hisse.html sparkline desenine hizali)
 
 function _syncMainChart() {
   const elMain = document.getElementById('chartMain');
@@ -1023,8 +1024,8 @@ async function buildCharts(d) {
   });
 }
 
-/* Tek global resize handler (rebuild her çağrıldığında eklenmez) */
-window.addEventListener('resize', _syncMainChart);
+/* Tek global resize handler (rebuild her çağrıldığında eklenmez), debounce'lu (r157: sürükleyerek resize sırasında ardışık chart redraw'ı önler) */
+window.addEventListener('resize', function(){ clearTimeout(_mainResizeT); _mainResizeT = setTimeout(_syncMainChart, 150); });
 
 /* ── Endeks kartı render ─────────────────────────── */
 function renderEndeksCard(sym, s) {

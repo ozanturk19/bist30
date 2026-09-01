@@ -1457,6 +1457,7 @@ function shareSignal(platform) {
 let _hisseChart = null;        // r140: onceki instance/RO/listener temizligi icin (index.html chartMain deseniyle simetrik)
 let _hisseChartRO = null;
 let _hisseResizeHandler = null;
+let _chartResizeT = null;   // r157: resize debounce (sparkline'daki _sparkResizeTimer desenine hizali)
 
 function buildChart(d) {
   if (_hisseChart) { try { _hisseChart.remove(); } catch(_) { console.warn('eski chart instance temizlenemedi', _); } _hisseChart = null; }
@@ -1589,7 +1590,7 @@ function buildChart(d) {
     chart.applyOptions({ width: w, height: isMob ? 240 : 340 });
   }
 
-  _hisseResizeHandler = _syncChartSize;
+  _hisseResizeHandler = function(){ clearTimeout(_chartResizeT); _chartResizeT = setTimeout(_syncChartSize, 150); };
   window.addEventListener('resize', _hisseResizeHandler);
 
   // SPEC-017 Faz F Bug 3: ResizeObserver — tab switch (display:none→block) resize tetikle
