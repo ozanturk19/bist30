@@ -337,7 +337,7 @@ async function applyFilters() {
   document.getElementById('emptyDiv').style.display    = 'none';
 
   try {
-    const r = await fetch('/api/tarama?' + params);
+    const r = await fetch('/api/tarama?' + params, { signal: AbortSignal.timeout(15000) });
     const d = await r.json();
     if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
     if (mySeq !== _filtersSeq) return; // bayat yanit — daha yeni bir applyFilters cagrisi var, at

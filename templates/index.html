@@ -1234,7 +1234,7 @@ async function fetchChart100(isRetry) {
   }
   const mySeq = ++_chart100Seq;
   try {
-    const res  = await fetch('/api/chart/XU100');
+    const res  = await fetch('/api/chart/XU100', { signal: AbortSignal.timeout(15000) });
     const json = await res.json();
     if (mySeq !== _chart100Seq) return;  // daha yeni bir fetchChart100() cagrisi baslamis, bayat yaniti at
     if (json.loading || !json.chart) { setTimeout(() => fetchChart100(true), 5000); return; }
@@ -2128,6 +2128,7 @@ async function saveAlertSettings() {
       method: 'POST', credentials: 'same-origin',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(15000),
     });
     const d = await r.json();
     if (d.ok) {
@@ -2155,7 +2156,7 @@ async function deleteAlertSettings() {
     // r37 bug-hunt: r.ok kontrolsüz idi — 401/429/500'de fetch() reddetmez,
     // istemci sahte "silindi" gösterip _userAlerts'ten düşürüyordu, sunucudaki
     // alert canlı kalmaya devam ediyor ve kullanıcı bunu göremiyordu.
-    const r = await fetch(`/api/user-alerts/${ticker}`, {method: 'DELETE', credentials: 'same-origin'});
+    const r = await fetch(`/api/user-alerts/${ticker}`, {method: 'DELETE', credentials: 'same-origin', signal: AbortSignal.timeout(15000)});
     if (!r.ok) {
       if (st) st.textContent = '❌ Silme başarısız, tekrar deneyin';
       return;
@@ -2918,7 +2919,7 @@ function toggleWatch(ticker) {
       // CPO-DEV2-084 #2: deleteAlertSettings() emsaliyle ayni ilke - basarisiz silme
       // sessiz kalmasin. _userAlerts SADECE r.ok'ta silinir, boylece basarisizlikta
       // ⚙️ butonu (hasAlertAccess kosulu) bir sonraki render'da gorunur kalir.
-      fetch(`/api/user-alerts/${_delTicker}`, {method: 'DELETE', credentials: 'same-origin'})
+      fetch(`/api/user-alerts/${_delTicker}`, {method: 'DELETE', credentials: 'same-origin', signal: AbortSignal.timeout(15000)})
         .then(r => {
           if (r.ok) { delete _userAlerts[_delTicker]; }
           else { showAlarmToast(`${_delTicker} e-posta alerti silinemedi, sunucuda aktif kalmaya devam ediyor — ⚙️ ile tekrar dene`, 'err'); }

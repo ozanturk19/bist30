@@ -401,7 +401,7 @@ window.addEventListener('pageshow', (ev) => {
   /* Yoksa otomatik başlat */
   if (statusEl) statusEl.textContent = 'Backtest başlatılıyor…';
   try {
-    const runRes = await fetch('/api/backtest/run', { method: 'POST' });
+    const runRes = await fetch('/api/backtest/run', { method: 'POST', signal: AbortSignal.timeout(15000) });
     if (!runRes.ok) {
       // CPO-DEV2-049 madde 2: 403 (admin-only) onceden basari sanilip 15-20dk
       // bosuna polling yapip 'zaman asimi' ile pes ediliyordu.

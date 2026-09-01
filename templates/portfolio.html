@@ -505,7 +505,7 @@ async function fetchLive() {
   if (_fetchLiveBusy) return;
   _fetchLiveBusy = true;
   try {
-    const r = await fetch('/api/data');
+    const r = await fetch('/api/data', { signal: AbortSignal.timeout(15000) });
     const j = await r.json();
     if (j.stocks) {
       j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal, signal_price: s.signal_price }; });

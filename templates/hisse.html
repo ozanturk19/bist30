@@ -2214,7 +2214,7 @@ async function loadChart(retry) {
   // Önce chart fetch + render, sonra /api/data ayrı non-blocking (fail-silent).
   try {
     /* 1) Chart endpoint — kritik path, hemen render */
-    const res = await fetch('/api/hisse/' + TICKER + '/chart');
+    const res = await fetch('/api/hisse/' + TICKER + '/chart', { signal: AbortSignal.timeout(15000) });
     const json = await res.json();
     if (_mySeq !== _chartSeq) return;   /* bayat yanit, yeni bir loadChart cagrisi baslamis */
 
@@ -2433,7 +2433,7 @@ async function loadSignalExplanation(retryCount) {
   footerEl.style.display = 'none';
 
   try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/signal-explanation');
+    const res  = await fetch('/api/hisse/' + TICKER + '/signal-explanation', { signal: AbortSignal.timeout(15000) });
     let data = null;
     try { data = await res.json(); } catch(parseErr) { console.warn('signal-explanation JSON parse hatasi:', parseErr); }
     /* CPO-DEV2-083: backend artik gecerli-ama-veri-eksik durumda 503 donuyor (once 200'du).
@@ -2547,7 +2547,7 @@ async function loadKapDisclosures() {
   if (!loadEl || !listEl) return;
 
   try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/kap');
+    const res  = await fetch('/api/hisse/' + TICKER + '/kap', { signal: AbortSignal.timeout(15000) });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
@@ -2643,7 +2643,7 @@ function _pbColor(v) { return v == null ? '#e5e1e4' : v < 1 ? '#00e290' : v < 3 
 
 async function loadFundamentals() {
   try {
-    const res  = await fetch('/api/hisse/' + TICKER + '/fundamentals');
+    const res  = await fetch('/api/hisse/' + TICKER + '/fundamentals', { signal: AbortSignal.timeout(15000) });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     document.getElementById('fundLoading').style.display = 'none';

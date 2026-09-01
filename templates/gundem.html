@@ -230,8 +230,8 @@ async function loadGundem() {
   try {
     // r41: iki bagimsiz kaynak ayri ele alinir -- market-news ag hatasi gundem verisini dusurmemeli
     const [gundemSettled, newsSettled] = await Promise.allSettled([
-      fetch('/api/gundem'),
-      fetch('/api/market-news'),
+      fetch('/api/gundem', { signal: AbortSignal.timeout(15000) }),
+      fetch('/api/market-news', { signal: AbortSignal.timeout(15000) }),
     ]);
     if (gundemSettled.status === 'rejected') throw gundemSettled.reason;
     const gundemRes = gundemSettled.value;

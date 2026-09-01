@@ -204,7 +204,7 @@ let _btLoadSeq = 0;  /* r144: visibilitychange her odaklanmada load()'u yeniden 
 async function load() {
   const mySeq = ++_btLoadSeq;
   try {
-    const res  = await fetch('/api/bilanco-takvimi');
+    const res  = await fetch('/api/bilanco-takvimi', { signal: AbortSignal.timeout(15000) });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (!data.periods || data.periods.length === 0) throw new Error('Boş veri');

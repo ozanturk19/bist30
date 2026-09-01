@@ -412,7 +412,7 @@ async function doCompare(opts) {
   document.getElementById('compareSubtitle').textContent = inputs.join(' · ');
 
   try {
-    const res  = await fetch(`/api/karsilastir?tickers=${inputs.map(encodeURIComponent).join(',')}`);
+    const res  = await fetch(`/api/karsilastir?tickers=${inputs.map(encodeURIComponent).join(',')}`, { signal: AbortSignal.timeout(15000) });
     const data = await res.json();
     if (mySeq !== _compareSeq) return;  // daha yeni bir karsilastirma baslamis, bu yaniti at
     if (!res.ok || data.ok === false) {
