@@ -1271,9 +1271,14 @@ SECTORS = {
                       "CCOLA", "EGEEN", "DYOBY", "ERSU",  "KMPUR", "KONYA",
                       "MEGAP", "MIPAZ", "MRDIN", "NUHCM", "MERCN"],
     "Sigorta":       ["ANHYT", "ANSGR", "TURSG", "AKGRT"],
-    "Diğer":         ["BJKAS", "FENER", "GENIL", "KARTN", "ADEL",  "DURDO",
-                      "ECILC", "FMIZP", "FORMT", "GSRAY", "IEYHO", "IPMAT",
-                      "KERVT", "LKMNH", "MEDTR", "PARSN", "AGROT", "MARTI"],
+    # CPO-1464 #3: GENIL/ECILC/MEDTR "Diğer" catch-all'a dusup spor kulubu/
+    # kagit/basim sirketleriyle "ayni sektor" gosteriliyordu (/hisse/GENIL,
+    # /sektor-harita). ALKLC (Alkaloid Sağlık) hicbir sektorde listeli
+    # degildi, _get_sector zaten "Diğer"e dusuruyordu.
+    "İlaç/Sağlık":   ["GENIL", "ECILC", "MEDTR", "ALKLC"],
+    "Diğer":         ["BJKAS", "FENER", "KARTN", "ADEL",  "DURDO",
+                      "FMIZP", "FORMT", "GSRAY", "IEYHO", "IPMAT",
+                      "KERVT", "LKMNH", "PARSN", "AGROT", "MARTI"],
 }
 
 # DEV2-r4-perf: SECTORS lineer taramasi yerine bir kez kurulan ters-index.
@@ -5593,6 +5598,24 @@ def _load_company_summary_from_disk():
     except Exception as e:
         logger.warning("_load_company_summary_from_disk hatası: %s", e)
 
+# CPO-1464 #3: "A.Ş."/"T.A.Ş." gibi unvan kısaltmalarındaki nokta cümle sonu
+# sanılıp metin ortasında kesiliyordu (GENIL "...Ticaret A." -> yarım cümle;
+# canlı cache taramasında 214 tickerdan 110'u etkileniyordu). Bilinen kısaltmalar
+# once placeholder'a cevrilip split sonrasi geri konur -- uzun->kisa sirali
+# (T.A.Ş. iceriginde A.Ş. de gectigi icin once o degistirilmeli).
+_SEO_ABBREVIATIONS = ["T.A.Ş.", "A.Ş.", "Ltd. Şti.", "San. Tic.", "Ltd.Şti."]
+
+def _first_sentence(text):
+    """Metnin ilk CÜMLESİNİ döndürür (bilinen TR unvan kısaltmalarındaki
+    noktayı cümle sonu saymadan). Boşsa ''."""
+    protected = text
+    for abbr in _SEO_ABBREVIATIONS:
+        protected = protected.replace(abbr, abbr.replace(".", "\x00"))
+    first = protected.split(".")[0].strip()
+    if not first:
+        return ""
+    return first.replace("\x00", ".") + "."
+
 def get_company_summary(ticker):
     """Şirket AI özeti — in-memory cache okur; yoksa/bayatsa None (graceful)."""
     now = time.time()
@@ -7837,9 +7860,16 @@ def stock_page(ticker):
         return render_template("404.html"), 404
     name   = STOCK_NAMES.get(ticker, ticker)
     sector = _get_sector(ticker)
+    # CPO-1464 #3: "Diğer" gercek bir sektor degil, siniflandirilamayan
+    # ticker'lar icin catch-all bucket (spor kulubu + kagit + basim gibi
+    # alakasiz sirketler bir arada) -- GENIL "Diğer Sektöründen Diğer
+    # Hisseler" altinda BJKAS/FENER/KARTN gormesi buradan geliyordu. Sektoru
+    # "Diğer" olan ticker icin "ayni sektor" havuzu bos sayilir (asagidaki
+    # her iki kullanim yerinde de).
+    _sector_pool = [] if sector == "Diğer" else SECTORS.get(sector, [])
 
     # Sektör karşılaştırma URL'i — aynı sektördeki ilk 2 peer ile
-    _sector_peers = [t for t in SECTORS.get(sector, []) if t != ticker and t in BIST100][:2]
+    _sector_peers = [t for t in _sector_pool if t != ticker and t in BIST100][:2]
     compare_url = "/karsilastir?tickers=" + ",".join([ticker] + _sector_peers)
 
     # SEO: mevcut cache'ten temel sinyal verisini SSR için çek
@@ -7863,7 +7893,7 @@ def stock_page(ticker):
     # İlgili hisseler — aynı sektörden 5 hisse (internal linking)
     related_stocks = [
         {"ticker": t, "name": STOCK_NAMES.get(t, t)}
-        for t in SECTORS.get(sector, [])
+        for t in _sector_pool
         if t != ticker and t in BIST100 and t != "XU030"
     ][:5]
 
@@ -7917,11 +7947,11 @@ def stock_page(ticker):
             "a": "Teknik göstergeler: " + ", ".join(_parts) + ". Yatırım tavsiyesi değildir.",
         })
     if company_summary:
-        _first = company_summary.split(".")[0].strip()
+        _first = _first_sentence(company_summary)
         if _first:
             seo_faq.append({
                 "q": f"{ticker} ne yapan şirket?",
-                "a": _first + ".",
+                "a": _first,
             })
 
     # SPEC-014 A1 — Sinyal Özeti (deterministik konsolide kutu)
