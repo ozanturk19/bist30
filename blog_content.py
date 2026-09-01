@@ -2700,7 +2700,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>ETF ile Hisse Senedi Arasındaki Farklar</h2>
-<table style="width:100%;border-collapse:collapse;font-size:13px;margin:16px 0">
+<table style="width:100%;border-collapse:collapse;font-size:var(--bp-text-base);margin:16px 0">
   <thead>
     <tr style="background:#21262d">
       <th style="padding:10px;text-align:left;border:1px solid #30363d">Özellik</th>
@@ -3203,7 +3203,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Hızlı Karşılaştırma Tablosu</h2>
 <table style="width:100%;border-collapse:collapse;margin:16px 0">
   <thead><tr style="background:#1e2d45">
-    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Kriter</th>
+    <th style="padding:8px 12px;text-align:left;font-size:var(--bp-text-sm);color:#94a3b8">Kriter</th>
     <th style="padding:8px 12px;text-align:center;font-size:12px;color:#e3b341">🥇 Altın</th>
     <th style="padding:8px 12px;text-align:center;font-size:12px;color:#3fb950">📈 Borsa</th>
     <th style="padding:8px 12px;text-align:center;font-size:12px;color:#58a6ff">💵 Döviz</th>
@@ -3281,7 +3281,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     <li>%20 Döviz / Dövizli mevduat</li>
     <li>%15 Nakit / TL araçlar</li>
   </ul>
-  <p style="font-size:11px;color:#64748b;margin-top:8px">Bu yalnızca örnek dağılımdır, kişisel mali durumunuza ve risk toleransınıza göre ayarlamalısınız. Yatırım tavsiyesi değildir.</p>
+  <p style="font-size:var(--bp-text-xs);color:#64748b;margin-top:8px">Bu yalnızca örnek dağılımdır, kişisel mali durumunuza ve risk toleransınıza göre ayarlamalısınız. Yatırım tavsiyesi değildir.</p>
 </div>
 
 <h2>BorsaPusula ile BIST Sinyallerini Takip Et</h2>
@@ -3313,7 +3313,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Temettü Verimi Nedir?</h2>
 <p>Temettü verimi (dividend yield), hisse başına ödenen yıllık temettünün hisse fiyatına bölünmesiyle hesaplanır:</p>
-<div style="background:#1a2438;border:1px solid #1e2d45;border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:15px;font-weight:700;color:#58a6ff">
+<div style="background:#1a2438;border:1px solid #1e2d45;border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:var(--bp-text-15);font-weight:700;color:#58a6ff">
   Temettü Verimi = (Hisse Başı Temettü ÷ Hisse Fiyatı) × 100
 </div>
 <p>Örnek: Hissesi 50 TL olan bir şirket 5 TL temettü ödüyorsa temettü verimi %10 olur.</p>
@@ -4013,7 +4013,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h3>1. Bilanço (Balance Sheet)</h3>
 <p>Şirketin belirli bir tarihteki varlıkları, yükümlülükleri ve öz sermayesini gösterir. Temel denklem:</p>
-<div style="background:#1a2438;border:1px solid #1e2d45;border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:16px;font-weight:700;color:#58a6ff">
+<div style="background:#1a2438;border:1px solid #1e2d45;border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:var(--bp-text-lg);font-weight:700;color:#58a6ff">
   Varlıklar = Yükümlülükler + Öz Sermaye
 </div>
 <ul>
@@ -4219,7 +4219,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>2026 BIST Hisse Senedi Seans Saatleri</h2>
 <p>Borsa İstanbul Pay Piyasası (hisse senetleri) şu seans düzenini izler:</p>
-<table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
+<table style="width:100%;border-collapse:collapse;font-size:var(--bp-text-md);margin:12px 0">
   <thead>
     <tr style="background:#21262d">
       <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Seans</th>
@@ -4605,7 +4605,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Lot Hesabı: Kaç Lira Ödersiniz?</h2>
 <p>İşlem maliyeti son derece basit hesaplanır:</p>
-<pre style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:#e6edf3">
+<pre style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;font-size:var(--bp-text-base);color:#e6edf3">
 Maliyet = Lot Adedi × Hisse Fiyatı × (1 + Komisyon Oranı)
 
 Örnek — AKBNK @ 130₺, 100 lot:

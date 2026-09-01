@@ -25,7 +25,6 @@
     font-size: var(--bp-text-xl); font-weight: 700; color: #f0f6fc;
     margin: 32px 0 14px;
     padding-bottom: 8px;
-    border-bottom: 1px solid #21262d;
   }
   .prose h3 {
     font-size: var(--bp-text-md); font-weight: 700; color: #e6edf3;
@@ -145,8 +144,7 @@
     display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
   }
   .market-card ul { margin-left: 0; list-style: none; }
-  .market-card li { font-size: var(--bp-text-sm); color: #8b949e; padding: 3px 0; border-bottom: 1px solid #21262d; }
-  .market-card li:last-child { border-bottom: none; }
+  .market-card li { font-size: var(--bp-text-sm); color: #8b949e; padding: 8px 0; }
 
   /* Methodology box */
   .method-box {
@@ -178,11 +176,9 @@
     align-items: flex-start;
     gap: 10px;
     padding: 8px 0;
-    border-bottom: 1px solid #21262d;
     color: #c9d1d9;
     font-size: var(--bp-text-base);
   }
-  .roadmap-list li:last-child { border-bottom: none; }
   .rl-done    { color: #3fb950; font-size: var(--bp-text-md); flex-shrink: 0; }
   .rl-wip     { color: #d29922; font-size: var(--bp-text-md); flex-shrink: 0; }
   .rl-todo    { color: #8b949e; font-size: var(--bp-text-md); flex-shrink: 0; }

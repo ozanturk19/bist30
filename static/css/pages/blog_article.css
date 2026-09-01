@@ -1,7 +1,10 @@
 /* ==== extracted from templates/blog_article.html (T2.5) ==== */
 
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-size:var(--bp-text-md); line-height:1.7; min-height:100vh; }
+  /* r155 bug-hunt: DEV2-T-MOBOVF-1 ile ayni sinif — hisse.css/index.css/portfolio.css
+     emsaliyle ayni yatay-tasma guard'i eksikti. */
+  html { overflow-x: clip; }
+  body { font-size:var(--bp-text-md); line-height:1.7; min-height:100vh; overflow-x: clip; }
   header { background:#161b22; border-bottom:1px solid #30363d; padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
   .page-sub   { font-size:var(--bp-text-sm); color:#8b949e; margin-top:1px; }
 
@@ -14,7 +17,7 @@
   .art-meta { display:flex; gap:16px; font-size:var(--bp-text-sm); color:var(--bp-text3); padding-top:12px; }
 
   .prose { color:#c9d1d9; }
-  .prose h2 { font-size:var(--bp-text-xl); font-weight:700; color:#f0f6fc; margin:32px 0 12px; padding-bottom:8px; border-bottom:1px solid #21262d; }
+  .prose h2 { font-size:var(--bp-text-xl); font-weight:700; color:#f0f6fc; margin:32px 0 12px; padding-bottom:8px; }
   .prose h3 { font-size:var(--bp-text-15); font-weight:600; color:#c9d1d9; margin:20px 0 8px; }
   .prose p  { margin-bottom:14px; }
   .prose ul, .prose ol { margin:8px 0 14px 20px; }
@@ -121,6 +124,16 @@
   .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:34px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
+
+  /* r155 gorsel denetim: WCAG 2.5.5 - .btn-action emsaliyle ayni desen, gorunum degismez.
+     #artSubCloseBtn zaten inline position:absolute tasiyor (kendi konumlandirma baglami),
+     digerlerine position:relative gerekiyor. */
+  #blogShareWaBtn, #blogCopyBtn, #artSubBtn { position: relative; }
+  #blogShareWaBtn::before, #blogCopyBtn::before, #artSubBtn::before, #artSubCloseBtn::before {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    min-width: 44px; min-height: 44px; width: 100%; height: 100%;
+    transform: translate(-50%,-50%);
+  }
 
   /* Reading progress bar */
   .read-progress {

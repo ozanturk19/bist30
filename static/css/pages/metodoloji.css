@@ -27,7 +27,6 @@
     color: #f0f6fc;
     margin: 32px 0 12px;
     padding-bottom: 8px;
-    border-bottom: 1px solid #21262d;
   }
   .prose h3 {
     font-size: var(--bp-text-15);
