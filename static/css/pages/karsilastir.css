@@ -35,17 +35,21 @@
   .ticker-input:focus { border-color: var(--accent); }
   .ticker-input::placeholder { color: var(--bp-text3); text-transform: none; font-family: inherit; }
   .compare-btn {
+    position: relative;
     background: var(--accent); color: #fff; border: none; border-radius:var(--bp-radius);
     padding: 8px 18px; font-size: var(--bp-text-base); font-weight: 600; cursor: pointer;
     transition: background .15s; white-space: nowrap;
   }
+  .compare-btn::before { content:''; position:absolute; top:50%; left:50%; min-width:44px; min-height:44px; width:100%; height:100%; transform:translate(-50%,-50%); }
   .compare-btn:hover { background: #388bfd; }
   .share-btn {
+    position: relative;
     background: var(--bp-surface2); color: var(--bp-text2); border: 1px solid var(--bp-border);
     border-radius:var(--bp-radius); padding: 8px 14px; font-size: var(--bp-text-sm); cursor: pointer;
     transition: all .15s; white-space: nowrap; text-decoration: none; display: flex;
     align-items: center; gap: 5px;
   }
+  .share-btn::before { content:''; position:absolute; top:50%; left:50%; min-width:44px; min-height:44px; width:100%; height:100%; transform:translate(-50%,-50%); }
   .share-btn:hover { color: var(--bp-text); border-color: var(--bp-border2); }
 
   /* ── Comparison Table ── */
@@ -164,6 +168,7 @@
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
   .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%,-50%); }
   .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item {
