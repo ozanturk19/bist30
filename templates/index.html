@@ -1326,7 +1326,7 @@ function applyLivePrices(prices, ts) {
     }
     if (mChangeEl) {
       const sign = d.change_pct > 0 ? '+' : '';
-      mChangeEl.textContent = sign + d.change_pct.toFixed(2) + '%';
+      mChangeEl.textContent = sign + d.change_pct.toFixed(2).replace('.', ',') + '%';
       mChangeEl.style.color = d.change_pct > 0 ? '#00e290' : d.change_pct < 0 ? '#f85149' : '#8b949e';
     }
 
@@ -1854,7 +1854,7 @@ function _updateIdealStrip(stocks) {
   if (!strip || !items || ideal.length === 0) { if (strip) strip.style.visibility = 'hidden'; return; }
   items.innerHTML = ideal.slice(0, 10).map(s => {
     const retHtml = s._ret !== null
-      ? ` <span style="font-size:10px;font-weight:600;color:var(--bp-al)">+${s._ret.toFixed(1)}% <span style="opacity:.65;font-weight:500">sinyalden beri</span></span>`
+      ? ` <span style="font-size:10px;font-weight:600;color:var(--bp-al)">+${s._ret.toFixed(1).replace('.', ',')}% <span style="opacity:.65;font-weight:500">sinyalden beri</span></span>`
       : '';
     return `<a href="/hisse/${_escJsStr(s.ticker)}" style="display:inline-flex;align-items:center;gap:4px;background:rgba(var(--bp-al-rgb),.08);
       border:1px solid rgba(var(--bp-al-rgb),.2);border-radius:var(--bp-radius);padding:3px 8px;text-decoration:none;
@@ -2269,7 +2269,7 @@ function renderTable() {
         } else if (s.signal_price && s.signal !== 'BEKLE' && !bpIsSignalFromToday(s.signal_date)) {
           const ret = ((s.price - s.signal_price) / s.signal_price * 100);
           const rc = ret >= 0 ? '#00e290' : '#f85149';
-          entryTxt = `Giriş ${s.signal_price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} <span style="color:${rc}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>`;
+          entryTxt = `Giriş ${s.signal_price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} <span style="color:${rc}">${ret>=0?'+':''}${ret.toFixed(1).replace('.', ',')}%</span>`;
         }
         const secHtml = s.sector && s.sector !== 'Diğer' ? `<div class="mc-sector">${_esc(s.sector)}</div>` : '';
         const anomalyHtml = (s.anomaly && s.anomaly.flag)
@@ -2329,7 +2329,7 @@ function renderTable() {
             <div class="mc-rgt-wrap">
               <div class="mc-rgt">
                 <div class="mc-price" id="mlp-${_escJsStr(s.ticker)}" data-raw="${s.price}">${fmtP}</div>
-                <div style="font-size:var(--bp-text-sm);color:${chgColor}" id="mlc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2)}%</div>
+                <div style="font-size:var(--bp-text-sm);color:${chgColor}" id="mlc-${_escJsStr(s.ticker)}">${chgSign}${s.change_pct.toFixed(2).replace('.', ',')}%</div>
               </div>
               <button class="mc-bell ${_isWatchingMc ? 'watching' : ''}" id="mcb-${_escJsStr(s.ticker)}"
                       type="button" onclick="event.preventDefault();event.stopPropagation();toggleWatch('${_escJsStr(s.ticker)}')"
@@ -2421,7 +2421,7 @@ function renderTable() {
       const retSign = ret >= 0 ? '+' : '';
       const retColor = ret >= 0 ? '#00e290' : '#f85149';
       sigPriceHtml = `<span class="sig-price">${ep.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>` +
-        `<span style="font-size:10px;color:${retColor};margin-left:3px">${retSign}${ret.toFixed(1)}%</span>`;
+        `<span style="font-size:10px;color:${retColor};margin-left:3px">${retSign}${ret.toFixed(1).replace('.', ',')}%</span>`;
     } else {
       sigPriceHtml = '<span class="bp-text-muted">—</span>';
     }
