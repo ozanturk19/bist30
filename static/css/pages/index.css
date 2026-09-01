@@ -19,7 +19,6 @@
   }
 
   /* Section / panel headings — Space Grotesk (sharp, machined look) */
-  .section-title,
   .ec-title, .hp-title, .mb-title,
   .bilanco-mini-title, h1, h2, h3 {
     font-family: 'Space Grotesk', system-ui, sans-serif;
@@ -77,6 +76,7 @@
     100% { transform: translateX(-50%); }
   }
   .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
+  .macro-pause-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%,-50%); }
   .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item {
@@ -261,8 +261,7 @@
   }
   .ms-header {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px; padding-bottom: 10px;
-    border-bottom: 1px solid rgba(48,54,61,0.5);
+    margin-bottom: 16px;
     flex-wrap: wrap; gap: 8px;
   }
   .ms-live-indicator {
@@ -340,7 +339,7 @@
 
   .ms-microstats {
     display: flex; gap: 8px; flex-wrap: wrap;
-    padding-top: 12px; border-top: 1px solid rgba(48,54,61,0.5);
+    margin-top: 16px;
   }
   .ms-stat {
     display: inline-flex; align-items: center; gap: 6px;
@@ -454,6 +453,11 @@
     font-size: var(--bp-text-2xs); font-weight: 600; color: var(--bp-text3); text-decoration: none;
     background: rgba(139,148,158,0.1); border: 1px solid rgba(139,148,158,0.2);
     border-radius: var(--bp-radius-4); padding: 1px 5px; transition: all .15s;
+    position: relative; display: inline-block;
+  }
+  .gnm-kap-link::before {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 44px; height: 44px; transform: translate(-50%,-50%);
   }
   .gnm-kap-link:hover {
     color: var(--bp-text); background: rgba(139,148,158,0.2);
@@ -713,7 +717,7 @@
     content: '';
     position: absolute;
     top: 50%; left: 50%;
-    width: 32px; height: 32px;
+    width: 44px; height: 44px;
     transform: translate(-50%, -50%);
   }
   .afb-chip-x:hover {
@@ -1125,7 +1129,7 @@
   }
   .hp-section::-webkit-scrollbar { display: none; }
   .hp-section-r {
-    border-left: 1px solid var(--bp-border);
+    padding-left: 16px;
   }
   .hp-title {
     font-size: var(--bp-text-2xs); font-weight: 700; color: var(--bp-text3);
@@ -1443,10 +1447,10 @@
     .charts-wrap { padding: 4px 12px 8px; }
     #chartMain { height: 232px; margin: 4px 10px 6px; }
     .chart-loading { height: 232px; }
-    .hp-twin { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .hp-section { flex: 0 0 140px; min-width: 0; padding: 8px 10px; overflow-y: visible; }
-    .hp-section-r { border-left: 1px solid var(--bp-border); }
-    .hp-name { display: none; }
+    /* hp-twin/hp-section(-r)/hp-name: bughunt-r151 öncesi burada ayrı bir row/140px
+       kuralı vardı, alttaki "Item 11 fix" (max-width:768px) bloğuyla çakışıp 721-768px
+       aralığında sıkışık/isim-gizli bir ara-durum yaratıyordu — tek breakpoint'e
+       birleştirildi, davranış artık aşağıdaki blokta tanımlı. */
     /* Stats bar → 2×2 grid (was cramped 4-card row) */
     .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .stat-card { padding: 12px 14px; min-width: unset; }
@@ -1471,8 +1475,10 @@
 
   }
 
-/* Item 11 fix: mobile hareketliler centering — .hp-twin display:flex, grid-template-columns no-op'tu, flex-direction override edilerek gercek dikey istif yapildi */
-@media (max-width: 720px) {
+/* Item 11 fix: mobile hareketliler centering — .hp-twin display:flex, grid-template-columns no-op'tu, flex-direction override edilerek gercek dikey istif yapildi.
+   bughunt-r151: 720px -> 768px (yukarıdaki 768px bloğuyla aynı eşiğe hizalandı, 721-768px
+   arasında ayrı/sıkışık bir ara-durum kalmasın diye). */
+@media (max-width: 768px) {
   .hp-twin {
     flex-direction: column !important;
     gap: 10px !important;

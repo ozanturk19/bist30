@@ -473,7 +473,7 @@ async function clearPortfolio() {
   render();
   // CPO-DEV2-049 madde 5: sadece localStorage degil, sunucudaki bulut kopyasi da silinsin
   // (aksi halde kullaniciya 'silindi' hissi veren ama gercekte silmeyen bir UI olur).
-  const _cloudToken = localStorage.getItem(CLOUD_TOKEN_KEY);
+  const _cloudToken = _safeGetToken();
   let _cloudDeleteFailed = false;
   if (_cloudToken) {
     try {
@@ -723,10 +723,24 @@ document.addEventListener('visibilitychange', () => {
 const CLOUD_TOKEN_KEY = 'bp_cloud_token';
 let _cloudModalRelease = null;
 
+// bughunt-r151: dosyanin geri kalanindaki PF_KEY/LS_WARN_KEY erisimleri (yukarida)
+// hep try/catch icindeydi (private mod/kota -> exception -> zincirleme kirilma),
+// Cloud Sync sonradan eklendiginde bu desen atlanmisti. Ayni desene hizalandi.
+function _safeGetToken() {
+  try { return localStorage.getItem(CLOUD_TOKEN_KEY); } catch (e) { return null; }
+}
+function _safeSetToken(token) {
+  try { localStorage.setItem(CLOUD_TOKEN_KEY, token); return true; }
+  catch (e) { console.warn('cloud token yazilamadi (kota/private mod):', e); return false; }
+}
+function _safeRemoveToken() {
+  try { localStorage.removeItem(CLOUD_TOKEN_KEY); } catch (e) { /* best-effort */ }
+}
+
 function openCloudSync() {
   const modal = document.getElementById('cloudModal');
   modal.style.display = 'flex';
-  const saved = localStorage.getItem(CLOUD_TOKEN_KEY);
+  const saved = _safeGetToken();
   if (saved) _showActiveToken(saved);
   else document.getElementById('cloudActiveSection').style.display = 'none';
   document.getElementById('cloudMsg').textContent = '';
@@ -752,7 +766,7 @@ async function createCloudToken() {
     const res  = await fetch('/api/portfolio/new', {method:'POST', signal: AbortSignal.timeout(15000)});
     const data = await res.json();
     if (!data.token) throw new Error('no token');
-    localStorage.setItem(CLOUD_TOKEN_KEY, data.token);
+    if (!_safeSetToken(data.token)) { _setCloudMsg('Token oluşturuldu ama bu cihazda saklanamadı (gizli mod?).', '#f85149'); return; }
     _showActiveToken(data.token);
     // Auto-save current portfolio
     const saved = await saveToCloud(true);
@@ -776,7 +790,7 @@ async function loadCloudToken() {
     if (!res.ok) { _setCloudMsg('Token bulunamadı.', '#f85149'); return; }
     const data = await res.json();
     if (!data.positions) { _setCloudMsg('Geçersiz portföy verisi.', '#f85149'); return; }
-    localStorage.setItem(CLOUD_TOKEN_KEY, token);
+    if (!_safeSetToken(token)) { _setCloudMsg('Token bu cihazda saklanamadı (gizli mod?).', '#f85149'); return; }
     _showActiveToken(token);
     // Merge positions
     data.positions.forEach(p => {
@@ -794,7 +808,7 @@ async function loadCloudToken() {
 }
 
 async function saveToCloud(silent) {
-  const token = localStorage.getItem(CLOUD_TOKEN_KEY);
+  const token = _safeGetToken();
   if (!token) { _setCloudMsg('Önce token oluşturun.', '#f85149'); return; }
   if (!silent && !confirm('Bu, sunucudaki mevcut veriyi değiştirecek, devam edilsin mi?')) return;
   const btn = document.getElementById('cloudSaveBtn');
@@ -824,7 +838,7 @@ async function saveToCloud(silent) {
 }
 
 async function loadFromCloud() {
-  const token = localStorage.getItem(CLOUD_TOKEN_KEY);
+  const token = _safeGetToken();
   if (!token) { _setCloudMsg('Önce token oluşturun.', '#f85149'); return; }
   if (portfolio.length && !confirm(`Bulut kopyası yerel portföyünüzün (${portfolio.length} pozisyon) üzerine yazılacak. Devam edilsin mi?`)) return;
   const btn = document.getElementById('cloudLoadFromCloudBtn');
@@ -848,14 +862,14 @@ async function loadFromCloud() {
 }
 
 function forgetCloudToken() {
-  localStorage.removeItem(CLOUD_TOKEN_KEY);
+  _safeRemoveToken();
   document.getElementById('cloudActiveSection').style.display = 'none';
   document.getElementById('cloudTokenInput').value = '';
   _setCloudMsg('Token unutuldu (portföy bu cihazda korunuyor).', '#8b949e');
 }
 
 function copyCloudLink() {
-  const token = localStorage.getItem(CLOUD_TOKEN_KEY);
+  const token = _safeGetToken();
   if (!token) return;
   function fallbackCopy() {
     try {
