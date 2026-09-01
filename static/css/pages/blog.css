@@ -1,7 +1,10 @@
 /* ==== extracted from templates/blog.html (T2.5) ==== */
 
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-size:var(--bp-text-md); min-height:100vh; }
+  /* r155 bug-hunt: DEV2-T-MOBOVF-1 ile ayni sinif — hisse.css/index.css/portfolio.css
+     emsaliyle ayni yatay-tasma guard'i eksikti. */
+  html { overflow-x: clip; }
+  body { font-size:var(--bp-text-md); min-height:100vh; overflow-x: clip; }
   header { background:#161b22; border-bottom:1px solid #30363d; padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
   .page-sub   { font-size:var(--bp-text-base); color:#8b949e; margin-top:1px; }

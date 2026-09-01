@@ -1,10 +1,14 @@
 /* ==== extracted from templates/hisseler.html (T2.5) ==== */
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* r155 bug-hunt: DEV2-T-MOBOVF-1 ile ayni sinif — hisse.css/index.css/portfolio.css
+     emsaliyle ayni yatay-tasma guard'i eksikti. */
+  html { overflow-x: clip; }
   body {
     font-size: var(--bp-text-md);
     line-height: 1.7;
     min-height: 100vh;
+    overflow-x: clip;
   }
   header {
     background: #161b22;

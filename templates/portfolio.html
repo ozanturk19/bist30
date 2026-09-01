@@ -548,10 +548,15 @@ function render() {
     const live   = liveData[p.ticker];
     const cur    = live ? live.price : null;
     const sig    = live ? live.signal : '—';
-    const cost   = p.lot * p.price;
-    const val    = cur !== null ? p.lot * cur : null;
+    // r155 bug-hunt: bulut-yukleme/eski-format pozisyonlarda lot/price
+    // eksik/gecersiz olabilir (loadFromCloud/loadCloudToken importPortfolio
+    // ile ayni sayisal dogrulamayi yapmiyordu) — Number.isFinite guard'i
+    // olmadan cost=NaN olup "NaN ₺"/"NaN%" olarak DOM'a sizardi.
+    const validPos = Number.isFinite(p.lot) && Number.isFinite(p.price);
+    const cost   = validPos ? p.lot * p.price : null;
+    const val    = (cur !== null && cost !== null) ? p.lot * cur : null;
     const pnl    = val !== null ? val - cost  : null;
-    const pnlPct = pnl !== null ? (pnl / cost * 100) : null;
+    const pnlPct = (pnl !== null && cost > 0) ? (pnl / cost * 100) : null;
     // P0-MONEY-1: cost/val eslestirilerek toplanir — canli fiyati gelmeyen pozisyonun
     // MALIYETI toplama girip DEGERI girmezse toplam K/Z olduğundan kotu gorunurdu.
     if (val !== null) {
@@ -582,7 +587,7 @@ function render() {
       <td>${fmt(p.lot,0)}</td>
       <td>${fmt(p.price)}</td>
       <td>${cur !== null ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>
-      <td class="hm bp-text-muted">${fmtM(cost)}</td>
+      <td class="hm bp-text-muted">${cost !== null ? fmtM(cost) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${val !== null ? fmtM(val) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${pnlHtml}</td>
       <td>${pnlPctHtml}</td>
@@ -608,7 +613,7 @@ function render() {
       <div class="pf-mdetail-row">
         <div class="pf-metric"><div class="pf-metric-label">Adet</div><span>${fmt(p.lot,0)}</span></div>
         <div class="pf-metric"><div class="pf-metric-label">Alış ₺</div><span>${fmt(p.price)}</span></div>
-        <div class="pf-metric"><div class="pf-metric-label">Maliyet</div><span>${fmtM(cost)}</span></div>
+        <div class="pf-metric"><div class="pf-metric-label">Maliyet</div><span>${cost !== null ? fmtM(cost) : '—'}</span></div>
         <div class="pf-metric"><div class="pf-metric-label">Değer</div><span>${val !== null ? fmtM(val) : '—'}</span></div>
         <div class="pf-metric"><div class="pf-metric-label">Tarih</div><span class="pf-mdate">${fmtDate(p.date)}</span></div>
       </div>
@@ -762,13 +767,19 @@ async function loadCloudToken() {
     if (!data.positions) { _setCloudMsg('Geçersiz portföy verisi.', '#f85149'); return; }
     if (!_safeSetToken(token)) { _setCloudMsg('Token bu cihazda saklanamadı (gizli mod?).', '#f85149'); return; }
     _showActiveToken(token);
-    // Merge positions
+    // r155 bug-hunt: importPortfolio ile ayni lot/price dogrulamasi —
+    // eski-format/eksik kayitlar (yalniz buy_price/quantity, ya da lot/price
+    // hic yok) sessizce atlanir, cost/pnlPct NaN sizintisina yol acmaz.
+    let skipped = 0;
     data.positions.forEach(p => {
+      const lot = Number(p.lot), price = Number(p.price);
+      if (!p.ticker || !Number.isFinite(lot) || lot <= 0 || !Number.isFinite(price) || price <= 0) { skipped++; return; }
+      p.lot = lot; p.price = price;
       const exists = portfolio.some(x => x.ticker === p.ticker && +x.price === +p.price && x.date === p.date);
       if (!exists) portfolio.push({...p, id: Date.now() + Math.random()});
     });
     save(); render();
-    _setCloudMsg(`Yüklendi! ${data.positions.length} pozisyon.`, '#3fb950');
+    _setCloudMsg(`Yüklendi! ${data.positions.length - skipped} pozisyon.${skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''}`, '#3fb950');
     input.value = '';
   } catch(e) {
     _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
@@ -821,9 +832,15 @@ async function loadFromCloud() {
     if (!data.positions) { _setCloudMsg('Geçersiz portföy.', '#f85149'); return; }
     // id her zaman burada uretilir; guvenilmeyen cloud verisindeki p.id'ye
     // guvenilmiyor (onclick="removePosition(${p.id})" tirnaksiz sayi bekliyor)
-    portfolio = data.positions.map(p => ({...p, id: Date.now() + Math.random()}));
+    // r155 bug-hunt: importPortfolio ile ayni lot/price dogrulamasi — eski-
+    // format/eksik kayitlar atlanir, cost/pnlPct NaN sizintisina yol acmaz.
+    const rawCount = data.positions.length;
+    portfolio = data.positions
+      .map(p => { const lot = Number(p.lot), price = Number(p.price); return {...p, lot, price, id: Date.now() + Math.random()}; })
+      .filter(p => p.ticker && Number.isFinite(p.lot) && p.lot > 0 && Number.isFinite(p.price) && p.price > 0);
     save(); render();
-    _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.`, '#3fb950');
+    const skipped = rawCount - portfolio.length;
+    _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.${skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''}`, '#3fb950');
   } catch(e) {
     _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, '#f85149');
   } finally {

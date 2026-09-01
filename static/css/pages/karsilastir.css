@@ -1,8 +1,13 @@
 /* ==== extracted from templates/karsilastir.html (T2.5) ==== */
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* r155 bug-hunt: DEV2-T-MOBOVF-1 ile ayni sinif — bu sayfa .ac-dropdown gibi
+     position:absolute acilir katmanlar tasiyor, hisse.css/index.css/portfolio.css
+     emsaliyle ayni yatay-tasma guard'i yoktu. */
+  html { overflow-x: clip; }
   body {
     -webkit-font-smoothing: antialiased; font-size: var(--bp-text-md); min-height: 100vh;
+    overflow-x: clip;
   }
   header {
     background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
