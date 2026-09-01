@@ -8780,13 +8780,32 @@ def api_tarama():
     if sort_dir in ("asc", "desc"):
         rev = sort_dir == "desc"
     else:
-        rev = sort_by in ("adx","price","signal_bars","vol_ratio","bull_score","change_pct","signal_strength")
+        # CPO-1464 #2: signal_bars artik ters-epoch key doner (asc = en yeni
+        # ilk), frontend'in _sortDefaultDir ile ayni varsayilan yon -- bu
+        # yuzden diger alanlarin aksine burada rev=True DEGIL.
+        rev = sort_by in ("adx","price","vol_ratio","bull_score","change_pct","signal_strength")
     def _tarama_sort_key(x):
+        if sort_by == 'signal_bars':
+            # CPO-1464 #2: signal_bars bir BAR sayacidir -- haftasonu/refresh-
+            # atlama gunlerini ticker'a gore FARKLI atlar, bu yuzden takvimde
+            # daha eski bir signal_date'e sahip ticker, daha az kacirilmis
+            # refresh nedeniyle daha DUSUK bar sayisiyla bitip yanlislikla
+            # "daha taze" gorunebiliyordu (DERHL 13.03 > ARCLK/CLEBI/ESEN
+            # 09.03 siralanmasi). Kanonik eksen signal_date (CPO-1335) --
+            # "Tazelik" sutunu artik gercek takvim tarihine gore siralanir.
+            # Negatif epoch: frontend'in varsayilan yonu 'asc' iken (bkz.
+            # _sortDefaultDir) en yeni tarih ilk sirada cikmasi icin (eski
+            # bar-sayaci mantigindaki "kucuk bar = taze" davranisiyla ayni).
+            sd = x.get('signal_date')
+            try:
+                ts = datetime.strptime(sd, '%d.%m.%Y').timestamp() if sd else None
+            except ValueError:
+                ts = None
+            # bilinmiyorsa listenin basina degil sonuna dusmeli (yon fark etmeksizin)
+            return float('inf') if ts is None else -ts
         v = x.get(sort_by)
         if v is None:
-            # signal_bars icin None 0'a degil sonsuza esitlenir: bilinmeyen tazelik
-            # listenin basina degil sonuna dusmeli (frontend de bunu 'eski/bilinmiyor' gosterir)
-            v = float('inf') if sort_by == 'signal_bars' else 0
+            v = 0
         return (isinstance(v, str), v)
     # r140: esit degerli satirlarda deterministik tiebreak yoktu -- temel liste
     # (_cache['data']) her refresh'te as_completed() zamanlamasina gore yeniden
