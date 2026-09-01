@@ -60,7 +60,9 @@ function bpPollDataQuality() {
     .then(function(j) { bpUpdateStaleBanner(j.data_quality, j.stocks_age_s); })
     .catch(function(e) { console.error('data-quality polling basarisiz', e); });
 }
+var _dqPollInterval = null;
 function bpStartDataQualityPolling() {
+  if (_dqPollInterval) return;
   bpPollDataQuality();
-  setInterval(bpPollDataQuality, 60000);
+  _dqPollInterval = setInterval(bpPollDataQuality, 60000);
 }
