@@ -1299,8 +1299,15 @@ def _get_sector(ticker: str) -> str:
 
 def _enrich_stock(s: dict) -> dict:
     """Stock dict'ine sector ve name alanlarını ekler (in-place + return)."""
-    if "sector" not in s:
-        s["sector"] = _get_sector(s.get("ticker", ""))
+    # CPO-1464 #3 (ikinci katman): sector HER YÜKLEMEDE _get_sector()'dan
+    # taze hesaplanır. Eskiden "sector" not in s guard'ı vardı — disk cache'te
+    # zaten yazılı bir sector değeri SECTORS taksonomisi değişse bile SONSUZA
+    # kadar taşınıyordu (GENIL fix'i deploy edildikten sonra bile /sektor-harita
+    # ve /api/sektor-summary hâlâ eski "Diğer" değerini gösteriyordu — canlıda
+    # doğrulandı). Aynı desen tier/signal_strength için CPO-DEV2-053/055'te
+    # zaten çözülmüştü (aşağıda ~30 satır sonra), sector de aynı yaklaşımı
+    # izlemeli: ucuz saf fonksiyon, cache'lemeye değmez.
+    s["sector"] = _get_sector(s.get("ticker", ""))
     if "name" not in s:
         s["name"] = STOCK_NAMES.get(s.get("ticker", ""), "")
     return s
@@ -9929,10 +9936,12 @@ def ozet_gecmis(tarih):
         abort(404)
 
     stocks     = snap.get("stocks", [])
-    # Add sector field (not stored in snapshot) — fixes groupby error
+    # CPO-1464 #3: sector HER ZAMAN taze _get_sector()'dan yazılır (arşiv
+    # snapshot'ında zaten yoktu ama varsa da eski taksonomiyi taşıyabilirdi —
+    # bkz. _enrich_stock aynı fix). Sektör sınıflandırması "o günkü" değil
+    # güncel/kanonik olmalı.
     for s in stocks:
-        if "sector" not in s:
-            s["sector"] = _get_sector(s["ticker"])
+        s["sector"] = _get_sector(s["ticker"])
     # CPO-1107 Faz0#6: XU030 bir endeks, hisse değil — evren sayısı/liste tek kaynak
     stocks = [s for s in stocks if s.get("ticker") != "XU030"]
     al_list    = [s for s in stocks if s.get("signal") == "AL"]
