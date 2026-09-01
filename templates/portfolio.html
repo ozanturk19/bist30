@@ -61,14 +61,13 @@
     <div class="sum-card"><div class="sum-num sum-blue" id="sumCount">0</div><div class="sum-lbl">Hisse</div></div>
     <div class="sum-card"><div class="sum-num sum-blue" id="sumCost">0 ₺</div><div class="sum-lbl">Maliyet</div></div>
     <div class="sum-card"><div class="sum-num sum-blue" id="sumValue">0 ₺</div><div class="sum-lbl">Güncel Değer</div></div>
-    <div class="sum-card"><div class="sum-num" id="sumPnl">0 ₺</div><div class="sum-lbl">Kâr / Zarar</div></div>
+    <div class="sum-card">
+      <div class="sum-num" id="sumPnl">0 ₺</div>
+      <div class="sum-pct" id="sumPnlPct"></div>
+      <div class="sum-lbl">Kâr / Zarar</div>
+    </div>
     <div class="sum-card"><div class="sum-num sum-green" id="sumAlCount">0</div><div class="sum-lbl">Güçlü Trend</div></div>
     <div class="sum-card"><div class="sum-num sum-red"  id="sumSatCount">0</div><div class="sum-lbl">Trend Bozuldu</div></div>
-    <div class="sum-card" id="sumXu030Card" style="display:none">
-      <div class="sum-num" id="sumXu030Pf">—</div>
-      <div class="sum-lbl">Portföy Getiri</div>
-      <span class="xu030-compare" id="sumXu030Cmp"></span>
-    </div>
   </div>
   <div id="pfMissingPriceWarn" role="status" aria-live="polite" style="display:none;margin-top:8px;font-size:var(--bp-text-base);color:var(--bp-text3)"></div>
   <div style="margin-top:8px;font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.5">
@@ -206,7 +205,6 @@ try {
 }
 let liveData   = {};  // ticker → {price, signal, signal_price}
 let chartData  = {};  // ticker → [close prices last 30d]
-let xu030Ohlc  = [];  // [{time:"YYYY-MM-DD", close:...}, ...]
 
 // r37 bug-hunt: portfolio sadece sayfa yüklenirken bir kez localStorage'dan
 // okunuyordu, sonrasında bellek-içi tutuluyordu — iki sekme açıkken birinde
@@ -251,31 +249,20 @@ function save() {
   }
 }
 
-/* T7.4: canlı veri (fiyat/sinyal, XU030 kıyas) çekilemediğinde görünür
-   uyarı + retry — hisse bazlı sparkline eksikliği tabloda zaten "—" ile
-   zarifçe düşüyor (svgSparkline), o yüzden ayrı alarm tetiklemiyor.
-   İki bağımsız fetch döngüsü (fetchLive 60sn, fetchCharts 5dk) aynı
-   banner'ı paylaştığı için durum ayrı ayrı izlenir — biri düzelirken
-   diğerinin hatası banner'ı erken kapatmasın diye. */
-const _pfFetchErr = { live: false, chart: false };
+/* T7.4: canlı veri (fiyat/sinyal) çekilemediğinde görünür uyarı + retry —
+   hisse bazlı sparkline eksikliği tabloda zaten "—" ile zarifçe düşüyor
+   (svgSparkline), o yüzden ayrı alarm tetiklemiyor. */
+const _pfFetchErr = { live: false };
 function _updatePfFetchError() {
-  document.getElementById('pfFetchError').style.display = (_pfFetchErr.live || _pfFetchErr.chart) ? 'flex' : 'none';
+  document.getElementById('pfFetchError').style.display = _pfFetchErr.live ? 'flex' : 'none';
 }
 function retryPortfolioFetch() { fetchLive(); fetchCharts(); }
 
-/* ── F6: Chart data + Sparkline + XU030 ──────────── */
+/* ── F6: Chart data + Sparkline ──────────── */
 let _fetchChartsBusy = false;
 async function fetchCharts() {
   if (_fetchChartsBusy) return;
   _fetchChartsBusy = true;
-  // XU030 OHLC — mevcut /api/chart cache'i reuse
-  try {
-    const r = await fetch('/api/chart');
-    const j = await r.json();
-    if (j.chart && j.chart.ohlc) xu030Ohlc = j.chart.ohlc;
-    _pfFetchErr.chart = false;
-  } catch(e) { _pfFetchErr.chart = true; }
-  _updatePfFetchError();
   // Sparkline: portföydeki her benzersiz hisse için son 30g close
   // r83-CPO-067: sinirsiz esZamanli fan-out onlemek icin 15'lik batch'ler halinde cek
   const tickers = [...new Set(portfolio.map(p => p.ticker))];
@@ -311,14 +298,6 @@ function svgSparkline(prices) {
   return '<svg width="' + W + '" height="' + H + '" style="display:block;overflow:visible">' +
     '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
     '</svg>';
-}
-
-function calcXu030ReturnSince(dateStr) {
-  if (!xu030Ohlc.length || !dateStr) return null;
-  const entry = xu030Ohlc.find(d => d.time >= dateStr) || xu030Ohlc[xu030Ohlc.length - 1];
-  const last  = xu030Ohlc[xu030Ohlc.length - 1];
-  if (!entry || !last || !entry.close || !last.close) return null;
-  return (last.close - entry.close) / entry.close * 100;
 }
 
 function fillEntry(ticker, price) {
@@ -639,10 +618,7 @@ function render() {
   });
   tbody.innerHTML = rows.map(r => r.trHtml).join('');
   if (mcards) mcards.innerHTML = rows.map(r => r.cardHtml).join('');
-  // XU030 kıyaslama: portföydeki en erken tarih baz alınır
-  const earliestDate = portfolio.reduce((mn, p) => (!mn || p.date < mn) ? p.date : mn, '');
-  const xu030Ret = calcXu030ReturnSince(earliestDate);
-  renderSummary({ totalCost, totalVal, pnl: totalVal - totalCost, count: portfolio.length, alCount, satCount, xu030Ret, missingPriceCount });
+  renderSummary({ totalCost, totalVal, pnl: totalVal - totalCost, count: portfolio.length, alCount, satCount, missingPriceCount });
 }
 
 function renderSummary(s) {
@@ -652,9 +628,9 @@ function renderSummary(s) {
     document.getElementById('sumCost').textContent  = '0 ₺';
     document.getElementById('sumValue').textContent = '0 ₺';
     document.getElementById('sumPnl').textContent   = '0 ₺';
+    document.getElementById('sumPnlPct').textContent = '';
     document.getElementById('sumAlCount').textContent = '0';
     document.getElementById('sumSatCount').textContent= '0';
-    document.getElementById('sumXu030Card').style.display = 'none';
     return;
   }
   const missWarnEl = document.getElementById('pfMissingPriceWarn');
@@ -670,23 +646,17 @@ function renderSummary(s) {
   const pnlEl = document.getElementById('sumPnl');
   pnlEl.textContent = s.totalVal ? (s.pnl >= 0 ? '+' : '') + fmtM(s.pnl) : '—';
   pnlEl.className   = 'sum-num ' + (s.pnl >= 0 ? 'sum-green' : 'sum-red');
+  const pctEl = document.getElementById('sumPnlPct');
+  if (s.totalVal && s.totalCost) {
+    const pfRet = (s.pnl / s.totalCost) * 100;
+    pctEl.textContent = (pfRet >= 0 ? '+' : '') + pfRet.toFixed(1).replace('.', ',') + '%';
+    pctEl.className   = 'sum-pct ' + (pfRet >= 0 ? 'sum-green' : 'sum-red');
+  } else {
+    pctEl.textContent = '';
+    pctEl.className   = 'sum-pct';
+  }
   document.getElementById('sumAlCount').textContent  = s.alCount;
   document.getElementById('sumSatCount').textContent = s.satCount;
-  // XU030 kıyaslama kartı
-  if (s.totalVal && s.totalCost && s.xu030Ret !== null && s.xu030Ret !== undefined) {
-    const pfRet = (s.pnl / s.totalCost) * 100;
-    const diff  = pfRet - s.xu030Ret;
-    const pfEl  = document.getElementById('sumXu030Pf');
-    pfEl.textContent = (pfRet >= 0 ? '+' : '') + pfRet.toFixed(1).replace('.', ',') + '%';
-    pfEl.className   = 'sum-num ' + (pfRet >= 0 ? 'sum-green' : 'sum-red');
-    const cmpEl = document.getElementById('sumXu030Cmp');
-    const diffSign = diff >= 0 ? '+' : '';
-    cmpEl.textContent = 'vs BIST30: ' + diffSign + diff.toFixed(1).replace('.', ',') + '%';
-    cmpEl.className   = 'xu030-compare ' + (diff >= 0 ? 'xu030-above' : 'xu030-below');
-    document.getElementById('sumXu030Card').style.display = '';
-  } else {
-    document.getElementById('sumXu030Card').style.display = 'none';
-  }
 }
 
 // Enter key on inputs

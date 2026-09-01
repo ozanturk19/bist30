@@ -10,6 +10,7 @@
   .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
   .sum-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; text-align:center; }
   .sum-num  { font-size:var(--bp-text-28); font-weight:800; line-height:1; }
+  .sum-pct  { font-size:var(--bp-text-sm); font-weight:700; margin-top:3px; line-height:1.2; min-height:1.2em; }
   .sum-lbl  { font-size:var(--bp-text-xs); color:#8b949e; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   .sum-green{ color:#3fb950; } .sum-red{ color:#f85149; } .sum-blue{ color:#58a6ff; }
 
@@ -156,8 +157,6 @@
     white-space:nowrap; transition:all .15s;
   }
   .btn-entry:hover { background:rgba(63,185,80,.2); border-color:#3fb950; }
-  .xu030-compare { font-size:var(--bp-text-2xs); color:#8b949e; margin-top:4px; display:block; }
-  .xu030-above { color:#3fb950; } .xu030-below { color:#f85149; }
 
   /* ── Makro Ticker Bandı ── */
   .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); height:34px; overflow:hidden; position:relative; white-space:nowrap; }
