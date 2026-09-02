@@ -976,8 +976,10 @@
       .bp-symbol-pill { font-size: var(--bp-text-xs); padding: 5px 8px; gap: 4px; }
     }
     /* SPEC-UX-BATCH-2026-06-03 Madde 1A + 2 (CPO-463/464/465):
-       segmented-control, aktif=accent-mavi (#1f6feb) pill. Sinyal renkleri (yeşil/kırmızı) NÖTR sekme barında YOK
-       — accent-mavi marka rezerve. AI tab "AI Analiz" + sparkle simge (SAFETY-CRITICAL: "AI"→"AL" karışıklık riski). */
+       segmented-control, aktif=marka rengi (var(--bp-brand)) pill (r170: eski ham
+       #1f6feb'ten kanonik token'a geçirildi, tarama.css'teki aynı sınıf drift'iyle
+       aynı turda). Sinyal renkleri (yeşil/kırmızı) NÖTR sekme barında YOK — marka
+       rengi rezerve. AI tab "AI Analiz" + sparkle simge (SAFETY-CRITICAL: "AI"→"AL" karışıklık riski). */
     .bp-segments-inner {
       display: flex; gap: 4px;
       max-width: 1400px;
@@ -1008,12 +1010,12 @@
       }
     }
     .bp-segments-inner a.active {
-      color: #ffffff;
-      background: #1f6feb;
-      box-shadow: 0 1px 2px rgba(31,111,235,0.35), 0 0 0 1px rgba(31,111,235,0.5) inset;
+      color: var(--bp-bg);
+      background: var(--bp-brand);
+      box-shadow: 0 1px 2px rgba(var(--bp-brand-rgb),0.35), 0 0 0 1px rgba(var(--bp-brand-rgb),0.5) inset;
     }
     .bp-segments-inner a.active:hover {
-      background: #1f6feb;
+      background: var(--bp-brand);
     }
     .bp-seg-icon {
       display: inline-block; flex-shrink: 0;
@@ -1152,9 +1154,9 @@
     .bp-bottom-cta.hidden { transform: translateY(100%); }
     .bp-cta-watchlist {
       flex: 6; min-height: 44px;
-      background: rgba(31,111,235,0.14);
-      color: #6ea3ff;
-      border: 1px solid rgba(31,111,235,0.42);
+      background: rgba(var(--bp-brand-rgb),0.14);
+      color: var(--bp-brand);
+      border: 1px solid rgba(var(--bp-brand-rgb),0.42);
       border-radius: var(--bp-radius-9); cursor: pointer;
       font-family: 'Manrope', system-ui, sans-serif;
       font-size: var(--bp-text-base); font-weight: 600;
@@ -1163,12 +1165,12 @@
       -webkit-tap-highlight-color: transparent;
       padding: 0 12px;
     }
-    .bp-cta-watchlist:hover { background: rgba(31,111,235,0.20); }
+    .bp-cta-watchlist:hover { background: rgba(var(--bp-brand-rgb),0.20); }
     .bp-cta-watchlist:active { transform: scale(0.97); }
     .bp-cta-watchlist.active {
-      background: rgba(31,111,235,0.28);
-      color: #ffffff;
-      border-color: rgba(31,111,235,0.7);
+      background: rgba(var(--bp-brand-rgb),0.28);
+      color: var(--bp-brand);
+      border-color: rgba(var(--bp-brand-rgb),0.7);
     }
     .bp-cta-alarm {
       flex: 3; min-height: 44px;

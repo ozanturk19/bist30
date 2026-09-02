@@ -6,7 +6,7 @@
     --border:var(--bp-bkl-bd);
     --text2:var(--bp-text2); --text3:var(--bp-text3);
     --al:var(--bp-al); --sat:var(--bp-sat); --bkl:var(--bp-bkl);
-    --brand:#1f6feb; --gold:#e3b341;
+    --brand:var(--bp-brand); --gold:#e3b341;
   }
   /* r155 bug-hunt: DEV2-T-MOBOVF-1 ile ayni sinif — hisse.css/index.css/portfolio.css
      emsaliyle ayni yatay-tasma guard'i eksikti. */
@@ -85,8 +85,8 @@
   }
   .search-group input[type=text]:focus {
     outline: none;
-    border-color: rgba(31,111,235,0.55);
-    box-shadow: 0 0 0 2px rgba(31,111,235,0.18);
+    border-color: rgba(var(--bp-brand-rgb),0.55);
+    box-shadow: 0 0 0 2px rgba(var(--bp-brand-rgb),0.18);
   }
   .search-group .search-icon {
     /* Label ~18px üstte + input height ~34px → bottom:10px ikonu input dikey ortası civarına oturtur (önceden de bu pattern'di).
@@ -96,7 +96,7 @@
     color:var(--text3); pointer-events:none;
     opacity: 0.85;
   }
-  .search-group input[type=text]:focus ~ .search-icon { opacity: 1; color: rgba(31,111,235,0.85); }
+  .search-group input[type=text]:focus ~ .search-icon { opacity: 1; color: rgba(var(--bp-brand-rgb),0.85); }
   .search-clear {
     position:absolute; right:8px; bottom:7px;
     background:none; border:none; color:var(--text3); cursor:pointer;
@@ -128,8 +128,8 @@
     align-items: center;
     gap: 4px;
     padding: 4px 4px 4px 10px;
-    background: rgba(31,111,235,.10);
-    border: 1px solid rgba(31,111,235,.30);
+    background: rgba(var(--bp-brand-rgb),.10);
+    border: 1px solid rgba(var(--bp-brand-rgb),.30);
     border-radius: var(--bp-radius-20);
     font-size: var(--bp-text-sm);
     color: var(--bp-text);
@@ -138,8 +138,8 @@
     transition: all .15s ease;
   }
   .active-chip:hover {
-    background: rgba(31,111,235,.18);
-    border-color: var(--accent, #1f6feb);
+    background: rgba(var(--bp-brand-rgb),.18);
+    border-color: var(--bp-brand);
   }
   .active-chip .chip-x {
     width: 18px;
@@ -202,7 +202,7 @@
   }
   /* r122 bug-hunt: outline:none klavye kullanicisi icin gorunmez focus birakiyordu,
      .filter-group select:focus'taki ayni token/desen burada da uygulandi. */
-  .sort-select:focus-visible { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(31,111,235,.35); }
+  .sort-select:focus-visible { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(var(--bp-brand-rgb),.35); }
 
   /* ── Tablo ── */
   .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }
@@ -238,7 +238,7 @@
   #resultTable { transition:opacity .15s ease; }
   tbody a { text-decoration:none; color:inherit; }
 
-  .tk { font-size:var(--bp-text-md); font-weight:700; color:#f0f6fc; }
+  .tk { font-size:var(--bp-text-md); font-weight:700; color:var(--bp-text); }
   .tk-name { font-size:var(--bp-text-xs); color:var(--text2); margin-top:1px; }
   .sector-tag {
     font-size:var(--bp-text-2xs); color:var(--text3); background:var(--surface2);
@@ -313,7 +313,7 @@
     height:100%; border-radius:var(--bp-radius-xs);
     transition:width 0.3s ease;
   }
-  .trend-bar-fill.strong { background:linear-gradient(90deg,#3fb950,#1f6feb); }
+  .trend-bar-fill.strong { background:linear-gradient(90deg,#3fb950,var(--bp-brand)); }
   .trend-bar-fill.medium { background:#1f6feb; }
   .trend-bar-fill.weak   { background:var(--text3); }
 
@@ -352,7 +352,7 @@
   .score-val.weak     { color:var(--text3); }
   .score-bar-bg { flex:0 0 40px; height:4px; background:rgba(255,255,255,0.08); border-radius:var(--bp-radius-xs); overflow:hidden; }
   .score-bar-fill { height:100%; border-radius:var(--bp-radius-xs); }
-  .score-bar-fill.premium  { background:linear-gradient(90deg,var(--bp-premium),var(--bp-premium)); }
+  .score-bar-fill.premium  { background:linear-gradient(90deg,var(--bp-premium),var(--bp-brand)); }
   .score-bar-fill.plus     { background:#1f6feb; }
   .score-bar-fill.weak     { background:var(--text3); }
 
@@ -406,7 +406,7 @@
     transition:border-color 0.15s, background .15s, transform .1s;
     -webkit-tap-highlight-color:transparent;
   }
-  .mr-card:hover { border-color:var(--accent,#1f6feb); }
+  .mr-card:hover { border-color:var(--bp-brand); }
   .mr-card:active { transform:scale(.98); background:var(--surface2); }
   .mr-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
   .mr-ticker { font-size:var(--bp-text-15); font-weight:700; color:var(--bp-text); letter-spacing:0.5px; }
