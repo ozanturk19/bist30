@@ -273,7 +273,17 @@ def _json_to_dataframe(data: dict):
         # NG=F) DST geçişli borsa saatinden karışık UTC offset'li index dönüyor;
         # utc=True olmadan pd.to_datetime exception atıyor, _compute_chart_data
         # bunu sessizce None'a çeviriyor (63 gündür 6 makro grafik boş kalmıştı).
-        df.index = pd.to_datetime(data["index"], utc=True)
+        # CPO-1466: utc=True BIST (.IS, sabit +03:00) barlarını UTC'ye çevirirken
+        # yerel gece yarısını bir önceki UTC gününe düşürüyordu (örn. 28 Ağustos
+        # 00:00+03:00 -> 27 Ağustos 21:00 UTC) — downstream .date()/.strftime()
+        # bu UTC damgasını kullandığı için HER BIST bar'ı 1 gün geriye kayıyor,
+        # her Pazartesi de kaydıktan sonra Pazar'a düşüp is_trading_day() ile
+        # sessizce eleniyordu (28 Ağustos "kayıp" değildi, 27 Ağustos etiketi
+        # altında gizliydi). tz_convert("Europe/Istanbul") tarihi uygulamanın
+        # tek kanonik takvimine (lib/trading_calendar) geri sabitliyor — BIST
+        # (+03:00) için ofset zaten aynı olduğundan bu no-op'a eşdeğer, negatif
+        # ofsetli (EST/EDT) varlıklarda da ileri kayma olduğundan tarih değişmiyor.
+        df.index = pd.to_datetime(data["index"], utc=True).tz_convert("Europe/Istanbul")
         df.index.name = "Date"
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
