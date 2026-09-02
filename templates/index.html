@@ -3324,7 +3324,7 @@ async function loadGundem(newsOnly) {
     const [newsRes, bilRes] = await Promise.all(fetches);
     if (!newsRes.ok) throw new Error('market-news ' + newsRes.status);
     const newsData = await newsRes.json();
-    const bilData  = bilRes ? await bilRes.json() : null;
+    const bilData  = (bilRes && bilRes.ok) ? await bilRes.json() : null;
 
     // — Haber Kartları —
     const cardsEl = document.getElementById('gundemCards');
