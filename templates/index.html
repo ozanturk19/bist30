@@ -125,7 +125,7 @@
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=b1e2a745">
 <script src="/static/bp-vocab.js?v=20260823C"></script>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=2b420864">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=d87e0e2e">
 <style id="bp-critical-css">
 .bp-footer-link{color:var(--bp-text3);text-decoration:none;transition:color .15s}.bp-footer-link:hover{color:var(--bp-text)}/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -306,10 +306,10 @@
   <div class="bp-filter-panel" aria-label="Filtreleme paneli">
   <!-- ── Feature 1 #1B — Preset Chips (CPO MSG-060) ── -->
   <div class="preset-chips" id="presetChips" role="group" aria-label="Hazır filtreler">
-    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)"><span aria-hidden="true">🔥</span> Top Kazananlar</button>
-    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)"><span aria-hidden="true">📊</span> Hacim Öncüleri</button>
-    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)"><span aria-hidden="true">⭐</span> Hacim Onaylı</button>
-    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden><span aria-hidden="true">⭐</span> Watchlist'im</button>
+    <button class="preset-chip" data-preset="TOP_GAINERS" onclick="applyPreset('TOP_GAINERS', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Top Kazananlar</button>
+    <button class="preset-chip" data-preset="VOL_LEADERS" onclick="applyPreset('VOL_LEADERS', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Hacim Öncüleri</button>
+    <button class="preset-chip" data-preset="PREMIUM" onclick="toggleChip('premium', this)"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Hacim Onaylı</button>
+    <button class="preset-chip" data-preset="WATCH" id="presetWatchChip" onclick="toggleChip('watch', this)" hidden><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Watchlist'im</button>
   </div>
 
   <div class="filters">
@@ -1983,21 +1983,37 @@ function setSector(sector, btn) {
   _afterFilterChange({ push: true });  /* #32: _saveFilterState + URL push + full sync */
 }
 
+// r172 (cool/stunning denetimi): sektor cipleri emoji kullaniyordu - OS'a gore
+// tamamen farkli render edilip (Apple/Windows/Android) dark-tema disiplinini
+// above-the-fold kirıyordu. Header'in kendi SVG ikon diliyle (currentColor,
+// 24x24 viewBox, stroke-width 2) ayni desene gecirildi - ikon rengi otomatik
+// olarak cipin color/hover state'ine uyar, ekstra CSS gerekmez.
+const _bpSectorSvg = (path) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' + path + '</svg>';
+const SECTOR_ICONS = {
+  'Bankacılık': _bpSectorSvg('<line x1="3" y1="21" x2="21" y2="21"/><line x1="5" y1="21" x2="5" y2="10"/><line x1="9" y1="21" x2="9" y2="10"/><line x1="15" y1="21" x2="15" y2="10"/><line x1="19" y1="21" x2="19" y2="10"/><polygon points="12 3 21 9 3 9"/>'),
+  'Holding': _bpSectorSvg('<rect x="4" y="2" width="16" height="20"/><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="14" x2="20" y2="14"/><line x1="10" y1="2" x2="10" y2="22"/>'),
+  'Sanayi': _bpSectorSvg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'),
+  'Enerji': _bpSectorSvg('<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>'),
+  'Perakende': _bpSectorSvg('<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>'),
+  'Teknoloji': _bpSectorSvg('<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>'),
+  'Telekom': _bpSectorSvg('<path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/>'),
+  'Ulaşım': _bpSectorSvg('<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'),
+  'GYO': _bpSectorSvg('<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>'),
+  'Kimya/Malzeme': _bpSectorSvg('<path d="M9 3h6"/><path d="M10 3v6.5L5 19a1 1 0 0 0 .9 1.5h12.2a1 1 0 0 0 .9-1.5L14 9.5V3"/>'),
+  'Madencilik': _bpSectorSvg('<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>'),
+  'Sigorta': _bpSectorSvg('<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'),
+};
+
 function buildSectorButtons(sectors) {
   const wrap = document.getElementById('sectorFilters');
   if (!sectors || sectors.length === 0) return;
   // "Tümü" button zaten HTML'de var; diğerlerini ekle
   const existing = wrap.querySelectorAll('.sector-btn');
   existing.forEach((b, i) => { if (i > 0) b.remove(); });   // Tümü'yü koru
-  const sectorIcons = {
-    'Bankacılık': '🏦', 'Holding': '🏢', 'Sanayi': '⚙️', 'Enerji': '⚡',
-    'Perakende': '🛒', 'Teknoloji': '💻', 'Telekom': '📡', 'Ulaşım': '✈️',
-    'GYO': '🏗️', 'Kimya/Malzeme': '🧪', 'Madencilik': '⛏️', 'Sigorta': '🛡️', 'Diğer': '•'
-  };
   sectors.forEach(s => {
     const btn = document.createElement('button');
     btn.className = 'sector-btn';
-    btn.textContent = (sectorIcons[s] || '') + ' ' + s;
+    btn.innerHTML = (SECTOR_ICONS[s] || '') + '<span>' + escapeHtml(s) + '</span>';
     btn.onclick = () => setSector(s, btn);
     wrap.appendChild(btn);
   });

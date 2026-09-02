@@ -160,7 +160,9 @@
     white-space: nowrap;
     transition: all 0.15s ease;
     font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
   }
+  .preset-chip svg { width: 14px; height: 14px; flex-shrink: 0; }
   .preset-chip:hover {
     background: rgba(28,33,40,0.95);
     color: var(--bp-text);
@@ -660,7 +662,9 @@
     padding: 4px 11px; border-radius: var(--bp-radius-14); border: 1px solid var(--bp-border);
     background: transparent; color: var(--bp-text3); cursor: pointer;
     font-size: var(--bp-text-xs); font-weight: 500; font-family: inherit; transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 4px;
   }
+  .sector-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
   .sector-btn:hover { border-color: var(--bp-border2); color: var(--bp-text2); }
   .sector-btn.active-sector { background: rgba(var(--bp-brand-rgb),.14); border-color: rgba(var(--bp-brand-rgb),.45); color: var(--bp-brand); }
 
