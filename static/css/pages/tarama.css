@@ -153,9 +153,11 @@
     padding: 0;
     transition: all .15s;
   }
-  .active-chip .chip-x:hover {
-    background: rgba(var(--bp-sat-rgb),.20);
-    color: var(--bp-sat);
+  @media (hover: hover) and (pointer: fine) {
+    .active-chip .chip-x:hover {
+      background: rgba(var(--bp-sat-rgb),.20);
+      color: var(--bp-sat);
+    }
   }
   .chip-clear-all {
     background: transparent;

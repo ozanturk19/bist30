@@ -107,10 +107,12 @@
     transition: all .15s;
     flex-shrink: 0;
   }
-  .header-search-btn:hover {
-    background: var(--bp-surface2);
-    border-color: var(--bp-border2);
-    color: var(--bp-text);
+  @media (hover: hover) and (pointer: fine) {
+    .header-search-btn:hover {
+      background: var(--bp-surface2);
+      border-color: var(--bp-border2);
+      color: var(--bp-text);
+    }
   }
   @media (max-width: 768px) {
     .header-search-btn { min-width: 44px; min-height: 44px; }
@@ -843,9 +845,11 @@
 
   tbody tr { border-bottom: 1px solid var(--bp-border); transition: background 0.15s, box-shadow 0.15s; }
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover {
-    background: var(--bp-surface2);
-    box-shadow: inset 3px 0 0 rgba(var(--bp-al-rgb), 0.35);
+  @media (hover: hover) and (pointer: fine) {
+    tbody tr:hover {
+      background: var(--bp-surface2);
+      box-shadow: inset 3px 0 0 rgba(var(--bp-al-rgb), 0.35);
+    }
   }
   td { padding: 10px 16px; white-space: nowrap; }
 
@@ -1012,7 +1016,9 @@
     transition: border-color .15s, box-shadow .15s;
     user-select: none;
   }
-  .endeks-card:hover { border-color: var(--bp-border2); box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb),.06); transform: translate(-1px,-1px); }
+  @media (hover: hover) and (pointer: fine) {
+    .endeks-card:hover { border-color: var(--bp-border2); box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb),.06); transform: translate(-1px,-1px); }
+  }
   .endeks-card.active { border-color: var(--bp-brand); box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb),.10); }
 
   .ec-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -1256,7 +1262,9 @@
     font-size:var(--bp-text-2xs); border-radius:var(--bp-radius-4); padding:2px 6px; font-family:inherit;
     transition:all .15s; white-space:nowrap;
   }
-  .ap-pa-set:hover { border-color:#e3b341; color:#e3b341; }
+  @media (hover: hover) and (pointer: fine) {
+    .ap-pa-set:hover { border-color:#e3b341; color:#e3b341; }
+  }
   .ap-pa-clear {
     background:none; border:none; color:#e3b341; cursor:pointer;
     font-size:var(--bp-text-sm); padding:0 2px; line-height:1;
