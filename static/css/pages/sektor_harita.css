@@ -28,7 +28,7 @@
      birlestirildi, canli olarak zaten uygulanan -2px+box-shadow degeri korundu. */
   .sector-card:hover { border-color:var(--bp-border2); transform:translateY(-2px); box-shadow:var(--bp-shadow-sm); }
   .sector-card::before {
-    content:''; position:absolute; inset:0; opacity:0.06;
+    content:''; position:absolute; inset:0; opacity:var(--heat-opacity, 0.06);
     background:var(--heat-color, var(--bp-surface2));
   }
 
