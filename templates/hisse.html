@@ -474,7 +474,7 @@
   
   <div class="bp-bottom-cta" id="bpBottomCta" role="toolbar" aria-label="Hisse aksiyonları">
     <button class="bp-cta-watchlist" id="bpCtaWatch" type="button"
-            onclick="if(typeof toggleHisseWatch==='function')toggleHisseWatch();">
+            onclick="if(typeof togglePortfolio==='function')togglePortfolio();">
       <span id="bpCtaWatchIcon"><span aria-hidden="true">⭐</span></span>
       <span id="bpCtaWatchLabel">Takibe Al</span>
     </button>
@@ -490,7 +490,6 @@
       </svg>
     </button>
   </div>
-  <div class="bp-bottom-cta-spacer"></div>
 
   <!-- Grafik -->
   <div id="chart-section" data-tab-content="grafik" class="chart-section" role="tabpanel" aria-labelledby="tab-grafik" tabindex="0" style="scroll-margin-top:80px">
@@ -1051,6 +1050,7 @@
     style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);padding:2px 4px" aria-label="Kapat">×</button>
 </div>
 
+<div class="bp-bottom-cta-spacer"></div>
 </main>
 
 <footer style="text-align:center;padding:20px;font-size:var(--bp-text-sm);color:var(--bp-text3);margin-top:20px">
@@ -1355,6 +1355,17 @@ function updateHibStarBtn() {
   }
   btn.setAttribute('aria-pressed', String(inPf));
   btn.setAttribute('aria-label', inPf ? 'Portföyde' : 'Portföye ekle');
+
+  // r168: alt sabit CTA çubuğundaki (SPEC-017 v2 c3) bpCtaWatch artık togglePortfolio()
+  // çağırıyor (eskiden toggleHisseWatch()'a, yani alarm butonuyla aynı işleve bağlıydı —
+  // aynı çubukta iki farklı etiketli buton aynı şeyi yapıyordu). Senkronu da HIB_PF_KEY'e taşı.
+  const ctaBtn = document.getElementById('bpCtaWatch');
+  if (ctaBtn) {
+    const ctaLbl = document.getElementById('bpCtaWatchLabel');
+    ctaBtn.classList.toggle('active', inPf);
+    ctaBtn.setAttribute('aria-pressed', String(inPf));
+    if (ctaLbl) ctaLbl.textContent = inPf ? 'Portföyde ✓' : 'Takibe Al';
+  }
 }
 
 function updateHibBellBtn() {
@@ -1376,16 +1387,8 @@ function updateHibBellBtn() {
     btn.setAttribute('aria-pressed', String(inW));
     btn.setAttribute('aria-label', inW ? 'Alarm aktif' : 'Bildirim al');
   }
-  // r145: alt sabit CTA çubuğundaki (SPEC-017 v2 c3) bpCtaWatch aynı HIB_WATCH_KEY'i
-  // paylaşıyor ama hiçbir yerde güncellenmiyordu — hem aynı-sekme hem çapraz-sekme
-  // (storage event) senkronu bu eksik yüzünden hiç çalışmıyordu.
-  const ctaBtn = document.getElementById('bpCtaWatch');
-  if (ctaBtn) {
-    const ctaLbl = document.getElementById('bpCtaWatchLabel');
-    ctaBtn.classList.toggle('active', inW);
-    ctaBtn.setAttribute('aria-pressed', String(inW));
-    if (ctaLbl) ctaLbl.textContent = inW ? 'Takipte ✓' : 'Takibe Al';
-  }
+  // r168: bpCtaWatch senkronu artık updateHibStarBtn()'de (HIB_PF_KEY tabanlı) —
+  // bkz. o fonksiyondaki not.
 }
 
 // CPO-DEV2-088(A) / r121: cok-sekme senkronizasyonu — index.html'deki storage event
@@ -1394,6 +1397,7 @@ function updateHibBellBtn() {
 // sadece render) — eksik olan tek sey diger sekme yazinca bu render'i tetiklemekti.
 window.addEventListener('storage', e => {
   if (e.key === HIB_WATCH_KEY) updateHibBellBtn();
+  if (e.key === HIB_PF_KEY) updateHibStarBtn();
 });
 
 // Init when DOM ready
@@ -2155,7 +2159,7 @@ function renderSigPerf(history) {
 
   const wrEl = document.getElementById('sigPerfWinRate');
   wrEl.textContent = '%' + winRate;
-  wrEl.style.color = 'var(--bp-text)';
+  wrEl.style.color = winRate > 60 ? '#00e290' : (winRate < 40 ? '#f85149' : '#909097');
 
   const avgEl = document.getElementById('sigPerfAvg');
   avgEl.textContent = (avgRet > 0 ? '+' : '') + avgRet.toFixed(1).replace('.', ',') + '%';

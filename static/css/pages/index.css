@@ -1026,7 +1026,7 @@
   .ec-spark { width: 80px; height: 32px; flex-shrink: 0; overflow: visible; }
 
   .ec-price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
-  .ec-price { font-family: 'Space Grotesk', monospace, sans-serif; font-size: var(--bp-text-2xl); font-weight: 700; color: var(--bp-text); font-variant-numeric: tabular-nums; }
+  .ec-price { font-family: 'Space Grotesk', monospace, sans-serif; font-size: var(--bp-text-28); font-weight: 700; color: var(--bp-text); font-variant-numeric: tabular-nums; }
   .ec-chg   { font-size: var(--bp-text-base); font-weight: 600; font-variant-numeric: tabular-nums; }
   .ec-chg.pos { color: var(--bp-al); }
   .ec-chg.neg { color: var(--bp-sat); }
@@ -1394,7 +1394,7 @@
     /* Dual endeks kartları — mobilde yığılmış */
     .dual-endeks { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
     .endeks-card { padding: 10px 12px; }
-    .ec-price { font-size: var(--bp-text-lg); }
+    .ec-price { font-size: var(--bp-text-3xl); }
     .ec-spark { width: 60px; height: 26px; }
     .ec-inds { display: none; }
     /* Accordion body — mobilde dikey */
@@ -1410,6 +1410,7 @@
     /* Stats bar → 2×2 grid (was cramped 4-card row) */
     .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .stat-card { padding: 12px 14px; min-width: unset; }
+    .stat-card:last-child { grid-column: 1 / -1; }
     .stat-card .stat-num { font-size: var(--bp-text-22); }
     td { padding: 8px 10px; }
     .indicators { display: none; }
