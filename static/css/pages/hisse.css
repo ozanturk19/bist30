@@ -941,7 +941,9 @@
 
   /* ── Header Search Button ── */
   .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius:var(--bp-radius); color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 6px; }
-  .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
+  @media (hover: hover) and (pointer: fine) {
+    .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
+  }
   @media (max-width: 768px) { .header-search-btn { min-width: 44px; min-height: 44px; } }
 
 
@@ -996,9 +998,11 @@
       cursor: pointer;
       letter-spacing: 0.3px;
     }
-    .bp-segments-inner a:hover {
-      color: var(--bp-text);
-      background: rgba(255,255,255,0.04);
+    @media (hover: hover) and (pointer: fine) {
+      .bp-segments-inner a:hover {
+        color: var(--bp-text);
+        background: rgba(255,255,255,0.04);
+      }
     }
     .bp-segments-inner a.active {
       color: #ffffff;

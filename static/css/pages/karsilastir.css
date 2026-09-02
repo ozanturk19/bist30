@@ -275,10 +275,15 @@
   .help-icon:hover, .help-icon:focus-visible { color: var(--bp-text); border-color: var(--bp-border2); }
 
   /* ── CPO-DEV2-101: mobilde matris yerine per-ticker kart listesi (tarama/portfolio
-     ile ayni <=768px esigi — 769-899px "tablet" araliginda hala yatay-kaydirilabilir
-     matris gosterilir, cunku o genislikte matris zaten sigar/kullanilabilir). ── */
+     ile ayni esik).
+     r161-bughunt zindex-sticky-overlap: eski yorumdaki "769-899px'te matris zaten
+     sigar/kullanilabilir" varsayimi CANLI OLCUMLE CURUTULDU - 820px genislikte
+     thead th sticky hic calismiyor (sayfa scroll'uyla ayni delta ile kayiyor, .compare-wrap
+     overflow-x:auto oldugu icin overflow-y de auto'ya donusuyor ve sticky referansi
+     viewport degil bu hic kaymayan container oluyor). Esik 768->899px, T2.4/DEV2-021
+     emsaliyle hizalandi, boslugu kapatir. ── */
   .cmp-mcards { display: none; flex-direction: column; gap: 12px; }
-  @media (max-width: 768px) {
+  @media (max-width: 899px) {
     .compare-wrap { display: none !important; }
     .cmp-mcards { display: flex; }
   }

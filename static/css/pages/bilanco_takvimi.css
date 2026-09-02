@@ -23,7 +23,10 @@
     background:var(--bp-surface2); color:var(--bp-text2); cursor:pointer;
     font-size:var(--bp-text-sm); font-weight:600; transition:all .15s; font-family:inherit;
   }
-  .filter-btn:hover, .filter-btn.active { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
+  .filter-btn.active { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
+  @media (hover: hover) and (pointer: fine) {
+    .filter-btn:hover { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
+  }
   .filter-btn.fal.active   { border-color:var(--bp-al);  background:rgba(63,185,80,0.12);  color:var(--bp-al); }
   .filter-btn.fsat.active  { border-color:var(--bp-sat); background:rgba(var(--bp-sat-rgb),0.12);  color:var(--bp-sat); }
   .filter-btn.fbkl.active  { border-color:var(--bp-bkl); background:rgba(139,148,158,0.12);color:var(--bp-bkl);}

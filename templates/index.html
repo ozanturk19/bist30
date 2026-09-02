@@ -125,7 +125,7 @@
 <!-- Manrope fallback: size-adjust matched to Manrope (not Inter) — eliminates CLS on font swap -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=b1e2a745">
 <script src="/static/bp-vocab.js?v=20260823C"></script>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=272a9219">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=9249c5c4">
 <style id="bp-critical-css">
 .bp-footer-link{color:var(--bp-text3);text-decoration:none;transition:color .15s}.bp-footer-link:hover{color:var(--bp-text)}/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -1579,19 +1579,12 @@ function toggleAdvPanel() {
 
 function setAdv(key, val, btn) {
   advFilters[key] = val;
-  /* SPEC-009: seçili chip tek net .adv-active — grup içinde yalnız 1 aktif.
-     Eski sel/sel-bull/sel-bear üçlü şeması "hangisi seçili" belirsizliği yaratıyordu. */
-  const group = document.getElementById('adv-' + key);
-  group.querySelectorAll('.adv-chip').forEach(c => c.classList.remove('adv-active'));
-  if (btn) btn.classList.add('adv-active');
-  /* Aktif filtre sayısı badge */
-  const active = (advFilters.adx > 0 ? 1 : 0) + (advFilters.bars > 0 ? 1 : 0)
-               + (advFilters.vol > 0 ? 1 : 0) + (advFilters.rsi !== 'all' ? 1 : 0)
-               + (advFilters.eq !== 'all' ? 1 : 0);
-  const badge = document.getElementById('advBadge');
-  badge.textContent = active;
-  badge.style.display = active > 0 ? '' : 'none';
-  document.getElementById('advToggle').classList.toggle('active', active > 0 || document.getElementById('advPanel').classList.contains('open'));
+  /* r161-bughunt history-back-stale-state: chip/badge/toggle görsel senkronu artik
+     _syncFilterChips() icinde (advFilters'tan tek kaynakli re-derive) — burada tekrar
+     etmiyoruz, _afterFilterChange() zaten _syncFilterChips()'i cagiriyor. Eskiden bu
+     senkron SADECE burada (dogrudan tiklamada) oluyordu; popstate/URL-hydration/
+     localStorage-restore/resetFilters gibi advFilters'i programatik degistiren yollarda
+     panel gorseli "Tumu" secili gibi kalip tablo sessizce filtreli kaliyordu. */
   _afterFilterChange({ push: true });  /* #32: _saveFilterState + URL push + full sync */
 }
 
@@ -1789,7 +1782,7 @@ function renderHeroPanel(stocks) {
   /* Tek satır: renkli şerit + ticker + hisse adı (kısaltılmış) + % değişim */
   const row = (s, barCls) => {
     const shortName = (s.name || '').replace(' A.Ş.','').replace(' Holding','').substring(0, 16);
-    return `<a href="/hisse/${_esc(s.ticker)}" class="hp-row">
+    return `<a href="/hisse/${_esc(s.ticker)}" class="hp-row" title="${_esc(s.name || '')}">
       <div class="hp-bar ${barCls}"></div>
       <span class="hp-ticker">${_esc(s.ticker)}</span>
       <span class="hp-name">${_esc(shortName)}</span>
@@ -2043,7 +2036,7 @@ async function openAlertModal(ticker) {
     document.body.appendChild(modal);
   }
   const isLoggedIn = _isLoggedIn();
-  const loginNotice = isLoggedIn ? '' : `<div class="alert-modal-login-notice">⚠️ Alert ayarları için BorsaPusula hesabınıza giriş yapmanız gerekiyor.<br><a href="#" onclick="closePremiumModal();openPremiumModal();return false" style="color:var(--bp-volume)">Ücretsiz giriş yap →</a></div>`;
+  const loginNotice = isLoggedIn ? '' : `<div class="alert-modal-login-notice">⚠️ Alert ayarları için BorsaPusula hesabınıza giriş yapmanız gerekiyor.<br><a href="#" onclick="closeAlertModal();closePremiumModal();openPremiumModal();return false" style="color:var(--bp-volume)">Ücretsiz giriş yap →</a></div>`;
   const cfg = _userAlerts[ticker] || {};
   modal.innerHTML = `<div class="alert-modal" role="dialog" aria-modal="true">
     <button class="alert-modal-close" onclick="closeAlertModal()" aria-label="Kapat">×</button>
@@ -2051,7 +2044,7 @@ async function openAlertModal(ticker) {
     ${loginNotice}
     <div class="alert-modal-row">
       <label for="am-price-pct">📈 Fiyat hareketi eşiği (%)</label>
-      <input type="number" id="am-price-pct" min="0.1" max="20" step="0.5" inputmode="decimal" placeholder="—" value="${cfg.price_pct != null ? cfg.price_pct : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+      <input type="number" id="am-price-pct" min="0.1" max="20" step="0.5" inputmode="decimal" placeholder="—" value="${cfg.price_pct != null ? cfg.price_pct : ''}" ${!isLoggedIn ? 'disabled' : ''} onwheel="this.blur()">
     </div>
     <div class="alert-modal-row">
       <label for="am-signal-change">🔄 Sinyal değişimi (AL/SAT/BEKLE)</label>
@@ -2059,11 +2052,11 @@ async function openAlertModal(ticker) {
     </div>
     <div class="alert-modal-row">
       <label for="am-rsi">📉 RSI aşırı satış eşiği (≤)</label>
-      <input type="number" id="am-rsi" min="10" max="50" step="1" inputmode="numeric" placeholder="—" value="${cfg.rsi_threshold != null ? cfg.rsi_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+      <input type="number" id="am-rsi" min="10" max="50" step="1" inputmode="numeric" placeholder="—" value="${cfg.rsi_threshold != null ? cfg.rsi_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''} onwheel="this.blur()">
     </div>
     <div class="alert-modal-row">
       <label for="am-rvol">📊 RVOL yüksek hacim eşiği (≥x)</label>
-      <input type="number" id="am-rvol" min="1" max="10" step="0.5" inputmode="decimal" placeholder="—" value="${cfg.rvol_threshold != null ? cfg.rvol_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+      <input type="number" id="am-rvol" min="1" max="10" step="0.5" inputmode="decimal" placeholder="—" value="${cfg.rvol_threshold != null ? cfg.rvol_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''} onwheel="this.blur()">
     </div>
     ${isLoggedIn ? `<button class="alert-modal-save" onclick="saveAlertSettings()">💾 Kaydet</button>
     ${_userAlerts[ticker] ? `<button class="alert-modal-delete" onclick="deleteAlertSettings()">🗑 Bu alerti sil</button>` : ''}` : ''}
@@ -2514,6 +2507,25 @@ function _syncFilterChips() {
     if (p === 'PREMIUM')    c.classList.toggle('active', filterPremium);
     else if (p === 'WATCH') c.classList.toggle('active', filterWatch);
   });
+  /* r161-bughunt history-back-stale-state: adv-chip (adx/bars/vol/rsi/eq) + #advBadge +
+     #advToggle artik burada advFilters'tan tek kaynakli re-derive ediliyor (setAdv'daki
+     eski inline blok kaldirildi). Bu fonksiyonun zaten cagirildigi 3 nokta (popstate,
+     _afterFilterChange -> resetFilters/toggleChip/setAdv/setSearch, init sonrasi) artik
+     panel gorselini de dogru tutuyor. */
+  Object.keys(advFilters).forEach(key => {
+    const group = document.getElementById('adv-' + key);
+    if (!group) return;
+    group.querySelectorAll('.adv-chip').forEach(c => {
+      c.classList.toggle('adv-active', String(c.dataset.val) === String(advFilters[key]));
+    });
+  });
+  const advActive = (advFilters.adx > 0 ? 1 : 0) + (advFilters.bars > 0 ? 1 : 0)
+                  + (advFilters.vol > 0 ? 1 : 0) + (advFilters.rsi !== 'all' ? 1 : 0)
+                  + (advFilters.eq !== 'all' ? 1 : 0);
+  const advBadge = document.getElementById('advBadge');
+  if (advBadge) { advBadge.textContent = advActive; advBadge.style.display = advActive > 0 ? '' : 'none'; }
+  const advToggleBtn = document.getElementById('advToggle');
+  if (advToggleBtn) advToggleBtn.classList.toggle('active', advActive > 0 || document.getElementById('advPanel')?.classList.contains('open'));
 }
 
 /* SPEC-009 G2: premium/today/watch bağımsız toggle — diğerlerini etkilemez (AND). */
@@ -3074,7 +3086,8 @@ function renderAlarmPanel() {
             type="number" step="0.01" min="0" inputmode="decimal" aria-label="Üstü fiyat alarmı"
             placeholder="${aboveHasAlarm ? pa.above : '—'}"
             value="${aboveHasAlarm ? pa.above : ''}"
-            onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','above','${aboveInputId}')">
+            onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','above','${aboveInputId}')"
+            onwheel="this.blur()">
           ${aboveHasAlarm
             ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${tJs}','above')" title="Alarmı temizle" aria-label="${tEsc} üstü fiyat alarmını temizle">✕</button>`
             : `<button class="ap-pa-set" onclick="setPriceAlarm('${tJs}','above','${aboveInputId}')">Kur</button>`}
@@ -3085,7 +3098,8 @@ function renderAlarmPanel() {
             type="number" step="0.01" min="0" inputmode="decimal" aria-label="Altı fiyat alarmı"
             placeholder="${belowHasAlarm ? pa.below : '—'}"
             value="${belowHasAlarm ? pa.below : ''}"
-            onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','below','${belowInputId}')">
+            onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','below','${belowInputId}')"
+            onwheel="this.blur()">
           ${belowHasAlarm
             ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${tJs}','below')" title="Alarmı temizle" aria-label="${tEsc} altı fiyat alarmını temizle">✕</button>`
             : `<button class="ap-pa-set" onclick="setPriceAlarm('${tJs}','below','${belowInputId}')">Kur</button>`}
@@ -3282,7 +3296,7 @@ function _renderGnmCard(item) {
   <div class="gnm-card-top">
     <div>
       <div class="gnm-ticker">${_esc(item.ticker)}</div>
-      <div class="gnm-name">${_esc(item.name || '')}</div>
+      <div class="gnm-name" title="${_esc(item.name || '')}">${_esc(item.name || '')}</div>
     </div>
     <span class="gnm-badge ${badgeCls}">${badgeTxt}</span>
   </div>
@@ -3310,7 +3324,7 @@ async function loadGundem(newsOnly) {
     const [newsRes, bilRes] = await Promise.all(fetches);
     if (!newsRes.ok) throw new Error('market-news ' + newsRes.status);
     const newsData = await newsRes.json();
-    const bilData  = bilRes ? await bilRes.json() : null;
+    const bilData  = (bilRes && bilRes.ok) ? await bilRes.json() : null;
 
     // — Haber Kartları —
     const cardsEl = document.getElementById('gundemCards');
@@ -3456,7 +3470,7 @@ function showSearchAc(val) {
     const sigBg    = s.signal === 'AL' ? 'rgba(0,226,144,.12)' : s.signal === 'SAT' ? 'rgba(248,81,73,.12)' : 'rgba(139,148,158,.1)';
     const sigIcon  = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
     const shortName = (s.name || '').replace(' A.Ş.','').replace(' Holding','').substring(0, 24);
-    return `<a class="sac-item" href="/hisse/${_esc(s.ticker)}" data-idx="${i}">
+    return `<a class="sac-item" href="/hisse/${_esc(s.ticker)}" data-idx="${i}" title="${_esc(s.name || '')}">
       <span class="sac-ticker">${_esc(s.ticker)}</span>
       <span class="sac-name">${_esc(shortName)}</span>
       <span class="sac-sig" style="color:${sigColor};background:${sigBg}">${sigIcon} ${sigLabel(s.signal)}</span>
@@ -3694,7 +3708,7 @@ async function loadMacroNews() {
       const safeTitle = _esc(item.title  || '');
       const safeTime  = _esc(item.date_str || '');
       return `<a href="${safeUrl}" target="_blank" rel="noopener" class="macro-news-item" role="listitem">
-        <span class="macro-news-src">${safeSrc}</span>
+        <span class="macro-news-src" title="${safeSrc}">${safeSrc}</span>
         <span class="macro-news-title">${safeTitle}</span>
         <span class="macro-news-time">${safeTime}</span>
       </a>`;

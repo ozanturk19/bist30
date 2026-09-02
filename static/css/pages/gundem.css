@@ -68,7 +68,9 @@
   }
   .stock-card.al  { --card-accent: var(--bp-al); }
   .stock-card.sat { --card-accent: var(--bp-sat); }
-  .stock-card:hover { border-color: var(--bp-border2); background: var(--bp-surface2); transform: translateY(-1px); }
+  @media (hover: hover) and (pointer: fine) {
+    .stock-card:hover { border-color: var(--bp-border2); background: var(--bp-surface2); transform: translateY(-1px); }
+  }
 
   .sc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
   .sc-top > div:first-child { min-width: 0; }

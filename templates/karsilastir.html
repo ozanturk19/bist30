@@ -43,7 +43,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/tokens.css?v=b1e2a745">
 <script src="/static/bp-vocab.js?v=20260823C"></script>
-<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=9144f2cb">
+<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=048744ef">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header div.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> div.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> div.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:#1f6feb;color:#fff;padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid #1f6feb;outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 {% with hdr_title = 'Hisse Karşılaştırma', hdr_sub = '2-4 hisseyi seçin', hdr_sub_id = 'compareSubtitle', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
@@ -338,7 +338,7 @@ function buildTable(stocks) {
 // "satir=hisse" kart deseni burada dogrudan uygulanamaz — bunun yerine her hisse kendi
 // karti olur, karti icinde TUM metrikler (ROW_LABELS) dikey liste halinde gosterilir.
 // Ayni renderCell/renderScoreCell/ROW_LABELS kullanilir, ikinci bir veri/etiket kaynagi
-// icat edilmez. Masaustunde gizli (bkz. karsilastir.css @media max-width:768px).
+// icat edilmez. Masaustunde gizli (bkz. karsilastir.css @media max-width:899px).
 function buildMobileCards(stocks) {
   const active = stocks.filter(s => s.found);
   if (active.length === 0) return '';
@@ -523,7 +523,7 @@ function renderDropdown(inputId, items) {
   const html = items.map((it, i) => `
     <div class="ac-item" id="${dd.id}-opt-${i}" role="option" aria-selected="false" data-idx="${i}" data-ticker="${escapeHtml(it.ticker)}">
       <span class="ac-item-ticker">${escapeHtml(it.ticker)}</span>
-      <span class="ac-item-name">${escapeHtml(it.name)}</span>
+      <span class="ac-item-name" title="${escapeHtml(it.name)}">${escapeHtml(it.name)}</span>
     </div>
   `).join('');
   dd.innerHTML = html;

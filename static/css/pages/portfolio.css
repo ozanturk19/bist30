@@ -122,11 +122,15 @@
   @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
 
   /* ── CPO-DEV2-100: Yol A - mobilde tablo yerine kart listesi (tarama.html
-     #mobileResultCards ile ayni desen - <=768px'te tablo tamamen gizlenir,
-     kart listesi devreye girer; sticky-header masaüstü fix'i (yukarida) bu
-     yuzden sadece 769-899px "tablet" araligini kapsiyor). ── */
+     #mobileResultCards ile ayni desen).
+     r161-bughunt zindex-sticky-overlap: bu bloktaki eski yorum "sticky-header fix'i
+     sadece 769-899px 'tablet' araligini kapsiyor" varsayimi CANLI OLCUMLE CURUTULDU -
+     820px genislikte thead th scroll ile birlikte kayiyor (sticky HIC calismiyor,
+     tabloyla ayni delta ile hareket ediyor), "matris zaten sigar" varsayimi CSS'in
+     overflow-x:auto -> overflow-y:auto zorlamasini (sticky referansini kirmasini)
+     etkilemiyor. Esik 768->899px, T2.4/DEV2-021 emsaliyle hizalandi, boslugu kapatir. ── */
   #pfMobileCards { display:none; flex-direction:column; gap:10px; padding:4px 0 12px; }
-  @media (max-width:768px) {
+  @media (max-width:899px) {
     #pfTable { display:none !important; }
     #pfMobileCards { display:flex; }
   }

@@ -113,7 +113,9 @@
     display: block;
     min-width: 0;
   }
-  .stock-card:hover { background: var(--bp-surface3); border-color: var(--bp-border2); }
+  @media (hover: hover) and (pointer: fine) {
+    .stock-card:hover { background: var(--bp-surface3); border-color: var(--bp-border2); }
+  }
   .sc-ticker  { font-size: var(--bp-text-md); font-weight: 700; color: var(--bp-text); font-family: 'Space Grotesk', system-ui, sans-serif; }
   .sc-name    { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .sc-signal  { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: var(--bp-text-xs); font-weight: 600; padding: 2px 8px; border-radius: var(--bp-radius-4); }
@@ -184,7 +186,9 @@
 
   /* ── Header Search Button ── */
   .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius:var(--bp-radius); color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 8px; }
-  .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
+  @media (hover: hover) and (pointer: fine) {
+    .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
+  }
 
   /* ── Sektör Nabzı ── */
   .sector-nabzi { display:flex; flex-direction:column; gap:7px; }
