@@ -67,6 +67,10 @@
     font-family:inherit; outline:none; transition:border-color .15s;
     appearance:none; cursor:pointer;
   } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
+  .filter-group select {
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%238b949e' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat; background-position:right 10px center; padding-right:26px;
+  }
   .filter-group select:focus,
   .filter-group input[type=number]:focus,
   .filter-group input[type=text]:focus { border-color:var(--brand); }
@@ -227,7 +231,11 @@
   .th-sort-btn.sort-desc::after { content:' ▼'; color:var(--brand); }
   tbody td { padding:10px 14px; border-bottom:1px solid var(--bp-border-subtle); vertical-align:middle; }
   tbody tr:last-child td { border-bottom:none; }
-  tbody tr:hover td { background:rgba(255,255,255,.02); }
+  tbody tr { cursor:pointer; transition:background .15s, box-shadow .15s; }
+  @media (hover: hover) and (pointer: fine) {
+    tbody tr:hover { background:var(--surface2); box-shadow:inset 3px 0 0 rgba(var(--bp-al-rgb),.35); }
+  }
+  #resultTable { transition:opacity .15s ease; }
   tbody a { text-decoration:none; color:inherit; }
 
   .tk { font-size:var(--bp-text-md); font-weight:700; color:#f0f6fc; }
@@ -395,9 +403,11 @@
   .mr-card {
     display:block; background:var(--surface); border:1px solid var(--border);
     border-radius:var(--bp-radius-lg); padding:12px 14px; text-decoration:none; color:inherit;
-    transition:border-color 0.15s;
+    transition:border-color 0.15s, background .15s, transform .1s;
+    -webkit-tap-highlight-color:transparent;
   }
   .mr-card:hover { border-color:var(--accent,#1f6feb); }
+  .mr-card:active { transform:scale(.98); background:var(--surface2); }
   .mr-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
   .mr-ticker { font-size:var(--bp-text-15); font-weight:700; color:var(--bp-text); letter-spacing:0.5px; }
   .mr-name   { font-size:var(--bp-text-xs); color:var(--text3); margin-top:1px; }

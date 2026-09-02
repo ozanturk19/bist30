@@ -613,7 +613,10 @@
     color: var(--bp-text2);
   }
   .history-table tr:last-child td { border-bottom: none; }
-  .history-table tr:hover td { background: rgba(255,255,255,.02); }
+  .history-table tr { transition: background .15s, box-shadow .15s; }
+  @media (hover: hover) and (pointer: fine) {
+    .history-table tr:hover { background: var(--bp-surface2); box-shadow: inset 3px 0 0 rgba(var(--bp-al-rgb),.35); }
+  }
 
   /* ── İlgili Blog Kartları ── */
   .blog-read-card {
