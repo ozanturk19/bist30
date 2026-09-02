@@ -2036,7 +2036,7 @@ async function openAlertModal(ticker) {
     document.body.appendChild(modal);
   }
   const isLoggedIn = _isLoggedIn();
-  const loginNotice = isLoggedIn ? '' : `<div class="alert-modal-login-notice">⚠️ Alert ayarları için BorsaPusula hesabınıza giriş yapmanız gerekiyor.<br><a href="#" onclick="closePremiumModal();openPremiumModal();return false" style="color:var(--bp-volume)">Ücretsiz giriş yap →</a></div>`;
+  const loginNotice = isLoggedIn ? '' : `<div class="alert-modal-login-notice">⚠️ Alert ayarları için BorsaPusula hesabınıza giriş yapmanız gerekiyor.<br><a href="#" onclick="closeAlertModal();closePremiumModal();openPremiumModal();return false" style="color:var(--bp-volume)">Ücretsiz giriş yap →</a></div>`;
   const cfg = _userAlerts[ticker] || {};
   modal.innerHTML = `<div class="alert-modal" role="dialog" aria-modal="true">
     <button class="alert-modal-close" onclick="closeAlertModal()" aria-label="Kapat">×</button>
