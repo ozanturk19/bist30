@@ -413,6 +413,10 @@
   .mr-name   { font-size:var(--bp-text-xs); color:var(--text3); margin-top:1px; }
   .mr-bottom { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .mr-metric { display:flex; flex-direction:column; gap:2px; }
+  /* r169: .score-bar-bg'nin flex:0 0 40px'i .score-cell'in yatay flex bagalamı icin -
+     .mr-metric dikey flex oldugundan ayni kural genislik yerine yukseklik/flex-basis'i
+     bozuyordu (dev buyuk kutu). Burada yatay, ince bir cubuk olarak sabitleniyor. */
+  .mr-metric .score-bar-bg { flex:none; width:100%; height:4px; margin-top:2px; }
   .mr-metric-label { font-size:var(--bp-text-2xs); color:var(--text3); text-transform:uppercase; letter-spacing:0.4px; }
   .mr-price-val { font-variant-numeric:tabular-nums; font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text); }
 
