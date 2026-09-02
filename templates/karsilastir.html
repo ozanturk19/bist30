@@ -523,7 +523,7 @@ function renderDropdown(inputId, items) {
   const html = items.map((it, i) => `
     <div class="ac-item" id="${dd.id}-opt-${i}" role="option" aria-selected="false" data-idx="${i}" data-ticker="${escapeHtml(it.ticker)}">
       <span class="ac-item-ticker">${escapeHtml(it.ticker)}</span>
-      <span class="ac-item-name">${escapeHtml(it.name)}</span>
+      <span class="ac-item-name" title="${escapeHtml(it.name)}">${escapeHtml(it.name)}</span>
     </div>
   `).join('');
   dd.innerHTML = html;

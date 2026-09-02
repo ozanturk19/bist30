@@ -177,7 +177,7 @@ function render(data) {
               </a>
               <span class="sig-badge sig-${sigClass(s.signal)}">${sigIcon(s.signal)} ${sigLabel(s.signal)}</span>
             </div>
-            <div class="sc-name">${escapeHtml(s.name)}</div>
+            <div class="sc-name" title="${escapeHtml(s.name)}">${escapeHtml(s.name)}</div>
             ${s.price ? `<div class="sc-price">${s.price.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2})} ₺</div>` : ''}
             <div class="sc-date">📅 ${formatEarningsDate(s, period.label)}</div>
             <a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener"

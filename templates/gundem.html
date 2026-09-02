@@ -204,7 +204,7 @@ function renderCard(s, isNew) {
   const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';
 
   const etTicker = escapeHtml(s.ticker);
-  return `<a href="/hisse/${etTicker}" class="stock-card ${sigCls}${isNew?' new-signal':''}">
+  return `<a href="/hisse/${etTicker}" class="stock-card ${sigCls}${isNew?' new-signal':''}" title="${escapeHtml(s.name||'')}">
     <div class="sc-top">
       <div>
         <div class="sc-ticker">${etTicker}${newMark}</div>

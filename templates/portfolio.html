@@ -148,7 +148,7 @@
     <span class="add-lbl">Hisse ekle:</span>
     <input type="text" id="addTicker" placeholder="THYAO veya Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu">
     <datalist id="bistTickerList"></datalist>
-    <input type="number" id="addLot" placeholder="Adet" min="1" step="1" inputmode="numeric" aria-label="Adet">
+    <input type="number" id="addLot" placeholder="Adet" min="1" step="1" inputmode="numeric" aria-label="Adet" onwheel="this.blur()">
     <input type="text" id="addPrice" placeholder="Alış fiyatı ₺" inputmode="decimal" aria-label="Alış fiyatı">
     <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>

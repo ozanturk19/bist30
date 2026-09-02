@@ -1782,7 +1782,7 @@ function renderHeroPanel(stocks) {
   /* Tek satır: renkli şerit + ticker + hisse adı (kısaltılmış) + % değişim */
   const row = (s, barCls) => {
     const shortName = (s.name || '').replace(' A.Ş.','').replace(' Holding','').substring(0, 16);
-    return `<a href="/hisse/${_esc(s.ticker)}" class="hp-row">
+    return `<a href="/hisse/${_esc(s.ticker)}" class="hp-row" title="${_esc(s.name || '')}">
       <div class="hp-bar ${barCls}"></div>
       <span class="hp-ticker">${_esc(s.ticker)}</span>
       <span class="hp-name">${_esc(shortName)}</span>
@@ -2044,7 +2044,7 @@ async function openAlertModal(ticker) {
     ${loginNotice}
     <div class="alert-modal-row">
       <label for="am-price-pct">📈 Fiyat hareketi eşiği (%)</label>
-      <input type="number" id="am-price-pct" min="0.1" max="20" step="0.5" inputmode="decimal" placeholder="—" value="${cfg.price_pct != null ? cfg.price_pct : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+      <input type="number" id="am-price-pct" min="0.1" max="20" step="0.5" inputmode="decimal" placeholder="—" value="${cfg.price_pct != null ? cfg.price_pct : ''}" ${!isLoggedIn ? 'disabled' : ''} onwheel="this.blur()">
     </div>
     <div class="alert-modal-row">
       <label for="am-signal-change">🔄 Sinyal değişimi (AL/SAT/BEKLE)</label>
@@ -2052,11 +2052,11 @@ async function openAlertModal(ticker) {
     </div>
     <div class="alert-modal-row">
       <label for="am-rsi">📉 RSI aşırı satış eşiği (≤)</label>
-      <input type="number" id="am-rsi" min="10" max="50" step="1" inputmode="numeric" placeholder="—" value="${cfg.rsi_threshold != null ? cfg.rsi_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+      <input type="number" id="am-rsi" min="10" max="50" step="1" inputmode="numeric" placeholder="—" value="${cfg.rsi_threshold != null ? cfg.rsi_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''} onwheel="this.blur()">
     </div>
     <div class="alert-modal-row">
       <label for="am-rvol">📊 RVOL yüksek hacim eşiği (≥x)</label>
-      <input type="number" id="am-rvol" min="1" max="10" step="0.5" inputmode="decimal" placeholder="—" value="${cfg.rvol_threshold != null ? cfg.rvol_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''}>
+      <input type="number" id="am-rvol" min="1" max="10" step="0.5" inputmode="decimal" placeholder="—" value="${cfg.rvol_threshold != null ? cfg.rvol_threshold : ''}" ${!isLoggedIn ? 'disabled' : ''} onwheel="this.blur()">
     </div>
     ${isLoggedIn ? `<button class="alert-modal-save" onclick="saveAlertSettings()">💾 Kaydet</button>
     ${_userAlerts[ticker] ? `<button class="alert-modal-delete" onclick="deleteAlertSettings()">🗑 Bu alerti sil</button>` : ''}` : ''}
@@ -3086,7 +3086,8 @@ function renderAlarmPanel() {
             type="number" step="0.01" min="0" inputmode="decimal" aria-label="Üstü fiyat alarmı"
             placeholder="${aboveHasAlarm ? pa.above : '—'}"
             value="${aboveHasAlarm ? pa.above : ''}"
-            onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','above','${aboveInputId}')">
+            onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','above','${aboveInputId}')"
+            onwheel="this.blur()">
           ${aboveHasAlarm
             ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${tJs}','above')" title="Alarmı temizle" aria-label="${tEsc} üstü fiyat alarmını temizle">✕</button>`
             : `<button class="ap-pa-set" onclick="setPriceAlarm('${tJs}','above','${aboveInputId}')">Kur</button>`}
@@ -3097,7 +3098,8 @@ function renderAlarmPanel() {
             type="number" step="0.01" min="0" inputmode="decimal" aria-label="Altı fiyat alarmı"
             placeholder="${belowHasAlarm ? pa.below : '—'}"
             value="${belowHasAlarm ? pa.below : ''}"
-            onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','below','${belowInputId}')">
+            onkeydown="if(event.key==='Enter')setPriceAlarm('${tJs}','below','${belowInputId}')"
+            onwheel="this.blur()">
           ${belowHasAlarm
             ? `<button class="ap-pa-clear" onclick="clearPriceAlarm('${tJs}','below')" title="Alarmı temizle" aria-label="${tEsc} altı fiyat alarmını temizle">✕</button>`
             : `<button class="ap-pa-set" onclick="setPriceAlarm('${tJs}','below','${belowInputId}')">Kur</button>`}
@@ -3294,7 +3296,7 @@ function _renderGnmCard(item) {
   <div class="gnm-card-top">
     <div>
       <div class="gnm-ticker">${_esc(item.ticker)}</div>
-      <div class="gnm-name">${_esc(item.name || '')}</div>
+      <div class="gnm-name" title="${_esc(item.name || '')}">${_esc(item.name || '')}</div>
     </div>
     <span class="gnm-badge ${badgeCls}">${badgeTxt}</span>
   </div>
@@ -3468,7 +3470,7 @@ function showSearchAc(val) {
     const sigBg    = s.signal === 'AL' ? 'rgba(0,226,144,.12)' : s.signal === 'SAT' ? 'rgba(248,81,73,.12)' : 'rgba(139,148,158,.1)';
     const sigIcon  = s.signal === 'AL' ? '▲' : s.signal === 'SAT' ? '▼' : '●';
     const shortName = (s.name || '').replace(' A.Ş.','').replace(' Holding','').substring(0, 24);
-    return `<a class="sac-item" href="/hisse/${_esc(s.ticker)}" data-idx="${i}">
+    return `<a class="sac-item" href="/hisse/${_esc(s.ticker)}" data-idx="${i}" title="${_esc(s.name || '')}">
       <span class="sac-ticker">${_esc(s.ticker)}</span>
       <span class="sac-name">${_esc(shortName)}</span>
       <span class="sac-sig" style="color:${sigColor};background:${sigBg}">${sigIcon} ${sigLabel(s.signal)}</span>
@@ -3706,7 +3708,7 @@ async function loadMacroNews() {
       const safeTitle = _esc(item.title  || '');
       const safeTime  = _esc(item.date_str || '');
       return `<a href="${safeUrl}" target="_blank" rel="noopener" class="macro-news-item" role="listitem">
-        <span class="macro-news-src">${safeSrc}</span>
+        <span class="macro-news-src" title="${safeSrc}">${safeSrc}</span>
         <span class="macro-news-title">${safeTitle}</span>
         <span class="macro-news-time">${safeTime}</span>
       </a>`;

@@ -208,7 +208,7 @@
 <!-- Hisse Kimlik Çubuğu -->
 <div class="hisse-id-bar">
   <h1 class="hib-ticker">{{ ticker }}</h1>
-  <span class="hib-name">{{ name }}</span>
+  <span class="hib-name" title="{{ name }}">{{ name }}</span>
   <div class="header-price-group">
     <span class="header-price" id="hpPrice">—</span>
     <span class="header-chg neu" id="hpChg">—</span>
@@ -1004,7 +1004,7 @@
     <h2 class="section-title" id="related-heading"><span aria-hidden="true">🔗</span> {{ sector }} Sektöründen Diğer Hisseler</h2>
     <div class="related-grid">
       {% for r in related_stocks %}
-      <a href="/hisse/{{ r.ticker }}" class="related-chip">
+      <a href="/hisse/{{ r.ticker }}" class="related-chip" title="{{ r.name }}">
         <span class="related-ticker">{{ r.ticker }}</span>
         <span class="related-name">{{ r.name }}</span>
       </a>
