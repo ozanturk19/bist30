@@ -57,6 +57,13 @@ if [ "$STATUS" != "PASS" ]; then
     echo "Detay: $LOG (host), tests/mobile-overflow/latest.json (JSON). Onceki durum: $PREV_STATUS."
     echo ""
   } >> "$MAILBOX" 2>/dev/null
+
+  ( cd /root/ops \
+    && git add mailbox/dev2-to-cpo.md \
+    && git commit -q -m "auto: mobile-overflow-check $STATUS [$TS]" \
+    && git pull -q --rebase origin main \
+    && git push -q origin main
+  ) >> "$LOG" 2>&1
 fi
 
 exit 0
