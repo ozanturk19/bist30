@@ -30,6 +30,7 @@
   .sector-card::before {
     content:''; position:absolute; inset:0; opacity:var(--heat-opacity, 0.06);
     background:var(--heat-color, var(--bp-surface2));
+    transition: opacity .7s ease-out;
   }
 
   .sec-name { font-size:var(--bp-text-md); font-weight:700; margin-bottom:10px; position:relative; font-family:'Space Grotesk',system-ui,sans-serif; }
