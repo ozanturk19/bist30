@@ -47,7 +47,7 @@ ARTICLES = [
       },
       {
         "q": "BorsaPusula'da kaç BIST100 hissesi takip ediliyor?",
-        "a": "BorsaPusula, BIST100 bünyesindeki 90'dan fazla hisse için algoritmik Supertrend + ADX + EMA teknik analiz sinyallerini günlük olarak hesaplar ve ücretsiz sunar."
+        "a": "BorsaPusula, BIST100 ve ötesinde 214 hisse için algoritmik Supertrend + ADX + EMA teknik analiz sinyallerini günlük olarak hesaplar ve ücretsiz sunar."
       }
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS', 'TUPRS', 'ISCTR', 'FROTO']
