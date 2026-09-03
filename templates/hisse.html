@@ -1468,6 +1468,8 @@ function shareSignal(platform) {
 
 /* ── Grafik kurulumu ─────────────────────────────────── */
 let _hisseChart = null;        // r140: onceki instance/RO/listener temizligi icin (index.html chartMain deseniyle simetrik)
+let _hisseCandleSeries = null; // r175: SSE canli fiyat cizgisini guncelleyebilmek icin candle serisine disaridan erisim
+let _hisseLivePriceLine = null;
 let _hisseChartRO = null;
 let _hisseResizeHandler = null;
 let _chartResizeT = null;   // r157: resize debounce (sparkline'daki _sparkResizeTimer desenine hizali)
@@ -1475,6 +1477,7 @@ let _chartResizeT = null;   // r157: resize debounce (sparkline'daki _sparkResiz
 function buildChart(d) {
   if (_hisseChart) { try { _hisseChart.remove(); } catch(_) { console.warn('eski chart instance temizlenemedi', _); } _hisseChart = null; }
   if (_hisseChartRO) { try { _hisseChartRO.disconnect(); } catch(_) { /* zaten disconnect olabilir */ } _hisseChartRO = null; }
+  _hisseCandleSeries = null; _hisseLivePriceLine = null; // r175: chart.remove() ile disposed oldular, SSE'nin eski referansa yazmasin
   if (_hisseResizeHandler) { window.removeEventListener('resize', _hisseResizeHandler); _hisseResizeHandler = null; }
   document.getElementById('chartLoading').style.display = 'none';
   document.getElementById('chartsInner').style.display  = 'block';
@@ -1553,6 +1556,25 @@ function buildChart(d) {
 
   const candle = BPChart.addCandleSeries(chart);
   candle.setData(d.ohlc);
+  _hisseCandleSeries = candle;
+
+  /* r175 (Ozan bug bildirimi): grafik gunluk mum oldugu icin bugunun cubugu
+     kapanana kadar eklenmiyor - son mum-fiyati (dunku kapanis) her zaman
+     ustteki canli fiyattan (SSE ile guncellenen hpPrice) farkli gorunuyordu,
+     "grafik guncel degil" izlenimi yaratiyordu. Ayri, capraz kesikli bir
+     "Canli" fiyat cizgisi ekleyip SSE mesajlarinda guncelleyerek ikisini
+     ayni grafikte gorunur/ayirt edilebilir kiliyoruz - veri degismedi,
+     sadece canli fiyatin nerede oldugu artik grafikte de goruluyor. */
+  if (d.summary && d.summary.price != null) {
+    _hisseLivePriceLine = candle.createPriceLine({
+      price: d.summary.price,
+      color: '#b8c3ff',
+      lineWidth: 1,
+      lineStyle: LC.LineStyle.Dashed,
+      axisLabelVisible: true,
+      title: 'Canlı',
+    });
+  }
 
   /* EMA legend */
   const legEl = document.getElementById('emaLegend');
@@ -2859,6 +2881,11 @@ function startSSE() {
 
       priceEl.dataset.raw = d.price;
       priceEl.textContent = d.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      /* r175: grafikteki "Canlı" kesikli çizgiyi de aynı SSE mesajıyla senkron tut */
+      if (_hisseCandleSeries && _hisseLivePriceLine) {
+        _hisseLivePriceLine.applyOptions({ price: d.price });
+      }
 
       if (old && d.price !== old) {
         priceEl.classList.remove('flash-up', 'flash-down');
