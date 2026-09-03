@@ -107,8 +107,8 @@
   @media(max-width:640px) { .ozet-bar{flex-wrap:wrap;gap:0} .ozet-metric{flex:0 0 50%;min-width:0;} .ozet-metric:nth-child(2)::before,.ozet-metric:nth-child(4)::before{display:none} .ozet-metric:nth-child(3),.ozet-metric:nth-child(4){border-top:1px solid #1e2d45;} }
 
   /* Trigger button */
-  .btn-run { background:#1f6feb; border:none; color:#fff; border-radius:var(--bp-radius); padding:8px 18px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; margin-left:12px; }
-  .btn-run:hover { background:#388bfd; }
+  .btn-run { background:var(--bp-brand); border:none; color:var(--bp-bg); border-radius:var(--bp-radius); padding:8px 18px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; margin-left:12px; }
+  .btn-run:hover { background:#388bfd; color:#fff; }
   .btn-run:disabled { background:#30363d; color:#8b949e; cursor:not-allowed; }
 
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); margin-top:32px; }

@@ -150,7 +150,7 @@
   .method-box {
     background: #161b22;
     border: 1px solid #30363d;
-    border-left: 3px solid #1f6feb;
+    border-left: 3px solid var(--bp-brand);
     border-radius:var(--bp-radius-md);
     padding: 16px 18px;
     margin: 14px 0;

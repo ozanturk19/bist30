@@ -12,9 +12,9 @@
 
   .cat-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
   .cat-btn { background:#21262d; border:1px solid #30363d; border-radius:var(--bp-radius-20); padding:5px 14px; font-size:var(--bp-text-sm); color:#8b949e; cursor:pointer; transition:all .15s; }
-  .cat-btn.active { background:#1f6feb; border-color:#1f6feb; color:#fff; }
+  .cat-btn.active { background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
   @media (hover: hover) and (pointer: fine) {
-    .cat-btn:hover { background:#1f6feb; border-color:#1f6feb; color:#fff; }
+    .cat-btn:hover { background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
   }
   .blog-search-wrap { position:relative; margin-bottom:20px; }
   .blog-search {
@@ -22,7 +22,7 @@
     color:#e6edf3; padding:9px 14px 9px 38px; font-size:var(--bp-text-lg); outline:none;
     transition:border-color .15s; font-family:inherit;
   } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
-  .blog-search:focus { border-color:#1f6feb; }
+  .blog-search:focus { border-color:var(--bp-brand); }
   .blog-search::placeholder { color:var(--bp-text3); }
   .blog-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--bp-text3); pointer-events:none; }
   .no-results { padding:40px 24px; text-align:center; color:var(--bp-text3); }
@@ -41,7 +41,7 @@
 
   .blog-loadmore-wrap { text-align:center; margin-top:24px; }
   .blog-loadmore-btn { background:#21262d; border:1px solid #30363d; border-radius:var(--bp-radius-md); color:#e6edf3; padding:10px 26px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; transition:all .15s; font-family:inherit; }
-  .blog-loadmore-btn:hover { background:#1f6feb; border-color:#1f6feb; color:#fff; }
+  .blog-loadmore-btn:hover { background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
 
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); margin-top:32px; }
   footer a { color:#8b949e; text-decoration:none; }

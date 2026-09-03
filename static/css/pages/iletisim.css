@@ -21,7 +21,7 @@
 
 
   #contactForm input:focus, #contactForm select:focus, #contactForm textarea:focus {
-    border-color: #1f6feb;
+    border-color: var(--bp-brand);
   }
   @media (max-width: 500px) {
     #contactForm > div:first-child { grid-template-columns: 1fr !important; }

@@ -257,7 +257,7 @@
   }
   .score-bar-fill {
     height: 100%; border-radius:var(--bp-radius-sm);
-    background: linear-gradient(90deg, #1f6feb, #3fb950);
+    background: linear-gradient(90deg, var(--bp-brand), #3fb950);
     transition: width .4s ease;
   }
   .score-verdict {

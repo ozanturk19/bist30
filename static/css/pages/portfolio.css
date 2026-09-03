@@ -19,8 +19,8 @@
   .add-bar input:focus { border-color:#58a6ff; }
   .add-bar input { width:140px; }
   .add-bar input[type=number] { width:130px; }
-  .btn-add { background:#1f6feb; border:none; color:#fff; border-radius:var(--bp-radius); padding:7px 16px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; }
-  .btn-add:hover { background:#388bfd; }
+  .btn-add { background:var(--bp-brand); border:none; color:var(--bp-bg); border-radius:var(--bp-radius); padding:7px 16px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; }
+  .btn-add:hover { background:#388bfd; color:#fff; }
   .add-lbl { font-size:var(--bp-text-sm); color:#8b949e; }
 
   .pf-table { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }
