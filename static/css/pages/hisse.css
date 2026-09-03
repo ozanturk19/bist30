@@ -151,7 +151,7 @@
 
   /* Toast */
   .hib-toast {
-    position: fixed; left: 50%; bottom: 80px;
+    position: fixed; left: 50%; bottom: 24px;
     transform: translateX(-50%) translateY(20px);
     background: #161618; border: 1px solid var(--bp-border);
     color: var(--bp-text); padding: 10px 18px;
@@ -163,12 +163,10 @@
   .hib-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .hib-toast.success { border-color: rgba(var(--bp-al-rgb),0.4); }
   .hib-toast.warn { border-color: rgba(var(--bp-volume-rgb),0.4); }
-  /* Sabit bottom:80px, safe-area buyudukce (ve mobil nav + .bp-bottom-cta
-     ustuste bindiginde) sayfanin kendi CTA barinin arkasinda kayboluyordu
-     (bug-hunt). .bp-bottom-cta ile ayni desen: 64px nav + safe-area ekle. */
-  /* DEV2-r4-css-breakpoint: shared.css:101 kanonik 900px esigine hizalandi. */
+  /* r177: bp-bottom-cta kaldırıldığı için eskiden 80px+64px olan alt boşluk
+     sadece mobil nav'ı (64px) hesaba katacak şekilde sadeleşti. */
   @media (max-width: 900px) {
-    .hib-toast { bottom: calc(80px + 64px + env(safe-area-inset-bottom)); }
+    .hib-toast { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
   }
   .hib-compare:hover { background: rgba(var(--bp-brand-rgb),.2); }
   .live-dot-pulse {
@@ -1033,7 +1031,7 @@
     }
     /* FAB "Üste çık" — scroll edildiğinde sağ-alt */
     .bp-fab-up {
-      position: fixed; bottom: 80px; right: 16px; z-index: var(--bp-z-fab-up);
+      position: fixed; bottom: 24px; right: 16px; z-index: var(--bp-z-fab-up);
       width: 44px; height: 44px;
       background: rgba(var(--bp-al-rgb),0.92);
       color: var(--bp-bg); border: none; border-radius: 50%;
@@ -1045,11 +1043,10 @@
     .bp-fab-up.visible { display: flex; }
     .bp-fab-up:active { transform: scale(0.92); }
     .bp-fab-up svg { width: 22px; height: 22px; stroke-width: 2.4; }
-    /* Sabit bottom:80px, safe-area buyudukce sayfanin kendi CTA barinin
-       arkasinda kayboluyordu (bug-hunt), .bp-bottom-cta ile ayni desen */
-    /* DEV2-r4-css-breakpoint: shared.css:101 kanonik 900px esigine hizalandi. */
+    /* r177: bp-bottom-cta kaldırıldığı için eskiden 80px+64px olan alt boşluk
+       sadece mobil nav'ı (64px) hesaba katacak şekilde sadeleşti. */
     @media (max-width: 900px) {
-      .bp-fab-up { bottom: calc(80px + 64px + env(safe-area-inset-bottom)); }
+      .bp-fab-up { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
     }
   
 
@@ -1137,84 +1134,11 @@
     }
   
 
-    /* SPEC-UX-BATCH-2026-06-03 Madde 1B (CPO-464/465): alt bar MİNİMAL kompakt slim.
-       Watchlist=accent-mavi birincil, Alarm=nötr ikincil (sarı tonu kaldırıldı — sinyal/uyarı renk rezerve). Touch ≥44px korunur. */
-    .bp-bottom-cta {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--bp-z-bottom-cta);
-      background: rgba(var(--bp-bg-rgb),0.96);
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
-      border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
-      box-shadow: var(--bp-shadow-up-sm);
-      padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
-      display: flex; gap: 6px;
-      transform: translateY(0);
-      transition: transform 0.3s cubic-bezier(.32,.72,0,1);
-    }
-    .bp-bottom-cta.hidden { transform: translateY(100%); }
-    .bp-cta-watchlist {
-      flex: 6; min-height: 44px;
-      background: rgba(var(--bp-brand-rgb),0.14);
-      color: var(--bp-brand);
-      border: 1px solid rgba(var(--bp-brand-rgb),0.42);
-      border-radius: var(--bp-radius-9); cursor: pointer;
-      font-family: 'Manrope', system-ui, sans-serif;
-      font-size: var(--bp-text-base); font-weight: 600;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      transition: background 0.15s, border-color 0.15s, color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-      padding: 0 12px;
-    }
-    .bp-cta-watchlist:hover { background: rgba(var(--bp-brand-rgb),0.20); }
-    .bp-cta-watchlist:active { transform: scale(0.97); }
-    .bp-cta-watchlist.active {
-      background: rgba(var(--bp-brand-rgb),0.28);
-      color: var(--bp-brand);
-      border-color: rgba(var(--bp-brand-rgb),0.7);
-    }
-    .bp-cta-alarm {
-      flex: 3; min-height: 44px;
-      background: rgba(255,255,255,0.04);
-      color: #a8acb6;
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: var(--bp-radius-9); cursor: pointer;
-      font-family: 'Manrope', system-ui, sans-serif;
-      font-size: var(--bp-text-base); font-weight: 600;
-      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-      transition: background 0.15s, color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-      padding: 0 10px;
-    }
-    .bp-cta-alarm:hover { background: rgba(255,255,255,0.07); color: #d4d7de; }
-    .bp-cta-alarm:active { transform: scale(0.95); }
-    .bp-cta-share {
-      flex: 0 0 44px; min-height: 44px;
-      background: rgba(255,255,255,0.04);
-      color: #a8acb6;
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: var(--bp-radius-9); cursor: pointer;
-      display: inline-flex; align-items: center; justify-content: center;
-      transition: background 0.15s, color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .bp-cta-share:hover { background: rgba(255,255,255,0.07); color: #d4d7de; }
-    .bp-cta-share:active { transform: scale(0.95); }
-    .bp-cta-share svg { width: 17px; height: 17px; stroke-width: 2.2; }
-    /* Spacer: bottom CTA varken page content alta gizlenmez — yükseklik 64→58 (kompakt) */
-    .bp-bottom-cta-spacer { height: 58px; }
-    @media (max-width: 480px) {
-      .bp-bottom-cta { padding: 5px 8px calc(5px + env(safe-area-inset-bottom)); gap: 5px; }
-      .bp-cta-watchlist { font-size: var(--bp-text-base); padding: 0 8px; }
-      .bp-cta-alarm { font-size: var(--bp-text-sm); padding: 0 6px; }
-    }
-    /* P1: nav z-index fix — action bar yukarı it (mobile nav = 64px).
-       DEV2-r4-css-breakpoint: shared.css:101 kanonik 900px esigine hizalandi
-       (T2.4/5f85b93 nav gorunurlugunu 900px'e tasimisti, bu kural 768px'te
-       kalmisti — 769-900px araliginda CTA bar nav'in tam ustunde kaliyordu). */
-    @media (max-width: 900px) {
-      .bp-bottom-cta { bottom: calc(64px + env(safe-area-inset-bottom)); padding-bottom: 6px; border-radius: 12px 12px 0 0; }
-    }
-  
+    /* r177 (Ozan geri bildirimi, maksimum sadelik): alt sabit CTA çubuğu (Takibe Al/
+       Alarm/Paylaş) kaldırıldı — Portföy ve Alarm zaten yukarıdaki .hib-action-bar'da
+       (hibStarBtn/hibBellBtn) vardı, aynı iki eylem sayfada iki ayrı yerde tekrar
+       ediyordu. Paylaş .hib-action-bar'a üçüncü buton olarak taşındı. Her sayfa
+       görüntülemesinde kalıcı ~60-90px (safe-area dahil) dikey alan geri kazanıldı. */
 
     .bp-detail-cta-wrap {
       margin-bottom: 20px; padding: 16px;

@@ -1018,6 +1018,9 @@
     padding: 14px 16px;
     cursor: pointer;
     transition: border-color .15s, box-shadow .15s;
+    min-width: 0; /* r176: grid item varsayilan min-width:auto icerigin (ozellikle
+      mobil buyutulmus .ec-price) min-content genisligini asamiyordu, track 1fr
+      yerine icerige gore 212px'e sisip mobilde 71px sayfa tasmasina yol aciyordu */
     user-select: none;
   }
   @media (hover: hover) and (pointer: fine) {
