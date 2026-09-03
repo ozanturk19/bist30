@@ -468,7 +468,7 @@ _FUND_SLOW_MS = 5000  # >5s uyarı (Ticker.info baseline ~2-3s)
 def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
     """Lock-free fundamentals fetch via yf_fundamentals_fetch.py subprocess — G24c.
     Replaces _YF_GLOBAL_LOCK + yf.Ticker().info in _get_fundamentals().
-    Hard 30s kill vs lock wait. Returns info subset dict or None on failure.
+    Hard 30s kill vs lock wait. Returns {"info":..., "statement_trend":...} dict or None on failure.
     Rollback: revert this function + _get_fundamentals() lines.
     """
     if _yahoo_cb_blocked():
@@ -493,7 +493,7 @@ def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
         logger.debug("yf_fund_fetch %s: %.0fms", ticker_base, _ms)
         if _ms > _FUND_SLOW_MS:
             logger.warning("yf_fund_fetch %s SLOW: %.0fms", ticker_base, _ms)
-        return info
+        return {"info": info, "statement_trend": data.get("statement_trend") or []}
     except subprocess.TimeoutExpired:
         _yahoo_cb_record(False, timeout=True)
         _ms = (time.perf_counter() - _t0) * 1000
@@ -8010,6 +8010,14 @@ _FUND_SANITY = {
     "debt_to_equity": (0.0, 2000.0),
     "current_ratio":  (0.0, 50.0),
     "price_to_sales": (0.0, 100.0),
+    "insider_pct":       (0.0, 100.0),
+    "institutional_pct": (0.0, 100.0),
+}
+
+# CPO r174: yfinance recommendationKey ham İngilizce donuyor (buy/hold/sell vb.)
+_RECOMMENDATION_TR = {
+    "strong_buy": "Güçlü Al", "buy": "Al", "hold": "Tut",
+    "sell": "Sat", "strong_sell": "Güçlü Sat", "none": None,
 }
 
 def _clean_fundamentals(data: dict) -> dict:
@@ -8083,9 +8091,10 @@ def _get_fundamentals(ticker_base):
         logger.debug("_get_fundamentals(%s): REFRESH_WORKER=web — cache-only", ticker_base)
         return cached["data"] if cached else {}
     try:
-        info = _fetch_fundamentals_subprocess(ticker_base)
-        if not info:
+        _fetched = _fetch_fundamentals_subprocess(ticker_base)
+        if not _fetched:
             return {}
+        info = _fetched["info"]
         def safe(key, default=None):
             v = info.get(key)
             return v if v not in (None, "N/A") else default
@@ -8121,8 +8130,17 @@ def _get_fundamentals(ticker_base):
             "debt_to_equity":    round(safe("debtToEquity", 0), 2) if safe("debtToEquity") is not None else None,
             "current_ratio":     round(safe("currentRatio", 0), 2) if safe("currentRatio") is not None else None,
             "price_to_sales":    round(safe("priceToSalesTrailing12Months", 0), 2) if safe("priceToSalesTrailing12Months") is not None else None,
+            # CPO r174 (Ozan istegi, temel analiz genisletme)
+            "analyst_target":    safe("targetMeanPrice"),
+            "analyst_rec":       _RECOMMENDATION_TR.get(safe("recommendationKey"), None),
+            "analyst_count":     int(safe("numberOfAnalystOpinions")) if safe("numberOfAnalystOpinions") is not None else None,
+            "book_value":        safe("bookValue"),
+            "total_cash":        fmt_billion(safe("totalCash")),
+            "insider_pct":       round(safe("heldPercentInsiders", 0) * 100, 1) if safe("heldPercentInsiders") is not None else None,
+            "institutional_pct": round(safe("heldPercentInstitutions", 0) * 100, 1) if safe("heldPercentInstitutions") is not None else None,
         }
         data = _clean_fundamentals(raw)
+        data["statement_trend"] = _fetched.get("statement_trend") or []
         with _lock:
             _fundamentals_cache[ticker_base] = {"data": data, "ts": now}
         return data

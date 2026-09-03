@@ -757,6 +757,8 @@
       <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Yükleniyor…
     </div>
     <div id="fundContent" style="display:none;padding:16px 18px">
+      <!-- Analist Konsensüsü — r174 (Ozan istegi) -->
+      <div id="fundAnalyst" style="display:none;margin-bottom:16px;background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:12px 14px"></div>
       <!-- Değerleme -->
       <div id="fundValuation" style="margin-bottom:16px">
         <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">💰</span> Değerleme</div>
@@ -767,11 +769,18 @@
         <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">📈</span> Kârlılık & Büyüme</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridProfit"></div>
       </div>
+      <!-- Ciro & Net Kâr Trendi — r174 (Ozan istegi, son 4 yil) -->
+      <div id="fundTrend" style="display:none;margin-bottom:16px">
+        <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">📊</span> Ciro & Net Kâr Trendi (Yıllık)</div>
+        <div id="fundTrendChart" style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:12px 14px"></div>
+      </div>
       <!-- Getiri & Risk -->
       <div id="fundReturn">
         <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">🎯</span> Getiri & Risk</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridReturn"></div>
       </div>
+      <!-- Sahiplik — r174 (Ozan istegi) -->
+      <div id="fundOwnership" style="display:none;margin-top:10px;font-size:var(--bp-text-xs);color:var(--bp-text3)"></div>
     </div>
   </div>
 
@@ -2665,6 +2674,8 @@ async function loadFundamentals() {
       _fundCard('F/DD Oranı', f.pb_ratio != null ? f.pb_ratio.toFixed(2).replace('.', ',') + 'x' : null, _pbColor(f.pb_ratio), f.pb_ratio < 1 ? 'Ucuz' : f.pb_ratio < 3 ? 'Makul' : 'Pahalı'),
       _fundCard('HBK (EPS)', f.eps != null ? f.eps.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : null, '#e5e1e4'),
       _fundCard('F/S Oranı', f.price_to_sales != null ? f.price_to_sales.toFixed(2).replace('.', ',') + 'x' : null, '#e5e1e4'),
+      _fundCard('Defter Değeri (Hisse Başı)', f.book_value != null ? f.book_value.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : null, '#e5e1e4'),
+      _fundCard('Nakit ve Benzerleri', f.total_cash, '#e5e1e4'),
     ].filter(Boolean).join('');
 
     /* Kârlılık kartları */
@@ -2695,6 +2706,64 @@ async function loadFundamentals() {
     else           document.getElementById('fundProfitability').style.display = 'none';
     if (retCards)  document.getElementById('fundGridReturn').innerHTML  = retCards;
     else           document.getElementById('fundReturn').style.display = 'none';
+
+    /* Analist Konsensüsü — r174 (Ozan istegi): kucuk hisselerde analist kapsamı
+       hic yok (yfinance null donuyor), o yuzden analyst_count yoksa hic gosterme. */
+    if (f.analyst_target != null && f.analyst_count) {
+      const curP = _hibCurrentPrice();
+      const upside = (curP && curP > 0) ? ((f.analyst_target - curP) / curP * 100) : null;
+      const recColors = { 'Güçlü Al': 'var(--bp-al)', 'Al': 'var(--bp-al)', 'Tut': 'var(--bp-bkl)', 'Sat': 'var(--bp-sat)', 'Güçlü Sat': 'var(--bp-sat)' };
+      const recColor = recColors[f.analyst_rec] || 'var(--bp-text3)';
+      const recBadge = f.analyst_rec ? `<span style="background:${recColor};color:var(--bp-bg);font-weight:700;font-size:var(--bp-text-xs);padding:2px 9px;border-radius:var(--bp-radius-20)">${f.analyst_rec}</span>` : '';
+      const upsideHtml = upside != null
+        ? `<span style="color:${upside >= 0 ? 'var(--bp-al)' : 'var(--bp-sat)'};font-weight:600">${upside >= 0 ? '+' : ''}${upside.toFixed(1).replace('.', ',')}%</span>`
+        : '';
+      document.getElementById('fundAnalyst').innerHTML =
+        `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          ${recBadge}
+          <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px">Analist Hedef Fiyatı</span>
+          <span style="font-size:var(--bp-text-lg);font-weight:800;font-variant-numeric:tabular-nums">${f.analyst_target.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>
+          ${upsideHtml}
+          <span style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-left:auto">${f.analyst_count} analist</span>
+        </div>`;
+      document.getElementById('fundAnalyst').style.display = '';
+    }
+
+    /* Ciro & Net Kâr Trendi — r174 (son 4 yil, evrensel iki kalem) */
+    const trend = f.statement_trend || [];
+    if (trend.length >= 2) {
+      // Ciro ve Net Kar ayni skalada (ortak max) - iki serinin gorsel olarak
+      // karsilastirilabilir olmasi icin (Net Kar hep Ciro'dan kucuktur, marjin gorunur).
+      const maxVal = Math.max(...trend.flatMap(t => [Math.abs(t.total_revenue || 0), Math.abs(t.net_income || 0)]));
+      const barsHtml = trend.map(t => {
+        const revPct = maxVal > 0 ? Math.max(4, Math.abs(t.total_revenue || 0) / maxVal * 100) : 4;
+        const niPct  = maxVal > 0 ? Math.max(4, Math.abs(t.net_income || 0) / maxVal * 100) : 4;
+        const niNeg  = (t.net_income || 0) < 0;
+        return `<div style="flex:1;min-width:56px;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:100%;display:flex;align-items:flex-end;gap:3px;height:64px">
+            <div title="Ciro" style="flex:1;background:var(--bp-brand);border-radius:3px 3px 0 0;height:${revPct}%;min-height:3px"></div>
+            <div title="Net Kâr" style="flex:1;background:${niNeg ? 'var(--bp-sat)' : 'var(--bp-al)'};border-radius:3px 3px 0 0;height:${niPct}%;min-height:3px"></div>
+          </div>
+          <div style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:600">${t.year}</div>
+        </div>`;
+      }).join('');
+      document.getElementById('fundTrendChart').innerHTML =
+        `<div style="display:flex;gap:6px;align-items:flex-end">${barsHtml}</div>
+         <div style="display:flex;gap:14px;margin-top:10px;font-size:var(--bp-text-2xs);color:var(--bp-text3)">
+           <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--bp-brand);margin-right:4px"></span>Ciro</span>
+           <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--bp-al);margin-right:4px"></span>Net Kâr</span>
+         </div>`;
+      document.getElementById('fundTrend').style.display = '';
+    }
+
+    /* Sahiplik — r174 */
+    if (f.insider_pct != null || f.institutional_pct != null) {
+      const parts = [];
+      if (f.insider_pct != null) parts.push(`İçeriden sahiplik %${f.insider_pct.toFixed(1).replace('.', ',')}`);
+      if (f.institutional_pct != null) parts.push(`Kurumsal sahiplik %${f.institutional_pct.toFixed(1).replace('.', ',')}`);
+      document.getElementById('fundOwnership').textContent = parts.join(' · ');
+      document.getElementById('fundOwnership').style.display = '';
+    }
 
     document.getElementById('fundContent').style.display = '';
   } catch(e) {
