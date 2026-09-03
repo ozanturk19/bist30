@@ -1294,10 +1294,12 @@
     width:52px; height:52px;
     font-size:var(--bp-text-22); cursor:pointer;
     box-shadow: 0 0 18px rgba(var(--bp-al-rgb),0.22), 0 4px 20px rgba(0,0,0,0.5);
-    display:flex; align-items:center; justify-content:center;
-    transition: all .2s; color:var(--bp-al);
+    align-items:center; justify-content:center;
+    transition: opacity .2s, transform .2s; color:var(--bp-al);
     -webkit-tap-highlight-color: transparent;
+    display:none; opacity:0; pointer-events:none; transform:scale(.85);
   }
+  .alarm-fab.fab-visible { display:flex; opacity:1; pointer-events:auto; transform:scale(1); }
   .alarm-fab:hover { background: rgba(var(--bp-al-rgb),0.22); transform:scale(1.05); box-shadow: 0 0 24px rgba(var(--bp-al-rgb),0.35), 0 6px 24px rgba(0,0,0,0.5); }
   .alarm-fab:active { transform: scale(0.94); }
   /* Mobil alt navigasyon barı görünürken FAB'ı üstüne it (bug-hunt, .bp-bottom-cta ile ayni desen).
