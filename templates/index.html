@@ -447,6 +447,18 @@
       window._bpOnboardImplicitSeen = true;
       if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
     }, {passive:true});
+    // r182: header'daki genel Ogrenme Modu dugmesi (.bp-lm-toggle, learning-mode.js —
+    // tum sayfalarda ortak, bu banner'dan habersiz) uzerinden acilirsa banner "Ilk kez
+    // mi? Ogrenme Modu'nu acin" demeye devam ediyordu -- kullanici zaten yaptigi seyi
+    // yapmasi istenen kafa karistirici durum. Dugme sayfa yuklendikten SONRA (DOMContentLoaded)
+    // olusturuldugu icin dogrudan referans yerine delegasyonla dinleniyor.
+    document.addEventListener('click', function(ev){
+      if (el.style.display === 'none') return;
+      if (!ev.target.closest || !ev.target.closest('.bp-lm-toggle')) return;
+      el.style.display = 'none';
+      try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
+      if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
+    });
   } catch(e) { console.warn('onboarding banner init basarisiz', e); }
 })();
 </script>
