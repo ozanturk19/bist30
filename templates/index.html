@@ -436,6 +436,17 @@
       try { localStorage.setItem('bp_onboard_dismissed', '1'); } catch(e) { console.warn('bp_onboard_dismissed kaydi basarisiz', e); }
       if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
     });
+    // r181: onboarding banner'i hicbir zaman tiklamadan (kapat/ac) gecen ziyaretci
+    // icin abone-ol seridi suresiz bloke kaliyordu -- 9 abone/4.5 ay dusuk donusum
+    // oranina olasi katki. Kapatilmadan asagi kaydiran ziyaretciyi "gordu" sayip
+    // abone-ol seridine tek seferlik gecis izni ver (onboarding banner'inin
+    // kendisi kapanmaz/dokunulmaz, sadece kilit acilir).
+    window.addEventListener('scroll', function _bpOnboardScrollFallback(){
+      if (window.scrollY < 600) return;
+      window.removeEventListener('scroll', _bpOnboardScrollFallback);
+      window._bpOnboardImplicitSeen = true;
+      if (typeof window._bpTryHeroSub === 'function') window._bpTryHeroSub();
+    }, {passive:true});
   } catch(e) { console.warn('onboarding banner init basarisiz', e); }
 })();
 </script>
@@ -580,7 +591,7 @@
           if (el.style.display === 'flex') return;
           if (localStorage.getItem('bp_hero_sub_dismissed') === '1') return;
           if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) return;
-          var onboardSeen = localStorage.getItem('bp_onboard_dismissed') === '1' || localStorage.getItem('bp_learning_mode') === '1';
+          var onboardSeen = localStorage.getItem('bp_onboard_dismissed') === '1' || localStorage.getItem('bp_learning_mode') === '1' || window._bpOnboardImplicitSeen === true;
           if (!onboardSeen) return;
           el.style.display = 'flex';
         } catch(e) { console.warn('hero abonelik seridi gec-gosterim basarisiz', e); }
