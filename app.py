@@ -9305,6 +9305,17 @@ def api_cache_inventory():
     return safe_json({"generated_at": datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"), "caches": entries})
 
 
+def _tpl_lastmod(tpl_name, fallback):
+    # CPO-1477: statik sayfalar icin gercek "son degisim" tarihi olarak sablon
+    # dosyasinin mtime'ini kullan -- her istek icin sabit "bugun" yerine, dosya
+    # gercekten degisince (deploy) guncellenen bir tarih.
+    try:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates", tpl_name)
+        return datetime.fromtimestamp(os.path.getmtime(path), _TZ_TR).date().isoformat()
+    except OSError:
+        return fallback
+
+
 @app.route("/sitemap.xml")
 def sitemap():
     today = datetime.now(_TZ_TR).date().isoformat()
@@ -9315,11 +9326,11 @@ def sitemap():
         {"loc": "/",            "priority": "1.0", "changefreq": "hourly"},
         {"loc": "/ozet",        "priority": "0.9", "changefreq": "daily"},
         {"loc": "/tarama",      "priority": "0.8", "changefreq": "daily"},
-        {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly"},
-        {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly"},
-        {"loc": "/gizlilik",    "priority": "0.3", "changefreq": "yearly"},
-        {"loc": "/yasal",       "priority": "0.3", "changefreq": "yearly"},
-        {"loc": "/iletisim",    "priority": "0.4", "changefreq": "yearly"},
+        {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly", "lastmod": _tpl_lastmod("metodoloji.html", today)},
+        {"loc": "/hakkinda",    "priority": "0.6", "changefreq": "monthly", "lastmod": _tpl_lastmod("hakkinda.html", today)},
+        {"loc": "/gizlilik",    "priority": "0.3", "changefreq": "yearly", "lastmod": _tpl_lastmod("gizlilik.html", today)},
+        {"loc": "/yasal",       "priority": "0.3", "changefreq": "yearly", "lastmod": _tpl_lastmod("yasal.html", today)},
+        {"loc": "/iletisim",    "priority": "0.4", "changefreq": "yearly", "lastmod": _tpl_lastmod("iletisim.html", today)},
     ]
     for t in BIST30:
         if t != "XU030":
@@ -9337,7 +9348,7 @@ def sitemap():
             if re.match(r"^\d{4}-\d{2}-\d{2}\.json$", f)
         ], reverse=True)[:90]
         for d in snapshot_dates:
-            pages.append({"loc": f"/ozet/{d}", "priority": "0.5", "changefreq": "never"})
+            pages.append({"loc": f"/ozet/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
     except Exception as e:
         logger.warning("sitemap: /ozet arsiv listesi okunamadi: %s", e)
     pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "weekly"})
@@ -9346,14 +9357,14 @@ def sitemap():
     for a in ARTICLES:
         if a.get("canonical_slug"):
             continue  # deprecated/duplicate slug — canonical hedefi kendi ARTICLES girdisiyle zaten listeleniyor
-        pages.append({"loc": f"/blog/{quote(a['slug'])}", "priority": "0.7", "changefreq": "monthly"})
-    today = datetime.now(_TZ_TR).date().isoformat()
+        pages.append({"loc": f"/blog/{quote(a['slug'])}", "priority": "0.7", "changefreq": "monthly",
+                      "lastmod": a.get("date", today)})
     xml   = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     base  = "https://borsapusula.com"   # Domain eklenince burası güncellenir
     for p in pages:
         xml.append(f"  <url><loc>{base}{p['loc']}</loc>"
-                   f"<lastmod>{today}</lastmod>"
+                   f"<lastmod>{p.get('lastmod', today)}</lastmod>"
                    f"<changefreq>{p['changefreq']}</changefreq>"
                    f"<priority>{p['priority']}</priority></url>")
     xml.append("</urlset>")
