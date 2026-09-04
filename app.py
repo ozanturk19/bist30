@@ -8046,6 +8046,20 @@ def _get_fundamentals(ticker_base):
             v = info.get(key)
             return v if v not in (None, "N/A") else default
 
+        def safe_num(key, default=None):
+            # CPO-1475: bazi ticker'lar (orn. BOSSA) icin yfinance beklenmedik
+            # sekilde string donuyor -- round()/int() bunu TypeError'a
+            # dusuruyor ve tek alan hatasi disaridaki tek try/except'te
+            # TUM 25+ alani {}'e siliyordu. Sadece round()/int() ile
+            # islenen sayisal alanlarda kullan.
+            v = info.get(key)
+            if v in (None, "N/A"):
+                return default
+            try:
+                return float(v)
+            except (TypeError, ValueError):
+                return default
+
         def fmt_billion(v):
             if v is None: return None
             av = abs(v)
@@ -8055,36 +8069,36 @@ def _get_fundamentals(ticker_base):
             return f"{tr_price_filter(v)} ₺"
 
         raw = {
-            "pe_ratio":          round(safe("trailingPE", 0), 1) if safe("trailingPE") is not None else None,
-            "forward_pe":        round(safe("forwardPE", 0), 1) if safe("forwardPE") is not None else None,
-            "pb_ratio":          round(safe("priceToBook", 0), 2) if safe("priceToBook") is not None else None,
+            "pe_ratio":          round(safe_num("trailingPE"), 1) if safe_num("trailingPE") is not None else None,
+            "forward_pe":        round(safe_num("forwardPE"), 1) if safe_num("forwardPE") is not None else None,
+            "pb_ratio":          round(safe_num("priceToBook"), 2) if safe_num("priceToBook") is not None else None,
             "eps":               safe("trailingEps"),
             "market_cap":        fmt_billion(safe("marketCap")),
             "revenue":           fmt_billion(safe("totalRevenue")),
             "net_income":        fmt_billion(safe("netIncomeToCommon")),
-            "dividend_yield":    round(safe("dividendYield", 0), 2) if safe("dividendYield") is not None else None,
-            "roe":               round(safe("returnOnEquity", 0) * 100, 1) if safe("returnOnEquity") is not None else None,
-            "beta":              round(safe("beta", 0), 2) if safe("beta") is not None else None,
+            "dividend_yield":    round(safe_num("dividendYield"), 2) if safe_num("dividendYield") is not None else None,
+            "roe":               round(safe_num("returnOnEquity") * 100, 1) if safe_num("returnOnEquity") is not None else None,
+            "beta":              round(safe_num("beta"), 2) if safe_num("beta") is not None else None,
             "shares":            fmt_billion(safe("sharesOutstanding")),
             "52w_high":          safe("fiftyTwoWeekHigh"),
             "52w_low":           safe("fiftyTwoWeekLow"),
             "avg_volume":        safe("averageVolume"),
             "short_name":        safe("shortName"),
-            "profit_margin":     round(safe("profitMargins", 0) * 100, 1) if safe("profitMargins") is not None else None,
-            "operating_margin":  round(safe("operatingMargins", 0) * 100, 1) if safe("operatingMargins") is not None else None,
-            "earnings_growth":   round(safe("earningsGrowth", 0) * 100, 1) if safe("earningsGrowth") is not None else None,
-            "revenue_growth":    round(safe("revenueGrowth", 0) * 100, 1) if safe("revenueGrowth") is not None else None,
-            "debt_to_equity":    round(safe("debtToEquity", 0), 2) if safe("debtToEquity") is not None else None,
-            "current_ratio":     round(safe("currentRatio", 0), 2) if safe("currentRatio") is not None else None,
-            "price_to_sales":    round(safe("priceToSalesTrailing12Months", 0), 2) if safe("priceToSalesTrailing12Months") is not None else None,
+            "profit_margin":     round(safe_num("profitMargins") * 100, 1) if safe_num("profitMargins") is not None else None,
+            "operating_margin":  round(safe_num("operatingMargins") * 100, 1) if safe_num("operatingMargins") is not None else None,
+            "earnings_growth":   round(safe_num("earningsGrowth") * 100, 1) if safe_num("earningsGrowth") is not None else None,
+            "revenue_growth":    round(safe_num("revenueGrowth") * 100, 1) if safe_num("revenueGrowth") is not None else None,
+            "debt_to_equity":    round(safe_num("debtToEquity"), 2) if safe_num("debtToEquity") is not None else None,
+            "current_ratio":     round(safe_num("currentRatio"), 2) if safe_num("currentRatio") is not None else None,
+            "price_to_sales":    round(safe_num("priceToSalesTrailing12Months"), 2) if safe_num("priceToSalesTrailing12Months") is not None else None,
             # CPO r174 (Ozan istegi, temel analiz genisletme)
             "analyst_target":    safe("targetMeanPrice"),
             "analyst_rec":       _RECOMMENDATION_TR.get(safe("recommendationKey"), None),
-            "analyst_count":     int(safe("numberOfAnalystOpinions")) if safe("numberOfAnalystOpinions") is not None else None,
+            "analyst_count":     int(safe_num("numberOfAnalystOpinions")) if safe_num("numberOfAnalystOpinions") is not None else None,
             "book_value":        safe("bookValue"),
             "total_cash":        fmt_billion(safe("totalCash")),
-            "insider_pct":       round(safe("heldPercentInsiders", 0) * 100, 1) if safe("heldPercentInsiders") is not None else None,
-            "institutional_pct": round(safe("heldPercentInstitutions", 0) * 100, 1) if safe("heldPercentInstitutions") is not None else None,
+            "insider_pct":       round(safe_num("heldPercentInsiders") * 100, 1) if safe_num("heldPercentInsiders") is not None else None,
+            "institutional_pct": round(safe_num("heldPercentInstitutions") * 100, 1) if safe_num("heldPercentInstitutions") is not None else None,
         }
         data = _clean_fundamentals(raw)
         data["statement_trend"] = _fetched.get("statement_trend") or []
