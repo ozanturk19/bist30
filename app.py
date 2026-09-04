@@ -3844,7 +3844,9 @@ def fetch_live_prices():
         if not result:
             return
         now_str = datetime.now(_TZ_TR).strftime("%H:%M:%S")
-        payload = {t: {**v, "updated": now_str} for t, v in result.items()}
+        # CPO-1471(b)/CPO-1473: son bilinen sinyali (_prev_signals, refresh kadanslı)
+        # payload'a ekle — ekstra yfinance/analiz çağrısı yok, mevcut in-memory dict lookup.
+        payload = {t: {**v, "updated": now_str, "signal": _prev_signals.get(t)} for t, v in result.items()}
         if payload:
             with _lock:
                 _live_prices.update(payload)
