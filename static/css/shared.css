@@ -76,6 +76,13 @@
     .filter-btn { min-height: 44px; }
   }
 
+  /* Logo mobilde kucultulur (768px = index.css'teki header-yukseklik kirilim
+     noktasiyla ayni, 56px header'a rahat sigmasi icin — desktop boyutu
+     (215x56, _header.html) 60px header'a sigsa da 56px'e cok yakin kalirdi). */
+  @media (max-width: 768px) {
+    .bp-logo { width: 169px; height: auto; }
+  }
+
 /* PRINT-STYLESHEET-MISSING fix (r123 bug-hunt): sitede hicbir @media print
    katmani yoktu (0/24 CSS, 0/29+ sablon dogrulandi) - kullanici Ctrl+P /
    "PDF olarak kaydet" yaptiginda sticky/fixed header + alt navigasyon her
