@@ -162,7 +162,23 @@
   // yazdigi kucuk 'i' HER ZAMAN noktali 'i' uretir, boylece SISE/ISCTR/BIMAS gibi ASCII
   // 'I' iceren 33/215 ticker kucuk harfle asla eslesmiyordu. Hem 'İ' hem 'I'yi 'i'ye
   // katlayan ozel fold, r28'in cozdugu sorunu da korur.
-  function trFold(s) { return String(s || '').replace(/İ/g, 'i').replace(/I/g, 'i').toLowerCase(); }
+  // 05.09-CPO: sirket adlarinin 117/223'u (%52) İ/I disinda baska Turkce harf
+  // iceriyor (ş/ğ/ü/ö/ç/ı) -- "eregli", "is bank", "koc holding", "turkcell" gibi
+  // duz ASCII aramalar hic eslesmiyordu (STOCK_NAMES orijinal Turkce harflerle,
+  // arama kutusu ise cogunlukla ASCII klavyeyle yaziliyor). İ/I fold'undan SONRA,
+  // once (locale-bagimsiz) toLowerCase ile buyuk/kucuk esitlenir, sonra kalan
+  // Turkce kucuk harfler ASCII esdegerine katlanir.
+  function trFold(s) {
+    return String(s || '')
+      .replace(/İ/g, 'i').replace(/I/g, 'i')
+      .toLowerCase()
+      .replace(/ı/g, 'i')
+      .replace(/ş/g, 's')
+      .replace(/ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/ö/g, 'o')
+      .replace(/ç/g, 'c');
+  }
 
   function filter(q) {
     if (!_syms) return [];
