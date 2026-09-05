@@ -161,7 +161,11 @@ log "Target: $TARGET_SHA | Rollback: $ROLLBACK_SHA | Service: $SERVICE"
 # commit varsa, işlenmemiş yeni bir CPO mesajı var demektir — deploy durur.
 log "PRE-FLIGHT 0/6: Mailbox gate (agent=$DEPLOY_AGENT)..."
 if [ -d "$OPS_DIR/.git" ]; then
-  if ! (cd "$OPS_DIR" && git pull --ff-only origin main --quiet); then
+  # CPO-1489: /root/ops üzerinde her dakika çalışan cron da aynı repo'ya
+  # kilitsiz git pull yapıyor (/tmp/ops-pull.lock). Aynı kilidi kullanmazsak
+  # iki eşzamanlı pull FETCH_HEAD'de çakışıp "multiple branches" hatası
+  # üretiyor — cron'un kilidiyle sarmalayıp race'i önlüyoruz.
+  if ! flock --wait 5 /tmp/ops-pull.lock -c "cd '$OPS_DIR' && git pull --ff-only origin main --quiet"; then
     log "  ERROR: $OPS_DIR git pull --ff-only başarısız — aborting (ops repo'yu elle kontrol et)"
     exit 1
   fi
