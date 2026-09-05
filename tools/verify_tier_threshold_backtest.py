@@ -38,6 +38,20 @@ sınırları (confirmed=True basitleştirmesi, SL/TP simüle etmeyen motor, sade
 BIST30 alt-kümesi) yüzünden KESİN bir "üst eşik bozuk" sonucu DEĞİL — ama alt
 sınırın (56) tuttuğu, üst sınırın (70) şu haliyle ayrıştırıcı olmadığı, gelecekte
 daha büyük örneklemle (BIST100) tekrar bakılmaya değer bir sinyal.
+
+Son doğrulama #2 (05.09.2026, TAM BIST100, 2y günlük veri, AL+SAT, n=2994 episode
+— Ozan: "tüm hisseleri kontrol et aynı gözle"):
+    guclu_sinyal (>=70): n=334   win=37.7%  sharpe=1.87
+    standart     (56-69): n=1454  win=35.6%  sharpe=2.43
+    rozetsiz     (<56):   n=1206  win=31.7%  sharpe=-0.18
+    Baseline (tümü):      n=2994  win=34.2%  sharpe=2.6
+
+Büyük örneklem BIST30 bulgusunu DOĞRULADI: alt sınır (56) hâlâ net (rozetsiz
+belirgin şekilde daha kötü hem win-rate hem Sharpe'ta). Üst sınır (70) bu kez
+win-rate'te hafif öne geçti (37.7% vs 35.6%) AMA Sharpe'ta hâlâ standart'ın
+GERİSİNDE (1.87 vs 2.43) — karışık sinyal, "guclu_sinyal her açıdan daha iyi"
+iddiasını desteklemiyor. n=2994 ile artık istatistiksel gürültü ihtimali düşük,
+bu gerçek bir desen gibi görünüyor.
 """
 import sys, os, time
 sys.path.insert(0, "/root/bist30")
@@ -47,11 +61,58 @@ import yfinance as yf
 import pandas as pd
 from indicators import compute_ema, compute_adx, compute_supertrend, compute_rsi
 
-BIST30 = [
-    "AKBNK", "ARCLK", "ASELS", "BIMAS", "EKGYO", "ENKAI", "EREGL", "FROTO",
-    "GARAN", "HALKB", "ISCTR", "KCHOL", "KOZAA", "KOZAL", "KRDMD", "MGROS",
-    "OYAKC", "PETKM", "PGSUS", "SAHOL", "SASA", "SISE", "TAVHL", "TCELL",
-    "THYAO", "TKFEN", "TOASO", "TTKOM", "TUPRS", "VAKBN",
+# app.py:774 BIST100 listesinin birebir kopyası (05.09 genişletme, Ozan: "tüm
+# hisseleri kontrol et aynı gözle") — app.py'yi import ETMİYORUZ (bg-thread/
+# Flask side-effect riski, bkz. verify_premium_badge_backtest.py aynı disiplin),
+# XU030 (endeks, hisse değil) hariç tutuldu.
+BIST100 = [
+    "AKBNK", "ARCLK", "ASELS", "BIMAS", "EKGYO",
+    "EREGL", "FROTO", "GARAN", "HEKTS", "ISCTR",
+    "KCHOL", "KRDMD", "MGROS", "ODAS", "OYAKC",
+    "PGSUS", "SAHOL", "SASA", "SISE", "SOKM",
+    "TAVHL", "TCELL", "THYAO", "TKFEN", "TOASO",
+    "TUPRS", "VAKBN", "YKBNK",
+    "AEFES", "AGHOL", "AKSA",  "AKSEN", "ALARK",
+    "ALBRK", "ALFAS", "ALGYO", "ALKIM",
+    "ANHYT", "ANSGR", "ASUZU", "BJKAS", "BRSAN",
+    "BRYAT", "BUCIM", "CCOLA", "CIMSA", "CWENE",
+    "DOAS",  "DOHOL", "EGEEN", "ENJSA", "ENKAI",
+    "EUPWR", "FENER", "GENIL", "GLYHO", "GUBRF",
+    "HALKB", "INDES", "ISDMR", "ISGYO",
+    "ISMEN", "IZMDC", "JANTS", "KARTN", "KCAER",
+    "KLNMA", "KONTR", "KORDS",
+    "LOGO",  "MAVI",  "NETAS", "NTHOL",
+    "OTKAR", "PARSN", "PETKM", "PRKAB", "RYSAS",
+    "SARKY", "SELEC", "SMRTG", "TATGD", "TTKOM",
+    "TTRAK", "TURSG", "ULKER", "VESBE", "VESTL",
+    "YATAS", "ZOREN",
+    "ADEL",  "ADESE", "AKMGY", "AKGRT", "ARSAN",
+    "AYCES", "BIOEN", "BOSSA", "CEMTS",
+    "CEMAS", "CLEBI", "CRDFA", "DENGE", "DNISI",
+    "DOGUB", "DURDO", "DYOBY", "ECILC",
+    "EDIP",  "EGGUB", "EGPRO", "EMKEL", "ERBOS",
+    "ERSU",  "ESCOM", "FMIZP", "FORMT", "GESAN",
+    "GSDHO", "GSRAY", "GOKNR", "HDFGS", "HLGYO",
+    "HTTBT", "IEYHO", "ISKPL", "ISFIN",
+    "KAPLM", "KATMR", "KMPUR", "KONYA",
+    "KRSTL", "LKMNH", "LUKSK", "MAKTK", "MPARK",
+    "MEDTR", "MEGAP", "MTRKS",
+    "NATEN", "NIBAS", "NUHCM", "ORGE",
+    "ASTOR", "PEKGY", "PASEU", "MIATK", "CANTE",
+    "KLRHO", "PSGYO", "QUAGR", "IZENR", "EUREN",
+    "ALKLC", "YEOTK", "BINHO", "FZLGY", "SKBNK",
+    "MAGEN", "SURGY", "ESEN", "REEDR", "ALTNY",
+    "ENERY", "BTCIM", "SDTTR", "BURCE", "TUKAS",
+    "MARTI", "FONET", "AGROT", "MRGYO", "TUREX",
+    "LILAK", "TCKRC", "PENGD", "PAPIL", "AYGAZ",
+    "TSKB", "FORTE", "AKFYE", "TEKTU", "LMKDC",
+    "ECZYT", "ARENA", "USAK", "MARKA", "BERA",
+    "LINK", "MERCN", "ARDYZ", "KZBGY", "GMTAS",
+    "AHGAZ",
+    "KAREL", "ARZUM", "AKCNS", "MERKO", "KARSN",
+    "POLHO", "TABGD", "GENTS", "ANELE", "HATSN",
+    "SMART", "PKART", "AYEN", "EDATA", "TMSN",
+    "AYDEM", "SNGYO", "YESIL", "LRSHO", "DERHL",
 ]
 
 
@@ -163,14 +224,14 @@ def sharpe_stats(eps):
 
 def main():
     all_eps = []
-    for t in BIST30:
+    for t in BIST100:
         eps = backtest_ticker(t)
         time.sleep(0.3)
         if eps:
             all_eps += eps
         print(f"  {t}: {'ok (' + str(len(eps)) + ' episodes)' if eps else 'FAILED'}", file=sys.stderr)
 
-    print("\n=== Tier esigi (70/56) backtest performans korelasyonu — AL+SAT, BIST30, 2y ===")
+    print("\n=== Tier esigi (70/56) backtest performans korelasyonu — AL+SAT, BIST100, 2y ===")
     print("(confirmed=True varsayimi, vol_ratio=gunluk/20g-ort, methodoloji notlari script basinda)\n")
     for tier in ["guclu_sinyal", "standart", "rozetsiz"]:
         bucket = [e for e in all_eps if e["tier"] == tier]
