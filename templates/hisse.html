@@ -2911,11 +2911,18 @@ document.addEventListener('visibilitychange', () => {
 /* ── Diğer Hisseler Accordion ──────────────────── */
 
 /* ── Makro Ticker Bandı — merkezi bpLoadMacroBar (bp-search.js), CPO-DEV2-081(C) ── */
-document.addEventListener('DOMContentLoaded', function() {
-  window.bpLoadMacroBar();
-  setInterval(window.bpLoadMacroBar, 180000);
-  window._bpResumeMacro = window.bpLoadMacroBar; /* r98: sekme görünür olunca visibilitychange'den tetiklenir */
-});
+(function() {
+  function _bpMacroInit() {
+    window.bpLoadMacroBar();
+    setInterval(window.bpLoadMacroBar, 180000);
+    window._bpResumeMacro = window.bpLoadMacroBar; /* r98: sekme görünür olunca visibilitychange'den tetiklenir */
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _bpMacroInit);
+  } else {
+    _bpMacroInit();
+  }
+})();
 </script>
 
 <script src="/static/bp-search.js?v=63" defer></script>

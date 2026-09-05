@@ -139,7 +139,7 @@ function filterBlog() {
   }
 }
 // Makro Ticker
-document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); filterBlog(); });
+(function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); filterBlog(); } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } })();
 </script>
 <script src="/static/bp-search.js?v=63" defer></script>
 {% include '_mobile_nav_partial.html' %}

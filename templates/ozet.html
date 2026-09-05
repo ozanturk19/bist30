@@ -417,7 +417,7 @@ function goToDate(date) {
   <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Yatırım tavsiyesi değildir. · © 2026 borsapusula.com
 </footer>
 <script>
-document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); });
+(function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } })();
 
 // Bilanço sezonu uyarısı — yaklaşan dönem varsa göster
 (async function(){

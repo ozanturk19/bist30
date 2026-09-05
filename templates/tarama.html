@@ -174,10 +174,17 @@
 <script src="/static/stale-banner.js?v=d28fd8ba"></script>
 <script>
 /* ── Makro ticker — merkezi bpLoadMacroBar (bp-search.js), CPO-DEV2-081(C) ── */
-document.addEventListener('DOMContentLoaded', function() {
-  window.bpLoadMacroBar();
-  setInterval(window.bpLoadMacroBar, 180000);
-});
+(function() {
+  function _bpMacroInit() {
+    window.bpLoadMacroBar();
+    setInterval(window.bpLoadMacroBar, 180000);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _bpMacroInit);
+  } else {
+    _bpMacroInit();
+  }
+})();
 
 /* ── Tarama ── */
 let _currentSort = 'signal_strength';

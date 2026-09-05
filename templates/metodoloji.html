@@ -234,7 +234,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 </footer>
 
 <script>
-document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); });
+(function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } })();
 </script>
 
 <script src="/static/bp-search.js?v=63" defer></script>

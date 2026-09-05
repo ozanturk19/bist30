@@ -379,7 +379,7 @@ window.addEventListener('pageshow', function(e) {
 });
 
 // Makro Ticker Bandı
-document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); });
+(function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } })();
 
 // ── T4.2: Sektör Tab Sistemi ──
 let _cmpLoaded = false;

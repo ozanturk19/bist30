@@ -280,7 +280,7 @@
 {% endif %}
 <script>
 // Makro Ticker
-document.addEventListener('DOMContentLoaded', function(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); });
+(function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } })();
 
 // Blog paylaşım fonksiyonları
 const _BLOG_TITLE = {{ article.title | tojson }};
