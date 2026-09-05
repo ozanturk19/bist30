@@ -1749,6 +1749,15 @@ function renderSummary(s, signalData) {
   /* ── Giriş Analizi ── */
   (function renderEntryAnalysis() {
     const section = document.getElementById('entryAnalysisSection');
+    // CPO r-fix (05.09): bu fonksiyon asenkron veri geldiginde (initial tab-uygulamasindan
+    // SONRA) calisabiliyordu ve asagidaki her dal kosulsuz section.style.display='block'
+    // yapiyordu -- ozet DISINDA bir sekme (orn. ?tab=ai ile dogrudan link) aktifken bile
+    // Giris Analizi kutusu yanlislikla goruntuye sizabiliyordu (canli dogrulandi,
+    // data-tab-content="ozet" olan bu section applyTab()'in gizlemesine ragmen tekrar
+    // aciliyordu). Once aktif sekmeyi kontrol et, ozet degilse dokunma.
+    const _activeSeg = document.querySelector('.bp-segments-inner a.active');
+    const _activeTab = _activeSeg ? _activeSeg.dataset.segment : 'ozet';
+    if (_activeTab !== 'ozet') { if (section) section.style.display = 'none'; return; }
     // CPO-1107 Faz0 #2 (TUPRS-sınıfı çelişki): "aktif sinyal yok" kararı header
     // rozetiyle (s.signal) AYNI kanonik kaynaktan gelmeli — signalData ayrı bir
     // async fetch'ten (/api/data) geliyor ve ilk çizimde null / gecikmeli olabilir,
