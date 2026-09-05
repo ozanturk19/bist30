@@ -2898,7 +2898,7 @@ def _notify_email_signal_changes(changes):
 # 10-18 TR seans penceresi) artık lib/trading_calendar.py'de tek kanonik kaynak —
 # tools/restart-bist30-refresh-conditional.sh de aynı modülden okuyor, iki bağımsız
 # kopya kalmasın diye (CPO-1193 §4'ün açtığı borç).
-from lib.trading_calendar import is_trading_day, market_open as _market_open
+from lib.trading_calendar import is_trading_day, market_open as _market_open, is_closing_snapshot_window as _is_closing_snapshot_window
 
 
 def _compute_data_quality(bad_ticker_count, total_count, market_open):
@@ -3661,13 +3661,19 @@ def _refresh_data_impl():
             s.get("ticker"): s.get("last_fresh_ts") for s in _cache.get("data", []) if s.get("ticker")
         }
     _ordered_tickers = _staleness_priority_order(BIST30, _last_fresh_by_ticker.get)
+    # CPO-1485: 18:00-18:20 TR "final closing snapshot" penceresinde 180s soft-cap
+    # yerine daha cömert bütçe kullan — kanıt: Cuma 18:05 TR başlayan tur 180s'de
+    # 131/215 hisseyi bitirebildi, servis 18:17 TR'de durunca eksik kalanlar bir
+    # ÖNCEKİ turun (gerçek kapanıştan 20-30dk önce) fiyatıyla donduruldu. Bu pencerede
+    # hız değil doğruluk öncelikli — normal seans içi cadence'a dokunulmuyor.
+    _soft_cap = 400 if _is_closing_snapshot_window() else 180
     # CPO-596: `with executor` kullanma — __exit__ shutdown(wait=True) çağırır ve hung thread'de
     # 66 saat bloke kalır. Explicit shutdown(wait=False) ile hung thread'leri bırak, devam et.
     ex = _cf_analyze.ThreadPoolExecutor(max_workers=4, thread_name_prefix="refresh_par")  # CPO-740 Görev 10: 2→4 (subprocess isolation — no shared yfinance state)
     try:
         future_map = {ex.submit(_analyze_with_timeout, t): t for t in _ordered_tickers}
         try:
-            for future in _cf_analyze.as_completed(future_map, timeout=180):
+            for future in _cf_analyze.as_completed(future_map, timeout=_soft_cap):
                 try:
                     r = future.result(timeout=1)  # _analyze_with_timeout zaten 8s döner
                     if r:
@@ -3675,9 +3681,9 @@ def _refresh_data_impl():
                 except Exception as e:
                     logger.warning("refresh_data future hatası (%s): %s", future_map[future], e)
         except _cf_analyze.TimeoutError:
-            # 180s'de bitmediyse iptal et — gelen sonuçlarla devam (degraded ama YAZAR)
+            # soft cap'te bitmediyse iptal et — gelen sonuçlarla devam (degraded ama YAZAR)
             done_count = sum(1 for f in future_map if f.done())
-            logger.warning("refresh_data 180s soft cap → %d/%d ticker tamamlandı, degraded yaz", done_count, len(future_map))
+            logger.warning("refresh_data %ds soft cap → %d/%d ticker tamamlandı, degraded yaz", _soft_cap, done_count, len(future_map))
             for f in future_map:
                 if not f.done():
                     f.cancel()
@@ -4139,9 +4145,11 @@ def background_refresh():
             logger.info("background_refresh: SKIP: prod refresh window (staging, Pzt-Cum 10:00-18:00 TR)")
             time.sleep(900)
             continue
-        # 1) BIST30 ana refresh — watchdog'lu (4dk timeout)
+        # 1) BIST30 ana refresh — watchdog'lu (4dk timeout, kapanış penceresinde 8dk —
+        # CPO-1485: _refresh_data_impl içindeki 400s soft-cap'i erken kesmesin)
+        _refresh_watchdog_timeout = 480 if _is_closing_snapshot_window() else _REFRESH_DATA_TIMEOUT
         logger.info("background_refresh: refresh_data() başlıyor")
-        ok = _run_with_timeout("refresh_data", refresh_data, (), _REFRESH_DATA_TIMEOUT)
+        ok = _run_with_timeout("refresh_data", refresh_data, (), _refresh_watchdog_timeout)
         if ok:
             logger.info("background_refresh: refresh_data() tamamlandı")
 
@@ -10891,7 +10899,7 @@ def _earnings_refresh_impl():
                 "price":       sig_data.get("price"),
                 "is_premium":  sig_data.get("is_premium", False),
                 "date":        date_label,
-                "kap_url":     f"https://www.kap.org.tr/tr/Bildirim/Ara?ara={t}&tip=MAL&kategori=2",
+                "kap_url":     kap_url_for(t),
             })
         # Sinyal önceliği: AL → SAT → BEKLE, içinde alfabetik
         stocks_in_period.sort(key=lambda x: (
@@ -11154,7 +11162,7 @@ def _dividend_refresh_impl():
                     "next_ex_date":    next_ex,
                     "last_div_date":   last_div_date,
                     "last_div_amount": last_div_amount,
-                    "kap_url":         f"https://www.kap.org.tr/tr/Bildirim/Ara?ara={t}&tip=MAL&kategori=2",
+                    "kap_url":         kap_url_for(t),
                 })
         except Exception:
             pass
