@@ -195,7 +195,19 @@ let _allRows  = [];      // full server result before text-search filter
 let _hasLoadedOnce = false;  // r47: _allRows.length===0 hem 'hic yuklenmedi' hem 'filtre 0 sonuc döndürdü' durumunu ayirt edemiyordu
 let _searchQ  = '';
 let _searchQAscii = ''; // bughunt-r86: ticker karsilastirmasi icin locale-bagimsiz ASCII buyuk harf
+let _searchQFold = ''; // CPO-06.09: sirket ADI icin diyakritik-katlanmis (ş/ğ/ü/ö/ç/ı->ascii) arama
 let _searchTimer;
+
+// CPO-06.09: bp-search.js'teki trFold() ile ayni mantik — 223 isimden 117'si (%52)
+// İ/I disinda Turkce harf iceriyor, toLocaleUpperCase('tr-TR') tek basina bunlari
+// ASCII yaziyla eslestiremiyor ("eregli" Ereğli'yi, "koc holding" Koç Holding'i bulamiyordu).
+function _trFold(s) {
+  return String(s || '')
+    .replace(/İ/g, 'i').replace(/I/g, 'i')
+    .toLowerCase()
+    .replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c');
+}
 
 function onSearchInput(val) {
   const q = val.trim();
@@ -204,6 +216,7 @@ function onSearchInput(val) {
   _searchTimer = setTimeout(() => {
     _searchQ = q.toLocaleUpperCase('tr-TR');
     _searchQAscii = q.toUpperCase();
+    _searchQFold = _trFold(q);
     applyTextFilter();
   }, 180);
 }
@@ -213,6 +226,7 @@ function clearSearch() {
   document.getElementById('searchClearBtn').style.display = 'none';
   _searchQ = '';
   _searchQAscii = '';
+  _searchQFold = '';
   applyTextFilter();
 }
 
@@ -221,7 +235,8 @@ function applyTextFilter() {
   const rows = _searchQ
     ? _allRows.filter(s =>
         s.ticker.includes(_searchQAscii) ||
-        (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)))
+        (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)) ||
+        (s.name && _trFold(s.name).includes(_searchQFold)))
     : _allRows;
   renderResults(rows, rows.length);
   // bug-hunt r95: applyFilters() her zaman chip bar'i yeniliyordu ama bu fonksiyon
@@ -352,7 +367,10 @@ async function applyFilters() {
     _hasLoadedOnce = true;
     // Apply text filter on top of server results
     const filtered = _searchQ
-      ? _allRows.filter(s => s.ticker.includes(_searchQAscii) || (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)))
+      ? _allRows.filter(s =>
+          s.ticker.includes(_searchQAscii) ||
+          (s.name && s.name.toLocaleUpperCase('tr-TR').includes(_searchQ)) ||
+          (s.name && _trFold(s.name).includes(_searchQFold)))
       : _allRows;
     renderResults(filtered, filtered.length);
     // I1 — Active filter chips render (her applyFilters sonrası)
@@ -426,6 +444,7 @@ function removeFilterChip(filterKey) {
       document.getElementById('fSearch').value = '';
       _searchQ = '';
       _searchQAscii = '';
+      _searchQFold = '';
       const x = document.getElementById('searchClearBtn');
       if (x) x.style.display = 'none';
     },
@@ -667,6 +686,7 @@ function resetFilters() {
   document.getElementById('searchClearBtn').style.display = 'none';
   _searchQ = '';
   _searchQAscii = '';
+  _searchQFold = '';
   _currentSort = 'signal_strength';
   _sortDir = 'desc';
   _resetSortTHVisuals();
