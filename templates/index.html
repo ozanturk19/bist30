@@ -901,8 +901,13 @@
 <script>
 /* ── Makro Ticker Bandı — merkezi bpLoadMacroBar (bp-search.js), CPO-DEV2-081(C) ──
    ec30/ec100 endeks karti guncellemesi (makro API'den, chart yuklenmeden once de
-   calisir) sablon-ozel yan etki oldugundan onItems callback'i olarak kaldi. */
-document.addEventListener('DOMContentLoaded', function() {
+   calisir) sablon-ozel yan etki oldugundan onItems callback'i olarak kaldi.
+   CPO r-fix (05.09): bu blok 'DOMContentLoaded' listener'ina SARILIYDI, ama script
+   sayfanin sonunda (senkron <script>) calistigi icin event COKTAN GECMIS oluyordu —
+   listener HICBIR ZAMAN tetiklenmiyordu, ec30/ec100 fiyat kartlari HER yuklemede
+   sonsuza dek 'yukleniyor' iskeletinde kaliyordu (canli dogrulandi: readyState
+   'complete', DOMContentLoaded asla ates almiyor). Standart fix: readyState kontrolu. */
+function _bpInitEndeksCards() {
   function _bpUpdateEndeksCards(items) {
     items.forEach(function(it) {
       if (it.label !== 'XU030' && it.label !== 'XU100') return;
@@ -923,7 +928,12 @@ document.addEventListener('DOMContentLoaded', function() {
   window.bpLoadMacroBar(_bpUpdateEndeksCards);
   setInterval(window.bpLoadMacroBar, 180000, _bpUpdateEndeksCards);
   window._bpResumeMacro = function() { window.bpLoadMacroBar(_bpUpdateEndeksCards); }; /* r98: sekme görünür olunca visibilitychange'den tetiklenir */
-});
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _bpInitEndeksCards);
+} else {
+  _bpInitEndeksCards();
+}
 
 /* ── Lightweight Charts v4 ───────────────────────── */
 /* lazy-load: hisse.html _loadChartLib() ile ayni desen — 160KB script yalniz
