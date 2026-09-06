@@ -4866,6 +4866,13 @@ def _do_macro_ai_refresh():
         return
     _macro_ai_refreshing = True
     try:
+        # CPO-1494: piyasa kapalıyken (hafta sonu/tatil) yeni özet ÜRETME —
+        # prompt'a "bugün X" deyip piyasa durumunu hiç söylemediğimiz için
+        # Gemini donmuş Cuma verisiyle "şu an işlem görüyor" gibi şimdiki-zaman
+        # dili üretiyordu. Piyasa kapalıyken mevcut (açıkken üretilmiş) özet
+        # zaten stale_warning/hidden (24h/48h) mekanizmasıyla gösteriliyor.
+        if not _market_open():
+            return
         with _lock:
             macro_items = _macro_cache.get("data") or []
         if not macro_items:
