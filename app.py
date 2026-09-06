@@ -10011,7 +10011,27 @@ def ozet_page():
     # son işlem gününe (ör. Cuma) aitti -- SEO title/meta yanıltıcıydı. Zaten
     # var olan arşiv mekanizmasını (historical_date, /ozet/<tarih>) en son
     # mevcut snapshot gününe tetikleyerek aynı tek kaynağa çeviriyoruz.
-    if not is_trading_day():
+    with _lock:
+        stocks = list(_cache["data"])
+        loading = len(stocks) == 0
+
+    # CPO-1498: is_trading_day() sadece hafta içi/tatil bakar, SAATİ bilmiyor —
+    # hafta içi sabah 00:00-10:00 TR arası (piyasa henüz açılmadan) cache hâlâ
+    # önceki işlem gününün (ör. Cuma) verisini taşırken is_trading_day() True
+    # döner ve fallback hiç tetiklenmezdi. Anasayfadaki api_market_summary()
+    # gibi cache'in GERÇEK tazelik tarihine (kanonik p90 updated_at) bakıp
+    # bugünden farklıysa da aynı arşiv fallback'ini tetikliyoruz.
+    _needs_archive_fallback = not is_trading_day()
+    if not _needs_archive_fallback and stocks:
+        _upd_at = _data_quality_snapshot(stocks).get("updated_at")
+        if _upd_at:
+            try:
+                _upd_date = datetime.strptime(_upd_at, "%d.%m.%Y %H:%M:%S").date()
+                _needs_archive_fallback = _upd_date != datetime.now(_TZ_TR).date()
+            except Exception:
+                pass
+
+    if _needs_archive_fallback:
         try:
             _files = sorted([
                 f.replace(".json", "")
@@ -10022,9 +10042,6 @@ def ozet_page():
                 return ozet_gecmis(_files[0])
         except Exception as e:
             logger.debug("ozet_page tatil-fallback hatasi: %s", e)
-    with _lock:
-        stocks = list(_cache["data"])
-        loading = len(stocks) == 0
 
     # CPO-1107 Faz0#6: XU030 bir endeks, hisse değil — evren sayısı/liste tek kaynak
     stocks = [s for s in stocks if s.get("ticker") != "XU030"]
