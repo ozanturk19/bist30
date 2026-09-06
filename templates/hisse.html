@@ -904,7 +904,7 @@
     </div>
     <p id="sigExplainText" role="status" aria-live="polite" style="display:none;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0"></p>
     <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:var(--bp-text-xs);color:#475569">
-      <span aria-hidden="true">🤖</span> Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 4 saatte bir yenilenir
+      <span aria-hidden="true">🤖</span> Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 12 saatte bir yenilenir
     </div>
   </div>
 
@@ -2484,7 +2484,7 @@ async function loadSignalExplanation(retryCount) {
           : 'Algoritmik sinyal motorundan türetildi';
       }
       footerEl.innerHTML = isAI
-        ? '🤖 Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 4 saatte bir yenilenir'
+        ? '🤖 Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 12 saatte bir yenilenir'
         : '📐 Algoritmik analiz — sinyal motorundaki göstergeler temel alınmıştır · yatırım tavsiyesi değildir';
       _sigExplainActive = false;
 

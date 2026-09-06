@@ -1670,11 +1670,13 @@ def analyze(ticker_base):
         # (satır ~1683) yapay bir doldurma değeri — bu durumda weekly_dir=0'ı
         # gate'in her iki yönde de "geçti" sayması fail-open bir mantık
         # hatasıydı (veri kalitesi en düşükken ana-trend filtresi devre
-        # dışı kalıyordu). CB açıkken haftalık gate artık fail-closed:
-        # weekly_dir gerçekten hesaplanmadıysa (_cb_skip) sinyal üretilmez.
-        if bull_score >= 3 and weekly_dir != -1 and not _cb_skip:
+        # dışı kalıyordu). CPO-1496: `not _cb_skip` yalnızca CB-skip yolunu
+        # yakalıyordu — _weekly_trend()'in KENDİ <25-bar/exception fallback'i
+        # (CB kapalıyken de olabilir) de aynı weekly_dir=0'ı üretip gate'i
+        # atlatıyordu. weekly_dir != 0 her iki "hesaplanamadı" yolunu da kapsar.
+        if bull_score >= 3 and weekly_dir != -1 and weekly_dir != 0:
             signal = "AL"
-        elif bear_score >= 3 and weekly_dir != 1 and not _cb_skip:
+        elif bear_score >= 3 and weekly_dir != 1 and weekly_dir != 0:
             signal = "SAT"
         else:
             signal = "BEKLE"
@@ -6777,6 +6779,13 @@ def _enrich_signal_explanation(ticker, signal_data):
     Yalnızca _on_demand_signal_explain_worker tarafından çağrılır (leader-only,
     _gemini_rate_acquire üzerinden global rate-limited). Request path'ini bloke etmez.
     """
+    # CPO-1496: piyasa kapalıyken (hafta sonu/tatil) yeni açıklama ÜRETME —
+    # CPO-1494 ile aynı kusur: Gemini'ye piyasa durumu söylenmediği için donmuş
+    # fiyatla "şu an X ₺ seviyesinde işlem görüyor" gibi şimdiki-zaman metni
+    # üretiyordu. Piyasa kapalıyken mevcut cache (varsa) korunur, yoksa
+    # request path zaten algoritmik commentary dönüyor (tense-safe).
+    if not _market_open():
+        return None
     now = time.time()
     ctx = _compute_signal_commentary(ticker, signal_data)
     sig, name, commentary, sig_lbl = ctx["sig"], ctx["name"], ctx["commentary"], ctx["sig_lbl"]
@@ -7908,10 +7917,13 @@ def stock_page(ticker):
               f"Yatırım tavsiyesi değildir."),
     })
     if price:
-        _chg_txt = f", günlük değişim %{chg:.2f}" if isinstance(chg, (int, float)) else ""
+        # CPO-1496: TR locale formatlayıcısından geçmeden ham Python float basılıyordu
+        # ("131.6 TL", "%0.15") — sayfanın geri kalanı (fiyat kartı) virgüllü format
+        # kullanıyor, aynı ekranda çelişki oluşuyordu.
+        _chg_txt = f", günlük değişim %{tr_price_filter(chg)}" if isinstance(chg, (int, float)) else ""
         seo_faq.append({
             "q": f"{ticker} hisse fiyatı ne kadar?",
-            "a": f"{ticker} güncel fiyatı {price} TL{_chg_txt}.",
+            "a": f"{ticker} güncel fiyatı {tr_price_filter(price)} TL{_chg_txt}.",
         })
     if adx_val is not None or score is not None:
         _parts = []
@@ -7920,7 +7932,7 @@ def stock_page(ticker):
         if score is not None:
             _parts.append(f"sinyal skoru {score}/100")
         if isinstance(rr_val, (int, float)) and rr_val:
-            _parts.append(f"R/R oranı {rr_val}")
+            _parts.append(f"R/R oranı {tr_num_filter(rr_val)}")
         seo_faq.append({
             "q": f"{ticker} hissesi prim potansiyeli nedir?",
             "a": "Teknik göstergeler: " + ", ".join(_parts) + ". Yatırım tavsiyesi değildir.",
