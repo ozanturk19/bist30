@@ -101,6 +101,14 @@
         }
         if (status) status.innerHTML = '<span style="color:#3fb950">✅ Premium aktif! Sayfa yenileniyor…</span>';
         setTimeout(() => { closePremiumModal(); location.reload(); }, 1200);
+      } else if (json.message && json.message.indexOf('zaten kayıtlı') !== -1) {
+        /* CPO-06.09: bu email zaten abone — "Premium'u Aç" burada çözümsüz bir hataya
+           düşüyordu (kullanıcı asıl "Üye Girişi" akışına yönlendirilmeliydi ama hiçbir
+           ipucu yoktu). Email zaten girilmişken kullanıcıyı ekstra tıklamaya zorlamadan
+           doğrudan mevcut, güvenli (OTP/magic-link) giriş akışına yönlendiriyoruz. */
+        if (status) status.innerHTML = '<span style="color:var(--bp-text3)">ℹ️ Bu e-posta zaten kayıtlı — giriş linki gönderiliyor…</span>';
+        if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
+        submitPremiumRecognize();
       } else {
         if (status) status.innerHTML = `<span class="bp-sat-text">⚠️ ${_esc(json.message || json.error || 'Hata')}</span>`;
         if (btn) { btn.disabled = false; btn.textContent = '💎 Premium\'u Aç'; }
