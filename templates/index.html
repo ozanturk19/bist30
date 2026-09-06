@@ -618,7 +618,13 @@
     const emailEl = document.getElementById('heroSubEmail');
     const email = emailEl ? emailEl.value.trim() : '';
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
+      // CPO-06.09: emailEl'in kendi onfocus="...var(--bp-brand)" handler'ı focus()
+      // sirasinda senkron calisip kirmizi border'i aninda eziyordu — kullanici
+      // gecersiz e-posta girince HICBIR gorsel/metinsel geri bildirim gormuyordu.
+      // Once focus (onfocus tetiklenip mavi border yazar), SONRA kirmizi override et.
+      if (emailEl) { emailEl.focus(); emailEl.style.borderColor = '#f85149'; }
+      const msg = document.getElementById('heroSubMsg');
+      if (msg) msg.innerHTML = '<span class="bp-sat-text">Geçerli bir e-posta adresi girin.</span>';
       return;
     }
     const btn = document.querySelector('#heroSubForm button');
