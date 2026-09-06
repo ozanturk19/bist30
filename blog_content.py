@@ -1119,7 +1119,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 </ul>
 
 <h2>Piyasa Bağlamı</h2>
-<p><a href="/ozet">Sinyal Özeti</a> sayfasındaki barometresi kontrol edin. AL oranı %60 üzerindeyse piyasa geneli güçlü — daha agresif girilir. %30 altındaysa piyasa zayıf — yalnızca en güçlü sinyaller değerlendirilir.</p>
+<p><a href="/ozet">Sinyal Özeti</a> sayfasındaki barometresi kontrol edin. AL oranı %50 üzerindeyse piyasa geneli güçlü — daha agresif girilir. %30 altındaysa piyasa zayıf — yalnızca en güçlü sinyaller değerlendirilir.</p>
 
 <h2>Pratik Örnek</h2>
 <p>Diyelim ki THYAO ve ASELS her ikisi de AL sinyali veriyor:</p>
@@ -1851,7 +1851,7 @@ Güçlü momentum için hacim şart:
 
 - Yükseliş günlerinde hacim ortalamanın **üzerinde** olmalı
 - Düşüş günlerinde hacim ortalamanın **altında** olmalı
-- "Vol Ratio" ≥ 1.5 güçlü alıcı ilgisine işaret eder
+- RVOL (5 günlük hacim ortalamasının 20 günlüğe oranı) ≥ 1.20 güçlü alıcı ilgisine işaret eder
 
 ## Güçlü Momentum Hisseleri Nasıl Taranır?
 
@@ -1868,9 +1868,9 @@ Bu kriterlerin tamamını sağlayan hisseler en güçlü momentum adaylarıdır.
 
 [BorsaPusula'nın tarama sayfası](/tarama) bu kriterlerin tamamını uygular:
 
-- "Güçlü Trend" filtresi → Supertrend AL + ADX uyumlu
-- "ADX ≥ 25" gelişmiş filtresi → trend gücü doğrulaması
-- "Vol Ratio" filtresi → hacim teyidi
+- "Güçlü Trend" (AL) sinyal filtresi → Supertrend AL + ADX uyumlu
+- "Min ADX" alanına 25 girilmesi → trend gücü doğrulaması
+- ⭐ "Hacim Onaylı" rozeti (RVOL ≥ 1.20) → hacim teyidi
 - Sinyal güç çubukları → momentum yoğunluğunu görsel olarak gösterir
 
 ## Momentum Stratejisinin Riskleri
@@ -1900,7 +1900,7 @@ Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir."""
       {"q": "Momentum ve trend takip aynı şey mi?", "a": "Çok benzer stratejilerdir. Trend takip daha uzun vadeli (haftalar-aylar), momentum genellikle daha kısa vadeli (günler-haftalar) olur. Her ikisi de 'güçlü yükselişi takip et' prensibine dayanır."},
       {"q": "ADX 50'nin üzerindeyken ne yapılmalı?", "a": "ADX 50+ aşırı momentum gösterir ve genellikle yakında yavaşlama/düzeltme gelir. Bu seviyede yeni pozisyon açmak yerine mevcut pozisyonun stop'unu sıkılaştırmak veya kısmi kar almak düşünülebilir."},
       {"q": "Düşük ADX'te momentum stratejisi işe yarar mı?", "a": "ADX 20'nin altındayken piyasa yatay hareket eder ve momentum sinyalleri çok fazla false positive üretir. Bu ortamda momentum stratejisi yerine destek/direnç ticareti daha uygun olabilir."},
-      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Ana sayfadaki 'Güçlü Trend' filtresini seçin, ardından gelişmiş filtrelerden 'ADX ≥ 25' ve 'Vol Ratio ≥ 1.5' seçin. Sinyal güç çubukları en yüksek olan hisseler en güçlü momentum adaylarıdır."}
+      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Tarama sayfasında Sinyal filtresinden 'AL' (Güçlü Trend), Min ADX alanına 25 girin ve sonuçları Sinyal Gücü'ne göre sıralayın. ⭐ Hacim Onaylı rozeti (RVOL ≥ 1.20) en güçlü hacim teyitli adayları işaretler."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'GARAN', 'KCHOL', 'BIMAS']
   },
@@ -3496,7 +3496,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>Bu dağılım kişisel risk toleransına ve yatırım ufkuna göre önemli ölçüde farklılaşabilir.</p>
 
 <h2>BorsaPusula BIST Sinyalleri</h2>
-<p>BorsaPusula, BIST100 hisseleri için algoritmik Supertrend + ADX + EMA sinyalleri üretir. Kripto pozisyonunuzu ayrı bir platformda takip ederken, portföyünüzün BIST bölümünü BorsaPusula ile yönetebilirsiniz.</p>
+<p>BorsaPusula, BIST hisseleri için algoritmik Supertrend + ADX + EMA sinyalleri üretir. Kripto pozisyonunuzu ayrı bir platformda takip ederken, portföyünüzün BIST bölümünü BorsaPusula ile yönetebilirsiniz.</p>
 """,
     "faqs": [
       {"q": "Bitcoin mi BIST hisseleri mi daha karlı?",
@@ -3506,7 +3506,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "Kripto borsası güvenli mi?",
        "a": "Merkezi kripto borsaları (Binance, Bitfinex gibi) SPK denetiminde değildir ve siz borsanın iflas riskini taşırsınız. FTX iflasında milyonlarca kullanıcı fonuna erişemedi. Donanım cüzdan kullanmak, güvenilir platformlar seçmek ve yatırım miktarını sınırlandırmak risk azaltmanın yollarıdır."},
       {"q": "BorsaPusula kripto sinyalleri veriyor mu?",
-       "a": "Hayır, BorsaPusula yalnızca BIST100 hisseleri için algoritmik teknik analiz sinyalleri üretir. Kripto varlıklar için ayrı bir platform kullanmanız gerekir."}
+       "a": "Hayır, BorsaPusula yalnızca BIST hisseleri için algoritmik teknik analiz sinyalleri üretir. Kripto varlıklar için ayrı bir platform kullanmanız gerekir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'KCHOL']
   },
@@ -3857,7 +3857,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </div>
 
 <h2>BorsaPusula BIST Sinyalleri</h2>
-<p>BorsaPusula, BIST100 hisseleri için algoritmik Supertrend + ADX + EMA sinyalleri üretir. ABD borsası pozisyonlarınızı ayrı bir platformda takip ederken, portföyünüzün BIST bölümünü BorsaPusula ile yönetebilirsiniz.</p>
+<p>BorsaPusula, BIST hisseleri için algoritmik Supertrend + ADX + EMA sinyalleri üretir. ABD borsası pozisyonlarınızı ayrı bir platformda takip ederken, portföyünüzün BIST bölümünü BorsaPusula ile yönetebilirsiniz.</p>
 """,
     "faqs": [
       {"q": "S&P500'e yatırım yapmak güvenli mi?",
@@ -5861,7 +5861,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p><strong>Kâr Dağıtım Kararı:</strong> Şirketin Genel Kurulu, bir önceki yılın kârından ne kadar temettü dağıtacağına karar verir. Bu karar KAP'ta açıklanır.</p>
 <p><strong>Ex-Temettü Tarihi (Temettü Kaydı):</strong> Bu tarihte veya sonrasında hisseyi satın alanlar o dönemin temettüsünü alamaz. Ex-temettü tarihinde hisse fiyatı teorik olarak temettü kadar düşer.</p>
 <p><strong>Ödeme Tarihi:</strong> Temettü, hak kazanan yatırımcılara belirtilen tarihte ödenir.</p>
-<p>BIST'te temettü ödemeleri genellikle Mart-Haziran döneminde yoğunlaşır (bir önceki yılın kâr dağıtımları). BorsaPusula /takvim sayfasında temettü takvimini takip edebilirsiniz.</p>
+<p>BIST'te temettü ödemeleri genellikle Mart-Haziran döneminde yoğunlaşır (bir önceki yılın kâr dağıtımları). BorsaPusula <a href="/temettu-takvimi">temettü takvimi</a> sayfasında bu tarihleri takip edebilirsiniz.</p>
 
 <h2>BIST'te Yüksek Temettü Veren Sektörler</h2>
 <p>Temettü geliri açısından öne çıkan BIST sektörleri:</p>
