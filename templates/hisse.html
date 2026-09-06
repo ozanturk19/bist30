@@ -89,6 +89,13 @@
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggmxSuXd.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2" crossorigin>
+<!-- CPO-06.09: yukarıdaki 4 preload'a karşılık gelen @font-face hiç bildirilmemişti —
+     dosyalar önbelleğe iniyordu ama tarayıcı bunları "Space Grotesk"/"Manrope" adına
+     bağlayan bir kural görmediği için hiç KULLANILMIYORDU, sayfa system-ui'ye
+     düşüyordu. Kanıtlanmış Google Fonts CSS linkiyle tamamlandı (diğer 20 şablonla
+     aynı desen) — preload'lar kalsın, zararsız erken-ısınma. -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=b1e2a745">
 <script src="/static/bp-vocab.js?v=20260823C"></script>
