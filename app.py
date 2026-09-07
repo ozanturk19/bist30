@@ -2917,7 +2917,12 @@ def _notify_email_signal_changes(changes):
 # 10-18 TR seans penceresi) artık lib/trading_calendar.py'de tek kanonik kaynak —
 # tools/restart-bist30-refresh-conditional.sh de aynı modülden okuyor, iki bağımsız
 # kopya kalmasın diye (CPO-1193 §4'ün açtığı borç).
-from lib.trading_calendar import is_trading_day, market_open as _market_open, is_closing_snapshot_window as _is_closing_snapshot_window
+from lib.trading_calendar import (
+    is_trading_day, market_open as _market_open,
+    is_closing_snapshot_window as _is_closing_snapshot_window,
+    is_after_market_close as _is_after_market_close,
+    expected_data_date as _expected_data_date,
+)
 
 
 def _compute_data_quality(bad_ticker_count, total_count, market_open):
@@ -3051,16 +3056,16 @@ def build_data_freshness(stocks=None):
 
     /api/data ve /api/health response'larına eklenir (T4.1: /api/heatmap
     yetim sayfayla birlikte kaldırıldı, artık tüketici değil).
-    is_stale = market_day ve stocks yaşı (CPO-1137: kanonik p90, bkz.
-    _canonical_stocks_age) > 1800s (30dk) — hafta sonu/tatil günlerinde
-    bist30-refresh zaten çalışmadığından (CPO-919 Hibrit Batch, weekday-only
-    cron) o günlerde is_stale asla true olmaz (DEV-993/CPO weekend-aware stale
-    P3 kararı). CPO-596: saat-bazlı market_open'a bağlama, gün-bazlı market_day
-    yeterli — absolute 30dk threshold korunur.
 
-    stocks verilmezse (ör. arka plan monitor thread'i) _cache'ten okunur;
-    çağıranda zaten stocks listesi varsa (örn. api_data/api_heatmap) o
-    kullanılır — ekstra _lock alımı önlenir.
+    CPO-1508/1512 (EOD-only pivot, Faz 0): is_stale artık SAAT-bazlı sabit eşik
+    (eski: mkt_day AND stocks_age>1800s) DEĞİL, TRADING-DAY-bazlı — çünkü cadence
+    900s'ten günde-bir-keze (kapanış sonrası) indi; eski eşikle her gün 10:00
+    TR'den itibaren stocks_age zaten >30dk olacağından gün boyu yanlış-pozitif
+    "bayat veri" tetiklenirdi. Yeni mantık: son üretilen verinin (updated_at)
+    TARİHİ, `expected_data_date()`'in (lib/trading_calendar.py) beklediği trading-
+    day ile eşleşiyor mu? Basit "age > sabit_saat" hafta sonu kenarında kırılırdı
+    (Cuma 18:14 verisi Pazartesi 10:00'da ~64 saat yaşında ama GEÇERLİ) —
+    expected_data_date bunu trading-day farkıyla doğru ele alıyor.
     """
     now = time.time()
     with _lock:
@@ -3079,9 +3084,10 @@ def build_data_freshness(stocks=None):
     # CPO-1148 §3+§5: yaş "bilinmiyor" olması (stocks var ama sinyal yok)
     # "taze" değil, tam tersi — sessizce is_stale=False'a düşürme, aksi halde
     # tam da CPO'nun bildirdiği 183/215 sinyalsiz senaryo "stale değil" görünür.
-    is_stale = bool(mkt_day and (
-        (stocks_age is not None and stocks_age > 1800) or _age_unknown_with_signal
-    ))
+    _actual_date   = datetime.fromtimestamp(eff_ts, _TZ_TR).date() if eff_ts else None
+    _expected_date = _expected_data_date()
+    is_stale = bool(_age_unknown_with_signal or _actual_date is None
+                     or _actual_date < _expected_date)
 
     return {
         "stocks_updated_at":  updated_at,
@@ -3238,11 +3244,21 @@ threading.Thread(target=_digest_cron_loop, daemon=True, name="digest-cron").star
 logger.info("Digest cron başlatıldı (her 5 dakikada kontrol, 19:00'da tetikler)")
 
 
-# ── SPEC-014 B4 — Freshness monitor (market saatinde veri yaşı > 25dk → Telegram) ──
+# ── SPEC-014 B4 — Freshness monitor (market saatinde EOD veri günü eski → Telegram) ──
 _freshness_alert_state = {"last_alert_ts": 0.0}
 
 def _freshness_monitor_loop():
-    """Market seansında veri yaşı > 25dk ise Telegram uyarısı gönderir.
+    """Market seansında elimizdeki veri BEKLENEN trading-day'e ait değilse
+    (build_data_freshness().is_stale) Telegram uyarısı gönderir.
+
+    CPO-1508/1512 (EOD-only, Faz 0): eski eşik "veri yaşı > 25dk" idi — cadence
+    900s sürekli döngüyü varsayıyordu. Cadence günde-bir-keze indi (bkz.
+    background_refresh); dünkü kapanış verisi bugün 10:00-18:00 TR arası HER
+    ZAMAN >25dk yaşında ve GEÇERLİ olacağından eski eşik her sabah 10:00'dan
+    itibaren saatte-bir sahte Telegram spam'i üretirdi. is_stale (aynı trading-
+    day karşılaştırması — build_data_freshness/expected_data_date) ile
+    değiştirildi: yalnız GERÇEK bir gecikme (bugünün EOD'u beklenenden eski)
+    varsa tetiklenir.
 
     #22 trading-day + market-hours guard ile false positive önlenir
     (gece/tatil veri yaşı zaten yüksek olur — alarm yalnız seans içinde).
@@ -3261,22 +3277,22 @@ def _freshness_monitor_loop():
                 continue
             if _market_open():
                 fresh = build_data_freshness()
-                age = fresh.get("stocks_age_seconds")
-                if age is not None and age > 1500:  # 25 dk
+                if fresh.get("is_stale"):
                     now = time.time()
                     if now - _freshness_alert_state["last_alert_ts"] > 3600:
                         _freshness_alert_state["last_alert_ts"] = now
-                        mins = age // 60
+                        age = fresh.get("stocks_age_seconds")
+                        age_txt = f"{age // 60} dakikadır" if age is not None else "bilinmeyen süredir"
                         sent = _send_telegram(
                             f"⚠️ <b>BorsaPusula veri tazeliği uyarısı</b>\n"
-                            f"BIST seansında hisse verisi <b>{mins} dakikadır</b> "
-                            f"güncellenmedi (eşik 25 dk).\n"
+                            f"BIST seansında hisse verisi beklenen işlem gününe ait değil "
+                            f"({age_txt} güncellenmedi).\n"
                             f"Son güncelleme: {fresh.get('stocks_updated_at') or '—'}"
                         )
                         if sent:
-                            logger.warning("Freshness alarm: stocks_age=%ss (>25dk), Telegram gönderildi", age)
+                            logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), Telegram gönderildi", age)
                         else:
-                            logger.warning("Freshness alarm: stocks_age=%ss (>25dk), Telegram GÖNDERİLEMEDİ (token yok veya hata) — ops bu uyarıyı GÖRMEDİ", age)
+                            logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), Telegram GÖNDERİLEMEDİ (token yok veya hata) — ops bu uyarıyı GÖRMEDİ", age)
         except Exception as e:
             logger.error("freshness_monitor_loop: %s", e, exc_info=True)
         time.sleep(300)  # 5 dakikada bir kontrol
@@ -4161,26 +4177,50 @@ def background_refresh():
     # (elle `systemctl start` ile kaldırılırsa da prod seansında sessizce skip eder).
     _is_staging_refresh = os.environ.get("BIST_STAGING") == "1"
 
+    # CPO-1508/1512 (EOD-only pivot, Faz 0): 900s canlı döngü kaldırıldı — ana
+    # refresh artık işlem günü başına BİR KEZ, kapanıştan sonra (18:00 TR'den
+    # itibaren: 18:00-18:20 asıl deneme + sonrası restart/hata catch-up) çalışır.
+    # Gate, günlük snapshot dosyasının varlığına dayanır (_save_daily_snapshot
+    # zaten aynı "bugün var mı" guard'ını kullanıyordu — tek kaynağa toplandı).
+    # Beklemede kısa (600s) poll: hem kapanış penceresini (20dk) kaçırmaz hem de
+    # loop-watchdog'un 1800s eşiğinin rahatça altında kalır.
+    _EOD_POLL_INTERVAL = 600
+
     while True:
         _bg_loop_last_ts[0] = time.time()
         if _is_staging_refresh and _market_open():
             logger.info("background_refresh: SKIP: prod refresh window (staging, Pzt-Cum 10:00-18:00 TR)")
-            time.sleep(900)
+            time.sleep(_EOD_POLL_INTERVAL)
             continue
+
+        _today_tr = datetime.now(_TZ_TR).date()
+        _today_snapshot_path = os.path.join(_SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}.json")
+        _already_done_today = os.path.exists(_today_snapshot_path)
+        _should_run_eod = (is_trading_day(_today_tr) and not _already_done_today
+                            and _is_after_market_close())
+
+        if not _should_run_eod:
+            time.sleep(_EOD_POLL_INTERVAL)
+            continue
+
         # 1) BIST30 ana refresh — watchdog'lu (4dk timeout, kapanış penceresinde 8dk —
         # CPO-1485: _refresh_data_impl içindeki 400s soft-cap'i erken kesmesin)
         _refresh_watchdog_timeout = 480 if _is_closing_snapshot_window() else _REFRESH_DATA_TIMEOUT
-        logger.info("background_refresh: refresh_data() başlıyor")
+        logger.info("background_refresh: EOD refresh_data() başlıyor (%s)", _today_tr.isoformat())
         ok = _run_with_timeout("refresh_data", refresh_data, (), _refresh_watchdog_timeout)
         if ok:
             logger.info("background_refresh: refresh_data() tamamlandı")
 
-        # Paket 1 — api_stale alert: refresh sonrası cache_ts kontrol
+        # Paket 1 — api_stale alert: refresh sonrası cache_ts kontrol.
+        # CPO-1512: eski gate market_open() idi (900s döngü seans boyunca çalışırdı).
+        # EOD-only cadence'te bu blok yalnızca kapanıştan sonra (market_open() HER
+        # ZAMAN False) çalıştığı için eski gate alarmı kalıcı sessize alırdı —
+        # is_after_market_close() ile değiştirildi: "şimdi EOD verisi hazır olmalıydı"
+        # penceresi burada da aynı.
         try:
             global _last_stale_alert_ts
             _cache_ts = _cache.get("last_refresh_ts") or None
-            _mkt_open = _market_open()
-            _stale = _check_api_stale(_cache_ts, market_open=_mkt_open)
+            _stale = _check_api_stale(_cache_ts, market_open=_is_after_market_close())
             if _stale:
                 _alert_line = _format_alert_md(_stale)
                 try:
@@ -4210,7 +4250,7 @@ def background_refresh():
             _run_with_timeout(task_name, fn, args, _CHART_TASK_TIMEOUT)
             time.sleep(5)  # CPO-583: inter-chart throttle — pandas spike aralarında CPU soğutur
 
-        time.sleep(900)
+        time.sleep(_EOD_POLL_INTERVAL)
 
 
 # ── Güvenlik Headerları ───────────────────────────────────────────────────────
@@ -8962,15 +9002,23 @@ def _compute_health():
     macro_stale  = macro_age_s is None or macro_age_s > _MACRO_TTL
 
     # ── Component durumları ── (seans dışında stale OK — normal davranış)
+    # CPO-1508/1512 (EOD-only, Faz 0): eski stocks_age_s>1800/900s eşiği cadence
+    # 900s sürekli döngüyü varsayıyordu. Cadence günde-bir-keze indi (bkz.
+    # background_refresh) — 10:00-17:59 TR arası stocks_age_s HER GÜN doğal
+    # olarak >1800s olur (dünkü kapanış verisi, GEÇERLİ) ve eski eşik her sabah
+    # 10:00'dan itibaren sahte CRITICAL/health_cron alarmı üretirdi. build_data_
+    # freshness() ile AYNI trading-day eşleşmesine geçirildi (is_stale ile aynı
+    # kaynak: lib/trading_calendar.expected_data_date).
+    _stocks_actual_date = (datetime.fromtimestamp(_stocks_eff_ts, _TZ_TR).date()
+                            if _stocks_eff_ts else None)
+    _stocks_expected_date = _expected_data_date()
     if stocks_count == 0:
         stocks_status = "critical"
     elif not mkt_open:
         stocks_status = "ok"
-    elif stocks_age_s is None or stocks_age_s > 1800:
-        stocks_status = "critical"
-    elif stocks_age_s > 900:
-        stocks_status = "degraded"
-    elif mkt_open and bad_ticker_count > 5:  # M5: çok ticker stale → data kalitesi bozuk
+    elif _stocks_actual_date is None or _stocks_actual_date < _stocks_expected_date:
+        stocks_status = "critical"  # beklenen trading-day'e ait veri yok — gerçek sorun
+    elif bad_ticker_count > 5:  # M5: çok ticker stale → data kalitesi bozuk
         stocks_status = "degraded"
     else:
         stocks_status = "ok"
