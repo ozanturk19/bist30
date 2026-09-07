@@ -1450,6 +1450,7 @@ function shareSignal(platform) {
 let _hisseChart = null;        // r140: onceki instance/RO/listener temizligi icin (index.html chartMain deseniyle simetrik)
 let _hisseCandleSeries = null; // r175: SSE canli fiyat cizgisini guncelleyebilmek icin candle serisine disaridan erisim
 let _hisseLivePriceLine = null;
+let _hisseLastClose = null; // CPO-07.09: "Canlı" cizgisi son mum kapanisindan ne kadar farkli, SSE handler'i da bunu bilmeli
 let _hisseChartRO = null;
 let _hisseResizeHandler = null;
 let _chartResizeT = null;   // r157: resize debounce (sparkline'daki _sparkResizeTimer desenine hizali)
@@ -1545,7 +1546,14 @@ function buildChart(d) {
      "Canli" fiyat cizgisi ekleyip SSE mesajlarinda guncelleyerek ikisini
      ayni grafikte gorunur/ayirt edilebilir kiliyoruz - veri degismedi,
      sadece canli fiyatin nerede oldugu artik grafikte de goruluyor. */
-  if (d.summary && d.summary.price != null) {
+  /* CPO-07.09: "Canlı" çizgisi sadece canlı fiyat SON MUM KAPANIŞINDAN belirgin
+     şekilde farklıysa gösterilir — ikisi eşit/çok yakınken iki ayrı eksen
+     etiketi üst üste binip (özellikle dar mobil eksende) komşu ızgara
+     etiketlerini kırpıyordu. Eşitken zaten tek bir kapanış-fiyatı etiketi
+     (lastValueVisible) yeterli, ayrı bir "Canlı" çizgisine gerek yok. */
+  _hisseLastClose = d.ohlc && d.ohlc.length ? d.ohlc[d.ohlc.length - 1].close : null;
+  if (d.summary && d.summary.price != null && _hisseLastClose &&
+      Math.abs(d.summary.price - _hisseLastClose) / _hisseLastClose > 0.001) {
     _hisseLivePriceLine = candle.createPriceLine({
       price: d.summary.price,
       color: '#b8c3ff',
@@ -2871,9 +2879,23 @@ function startSSE() {
       priceEl.dataset.raw = d.price;
       priceEl.textContent = d.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-      /* r175: grafikteki "Canlı" kesikli çizgiyi de aynı SSE mesajıyla senkron tut */
-      if (_hisseCandleSeries && _hisseLivePriceLine) {
-        _hisseLivePriceLine.applyOptions({ price: d.price });
+      /* r175: grafikteki "Canlı" kesikli çizgiyi de aynı SSE mesajıyla senkron tut.
+         CPO-07.09: çizgi sadece canlı fiyat son kapanıştan belirgin farklıyken
+         var olsun — seans içinde fark açılırsa oluştur, kapanırsa kaldır
+         (dar eksende iki çakışan etiket komşu ızgara etiketlerini kırpıyordu). */
+      if (_hisseCandleSeries && _hisseLastClose) {
+        const _diverges = Math.abs(d.price - _hisseLastClose) / _hisseLastClose > 0.001;
+        if (_hisseLivePriceLine && !_diverges) {
+          _hisseCandleSeries.removePriceLine(_hisseLivePriceLine);
+          _hisseLivePriceLine = null;
+        } else if (_hisseLivePriceLine) {
+          _hisseLivePriceLine.applyOptions({ price: d.price });
+        } else if (_diverges) {
+          _hisseLivePriceLine = _hisseCandleSeries.createPriceLine({
+            price: d.price, color: '#b8c3ff', lineWidth: 1,
+            lineStyle: LC.LineStyle.Dashed, axisLabelVisible: true, title: 'Canlı',
+          });
+        }
       }
 
       if (old && d.price !== old) {

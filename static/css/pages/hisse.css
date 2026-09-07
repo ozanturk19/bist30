@@ -1026,6 +1026,14 @@
         overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
       }
       .bp-segments-inner::-webkit-scrollbar { display: none; }
+      /* CPO-07.09: scrollbar gizli, sekme şeridi (ör. "Haberler") kesik görünüp
+         kaydırılabilir olduğu belli olmuyordu — sağ kenara sabit bir solma
+         ipucu ekleniyor. .bp-segments zaten sticky (position context var). */
+      .bp-segments::after {
+        content: ''; position: absolute; top: 6px; bottom: 6px; right: 16px;
+        width: 28px; pointer-events: none;
+        background: linear-gradient(to right, transparent, var(--bp-bg));
+      }
       .bp-segments-inner a { flex: 0 0 auto; font-size: var(--bp-text-sm); padding: 8px 10px; letter-spacing: 0.2px; gap: 4px; }
       .bp-seg-icon { width: 11px; height: 11px; }
     }

@@ -316,7 +316,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Risk:Ödül oranı en az <strong>1:2</strong> olmalıdır. Yani 5₺ risk alıyorsanız, en az 10₺ kâr potansiyeli olan işlemlere girin. Bu oran zamanla bileşik getiriyi dramatik şekilde artırır.</p>
 
 <h2>6. Piyasa Barometresi Kullanımı</h2>
-<p><a href="/ozet">BorsaPusula Özet</a> sayfasındaki barometrede AL oranı %30'un altındaysa piyasa genel olarak baskı altında demektir. Böyle dönemlerde yeni pozisyon açmak yerine mevcut pozisyonları korumak ve nakit tutmak daha akılcıdır.</p>
+<p><a href="/ozet">BorsaPusula Özet</a> sayfasındaki barometre, güçlü sinyal oranını gösterir. Bu oran düşükse (ör. %30'un altında), piyasa genel olarak baskı altında olabilir — böyle dönemlerde yeni pozisyon açmak yerine mevcut pozisyonları korumak ve nakit tutmak daha akılcı olabilir.</p>
 """,
     "faqs": [
       {"q": "Portföyde kaç hisse bulunmalıdır?", "a": "Yeterli çeşitlendirme için genellikle 8-15 hisse önerilir. Çok az hisse riski konsantre eder; çok fazla hisse ise takibi zorlaştırır ve getiriyi ortalamaya yaklaştırır. Farklı sektörlerden seçim yapılması önemlidir."},
@@ -906,7 +906,7 @@ Histogram = MACD − Sinyal</pre>
 <p>İlk gün oluşan sinyal "ham sinyal"dir. 3 gün boyunca aynı kalan sinyal "onaylı" sayılır. BorsaPusula hisse sayfalarında kaç gündür devam ettiği gösterilir.</p>
 
 <h2>Piyasa Barometresi</h2>
-<p><a href="/ozet">Günlük Özet</a> sayfasındaki barometresi tüm piyasanın anlık durumunu gösterir. AL hisselerinin oranı %50'nin üzerindeyse genel trend yukarı; %30'un altındaysa savunmacı bir duruş önerilir.</p>
+<p><a href="/ozet">Günlük Özet</a> sayfasındaki barometre, tüm piyasanın anlık durumunu (güçlü sinyal oranını) gösterir. Bu oran %50'nin üzerindeyse genel trend yukarı yönlü sayılabilir; %30'un altındaysa daha temkinli/savunmacı bir yaklaşım düşünülebilir.</p>
 
 <h2>Veri Kaynağı ve Güncelleme Sıklığı</h2>
 <p>Tüm fiyat verileri Yahoo Finance (yfinance) API'sından alınır. Günlük barlar (2 yıl geçmiş) ve haftalık barlar (1 yıl) kullanılır. Sinyaller <strong>15 dakikada bir</strong> güncellenir. Canlı fiyatlar 30 saniyede bir SSE ile yayınlanır.</p>
@@ -1119,7 +1119,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 </ul>
 
 <h2>Piyasa Bağlamı</h2>
-<p><a href="/ozet">Sinyal Özeti</a> sayfasındaki barometresi kontrol edin. AL oranı %50 üzerindeyse piyasa geneli güçlü — daha agresif girilir. %30 altındaysa piyasa zayıf — yalnızca en güçlü sinyaller değerlendirilir.</p>
+<p><a href="/ozet">Sinyal Özeti</a> sayfasındaki barometreyi kontrol edin. AL oranı %50 üzerindeyse piyasa geneli güçlü sayılabilir; %30 altındaysa piyasa zayıf kabul edilip yalnızca en güçlü sinyaller değerlendirilebilir.</p>
 
 <h2>Pratik Örnek</h2>
 <p>Diyelim ki THYAO ve ASELS her ikisi de AL sinyali veriyor:</p>
@@ -5706,7 +5706,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Hisse senetleriyle düşük/negatif korelasyon (kriz döneminde hisseler düşerken altın yükselir)</li>
   <li>TL bazında hem global altın fiyatından hem de TL değer kaybından yararlanır</li>
 </ul>
-<p>BorsaPusula üzerinden altın ve gümüş fiyatlarını ve teknik sinyallerini takip edebilirsiniz.</p>
+<p>BorsaPusula'nın makro piyasa çubuğunda güncel altın ve gümüş fiyatlarını takip edebilirsiniz.</p>
 
 <h3>2. ABD Doları (USD)</h3>
 <p>Dünya rezerv para birimi olması nedeniyle global krizlerde USD güçlenir. Türk yatırımcılar için TL'nin tarihi değer kaybından dolayı USD tutmak çift koruma sağlar: hem kriz koruması hem TL erimesinden korunma.</p>
