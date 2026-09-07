@@ -2250,14 +2250,19 @@ _load_prev_signals()
 
 
 def _send_telegram(text):
-    """Telegram kanalına/gruba mesaj gönderir.
+    """Telegram kanalına/gruba mesaj gönderir. Gönderim gerçekten başarılıysa
+    True, aksi halde (token yok / HTTP hata / exception) False döner.
 
     CPO-1260-B P1: token eksikse startup'ta zaten bir kez WARNING loglandı (yukarıda,
     modül yüklenirken) — burada sessiz return kasıtlı, her çağrıda tekrar loglanmaz.
     Gönderim SONUCU (başarı dahil) artık HTTP koduyla loglanıyor — önceden sadece
-    başarısızlık loglanıyordu, başarı ile "hiç denenmedi" ayırt edilemiyordu."""
+    başarısızlık loglanıyordu, başarı ile "hiç denenmedi" ayırt edilemiyordu.
+
+    CPO-1504: dönüş değeri eklendi — çağıranlar (örn. freshness_monitor_loop)
+    önceden sonucu kontrol etmeden "gönderildi" logluyordu; token yokken bile
+    sessizce başarılı görünüyordu."""
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHANNEL_ID:
-        return
+        return False
     try:
         url  = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         resp = requests.post(url, json={
@@ -2268,10 +2273,12 @@ def _send_telegram(text):
         }, timeout=10)
         if not resp.ok:
             logger.warning("Telegram gönderimi başarısız: HTTP %d %s", resp.status_code, resp.text[:200])
-        else:
-            logger.info("Telegram gönderimi başarılı: HTTP %d", resp.status_code)
+            return False
+        logger.info("Telegram gönderimi başarılı: HTTP %d", resp.status_code)
+        return True
     except Exception as e:
         logger.warning("Telegram hatası: %s", e)
+        return False
 
 
 def _notify_signal_changes(new_results):
@@ -3250,13 +3257,16 @@ def _freshness_monitor_loop():
                     if now - _freshness_alert_state["last_alert_ts"] > 3600:
                         _freshness_alert_state["last_alert_ts"] = now
                         mins = age // 60
-                        _send_telegram(
+                        sent = _send_telegram(
                             f"⚠️ <b>BorsaPusula veri tazeliği uyarısı</b>\n"
                             f"BIST seansında hisse verisi <b>{mins} dakikadır</b> "
                             f"güncellenmedi (eşik 25 dk).\n"
                             f"Son güncelleme: {fresh.get('stocks_updated_at') or '—'}"
                         )
-                        logger.warning("Freshness alarm: stocks_age=%ss (>25dk), Telegram gönderildi", age)
+                        if sent:
+                            logger.warning("Freshness alarm: stocks_age=%ss (>25dk), Telegram gönderildi", age)
+                        else:
+                            logger.warning("Freshness alarm: stocks_age=%ss (>25dk), Telegram GÖNDERİLEMEDİ (token yok veya hata) — ops bu uyarıyı GÖRMEDİ", age)
         except Exception as e:
             logger.error("freshness_monitor_loop: %s", e, exc_info=True)
         time.sleep(300)  # 5 dakikada bir kontrol
@@ -9059,6 +9069,15 @@ def _compute_health():
         "alarm_channels": {
             "telegram": "configured" if (TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID) else "missing",
             "smtp":     "configured" if (SMTP_HOST and SMTP_USER and SMTP_PASS) else "missing",
+        },
+        # CPO-1504: MOD A (saf Yahoo yavaşlığı) / MOD B (breaker açık) ayrımı önceden
+        # health'ten görünmüyordu, SSH+log grep gerekiyordu. worker-local (her gunicorn
+        # worker kendi _yahoo_cb'sini tutar, _yahoo_cb_record'daki desenle aynı).
+        "yahoo_cb": {
+            "open":         _yahoo_cb_blocked(),
+            "fails":        _yahoo_cb["fails"],
+            "opens_total":  _yahoo_cb["opens"],
+            "window_skips": _yahoo_cb["window_skips"],
         },
         # CPO-1261 §3 — worker başına aktif greenlet sayısı + worker_connections
         # doluluk oranı. ~60s'de bir güncellenir (bkz. _health_snapshot_loop),
