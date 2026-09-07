@@ -1339,14 +1339,6 @@ _SSE_MAX_LIFETIME_S = 240
 _bt_cache    = {"data": None, "computed_at": None}   # backtest cache
 _anomaly_cache = {}  # ticker -> {score, flag, reason} for UI badge (F2)
 
-# F9: WebSocket clients — per-worker dict, no cross-process sharing
-# ws → {"email": str|None, "is_premium": bool, "subscribe": set, "ip": str}
-_ws_clients: dict = {}
-_ws_lock    = threading.Lock()
-# CPO-1509 madde 6: email cookie'si olmayan (anonim) istemciler icin kota yoktu —
-# IP basina anonim WS baglanti tavani (worker-local, nginx onunde ek limit_conn yok).
-_WS_ANON_MAX_PER_IP = 5
-
 # ── Phase 3 #2 Paket 1 — api_stale globals ────────────────────────────────────
 _ALERT_MD_PATH     = os.environ.get("DQV_ALERT_PATH", "/root/bist30/ALERT.md")
 _last_stale_alert_ts: "float | None" = None
@@ -1385,37 +1377,6 @@ def _push_sse(payload: dict):
                 dead.append(q)
         for q in dead:
             _sse_clients.remove(q)
-
-
-def _ws_broadcast():
-    """F9: Push signal update to all WS clients connected to this worker."""
-    if not _WS_AVAILABLE or not _ws_clients:
-        return
-    try:
-        with _lock:
-            data = list(_cache.get("data") or [])
-            updated_at = _cache.get("updated_at", "")
-        if not data:
-            return
-        payload = json.dumps({
-            "type": "signal_update",
-            "updated_at": updated_at,
-            "count": len(data),
-        })
-        dead = []
-        with _ws_lock:
-            clients = list(_ws_clients.keys())
-        for ws in clients:
-            try:
-                ws.send(payload)
-            except Exception:
-                dead.append(ws)
-        if dead:
-            with _ws_lock:
-                for ws in dead:
-                    _ws_clients.pop(ws, None)
-    except Exception as _e:
-        logger.debug("_ws_broadcast hata: %s", _e)
 
 
 def _fill_intraday_gaps(df, ticker):
@@ -3579,8 +3540,6 @@ def _load_cache_from_disk():
                 _cache["loading"] = False  # G25: disk-reload sonrası loading flag sıfırla
             _disk_cache_mtime = current_mtime  # H3: state update sadece load sonrası
             logger.info("Disk cache yüklendi: %d hisse (updated_at=%s)", len(data), disk_ts)
-            # F9: notify WS clients connected to this non-leader worker
-            _ws_broadcast()
     except Exception as e:
         logger.warning("Disk cache okuma hatası: %s", e)
 
@@ -3876,9 +3835,6 @@ def _refresh_data_impl():
                 _anomaly_cache.update(_new_ac)
         except Exception as _e:
             logger.warning("UI_ANOMALY_CACHE exception: %s", _e)
-
-    # F9: notify WS clients connected to this worker
-    _ws_broadcast()
 
 
 def fetch_live_prices():
@@ -4297,7 +4253,8 @@ def set_security_headers(response):
     # worker'da 95/100 worker-connections tavanına dayanmıştı. Kök neden gevent pywsgi'nin
     # keep-alive bekleme döngüsünde erken FIN'i güvenilir tespit edememesi. keep-alive'ı
     # TÜM response'larda kapatmak bağlantının o bekleme durumuna hiç girmesini engeller.
-    # /ws/prices hariç — wsgi.websocket set edildiğinde soket hijack edilmiş oluyor.
+    # websocket route'lar hariç — wsgi.websocket set edildiğinde soket hijack edilmiş oluyor
+    # (F9 /ws/prices DEV-1802'de kaldırıldı, bu genel kontrol olası gelecekteki WS route'lar için kalıyor).
     # DEV-1565'ten fark: bu deploy disk köprüsünden AYRI, manuel yük testi YAPILMADAN.
     if request.environ.get("wsgi.websocket") is None:
         response.headers["Connection"] = "close"
@@ -5201,102 +5158,6 @@ def api_stream():
     )
 
 
-# ── F9 WebSocket: /ws/prices ─────────────────────────────────────────────────
-# DEV-968/969 kök neden: Werkzeug 3.x, Upgrade:websocket header'ı olan istekleri
-# route eşleştirmede websocket=True işaretli kurallarla eşleştirmeye çalışıyor;
-# işaretlenmemiş route'larda NoMatch(websocket_mismatch=True) → WebsocketMismatch
-# (400) fırlatıyor, Flask view'a HİÇ girmeden. gevent-websocket (WSGI seviyesinde
-# environ['wsgi.websocket'] set eden eski/legacy pattern) bu Werkzeug davranışından
-# habersiz. Tek satırlık kalıcı çözüm: route'u websocket=True ile işaretle.
-@app.route("/ws/prices", websocket=True)
-def ws_prices():
-    if not _WS_AVAILABLE:
-        abort(501)
-    ws = request.environ.get("wsgi.websocket")
-    if not ws:
-        return "WebSocket upgrade required", 400
-    # CPO-505'te yfinance hang'i önlemek için socket.setdefaulttimeout(8) global
-    # set edilmişti (app.py üst kısım) — bu, WS bağlantısının alt soketine de
-    # miras kalıyor ve 8s boşta kalınca socket.timeout ile bağlantı kopuyordu
-    # (ikinci, bağımsız kök neden — Werkzeug routing fix'inden sonra ortaya çıktı).
-    # WS soketi uzun süre boşta kalabileceği için timeout'u kaldırıyoruz.
-    try:
-        ws.handler.socket.settimeout(None)
-    except Exception:
-        pass
-
-    is_prem = request.cookies.get("bp_premium_trial") == "1"
-    email   = request.cookies.get("bp_sub", "").strip() or None
-    max_conns = 3 if is_prem else 1
-    remote_ip = get_remote_address()
-
-    with _ws_lock:
-        if email:
-            user_count = sum(1 for m in _ws_clients.values() if m.get("email") == email)
-            if user_count >= max_conns:
-                try:
-                    ws.close()
-                except Exception:
-                    pass
-                return ""
-        else:
-            # CPO-1509 madde 6: anonim istemcilerde kota kontrolu hic yoktu,
-            # sinirsiz baglanti acabiliyorlardi — IP basina tavan koyuldu.
-            anon_ip_count = sum(1 for m in _ws_clients.values()
-                                 if m.get("email") is None and m.get("ip") == remote_ip)
-            if anon_ip_count >= _WS_ANON_MAX_PER_IP:
-                try:
-                    ws.close()
-                except Exception:
-                    pass
-                return ""
-        _ws_clients[ws] = {"email": email, "is_premium": is_prem, "subscribe": set(), "ip": remote_ip}
-
-    logger.debug("WS bağlandı: email=%s premium=%s toplam=%d", email, is_prem, len(_ws_clients))
-
-    # CPO-974 Bug2 idle-timeout mitigasyonu: sinyal güncellemesi gelene kadar
-    # bağlantı boşta kalıyor, bazı edge/proxy katmanları idle WS bağlantısını
-    # kapatabilir. 20s'de bir PING frame göndererek bağlantıyı canlı tutuyoruz.
-    # NOT: canlı ortamda ayrıca gunicorn 25.3.0 + gevent-websocket 0.10.1 arasında
-    # WS handshake sonrası bağlantının anında kapandığı (Flask view'a hiç
-    # girilmeden) daha temel bir uyumluluk sorunu tespit edildi — DEV-968 raporuna
-    # bakınız. O sorun çözülene kadar bu ping mekanizması devreye giremiyor.
-    ping_greenlet = None
-    if _gevent is not None:
-        def _ws_ping_loop():
-            while True:
-                _gevent.sleep(20)
-                try:
-                    ws.send_frame("", ws.OPCODE_PING)
-                except Exception:
-                    break
-        ping_greenlet = _gevent.spawn(_ws_ping_loop)
-
-    try:
-        # Send current data immediately on connect
-        _ws_broadcast()
-        while True:
-            msg = ws.receive()
-            if msg is None:
-                break
-            try:
-                data = json.loads(msg)
-                if "subscribe" in data:
-                    with _ws_lock:
-                        if ws in _ws_clients:
-                            _ws_clients[ws]["subscribe"] = set(data["subscribe"])
-            except Exception as e:
-                logger.debug("WS subscribe mesajı parse edilemedi: %s", e)
-    except WebSocketError:
-        pass
-    finally:
-        if ping_greenlet is not None:
-            ping_greenlet.kill()
-        with _ws_lock:
-            _ws_clients.pop(ws, None)
-        logger.debug("WS ayrıldı: email=%s toplam=%d", email, len(_ws_clients))
-
-    return ""
 
 
 def _safe_float(val):
