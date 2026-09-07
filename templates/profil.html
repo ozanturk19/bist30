@@ -88,6 +88,21 @@ document.querySelectorAll('.opt').forEach(btn => {
     btn.classList.add('selected');
     btn.setAttribute('aria-checked', 'true');
   });
+  btn.addEventListener('keydown', (e) => {
+    // ARIA APG radiogroup deseni: ok tuslari odagi tasir VE secimi degistirir (tablist'ten farkli olarak)
+    const group = Array.prototype.slice.call(document.querySelectorAll(`.opt[data-q="${q}"]`));
+    const idx = group.indexOf(btn);
+    let nextIdx = -1;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') nextIdx = (idx + 1) % group.length;
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') nextIdx = (idx - 1 + group.length) % group.length;
+    else if (e.key === 'Home') nextIdx = 0;
+    else if (e.key === 'End') nextIdx = group.length - 1;
+    if (nextIdx !== -1) {
+      e.preventDefault();
+      group[nextIdx].focus();
+      group[nextIdx].click();
+    }
+  });
 });
 
 async function submitProfile(e) {

@@ -58,9 +58,11 @@
   }
 
   var openPop = null;
+  var openPopOwner = null;
 
   function closePop() {
     if (openPop) { openPop.remove(); openPop = null; }
+    if (openPopOwner) { openPopOwner.setAttribute('aria-expanded', 'false'); openPopOwner = null; }
     document.removeEventListener('click', onceClose, true);
     document.removeEventListener('keydown', onKeydownClose, true);
   }
@@ -75,6 +77,11 @@
     closePop();
     var pop = document.createElement('div');
     pop.className = 'bp-lm-pop';
+    pop.setAttribute('role', 'tooltip');
+    if (anchor.id) {
+      pop.id = anchor.id + '-pop';
+      anchor.setAttribute('aria-controls', pop.id);
+    }
     pop.innerHTML = '<b>' + term + '</b>' + def;
     document.body.appendChild(pop);
     var r = anchor.getBoundingClientRect();
@@ -84,6 +91,8 @@
     pop.style.top = top + 'px';
     pop.style.left = Math.max(8, left) + 'px';
     openPop = pop;
+    openPopOwner = anchor;
+    anchor.setAttribute('aria-expanded', 'true');
     setTimeout(function () {
       document.addEventListener('click', onceClose, true);
       document.addEventListener('keydown', onKeydownClose, true);
@@ -108,7 +117,10 @@
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'bp-lm-btn';
+      btn.id = 'bp-lm-btn-' + i;
       btn.setAttribute('aria-label', term + ' tanımı');
+      btn.setAttribute('aria-haspopup', 'true');
+      btn.setAttribute('aria-expanded', 'false');
       btn.title = term + ' — Öğrenme Modu açıklaması';
       btn.textContent = '?';
       btn.addEventListener('click', function (t, d) {
