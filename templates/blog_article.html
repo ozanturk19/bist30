@@ -204,6 +204,10 @@
         onmouseover="this.style.background='#2d79f3';this.style.color='#fff'" onmouseout="this.style.background='var(--bp-brand)';this.style.color='var(--bp-bg)'">
         Abone Ol
       </button>
+      <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:#8b949e;flex-basis:100%;cursor:pointer;line-height:1.4">
+        <input type="checkbox" id="artSubKvkk" required style="margin-top:2px;flex-shrink:0">
+        <span><a href="/gizlilik" target="_blank" style="color:var(--bp-brand)">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
+      </label>
     </div>
     <button onclick="document.getElementById('artSubBar').style.display='none'" id="artSubCloseBtn"
       style="position:absolute;top:8px;right:10px;background:none;border:none;
@@ -349,6 +353,12 @@ async function artSubmitSub() {
   const formEl  = document.getElementById('artSubForm');
   if (!emailEl || !formEl) return;
   const email = emailEl.value.trim();
+  const kvkkEl = document.getElementById('artSubKvkk');
+  if (kvkkEl && !kvkkEl.checked) {
+    const btn = document.getElementById('artSubBtn');
+    if (btn) { btn.textContent = 'KVKK onayı gerekli'; setTimeout(() => { btn.textContent = 'Abone Ol'; }, 2500); }
+    return;
+  }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     emailEl.style.borderColor = 'var(--bp-sat)';
     emailEl.placeholder = 'Geçerli bir e-posta girin';

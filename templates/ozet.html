@@ -378,7 +378,7 @@ function goToDate(date) {
       <div style="font-size:var(--bp-text-md);font-weight:700;color:var(--bp-text);margin-bottom:3px"><span aria-hidden="true">📬</span> Günlük Özeti E-postayla Al</div>
       <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Her gün akşam 19:00'da BIST sinyal özeti gelen kutunuzda — ücretsiz, iptal her zaman.</div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px" id="ozSubForm" role="status" aria-live="polite">
+    <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px;flex-wrap:wrap" id="ozSubForm" role="status" aria-live="polite">
       <input id="ozSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
         style="flex:1;background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text);
                padding:8px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-lg);font-family:inherit;outline:none;
@@ -392,6 +392,10 @@ function goToDate(date) {
         onmouseover="this.style.background='#c8d1ff'" onmouseout="this.style.background='#b8c3ff'">
         Abone Ol
       </button>
+      <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--bp-text3,#8b949e);width:100%;cursor:pointer;line-height:1.4">
+        <input type="checkbox" id="ozSubKvkk" required style="margin-top:2px;flex-shrink:0">
+        <span><a href="/gizlilik" target="_blank" style="color:var(--bp-brand)">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
+      </label>
       <span id="ozSubMsg" style="font-size:var(--bp-text-sm)"></span>
     </div>
     <button onclick="document.getElementById('ozSubBar').style.display='none'"
@@ -467,6 +471,12 @@ function goToDate(date) {
 async function ozSubmitSub() {
   const emailEl = document.getElementById('ozSubEmail');
   const email   = emailEl ? emailEl.value.trim() : '';
+  const kvkkEl = document.getElementById('ozSubKvkk');
+  if (kvkkEl && !kvkkEl.checked) {
+    const msg = document.getElementById('ozSubMsg');
+    if (msg) msg.innerHTML = '<span class="bp-sat-text">Devam etmek için KVKK onay kutusunu işaretleyin.</span>';
+    return;
+  }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     if (emailEl) { emailEl.style.borderColor = '#f85149'; emailEl.focus(); }
     return;

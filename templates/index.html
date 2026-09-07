@@ -579,6 +579,10 @@
                font-size:var(--bp-text-sm);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">
         Abone Ol
       </button>
+      <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--bp-text3,#8b949e);width:100%;cursor:pointer;line-height:1.4">
+        <input type="checkbox" id="heroSubKvkk" required style="margin-top:2px;flex-shrink:0">
+        <span><a href="/gizlilik" target="_blank" style="color:var(--bp-brand)">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
+      </label>
       <span id="heroSubMsg" style="font-size:var(--bp-text-xs);width:100%"></span>
     </div>
     <button type="button" id="heroSubDismiss" class="bp-banner-close" title="Kapat" aria-label="Kapat">×</button>
@@ -617,6 +621,12 @@
   async function heroSubmitSub() {
     const emailEl = document.getElementById('heroSubEmail');
     const email = emailEl ? emailEl.value.trim() : '';
+    const kvkkEl = document.getElementById('heroSubKvkk');
+    if (kvkkEl && !kvkkEl.checked) {
+      const msg = document.getElementById('heroSubMsg');
+      if (msg) msg.innerHTML = '<span class="bp-sat-text">Devam etmek için KVKK onay kutusunu işaretleyin.</span>';
+      return;
+    }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       // CPO-06.09: emailEl'in kendi onfocus="...var(--bp-brand)" handler'ı focus()
       // sirasinda senkron calisip kirmizi border'i aninda eziyordu — kullanici

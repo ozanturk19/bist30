@@ -1049,6 +1049,10 @@
       Abone Ol
     </button>
   </div>
+  <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--bp-text3);flex-basis:100%;cursor:pointer;line-height:1.4">
+    <input type="checkbox" id="hisseSubKvkk" required style="margin-top:2px;flex-shrink:0">
+    <span><a href="/gizlilik" target="_blank" style="color:var(--bp-brand)">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
+  </label>
   <button onclick="document.getElementById('hisseSubCta').style.display='none'"
     style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);padding:2px 4px" aria-label="Kapat">×</button>
 </div>
@@ -1075,6 +1079,11 @@
 async function hisseSubscribe() {
   const emailEl = document.getElementById('hisseSubEmail');
   const email   = (emailEl.value || '').trim();
+  const kvkkEl = document.getElementById('hisseSubKvkk');
+  if (kvkkEl && !kvkkEl.checked) {
+    if (window.showToast) showToast('Devam etmek için KVKK onay kutusunu işaretleyin.', 'error');
+    return;
+  }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { emailEl.style.borderColor='#f85149'; emailEl.focus(); return; }
   const btn = document.querySelector('#hisseSubForm button');
   btn.textContent = 'Kaydediliyor…'; btn.disabled = true;

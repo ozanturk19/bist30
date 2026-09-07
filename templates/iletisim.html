@@ -75,6 +75,12 @@
         <label for="cfMessage" style="font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Mesaj</label>
         <textarea id="cfMessage" required maxlength="2000" rows="5" placeholder="Mesajınızı buraya yazın..." style="width:100%;background:var(--bp-border-subtle);border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:var(--bp-text-lg);resize:vertical;font-family:inherit;transition:border-color .15s"></textarea>
       </div>
+      <div style="margin-bottom:14px">
+        <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:#8b949e;cursor:pointer;line-height:1.4">
+          <input type="checkbox" id="cfKvkk" required style="margin-top:2px;flex-shrink:0">
+          <span><a href="/gizlilik" target="_blank" style="color:#58a6ff">Gizlilik Politikası</a>'nı okudum, mesajımdaki kişisel verilerimin işlenmesini kabul ediyorum.</span>
+        </label>
+      </div>
       <button type="submit" id="cfBtn" style="background:var(--bp-brand);color:var(--bp-bg);border:none;border-radius:var(--bp-radius);padding:10px 24px;font-size:var(--bp-text-base);font-weight:600;cursor:pointer;transition:background .15s">
         Gönder <span aria-hidden="true">→</span>
       </button>
@@ -129,6 +135,14 @@ async function submitForm(e) {
   }
   messageEl.removeAttribute('aria-invalid');
   messageEl.removeAttribute('aria-describedby');
+  const kvkkEl = document.getElementById('cfKvkk');
+  if (kvkkEl && !kvkkEl.checked) {
+    msg.style.display = 'block';
+    msg.style.color = 'var(--bp-sat)';
+    msg.textContent = '❌ Devam etmek için KVKK onay kutusunu işaretleyin.';
+    kvkkEl.focus();
+    return;
+  }
   msg.style.display = 'none';
   btn.disabled = true;
   btn.textContent = 'Gönderiliyor…';

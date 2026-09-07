@@ -46,6 +46,10 @@
             <input type="text" id="pmName" placeholder="Adın (opsiyonel)"
                    aria-label="Adın (opsiyonel)"
                    autocomplete="given-name" maxlength="80">
+            <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--bp-text3,#8b949e);cursor:pointer;line-height:1.4;margin:6px 0">
+              <input type="checkbox" id="pmKvkk" required style="margin-top:2px;flex-shrink:0">
+              <span><a href="/gizlilik" target="_blank" style="color:var(--bp-brand)">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
+            </label>
             <div class="premium-modal-buttons">
               <button type="submit" id="pmSubmitBtn" class="premium-modal-submit">💎 Premium'u Aç</button>
               <button type="button" id="pmLoginBtn" class="premium-modal-recognize" onclick="submitPremiumRecognize()">👤 Üye Girişi</button>
@@ -73,6 +77,11 @@
     const status  = document.getElementById('pmStatus');
     const email   = (emailEl?.value || '').trim();
     const name    = (nameEl?.value || '').trim();
+    const kvkkEl  = document.getElementById('pmKvkk');
+    if (kvkkEl && !kvkkEl.checked) {
+      if (status) status.innerHTML = '<span class="bp-sat-text">⚠️ Devam etmek için KVKK onay kutusunu işaretleyin.</span>';
+      return;
+    }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       if (status) status.innerHTML = '<span class="bp-sat-text">⚠️ Geçerli email gerekli.</span>';
       if (emailEl) { emailEl.style.borderColor = 'var(--bp-sat)'; emailEl.focus(); }
