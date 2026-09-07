@@ -1340,9 +1340,12 @@ _bt_cache    = {"data": None, "computed_at": None}   # backtest cache
 _anomaly_cache = {}  # ticker -> {score, flag, reason} for UI badge (F2)
 
 # F9: WebSocket clients — per-worker dict, no cross-process sharing
-# ws → {"email": str|None, "is_premium": bool, "subscribe": set}
+# ws → {"email": str|None, "is_premium": bool, "subscribe": set, "ip": str}
 _ws_clients: dict = {}
 _ws_lock    = threading.Lock()
+# CPO-1509 madde 6: email cookie'si olmayan (anonim) istemciler icin kota yoktu —
+# IP basina anonim WS baglanti tavani (worker-local, nginx onunde ek limit_conn yok).
+_WS_ANON_MAX_PER_IP = 5
 
 # ── Phase 3 #2 Paket 1 — api_stale globals ────────────────────────────────────
 _ALERT_MD_PATH     = os.environ.get("DQV_ALERT_PATH", "/root/bist30/ALERT.md")
@@ -2462,8 +2465,10 @@ def _mail_route_allowed(bucket, key, max_count, window_sec):
         return True
 
 
-def send_email(to_email, subject, html_body):
-    """SMTP üzerinden HTML e-posta gönderir. Config eksikse sessizce atlar."""
+def send_email(to_email, subject, html_body, unsubscribe_url=None, reply_to=None):
+    """SMTP üzerinden HTML e-posta gönderir. Config eksikse sessizce atlar.
+    unsubscribe_url verilirse RFC 8058 List-Unsubscribe(-Post) header'ları eklenir.
+    reply_to verilirse Reply-To header'ı eklenir (ör. iletişim formu göndereni)."""
     if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
         return False
     try:
@@ -2471,6 +2476,11 @@ def send_email(to_email, subject, html_body):
         msg["Subject"] = subject
         msg["From"]    = SMTP_FROM
         msg["To"]      = to_email
+        if unsubscribe_url:
+            msg["List-Unsubscribe"] = f"<{unsubscribe_url}>"
+            msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
+        if reply_to:
+            msg["Reply-To"] = reply_to
         msg.attach(MIMEText(html_body, "html", "utf-8"))
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as srv:
             srv.ehlo()
@@ -2635,7 +2645,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     </table>
 
     <p style="text-align:center;font-size:12px;color:#909097;margin-top:18px;line-height:1.5">
-      İlk özet mailini bu akşam alacaksın (günlük özet — varsayılan tercih).<br>
+      İlk özet mailini bir sonraki işlem günü akşamı alacaksın (günlük özet — varsayılan tercih).<br>
       Anlık bildirim istersen profilinden "Anında" seçeneğini seçebilirsin.
     </p>
     '''
@@ -2691,7 +2701,7 @@ def _build_signal_email(changes, unsubscribe_url):
     cards = ""
     for t, old, new, stock in changes[:10]:
         name      = STOCK_NAMES.get(t, t)
-        price     = stock.get("price") or 0
+        price     = stock.get("price")
         sl_level  = stock.get("sl_level")
         adx       = stock.get("adx") or 0
         rvol      = stock.get("rvol")
@@ -2820,7 +2830,7 @@ def _serialize_change(c):
             "is_premium": stock.get("is_premium", False),
             "name":       STOCK_NAMES.get(t, t),
         },
-        "ts":        datetime.now().isoformat(),
+        "ts":        datetime.now(_TZ_TR).isoformat(),
     }
 
 
@@ -2894,7 +2904,7 @@ def _notify_email_signal_changes(changes):
             subject = subject_prefix + " Sinyal Değişimi: " + ", ".join(c[0] for c in relevant[:3])
             if len(relevant) > 3:
                 subject += f" +{len(relevant) - 3}"
-            if send_email(email, subject, _build_signal_email(relevant, unsub_url)):
+            if send_email(email, subject, _build_signal_email(relevant, unsub_url), unsubscribe_url=unsub_url):
                 sent += 1
             time.sleep(0.3)
         if sent:
@@ -3158,7 +3168,7 @@ def _send_digest_emails(timeframe="daily", force=False):
         if prem_count > 0:
             subject += f" — {prem_count} Premium 💎"
 
-        if send_email(email, subject, _build_signal_email(relevant, unsub_url)):
+        if send_email(email, subject, _build_signal_email(relevant, unsub_url), unsubscribe_url=unsub_url):
             sent += 1
         else:
             skip_reasons["send_fail"] += 1
@@ -5178,6 +5188,7 @@ def ws_prices():
     is_prem = request.cookies.get("bp_premium_trial") == "1"
     email   = request.cookies.get("bp_sub", "").strip() or None
     max_conns = 3 if is_prem else 1
+    remote_ip = get_remote_address()
 
     with _ws_lock:
         if email:
@@ -5188,7 +5199,18 @@ def ws_prices():
                 except Exception:
                     pass
                 return ""
-        _ws_clients[ws] = {"email": email, "is_premium": is_prem, "subscribe": set()}
+        else:
+            # CPO-1509 madde 6: anonim istemcilerde kota kontrolu hic yoktu,
+            # sinirsiz baglanti acabiliyorlardi — IP basina tavan koyuldu.
+            anon_ip_count = sum(1 for m in _ws_clients.values()
+                                 if m.get("email") is None and m.get("ip") == remote_ip)
+            if anon_ip_count >= _WS_ANON_MAX_PER_IP:
+                try:
+                    ws.close()
+                except Exception:
+                    pass
+                return ""
+        _ws_clients[ws] = {"email": email, "is_premium": is_prem, "subscribe": set(), "ip": remote_ip}
 
     logger.debug("WS bağlandı: email=%s premium=%s toplam=%d", email, is_prem, len(_ws_clients))
 
@@ -10148,7 +10170,7 @@ def api_contact():
         f"<p><b>Konu:</b> {_html.escape(subject)}</p>"
         f"<p style='white-space:pre-wrap'>{_html.escape(message)}</p>"
     )
-    if not send_email(ADMIN_MAIL, f"[BorsaPusula Iletisim] {subject}", body_html):
+    if not send_email(ADMIN_MAIL, f"[BorsaPusula Iletisim] {subject}", body_html, reply_to=email):
         logger.error("Contact mail gonderilemedi: %s <%s>", name, email)
         return jsonify({"ok": False, "error": "Mail gonderilemedi"}), 500
 
@@ -11494,7 +11516,8 @@ def api_recognize():
             name = info.get("name")
             threading.Thread(target=send_email, args=(
                 email, "🔑 BorsaPusula — Giriş Bağlantın",
-                _build_login_email(email, login_url, unsub_url, name=name)
+                _build_login_email(email, login_url, unsub_url, name=name),
+                unsub_url
             ), daemon=True).start()
 
     return safe_json(generic_resp)
@@ -11569,7 +11592,8 @@ def api_subscribe():
             unsub = f"https://borsapusula.com/unsubscribe/{token}"
             threading.Thread(target=send_email, args=(
                 email, "✅ BorsaPusula — Abonelik Yenilendi",
-                _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", ""))
+                _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", "")),
+                unsub
             ), daemon=True).start()
             react_resp = safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!", "token": token, "name": subs[email].get("name", ""), "email": email})
             react_resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
@@ -11593,7 +11617,8 @@ def api_subscribe():
     unsub = f"https://borsapusula.com/unsubscribe/{token}"
     threading.Thread(target=send_email, args=(
         email, "✅ BorsaPusula — Abonelik Onayı",
-        _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", ""))
+        _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", "")),
+        unsub
     ), daemon=True).start()
 
     logger.info("Yeni e-posta abonesi: %s", email)
@@ -11905,33 +11930,36 @@ def _check_user_alerts(stocks):
             rows = ""
             for tkr, s, reasons in triggered:
                 sig = s.get("signal", "")
-                sig_color = "#22c55e" if sig == "AL" else "#ef4444" if sig == "SAT" else "#888"
+                sig_color = "#00e290" if sig == "AL" else "#f85149" if sig == "SAT" else "#909097"
                 rows += f"""<tr>
-  <td style="padding:10px 14px;border-bottom:1px solid #222;font-weight:700">{tkr}</td>
-  <td style="padding:10px 14px;border-bottom:1px solid #222;color:{sig_color}">{sig}</td>
-  <td style="padding:10px 14px;border-bottom:1px solid #222">{s.get('price') or '—'}</td>
-  <td style="padding:10px 14px;border-bottom:1px solid #222">{'; '.join(reasons)}</td>
+  <td style="padding:10px 14px;border-bottom:1px solid #2a2a2c;color:#e5e1e4;font-weight:700">{tkr}</td>
+  <td style="padding:10px 14px;border-bottom:1px solid #2a2a2c;color:{sig_color};font-weight:700">{sig}</td>
+  <td style="padding:10px 14px;border-bottom:1px solid #2a2a2c;color:#c7c5cd">{tr_price_filter(s.get('price'))}</td>
+  <td style="padding:10px 14px;border-bottom:1px solid #2a2a2c;color:#c7c5cd">{'; '.join(reasons)}</td>
 </tr>"""
             # CPO-DEV2-047 madde 5: diger tum transactional maillerin (welcome/login/signal)
             # zorunlu tuttugu _email_base() deseni bu mail tipine de getirildi — yasal
             # disclaimer + gercek (tiklanabilir) unsubscribe linki artik var.
+            # CPO-1509 madde 4: diger maillerin (_build_signal_email/_email_base) marka
+            # paletine (#161618/#2a2a2c/#e5e1e4/#909097/#00e290/#f85149) hizalandi,
+            # eskiden GitHub-dark benzeri ayrı bir palet (#161b22/#1f2937) kullaniyordu.
             content = f"""<h2 style="margin:0 0 12px;font-size:20px;color:#e5e1e4">🔔 Watchlist Alarmı</h2>
-<p style="margin:0 0 16px;color:#c7c9d1;font-size:14px;line-height:1.6">Merhaba {name}, takip listendeki hisselerde alarm koşulları tetiklendi:</p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;background:#161b22;border-radius:8px;overflow:hidden">
-<tr style="background:#1f2937;color:#8b949e;font-size:12px">
+<p style="margin:0 0 16px;color:#c7c5cd;font-size:14px;line-height:1.6">Merhaba {name}, takip listendeki hisselerde alarm koşulları tetiklendi:</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;background:#161618;border:1px solid #2a2a2c;border-radius:8px;overflow:hidden">
+<tr style="background:#1c1c1f;color:#909097;font-size:12px">
   <th style="padding:8px 14px;text-align:left">Hisse</th>
   <th style="padding:8px 14px;text-align:left">Sinyal</th>
   <th style="padding:8px 14px;text-align:left">Fiyat</th>
   <th style="padding:8px 14px;text-align:left">Neden</th>
 </tr>{rows}
 </table>
-<p style="margin-top:20px;font-size:13px;color:#8b949e;line-height:1.6">
-  Bu alarmı devre dışı bırakmak için <a href="https://borsapusula.com/profil" style="color:#00e2a1">profil sayfandan</a> ilgili takibi silebilirsin.
+<p style="margin-top:20px;font-size:13px;color:#909097;line-height:1.6">
+  Bu alarmı devre dışı bırakmak için <a href="https://borsapusula.com/profil?t={rec.get('token', '')}" style="color:#00e290">profil sayfandan</a> ilgili takibi silebilirsin.
 </p>"""
             preheader = f"Takip listendeki {len(triggered)} hissede alarm koşulu tetiklendi."
             unsub_url = f"https://borsapusula.com/unsubscribe/{rec.get('token', '')}"
             html = _email_base(content, unsub_url, preheader=preheader)
-            send_email(email, f"🔔 BorsaPusula — {len(triggered)} Watchlist Alarmı", html)
+            send_email(email, f"🔔 BorsaPusula — {len(triggered)} Watchlist Alarmı", html, unsubscribe_url=unsub_url)
             with _sub_lock:
                 subs2 = _load_subscribers()
                 if email in subs2:
