@@ -115,6 +115,16 @@ except ImportError as _dqv_import_err:
     ENTRY_QUALITY_LABELS = {'IDEAL': 'İdeal', 'IYI': 'İyi', 'DIKKATLI': 'Dikkatli', 'UZAK': 'Uzak'}
     SIGNAL_DATE_LABELS = {'TODAY': 'Bugün', 'YESTERDAY': 'Dün'}
 
+# ── CPO-1528 Faz 2: Temel Analiz Skoru + BorsaPusula Kompozit Skoru ──────────
+try:
+    import sector_stats as _sector_stats
+    import financial_health_score as _fhs
+    _FHS_AVAILABLE = True
+except ImportError as _fhs_import_err:
+    _FHS_AVAILABLE = False
+    import logging as _log_tmp
+    _log_tmp.getLogger(__name__).warning("financial_health_score unavailable: %s", _fhs_import_err)
+
 # ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
 _SENTRY_AVAILABLE = False
 try:
@@ -492,7 +502,17 @@ def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
         logger.debug("yf_fund_fetch %s: %.0fms", ticker_base, _ms)
         if _ms > _FUND_SLOW_MS:
             logger.warning("yf_fund_fetch %s SLOW: %.0fms", ticker_base, _ms)
-        return {"info": info, "statement_trend": data.get("statement_trend") or []}
+        # CPO-1528 Faz 2: yf_fundamentals_fetch.py fetch() artık Faz 1/CPO-1527
+        # çapraz-tablo oranlarını da (quick_ratio/gross_margin/ebitda_margin/
+        # fcf_to_sales/net_debt_to_ebitda/ev_to_ebitda/ocf_*) döndürüyor —
+        # önceden burada info+statement_trend dışındaki her şey sessizce atılıyordu.
+        _extra_keys = (
+            "quick_ratio", "gross_margin", "ebitda_margin", "fcf_to_sales",
+            "net_debt_to_ebitda", "ev_to_ebitda", "ocf_positive_quarters",
+            "ocf_stability_cv",
+        )
+        extra = {k: data.get(k) for k in _extra_keys if k in data}
+        return {"info": info, "statement_trend": data.get("statement_trend") or [], "extra": extra}
     except subprocess.TimeoutExpired:
         _yahoo_cb_record(False, timeout=True)
         _ms = (time.perf_counter() - _t0) * 1000
@@ -3663,6 +3683,10 @@ def _refresh_data_impl():
     # Başarılı güncellemeden sonra diske yaz
     _save_cache_to_disk(results)
     _save_daily_snapshot(results)   # T2-6: Günlük snapshot (seans sonrası)
+    try:
+        _run_eod_scoring_pass(results)  # CPO-1528 Faz 2: Temel Analiz Skoru (seans sonrası, günde bir)
+    except Exception as _e:
+        logger.error("_run_eod_scoring_pass exception: %s", _e)
 
     # F4: Watchlist alert check — abone koşullarını kontrol et
     try:
@@ -3816,6 +3840,8 @@ def background_refresh():
                 _load_earnings_cache_from_disk()
                 _load_mtf_cache_from_disk()
                 _load_fundamentals_cache_from_disk()
+                _load_sector_stats_from_disk()      # CPO-1528 Faz 2
+                _load_health_scores_from_disk()     # CPO-1528 Faz 2
             except Exception as e:
                 logger.error("web disk-reload hatası: %s", e)
             time.sleep(90)
@@ -3834,6 +3860,8 @@ def background_refresh():
                 _load_earnings_cache_from_disk()
                 _load_mtf_cache_from_disk()
                 _load_fundamentals_cache_from_disk()
+                _load_sector_stats_from_disk()      # CPO-1528 Faz 2
+                _load_health_scores_from_disk()     # CPO-1528 Faz 2
             except Exception as e:
                 logger.error("background_refresh non-leader reload hatası: %s", e)
             time.sleep(90)
@@ -7815,6 +7843,9 @@ def _get_fundamentals(ticker_base):
             "insider_pct":       round(safe_num("heldPercentInsiders") * 100, 1) if safe_num("heldPercentInsiders") is not None else None,
             "institutional_pct": round(safe_num("heldPercentInstitutions") * 100, 1) if safe_num("heldPercentInstitutions") is not None else None,
         }
+        # CPO-1528 Faz 2: Faz 1/CPO-1527 çapraz-tablo oranları — financial_health_score.py
+        # girdisi. _FUND_SANITY zaten bu alanlar için sınır tanımlıyor (ocf_* hariç, bkz. yorum orada).
+        raw.update(_fetched.get("extra") or {})
         data = _clean_fundamentals(raw)
         data["statement_trend"] = _fetched.get("statement_trend") or []
         with _lock:
@@ -7835,6 +7866,175 @@ def api_stock_fundamentals(ticker):
     data = _get_fundamentals(ticker)
     return safe_json({"fundamentals": data})
 
+
+# ── CPO-1528 Faz 2: Temel Analiz Skoru + BorsaPusula Kompozit Skoru ──────────
+# _save_daily_snapshot deseniyle simetrik: seans sonrası (hour>=14 UTC), günde
+# bir kez, idempotent. SADECE leader process'te çalışır — refresh_data() zaten
+# leader-only (REFRESH_WORKER=1/unset), web worker'lar bu fonksiyonu hiç çağırmaz.
+_SCORES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scores")
+os.makedirs(_SCORES_DIR, exist_ok=True)
+
+_sector_stats_cache = {}      # {sector: {metric: {median,stdev,n}}} — en son EOD turu
+_financial_health_cache = {}  # {ticker: {"data": {...}, "ts": float}} — _fundamentals_cache şekliyle simetrik
+
+_SECTOR_STATS_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_sector_stats.json")
+_HEALTH_SCORES_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_health_scores.json")
+
+
+def _save_sector_stats_to_disk():
+    try:
+        with _lock:
+            snapshot = dict(_sector_stats_cache)
+        if not snapshot:
+            return
+        _atomic_write_json(_SECTOR_STATS_DISK_PATH, snapshot)
+    except Exception as e:
+        logger.warning("_save_sector_stats_to_disk hatası: %s", e)
+
+
+def _load_sector_stats_from_disk():
+    """Web worker disk-reload — leader'ın en son EOD sektör istatistiklerini okur."""
+    try:
+        if not os.path.exists(_SECTOR_STATS_DISK_PATH):
+            return
+        with open(_SECTOR_STATS_DISK_PATH, "r", encoding="utf-8") as f:
+            disk = json.load(f)
+        if not isinstance(disk, dict):
+            return
+        with _lock:
+            _sector_stats_cache.clear()
+            _sector_stats_cache.update(disk)
+    except Exception as e:
+        logger.warning("_load_sector_stats_from_disk hatası: %s", e)
+
+
+def _save_health_scores_to_disk():
+    try:
+        with _lock:
+            snapshot = dict(_financial_health_cache)
+        if not snapshot:
+            return
+        _atomic_write_json(_HEALTH_SCORES_DISK_PATH, snapshot)
+    except Exception as e:
+        logger.warning("_save_health_scores_to_disk hatası: %s", e)
+
+
+def _load_health_scores_from_disk():
+    """_load_fundamentals_cache_from_disk deseniyle aynı — ticker başına en taze ts kazanır."""
+    try:
+        if not os.path.exists(_HEALTH_SCORES_DISK_PATH):
+            return
+        with open(_HEALTH_SCORES_DISK_PATH, "r", encoding="utf-8") as f:
+            disk = json.load(f)
+        if not isinstance(disk, dict):
+            return
+        with _lock:
+            for tk, dentry in disk.items():
+                if not isinstance(dentry, dict):
+                    continue
+                mem = _financial_health_cache.get(tk)
+                if not mem or dentry.get("ts", 0) > mem.get("ts", 0):
+                    _financial_health_cache[tk] = dentry
+    except Exception as e:
+        logger.warning("_load_health_scores_from_disk hatası: %s", e)
+
+
+def _run_eod_scoring_pass(results: list):
+    """Seans kapandıktan sonra (14:00 UTC → 17:00 TR) Temel Analiz Skoru turu.
+    _save_daily_snapshot ile aynı gate + idempotency deseni: günde bir kez,
+    dosya varsa (bugün zaten çalıştı / leader restart oldu) tekrar hesaplamaz.
+
+    Performans notu: burada YENİ bir yfinance fetch tetiklenMEZ — sadece
+    _fundamentals_cache'te (fundamentals-warmup-daemon'ın zaten doldurduğu)
+    mevcut veriler kullanılır; eksik ticker'lar data_completeness'a düşük
+    oranla yansır, refresh_data() bu yüzden bloklanmaz."""
+    if not _FHS_AVAILABLE:
+        return
+    now = datetime.now()
+    if now.hour < 14:
+        return
+    fname = os.path.join(_SCORES_DIR, f"{now.strftime('%Y-%m-%d')}.json")
+    if os.path.exists(fname):
+        return  # Bugün zaten çalıştı
+
+    try:
+        sec_map = _build_sector_map(results)
+        ticker_to_sector = {}
+        for sec, items in sec_map.items():
+            for it in items:
+                tk = it.get("ticker")
+                if tk:
+                    ticker_to_sector[tk] = sec
+
+        stocks_with_fundamentals = []
+        for tk, sec in ticker_to_sector.items():
+            with _lock:
+                cached = _fundamentals_cache.get(tk)
+            fdata = dict(cached["data"]) if cached else {}
+            fdata["ticker"] = tk
+            fdata["sector"] = sec
+            stocks_with_fundamentals.append(fdata)
+
+        sector_stats_result = _sector_stats.compute_sector_stats(stocks_with_fundamentals)
+        with _lock:
+            _sector_stats_cache.clear()
+            _sector_stats_cache.update(sector_stats_result)
+        _save_sector_stats_to_disk()
+
+        signal_strength_by_ticker = {r.get("ticker"): r.get("signal_strength") for r in results}
+
+        health_now = time.time()
+        scores_out = {}
+        for fdata in stocks_with_fundamentals:
+            tk = fdata["ticker"]
+            sec = fdata["sector"]
+            health = _fhs.compute_health_score(fdata, sec, stocks_with_fundamentals)
+            teknik_skor = signal_strength_by_ticker.get(tk)
+            composite = _fhs.compute_borsapusula_score(teknik_skor, health.get("temel_analiz_skoru"))
+            entry = {
+                "teknik_analiz_skoru": teknik_skor,
+                "temel_analiz_skoru": health.get("temel_analiz_skoru"),
+                "borsapusula_skoru": composite.get("borsapusula_skoru"),
+                "data_completeness": health.get("data_completeness"),
+                "partial": composite.get("partial"),
+                "band": health.get("band"),
+                "categories": health.get("categories"),
+            }
+            scores_out[tk] = entry
+            with _lock:
+                _financial_health_cache[tk] = {"data": entry, "ts": health_now}
+
+        _save_health_scores_to_disk()
+
+        try:
+            with open(fname, "w", encoding="utf-8") as f:
+                json.dump({
+                    "date": now.strftime("%Y-%m-%d"),
+                    "date_tr": now.strftime("%d.%m.%Y"),
+                    "saved_at": now.isoformat(),
+                    "ticker_count": len(scores_out),
+                    "scores": scores_out,
+                }, f, ensure_ascii=False, default=str)
+            logger.info("EOD scoring turu yazıldı: %s (%d ticker)", fname, len(scores_out))
+        except Exception as e:
+            logger.warning("EOD scoring dosya yazma hatası: %s", e)
+    except Exception as e:
+        logger.error("_run_eod_scoring_pass hatası: %s", e)
+
+
+@app.route("/api/hisse/<ticker>/health-score")
+@limiter.limit("30 per minute")
+def api_stock_health_score(ticker):
+    """Teknik/Temel/BorsaPusula kompozit skoru — CPO-1528 Faz 2, sadece manuel
+    doğrulama için, ana UI'a henüz bağlanmadı (CPO Faz 4'te bağlayacak)."""
+    ticker = ticker.upper()
+    if ticker not in BIST100:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+    with _lock:
+        cached = _financial_health_cache.get(ticker)
+    if not cached:
+        return safe_json({"error": "Skor henüz hesaplanmadı (EOD turu bekleniyor)"}), 404
+    return safe_json(cached["data"])
 
 
 # ─── News endpoint queue pattern ───
