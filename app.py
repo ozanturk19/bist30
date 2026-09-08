@@ -778,6 +778,11 @@ BIST100 = [
 BIST30 = BIST100
 # CPO-1107 Faz0#6: tek kaynak evren sayısı — XU030 endeks, hisse değil, hariç tutulur
 BIST_STOCK_COUNT = len([t for t in BIST100 if t != "XU030"])
+# CPO-1533: gerçek BIST30 endeks bileşenleri (BIST30 adı yukarıda BIST100'e
+# alias'landığı için ayrı isim) — Gemini kotası paylaşan işlerde (health-explain)
+# evreni daraltmak için tek kaynak; BIST100[:28] deseni zaten 3 yerde (backtest,
+# earnings-refresh, bilanco-takvimi) tekrarlanıyordu, burada isimlendirdik.
+BIST30_LITERAL = BIST100[:28]
 
 STOCK_NAMES = {
     # ── BIST30 ──────────────────────────────────────────
@@ -8114,7 +8119,12 @@ def _run_eod_scoring_pass(results: list):
             scores_out[tk] = entry
             with _lock:
                 _financial_health_cache[tk] = {"data": entry, "ts": health_now}
-            if entry["categories"] and GEMINI_API_KEY and _is_gemini_leader():
+            # CPO-1533: Gemini zenginleştirmesi BIST30 ile sınırlı — kota haber
+            # prefetch'iyle paylaşılıyor (~20-40 istek/gün tavanı), 215 ticker'ın
+            # tamamı bu kuyruğa girerse kota anında tükenir. Deterministik şablon
+            # metni (yukarıda) yine TÜM ticker'lara yazılıyor, hiçbir alan boş
+            # kalmaz — sadece doğal-dile çevirme BIST30'a odaklanıyor.
+            if tk in BIST30_LITERAL and entry["categories"] and GEMINI_API_KEY and _is_gemini_leader():
                 with _health_explain_queue_lock:
                     _health_explain_queue[tk] = entry
 
