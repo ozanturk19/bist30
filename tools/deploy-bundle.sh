@@ -324,7 +324,16 @@ log "DEPLOY 2/4: Pulling main..."
 if [ "$SKIP_PULL" = "1" ]; then
   log "  SKIP: repo zaten $TARGET_SHA — pull yapilmadi (yalniz reload gerekli)."
 elif true; then
-dry "cd $REPO_DIR && git pull --ff-only origin main --quiet"
+if ! dry "cd $REPO_DIR && git pull --ff-only origin main --quiet"; then
+  # set -e altinda dry() eval basarisiz donerse script bu satirda SESSIZCE
+  # cikardi (ne ERROR log'u ne fail_rollback) — DEV-1820'de VPS'te 8+ saat
+  # boyunca hicbir iz birakmadan gozlenen davranis buydu. fail_rollback DEGIL:
+  # pull henuz REPO_DIR'i degistirmedi (ff-only basarisizsa no-op), servisi
+  # gereksiz yere restart etmenin anlami yok — DEPLOY 1/4'teki fetch hatasi
+  # deseniyle simetrik, salt log+exit.
+  log "ERROR: git pull --ff-only basarisiz (kirli/diverged repo, lock?) — aborting, servis dokunulmadi"
+  exit 1
+fi
 if [ "$DRY_RUN" = "0" ]; then
   NEW_SHA=$(cd "$REPO_DIR" && git rev-parse HEAD)
   log "  HEAD after pull: $NEW_SHA"
