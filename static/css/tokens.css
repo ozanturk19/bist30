@@ -52,6 +52,7 @@
   --bp-volume-bg: rgba(var(--bp-volume-rgb), 0.10);
   --bp-volume-bd: rgba(var(--bp-volume-rgb), 0.45);
   --bp-premium:   #a855f7;   /* tier/paywall (Premium) — SPEC-018 W2 mor imza */
+  --bp-accent-cyan: #22d3ee;   /* Data-Art ana sayfa (08.09) — vurgu/glow, dördüncü nötr-olmayan aksan */
 
   /* Radius */
   --bp-radius:    6px;
@@ -87,6 +88,7 @@
   --bp-gold-rgb:     245, 158, 11;
   --bp-volume-rgb:   255, 200, 80;
   --bp-premium-rgb:  168, 85, 247;
+  --bp-accent-cyan-rgb: 34, 211, 238;
 
   /* Compat aliases — eski stil kodlarıyla uyumluluk */
   --accent:       #b8c3ff;
