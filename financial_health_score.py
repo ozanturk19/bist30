@@ -66,6 +66,13 @@ TOTAL_METRIC_COUNT = sum(len(c["metrics"]) for c in CATEGORIES.values())
 
 BAND_KIRMIZI, BAND_SARI, BAND_YESIL = "kirmizi", "sari", "yesil"
 
+CATEGORY_LABELS = {
+    "karlilik": "Kârlılık",
+    "nakit_akisi": "Nakit Akışı",
+    "kaldirac": "Kaldıraç",
+    "degerleme_buyume": "Değerleme/Büyüme",
+}
+
 
 def _band(score):
     if score is None:
@@ -135,6 +142,44 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
         "band": _band(score),
         "categories": {c: round(s, 1) for c, s in category_scores.items()},
     }
+
+
+def _tier_word(score):
+    if score >= 70:
+        return "güçlü"
+    if score >= 50:
+        return "ortalama"
+    return "zayıf"
+
+
+def build_rationale(categories, data_completeness):
+    """CPO-1531 Faz 3 — kategori skorlarından deterministik Türkçe gerekçe cümlesi.
+
+    En güçlü ve en zayıf kategoriyi karşılaştırır. Bu cümle Gemini'ye SADECE
+    akıcı Türkçe'ye çevrilmek üzere verilir — yeni analiz/yorum YAPILMAZ,
+    burada üretilen anlam sabittir (_enrich_signal_explanation'daki
+    önce-hesapla-sonra-Türkçeleştir deseniyle birebir)."""
+    if not categories:
+        return "Yeterli finansal veri bulunmadığı için temel analiz skoru hesaplanamadı."
+
+    ranked = sorted(categories.items(), key=lambda kv: kv[1], reverse=True)
+    best_name, best_score = ranked[0]
+    worst_name, worst_score = ranked[-1]
+    best_label = CATEGORY_LABELS.get(best_name, best_name)
+    worst_label = CATEGORY_LABELS.get(worst_name, worst_name)
+
+    if len(ranked) == 1 or best_name == worst_name:
+        sentence = f"{best_label} kategorisinde {_tier_word(best_score)} bir görünüm var (skor: {best_score:.0f})."
+    else:
+        sentence = (
+            f"{best_label} kategorisinde {_tier_word(best_score)} bir görünüm var (skor: {best_score:.0f}), "
+            f"{worst_label} kategorisinde ise {_tier_word(worst_score)} sonuçlar öne çıkıyor (skor: {worst_score:.0f})."
+        )
+
+    if data_completeness is not None and data_completeness < 0.6:
+        sentence += " Bazı finansal veriler eksik olduğu için skor sınırlı veriyle hesaplanmıştır."
+
+    return sentence
 
 
 def compute_borsapusula_score(teknik_skor, temel_skor, weights=None):

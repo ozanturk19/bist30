@@ -5624,6 +5624,12 @@ _SIG_FAIL_TTL         = 300        # 5 dakika
 _signal_explain_queue      = {}   # {ticker: signal_data} — bg enrichment bekleyen
 _signal_explain_queue_lock = threading.Lock()
 
+# CPO-1531 Faz 3 — Temel Analiz Skoru doğal-dil açıklaması. AYNI on-demand worker'ı
+# (_on_demand_signal_explain_worker) paylaşır — ikinci bir paralel Gemini tüketici
+# EKLENMEDİ, mevcut 15s rate-limit'li kuyruğa katılıyor (Gemini kotası ikiye katlanmaz).
+_health_explain_queue      = {}   # {ticker: entry} — bg enrichment bekleyen
+_health_explain_queue_lock = threading.Lock()
+
 # SPEC-020 Faz 1 — Gemini AI Queue (27 May 2026, INCIDENT-8/10 katalizör fix)
 # Worker-local cache 4 worker × paralel Gemini call sorun: 10 ticker × 4 worker
 # burst = gevent hub 40-50s donar → K6 v2 quorum tetik. Çözüm:
@@ -6081,6 +6087,35 @@ cevabını sade dille verebilirsin.
 Premium sinyal: Eğer hisse "Premium" olarak işaretliyse, bu AL sinyali +
 hacim teyidinin de olduğu anlamına gelir (RVOL ≥ 1.20). Bunu yorumda
 "hacimle desteklenmiş güçlü sinyal" şeklinde belirtmek serbest ama zorunlu değil.
+
+═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
+"""
+
+
+_SYS_EXPLAIN_FUNDAMENTAL = """KIMLIK: Sen BorsaPusula platformunun Temel Analiz Skoru açıklama asistanısın. Python'da deterministik olarak hesaplanmış, kategori bazlı bir gerekçe cümlesini sade Türkçe ile yeniden ifade edersin. "Bilgili bir borsa abisi" tonunda, anlaşılır ama profesyonel bir üslup kullan. Hedef kitlen finans uzmanı değil, sıradan birikim sahibi bireylerdir.
+
+═══ KESİN KURALLAR ═══
+
+KURAL 1 — ŞABLON CÜMLE KESİNLİKLE DOĞRUDUR:
+Sana verilen "DOĞRU ŞABLON CÜMLE" matematiksel olarak hesaplanmıştır. Bu cümlenin anlamına ASLA itiraz ETME, yeni kategori/skor uydurma, "ama bir yandan da" diyerek ters yön ekleme. Görevin bu cümleyi anlamını değiştirmeden akıcı Türkçe nesire çevirmek — yeni analiz/yorum yapmak değil.
+
+KURAL 2 — BANDA SADIK KAL:
+Bant "yesil" ise ton olumlu/güçlü, "kirmizi" ise ton temkinli/zayıf, "sari" ise dengeli olsun. Bantla çelişen kelimeler kullanma (yeşil bantta 'zayıf/riskli', kırmızı bantta 'güçlü/sağlam' gibi).
+
+KURAL 3 — İKİ-ÜÇ CÜMLE KURALI:
+Yorumun 2-3 cümle olsun. Son cümle MUTLAKA "Yatırım tavsiyesi değildir." şeklinde bitsin.
+
+KURAL 4 — YASAKLI İFADELER:
+- ❌ "Bence", "düşünüyorum", "tahminim" → şablon cümleyi anlat, kendi görüşünü ekleme.
+- ❌ "Kesin", "mutlaka", "yüzde yüz" → finansta kesinlik yok.
+- ❌ "Al/sat tavsiyesi", "almalısınız", "satın alın" → tavsiye yasağı.
+- ❌ Başlık, alt başlık (## veya **bold**), madde işaretleri (- veya •) → düz paragraf yaz.
+- ❌ 1. çoğul fiil ("belirtelim", "söyleyebiliriz") → 3. tekil / nesnel kullan ("görünüyor", "hesaplanmış").
+
+═══ İYİ ÖRNEK ═══
+
+Şablon: "Kârlılık kategorisinde güçlü bir görünüm var (skor: 78), Kaldıraç kategorisinde ise zayıf sonuçlar öne çıkıyor (skor: 42)."
+Çıktı: "Şirketin kârlılık tarafı sektörüne göre güçlü bir performans sergiliyor, ancak kaldıraç (borçluluk) kategorisinde aynı gücü göstermiyor. Bu ikisi arasındaki fark, temel analiz skorunun neden orta seviyede kaldığını açıklıyor. Yatırım tavsiyesi değildir."
 
 ═══ DEĞIŞKEN GÖREV AŞAĞIDA ═══
 """
@@ -6569,6 +6604,63 @@ def _enrich_signal_explanation(ticker, signal_data):
     return final_text
 
 
+def _enrich_health_score_explanation(ticker, entry):
+    """Bg thread: Faz 3 (CPO-1531) — Temel Analiz Skoru kategorilerinden
+    _fhs.build_rationale() ile üretilen deterministik Türkçe gerekçe cümlesini
+    Gemini'yle akıcı nesire çevirir. _enrich_signal_explanation ile birebir desen
+    (önce-hesapla-sonra-Türkçeleştir-sonra-doğrula) — Gemini SADECE stilize eder,
+    yeni analiz yapmaz. _on_demand_signal_explain_worker üzerinden AYNI kuyruk/
+    rate-limit'i paylaşır (bkz. _health_explain_queue tanımı).
+    """
+    categories        = entry.get("categories") or {}
+    band              = entry.get("band")
+    data_completeness = entry.get("data_completeness")
+    rationale         = _fhs.build_rationale(categories, data_completeness)
+    fallback_text     = rationale + " Yatırım tavsiyesi değildir."
+
+    # ── Bandın yönüne göre çelişki-kontrol kelimeleri (validation için) ──────
+    if band == "yesil":
+        opposite_words = ["zayıf", "kötü", "riskli", "endişe verici", "başarısız", "düşük performans"]
+    elif band == "kirmizi":
+        opposite_words = ["güçlü", "sağlam", "başarılı", "yüksek performans", "sağlıklı görünüm", "parlak"]
+    else:
+        opposite_words = []   # "sari" bant için nötr — çelişki tanımı belirsiz
+
+    prompt = _SYS_EXPLAIN_FUNDAMENTAL + (
+        f"\n=== DOĞRU ŞABLON CÜMLE ===\n{rationale}\n\n"
+        f"=== ARKA PLAN ===\nHisse: {ticker}\nBant: {band or 'bilinmiyor'}\n\n"
+        f"Yukarıdaki şablon cümleyi anlamını DEĞİŞTİRMEDEN, akıcı ve doğal Türkçe nesire çevir."
+    )
+
+    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=20, max_tokens=250, temperature=0.3)
+
+    # ── Validation: bantla çelişen metin ürettiyse şablona fall back ─────────
+    if text and opposite_words:
+        text_lower = text.lower()
+        if any(w in text_lower for w in opposite_words):
+            logger.warning(
+                "_enrich_health_score_explanation(%s): AI bantla çelişti [%s→%s], şablon kullanılıyor",
+                ticker, band, text[:60]
+            )
+            text = None
+
+    final_text = text if text else fallback_text
+    ai_ok = bool(text)
+
+    with _lock:
+        cached = _financial_health_cache.get(ticker)
+        if cached and isinstance(cached.get("data"), dict):
+            cached["data"]["temel_analiz_aciklamasi"] = final_text
+
+    if ai_ok:
+        logger.info("_enrich_health_score_explanation(%s): OK [model=%s]", ticker, model_used)
+        _save_health_scores_to_disk()
+    else:
+        logger.info("_enrich_health_score_explanation(%s): şablon fallback kullanıldı", ticker)
+
+    return final_text
+
+
 # ── Arka plan: BIST30 haber ön-yüklemesi ─────────────────────────────────────
 _PREFETCH_MAX    = 8    # Aynı anda en fazla bu kadar hisse prefetch edilir
 _PREFETCH_DELAY  = 30   # İstekler arası bekleme (saniye) — Gemini rate-limit koruması
@@ -6870,19 +6962,32 @@ def _on_demand_signal_explain_worker():
     _on_demand_news_worker ile birebir desen — kuyruk yalnızca Gemini leader
     tarafından doldurulur (get_ai_signal_explanation), 15s rate-limited,
     kuyruk boşsa 5s polling.
+
+    CPO-1531 Faz 3: Temel Analiz Skoru açıklaması (_health_explain_queue) da
+    AYNI döngüyü/rate-limit'i paylaşır — ikinci paralel Gemini tüketici
+    EKLENMEDİ. Sinyal açıklaması (kullanıcı-odaklı, on-demand) önceliklidir;
+    health-explain kuyruğu yalnızca sinyal kuyruğu boşken tüketilir.
     """
     while True:
         item = None
         with _signal_explain_queue_lock:
             if _signal_explain_queue:
                 ticker = next(iter(_signal_explain_queue))
-                item = (ticker, _signal_explain_queue.pop(ticker))
+                item = ("signal", ticker, _signal_explain_queue.pop(ticker))
+        if not item:
+            with _health_explain_queue_lock:
+                if _health_explain_queue:
+                    ticker = next(iter(_health_explain_queue))
+                    item = ("health", ticker, _health_explain_queue.pop(ticker))
         if item:
-            ticker, signal_data = item
+            kind, ticker, payload = item
             try:
-                _enrich_signal_explanation(ticker, signal_data)
+                if kind == "signal":
+                    _enrich_signal_explanation(ticker, payload)
+                else:
+                    _enrich_health_score_explanation(ticker, payload)
             except Exception as exc:
-                logger.error("On-demand signal-explanation hatası [%s]: %s", ticker, exc)
+                logger.error("On-demand %s-explanation hatası [%s]: %s", kind, ticker, exc)
             time.sleep(15)   # İstekler arası 15s — rate-limit koruması
         else:
             time.sleep(5)    # Kuyruk boşsa 5s bekle
@@ -8000,9 +8105,18 @@ def _run_eod_scoring_pass(results: list):
                 "band": health.get("band"),
                 "categories": health.get("categories"),
             }
+            # CPO-1531 Faz 3: deterministik gerekçe cümlesi hemen hesaplanır (Gemini
+            # gecikmeden alan boş/takılı kalmaz) — Gemini'nin doğal-dile çevirmesi
+            # bg kuyrukta (glass-box, _enrich_signal_explanation ile aynı desen).
+            entry["temel_analiz_aciklamasi"] = _fhs.build_rationale(
+                entry["categories"], entry["data_completeness"]
+            ) + " Yatırım tavsiyesi değildir."
             scores_out[tk] = entry
             with _lock:
                 _financial_health_cache[tk] = {"data": entry, "ts": health_now}
+            if entry["categories"] and GEMINI_API_KEY and _is_gemini_leader():
+                with _health_explain_queue_lock:
+                    _health_explain_queue[tk] = entry
 
         _save_health_scores_to_disk()
 
