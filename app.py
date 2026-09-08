@@ -4094,7 +4094,14 @@ def background_refresh():
     # 06.06 06:28'de leader thread dondu → updated_at 4h sabit, /hisse flapping DOWN (worker hang).
     # Watchdog: her ağır iş ThreadPoolExecutor ile timeout-bounded — N dk geçerse skip + sonraki cycle.
     import concurrent.futures as _cf
-    _REFRESH_DATA_TIMEOUT = 240   # 4 dakika (30 ticker × ~8s yfinance soft-cap)
+    # DEV-1805 madde 5: eski yorum "30 ticker × ~8s" diyordu, gerçek evren 215 ticker
+    # (BIST100 app.py:774-829) — o hesap hiç güncellenmemiş, yanıltıcıydı. Bu değer
+    # SADECE kapanış-dışı/catch-up turları için (normal EOD turu is_closing_snapshot_window()
+    # ile 480s kullanıyor). 215 ticker için ampirik dayanak: kapanış penceresinde 180s'de
+    # 131/215 tamamlanabildiği kanıtlandı (trading_calendar.py:53, CPO-1485 kök neden) —
+    # 240s bu kanıta göre de dar olabilir; kesin ticker-başı-süre formülü yok, 500+'a
+    # çıkmadan önce canlı ölçümle yeniden kalibre edilmeli (Faz 1 madde 3/4).
+    _REFRESH_DATA_TIMEOUT = 240
     _CHART_TASK_TIMEOUT   = 60    # 1 dakika per chart refresh
     _executor = _cf.ThreadPoolExecutor(max_workers=2, thread_name_prefix="bg_refresh_wd")
 
