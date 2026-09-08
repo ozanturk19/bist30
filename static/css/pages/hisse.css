@@ -1254,3 +1254,27 @@
   border-color: var(--bp-accent-cyan);
   background: rgba(var(--bp-accent-cyan-rgb), .08);
 }
+
+/* ── Teknik Detaylar konsolu — renk-kodlu satırlar (08.09 gece) ── */
+.tech-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+.tech-row-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+}
+.tech-row-bull .tech-row-dot { background: var(--bp-al); box-shadow: 0 0 6px rgba(var(--bp-al-rgb), .6); }
+.tech-row-bear .tech-row-dot { background: var(--bp-sat); box-shadow: 0 0 6px rgba(var(--bp-sat-rgb), .6); }
+.tech-row-neutral .tech-row-dot { background: var(--bp-text3); }
+
+/* ── MTF (Çoklu Zaman Dilimi) kartları — hafif eğim + durum-renkli glow (08.09 gece) ── */
+.mtf-card {
+  transform: rotate(var(--rot, 0deg));
+  transition: transform var(--bp-dur-base) var(--bp-ease-standard);
+}
+.mtf-card:hover { transform: rotate(0deg) translateY(-3px); }
