@@ -1185,48 +1185,66 @@ SECTORS = {
                       "ALBRK", "KLNMA", "ISMEN", "ISFIN", "CRDFA", "SKBNK", "TSKB"],
     "Holding":       ["KCHOL", "SAHOL", "AGHOL", "ALARK", "DOHOL", "GLYHO",
                       "NTHOL", "TKFEN", "BRYAT", "GSDHO", "DENGE", "HDFGS",
-                      "DOGUB", "DOBUR", "KLRHO", "BINHO", "ECZYT", "MARKA", "BERA", "POLHO", "LRSHO", "DERHL"],
+                      "DOGUB", "KLRHO", "BINHO", "ECZYT", "MARKA", "BERA", "POLHO", "LRSHO", "DERHL"],
     "Sanayi":        ["ARCLK", "ASELS", "EREGL", "FROTO", "KRDMD", "TOASO",
                       "ASUZU", "BRSAN", "DOAS",  "ISDMR", "IZMDC", "JANTS",
                       "KCAER", "KORDS", "OTKAR", "PARSN", "SARKY", "TTRAK",
                       "VESTL", "VESBE", "YATAS", "ARSAN", "BOSSA", "CEMTS",
                       "CEMAS", "EDIP",  "EMKEL", "ERBOS", "EGGUB", "EGPRO",
                       "GESAN", "KAPLM", "KATMR", "LKMNH", "LUKSK", "MAKTK",
-                      "MUTLU", "NIBAS", "NUHCM", "PASEU", "QUAGR", "EUREN", "BURCE", "LILAK", "USAK", "GMTAS", "ALTNY", "SDTTR", "PAPIL", "BTCIM", "LMKDC", "TEKTU", "ARZUM", "AKCNS", "KARSN", "GENTS", "ANELE", "HATSN", "PKART", "TMSN"],
+                      "NIBAS", "NUHCM", "PASEU", "QUAGR", "EUREN", "BURCE", "LILAK", "USAK", "GMTAS", "ALTNY", "SDTTR", "PAPIL", "BTCIM", "LMKDC", "TEKTU", "ARZUM", "AKCNS", "KARSN", "GENTS", "ANELE", "HATSN", "PKART", "TMSN",
+                      "AYCES"],
     "Enerji":        ["AKSEN", "ALFAS", "CWENE", "ENJSA", "ENKAI",
                       "EUPWR", "ODAS",  "PRKAB", "SMRTG", "TUPRS", "ZOREN",
-                      "BASGZ", "BIOEN", "NATEN", "ORGE", "ASTOR", "CANTE", "IZENR", "MAGEN", "ESEN", "ENERY", "AYGAZ", "AKFYE", "AHGAZ", "SMART", "AYEN", "AYDEM"],
+                      "BIOEN", "NATEN", "ORGE", "ASTOR", "CANTE", "IZENR", "MAGEN", "ESEN", "ENERY", "AYGAZ", "AKFYE", "AHGAZ", "SMART", "AYEN", "AYDEM"],
     "Perakende":     ["BIMAS", "MGROS", "SOKM",  "MAVI",  "SELEC", "ULKER",
-                      "KRSTL", "TUKAS", "TUREX", "PENGD", "TCKRC", "MERKO", "TABGD"],
+                      "KRSTL", "TUKAS", "TUREX", "PENGD", "TCKRC", "MERKO", "TABGD",
+                      "ADESE"],
     "Teknoloji":     ["INDES", "LOGO",  "NETAS", "KONTR", "ESCOM", "MTRKS",
                       "HTTBT", "MPARK", "MIATK", "YEOTK", "REEDR", "FONET", "FORTE", "ARENA", "LINK", "ARDYZ", "KAREL", "EDATA"],
     "Telekom":       ["TCELL", "TTKOM"],
     "Ulaşım":        ["PGSUS", "TAVHL", "THYAO", "RYSAS", "CLEBI"],
-    "GYO":           ["EKGYO", "ALGYO", "ISGYO", "AKMGY", "HLGYO", "BASGZ", "PEKGY", "PSGYO", "FZLGY", "SURGY", "MRGYO", "KZBGY", "SNGYO", "YESIL"],
-    "Kimya/Malzeme": ["AKSA", "ALKIM", "ANACM", "ISKPL", "BUCIM", "CIMSA", "GUBRF", "HEKTS",
+    "GYO":           ["EKGYO", "ALGYO", "ISGYO", "AKMGY", "HLGYO", "PEKGY", "PSGYO", "FZLGY", "SURGY", "MRGYO", "KZBGY", "SNGYO", "YESIL"],
+    "Kimya/Malzeme": ["AKSA", "ALKIM", "ISKPL", "BUCIM", "CIMSA", "GUBRF", "HEKTS",
                       "OYAKC", "PETKM", "SASA",  "SISE",  "TATGD", "AEFES",
                       "CCOLA", "EGEEN", "DYOBY", "ERSU",  "KMPUR", "KONYA",
-                      "MEGAP", "MIPAZ", "MRDIN", "NUHCM", "MERCN"],
+                      "MEGAP", "NUHCM", "MERCN",
+                      "GOKNR"],
     "Sigorta":       ["ANHYT", "ANSGR", "TURSG", "AKGRT"],
     # CPO-1464 #3: GENIL/ECILC/MEDTR "Diğer" catch-all'a dusup spor kulubu/
     # kagit/basim sirketleriyle "ayni sektor" gosteriliyordu (/hisse/GENIL,
     # /sektor-harita). ALKLC (Alkaloid Sağlık) hicbir sektorde listeli
     # degildi, _get_sector zaten "Diğer"e dusuruyordu.
-    "İlaç/Sağlık":   ["GENIL", "ECILC", "MEDTR", "ALKLC"],
+    "İlaç/Sağlık":   ["GENIL", "ECILC", "MEDTR", "ALKLC", "DNISI"],
     "Diğer":         ["BJKAS", "FENER", "KARTN", "ADEL",  "DURDO",
-                      "FMIZP", "FORMT", "GSRAY", "IEYHO", "IPMAT",
-                      "KERVT", "LKMNH", "PARSN", "AGROT", "MARTI"],
+                      "FMIZP", "FORMT", "GSRAY", "IEYHO",
+                      "LKMNH", "PARSN", "AGROT", "MARTI"],
 }
 
 # DEV2-r4-perf: SECTORS lineer taramasi yerine bir kez kurulan ters-index.
 # setdefault kritik: SECTORS icinde birden fazla sektorde gecen ticker'lar
-# (PARSN/LKMNH/NUHCM/BASGZ) icin eski davranis (ilk eslesen sektor kazanir,
+# (PARSN/LKMNH/NUHCM) icin eski davranis (ilk eslesen sektor kazanir,
 # SECTORS.items() sirasina gore) birebir korunur.
 _TICKER_TO_SECTOR = {}
 for _dev2_sector, _dev2_tickers in SECTORS.items():
     for _dev2_ticker in _dev2_tickers:
         _TICKER_TO_SECTOR.setdefault(_dev2_ticker, _dev2_sector)
 del _dev2_sector, _dev2_tickers, _dev2_ticker
+
+# CPO-1517/DEV-1805 Faz1(a): BIST100 (fetch evreni) ve SECTORS (taksonomi)
+# önceden bağımsız iki hardcoded liste olduğu için sessizce senkron kaybediyordu
+# (4 aktif ticker SECTORS'ta yoktu -> "Diğer"e düşüyordu, 8 ölü ticker BIST100'de
+# olmadığı halde SECTORS'ta duruyordu). Tek kaynak BIST100 kalıyor (fetch/refresh
+# evreni); bu assert SECTORS'un BIST100'ü tam kapsamasını zorunlu kılar, gelecekte
+# BIST100'e eklenen bir ticker SECTORS'a eklenmeden deploy edilirse import anında
+# (sessizce "Diğer"e düşmek yerine) net bir hata ile durur.
+_bist100_stocks = set(t for t in BIST100 if t != "XU030")
+_sectors_missing = _bist100_stocks - set(_TICKER_TO_SECTOR)
+assert not _sectors_missing, (
+    f"SECTORS tek-kaynak ihlali: BIST100'de olup SECTORS'ta olmayan ticker'lar: "
+    f"{sorted(_sectors_missing)} (app.py SECTORS sözlüğüne ekleyin)"
+)
+del _bist100_stocks, _sectors_missing
 
 
 def _get_sector(ticker: str) -> str:
