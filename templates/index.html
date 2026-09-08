@@ -107,6 +107,9 @@ header{
 
 /* ── makro şerit — DOM/id/JS AYNEN, sadece CSS (Madde 2) ── */
 #macroBar{position:relative;display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-border);height:32px;overflow:hidden}
+.macro-bar::before,.macro-bar::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised)}
+.macro-bar::before{left:0;background:linear-gradient(to right,var(--bp-surface),transparent)}
+.macro-bar::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}
 .macro-live{display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text3);border-right:1px solid var(--bp-border);background:var(--bp-surface)}
 .macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-accent-cyan);box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.7);flex:none;animation:daPulseDot 1.8s ease-in-out infinite}
 @keyframes daPulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}
