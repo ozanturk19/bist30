@@ -272,9 +272,12 @@ header{
 .da-scard{grid-column:span 4;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-20);padding:clamp(16px,2vw,22px);position:relative;overflow:hidden;transition:transform var(--bp-dur-slower) cubic-bezier(.2,.8,.2,1),border-color var(--bp-dur-slow),box-shadow var(--bp-dur-slower);opacity:0;transform:translateY(22px) rotate(var(--rot,0deg));display:flex;flex-direction:column;gap:14px;text-decoration:none;color:inherit}
 .da-scard.in-view{opacity:1;transform:translateY(0) rotate(var(--rot,0deg))}
 .da-scard:hover{transform:translateY(-6px) rotate(0deg) scale(1.012);border-color:var(--bp-border2);box-shadow:0 30px 70px -30px rgba(124,92,255,.35)}
-.da-scard.xl{grid-column:span 6;grid-row:span 2}
-.da-scard.md{grid-column:span 4}
-.da-scard.sm{grid-column:span 3}
+.da-scard.xl{grid-column:span 5;grid-row:span 2}
+.da-scard.lg{grid-column:span 4;grid-row:span 2}
+.da-scard.md{grid-column:span 3}
+.da-scard.sm{grid-column:span 4}
+.da-scard.xs{grid-column:span 12;flex-direction:row;align-items:center;flex-wrap:wrap}
+.da-scard.xs .da-sc-top{width:100%}
 .da-sc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .da-sc-ticker{font-family:'Space Grotesk',monospace,sans-serif;font-weight:700;font-size:clamp(1.3rem,2vw,1.9rem)}
 .da-sc-company{font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -291,8 +294,8 @@ header{
 .da-sc-sig.sig-al{color:var(--bp-al);background:var(--bp-al-bg)}
 .da-sc-sig.sig-sat{color:var(--bp-sat);background:rgba(var(--bp-sat-rgb),.1)}
 .da-sc-sig.sig-bekle{color:var(--bp-text3);background:var(--bp-surface2)}
-@media(max-width:900px){.da-stock-grid{grid-template-columns:repeat(6,1fr)}.da-scard.xl{grid-column:span 6;grid-row:auto}.da-scard.md,.da-scard.sm{grid-column:span 3}}
-@media(max-width:560px){.da-stock-grid{grid-template-columns:1fr}.da-scard,.da-scard.xl,.da-scard.md,.da-scard.sm{grid-column:1/-1;--rot:0deg !important}}
+@media(max-width:900px){.da-stock-grid{grid-template-columns:repeat(6,1fr)}.da-scard.xl,.da-scard.lg{grid-column:span 6;grid-row:auto}.da-scard.md,.da-scard.sm{grid-column:span 3}.da-scard.xs{grid-column:span 6}}
+@media(max-width:560px){.da-stock-grid{grid-template-columns:1fr}.da-scard,.da-scard.xl,.da-scard.lg,.da-scard.md,.da-scard.sm,.da-scard.xs{grid-column:1/-1;flex-direction:column;--rot:0deg !important}}
 
 /* ── gün içi hareket şeridi ── */
 .da-marquee-wrap{padding:clamp(20px,3vw,32px) 0;border-top:1px solid var(--bp-border);border-bottom:1px solid var(--bp-border);overflow:hidden;background:var(--bp-surface);margin:0 clamp(-16px,-4vw,-40px)}
@@ -591,22 +594,7 @@ header{
   </div>
 </section>
 
-<!-- ═══ KÜRATÖRLÜ LİSTELER ═══ -->
-<section class="da-section" id="listeler">
-  <div class="da-section-head">
-    <div>
-      <div class="da-eyebrow">Küratörlü Listeler</div>
-      <h2 class="da-section-title da-display">Tarama motorunun öne çıkardıkları.</h2>
-    </div>
-    <p class="da-section-desc">Her sayfa yüklemesinde /api/data üzerinden yeniden hesaplanır.</p>
-  </div>
-  <div class="da-curated-list" id="daCuratedList">
-    <div class="da-curated-card"><div class="da-skel" style="width:60px;height:60px;border-radius:12px"></div><div style="flex:1"><div class="da-skel" style="width:50%;height:1.2rem;border-radius:6px"></div></div></div>
-    <div class="da-curated-card"><div class="da-skel" style="width:60px;height:60px;border-radius:12px"></div><div style="flex:1"><div class="da-skel" style="width:50%;height:1.2rem;border-radius:6px"></div></div></div>
-  </div>
-</section>
-
-<!-- ═══ ÖNE ÇIKAN HİSSELER IZGARASI ═══ -->
+<!-- ═══ ÖNE ÇIKAN HİSSELER IZGARASI (mockup sırası: recap→sektör→skor) ═══ -->
 <section class="da-section da-clip-block" id="skorlar">
   <div class="da-section-head">
     <div>
@@ -619,6 +607,21 @@ header{
     <div class="da-skel" style="grid-column:span 6;grid-row:span 2;border-radius:var(--bp-radius-20)"></div>
     <div class="da-skel" style="grid-column:span 3;border-radius:var(--bp-radius-20)"></div>
     <div class="da-skel" style="grid-column:span 3;border-radius:var(--bp-radius-20)"></div>
+  </div>
+</section>
+
+<!-- ═══ KÜRATÖRLÜ LİSTELER ═══ -->
+<section class="da-section" id="listeler">
+  <div class="da-section-head">
+    <div>
+      <div class="da-eyebrow">Küratörlü Listeler</div>
+      <h2 class="da-section-title da-display">Tarama motorunun öne çıkardıkları.</h2>
+    </div>
+    <p class="da-section-desc">Her sayfa yüklemesinde /api/data üzerinden yeniden hesaplanır.</p>
+  </div>
+  <div class="da-curated-list" id="daCuratedList">
+    <div class="da-curated-card"><div class="da-skel" style="width:60px;height:60px;border-radius:12px"></div><div style="flex:1"><div class="da-skel" style="width:50%;height:1.2rem;border-radius:6px"></div></div></div>
+    <div class="da-curated-card"><div class="da-skel" style="width:60px;height:60px;border-radius:12px"></div><div style="flex:1"><div class="da-skel" style="width:50%;height:1.2rem;border-radius:6px"></div></div></div>
   </div>
 </section>
 
@@ -990,8 +993,9 @@ header{
                    .sort(function(a,b){ return b.signal_strength - a.signal_strength; }).slice(0, 8);
     if (!top.length) { daShowSectionEmpty('daStockGrid', 'Şu an gösterilecek hisse yok.'); return; }
     var rots = [-1.1, 0.9, -0.6, 1.3, -0.9, 0.6, -0.4, 1.0];
+    var sizeCycle = ['xl', 'lg', 'md', 'md', 'sm', 'sm', 'sm', 'xs'];
     el.innerHTML = top.map(function(s, i){
-      var sizeCls = i === 0 ? 'xl' : (i <= 2 ? 'md' : 'sm');
+      var sizeCls = sizeCycle[i] || 'sm';
       var sig = signalMeta(s.signal);
       var col = scoreColorVar(s.signal_strength);
       var dash = ringDash(s.signal_strength, 27);
