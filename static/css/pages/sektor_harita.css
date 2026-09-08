@@ -62,7 +62,9 @@
 
   /* Summary row */
   .sum-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
-  .sum-chip { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:10px 14px; text-align:center; flex:1; min-width:100px; transition:border-color .15s; }
+  .sum-chip { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:10px 14px; text-align:center; flex:1; min-width:100px; transition:border-color .15s; position:relative; overflow:hidden; }
+  .sum-chip::before { content:''; position:absolute; top:-60%; right:-15%; width:80px; height:80px; border-radius:50%; background:radial-gradient(circle, rgba(124,92,255,.12), transparent 70%); pointer-events:none; }
+  .sum-chip > * { position:relative; }
   .sum-chip:hover { border-color:var(--bp-border2); }
   .sum-num  { font-size:var(--bp-text-22); font-weight:800; font-family:'Space Grotesk',system-ui,sans-serif; }
   .sum-lbl  { font-size:var(--bp-text-2xs); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
@@ -207,4 +209,22 @@
   #cmpLoadingOverlay { display:none; padding:48px; text-align:center; color:var(--bp-text3); font-size:var(--bp-text-base); }
   #cmpLoadingOverlay.visible { display:block; }
   @keyframes cmpSpin { to{transform:rotate(360deg)} }
+
+  /* ── Data-Art sektör kartı cilası (08.09/09.09 gece) — ::before ısı-katmanı
+     FONKSİYONEL (heat-color overlay), dokunulmadı; hafif eğim + mor hover-glow
+     ::after ile eklendi (namespace çakışması yok). ── */
+  .sector-card {
+    transform: rotate(var(--rot, 0deg));
+    transition: border-color .15s, transform .2s var(--bp-ease-standard, ease), box-shadow .2s ease;
+  }
+  .sector-card:nth-child(5n+1) { --rot: -.7deg; }
+  .sector-card:nth-child(5n+2) { --rot: .5deg; }
+  .sector-card:nth-child(5n+3) { --rot: -.4deg; }
+  .sector-card:nth-child(5n+4) { --rot: .6deg; }
+  .sector-card:nth-child(5n+5) { --rot: -.5deg; }
+  .sector-card:hover {
+    border-color: var(--bp-border2);
+    transform: rotate(0deg) translateY(-3px);
+    box-shadow: 0 20px 45px -22px rgba(124, 92, 255, .4);
+  }
 
