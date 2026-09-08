@@ -718,6 +718,27 @@
   // /api/macro cekilmez. onItems, index.html'in ec30/ec100 endeks karti guncellemesi
   // gibi sablon-ozel yan etkiler icin opsiyonel callback (items render'dan once cagrilir).
   var _bpMacroSeq = 0;  // DOMContentLoaded + setInterval(180s) + visibilitychange ust uste binerse yaris durumu guard'i (r153 bug-hunt)
+  // CPO-1523: /api/macro'nun donduregu stale bayragi hic okunmuyordu — kullanici,
+  // seans disinda saatlerce donuk kalan makro seridi "canli" saniyordu. Bu subtle
+  // rozet backend'in gercek fetch araligini degistirmez (bkz CPO-1522), sadece
+  // mevcut stale bilgisini kullaniciya gorunur kilar. Inline stil kullaniliyor
+  // ki 13 sayfa CSS'ine ayni kurali tekrar tekrar kopyalamak gerekmesin.
+  function bpSetMacroStaleBadge(track, isStale) {
+    var bar = track.closest('.macro-bar');
+    if (!bar) return;
+    var badge = bar.querySelector('.macro-stale-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'macro-stale-badge';
+      badge.setAttribute('role', 'img');
+      badge.setAttribute('aria-label', 'Veriler gecikmeli olabilir');
+      badge.title = 'Piyasa verileri gecikmeli olabilir (son güncellemeden bu yana zaman geçti)';
+      badge.textContent = '⏱';
+      badge.style.cssText = 'position:absolute;top:2px;left:6px;font-size:10px;line-height:1;opacity:.75;z-index:4;pointer-events:none;color:inherit';
+      bar.appendChild(badge);
+    }
+    badge.style.display = isStale ? 'inline' : 'none';
+  }
   window.bpLoadMacroBar = async function(onItems) {
     var track = document.getElementById('macroTrack');
     if (!track) return;
@@ -728,6 +749,7 @@
       var d = await r.json();
       if (mySeq !== _bpMacroSeq) return;  // daha yeni bir bpLoadMacroBar() cagrisi baslamis, bu yaniti at
       if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
+      bpSetMacroStaleBadge(track, !!d.stale);
       var items = d.items || [];
       if (!items.length) {
         // CPO-DEV2-084 #1: backend gecerli-ama-bos donerse de kalici "Yukleniyor..."
