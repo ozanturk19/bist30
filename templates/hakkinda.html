@@ -46,9 +46,8 @@
   <div class="hero-tags">
     <span class="hero-tag"><span aria-hidden="true">🇹🇷</span> Türkçe</span>
     <span class="hero-tag"><span aria-hidden="true">🤖</span> Algoritmik</span>
-    <span class="hero-tag"><span aria-hidden="true">⚡</span> Canlı Veri</span>
+    <span class="hero-tag"><span aria-hidden="true">📊</span> Günlük Güncelleme</span>
     <span class="hero-tag"><span aria-hidden="true">🆓</span> Tamamen Ücretsiz</span>
-    <span class="hero-tag"><span aria-hidden="true">📡</span> SSE Akışı</span>
   </div>
 </div>
 
@@ -59,8 +58,8 @@
     <div class="stat-lbl">Takip edilen BIST hissesi</div>
   </div>
   <div class="stat-box">
-    <div class="stat-num">30 sn</div>
-    <div class="stat-lbl">Canlı fiyat güncelleme</div>
+    <div class="stat-num">Günde 1</div>
+    <div class="stat-lbl">Kapanış sonrası veri güncellemesi (EOD)</div>
   </div>
   <div class="stat-box">
     <div class="stat-num">3</div>
@@ -113,7 +112,6 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
     <ul>
       <li>{{ bist_count }} hisse, sektör filtreleri</li>
       <li>BIST30 ve BIST100 endeks grafikleri</li>
-      <li>Canlı fiyat akışı (SSE)</li>
       <li>KAP bildirim entegrasyonu</li>
       <li>Bilanço takvimi</li>
     </ul>
@@ -135,13 +133,6 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
     <div>
       <div class="feature-title">Hisse Detay Sayfası</div>
       <div class="feature-desc">Bireysel grafik (2 yıl geçmiş), Supertrend + EMA çakıştırması, sinyal geçmişi, KAP haberleri, AI haber özeti.</div>
-    </div>
-  </div>
-  <div class="feature-card">
-    <div class="feature-icon"><span aria-hidden="true">⚡</span></div>
-    <div>
-      <div class="feature-title">Canlı Fiyat Akışı</div>
-      <div class="feature-desc">Server-Sent Events (SSE) ile ~30 saniyede bir fiyat güncellemesi — sayfa yenilemesi gerekmez.</div>
     </div>
   </div>
   <div class="feature-card">
@@ -214,7 +205,7 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
 <div class="tech-grid">
   <div class="tech-card">
     <div class="tech-name">Python / Flask</div>
-    <div class="tech-desc">Backend, sinyal motoru, REST API, SSE</div>
+    <div class="tech-desc">Backend, sinyal motoru, REST API</div>
   </div>
   <div class="tech-card">
     <div class="tech-name">yfinance</div>
@@ -229,12 +220,8 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
     <div class="tech-desc">TradingView açık kaynak grafik kütüphanesi</div>
   </div>
   <div class="tech-card">
-    <div class="tech-name">SSE (EventSource)</div>
-    <div class="tech-desc">Gerçek zamanlı push — WebSocket gerekmez</div>
-  </div>
-  <div class="tech-card">
     <div class="tech-name">Gunicorn + Gevent</div>
-    <div class="tech-desc">Async SSE destekli prodüksiyon sunucusu</div>
+    <div class="tech-desc">Async prodüksiyon sunucusu</div>
   </div>
   <div class="tech-card">
     <div class="tech-name">Gemini 2.5 Flash</div>
@@ -251,7 +238,6 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
 <ul>
   <li><strong>Fiyat verisi:</strong> Yahoo Finance (yfinance) — ücretsiz, ~15 dakika gecikmeli</li>
   <li><strong>Sinyal hesaplama:</strong> Her 15 dakikada bir sunucu tarafında yenilenir</li>
-  <li><strong>Canlı fiyat:</strong> SSE ile yaklaşık 30 saniyede bir tarayıcıya iletilir</li>
   <li><strong>BIST kapsamı:</strong> {{ bist_count }} hisse (BIST100 + ek hisseler), 13 sektör</li>
   <li><strong>KAP haberleri:</strong> Anlık KAP bildirimleri hisse sayfalarında gösterilir</li>
   <li><strong>AI haberleri:</strong> Gemini 2.5 Flash — Gemini 429 rate limit nedeniyle önbellek kullanılır</li>
@@ -263,7 +249,7 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>BIST100 sinyal motoru (Supertrend + ADX + EMA)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>BIST30 / BIST100 endeks grafikleri</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Bireysel hisse sayfaları ({{ bist_count }} hisse)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Canlı fiyat akışı (SSE, ~30 sn)</span></li>
+  <li><span class="rl-todo"><span role="img" aria-label="Retire edildi"><span aria-hidden="true">🔚</span></span></span> <span>Canlı fiyat akışı (SSE) — EOD-only mimariye geçişle retire edildi</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Sinyal geçmişi tablosu</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Hacim grafiği + 52-hafta aralık barı</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Günlük özet sayfası</span></li>

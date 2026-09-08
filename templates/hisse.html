@@ -221,7 +221,6 @@
     <span class="header-chg neu" id="hpChg">—</span>
     <span class="signal-badge signal-BEKLE" id="hpSignal" title="Yükleniyor">⋯</span>
     <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge"><span aria-hidden="true">⚠</span> Anomal</span>
-    <span id="liveTs" style="font-size:var(--bp-text-xs);color:var(--bp-text3)">○</span>
   </div>
   {% if sector %}
   <span class="hib-sector">{{ sector }}</span>
@@ -1303,17 +1302,6 @@ function toggleHisseWatch() {
     w.splice(idx, 1);
     if (_hibSafeWriteWatch(w)) {
       _hibToast(TICKER + ' alarmı kapatıldı', 'warn');
-      // r103 bug-hunt: index.html toggleWatch()'daki (bug-hunt r96) ayni temizlik
-      // hisse.html'in bagimsiz uygulamasina hic tasinmamisti — takip kaldirilinca
-      // fiyat alarmi + sunucu-taraflı e-posta alarmi yetim kalip sessizce yasamaya
-      // devam ediyordu.
-      try {
-        const pa = JSON.parse(localStorage.getItem('bp_price_alarms') || '{}');
-        if (pa && typeof pa === 'object' && TICKER in pa) {
-          delete pa[TICKER];
-          localStorage.setItem('bp_price_alarms', JSON.stringify(pa));
-        }
-      } catch (e) { console.warn('hisse fiyat alarmi temizligi basarisiz:', e); }
       if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) {
         _pending = true;
         _hibWatchToggleInFlight = true;
@@ -1457,9 +1445,6 @@ function shareSignal(platform) {
 
 /* ── Grafik kurulumu ─────────────────────────────────── */
 let _hisseChart = null;        // r140: onceki instance/RO/listener temizligi icin (index.html chartMain deseniyle simetrik)
-let _hisseCandleSeries = null; // r175: SSE canli fiyat cizgisini guncelleyebilmek icin candle serisine disaridan erisim
-let _hisseLivePriceLine = null;
-let _hisseLastClose = null; // CPO-07.09: "Canlı" cizgisi son mum kapanisindan ne kadar farkli, SSE handler'i da bunu bilmeli
 let _hisseChartRO = null;
 let _hisseResizeHandler = null;
 let _chartResizeT = null;   // r157: resize debounce (sparkline'daki _sparkResizeTimer desenine hizali)
@@ -1467,7 +1452,6 @@ let _chartResizeT = null;   // r157: resize debounce (sparkline'daki _sparkResiz
 function buildChart(d) {
   if (_hisseChart) { try { _hisseChart.remove(); } catch(_) { console.warn('eski chart instance temizlenemedi', _); } _hisseChart = null; }
   if (_hisseChartRO) { try { _hisseChartRO.disconnect(); } catch(_) { /* zaten disconnect olabilir */ } _hisseChartRO = null; }
-  _hisseCandleSeries = null; _hisseLivePriceLine = null; // r175: chart.remove() ile disposed oldular, SSE'nin eski referansa yazmasin
   if (_hisseResizeHandler) { window.removeEventListener('resize', _hisseResizeHandler); _hisseResizeHandler = null; }
   document.getElementById('chartLoading').style.display = 'none';
   document.getElementById('chartsInner').style.display  = 'block';
@@ -1546,32 +1530,6 @@ function buildChart(d) {
 
   const candle = BPChart.addCandleSeries(chart);
   candle.setData(d.ohlc);
-  _hisseCandleSeries = candle;
-
-  /* r175 (Ozan bug bildirimi): grafik gunluk mum oldugu icin bugunun cubugu
-     kapanana kadar eklenmiyor - son mum-fiyati (dunku kapanis) her zaman
-     ustteki canli fiyattan (SSE ile guncellenen hpPrice) farkli gorunuyordu,
-     "grafik guncel degil" izlenimi yaratiyordu. Ayri, capraz kesikli bir
-     "Canli" fiyat cizgisi ekleyip SSE mesajlarinda guncelleyerek ikisini
-     ayni grafikte gorunur/ayirt edilebilir kiliyoruz - veri degismedi,
-     sadece canli fiyatin nerede oldugu artik grafikte de goruluyor. */
-  /* CPO-07.09: "Canlı" çizgisi sadece canlı fiyat SON MUM KAPANIŞINDAN belirgin
-     şekilde farklıysa gösterilir — ikisi eşit/çok yakınken iki ayrı eksen
-     etiketi üst üste binip (özellikle dar mobil eksende) komşu ızgara
-     etiketlerini kırpıyordu. Eşitken zaten tek bir kapanış-fiyatı etiketi
-     (lastValueVisible) yeterli, ayrı bir "Canlı" çizgisine gerek yok. */
-  _hisseLastClose = d.ohlc && d.ohlc.length ? d.ohlc[d.ohlc.length - 1].close : null;
-  if (d.summary && d.summary.price != null && _hisseLastClose &&
-      Math.abs(d.summary.price - _hisseLastClose) / _hisseLastClose > 0.001) {
-    _hisseLivePriceLine = candle.createPriceLine({
-      price: d.summary.price,
-      color: '#b8c3ff',
-      lineWidth: 1,
-      lineStyle: LC.LineStyle.Dashed,
-      axisLabelVisible: true,
-      title: 'Canlı',
-    });
-  }
 
   /* EMA legend */
   const legEl = document.getElementById('emaLegend');
@@ -2296,22 +2254,6 @@ async function loadChart(retry) {
     fetch('/api/data').then(r => r.json()).then(data2 => {
       renderFreshness(data2.data_freshness, data2.data_quality, data2.stocks_age_s, data2.refreshing);  /* SPEC-014 B2/B3 + CPO-551 A5 */
 
-      /* CPO-DEV2-076 (A): piyasa kapalıyken SSE'yi kapat, pulse yerine statik gösterge --
-         _sseEs kontrolünden BAĞIMSIZ (baglanti hic acilmamis olsa bile -- ör. sayfa
-         arka planda acilmissa -- gösterge yine de "Piyasa kapalı" olmalı, varsayilan
-         nötr işaretçide (○) kalmamalı). */
-      if (data2.data_freshness && typeof data2.data_freshness.market_open === 'boolean') {
-        _marketOpenNow = data2.data_freshness.market_open;
-        if (!_marketOpenNow) {
-          if (_sseEs) { _sseEs.close(); _sseEs = null; }
-          const _lt0 = document.getElementById('liveTs');
-          if (_lt0) {
-            _lt0.style.cssText = 'font-size:var(--bp-text-xs);color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
-            _lt0.innerHTML = '<span class="live-dot-idle"></span>Piyasa kapalı';
-          }
-        }
-      }
-
       /* Summary enrichment — signal_bars/date /api/data'dan */
       const sd = (data2.stocks || []).find(s => s.ticker === TICKER);
       if (sd) {
@@ -2863,96 +2805,9 @@ async function loadMTF() {
 }
 loadMTF();
 
-/* ── SSE Canlı Fiyat ──────────────────────────────── */
-let _sseRetry = 1000;
-let _sseEs = null;
-let _sseRetryTimer = null; /* r159: bekleyen reconnect setTimeout id'si, pagehide/hidden'da clearTimeout edilir (leftover timer -> gereksiz reconnect churn) */
-let _marketOpenNow = true; /* CPO-DEV2-076 (A): startSSE() ilk çağrıldığında (sayfa yüklenirken) henüz /api/data yanıtı gelmemiş olabilir, iyimser varsayılan */
-function startSSE() {
-  if (!_marketOpenNow || document.hidden) return; /* CPO-DEV2-076 (A): piyasa kapalıyken sahte "canlı" bağlantı açma */
-  if (_sseEs) { _sseEs.close(); _sseEs = null; }
-  const es = new EventSource('/api/stream');
-  _sseEs = es;
-  es.onopen = () => { _sseRetry = 1000; };
-  es.onmessage = e => {
-    try {
-      const msg = JSON.parse(e.data);
-      if (msg.type !== 'prices') return;
-      const d = msg.data[TICKER];
-      if (!d) return;
-
-      const priceEl = document.getElementById('hpPrice');
-      const chgEl   = document.getElementById('hpChg');
-      const old = parseFloat(priceEl.dataset.raw || '0');
-
-      priceEl.dataset.raw = d.price;
-      priceEl.textContent = d.price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-      /* r175: grafikteki "Canlı" kesikli çizgiyi de aynı SSE mesajıyla senkron tut.
-         CPO-07.09: çizgi sadece canlı fiyat son kapanıştan belirgin farklıyken
-         var olsun — seans içinde fark açılırsa oluştur, kapanırsa kaldır
-         (dar eksende iki çakışan etiket komşu ızgara etiketlerini kırpıyordu). */
-      if (_hisseCandleSeries && _hisseLastClose) {
-        const _diverges = Math.abs(d.price - _hisseLastClose) / _hisseLastClose > 0.001;
-        if (_hisseLivePriceLine && !_diverges) {
-          _hisseCandleSeries.removePriceLine(_hisseLivePriceLine);
-          _hisseLivePriceLine = null;
-        } else if (_hisseLivePriceLine) {
-          _hisseLivePriceLine.applyOptions({ price: d.price });
-        } else if (_diverges) {
-          _hisseLivePriceLine = _hisseCandleSeries.createPriceLine({
-            price: d.price, color: '#b8c3ff', lineWidth: 1,
-            lineStyle: LC.LineStyle.Dashed, axisLabelVisible: true, title: 'Canlı',
-          });
-        }
-      }
-
-      if (old && d.price !== old) {
-        priceEl.classList.remove('flash-up', 'flash-down');
-        void priceEl.offsetWidth;
-        priceEl.classList.add(d.price > old ? 'flash-up' : 'flash-down');
-        clearTimeout(priceEl._flashTimer);
-        priceEl._flashTimer = setTimeout(() => priceEl.classList.remove('flash-up', 'flash-down'), 600);
-      }
-
-      if (d.change_pct != null) {
-        const sign = d.change_pct > 0 ? '+' : '';
-        chgEl.textContent = sign + d.change_pct.toFixed(2).replace('.', ',') + '%';
-        chgEl.className   = 'header-chg ' + (d.change_pct > 0 ? 'pos' : d.change_pct < 0 ? 'neg' : 'neu');
-      }
-
-      const _lt = document.getElementById('liveTs');
-      _lt.style.cssText = 'font-size:var(--bp-text-xs);color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
-      _lt.innerHTML = '<span class="live-dot-pulse"></span>' + msg.ts;
-    } catch(_) { console.warn('SSE fiyat guncelleme hatasi', _); }
-  };
-  es.onerror = () => {
-    es.close();
-    _sseEs = null;
-    const _lt = document.getElementById('liveTs');
-    if (_lt) {
-      _lt.style.cssText = 'font-size:var(--bp-text-xs);color:var(--bp-text3);display:inline-flex;align-items:center;gap:4px';
-      _lt.innerHTML = '<span class="live-dot-idle"></span>bağlantı koptu — yeniden bağlanılıyor…';
-    }
-    _sseRetryTimer = setTimeout(startSSE, _sseRetry);
-    _sseRetry = Math.min(_sseRetry * 2, 30000);
-  };
-}
-startSSE();
-window.addEventListener('pagehide', () => { clearTimeout(_sseRetryTimer); if (_sseEs) { _sseEs.close(); _sseEs = null; } });
-window.addEventListener('pageshow', e => { if (e.persisted) startSSE(); });
-
-/* CPO-DEV2-072 r98: Page Visibility — sekme arka plandayken duraklat.
-   Veri doğruluğuna dokunmuyor, sadece NE ZAMAN çektiğini değiştiriyor.
-   Sekme gizliyken SSE kapanır; görünür olunca hemen bir kez tazelenip devam eder. */
+/* CPO-DEV2-072 r98: Page Visibility — sekme görünür olunca makro bandı tazele. */
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    clearTimeout(_sseRetryTimer);
-    if (_sseEs) { _sseEs.close(); _sseEs = null; }
-  } else {
-    if (!_sseEs) startSSE();
-    if (window._bpResumeMacro) window._bpResumeMacro();
-  }
+  if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro();
 });
 
 /* ── Diğer Hisseler Accordion ──────────────────── */

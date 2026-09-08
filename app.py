@@ -297,7 +297,6 @@ _YF_FETCH_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_fetch.py")
 _YF_MACRO_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_macro_fetch.py")
 _YF_FUND_SCRIPT   = os.path.join(os.path.dirname(__file__), "yf_fundamentals_fetch.py")
 _YF_CHART_SCRIPT  = os.path.join(os.path.dirname(__file__), "yf_chart_fetch.py")
-_YF_LIVE_SCRIPT   = os.path.join(os.path.dirname(__file__), "yf_live_fetch.py")
 
 _SUBPROCESS_SLOW_MS = 3000  # CPO-740 Görev 12c: >3s uyarı (baseline ~956ms × 3)
 
@@ -540,78 +539,6 @@ def _fetch_chart_subprocess(yf_ticker, period="5y", timeout=40):
         return None
     except Exception as e:
         logger.error("yf_chart_fetch %s error: %s", yf_ticker, e)
-        return None
-
-
-_LIVE_SLOW_MS = 20000  # >20s uyarı (150+ ticker batch baseline ~5-15s)
-
-def _fetch_live_subprocess(tickers_str, timeout=60):
-    """Lock-free BIST batch price fetch via yf_live_fetch.py subprocess — G24d.
-    Replaces _YF_GLOBAL_LOCK + yf.download() in fetch_live_prices().
-    Returns {base_ticker: {price, change_pct}} or None on failure.
-    """
-    if _yahoo_cb_blocked():
-        _yahoo_cb["window_skips"] += 1
-        return None
-    _t0 = time.perf_counter()
-    try:
-        result = subprocess.run(
-            [_sys.executable, _YF_LIVE_SCRIPT, "bist", tickers_str],
-            capture_output=True, text=True, timeout=timeout,
-        )
-        _yahoo_cb_record(result.returncode == 0, result.stderr)
-        _ms = (time.perf_counter() - _t0) * 1000
-        if result.returncode != 0:
-            logger.warning("yf_live_fetch bist FAIL %.0fms: %s", _ms, result.stderr[:120])
-            return None
-        data = json.loads(result.stdout)
-        payload = data.get("payload")
-        logger.debug("yf_live_fetch bist: %.0fms %d tickers", _ms, len(payload) if payload else 0)
-        if _ms > _LIVE_SLOW_MS:
-            logger.warning("yf_live_fetch bist SLOW: %.0fms", _ms)
-        return payload
-    except subprocess.TimeoutExpired:
-        _yahoo_cb_record(False, timeout=True)
-        _ms = (time.perf_counter() - _t0) * 1000
-        logger.warning("yf_live_fetch bist TIMEOUT %ds (%.0fms elapsed)", timeout, _ms)
-        return None
-    except Exception as e:
-        logger.error("yf_live_fetch bist error: %s", e)
-        return None
-
-
-def _fetch_global_subprocess(syms, timeout=60):
-    """Lock-free global price fetch via yf_live_fetch.py subprocess — G24d.
-    Replaces _YF_GLOBAL_LOCK + yf.download() in fetch_global_prices().
-    Returns {yf_sym: {price, change_pct}} or None on failure.
-    """
-    if _yahoo_cb_blocked():
-        _yahoo_cb["window_skips"] += 1
-        return None
-    _t0 = time.perf_counter()
-    try:
-        result = subprocess.run(
-            [_sys.executable, _YF_LIVE_SCRIPT, "global", json.dumps(syms)],
-            capture_output=True, text=True, timeout=timeout,
-        )
-        _yahoo_cb_record(result.returncode == 0, result.stderr)
-        _ms = (time.perf_counter() - _t0) * 1000
-        if result.returncode != 0:
-            logger.warning("yf_live_fetch global FAIL %.0fms: %s", _ms, result.stderr[:120])
-            return None
-        data = json.loads(result.stdout)
-        payload = data.get("payload")
-        logger.debug("yf_live_fetch global: %.0fms %d syms", _ms, len(payload) if payload else 0)
-        if _ms > _LIVE_SLOW_MS:
-            logger.warning("yf_live_fetch global SLOW: %.0fms", _ms)
-        return payload
-    except subprocess.TimeoutExpired:
-        _yahoo_cb_record(False, timeout=True)
-        _ms = (time.perf_counter() - _t0) * 1000
-        logger.warning("yf_live_fetch global TIMEOUT %ds (%.0fms elapsed)", timeout, _ms)
-        return None
-    except Exception as e:
-        logger.error("yf_live_fetch global error: %s", e)
         return None
 
 
@@ -1324,18 +1251,7 @@ def _enrich_stock(s: dict) -> dict:
 
 
 _cache       = {"data": [], "updated_at": None, "last_refresh_ts": 0.0, "loading": True}  # SPEC-008 v1.2 #39; loading=True cold-start sentinel (G25)
-_live_prices = {}
 _lock        = threading.Lock()
-_sse_clients = []
-_sse_lock    = threading.Lock()
-# CPO-1218 P0(2): SSE bağlantısına mutlak ömür tavanı. Kanıt: istemci/nginx
-# FIN gönderdiğinde generate() bunu writes ile ASLA tespit edemiyordu (CLOSE-WAIT
-# soketine keepalive yazmak hata fırlatmıyor — canlıda 2163s açık kalan tek bir
-# stream ölçüldü, ~144 keepalive hatasız gönderilmiş); worker 100 bağlantı
-# tavanına ulaşınca (worker-connections 100) yeni istek alamıyor, 60s nginx
-# upstream timeout → 504. EventSource istemci tarafında native otomatik
-# reconnect yaptığı için sunucunun kendi tarafından kapatması güvenli.
-_SSE_MAX_LIFETIME_S = 240
 _bt_cache    = {"data": None, "computed_at": None}   # backtest cache
 _anomaly_cache = {}  # ticker -> {score, flag, reason} for UI badge (F2)
 
@@ -1364,19 +1280,6 @@ except Exception:
 # yenilemesiyle birkaç dakikada dolar (_serial_chart_refresh); bu pencere
 # geçtiyse "loading:true" artık dürüst değil — bkz _chart_response_with_macro_summary.
 _CHART_LOADING_GRACE_S = 300
-
-
-def _push_sse(payload: dict):
-    msg = f"data: {json.dumps(payload)}\n\n"
-    with _sse_lock:
-        dead = []
-        for q in _sse_clients:
-            try:
-                q.append(msg)
-            except Exception:
-                dead.append(q)
-        for q in dead:
-            _sse_clients.remove(q)
 
 
 def _fill_intraday_gaps(df, ticker):
@@ -3377,7 +3280,6 @@ logger.info("Synthetic drift monitor başlatıldı (M6 — her 90s drift analizi
 
 
 _DISK_CACHE_PATH       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_cache.json")
-_LIVE_PRICES_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_live_prices.json")
 _BT_DISK_PATH          = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backtest_cache.json")
 _SNAPSHOTS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snapshots")
 os.makedirs(_SNAPSHOTS_DIR, exist_ok=True)
@@ -3835,168 +3737,6 @@ def _refresh_data_impl():
                 _anomaly_cache.update(_new_ac)
         except Exception as _e:
             logger.warning("UI_ANOMALY_CACHE exception: %s", _e)
-
-
-def fetch_live_prices():
-    tickers_str = " ".join(t + ".IS" for t in BIST30)
-    try:
-        result = _fetch_live_subprocess(tickers_str)
-        if not result:
-            return
-        now_str = datetime.now(_TZ_TR).strftime("%H:%M:%S")
-        # CPO-1471(b)/CPO-1473: son bilinen sinyali (_prev_signals, refresh kadanslı)
-        # payload'a ekle — ekstra yfinance/analiz çağrısı yok, mevcut in-memory dict lookup.
-        payload = {t: {**v, "updated": now_str, "signal": _prev_signals.get(t)} for t, v in result.items()}
-        if payload:
-            with _lock:
-                _live_prices.update(payload)
-            _save_live_prices_to_disk()
-            _push_sse({"type": "prices", "data": payload, "ts": now_str})
-    except Exception as e:
-        logger.error("fetch_live_prices: %s", e, exc_info=True)
-
-
-_GLOBAL_TICKERS_YF = {
-    "BTC":      "BTC-USD",
-    "ETH":      "ETH-USD",
-    "SOL":      "SOL-USD",
-    "BNB":      "BNB-USD",
-    "ALTIN":    "GC=F",
-    "GUMUS":    "SI=F",
-    "PETROL":   "CL=F",
-    "DOGALGAZ": "NG=F",
-    "SP500":    "^GSPC",
-    "NASDAQ":   "^IXIC",
-    # US Stocks
-    "AAPL": "AAPL", "MSFT": "MSFT", "NVDA": "NVDA", "GOOGL": "GOOGL",
-    "AMZN": "AMZN", "META": "META", "TSLA": "TSLA", "NFLX": "NFLX",
-    "JPM":  "JPM",  "BRKB": "BRK-B","WMT":  "WMT",  "V":    "V",
-    "MA":   "MA",   "UNH":  "UNH",  "XOM":  "XOM",
-}
-
-def fetch_global_prices():
-    """Kripto, emtia ve ABD hisselerinin fiyatlarını çeker, SSE'ye push eder."""
-    try:
-        syms = list(set(_GLOBAL_TICKERS_YF.values()))
-        result = _fetch_global_subprocess(syms)
-        if not result:
-            return
-        now_str = datetime.now(_TZ_TR).strftime("%H:%M:%S")
-        yf_to_keys = {}
-        for k, v in _GLOBAL_TICKERS_YF.items():
-            yf_to_keys.setdefault(v, []).append(k)
-        payload = {}
-        for yf_sym, keys in yf_to_keys.items():
-            if yf_sym not in result:
-                continue
-            entry = {**result[yf_sym], "updated": now_str}
-            for k in keys:
-                payload[k] = entry
-        if payload:
-            with _lock:
-                _live_prices.update(payload)
-            _save_live_prices_to_disk()
-            _push_sse({"type": "global_prices", "data": payload, "ts": now_str})
-    except Exception as e:
-        logger.error("fetch_global_prices: %s", e, exc_info=True)
-
-
-def _save_live_prices_to_disk():
-    """Refresh service: _live_prices'ı diske yazar; web workerlar okusun.
-    Boş dict'i yazmaz — startup'ta var olan disk verisini silmesin."""
-    try:
-        with _lock:
-            snapshot = dict(_live_prices)
-        if not snapshot:
-            return
-        _atomic_write_json(_LIVE_PRICES_DISK_PATH, snapshot)
-    except Exception as e:
-        logger.warning("_save_live_prices_to_disk hatası: %s", e)
-
-
-_live_prices_disk_mtime = None  # per-worker; CPO-1135 B1 şart 3 — mtime değişmediyse parse atla
-
-
-def _load_live_prices_from_disk():
-    """Web worker: _live_prices'ı diskten yükler (yfinance yapmadan).
-
-    CPO-1135 B1: leader (REFRESH_WORKER=1) diske yazdığı fiyatları, web worker'lar
-    burada okuyup kendi process-local _sse_clients'ına push eder — cross-process
-    SSE yayını disk-reload'a "iğnelenerek" eklenir, yeni thread/loop yok.
-    Şart 1: diff boşsa push yok. Şart 3: mtime değişmediyse JSON parse atla.
-    """
-    global _live_prices_disk_mtime
-    try:
-        if not os.path.exists(_LIVE_PRICES_DISK_PATH):
-            return
-        mtime = os.path.getmtime(_LIVE_PRICES_DISK_PATH)
-        if _live_prices_disk_mtime is not None and mtime == _live_prices_disk_mtime:
-            return
-        _live_prices_disk_mtime = mtime
-        with open(_LIVE_PRICES_DISK_PATH, "r", encoding="utf-8") as f:
-            d = json.load(f)
-        if isinstance(d, dict) and d:
-            with _lock:
-                diff = {k: v for k, v in d.items() if _live_prices.get(k) != v}
-                _live_prices.update(d)
-            logger.debug("_load_live_prices_from_disk: %d fiyat yüklendi", len(d))
-            if diff:
-                now_str = datetime.now(_TZ_TR).strftime("%H:%M:%S")
-                _push_sse({"type": "prices", "data": diff, "ts": now_str})
-    except Exception as e:
-        logger.warning("_load_live_prices_from_disk hatası: %s", e)
-
-
-def background_global_prices():
-    # CPO-558 (11.06.2026): REFRESH_WORKER guard — web worker'da yfinance yasak
-    _rw = os.environ.get("REFRESH_WORKER", "")
-    if _rw == "web":
-        logger.info("background_global_prices: REFRESH_WORKER=web — global fiyatlar background_live_prices disk-reload ile güncellenir")
-        return
-    elif _rw == "1":
-        logger.info("background_global_prices: REFRESH_WORKER=1 — bist30-refresh.service lider modu")
-    # CPO-520 P0 (07.06.2026): _is_macro_leader fcntl ile multi-worker fan-out önlendi
-    # (4 worker × kripto+emtia+ABD multi yfinance download = 25 ticker × 4 = 100 paralel call → deadlock)
-    if not _is_macro_leader():
-        logger.info("background_global_prices: non-leader worker — atlandı")
-        return
-    logger.info("background_global_prices: LEADER worker — fetch modu (60s)")
-    time.sleep(60)  # CPO-592v3: startup delay — refresh_data() ilk analyze batch'ini tamamlasın
-    while True:
-        try:
-            fetch_global_prices()
-        except Exception as e:
-            logger.error("background_global_prices hatası: %s", e, exc_info=True)
-        time.sleep(60)
-
-
-def background_live_prices():
-    # CPO-558 (11.06.2026): REFRESH_WORKER guard — web worker'da yfinance yasak
-    _rw = os.environ.get("REFRESH_WORKER", "")
-    if _rw == "web":
-        logger.info("background_live_prices: REFRESH_WORKER=web — disk-reload only modu (30s)")
-        while True:
-            try:
-                _load_live_prices_from_disk()
-            except Exception as e:
-                logger.error("background_live_prices disk-reload hatası: %s", e)
-            time.sleep(30)
-        return  # ulaşılmaz
-    elif _rw == "1":
-        logger.info("background_live_prices: REFRESH_WORKER=1 — bist30-refresh.service lider modu")
-    # CPO-520 P0 (07.06.2026): _is_macro_leader fcntl ile multi-worker fan-out önlendi
-    # (4 worker × BIST30 multi yfinance.download = 30 ticker × 4 = 120 paralel call → deadlock)
-    if not _is_macro_leader():
-        logger.info("background_live_prices: non-leader worker — atlandı")
-        return
-    logger.info("background_live_prices: LEADER worker — fetch modu (30s)")
-    time.sleep(30)  # CPO-592v3: startup delay — refresh_data() ilk analyze batch'ini tamamlasın
-    while True:
-        try:
-            fetch_live_prices()
-        except Exception as e:
-            logger.error("background_live_prices hatası: %s", e, exc_info=True)
-        time.sleep(30)
 
 
 def _purge_stale_chart_caches():
@@ -5106,64 +4846,6 @@ def api_market_summary():
         "totalBullCount": len(all_bull),
         # watchlistMoved: client-side hesaplanır (watchlist localStorage)
     })
-
-
-@app.route("/api/stream")
-def api_stream():
-    client_queue = collections.deque()
-    with _sse_lock:
-        _sse_clients.append(client_queue)
-
-    with _lock:
-        initial = dict(_live_prices)
-    initial_msg = (
-        f"data: {json.dumps({'type': 'prices', 'data': initial, 'ts': datetime.now(_TZ_TR).strftime('%H:%M:%S')})}\n\n"
-        if initial else ""
-    )
-
-    def generate():
-        # CPO-1135 A: ~15s'de bir keepalive comment — ölü soket bu sayede
-        # finally bloğunda _sse_clients'tan temizlenir (CF/tarayıcı idle riski kapanır).
-        last_activity = time.monotonic()
-        stream_start   = time.monotonic()
-        try:
-            if initial_msg:
-                yield initial_msg
-            while True:
-                # CPO-1218 P0(2): mutlak ömür tavanı — keepalive yazmak CLOSE-WAIT
-                # soketinde hata fırlatmıyor, bu döngü tek başına asla çıkmayabilir.
-                # Süre dolunca generator normal biter → yanıt kapanır → fd serbest
-                # kalır. EventSource istemcisi otomatik reconnect eder.
-                if time.monotonic() - stream_start >= _SSE_MAX_LIFETIME_S:
-                    break
-                while client_queue:
-                    yield client_queue.popleft()
-                    last_activity = time.monotonic()
-                if time.monotonic() - last_activity >= 15:
-                    yield ": keepalive\n\n"
-                    last_activity = time.monotonic()
-                time.sleep(0.5)
-        finally:
-            with _sse_lock:
-                if client_queue in _sse_clients:
-                    _sse_clients.remove(client_queue)
-
-    return Response(
-        generate(),
-        mimetype="text/event-stream",
-        headers={
-            "Cache-Control":     "no-cache",
-            "X-Accel-Buffering": "no",
-            # CPO-1218 takip (02.08 20:xx TR): nginx /api/stream'i pool'lu
-            # bist30_upstream'e almıyor (keepalive korunmuyor, CPO-483 notu),
-            # ama burada "keep-alive" demek gunicorn'a soketi bir sonraki
-            # istek için açık tut derdi — o istek hiç gelmiyor, socket
-            # CLOSE-WAIT'te asılı kalıyor (canlı ölçüm: 1 worker'da 44→49,
-            # ~90s'de). "close" ile generate() bitince soket hemen kapanır.
-            "Connection":        "close",
-        },
-    )
-
 
 
 
@@ -9035,7 +8717,6 @@ def _compute_health():
         "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
         "drift_count":              drift_count,  # M6: ardışık döngü arası drift ticker sayısı
         "bad_ticker_count":         bad_ticker_count,  # M5: stale fallback ticker sayısı
-        "sse_clients":              len(_sse_clients),  # CPO-1135 diagnostik — process-local, sızıntı ölçümü için
         "git_sha":                  _GIT_SHA,  # CPO-DEV2-035 P1-INTEGRITY-1
         "ts": now,
     }
@@ -9268,7 +8949,6 @@ def api_cache_inventory():
                         "status": "FRESH" if age < 3600 else "STALE", "note": note})
 
     _check("stocks_main", _DISK_CACHE_PATH)
-    _check("live_prices", _LIVE_PRICES_DISK_PATH)
     _check("macro", _MACRO_DISK_PATH)
     _check("macro_ai_summary", _MACRO_AI_DISK_PATH, "Gemini kota bağımlı — STALE beklenir")
     _check("news", _NEWS_CACHE_DISK_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
@@ -12246,8 +11926,6 @@ def _startup():
 
     threading.Thread(target=_serial_chart_refresh_with_event, daemon=True).start()
     threading.Thread(target=_background_refresh_after_serial,  daemon=True).start()
-    threading.Thread(target=background_live_prices,    daemon=True).start()
-    threading.Thread(target=background_global_prices,  daemon=True).start()
     # Makro ticker'ları servis başlar başlamaz ilk kez çek (arka planda)
     def _warm_macro():
         # CPO-558B: web worker'da yfinance yasak — disk-reload yeterli
