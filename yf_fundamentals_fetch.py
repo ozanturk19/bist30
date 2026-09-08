@@ -20,6 +20,8 @@ _NEEDED_KEYS = [
     # CPO r174 (Ozan istegi, temel analiz genisletme): analist + sahiplik + defter degeri
     "targetMeanPrice", "recommendationKey", "numberOfAnalystOpinions",
     "bookValue", "totalCash", "heldPercentInsiders", "heldPercentInstitutions",
+    # CPO-1527 (FD/FAVOK icin): EBITDA payda, enterpriseValue pay
+    "enterpriseValue",
 ]
 
 # CPO r174: yillik gelir tablosu trendi (Ciro+Net Kar, tum sektorlerde var) —
@@ -156,6 +158,73 @@ def _fetch_cashflow_trend(ticker) -> dict:
     return out
 
 
+# CPO-1527: gross_margin/ebitda_margin için income_stmt'ten Gross Profit/EBITDA
+# gerekiyor — _STATEMENT_ROWS bunları bilinçli dışlamıştı (banka sektöründe
+# satır yok, bkz. _STATEMENT_ROWS üstündeki not), o yüzden ayrı, izole bir
+# okuma: sadece en güncel dönem, çok-yıllık trend değil.
+_INCOME_RATIO_ROWS = ["Total Revenue", "Gross Profit", "EBITDA"]
+
+
+def _fetch_latest_income_items(ticker) -> dict:
+    """En güncel yıllık gelir tablosu satırları — çapraz-tablo oranları için
+    (CPO-1527). Gross Profit/EBITDA banka sektöründe yok → None kalır."""
+    try:
+        df = ticker.income_stmt
+    except Exception:
+        return {}
+    if df is None or df.empty:
+        return {}
+    col = df.columns[0]
+    return {
+        "total_revenue": _latest_col_value(df, "Total Revenue", col),
+        "gross_profit": _latest_col_value(df, "Gross Profit", col),
+        "ebitda": _latest_col_value(df, "EBITDA", col),
+    }
+
+
+def _merge_cross_statement_ratios(info_subset: dict, income: dict, balance: dict,
+                                   cashflow: dict) -> dict:
+    """gross_margin/ebitda_margin/fcf_to_sales/net_debt_to_ebitda/ev_to_ebitda —
+    gelir tablosu + bilanço + nakit akış + .info tek düz dict'te birleşir
+    (CPO-1527). Sanity clamp burada değil, app.py _FUND_SANITY'de yapılır;
+    burada sadece anlamsız bölümler (EBITDA<=0) None'a çekilir."""
+    revenue = income.get("total_revenue")
+    gross_profit = income.get("gross_profit")
+    ebitda = income.get("ebitda")
+    ebitda_positive = ebitda is not None and ebitda > 0
+
+    gross_margin = None
+    if revenue and gross_profit is not None:
+        gross_margin = (gross_profit / revenue) * 100
+
+    ebitda_margin = None
+    if revenue and ebitda is not None:
+        ebitda_margin = (ebitda / revenue) * 100
+
+    fcf_to_sales = None
+    fcf = cashflow.get("free_cash_flow")
+    if revenue and fcf is not None:
+        fcf_to_sales = (fcf / revenue) * 100
+
+    net_debt_to_ebitda = None
+    net_debt = balance.get("net_debt")
+    if ebitda_positive and net_debt is not None:
+        net_debt_to_ebitda = net_debt / ebitda
+
+    ev_to_ebitda = None
+    enterprise_value = info_subset.get("enterpriseValue")
+    if ebitda_positive and enterprise_value is not None:
+        ev_to_ebitda = enterprise_value / ebitda
+
+    return {
+        "gross_margin": gross_margin,
+        "ebitda_margin": ebitda_margin,
+        "fcf_to_sales": fcf_to_sales,
+        "net_debt_to_ebitda": net_debt_to_ebitda,
+        "ev_to_ebitda": ev_to_ebitda,
+    }
+
+
 def fetch(yf_ticker: str) -> dict:
     """Temel analiz bilgilerini döndürür — subprocess isolated."""
     import yfinance as yf
@@ -177,7 +246,18 @@ def fetch(yf_ticker: str) -> dict:
 
     trend = _fetch_statement_trend(t)
 
-    return {"ticker": yf_ticker, "info": subset, "statement_trend": trend}
+    # CPO-1527: Kaldiraç/Nakit Akışı skor girdileri — izole fetcher'ları
+    # (CPO-1526, DEV-1813) fetch()'e bağla + çapraz-tablo oranlarını birleştir.
+    balance = _fetch_balance_sheet_trend(t)
+    cashflow = _fetch_cashflow_trend(t)
+    income_latest = _fetch_latest_income_items(t)
+    ratios = _merge_cross_statement_ratios(subset, income_latest, balance, cashflow)
+
+    result = {"ticker": yf_ticker, "info": subset, "statement_trend": trend}
+    result.update(balance)
+    result.update(cashflow)
+    result.update(ratios)
+    return result
 
 
 def main():

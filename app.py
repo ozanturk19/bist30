@@ -7666,6 +7666,14 @@ _FUND_SANITY = {
     "price_to_sales": (0.0, 100.0),
     "insider_pct":       (0.0, 100.0),
     "institutional_pct": (0.0, 100.0),
+    # CPO-1527 (CPO-1526 Faz 1 kaldıraç/nakit akışı girdileri — izole, henüz
+    # _get_fundamentals()'a bağlanmadı, bkz. yf_fundamentals_fetch.py fetch())
+    "quick_ratio":        (0.0, 30.0),      # current_ratio (0,50) emsaliyle tutarlı, biraz daha sıkı
+    "gross_margin":       (-200.0, 100.0),  # profit_margin ile birebir aynı stil
+    "ebitda_margin":      (-200.0, 100.0),
+    "fcf_to_sales":       (-200.0, 200.0),  # FCF yapısal olarak revenue'ya sınırlı değil, biraz daha geniş
+    "net_debt_to_ebitda": (-20.0, 50.0),    # fetch()'teki EBITDA>0 guard'ı zaten en kötü uçları önlüyor
+    "ev_to_ebitda":       (-50.0, 150.0),   # pe_ratio'nun üst sınırıyla (150) tutarlı
 }
 
 # CPO r174: yfinance recommendationKey ham İngilizce donuyor (buy/hold/sell vb.)
