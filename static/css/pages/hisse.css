@@ -1193,3 +1193,60 @@
   outline-offset: 2px;
   border-radius: var(--bp-radius-sm);
 }
+
+/* ── Data-Art içerik-kartı cilası (08.09 gece) — hero'yla aynı görsel dil
+   mockup'taki (hisse-detay-dataart.html) "köşe parıltısı + kenarlık-kontrastı +
+   hafif eğim" reçetesi: box-shadow YOK (derinlik border-contrast'tan gelir),
+   sadece ADDITIVE — mevcut inline background/border/padding'e dokunulmadı,
+   hiçbir HTML/JS/id değişmedi. ── */
+#signalSummarySection,
+.content-card,
+.faq-card {
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--bp-dur-base) var(--bp-ease-standard);
+}
+#signalSummarySection::before,
+.content-card::before,
+.faq-card::before {
+  content: '';
+  position: absolute;
+  top: -35%;
+  right: -6%;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 92, 255, .13), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+#signalSummarySection:hover,
+.content-card:hover,
+.faq-card:hover {
+  border-color: var(--bp-border2);
+}
+/* İçerik kart-içi öğeler parıltının üstünde kalsın */
+#signalSummarySection > *,
+.content-card > *,
+.faq-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.related-grid .related-chip {
+  transform: rotate(var(--rot, 0deg));
+  transition: border-color var(--bp-dur-base) var(--bp-ease-standard),
+              background var(--bp-dur-base) var(--bp-ease-standard),
+              transform var(--bp-dur-base) var(--bp-ease-standard);
+}
+.related-grid .related-chip:nth-child(6n+1) { --rot: -1.1deg; }
+.related-grid .related-chip:nth-child(6n+2) { --rot: .8deg; }
+.related-grid .related-chip:nth-child(6n+3) { --rot: -.6deg; }
+.related-grid .related-chip:nth-child(6n+4) { --rot: 1deg; }
+.related-grid .related-chip:nth-child(6n+5) { --rot: -.9deg; }
+.related-grid .related-chip:nth-child(6n+6) { --rot: .5deg; }
+.related-grid .related-chip:hover {
+  transform: rotate(0deg) translateY(-2px);
+  border-color: var(--bp-accent-cyan);
+  background: rgba(var(--bp-accent-cyan-rgb), .08);
+}
