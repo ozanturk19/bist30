@@ -1,12 +1,12 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | BorsaPusula</title>
-<meta name="description" content="BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 tabanlı Güçlü Trend / Trend Bozuldu sinyalleri. Ücretsiz, canlı güncelleme.">
+<meta name="description" content="BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 tabanlı Güçlü Trend / Trend Bozuldu sinyalleri. Ücretsiz, günlük güncelleme.">
 <meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, algoritmik borsa, sektör analizi">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <link rel="canonical" href="https://borsapusula.com/">
 <!-- Open Graph -->
 <meta property="og:type"        content="website">
 <meta property="og:title"       content="BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri">
-<meta property="og:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST100 teknik analiz sinyalleri. Ücretsiz ve canlı.">
+<meta property="og:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST100 teknik analiz sinyalleri. Ücretsiz, gün sonu verisiyle güncel.">
 <meta property="og:url"         content="https://borsapusula.com/">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
@@ -15,7 +15,7 @@
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri">
-<meta name="twitter:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST100 teknik analiz sinyalleri. Ücretsiz ve canlı.">
+<meta name="twitter:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST100 teknik analiz sinyalleri. Ücretsiz, gün sonu verisiyle güncel.">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <script type="application/ld+json">
 {
@@ -149,7 +149,6 @@ header{
 .da-hero-content{position:relative;z-index:2}
 .da-eyebrow-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:clamp(24px,4vw,40px)}
 .da-badge{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);letter-spacing:.08em;text-transform:uppercase;padding:7px 13px;border-radius:var(--bp-radius-pill);border:1px solid var(--bp-border2);color:var(--bp-text2);background:var(--bp-surface)}
-.da-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--bp-al);flex:none;animation:daPulseDot 2.2s ease-in-out infinite}
 .da-index-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:clamp(14px,3vw,24px);margin-bottom:8px}
 .da-index-label{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-base);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text3);margin-bottom:8px}
 .da-index-number{font-weight:800;letter-spacing:-.03em;font-size:clamp(3rem,9.5vw,6.8rem);line-height:.92;background:linear-gradient(120deg,var(--bp-text) 0%,var(--bp-text) 55%,var(--bp-accent-cyan) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;min-width:5ch;display:inline-block}
@@ -435,7 +434,7 @@ header{
 
   <div class="da-hero-content">
     <div class="da-eyebrow-row">
-      <span class="da-badge"><span class="dot"></span>Canlı Piyasa Verisi</span>
+      <span class="da-badge">Gün Sonu Verisi</span>
       <span class="da-badge">Algoritmik Teknik Analiz</span>
       <span class="da-badge" id="daUniverseBadge" hidden></span>
     </div>
