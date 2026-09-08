@@ -436,3 +436,31 @@
     .import-toast { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
   }
 
+  /* ── Data-Art filtre çubuğu cilası (08.09 gece) — köşe parıltısı, hisse.html
+     içerik-kartlarıyla aynı reçete; yoğun veri tablosuna DOKUNULMADI (tarama/
+     scanability önceliği), sadece "app shell" (filtre chrome) güçlendirildi. ── */
+  .filter-bar {
+    position: relative;
+    overflow: hidden;
+  }
+  .filter-bar::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -4%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 92, 255, .10), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .filter-bar > * { position: relative; z-index: 1; }
+  .filter-group select:focus,
+  .filter-group input[type=number]:focus {
+    box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb), .14);
+  }
+  .active-chip:hover {
+    box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb), .10);
+  }
+
