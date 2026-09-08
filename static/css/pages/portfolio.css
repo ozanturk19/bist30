@@ -179,3 +179,24 @@
   .macro-item-lbl { font-weight:600; color:#cbd5e1; }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
 
+  /* ── Data-Art köşe parıltısı (09.09 gece) — özet kutuları + ekleme çubuğu;
+     yoğun pf-table/pf-mcard pozisyon listesine (kişi başına farklı sayıda satır
+     olabilir, tekdüze ızgara değil ama yine de yoğun veri) dokunulmadı — aynı
+     "scanability > estetik" gerekçesi diğer sayfalarla tutarlı. ── */
+  .sum-card, .add-bar {
+    position: relative;
+    overflow: hidden;
+  }
+  .sum-card::before, .add-bar::before {
+    content: '';
+    position: absolute;
+    top: -55%;
+    right: -8%;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 92, 255, .12), transparent 70%);
+    pointer-events: none;
+  }
+  .sum-card > *, .add-bar > * { position: relative; }
+
