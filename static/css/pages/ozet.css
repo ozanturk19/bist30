@@ -47,7 +47,21 @@
     padding: 16px 14px;
     text-align: center;
     transition: border-color .15s;
+    position: relative;
+    overflow: hidden;
   }
+  .counter-card::before {
+    content: '';
+    position: absolute;
+    top: -55%;
+    right: -10%;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 92, 255, .12), transparent 70%);
+    pointer-events: none;
+  }
+  .counter-card > * { position: relative; }
   .counter-card:hover { border-color: var(--bp-border2); }
   .counter-num  { font-size: var(--bp-text-36); font-weight: 800; line-height: 1; font-family: 'Space Grotesk', system-ui, sans-serif; }
   .counter-lbl  { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
