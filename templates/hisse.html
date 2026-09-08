@@ -99,7 +99,7 @@
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=b1e2a745">
 <script src="/static/bp-vocab.js?v=20260823C" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=7ea7fe33">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=23d57997">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:var(--bp-brand);color:var(--bp-bg);padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid var(--bp-brand);outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -307,34 +307,62 @@
   {%- else -%}
     {% set _hc='#9ca3af' %}{% set _hc2='#6b7280' %}{% set _lbl='YATAY' %}{% set _icon='⏸' %}
   {%- endif -%}
-  <div class="bp-hero-card" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
-    <div class="bp-hero-header">
-      <div class="bp-hero-badge">
-        <span class="bp-hero-icon">{{ _icon }}</span>
-        <span>{{ _lbl }}</span>
+  <div class="bp-hero-card da-hero-card" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
+    <svg class="da-hero-art" viewBox="0 0 400 267" aria-hidden="true" focusable="false">
+      <circle cx="60" cy="40" r="1.6" fill="{{ _hc }}" opacity=".55"/>
+      <circle cx="340" cy="60" r="1.6" fill="{{ _hc }}" opacity=".4"/>
+      <circle cx="300" cy="210" r="1.6" fill="{{ _hc }}" opacity=".5"/>
+      <circle cx="40" cy="200" r="1.6" fill="{{ _hc }}" opacity=".35"/>
+      <line x1="60" y1="40" x2="300" y2="210" stroke="{{ _hc }}" stroke-width=".5" opacity=".12"/>
+      <line x1="340" y1="60" x2="40" y2="200" stroke="{{ _hc }}" stroke-width=".5" opacity=".1"/>
+    </svg>
+    <div class="da-hero-grid">
+      <div class="da-hero-left">
+        <div class="bp-hero-header">
+          <div class="bp-hero-badge">
+            <span class="bp-hero-icon">{{ _icon }}</span>
+            <span>{{ _lbl }}</span>
+          </div>
+          {# CPO-1335: bar sayacı "gün" birimiyle sunuluyordu ve bilinmeyen değer
+             sessizce 1 güne düşüyordu; kaynak artık takvim yaşı (signal_date). #}
+          <span class="bp-hero-meta">{{ ssr_signal.signal_date|signal_age_text }}</span>
+        </div>
+        {% if _sig in ('AL', 'SAT') %}
+        <div class="bp-hero-power-wrap">
+          <div class="bp-hero-power-label">
+            <span>Teknik Güç Skoru</span>
+            <strong>{{ _score|int }}/100</strong>
+          </div>
+          <div class="bp-hero-power-bar">
+            <div class="bp-hero-power-fill" style="width:{{ _score|int }}%"></div>
+          </div>
+        </div>
+        {% endif %}
+        {% if ssr_signal.tp_level or ssr_signal.sl_level %}
+        <div class="bp-hero-levels">
+          {% if ssr_signal.tp_level %}<span><strong>Hedef:</strong>{{ ssr_signal.tp_level|tr_price }} ₺</span>{% endif %}
+          {% if ssr_signal.sl_level %}<span><strong>Stop:</strong>{{ ssr_signal.sl_level|tr_price }} ₺</span>{% endif %}
+          {% if ssr_signal.entry %}<span><strong>Giriş:</strong>{{ ssr_signal.entry|tr_price }} ₺</span>{% endif %}
+        </div>
+        {% endif %}
       </div>
-      {# CPO-1335: bar sayacı "gün" birimiyle sunuluyordu ve bilinmeyen değer
-         sessizce 1 güne düşüyordu; kaynak artık takvim yaşı (signal_date). #}
-      <span class="bp-hero-meta">{{ ssr_signal.signal_date|signal_age_text }}</span>
-    </div>
-    {% if _sig in ('AL', 'SAT') %}
-    <div class="bp-hero-power-wrap">
-      <div class="bp-hero-power-label">
-        <span>Sinyal Gücü</span>
-        <strong>{{ _score|int }}/100</strong>
+      {% if _sig in ('AL', 'SAT') %}
+      <div class="da-hero-ring-wrap">
+        <svg class="da-hero-ring" viewBox="0 0 160 160" aria-label="Teknik Güç Skoru {{ _score|int }} / 100">
+          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--bp-border)" stroke-width="10"/>
+          <circle cx="80" cy="80" r="68" fill="none" stroke="{{ _hc }}" stroke-width="10"
+                  stroke-linecap="round" stroke-dasharray="427.3"
+                  stroke-dashoffset="{{ ((427.3 * (100 - _score|int)) / 100)|round(2) }}"
+                  transform="rotate(-90 80 80)"/>
+        </svg>
+        <div class="da-hero-ring-center">
+          <span class="da-hero-ring-num">{{ _score|int }}</span>
+          <span class="da-hero-ring-lbl">/ 100</span>
+        </div>
       </div>
-      <div class="bp-hero-power-bar">
-        <div class="bp-hero-power-fill" style="width:{{ _score|int }}%"></div>
-      </div>
+      <div class="da-hero-fundamental-teaser">🔜 Temel Analiz Skoru: Yakında</div>
+      {% endif %}
     </div>
-    {% endif %}
-    {% if ssr_signal.tp_level or ssr_signal.sl_level %}
-    <div class="bp-hero-levels">
-      {% if ssr_signal.tp_level %}<span><strong>Hedef:</strong>{{ ssr_signal.tp_level|tr_price }} ₺</span>{% endif %}
-      {% if ssr_signal.sl_level %}<span><strong>Stop:</strong>{{ ssr_signal.sl_level|tr_price }} ₺</span>{% endif %}
-      {% if ssr_signal.entry %}<span><strong>Giriş:</strong>{{ ssr_signal.entry|tr_price }} ₺</span>{% endif %}
-    </div>
-    {% endif %}
     {# SPEC-017 v2 c5 — Sparkline 30D (vanilla canvas + long-press crosshair) #}
     <div class="bp-spark-wrap" id="bpSparkWrap" style="display:none">
       <div class="bp-spark-label">
@@ -1068,7 +1096,7 @@
     <a href="/metodoloji" style="color:var(--bp-text3);text-decoration:none">Metodoloji</a> ·
     <a href="/yasal" style="color:var(--bp-text3);text-decoration:none">Yasal Uyarı</a>
   </div>
-  <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong>yatırım tavsiyesi değildir</strong>. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
+  <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong>yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
 </footer>
 
 <script src="/static/bp-format.js?v=20260808a"></script>
