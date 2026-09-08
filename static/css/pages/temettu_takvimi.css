@@ -139,3 +139,22 @@
   .sc-ticker-link { text-decoration: none; color: inherit; }
   .sc-ticker-link:hover .sc-ticker { color: #58a6ff; }
 
+  /* ── Data-Art köşe parıltısı (09.09 gece) — bilanco_takvimi.css ile aynı reçete;
+     yoğun stock-card ızgarasına dokunulmadı (scanability). ── */
+  .sum-chip {
+    position: relative;
+    overflow: hidden;
+  }
+  .sum-chip::before {
+    content: '';
+    position: absolute;
+    top: -55%;
+    right: -8%;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 92, 255, .12), transparent 70%);
+    pointer-events: none;
+  }
+  .sum-chip > * { position: relative; }
+
