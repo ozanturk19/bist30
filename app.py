@@ -4152,6 +4152,46 @@ def api_data_lite():
     return _resp
 
 
+@app.route("/api/hisse/<ticker>/lite")
+@limiter.limit("30 per minute")  # ailedeki kardeş route'larla tutarlı (fundamentals/news/chart)
+def api_hisse_lite(ticker):
+    """CPO-1512 madde 1: hisse.html tam /api/data'yı (~280KB, 215 hisse) indirip
+    client-side kendi ticker'ını filtreliyordu. Bu endpoint sadece o sayfanın
+    gerçekten kullandığı alanları tek ticker için döner (bkz. renderSummary)."""
+    ticker = ticker.upper()
+    if ticker not in BIST100:
+        return safe_json({"error": "Hisse bulunamadı"}), 404
+    with _lock:
+        stocks = list(_cache["data"])
+        _ac_snap = dict(_anomaly_cache)
+    stock = next((s for s in stocks if s.get("ticker") == ticker), None)
+    if not stock:
+        return safe_json({"stock": None, "loading": True})
+    anomaly = _ac_snap.get(ticker, {"flag": False, "reason": ""})
+    out = {
+        "ticker":           stock.get("ticker"),
+        "name":             stock.get("name") or stock.get("ticker"),
+        "price":            stock.get("price"),
+        "change_pct":       stock.get("change_pct"),
+        "signal":           stock.get("signal"),
+        "signal_price":     stock.get("signal_price"),
+        "signal_date":      stock.get("signal_date"),
+        "signal_bars":      stock.get("signal_bars"),
+        "signal_age_label": stock.get("signal_age_label"),
+        "signal_age_color": stock.get("signal_age_color"),
+        "sl_level":         stock.get("sl_level"),
+        "is_premium":       stock.get("is_premium"),
+        "anomaly":          {"flag": anomaly.get("flag", False), "reason": anomaly.get("reason", "")},
+    }
+    _resp = safe_json({"stock": out})
+    _etag = hashlib.md5(_resp.get_data()).hexdigest()
+    _resp.headers["Cache-Control"] = "no-cache"
+    _resp.headers["ETag"] = _etag
+    if request.headers.get("If-None-Match") == _etag:
+        return Response(status=304, headers={"Cache-Control": "no-cache", "ETag": _etag})
+    return _resp
+
+
 # ── T4.1 (Master Donusum FAZ4 KALDIR): /heatmap tam yetim sayfa idi (0 ic
 # link, sitemap disi, tier/premium taksonomisine bagli, CPO-1191/1197
 # ihlallerinin en yogun oldugu sayfa) - kaldirildi, /api/heatmap'in tek
