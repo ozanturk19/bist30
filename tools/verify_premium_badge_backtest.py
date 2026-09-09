@@ -15,15 +15,20 @@ mantığını inline kopyalar).
 Çalıştırma: python3 tools/verify_premium_badge_backtest.py
 (offline, salt-okunur, yfinance dışında hiçbir canlı sisteme dokunmaz)
 
-Son doğrulama (30.08.2026, BIST30 evreni, 2y günlük veri, KOZAA/KOZAL Yahoo'da
-delisted oldukları için evren dışı kaldı — 28/30 hisse):
-    Baseline (tüm AL):        n=258  win=34.1%  sharpe=0.70
-    RVOL <  1.20 (non-premium): n=147  win=32.0%  sharpe=0.12
-    RVOL >= 1.20 (premium):     n=67   win=49.3%  sharpe=2.11
+Son doğrulama (09.09.2026, CPO-1543 ADX tie-bug fix'inden [a765e31] SONRA,
+BIST30 evreni, 2y günlük veri, KOZAA/KOZAL Yahoo'da delisted oldukları için
+evren dışı kaldı — 28/30 hisse):
+    Baseline (tüm AL):          n=251  win=35.1%  sharpe=1.08
+    RVOL <  1.20 (non-premium): n=153  win=30.1%  sharpe=0.01
+    RVOL >= 1.20 (premium):     n=71   win=50.7%  sharpe=2.35
 Orijinal iddia (1.62->2.97, %36.7->%51.5) ile TAM eşleşmiyor (farklı veri
 penceresi/evren kaçınılmaz kayma yaratır — trailing 2y backtest zaten zamanla
 değişir), ama YÖN ve BÜYÜKLÜK ORANI doğrulandı: premium alt-küme hem win-rate
 hem Sharpe'ta belirgin şekilde daha iyi. Rozet iddiası GERÇEK, fabrikasyon değil.
+
+Önceki doğrulama (30.08.2026, ADX fix'inden ÖNCE): n=258/147/67,
+win=34.1%/32.0%/49.3%, sharpe=0.70/0.12/2.11 — ADX fix sinyal sayısını ve
+kesin rakamları değiştirdi ama yön/oran sonucu değişmedi.
 
 Bilinen metodoloji sınırı (CPO-1457 not b): bu motor gerçek SL/TP'de çıkmıyor,
 sinyal tersine dönene veya fwd_days (20 bar) dolana kadar pozisyonda kalıyor —

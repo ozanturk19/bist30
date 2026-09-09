@@ -1715,12 +1715,13 @@ def analyze(ticker_base):
 
         # ── RVOL (Relative Volume) — kalite sinyali ────────────────────────
         # Son 5 gün ortalama hacmi / Son 20 gün ortalama hacmi.
-        # >= 1.20 → premium sinyal (backtest: Sharpe 1.62 → 2.97, Win Rate 36.7% → 51.5%)
+        # >= 1.20 → premium sinyal (backtest: Sharpe 0.01 → 2.35, Win Rate 30.1% → 50.7%)
         # CPO-1457 (30.08.2026): orijinal iddiayı üreten script kod tabanında
         # bulunamamıştı — tools/verify_premium_badge_backtest.py ile bağımsız
-        # yeniden üretildi, yön/oran doğrulandı (bkz. script docstring'i için
-        # güncel sayılar), rozet iddiası gerçek. Gelecekte yeniden denetlerken
-        # o script'i çalıştır, sıfırdan araştırma yapma.
+        # yeniden üretildi, yön/oran doğrulandı. CPO-1547 (09.09.2026): CPO-1543
+        # ADX tie-bug fix'inden [a765e31] SONRA yeniden çalıştırıldı, sayılar
+        # yukarıdaki gibi güncellendi (bkz. script docstring'i). Gelecekte
+        # yeniden denetlerken o script'i çalıştır, sıfırdan araştırma yapma.
         rvol = None
         is_premium = False
         try:
@@ -2513,7 +2514,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
             </td></tr>
           <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">💎</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
-              <strong style="color:#ffc850">Premium işaretli</strong> sinyaller — hacim onaylı (RVOL ≥ 1.20). Backtest&apos;te %51 win rate, Sharpe 2.97.
+              <strong style="color:#ffc850">Premium işaretli</strong> sinyaller — hacim onaylı (RVOL ≥ 1.20). Backtest&apos;te %50.7 win rate, Sharpe 2.35.
             </td></tr>
         </table>
       </td></tr>
