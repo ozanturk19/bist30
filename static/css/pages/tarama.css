@@ -2,11 +2,13 @@
 
   * { margin:0; padding:0; box-sizing:border-box; }
   :root {
-    --surface:#161b22; --surface2:#1c2128;
+    /* CPO-1558: son 2 ham-hex yerel token (--surface/--surface2 kanonikten hafif
+       sapmıştı, --gold hiç aliaslanmamıştı — bkz. reference_sablon_yerel_root_palet_sapmasi) */
+    --surface:var(--bp-surface); --surface2:var(--bp-surface2);
     --border:var(--bp-bkl-bd);
     --text2:var(--bp-text2); --text3:var(--bp-text3);
     --al:var(--bp-al); --sat:var(--bp-sat); --bkl:var(--bp-bkl);
-    --brand:var(--bp-brand); --gold:#e3b341;
+    --brand:var(--bp-brand); --gold:var(--bp-gold);
   }
   /* r155 bug-hunt: DEV2-T-MOBOVF-1 ile ayni sinif — hisse.css/index.css/portfolio.css
      emsaliyle ayni yatay-tasma guard'i eksikti. */
@@ -19,7 +21,7 @@
     padding:12px 24px; display:flex; align-items:center; gap:14px;
     position:sticky; top:0; z-index:var(--bp-z-dropdown);
   }
-  .page-title { font-size:var(--bp-text-xl); font-weight:700; color:#f0f6fc; }
+  .page-title { font-size:var(--bp-text-xl); font-weight:700; color:var(--bp-text); }
   .page-sub   { font-size:var(--bp-text-sm); color:var(--text2); margin-top:1px; }
 
   /* ── Makro bar ── */
@@ -46,7 +48,7 @@
     display:inline-flex; align-items:center; gap:7px;
     padding:0 18px; border-right:1px solid var(--bp-border-subtle); font-size:var(--bp-text-xs); height:32px;
   }
-  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
+  .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
   .mc-pos { color:var(--al); } .mc-neg { color:var(--sat); } .mc-neu { color:var(--text2); }
 
   .container { max-width:var(--bp-container-1200); margin:0 auto; padding:20px 20px; }
@@ -118,7 +120,7 @@
     gap: 6px;
     padding: 10px 0 6px;
     margin: 4px 0 8px;
-    border-bottom: 1px solid var(--border, #21262d);
+    border-bottom: 1px solid var(--border);
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -149,7 +151,7 @@
     justify-content: center;
     background: transparent;
     border: 0;
-    color: var(--text2, #8b949e);
+    color: var(--text2);
     cursor: pointer;
     font-size: var(--bp-text-md);
     line-height: 1;
@@ -166,7 +168,7 @@
   .chip-clear-all {
     background: transparent;
     border: 0;
-    color: var(--text2, #8b949e);
+    color: var(--text2);
     font-size: var(--bp-text-sm);
     cursor: pointer;
     padding: 4px 10px;
@@ -301,7 +303,7 @@
     font-size:var(--bp-text-xs); font-weight:700; letter-spacing:0.3px;
     white-space:nowrap;
   }
-  .trend-label.strong { color:#3fb950; }
+  .trend-label.strong { color:var(--bp-al); }
   .trend-label.medium { color:var(--bp-text); }
   .trend-label.weak   { color:var(--text3); }
   .trend-bar {
@@ -313,8 +315,8 @@
     height:100%; border-radius:var(--bp-radius-xs);
     transition:width 0.3s ease;
   }
-  .trend-bar-fill.strong { background:linear-gradient(90deg,#3fb950,var(--bp-brand)); }
-  .trend-bar-fill.medium { background:#1f6feb; }
+  .trend-bar-fill.strong { background:linear-gradient(90deg,var(--bp-al),var(--bp-brand)); }
+  .trend-bar-fill.medium { background:var(--bp-brand); }
   .trend-bar-fill.weak   { background:var(--text3); }
 
   /* RVOL× — dot + sayı */
@@ -322,12 +324,12 @@
     display:inline-flex; align-items:center; gap:6px;
     font-variant-numeric:tabular-nums; font-weight:600; font-size:var(--bp-text-base);
   }
-  .rvol-cell.high   { color:#3fb950; }
+  .rvol-cell.high   { color:var(--bp-al); }
   .rvol-cell.normal { color:var(--bp-text); }
   .rvol-cell.low    { color:var(--text3); }
   .rvol-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .rvol-dot.high   { background:#3fb950; }
-  .rvol-dot.normal { background:#1f6feb; }
+  .rvol-dot.high   { background:var(--bp-al); }
+  .rvol-dot.normal { background:var(--bp-brand); }
   .rvol-dot.low    { background:var(--text3); }
 
   /* Tazelik (eski Süre) — Bugün/Dün/X gün badges */
@@ -336,8 +338,8 @@
     padding:2px 8px; border-radius:var(--bp-radius-4);
     font-size:var(--bp-text-xs); font-weight:600;
   }
-  .fresh-badge.today     { background:rgba(var(--bp-al-rgb),0.10); color:#3fb950; }
-  .fresh-badge.yesterday { background:rgba(88,166,255,0.10); color:#58a6ff; }
+  .fresh-badge.today     { background:rgba(var(--bp-al-rgb),0.10); color:var(--bp-al); }
+  .fresh-badge.yesterday { background:rgba(var(--bp-brand-rgb),0.10); color:var(--bp-brand); }
   .fresh-badge.old       { background:rgba(139,148,158,0.10); color:var(--text3); }
   .fresh-dot { font-size:8px; line-height:1; }
 
@@ -348,12 +350,12 @@
   .score-cell { display:flex; align-items:center; gap:7px; min-width:66px; }
   .score-val { font-size:var(--bp-text-base); font-weight:700; font-variant-numeric:tabular-nums; }
   .score-val.premium  { color:var(--bp-premium); }
-  .score-val.plus     { color:#1f6feb; }
+  .score-val.plus     { color:var(--bp-brand); }
   .score-val.weak     { color:var(--text3); }
   .score-bar-bg { flex:0 0 40px; height:4px; background:rgba(255,255,255,0.08); border-radius:var(--bp-radius-xs); overflow:hidden; }
   .score-bar-fill { height:100%; border-radius:var(--bp-radius-xs); }
   .score-bar-fill.premium  { background:linear-gradient(90deg,var(--bp-premium),var(--bp-brand)); }
-  .score-bar-fill.plus     { background:#1f6feb; }
+  .score-bar-fill.plus     { background:var(--bp-brand); }
   .score-bar-fill.weak     { background:var(--text3); }
 
   /* TH tooltip (yeni kolon başlıkları) — position:relative eklemiyoruz,
@@ -365,7 +367,7 @@
     content: attr(data-tooltip);
     position:absolute; top:100%; left:50%;
     transform:translateX(-50%) translateY(6px);
-    background:#1c2128; color:var(--bp-text);
+    background:var(--bp-surface2); color:var(--bp-text);
     border:1px solid var(--bp-border-subtle);
     border-radius:var(--bp-radius); padding:5px 9px;
     font-size:var(--bp-text-xs); font-weight:500;

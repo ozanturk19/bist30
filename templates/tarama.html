@@ -102,7 +102,7 @@
 
   <!-- Sonuç başlık -->
   <div class="result-header">
-    <div class="result-count" id="resultCount" role="status" aria-live="polite"><strong>—</strong> sonuç<span id="inlineSpinner" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><svg width="14" height="14" viewBox="0 0 24 24" style="animation:tarSpin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke="#58a6ff" stroke-width="2.5" fill="none" stroke-dasharray="50 60"/></svg></span></div>
+    <div class="result-count" id="resultCount" role="status" aria-live="polite"><strong>—</strong> sonuç<span id="inlineSpinner" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><svg width="14" height="14" viewBox="0 0 24 24" style="animation:tarSpin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke="var(--bp-brand)" stroke-width="2.5" fill="none" stroke-dasharray="50 60"/></svg></span></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
       <select class="sort-select" id="sortSel" onchange="applyFilters()" aria-label="Sıralama">
@@ -115,10 +115,10 @@
       <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:var(--bp-text-sm);border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
         data-tip="Skor: Birleşik kalite (günlük hacim oranı + ADX + RSI + Teyit) — Güçlü Sinyal / Standart bu skordan belirlenir. En kaliteli hisseler üstte.&#10;ADX: Sadece trend gücü. Güçlü Sinyal rozetli bir hisse ADX düşük olabilir.&#10;RVOL: 5g/20g hacim oranı — anormal hareket göstergesi (Skor'daki hacim bileşeninden farklı bir hesaplama).&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
       <button onclick="exportCSV()" title="Sonuçları CSV olarak indir"
-        style="background:rgba(31,111,235,.1);border:1px solid rgba(31,111,235,.3);color:#58a6ff;
+        style="background:rgba(var(--bp-brand-rgb),.1);border:1px solid rgba(var(--bp-brand-rgb),.3);color:var(--bp-brand);
                border-radius:var(--bp-radius);padding:5px 11px;font-size:var(--bp-text-sm);cursor:pointer;font-family:inherit;
                display:flex;align-items:center;gap:5px;transition:all .15s"
-        onmouseover="this.style.background='rgba(31,111,235,.2)'" onmouseout="this.style.background='rgba(31,111,235,.1)'">
+        onmouseover="this.style.background='rgba(var(--bp-brand-rgb),.2)'" onmouseout="this.style.background='rgba(var(--bp-brand-rgb),.1)'">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
