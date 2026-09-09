@@ -305,7 +305,7 @@
     {%- else %}{% set _hc='#fca5a5' %}{% set _hc2='#ef4444' %}{% endif -%}
     {% set _lbl='TREND BOZULDU' %}{% set _icon='▼' %}
   {%- else -%}
-    {% set _hc='#9ca3af' %}{% set _hc2='#6b7280' %}{% set _lbl='YATAY' %}{% set _icon='⏸' %}
+    {% set _hc='var(--bp-text3)' %}{% set _hc2='var(--bp-bkl)' %}{% set _lbl='YATAY' %}{% set _icon='⏸' %}
   {%- endif -%}
   <div class="bp-hero-card da-hero-card" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
     <svg class="da-hero-art" viewBox="0 0 400 267" aria-hidden="true" focusable="false">
@@ -1002,7 +1002,7 @@
   <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);overflow:hidden;margin-bottom:20px" id="fundSection">
     <div style="padding:12px 18px;border-bottom:1px solid var(--bp-surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> Temel Analiz</h2>
-      <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">yfinance · 4 saatlik cache</span>
+      <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">4 saatte bir güncellenir</span>
     </div>
     <div id="fundLoading" style="color:var(--bp-text3);font-size:var(--bp-text-base);display:flex;align-items:center;gap:8px;padding:20px 18px">
       <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Yükleniyor…
@@ -1120,7 +1120,7 @@
       X (Twitter)
     </button>
     <button id="shareCopy" onclick="shareSignal('copy')"
-      style="display:inline-flex;align-items:center;gap:5px;background:rgba(var(--bp-brand-rgb),.08);border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:#93c5fd;cursor:pointer;font-family:inherit;transition:all .15s"
+      style="display:inline-flex;align-items:center;gap:5px;background:rgba(var(--bp-brand-rgb),.08);border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-brand);cursor:pointer;font-family:inherit;transition:all .15s"
       onmouseover="this.style.background='rgba(184,195,255,.15)'" onmouseout="this.style.background='rgba(184,195,255,.08)'">
       <span aria-hidden="true">🔗</span> Linki Kopyala
     </button>
@@ -1145,7 +1145,7 @@
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="font-size:var(--bp-text-15)"><span aria-hidden="true">✨</span></span>
       <span style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
-      <span id="sigExplainBadge" style="margin-left:auto;font-size:var(--bp-text-xs);background:rgba(var(--bp-brand-rgb),0.15);color:#93c5fd;padding:2px 8px;border-radius:var(--bp-radius-lg);border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
+      <span id="sigExplainBadge" style="margin-left:auto;font-size:var(--bp-text-xs);background:rgba(var(--bp-brand-rgb),0.15);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-lg);border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
     </div>
     {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
     <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:var(--bp-text-sm);color:#f87171;line-height:1.6"></div>
@@ -1160,7 +1160,7 @@
       </div>
     </div>
     <p id="sigExplainText" role="status" aria-live="polite" style="display:none;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0"></p>
-    <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:var(--bp-text-xs);color:#475569">
+    <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">
       <span aria-hidden="true">🤖</span> Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 12 saatte bir yenilenir
     </div>
   </div>
@@ -1311,7 +1311,7 @@
     <span><a href="/gizlilik" target="_blank" style="color:var(--bp-brand)">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
   </label>
   <button onclick="document.getElementById('hisseSubCta').style.display='none'"
-    style="background:none;border:none;color:#374151;cursor:pointer;font-size:var(--bp-text-lg);padding:2px 4px" aria-label="Kapat">×</button>
+    style="background:none;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-lg);padding:2px 4px" aria-label="Kapat">×</button>
 </div>
 
 </main>
@@ -2461,6 +2461,20 @@ function _showChartStatus(msg, withRetryBtn) {
   }
 }
 
+/* CPO-1558: "Sinyal aktif — giriş analizi yükleniyor…" placeholder'ı /api/data
+   enrichment'i (aşağıda) ticker'ı bulamazsa ya da hiç yanıt vermezse sonsuza
+   kadar asılı kalıyordu (Fable denetimi: 88s+ sonra hâlâ "yükleniyor" — canlı
+   ölçümle doğrulandı, /hisse). renderSummary(sd=null) SADECE ilk "yükleniyor"
+   metnini yazar, onu asla temizlemez — bu fonksiyon /api/data turu ne şekilde
+   biterse bitsin (ticker bulunamadı ya da fetch hata) çağrılır ve metin hâlâ
+   "yükleniyor" ise dürüst bir son-durum mesajına çevirir. */
+function _resolveStuckEntryAnalysis() {
+  const grid = document.getElementById('entryAnalysisGrid');
+  if (grid && grid.textContent.indexOf('yükleniyor') !== -1) {
+    grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">Bu sinyal için giriş analizi şu an hesaplanamadı, veri yetersiz.</div>';
+  }
+}
+
 let _chartSeq = 0;
 async function loadChart(retry) {
   retry = retry || 0;
@@ -2532,11 +2546,14 @@ async function loadChart(retry) {
           _ab.title = sd.anomaly.reason || '';
           _ab.style.display = '';
         }
+      } else {
+        _resolveStuckEntryAnalysis();
       }
 
     }).catch(err => {
       /* /api/data fail → chart yine görünür, sadece enrichment yok. Sessiz fail. */
       console.warn('[chart] /api/data enrichment fail (chart already rendered):', err);
+      _resolveStuckEntryAnalysis();
     });
   } catch (e) {
     if (_mySeq !== _chartSeq) return;
@@ -3058,7 +3075,7 @@ async function loadMTF() {
 
       return `
         <div class="mtf-card" style="background:${bg};border:1px solid ${bord};border-radius:14px;padding:14px;text-align:center;--rot:${rot}deg;box-shadow:0 12px 28px -18px ${col}">
-          <div style="font-size:var(--bp-text-sm);color:#b8b8c0;margin-bottom:8px">${tf.label}</div>
+          <div style="font-size:var(--bp-text-sm);color:var(--bp-text3);margin-bottom:8px">${tf.label}</div>
           <div style="font-size:20px;font-weight:800;color:${col}">${arr} ${lbl}</div>
           <div style="font-size:var(--bp-text-sm);color:#b8b8c0;margin-top:4px">ADX ${d.adx}</div>
           ${scoreBar}
