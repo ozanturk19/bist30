@@ -238,7 +238,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "faqs": [
       {"q": "Teknik analiz mi temel analiz mi daha önemlidir?", "a": "İkisi birbirini tamamlar. Temel analiz 'hangi hisseye' gireceğinizi belirler; teknik analiz 'ne zaman' gireceğinizi söyler. BorsaPusula teknik sinyaller üretir ancak temel verilerle birlikte değerlendirilmesi tavsiye edilir."},
       {"q": "Teknik analiz geçmişe mi geleceğe mi bakar?", "a": "Teknik analiz geçmiş fiyat ve hacim verilerini inceleyerek geleceğe dair olasılıksal tahminler yapar. Tarih tekerrür eder prensibi üzerine kuruludur ancak kesin öngörü değildir."},
-      {"q": "BorsaPusula hangi teknik göstergeleri kullanıyor?", "a": "BorsaPusula üçlü filtre sistemi kullanır: Supertrend (ATR tabanlı trend yönü), ADX ≥ 25 (trend gücü doğrulaması) ve EMA12/EMA99 kesişimi (orta-uzun vadeli trend teyidi). Üçü aynı anda AL yönünde olduğunda sinyal verilir."}
+      {"q": "BorsaPusula hangi teknik göstergeleri kullanıyor?", "a": "BorsaPusula üçlü filtre sistemi kullanır: Supertrend (ATR tabanlı trend yönü), ADX ≥ 25 (trend gücü doğrulaması) ve EMA12/EMA99 kesişimi (orta-uzun vadeli trend teyidi). Üçü aynı anda Güçlü Trend yönünde olduğunda sinyal verilir."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO']
   },
@@ -281,7 +281,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 """,
     "faqs": [
       {"q": "Stop loss nedir ve neden kullanılmalıdır?", "a": "Stop loss, hisse belirlenen fiyat seviyesinin altına düşünce pozisyonu otomatik kapatan emirdir. Küçük kayıpları keserek büyük felaketlerin önüne geçer ve duygusal karar vermeyi engeller."},
-      {"q": "BorsaPusula stop loss seviyesi nasıl hesaplanır?", "a": "BorsaPusula her AL sinyali için ATR tabanlı stop loss seviyesi hesaplar. Bu seviye Supertrend bandıyla örtüşür. Fiyat bu seviyenin altına düştüğünde sistem SAT sinyaline geçer."},
+      {"q": "BorsaPusula stop loss seviyesi nasıl hesaplanır?", "a": "BorsaPusula her Güçlü Trend sinyali için ATR tabanlı stop loss seviyesi hesaplar. Bu seviye Supertrend bandıyla örtüşür. Fiyat bu seviyenin altına düştüğünde sistem Trend Bozuldu sinyaline geçer."},
       {"q": "Stop loss seviyesini ne kadar geniş tutmalıyım?", "a": "Çok dar stop erken durdurur, çok geniş stop riski artırır. BorsaPusula ATR bazlı stop volatiliteye göre otomatik ayarlanır. Swing işlemler için genellikle giriş fiyatının %5-10 altı uygundur."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO']
@@ -6725,7 +6725,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Değer analizi size hangi hisseyi alacağınızı söyler (ne)</li>
   <li>Teknik analiz ve BorsaPusula sinyalleri size ne zaman gireceğinizi söyler (ne zaman)</li>
 </ul>
-<p>Değerli olduğunu düşündüğünüz bir hissede BorsaPusula AL sinyali oluştuğunda ikili teyit elde edilir: hem temel hem teknik görünüm olumlu. Bu kombinasyon, yalnızca teknik veya yalnızca temel analiz kullanan yaklaşımların ötesinde daha güçlü bir karar zemini oluşturur.</p>
+<p>Değerli olduğunu düşündüğünüz bir hissede BorsaPusula Güçlü Trend sinyali oluştuğunda ikili teyit elde edilir: hem temel hem teknik görünüm olumlu. Bu kombinasyon, yalnızca teknik veya yalnızca temel analiz kullanan yaklaşımların ötesinde daha güçlü bir karar zemini oluşturur.</p>
 """,
     "faqs": [
       {"q": "Değer yatırımı BIST'te işe yarar mı?",
@@ -6799,7 +6799,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Ortak nokta: Her büyük kriz, sabırlı uzun vadeli yatırımcılar için önemli alım fırsatı sundu. Panikle satan kısa vadeli yatırımcılar her seferinde toparlanmanın dışında kaldı.</p>
 
 <h2>BorsaPusula ile Kriz Yönetimi</h2>
-<p>BorsaPusula sinyalleri kriz dönemlerinde netlik sağlar: Tüm BIST30'da SAT sinyali ağırlıklıysa piyasa henüz dip yapmamış olabilir. AL sinyalleri yeniden yoğunlaşmaya başladığında trendin dönüşü teknik olarak teyit ediliyor demektir. Bu mekanik teyit, duygusal kararların yerini alır.</p>
+<p>BorsaPusula sinyalleri kriz dönemlerinde netlik sağlar: Tüm BIST30'da Trend Bozuldu sinyali ağırlıklıysa piyasa henüz dip yapmamış olabilir. Güçlü Trend sinyalleri yeniden yoğunlaşmaya başladığında trendin dönüşü teknik olarak teyit ediliyor demektir. Bu mekanik teyit, duygusal kararların yerini alır.</p>
 """,
     "faqs": [
       {"q": "Düşen bıçağı tutmak neden tehlikeli?",
@@ -6928,7 +6928,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Önemli not: KAP bildirimleri resmi kaynak olmakla birlikte yorumlanması zaman ve deneyim gerektirir. Olumlu görünen bir açıklama beklentilerle kıyaslandığında hayal kırıklığı yaratabilir; olumsuz görünen bir açıklama bazen çoktan fiyatlanmış olabilir. Bildirim + piyasa beklentisi + teknik görünüm üçgenine bakmak en sağlıklı yaklaşımdır.</p>
 
 <h2>KAP Bildirimi ve Teknik Sinyalin Birleşimi</h2>
-<p>Bir hissede AL sinyali ile güçlü bir KAP bildirimi (örneğin büyük bir sözleşme kazanımı) aynı anda gerçekleştiğinde, bu genellikle güçlü bir katalizör oluşturur — teknik görünüm ile temel haber akışı aynı yönde birleşir. BorsaPusula hisse sayfasındaki "KAP Bildirimleri" sekmesi son 90 günün bildirimlerini listeler; "Sinyalin Hikayesi" bölümünde ise sinyal tarihi etrafında yayımlanan KAP bildirimleri birlikte gösterilir, böylece bir sinyalin arkasında haber akışı olup olmadığını görebilirsiniz.</p>
+<p>Bir hissede Güçlü Trend sinyali ile güçlü bir KAP bildirimi (örneğin büyük bir sözleşme kazanımı) aynı anda gerçekleştiğinde, bu genellikle güçlü bir katalizör oluşturur — teknik görünüm ile temel haber akışı aynı yönde birleşir. BorsaPusula hisse sayfasındaki "KAP Bildirimleri" sekmesi son 90 günün bildirimlerini listeler; "Sinyalin Hikayesi" bölümünde ise sinyal tarihi etrafında yayımlanan KAP bildirimleri birlikte gösterilir, böylece bir sinyalin arkasında haber akışı olup olmadığını görebilirsiniz.</p>
 <p><strong>Sık yapılan hatalar:</strong></p>
 <ul>
   <li>KAP bildirimi çıkar çıkmaz panikle işlem yapmak — haber çoğu zaman piyasa tarafından zaten fiyatlanmıştır.</li>
@@ -7002,7 +7002,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Piyasanın genel yüksek volatilite dönemlerinde (seçim, kriz) sektörel veya şirket bazlı hacim yüksek olabilir; bireysel hisse analizinde bunu ayırt etmek gerekir</li>
   <li>Ortalama günlük işlem hacmi düşük olan hisseler için hacim analizi daha az güvenilirdir — birkaç büyük emir hacmi manipüle edebilir</li>
 </ul>
-<p>BorsaPusula sinyalleri, hacim verilerini otomatik olarak değerlendirir. AL sinyallerinin hacimsiz kırılım dönemlerinde değil güçlü hacimlerin eşliğinde oluşması, sinyal güvenilirliğini artıran faktörler arasında yer alır.</p>
+<p>BorsaPusula sinyalleri, hacim verilerini otomatik olarak değerlendirir. Güçlü Trend sinyallerinin hacimsiz kırılım dönemlerinde değil güçlü hacimlerin eşliğinde oluşması, sinyal güvenilirliğini artıran faktörler arasında yer alır.</p>
 
 <h2>Chaikin Money Flow (CMF) ile Para Akışını Ölçmek</h2>
 <p>Chaikin Money Flow (CMF), belirli bir dönemdeki (genellikle 20 gün) kapanış fiyatının mum aralığındaki konumunu hacimle ağırlıklandırarak alım-satım baskısını tek bir çizgide özetler. -1 ile +1 arasında salınır:</p>
@@ -7078,9 +7078,9 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Rebalancing ve BorsaPusula Sinyalleri</h2>
 <p>BorsaPusula sinyalleri rebalancing kararlarını destekler:</p>
 <ul>
-  <li>Portföyde oranı büyümüş hissenin SAT sinyali varsa → rebalancing için doğal çıkış noktası</li>
-  <li>Az ağırlıklı olmak istediğiniz sektörde AL sinyali geliyorsa → kademeli ekleme fırsatı</li>
-  <li>Tüm hisseler AL sinyalindeyken rebalancing, güçlü trendde gereksiz satış yaratabilir — sinyal durumuna göre zamanlama ayarlanmalı</li>
+  <li>Portföyde oranı büyümüş hissenin Trend Bozuldu sinyali varsa → rebalancing için doğal çıkış noktası</li>
+  <li>Az ağırlıklı olmak istediğiniz sektörde Güçlü Trend sinyali geliyorsa → kademeli ekleme fırsatı</li>
+  <li>Tüm hisseler Güçlü Trend sinyalindeyken rebalancing, güçlü trendde gereksiz satış yaratabilir — sinyal durumuna göre zamanlama ayarlanmalı</li>
 </ul>
 <p>Türkiye gibi yüksek volatiliteli piyasalarda 3-6 aylık rebalancing sıklığı, gereksiz işlem maliyetine neden olmadan risk profilini kontrol altında tutar. Yıllık tek rebalancing ise drift riskini taşır.</p>
 """,
@@ -7120,7 +7120,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p><strong>Doji:</strong> Açılış ve kapanış neredeyse aynı seviyede — gövde yok veya çok küçük. Alıcı ve satıcılar dengededir; trend belirsizliği veya dönüş öncesi duraksamayı temsil eder. Uzun bir yükseliş veya düşüşün sonunda oluşan doji, daha güçlü dönüş sinyali verir.</p>
 <p><strong>Çekiç (Hammer):</strong> Küçük gövde + çok uzun alt fitil. Düşen trendde oluşursa güçlü dönüş sinyali. Alt fitil uzunluğu en az gövdenin 2 katı olmalı. Mesaj: Satıcılar fiyatı sert düşürdü ama alıcılar geri aldı.</p>
 <p><strong>Ters Çekiç (Inverted Hammer):</strong> Küçük gövde + uzun üst fitil. Düşen trendde dip noktasında oluşursa toparlanma işareti olabilir ama çekiçten daha az güvenilir.</p>
-<p><strong>Asılı Adam (Hanging Man):</strong> Çekiçle aynı şekle sahip ama yükselen trendde oluşur → SAT sinyali. Aynı form, konuma göre farklı anlam taşır.</p>
+<p><strong>Asılı Adam (Hanging Man):</strong> Çekiçle aynı şekle sahip ama yükselen trendde oluşur → düşüş sinyali. Aynı form, konuma göre farklı anlam taşır.</p>
 <p><strong>Kayan Yıldız (Shooting Star):</strong> Küçük gövde + çok uzun üst fitil. Yükselen trendde oluşursa güçlü düşüş sinyali. Alıcılar fiyatı yukarı itti ama satıcılar geri çekti.</p>
 
 <h2>Çift Mum Formasyonları</h2>
