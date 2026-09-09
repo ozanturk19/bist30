@@ -670,41 +670,26 @@
   };
 
 
-  // ── bpStartMacroTicker — KALICI çözüm, JS RAF tabanlı constant pixel-per-second
-  // Tüm sayfalarda aynı hızı garanti eder (CSS animation duration hesabı kullanma!)
+  // ── bpStartMacroTicker — CPO-1552: JS RAF (her frame main-thread'de style.transform
+  // yazan) yaklaşım, sayfa main-thread'i başka işle meşgulken (özellikle Data-Art
+  // anasayfada — spotlight/sektör-ısı/haber listesi eşzamanlı render) frame atlıyor,
+  // gözle görülür "takıla takıla" kaymaya yol açıyordu (ölçüldü: rAF frame aralığı
+  // 17-39ms arası düzensiz salınım, olması gereken sabit ~16.7ms yerine). CSS
+  // @keyframes + compositor thread'e geri dönüldü (main-thread meşgulken bile pürüzsüz
+  // akar) — ama süresini JS ile içerik genişliğine göre HESAPLIYORUZ, böylece eski
+  // "tüm sayfalarda aynı piksel/saniye hızı" kazanımı da korunuyor (sabit 40s süre,
+  // farklı içerik genişliğinde farklı görünür hız sorununu geri getirmez).
+  // animation-play-state'e HİÇ dokunmuyoruz — mevcut :hover / [data-paused] CSS
+  // kuralları (tüm sayfalarda zaten var) aynen çalışmaya devam eder.
   window.bpStartMacroTicker = function(opts) {
     opts = opts || {};
-    var pps = opts.pps || 55;          // pixels-per-second (sabit)
+    var pps = opts.pps || 55;          // pixels-per-second (sabit, içerik genişliğinden bağımsız hız)
     var track = opts.track || document.getElementById('macroTrack');
     if (!track) return;
-    if (track._bpTickerStarted) return;
-    track._bpTickerStarted = true;
-
-    // CSS animasyonunu kapat (override)
-    track.style.animation = 'none';
-    track.style.willChange = 'transform';
-
-    var offset = 0, last = 0, paused = false;
-    var bar = track.closest('.macro-bar');
-    track.addEventListener('mouseenter', function(){ paused = true; });
-    track.addEventListener('mouseleave', function(){ paused = false; });
-
-    function step(now) {
-      // bug-hunt r23: macro-pause-btn (data-paused) daha once RAF dongusune hic
-      // baglanmiyordu — buton "duraklatildi" gorunup serit fiilen kaymaya devam ediyordu
-      var btnPaused = bar && bar.getAttribute('data-paused') === 'true';
-      if (last && !paused && !btnPaused && !document.hidden) {
-        var dt = (now - last) / 1000;       // saniye
-        if (dt > 0.1) dt = 0.1;             // tab değiştirme jump'ını önle
-        offset += pps * dt;
-        var half = track.scrollWidth / 2;
-        if (half > 0 && offset >= half) offset -= half;
-        track.style.transform = 'translateX(' + (-offset).toFixed(1) + 'px)';
-      }
-      last = now;
-      requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
+    var half = track.scrollWidth / 2;
+    if (half <= 0) return;
+    var duration = half / pps;         // saniye — sabit piksel/saniye hızını verir
+    track.style.animationDuration = duration.toFixed(2) + 's';
   };
 
   // ── loadMacroBar — merkezi orkestrasyon (DEV2-r103/CPO-DEV2-078: 10 sablonda
