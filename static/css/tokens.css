@@ -504,6 +504,15 @@ body {
   border: 0;
 }
 
+/* CPO-1557: `hidden` attribuna (sitede 300+ kullanım) HERHANGİ bir class'ın
+   display:flex/grid/block/inline-flex kuralı EŞİT özgüllükte (0,1,0) olduğu
+   için author-CSS user-agent varsayılanını (`[hidden]{display:none}`) sessizce
+   eziyor — sonuç: JS henüz `el.hidden=false` yapmadan önce eleman GÖRÜNÜR
+   kalıyor (ör. anasayfada "X Hisse Otomatik Taranıyor" rozeti veri gelene
+   kadar boş bir kapsül olarak görünüyordu). Tek satırlık global reset, tüm
+   sayfalarda tüm `hidden` kullanımlarını tek seferde düzeltir. */
+[hidden] { display: none !important; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
