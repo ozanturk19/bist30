@@ -1399,6 +1399,39 @@ def _weekly_trend(ticker: str) -> int:
         return 0
 
 
+def _historical_weekly_dir_series(close: pd.Series) -> pd.Series:
+    """Backtest ve sinyal-başlangıcı geriye-yürüme için lookahead-free haftalık
+    EMA20 yön serisi (CPO-1559 P0-1/P0-2). _weekly_trend()'in canlı gate'ini
+    (haftalık EMA20 son iki değerin karşılaştırması) her gün için SADECE o güne
+    kadarki veriyle taklit eder — gelecek veri sızıntısı (lookahead bias) yok.
+
+    Her hafta için EMA20'nin TAMAMLANMIŞ önceki haftalardan gelen değeri
+    (ema_prev) sabittir; o haftanın içindeki her gün için mevcut haftanın
+    "şu ana kadarki" kapanışı o günün kendi kapanışıdır (ewm adjust=False
+    formülüyle tek adım ileri taşınır) — bu yüzden aynı hafta içindeki günler
+    ema_prev'i paylaşır, sadece son terim değişir.
+    """
+    weekly_close = close.resample("W-FRI").last().dropna()
+    weekly_ema20 = weekly_close.ewm(span=20, adjust=False).mean()
+    ema_prev_by_week = weekly_ema20.shift(1)
+    ema_prev_by_week.index = ema_prev_by_week.index.to_period("W-FRI")
+    completed_before = pd.Series(range(len(weekly_close)),
+                                  index=weekly_close.index.to_period("W-FRI"))
+
+    alpha = 2.0 / 21.0  # span=20 → ewm(adjust=False) alpha
+    week_of_day = close.index.to_period("W-FRI")
+    dirs = np.zeros(len(close), dtype=int)
+    for i, wp in enumerate(week_of_day):
+        n_before = completed_before.get(wp)
+        ema_prev = ema_prev_by_week.get(wp)
+        if n_before is None or n_before < 24 or ema_prev is None or pd.isna(ema_prev):
+            dirs[i] = 0
+            continue
+        ema_now = alpha * float(close.iloc[i]) + (1 - alpha) * float(ema_prev)
+        dirs[i] = 1 if ema_now > float(ema_prev) else -1
+    return pd.Series(dirs, index=close.index)
+
+
 def compose_score(adx: float, vol_ratio: float, bull_score: int,
                   confirmed: bool, rsi: float, signal: str = "AL") -> int:
     """Tek skor kaynağı — 0-100 aralığı. CPO-535 spec.
@@ -1592,14 +1625,29 @@ def analyze(ticker_base):
             signal = "BEKLE"
 
         # ── Sinyal tarihi & süre ─────────────────────────────────────────
+        # CPO-1559 P0-2: bar_signal(i) eskiden ham 3-kriter hizalamasına
+        # bakıyordu, haftalık gate'i hiç sormuyordu ("ucuz bir haftalık-trend
+        # GEÇMİŞ serisi yoktu") — bu, signal_bars/signal_date/confirmed'ı ve
+        # daha önemlisi signal_price'ı (TP1/TP2/entry_quality/rr_signal'in
+        # çapası) haftalık gate'in gerçekte açıldığı günden çok daha eskiye
+        # (ham hizalanmanın başladığı güne) sabitleyebiliyordu.
+        # _historical_weekly_dir_series() artık bu geçmiş seriyi lookahead
+        # olmadan üretiyor, geriye-yürüme de canlı gate ile aynı mantığı kullanıyor.
+        weekly_dir_hist = _historical_weekly_dir_series(close)
+
         def bar_signal(i):
             ei12  = float(ema12.iloc[i]);  ei99  = float(ema99.iloc[i])
             ai    = float(adx.iloc[i])
             dip_i = float(di_plus.iloc[i]); dim_i = float(di_minus.iloc[i])
             sti   = int(supertrend.iloc[i])
+            wdir_i = int(weekly_dir_hist.iloc[i])
             bs  = int(sti == 1)  + int(ai >= 25 and dip_i > dim_i) + int(ei12 > ei99)
             brs = int(sti == -1) + int(ai >= 25 and dim_i > dip_i) + int(ei12 < ei99)
-            return "AL" if bs >= 3 else "SAT" if brs >= 3 else "BEKLE"
+            if bs >= 3 and wdir_i != -1 and wdir_i != 0:
+                return "AL"
+            elif brs >= 3 and wdir_i != 1 and wdir_i != 0:
+                return "SAT"
+            return "BEKLE"
 
         today_str   = datetime.now(_TZ_TR).strftime("%d.%m.%Y")
         signal_date = today_str
@@ -10370,15 +10418,26 @@ def api_portfolio_delete(token):
 
 
 # ── Backtest / Sinyal Performansı ─────────────────────────────────────────────
-def _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, i):
-    """i. bar için sinyal hesapla."""
+def _bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, weekly_dir, i):
+    """i. bar için sinyal hesapla.
+
+    CPO-1559 P0-1: canlı analyze()'nin uyguladığı haftalık-trend gate'i
+    (app.py ~1587-1592, büyük ters trendde sinyal üretme) artık burada da
+    uygulanıyor — weekly_dir, _historical_weekly_dir_series() ile lookahead
+    olmadan hesaplanmış geçmiş haftalık yön serisi.
+    """
     ei12  = float(ema12.iloc[i]);   ei99  = float(ema99.iloc[i])
     ai    = float(adx.iloc[i])
     dip   = float(di_plus.iloc[i]); dim   = float(di_minus.iloc[i])
     sti   = int(supertrend.iloc[i])
+    wdir  = int(weekly_dir.iloc[i])
     bs    = int(sti == 1)  + int(ai >= 25 and dip > dim) + int(ei12 > ei99)
     brs   = int(sti == -1) + int(ai >= 25 and dim > dip) + int(ei12 < ei99)
-    return "AL" if bs >= 3 else "SAT" if brs >= 3 else "BEKLE"
+    if bs >= 3 and wdir != -1 and wdir != 0:
+        return "AL"
+    elif brs >= 3 and wdir != 1 and wdir != 0:
+        return "SAT"
+    return "BEKLE"
 
 
 def backtest_ticker(ticker_base, fwd_days=20):
@@ -10409,9 +10468,11 @@ def backtest_ticker(ticker_base, fwd_days=20):
         ema99                  = compute_ema(close, 99)
         adx, di_plus, di_minus = compute_adx(high, low, close)
         supertrend, _          = compute_supertrend(high, low, close)
+        weekly_dir_hist        = _historical_weekly_dir_series(close)
 
         # Her bar için sinyal
-        signals = [_bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend, i)
+        signals = [_bar_signal_fast(ema12, ema99, adx, di_plus, di_minus, supertrend,
+                                     weekly_dir_hist, i)
                    for i in range(n)]
 
         episodes = []   # {"sig", "entry_i", "entry_price", "exit_i", "exit_price", "ret_pct"}
