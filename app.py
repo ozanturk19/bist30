@@ -2918,6 +2918,7 @@ from lib.trading_calendar import (
     is_closing_snapshot_window as _is_closing_snapshot_window,
     is_after_market_close as _is_after_market_close,
     expected_data_date as _expected_data_date,
+    eod_data_ready_after as _eod_data_ready_after,
 )
 
 
@@ -4075,6 +4076,33 @@ def background_refresh():
         _already_done_today = os.path.exists(_today_snapshot_path)
         _should_run_eod = (is_trading_day(_today_tr) and not _already_done_today
                             and _is_after_market_close())
+
+        # CPO-1566 P0: refresh_xu100_chart()/refresh_chart() (XU030) EOD döngüsünde
+        # SADECE _should_run_eod bloğunda, kapanışı (18:00 TR) yakalayan İLK poll'da
+        # (genelde 18:02-18:04 TR) bir kez çalışıyordu ve BİR DAHA HİÇ tekrar
+        # denenmiyordu — o an Yahoo'nun XU100.IS/XU030.IS verisi henüz kapanış
+        # auction'ının nihai basılmış fiyatını yansıtmayabiliyor (CPO-1566 kanıtı:
+        # 18:02 TR fetch 14540.81, saatler sonra Yahoo'nun kendisi 14505.48'e
+        # settle olmuş — ~35 puan/%0.24 fark). Kalıcı çözüm: erken fetch'i KORU
+        # (kullanıcı 18:0x'te veri görsün) ama is_closing_snapshot_window'un
+        # zaten tanımladığı "veri artık settle olmuş olmalı" eşiğinde
+        # (eod_data_ready_after → 18:30 TR) günde bir kez AYRI bir doğrulama/
+        # re-fetch turu ekle — farklıysa üzerine yazar. Marker dosyası restart'a
+        # dayanıklı (günlük snapshot deseniyle simetrik).
+        _today_chart_reverify_path = os.path.join(
+            _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_chart_reverify.flag"
+        )
+        if (is_trading_day(_today_tr) and _eod_data_ready_after()
+                and not os.path.exists(_today_chart_reverify_path)):
+            logger.info("background_refresh: EOD chart re-verify (Yahoo settle payı, 18:30+ TR)")
+            for task_name, fn, args in _CHART_REFRESH_TASKS:
+                _run_with_timeout(f"{task_name}_reverify", fn, args, _CHART_TASK_TIMEOUT)
+                time.sleep(5)
+            try:
+                with open(_today_chart_reverify_path, "w", encoding="utf-8") as _f:
+                    _f.write(datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"))
+            except OSError as _e:
+                logger.warning("chart reverify marker yazılamadı: %s", _e)
 
         if not _should_run_eod:
             time.sleep(_EOD_POLL_INTERVAL)
