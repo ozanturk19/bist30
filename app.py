@@ -10653,7 +10653,12 @@ def _signed_ret(ep):
 
 def run_backtest():
     """BIST30 hisseleri için backtest yürüt ve cache'e kaydet."""
-    # Sadece BIST30 (ilk 28 hisse) – 130 hisse çok yavaş olur
+    # CPO-1559 P1: kasıtlı olarak sadece BIST30 (ilk 28 hisse) — ürün ~215
+    # ticker'ı tarıyor ama tam evrende backtest (215 × yfinance.download,
+    # her biri arasında 0.3s bekleme) hem çok yavaş olur hem Yahoo rate-limit/
+    # circuit-breaker riskini büyütür (bkz. bilinen CB kesinti geçmişi).
+    # Bu yüzden istatistiğin kapsamı /sinyal-performans'ta açıkça belirtilir
+    # (küçük/orta-cap için temsili olmayabilir) — örneklemi genişletmek yerine.
     bt_tickers = BIST100[:28]
     all_episodes = {"AL": [], "SAT": []}
     per_ticker   = []

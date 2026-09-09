@@ -42,6 +42,7 @@
   <div class="info-box">
     <strong>Metodoloji:</strong> Son 2 yıllık günlük OHLC verisi üzerinde, mevcut sinyal motoru (<a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" title="Metodoloji — Supertrend">Supertrend</a> + <a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" title="Metodoloji — ADX">ADX</a>≥25 + <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" title="Metodoloji — EMA">EMA12/99</a>) her bar için yeniden çalıştırılır.
     Bir trend sinyali başladığında fiyat kaydedilir; sinyal bittiğinde veya 20 iş günü geçince kapanış fiyatı ile getiri hesaplanır.
+    Örneklem sadece BIST30 (büyük-cap {{ bt.tickers_used if bt else 30 }} hisse) ile sınırlıdır; sitenin sinyal ürettiği ~215 hisselik evrenin küçük/orta-cap çoğunluğu için temsili olmayabilir.
     <strong>Geçmiş performans gelecek getiriyi garanti etmez.</strong> Yatırım tavsiyesi değildir.
   </div>
 
