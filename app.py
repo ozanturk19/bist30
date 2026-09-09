@@ -127,6 +127,39 @@ except ImportError as _fhs_import_err:
 
 # ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
 _SENTRY_AVAILABLE = False
+
+# CPO-1561 P0: abone auth token'ı (/profil?t=, /unsubscribe/<token>) hem query
+# string hem path segment'i olarak Sentry transaction/event URL'lerine ham
+# haliyle gidiyordu (send_default_pii kapalı olsa da request.url zaten
+# scrub edilmiyordu). Token formatı secrets.token_hex(20/24) -> 32+ karakter
+# hex string; hem "t=<hex>" query param'ı hem "/unsubscribe/<hex>" path
+# segment'ini [REDACTED] ile değiştiriyoruz.
+_SENTRY_TOKEN_QS_RE = re.compile(r"([?&]t=)[0-9a-fA-F]{16,}")
+_SENTRY_TOKEN_PATH_RE = re.compile(r"(/unsubscribe/)[0-9a-fA-F]{16,}")
+
+def _sentry_scrub_url(url: str) -> str:
+    if not url:
+        return url
+    url = _SENTRY_TOKEN_QS_RE.sub(r"\1[REDACTED]", url)
+    url = _SENTRY_TOKEN_PATH_RE.sub(r"\1[REDACTED]", url)
+    return url
+
+def _sentry_before_send(event, hint):
+    try:
+        req = event.get("request")
+        if isinstance(req, dict):
+            if req.get("url"):
+                req["url"] = _sentry_scrub_url(req["url"])
+            if req.get("query_string"):
+                req["query_string"] = _sentry_scrub_url("?" + req["query_string"]).lstrip("?")
+        for bc in (event.get("breadcrumbs") or {}).get("values", []):
+            data = bc.get("data")
+            if isinstance(data, dict) and data.get("url"):
+                data["url"] = _sentry_scrub_url(data["url"])
+    except Exception:
+        pass
+    return event
+
 try:
     import sentry_sdk as _sentry_sdk
     _sentry_dsn = os.environ.get("SENTRY_DSN", "")
@@ -135,6 +168,8 @@ try:
             dsn=_sentry_dsn,
             traces_sample_rate=0.1,
             environment=os.environ.get("FLASK_ENV", "production"),
+            before_send=_sentry_before_send,
+            before_send_transaction=_sentry_before_send,
         )
         _SENTRY_AVAILABLE = True
 except ImportError:
@@ -11714,8 +11749,18 @@ def api_subscribe():
 
 @app.route("/profil")
 def profil_page():
-    """Profil tamamla sayfası — token ile kullanıcıyı tanı."""
-    token = request.args.get("t") or request.cookies.get("bp_sub", "")
+    """Profil tamamla sayfası — token ile kullanıcıyı tanı.
+    CPO-1561 P0: hoş geldin mailindeki link ?t=<token> taşıyor — GA4/Sentry'ye
+    sızmasın diye (URL analytics'e page_location/request.url olarak gidiyordu)
+    /api/recognize/confirm ile aynı desen: token'ı httponly cookie'ye taşı,
+    URL'den ?t= parametresini temizleyip tekrar /profil'e yönlendir. Cookie
+    zaten varsa (ikinci ziyaret) hiç ?t= gelmez, bu blok atlanır."""
+    url_token = (request.args.get("t") or "").strip()
+    if url_token and url_token != request.cookies.get("bp_sub", ""):
+        resp = redirect("/profil")
+        resp.set_cookie("bp_sub", url_token, max_age=31536000, samesite="Lax", secure=True, httponly=True)
+        return resp
+    token = request.cookies.get("bp_sub", "")
     if not token:
         # CPO-1190 K9: çıplak 400 yerine markalı açıklama sayfası — kullanıcı
         # bu sayfaya yalnızca e-posta linkiyle (?t=token) gelmeli. Küçük
