@@ -84,13 +84,15 @@ def _band(score):
     return BAND_YESIL
 
 
-def _metric_score(metric, value, sector, stocks_with_fundamentals, reverse):
-    """Tek bir metriğin 0-100 skoru. ocf_positive_quarters (4 üzerinden sayaç)
-    percentile'a girmez, doğrudan ölçeklenir — sektör-içi kıyas anlamsız."""
+def _metric_score(metric, value, sector, stocks_with_fundamentals, reverse, ticker_fundamentals=None):
+    """Tek bir metriğin 0-100 skoru. ocf_positive_quarters (gerçek çeyrek sayısı
+    üzerinden sayaç, bkz. ocf_quarters_used) percentile'a girmez, doğrudan
+    ölçeklenir — sektör-içi kıyas anlamsız."""
     if value is None:
         return None
     if metric == "ocf_positive_quarters":
-        return max(0.0, min(100.0, (value / 4.0) * 100.0))
+        quarters_used = (ticker_fundamentals or {}).get("ocf_quarters_used") or 4
+        return max(0.0, min(100.0, (value / quarters_used) * 100.0))
     pct = sector_stats.ticker_metric_percentile(value, metric, sector, stocks_with_fundamentals)
     if pct is None:
         return None
@@ -115,7 +117,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
         metric_scores = []
         for metric, reverse in cat["metrics"]:
             value = ticker_fundamentals.get(metric)
-            score = _metric_score(metric, value, sector, stocks_with_fundamentals, reverse)
+            score = _metric_score(metric, value, sector, stocks_with_fundamentals, reverse, ticker_fundamentals)
             if score is not None:
                 metric_scores.append(score)
                 metrics_with_data += 1
@@ -139,7 +141,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
     return {
         "temel_analiz_skoru": round(score),
         "data_completeness": data_completeness,
-        "band": _band(score),
+        "band": _band(round(score)),
         "categories": {c: round(s, 1) for c, s in category_scores.items()},
     }
 

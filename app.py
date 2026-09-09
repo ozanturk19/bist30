@@ -509,7 +509,7 @@ def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
         _extra_keys = (
             "quick_ratio", "gross_margin", "ebitda_margin", "fcf_to_sales",
             "net_debt_to_ebitda", "ev_to_ebitda", "ocf_positive_quarters",
-            "ocf_stability_cv",
+            "ocf_quarters_used", "ocf_stability_cv",
         )
         extra = {k: data.get(k) for k in _extra_keys if k in data}
         return {"info": info, "statement_trend": data.get("statement_trend") or [], "extra": extra}
