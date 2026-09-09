@@ -4751,8 +4751,6 @@ def _do_macro_ai_refresh():
         oil    = _lbl("PETROL")
         btc    = _lbl("BTC")
 
-        _today_now = datetime.now(_TZ_TR)
-        today_str = f"{_today_now.strftime('%d')} {_tr_month(_today_now)} {_today_now.strftime('%Y')}"
         lines = []
         if xu100:
             chg_str = ('%+.2f' % xu100c + '%') if xu100c is not None else '—'
@@ -4766,9 +4764,11 @@ def _do_macro_ai_refresh():
             return
 
         prompt = (
-            f"Bugün {today_str}. Türk piyasaları anlık verileri:\n"
+            "Türk piyasaları son kapanış verileri:\n"
             + "\n".join(f"• {ln}" for ln in lines)
-            + "\n\nKURAL: Sadece bu verileri yorumla. Spekülasyon yapma. Tahmin yapma.\n"
+            + "\n\nKURAL: Sadece bu verileri yorumla. Spekülasyon yapma. Tahmin yapma. "
+            "Tarih belirtme; 'bugün', 'şu an', 'şu anda', 'şu sıralar' gibi zamana "
+            "bağlı ifadeler KULLANMA — veriyi tarihsiz/zamansız yorumla.\n"
             "GÖREV: Bireysel yatırımcı için 2 cümlelik Türkçe piyasa özeti. "
             "Yatırım tavsiyesi verme. Giriş/kapanış cümlesi ekleme."
         )
