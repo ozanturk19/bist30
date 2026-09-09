@@ -600,7 +600,7 @@ header{
       <div class="da-eyebrow">Günün Öne Çıkanı</div>
       <h2 class="da-section-title da-display">En yüksek Teknik Güç Skoru.</h2>
     </div>
-    <p class="da-section-desc">signal_strength — ADX, hacim teyidi ve RSI bölgesinin ağırlıklı bileşimi (0–100).</p>
+    <p class="da-section-desc">Teknik Güç Skoru — ADX, hacim teyidi ve RSI bölgesinin ağırlıklı bileşimi (0–100).</p>
   </div>
   <div id="daSpotlightBody">
     <div class="da-spot-grid">
@@ -1016,7 +1016,7 @@ header{
       cards.push(
         '<div class="da-curated-card"><div class="da-curated-num da-display">01</div>' +
         '<div class="da-curated-body"><div class="da-curated-title">Bugünün En Güçlü Teknik Sinyalleri</div>' +
-        '<div class="da-curated-desc">Teknik Güç Skoru (signal_strength) en yüksek hisseler.</div></div>' +
+        '<div class="da-curated-desc">Teknik Güç Skoru en yüksek hisseler.</div></div>' +
         '<div class="da-chip-row">' + byScore.map(function(s){ return chip(s.ticker, fmtNum0(s.signal_strength), scoreColorVar(s.signal_strength), 'var(--bp-surface3)'); }).join('') + '</div></div>'
       );
     }
