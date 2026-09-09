@@ -83,6 +83,31 @@ def eod_data_ready_after(now_tr=None):
     return _now_total_min >= _ready_total_min
 
 
+def eod_fetch_trigger_ready_after(now_tr=None):
+    """CPO-1567 P0-A: background_refresh()'in günde-bir ana EOD tetikleyicisi
+    (215 hisse + XU030/XU100 chart ilk-fetch) artık kapanışın (18:00 TR) TAM
+    saniyesinde değil, küçük bir Yahoo-settle tamponundan (_EOD_READY_BUFFER_MINUTES
+    = 10dk → 18:10 TR) sonra ateşlensin — CPO-1566/1567 kanıtı: 18:00-18:05 TR
+    arası ilk poll'da Yahoo'nun kapanış auction fiyatı henüz basılı/nihai
+    olmayabiliyor (AKBNK örneği: 18:04:45 TR'de site -%1,60, gerçek -%2,67).
+
+    eod_data_ready_after()'ın TAM 30dk'lık tamponunu (18:20 pencere + 10dk)
+    BİLEREK kullanmıyoruz: 215 ticker'lık ana tur zaten bazı günler 6+ saat
+    sürüyor ve 19:00 TR systemctl-stop'tan önce bitmeyebiliyor (CPO-1563) —
+    tetikleyiciyi 30dk geciktirmek bu bitmeme riskini büyütür. Sadece
+    _EOD_READY_BUFFER_MINUTES (10dk) kadar erteliyoruz: en kaba "az önce basıldı,
+    henüz settle olmadı" penceresini atlatır, toplam bütçeyi ciddi kısaltmaz.
+    Chart re-verify turu (eod_data_ready_after, 18:30 TR) zaten ayrıca ikinci
+    bir doğrulama yapıyor — bu fonksiyon SADECE ilk tetikleme anını küçük
+    ölçüde erteliyor, onun yerine geçmiyor."""
+    now_tr = now_tr or datetime.now(_TZ_TR)
+    if not is_trading_day(now_tr.date()):
+        return False
+    _ready_total_min = _CLOSING_WINDOW_HOUR * 60 + _EOD_READY_BUFFER_MINUTES
+    _now_total_min = now_tr.hour * 60 + now_tr.minute
+    return _now_total_min >= _ready_total_min
+
+
 def last_trading_day_on_or_before(d):
     """d dahil, geriye doğru en yakın işlem günü (hafta sonu/tatil atlanır)."""
     while not is_trading_day(d):

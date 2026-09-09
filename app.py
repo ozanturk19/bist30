@@ -2919,6 +2919,7 @@ from lib.trading_calendar import (
     is_after_market_close as _is_after_market_close,
     expected_data_date as _expected_data_date,
     eod_data_ready_after as _eod_data_ready_after,
+    eod_fetch_trigger_ready_after as _eod_fetch_trigger_ready_after,
 )
 
 
@@ -4074,8 +4075,16 @@ def background_refresh():
         _today_tr = datetime.now(_TZ_TR).date()
         _today_snapshot_path = os.path.join(_SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}.json")
         _already_done_today = os.path.exists(_today_snapshot_path)
+        # CPO-1567 P0-A: ana EOD tetikleyicisi eskiden _is_after_market_close()
+        # (18:00 TR'nin tam saniyesi) idi — XU100 vakasıyla aynı "Yahoo henüz
+        # settle etmedi" riskini 215 hisse + signal_price anchor'ı için de
+        # taşıyordu. eod_fetch_trigger_ready_after() (18:10 TR, küçük tampon)
+        # ile değiştirildi — bkz. lib/trading_calendar.py docstring'i neden TAM
+        # 30dk'lık eod_data_ready_after() tamponunun KULLANILMADIĞINI (215
+        # ticker'lık turun 19:00 TR stop'tan önce bitmeme riskini büyütmemek
+        # için) açıklıyor.
         _should_run_eod = (is_trading_day(_today_tr) and not _already_done_today
-                            and _is_after_market_close())
+                            and _eod_fetch_trigger_ready_after())
 
         # CPO-1566 P0: refresh_xu100_chart()/refresh_chart() (XU030) EOD döngüsünde
         # SADECE _should_run_eod bloğunda, kapanışı (18:00 TR) yakalayan İLK poll'da
@@ -4659,12 +4668,13 @@ def _read_macro_heartbeat():
 
 
 def _in_macro_refresh_window(now_ts):
-    """bist30-refresh.service'in cron'la aktif tutulduğu pencere: Pzt-Cum 07:00-15:00 UTC
-    (crontab: '0 7 * * 1-5 systemctl start' / '0 15 * * 1-5 systemctl stop'). Pencere
-    dışında loop zaten ÇALIŞMIYOR OLMALI (tasarım gereği) — orada heartbeat yaşı
-    değerlendirilmez, sahte-alarm üretilmez."""
+    """bist30-refresh.service'in cron'la aktif tutulduğu pencere: Pzt-Cum 07:00-16:00 UTC
+    (crontab: '0 7 * * 1-5 systemctl start' / '0 16 * * 1-5 systemctl stop' — CPO-1567 P2:
+    sabit eskiden 15:00 UTC yazıyordu, gerçek crontab 16:00 UTC'de durduruyor, `crontab -l`
+    ile doğrulandı). Pencere dışında loop zaten ÇALIŞMIYOR OLMALI (tasarım gereği) — orada
+    heartbeat yaşı değerlendirilmez, sahte-alarm üretilmez."""
     dt = datetime.fromtimestamp(now_ts, timezone.utc)
-    return dt.weekday() < 5 and 7 <= dt.hour < 15
+    return dt.weekday() < 5 and 7 <= dt.hour < 16
 
 
 def _macro_bg_loop():
@@ -9140,7 +9150,7 @@ def _compute_health():
         stocks_status = "ok"
 
     # CPO-1260-A(b): loop-nabzı ekseni — disk-bridge heartbeat, SADECE bist30-refresh.service'in
-    # aktif olması gereken pencerede (cron Pzt-Cum 07:00-15:00 UTC) değerlendirilir. Pencere
+    # aktif olması gereken pencerede (cron Pzt-Cum 07:00-16:00 UTC) değerlendirilir. Pencere
     # dışında loop zaten çalışmıyor OLMALI (tasarım gereği) — orada heartbeat yaşı anlamsız,
     # sahte-alarm üretilmez. Bu, veri-yaşı (macro_stale) ekseninden BAĞIMSIZ ikinci bir eksen.
     _macro_hb = _read_macro_heartbeat()
@@ -9155,7 +9165,19 @@ def _compute_health():
         macro_status = "critical"   # CPO-1258 §2 gerçek amacı: pencere İÇİNDE loop nabzı kesin kesildi
     elif _macro_loop_dead:
         macro_status = "degraded"   # pencere içinde loop nabzı zayıfladı
-    elif not mkt_open:
+    elif not _macro_in_refresh_window:
+        # CPO-1567 P0-B: eskiden `not mkt_open` idi (BIST seansı 10:00-18:00 TR) —
+        # bist30-refresh.service'in GERÇEK fetch penceresiyle (07:00-16:00 UTC =
+        # 10:00-19:00 TR) örtüşmüyordu. Sonuç: 18:00-19:00 TR arası (servis hâlâ
+        # ACTİF fetch yaparken) bir arıza olsa bile health "ok" derdi (mkt_open
+        # zaten 18:00'de False oluyor) — asıl amaç "servis zaten kapalıyken sahte
+        # alarm üretme" idi, "servis çalışırken de göz yum" değil. Artık gerçek
+        # fetch penceresi dışındayken (19:00 TR-10:00 TR + hafta sonu, tasarım
+        # gereği loop kapalı) "ok" diyor, pencere İÇİNDEYKEN gerçek yaş eşiklerine
+        # (altta) düşüyor. NOT: bu, USDTRY/BTC/SP500 gibi 7/24 işlem gören 8
+        # kalemin servis kapalıyken (gece/hafta sonu) donuk kalması sorununu
+        # ÇÖZMÜYOR — o ayrı bir mimari karar (macro fetch'i BIST-saatleri
+        # servisinden ayırmak), bkz. DEV-1843 mailbox yanıtı.
         macro_status = "ok"
     elif macro_age_s is None or macro_age_s > 3600:
         macro_status = "critical"
