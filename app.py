@@ -9154,7 +9154,15 @@ def _compute_health():
         msg_parts.append(f"stocks {stocks_age_s}s stale" if stocks_age_s else "stocks data yok")
     elif stocks_status == "degraded":
         if bad_ticker_count > 5 and mkt_open:
-            msg_parts.append(f"{bad_ticker_count} ticker stale fallback")
+            # DEV-1836/1838 P1: EOD-only cadence'te bugünün turu ancak kapanıştan
+            # (18:00 TR) SONRA çalışır — mkt_open=True iken (10:00-18:00 TR) bu
+            # sayaç matematiksel olarak HER ZAMAN bir önceki (dünkü) EOD turunun
+            # bakiye fallback'idir, "şu an donmuş/devam eden bir tur" DEĞİL.
+            # Mesaj bunu ayırt etmediği için CPO-1563'te yanlış alarma yol açmıştı.
+            msg_parts.append(
+                f"{bad_ticker_count} ticker dünkü EOD turundan kalan stale fallback "
+                f"(bugünün turu ~18:00 TR'de)"
+            )
         else:
             msg_parts.append(f"stocks {stocks_age_s}s stale")
     if macro_status == "critical":
