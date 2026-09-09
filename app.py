@@ -2953,6 +2953,16 @@ def _compute_data_quality(bad_ticker_count, total_count, market_open):
 # (epoch=0) gibi anlamsız bir değere düşmesin.
 _NEVER_FRESH_SENTINEL_S = 7 * 86400  # 7 gün
 
+# DEV-1832/CPO-1563 P1: _compute_data_quality/_canonical_stocks_age p90 tabanlı
+# aggregate — %10'a kadar ticker kalıcı donuk kalsa da aggregate "fresh"
+# görünebilir (p90 eşiği onları hiç kapsamına almaz). Bu eşik PER-TICKER
+# kontrol için: normal Cuma-kapanış → Pazartesi-açılış boşluğu (~60s wall)
+# ve tek günlük resmi tatil dahil YANLIŞ ALARM vermeyecek kadar geniş (4 gün),
+# ama "sessizce süresiz donma" senaryosunu bir iş haftası içinde yakalayacak
+# kadar sıkı. Uzun bayram tatillerinde (5-9 gün) nadir yanlış-pozitif kabul
+# edilebilir — bu sadece P1 görünürlük uyarısı, sayfa/otomatik aksiyon değil.
+_FROZEN_TICKER_ALERT_S = 4 * 86400  # 4 gün
+
 
 def _canonical_stocks_age(stocks, now=None):
     """CPO-1137: /api/health, /api/data ve is_stale ÜÇÜNÜN paylaştığı TEK yaş
@@ -3873,6 +3883,30 @@ def _refresh_data_impl():
                 _anomaly_cache.update(_new_ac)
         except Exception as _e:
             logger.warning("UI_ANOMALY_CACHE exception: %s", _e)
+
+    # ── DEV-1832/CPO-1563 P1: Donmuş ticker yaş sayacı ───────────────────────
+    # Aggregate _canonical_stocks_age p90-tabanlı olduğu için kalıcı donuk bir
+    # azınlık (< %10) hiçbir zaman aggregate'i "stale"e çekmez — bu blok
+    # PER-TICKER last_fresh_ts eşiğini aşanları ayrıca görünür kılar.
+    try:
+        _now_frozen = time.time()
+        _frozen = [
+            (s["ticker"], int(_now_frozen - s["last_fresh_ts"]))
+            for s in results
+            if s.get("ticker") and s.get("last_fresh_ts")
+            and (_now_frozen - s["last_fresh_ts"]) > _FROZEN_TICKER_ALERT_S
+        ]
+        if _frozen:
+            _frozen.sort(key=lambda x: -x[1])
+            _detail = ", ".join(f"{t}={age // 86400}g" for t, age in _frozen[:10])
+            if _ALERTING_AVAILABLE:
+                _dqv_alert("DQV_FROZEN",
+                           f"{len(_frozen)} ticker >{_FROZEN_TICKER_ALERT_S // 86400}g donuk: {_detail}")
+            else:
+                logger.warning("FROZEN_TICKERS: %d ticker >%dg donuk: %s",
+                               len(_frozen), _FROZEN_TICKER_ALERT_S // 86400, _detail)
+    except Exception as _e:
+        logger.warning("FROZEN_TICKER_CHECK exception: %s", _e)
 
 
 def _purge_stale_chart_caches():

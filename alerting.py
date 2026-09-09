@@ -16,6 +16,7 @@ DQV_TIER = {
     "DQV_CROSS":    "P1",
     "DQV_ANOMALY":  "P1",
     "DQV_EMAIL_QA": "P1",
+    "DQV_FROZEN":   "P1",
     "DQV_SV_DATA":  "P0",
     "DQV_SV_MACRO": "P0",
     "DQV_SV_CHART": "P0",
