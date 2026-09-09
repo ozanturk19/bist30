@@ -1278,3 +1278,156 @@
   transition: transform var(--bp-dur-base) var(--bp-ease-standard);
 }
 .mtf-card:hover { transform: rotate(0deg) translateY(-3px); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   CPO-1554 Faz 4 — Üç Skor Analizi (BorsaPusula / Teknik / Temel + radar)
+   Organik/Asimetrik konsept (workflow judge-panel 8.4/10 kazanan tasarım),
+   Kokpit'ten radar-renk düzeltmesi + Kart Yığını'ndan "YENİ" rozeti aşılandı.
+   [data-state="full"]  — hs (health-score) mevcut, tüm kompozisyon.
+   [data-state="partial"] — hs yok (EOD turu bekleniyor), sadece Teknik
+   gauge + kompakt dürüst bekleme notu, sade tek-satır düzen.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.score-section { position: relative; margin-bottom: 20px; }
+.score-section::before {
+  content: ''; position: absolute; inset: -60px; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 600px 420px at 26% 14%, rgba(var(--bp-volume-rgb), .07), transparent 70%),
+    radial-gradient(ellipse 520px 420px at 78% 68%, rgba(var(--bp-accent-cyan-rgb), .06), transparent 70%);
+}
+.score-section-eyebrow { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 6px; max-width: 1180px; position: relative; z-index: 1; }
+.score-section-title { font-family: 'Bricolage Grotesque', -apple-system, sans-serif; font-weight: 800; letter-spacing: -0.02em; font-size: 22px; color: var(--bp-text); }
+.formula-note { font-size: 12.5px; color: var(--bp-text3); margin-top: 2px; }
+.formula-note b { color: var(--bp-text2); font-weight: 600; }
+.axis-legend { font-size: 11.5px; color: var(--bp-text3); margin: 6px 0 26px; max-width: 1180px; position: relative; z-index: 1; }
+.axis-legend span { color: var(--bp-text2); }
+.axis-legend em { font-style: normal; color: var(--bp-text3); }
+
+.score-canvas { position: relative; width: 100%; max-width: 1180px; margin: 0 auto; z-index: 1; }
+[data-state="full"] .score-canvas { min-height: 800px; }
+
+/* radar */
+.radar-wrap { position: absolute; left: 0; top: 90px; width: 560px; height: 560px; transition: opacity .35s ease, filter .35s ease; }
+.radar-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.radar-grid { fill: none; stroke: var(--bp-border); stroke-width: 1; opacity: .55; }
+.radar-grid--outer { opacity: .85; }
+.radar-axis { stroke: var(--bp-border); stroke-width: 1; opacity: .4; }
+.radar-data { stroke: var(--bp-accent-cyan); stroke-width: 2; }
+.axis-name { font-size: 10.5px; letter-spacing: .07em; fill: var(--bp-text3); text-transform: uppercase; font-family: -apple-system, sans-serif; }
+.axis-value { font-size: 17px; font-weight: 800; font-family: 'Bricolage Grotesque', sans-serif; }
+.radar-partial-note {
+  display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 230px; text-align: center; font-size: 12px; color: var(--bp-text2);
+  background: rgba(20, 20, 22, .85); border: 1px solid var(--bp-border); border-radius: 10px; padding: 10px 14px;
+  backdrop-filter: blur(2px);
+}
+.radar-wrap[data-dim="true"] { opacity: .3; filter: saturate(.35); }
+.radar-wrap[data-dim="true"] .radar-partial-note { display: block; }
+
+.decor-nodes { position: absolute; left: 34px; top: 110px; width: 170px; height: 170px; z-index: 0; opacity: .7; pointer-events: none; }
+
+/* gauges (ortak) */
+.gauge { position: absolute; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: transform .25s ease, opacity .3s ease; }
+.gauge:hover { transform: scale(1.035); }
+.gauge .gauge-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.gauge .ring-bg { fill: none; stroke: var(--bp-border); stroke-width: 6; }
+.gauge .ring-fg { fill: none; stroke: var(--band-color, var(--bp-brand)); stroke-width: 6; stroke-linecap: round; }
+.gauge-center { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.gauge-value { font-family: 'Bricolage Grotesque', -apple-system, sans-serif; font-weight: 800; letter-spacing: -0.02em; color: var(--bp-text); line-height: 1; }
+.gauge-max { font-size: 12px; color: var(--bp-text3); margin-top: 2px; }
+.gauge-label {
+  position: absolute; left: 50%; bottom: -30px; transform: translateX(-50%);
+  text-align: center; font-size: 10.5px; letter-spacing: .08em; color: var(--bp-text3);
+  text-transform: uppercase; white-space: nowrap;
+}
+
+/* hero — BorsaPusula Skoru */
+.hero-gauge { left: 490px; top: 0; width: 260px; height: 260px; z-index: 6; box-shadow: 0 30px 70px -24px rgba(var(--band-rgb), .5); }
+.hero-gauge .ring-fg { stroke-width: 9; filter: drop-shadow(0 0 12px rgba(var(--band-rgb), .6)); }
+.hero-gauge .gauge-value { font-size: 66px; }
+.hero-gauge .gauge-label { bottom: -46px; font-size: 12px; line-height: 1.5; }
+.hero-formula { position: absolute; left: 50%; bottom: -70px; transform: translateX(-50%); font-size: 11px; color: var(--bp-text3); white-space: nowrap; text-align: center; }
+.partial-badge {
+  display: none; position: absolute; top: -8px; right: -4px; z-index: 8;
+  align-items: center; gap: 5px; background: var(--bp-surface); border: 1px solid rgba(var(--bp-premium-rgb), .5);
+  color: var(--bp-premium); font-size: 10px; font-weight: 700; letter-spacing: .05em;
+  padding: 5px 10px; border-radius: 20px; text-transform: uppercase; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .6);
+}
+.hero-gauge[data-missing="true"] .partial-badge { display: flex; }
+
+/* teknik + temel */
+.teknik-gauge { left: 26px; top: 560px; width: 172px; height: 172px; z-index: 4; --band-color: var(--bp-brand); --band-rgb: var(--bp-brand-rgb); }
+.teknik-gauge .gauge-value { font-size: 34px; }
+
+.temel-gauge { left: 518px; top: 518px; width: 172px; height: 172px; z-index: 4; --band-color: var(--bp-accent-cyan); --band-rgb: var(--bp-accent-cyan-rgb); }
+.temel-gauge .gauge-value { font-size: 34px; }
+.new-badge {
+  position: absolute; top: -8px; left: 50%; transform: translateX(-50%); z-index: 8;
+  font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--bp-premium); background: rgba(var(--bp-premium-rgb), .13);
+  border: 1px solid rgba(var(--bp-premium-rgb), .35);
+  padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+}
+.completeness { position: absolute; left: 50%; bottom: -60px; transform: translateX(-50%); width: 130px; text-align: center; }
+.completeness .bar { height: 3px; border-radius: 2px; background: var(--bp-border); overflow: hidden; margin-top: 4px; }
+.completeness .bar i { display: block; height: 100%; background: var(--bp-accent-cyan); }
+.completeness span { font-size: 9.5px; color: var(--bp-text3); }
+
+.temel-gauge[data-missing="true"] { opacity: .4; }
+.temel-gauge[data-missing="true"] .gauge-value { color: var(--bp-text3); }
+
+/* AI gerekçe kartı */
+.rationale-card {
+  position: absolute; left: 770px; top: 330px; width: 360px; z-index: 3;
+  background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius: 16px;
+  padding: 22px 24px; overflow: hidden;
+}
+.rationale-card::before {
+  content: ''; position: absolute; top: -55%; right: -8%; width: 130px; height: 130px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--bp-accent-cyan-rgb), .14), transparent 70%); pointer-events: none;
+}
+.rc-eyebrow { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--bp-accent-cyan); margin-bottom: 12px; position: relative; }
+.rationale-card p { font-size: 14px; line-height: 1.65; color: var(--bp-text2); margin: 0 0 12px; position: relative; }
+.rationale-card .rc-note { font-size: 11.5px; color: var(--bp-volume); margin: -4px 0 12px; }
+.rc-disclaimer { font-size: 11px; color: var(--bp-text3); position: relative; }
+
+/* ── [data-state="partial"] — hs yok, sade tek-satır düzen ── */
+[data-state="partial"] .score-canvas {
+  display: flex; align-items: center; gap: 28px; flex-wrap: wrap; padding: 6px 0 34px;
+}
+[data-state="partial"] .teknik-gauge { position: relative; left: auto; top: auto; width: 140px; height: 140px; flex-shrink: 0; }
+.pending-note {
+  flex: 1; min-width: 260px; display: flex; align-items: flex-start; gap: 14px;
+  background: var(--bp-surface2); border: 1px dashed var(--bp-border); border-radius: 14px; padding: 18px 20px;
+}
+.pending-icon {
+  width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; border: 1.5px dashed var(--bp-text3);
+  display: flex; align-items: center; justify-content: center; font-size: 15px; color: var(--bp-text3);
+  animation: scorePendingPulse 2.4s ease-in-out infinite;
+}
+@keyframes scorePendingPulse { 0%, 100% { opacity: .55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
+.pending-title { font-size: 14px; font-weight: 700; color: var(--bp-text); margin-bottom: 4px; }
+.pending-text { font-size: 12.5px; color: var(--bp-text3); line-height: 1.55; }
+.pending-eta { display: inline-block; margin-top: 8px; font-size: 11.5px; color: var(--bp-volume); background: rgba(var(--bp-volume-rgb), .1); border: 1px solid rgba(var(--bp-volume-rgb), .3); padding: 3px 10px; border-radius: 20px; }
+
+/* ── ≥1024px serbest kompozisyon, <900px tek-kolon akış (full state) ── */
+@media (max-width: 900px) {
+  [data-state="full"] .score-canvas {
+    min-height: auto; display: flex; flex-direction: column; align-items: center; gap: 30px; padding: 10px 0 40px;
+  }
+  [data-state="full"] .radar-wrap, [data-state="full"] .hero-gauge,
+  [data-state="full"] .teknik-gauge, [data-state="full"] .temel-gauge,
+  [data-state="full"] .rationale-card {
+    position: relative; left: auto; top: auto; right: auto; bottom: auto; transform: none; margin: 0;
+  }
+  [data-state="full"] .decor-nodes { display: none; }
+  [data-state="full"] .hero-gauge { order: 1; width: 190px; height: 190px; margin-bottom: 64px; box-shadow: 0 20px 50px -20px rgba(var(--band-rgb), .5); }
+  [data-state="full"] .hero-gauge .gauge-value { font-size: 48px; }
+  [data-state="full"] .teknik-gauge { order: 2; width: 130px; height: 130px; margin-bottom: 44px; }
+  [data-state="full"] .temel-gauge { order: 3; width: 130px; height: 130px; margin-bottom: 64px; }
+  [data-state="full"] .radar-wrap { order: 4; width: min(360px, 90vw); height: min(360px, 90vw); margin-top: 6px; }
+  [data-state="full"] .rationale-card { order: 5; width: 100%; max-width: 420px; }
+  [data-state="full"] .gauge-label { bottom: -26px; }
+  [data-state="full"] .hero-formula { display: none; }
+  [data-state="partial"] .score-canvas { flex-direction: column; align-items: center; text-align: left; }
+}

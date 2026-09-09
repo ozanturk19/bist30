@@ -99,7 +99,7 @@
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=b1e2a745">
 <script src="/static/bp-vocab.js?v=20260823C" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=fc3da8ea">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=328e9345">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:var(--bp-brand);color:var(--bp-bg);padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid var(--bp-brand);outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -657,6 +657,236 @@
       <div class="info-card-sub">bar (gün)</div>
     </div>
   </div>
+
+  <!-- CPO-1554 Faz 4 — Üç Skor Analizi (BorsaPusula / Teknik / Temel + radar).
+       Organik/Asimetrik konsept (judge-panel 8.4/10), Kokpit+Kart Yığını'ndan
+       aşılandı. hs_available=False iken (EOD turu bu ticker için hiç çalışmadı)
+       kompakt dürüst-bekleme durumu; Teknik Analiz Skoru HER ZAMAN ssr_signal'dan
+       (mevcut, çalışan kaynak) bağımsız gösterilir — hs'e hiç bağımlı değil. -->
+  {% set new_teknik_score = (ssr_signal.signal_strength | int) if (ssr_signal and ssr_signal.signal_strength) else none %}
+  {% if new_teknik_score or hs_available %}
+  {% set RING_R = 45 %}
+  {% set RING_C = 282.743 %}
+  {% set RADAR_CX = 260 %}
+  {% set RADAR_CY = 260 %}
+  {% set RADAR_R  = 225 %}
+  {% set BAND_META = {
+    'yesil':   {'var': '--bp-al',     'rgb_var': '--bp-al-rgb'},
+    'sari':    {'var': '--bp-volume', 'rgb_var': '--bp-volume-rgb'},
+    'kirmizi': {'var': '--bp-sat',    'rgb_var': '--bp-sat-rgb'}
+  } %}
+  {% macro health_color(v) -%}
+  {%- if v is none -%}var(--bp-text3)
+  {%- elif v >= 65 -%}var(--bp-al)
+  {%- elif v >= 40 -%}var(--bp-volume)
+  {%- else -%}var(--bp-sat)
+  {%- endif -%}
+  {%- endmacro %}
+
+  {% set temel_score  = hs.temel_analiz_skoru if hs_available else none %}
+  {% set hero_score   = hs.borsapusula_skoru if hs_available else none %}
+  {% set temel_missing = (not hs_available) or temel_score is none %}
+  {% set radar_dim = temel_missing or (hs_available and hs.partial) %}
+  {% set band = BAND_META.get(hs.band, BAND_META['sari']) if hs_available else BAND_META['sari'] %}
+  {% set completeness_pct = ((hs.data_completeness * 100) | round | int) if (hs_available and hs.data_completeness is not none) else 0 %}
+
+  {% if new_teknik_score %}
+    {% set teknik_offset = '%.2f'|format(RING_C * (100 - new_teknik_score) / 100) %}
+  {% endif %}
+  {% if hero_score is not none %}
+    {% set hero_offset = '%.2f'|format(RING_C * (100 - hero_score) / 100) %}
+  {% endif %}
+  {% if not temel_missing %}
+    {% set temel_offset = '%.2f'|format(RING_C * (100 - temel_score) / 100) %}
+  {% endif %}
+  {% if not radar_dim %}
+    {% set y_karlilik  = RADAR_CY - (RADAR_R * hs.categories.karlilik / 100) %}
+    {% set x_nakit     = RADAR_CX + (RADAR_R * hs.categories.nakit_akisi / 100) %}
+    {% set y_kaldirac  = RADAR_CY + (RADAR_R * hs.categories.kaldirac / 100) %}
+    {% set x_degerleme = RADAR_CX - (RADAR_R * hs.categories.degerleme_buyume / 100) %}
+  {% endif %}
+
+  <section class="score-section" id="threeScoreSection" data-tab-content="ozet" data-state="{{ 'full' if hs_available else 'partial' }}">
+    <div class="score-section-eyebrow">
+      <div>
+        <div class="score-section-title"><span aria-hidden="true">🧭</span> Skor Analizi</div>
+        <div class="formula-note">BorsaPusula Skoru = <b>Temel ×%60</b> + <b>Teknik ×%40</b>{% if hs_available %} — dört eksenli Temel kırılımı radar grafikte{% endif %}</div>
+      </div>
+    </div>
+
+    {% if hs_available %}
+    <div class="axis-legend">
+      <span>Kârlılık</span> ×%30 · <span>Nakit Akışı</span> ×%30 · <span>Kaldıraç</span> ×%25 · <span>Değerleme/Büyüme</span> ×%15
+      <em>— Temel Analiz Skoru'nun alt kırılımı</em>
+    </div>
+    {% endif %}
+
+    <div class="score-canvas">
+
+      {% if hs_available %}
+      <!-- köşe-dolduran takımyıldız deseni (dekoratif, homepage hero-art yankısı) -->
+      <svg class="decor-nodes" viewBox="0 0 170 170" aria-hidden="true">
+        <line x1="20" y1="140" x2="70" y2="90" stroke="var(--bp-brand)" stroke-opacity=".25" stroke-width="1"/>
+        <line x1="70" y1="90" x2="55" y2="30" stroke="var(--bp-accent-cyan)" stroke-opacity=".2" stroke-width="1"/>
+        <line x1="70" y1="90" x2="130" y2="60" stroke="var(--bp-brand)" stroke-opacity=".18" stroke-width="1"/>
+        <circle cx="20" cy="140" r="3" fill="var(--bp-brand)" fill-opacity=".5"/>
+        <circle cx="70" cy="90" r="4.5" fill="var(--bp-accent-cyan)" fill-opacity=".55"/>
+        <circle cx="55" cy="30" r="2.5" fill="var(--bp-brand)" fill-opacity=".4"/>
+        <circle cx="130" cy="60" r="2.5" fill="var(--bp-accent-cyan)" fill-opacity=".35"/>
+      </svg>
+
+      <!-- RADAR: Temel Analiz Skoru'nun 4 eksenli kırılımı -->
+      <div class="radar-wrap" data-dim="{{ 'true' if radar_dim else 'false' }}"
+           role="img"
+           aria-label="Temel Analiz kırılımı: Kârlılık {{ '%.0f'|format(hs.categories.karlilik) if not radar_dim else '—' }}, Nakit Akışı {{ '%.0f'|format(hs.categories.nakit_akisi) if not radar_dim else '—' }}, Kaldıraç {{ '%.0f'|format(hs.categories.kaldirac) if not radar_dim else '—' }}, Değerleme/Büyüme {{ '%.0f'|format(hs.categories.degerleme_buyume) if not radar_dim else '—' }}">
+        <svg viewBox="-50 -25 620 570" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="radarGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" style="stop-color:var(--bp-accent-cyan)" stop-opacity="0.30"/>
+              <stop offset="100%" style="stop-color:var(--bp-brand)" stop-opacity="0.14"/>
+            </linearGradient>
+            <filter id="dotGlow" x="-120%" y="-120%" width="340%" height="340%">
+              <feGaussianBlur stdDeviation="3.2" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <polygon points="260,203.75 316.25,260 260,316.25 203.75,260" class="radar-grid"/>
+          <polygon points="260,147.5 372.5,260 260,372.5 147.5,260" class="radar-grid"/>
+          <polygon points="260,91.25 428.75,260 260,428.75 91.25,260" class="radar-grid"/>
+          <polygon points="260,35 485,260 260,485 35,260" class="radar-grid radar-grid--outer"/>
+
+          <line x1="260" y1="260" x2="260" y2="35" class="radar-axis"/>
+          <line x1="260" y1="260" x2="485" y2="260" class="radar-axis"/>
+          <line x1="260" y1="260" x2="260" y2="485" class="radar-axis"/>
+          <line x1="260" y1="260" x2="35" y2="260" class="radar-axis"/>
+
+          {% if not radar_dim %}
+          <polygon points="{{ RADAR_CX }},{{ '%.1f'|format(y_karlilik) }} {{ '%.1f'|format(x_nakit) }},{{ RADAR_CY }} {{ RADAR_CX }},{{ '%.1f'|format(y_kaldirac) }} {{ '%.1f'|format(x_degerleme) }},{{ RADAR_CY }}" class="radar-data" fill="url(#radarGrad)"/>
+
+          <circle cx="{{ RADAR_CX }}" cy="{{ '%.1f'|format(y_karlilik) }}" r="6" style="fill:{{ health_color(hs.categories.karlilik) }}" filter="url(#dotGlow)"><title>Kârlılık: {{ '%.1f'|format(hs.categories.karlilik) }}</title></circle>
+          <circle cx="{{ '%.1f'|format(x_nakit) }}" cy="{{ RADAR_CY }}" r="6" style="fill:{{ health_color(hs.categories.nakit_akisi) }}" filter="url(#dotGlow)"><title>Nakit Akışı: {{ '%.1f'|format(hs.categories.nakit_akisi) }}</title></circle>
+          <circle cx="{{ RADAR_CX }}" cy="{{ '%.1f'|format(y_kaldirac) }}" r="6" style="fill:{{ health_color(hs.categories.kaldirac) }}" filter="url(#dotGlow)"><title>Kaldıraç: {{ '%.1f'|format(hs.categories.kaldirac) }}</title></circle>
+          <circle cx="{{ '%.1f'|format(x_degerleme) }}" cy="{{ RADAR_CY }}" r="6" style="fill:{{ health_color(hs.categories.degerleme_buyume) }}" filter="url(#dotGlow)"><title>Değerleme/Büyüme: {{ '%.1f'|format(hs.categories.degerleme_buyume) }}</title></circle>
+          <circle cx="260" cy="260" r="3" fill="var(--bp-text3)"/>
+
+          <text x="260" y="2" text-anchor="middle">
+            <tspan class="axis-name">KÂRLILIK</tspan>
+            <tspan x="260" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.karlilik) }}">{{ '%.0f'|format(hs.categories.karlilik) }}</tspan>
+          </text>
+          <text x="498" y="253" text-anchor="start">
+            <tspan class="axis-name">NAKİT AKIŞI</tspan>
+            <tspan x="498" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.nakit_akisi) }}">{{ '%.0f'|format(hs.categories.nakit_akisi) }}</tspan>
+          </text>
+          <text x="260" y="502" text-anchor="middle">
+            <tspan class="axis-name">KALDIRAÇ</tspan>
+            <tspan x="260" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.kaldirac) }}">{{ '%.0f'|format(hs.categories.kaldirac) }}</tspan>
+          </text>
+          <text x="22" y="238" text-anchor="end">
+            <tspan class="axis-name">DEĞERLEME</tspan>
+            <tspan x="22" dy="13" class="axis-name">/BÜYÜME</tspan>
+            <tspan x="22" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.degerleme_buyume) }}">{{ '%.0f'|format(hs.categories.degerleme_buyume) }}</tspan>
+          </text>
+          {% endif %}
+        </svg>
+        <div class="radar-partial-note">
+          {% if temel_missing %}Temel Analiz verisi eksik — radar gösterge amaçlıdır, kompozite dahil edilmedi.
+          {% else %}Veri kalitesi sınırlı — bu kırılım gösterge amaçlıdır.{% endif %}
+        </div>
+      </div>
+
+      <!-- HERO: BorsaPusula Skoru -->
+      <div class="gauge hero-gauge" data-missing="{{ 'true' if temel_missing else 'false' }}"
+           style="--band-color:var({{ band.var }}); --band-rgb:var({{ band.rgb_var }});"
+           role="img" aria-label="BorsaPusula Skoru {{ hero_score }} / 100">
+        <div class="partial-badge">◐ Sınırlı Veri</div>
+        <svg class="gauge-ring" viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="{{ RING_R }}"/>
+          <circle class="ring-fg" cx="50" cy="50" r="{{ RING_R }}" stroke-dasharray="{{ RING_C }},{{ RING_C }}" stroke-dashoffset="{{ hero_offset }}"/>
+        </svg>
+        <div class="gauge-center">
+          <span class="gauge-value">{{ hero_score }}</span>
+          <span class="gauge-max">/100</span>
+        </div>
+        <div class="gauge-label">BorsaPusula<br>Skoru</div>
+        <div class="hero-formula">
+          {% if temel_missing %}{{ hero_score }} ≈ sadece Teknik ({{ new_teknik_score }}) — Temel Analiz eksik
+          {% else %}{{ hero_score }} ≈ Temel {{ temel_score }}×0.6 + Teknik {{ new_teknik_score }}×0.4{% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if new_teknik_score %}
+      <!-- Teknik Analiz Skoru — mevcut kaynak (ssr_signal), hs'ten bağımsız -->
+      <div class="gauge teknik-gauge" title="Teknik Analiz Skoru — Supertrend + ADX + hacim teyidi"
+           role="img" aria-label="Teknik Analiz Skoru {{ new_teknik_score }} / 100">
+        <svg class="gauge-ring" viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="{{ RING_R }}"/>
+          <circle class="ring-fg" cx="50" cy="50" r="{{ RING_R }}" stroke-dasharray="{{ RING_C }},{{ RING_C }}" stroke-dashoffset="{{ teknik_offset }}"/>
+        </svg>
+        <div class="gauge-center">
+          <span class="gauge-value">{{ new_teknik_score }}</span>
+          <span class="gauge-max">/100</span>
+        </div>
+        <div class="gauge-label">Teknik Analiz<br>Skoru</div>
+      </div>
+      {% endif %}
+
+      {% if hs_available %}
+      <!-- Temel Analiz Skoru -->
+      <div class="gauge temel-gauge" data-missing="{{ 'true' if temel_missing else 'false' }}"
+           title="Temel Analiz Skoru — 4 eksenli finansal sağlık"
+           role="img" aria-label="Temel Analiz Skoru {{ temel_score if not temel_missing else 'veri yok' }} / 100">
+        <span class="new-badge">YENİ</span>
+        <svg class="gauge-ring" viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="{{ RING_R }}"/>
+          {% if temel_missing %}
+          <circle class="ring-fg" cx="50" cy="50" r="{{ RING_R }}" stroke-dasharray="0,{{ RING_C }}"/>
+          {% else %}
+          <circle class="ring-fg" cx="50" cy="50" r="{{ RING_R }}" stroke-dasharray="{{ RING_C }},{{ RING_C }}" stroke-dashoffset="{{ temel_offset }}"/>
+          {% endif %}
+        </svg>
+        <div class="gauge-center">
+          <span class="gauge-value">{{ temel_score if not temel_missing else '—' }}</span>
+          <span class="gauge-max">/100</span>
+        </div>
+        <div class="gauge-label">Temel Analiz<br>Skoru</div>
+        {% if not temel_missing %}
+        <div class="completeness">
+          <span>Veri tamlığı %{{ completeness_pct }}</span>
+          <div class="bar"><i style="width:{{ completeness_pct }}%"></i></div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- AI gerekçe -->
+      <div class="rationale-card">
+        <div class="rc-eyebrow">✦ AI Yorumu</div>
+        {% if hs.temel_analiz_aciklamasi %}
+        <p>{{ hs.temel_analiz_aciklamasi }}</p>
+        {% else %}
+        <p>AI yorumu hazırlanıyor.</p>
+        {% endif %}
+        {% if temel_missing %}
+        <p class="rc-note">Not: sadece Teknik Analiz verisine dayanır.</p>
+        {% endif %}
+        <div class="rc-disclaimer">Yatırım tavsiyesi değildir.</div>
+      </div>
+      {% else %}
+      <!-- kompakt dürüst bekleme — Temel/BorsaPusula bu hisse için bugünkü EOD turunu bekliyor -->
+      <div class="pending-note">
+        <div class="pending-icon">⏳</div>
+        <div>
+          <div class="pending-title">Temel Analiz &amp; BorsaPusula Skoru bekleniyor</div>
+          <div class="pending-text">Bu hissenin Temel Analiz Skoru ve BorsaPusula kompozit skoru için bugünkü EOD (gün-sonu) turu henüz tamamlanmadı. Teknik Analiz Skoru yukarıda güncel.</div>
+          <div class="pending-eta">Tahmini: bugün ~18:00 TR</div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </section>
+  {% endif %}
 
   <!-- Giriş Analizi (Güçlü Trend / Trend Bozuldu sinyallerinde gösterilir) -->
   <div class="entry-analysis-section" id="entryAnalysisSection" data-tab-content="ozet" style="display:none">
