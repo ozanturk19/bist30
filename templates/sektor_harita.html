@@ -1,14 +1,14 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Sektör Isı Haritası ve Karşılaştırma | BorsaPusula</title>
-<meta name="description" content="BIST sektörlerini anlık trend sinyal yoğunluğuna göre karşılaştırın, en fazla 3 sektörü yan yana kıyaslayın. Hangi sektörler güçlü trend sergiliyor?">
+<meta name="description" content="BIST sektörlerini güncel trend sinyal yoğunluğuna göre karşılaştırın, en fazla 3 sektörü yan yana kıyaslayın. Hangi sektörler güçlü trend sergiliyor?">
 <link rel="canonical" href="https://borsapusula.com/sektor-harita">
 <meta property="og:title"       content="Sektör Isı Haritası ve Karşılaştırma — BorsaPusula">
-<meta property="og:description" content="BIST sektörlerini anlık trend sinyal yoğunluğuna göre karşılaştırın, en fazla 3 sektörü yan yana kıyaslayın.">
+<meta property="og:description" content="BIST sektörlerini güncel trend sinyal yoğunluğuna göre karşılaştırın, en fazla 3 sektörü yan yana kıyaslayın.">
 <meta property="og:url"         content="https://borsapusula.com/sektor-harita">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Sektör Isı Haritası ve Karşılaştırma — BorsaPusula">
-<meta name="twitter:description" content="BIST sektörlerini anlık trend sinyal yoğunluğuna göre karşılaştırın, en fazla 3 sektörü yan yana kıyaslayın.">
+<meta name="twitter:description" content="BIST sektörlerini güncel trend sinyal yoğunluğuna göre karşılaştırın, en fazla 3 sektörü yan yana kıyaslayın.">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=94d8ae4b">
 <script src="/static/bp-vocab.js?v=20260823C" defer></script>
-<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=62492f98">
+<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=33f81c66">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header div.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> div.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> div.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:var(--bp-brand);color:var(--bp-bg);padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid var(--bp-brand);outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Mobile Bottom Navigation -->
@@ -263,7 +263,7 @@ function renderHeatmap(stocks) {
 
     return `
     <div class="sector-card" data-sector="${esc(sec.name)}" data-href="/tarama?sector=${encodeURIComponent(sec.name)}" data-heat-target="${heatOpacity.toFixed(3)}" style="--heat-color:${color};--heat-opacity:0;cursor:pointer" title="${esc(sec.name)} sektöründeki tüm hisseleri taramaya götür" tabindex="0" role="link">
-      <div class="sec-name" style="color:${color}">${esc(sec.name)}</div>
+      <h2 class="sec-name" style="color:${color}">${esc(sec.name)}</h2>
       <div class="sec-stats">
         ${premPill}
         <span class="stat-pill pill-al">▲ ${sec.al.length}</span>
@@ -562,15 +562,15 @@ function renderCompare(json) {
     var scoreSign = score > 0 ? '+' : '';
 
     col.innerHTML = '<div class="sec-col-header">' +
-      '<div class="sec-col-name">' + esc(d.name) + '</div>' +
+      '<h2 class="sec-col-name">' + esc(d.name) + '</h2>' +
       '<div class="score-bar-wrap">' +
         '<div class="score-bar-label"><span>Sinyal Skoru</span><span style="color:' + ACCENT_COLORS[i] + ';font-weight:800">' + scoreSign + score + '</span></div>' +
         '<div class="score-bar-track"><div class="score-bar-fill ' + barClass + '" style="width:' + scoreAbs + '%"></div></div>' +
       '</div>' +
       '<div class="cmp-sec-stats">' +
-        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">AL</div><div class="cmp-stat-pill-val val-al">' + d.al + '</div></div>' +
-        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">SAT</div><div class="cmp-stat-pill-val val-sat">' + d.sat + '</div></div>' +
-        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">BEKLE</div><div class="cmp-stat-pill-val val-bkl">' + d.bekle + '</div></div>' +
+        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabel('AL') + '</div><div class="cmp-stat-pill-val val-al">' + d.al + '</div></div>' +
+        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabel('SAT') + '</div><div class="cmp-stat-pill-val val-sat">' + d.sat + '</div></div>' +
+        '<div class="cmp-stat-pill"><div class="cmp-stat-pill-lbl">' + sigLabel('BEKLE') + '</div><div class="cmp-stat-pill-val val-bkl">' + d.bekle + '</div></div>' +
       '</div>' +
       '<div class="sec-metrics">' +
         '<div class="metric-card"><div class="metric-lbl">Ort. RVOL</div><div class="metric-val">' + (d.avg_rvol != null ? d.avg_rvol.toFixed(2).replace('.', ',') + 'x' : '—') + '</div></div>' +

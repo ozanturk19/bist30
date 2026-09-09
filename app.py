@@ -11997,7 +11997,7 @@ def _check_user_alerts(stocks):
                 prev_sig = rec.get("_alert_prev_signals", {}).get(ticker)
                 cur_sig  = s.get("signal")
                 if prev_sig and cur_sig and prev_sig != cur_sig:
-                    reasons.append(f"Sinyal değişimi: {prev_sig} → {cur_sig}")
+                    reasons.append(f"Sinyal değişimi: {_SIGNAL_LABELS.get(prev_sig, prev_sig)} → {_SIGNAL_LABELS.get(cur_sig, cur_sig)}")
             if reasons:
                 triggered.append((ticker, s, reasons))
         if not triggered:
@@ -12011,7 +12011,7 @@ def _check_user_alerts(stocks):
                 sig_color = "#00e290" if sig == "AL" else "#f85149" if sig == "SAT" else "#909097"
                 rows += f"""<tr>
   <td style="padding:10px 14px;border-bottom:1px solid #2a2a2c;color:#e5e1e4;font-weight:700">{tkr}</td>
-  <td style="padding:10px 14px;border-bottom:1px solid #2a2a2c;color:{sig_color};font-weight:700">{sig}</td>
+  <td style="padding:10px 14px;border-bottom:1px solid #2a2a2c;color:{sig_color};font-weight:700">{_SIGNAL_LABELS.get(sig, sig)}</td>
   <td style="padding:10px 14px;border-bottom:1px solid #2a2a2c;color:#c7c5cd">{tr_price_filter(s.get('price'))}</td>
   <td style="padding:10px 14px;border-bottom:1px solid #2a2a2c;color:#c7c5cd">{'; '.join(reasons)}</td>
 </tr>"""

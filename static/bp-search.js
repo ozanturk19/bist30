@@ -213,15 +213,30 @@
     { h:'/karsilastir',       i:'⚖️', t:'Hisse Karşılaştır' }
   ];
 
+  function announce(text) {
+    var st = document.getElementById('bpSearchStatus');
+    if (st) st.textContent = text;
+  }
+
+  function syncActiveDescendant() {
+    var inp = document.getElementById('bpSearchInput');
+    if (!inp) return;
+    var items = getItems();
+    items.forEach(function(it, i){ it.setAttribute('aria-selected', i === _sel ? 'true' : 'false'); });
+    inp.setAttribute('aria-activedescendant', (_sel >= 0 && items[_sel]) ? items[_sel].id : '');
+  }
+
   function render(q) {
     var res = document.getElementById('bpSearchResults');
     if (!res) return;
     if (!q.trim()) {
       res.innerHTML = '<div class="bp-search-section-title">Popüler Konular</div>'
         + TOPICS.map(function(it, i){
-            return '<a href="' + it.h + '" class="bp-search-topic ' + (i===0?'bp-sel':'') + '" data-idx="' + i + '"><span style="margin-right:8px">' + it.i + '</span>' + it.t + '</a>';
+            return '<a href="' + it.h + '" id="bp-sr-' + i + '" role="option" class="bp-search-topic ' + (i===0?'bp-sel':'') + '" data-idx="' + i + '"><span style="margin-right:8px">' + it.i + '</span>' + it.t + '</a>';
           }).join('');
       _sel = 0;
+      syncActiveDescendant();
+      announce(TOPICS.length + ' popüler konu listelendi');
       return;
     }
     var m = filter(q);
@@ -230,6 +245,8 @@
         ? '<div class="bp-search-empty">Arama verisi yüklenemedi, lütfen tekrar deneyin.</div>'
         : '<div class="bp-search-empty">Hiç eşleşme yok. Farklı bir kelime deneyin.</div>';
       _sel = -1;
+      syncActiveDescendant();
+      announce(_loadFailed ? 'Arama verisi yüklenemedi' : 'Hiç eşleşme yok');
       return;
     }
     var html = '<div class="bp-search-section-title">Hisseler</div>';
@@ -240,7 +257,7 @@
       var cCls = c == null ? 'bp-neu' : c > 0 ? 'bp-pos' : c < 0 ? 'bp-neg' : 'bp-neu';
       var cSign = c == null ? '—' : (c > 0 ? '+' : '') + c.toFixed(2) + '%';
       var priceStr = (typeof s.p === 'number' && s.p > 0) ? s.p.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
-      html += '<a href="/hisse/' + escHtml(s.t) + '" class="bp-search-result ' + (i===0?'bp-sel':'') + '" data-idx="' + i + '">'
+      html += '<a href="/hisse/' + escHtml(s.t) + '" id="bp-sr-' + i + '" role="option" class="bp-search-result ' + (i===0?'bp-sel':'') + '" data-idx="' + i + '">'
             + '<span class="bp-sr-tk">' + escHtml(s.t) + '</span>'
             + '<span class="bp-sr-sig ' + sigCls + '">' + arr + '</span>'
             + '<span class="bp-sr-name">' + escHtml(s.n) + (s.sec ? ' <span style="color:var(--bp-text3);font-weight:400">· ' + escHtml(s.sec) + '</span>' : '') + '</span>'
@@ -250,6 +267,8 @@
     });
     res.innerHTML = html;
     _sel = 0;
+    syncActiveDescendant();
+    announce(m.length + ' sonuç bulundu');
   }
 
   function getItems() {
@@ -265,10 +284,11 @@
       +   '<div class="bp-search-modal" id="bpSearchModal" role="dialog" aria-modal="true" aria-label="Site içi arama">'
       +     '<div class="bp-search-input-wrap">'
       +       '<svg class="bp-search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
-      +       '<input id="bpSearchInput" type="text" placeholder="Hisse, sektör veya konu ara…" aria-label="Hisse, sektör veya konu ara" autocomplete="off" spellcheck="false">'
+      +       '<input id="bpSearchInput" type="text" placeholder="Hisse, sektör veya konu ara…" aria-label="Hisse, sektör veya konu ara" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="bpSearchResults" aria-autocomplete="list" aria-activedescendant="">'
       +       '<button class="bp-search-close" type="button" id="bpSearchClose" aria-label="Kapat">✕</button>'
       +     '</div>'
-      +     '<div class="bp-search-results" id="bpSearchResults"></div>'
+      +     '<div class="bp-search-results" id="bpSearchResults" role="listbox" aria-label="Arama sonuçları"></div>'
+      +     '<div class="sr-only" id="bpSearchStatus" role="status" aria-live="polite"></div>'
       +   '</div>'
       + '</div>';
     document.body.appendChild(wrap.firstElementChild);
@@ -346,6 +366,7 @@
       if (_sel >= items.length) _sel = 0;
       items[_sel].classList.add('bp-sel');
       items[_sel].scrollIntoView({ block: 'nearest' });
+      syncActiveDescendant();
     } else if (e.key === 'Enter') {
       var sel = document.querySelector('.bp-search-result.bp-sel, .bp-search-topic.bp-sel');
       if (sel && sel.href) {

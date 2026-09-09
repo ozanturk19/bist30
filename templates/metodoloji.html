@@ -142,9 +142,9 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 </ul>
 <p>
   BorsaPusula'da RSI, <strong>Güç Skoru</strong> hesaplamasında sinyal yönüne göre değerlendirilir:
-  AL sinyalinde RSI 50–75 arası +10 puan, 75 üzeri +5 puan; SAT sinyalinde RSI 25–50 arası
-  +10 puan, 25 altı +5 puan (maksimum katkı 10 puan). Sinyal motoru ADX+Supertrend+EMA
-  üzerinden çalışır; RSI teyit göstergesi niteliğindedir.
+  Güçlü Trend sinyalinde RSI 50–75 arası +10 puan, 75 üzeri +5 puan; Trend Bozuldu sinyalinde
+  RSI 25–50 arası +10 puan, 25 altı +5 puan (maksimum katkı 10 puan). Sinyal motoru
+  ADX+Supertrend+EMA üzerinden çalışır; RSI teyit göstergesi niteliğindedir.
 </p>
 
 <h2 id="ema">3. EMA12 / EMA99 Kesişimi</h2>
@@ -175,23 +175,23 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 </p>
 
 <div class="signal-box al">
-  <strong style="color:#3fb950">▲ Güçlü Trend Sinyali</strong> — 3 kriter aynı anda: ST LONG + ADX ≥ 25 + DI+ > DI− + EMA12 > EMA99.<br>
+  <strong style="color:var(--bp-al)">▲ Güçlü Trend Sinyali</strong> — 3 kriter aynı anda: ST LONG + ADX ≥ 25 + DI+ > DI− + EMA12 > EMA99.<br>
   <small class="bp-text-muted">Giriş fiyatı: Sinyalin oluştuğu günün kapanış fiyatı. Stop Loss: Supertrend alt bandı.</small>
 </div>
 
 <div class="signal-box sat">
   <strong class="bp-sat-text">▼ Trend Bozuldu Sinyali</strong> — 3 kriter aynı anda: ST SHORT + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99.<br>
-  <small class="bp-text-muted">Açığa satış veya pozisyon kapatma sinyali. Stop Loss: Supertrend üst bandı.</small>
+  <small class="bp-text-muted">Mevcut yükseliş trendinin bozulduğunu gösterir. BorsaPusula long-only bir üründür — BIST'te bireysel yatırımcılar için açığa satış pratikte uygulanamadığından bu sinyalde somut giriş/hedef/stop seviyeleri gösterilmez, sadece pozisyon kapatma değerlendirmesi için bir uyarı niteliğindedir.</small>
 </div>
 
 <h2 id="sinyal-gucu">Sinyal Gücü (Skor)</h2>
 <p>
   Her hisse için <a class="jargon-term" data-term="adx" href="#adx">ADX</a> (trend gücü), hacim oranı,
   sinyal skoru ve teyit durumu birleştirilerek 0-100 arası bir <strong>Sinyal Gücü</strong> skoru
-  oluşturulur (tarama tablosundaki "Sinyal Gücü" kolonu). En yüksek skorlu hisseler AL filtresinde
-  listenin başında yer alır — bu skor, eski "Güçlü Momentum Listesi" (/gucu-yuksek) sayfasının
+  oluşturulur (tarama tablosundaki "Sinyal Gücü" kolonu). En yüksek skorlu hisseler "▲ Güçlü Trend"
+  filtresinde listenin başında yer alır — bu skor, eski "Güçlü Momentum Listesi" (/gucu-yuksek) sayfasının
   kullandığı sıralamayla aynıdır; o sayfa artık <a href="/tarama?signal=AL&amp;sort=signal_strength">/tarama</a>'nın
-  AL + Sinyal Gücü ön-ayarına yönleniyor. Bu skor sitede <strong>tek kaynaktan</strong> hesaplanır —
+  Güçlü Trend + Sinyal Gücü ön-ayarına yönleniyor. Bu skor sitede <strong>tek kaynaktan</strong> hesaplanır —
   hisse detay sayfası, tarama tablosu ve karşılaştırma sayfası aynı sayıyı gösterir, hiçbir sayfa
   kendi ayrı skorunu üretmez.
 </p>
