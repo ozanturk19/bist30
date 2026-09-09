@@ -7692,6 +7692,15 @@ def stock_page(ticker):
                 ssr_signal = s
                 break
 
+    # CPO-1554 Faz 4: Temel/BorsaPusula kompozit skoru SSR için — /api/hisse/<t>/health-score
+    # ile AYNI kaynak (_financial_health_cache), ekstra network round-trip yok, ssr_signal
+    # ile simetrik desen. EOD turu bu hisse için hiç çalışmadıysa hs_available=False,
+    # template dürüst bekleme durumu gösterir (sahte/varsayılan sayı YOK).
+    with _lock:
+        _hs_cached = _financial_health_cache.get(ticker)
+    hs = _hs_cached["data"] if _hs_cached else None
+    hs_available = hs is not None
+
     # T3-4: İlgili blog makaleleri — bu ticker'ı related_tickers olarak işaretleyenler
     related_blog = [
         {"slug": a["slug"], "title": a["title"], "cat": a["cat"], "mins": a.get("mins") or a.get("read_min", 5)}
@@ -7778,6 +7787,8 @@ def stock_page(ticker):
                            sector=sector,
                            signal_summary=signal_summary,
                            ssr_signal=ssr_signal,
+                           hs=hs,
+                           hs_available=hs_available,
                            kap_url=kap_url_for(ticker),
                            related_blog=related_blog,
                            compare_url=compare_url,

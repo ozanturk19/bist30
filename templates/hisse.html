@@ -1100,7 +1100,7 @@
 </footer>
 
 <script src="/static/bp-format.js?v=20260808a"></script>
-<script src="/static/stale-banner.js?v=d28fd8ba"></script>
+<script src="/static/stale-banner.js?v=6364230b"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
 async function hisseSubscribe() {
@@ -1654,7 +1654,10 @@ function renderFreshness(f, dq, ageS, refreshing) {
   } else if (age < 300) {
     color = '#f59e0b'; label = 'BIST ~15dk gecikmeli';
   } else {
-    color = '#f5c949'; label = `Veri ${bpFmtAge(age)} önce güncellendi`;
+    /* CPO-1555: goreli "X once guncellendi" yerine mutlak tarih — EOD
+       mimarisiyle tutarli (Ozan notu). */
+    color = '#f5c949';
+    label = (typeof bpFmtUpdateDate === 'function' ? bpFmtUpdateDate(age) + ' gün sonu verileri' : 'Gün sonu verileri');
   }
   dot.style.background = color;
   txt.textContent = label;

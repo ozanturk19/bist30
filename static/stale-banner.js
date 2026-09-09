@@ -5,18 +5,15 @@
    CPO-1151 §3: ageS bilinmediğinde '?' yerine dürüst metin; "Yenileniyor..."
    yalnız /api/data.refreshing===true iken eklenir (refreshing 3. parametre,
    /api/data-quality'yi kullanan çağıranlarda undefined → ek metin yok). */
-/* T7.2 — insan dili yaş formatı: <60dk "dk", <48sa "sa dk", ustu "gun sa".
-   Onceki: ham dakika (orn "5115 dakikadir") — coklu-gunluk bayatlikta okunmaz
-   hale geliyordu (bkz FAZ7.5/T7.2 canli olcum, stocks_age_seconds~85 saat). */
-function bpFmtAge(ageS) {
-  var totalMin = Math.floor(ageS / 60);
-  if (totalMin < 60) return totalMin + ' dk';
-  var totalHour = Math.floor(totalMin / 60);
-  var remMin = totalMin % 60;
-  if (totalHour < 48) return totalHour + ' sa ' + remMin + ' dk';
-  var days = Math.floor(totalHour / 24);
-  var remHour = totalHour % 24;
-  return days + ' gün ' + remHour + ' sa';
+/* CPO-1555: "X dk/sa önce güncellendi" göreli ifadesi EOD mimarisiyle
+   (günde bir kez, gün-sonu kapanışı) çelişiyordu — Ozan'ın notu: mutlak
+   tarih ("08.09 gün sonu verileri gösterilmektedir") her zaman daha doğru.
+   ageS'ten geriye doğru gerçek takvim tarihini hesaplar. */
+function bpFmtUpdateDate(ageS) {
+  var d = new Date(Date.now() - ageS * 1000);
+  var dd = String(d.getDate()).padStart(2, '0');
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  return dd + '.' + mm;
 }
 
 function bpUpdateStaleBanner(dq, ageS, refreshing) {
@@ -24,11 +21,11 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
   var bTxt   = document.getElementById('staleBannerText');
   if (!banner) return;
   var hasAge = ageS != null && !isNaN(ageS);
-  var ageTxt = hasAge ? bpFmtAge(ageS) : null;
+  var dateTxt = hasAge ? bpFmtUpdateDate(ageS) : null;
   var suffix = refreshing === true ? ' Yenileniyor...' : '';
   if (dq === 'critical') {
     var critTxt = hasAge
-      ? 'Veriler ' + ageTxt + ' boyunca güncellenemiyor.'
+      ? dateTxt + ' gün sonu verileri gösterilmektedir — güncel veri şu an alınamıyor.'
       : 'Veriler güncellenemiyor — son güncelleme zamanı doğrulanamıyor.';
     if (bTxt) { bTxt.textContent = critTxt + suffix; bTxt.style.color = '#f85149'; }
     banner.style.background  = 'rgba(248,81,73,0.12)';
@@ -36,7 +33,7 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
     banner.style.display     = 'block';
   } else if (dq === 'stale') {
     var staleTxt = hasAge
-      ? 'Veriler ' + ageTxt + ' önce güncellendi.'
+      ? dateTxt + ' gün sonu verileri gösterilmektedir.'
       : 'Veriler bayat olabilir — son güncelleme zamanı doğrulanamıyor.';
     if (bTxt) { bTxt.textContent = staleTxt + suffix; bTxt.style.color = '#f5c949'; }
     banner.style.background  = 'rgba(245,201,73,.10)';
