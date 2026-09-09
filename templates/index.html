@@ -302,8 +302,16 @@ header{
 .da-scard.lg{grid-column:span 4;grid-row:span 2}
 .da-scard.md{grid-column:span 3}
 .da-scard.sm{grid-column:span 4}
-.da-scard.xs{grid-column:span 12;flex-direction:row;align-items:center;flex-wrap:wrap}
+.da-scard.xs{grid-column:span 12;flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
 .da-scard.xs .da-sc-top{width:100%}
+@media(min-width:561px){
+  /* CPO: xs kart tam genişlik (span 12) ama içeriği (top+ring+rozet) hep dar
+     kalıyordu, top %100 genişliği tek başına alınca mid alta düşüp yanında
+     ~1000px boş bant bırakıyordu — top'u esnek genişliğe indirip mid'i aynı
+     satırda sağa yasladık, dolgu artık tüm kartı kullanıyor. */
+  .da-scard.xs .da-sc-top{width:auto;flex:1 1 auto;min-width:240px}
+  .da-scard.xs .da-sc-mid{margin-top:0}
+}
 .da-sc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .da-sc-ticker{font-family:'Space Grotesk',monospace,sans-serif;font-weight:700;font-size:clamp(1.3rem,2vw,1.9rem)}
 .da-sc-company{font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
