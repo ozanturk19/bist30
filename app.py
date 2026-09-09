@@ -4714,7 +4714,7 @@ def _macro_bg_loop():
             time.sleep(90)
         return  # ulaşılmaz
 
-    logger.info("_macro_bg_loop: LEADER worker — yfinance fetch modu (180s)")
+    logger.info("_macro_bg_loop: LEADER worker — yfinance fetch modu (180s/600s cadence, CPO-1569)")
     # İlk run hemen (cache cold ise warm yapsın)
     while True:
         # acquire(blocking=False): kilit alınmazsa skip — bir önceki cycle hâlâ devam ediyor
@@ -4751,7 +4751,13 @@ def _macro_bg_loop():
                 _write_macro_heartbeat()   # CPO-1260-A(b): basari/bos/exception fark etmez, her iterasyon
         else:
             logger.debug("_macro_bg_loop: previous cycle still running, skip")
-        time.sleep(180)   # 3 dakika
+        # CPO-1569: bist30-refresh.service penceresinde (10:00-19:00 TR, hafta içi)
+        # 180s, dışında (gece + hafta sonu) 600s — bist30-macro.service (7/24, CPO-1569)
+        # tek başına lider olduğunda Yahoo yük artışını ~2,7x yerine ~1,3x'e sınırlar
+        # (13 Temmuz rate-limit kesintisi emsali). Pencere içinde davranış DEĞİŞMEDİ
+        # (bugünküyle aynı 180s) — bist30-refresh.service zaten aktifken iki proses
+        # aynı kilide yarışır, kazanan bugünkü gibi 180s'de fetch eder.
+        time.sleep(180 if _in_macro_refresh_window(time.time()) else 600)
 
 # Disk load — _fetch_macro tanımlandıktan sonra thread başlatılır (aşağıda)
 _load_macro_from_disk()
