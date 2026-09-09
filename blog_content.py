@@ -60,7 +60,7 @@ ARTICLES = [
     "mins": 6,
     "cat": "Teknik Analiz",
     "body": """
-<p>Supertrend, <strong>ATR (Average True Range)</strong> tabanlı bir trend takip göstergesidir. Fiyatın üzerinde mi yoksa altında mı seyrettiğine bakarak basit bir AL/SAT sinyali üretir. Hem yeni hem de deneyimli yatırımcıların sıkça kullandığı bir indikatördür.</p>
+<p>Supertrend, <strong>ATR (Average True Range)</strong> tabanlı bir trend takip göstergesidir. Fiyatın üzerinde mi yoksa altında mı seyrettiğine bakarak basit bir yön sinyali üretir. Hem yeni hem de deneyimli yatırımcıların sıkça kullandığı bir indikatördür.</p>
 
 <h2>Nasıl Hesaplanır?</h2>
 <p>Supertrend iki değişkene dayanır:</p>
@@ -71,7 +71,7 @@ ARTICLES = [
 <p>Formül özeti:</p>
 <pre>Üst Band = (Yüksek + Düşük) / 2 + Multiplier × ATR(Period)
 Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
-<p>Fiyat üst bandı yukarı kırarsa <strong>LONG (AL)</strong>, alt bandı aşağı kırarsa <strong>SHORT (SAT)</strong> sinyali oluşur.</p>
+<p>Fiyat üst bandı yukarı kırarsa <strong>LONG (Güçlü Trend)</strong>, alt bandı aşağı kırarsa <strong>SHORT (Trend Bozuldu)</strong> sinyali oluşur.</p>
 
 <h2>Supertrend(10,3) Neden?</h2>
 <p>Düşük period + yüksek multiplier → daha az sahte sinyal ama geç tepki. Yüksek period + düşük multiplier → hızlı ama çok fazla whipsaw (sahte sinyal). <code>(10,3)</code> kombinasyonu, günlük BIST hisseleri için gürültü ile duyarlılık arasında kabul görmüş bir denge noktasıdır.</p>
@@ -87,7 +87,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Yatay (sideways) piyasalarda Supertrend çok sık sinyal üretir ve sahte girişlere yol açar. Bu yüzden BorsaPusula, Supertrend'i tek başına değil <strong>ADX ≥ 25 filtresiyle</strong> birlikte kullanır. ADX trendin <em>var olduğunu</em> doğrulamadan Supertrend sinyali geçerli sayılmaz.</p>
 
 <h2>Stop Loss Olarak Supertrend</h2>
-<p>AL pozisyonunda Supertrend alt bandı dinamik stop loss görevi görür. Fiyat bu seviyenin altına inerse sinyal SAT'a döner ve pozisyondan çıkılması gerekir. Bu mekanizma, büyük kayıpları otomatik olarak sınırlar.</p>
+<p>Güçlü Trend pozisyonunda Supertrend alt bandı dinamik stop loss görevi görür. Fiyat bu seviyenin altına inerse sinyal Trend Bozuldu haline gelir ve pozisyondan çıkılması gerekir. Bu mekanizma, büyük kayıpları otomatik olarak sınırlar.</p>
 """,
     "faqs": [
       {
@@ -131,14 +131,14 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   <li><strong>DI+ (yeşil):</strong> Yükselen baskı (Positive Directional Indicator)</li>
   <li><strong>DI− (kırmızı):</strong> Düşen baskı (Negative Directional Indicator)</li>
 </ul>
-<p><strong>DI+ &gt; DI−</strong> ise piyasada alış baskısı hâkim → AL yönü<br>
-<strong>DI− &gt; DI+</strong> ise piyasada satış baskısı hâkim → SAT yönü</p>
+<p><strong>DI+ &gt; DI−</strong> ise piyasada alış baskısı hâkim → Güçlü Trend yönü<br>
+<strong>DI− &gt; DI+</strong> ise piyasada satış baskısı hâkim → Trend Bozuldu yönü</p>
 
 <h2>Neden ADX ≥ 25 Şartı?</h2>
 <p>Trend yokken (ADX &lt; 25) Supertrend de EMA da sahte sinyal üretir. ADX filtresi, yalnızca gerçekten güçlü bir trendin başladığı anlarda devreye girmesini sağlar. BorsaPusula'nın üçlü filtre sisteminde ADX, "gürültüyü kesen" kritik katmandır.</p>
 
 <h2>Pratik Kullanım Örneği</h2>
-<p>Diyelim ki THYAO için Supertrend LONG sinyali verdi. Ancak ADX = 18. Bu durumda BorsaPusula <strong>AL sinyali üretmez</strong> — trend yeterince güçlü değil demektir. ADX 28'e çıktığında ve DI+ > DI− olduğunda sinyal geçerli hale gelir.</p>
+<p>Diyelim ki THYAO için Supertrend LONG sinyali verdi. Ancak ADX = 18. Bu durumda BorsaPusula <strong>Güçlü Trend sinyali üretmez</strong> — trend yeterince güçlü değil demektir. ADX 28'e çıktığında ve DI+ > DI− olduğunda sinyal geçerli hale gelir.</p>
 """,
     "faqs": [
       {
@@ -327,32 +327,32 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   },
   {
     "slug": "al-sat-sinyali-nasil-yorumlanir",
-    "title": "AL/SAT Sinyali Nedir? Nasıl Yorumlanır?",
-    "desc": "Algoritmik AL ve SAT sinyallerinin ne anlama geldiği, nasıl kullanılacağı ve hangi tuzaklardan kaçınılacağı.",
+    "title": "Güçlü Trend / Trend Bozuldu Sinyali Nedir? Nasıl Yorumlanır?",
+    "desc": "Algoritmik Güçlü Trend ve Trend Bozuldu sinyallerinin ne anlama geldiği, nasıl kullanılacağı ve hangi tuzaklardan kaçınılacağı.",
     "date": "2026-04-08",
     "mins": 5,
     "cat": "Temel Kavramlar",
     "body": """
-<p>BorsaPusula'daki AL ve SAT sinyalleri, <strong>üç teknik kriteri aynı anda</strong> sağlayan hisseler için otomatik olarak üretilir. Bu sinyaller bir tavsiye değil, teknik bir tespittir. Kararı yatırımcı verir.</p>
+<p>BorsaPusula'daki Güçlü Trend ve Trend Bozuldu sinyalleri, <strong>üç teknik kriteri aynı anda</strong> sağlayan hisseler için otomatik olarak üretilir. Bu sinyaller bir tavsiye değil, teknik bir tespittir. Kararı yatırımcı verir.</p>
 
-<h2>AL Sinyali Ne Demek?</h2>
-<p>AL sinyali şu dört koşul aynı anda sağlandığında oluşur:</p>
+<h2>Güçlü Trend Sinyali Ne Demek?</h2>
+<p>Güçlü Trend sinyali şu dört koşul aynı anda sağlandığında oluşur:</p>
 <ul>
-  <li>✅ Supertrend LONG modda (fiyat bandın üzerinde)</li>
+  <li>✅ Supertrend yükseliş modda (fiyat bandın üzerinde)</li>
   <li>✅ ADX ≥ 25 (güçlü trend var)</li>
   <li>✅ DI+ &gt; DI− (alış yönünde güç)</li>
   <li>✅ EMA12 &gt; EMA99 (kısa dönem uzun dönemin üzerinde)</li>
 </ul>
 <p>Bu koşullar yükselen trendin başlangıcını veya güçlenmesini işaret eder.</p>
 
-<h2>SAT Sinyali Ne Demek?</h2>
-<p>SAT sinyali yukarıdakilerin tersidir: ST SHORT + ADX ≥ 25 + DI− &gt; DI+ + EMA12 &lt; EMA99. Bu sinyal hem açığa satış yapanlar için hem de mevcut AL pozisyonundan çıkmak isteyenler için geçerlidir.</p>
+<h2>Trend Bozuldu Sinyali Ne Demek?</h2>
+<p>Trend Bozuldu sinyali yukarıdakilerin tersidir: Supertrend düşüş modu + ADX ≥ 25 + DI− &gt; DI+ + EMA12 &lt; EMA99. BorsaPusula long-only bir üründür — bu sinyal açığa satış için tasarlanmamıştır; mevcut bir yükseliş pozisyonunun trend gücünü kaybettiğini, pozisyon kapatmayı değerlendirmek için bir uyarı olarak yorumlanmalıdır.</p>
 
 <h2>Sinyal Kaç Gündür Devam Ediyor?</h2>
-<p>Hisse sayfasında "X gündür AL" ifadesine dikkat edin. 1. günde oluşan sinyal henüz teyit edilmemiştir. <strong>3 gün ve üzeri</strong> sinyaller daha güvenilirdir. Giriş fiyatı, sinyalin oluştuğu günün kapanış fiyatı olarak gösterilir.</p>
+<p>Hisse sayfasında "X gündür Güçlü Trend" ifadesine dikkat edin. 1. günde oluşan sinyal henüz teyit edilmemiştir. <strong>3 gün ve üzeri</strong> sinyaller daha güvenilirdir. Giriş fiyatı, sinyalin oluştuğu günün kapanış fiyatı olarak gösterilir.</p>
 
-<h2>BEKLE Sinyali</h2>
-<p>Üç kriterin tamamı aynı yönü göstermiyorsa sinyal BEKLE'dir. Bu, "kaçırma korkusuyla" pozisyon almamak için önemli bir filtredir. Pek çok iyi işlem, BEKLE'den AL'a geçişi sabırla bekleyerek yakalanır.</p>
+<h2>Yatay Sinyali</h2>
+<p>Üç kriterin tamamı aynı yönü göstermiyorsa sinyal Yatay'dır. Bu, "kaçırma korkusuyla" pozisyon almamak için önemli bir filtredir. Pek çok iyi işlem, Yatay'dan Güçlü Trend'e geçişi sabırla bekleyerek yakalanır.</p>
 
 <h2>Neyi Yapmaz?</h2>
 <ul>
@@ -363,9 +363,9 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Sinyal sistemi bir araçtır. Kararı hâlâ siz verirsiniz.</p>
 """,
     "faqs": [
-      {"q": "AL sinyali ne anlama gelir?", "a": "AL sinyali, Supertrend yükseliş bandında, ADX 25 üzerinde ve EMA12 > EMA99 koşullarının tamamının sağlandığını gösterir. Hissenin güçlü yükseliş trendinde olduğu anlamına gelir, ancak her AL sinyali yatırım tavsiyesi değildir."},
+      {"q": "Güçlü Trend sinyali ne anlama gelir?", "a": "Güçlü Trend sinyali, Supertrend yükseliş bandında, ADX 25 üzerinde ve EMA12 > EMA99 koşullarının tamamının sağlandığını gösterir. Hissenin güçlü yükseliş trendinde olduğu anlamına gelir, ancak her Güçlü Trend sinyali yatırım tavsiyesi değildir."},
       {"q": "Sinyal kaç gündür devam ediyor bilgisi önemli midir?", "a": "Evet, çok önemlidir. 3+ gündür devam eden onaylı sinyal, ilk günkü ham sinyalden çok daha güvenilirdir. Onaylı sinyal trendin gerçek ve sürdürülebilir olduğunu gösterir."},
-      {"q": "BEKLE sinyalinde ne yapmalıyım?", "a": "BEKLE sinyali ne alın ne satın demektir, trend henüz belirgin değil. Mevcut pozisyonunuz varsa tutmaya devam edebilirsiniz. Yeni pozisyon için AL sinyalini beklemek gereksiz risk almaktan daha akıllıcadır."}
+      {"q": "Yatay sinyalinde ne yapmalıyım?", "a": "Yatay sinyali ne alın ne satın demektir, trend henüz belirgin değil. Mevcut pozisyonunuz varsa tutmaya devam edebilirsiniz. Yeni pozisyon için Güçlü Trend sinyalini beklemek gereksiz risk almaktan daha akıllıcadır."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'ASELS', 'THYAO']
   },
@@ -380,25 +380,25 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>BorsaPusula'nın sinyal motoru yalnızca günlük verilere bakmaz. Günlük sinyaller, <strong>haftalık EMA20 yönüyle filtrelenir.</strong> Bu "trend gate" mekanizması, büyük trende karşı pozisyon almayı engeller.</p>
 
 <h2>Neden Çok Zaman Dilimi?</h2>
-<p>Büyük resmi görmeden günlük grafiğe bakmak, ormanı değil yalnızca ağaçları görmektir. Haftalık grafik düşüş trendindeyken günlük grafikte kısa süreli AL sinyalleri oluşabilir — bunlar genellikle "ölü kedi sıçraması"dır ve sürdürülebilir değildir.</p>
+<p>Büyük resmi görmeden günlük grafiğe bakmak, ormanı değil yalnızca ağaçları görmektir. Haftalık grafik düşüş trendindeyken günlük grafikte kısa süreli Güçlü Trend sinyalleri oluşabilir — bunlar genellikle "ölü kedi sıçraması"dır ve sürdürülebilir değildir.</p>
 
 <h2>EMA20 Haftalık Neden?</h2>
 <p>Haftalık EMA20 ≈ günlük EMA100. Bu seviyenin üzerindeki fiyat, orta vadeli yükseliş trendi içinde demektir. Kurumsal yatırımcıların çok büyük bölümü bu seviyeyi takip eder.</p>
 
 <h2>Filtre Nasıl Çalışır?</h2>
 <ul>
-  <li>Haftalık EMA20 yükseliyor + Günlük AL sinyali → <strong>Geçerli</strong></li>
-  <li>Haftalık EMA20 düşüyor + Günlük AL sinyali → <strong>Engellendi</strong></li>
-  <li>Haftalık EMA20 düşüyor + Günlük SAT sinyali → <strong>Geçerli</strong></li>
+  <li>Haftalık EMA20 yükseliyor + Günlük Güçlü Trend sinyali → <strong>Geçerli</strong></li>
+  <li>Haftalık EMA20 düşüyor + Günlük Güçlü Trend sinyali → <strong>Engellendi</strong></li>
+  <li>Haftalık EMA20 düşüyor + Günlük Trend Bozuldu sinyali → <strong>Geçerli</strong></li>
 </ul>
 
 <h2>Pratikte Ne Fark Yaratır?</h2>
-<p>Bu filtre, yıllık sinyal sayısını azaltır ama kaliteyi artırır. Daha az ama daha doğru sinyal demektir. Özellikle 2023–2024 dönemindeki BIST100 düzeltmelerinde bu filtre pek çok yanlış AL sinyalini dışarıda bıraktı.</p>
+<p>Bu filtre, yıllık sinyal sayısını azaltır ama kaliteyi artırır. Daha az ama daha doğru sinyal demektir. Özellikle 2023–2024 dönemindeki BIST100 düzeltmelerinde bu filtre pek çok yanlış Güçlü Trend sinyalini dışarıda bıraktı.</p>
 """,
     "faqs": [
       {"q": "Haftalık trend filtresi neden kullanılır?", "a": "Günlük sinyaller kısa vadeli gürültüye duyarlıdır. Haftalık EMA20 yönüyle filtrelemek büyük trende karşı giriş yapmayı önler ve sahte sinyal sayısını önemli ölçüde azaltır."},
       {"q": "Çoklu zaman dilimi analizi nedir?", "a": "Farklı periyotlardaki trendlerin aynı anda değerlendirilmesidir. Üst zaman dilimi trend yönü belirler, alt zaman dilimi giriş zamanlar. BorsaPusula haftalık trendin desteğini alan günlük sinyalleri tercih eder."},
-      {"q": "MTF analizi BorsaPusula'da nasıl görülür?", "a": "Her hisse sayfasında H4, Günlük, Haftalık ve Aylık zaman dilimlerini gösteren MTF analizi bulunur. Tüm periyotlarda AL gösteren hisseler en güçlü adaylardır."}
+      {"q": "MTF analizi BorsaPusula'da nasıl görülür?", "a": "Her hisse sayfasında H4, Günlük, Haftalık ve Aylık zaman dilimlerini gösteren MTF analizi bulunur. Tüm periyotlarda Güçlü Trend gösteren hisseler en güçlü adaylardır."}
     ],
     "related_tickers": ['AKBNK', 'ASELS']
   },
@@ -506,7 +506,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Kendi algo sisteminizi kurmak için programlama bilgisi gerekir. Ancak BorsaPusula gibi platformlar aracılığıyla algoritmaların ürettiği sinyalleri kullanmak için teknik bilgiye ihtiyaç yoktur. Önemli olan sistemi <em>anlamak</em> ve kurallara uymaktır.</p>
 """,
     "faqs": [
-      {"q": "Algoritmik trading bireysel yatırımcı için nasıl faydalıdır?", "a": "BorsaPusula gibi platformlar sayesinde programlama bilgisi olmadan algoritmik sinyallerden yararlanılabilir. Platform 214 hisseyi tarar ve AL/SAT/BEKLE kararı üretir; siz sadece değerlendirip karar verirsiniz."},
+      {"q": "Algoritmik trading bireysel yatırımcı için nasıl faydalıdır?", "a": "BorsaPusula gibi platformlar sayesinde programlama bilgisi olmadan algoritmik sinyallerden yararlanılabilir. Platform 214 hisseyi tarar ve Güçlü Trend/Trend Bozuldu/Yatay kararı üretir; siz sadece değerlendirip karar verirsiniz."},
       {"q": "Algoritmik sistemler her zaman başarılı mı olur?", "a": "Hayır. Algoritmik sistemler istatistiksel olasılıklar üzerinde çalışır, kesinlik garantisi vermez. Piyasa rejimleri değişebilir ve sistemi periyodik olarak gözden geçirmek önemlidir."},
       {"q": "BorsaPusula tam otomatik işlem yapıyor mu?", "a": "Hayır. BorsaPusula algoritmik sinyal üretir ancak emir vermez. Bu yarı otomatik model algoritmanın tutarlılığını insanın bağlamsal değerlendirmesiyle birleştirir."}
     ],
@@ -541,12 +541,12 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 </ul>
 
 <h2>BorsaPusula Grafiklerinde Kullanımı</h2>
-<p>Hisse grafiklerinde Supertrend bandı önemli bir dinamik destek/direnç görevi görür. AL sinyalinde Supertrend alt bandının üzerinde kaldıkça trend devam ediyor demektir. Bu bandın kırılması ise SAT sinyaline geçiş anlamına gelir.</p>
+<p>Hisse grafiklerinde Supertrend bandı önemli bir dinamik destek/direnç görevi görür. Güçlü Trend sinyalinde Supertrend alt bandının üzerinde kaldıkça trend devam ediyor demektir. Bu bandın kırılması ise Trend Bozuldu sinyaline geçiş anlamına gelir.</p>
 """,
     "faqs": [
       {"q": "Destek seviyesi nasıl belirlenir?", "a": "Destek, fiyatın geçmişte birden fazla kez düşüp toparlandığı fiyat bölgesidir. Önceki diplere bakılır; yuvarlak sayılar, EMA seviyeleri ve Fibonacci geri çekilmeleri de destek oluşturur."},
       {"q": "Kırılan bir direnç neden destek olur?", "a": "Rol değişimi prensibi olarak bilinir. Direnç kırıldığında piyasa o seviyenin üzerinde işlem yapmayı kabul etmiştir. Eski direnç seviyesi artık alıcıların referans fiyatı haline gelir ve geri çekilmelerde destek görevi görür."},
-      {"q": "Supertrend dinamik destek işlevi görür mü?", "a": "Evet. BorsaPusula grafiklerinde Supertrend bandı hem AL/SAT sinyali üretir hem de dinamik destek/direnç göstergesi işlevi görür. AL sinyalinde fiyat Supertrend'in üzerinde kaldığı sürece trend devam eder."}
+      {"q": "Supertrend dinamik destek işlevi görür mü?", "a": "Evet. BorsaPusula grafiklerinde Supertrend bandı hem Güçlü Trend/Trend Bozuldu sinyali üretir hem de dinamik destek/direnç göstergesi işlevi görür. Güçlü Trend sinyalinde fiyat Supertrend'in üzerinde kaldığı sürece trend devam eder."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO']
   },
@@ -580,12 +580,12 @@ RS = Ortalama Yükselen Bar / Ortalama Düşen Bar (genellikle son 14 bar)</pre>
 </ul>
 
 <h2>BorsaPusula ile RSI Kombine Kullanım</h2>
-<p>BorsaPusula AL sinyali verdiğinde, RSI 50–65 arasındaysa trend henüz erken aşamada demektir — potansiyel iyi. RSI 80'in üzerindeyken AL sinyali geliyorsa, trendin güçlü ama kısa vadeli geri çekilme riskinin yüksek olduğunu aklınızda bulundurun.</p>
+<p>BorsaPusula Güçlü Trend sinyali verdiğinde, RSI 50–65 arasındaysa trend henüz erken aşamada demektir — potansiyel iyi. RSI 80'in üzerindeyken Güçlü Trend sinyali geliyorsa, trendin güçlü ama kısa vadeli geri çekilme riskinin yüksek olduğunu aklınızda bulundurun.</p>
 """,
     "faqs": [
       {"q": "RSI 30 altına düştüğünde hisse mutlaka alınmalı mıdır?", "a": "Hayır. RSI 30 altı aşırı satım bölgesi olsa da güçlü düşüş trendinde RSI uzun süre 30 altında kalabilir. BorsaPusula Supertrend ve ADX teyidiyle birlikte değerlendirmek gerekir."},
       {"q": "RSI divergence nasıl tespit edilir?", "a": "Bearish divergence: Fiyat yeni yüksek yaparken RSI yapamıyor. Bullish divergence: Fiyat yeni düşük yaparken RSI yapamıyor. Bu uyumsuzluk yaklaşan trend dönüşüne işaret edebilir."},
-      {"q": "BorsaPusula'da RSI değeri nerede görünür?", "a": "Her hisse sayfasında güncel RSI değeri gösterilir. AL sinyalinde RSI 50-65 arasındaki hisseler ideal giriş noktasındadır, henüz aşırı alım bölgesine girmemiş demektir."}
+      {"q": "BorsaPusula'da RSI değeri nerede görünür?", "a": "Her hisse sayfasında güncel RSI değeri gösterilir. Güçlü Trend sinyalinde RSI 50-65 arasındaki hisseler ideal giriş noktasındadır, henüz aşırı alım bölgesine girmemiş demektir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'ASELS']
   },
@@ -607,8 +607,8 @@ Histogram = MACD − Sinyal</pre>
 
 <h2>Sinyal Türleri</h2>
 <ul>
-  <li><strong>MACD ÜZERİNE geçişi:</strong> MACD çizgisi sinyali yukarı kesince AL işareti</li>
-  <li><strong>MACD ALTİNA geçişi:</strong> MACD çizgisi sinyali aşağı kesince SAT işareti</li>
+  <li><strong>MACD ÜZERİNE geçişi:</strong> MACD çizgisi sinyali yukarı kesince Güçlü Trend işareti</li>
+  <li><strong>MACD ALTİNA geçişi:</strong> MACD çizgisi sinyali aşağı kesince Trend Bozuldu işareti</li>
   <li><strong>Sıfır geçişi:</strong> MACD sıfırın üstüne çıkarsa güçlü yükseliş; altına inerse güçlü düşüş</li>
   <li><strong>Histogram küçülmesi:</strong> Momentum zayıflıyor — trend değişimi yaklaşıyor olabilir</li>
 </ul>
@@ -621,7 +621,7 @@ Histogram = MACD − Sinyal</pre>
 """,
     "faqs": [
       {"q": "MACD hangi parametrelerle kullanılır?", "a": "Standart MACD: EMA(12) - EMA(26) = MACD çizgisi, EMA(9) of MACD = sinyal çizgisi, MACD - Sinyal = histogram. Bu parametreler Gerald Appel tarafından tanımlanmış global standart değerlerdir."},
-      {"q": "MACD histogram ne anlama gelir?", "a": "MACD histogramı MACD ile sinyal çizgisi arasındaki farkı gösterir. Histogram büyüyorsa momentum artıyor, küçülüyorsa zayıflıyor. Sıfırdan yükseğe geçiş AL, sıfırın altına iniş SAT momentumu gösterir."},
+      {"q": "MACD histogram ne anlama gelir?", "a": "MACD histogramı MACD ile sinyal çizgisi arasındaki farkı gösterir. Histogram büyüyorsa momentum artıyor, küçülüyorsa zayıflıyor. Sıfırdan yükseğe geçiş Güçlü Trend, sıfırın altına iniş Trend Bozuldu momentumu gösterir."},
       {"q": "MACD Supertrend'den üstün müdür?", "a": "İkisi farklı avantajlar sunar. MACD divergence tespit edebilir, Supertrend edemez. Supertrend volatiliteye adapte olur (ATR bazlı), MACD olamaz. BorsaPusula Supertrend + ADX kombinasyonunu tercih eder."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS']
@@ -691,19 +691,19 @@ Histogram = MACD − Sinyal</pre>
 <p>Her Fibonacci sayısını bir öncekine bölünce elde edilen değer (örn. 21÷13 ≈ 1.618) altın orana yaklaşır. Bu oran, borsalarda en kritik geri çekilme seviyeleri için kullanılır. Birçok büyük yükseliş trendi %61.8 geri çekilmesinden sonra devam etmiştir.</p>
 
 <h2>BorsaPusula ile Kullanımı</h2>
-<p>Supertrend AL sinyali geldiğinde, fiyat aynı zamanda %38.2 veya %61.8 Fibonacci desteğindeyse sinyal daha güçlü bir "giriş noktası" işaret eder. İki farklı metodun aynı seviyeye işaret etmesi "confluance" (örtüşme) olarak adlandırılır.</p>
+<p>Supertrend Güçlü Trend sinyali geldiğinde, fiyat aynı zamanda %38.2 veya %61.8 Fibonacci desteğindeyse sinyal daha güçlü bir "giriş noktası" işaret eder. İki farklı metodun aynı seviyeye işaret etmesi "confluance" (örtüşme) olarak adlandırılır.</p>
 """,
     "faqs": [
       {"q": "Fibonacci seviyeleri nasıl çizilir?", "a": "Yükselen trendde trend başlangıcından (0%) sonuna (100%) çizgi çekin. Fibonacci aracı bu iki nokta arasında otomatik olarak %23.6, %38.2, %50, %61.8 ve %78.6 seviyelerini hesaplar."},
       {"q": "Neden %61.8 altın oran olarak adlandırılır?", "a": "Her Fibonacci sayısının kendinden öncekine oranı yaklaşık 1.618'e yaklaşır (altın oran). Bu oran doğada ve mimaride de karşımıza çıkar. Analistler fiyatların bu seviyede tepki verdiğini gözlemlemişlerdir."},
-      {"q": "Supertrend ile Fibonacci kombinasyonu nasıl kullanılır?", "a": "AL sinyali geldiğinde fiyat eş zamanlı olarak %38.2 veya %61.8 Fibonacci desteğindeyse iki metodun aynı seviyeye işaret etmesi confluance (örtüşme) oluşturur. Bu giriş noktasının güvenilirliğini artırır."}
+      {"q": "Supertrend ile Fibonacci kombinasyonu nasıl kullanılır?", "a": "Güçlü Trend sinyali geldiğinde fiyat eş zamanlı olarak %38.2 veya %61.8 Fibonacci desteğindeyse iki metodun aynı seviyeye işaret etmesi confluance (örtüşme) oluşturur. Bu giriş noktasının güvenilirliğini artırır."}
     ],
     "related_tickers": ['AKBNK', 'THYAO']
   },
   {
     "slug": "bollinger-bantlari",
     "title": "Bollinger Bantları Nedir? Volatilite ile Fiyat İlişkisi",
-    "desc": "Bollinger Bantları nasıl hesaplanır, bant sıkışması ne anlama gelir, AL/SAT sinyali olarak nasıl kullanılır?",
+    "desc": "Bollinger Bantları nasıl hesaplanır, bant sıkışması ne anlama gelir, Güçlü Trend/Trend Bozuldu sinyali olarak nasıl kullanılır?",
     "date": "2026-04-18",
     "mins": 4,
     "cat": "Teknik Analiz",
@@ -764,7 +764,7 @@ Histogram = MACD − Sinyal</pre>
 <p>Türk borsasında holding şirketleri (KCHOL, SAHOL), telekomünikasyon (TCELL) ve petrol/kimya (TUPRS, PETKM) sektörleri tarihsel olarak temettü dağıtan şirketler arasında öne çıkar. Ancak yüksek enflasyon dönemlerinde şirketler temettü yerine yatırıma yönelebilir.</p>
 
 <h2>Temettü + Sinyal Kombinasyonu</h2>
-<p>Yüksek temettü verimine sahip bir hisse <em>aynı zamanda</em> AL sinyali veriyorsa hem temettü geliri hem de fiyat artışı potansiyeli bir arada sunulmuş demektir. BorsaPusula'nın temel analiz bölümünde temettü verimi de gösterilir.</p>
+<p>Yüksek temettü verimine sahip bir hisse <em>aynı zamanda</em> Güçlü Trend sinyali veriyorsa hem temettü geliri hem de fiyat artışı potansiyeli bir arada sunulmuş demektir. BorsaPusula'nın temel analiz bölümünde temettü verimi de gösterilir.</p>
 """,
     "faqs": [
       {"q": "Temettü verimi nasıl hesaplanır?", "a": "Temettü Verimi = Yıllık Temettü ÷ Hisse Fiyatı × 100. Örneğin hisse 50₺ ve yıllık temettü 3₺ ise verimi %6'dır. Devlet tahvil faizleriyle karşılaştırılarak değerlendirilir."},
@@ -826,7 +826,7 @@ Histogram = MACD − Sinyal</pre>
 <h2>A–E</h2>
 <ul>
   <li><strong>ADX:</strong> Trend gücü ölçen gösterge. 25+ güçlü trend.</li>
-  <li><strong>AL (Long):</strong> Fiyat yükselir beklentisiyle hisse satın alma.</li>
+  <li><strong>Long (Uzun Pozisyon):</strong> Fiyat yükselir beklentisiyle hisse satın alma.</li>
   <li><strong>ATR:</strong> Average True Range — ortalama fiyat dalgalanma aralığı.</li>
   <li><strong>Bant:</strong> Supertrend veya Bollinger gibi göstergelerdeki fiyat kanalı.</li>
   <li><strong>Bear Market:</strong> %20+ düşüş yaşanan piyasa koşulları.</li>
@@ -862,7 +862,7 @@ Histogram = MACD − Sinyal</pre>
 
 <h2>S–Z</h2>
 <ul>
-  <li><strong>SAT (Short):</strong> Düşüş beklentisiyle pozisyon almak.</li>
+  <li><strong>Short (Kısa Pozisyon):</strong> Düşüş beklentisiyle pozisyon almak.</li>
   <li><strong>SMA:</strong> Basit Hareketli Ortalama.</li>
   <li><strong>Stop Loss:</strong> Zarar durdurma emri. Belirli fiyatın altında otomatik satış.</li>
   <li><strong>Supertrend:</strong> ATR tabanlı trend takip göstergesi.</li>
@@ -875,7 +875,7 @@ Histogram = MACD − Sinyal</pre>
 </ul>
 """,
     "faqs": [
-      {"q": "Borsa işlemlerinde en sık kullanılan terimler nelerdir?", "a": "En temel kavramlar: AL/SAT emri, stop loss (zarar durdur), take profit (kâr al), piyasa emri, limit emir, spread, lot, portföy, pozisyon, volatilite ve hacim. Bu terimlerin anlamını bilmeden işlem yapmamak önemlidir."},
+      {"q": "Borsa işlemlerinde en sık kullanılan terimler nelerdir?", "a": "En temel kavramlar: alım/satım emri, stop loss (zarar durdur), take profit (kâr al), piyasa emri, limit emir, spread, lot, portföy, pozisyon, volatilite ve hacim. Bu terimlerin anlamını bilmeden işlem yapmamak önemlidir."},
       {"q": "Bull ve Bear piyasası ne demektir?", "a": "Bull (boğa) piyasası fiyatların genel olarak yükseldiği iyimser dönemdir. Bear (ayı) piyasası ise fiyatların %20 veya daha fazla düştüğü karamser dönemdir. Bu iki kavram piyasa senaryolarını anlatmak için sıkça kullanılır."},
       {"q": "BorsaPusula teknik terimlerini nerede açıklıyor?", "a": "ADX, RSI, Supertrend, EMA gibi tüm teknik göstergeler için Metodoloji sayfasında detaylı açıklamalar bulunur. Her sinyal bileşeninin nasıl hesaplandığı ve yorumlandığı anlatılır."}
     ],
@@ -889,7 +889,7 @@ Histogram = MACD − Sinyal</pre>
     "mins": 6,
     "cat": "Teknik Analiz",
     "body": """
-<p>BorsaPusula, 214 hisseyi (BIST100 + ek hisseler) her gün algoritmik olarak analiz eder ve her hisse için AL, SAT veya BEKLE kararı üretir. Bu makalede bu sistemin arka planını anlıyoruz.</p>
+<p>BorsaPusula, 214 hisseyi (BIST100 + ek hisseler) her gün algoritmik olarak analiz eder ve her hisse için Güçlü Trend, Trend Bozuldu veya Yatay kararı üretir. Bu makalede bu sistemin arka planını anlıyoruz.</p>
 
 <h2>Üçlü Filtre Mantığı</h2>
 <p>Tek bir gösterge sahte sinyal üretebilir. Üç göstergenin aynı anda aynı yönü göstermesi, yanlış sinyal olasılığını dramatik şekilde düşürür. BorsaPusula'nın üç kriteri:</p>
@@ -900,7 +900,7 @@ Histogram = MACD − Sinyal</pre>
 </ol>
 
 <h2>Haftalık Trend Gate</h2>
-<p>Günlük sinyaller, haftalık EMA20 yönüyle filtrelenir. Haftalık düşüş trendindeyken günlük AL sinyali engellenir. Bu filtre, yükselen trendin "büyük resmini" kaçırmamayı sağlar.</p>
+<p>Günlük sinyaller, haftalık EMA20 yönüyle filtrelenir. Haftalık düşüş trendindeyken günlük Güçlü Trend sinyali engellenir. Bu filtre, yükselen trendin "büyük resmini" kaçırmamayı sağlar.</p>
 
 <h2>Sinyal Onayı (3 Bar Kuralı)</h2>
 <p>İlk gün oluşan sinyal "ham sinyal"dir. 3 gün boyunca aynı kalan sinyal "onaylı" sayılır. BorsaPusula hisse sayfalarında kaç gündür devam ettiği gösterilir.</p>
@@ -909,12 +909,12 @@ Histogram = MACD − Sinyal</pre>
 <p><a href="/ozet">Günlük Özet</a> sayfasındaki barometre, tüm piyasanın anlık durumunu (güçlü sinyal oranını) gösterir. Bu oran %50'nin üzerindeyse genel trend yukarı yönlü sayılabilir; %30'un altındaysa daha temkinli/savunmacı bir yaklaşım düşünülebilir.</p>
 
 <h2>Veri Kaynağı ve Güncelleme Sıklığı</h2>
-<p>Tüm fiyat verileri Yahoo Finance (yfinance) API'sından alınır. Günlük barlar (2 yıl geçmiş) ve haftalık barlar (1 yıl) kullanılır. Sinyaller <strong>15 dakikada bir</strong> güncellenir. Canlı fiyatlar 30 saniyede bir SSE ile yayınlanır.</p>
+<p>Tüm fiyat verileri Yahoo Finance (yfinance) API'sından alınır. Günlük barlar (2 yıl geçmiş) ve haftalık barlar (1 yıl) kullanılır. Sinyaller <strong>günde bir kez</strong>, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) güncellenir — BorsaPusula gün sonu (EOD) verisiyle çalışır, gün içi canlı fiyat akışı sunmaz.</p>
 """,
     "faqs": [
-      {"q": "BorsaPusula sinyalleri ne sıklıkla güncelleniyor?", "a": "Sinyal hesaplamaları 15 dakikada bir yapılır. Canlı fiyatlar SSE teknolojisiyle 30 saniyede bir güncellenir. Sinyaller Yahoo Finance verilerinden hesaplanır ve piyasa saatleri içinde aktiftir."},
+      {"q": "BorsaPusula sinyalleri ne sıklıkla güncelleniyor?", "a": "Sinyal hesaplamaları günde bir kez, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) yapılır. Sinyaller Yahoo Finance verilerinden hesaplanır; BorsaPusula gün sonu (EOD) verisiyle çalışır, gün içi canlı takip sunmaz."},
       {"q": "Üçlü filtre sistemi neden tek göstergeden daha güvenilir?", "a": "Supertrend + ADX + EMA üçünün aynı anda aynı yönü göstermesi gerektiğinden rastgele kesişim olasılığı dramatik biçimde azalır. Bu da sahte sinyal sayısını önemli ölçüde düşürür."},
-      {"q": "Onaylı sinyal ile ham sinyal arasındaki fark nedir?", "a": "Ham sinyal oluştuğu ilk gündür ve daha az güvenilirdir. Onaylı sinyal aynı sinyalin 3+ gün sürmesidir ve trend gücünü doğrular. Kaç gündür devam ettiği hisse sayfalarında signal_bars değeriyle gösterilir."}
+      {"q": "Onaylı sinyal ile ham sinyal arasındaki fark nedir?", "a": "Ham sinyal oluştuğu ilk gündür ve daha az güvenilirdir. Onaylı sinyal aynı sinyalin 3+ gün sürmesidir ve trend gücünü doğrular. Kaç gündür devam ettiği hisse sayfalarında ayrıca gösterilir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'ASELS', 'THYAO']
   },
@@ -953,12 +953,12 @@ Histogram = MACD − Sinyal</pre>
 <p>Türk teknoloji ekosistemi gelişiyor. Telekomünikasyon şirketleri nispeten savunmacı; yazılım şirketleri (LOGO) büyüme potansiyeli yüksek.</p>
 
 <h2>BorsaPusula'da Sektör Filtresi</h2>
-<p>Ana sayfada sektör butonlarıyla yalnızca ilgilendiğiniz sektörün hisselerini görebilirsiniz. Hangi sektörün kaç AL sinyali verdiğini karşılaştırarak güçlü sektörleri tespit edebilirsiniz.</p>
+<p>Ana sayfada sektör butonlarıyla yalnızca ilgilendiğiniz sektörün hisselerini görebilirsiniz. Hangi sektörün kaç Güçlü Trend sinyali verdiğini karşılaştırarak güçlü sektörleri tespit edebilirsiniz.</p>
 """,
     "faqs": [
       {"q": "BIST100'de en büyük sektör hangisidir?", "a": "Bankacılık ve finans sektörü BIST100'ün en yüksek ağırlığını oluşturur. AKBNK, GARAN, ISCTR, VAKBN gibi büyük bankalar endeksi güçlü şekilde etkiler. Bankacılık haberleri tüm endeksi etkiler."},
       {"q": "Sektör rotasyonu ne demektir?", "a": "Piyasa döngüsünün farklı aşamalarında farklı sektörler öne çıkar. Ekonomi büyürken sanayi ve teknoloji liderken resesyonda zorunlu tüketim ve sağlık savunmacı sektörler öne geçer."},
-      {"q": "BorsaPusula'da sektör filtresi nasıl kullanılır?", "a": "Ana sayfada sektör butonlarıyla yalnızca ilgili sektörün hisseleri görülür. Sektör ısı haritası (/sektor-harita) tüm sektörlerin AL/SAT/BEKLE dağılımını görsel karşılaştırma imkânı sunar."}
+      {"q": "BorsaPusula'da sektör filtresi nasıl kullanılır?", "a": "Ana sayfada sektör butonlarıyla yalnızca ilgili sektörün hisseleri görülür. Sektör ısı haritası (/sektor-harita) tüm sektörlerin Güçlü Trend/Trend Bozuldu/Yatay dağılımını görsel karşılaştırma imkânı sunar."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO', 'BIMAS']
   },
@@ -1000,12 +1000,12 @@ Histogram = MACD − Sinyal</pre>
 <p>Her kaybı not edin: Ne oldu, neden yanlış oldu, bir daha ne yapardım? Bu "işlem günlüğü" zamanla en değerli öğrenme kaynağınız olur.</p>
 
 <h2>10. Sabır En Büyük Silah</h2>
-<p>Çoğu kazanan işlem, bir sinyal oluştuğunda hemen almak değil, doğru kurulumu <em>beklemekten</em> gelir. BEKLE sinyali de bir sinyaldir — "henüz hazır değil, izle" demektir.</p>
+<p>Çoğu kazanan işlem, bir sinyal oluştuğunda hemen almak değil, doğru kurulumu <em>beklemekten</em> gelir. Yatay sinyali de bir sinyaldir — "henüz hazır değil, izle" demektir.</p>
 """,
     "faqs": [
       {"q": "Borsaya başlamak için minimum ne kadar sermaye gerekir?", "a": "Teknik olarak birkaç yüz TL ile borsaya başlanabilir. Ancak çeşitlendirme yapabilmek ve işlem maliyetlerinin getiriyi yememesi için en az 10.000-50.000 TL ile başlamak önerilir. Her zaman kaybetmeyi göze alabileceğiniz para kullanın."},
       {"q": "Borsayı öğrenmek için nereden başlamalıyım?", "a": "BorsaPusula Blog'undaki temel kavramlar makaleleri ile başlayabilirsiniz. Metodoloji sayfası algoritmanın nasıl çalıştığını açıklar. Daha sonra küçük miktarlarla uygulama yaparak deneyim kazanın."},
-      {"q": "BorsaPusula sinyallerini nasıl takip etmeliyim?", "a": "Ana sayfadan tüm hisselerin AL/SAT/BEKLE durumunu görebilirsiniz. İlgilendiğiniz hisseler için Günlük Özet sayfasını sabah kontrol edin. E-posta aboneliğiyle sinyal değişimlerini otomatik alın."}
+      {"q": "BorsaPusula sinyallerini nasıl takip etmeliyim?", "a": "Ana sayfadan tüm hisselerin Güçlü Trend/Trend Bozuldu/Yatay durumunu görebilirsiniz. İlgilendiğiniz hisseler için Günlük Özet sayfasını sabah kontrol edin. E-posta aboneliğiyle sinyal değişimlerini otomatik alın."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'BIMAS']
   },
@@ -1034,7 +1034,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <p>"Bunu baştan biliyordum zaten" hissi, gelecekteki kararları abartılı özgüvenle almaya yol açar. Geçmişteki başarı şansın mı yoksa becerinin mi ürünüydü, bunu sorgulamak gerekir.</p>
 
 <h2>Algoritmik Sistemin Psikolojik Değeri</h2>
-<p>BorsaPusula gibi kural tabanlı sistemler duyguları denklemden çıkarır. "Hisse düşüyor, çıkmalı mıyım?" sorusunun cevabı nettir: Supertrend SAT'a geçmedikçe sistem AL der. Bu netlik paniği önler.</p>
+<p>BorsaPusula gibi kural tabanlı sistemler duyguları denklemden çıkarır. "Hisse düşüyor, çıkmalı mıyım?" sorusunun cevabı nettir: Supertrend Trend Bozuldu sinyaline geçmedikçe sistem Güçlü Trend der. Bu netlik paniği önler.</p>
 
 <h2>Pratik Çözümler</h2>
 <ul>
@@ -1047,7 +1047,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
     "faqs": [
       {"q": "FOMO yatırım kararlarını nasıl etkiler?", "a": "FOMO, sosyal medyada başkasının kazandığını gördüğünüzde irrasyonel alım kararları almanıza neden olur. Genellikle rallinin tepesine yakın giriş yapılır ve ardından düşüş yaşanır. Kural tabanlı sinyal sistemleri FOMO'yu önlemenin en etkili yoludur."},
       {"q": "Kaybeden pozisyonları kapatmak neden psikolojik olarak zordur?", "a": "Kahneman'ın kayıptan kaçınma teorisine göre insanlar kaybın acısını kazancın sevincinin 2 katı hisseder. Bu nedenle 'bekleyeyim düzelir' rasyonalizasyonuna sığınılır. Stop loss bu tuzağı mekanik olarak ortadan kaldırır."},
-      {"q": "Algoritmik sinyal kullanmak psikolojik hatayı önler mi?", "a": "Önemli ölçüde evet. Supertrend SAT'a geçmedikçe sistem AL der ve bu netlik panikleri önler. Ancak algoritmaya körce güvenmek de tuzaktır; sistemi anlamak ve bağlamsal değerlendirme yapmak gerekir."}
+      {"q": "Algoritmik sinyal kullanmak psikolojik hatayı önler mi?", "a": "Önemli ölçüde evet. Supertrend Trend Bozuldu sinyaline geçmedikçe sistem Güçlü Trend der ve bu netlik panikleri önler. Ancak algoritmaya körce güvenmek de tuzaktır; sistemi anlamak ve bağlamsal değerlendirme yapmak gerekir."}
     ],
     "related_tickers": ['AKBNK', 'THYAO']
   },
@@ -1083,25 +1083,25 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
     "faqs": [
       {"q": "Supertrend mi MACD mi daha iyi bir göstergedir?", "a": "Birinin diğerinden üstün olduğunu söylemek yanıltıcı olur. Supertrend volatiliteye uyum sağlar ve dinamik stop loss verir; MACD divergence tespiti yapabilir. BorsaPusula Supertrend + ADX kombinasyonunu tercih eder."},
       {"q": "Neden BorsaPusula MACD yerine Supertrend kullanıyor?", "a": "Supertrend ATR bazlı olduğundan farklı volatilite ortamlarında aynı parametrelerle kullanılabilir ve dinamik stop loss sağlar. MACD gecikmeli ve sabit parametreli olduğundan BIST piyasasına daha az uyumludur."},
-      {"q": "İki gösterge çakıştığında ne yapmalıyım?", "a": "Supertrend AL + MACD da AL yönünde ise sinyal güçlüdür. Supertrend AL ancak MACD bearish divergence gösteriyorsa dikkatli olunmalıdır. Çakışma güvenilirliği artırır, uyuşmazlık uyarı işareti verir."}
+      {"q": "İki gösterge çakıştığında ne yapmalıyım?", "a": "Supertrend Güçlü Trend + MACD de yükseliş yönünde ise sinyal güçlüdür. Supertrend Güçlü Trend ancak MACD bearish divergence gösteriyorsa dikkatli olunmalıdır. Çakışma güvenilirliği artırır, uyuşmazlık uyarı işareti verir."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO']
   },
   {
     "slug": "hisse-secim-kriterleri",
     "title": "Hangi Hisseyi Seçmeli? Teknik + Temel Kombinasyon",
-    "desc": "Birden fazla AL sinyali olan hisseler arasında nasıl seçim yapılır? Teknik ve temel kriterleri birleştiren bir yaklaşım.",
+    "desc": "Birden fazla Güçlü Trend sinyali olan hisseler arasında nasıl seçim yapılır? Teknik ve temel kriterleri birleştiren bir yaklaşım.",
     "date": "2026-04-27",
     "mins": 6,
     "cat": "Strateji",
     "body": """
-<p>BorsaPusula'da aynı anda onlarca hisse AL sinyali verebilir. Bunların hepsine girilmez — portföy kapasitesi sınırlıdır. Peki nasıl seçim yapılır?</p>
+<p>BorsaPusula'da aynı anda onlarca hisse Güçlü Trend sinyali verebilir. Bunların hepsine girilmez — portföy kapasitesi sınırlıdır. Peki nasıl seçim yapılır?</p>
 
 <h2>Teknik Puanlama (1-3 puan)</h2>
 <ul>
   <li><strong>+1:</strong> Sinyal 3+ gündür devam ediyor (onaylı)</li>
   <li><strong>+1:</strong> ADX 35'in üzerinde (çok güçlü trend)</li>
-  <li><strong>+1:</strong> Haftalık ve aylık grafik de AL yönünde</li>
+  <li><strong>+1:</strong> Haftalık ve aylık grafik de Güçlü Trend yönünde</li>
 </ul>
 
 <h2>Temel Puanlama (1-3 puan)</h2>
@@ -1119,10 +1119,10 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 </ul>
 
 <h2>Piyasa Bağlamı</h2>
-<p><a href="/ozet">Sinyal Özeti</a> sayfasındaki barometreyi kontrol edin. AL oranı %50 üzerindeyse piyasa geneli güçlü sayılabilir; %30 altındaysa piyasa zayıf kabul edilip yalnızca en güçlü sinyaller değerlendirilebilir.</p>
+<p><a href="/ozet">Sinyal Özeti</a> sayfasındaki barometreyi kontrol edin. Güçlü Trend oranı %50 üzerindeyse piyasa geneli güçlü sayılabilir; %30 altındaysa piyasa zayıf kabul edilip yalnızca en güçlü sinyaller değerlendirilebilir.</p>
 
 <h2>Pratik Örnek</h2>
-<p>Diyelim ki THYAO ve ASELS her ikisi de AL sinyali veriyor:</p>
+<p>Diyelim ki THYAO ve ASELS her ikisi de Güçlü Trend sinyali veriyor:</p>
 <ul>
   <li>THYAO: Sinyal 5 gündür, ADX=38, F/K makul → Skor: +5</li>
   <li>ASELS: Sinyal bugün oluştu, ADX=22 → Skor: +1</li>
@@ -1130,7 +1130,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <p>THYAO açıkça daha güçlü bir kurulum sunuyor.</p>
 """,
     "faqs": [
-      {"q": "Çok sayıda AL sinyali arasından nasıl seçim yapılır?", "a": "Teknik puanlama: sinyal kaç gündür sürüyor, ADX değeri, MTF uyumu. Temel puanlama: F/K, ROE, temettü. Piyasa bağlamı: genel AL oranı. Bu üç boyutu birleştirerek en yüksek puanlı hisseyi seçin."},
+      {"q": "Çok sayıda Güçlü Trend sinyali arasından nasıl seçim yapılır?", "a": "Teknik puanlama: sinyal kaç gündür sürüyor, ADX değeri, MTF uyumu. Temel puanlama: F/K, ROE, temettü. Piyasa bağlamı: genel Güçlü Trend oranı. Bu üç boyutu birleştirerek en yüksek puanlı hisseyi seçin."},
       {"q": "ADX değeri hisse seçiminde ne kadar önemlidir?", "a": "ADX 25 üzeri trend güçlü, ADX 35 üzeri çok güçlü demektir. Aynı sinyal gücünde iki hisse arasında seçimde ADX değeri yüksek olan daha güvenilir trend gösterir ve tercih edilmelidir."},
       {"q": "Giriş kalitesi İdeal/İyi/Dikkatli/Uzak neye göre belirlenir?", "a": "BorsaPusula giriş kalitesi güncel fiyatın Supertrend'e olan mesafesine göre belirlenir. İdeal fiyat Supertrend'e çok yakın (az risk), İyi makul mesafede, Dikkatli nispeten uzak, Uzak çok uzak ve yüksek risk anlamına gelir."}
     ],
@@ -1163,11 +1163,11 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
   <li><strong>Büyüklük:</strong> Bu sözleşme/gelişme şirketin yıllık cirosunun yüzde kaçını etkiliyor?</li>
   <li><strong>Yinelelenebilirlik:</strong> Tek seferlik mi, tekrarlayan mı?</li>
   <li><strong>Piyasanın beklentisi:</strong> Beklenen bir gelişmeyse zaten fiyatlanmış olabilir.</li>
-  <li><strong>Teknik sinyal ile uyum:</strong> Hisse aynı anda AL sinyali veriyor mu?</li>
+  <li><strong>Teknik sinyal ile uyum:</strong> Hisse aynı anda Güçlü Trend sinyali veriyor mu?</li>
 </ol>
 
 <h2>KAP + Teknik Sinyal Kombinasyonu</h2>
-<p>BorsaPusula'nın en güçlü özelliklerinden biri, KAP bildirimleri ile teknik sinyalleri aynı ekranda göstermesidir. Bir hissenin hem AL sinyali verdiği hem de güçlü bir KAP bildirimi yaptığı dönemler — örneğin büyük sözleşme + Supertrend AL uyumu — genellikle güçlü katalizör oluşturur.</p>
+<p>BorsaPusula'nın en güçlü özelliklerinden biri, KAP bildirimleri ile teknik sinyalleri aynı ekranda göstermesidir. Bir hissenin hem Güçlü Trend sinyali verdiği hem de güçlü bir KAP bildirimi yaptığı dönemler — örneğin büyük sözleşme + Supertrend Güçlü Trend uyumu — genellikle güçlü katalizör oluşturur.</p>
 
 <h2>KAP Bildirimlerine Nasıl Erişilir?</h2>
 <p>BorsaPusula'da her hisse sayfasında <strong>"KAP Bildirimleri"</strong> sekmesi bulunur. Son 90 günlük bildirimler orada listelenir. Doğrudan KAP platformuna (kap.org.tr) da erişebilirsiniz.</p>
@@ -1260,7 +1260,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <h2>Hangi BIST30 Hissesi Daha İyi?</h2>
 <p>"En iyi BIST30 hissesi" sorusunun tek bir yanıtı yoktur. Değerlendirirken şunlara bakın:</p>
 <ol>
-  <li><strong>Aktif sinyal:</strong> AL sinyali var mı, kaç gündür sürüyor?</li>
+  <li><strong>Aktif sinyal:</strong> Güçlü Trend sinyali var mı, kaç gündür sürüyor?</li>
   <li><strong>Trend gücü:</strong> ADX değeri 25'in üzerinde mi?</li>
   <li><strong>Giriş kalitesi:</strong> Fiyat Supertrend'e yakın mı (İdeal/İyi)?</li>
   <li><strong>Risk/Ödül:</strong> R/R oranı en az 1:2 mi?</li>
@@ -1372,7 +1372,7 @@ Swing traderde sermayeyi korumak kritiktir:
 
 BorsaPusula'daki algoritmik sinyaller tam olarak swing trading için tasarlanmıştır:
 
-- **AL sinyali** = Supertrend + ADX + EMA üçlü onayı → Swing giriş fırsatı
+- **Güçlü Trend sinyali** = Supertrend + ADX + EMA üçlü onayı → Swing giriş fırsatı
 - **ADX değeri** → Trendin ne kadar güçlü olduğunu gösterir
 - **Sinyal yaşı** → Kaç gün önce girdi, henüz erken mi geç mi?
 - **Giriş/SL seviyeleri** → Stop-loss otomatik hesaplanmış
@@ -1571,7 +1571,7 @@ BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA12/99 kombinasyonunu kullan
       {"q": "MACD sıfır çizgisinin önemi nedir?", "a": "MACD hattı sıfırın üzerindeyse EMA12 > EMA26 demektir, yani kısa vadeli ortalama uzun vadeliyi geçmiştir ve yükseliş momentumu var. Sıfırın altındaysa tersi geçerlidir."},
       {"q": "MACD uyumsuzluğu neden önemlidir?", "a": "Uyumsuzluk, fiyat ile momentum arasındaki çelişkiyi gösterir. Fiyat yeni zirve yaparken MACD yapmıyorsa, yükseliş momentumu zayıflıyor demektir ve yakında düzeltme gelebilir. Bu sinyaller çok güvenilir olmakla birlikte kesin değildir."},
       {"q": "MACD ile ne sıklıkla işlem yapılabilir?", "a": "Günlük grafikte MACD ayda 2-5 sinyal üretebilir. Çok kısa vadeli grafikte (15dk) sinyaller çok fazla ve gürültülü olur. Haftalık grafikte sinyaller seyrek ama güvenilir olur."},
-      {"q": "MACD'yi Supertrend ile birleştirmek mümkün mü?", "a": "Evet, ikisi çok iyi tamamlar. Supertrend trend yönünü ve stop seviyesini belirler; MACD giriş zamanlaması için kullanılır. Supertrend AL veriyorken MACD kesişimi oluşursa sinyal kalitesi artar."}
+      {"q": "MACD'yi Supertrend ile birleştirmek mümkün mü?", "a": "Evet, ikisi çok iyi tamamlar. Supertrend trend yönünü ve stop seviyesini belirler; MACD giriş zamanlaması için kullanılır. Supertrend Güçlü Trend veriyorken MACD kesişimi oluşursa sinyal kalitesi artar."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'SISE', 'KRDMD']
   },
@@ -1592,7 +1592,7 @@ Destek seviyelerini oluşturan faktörler:
 - Önceki dip noktaları
 - Yuvarlak sayılar (100 TL, 50 TL gibi)
 - Hareketli ortalamalar (EMA50, EMA200)
-- Supertrend çizgisi (AL sinyalinde)
+- Supertrend çizgisi (Güçlü Trend sinyalinde)
 - Fibonacci geri çekilme seviyeleri
 
 ## Direnç Nedir?
@@ -1604,7 +1604,7 @@ Direnç seviyelerini oluşturan faktörler:
 - Önceki zirve noktaları
 - Yuvarlak sayılar
 - Uzun vadeli hareketli ortalamalar (EMA200)
-- Supertrend çizgisi (SAT sinyalinde)
+- Supertrend çizgisi (Trend Bozuldu sinyalinde)
 - Önceki destek kırıldıktan sonra oluşan dirençler
 
 ## Destek ve Direnç'in Temel Özellikleri
@@ -1643,8 +1643,8 @@ Destek/direnç bölgesine yaklaşırken hacim artışı önemlidir:
 3. Hacmin nasıl davrandığına bak
 
 ### Adım 3: Stop-Loss Yerleştir
-- AL pozisyonu için: Destek seviyesinin biraz altına stop koy (ATR × 0.5 mesafe)
-- SAT pozisyonu için: Direnç seviyesinin biraz üstüne stop koy
+- Uzun (Long) pozisyon için: Destek seviyesinin biraz altına stop koy (ATR × 0.5 mesafe)
+- Kısa (Short) pozisyon için: Direnç seviyesinin biraz üstüne stop koy
 
 ### Adım 4: Hedef Fiyat Belirle
 - Bir sonraki anlamlı destek/direnç seviyesini hedef al
@@ -1654,8 +1654,8 @@ Destek/direnç bölgesine yaklaşırken hacim artışı önemlidir:
 
 BorsaPusula'nın sinyalleri, Supertrend çizgisini dinamik destek/direnç olarak kullanır:
 
-- **AL sinyalinde:** Supertrend alt çizgisi → dinamik destek, stop-loss buraya konulur
-- **SAT sinyalinde:** Supertrend üst çizgisi → dinamik direnç, stop-loss buraya konulur
+- **Güçlü Trend sinyalinde:** Supertrend alt çizgisi → dinamik destek, stop-loss buraya konulur
+- **Trend Bozuldu sinyalinde:** Supertrend üst çizgisi → dinamik direnç, stop-loss buraya konulur
 
 Bu yaklaşım, klasik statik destek/direnç yerine piyasanın volatilitesine otomatik adapte olur.
 
@@ -1691,7 +1691,7 @@ Not: Bir seviye ne kadar çok test edilirse o kadar güçlenir, ama bu aynı zam
 
 ❌ **Stop koymamak** — Destek kırılabilir. Her desteğin altına mutlaka stop koyun.
 
-[Canlı Supertrend seviyeleri ve AL/SAT sinyallerini gör →](/)""",
+[Canlı Supertrend seviyeleri ve Güçlü Trend/Trend Bozuldu sinyallerini gör →](/)""",
     "faqs": [
       {"q": "Destek ve direnç nasıl çizilir?", "a": "Grafikte önceki zirve ve dip noktalarını bulun. Birden fazla kez fiyatın durduğu veya geri döndüğü seviyeleri yatay çizgilerle işaretleyin. Bu seviyelere ne kadar çok dokunulmuşsa o kadar güçlüdür."},
       {"q": "Yuvarlak sayılar neden önemli destek/direnç seviyeleridir?", "a": "100, 50, 200 gibi yuvarlak sayılar psikolojik olarak önemlidir. Birçok yatırımcı bu seviyelerde emir verir. Bu yüzden bu seviyelerde çok sayıda alış/satış emri birikir ve fiyat buralarda sıkça durur veya geri döner."},
@@ -1754,8 +1754,8 @@ BorsaPusula, her hisse için 20 günlük ortalama hacmi referans alır. Günlük
 ### Supertrend + Hacim Teyidi
 BorsaPusula sinyallerinde hacim teyidi önemli rol oynar:
 
-- AL sinyali + yüksek hacim = **Güçlü AL**, giriş kalitesi yüksek
-- AL sinyali + düşük hacim = **Zayıf AL**, kırılım sahte olabilir
+- Güçlü Trend sinyali + yüksek hacim = **hacim onaylı güçlü sinyal**, giriş kalitesi yüksek
+- Güçlü Trend sinyali + düşük hacim = **hacim onaysız zayıf sinyal**, kırılım sahte olabilir
 
 Hisse sayfasında "Hacim Profili" bölümü bu bilgiyi (⭐ Hacim Onaylı / ✓ TEYİTLİ rozetleriyle) otomatik gösterir.
 
@@ -1789,7 +1789,7 @@ Her sinyal öncesi şunları kontrol edin:
 3. ✅ Trend yönüyle hacim uyumlu mu?
 4. ✅ Hacim uyumsuzluğu var mı?
 
-[BIST hisselerinin hacim verisini ve AL/SAT sinyallerini gör →](/)""",
+[BIST hisselerinin hacim verisini ve Güçlü Trend/Trend Bozuldu sinyallerini gör →](/)""",
     "faqs": [
       {"q": "Hacim analizi için hangi periyot kullanılmalı?", "a": "Günlük grafikte 20 günlük ortalama hacim sık kullanılan referanstır. Kısa vadeli işlemler için 5-10 günlük ortalama daha duyarlıdır. BorsaPusula'nın vol_ratio metriği 20 günlük ortalaması üzerinden hesaplanır."},
       {"q": "Düşük hacimli hisseler nasıl ele alınmalı?", "a": "Düşük hacimli (illik) hisseler, büyük alım-satım emirlerinde fiyatı hızla etkileyebilir. Bu hisselerde teknik analiz daha az güvenilir olur. BIST30 hisselerinin yüksek likiditesi teknik analizin etkinliğini artırır."},
@@ -1856,7 +1856,7 @@ Güçlü momentum için hacim şart:
 ## Güçlü Momentum Hisseleri Nasıl Taranır?
 
 **Filtre kriterleri:**
-1. Supertrend = AL (yükseliş trendi aktif)
+1. Supertrend = Güçlü Trend (yükseliş trendi aktif)
 2. ADX ≥ 25 (trend güçlü)
 3. EMA12 > EMA99 (uzun vadeli eğilim yukarı)
 4. Sinyal 3+ bar onaylı (geçici sinyal değil)
@@ -1868,7 +1868,7 @@ Bu kriterlerin tamamını sağlayan hisseler en güçlü momentum adaylarıdır.
 
 [BorsaPusula'nın tarama sayfası](/tarama) bu kriterlerin tamamını uygular:
 
-- "Güçlü Trend" (AL) sinyal filtresi → Supertrend AL + ADX uyumlu
+- "Güçlü Trend" sinyal filtresi → Supertrend Güçlü Trend + ADX uyumlu
 - "Min ADX" alanına 25 girilmesi → trend gücü doğrulaması
 - ⭐ "Hacim Onaylı" rozeti (RVOL ≥ 1.20) → hacim teyidi
 - Sinyal güç çubukları → momentum yoğunluğunu görsel olarak gösterir
@@ -1900,7 +1900,7 @@ Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir."""
       {"q": "Momentum ve trend takip aynı şey mi?", "a": "Çok benzer stratejilerdir. Trend takip daha uzun vadeli (haftalar-aylar), momentum genellikle daha kısa vadeli (günler-haftalar) olur. Her ikisi de 'güçlü yükselişi takip et' prensibine dayanır."},
       {"q": "ADX 50'nin üzerindeyken ne yapılmalı?", "a": "ADX 50+ aşırı momentum gösterir ve genellikle yakında yavaşlama/düzeltme gelir. Bu seviyede yeni pozisyon açmak yerine mevcut pozisyonun stop'unu sıkılaştırmak veya kısmi kar almak düşünülebilir."},
       {"q": "Düşük ADX'te momentum stratejisi işe yarar mı?", "a": "ADX 20'nin altındayken piyasa yatay hareket eder ve momentum sinyalleri çok fazla false positive üretir. Bu ortamda momentum stratejisi yerine destek/direnç ticareti daha uygun olabilir."},
-      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Tarama sayfasında Sinyal filtresinden 'AL' (Güçlü Trend), Min ADX alanına 25 girin ve sonuçları Sinyal Gücü'ne göre sıralayın. ⭐ Hacim Onaylı rozeti (RVOL ≥ 1.20) en güçlü hacim teyitli adayları işaretler."}
+      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Tarama sayfasında Sinyal filtresinden 'Güçlü Trend', Min ADX alanına 25 girin ve sonuçları Sinyal Gücü'ne göre sıralayın. ⭐ Hacim Onaylı rozeti (RVOL ≥ 1.20) en güçlü hacim teyitli adayları işaretler."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'GARAN', 'KCHOL', 'BIMAS']
   },
@@ -2158,19 +2158,19 @@ Standart parametre: **%K(14), %D(3)** — yani 14 günlük fiyat aralığı.
 
 Sinyal güvenilirliği için iki göstergenin aynı yönü işaret etmesi tercih edilir:
 
-**Güçlü AL Kombinasyonu:**
+**Güçlü Alım Kombinasyonu:**
 1. Stokastik 20'nin altından %K > %D kesişimi
 2. RSI 30-50 arası (aşırı satımdan çıkıyor)
 3. Fiyat güçlü destek seviyesinde
 
-**Güçlü SAT Kombinasyonu:**
+**Güçlü Satım Kombinasyonu:**
 1. Stokastik 80'in üstünden %K < %D kesişimi
 2. RSI 70 üzerinde (aşırı alım)
 3. Fiyat önemli direnç seviyesinde
 
 ## BorsaPusula Sinyalleriyle İlişkisi
 
-BorsaPusula'nın AL sinyali, **ADX ≥ 25 + Supertrend + EMA12/99** üçlü kritere dayanır. RSI, bu sistemde *tamamlayıcı gösterge* olarak kullanılır. [Hisse sayfasındaki](/hisse/AKBNK) sinyal badge'ine hover ettiğinizde RSI değerini görebilirsiniz.
+BorsaPusula'nın Güçlü Trend sinyali, **ADX ≥ 25 + Supertrend + EMA12/99** üçlü kritere dayanır. RSI, bu sistemde *tamamlayıcı gösterge* olarak kullanılır. [Hisse sayfasındaki](/hisse/AKBNK) sinyal badge'ine hover ettiğinizde RSI değerini görebilirsiniz.
 
 Stokastik osilatörü grafik platformunda ek katman olarak kullanarak, BorsaPusula sinyallerine **ikinci bir momentum teyidi** ekleyebilirsiniz.
 
@@ -2344,8 +2344,8 @@ BYF (Borsa Yatırım Fonu) veya hisse senedi fonu üzerinden BIST100 veya BIST30
 ### Bireysel Hisseler — Teknik Filtreli DCA
 BorsaPusula sinyallerini DCA ile kombine etmek mümkündür:
 1. **Sinyal yoksa:** Düzenli yatırımını endeks fonuna yönelt
-2. **AL sinyali + düşük giriş maliyeti:** O hisseye DCA'nın bir kısmını yönelt
-3. **SAT sinyali:** O hissede DCA'yı durdur, endekse yönelt
+2. **Güçlü Trend sinyali + düşük giriş maliyeti:** O hisseye DCA'nın bir kısmını yönelt
+3. **Trend Bozuldu sinyali:** O hissede DCA'yı durdur, endekse yönelt
 
 ### Kur Riski — TL DCA
 Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA stratejisinde döviz bazlı varlıkları (altın, USD fonu) portföyün bir kısmına dahil etmek denge sağlar.
@@ -2360,7 +2360,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 **İleri seviye:**
 
-- BorsaPusula'da [AL sinyalinde olan hisselere](/tarama) odaklan
+- BorsaPusula'da [Güçlü Trend sinyalinde olan hisselere](/tarama) odaklan
 - Yüksek ADX + uzun süredir aktif sinyal → DCA için tercih et
 - Quarterly rebalancing: Her çeyrekte portföy dağılımını gözden geçir
 
@@ -2371,7 +2371,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "DCA ile ortalama maliyet düşürme aynı mı?",
        "a": "Hayır, farklıdır. DCA, düzenli aralıklarla sabit miktarda alım yapmaktır. 'Ortalama maliyet düşürme' ise fiyat düştükçe daha fazla alarak mevcut maliyetin altına inmektir. DCA önceden planlanmışken, ortalama düşürme genellikle reaktif bir karardır."},
       {"q": "BIST'te DCA uygulamak için hangi hisseleri seçmeliyim?",
-       "a": "DCA için en güvenli seçim endeks fonlarıdır (BYF — BIST100 veya BIST30). Bireysel hissede ise sektör lideri, güçlü bilanço ve uzun vadeli büyüme hikayesi olan şirketlere odaklanılmalıdır. BorsaPusula'da uzun süredir AL sinyalinde olan, yüksek ADX'li hisseler teknik açıdan desteklenmiş seçenekler sunar."},
+       "a": "DCA için en güvenli seçim endeks fonlarıdır (BYF — BIST100 veya BIST30). Bireysel hissede ise sektör lideri, güçlü bilanço ve uzun vadeli büyüme hikayesi olan şirketlere odaklanılmalıdır. BorsaPusula'da uzun süredir Güçlü Trend sinyalinde olan, yüksek ADX'li hisseler teknik açıdan desteklenmiş seçenekler sunar."},
       {"q": "Ne kadar sıklıkla DCA yapmalıyım?",
        "a": "Aylık DCA en yaygın ve pratik yöntemdir. Maaş aldıktan hemen sonra otomatik olarak yatırıma yönlendirmek, psikolojik bariyer oluşturmaz. Haftalık DCA daha küçük miktarlarda da uygulanabilir ancak işlem maliyetleri önemli hale gelebilir."},
       {"q": "DCA piyasa çöküşünde işe yarar mı?",
@@ -2422,20 +2422,20 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>Sektör Rotasyonu Stratejisini Nasıl Uygularsınız?</h2>
 <ol>
 <li><strong>Makro bağlamı belirleyin:</strong> TCMB faizi artırıyor mu, indiriyor mu? Enflasyon yüksekse hangi sektörler korunma sağlar?</li>
-<li><strong>Teknik sinyali filtreleyin:</strong> BorsaPusula'da sektör bazlı AL sinyal yoğunluğunu inceleyin. Hangi sektörde AL sinyali veren hisse oranı yüksek?</li>
+<li><strong>Teknik sinyali filtreleyin:</strong> BorsaPusula'da sektör bazlı Güçlü Trend sinyal yoğunluğunu inceleyin. Hangi sektörde Güçlü Trend sinyali veren hisse oranı yüksek?</li>
 <li><strong>Relatif güç karşılaştırması:</strong> Sektörün BIST100'e göre relatif performansına bakın. BIST100 düşerken sektör daha az düşüyorsa güçlü görünümdedir.</li>
 <li><strong>Rotasyona dikkat:</strong> Haber akışı veya kurumsal yatırımcı hareketleri hangi sektörü ön plana çıkarıyor?</li>
 </ol>
 
 <h2>BorsaPusula Sektör Verileri</h2>
-<p>BorsaPusula ana sayfasındaki <strong>Sektör filtresi</strong>, tüm sektörlerin güncel AL/SAT/BEKLE sinyal dağılımını anlık gösterir. Kimya/Malzeme ve Enerji gibi sektörlerde AL sinyal yoğunluğu arttığında, bu sektörlere olan kurumsal ilginin arttığına işaret edebilir.</p>
+<p>BorsaPusula ana sayfasındaki <strong>Sektör filtresi</strong>, tüm sektörlerin güncel Güçlü Trend/Trend Bozuldu/Yatay sinyal dağılımını anlık gösterir. Kimya/Malzeme ve Enerji gibi sektörlerde Güçlü Trend sinyal yoğunluğu arttığında, bu sektörlere olan kurumsal ilginin arttığına işaret edebilir.</p>
 
 <p><a href="/">Ana sayfada sektör bazlı sinyalleri filtreleyin →</a></p>""",
     "faqs": [
       {"q": "Sektör rotasyonu nedir?",
        "a": "Ekonomik döngünün farklı evrelerinde farklı sektörler öne çıkar — bunu takip ederek öne çıkmakta olan sektörlere yatırımı yönlendirme stratejisine sektör rotasyonu denir."},
       {"q": "BIST'te en güçlü sektörü nasıl bulabilirim?",
-       "a": "BorsaPusula ana sayfasındaki sektör filtresi, her sektördeki AL/SAT/BEKLE sinyal dağılımını gösterir. AL sinyal yoğunluğu yüksek sektörler teknik açıdan güçlüdür."},
+       "a": "BorsaPusula ana sayfasındaki sektör filtresi, her sektördeki Güçlü Trend/Trend Bozuldu/Yatay sinyal dağılımını gösterir. Güçlü Trend sinyal yoğunluğu yüksek sektörler teknik açıdan güçlüdür."},
       {"q": "Bankacılık sektörü ne zaman güçlenir?",
        "a": "Faiz artış dönemlerinde net faiz marjı yükselen bankalar genellikle kazanır. Ancak Türkiye'de TCMB belirsizliği bu ilişkiyi karmaşıklaştırabilir. Kredi büyümesi ve NIM takip edilmesi gereken metriklerdir."},
       {"q": "İhracatçı sektörler ne zaman öne çıkar?",
@@ -2479,10 +2479,10 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <table>
 <thead><tr><th>Senaryo</th><th>ST</th><th>ADX</th><th>EMA</th><th>Sonuç</th></tr></thead>
 <tbody>
-<tr><td>Güçlü AL</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &gt; 99</td><td>✅ Güçlü Trend teyidi</td></tr>
+<tr><td>Üçlü Onay (Yükseliş)</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &gt; 99</td><td>✅ Güçlü Trend teyidi</td></tr>
 <tr><td>Zayıf Onay</td><td>▲ Yeşil</td><td>&lt; 25</td><td>12 &gt; 99</td><td>⚠️ Yatay, teyit yok</td></tr>
 <tr><td>Karışık</td><td>▲ Yeşil</td><td>≥ 25</td><td>12 &lt; 99</td><td>⚠️ Yatay, teyit yok</td></tr>
-<tr><td>Güçlü SAT</td><td>▼ Kırmızı</td><td>≥ 25</td><td>12 &lt; 99</td><td>❌ Trend Bozuldu — çıkış uyarısı</td></tr>
+<tr><td>Üçlü Onay (Düşüş)</td><td>▼ Kırmızı</td><td>≥ 25</td><td>12 &lt; 99</td><td>❌ Trend Bozuldu — çıkış uyarısı</td></tr>
 </tbody>
 </table>
 
@@ -2491,7 +2491,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <li><strong>Giriş:</strong> Üç koşul aynı anda sağlandığında, ilk kapanıştan sonra giriş. Gecikme riskini azaltmak için ATR bazlı giriş bölgesi kullanılır.</li>
 <li><strong>Stop loss:</strong> Supertrend çizgisinin hemen altı — trendin bozulduğunu kanıtlayan seviye.</li>
 <li><strong>Kâr alma:</strong> TP1 = 1.5× ATR, TP2 = 3× ATR; ya da Supertrend çizgisi kırıldığında.</li>
-<li><strong>Çıkış:</strong> Supertrend SAT'a geçtiğinde veya ADX 20'nin altına indiğinde.</li>
+<li><strong>Çıkış:</strong> Supertrend Trend Bozuldu sinyaline geçtiğinde veya ADX 20'nin altına indiğinde.</li>
 </ul>
 
 <h2>Trend Takibin Zayıf Yönleri</h2>
@@ -2511,7 +2511,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "Supertrend ne zaman yanlış sinyal verir?",
        "a": "Volatilitenin ani arttığı dönemlerde, özellikle yatay piyasada, Supertrend sık sık yön değiştirir. Bu nedenle ADX filtresi kritik önem taşır — trend gücü zayıfken Supertrend sinyalleri güvenilir değildir."},
       {"q": "Stop loss nereye koyulmalı?",
-       "a": "Trend takip stratejisinde stop loss tipik olarak Supertrend çizgisinin biraz altına (AL için) veya üstüne (SAT için) yerleştirilir. Bu seviyenin kırılması trendin bozulduğuna işaret eder."},
+       "a": "Trend takip stratejisinde stop loss tipik olarak Supertrend çizgisinin biraz altına (Güçlü Trend için) veya üstüne (Trend Bozuldu için) yerleştirilir. Bu seviyenin kırılması trendin bozulduğuna işaret eder."},
       {"q": "Kâr alma hedefleri nasıl belirlenir?",
        "a": "BorsaPusula TP1 için ~1.5×ATR, TP2 için ~3×ATR kullanır. Aktif yönetimde ise Supertrend çizgisinin kırılması güçlü bir çıkış sinyali olarak değerlendirilebilir."}
     ],
@@ -3079,13 +3079,13 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>BorsaPusula'nın Yaklaşımı</h2>
-<p>BorsaPusula sinyalleri BIST hisseleri için "AL" (Güçlü Trend) veya "SAT" (Trend Bozuldu) sinyali üretir. "SAT" sinyali, hissenin <strong>trendinin bozulduğunu/sona erdiğini</strong> gösterir ve mevcut pozisyondan çıkış/kaçınma için işaret olarak kullanılır — açığa satış pozisyonu açmak için değil. Bu yaklaşım, bireysel yatırımcılara karmaşık açığa satış mekaniklerini öğrenmeden trend takibi yapma imkânı sunar.</p>
+<p>BorsaPusula sinyalleri BIST hisseleri için Güçlü Trend veya Trend Bozuldu sinyali üretir. Trend Bozuldu sinyali, hissenin <strong>trendinin bozulduğunu/sona erdiğini</strong> gösterir ve mevcut pozisyondan çıkış/kaçınma için işaret olarak kullanılır — açığa satış pozisyonu açmak için değil. Bu yaklaşım, bireysel yatırımcılara karmaşık açığa satış mekaniklerini öğrenmeden trend takibi yapma imkânı sunar.</p>
 """,
     "faqs": [
       {"q": "BIST'te herkes açığa satış yapabilir mi?",
        "a": "Hayır. Açığa satış yalnızca SPK'nın onayladığı sınırlı sayıda hisse için mümkündür ve ödünç pay bulunması gerekir. Bireysel yatırımcılar için pratikte oldukça kısıtlı bir araçtır."},
-      {"q": "SAT sinyali gördüğümde açığa satış yapmalı mıyım?",
-       "a": "BorsaPusula'daki SAT (Trend Bozuldu) sinyali, açığa satış için tasarlanmamıştır. Bu sinyal, mevcut pozisyondan çıkış veya o hisseden kaçınma işareti olarak değerlendirilmelidir. Açığa satış tamamen farklı risk ve mekanik içerir."},
+      {"q": "Trend Bozuldu sinyali gördüğümde açığa satış yapmalı mıyım?",
+       "a": "BorsaPusula'daki Trend Bozuldu sinyali, açığa satış için tasarlanmamıştır. Bu sinyal, mevcut pozisyondan çıkış veya o hisseden kaçınma işareti olarak değerlendirilmelidir. Açığa satış tamamen farklı risk ve mekanik içerir."},
       {"q": "Açığa satış yerine VIOP kullanmak daha mı iyi?",
        "a": "BIST bireysel yatırımcıları için düşüş pozisyonu almak istiyorsanız VIOP, açığa satıştan genellikle daha erişilebilir ve likittir. Ancak her iki araç da yüksek risk taşır ve kapsamlı bilgi gerektirir."},
       {"q": "Short squeeze nedir?",
@@ -3285,7 +3285,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </div>
 
 <h2>BorsaPusula ile BIST Sinyallerini Takip Et</h2>
-<p>Portföyünüzün borsa bölümü için BorsaPusula'nın algoritmik sinyal sistemi kullanılabilir. AL sinyalindeki BIST100 hisseleri gerçek zamanlı takip edilir, giriş kalitesi ve SL/TP seviyeleri gösterilir.</p>
+<p>Portföyünüzün borsa bölümü için BorsaPusula'nın algoritmik sinyal sistemi kullanılabilir. Güçlü Trend sinyali veren BIST hisseleri gün sonu verisiyle günlük olarak taranır, giriş kalitesi ve SL/TP seviyeleri gösterilir.</p>
 """,
     "faqs": [
       {"q": "Türkiye'de en güvenli yatırım aracı hangisi?",
@@ -3377,7 +3377,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>BorsaPusula'nın önerilen yaklaşımı:</p>
 <ol>
   <li>Yüksek temettü verimi olan BIST hisselerini temel analiz kısmından listele</li>
-  <li>Sinyal "AL" durumuna geçtiğinde giriş noktasını değerlendir</li>
+  <li>Sinyal "Güçlü Trend" durumuna geçtiğinde giriş noktasını değerlendir</li>
   <li>Güçlü trend + yüksek temettü = dual kaynak: fiyat artışı + temettü geliri</li>
 </ol>
 
@@ -3719,7 +3719,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h3>Örnek Uygulama — AKBNK</h3>
 <ol>
   <li><strong>Temel filtre:</strong> Banka karlılığı güçlü, F/K oranı sektör ortalamasının altında, temettü verimi cazip</li>
-  <li><strong>Teknik giriş:</strong> BorsaPusula sinyali AL durumuna geçiyor, ADX ≥ 25, Supertrend yeşil</li>
+  <li><strong>Teknik giriş:</strong> BorsaPusula sinyali Güçlü Trend durumuna geçiyor, ADX ≥ 25, Supertrend yeşil</li>
   <li><strong>Karar:</strong> Her iki filtreden geçen hisse için giriş değerlendirilebilir</li>
 </ol>
 
@@ -4113,7 +4113,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </div>
 
 <h2>Teknik Sinyal + Temel Analiz Kombinasyonu</h2>
-<p>BorsaPusula hisse sayfalarında F/K, PD/DD, ROE ve temettü verimi temel verileri canlı olarak sunulmaktadır. Teknik AL sinyali alan bir hissenin temel analiz verilerini kontrol etmek, yatırım kararını güçlendirir.</p>
+<p>BorsaPusula hisse sayfalarında F/K, PD/DD, ROE ve temettü verimi temel verileri canlı olarak sunulmaktadır. Teknik Güçlü Trend sinyali alan bir hissenin temel analiz verilerini kontrol etmek, yatırım kararını güçlendirir.</p>
 """,
     "faqs": [
       {"q": "Bilanço okumak için muhasebe bilgisi şart mı?",
@@ -4178,8 +4178,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>BorsaPusula Sinyalleriyle Rebalancing</h2>
 <p>Teknik sinyal sistemi rebalancing kararınızı destekleyebilir:</p>
 <ul>
-  <li>Hisse "AL" sinyalinde ve hedef ağırlığın üzerindeyse: Kademeli azaltma düşünülebilir</li>
-  <li>Hisse "SAT" veya "BEKLE" sinyaline geçtiyse: Rebalancing için iyi bir fırsat noktası olabilir</li>
+  <li>Hisse "Güçlü Trend" sinyalinde ve hedef ağırlığın üzerindeyse: Kademeli azaltma düşünülebilir</li>
+  <li>Hisse "Trend Bozuldu" veya "Yatay" sinyaline geçtiyse: Rebalancing için iyi bir fırsat noktası olabilir</li>
   <li>Teknik sinyal + ağırlık kontrolü kombinasyonu daha bilinçli karar üretir</li>
 </ul>
 
@@ -4201,7 +4201,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "Eğer piyasa yükseliyorsa neden satayım?",
        "a": "Rebalancing geleceği tahmin etmek değildir. Yükselen piyasada aşırı konumlanmak, düşüşte daha büyük kayba yol açabilir. Hedef ağırlıklara dönmek bir risk yönetimi disiplinidir."},
       {"q": "BorsaPusula sinyalleri rebalancing kararında nasıl kullanılır?",
-       "a": "Hisse SAT veya BEKLE sinyaline geçtiğinde portföy ağırlığını da kontrol edin. SAT sinyali + yüksek portföy ağırlığı kombinasyonu, azaltma için güçlü bir gerekçe oluşturabilir. Ancak sinyaller yatırım tavsiyesi değildir."}
+       "a": "Hisse Trend Bozuldu veya Yatay sinyaline geçtiğinde portföy ağırlığını da kontrol edin. Trend Bozuldu sinyali + yüksek portföy ağırlığı kombinasyonu, azaltma için güçlü bir gerekçe oluşturabilir. Ancak sinyaller yatırım tavsiyesi değildir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'TUPRS', 'THYAO', 'ASELS']
   },
@@ -4822,8 +4822,8 @@ Toplam ≈ 13.003,90₺
 <h2>Formasyonları BorsaPusula Sinyalleriyle Birleştirmek</h2>
 <p>BorsaPusula sistemi Supertrend + ADX + EMA kırılımını baz alır; grafik formasyonları ek teyit olarak kullanılabilir:</p>
 <ul>
-  <li>Hisse AL sinyalindeyken yükselen üçgen üst bandı kırıyorsa → Güçlü alım sinyali</li>
-  <li>Hisse BEKLE sinyalindeyken bayrak konsolidasyonundan çıkış görülüyorsa → Önceden takibe al</li>
+  <li>Hisse Güçlü Trend sinyalindeyken yükselen üçgen üst bandı kırıyorsa → Güçlü alım sinyali</li>
+  <li>Hisse Yatay sinyalindeyken bayrak konsolidasyonundan çıkış görülüyorsa → Önceden takibe al</li>
   <li>Formasyonun hacim desteği varsa → Sinyal güvenilirliği artar</li>
 </ul>
 <p>Formasyonlar tek başına yeterli değildir. Her zaman trend yönüyle ve hacim verileriyle teyit edin.</p>
@@ -4924,7 +4924,7 @@ Toplam ≈ 13.003,90₺
 </ul>
 
 <h2>BorsaPusula'yı Küçük Sermayeyle Kullanmak</h2>
-<p>Sinyal takip sistemi küçük sermayeli yatırımcılara da tam hizmet verir. <a href="/tarama">Hisse Tarayıcı</a>'da AL sinyali + İdeal giriş kalitesi filtreleyerek en uygun giriş noktalarındaki hisseleri görüntüleyebilirsiniz. Her hissenin stop loss ve hedef fiyatını görerek risk/ödül oranını hesaplamak kolaylaşır.</p>
+<p>Sinyal takip sistemi küçük sermayeli yatırımcılara da tam hizmet verir. <a href="/tarama">Hisse Tarayıcı</a>'da Güçlü Trend sinyali + İdeal giriş kalitesi filtreleyerek en uygun giriş noktalarındaki hisseleri görüntüleyebilirsiniz. Her hissenin stop loss ve hedef fiyatını görerek risk/ödül oranını hesaplamak kolaylaşır.</p>
 """,
     "faqs": [
       {"q": "Borsaya başlamak için minimum ne kadar para gerekir?",
@@ -5225,7 +5225,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Zararda Satmayı Gerektiren Net Sinyaller</h2>
 <ul>
   <li><strong>Stop loss seviyesi kırıldığında:</strong> Önceden belirlenen çıkış noktasına gelindiğinde hemen sat</li>
-  <li><strong>Sinyal tersine döndüğünde:</strong> AL sinyali olan hisse SAT'a döndüyse pozisyonun gerekçesi kalkmıştır</li>
+  <li><strong>Sinyal tersine döndüğünde:</strong> Güçlü Trend sinyali olan hisse Trend Bozuldu durumuna geçtiyse pozisyonun gerekçesi kalkmıştır</li>
   <li><strong>Şirket haberleri temel analizi değiştirdiğinde:</strong> Büyük skandal, CEO değişikliği, iflas riski</li>
   <li><strong>Daha iyi fırsat ortaya çıktığında:</strong> Zararın büyümesini beklemek yerine parayı daha iyi fırsata taşıyın</li>
   <li><strong>Portföyün sağlığını korumalısınız:</strong> Tek pozisyonun büyük zararı portföyü ezmemeli</li>
@@ -5244,7 +5244,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <ul>
   <li>Genel piyasa düşüşünde sağlam temel/teknik yapısını koruyan hisselerde</li>
   <li>Önceden planlanmış kademeli alım stratejisinin parçasıysa</li>
-  <li>Sinyal hala AL durumundaysa (geçici geri çekilme)</li>
+  <li>Sinyal hala Güçlü Trend durumundaysa (geçici geri çekilme)</li>
 </ul>
 
 <h2>BorsaPusula Stop Loss Kuralı</h2>
@@ -5260,7 +5260,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Zararda hisseyi ne zaman satmalıyım?",
        "a": "Önceden belirlediğiniz stop loss seviyesine gelindiğinde, sinyal tersine döndüğünde veya şirketle ilgili temel analizinizi değiştiren bir gelişme yaşandığında satmalısınız. 'Belki çıkar' beklentisiyle tutmak genellikle zararı büyütür."},
       {"q": "Ortalama düşürme yapmalı mıyım?",
-       "a": "Genel piyasa düşüşünde sağlam temel yapısını koruyan, sinyali hala AL olan hisselerde kademeli ek alım makul olabilir. Ancak trendin aşağı döndüğü, sinyalin bozulduğu veya şirketle olumsuz haberler olduğu durumlarda ortalama düşürme riski artırır."},
+       "a": "Genel piyasa düşüşünde sağlam temel yapısını koruyan, sinyali hala Güçlü Trend olan hisselerde kademeli ek alım makul olabilir. Ancak trendin aşağı döndüğü, sinyalin bozulduğu veya şirketle olumsuz haberler olduğu durumlarda ortalama düşürme riski artırır."},
       {"q": "Stop loss seviyesini sonradan değiştirebilir miyim?",
        "a": "Piyasanın lehinize gittiği durumlarda stop loss'u yukarı çekmek (trailing stop) mantıklıdır. Ancak aleyhinize gidince 'biraz daha bekleyeyim' diyerek stop loss'u aşağı indirmek en yaygın ve zararlı hatadır. Stop loss orijinal planınızın parçasıdır."},
       {"q": "BorsaPusula'daki SL seviyesi ne işe yarar?",
@@ -5490,7 +5490,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Kâr Alma Gerektiren Sinyal Değişiklikleri</h2>
 <p>BorsaPusula sinyali çerçevesinde şu durumlarda çıkış düşünülmelidir:</p>
 <ul>
-  <li>AL sinyali → BEKLE veya SAT'a döndüğünde</li>
+  <li>Güçlü Trend sinyali → Yatay veya Trend Bozuldu durumuna döndüğünde</li>
   <li>Giriş kalitesi İdeal/İyi'dan Dikkatli/Uzak'a düştüğünde (pozisyon genişletme değil, değerlendirme)</li>
   <li>ADX 25'in altına düştüğünde (trend zayıflıyor)</li>
   <li>Hisse TP1 veya TP2 seviyesine ulaştığında</li>
@@ -5564,8 +5564,8 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Formasyonları BorsaPusula ile Kullanmak</h2>
 <p>Bu dönüş formasyonları, sinyal değişimiyle birleştirildiğinde daha güçlü olur:</p>
 <ul>
-  <li>Hisse SAT sinyaline döndüğünde + baş-omuz boyun kırılımı eş zamanlı oluşuyorsa → Güçlü düşüş teyidi</li>
-  <li>İkili dip + yeni AL sinyali → Güçlü dönüş teyidi</li>
+  <li>Hisse Trend Bozuldu sinyaline döndüğünde + baş-omuz boyun kırılımı eş zamanlı oluşuyorsa → Güçlü düşüş teyidi</li>
+  <li>İkili dip + yeni Güçlü Trend sinyali → Güçlü dönüş teyidi</li>
   <li>Formasyon tamamlanmadan sinyal değişimi yoksa → Dikkatli ol, erken giriş riski</li>
 </ul>
 <p>Her formasyon kırılımı için stop loss: Formasyonun en yüksek (ikili tepe, baş-omuz) veya en düşük (ikili dip, ters baş-omuz) noktasının hemen ötesine konumlandırılır.</p>
@@ -5665,7 +5665,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 </ul>
 
 <h2>Bankacılık Hisselerinde Teknik + Temel Analiz Kombinasyonu</h2>
-<p>BorsaPusula bankacılık hisselerini teknik sinyal sistemiyle izler. Güçlü sinyal (AL + İdeal + ADX yüksek) olduğunda:</p>
+<p>BorsaPusula bankacılık hisselerini teknik sinyal sistemiyle izler. Güçlü sinyal (Güçlü Trend + İdeal + ADX yüksek) olduğunda:</p>
 <ul>
   <li>Temel analiz katmanı ekleyin: ROE > %15, NPL < %4, P/B < 1.5 gibi filtreler uygulayın</li>
   <li>Makro bağlama bakın: TCMB sıkılaştırma mı, gevşetme mi?</li>
@@ -5888,7 +5888,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 
 <h2>Temettü Yatırımcılığının Riskleri</h2>
 <p>Temettü verimi çekici görünse de bazı riskler göz önünde bulundurulmalı: şirket zararında kârdan temettü verilmez; ekonomik krizde temettü kesilebilir; ex-temettü tarihinde hisse fiyatı temettü miktarı kadar düşer (net verim sıfır olabilir); enflasyonun üzerinde getiri için verim oranının yüksek olması gerekmektedir.</p>
-<p>BorsaPusula sinyalleri, temettü tarihlerini bilanço takvimi ile birlikte takip etmenizi sağlar. Yüksek temettü veren bir hisseyi AL sinyalinin başında almak, hem temettü hem de fiyat artışından yararlanma fırsatı sunabilir.</p>
+<p>BorsaPusula sinyalleri, temettü tarihlerini bilanço takvimi ile birlikte takip etmenizi sağlar. Yüksek temettü veren bir hisseyi Güçlü Trend sinyalinin başında almak, hem temettü hem de fiyat artışından yararlanma fırsatı sunabilir.</p>
 """,
     "faqs": [
       {"q": "Temettü almak için hisseyi ne kadar tutmak gerekir?",
@@ -5941,7 +5941,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Özellikle piyasanın yükseldiği dönemlerde yatırımcılar kendi yeteneklerini aşırı değerlendirme eğilimi gösterir. "Bu hisseler yükseldi çünkü doğru seçtim" yerine "piyasa genel olarak yükseldi" gerçeğini görmek zordur. Aşırı güven aşırı işlem sıklığına (ve komisyon+vergi maliyetlerine) ve yetersiz çeşitlendirmeye yol açar.</p>
 
 <h2>Bu Hatalardan Nasıl Kaçınılır?</h2>
-<p><strong>1. Kural Tabanlı Sistem Kullanın:</strong> BorsaPusula gibi algoritma tabanlı sinyal platformları, duygusal karar vermenin önüne geçmek için etkili araçlardır. "Sistem AL dedi, ben de aldım" yaklaşımı FOMO ve sürü kararlarını azaltır.</p>
+<p><strong>1. Kural Tabanlı Sistem Kullanın:</strong> BorsaPusula gibi algoritma tabanlı sinyal platformları, duygusal karar vermenin önüne geçmek için etkili araçlardır. "Sistem Güçlü Trend dedi, ben de aldım" yaklaşımı FOMO ve sürü kararlarını azaltır.</p>
 <p><strong>2. İşlem Öncesi Plan Yapın:</strong> Alım kararı vermeden önce şunu yazın: Neden alıyorum? Hedef fiyatım ne? Stop-lossum nerede? Bu koşullarda satarım? Plan yazmak duygusal kararları filtreler.</p>
 <p><strong>3. Pozisyon Büyüklüğü Kuralı:</strong> Tek bir hisseye portföyün %10'undan fazlasını koymamak, kayıptan kaçınma önyargısının yarattığı "bu kez farklı olacak" düşüncesine karşı mekanik bir koruma sağlar.</p>
 <p><strong>4. Performans Günlüğü Tutun:</strong> Her işlemi kaydedin: gerekçe, giriş/çıkış fiyatı, sonuç. Zaman içinde hangi önyargılardan en çok etkilendiğinizi göreceksiniz.</p>
@@ -6023,7 +6023,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li>Uzun vadeli sabit faizli tahvilden uzak dur</li>
   <li>Nakit oranını portföyde artır (fırsat fonu)</li>
 </ul>
-<p>BorsaPusula sinyalleri, her hissenin trend ve momentum durumunu gerçek zamanlı takip eder. Stagflasyon döneminde trendin yönüne göre konumlanmak, makro ortamın yarattığı sürtünmeyi minimize etmek için en pratik yaklaşımlardan biridir.</p>
+<p>BorsaPusula sinyalleri, her hissenin trend ve momentum durumunu gün sonu verisiyle günlük olarak takip eder. Stagflasyon döneminde trendin yönüne göre konumlanmak, makro ortamın yarattığı sürtünmeyi minimize etmek için en pratik yaklaşımlardan biridir.</p>
 """,
     "faqs": [
       {"q": "Stagflasyon durgunluktan farkı nedir?",
@@ -6219,7 +6219,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Pratik kural: BIST'te bireysel yatırımcı için 5-12 hisse, en az 3-4 farklı sektörden, ideal aralık.</p>
 
 <h2>BorsaPusula ile Çeşitlendirme Takibi</h2>
-<p>BorsaPusula'nın ana sayfasında tüm BIST30 hisselerinin sinyal durumunu tek ekranda görebilirsiniz. Sektörel filtreleme özelliğiyle belirli bir sektördeki hisseleri izole edebilir ve portföyünüzün sektörel dağılımını optimize edebilirsiniz. AL sinyali veren hisseler farklı sektörlerden seçildiğinde hem kâr potansiyeli hem risk yönetimi dengesi sağlanmış olur.</p>
+<p>BorsaPusula'nın ana sayfasında tüm BIST30 hisselerinin sinyal durumunu tek ekranda görebilirsiniz. Sektörel filtreleme özelliğiyle belirli bir sektördeki hisseleri izole edebilir ve portföyünüzün sektörel dağılımını optimize edebilirsiniz. Güçlü Trend sinyali veren hisseler farklı sektörlerden seçildiğinde hem kâr potansiyeli hem risk yönetimi dengesi sağlanmış olur.</p>
 """,
     "faqs": [
       {"q": "Kaç hisse ile portföy oluşturulmalı?",
@@ -6474,13 +6474,13 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Türk yatırımcıların çoğu stop-loss kullanmaz. Bu hem davranışsal (kayıptan kaçınma önyargısı) hem de pratik (aracı kurum sistemleri) nedenlerden kaynaklanır. Önerilen yaklaşım:</p>
 <ul>
   <li>Her pozisyonda mental (zihinsel) stop-loss seviyesi belirleyin</li>
-  <li>BorsaPusula'nın SAT sinyali = sistematik stop-loss gibi çalışır</li>
+  <li>BorsaPusula'nın Trend Bozuldu sinyali = sistematik stop-loss gibi çalışır</li>
   <li>Supertrend kırmızıya döndüğünde pozisyon kapatmak, mekanik stop-loss yetersizliğini telafi eder</li>
 </ul>
 """,
     "faqs": [
       {"q": "Stop-loss emirleri BIST'te nasıl verilir?",
-       "a": "Türkiye'de aracı kurumlar 'koşullu emir' veya 'şartlı emir' adıyla stop-loss benzeri emirler sunmaktadır. Ancak tüm platformlarda gerçek trailing stop veya garantili stop bulunmayabilir. Alterneatif olarak, BorsaPusula gibi sinyal platformlarının SAT sinyallerini manuel stop-loss olarak kullanmak pratik bir çözümdür."},
+       "a": "Türkiye'de aracı kurumlar 'koşullu emir' veya 'şartlı emir' adıyla stop-loss benzeri emirler sunmaktadır. Ancak tüm platformlarda gerçek trailing stop veya garantili stop bulunmayabilir. Alterneatif olarak, BorsaPusula gibi sinyal platformlarının Trend Bozuldu sinyallerini manuel stop-loss olarak kullanmak pratik bir çözümdür."},
       {"q": "Stop-loss tetiklenirse ne kaybetmiş olurum?",
        "a": "Stop-loss, baştan kabul ettiğiniz maksimum kayıp miktarını temsil eder. Örneğin alış fiyatından %7 stop-loss koyduysanız, o pozisyonda en fazla %7 kaybedersiniz. Bu kayıp acı verse de kurtarılabilir bir kayıptır. Stop-loss koymadan tutulup %40-50 kaybeden pozisyonlar ise çok daha zor telafi edilir."},
       {"q": "ATR nasıl hesaplanır?",
@@ -6602,7 +6602,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
     <td style="padding:8px; border:1px solid #30363d;">Limit satış emri</td>
   </tr>
 </table>
-<p>BorsaPusula'nın AL ve SAT sinyalleri, emir türü kararını basitleştirir: Sinyal geldiğinde giriş fiyatı önerisini limit emrinde kullanabilir veya hızlı hareket için piyasa emrini tercih edebilirsiniz.</p>
+<p>BorsaPusula'nın Güçlü Trend ve Trend Bozuldu sinyalleri, emir türü kararını basitleştirir: Sinyal geldiğinde giriş fiyatı önerisini limit emrinde kullanabilir veya hızlı hareket için piyasa emrini tercih edebilirsiniz.</p>
 """,
     "faqs": [
       {"q": "Piyasa emri mi limit emri mi daha iyi?",
@@ -6647,11 +6647,11 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Sektör Rotasyonu Nasıl Uygulanır?</h2>
 <p><strong>Adım 1 — Makro Rejimi Tanımlayın:</strong> Türkiye şu an ekonomik döngünün hangi aşamasında? Büyüme hızlanıyor mu, yavaşlıyor mu? Enflasyon ve faiz yönü ne?</p>
 <p><strong>Adım 2 — Sektör Liderliğini İzleyin:</strong> Hangi sektörler piyasadan daha güçlü performans gösteriyor (rölatif güç)? Piyasa liderlerini teyit etmek için sektör endekslerini takip edin.</p>
-<p><strong>Adım 3 — Güçlü Sinyalleri Filtreleyin:</strong> Lider sektördeki AL sinyali olan hisseler, hem makro döngüde hem de teknik analizde çift teyit sunar.</p>
-<p><strong>Adım 4 — Kademeli Geçiş:</strong> Tüm portföyü bir anda döndürmek yerine kademeli rotasyon riski azaltır. Eski sektördeki hisseler SAT sinyali vermeye başladıkça yeni sektördeki hisselerle değiştirilir.</p>
+<p><strong>Adım 3 — Güçlü Sinyalleri Filtreleyin:</strong> Lider sektördeki Güçlü Trend sinyali olan hisseler, hem makro döngüde hem de teknik analizde çift teyit sunar.</p>
+<p><strong>Adım 4 — Kademeli Geçiş:</strong> Tüm portföyü bir anda döndürmek yerine kademeli rotasyon riski azaltır. Eski sektördeki hisseler Trend Bozuldu sinyali vermeye başladıkça yeni sektördeki hisselerle değiştirilir.</p>
 
 <h2>BorsaPusula ile Sektör Rotasyonu</h2>
-<p>BorsaPusula ana sayfasındaki sektör filtresi, belirli bir sektördeki tüm hisselerin sinyal durumunu tek seferde görmenizi sağlar. Bir sektörde AL sinyalleri yoğunlaşıyorsa sektörel momentum güçleniyor demektir. Birden fazla sektörü karşılaştırarak hangi sektörün sinyal kalitesinin daha güçlü olduğunu analiz edebilirsiniz.</p>
+<p>BorsaPusula ana sayfasındaki sektör filtresi, belirli bir sektördeki tüm hisselerin sinyal durumunu tek seferde görmenizi sağlar. Bir sektörde Güçlü Trend sinyalleri yoğunlaşıyorsa sektörel momentum güçleniyor demektir. Birden fazla sektörü karşılaştırarak hangi sektörün sinyal kalitesinin daha güçlü olduğunu analiz edebilirsiniz.</p>
 
 <h2>Sektöre Özel Takip Edilecek Göstergeler</h2>
 <p>Rotasyon kararını güçlendirmek için bazı sektörlerde ek göstergelere bakmak faydalıdır:</p>
