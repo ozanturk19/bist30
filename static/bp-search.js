@@ -745,7 +745,7 @@
     }
     badge.style.display = isStale ? 'inline' : 'none';
   }
-  window.bpLoadMacroBar = async function(onItems) {
+  window.bpLoadMacroBar = async function(onItems, excludeLabels) {
     var track = document.getElementById('macroTrack');
     if (!track) return;
     if (document.hidden) return;
@@ -757,6 +757,15 @@
       if (!r.ok || d.ok === false) throw new Error(d.error || ('HTTP ' + r.status));
       bpSetMacroStaleBadge(track, !!d.stale);
       var items = d.items || [];
+      // CPO-1558: bazı sayfalarda (ör. anasayfa hero'su) aynı endeksin AYRI, EOD-
+      // tutarlı bir gösterimi zaten var — canlı ticker'da da göstermek, iki farklı
+      // sayı aynı ekranda çelişiyormuş gibi görünmesine yol açıyordu (Ozan yakaladı:
+      // ticker'da BIST100 14.505, hero'da BIST100 14.540,81). Sayfa kendi excludeLabels
+      // listesiyle bu tekrarı önleyebilir; varsayılan davranış (parametre verilmezse)
+      // hiçbir şeyi filtrelemez, diğer sayfalar etkilenmez.
+      if (excludeLabels && excludeLabels.length) {
+        items = items.filter(function(it){ return excludeLabels.indexOf(it.label) === -1; });
+      }
       if (!items.length) {
         // CPO-DEV2-084 #1: backend gecerli-ama-bos donerse de kalici "Yukleniyor..."
         // yerine durust notr mesaj goster - ama sadece bu track daha once hic

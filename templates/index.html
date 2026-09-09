@@ -732,7 +732,7 @@ header{
 
 <script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=6364230b"></script>
-<script src="/static/bp-search.js?v=66" defer></script>
+<script src="/static/bp-search.js?v=67" defer></script>
 <script>
 /* ═══════════════════════════════════════════════════════════════════════
    DATA-ART ANA SAYFA — veri katmanı. Gerçek endpoint'ler:
@@ -793,10 +793,15 @@ header{
   //    çelişiyordu çünkü 3dk'da bir canlı feed'ten güncelleniyordu (Fable denetimi,
   //    canlı ölçümle doğrulandı). Hero artık SADECE daLoadData()'nın /api/data'dan
   //    okuduğu EOD-tutarlı xu100_close/xu100_change_pct'e bağlı — bkz. setHeroFromEod. ═══
+  // CPO-1558: XU100 (BIST100) canlı ticker'dan HARİÇ tutuluyor — hero'nun
+  // KENDİ EOD-tutarlı BIST100 sayısıyla aynı ekranda çelişiyordu (Ozan
+  // canlıda yakaladı: ticker 14.505, hero 14.540,81 — iki farklı "BIST100").
+  // BIST30'un aynı sayfada rakip bir hero'su yok, o yüzden ticker'da kalıyor.
+  var DA_MACRO_EXCLUDE = ['XU100'];
   function _daInitMacro(){
-    window.bpLoadMacroBar();
-    setInterval(window.bpLoadMacroBar, 180000);
-    window._bpResumeMacro = function(){ window.bpLoadMacroBar(); };
+    window.bpLoadMacroBar(undefined, DA_MACRO_EXCLUDE);
+    setInterval(window.bpLoadMacroBar, 180000, undefined, DA_MACRO_EXCLUDE);
+    window._bpResumeMacro = function(){ window.bpLoadMacroBar(undefined, DA_MACRO_EXCLUDE); };
   }
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _daInitMacro); }
   else { _daInitMacro(); }
