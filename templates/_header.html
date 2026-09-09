@@ -42,26 +42,18 @@
 <header>
   <a href="/" class="logo-link" aria-label="BorsaPusula — Piyasanın Yönü">
     <svg class="bp-logo" width="215" height="56" viewBox="0 0 460 120" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-      <!-- CPO-1553: logo Data-Art token sisteminden önceki kendi ham-hex paletini
-           taşıyordu, siteyle görsel tutarsızlık yaratıyordu — renk+font token'lara
-           hizalandı, ikon/wordmark TASARIMI değişmedi. -->
+      <!-- CPO-1558: kare-çerçeveli pusula/ızgara ikonu, onaylı Data-Art mockup'ındaki
+           (mockup-c-dataart.html) gerçek marka işaretiyle hiç örtüşmüyordu — mockup'taki
+           çember + 4-uçlu kıvılcım/pusula-yıldızı işareti (mor→camgöbeği gradyan)
+           birebir uygulandı, kare/ızgara/ikinci-ibre tamamen kaldırıldı. -->
       <defs>
-        <linearGradient id="bpNeedle" x1="60" y1="22" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+        <linearGradient id="bpMark" x1="18" y1="24" x2="90" y2="96" gradientUnits="userSpaceOnUse">
           <stop offset="0" stop-color="var(--bp-brand)"/>
-          <stop offset="1" stop-color="var(--bp-al)"/>
+          <stop offset="1" stop-color="var(--bp-accent-cyan)"/>
         </linearGradient>
       </defs>
-      <rect x="14" y="20" width="80" height="80" rx="18" fill="var(--bp-bg)" stroke="var(--bp-border)"/>
-      <g stroke="var(--bp-border-subtle)" stroke-width="1">
-        <line x1="22" y1="46" x2="86" y2="46"/>
-        <line x1="22" y1="74" x2="86" y2="74"/>
-        <line x1="40" y1="28" x2="40" y2="92"/>
-        <line x1="68" y1="28" x2="68" y2="92"/>
-      </g>
-      <path d="M54 33 L62 60 L54 55 L46 60 Z" fill="url(#bpNeedle)"/>
-      <path d="M54 87 L60 61 L54 64 L48 61 Z" fill="var(--bp-border2)"/>
-      <circle cx="54" cy="60" r="3.5" fill="var(--bp-text)"/>
-      <circle cx="54" cy="60" r="1.4" fill="var(--bp-al)"/>
+      <circle cx="54" cy="60" r="36" fill="none" stroke="url(#bpMark)" stroke-width="3"/>
+      <path d="M54 35 L63 57.5 L86.5 60 L63 62.5 L54 85 L45 62.5 L21.5 60 L45 57.5 Z" fill="url(#bpMark)"/>
       <text x="116" y="64" fill="var(--bp-text)" font-family="'Bricolage Grotesque','Sora','Manrope',Arial,sans-serif" font-size="38" font-weight="800" letter-spacing="-0.5">Borsa<tspan fill="var(--bp-al)">Pusula</tspan></text>
       <line x1="118" y1="78" x2="430" y2="78" stroke="var(--bp-border)" stroke-width="1"/>
       <text x="118" y="102" fill="var(--bp-text3)" font-family="'Manrope',Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="1.8">PİYASANIN YÖNÜ</text>

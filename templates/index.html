@@ -87,18 +87,25 @@ header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){d
 /* ═══════════════════════════════════════════════════════════════════════
    DATA-ART NABIZ — ana sayfa, tokens.css KANONIK paletiyle (mockup-c-dataart
    ilhamı, birebir onaylanan görsel dil; renk kaynağı SADECE tokens.css'teki --bp- öneki).
-   Yeni token: --bp-accent-cyan / --bp-accent-cyan-rgb (henüz tokens.css'te
-   YOK — bu şablon canlıya alınmadan önce tokens.css'e eklenmeli, bkz. dispatch notu).
+   --bp-accent-cyan / --bp-accent-cyan-rgb tokens.css'e eklendi (satır ~55/91).
    ═══════════════════════════════════════════════════════════════════════ */
 
 .da-display{font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;}
 .da-num{font-family:'Space Grotesk',monospace,sans-serif;font-variant-numeric:tabular-nums;}
 
+/* CPO-1558: tokens.css'in kanonik body{} kuralı margin sıfırlamıyor (sadece bg/renk/font) —
+   diğer şablonlar bunu kendi sayfa CSS'inde sıfırlıyor (örn. tarama.css `* {margin:0}`),
+   anasayfanın kendi stil bloğunda bu hiç yoktu → UA varsayılanı body{margin:8px} sızıyordu,
+   mobilde header/macroBar/main 8px kayık, .da-hero/.da-grain/bottom-nav ise full-bleed
+   duruyordu (Ozan canlı-site/mockup karşılaştırması). */
+*{box-sizing:border-box}
+body{margin:0}
+
 /* ── header kabuğu — her sayfa kendi shell CSS'ini taşır (Şablon Paydası 27 deseni) ── */
 header{
   background:rgba(var(--bp-bg-rgb),.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   border-bottom:1px solid var(--bp-border);padding:0 clamp(14px,3vw,24px);height:60px;
-  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:32px;
   z-index:var(--bp-z-dropdown);gap:12px;transform:translateZ(0);
 }
 .logo-link{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
@@ -106,15 +113,17 @@ header{
 .bp-nav-item[aria-current="page"]{color:var(--bp-brand);background:rgba(var(--bp-brand-rgb),.12)}
 
 /* ── makro şerit — DOM/id/JS AYNEN, sadece CSS (Madde 2) ──
-   CPO-1557: header sticky (top:0, 60px) ama makro şerit position:relative'ti,
-   sayfa kaydırılınca kayboluyordu (Ozan bulgusu). Header'ın hemen altına
-   sabitlendi (top:60px), z-index'i dropdown katmanının altında ama normal
-   içeriğin üstünde. */
-#macroBar{position:sticky;top:60px;z-index:var(--bp-z-sticky);display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-border);height:32px;overflow:hidden}
+   CPO-1558: onaylı mockup'ta makro şerit header'ın ÜSTÜNDE — sıra değişti,
+   şimdi #macroBar top:0'a sabitleniyor, header hemen altına (top:32px).
+   Ayrıca: .macro-live ("Canlı" rozeti) z-index'i yoktu, #macroTrack'in
+   transform:translateX ile kayan marquee'si (yeni stacking context) DOM
+   sırasına göre üstüne boyanıyordu — canlı ölçümle doğrulandı
+   (elementFromPoint rozetin üstünde .mc-pos döndürüyordu). z-index eklendi. */
+#macroBar{position:sticky;top:0;z-index:var(--bp-z-sticky);display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-border);height:32px;overflow:hidden}
 .macro-bar::before,.macro-bar::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised)}
 .macro-bar::before{left:0;background:linear-gradient(to right,var(--bp-surface),transparent)}
 .macro-bar::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}
-.macro-live{display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text3);border-right:1px solid var(--bp-border);background:var(--bp-surface)}
+.macro-live{position:relative;z-index:var(--bp-z-raised);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text3);border-right:1px solid var(--bp-border);background:var(--bp-surface)}
 .macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-accent-cyan);box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.7);flex:none;animation:daPulseDot 1.8s ease-in-out infinite}
 @keyframes daPulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}
 #macroTrack{display:flex;align-items:center;height:100%;white-space:nowrap;animation:daMacroScroll 40s linear infinite;will-change:transform}
@@ -166,7 +175,14 @@ header{
 .da-badge{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);letter-spacing:.08em;text-transform:uppercase;padding:7px 13px;border-radius:var(--bp-radius-pill);border:1px solid var(--bp-border2);color:var(--bp-text2);background:var(--bp-surface)}
 .da-index-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:clamp(14px,3vw,24px);margin-bottom:8px}
 .da-index-label{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-base);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text3);margin-bottom:8px}
-.da-index-number{font-weight:800;letter-spacing:-.03em;font-size:clamp(3.4rem,10.5vw,7.6rem);line-height:.92;background:linear-gradient(120deg,var(--bp-text) 0%,var(--bp-text) 55%,var(--bp-accent-cyan) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;min-width:5ch;display:inline-block;filter:drop-shadow(0 0 46px rgba(var(--bp-al-rgb),.14))}
+/* CPO-1558: gradient-text için fallback yoktu — background-clip:text tarayıcıda
+   desteklenmese veya CSS henüz uygulanmamışken yakalansa color:transparent tek
+   başına metni görünmez bırakıyordu (Fable denetimi, 2/4 masaüstü yüklemede
+   yakaladı). Temel renk her zaman okunur, gradyan sadece destekleniyorsa binir. */
+.da-index-number{font-weight:800;letter-spacing:-.03em;font-size:clamp(3.4rem,10.5vw,7.6rem);line-height:.92;color:var(--bp-text);min-width:5ch;display:inline-block;filter:drop-shadow(0 0 46px rgba(var(--bp-al-rgb),.14))}
+@supports (background-clip:text) or (-webkit-background-clip:text){
+  .da-index-number{background:linear-gradient(120deg,var(--bp-text) 0%,var(--bp-text) 55%,var(--bp-accent-cyan) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+}
 .da-index-change{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:clamp(1rem,1.8vw,1.3rem);padding:8px 16px 8px 12px;border-radius:var(--bp-radius-pill);transform:rotate(-1.6deg);margin-bottom:10px}
 .da-index-change.pos{color:var(--bp-al);background:var(--bp-al-bg);border:1px solid var(--bp-al-bd)}
 .da-index-change.neg{color:var(--bp-sat);background:rgba(var(--bp-sat-rgb),.09);border:1px solid rgba(var(--bp-sat-rgb),.35)}
@@ -399,10 +415,9 @@ header{
 <div class="da-grain" aria-hidden="true"></div>
 <h1 style="position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri</h1>
 
-{% include '_header.html' %}
-
-<!-- Makro Ticker Bandı — DOM id'leri (#macroBar/#macroTrack) ve window.bpLoadMacroBar
-     çağrısı AYNEN korunur (Madde 2). Yalnız CSS yeniden yazıldı, JS mantığına dokunulmadı. -->
+<!-- CPO-1558: makro şerit onaylı mockup'taki gibi header'ın ÜSTÜNE alındı (Ozan
+     canlı-site/mockup karşılaştırması) — sticky top değerleri buna göre değişti
+     (#macroBar top:0, header top:32px), DOM id'leri/JS AYNEN korunur. -->
 <div class="macro-bar" id="macroBar">
   <div class="macro-live"><span class="macro-live-dot"></span>Canlı</div>
   <button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button>
@@ -410,6 +425,8 @@ header{
     <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
   </div>
 </div>
+
+{% include '_header.html' %}
 
 <main id="main-content" class="da-page" tabindex="-1">
 
