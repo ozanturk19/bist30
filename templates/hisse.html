@@ -1911,6 +1911,17 @@ function renderCommentary(commentary) {
 }
 
 /* ── Özet kartları doldur ──────────────────────────── */
+// CPO-1558: renderEntryAnalysis'in placeholder dalları (yükleniyor/veri yok/
+// sinyal yok) #entryAnalysisGrid'in TÜM innerHTML'ini bir mesajla değiştiriyordu
+// — bu, grid'in içindeki #eqBadge/#eqNote/#rrBarContainer/#rrLevels çocuk
+// elementlerini KALICI OLARAK yok ediyordu. renderSummary ikinci kez gerçek
+// veriyle (signalData dolu) çağrıldığında "başarı" dalı bu ID'leri
+// getElementById ile arıyor ama artık DOM'da yoklar — sessizce hiçbir şey
+// yazmıyor, placeholder metni sonsuza dek ekranda kalıyor. Canlı ölçümle
+// doğrulandı (AGHOL, entry_quality:"IDEAL" olmasına rağmen "yükleniyor" takılı
+// kalıyordu). Grid'in orijinal (bozulmamış) HTML'i ilk çağrıda BİR KEZ
+// yakalanıp, başarı daline girmeden hemen önce geri yükleniyor.
+let _pristineEntryGridHtml = null;
 function renderSummary(s, signalData) {
   window._bpLastSignalData = signalData || null;   // _hibCurrentPrice() icin
   /* Header */
@@ -2001,6 +2012,8 @@ function renderSummary(s, signalData) {
     const _activeSeg = document.querySelector('.bp-segments-inner a.active');
     const _activeTab = _activeSeg ? _activeSeg.dataset.segment : 'ozet';
     if (_activeTab !== 'ozet') { if (section) section.style.display = 'none'; return; }
+    const grid = document.getElementById('entryAnalysisGrid');
+    if (grid && _pristineEntryGridHtml === null) _pristineEntryGridHtml = grid.innerHTML;
     // CPO-1107 Faz0 #2 (TUPRS-sınıfı çelişki): "aktif sinyal yok" kararı header
     // rozetiyle (s.signal) AYNI kanonik kaynaktan gelmeli — signalData ayrı bir
     // async fetch'ten (/api/data) geliyor ve ilk çizimde null / gecikmeli olabilir,
@@ -2037,6 +2050,14 @@ function renderSummary(s, signalData) {
     }
 
     if (section) section.style.display = 'block';
+    // CPO-1558: bir önceki çağrı bu grid'i bir placeholder mesajıyla değiştirmiş
+    // olabilir (yükleniyor/veri yok/sinyal yok dalları) — bu, aşağıdaki başarı
+    // dalının getElementById ile aradığı #eqBadge/#eqNote/#rrBarContainer/
+    // #rrLevels'ı yok etmiş olur. Gerçek veriyle doldurmadan önce orijinal
+    // (bozulmamış) yapıyı geri yükle.
+    if (grid && _pristineEntryGridHtml !== null && grid.innerHTML !== _pristineEntryGridHtml) {
+      grid.innerHTML = _pristineEntryGridHtml;
+    }
 
     // CPO-DEV2-052 #1 (Ozan kararı): SAT sinyalinde AL'daki gibi somut bir "trade
     // yapısı" (giriş kalitesi rozeti, ideal giriş bölgesi, SL/TP1/TP2 rakamları,
