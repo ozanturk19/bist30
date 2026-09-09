@@ -45,10 +45,14 @@
       <!-- CPO-1558: kare-çerçeveli pusula/ızgara ikonu, onaylı Data-Art mockup'ındaki
            (mockup-c-dataart.html) gerçek marka işaretiyle hiç örtüşmüyordu — mockup'taki
            çember + 4-uçlu kıvılcım/pusula-yıldızı işareti (mor→camgöbeği gradyan)
-           birebir uygulandı, kare/ızgara/ikinci-ibre tamamen kaldırıldı. -->
+           birebir uygulandı, kare/ızgara/ikinci-ibre tamamen kaldırıldı.
+           CPO-1558 devamı: ilk sürüm gradyanı --bp-brand (soluk periwinkle) kullanıyordu,
+           mockup'un canlı morundan (#7c5cff) çok soluk kaldığı için gradyan geçişi neredeyse
+           hiç görünmüyordu (Ozan yakaladı) — --bp-art-violet (mockup'la aynı doygun ton,
+           tokens.css'e eklendi) ile değiştirildi. -->
       <defs>
         <linearGradient id="bpMark" x1="18" y1="24" x2="90" y2="96" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stop-color="var(--bp-brand)"/>
+          <stop offset="0" stop-color="var(--bp-art-violet)"/>
           <stop offset="1" stop-color="var(--bp-accent-cyan)"/>
         </linearGradient>
       </defs>
