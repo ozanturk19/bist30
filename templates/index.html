@@ -787,17 +787,28 @@ header{
   // ── State ──
   var st = { macro: null, stocksErr: null, sectorsErr: null, realStocks: null, sectors: null, dataEnvelope: null };
 
-  // ═══ 1) MAKRO — BIST100 seviyesi + hero değişim rozeti (bpLoadMacroBar AYNEN) ═══
-  function updateHeroFromMacro(items){
-    var xu = null;
-    for (var i=0;i<items.length;i++){ if (items[i].label === 'XU100') { xu = items[i]; break; } }
-    if (!xu || typeof xu.price !== 'number') return;
-    st.macro = xu;
+  // ═══ 1) Üst şerit (küçük ticker) — canlı, kendi 180s döngüsünde kalır (plan
+  //    kararı: makro istisnası). Hero BIST100 sayısı ARTIK BURADAN BESLENMİYOR —
+  //    CPO-1558: hero, "gün sonu verisiyle güncellenir" diyen kendi alt yazısıyla
+  //    çelişiyordu çünkü 3dk'da bir canlı feed'ten güncelleniyordu (Fable denetimi,
+  //    canlı ölçümle doğrulandı). Hero artık SADECE daLoadData()'nın /api/data'dan
+  //    okuduğu EOD-tutarlı xu100_close/xu100_change_pct'e bağlı — bkz. setHeroFromEod. ═══
+  function _daInitMacro(){
+    window.bpLoadMacroBar();
+    setInterval(window.bpLoadMacroBar, 180000);
+    window._bpResumeMacro = function(){ window.bpLoadMacroBar(); };
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _daInitMacro); }
+  else { _daInitMacro(); }
+
+  // ═══ 1b) Hero BIST100 — EOD-tutarlı, daLoadData() içinde /api/data'dan bir kez set edilir ═══
+  function setHeroFromEod(price, chg){
+    if (typeof price !== 'number') return;
+    st.macro = { price: price, change: chg };
     var numEl = document.getElementById('daIndexNumber');
     var chgEl = document.getElementById('daIndexChange');
-    if (numEl) numEl.textContent = fmtPrice(xu.price);
+    if (numEl) numEl.textContent = fmtPrice(price);
     if (chgEl) {
-      var chg = xu.change;
       var cls = (typeof chg === 'number') ? (chg > 0.05 ? 'pos' : chg < -0.05 ? 'neg' : 'neu') : 'neu';
       var arrowPath = cls === 'pos' ? 'M12 4 L19 16 H5 Z' : cls === 'neg' ? 'M12 20 L19 8 H5 Z' : 'M5 12 H19';
       chgEl.className = 'da-index-change ' + cls;
@@ -805,14 +816,6 @@ header{
     }
     daRenderRecap();
   }
-  function _bpUpdateEndeksHero(items){ updateHeroFromMacro(items); }
-  function _daInitMacro(){
-    window.bpLoadMacroBar(_bpUpdateEndeksHero);
-    setInterval(window.bpLoadMacroBar, 180000, _bpUpdateEndeksHero);
-    window._bpResumeMacro = function(){ window.bpLoadMacroBar(_bpUpdateEndeksHero); };
-  }
-  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _daInitMacro); }
-  else { _daInitMacro(); }
 
   // ═══ 2) /api/stocks/list — taranan evren büyüklüğü rozeti ═══
   fetch('/api/stocks/list').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(d){
@@ -859,8 +862,10 @@ header{
       st.realStocks = real;
       st.stocksErr = null;
 
-      // Hero sparkline + "son güncelleme" (xu100_spark + updated_at, CPO-690)
+      // Hero sparkline + sayı + "son güncelleme" (xu100_spark/xu100_close/xu100_change_pct
+      // + updated_at — hepsi AYNI /api/data cevabından, CPO-1558: artık tutarlı tek kaynak)
       drawSpark(document.getElementById('daSpark'), d.xu100_spark);
+      setHeroFromEod(d.xu100_close, d.xu100_change_pct);
       var subEl = document.getElementById('daIndexSubText');
       if (subEl) subEl.textContent = d.updated_at ? ('Son güncelleme: ' + d.updated_at + ' · gün sonu verisiyle güncellenir') : 'gün sonu verisiyle güncellenir';
 

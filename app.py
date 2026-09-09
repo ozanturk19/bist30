@@ -4122,6 +4122,18 @@ def api_data():
     with _lock:
         _xu100_ohlc = ((_xu100_chart_cache.get("data") or {}).get("ohlc") or [])[-30:]
     xu100_spark = [round(p["close"], 2) for p in _xu100_ohlc if p.get("close")]
+    # CPO-1558: hero BIST100 sayısı anasayfada 3dk'da bir CANLI makro XU100 feed'inden
+    # güncelleniyordu ama kendi altındaki alt yazı "gün sonu verisiyle güncellenir"
+    # diyordu — iki kaynak çelişiyordu (Fable denetimi, canlı ölçümle doğrulandı).
+    # xu100_spark'ı besleyen AYNI EOD-tutarlı chart cache'ten (leader'ın refresh_xu100_chart
+    # yazdığı chart_xu100.json) son kapanış + önceki kapanışa göre yüzde değişim — anasayfa
+    # hero'yu buna bağlayıp canlı makro poll'dan ayıracak, yeni bir hesaplama/fetch YOK.
+    _xu100_closes = [p["close"] for p in _xu100_ohlc if p.get("close")]
+    xu100_close = round(_xu100_closes[-1], 2) if _xu100_closes else None
+    xu100_change_pct = (
+        round((_xu100_closes[-1] - _xu100_closes[-2]) / _xu100_closes[-2] * 100, 2)
+        if len(_xu100_closes) >= 2 and _xu100_closes[-2] else None
+    )
     _resp_data = {
         "stocks":       stocks,
         "updated_at":   _resp_updated_at,  # CPO-1114 K1: last_fresh_ts medyanı (bkz. yukarı)
@@ -4132,6 +4144,8 @@ def api_data():
         "refreshing":   _loading,   # True = background refresh aktif
         "data_freshness": build_data_freshness(stocks),  # SPEC-014 B1 (CPO-1137: kanonik, aynı stocks)
         "xu100_spark":  xu100_spark,  # CPO-690: BIST100 sparkline (son 30 gün)
+        "xu100_close":  xu100_close,       # CPO-1558: EOD kapanış (aynı chart cache, live değil)
+        "xu100_change_pct": xu100_change_pct,  # CPO-1558: önceki EOD kapanışa göre %
     }
     # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
     if _DQV_AVAILABLE:
