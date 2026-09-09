@@ -19,10 +19,25 @@ doldurmuyoruz — yanıltıcı olur). Kategori tamamen boşsa üst-seviye ağır
 kalan kategoriler arasında yeniden dağıtılır; sonuçla birlikte
 `data_completeness` (0-1 arası, gerçekte veri bulunan metrik oranı) taşınır.
 
+Güven eşiği (CPO-1528 P1 denetimi, 09.09): toplam veri bulunan metrik sayısı
+MIN_METRICS_FOR_SCORE altındaysa (ör. tek bir metrik geçerli) skor/bant
+BASTIRILIR (None döner) — tek metriğin doğrudan 0-100 skoru ve rengini
+belirlemesini, ve %60 ağırlıkla BorsaPusula Skoru'na sızmasını önler. Bu,
+data_completeness<0.6 iken rationale'a eklenen "sınırlı veri" dipnotundan
+AYRI ve daha sert bir kapı — dipnot skoru göstermeye devam eder, bu kapı
+skoru hiç üretmez.
+
 Bantlar: 0-49 kırmızı, 50-69 sarı, 70-100 yeşil (Site Contract, sabit).
 """
 
 import sector_stats
+
+# En az bu kadar metrik veri içermeden Temel Analiz Skoru/bant üretilmez
+# (bkz. modül docstring'indeki "Güven eşiği"). 14 metriklik havuzda ~%21 —
+# en küçük kategorilerin (nakit_akışı/kaldıraç, 3 metrik) tek başına dolu
+# olmasına izin verecek kadar gevşek, tek/çift metriğin skoru tek başına
+# belirlemesini engelleyecek kadar sıkı.
+MIN_METRICS_FOR_SCORE = 3
 
 # metric adı -> (ters mi, ocf_positive_quarters gibi özel doğrudan-ölçek mi)
 CATEGORIES = {
@@ -126,7 +141,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
 
     data_completeness = round(metrics_with_data / TOTAL_METRIC_COUNT, 2)
 
-    if not category_scores:
+    if not category_scores or metrics_with_data < MIN_METRICS_FOR_SCORE:
         return {
             "temel_analiz_skoru": None,
             "data_completeness": data_completeness,
