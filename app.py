@@ -1822,7 +1822,12 @@ def analyze(ticker_base):
 
         # ── compose_score → signal_strength (CPO-535, #36) ──────────────────
         # Tek ve tutarlı skor. hisse detay ↔ Güçlü Trend listesi aynı sayıyı gösterir.
-        signal_strength = 0
+        # CPO-1545: BEKLE (aktif sinyal yok) durumunda None kalmalı — 0 olursa
+        # compute_borsapusula_score() bunu "gerçek bir teknik skor" sanıp temel_skor
+        # ile ağırlıklı ortalamaya katıyor, güçlü finansalı olan ama şu an sadece
+        # konsolidasyonda olan hisseleri yanlışlıkla "kırmızı" banda düşürüyordu.
+        # None → compute_borsapusula_score zaten var olan partial=True (sadece-temel) yoluna düşer.
+        signal_strength = None
         if signal != "BEKLE":
             _bs = bull_score if signal == "AL" else (bear_score or 0)
             signal_strength = compose_score(
