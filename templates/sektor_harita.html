@@ -114,7 +114,10 @@ function _pyRound(x) {
 }
 
 function heatColor(score) {
-  // score: -100..+100  →  renk (Stitch palette)
+  // score: -100..+100 → renk (Stitch palette)
+  // CPO-1575 kontrolü: hisse.html'de AYNI 7-basamaklı gradyan yok — orada
+  // sadece 3 semantik renk var (--bp-al/--bp-sat/--bp-text3 = al/sat/bekle).
+  // Bu 7-adımlı score-band gradyanı şu an sadece burada kullanılıyor.
   if (score >= 60)  return '#00e290';
   if (score >= 30)  return '#34d399';
   if (score >= 10)  return '#6ee7b7';
