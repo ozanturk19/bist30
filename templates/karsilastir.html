@@ -112,7 +112,7 @@ const TICKERS_PARAM = "{{ tickers_param }}";
 const ROW_LABELS = [
   { key: '_sep_tech',     label: '<span aria-hidden="true">📊</span> TEKNİK ANALİZ', isSep: true },
   { key: 'signal',        label: 'Sinyal' },
-  { key: 'is_premium',    label: 'Hacim Onaylı <span aria-hidden="true">⭐</span>', help: 'AL sinyali olan VE 5 günlük hacim ortalaması son 20 gün ortalamasının 1.20 katından yüksek olan hisseler. Backtest\'te en güçlü Sharpe oranı bu kategoride.' },
+  { key: 'is_premium',    label: 'Hacim Onaylı <span aria-hidden="true">⭐</span>', help: 'Güçlü Trend sinyali olan VE 5 günlük hacim ortalaması son 20 gün ortalamasının 1.20 katından yüksek olan hisseler. Backtest\'te en güçlü Sharpe oranı bu kategoride.' },
   { key: 'price',         label: 'Son Fiyat' },
   { key: 'change_pct',    label: 'Günlük Değişim' },
   { key: 'adx',           label: 'ADX (Trend Gücü)' },
@@ -120,7 +120,7 @@ const ROW_LABELS = [
   { key: 'signal_date',   label: 'Sinyal Tarihi' },
   { key: 'signal_bars',   label: 'Sinyal Süresi' },
   { key: 'entry_quality', label: 'Giriş Kalitesi', help: 'Şu an satın alınsa giriş ne kadar uygun? İdeal/İyi: hisse henüz aşırı yükselmemiş, giriş için iyi seviye. Dikkatli: hisse hareket halinde, takip edilebilir. Uzak: zaten çok yükselmiş, kovalama riski yüksek — pullback bekle.' },
-  { key: 'sl_level',      label: 'Stop-Loss (ST)', help: 'Supertrend bandının güncel seviyesi — sinyal AL/SAT olmasa da her zaman hesaplanır, açık bir pozisyonun stopu anlamına gelmez.' },
+  { key: 'sl_level',      label: 'Stop-Loss (ST)', help: 'Supertrend bandının güncel seviyesi — sinyal yönü ne olursa olsun her zaman hesaplanır, açık bir pozisyonun stopu anlamına gelmez.' },
   { key: 'tp1',           label: 'Hedef 1 (TP1)' },
   { key: 'tp2',           label: 'Hedef 2 (TP2)' },
   { key: 'rr_ratio',      label: 'Risk/Ödül (R/R)' },
@@ -209,11 +209,11 @@ function renderCell(key, s) {
     /* CPO-1335: "Sinyal Süresi" bar sayacı değil takvim yaşı */
     case 'signal_bars':   return `<span class="mono">${bpSignalAgeText(s.signal_date)}</span>`;
     case 'signal_date':   return v ? `<span style="font-size:var(--bp-text-sm)">${v}</span>` : '<span class="muted">—</span>';
-    case 'entry_quality': return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde giriş değerlendirmesi gösterilmez') : renderQuality(v);
-    case 'sl_level':      return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde somut stop seviyesi gösterilmez') : (v ? `<span class="dn mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
-    case 'tp1':           return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
-    case 'tp2':           return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
-    case 'rr_ratio':      return (s.signal === 'SAT') ? _naForSat('SAT sinyalinde risk/ödül oranı gösterilmez') : (v ? `<span class="mono" style="color:#58a6ff">1 : ${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>');
+    case 'entry_quality': return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde giriş değerlendirmesi gösterilmez') : renderQuality(v);
+    case 'sl_level':      return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde somut stop seviyesi gösterilmez') : (v ? `<span class="dn mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
+    case 'tp1':           return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
+    case 'tp2':           return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
+    case 'rr_ratio':      return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde risk/ödül oranı gösterilmez') : (v ? `<span class="mono" style="color:var(--bp-accent-cyan)">1 : ${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>');
     case 'sector':        return v ? `<span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">${v}</span>` : '<span class="muted">—</span>';
     // ── Temel analiz ──
     case 'market_cap':    return v ? `<span class="mono" style="font-size:var(--bp-text-base)">${v}</span>` : '<span class="muted">—</span>';

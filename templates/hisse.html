@@ -1055,7 +1055,7 @@
         <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Analiz Edilen Sinyal</div>
       </div>
     </div>
-    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal ve SAT sinyalleri hariç, yalnızca AL sinyalleri · <span aria-hidden="true">⚠️</span> Geçmiş performans gelecek garantisi değildir</div>
+    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal ve Trend Bozuldu sinyalleri hariç, yalnızca Güçlü Trend sinyalleri · <span aria-hidden="true">⚠️</span> Geçmiş performans gelecek garantisi değildir</div>
   </div>
 
     </div>
@@ -2078,7 +2078,7 @@ function renderSummary(s, signalData) {
       const rrBarEl = document.getElementById('rrBarContainer');
       if (rrBarEl) rrBarEl.innerHTML = '';
       const rrLevelsEl = document.getElementById('rrLevels');
-      if (rrLevelsEl) rrLevelsEl.innerHTML = `<div style="color:var(--bp-text3);font-size:var(--bp-text-sm);padding:2px 0;line-height:1.5">BIST'te açığa satış pratikte uygulanamadığı için SAT sinyalinde somut giriş/hedef/stop seviyeleri gösterilmiyor.</div>`;
+      if (rrLevelsEl) rrLevelsEl.innerHTML = `<div style="color:var(--bp-text3);font-size:var(--bp-text-sm);padding:2px 0;line-height:1.5">BIST'te açığa satış pratikte uygulanamadığı için Trend Bozuldu sinyalinde somut giriş/hedef/stop seviyeleri gösterilmiyor.</div>`;
     } else {
       /* Giriş Değerlendirmesi */
       const eq = signalData.entry_quality;
@@ -2362,7 +2362,7 @@ function renderHistory(history, currentPrice) {
   // kırmızı gösterilmez ([[project_long_only_ihlali_sat_dali]], aynı desen
   // CPO-DEV2-074#2'de sinyal_performans.html'e uygulanmıştı) — gerçek (ters
   // çevrilmemiş) fiyat hareketi nötr gri renkte gösterilir, gizlenmez.
-  const _SAT_TIP = 'SAT sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez';
+  const _SAT_TIP = 'Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez';
   tbody.innerHTML = history.map((h, idx) => {
     const icon = h.signal === 'AL' ? '▲' : '▼';
     let retHtml = '<td style="color:var(--bp-text3);font-size:var(--bp-text-xs)">—</td>';
@@ -2982,7 +2982,7 @@ async function loadFundamentals() {
     if (f.analyst_target != null && f.analyst_count) {
       const curP = _hibCurrentPrice();
       const upside = (curP && curP > 0) ? ((f.analyst_target - curP) / curP * 100) : null;
-      const recColors = { 'Güçlü Al': 'var(--bp-al)', 'Al': 'var(--bp-al)', 'Tut': 'var(--bp-bkl)', 'Sat': 'var(--bp-sat)', 'Güçlü Sat': 'var(--bp-sat)' };
+      const recColors = { 'Güçlü Pozitif': 'var(--bp-al)', 'Pozitif': 'var(--bp-al)', 'Nötr': 'var(--bp-bkl)', 'Negatif': 'var(--bp-sat)', 'Güçlü Negatif': 'var(--bp-sat)' };
       const recColor = recColors[f.analyst_rec] || 'var(--bp-text3)';
       const recBadge = f.analyst_rec ? `<span style="background:${recColor};color:var(--bp-bg);font-weight:700;font-size:var(--bp-text-xs);padding:2px 9px;border-radius:var(--bp-radius-20)">${f.analyst_rec}</span>` : '';
       const upsideHtml = upside != null

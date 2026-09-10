@@ -1,16 +1,16 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Tüm BIST Hisseleri — {{ total_count }} Şirket Listesi | BorsaPusula</title>
-<meta name="description" content="Borsa İstanbul'da işlem gören {{ total_count }} hissenin tam listesi. Sektörlere göre gruplandırılmış, alfabetik erişimli. Her hisse için AL/SAT sinyali ve grafik.">
+<meta name="description" content="Borsa İstanbul'da işlem gören {{ total_count }} hissenin tam listesi. Sektörlere göre gruplandırılmış, alfabetik erişimli. Her hisse için trend sinyali ve grafik.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/hisseler">
 <meta property="og:title"       content="Tüm BIST Hisseleri — {{ total_count }} Şirket Listesi">
-<meta property="og:description" content="{{ total_count }} BIST hissesinin tam listesi. Sektörel + alfabetik. Günlük teknik analiz ve AL/SAT sinyali.">
+<meta property="og:description" content="{{ total_count }} BIST hissesinin tam listesi. Sektörel + alfabetik. Günlük teknik analiz ve trend sinyali.">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:url"         content="https://borsapusula.com/hisseler">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Tüm BIST Hisseleri — {{ total_count }} Şirket Listesi">
-<meta name="twitter:description" content="{{ total_count }} BIST hissesinin tam listesi. Sektörel + alfabetik. Günlük teknik analiz ve AL/SAT sinyali.">
+<meta name="twitter:description" content="{{ total_count }} BIST hissesinin tam listesi. Sektörel + alfabetik. Günlük teknik analiz ve trend sinyali.">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -42,7 +42,7 @@
   <p>
     Borsa İstanbul'da işlem gören <strong>{{ total_count }} hissenin</strong> tam listesi.
     Sektörlere göre gruplandırılmış, alfabetik erişimli. Her hisse için günlük
-    teknik analiz, AL/SAT sinyali, fiyat grafiği, hacim verisi, KAP haberleri ve
+    teknik analiz, trend sinyali, fiyat grafiği, hacim verisi, KAP haberleri ve
     şirket raporu mevcut.
   </p>
   <div class="hh-stats">

@@ -2334,15 +2334,20 @@ def _notify_signal_changes(new_results):
 
     if changes and TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID and in_session:
         sig_emoji = {"AL": "🟢", "SAT": "🔴", "BEKLE": "⚪"}
+        # CPO 10.09: `old` (onceki sinyal) ham "AL"/"SAT"/"BEKLE" olarak sizdiriliyordu —
+        # `new`/`lbl` zaten cevriliyordu ama `old` hic etiketlenmemisti (K3 gate'i bunu
+        # yakalamaz, gate template degil burasi). Ayni cevirmeye tabi tutuldu.
+        _sig_lbl = {"AL": "Güçlü Trend ▲", "SAT": "Trend Bozuldu ▼", "BEKLE": "Yatay"}
         lines = [f"<b>📊 BorsaPusula — Sinyal Değişimi</b>\n"]
         for t, old, new, stock in changes[:10]:
             e    = sig_emoji.get(new, "")
             name = STOCK_NAMES.get(t, t)
-            lbl  = "Güçlü Trend ▲" if new == "AL" else "Trend Bozuldu ▼"
+            lbl  = _sig_lbl.get(new, new)
+            old_lbl = _sig_lbl.get(old, old)
             price = stock.get("price") or ""
             price_str = f" — {tr_price_filter(price)} ₺" if price else ""
             lines.append(f"{e} <b>{t}</b> ({name}){price_str}")
-            lines.append(f"   <i>{old} → {lbl}</i>")
+            lines.append(f"   <i>{old_lbl} → {lbl}</i>")
         lines.append(f"\n<a href='https://borsapusula.com'>borsapusula.com</a>")
         lines.append("<i>⚠️ Yatırım tavsiyesi değildir.</i>")
         _send_telegram("\n".join(lines))
@@ -8015,9 +8020,13 @@ _FUND_SANITY = {
 }
 
 # CPO r174: yfinance recommendationKey ham İngilizce donuyor (buy/hold/sell vb.)
+# CPO 10.09: "Güçlü Al"/"Al"/"Sat"/"Güçlü Sat" literal AL/SAT kelimelerini içeriyordu
+# — bu üçüncü-taraf analist konsensüsü olsa da (sitenin kendi sinyali değil), K3
+# yasağı kaynak ayrımı yapmıyor, hiçbir yerde AL/SAT görünmemeli. Nötr pozitif/
+# negatif dile çevrildi.
 _RECOMMENDATION_TR = {
-    "strong_buy": "Güçlü Al", "buy": "Al", "hold": "Tut",
-    "sell": "Sat", "strong_sell": "Güçlü Sat", "none": None,
+    "strong_buy": "Güçlü Pozitif", "buy": "Pozitif", "hold": "Nötr",
+    "sell": "Negatif", "strong_sell": "Güçlü Negatif", "none": None,
 }
 
 def _clean_fundamentals(data: dict) -> dict:

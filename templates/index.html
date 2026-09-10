@@ -626,7 +626,7 @@ header{
       <div class="da-eyebrow" id="daSectorCount">Sektörler</div>
       <h2 class="da-section-title da-display">Sektör nabzı, tek bakışta.</h2>
     </div>
-    <p class="da-section-desc">Kutu büyüklüğü sektör skorunun mutlak değeriyle orantılıdır. Skor = (AL − SAT) / Toplam × 100.</p>
+    <p class="da-section-desc">Kutu büyüklüğü sektör skorunun mutlak değeriyle orantılıdır. Skor = (Güçlü − Bozuldu) / Toplam × 100.</p>
   </div>
   <div id="daMosaicBody">
     <div class="da-mosaic" aria-hidden="true">
@@ -952,7 +952,7 @@ header{
     if (st.sectors && st.sectors.length) {
       var top = st.sectors[0]; // API zaten score DESC sıralı dönüyor
       if (top && typeof top.score === 'number') {
-        frags.push('<strong>' + esc(top.name) + '</strong> sektörü ' + (top.score>=0?'pozitif':'negatif') + ' ayrışmayla öne çıktı — sektör skoru ' + fmtNum0(top.score) + ' (' + top.al + ' AL / ' + top.sat + ' SAT).');
+        frags.push('<strong>' + esc(top.name) + '</strong> sektörü ' + (top.score>=0?'pozitif':'negatif') + ' ayrışmayla öne çıktı — sektör skoru ' + fmtNum0(top.score) + ' (' + top.al + ' Güçlü / ' + top.sat + ' Bozuldu).');
       }
     }
     if (st.realStocks && st.realStocks.length) {
@@ -1106,10 +1106,10 @@ header{
       var pos = s.score >= 0;
       var alpha = Math.max(0.10, Math.min(0.5, Math.abs(s.score) / maxAbs * 0.42 + 0.08));
       var arrowPath = pos ? 'M12 4 L19 16 H5 Z' : 'M12 20 L19 8 H5 Z';
-      return '<div class="da-tile ' + (pos?'da-tile-pos':'da-tile-neg') + ' ' + sizeCls + '" style="--a:' + alpha.toFixed(2) + '" title="' + s.al + ' AL · ' + s.sat + ' SAT · ' + s.bekle + ' BEKLE (toplam ' + s.total + ')">' +
+      return '<div class="da-tile ' + (pos?'da-tile-pos':'da-tile-neg') + ' ' + sizeCls + '" style="--a:' + alpha.toFixed(2) + '" title="' + s.al + ' Güçlü · ' + s.sat + ' Bozuldu · ' + s.bekle + ' Yatay (toplam ' + s.total + ')">' +
         '<div class="name">' + esc(s.name) + '</div>' +
         '<div><div class="chg ' + (pos?'tile-up':'tile-down') + ' da-num"><svg viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor"/></svg>' + (pos?'+':'') + fmtNum0(s.score) + '<span class="u">skor</span></div>' +
-        '<div class="meta">' + s.al + ' AL / ' + s.sat + ' SAT' + (s.avg_rvol!=null ? ' · RVOL ' + s.avg_rvol.toFixed(2) + '×' : '') + '</div></div>' +
+        '<div class="meta">' + s.al + ' Güçlü / ' + s.sat + ' Bozuldu' + (s.avg_rvol!=null ? ' · RVOL ' + s.avg_rvol.toFixed(2) + '×' : '') + '</div></div>' +
       '</div>';
     }).join('') + '</div>';
     el.innerHTML = html;
