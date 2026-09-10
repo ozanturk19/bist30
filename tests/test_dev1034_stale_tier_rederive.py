@@ -93,3 +93,13 @@ def test_derive_tier_handles_falsy_signal_strength_without_crash():
     derive_tier = _load_derive_tier()
     assert derive_tier("AL", 0, False, False) is None
     assert derive_tier(None, 0, False, False) is None
+
+
+def test_derive_tier_sat_never_gets_a_badge():
+    """CPO-1572 (10.09.2026): long-only — SAT hiçbir skorda tier alamaz,
+    AL ile aynı 70/56 bandını paylaşırsa "güçlü/kazanan" gibi görünüyordu."""
+    derive_tier = _load_derive_tier()
+    assert derive_tier("SAT", 100, False, False) is None
+    assert derive_tier("SAT", 75, False, False) is None
+    assert derive_tier("SAT", 60, False, False) is None
+    assert derive_tier("SAT", 0, False, False) is None

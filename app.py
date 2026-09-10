@@ -1539,9 +1539,17 @@ def _derive_tier(signal, signal_strength, low_liquidity, earnings_warning):
     çakışıyordu. Yeni eşikler (70/56), 54 aktif sinyalin yeniden ölçeklenmiş
     dağılımındaki doğal boşluklara göre kalibre edildi ve CPO tarafından
     onaylandı (üstteki 6 ve alttaki 5 hissenin eski sınırları korunuyor).
+
+    CPO-1572 (10.09.2026): long-only ilkesi genişletildi — SAT sinyali artık
+    HİÇBİR bantta tier alamaz (her zaman None/rozet-yok). Önceden SAT da AL
+    ile aynı 70/56 eşiğinden "guclu_sinyal"/"standart" alabiliyordu, bu da
+    tarama/hisse/karsilastir'de SAT'ı görsel olarak "güçlü/kazanan" gibi
+    gösteriyordu (Ozan: "trend bozuldu bizim için güçlü bir sinyal olmasın").
+    signal_strength (compose_score) ham DEĞERİ değişmedi — sadece bu türetilmiş
+    sunum/rozet bandı SAT için nötrleştirildi, analitik/backtest bütünlüğü ayrı.
     """
     tier = None
-    if signal != "BEKLE":
+    if signal == "AL":
         try:
             if signal_strength >= 70: tier = "guclu_sinyal"
             elif signal_strength >= 56: tier = "standart"

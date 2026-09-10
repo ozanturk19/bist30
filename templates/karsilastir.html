@@ -303,7 +303,9 @@ function buildTable(stocks) {
   }).join('');
 
   // ── Yatırım Skoru satırı (kazananı belirle, kanonik signal_strength) ──
-  const scores = stocks.map(s => s.found ? (s.signal_strength || 0) : -1);
+  // CPO-1572 (10.09): long-only — SAT sinyali skor yüksek olsa da 🏆 "En Yüksek"
+  // kazanamaz, sadece AL sinyalleri yarışır (Ozan: SAT güçlü/kazanan gösterilmesin).
+  const scores = stocks.map(s => s.found && s.signal === 'AL' ? (s.signal_strength || 0) : -1);
   const maxScore = Math.max(...scores);
   const winnerIdx = maxScore > 0 ? scores.indexOf(maxScore) : -1;
   const scoreCells = stocks.map((s, i) => {
@@ -345,7 +347,8 @@ function buildMobileCards(stocks) {
   const active = stocks.filter(s => s.found);
   if (active.length === 0) return '';
 
-  const scores = stocks.map(s => s.found ? (s.signal_strength || 0) : -1);
+  // CPO-1572 (10.09): long-only — bkz. buildComparisonTable üstteki not, aynı kural
+  const scores = stocks.map(s => s.found && s.signal === 'AL' ? (s.signal_strength || 0) : -1);
   const maxScore = Math.max(...scores);
   const winnerIdx = maxScore > 0 ? scores.indexOf(maxScore) : -1;
 
