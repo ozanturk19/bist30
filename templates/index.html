@@ -101,9 +101,15 @@ header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){d
 *{box-sizing:border-box}
 body{margin:0}
 
-/* ── header kabuğu — her sayfa kendi shell CSS'ini taşır (Şablon Paydası 27 deseni) ── */
+/* ── header kabuğu — her sayfa kendi shell CSS'ini taşır (Şablon Paydası 27 deseni) ──
+   Ozan 10.09: anasayfanın makro bar akışı diğer sayfalara göre gözle görülür
+   takılıyordu ("hafif takılma... göz yoruyor"), diğer tüm sayfalar akıcıydı.
+   Kök neden: sadece bu sayfanın header'ı backdrop-filter:blur(16px) taşıyordu
+   (hiçbir diğer sayfada yok, hepsi düz/opak arkaplan) — sticky+her zaman
+   animasyonlu makro şeritle aynı anda sürekli GPU compositing yükü oluşturuyordu.
+   Diğer sayfalarla AYNI opak arkaplan desenine geçirildi, blur kaldırıldı. */
 header{
-  background:rgba(var(--bp-bg-rgb),.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:var(--bp-bg);
   border-bottom:1px solid var(--bp-border);padding:0 clamp(14px,3vw,24px);height:60px;
   display:flex;align-items:center;justify-content:space-between;position:sticky;top:32px;
   z-index:var(--bp-z-dropdown);gap:12px;transform:translateZ(0);
@@ -204,8 +210,11 @@ header{
 .da-legend-sep{width:1px;background:var(--bp-border);align-self:stretch}
 
 /* ── section head (yeniden kullanılan) ── */
-.da-section{padding:clamp(50px,7vw,96px) 0}
-.da-section-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:clamp(26px,4vw,40px)}
+/* Ozan 10.09: 7 .da-section art arda 96px+96px (üst+alt) padding'le gereksiz
+   scroll yaratıyordu — bölümler arası ayrım korunacak kadar (tam 0'a inmedi)
+   ama önceki tavana göre ~%35 daraltıldı. */
+.da-section{padding:clamp(32px,4.5vw,62px) 0}
+.da-section-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:clamp(20px,3vw,30px)}
 .da-eyebrow{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-volume);margin-bottom:8px}
 .da-section-title{font-weight:800;letter-spacing:-.025em;font-size:clamp(1.9rem,4vw,3.1rem);line-height:1.04;max-width:20ch}
 .da-section-desc{color:var(--bp-text3);max-width:44ch;font-size:var(--bp-text-base);line-height:1.6}
@@ -961,9 +970,10 @@ header{
     el.innerHTML = frags.join(' ');
   }
 
-  // ── Spotlight: en yüksek signal_strength ──
+  // ── Spotlight: en yüksek signal_strength (Ozan 10.09: long-only — Trend Bozuldu
+  //    "öne çıkan/güçlü" olarak asla öne çıkmasın, sadece Güçlü Trend yarışsın) ──
   function daRenderSpotlight(real){
-    var withScore = real.filter(function(s){ return typeof s.signal_strength === 'number'; });
+    var withScore = real.filter(function(s){ return typeof s.signal_strength === 'number' && s.signal === 'AL'; });
     var body = document.getElementById('daSpotlightBody');
     if (!body) return;
     if (!withScore.length) { daShowSectionEmpty('daSpotlightBody', 'Şu an Teknik Güç Skoru hesaplanmış hisse yok.'); return; }
@@ -1003,7 +1013,7 @@ header{
   function daRenderCurated(real){
     var el = document.getElementById('daCuratedList');
     if (!el) return;
-    var byScore = real.filter(function(s){ return typeof s.signal_strength === 'number'; })
+    var byScore = real.filter(function(s){ return typeof s.signal_strength === 'number' && s.signal === 'AL'; })
                        .sort(function(a,b){ return b.signal_strength - a.signal_strength; }).slice(0, 6);
     var byRvol = real.filter(function(s){ return typeof s.rvol === 'number'; })
                       .sort(function(a,b){ return b.rvol - a.rvol; }).slice(0, 6);
@@ -1032,11 +1042,13 @@ header{
     el.innerHTML = cards.join('');
   }
 
-  // ── Öne çıkan hisseler ızgarası (top 8 signal_strength, asimetrik boy) ──
+  // ── Öne çıkan hisseler ızgarası (top 8 signal_strength, asimetrik boy) —
+  //    Ozan 10.09: long-only, "En güçlü sinyaller" başlığı altında Trend Bozuldu
+  //    (SAT) asla üst sıraya çıkmasın, sadece Güçlü Trend (AL) yarışsın ──
   function daRenderStockGrid(real){
     var el = document.getElementById('daStockGrid');
     if (!el) return;
-    var top = real.filter(function(s){ return typeof s.signal_strength === 'number'; })
+    var top = real.filter(function(s){ return typeof s.signal_strength === 'number' && s.signal === 'AL'; })
                    .sort(function(a,b){ return b.signal_strength - a.signal_strength; }).slice(0, 8);
     if (!top.length) { daShowSectionEmpty('daStockGrid', 'Şu an gösterilecek hisse yok.'); return; }
     var rots = [-1.1, 0.9, -0.6, 1.3, -0.9, 0.6, -0.4, 1.0];
@@ -1047,17 +1059,28 @@ header{
       var col = scoreColorVar(s.signal_strength);
       var dash = ringDash(s.signal_strength, 27);
       var chg = s.change_pct, up = typeof chg === 'number' && chg >= 0;
-      // CPO-1557: xl/lg kartlar (grid-row:span 2) .da-sc-mid'in margin-top:auto'suyla
-      // ring/rozet'i dibe iterken üstte büyük bir boş alan kalıyordu (Ozan bulgusu:
-      // "kocaman ama içi boş"). Sadece bu iki büyük boyda ek bir istatistik satırı
-      // (sektör/ADX/RVOL) ekleniyor — küçük kartlar zaten kompakt, dokunulmadı.
+      // CPO-1557 + 10.09 devamı: xl/lg kartlar (grid-row:span 2) .da-sc-mid'in
+      // margin-top:auto'suyla ring/rozet'i dibe iterken üstte büyük bir boş alan
+      // kalıyordu (Ozan bulgusu, CPO-1557'de sektör/ADX/RVOL chip'leriyle kısmen
+      // ele alınmıştı, 10.09'da "hâlâ bomboş" diye tekrar işaretlendi) — spotlight
+      // bileşeninin zaten var olan ADX/RVOL/RSI bar satırlarını (.da-spot-sub-row,
+      // sıfır yeni CSS) buraya da taşıyıp gerçek veri yoğunluğuyla dolduruyoruz.
       var extraHtml = '';
       if (sizeCls === 'xl' || sizeCls === 'lg') {
-        var chips = [];
-        if (s.sector) chips.push('<span class="da-sc-chip">' + esc(s.sector) + '</span>');
-        if (typeof s.adx === 'number') chips.push('<span class="da-sc-chip">ADX ' + fmtNum0(s.adx) + '</span>');
-        if (typeof s.rvol === 'number') chips.push('<span class="da-sc-chip">RVOL ' + s.rvol.toFixed(1) + 'x</span>');
-        if (chips.length) extraHtml = '<div class="da-sc-extra">' + chips.join('') + '</div>';
+        if (s.sector) extraHtml += '<div class="da-sc-extra"><span class="da-sc-chip">' + esc(s.sector) + '</span></div>';
+        var barRows = '';
+        if (typeof s.adx === 'number') {
+          var adxPctG = Math.max(0, Math.min(100, (s.adx/50)*100));
+          barRows += '<div class="da-spot-sub-row"><span class="lbl">ADX</span><div class="bar bar-adx"><i style="width:' + adxPctG.toFixed(0) + '%"></i></div><span class="val">' + fmtNum0(s.adx) + '</span></div>';
+        }
+        if (typeof s.rvol === 'number') {
+          var rvolPctG = Math.max(0, Math.min(100, (s.rvol/3)*100));
+          barRows += '<div class="da-spot-sub-row"><span class="lbl">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPctG.toFixed(0) + '%"></i></div><span class="val">' + s.rvol.toFixed(2) + '×</span></div>';
+        }
+        if (typeof s.rsi === 'number') {
+          barRows += '<div class="da-spot-sub-row"><span class="lbl">RSI</span><div class="bar bar-rsi"><i style="width:' + Math.max(0,Math.min(100,s.rsi)).toFixed(0) + '%"></i></div><span class="val">' + fmtNum0(s.rsi) + '</span></div>';
+        }
+        if (barRows) extraHtml += '<div style="display:flex;flex-direction:column;gap:7px;margin-top:2px">' + barRows + '</div>';
       }
       return '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-scard ' + sizeCls + '" style="--rot:' + rots[i%rots.length] + 'deg">' +
         '<div class="da-sc-top"><div><div class="da-sc-ticker">' + esc(s.ticker) + '</div><div class="da-sc-company">' + esc(s.name||'') + '</div></div>' +

@@ -111,25 +111,16 @@
   <a href="/" class="logo-link" aria-label="BorsaPusula — Piyasanın Yönü">
     <svg class="bp-logo" width="215" height="56" viewBox="0 0 460 120" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="bpNeedle" x1="60" y1="22" x2="60" y2="60" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stop-color="#b8c3ff"/>
-          <stop offset="1" stop-color="#00e2a1"/>
+        <linearGradient id="bpMark" x1="18" y1="24" x2="90" y2="96" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="var(--bp-art-violet)"/>
+          <stop offset="1" stop-color="var(--bp-accent-cyan)"/>
         </linearGradient>
       </defs>
-      <rect x="14" y="20" width="80" height="80" rx="18" fill="#0f1218" stroke="#28303f"/>
-      <g stroke="#222a37" stroke-width="1">
-        <line x1="22" y1="46" x2="86" y2="46"/>
-        <line x1="22" y1="74" x2="86" y2="74"/>
-        <line x1="40" y1="28" x2="40" y2="92"/>
-        <line x1="68" y1="28" x2="68" y2="92"/>
-      </g>
-      <path d="M54 33 L62 60 L54 55 L46 60 Z" fill="url(#bpNeedle)"/>
-      <path d="M54 87 L60 61 L54 64 L48 61 Z" fill="#2c3445"/>
-      <circle cx="54" cy="60" r="3.5" fill="#eef3f8"/>
-      <circle cx="54" cy="60" r="1.4" fill="#00e2a1"/>
-      <text x="116" y="64" fill="#eef3f8" font-family="'Sora','Manrope',Arial,sans-serif" font-size="38" font-weight="800" letter-spacing="-0.5">Borsa<tspan fill="#00e2a1">Pusula</tspan></text>
-      <line x1="118" y1="78" x2="430" y2="78" stroke="#1e2532" stroke-width="1"/>
-      <text x="118" y="102" fill="#a8b1c2" font-family="'Manrope',Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="1.8">PİYASANIN YÖNÜ</text>
+      <circle cx="54" cy="60" r="36" fill="none" stroke="url(#bpMark)" stroke-width="3"/>
+      <path d="M54 35 L63 57.5 L86.5 60 L63 62.5 L54 85 L45 62.5 L21.5 60 L45 57.5 Z" fill="url(#bpMark)"/>
+      <text x="116" y="64" fill="var(--bp-text)" font-family="'Space Grotesk','Manrope',Arial,sans-serif" font-size="38" font-weight="700" letter-spacing="-0.5">Borsa<tspan fill="var(--bp-al)">Pusula</tspan></text>
+      <line x1="118" y1="78" x2="430" y2="78" stroke="var(--bp-border)" stroke-width="1"/>
+      <text x="118" y="102" fill="var(--bp-text3)" font-family="'Manrope',Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="1.8">PİYASANIN YÖNÜ</text>
     </svg>
   </a>
 
@@ -182,6 +173,20 @@
   </div>{# /bp-header-row #}
 </header>
 
+<!-- Makro Ticker Bandı -->
+{# CPO: siteneli sayfa sırası header→makrobar→sayfa-içeriği. Bu sayfada makrobar
+   önceden bp-segments'ten (tab bar) SONRA geliyordu — tek sayfa diğer tüm
+   sayfalarla tutarsızdı (Ozan yakaladı, canlı ekran görüntüsüyle). Taşındı;
+   bp-segments'in position:sticky top:60px davranışı DOM sırasından bağımsız
+   (kendi top değerine göre sabitleniyor), bu taşıma sticky mekaniğini bozmaz —
+   ilk yüklemede header→makrobar→tab bar görünür, aşağı kaydırınca tab bar
+   header'ın hemen altına yapışır (makrobar normal akışta kayıp gider). #}
+<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button>
+  <div class="macro-track" id="macroTrack">
+    <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
+  </div>
+</div>
+
 {# SPEC-STICKY-HEADER-v3 fix5: bp-segments header DIŞINDA (header'a bp-search.js !important 60px max-height zorluyor — çocuk overflow ediyordu). Sticky top:60 = header altında sabit. #}
 <nav class="bp-segments" aria-label="Hisse detay segmentleri">
   {% if ssr_signal %}
@@ -204,13 +209,6 @@
     <a class="bp-seg-item" data-segment="haberler" id="tab-haberler" role="tab" aria-selected="false" aria-controls="storySection panel-haberler-main" tabindex="-1">Haberler</a>
   </div>
 </nav>
-
-<!-- Makro Ticker Bandı -->
-<div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)">⏸</button>
-  <div class="macro-track" id="macroTrack">
-    <span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span>
-  </div>
-</div>
 
 <!-- Hisse Kimlik Çubuğu -->
 <div class="hisse-id-bar">

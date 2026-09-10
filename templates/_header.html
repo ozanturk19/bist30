@@ -58,7 +58,11 @@
       </defs>
       <circle cx="54" cy="60" r="36" fill="none" stroke="url(#bpMark)" stroke-width="3"/>
       <path d="M54 35 L63 57.5 L86.5 60 L63 62.5 L54 85 L45 62.5 L21.5 60 L45 57.5 Z" fill="url(#bpMark)"/>
-      <text x="116" y="64" fill="var(--bp-text)" font-family="'Bricolage Grotesque','Sora','Manrope',Arial,sans-serif" font-size="38" font-weight="800" letter-spacing="-0.5">Borsa<tspan fill="var(--bp-al)">Pusula</tspan></text>
+      <!-- CPO: wordmark önceden 'Bricolage Grotesque','Sora' istiyordu ama bu iki font
+           bu partial'ı kullanan ~25 sayfanın HİÇBİRİNDE yüklenmiyor (sadece index.html
+           yüklüyor) — sessizce Manrope'a düşüyordu. Gerçekten yüklü olan (500/600/700)
+           ve zaten bu sayfaların kendi h1/h2 font'u olan Space Grotesk'e geçirildi. -->
+      <text x="116" y="64" fill="var(--bp-text)" font-family="'Space Grotesk','Manrope',Arial,sans-serif" font-size="38" font-weight="700" letter-spacing="-0.5">Borsa<tspan fill="var(--bp-al)">Pusula</tspan></text>
       <line x1="118" y1="78" x2="430" y2="78" stroke="var(--bp-border)" stroke-width="1"/>
       <text x="118" y="102" fill="var(--bp-text3)" font-family="'Manrope',Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="1.8">PİYASANIN YÖNÜ</text>
     </svg>
