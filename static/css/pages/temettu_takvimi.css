@@ -10,7 +10,7 @@
   header {
     background:var(--bp-surface); border-bottom:1px solid var(--bp-border);
     padding:14px 24px; display:flex; align-items:center; gap:16px;
-    position:sticky; top:0; z-index:var(--bp-z-dropdown);
+    position:sticky; top:32px; z-index:var(--bp-z-dropdown);
   }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
   .page-sub   { font-size:var(--bp-text-base); color:#8b949e; }
@@ -119,7 +119,7 @@
   }
 
   /* Makro Ticker */
-  .macro-bar{background:var(--bp-bg);border-bottom:1px solid var(--bp-border);height:32px;overflow:hidden;position:relative;white-space:nowrap;}
+  .macro-bar{background:var(--bp-bg);border-bottom:1px solid var(--bp-border);height:32px;overflow:hidden;position:sticky;top:0;z-index:var(--bp-z-sticky);white-space:nowrap;}
   .macro-bar::before,.macro-bar::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised);}
   .macro-bar::before{left:0;background:linear-gradient(to right,var(--bp-bg),transparent);}
   .macro-bar::after{right:0;background:linear-gradient(to left,var(--bp-bg),transparent);}

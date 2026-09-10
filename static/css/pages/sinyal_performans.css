@@ -2,7 +2,7 @@
 
   * { margin:0; padding:0; box-sizing:border-box; }
   body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
-  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
+  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:32px; z-index:var(--bp-z-dropdown); }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:var(--bp-text); }
   .page-sub   { font-size:var(--bp-text-base); color:var(--bp-text3); }
   .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:24px; }
@@ -116,18 +116,18 @@
   @media(max-width:600px) { .container{padding:12px;} .hm{display:none;} }
 
   /* ── Makro Ticker Bandı ── */
-  .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); height:34px; overflow:hidden; position:relative; white-space:nowrap; }
+  .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); height:32px; overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap; }
   .macro-bar::before,.macro-bar::after { content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised); }
   .macro-bar::before { left:0; background:linear-gradient(to right,var(--bp-bg),transparent); }
   .macro-bar::after  { right:0; background:linear-gradient(to left,var(--bp-bg),transparent); }
-  .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite;will-change:transform; height:34px; }
+  .macro-track { display:inline-flex; align-items:center; animation:macroScroll 40s linear infinite;will-change:transform; height:32px; }
   .macro-bar:hover .macro-track { animation-play-state:paused; }
   @keyframes macroScroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
   .macro-pause-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: var(--bp-z-local-control); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; opacity: .55; font-size: var(--bp-text-sm); line-height: 1; cursor: pointer; padding: 0; }
   .macro-pause-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; transform: translate(-50%,-50%); }
   .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
-  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:34px; color:inherit; }
+  .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:32px; color:inherit; }
   .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
 

@@ -19,7 +19,7 @@
   header {
     background:var(--surface); border-bottom:1px solid var(--border);
     padding:12px 24px; display:flex; align-items:center; gap:14px;
-    position:sticky; top:0; z-index:var(--bp-z-dropdown);
+    position:sticky; top:32px; z-index:var(--bp-z-dropdown);
   }
   .page-title { font-size:var(--bp-text-xl); font-weight:700; color:var(--bp-text); }
   .page-sub   { font-size:var(--bp-text-sm); color:var(--text2); margin-top:1px; }
@@ -27,7 +27,7 @@
   /* ── Makro bar ── */
   .macro-bar {
     background:var(--bp-bg); border-bottom:1px solid var(--bp-border-subtle);
-    height:32px; overflow:hidden; position:relative; white-space:nowrap;
+    height:32px; overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap;
   }
   .macro-bar::before,.macro-bar::after {
     content:''; position:absolute; top:0; bottom:0; width:60px; pointer-events:none; z-index:var(--bp-z-raised);

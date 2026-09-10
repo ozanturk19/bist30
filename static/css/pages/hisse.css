@@ -59,7 +59,7 @@
     background: var(--bp-bg);
     border-bottom: 1px solid rgba(var(--bp-border-rgb),0.95);
     position: sticky;
-    top: 0;
+    top: 32px;
     z-index:var(--bp-z-dropdown);
     display: flex;
     min-height: calc(60px + env(safe-area-inset-top));
@@ -896,7 +896,7 @@
   .macro-bar {
     min-height: 44px;
     background: var(--bp-bg); border-bottom: 1px solid var(--bp-border);
-    height: 34px; overflow: hidden; position: relative; white-space: nowrap;
+    height: 32px; overflow: hidden; position: sticky; top: 0; z-index: var(--bp-z-sticky); white-space: nowrap;
   }
   .macro-bar::before, .macro-bar::after {
     content: ''; position: absolute; top: 0; bottom: 0; width: 60px;
@@ -906,7 +906,7 @@
   .macro-bar::after  { right: 0; background: linear-gradient(to left,  var(--bp-bg), transparent); }
   .macro-track {
     display: inline-flex; align-items: center;
-    animation: macroScroll 40s linear infinite;will-change:transform; height: 34px;
+    animation: macroScroll 40s linear infinite;will-change:transform; height: 32px;
   }
   @media (hover: hover) and (pointer: fine) { .macro-bar:hover .macro-track { animation-play-state: paused; } }
   @keyframes macroScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -917,7 +917,7 @@
   .macro-item {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 0 20px; border-right: 1px solid var(--bp-border);
-    font-size: var(--bp-text-sm); height: 34px;
+    font-size: var(--bp-text-sm); height: 32px;
   }
   .macro-item-lbl { font-weight: 600; color: var(--bp-text); }
   .mc-pos { color: var(--bp-al); }
@@ -935,8 +935,9 @@
 
     .bp-segments {
       /* SPEC-STICKY-HEADER-v3 fix5: header DIŞINDA sticky (bp-search.js !important header'ı 60px max-height kilitliyor; içerde overflow ediyordu).
-         Sticky top:60 = header (60px) altında sabit kalır. Macro-bar segments'in altında normal flow. */
-      position: sticky; top: 60px; left: 0; right: 0;
+         CPO: makro bar artık header'ın ÜSTÜNDE sticky (top:0, 32px yükseklik), header top:32px'e indi —
+         bu yüzden bp-segments top:60px'den top:92px'e (60+32) taşındı, header'ın hemen altında sabit kalmaya devam eder. */
+      position: sticky; top: 92px; left: 0; right: 0;
       z-index: var(--bp-z-sticky-subheader);
       background: var(--bp-bg);
       border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
