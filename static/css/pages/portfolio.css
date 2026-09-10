@@ -3,27 +3,27 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { -webkit-font-smoothing:antialiased; font-size:var(--bp-text-md); min-height:100vh; overflow-x:hidden; }
   header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
-  .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
-  .page-sub   { font-size:var(--bp-text-base); color:#8b949e; }
+  .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:var(--bp-text); }
+  .page-sub   { font-size:var(--bp-text-base); color:var(--bp-text3); }
   .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:24px; }
 
   .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:24px; }
-  .sum-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; text-align:center; }
+  .sum-card { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:16px; text-align:center; }
   .sum-num  { font-size:var(--bp-text-28); font-weight:800; line-height:1; }
   .sum-pct  { font-size:var(--bp-text-sm); font-weight:700; margin-top:3px; line-height:1.2; min-height:1.2em; }
-  .sum-lbl  { font-size:var(--bp-text-xs); color:#8b949e; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
-  .sum-green{ color:#3fb950; } .sum-red{ color:#f85149; } .sum-blue{ color:#58a6ff; }
+  .sum-lbl  { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
+  .sum-green{ color:var(--bp-al); } .sum-red{ color:var(--bp-sat); } .sum-blue{ color:var(--bp-accent-cyan); }
 
-  .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:16px; }
-  .add-bar input { background:#21262d; border:1px solid #30363d; color:#e6edf3; border-radius:var(--bp-radius); padding:7px 12px; font-size:var(--bp-text-lg); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
-  .add-bar input:focus { border-color:#58a6ff; }
+  .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:16px; }
+  .add-bar input { background:var(--bp-border-subtle); border:1px solid var(--bp-border); color:var(--bp-text); border-radius:var(--bp-radius); padding:7px 12px; font-size:var(--bp-text-lg); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
+  .add-bar input:focus { border-color:var(--bp-accent-cyan); }
   .add-bar input { width:140px; }
   .add-bar input[type=number] { width:130px; }
   .btn-add { background:var(--bp-brand); border:none; color:var(--bp-bg); border-radius:var(--bp-radius); padding:7px 16px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; }
-  .btn-add:hover { background:#388bfd; color:#fff; }
-  .add-lbl { font-size:var(--bp-text-sm); color:#8b949e; }
+  .btn-add:hover { background:var(--bp-accent-cyan); color:var(--bp-bg); }
+  .add-lbl { font-size:var(--bp-text-sm); color:var(--bp-text3); }
 
-  .pf-table { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .pf-table { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }
   /* CPO-DEV2-100: overflow-x:auto kosulsuz uygulanmisti, geregi olmayan genislikte bile
      thead sticky referansini bozuyordu. >=900px'te tablo viewport'a sigar (mobilde
      zaten #pfMobileCards devrede, table gizli) - scroll ihtiyaci kalmiyor. */
@@ -31,22 +31,22 @@
     .pf-table { overflow-x: visible; }
   }
   table { width:100%; border-collapse:collapse; }
-  thead th { background:#1c2128; padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:#8b949e; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid #30363d; white-space:nowrap; position:sticky; top:60px; z-index:var(--bp-z-dropdown); }
-  tbody tr { border-bottom:1px solid #21262d; }
+  thead th { background:var(--bp-surface2); padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--bp-border); white-space:nowrap; position:sticky; top:60px; z-index:var(--bp-z-dropdown); }
+  tbody tr { border-bottom:1px solid var(--bp-border-subtle); }
   tbody tr:last-child { border-bottom:none; }
-  tbody tr:hover { background:#1c2128; }
+  tbody tr:hover { background:var(--bp-surface2); }
   td { padding:10px 14px; white-space:nowrap; font-size:var(--bp-text-base); }
-  .ticker-link { font-weight:700; color:#f0f6fc; text-decoration:none; }
-  .ticker-link:hover { color:#58a6ff; }
+  .ticker-link { font-weight:700; color:var(--bp-text); text-decoration:none; }
+  .ticker-link:hover { color:var(--bp-accent-cyan); }
 
   .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; }
-  .signal-AL    { background:#1a4731; color:var(--bp-al); border:1px solid #238636; }
-  .signal-SAT   { background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
-  .signal-BEKLE { background:#21262d; color:#8b949e; border:1px solid #30363d; }
+  .signal-AL    { background:var(--bp-al-bg); color:var(--bp-al); border:1px solid var(--bp-al-bd); }
+  .signal-SAT   { background:var(--bp-sat-bg); color:var(--bp-sat); border:1px solid var(--bp-sat-bd); }
+  .signal-BEKLE { background:rgba(var(--bp-text3-rgb),.15); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.3); }
 
-  .pos-pnl { color:#3fb950; font-weight:600; }
-  .neg-pnl { color:#f85149; font-weight:600; }
-  .neu-pnl { color:#8b949e; }
+  .pos-pnl { color:var(--bp-al); font-weight:600; }
+  .neg-pnl { color:var(--bp-sat); font-weight:600; }
+  .neu-pnl { color:var(--bp-text3); }
 
   .btn-del { position:relative; background:none; border:none; color:var(--bp-text3); cursor:pointer; font-size:var(--bp-text-md); padding:2px 6px; }
   .btn-del::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
@@ -60,7 +60,7 @@
   .btn-action {
     position: relative;
     display: inline-flex; align-items: center; gap: 5px;
-    background: none; border: 1px solid #30363d; color: #8b949e;
+    background: none; border: 1px solid var(--bp-border); color: var(--bp-text3);
     border-radius:var(--bp-radius); padding: 5px 12px; font-size: var(--bp-text-sm);
     cursor: pointer; transition: all .15s;
   }
@@ -73,11 +73,11 @@
   /* Import modal */
   .import-toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: #1c2128; border: 1px solid #30363d; border-radius:var(--bp-radius-md);
-    padding: 10px 20px; font-size: var(--bp-text-base); color: #e6edf3;
+    background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-md);
+    padding: 10px 20px; font-size: var(--bp-text-base); color: var(--bp-text);
     z-index: var(--bp-z-page-toast); display: none; box-shadow: var(--bp-shadow-sm);
   }
-  .import-toast.ok  { border-color: #238636; color: #3fb950; }
+  .import-toast.ok  { border-color: var(--bp-al-bd); color: var(--bp-al); }
   .import-toast.err { border-color: var(--bp-sat-bd); color: var(--bp-sat); }
   @media (max-width: 900px) {
     .import-toast { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
@@ -91,18 +91,18 @@
     display:flex; align-items:flex-start; gap:12px;
     background:rgba(var(--bp-gold-rgb),.06); border:1px solid rgba(var(--bp-gold-rgb),.2);
     border-radius:var(--bp-radius-lg); padding:14px 16px; margin-bottom:20px;
-    font-size:var(--bp-text-base); color:#94a3b8; line-height:1.6;
+    font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.6;
   }
   .ls-warning-icon { font-size:var(--bp-text-xl); flex-shrink:0; margin-top:1px; }
   .ls-warning-body { flex:1; }
-  .ls-warning-title { font-weight:700; color:#e3b341; margin-bottom:3px; }
+  .ls-warning-title { font-weight:700; color:var(--bp-gold); margin-bottom:3px; }
   .ls-warning-close {
     position:relative; background:none; border:none; color:var(--bp-text3); cursor:pointer;
     font-size:var(--bp-text-lg); padding:0 2px; flex-shrink:0; line-height:1;
     transition:color .15s;
   }
   .ls-warning-close::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
-  .ls-warning-close:hover { color:#e3b341; }
+  .ls-warning-close:hover { color:var(--bp-gold); }
 
   /* T7.4: canlı veri/grafik fetch hatası banner'ı */
   .pf-fetch-error {
@@ -119,7 +119,7 @@
   .pf-fetch-error-retry:hover { background:rgba(var(--bp-sat-rgb),.12); }
 
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); margin-top:32px; }
-  footer a { color:#8b949e; text-decoration:none; }
+  footer a { color:var(--bp-text3); text-decoration:none; }
   @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
 
   /* ── CPO-DEV2-100: Yol A - mobilde tablo yerine kart listesi (tarama.html
@@ -136,20 +136,20 @@
     #pfMobileCards { display:flex; }
   }
   .pf-mcard {
-    background:#161b22; border:1px solid var(--bp-bkl-bd); border-radius:var(--bp-radius-lg);
+    background:var(--bp-surface); border:1px solid var(--bp-bkl-bd); border-radius:var(--bp-radius-lg);
     padding:12px 14px;
   }
   .pf-mtop { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px; }
-  .pf-mticker { font-size:var(--bp-text-15); font-weight:700; color:#f0f6fc; text-decoration:none; }
-  .pf-mticker:hover { color:#58a6ff; }
+  .pf-mticker { font-size:var(--bp-text-15); font-weight:700; color:var(--bp-text); text-decoration:none; }
+  .pf-mticker:hover { color:var(--bp-accent-cyan); }
   .pf-mtop-right { display:flex; align-items:center; gap:8px; }
   .pf-mprice-row, .pf-mdetail-row { display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; }
   .pf-mprice-row { margin-bottom:10px; }
   .pf-mdetail-row { padding-top:10px; border-top:1px solid var(--bp-border-subtle); }
   .pf-metric { display:flex; flex-direction:column; gap:2px; }
-  .pf-metric-label { font-size:var(--bp-text-2xs); color:#8b949e; text-transform:uppercase; letter-spacing:.4px; }
+  .pf-metric-label { font-size:var(--bp-text-2xs); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.4px; }
   .pf-mprice-row .pf-metric span { font-size:var(--bp-text-base); font-weight:600; }
-  .pf-mdate { font-size:var(--bp-text-sm); color:#8b949e; }
+  .pf-mdate { font-size:var(--bp-text-sm); color:var(--bp-text3); }
   .pf-mspark { margin-top:10px; }
   .pf-mentry { margin-top:8px; }
 
@@ -158,10 +158,10 @@
   .btn-entry {
     display:inline-block; padding:2px 7px; border-radius:var(--bp-radius-4); margin-left:5px;
     font-size:var(--bp-text-2xs); font-weight:700; cursor:pointer; vertical-align:middle;
-    background:rgba(63,185,80,.1); border:1px solid rgba(63,185,80,.3); color:#3fb950;
+    background:rgba(var(--bp-al-rgb),.1); border:1px solid rgba(var(--bp-al-rgb),.3); color:var(--bp-al);
     white-space:nowrap; transition:all .15s;
   }
-  .btn-entry:hover { background:rgba(63,185,80,.2); border-color:#3fb950; }
+  .btn-entry:hover { background:rgba(var(--bp-al-rgb),.2); border-color:var(--bp-al); }
 
   /* ── Makro Ticker Bandı ── */
   .macro-bar { background:var(--bp-bg); border-bottom:1px solid var(--bp-border); height:34px; overflow:hidden; position:relative; white-space:nowrap; }
@@ -176,8 +176,8 @@
   .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:34px; color:inherit; }
-  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
+  .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
+  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
 
   /* ── Data-Art köşe parıltısı (09.09 gece) — özet kutuları + ekleme çubuğu;
      yoğun pf-table/pf-mcard pozisyon listesine (kişi başına farklı sayıda satır
@@ -195,8 +195,7 @@
     width: 90px;
     height: 90px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(124, 92, 255, .12), transparent 70%);
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb), .12), transparent 70%);
     pointer-events: none;
   }
   .sum-card > *, .add-bar > * { position: relative; }
-
