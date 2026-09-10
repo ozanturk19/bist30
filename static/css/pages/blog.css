@@ -5,46 +5,46 @@
      emsaliyle ayni yatay-tasma guard'i eksikti. */
   html { overflow-x: clip; }
   body { font-size:var(--bp-text-md); min-height:100vh; overflow-x: clip; }
-  header { background:#161b22; border-bottom:1px solid #30363d; padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
-  .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:#f0f6fc; }
-  .page-sub   { font-size:var(--bp-text-base); color:#8b949e; margin-top:1px; }
+  header { background:var(--bp-surface); border-bottom:1px solid var(--bp-border); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:var(--bp-z-dropdown); }
+  .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:var(--bp-text); }
+  .page-sub   { font-size:var(--bp-text-base); color:var(--bp-text3); margin-top:1px; }
   .container  { max-width:var(--bp-container-1100); margin:0 auto; padding:28px 24px; }
 
   .cat-filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
-  .cat-btn { background:#21262d; border:1px solid #30363d; border-radius:var(--bp-radius-20); padding:5px 14px; font-size:var(--bp-text-sm); color:#8b949e; cursor:pointer; transition:all .15s; }
+  .cat-btn { background:var(--bp-border-subtle); border:1px solid var(--bp-border); border-radius:var(--bp-radius-20); padding:5px 14px; font-size:var(--bp-text-sm); color:var(--bp-text3); cursor:pointer; transition:all .15s; }
   .cat-btn.active { background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
   @media (hover: hover) and (pointer: fine) {
     .cat-btn:hover { background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
   }
   .blog-search-wrap { position:relative; margin-bottom:20px; }
   .blog-search {
-    width:100%; background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-md);
-    color:#e6edf3; padding:9px 14px 9px 38px; font-size:var(--bp-text-lg); outline:none;
+    width:100%; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md);
+    color:var(--bp-text); padding:9px 14px 9px 38px; font-size:var(--bp-text-lg); outline:none;
     transition:border-color .15s; font-family:inherit;
   } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
   .blog-search:focus { border-color:var(--bp-brand); }
   .blog-search::placeholder { color:var(--bp-text3); }
   .blog-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--bp-text3); pointer-events:none; }
   .no-results { padding:40px 24px; text-align:center; color:var(--bp-text3); }
-  .bc-new { display:inline-block; background:rgba(63,185,80,.12); border:1px solid rgba(63,185,80,.3); color:#3fb950; font-size:var(--bp-text-sm); font-weight:700; padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:6px; vertical-align:middle; text-transform:uppercase; letter-spacing:.3px; }
+  .bc-new { display:inline-block; background:rgba(var(--bp-al-rgb),.12); border:1px solid rgba(var(--bp-al-rgb),.3); color:var(--bp-al); font-size:var(--bp-text-sm); font-weight:700; padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:6px; vertical-align:middle; text-transform:uppercase; letter-spacing:.3px; }
 
   .blog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
-  .blog-card { background:#161b22; border:1px solid #30363d; border-radius:var(--bp-radius-lg); padding:20px; text-decoration:none; display:block; transition:all .15s; }
+  .blog-card { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:20px; text-decoration:none; display:block; transition:all .15s; }
   @media (hover: hover) and (pointer: fine) {
-    .blog-card:hover { border-color:#8b949e; background:#1c2128; transform:translateY(-2px); }
+    .blog-card:hover { border-color:var(--bp-text3); background:var(--bp-surface2); transform:translateY(-2px); }
   }
-  .bc-cat  { font-size:var(--bp-text-xs); color:#58a6ff; font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
-  .bc-title{ font-size:var(--bp-text-lg); font-weight:700; color:#f0f6fc; line-height:1.4; margin-bottom:8px; }
-  .bc-desc { font-size:var(--bp-text-base); color:#8b949e; line-height:1.6; margin-bottom:14px; }
+  .bc-cat  { font-size:var(--bp-text-xs); color:var(--bp-accent-cyan); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+  .bc-title{ font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); line-height:1.4; margin-bottom:8px; }
+  .bc-desc { font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.6; margin-bottom:14px; }
   .bc-meta { display:flex; align-items:center; gap:12px; font-size:var(--bp-text-xs); color:var(--bp-text3); }
   .bc-meta span { display:flex; align-items:center; gap:4px; }
 
   .blog-loadmore-wrap { text-align:center; margin-top:24px; }
-  .blog-loadmore-btn { background:#21262d; border:1px solid #30363d; border-radius:var(--bp-radius-md); color:#e6edf3; padding:10px 26px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; transition:all .15s; font-family:inherit; }
+  .blog-loadmore-btn { background:var(--bp-border-subtle); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); color:var(--bp-text); padding:10px 26px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; transition:all .15s; font-family:inherit; }
   .blog-loadmore-btn:hover { background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
 
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); margin-top:32px; }
-  footer a { color:#8b949e; text-decoration:none; }
+  footer a { color:var(--bp-text3); text-decoration:none; }
   @media(max-width:600px) { .container{padding:14px;} .blog-grid{grid-template-columns:1fr;} }
 
   /* Makro Ticker */
@@ -60,6 +60,6 @@
   .macro-pause-btn:hover, .macro-pause-btn:focus-visible { opacity: 1; }
   .macro-bar[data-paused="true"] .macro-track { animation-play-state: paused !important; }
   .macro-item { display:inline-flex; align-items:center; gap:8px; padding:0 20px; border-right:1px solid var(--bp-border); font-size:var(--bp-text-sm); height:34px; color:inherit; }
-  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
+  .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
+  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
 
