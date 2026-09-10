@@ -53,17 +53,17 @@
     <form id="contactForm" onsubmit="submitForm(event)" novalidate>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
         <div>
-          <label for="cfName" style="font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Ad Soyad</label>
-          <input id="cfName" type="text" required maxlength="100" autocomplete="name" placeholder="Adınız" style="width:100%;background:var(--bp-border-subtle);border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:var(--bp-text-lg);transition:border-color .15s">
+          <label for="cfName" style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Ad Soyad</label>
+          <input id="cfName" type="text" required maxlength="100" autocomplete="name" placeholder="Adınız" style="width:100%;background:var(--bp-border-subtle);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:9px 12px;color:var(--bp-text);font-size:var(--bp-text-lg);transition:border-color .15s">
         </div>
         <div>
-          <label for="cfEmail" style="font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">E-posta</label>
-          <input id="cfEmail" type="email" required maxlength="200" autocomplete="email" placeholder="ornek@mail.com" style="width:100%;background:var(--bp-border-subtle);border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:var(--bp-text-lg);transition:border-color .15s">
+          <label for="cfEmail" style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">E-posta</label>
+          <input id="cfEmail" type="email" required maxlength="200" autocomplete="email" placeholder="ornek@mail.com" style="width:100%;background:var(--bp-border-subtle);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:9px 12px;color:var(--bp-text);font-size:var(--bp-text-lg);transition:border-color .15s">
         </div>
       </div>
       <div style="margin-bottom:12px">
-        <label for="cfSubject" style="font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Konu</label>
-        <select id="cfSubject" style="width:100%;background:var(--bp-border-subtle);border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:var(--bp-text-lg)">
+        <label for="cfSubject" style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Konu</label>
+        <select id="cfSubject" style="width:100%;background:var(--bp-border-subtle);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:9px 12px;color:var(--bp-text);font-size:var(--bp-text-lg)">
           <option value="Site Hatası (buton, görünüm)">🐛 Site Hatası (buton, görünüm)</option>
           <option value="Öneri">💡 Öneri</option>
           <option value="Veri Hatası (fiyat, sinyal)">📊 Veri Hatası (fiyat, sinyal)</option>
@@ -72,13 +72,13 @@
         </select>
       </div>
       <div style="margin-bottom:16px">
-        <label for="cfMessage" style="font-size:var(--bp-text-xs);color:#8b949e;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Mesaj</label>
-        <textarea id="cfMessage" required maxlength="2000" rows="5" placeholder="Mesajınızı buraya yazın..." style="width:100%;background:var(--bp-border-subtle);border:1px solid #30363d;border-radius:var(--bp-radius);padding:9px 12px;color:#e6edf3;font-size:var(--bp-text-lg);resize:vertical;font-family:inherit;transition:border-color .15s"></textarea>
+        <label for="cfMessage" style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Mesaj</label>
+        <textarea id="cfMessage" required maxlength="2000" rows="5" placeholder="Mesajınızı buraya yazın..." style="width:100%;background:var(--bp-border-subtle);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:9px 12px;color:var(--bp-text);font-size:var(--bp-text-lg);resize:vertical;font-family:inherit;transition:border-color .15s"></textarea>
       </div>
       <div style="margin-bottom:14px">
-        <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:#8b949e;cursor:pointer;line-height:1.4">
+        <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--bp-text3);cursor:pointer;line-height:1.4">
           <input type="checkbox" id="cfKvkk" required style="margin-top:2px;flex-shrink:0">
-          <span><a href="/gizlilik" target="_blank" style="color:#58a6ff">Gizlilik Politikası</a>'nı okudum, mesajımdaki kişisel verilerimin işlenmesini kabul ediyorum.</span>
+          <span><a href="/gizlilik" target="_blank" style="color:var(--bp-accent-cyan)">Gizlilik Politikası</a>'nı okudum, mesajımdaki kişisel verilerimin işlenmesini kabul ediyorum.</span>
         </label>
       </div>
       <button type="submit" id="cfBtn" style="background:var(--bp-brand);color:var(--bp-bg);border:none;border-radius:var(--bp-radius);padding:10px 24px;font-size:var(--bp-text-base);font-weight:600;cursor:pointer;transition:background .15s">
@@ -166,8 +166,8 @@ async function submitForm(e) {
       document.getElementById('cfSubject').disabled = true;
       btn.style.display = 'none';
       msg.style.display = 'block';
-      msg.style.color = '#3fb950';
-      msg.innerHTML = '✅ Mesajınız iletildi.<br><span style="font-size:var(--bp-text-base);color:#8b949e">1–3 iş günü içinde yanıt veriyoruz.</span>';
+      msg.style.color = 'var(--bp-al)';
+      msg.innerHTML = '✅ Mesajınız iletildi.<br><span style="font-size:var(--bp-text-base);color:var(--bp-text3)">1–3 iş günü içinde yanıt veriyoruz.</span>';
     } else {
       msg.style.display = 'block';
       msg.style.color = 'var(--bp-sat)';
