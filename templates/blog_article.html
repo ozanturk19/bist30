@@ -1,6 +1,6 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ article.title }} | BorsaPusula</title>
 <meta name="description" content="{{ article.desc }}">
-<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/blog/{{ (article.canonical_slug if article.canonical_slug else article.slug) | urlencode }}">
 <meta property="og:type"        content="article">
 <meta property="og:title"       content="{{ article.title }} | borsapusula.com">
