@@ -223,8 +223,8 @@
   .anomaly-badge {
     display: inline-flex; align-items: center; gap: 3px;
     padding: 2px 8px; border-radius:var(--bp-radius-lg);
-    background: rgba(217,153,34,0.15);
-    color: #d29922; border: 1px solid rgba(217,153,34,0.3);
+    background: rgba(var(--bp-warn-rgb),0.15);
+    color: var(--bp-warn); border: 1px solid rgba(var(--bp-warn-rgb),0.3);
     font-size: var(--bp-text-xs); font-weight: 600; cursor: default;
   }
   /* ── Container ── */
@@ -393,7 +393,7 @@
     margin-bottom: 8px;
   }
   .eq-safe  { background: rgba(var(--bp-al-rgb),0.12);  color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),0.3); }
-  .eq-risky { background: rgba(210,153,34,0.12); color: #e3b341; border: 1px solid rgba(210,153,34,0.3); }
+  .eq-risky { background: rgba(var(--bp-warn-rgb),0.12); color: #e3b341; border: 1px solid rgba(var(--bp-warn-rgb),0.3); }
   .eq-note {
     font-size: var(--bp-text-sm);
     color: var(--bp-text3);

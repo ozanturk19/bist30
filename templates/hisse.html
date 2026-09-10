@@ -1963,7 +1963,7 @@ function renderSummary(s, signalData) {
                      ageColor === 'orange' ? '🟠' :
                      ageColor === 'red' ? '🔴' : '';
     const ageHexColor = ageColor === 'green' ? '#3fb950' :
-                        ageColor === 'yellow' ? '#d29922' :
+                        ageColor === 'yellow' ? 'var(--bp-warn)' :
                         ageColor === 'orange' ? '#f0883e' :
                         ageColor === 'red' ? 'var(--bp-sat)' : '#8b949e';
     const ageHtml = ageLabel ? ` <span style="color:${ageHexColor};font-size:var(--bp-text-xs);margin-left:6px" data-tip="Sinyal yaşı: ${ageLabel}" tabindex="0">${ageEmoji} ${ageLabel}</span>` : '';
@@ -2095,7 +2095,7 @@ function renderSummary(s, signalData) {
       // Faz 1 #5: Bilanço uyarısı (7 gün içinde kesin tarih varsa)
       if (signalData.earnings_warning) {
         const ew = signalData.earnings_warning;
-        noteHtml += `<br><span style="margin-top:8px;display:inline-block;background:rgba(210,153,34,0.12);border:1px solid rgba(210,153,34,0.4);border-radius:6px;padding:5px 10px;color:#d29922;font-size:var(--bp-text-sm);font-weight:600" data-tip="Bilanço açıklaması fiyatta volatilite yaratabilir, pozisyon önce kapatılması düşünülebilir" tabindex="0">⚠️ ${ew.message}</span>`;
+        noteHtml += `<br><span style="margin-top:8px;display:inline-block;background:rgba(var(--bp-warn-rgb),0.12);border:1px solid rgba(var(--bp-warn-rgb),0.4);border-radius:6px;padding:5px 10px;color:var(--bp-warn);font-size:var(--bp-text-sm);font-weight:600" data-tip="Bilanço açıklaması fiyatta volatilite yaratabilir, pozisyon önce kapatılması düşünülebilir" tabindex="0">⚠️ ${ew.message}</span>`;
       }
       const eqNoteEl = document.getElementById('eqNote');
       if (eqNoteEl) eqNoteEl.innerHTML = noteHtml;
@@ -2131,7 +2131,7 @@ function renderSummary(s, signalData) {
             <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:var(--bp-text-xs);font-variant-numeric:tabular-nums">
               <div style="display:flex;justify-content:space-between;color:#8b949e">
                 <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">R/R</a></span>
-                <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : 'var(--bp-sat)'}">${rrSig.toFixed(2).replace('.', ',')}x</strong>
+                <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? 'var(--bp-warn)' : 'var(--bp-sat)'}">${rrSig.toFixed(2).replace('.', ',')}x</strong>
               </div>
             </div>` : '';
           rrLevelsEl.innerHTML = `
@@ -2866,7 +2866,7 @@ async function loadKapDisclosures() {
         <div class="kap-meta">
           <span>${dateShort}</span>
           ${d.subject ? `<span style="color:var(--bp-border)">·</span><span style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-tip="${escHtml(d.subject)}" tabindex="0">${escHtml(d.subject)}</span>` : ''}
-          ${d.late ? '<span style="color:#d29922;font-size:10px">⚠ GECİKMELİ</span>' : ''}
+          ${d.late ? '<span style="color:var(--bp-warn);font-size:10px">⚠ GECİKMELİ</span>' : ''}
         </div>
       </div>`;
     }).join('');

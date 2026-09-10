@@ -141,8 +141,8 @@
   }
   .q-ideal  { background: rgba(var(--bp-al-rgb),.18);  color:var(--bp-al); }
   .q-iyi    { background: rgba(var(--bp-accent-cyan-rgb),.18);  color:var(--bp-accent-cyan); }
-  .q-dikkat { background: rgba(210,153,34,.18);  color:#d29922; }
-  .q-uzak   { background: rgba(210,153,34,.18);  color:#d29922; }
+  .q-dikkat { background: rgba(var(--bp-warn-rgb),.18);  color:var(--bp-warn); }
+  .q-uzak   { background: rgba(var(--bp-warn-rgb),.18);  color:var(--bp-warn); }
   .q-none   { color: var(--bp-text3); }
 
 

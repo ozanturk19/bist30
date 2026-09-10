@@ -56,6 +56,9 @@
   --bp-art-violet: #7c5cff;   /* CPO-1558: Data-Art mockup'ın kendi dekoratif gradyan mor'u (hero-art
                                   blob'ları + logo mark'ı aynı kaynaktan — --bp-brand'in soluk
                                   periwinkle'ından KASITLI olarak daha canlı/doygun */
+  --bp-warn:      #d29922;   /* CPO-1576 (CPO-DEV2-061 emsaline dayalı kanonikleştirme): dikkat/orta-risk
+                                 amber — entry-quality "dikkatli/uzak" + bilanço-yaklaşıyor rozeti + R:R
+                                 orta-bölge. --bp-gold'dan (premium/altın) AYRI semantik eksen, karıştırma. */
 
   /* Radius */
   --bp-radius:    6px;
@@ -93,6 +96,7 @@
   --bp-premium-rgb:  168, 85, 247;
   --bp-accent-cyan-rgb: 34, 211, 238;
   --bp-art-violet-rgb: 124, 92, 255;
+  --bp-warn-rgb:  210, 153, 34;
 
   /* Compat aliases — eski stil kodlarıyla uyumluluk */
   --accent:       #b8c3ff;
