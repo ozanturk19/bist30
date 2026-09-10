@@ -559,7 +559,7 @@
          gösterilir. Halka rengi (_tc) skor bandını nötr biçimde korur, tier ismi metin olarak
          artık render edilmiyor. CPO-DEV2-053/055: 3→2 katman, "Premium" adı kaldırıldı. #}
       {%- set _tier = ssr_signal.tier -%}
-      {%- if   _tier == "guclu_sinyal" %}{% set _tc = "#a855f7" %}
+      {%- if   _tier == "guclu_sinyal" %}{% set _tc = "var(--bp-premium)" %}
       {%- elif _tier == "standart"     %}{% set _tc = "#1f6feb" %}
       {%- else                         %}{% set _tc = "var(--bp-text3)" %}{% endif %}
       <div class="score-ring" style="display:flex;align-items:center;gap:8px;margin-left:auto"
@@ -571,7 +571,7 @@
                   stroke-dashoffset="{{ ((175.93 * (100 - _ts)) / 100)|round(2) }}"
                   transform="rotate(-90 32 32)"/>
           <text x="32" y="34" text-anchor="middle" dominant-baseline="middle"
-                fill="#e5e1e4" style="font-weight:700;font-size:var(--bp-text-xl);font-family:inherit">{{ _ts }}</text>
+                fill="var(--bp-text)" style="font-weight:700;font-size:var(--bp-text-xl);font-family:inherit">{{ _ts }}</text>
         </svg>
         <div style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.1">
           {%- if ssr_signal.is_premium %}
@@ -938,13 +938,13 @@
       <div style="display:flex;gap:6px;align-items:center">
         <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
                 style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
-                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='#c7c5cd'"
-                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='#909097'"
+                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
+                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'"
                 title="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
         <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
                 style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
-                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='#c7c5cd'"
-                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='#909097'">
+                onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
+                onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'">
           Detaylı göster ▾
         </button>
       </div>
@@ -1087,17 +1087,17 @@
     <span style="font-size:var(--bp-text-sm);color:var(--bp-text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Resmi Kaynaklar</span>
     <a href="{{ kap_url }}" target="_blank" rel="noopener"
        style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-text3);text-decoration:none;transition:all .15s"
-       onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
+       onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">
       <span aria-hidden="true">📋</span> KAP Bildirimleri
     </a>
     <a href="https://finance.yahoo.com/quote/{{ ticker }}.IS" target="_blank" rel="noopener"
        style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-text3);text-decoration:none;transition:all .15s"
-       onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
+       onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">
       <span aria-hidden="true">📈</span> Yahoo Finance
     </a>
     <a href="https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/sirket-karti.aspx?hisse={{ ticker }}" target="_blank" rel="noopener"
        style="display:inline-flex;align-items:center;gap:5px;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-text3);text-decoration:none;transition:all .15s"
-       onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
+       onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">
       <span aria-hidden="true">🏦</span> İş Yatırım
     </a>
   </div>
@@ -1185,7 +1185,7 @@
       <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Son 90 gün · ODA + Finansal Rapor</span>
       <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q={{ ticker }}" target="_blank" rel="noopener"
          style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:var(--bp-text-xs);color:var(--bp-text3);background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
-         onmouseover="this.style.color='#e5e1e4'" onmouseout="this.style.color='#909097'">
+         onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">
         KAP'ta Aç <span aria-hidden="true">↗</span>
       </a>
     </div>
@@ -1339,7 +1339,7 @@ async function hisseSubscribe() {
     if (window.showToast) showToast('Devam etmek için KVKK onay kutusunu işaretleyin.', 'error');
     return;
   }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { emailEl.style.borderColor='#f85149'; emailEl.focus(); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { emailEl.style.borderColor='var(--bp-sat)'; emailEl.focus(); return; }
   const btn = document.querySelector('#hisseSubForm button');
   btn.textContent = 'Kaydediliyor…'; btn.disabled = true;
   try {
@@ -1351,7 +1351,7 @@ async function hisseSubscribe() {
       setTimeout(() => { if(cta) cta.style.display='none'; }, 4000);
     } else {
       btn.textContent = 'Abone Ol'; btn.disabled = false;
-      emailEl.style.borderColor = '#f85149';
+      emailEl.style.borderColor = 'var(--bp-sat)';
       if (window.showToast) showToast('⚠️ ' + (j.message || j.error || 'Bir hata oluştu'), 'error');
     }
   } catch(e) { btn.textContent = 'Abone Ol'; btn.disabled = false; if (window.showToast) showToast('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'error'); }
@@ -1798,7 +1798,7 @@ function buildChart(d) {
       : '';
     legEl.innerHTML =
       datePart +
-      `<span style="color:#b8c3ff"><span style="display:inline-block;width:14px;height:2px;background:#b8c3ff;vertical-align:middle;margin-right:3px;border-radius:var(--bp-radius-1)"></span>EMA12 ${fmt(l12)}</span>&nbsp;&nbsp;` +
+      `<span style="color:var(--bp-brand)"><span style="display:inline-block;width:14px;height:2px;background:var(--bp-brand);vertical-align:middle;margin-right:3px;border-radius:var(--bp-radius-1)"></span>EMA12 ${fmt(l12)}</span>&nbsp;&nbsp;` +
       `<span style="color:#e3b341"><span style="display:inline-block;width:14px;height:2px;background:#e3b341;vertical-align:middle;margin-right:3px;border-radius:var(--bp-radius-1)"></span>EMA99 ${fmt(l99)}</span>`;
   }
   updateLeg();
@@ -1874,13 +1874,13 @@ function renderFreshness(f, dq, ageS, refreshing) {
      (effDq stale/critical) burada kısa durum kalır, ayrıntı banner'da. */
   let color, label;
   if (!f.market_open) {
-    color = '#909097'; label = 'Piyasa kapalı';
+    color = 'var(--bp-text3)'; label = 'Piyasa kapalı';
   } else if (effDq === 'critical') {
-    color = '#f85149'; label = 'Veri bayat';
+    color = 'var(--bp-sat)'; label = 'Veri bayat';
   } else if (effDq === 'stale') {
     color = '#f5c949'; label = 'Veri gecikmeli';
   } else if (age < 300) {
-    color = '#f59e0b'; label = 'BIST ~15dk gecikmeli';
+    color = 'var(--bp-gold)'; label = 'BIST ~15dk gecikmeli';
   } else {
     /* CPO-1555: goreli "X once guncellendi" yerine mutlak tarih — EOD
        mimarisiyle tutarli (Ozan notu). */
@@ -1965,7 +1965,7 @@ function renderSummary(s, signalData) {
     const ageHexColor = ageColor === 'green' ? '#3fb950' :
                         ageColor === 'yellow' ? '#d29922' :
                         ageColor === 'orange' ? '#f0883e' :
-                        ageColor === 'red' ? '#f85149' : '#8b949e';
+                        ageColor === 'red' ? 'var(--bp-sat)' : '#8b949e';
     const ageHtml = ageLabel ? ` <span style="color:${ageHexColor};font-size:var(--bp-text-xs);margin-left:6px" data-tip="Sinyal yaşı: ${ageLabel}" tabindex="0">${ageEmoji} ${ageLabel}</span>` : '';
     document.getElementById('icDate').innerHTML =
       (isNew ? '<span style="color:#e3b341">⚡ Bugün</span>'
@@ -1979,7 +1979,7 @@ function renderSummary(s, signalData) {
       // kullaniyordu - ayni ekranda iki tutarsiz fiyat kaynagi.
       const ret = ((_dispPrice - ep) / ep * 100);
       const retSign = ret >= 0 ? '+' : '';
-      const retColor = ret >= 0 ? '#00e290' : '#f85149';
+      const retColor = ret >= 0 ? 'var(--bp-al)' : 'var(--bp-sat)';
       document.getElementById('icEntry').innerHTML =
         fmt(ep) + ` <span style="font-size:var(--bp-text-xs);color:${retColor}">(${retSign}${ret.toFixed(1).replace('.', ',')}%)</span>`;
     } else if (s.signal !== 'BEKLE' && isNew) {
@@ -2131,7 +2131,7 @@ function renderSummary(s, signalData) {
             <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:var(--bp-text-xs);font-variant-numeric:tabular-nums">
               <div style="display:flex;justify-content:space-between;color:#8b949e">
                 <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">R/R</a></span>
-                <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : '#f85149'}">${rrSig.toFixed(2).replace('.', ',')}x</strong>
+                <strong style="color:${rrSig >= 2.0 ? '#3fb950' : rrSig >= 1.0 ? '#d29922' : 'var(--bp-sat)'}">${rrSig.toFixed(2).replace('.', ',')}x</strong>
               </div>
             </div>` : '';
           rrLevelsEl.innerHTML = `
@@ -2437,11 +2437,11 @@ function renderSigPerf(history) {
 
   const wrEl = document.getElementById('sigPerfWinRate');
   wrEl.textContent = '%' + winRate;
-  wrEl.style.color = winRate > 60 ? '#00e290' : (winRate < 40 ? '#f85149' : '#909097');
+  wrEl.style.color = winRate > 60 ? 'var(--bp-al)' : (winRate < 40 ? 'var(--bp-sat)' : 'var(--bp-text3)');
 
   const avgEl = document.getElementById('sigPerfAvg');
   avgEl.textContent = (avgRet > 0 ? '+' : '') + avgRet.toFixed(1).replace('.', ',') + '%';
-  avgEl.style.color = avgRet > 0 ? '#00e290' : (avgRet < 0 ? '#f85149' : '#909097');
+  avgEl.style.color = avgRet > 0 ? 'var(--bp-al)' : (avgRet < 0 ? 'var(--bp-sat)' : 'var(--bp-text3)');
 
   document.getElementById('sigPerfCount').textContent = closed.length;
   box.style.display = '';
@@ -2648,7 +2648,7 @@ async function loadNews(retryCount) {
       if (badge) {
         badge.textContent = isKap ? 'KAP + AI' : 'Gemini AI';
         badge.style.background = isKap ? 'rgba(0,226,144,.12)' : '';
-        badge.style.color      = isKap ? '#00e290' : '';
+        badge.style.color      = isKap ? 'var(--bp-al)' : '';
         badge.style.borderColor= isKap ? 'rgba(0,226,144,.25)' : '';
       }
       if (desc) {
@@ -2794,14 +2794,14 @@ async function loadSignalStory() {
       win.textContent = `${data.window_start} – ${data.signal_date} (sinyal)`;
     }
 
-    const CLASS_CLR = { ODA: '#b8c3ff', FR: '#00e290' };
+    const CLASS_CLR = { ODA: 'var(--bp-brand)', FR: 'var(--bp-al)' };
 
     list.innerHTML = events.map(ev => {
       const delta    = ev.days_delta;
       const deltaStr = delta === 0 ? 'Sinyal günü'
                      : delta > 0  ? `+${delta}g sonra`
                      : `${Math.abs(delta)}g önce`;
-      const clr     = CLASS_CLR[ev.class] || '#909097';
+      const clr     = CLASS_CLR[ev.class] || 'var(--bp-text3)';
       const summary = ev.summary || ev.subject || '—';
       return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--bp-surface2)">
         <span style="font-size:10px;color:${clr};background:rgba(0,0,0,.15);border:1px solid currentColor;border-radius:3px;padding:1px 5px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escHtml(ev.class)}</span>
@@ -2910,7 +2910,7 @@ loadKapDisclosures();
 /* ── Temel Analiz ──────────────────────────────────── */
 function _fundCard(lbl, val, color, sub) {
   if (val == null) return '';
-  const c = color || '#e5e1e4';
+  const c = color || 'var(--bp-text)';
   const subHtml = sub ? `<div style="font-size:10px;color:var(--bp-text3);margin-top:2px">${sub}</div>` : '';
   return `<div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:8px;padding:11px 13px">
     <div style="font-size:10px;color:var(--bp-text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;font-weight:600">${lbl}</div>
@@ -2919,10 +2919,10 @@ function _fundCard(lbl, val, color, sub) {
   </div>`;
 }
 function _pct(v, label) { return v != null ? `%${v}` : null; }
-function _growthColor(v) { return v == null ? '#e5e1e4' : v > 10 ? '#00e290' : v > 0 ? '#f59e0b' : '#f85149'; }
-function _roeColor(v) { return v == null ? '#e5e1e4' : v > 20 ? '#00e290' : v > 10 ? '#f59e0b' : '#f85149'; }
-function _peColor(v) { return v == null ? '#e5e1e4' : v < 12 ? '#00e290' : v < 25 ? '#f59e0b' : '#f85149'; }
-function _pbColor(v) { return v == null ? '#e5e1e4' : v < 1 ? '#00e290' : v < 3 ? '#f59e0b' : '#f85149'; }
+function _growthColor(v) { return v == null ? 'var(--bp-text)' : v > 10 ? 'var(--bp-al)' : v > 0 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
+function _roeColor(v) { return v == null ? 'var(--bp-text)' : v > 20 ? 'var(--bp-al)' : v > 10 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
+function _peColor(v) { return v == null ? 'var(--bp-text)' : v < 12 ? 'var(--bp-al)' : v < 25 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
+function _pbColor(v) { return v == null ? 'var(--bp-text)' : v < 1 ? 'var(--bp-al)' : v < 3 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
 
 async function loadFundamentals() {
   try {
@@ -2938,20 +2938,20 @@ async function loadFundamentals() {
 
     /* Değerleme kartları */
     const valCards = [
-      _fundCard('Piyasa Değeri', f.market_cap, '#e5e1e4'),
+      _fundCard('Piyasa Değeri', f.market_cap, 'var(--bp-text)'),
       _fundCard('F/K Oranı', f.pe_ratio != null ? f.pe_ratio.toFixed(1).replace('.', ',') + 'x' : null, _peColor(f.pe_ratio), f.pe_ratio < 12 ? 'Ucuz' : f.pe_ratio < 25 ? 'Makul' : 'Pahalı'),
       _fundCard('İleriye Dönük F/K', f.forward_pe != null ? f.forward_pe.toFixed(1).replace('.', ',') + 'x' : null, _peColor(f.forward_pe), f.forward_pe < 12 ? 'Ucuz' : f.forward_pe < 25 ? 'Makul' : 'Pahalı'),
       _fundCard('F/DD Oranı', f.pb_ratio != null ? f.pb_ratio.toFixed(2).replace('.', ',') + 'x' : null, _pbColor(f.pb_ratio), f.pb_ratio < 1 ? 'Ucuz' : f.pb_ratio < 3 ? 'Makul' : 'Pahalı'),
-      _fundCard('HBK (EPS)', f.eps != null ? f.eps.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : null, '#e5e1e4'),
-      _fundCard('F/S Oranı', f.price_to_sales != null ? f.price_to_sales.toFixed(2).replace('.', ',') + 'x' : null, '#e5e1e4'),
-      _fundCard('Defter Değeri (Hisse Başı)', f.book_value != null ? f.book_value.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : null, '#e5e1e4'),
-      _fundCard('Nakit ve Benzerleri', f.total_cash, '#e5e1e4'),
+      _fundCard('HBK (EPS)', f.eps != null ? f.eps.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : null, 'var(--bp-text)'),
+      _fundCard('F/S Oranı', f.price_to_sales != null ? f.price_to_sales.toFixed(2).replace('.', ',') + 'x' : null, 'var(--bp-text)'),
+      _fundCard('Defter Değeri (Hisse Başı)', f.book_value != null ? f.book_value.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : null, 'var(--bp-text)'),
+      _fundCard('Nakit ve Benzerleri', f.total_cash, 'var(--bp-text)'),
     ].filter(Boolean).join('');
 
     /* Kârlılık kartları */
     const profCards = [
-      _fundCard('Yıllık Ciro', f.revenue, '#e5e1e4'),
-      _fundCard('Net Kâr', f.net_income, '#e5e1e4'),
+      _fundCard('Yıllık Ciro', f.revenue, 'var(--bp-text)'),
+      _fundCard('Net Kâr', f.net_income, 'var(--bp-text)'),
       _fundCard('Net Kâr Marjı', f.profit_margin != null ? `%${f.profit_margin.toFixed(1).replace('.', ',')}` : null, _growthColor(f.profit_margin), f.profit_margin > 10 ? 'Yüksek' : f.profit_margin > 0 ? 'Orta' : 'Negatif'),
       _fundCard('Faaliyet Marjı', f.operating_margin != null ? `%${f.operating_margin.toFixed(1).replace('.', ',')}` : null, _growthColor(f.operating_margin), f.operating_margin > 10 ? 'Yüksek' : f.operating_margin > 0 ? 'Orta' : 'Negatif'),
       _fundCard('Kazanç Büyümesi', f.earnings_growth != null ? `%${f.earnings_growth.toFixed(1).replace('.', ',')}` : null, _growthColor(f.earnings_growth), f.earnings_growth > 10 ? 'Güçlü' : f.earnings_growth > 0 ? 'Ilımlı' : 'Daralma'),
@@ -2962,9 +2962,9 @@ async function loadFundamentals() {
     const retCards = [
       _fundCard('Temettü Verimi', f.dividend_yield != null ? `%${f.dividend_yield.toFixed(2).replace('.', ',')}` : null, f.dividend_yield >= 4 ? 'var(--bp-al)' : f.dividend_yield > 0 ? 'var(--bp-gold)' : 'var(--bp-text3)', f.dividend_yield >= 4 ? 'Yüksek' : f.dividend_yield > 0 ? 'Standart' : 'Yok'),
       _fundCard('ROE (Öz Ser. Get.)', f.roe != null ? `%${f.roe.toFixed(1).replace('.', ',')}` : null, _roeColor(f.roe), f.roe > 20 ? 'Güçlü' : f.roe > 10 ? 'Orta' : 'Zayıf'),
-      _fundCard('Beta (Piyasa Riski)', f.beta != null ? f.beta.toFixed(2).replace('.', ',') : null, f.beta > 1.3 ? '#f85149' : f.beta < 0.7 ? '#00e290' : '#e5e1e4', f.beta > 1 ? 'Piyasa üstü risk' : 'Düşük volatilite'),
+      _fundCard('Beta (Piyasa Riski)', f.beta != null ? f.beta.toFixed(2).replace('.', ',') : null, f.beta > 1.3 ? 'var(--bp-sat)' : f.beta < 0.7 ? 'var(--bp-al)' : 'var(--bp-text)', f.beta > 1 ? 'Piyasa üstü risk' : 'Düşük volatilite'),
       _fundCard('Borç/Öz Sermaye', f.debt_to_equity != null ? f.debt_to_equity.toFixed(2).replace('.', ',') + 'x' : null, f.debt_to_equity > 2 ? 'var(--bp-sat)' : f.debt_to_equity > 1 ? 'var(--bp-gold)' : 'var(--bp-al)', f.debt_to_equity > 2 ? 'Yüksek' : f.debt_to_equity > 1 ? 'Orta' : 'Düşük'),
-      _fundCard('Cari Oran', f.current_ratio != null ? f.current_ratio.toFixed(2).replace('.', ',') : null, f.current_ratio >= 2 ? '#00e290' : f.current_ratio >= 1 ? '#f59e0b' : '#f85149', f.current_ratio >= 2 ? 'Güçlü' : f.current_ratio >= 1 ? 'Yeterli' : 'Zayıf'),
+      _fundCard('Cari Oran', f.current_ratio != null ? f.current_ratio.toFixed(2).replace('.', ',') : null, f.current_ratio >= 2 ? 'var(--bp-al)' : f.current_ratio >= 1 ? 'var(--bp-gold)' : 'var(--bp-sat)', f.current_ratio >= 2 ? 'Güçlü' : f.current_ratio >= 1 ? 'Yeterli' : 'Zayıf'),
     ].filter(Boolean).join('');
 
     const allEmpty = !valCards && !profCards && !retCards;
@@ -3058,9 +3058,9 @@ async function loadMTF() {
       { key: 'monthly', label: '🗓️ Aylık',     short: '1M' },
     ];
 
-    const sigColor = s => s === 'AL' ? '#00e290' : s === 'SAT' ? '#f85149' : '#909097';
-    const sigBg    = s => s === 'AL' ? '#1a4731' : s === 'SAT' ? '#3d0f0f' : '#1c1b1f';
-    const sigBord  = s => s === 'AL' ? '#238636' : s === 'SAT' ? '#da3633' : 'var(--bp-border)';
+    const sigColor = s => s === 'AL' ? 'var(--bp-al)' : s === 'SAT' ? 'var(--bp-sat)' : 'var(--bp-bkl)';
+    const sigBg    = s => s === 'AL' ? '#1a4731' : s === 'SAT' ? 'var(--bp-sat-bg)' : 'var(--bp-surface2)';
+    const sigBord  = s => s === 'AL' ? '#238636' : s === 'SAT' ? 'var(--bp-sat-bd)' : 'var(--bp-border)';
     const sigArrow = s => s === 'AL' ? '▲' : s === 'SAT' ? '▼' : '●';
 
     /* CPO-983 Opsiyon B: 4 ayrı boş "Veri yok" kutusu yerine tek anlamlı placeholder */
@@ -3165,7 +3165,7 @@ function _applyTooltipVisibility() {
   const tb = document.getElementById('tooltipToggle');
   if (tb) {
     tb.textContent = show ? '? Kapat' : '? Açıkla';
-    tb.style.color = show ? '#b8c3ff' : '#909097';
+    tb.style.color = show ? 'var(--bp-brand)' : 'var(--bp-text3)';
     tb.style.borderColor = show ? 'rgba(184,195,255,0.35)' : 'var(--bp-border)';
   }
 }
