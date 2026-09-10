@@ -894,7 +894,6 @@
   }
   /* ── Makro Ticker Bandı ── */
   .macro-bar {
-    min-height: 44px;
     background: var(--bp-bg); border-bottom: 1px solid var(--bp-border);
     height: 32px; overflow: hidden; position: sticky; top: 0; z-index: var(--bp-z-sticky); white-space: nowrap;
   }
