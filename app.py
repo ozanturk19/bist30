@@ -9059,6 +9059,20 @@ def api_tarama():
         # yuzden diger alanlarin aksine burada rev=True DEGIL.
         rev = sort_by in ("adx","price","vol_ratio","bull_score","change_pct","signal_strength")
     def _tarama_sort_key(x):
+        if sort_by == 'signal_strength':
+            # CPO-1581: "Skor" siralamasi yon-korlaydi -- SAT (Trend Bozuldu)
+            # ham signal_strength yuksekse listenin basina cikabiliyordu, bu
+            # da Ozan'in "long only, sadece guclu trendler iyi puan alsin"
+            # talimatiyla celisiyordu. Once yon bucket'i (AL=0, BEKLE=1,
+            # SAT=2) sabit kalir -- AL HER ZAMAN SAT'in onunde -- sonra
+            # bucket ICINDE signal_strength sort_dir'e gore siralanir.
+            # bucket_key rev'e gore isaret degistirir ki sort()'un tum
+            # tuple'i reverse=True'da TERSE cevirmesi bucket sirasini
+            # bozmasin (digerleri: adx/price/vol_ratio yon-bagimsiz, DOKUNULMADI).
+            bucket = {'AL': 0, 'BEKLE': 1, 'SAT': 2}.get(x.get('signal'), 1)
+            bucket_key = -bucket if rev else bucket
+            v = x.get('signal_strength') or 0
+            return (bucket_key, v)
         if sort_by == 'signal_bars':
             # CPO-1464 #2: signal_bars bir BAR sayacidir -- haftasonu/refresh-
             # atlama gunlerini ticker'a gore FARKLI atlar, bu yuzden takvimde
