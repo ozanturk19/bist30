@@ -7708,7 +7708,7 @@ def build_signal_summary(stock):
     # ── Katman A — tek cümle (durum matrisi) ──────────────────────────────────
     if signal == "AL":
         if not gain_pct_known:
-            verdict = ("Alış sinyali aktif ancak fiyat değişim verisi şu an hesaplanamıyor; "
+            verdict = ("Güçlü Trend sinyali aktif ancak fiyat değişim verisi şu an hesaplanamıyor; "
                        "trend gücü ve giriş zamanlaması için ek göstergelere bakılması öneriliyor.")
         elif gain_pct > 50 and rsi_hot:
             verdict = ("Trend güçlü kalmaya devam ediyor; ancak fiyat sinyal "
@@ -7725,33 +7725,33 @@ def build_signal_summary(stock):
             verdict = ("Trend yeni güçlenmiş; sinyal taze ve giriş için nispeten erken "
                        "bir aşamada görünüyor.")
         else:
-            verdict = "Trend güçlü ve alış sinyali aktif kalmaya devam ediyor."
+            verdict = "Trend güçlü, sinyal aktif kalmaya devam ediyor."
     elif signal == "SAT":
         if not gain_pct_known:
-            verdict = ("Satış sinyali aktif ancak fiyat değişim verisi şu an hesaplanamıyor; "
+            verdict = ("Trend Bozuldu sinyali aktif ancak fiyat değişim verisi şu an hesaplanamıyor; "
                        "trend yönü için ek göstergelere bakılması öneriliyor.")
         elif gain_pct < -20 and rsi_cold:
             verdict = ("Düşüş trendi sürüyor; fiyat sinyal başlangıcına göre belirgin "
-                       "geriledi ve kısa vadede aşırı satım bölgesine yaklaştı — yeni satış "
-                       "için acele etmek yerine tepki ihtimalini izlemek daha sağlıklı.")
+                       "geriledi ve kısa vadede aşırı satım bölgesine yaklaştı — yeni "
+                       "pozisyon için acele etmek yerine tepki ihtimalini izlemek daha sağlıklı.")
         elif gain_pct < -20:
             verdict = ("Düşüş trendi güçlü; fiyat sinyal başından bu yana belirgin geriledi, "
-                       "satış baskısı sürüyor görünüyor.")
+                       "düşüş baskısı sürüyor görünüyor.")
         elif bars <= 5:
-            verdict = ("Satış sinyali yeni oluşmuş; trend aşağı yönlü dönmeye başlamış "
+            verdict = ("Trend Bozuldu sinyali yeni oluşmuş; trend aşağı yönlü dönmeye başlamış "
                        "görünüyor.")
         else:
-            verdict = "Trend zayıf ve satış sinyali aktif kalmaya devam ediyor."
+            verdict = "Trend zayıf, sinyal aktif kalmaya devam ediyor."
     else:  # BEKLE
         if weekly == 1:
-            verdict = ("Net bir alım/satım sinyali yok; göstergeler kararsız ancak "
+            verdict = ("Net bir yön sinyali yok; göstergeler kararsız ancak "
                        "orta vadeli görünüm hâlâ yukarı yönlü — beklemek şu an daha "
                        "temkinli bir tercih.")
         elif weekly == -1:
             verdict = ("Net bir sinyal yok ve orta vadeli görünüm zayıf — yeni pozisyon "
                        "için acele etmemek, netleşmeyi beklemek daha sağlıklı görünüyor.")
         else:
-            verdict = ("Şu an net bir alım/satım sinyali yok; göstergeler kararsız, "
+            verdict = ("Şu an net bir yön sinyali yok; göstergeler kararsız, "
                        "yön belirginleşene kadar beklemek daha mantıklı görünüyor.")
 
     # ── Katman B — 3 madde ────────────────────────────────────────────────────
@@ -7764,12 +7764,12 @@ def build_signal_summary(stock):
         adx_txt = f" (trend gücü {_adx_lbl_map[derive_adx_label(adx)]})"
     if signal == "AL":
         points.append({
-            "text": "Trend yukarı yönlü: orta/uzun vadeli göstergeler alım tarafında" + adx_txt + ".",
+            "text": "Trend yukarı yönlü: orta/uzun vadeli göstergeler yükseliş tarafında" + adx_txt + ".",
             "tip":  "ADX, EMA ve Supertrend gibi göstergelerin ortak yönü değerlendirilir.",
         })
     elif signal == "SAT":
         points.append({
-            "text": "Trend aşağı yönlü: orta/uzun vadeli göstergeler satış tarafında" + adx_txt + ".",
+            "text": "Trend aşağı yönlü: orta/uzun vadeli göstergeler düşüş tarafında" + adx_txt + ".",
             "tip":  "ADX, EMA ve Supertrend gibi göstergelerin ortak yönü değerlendirilir.",
         })
     else:
@@ -7795,7 +7795,7 @@ def build_signal_summary(stock):
             risk_txt = "Giriş riski değerlendirilemiyor: sinyal başlangıç fiyatı verisi eksik."
         else:
             risk_txt = (f"Fiyat sinyal başlangıcına göre %{gain_pct:.0f} seviyesinde — "
-                        "satış sinyali bu hareketle uyumlu.")
+                        "Trend Bozuldu sinyali bu hareketle uyumlu.")
     else:
         risk_txt = "Net sinyal olmadığı için tanımlı bir giriş bölgesi yok."
     rsi_tip = ""
