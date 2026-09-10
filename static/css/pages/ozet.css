@@ -7,10 +7,11 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
+  /* CPO 10.09: backdrop-filter:blur(16px) sticky header + hemen üstünde/altında
+     sürekli animasyonlu makro şerit (index.html'de teşhis edilen aynı jank
+     deseni, denetimde bu sayfada da bulundu) — kaldırıldı, opak arkaplana geçirildi. */
   header {
-    background: rgba(var(--bp-bg-rgb),0.92);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: var(--bp-bg);
     border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
     padding: 0 24px;
     height: 60px;

@@ -1,11 +1,13 @@
 /* ==== extracted from templates/_mobile_nav_partial.html (T2.5) ==== */
 
+  /* CPO 10.09: denetimde jank-riski işaretlendi — arkaplan zaten %96 opak
+     (blur'un görsel katkısı minimal), sitenin her sayfasında her zaman
+     görünen sabit bir eleman + üst makro şeridin sürekli animasyonuyla
+     aynı anda GPU compositing bütçesini paylaşıyordu. Kaldırıldı. */
   .mobile-bottom-nav {
     display: none;
     position: fixed; bottom: 0; left: 0; right: 0; z-index:var(--bp-z-sticky);
-    background: rgba(var(--bp-bg-rgb),0.96);
-    backdrop-filter: blur(24px) saturate(140%);
-    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    background: rgba(var(--bp-bg-rgb),0.99);
     border-top: 1px solid rgba(var(--bp-border-rgb),0.7);
     padding-bottom: env(safe-area-inset-bottom);
   }
