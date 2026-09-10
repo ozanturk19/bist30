@@ -42,12 +42,24 @@ else
 fi
 
 # 3. KALICI_KURALLAR audit
+# CPO-1584 (11.09): eskiden SADECE templates/hisse.html taranıyordu — diğer
+# 14 şablon (tarama/sektör-harita/index/portfolio/gundem/... dahil) hiç
+# kontrol edilmiyordu, push-time gate commit-time gate'le (.githooks/
+# pre-commit, aynı gün genişletildi) tutarsızdı. Liste ikisinde de senkron
+# tutulmalı.
 echo ""
 echo "3/8 KALICI_KURALLAR audit..."
-if ./tests/audit/kalici-kurallar-check.sh templates/hisse.html > /dev/null 2>&1; then
-  echo "  ✓ KK 11/11 PASS"
+KK_AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/sinyal_performans.html templates/index.html templates/portfolio.html templates/gundem.html templates/metodoloji.html templates/blog.html templates/blog_article.html templates/temettu_takvimi.html templates/bilanco_takvimi.html"
+KK_FAIL=0
+for f in $KK_AUDIT_FILES; do
+  if ! ./tests/audit/kalici-kurallar-check.sh "$f" > /dev/null 2>&1; then
+    echo "  ✗ KK ihlali: $f. Detay için ./tests/audit/kalici-kurallar-check.sh $f çalıştır."
+    KK_FAIL=$((KK_FAIL + 1))
+  fi
+done
+if [ "$KK_FAIL" = "0" ]; then
+  echo "  ✓ KK $(echo $KK_AUDIT_FILES | wc -w | tr -d ' ') dosya PASS"
 else
-  echo "  ✗ KK ihlali var. Detay için tests/audit/kalici-kurallar-check.sh çalıştır."
   FAIL=$((FAIL + 1))
 fi
 
