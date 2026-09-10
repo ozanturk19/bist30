@@ -303,7 +303,11 @@
     font-size:var(--bp-text-xs); font-weight:700; letter-spacing:0.3px;
     white-space:nowrap;
   }
-  .trend-label.strong { color:var(--bp-al); }
+  /* ADX yön-bağımsız bir büyüklük ölçüsü (SAT sinyalinde de yüksek çıkabilir) —
+     --bp-al (yükseliş yeşili) kullanılırsa "Trend Bozuldu" rozetinin yanında
+     çelişkili bir "güçlü/olumlu" izlenimi verir (10.09 canlı denetimde BTCIM'de
+     yakalandı). Nötr --bp-accent-cyan kullanılır, yön rengiyle karışmaz. */
+  .trend-label.strong { color:var(--bp-accent-cyan); }
   .trend-label.medium { color:var(--bp-text); }
   .trend-label.weak   { color:var(--text3); }
   .trend-bar {
@@ -315,7 +319,7 @@
     height:100%; border-radius:var(--bp-radius-xs);
     transition:width 0.3s ease;
   }
-  .trend-bar-fill.strong { background:linear-gradient(90deg,var(--bp-al),var(--bp-brand)); }
+  .trend-bar-fill.strong { background:linear-gradient(90deg,var(--bp-accent-cyan),var(--bp-brand)); }
   .trend-bar-fill.medium { background:var(--bp-brand); }
   .trend-bar-fill.weak   { background:var(--text3); }
 
