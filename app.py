@@ -2791,11 +2791,6 @@ def _build_signal_email(changes, unsubscribe_url):
           Tüm Sinyalleri Gör →
         </a>
       </td></tr>
-      <tr><td align="center" style="padding-top:10px">
-        <a href="https://borsapusula.com/sinyal-performans" style="display:inline-block;color:#909097;font-size:12px;text-decoration:none;border-bottom:1px solid #3a3a42;padding-bottom:1px">
-          Backtest performansını gör →
-        </a>
-      </td></tr>
     </table>
     '''
     return _email_base(content, unsubscribe_url, preheader=preheader)
@@ -9113,6 +9108,112 @@ def api_tarama():
                       "count": len(results), "updated_at": upd})
 
 
+@app.route("/api/tarama/temel")
+@limiter.limit("60 per minute")
+def api_tarama_temel():
+    """Temel Analiz Tarama — CPO-1585 İş 2. Ayrı, temiz uç nokta (sektör-harita'daki
+    "her sekme kendi fetch fonksiyonu" deseniyle tutarlı) — /api/tarama'ya mode
+    parametresi eklenmedi.
+
+    Kaynak: _financial_health_cache (günlük EOD turunda dolduruluyor, yeni hesaplama
+    YOK). Cache'teki teknik_analiz_skoru/borsapusula_skoru gün içi bayatlıyor —
+    SADECE temel alanlar (temel_analiz_skoru, categories, band, data_completeness,
+    partial, temel_analiz_aciklamasi) cache'ten gelir; price/change_pct/signal
+    /api/tarama'nın okuduğu aynı canlı kaynaktan (_cache["data"]) istek anında
+    join edilir.
+
+    CPO-1572 kararı: /api/tarama'daki AL-önce-SAT long-only kova sıralaması
+    (CPO-1581) BURAYA uygulanmaz — Temel Analiz Tarama'nın amacı teknik sinyalden
+    bağımsız temel gücü göstermek (bir hisse teknik SAT ama temelde güçlü olabilir).
+    Sıralama saf temel_analiz_skoru/vb. değerine göredir; `signal` SADECE eşitlik
+    filtresi, asla sıralama girdisi değildir.
+    """
+    def _qfloat(name, default):
+        import math
+        try:
+            v = float(request.args.get(name, default))
+        except (TypeError, ValueError):
+            return default
+        return v if math.isfinite(v) else default
+
+    min_score = _qfloat("min_score", 0)
+    band      = request.args.get("band",   "").strip().lower()
+    sector    = request.args.get("sector", "").strip()
+    min_p     = _qfloat("min_price", 0)
+    max_p     = _qfloat("max_price", 999999)
+    sig       = request.args.get("signal", "").strip().upper()
+    sort_by   = request.args.get("sort",   "temel_score").strip().lower()
+    sort_dir  = request.args.get("sort_dir", "").strip().lower()
+
+    with _lock:
+        health_snapshot = dict(_financial_health_cache)
+        live_by_ticker  = {s.get("ticker"): s for s in _cache["data"]}
+        upd = _cache.get("updated_at", "")
+
+    results = []
+    for tk in BIST100:
+        entry_wrap = health_snapshot.get(tk)
+        if not entry_wrap:
+            continue  # kaydı yoktu — uydurma değer yok, listede hiç görünmez
+        entry = entry_wrap.get("data") or {}
+        # MIN_METRICS_FOR_SCORE altında skor/bant bastırılmış (financial_health_score.py) —
+        # None skor filtrelenemez/sıralanamaz, bu tarama için de anlamsız, atlanır.
+        if entry.get("temel_analiz_skoru") is None:
+            continue
+        b = entry.get("band")
+        if band and b != band:
+            continue
+        sec = _get_sector(tk)
+        if sector and sec.lower() != sector.lower():
+            continue
+        live = live_by_ticker.get(tk) or {}
+        raw_price = live.get("price")
+        price = raw_price if raw_price is not None else 0  # SADECE min_p/max_p filtresi icin
+        if price < min_p or price > max_p:
+            continue
+        if entry["temel_analiz_skoru"] < min_score:
+            continue
+        live_signal = live.get("signal", "")
+        if sig and live_signal != sig:
+            continue
+        results.append({
+            "ticker":                  tk,
+            "name":                    STOCK_NAMES.get(tk, tk),
+            "sector":                  sec,
+            "price":                   raw_price,
+            "change_pct":              live.get("change_pct"),
+            "signal":                  live_signal,
+            "temel_analiz_skoru":      entry.get("temel_analiz_skoru"),
+            "borsapusula_skoru":       entry.get("borsapusula_skoru"),
+            "band":                    b,
+            "categories":              entry.get("categories") or {},
+            "data_completeness":       entry.get("data_completeness"),
+            "partial":                 entry.get("partial"),
+            "temel_analiz_aciklamasi": entry.get("temel_analiz_aciklamasi"),
+        })
+
+    SORT_FIELD_MAP = {"temel_score": "temel_analiz_skoru", "borsapusula_score": "borsapusula_skoru"}
+    CATEGORY_SORT_KEYS = ("karlilik", "nakit_akisi", "kaldirac", "degerleme_buyume")
+    if sort_dir in ("asc", "desc"):
+        rev = sort_dir == "desc"
+    else:
+        rev = True  # skor alanlari icin varsayilan yuksekten dusuge
+
+    def _sort_key(x):
+        if sort_by in CATEGORY_SORT_KEYS:
+            v = (x.get("categories") or {}).get(sort_by)
+        else:
+            v = x.get(SORT_FIELD_MAP.get(sort_by, "temel_analiz_skoru"))
+        # None-guvenli: eksik deger yon fark etmeksizin listenin sonuna duser
+        # (r39 /api/tarama deseniyle ayni, bkz. sinyal_performans eski sort).
+        return (v is None, -(v or 0) if rev else (v or 0))
+
+    results.sort(key=lambda x: x.get("ticker") or "")
+    results.sort(key=_sort_key)
+
+    return safe_json({"results": results, "count": len(results), "updated_at": upd})
+
+
 # ── SEO: sitemap, robots, favicon ────────────────────────────────────────────
 _sitemap_cache: dict = {}  # {"xml": str, "date": str}
 
@@ -9634,7 +9735,6 @@ def sitemap():
             pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
     pages.append({"loc": "/blog",               "priority": "0.8", "changefreq": "weekly"})
     pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly"})
-    pages.append({"loc": "/sinyal-performans",  "priority": "0.7", "changefreq": "weekly"})
     pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
     pages.append({"loc": "/hisseler",          "priority": "0.85", "changefreq": "daily"})
     # T0.8 (CPO-1321): /ozet/<tarih> arşivi — günlük büyüyen içerik, indekslenmesi için sitemap'e eklenir
@@ -10799,35 +10899,14 @@ def _inject_analytics_context():
 
 @app.route("/sinyaller")
 def redirect_sinyaller():
-    return redirect("/sinyal-performans", 301)
+    return redirect("/tarama", 301)
 
 
 @app.route("/sinyal-performans")
 def sinyal_performans():
-    with _lock:
-        bt = _bt_cache.get("data")
-    # Aktif sinyallerden anlık performans tablosu
-    with _lock:
-        stocks = list(_cache["data"])
-    aktif = [s for s in stocks if s["signal"] in ("AL", "SAT") and s.get("signal_price")]
-    for s in aktif:
-        if s.get("signal_price") and s.get("price"):
-            raw_ret = (s["price"] - s["signal_price"]) / s["signal_price"] * 100
-            # CPO-DEV2-074: CPO-DEV2-045'teki ters-cevirme (-raw_ret) SAT icin fiyat
-            # dususunu yesil "kazanc" gibi gosteriyordu — urun long-only, kullanici
-            # gercekte kisa pozisyon acamadigi icin bu yanilticiydi (T3.7'de backtest
-            # ozetinden SAT win-rate/getiri kaldirma kararinin ayni gerekcesi, bkz
-            # [[project_long_only_ihlali_sat_dali]]). Artik AL/SAT ayni ham (ters-
-            # cevrilmemis) fiyat hareketini tasiyor; SAT satirlari render tarafinda
-            # (templates/sinyal_performans.html) notr/gri renkte gosterilir ve
-            # "getiri" degil ham fiyat hareketi olarak sunulur.
-            s["aktif_ret"] = round(raw_ret, 2)
-        else:
-            s["aktif_ret"] = None
-    # r39: None-guvenli sirala (Jinja sort(attribute=...) None/float TypeError atip
-    # sayfayi 500'e dusuruyordu -- None'lar sona, kalan buyukten kucuge).
-    aktif.sort(key=lambda s: (s["aktif_ret"] is None, -(s["aktif_ret"] if s["aktif_ret"] is not None else 0)))
-    return render_template("sinyal_performans.html", bt=bt, aktif=aktif)
+    # CPO-1585 İş 1: sayfa /tarama'ya birlestirildi, eski bookmark/backlink
+    # 404 yemesin diye decorator kaldı, govde kalici redirect'e cevrildi.
+    return redirect("/tarama", code=301)
 
 
 @app.route("/api/backtest")
@@ -12394,10 +12473,11 @@ def _get_blog_cache():
 
 
 # CPO-1191 Karar 5: interaktif /backtest sayfası + özel-strateji API'leri kaldırıldı
-# (template attic/backtest.html, kod git geçmişinde). Kalıcı 301 → /sinyal-performans.
+# (template attic/backtest.html, kod git geçmişinde). Kalıcı 301 → /tarama (CPO-1585:
+# /sinyal-performans de /tarama'ya birleştiği için çifte 301 zincirine düşülmesin diye).
 @app.route("/backtest")
 def backtest_page():
-    return redirect("/sinyal-performans", code=301)
+    return redirect("/tarama", code=301)
 
 
 # CPO-1191 Karar 6: /virtual-portfolio kaldırıldığında 301 eklenmemişti (CPO-1195 §5) —
