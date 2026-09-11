@@ -567,8 +567,8 @@ header{
     </div>
     <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
       <div class="da-gnm-tabs" id="daGnmTabs" role="tablist" aria-label="Gündem sekmeleri">
-        <button type="button" class="da-gnm-tab active" id="daGnmTabMakro" role="tab" aria-selected="true" aria-controls="daGnmPanelMakro" onclick="daSwitchGnmTab('makro')"><span aria-hidden="true">🌍</span> Makro</button>
-        <button type="button" class="da-gnm-tab" id="daGnmTabHisse" role="tab" aria-selected="false" aria-controls="daGnmPanelHisse" onclick="daSwitchGnmTab('hisse')"><span aria-hidden="true">📈</span> Hisse</button>
+        <button type="button" class="da-gnm-tab active" id="daGnmTabMakro" role="tab" aria-selected="true" aria-controls="daGnmPanelMakro" tabindex="0" onclick="daSwitchGnmTab('makro')"><span aria-hidden="true">🌍</span> Makro</button>
+        <button type="button" class="da-gnm-tab" id="daGnmTabHisse" role="tab" aria-selected="false" aria-controls="daGnmPanelHisse" tabindex="-1" onclick="daSwitchGnmTab('hisse')"><span aria-hidden="true">📈</span> Hisse</button>
       </div>
       <a href="/gundem" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tümü →</a>
     </div>
@@ -1206,12 +1206,34 @@ header{
     var isMakro = tab === 'makro';
     document.getElementById('daGnmTabMakro').classList.toggle('active', isMakro);
     document.getElementById('daGnmTabMakro').setAttribute('aria-selected', String(isMakro));
+    document.getElementById('daGnmTabMakro').tabIndex = isMakro ? 0 : -1;
     document.getElementById('daGnmTabHisse').classList.toggle('active', !isMakro);
     document.getElementById('daGnmTabHisse').setAttribute('aria-selected', String(!isMakro));
+    document.getElementById('daGnmTabHisse').tabIndex = isMakro ? -1 : 0;
     document.getElementById('daGnmPanelMakro').style.display = isMakro ? '' : 'none';
     document.getElementById('daGnmPanelHisse').style.display = isMakro ? 'none' : '';
     if (!isMakro && !_daGnmHisseLoaded) daLoadGundemHisse();
   }
+
+  // Klavye-only kullanıcılar için: sekmeler arasında ok tuşlarıyla gezinme +
+  // Enter/Space ile aktive etme (diğer sekme bileşenleriyle aynı desen).
+  document.getElementById('daGnmTabs').addEventListener('keydown', function(e){
+    var tabs = [document.getElementById('daGnmTabMakro'), document.getElementById('daGnmTabHisse')];
+    var idx = tabs.indexOf(document.activeElement);
+    if (idx === -1) return;
+    var next = null;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'Home' || e.key === 'End') {
+      next = (e.key === 'Home') ? tabs[0]
+        : (e.key === 'End') ? tabs[tabs.length - 1]
+        : (e.key === 'ArrowRight') ? tabs[(idx + 1) % tabs.length]
+        : tabs[(idx - 1 + tabs.length) % tabs.length];
+      e.preventDefault();
+      next.focus();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      daSwitchGnmTab(document.activeElement === tabs[0] ? 'makro' : 'hisse');
+    }
+  });
   window.daSwitchGnmTab = daSwitchGnmTab;
 
   function daLoadMacroNews(){
