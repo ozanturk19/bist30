@@ -11759,7 +11759,7 @@ def api_market_news():
             sl_val  = s.get("sl_level") or 0
             tp_val  = s.get("tp1") or 0
             snippet = (
-                f"{dur.capitalize()} {sig} sinyali aktif"
+                f"{dur.capitalize()} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif"
                 f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
                 f"SL: {tr_price_filter(sl_val)}₺ | Hedef: {tr_price_filter(tp_val)}₺"
             )
@@ -11772,7 +11772,7 @@ def api_market_news():
             sl_val  = s.get("sl_level") or 0
             tp_val  = s.get("tp1") or 0
             snippet = (
-                f"{dur.capitalize()} {sig} sinyali aktif"
+                f"{dur.capitalize()} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif"
                 f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
                 f"SL: {tr_price_filter(sl_val)}₺ | Hedef: {tr_price_filter(tp_val)}₺"
             )
