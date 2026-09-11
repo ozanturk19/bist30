@@ -4259,9 +4259,64 @@ def set_security_headers(response):
     return response
 
 
+def _get_xu100_level():
+    """BIST100 (XU100) EOD-tutarlı seviye + spark + değişim — chart_xu100.json'dan
+    (CPO-1558). api_data() ve index() (CPO-1587 Faz 2 SSR) aynı kaynağı, kopya
+    hesaplama olmadan paylaşır."""
+    _load_xu100_chart_from_disk()
+    with _lock:
+        _xu100_ohlc = ((_xu100_chart_cache.get("data") or {}).get("ohlc") or [])[-30:]
+    closes = [p["close"] for p in _xu100_ohlc if p.get("close")]
+    close = round(closes[-1], 2) if closes else None
+    change_pct = (
+        round((closes[-1] - closes[-2]) / closes[-2] * 100, 2)
+        if len(closes) >= 2 and closes[-2] else None
+    )
+    return {
+        "close":       close,
+        "change_pct":  change_pct,
+        "spark":       [round(c, 2) for c in closes],
+    }
+
+
+def _compute_index_ssr_context():
+    """Anasayfa SSR için minimal salt-okur veri (CPO-1587 Faz 2): BIST100 seviyesi +
+    Güçlü Trend/Trend Bozuldu/Yatay sayıları + Teknik Güç Skoru en yüksek AL
+    hisseler (JS'in daRenderSpotlight/daRenderStockGrid ile aynı seçim mantığı).
+    JS'in mevcut /api/data + /api/macro akışı DEĞİŞMEZ, ilk başarılı fetch bu
+    değerlerin üzerine yazar — sadece JS-öncesi an artık boş değil."""
+    with _lock:
+        stocks = list(_cache["data"])
+    bist = [s for s in stocks if s.get("ticker") not in ("XU030", "XU100")]
+    signal_counts = {
+        "al":    sum(1 for s in bist if s.get("signal") == "AL"),
+        "sat":   sum(1 for s in bist if s.get("signal") == "SAT"),
+        "bekle": sum(1 for s in bist if s.get("signal") == "BEKLE"),
+        "total": len(bist),
+    }
+    with_score = [s for s in bist
+                  if isinstance(s.get("signal_strength"), (int, float)) and s.get("signal") == "AL"]
+    top_signals = sorted(with_score, key=lambda s: s.get("signal_strength") or 0, reverse=True)[:8]
+    return {
+        "bist_level":    _get_xu100_level(),
+        "signal_counts": signal_counts,
+        "top_signals":   top_signals,
+    }
+
+
 @app.route("/")
 def index():
-    resp = app.make_response(render_template("index.html"))
+    # CPO-1587 Faz 2: BIST100 seviyesi + sinyal sayıları + Teknik Güç Skoru en
+    # yüksek hisseler bir kez sunucu tarafında hesaplanıp SSR context olarak
+    # geçiliyor — kullanıcı deneyimi/JS davranışı değişmiyor (bkz. yukarıdaki
+    # docstring), sadece JS çalıştırmayan crawler'lar için ilk render boş değil.
+    _ssr = _compute_index_ssr_context()
+    resp = app.make_response(render_template(
+        "index.html",
+        ssr_bist_level=_ssr["bist_level"],
+        ssr_signal_counts=_ssr["signal_counts"],
+        ssr_top_signals=_ssr["top_signals"],
+    ))
     resp.headers["Cache-Control"] = "no-cache, must-revalidate"
     resp.headers["Pragma"] = "no-cache"
     return resp
@@ -4312,22 +4367,18 @@ def api_data():
     # CPO-1461: mtime-guard'lı disk-reload — web worker'da _xu100_chart_cache
     # yfinance ile hiç güncellenmiyor (REFRESH_WORKER=web guard), tek kaynak
     # leader'ın (refresh_xu100_chart) yazdığı chart_xu100.json.
-    _load_xu100_chart_from_disk()
-    with _lock:
-        _xu100_ohlc = ((_xu100_chart_cache.get("data") or {}).get("ohlc") or [])[-30:]
-    xu100_spark = [round(p["close"], 2) for p in _xu100_ohlc if p.get("close")]
     # CPO-1558: hero BIST100 sayısı anasayfada 3dk'da bir CANLI makro XU100 feed'inden
     # güncelleniyordu ama kendi altındaki alt yazı "gün sonu verisiyle güncellenir"
     # diyordu — iki kaynak çelişiyordu (Fable denetimi, canlı ölçümle doğrulandı).
     # xu100_spark'ı besleyen AYNI EOD-tutarlı chart cache'ten (leader'ın refresh_xu100_chart
     # yazdığı chart_xu100.json) son kapanış + önceki kapanışa göre yüzde değişim — anasayfa
     # hero'yu buna bağlayıp canlı makro poll'dan ayıracak, yeni bir hesaplama/fetch YOK.
-    _xu100_closes = [p["close"] for p in _xu100_ohlc if p.get("close")]
-    xu100_close = round(_xu100_closes[-1], 2) if _xu100_closes else None
-    xu100_change_pct = (
-        round((_xu100_closes[-1] - _xu100_closes[-2]) / _xu100_closes[-2] * 100, 2)
-        if len(_xu100_closes) >= 2 and _xu100_closes[-2] else None
-    )
+    # CPO-1587 Faz 2: bu hesaplama _get_xu100_level()'a çıkarıldı — index() SSR
+    # aynı kaynağı kopya kod olmadan paylaşır.
+    _xu100_lvl = _get_xu100_level()
+    xu100_spark = _xu100_lvl["spark"]
+    xu100_close = _xu100_lvl["close"]
+    xu100_change_pct = _xu100_lvl["change_pct"]
     _resp_data = {
         "stocks":       stocks,
         "updated_at":   _resp_updated_at,  # CPO-1114 K1: last_fresh_ts medyanı (bkz. yukarı)
@@ -10296,15 +10347,10 @@ def api_stocks_list():
 
 
 # ── Piyasa Gündem Merkezi ────────────────────────────────────────────────────
-@app.route("/gundem")
-def gundem_page():
-    return render_template("gundem.html")
-
-
-@app.route("/api/gundem")
-@limiter.limit("30 per minute")
-def api_gundem():
-    """Piyasa Gündem API — bugün değişen sinyaller, güçlü trendler, sinyal özeti."""
+def _compute_gundem_data():
+    """Piyasa Gündem verisi — bugün değişen sinyaller, güçlü trendler, sinyal
+    özeti, bilanço takvimi. /gundem (SSR) ve /api/gundem (canlı JS) tarafından
+    ortak kullanılır (CPO-1587 Faz 2: tek kaynak, kopya kod yok)."""
     with _lock:
         stocks = list(_cache["data"])
 
@@ -10371,7 +10417,7 @@ def api_gundem():
         else:
             gundem_closed_msg = "BIST seansı kapandı — yarınki seansta yeni sinyaller görünecek."
 
-    return safe_json({
+    return {
         "new_signals": new_signals,
         "strong_al":   strong_al,
         "updated_at":  _data_quality_snapshot(stocks).get("updated_at"),
@@ -10384,7 +10430,31 @@ def api_gundem():
         "bilanco_upcoming": bilanco_upcoming,
         "market_open":     _mkt_open,
         "closed_message":  gundem_closed_msg,
-    })
+    }
+
+
+@app.route("/gundem")
+def gundem_page():
+    # CPO-1587 Faz 2: aynı hesaplamanın (new_signals/strong_al/...) SSR context'i
+    # (JS'in mevcut fetch+innerHTML davranışı aynen korunuyor, bkz. /tarama deseni).
+    _g = _compute_gundem_data()
+    return render_template(
+        "gundem.html",
+        ssr_new_signals=_g["new_signals"],
+        ssr_strong_al=_g["strong_al"],
+        ssr_signal_summary=_g["signal_summary"],
+        ssr_bilanco_upcoming=_g["bilanco_upcoming"],
+        ssr_market_open=_g["market_open"],
+        ssr_closed_message=_g["closed_message"],
+        ssr_updated_at=_g["updated_at"],
+    )
+
+
+@app.route("/api/gundem")
+@limiter.limit("30 per minute")
+def api_gundem():
+    """Piyasa Gündem API — bugün değişen sinyaller, güçlü trendler, sinyal özeti."""
+    return safe_json(_compute_gundem_data())
 
 
 # ── Geçmiş Günlük Snapshot API ───────────────────────────────────────────────
@@ -11079,15 +11149,13 @@ def sektor():
     return redirect("/sektor-harita", 301)
 
 
-@app.route("/sektor-harita")
-def sektor_harita():
-    return render_template("sektor_harita.html")
-
-
-@app.route("/api/sector-heatmap")
-def api_sector_heatmap():
+def _compute_sector_heatmap():
+    """Sektör bazlı AL/SAT/BEKLE toplamı + skor + ort. RVOL — /sektor-harita
+    (SSR) ve /api/sector-heatmap (canlı JS) tarafından ortak kullanılır
+    (CPO-1587 Faz 2: tek kaynak, kopya kod yok)."""
     with _lock:
         stocks = list(_cache["data"])
+        upd = _cache.get("updated_at")
     sec_map = {}
     for s in stocks:
         tk = s.get("ticker", "")
@@ -11116,7 +11184,21 @@ def api_sector_heatmap():
         result.append({"name": name, "al": d["al"], "sat": d["sat"], "bekle": d["bekle"],
                         "total": total, "score": score, "avg_rvol": avg_rvol})
     result.sort(key=lambda x: x["score"], reverse=True)
-    return safe_json({"sectors": result, "updated_at": _cache.get("updated_at")})
+    return result, upd
+
+
+@app.route("/sektor-harita")
+def sektor_harita():
+    # CPO-1587 Faz 2: sektör sayısı az olduğu için tamamı SSR context'e geçiliyor
+    # (JS'in mevcut fetch+innerHTML davranışı aynen korunuyor, bkz. /tarama deseni).
+    ssr_sectors, ssr_updated_at = _compute_sector_heatmap()
+    return render_template("sektor_harita.html", ssr_sectors=ssr_sectors, ssr_updated_at=ssr_updated_at)
+
+
+@app.route("/api/sector-heatmap")
+def api_sector_heatmap():
+    result, updated_at = _compute_sector_heatmap()
+    return safe_json({"sectors": result, "updated_at": updated_at})
 
 
 # ── F12: Sektör Karşılaştırma ─────────────────────────────────────────────────
