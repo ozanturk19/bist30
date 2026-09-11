@@ -24,7 +24,7 @@ ARTICLES = [
 <p>Bir hissenin BIST30'da olması, o hissenin hem likit hem de kurumsal yatırımcıların portföyünde bulunduğunun göstergesidir.</p>
 
 <h2>Endeks Revizyonları</h2>
-<p>Borsa İstanbul, endeks bileşenlerini <strong>her yıl Mart ve Eylül</strong> aylarında günceller. Kriterleri sağlayamayanlar endeksten çıkar, yeni yüksek hacimli hisseler girer. Bu değişiklikler kurumsal yatırımcıların alım-satım kararlarını önemli ölçüde etkiler.</p>
+<p>Borsa İstanbul, endeks bileşenlerini <strong>yılda dört kez</strong> (Ocak-Mart, Nisan-Haziran, Temmuz-Eylül, Ekim-Aralık dönemleri sonunda) günceller. Kriterleri sağlayamayanlar endeksten çıkar, yeni yüksek hacimli hisseler girer. Bu değişiklikler kurumsal yatırımcıların alım-satım kararlarını önemli ölçüde etkiler.</p>
 
 <h2>BIST100'ü Takip Etmenin Yolları</h2>
 <ul>
@@ -43,7 +43,7 @@ ARTICLES = [
       },
       {
         "q": "BIST100 endeksi ne zaman güncellenir?",
-        "a": "Borsa İstanbul, endeks bileşenlerini her yıl Mart ve Eylül aylarında günceller. Yeterli işlem hacmini veya piyasa değerini koruyamayan hisseler endeksten çıkarılır, yeni şirketler dahil edilir."
+        "a": "Borsa İstanbul, endeks bileşenlerini yılda dört kez (Ocak-Mart, Nisan-Haziran, Temmuz-Eylül, Ekim-Aralık dönemleri sonunda) günceller. Yeterli işlem hacmini veya piyasa değerini koruyamayan hisseler endeksten çıkarılır, yeni şirketler dahil edilir."
       },
       {
         "q": "BorsaPusula'da kaç BIST100 hissesi takip ediliyor?",
@@ -815,13 +815,13 @@ Histogram = MACD − Sinyal</pre>
   },
   {
     "slug": "borsa-sozlugu",
-    "title": "Borsa Sözlüğü: En Sık Kullanılan 40 Terim",
+    "title": "Borsa Sözlüğü: En Sık Kullanılan 35 Terim",
     "desc": "Borsa yatırımcılarının bilmesi gereken temel terimlerin Türkçe açıklamaları. Hisse, endeks, lot, emir türleri ve daha fazlası.",
     "date": "2026-04-21",
     "mins": 8,
     "cat": "Temel Kavramlar",
     "body": """
-<p>Borsaya yeni başlayanlar için en zorlu engellerden biri terminolojidir. Bu sözlük, en sık kullanılan 40 terimi sade Türkçeyle açıklar.</p>
+<p>Borsaya yeni başlayanlar için en zorlu engellerden biri terminolojidir. Bu sözlük, en sık kullanılan 35 terimi sade Türkçeyle açıklar.</p>
 
 <h2>A–E</h2>
 <ul>
@@ -1198,7 +1198,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <p><strong>BIST30</strong>, Borsa İstanbul'daki en yüksek işlem hacmine sahip 30 büyük hisseyi kapsayan prestijli bir endekstir. Türkiye vadeli işlemler piyasasının (VİOP) temel endeksi olması nedeniyle kurumsal yatırımcılar ve fon yöneticilerinin en yakından takip ettiği endekstir.</p>
 
 <h2>BIST30 Hisseleri (2026)</h2>
-<p>Endeks bileşenleri Borsa İstanbul tarafından Mart ve Eylül aylarında güncellenir. 2026 yılı itibarıyla BIST30 şu sektörlerden oluşmaktadır:</p>
+<p>Endeks bileşenleri Borsa İstanbul tarafından yılda dört kez (Ocak-Mart, Nisan-Haziran, Temmuz-Eylül, Ekim-Aralık dönemleri sonunda) güncellenir. 2026 yılı itibarıyla BIST30 şu sektörlerden oluşmaktadır:</p>
 
 <h3>Bankacılık</h3>
 <ul>
@@ -1269,8 +1269,8 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <p><a href="/gucu-yuksek">Güçlü Momentum</a> sayfasında tüm bu kriterleri en iyi karşılayan BIST30 hisseleri sıralanmaktadır.</p>
 """,
     "faqs": [
-      {"q": "BIST30'da kaç hisse var ve hangileri?", "a": "BIST30, Borsa İstanbul'da en likit 30 hisseyi kapsar. Bankacılık (AKBNK, GARAN, ISCTR, YKBNK, VAKBN, HALKB), holding/sanayi (KCHOL, SAHOL, ARCLK, FROTO, TOASO, EREGL), enerji (TUPRS, AKSEN, ENKAI, SASA) ve diğer sektörlerden oluşur."},
-      {"q": "BIST30 endeksi ne kadar sıklıkla güncellenir?", "a": "Borsa İstanbul, BIST30 endeks bileşenlerini her yıl Mart ve Eylül aylarında inceler ve günceller. Yeterli likidite ve piyasa değeri kriterlerini karşılayamayan hisseler çıkarılır, yerlerine uygun hisseler alınır."},
+      {"q": "BIST30'da kaç hisse var ve hangileri?", "a": "BIST30, Borsa İstanbul'da en likit 30 hisseyi kapsar. Bankacılık (AKBNK, GARAN, ISCTR, YKBNK, VAKBN, HALKB), holding/sanayi (KCHOL, SAHOL, ARCLK, FROTO, TOASO, EREGL), enerji (TUPRS, PETKM, AKSEN, ENKAI, SASA) ve diğer sektörlerden oluşur."},
+      {"q": "BIST30 endeksi ne kadar sıklıkla güncellenir?", "a": "Borsa İstanbul, BIST30 endeks bileşenlerini yılda dört kez (Ocak-Mart, Nisan-Haziran, Temmuz-Eylül, Ekim-Aralık dönemleri sonunda) inceler ve günceller. Yeterli likidite ve piyasa değeri kriterlerini karşılayamayan hisseler çıkarılır, yerlerine uygun hisseler alınır."},
       {"q": "BIST30 hisselerinin teknik sinyalleri nereden takip edilir?", "a": "BorsaPusula'da BIST30 hisselerinin tamamı için Supertrend + ADX + EMA algoritmik sinyalleri ücretsiz olarak sunulmaktadır. Ana sayfada 'BIST30' filtresiyle bu hisseleri ayrıca görebilirsiniz."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']

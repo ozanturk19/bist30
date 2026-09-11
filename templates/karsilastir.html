@@ -640,12 +640,18 @@ loadStocksList();
 
 // URL'den otomatik yükle
 if (TICKERS_PARAM) {
-  const parts = TICKERS_PARAM.split(',').slice(0,4);
-  parts.forEach((t,i) => {
-    const el = document.getElementById('t' + (i+1));
-    if (el) el.value = t.trim().toUpperCase();
+  // bp-vocab.js (escapeHtml burada tanımlı) defer ile yükleniyor -- bu senkron
+  // inline script'ten SONRA calisir. doCompare() skeleton'i escapeHtml'e
+  // ihtiyac duydugu icin DOMContentLoaded'a kadar ertelenmeli, aksi halde
+  // ReferenceError ile sessizce patlar (paylasim linki hic render olmaz).
+  document.addEventListener('DOMContentLoaded', () => {
+    const parts = TICKERS_PARAM.split(',').slice(0,4);
+    parts.forEach((t,i) => {
+      const el = document.getElementById('t' + (i+1));
+      if (el) el.value = t.trim().toUpperCase();
+    });
+    doCompare({skipUrl: true});
   });
-  doCompare({skipUrl: true});
 }
 
 // bug-hunt r94: URL pushState ile guncelleniyordu ama popstate dinleyicisi yoktu —
