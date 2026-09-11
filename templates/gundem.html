@@ -38,7 +38,30 @@
   </div>
 </div>
 
-{% with hdr_title = 'Piyasa Gündem Merkezi', hdr_sub = 'Yükleniyor…', hdr_sub_id = 'updatedAt', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+{% with hdr_title = 'Piyasa Gündem Merkezi', hdr_sub = ('Güncellendi: ' + ssr_updated_at) if ssr_updated_at else 'Yükleniyor…', hdr_sub_id = 'updatedAt', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+{% macro gundem_card(s, is_new) %}{% set sig_cls = 'al' if s.signal=='AL' else 'sat' if s.signal=='SAT' else 'bkl' %}<a href="/hisse/{{ s.ticker }}" class="stock-card {{ sig_cls }}{{ ' new-signal' if is_new else '' }}" title="{{ s.name or '' }}">
+  <div class="sc-top">
+    <div>
+      <div class="sc-ticker">{{ s.ticker }}{% if is_new %}<span class="new-badge">Bugün</span>{% endif %}</div>
+      <div class="sc-name">{{ ((s.name or '')|replace(' A.Ş.','')|replace(' T.A.Ş.','')) }}</div>
+    </div>
+    <span class="badge {{ sig_cls }}">{{ '▲' if s.signal=='AL' else '▼' if s.signal=='SAT' else '●' }} {{ s.signal|signal_label }}</span>
+  </div>
+  <div class="sc-metrics">
+    {% if s.adx is not none %}<div class="sc-metric"><span>ADX </span><strong>{{ '%.1f'|format(s.adx)|replace('.', ',') }}</strong></div>{% endif %}
+    {% if s.rsi is not none %}<div class="sc-metric"><span>RSI </span><strong>{{ '%.1f'|format(s.rsi)|replace('.', ',') }}</strong></div>{% endif %}
+    {% if s.signal_date %}<div class="sc-metric"><span>Süre </span><strong>{{ s.signal_date|signal_age_text }}</strong></div>{% endif %}
+    {% if s.entry_quality %}<div class="sc-metric"><span>Kalite </span><strong>{{ {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Uzak'}.get(s.entry_quality, s.entry_quality) }}</strong></div>{% endif %}
+    {% if s.rr_signal %}<div class="sc-metric"><span>R/R </span><strong>1:{{ '%.1f'|format(s.rr_signal)|replace('.', ',') }}</strong></div>{% endif %}
+  </div>
+  <div class="sc-footer">
+    <div style="display:flex;align-items:center;gap:8px">
+      {% if s.price %}<span class="sc-price">{{ s.price|tr_price }} ₺</span>{% endif %}
+      {% if s.price and s.change_pct is not none %}<span class="sc-chg {{ 'up' if s.change_pct > 0 else 'dn' if s.change_pct < 0 else 'neu' }}">{{ '+' if s.change_pct > 0 else '' }}{{ '%.2f'|format(s.change_pct)|replace('.', ',') }}%</span>{% endif %}
+    </div>
+    <span class="sc-arrow">Detay →</span>
+  </div>
+</a>{% endmacro %}
 <h1 class="sr-only">Gündem & Piyasa Haberleri</h1>
 
 <main id="main-content" class="container" tabindex="-1">
@@ -59,10 +82,17 @@
 
   <!-- Stats -->
   <div class="stats-row" id="statsRow" role="status" aria-live="polite">
+    {% if ssr_signal_summary %}
+    <div class="stat-card"><div class="stat-num num-al">{{ ssr_signal_summary.al }}</div><div class="stat-lbl">Güçlü Trend</div></div>
+    <div class="stat-card"><div class="stat-num num-sat">{{ ssr_signal_summary.sat }}</div><div class="stat-lbl">Trend Bozuldu</div></div>
+    <div class="stat-card"><div class="stat-num num-bkl">{{ ssr_signal_summary.bekle }}</div><div class="stat-lbl">Yatay</div></div>
+    <div class="stat-card"><div class="stat-num num-tot">{{ ssr_signal_summary.total }}</div><div class="stat-lbl">Toplam Hisse</div></div>
+    {% else %}
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Güçlü Trend</div></div>
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Trend Bozuldu</div></div>
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Yatay</div></div>
     <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Toplam Hisse</div></div>
+    {% endif %}
   </div>
 
   <!-- Bugün Sinyal Değişenler -->
@@ -72,11 +102,16 @@
         <span class="dot dot-al"></span>
         Bugün Sinyal Değişenler
       </div>
-      <span class="section-sub" id="newSigCount" aria-live="polite">—</span>
+      <span class="section-sub" id="newSigCount" aria-live="polite">{{ (ssr_new_signals|length ~ ' hisse') if ssr_new_signals else '' }}</span>
     </div>
     <div id="newSignalsGrid" class="stock-grid">
+      {% if ssr_new_signals %}{% for s in ssr_new_signals %}{{ gundem_card(s, true) }}{% endfor %}
+      {% elif ssr_market_open is defined and not ssr_market_open and ssr_closed_message %}<div class="empty-box">{{ ssr_closed_message }}</div>
+      {% elif ssr_market_open is defined %}<div class="empty-box">Bugün henüz sinyal değişimi yok. Piyasa sinyalleri gün içinde güncellenir.</div>
+      {% else %}
       <div class="skeleton sk-card"></div>
       <div class="skeleton sk-card"></div>
+      {% endif %}
     </div>
   </div>
 
@@ -90,9 +125,13 @@
       <span class="section-sub">ADX sıralamalı — Top 8</span>
     </div>
     <div id="strongAlGrid" class="stock-grid">
+      {% if ssr_strong_al %}{% for s in ssr_strong_al %}{{ gundem_card(s, false) }}{% endfor %}
+      {% elif ssr_strong_al is defined %}<div class="empty-box">Güçlü trend verisi bekleniyor…</div>
+      {% else %}
       <div class="skeleton sk-card"></div>
       <div class="skeleton sk-card"></div>
       <div class="skeleton sk-card"></div>
+      {% endif %}
     </div>
   </div>
 
@@ -105,7 +144,7 @@
     <div class="bp-detail-toggle-body">
 
     <!-- Bilanço Takvimi -->
-    <div class="section" id="bilancoBand" style="display:none">
+    <div class="section" id="bilancoBand"{% if not ssr_bilanco_upcoming %} style="display:none"{% endif %}>
       <div class="section-hdr">
         <div class="section-title">
           <span class="dot" style="background:var(--bp-gold)"></span>
@@ -113,7 +152,16 @@
         </div>
         <a href="/bilanco-takvimi" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
       </div>
-      <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+      <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap">{% for p in ssr_bilanco_upcoming %}{% set is_active = p.status == 'active' %}{% set dot_clr = 'var(--bp-gold)' if is_active else 'var(--bp-text3)' %}
+        <div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};border-radius:8px;padding:12px 14px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="width:7px;height:7px;border-radius:50%;background:{{ dot_clr }};flex-shrink:0"></span>
+            <span style="font-size:var(--bp-text-sm);font-weight:600;color:var(--bp-text2)">{{ p.label }}</span>
+            <span style="font-size:10px;padding:1px 7px;border-radius:10px;background:{{ 'rgba(var(--bp-gold-rgb),.12)' if is_active else 'rgba(var(--bp-text3-rgb),.08)' }};border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};color:{{ dot_clr }};margin-left:auto">{{ 'Aktif' if is_active else 'Yaklaşıyor' }}</span>
+          </div>
+          <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-bottom:3px">{{ p.desc }}</div>
+          <div style="font-size:var(--bp-text-xs);color:{{ dot_clr }};font-weight:500">{{ p.days_label }}</div>
+        </div>{% endfor %}</div>
     </div>
 
     <!-- Ekonomik Takvim -->
