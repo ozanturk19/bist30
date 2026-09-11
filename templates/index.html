@@ -1,5 +1,5 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | BorsaPusula</title>
-<meta name="description" content="BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 tabanlı Güçlü Trend / Trend Bozuldu sinyalleri. Ücretsiz, günlük güncelleme.">
+<meta name="description" content="{% if ssr_signal_counts and ssr_bist_level and ssr_bist_level.close is not none %}BIST100 {{ ssr_bist_level.close|tr_price }} seviyesinde — şu an {{ ssr_signal_counts.al }} Güçlü Trend, {{ ssr_signal_counts.sat }} Trend Bozuldu sinyali aktif. Supertrend, ADX ve EMA12/99 tabanlı algoritmik teknik analiz. Ücretsiz, günlük güncelleme.{% else %}BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 tabanlı Güçlü Trend / Trend Bozuldu sinyalleri. Ücretsiz, günlük güncelleme.{% endif %}">
 <meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, algoritmik borsa, sektör analizi">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/">
@@ -509,16 +509,15 @@ header{
     <div class="da-index-row">
       <div>
         <div class="da-index-label">BIST 100</div>
-        <div class="da-index-number da-display" id="daIndexNumber" aria-live="polite">
-          <span class="da-skel" style="display:inline-block;width:5ch;height:.8em;border-radius:8px;vertical-align:middle"></span>
+        <div class="da-index-number da-display" id="daIndexNumber" aria-live="polite">{% if ssr_bist_level and ssr_bist_level.close is not none %}{{ ssr_bist_level.close|tr_price }}{% else %}<span class="da-skel" style="display:inline-block;width:5ch;height:.8em;border-radius:8px;vertical-align:middle"></span>{% endif %}
         </div>
       </div>
-      <span class="da-index-change neu" id="daIndexChange">
-        <span class="da-skel" style="display:inline-block;width:4ch;height:1em;border-radius:6px"></span>
+      {% set _chg = ssr_bist_level.change_pct if ssr_bist_level else none %}
+      <span class="da-index-change {{ 'pos' if _chg is not none and _chg > 0.05 else 'neg' if _chg is not none and _chg < -0.05 else 'neu' }}" id="daIndexChange">{% if _chg is not none %}<svg viewBox="0 0 24 24" fill="none"><path d="{{ 'M12 4 L19 16 H5 Z' if _chg > 0.05 else 'M12 20 L19 8 H5 Z' if _chg < -0.05 else 'M5 12 H19' }}" fill="currentColor" stroke="currentColor" stroke-width="1.5"/></svg>{{ '+' if _chg > 0 else '' }}{{ '%.2f'|format(_chg)|replace('.', ',') }}%{% else %}<span class="da-skel" style="display:inline-block;width:4ch;height:1em;border-radius:6px"></span>{% endif %}
       </span>
     </div>
     <div class="da-index-sub">
-      <span id="daIndexSubText">Endeks verisi yükleniyor…</span>
+      <span id="daIndexSubText">{{ 'gün sonu verisiyle güncellenir' if (ssr_bist_level and ssr_bist_level.close is not none) else 'Endeks verisi yükleniyor…' }}</span>
       <svg class="da-spark" id="daSpark" viewBox="0 0 110 28" aria-hidden="true"></svg>
     </div>
 
@@ -612,10 +611,30 @@ header{
     <p class="da-section-desc">Teknik Güç Skoru — ADX, hacim teyidi ve RSI bölgesinin ağırlıklı bileşimi (0–100).</p>
   </div>
   <div id="daSpotlightBody">
+    {% if ssr_top_signals %}{% set s = ssr_top_signals[0] %}
+    <div class="da-spot-grid">
+      <div class="da-spot-ring-wrap"><div class="da-spot-ring-num"><span class="n da-num">{{ s.signal_strength|tr_num if s.signal_strength is not none else '—' }}</span><span class="l">Teknik Güç Skoru</span></div></div>
+      <div class="da-spot-body">
+        <div class="da-spot-top">
+          <div><div class="da-spot-ticker"><a href="/hisse/{{ s.ticker }}">{{ s.ticker }}</a></div>
+          <div class="da-spot-company">{{ s.name or '' }}</div>
+          {% if s.sector %}<span class="da-spot-sector">{{ s.sector }}</span>{% endif %}</div>
+          <div class="da-spot-price"><div class="p da-num">{{ s.price|tr_price }} ₺</div><div class="d da-num" style="color:{{ 'var(--bp-al)' if (s.change_pct is not none and s.change_pct >= 0) else 'var(--bp-sat)' }}">{{ '%+.2f'|format(s.change_pct)|replace('.', ',') if s.change_pct is not none else '—' }}%</div></div>
+        </div>
+        <span class="da-spot-signal sig-al">● Güçlü Trend</span>
+        <div class="da-spot-subs">
+          <div class="da-spot-sub-row"><span class="lbl">ADX</span><span class="val da-num">{{ s.adx|round(0)|int if s.adx is not none else '—' }}</span></div>
+          <div class="da-spot-sub-row"><span class="lbl">RVOL</span><span class="val da-num">{{ '%.2f×'|format(s.rvol) if s.rvol is not none else '—' }}</span></div>
+          <div class="da-spot-sub-row"><span class="lbl">RSI</span><span class="val da-num">{{ s.rsi|round(0)|int if s.rsi is not none else '—' }}</span></div>
+        </div>
+      </div>
+    </div>
+    {% else %}
     <div class="da-spot-grid">
       <div class="da-skel" style="width:190px;height:190px;border-radius:50%"></div>
       <div style="flex:1"><div class="da-skel" style="width:60%;height:2rem;border-radius:8px;margin-bottom:12px"></div><div class="da-skel" style="width:40%;height:1rem;border-radius:6px"></div></div>
     </div>
+    {% endif %}
   </div>
 </section>
 
@@ -650,9 +669,18 @@ header{
     <a href="/tarama?sort=signal_strength" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tüm taramayı gör →</a>
   </div>
   <div class="da-stock-grid" id="daStockGrid">
+    {% if ssr_top_signals %}{% for s in ssr_top_signals %}
+    <a href="/hisse/{{ s.ticker }}" class="da-scard sm">
+      <div class="da-sc-top"><div><div class="da-sc-ticker">{{ s.ticker }}</div><div class="da-sc-company">{{ s.name or '' }}</div></div>
+      <div class="da-sc-price"><div class="p">{{ s.price|tr_price }}</div><div class="d" style="color:{{ 'var(--bp-al)' if (s.change_pct is not none and s.change_pct >= 0) else 'var(--bp-sat)' }}">{{ '%+.2f'|format(s.change_pct)|replace('.', ',') if s.change_pct is not none else '—' }}%</div></div></div>
+      <div class="da-sc-mid"><div class="da-sc-ring-num">{{ s.signal_strength|tr_num if s.signal_strength is not none else '—' }}</div>
+      <span class="da-sc-sig sig-al">● Güçlü Trend</span></div>
+    </a>
+    {% endfor %}{% else %}
     <div class="da-skel" style="grid-column:span 6;grid-row:span 2;border-radius:var(--bp-radius-20)"></div>
     <div class="da-skel" style="grid-column:span 3;border-radius:var(--bp-radius-20)"></div>
     <div class="da-skel" style="grid-column:span 3;border-radius:var(--bp-radius-20)"></div>
+    {% endif %}
   </div>
 </section>
 
