@@ -8985,37 +8985,12 @@ def api_stock_chart(ticker):
 
 
 # ── Strateji Tarayıcısı ──────────────────────────────────────────────────────
-@app.route("/tarama")
-def tarama():
-    return render_template("tarama.html")
-
-
-@app.route("/api/tarama")
-@limiter.limit("60 per minute")
-def api_tarama():
-    """Hisse tarayıcısı — sinyal, ADX, fiyat, hacim, sektör filtresi."""
-    def _qfloat(name, default):
-        # DEV2-bughunt-r7: float("nan") exception firlatmiyor -> min_price/max_price/min_adx
-        # filtreleri "nan" degeriyle sessizce devre disi kaliyordu (NaN karsilastirmasi hep False).
-        import math
-        try:
-            v = float(request.args.get(name, default))
-        except (TypeError, ValueError):
-            return default
-        return v if math.isfinite(v) else default
-    # DEV2-r4-input-edge: case-insensitive normalize — buyuk/kucuk harf farki
-    # sessizce 0 sonuc donduruyordu (signal/sector/eq) veya siralamayi sessizce
-    # iptal ediyordu (sort). Kanonik veri (signal/entry_quality) hep ASCII
-    # buyuk harf oldugundan .upper() guvenli; sort_by dict anahtarlariyla
-    # (hepsi lowercase) karsilastirildigi icin .lower() guvenli.
-    sig      = request.args.get("signal",    "").strip().upper()
-    min_adx  = _qfloat("min_adx",   0)
-    min_p    = _qfloat("min_price", 0)
-    max_p    = _qfloat("max_price", 999999)
-    sector   = request.args.get("sector",    "").strip()
-    eq       = request.args.get("eq",        "").strip().upper()   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
-    sort_by  = request.args.get("sort",      "signal_strength").strip().lower()  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
-
+def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
+                             eq="", sort_by="signal_strength", sort_dir="",
+                             only_premium=False):
+    """Tarama filtre/sirala/sekillendirme mantigi — /tarama (SSR, varsayilan
+    parametrelerle) ve /api/tarama (kullanici filtreleriyle) tarafindan ortak
+    kullanilir (CPO-1587 Faz 2: tek kaynak, kopya kod yok)."""
     with _lock:
         stocks = list(_cache["data"])
         upd    = _cache.get("updated_at", "")
@@ -9072,8 +9047,7 @@ def api_tarama():
             "sl_level":      s.get("sl_level"),
         })
 
-    sort_dir = request.args.get("sort_dir", "")  # asc | desc | (default desc)
-    only_premium = request.args.get("only_premium", "") == "1"
+    # sort_dir: "" | asc | desc — cagiran taraf (api_tarama) request.args'tan cozer
     if only_premium:
         results = [r for r in results if r.get("is_premium")]
     if sort_dir in ("asc", "desc"):
@@ -9133,6 +9107,51 @@ def api_tarama():
     with _lock:
         sectors = sorted(set(_get_sector(s.get("ticker","")) for s in _cache["data"]
                              if s.get("ticker") not in ("XU030","XU100")))
+
+    return results, sectors, upd
+
+
+@app.route("/tarama")
+def tarama():
+    # CPO-1587 Faz 2: varsayilan (filtresiz) sonuclarin ilk 30'u SSR icin —
+    # AI crawler'lar JS calistirmayabilir, ham HTML artik bos degil.
+    # JS mevcut fetch+innerHTML davranisini AYNEN koruyor, ilk basarili
+    # fetch'te SSR satirlarinin uzerine yaziyor — kullanici deneyimi degismez.
+    results, _sectors, _upd = _compute_tarama_results()
+    return render_template("tarama.html", ssr_rows=results[:30])
+
+
+@app.route("/api/tarama")
+@limiter.limit("60 per minute")
+def api_tarama():
+    """Hisse tarayıcısı — sinyal, ADX, fiyat, hacim, sektör filtresi."""
+    def _qfloat(name, default):
+        # DEV2-bughunt-r7: float("nan") exception firlatmiyor -> min_price/max_price/min_adx
+        # filtreleri "nan" degeriyle sessizce devre disi kaliyordu (NaN karsilastirmasi hep False).
+        import math
+        try:
+            v = float(request.args.get(name, default))
+        except (TypeError, ValueError):
+            return default
+        return v if math.isfinite(v) else default
+    # DEV2-r4-input-edge: case-insensitive normalize — buyuk/kucuk harf farki
+    # sessizce 0 sonuc donduruyordu (signal/sector/eq) veya siralamayi sessizce
+    # iptal ediyordu (sort). Kanonik veri (signal/entry_quality) hep ASCII
+    # buyuk harf oldugundan .upper() guvenli; sort_by dict anahtarlariyla
+    # (hepsi lowercase) karsilastirildigi icin .lower() guvenli.
+    sig      = request.args.get("signal",    "").strip().upper()
+    min_adx  = _qfloat("min_adx",   0)
+    min_p    = _qfloat("min_price", 0)
+    max_p    = _qfloat("max_price", 999999)
+    sector   = request.args.get("sector",    "").strip()
+    eq       = request.args.get("eq",        "").strip().upper()   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
+    sort_by  = request.args.get("sort",      "signal_strength").strip().lower()  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
+    sort_dir = request.args.get("sort_dir", "")  # asc | desc | (default desc)
+    only_premium = request.args.get("only_premium", "") == "1"
+
+    results, sectors, upd = _compute_tarama_results(
+        sig=sig, min_adx=min_adx, min_p=min_p, max_p=max_p, sector=sector,
+        eq=eq, sort_by=sort_by, sort_dir=sort_dir, only_premium=only_premium)
 
     return safe_json({"results": results, "sectors": sectors,
                       "count": len(results), "updated_at": upd})
