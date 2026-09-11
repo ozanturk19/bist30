@@ -786,7 +786,7 @@ async function loadCloudToken() {
     let skipped = 0;
     data.positions.forEach(p => {
       const lot = Number(p.lot), price = Number(p.price);
-      if (!p.ticker || !Number.isFinite(lot) || lot <= 0 || !Number.isFinite(price) || price <= 0) { skipped++; return; }
+      if (!p.ticker || !Number.isFinite(lot) || lot <= 0 || !Number.isInteger(lot) || !Number.isFinite(price) || price <= 0) { skipped++; return; }
       p.lot = lot; p.price = price;
       const exists = portfolio.some(x => x.ticker === p.ticker && +x.price === +p.price && x.date === p.date);
       if (!exists) portfolio.push({...p, id: Date.now() + Math.random()});
@@ -850,7 +850,7 @@ async function loadFromCloud() {
     const rawCount = data.positions.length;
     portfolio = data.positions
       .map(p => { const lot = Number(p.lot), price = Number(p.price); return {...p, lot, price, id: Date.now() + Math.random()}; })
-      .filter(p => p.ticker && Number.isFinite(p.lot) && p.lot > 0 && Number.isFinite(p.price) && p.price > 0);
+      .filter(p => p.ticker && Number.isFinite(p.lot) && p.lot > 0 && Number.isInteger(p.lot) && Number.isFinite(p.price) && p.price > 0);
     save(); render();
     const skipped = rawCount - portfolio.length;
     _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.${skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''}`, 'var(--bp-al)');
