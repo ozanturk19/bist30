@@ -138,11 +138,11 @@
 
   <!-- Tablo -->
   <div class="table-wrap" id="tableWrap">
-    <div class="loading-overlay" id="loadingDiv" role="status" aria-live="polite">
+    <div class="loading-overlay" id="loadingDiv" role="status" aria-live="polite"{% if ssr_rows %} style="display:none"{% endif %}>
       <div class="spinner"></div>
       <span>Veriler yükleniyor…</span>
     </div>
-    <table id="resultTable" style="display:none">
+    <table id="resultTable"{% if not ssr_rows %} style="display:none"{% endif %}>
       <caption class="sr-only">Tarama sonuçları — hisse, sinyal, sinyal gücü, trend gücü ve teknik göstergeler</caption>
       <thead>
         {# SPEC-UX-BATCH-2026-06-03 Task #23 (CPO-475): Tarama kolon redesign.
@@ -162,7 +162,18 @@
           <th scope="col" class="hide-mob hide-tablet">Sektör</th>
         </tr>
       </thead>
-      <tbody id="resultBody"></tbody>
+      <tbody id="resultBody">{% for s in ssr_rows %}{% set _eq = {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Uzak'} %}<tr>
+        <td><a href="/hisse/{{ s.ticker }}"><div class="tk">{{ s.ticker }}</div><div class="tk-name">{{ (s.name or '')|replace(' A.Ş.','')|truncate(20, True, '') }}</div></a></td>
+        <td><span class="sig-badge sig-{{ s.signal }}">{{ '▲' if s.signal=='AL' else '▼' if s.signal=='SAT' else '●' }} {{ s.signal|signal_label }}</span></td>
+        <td>{{ s.signal_strength }}</td>
+        <td>{{ s.adx_label }}</td>
+        <td>{{ _eq.get(s.entry_quality, '—') }}</td>
+        <td class="hide-mob-narrow price-val">{{ s.price|tr_price }}</td>
+        <td class="hide-mob-narrow">{{ '%+.2f%%'|format(s.change_pct)|replace('.', ',') if s.change_pct is not none else '—' }}</td>
+        <td class="hide-mob">{{ '%.2f×'|format(s.vol_ratio)|replace('.', ',') if s.vol_ratio is not none else '—' }}</td>
+        <td class="hide-mob">{{ s.signal_date|signal_age_text }}</td>
+        <td class="hide-mob hide-tablet"><span class="sector-tag">{{ s.sector or '—' }}</span></td>
+      </tr>{% endfor %}</tbody>
     </table>
     <div id="mobileResultCards"></div>
     <div class="empty-state" id="emptyDiv" style="display:none" role="status" aria-live="polite">
