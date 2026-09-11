@@ -99,7 +99,7 @@
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
 <script src="/static/bp-vocab.js?v=20260823C" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=6097fdc2">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=08097045">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:var(--bp-brand);color:var(--bp-bg);padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid var(--bp-brand);outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -210,7 +210,7 @@
   <h1 class="hib-ticker">{{ ticker }}</h1>
   <span class="hib-name" title="{{ name }}">{{ name }}</span>
   <div class="header-price-group">
-    <span class="header-price" id="hpPrice">—</span>
+    <span class="header-price" id="hpPrice">{{ ssr_signal.price|tr_price if ssr_signal and ssr_signal.price is not none else '—' }}</span>
     <span class="header-chg neu" id="hpChg">—</span>
     <span class="signal-badge signal-BEKLE" id="hpSignal" title="Yükleniyor">⋯</span>
     <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge"><span aria-hidden="true">⚠</span> Anomal</span>
@@ -1211,6 +1211,31 @@
       {% if ssr_signal.adx %}ADX değeri {{ ssr_signal.adx }}.{% endif %}
       Sinyal; <strong>Supertrend(10,3)</strong>, <strong>ADX ≥ 25</strong> ve <strong>EMA12/EMA99</strong> göstergelerinin aynı anda uyum sağlamasıyla oluşur.
     </p>
+  </div>
+
+  <!-- GEO: hap-bilgi kapsülü — kendi başına alıntılanabilir, etiketli
+       istatistik listesi. AI özetleyicilerin (ChatGPT/Perplexity/Claude)
+       düz cümleden çok etiketli değer tercih ettiği bulgusuna dayanıyor
+       (bkz. proje planı, 11.09 GEO turu). Sadece mevcut ssr_signal/hs
+       context'inden — yeni hesaplama yok, uydurma sayı yok. -->
+  <div class="quickfacts-card" data-tab-content="always">
+    <div class="quickfacts-title"><span aria-hidden="true">📌</span> {{ ticker }} — Hap Bilgi</div>
+    <dl class="quickfacts-list">
+      <div class="qf-row"><dt>Hisse</dt><dd>{{ ticker }} — {{ name }}</dd></div>
+      <div class="qf-row"><dt>Sektör</dt><dd>{{ sector }}</dd></div>
+      <div class="qf-row"><dt>Güncel Fiyat</dt><dd>{{ ssr_signal.price|tr_price }} ₺</dd></div>
+      <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
+      <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ ssr_signal.signal_date|signal_age_text }}</dd></div>
+      <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{{ ssr_signal.signal_strength|int }}/100</dd></div>
+      <div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{% if hs_available and hs.temel_analiz_skoru is not none %}{{ hs.temel_analiz_skoru }}/100{% else %}Veri bekleniyor{% endif %}</dd></div>
+      {% if hs_available and hs.borsapusula_skoru is not none %}
+      <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
+      {% endif %}
+      {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ ssr_signal.adx }}</dd></div>{% endif %}
+      {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ ssr_signal.rsi|int }}</dd></div>{% endif %}
+      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Stop Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺</dd></div>{% endif %}
+    </dl>
+    <div class="quickfacts-disclaimer"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir.</div>
   </div>
   {% endif %}
 
