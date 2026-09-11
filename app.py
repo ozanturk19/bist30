@@ -785,52 +785,49 @@ DELISTED_TICKERS = {
 # BIST100 hisse listesi (XU030 endeks dahil)
 BIST100 = [
     # ── BIST30 ──────────────────────────────────────────
-    "AKBNK", "ARCLK", "ASELS", "BIMAS", "EKGYO",
-    "EREGL", "FROTO", "GARAN", "HEKTS", "ISCTR",
-    "KCHOL", "KRDMD", "MGROS", "ODAS", "OYAKC",
-    "PGSUS", "SAHOL", "SASA", "SISE", "SOKM",
-    "TAVHL", "TCELL", "THYAO", "TKFEN", "TOASO",
-    "TUPRS", "VAKBN", "YKBNK",
+    "AEFES", "AKBNK", "ASELS", "ASTOR", "BIMAS",
+    "DSTKF", "EKGYO", "ENKAI", "EREGL", "FROTO",
+    "GARAN", "GUBRF", "ISCTR", "KCHOL", "KRDMD",
+    "MGROS", "PETKM", "PGSUS", "SAHOL", "SASA",
+    "SISE", "TAVHL", "TCELL", "THYAO", "TOASO",
+    "TRALT", "TTKOM", "TUPRS", "VAKBN", "YKBNK",
     # ── BIST100 ek hisseler ─────────────────────────────
-    "AEFES", "AGHOL", "AKSA",  "AKSEN", "ALARK",
-    "ALBRK", "ALFAS", "ALGYO", "ALKIM",
-    "ANHYT", "ANSGR", "ASUZU", "BJKAS", "BRSAN",
-    "BRYAT", "BUCIM", "CCOLA", "CIMSA", "CWENE",
-    "DOAS",  "DOHOL", "EGEEN", "ENJSA", "ENKAI",
-    "EUPWR", "FENER", "GENIL", "GLYHO", "GUBRF",
-    "HALKB", "INDES", "ISDMR", "ISGYO",
+    "AGHOL", "AKSA", "AKSEN", "ALARK", "ALBRK",
+    "ALFAS", "ALGYO", "ALKIM", "ANHYT", "ANSGR",
+    "ASUZU", "BJKAS", "BRSAN", "BRYAT", "BUCIM",
+    "CCOLA", "CIMSA", "CWENE", "DOAS", "DOHOL",
+    "EGEEN", "ENJSA", "EUPWR", "FENER", "GENIL",
+    "GLYHO", "HALKB", "INDES", "ISDMR", "ISGYO",
     "ISMEN", "IZMDC", "JANTS", "KARTN", "KCAER",
-    "KLNMA", "KONTR", "KORDS",
-    "LOGO",  "MAVI",  "NETAS", "NTHOL",
-    "OTKAR", "PARSN", "PETKM", "PRKAB", "RYSAS",
-    "SARKY", "SELEC", "SMRTG", "TATGD", "TTKOM",
+    "KLNMA", "KONTR", "KORDS", "LOGO", "MAVI",
+    "NETAS", "NTHOL", "OTKAR", "PARSN", "PRKAB",
+    "RYSAS", "SARKY", "SELEC", "SMRTG", "TATGD",
     "TTRAK", "TURSG", "ULKER", "VESBE", "VESTL",
-    "YATAS", "ZOREN",
+    "YATAS", "ZOREN", "ARCLK", "HEKTS", "ODAS",
+    "OYAKC", "SOKM", "TKFEN",
     # ── BIST100+ genişleme ──────────────────────────────
-    "ADEL",  "ADESE", "AKMGY", "AKGRT", "ARSAN",
-    "AYCES", "BIOEN", "BOSSA", "CEMTS",
-    "CEMAS", "CLEBI", "CRDFA", "DENGE", "DNISI",
-    "DOGUB", "DURDO", "DYOBY", "ECILC",
-    "EDIP",  "EGGUB", "EGPRO", "EMKEL", "ERBOS",
-    "ERSU",  "ESCOM", "FMIZP", "FORMT", "GESAN",
-    "GSDHO", "GSRAY", "GOKNR", "HDFGS", "HLGYO",
-    "HTTBT", "IEYHO", "ISKPL", "ISFIN",
-    "KAPLM", "KATMR", "KMPUR", "KONYA",
-    "KRSTL", "LKMNH", "LUKSK", "MAKTK", "MPARK",
-    "MEDTR", "MEGAP", "MTRKS",
-    "NATEN", "NIBAS", "NUHCM", "ORGE",
+    "ADEL", "ADESE", "AKMGY", "AKGRT", "ARSAN",
+    "AYCES", "BIOEN", "BOSSA", "CEMTS", "CEMAS",
+    "CLEBI", "CRDFA", "DENGE", "DNISI", "DOGUB",
+    "DURDO", "DYOBY", "ECILC", "EDIP", "EGGUB",
+    "EGPRO", "EMKEL", "ERBOS", "ERSU", "ESCOM",
+    "FMIZP", "FORMT", "GESAN", "GSDHO", "GSRAY",
+    "GOKNR", "HDFGS", "HLGYO", "HTTBT", "IEYHO",
+    "ISKPL", "ISFIN", "KAPLM", "KATMR", "KMPUR",
+    "KONYA", "KRSTL", "LKMNH", "LUKSK", "MAKTK",
+    "MPARK", "MEDTR", "MEGAP", "MTRKS", "NATEN",
+    "NIBAS", "NUHCM", "ORGE",
     # ── Faz 2: Yıldız Pazar genişlemesi (>=200M TL/gün, 2026-05-07) ─
-    "ASTOR", "PEKGY", "PASEU", "MIATK", "CANTE",
-    "KLRHO", "PSGYO", "QUAGR", "IZENR", "EUREN",
-    "ALKLC", "YEOTK", "BINHO", "FZLGY", "SKBNK",
-    "MAGEN", "SURGY", "ESEN", "REEDR", "ALTNY",
-    "ENERY", "BTCIM", "SDTTR", "BURCE", "TUKAS",
-    "MARTI", "FONET", "AGROT", "MRGYO", "TUREX",
-    "LILAK", "TCKRC", "PENGD", "PAPIL", "AYGAZ",
-    "TSKB", "FORTE", "AKFYE", "TEKTU", "LMKDC",
-    "ECZYT", "ARENA", "USAK", "MARKA", "BERA",
-    "LINK", "MERCN", "ARDYZ", "KZBGY", "GMTAS",
-    "AHGAZ",
+    "PEKGY", "PASEU", "MIATK", "CANTE", "KLRHO",
+    "PSGYO", "QUAGR", "IZENR", "EUREN", "ALKLC",
+    "YEOTK", "BINHO", "FZLGY", "SKBNK", "MAGEN",
+    "SURGY", "ESEN", "REEDR", "ALTNY", "ENERY",
+    "BTCIM", "SDTTR", "BURCE", "TUKAS", "MARTI",
+    "FONET", "AGROT", "MRGYO", "TUREX", "LILAK",
+    "TCKRC", "PENGD", "PAPIL", "AYGAZ", "TSKB",
+    "FORTE", "AKFYE", "TEKTU", "LMKDC", "ECZYT",
+    "ARENA", "USAK", "MARKA", "BERA", "LINK",
+    "MERCN", "ARDYZ", "KZBGY", "GMTAS", "AHGAZ",
     # ── 125M cutoff genişleme (2026-05-07) ──
     "KAREL", "ARZUM", "AKCNS", "MERKO", "KARSN",
     "POLHO", "TABGD", "GENTS", "ANELE", "HATSN",
@@ -847,7 +844,10 @@ BIST_STOCK_COUNT = len([t for t in BIST100 if t != "XU030"])
 # alias'landığı için ayrı isim) — Gemini kotası paylaşan işlerde (health-explain)
 # evreni daraltmak için tek kaynak; BIST100[:28] deseni zaten 3 yerde (backtest,
 # earnings-refresh, bilanco-takvimi) tekrarlanıyordu, burada isimlendirdik.
-BIST30_LITERAL = BIST100[:28]
+# CPO-1596: 2026 Q3 revizyonuyla gerçek BIST30 28 değil 30 üye (DSTKF/TRALT
+# eklendi, ARCLK/HEKTS/ODAS/OYAKC/SOKM/TKFEN çıktı) — TradingView + Midas
+# çapraz doğrulandı, yfinance veri kaynağı da teyit edildi (2026-09-11).
+BIST30_LITERAL = BIST100[:30]
 
 STOCK_NAMES = {
     # ── BIST30 ──────────────────────────────────────────
@@ -879,6 +879,10 @@ STOCK_NAMES = {
     "TUPRS": "Tüpraş Türkiye Petrol Rafinerileri",
     "VAKBN": "Vakıfbank",
     "YKBNK": "Yapı ve Kredi Bankası",
+    # CPO-1596: 2026 Q3 revizyonuyla BIST30'a yeni giren, evrende hiç
+    # olmayan 2 ticker (ASTOR/ENKAI/GUBRF/PETKM/TTKOM zaten aşağıda tanımlı)
+    "DSTKF": "Destek Finans Faktoring",
+    "TRALT": "Türk Altın İşletmeleri",
     # ── BIST100 ek hisseler ─────────────────────────────
     "AEFES": "Anadolu Efes Biracılık",
     "AGHOL": "AG Anadolu Grubu Holding",
@@ -1272,7 +1276,8 @@ def fetch_kap_disclosures(ticker: str, days: int = 90) -> list:
 # ── Sektör sınıflandırması ────────────────────────────────────────────────────
 SECTORS = {
     "Bankacılık":    ["AKBNK", "GARAN", "HALKB", "ISCTR", "VAKBN", "YKBNK",
-                      "ALBRK", "KLNMA", "ISMEN", "ISFIN", "CRDFA", "SKBNK", "TSKB"],
+                      "ALBRK", "KLNMA", "ISMEN", "ISFIN", "CRDFA", "SKBNK", "TSKB",
+                      "DSTKF"],
     "Holding":       ["KCHOL", "SAHOL", "AGHOL", "ALARK", "DOHOL", "GLYHO",
                       "NTHOL", "TKFEN", "BRYAT", "GSDHO", "DENGE", "HDFGS",
                       "DOGUB", "KLRHO", "BINHO", "ECZYT", "MARKA", "BERA", "POLHO", "LRSHO", "DERHL"],
@@ -1283,7 +1288,7 @@ SECTORS = {
                       "CEMAS", "EDIP",  "EMKEL", "ERBOS", "EGGUB", "EGPRO",
                       "GESAN", "KAPLM", "KATMR", "LKMNH", "LUKSK", "MAKTK",
                       "NIBAS", "NUHCM", "PASEU", "QUAGR", "EUREN", "BURCE", "LILAK", "USAK", "GMTAS", "ALTNY", "SDTTR", "PAPIL", "BTCIM", "LMKDC", "TEKTU", "ARZUM", "AKCNS", "KARSN", "GENTS", "ANELE", "HATSN", "PKART", "TMSN",
-                      "AYCES"],
+                      "AYCES", "TRALT"],
     "Enerji":        ["AKSEN", "ALFAS", "CWENE", "ENJSA", "ENKAI",
                       "EUPWR", "ODAS",  "PRKAB", "SMRTG", "TUPRS", "ZOREN",
                       "BIOEN", "NATEN", "ORGE", "ASTOR", "CANTE", "IZENR", "MAGEN", "ESEN", "ENERY", "AYGAZ", "AKFYE", "AHGAZ", "SMART", "AYEN", "AYDEM"],
@@ -2785,6 +2790,14 @@ def _build_signal_email(changes, unsubscribe_url):
     if prem_count > 0:
         summary_chips += f'<span style="display:inline-block;background:rgba(255,200,80,0.10);border:1px solid rgba(255,200,80,0.40);color:#ffc850;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">💎 {prem_count} Premium</span>'
 
+    more_html = ""
+    if len(changes) > 10:
+        more_html = f'''<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:2px">
+      <tr><td align="center" style="padding:2px 0 4px">
+        <span style="font-size:12px;color:#909097">+{len(changes)-10} sinyal daha var, tümünü sitede gör</span>
+      </td></tr>
+    </table>'''
+
     _now_tr = datetime.now(_TZ_TR)
     content = f'''
     <!-- Header -->
@@ -2800,6 +2813,8 @@ def _build_signal_email(changes, unsubscribe_url):
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
       {cards}
     </table>
+
+    {more_html}
 
     <!-- CTA -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px">
@@ -10857,7 +10872,7 @@ def run_backtest():
     # circuit-breaker riskini büyütür (bkz. bilinen CB kesinti geçmişi).
     # Bu yüzden istatistiğin kapsamı /sinyal-performans'ta açıkça belirtilir
     # (küçük/orta-cap için temsili olmayabilir) — örneklemi genişletmek yerine.
-    bt_tickers = BIST100[:28]
+    bt_tickers = BIST30_LITERAL
     all_episodes = {"AL": [], "SAT": []}
     per_ticker   = []
 
@@ -11286,7 +11301,7 @@ def _earnings_refresh_impl():
 
     # Her hisse için yfinance calendar dene (bazı hisseler için gerçek tarih döner)
     yf_dates = {}   # ticker → date_str
-    sample_tickers = BIST100[:28]   # Sadece BIST30 için hız kazanımı
+    sample_tickers = BIST30_LITERAL   # Sadece BIST30 için hız kazanımı
     for t in sample_tickers:
         try:
             cal = yf.Ticker(t + ".IS").calendar
@@ -11594,7 +11609,7 @@ def _dividend_refresh_impl():
         stocks = list(_cache["data"])
     sig_map = {s["ticker"]: s for s in stocks}
 
-    sample_tickers = BIST100[:28]   # bilanco-takvimi ile aynı örneklem (hız/rate-limit)
+    sample_tickers = BIST30_LITERAL   # bilanco-takvimi ile aynı örneklem (hız/rate-limit)
     result_stocks = []
     for t in sample_tickers:
         try:

@@ -1207,17 +1207,17 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
   <li><strong>ISCTR</strong> — İş Bankası C</li>
   <li><strong>VAKBN</strong> — Vakıfbank</li>
   <li><strong>YKBNK</strong> — Yapı Kredi Bankası</li>
-  <li><strong>HALKB</strong> — Halkbank</li>
+  <li><strong>DSTKF</strong> — Destek Finans Faktoring</li>
 </ul>
 
 <h3>Holding ve Sanayi</h3>
 <ul>
   <li><strong>KCHOL</strong> — Koç Holding</li>
   <li><strong>SAHOL</strong> — Sabancı Holding</li>
-  <li><strong>ARCLK</strong> — Arçelik</li>
   <li><strong>FROTO</strong> — Ford Otosan</li>
   <li><strong>TOASO</strong> — Tofaş Oto</li>
   <li><strong>EREGL</strong> — Ereğli Demir Çelik</li>
+  <li><strong>KRDMD</strong> — Kardemir Karabük Demir Çelik</li>
 </ul>
 
 <h3>Enerji ve Petrokimya</h3>
@@ -1225,8 +1225,9 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
   <li><strong>TUPRS</strong> — Tüpraş</li>
   <li><strong>PETKM</strong> — Petkim</li>
   <li><strong>SASA</strong> — Sasa Polyester</li>
-  <li><strong>AKSEN</strong> — Aksen Enerji</li>
   <li><strong>ENKAI</strong> — Enka İnşaat</li>
+  <li><strong>ASTOR</strong> — Astor Enerji</li>
+  <li><strong>GUBRF</strong> — Gübre Fabrikaları T.A.Ş.</li>
 </ul>
 
 <h3>Diğer Sektörler</h3>
@@ -1238,11 +1239,11 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
   <li><strong>MGROS</strong> — Migros (Perakende)</li>
   <li><strong>ASELS</strong> — Aselsan (Savunma)</li>
   <li><strong>EKGYO</strong> — Emlak Konut GYO</li>
-  <li><strong>TKFEN</strong> — Tekfen Holding</li>
   <li><strong>TAVHL</strong> — TAV Havalimanları</li>
   <li><strong>PGSUS</strong> — Pegasus Hava Yolları</li>
   <li><strong>SISE</strong> — Şişe Cam</li>
-  <li><strong>HEKTS</strong> — Hektaş</li>
+  <li><strong>AEFES</strong> — Anadolu Efes Biracılık</li>
+  <li><strong>TRALT</strong> — Türk Altın İşletmeleri</li>
 </ul>
 
 <h2>BIST30'un Önemi</h2>
@@ -1269,7 +1270,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <p><a href="/gucu-yuksek">Güçlü Momentum</a> sayfasında tüm bu kriterleri en iyi karşılayan BIST30 hisseleri sıralanmaktadır.</p>
 """,
     "faqs": [
-      {"q": "BIST30'da kaç hisse var ve hangileri?", "a": "BIST30, Borsa İstanbul'da en likit 30 hisseyi kapsar. Bankacılık (AKBNK, GARAN, ISCTR, YKBNK, VAKBN, HALKB), holding/sanayi (KCHOL, SAHOL, ARCLK, FROTO, TOASO, EREGL), enerji (TUPRS, PETKM, AKSEN, ENKAI, SASA) ve diğer sektörlerden oluşur."},
+      {"q": "BIST30'da kaç hisse var ve hangileri?", "a": "BIST30, Borsa İstanbul'da en likit 30 hisseyi kapsar. Bankacılık (AKBNK, GARAN, ISCTR, YKBNK, VAKBN, DSTKF), holding/sanayi (KCHOL, SAHOL, FROTO, TOASO, EREGL, KRDMD), enerji (TUPRS, PETKM, ASTOR, ENKAI, SASA, GUBRF) ve diğer sektörlerden oluşur."},
       {"q": "BIST30 endeksi ne kadar sıklıkla güncellenir?", "a": "Borsa İstanbul, BIST30 endeks bileşenlerini yılda dört kez (Ocak-Mart, Nisan-Haziran, Temmuz-Eylül, Ekim-Aralık dönemleri sonunda) inceler ve günceller. Yeterli likidite ve piyasa değeri kriterlerini karşılayamayan hisseler çıkarılır, yerlerine uygun hisseler alınır."},
       {"q": "BIST30 hisselerinin teknik sinyalleri nereden takip edilir?", "a": "BorsaPusula'da BIST30 hisselerinin tamamı için Supertrend + ADX + EMA algoritmik sinyalleri ücretsiz olarak sunulmaktadır. Ana sayfada 'BIST30' filtresiyle bu hisseleri ayrıca görebilirsiniz."}
     ],
