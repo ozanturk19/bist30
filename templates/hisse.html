@@ -151,10 +151,6 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" stroke-linejoin="round"/></svg>
     <span>Sektörler</span>
   </a>
-  <a href="/sinyal-performans" data-route="/sinyal-performans" class="bp-nav-item">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    <span>Performans</span>
-  </a>
   <a href="/blog" data-route="/blog" class="bp-nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
     <span>Blog</span>
@@ -1036,9 +1032,8 @@
        listesinden (signal_history) hesaplanır; ayrı/bayat backtest cache'i
        kullanmaz, böylece "Toplam Sinyal" tablosuyla aynı kaynağa dayanır. -->
   <div id="sigPerfBox" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="margin-bottom:10px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📊</span> Geçmiş Sinyal Performansı</h2>
-      <a href="/sinyal-performans" style="font-size:var(--bp-text-xs);color:var(--bp-brand);text-decoration:none;font-weight:600">Tüm backtest <span aria-hidden="true">→</span></a>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
       <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
@@ -3128,7 +3123,7 @@ document.addEventListener('visibilitychange', () => {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=67" defer></script>
+<script src="/static/bp-search.js?v=69" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 <script src="/static/js/bp-chart-common.js?v=2"></script>
 <script src="/static/learning-mode.js?v=5" defer></script>

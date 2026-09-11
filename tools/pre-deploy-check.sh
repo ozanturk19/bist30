@@ -49,7 +49,7 @@ fi
 # tutulmalı.
 echo ""
 echo "3/8 KALICI_KURALLAR audit..."
-KK_AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/sinyal_performans.html templates/index.html templates/portfolio.html templates/gundem.html templates/metodoloji.html templates/blog.html templates/blog_article.html templates/temettu_takvimi.html templates/bilanco_takvimi.html"
+KK_AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/index.html templates/portfolio.html templates/gundem.html templates/metodoloji.html templates/blog.html templates/blog_article.html templates/temettu_takvimi.html templates/bilanco_takvimi.html"
 KK_FAIL=0
 for f in $KK_AUDIT_FILES; do
   if ! ./tests/audit/kalici-kurallar-check.sh "$f" > /dev/null 2>&1; then
