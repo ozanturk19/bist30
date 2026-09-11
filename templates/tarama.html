@@ -1088,7 +1088,7 @@ function switchTaramaTab(tab, opts) {
     el.setAttribute('aria-selected', isActive ? 'true' : 'false');
     el.tabIndex = isActive ? 0 : -1;
   });
-  try { localStorage.setItem('bp_tarama_tab', tab); } catch(e) {}
+  try { localStorage.setItem('bp_tarama_tab', tab); } catch(e) { console.warn('Sekme tercihi kaydedilemedi', e); }
   if (!opts.skipUrl) {
     try {
       const url = new URL(window.location.href);
@@ -1139,7 +1139,7 @@ window.addEventListener('popstate', () => {
     const urlTab = new URL(window.location.href).searchParams.get('tab');
     if (urlTab && TARAMA_TABS.indexOf(urlTab) !== -1) initialTab = urlTab;
     else initialTab = localStorage.getItem('bp_tarama_tab') || 'teknik';
-  } catch(e) {}
+  } catch(e) { console.warn('Sekme başlangıç durumu okunamadı', e); }
   if (TARAMA_TABS.indexOf(initialTab) === -1) initialTab = 'teknik';
   switchTaramaTab(initialTab, {skipUrl: true});
 })();
