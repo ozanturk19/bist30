@@ -10391,15 +10391,23 @@ def ozet_page():
     # döner ve fallback hiç tetiklenmezdi. Anasayfadaki api_market_summary()
     # gibi cache'in GERÇEK tazelik tarihine (kanonik p90 updated_at) bakıp
     # bugünden farklıysa da aynı arşiv fallback'ini tetikliyoruz.
+    #
+    # CPO-1588: yukarıdaki tarih-karşılaştırma SAATİ hesaba katmadığı için
+    # piyasa AÇIKKEN de (10:00-18:2x TR) tetikleniyordu — EOD-only mimaride
+    # kapanışa kadar cache'in "dün"e ait olması BEKLENEN durum, "geçmiş
+    # görünüm" değil. Tarih-karşılaştırmasını sadece CPO-1498'in asıl hedefi
+    # olan pencereye (piyasa henüz açılmadan, saat < 10:00 TR) sınırlıyoruz.
     _needs_archive_fallback = not is_trading_day()
     if not _needs_archive_fallback and stocks:
-        _upd_at = _data_quality_snapshot(stocks).get("updated_at")
-        if _upd_at:
-            try:
-                _upd_date = datetime.strptime(_upd_at, "%d.%m.%Y %H:%M:%S").date()
-                _needs_archive_fallback = _upd_date != datetime.now(_TZ_TR).date()
-            except Exception:
-                pass
+        _now_tr = datetime.now(_TZ_TR)
+        if _now_tr.hour < 10:
+            _upd_at = _data_quality_snapshot(stocks).get("updated_at")
+            if _upd_at:
+                try:
+                    _upd_date = datetime.strptime(_upd_at, "%d.%m.%Y %H:%M:%S").date()
+                    _needs_archive_fallback = _upd_date != _now_tr.date()
+                except Exception:
+                    pass
 
     if _needs_archive_fallback:
         try:
