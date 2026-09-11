@@ -206,10 +206,10 @@
 
   var TOPICS = [
     { h:'/tarama?signal=AL&sort=signal_strength', i:'⚡', t:'Güçlü Trend Hisseler' },
-    { h:'/tarama',            i:'🔍', t:'Hisse Tarama' },
+    { h:'/tarama',            i:'🔍', t:'Teknik Analiz Tarama' },
+    { h:'/tarama?tab=temel',  i:'🧮', t:'Temel Analiz Tarama' },
     { h:'/bilanco-takvimi',   i:'📅', t:'Bilanço Takvimi' },
     { h:'/sektor-harita',     i:'🗺️', t:'Sektör Haritası' },
-    { h:'/sinyal-performans', i:'📈', t:'Sinyal Performansı' },
     { h:'/karsilastir',       i:'⚖️', t:'Hisse Karşılaştır' }
   ];
 
