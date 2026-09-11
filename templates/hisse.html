@@ -317,8 +317,10 @@
             <span>{{ _lbl }}</span>
           </div>
           {# CPO-1335: bar sayacı "gün" birimiyle sunuluyordu ve bilinmeyen değer
-             sessizce 1 güne düşüyordu; kaynak artık takvim yaşı (signal_date). #}
-          <span class="bp-hero-meta">{{ ssr_signal.signal_date|signal_age_text }}</span>
+             sessizce 1 güne düşüyordu; kaynak artık takvim yaşı (signal_date).
+             CPO-1595: nötr, tam cümle ("N gün önce oluştu") — kalite/yargı
+             çağrışımı yok. #}
+          <span class="bp-hero-meta">{{ ssr_signal.signal_date|signal_age_phrase }}</span>
         </div>
         {% if _sig in ('AL', 'SAT') %}
         <div class="bp-hero-power-wrap">
@@ -1225,7 +1227,7 @@
       <div class="qf-row"><dt>Sektör</dt><dd>{{ sector }}</dd></div>
       <div class="qf-row"><dt>Güncel Fiyat</dt><dd>{{ ssr_signal.price|tr_price }} ₺</dd></div>
       <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
-      <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ ssr_signal.signal_date|signal_age_text }}</dd></div>
+      <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ ssr_signal.signal_date|signal_age_phrase }}</dd></div>
       <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{{ ssr_signal.signal_strength|int }}/100</dd></div>
       <div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{% if hs_available and hs.temel_analiz_skoru is not none %}{{ hs.temel_analiz_skoru }}/100{% else %}Veri bekleniyor{% endif %}</dd></div>
       {% if hs_available and hs.borsapusula_skoru is not none %}
@@ -1974,21 +1976,14 @@ function renderSummary(s, signalData) {
     const date = signalData.signal_date || '—';
     // "⚡ Bugün" yalnızca AL/SAT için — Yatay+Bugün çelişkili görünür
     const isNew = bpIsSignalFromToday(signalData.signal_date) && signalData.signal !== 'BEKLE';
-    // Faz 1 #4: Sinyal yaşı yorumu (Taze/Gelişiyor/Olgunlaşıyor/Olgun)
-    const ageLabel = signalData.signal_age_label;
-    const ageColor = signalData.signal_age_color;
-    const ageEmoji = ageColor === 'green' ? '🟢' :
-                     ageColor === 'yellow' ? '🟡' :
-                     ageColor === 'orange' ? '🟠' :
-                     ageColor === 'red' ? '🔴' : '';
-    const ageHexColor = ageColor === 'green' ? '#3fb950' :
-                        ageColor === 'yellow' ? 'var(--bp-warn)' :
-                        ageColor === 'orange' ? '#f0883e' :
-                        ageColor === 'red' ? 'var(--bp-sat)' : '#8b949e';
-    const ageHtml = ageLabel ? ` <span style="color:${ageHexColor};font-size:var(--bp-text-xs);margin-left:6px" data-tip="Sinyal yaşı: ${ageLabel}" tabindex="0">${ageEmoji} ${ageLabel}</span>` : '';
+    // CPO-1595: eski "Taze/Gelişiyor/Olgunlaşıyor/Olgun" renkli rozeti (Faz 1 #4)
+    // kaldırıldı — 11.09 bağımsız değerlendirme bu rozeti "kalite çağrışımlı
+    // isimlendirme, örtük AL/SAT nüdge'i riski" gerekçesiyle reddetti (rozet
+    // yeşil→kırmızı renk geçişiyle "iyi→geç" ima ediyordu). Nötr yaş bilgisi
+    // zaten date + bpSignalAgeText ile veriliyor.
     document.getElementById('icDate').innerHTML =
       (isNew ? '<span style="color:#e3b341">⚡ Bugün</span>'
-             : date + ' · ' + bpSignalAgeText(signalData.signal_date)) + ageHtml;
+             : date + ' · ' + bpSignalAgeText(signalData.signal_date));
     document.getElementById('icBars').textContent = (bars == null ? '—' : bars);
 
     if (signalData.signal_price && s.signal !== 'BEKLE' && !isNew) {

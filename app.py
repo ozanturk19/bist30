@@ -683,6 +683,36 @@ def signal_age_text_filter(signal_date, today=None):
     return f"{age} gün"
 
 
+@app.template_filter('signal_age_phrase')
+def signal_age_phrase_filter(signal_date, today=None):
+    """CPO-1595: hisse.html'de MUTLAK tarih olmadan tek başına gösterilen
+    yerler için tam, nötr cümle: "Bugün oluştu" / "Dün oluştu" / "N gün önce
+    oluştu". signal_age_text ile aynı yaş hesabını kullanır ama ozet/
+    karsilastir/gundem gibi mutlak tarihin YANINDA kısa "N gün" biçiminde
+    göründüğü yerlerdeki sözdizimini bozmamak için ayrı filtre olarak
+    tutulur (bkz. signal_age_text docstring).
+
+    Bilinçli olarak yargı/kalite çağrışımı yok (Taze/Olgun gibi) — CPO-1595
+    değerlendirmesi bu tür isimlendirmeyi reddetti.
+    """
+    if today and not isinstance(today, date):
+        try:
+            today = date.fromisoformat(today)
+        except (ValueError, TypeError):
+            today = None
+    age = signal_date_age_days(signal_date, today=today or None)
+    if age is None:
+        return "—"
+    if age == 0:
+        return "Bugün oluştu"
+    if age == 1:
+        return "Dün oluştu"
+    if age < 0:
+        label = derive_signal_date_label(signal_date, today=today)
+        return label or "—"
+    return f"{age} gün önce oluştu"
+
+
 @app.template_filter('signal_age_days')
 def signal_age_days_filter(signal_date):
     """Sıralanabilir sayısal takvim yaşı; bilinmiyorsa büyük NEGATİF sentinel
@@ -1837,23 +1867,12 @@ def analyze(ticker_base):
                     "message": f"Bilanço {_e['days_ahead']} gün sonra ({_e['date']}) — pozisyon riski yüksek"
                 }
 
-        # ── Sinyal Yaşı Yorumu (Faz 1 #4) — spec Bölüm 4.3 ──────────────────
-        # 1-3 gün → Taze | 4-7 gün → Gelişiyor | 8-15 gün → Olgunlaşıyor | 15+ → Olgun
-        if signal == "BEKLE" or signal_bars is None:
-            signal_age_label = None
-            signal_age_color = None
-        elif signal_bars <= 3:
-            signal_age_label = "Taze"
-            signal_age_color = "green"      # 🟢 İdeal pencere
-        elif signal_bars <= 7:
-            signal_age_label = "Gelişiyor"
-            signal_age_color = "yellow"     # 🟡 Hâlâ değerlendirilebilir
-        elif signal_bars <= 15:
-            signal_age_label = "Olgunlaşıyor"
-            signal_age_color = "orange"     # 🟠 Dikkatli değerlendir
-        else:
-            signal_age_label = "Olgun"
-            signal_age_color = "red"        # 🔴 Yeni giriş için geç
+        # NOT (CPO-1595, 11.09): "Sinyal Yaşı Yorumu" (eski Faz 1 #4 —
+        # Taze/Gelişiyor/Olgunlaşıyor/Olgun + yeşil→kırmızı renk rozeti) buradan
+        # ve tüketicilerinden (hisse.html icDate, /api/hisse/<t>/lite) kaldırıldı.
+        # Bağımsız değerlendirme bu isimlendirmeyi "kalite çağrışımlı, örtük
+        # AL/SAT nüdge'i riski" gerekçesiyle reddetti. Nötr yaş bilgisi artık
+        # signal_age_phrase Jinja filtresiyle SSR (hisse.html hero/quickfacts).
 
         # ── RSI Bölge Rozeti (Faz 1 #3) — spec Bölüm 3.3 ────────────────────
         # 30-45: Dip Toparlanması | 45-60: İdeal Giriş ✅ | 60-70: Trend Güçleniyor
@@ -1990,8 +2009,6 @@ def analyze(ticker_base):
             },
             "rsi":             rsi_val,
             "rsi_zone":        rsi_zone,  # Faz 1 #3: yorumlanmış bölge etiketi
-            "signal_age_label": signal_age_label,  # Faz 1 #4: Taze/Gelişiyor/Olgunlaşıyor/Olgun
-            "signal_age_color": signal_age_color,  # green/yellow/orange/red
             "earnings_warning": earnings_warning,  # Faz 1 #5: 7 gün içinde bilanço uyarısı
             "vol_ratio":       vol_ratio,
             "vol_confirmed":   vol_confirmed,
@@ -4392,8 +4409,6 @@ def api_hisse_lite(ticker):
         "signal_price":     stock.get("signal_price"),
         "signal_date":      stock.get("signal_date"),
         "signal_bars":      stock.get("signal_bars"),
-        "signal_age_label": stock.get("signal_age_label"),
-        "signal_age_color": stock.get("signal_age_color"),
         "sl_level":         stock.get("sl_level"),
         "is_premium":       stock.get("is_premium"),
         "anomaly":          {"flag": anomaly.get("flag", False), "reason": anomaly.get("reason", "")},
@@ -9855,6 +9870,44 @@ Crawl-delay: 5
 
 # Sitemaps
 Sitemap: https://borsapusula.com/sitemap.xml
+"""
+    return Response(body, mimetype="text/plain")
+
+
+@app.route("/llms.txt")
+def llms_txt():
+    """CPO-1587 Faz 1C (GEO): robots.txt/sitemap.xml deseniyle aynı —
+    statik dosya DEĞİL, inline route. AI cevap motorlarının (ChatGPT/
+    Perplexity/Claude) sitenin yapısını anlaması için kısa, elle
+    yazılmış özet."""
+    body = """# BorsaPusula
+
+> BIST (Borsa İstanbul) hisseleri için algoritmik teknik analiz sinyalleri.
+> Supertrend(10,3) + ADX + EMA12/EMA99 tabanlı, kural-temelli, gün sonu güncellenen.
+> Yatırım tavsiyesi değildir.
+
+## Ana Sayfalar
+- [Sinyal Paneli](https://borsapusula.com/): BIST100 güncel Güçlü Trend/Trend Bozuldu sinyalleri, BIST100 endeks durumu
+- [Hisse Tarayıcı](https://borsapusula.com/tarama): sinyal/sektör/fiyat/ADX filtreli tarama, Teknik ve Temel Analiz modları
+- [Sektör Haritası](https://borsapusula.com/sektor-harita): sektör bazlı sinyal yoğunluğu
+- [Piyasa Gündemi](https://borsapusula.com/gundem): bugün sinyal değiştiren hisseler
+- [Sinyal Özeti](https://borsapusula.com/ozet): günlük Güçlü Trend/Trend Bozuldu/Yatay dağılımı
+
+## Hisse Sayfaları
+- Format: https://borsapusula.com/hisse/{TICKER} — örn. /hisse/THYAO
+- Her sayfada: güncel fiyat, sinyal, ADX/RSI, teknik ve temel analiz skoru, SSS
+
+## Metodoloji
+- [Metodoloji](https://borsapusula.com/metodoloji): sinyal üretim kuralları
+- [Hakkında](https://borsapusula.com/hakkinda)
+
+## Önemli Notlar
+- Veri kaynağı: gün sonu (EOD) BIST verisi, günlük güncelleme
+- Sinyal terminolojisi: "Güçlü Trend", "Trend Bozuldu", "Yatay" — alım-satım tavsiyesi DEĞİLDİR
+- Tüm sayfalar Türkçe (tr)
+
+## İletişim
+- [İletişim](https://borsapusula.com/iletisim)
 """
     return Response(body, mimetype="text/plain")
 
