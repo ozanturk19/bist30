@@ -32,11 +32,41 @@
 
   <div class="search-card">
     <label for="q404">Hisse kodu ile ara (ör. THYAO)</label>
-    <form class="search-row" onsubmit="event.preventDefault(); var v=document.getElementById('q404').value.trim().toUpperCase(); if(v) window.location.href='/hisse/'+encodeURIComponent(v);">
+    <form class="search-row" id="q404Form">
       <input id="q404" name="q" type="text" maxlength="10" placeholder="THYAO, GARAN, ASELS...">
       <button type="submit">Git</button>
     </form>
+    <div id="q404Hint" style="margin-top:10px;font-size:var(--bp-text-sm);color:var(--bp-text3)"></div>
   </div>
+  <script>
+    (function(){
+      // bughunt-12.09: onceden hicbir dogrulama yapmadan direkt /hisse/<GIRDI>'ye
+      // yonlendiriyordu -- yanlis/eksik bir kod ikinci bir 404'e dusuyordu, geri
+      // bildirim yoktu. /api/data zaten site genelinde kullanilan hafif kaynak,
+      // burada sadece ticker listesi icin kullaniliyor.
+      var _tickers = null;
+      fetch('/api/data').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+        if (d && Array.isArray(d.stocks)) _tickers = d.stocks.map(function(s){ return s.ticker; }).filter(Boolean);
+      }).catch(function(err){ console.warn('404 ticker-list fetch failed:', err); });
+      var form = document.getElementById('q404Form');
+      var hint = document.getElementById('q404Hint');
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var v = document.getElementById('q404').value.trim().toUpperCase();
+        if (!v) return;
+        if (!_tickers) { window.location.href = '/hisse/' + encodeURIComponent(v); return; }
+        if (_tickers.indexOf(v) !== -1) { window.location.href = '/hisse/' + encodeURIComponent(v); return; }
+        var starts = _tickers.filter(function(t){ return t.indexOf(v) === 0; }).slice(0, 5);
+        if (starts.length) {
+          hint.innerHTML = 'Bunu mu demek istediniz? ' + starts.map(function(t){
+            return '<a href="/hisse/' + encodeURIComponent(t) + '" style="color:var(--bp-brand);margin-right:10px">' + t + '</a>';
+          }).join('');
+        } else {
+          hint.innerHTML = '"' + v + '" ile eşleşen bir hisse bulunamadı. <a href="/tarama" style="color:var(--bp-brand)">Tarama sayfasından göz atın</a>.';
+        }
+      });
+    })();
+  </script>
 
   <div class="popular">
     <h2>Popüler Sayfalar</h2>

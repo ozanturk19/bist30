@@ -201,7 +201,12 @@
       if (score) out.push({ s: s, score: score });
     }
     out.sort(function(a,b){ return b.score - a.score; });
-    return out.slice(0, 10).map(function(x){ return x.s; });
+    // bughunt-12.09: sabit slice(0,10) sektor sorgularinda (ör. "bankacilik",
+    // 13 esdeger-skorlu sonuc) rastgele/dizilim-sirali 3'unu (AKBNK/GARAN/YKBNK
+    // gibi en likit bankalari) sessizce gizliyordu, "daha fazla var" isareti de
+    // yoktu. Sonuc listesi zaten kendi kutusunda scroll edebiliyor
+    // (.bp-search-results{overflow-y:auto}), tavan 25'e cikarildi.
+    return out.slice(0, 25).map(function(x){ return x.s; });
   }
 
   var TOPICS = [

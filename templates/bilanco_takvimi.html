@@ -197,7 +197,7 @@ function render(data) {
   }).join('');
 
   container.innerHTML = sectionsHtml.trim() === ''
-    ? '<div class="loading-msg">Bu filtreye uyan hisse bulunamadı.</div>'
+    ? '<div class="empty-state"><div class="empty-icon"><span aria-hidden="true">📭</span></div><h2>Sonuç bulunamadı</h2><p>Bu filtreye uyan hisse yok — tüm sinyalleri görmek için filtreyi sıfırlayın.</p><button class="btn-reset" onclick="setFilter(\'all\')">Filtreleri Sıfırla</button></div>'
     : sectionsHtml;
 }
 

@@ -122,6 +122,19 @@
 
   .loading-msg { text-align:center; padding:60px; color:var(--bp-text3); font-size:var(--bp-text-lg); }
 
+  /* ── Filtre sonucu boş durum (bughunt-12.09: tarama.html'in .empty-state
+     desenine hizalandi, ikon+baslik+CTA icermeyen ciplak loading-msg yerine) ── */
+  .empty-state { text-align:center; padding:60px 20px; color:var(--bp-text2); }
+  .empty-state .empty-icon { font-size:var(--bp-text-40); margin-bottom:14px; }
+  .empty-state h2 { font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); margin-bottom:6px; }
+  .empty-state p { font-size:var(--bp-text-base); margin-top:6px; }
+  .btn-reset {
+    background:none; color:var(--bp-text2); border:1px solid var(--bp-border);
+    border-radius:var(--bp-radius); padding:8px 14px; font-size:var(--bp-text-base); cursor:pointer;
+    font-family:inherit; transition:all .15s; margin-top:14px;
+  }
+  .btn-reset:hover { border-color:var(--bp-text2); color:var(--bp-text); }
+
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); margin-top:32px; }
   footer a { color:var(--bp-text3); text-decoration:none; }
 

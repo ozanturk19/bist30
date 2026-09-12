@@ -480,7 +480,7 @@ async function runCompare() {
   } catch(e) {
     if (myReqId !== _cmpReqId) return;
     overlay.classList.remove('visible');
-    result.innerHTML = '<div class="cmp-empty-state">Karşılaştırma verisi yüklenemedi.</div>';
+    result.innerHTML = '<div class="cmp-empty-state">Karşılaştırma verisi yüklenemedi. Lütfen tekrar deneyin.</div>';
   } finally {
     if (myReqId === _cmpReqId && btn) btn.disabled = _selected.length < 2;
   }
