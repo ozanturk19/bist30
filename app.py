@@ -7446,15 +7446,24 @@ def _compute_chart_data(ticker_base, period="2y"):
                 "bull":  int(std_arr[i]) == 1,
             })
 
-        # Sinyal fonksiyonu (tek bar)
+        # Sinyal fonksiyonu (tek bar) — CPO-1621 P1-3: haftalık EMA20 gate'i
+        # kanonik bar_signal()/_bar_signal_fast() ile aynı şekilde uygulanır
+        # (weekly_dir_hist lookahead-free, _historical_weekly_dir_series).
+        weekly_dir_hist = _historical_weekly_dir_series(close)
+
         def bar_sig(i):
             ei12  = float(ema12.iloc[i]);   ei99  = float(ema99.iloc[i])
             ai    = float(adx.iloc[i])
             dip_i = float(di_plus_s.iloc[i]); dim_i = float(di_minus_s.iloc[i])
             sti   = int(supertrend.iloc[i])
+            wdir_i = int(weekly_dir_hist.iloc[i])
             bs  = int(sti == 1)  + int(ai >= 25 and dip_i > dim_i) + int(ei12 > ei99)
             brs = int(sti == -1) + int(ai >= 25 and dim_i > dip_i) + int(ei12 < ei99)
-            return "AL" if bs >= 3 else "SAT" if brs >= 3 else "BEKLE"
+            if bs >= 3 and wdir_i != -1 and wdir_i != 0:
+                return "AL"
+            elif brs >= 3 and wdir_i != 1 and wdir_i != 0:
+                return "SAT"
+            return "BEKLE"
 
         # Grafik marker'ları ve sinyal geçmişi
         markers        = []
@@ -7515,9 +7524,12 @@ def _compute_chart_data(ticker_base, period="2y"):
         except Exception:
             wkly_dir = 0
 
-        if bull_score >= 3 and wkly_dir != -1:
+        # CPO-1621 P1-3: CPO-1496'nın analyze()'da kapattığı fail-open sınıfı
+        # (wkly_dir==0 → haftalık veri yetersiz/hata) burada da kapatılıyor —
+        # yetersiz veriyle AL/SAT üretme, BEKLE'ye düş.
+        if bull_score >= 3 and wkly_dir != -1 and wkly_dir != 0:
             signal = "AL"
-        elif bear_score >= 3 and wkly_dir != 1:
+        elif bear_score >= 3 and wkly_dir != 1 and wkly_dir != 0:
             signal = "SAT"
         else:
             signal = "BEKLE"
