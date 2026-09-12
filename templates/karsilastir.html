@@ -257,7 +257,11 @@ function verdictFor(tier) {
 
 function renderScoreCell(s, isWinner) {
   if (!s || !s.found) return '<span class="muted" style="font-size:20px">—</span>';
-  const total = s.signal_strength || 0;
+  // bughunt-12.09: signal_strength Yatay/BEKLE sinyallerde null (uygulanamaz) döner,
+  // önceki `|| 0` bunu "0/100 Nötr" olarak gösterip gerçekten sıfır puanlanmış gibi
+  // yanıltıyordu — sayfanın kendi null-gösterim deseniyle (— ) tutarlı hale getirildi.
+  if (s.signal_strength == null) return '<span class="muted" style="font-size:20px">—</span>';
+  const total = s.signal_strength;
   const v = verdictFor(s.tier);
   const winnerCls = isWinner ? ' winner' : '';
   const winnerBadge = isWinner ? '<div class="winner-badge">🏆 En Yüksek</div>' : '';
