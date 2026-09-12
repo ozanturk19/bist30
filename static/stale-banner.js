@@ -58,8 +58,21 @@ function bpPollDataQuality() {
     .catch(function(e) { console.error('data-quality polling basarisiz', e); });
 }
 var _dqPollInterval = null;
+var _dqVisListenerAdded = false;
 function bpStartDataQualityPolling() {
   if (_dqPollInterval) return;
   bpPollDataQuality();
   _dqPollInterval = setInterval(bpPollDataQuality, 60000);
+  /* bughunt-12.09: bpLoadMacroBar ile ayni desendeki bug — sayfa document.hidden
+     iken yuklenirse ilk poll no-op donuyordu, sekme gorunur olunca da hicbir
+     yerde tekrar denenmiyordu (60s'lik interval de arka planda tarayicilar
+     tarafindan suspend edilebiliyor). Tum 8 sayfa bu fonksiyonu TEK cagri
+     noktasindan kullandigi icin fix burada merkezi, sablon basina tekrar
+     gerekmiyor (r98/bpLoadMacroBar fix'iyle ayni ilke). */
+  if (!_dqVisListenerAdded) {
+    _dqVisListenerAdded = true;
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) bpPollDataQuality();
+    });
+  }
 }
