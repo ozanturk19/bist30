@@ -938,7 +938,7 @@ Histogram = MACD − Sinyal</pre>
 
 <h2>Sanayi ve Savunma</h2>
 <p><strong>Başlıca hisseler:</strong> ASELS, FROTO, TOASO, TTRAK, OTKAR, ASUZU</p>
-<p>İhracat bazlı şirketler döviz geliri elde eder ve TL değer kaybından faydalanır. Savunma sanayii (ASELS, ASELSAN) uzun vadeli Ar-Ge yatırımlarıyla değer yaratır.</p>
+<p>İhracat bazlı şirketler döviz geliri elde eder ve TL değer kaybından faydalanır. Savunma sanayii (ASELSAN/ASELS) uzun vadeli Ar-Ge yatırımlarıyla değer yaratır.</p>
 
 <h2>Holding ve Yatırım</h2>
 <p><strong>Başlıca hisseler:</strong> KCHOL, SAHOL, GLYHO, NTHOL, AGHOL</p>
@@ -4231,7 +4231,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <tbody>
     <tr style="border-top:1px solid #30363d">
       <td style="padding:8px 12px;color:#e6edf3">Sabah Tek Fiyat Seansı</td>
-      <td style="padding:8px 12px;color:#3fb950;font-family:monospace;font-weight:600">09:30 – 10:00</td>
+      <td style="padding:8px 12px;color:#3fb950;font-family:monospace;font-weight:600">09:40 – 10:00</td>
       <td style="padding:8px 12px;color:#8b949e">Açılış fiyatı belirlenir, emir toplanır</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
@@ -4249,7 +4249,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p><strong>Önemli:</strong> Türkiye saati (TRT/UTC+3) kullanılır. Yaz/kış saati değişiminden etkilenmez çünkü Türkiye saati sabit kaldı.</p>
 
 <h2>Sabah Tek Fiyat Seansı Nasıl Çalışır?</h2>
-<p>Saat 09:30-10:00 arasında yatırımcılar emir girebilir ancak eşleşme gerçekleşmez. 10:00'de sistem, girilen tüm emirleri değerlendirerek en fazla işlemi sağlayan "açılış fiyatını" tek seferde belirler. Bu fiyat aynı zamanda gün içindeki ilk işlem fiyatıdır.</p>
+<p>Saat 09:40-10:00 arasında yatırımcılar emir girebilir ancak eşleşme gerçekleşmez. 10:00'de sistem, girilen tüm emirleri değerlendirerek en fazla işlemi sağlayan "açılış fiyatını" tek seferde belirler. Bu fiyat aynı zamanda gün içindeki ilk işlem fiyatıdır.</p>
 <ul>
   <li>Açılış öncesinde girilmiş emirlerin büyük kısmı bu seanstta eşleşir</li>
   <li>Fiyat hareket sınırı: bir önceki kapanışa göre ±%20 (devre kesici mekanizması)</li>
@@ -4289,11 +4289,11 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 """,
     "faqs": [
       {"q": "BIST kaçta açılır, kaçta kapanır?",
-       "a": "BIST Pay Piyasası, sabah 09:30'da tek fiyat seansıyla başlar. Ana sürekli müzayede seansı 10:00-18:00 saatleri arasındadır. Kapanış tek fiyat seansı ise 18:00-18:10 arasında gerçekleşir."},
+       "a": "BIST Pay Piyasası, sabah 09:40'ta tek fiyat seansıyla başlar. Ana sürekli müzayede seansı 10:00-18:00 saatleri arasındadır. Kapanış tek fiyat seansı ise 18:00-18:10 arasında gerçekleşir."},
       {"q": "Borsa tatil günlerinde açık mı?",
        "a": "Hayır, Borsa İstanbul resmi tatil günlerinde kapalıdır. Ramazan ve Kurban Bayramları, 23 Nisan, 1 Mayıs, 19 Mayıs, 30 Ağustos ve 29 Ekim'de borsa işlem görmez. Güncel tatil takvimi için Borsa İstanbul resmi sitesine bakın."},
       {"q": "Sabah 10:00'den önce emir girebilir miyim?",
-       "a": "Evet. Sabah 09:30-10:00 arasındaki 'Tek Fiyat Seansı'nda emir girebilirsiniz. Bu emirler 10:00'de sistem tarafından eşleştirilir ve açılış fiyatını belirler. Emir eşleşmesi saat 10:00'e kadar gerçekleşmez."},
+       "a": "Evet. Sabah 09:40-10:00 arasındaki 'Tek Fiyat Seansı'nda emir girebilirsiniz. Bu emirler 10:00'de sistem tarafından eşleştirilir ve açılış fiyatını belirler. Emir eşleşmesi saat 10:00'e kadar gerçekleşmez."},
       {"q": "BorsaPusula sinyalleri ne zaman güncellenir?",
        "a": "Sinyaller, kapanış seansı tamamlandıktan sonra günlük bar verileri işlenerek hesaplanır. Güncelleme genellikle saat 18:30-19:00 arasında tamamlanır. Sabah işlemlerine başlamadan önce güncel sinyalleri kontrol etmenizi öneririz."}
     ],
@@ -4601,7 +4601,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>Borsa işlemlerine yeni başlayanların sıkça kafasını karıştıran kavramlardan biri "lot"tur. "1 lot AKBNK alalım" ya da "500 lot GARAN" gibi ifadeler duyduğunuzda ne anlaşılır? Bu rehberde lot kavramını ve pay senedi hesaplamalarını net biçimde açıklıyoruz.</p>
 
 <h2>Lot Nedir?</h2>
-<p>Türkiye borsasında (BIST) <strong>1 lot = 1 adet pay senedi</strong> (hisse)dir. Bu tanım 2014'teki Borsa İstanbul reformuyla basitleştirildi. Önceden 1 lot = 1.000 hisse anlamına geliyordu; ancak bu değiştirildi.</p>
+<p>Türkiye borsasında (BIST) <strong>1 lot = 1 adet pay senedi</strong> (hisse)dir. Bu tanım 2005'teki Yeni Türk Lirası (YTL) geçişiyle birlikte yapılan Borsa İstanbul reformuyla basitleştirildi. Önceden 1 lot = 1.000 hisse anlamına geliyordu; ancak bu değiştirildi.</p>
 <p>Yani AKBNK hissesinden "5 lot" almak istiyorsanız, aslında 5 adet AKBNK pay senedi almak istiyorsunuz demektir. Banka uygulamalarında "adet" veya "pay" olarak da ifade edilebilir.</p>
 
 <h2>Lot Hesabı: Kaç Lira Ödersiniz?</h2>
@@ -4643,7 +4643,7 @@ Toplam ≈ 13.003,90₺
       {"q": "BIST'te minimum kaç lot alınabilir?",
        "a": "Borsa İstanbul Pay Piyasası'nda minimum 1 lot (1 adet pay) ile işlem yapılabilir. Çoğu aracı kurum minimum tutar belirlememektedir; dolayısıyla 1 adet hisse alabilirsiniz."},
       {"q": "Lot ile pay aynı şey midir?",
-       "a": "Evet, Türkiye borsasında 1 lot = 1 pay (hisse) = 1 adet hisse senedidir. 2014 reformundan önce 1 lot 1.000 hisseye eşitti; artık 1:1 oranındadır. Banka uygulamalarında 'lot', 'pay' veya 'adet' kelimeleri aynı anlama gelir."},
+       "a": "Evet, Türkiye borsasında 1 lot = 1 pay (hisse) = 1 adet hisse senedidir. 2005'teki YTL geçişi reformundan önce 1 lot 1.000 hisseye eşitti; artık 1:1 oranındadır. Banka uygulamalarında 'lot', 'pay' veya 'adet' kelimeleri aynı anlama gelir."},
       {"q": "Hisse bölünmesi (split) sonrasında lotlarım ne olur?",
        "a": "Split oranında lot adedisi artar, fiyat aynı oranda düşer. Toplam değer değişmez. 2:1 split olduğunda 100 lot → 200 lot olur ama her lot değeri yarıya iner. Portföyünüzün toplam değeri aynı kalır."}
     ],
