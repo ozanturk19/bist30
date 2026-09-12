@@ -8395,6 +8395,7 @@ def _run_eod_scoring_pass(results: list):
                 "partial": composite.get("partial"),
                 "band": health.get("band"),
                 "categories": health.get("categories"),
+                "categories_na": health.get("categories_na") or [],
             }
             # CPO-1531 Faz 3: deterministik gerekçe cümlesi hemen hesaplanır (Gemini
             # gecikmeden alan boş/takılı kalmaz) — Gemini'nin doğal-dile çevirmesi
@@ -9288,6 +9289,7 @@ def api_tarama_temel():
             "borsapusula_skoru":       entry.get("borsapusula_skoru"),
             "band":                    b,
             "categories":              entry.get("categories") or {},
+            "categories_na":           entry.get("categories_na") or [],
             "data_completeness":       entry.get("data_completeness"),
             "categories_complete":     entry.get("categories_complete"),
             "partial":                 entry.get("partial"),

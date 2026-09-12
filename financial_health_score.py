@@ -88,6 +88,25 @@ CATEGORY_LABELS = {
     "degerleme_buyume": "Değerleme/Büyüme",
 }
 
+# CPO-1617/1619 (12.09.2026): bu tickerlarda Kaldıraç kategorisi veri
+# BOŞLUĞU değil, yapısal olarak UYGULANAMAZ — mevduat bankası (+ ağırlıklı
+# finansal iştirak/GYO) bilanço sunumunda "Current Assets/Current
+# Liabilities/EBITDA" satırları yfinance'da hiç yok (bkz.
+# yf_fundamentals_fetch.py _fetch_balance_sheet_trend/_fetch_latest_income_items
+# docstring'leri, AKBNK ile canlı doğrulandı), o yüzden net_debt_to_ebitda/
+# current_ratio/quick_ratio hep None gelir. CPO'nun 214-ticker taramasıyla
+# doğrulanan tam liste — aynı "Bankacılık" sektöründeki leasing/faktoring/
+# aracı kurum tickerları (ISFIN/CRDFA/ISMEN) BU LİSTEDE YOK, çünkü onlarda
+# kaldıraç metrikleri gerçekten hesaplanabiliyor (mevduat bankası bilanço
+# yapısına sahip değiller). Liste elle tutuluyor çünkü kod tabanında
+# "mevduat bankası" ayrımını yapan başka bir sektör alt-kırılımı yok.
+LEVERAGE_NA_TICKERS = {
+    "AKBNK", "GARAN", "HALKB", "ISCTR", "VAKBN", "YKBNK",
+    "ALBRK", "KLNMA", "TSKB", "SKBNK",  # mevduat bankaları
+    "SAHOL",  # holding, ağırlıklı finansal iştirak yapısı
+    "YESIL",  # GYO, bilanço yapısı benzer şekilde uyumsuz
+}
+
 
 def _band(score):
     if score is None:
@@ -124,7 +143,14 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
 
     Çıktı: {"temel_analiz_skoru": int|None, "data_completeness": float,
             "categories_complete": bool, "band": str|None,
-            "categories": {kategori: skor}}
+            "categories": {kategori: skor}, "categories_na": [kategori, ...]}
+
+    categories_na (CPO-1617), categories dict'inde eksik olan kategorilerden
+    hangilerinin GEÇİCİ veri boşluğu değil, ticker'ın sektör/bilanço yapısı
+    gereği YAPISAL OLARAK uygulanamaz olduğunu işaretler (bkz.
+    LEVERAGE_NA_TICKERS). categories_complete hâlâ False kalır (numerik skor
+    hâlâ yok) — bu alan sadece nedeni ayırt etmek için, radar gibi tüketen
+    kod "veri yok" yerine "sektöre özgü, uygulanamaz" gösterebilsin diye var.
 
     categories_complete, 4 kategorinin (karlilik/nakit_akisi/kaldirac/
     degerleme_buyume) HEPSİNİN skoru hesaplanabildiğini gösterir — bununla
@@ -152,6 +178,12 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
     data_completeness = round(metrics_with_data / TOTAL_METRIC_COUNT, 2)
     categories_complete = len(category_scores) == len(CATEGORIES)
 
+    ticker = ticker_fundamentals.get("ticker")
+    categories_na = [
+        c for c in CATEGORIES
+        if c not in category_scores and c == "kaldirac" and ticker in LEVERAGE_NA_TICKERS
+    ]
+
     if not category_scores or metrics_with_data < MIN_METRICS_FOR_SCORE:
         return {
             "temel_analiz_skoru": None,
@@ -159,6 +191,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
             "categories_complete": categories_complete,
             "band": None,
             "categories": {},
+            "categories_na": categories_na,
         }
 
     total_weight = sum(CATEGORIES[c]["weight"] for c in category_scores)
@@ -171,6 +204,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
         "categories_complete": categories_complete,
         "band": _band(round(score)),
         "categories": {c: round(s, 1) for c, s in category_scores.items()},
+        "categories_na": categories_na,
     }
 
 
