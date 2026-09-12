@@ -680,6 +680,14 @@
 
   {% set temel_score  = hs.temel_analiz_skoru if hs_available else none %}
   {% set hero_score   = hs.borsapusula_skoru if hs_available else none %}
+  {# bughunt-12.09: hs_available=False iken (temel hiç hesaplanmamış) ama
+     aktif bir Teknik sinyal (new_teknik_score) varsa hero_score DAİMA None
+     kalıyordu — gauge'in büyük sayısı ve aria-label'ı ham "None" basıyordu.
+     hero_display bu durumda Teknik'e düşer (aşağıdaki "sadece Teknik"
+     dalının zaten anlattığı şeyle tutarlı), ikisi de yoksa None kalır
+     (o zaman zaten dış {% if new_teknik_score or hs_available %} kapısı
+     bu bloğu hiç render etmez). #}
+  {% set hero_display = hero_score if hero_score is not none else new_teknik_score %}
   {% set temel_missing = (not hs_available) or temel_score is none %}
   {% set radar_categories_complete = hs_available and hs.categories.karlilik is defined and hs.categories.nakit_akisi is defined and hs.categories.kaldirac is defined and hs.categories.degerleme_buyume is defined %}
   {% set radar_dim = temel_missing or (hs_available and hs.partial) or not radar_categories_complete %}
@@ -689,8 +697,8 @@
   {% if new_teknik_score %}
     {% set teknik_offset = '%.2f'|format(RING_C * (100 - new_teknik_score) / 100) %}
   {% endif %}
-  {% if hero_score is not none %}
-    {% set hero_offset = '%.2f'|format(RING_C * (100 - hero_score) / 100) %}
+  {% if hero_display is not none %}
+    {% set hero_offset = '%.2f'|format(RING_C * (100 - hero_display) / 100) %}
   {% endif %}
   {% if not temel_missing %}
     {% set temel_offset = '%.2f'|format(RING_C * (100 - temel_score) / 100) %}
@@ -794,19 +802,19 @@
       <!-- HERO: BorsaPusula Skoru -->
       <div class="gauge hero-gauge" data-missing="{{ 'true' if temel_missing else 'false' }}"
            style="--band-color:var({{ band.var }}); --band-rgb:var({{ band.rgb_var }});"
-           role="img" aria-label="BorsaPusula Skoru {{ hero_score }} / 100">
+           role="img" aria-label="BorsaPusula Skoru {{ hero_display }} / 100">
         <div class="partial-badge">◐ Sınırlı Veri</div>
         <svg class="gauge-ring" viewBox="0 0 100 100">
           <circle class="ring-bg" cx="50" cy="50" r="{{ RING_R }}"/>
           <circle class="ring-fg" cx="50" cy="50" r="{{ RING_R }}" stroke-dasharray="{{ RING_C }},{{ RING_C }}" stroke-dashoffset="{{ hero_offset }}"/>
         </svg>
         <div class="gauge-center">
-          <span class="gauge-value">{{ hero_score }}</span>
+          <span class="gauge-value">{{ hero_display }}</span>
           <span class="gauge-max">/100</span>
         </div>
         <div class="gauge-label">BorsaPusula<br>Skoru</div>
         <div class="hero-formula">
-          {% if temel_missing %}{{ hero_score }} ≈ sadece Teknik ({{ new_teknik_score }}) — Temel Analiz eksik
+          {% if temel_missing %}{{ hero_display }} ≈ sadece Teknik ({{ new_teknik_score }}) — Temel Analiz eksik
           {% elif not new_teknik_score %}{{ hero_score }} ≈ sadece Temel ({{ temel_score }}) — Teknik sinyal aktif değil (Yatay)
           {% else %}{{ hero_score }} ≈ Temel {{ temel_score }}×0.6 + Teknik {{ new_teknik_score }}×0.4{% endif %}
         </div>
