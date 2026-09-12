@@ -45,7 +45,7 @@
     "url": "https://borsapusula.com"
   },{% if seo_signal or seo_score or seo_adx %}
   "additionalProperty": [
-    {"@type": "PropertyValue", "name": "Sinyal", "value": "{{ seo_signal }}"}{% if seo_score is not none %},
+    {"@type": "PropertyValue", "name": "Sinyal", "value": "{{ seo_signal|signal_label }}"}{% if seo_score is not none %},
     {"@type": "PropertyValue", "name": "Sinyal Skoru", "value": "{{ seo_score }}"}{% endif %}{% if seo_adx is not none %},
     {"@type": "PropertyValue", "name": "ADX", "value": "{{ seo_adx|int }}"}{% endif %}{% if seo_rsi is not none %},
     {"@type": "PropertyValue", "name": "RSI", "value": "{{ seo_rsi|int }}"}{% endif %}
