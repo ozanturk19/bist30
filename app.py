@@ -10282,10 +10282,16 @@ def api_karsilastir():
 
     with _lock:
         data_map = {s["ticker"]: s for s in _cache["data"]}
+        # CPO-1610: /hisse hero (hs.borsapusula_skoru) ile AYNI kaynak — ekstra
+        # hesaplama yok, EOD turunun zaten doldurduğu _financial_health_cache'ten
+        # O(1) okuma (bkz. api_stock_health_score / hisse route'undaki hs_available deseni).
+        hs_map = {t: _financial_health_cache.get(t) for t in tickers}
 
     results = []
     for ticker in tickers:
         s = data_map.get(ticker, {})
+        hs_cached = hs_map.get(ticker)
+        hs_data = hs_cached["data"] if hs_cached else None
         inds        = s.get("indicators") or {}
         _adx_raw    = (inds.get("adx") or {}).get("label", "")
         try:
@@ -10321,6 +10327,11 @@ def api_karsilastir():
             # artik kendi calcScore()'unu degil bu alani gosterir (BJKAS 95/Premium vs 65/Iyi
             # celiskisini kapatir, bkz. CPO-DEV2-053 raporu)
             "tier":           s.get("tier"),
+            # CPO-1610: /hisse hero gauge'un gosterdigi kompozit puan (Temel x0.6 + Teknik x0.4).
+            # signal_strength'ten FARKLI bir sayidir (o SADECE teknik) — karsilastir.html artik
+            # ikisini de ayri, acikca etiketli satirlarda gosteriyor, tek "puan" gibi sunulmuyor.
+            "borsapusula_skoru": hs_data.get("borsapusula_skoru") if hs_data else None,
+            "hs_available":      hs_data is not None,
             "sector":         _get_sector(ticker),
             # DEV2-bughunt-r7: bulunamayan (found=False) ticker icin de kap_url_for()
             # her zaman bir fallback arama linki dondugunden, karsilastir.html olmayan

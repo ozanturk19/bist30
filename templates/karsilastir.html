@@ -111,6 +111,10 @@ const TICKERS_PARAM = "{{ tickers_param }}";
 const ROW_LABELS = [
   { key: '_sep_tech',     label: '<span aria-hidden="true">📊</span> TEKNİK ANALİZ', isSep: true },
   { key: 'signal',        label: 'Sinyal' },
+  // CPO-1610: /hisse hero'daki kompozit skorla AYNI alan (hs.borsapusula_skoru) — ayrı,
+  // açıkça etiketli satır. "Yatırım Skoru" (üstteki scoreRow) SADECE Teknik Güç'tür,
+  // bu ikisi artık aynı sayı gibi karışmıyor.
+  { key: 'borsapusula_skoru', label: 'BorsaPusula Skoru', help: 'Temel Analiz ×%60 + Teknik Güç ×%40 kompozit puan — /hisse sayfasındaki ana skorla birebir aynı kaynak. Yukarıdaki "Teknik Güç" ile karıştırılmamalı.' },
   { key: 'is_premium',    label: 'Hacim Onaylı <span aria-hidden="true">⭐</span>', help: 'Güçlü Trend sinyali olan VE 5 günlük hacim ortalaması son 20 gün ortalamasının 1.20 katından yüksek olan hisseler. Backtest\'te en güçlü Sharpe oranı bu kategoride.' },
   { key: 'price',         label: 'Son Fiyat' },
   { key: 'change_pct',    label: 'Günlük Değişim' },
@@ -214,6 +218,11 @@ function renderCell(key, s) {
     case 'tp2':           return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
     case 'rr_ratio':      return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde risk/ödül oranı gösterilmez') : (v ? `<span class="mono" style="color:var(--bp-accent-cyan)">1 : ${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>');
     case 'sector':        return v ? `<span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">${v}</span>` : '<span class="muted">—</span>';
+    // CPO-1610: EOD skor turu bu hisse icin henuz calismadiysa (hs_available=false)
+    // dogru "bekleniyor" durumu — sahte/varsayilan sayi YOK (hisse.html ile ayni durus).
+    case 'borsapusula_skoru':
+      if (!s.hs_available) return '<span class="muted" style="font-size:var(--bp-text-xs)"><span aria-hidden="true">🔜</span> Yakında</span>';
+      return v != null ? `<span class="mono" style="font-weight:700">${v}<small style="font-weight:400;color:var(--bp-text3)"> / 100</small></span>` : '<span class="muted">—</span>';
     // ── Temel analiz ──
     case 'market_cap':    return v ? `<span class="mono" style="font-size:var(--bp-text-base)">${v}</span>` : '<span class="muted">—</span>';
     case 'pe_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>';
@@ -237,7 +246,7 @@ function renderCell(key, s) {
   }
 }
 
-// ── Yatırım Skoru — kanonik signal_strength + tier (CPO-DEV2-053/055) ──────
+// ── Teknik Güç — kanonik signal_strength + tier (CPO-DEV2-053/055) ──────
 // Önceden bu dosyanın kendi bağımsız calcScore() fonksiyonu vardı (tech+fund, 0-100,
 // signal/ADX/R-R/bull_score+temel veriden yeniden hesaplıyordu) — /hisse ve /tarama'nın
 // gösterdiği compose_score()'tan TAMAMEN farklı bir sayı üretiyordu (kanıt: BJKAS aynı an
@@ -305,9 +314,12 @@ function buildTable(stocks) {
     </th>`;
   }).join('');
 
-  // ── Yatırım Skoru satırı (kazananı belirle, kanonik signal_strength) ──
+  // ── Teknik Güç satırı (kazananı belirle, kanonik signal_strength) ──
   // CPO-1572 (10.09): long-only — SAT sinyali skor yüksek olsa da 🏆 "En Yüksek"
   // kazanamaz, sadece AL sinyalleri yarışır (Ozan: SAT güçlü/kazanan gösterilmesin).
+  // CPO-1610: "Yatırım Skoru" adı belirsizdi (kompozit BorsaPusula Skoru ile karışıyordu,
+  // bu SADECE signal_strength/teknik). hisse.html'in qf-row etiketiyle ("Teknik Güç Skoru")
+  // aynı vocabulary'e hizalandı — ayrı "BorsaPusula Skoru" satırı ROW_LABELS'ta eklendi.
   const scores = stocks.map(s => s.found && s.signal === 'AL' ? (s.signal_strength || 0) : -1);
   const maxScore = Math.max(...scores);
   const winnerIdx = maxScore > 0 ? scores.indexOf(maxScore) : -1;
@@ -317,7 +329,7 @@ function buildTable(stocks) {
   }).join('');
   const scoreRow = `
     <tr class="score-row">
-      <th class="row-label" scope="row" style="font-size:var(--bp-text-sm);color:var(--bp-text2)"><span aria-hidden="true">🏆</span> Yatırım<br>Skoru</th>
+      <th class="row-label" scope="row" style="font-size:var(--bp-text-sm);color:var(--bp-text2)"><span aria-hidden="true">🏆</span> Teknik<br>Güç</th>
       ${scoreCells}
     </tr>
   `;
@@ -402,7 +414,7 @@ async function doCompare(opts) {
         <caption class="sr-only">Seçilen hisselerin yan yana karşılaştırma tablosu</caption>
         <thead><tr><th class="row-label" scope="col"></th>${inputs.map(t=>{const et=escapeHtml(t); const eu=encodeURIComponent(t); return `<th class="col-hdr" scope="col"><a href="/hisse/${eu}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${et} detay sayfası">${et}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`;}).join('')}</tr></thead>
         <tbody>
-          <tr class="score-row"><th class="row-label" scope="row"><span aria-hidden="true">🏆</span> Yatırım Skoru</th>${inputs.map(()=>`<td><div class="skeleton" style="height:60px;width:90px"></div></td>`).join('')}</tr>
+          <tr class="score-row"><th class="row-label" scope="row"><span aria-hidden="true">🏆</span> Teknik Güç</th>${inputs.map(()=>`<td><div class="skeleton" style="height:60px;width:90px"></div></td>`).join('')}</tr>
           ${ROW_LABELS.map(({label, isSep})=>{
             if (isSep) return `<tr class="row-sep"><td colspan="${skelColspan}">${label}</td></tr>`;
             return `<tr><th class="row-label" scope="row">${label}</th>${inputs.map(()=>`<td><div class="skeleton"></div></td>`).join('')}</tr>`;
