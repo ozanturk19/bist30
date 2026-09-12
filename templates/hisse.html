@@ -807,6 +807,7 @@
         <div class="gauge-label">BorsaPusula<br>Skoru</div>
         <div class="hero-formula">
           {% if temel_missing %}{{ hero_score }} ≈ sadece Teknik ({{ new_teknik_score }}) — Temel Analiz eksik
+          {% elif not new_teknik_score %}{{ hero_score }} ≈ sadece Temel ({{ temel_score }}) — Teknik sinyal aktif değil (Yatay)
           {% else %}{{ hero_score }} ≈ Temel {{ temel_score }}×0.6 + Teknik {{ new_teknik_score }}×0.4{% endif %}
         </div>
       </div>
@@ -3144,7 +3145,7 @@ document.addEventListener('visibilitychange', () => {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=70" defer></script>
+<script src="/static/bp-search.js?v=71" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 <script src="/static/js/bp-chart-common.js?v=2"></script>
 <script src="/static/learning-mode.js?v=5" defer></script>

@@ -543,6 +543,14 @@
     }
     tick();
     setInterval(tick, 1000);
+    /* bughunt-12.09 (workflow bulgusu): 1sn interval hidden->visible geçişinde
+       teorik olarak kendi turuyla iyileşiyor ama tarayıcı arka-plan timer'ları
+       suspend ederse (macro bar/stale-banner'da tam da bu yüzden "sonsuza dek
+       Yükleniyor" oluyordu) bu rozet de aynı riski taşıyor — anında resume
+       garantisi için macro bar'la aynı desen eklendi. */
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) tick();
+    });
   }
 
   // Smart refresh — page-specific manualRefresh() if exists, else location.reload()

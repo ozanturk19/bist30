@@ -45,6 +45,13 @@
     <button class="pf-fetch-error-retry" onclick="retryPortfolioFetch()">Tekrar dene</button>
   </div>
 
+  <!-- bughunt-12.09: localStorage YAZMA hatası banner'ı, aşağıdaki bilgi bandından
+       BİLEREK ayrı — save() başarısız olursa kullanıcı bilgi bandını daha önce
+       kapatmış olsa bile bu mutlaka görünmeli (gerçek, o anki veri kaybı riski). -->
+  <div class="pf-fetch-error" id="pfSaveError" role="alert" aria-live="assertive" style="display:none">
+    <span><span aria-hidden="true">⚠️</span> Portföyünüz bu cihazda kaydedilemedi (depolama alanı dolu veya gizli mod olabilir) — son değişiklik kalıcı olmamış olabilir.</span>
+  </div>
+
   <!-- localStorage Uyarı Bandı -->
   <div class="ls-warning" id="lsWarning" style="display:none">
     <span class="ls-warning-icon"><span aria-hidden="true">💾</span></span>
@@ -244,11 +251,18 @@ function fmtM(v) {
 }
 
 function save() {
+  var errEl = document.getElementById('pfSaveError');
   try {
     localStorage.setItem(PF_KEY, JSON.stringify(portfolio));
+    if (errEl) errEl.style.display = 'none';
   } catch (e) {
+    // bughunt-12.09: ONCEDEN showLsWarning() cagriliyordu — o fonksiyon
+    // "daha once kapatildiysa gosterme" bayragini bilgi bandiyla PAYLASIYORDU,
+    // yani kullanici bilgi bandini kapatmissa GERCEK bir kayit hatasi da
+    // sessizce bastiriliyordu, pozisyon veri kaybi kullaniciya hic bildirilmiyordu.
+    // Ayri, dismiss-bayragindan bagimsiz bir banner kullaniliyor artik.
     console.warn('portfolio localStorage yazilamadi (kota/private mod):', e);
-    showLsWarning();
+    if (errEl) errEl.style.display = 'flex';
   }
 }
 
@@ -913,7 +927,7 @@ document.getElementById('cloudModal').addEventListener('click', function(e) {
 // Makro Ticker Bandı
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
 </script>
-<script src="/static/bp-search.js?v=70" defer></script>
+<script src="/static/bp-search.js?v=71" defer></script>
 <script src="/static/stale-banner.js?v=327ff569"></script>
 <script>bpStartDataQualityPolling();</script>
 
