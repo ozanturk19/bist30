@@ -123,8 +123,18 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
     (percentile havuzu için gerekli — sector_stats.ticker_metric_percentile).
 
     Çıktı: {"temel_analiz_skoru": int|None, "data_completeness": float,
-            "band": str|None, "categories": {kategori: skor}}
-    """
+            "categories_complete": bool, "band": str|None,
+            "categories": {kategori: skor}}
+
+    categories_complete, 4 kategorinin (karlilik/nakit_akisi/kaldirac/
+    degerleme_buyume) HEPSİNİN skoru hesaplanabildiğini gösterir — bununla
+    compute_borsapusula_score()'un döndürdüğü "partial" (composite skorun
+    temel/teknik bileşenlerinden biri mi eksik) TAMAMEN AYRI bir kavramdır.
+    İkisini karıştırmak CPO-1606 P0'ına (hisse.html radar_dim, 4 banka
+    ticker'ı) yol açtı: kaldirac kategorisi eksik olsa da hem temel_skor
+    hem teknik_skor mevcutsa composite.partial=False kalıyor, kategori
+    eksikliğini hiç yansıtmıyordu. Kullanan kod categories_complete'i
+    kullanmalı, partial'ı değil."""
     category_scores = {}
     metrics_with_data = 0
 
@@ -140,11 +150,13 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
             category_scores[cat_name] = sum(metric_scores) / len(metric_scores)
 
     data_completeness = round(metrics_with_data / TOTAL_METRIC_COUNT, 2)
+    categories_complete = len(category_scores) == len(CATEGORIES)
 
     if not category_scores or metrics_with_data < MIN_METRICS_FOR_SCORE:
         return {
             "temel_analiz_skoru": None,
             "data_completeness": data_completeness,
+            "categories_complete": categories_complete,
             "band": None,
             "categories": {},
         }
@@ -156,6 +168,7 @@ def compute_health_score(ticker_fundamentals, sector, stocks_with_fundamentals):
     return {
         "temel_analiz_skoru": round(score),
         "data_completeness": data_completeness,
+        "categories_complete": categories_complete,
         "band": _band(round(score)),
         "categories": {c: round(s, 1) for c, s in category_scores.items()},
     }

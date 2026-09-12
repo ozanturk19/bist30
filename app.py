@@ -8391,6 +8391,7 @@ def _run_eod_scoring_pass(results: list):
                 "temel_analiz_skoru": health.get("temel_analiz_skoru"),
                 "borsapusula_skoru": composite.get("borsapusula_skoru"),
                 "data_completeness": health.get("data_completeness"),
+                "categories_complete": health.get("categories_complete"),
                 "partial": composite.get("partial"),
                 "band": health.get("band"),
                 "categories": health.get("categories"),
@@ -9288,6 +9289,7 @@ def api_tarama_temel():
             "band":                    b,
             "categories":              entry.get("categories") or {},
             "data_completeness":       entry.get("data_completeness"),
+            "categories_complete":     entry.get("categories_complete"),
             "partial":                 entry.get("partial"),
             "temel_analiz_aciklamasi": entry.get("temel_analiz_aciklamasi"),
         })
