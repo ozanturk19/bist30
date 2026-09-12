@@ -849,6 +849,14 @@ header{
   }
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _daInitMacro); }
   else { _daInitMacro(); }
+  /* bughunt-12.09: _bpResumeMacro TANIMLIYDI ama hiç çağrılmıyordu — sayfa
+     document.hidden=true iken yüklenirse (arka planda açılma, ekran kilidi vb.)
+     bpLoadMacroBar() sessizce no-op dönüp bir daha hiç denemiyordu, makro bandı
+     "Yükleniyor…"da sonsuza dek kilitli kalıyordu (hisse.html'deki r98 deseniyle
+     aynı fix, CPO-DEV2-072). */
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro();
+  });
 
   // ═══ 1b) Hero BIST100 — EOD-tutarlı, daLoadData() içinde /api/data'dan bir kez set edilir ═══
   function setHeroFromEod(price, chg){

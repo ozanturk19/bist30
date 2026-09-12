@@ -318,12 +318,19 @@
   function _bpMacroInit() {
     window.bpLoadMacroBar();
     setInterval(window.bpLoadMacroBar, 180000);
+    window._bpResumeMacro = window.bpLoadMacroBar;
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', _bpMacroInit);
   } else {
     _bpMacroInit();
   }
+  /* bughunt-12.09: sayfa document.hidden=true iken yüklenirse bpLoadMacroBar()
+     no-op dönüp bir daha denemiyordu, bant sonsuza dek "Yükleniyor…"da
+     kilitli kalıyordu (hisse.html r98 deseniyle aynı fix). */
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro();
+  });
 })();
 
 /* ── Tarama ── */
