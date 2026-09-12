@@ -690,7 +690,20 @@
   {% set hero_display = hero_score if hero_score is not none else new_teknik_score %}
   {% set temel_missing = (not hs_available) or temel_score is none %}
   {% set radar_categories_complete = hs_available and hs.categories.karlilik is defined and hs.categories.nakit_akisi is defined and hs.categories.kaldirac is defined and hs.categories.degerleme_buyume is defined %}
-  {% set radar_dim = temel_missing or (hs_available and hs.partial) or not radar_categories_complete %}
+  {# CPO-1617/1619 (DEV-1897): kaldirac bazı ticker'larda (mevduat bankaları +
+     SAHOL/YESIL, financial_health_score.LEVERAGE_NA_TICKERS) GEÇİCİ veri
+     boşluğu değil, bilanço yapısı gereği YAPISAL olarak uygulanamaz.
+     hs.categories_na bunu ayırt eder — bu durumda radar'ı TAMAMEN gizlemek
+     yerine 3 gerçek eksen + "N/A" etiketli 1 eksen gösteriyoruz. Genel
+     "gerçek veri boşluğu" durumunda (categories_na boş) eski hep-ya-da-hiç
+     davranış AYNEN korunuyor. hs.categories_na eski cache'lerde (Pazartesi
+     EOD öncesi) henüz yok olabilir — "is defined" ile güvenli kontrol
+     ediliyor, aksi halde CPO-1606 P0'ındaki gibi Undefined aritmetiği 500
+     üretir. #}
+  {% set kaldirac_na = hs_available and (hs.categories_na is defined) and hs.categories_na and ('kaldirac' in hs.categories_na) %}
+  {% set radar_other3_complete = hs_available and hs.categories.karlilik is defined and hs.categories.nakit_akisi is defined and hs.categories.degerleme_buyume is defined %}
+  {% set radar_partial_na = kaldirac_na and radar_other3_complete and not radar_categories_complete and not temel_missing and not (hs_available and hs.partial) %}
+  {% set radar_dim = temel_missing or (hs_available and hs.partial) or (not radar_categories_complete and not radar_partial_na) %}
   {% set band = BAND_META.get(hs.band, BAND_META['sari']) if hs_available else BAND_META['sari'] %}
   {% set completeness_pct = ((hs.data_completeness * 100) | round | int) if (hs_available and hs.data_completeness is not none) else 0 %}
 
@@ -706,8 +719,10 @@
   {% if not radar_dim %}
     {% set y_karlilik  = RADAR_CY - (RADAR_R * hs.categories.karlilik / 100) %}
     {% set x_nakit     = RADAR_CX + (RADAR_R * hs.categories.nakit_akisi / 100) %}
-    {% set y_kaldirac  = RADAR_CY + (RADAR_R * hs.categories.kaldirac / 100) %}
     {% set x_degerleme = RADAR_CX - (RADAR_R * hs.categories.degerleme_buyume / 100) %}
+    {% if radar_categories_complete %}
+      {% set y_kaldirac = RADAR_CY + (RADAR_R * hs.categories.kaldirac / 100) %}
+    {% endif %}
   {% endif %}
 
   <section class="score-section" id="threeScoreSection" data-tab-content="ozet" data-state="{{ 'full' if hs_available else 'partial' }}">
@@ -742,7 +757,7 @@
       <!-- RADAR: Temel Analiz Skoru'nun 4 eksenli kırılımı -->
       <div class="radar-wrap" data-dim="{{ 'true' if radar_dim else 'false' }}"
            role="img"
-           aria-label="Temel Analiz kırılımı: Kârlılık {{ '%.0f'|format(hs.categories.karlilik) if not radar_dim else '—' }}, Nakit Akışı {{ '%.0f'|format(hs.categories.nakit_akisi) if not radar_dim else '—' }}, Kaldıraç {{ '%.0f'|format(hs.categories.kaldirac) if not radar_dim else '—' }}, Değerleme/Büyüme {{ '%.0f'|format(hs.categories.degerleme_buyume) if not radar_dim else '—' }}">
+           aria-label="Temel Analiz kırılımı: Kârlılık {{ '%.0f'|format(hs.categories.karlilik) if not radar_dim else '—' }}, Nakit Akışı {{ '%.0f'|format(hs.categories.nakit_akisi) if not radar_dim else '—' }}, Kaldıraç {{ (('%.0f'|format(hs.categories.kaldirac) if radar_categories_complete else 'Sektöre özgü, uygulanamaz') if not radar_dim else '—') }}, Değerleme/Büyüme {{ '%.0f'|format(hs.categories.degerleme_buyume) if not radar_dim else '—' }}">
         <svg viewBox="-50 -25 620 570" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="radarGrad" x1="0" y1="0" x2="1" y2="1">
@@ -766,6 +781,7 @@
           <line x1="260" y1="260" x2="35" y2="260" class="radar-axis"/>
 
           {% if not radar_dim %}
+          {% if radar_categories_complete %}
           <polygon points="{{ RADAR_CX }},{{ '%.1f'|format(y_karlilik) }} {{ '%.1f'|format(x_nakit) }},{{ RADAR_CY }} {{ RADAR_CX }},{{ '%.1f'|format(y_kaldirac) }} {{ '%.1f'|format(x_degerleme) }},{{ RADAR_CY }}" class="radar-data" fill="url(#radarGrad)"/>
 
           <circle cx="{{ RADAR_CX }}" cy="{{ '%.1f'|format(y_karlilik) }}" r="6" style="fill:{{ health_color(hs.categories.karlilik) }}" filter="url(#dotGlow)"><title>Kârlılık: {{ '%.1f'|format(hs.categories.karlilik) }}</title></circle>
@@ -791,6 +807,36 @@
             <tspan x="22" dy="13" class="axis-name">/BÜYÜME</tspan>
             <tspan x="22" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.degerleme_buyume) }}">{{ '%.0f'|format(hs.categories.degerleme_buyume) }}</tspan>
           </text>
+          {% elif radar_partial_na %}
+          <!-- CPO-1617/1619: kaldirac sektöre özgü uygulanamaz — 3 gerçek eksen +
+               1 "N/A" eksen. polyline kasıtlı: fill kapalı üçgeni ima eder ama
+               stroke kaldirac köşesine değmez, eksik veri görsel olarak dürüst. -->
+          <polyline points="{{ '%.1f'|format(x_degerleme) }},{{ RADAR_CY }} {{ RADAR_CX }},{{ '%.1f'|format(y_karlilik) }} {{ '%.1f'|format(x_nakit) }},{{ RADAR_CY }}" class="radar-data" fill="url(#radarGrad)"/>
+
+          <circle cx="{{ RADAR_CX }}" cy="{{ '%.1f'|format(y_karlilik) }}" r="6" style="fill:{{ health_color(hs.categories.karlilik) }}" filter="url(#dotGlow)"><title>Kârlılık: {{ '%.1f'|format(hs.categories.karlilik) }}</title></circle>
+          <circle cx="{{ '%.1f'|format(x_nakit) }}" cy="{{ RADAR_CY }}" r="6" style="fill:{{ health_color(hs.categories.nakit_akisi) }}" filter="url(#dotGlow)"><title>Nakit Akışı: {{ '%.1f'|format(hs.categories.nakit_akisi) }}</title></circle>
+          <circle cx="{{ '%.1f'|format(x_degerleme) }}" cy="{{ RADAR_CY }}" r="6" style="fill:{{ health_color(hs.categories.degerleme_buyume) }}" filter="url(#dotGlow)"><title>Değerleme/Büyüme: {{ '%.1f'|format(hs.categories.degerleme_buyume) }}</title></circle>
+          <circle cx="260" cy="260" r="3" fill="var(--bp-text3)"/>
+
+          <text x="260" y="2" text-anchor="middle">
+            <tspan class="axis-name">KÂRLILIK</tspan>
+            <tspan x="260" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.karlilik) }}">{{ '%.0f'|format(hs.categories.karlilik) }}</tspan>
+          </text>
+          <text x="498" y="253" text-anchor="start">
+            <tspan class="axis-name">NAKİT AKIŞI</tspan>
+            <tspan x="498" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.nakit_akisi) }}">{{ '%.0f'|format(hs.categories.nakit_akisi) }}</tspan>
+          </text>
+          <text x="260" y="502" text-anchor="middle">
+            <title>Kaldıraç: sektöre özgü, uygulanamaz</title>
+            <tspan class="axis-name">KALDIRAÇ</tspan>
+            <tspan x="260" dy="17" class="axis-value" style="fill:var(--bp-text3);font-size:12px">N/A</tspan>
+          </text>
+          <text x="22" y="238" text-anchor="end">
+            <tspan class="axis-name">DEĞERLEME</tspan>
+            <tspan x="22" dy="13" class="axis-name">/BÜYÜME</tspan>
+            <tspan x="22" dy="17" class="axis-value" style="fill:{{ health_color(hs.categories.degerleme_buyume) }}">{{ '%.0f'|format(hs.categories.degerleme_buyume) }}</tspan>
+          </text>
+          {% endif %}
           {% endif %}
         </svg>
         <div class="radar-partial-note">
