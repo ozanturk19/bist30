@@ -27,7 +27,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
 <script src="/static/bp-vocab.js?v=20260823C" defer></script>
-<link rel="stylesheet" href="/static/css/pages/portfolio.css?v=87aeca0a">
+<link rel="stylesheet" href="/static/css/pages/portfolio.css?v=60cccaf2">
 <style id="bp-critical-css">/* anti-CLS: hide page titles + lock nav layout */header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.bp-main-nav::-webkit-scrollbar{display:none}.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:var(--bp-radius-md);font-size:var(--bp-text-xs);line-height:1;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:0.6px;color:var(--bp-text2);text-decoration:none;background:none;border:none;cursor:pointer;font-family:"Space Grotesk",system-ui,sans-serif}.bp-nav-more-wrap{position:relative;flex-shrink:0}.bp-nav-more-menu{display:none}.search-overlay,.bp-search-overlay{display:none}.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}@media (max-width:900px){.bp-main-nav{display:none}}.skip-link{position:absolute;top:-40px;left:0;background:var(--bp-brand);color:var(--bp-bg);padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid var(--bp-brand);outline-offset:2px}:focus:not(:focus-visible){outline:none}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
@@ -155,13 +155,14 @@
   <!-- Hisse ekle -->
   <h2 class="sr-only">Pozisyonlarım</h2>
   <div class="add-bar">
-    <span class="add-lbl">Hisse ekle:</span>
+    <span class="add-lbl" id="addBarLbl">Hisse ekle:</span>
     <input type="text" id="addTicker" placeholder="THYAO veya Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu">
     <datalist id="bistTickerList"></datalist>
     <input type="number" id="addLot" placeholder="Adet" min="1" max="1000000000" step="1" inputmode="numeric" aria-label="Adet" onwheel="this.blur()">
     <input type="text" id="addPrice" placeholder="Alış fiyatı ₺" inputmode="decimal" aria-label="Alış fiyatı">
     <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>
+    <button type="button" class="btn-add" id="editCancelBtn" onclick="cancelEditPosition()" style="display:none;background:transparent;border:1px solid var(--bp-border)">İptal</button>
     <span id="addErr" role="alert" style="color:var(--bp-sat);font-size:var(--bp-text-sm)"></span>
   </div>
 
@@ -497,6 +498,12 @@ function parseTRPrice(raw) {
   return parseFloat(raw);
 }
 
+// bughunt-12.09 (live-flow-audit-2): portfolio'da tek CRUD eksiği "Update"ti —
+// kullanıcı yanlış girilen lot/fiyatı düzeltmek için satırı silip sıfırdan
+// eklemek zorundaydı. _editingId set edilmişse addPosition() artık push yerine
+// mevcut kaydı yerinde günceller (id + sıradaki yeri korunur).
+let _editingId = null;
+
 function addPosition() {
   const btn = document.querySelector('.btn-add');
   if (btn && btn.disabled) return;
@@ -510,7 +517,14 @@ function addPosition() {
   if (!Number.isFinite(price) || price <= 0 || price > 1e9) { err.textContent = 'Geçerli fiyat girin.'; return; }
   err.textContent = '';
   if (btn) btn.disabled = true;
-  portfolio.push({ ticker, lot, price, date: date || new Intl.DateTimeFormat('en-CA', {timeZone: 'Europe/Istanbul'}).format(new Date()), id: Date.now() });
+  const finalDate = date || new Intl.DateTimeFormat('en-CA', {timeZone: 'Europe/Istanbul'}).format(new Date());
+  if (_editingId !== null) {
+    const idx = portfolio.findIndex(p => p.id === _editingId);
+    if (idx !== -1) portfolio[idx] = { ...portfolio[idx], ticker, lot, price, date: finalDate };
+    cancelEditPosition();
+  } else {
+    portfolio.push({ ticker, lot, price, date: finalDate, id: Date.now() });
+  }
   save();
   document.getElementById('addTicker').value = '';
   document.getElementById('addLot').value    = '';
@@ -521,7 +535,42 @@ function addPosition() {
   if (btn) setTimeout(() => { btn.disabled = false; }, 0);
 }
 
+function editPosition(id) {
+  const p = portfolio.find(x => x.id === id);
+  if (!p) return;
+  _editingId = id;
+  document.getElementById('addTicker').value = p.ticker;
+  document.getElementById('addLot').value    = p.lot;
+  document.getElementById('addPrice').value  = String(p.price);
+  document.getElementById('addDate').value   = p.date;
+  document.getElementById('addErr').textContent = '';
+  const lbl = document.getElementById('addBarLbl');
+  if (lbl) lbl.textContent = 'Pozisyonu düzenle:';
+  const btn = document.querySelector('.btn-add');
+  if (btn) btn.textContent = '✓ Güncelle';
+  const cancelBtn = document.getElementById('editCancelBtn');
+  if (cancelBtn) cancelBtn.style.display = '';
+  document.getElementById('addTicker').scrollIntoView({behavior: 'smooth', block: 'center'});
+  document.getElementById('addLot').focus();
+}
+
+function cancelEditPosition() {
+  _editingId = null;
+  document.getElementById('addTicker').value = '';
+  document.getElementById('addLot').value    = '';
+  document.getElementById('addPrice').value  = '';
+  document.getElementById('addDate').value   = '';
+  document.getElementById('addErr').textContent = '';
+  const lbl = document.getElementById('addBarLbl');
+  if (lbl) lbl.textContent = 'Hisse ekle:';
+  const btn = document.querySelector('.btn-add');
+  if (btn) btn.textContent = '+ Ekle';
+  const cancelBtn = document.getElementById('editCancelBtn');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+}
+
 function removePosition(id) {
+  if (_editingId === id) cancelEditPosition();
   portfolio = portfolio.filter(p => p.id !== id);
   save();
   render();
@@ -566,7 +615,7 @@ function render() {
   const empty = document.getElementById('emptyMsg');
   const table = document.getElementById('pfTable');
   const mcards = document.getElementById('pfMobileCards');
-  if (portfolio.length === 0) { empty.style.display=''; table.style.display='none'; if (mcards) mcards.innerHTML=''; renderSummary({count:0}); return; }
+  if (portfolio.length === 0) { empty.style.display=''; table.style.display='none'; tbody.innerHTML=''; if (mcards) mcards.innerHTML=''; renderSummary({count:0}); return; }
   empty.style.display = 'none';
   table.style.display = '';
 
@@ -620,7 +669,7 @@ function render() {
       <td>${pnlPctHtml}</td>
       <td>${sigBadge}</td>
       <td class="hm td-spark">${sparkHtml}</td>
-      <td><button class="btn-del" onclick="removePosition(${p.id})" title="Kaldır" aria-label="${esc(p.ticker)} pozisyonunu kaldır">✕</button></td>
+      <td><button class="btn-edit" onclick="editPosition(${p.id})" title="Düzenle" aria-label="${esc(p.ticker)} pozisyonunu düzenle">✎</button><button class="btn-del" onclick="removePosition(${p.id})" title="Kaldır" aria-label="${esc(p.ticker)} pozisyonunu kaldır">✕</button></td>
     </tr>`;
     // CPO-DEV2-100: Yol A - tarama.html #mobileResultCards ile ayni desen,
     // <=899px'te tabloyla ayni veri kart formatinda gosterilir.
@@ -629,6 +678,7 @@ function render() {
         <a href="/hisse/${esc(p.ticker)}" class="pf-mticker">${esc(p.ticker)}</a>
         <div class="pf-mtop-right">
           ${sigBadge}
+          <button class="btn-edit" onclick="editPosition(${p.id})" title="Düzenle" aria-label="${esc(p.ticker)} pozisyonunu düzenle">✎</button>
           <button class="btn-del" onclick="removePosition(${p.id})" title="Kaldır" aria-label="${esc(p.ticker)} pozisyonunu kaldır">✕</button>
         </div>
       </div>
