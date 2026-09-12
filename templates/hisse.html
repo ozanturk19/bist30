@@ -681,7 +681,8 @@
   {% set temel_score  = hs.temel_analiz_skoru if hs_available else none %}
   {% set hero_score   = hs.borsapusula_skoru if hs_available else none %}
   {% set temel_missing = (not hs_available) or temel_score is none %}
-  {% set radar_dim = temel_missing or (hs_available and hs.partial) %}
+  {% set radar_categories_complete = hs_available and hs.categories.karlilik is defined and hs.categories.nakit_akisi is defined and hs.categories.kaldirac is defined and hs.categories.degerleme_buyume is defined %}
+  {% set radar_dim = temel_missing or (hs_available and hs.partial) or not radar_categories_complete %}
   {% set band = BAND_META.get(hs.band, BAND_META['sari']) if hs_available else BAND_META['sari'] %}
   {% set completeness_pct = ((hs.data_completeness * 100) | round | int) if (hs_available and hs.data_completeness is not none) else 0 %}
 
