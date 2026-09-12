@@ -10768,13 +10768,24 @@ def api_portfolio_save(token):
     # (isinstance(t,str) and ...) atlayıp kabul ediliyordu; ayrıca geçerli ama
     # küçük harfli ticker'lar normalize edilmeden diske yazılıp /api/data'daki
     # büyük-harf liveData anahtarlarıyla kalıcı eşleşmiyordu. İkisi tek kontrolde kapatıldı.
+    # CPO-1608 madde 5: gecersiz TEK ticker tum istegi 400 ile reddediyordu (hangi
+    # ticker oldugunu belirtmeden), altindaki sayisal dogrulama ise sadece o pozisyonu
+    # atlıyordu — iki farkli hata stratejisi aynı fonksiyondaydı. Artik gecersiz ticker
+    # de skip edilip response'ta "skipped" ile bildiriliyor (mevcut sayısal-alan
+    # stratejisiyle tutarli); büyük bir portföyde tek delisted/hatali sembol yüzünden
+    # kullanıcı TÜM kaydını kaybetmiyor.
+    skipped_tickers = []
+    valid_positions = []
     for p in positions:
         if isinstance(p, dict):
             t = p.get("ticker")
             if t is not None:
                 if not isinstance(t, str) or t.strip().upper() not in _PF_VALID_TICKERS:
-                    return safe_json({"error": "Bilinmeyen hisse sembolü"}), 400
+                    skipped_tickers.append(t if isinstance(t, str) else str(t))
+                    continue
                 p["ticker"] = t.strip().upper()
+        valid_positions.append(p)
+    positions = valid_positions
 
     # Sadece izin verilen alanları kaydet (injection güvenliği)
     # DEV2-bughunt-r7: client (templates/portfolio.html) 'lot'/'price' alanlarıyla gönderiyor,
@@ -10822,7 +10833,10 @@ def api_portfolio_save(token):
             # (process-local) senkronize etmiyor, ayni token'a esanli 2 POST
             # farkli worker'a duserse tmp+os.replace olmadan dosya bozulabiliyordu.
             _tp_write_json(path, payload, atomic=True, ensure_ascii=False)
-        return safe_json({"ok": True, "count": len(clean)})
+        resp = {"ok": True, "count": len(clean)}
+        if skipped_tickers:
+            resp["skipped"] = skipped_tickers
+        return safe_json(resp)
     except Exception as e:
         logger.error("Portfolio save [%s]: %s", token, e)
         return safe_json({"error": "Sunucu hatası"}), 500
@@ -12019,11 +12033,14 @@ def api_recognize():
             login_url = f"https://borsapusula.com/api/recognize/confirm?t={login_token}"
             unsub_url = f"https://borsapusula.com/unsubscribe/{info.get('token', '')}"
             name = info.get("name")
-            threading.Thread(target=send_email, args=(
-                email, "🔑 BorsaPusula — Giriş Bağlantın",
-                _build_login_email(email, login_url, unsub_url, name=name),
-                unsub_url
-            ), daemon=True).start()
+            # CPO-1608 madde 1: yanit kasitli olarak jenerik kaliyor (enumeration
+            # onlemi) ama SMTP hatasi artik loglaniyor — onceden fire-and-forget
+            # thread'in donus degeri hic kontrol edilmiyordu, hata sessizce kayboluyordu.
+            def _send_login_mail():
+                if not send_email(email, "🔑 BorsaPusula — Giriş Bağlantın",
+                                   _build_login_email(email, login_url, unsub_url, name=name), unsub_url):
+                    logger.error("Magic-link login maili gonderilemedi: %s", email)
+            threading.Thread(target=_send_login_mail, daemon=True).start()
 
     return safe_json(generic_resp)
 
@@ -12095,12 +12112,18 @@ def api_subscribe():
             _save_subscribers(subs)
             token = subs[email].get("token", "")
             unsub = f"https://borsapusula.com/unsubscribe/{token}"
-            threading.Thread(target=send_email, args=(
+            # CPO-1608 madde 1: fire-and-forget thread donus degerini hic kontrol
+            # etmiyordu, SMTP hatasi sessizce kayboluyordu — /api/contact deseniyle
+            # tutarli: senkron gonder + basarisizsa logla + yanita ekle (additive,
+            # ok:true kaliyor cunku abonelik kaydi zaten basarili).
+            email_sent = send_email(
                 email, "✅ BorsaPusula — Abonelik Yenilendi",
                 _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", "")),
                 unsub
-            ), daemon=True).start()
-            react_resp = safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!", "token": token, "name": subs[email].get("name", ""), "email": email})
+            )
+            if not email_sent:
+                logger.error("Abonelik yenileme maili gonderilemedi: %s", email)
+            react_resp = safe_json({"ok": True, "message": "Aboneliğiniz yeniden aktif edildi!", "token": token, "name": subs[email].get("name", ""), "email": email, "email_sent": email_sent})
             react_resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
             return react_resp
 
@@ -12120,19 +12143,22 @@ def api_subscribe():
         _save_subscribers(subs)
 
     unsub = f"https://borsapusula.com/unsubscribe/{token}"
-    threading.Thread(target=send_email, args=(
+    email_sent = send_email(
         email, "✅ BorsaPusula — Abonelik Onayı",
         _build_welcome_email(email, unsub, name=subs[email].get("name"), profile_token=subs[email].get("token", "")),
         unsub
-    ), daemon=True).start()
+    )
+    if not email_sent:
+        logger.error("Abonelik onay maili gonderilemedi: %s", email)
 
     logger.info("Yeni e-posta abonesi: %s", email)
     resp = safe_json({
         "ok":      True,
-        "message": "Abonelik başarılı! Onay e-postası gönderildi.",
+        "message": "Abonelik başarılı! Onay e-postası gönderildi." if email_sent else "Abonelik başarılı! Onay e-postası şu an gönderilemedi, kaydınız aktif.",
         "token":   token,
         "name":    name,
         "email":   email,
+        "email_sent": email_sent,
     })
     # Cookie set — 1 yıl, SameSite=Lax (CSRF korumalı)
     resp.set_cookie("bp_sub", token, max_age=31536000, samesite="Lax", secure=True, httponly=True)  # P1-SEC-3
@@ -12474,19 +12500,24 @@ def _check_user_alerts(stocks):
             preheader = f"Takip listendeki {len(triggered)} hissede alarm koşulu tetiklendi."
             unsub_url = f"https://borsapusula.com/unsubscribe/{rec.get('token', '')}"
             html = _email_base(content, unsub_url, preheader=preheader)
-            send_email(email, f"🔔 BorsaPusula — {len(triggered)} Watchlist Alarmı", html, unsubscribe_url=unsub_url)
-            with _sub_lock:
-                subs2 = _load_subscribers()
-                if email in subs2:
-                    if "alerts_last_sent" not in subs2[email]:
-                        subs2[email]["alerts_last_sent"] = {}
-                    if "_alert_prev_signals" not in subs2[email]:
-                        subs2[email]["_alert_prev_signals"] = {}
-                    for tkr, s, _ in triggered:
-                        subs2[email]["alerts_last_sent"][tkr] = now_ts
-                        subs2[email]["_alert_prev_signals"][tkr] = s.get("signal")
-                    _save_subscribers(subs2)
-            logger.info("F4 alert email sent: %s → %d tickers", email, len(triggered))
+            # CPO-1608 madde 2: gonderim basarisiz olursa cooldown yazilmiyor —
+            # onceden hem basari hem hata durumunda koşulsuz yaziliyordu, SMTP
+            # gecici arizasinda kullanici alarmi hic almayip 4 saat sessiz kaliyordu.
+            if send_email(email, f"🔔 BorsaPusula — {len(triggered)} Watchlist Alarmı", html, unsubscribe_url=unsub_url):
+                with _sub_lock:
+                    subs2 = _load_subscribers()
+                    if email in subs2:
+                        if "alerts_last_sent" not in subs2[email]:
+                            subs2[email]["alerts_last_sent"] = {}
+                        if "_alert_prev_signals" not in subs2[email]:
+                            subs2[email]["_alert_prev_signals"] = {}
+                        for tkr, s, _ in triggered:
+                            subs2[email]["alerts_last_sent"][tkr] = now_ts
+                            subs2[email]["_alert_prev_signals"][tkr] = s.get("signal")
+                        _save_subscribers(subs2)
+                logger.info("F4 alert email sent: %s → %d tickers", email, len(triggered))
+            else:
+                logger.error("F4 alert email FAILED (no cooldown written, will retry): %s → %d tickers", email, len(triggered))
         except Exception as e:
             logger.error("_check_user_alerts send error (%s): %s", email, e)
 

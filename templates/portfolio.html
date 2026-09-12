@@ -817,7 +817,10 @@ async function saveToCloud(silent) {
     });
     const data = await res.json();
     if (data.ok) {
-      if (!silent) _setCloudMsg(`Kaydedildi! ${data.count} pozisyon.`, 'var(--bp-al)');
+      if (!silent) {
+        const skippedMsg = (data.skipped && data.skipped.length) ? ` (${data.skipped.length} bilinmeyen sembol atlandı: ${data.skipped.join(', ')})` : '';
+        _setCloudMsg(`Kaydedildi! ${data.count} pozisyon.${skippedMsg}`, skippedMsg ? 'var(--bp-warn)' : 'var(--bp-al)');
+      }
       return true;
     } else {
       _setCloudMsg('Kayıt hatası: ' + (data.error || '?'), 'var(--bp-sat)');
