@@ -310,8 +310,15 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     clearInterval(_sectorLoadInt);
   } else {
-    load();
-    _sectorLoadInt = setInterval(load, 120000);
+    // bughunt-12.09: kullanıcı Karşılaştır sekmesindeyken (panelIsiHaritasi
+    // gizli) bu geçmişte koşulsuz resume ediyordu — arka planda görünmeyen
+    // Isı Haritası'nı gereksiz yere yeniden yüklüyordu (fazladan /api/data
+    // isteği). Artık sadece Isı Haritası paneli gerçekten görünürken tazeler.
+    var panelHm = document.getElementById('panelIsiHaritasi');
+    if (panelHm && panelHm.style.display !== 'none') {
+      load();
+      _sectorLoadInt = setInterval(load, 120000);
+    }
   }
 });
 
