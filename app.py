@@ -1805,8 +1805,7 @@ def analyze(ticker_base):
                 optimal_entry = round(max(sl_val + atr_now * 0.8, c * 0.97), 2)
             else:
                 entry_quality = "UZAK"
-                entry_note    = (f"Fiyat +{pct_moved:.1f}% yükseldi "
-                                 f"({atrs_moved:.1f} ATR) — kovalama riski yüksek, pullback bekle")
+                entry_note    = f"UZAK · +{pct_moved:.1f}% ({atrs_moved:.1f} ATR) · Kovalama riski"
                 optimal_entry = round(max(sl_val + atr_now * 0.8, c * 0.95), 2)
 
         elif signal == "SAT" and signal_price and sl_val and c < sl_val and atr_now > 0:
@@ -1835,8 +1834,7 @@ def analyze(ticker_base):
                 optimal_entry = round(min(sl_val - atr_now * 0.8, c * 1.03), 2)
             else:
                 entry_quality = "UZAK"
-                entry_note    = (f"Fiyat -{pct_moved:.1f}% düştü "
-                                 f"({atrs_moved:.1f} ATR) — aşırı satım bölgesi, riski yüksek")
+                entry_note    = f"UZAK · -{pct_moved:.1f}% ({atrs_moved:.1f} ATR) · Aşırı satım riski"
                 optimal_entry = round(min(sl_val - atr_now * 0.8, c * 1.05), 2)
 
         # ── RVOL (Relative Volume) — kalite sinyali ────────────────────────
@@ -5033,10 +5031,12 @@ def _do_macro_ai_refresh():
             + "\n\nKURAL: Sadece bu verileri yorumla. Spekülasyon yapma. Tahmin yapma. "
             "Tarih belirtme; 'bugün', 'şu an', 'şu anda', 'şu sıralar' gibi zamana "
             "bağlı ifadeler KULLANMA — veriyi tarihsiz/zamansız yorumla.\n"
-            "GÖREV: Bireysel yatırımcı için 2 cümlelik Türkçe piyasa özeti. "
+            "GÖREV: Bireysel yatırımcı için TEK SATIR Türkçe piyasa özeti, en fazla 220 karakter. "
+            "Tam cümle kurma; kısa ifadeleri ' · ' ile ayır (örnek biçim: "
+            "'BIST100 %62 yükselişte · Dolar/TL yatay · Altın hafif değer kaybediyor'). "
             "Yatırım tavsiyesi verme. Giriş/kapanış cümlesi ekleme."
         )
-        _, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=12, max_tokens=600, temperature=0.3)
+        _, text = _gemini_call(prompt, _GEMINI_NEWS_ATTEMPTS, timeout=12, max_tokens=120, temperature=0.3)
         if text:
             now = time.time()
             today_s = datetime.now(_TZ_TR).strftime("%Y-%m-%d")
@@ -6838,10 +6838,11 @@ def _enrich_signal_explanation(ticker, signal_data):
         f"DI+: {di_plus:.0f}, DI-: {di_minus:.0f}\n"
         f"  • EMA12 {e12:.0f} {'>' if e12 > e99 else '<'} EMA99 {e99:.0f} ✓\n"
         f"  • Fiyat: {tr_price_filter(price)} ₺ | Sinyal süresi: {bars} gün{sl_line}\n\n"
-        f"Yukarıdaki kurallara göre bu sinyali 3 cümlede sade Türkçe ile yeniden ifade et."
+        f"Yukarıdaki rakamlar/göstergeler zaten kullanıcıya ayrıca gösteriliyor — onları tekrarlama. "
+        f"SADECE bu sinyalde neden şu an dikkat çekici olduğunu tek cümlede, en fazla 15 kelimeyle vurgula."
     )
 
-    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=20, max_tokens=250, temperature=0.3)
+    model_used, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS, timeout=20, max_tokens=60, temperature=0.3)
 
     # ── Validation: sinyalle çelişen metin ürettiyse commentary'ye fall back ─
     if text and opposite_words:
