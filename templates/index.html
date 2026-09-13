@@ -522,13 +522,24 @@ header{
     </div>
 
     <h2 class="da-tagline da-display">Fiyatı değil<br><span class="accent">SİNYALİ</span> oku.</h2>
-    <p class="da-hero-sub">Supertrend, ADX ve hacim teyidini tek bir <strong style="color:var(--bp-text)">Teknik Güç Skoru</strong>'nda (0–100) birleştiriyoruz — algoritmanın 3 bağımsız testten geçirdiği sinyaller, geriye dönük backtest doğrulamasıyla.</p>
+    {# bughunt-13.09 (strateji workflow, ilk-kullanım denetimi): yeni kullanıcı
+       jargonla (Supertrend/ADX/Teknik Güç Skoru) ilk saniyede karşılaşıyor,
+       tek açıklama kaynağı olan /metodoloji anasayfadan hiç linklenmiyordu —
+       sadece header "Daha" menüsünün 7. öğesi. Yeni bileşen değil, mevcut
+       terimi ve lejantı mevcut sayfaya bağlamak yeterli. #}
+    <p class="da-hero-sub">Supertrend, ADX ve hacim teyidini tek bir <a href="/metodoloji" style="color:var(--bp-text);text-decoration:underline;text-decoration-color:var(--bp-border2);text-underline-offset:2px"><strong>Teknik Güç Skoru</strong></a>'nda (0–100) birleştiriyoruz — algoritmanın 3 bağımsız testten geçirdiği sinyaller, geriye dönük backtest doğrulamasıyla.</p>
 
+    {# bughunt-13.09 (strateji workflow, ilk-kullanım denetimi): arama
+       kutusuna tıklayınca açılan overlay'de "ne arayacağını bilmeyen"
+       kullanıcı için 6 hazır seçenek (Popüler Konular) var — ama hiçbir
+       ipucu vermiyordu, kullanıcı önce tıklamayı göze almak zorundaydı.
+       Zaten inşa edilmiş çözümü görünür kılan tek satırlık ekleme. #}
     <button type="button" class="da-search-trigger" onclick="bpOpenSearch()" aria-label="Hisse veya sektör ara — Cmd+K">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21 L16.65 16.65"/></svg>
       <span class="da-st-label">THYAO, GARAN ya da bir sektör ara…</span>
       <span class="da-search-kbd">⌘K</span>
     </button>
+    <p style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin:6px 0 0;text-align:center">Ne arayacağınızı bilmiyor musunuz? Tıklayın, popüler konuları gösterelim.</p>
 
     <div class="da-legend-strip">
       <div class="da-legend-item"><span class="sw" style="background:var(--bp-al)"></span>70–100 Güçlü</div>
@@ -536,6 +547,8 @@ header{
       <div class="da-legend-item"><span class="sw" style="background:var(--bp-volume)"></span>56–69 Orta</div>
       <div class="da-legend-sep"></div>
       <div class="da-legend-item"><span class="sw" style="background:var(--bp-sat)"></span>&lt;56 Zayıf</div>
+      <div class="da-legend-sep"></div>
+      <a href="/metodoloji" class="da-legend-item" style="color:var(--bp-brand);text-decoration:none">Nasıl hesaplanıyor? →</a>
     </div>
   </div>
 </section>
@@ -1047,10 +1060,10 @@ header{
           '</div>' +
           '<span class="da-spot-signal ' + sig.cls + '">● ' + sig.label + '</span>' +
           '<div class="da-spot-subs">' +
-            '<div class="da-spot-sub-row"><span class="lbl">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.adx!=null?Math.round(s.adx):'—') + '</span></div>' +
-            '<div class="da-spot-sub-row"><span class="lbl">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2)+'×':'—') + '</span></div>' +
-            '<div class="da-spot-sub-row"><span class="lbl">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rsi!=null?Math.round(s.rsi):'—') + '</span></div>' +
-            (hasBps ? '<div class="da-spot-sub-row"><span class="lbl">BP</span><div class="bar"><i style="width:' + s.borsapusula_skoru + '%;background:' + bpsCol + '"></i></div><span class="val da-num" style="color:' + bpsCol + '">' + s.borsapusula_skoru + '</span></div>' : '') +
+            '<div class="da-spot-sub-row"><span class="lbl" title="ADX — trend gücü (25 üzeri güçlü, /metodoloji)">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.adx!=null?Math.round(s.adx):'—') + '</span></div>' +
+            '<div class="da-spot-sub-row"><span class="lbl" title="RVOL — bugünün hacmi / 5 günlük ortalama hacim">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2)+'×':'—') + '</span></div>' +
+            '<div class="da-spot-sub-row"><span class="lbl" title="RSI — göreceli güç endeksi, aşırı alım/satım bölgesi">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rsi!=null?Math.round(s.rsi):'—') + '</span></div>' +
+            (hasBps ? '<div class="da-spot-sub-row"><span class="lbl" title="BP = BorsaPusula Skoru — Temel×%60 + Teknik×%40 bileşik puan">BP</span><div class="bar"><i style="width:' + s.borsapusula_skoru + '%;background:' + bpsCol + '"></i></div><span class="val da-num" style="color:' + bpsCol + '">' + s.borsapusula_skoru + '</span></div>' : '') +
           '</div>' +
           (hasBps ? '' :
             '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-fund-teaser" style="text-decoration:none">BorsaPusula Skoru → hisse sayfasında</a>') +
