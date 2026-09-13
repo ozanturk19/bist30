@@ -10363,6 +10363,10 @@ def api_karsilastir():
             # ikisini de ayri, acikca etiketli satirlarda gosteriyor, tek "puan" gibi sunulmuyor.
             "borsapusula_skoru": hs_data.get("borsapusula_skoru") if hs_data else None,
             "hs_available":      hs_data is not None,
+            # CPO-1628: hisse.html/tarama.html'in health_color() macro'suyla AYNI
+            # eşik (financial_health_score._band, 50/70) — karsilastir.html kendi
+            # eşiğini yeniden icat etmesin (feedback_puan_tutarlilik_kanonik).
+            "band": _fhs._band(hs_data.get("borsapusula_skoru")) if (hs_data and _FHS_AVAILABLE) else None,
             "sector":         _get_sector(ticker),
             # DEV2-bughunt-r7: bulunamayan (found=False) ticker icin de kap_url_for()
             # her zaman bir fallback arama linki dondugunden, karsilastir.html olmayan
