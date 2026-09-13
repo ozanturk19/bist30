@@ -11398,6 +11398,29 @@ def sektor_karsilastir():
     return redirect(target, code=301)
 
 
+def _overlay_live_prices(stocks):
+    """CPO-1632 fix: bilanco/temettu takvimi cache'leri 12s TTL'li yfinance
+    hesaplamasi anindaki fiyati donduruyordu — hesaplama genelde seans
+    ACILISINDA (bist30-refresh baslangicinda) tetiklendigi icin buyuk gun-ici
+    hareketlerde ana /api/data fiyatindan %10'a varan sapma olusuyordu.
+    yfinance tarih/donem alanlari degismez oldugu icin cache TTL'i aynen
+    kalir; sadece sunum aninda fiyat/sinyal _cache'ten (zaten 90s'de bir
+    disk'ten tazelenen ana snapshot) ucuza overlay edilir, yfinance
+    cagrisi gerekmez."""
+    with _lock:
+        live = {s["ticker"]: s for s in _cache["data"]}
+    out = []
+    for s in stocks:
+        live_s = live.get(s.get("ticker"))
+        if live_s:
+            s = dict(s)
+            s["price"]      = live_s.get("price", s.get("price"))
+            s["signal"]     = live_s.get("signal", s.get("signal"))
+            s["is_premium"] = live_s.get("is_premium", s.get("is_premium"))
+        out.append(s)
+    return out
+
+
 # ── Bilanço Takvimi ───────────────────────────────────────────────────────────
 _earnings_cache      = {"data": None, "ts": 0}
 _EARNINGS_TTL        = 3600 * 12   # 12 saat
@@ -11676,6 +11699,12 @@ def bilanco_takvimi():
 @limiter.limit("60 per minute")  # r37 bug-hunt: kardeş /api/bilanco-mini ile aynı limit, eksikti
 def api_bilanco_takvimi():
     data = get_earnings_data()
+    if data.get("periods"):
+        data = dict(data)
+        data["periods"] = [
+            {**p, "stocks": _overlay_live_prices(p.get("stocks", []))}
+            for p in data["periods"]
+        ]
     return safe_json(data)
 
 
@@ -11887,6 +11916,9 @@ def temettu_takvimi():
 @limiter.limit("60 per minute")
 def api_temettu_takvimi():
     data = get_dividend_data()
+    if data.get("stocks"):
+        data = dict(data)
+        data["stocks"] = _overlay_live_prices(data["stocks"])
     return safe_json(data)
 
 
