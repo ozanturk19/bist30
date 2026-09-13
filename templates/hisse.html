@@ -43,12 +43,17 @@
     "@type": "Organization",
     "name": "BorsaPusula",
     "url": "https://borsapusula.com"
-  },{% if seo_signal or seo_score or seo_adx %}
+  },{% if seo_signal or seo_score or seo_adx or (hs_available and hs.borsapusula_skoru is not none) %}
+  {# bughunt-13.09 (finansal-analist workflow, GEO §2): BorsaPusula Skoru
+     sitenin en özgün metriği olmasına rağmen sadece görünür HTML'deydi,
+     yapılandırılmış veride yoktu — AI motorları JSON-LD'yi HTML'den daha
+     güvenilir sayar. #}
   "additionalProperty": [
     {"@type": "PropertyValue", "name": "Sinyal", "value": "{{ seo_signal|signal_label }}"}{% if seo_score is not none %},
     {"@type": "PropertyValue", "name": "Sinyal Skoru", "value": "{{ seo_score }}"}{% endif %}{% if seo_adx is not none %},
     {"@type": "PropertyValue", "name": "ADX", "value": "{{ seo_adx|int }}"}{% endif %}{% if seo_rsi is not none %},
-    {"@type": "PropertyValue", "name": "RSI", "value": "{{ seo_rsi|int }}"}{% endif %}
+    {"@type": "PropertyValue", "name": "RSI", "value": "{{ seo_rsi|int }}"}{% endif %}{% if hs_available and hs.borsapusula_skoru is not none %},
+    {"@type": "PropertyValue", "name": "BorsaPusula Skoru", "value": "{{ hs.borsapusula_skoru }}"}{% endif %}
   ],{% endif %}
   "inLanguage": "tr"
 }
@@ -642,7 +647,7 @@
       <div class="info-card-sub" id="icEntryLbl">Sinyal başladığındaki kapanış</div>
     </div>
     <div class="info-card">
-      <div class="info-card-label">Stop Loss (ST)</div>
+      <div class="info-card-label">Supertrend Seviyesi</div>
       <div class="info-card-value" id="icSl">—</div>
       <div class="info-card-sub" id="icSlPct">—</div>
     </div>
@@ -1205,9 +1210,31 @@
     {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
     <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:var(--bp-text-sm);color:#f87171;line-height:1.6"></div>
     <div id="sigExplainLoading" role="status" aria-live="polite" style="display:flex;flex-direction:column;gap:10px;color:var(--bp-text3);font-size:var(--bp-text-base)">
-      {# SPEC-017 Faz 3 F2-B3: Statik özet ÖNCE (içerik), spinner SONRA (durum) — kullanıcı boş ekran görmesin #}
+      {# bughunt-13.09 (finansal-analist workflow §2.3): metodoloji nesri yerine
+         ✓ checklist — AL/SAT'ta 3 kriter sinyalin ÜRETİLME koşulu olduğu için
+         (motor mantığı gereği) her zaman DOĞRU, EMA12/EMA99'un gerçek ₺ değeri
+         ssr_signal'da yok (fabrике edilmedi) — sadece yön etiketi gösterilir.
+         Yatay'da hangi kriterin başarısız olduğu bilinmediği için checklist
+         DEĞİL, dürüst tek cümle kullanılır. #}
       <div style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.65;padding:10px 12px;background:rgba(var(--bp-brand-rgb),0.06);border-left:3px solid rgba(var(--bp-brand-rgb),0.4);border-radius:0 8px 8px 0">
-        Algoritmamız <strong style="color:var(--bp-brand)">Supertrend(10,3), ADX ≥ 25, EMA12/EMA99</strong> kriterlerinin aynı anda uyum sağlamasını değerlendirir. <strong class="bp-al-text">Güçlü Trend</strong> sinyali bu kriterlerin pozitif konfirmasyonunu, <strong class="bp-sat-text">Trend Bozuldu</strong> negatif konfirmasyonunu gösterir. Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-brand);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
+        {% if ssr_signal.signal == 'AL' %}
+        <ul style="list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px;font-size:var(--bp-text-sm)">
+          <li><span class="bp-al-text" aria-hidden="true">✓</span> Supertrend — Yükseliş yönü</li>
+          <li><span class="bp-al-text" aria-hidden="true">✓</span> ADX {{ ssr_signal.adx|int if ssr_signal.adx else '—' }} — Güçlü trend (eşik: 25)</li>
+          <li><span class="bp-al-text" aria-hidden="true">✓</span> EMA12 &gt; EMA99 — Yükseliş hizalaması</li>
+        </ul>
+        <strong class="bp-al-text">3/3 kriter uyumlu → Güçlü Trend.</strong>
+        {% elif ssr_signal.signal == 'SAT' %}
+        <ul style="list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px;font-size:var(--bp-text-sm)">
+          <li><span class="bp-sat-text" aria-hidden="true">✓</span> Supertrend — Düşüş yönü</li>
+          <li><span class="bp-sat-text" aria-hidden="true">✓</span> ADX {{ ssr_signal.adx|int if ssr_signal.adx else '—' }} — Güçlü trend (eşik: 25)</li>
+          <li><span class="bp-sat-text" aria-hidden="true">✓</span> EMA12 &lt; EMA99 — Düşüş hizalaması</li>
+        </ul>
+        <strong class="bp-sat-text">3/3 kriter uyumlu → Trend Bozuldu.</strong>
+        {% else %}
+        Supertrend, ADX ≥ 25 ve EMA12/EMA99 kriterleri şu an aynı anda sağlanmıyor — net bir trend sinyali yok.
+        {% endif %}
+        Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-brand);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
       <div style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:#6b6b73">
         <div class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></div>

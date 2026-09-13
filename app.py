@@ -9993,6 +9993,11 @@ def llms_txt():
 - [Sektör Haritası](https://borsapusula.com/sektor-harita): sektör bazlı sinyal yoğunluğu
 - [Piyasa Gündemi](https://borsapusula.com/gundem): bugün sinyal değiştiren hisseler
 - [Sinyal Özeti](https://borsapusula.com/ozet): günlük Güçlü Trend/Trend Bozuldu/Yatay dağılımı
+- [Hisse Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
+- [Tüm Hisseler](https://borsapusula.com/hisseler): tam hisse listesi
+- [Bilanço Takvimi](https://borsapusula.com/bilanco-takvimi): yaklaşan finansal sonuç tarihleri
+- [Temettü Takvimi](https://borsapusula.com/temettu-takvimi): yaklaşan temettü ödemeleri
+- [Blog](https://borsapusula.com/blog): teknik analiz eğitim içerikleri (okumalar)
 
 ## Hisse Sayfaları
 - Format: https://borsapusula.com/hisse/{TICKER} — örn. /hisse/THYAO

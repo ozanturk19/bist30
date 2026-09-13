@@ -140,7 +140,11 @@ function sigLabel(sig) {
    (r41, commit fd4d9f5, tooltip baglaminda) — buraya TASINMADI, dokunulmadi.
    Global 'eqLabel' adiyla expose ediyoruz ki cagiran sablonlarin mevcut
    kullanimlari degismesin. */
-var BP_EQ_LABELS = { IDEAL: 'İdeal', IYI: 'İyi', DIKKATLI: 'Dikkatli', UZAK: 'Uzak' };
+/* bughunt-13.09 (finansal-analist workflow §B): "Uzak" tek basina
+   anlasilmiyordu (tooltip'i olmayan yuzeylerde, orn. tarama.html) —
+   "Kovalama" karsilastir.html'in mevcut tooltip metninde zaten kullanilan
+   kelime, tek basina daha aciklayici. */
+var BP_EQ_LABELS = { IDEAL: 'İdeal', IYI: 'İyi', DIKKATLI: 'Dikkatli', UZAK: 'Kovalama' };
 function eqLabel(code) {
   return BP_EQ_LABELS[code] || code;
 }

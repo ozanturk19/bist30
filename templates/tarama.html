@@ -163,7 +163,7 @@
           <th scope="col" class="hide-mob hide-tablet">Sektör</th>
         </tr>
       </thead>
-      <tbody id="resultBody">{% for s in ssr_rows %}{% set _eq = {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Uzak'} %}<tr>
+      <tbody id="resultBody">{% for s in ssr_rows %}{% set _eq = {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Kovalama'} %}<tr>
         <td><a href="/hisse/{{ s.ticker }}"><div class="tk">{{ s.ticker }}</div><div class="tk-name">{{ (s.name or '')|replace(' A.Ş.','')|truncate(20, True, '') }}</div></a></td>
         <td><span class="sig-badge sig-{{ s.signal }}">{{ '▲' if s.signal=='AL' else '▼' if s.signal=='SAT' else '●' }} {{ s.signal|signal_label }}</span></td>
         <td>{{ s.signal_strength }}</td>
@@ -205,7 +205,7 @@
       </div>
 
       <div class="filter-group">
-        <label for="fMinTemel">Min Temel Skoru</label>
+        <label for="fMinTemel">Min Temel Skor</label>
         <input type="number" id="fMinTemel" value="0" min="0" max="100" step="5" style="width:90px" onwheel="this.blur()">
       </div>
 
@@ -256,7 +256,7 @@
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
         <select class="sort-select" id="sortSelTemel" onchange="applyTemelFilters()" aria-label="Sıralama">
-          <option value="temel_score">Temel Analiz Skoru (Yüksek → Düşük)</option>
+          <option value="temel_score">Temel Skor (Yüksek → Düşük)</option>
           <option value="borsapusula_score">BorsaPusula Skoru (Yüksek → Düşük)</option>
           <option value="karlilik">Kârlılık (Yüksek → Düşük)</option>
           <option value="nakit_akisi">Nakit Akışı (Yüksek → Düşük)</option>
@@ -277,7 +277,7 @@
         <thead>
           <tr>
             <th scope="col">Hisse</th>
-            <th scope="col" data-tooltip="Kârlılık×%30 + Nakit Akışı×%30 + Kaldıraç×%25 + Değerleme/Büyüme×%15 — varsayılan sıralama">Temel Analiz Skoru</th>
+            <th scope="col" data-tooltip="Kârlılık×%30 + Nakit Akışı×%30 + Kaldıraç×%25 + Değerleme/Büyüme×%15 — varsayılan sıralama">Temel Skor</th>
             <th scope="col" class="hide-mob" data-tooltip="Temel×%60 + Teknik×%40 kompozit skor">BorsaPusula Skoru</th>
             <th scope="col" class="hide-mob hide-tablet">Kârlılık</th>
             <th scope="col" class="hide-mob hide-tablet">Nakit Akışı</th>
@@ -1048,8 +1048,8 @@ function renderTemelResults(rows, count) {
           <span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span>
         </div>
         <div class="mr-bottom">
-          <div class="mr-metric"><div class="mr-metric-label">Temel Skoru</div>${_scoreHtml}</div>
-          <div class="mr-metric"><div class="mr-metric-label">BorsaPusula</div><span style="color:var(--bp-text2)">${s.borsapusula_skoru != null ? s.borsapusula_skoru : '—'}</span></div>
+          <div class="mr-metric"><div class="mr-metric-label">Temel Skor</div>${_scoreHtml}</div>
+          <div class="mr-metric"><div class="mr-metric-label">BP Skoru</div><span style="color:var(--bp-text2)">${s.borsapusula_skoru != null ? s.borsapusula_skoru : '—'}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—'}</span></div>
         </div>
       </a>`;
