@@ -1005,7 +1005,11 @@ function renderTemelResults(rows, count) {
   };
   const borsaPusulaCell = (score) => {
     if (score == null) return '<span style="color:var(--bp-text3)">—</span>';
-    return `<span style="font-weight:600;color:var(--bp-text2)">${score}</span>`;
+    // bughunt-13.09: hisse.html hero'da BorsaPusula Skoru 70/50 esigiyle
+    // renklendiriliyor, burada hic renklendirilmiyordu (puan tutarlilik
+    // ihlali) — _categoryColorVar AYNI kanonik esigi zaten uyguluyor,
+    // Temel Skor'un kendi band alanini reuse ETMEDEN (ayri bir metrik).
+    return `<span style="font-weight:600;color:var(${_categoryColorVar(score)})">${score}</span>`;
   };
   const categoryCell = (v) => {
     if (v == null) return '<span style="color:var(--bp-text3)">—</span>';
