@@ -822,6 +822,16 @@ header{
     if (v >= 56) return 'var(--bp-volume)';
     return 'var(--bp-sat)';
   }
+  // bughunt-13.09 (CPO-1627 backend fix sonrasi): BorsaPusula Skoru icin AYRI
+  // fonksiyon — scoreColorVar (70/56) Teknik Guc Skoru rozet esigi, BorsaPusula
+  // ise kanonik 70/50 (hisse.html hero + tarama.html _categoryColorVar ile ayni).
+  // Ikisini karistirmak tam da puan-tutarlilik ihlali sinifina girerdi.
+  function bpScoreColorVar(v){
+    if (typeof v !== 'number') return 'var(--bp-text3)';
+    if (v >= 70) return 'var(--bp-al)';
+    if (v >= 50) return 'var(--bp-volume)';
+    return 'var(--bp-sat)';
+  }
   function ringDash(pct, r){
     var c = 2 * Math.PI * r;
     var v = Math.max(0, Math.min(100, pct || 0)) / 100 * c;
@@ -1020,6 +1030,8 @@ header{
     var rvolPct = Math.max(0, Math.min(100, ((s.rvol||0)/3)*100));
     var rsiPct = Math.max(0, Math.min(100, (s.rsi||0)));
     var chg = s.change_pct, chgUp = typeof chg === 'number' && chg >= 0;
+    var hasBps = s.hs_available && typeof s.borsapusula_skoru === 'number';
+    var bpsCol = hasBps ? bpScoreColorVar(s.borsapusula_skoru) : null;
     body.innerHTML =
       '<div class="da-spot-grid">' +
         '<div class="da-spot-ring-wrap"><svg viewBox="0 0 100 100">' +
@@ -1038,8 +1050,10 @@ header{
             '<div class="da-spot-sub-row"><span class="lbl">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.adx!=null?Math.round(s.adx):'—') + '</span></div>' +
             '<div class="da-spot-sub-row"><span class="lbl">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2)+'×':'—') + '</span></div>' +
             '<div class="da-spot-sub-row"><span class="lbl">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rsi!=null?Math.round(s.rsi):'—') + '</span></div>' +
+            (hasBps ? '<div class="da-spot-sub-row"><span class="lbl">BP</span><div class="bar"><i style="width:' + s.borsapusula_skoru + '%;background:' + bpsCol + '"></i></div><span class="val da-num" style="color:' + bpsCol + '">' + s.borsapusula_skoru + '</span></div>' : '') +
           '</div>' +
-          '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-fund-teaser" style="text-decoration:none">BorsaPusula Skoru → hisse sayfasında</a>' +
+          (hasBps ? '' :
+            '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-fund-teaser" style="text-decoration:none">BorsaPusula Skoru → hisse sayfasında</a>') +
         '</div>' +
       '</div>';
   }
