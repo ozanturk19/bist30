@@ -40,6 +40,7 @@ last_news_prefetch_run.json
 news_inflight.json
 last_company_summary.json
 last_mtf_cache.json
+last_kap_cache.json
 last_fundamentals_cache.json
 last_earnings_cache.json
 last_live_prices.json

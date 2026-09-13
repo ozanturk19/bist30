@@ -4024,6 +4024,7 @@ def background_refresh():
                 _load_macro_from_disk()
                 _load_earnings_cache_from_disk()
                 _load_mtf_cache_from_disk()
+                _load_kap_cache_from_disk()         # CPO-1634
                 _load_fundamentals_cache_from_disk()
                 _load_sector_stats_from_disk()      # CPO-1528 Faz 2
                 _load_health_scores_from_disk()     # CPO-1528 Faz 2
@@ -4044,6 +4045,7 @@ def background_refresh():
                 _load_macro_from_disk()
                 _load_earnings_cache_from_disk()
                 _load_mtf_cache_from_disk()
+                _load_kap_cache_from_disk()         # CPO-1634
                 _load_fundamentals_cache_from_disk()
                 _load_sector_stats_from_disk()      # CPO-1528 Faz 2
                 _load_health_scores_from_disk()     # CPO-1528 Faz 2
@@ -8656,9 +8658,18 @@ def get_signal_story(ticker: str, signal_date: str) -> dict:
     if kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL:
         all_discs = kap_hit["data"]
     else:
-        all_discs = fetch_kap_disclosures(ticker, days=90)
+        # CPO-1634: cache-miss bu worker'da olabilir ama başka worker az önce
+        # yazmış olabilir — fetch'ten önce diskten merge dene.
+        _load_kap_cache_from_disk()
         with _lock:
-            _kap_cache[ticker] = {"data": all_discs, "ts": now_ts}
+            kap_hit = _kap_cache.get(ticker)
+        if kap_hit and (now_ts - kap_hit["ts"]) < _KAP_CACHE_TTL:
+            all_discs = kap_hit["data"]
+        else:
+            all_discs = fetch_kap_disclosures(ticker, days=90)
+            with _lock:
+                _kap_cache[ticker] = {"data": all_discs, "ts": now_ts}
+            _save_kap_cache_to_disk()
 
     events = []
     for d in all_discs:
@@ -8714,6 +8725,44 @@ def api_signal_story(ticker):
     return safe_json(story)
 
 
+_KAP_CACHE_DISK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_kap_cache.json")
+
+
+def _save_kap_cache_to_disk():
+    """KAP cache'i diske yazar (cross-worker sync, _mtf_cache ile aynı desen — CPO-1634:
+    gunicorn -w 4 altında her worker'ın kendi process-local _kap_cache'i vardı,
+    round-robin dağıtımla aynı ticker farklı worker'lara düşünce 30dk TTL fiilen
+    hiç işlemiyordu). _lock DIŞINDA çağrılmalı."""
+    try:
+        with _lock:
+            snapshot = dict(_kap_cache)
+        if not snapshot:
+            return
+        _atomic_write_json(_KAP_CACHE_DISK_PATH, snapshot)
+    except Exception as e:
+        logger.warning("_save_kap_cache_to_disk hatası: %s", e)
+
+
+def _load_kap_cache_from_disk():
+    """Diskten KAP cache merge — ticker başına en taze ts kazanır."""
+    try:
+        if not os.path.exists(_KAP_CACHE_DISK_PATH):
+            return
+        with open(_KAP_CACHE_DISK_PATH, "r", encoding="utf-8") as f:
+            disk = json.load(f)
+        if not isinstance(disk, dict):
+            return
+        with _lock:
+            for tk, dentry in disk.items():
+                if not isinstance(dentry, dict):
+                    continue
+                mem = _kap_cache.get(tk)
+                if not mem or dentry.get("ts", 0) > mem.get("ts", 0):
+                    _kap_cache[tk] = dentry
+    except Exception as e:
+        logger.warning("_load_kap_cache_from_disk hatası: %s", e)
+
+
 @app.route("/api/hisse/<ticker>/kap")
 @limiter.limit("30 per minute")
 def api_stock_kap(ticker):
@@ -8728,9 +8777,18 @@ def api_stock_kap(ticker):
         if cached and (now - cached["ts"]) < _KAP_CACHE_TTL:
             return safe_json({"disclosures": cached["data"], "cached": True})
 
+    # CPO-1634: cache-miss bu worker'da olabilir ama başka worker az önce
+    # yazmış olabilir — fetch'ten önce diskten merge dene.
+    _load_kap_cache_from_disk()
+    with _lock:
+        cached = _kap_cache.get(ticker)
+        if cached and (now - cached["ts"]) < _KAP_CACHE_TTL:
+            return safe_json({"disclosures": cached["data"], "cached": True})
+
     disclosures = fetch_kap_disclosures(ticker, days=90)
     with _lock:
         _kap_cache[ticker] = {"data": disclosures, "ts": now}
+    _save_kap_cache_to_disk()
 
     return safe_json({
         "disclosures": disclosures,
