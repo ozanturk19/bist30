@@ -1644,6 +1644,20 @@ def analyze(ticker_base):
 
         volume = df["Volume"].squeeze() if "Volume" in df.columns else pd.Series([0]*len(close), index=close.index)
 
+        # CPO-1630 P2: aşağıdaki change_pct guard'ı (BIST %10 tavan) sadece SON iki
+        # barı karşılaştırıyor — geçmiş pencerede kalan (split/kötü veri günü) bir
+        # anomali hiç tetiklenmeden Wilder-smoothed EMA/ADX/Supertrend'e sızabiliyor.
+        # BİLİNÇLİ TASARIM: burada return None YAPMIYORUZ — 2 yıllık pencerede tek bir
+        # >%10.5 bar (askıdan dönüş, temettü kesintisi vb. MEŞRU nedenlerle de olabilir)
+        # tüm ticker'ı kalıcı olarak prev_cache fallback'e hapseder (yeni ve daha büyük
+        # bir kesinti riski). Sadece görünürlük için logla — ops bu logu inceleyip
+        # gerçek bir veri hatası ise ayrıca (ticker-özel) ele alır.
+        _hist_jump = close.pct_change().abs()
+        if _hist_jump.iloc[:-1].gt(0.105).any():
+            _bad_dates = list(close.index[:-1][_hist_jump.iloc[:-1] > 0.105].strftime("%Y-%m-%d"))
+            logger.info("gecmis-pencere anomali (bilgi amacli, guard uygulanmadi): %s tarih(ler)inde |%%10.5| asan siçrama — %s",
+                        ticker_base, _bad_dates)
+
         ema12                  = compute_ema(close, 12)
         ema99                  = compute_ema(close, 99)
         adx, di_plus, di_minus = compute_adx(high, low, close)
@@ -8847,7 +8861,7 @@ def _compute_mtf(ticker):
                 "Low":   "min",   "Close": "last",
                 "Volume":"sum",
             }).dropna(subset=["Close"])
-            if len(df_4h) < 40:
+            if len(df_4h) < 60:
                 return None
             close = df_4h["Close"].squeeze()
             high  = df_4h["High"].squeeze()
@@ -8878,9 +8892,9 @@ def _compute_mtf(ticker):
     return {
         "ticker":  ticker,
         "h4":      _tf_signal_4h(ticker),
-        "daily":   _tf_signal("1d",  "2y",  80),
+        "daily":   _tf_signal("1d",  "2y",  110),
         "weekly":  _tf_signal("1wk", "5y",  40),
-        "monthly": _tf_signal("1mo", "10y", 12),
+        "monthly": _tf_signal("1mo", "10y", 20),
     }
 
 
@@ -10239,6 +10253,18 @@ def og_image_png():
                     headers={"Cache-Control": "public, max-age=3600"})
 
 
+def _normalize_tickers(raw, limit=4):
+    """`tickers=` query-param'ını /karsilastir sayfası ve /api/karsilastir için
+    TEK ortak mantıkla normalize eder (CPO-1630 P2): trim + upper + whitelist +
+    alfabetik dedup + limit. Önceden sayfa sorted(set(...)) kullanırken API
+    dict.fromkeys(...) (giriş sırası) kullanıyordu — aynı ticker seti farklı
+    sırayla girilince limit'in kestiği 4'lü farklılaşabiliyordu."""
+    return sorted({
+        t.strip().upper() for t in raw.split(",")
+        if re.match(r"^[A-Z0-9]{1,10}$", t.strip().upper())
+    })[:limit]
+
+
 # ── Hisse Karşılaştırma ──────────────────────────────────────────────────────
 @app.route("/karsilastir")
 def karsilastir():
@@ -10262,10 +10288,11 @@ def karsilastir():
         # Normalize: trim + upper + dedup + alfabetik sırala (max 4 — API ile uyumlu)
         # bug-hunt r23: charset whitelist — '&'/'#'/'=' gibi karakterler redirect/canonical
         # query-string'ini ve JSON-LD'yi bozuyordu (ör. tickers=A%26C -> Location query'si kırılıyordu)
-        tickers = sorted({
-            t.strip().upper() for t in raw.split(",")
-            if re.match(r"^[A-Z0-9]{1,10}$", t.strip().upper())
-        })[:4]
+        tickers = _normalize_tickers(raw, limit=4)
+        if len(tickers) < 2:
+            # CPO-1630 P2: tek-hisse "karşılaştırma" backend'de de engellensin —
+            # frontend'deki "en az 2 gerekli" kısıtı sadece UI'daydı, direkt link ile atlanabiliyordu
+            tickers = []
         if tickers:
             norm = ",".join(tickers)
             if raw != norm:
@@ -10303,13 +10330,12 @@ def api_karsilastir():
     # bug-hunt r92: sayfa route'u (/karsilastir) sorted(set(...)) ile dedup yapiyordu,
     # bu endpoint yapmiyordu -- ayni ticker tekrar tekrar gonderilirse (ör. tickers=AKBNK,AKBNK,AKBNK,AKBNK,GARAN)
     # gecerli farkli bir ticker (GARAN) 4'luk limitten sessizce disariya dusuyordu.
-    tickers = list(dict.fromkeys(
-        t.strip().upper() for t in
-        request.args.get("tickers", "").split(",")
-        if re.match(r"^[A-Z0-9]{1,10}$", t.strip().upper())
-    ))[:4]
+    tickers = _normalize_tickers(request.args.get("tickers", ""), limit=4)
     if not tickers:
         return safe_json({"ok": False, "error": "tickers parametresi gerekli"}), 400
+    if len(tickers) < 2:
+        # CPO-1630 P2: tek-hisse "karşılaştırma" backend'de de engellensin
+        return safe_json({"ok": False, "error": "en az 2 farklı ticker gerekli"}), 400
 
     with _lock:
         data_map = {s["ticker"]: s for s in _cache["data"]}
