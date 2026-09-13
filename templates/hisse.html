@@ -305,6 +305,16 @@
   {%- else -%}
     {% set _hc='var(--bp-text3)' %}{% set _hc2='var(--bp-bkl)' %}{% set _lbl='YATAY' %}{% set _icon='⏸' %}
   {%- endif -%}
+  {# bughunt-13.09 (Ozan, ikinci kez: "yine teknik analiz güçlü trend önde
+     duruyor, bu tasarım değişecek mi?"): _bpc/_bps artık hero'nun EN ÜSTÜNDE,
+     tek bir yerde hesaplanıyor — hem büyük ring hem (varsa) fallback teaser
+     bunu kullanıyor, iki kez hesaplama yok. #}
+  {%- if hs_available and hs.borsapusula_skoru is not none -%}
+    {%- set _bps = hs.borsapusula_skoru -%}
+    {%- if _bps >= 70 %}{% set _bpc = 'var(--bp-al)' %}
+    {%- elif _bps >= 50 %}{% set _bpc = 'var(--bp-volume)' %}
+    {%- else %}{% set _bpc = 'var(--bp-sat)' %}{% endif -%}
+  {%- endif -%}
   <div class="bp-hero-card da-hero-card" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
     <svg class="da-hero-art" viewBox="0 0 400 267" aria-hidden="true" focusable="false">
       <circle cx="60" cy="40" r="1.6" fill="{{ _hc }}" opacity=".55"/>
@@ -327,6 +337,13 @@
              çağrışımı yok. #}
           <span class="bp-hero-meta">{{ ssr_signal.signal_date|signal_age_phrase }}</span>
         </div>
+        {# bughunt-13.09 (Ozan, 2. kez: "yine teknik analiz güçlü trend önde
+           duruyor, tasarım değişecek mi?"): BorsaPusula Skoru artık hero'nun
+           TEK büyük/dominant görseli (sağdaki ring) — Skor Analizi bölümündeki
+           260px hero-gauge/172px teknik-gauge oranıyla AYNI hiyerarşi burada
+           da kuruldu. Teknik Güç Skoru ayrı bir bar olarak İKİNCİL kaldı,
+           sadece aktif sinyalde (giriş/stop'a doğrudan bağlı olduğu için hâlâ
+           faydalı) — artık kendi büyük ring'i yok, ring BorsaPusula'ya ait. #}
         {% if _sig in ('AL', 'SAT') %}
         <div class="bp-hero-power-wrap">
           <div class="bp-hero-power-label">
@@ -338,30 +355,6 @@
           </div>
         </div>
         {% endif %}
-        {# bughunt-13.09 (Ozan: "BorsaPusula skoru daha üstte görünür olmalı"):
-           hero'da SADECE Teknik Güç Skoru vardı, BorsaPusula Skoru (kompozit)
-           için ise bu bölüm hâlâ "🔜 Yakında" YAZIYORDU — Faz 4'ten beri
-           (09.09) canlı olan bir özelliğin bayat "coming soon" metni.
-           Gerçek skor artık Teknik'le AYNI görsel ağırlıkta (aynı
-           power-bar deseni), sayfanın en üstünde, scroll gerekmeden. #}
-        {% if hs_available and hs.borsapusula_skoru is not none %}
-        {%- set _bps = hs.borsapusula_skoru -%}
-        {%- if _bps >= 70 %}{% set _bpc = 'var(--bp-al)' %}
-        {%- elif _bps >= 50 %}{% set _bpc = 'var(--bp-volume)' %}
-        {%- else %}{% set _bpc = 'var(--bp-sat)' %}{% endif -%}
-        <a href="#threeScoreSection"
-           onclick="var t=document.getElementById('threeScoreSection');if(t){window.applyTab&&applyTab('ozet');window.bpScrollIntoView(t,{block:'start'});}return false"
-           data-tip="BorsaPusula Skoru, Teknik ve Temel analizin ağırlıklı bileşimidir — Teknik Güç Skoru sadece an'lık trend gücünü gösterir." tabindex="0"
-           class="bp-hero-power-wrap" style="display:block;text-decoration:none;cursor:pointer">
-          <div class="bp-hero-power-label">
-            <span>BorsaPusula Skoru <span aria-hidden="true" style="opacity:.6">↓</span></span>
-            <strong style="color:{{ _bpc }}">{{ _bps }}/100</strong>
-          </div>
-          <div class="bp-hero-power-bar">
-            <div class="bp-hero-power-fill" style="width:{{ _bps }}%;background:{{ _bpc }}"></div>
-          </div>
-        </a>
-        {% endif %}
         {% if ssr_signal.tp_level or ssr_signal.sl_level %}
         <div class="bp-hero-levels">
           {% if ssr_signal.tp_level %}<span><strong>Hedef:</strong>{{ ssr_signal.tp_level|tr_price }} ₺</span>{% endif %}
@@ -370,29 +363,7 @@
         </div>
         {% endif %}
       </div>
-      {% if _sig in ('AL', 'SAT') %}
-      <div class="da-hero-ring-wrap">
-        <svg class="da-hero-ring" viewBox="0 0 160 160" aria-label="Teknik Güç Skoru {{ _score|int }} / 100">
-          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--bp-border)" stroke-width="10"/>
-          <circle cx="80" cy="80" r="68" fill="none" stroke="{{ _hc }}" stroke-width="10"
-                  stroke-linecap="round" stroke-dasharray="427.3"
-                  stroke-dashoffset="{{ ((427.3 * (100 - _score|int)) / 100)|round(2) }}"
-                  transform="rotate(-90 80 80)"/>
-        </svg>
-        <div class="da-hero-ring-center">
-          <span class="da-hero-ring-num">{{ _score|int }}</span>
-          <span class="da-hero-ring-lbl">/ 100</span>
-        </div>
-      </div>
-      {% if not (hs_available and hs.borsapusula_skoru is not none) %}
-      <div class="da-hero-fundamental-teaser">Temel Analiz Skoru: veri bekleniyor</div>
-      {% endif %}
-      {% elif hs_available and hs.borsapusula_skoru is not none %}
-      {# bughunt-13.09 (derinlemesine tasarım araştırması, P0-1): Yatay durumda
-         (AL/SAT sinyali yokken) hero'nun en büyük/en otoriter görsel öğesi
-         (bu ring) tamamen boş kalıyordu — tam da BorsaPusula Skoru'nun en
-         değerli olduğu an (Teknik sessizken). _bpc zaten yukarıdaki power-bar
-         bloğunda hesaplandı (aynı if koşulu), tekrar hesaplanmıyor. #}
+      {% if hs_available and hs.borsapusula_skoru is not none %}
       <div class="da-hero-ring-wrap">
         <svg class="da-hero-ring" viewBox="0 0 160 160" aria-label="BorsaPusula Skoru {{ _bps }} / 100">
           <circle cx="80" cy="80" r="68" fill="none" stroke="var(--bp-border)" stroke-width="10"/>
@@ -405,7 +376,29 @@
           <span class="da-hero-ring-num">{{ _bps }}</span>
           <span class="da-hero-ring-lbl">/ 100</span>
         </div>
+        <div class="da-hero-ring-caption">BorsaPusula Skoru</div>
       </div>
+      {% elif _sig in ('AL', 'SAT') %}
+      {# Temel veri henüz hazır değilse (hs_available=false) eski davranış
+         korunuyor — büyük ring boş kalmasın diye Teknik geçici olarak
+         gösteriliyor, ama bu artık İSTİSNA, kural değil. #}
+      <div class="da-hero-ring-wrap">
+        <svg class="da-hero-ring" viewBox="0 0 160 160" aria-label="Teknik Güç Skoru {{ _score|int }} / 100">
+          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--bp-border)" stroke-width="10"/>
+          <circle cx="80" cy="80" r="68" fill="none" stroke="{{ _hc }}" stroke-width="10"
+                  stroke-linecap="round" stroke-dasharray="427.3"
+                  stroke-dashoffset="{{ ((427.3 * (100 - _score|int)) / 100)|round(2) }}"
+                  transform="rotate(-90 80 80)"/>
+        </svg>
+        <div class="da-hero-ring-center">
+          <span class="da-hero-ring-num">{{ _score|int }}</span>
+          <span class="da-hero-ring-lbl">/ 100</span>
+        </div>
+        <div class="da-hero-ring-caption">Teknik Güç Skoru</div>
+      </div>
+      <div class="da-hero-fundamental-teaser">BorsaPusula Skoru: veri bekleniyor</div>
+      {% else %}
+      <div class="da-hero-fundamental-teaser">BorsaPusula Skoru: veri bekleniyor</div>
       {% endif %}
     </div>
     {# SPEC-017 v2 c5 — Sparkline 30D (vanilla canvas + long-press crosshair) #}
