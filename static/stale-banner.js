@@ -50,11 +50,17 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
 
 /* tarama/hisseler/sinyal_performans — /api/data (216 kayıt) çekmiyorlar, hafif
    /api/data-quality endpoint'ini (CPO-1121 §1) 60s'de bir çekip aynı fonksiyona post eder. */
+var _dqEverLoaded = false;
 function bpPollDataQuality() {
-  if (document.hidden) return; /* sekme arka plandayken /api/data-quality cekilmez (bp-search.js bpLoadMacroBar ile ayni desen) */
+  /* bughunt-13.09: bpLoadMacroBar'daki AYNI kilit bug'ı burada da vardı —
+     hidden iken KOŞULSUZ atlanıyordu, sayfa hidden yüklenip visibilitychange
+     hiç ateşlenmezse stale-banner hiçbir zaman ilk kontrolünü yapamıyordu
+     (bkz. bpLoadMacroBar fix'i, aynı prensip: hiç veri gelmediyse hidden'dan
+     bağımsız dene, zaten yüklendiyse hidden'da boşa pil harcama). */
+  if (document.hidden && _dqEverLoaded) return;
   fetch('/api/data-quality', {cache: 'no-store', signal: AbortSignal.timeout(10000)})
     .then(function(r) { return r.json(); })
-    .then(function(j) { bpUpdateStaleBanner(j.data_quality, j.stocks_age_s); })
+    .then(function(j) { bpUpdateStaleBanner(j.data_quality, j.stocks_age_s); _dqEverLoaded = true; })
     .catch(function(e) { console.error('data-quality polling basarisiz', e); });
 }
 var _dqPollInterval = null;
