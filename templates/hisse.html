@@ -338,6 +338,29 @@
           </div>
         </div>
         {% endif %}
+        {# bughunt-13.09 (Ozan: "BorsaPusula skoru daha üstte görünür olmalı"):
+           hero'da SADECE Teknik Güç Skoru vardı, BorsaPusula Skoru (kompozit)
+           için ise bu bölüm hâlâ "🔜 Yakında" YAZIYORDU — Faz 4'ten beri
+           (09.09) canlı olan bir özelliğin bayat "coming soon" metni.
+           Gerçek skor artık Teknik'le AYNI görsel ağırlıkta (aynı
+           power-bar deseni), sayfanın en üstünde, scroll gerekmeden. #}
+        {% if hs_available and hs.borsapusula_skoru is not none %}
+        {%- set _bps = hs.borsapusula_skoru -%}
+        {%- if _bps >= 70 %}{% set _bpc = 'var(--bp-al)' %}
+        {%- elif _bps >= 50 %}{% set _bpc = 'var(--bp-volume)' %}
+        {%- else %}{% set _bpc = 'var(--bp-sat)' %}{% endif -%}
+        <a href="#threeScoreSection"
+           onclick="var t=document.getElementById('threeScoreSection');if(t){window.applyTab&&applyTab('ozet');window.bpScrollIntoView(t,{block:'start'});}return false"
+           class="bp-hero-power-wrap" style="display:block;text-decoration:none;cursor:pointer">
+          <div class="bp-hero-power-label">
+            <span>BorsaPusula Skoru <span aria-hidden="true" style="opacity:.6">↓</span></span>
+            <strong style="color:{{ _bpc }}">{{ _bps }}/100</strong>
+          </div>
+          <div class="bp-hero-power-bar">
+            <div class="bp-hero-power-fill" style="width:{{ _bps }}%;background:{{ _bpc }}"></div>
+          </div>
+        </a>
+        {% endif %}
         {% if ssr_signal.tp_level or ssr_signal.sl_level %}
         <div class="bp-hero-levels">
           {% if ssr_signal.tp_level %}<span><strong>Hedef:</strong>{{ ssr_signal.tp_level|tr_price }} ₺</span>{% endif %}
@@ -360,7 +383,9 @@
           <span class="da-hero-ring-lbl">/ 100</span>
         </div>
       </div>
-      <div class="da-hero-fundamental-teaser">🔜 Temel Analiz Skoru: Yakında</div>
+      {% if not (hs_available and hs.borsapusula_skoru is not none) %}
+      <div class="da-hero-fundamental-teaser">Temel Analiz Skoru: veri bekleniyor</div>
+      {% endif %}
       {% endif %}
     </div>
     {# SPEC-017 v2 c5 — Sparkline 30D (vanilla canvas + long-press crosshair) #}
