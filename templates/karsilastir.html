@@ -220,9 +220,15 @@ function renderCell(key, s) {
     case 'sector':        return v ? `<span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">${v}</span>` : '<span class="muted">—</span>';
     // CPO-1610: EOD skor turu bu hisse icin henuz calismadiysa (hs_available=false)
     // dogru "bekleniyor" durumu — sahte/varsayilan sayi YOK (hisse.html ile ayni durus).
-    case 'borsapusula_skoru':
-      if (!s.hs_available) return '<span class="muted" style="font-size:var(--bp-text-xs)"><span aria-hidden="true">🔜</span> Yakında</span>';
-      return v != null ? `<span class="mono" style="font-weight:700">${v}<small style="font-weight:400;color:var(--bp-text3)"> / 100</small></span>` : '<span class="muted">—</span>';
+    case 'borsapusula_skoru': {
+      if (!s.hs_available) return '<span class="muted" style="font-size:var(--bp-text-xs)">Veri bekleniyor</span>';
+      if (v == null) return '<span class="muted">—</span>';
+      // bughunt-13.09 (CPO-1628, DEV1 band alanini ekledi): hisse.html
+      // hero'daki AYNI kanonik banti (financial_health_score.py _band()) —
+      // yeni esik hesaplanmiyor, backend'in kendi siniflandirmasi kullaniliyor.
+      const _bandVar = { yesil: '--bp-al', sari: '--bp-volume', kirmizi: '--bp-sat' }[s.band] || '--bp-text2';
+      return `<span class="mono" style="font-weight:700;color:var(${_bandVar})">${v}<small style="font-weight:400;color:var(--bp-text3)"> / 100</small></span>`;
+    }
     // ── Temel analiz ──
     case 'market_cap':    return v ? `<span class="mono" style="font-size:var(--bp-text-base)">${v}</span>` : '<span class="muted">—</span>';
     case 'pe_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>';
