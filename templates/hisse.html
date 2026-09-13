@@ -1284,7 +1284,7 @@
       <div class="qf-row"><dt>Güncel Fiyat</dt><dd>{{ ssr_signal.price|tr_price }} ₺</dd></div>
       <div class="qf-row"><dt>Sinyal</dt><dd>{{ ssr_signal.signal|signal_label }}</dd></div>
       <div class="qf-row"><dt>Sinyal Tarihi</dt><dd>{{ ssr_signal.signal_date|signal_age_phrase }}</dd></div>
-      <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{{ ssr_signal.signal_strength|int }}/100</dd></div>
+      <div class="qf-row"><dt>Teknik Güç Skoru</dt><dd>{% if ssr_signal.signal_strength is not none %}{{ ssr_signal.signal_strength|int }}/100{% else %}Sinyal aktif değil (Yatay){% endif %}</dd></div>
       <div class="qf-row"><dt>Temel Analiz Skoru</dt><dd>{% if hs_available and hs.temel_analiz_skoru is not none %}{{ hs.temel_analiz_skoru }}/100{% else %}Veri bekleniyor{% endif %}</dd></div>
       {% if hs_available and hs.borsapusula_skoru is not none %}
       <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
