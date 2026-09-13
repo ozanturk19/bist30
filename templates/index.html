@@ -614,19 +614,24 @@ header{
   </div>
 </section>
 
-<!-- ═══ SPOTLIGHT — en yüksek Teknik Güç Skoru'na sahip hisse ═══ -->
+<!-- ═══ SPOTLIGHT — en yüksek BorsaPusula Skoru'na sahip hisse (13.09/14.09: Ozan'ın
+     tekrarlanan "teknik önde duruyor" geri bildirimi sonrası hisse.html hero ile
+     AYNI hiyerarşiye çekildi — BP dominant, Teknik ikincil) ═══ -->
 <section class="da-section" id="daSpotlightSection">
   <div class="da-section-head">
     <div>
       <div class="da-eyebrow">Günün Öne Çıkanı</div>
-      <h2 class="da-section-title da-display">En yüksek Teknik Güç Skoru.</h2>
+      <h2 class="da-section-title da-display">En yüksek BorsaPusula Skoru.</h2>
     </div>
-    <p class="da-section-desc">Teknik Güç Skoru — ADX, hacim teyidi ve RSI bölgesinin ağırlıklı bileşimi (0–100).</p>
+    <p class="da-section-desc">BorsaPusula Skoru — Temel Analiz Skoru (%60) ve Teknik Güç Skoru'nun (%40) bileşik puanı (0–100).</p>
   </div>
   <div id="daSpotlightBody">
-    {% if ssr_top_signals %}{% set s = ssr_top_signals[0] %}
+    {% if ssr_top_signals %}
+    {% set _bp_candidates = ssr_top_signals|selectattr('hs_available')|list %}
+    {% set s = (_bp_candidates|sort(attribute='borsapusula_skoru', reverse=True)|first) if _bp_candidates else ssr_top_signals[0] %}
+    {% set _useBps = s.hs_available and s.borsapusula_skoru is not none %}
     <div class="da-spot-grid">
-      <div class="da-spot-ring-wrap"><div class="da-spot-ring-num"><span class="n da-num">{{ s.signal_strength|tr_num if s.signal_strength is not none else '—' }}</span><span class="l">Teknik Güç Skoru</span></div></div>
+      <div class="da-spot-ring-wrap"><div class="da-spot-ring-num"><span class="n da-num">{{ (s.borsapusula_skoru if _useBps else s.signal_strength)|tr_num if (s.borsapusula_skoru if _useBps else s.signal_strength) is not none else '—' }}</span><span class="l">{{ 'BorsaPusula Skoru' if _useBps else 'Teknik Güç Skoru' }}</span></div></div>
       <div class="da-spot-body">
         <div class="da-spot-top">
           <div><div class="da-spot-ticker"><a href="/hisse/{{ s.ticker }}">{{ s.ticker }}</a></div>
@@ -636,6 +641,7 @@ header{
         </div>
         <span class="da-spot-signal sig-al">● Güçlü Trend</span>
         <div class="da-spot-subs">
+          {% if _useBps %}<div class="da-spot-sub-row"><span class="lbl">Teknik</span><span class="val da-num">{{ s.signal_strength|tr_num if s.signal_strength is not none else '—' }}</span></div>{% endif %}
           <div class="da-spot-sub-row"><span class="lbl">ADX</span><span class="val da-num">{{ s.adx|round(0)|int if s.adx is not none else '—' }}</span></div>
           <div class="da-spot-sub-row"><span class="lbl">RVOL</span><span class="val da-num">{{ '%.2f×'|format(s.rvol) if s.rvol is not none else '—' }}</span></div>
           <div class="da-spot-sub-row"><span class="lbl">RSI</span><span class="val da-num">{{ s.rsi|round(0)|int if s.rsi is not none else '—' }}</span></div>
@@ -1028,29 +1034,36 @@ header{
     el.innerHTML = frags.join(' ');
   }
 
-  // ── Spotlight: en yüksek signal_strength (Ozan 10.09: long-only — Trend Bozuldu
-  //    "öne çıkan/güçlü" olarak asla öne çıkmasın, sadece Güçlü Trend yarışsın) ──
+  // ── Spotlight: Ozan'ın 13.09 (2. kez) geri bildirimi sonrası hisse.html hero
+  //    ile AYNI hiyerarşi — BorsaPusula Skoru dominant ring, Teknik ikincil.
+  //    Long-only kısıtı (Ozan 10.09: Trend Bozuldu asla "öne çıkan" olmasın,
+  //    sadece Güçlü Trend yarışsın) AYNEN korunuyor — sadece AL aday havuzu. ──
   function daRenderSpotlight(real){
-    var withScore = real.filter(function(s){ return typeof s.signal_strength === 'number' && s.signal === 'AL'; });
+    var pool = real.filter(function(s){ return typeof s.signal_strength === 'number' && s.signal === 'AL'; });
     var body = document.getElementById('daSpotlightBody');
     if (!body) return;
-    if (!withScore.length) { daShowSectionEmpty('daSpotlightBody', 'Şu an Teknik Güç Skoru hesaplanmış hisse yok.'); return; }
-    var s = withScore.reduce(function(a,b){ return b.signal_strength > a.signal_strength ? b : a; });
+    if (!pool.length) { daShowSectionEmpty('daSpotlightBody', 'Şu an gösterilecek hisse verisi yok.'); return; }
+    var withBps = pool.filter(function(s){ return s.hs_available && typeof s.borsapusula_skoru === 'number'; });
+    var useBps = withBps.length > 0;
+    var s = useBps
+      ? withBps.reduce(function(a,b){ return b.borsapusula_skoru > a.borsapusula_skoru ? b : a; })
+      : pool.reduce(function(a,b){ return b.signal_strength > a.signal_strength ? b : a; });
     var sig = signalMeta(s.signal);
-    var col = scoreColorVar(s.signal_strength);
-    var dash = ringDash(s.signal_strength, 44);
+    var ringVal = useBps ? s.borsapusula_skoru : s.signal_strength;
+    var col = useBps ? bpScoreColorVar(ringVal) : scoreColorVar(ringVal);
+    var dash = ringDash(ringVal, 44);
+    var ringLabel = useBps ? 'BorsaPusula Skoru' : 'Teknik Güç Skoru';
     var adxPct = Math.max(0, Math.min(100, ((s.adx||0)/50)*100));
     var rvolPct = Math.max(0, Math.min(100, ((s.rvol||0)/3)*100));
     var rsiPct = Math.max(0, Math.min(100, (s.rsi||0)));
     var chg = s.change_pct, chgUp = typeof chg === 'number' && chg >= 0;
-    var hasBps = s.hs_available && typeof s.borsapusula_skoru === 'number';
-    var bpsCol = hasBps ? bpScoreColorVar(s.borsapusula_skoru) : null;
+    var tekCol = scoreColorVar(s.signal_strength);
     body.innerHTML =
       '<div class="da-spot-grid">' +
         '<div class="da-spot-ring-wrap"><svg viewBox="0 0 100 100">' +
           '<circle class="da-spot-ring-track" cx="50" cy="50" r="44"/>' +
           '<circle class="da-spot-ring-val" cx="50" cy="50" r="44" stroke="' + col + '" stroke-dasharray="' + dash + '"/>' +
-        '</svg><div class="da-spot-ring-num"><span class="n da-num">' + fmtNum0(s.signal_strength) + '</span><span class="l">Teknik Güç Skoru</span></div></div>' +
+        '</svg><div class="da-spot-ring-num"><span class="n da-num">' + fmtNum0(ringVal) + '</span><span class="l">' + ringLabel + '</span></div></div>' +
         '<div class="da-spot-body">' +
           '<div class="da-spot-top">' +
             '<div><div class="da-spot-ticker"><a href="/hisse/' + encodeURIComponent(s.ticker) + '">' + esc(s.ticker) + '</a></div>' +
@@ -1060,12 +1073,12 @@ header{
           '</div>' +
           '<span class="da-spot-signal ' + sig.cls + '">● ' + sig.label + '</span>' +
           '<div class="da-spot-subs">' +
+            (useBps ? '<div class="da-spot-sub-row"><span class="lbl" title="Teknik Güç Skoru — ADX, hacim teyidi ve RSI bölgesinin bileşimi">Teknik</span><div class="bar"><i style="width:' + (s.signal_strength||0) + '%;background:' + tekCol + '"></i></div><span class="val da-num" style="color:' + tekCol + '">' + fmtNum0(s.signal_strength) + '</span></div>' : '') +
             '<div class="da-spot-sub-row"><span class="lbl" title="ADX — trend gücü (25 üzeri güçlü, /metodoloji)">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.adx!=null?Math.round(s.adx):'—') + '</span></div>' +
             '<div class="da-spot-sub-row"><span class="lbl" title="RVOL — bugünün hacmi / 5 günlük ortalama hacim">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2)+'×':'—') + '</span></div>' +
             '<div class="da-spot-sub-row"><span class="lbl" title="RSI — göreceli güç endeksi, aşırı alım/satım bölgesi">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rsi!=null?Math.round(s.rsi):'—') + '</span></div>' +
-            (hasBps ? '<div class="da-spot-sub-row"><span class="lbl" title="BP = BorsaPusula Skoru — Temel×%60 + Teknik×%40 bileşik puan">BP</span><div class="bar"><i style="width:' + s.borsapusula_skoru + '%;background:' + bpsCol + '"></i></div><span class="val da-num" style="color:' + bpsCol + '">' + s.borsapusula_skoru + '</span></div>' : '') +
           '</div>' +
-          (hasBps ? '' :
+          (useBps ? '' :
             '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-fund-teaser" style="text-decoration:none">BorsaPusula Skoru → hisse sayfasında</a>') +
         '</div>' +
       '</div>';
