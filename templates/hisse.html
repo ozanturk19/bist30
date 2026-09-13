@@ -1805,17 +1805,23 @@ function updateHibBellBtn() {
   const inW = Array.isArray(w) && w.includes(TICKER);
   if (btn) {
     const lbl = btn.querySelector('.hib-action-lbl');
+    // bughunt-13.09 (2sa edge-case workflow, P3): "Alarm aktif ✓" kalici
+    // etiketi, giris yapilmamis kullanicida sadece bu cihazin localStorage'ina
+    // yazildigini (gercek e-posta/push bildirimi YOK) yeterince acik
+    // etmiyordu — "Takipte" (izlenen listeye eklendi, ama sunucuya kayit
+    // yok) daha durust. Toast mesaji (satir ~1773) zaten giris durumuna
+    // gore dogru koşullanmisti, sadece bu kalici buton etiketi tutarsizdi.
     if (inW) {
       btn.classList.add('active-bell');
-      btn.title = 'Alarm aktif — kapatmak için tıkla';
-      if (lbl) lbl.textContent = 'Alarm aktif ✓';
+      btn.title = 'Takipte (bu cihazda) — çıkarmak için tıkla';
+      if (lbl) lbl.textContent = 'Takipte ✓';
     } else {
       btn.classList.remove('active-bell');
       btn.title = 'Sinyal değişiminde bildirim al';
       if (lbl) lbl.textContent = 'Bildirim al';
     }
     btn.setAttribute('aria-pressed', String(inW));
-    btn.setAttribute('aria-label', inW ? 'Alarm aktif' : 'Bildirim al');
+    btn.setAttribute('aria-label', inW ? 'Takipte' : 'Bildirim al');
   }
 }
 
