@@ -670,10 +670,15 @@
     'sari':    {'var': '--bp-volume', 'rgb_var': '--bp-volume-rgb'},
     'kirmizi': {'var': '--bp-sat',    'rgb_var': '--bp-sat-rgb'}
   } %}
+  {# bughunt-13.09 (finansal-analist workflow): eşik backend'in kanonik _band()
+     (financial_health_score.py) ile aynı hizaya getirildi — 65/40 iken bir
+     kategori 66 puanla yeşil gösterirken kompozit skor 66<70 olduğu için
+     sarı bantta kalabiliyordu, aynı sayfada iki farklı renk-eşiği çelişkisi
+     (feedback_puan_tutarlilik_kanonik ihlali). #}
   {% macro health_color(v) -%}
   {%- if v is none -%}var(--bp-text3)
-  {%- elif v >= 65 -%}var(--bp-al)
-  {%- elif v >= 40 -%}var(--bp-volume)
+  {%- elif v >= 70 -%}var(--bp-al)
+  {%- elif v >= 50 -%}var(--bp-volume)
   {%- else -%}var(--bp-sat)
   {%- endif -%}
   {%- endmacro %}

@@ -885,11 +885,12 @@ let _filtersSeqTemel = 0;
 
 const _BAND_COLOR_VAR = { yesil: '--bp-al', sari: '--bp-volume', kirmizi: '--bp-sat' };
 function _bandColorVar(band) { return _BAND_COLOR_VAR[band] || '--bp-text3'; }
-// hisse.html:671 health_color() ile birebir aynı eşik (v>=65 al, v>=40 volume, altı sat)
+// hisse.html health_color() ile birebir aynı eşik — bughunt-13.09: backend'in
+// kanonik _band() eşiğiyle (50/70) hizalandı, önceden 65/40 idi (puan tutarlılık ihlali)
 function _categoryColorVar(v) {
   if (v == null) return '--bp-text3';
-  if (v >= 65) return '--bp-al';
-  if (v >= 40) return '--bp-volume';
+  if (v >= 70) return '--bp-al';
+  if (v >= 50) return '--bp-volume';
   return '--bp-sat';
 }
 function _bandLabel(band) { return { yesil: '🟢 Yeşil', sari: '🟡 Sarı', kirmizi: '🔴 Kırmızı' }[band] || '—'; }
