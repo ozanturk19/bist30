@@ -435,7 +435,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "faqs": [
       {"q": "F/K oranı kaç olmalıdır?", "a": "Evrensel bir doğru değer yoktur. BIST100 bankacılık hisseleri genellikle 5-12 arasında işlem görürken teknoloji şirketleri 20-50 olabilir. Önemli olan aynı sektördeki rakiplerle karşılaştırmaktır."},
       {"q": "Düşük F/K her zaman ucuz hisse demek midir?", "a": "Hayır. Düşük F/K büyüme beklentisinin olmadığını, şirkette sorunlar olduğunu veya sektörün baskı altında olduğunu gösterebilir. F/K'yı ROE, büyüme oranı ve sektör bağlamıyla birlikte değerlendirin."},
-      {"q": "BorsaPusula'da F/K bilgisi nerede görünür?", "a": "Her hisse detay sayfasının Temel Analiz bölümünde F/K oranı gösterilir. Bu veri Yahoo Finance'den günlük güncellenir. Teknik sinyal ile düşük F/K kombinasyonu özellikle güçlü bir seçim kriteri olabilir."}
+      {"q": "BorsaPusula'da F/K bilgisi nerede görünür?", "a": "Her hisse detay sayfasının Temel Analiz bölümünde F/K oranı gösterilir. Bu veri Yahoo Finance'den 4 saatte bir güncellenir. Teknik sinyal ile düşük F/K kombinasyonu özellikle güçlü bir seçim kriteri olabilir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'EREGL']
   },
@@ -607,8 +607,8 @@ Histogram = MACD − Sinyal</pre>
 
 <h2>Sinyal Türleri</h2>
 <ul>
-  <li><strong>MACD ÜZERİNE geçişi:</strong> MACD çizgisi sinyali yukarı kesince Güçlü Trend işareti</li>
-  <li><strong>MACD ALTİNA geçişi:</strong> MACD çizgisi sinyali aşağı kesince Trend Bozuldu işareti</li>
+  <li><strong>MACD ÜZERİNE geçişi:</strong> MACD çizgisi sinyali yukarı kesince alış sinyali</li>
+  <li><strong>MACD ALTİNA geçişi:</strong> MACD çizgisi sinyali aşağı kesince satış sinyali</li>
   <li><strong>Sıfır geçişi:</strong> MACD sıfırın üstüne çıkarsa güçlü yükseliş; altına inerse güçlü düşüş</li>
   <li><strong>Histogram küçülmesi:</strong> Momentum zayıflıyor — trend değişimi yaklaşıyor olabilir</li>
 </ul>
@@ -621,7 +621,7 @@ Histogram = MACD − Sinyal</pre>
 """,
     "faqs": [
       {"q": "MACD hangi parametrelerle kullanılır?", "a": "Standart MACD: EMA(12) - EMA(26) = MACD çizgisi, EMA(9) of MACD = sinyal çizgisi, MACD - Sinyal = histogram. Bu parametreler Gerald Appel tarafından tanımlanmış global standart değerlerdir."},
-      {"q": "MACD histogram ne anlama gelir?", "a": "MACD histogramı MACD ile sinyal çizgisi arasındaki farkı gösterir. Histogram büyüyorsa momentum artıyor, küçülüyorsa zayıflıyor. Sıfırdan yükseğe geçiş Güçlü Trend, sıfırın altına iniş Trend Bozuldu momentumu gösterir."},
+      {"q": "MACD histogram ne anlama gelir?", "a": "MACD histogramı MACD ile sinyal çizgisi arasındaki farkı gösterir. Histogram büyüyorsa momentum artıyor, küçülüyorsa zayıflıyor. Sıfırdan yükseğe geçiş yükseliş momentumu, sıfırın altına iniş düşüş momentumu gösterir."},
       {"q": "MACD Supertrend'den üstün müdür?", "a": "İkisi farklı avantajlar sunar. MACD divergence tespit edebilir, Supertrend edemez. Supertrend volatiliteye adapte olur (ATR bazlı), MACD olamaz. BorsaPusula Supertrend + ADX kombinasyonunu tercih eder."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS']
