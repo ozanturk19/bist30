@@ -1039,7 +1039,7 @@ header{
             '<div class="da-spot-sub-row"><span class="lbl">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2)+'×':'—') + '</span></div>' +
             '<div class="da-spot-sub-row"><span class="lbl">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rsi!=null?Math.round(s.rsi):'—') + '</span></div>' +
           '</div>' +
-          '<div class="da-fund-teaser">🔜 Temel Analiz Skoru: Yakında</div>' +
+          '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-fund-teaser" style="text-decoration:none">BorsaPusula Skoru → hisse sayfasında</a>' +
         '</div>' +
       '</div>';
   }
