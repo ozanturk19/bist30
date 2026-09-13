@@ -2558,26 +2558,17 @@ def _email_base(content_html, unsubscribe_url, preheader=""):
       <!-- Logo header -->
       <tr><td align="center" style="padding-bottom:24px">
         <a href="https://borsapusula.com" style="text-decoration:none;display:inline-block">
-          <svg width="220" height="58" viewBox="0 0 460 120" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="bpEmailNeedle" x1="60" y1="22" x2="60" y2="60" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stop-color="#b8c3ff"/>
-                <stop offset="1" stop-color="#00e2a1"/>
-              </linearGradient>
-            </defs>
-            <rect x="14" y="20" width="80" height="80" rx="18" fill="#0f1218" stroke="#28303f"/>
-            <line x1="22" y1="46" x2="86" y2="46" stroke="#222a37" stroke-width="1"/>
-            <line x1="22" y1="74" x2="86" y2="74" stroke="#222a37" stroke-width="1"/>
-            <line x1="40" y1="28" x2="40" y2="92" stroke="#222a37" stroke-width="1"/>
-            <line x1="68" y1="28" x2="68" y2="92" stroke="#222a37" stroke-width="1"/>
-            <path d="M54 33 L62 60 L54 55 L46 60 Z" fill="url(#bpEmailNeedle)"/>
-            <path d="M54 87 L60 61 L54 64 L48 61 Z" fill="#2c3445"/>
-            <circle cx="54" cy="60" r="3.5" fill="#eef3f8"/>
-            <circle cx="54" cy="60" r="1.4" fill="#00e2a1"/>
-            <text x="116" y="66" fill="#eef3f8" font-family="'Sora','Manrope',Arial,sans-serif" font-size="34" font-weight="800" letter-spacing="-0.5">Borsa<tspan fill="#00e2a1">Pusula</tspan></text>
-            <line x1="118" y1="78" x2="430" y2="78" stroke="#1e2532" stroke-width="1"/>
-            <text x="118" y="94" fill="#8f98a8" font-family="'Manrope',Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2.4">PİYASANIN YÖNÜ</text>
-          </svg>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto">
+            <tr>
+              <td style="padding-right:14px;vertical-align:middle">
+                <img src="https://borsapusula.com/static/icon-192.png" width="44" height="44" alt="BorsaPusula" style="display:block;border:0;border-radius:10px">
+              </td>
+              <td style="vertical-align:middle;text-align:left">
+                <div style="font-size:26px;font-weight:800;line-height:1.1;letter-spacing:-0.5px;font-family:'Sora','Manrope',Arial,sans-serif;color:#eef3f8">Borsa<span style="color:#00e2a1">Pusula</span></div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:2.4px;color:#8f98a8;margin-top:4px;font-family:'Manrope',Arial,sans-serif">PİYASANIN YÖNÜ</div>
+              </td>
+            </tr>
+          </table>
         </a>
       </td></tr>
 
