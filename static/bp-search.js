@@ -737,6 +737,16 @@
   // /api/macro cekilmez. onItems, index.html'in ec30/ec100 endeks karti guncellemesi
   // gibi sablon-ozel yan etkiler icin opsiyonel callback (items render'dan once cagrilir).
   var _bpMacroSeq = 0;  // DOMContentLoaded + setInterval(180s) + visibilitychange ust uste binerse yaris durumu guard'i (r153 bug-hunt)
+  var _bpMacroEverLoaded = false;  // bughunt-13.09 (Ozan canli mobilde yakaladi, 2. kez):
+  // document.hidden guard'i asagida SADECE fetch'i degil, resume-on-visible
+  // fix'inin (r98/CPO-DEV2-072) kendisini de blokluyordu — sayfa hidden=true
+  // iken yuklenip visibilitychange event'i hic ATEŞLENMEZSE (gercek mobilde:
+  // arka planda acilan sekme, PWA/ana-ekran baslatma, bazi Safari/WebView
+  // gorunurluk kosesi durumlari) bant SONSUZA DEK "Yukleniyor..." plasehoder'inda
+  // kaliyordu, hicbir kurtarma yolu yoktu. Placeholder'in kendisi de .macro-item
+  // class'i tasidigindan (satir ~787/809'daki "zaten gercek veri var mi" kontrolu)
+  // "hic gercek veri render edilmedi" ile "placeholder var" ayirt edilemiyordu —
+  // ayri bir flag gerekiyordu.
   // CPO-1523: /api/macro'nun donduregu stale bayragi hic okunmuyordu — kullanici,
   // seans disinda saatlerce donuk kalan makro seridi "canli" saniyordu. Bu subtle
   // rozet backend'in gercek fetch araligini degistirmez (bkz CPO-1522), sadece
@@ -761,7 +771,11 @@
   window.bpLoadMacroBar = async function(onItems, excludeLabels) {
     var track = document.getElementById('macroTrack');
     if (!track) return;
-    if (document.hidden) return;
+    // hidden iken SADECE zaten basarili bir render varsa atla (bosa pil/veri
+    // tuketme) — hic gercek veri yuklenmediyse (ilk yukleme veya kurtarma)
+    // gorunurluk durumundan BAGIMSIZ dene, aksi halde visibilitychange hic
+    // ateslenmezse bant sonsuza dek kilitli kalirdi (yukaridaki not).
+    if (document.hidden && _bpMacroEverLoaded) return;
     var mySeq = ++_bpMacroSeq;
     try {
       var r = await fetch('/api/macro');
@@ -783,7 +797,11 @@
         // CPO-DEV2-084 #1: backend gecerli-ama-bos donerse de kalici "Yukleniyor..."
         // yerine durust notr mesaj goster - ama sadece bu track daha once hic
         // gercek veri render etmemisse (onceki basarili yuklemeyi silme).
-        if (!track.querySelector('.macro-item')) {
+        // bughunt-13.09: eski kontrol (!track.querySelector('.macro-item'))
+        // hicbir zaman true olamazdi — placeholder'in KENDISI de .macro-item
+        // class'i tasiyor, yani bu dal fiilen hic calismiyordu. _bpMacroEverLoaded
+        // flag'i gercek veriyle placeholder'i dogru ayirt ediyor.
+        if (!_bpMacroEverLoaded) {
           track.innerHTML = '<span class="macro-item"><span class="macro-item-lbl">Piyasa verisi şu an alınamıyor</span></span>';
         }
         return;
@@ -800,12 +818,15 @@
       }).join('');
       track.innerHTML = html + html;
       window.bpStartMacroTicker({ track: track, pps: 55 });
+      _bpMacroEverLoaded = true;
     } catch (e) {
       console.error('loadMacroBar basarisiz', e);
       if (mySeq !== _bpMacroSeq) return;  // bayat hata mesajiyla daha yeni bir basarili render'in ustune yazma
       // CPO-DEV2-084 #1: fetch/parse hatasinda da ayni notr-mesaj kurali -
       // onceden basarili render varsa (stale ama gercek veri) dokunma, yoksa goster.
-      if (!track.querySelector('.macro-item')) {
+      // bughunt-13.09: ayni yanlis .macro-item kontrolu burada da vardi, ayni
+      // flag ile duzeltildi (bkz yukaridaki not).
+      if (!_bpMacroEverLoaded) {
         track.innerHTML = '<span class="macro-item"><span class="macro-item-lbl">Piyasa verisi şu an alınamıyor</span></span>';
       }
     }
