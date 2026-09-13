@@ -3284,12 +3284,15 @@ def _digest_cron_loop():
                     except Exception:
                         pass
                 if not already_sent:
-                    logger.info("Daily digest cron tetiklendi: %s", today_str)
-                    _send_digest_emails("daily")
-                    # Cuma ise haftalık da gönder
+                    # CPO-1633 fix: weekly ONCE calisir (daily'nin SONUNDA temizledigi
+                    # pending_changes.json PAYLASILAN buffer'i henuz dolu). Sira tersi
+                    # olsaydi weekly her zaman bos buffer okuyup sessizce hicbir mail
+                    # gondermiyordu (Mayis 2026'dan beri ~18 Cuma etkilendi).
                     if now.weekday() == 4:  # Friday
                         logger.info("Weekly digest cron (Cuma)")
                         _send_digest_emails("weekly")
+                    logger.info("Daily digest cron tetiklendi: %s", today_str)
+                    _send_digest_emails("daily")
                     try:
                         with open(last_sent_path, "w") as f:
                             f.write(today_str)
