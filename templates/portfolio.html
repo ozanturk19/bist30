@@ -155,7 +155,7 @@
   <!-- Hisse ekle -->
   <h2 class="sr-only">Pozisyonlarım</h2>
   <div class="add-bar">
-    <span class="add-lbl" id="addBarLbl">Hisse ekle:</span>
+    <span class="add-lbl" id="addBarLbl" aria-live="polite">Hisse ekle:</span>
     <input type="text" id="addTicker" placeholder="THYAO veya Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu">
     <datalist id="bistTickerList"></datalist>
     <input type="number" id="addLot" placeholder="Adet" min="1" max="1000000000" step="1" inputmode="numeric" aria-label="Adet" onwheel="this.blur()">
