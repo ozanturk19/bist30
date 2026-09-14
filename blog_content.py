@@ -1300,7 +1300,7 @@ Günlük (day trading) gibi çok kısa vadeli değil, uzun vadeli yatırım gibi
 
 ## BIST'te Swing Trading Mantığı
 
-BIST hisseleri günde %5-15 hareket edebilir. Swing trader bu dalgalanmalardan yararlanır:
+BIST hisselerinde bir trend dalgası (birkaç günden 2-3 haftaya kadar), toplamda %5-15 aralığında bir fiyat hareketi oluşturabilir. Swing trader tek bir günü değil, bu çok günlük dalgayı hedefler:
 
 - **Giriş:** Trend başlangıcında veya geri çekilmede
 - **Tutma:** Trendin devam ettiği süre (ortalama 5-15 gün)
@@ -1327,8 +1327,11 @@ Giriş/çıkış zamanlaması için:
 - RSI 70+ bölgesinde fiyat → Kar alım bölgesi
 
 ### 4. EMA (Hareketli Ortalama)
+Genel swing trading pratiğinde sık kullanılan bir yaklaşım EMA 20/50/100 hizalamasıdır:
 - EMA 20 > EMA 50 > EMA 100 hizalaması → Güçlü yükseliş trendi
 - Fiyat EMA 20'ye geri çekilirse → Swing alım noktası
+
+(Not: BorsaPusula'nın kendi sinyal motoru farklı periyotlar — EMA12/EMA99 — kullanır, aşağıdaki bölüme bakın.)
 
 ## Pratik Swing Trading Stratejisi: Pullback Al
 
@@ -1566,7 +1569,7 @@ BIST hisselerinde MACD kullanırken dikkat edilmesi gerekenler:
 
 ## BorsaPusula'da MACD
 
-BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA12/99 kombinasyonunu kullanır. MACD histogram, sinyal sayfalarında destekleyici gösterge olarak sunulur. [Canlı sinyalleri görmek için ana sayfayı ziyaret edin.](/)""",
+BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA12/99 kombinasyonunu kullanır. MACD histogram, sinyal sayfalarında destekleyici gösterge olarak sunulur. [Güncel sinyalleri görmek için ana sayfayı ziyaret edin.](/)""",
     "faqs": [
       {"q": "MACD için en iyi periyot ayarları nelerdir?", "a": "Standart ayarlar EMA(12,26,9)'dur. Kısa vadeli trading için (3,10,16) kullanılabilir. BIST günlük grafiklerinde standart 12-26-9 ayarı yeterince iyi performans göstermektedir."},
       {"q": "MACD sıfır çizgisinin önemi nedir?", "a": "MACD hattı sıfırın üzerindeyse EMA12 > EMA26 demektir, yani kısa vadeli ortalama uzun vadeliyi geçmiştir ve yükseliş momentumu var. Sıfırın altındaysa tersi geçerlidir."},
@@ -1692,7 +1695,7 @@ Not: Bir seviye ne kadar çok test edilirse o kadar güçlenir, ama bu aynı zam
 
 ❌ **Stop koymamak** — Destek kırılabilir. Her desteğin altına mutlaka stop koyun.
 
-[Canlı Supertrend seviyeleri ve Güçlü Trend/Trend Bozuldu sinyallerini gör →](/)""",
+[Güncel Supertrend seviyeleri ve Güçlü Trend/Trend Bozuldu sinyallerini gör →](/)""",
     "faqs": [
       {"q": "Destek ve direnç nasıl çizilir?", "a": "Grafikte önceki zirve ve dip noktalarını bulun. Birden fazla kez fiyatın durduğu veya geri döndüğü seviyeleri yatay çizgilerle işaretleyin. Bu seviyelere ne kadar çok dokunulmuşsa o kadar güçlüdür."},
       {"q": "Yuvarlak sayılar neden önemli destek/direnç seviyeleridir?", "a": "100, 50, 200 gibi yuvarlak sayılar psikolojik olarak önemlidir. Birçok yatırımcı bu seviyelerde emir verir. Bu yüzden bu seviyelerde çok sayıda alış/satış emri birikir ve fiyat buralarda sıkça durur veya geri döner."},
@@ -2412,7 +2415,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>Faiz artış dönemlerinde net faiz marjı yükselen bankalar kazanır. Ancak TCMB politika belirsizliğinde bankacılık sektörü yüksek volatilite yaşar. <strong>Net faiz marjı (NIM)</strong> ve <strong>kredi büyüme oranı</strong> izlenmesi gereken temel metriklerdir.</p>
 
 <h3>2. Enerji ve Kimya</h3>
-<p>Petrol fiyatları yükseldiğinde BIST'teki enerji hisseleri (TUPRS, BIMAS vb.) öne çıkar. Türkiye net enerji ithalatçısı olduğundan enerji fiyatları aynı zamanda cari açığı etkiler — bu da TL üzerinde baskı yaratabilir.</p>
+<p>Petrol fiyatları yükseldiğinde BIST'teki enerji ve petrokimya hisseleri (TUPRS, PETKM vb.) öne çıkar. Türkiye net enerji ithalatçısı olduğundan enerji fiyatları aynı zamanda cari açığı etkiler — bu da TL üzerinde baskı yaratabilir.</p>
 
 <h3>3. İhracatçı Sanayi</h3>
 <p>Kur yükseldiğinde döviz geliri olan ihracatçı şirketler (FROTO, TOASO, EREGL) kazanır. Bu hisseler TL değer kaybına karşı doğal bir hedge görevi görür.</p>
@@ -2578,7 +2581,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>BorsaPusula'da Uyuşmazlık Nasıl İzlenir?</h2>
 <p>Her hisse detay sayfasında RSI değeri ve grafik üzerinde fiyat hareketleri görülebilir. RSI 70 üzerindeyken fiyat yeni zirve yapıyorsa ve RSI önceki zirveyi kıramıyorsa, bu durumu göz önünde bulundurun.</p>
 
-<p>Unutmayın: BorsaPusula sinyali 3 indikatörün <em>hizalanmasını</em> arar — uyuşmazlık bu hizalamayı bozabilir ve sinyali zayıflatabilir. <a href="/">Anlık sinyalleri inceleyin →</a></p>""",
+<p>Unutmayın: BorsaPusula sinyali 3 indikatörün <em>hizalanmasını</em> arar — uyuşmazlık bu hizalamayı bozabilir ve sinyali zayıflatabilir. <a href="/">Güncel sinyalleri inceleyin →</a></p>""",
     "faqs": [
       {"q": "RSI uyuşmazlığı (divergence) nedir?",
        "a": "Fiyat yeni zirve ya da dip yaparken RSI aynı hareketi yapmıyorsa bu uyuşmazlık (divergence) olarak adlandırılır. Fiyat ile momentum arasındaki bu ayrışma, olası trend dönüşünün habercisidir."},
@@ -4114,7 +4117,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </div>
 
 <h2>Teknik Sinyal + Temel Analiz Kombinasyonu</h2>
-<p>BorsaPusula hisse sayfalarında F/K, PD/DD, ROE ve temettü verimi temel verileri canlı olarak sunulmaktadır. Teknik Güçlü Trend sinyali alan bir hissenin temel analiz verilerini kontrol etmek, yatırım kararını güçlendirir.</p>
+<p>BorsaPusula hisse sayfalarında F/K, PD/DD, ROE ve temettü verimi temel verileri düzenli aralıklarla güncellenerek sunulmaktadır. Teknik Güçlü Trend sinyali alan bir hissenin temel analiz verilerini kontrol etmek, yatırım kararını güçlendirir.</p>
 """,
     "faqs": [
       {"q": "Bilanço okumak için muhasebe bilgisi şart mı?",
@@ -5822,7 +5825,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>RSI Stratejileri</h2>
 <p><strong>Klasik 30/70 Stratejisi:</strong> RSI 30'un altına düştüğünde alım, 70'in üstüne çıktığında satım yapılır. Yatay (range) piyasalarda etkilidir; trend piyasalarda yetersizdir.</p>
 <p><strong>RSI + Trend Filtresi:</strong> EMA 200 üzerindeyken (yükselen trend) sadece RSI 30-40 aralığından alım yapılır. EMA 200 altındayken (düşen trend) sadece RSI 60-70 aralığından satış yapılır. Trend yönünde işlem yaparak başarı oranı artırılır.</p>
-<p><strong>RSI + Supertrend:</strong> BorsaPusula'nın kullandığı Supertrend ile birleştirildiğinde çok güçlü sinyal kombinasyonu oluşur: Supertrend yeşil + RSI 50'nin üstü ve dip noktadan dönüş → al; Supertrend kırmızı + RSI 50'nin altı ve tepe noktadan dönüş → sat.</p>
+<p><strong>RSI + Supertrend:</strong> BorsaPusula'nın da kullandığı Supertrend ile birleştirildiğinde güçlü bir teyit kombinasyonu oluşur: Supertrend yeşil + RSI 50'nin üstü ve dip noktadan dönüş → yükseliş teyidi güçlenir; Supertrend kırmızı + RSI 50'nin altı ve tepe noktadan dönüş → düşüş teyidi güçlenir.</p>
 
 <h2>RSI'ın Sınırlamaları</h2>
 <p>RSI mükemmel değildir. Güçlü trendlerde aşırı alım/satım seviyeleri uzun süre aşılabilir. Sinyal gecikmesi yaşanabilir — fiyat zaten hareket etmişken RSI sinyal verebilir. Diğer göstergelerle (hacim, trend, formasyon) kombinasyon kullanımı daha sağlıklı sonuç verir.</p>
@@ -6197,11 +6200,14 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>Bankacılık ve Finansal Hizmetler:</strong> BIST'in en ağırlıklı sektörü. AKBNK, GARAN, ISCTR, YKBNK, VAKBN, HALKB.</li>
   <li><strong>Holding şirketleri:</strong> KCHOL, SAHOL, ECZYT — geniş iş alanlarına yayılmış, içsel çeşitlendirme.</li>
   <li><strong>Savunma ve Havacılık:</strong> ASELS, TUSAS — büyük ölçüde ihracat ve savunma bütçeleriyle yönleniyor.</li>
-  <li><strong>Enerji ve Petro-Kimya:</strong> TUPRS, BIMAS — enflasyon geçirgenliği güçlü.</li>
+  <li><strong>Enerji ve Petro-Kimya:</strong> TUPRS — enflasyon geçirgenliği güçlü.</li>
+  <li><strong>Perakende:</strong> BIMAS — iç tüketime dayalı, görece savunmacı.</li>
+  <li><strong>Otomotiv ve Sanayi:</strong> TOASO — ihracat ve iç talebe bağlı üretim.</li>
+  <li><strong>Kimya/Malzeme:</strong> SISE — cam ve kimya üretimi, ihracat ağırlıklı.</li>
   <li><strong>Havayolu ve Turizm:</strong> THYAO — döviz geliri nedeniyle TL zayıfladığında göreceli avantaj.</li>
   <li><strong>Demir-Çelik:</strong> EREGL — emtia fiyatlarına ve küresel çelik döngüsüne bağlı.</li>
   <li><strong>Telekomünikasyon:</strong> TCELL, TTKOM — savunmacı, istikrarlı nakit akışı.</li>
-  <li><strong>İnşaat ve GYO:</strong> TOASO, SISE — faiz oranlarına hassas.</li>
+  <li><strong>GYO:</strong> EKGYO — faiz oranlarına hassas.</li>
 </ul>
 
 <h2>Etkili Çeşitlendirme İlkeleri</h2>
@@ -6810,7 +6816,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Kriz döneminde hangi hisseler daha dayanıklı?",
        "a": "Savunmacı sektörler (telekomünikasyon, temel tüketim, sağlık) kriz dönemlerinde genellikle endeksin altında düşer. Döviz geliri olan (THYAO, ASELS) ve güçlü nakit pozisyonlu şirketler de görece daha dayanıklı olabilir. Yüksek borçlu, büyüme bağımlı şirketler ise kriz dönemlerinde en fazla zarar görme eğilimindedir."},
       {"q": "Borsa krizleri ne kadar sürer?",
-       "a": "Tarihsel verilere göre kısa süreli krizler (COVID 2020 gibi) 3-6 ayda toparlanabilirken yapısal krizler (2001 Türkiye, 2008 küresel) 1-3 yıl sürebilir. Toparlanma süresi krizin kaynağına (makroekonomik, sektörel, küresel) ve politika tepkisinin hızına göre değişir. Uzun vadeli perspektiften bakıldığında tüm büyük krizler nihayetinde toparlanmıştır."}
+       "a": "Tarihsel verilere göre kısa süreli krizler (COVID 2020 gibi, ~8 ay) birkaç ay içinde toparlanabilirken yapısal krizler (2001 Türkiye, 2008 küresel) 1-3 yıl sürebilir. Toparlanma süresi krizin kaynağına (makroekonomik, sektörel, küresel) ve politika tepkisinin hızına göre değişir. Uzun vadeli perspektiften bakıldığında tüm büyük krizler nihayetinde toparlanmıştır."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS', 'GARAN', 'EREGL', 'TUPRS']
   },
@@ -6896,7 +6902,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>Kâr Dağıtım Kararları:</strong> Temettü miktarı, ödeme tarihi ve yöntemi.</li>
   <li><strong>Genel Kurul Duyuruları:</strong> Olağan/olağanüstü genel kurul tarihleri ve gündemleri.</li>
   <li><strong>Sermaye Artışı Duyuruları:</strong> Bedelli/bedelsiz sermaye artışı haberleri.</li>
-  <li><strong>İçtika (İçeriden Öğrenenlerin Ticareti) Bildirimleri:</strong> Yönetim kurulu üyeleri ve büyük hissedarların hisse alım-satımı.</li>
+  <li><strong>İçeriden Öğrenenlerin Ticareti Bildirimleri:</strong> Yönetim kurulu üyeleri ve büyük hissedarların hisse alım-satımı.</li>
 </ul>
 
 <h2>KAP Bildirimleri Piyasayı Nasıl Etkiler?</h2>
@@ -6915,8 +6921,8 @@ ROA = Net Kâr / Toplam Aktifler × 100
 </ul>
 <p>BorsaPusula'nın bilanço takvim sayfası bu tarihleri önceden gösterir, böylece hangi hissenin ne zaman açıklama yapacağını planlayabilirsiniz.</p>
 
-<h2>İçtika Bildirimleri: Yönetim Kurulunun Hareketleri</h2>
-<p>Şirket yöneticilerinin kendi hisselerini alması veya satması, KAP'ta zorunlu olarak açıklanır. Bu işlemler "içtika" bildirimi olarak adlandırılır.</p>
+<h2>İçeriden Öğrenenlerin Ticareti: Yönetim Kurulunun Hareketleri</h2>
+<p>Şirket yöneticilerinin kendi hisselerini alması veya satması, KAP'ta zorunlu olarak açıklanır. Bu işlemler "içeriden öğrenenlerin ticareti" bildirimi olarak adlandırılır.</p>
 <p>Yönetim kurulunun kendi şirket hissesi alması genellikle pozitif sinyal olarak yorumlanır: İçerdekiler şirketin değerini görüyor ve kendi parasını koyuyor. Tersi — yöneticilerin hisse satması — tek başına negatif bir işaret olmak zorunda değildir (vergiler, çeşitlendirme, kişisel nakit ihtiyacı olabilir) ama dikkat çekicidir.</p>
 
 <h2>KAP'ı Etkin Takip Etme Yöntemleri</h2>
@@ -6951,7 +6957,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
        "a": "Mesai saatleri dışında yayımlanan önemli KAP bildirimleri ertesi sabah piyasa açılışında fiyatlanır. Bu nedenle açılışta ani yükseliş veya düşüş görülmesi normaldir. Özellikle bilanço açıklamaları mesai saatlerinde (09:40-18:00) yapılmak zorunda değildir; akşam veya gece de gelebilir."},
       {"q": "Özel durum açıklaması (ÖDA) neden önemli?",
        "a": "ÖDA, şirketi etkileyen önemli gelişmelerin yatırımcılara eşit ve eş zamanlı biçimde duyurulmasını sağlar. Büyük bir sözleşme kazanımı, önemli bir ortaklık, varlık satışı veya hukuki gelişme gibi hisse değerini etkileyebilecek bilgiler ÖDA ile kamuoyuna duyurulur. Bu bildirimler gün içinde hızlı fiyat hareketlerine neden olabilir."},
-      {"q": "İçtika bildirimi ne zaman kamuoyuna duyurulmalı?",
+      {"q": "İçeriden öğrenenlerin ticareti bildirimi ne zaman kamuoyuna duyurulmalı?",
        "a": "Şirket içindekiler (yönetim kurulu üyeleri, büyük hissedarlar) hisse alım-satımlarını SPK yönetmeliğine göre genellikle 3 iş günü içinde KAP'ta bildirmek zorundadır. Bu zorunluluk, içeriden öğrenenlerin bilgi avantajını kamuyla paylaşmasını sağlar — yatırımcılar yönetimin piyasa hareketlerini takip edebilir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL', 'TUPRS']
@@ -7023,7 +7029,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>MACD kesişti + hacim arttı:</strong> Güçlü sinyal — momentum değişimi geniş katılımla destekleniyor.</li>
   <li><strong>MACD kesişti ama hacim yok:</strong> Sahte sinyal riski yüksektir — kesişim teknik olarak gerçekleşmiş olsa da arkasında yeterli işlem hacmi olmadığından kısa sürede geri dönebilir.</li>
 </ul>
-<p>Bu nedenle MACD sinyallerini değerlendirirken CMF ve Hacim Profili'ne birlikte bakmak, tek göstergeye dayanan yorumdan daha sağlam bir tablo ortaya koyar.</p>
+<p>Bu nedenle MACD sinyallerini değerlendirirken hacim teyidine (BorsaPusula'daki Hacim Profili gibi) birlikte bakmak, tek göstergeye dayanan yorumdan daha sağlam bir tablo ortaya koyar.</p>
 """,
     "faqs": [
       {"q": "Hacim ne kadar yüksek olursa kırılım o kadar güçlü müdür?",
