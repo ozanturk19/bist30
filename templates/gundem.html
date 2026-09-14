@@ -107,7 +107,7 @@
     <div id="newSignalsGrid" class="stock-grid">
       {% if ssr_new_signals %}{% for s in ssr_new_signals %}{{ gundem_card(s, true) }}{% endfor %}
       {% elif ssr_market_open is defined and not ssr_market_open and ssr_closed_message %}<div class="empty-box">{{ ssr_closed_message }}</div>
-      {% elif ssr_market_open is defined %}<div class="empty-box">Bugün henüz sinyal değişimi yok. Piyasa sinyalleri gün içinde güncellenir.</div>
+      {% elif ssr_market_open is defined %}<div class="empty-box">Bugün henüz yeni sinyal yok — sinyaller seans kapanışında (gün sonu) güncellenir.</div>
       {% else %}
       <div class="skeleton sk-card"></div>
       <div class="skeleton sk-card"></div>
@@ -310,11 +310,12 @@ async function loadGundem() {
     const newSigs = d.new_signals || [];
     document.getElementById('newSigCount').textContent = newSigs.length > 0 ? `${newSigs.length} hisse` : '';
     if (newSigs.length === 0) {
-      // CPO-DEV2-072 r97(b): piyasa kapalıyken (hafta sonu/tatil/seans dışı)
-      // "gün içinde güncellenir" vaadi yanıltıcı — sunucunun ayırt ettiği mesajı kullan.
+      // CPO-DEV2-072 r97(b) + CPO-1646: piyasa kapalıyken sunucunun ayırt ettiği
+      // mesajı kullan; açıkken de "gün içinde güncellenir" YANLIŞ vaadi yerine
+      // EOD mimarisiyle tutarlı, gün-sonu odaklı dürüst metin kullanılır.
       const emptyMsg = (d.market_open === false && d.closed_message)
         ? escapeHtml(d.closed_message)
-        : 'Bugün henüz sinyal değişimi yok. Piyasa sinyalleri gün içinde güncellenir.';
+        : 'Bugün henüz yeni sinyal yok — sinyaller seans kapanışında (gün sonu) güncellenir.';
       document.getElementById('newSignalsGrid').innerHTML =
         '<div class="empty-box">' + emptyMsg + '</div>';
     } else {
