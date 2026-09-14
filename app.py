@@ -9118,6 +9118,14 @@ def api_stock_chart(ticker):
         data["summary"]["bear_score"]  = main_stock.get("bear_score",  data["summary"].get("bear_score"))
         data["summary"]["sl_level"]    = main_stock.get("sl_level",    data["summary"].get("sl_level"))
         data["summary"]["signal_bars"] = main_stock.get("signal_bars", data["summary"].get("signal_bars", 1))
+        # CPO-1639: _compute_chart_data() kendi bağımsız `close` serisinden
+        # price/change_pct hesaplıyordu — ana cache'le (analyze()) farklı
+        # zamanlarda/kaynaklarda çalıştığından 12/12 test edilen hissede
+        # sapma ölçüldü. Sinyal alanı zaten ana cache'ten override ediliyordu
+        # (yukarı); aynı tek-kaynak ilkesini fiyat/değişim%'e de genişlet.
+        if main_price > 0:
+            data["summary"]["price"]      = main_price
+            data["summary"]["change_pct"] = main_stock.get("change_pct", data["summary"].get("change_pct"))
 
     _resp_chart = {"chart": data, "updated_at": upd, "loading": False}
     # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
@@ -9196,7 +9204,11 @@ def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
             "rvol":          s.get("rvol"),
             "is_premium":    s.get("is_premium", False),
             "tier":          s.get("tier"),   # SPEC-007: paywall için (guclu_sinyal/standart/None, CPO-DEV2-053/055)
-            "signal_strength": s.get("signal_strength") or 0,  # CPO-985 #8.2 + SPEC-018 W2: "Skor" sıralama alanı — tier'ı (Güçlü Sinyal/Standart) doğrudan sürükleyen tek sayı
+            # CPO-1640: `or 0` kaldırıldı — BEKLE (sinyal yok) hissede None
+            # sessizce "0/100" (en kötü olası skor) ile karışıyordu. Bilinmiyorsa
+            # None geçsin, tüketici (tarama.html scoreCell) nötr bassın; sort
+            # key (_tarama_sort_key) None'ı zaten ayrıca 0 olarak ele alıyor.
+            "signal_strength": s.get("signal_strength"),  # CPO-985 #8.2 + SPEC-018 W2: "Skor" sıralama alanı — tier'ı (Güçlü Sinyal/Standart) doğrudan sürükleyen tek sayı
             "bull_score":    s.get("bull_score") or 0,
             "sl_level":      s.get("sl_level"),
         })

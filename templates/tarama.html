@@ -166,7 +166,7 @@
       <tbody id="resultBody">{% for s in ssr_rows %}{% set _eq = {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Kovalama'} %}<tr>
         <td><a href="/hisse/{{ s.ticker }}"><div class="tk">{{ s.ticker }}</div><div class="tk-name">{{ (s.name or '')|replace(' A.Ş.','')|truncate(20, True, '') }}</div></a></td>
         <td><span class="sig-badge sig-{{ s.signal }}">{{ '▲' if s.signal=='AL' else '▼' if s.signal=='SAT' else '●' }} {{ s.signal|signal_label }}</span></td>
-        <td>{{ s.signal_strength }}</td>
+        <td>{{ s.signal_strength if s.signal_strength is not none else '—' }}</td>
         <td>{{ s.adx_label }}</td>
         <td>{{ _eq.get(s.entry_quality, '—') }}</td>
         <td class="hide-mob-narrow price-val">{{ s.price|tr_price }}</td>
@@ -712,7 +712,16 @@ function renderResults(rows, count) {
   // yeni "standart" tier'i eski "plus" (mavi) rengine eşlendi — hisse.html skor halkasıyla
   // aynı renk sözlüğü (guclu_sinyal=mor, standart=mavi, rozet-yok=nötr).
   const scoreCell = (score, tier) => {
-    const v = score || 0;
+    // CPO-1640: signal_strength artık BEKLE (sinyal yok) hissede null gelir
+    // (bkz. app.py _compute_tarama_results) — "0" yazıp uydurma kötü skor
+    // gösterme, hisse.html Hap Bilgi bloğuyla aynı nötr dil.
+    if (score == null) {
+      return `<div class="score-cell" tabindex="0" data-tip="Sinyal aktif değil (Yatay) — skor uygulanamaz">
+        <span class="score-val weak">—</span>
+        <div class="score-bar-bg"><div class="score-bar-fill weak" style="width:0%"></div></div>
+      </div>`;
+    }
+    const v = score;
     const cls = tier === 'guclu_sinyal' ? 'premium' : tier === 'standart' ? 'plus' : 'weak';
     const pct = Math.max(4, Math.min(100, v));
     return `<div class="score-cell" tabindex="0" data-tip="Sinyal Gücü ${v}/100 — sıralama bu skora göre">
@@ -794,15 +803,17 @@ function renderResults(rows, count) {
       const _tlbl = s.adx_label || 'Zayıf';
       const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
       // T3.5: mobil kartta da masaüstüyle aynı skor rengi (tier bazlı) — bkz. scoreCell()
-      const _scv  = s.signal_strength || 0;
-      const _sccls = s.tier === 'guclu_sinyal' ? 'premium' : s.tier === 'standart' ? 'plus' : 'weak';
+      // CPO-1640: null (BEKLE/sinyal yok) → "0" değil "—" (bkz. scoreCell())
+      const _scv  = s.signal_strength;
+      const _scDisp = _scv == null ? '—' : _scv;
+      const _sccls = s.signal_strength == null ? 'weak' : s.tier === 'guclu_sinyal' ? 'premium' : s.tier === 'standart' ? 'plus' : 'weak';
       return `<a href="/hisse/${escapeHtml(s.ticker)}" class="mr-card">
         <div class="mr-top">
           <div><div class="mr-ticker">${escapeHtml(s.ticker)}${_prm}</div><div class="mr-name">${escapeHtml((s.name||'').replace(' A.Ş.','').substring(0,22))}</div></div>
           <span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span>
         </div>
         <div class="mr-bottom">
-          <div class="mr-metric"><div class="mr-metric-label">Sinyal Gücü</div><span class="score-val ${_sccls}">${_scv}</span><div class="score-bar-bg"><div class="score-bar-fill ${_sccls}" style="width:${Math.max(4, Math.min(100, _scv))}%"></div></div></div>
+          <div class="mr-metric"><div class="mr-metric-label">Sinyal Gücü</div><span class="score-val ${_sccls}">${_scDisp}</span><div class="score-bar-bg"><div class="score-bar-fill ${_sccls}" style="width:${_scv == null ? 0 : Math.max(4, Math.min(100, _scv))}%"></div></div></div>
           <div class="mr-metric"><div class="mr-metric-label">Trend</div><span class="trend-label ${_tl[1]}">${_tl[0]}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Kalite</div>${_eqH}</div>
           <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—'}</span></div>
