@@ -206,11 +206,16 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 # ── Rate Limiter ──────────────────────────────────────────────────────────────
 # CPO-1641: memory:// per-worker'da izole (gunicorn -w 4) — limitler fiilen ~4x
 # gevşiyordu. Redis cross-worker paylaşılan sayaç sağlıyor.
+# CPO-1642: swallow_errors=True — Redis erişilemez olursa (çökme/restart/ağ)
+# rate-limit kontrolü sessizce atlanır (log'a yazılır), istek normal işlenir.
+# Aksi halde storage hatası yakalanmadan yukarı fırlar -> ~40 rate-limitli
+# route 500 döner (default False ile).
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
     default_limits=["300 per minute"],
     storage_uri=os.environ.get("RATELIMIT_STORAGE_URI", "redis://localhost:6379"),
+    swallow_errors=True,
 )
 
 # ── Admin endpoint koruması ───────────────────────────────────────────────────
