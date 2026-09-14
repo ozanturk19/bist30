@@ -1051,7 +1051,7 @@
 
   <details class="bp-detail-toggle" id="ozetDetailToggle" data-tab-content="ozet">
     <summary class="bp-detail-toggle-summary">
-      <span class="bp-detail-toggle-label"><span aria-hidden="true">📊</span> Detaylı Analiz</span>
+      <span class="bp-detail-toggle-label"><span aria-hidden="true">📊</span> Teknik Detaylar</span>
       <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
     </summary>
     <div class="bp-detail-toggle-body">
@@ -1121,8 +1121,40 @@
     <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)"><span aria-hidden="true">ℹ️</span> Bu tablo güncel algoritma ile geriye dönük hesaplanmıştır — o tarihte gösterilen canlı sinyalle birebir aynı olmayabilir.</div>
   </div>
 
-  <!-- Temel Analiz -->
-  <div style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);overflow:hidden;margin-bottom:20px" id="fundSection">
+  <!-- Geçmiş Sinyal Performansı — CPO-1107 madde 3: artık aynı sinyal geçmişi
+       listesinden (signal_history) hesaplanır; ayrı/bayat backtest cache'i
+       kullanmaz, böylece "Toplam Sinyal" tablosuyla aynı kaynağa dayanır. -->
+  <div id="sigPerfBox" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px">
+    <div style="margin-bottom:10px">
+      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📊</span> Geçmiş Sinyal Performansı</h2>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
+        <div id="sigPerfWinRate" style="font-size:var(--bp-text-3xl);font-weight:800"></div>
+        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Sinyal Kazanma Oranı</div>
+      </div>
+      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
+        <div id="sigPerfAvg" style="font-size:var(--bp-text-3xl);font-weight:800"></div>
+        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Ort. Sinyal Getirisi</div>
+      </div>
+      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
+        <div id="sigPerfCount" style="font-size:var(--bp-text-3xl);font-weight:800;color:var(--bp-text3)"></div>
+        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Analiz Edilen Sinyal</div>
+      </div>
+    </div>
+    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal ve Trend Bozuldu sinyalleri hariç, yalnızca Güçlü Trend sinyalleri · <span aria-hidden="true">⚠️</span> Geçmiş performans gelecek garantisi değildir</div>
+  </div>
+
+    </div>
+  </details>
+
+  <!-- Temel Analiz — CPO-1651: Ozan 14.09 akşam "temel analiz sayfada ön planda
+       değil, uzun scroll boyunca hiç görünmüyor" geri bildirimi. Kök neden:
+       bu blok önceden #ozetDetailToggle'ın (varsayılan KAPALI "Detaylı Analiz"
+       accordion'u) İÇİNDEYDİ — Onaylar/Çoklu Zaman Dilimi/Sinyal Geçmişi/Sinyal
+       Performansı ile aynı genel etikette gizliydi, kullanıcı ayırt edemiyordu.
+       Artık kendi başına, her zaman görünür, adı geçen accordion'un DIŞINDA. -->
+  <div data-tab-content="ozet" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);overflow:hidden;margin-bottom:20px" id="fundSection">
     <div style="padding:12px 18px;border-bottom:1px solid var(--bp-surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> Temel Analiz</h2>
       <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">4 saatte bir güncellenir</span>
@@ -1157,33 +1189,6 @@
       <div id="fundOwnership" style="display:none;margin-top:10px;font-size:var(--bp-text-xs);color:var(--bp-text3)"></div>
     </div>
   </div>
-
-  <!-- Geçmiş Sinyal Performansı — CPO-1107 madde 3: artık aynı sinyal geçmişi
-       listesinden (signal_history) hesaplanır; ayrı/bayat backtest cache'i
-       kullanmaz, böylece "Toplam Sinyal" tablosuyla aynı kaynağa dayanır. -->
-  <div id="sigPerfBox" style="display:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:14px 18px;margin-bottom:20px">
-    <div style="margin-bottom:10px">
-      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📊</span> Geçmiş Sinyal Performansı</h2>
-    </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div id="sigPerfWinRate" style="font-size:var(--bp-text-3xl);font-weight:800"></div>
-        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Sinyal Kazanma Oranı</div>
-      </div>
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div id="sigPerfAvg" style="font-size:var(--bp-text-3xl);font-weight:800"></div>
-        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Ort. Sinyal Getirisi</div>
-      </div>
-      <div style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:10px 14px;flex:1;min-width:100px;text-align:center">
-        <div id="sigPerfCount" style="font-size:var(--bp-text-3xl);font-weight:800;color:var(--bp-text3)"></div>
-        <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:3px">Analiz Edilen Sinyal</div>
-      </div>
-    </div>
-    <div style="margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">Yukarıdaki Sinyal Geçmişi tablosundan hesaplanır — aktif (henüz kapanmamış) sinyal ve Trend Bozuldu sinyalleri hariç, yalnızca Güçlü Trend sinyalleri · <span aria-hidden="true">⚠️</span> Geçmiş performans gelecek garantisi değildir</div>
-  </div>
-
-    </div>
-  </details>
 
   <!-- SPEC-017 v2 Faz A c3 — Özet sonu "Detay için" CTA (3 tab) -->
   <div data-tab-content="ozet" class="bp-detail-cta-wrap">
@@ -1307,6 +1312,30 @@
     <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">
       <span aria-hidden="true">🤖</span> Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 12 saatte bir yenilenir
     </div>
+  </div>
+
+  <!-- Temel Görünüm AI Yorumu — CPO-1651: AI Analiz sekmesi sadece Teknik sinyali
+       açıklıyordu, Temel Analiz için paralel bir kart hiç yoktu. hs.temel_analiz_aciklamasi
+       Skor Analizi'ndeki (Özet sekmesi) "AI Yorumu" kartıyla AYNI kaynak — backend
+       zaten hesaplıyor, burada yeni bir çağrı/hesaplama yok, sadece ikinci bir
+       görünüm. BIST30 dışı ~186 hisse için bu metin deterministik şablon cümlesi
+       (Gemini'siz), BIST30 için Gemini'yle üslup cilası görmüş olabilir — bu yüzden
+       Teknik karttaki gibi koşulsuz "Gemini AI" rozeti kullanılmadı (Skor Analizi'ndeki
+       "✦ AI Yorumu" tarzıyla tutarlı, aşırı-iddia yok). -->
+  {% set _temel_ready = hs_available and hs.temel_analiz_skoru is not none %}
+  <div data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-accent-cyan-rgb),0.07),rgba(29,78,216,0.03));border:1px solid rgba(var(--bp-accent-cyan-rgb),0.2);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:var(--bp-text-15)"><span aria-hidden="true">📋</span></span>
+      <span style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);text-transform:uppercase;letter-spacing:.5px">Temel Görünüm Ne Anlama Geliyor?</span>
+    </div>
+    {% if _temel_ready %}
+    <p style="font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0 0 8px">{{ hs.temel_analiz_aciklamasi if hs.temel_analiz_aciklamasi else 'AI yorumu hazırlanıyor.' }}</p>
+    <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">
+      <span aria-hidden="true">📊</span> Temel Analiz Skoru {{ hs.temel_analiz_skoru }}/100 — detaylı sayısal kırılım için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-accent-cyan);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki Skor Analizi ve Temel Analiz</a> bölümlerine göz atabilirsiniz.
+    </div>
+    {% else %}
+    <p style="font-size:var(--bp-text-base);color:var(--bp-text3);line-height:1.65;margin:0">Bu hissenin Temel Analiz Skoru için bugünkü EOD (gün-sonu) turu henüz tamamlanmadı.</p>
+    {% endif %}
   </div>
 
   <!-- AI Haberler -->
