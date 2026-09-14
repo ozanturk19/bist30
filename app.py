@@ -9294,28 +9294,44 @@ def tarama():
     return render_template("tarama.html", ssr_rows=results[:30])
 
 
+class _BadFilterValue(ValueError):
+    """CPO-1644: sayisal filtre parametresi icin sessizce 'filtresiz'e
+    duşmek yerine 400 dondurulmesini isaretler."""
+
+
+def _qfloat(name, default):
+    # DEV2-bughunt-r7: float("nan") exception firlatmiyor -> min_price/max_price/min_adx
+    # filtreleri "nan" degeriyle sessizce devre disi kaliyordu (NaN karsilastirmasi hep False)
+    # -> bilincli olarak "filtresiz" davranisi korunur (default donulur).
+    # CPO-1644: "abc" gibi parse edilemeyen (TypeError/ValueError) degerler ise artik
+    # sessizce filtresiz'e dusmek yerine _BadFilterValue firlatir (cagiran 400 dondurur).
+    import math
+    raw = request.args.get(name)
+    if raw is None or raw == "":
+        return default
+    try:
+        v = float(raw)
+    except (TypeError, ValueError):
+        raise _BadFilterValue(name)
+    return v if math.isfinite(v) else default
+
+
 @app.route("/api/tarama")
 @limiter.limit("60 per minute")
 def api_tarama():
     """Hisse tarayıcısı — sinyal, ADX, fiyat, hacim, sektör filtresi."""
-    def _qfloat(name, default):
-        # DEV2-bughunt-r7: float("nan") exception firlatmiyor -> min_price/max_price/min_adx
-        # filtreleri "nan" degeriyle sessizce devre disi kaliyordu (NaN karsilastirmasi hep False).
-        import math
-        try:
-            v = float(request.args.get(name, default))
-        except (TypeError, ValueError):
-            return default
-        return v if math.isfinite(v) else default
     # DEV2-r4-input-edge: case-insensitive normalize — buyuk/kucuk harf farki
     # sessizce 0 sonuc donduruyordu (signal/sector/eq) veya siralamayi sessizce
     # iptal ediyordu (sort). Kanonik veri (signal/entry_quality) hep ASCII
     # buyuk harf oldugundan .upper() guvenli; sort_by dict anahtarlariyla
     # (hepsi lowercase) karsilastirildigi icin .lower() guvenli.
     sig      = request.args.get("signal",    "").strip().upper()
-    min_adx  = _qfloat("min_adx",   0)
-    min_p    = _qfloat("min_price", 0)
-    max_p    = _qfloat("max_price", 999999)
+    try:
+        min_adx  = _qfloat("min_adx",   0)
+        min_p    = _qfloat("min_price", 0)
+        max_p    = _qfloat("max_price", 999999)
+    except _BadFilterValue as e:
+        return jsonify({"error": f"Gecersiz sayisal filtre degeri: {e.args[0]}"}), 400
     sector   = request.args.get("sector",    "").strip()
     eq       = request.args.get("eq",        "").strip().upper()   # IDEAL | IYI | DIKKATLI | UZAK — deprecated
     sort_by  = request.args.get("sort",      "signal_strength").strip().lower()  # CPO-985 #8.2 + SPEC-018 W2: default artık Skor (signal_strength), eskiden adx
@@ -9350,19 +9366,14 @@ def api_tarama_temel():
     Sıralama saf temel_analiz_skoru/vb. değerine göredir; `signal` SADECE eşitlik
     filtresi, asla sıralama girdisi değildir.
     """
-    def _qfloat(name, default):
-        import math
-        try:
-            v = float(request.args.get(name, default))
-        except (TypeError, ValueError):
-            return default
-        return v if math.isfinite(v) else default
-
-    min_score = _qfloat("min_score", 0)
+    try:
+        min_score = _qfloat("min_score", 0)
+        min_p     = _qfloat("min_price", 0)
+        max_p     = _qfloat("max_price", 999999)
+    except _BadFilterValue as e:
+        return jsonify({"error": f"Gecersiz sayisal filtre degeri: {e.args[0]}"}), 400
     band      = request.args.get("band",   "").strip().lower()
     sector    = request.args.get("sector", "").strip()
-    min_p     = _qfloat("min_price", 0)
-    max_p     = _qfloat("max_price", 999999)
     sig       = request.args.get("signal", "").strip().upper()
     sort_by   = request.args.get("sort",   "temel_score").strip().lower()
     sort_dir  = request.args.get("sort_dir", "").strip().lower()
@@ -9973,6 +9984,7 @@ def sitemap():
     except Exception as e:
         logger.warning("sitemap: /ozet arsiv listesi okunamadi: %s", e)
     pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "weekly"})
+    pages.append({"loc": "/temettu-takvimi",    "priority": "0.8", "changefreq": "weekly"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly"})
     for a in ARTICLES:
