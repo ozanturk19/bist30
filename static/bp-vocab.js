@@ -131,6 +131,10 @@ function bpFormatAssetPrice(key, price) {
    HIC degismesin — sadece yerel tanimlar kaldirildi. */
 var BP_SIG_LABELS = { AL: 'Güçlü Trend', SAT: 'Trend Bozuldu', BEKLE: 'Yatay' };
 function sigLabel(sig) {
+  // CPO-1647: sig null/undefined olabilir (ticker sinyal motorunda henüz yok,
+  // ör. <120 gün geçmişi olan yeni BIST30 üyesi) — "null" yazısı basmak yerine
+  // dürüst bir bekleme metni göster.
+  if (!sig) return 'Veri bekleniyor';
   return BP_SIG_LABELS[sig] || sig;
 }
 

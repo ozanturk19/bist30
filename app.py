@@ -8047,12 +8047,12 @@ def stock_page(ticker):
         # Fallback: signal_strength yoksa bull/bear x 33 ~ 0-100 normalize
         raw = (ssr_signal or {}).get("bull_score" if sig == "AL" else "bear_score")
         score = int(raw * 33) if isinstance(raw, (int, float)) else None
-    _inds    = (ssr_signal or {}).get("indicators") or {}
-    _adx_lbl = (_inds.get("adx") or {}).get("label", "")
-    try:
-        adx_val = float(_adx_lbl.replace("ADX", "").strip()) if _adx_lbl else None
-    except (ValueError, TypeError):
-        adx_val = None
+    # CPO-1649: aynı çift-yuvarlama ailesi (CPO-1648, /api/karsilastir) — eskiden
+    # indicators.adx.label ("ADX 14" gibi zaten yuvarlanmış görüntü metni) geri
+    # parse ediliyordu, sayfanın görünür panelindeki hassas üst-seviye "adx"
+    # alanından (round(adx_val,1)) SAPAN bir değer üretiyordu (JSON-LD/FAQ 14
+    # derken panel 13.5 gösteriyordu). Artık aynı kaynak.
+    adx_val = (ssr_signal or {}).get("adx")
     # SPEC-017 Faz 3 batch v2 B1: SSS cevabında AL/SAT parantez yasak (K3 wording disiplin)
     sig_label = _SIGNAL_LABELS.get(sig, sig)
 
@@ -10443,12 +10443,12 @@ def api_karsilastir():
         s = data_map.get(ticker, {})
         hs_cached = hs_map.get(ticker)
         hs_data = hs_cached["data"] if hs_cached else None
-        inds        = s.get("indicators") or {}
-        _adx_raw    = (inds.get("adx") or {}).get("label", "")
-        try:
-            adx_val = float(_adx_raw.replace("ADX", "").strip()) if _adx_raw else None
-        except (ValueError, TypeError):
-            adx_val = None
+        # CPO-1648: eskiden indicators.adx.label ("ADX 18" — zaten int'e
+        # yuvarlanmış görüntü metni) geri parse ediliyordu, çift yuvarlama
+        # X.5-X.9 sınırında yanlış kategoriye düşürüyordu (ör. 17.5 → "Orta").
+        # Üst-seviye "adx" alanı zaten hassas (round(adx_val,1), app.py:2015,
+        # /api/data ve /api/tarama'nın da kaynağı) — doğrudan onu kullan.
+        adx_val = s.get("adx")
         # Temel analiz verileri (sadece BIST hisseleri ve veri varsa)
         fund = _get_fundamentals(ticker) if ticker in BIST100 and bool(s) else {}
         results.append({
@@ -11676,13 +11676,18 @@ def _earnings_refresh_impl():
         for t, (pidx, date_label) in assigned.items():
             if pidx != i:
                 continue
-            sig_data = sig_map.get(t, {})
+            # CPO-1647: sig_map'te yoksa (ör. DSTKF/TRALT — <120 gün geçmişi
+            # olan yeni BIST30 üyeleri, analyze() 120 bar eşiğinin altında
+            # sessizce None döner) eski kod {} default'u üzerinden uydurma
+            # "BEKLE"/Yatay basıyordu. Artık dürüstçe None — frontend "Veri
+            # bekleniyor" gösteriyor, sahte bir sinyal iddia etmiyor.
+            sig_data = sig_map.get(t)
             stocks_in_period.append({
                 "ticker":      t,
                 "name":        STOCK_NAMES.get(t, t),
-                "signal":      sig_data.get("signal", "BEKLE"),
-                "price":       sig_data.get("price"),
-                "is_premium":  sig_data.get("is_premium", False),
+                "signal":      sig_data.get("signal") if sig_data else None,
+                "price":       sig_data.get("price") if sig_data else None,
+                "is_premium":  sig_data.get("is_premium", False) if sig_data else False,
                 "date":        date_label,
                 "kap_url":     kap_url_for(t),
             })
@@ -11943,13 +11948,15 @@ def _dividend_refresh_impl():
                     last_div_amount = round(float(last_amt), 4)
 
             if next_ex or last_div_date:
-                sig_data = sig_map.get(t, {})
+                # CPO-1647 ile aynı desen (bilanco-takvimi) — sig_map'te yoksa
+                # dürüstçe None, uydurma "BEKLE" yok.
+                sig_data = sig_map.get(t)
                 result_stocks.append({
                     "ticker":          t,
                     "name":            STOCK_NAMES.get(t, t),
-                    "signal":          sig_data.get("signal", "BEKLE"),
-                    "price":           sig_data.get("price"),
-                    "is_premium":      sig_data.get("is_premium", False),
+                    "signal":          sig_data.get("signal") if sig_data else None,
+                    "price":           sig_data.get("price") if sig_data else None,
+                    "is_premium":      sig_data.get("is_premium", False) if sig_data else False,
                     "next_ex_date":    next_ex,
                     "last_div_date":   last_div_date,
                     "last_div_amount": last_div_amount,

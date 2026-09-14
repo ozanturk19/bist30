@@ -1,13 +1,13 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
 {% if ssr_signal and ssr_signal.signal == 'AL' %}
   {% set _st = ticker ~ ' Güçlü Trend — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|round|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|round|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
 {% elif ssr_signal and ssr_signal.signal == 'SAT' %}
   {% set _st = ticker ~ ' Trend Bozuldu — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') Trend Bozuldu sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') Trend Bozuldu sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|round|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|round|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
 {% elif ssr_signal %}
   {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ (ssr_signal.adx or 0)|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|int ~ '. Supertrend+EMA12/99 tabanlı algoritmik BIST sinyali. Ücretsiz.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ (ssr_signal.adx or 0)|round|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|round|int ~ '. Supertrend+EMA12/99 tabanlı algoritmik BIST sinyali. Ücretsiz.' %}
 {% else %}
   {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
   {% set _sd = ticker ~ ' (' ~ name ~ ') güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST analizi. Ücretsiz, günlük güncelleme.' %}
@@ -51,8 +51,12 @@
   "additionalProperty": [
     {"@type": "PropertyValue", "name": "Sinyal", "value": "{{ seo_signal|signal_label }}"}{% if seo_score is not none %},
     {"@type": "PropertyValue", "name": "Sinyal Skoru", "value": "{{ seo_score }}"}{% endif %}{% if seo_adx is not none %},
-    {"@type": "PropertyValue", "name": "ADX", "value": "{{ seo_adx|int }}"}{% endif %}{% if seo_rsi is not none %},
-    {"@type": "PropertyValue", "name": "RSI", "value": "{{ seo_rsi|int }}"}{% endif %}{% if hs_available and hs.borsapusula_skoru is not none %},
+    {# CPO-1649: |int KESER (13.5→13), FAQ metni app.py:8080'de {:.0f} kullanıyor
+       (13.5→14, round-half) — aynı sayfada iki farklı yuvarlama kuralı "3 farklı
+       sayı" çelişkisine katkıda bulunuyordu. |round FAQ ile aynı davranışa (en
+       yakın tam sayı) yaklaştırır. #}
+    {"@type": "PropertyValue", "name": "ADX", "value": "{{ seo_adx|round|int }}"}{% endif %}{% if seo_rsi is not none %},
+    {"@type": "PropertyValue", "name": "RSI", "value": "{{ seo_rsi|round|int }}"}{% endif %}{% if hs_available and hs.borsapusula_skoru is not none %},
     {"@type": "PropertyValue", "name": "BorsaPusula Skoru", "value": "{{ hs.borsapusula_skoru }}"}{% endif %}
   ],{% endif %}
   "inLanguage": "tr"

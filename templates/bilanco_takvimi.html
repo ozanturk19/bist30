@@ -119,7 +119,8 @@ function render(data) {
     seen.add(s.ticker);
     if (s.signal === 'AL')   totalAl++;
     else if (s.signal === 'SAT') totalSat++;
-    else                     totalBkl++;
+    else if (s.signal === 'BEKLE') totalBkl++;
+    // CPO-1647: s.signal null ise (veri henüz yok) hiçbir sayaca dahil edilmez
     totalAll++;
   }));
   document.getElementById('sumAl').textContent    = totalAl;
