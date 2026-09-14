@@ -307,9 +307,11 @@ function buildTable(stocks) {
 
   const headers = stocks.map(s => {
     // DEV2-bughunt-r7: bulunamayan (found=false) ticker icin /hisse/ linki 404'e gidiyordu.
+    // CPO-1645: masaüstü başlığı bulunamayan hisse için mobil karttaki "Bulunamadı"
+    // etiketini taşımıyordu, ticker adı sanki gerçek şirket adıymış gibi görünüyordu.
     const inner = `
         <div class="col-ticker">${escapeHtml(s.ticker)}</div>
-        <div class="col-name" title="${escapeHtml(s.name||'')}">${escapeHtml(s.name||'')}</div>
+        <div class="col-name" title="${escapeHtml(s.name||'')}">${s.found ? escapeHtml(s.name||'') : '<span class="muted">Bulunamadı</span>'}</div>
         ${s.kap_url ? `<a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
       `;
     return `
