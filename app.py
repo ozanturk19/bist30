@@ -204,11 +204,13 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 # ── Rate Limiter ──────────────────────────────────────────────────────────────
+# CPO-1641: memory:// per-worker'da izole (gunicorn -w 4) — limitler fiilen ~4x
+# gevşiyordu. Redis cross-worker paylaşılan sayaç sağlıyor.
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
     default_limits=["300 per minute"],
-    storage_uri="memory://",
+    storage_uri=os.environ.get("RATELIMIT_STORAGE_URI", "redis://localhost:6379"),
 )
 
 # ── Admin endpoint koruması ───────────────────────────────────────────────────
