@@ -28,7 +28,7 @@ ARTICLES = [
 
 <h2>BIST100'ü Takip Etmenin Yolları</h2>
 <ul>
-  <li>BorsaPusula'da 214 hissenin (BIST100 + ek hisseler) anlık sinyalini izleyin.</li>
+  <li>BorsaPusula'da 214 hissenin (BIST100 + ek hisseler) güncel sinyalini izleyin — sinyaller günlük olarak, gün sonu verisiyle hesaplanır.</li>
   <li>Günlük <a href="/ozet">Sinyal Özeti</a> sayfasından piyasa genelinin durumunu görün.</li>
   <li>Endeks bileşenlerinin tamamı Borsa İstanbul resmi sitesinde yayınlanır.</li>
 </ul>
@@ -143,7 +143,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "faqs": [
       {
         "q": "ADX değeri ne anlama gelir?",
-        "a": "ADX (Average Directional Index), trendin gücünü 0-100 arası bir skala ile ölçer. 0-25 arası zayıf veya yok sayılabilir trend, 25-50 orta güçlü trend, 50+ güçlü trend anlamına gelir. Yön bilgisi vermez; yalnızca trendin ne kadar güçlü olduğunu gösterir."
+        "a": "ADX (Average Directional Index), trendin gücünü 0-100 arası bir skala ile ölçer. 0-25 arası zayıf veya yok sayılabilir trend, 25-40 güçlü trend, 40+ çok güçlü trend anlamına gelir. Yön bilgisi vermez; yalnızca trendin ne kadar güçlü olduğunu gösterir."
       },
       {
         "q": "BorsaPusula neden ADX ≥ 25 şartı koyuyor?",
@@ -336,7 +336,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>BorsaPusula'daki Güçlü Trend ve Trend Bozuldu sinyalleri, <strong>üç teknik kriteri aynı anda</strong> sağlayan hisseler için otomatik olarak üretilir. Bu sinyaller bir tavsiye değil, teknik bir tespittir. Kararı yatırımcı verir.</p>
 
 <h2>Güçlü Trend Sinyali Ne Demek?</h2>
-<p>Güçlü Trend sinyali şu dört koşul aynı anda sağlandığında oluşur:</p>
+<p>Güçlü Trend sinyali şu üç kriter aynı anda sağlandığında oluşur:</p>
 <ul>
   <li>✅ Supertrend yükseliş modda (fiyat bandın üzerinde)</li>
   <li>✅ ADX ≥ 25 (güçlü trend var)</li>
@@ -906,7 +906,7 @@ Histogram = MACD − Sinyal</pre>
 <p>İlk gün oluşan sinyal "ham sinyal"dir. 3 gün boyunca aynı kalan sinyal "onaylı" sayılır. BorsaPusula hisse sayfalarında kaç gündür devam ettiği gösterilir.</p>
 
 <h2>Piyasa Barometresi</h2>
-<p><a href="/ozet">Günlük Özet</a> sayfasındaki barometre, tüm piyasanın anlık durumunu (güçlü sinyal oranını) gösterir. Bu oran %50'nin üzerindeyse genel trend yukarı yönlü sayılabilir; %30'un altındaysa daha temkinli/savunmacı bir yaklaşım düşünülebilir.</p>
+<p><a href="/ozet">Günlük Özet</a> sayfasındaki barometre, tüm piyasanın güncel durumunu (güçlü sinyal oranını) gösterir. Bu oran %50'nin üzerindeyse genel trend yukarı yönlü sayılabilir; %30'un altındaysa daha temkinli/savunmacı bir yaklaşım düşünülebilir.</p>
 
 <h2>Veri Kaynağı ve Güncelleme Sıklığı</h2>
 <p>Tüm fiyat verileri Yahoo Finance (yfinance) API'sından alınır. Günlük barlar (2 yıl geçmiş) ve haftalık barlar (1 yıl) kullanılır. Sinyaller <strong>günde bir kez</strong>, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) güncellenir — BorsaPusula gün sonu (EOD) verisiyle çalışır, gün içi canlı fiyat akışı sunmaz.</p>
@@ -1152,7 +1152,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 <ul>
   <li><strong>ÖDA (Özel Durum Açıklaması):</strong> Şirketin değerini etkileyebilecek önemli gelişmeler — büyük sözleşmeler, ortaklık değişiklikleri, önemli davalar</li>
   <li><strong>FR (Finansal Rapor):</strong> Üç aylık ve yıllık mali tablolar — bilanço, gelir tablosu, nakit akışı</li>
-  <li><strong>ODA (Olağan/Olağanüstü Genel Kurul):</strong> Genel kurul kararları, temettü açıklamaları</li>
+  <li><strong>Genel Kurul (Olağan/Olağanüstü):</strong> Genel kurul kararları, temettü açıklamaları</li>
   <li><strong>Pay Alım/Satım:</strong> İçeriden işlem bildirimleri — yöneticilerin hisse alım/satımları</li>
   <li><strong>Sözleşme:</strong> Kamu ya da özel sektörle imzalanan önemli sözleşmeler</li>
 </ul>
@@ -1256,7 +1256,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
 </ul>
 
 <h2>BIST30 Sinyal Analizi — Güncel Durum</h2>
-<p>BorsaPusula, BIST30 hisselerinin tamamı için Supertrend, ADX ve EMA tabanlı algoritmik sinyal hesaplar. <a href="/">Güncel sinyalleri</a> görmek için ana sayfayı ziyaret edin. <a href="/ozet">Sinyal Özeti</a> sayfasında ise tüm endeksin anlık durumunu tek bakışta görebilirsiniz.</p>
+<p>BorsaPusula, BIST30 hisselerinin tamamı için Supertrend, ADX ve EMA tabanlı algoritmik sinyal hesaplar. <a href="/">Güncel sinyalleri</a> görmek için ana sayfayı ziyaret edin. <a href="/ozet">Sinyal Özeti</a> sayfasında ise tüm endeksin güncel durumunu tek bakışta görebilirsiniz.</p>
 
 <h2>Hangi BIST30 Hissesi Daha İyi?</h2>
 <p>"En iyi BIST30 hissesi" sorusunun tek bir yanıtı yoktur. Değerlendirirken şunlara bakın:</p>
@@ -2010,7 +2010,7 @@ Mum formasyonları *tek başına yeterli değildir*. Güvenilirliği artırmak i
 
 ## BorsaPusula Bağlantısı
 
-BorsaPusula'nın sinyal algoritması doğrudan mum formasyonlarına bakmaz; Supertrend + ADX + EMA kombinasyonunu kullanır. Ancak bu sinyaller zaten güçlü mum oluşumlarıyla sık sık örtüşür. [Canlı sinyalleri görmek için ana sayfayı ziyaret edin.](/)""",
+BorsaPusula'nın sinyal algoritması doğrudan mum formasyonlarına bakmaz; Supertrend + ADX + EMA kombinasyonunu kullanır. Ancak bu sinyaller zaten güçlü mum oluşumlarıyla sık sık örtüşür. [Güncel sinyalleri görmek için ana sayfayı ziyaret edin.](/)""",
     "faqs": [
       {"q": "Mum grafik formasyonları ne kadar güvenilir?", "a": "Tek başına kullanıldığında %50-65 başarı oranına sahiptirler. Hacim teyidi, destek/direnç uyumu ve büyük zaman dilimiyle birleştirildiğinde güvenilirlik %70-80'e çıkabilir. Hiçbir formasyon %100 kesin değildir."},
       {"q": "Çekiç ve ters çekiç arasındaki fark nedir?", "a": "Çekiç'te uzun fitil altta, gövde yukarıdadır; güçlü dönüş sinyalidir. Ters Çekiç'te uzun fitil üstte, gövde alttadır; daha zayıf bir sinyal olup mutlaka teyit gerektir."},
@@ -2101,7 +2101,7 @@ BorsaPusula'nın **[makro ticker bandı](/),** USD/TRY kurunu anlık olarak gös
 - Kur yükselişinde: FROTO, EREGL gibi ihracatçı hisselerin sinyallerini takip edin
 - Kur düşüşünde: İthalatçı şirketler ve tüketici sektörü sinyallerini değerlendirin
 
-[Tüm BIST100 hisselerinin canlı sinyallerine bakmak için ana sayfayı ziyaret edin.](/)""",
+[Tüm BIST100 hisselerinin güncel sinyallerine bakmak için ana sayfayı ziyaret edin.](/)""",
     "faqs": [
       {"q": "Kur yükselince BIST her zaman düşer mi?", "a": "Hayır. Kur yükselişi piyasayı hem pozitif (ihracatçı şirketler, döviz geliri olanlar) hem negatif (ithalatçılar, döviz borçlular) etkiler. BIST üzerindeki net etki, hangi sektörlerin ağırlıklı olduğuna bağlıdır. Hızlı kur yükselişleri genellikle genel bir risk kaçışına yol açsa da orta vadede ihracat odaklı şirketler kazanır."},
       {"q": "Dolar/TL ve altın arasındaki ilişki nasıl?", "a": "Altın hem USD hem güvenli liman varlığı olduğundan, Türk yatırımcı için TL bazındaki altın fiyatı kur × uluslararası altın fiyatından oluşur. Kur yükselirken uluslararası altın sabit kalsa bile TL bazındaki altın fiyatı artar."},
@@ -2432,7 +2432,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ol>
 
 <h2>BorsaPusula Sektör Verileri</h2>
-<p>BorsaPusula ana sayfasındaki <strong>Sektör filtresi</strong>, tüm sektörlerin güncel Güçlü Trend/Trend Bozuldu/Yatay sinyal dağılımını anlık gösterir. Kimya/Malzeme ve Enerji gibi sektörlerde Güçlü Trend sinyal yoğunluğu arttığında, bu sektörlere olan kurumsal ilginin arttığına işaret edebilir.</p>
+<p>BorsaPusula ana sayfasındaki <strong>Sektör filtresi</strong>, tüm sektörlerin güncel Güçlü Trend/Trend Bozuldu/Yatay sinyal dağılımını gösterir. Kimya/Malzeme ve Enerji gibi sektörlerde Güçlü Trend sinyal yoğunluğu arttığında, bu sektörlere olan kurumsal ilginin arttığına işaret edebilir.</p>
 
 <p><a href="/">Ana sayfada sektör bazlı sinyalleri filtreleyin →</a></p>""",
     "faqs": [
@@ -4826,7 +4826,7 @@ Toplam ≈ 13.003,90₺
 <h2>Formasyonları BorsaPusula Sinyalleriyle Birleştirmek</h2>
 <p>BorsaPusula sistemi Supertrend + ADX + EMA kırılımını baz alır; grafik formasyonları ek teyit olarak kullanılabilir:</p>
 <ul>
-  <li>Hisse Güçlü Trend sinyalindeyken yükselen üçgen üst bandı kırıyorsa → Güçlü alım sinyali</li>
+  <li>Hisse Güçlü Trend sinyalindeyken yükselen üçgen üst bandı kırıyorsa → yükseliş teyidi güçlenir</li>
   <li>Hisse Yatay sinyalindeyken bayrak konsolidasyonundan çıkış görülüyorsa → Önceden takibe al</li>
   <li>Formasyonun hacim desteği varsa → Sinyal güvenilirliği artar</li>
 </ul>
@@ -7145,7 +7145,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p><strong>Karanlık Bulut Örtüsü (Dark Cloud Cover):</strong> İki mumluk bir yükseliş dönüş formasyonudur. Güçlü bir yeşil mumun ardından, önceki mumun üzerinde açılıp gövdenin ortasının altında kapanan bir kırmızı mum gelir. Alıcı hakimiyetinin aniden satıcılara geçtiğini gösterir.</p>
 <p><strong>Marubozu:</strong> Fitilsiz veya çok kısa fitilli, güçlü ve kararlı bir mumdur. Yeşil marubozu alıcıların tam hakimiyetine, kırmızı marubozu ise satıcıların tam hakimiyetine işaret eder ve genellikle trendin aynı yönde devam edeceğine dair güçlü bir sinyal verir.</p>
 <p><strong>Spinning Top (Topaç):</strong> Küçük gövde ve her iki yönde uzun fitilden oluşur. Alıcı ile satıcı arasındaki dengeyi ve piyasadaki kararsızlığı yansıtır; doji gibi kesin bir yön belirtmez ama dikkatli izlenmesi gereken bir sinyaldir.</p>
-<p>İstatistiksel olarak, bir dönüş formasyonu yüksek işlem hacmiyle birlikte oluştuğunda güvenilirliği yaklaşık iki katına çıkar — bu nedenle hacim teyidi, formasyon yorumlamasının ayrılmaz bir parçası olmalıdır.</p>
+<p>Bir dönüş formasyonu yüksek işlem hacmiyle birlikte oluştuğunda daha güvenilir kabul edilir — bu nedenle hacim teyidi, formasyon yorumlamasının ayrılmaz bir parçası olmalıdır.</p>
 
 <h2>Mum Formasyonlarını Doğru Kullanmak</h2>
 <p>Mum formasyonları tek başına yeterli değildir. Güvenilirliği artırmak için:</p>
@@ -7161,7 +7161,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
       {"q": "Mum grafiği mi çubuk grafik mi daha iyi?",
        "a": "Mum grafikleri, çubuk grafiklere aynı bilgiyi çok daha görsel ve okunabilir biçimde sunar. Günümüzde neredeyse tüm profesyonel trader mum grafik kullanır. Çubuk grafik artık büyük ölçüde yerini mum grafiğe bırakmıştır. Başlangıç seviyesi için mum grafik öğrenmek hem daha kolay hem daha bilgilendiricidir."},
       {"q": "Mum formasyonu ne kadar güvenilir?",
-       "a": "Mum formasyonları, diğer teknik göstergeler ve bağlamla birlikte kullanıldığında değer kazanır. Tek başına bir mum formasyonu %60-65 civarında başarı oranı sunarken, destekleyici göstergelerle (%70-75+) bu oran artar. Her formasyon için stop-loss ile pozisyon yönetmek şarttır."},
+       "a": "Mum formasyonları, diğer teknik göstergeler ve bağlamla birlikte kullanıldığında değer kazanır. Tek başına bir mum formasyonuna güvenmek yerine, destekleyici göstergelerle (hacim, trend yönü, Supertrend teyidi) birlikte değerlendirmek güvenilirliği artırır. Her formasyon için stop-loss ile pozisyon yönetmek şarttır."},
       {"q": "Hangi zaman diliminde mum formasyonları daha güvenilir?",
        "a": "Daha uzun zaman dilimleri daha güvenilir formasyon verir: Günlük > 4 saatlik > 1 saatlik > 15 dakikalık. Dakikalık grafikler çok fazla gürültü içerir. Swing trader için günlük grafikteki mum formasyonları, scalper için ise 15 dakikalık-1 saatlik grafikler daha uygun olabilir."},
       {"q": "Doji her zaman trend dönüşü mü gösterir?",
