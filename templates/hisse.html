@@ -2523,7 +2523,7 @@ function renderMiniStats(history) {
 }
 
 /* ── Sinyal geçmişi ─────────────────────────────────── */
-function renderHistory(history, currentPrice) {
+function renderHistory(history, currentPrice, liveSignal) {
   const tbody = document.getElementById('historyBody');
   if (!history || history.length === 0) {
     tbody.innerHTML = '<tr><td colspan="4" style="color:var(--bp-text3);text-align:center;padding:20px">Geçmiş bulunamadı</td></tr>';
@@ -2545,7 +2545,7 @@ function renderHistory(history, currentPrice) {
     const icon = h.signal === 'AL' ? '▲' : '▼';
     let retHtml = '<td style="color:var(--bp-text3);font-size:var(--bp-text-xs)">—</td>';
 
-    if (idx === 0) {
+    if (idx === 0 && h.signal === liveSignal) {
       // Aktif sinyal — API'den gelen anlık fiyatla karşılaştır
       const curP = parseFloat(currentPrice) || 0;
       if (curP && h.price) {
@@ -2559,6 +2559,11 @@ function renderHistory(history, currentPrice) {
           retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)">${sign}${ret.toFixed(1).replace('.', ',')}% <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span></td>`;
         }
       }
+    } else if (idx === 0) {
+      // CPO-1637: sinyal BEKLE'ye (veya karşı yöne) dönmüş ama backend bu
+      // geçişi henüz ayrı bir "kapandı" kaydı olarak loglamıyor — gerçek
+      // kapanış fiyatı/tarihi bilinmiyor, uydurmaktansa boş bırakılıyor.
+      retHtml = '<td style="color:var(--bp-text3);font-size:var(--bp-text-xs)">(kapandı)</td>';
     } else {
       // Kapanmış sinyal — history[idx-1] bu sinyali kapatan (daha yeni) sinyaldir
       const exitH = history[idx - 1];
@@ -2594,7 +2599,12 @@ function renderHistory(history, currentPrice) {
    T3.7'de backtest özetine uygulanan aynı long-only ilkesi (SAT'ı ayrı yön-
    düzeltmesiyle "kazanç" gibi göstermek yanıltıcı). Bu ayrıca eski winRate
    (yön-düzeltmeli) / avgRet (ham ret) iç tutarsızlığını da kökten kapatır:
-   AL için yön düzeltmesi zaten ret>0 ile özdeş. */
+   AL için yön düzeltmesi zaten ret>0 ile özdeş.
+   CPO-1637 bilinen sınırlama: idx=0 burada da her zaman "hariç" sayılır —
+   aslen çoktan kapanmış (BEKLE'ye dönmüş) bir sinyal idx=0'da kalmışsa
+   (backend henüz bu geçişi kaydetmiyor) gerçek kapanış fiyatı/tarihi
+   olmadığından örnekleme haksız yere alınamıyor. Tam çözüm backend'in
+   BEKLE geçişini de ayrı bir "kapandı" kaydı olarak loglamasını gerektirir. */
 function renderSigPerf(history) {
   const box = document.getElementById('sigPerfBox');
   if (!box) return;
@@ -2707,7 +2717,7 @@ async function loadChart(retry) {
 
     /* Chart hemen render — /api/data'ya BAĞLI DEĞİL */
     buildChart(json.chart);
-    renderHistory(json.chart.signal_history, json.chart.summary?.price);
+    renderHistory(json.chart.signal_history, json.chart.summary?.price, json.chart.summary?.signal);
     renderSigPerf(json.chart.signal_history);
     renderCommentary(json.chart.commentary);
     renderSummary(json.chart.summary, null);  /* sd=null, /api/data sonra enrich edecek */
