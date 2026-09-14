@@ -7488,30 +7488,41 @@ def _compute_chart_data(ticker_base, period="2y"):
             return "BEKLE"
 
         # Grafik marker'ları ve sinyal geçmişi
+        # CPO-1637 Seçenek 2 (tam fix): BEKLE'ye dönüşler ayrı bir satır
+        # olarak EKLENMEZ (tablo hâlâ sadece AL/SAT olaylarını listeler,
+        # window/limit davranışı değişmez) — bunun yerine az önce kapanmış
+        # AL/SAT kaydı `closed_at_date`/`closed_at_price` ile işaretlenir.
+        # Böylece frontend hem "(aktif)" etiketini artık canlı sinyalle
+        # çapraz kontrol edip yanlış basmıyor hem de gerçek kapanış
+        # fiyatıyla getiri hesaplayabiliyor (uydurma yok).
         markers        = []
         signal_history = []
         prev_sig       = "BEKLE"
         for i in range(200, len(close)):
             sig = bar_sig(i)
-            if sig != prev_sig and sig != "BEKLE":
+            if sig != prev_sig:
                 d_str = close.index[i].strftime("%Y-%m-%d")
-                entry_price = round(float(close.iloc[i]), 2)
-                if d_str in show_set:
-                    markers.append({
-                        "time":     d_str,
-                        "position": "belowBar" if sig == "AL" else "aboveBar",
-                        "color":    "#3fb950"  if sig == "AL" else "#f85149",
-                        "shape":    "arrowUp"  if sig == "AL" else "arrowDown",
-                        "text":     "▲" if sig == "AL" else "▼",
-                        "signal":   sig,
-                        "price":    entry_price,
-                        "date_tr":  close.index[i].strftime("%d.%m.%Y"),
+                price_i = round(float(close.iloc[i]), 2)
+                if sig != "BEKLE":
+                    if d_str in show_set:
+                        markers.append({
+                            "time":     d_str,
+                            "position": "belowBar" if sig == "AL" else "aboveBar",
+                            "color":    "#3fb950"  if sig == "AL" else "#f85149",
+                            "shape":    "arrowUp"  if sig == "AL" else "arrowDown",
+                            "text":     "▲" if sig == "AL" else "▼",
+                            "signal":   sig,
+                            "price":    price_i,
+                            "date_tr":  close.index[i].strftime("%d.%m.%Y"),
+                        })
+                    signal_history.append({
+                        "date":   close.index[i].strftime("%d.%m.%Y"),
+                        "signal": sig,
+                        "price":  price_i,
                     })
-                signal_history.append({
-                    "date":   close.index[i].strftime("%d.%m.%Y"),
-                    "signal": sig,
-                    "price":  entry_price,
-                })
+                elif signal_history:
+                    signal_history[-1]["closed_at_date"]  = close.index[i].strftime("%d.%m.%Y")
+                    signal_history[-1]["closed_at_price"] = price_i
             prev_sig = sig
         signal_history = list(reversed(signal_history[-15:]))   # en yeni başta, max 15
 

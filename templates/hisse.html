@@ -2545,39 +2545,38 @@ function renderHistory(history, currentPrice, liveSignal) {
     const icon = h.signal === 'AL' ? '▲' : '▼';
     let retHtml = '<td style="color:var(--bp-text3);font-size:var(--bp-text-xs)">—</td>';
 
-    if (idx === 0 && h.signal === liveSignal) {
-      // Aktif sinyal — API'den gelen anlık fiyatla karşılaştır
-      const curP = parseFloat(currentPrice) || 0;
-      if (curP && h.price) {
-        const ret  = ((curP - h.price) / h.price * 100);
-        const sign = ret >= 0 ? '+' : '';
-        if (h.signal === 'SAT') {
-          retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1).replace('.', ',')}% <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span></td>`;
-        } else {
-          const isGain = ret > 0;
-          const clr    = isGain ? 'var(--bp-al)' : (Math.abs(ret) < 1 ? 'var(--bp-text3)' : 'var(--bp-sat)');
-          retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)">${sign}${ret.toFixed(1).replace('.', ',')}% <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span></td>`;
-        }
+    // CPO-1637 Seçenek 2: backend artık BEKLE'ye dönüşü `closed_at_price`/
+    // `closed_at_date` ile bu kaydın üzerinde işaretliyor — varsa bu GERÇEK
+    // kapanış, idx'ten bağımsız olarak "aktif" değil "(kapandı)" olarak
+    // gösterilir (idx===0 olsa bile artık canlı fiyatla karıştırılmaz).
+    const isReallyActive = (idx === 0 && h.signal === liveSignal && h.closed_at_price == null);
+    let exitPrice = null, activeTag = '';
+    if (isReallyActive) {
+      exitPrice = parseFloat(currentPrice) || 0;
+      activeTag = ' <span style="font-size:10px;color:var(--bp-text3)">(aktif)</span>';
+    } else if (h.closed_at_price != null) {
+      exitPrice = h.closed_at_price;
+    } else if (idx > 0) {
+      // Fallback: closed_at yok (doğrudan karşı yöne flip, BEKLE arada değil)
+      // — history[idx-1] bu sinyali kapatan (daha yeni) sinyaldir
+      const exitH = history[idx - 1];
+      exitPrice = exitH ? exitH.price : null;
+    }
+
+    if (exitPrice != null && h.price) {
+      const ret  = ((exitPrice - h.price) / h.price * 100);
+      const sign = ret >= 0 ? '+' : '';
+      if (h.signal === 'SAT') {
+        retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1).replace('.', ',')}%${activeTag}</td>`;
+      } else {
+        const isGain = ret > 0;
+        const clr    = isGain ? 'var(--bp-al)' : (Math.abs(ret) < 1 ? 'var(--bp-text3)' : 'var(--bp-sat)');
+        retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)">${sign}${ret.toFixed(1).replace('.', ',')}%${activeTag}</td>`;
       }
     } else if (idx === 0) {
-      // CPO-1637: sinyal BEKLE'ye (veya karşı yöne) dönmüş ama backend bu
-      // geçişi henüz ayrı bir "kapandı" kaydı olarak loglamıyor — gerçek
-      // kapanış fiyatı/tarihi bilinmiyor, uydurmaktansa boş bırakılıyor.
+      // Hâlâ aktif olmayan (liveSignal'e uymuyor) ama kapanış fiyatı da yok
+      // — beklenmeyen edge case, uydurmaktansa boş bırakılıyor.
       retHtml = '<td style="color:var(--bp-text3);font-size:var(--bp-text-xs)">(kapandı)</td>';
-    } else {
-      // Kapanmış sinyal — history[idx-1] bu sinyali kapatan (daha yeni) sinyaldir
-      const exitH = history[idx - 1];
-      if (exitH && h.price) {
-        const ret  = ((exitH.price - h.price) / h.price * 100);
-        const sign = ret >= 0 ? '+' : '';
-        if (h.signal === 'SAT') {
-          retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1).replace('.', ',')}%</td>`;
-        } else {
-          const isGain = ret > 0;
-          const clr    = isGain ? 'var(--bp-al)' : (Math.abs(ret) < 1 ? 'var(--bp-text3)' : 'var(--bp-sat)');
-          retHtml = `<td style="color:${clr};font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)">${sign}${ret.toFixed(1).replace('.', ',')}%</td>`;
-        }
-      }
     }
 
     return `<tr>
@@ -2600,21 +2599,27 @@ function renderHistory(history, currentPrice, liveSignal) {
    düzeltmesiyle "kazanç" gibi göstermek yanıltıcı). Bu ayrıca eski winRate
    (yön-düzeltmeli) / avgRet (ham ret) iç tutarsızlığını da kökten kapatır:
    AL için yön düzeltmesi zaten ret>0 ile özdeş.
-   CPO-1637 bilinen sınırlama: idx=0 burada da her zaman "hariç" sayılır —
-   aslen çoktan kapanmış (BEKLE'ye dönmüş) bir sinyal idx=0'da kalmışsa
-   (backend henüz bu geçişi kaydetmiyor) gerçek kapanış fiyatı/tarihi
-   olmadığından örnekleme haksız yere alınamıyor. Tam çözüm backend'in
-   BEKLE geçişini de ayrı bir "kapandı" kaydı olarak loglamasını gerektirir. */
+   CPO-1637 Seçenek 2: backend artık BEKLE'ye dönüşü işaretleyen kaydın
+   üzerine `closed_at_price` koyuyor — bu alan varsa idx=0 dahi olsa
+   sinyal GERÇEKTEN kapanmış demektir, örnekleme dahil edilir (gerçek
+   kapanış fiyatıyla). closed_at_price yoksa (hâlâ aktif VEYA doğrudan
+   karşı yöne flip) eski davranış: idx=0 hariç, idx>0 için history[idx-1]. */
 function renderSigPerf(history) {
   const box = document.getElementById('sigPerfBox');
   if (!box) return;
   const closed = [];
-  for (let idx = 1; idx < (history || []).length; idx++) {
+  for (let idx = 0; idx < (history || []).length; idx++) {
     const h = history[idx];
     if (h.signal !== 'AL') continue;
-    const exitH = history[idx - 1];
-    if (!exitH || !h.price) continue;
-    const ret = (exitH.price - h.price) / h.price * 100;
+    let exitPrice = null;
+    if (h.closed_at_price != null) {
+      exitPrice = h.closed_at_price;
+    } else if (idx > 0) {
+      const exitH = history[idx - 1];
+      exitPrice = exitH ? exitH.price : null;
+    }
+    if (exitPrice == null || !h.price) continue;
+    const ret = (exitPrice - h.price) / h.price * 100;
     closed.push({ ret, isGain: ret > 0 });
   }
   if (closed.length === 0) { box.style.display = 'none'; return; }
