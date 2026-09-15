@@ -3340,7 +3340,7 @@ async function loadMTF() {
       const bord = sigBord(d.signal);
       const arr  = sigArrow(d.signal);
       const lbl  = sigLabel(d.signal);
-      const scoreBar = d.bull_score > 0
+      const scoreBar = d.bull_score >= d.bear_score
         ? `<div style="display:flex;gap:2px;margin-top:6px">${[0,1,2].map(i =>
             `<div style="flex:1;height:4px;border-radius:2px;background:${i<d.bull_score?col:'var(--bp-border)'}"></div>`
           ).join('')}</div>`
@@ -3385,7 +3385,7 @@ document.addEventListener('visibilitychange', () => {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=72" defer></script>
+<script src="/static/bp-search.js?v=73" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 <script src="/static/js/bp-chart-common.js?v=2"></script>
 <script src="/static/learning-mode.js?v=5" defer></script>

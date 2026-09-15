@@ -197,8 +197,9 @@
     border-color: var(--bp-brand);
   }
   .active-chip .chip-x {
-    width: 18px;
-    height: 18px;
+    position: relative;
+    width: 22px;
+    height: 22px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -211,6 +212,13 @@
     border-radius: 50%;
     padding: 0;
     transition: all .15s;
+  }
+  .active-chip .chip-x::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    min-width: 36px; min-height: 36px;
+    transform: translate(-50%, -50%);
   }
   @media (hover: hover) and (pointer: fine) {
     .active-chip .chip-x:hover {
@@ -232,6 +240,11 @@
   @media (max-width: 640px) {
     .active-chips-bar { padding: 8px 0 4px; }
     .active-chip { font-size: var(--bp-text-xs); padding: 3px 3px 3px 9px; }
+    /* 15.09 fresh-ground-audit #5: filtre/siralama kontrolleri 36px/29.5px idi, 44px dokunma hedefinin altinda */
+    .filter-group select,
+    .filter-group input[type=number],
+    .filter-group input[type=text] { min-height: 44px; }
+    .sort-select { min-height: 44px; padding-top: 9px; padding-bottom: 9px; }
   }
 
   .btn-reset {

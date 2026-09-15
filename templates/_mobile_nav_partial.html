@@ -8,7 +8,10 @@
    için değiştirilmedi, sadece görsel SVG.
    CPO-DEV2-054 Faz 1: push-özel senkronizasyon (F11) kaldırıldı — web-push
    tamamen kaldırıldı, gerçek abone hiç olmamıştı.
-   Pull-to-refresh: index.html'de ayrıca eklendi.
+   15.09 fresh-ground-audit: "Pull-to-refresh index.html'de eklendi" notu YANLIŞTI —
+   gerçek touch implementasyonu hiç yoktu (native browser PTR'a güveniliyordu, PWA/
+   standalone modda o da çalışmaz). Bu yanlış varsayım header'daki Yenile butonunu
+   mobilde tamamen gizletmişti (bp-search.js) — o gizleme kaldırıldı, not düzeltildi.
    Idempotent: CSS class'ları unique (mbn-*), JS window.toggleMbnSheet / closeMbnSheet
    re-assignment ile çift tanımlama hatası önler. {% include %} ile çağrılır. #}
 

@@ -23,7 +23,8 @@
     + '.bp-search-modal{width:min(560px,calc(100vw - 32px));background:#141416;border:1px solid #2a2a2c;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);max-height:calc(100vh - 120px);display:flex;flex-direction:column}'
     + '.bp-search-input-wrap{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid #2a2a2c}'
     + '.bp-search-input-icon{width:18px;height:18px;color:#909097;flex-shrink:0}'
-    + '#bpSearchInput{flex:1;background:none;border:none;outline:none;font-size:15px;color:#e5e1e4;font-family:Manrope,system-ui,sans-serif;min-width:0;padding:0;margin:0}'
+    + '#bpSearchInput{flex:1;background:none;border:none;outline:none;font-size:15px;color:#e5e1e4;font-family:Manrope,system-ui,sans-serif;min-width:0;padding:0;margin:0;-webkit-appearance:none;appearance:none}'
+    + '#bpSearchInput::-webkit-search-cancel-button,#bpSearchInput::-webkit-search-decoration{-webkit-appearance:none;appearance:none}'
     + '#bpSearchInput::placeholder{color:#909097}'
     + '.bp-search-close{background:#1c1b1f;border:1px solid #2a2a2c;color:#c7c5cd;width:28px;height:28px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-family:inherit;padding:0}'
     + '.bp-search-close:hover{background:#201f21;color:#e5e1e4}'
@@ -101,9 +102,12 @@
     + '@keyframes bpRefreshSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}'
     + '.bp-refresh-btn svg{width:12px;height:12px;flex-shrink:0}'
     + '@media (max-width:768px){.bp-live-time{font-size:10px;padding:4px 7px}.bp-live-time .bp-live-time-text{display:none}.bp-refresh-btn .bp-refresh-label{display:none}.bp-refresh-btn{padding:5px 8px}}'
-    + '@media (max-width:480px){.bp-live-time{display:none}}'
-    /* CPO-1192 M1/M2: mobil üst bar taşması — Yenile pull-to-refresh'le çözülür, header'da yer kaplamasın */
-    + '@media (max-width:600px){.bp-refresh-btn{display:none}}';
+    + '@media (max-width:480px){.bp-live-time{display:none}}';
+    /* 15.09 fresh-ground-audit #3: CPO-1192'nin "Yenile pull-to-refresh'le çözülür" varsayımı
+       yanlıştı — sitede gerçek bir touch pull-to-refresh implementasyonu hiç yoktu, mobilde
+       (özellikle PWA/standalone modda, tarayıcı chrome'u olmadığı için native PTR de çalışmaz)
+       kullanıcının manuel yenileme yolu tamamen kapanıyordu. 768px altında zaten ikon-only
+       kompakt hale geliyor (satır 104); tamamen gizleme kuralı kaldırıldı. */
 
   // Inject CSS
   if (!document.getElementById('bp-search-css')) {
@@ -289,7 +293,7 @@
       +   '<div class="bp-search-modal" id="bpSearchModal" role="dialog" aria-modal="true" aria-label="Site içi arama">'
       +     '<div class="bp-search-input-wrap">'
       +       '<svg class="bp-search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
-      +       '<input id="bpSearchInput" type="text" placeholder="Hisse, sektör veya konu ara…" aria-label="Hisse, sektör veya konu ara" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="bpSearchResults" aria-autocomplete="list" aria-activedescendant="">'
+      +       '<input id="bpSearchInput" type="search" placeholder="Hisse, sektör veya konu ara…" aria-label="Hisse, sektör veya konu ara" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="bpSearchResults" aria-autocomplete="list" aria-activedescendant="">'
       +       '<button class="bp-search-close" type="button" id="bpSearchClose" aria-label="Kapat">✕</button>'
       +     '</div>'
       +     '<div class="bp-search-results" id="bpSearchResults" role="listbox" aria-label="Arama sonuçları"></div>'
