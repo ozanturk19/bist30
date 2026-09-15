@@ -580,7 +580,7 @@
   function reportClientError(payload) {
     try {
       navigator.sendBeacon
-        ? navigator.sendBeacon('/api/log-error', JSON.stringify(payload))
+        ? navigator.sendBeacon('/api/log-error', new Blob([JSON.stringify(payload)], {type: 'application/json'}))
         : fetch('/api/log-error', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
