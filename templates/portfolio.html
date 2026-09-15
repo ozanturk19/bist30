@@ -701,7 +701,26 @@ function render() {
   tbody.innerHTML = rows.map(r => r.trHtml).join('');
   if (mcards) mcards.innerHTML = rows.map(r => r.cardHtml).join('');
   renderSummary({ totalCost, totalVal, pnl: totalVal - totalCost, count: portfolio.length, alCount, satCount, missingPriceCount });
+  _pfCheckTableOverflow();
 }
+
+/* 15.09 fresh-ground-audit fix: CPO-DEV2-100'un statik ">=900px sigar" varsayimi yanlisti
+   (bkz. portfolio.css .pf-table yorumu) — tablo GERCEKTEN sigdiginda (icerik genisligi <=
+   kapsayici genislik) .pf-fits class'i eklenir, sticky thead o zaman calisir; sigmadiginda
+   overflow-x:auto ile yatay kaydirma her zaman erisilebilir kalir, Duzenle/Sil butonlari
+   asla ekran disina dusmez. render() sonrasi + resize'da (debounced) cagrilir. */
+function _pfCheckTableOverflow() {
+  const wrap = document.querySelector('.pf-table');
+  const table = wrap ? wrap.querySelector('table') : null;
+  if (!wrap || !table || table.style.display === 'none') return;
+  const fits = table.scrollWidth <= wrap.clientWidth + 1;
+  wrap.classList.toggle('pf-fits', fits);
+}
+let _pfResizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_pfResizeTimer);
+  _pfResizeTimer = setTimeout(_pfCheckTableOverflow, 150);
+});
 
 function renderSummary(s) {
   if (!s || s.count === 0) {

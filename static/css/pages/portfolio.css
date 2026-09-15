@@ -24,12 +24,15 @@
   .add-lbl { font-size:var(--bp-text-sm); color:var(--bp-text3); }
 
   .pf-table { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  /* CPO-DEV2-100: overflow-x:auto kosulsuz uygulanmisti, geregi olmayan genislikte bile
-     thead sticky referansini bozuyordu. >=900px'te tablo viewport'a sigar (mobilde
-     zaten #pfMobileCards devrede, table gizli) - scroll ihtiyaci kalmiyor. */
-  @media (min-width:900px) {
-    .pf-table { overflow-x: visible; }
-  }
+  /* CPO-DEV2-100'un ">=900px'te tablo viewport'a sigar" varsayimi 15.09 fresh-ground-audit'te
+     YANLIS cikti: 12 sutunlu tablo .container'in sabit max-width:1100px tavanina (padding sonrasi
+     ~1052px kullanilabilir alan) gercek verideki genislikten (olculen ~1077px+) daha dar kaliyor —
+     viewport 1200px+ olsa bile .container büyümeyi durdurdugu icin duzelmiyor, Duzenle/Sil butonlari
+     erisilemez hale geliyordu. Statik bir breakpoint (900px yerine baska bir sayi) bu sorunu COZMEZ
+     cunku "sigma" viewport genisligine degil, GERCEK VERI genisligine bagli (ticker/PnL rakamlarinin
+     uzunlugu degisken). Cozum: JS (_pfCheckTableOverflow, portfolio.html) render sonrasi gercekten
+     olcup sadece GERCEKTEN sigdiginda .pf-fits class'i ekliyor — statik breakpoint yerine dinamik olcum. */
+  .pf-table.pf-fits { overflow-x: visible; }
   table { width:100%; border-collapse:collapse; }
   thead th { background:var(--bp-surface2); padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--bp-border); white-space:nowrap; position:sticky; top:60px; z-index:var(--bp-z-dropdown); }
   tbody tr { border-bottom:1px solid var(--bp-border-subtle); }
