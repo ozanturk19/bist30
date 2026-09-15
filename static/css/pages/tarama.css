@@ -472,6 +472,17 @@
     #resultTable { display:none !important; }
     #mobileResultCards { display:flex; }
   }
+  /* Temel Analiz sekmesi (#resultTableTemel/#mobileResultCardsTemel) yukarıdaki
+     #resultTable/#mobileResultCards ile AYNI sticky-thead kırılganlığına sahip
+     (satır 462-469'daki açıklama) ama bu kural eklendiğinde bu ikinci tabloya
+     hiç uygulanmamıştı — mobilde thead sticky referansı .table-wrap'in kendi
+     scrollport'una kayıp başlık satırını ilk verinin altına itiyordu (15.09
+     Ozan canlı ekran görüntüsü). Aynı 900px eşiğiyle hizalanmalı. */
+  #mobileResultCardsTemel { display:none; flex-direction:column; gap:10px; padding:4px 0 12px; }
+  @media (max-width:899px) {
+    #resultTableTemel { display:none !important; }
+    #mobileResultCardsTemel { display:flex; }
+  }
   .mr-card {
     display:block; background:var(--surface); border:1px solid var(--border);
     border-radius:var(--bp-radius-lg); padding:12px 14px; text-decoration:none; color:inherit;
