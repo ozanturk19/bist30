@@ -1925,18 +1925,29 @@ let _hisseResizeHandler = null;
 let _chartResizeT = null;   // r157: resize debounce (sparkline'daki _sparkResizeTimer desenine hizali)
 
 function buildChart(d) {
+  /* 15.09 fresh-ground-audit fix: backend'in WARMUP_MIN kapısından bağımsız, kendi
+   * istemci-taraflı güvenlik ağı — backend garantisi bir gün değişirse sessizce
+   * bozuk/boş bir grafik çizmek yerine dürüst bir mesaj göster. */
+  if ((d.ohlc || []).length < 2) {
+    _showChartStatus('Bu hisse için yeterli grafik verisi yok.', false);
+    return;
+  }
   if (_hisseChart) { try { _hisseChart.remove(); } catch(_) { console.warn('eski chart instance temizlenemedi', _); } _hisseChart = null; }
   if (_hisseChartRO) { try { _hisseChartRO.disconnect(); } catch(_) { /* zaten disconnect olabilir */ } _hisseChartRO = null; }
   if (_hisseResizeHandler) { window.removeEventListener('resize', _hisseResizeHandler); _hisseResizeHandler = null; }
   document.getElementById('chartLoading').style.display = 'none';
   document.getElementById('chartsInner').style.display  = 'block';
 
-  /* G27: dynamic chart title based on OHLC count (defensive — avoids "Günlük" label on monthly data) */
+  /* 15.09 fresh-ground-audit fix: backend bu route icin OHLC'yi HER ZAMAN gunluk bar
+   * uretiyor (weekly/monthly resample yok) — bar sayisi veri granularitesini degil,
+   * sadece hissenin ne kadar suredir islem gordugunu yansitir. Eski G27 bloğu bunu
+   * "Haftalik/Aylik" diye yanlis etiketliyordu (150-300 bar arasi her yeni-listelenmis
+   * hisse icin). Etiket her zaman "Gunluk" kalir, sure kismi dogru veriye gore kurulur. */
   (function() {
     var n = (d.ohlc || []).length;
-    var period = n > 300 ? 'Günlük' : n > 100 ? 'Haftalık' : 'Aylık';
+    var sure = n >= 500 ? '2 Yıl' : (n + ' İşlem Günü');
     var el = document.querySelector('.chart-label');
-    if (el) el.textContent = '{{ ticker }} — ' + period + ' Grafik (2 Yıl)';
+    if (el) el.textContent = '{{ ticker }} — Günlük Grafik (' + sure + ')';
   })();
 
   /* #18-redux: sequential reindex — tatil/hafta sonu gap yok (TradingView standardı)
