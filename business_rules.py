@@ -181,6 +181,33 @@ def derive_adx_label(adx):
     return "Zayıf"
 
 
+# CPO-1656: /api/data (app.py, Faz 1 #3) ve /api/karsilastir farklı eşiklerle
+# (kanonik <70 vs karsilastir'in kendi >70) çelişen RSI bölge etiketi
+# üretiyordu — aynı TUPRS RSI=70.6 için biri "Dikkatli" biri "(Aşırı Alım)"
+# gösteriyordu. derive_adx_label ile aynı desen: tek kaynak burada.
+def derive_rsi_zone(rsi):
+    """RSI değerinden tek kaynaklı bölge etiketi (Site Contract Bölüm 3.3).
+
+    Eşikler: <30 Aşırı Satım · 30-45 Dip Toparlanması · 45-60 İdeal Giriş
+    Penceresi · 60-70 Trend Güçleniyor · 70-80 Dikkatli · >=80 Aşırı Alım.
+    """
+    try:
+        r = float(rsi)
+    except (TypeError, ValueError):
+        return None
+    if r < 30:
+        return "Aşırı Satım"
+    if r < 45:
+        return "Dip Toparlanması"
+    if r < 60:
+        return "İdeal Giriş Penceresi"
+    if r < 70:
+        return "Trend Güçleniyor"
+    if r < 80:
+        return "Dikkatli"
+    return "Aşırı Alım"
+
+
 # ── T1.1 (CPO-1321 FAZ 1) — kanonik sözlük evi ──────────────────────────────
 # derive_adx_label ile aynı desen. NOT (r53 bug-hunt + CPO-DEV2-060 düzeltmesi):
 # bu 4 sözlük app.py için tek kaynak ama templates/*.html HÂLÂ kendi bağımsız

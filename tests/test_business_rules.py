@@ -11,6 +11,7 @@ from business_rules import (
     validate_date_range,
     validate_stocks_list,
     derive_adx_label,
+    derive_rsi_zone,
 )
 from datetime import date
 
@@ -167,6 +168,40 @@ def test_adx_label_invalid_defaults_zayif():
     assert derive_adx_label("n/a") == "Zayıf"
 
 
+# ── derive_rsi_zone (CPO-1656 — tek kaynaklı RSI bölge eşiği) ─────────────────
+# TUPRS RSI=70.6 örneği: /hisse ve /api/data bunu "Dikkatli" gösterirken
+# /karsilastir kendi bağımsız >70 mantığıyla "(Aşırı Alım)" gösteriyordu.
+# Aşağıdaki sınır testleri derive_rsi_zone'un kanonik (<70 Dikkatli, >=80
+# Aşırı Alım) eşiğini kilitler.
+
+def test_rsi_zone_asiri_satim():
+    assert derive_rsi_zone(29.9) == "Aşırı Satım"
+
+def test_rsi_zone_dip_toparlanma_lower_bound():
+    assert derive_rsi_zone(30) == "Dip Toparlanması"
+
+def test_rsi_zone_ideal_giris_lower_bound():
+    assert derive_rsi_zone(45) == "İdeal Giriş Penceresi"
+
+def test_rsi_zone_trend_guclenior_lower_bound():
+    assert derive_rsi_zone(60) == "Trend Güçleniyor"
+
+def test_rsi_zone_dikkatli_lower_bound():
+    assert derive_rsi_zone(70) == "Dikkatli"
+
+def test_rsi_zone_dikkatli_upper_bound_tuprs_ornegi():
+    assert derive_rsi_zone(70.6) == "Dikkatli"  # karsilastir eskiden "(Aşırı Alım)" derdi
+
+def test_rsi_zone_asiri_alim_lower_bound():
+    assert derive_rsi_zone(80) == "Aşırı Alım"
+
+def test_rsi_zone_none_returns_none():
+    assert derive_rsi_zone(None) is None
+
+def test_rsi_zone_invalid_returns_none():
+    assert derive_rsi_zone("n/a") is None
+
+
 # ── runner ───────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -185,6 +220,11 @@ if __name__ == "__main__":
         test_adx_label_zayif, test_adx_label_orta_lower_bound, test_adx_label_orta_upper_bound,
         test_adx_label_guclu_lower_bound, test_adx_label_guclu_upper_bound, test_adx_label_cok_guclu,
         test_adx_label_none_defaults_zayif, test_adx_label_invalid_defaults_zayif,
+        test_rsi_zone_asiri_satim, test_rsi_zone_dip_toparlanma_lower_bound,
+        test_rsi_zone_ideal_giris_lower_bound, test_rsi_zone_trend_guclenior_lower_bound,
+        test_rsi_zone_dikkatli_lower_bound, test_rsi_zone_dikkatli_upper_bound_tuprs_ornegi,
+        test_rsi_zone_asiri_alim_lower_bound, test_rsi_zone_none_returns_none,
+        test_rsi_zone_invalid_returns_none,
     ]
     passed = failed_list = 0
     fail_names = []

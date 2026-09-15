@@ -74,6 +74,7 @@ except ImportError:
 try:
     from business_rules   import validate_stocks_list          as _dqv_business_rules
     from business_rules   import derive_adx_label
+    from business_rules   import derive_rsi_zone                # CPO-1656: tek kaynak
     from business_rules   import is_signal_from_today          # CPO-1335
     from business_rules   import derive_signal_date_label      # CPO-1335
     from business_rules   import signal_date_age_days          # CPO-1335
@@ -104,6 +105,17 @@ except ImportError as _dqv_import_err:
         if a >= 25: return "Güçlü"
         if a >= 18: return "Orta"
         return "Zayıf"
+    def derive_rsi_zone(rsi):  # fallback: business_rules.derive_rsi_zone ile BIREBIR AYNI kalmali
+        try:
+            r = float(rsi)
+        except (TypeError, ValueError):
+            return None
+        if r < 30: return "Aşırı Satım"
+        if r < 45: return "Dip Toparlanması"
+        if r < 60: return "İdeal Giriş Penceresi"
+        if r < 70: return "Trend Güçleniyor"
+        if r < 80: return "Dikkatli"
+        return "Aşırı Alım"
     # CPO-1335: sözlük evi yüklenemezse göreli tarih etiketi ÜRETME.
     # "Bugün" varsayımına düşmektense etiketsiz kal — bu bir dürüstlük
     # kalemi, sessiz fallback kusurun ta kendisiydi (`bars || 1`).
@@ -1899,22 +1911,11 @@ def analyze(ticker_base):
         # signal_age_phrase Jinja filtresiyle SSR (hisse.html hero/quickfacts).
 
         # ── RSI Bölge Rozeti (Faz 1 #3) — spec Bölüm 3.3 ────────────────────
-        # 30-45: Dip Toparlanması | 45-60: İdeal Giriş ✅ | 60-70: Trend Güçleniyor
-        # 70-80: Dikkatli ⚠️ | 80+: Aşırı Alım 🔴 | <30: Aşırı Satım
-        if rsi_val is None:
-            rsi_zone = None
-        elif rsi_val < 30:
-            rsi_zone = "Aşırı Satım"
-        elif rsi_val < 45:
-            rsi_zone = "Dip Toparlanması"
-        elif rsi_val < 60:
-            rsi_zone = "İdeal Giriş Penceresi"
-        elif rsi_val < 70:
-            rsi_zone = "Trend Güçleniyor"
-        elif rsi_val < 80:
-            rsi_zone = "Dikkatli"
-        else:
-            rsi_zone = "Aşırı Alım"
+        # CPO-1656: kanonik derive_rsi_zone()'a taşındı (tek kaynak, aşağıdaki
+        # eşikler business_rules.py:derive_rsi_zone ile BIREBIR AYNI kalmali) —
+        # önceden /api/karsilastir kendi bağımsız (>70 Aşırı Alım) eşiğini
+        # kullanıyordu, aynı hissede iki sayfa zıt yorum üretiyordu.
+        rsi_zone = derive_rsi_zone(rsi_val)
 
         # ── R/R Çift Oran (Faz 1 #2) — bug fix ─────────────────────────────
         # Önceki kod hard-coded rr_ratio=2.0 veriyordu (anlamsız).
@@ -10457,6 +10458,11 @@ def api_karsilastir():
             "adx":            adx_val,
             "adx_label":      derive_adx_label(adx_val) if adx_val is not None else None,  # CPO-1196 D0 #4
             "rsi":            s.get("rsi"),
+            # CPO-1656: kanonik derive_rsi_zone() — karsilastir.html'in kendi
+            # bağımsız (>70 Aşırı Alım) eşiği ADX'teki CPO-1648 deseninin
+            # RSI'ya hiç uygulanmamış hâliydi, aynı hissede /hisse ile zıt
+            # yorum üretiyordu (backend alanı burada açılır, frontend ayrı fix'te tüketir).
+            "rsi_zone":       derive_rsi_zone(s.get("rsi")),
             "signal_bars":    s.get("signal_bars"),
             "signal_date":    s.get("signal_date"),
             "entry_quality":  s.get("entry_quality"),
