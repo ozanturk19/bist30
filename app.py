@@ -12787,7 +12787,7 @@ _LOG_CTRL_CHARS_RE = re.compile(r"[\r\n\x00-\x1f]")   # log injection/forging ko
 @limiter.limit("30 per minute")
 def api_log_error():
     """Client-side JS hatalarını logger'a yazar. Stealth bug detection."""
-    data = request.get_json(silent=True)
+    data = request.get_json(silent=True, force=True)
     if not isinstance(data, dict):
         data = {}
     msg  = _LOG_CTRL_CHARS_RE.sub(" ", (data.get("msg") or "").strip())[:500]
