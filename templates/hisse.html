@@ -2454,8 +2454,13 @@ function renderSummary(s, signalData) {
   const _IND_TOOLTIPS = {
     'Trend Yönü':  'Supertrend(10,3) indikatörü fiyatın ATR bazlı dinamik banda göre LONG mu SHORT mu olduğunu belirler. Fiyat üst bandın üzerinde kapanırsa yükseliş, altında kapanırsa düşüş yönü onaylanır. Örnek: 3 ardışık kapanış Supertrend bandı üzerinde → güçlü yükseliş trendi.',
     'Momentum':    'ADX (Ortalama Yön Endeksi) trendin gücünü 0-100 arası ölçer — yön değil güç verir. ADX ≥ 25 güçlü trend, 18-25 orta, < 18 zayıf/yatay piyasa anlamına gelir. DI+ > DI− ise alıcılar baskın, DI− > DI+ ise satıcılar baskın.',
-    'Vade Uyumu':  'EMA12 (12 günlük) ve EMA99 (99 günlük) hareketli ortalama karşılaştırılır. EMA12 > EMA99 kısa vadenin uzun vadenin üzerinde olduğunu — yani yükseliş eğilimini — gösterir. Örnek: Her iki EMA aynı yönde ise tüm vadeler uyumlu, sinyal güvenilirliği artar.',
+    'Vade Uyumu':  'EMA12 (12 günlük) ve EMA99 (99 günlük) hareketli ortalama karşılaştırılır. EMA12 > EMA99 kısa vadenin uzun vadenin üzerinde olduğunu — yani yükseliş eğilimini — gösterir. Örnek: Her iki EMA aynı yönde ise tüm vadeler uyumlu, sinyal güvenilirliği artar. "Kararsızlık bölgesi" notu: fark %0.15'in altındaysa iki ortalama neredeyse çakışıyor demektir, sinyal sınıflandırmasını DEĞİŞTİRMEZ — sadece şeffaflık için gösterilir.',
   };
+  // CPO-1656 EK YANIT Seçenek B: ham EMA12/EMA99 fark yüzdesi eşik-altıysa
+  // (business_rules.derive_ema_deadband, %0.15) sadece bilgilendirici bir not
+  // eklenir — e12_bull/e12_bear karşılaştırması (dolayısıyla ok/AL-SAT-BEKLE)
+  // DEĞİŞMEZ, sıfır regresyon riski.
+  const _emaDb = signalData && signalData.indicators && signalData.indicators.ema1299;
   const inds = [
     {
       label: 'Trend Yönü',
@@ -2473,8 +2478,10 @@ function renderSummary(s, signalData) {
     },
     {
       label: 'Vade Uyumu',
-      detail: s.e12 > s.e99 ? 'Kısa > Uzun' : s.e12 < s.e99 ? 'Kısa < Uzun' : 'Eşit',
-      techDetail: 'EMA12: ' + s.e12 + ' · EMA99: ' + s.e99,
+      detail: (s.e12 > s.e99 ? 'Kısa > Uzun' : s.e12 < s.e99 ? 'Kısa < Uzun' : 'Eşit') +
+        (_emaDb && _emaDb.deadband ? ' · ⚠️ kararsızlık bölgesi' : ''),
+      techDetail: 'EMA12: ' + s.e12 + ' · EMA99: ' + s.e99 +
+        (_emaDb && _emaDb.diff_pct != null ? ' · fark: %' + String(_emaDb.diff_pct).replace('.', ',') : ''),
       ok: s.signal === 'SAT' ? s.e12_bear : s.e12_bull,
       blog: '/blog/ema-hareketli-ortalama-nedir'
     },

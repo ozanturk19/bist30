@@ -208,6 +208,34 @@ def derive_rsi_zone(rsi):
     return "Aşırı Alım"
 
 
+# CPO-1656 EK YANIT: EMA12/EMA99 kriterinde histerezis/ölü-bant YOK, salt
+# e12>e99/e12<e99 karşılaştırması — CPO Seçenek A'yı (gerçek dead-band, sinyal
+# üretimini değiştirir) Ozan onayı gerektiren ayrı bir konu olarak ayırdı,
+# Seçenek B'yi (UI-only rozet, sinyal motoru DEĞİŞMEZ) onayladı. Bu fonksiyon
+# SADECE ham fark yüzdesini ve eşik-altı "kararsızlık bölgesi" bayrağını
+# hesaplar — app.py'deki e12_bull/e12_bear karşılaştırması bu fonksiyonu
+# hiç çağırmaz, sıfır regresyon riski.
+EMA_DEADBAND_THRESHOLD_PCT = 0.15
+
+
+def derive_ema_deadband(e12, e99):
+    """EMA12/EMA99 ham fark yüzdesi + kararsızlık-bölgesi bayrağı (Seçenek B).
+
+    Döner: (diff_pct, is_deadband). diff_pct=|e12-e99|/e99*100, is_deadband
+    diff_pct < %0.15 ise True (CPO-1656'da CPO'nun önerdiği eşik). Sinyal
+    sınıflandırması (AL/SAT/BEKLE) bu eşikten etkilenmez — sadece UI rozeti içindir.
+    """
+    try:
+        e12f = float(e12)
+        e99f = float(e99)
+    except (TypeError, ValueError):
+        return None, False
+    if e99f == 0:
+        return None, False
+    diff_pct = abs(e12f - e99f) / abs(e99f) * 100
+    return round(diff_pct, 3), diff_pct < EMA_DEADBAND_THRESHOLD_PCT
+
+
 # ── T1.1 (CPO-1321 FAZ 1) — kanonik sözlük evi ──────────────────────────────
 # derive_adx_label ile aynı desen. NOT (r53 bug-hunt + CPO-DEV2-060 düzeltmesi):
 # bu 4 sözlük app.py için tek kaynak ama templates/*.html HÂLÂ kendi bağımsız

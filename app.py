@@ -75,6 +75,7 @@ try:
     from business_rules   import validate_stocks_list          as _dqv_business_rules
     from business_rules   import derive_adx_label
     from business_rules   import derive_rsi_zone                # CPO-1656: tek kaynak
+    from business_rules   import derive_ema_deadband            # CPO-1656 EK YANIT: Seçenek B (UI-only rozet)
     from business_rules   import is_signal_from_today          # CPO-1335
     from business_rules   import derive_signal_date_label      # CPO-1335
     from business_rules   import signal_date_age_days          # CPO-1335
@@ -116,6 +117,15 @@ except ImportError as _dqv_import_err:
         if r < 70: return "Trend Güçleniyor"
         if r < 80: return "Dikkatli"
         return "Aşırı Alım"
+    def derive_ema_deadband(e12, e99):  # fallback: business_rules.derive_ema_deadband ile BIREBIR AYNI kalmali
+        try:
+            e12f = float(e12); e99f = float(e99)
+        except (TypeError, ValueError):
+            return None, False
+        if e99f == 0:
+            return None, False
+        diff_pct = abs(e12f - e99f) / abs(e99f) * 100
+        return round(diff_pct, 3), diff_pct < 0.15
     # CPO-1335: sözlük evi yüklenemezse göreli tarih etiketi ÜRETME.
     # "Bugün" varsayımına düşmektense etiketsiz kal — bu bir dürüstlük
     # kalemi, sessiz fallback kusurun ta kendisiydi (`bars || 1`).
@@ -1714,6 +1724,10 @@ def analyze(ticker_base):
         adx_bear = adx_val >= 25 and di_m > di_p
         e12_bull = e12 > e99
         e12_bear = e12 < e99
+        # CPO-1656 EK YANIT Seçenek B: ham fark yüzdesi + kararsızlık-bölgesi
+        # rozeti — SADECE UI için, e12_bull/e12_bear karşılaştırması (yukarıda)
+        # bu değerleri hiç kullanmaz, sinyal motoru değişmez.
+        ema_diff_pct, ema_deadband = derive_ema_deadband(e12, e99)
 
         bull_score = int(st_bull) + int(adx_bull) + int(e12_bull)  # max 3
         bear_score = int(st_bear) + int(adx_bear) + int(e12_bear)  # max 3
@@ -2030,6 +2044,8 @@ def analyze(ticker_base):
                     "label": "EMA12/99",
                     "value": f"{e12:.0f}/{e99:.0f}",
                     "bull":  e12_bull, "bear": e12_bear,
+                    "diff_pct": ema_diff_pct,   # CPO-1656 EK YANIT Seçenek B: ham fark %, UI rozeti icin
+                    "deadband": ema_deadband,   # True => "kararsızlık bölgesi", sinyal siniflandirmasi degismez
                 },
             },
             "rsi":             rsi_val,

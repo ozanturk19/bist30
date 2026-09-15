@@ -12,6 +12,7 @@ from business_rules import (
     validate_stocks_list,
     derive_adx_label,
     derive_rsi_zone,
+    derive_ema_deadband,
 )
 from datetime import date
 
@@ -202,6 +203,54 @@ def test_rsi_zone_invalid_returns_none():
     assert derive_rsi_zone("n/a") is None
 
 
+# ── derive_ema_deadband (CPO-1656 EK YANIT Seçenek B — UI-only rozet) ─────────
+# ISCTR canlı örneği (CPO-1656): EMA12=13.4147/EMA99=13.4293, fark %0.109 —
+# eşiğin (%0.15) altında, "kararsızlık bölgesi" True olmalı.
+
+def test_ema_deadband_isctr_ornegi_true():
+    diff_pct, deadband = derive_ema_deadband(13.4147, 13.4293)
+    assert diff_pct == 0.109
+    assert deadband is True
+
+def test_ema_deadband_uzak_degerler_false():
+    diff_pct, deadband = derive_ema_deadband(121, 104)
+    assert deadband is False
+    assert diff_pct > 0.15
+
+def test_ema_deadband_esik_altinda_true():
+    diff_pct, deadband = derive_ema_deadband(100.10, 100.0)
+    assert deadband is True
+
+def test_ema_deadband_esikte_false():
+    # tam %0.15 -> strict < kullanılır, eşitlik deadband SAYILMAZ
+    diff_pct, deadband = derive_ema_deadband(100.15, 100.0)
+    assert diff_pct == 0.15
+    assert deadband is False
+
+def test_ema_deadband_none_input():
+    diff_pct, deadband = derive_ema_deadband(None, 100)
+    assert diff_pct is None
+    assert deadband is False
+
+def test_ema_deadband_invalid_input():
+    diff_pct, deadband = derive_ema_deadband("n/a", 100)
+    assert diff_pct is None
+    assert deadband is False
+
+def test_ema_deadband_zero_e99():
+    diff_pct, deadband = derive_ema_deadband(10, 0)
+    assert diff_pct is None
+    assert deadband is False
+
+def test_ema_deadband_does_not_affect_bull_bear_comparison():
+    # Sinyal motorunun e12>e99/e12<e99 karşılaştırması bu fonksiyondan
+    # BAĞIMSIZ kalmalı — deadband True olsa bile yön karşılaştırması aynı.
+    e12, e99 = 13.4147, 13.4293
+    _, deadband = derive_ema_deadband(e12, e99)
+    assert deadband is True
+    assert (e12 > e99) is False  # e12 < e99, yön hâlâ net (sadece fark küçük)
+
+
 # ── runner ───────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -225,6 +274,10 @@ if __name__ == "__main__":
         test_rsi_zone_dikkatli_lower_bound, test_rsi_zone_dikkatli_upper_bound_tuprs_ornegi,
         test_rsi_zone_asiri_alim_lower_bound, test_rsi_zone_none_returns_none,
         test_rsi_zone_invalid_returns_none,
+        test_ema_deadband_isctr_ornegi_true, test_ema_deadband_uzak_degerler_false,
+        test_ema_deadband_esik_altinda_true, test_ema_deadband_esikte_false,
+        test_ema_deadband_none_input, test_ema_deadband_invalid_input,
+        test_ema_deadband_zero_e99, test_ema_deadband_does_not_affect_bull_bear_comparison,
     ]
     passed = failed_list = 0
     fail_names = []
