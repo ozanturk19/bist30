@@ -145,7 +145,7 @@
   /* ── Makro Ticker Bandı ── */
   .macro-bar {
     background:var(--bp-bg); border-bottom:1px solid var(--bp-border);
-    height:calc(32px + env(safe-area-inset-top,0px)); padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap;
+    min-height:32px; padding-top:env(safe-area-inset-top,0px); overflow:hidden; position:sticky; top:0; z-index:var(--bp-z-sticky); white-space:nowrap;
   }
   .macro-bar::before, .macro-bar::after {
     content:''; position:absolute; top:0; bottom:0; width:60px;
