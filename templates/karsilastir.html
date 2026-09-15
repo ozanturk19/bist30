@@ -175,11 +175,14 @@ function renderAdx(v, label) {
   return `<span class="${cl} mono">${n.toFixed(1).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
 }
 
-function renderRsi(v) {
+function renderRsi(v, zone) {
   if (v == null) return '<span class="muted">—</span>';
   const n = parseFloat(v);
-  const cl = n>70 ? 'dn' : n<30 ? 'up' : '';
-  const lbl = n>70 ? '(Aşırı Alım)' : n<30 ? '(Aşırı Satım)' : '';
+  // 15.09 CPO-1656 fix: bölge etiketi artık sunucudan gelir (business_rules.derive_rsi_zone —
+  // ADX'teki CPO-1648 deseniyle aynı), kendi bağımsız >70/<30 eşiğimiz kanonikle tutarsızdı
+  // (TUPRS RSI=70.6 burada "Aşırı Alım" derken /hisse'de "Dikkatli" diyordu).
+  const lbl = zone || '';
+  const cl = zone === 'Aşırı Alım' ? 'dn' : zone === 'Aşırı Satım' ? 'up' : '';
   return `<span class="${cl} mono">${n.toFixed(1).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
 }
 
@@ -208,7 +211,7 @@ function renderCell(key, s) {
     case 'price':         return renderPrice(v);
     case 'change_pct':    return renderChg(v);
     case 'adx':           return renderAdx(v, s.adx_label);
-    case 'rsi':           return renderRsi(v);
+    case 'rsi':           return renderRsi(v, s.rsi_zone);
     /* CPO-1335: "Sinyal Süresi" bar sayacı değil takvim yaşı */
     case 'signal_bars':   return `<span class="mono">${bpSignalAgeText(s.signal_date)}</span>`;
     case 'signal_date':   return v ? `<span style="font-size:var(--bp-text-sm)">${v}</span>` : '<span class="muted">—</span>';
