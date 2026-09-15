@@ -739,7 +739,7 @@ Histogram = MACD − Sinyal</pre>
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO']
   },
   {
-    "slug": "temettü-yatırımı",
+    "slug": "temettu-yatirimi",
     "title": "Temettü Yatırımı: Düzenli Gelir İçin BIST Hisseleri",
     "desc": "Temettü nedir, temettü verimi nasıl hesaplanır, hangi BIST100 şirketleri yüksek temettü dağıtır?",
     "date": "2026-04-19",
@@ -3306,7 +3306,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
   # ── ARTICLE 57 ─────────────────────────────────────────────────────────────
   {
-    "slug": "bist100-temettü-hisseleri-2026",
+    "slug": "bist100-temettu-hisseleri-2026",
     "title": "BIST100 Temettü Hisseleri 2026: Düzenli Gelir İçin Rehber",
     "desc": "BIST100'de en yüksek temettü verimine sahip hisseler hangileri? Temettü yatırımı nasıl yapılır, ne zaman alınır, vergi avantajları nelerdir? 2026 rehberi.",
     "cat": "Temel Analiz",

@@ -7412,8 +7412,13 @@ def _compute_chart_data(ticker_base, period="2y"):
 
     try:
         df = _fetch_chart_subprocess(ticker, period)  # G24b: lock-free subprocess
-        if df is None or len(df) < WARMUP_MIN:
-            return None
+        if df is None:
+            return None  # transient fetch hatası — sonraki cycle'da yeniden denenir
+        if len(df) < WARMUP_MIN:
+            # CPO-1653 P1: yapısal eksiklik (az-geçmişli hisse) — asla "geçici" değil,
+            # WARMUP_MIN gün dolana kadar düzelmeyecek. None ile aynı işlenirse hiç
+            # diske yazılmaz ve /api/hisse/<ticker>/chart sonsuza dek loading:true döner.
+            return {"insufficient_history": True, "bars_available": len(df)}
 
         has_volume = "Volume" in df.columns
         cols = ["Open", "High", "Low", "Close"] + (["Volume"] if has_volume else [])
@@ -7621,7 +7626,7 @@ def _compute_chart_data(ticker_base, period="2y"):
             "markers":        markers,
             "signal_history": signal_history,
             "volume":         vol_data,
-            "week52":         {"high": w52_high, "low": w52_low},
+            "week52":         {"high": w52_high, "low": w52_low, "bars_used": week52_bars, "is_partial": week52_bars < 252},
             "commentary":     commentary,
             "summary": {
                 "price":      round(c, 2),
@@ -7966,25 +7971,9 @@ def stock_page(ticker):
     ticker = ticker.upper()
     if ticker not in BIST100:
         if ticker in DELISTED_TICKERS:
-            from flask import make_response
-            html = (
-                "<!doctype html><html lang='tr'><head><meta charset='utf-8'>"
-                "<meta name='viewport' content='width=device-width,initial-scale=1.0'>"
-                f"<title>{ticker} — Borsadan çekildi | BorsaPusula</title>"
-                "<meta name='robots' content='noindex'>"
-                "<meta http-equiv='refresh' content='5;url=/hisseler'>"
-                "<style>body{background:#0e0e12;color:#e5e1e4;font-family:system-ui;padding:60px 20px;text-align:center}"
-                "a{color:#70b1ff;text-decoration:none;font-weight:600}h1{font-size:24px;margin-bottom:10px}"
-                "p{color:#909097;line-height:1.6}</style></head><body>"
-                f"<h1>{ticker} hissesi artık işlem görmüyor</h1>"
-                "<p>Bu hisse Borsa İstanbul'dan çekildi veya başka bir şirketle birleşti.</p>"
-                "<p><a href='/hisseler'>Tüm aktif BIST hisselerini görüntüle →</a></p>"
-                "<p style='font-size:11px;margin-top:20px'>5 saniye içinde otomatik yönlendirme…</p>"
-                "</body></html>"
-            )
-            r = make_response(html, 410)
-            r.headers['Content-Type'] = 'text/html; charset=utf-8'
-            return r
+            # CPO-1653 P1: eskiden ham hardcoded HTML string (marka kimliğinin
+            # tamamen dışında) — 404/500 ile aynı markalı _base.html desenine taşındı.
+            return render_template("410.html", ticker=ticker), 410
         return render_template("404.html"), 404
     name   = STOCK_NAMES.get(ticker, ticker)
     sector = _get_sector(ticker)
@@ -9074,6 +9063,14 @@ def api_stock_chart(ticker):
     if not data:
         return safe_json({"chart": None, "loading": True, "reason": "cache_miss_read_only_mode"})
 
+    if data.get("unavailable"):
+        # CPO-1653 P1: az-geçmişli hisse — retry hiçbir zaman işe yaramayacak,
+        # frontend'e dürüst kalıcı-unavailable dönülür (bkz. _compute_chart_data).
+        return safe_json({
+            "chart": None, "loading": False, "unavailable": True,
+            "reason": data.get("reason", "insufficient_history"),
+        })
+
     # ── SPEC-008 L1: Chart Integrity Guard ───────────────────────────────────
     # FINAL doğrulama — bozuk chart ASLA render edilmez. Sapma varsa cache iptal
     # + recompute; recompute de bozuksa integrity_error döner (frontend skeleton).
@@ -9088,7 +9085,7 @@ def api_stock_chart(ticker):
             with _lock:
                 _stock_chart_cache.pop(ticker, None)
             fresh = _compute_chart_data(ticker, period="2y")
-            if fresh:
+            if fresh and not fresh.get("insufficient_history"):
                 data = fresh
                 upd  = datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
                 with _lock:
@@ -12950,6 +12947,11 @@ _BLOG_SLUG_REDIRECTS = {
     "kap-bildirimleri-nedir":        "kap-bildirimleri-nasil-takip-edilir",
     "sektor-rotasyonu-nedir":        "bist-sektor-rotasyonu-hangi-donemde-hangi-sektor",
     "mum-grafik-formasyonlari":      "mum-formasyonlari-teknik-analiz-rehberi",
+    # CPO-1653 P2: 2/100 makale ham Türkçe karakterli slug kullanıyordu (98'i
+    # ASCII transliterasyonlu) — href ham UTF-8, canonical/sitemap %-encoded,
+    # aynı sayfa farklı byte-temsille yayılıyordu. ASCII'ye çevrildi + 301.
+    "temettü-yatırımı":              "temettu-yatirimi",
+    "bist100-temettü-hisseleri-2026": "bist100-temettu-hisseleri-2026",
 }
 
 def _normalize_article(a):
@@ -13188,6 +13190,18 @@ def _startup():
                     try:
                         data = _compute_chart_data(ticker, "2y")
                         if data:
+                            if data.get("insufficient_history"):
+                                # CPO-1653 P1: yapısal "yeterli geçmişi yok" — normal chart
+                                # şemasından ayırt edilebilir bir marker olarak diske yazılır,
+                                # api_stock_chart bunu görünce dürüst unavailable:true döner.
+                                path = os.path.join(_PHASE3_CHART_DIR, f"chart_{ticker}.json")
+                                _atomic_write_json(path, {
+                                    "unavailable": True,
+                                    "reason": "insufficient_history",
+                                    "bars_available": data.get("bars_available", 0),
+                                })
+                                done += 1
+                                continue
                             ohlc_count = len(data.get("ohlc") or [])
                             if ohlc_count < 100:
                                 # G28-b: yfinance gevent-lock timeout → yanlış interval data → düşük bar sayısı
@@ -13339,7 +13353,9 @@ def rate_limit_exceeded(e):
     # navigasyonuyla acilan sayfalar) artik ciplak JSON degil basit bir HTML mesaji alir.
     if request.path.startswith("/api/"):
         return jsonify({"ok": False, "error": "Çok fazla istek, lütfen biraz sonra tekrar deneyin."}), 429
-    return "<h1>429 Çok Fazla İstek</h1><p>Çok fazla istek gönderdiniz, lütfen biraz sonra tekrar deneyin.</p>", 429
+    # CPO-1653 P2: eskiden ham <h1> string (marka kimliğinin dışında) — 404/500
+    # ile aynı markalı _base.html desenine taşındı.
+    return render_template("429.html"), 429
 
 
 # r44 bug-hunt: 404/429 icin yapilan "/api/* -> JSON" ayristirmasi 500e hic

@@ -567,7 +567,7 @@
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
       <div class="week52-bar" id="week52Bar" style="display:none">
         <div class="week52-label">
-          <span>52 Haftalık Aralık</span>
+          <span id="w52label">52 Haftalık Aralık</span>
           <span><span id="w52low" class="bp-sat-text">—</span> — <span id="w52high" class="bp-al-text">—</span></span>
         </div>
         <div class="week52-track">
@@ -2010,6 +2010,14 @@ function buildChart(d) {
     document.getElementById('w52cur').textContent    = fmt(cur) + ' ₺';
     document.getElementById('w52fill').style.width   = pct + '%';
     document.getElementById('w52cursor').style.left  = pct + '%';
+    /* CPO-1653 P2: az-geçmişli hisselerde "52 Haftalık" yanlış — backend'in
+       fiilen kullandığı bar sayısını (bars_used) dürüstçe göster. */
+    const w52label = document.getElementById('w52label');
+    if (w52label) {
+      w52label.textContent = d.week52.is_partial
+        ? d.week52.bars_used + ' Günlük Aralık (halka arzdan bu yana)'
+        : '52 Haftalık Aralık';
+    }
     document.getElementById('week52Bar').style.display = '';
   }
 
@@ -2757,6 +2765,13 @@ async function loadChart(retry) {
 
     if (json.integrity_error) {
       console.warn('[chart] integrity_error:', json.integrity_error);
+    }
+    if (json.unavailable) {
+      /* CPO-1653 P1: yapısal "yeterli geçmişi yok" — retry hiçbir zaman işe
+         yaramayacak (bkz. app.py _compute_chart_data WARMUP_MIN), yanlış
+         "geçici" mesajı yerine dürüst kalıcı mesaj göster, RETRY YOK. */
+      _showChartStatus('Bu hisse için grafik verisi henüz yeterli değil.', false);
+      return;
     }
     if (!res.ok || json.loading || json.integrity_error || !json.chart) {
       if (retry < _MAX_CHART_RETRY) {
