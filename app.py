@@ -13184,43 +13184,85 @@ def _startup():
                         return 0
                 tickers = _staleness_priority_order(tickers, _chart_mtime)
                 logger.info("_slow_chart_refresh başladı: %d ticker (staleness-öncelikli sıra)", len(tickers))
+
+                def _process_chart_ticker(ticker):
+                    """Tek ticker için chart hesapla + diske yaz.
+                    Dönüş: 'ok' | 'insufficient' | 'corrupt' | 'fetch_failed'."""
+                    data = _compute_chart_data(ticker, "2y")
+                    if not data:
+                        # CB açık / timeout / subprocess hatası — _fetch_chart_subprocess
+                        # zaten kendi seviyesinde loglar, burada sessiz None dönüyordu.
+                        return "fetch_failed"
+                    if data.get("insufficient_history"):
+                        # CPO-1653 P1: yapısal "yeterli geçmişi yok" — normal chart
+                        # şemasından ayırt edilebilir bir marker olarak diske yazılır,
+                        # api_stock_chart bunu görünce dürüst unavailable:true döner.
+                        path = os.path.join(_PHASE3_CHART_DIR, f"chart_{ticker}.json")
+                        _atomic_write_json(path, {
+                            "unavailable": True,
+                            "reason": "insufficient_history",
+                            "bars_available": data.get("bars_available", 0),
+                        })
+                        return "insufficient"
+                    ohlc_count = len(data.get("ohlc") or [])
+                    if ohlc_count < 100:
+                        # G28-b: yfinance gevent-lock timeout → yanlış interval data → düşük bar sayısı
+                        logger.warning(
+                            "_slow_chart_refresh [%s]: CORRUPT_CACHE_REDETECTED ohlc=%d < 100 — diske yazılmadı",
+                            ticker, ohlc_count
+                        )
+                        return "corrupt"
+                    path = os.path.join(_PHASE3_CHART_DIR, f"chart_{ticker}.json")
+                    _atomic_write_json(path, data)
+                    return "ok"
+
                 done = 0
                 skipped_corrupt = 0
+                fetch_failed = []
                 for ticker in tickers:
                     try:
-                        data = _compute_chart_data(ticker, "2y")
-                        if data:
-                            if data.get("insufficient_history"):
-                                # CPO-1653 P1: yapısal "yeterli geçmişi yok" — normal chart
-                                # şemasından ayırt edilebilir bir marker olarak diske yazılır,
-                                # api_stock_chart bunu görünce dürüst unavailable:true döner.
-                                path = os.path.join(_PHASE3_CHART_DIR, f"chart_{ticker}.json")
-                                _atomic_write_json(path, {
-                                    "unavailable": True,
-                                    "reason": "insufficient_history",
-                                    "bars_available": data.get("bars_available", 0),
-                                })
-                                done += 1
-                                continue
-                            ohlc_count = len(data.get("ohlc") or [])
-                            if ohlc_count < 100:
-                                # G28-b: yfinance gevent-lock timeout → yanlış interval data → düşük bar sayısı
-                                logger.warning(
-                                    "_slow_chart_refresh [%s]: CORRUPT_CACHE_REDETECTED ohlc=%d < 100 — diske yazılmadı",
-                                    ticker, ohlc_count
-                                )
-                                skipped_corrupt += 1
-                            else:
-                                path = os.path.join(_PHASE3_CHART_DIR, f"chart_{ticker}.json")
-                                _atomic_write_json(path, data)
-                                done += 1
+                        status = _process_chart_ticker(ticker)
+                        if status in ("ok", "insufficient"):
+                            done += 1
+                        elif status == "corrupt":
+                            skipped_corrupt += 1
+                        elif status == "fetch_failed":
+                            fetch_failed.append(ticker)
                     except Exception as e:
                         logger.warning("_slow_chart_refresh [%s]: %s", ticker, e)
                     time.sleep(1)  # CPO-620: throttle 3s→1s, 15dk pencereye sigmak icin
                 logger.info(
-                    "_slow_chart_refresh tamamlandı: %d/%d ticker diske yazıldı, %d corrupt_skipped",
-                    done, len(tickers), skipped_corrupt
+                    "_slow_chart_refresh tamamlandı: %d/%d ticker diske yazıldı, %d corrupt_skipped, %d fetch_failed",
+                    done, len(tickers), skipped_corrupt, len(fetch_failed)
                 )
+
+                # CPO-1655: mtime=0 (hiç yazılmamış) ticker'lar staleness sırasında hep
+                # İLK denenir; cycle başında Yahoo CB hâlâ açıksa/contention varsa hep
+                # başarısız olurlar, mtime asla güncellenmez ve BİR SONRAKİ cycle'da yine
+                # aynı şekilde ilk sırada aynı nedenle başarısız olabilirler — kalıcı
+                # starvation (DSTKF/TRALT canlıda haftalardır hiç chart dosyası yazmamıştı).
+                # 214 diğer ticker işlendikten sonra (CB baskısı geçmiş olmalı) aynı
+                # cycle içinde bir kez daha dene.
+                if fetch_failed:
+                    logger.warning(
+                        "_slow_chart_refresh: %d ticker fetch başarısız oldu (%s) — 3s sonra tekrar denenecek",
+                        len(fetch_failed), ", ".join(fetch_failed)
+                    )
+                    time.sleep(3)
+                    retried_ok = 0
+                    for ticker in fetch_failed:
+                        try:
+                            status = _process_chart_ticker(ticker)
+                            if status in ("ok", "insufficient"):
+                                retried_ok += 1
+                                done += 1
+                        except Exception as e:
+                            logger.warning("_slow_chart_refresh retry [%s]: %s", ticker, e)
+                        time.sleep(1)
+                    logger.info(
+                        "_slow_chart_refresh retry tamamlandı: %d/%d fetch_failed ticker kurtarıldı",
+                        retried_ok, len(fetch_failed)
+                    )
             except Exception as e:
                 logger.error("_slow_chart_refresh outer: %s", e)
             time.sleep(6 * 3600)  # 6 saatte bir tam cycle
