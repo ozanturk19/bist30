@@ -1945,7 +1945,10 @@ function buildChart(d) {
    * hisse icin). Etiket her zaman "Gunluk" kalir, sure kismi dogru veriye gore kurulur. */
   (function() {
     var n = (d.ohlc || []).length;
-    var sure = n >= 500 ? '2 Yıl' : (n + ' İşlem Günü');
+    /* esik 500 degil 450: tam 2 yillik pencere alan yerlesik hisseler bile tatil/
+       veri-baslangici farkiyla 495-504 arasi dogal varyasyon gosteriyor (orn. AKBNK
+       497) — 500 sert esigi bunlari yanlislikla "kisa gecmis" gibi etiketliyordu. */
+    var sure = n >= 450 ? '2 Yıl' : (n + ' İşlem Günü');
     var el = document.querySelector('.chart-label');
     if (el) el.textContent = '{{ ticker }} — Günlük Grafik (' + sure + ')';
   })();
