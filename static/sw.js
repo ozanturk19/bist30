@@ -1,5 +1,5 @@
 /* BorsaPusula Service Worker v3.1 — offline fallback + PWA optimize */
-const CACHE = 'borsapusula-v26';
+const CACHE = 'borsapusula-v27';
 
 /* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç) */
 const STATIC = [
@@ -7,11 +7,10 @@ const STATIC = [
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',
-  '/static/css/tokens.css?v=20260820B',
-  '/static/css/shared.css?v=36220ae5',
+  '/static/css/tokens.css?v=f14ab7b6',
+  '/static/css/shared.css?v=5761378a',
   '/static/css/pages/offline.css?v=128de31d',
   '/offline',
-  'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional',
 ];
 
 self.addEventListener('install', e => {
@@ -42,7 +41,10 @@ self.addEventListener('activate', e => {
  */
 function isStaticAsset(url) {
   if (url.pathname.startsWith('/static/')) return true;
-  if (url.hostname === 'fonts.googleapis.com') return true;
+  /* fonts.googleapis.com KASITLI olarak DIŞARIDA: sayfalar bu CSS'i <link rel=preload as=style>
+     ile önceden ısıtıyor (CPO-06.09) — SW burayı intercept ederse tarayıcı preload'ı "cross-world
+     service worker resource mismatch" diye reddedip ikinci kez ağdan çekiyor, preload boşa gidiyor.
+     15.09 fresh-ground-audit bulgusu. Asıl font dosyaları (gstatic) SW cache'inde kalmaya devam eder. */
   if (url.hostname === 'fonts.gstatic.com') return true;
   return false;
 }

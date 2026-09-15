@@ -1,15 +1,15 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Piyasa Gündem Merkezi | BorsaPusula</title>
-<meta name="description" content="Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.">
+<meta name="description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} bugün değişen sinyal.{% else %}Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/gundem">
 <meta property="og:title"       content="Piyasa Gündem Merkezi — BorsaPusula">
-<meta property="og:description" content="Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.">
+<meta property="og:description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} bugün değişen sinyal.{% else %}Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
 <meta property="og:url"         content="https://borsapusula.com/gundem">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Piyasa Gündem Merkezi — BorsaPusula">
-<meta name="twitter:description" content="Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.">
+<meta name="twitter:description" content="{% if ssr_signal_summary %}Şu an BIST'te {{ ssr_signal_summary.al }} güçlü trend, {{ ssr_new_signals|length }} bugün değişen sinyal.{% else %}Bugün sinyal değişen BIST hisseleri, en güçlü trendler (ADX sıralamalı), piyasa sinyal özeti.{% endif %}">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
