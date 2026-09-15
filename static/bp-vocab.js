@@ -138,6 +138,23 @@ function sigLabel(sig) {
   return BP_SIG_LABELS[sig] || sig;
 }
 
+/* 15.09 fresh-ground-audit #11: ADX/RSI/Supertrend gibi terimler .jargon-term
+   deseniyle (title+/metodoloji linki) gösteriliyordu ama sitenin EN sık tekrar
+   eden terimi (sigLabel) hiç. sigLabel() KASITLI OLARAK plain-text kalıyor —
+   2 call site (portfolio.html/tarama.html CSV export) düz metin gerektiriyor,
+   sigLabel'i HTML dönecek şekilde değiştirmek CSV'ye ham <a> etiketi sızdırırdı.
+   Bunun yerine SADECE HTML/badge render eden call site'larda sigLabel() yerine
+   bu fonksiyon kullanılır — mevcut sigLabel() call site'ları HİÇ değişmedi. */
+function sigLabelTooltip(sig) {
+  if (!sig) return sigLabel(sig);
+  // onclick=stopPropagation: bazı call site'larda badge, kendi onclick="location.href=..."
+  // navigasyonu olan bir kart/satır içinde oturuyor (bilanco_takvimi/temettu_takvimi
+  // .stock-card) — .sc-ticker-link'in zaten yaptığı gibi tıklamanın karta sızmasını
+  // engeller. Gerçek <a> içine YERLEŞTİRME (nested-anchor) gereken yerlerde (tarama.html
+  // .mr-card, sektor_harita.html .cmp-stock-row) bu fonksiyon KULLANILMAZ, sigLabel() kalır.
+  return '<a class="jargon-term" data-term="sinyal" href="/metodoloji#sinyal-onayi" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + sigLabel(sig) + '</a>';
+}
+
 /* Giris kalitesi etiketi — kanonik harita, 3 sablonda (gundem/karsilastir/
    tarama) ayri ayri kopyalanmisti (105. bagimsiz bug-hunt turu bulgusu).
    index.html'in kendi ikon-onekli varyanti KASITLI bir tasarim farki
