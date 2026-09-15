@@ -111,7 +111,7 @@ body{margin:0}
 header{
   background:var(--bp-bg);
   border-bottom:1px solid var(--bp-border);padding:0 clamp(14px,3vw,24px);height:60px;
-  display:flex;align-items:center;justify-content:space-between;position:sticky;top:32px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:calc(32px + env(safe-area-inset-top,0px));
   z-index:var(--bp-z-dropdown);gap:12px;transform:translateZ(0);
 }
 .logo-link{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
@@ -125,7 +125,7 @@ header{
    transform:translateX ile kayan marquee'si (yeni stacking context) DOM
    sırasına göre üstüne boyanıyordu — canlı ölçümle doğrulandı
    (elementFromPoint rozetin üstünde .mc-pos döndürüyordu). z-index eklendi. */
-#macroBar{position:sticky;top:0;z-index:var(--bp-z-sticky);display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-border);height:32px;overflow:hidden}
+#macroBar{position:sticky;top:0;z-index:var(--bp-z-sticky);display:flex;align-items:stretch;background:var(--bp-surface);border-bottom:1px solid var(--bp-border);height:calc(32px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);overflow:hidden}
 .macro-bar::before,.macro-bar::after{content:'';position:absolute;top:0;bottom:0;width:60px;pointer-events:none;z-index:var(--bp-z-raised)}
 .macro-bar::before{left:0;background:linear-gradient(to right,var(--bp-surface),transparent)}
 .macro-bar::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}

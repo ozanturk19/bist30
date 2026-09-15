@@ -59,7 +59,7 @@
     background: var(--bp-bg);
     border-bottom: 1px solid rgba(var(--bp-border-rgb),0.95);
     position: sticky;
-    top: 32px;
+    top: calc(32px + env(safe-area-inset-top,0px));
     z-index:var(--bp-z-dropdown);
     display: flex;
     min-height: calc(60px + env(safe-area-inset-top));
@@ -919,7 +919,7 @@
   /* ── Makro Ticker Bandı ── */
   .macro-bar {
     background: var(--bp-bg); border-bottom: 1px solid var(--bp-border);
-    height: 32px; overflow: hidden; position: sticky; top: 0; z-index: var(--bp-z-sticky); white-space: nowrap;
+    height: calc(32px + env(safe-area-inset-top,0px)); padding-top: env(safe-area-inset-top,0px); overflow: hidden; position: sticky; top: 0; z-index: var(--bp-z-sticky); white-space: nowrap;
   }
   .macro-bar::before, .macro-bar::after {
     content: ''; position: absolute; top: 0; bottom: 0; width: 60px;
