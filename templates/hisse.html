@@ -754,8 +754,18 @@
      üretir. #}
   {% set kaldirac_na = hs_available and (hs.categories_na is defined) and hs.categories_na and ('kaldirac' in hs.categories_na) %}
   {% set radar_other3_complete = hs_available and hs.categories.karlilik is defined and hs.categories.nakit_akisi is defined and hs.categories.degerleme_buyume is defined %}
-  {% set radar_partial_na = kaldirac_na and radar_other3_complete and not radar_categories_complete and not temel_missing and not (hs_available and hs.partial) %}
-  {% set radar_dim = temel_missing or (hs_available and hs.partial) or (not radar_categories_complete and not radar_partial_na) %}
+  {# bughunt-16.09: financial_health_score.py'nin kendi docstring'i (CPO-1606 P0
+     emsali) "hs.partial composite (temel+teknik) skorun tek taraflı kalmasını
+     gösterir, categories_complete/radar_categories_complete'ten TAMAMEN AYRI —
+     bunu karıştırma" diye açıkça uyarıyordu, ama bu iki satır AYNI karışıklığı
+     tekrar etmişti: hs.partial (mesela sadece o an aktif bir Teknik sinyal
+     olmadığı için True) radar'ı sektöre veya bilançoya göre değil, sinyal
+     durumuna göre "Sınırlı Veri" gösteriyordu — 216 hissenin ~%76'sı (Yatay/
+     Bekle sinyalli TÜM hisseler) fundamental verisi %100 tam olsa bile
+     (ör. ASELS/SİSE/EREGL, data_completeness=1.0) gereksiz yere donuklaşıyordu.
+     Ozan'ın "hisseler arası tutarsız, standart yok" geri bildirimiyle bulundu. #}
+  {% set radar_partial_na = kaldirac_na and radar_other3_complete and not radar_categories_complete and not temel_missing %}
+  {% set radar_dim = temel_missing or (not radar_categories_complete and not radar_partial_na) %}
   {% set band = BAND_META.get(hs.band, BAND_META['sari']) if hs_available else BAND_META['sari'] %}
   {% set completeness_pct = ((hs.data_completeness * 100) | round | int) if (hs_available and hs.data_completeness is not none) else 0 %}
 
