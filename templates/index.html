@@ -1012,7 +1012,7 @@ header{
     var frags = [];
     if (st.macro && typeof st.macro.change === 'number') {
       var up = st.macro.change >= 0;
-      frags.push('BIST100 bugün <span class="' + (up?'up':'down') + '">' + fmtPct(st.macro.change) + '</span> ile <strong>' + fmtPrice(st.macro.price) + '</strong> seviyesinde.');
+      frags.push('BIST100 son kapanışta <span class="' + (up?'up':'down') + '">' + fmtPct(st.macro.change) + '</span> ile <strong>' + fmtPrice(st.macro.price) + '</strong> seviyesinde.');
     }
     if (st.sectors && st.sectors.length) {
       var top = st.sectors[0]; // API zaten score DESC sıralı dönüyor
@@ -1025,7 +1025,7 @@ header{
       if (withChg.length) {
         var mover = withChg.reduce(function(a,b){ return Math.abs(b.change_pct) > Math.abs(a.change_pct) ? b : a; });
         var mup = mover.change_pct >= 0;
-        frags.push('<strong>' + esc(mover.ticker) + '</strong> <span class="' + (mup?'up':'down') + '">' + fmtPct(mover.change_pct) + '</span> değişimle günün en hareketli hissesi oldu.');
+        frags.push('<strong>' + esc(mover.ticker) + '</strong> <span class="' + (mup?'up':'down') + '">' + fmtPct(mover.change_pct) + '</span> değişimle son kapanışın en hareketli hissesi oldu.');
       }
     }
     if (!frags.length) {
