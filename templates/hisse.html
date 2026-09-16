@@ -1807,7 +1807,32 @@ function toggleHisseWatch() {
     w.push(TICKER);
     if (_hibSafeWriteWatch(w)) {
       const _loggedIn = !!document.cookie.match(/(?:^|;\s*)bp_sub=/);
-      _hibToast(TICKER + ' takibe eklendi' + (_loggedIn ? ' — e-posta bildirimi için Ana Sayfa\'dan Alert Ayarları\'nı aç' : ''), 'success');
+      _hibToast(TICKER + ' takibe eklendi' + (_loggedIn ? ' — sinyal değiştiğinde e-posta ile haber vereceğiz' : ''), 'success');
+      if (_loggedIn) {
+        // 16.09: eskiden burada hicbir sunucu cagrisi yoktu, toast var-olmayan bir
+        // "Ana Sayfa Alert Ayarlari" sayfasina yonlendiriyordu (Ozan bulgusu, derin
+        // analiz sonrasi karar: aktive et). DELETE dalinin (yukarida) ayni async-guard
+        // + r.ok kontrolu + sessiz-yutmama desenini simetrik olarak uyguluyor.
+        _pending = true;
+        _hibWatchToggleInFlight = true;
+        fetch(`/api/user-alerts/${TICKER}`, {
+          method: 'POST', credentials: 'same-origin',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({signal_change: true})
+        })
+          .then(r => {
+            if (!r.ok) _hibToast(TICKER + ' e-posta alarmı kaydedilemedi, takip listesinde ama bildirim almayacaksın', 'warn');
+          })
+          .catch(e => {
+            console.warn('takibe eklerken sunucu alerti kaydedilemedi:', e);
+            _hibToast(TICKER + ' e-posta alarmı kaydedilemedi (bağlantı hatası)', 'warn');
+          })
+          .finally(() => {
+            _hibWatchToggleInFlight = false;
+            const _hibBtn2 = document.getElementById('hibBellBtn');
+            if (_hibBtn2) _hibBtn2.disabled = false;
+          });
+      }
     }
   }
   updateHibBellBtn();
