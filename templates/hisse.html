@@ -694,9 +694,13 @@
       <div class="info-card-sub" id="icSlPct">—</div>
     </div>
     <div class="info-card">
+      <!-- 17.09 bughunt: "bar (gün)" alt-etiketi signal_bars'ı (hafta sonu atlayan
+           işlem-günü sayacı) takvim günüymüş gibi gösteriyordu — hemen üstteki
+           icDate/bpSignalAgeText (satır ~2239) AYNI sinyal için farklı bir takvim-
+           günü sayısı gösteriyordu (ör. 7 bar vs 9 takvim günü, aynı ekranda). -->
       <div class="info-card-label">Süre</div>
       <div class="info-card-value" id="icBars">—</div>
-      <div class="info-card-sub">bar (gün)</div>
+      <div class="info-card-sub">bar sayısı</div>
     </div>
   </div>
 
@@ -2486,6 +2490,9 @@ function renderSummary(s, signalData) {
   // orada degisirse burasi da elle guncellenmeli (otomatik kilit yok).
   const adxStrength = (signalData && signalData.adx_label) ? signalData.adx_label
     : (s.adx >= 40 ? 'Çok Güçlü' : s.adx >= 25 ? 'Güçlü' : s.adx >= 18 ? 'Orta' : 'Zayıf');
+  // adxStrength (etiket) gibi ADX SAYISI da mümkünse taze signalData'dan (/api/data)
+  // okunmalı — s.adx chart endpoint'inden gelir, günlerce geride kalabilir.
+  const adxNum = (signalData && signalData.adx != null) ? signalData.adx : s.adx;
   const _IND_TOOLTIPS = {
     'Trend Yönü':  'Supertrend(10,3) indikatörü fiyatın ATR bazlı dinamik banda göre LONG mu SHORT mu olduğunu belirler. Fiyat üst bandın üzerinde kapanırsa yükseliş, altında kapanırsa düşüş yönü onaylanır. Örnek: 3 ardışık kapanış Supertrend bandı üzerinde → güçlü yükseliş trendi.',
     'Momentum':    'ADX (Ortalama Yön Endeksi) trendin gücünü 0-100 arası ölçer — yön değil güç verir. ADX ≥ 25 güçlü trend, 18-25 orta, < 18 zayıf/yatay piyasa anlamına gelir. DI+ > DI− ise alıcılar baskın, DI− > DI+ ise satıcılar baskın.',
@@ -2506,8 +2513,13 @@ function renderSummary(s, signalData) {
     },
     {
       label: 'Momentum',
-      detail: adxStrength + (s.adx ? ' (' + Number(s.adx).toFixed(1).replace('.', ',') + ')' : ''),
-      techDetail: 'ADX(14): ' + s.adx + ' · DI+: ' + s.di_plus + ' · DI−: ' + s.di_minus,
+      // 17.09 bughunt: chart endpoint'in summary'si (s.adx) /api/data'dan (signalData.adx)
+      // günlerce geride kalabiliyor (ayrı önbellek döngüleri) — aynı ADX metriği için
+      // sayfada iki farklı sayı görünüyordu (ör. KONTR: 36.8 vs 38.7). adxStrength
+      // etiketi zaten signalData'yı önceliklendiriyordu (satır üstte), sayı da aynı
+      // kaynağa hizalandı.
+      detail: adxStrength + (adxNum ? ' (' + Number(adxNum).toFixed(1).replace('.', ',') + ')' : ''),
+      techDetail: 'ADX(14): ' + adxNum + ' · DI+: ' + s.di_plus + ' · DI−: ' + s.di_minus,
       ok: s.signal === 'SAT' ? s.adx_bear : s.adx_bull,
       blog: '/blog/adx-indikatoru-nedir'
     },
@@ -2553,7 +2565,7 @@ function renderSummary(s, signalData) {
                     rsi < 30 ? '💎' : '';
     const rsiLbl = rsiIcon ? `${rsiIcon} ${zone}` : zone || 'Normal';
     indHtml += `<span class="${rsiCls}">RSI ${rsi}<span class="ind-detail">${rsiLbl}</span></span>` +
-      `<button type="button" class="ind-help" data-tooltip="RSI: 0-100 aras\u0131 momentum g\u00f6stergesi. 70 \u00fczeri \u0027a\u015f\u0131r\u0131 al\u0131m\u0027 (sat\u0131\u015f bask\u0131s\u0131 olabilir), 30 alt\u0131 \u0027a\u015f\u0131r\u0131 sat\u0131m\u0027 (al\u0131m f\u0131rsat\u0131 olabilir)." data-link="/blog/rsi-gostergesi-nedir" aria-label="RSI nedir?">?</button>`;
+      `<button type="button" class="ind-help" data-tooltip="RSI: 0-100 aras\u0131 momentum g\u00f6stergesi. 30 alt\u0131 a\u015f\u0131r\u0131 sat\u0131m, 30-45 dip toparlanmas\u0131, 45-60 ideal giri\u015f penceresi, 60-70 trend g\u00fc\u00e7leniyor, 70-80 dikkatli, 80 \u00fcst\u00fc a\u015f\u0131r\u0131 al\u0131m." data-link="/blog/rsi-gostergesi-nedir" aria-label="RSI nedir?">?</button>`;
   }
 
   /* Hacim oranı badge (sadece dikkat çekici olduğunda göster) */
