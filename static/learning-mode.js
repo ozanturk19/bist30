@@ -9,7 +9,7 @@
 
   var GLOSSARY = {
     'adx': 'Trend gücü göstergesi (0–100). 25 üstü güçlü trend demek, 18 altı zayıf/yatay piyasa, arası orta güçte.',
-    'rsi': 'Göreceli Güç Endeksi (0–100). 70 üstü aşırı alım, 30 altı aşırı satım bölgesi sinyali verir.',
+    'rsi': 'Göreceli Güç Endeksi (0–100). 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 ideal giriş penceresi, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım.',
     'ema12': 'Üstel hareketli ortalama (12 gün). Kısa vadeli trend yönünü gösterir.',
     'ema99': 'Üstel hareketli ortalama (99 gün). Uzun vadeli trend yönünü gösterir.',
     'ema': 'Üstel hareketli ortalama — son verilere daha çok ağırlık verir. EMA12 kısa, EMA99 uzun vadeyi temsil eder.',

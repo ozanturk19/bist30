@@ -51,7 +51,7 @@
     {% if s.adx is not none %}<div class="sc-metric"><span>ADX </span><strong>{{ '%.1f'|format(s.adx)|replace('.', ',') }}</strong></div>{% endif %}
     {% if s.rsi is not none %}<div class="sc-metric"><span>RSI </span><strong>{{ '%.1f'|format(s.rsi)|replace('.', ',') }}</strong></div>{% endif %}
     {% if s.signal_date %}<div class="sc-metric"><span>Süre </span><strong>{{ s.signal_date|signal_age_text }}</strong></div>{% endif %}
-    {% if s.entry_quality %}<div class="sc-metric"><span>Kalite </span><strong>{{ {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Uzak'}.get(s.entry_quality, s.entry_quality) }}</strong></div>{% endif %}
+    {% if s.entry_quality %}<div class="sc-metric"><span>Kalite </span><strong>{{ {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Kovalama'}.get(s.entry_quality, s.entry_quality) }}</strong></div>{% endif %}
     {% if s.rr_signal %}<div class="sc-metric"><span>R/R </span><strong>1:{{ '%.1f'|format(s.rr_signal)|replace('.', ',') }}</strong></div>{% endif %}
   </div>
   <div class="sc-footer">

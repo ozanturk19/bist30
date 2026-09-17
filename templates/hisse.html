@@ -2377,7 +2377,10 @@ function renderSummary(s, signalData) {
       const tp1 = signalData.tp1;
       const tp2 = signalData.tp2;
       const sl  = s.sl_level;
-      const cur = s.price;
+      // bughunt-r120 emsali: header fiyatı (_dispPrice, satır ~2208) ile bu kutu
+      // farklı kaynak kullanıyordu (ham s.price) — bugün CPO-1639 backend senkronu
+      // sayesinde maskeli/eşit ama defansif olarak ayni desene hizalandı.
+      const cur = _dispPrice;
       if (tp1 && tp2 && sl && cur) {
         const risk   = Math.abs(cur - sl);
         const reward = Math.abs(tp2 - cur);
@@ -3442,7 +3445,7 @@ document.addEventListener('visibilitychange', () => {
 <script src="/static/bp-search.js?v=75" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 <script src="/static/js/bp-chart-common.js?v=2"></script>
-<script src="/static/learning-mode.js?v=5" defer></script>
+<script src="/static/learning-mode.js?v=6" defer></script>
 
 <script>
 /* ind-help: mobile tap-to-toggle */
