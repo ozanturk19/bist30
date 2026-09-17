@@ -2506,12 +2506,25 @@ function renderSummary(s, signalData) {
   // eklenir — e12_bull/e12_bear karşılaştırması (dolayısıyla ok/AL-SAT-BEKLE)
   // DEĞİŞMEZ, sıfır regresyon riski.
   const _emaDb = signalData && signalData.indicators && signalData.indicators.ema1299;
+  // CPO-1665 orta öncelik #2: Trend Yönü/Vade Uyumu (ve ADX'in kendi ok checkmark'ı)
+  // hâlâ SADECE chart endpoint'inin (s.*) kendi bağımsız hesabını kullanıyordu —
+  // ADX sayı/etiket fix'i (yukarıda) gibi ana cache'e (signalData.indicators, otoritelif
+  // kaynak) fallback yapmıyordu. GUBRF'de canlı yön-flip kanıtlandı (chart ↑ derken
+  // ana cache ↓ diyordu, rozet chart'a göre renkleniyordu). Aynı "tek kaynak" ilkesini
+  // üç göstergenin bull/bear durumuna da genişlet.
+  const _siInd = signalData && signalData.indicators;
+  const stBull  = (_siInd && _siInd.supertrend) ? _siInd.supertrend.bull : s.st_bull;
+  const stBear  = (_siInd && _siInd.supertrend) ? _siInd.supertrend.bear : s.st_bear;
+  const adxBull = (_siInd && _siInd.adx)        ? _siInd.adx.bull        : s.adx_bull;
+  const adxBear = (_siInd && _siInd.adx)        ? _siInd.adx.bear        : s.adx_bear;
+  const e12Bull = (_siInd && _siInd.ema1299)    ? _siInd.ema1299.bull    : s.e12_bull;
+  const e12Bear = (_siInd && _siInd.ema1299)    ? _siInd.ema1299.bear    : s.e12_bear;
   const inds = [
     {
       label: 'Trend Yönü',
-      detail: s.st_bull ? '↑ Yükseliş' : s.st_bear ? '↓ Düşüş' : '— Net değil',
+      detail: stBull ? '↑ Yükseliş' : stBear ? '↓ Düşüş' : '— Net değil',
       techDetail: 'Supertrend(10,3): ' + (s.st_bull ? 'LONG' : s.st_bear ? 'SHORT' : 'NEUTRAL'),
-      ok: s.signal === 'SAT' ? s.st_bear : s.st_bull,
+      ok: s.signal === 'SAT' ? stBear : stBull,
       blog: '/blog/supertrend-indikatoru-nedir'
     },
     {
@@ -2523,16 +2536,16 @@ function renderSummary(s, signalData) {
       // kaynağa hizalandı.
       detail: adxStrength + (adxNum ? ' (' + Number(adxNum).toFixed(1).replace('.', ',') + ')' : ''),
       techDetail: 'ADX(14): ' + adxNum + ' · DI+: ' + s.di_plus + ' · DI−: ' + s.di_minus,
-      ok: s.signal === 'SAT' ? s.adx_bear : s.adx_bull,
+      ok: s.signal === 'SAT' ? adxBear : adxBull,
       blog: '/blog/adx-indikatoru-nedir'
     },
     {
       label: 'Vade Uyumu',
-      detail: (s.e12 > s.e99 ? 'Kısa > Uzun' : s.e12 < s.e99 ? 'Kısa < Uzun' : 'Eşit') +
+      detail: (e12Bull ? 'Kısa > Uzun' : e12Bear ? 'Kısa < Uzun' : 'Eşit') +
         (_emaDb && _emaDb.deadband ? ' · ⚠️ kararsızlık bölgesi' : ''),
       techDetail: 'EMA12: ' + s.e12 + ' · EMA99: ' + s.e99 +
         (_emaDb && _emaDb.diff_pct != null ? ' · fark: %' + String(_emaDb.diff_pct).replace('.', ',') : ''),
-      ok: s.signal === 'SAT' ? s.e12_bear : s.e12_bull,
+      ok: s.signal === 'SAT' ? e12Bear : e12Bull,
       blog: '/blog/ema-hareketli-ortalama-nedir'
     },
   ].map(i => Object.assign(i, { tooltip: _IND_TOOLTIPS[i.label] || '' }));

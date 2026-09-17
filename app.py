@@ -7953,7 +7953,8 @@ def build_signal_summary(stock):
         risk_txt = "Net sinyal olmadığı için tanımlı bir giriş bölgesi yok."
     rsi_tip = ""
     if isinstance(rsi, (int, float)):
-        rsi_tip = f" RSI {rsi:.0f} — 70 üstü aşırı alım, 30 altı aşırı satım bölgesi."
+        rsi_tip = (f" RSI {rsi:.0f} — 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 ideal "
+                   "giriş penceresi, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım.")
     points.append({
         "text": risk_txt,
         "tip":  "Sinyal başlangıç fiyatı ile güncel fiyat arasındaki fark." + rsi_tip,
