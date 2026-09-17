@@ -610,6 +610,11 @@
       var reason = e.reason || {};
       var msg = String(reason.message || reason || 'Unhandled promise rejection');
       if (msg.includes('region1.google-analytics')) return;
+      // 17.09: sendBeacon fix (a3be2fd) canli hata izlemeyi actiktan sonra loglar
+      // MetaMask/cuzdan tarayici eklentilerinin kendi baglanti hatalariyla dolmaya
+      // basladi (bizim kodumuzla ilgisi yok, eklenti HER sayfaya kendini enjekte
+      // edip baglanmaya calisiyor) -- google-analytics filtresiyle ayni ilke.
+      if (msg.includes('MetaMask')) return;
       reportClientError({
         msg:   ('PromiseRejection: ' + msg).slice(0, 500),
         page:  location.pathname,
