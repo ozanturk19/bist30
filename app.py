@@ -9151,6 +9151,21 @@ def api_stock_chart(ticker):
             data["summary"]["price"]      = main_price
             data["summary"]["change_pct"] = main_stock.get("change_pct", data["summary"].get("change_pct"))
 
+        # CPO-1665 P1: commentary metni chart'ın KENDİ (senkron olmayan) signal/tarih
+        # bilgisinden üretiliyordu — yukarıdaki override sadece summary alanlarını
+        # yamıyordu, commentary string'i hiç yeniden üretilmiyordu (ör. main=BEKLE
+        # iken commentary hâlâ eski "SAT sinyali aktif" anlatısını gösteriyordu).
+        # Uyuşmazlık varsa commentary'yi ana cache'in otoritelif sinyaline göre
+        # aynı üreteçle (_generate_commentary) yeniden hesapla.
+        if chart_sig != main_sig:
+            s = data["summary"]
+            data["commentary"] = _generate_commentary(
+                ticker, s.get("signal"), s.get("signal_bars", 1),
+                main_stock.get("signal_date"),
+                s.get("adx", 0), s.get("di_plus", 0), s.get("di_minus", 0),
+                s.get("e12", 0), s.get("e99", 0), s.get("st_bull", False),
+            )
+
     _resp_chart = {"chart": data, "updated_at": upd, "loading": False}
     # ── Faz 12 P1 DQV: Schema Validation — monitoring-only ────────────────────
     if _DQV_AVAILABLE:
