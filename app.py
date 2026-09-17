@@ -5569,11 +5569,13 @@ _COMPANY_SUMMARY_PROMPT = (
     "Sen finansal yazılım için içerik üreticisin. Türkçe BIST hissesi {ticker} "
     "({name}) hakkında 2 paragraf özet yaz.\n\n"
     "KURAL:\n"
-    "1. İlk paragraf 2-3 cümle: Şirket ne yapıyor, hangi sektörde, ana iş kolu.\n"
+    "1. İlk paragraf 2-3 cümle: Şirket ne yapıyor, ana iş kolu.\n"
     "2. İkinci paragraf 2-3 cümle: Pazardaki konumu, yatırımcı için önemli faktörler.\n"
-    "3. Yatırım tavsiyesi YOK, sadece bilgi.\n"
-    "4. Maksimum 150 kelime toplam. Net, kısa cümleler.\n"
-    "5. Sadece düz metin — başlık yok, markdown yok, madde işareti yok.\n\n"
+    "3. Sektörden bahsedirken MUTLAKA şu ismi kullan: \"{sector}\". Başka bir sektör "
+    "adı uydurma veya bu isimden sapma.\n"
+    "4. Yatırım tavsiyesi YOK, sadece bilgi.\n"
+    "5. Maksimum 150 kelime toplam. Net, kısa cümleler.\n"
+    "6. Sadece düz metin — başlık yok, markdown yok, madde işareti yok.\n\n"
     "Çıktı: sadece 2 paragraf."
 )
 
@@ -5639,7 +5641,8 @@ def _generate_company_summary(ticker):
     if not GEMINI_API_KEY:
         return None
     name = STOCK_NAMES.get(ticker, ticker)
-    prompt = _COMPANY_SUMMARY_PROMPT.format(ticker=ticker, name=name)
+    sector = _TICKER_TO_SECTOR.get(ticker, "Diğer")
+    prompt = _COMPANY_SUMMARY_PROMPT.format(ticker=ticker, name=name, sector=sector)
     model, text = _gemini_call(prompt, _GEMINI_EXPLAIN_ATTEMPTS,
                                timeout=20, max_tokens=400, temperature=0.4)
     if text:
