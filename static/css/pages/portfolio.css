@@ -34,7 +34,7 @@
      olcup sadece GERCEKTEN sigdiginda .pf-fits class'i ekliyor — statik breakpoint yerine dinamik olcum. */
   .pf-table.pf-fits { overflow-x: visible; }
   table { width:100%; border-collapse:collapse; }
-  thead th { background:var(--bp-surface2); padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--bp-border); white-space:nowrap; position:sticky; top:60px; z-index:var(--bp-z-dropdown); }
+  thead th { background:var(--bp-surface2); padding:10px 14px; text-align:left; font-size:var(--bp-text-xs); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--bp-border); white-space:nowrap; position:sticky; top:calc(32px + env(safe-area-inset-top,0px) + 60px); z-index:var(--bp-z-dropdown); }
   tbody tr { border-bottom:1px solid var(--bp-border-subtle); }
   tbody tr:last-child { border-bottom:none; }
   tbody tr:hover { background:var(--bp-surface2); }

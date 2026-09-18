@@ -565,12 +565,16 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 RS = Ortalama Yükselen Bar / Ortalama Düşen Bar (genellikle son 14 bar)</pre>
 
 <h2>Temel Yorumlama</h2>
+<p>BorsaPusula'da RSI, 6 bölgeye ayrılmış kanonik bir şemayla yorumlanır — hisse sayfalarındaki RSI rozeti bu şemayı kullanır:</p>
 <ul>
-  <li><strong>RSI &gt; 70:</strong> Aşırı alım bölgesi. Hisse kısa vadede pahalı, geri çekilme olabilir.</li>
-  <li><strong>RSI &lt; 30:</strong> Aşırı satım bölgesi. Hisse kısa vadede ucuz, toparlanma olabilir.</li>
-  <li><strong>RSI = 50:</strong> Nötr bölge, belirgin güç yok.</li>
+  <li><strong>RSI &lt; 30:</strong> Aşırı Satım. Hisse kısa vadede ucuz, toparlanma olabilir.</li>
+  <li><strong>RSI 30–45:</strong> Dip Toparlanması.</li>
+  <li><strong>RSI 45–60:</strong> İdeal Giriş Penceresi.</li>
+  <li><strong>RSI 60–70:</strong> Trend Güçleniyor.</li>
+  <li><strong>RSI 70–80:</strong> Dikkatli — trend güçlü olabilir ama geri çekilme riski artar.</li>
+  <li><strong>RSI &gt; 80:</strong> Aşırı Alım. Hisse kısa vadede pahalı, geri çekilme olabilir.</li>
 </ul>
-<p>⚠️ Dikkat: Güçlü bir trendde RSI uzun süre 70 üzerinde kalabilir. "Aşırı alım" tek başına satış sinyali değildir.</p>
+<p>⚠️ Dikkat: Güçlü bir trendde RSI uzun süre 70 üzerinde kalabilir. "Dikkatli"/"Aşırı Alım" bölgeleri tek başına satış sinyali değildir.</p>
 
 <h2>RSI Uyuşmazlığı (Divergence)</h2>
 <p>En güçlü RSI sinyallerinden biri:</p>
@@ -580,12 +584,12 @@ RS = Ortalama Yükselen Bar / Ortalama Düşen Bar (genellikle son 14 bar)</pre>
 </ul>
 
 <h2>BorsaPusula ile RSI Kombine Kullanım</h2>
-<p>BorsaPusula Güçlü Trend sinyali verdiğinde, RSI 50–65 arasındaysa trend henüz erken aşamada demektir — potansiyel iyi. RSI 80'in üzerindeyken Güçlü Trend sinyali geliyorsa, trendin güçlü ama kısa vadeli geri çekilme riskinin yüksek olduğunu aklınızda bulundurun.</p>
+<p>BorsaPusula Güçlü Trend sinyali verdiğinde, RSI 45–60 arasındaysa (İdeal Giriş Penceresi) trend henüz erken aşamada demektir — potansiyel iyi. RSI 80'in üzerindeyken Güçlü Trend sinyali geliyorsa, trendin güçlü ama kısa vadeli geri çekilme riskinin yüksek olduğunu aklınızda bulundurun.</p>
 """,
     "faqs": [
       {"q": "RSI 30 altına düştüğünde hisse mutlaka alınmalı mıdır?", "a": "Hayır. RSI 30 altı aşırı satım bölgesi olsa da güçlü düşüş trendinde RSI uzun süre 30 altında kalabilir. BorsaPusula Supertrend ve ADX teyidiyle birlikte değerlendirmek gerekir."},
       {"q": "RSI divergence nasıl tespit edilir?", "a": "Bearish divergence: Fiyat yeni yüksek yaparken RSI yapamıyor. Bullish divergence: Fiyat yeni düşük yaparken RSI yapamıyor. Bu uyumsuzluk yaklaşan trend dönüşüne işaret edebilir."},
-      {"q": "BorsaPusula'da RSI değeri nerede görünür?", "a": "Her hisse sayfasında güncel RSI değeri gösterilir. Güçlü Trend sinyalinde RSI 50-65 arasındaki hisseler ideal giriş noktasındadır, henüz aşırı alım bölgesine girmemiş demektir."}
+      {"q": "BorsaPusula'da RSI değeri nerede görünür?", "a": "Her hisse sayfasında güncel RSI değeri gösterilir. RSI 45-60 arasındaki hisseler İdeal Giriş Penceresi'ndedir, henüz aşırı alım bölgesine girmemiş demektir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'ASELS']
   },

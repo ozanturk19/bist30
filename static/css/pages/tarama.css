@@ -286,7 +286,9 @@
     font-weight:700; padding:10px 14px; border-bottom:1px solid var(--border);
     text-align:left; white-space:nowrap; background:var(--surface2); cursor:pointer;
     user-select:none; transition:color .15s;
-    position:sticky; top:60px; z-index:var(--bp-z-dropdown);
+    /* 18.09 bughunt: karsilastir.css/portfolio.css ile ayni eksik -- makro-bar
+       (32px+inset) payi hic eklenmemisti, thead header'in alt kismina biniyordu. */
+    position:sticky; top:calc(32px + env(safe-area-inset-top,0px) + 60px); z-index:var(--bp-z-dropdown);
   }
   thead th:hover { color:var(--bp-text); }
   thead th.th-sortable { padding:0; }
