@@ -1040,18 +1040,26 @@ header{
 
   // ── Spotlight: Ozan'ın 13.09 (2. kez) geri bildirimi sonrası hisse.html hero
   //    ile AYNI hiyerarşi — BorsaPusula Skoru dominant ring, Teknik ikincil.
-  //    Long-only kısıtı (Ozan 10.09: Trend Bozuldu asla "öne çıkan" olmasın,
-  //    sadece Güçlü Trend yarışsın) AYNEN korunuyor — sadece AL aday havuzu. ──
+  //    Long-only kısıtı (Ozan 10.09: Trend Bozuldu asla "öne çıkan" olmasın)
+  //    AYNEN korunuyor — SAT havuz dışı. 18.09: Ozan "en yüksek BorsaPusula
+  //    Skoru 65 gösteriyor, nasıl olabilir?" diye sordu — kök neden: BPS bir
+  //    KALİTE puanı (Temel+Teknik bileşik, başlık/açıklama bunu zaten söylüyor),
+  //    aktif AL sinyali değil, ama havuz eskiden SADECE AL'a kısıtlıydı — Yatay
+  //    (BEKLE) hisseler (ör. ANHYT BPS=87) havuz dışında kalıp gerçek en yüksek
+  //    skor hiç yarışamıyordu. Artık BEKLE de yarışıyor, sadece SAT (Trend
+  //    Bozuldu) hâlâ hariç. ──
   function daRenderSpotlight(real){
-    var pool = real.filter(function(s){ return typeof s.signal_strength === 'number' && s.signal === 'AL'; });
+    var pool = real.filter(function(s){ return s.signal !== 'SAT'; });
     var body = document.getElementById('daSpotlightBody');
     if (!body) return;
     if (!pool.length) { daShowSectionEmpty('daSpotlightBody', 'Şu an gösterilecek hisse verisi yok.'); return; }
     var withBps = pool.filter(function(s){ return s.hs_available && typeof s.borsapusula_skoru === 'number'; });
     var useBps = withBps.length > 0;
+    var techPool = pool.filter(function(s){ return typeof s.signal_strength === 'number'; });
     var s = useBps
       ? withBps.reduce(function(a,b){ return b.borsapusula_skoru > a.borsapusula_skoru ? b : a; })
-      : pool.reduce(function(a,b){ return b.signal_strength > a.signal_strength ? b : a; });
+      : (techPool.length ? techPool.reduce(function(a,b){ return b.signal_strength > a.signal_strength ? b : a; }) : null);
+    if (!s) { daShowSectionEmpty('daSpotlightBody', 'Şu an gösterilecek hisse verisi yok.'); return; }
     var sig = signalMeta(s.signal);
     var ringVal = useBps ? s.borsapusula_skoru : s.signal_strength;
     var col = useBps ? bpScoreColorVar(ringVal) : scoreColorVar(ringVal);
@@ -1061,7 +1069,8 @@ header{
     var rvolPct = Math.max(0, Math.min(100, ((s.rvol||0)/3)*100));
     var rsiPct = Math.max(0, Math.min(100, (s.rsi||0)));
     var chg = s.change_pct, chgUp = typeof chg === 'number' && chg >= 0;
-    var tekCol = scoreColorVar(s.signal_strength);
+    var hasTek = typeof s.signal_strength === 'number';
+    var tekCol = hasTek ? scoreColorVar(s.signal_strength) : null;
     body.innerHTML =
       '<div class="da-spot-grid">' +
         '<div class="da-spot-ring-wrap"><svg viewBox="0 0 100 100">' +
@@ -1077,7 +1086,7 @@ header{
           '</div>' +
           '<span class="da-spot-signal ' + sig.cls + '">● ' + sig.label + '</span>' +
           '<div class="da-spot-subs">' +
-            (useBps ? '<div class="da-spot-sub-row"><span class="lbl" title="Teknik Güç Skoru — ADX, hacim teyidi ve RSI bölgesinin bileşimi">Teknik</span><div class="bar"><i style="width:' + (s.signal_strength||0) + '%;background:' + tekCol + '"></i></div><span class="val da-num" style="color:' + tekCol + '">' + fmtNum0(s.signal_strength) + '</span></div>' : '') +
+            (useBps && hasTek ? '<div class="da-spot-sub-row"><span class="lbl" title="Teknik Güç Skoru — ADX, hacim teyidi ve RSI bölgesinin bileşimi">Teknik</span><div class="bar"><i style="width:' + s.signal_strength + '%;background:' + tekCol + '"></i></div><span class="val da-num" style="color:' + tekCol + '">' + fmtNum0(s.signal_strength) + '</span></div>' : '') +
             '<div class="da-spot-sub-row"><span class="lbl" title="ADX — trend gücü (25 üzeri güçlü, /metodoloji)">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.adx!=null?Math.round(s.adx):'—') + '</span></div>' +
             '<div class="da-spot-sub-row"><span class="lbl" title="RVOL — bugünün hacmi / 5 günlük ortalama hacim">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2)+'×':'—') + '</span></div>' +
             '<div class="da-spot-sub-row"><span class="lbl" title="RSI — göreceli güç endeksi, aşırı alım/satım bölgesi">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rsi!=null?Math.round(s.rsi):'—') + '</span></div>' +
