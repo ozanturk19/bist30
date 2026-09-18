@@ -319,7 +319,13 @@
     {%- elif _bps >= 50 %}{% set _bpc = 'var(--bp-volume)' %}
     {%- else %}{% set _bpc = 'var(--bp-sat)' %}{% endif -%}
   {%- endif -%}
-  <div class="bp-hero-card da-hero-card" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
+  {# 18.09 Ozan (üçüncü kez, bkz. bughunt-13.09 yorumu üstte): "teknik analiz/
+     büyük hero kartı her sekmede önde duruyor, her sekmenin kendi bütünlüğü
+     olmalı, çok scroll gerekmeden bilgiye ulaşılmalı" — bu büyük kart (rozet+
+     gauge+Son 30 Gün sparkline) artık SADECE Özet sekmesinde gösteriliyor.
+     Kompakt bağlam (fiyat/sinyal/ticker) header'daki hpPrice/hpChg/hpSignal
+     ile (bu bloğun DIŞINDA, satır ~222) zaten her sekmede görünür kalıyor. #}
+  <div class="bp-hero-card da-hero-card" data-tab-content="ozet" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
     <svg class="da-hero-art" viewBox="0 0 400 267" aria-hidden="true" focusable="false">
       <circle cx="60" cy="40" r="1.6" fill="{{ _hc }}" opacity=".55"/>
       <circle cx="340" cy="60" r="1.6" fill="{{ _hc }}" opacity=".4"/>
