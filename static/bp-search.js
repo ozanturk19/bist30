@@ -93,9 +93,11 @@
     + '@media (max-width:900px){.bp-main-nav{display:none}}'
     /* ── Header-right uniform actions: live time + refresh + search (all pages) ── */
     + '.bp-header-right{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}'
-    + '.bp-live-time{display:inline-flex;align-items:center;gap:5px;background:rgba(0,226,144,0.06);border:1px solid rgba(0,226,144,0.20);color:#00e290;font-size:11px;font-weight:700;padding:5px 9px;border-radius:6px;font-family:"Space Grotesk",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0.3px;white-space:nowrap}'
-    + '.bp-live-dot{width:6px;height:6px;border-radius:50%;background:#00e290;animation:bpLivePulse 2s infinite;flex-shrink:0}'
-    + '@keyframes bpLivePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.8)}}'
+    /* CPO-1666 #6: yesil nabiz + "CANLI" etiketi EOD (gun-sonu) mimariyle
+       celisiyordu -- bu sadece yerel saat, veri tazeligiyle ilgisi yok.
+       Notr gri + sabit nokta (nabiz yok) + "Yerel Saat" metnine cevrildi. */
+    + '.bp-live-time{display:inline-flex;align-items:center;gap:5px;background:rgba(144,144,151,0.08);border:1px solid rgba(144,144,151,0.20);color:#909097;font-size:11px;font-weight:700;padding:5px 9px;border-radius:6px;font-family:"Space Grotesk",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0.3px;white-space:nowrap}'
+    + '.bp-live-dot{width:6px;height:6px;border-radius:50%;background:#909097;flex-shrink:0}'
     + '.bp-refresh-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid #2a2a2c;color:#c7c5cd;font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;transition:background .15s,border-color .15s;text-transform:uppercase;letter-spacing:0.4px;font-family:"Space Grotesk",system-ui,sans-serif;flex-shrink:0;line-height:1}'
     + '.bp-refresh-btn:hover{background:rgba(184,195,255,0.08);border-color:#46464d;color:#e5e1e4}'
     + '.bp-refresh-btn.spinning svg{animation:bpRefreshSpin 0.8s linear infinite}'
@@ -505,7 +507,7 @@
     var liveTime = document.createElement('span');
     liveTime.className = 'bp-live-time';
     liveTime.id = 'bpLiveTime';
-    liveTime.innerHTML = '<span class="bp-live-dot"></span><span class="bp-live-time-text" id="bpLiveTimeText">CANLI</span>';
+    liveTime.innerHTML = '<span class="bp-live-dot"></span><span class="bp-live-time-text" id="bpLiveTimeText">Yerel Saat</span>';
     wrapper.appendChild(liveTime);
 
     // Move/append search button into wrapper

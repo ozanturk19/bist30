@@ -1836,7 +1836,16 @@ def analyze(ticker_base):
             tp2      = round(c + risk * 3, 2)    # 3R hedef
             rr_ratio = 2.0                        # standart 2R TP hedefleniyor
 
-            if atrs_moved < 1.0:
+            # CPO-1666 #2: pct_moved negatifken (fiyat sinyale KARŞI hareket etti,
+            # AL sinyalinden sonra düştü) atrs_moved da negatif olup < 1.0 testini
+            # geçiyor ve "IDEAL" basıyordu — SL'ye yaklaşmış, kaybeden bir pozisyon
+            # "taze/en avantajlı" diye etiketleniyordu (NETAS canlı örneği: -%9.7,
+            # SL'ye 0.7% kaldı, yine de IDEAL). Ters yönde hareket ayrı ele alınmalı.
+            if pct_moved < 0:
+                entry_quality = "UZAK"
+                entry_note    = (f"UZAK · Fiyat sinyalden bu yana %{abs(pct_moved):.1f} düştü "
+                                 f"({abs(atrs_moved):.1f} ATR) — sinyal SL'ye yaklaştı, riskli bölge")
+            elif atrs_moved < 1.0:
                 entry_quality = "IDEAL"
                 entry_note    = (f"Sinyal taze ({signal_bars} bar), "
                                  f"fiyat SL'ye yakın — R/R en avantajlı bölge")
@@ -1866,7 +1875,14 @@ def analyze(ticker_base):
             tp2      = round(c - risk * 3, 2)
             rr_ratio = 2.0
 
-            if atrs_moved < 1.0:
+            # CPO-1666 #2: AL taraftaki aynı fix, SAT için simetrik (yukarıdaki
+            # yorum bkz.) — fiyat SAT sinyaline karşı (yukarı) hareket ettiyse
+            # negatif pct_moved yine "IDEAL" olarak sızmasın.
+            if pct_moved < 0:
+                entry_quality = "UZAK"
+                entry_note    = (f"UZAK · Fiyat sinyalden bu yana %{abs(pct_moved):.1f} yükseldi "
+                                 f"({abs(atrs_moved):.1f} ATR) — sinyal SL'ye yaklaştı, riskli bölge")
+            elif atrs_moved < 1.0:
                 entry_quality = "IDEAL"
                 entry_note    = (f"Trend Bozuldu taze ({signal_bars} bar), "
                                  f"SL yakın — R/R en avantajlı bölge")
@@ -4263,6 +4279,12 @@ def set_security_headers(response):
             "object-src 'none'; "
             "upgrade-insecure-requests;"
         )
+        # CPO-1666 #7: /hisse/<ticker> (410 dahil) ve kardeş HTML route'ları
+        # (404 vb.) hiç Cache-Control basmıyordu — tarayıcı heuristic
+        # freshness'a düşebilirdi. Zaten kendi Cache-Control'unu basan
+        # route'lara (ör. statik/API json) dokunmuyoruz.
+        if "Cache-Control" not in response.headers:
+            response.headers["Cache-Control"] = "no-cache, must-revalidate"
     # CF'in EKLEMEDİĞİ header'lar (modern security):
     response.headers["X-DNS-Prefetch-Control"] = "on"
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
@@ -10681,8 +10703,15 @@ def api_snapshots():
 
 
 @app.route("/ozet/<tarih>")
-def ozet_gecmis(tarih):
-    """Geçmiş tarihli sinyal özeti."""
+def ozet_gecmis(tarih, via_auto_fallback=False):
+    """Geçmiş tarihli sinyal özeti.
+
+    via_auto_fallback: CPO-1666 #4 — ozet_page() (bare /ozet) piyasa henüz
+    veri üretmediğinde bu fonksiyona iç çağrı yapıp aynı "Geçmiş Görünüm"
+    banner'ını basıyordu; kullanıcı zaten /ozet'teyken "Güncel Özete Dön"
+    linkine tıklayınca yine /ozet'e (aynı fallback'e) düşüp işlevsiz
+    görünüyordu. Bu bayrak template'in butonu gizlemesini sağlar.
+    """
     if not re.match(r"^\d{4}-\d{2}-\d{2}$", tarih):
         abort(404)
     fname = os.path.join(_SNAPSHOTS_DIR, f"{tarih}.json")
@@ -10710,14 +10739,17 @@ def ozet_gecmis(tarih):
     # CPO-1335: arşiv sayfası kendi gününe göre değerlendirilir — donmuş
     # is_new_signal yerine signal_date, referans gün ARŞİV günü (bugün değil).
     _arsiv_gun = date.fromisoformat(tarih)
+    # CPO-1666 #3: /ozet_page ile aynı fix (bkz. yukarıdaki not) — arşiv
+    # sayfasında da BEKLE'ye dönen sinyaller "yeni sinyal" gibi görünmesin.
     new_signals = [s for s in stocks
-                   if is_signal_from_today(s.get("signal_date"), today=_arsiv_gun)]
+                   if is_signal_from_today(s.get("signal_date"), today=_arsiv_gun)
+                   and s.get("signal") != "BEKLE"]
     return render_template("ozet.html",
         stocks=stocks, loading=False,
         al_list=al_list, sat_list=sat_list, bekle_list=bekle_list,
         new_signals=new_signals, today_str=snap.get("date_tr", tarih),
         stock_names=STOCK_NAMES,
-        historical_date=tarih)
+        historical_date=tarih, via_auto_fallback=via_auto_fallback)
 
 
 @app.route("/api/ozet/snapshots")
@@ -10780,7 +10812,7 @@ def ozet_page():
                 if re.match(r"^\d{4}-\d{2}-\d{2}\.json$", f)
             ], reverse=True)
             if _files:
-                return ozet_gecmis(_files[0])
+                return ozet_gecmis(_files[0], via_auto_fallback=True)
         except Exception as e:
             logger.debug("ozet_page tatil-fallback hatasi: %s", e)
 
@@ -10791,7 +10823,12 @@ def ozet_page():
     sat_list   = [s for s in stocks if s["signal"] == "SAT"]
     bekle_list = [s for s in stocks if s["signal"] == "BEKLE"]
     # CPO-1335: donmuş is_new_signal yerine okuma-anı signal_date kontrolü.
-    new_signals = [s for s in stocks if is_signal_from_today(s.get("signal_date"))]
+    # CPO-1666 #3: /gundem'in (satır ~10589) zaten uyguladığı "BEKLE değil"
+    # filtresi burada eksikti — bir hisse BEKLE'ye dönüp signal_date bugüne
+    # sıfırlandığında "Sinyal Değişenler"de sanki yeni AL/SAT sinyaliymiş gibi
+    # görünüyordu.
+    new_signals = [s for s in stocks
+                   if is_signal_from_today(s.get("signal_date")) and s.get("signal") != "BEKLE"]
 
     today_str = datetime.now(_TZ_TR).strftime("%d.%m.%Y")  # CPO-1335: TR günü
     return render_template("ozet.html",
@@ -13185,17 +13222,26 @@ def _startup():
     # desen — bu warm-up olmadan _dividend_cache hiç dolmaz: get_dividend_data()'nın
     # lazy-TTL dalı sadece web-dışı bir process'e /api/temettu-takvimi isteği
     # geldiğinde tetiklenir, ama refresh service'e böyle bir istek hiç gelmiyor).
+    #
+    # CPO-1666 #5: bu fonksiyon TEK SEFER çalışıp çıkıyordu — bist30-refresh.service
+    # Type=simple/Restart=always (systemd timer YOK, kalıcı süreç), yani "yenileme
+    # döngüsü" fiilen crash olmadıkça bir daha hiç tetiklenmiyordu (TTL=12 saat
+    # hedefine rağmen). while True + _DIVIDEND_TTL periyoduyla gerçek bir döngüye çevrildi —
+    # get_dividend_data() zaten kendi TTL/lock kontrolünü yapıyor, burada sadece
+    # düzenli aralıklarla çağrılması gerekiyordu.
     def _warm_dividend():
         # CPO-558B ile aynı guard: web worker'da yfinance yasak
         if os.environ.get("REFRESH_WORKER") == "web":
             logger.info("_warm_dividend: REFRESH_WORKER=web — yfinance atlandı")
             return
         time.sleep(90)    # bilanço/macro warm-up'lardan sonra başla, yfinance rate-limit'i paylaş
-        try:
-            get_dividend_data()
-            logger.info("_warm_dividend: temettü takvimi ön yüklendi")
-        except Exception as e:
-            logger.warning("_warm_dividend: %s", e)
+        while True:
+            try:
+                get_dividend_data()
+                logger.info("_warm_dividend: temettü takvimi ön yüklendi")
+            except Exception as e:
+                logger.warning("_warm_dividend: %s", e)
+            time.sleep(_DIVIDEND_TTL)
     threading.Thread(target=_warm_dividend, daemon=True).start()
 
     def _slow_chart_refresh_daemon():

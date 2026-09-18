@@ -89,13 +89,20 @@ function goToDate(date) {
      padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
   <span style="font-size:var(--bp-text-xl)"><span aria-hidden="true">🗓</span></span>
   <div style="flex:1;min-width:0">
+    {% if via_auto_fallback %}
+    <span style="color:var(--bp-gold);font-weight:700;font-size:var(--bp-text-base)">Son İşlem Günü — {{ historical_date }}</span>
+    <span style="color:var(--bp-text3);font-size:var(--bp-text-sm);margin-left:8px">Yeni işlem günü verisi henüz oluşmadı, en son kayıt gösteriliyor.</span>
+    {% else %}
     <span style="color:var(--bp-gold);font-weight:700;font-size:var(--bp-text-base)">Geçmiş Görünüm — {{ historical_date }}</span>
     <span style="color:var(--bp-text3);font-size:var(--bp-text-sm);margin-left:8px">Bu sayfa o güne ait anlık kaydı göstermektedir.</span>
+    {% endif %}
   </div>
+  {% if not via_auto_fallback %}
   <a href="/ozet" style="background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius);
      padding:5px 12px;font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;white-space:nowrap;flex-shrink:0;">
     <span aria-hidden="true">↩</span> Güncel Özete Dön
   </a>
+  {% endif %}
 </div>
 {% endif %}
 
