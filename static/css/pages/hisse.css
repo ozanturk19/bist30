@@ -1123,6 +1123,60 @@
       .da-hero-fundamental-teaser{grid-column:1;}
     }
 
+    /* ── Data-Art dil aktarımı: Paylaş/Haber-Akışı kutuları (18.09 — Ozan:
+       "Resmi Kaynaklar amatör görünüyor, hisse sayfası ana sayfayla tasarımsal
+       konuşmuyor"). Ana sayfanın .da-eyebrow/.da-badge/.da-recap-panel dilinden
+       ödünç alınan hisse.html karşılıkları — kanonik paylaşılan dosya değil ama
+       en azından AYNI dili konuşuyor, sonraki sayfalara da taşınabilir. ── */
+    .da-util-eyebrow{
+      display:inline-flex;align-items:center;gap:7px;
+      font-family:'Space Grotesk',system-ui,sans-serif;
+      font-size:var(--bp-text-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--bp-accent-cyan);
+    }
+    .da-util-eyebrow .dot{
+      width:6px;height:6px;border-radius:50%;background:var(--bp-accent-cyan);
+      box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.6);flex:none;
+    }
+    .da-share-panel{
+      position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;
+      background:linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+      border:1px solid var(--bp-border);border-radius:var(--bp-radius-20);
+      padding:16px 20px;margin-bottom:20px;
+    }
+    .da-share-panel::before{
+      content:'';position:absolute;top:-55%;right:-8%;width:200px;height:200px;border-radius:50%;
+      background:radial-gradient(circle, rgba(var(--bp-art-violet-rgb),.14), transparent 70%);
+      pointer-events:none;
+    }
+    .da-share-btns{position:relative;display:flex;flex-wrap:wrap;gap:10px}
+    .da-share-btn{
+      display:inline-flex;align-items:center;gap:6px;
+      border-radius:var(--bp-radius-pill);padding:7px 14px;
+      font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;font-family:inherit;
+      transition:transform .15s ease, background .15s ease;transform:rotate(-1deg);
+    }
+    .da-share-btn:nth-child(2){ transform:rotate(.8deg); }
+    .da-share-btn:nth-child(3){ transform:rotate(-.6deg); }
+    .da-share-btn:hover{ transform:rotate(0deg) translateY(-1px); }
+    .da-share-btn:active{ transform:scale(.96); }
+
+    .da-story-panel{
+      position:relative;overflow:hidden;
+      background:linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+      border:1px solid var(--bp-border);border-left:3px solid var(--bp-accent-cyan);
+      border-radius:var(--bp-radius-20);padding:18px 20px;margin-bottom:20px;
+    }
+    .da-story-panel::before{
+      content:'';position:absolute;top:-45%;right:-10%;width:260px;height:260px;border-radius:50%;
+      background:radial-gradient(circle, rgba(var(--bp-accent-cyan-rgb),.10), transparent 70%);
+      pointer-events:none;
+    }
+    .da-story-head{position:relative;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+    .da-story-title{
+      position:relative;font-weight:800;letter-spacing:-.01em;font-size:clamp(1.05rem,2vw,1.3rem);
+      color:var(--bp-text);margin:0;
+    }
 
     .bp-spark-wrap { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
     .bp-spark-label {
