@@ -576,7 +576,13 @@ def _fetch_fundamentals_subprocess(ticker_base, timeout=30):
             "ocf_quarters_used", "ocf_stability_cv",
         )
         extra = {k: data.get(k) for k in _extra_keys if k in data}
-        return {"info": info, "statement_trend": data.get("statement_trend") or [], "extra": extra}
+        return {
+            "info": info,
+            "statement_trend": data.get("statement_trend") or [],
+            # CPO-1667: ciro/net kar trendi icin ceyreklik esdeger, yillik statement_trend'e ek
+            "statement_trend_quarterly": data.get("statement_trend_quarterly") or [],
+            "extra": extra,
+        }
     except subprocess.TimeoutExpired:
         _yahoo_cb_record(False, timeout=True)
         _ms = (time.perf_counter() - _t0) * 1000
@@ -8327,6 +8333,7 @@ def _get_fundamentals(ticker_base):
         raw.update(_fetched.get("extra") or {})
         data = _clean_fundamentals(raw)
         data["statement_trend"] = _fetched.get("statement_trend") or []
+        data["statement_trend_quarterly"] = _fetched.get("statement_trend_quarterly") or []
         with _lock:
             _fundamentals_cache[ticker_base] = {"data": data, "ts": now}
         return data

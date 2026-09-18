@@ -59,6 +59,34 @@ def _fetch_statement_trend(ticker) -> list:
     return out[-4:]  # en fazla 4 yil
 
 
+def _fetch_statement_trend_quarterly(ticker) -> list:
+    """Son ceyreklerin Ciro+Net Kar trendi (CPO-1667) — _fetch_statement_trend'in
+    ceyreklik esdegeri, ayni NaN/eksik-donem korumasi. period etiketi "YYYYQn"
+    formatinda (tek basina "year" cakisir, ayni yil icinde birden fazla ceyrek var)."""
+    try:
+        df = ticker.quarterly_income_stmt
+    except Exception:
+        return []
+    if df is None or df.empty:
+        return []
+    out = []
+    for col in df.columns:
+        if not hasattr(col, "year") or not hasattr(col, "quarter"):
+            continue
+        row = {"period": f"{col.year}Q{col.quarter}", "year": col.year, "quarter": col.quarter}
+        has_data = False
+        for key in _STATEMENT_ROWS:
+            if key in df.index:
+                v = df.loc[key, col]
+                if v is not None and not (isinstance(v, float) and v != v):  # NaN guard
+                    row[key.lower().replace(" ", "_")] = float(v)
+                    has_data = True
+        if has_data:
+            out.append(row)
+    out.sort(key=lambda r: (r["year"], r["quarter"]))
+    return out[-8:]  # en fazla 8 ceyrek (yfinance genelde ~4-5 doner)
+
+
 # CPO-1526 (Faz 1 temel-veri fetcher spec): Kaldiraç + Nakit Akışı skor
 # girdileri. _fetch_statement_trend()'in aksine çok-yıllık liste değil, tek
 # en güncel dönemin normalize edilmiş DÜZ dict'i — bunlar oran/istikrar
@@ -245,6 +273,7 @@ def fetch(yf_ticker: str) -> dict:
             subset[k] = str(v)
 
     trend = _fetch_statement_trend(t)
+    trend_quarterly = _fetch_statement_trend_quarterly(t)
 
     # CPO-1527: Kaldiraç/Nakit Akışı skor girdileri — izole fetcher'ları
     # (CPO-1526, DEV-1813) fetch()'e bağla + çapraz-tablo oranlarını birleştir.
@@ -253,7 +282,10 @@ def fetch(yf_ticker: str) -> dict:
     income_latest = _fetch_latest_income_items(t)
     ratios = _merge_cross_statement_ratios(subset, income_latest, balance, cashflow)
 
-    result = {"ticker": yf_ticker, "info": subset, "statement_trend": trend}
+    result = {
+        "ticker": yf_ticker, "info": subset,
+        "statement_trend": trend, "statement_trend_quarterly": trend_quarterly,
+    }
     result.update(balance)
     result.update(cashflow)
     result.update(ratios)
