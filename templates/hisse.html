@@ -1195,9 +1195,15 @@
         <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">📈</span> Kârlılık & Büyüme</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridProfit"></div>
       </div>
-      <!-- Ciro & Net Kâr Trendi — r174 (Ozan istegi, son 4 yil) -->
+      <!-- Ciro & Net Kâr Trendi — r174 (Ozan istegi) + CPO-1667 (19.09, ceyreklik toggle) -->
       <div id="fundTrend" style="display:none;margin-bottom:16px">
-        <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">📊</span> Ciro & Net Kâr Trendi (Yıllık)</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+          <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px"><span aria-hidden="true">📊</span> Ciro & Net Kâr Trendi</div>
+          <div id="fundTrendToggle" style="display:none;gap:4px;background:var(--bp-surface2);border-radius:var(--bp-radius-pill);padding:3px" role="group" aria-label="Zaman aralığı">
+            <button type="button" id="fundTrendBtnY" onclick="fundTrendSetPeriod('y')" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:var(--bp-text-2xs);font-weight:700;padding:5px 11px;border-radius:var(--bp-radius-pill);color:var(--bp-text3)">Yıllık</button>
+            <button type="button" id="fundTrendBtnQ" onclick="fundTrendSetPeriod('q')" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:var(--bp-text-2xs);font-weight:700;padding:5px 11px;border-radius:var(--bp-radius-pill);color:var(--bp-text3)">Çeyreklik</button>
+          </div>
+        </div>
         <div id="fundTrendChart" style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:12px 14px"></div>
       </div>
       <!-- Getiri & Risk -->
@@ -3239,6 +3245,69 @@ function _roeColor(v) { return v == null ? 'var(--bp-text)' : v > 20 ? 'var(--bp
 function _peColor(v) { return v == null ? 'var(--bp-text)' : v < 12 ? 'var(--bp-al)' : v < 25 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
 function _pbColor(v) { return v == null ? 'var(--bp-text)' : v < 1 ? 'var(--bp-al)' : v < 3 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
 
+/* Ciro & Net Kâr Trendi — r174 (yıllık) + CPO-1667 (19.09, çeyreklik — DEV1'in
+   statement_trend_quarterly alanı, "en yüksek skor" ve "Resmi Kaynaklar" fix'leriyle
+   aynı gece Ozan'ın 5 maddelik geri bildiriminin devamı, bkz. memory
+   project_data_art_kapsamli_donusum_baslangici_18_09). Tek render fonksiyonu her iki
+   period için de kullanılıyor, bar/etiket boyutu bar sayısına göre otomatik daralıyor
+   (yıllık ~4 bar geniş, çeyreklik ~8 bar dar). */
+const _fundTrendData = { y: [], q: [] };
+function _fmtCompactTL(v){
+  if (v == null) return '—';
+  const abs = Math.abs(v), sign = v < 0 ? '-' : '';
+  if (abs >= 1e9) return sign + (abs/1e9).toFixed(1).replace('.', ',') + ' Mr ₺';
+  if (abs >= 1e6) return sign + Math.round(abs/1e6).toLocaleString('tr-TR') + ' Mn ₺';
+  return sign + Math.round(abs).toLocaleString('tr-TR') + ' ₺';
+}
+function _renderFundTrendChart(period) {
+  const chartEl = document.getElementById('fundTrendChart');
+  if (!chartEl) return;
+  const trend = period === 'q' ? _fundTrendData.q : _fundTrendData.y;
+  if (!trend.length) {
+    chartEl.innerHTML = '<div style="font-size:var(--bp-text-sm);color:var(--bp-text3);text-align:center;padding:14px 0">Çeyreklik veri bulunamadı.</div>';
+    return;
+  }
+  const maxVal = Math.max(...trend.flatMap(t => [Math.abs(t.total_revenue || 0), Math.abs(t.net_income || 0)]));
+  const n = trend.length;
+  const groupW = Math.max(46, Math.min(92, Math.floor(440 / n)));
+  const barW = Math.max(12, Math.min(28, Math.floor(groupW * 0.32)));
+  const gap = n > 6 ? 6 : 10;
+  const containerW = Math.min(460, n * (groupW + gap));
+  const lblFont = n > 6 ? '8px' : '10px';
+  const barsHtml = trend.map(t => {
+    const label = period === 'q' ? (t.quarter + 'Ç\'' + String(t.year).slice(2)) : String(t.year);
+    const revPct = maxVal > 0 ? Math.max(4, Math.abs(t.total_revenue || 0) / maxVal * 100) : 4;
+    const niPct  = maxVal > 0 ? Math.max(4, Math.abs(t.net_income || 0) / maxVal * 100) : 4;
+    const niNeg  = (t.net_income || 0) < 0;
+    return `<div style="flex:1;max-width:${groupW}px;display:flex;flex-direction:column;align-items:center;gap:5px">
+      <div style="font-size:${lblFont};line-height:1.5;text-align:center;white-space:nowrap">
+        <div style="color:var(--bp-brand);font-weight:700">${_fmtCompactTL(t.total_revenue)}</div>
+        <div style="color:${niNeg ? 'var(--bp-sat)' : 'var(--bp-al)'};font-weight:700">${_fmtCompactTL(t.net_income)}</div>
+      </div>
+      <div style="width:100%;display:flex;align-items:flex-end;justify-content:center;gap:${Math.max(2, Math.floor(barW*0.2))}px;height:64px">
+        <div title="Ciro ${label}: ${_fmtCompactTL(t.total_revenue)}" style="flex:1;max-width:${barW}px;background:var(--bp-brand);border-radius:3px 3px 0 0;height:${revPct}%;min-height:3px"></div>
+        <div title="Net Kâr ${label}: ${_fmtCompactTL(t.net_income)}" style="flex:1;max-width:${barW}px;background:${niNeg ? 'var(--bp-sat)' : 'var(--bp-al)'};border-radius:3px 3px 0 0;height:${niPct}%;min-height:3px"></div>
+      </div>
+      <div style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:600">${label}</div>
+    </div>`;
+  }).join('');
+  chartEl.innerHTML =
+    `<div style="display:flex;gap:${gap}px;align-items:flex-end;justify-content:center;max-width:${containerW}px;margin:0 auto">${barsHtml}</div>
+     <div style="display:flex;gap:14px;margin-top:10px;justify-content:center;font-size:var(--bp-text-2xs);color:var(--bp-text3)">
+       <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--bp-brand);margin-right:4px"></span>Ciro</span>
+       <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--bp-al);margin-right:4px"></span>Net Kâr</span>
+     </div>`;
+}
+window.fundTrendSetPeriod = function(period) {
+  _renderFundTrendChart(period);
+  const btnY = document.getElementById('fundTrendBtnY'), btnQ = document.getElementById('fundTrendBtnQ');
+  if (!btnY || !btnQ) return;
+  const on  = { background: 'var(--bp-bg)', color: 'var(--bp-text)' };
+  const off = { background: 'none', color: 'var(--bp-text3)' };
+  Object.assign(btnY.style, period === 'y' ? on : off);
+  Object.assign(btnQ.style, period === 'q' ? on : off);
+};
+
 async function loadFundamentals() {
   try {
     const res  = await fetch('/api/hisse/' + TICKER + '/fundamentals', { signal: AbortSignal.timeout(15000) });
@@ -3314,48 +3383,17 @@ async function loadFundamentals() {
       document.getElementById('fundAnalyst').style.display = '';
     }
 
-    /* Ciro & Net Kâr Trendi — r174 (son 4 yil, evrensel iki kalem).
-       18.09 Ozan: "barlar çok geniş görünüyor anlaşılmıyor ne olduğu" — kök neden:
-       sadece 4 yıl olduğu için flex:1 barlar kartın tam genişliğine yayılıp
-       şişkin/anlamsız görünüyordu, üstelik hiçbir sayısal değer yazmıyordu (sadece
-       göreli yükseklik). Sabit dar genişlik + her barın üstünde okunur değer
-       etiketi eklendi. Çeyreklik veri (daha fazla bar) backend'de
-       ticker.quarterly_income_stmt gerektirir — CPO kapsamı dışı, DEV1'e iletildi
-       (bkz. memory project_data_art_kapsamli_donusum_baslangici_18_09). */
-    const trend = f.statement_trend || [];
-    if (trend.length >= 2) {
-      // Ciro ve Net Kar ayni skalada (ortak max) - iki serinin gorsel olarak
-      // karsilastirilabilir olmasi icin (Net Kar hep Ciro'dan kucuktur, marjin gorunur).
-      const maxVal = Math.max(...trend.flatMap(t => [Math.abs(t.total_revenue || 0), Math.abs(t.net_income || 0)]));
-      function fmtCompactTL(v){
-        if (v == null) return '—';
-        const abs = Math.abs(v), sign = v < 0 ? '-' : '';
-        if (abs >= 1e9) return sign + (abs/1e9).toFixed(1).replace('.', ',') + ' Mr ₺';
-        if (abs >= 1e6) return sign + Math.round(abs/1e6).toLocaleString('tr-TR') + ' Mn ₺';
-        return sign + Math.round(abs).toLocaleString('tr-TR') + ' ₺';
-      }
-      const barsHtml = trend.map(t => {
-        const revPct = maxVal > 0 ? Math.max(4, Math.abs(t.total_revenue || 0) / maxVal * 100) : 4;
-        const niPct  = maxVal > 0 ? Math.max(4, Math.abs(t.net_income || 0) / maxVal * 100) : 4;
-        const niNeg  = (t.net_income || 0) < 0;
-        return `<div style="flex:1;max-width:92px;display:flex;flex-direction:column;align-items:center;gap:5px">
-          <div style="font-size:10px;line-height:1.5;text-align:center;white-space:nowrap">
-            <div style="color:var(--bp-brand);font-weight:700">${fmtCompactTL(t.total_revenue)}</div>
-            <div style="color:${niNeg ? 'var(--bp-sat)' : 'var(--bp-al)'};font-weight:700">${fmtCompactTL(t.net_income)}</div>
-          </div>
-          <div style="width:100%;display:flex;align-items:flex-end;justify-content:center;gap:6px;height:64px">
-            <div title="Ciro ${t.year}: ${fmtCompactTL(t.total_revenue)}" style="flex:1;max-width:28px;background:var(--bp-brand);border-radius:3px 3px 0 0;height:${revPct}%;min-height:3px"></div>
-            <div title="Net Kâr ${t.year}: ${fmtCompactTL(t.net_income)}" style="flex:1;max-width:28px;background:${niNeg ? 'var(--bp-sat)' : 'var(--bp-al)'};border-radius:3px 3px 0 0;height:${niPct}%;min-height:3px"></div>
-          </div>
-          <div style="font-size:var(--bp-text-2xs);color:var(--bp-text3);font-weight:600">${t.year}</div>
-        </div>`;
-      }).join('');
-      document.getElementById('fundTrendChart').innerHTML =
-        `<div style="display:flex;gap:10px;align-items:flex-end;justify-content:center;max-width:420px;margin:0 auto">${barsHtml}</div>
-         <div style="display:flex;gap:14px;margin-top:10px;justify-content:center;font-size:var(--bp-text-2xs);color:var(--bp-text3)">
-           <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--bp-brand);margin-right:4px"></span>Ciro</span>
-           <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--bp-al);margin-right:4px"></span>Net Kâr</span>
-         </div>`;
+    /* Ciro & Net Kâr Trendi — r174 (yıllık) + CPO-1667 (19.09, çeyreklik toggle).
+       Render mantığı + fmt helper artık _renderFundTrendChart()/_fmtCompactTL()'de
+       (loadFundamentals'ın ÜSTÜNDE tanımlı, toggle butonları her an çağırabilsin diye). */
+    const trendY = f.statement_trend || [];
+    const trendQ = f.statement_trend_quarterly || [];
+    _fundTrendData.y = trendY;
+    _fundTrendData.q = trendQ;
+    if (trendY.length >= 2) {
+      const toggle = document.getElementById('fundTrendToggle');
+      if (toggle) toggle.style.display = trendQ.length >= 2 ? 'flex' : 'none';
+      fundTrendSetPeriod('y');
       document.getElementById('fundTrend').style.display = '';
     }
 
