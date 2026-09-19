@@ -309,7 +309,7 @@
   tbody a { text-decoration:none; color:inherit; }
 
   .tk { font-size:var(--bp-text-md); font-weight:700; color:var(--bp-text); }
-  .tk-name { font-size:var(--bp-text-xs); color:var(--text2); margin-top:1px; }
+  .tk-name { font-size:var(--bp-text-xs); color:var(--text2); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
   .sector-tag {
     font-size:var(--bp-text-2xs); color:var(--text3); background:var(--surface2);
     border:1px solid var(--bp-border-subtle); border-radius:var(--bp-radius-lg); padding:2px 7px;
