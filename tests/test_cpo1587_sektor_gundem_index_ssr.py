@@ -195,12 +195,15 @@ def test_xu100_level_empty_ohlc_returns_none():
     assert lvl["spark"] == []
 
 
-def _fresh_index_ssr_context():
+def _fresh_index_ssr_context(financial_health_cache=None):
     ns = {
         "_lock": _FakeLockCtx(),
         "_cache": {"data": _INDEX_STOCKS, "updated_at": "12.09.2026 09:00"},
         "_load_xu100_chart_from_disk": lambda: None,
         "_xu100_chart_cache": {"data": {"ohlc": [{"close": 14200.0}, {"close": 14505.5}]}},
+        # CPO-1668 #6: spotlight secimi artik _financial_health_cache'ten
+        # borsapusula_skoru okuyor (JS'in daRenderSpotlight'iyla ayni havuz).
+        "_financial_health_cache": financial_health_cache or {},
     }
     # _compute_index_ssr_context, govde icinde _get_xu100_level'i cagiriyor --
     # ikisi de ayni namespace'te tanimlanmali.
@@ -228,3 +231,49 @@ def test_index_ssr_bist_level_uses_same_source():
     fn = _fresh_index_ssr_context()
     ctx = fn()
     assert ctx["bist_level"]["close"] == 14505.5
+
+
+def test_index_ssr_spotlight_no_top8_restriction_includes_bekle():
+    """CPO-1668 #6: spotlight JS'in daRenderSpotlight'iyla ayni havuzdan
+    seciliyor -- top-8/AL kisiti yok, sadece SAT haric. Eskiden spotlight
+    top_signals'tan (top-8 AL) turetiliyordu, bu yuzden BEKLE bir hisse en
+    yuksek signal_strength'e sahip olsa bile hic secilemezdi."""
+    stocks = [
+        {"ticker": "XU030", "signal": "AL", "signal_strength": 999},
+        {"ticker": "AKBNK", "signal": "AL", "signal_strength": 80},
+        {"ticker": "THYAO", "signal": "SAT", "signal_strength": 99},
+        {"ticker": "TCELL", "signal": "BEKLE", "signal_strength": 95},
+    ]
+    ns = {
+        "_lock": _FakeLockCtx(),
+        "_cache": {"data": stocks, "updated_at": "x"},
+        "_load_xu100_chart_from_disk": lambda: None,
+        "_xu100_chart_cache": {"data": {"ohlc": [{"close": 100.0}]}},
+        "_financial_health_cache": {},
+    }
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    ctx = ns["_compute_index_ssr_context"]()
+    assert ctx["spotlight"]["ticker"] == "TCELL"  # BEKLE ama SAT haric en yuksek skor
+
+
+def test_index_ssr_spotlight_prefers_borsapusula_skoru_over_signal_strength():
+    """JS'teki useBps mantigi: havuzda hs_available+borsapusula_skoru olan
+    herhangi bir hisse varsa spotlight ONLARIN icinden en yuksek BPS'e gore
+    secilir, signal_strength'e degil."""
+    stocks = [
+        {"ticker": "AKBNK", "signal": "AL", "signal_strength": 90},
+        {"ticker": "AEFES", "signal": "AL", "signal_strength": 10},
+    ]
+    hs_cache = {"AEFES": {"data": {"borsapusula_skoru": 88}}}
+    ns = {
+        "_lock": _FakeLockCtx(),
+        "_cache": {"data": stocks, "updated_at": "x"},
+        "_load_xu100_chart_from_disk": lambda: None,
+        "_xu100_chart_cache": {"data": {"ohlc": []}},
+        "_financial_health_cache": hs_cache,
+    }
+    exec(_extract("_get_xu100_level") + _extract("_compute_index_ssr_context"), ns)
+    ctx = ns["_compute_index_ssr_context"]()
+    assert ctx["spotlight"]["ticker"] == "AEFES"
+    assert ctx["spotlight"]["hs_available"] is True
+    assert ctx["spotlight"]["borsapusula_skoru"] == 88

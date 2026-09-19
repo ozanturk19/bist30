@@ -11450,21 +11450,6 @@ def sektor():
     return redirect("/sektor-harita", 301)
 
 
-# CPO-1668 #7: JS'in eşit-skor tiebreak'i localeCompare(name,'tr') kullanıyor —
-# Python'un çıplak string karşılaştırması Unicode kod noktası sırasına düşer,
-# bu da "İlaç/Sağlık" (tek İ-baslayan sektör) gibi adları TR alfabesindeki
-# gerçek yerine (H-K arası) değil en sona (İ'nin kod noktası Z'den büyük)
-# koyar. Küçük, sabit bir TR alfabe tablosuyla gerçek collation sırası taklit
-# ediliyor — locale.setlocale() KULLANILMIYOR (process-global, gevent'te
-# thread-safe değil, VPS'te tr_TR.UTF-8 kurulu olmayabilir).
-_TR_ORDER_STR = "aAbBcCçÇdDeEfFgGğĞhHıIiİjJkKlLmMnNoOöÖpPrRsSşŞtTuUüÜvVyYzZ"
-_TR_ORDER = {ch: i for i, ch in enumerate(_TR_ORDER_STR)}
-
-
-def _tr_sort_key(name):
-    return [_TR_ORDER.get(ch, 1000 + ord(ch)) for ch in name]
-
-
 def _compute_sector_heatmap():
     """Sektör bazlı AL/SAT/BEKLE toplamı + skor + ort. RVOL — /sektor-harita
     (SSR) ve /api/sector-heatmap (canlı JS) tarafından ortak kullanılır
@@ -11508,7 +11493,19 @@ def _compute_sector_heatmap():
     # CPO-1668 #7: JS'in tiebreak'iyle (b.score - a.score || a.name.localeCompare(b.name,'tr'))
     # AYNI ikincil sıralama — eskiden eşit skorlu sektörler için tiebreak yoktu,
     # Python dict insertion-order'a düşüyordu; JS yüklenince eşit skorlu kartlar
-    # ad-alfabetik sıraya "atlıyordu" (görünür yer değiştirme).
+    # ad-alfabetik sıraya "atlıyordu" (görünür yer değiştirme). Çıplak string
+    # karşılaştırması Unicode kod noktası sırasına düşer ve "İlaç/Sağlık" (tek
+    # İ-baslayan sektör) gibi adları TR alfabesindeki gerçek yerine (H-K arası)
+    # değil en sona koyar (İ'nin kod noktası Z'den büyük) — küçük, sabit bir TR
+    # alfabe tablosuyla gerçek collation taklit ediliyor. locale.setlocale()
+    # KULLANILMIYOR (process-global, gevent'te thread-safe değil, VPS'te
+    # tr_TR.UTF-8 kurulu olmayabilir).
+    _tr_order_str = "aAbBcCçÇdDeEfFgGğĞhHıIiİjJkKlLmMnNoOöÖpPrRsSşŞtTuUüÜvVyYzZ"
+    _tr_order = {ch: i for i, ch in enumerate(_tr_order_str)}
+
+    def _tr_sort_key(name):
+        return [_tr_order.get(ch, 1000 + ord(ch)) for ch in name]
+
     result.sort(key=lambda x: (-x["score"], _tr_sort_key(x["name"])))
     return result, upd
 
