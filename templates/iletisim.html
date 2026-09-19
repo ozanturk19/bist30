@@ -63,7 +63,8 @@
       </div>
       <div style="margin-bottom:12px">
         <label for="cfSubject" style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Konu</label>
-        <select id="cfSubject" style="width:100%;background:var(--bp-border-subtle);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:9px 12px;color:var(--bp-text);font-size:var(--bp-text-lg)">
+        <select id="cfSubject" required style="width:100%;background:var(--bp-border-subtle);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:9px 12px;color:var(--bp-text);font-size:var(--bp-text-lg)">
+          <option value="" selected disabled>Seçiniz…</option>
           <option value="Site Hatası (buton, görünüm)">🐛 Site Hatası (buton, görünüm)</option>
           <option value="Öneri">💡 Öneri</option>
           <option value="Veri Hatası (fiyat, sinyal)">📊 Veri Hatası (fiyat, sinyal)</option>
@@ -178,7 +179,7 @@ async function submitForm(e) {
   } catch(err) {
     msg.style.display = 'block';
     msg.style.color = 'var(--bp-sat)';
-    msg.textContent = 'Bağlantı hatası — lütfen daha sonra tekrar deneyin.';
+    msg.textContent = '❌ Bağlantı hatası — lütfen daha sonra tekrar deneyin.';
     btn.disabled = false;
     btn.innerHTML = 'Gönder <span aria-hidden="true">→</span>';
   }

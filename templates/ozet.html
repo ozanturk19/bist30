@@ -90,10 +90,10 @@ function goToDate(date) {
   <span style="font-size:var(--bp-text-xl)"><span aria-hidden="true">🗓</span></span>
   <div style="flex:1;min-width:0">
     {% if via_auto_fallback %}
-    <span style="color:var(--bp-gold);font-weight:700;font-size:var(--bp-text-base)">Son İşlem Günü — {{ historical_date }}</span>
+    <span style="color:var(--bp-gold);font-weight:700;font-size:var(--bp-text-base)">Son İşlem Günü — {{ today_str }}</span>
     <span style="color:var(--bp-text3);font-size:var(--bp-text-sm);margin-left:8px">Yeni işlem günü verisi henüz oluşmadı, en son kayıt gösteriliyor.</span>
     {% else %}
-    <span style="color:var(--bp-gold);font-weight:700;font-size:var(--bp-text-base)">Geçmiş Görünüm — {{ historical_date }}</span>
+    <span style="color:var(--bp-gold);font-weight:700;font-size:var(--bp-text-base)">Geçmiş Görünüm — {{ today_str }}</span>
     <span style="color:var(--bp-text3);font-size:var(--bp-text-sm);margin-left:8px">Bu sayfa o güne ait anlık kaydı göstermektedir.</span>
     {% endif %}
   </div>
@@ -177,7 +177,7 @@ function goToDate(date) {
     </a>
     {% endfor %}
   </div>
-  <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:10px"><span aria-hidden="true">✅</span> İdeal: Supertrend + ADX güçlü + Fiyat giriş bölgesinde · <a href="/" style="color:var(--bp-accent-cyan);text-decoration:none">Detaylı filtrele <span aria-hidden="true">→</span></a></div>
+  <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:10px"><span aria-hidden="true">✅</span> İdeal: Supertrend + ADX güçlü + Fiyat giriş bölgesine yakın · <a href="/tarama" style="color:var(--bp-accent-cyan);text-decoration:none">Detaylı filtrele <span aria-hidden="true">→</span></a></div>
 </div>
 {% endif %}
 

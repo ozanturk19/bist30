@@ -27,7 +27,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/portfolio.css?v=581838be">
+<link rel="stylesheet" href="/static/css/pages/portfolio.css?v=30a62a27">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
@@ -156,7 +156,7 @@
   <h2 class="sr-only">Pozisyonlarım</h2>
   <div class="add-bar">
     <span class="add-lbl" id="addBarLbl" aria-live="polite">Hisse ekle:</span>
-    <input type="text" id="addTicker" placeholder="THYAO veya Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu">
+    <input type="text" id="addTicker" placeholder="THYAO, Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu veya adı">
     <datalist id="bistTickerList"></datalist>
     <input type="number" id="addLot" placeholder="Adet" min="1" max="1000000000" step="1" inputmode="numeric" aria-label="Adet" onwheel="this.blur()">
     <input type="text" id="addPrice" placeholder="Alış fiyatı ₺" inputmode="decimal" aria-label="Alış fiyatı">
@@ -363,7 +363,7 @@ function csvSafe(v) {
 }
 function exportCSV() {
   if (!portfolio.length) { showToast('Portföy boş — önce hisse ekleyin.', 'err'); return; }
-  const headers = ['Hisse','Lot','Alış Fiyatı (₺)','Alış Tarihi','Güncel Fiyat (₺)','Sinyal','P&L (₺)','P&L (%)'];
+  const headers = ['Hisse','Lot','Alış Fiyatı (₺)','Alış Tarihi','Güncel Fiyat (₺)','Sinyal','K/Z (₺)','K/Z (%)'];
   const rows = portfolio.map(p => {
     const live     = liveData[p.ticker];
     const current  = live ? live.price  : '';

@@ -204,6 +204,9 @@ header{
 .da-search-trigger svg{width:19px;height:19px;flex:none;color:var(--bp-text3)}
 .da-search-trigger span.da-st-label{flex:1;font-size:var(--bp-text-lg);color:var(--bp-text3)}
 .da-search-kbd{font-family:'Space Grotesk',monospace,sans-serif;font-size:var(--bp-text-2xs);color:var(--bp-text3);border:1px solid var(--bp-border2);padding:3px 8px;border-radius:var(--bp-radius-sm);flex:none}
+/* 19.09: masaüstünden kalma ⌘K rozeti dokunmatik/mobil cihazda anlamsız — fiziksel
+   Cmd tuşu yok, kafa karıştırıyordu. */
+@media (max-width:680px){.da-search-kbd{display:none}}
 .da-legend-strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:clamp(30px,5vw,50px);padding:14px clamp(16px,3vw,22px);background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-xl);max-width:fit-content}
 .da-legend-item{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',monospace,sans-serif;font-size:var(--bp-text-sm);color:var(--bp-text2)}
 .da-legend-item .sw{width:10px;height:10px;border-radius:3px;flex:none}

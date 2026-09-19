@@ -365,7 +365,7 @@
           </div>
         </div>
         {% endif %}
-        {% if ssr_signal.tp_level or ssr_signal.sl_level %}
+        {% if _sig in ('AL', 'SAT') and (ssr_signal.tp_level or ssr_signal.sl_level) %}
         <div class="bp-hero-levels">
           {% if ssr_signal.tp_level %}<span><strong>Hedef:</strong>{{ ssr_signal.tp_level|tr_price }} ₺</span>{% endif %}
           {% if ssr_signal.sl_level %}<span><strong>Stop:</strong>{{ ssr_signal.sl_level|tr_price }} ₺</span>{% endif %}
@@ -1417,8 +1417,8 @@
       {% if hs_available and hs.borsapusula_skoru is not none %}
       <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
       {% endif %}
-      {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ ssr_signal.adx }}</dd></div>{% endif %}
-      {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ ssr_signal.rsi|int }}</dd></div>{% endif %}
+      {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ ssr_signal.adx|round|int }}</dd></div>{% endif %}
+      {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ ssr_signal.rsi|round|int }}</dd></div>{% endif %}
       {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Stop Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺</dd></div>{% endif %}
     </dl>
     <div class="quickfacts-disclaimer"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir.</div>
