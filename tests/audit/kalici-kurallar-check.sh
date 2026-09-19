@@ -45,7 +45,12 @@ check() {
 printf "${ECHO_HEADER}=== KALICI_KURALLAR v1.1 Audit — %s ===${ECHO_RESET}\n\n" "$FILE"
 
 # K1 — Navigasyon (bp-main-nav var mı?)
-check "K1 nav bar (bp-main-nav)" "bp-main-nav" 1
+# 19.09: nav CSS'i (.bp-main-nav{...}) sayfa-başına kopya olmaktan çıkıp tek kaynak
+# _bp_critical_css.html'e taşındı (bkz. project_data_art_kapsamli_donusum_baslangici_18_09) —
+# bu yüzden literal "bp-main-nav" artık sayfanın kendi dosyasında hiç geçmeyebilir, sadece
+# _header.html include'u üzerinden miras alınır. include'un kendisi de gerçek <nav
+# class="bp-main-nav"> elemanını garanti ettiği için ikinci bir kabul yolu olarak sayılıyor.
+check "K1 nav bar (bp-main-nav)" "bp-main-nav|include '_header.html'|include \"_header.html\"" 1
 
 # K2 — Geri tuş yasak (bp-sh-back HTML class veya history.back)
 check "K2 geri tuş HTML" 'class="bp-sh-back"' 0
