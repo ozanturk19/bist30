@@ -1,14 +1,14 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Temettü Takvimi — BIST Temettü Tarihleri ve Tutarları | BorsaPusula</title>
-<meta name="description" content="BIST100 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları. Trend sinyalleriyle birlikte temettü takvimini takip edin.">
+<meta name="description" content="BIST30 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları. Trend sinyalleriyle birlikte temettü takvimini takip edin.">
 <link rel="canonical" href="https://borsapusula.com/temettu-takvimi">
 <meta property="og:title"       content="Temettü Takvimi — BIST Temettü Tarihleri ve Tutarları | BorsaPusula">
-<meta property="og:description" content="BIST100 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları.">
+<meta property="og:description" content="BIST30 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları.">
 <meta property="og:url"         content="https://borsapusula.com/temettu-takvimi">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Temettü Takvimi — BIST Temettü Tarihleri ve Tutarları | BorsaPusula">
-<meta name="twitter:description" content="BIST100 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları.">
+<meta name="twitter:description" content="BIST30 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları.">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -33,7 +33,7 @@
 <!-- Makro Ticker -->
 <div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 {% with hdr_icon = '💰', hdr_title = 'Temettü Takvimi', hdr_sub = 'Veriler yükleniyor…', hdr_sub_id = 'lastUpdate', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
-<h1 class="sr-only">BIST Temettü (Ex-Dividend) Takvimi</h1>
+<h1 class="sr-only">BIST Temettü (Ex-Temettü) Takvimi</h1>
 
 <main class="container" id="main-content" tabindex="-1">
 

@@ -527,7 +527,7 @@ header{
        tek açıklama kaynağı olan /metodoloji anasayfadan hiç linklenmiyordu —
        sadece header "Daha" menüsünün 7. öğesi. Yeni bileşen değil, mevcut
        terimi ve lejantı mevcut sayfaya bağlamak yeterli. #}
-    <p class="da-hero-sub">Supertrend, ADX ve hacim teyidini tek bir <a href="/metodoloji" style="color:var(--bp-text);text-decoration:underline;text-decoration-color:var(--bp-border2);text-underline-offset:2px"><strong>Teknik Güç Skoru</strong></a>'nda (0–100) birleştiriyoruz — algoritmanın 3 bağımsız testten geçirdiği sinyaller, geriye dönük backtest doğrulamasıyla.</p>
+    <p class="da-hero-sub">Supertrend, ADX ve EMA12/99'u tek bir <a href="/metodoloji" style="color:var(--bp-text);text-decoration:underline;text-decoration-color:var(--bp-border2);text-underline-offset:2px"><strong>Teknik Güç Skoru</strong></a>'nda (0–100) birleştiriyoruz — algoritmanın 3 bağımsız testten geçirdiği sinyaller, geriye dönük backtest doğrulamasıyla.</p>
 
     {# bughunt-13.09 (strateji workflow, ilk-kullanım denetimi): arama
        kutusuna tıklayınca açılan overlay'de "ne arayacağını bilmeyen"
@@ -643,7 +643,7 @@ header{
         <div class="da-spot-subs">
           {% if _useBps %}<div class="da-spot-sub-row"><span class="lbl">Teknik</span><span class="val da-num">{{ s.signal_strength|tr_num if s.signal_strength is not none else '—' }}</span></div>{% endif %}
           <div class="da-spot-sub-row"><span class="lbl">ADX</span><span class="val da-num">{{ s.adx|round(0)|int if s.adx is not none else '—' }}</span></div>
-          <div class="da-spot-sub-row"><span class="lbl">RVOL</span><span class="val da-num">{{ '%.2f×'|format(s.rvol) if s.rvol is not none else '—' }}</span></div>
+          <div class="da-spot-sub-row"><span class="lbl">RVOL</span><span class="val da-num">{{ ('%.2f'|format(s.rvol)|replace('.', ',')) ~ '×' if s.rvol is not none else '—' }}</span></div>
           <div class="da-spot-sub-row"><span class="lbl">RSI</span><span class="val da-num">{{ s.rsi|round(0)|int if s.rsi is not none else '—' }}</span></div>
         </div>
       </div>
@@ -1088,7 +1088,7 @@ header{
           '<div class="da-spot-subs">' +
             (useBps && hasTek ? '<div class="da-spot-sub-row"><span class="lbl" title="Teknik Güç Skoru — ADX, hacim teyidi ve RSI bölgesinin bileşimi">Teknik</span><div class="bar"><i style="width:' + s.signal_strength + '%;background:' + tekCol + '"></i></div><span class="val da-num" style="color:' + tekCol + '">' + fmtNum0(s.signal_strength) + '</span></div>' : '') +
             '<div class="da-spot-sub-row"><span class="lbl" title="ADX — trend gücü (25 üzeri güçlü, /metodoloji)">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.adx!=null?Math.round(s.adx):'—') + '</span></div>' +
-            '<div class="da-spot-sub-row"><span class="lbl" title="RVOL — bugünün hacmi / 5 günlük ortalama hacim">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2)+'×':'—') + '</span></div>' +
+            '<div class="da-spot-sub-row"><span class="lbl" title="RVOL — 5 günlük ortalama hacim / 20 günlük ortalama hacim">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2).replace('.', ',')+'×':'—') + '</span></div>' +
             '<div class="da-spot-sub-row"><span class="lbl" title="RSI — göreceli güç endeksi, aşırı alım/satım bölgesi">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rsi!=null?Math.round(s.rsi):'—') + '</span></div>' +
           '</div>' +
           (useBps ? '' :
@@ -1123,7 +1123,7 @@ header{
         '<div class="da-curated-card"><div class="da-curated-num da-display">02</div>' +
         '<div class="da-curated-body"><div class="da-curated-title">Yüksek Hacimli Hareketler</div>' +
         '<div class="da-curated-desc">Göreli hacim (RVOL) en yüksek hisseler.</div></div>' +
-        '<div class="da-chip-row">' + byRvol.map(function(s){ return chip(s.ticker, s.rvol.toFixed(2)+'×', 'var(--bp-volume)', 'rgba(var(--bp-volume-rgb),.12)'); }).join('') + '</div></div>'
+        '<div class="da-chip-row">' + byRvol.map(function(s){ return chip(s.ticker, s.rvol.toFixed(2).replace('.', ',')+'×', 'var(--bp-volume)', 'rgba(var(--bp-volume-rgb),.12)'); }).join('') + '</div></div>'
       );
     }
     if (!cards.length) { daShowSectionEmpty('daCuratedList', 'Şu an liste oluşturulacak veri yok.'); return; }

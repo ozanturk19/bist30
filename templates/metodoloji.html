@@ -108,7 +108,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   <li>Fiyat Supertrend bandının <strong>altında</strong> <span role="img" aria-label="anlamına gelir">→</span> SHORT (düşüş) trendi</li>
   <li>Band aynı zamanda dinamik bir <strong>Stop Loss</strong> seviyesi olarak kullanılır</li>
 </ul>
-<p>Grafiklerde mavi/yeşil çizgi Güçlü Trend, kırmızı çizgi Trend Bozuldu modunu gösterir. Fiyat bandı kırdığında otomatik sinyal değişir.</p>
+<p>Fiyat bandı kırdığında otomatik sinyal değişir — hisse sayfasındaki sinyal rozeti ve Supertrend Seviyesi bu geçişi anında yansıtır.</p>
 
 <h2 id="adx">2. ADX — Ortalama Yönlü Hareket Endeksi</h2>
 <p>
@@ -138,13 +138,14 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   <li><code>RSI 45–60</code> <span role="img" aria-label="anlamına gelir">→</span> İdeal Giriş Penceresi</li>
   <li><code>RSI 60–70</code> <span role="img" aria-label="anlamına gelir">→</span> Trend Güçleniyor</li>
   <li><code>RSI 70–80</code> <span role="img" aria-label="anlamına gelir">→</span> Dikkatli</li>
-  <li><code>RSI &gt; 80</code> <span role="img" aria-label="anlamına gelir">→</span> Aşırı Alım</li>
+  <li><code>RSI ≥ 80</code> <span role="img" aria-label="anlamına gelir">→</span> Aşırı Alım</li>
 </ul>
 <p>
   BorsaPusula'da RSI, <strong>Güç Skoru</strong> hesaplamasında sinyal yönüne göre değerlendirilir:
   Güçlü Trend sinyalinde RSI 50–75 arası +10 puan, 75 üzeri +5 puan; Trend Bozuldu sinyalinde
-  RSI 25–50 arası +10 puan, 25 altı +5 puan (maksimum katkı 10 puan). Sinyal motoru
-  ADX+Supertrend+EMA üzerinden çalışır; RSI teyit göstergesi niteliğindedir.
+  RSI 25–50 arası +10 puan, 25 altı +5 puan (ham maksimum katkı 10 puan — Sinyal Gücü'nün 100
+  puanlık toplamına ölçeklendiğinde aşağıdaki "RSI bölgesi ~13p" değerine karşılık gelir).
+  Sinyal motoru ADX+Supertrend+EMA üzerinden çalışır; RSI teyit göstergesi niteliğindedir.
 </p>
 
 <h2 id="ema">3. EMA12 / EMA99 Kesişimi</h2>
@@ -170,7 +171,8 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 
 <h2 id="sinyal-onayi">Sinyal Onayı</h2>
 <p>
-  Bir sinyal <strong>en az 3 bar (3 gün) devam</strong> ederse "onaylı" olarak kabul edilir.
+  Bir sinyal <strong>en az 3 bar devam</strong> ederse "onaylı" olarak kabul edilir (bar = veri
+  günü — hafta sonları ve tazelenemeyen günler sayılmaz, takvim günüyle birebir örtüşmeyebilir).
   Tek günlük flash sinyaller olası gürültüdür.
 </p>
 
@@ -200,7 +202,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   70+ → "Güçlü Sinyal" · 56–69 → "Standart" · &lt;56 → rozetsiz (sadece Güçlü Trend sinyalinde; Trend Bozuldu rozet almaz)
 </p>
 <p>
-  Düşük likidite (20 günlük ort. hacim 5M TL altı) veya yaklaşan bilanço tarihi varsa rozet bir kademe düşer.
+  Düşük likidite (20 günlük ort. hacim 5M TL altı) veya yaklaşan bilanço tarihi varsa rozet bir kademe düşer; ikisi birden geçerliyse rozet iki kademe birden düşebilir (tamamen kalkabilir).
   Günlük hacim oranı (hacim / 20 günlük ort.), sayfalarda ayrıca gösterilen <strong>RVOL</strong> göstergesiyle AYNI hesaplamadır — Skor'un içinde bir bileşen olarak kullanılır.
   Bu rozet, hacim onaylı sinyaller için kullanılan <strong>"Premium"</strong> ifadesiyle karıştırılmamalı — ikisi de ücretsiz, ödeme/paket ile ilgisi yok.
 </p>

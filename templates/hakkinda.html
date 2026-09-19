@@ -1,5 +1,5 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hakkında | BorsaPusula</title>
-<meta name="description" content="BorsaPusula hakkında: BIST100 için algoritmik teknik analiz platformu. Supertrend, ADX, EMA tabanlı sinyaller. Proje amacı, teknolojiler ve yol haritası.">
+<meta name="description" content="BorsaPusula hakkında: BIST100 + ek hisseler için algoritmik teknik analiz platformu. Supertrend, ADX, EMA tabanlı sinyaller. Proje amacı, teknolojiler ve yol haritası.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/hakkinda">
 <meta property="og:title"       content="Hakkında — borsapusula.com">
@@ -229,7 +229,7 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
   <li><strong>Fiyat verisi:</strong> Yahoo Finance (yfinance) — ücretsiz, ~15 dakika gecikmeli</li>
   <li><strong>Sinyal hesaplama:</strong> Günde bir kez, piyasa kapanışından sonra (~18:00–18:30 TR) sunucu tarafında yenilenir</li>
   <li><strong>BIST kapsamı:</strong> {{ bist_count }} hisse (BIST100 + ek hisseler), 13 sektör</li>
-  <li><strong>KAP haberleri:</strong> Anlık KAP bildirimleri hisse sayfalarında gösterilir</li>
+  <li><strong>KAP haberleri:</strong> KAP bildirimleri hisse sayfalarında gösterilir (30 dakikada bir güncellenir)</li>
   <li><strong>AI haberleri:</strong> Gemini 2.5 Flash — Gemini 429 rate limit nedeniyle önbellek kullanılır</li>
 </ul>
 
@@ -255,7 +255,7 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
   <li><span class="rl-todo"><span role="img" aria-label="Retire edildi"><span aria-hidden="true">🔚</span></span></span> <span>Sinyal Performans Analizi (backtest istatistikleri) — sayfa /tarama'ya birleştirildi, güncel bir arayüzü yok</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Blog — teknik analiz içerikleri</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>PWA (Service Worker, çevrimdışı destek)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Kişisel fiyat alarmları</span></li>
+  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Sinyal değişikliği bildirimleri</span></li>
   <li><span class="rl-wip"><span role="img" aria-label="Yapım aşamasında"><span aria-hidden="true">🔜</span></span></span> <span>Telegram sinyal botu</span></li>
   <li><span class="rl-wip"><span role="img" aria-label="Yapım aşamasında"><span aria-hidden="true">🔜</span></span></span> <span>Genişletilmiş backtest arayüzü (parametre testi)</span></li>
   <li><span class="rl-todo"><span role="img" aria-label="Planlanan"><span aria-hidden="true">💡</span></span></span> <span>Sosyal paylaşım (sinyal kartı görseli)</span></li>

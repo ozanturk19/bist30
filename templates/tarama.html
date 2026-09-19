@@ -1,14 +1,14 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hisse Tarayıcı — BIST Sinyal Filtresi | BorsaPusula</title>
-<meta name="description" content="BIST100 hisselerini sinyal, ADX, sektör ve fiyat kriterlerine göre filtreleyin. Güçlü Trend + ADX ≥ 25 + güvenli giriş kombinasyonlarını anında bulun.">
+<meta name="description" content="BIST hisselerini sinyal, ADX, sektör ve fiyat kriterlerine göre filtreleyin. Güçlü Trend + ADX ≥ 25 + güvenli giriş kombinasyonlarını anında bulun.">
 <link rel="canonical" href="https://borsapusula.com/tarama">
 <meta property="og:title"       content="Hisse Tarayıcı — BIST Sinyal Filtresi | borsapusula.com">
-<meta property="og:description" content="BIST100 hisselerini sinyal, ADX, sektör ve fiyat kriterlerine göre filtreleyin.">
+<meta property="og:description" content="BIST hisselerini sinyal, ADX, sektör ve fiyat kriterlerine göre filtreleyin.">
 <meta property="og:url"         content="https://borsapusula.com/tarama">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Hisse Tarayıcı — BIST Sinyal Filtresi | borsapusula.com">
-<meta name="twitter:description" content="BIST100 hisselerini sinyal, ADX, sektör ve fiyat kriterlerine göre filtreleyin.">
+<meta name="twitter:description" content="BIST hisselerini sinyal, ADX, sektör ve fiyat kriterlerine göre filtreleyin.">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -153,7 +153,7 @@
         <tr>
           <th scope="col">Hisse</th>
           <th scope="col">Sinyal</th>
-          <th scope="col" class="th-sortable" id="th-score" data-tooltip="Birleşik kalite skoru (ADX + Hacim + RSI + Teyit) — Güçlü Sinyal/Standart bu skordan belirlenir. Varsayılan sıralama." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_strength')">Sinyal Gücü</button></th>
+          <th scope="col" class="th-sortable" id="th-score" data-tooltip="Birleşik kalite skoru (ADX + günlük hacim oranı + RSI + Teyit) — Güçlü Sinyal/Standart bu skordan belirlenir. Varsayılan sıralama." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_strength')">Sinyal Gücü</button></th>
           <th scope="col" class="th-sortable" id="th-adx" data-tooltip="ADX 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, <18 Zayıf" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('adx')">Trend Gücü</button></th>
           <th scope="col">Giriş Kalitesi</th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-price" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('price')">Fiyat</button></th>
