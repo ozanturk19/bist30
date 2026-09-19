@@ -1178,6 +1178,27 @@
       color:var(--bp-text);margin:0;
     }
 
+    /* ── "Sinyal Özeti" kutusu — 19.09, hisse.html Data-Art denetiminin devamı.
+       Bu kutu Özet sekmesinde hero kartın HEMEN altında, sayfanın en görünür
+       içerik bloğu — hâlâ eski düz-kutu diliyle kalması hero'nun cüretkar
+       degrade/glow'undan sonra en sert görsel kopukluğu yaratıyordu. ── */
+    .da-summary-panel{
+      position:relative;overflow:hidden;
+      background:linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+      border:1px solid var(--bp-border);border-radius:var(--bp-radius-20);
+      padding:20px 20px 16px;margin-bottom:20px;
+    }
+    .da-summary-panel::before{
+      content:'';position:absolute;top:-40%;left:-6%;width:240px;height:240px;border-radius:50%;
+      background:radial-gradient(circle, rgba(var(--bp-brand-rgb),.12), transparent 70%);
+      pointer-events:none;
+    }
+    .da-summary-head{position:relative;display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+    .da-summary-title{
+      position:relative;font-weight:800;letter-spacing:-.01em;font-size:clamp(1.1rem,2.2vw,1.35rem);
+      color:var(--bp-text);margin:4px 0 0;display:flex;align-items:center;gap:8px;
+    }
+
     .bp-spark-wrap { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
     .bp-spark-label {
       display:flex; justify-content:space-between; align-items:baseline;

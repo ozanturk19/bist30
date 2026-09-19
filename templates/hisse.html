@@ -595,10 +595,12 @@
   {% if signal_summary %}
   <div id="signalSummarySection"
        data-tab-content="ozet"
-       style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);padding:18px 18px 14px;margin-bottom:20px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <h2 class="section-title" style="margin:0"><span aria-hidden="true">🧭</span> Sinyal Özeti</h2>
-      <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">2 saniyede karar yardımcısı</span>
+       class="da-summary-panel">
+    <div class="da-summary-head">
+      <div style="flex:1;min-width:0">
+        <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span> 2 Saniyede Karar Yardımcısı</span>
+        <h2 class="da-summary-title"><span aria-hidden="true">🧭</span> Sinyal Özeti</h2>
+      </div>
       {# CPO-535 #36 Skor Halka — compose_score (signal_strength) tek kaynak #}
       {%- set _ts = (ssr_signal.signal_strength | default(0)) | int %}
       {% if ssr_signal and _ts > 0 %}
