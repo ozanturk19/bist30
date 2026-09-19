@@ -861,7 +861,7 @@ Histogram = MACD − Sinyal</pre>
   <li><strong>Piyasa Değeri:</strong> Hisse fiyatı × toplam hisse adedi.</li>
   <li><strong>Pivot Noktası:</strong> Dün kapanışından hesaplanan destek/direnç seviyeleri.</li>
   <li><strong>PD/DD (PB):</strong> Piyasa Değeri / Defter Değeri.</li>
-  <li><strong>RSI:</strong> Momentum göstergesi. 30 aşırı satım, 70 aşırı alım.</li>
+  <li><strong>RSI:</strong> Momentum göstergesi. 30 altı aşırı satım, 80 üzeri aşırı alım.</li>
 </ul>
 
 <h2>S–Z</h2>
@@ -5807,7 +5807,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 
 <h2>Temel RSI Seviyeleri</h2>
 <ul>
-  <li><strong>70 üzeri — Aşırı Alım (Overbought):</strong> Hisse kısa vadede çok yüksek; fiyat düzeltmesi gelebilir. Ancak güçlü trendlerde RSI uzun süre 70 üzerinde kalabilir — bu nedenle aşırı alımı doğrudan satış sinyali olarak yorumlamak tehlikeli olabilir.</li>
+  <li><strong>80 üzeri — Aşırı Alım (Overbought):</strong> Hisse kısa vadede çok yüksek; fiyat düzeltmesi gelebilir. BorsaPusula'nın kanonik şemasında 70-80 arası "Dikkatli" olarak ayrı ele alınır — güçlü trendlerde RSI uzun süre 70 üzerinde kalabilir, bu nedenle 70'i tek başına aşırı alım/satış sinyali olarak yorumlamak tehlikeli olabilir.</li>
   <li><strong>30 altı — Aşırı Satım (Oversold):</strong> Hisse kısa vadede çok düşmüş; toparlanma gelebilir. Düşen trendlerde ise RSI uzun süre 30 altında kalabilir.</li>
   <li><strong>50 çizgisi — Momentum sınırı:</strong> RSI 50'nin üzerinde → yükselen momentum, altında → düşen momentum. Bazı analistler 50 üstüne çıkışı al, altına düşüşü sat sinyali olarak kullanır.</li>
 </ul>
