@@ -2707,7 +2707,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
       <tr><td style="padding:18px 22px">
         <div style="font-size:14px;font-weight:700;color:#b8c3ff;margin-bottom:6px">🎯 Sinyalleri sana özelleştir</div>
         <div style="font-size:12.5px;color:#c7c5cd;line-height:1.55;margin-bottom:12px">
-          30 saniye ayır, yatırım profilini doldur. Sana en uygun sinyal türleri ve mail sıklığını ayarla.
+          10 saniye sürer — mail sıklığını seç (günlük özet, anında, sadece Premium veya haftalık).
         </div>
         <a href="https://borsapusula.com/profil?t={profile_token}" style="display:inline-block;background:rgba(184,195,255,0.14);color:#b8c3ff;border:1px solid rgba(184,195,255,0.45);padding:8px 18px;border-radius:6px;text-decoration:none;font-size:12.5px;font-weight:700;letter-spacing:0.3px">
           Profili Tamamla →
@@ -4357,10 +4357,33 @@ def _compute_index_ssr_context():
     with_score = [s for s in bist
                   if isinstance(s.get("signal_strength"), (int, float)) and s.get("signal") == "AL"]
     top_signals = sorted(with_score, key=lambda s: s.get("signal_strength") or 0, reverse=True)[:8]
+
+    # CPO-1668 #6: spotlight artık top_signals (top-8 AL) listesinden DEĞİL,
+    # JS'in daRenderSpotlight'ıyla BİREBİR aynı havuzdan seçiliyor — top-8 kısıtı
+    # yok, BEKLE dahil (sadece SAT hariç). Eskiden ikisi ayrı havuzdu: JS'e BEKLE
+    # e04f92c/aa88213'te eklenmişti ama SSR güncellenmemişti, ilk boyada (SSR) bir
+    # hisse gösterilip JS yüklenince top-8 dışından farklı bir hisseye "atlayabiliyordu".
+    with _lock:
+        _hs_snap = dict(_financial_health_cache)
+    spot_pool = [s for s in bist if s.get("signal") != "SAT"]
+    spot_with_bps = []
+    for s in spot_pool:
+        _hs_entry = _hs_snap.get(s.get("ticker", ""))
+        _hs_data  = _hs_entry.get("data") if _hs_entry else None
+        _bps      = _hs_data.get("borsapusula_skoru") if _hs_data else None
+        if _hs_data is not None and isinstance(_bps, (int, float)):
+            spot_with_bps.append(dict(s, borsapusula_skoru=_bps, hs_available=True))
+    if spot_with_bps:
+        spotlight = max(spot_with_bps, key=lambda s: s["borsapusula_skoru"])
+    else:
+        _tech_pool = [s for s in spot_pool if isinstance(s.get("signal_strength"), (int, float))]
+        spotlight = max(_tech_pool, key=lambda s: s["signal_strength"]) if _tech_pool else None
+
     return {
         "bist_level":    _get_xu100_level(),
         "signal_counts": signal_counts,
         "top_signals":   top_signals,
+        "spotlight":     spotlight,
     }
 
 
@@ -4376,6 +4399,7 @@ def index():
         ssr_bist_level=_ssr["bist_level"],
         ssr_signal_counts=_ssr["signal_counts"],
         ssr_top_signals=_ssr["top_signals"],
+        ssr_spotlight=_ssr["spotlight"],
     ))
     resp.headers["Cache-Control"] = "no-cache, must-revalidate"
     resp.headers["Pragma"] = "no-cache"
@@ -6967,7 +6991,8 @@ def _enrich_health_score_explanation(ticker, entry):
     categories        = entry.get("categories") or {}
     band              = entry.get("band")
     data_completeness = entry.get("data_completeness")
-    rationale         = _fhs.build_rationale(categories, data_completeness)
+    categories_na     = entry.get("categories_na") or []
+    rationale         = _fhs.build_rationale(categories, data_completeness, categories_na)
     fallback_text     = rationale + " Yatırım tavsiyesi değildir."
 
     # ── Bandın yönüne göre çelişki-kontrol kelimeleri (validation için) ──────
@@ -7374,7 +7399,14 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         di_text    = f"DI+ {di_p:.0f} DI- {di_m:.0f}'i geçmiş durumda"
         if signal_date and not is_signal_from_today(signal_date):
             dur_label = derive_signal_date_label(signal_date) or signal_date
-            dur_text  = f"{dur_label} Güçlü Trend sinyali oluştu" if signal_bars <= 1 else f"Son {signal_bars} gündür Güçlü Trend sinyali aktif ({signal_date} tarihinden itibaren)"
+            # CPO-1668 #3: signal_bars bir BAR sayacı (hafta sonu/tazelenmeyen
+            # günleri atlar, bkz. CPO-1335), "gündür" TAKVİM birimiyle sunulunca
+            # yanlıştı (ör. ISDMR: signal_date 4 takvim günü önceydi ama metin
+            # "18 gündür" diyordu — signal_bars burada 18'di). signal_age_text
+            # filtresiyle AYNI takvim-yaşı hesabı kullanılıyor.
+            _age = signal_date_age_days(signal_date)
+            dur_text = (f"{dur_label} Güçlü Trend sinyali oluştu" if not _age or _age <= 1
+                        else f"Son {_age} gündür Güçlü Trend sinyali aktif ({signal_date} tarihinden itibaren)")
         elif signal_bars > 1:
             dur_text = f"Son {signal_bars} gündür Güçlü Trend sinyali aktif"
         else:
@@ -7391,7 +7423,10 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         di_text    = f"DI- {di_m:.0f} DI+ {di_p:.0f}'ün üzerinde"
         if signal_date and not is_signal_from_today(signal_date):
             dur_label = derive_signal_date_label(signal_date) or signal_date
-            dur_text  = f"{dur_label} Trend Bozuldu sinyali oluştu" if signal_bars <= 1 else f"Son {signal_bars} gündür Trend Bozuldu sinyali aktif ({signal_date} tarihinden itibaren)"
+            # CPO-1668 #3: bkz. AL dalındaki aynı açıklama (signal_bars≠takvim günü).
+            _age = signal_date_age_days(signal_date)
+            dur_text = (f"{dur_label} Trend Bozuldu sinyali oluştu" if not _age or _age <= 1
+                        else f"Son {_age} gündür Trend Bozuldu sinyali aktif ({signal_date} tarihinden itibaren)")
         elif signal_bars > 1:
             dur_text = f"Son {signal_bars} gündür Trend Bozuldu sinyali aktif"
         else:
@@ -8492,7 +8527,7 @@ def _run_eod_scoring_pass(results: list):
             # gecikmeden alan boş/takılı kalmaz) — Gemini'nin doğal-dile çevirmesi
             # bg kuyrukta (glass-box, _enrich_signal_explanation ile aynı desen).
             entry["temel_analiz_aciklamasi"] = _fhs.build_rationale(
-                entry["categories"], entry["data_completeness"]
+                entry["categories"], entry["data_completeness"], entry["categories_na"]
             ) + " Yatırım tavsiyesi değildir."
             scores_out[tk] = entry
             with _lock:
@@ -10602,13 +10637,15 @@ def _compute_gundem_data():
                    if s.get("signal_date") == today and s.get("signal") != "BEKLE"]
 
     # ADX sıralamalı en güçlü AL hisseler
+    # CPO-1668 #1: eskiden indicators.adx.label ("ADX 40" — zaten int'e
+    # yuvarlanmış görüntü metni) parse ediliyordu, eşit etikete yuvarlanan
+    # hisseler (ör. TUPRS 39,8 ve AYGAZ 40,3, ikisi de "ADX 40") ham değere göre
+    # değil etiket eşitliğine göre sıralanıyordu. Üst-seviye "adx" alanı zaten
+    # hassas (round(adx_val,1), app.py:2052) — doğrudan onu kullan (bkz. CPO-1648
+    # aynı desen, karsilastir.html tarafında).
     def _adx_val(s):
-        inds = s.get("indicators") or {}
-        lbl  = (inds.get("adx") or {}).get("label", "")
-        try:
-            return float(lbl.replace("ADX", "").strip())
-        except Exception:
-            return 0.0
+        v = s.get("adx")
+        return v if isinstance(v, (int, float)) else 0.0
 
     strong_al = sorted(
         [s for s in stocks if s.get("signal") == "AL"],
@@ -10916,7 +10953,7 @@ def api_contact():
     )
     if not send_email(ADMIN_MAIL, f"[BorsaPusula Iletisim] {subject}", body_html, reply_to=email):
         logger.error("Contact mail gonderilemedi: %s <%s>", name, email)
-        return jsonify({"ok": False, "error": "Mail gonderilemedi"}), 500
+        return jsonify({"ok": False, "error": "Mail gönderilemedi"}), 500
 
     logger.info("Contact mail gonderildi: %s <%s>", name, email)
     return jsonify({"ok": True})
@@ -11413,6 +11450,21 @@ def sektor():
     return redirect("/sektor-harita", 301)
 
 
+# CPO-1668 #7: JS'in eşit-skor tiebreak'i localeCompare(name,'tr') kullanıyor —
+# Python'un çıplak string karşılaştırması Unicode kod noktası sırasına düşer,
+# bu da "İlaç/Sağlık" (tek İ-baslayan sektör) gibi adları TR alfabesindeki
+# gerçek yerine (H-K arası) değil en sona (İ'nin kod noktası Z'den büyük)
+# koyar. Küçük, sabit bir TR alfabe tablosuyla gerçek collation sırası taklit
+# ediliyor — locale.setlocale() KULLANILMIYOR (process-global, gevent'te
+# thread-safe değil, VPS'te tr_TR.UTF-8 kurulu olmayabilir).
+_TR_ORDER_STR = "aAbBcCçÇdDeEfFgGğĞhHıIiİjJkKlLmMnNoOöÖpPrRsSşŞtTuUüÜvVyYzZ"
+_TR_ORDER = {ch: i for i, ch in enumerate(_TR_ORDER_STR)}
+
+
+def _tr_sort_key(name):
+    return [_TR_ORDER.get(ch, 1000 + ord(ch)) for ch in name]
+
+
 def _compute_sector_heatmap():
     """Sektör bazlı AL/SAT/BEKLE toplamı + skor + ort. RVOL — /sektor-harita
     (SSR) ve /api/sector-heatmap (canlı JS) tarafından ortak kullanılır
@@ -11427,7 +11479,7 @@ def _compute_sector_heatmap():
             continue
         sec = s.get("sector") or _get_sector(tk)
         if sec not in sec_map:
-            sec_map[sec] = {"al": 0, "sat": 0, "bekle": 0, "rvol_vals": []}
+            sec_map[sec] = {"al": 0, "sat": 0, "bekle": 0, "premium": 0, "rvol_vals": []}
         d = sec_map[sec]
         sig = s.get("signal", "BEKLE")
         if sig == "AL":
@@ -11436,6 +11488,11 @@ def _compute_sector_heatmap():
             d["sat"] += 1
         else:
             d["bekle"] += 1
+        # CPO-1668 #8: JS'in ⭐ Hacim Onaylı rozeti (pill-prem, sec.premium.length)
+        # is_premium'a bağlı ama SSR bunu hiç toplamıyordu — ilk boyada rozet
+        # eksik kalıp JS re-render'da "beliriyordu".
+        if s.get("is_premium"):
+            d["premium"] += 1
         rv = s.get("rvol")
         if rv is not None:
             d["rvol_vals"].append(float(rv))
@@ -11446,8 +11503,13 @@ def _compute_sector_heatmap():
         rvol_vals = d["rvol_vals"]
         avg_rvol = round(sum(rvol_vals) / len(rvol_vals), 2) if rvol_vals else None
         result.append({"name": name, "al": d["al"], "sat": d["sat"], "bekle": d["bekle"],
-                        "total": total, "score": score, "avg_rvol": avg_rvol})
-    result.sort(key=lambda x: x["score"], reverse=True)
+                        "total": total, "score": score, "avg_rvol": avg_rvol,
+                        "premium": d["premium"]})
+    # CPO-1668 #7: JS'in tiebreak'iyle (b.score - a.score || a.name.localeCompare(b.name,'tr'))
+    # AYNI ikincil sıralama — eskiden eşit skorlu sektörler için tiebreak yoktu,
+    # Python dict insertion-order'a düşüyordu; JS yüklenince eşit skorlu kartlar
+    # ad-alfabetik sıraya "atlıyordu" (görünür yer değiştirme).
+    result.sort(key=lambda x: (-x["score"], _tr_sort_key(x["name"])))
     return result, upd
 
 
@@ -13037,6 +13099,10 @@ _BLOG_SLUG_REDIRECTS = {
     # aynı sayfa farklı byte-temsille yayılıyordu. ASCII'ye çevrildi + 301.
     "temettü-yatırımı":              "temettu-yatirimi",
     "bist100-temettü-hisseleri-2026": "bist100-temettu-hisseleri-2026",
+    # CPO-1668 #14: 2 makalede yazım hatası (slug oluşturulurken elle yazılmış,
+    # transliterasyon hatası) — eski slug'a gelen indekslenmiş linkler/SEO için 301.
+    "kaldirach-ve-marjin-riskleri":   "kaldirac-ve-marjin-riskleri",
+    "bist-temettue-yatirimligi-rehberi": "bist-temettu-yatirimciligi-rehberi",
 }
 
 def _normalize_article(a):

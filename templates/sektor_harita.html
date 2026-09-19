@@ -65,6 +65,7 @@
       <a href="/tarama?sector={{ sec.name|urlencode }}" class="sector-card" data-sector="{{ sec.name }}" data-href="/tarama?sector={{ sec.name|urlencode }}" data-heat-target="{{ '%.3f'|format(heat_op) }}" style="--heat-color:{{ color }};--heat-opacity:0;cursor:pointer;text-decoration:none;display:block" title="{{ sec.name }} sektöründeki tüm hisseleri taramaya götür">
         <h2 class="sec-name" style="color:{{ color }}">{{ sec.name }}</h2>
         <div class="sec-stats">
+          {% if sec.premium %}<span class="stat-pill pill-prem" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1.20" tabindex="0">⭐ {{ sec.premium }}</span>{% endif %}
           <span class="stat-pill pill-al">▲ {{ sec.al }}</span>
           <span class="stat-pill pill-sat">▼ {{ sec.sat }}</span>
           <span class="stat-pill pill-bkl">● {{ sec.bekle }}</span>

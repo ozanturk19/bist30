@@ -244,9 +244,13 @@ function renderCard(s, isNew) {
   const metrics = [];
   if (adx != null)          metrics.push(`<div class="sc-metric"><span>ADX </span><strong>${adx.toFixed(1).replace('.', ',')}</strong></div>`);
   if (s.rsi != null)        metrics.push(`<div class="sc-metric"><span>RSI </span><strong>${parseFloat(s.rsi).toFixed(1).replace('.', ',')}</strong></div>`);
-  /* CPO-1335: "Süre" bar sayacı değil takvim yaşı */
+  /* CPO-1335: "Süre" bar sayacı değil takvim yaşı.
+     CPO-1668 #2: bpSignalAgeShort ("10G") SSR'ın kanonik signal_age_text filtresiyle
+     ("Bugün"/"Dün"/"N gün") uyuşmuyordu — sayfa yüklenip JS re-render tetiklenince
+     kullanıcı "10 gün → 10G" gibi görünür bir "flaş" yaşıyordu. bpSignalAgeText SSR
+     ile birebir aynı Bugün/Dün/N-gün mantığını uyguluyor (bkz. bp-format.js). */
   if (bpSignalDateAgeDays(s.signal_date) !== null)
-    metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeShort(s.signal_date)}</strong></div>`);
+    metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeText(s.signal_date)}</strong></div>`);
   if (s.entry_quality)      metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${eqLabel(s.entry_quality)}</strong></div>`);
   /* DEV-1763: sabit rr_ratio(=2.0) yerine sinyal başından gerçek R/R (rr_signal) */
   if (s.rr_signal)          metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_signal).toFixed(1).replace('.', ',')}</strong></div>`);

@@ -216,13 +216,22 @@ def _tier_word(score):
     return "zayıf"
 
 
-def build_rationale(categories, data_completeness):
+def build_rationale(categories, data_completeness, categories_na=None):
     """CPO-1531 Faz 3 — kategori skorlarından deterministik Türkçe gerekçe cümlesi.
 
     En güçlü ve en zayıf kategoriyi karşılaştırır. Bu cümle Gemini'ye SADECE
     akıcı Türkçe'ye çevrilmek üzere verilir — yeni analiz/yorum YAPILMAZ,
     burada üretilen anlam sabittir (_enrich_signal_explanation'daki
-    önce-hesapla-sonra-Türkçeleştir deseniyle birebir)."""
+    önce-hesapla-sonra-Türkçeleştir deseniyle birebir).
+
+    categories_na (CPO-1668 #5): compute_health_score'un döndürdüğü, eksik
+    kategorilerden hangilerinin GEÇİCİ veri boşluğu değil ticker'ın sektör/
+    bilanço yapısı gereği YAPISAL OLARAK uygulanamaz olduğunu işaretleyen liste
+    (bkz. LEVERAGE_NA_TICKERS). Eskiden ikisi ayırt edilmiyordu: GARAN gibi
+    mevduat bankalarında kaldıraç kategorisi hep boş olduğu için
+    data_completeness hep <0.6'ya düşüyor ve "bazı finansal veriler eksik"
+    notu ekleniyordu — oysa gerçek neden veri eksikliği değil, o hissede o
+    kategorinin hiç anlamlı olmaması."""
     if not categories:
         return "Yeterli finansal veri bulunmadığı için temel analiz skoru hesaplanamadı."
 
@@ -240,7 +249,10 @@ def build_rationale(categories, data_completeness):
             f"{worst_label} kategorisinde ise {_tier_word(worst_score)} sonuçlar öne çıkıyor (skor: {worst_score:.0f})."
         )
 
-    if data_completeness is not None and data_completeness < 0.6:
+    if categories_na:
+        na_labels = ", ".join(CATEGORY_LABELS.get(c, c) for c in categories_na)
+        sentence += f" {na_labels} kategorisi bu hissenin sektör/bilanço yapısı gereği hesaplanamaz; skor kalan kategorilere göre hesaplanmıştır."
+    elif data_completeness is not None and data_completeness < 0.6:
         sentence += " Bazı finansal veriler eksik olduğu için skor sınırlı veriyle hesaplanmıştır."
 
     return sentence

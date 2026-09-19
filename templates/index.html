@@ -629,9 +629,8 @@ header{
     <p class="da-section-desc">BorsaPusula Skoru — Temel Analiz Skoru (%60) ve Teknik Güç Skoru'nun (%40) bileşik puanı (0–100).</p>
   </div>
   <div id="daSpotlightBody">
-    {% if ssr_top_signals %}
-    {% set _bp_candidates = ssr_top_signals|selectattr('hs_available')|list %}
-    {% set s = (_bp_candidates|sort(attribute='borsapusula_skoru', reverse=True)|first) if _bp_candidates else ssr_top_signals[0] %}
+    {% if ssr_spotlight %}
+    {% set s = ssr_spotlight %}
     {% set _useBps = s.hs_available and s.borsapusula_skoru is not none %}
     <div class="da-spot-grid">
       <div class="da-spot-ring-wrap"><div class="da-spot-ring-num"><span class="n da-num">{{ (s.borsapusula_skoru if _useBps else s.signal_strength)|tr_num if (s.borsapusula_skoru if _useBps else s.signal_strength) is not none else '—' }}</span><span class="l">{{ 'BorsaPusula Skoru' if _useBps else 'Teknik Güç Skoru' }}</span></div></div>
@@ -642,7 +641,7 @@ header{
           {% if s.sector %}<span class="da-spot-sector">{{ s.sector }}</span>{% endif %}</div>
           <div class="da-spot-price"><div class="p da-num">{{ s.price|tr_price }} ₺</div><div class="d da-num" style="color:{{ 'var(--bp-al)' if (s.change_pct is not none and s.change_pct >= 0) else 'var(--bp-sat)' }}">{{ '%+.2f'|format(s.change_pct)|replace('.', ',') if s.change_pct is not none else '—' }}%</div></div>
         </div>
-        <span class="da-spot-signal sig-al">● Güçlü Trend</span>
+        {% if s.signal == 'AL' %}<span class="da-spot-signal sig-al">● Güçlü Trend</span>{% elif s.signal == 'SAT' %}<span class="da-spot-signal sig-sat">● Trend Bozuldu</span>{% else %}<span class="da-spot-signal sig-bekle">● Yatay</span>{% endif %}
         <div class="da-spot-subs">
           {% if _useBps %}<div class="da-spot-sub-row"><span class="lbl">Teknik</span><span class="val da-num">{{ s.signal_strength|tr_num if s.signal_strength is not none else '—' }}</span></div>{% endif %}
           <div class="da-spot-sub-row"><span class="lbl">ADX</span><span class="val da-num">{{ s.adx|round(0)|int if s.adx is not none else '—' }}</span></div>

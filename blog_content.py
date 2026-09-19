@@ -2206,7 +2206,7 @@ Stokastik osilatörü grafik platformunda ek katman olarak kullanarak, BorsaPusu
 
   # ── Makale 39 ──────────────────────────────────────────────────────
   {
-    "slug": "kaldirach-ve-marjin-riskleri",
+    "slug": "kaldirac-ve-marjin-riskleri",
     "title": "Kaldıraç ve Marjin: Borçlanarak Yatırım Yapmanın Riskleri",
     "cat": "Risk Yönetimi",
     "date": "2026-05-01",
@@ -5850,7 +5850,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 
   # ── ARTICLE 78 ──
   {
-    "slug": "bist-temettue-yatirimligi-rehberi",
+    "slug": "bist-temettu-yatirimciligi-rehberi",
     "title": "BIST'te Temettü Yatırımcılığı: Yüksek Temettü Veren Hisseler ve Stratejiler",
     "desc": "BIST'te temettü yatırımcılığı nasıl yapılır? Temettü verimi hesabı, ex-temettü tarihi, BIST'in en yüksek temettü veren sektörleri ve uzun vadeli strateji rehberi.",
     "date": "2026-05-01",

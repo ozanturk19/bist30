@@ -809,7 +809,16 @@
 
     {% if hs_available %}
     <div class="axis-legend">
+      {# CPO-1668 #4: kaldirac_na ticker'larda (mevduat bankaları/SAHOL/YESIL)
+         bu kategori hiç hesaplanmıyor ve ağırlığı (25) diğer 3 kategoriye
+         yeniden dağıtılıyor (financial_health_score.compute_health_score,
+         total_weight normalizasyonu) — eskiden metin sabitti, gerçek
+         hesaplamada hiç kullanılmayan bir kategoriyi göstermeye devam ediyordu. #}
+      {% if kaldirac_na %}
+      <span>Kârlılık</span> ×%40 · <span>Nakit Akışı</span> ×%40 · <span>Değerleme/Büyüme</span> ×%20
+      {% else %}
       <span>Kârlılık</span> ×%30 · <span>Nakit Akışı</span> ×%30 · <span>Kaldıraç</span> ×%25 · <span>Değerleme/Büyüme</span> ×%15
+      {% endif %}
       <em>— Temel Analiz Skoru'nun alt kırılımı</em>
     </div>
     {% endif %}
