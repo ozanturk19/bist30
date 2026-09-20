@@ -139,7 +139,7 @@
   .read-progress {
     position: fixed; top: 0; left: 0;
     width: 0%; height: 3px; z-index:var(--bp-z-toast);
-    background: linear-gradient(90deg, var(--bp-brand) 0%, var(--bp-accent-cyan) 50%, #7c3aed 100%);
+    background: linear-gradient(90deg, var(--bp-brand) 0%, var(--bp-accent-cyan) 50%, var(--bp-art-violet) 100%);
     will-change: width; pointer-events: none;
     transition: width 60ms linear;
   }

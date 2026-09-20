@@ -36,6 +36,9 @@
     margin-bottom: 14px; padding-bottom: 10px;
     border-bottom: 1px solid var(--bp-border-subtle);
   }
+  /* Baslik ikonlari: onceden sablonda ham `stroke="#8b949e"` (eski palet grisi)
+     vardi — SVG sunum-ozniteliginde var() calismadigi icin renk burada verilir. */
+  .section-card h2 > svg { color: var(--bp-text3); flex-shrink: 0; }
   .section-card p { color: var(--bp-text2); margin-bottom: 10px; }
   .section-card p:last-child { margin-bottom: 0; }
   .section-card ul { color: var(--bp-text2); margin: 8px 0 10px 18px; }
