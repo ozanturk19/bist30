@@ -20,18 +20,19 @@
   .container { max-width: var(--bp-container-1200); margin: 0 auto; padding: 24px; }
 
   /* ── Search Bar ── */
+  /* 20.09 Data-Art: yüzey + kenar + parıltı .da-panel'den geliyor (şablonda
+     `class="search-bar da-panel"`). "tarama/hisse.html ile aynı reçete"
+     yorumu 09.09'dan beri duruyordu ama reçete ELLE kopyalanmıştı — üç kopya
+     ayrı ayrı sürüklenmişti. Burada yalnız delta kalır. */
   .search-bar {
+    --da-glow-rgb: var(--bp-art-violet-rgb);
+    --da-glow-a: .10;
+    --da-glow-y: -50%;
+    --da-glow-x: -4%;
+    --da-glow-size: 200px;
     display: flex; gap: 8px; margin-bottom: 28px;
-    background: var(--bp-surface); border: 1px solid var(--bp-border);
     border-radius:var(--bp-radius-lg); padding: 16px;
     flex-wrap: wrap; align-items: center;
-    position: relative; overflow: hidden;
-  }
-  /* Data-Art köşe parıltısı (09.09 gece) — tarama/hisse.html ile aynı reçete */
-  .search-bar::before {
-    content: ''; position: absolute; top: -50%; right: -4%; width: 200px; height: 200px;
-    border-radius: 50%; background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),.10), transparent 70%);
-    pointer-events: none; z-index: 0;
   }
   .search-bar > * { position: relative; z-index: 1; }
   .search-bar .search-bar-label {
@@ -112,9 +113,15 @@
     padding: 16px 12px; border-right: 1px solid var(--bp-border);
   }
   .compare-table .col-hdr:last-child { border-right: none; }
-  .compare-table td { border-right: 1px solid rgba(30,45,69,.5); }
+  /* 20.09 CPO: bu iki kenar `rgba(30,45,69,.5)` (= #1e2d45, eski navy palet)
+     yaziyordu. AYNI HUCRENIN alt kenari 14 satir yukarida var(--bp-border)
+     (notr gri) ile boyaniyor, disindaki .compare-wrap cercevesi de oyle —
+     yani tek bir tablo hucresinin alt kenari gri, sag kenari maviydi. Canli
+     olculdu: td border-bottom rgb(42,42,44) vs border-right rgba(30,45,69,.5).
+     Ayni rolu iki paletle boyamak bir bug'dir (CPO-1682 olcutu). */
+  .compare-table td { border-right: 1px solid var(--bp-border); }
   .compare-table td:last-child { border-right: none; }
-  .compare-table th.row-label { border-right: 1px solid rgba(30,45,69,.5); }
+  .compare-table th.row-label { border-right: 1px solid var(--bp-border); }
   .compare-table tr:last-child th.row-label { border-bottom: none; }
 
   .col-ticker { font-size: var(--bp-text-xl); font-weight: 800; font-family: var(--bp-font-mono); }
@@ -211,7 +218,7 @@
   .ac-item {
     display: flex; align-items: center; justify-content: space-between;
     padding: 8px 12px; cursor: pointer; font-size: var(--bp-text-sm);
-    border-bottom: 1px solid rgba(30,45,69,.5);
+    border-bottom: 1px solid var(--bp-border);   /* 20.09: eski navy #1e2d45 -> notr token */
     transition: background .12s;
   }
   .ac-item:last-child { border-bottom: none; }
@@ -301,8 +308,13 @@
     .compare-wrap { display: none !important; }
     .cmp-mcards { display: flex; }
   }
+  /* .da-panel deltası (mobil kart) — kenar rengi bu sayfanın kendi seçimi
+     (--bp-bkl-bd), yüzey + parıltı paylaşılan katmandan. */
   .cmp-mcard {
-    background: var(--bp-surface); border: 1px solid var(--bp-bkl-bd);
+    --da-glow-a: .08;
+    --da-glow-y: -55%;
+    --da-glow-size: 150px;
+    border-color: var(--bp-bkl-bd);
     border-radius: var(--bp-radius-lg); padding: 14px 16px;
   }
   .cmp-mcard-winner {

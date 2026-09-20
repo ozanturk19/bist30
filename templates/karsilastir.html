@@ -44,8 +44,9 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=1eabd653">
+<link rel="stylesheet" href="/static/css/data-art.css?v=67e915a8">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=3d8b5037">
+<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=2fb8c4f2">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
@@ -63,7 +64,7 @@
 {% include '_stale_banner.html' %}
 
   <!-- Search Bar -->
-  <div class="search-bar">
+  <div class="search-bar da-panel">
     <span class="search-bar-label">Karşılaştırılacak hisseler (2-4 adet)</span>
     <div class="ticker-inputs">
       <div class="ac-wrap">
@@ -402,7 +403,7 @@ function buildMobileCards(stocks) {
 
   const cards = stocks.map((s, i) => {
     if (!s.found) {
-      return `<div class="cmp-mcard cmp-mcard-notfound">
+      return `<div class="cmp-mcard da-panel cmp-mcard-notfound">
         <div class="cmp-mtop"><span class="cmp-mticker">${escapeHtml(s.ticker)}</span><span class="muted" style="font-size:var(--bp-text-sm)">Bulunamadı</span></div>
       </div>`;
     }
@@ -421,7 +422,7 @@ function buildMobileCards(stocks) {
       const helpHtml = help ? ` <span class="help-icon" tabindex="0" data-tip="${help}">i</span>` : '';
       return `<div class="cmp-mrow"><span class="cmp-mrow-label">${label}${helpHtml}</span><span class="cmp-mrow-val">${renderCell(key, s)}</span></div>`;
     }).join('');
-    return `<div class="cmp-mcard${isWinner ? ' cmp-mcard-winner' : ''}">${header}${scoreHtml}${rowsHtml}</div>`;
+    return `<div class="cmp-mcard da-panel${isWinner ? ' cmp-mcard-winner' : ''}">${header}${scoreHtml}${rowsHtml}</div>`;
   }).join('');
 
   return `<div class="cmp-mcards" role="list" aria-label="Karşılaştırma sonuçları, hisse başına kart">${cards}</div>`;
