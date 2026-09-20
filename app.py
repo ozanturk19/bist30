@@ -11113,6 +11113,11 @@ def api_contact():
     email   = _LOG_CTRL_CHARS_RE.sub(" ", str(data.get("email",   "")).strip())[:200]
     subject = _LOG_CTRL_CHARS_RE.sub(" ", str(data.get("subject", "")).strip())[:200]
     message = str(data.get("message", "")).strip()[:2000]
+    # CPO-1689: form JS dogrulamasi subject'i atliyordu (novalidate altinda required
+    # etkisiz) ve JSON POST formu tamamen atlayabilir - mail basligi hicbir zaman
+    # bos kalmasin diye sunucu tarafinda varsayilana dusuluyor.
+    if not subject:
+        subject = "Konu belirtilmedi"
 
     if not all([name, email, message]):
         return jsonify({"ok": False, "error": "Eksik alan"}), 400
