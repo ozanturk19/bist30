@@ -697,7 +697,7 @@ header{
 
 <script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=c290d79e"></script>
-<script src="/static/bp-search.js?v=75" defer></script>
+<script src="/static/bp-search.js?v=76" defer></script>
 <script>
 /* ═══════════════════════════════════════════════════════════════════════
    DATA-ART ANA SAYFA — veri katmanı. Gerçek endpoint'ler:
@@ -1066,7 +1066,7 @@ header{
         }
         if (typeof s.rvol === 'number') {
           var rvolPctG = Math.max(0, Math.min(100, (s.rvol/3)*100));
-          barRows += '<div class="da-spot-sub-row"><span class="lbl">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPctG.toFixed(0) + '%"></i></div><span class="val">' + s.rvol.toFixed(2) + '×</span></div>';
+          barRows += '<div class="da-spot-sub-row"><span class="lbl">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPctG.toFixed(0) + '%"></i></div><span class="val">' + s.rvol.toFixed(2).replace('.', ',') + '×</span></div>';
         }
         if (typeof s.rsi === 'number') {
           barRows += '<div class="da-spot-sub-row"><span class="lbl">RSI</span><div class="bar bar-rsi"><i style="width:' + Math.max(0,Math.min(100,s.rsi)).toFixed(0) + '%"></i></div><span class="val">' + fmtNum0(s.rsi) + '</span></div>';
@@ -1100,7 +1100,7 @@ header{
       return '<div class="da-tile ' + (pos?'da-tile-pos':'da-tile-neg') + ' ' + sizeCls + '" style="--a:' + alpha.toFixed(2) + '" title="' + s.al + ' Güçlü · ' + s.sat + ' Bozuldu · ' + s.bekle + ' Yatay (toplam ' + s.total + ')">' +
         '<div class="name">' + esc(s.name) + '</div>' +
         '<div><div class="chg ' + (pos?'tile-up':'tile-down') + ' da-num"><svg viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor"/></svg>' + (pos?'+':'') + fmtNum0(s.score) + '<span class="u">skor</span></div>' +
-        '<div class="meta">' + s.al + ' Güçlü / ' + s.sat + ' Bozuldu' + (s.avg_rvol!=null ? ' · RVOL ' + s.avg_rvol.toFixed(2) + '×' : '') + '</div></div>' +
+        '<div class="meta">' + s.al + ' Güçlü / ' + s.sat + ' Bozuldu' + (s.avg_rvol!=null ? ' · RVOL ' + s.avg_rvol.toFixed(2).replace('.', ',') + '×' : '') + '</div></div>' +
       '</div>';
     }).join('') + '</div>';
     el.innerHTML = html;

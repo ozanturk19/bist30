@@ -266,7 +266,11 @@
       var sigCls = s.sig === 'AL' ? 'bp-al' : s.sig === 'SAT' ? 'bp-sat' : 'bp-bekle';
       var c = (typeof s.c === 'number') ? s.c : null;
       var cCls = c == null ? 'bp-neu' : c > 0 ? 'bp-pos' : c < 0 ? 'bp-neg' : 'bp-neu';
-      var cSign = c == null ? '—' : (c > 0 ? '+' : '') + c.toFixed(2) + '%';
+      /* CPO 20.09: ayni satirda fiyat toLocaleString('tr-TR') ile "321,75 ₺"
+         (virgul) basilirken degisim toFixed(2) ile "+1.23%" (NOKTA) basiliyordu
+         — tek satirda iki farkli ondalik ayirici. Ayni dosyadaki makro bar
+         (bpRenderMacro) zaten .replace('.', ',') kullaniyor; ayni idiom. */
+      var cSign = c == null ? '—' : (c > 0 ? '+' : '') + c.toFixed(2).replace('.', ',') + '%';
       var priceStr = (typeof s.p === 'number' && s.p > 0) ? s.p.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺' : '';
       html += '<a href="/hisse/' + escHtml(s.t) + '" id="bp-sr-' + i + '" role="option" class="bp-search-result ' + (i===0?'bp-sel':'') + '" data-idx="' + i + '">'
             + '<span class="bp-sr-tk">' + escHtml(s.t) + '</span>'
