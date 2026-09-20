@@ -65,6 +65,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
+<link rel="stylesheet" href="/static/css/data-art.css?v=67e915a8">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <style id="bp-critical-css">
 /* Kanonik anti-CLS bloğu — 27 şablonun paylaştığı desen, BİREBİR korunur (Madde 6f notu).
@@ -90,8 +91,6 @@ header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){d
    --bp-accent-cyan / --bp-accent-cyan-rgb tokens.css'e eklendi (satır ~55/91).
    ═══════════════════════════════════════════════════════════════════════ */
 
-.da-display{font-family:'Bricolage Grotesque','Space Grotesk',system-ui,sans-serif;}
-.da-num{font-family:'Space Grotesk',monospace,sans-serif;font-variant-numeric:tabular-nums;}
 
 /* CPO-1558: tokens.css'in kanonik body{} kuralı margin sıfırlamıyor (sadece bg/renk/font) —
    diğer şablonlar bunu kendi sayfa CSS'inde sıfırlıyor (örn. tarama.css `* {margin:0}`),
@@ -131,7 +130,6 @@ header{
 .macro-bar::after{right:32px;background:linear-gradient(to left,var(--bp-surface),transparent)}
 .macro-live{position:relative;z-index:var(--bp-z-raised);display:flex;align-items:center;gap:7px;padding:0 16px;flex-shrink:0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-2xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bp-text3);border-right:1px solid var(--bp-border);background:var(--bp-surface)}
 .macro-live-dot{width:6px;height:6px;border-radius:50%;background:var(--bp-accent-cyan);box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.7);flex:none;animation:daPulseDot 1.8s ease-in-out infinite}
-@keyframes daPulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}
 #macroTrack{display:flex;align-items:center;height:32px;white-space:nowrap;animation:daMacroScroll 40s linear infinite;will-change:transform}
 #macroBar:hover #macroTrack{animation-play-state:paused}
 @keyframes daMacroScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
@@ -143,17 +141,8 @@ header{
 .macro-pause-btn:hover,.macro-pause-btn:focus-visible{opacity:1}
 
 /* ── sayfa gövdesi ── */
-.da-page{max-width:1360px;margin:0 auto;padding:0 clamp(16px,4vw,40px);position:relative}
-.da-page > section{position:relative;z-index:1}
 #staleBanner{max-width:1360px;margin:14px auto 0;margin-left:clamp(16px,4vw,40px);margin-right:clamp(16px,4vw,40px)}
 
-/* ── skeleton / hata / boş durumlar (asla-boş-sayfa ilkesi) ── */
-.da-skel{position:relative;overflow:hidden;background:var(--bp-surface2);border-radius:var(--bp-radius-md)}
-.da-skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(var(--bp-text-rgb),.06),transparent);animation:daShimmer 1.5s infinite}
-@keyframes daShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-.da-state-msg{display:flex;align-items:center;gap:10px;padding:18px 20px;border:1px dashed var(--bp-border2);border-radius:var(--bp-radius-lg);color:var(--bp-text3);font-size:var(--bp-text-base);background:var(--bp-surface)}
-.da-state-msg.da-state-err{border-color:rgba(var(--bp-sat-rgb),.4);color:var(--bp-sat)}
-.da-state-msg button{margin-left:auto;background:var(--bp-surface2);border:1px solid var(--bp-border2);color:var(--bp-text);border-radius:var(--bp-radius);padding:6px 12px;font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0}
 
 /* ── HERO ── */
 .da-hero{position:relative;left:50%;width:100vw;margin-left:-50vw;padding:clamp(28px,5vw,56px) 0 clamp(50px,7vw,88px);overflow:hidden}
@@ -178,7 +167,6 @@ header{
 @keyframes daNodePulse{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.95;transform:scale(1.5)}}
 .da-hero-content{position:relative;z-index:2;max-width:1360px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
 .da-eyebrow-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:clamp(24px,4vw,40px)}
-.da-badge{display:inline-flex;align-items:center;gap:7px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);letter-spacing:.08em;text-transform:uppercase;padding:7px 13px;border-radius:var(--bp-radius-pill);border:1px solid var(--bp-border2);color:var(--bp-text2);background:var(--bp-surface)}
 .da-index-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:clamp(14px,3vw,24px);margin-bottom:8px}
 .da-index-label{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-base);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-text3);margin-bottom:8px}
 /* CPO-1558: gradient-text için fallback yoktu — background-clip:text tarayıcıda
@@ -212,27 +200,9 @@ header{
 .da-legend-item .sw{width:10px;height:10px;border-radius:3px;flex:none}
 .da-legend-sep{width:1px;background:var(--bp-border);align-self:stretch}
 
-/* ── section head (yeniden kullanılan) ── */
-/* Ozan 10.09: 7 .da-section art arda 96px+96px (üst+alt) padding'le gereksiz
-   scroll yaratıyordu — bölümler arası ayrım korunacak kadar (tam 0'a inmedi)
-   ama önceki tavana göre ~%35 daraltıldı. */
-.da-section{padding:clamp(32px,4.5vw,62px) 0}
-.da-section-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:clamp(20px,3vw,30px)}
-.da-eyebrow{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-sm);letter-spacing:.14em;text-transform:uppercase;color:var(--bp-volume);margin-bottom:8px}
-.da-section-title{font-weight:800;letter-spacing:-.025em;font-size:clamp(1.9rem,4vw,3.1rem);line-height:1.04;max-width:20ch}
-.da-section-desc{color:var(--bp-text3);max-width:44ch;font-size:var(--bp-text-base);line-height:1.6}
 
 /* ── bugün ne oldu ── */
-.da-recap-panel{position:relative;border-radius:var(--bp-radius-20);padding:clamp(24px,4vw,40px);background:linear-gradient(135deg,var(--bp-surface) 0%,var(--bp-surface2) 100%);border:1px solid var(--bp-border);border-left:3px solid var(--bp-brand);overflow:hidden}
-.da-recap-panel::before{content:'';position:absolute;top:-40%;right:-8%;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(124,92,255,.16),transparent 70%);pointer-events:none}
-.da-recap-tag{display:inline-flex;align-items:center;gap:8px;font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--bp-accent-cyan);margin-bottom:14px;position:relative}
-.da-recap-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--bp-accent-cyan);box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.6);animation:daPulseDot 1.8s ease-in-out infinite}
-.da-recap-headline{font-weight:800;letter-spacing:-.02em;font-size:clamp(1.6rem,3vw,2.3rem);margin:0 0 16px;position:relative}
-.da-recap-body{font-size:var(--bp-text-lg);line-height:1.75;color:var(--bp-text2);max-width:76ch;position:relative}
-.da-recap-body strong{color:var(--bp-text);font-weight:700}
-.da-recap-body .up{color:var(--bp-al);font-weight:700}
-.da-recap-body .down{color:var(--bp-sat);font-weight:700}
-.da-det-badge{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-family:'Space Grotesk',monospace,sans-serif;font-size:var(--bp-text-2xs);letter-spacing:.06em;text-transform:uppercase;color:var(--bp-text3);border:1px solid var(--bp-border2);border-radius:var(--bp-radius-pill);padding:5px 11px;position:relative}
+.da-recap-panel{padding:clamp(24px,4vw,40px);--da-glow-y:-40%;--da-glow-size:320px;--da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.16}  /* gövde reçetesi: data-art.css .da-panel */
 
 /* ── spotlight (öne çıkan hisse) ── */
 .da-spot-grid{display:grid;grid-template-columns:auto 1fr;gap:clamp(24px,4vw,48px);align-items:center;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-20);padding:clamp(26px,4vw,42px);position:relative;overflow:hidden}
@@ -300,10 +270,6 @@ header{
 .da-curated-body{flex:1;min-width:200px}
 .da-curated-title{font-weight:700;font-size:clamp(1.2rem,2vw,1.5rem);letter-spacing:-.01em;margin-bottom:6px}
 .da-curated-desc{color:var(--bp-text3);font-size:var(--bp-text-base);max-width:42ch;line-height:1.55}
-.da-chip-row{display:flex;flex-wrap:wrap;gap:9px;flex:none}
-.da-chip{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',monospace,sans-serif;font-size:var(--bp-text-sm);font-weight:700;background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:var(--bp-radius-pill);padding:7px 7px 7px 13px;text-decoration:color;color:var(--bp-text);transition:border-color var(--bp-dur-base) var(--bp-ease-standard),background var(--bp-dur-base) var(--bp-ease-standard)}
-.da-chip:hover{border-color:var(--bp-accent-cyan);background:rgba(var(--bp-accent-cyan-rgb),.08)}
-.da-chip-badge{font-size:var(--bp-text-xs);padding:3px 8px;border-radius:var(--bp-radius-pill);font-weight:700}
 
 /* ── öne çıkan hisse ızgarası ── */
 .da-stock-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-flow:dense;gap:16px}
@@ -411,25 +377,6 @@ header{
 .da-bp-desc{font-size:var(--bp-text-xs);color:var(--bp-text3);margin:2px 0}
 @media (max-width:768px){.da-gundem-layout{grid-template-columns:1fr}}
 
-/* Data-Art imza kesimi — "En güçlü sinyaller" bölümünü diyagonal clip-path ile ayrı bir
-   görsel blok yapar (mockup-c'nin .score-section'ı, denetim madde 3). --bg-alt yerine
-   gerçek token --bp-surface kullanıldı (mockup'a özel token, sitede yok). */
-.da-clip-block{
-  background:var(--bp-surface);
-  clip-path:polygon(0 3.5%, 100% 0, 100% 97%, 0 100%);
-  margin:0 0 -40px;
-  padding-top:clamp(70px,9vw,130px);
-  padding-bottom:clamp(60px,8vw,110px);
-}
-
-/* Data-Art imza dokusu — mockup-c-dataart.html'den birebir (denetim madde 3) */
-.da-grain{
-  position:fixed;inset:0;pointer-events:none;z-index:50;
-  background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
-  background-size:3px 3px;
-  opacity:.4;
-  mix-blend-mode:overlay;
-}
 </style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="da-grain" aria-hidden="true"></div>
@@ -558,7 +505,7 @@ header{
 
 <!-- ═══ BUGÜN NE OLDU — deterministik, kural tabanlı (LLM/Gemini çağrısı YOK) ═══ -->
 <section class="da-section" id="daRecapSection">
-  <div class="da-recap-panel">
+  <div class="da-panel da-panel--accent da-recap-panel">
     <div class="da-recap-tag"><span class="dot"></span>Piyasa Özeti</div>
     <h2 class="da-recap-headline da-display">Bugün ne oldu?</h2>
     <p class="da-recap-body" id="daRecapText">

@@ -107,8 +107,9 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
+<link rel="stylesheet" href="/static/css/data-art.css?v=67e915a8">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=fdd04f30">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=7bfeadf7">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -544,7 +545,7 @@
   {% if signal_summary %}
   <div id="signalSummarySection"
        data-tab-content="ozet"
-       class="da-summary-panel">
+       class="da-panel da-summary-panel">
     <div class="da-summary-head">
       <div style="flex:1;min-width:0">
         <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span> 2 Saniyede Karar Yardımcısı</span>
@@ -1134,7 +1135,7 @@
        accordion'u) İÇİNDEYDİ — Onaylar/Çoklu Zaman Dilimi/Sinyal Geçmişi/Sinyal
        Performansı ile aynı genel etikette gizliydi, kullanıcı ayırt edemiyordu.
        Artık kendi başına, her zaman görünür, adı geçen accordion'un DIŞINDA. -->
-  <div data-tab-content="ozet" class="da-fund-panel" id="fundSection">
+  <div data-tab-content="ozet" class="da-panel da-fund-panel" id="fundSection">
     <div class="da-fund-head">
       <h2 class="section-title"><span aria-hidden="true">📋</span> Temel Analiz</h2>
       <span class="da-fund-note">4 saatte bir güncellenir</span>
@@ -1202,7 +1203,7 @@
   
 
   <!-- Sosyal Paylaşım -->
-  <div id="shareSection" style="display:none" class="da-share-panel">
+  <div id="shareSection" style="display:none" class="da-panel da-share-panel">
     <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span> Sinyali Paylaş</span>
     <div class="da-share-btns">
       <button id="shareWA" class="da-share-btn" onclick="shareSignal('wa')"
@@ -1226,7 +1227,7 @@
   </div>
 
   <!-- Sinyal Dönemindeki Haber Akışı — sinyal tarihi etrafındaki KAP bildirimleri -->
-  <div id="storySection" data-tab-content="haberler" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0" style="display:none" class="da-story-panel">
+  <div id="storySection" data-tab-content="haberler" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0" style="display:none" class="da-panel da-panel--accent da-story-panel">
     <div class="da-story-head">
       <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span> Sinyal Dönemi</span>
       <span id="storyWindow" style="font-size:var(--bp-text-xs);color:var(--bp-text3)"></span>
@@ -1241,7 +1242,7 @@
 
   <!-- AI Sinyal Açıklaması -->
   <div id="ai-section" style="scroll-margin-top:80px"></div>
-  <div id="sigExplainSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" class="da-ai-panel">
+  <div id="sigExplainSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" class="da-panel da-panel--accent da-ai-panel">
     <div class="da-ai-head">
       <span class="da-util-eyebrow"><span aria-hidden="true">✨</span> Bu Sinyal Ne Anlama Geliyor?</span>
       <span id="sigExplainBadge" class="da-ai-badge">Gemini AI</span>
@@ -1295,7 +1296,7 @@
        Teknik karttaki gibi koşulsuz "Gemini AI" rozeti kullanılmadı (Skor Analizi'ndeki
        "✦ AI Yorumu" tarzıyla tutarlı, aşırı-iddia yok). -->
   {% set _temel_ready = hs_available and hs.temel_analiz_skoru is not none %}
-  <div data-tab-content="ai" class="da-ai-panel da-ai-panel--fund">
+  <div data-tab-content="ai" class="da-panel da-panel--accent da-ai-panel da-ai-panel--fund">
     <div class="da-ai-head">
       <span class="da-util-eyebrow"><span aria-hidden="true">📋</span> Temel Görünüm Ne Anlama Geliyor?</span>
     </div>
@@ -1352,7 +1353,7 @@
      kuralı) koruyor, GEO agent'ının "kural mantığını kaybetme" uyarısına
      bilinçli uyularak. #}
   <!-- SEO: Server-side rendered teknik özet — Google bot için crawlable içerik -->
-  <div data-tab-content="always" class="da-techsum-panel">
+  <div data-tab-content="always" class="da-panel da-techsum-panel">
     <div class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Teknik Özet</div>
     <p style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.7;margin:0">
       Sinyal, <strong>Supertrend(10,3)</strong>, <strong>ADX ≥ 25</strong> ve <strong>EMA12/EMA99</strong> göstergelerinin AYNI ANDA uyum sağlamasıyla oluşur.

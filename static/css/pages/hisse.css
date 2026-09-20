@@ -681,19 +681,10 @@
      ustlerinde tasimiyorlar — bu bilincli bir kontrast, "kart icinde
      kart" ayrimini koruyor. */
   .da-fund-panel {
-    position: relative; overflow: hidden;
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius-20);
     margin-bottom: 20px;
+    --da-glow-y:-40%;--da-glow-size:260px;
+    --da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.12;
   }
-  .da-fund-panel::before {
-    content:''; position:absolute; top:-40%; right:-8%;
-    width:260px; height:260px; border-radius:50%;
-    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.12), transparent 70%);
-    pointer-events:none;
-  }
-  .da-fund-panel > * { position: relative; }
   /* Temel Analiz verisi hic yoksa panel gizlenir. Inline style.display DEGIL
      sinif kullaniliyor: applyTab() her sekme gecisinde [data-tab-content]
      panellerinin inline display'ini '' yapiyor, yani inline gizleme bir
@@ -1316,15 +1307,10 @@
       box-shadow:0 0 8px rgba(var(--bp-accent-cyan-rgb),.6);flex:none;
     }
     .da-share-panel{
-      position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;
-      background:linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-      border:1px solid var(--bp-border);border-radius:var(--bp-radius-20);
+      display:flex;flex-direction:column;gap:12px;
       padding:16px 20px;margin-bottom:20px;
-    }
-    .da-share-panel::before{
-      content:'';position:absolute;top:-55%;right:-8%;width:200px;height:200px;border-radius:50%;
-      background:radial-gradient(circle, rgba(var(--bp-art-violet-rgb),.14), transparent 70%);
-      pointer-events:none;
+      --da-glow-y:-55%;--da-glow-size:200px;
+      --da-glow-rgb:var(--bp-art-violet-rgb);--da-glow-a:.14;
     }
     .da-share-btns{position:relative;display:flex;flex-wrap:wrap;gap:10px}
     .da-share-btn{
@@ -1341,18 +1327,14 @@
     /* SEO teknik-ozet seridi — 20.09'a kadar sablon icinde inline duz-kutu
        (surface + uppercase mikro-etiket) olarak duruyordu, yani Ozan'in
        "amator" dedigi desenin ta kendisiydi. */
+    /* 20.09: gövde reçetesi (degrade + kenarlık + radius + parıltı) artık
+       static/css/data-art.css `.da-panel` ilkelinde — burada SADECE bu panelin
+       deltası duruyor. Şablonda `da-panel` sınıfı eklendi. */
     .da-techsum-panel{
-      position:relative;overflow:hidden;
-      background:linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-      border:1px solid var(--bp-border);border-radius:var(--bp-radius-20);
       padding:16px 20px;margin-bottom:20px;
+      --da-glow-y:-50%;--da-glow-left:-5%;--da-glow-x:auto;--da-glow-size:220px;
+      --da-glow-rgb:var(--bp-accent-cyan-rgb);--da-glow-a:.09;
     }
-    .da-techsum-panel::before{
-      content:'';position:absolute;top:-50%;left:-5%;width:220px;height:220px;border-radius:50%;
-      background:radial-gradient(circle, rgba(var(--bp-accent-cyan-rgb),.09), transparent 70%);
-      pointer-events:none;
-    }
-    .da-techsum-panel > *{position:relative}
     .da-techsum-panel .da-util-eyebrow{margin-bottom:10px}
 
     /* ── AI Analiz sekmesi (20.09) — sekmenin IKI paneli de sayfanin geri kalanindan
@@ -1362,22 +1344,10 @@
        ikinci renk duragi (29,78,216 = eski palet blue-700) 3eef645'teki palet
        gocunden sag kalmis bir kalintiydi. Panel kimligi artik zeminle degil,
        sol aksan seridi + parilti rengiyle tasiniyor (.da-story-panel emsali). ── */
-    .da-ai-panel{
-      position:relative;overflow:hidden;
-      background:linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-      border:1px solid var(--bp-border);border-left:3px solid var(--bp-brand);
-      border-radius:var(--bp-radius-20);padding:18px 20px;margin-bottom:20px;
-    }
-    .da-ai-panel::before{
-      content:'';position:absolute;top:-45%;right:-8%;width:250px;height:250px;border-radius:50%;
-      background:radial-gradient(circle, rgba(var(--bp-brand-rgb),.11), transparent 70%);
-      pointer-events:none;
-    }
-    .da-ai-panel > *{position:relative}
-    .da-ai-panel--fund{ border-left-color:var(--bp-accent-cyan); }
-    .da-ai-panel--fund::before{
-      background:radial-gradient(circle, rgba(var(--bp-accent-cyan-rgb),.10), transparent 70%);
-    }
+    /* Aksan + parıltı .da-panel varsayılanlarıyla (marka mavisi) birebir aynı;
+       bu panelin deltası sadece iç boşluk. */
+    .da-ai-panel{ padding:18px 20px;margin-bottom:20px; }
+    .da-ai-panel--fund{ --da-accent:var(--bp-accent-cyan);--da-glow-rgb:var(--bp-accent-cyan-rgb);--da-glow-a:.10; }
     .da-ai-head{position:relative;display:flex;align-items:center;gap:8px;margin-bottom:10px}
     .da-ai-badge{
       margin-left:auto;font-size:var(--bp-text-xs);
@@ -1391,15 +1361,9 @@
     .da-ai-note{font-size:var(--bp-text-xs);color:var(--bp-text3)}
 
     .da-story-panel{
-      position:relative;overflow:hidden;
-      background:linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-      border:1px solid var(--bp-border);border-left:3px solid var(--bp-accent-cyan);
-      border-radius:var(--bp-radius-20);padding:18px 20px;margin-bottom:20px;
-    }
-    .da-story-panel::before{
-      content:'';position:absolute;top:-45%;right:-10%;width:260px;height:260px;border-radius:50%;
-      background:radial-gradient(circle, rgba(var(--bp-accent-cyan-rgb),.10), transparent 70%);
-      pointer-events:none;
+      padding:18px 20px;margin-bottom:20px;
+      --da-accent:var(--bp-accent-cyan);--da-glow-x:-10%;--da-glow-size:260px;
+      --da-glow-rgb:var(--bp-accent-cyan-rgb);--da-glow-a:.10;
     }
     .da-story-head{position:relative;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
     .da-story-title{
@@ -1412,15 +1376,8 @@
        içerik bloğu — hâlâ eski düz-kutu diliyle kalması hero'nun cüretkar
        degrade/glow'undan sonra en sert görsel kopukluğu yaratıyordu. ── */
     .da-summary-panel{
-      position:relative;overflow:hidden;
-      background:linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-      border:1px solid var(--bp-border);border-radius:var(--bp-radius-20);
       padding:20px 20px 16px;margin-bottom:20px;
-    }
-    .da-summary-panel::before{
-      content:'';position:absolute;top:-40%;left:-6%;width:240px;height:240px;border-radius:50%;
-      background:radial-gradient(circle, rgba(var(--bp-brand-rgb),.12), transparent 70%);
-      pointer-events:none;
+      --da-glow-y:-40%;--da-glow-left:-6%;--da-glow-x:auto;--da-glow-size:240px;--da-glow-a:.12;
     }
     .da-summary-head{position:relative;display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
     .da-summary-title{
@@ -1500,14 +1457,21 @@
    hafif eğim" reçetesi: box-shadow YOK (derinlik border-contrast'tan gelir),
    sadece ADDITIVE — mevcut inline background/border/padding'e dokunulmadı,
    hiçbir HTML/JS/id değişmedi. ── */
-#signalSummarySection,
+/* 20.09 BULGU — bu grup 08.09'da `#signalSummarySection`'ı da kapsıyordu; 19.09'da
+   aynı öğe için yazılan `.da-summary-panel::before` (marka parıltısı, 240px, sol-üst)
+   ID-özgüllüğü yüzünden CANLIDA HİÇ UYGULANMAMIŞTI — panel sessizce eski içerik-kartı
+   parıltısını (violet .13, 220px, sağ-üst) taşıyordu. Canlı ölçümle yakalandı
+   (getComputedStyle ::before: 220px/-35%/rgba(124,92,255,.13) ≠ kaynaktaki 240px).
+   `#signalSummarySection` gruptan çıkarıldı: panel artık data-art.css `.da-panel`
+   ilkelini kullanıyor, yani sayfadaki diğer 6 panelle AYNI reçete. Hover'daki
+   kenarlık-vurgusu da kalktı — bu kutu tıklanabilir değil, hover affordance'ı
+   yanıltıcıydı. */
 .content-card,
 .faq-card {
   position: relative;
   overflow: hidden;
   transition: border-color var(--bp-dur-base) var(--bp-ease-standard);
 }
-#signalSummarySection::before,
 .content-card::before,
 .faq-card::before {
   content: '';
@@ -1517,17 +1481,15 @@
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(124, 92, 255, .13), transparent 70%);
+  background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb), .13), transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
-#signalSummarySection:hover,
 .content-card:hover,
 .faq-card:hover {
   border-color: var(--bp-border2);
 }
 /* İçerik kart-içi öğeler parıltının üstünde kalsın */
-#signalSummarySection > *,
 .content-card > *,
 .faq-card > * {
   position: relative;
