@@ -30,6 +30,11 @@
    düşmedi, oysa doğrudan ölçümde 5/5 öğede ust=alt=0 (gereken 4) çıktı.
    Şüphelenilen bileşen için DOĞRUDAN room ölçümü yap, sweep sayısına güvenme.
 
+   ⛔ NEGATİF outline-offset halkayi İÇE alir -> ata ASLA kirpamaz. `need`
+   formulu bunu hesaba katmazsa kendi fix'ini ihlal sanar (21.09'da tam bunu
+   yapti: offset -2px/width 2px icin need=2 deyip "1 kenar gorunur" dedi,
+   oysa ekran goruntusunde halka TAM gorunuyordu).
+
    Kullanım: sayfayı aç → Tab'a bas → bu dosyanın gövdesini javascript_tool ile
    çalıştır. Çıktı: {page,cand,A,Aagg,B,Bagg,P,Pagg}. Hedef: A=0, B=0.
    ──────────────────────────────────────────────────────────────────── */
@@ -40,7 +45,7 @@ function snap(e){const o={},c=getComputedStyle(e);for(const p of OUT.concat(OTHE
 function cl(e){let a=e.parentElement;while(a&&a!==document.documentElement){const c=getComputedStyle(a);if((c.overflowX!=='visible'||c.overflowY!=='visible')&&a!==document.body)return a;a=a.parentElement;}return null;}
 function L(e){let s=e.tagName.toLowerCase();if(e.id)s+='#'+e.id;const c=(typeof e.className==='string')?e.className:'';if(c)s+='.'+c.trim().split(/\s+/).slice(0,2).join('.');return s;}
 const A=[],B=[],P=[];let cand=0;
-for(const e of document.querySelectorAll(SEL)){if(e.tabIndex<0||e.disabled)continue;if(!e.checkVisibility({checkOpacity:true,checkVisibilityCSS:true}))continue;if(e.getBoundingClientRect().height<1)continue;cand++;if(document.activeElement&&document.activeElement!==document.body)document.activeElement.blur();const b=snap(e);e.focus({preventScroll:true});if(document.activeElement!==e){e.blur();continue;}const a2=snap(e),r=e.getBoundingClientRect(),ch=Object.keys(b).filter(x=>b[x]!==a2[x]);e.blur();if(!ch.length){A.push({sel:L(e),txt:(e.textContent||e.value||'').trim().slice(0,30)});continue;}if(!ch.every(x=>OUT.includes(x)))continue;const fw=parseFloat(a2['outline-width'])||0,fo=parseFloat(a2['outline-offset'])||0,st=a2['outline-style'];if(st==='none'||fw===0){A.push({sel:L(e),txt:'outline-style:none'});continue;}const c=cl(e);if(!c)continue;const cr=c.getBoundingClientRect(),need=fw+Math.max(fo,0),rm={ust:r.top-cr.top,alt:cr.bottom-r.bottom,sol:r.left-cr.left,sag:cr.right-r.right};const vis=Object.values(rm).filter(v=>v>=need-0.5).length;if(vis<=1)B.push({sel:L(e),kirpan:L(c),vis,txt:(e.textContent||'').trim().slice(0,26)});else if(vis<=2)P.push({sel:L(e),kirpan:L(c),vis});}
+for(const e of document.querySelectorAll(SEL)){if(e.tabIndex<0||e.disabled)continue;if(!e.checkVisibility({checkOpacity:true,checkVisibilityCSS:true}))continue;if(e.getBoundingClientRect().height<1)continue;cand++;if(document.activeElement&&document.activeElement!==document.body)document.activeElement.blur();const b=snap(e);e.focus({preventScroll:true});if(document.activeElement!==e){e.blur();continue;}const a2=snap(e),r=e.getBoundingClientRect(),ch=Object.keys(b).filter(x=>b[x]!==a2[x]);e.blur();if(!ch.length){A.push({sel:L(e),txt:(e.textContent||e.value||'').trim().slice(0,30)});continue;}if(!ch.every(x=>OUT.includes(x)))continue;const fw=parseFloat(a2['outline-width'])||0,fo=parseFloat(a2['outline-offset'])||0,st=a2['outline-style'];if(st==='none'||fw===0){A.push({sel:L(e),txt:'outline-style:none'});continue;}const c=cl(e);if(!c)continue;const cr=c.getBoundingClientRect(),need=fo<0?Math.max(0,fw+fo):fw+fo,rm={ust:r.top-cr.top,alt:cr.bottom-r.bottom,sol:r.left-cr.left,sag:cr.right-r.right};const vis=Object.values(rm).filter(v=>v>=need-0.5).length;if(vis<=1)B.push({sel:L(e),kirpan:L(c),vis,txt:(e.textContent||'').trim().slice(0,26)});else if(vis<=2)P.push({sel:L(e),kirpan:L(c),vis});}
 k.remove();const ag=o=>{const m={};for(const x of o){const q=x.sel+(x.kirpan?' < '+x.kirpan:'');m[q]=m[q]||{k:q,n:0,d:x};m[q].n++;}return Object.values(m).sort((p,q)=>q.n-p.n).slice(0,8);};
 JSON.stringify({page:location.pathname,cand,A:A.length,Aagg:ag(A),B:B.length,Bagg:ag(B),P:P.length,Pagg:ag(P)})
 })()
