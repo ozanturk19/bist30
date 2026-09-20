@@ -2222,7 +2222,7 @@ function renderSummary(s, signalData) {
   /* Sinyal kartı */
   document.getElementById('icSignal').innerHTML = icon +  // label bp-hero-card'da gosteriliyor
     /* CPO-535 #36: is_premium (RVOL ≥ 1.20 backtest-onaylı) → "⭐ Hacim Onaylı" chip */
-    (signalData && signalData.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1.20" tabindex="0" style="display:inline-block;margin-left:4px;font-size:var(--bp-text-xs);color:var(--bp-volume);background:var(--bp-volume-bg);padding:1px 6px;border-radius:8px;border:1px solid var(--bp-volume-bd);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
+    (signalData && signalData.is_premium ? ' <span data-tip="Hacim Onaylı — RVOL ≥ 1,20" tabindex="0" style="display:inline-block;margin-left:4px;font-size:var(--bp-text-xs);color:var(--bp-volume);background:var(--bp-volume-bg);padding:1px 6px;border-radius:8px;border:1px solid var(--bp-volume-bd);font-weight:700;letter-spacing:.3px;vertical-align:middle">⭐ Hacim Onaylı</span>' : '');
   /* Sinyal date/bars — signalData'dan */
   if (signalData) {
     /* CPO-1335: `|| 1` fallback kaldırıldı — bilinmeyen bar sayısı sessizce
@@ -2441,7 +2441,7 @@ function renderSummary(s, signalData) {
       hpRvolVal.className = 'hp-row-val ' + cls;
       hpRvolVal.innerHTML = `${rvolVal.toFixed(2).replace('.', ',')}×` +
         /* CPO-535 #36: RVOL onaylı chip → "⭐ Hacim Onaylı" */
-        (isPremium ? ' <span class="hp-tag premium" data-tip="RVOL ≥ 1.20 — Hacim onaylı sinyal" tabindex="0">⭐ Hacim Onaylı</span>' : '');
+        (isPremium ? ' <span class="hp-tag premium" data-tip="RVOL ≥ 1,20 — Hacim onaylı sinyal" tabindex="0">⭐ Hacim Onaylı</span>' : '');
       hpRvolRow.style.display = '';
     }
 

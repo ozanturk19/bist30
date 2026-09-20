@@ -118,12 +118,12 @@
         <option value="signal_strength">Teknik Güç Skoru (Yüksek → Düşük)</option>
         <option value="adx">Trend Gücü / ADX (Güçlü → Zayıf)</option>
         <option value="price">Fiyat (Yüksek → Düşük)</option>
-        <option value="vol_ratio">RVOL (Yüksek → Düşük)</option>
+        <option value="vol_ratio">Günlük Hacim Oranı (Yüksek → Düşük)</option>
         <option value="change_pct">Değişim % (Yüksek → Düşük)</option>
         <option value="signal_bars">Tazelik (Yeni → Eski)</option>
       </select>
       <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:var(--bp-text-sm);border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
-        data-tip="Teknik Güç Skoru: Birleşik kalite (günlük hacim oranı + ADX + RSI + Teyit) — 💎 rozeti bu skordan belirlenir. En kaliteli hisseler üstte.&#10;Trend Gücü: Sadece ADX. 💎 rozetli bir hisse ADX düşük olabilir.&#10;RVOL: günlük/20g hacim oranı — anormal hareket göstergesi (Teknik Güç Skoru'ndaki hacim bileşeniyle aynı değer, ayrı gösterilir).&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
+        data-tip="Teknik Güç Skoru: Birleşik kalite (günlük hacim oranı + ADX + RSI + Teyit) — 💎 rozeti bu skordan belirlenir. En kaliteli hisseler üstte.&#10;Trend Gücü: Sadece ADX. 💎 rozetli bir hisse ADX düşük olabilir.&#10;Günlük Hacim Oranı: bugünkü hacim / 20 günlük ortalama — Teknik Güç Skoru'ndaki hacim bileşeniyle aynı değerdir. Diğer sayfalardaki RVOL ise 5 günlük ortalamayı kullanır, ayrı bir sayıdır.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
       <button onclick="exportCSV()" title="Sonuçları CSV olarak indir"
         style="background:rgba(var(--bp-brand-rgb),.1);border:1px solid rgba(var(--bp-brand-rgb),.3);color:var(--bp-brand);
                border-radius:var(--bp-radius);padding:5px 11px;font-size:var(--bp-text-sm);cursor:pointer;font-family:inherit;
@@ -147,7 +147,7 @@
       <caption class="sr-only">Tarama sonuçları — hisse, sinyal, teknik güç skoru, trend gücü ve teknik göstergeler</caption>
       <thead>
         {# SPEC-UX-BATCH-2026-06-03 Task #23 (CPO-475): Tarama kolon redesign.
-           Yeni sıra: Hisse / Sinyal / Teknik Güç (T3.5, skor — sıralamanın kaynağı; CPO-1682 kanonik ad) / Trend Gücü (eski ADX) / Giriş Kalitesi (öne) / Fiyat / Değişim / RVOL× / Tazelik / Sektör.
+           Yeni sıra: Hisse / Sinyal / Teknik Güç (T3.5, skor — sıralamanın kaynağı; CPO-1682 kanonik ad) / Trend Gücü (eski ADX) / Giriş Kalitesi (öne) / Fiyat / Değişim / Hacim Oranı× / Tazelik / Sektör.
            ≤899px: table gizlenir, #mobileResultCards devreye girer (bkz. aşağıda kart render'ı).
            R/R kolonu Faz 2'ye ertelendi (backend TP veri yok, CPO ile sürüyor). #}
         <tr>
@@ -158,7 +158,7 @@
           <th scope="col">Giriş Kalitesi</th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-price" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('price')">Fiyat</button></th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-chg" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('change_pct')">Değişim</button></th>
-          <th scope="col" class="hide-mob th-sortable" id="th-vol" data-tooltip="Bugünkü hacim / 20-gün ortalama" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('vol_ratio')">RVOL×</button></th>
+          <th scope="col" class="hide-mob th-sortable" id="th-vol" data-tooltip="Günlük Hacim Oranı — bugünkü hacim / 20 günlük ortalama. Sitenin başka sayfalarındaki RVOL&#39;dan FARKLI bir sayıdır (o 5 günlük ortalamayı kullanır)." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('vol_ratio')">Hacim Oranı ×</button></th>
           <th scope="col" class="hide-mob th-sortable" id="th-bars" data-tooltip="Sinyal kaç gün önce oluştu" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_bars')">Tazelik</button></th>
           <th scope="col" class="hide-mob hide-tablet">Sektör</th>
         </tr>
@@ -740,7 +740,9 @@ function renderResults(rows, count) {
       <div class="trend-bar"><div class="trend-bar-fill ${cls}" style="width:${pct.toFixed(0)}%"></div></div>
     </div>`;
   };
-  // RVOL: ≥1.5× yüksek (yeşil), 0.8-1.5× normal (mavi), <0.8× düşük (gri)
+  // Gunluk Hacim Orani (vol_ratio): >=1.5x yuksek (yesil), 0.8-1.5x normal (mavi), <0.8x dusuk (gri).
+  // DIKKAT: bu alan `vol_ratio` (bugunku hacim/20g ort). Sitedeki "RVOL" adi
+  // `rvol` alanina aittir (5g ort/20g ort) — ayri sayi, bkz. /metodoloji#terimler.
   const rvolCell = (vr) => {
     if (vr == null) return '<span class="rvol-cell low">—</span>';
     const v = vr;

@@ -203,7 +203,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 </p>
 <p>
   Düşük likidite (20 günlük ort. hacim 5M TL altı) veya yaklaşan bilanço tarihi varsa rozet bir kademe düşer; ikisi birden geçerliyse rozet iki kademe birden düşebilir (tamamen kalkabilir).
-  Günlük hacim oranı (hacim / 20 günlük ort.), sayfalarda ayrıca gösterilen <strong>RVOL</strong> göstergesiyle AYNI hesaplamadır — Skor'un içinde bir bileşen olarak kullanılır.
+  Skor'un hacim bileşeni <strong>Günlük Hacim Oranı</strong>dır (bugünkü hacim / 20 günlük ort.). Sayfalarda ayrıca gösterilen <strong>RVOL</strong> ise <strong>farklı bir sayıdır</strong> (5 günlük ort. / 20 günlük ort.) — ikisini karıştırmayın, aşağıdaki terim listesinde ayrı ayrı tanımlı.
   Bu rozet, hacim onaylı sinyaller için kullanılan <strong>"Premium"</strong> ifadesiyle karıştırılmamalı — ikisi de ücretsiz, ödeme/paket ile ilgisi yok.
 </p>
 
@@ -229,6 +229,19 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
     <dd><strong>Sadece ADX göstergesinin bandı</strong> (Çok Güçlü / Güçlü / Orta / Zayıf). Teknik Güç Skoru'nun
       <em>bir bileşenidir</em>, onunla aynı şey değildir — ADX yüksekken skor düşük olabilir.
       <span class="term-where">Tarama &laquo;Trend Gücü&raquo; kolonu</span></dd>
+  </div>
+  <div class="term-row">
+    <dt>Günlük Hacim Oranı <span class="term-num">bugün / 20g</span></dt>
+    <dd><strong>Bugünkü hacim ÷ son 20 günün ortalama hacmi.</strong> Tek günlük bir sıçramayı ölçer;
+      Teknik Güç Skoru'nun hacim bileşeni budur.
+      <span class="term-where">Tarama &laquo;Hacim Oranı&raquo; kolonu, CSV dışa aktarımı</span></dd>
+  </div>
+  <div class="term-row">
+    <dt>RVOL <span class="term-num">5g / 20g</span></dt>
+    <dd><strong>Son 5 günün ortalama hacmi ÷ son 20 günün ortalama hacmi.</strong> Tek günü değil,
+      hacmin <em>eğilimini</em> ölçer — <span aria-hidden="true">⭐</span> Hacim Onaylı rozetinin eşiği (1,20) bu sayıya bakar.
+      Günlük Hacim Oranı ile <strong>aynı sayı değildir</strong>, aynı hissede farklı çıkabilir.
+      <span class="term-where">Hisse sayfası, anasayfa, sektör ısı haritası, karşılaştırma</span></dd>
   </div>
   <div class="term-row">
     <dt><span aria-hidden="true">💎</span> Yüksek Skor · Orta Skor</dt>
