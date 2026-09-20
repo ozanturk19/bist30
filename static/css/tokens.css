@@ -17,6 +17,15 @@
   /* Borders */
   --bp-border:    #2a2a2c;
   --bp-border2:   #46464d;
+  /* 21.09 (CPO) K-Q — FORM ALANI SINIRI, WCAG 1.4.11 (Non-text Contrast, 3:1).
+     --bp-border (#2a2a2c) bir KART kenarligi icin dogru: kart kendi metniyle
+     tanindigi icin suslu sayilir ve 1.4.11'den MUAFTIR. Ama BOS bir metin
+     alanini bulmanin TEK yolu sinirdir; orada ayni token #0e0e12 zemin uzerinde
+     1.34:1 kaliyordu (canli olcum: 10 yuzey / 19 alan, en iyisi 2.06:1).
+     #6e6e7a sitedeki UC zeminin hepsinde gecer: #0e0e12'de 4.20:1,
+     #141416'da 4.02:1, #1c1b1f'te 3.65:1, alan dolgusu #21262d'de 3.31:1.
+     YALNIZ input/textarea/select icin; dekoratif kenarliklara UYGULANMAZ. */
+  --bp-field-border: #6e6e7a;
   --bp-border-subtle: #21262d;
 
   /* Text */

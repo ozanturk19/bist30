@@ -57,7 +57,7 @@
   .search-row input {
     flex: 1;
     background: var(--bp-surface2);
-    border: 1.5px solid var(--bp-border);
+    border: 1.5px solid var(--bp-field-border);   /* K-Q */
     border-radius:var(--bp-radius-md);
     padding: 10px 12px;
     color: var(--bp-text);

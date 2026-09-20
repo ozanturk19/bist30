@@ -55,7 +55,7 @@
        ok isaretini SILIYORDU (appearance:none + ok yok = HIC gostergesi olmayan
        select). Canli computed olcumde yakalandi. */
     background-color: var(--bp-border-subtle);
-    border: 1px solid var(--bp-border);
+    border: 1px solid var(--bp-field-border);   /* K-Q */
     border-radius: var(--bp-radius-md);
     padding: 10px 13px;
     color: var(--bp-text);
@@ -65,7 +65,7 @@
                 box-shadow  var(--bp-dur-base) var(--bp-ease-standard);
   }
   .cf-textarea { resize: vertical; line-height: 1.6; }
-  .cf-input:hover { border-color: var(--bp-border2); }
+  .cf-input:hover { border-color: var(--bp-text3); }   /* K-Q: hover TABANDAN acik olmali; --bp-border2 (#46464d) artik tabandan KOYUYDU */
   .cf-input:focus {
     border-color: var(--bp-brand);
     box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb), .16);

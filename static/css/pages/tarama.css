@@ -125,7 +125,7 @@
   .filter-group select,
   .filter-group input[type=number],
   .filter-group input[type=text] {
-    background:var(--surface2); border:1px solid var(--border);
+    background:var(--surface2); border:1px solid var(--bp-field-border);   /* K-Q */
     color:var(--bp-text); border-radius:var(--bp-radius); padding:7px 10px; font-size:var(--bp-text-lg);
     font-family:inherit; outline:none; transition:border-color .15s;
     appearance:none; cursor:pointer;
@@ -279,7 +279,7 @@
      (data-art.css); burada yalniz yuzey/kenarlik ve ok payi kaliyor.
      `font-size` BILEREK yazilmiyor: .da-select'in 16px'i gecerli olmali. */
   .sort-select {
-    background-color:var(--surface2); border:1px solid var(--border);
+    background-color:var(--surface2); border:1px solid var(--bp-field-border);   /* K-Q */
     color:var(--text2); border-radius:var(--bp-radius); padding:5px 28px 5px 10px;
     outline:none; cursor:pointer;
   }

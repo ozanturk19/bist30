@@ -15,7 +15,7 @@
   .sum-green{ color:var(--bp-al); } .sum-red{ color:var(--bp-sat); } .sum-blue{ color:var(--bp-accent-cyan); }
 
   .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:16px; }
-  .add-bar input { background:var(--bp-border-subtle); border:1px solid var(--bp-border); color:var(--bp-text); border-radius:var(--bp-radius); padding:7px 12px; font-size:var(--bp-text-lg); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
+  .add-bar input { background:var(--bp-border-subtle); border:1px solid var(--bp-field-border); /* K-Q */ color:var(--bp-text); border-radius:var(--bp-radius); padding:7px 12px; font-size:var(--bp-text-lg); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */
   .add-bar input:focus { border-color:var(--bp-accent-cyan); }
   .add-bar input { width:140px; }
   .add-bar input[type=number] { width:130px; }
