@@ -113,6 +113,14 @@
     display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;
   }
   .filter-group { display:flex; flex-direction:column; gap:5px; min-width:120px; }
+  /* 20.09 BULGU (denetim #77): Min/Max Fiyat kutulari `.hide-mob` tasiyordu, yani
+     ≤768px'te (tablet dahil) `display:none!important` ile SESSIZCE yok oluyordu —
+     ne bir "daha fazla filtre" dugmesi ne de ozelligin var oldugunu gosteren bir
+     ipucu kaliyordu. `.hide-mob` tablo KOLONLARI icin dogru bir arac (dar tabloda
+     kolon dusurmek), bir FILTRE icin degil: kolon gizlenince veri yine de satirda
+     duruyor, filtre gizlenince yetenek tamamen kayboluyor. Artik gizlenmiyorlar;
+     dar ekranda yan yana iki sutuna sariliyorlar. */
+  .filter-price input[type=number] { width:100px; }
   .filter-group label { font-size:var(--bp-text-2xs); font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
   .filter-group select,
   .filter-group input[type=number],
@@ -373,6 +381,9 @@
   /* ── Hide mobile ── */
   @media(max-width:768px) {
     .hide-mob { display:none!important; }
+    /* denetim #77 — bkz. .filter-price yorumu */
+    .filter-price { flex:1 1 calc(50% - 4px); min-width:0; }
+    .filter-price input[type=number] { width:100%; }
     .filter-bar { padding:12px; gap:8px; }
     .container { padding:12px; }
     header { padding:10px 14px; }
@@ -511,8 +522,17 @@
   .mr-card:hover { border-color:var(--bp-brand); }
   .mr-card:active { transform:scale(.98); background:var(--surface2); }
   .mr-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  /* flex ogesi varsayilan `min-width:auto` tasir; bu olmadan .mr-name'in
+     text-overflow:ellipsis'i devreye GIRMEZ (kutu icerige gore buyur). */
+  .mr-top > div:first-child { min-width:0; }
   .mr-ticker { font-size:var(--bp-text-15); font-weight:700; color:var(--bp-text); letter-spacing:0.5px; }
-  .mr-name   { font-size:var(--bp-text-xs); color:var(--text3); margin-top:1px; }
+  /* 20.09 BULGU (denetim #76): sirket adi JS'te `.substring(0,20/22)` ile VERI
+     seviyesinde kesiliyordu — "Anadolu Hayat Emeklili", "Tüpraş Türkiye Petro"
+     gibi uc-noktasiz, hatali gorunen isimler cikiyordu. Kirpma artik CSS'in isi
+     (masaustu `.tk-name`de zaten vardi, mobil kartta EKSIKTI) — yani ad sigarsa
+     TAM gorunuyor, sigmazsa uc nokta ile bitiyor. */
+  .mr-name   { font-size:var(--bp-text-xs); color:var(--text3); margin-top:1px;
+               white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .mr-bottom { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   .mr-metric { display:flex; flex-direction:column; gap:2px; }
   /* r169: .score-bar-bg'nin flex:0 0 40px'i .score-cell'in yatay flex bagalamı icin -
