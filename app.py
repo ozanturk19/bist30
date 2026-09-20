@@ -9855,6 +9855,19 @@ def _compute_health():
             # CPO-1165 D-NEWS-2 — önceden yalnız journald grep'iyle ölçülebiliyordu
             **{f"{k}_today": v for k, v in _news_daily_stats_sync().items() if k != "date"},
         },
+        # CPO-1676: macro_ai_cache 10 gün stale kalabildi ve hiçbir yüzey bunu
+        # ALARM olarak göstermiyordu — /api/internal/cache-inventory dosya
+        # mtime'ına bakıyordu (leader'ın 90s'lik gemini-cache-sync loop'u içerik
+        # aynı kalsa bile dosyayı sürekli yeniden yazıyor, mtime hep "taze"
+        # görünüyordu). Burada CONTENT yaşı (_macro_ai_cache["ts"]) kullanılıyor —
+        # news.degraded ile aynı desen, aynı paylaşımlı Gemini kota devresine bağlı.
+        "macro_ai": {
+            "age_h":       (round((now - _macro_ai_cache.get("ts", 0)) / 3600.0, 1)
+                             if _macro_ai_cache.get("ts") else None),
+            "generated_date": _macro_ai_cache.get("date"),
+            "stale_48h":   bool(_macro_ai_cache.get("ts")) and (now - _macro_ai_cache.get("ts", 0)) >= 172800,
+            "degraded":    _gemini_news_degraded(),  # aynı paylaşımlı kota devresi
+        },
         "data_freshness":           build_data_freshness(stocks_list),  # SPEC-014 B1 (CPO-1137: kanonik, aynı stocks)
         "market_data_age_s":         stocks_age_s,                           # CPO-590 madde 4
         "chart_integrity_recent":   _chart_integrity_count_recent(now),  # SPEC-008 L5
@@ -10081,11 +10094,29 @@ def api_cache_inventory():
     now = time.time()
     entries = []
 
-    def _check(name, path, note=""):
+    def _check(name, path, note="", content_ts_field=None):
         if not path or not os.path.exists(path):
             entries.append({"name": name, "disk_path_exists": False,
                             "last_write_age_s": None, "status": "NEVER_WRITTEN", "note": note})
             return
+        # CPO-1676: macro_ai_summary gibi tek-obje cache'ler leader'ın 90s'lik
+        # gemini-cache-sync loop'unda İÇERİK aynı kalsa bile diske yeniden
+        # yazılıyor (_save_macro_ai_to_disk her turda unconditional çağrılıyor) —
+        # mtime bu yüzden hep "az önce yazıldı" gösterir, 10 günlük stale içeriği
+        # bile FRESH olarak raporlar. content_ts_field verilirse mtime yerine
+        # JSON içindeki gerçek üretim zamanı kullanılır.
+        if content_ts_field:
+            try:
+                content_ts = _tp_read_json(path).get(content_ts_field)
+            except Exception:
+                content_ts = None
+            if content_ts:
+                age = now - content_ts
+                entries.append({"name": name, "disk_path_exists": True,
+                                "last_write_age_s": round(age, 1),
+                                "status": "FRESH" if age < 3600 else "STALE",
+                                "note": (note + " [içerik yaşı, mtime DEĞİL]").strip()})
+                return
         age = now - os.path.getmtime(path)
         entries.append({"name": name, "disk_path_exists": True,
                         "last_write_age_s": round(age, 1),
@@ -10093,7 +10124,8 @@ def api_cache_inventory():
 
     _check("stocks_main", _DISK_CACHE_PATH)
     _check("macro", _MACRO_DISK_PATH)
-    _check("macro_ai_summary", _MACRO_AI_DISK_PATH, "Gemini kota bağımlı — STALE beklenir")
+    _check("macro_ai_summary", _MACRO_AI_DISK_PATH, "Gemini kota bağımlı — STALE beklenir",
+           content_ts_field="ts")
     _check("news", _NEWS_CACHE_DISK_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
     _check("company_summary", _COMPANY_SUMMARY_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
     _check("sentiment", _SENTIMENT_DISK_PATH)
