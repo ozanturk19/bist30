@@ -1303,7 +1303,7 @@
     {% if _temel_ready %}
     <p class="da-ai-body" style="margin:0 0 8px">{{ hs.temel_analiz_aciklamasi if hs.temel_analiz_aciklamasi else 'AI yorumu hazırlanıyor.' }}</p>
     <div class="da-ai-note">
-      <span aria-hidden="true">📊</span> Temel Analiz Skoru {{ hs.temel_analiz_skoru }}/100 — detaylı sayısal kırılım için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-accent-cyan);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki Skor Analizi ve Temel Analiz</a> bölümlerine göz atabilirsiniz.
+      <span aria-hidden="true">📊</span> Temel Analiz Skoru {{ hs.temel_analiz_skoru }}/100 — detaylı sayısal kırılım için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" class="da-link">Özet sekmesindeki Skor Analizi ve Temel Analiz</a> bölümlerine göz atabilirsiniz.
     </div>
     {% else %}
     <p style="font-size:var(--bp-text-base);color:var(--bp-text3);line-height:1.65;margin:0">Bu hissenin Temel Analiz Skoru için bugünkü EOD (gün-sonu) turu henüz tamamlanmadı.</p>
