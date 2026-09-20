@@ -59,6 +59,23 @@
   --bp-warn:      #d29922;   /* CPO-1576 (CPO-DEV2-061 emsaline dayalı kanonikleştirme): dikkat/orta-risk
                                  amber — entry-quality "dikkatli/uzak" + bilanço-yaklaşıyor rozeti + R:R
                                  orta-bölge. --bp-gold'dan (premium/altın) AYRI semantik eksen, karıştırma. */
+  --bp-accent-yellow: #e3b341;   /* CPO 20.09: sarı aksan. Fiilen zaten KANONİKTİ — aynı değer 7 ayrı
+                                 yüzeyde birbirinden BAĞIMSIZ yazılıydı, tek kaynağı yoktu:
+                                   (1) bp-chart-common.js  EMA99 çizgi rengi
+                                   (2) hisse.html          EMA99 grafik göstergesi
+                                   (3) hisse.html          "⚡ Bugün" tazelik rozeti (×2)
+                                   (4) sektor_harita       orta RVOL kademesi (şablon + JS)
+                                   (5) /metodoloji         "EMA99 sarı renkle gösterilir" düzyazısı
+                                   (6) blog makaleleri     aynı cümle + tablo vurguları (×17)
+                                   (7) tarama.css          aynı sarı
+                                 (5) ve (6) ÜRÜNÜN GERÇEK RENGİNİ İDDİA EDİYOR: biri kaysa düzyazı
+                                 ürünü yanlış anlatır hâle gelirdi. Ad rol bazlı değil DEĞER bazlı
+                                 (--bp-accent-cyan emsali) çünkü üç ayrı semantik eksen aynı sarıyı
+                                 paylaşıyor. --bp-gold (premium/altın) ve --bp-warn (dikkat/orta-risk)
+                                 AYRI eksenler, karıştırma.
+                                 AÇIK SORU: sektor_harita'nın orta RVOL kademesi bu sarıyı
+                                 kullanıyor ama "Hacim Onaylı"nın kanonik rengi --bp-volume (#ffc850);
+                                 aynı kavram iki sarıyla boyanıyor olabilir — ayrı turda ölçülecek. */
 
   /* Radius */
   --bp-radius:    6px;
@@ -97,6 +114,7 @@
   --bp-accent-cyan-rgb: 34, 211, 238;
   --bp-art-violet-rgb: 124, 92, 255;
   --bp-warn-rgb:  210, 153, 34;
+  --bp-accent-yellow-rgb: 227, 179, 65;
 
   /* Compat aliases — eski stil kodlarıyla uyumluluk */
   --accent:       #b8c3ff;

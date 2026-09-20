@@ -106,7 +106,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=1eabd653">
+<link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
 <link rel="stylesheet" href="/static/css/data-art.css?v=67e915a8">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=1cc96cb3">
@@ -2074,7 +2074,7 @@ function buildChart(d) {
     legEl.innerHTML =
       datePart +
       `<span style="color:var(--bp-brand)"><span style="display:inline-block;width:14px;height:2px;background:var(--bp-brand);vertical-align:middle;margin-right:3px;border-radius:var(--bp-radius-1)"></span>EMA12 ${fmt(l12)}</span>&nbsp;&nbsp;` +
-      `<span style="color:#e3b341"><span style="display:inline-block;width:14px;height:2px;background:#e3b341;vertical-align:middle;margin-right:3px;border-radius:var(--bp-radius-1)"></span>EMA99 ${fmt(l99)}</span>`;
+      `<span style="color:var(--bp-accent-yellow)"><span style="display:inline-block;width:14px;height:2px;background:var(--bp-accent-yellow);vertical-align:middle;margin-right:3px;border-radius:var(--bp-radius-1)"></span>EMA99 ${fmt(l99)}</span>`;
   }
   updateLeg();
 
@@ -2237,7 +2237,7 @@ function renderSummary(s, signalData) {
     // yeşil→kırmızı renk geçişiyle "iyi→geç" ima ediyordu). Nötr yaş bilgisi
     // zaten date + bpSignalAgeText ile veriliyor.
     document.getElementById('icDate').innerHTML =
-      (isNew ? '<span style="color:#e3b341">⚡ Bugün</span>'
+      (isNew ? '<span style="color:var(--bp-accent-yellow)">⚡ Bugün</span>'
              : date + ' · ' + bpSignalAgeText(signalData.signal_date));
     document.getElementById('icBars').textContent = (bars == null ? '—' : bars);
 
@@ -2252,7 +2252,7 @@ function renderSummary(s, signalData) {
       document.getElementById('icEntry').innerHTML =
         fmt(ep) + ` <span style="font-size:var(--bp-text-xs);color:${retColor}">(${retSign}${ret.toFixed(1).replace('.', ',')}%)</span>`;
     } else if (s.signal !== 'BEKLE' && isNew) {
-      document.getElementById('icEntry').innerHTML = '<span style="color:#e3b341;font-size:var(--bp-text-sm)">⚡ Bugün oluştu</span>';
+      document.getElementById('icEntry').innerHTML = '<span style="color:var(--bp-accent-yellow);font-size:var(--bp-text-sm)">⚡ Bugün oluştu</span>';
     } else {
       document.getElementById('icEntry').textContent = '—';
       document.getElementById('icEntryLbl').textContent = 'Aktif sinyal yok';
@@ -3561,7 +3561,7 @@ document.addEventListener('visibilitychange', () => {
 
 <script src="/static/bp-search.js?v=75" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
-<script src="/static/js/bp-chart-common.js?v=3"></script>
+<script src="/static/js/bp-chart-common.js?v=4"></script>
 <script src="/static/learning-mode.js?v=6" defer></script>
 
 <script>

@@ -129,15 +129,31 @@
     }];
   }
 
+  /* 20.09 CPO: lightweight-charts canvas'a yazar, yani `var(--bp-x)` string'ini
+     COZEMEZ — bu yuzden renkler burada literal duruyordu ve tokens.css'ten
+     KOPUKTU. _tok() token'i calisma aninda okur, cozulmezse bugunku literali
+     yedek olarak dondurur (davranis degismez, tek kaynak kazanilir). */
+  function _tok(ad, yedek) {
+    try {
+      var v = getComputedStyle(document.documentElement).getPropertyValue(ad).trim();
+      return v || yedek;
+    } catch (e) { return yedek; }
+  }
+
   /* Kanonik EMA12/EMA99 çizgi çifti + fill primitive. Renkler: EMA12 marka rengi
-     (--bp-brand #b8c3ff, hisse.html'in secimiydi - index.html'in jenerik #58a6ff'i
-     yerine bu kanonik oldu), EMA99 altin (#e3b341, zaten ikisinde de ayniydi). */
+     (--bp-brand, hisse.html'in secimiydi - index.html'in jenerik #58a6ff'i
+     yerine bu kanonik oldu), EMA99 --bp-accent-yellow (20.09'da token'landi: ayni deger
+     bu dosyada, hisse.html gostergesinde, /metodoloji ve blog duzyazisinda
+     birbirinden BAGIMSIZ yaziliydi; duzyazi urunun GERCEK rengini iddia
+     ettigi icin biri kaysa digerleri urunu yanlis anlatirdi). */
   function addEmaPair(chart, ema12Data, ema99Data) {
-    var e99 = chart.addLineSeries({ color: '#e3b341', lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false });
+    var e99 = chart.addLineSeries({ color: _tok('--bp-accent-yellow', '#e3b341'), lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false });
     e99.setData(ema99Data);
-    var e12 = chart.addLineSeries({ color: '#b8c3ff', lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false });
+    var e12 = chart.addLineSeries({ color: _tok('--bp-brand', '#b8c3ff'), lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false });
     e12.setData(ema12Data);
-    e12.attachPrimitive(new EmaFillPrimitive(chart, ema12Data, ema99Data, 'rgba(0,226,144,0.13)', 'rgba(248,81,73,0.11)'));
+    e12.attachPrimitive(new EmaFillPrimitive(chart, ema12Data, ema99Data,
+      'rgba(' + _tok('--bp-al-rgb', '0,226,144') + ',0.13)',
+      'rgba(' + _tok('--bp-sat-rgb', '248,81,73') + ',0.11)'));
     return { e12: e12, e99: e99 };
   }
 

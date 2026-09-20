@@ -190,6 +190,22 @@ OLU_PALET = {
     "#e6edf3": ("--bp-text", "eski GitHub parlak metin"),
     "#0d1117": ("--bp-bg", "eski GitHub zemin"),
     "#161b22": ("--bp-surface", "eski GitHub yuzey"),
+    # ── 20.09 ikinci tur (/karsilastir + blog makale tablolari) ─────────────
+    # K-E'nin 13.09 kurulusunda 11 deger belgelenmisti; asagidakiler AYNI
+    # SINIFTI ama o turda hic aranmamisti. Ikisi canli olculerek bulundu:
+    #  * #1e2d45: karsilastirma tablosunda hucrenin SAG kenari mavi, ALT
+    #    kenari (ayni kural blogu, 14 satir yukarida) notr griydi.
+    #  * Blog makale tablolarinin TAMAMI ayri bir navy/slate paletindeydi —
+    #    #1e2d45 x63, #94a3b8 x42, #1a2030 x11, #f0883e x5, #1a2438 x2,
+    #    #64748b x1, #1c2128 x1. 20.09'un ilk blog temizligi (4036bef) bunlari
+    #    KACIRDI cunku yalniz o gunku 11 denylist degerini ariyordu.
+    "#1e2d45": ("--bp-border", "eski navy kenar (tablo hucresi)"),
+    "#1a2438": ("--bp-surface2", "eski navy kart zemini"),
+    "#1a2030": ("--bp-surface2", "eski navy kutu zemini"),
+    "#1c2128": ("--bp-surface2", "eski GitHub yuzey (koyu varyant)"),
+    "#94a3b8": ("--bp-text3", "Tailwind slate-400 (mavi tonlu ikincil metin)"),
+    "#64748b": ("--bp-text3", "Tailwind slate-500 (mavi tonlu ikincil metin)"),
+    "#f0883e": ("--bp-warn", "eski GitHub turuncu -> dikkat/orta-risk amber"),
 }
 # K-E kapsami: K-B'nin dosyalari + gercek JS dosyalari (tooltip/toast gibi
 # kullaniciya GORUNEN renkleri orada uretiliyor). VENDOR dosyasi haric —

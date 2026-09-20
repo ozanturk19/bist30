@@ -1,6 +1,6 @@
 {
  "_not": "T1.7 style-guard ratchet — kanonik-degerli ham hex, dosya basina TAVAN. Sayim yalniz DUSEBILIR; artis deploy'u bloklar. Yeni token eklenince token_imzasi degisir ve bu dosya --baseline ile yenilenir. 'dosyalar' anahtari sayfa sablonlarini + EK_HEX_DOSYALARI'ni (blog_content.py, harici css) birlikte tasir.",
- "token_imzasi": "23:#00e290,#0e0e12,#141416,#1c1b1f,#1e293b,#201f21,#21262d,#22d3ee|23",
+ "token_imzasi": "24:#00e290,#0e0e12,#141416,#1c1b1f,#1e293b,#201f21,#21262d,#22d3ee|24",
  "dosyalar": {
   "404.html": 0,
   "410.html": 0,
@@ -12,7 +12,7 @@
   "bilanco_takvimi.html": 0,
   "blog.html": 0,
   "blog_article.html": 0,
-  "blog_content.py": 255,
+  "blog_content.py": 0,
   "gizlilik.html": 0,
   "gundem.html": 0,
   "hakkinda.html": 0,
@@ -26,7 +26,7 @@
   "ozet.html": 0,
   "portfolio.html": 0,
   "profil.html": 0,
-  "sektor_harita.html": 12,
+  "sektor_harita.html": 8,
   "static/css/data-art.css": 0,
   "static/css/pages/404.css": 0,
   "static/css/pages/bilanco_takvimi.css": 0,
