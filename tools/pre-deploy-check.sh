@@ -23,7 +23,7 @@ echo "=== Pre-Deploy Check (CPO-359 Tier 0) ==="
 echo ""
 
 # 1. Jinja parse
-echo "1/8 Jinja parse..."
+echo "1/9 Jinja parse..."
 if python3 "$(dirname "$0")/_predeploy_jinja_check.py"; then
   echo "  ✓ Jinja parse OK"
 else
@@ -33,7 +33,7 @@ fi
 
 # 2. Python compile
 echo ""
-echo "2/8 Python compile (app.py)..."
+echo "2/9 Python compile (app.py)..."
 if python3 -c "import ast;ast.parse(open('app.py').read())" 2>/dev/null; then
   echo "  ✓ app.py compile OK"
 else
@@ -48,7 +48,7 @@ fi
 # pre-commit, aynı gün genişletildi) tutarsızdı. Liste ikisinde de senkron
 # tutulmalı.
 echo ""
-echo "3/8 KALICI_KURALLAR audit..."
+echo "3/9 KALICI_KURALLAR audit..."
 KK_AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/index.html templates/portfolio.html templates/gundem.html templates/metodoloji.html templates/blog.html templates/blog_article.html templates/temettu_takvimi.html templates/bilanco_takvimi.html"
 KK_FAIL=0
 for f in $KK_AUDIT_FILES; do
@@ -65,7 +65,7 @@ fi
 
 # 4. format-lint
 echo ""
-echo "4/8 format-lint (CPO-1180 K6)..."
+echo "4/9 format-lint (CPO-1180 K6)..."
 if ./tools/format-lint.sh > /dev/null 2>&1; then
   echo "  ✓ format-lint PASS"
 else
@@ -79,7 +79,7 @@ fi
 # donuyordu, boyutu dogruydu, grep iceride buluyordu. Elle calistirilan bir arac bir
 # sonraki kazada yok hukmundedir -- kapiya baglandi.
 echo ""
-echo "5/8 CSS token guard (CPO-1349)..."
+echo "5/9 CSS token guard (CPO-1349)..."
 if python3 tools/css-token-guard.py static/css/*.css > /dev/null 2>&1; then
   echo "  ✓ CSS token guard PASS"
 else
@@ -91,7 +91,7 @@ echo ""
 # 6. style-guard (T1.7) — css-token-guard YALNIZ static/css/*.css (2 dosya) bakiyor;
 # sablonlarin icindeki ~2300 var(--bp-*) kullanimi HICBIR kapida denetlenmiyordu.
 # K-A tanimsiz var() BLOKLAYICI (taban 0), K-B/K-C/K-D ratchet (yalniz dusebilir).
-echo "6/8 style-guard (T1.7: sablon ici var()/ham hex/yerel :root/bos catch ratchet)..."
+echo "6/9 style-guard (T1.7: sablon ici var()/ham hex/yerel :root/bos catch ratchet)..."
 if python3 tools/style-guard.py > /dev/null 2>&1; then
   echo "  ✓ style-guard PASS"
 else
@@ -106,7 +106,7 @@ fi
 # duruma gecti ama hicbir deploy bunu raporlamadi — "YAZILMIS ama BAGLANMAMIS"
 # sinifinin kendisi, 8f6006f'in kapattigi iki guard'la AYNI hastalik. Bagliyoruz.
 echo ""
-echo "7/8 lint_scope ratchet (T9.4: sablon sayisi daralma dedektoru)..."
+echo "7/9 lint_scope ratchet (T9.4: sablon sayisi daralma dedektoru)..."
 if python3 tools/lint_scope.py --check > /dev/null 2>&1; then
   echo "  ✓ lint_scope PASS"
 else
@@ -123,11 +123,30 @@ fi
 # ONCESI yakalar (Jinja {{ }}/{% %} soyulup node --check ile dogrulanir,
 # 31/31 mevcut sablonda 0 yanlis-pozitif dogrulanmistir).
 echo ""
-echo "8/8 node-syntax-check (DEV2-T-MOBOVF-1: sablon-ici JS sozdizimi)..."
+echo "8/9 node-syntax-check (DEV2-T-MOBOVF-1: sablon-ici JS sozdizimi)..."
 if python3 tools/node-syntax-check.py > /dev/null 2>&1; then
   echo "  ✓ node-syntax-check PASS"
 else
   echo "  ✗ node-syntax-check FAIL. Detay için: python3 tools/node-syntax-check.py"
+  FAIL=$((FAIL + 1))
+fi
+
+# 9. state-order-check (K-G, CPO 20.09.2026) -- `:hover` bir SOZDE-SINIFTIR,
+# yani `.a:hover` ile `.a.b` ozgulluk bakimindan ESITTIR; esitlikte karari
+# KAYNAK SIRASI verir. Durum kurali varyant bilesiklerinin USTUNDE yazilirsa
+# varyantin da tanimladigi her ozellik icin SESSIZCE olur -- ne tarayici
+# uyarir, ne yukaridaki 8 kattan biri gorur (hepsi degere/token'a/sozdizimine
+# bakar, CASCADE'e degil), ne de grep "kural var" demekten oteye gider.
+# Olculen bedel (443d0c5): /bilanco-takvimi 46 kartin 29'unda, /temettu 28'in
+# 4'unde marka rengi hover cercevesi HIC uygulanmiyordu. Taban SIFIR; kasitli
+# ciftler tool icindeki GOZDEN_GECIRILMIS_KASITLI'de GEREKCESIYLE yazilidir.
+echo ""
+echo "9/9 state-order-check (K-G: durum kurali varyantin ALTINDA olmali)..."
+if python3 tools/state-order-check.py > /dev/null 2>&1; then
+  echo "  ✓ state-order-check PASS"
+else
+  echo "  ✗ K-G KIRIK: bir durum kurali (:hover/:focus/:active) esit ozgullukteki"
+  echo "    varyantinin ALTINDA kaliyor. Detay için: python3 tools/state-order-check.py"
   FAIL=$((FAIL + 1))
 fi
 
