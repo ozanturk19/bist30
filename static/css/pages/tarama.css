@@ -337,14 +337,14 @@
     display:inline-flex; align-items:center; gap:3px;
     padding:3px 9px; border-radius:var(--bp-radius-20); font-size:var(--bp-text-xs); font-weight:700;
   }
-  .sig-AL   { background:rgba(63,185,80,.12); color:var(--al); border:1px solid rgba(63,185,80,.3); }
+  .sig-AL   { background:rgba(var(--bp-al-rgb),.12); color:var(--al); border:1px solid rgba(var(--bp-al-rgb),.3); }
   .sig-SAT  { background:rgba(var(--bp-sat-rgb),.12); color:var(--sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
-  .sig-BEKLE{ background:rgba(139,148,158,.1); color:var(--bkl); border:1px solid rgba(139,148,158,.2); }
+  .sig-BEKLE{ background:rgba(var(--bp-text3-rgb),.1); color:var(--bkl); border:1px solid rgba(var(--bp-text3-rgb),.2); }
 
   .eq-badge {
     font-size:var(--bp-text-2xs); font-weight:600; padding:2px 7px; border-radius:var(--bp-radius-lg);
   }
-  .eq-safe   { background:rgba(63,185,80,.1); color:var(--al); }
+  .eq-safe   { background:rgba(var(--bp-al-rgb),.1); color:var(--al); }
   .eq-risky  { background:rgba(227,179,65,.1); color:var(--gold); }
 
   .price-val { font-variant-numeric:tabular-nums; font-size:var(--bp-text-base); }
@@ -429,7 +429,7 @@
   }
   .fresh-badge.today     { background:rgba(var(--bp-al-rgb),0.10); color:var(--bp-al); }
   .fresh-badge.yesterday { background:rgba(var(--bp-brand-rgb),0.10); color:var(--bp-brand); }
-  .fresh-badge.old       { background:rgba(139,148,158,0.10); color:var(--text3); }
+  .fresh-badge.old       { background:rgba(var(--bp-text3-rgb),0.10); color:var(--text3); }
   .fresh-dot { font-size:8px; line-height:1; }
 
   /* Sinyal Gücü (T3.5, CPO/Master Dönüşüm Programı) — signal_strength (0-100),

@@ -151,7 +151,7 @@
   .compare-btn:hover { background:rgba(var(--bp-brand-rgb),0.2); }
   .compare-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
-  .cmp-skeleton { background:linear-gradient(90deg,#1c1b1f 25%,#232124 50%,#1c1b1f 75%); background-size:200% 100%; animation:cmpShimmer 1.4s infinite; border-radius:var(--bp-radius-md); }
+  .cmp-skeleton { background:linear-gradient(90deg,var(--bp-surface2) 25%,#232124 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:cmpShimmer 1.4s infinite; border-radius:var(--bp-radius-md); }
   @keyframes cmpShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
   .compare-grid { display:grid; gap:16px; }
@@ -171,7 +171,7 @@
   .score-bar-track { height:6px; background:var(--bp-border); border-radius:var(--bp-radius-sm); overflow:hidden; position:relative; }
   .score-bar-fill { height:100%; border-radius:var(--bp-radius-sm); transition:width .4s ease; }
   .score-positive { background:linear-gradient(90deg,var(--bp-al),#00c47a); }
-  .score-negative { background:linear-gradient(90deg,#f85149,#d03d36); }
+  .score-negative { background:linear-gradient(90deg,var(--bp-sat),#d03d36); }
   .score-neutral  { background:var(--bp-border2); }
 
   /* .sec-stats/.stat-pill isı haritası panelinde farklı bir düzen için zaten kullanılıyor (satır ~64-65) — çakışmayı önlemek için karşılaştır paneli kendi cmp- önekiyle isimlendirildi */

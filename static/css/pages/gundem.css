@@ -49,8 +49,8 @@
   .section-title .dot {
     width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
   }
-  .dot-al  { background: var(--bp-al); box-shadow: 0 0 6px rgba(63,185,80,.5); }
-  .dot-str { background: var(--accent); box-shadow: 0 0 6px rgba(31,111,235,.5); }
+  .dot-al  { background: var(--bp-al); box-shadow: 0 0 6px rgba(var(--bp-al-rgb),.5); }
+  .dot-str { background: var(--accent); box-shadow: 0 0 6px rgba(var(--bp-brand-rgb),.5); }
   .section-sub { font-size: var(--bp-text-xs); color: var(--bp-text3); }
 
   /* ── Stock Cards ── */
@@ -82,9 +82,9 @@
     border-radius: var(--bp-radius-20); font-size: var(--bp-text-2xs); font-weight: 600; letter-spacing: .3px;
     text-transform: uppercase; white-space: nowrap;
   }
-  .badge.al  { background: rgba(63,185,80,.12);  color:var(--bp-al);  border:1px solid rgba(63,185,80,.3); }
+  .badge.al  { background: rgba(var(--bp-al-rgb),.12);  color:var(--bp-al);  border:1px solid rgba(var(--bp-al-rgb),.3); }
   .badge.sat { background: rgba(var(--bp-sat-rgb),.12);  color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
-  .badge.bkl { background: rgba(139,148,158,.1); color:var(--bp-bkl); border:1px solid rgba(139,148,158,.2); }
+  .badge.bkl { background: rgba(var(--bp-text3-rgb),.1); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.2); }
 
   .sc-metrics {
     display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;
@@ -104,8 +104,8 @@
 
   /* ── New signal highlight ── */
   .stock-card.new-signal {
-    border-color: rgba(63,185,80,.4);
-    background: rgba(63,185,80,.04);
+    border-color: rgba(var(--bp-al-rgb),.4);
+    background: rgba(var(--bp-al-rgb),.04);
   }
   .stock-card.new-signal.sat {
     border-color: rgba(var(--bp-sat-rgb),.4);
@@ -113,7 +113,7 @@
   }
   .new-badge {
     display: inline-block; font-size: var(--bp-text-sm); font-weight: 700;
-    background: rgba(63,185,80,.2); color: var(--bp-al); border-radius:var(--bp-radius-sm);
+    background: rgba(var(--bp-al-rgb),.2); color: var(--bp-al); border-radius:var(--bp-radius-sm);
     padding: 1px 5px; text-transform: uppercase; letter-spacing: .5px; margin-left: 4px;
   }
   .sat .new-badge { background: rgba(var(--bp-sat-rgb),.2); color: var(--bp-sat); }
@@ -127,7 +127,7 @@
 
   /* ── Skeleton ── */
   .skeleton {
-    background: linear-gradient(90deg, #161b22 25%, #1e2530 50%, #161b22 75%);
+    background: linear-gradient(90deg, var(--bp-surface) 25%, var(--bp-surface2) 50%, var(--bp-surface) 75%);
     background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--bp-radius-4);
   }
   @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
@@ -168,8 +168,8 @@
     padding:0 20px; border-right:1px solid var(--bp-border);
     font-size:var(--bp-text-sm); height:32px; text-decoration:none; color:inherit;
   }
-  .macro-item-lbl { font-weight:600; color:#cbd5e1; }
-  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:#8b949e; }
+  .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
+  .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
 
   /* CPO-DEV2-104: ikincil/arşiv icerik toggle — hisse.css'teki (CPO-DEV2-098)
      .bp-detail-toggle deseniyle birebir ayni class adlari, sayfalar-arasi tutarlilik */

@@ -298,7 +298,7 @@
     position: absolute;
     left: 0; top: 0;
     height: 100%;
-    background: linear-gradient(90deg, #f85149, #e3b341, var(--bp-al));
+    background: linear-gradient(90deg, var(--bp-sat), var(--bp-warn), var(--bp-al));
     border-radius:var(--bp-radius-sm);
     transition: width 0.4s ease;
   }
@@ -392,7 +392,7 @@
     margin-bottom: 8px;
   }
   .eq-safe  { background: rgba(var(--bp-al-rgb),0.12);  color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),0.3); }
-  .eq-risky { background: rgba(var(--bp-warn-rgb),0.12); color: #e3b341; border: 1px solid rgba(var(--bp-warn-rgb),0.3); }
+  .eq-risky { background: rgba(var(--bp-warn-rgb),0.12); color: var(--bp-warn); border: 1px solid rgba(var(--bp-warn-rgb),0.3); }
   .eq-note {
     font-size: var(--bp-text-sm);
     color: var(--bp-text3);
@@ -525,7 +525,7 @@
   }
   .ind-bull    { background: rgba(var(--bp-al-rgb),.15);  color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.3);  }
   .ind-bear    { background: rgba(var(--bp-sat-rgb),.15);  color: var(--bp-sat); border: 1px solid rgba(var(--bp-sat-rgb),.3);  }
-  .ind-neutral { background: rgba(139,148,158,.12); color: var(--bp-bkl); border: 1px solid rgba(139,148,158,.25); }
+  .ind-neutral { background: rgba(var(--bp-text3-rgb),.12); color: var(--bp-bkl); border: 1px solid rgba(var(--bp-text3-rgb),.25); }
   .ind-bull:hover    { border-color: rgba(var(--bp-al-rgb),.6);  box-shadow: 0 0 0 3px rgba(var(--bp-al-rgb),.12); }
   .ind-bear:hover    { border-color: rgba(var(--bp-sat-rgb),.6); box-shadow: 0 0 0 3px rgba(var(--bp-sat-rgb),.12); }
 
@@ -573,7 +573,7 @@
   .sig-stat-val  { font-size:var(--bp-text-26); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
   .sig-stat-lbl  { font-size:var(--bp-text-2xs); color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   @keyframes shimmerStat { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-  .stat-sk { background:linear-gradient(90deg,var(--bp-surface2) 25%,#252d3a 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:var(--bp-radius-4); display:inline-block; }
+  .stat-sk { background:linear-gradient(90deg,var(--bp-surface2) 25%,var(--bp-surface3) 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:var(--bp-radius-4); display:inline-block; }
   @media(max-width:600px) { .sig-stats-row{grid-template-columns:repeat(2,1fr);} }
 
   /* ── Sinyal geçmişi ── */

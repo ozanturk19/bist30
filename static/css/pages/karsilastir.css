@@ -160,7 +160,7 @@
   .empty-state p  { font-size: var(--bp-text-base); line-height: 1.6; }
 
   .skeleton {
-    background: linear-gradient(90deg, var(--bp-surface) 25%, #1e2530 50%, var(--bp-surface) 75%);
+    background: linear-gradient(90deg, var(--bp-surface) 25%, var(--bp-surface2) 50%, var(--bp-surface) 75%);
     background-size: 200% 100%; animation: shimmer 1.4s infinite;
     border-radius: var(--bp-radius-4); height: 14px; width: 80px; display: inline-block;
   }

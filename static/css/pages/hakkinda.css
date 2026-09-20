@@ -37,8 +37,8 @@
 
   /* Hero */
   .hero {
-    background: linear-gradient(135deg, rgba(31,111,235,.08) 0%, rgba(63,185,80,.05) 100%);
-    border: 1px solid rgba(31,111,235,.2);
+    background: linear-gradient(135deg, rgba(var(--bp-art-violet-rgb),.10) 0%, rgba(var(--bp-accent-cyan-rgb),.05) 100%);
+    border: 1px solid rgba(var(--bp-art-violet-rgb),.22);
     border-radius:var(--bp-radius-xl);
     padding: 28px 28px 24px;
     margin-bottom: 8px;
@@ -159,7 +159,7 @@
     font-family: var(--bp-font-mono);
     font-size: var(--bp-text-base);
     color: var(--bp-accent-cyan);
-    background: rgba(31,111,235,.08);
+    background: rgba(var(--bp-accent-cyan-rgb),.07);
     border-radius: var(--bp-radius-4);
     padding: 10px 14px;
     margin: 8px 0;
