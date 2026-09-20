@@ -1288,11 +1288,10 @@
 
   <!-- AI Sinyal Açıklaması -->
   <div id="ai-section" style="scroll-margin-top:80px"></div>
-  <div id="sigExplainSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
+  <div id="sigExplainSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:var(--bp-radius-20);padding:18px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-      <span style="font-size:var(--bp-text-15)"><span aria-hidden="true">✨</span></span>
-      <span style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);text-transform:uppercase;letter-spacing:.5px">Bu Sinyal Ne Anlama Geliyor?</span>
-      <span id="sigExplainBadge" style="margin-left:auto;font-size:var(--bp-text-xs);background:rgba(var(--bp-brand-rgb),0.15);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-lg);border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
+      <span class="da-util-eyebrow"><span aria-hidden="true">✨</span> Bu Sinyal Ne Anlama Geliyor?</span>
+      <span id="sigExplainBadge" style="margin-left:auto;font-size:var(--bp-text-xs);background:rgba(var(--bp-brand-rgb),0.15);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-pill);border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
     </div>
     {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
     <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:var(--bp-text-sm);color:#f87171;line-height:1.6"></div>
@@ -1343,10 +1342,9 @@
        Teknik karttaki gibi koşulsuz "Gemini AI" rozeti kullanılmadı (Skor Analizi'ndeki
        "✦ AI Yorumu" tarzıyla tutarlı, aşırı-iddia yok). -->
   {% set _temel_ready = hs_available and hs.temel_analiz_skoru is not none %}
-  <div data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-accent-cyan-rgb),0.07),rgba(29,78,216,0.03));border:1px solid rgba(var(--bp-accent-cyan-rgb),0.2);border-radius:var(--bp-radius-lg);padding:16px 18px;margin-bottom:20px">
+  <div data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-accent-cyan-rgb),0.07),rgba(29,78,216,0.03));border:1px solid rgba(var(--bp-accent-cyan-rgb),0.2);border-radius:var(--bp-radius-20);padding:18px 18px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-      <span style="font-size:var(--bp-text-15)"><span aria-hidden="true">📋</span></span>
-      <span style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);text-transform:uppercase;letter-spacing:.5px">Temel Görünüm Ne Anlama Geliyor?</span>
+      <span class="da-util-eyebrow"><span aria-hidden="true">📋</span> Temel Görünüm Ne Anlama Geliyor?</span>
     </div>
     {% if _temel_ready %}
     <p style="font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0 0 8px">{{ hs.temel_analiz_aciklamasi if hs.temel_analiz_aciklamasi else 'AI yorumu hazırlanıyor.' }}</p>
