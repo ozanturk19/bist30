@@ -3012,7 +3012,7 @@ from lib.trading_calendar import (
 )
 
 
-def _compute_data_quality(bad_ticker_count, total_count, market_open):
+def _compute_data_quality(bad_ticker_count, total_count, market_open, is_stale=False):
     """CPO-1114 K2/K3 — tek kanonik aggregate data_quality hesaplayıcı.
 
     Per-ticker stale ORANINA dayanır (cycle/zaman bazlı DEĞİL) — DEV-1470'te
@@ -3024,9 +3024,17 @@ def _compute_data_quality(bad_ticker_count, total_count, market_open):
 
     market_open=False → "seans_disi" (CPO-1338: seans dışı stale by-design,
     alarm bastırma davranışı KORUNUYOR — ama artık "fresh" ile karıştırılmıyor).
+
+    CPO-1680 P0: market_open=False + is_stale=True (build_data_freshness'ın
+    trading-day karşılaştırması — 18.09 Cuma 38/217 ticker'ın Perşembe'de
+    KALMASI gibi GERÇEK bir gecikme, "hafta sonu en son EOD gösteriliyor"
+    normal durumu DEĞİL) → "seans_disi_eksik". Eskiden ikisi de kör "seans_disi"
+    dönüyordu, banner kasıtlı gizli kalıyordu — bu dal artık gerçek arızayı
+    "normal hafta sonu" ile karıştırmıyor, frontend bu değere göre ayrı banner
+    açabilir (bkz. CPO-1680 yanıtı).
     """
     if not market_open:
-        return "seans_disi"
+        return "seans_disi_eksik" if is_stale else "seans_disi"
     if not total_count:
         return "critical"
     stale_ratio = bad_ticker_count / total_count
@@ -3137,12 +3145,18 @@ def _data_quality_snapshot(stocks):
     _now       = time.time()
     _mkt_open  = _market_open()
     _bad_count = sum(1 for s in stocks if s.get("data_quality") == "stale")
-    _dq        = _compute_data_quality(_bad_count, len(stocks), _mkt_open)
     # CPO-1114 K1/DEV-1469/CPO-1137: updated_at "refresh_data() son ne zaman
     # ÇALIŞTI" değil, per-ticker last_fresh_ts'in kanonik (p90) yaşı — tipik
     # gösterilen verinin gerçekte ne zaman taze geldiğini yansıtır.
-    _age_s, _eff_ts, _ = _resolve_canonical_age_fallback(
+    _age_s, _eff_ts, _age_unknown_with_signal = _resolve_canonical_age_fallback(
         *_canonical_stocks_age(stocks, _now), stocks, _lr_ts, _now)
+    # CPO-1680 P0: build_data_freshness() ile AYNI trading-day karşılaştırması —
+    # market kapalıyken "seans_disi" (normal) ile "seans_disi_eksik" (gerçek
+    # gecikme) arasını ayırt etmek için _compute_data_quality'e is_stale gerekiyor.
+    _actual_date   = datetime.fromtimestamp(_eff_ts, _TZ_TR).date() if _eff_ts else None
+    _is_stale      = bool(_age_unknown_with_signal or _actual_date is None
+                           or _actual_date < _expected_data_date())
+    _dq        = _compute_data_quality(_bad_count, len(stocks), _mkt_open, _is_stale)
     _resp_updated_at = (datetime.fromtimestamp(_eff_ts, _TZ_TR).strftime("%d.%m.%Y %H:%M:%S")
                          if _eff_ts is not None else None)
     return {"data_quality": _dq, "stocks_age_s": _age_s, "updated_at": _resp_updated_at}
@@ -3348,8 +3362,8 @@ logger.info("Digest cron başlatıldı (her 5 dakikada kontrol, 19:00'da tetikle
 _freshness_alert_state = {"last_alert_ts": 0.0}
 
 def _freshness_monitor_loop():
-    """Market seansında elimizdeki veri BEKLENEN trading-day'e ait değilse
-    (build_data_freshness().is_stale) Telegram uyarısı gönderir.
+    """Elimizdeki veri BEKLENEN trading-day'e ait değilse (build_data_freshness().
+    is_stale) Telegram uyarısı gönderir.
 
     CPO-1508/1512 (EOD-only, Faz 0): eski eşik "veri yaşı > 25dk" idi — cadence
     900s sürekli döngüyü varsayıyordu. Cadence günde-bir-keze indi (bkz.
@@ -3360,8 +3374,14 @@ def _freshness_monitor_loop():
     değiştirildi: yalnız GERÇEK bir gecikme (bugünün EOD'u beklenenden eski)
     varsa tetiklenir.
 
-    #22 trading-day + market-hours guard ile false positive önlenir
-    (gece/tatil veri yaşı zaten yüksek olur — alarm yalnız seans içinde).
+    CPO-1680 P0: `if _market_open():` guard'ı KALDIRILDI — 18.09 Cuma 38/217
+    ticker'ın prev_cache fallback'e düşüp Perşembe'de kalması is_stale=True'yu
+    43 saat DOĞRU raporladı ama hafta sonu boyunca market kapalı olduğu için
+    bu döngü hiç bakmadı, hiçbir alarm çıkmadı. is_stale zaten expected_data_date()
+    üzerinden trading-day-farkında (hafta sonu/tatilde normal "Cuma verisi hâlâ
+    geçerli" durumunda False döner — bkz. lib/trading_calendar.expected_data_date),
+    yani market_open guard'ı yanlış-pozitifi önlemiyordu, sadece gerçek arızaları
+    da maskeliyordu. Artık her turda (leader ise) kontrol edilir.
     Anti-spam: aynı stale durumda en fazla saatte 1 mesaj.
 
     CPO-1207 §1: leader durumu artık HER TURDA burada değerlendiriliyor —
@@ -3375,24 +3395,23 @@ def _freshness_monitor_loop():
             if not _is_notify_leader():
                 time.sleep(300)
                 continue
-            if _market_open():
-                fresh = build_data_freshness()
-                if fresh.get("is_stale"):
-                    now = time.time()
-                    if now - _freshness_alert_state["last_alert_ts"] > 3600:
-                        _freshness_alert_state["last_alert_ts"] = now
-                        age = fresh.get("stocks_age_seconds")
-                        age_txt = f"{age // 60} dakikadır" if age is not None else "bilinmeyen süredir"
-                        sent = _send_telegram(
-                            f"⚠️ <b>BorsaPusula veri tazeliği uyarısı</b>\n"
-                            f"BIST seansında hisse verisi beklenen işlem gününe ait değil "
-                            f"({age_txt} güncellenmedi).\n"
-                            f"Son güncelleme: {fresh.get('stocks_updated_at') or '—'}"
-                        )
-                        if sent:
-                            logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), Telegram gönderildi", age)
-                        else:
-                            logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), Telegram GÖNDERİLEMEDİ (token yok veya hata) — ops bu uyarıyı GÖRMEDİ", age)
+            fresh = build_data_freshness()
+            if fresh.get("is_stale"):
+                now = time.time()
+                if now - _freshness_alert_state["last_alert_ts"] > 3600:
+                    _freshness_alert_state["last_alert_ts"] = now
+                    age = fresh.get("stocks_age_seconds")
+                    age_txt = f"{age // 60} dakikadır" if age is not None else "bilinmeyen süredir"
+                    sent = _send_telegram(
+                        f"⚠️ <b>BorsaPusula veri tazeliği uyarısı</b>\n"
+                        f"Hisse verisi beklenen işlem gününe ait değil "
+                        f"({age_txt} güncellenmedi).\n"
+                        f"Son güncelleme: {fresh.get('stocks_updated_at') or '—'}"
+                    )
+                    if sent:
+                        logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), Telegram gönderildi", age)
+                    else:
+                        logger.warning("Freshness alarm: is_stale=True (stocks_age=%ss), Telegram GÖNDERİLEMEDİ (token yok veya hata) — ops bu uyarıyı GÖRMEDİ", age)
         except Exception as e:
             logger.error("freshness_monitor_loop: %s", e, exc_info=True)
         time.sleep(300)  # 5 dakikada bir kontrol
@@ -3402,7 +3421,7 @@ def _freshness_monitor_loop():
 # gönderir (anti-spam state worker-local olduğu için gate şart). CPO-1207 §1:
 # thread artık KOŞULSUZ başlar — leader kontrolü döngü içinde her turda.
 threading.Thread(target=_freshness_monitor_loop, daemon=True, name="freshness-monitor").start()
-logger.info("Freshness monitor başlatıldı (leader durumu döngü içinde her turda — 5dk kontrol, seansda >25dk → Telegram)")
+logger.info("Freshness monitor başlatıldı (leader durumu döngü içinde her turda — 5dk kontrol, seans içi/dışı fark etmez, is_stale=True → Telegram)")
 
 
 # SPEC-008 L5 — Modül-load-time tanımlama (alarm thread'inden ÖNCE).
@@ -4479,7 +4498,7 @@ def api_data():
         "updated_at":   _resp_updated_at,  # CPO-1114 K1: last_fresh_ts medyanı (bkz. yukarı)
         "loading":      len(stocks) == 0,
         "sectors":      list(SECTORS.keys()),
-        "data_quality": _dq,        # "fresh" | "stale" | "critical" | "seans_disi" (CPO-551 → CPO-1114: per-ticker orana dayalı; CPO-1338: seans dışı)
+        "data_quality": _dq,        # "fresh" | "stale" | "critical" | "seans_disi" | "seans_disi_eksik" (CPO-551 → CPO-1114: per-ticker orana dayalı; CPO-1338: seans dışı; CPO-1680: seans dışı ama is_stale=True — gerçek gecikme)
         "stocks_age_s": _age_s,     # seconds since last GENUINE fresh data (median last_fresh_ts, CPO-1114)
         "refreshing":   _loading,   # True = background refresh aktif
         "data_freshness": build_data_freshness(stocks),  # SPEC-014 B1 (CPO-1137: kanonik, aynı stocks)
@@ -11823,13 +11842,17 @@ def _load_earnings_cache_from_disk():
 # tipik olarak bilanço açıklaması olmuyor (bkz. yukarıdaki sezon notu); bu
 # boşluğa denk gelen kesin bir yfinance tarihi olursa _earnings_refresh_impl
 # onu en yakın gelecek döneme (Q4 2026 Yıllık) düşürür, kaybolmaz.
+# CPO-1678: bu tarihler SPK II-14.1 teblig gün-sayısından TÜRETİLMİYOR — geçmiş
+# KAP bildirim emsaline göre elle kalibre edilmiş TAHMİNdir (Q1/Q4-yıllık lag
+# deseninden enterpole edildi). İleride KAP'tan gerçek bildirim tarihi
+# çekilebilirse bu tablo tamamen emekli olmalı.
 _BILANCO_PERIODS = [
     # (quarter_label, est_start_mm_dd, est_end_mm_dd, description)
-    ("Q4 2025 (Yıllık)", "2026-03-01", "2026-05-08", "2025 yıl sonu bilanço açıklamaları"),
-    ("Q1 2026",          "2026-05-09", "2026-07-08", "2026 1. çeyrek sonuçları"),
-    ("Q2 2026 (H1)",     "2026-07-09", "2026-09-30", "2026 ilk yarıyıl sonuçları"),
-    ("Q3 2026",          "2026-10-01", "2026-11-30", "2026 3. çeyrek sonuçları"),
-    ("Q4 2026 (Yıllık)", "2027-03-01", "2027-04-30", "2026 yıl sonu bilanço açıklamaları"),
+    ("Q4 2025 (Yıllık)", "2026-03-01", "2026-05-08", "2025 yıl sonu bilanço açıklamaları (tahmini)"),
+    ("Q1 2026",          "2026-05-09", "2026-07-08", "2026 1. çeyrek sonuçları (tahmini)"),
+    ("Q2 2026 (H1)",     "2026-08-08", "2026-10-07", "2026 ilk yarıyıl sonuçları (tahmini)"),
+    ("Q3 2026",          "2026-11-08", "2027-01-07", "2026 3. çeyrek sonuçları (tahmini)"),
+    ("Q4 2026 (Yıllık)", "2027-03-01", "2027-04-30", "2026 yıl sonu bilanço açıklamaları (tahmini)"),
 ]
 
 def _do_earnings_refresh():
