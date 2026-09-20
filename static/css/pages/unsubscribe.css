@@ -32,7 +32,10 @@ body{
    Önceki --bp-al SİNYAL rengiydi — site genelinde AL sinyali işareti olarak
    kullanılıyor, buton zemini olarak yalnız bu sayfa ve /profil sapıyordu. */
 .box .btn{
-  display:inline-block;
+  /* WCAG 2.5.5: onceki hal 36/38px yuksekti -- bu sayfa e-posta linkinden
+     gelir, yani neredeyse her zaman telefonda acilir. */
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:44px;
   background:var(--bp-brand);color:var(--bp-bg);
   padding:11px 24px;border-radius:var(--bp-radius-md);text-decoration:none;
   font-size:var(--bp-text-sm);font-weight:700;

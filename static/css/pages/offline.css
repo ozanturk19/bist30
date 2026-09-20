@@ -47,6 +47,10 @@ body{
   line-height:1.65;max-width:34ch;margin:0 auto;
 }
 .off-retry{
+  /* WCAG 2.5.5: onceki hal 36px yuksekti; bu sayfanin TEK eylemi ve
+     neredeyse her zaman telefonda aciliyor. */
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:44px;
   margin-top:22px;
   padding:11px 26px;
   background:var(--bp-brand);
