@@ -108,6 +108,15 @@ K-D  BOS catch{} — RATCHET, bloklamaz ama ARTAMAZ (T9.4)
      benzer); bir sonraki turda tokenizer/negatif-lookbehind ile daraltilabilir,
      bugun BLOKLAYICI degil cunku guard zaten BLOKLAYICI degil, RATCHET.
 
+K-F  MOTORSUZ SOZLESME — BLOKLAYICI, taban 0  (CPO, 20.09.2026)
+     Bir sablon `data-tip="..."` gibi bir davranis sozlesmesi yaziyorsa, o
+     sozlesmeyi yerine getiren JS dosyasini da yuklemek ZORUNDADIR. Aksi halde
+     oznitelik SESSIZCE hicbir sey yapmaz — K-A ile birebir ayni kusur sinifi
+     (tarayici hata vermez, HTTP 200, grep "desen uygulandi" der), sadece
+     token yerine davranis tarafinda. Bulunus: /ozet 46 `data-tip` tasiyordu,
+     `bp-tooltip.js` yuklu degildi, `title` yedegi de yoktu.
+     Ratchet YOK: fix sonrasi tum site 0 olculdu, taban SIFIR.
+
 Kullanim:
     python3 tools/style-guard.py             # denetle (deploy kapisi)
     python3 tools/style-guard.py --baseline  # ratchet'i bugunku duruma sabitle
@@ -210,6 +219,60 @@ def olu_palet_haritasi(harita):
 # <!-- -->) olcumden cikarilir. `//` satir yorumu BILEREK cikarilmaz: `https://`
 # icindeki cift-egik onu yanlis kesip kodun yarisini olcum disi birakirdi.
 YORUM_RE = re.compile(r"/\*.*?\*/|{#.*?#}|<!--.*?-->", re.S)
+
+
+# ── K-F: MOTORSUZ SOZLESME (CPO, 20.09.2026) ────────────────────────────────
+# Bir sablon `data-tip="..."` gibi bir davranis sozlesmesi yaziyorsa, o
+# sozlesmeyi YERINE GETIREN JS dosyasini da yuklemek ZORUNDADIR. Aksi halde
+# oznitelik SESSIZCE hicbir sey yapmaz: tarayici hata vermez, grep "desen
+# uygulandi" der, denetim yesil goruntlenir.
+#
+# Bulunus hikayesi (canli olculdu, tahmin degil): /ozet'te 46 adet `data-tip`
+# vardi — uzun-only SAT rozetinin "fiyat hareketi kazanc/kayip degil"
+# aciklamasi dahil — ama `bp-tooltip.js` HIC yuklenmiyordu ve `title` yedegi de
+# yoktu. Desenin diger 5 yuzeyi dosyayi yukluyordu; /ozet kod yorumunda
+# "5. yuzey" diye isaretlenmis ama BAGLANMAMISTI. Ustelik her dugum
+# tabindex="0" tasiyordu: klavyede payload tasimayan 46 durak.
+#
+# TABAN SIFIR: fix sonrasi tum site temiz olculdu, yani bu kapi mevcut borcu
+# degil YALNIZ yeni borcu bloklar. Ratchet'e gerek yok.
+MOTORSUZ_SOZLESME = (
+    # (motor dosya adi, markup imzasi, insan okunur ad)
+    ("bp-tooltip.js",    r"data-tip\s*=",                      "data-tip tooltip"),
+    ("learning-mode.js", r"jargon-term",                        "jargon-term terim baloncugu"),
+    ("toast.js",         r"\bbpToast\s*\(",                    "bpToast() cagrisi"),
+    ("focus-trap.js",    r"\bbpFocusTrap\s*\(|data-focus-trap", "focus trap"),
+)
+INCLUDE_RE = re.compile(r"(?:include|extends)\s+'([^']+)'")
+
+
+def _sablon_tam_metin(p, derinlik=0, gorulen=None):
+    """Sablon metni + include/extends ettigi partial'larin metni (ozyinelemeli).
+
+    Motor <script> etiketi cogu zaman sayfanin KENDISINDE degil bir kabuk
+    partial'inda durabilir; sadece sayfa dosyasina bakan bir denetim yanlis
+    alarm uretirdi.
+    """
+    gorulen = gorulen if gorulen is not None else set()
+    if p.name in gorulen or derinlik > 4 or not p.exists():
+        return ""
+    gorulen.add(p.name)
+    t = _oku(p)
+    for ad in INCLUDE_RE.findall(t):
+        t += _sablon_tam_metin(TPL_DIR / pathlib.Path(ad).name, derinlik + 1, gorulen)
+    return t
+
+
+def motorsuz_sozlesme_bul():
+    """[(sayfa, motor, ad, kullanim_sayisi)] — markup var, motor yuklu degil."""
+    bulgu = []
+    for f in sayfalar():
+        t = _sablon_tam_metin(f)
+        for js, rx, ad in MOTORSUZ_SOZLESME:
+            n = len(re.findall(rx, t))
+            if n and js not in t:
+                bulgu.append((f.name, js, ad, n))
+    return bulgu
 
 
 def olu_palet_say(metin, hexler, rgbler):
@@ -570,6 +633,18 @@ def main(argv):
         else:
             print("  TEMIZ  K-E olu palet: %d occurrence (taban %d, artis yok)"
                   % (sum(olu_sayim.values()), sum(op_taban.values())))
+
+    # ── K-F: motorsuz sozlesme — TABAN SIFIR, ratchet yok ───────────────────
+    mf = motorsuz_sozlesme_bul()
+    if mf:
+        hata = 1
+        print("  KIRIK  K-F motorsuz sozlesme: %d sayfa" % len(mf))
+        for sayfa, js, ad, n in mf:
+            print("         %-28s %d x %s -> %s yuklu DEGIL" % (sayfa, n, ad, js))
+        print("         Oznitelik SESSIZCE hicbir sey yapmaz: tarayici hata vermez,")
+        print("         grep 'desen uygulandi' der. Motoru sablona ekleyin.")
+    else:
+        print("  TEMIZ  K-F motorsuz sozlesme: 0 sayfa (taban 0)")
 
     if verbose:
         print("\n  %-32s %6s %6s" % ("dosya", "hex", "taban"))
