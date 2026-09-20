@@ -108,7 +108,7 @@
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=c1f1bc49">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=d656cb68">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -1124,10 +1124,10 @@
        accordion'u) İÇİNDEYDİ — Onaylar/Çoklu Zaman Dilimi/Sinyal Geçmişi/Sinyal
        Performansı ile aynı genel etikette gizliydi, kullanıcı ayırt edemiyordu.
        Artık kendi başına, her zaman görünür, adı geçen accordion'un DIŞINDA. -->
-  <div data-tab-content="ozet" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-lg);overflow:hidden;margin-bottom:20px" id="fundSection">
-    <div style="padding:12px 18px;border-bottom:1px solid var(--bp-surface2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> Temel Analiz</h2>
-      <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">4 saatte bir güncellenir</span>
+  <div data-tab-content="ozet" class="da-fund-panel" id="fundSection">
+    <div class="da-fund-head">
+      <h2 class="section-title"><span aria-hidden="true">📋</span> Temel Analiz</h2>
+      <span class="da-fund-note">4 saatte bir güncellenir</span>
     </div>
     <div id="fundLoading" style="color:var(--bp-text3);font-size:var(--bp-text-base);display:flex;align-items:center;gap:8px;padding:20px 18px">
       <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Yükleniyor…
@@ -1137,18 +1137,18 @@
       <div id="fundAnalyst" style="display:none;margin-bottom:16px;background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:12px 14px"></div>
       <!-- Değerleme -->
       <div id="fundValuation" style="margin-bottom:16px">
-        <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">💰</span> Değerleme</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridVal"></div>
+        <div class="da-fund-group-label"><span aria-hidden="true">💰</span> Değerleme</div>
+        <div class="da-fund-grid" id="fundGridVal"></div>
       </div>
       <!-- Kârlılık & Büyüme -->
       <div id="fundProfitability" style="margin-bottom:16px">
-        <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">📈</span> Kârlılık & Büyüme</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridProfit"></div>
+        <div class="da-fund-group-label"><span aria-hidden="true">📈</span> Kârlılık & Büyüme</div>
+        <div class="da-fund-grid" id="fundGridProfit"></div>
       </div>
       <!-- Ciro & Net Kâr Trendi — r174 (Ozan istegi) + CPO-1667 (19.09, ceyreklik toggle) -->
       <div id="fundTrend" style="display:none;margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">
-          <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px"><span aria-hidden="true">📊</span> Ciro & Net Kâr Trendi</div>
+          <div class="da-fund-group-label" style="margin-bottom:0"><span aria-hidden="true">📊</span> Ciro & Net Kâr Trendi</div>
           <div id="fundTrendToggle" style="display:none;gap:4px;background:var(--bp-surface2);border-radius:var(--bp-radius-pill);padding:3px" role="group" aria-label="Zaman aralığı">
             <button type="button" id="fundTrendBtnY" onclick="fundTrendSetPeriod('y')" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:var(--bp-text-2xs);font-weight:700;padding:5px 11px;border-radius:var(--bp-radius-pill);color:var(--bp-text3)">Yıllık</button>
             <button type="button" id="fundTrendBtnQ" onclick="fundTrendSetPeriod('q')" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:var(--bp-text-2xs);font-weight:700;padding:5px 11px;border-radius:var(--bp-radius-pill);color:var(--bp-text3)">Çeyreklik</button>
@@ -1158,8 +1158,8 @@
       </div>
       <!-- Getiri & Risk -->
       <div id="fundReturn">
-        <div style="font-size:var(--bp-text-2xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px"><span aria-hidden="true">🎯</span> Getiri & Risk</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px" id="fundGridReturn"></div>
+        <div class="da-fund-group-label"><span aria-hidden="true">🎯</span> Getiri & Risk</div>
+        <div class="da-fund-grid" id="fundGridReturn"></div>
       </div>
       <!-- Sahiplik — r174 (Ozan istegi) -->
       <div id="fundOwnership" style="display:none;margin-top:10px;font-size:var(--bp-text-xs);color:var(--bp-text3)"></div>
@@ -3268,7 +3268,7 @@ async function loadFundamentals() {
     document.getElementById('fundLoading').style.display = 'none';
     const f = json.fundamentals;
     if (!f || Object.keys(f).length === 0) {
-      document.getElementById('fundSection').style.display = 'none';
+      document.getElementById('fundSection').classList.add('da-fund-empty');
       return;
     }
 
@@ -3304,7 +3304,7 @@ async function loadFundamentals() {
     ].filter(Boolean).join('');
 
     const allEmpty = !valCards && !profCards && !retCards;
-    if (allEmpty) { document.getElementById('fundSection').style.display = 'none'; return; }
+    if (allEmpty) { document.getElementById('fundSection').classList.add('da-fund-empty'); return; }
 
     if (valCards)  document.getElementById('fundGridVal').innerHTML    = valCards;
     else           document.getElementById('fundValuation').style.display = 'none';
@@ -3360,7 +3360,7 @@ async function loadFundamentals() {
 
     document.getElementById('fundContent').style.display = '';
   } catch(e) {
-    document.getElementById('fundSection').style.display = 'none';
+    document.getElementById('fundSection').classList.add('da-fund-empty');
   }
 }
 loadFundamentals();

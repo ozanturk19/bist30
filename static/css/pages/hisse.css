@@ -631,14 +631,81 @@
     transform: rotate(0deg) translateY(-2px);
   }
 
-  /* ── AI Haberler ── */
-  .news-section {
-    background: var(--bp-surface);
+  /* ── Temel Analiz paneli (Data-Art, 20.09) ──
+     20.09'a kadar sablon icinde inline duz-kutu (surface + duz border +
+     radius-lg) idi; Ozet sekmesinin EN UZUN blogu oldugu icin hero'nun
+     degrade/glow dilinden en cok kopan yuzeydi. Baslik seridi grafik
+     sekmesiyle ayni desene (degrade serit + radial glow) getirildi.
+     Panel GOVDESINE degrade verildi ama ic kutulara (#fundAnalyst,
+     #fundTrendChart) DOKUNULMADI: ikisi de --bp-bg ile opak, degradeyi
+     ustlerinde tasimiyorlar — bu bilincli bir kontrast, "kart icinde
+     kart" ayrimini koruyor. */
+  .da-fund-panel {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
     border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
-    padding: 16px 18px;
+    border-radius: var(--bp-radius-20);
     margin-bottom: 20px;
   }
+  .da-fund-panel::before {
+    content:''; position:absolute; top:-40%; right:-8%;
+    width:260px; height:260px; border-radius:50%;
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.12), transparent 70%);
+    pointer-events:none;
+  }
+  .da-fund-panel > * { position: relative; }
+  /* Temel Analiz verisi hic yoksa panel gizlenir. Inline style.display DEGIL
+     sinif kullaniliyor: applyTab() her sekme gecisinde [data-tab-content]
+     panellerinin inline display'ini '' yapiyor, yani inline gizleme bir
+     sekme gidip-gelisinde geri aciliyordu (canlida olculdu: none -> block)
+     ve icerigi olmayan bos bir "Temel Analiz" basligi ortaya cikiyordu. */
+  .da-fund-panel.da-fund-empty { display: none !important; }
+  .da-fund-head {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--bp-border);
+    background: linear-gradient(90deg, rgba(var(--bp-art-violet-rgb),.10) 0%, transparent 60%);
+  }
+  .da-fund-head .section-title { margin: 0; }
+  .da-fund-note { font-size: var(--bp-text-xs); color: var(--bp-text3); }
+  /* Grup etiketleri (Degerleme / Karlilik / Trend / Getiri): renk bilincli
+     olarak cyan DEGIL — cyan bu sayfada panel-seviyesi eyebrow rengi
+     (.da-util-eyebrow), grup-ici alt etiketleri de cyan yapmak o hiyerarsi
+     ayrimini silerdi. Sadece tipografi Data-Art'a (Space Grotesk + .12em)
+     hizalandi. */
+  .da-fund-group-label {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--bp-text-2xs); font-weight: 700;
+    color: var(--bp-text3);
+    text-transform: uppercase; letter-spacing: .12em;
+    margin-bottom: 8px;
+  }
+  .da-fund-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+  }
+
+  /* ── AI Haberler ── */
+  /* Data-Art (20.09): AI haber ozeti paneli. Glow rengi VIOLET — bu kutunun
+     icerigi Gemini uretimi, sayfadaki diger AI yuzeyleriyle (AI Analiz sekmesi)
+     ayni aksan; KAP paneli ise resmi/dogrulanabilir veri oldugu icin cyan. */
+  .news-section {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+    border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius-20);
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .news-section::before {
+    content:''; position:absolute; top:-45%; right:-8%;
+    width:240px; height:240px; border-radius:50%;
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.13), transparent 70%);
+    pointer-events:none;
+  }
+  .news-section > * { position: relative; }
   .news-loading {
     display: flex; align-items: center; gap: 8px;
     color: var(--bp-text3); font-size: var(--bp-text-base); padding: 8px 0;
@@ -709,12 +776,21 @@
 
   /* ── KAP Bildirimleri ── */
   .kap-section {
-    background: var(--bp-surface);
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
     border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
-    padding: 16px 18px;
+    border-left: 3px solid var(--bp-accent-cyan);
+    border-radius: var(--bp-radius-20);
+    padding: 18px 20px;
     margin-bottom: 20px;
   }
+  .kap-section::before {
+    content:''; position:absolute; top:-45%; left:-6%;
+    width:240px; height:240px; border-radius:50%;
+    background: radial-gradient(circle, rgba(var(--bp-accent-cyan-rgb),0.10), transparent 70%);
+    pointer-events:none;
+  }
+  .kap-section > * { position: relative; }
   .kap-item {
     display: flex;
     flex-direction: column;
