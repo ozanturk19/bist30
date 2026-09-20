@@ -23,7 +23,7 @@ echo "=== Pre-Deploy Check (CPO-359 Tier 0) ==="
 echo ""
 
 # 1. Jinja parse
-echo "1/10 Jinja parse..."
+echo "1/11 Jinja parse..."
 if python3 "$(dirname "$0")/_predeploy_jinja_check.py"; then
   echo "  ✓ Jinja parse OK"
 else
@@ -33,7 +33,7 @@ fi
 
 # 2. Python compile
 echo ""
-echo "2/10 Python compile (app.py)..."
+echo "2/11 Python compile (app.py)..."
 if python3 -c "import ast;ast.parse(open('app.py').read())" 2>/dev/null; then
   echo "  ✓ app.py compile OK"
 else
@@ -48,7 +48,7 @@ fi
 # pre-commit, aynı gün genişletildi) tutarsızdı. Liste ikisinde de senkron
 # tutulmalı.
 echo ""
-echo "3/10 KALICI_KURALLAR audit..."
+echo "3/11 KALICI_KURALLAR audit..."
 KK_AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/index.html templates/portfolio.html templates/gundem.html templates/metodoloji.html templates/blog.html templates/blog_article.html templates/temettu_takvimi.html templates/bilanco_takvimi.html"
 KK_FAIL=0
 for f in $KK_AUDIT_FILES; do
@@ -65,7 +65,7 @@ fi
 
 # 4. format-lint
 echo ""
-echo "4/10 format-lint (CPO-1180 K6)..."
+echo "4/11 format-lint (CPO-1180 K6)..."
 if ./tools/format-lint.sh > /dev/null 2>&1; then
   echo "  ✓ format-lint PASS"
 else
@@ -79,7 +79,7 @@ fi
 # donuyordu, boyutu dogruydu, grep iceride buluyordu. Elle calistirilan bir arac bir
 # sonraki kazada yok hukmundedir -- kapiya baglandi.
 echo ""
-echo "5/10 CSS token guard (CPO-1349)..."
+echo "5/11 CSS token guard (CPO-1349)..."
 if python3 tools/css-token-guard.py static/css/*.css > /dev/null 2>&1; then
   echo "  ✓ CSS token guard PASS"
 else
@@ -91,7 +91,7 @@ echo ""
 # 6. style-guard (T1.7) — css-token-guard YALNIZ static/css/*.css (2 dosya) bakiyor;
 # sablonlarin icindeki ~2300 var(--bp-*) kullanimi HICBIR kapida denetlenmiyordu.
 # K-A tanimsiz var() BLOKLAYICI (taban 0), K-B/K-C/K-D ratchet (yalniz dusebilir).
-echo "6/10 style-guard (T1.7: sablon ici var()/ham hex/yerel :root/bos catch ratchet)..."
+echo "6/11 style-guard (T1.7: sablon ici var()/ham hex/yerel :root/bos catch ratchet)..."
 if python3 tools/style-guard.py > /dev/null 2>&1; then
   echo "  ✓ style-guard PASS"
 else
@@ -106,7 +106,7 @@ fi
 # duruma gecti ama hicbir deploy bunu raporlamadi — "YAZILMIS ama BAGLANMAMIS"
 # sinifinin kendisi, 8f6006f'in kapattigi iki guard'la AYNI hastalik. Bagliyoruz.
 echo ""
-echo "7/10 lint_scope ratchet (T9.4: sablon sayisi daralma dedektoru)..."
+echo "7/11 lint_scope ratchet (T9.4: sablon sayisi daralma dedektoru)..."
 if python3 tools/lint_scope.py --check > /dev/null 2>&1; then
   echo "  ✓ lint_scope PASS"
 else
@@ -123,7 +123,7 @@ fi
 # ONCESI yakalar (Jinja {{ }}/{% %} soyulup node --check ile dogrulanir,
 # 31/31 mevcut sablonda 0 yanlis-pozitif dogrulanmistir).
 echo ""
-echo "8/10 node-syntax-check (DEV2-T-MOBOVF-1: sablon-ici JS sozdizimi)..."
+echo "8/11 node-syntax-check (DEV2-T-MOBOVF-1: sablon-ici JS sozdizimi)..."
 if python3 tools/node-syntax-check.py > /dev/null 2>&1; then
   echo "  ✓ node-syntax-check PASS"
 else
@@ -141,7 +141,7 @@ fi
 # 4'unde marka rengi hover cercevesi HIC uygulanmiyordu. Taban SIFIR; kasitli
 # ciftler tool icindeki GOZDEN_GECIRILMIS_KASITLI'de GEREKCESIYLE yazilidir.
 echo ""
-echo "9/10 state-order-check (K-G: durum kurali varyantin ALTINDA olmali)..."
+echo "9/11 state-order-check (K-G: durum kurali varyantin ALTINDA olmali)..."
 if python3 tools/state-order-check.py > /dev/null 2>&1; then
   echo "  ✓ state-order-check PASS"
 else
@@ -161,12 +161,32 @@ fi
 # renklerin KENDISI. Taban SIFIR (77 cift). Kapsam siniri ve pozitif kontrol
 # kaydi tool'un docstring'inde.
 echo ""
-echo "10/10 contrast-check (K-I: ayni kuralda bg+fg WCAG kontrasti)..."
+echo "10/11 contrast-check (K-I: ayni kuralda bg+fg WCAG kontrasti)..."
 if python3 tools/contrast-check.py > /dev/null 2>&1; then
   echo "  ✓ contrast-check PASS"
 else
   echo "  ✗ K-I KIRIK: bir kuralda zemin+metin cifti WCAG AA esiginin altinda."
   echo "    Detay için: python3 tools/contrast-check.py --verbose"
+  FAIL=$((FAIL + 1))
+fi
+
+# 11. cachebust-check (K-J, CPO 20.09.2026) -- her `/static/...?v=<md5-8>`
+# referansi diskteki dosyanin gercek hash'iyle ESLESMEK zorunda. Iki ayri
+# sessiz basarisizligi kapatir: (1) static/sw.js precache listesi ile
+# templates/offline.html'in ELLE tasidigi hash'ler kopmustu -> `caches.match`
+# query string'i anahtarin parcasi saydigi icin /offline tam da ise
+# yarayacagi anda STILSIZ aciliyordu; (2) CSS degisip sablondaki ?v=
+# guncellenmezse Cloudflare ESKI dosyayi servis eder, deploy "basarili"
+# gorunur ama fix canliya CIKMAZ. Ustteki 10 kat dosyanin ICINE bakar,
+# hicbiri REFERANSA bakmaz. Taban SIFIR (118 referans). Elle artirilan
+# surum etiketleri (?v=75, ?v=4, ?v=20260915A) kasitli kapsam disi.
+echo ""
+echo "11/11 cachebust-check (K-J: ?v= referansi diskteki hash ile ayni mi)..."
+if python3 tools/cachebust-check.py > /dev/null 2>&1; then
+  echo "  ✓ cachebust-check PASS"
+else
+  echo "  ✗ K-J KIRIK: bir cache-bust referansi bayat -> canliya eski dosya gider."
+  echo "    Detay için: python3 tools/cachebust-check.py"
   FAIL=$((FAIL + 1))
 fi
 
