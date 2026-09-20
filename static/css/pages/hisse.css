@@ -584,7 +584,7 @@
     border: none; cursor: help; padding: 0; position: relative;
     font-family: inherit;
   }
-  .ind-help:hover { opacity: 1; background: var(--bp-border2); color: #fff; }
+  .ind-help:hover { opacity: 1; background: var(--bp-border2); color: var(--bp-text); }
   /* Tooltip popup */
   .ind-help::after {
     content: attr(data-tooltip);

@@ -107,9 +107,9 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/data-art.css?v=bd5026af">
+<link rel="stylesheet" href="/static/css/data-art.css?v=5c81cbb4">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=94aaee19">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=b28fe3c0">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -1274,7 +1274,7 @@
         {% else %}
         Supertrend, ADX ≥ 25 ve EMA12/EMA99 kriterleri şu an aynı anda sağlanmıyor — net bir trend sinyali yok.
         {% endif %}
-        Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-brand);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
+        Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" class="da-link">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
       <div style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:var(--bp-text3)">
         <div class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></div>
@@ -1490,7 +1490,7 @@
   </div>
   <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--bp-text3);flex-basis:100%;cursor:pointer;line-height:1.4">
     <input type="checkbox" id="hisseSubKvkk" required style="margin-top:2px;flex-shrink:0">
-    <span><a href="/gizlilik" target="_blank" style="color:var(--bp-brand)">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
+    <span><a href="/gizlilik" target="_blank" class="da-link">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
   </label>
   <button onclick="document.getElementById('hisseSubCta').style.display='none'"
     style="background:none;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-lg);padding:2px 4px" aria-label="Kapat">×</button>

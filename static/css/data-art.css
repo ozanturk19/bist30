@@ -152,3 +152,32 @@
   .bp-footer-link:hover{color:var(--bp-text)}
 }
 .bp-footer-link:focus-visible{color:var(--bp-text)}
+
+/* ── Satır-içi prose linki (20.09) ─────────────────────────────────────────
+   ÖLÇÜLMÜŞ BULGU, stil tercihi değil: cümle içindeki linkler yalnızca RENKLE
+   ayırt ediliyordu (`color:var(--bp-*);text-decoration:none`, başka ipucu yok)
+   ve sitede global bir `a:hover{text-decoration:underline}` kuralı da YOK.
+   WCAG 2.1 **1.4.1 Use of Color (A seviyesi)** rengi tek ayırt edici olarak
+   ancak link metni çevresindeki metne karşı **≥3:1** kontrast taşıyorsa kabul
+   eder. Ölçüm (relatif parlaklık, aynı formül tools/contrast-check.py):
+       --bp-brand (#b8c3ff) vs --bp-text2 (#c7c5cd) = **1.00:1**
+       --bp-accent-cyan (#22d3ee) vs --bp-text2     = **1.06:1**
+       en iyi hâli: cyan vs --bp-text3              = 1.75:1
+   Yani periwinkle link ile gövde metni parlaklık olarak BİREBİR aynı — renk
+   körlüğünde ya da gri ekranda link, düz metinden ayırt edilemiyordu.
+   Ölçüt eşiğin YARISININ altında olduğu için renk ayarıyla kapatılamaz;
+   renk-dışı bir ipucu ZORUNLU. Kesikli alt çizgi zaten sitede vardı
+   (hisse.html:1277 el-yazımı) — kanonikleştirildi.
+   Ayrıca kanonik renk taksonomisini uygular: prose-içi REFERANS = cyan
+   (CTA/buton `--bp-brand` kalır, bkz. 20.09 /gizlilik turu ölçümü). */
+.da-link{
+  color:var(--bp-accent-cyan);
+  text-decoration:none;
+  border-bottom:1px dashed currentColor;
+  transition:border-bottom-color var(--bp-dur-base) var(--bp-ease-standard),color var(--bp-dur-base) var(--bp-ease-standard);
+}
+/* Durum kuralı varyantın ALTINDA (K-G) */
+@media (hover: hover) and (pointer: fine){
+  .da-link:hover{color:var(--bp-text);border-bottom-style:solid}
+}
+.da-link:focus-visible{color:var(--bp-text);border-bottom-style:solid}
