@@ -575,7 +575,7 @@
     width: 200px;
     height: 200px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(124, 92, 255, .10), transparent 70%);
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb), .10), transparent 70%);
     pointer-events: none;
     z-index: 0;
   }

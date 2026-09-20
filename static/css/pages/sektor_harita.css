@@ -68,7 +68,7 @@
   /* Summary row */
   .sum-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
   .sum-chip { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:10px 14px; text-align:center; flex:1; min-width:100px; transition:border-color .15s; position:relative; overflow:hidden; }
-  .sum-chip::before { content:''; position:absolute; top:-60%; right:-15%; width:80px; height:80px; border-radius:50%; background:radial-gradient(circle, rgba(124,92,255,.12), transparent 70%); pointer-events:none; }
+  .sum-chip::before { content:''; position:absolute; top:-60%; right:-15%; width:80px; height:80px; border-radius:50%; background:radial-gradient(circle, rgba(var(--bp-art-violet-rgb),.12), transparent 70%); pointer-events:none; }
   .sum-chip > * { position:relative; }
   .sum-chip:hover { border-color:var(--bp-border2); }
   .sum-num  { font-size:var(--bp-text-22); font-weight:800; font-family:'Space Grotesk',system-ui,sans-serif; }
@@ -230,7 +230,7 @@
   .sector-card:hover {
     border-color: var(--bp-border2);
     transform: rotate(0deg) translateY(-3px);
-    box-shadow: 0 20px 45px -22px rgba(124, 92, 255, .4);
+    box-shadow: 0 20px 45px -22px rgba(var(--bp-art-violet-rgb), .4);
   }
 
 

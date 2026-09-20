@@ -41,30 +41,24 @@
   @media (max-width: 600px) {
     .counter-grid { grid-template-columns: repeat(2, 1fr); }
   }
+  /* 20.09 Data-Art: yuzey + parilti recetesi artik .da-panel'den geliyor
+     (templates/ozet.html'de `class="counter-card da-panel"`). Burada YALNIZ
+     bu sayfanin deltasi kalir: parilti boyutu/konumu/rengi + ic hizalama.
+     Onceki hali elle kopyalanmis bir panel recetesiydi ve parilti rengini
+     --bp-art-violet token'inin LITERALIYLE yaziyordu (ayni rengin iki kaynagi). */
   .counter-card {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
+    --da-glow-rgb: var(--bp-art-violet-rgb);
+    --da-glow-a: .12;
+    --da-glow-y: -55%;
+    --da-glow-x: -10%;
+    --da-glow-size: 90px;
+    border-radius: var(--bp-radius-lg);
     padding: 16px 14px;
     text-align: center;
     transition: border-color .15s;
-    position: relative;
-    overflow: hidden;
   }
-  .counter-card::before {
-    content: '';
-    position: absolute;
-    top: -55%;
-    right: -10%;
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(124, 92, 255, .12), transparent 70%);
-    pointer-events: none;
-  }
-  .counter-card > * { position: relative; }
   .counter-card:hover { border-color: var(--bp-border2); }
-  .counter-num  { font-size: var(--bp-text-36); font-weight: 800; line-height: 1; font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .counter-num  { font-size: var(--bp-text-36); font-weight: 800; line-height: 1; font-family: 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
   .counter-lbl  { font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
   .num-al    { color: var(--bp-al); }
   .num-sat   { color: var(--bp-sat); }
@@ -72,10 +66,13 @@
   .num-new   { color: var(--bp-gold); }
 
   /* ── Sinyaller ── */
+  /* .da-panel deltasi (bkz. .counter-card notu) — govde blogu; parilti daha
+     genis ve yukaridan, boylece uzun listelerin basligini aydinlatir. */
   .section-box {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
+    --da-glow-a: .07;
+    --da-glow-y: -60%;
+    --da-glow-size: 220px;
+    border-radius: var(--bp-radius-lg);
     padding: 16px;
     margin-bottom: 16px;
   }
@@ -144,10 +141,12 @@
   .sc-ret-neg { background: rgba(var(--bp-sat-rgb),.15); color: var(--bp-sat); }
 
   /* Piyasa barometresi */
+  /* .da-panel deltasi (bkz. .counter-card notu) */
   .barometer {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
+    --da-glow-a: .09;
+    --da-glow-y: -70%;
+    --da-glow-size: 200px;
+    border-radius: var(--bp-radius-lg);
     padding: 16px;
     margin-bottom: 16px;
   }

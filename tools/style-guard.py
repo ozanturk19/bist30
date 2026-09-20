@@ -286,6 +286,14 @@ def sayfalar():
 
 
 def hex_say(metin, harita, rgbharita=None):
+    # 20.09 CPO: K-B de blok yorumlarini olcum disi birakir. K-E bu savunmayi
+    # kurulusundan beri tasiyordu (bkz. YORUM_RE notu), K-B tasimiyordu —
+    # yapisal olarak AYNI kusur: gecmis bir fix'i ANLATAN yorum ("deger
+    # `rgba(124,92,255,.12)` literaliyle yaziliyordu") kusur olarak sayiliyor,
+    # ratchet tavani sisik kaliyor ve ayni dosyadaki GERCEK bir regresyonu
+    # maskeliyordu. Canli olcum: /ozet'in literali token'a cevrildi, ozet.css
+    # sayimi yine de 1'de kaldi — tek kaynagi fix'i anlatan yorumdu.
+    metin = YORUM_RE.sub(" ", metin)
     n = 0
     for h in HEX_RE.findall(metin):
         hl = h.lower()
