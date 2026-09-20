@@ -82,7 +82,7 @@ header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){d
 .search-overlay,.bp-search-overlay{display:none}
 .header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;background:transparent;border:1px solid var(--bp-border);border-radius:var(--bp-radius);color:var(--bp-text2);cursor:pointer}
 @media (max-width:900px){.bp-main-nav{display:none}}
-.skip-link{position:absolute;top:-40px;left:0;background:var(--bp-brand);color:var(--bp-bg);padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid var(--bp-brand);outline-offset:2px}:focus:not(:focus-visible){outline:none}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--bp-brand);color:var(--bp-bg);padding:8px 16px;z-index:var(--bp-z-toast);text-decoration:none;font-size:var(--bp-text-md);font-weight:600;border-radius:0 0 4px 0}.skip-link:focus{top:0}:focus-visible{outline:2px solid var(--bp-brand);outline-offset:2px}/* K-O (21.09): .bp-main-nav overflow-x:auto -> overflow-y de auto olur ve client kutusu nav ogesiyle AYNI yukseklikte (27px). Disariya cizilen 2px+2px halkanin ust/alt kenarlari TAMAMEN kirpiliyordu (canli boyama testiyle dogrulandi). Halka ice alindi: layout etkisi sifir, WCAG 2.4.7. */.bp-main-nav :focus-visible{outline-offset:-2px}:focus:not(:focus-visible){outline:none}
 </style>
 <style>
 /* ═══════════════════════════════════════════════════════════════════════
