@@ -75,6 +75,7 @@
   .hib-compare {
     display: inline-flex;
     align-items: center;
+    min-height: 24px;   /* 21.09 CPO — dokunma hedefi (WCAG 2.5.8-AA); canlida 22px olculdu */
     gap: 4px;
     font-size: var(--bp-text-xs);
     font-weight: 600;
@@ -574,6 +575,16 @@
     color: rgba(255,255,255,0.60); /* adequate contrast on tinted badge backgrounds */
     font-weight: 400;
     margin-left: 4px;
+  }
+  /* 21.09 (CPO) — DOKUNMA HEDEFİ: 22×22px, WCAG 2.5.8-AA asgarisinin (24)
+     altındaydı. Daire görsel olarak büyütülmedi (gösterge satırının hizasını
+     bozardı); bunun yerine data-art.css `.da-tap-halo` deseninin aynısı —
+     görünmez 44×44 ::before isabet alanı. `::after` zaten tooltip için
+     kullanıldığından halo burada `::before`a yazıldı; `position:relative`
+     kuralda zaten var. Emsal: portfolio.css `.ls-warning-close::before`. */
+  .ind-help::before {
+    content:''; position:absolute; top:50%; left:50%;
+    width:44px; height:44px; transform:translate(-50%,-50%);
   }
   .ind-help {
     display: inline-flex; align-items: center; justify-content: center;

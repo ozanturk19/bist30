@@ -96,10 +96,20 @@
 
   .sc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
   .sc-ticker { font-size:var(--bp-text-md); font-weight:700; color:var(--bp-text); }
+  /* 21.09 (CPO) — DOKUNMA HEDEFİ (WCAG 2.5.8-AA): rozetin İÇİNDE
+     `sigLabelTooltip()` tarafından basılan `<a class="jargon-term">` var ve
+     /metodoloji'ye gidiyor; kart ise (role="link") /hisse/<t>'ye gidiyor —
+     FARKLI hedefler, yani eşdeğer-kontrol muafiyeti YOK. Bağlantı canlıda
+     68×14px (bilanco) / 34×13px (temettü) ölçüldü: kartın içinde, kartla
+     farklı yere giden 13px'lik bir dokunma hedefi. Rozet yüksekliği 24px
+     iç-kutuya çıkarıldı ve bağlantı rozetin boyunu doldurur (align-self
+     stretch) — yazı boyutu DEĞİŞMEDİ. */
   .sig-badge {
+    display:inline-flex; align-items:stretch; min-height:28px;
     font-size:var(--bp-text-2xs); font-weight:700; padding:2px 7px; border-radius:var(--bp-radius-md);
     text-transform:uppercase; letter-spacing:.3px;
   }
+  .sig-badge > .jargon-term { display:flex; align-items:center; }
   /* 20.09 — GERCEK BUG (sinif ad-alani cakismasi): bu uc kural CIPLAK
      `.sig-al`/`.sig-sat`/`.sig-bkl` idi, ama ayni uc degistirici KARTIN
      kendisinde de var (`class="stock-card sig-bkl"`). AL/SAT icin yazari

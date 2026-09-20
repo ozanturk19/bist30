@@ -52,7 +52,13 @@
 
   /* Detail expand */
   .detail-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; position:relative; }
-  .stock-chip { padding:2px 7px; border-radius:var(--bp-radius); font-size:var(--bp-text-xs); font-weight:600; text-decoration:none; }
+  /* 21.09 (CPO) — DOKUNMA HEDEFİ: rozetler 50×20.6px'ti ve `.detail-row`
+     içinde 5px aralıkla YAN YANA duruyor; hem 24px asgarisinin (WCAG 2.5.8-AA)
+     altındaydı hem de aralık istisnası işlemiyordu. Bu sayfa tek başına 125
+     ihlal taşıyordu (sitedeki toplamın 2/3'ü). Kart tıklaması rozetle AYNI
+     yere gitmiyor (kart aç/kapa, rozet /hisse/<t>) — eşdeğer-kontrol
+     muafiyeti YOK. Yazı boyutu değişmedi, yalnız hedef büyüdü. */
+  .stock-chip { display:inline-flex; align-items:center; min-height:24px; padding:3px 8px; border-radius:var(--bp-radius); font-size:var(--bp-text-xs); font-weight:600; text-decoration:none; }
   .chip-al  { background:rgba(var(--bp-al-rgb),.10); color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.22); }
   .chip-sat { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.25); }
   .chip-bkl { background:rgba(var(--bp-text3-rgb),.08); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.18); }

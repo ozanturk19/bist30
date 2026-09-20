@@ -65,7 +65,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/data-art.css?v=0856466e">
+<link rel="stylesheet" href="/static/css/data-art.css?v=c236b48b">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <style id="bp-critical-css">
 /* Kanonik anti-CLS bloğu — 27 şablonun paylaştığı desen, BİREBİR korunur (Madde 6f notu).
@@ -490,7 +490,7 @@ header{
       <div class="da-legend-sep"></div>
       <div class="da-legend-item"><span class="sw" style="background:var(--bp-sat)"></span>&lt;56 Zayıf</div>
       <div class="da-legend-sep"></div>
-      <a href="/metodoloji" class="da-legend-item" style="color:var(--bp-brand);text-decoration:none">Nasıl hesaplanıyor? →</a>
+      <a href="/metodoloji" class="da-legend-item da-tap" style="color:var(--bp-brand);text-decoration:none">Nasıl hesaplanıyor? →</a>
     </div>
   </div>
 </section>
@@ -524,7 +524,7 @@ header{
         <button type="button" class="da-gnm-tab active" id="daGnmTabMakro" role="tab" aria-selected="true" aria-controls="daGnmPanelMakro" tabindex="0" onclick="daSwitchGnmTab('makro')"><span aria-hidden="true">🌍</span> Makro</button>
         <button type="button" class="da-gnm-tab" id="daGnmTabHisse" role="tab" aria-selected="false" aria-controls="daGnmPanelHisse" tabindex="-1" onclick="daSwitchGnmTab('hisse')"><span aria-hidden="true">📈</span> Hisse</button>
       </div>
-      <a href="/gundem" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tümü →</a>
+      <a href="/gundem" class="da-tap" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tümü →</a>
     </div>
   </div>
 
@@ -626,7 +626,7 @@ header{
       <div class="da-eyebrow">Teknik Güç Skoru</div>
       <h2 class="da-section-title da-display">En güçlü sinyaller.</h2>
     </div>
-    <a href="/tarama?sort=signal_strength" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tüm taramayı gör →</a>
+    <a href="/tarama?sort=signal_strength" class="da-tap" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tüm taramayı gör →</a>
   </div>
   <div class="da-stock-grid" id="daStockGrid">
     {% if ssr_top_signals %}{% for s in ssr_top_signals %}

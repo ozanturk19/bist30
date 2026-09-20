@@ -26,7 +26,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/data-art.css?v=0856466e">
+<link rel="stylesheet" href="/static/css/data-art.css?v=c236b48b">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <link rel="stylesheet" href="/static/css/pages/gundem.css?v=0af6ad48">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -155,7 +155,7 @@
           <span class="dot" style="background:var(--bp-gold)"></span>
           Bilanço Takvimi
         </div>
-        <a href="/bilanco-takvimi" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
+        <a href="/bilanco-takvimi" class="da-tap" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
       </div>
       <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap">{% for p in ssr_bilanco_upcoming %}{% set is_active = p.status == 'active' %}{% set dot_clr = 'var(--bp-gold)' if is_active else 'var(--bp-text3)' %}
         <div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};border-radius:var(--bp-radius-md);padding:12px 14px">

@@ -26,7 +26,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/data-art.css?v=0856466e">
+<link rel="stylesheet" href="/static/css/data-art.css?v=c236b48b">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <link rel="stylesheet" href="/static/css/pages/ozet.css?v=2a4e8e23">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -337,8 +337,7 @@ function goToDate(date) {
       </label>
       <span id="ozSubMsg" style="font-size:var(--bp-text-sm)"></span>
     </div>
-    <button onclick="document.getElementById('ozSubBar').style.display='none'"
-      style="background:none;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-xl);line-height:1;padding:2px 6px;flex-shrink:0"
+    <button class="da-close" onclick="document.getElementById('ozSubBar').style.display='none'"
       title="Kapat" aria-label="Kapat">×</button>
   </div>
 </div>

@@ -222,3 +222,50 @@
   background-repeat:no-repeat;
   background-position:right 10px center;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DOKUNMA HEDEFİ — WCAG 2.5.8 (Target Size Minimum, AA): 24×24 CSS px
+   21.09 (CPO) — canlı 375×812 ölçümü (elementFromPoint isabet testi, 14
+   yüzey) 189 gerçek ihlal buldu. Ölçüm YALNIZ `getBoundingClientRect` ile
+   yapılamaz; iki kör nokta var ve ikisi de bu turda yanlış-pozitif üretti:
+     1) sözde-öğeyle genişletilmiş isabet alanı (`.ls-warning-close::before`
+        zaten 44×44 halo koyuyor — öğe 13×16 görünür ama hedef 44×44'tür),
+     2) aynı yere giden DAHA BÜYÜK bir ata (bilanco/temettu `.stock-card`
+        role="link" olarak tüm kartı /hisse/<t>'ye götürüyor; içindeki
+        `.sc-ticker-link` eşdeğer-kontrol muafiyetine girer).
+   Bu yüzden ölçüt "kutunun boyu" değil, MERKEZDEN ±12px'teki noktaların
+   gerçekten bu öğeye isabet edip etmediğidir.
+   Muaf olanlar (kasıtlı, düzeltilmedi): cümle içi satır-içi bağlantılar
+   (`.da-link`, prose `.jargon-term`) — WCAG "inline" istisnası. ═════════ */
+
+/* Simge/kapat düğmeleri: GÖRSEL boyut değişmez, yalnız isabet alanı büyür.
+   Yoğun arayüzde (yan yana rozetler) halo'lar çakışabileceği için gerçek
+   büyütme gereken yerlerde .da-tap kullanılır, halo DEĞİL. */
+.da-tap-halo{position:relative}
+.da-tap-halo::before{
+  content:'';position:absolute;top:50%;left:50%;
+  width:44px;height:44px;transform:translate(-50%,-50%);
+}
+
+/* Bağımsız (cümle içinde OLMAYAN) CTA bağlantısı / kontrol. */
+.da-tap{
+  display:inline-flex;align-items:center;gap:4px;
+  min-height:24px;
+}
+
+/* Abone çubuğu "×" kapat düğmesi — 20.09'a kadar ozet.html/hisse.html/
+   blog_article.html'de ÜÇ AYRI el-yazımı inline stil vardı ve üçü üç farklı
+   boyut veriyordu (17.3×22.5 · 22.5×22 · 19×22). Tek kaynak. */
+.da-close{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:32px;min-height:32px;
+  padding:0;
+  background-color:transparent;
+  border:none;
+  color:var(--bp-text3);
+  font-size:var(--bp-text-xl);
+  line-height:1;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.da-close:hover{color:var(--bp-text2)}

@@ -107,9 +107,9 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/data-art.css?v=0856466e">
+<link rel="stylesheet" href="/static/css/data-art.css?v=c236b48b">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=b28fe3c0">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=381d01b3">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -604,7 +604,11 @@
 
     <!-- Katman C — detaylı teknik göstergeler (accordion, kapalı başlar) -->
     <details id="signalSummaryDetails" style="margin-top:10px;padding-top:10px">
-      <summary style="cursor:pointer;font-size:var(--bp-text-sm);color:var(--bp-brand);list-style:none;user-select:none"
+      {# 21.09 (CPO) DOKUNMA HEDEFİ: bu <summary> 309×15.5px'ti — aynı şablondaki
+         diğer iki accordion başlığı `.bp-detail-toggle-summary` kanoniğini
+         kullanırken bu üçüncüsü el yazımı inline stille kalmıştı. min-height
+         WCAG 2.5.8-AA (24px) için eklendi; renk/boyut aynı bırakıldı. #}
+      <summary style="cursor:pointer;font-size:var(--bp-text-sm);color:var(--bp-brand);list-style:none;user-select:none;display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:24px"
                title="Aç/kapat — ADX, RSI, EMA, DI±, Supertrend göstergeleri ve metodoloji linkleri">
         ▾ Detaylı teknik göstergeler <span style="color:var(--bp-text3);font-weight:normal;font-size:var(--bp-text-xs)">— aç/kapat</span>
       </summary>
@@ -1043,12 +1047,12 @@
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
       <div style="display:flex;gap:6px;align-items:center">
         <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
-                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
+                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
                 onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
                 onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'"
                 title="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
         <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
-                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
+                style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
                 onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
                 onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'">
           Detaylı göster ▾
@@ -1165,8 +1169,8 @@
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">
           <div class="da-fund-group-label" style="margin-bottom:0"><span aria-hidden="true">📊</span> Ciro & Net Kâr Trendi</div>
           <div id="fundTrendToggle" style="display:none;gap:4px;background:var(--bp-surface2);border-radius:var(--bp-radius-pill);padding:3px" role="group" aria-label="Zaman aralığı">
-            <button type="button" id="fundTrendBtnY" onclick="fundTrendSetPeriod('y')" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:var(--bp-text-2xs);font-weight:700;padding:5px 11px;border-radius:var(--bp-radius-pill);color:var(--bp-text3)">Yıllık</button>
-            <button type="button" id="fundTrendBtnQ" onclick="fundTrendSetPeriod('q')" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:var(--bp-text-2xs);font-weight:700;padding:5px 11px;border-radius:var(--bp-radius-pill);color:var(--bp-text3)">Çeyreklik</button>
+            <button type="button" id="fundTrendBtnY" onclick="fundTrendSetPeriod('y')" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:var(--bp-text-2xs);font-weight:700;padding:5px 11px;min-height:26px;border-radius:var(--bp-radius-pill);color:var(--bp-text3)">Yıllık</button>
+            <button type="button" id="fundTrendBtnQ" onclick="fundTrendSetPeriod('q')" style="border:none;background:none;cursor:pointer;font-family:inherit;font-size:var(--bp-text-2xs);font-weight:700;padding:5px 11px;min-height:26px;border-radius:var(--bp-radius-pill);color:var(--bp-text3)">Çeyreklik</button>
           </div>
         </div>
         <div id="fundTrendChart" style="background:var(--bp-bg);border:1px solid var(--bp-surface2);border-radius:var(--bp-radius-md);padding:12px 14px"></div>
@@ -1492,8 +1496,8 @@
     <input type="checkbox" class="da-check" id="hisseSubKvkk" required>
     <span><a href="/gizlilik" target="_blank" class="da-link">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
   </label>
-  <button onclick="document.getElementById('hisseSubCta').style.display='none'"
-    style="background:none;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-lg);padding:2px 4px" aria-label="Kapat">×</button>
+  <button class="da-close" onclick="document.getElementById('hisseSubCta').style.display='none'"
+    title="Kapat" aria-label="Kapat">×</button>
 </div>
 
 </main>
