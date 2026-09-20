@@ -13186,6 +13186,14 @@ def unsubscribe_page(token):
 
         del subs[match_email]
         _save_subscribers(subs)
+        # CPO-1691: login_sends.json rate-limit defteri e-postayı anahtar olarak
+        # tutuyor, abonelik silindikten sonra da kalıyordu -- "tamamen silindi"
+        # vaadi buraya da uygulanmalı.
+        with _login_sends_lock:
+            _ls_data = _tp_read_json(_LOGIN_SENDS_PATH, default={}) if os.path.exists(_LOGIN_SENDS_PATH) else {}
+            if match_email in _ls_data:
+                del _ls_data[match_email]
+                _tp_write_json(_LOGIN_SENDS_PATH, _ls_data, atomic=True, ensure_ascii=False)
         logger.info("E-posta abonelik iptal (kayit silindi): %s", match_email)
         resp = app.make_response(render_template("unsubscribe.html", success=True, confirm=False, email=match_email))
         # bug-hunt r96: kayit sunucudan silinse de bp_sub cookie'si tarayicida 1 yillik
