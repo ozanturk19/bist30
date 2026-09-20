@@ -133,11 +133,35 @@ TPL_DIR = ROOT / "templates"
 CSS_DIR = ROOT / "static" / "css"
 RATCHET = ROOT / "tools" / "style_guard_ratchet.json"
 
+# Vendor (minify edilmis 3. parti) dosyalar hicbir hex kapisinda sayilmaz —
+# bizim paletimiz degil, migre edilemez. EK_HEX_DOSYALARI ondan ONCE
+# tanimlandigi icin bu set yukarida durmak ZORUNDA (ileri referans olurdu).
+OLU_PALET_VENDOR = {"lightweight-charts.min.js"}
+
 # T1.7 GENISLETME (15.08.2026) — K-B'nin templates/ disina taan EK dosyalari.
 # tokens.css HARIC: o token'larin TANIM kaynagi, kendi hex'i "borc" degil.
 EK_HEX_DOSYALARI = [ROOT / "blog_content.py"] + \
     [f for f in sorted(CSS_DIR.glob("*.css")) if f.name != "tokens.css"] + \
-    [f for f in sorted((CSS_DIR / "pages").glob("*.css"))]
+    [f for f in sorted((CSS_DIR / "pages").glob("*.css"))] + \
+    [f for f in sorted((ROOT / "static").glob("*.js")) if f.name not in OLU_PALET_VENDOR] + \
+    [f for f in sorted((ROOT / "static" / "js").glob("*.js")) if f.name not in OLU_PALET_VENDOR]
+# CPO GENISLETME (20.09.2026) — static/**/*.js (vendor HARIC) K-B'ye ALINDI.
+# Olculen kor nokta: `EK_CATCH_DOSYALARI` (K-D) ve K-E'nin `kapsam` listesi JS
+# dosyalarini ZATEN tasiyordu, ama K-B'nin `hex_sayim` dongusu YALNIZ
+# EK_HEX_DOSYALARI'ni geziyordu — yani JS icinde enjekte edilen stylesheet'lerin
+# kanonik-degerli ham hex'i HICBIR kapida gorunmuyordu. Bu, dosyanin kendi
+# T2.2/T2.5 notlarinin uyardigi kusurun aynisi: "borc odenmedi, denetlenmeyen
+# bir dosyaya tasindi". Olcum: 94 occurrence (bp-search.js 56 — header aramasi
+# + makro bar, yani 21 sayfanin HEPSINDE calisan enjekte CSS; bp-chart-common 17;
+# learning-mode 13; toast 4; stale-banner 3; bp-tooltip 1). Mevcut borc
+# bloklanmaz (--baseline ile tavana alindi), YENI borc bloklar.
+# NOT (ayri kalem, bu kapiya GIRMEZ): JS'te ne kanonik ne OLU_PALET'te olan 4
+# deger olculdu — #f5c949 (stale banner sarisi, tokens.css'teki --bp-warn
+# #d29922 ve --bp-accent-yellow #e3b341 disinda UCUNCU bir sari), #6b7280
+# (learning-mode nokta), #3d5a80 (grafik crosshair), #161618 (tooltip+toast
+# zemini). Dordu de kontrast olcumunden GECIYOR (9.58/3.54/-/13.96:1), yani
+# gorsel kusur degil; halefleri bir TASARIM karari oldugu icin K-E denylist'ine
+# eklenmedi. Bkz. reference: "ne kanonik ne denylist'te hex hicbir kapida gorunmez".
 # T2.5 GENISLETME (18.08.2026) - inline <style> bloklari static/css/pages/*.css'e
 # TASINDI (bp-critical-css HARIC). Ust satir olmadan bu dosyalardaki ham hex
 # K-B'de HIC GORUNMEZ - T2.2'nin ayni dersi (yukarida KABUK_PARTIALS notu),
@@ -221,7 +245,6 @@ OLU_PALET = {
 # K-E kapsami: K-B'nin dosyalari + gercek JS dosyalari (tooltip/toast gibi
 # kullaniciya GORUNEN renkleri orada uretiliyor). VENDOR dosyasi haric —
 # lightweight-charts.min.js ucuncu parti, kendi paleti bizim kararimiz degil.
-OLU_PALET_VENDOR = {"lightweight-charts.min.js"}
 
 
 def olu_palet_haritasi(harita):
