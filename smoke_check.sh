@@ -13,12 +13,13 @@ PASS=0; FAIL=0
 run_check() {
     local name="$1"; local cmd="$2"
     printf "  %-36s" "$name"
-    if eval "$cmd" >/dev/null 2>&1; then
+    local out
+    if out=$(eval "$cmd" 2>&1); then
         echo "✅"
         PASS=$((PASS + 1))
     else
         echo "❌ FAIL"
-        eval "$cmd" 2>&1 | head -5 | sed 's/^/    /'
+        echo "$out" | head -5 | sed 's/^/    /'
         FAIL=$((FAIL + 1))
     fi
 }
@@ -35,7 +36,7 @@ from schema_validator  import validate_api_data, validate_api_macro, validate_ap
 from email_qa          import validate_email_pre_send
 from alerting          import emit_alert
 '"
-run_check "tests: DQV suite"      "python3 -m pytest tests/ -x -q 2>&1 | grep -E 'passed|failed|error'"
+run_check "tests: DQV suite"      "python3 -m pytest tests/ -x -q"
 run_check "syntax: templates+JS"  "python3 tools/node-syntax-check.py"
 
 echo "──────────────────────────────────────────────────"
