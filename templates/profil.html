@@ -7,7 +7,8 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/pages/profil.css?v=99cb66b3">
+<link rel="stylesheet" href="/static/css/data-art.css?v=4de26da7">
+<link rel="stylesheet" href="/static/css/pages/profil.css?v=5de608e2">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -22,6 +23,7 @@
 {% if email %}
 
 <div class="hero">
+  <div class="da-recap-tag"><span class="dot" aria-hidden="true"></span>Abonelik Tercihi</div>
   <h1>{% if name %}Merhaba {{ name.split()[0] }}!{% else %}Profilini Tamamla{% endif %}</h1>
   <p><strong>Mail bildirim sıklığını</strong> seç, 10 saniye sürer.</p>
 </div>
@@ -30,7 +32,7 @@
 <div class="alert alert-success"><span aria-hidden="true">✓</span> Profilin daha önce tamamlanmış. Aşağıdaki tercihi güncelleyebilirsin.</div>
 {% endif %}
 
-<form class="form-card" id="profileForm" role="status" aria-live="polite" onsubmit="return submitProfile(event)">
+<form class="form-card da-panel" id="profileForm" onsubmit="return submitProfile(event)">
 
   <!-- Mail Tercihi (formdaki tek soru — level/freq/size/segments r100 CPO-DEV2-074 ile
        kaldırıldı: hiçbiri mail dağıtımını etkilemiyordu, bkz app.py api_profile()) -->
@@ -50,7 +52,10 @@
     </button>
     <a href="/" class="btn btn-secondary">Atla</a>
   </div>
+  <div id="profileMsg" class="profile-msg"></div>
 </form>
+
+<div id="profileResult" class="form-card da-panel profile-result" role="status" aria-live="polite" tabindex="-1" hidden></div>
 
 <div class="footer-note">
   <a href="/"><span aria-hidden="true">←</span> Sinyal paneline dön</a> &nbsp;·&nbsp;
@@ -105,6 +110,23 @@ document.querySelectorAll('.opt').forEach(btn => {
   });
 });
 
+// 20.09 CPO denetimi — bu blokta duzeltilen IKI gercek bug:
+//   (1) `<form role="status" aria-live="polite">` formun KENDI rolunu
+//       eziyordu: yardimci teknoloji sayfada bir form gormuyordu, ustelik
+//       tum form kalici bir canli bolgeydi. Basari mesaji artik formun
+//       DISINDA, kendi role="status" panelinde duyuruluyor; form form kaliyor.
+//   (2) `submitBtn.textContent = ...` butonun icindeki
+//       `<span aria-hidden="true">✓</span>` sarmalayicisini yok ediyordu;
+//       geri yuklerken '✓ Profili Kaydet' duz metin olarak yazildigi icin
+//       ekran okuyucu bundan sonra "onay isareti" diye okuyordu.
+const PROFILE_BTN_HTML = '<span aria-hidden="true">✓</span> Profili Kaydet';
+
+function profileMsg(text, kind) {
+  const el = document.getElementById('profileMsg');
+  el.className = 'profile-msg' + (text ? ' profile-msg--on profile-msg--' + kind : '');
+  el.textContent = text || '';
+}
+
 async function submitProfile(e) {
   e.preventDefault();
   const submitBtn = document.getElementById('profileSubmit');
@@ -116,9 +138,10 @@ async function submitProfile(e) {
 
   // Min validation: mail_pref required (tek soru)
   if (!data.mail_pref) {
-    alert('Lütfen bir mail tercihi seç.');
+    profileMsg('Lütfen bir mail tercihi seç.', 'err');
     return false;
   }
+  profileMsg('', '');
 
   submitBtn.disabled = true;
   submitBtn.textContent = 'Kaydediliyor…';
@@ -135,22 +158,25 @@ async function submitProfile(e) {
     }
     const json = await res.json();
     if (json.ok) {
-      document.getElementById('profileForm').innerHTML =
-        '<div style="text-align:center;padding:30px 0">' +
-        '<div style="font-size:var(--bp-text-42);margin-bottom:12px">✓</div>' +
-        '<div style="font-size:18px;font-weight:800;color:var(--bp-al);margin-bottom:8px">Profilin kaydedildi!</div>' +
-        '<div style="font-size:var(--bp-text-base);color:var(--bp-text2);margin-bottom:24px">' + _escSub(json.message || 'Mail tercihleriniz güncellendi.') + '</div>' +
-        '<a href="/" class="btn">Sinyal Paneline Dön →</a>' +
-        '</div>';
+      const form = document.getElementById('profileForm');
+      const out  = document.getElementById('profileResult');
+      out.innerHTML =
+        '<div class="profile-result-mark" aria-hidden="true">✓</div>' +
+        '<div class="profile-result-title">Profilin kaydedildi!</div>' +
+        '<div class="profile-result-body">' + _escSub(json.message || 'Mail tercihleriniz güncellendi.') + '</div>' +
+        '<a href="/" class="btn">Sinyal Paneline Dön <span aria-hidden="true">→</span></a>';
+      form.hidden = true;
+      out.hidden = false;
+      out.focus();
     } else {
-      alert('⚠️ ' + (json.error || 'Bir hata oluştu'));
+      profileMsg((json.error || 'Bir hata oluştu'), 'err');
       submitBtn.disabled = false;
-      submitBtn.textContent = '✓ Profili Kaydet';
+      submitBtn.innerHTML = PROFILE_BTN_HTML;
     }
   } catch(e) {
-    alert('Bağlantı hatası — lütfen daha sonra tekrar deneyin.');
+    profileMsg('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'err');
     submitBtn.disabled = false;
-    submitBtn.textContent = '✓ Profili Kaydet';
+    submitBtn.innerHTML = PROFILE_BTN_HTML;
   }
   return false;
 }
@@ -161,7 +187,7 @@ window.addEventListener('pageshow', (ev) => {
   const btn = document.getElementById('profileSubmit');
   if (btn && btn.disabled) {
     btn.disabled = false;
-    btn.textContent = '✓ Profili Kaydet';
+    btn.innerHTML = PROFILE_BTN_HTML;
   }
 });
 </script>

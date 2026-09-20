@@ -25,7 +25,8 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/pages/iletisim.css?v=dd1451f2">
+<link rel="stylesheet" href="/static/css/data-art.css?v=4de26da7">
+<link rel="stylesheet" href="/static/css/pages/iletisim.css?v=623b6df5">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -34,7 +35,8 @@
 
 
 <main class="container" id="main-content" tabindex="-1">
-  <div class="card">
+  <section class="card da-panel da-panel--accent cf-intro">
+    <div class="da-recap-tag"><span class="dot" aria-hidden="true"></span>İletişim Kanalı</div>
     <h2>Bize Ulaşın</h2>
     <p>Hata bildirimi, öneri veya işbirliği için formu doldurun. Genellikle 1–3 iş günü içinde yanıt veriyoruz.</p>
 
@@ -45,25 +47,26 @@
         <div class="contact-val"><a href="mailto:iletisim@borsapusula.com">iletisim@borsapusula.com</a></div>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- İletişim Formu -->
-  <div class="card" style="margin-top:16px">
-    <h2 style="margin-bottom:16px">Mesaj Gönder</h2>
+  <section class="card da-panel da-panel--accent cf-formcard">
+    <div class="da-recap-tag"><span class="dot" aria-hidden="true"></span>Mesaj Formu</div>
+    <h2>Mesaj Gönder</h2>
     <form id="contactForm" onsubmit="submitForm(event)" novalidate>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="cf-grid">
         <div>
-          <label for="cfName" style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Ad Soyad</label>
-          <input id="cfName" type="text" required maxlength="100" autocomplete="name" placeholder="Adınız" style="width:100%;background:var(--bp-border-subtle);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:9px 12px;color:var(--bp-text);font-size:var(--bp-text-lg);transition:border-color .15s">
+          <label class="cf-label" for="cfName">Ad Soyad</label>
+          <input class="cf-input" id="cfName" type="text" required maxlength="100" autocomplete="name" placeholder="Adınız">
         </div>
         <div>
-          <label for="cfEmail" style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">E-posta</label>
-          <input id="cfEmail" type="email" required maxlength="200" autocomplete="email" placeholder="ornek@mail.com" style="width:100%;background:var(--bp-border-subtle);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:9px 12px;color:var(--bp-text);font-size:var(--bp-text-lg);transition:border-color .15s">
+          <label class="cf-label" for="cfEmail">E-posta</label>
+          <input class="cf-input" id="cfEmail" type="email" required maxlength="200" autocomplete="email" placeholder="ornek@mail.com">
         </div>
       </div>
-      <div style="margin-bottom:12px">
-        <label for="cfSubject" style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Konu</label>
-        <select id="cfSubject" required style="width:100%;background:var(--bp-border-subtle);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:9px 12px;color:var(--bp-text);font-size:var(--bp-text-lg)">
+      <div class="cf-row">
+        <label class="cf-label" for="cfSubject">Konu</label>
+        <select class="cf-input" id="cfSubject" required>
           <option value="" selected disabled>Seçiniz…</option>
           <option value="Site Hatası (buton, görünüm)">🐛 Site Hatası (buton, görünüm)</option>
           <option value="Öneri">💡 Öneri</option>
@@ -72,79 +75,110 @@
           <option value="Diğer">❓ Diğer</option>
         </select>
       </div>
-      <div style="margin-bottom:16px">
-        <label for="cfMessage" style="font-size:var(--bp-text-xs);color:var(--bp-text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Mesaj</label>
-        <textarea id="cfMessage" required maxlength="2000" rows="5" placeholder="Mesajınızı buraya yazın..." style="width:100%;background:var(--bp-border-subtle);border:1px solid var(--bp-border);border-radius:var(--bp-radius);padding:9px 12px;color:var(--bp-text);font-size:var(--bp-text-lg);resize:vertical;font-family:inherit;transition:border-color .15s"></textarea>
+      <div class="cf-row">
+        <label class="cf-label" for="cfMessage">Mesaj</label>
+        <textarea class="cf-input cf-textarea" id="cfMessage" required maxlength="2000" rows="5" placeholder="Mesajınızı buraya yazın..."></textarea>
       </div>
-      <div style="margin-bottom:14px">
-        <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--bp-text3);cursor:pointer;line-height:1.4">
-          <input type="checkbox" id="cfKvkk" required style="margin-top:2px;flex-shrink:0">
-          <span><a href="/gizlilik" target="_blank" style="color:var(--bp-accent-cyan)">Gizlilik Politikası</a>'nı okudum, mesajımdaki kişisel verilerimin işlenmesini kabul ediyorum.</span>
+      <div class="cf-row cf-consent-row">
+        <label class="cf-consent">
+          <input type="checkbox" id="cfKvkk" required>
+          <span><a href="/gizlilik" target="_blank">Gizlilik Politikası</a>'nı okudum, mesajımdaki kişisel verilerimin işlenmesini kabul ediyorum.</span>
         </label>
       </div>
-      <button type="submit" id="cfBtn" style="background:var(--bp-brand);color:var(--bp-bg);border:none;border-radius:var(--bp-radius);padding:10px 24px;font-size:var(--bp-text-base);font-weight:600;cursor:pointer;transition:background .15s">
+      <button type="submit" id="cfBtn" class="cf-submit">
         Gönder <span aria-hidden="true">→</span>
       </button>
-      <div id="cfMsg" role="status" aria-live="polite" style="margin-top:12px;font-size:var(--bp-text-base);display:none"></div>
+      <div id="cfMsg" role="status" aria-live="polite" class="cf-msg"></div>
     </form>
-  </div>
+  </section>
 
 <script>
+// ── 20.09 CPO denetimi — bu blokta duzeltilen UC gercek bug:
+//   (1) `novalidate` acikti, yani `<select required>` tarayici dogrulamasi
+//       HIC calismiyordu ve JS de konuyu kontrol etmiyordu -> bos konu
+//       backend'e gidip mail basligini "[BorsaPusula Iletisim] " (bos)
+//       birakiyordu (app.py api_contact yalniz name/email/message zorunlu).
+//   (2) Hatali alanin kirmizi kenarligi INLINE style ile basiliyordu; inline
+//       stil stylesheet'i yendigi icin kullanici alani duzeltip basariyla
+//       gonderse bile kenarlik KALICI kirmizi kaliyor, `:focus` kurali da
+//       hic gorunmuyordu. Artik sinif (`cf-invalid`) ile isaretleniyor ve
+//       kullanici yazmaya baslar baslamaz temizleniyor.
+//   (3) Basarili gonderimde name/email/message/subject disabled ediliyor ama
+//       KVKK kutusu ETKILESIMLI kaliyordu (yarim-donmus form).
+function cfShowMsg(text, kind) {
+  const msg = document.getElementById('cfMsg');
+  msg.className = 'cf-msg cf-msg--on ' + (kind === 'ok' ? 'cf-msg--ok' : 'cf-msg--err');
+  msg.textContent = text;
+}
+function cfMark(el, invalid) {
+  if (!el) return;
+  if (invalid) {
+    el.classList.add('cf-invalid');
+    el.setAttribute('aria-invalid', 'true');
+    el.setAttribute('aria-describedby', 'cfMsg');
+  } else {
+    el.classList.remove('cf-invalid');
+    el.removeAttribute('aria-invalid');
+    el.removeAttribute('aria-describedby');
+  }
+}
+// Kullanici duzeltmeye baslayinca kirmizi isaret ANINDA kalksin.
+document.getElementById('contactForm').addEventListener('input', (ev) => {
+  if (ev.target.classList && ev.target.classList.contains('cf-invalid')) cfMark(ev.target, false);
+});
+document.getElementById('contactForm').addEventListener('change', (ev) => {
+  if (ev.target.classList && ev.target.classList.contains('cf-invalid')) cfMark(ev.target, false);
+});
+
 async function submitForm(e) {
   e.preventDefault();
   const btn = document.getElementById('cfBtn');
   const msg = document.getElementById('cfMsg');
   const nameEl = document.getElementById('cfName');
   const emailEl = document.getElementById('cfEmail');
+  const subjectEl = document.getElementById('cfSubject');
   const messageEl = document.getElementById('cfMessage');
+  const kvkkEl = document.getElementById('cfKvkk');
   const name = nameEl.value.trim();
   const email = emailEl.value.trim();
   const message = messageEl.value.trim();
+  const subject = subjectEl.value;
+
   if (!name) {
-    nameEl.style.borderColor = 'var(--bp-sat)';
-    nameEl.setAttribute('aria-invalid', 'true');
-    nameEl.setAttribute('aria-describedby', 'cfMsg');
-    msg.style.display = 'block';
-    msg.style.color = 'var(--bp-sat)';
-    msg.textContent = '❌ Ad Soyad alanı zorunlu.';
+    cfMark(nameEl, true);
+    cfShowMsg('Ad Soyad alanı zorunlu.', 'err');
     nameEl.focus();
     return;
   }
-  nameEl.removeAttribute('aria-invalid');
-  nameEl.removeAttribute('aria-describedby');
+  cfMark(nameEl, false);
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    emailEl.style.borderColor = 'var(--bp-sat)';
-    emailEl.setAttribute('aria-invalid', 'true');
-    emailEl.setAttribute('aria-describedby', 'cfMsg');
-    msg.style.display = 'block';
-    msg.style.color = 'var(--bp-sat)';
-    msg.textContent = '❌ Geçerli bir e-posta adresi girin.';
+    cfMark(emailEl, true);
+    cfShowMsg('Geçerli bir e-posta adresi girin.', 'err');
     emailEl.focus();
     return;
   }
-  emailEl.removeAttribute('aria-invalid');
-  emailEl.removeAttribute('aria-describedby');
+  cfMark(emailEl, false);
+  // (1) Konu dogrulamasi — `novalidate` yuzunden `required` hic islemiyordu.
+  if (!subject) {
+    cfMark(subjectEl, true);
+    cfShowMsg('Lütfen bir konu seçin.', 'err');
+    subjectEl.focus();
+    return;
+  }
+  cfMark(subjectEl, false);
   if (!message) {
-    messageEl.style.borderColor = 'var(--bp-sat)';
-    messageEl.setAttribute('aria-invalid', 'true');
-    messageEl.setAttribute('aria-describedby', 'cfMsg');
-    msg.style.display = 'block';
-    msg.style.color = 'var(--bp-sat)';
-    msg.textContent = '❌ Mesaj alanı zorunlu.';
+    cfMark(messageEl, true);
+    cfShowMsg('Mesaj alanı zorunlu.', 'err');
     messageEl.focus();
     return;
   }
-  messageEl.removeAttribute('aria-invalid');
-  messageEl.removeAttribute('aria-describedby');
-  const kvkkEl = document.getElementById('cfKvkk');
+  cfMark(messageEl, false);
   if (kvkkEl && !kvkkEl.checked) {
-    msg.style.display = 'block';
-    msg.style.color = 'var(--bp-sat)';
-    msg.textContent = '❌ Devam etmek için KVKK onay kutusunu işaretleyin.';
+    cfShowMsg('Devam etmek için KVKK onay kutusunu işaretleyin.', 'err');
     kvkkEl.focus();
     return;
   }
-  msg.style.display = 'none';
+  msg.className = 'cf-msg';
   btn.disabled = true;
   btn.textContent = 'Gönderiliyor…';
   try {
@@ -154,7 +188,7 @@ async function submitForm(e) {
       body: JSON.stringify({
         name:    name,
         email:   email,
-        subject: document.getElementById('cfSubject').value,
+        subject: subject,
         message: message
       }),
       signal: AbortSignal.timeout(15000)
@@ -164,22 +198,18 @@ async function submitForm(e) {
       nameEl.disabled = true;
       emailEl.disabled = true;
       messageEl.disabled = true;
-      document.getElementById('cfSubject').disabled = true;
+      subjectEl.disabled = true;
+      if (kvkkEl) kvkkEl.disabled = true;   // (3)
       btn.style.display = 'none';
-      msg.style.display = 'block';
-      msg.style.color = 'var(--bp-al)';
-      msg.innerHTML = '✅ Mesajınız iletildi.<br><span style="font-size:var(--bp-text-base);color:var(--bp-text3)">1–3 iş günü içinde yanıt veriyoruz.</span>';
+      msg.className = 'cf-msg cf-msg--on cf-msg--ok';
+      msg.innerHTML = '✅ Mesajınız iletildi.<br><span class="cf-msg-sub">1–3 iş günü içinde yanıt veriyoruz.</span>';
     } else {
-      msg.style.display = 'block';
-      msg.style.color = 'var(--bp-sat)';
-      msg.textContent = '❌ Hata: ' + (d.error || 'Bilinmeyen hata');
+      cfShowMsg('Hata: ' + (d.error || 'Bilinmeyen hata'), 'err');
       btn.disabled = false;
       btn.innerHTML = 'Gönder <span aria-hidden="true">→</span>';
     }
   } catch(err) {
-    msg.style.display = 'block';
-    msg.style.color = 'var(--bp-sat)';
-    msg.textContent = '❌ Bağlantı hatası — lütfen daha sonra tekrar deneyin.';
+    cfShowMsg('Bağlantı hatası — lütfen daha sonra tekrar deneyin.', 'err');
     btn.disabled = false;
     btn.innerHTML = 'Gönder <span aria-hidden="true">→</span>';
   }

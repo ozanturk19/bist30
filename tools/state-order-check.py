@@ -59,6 +59,12 @@ GOZDEN_GECIRILMIS_KASITLI = {
     'Ayni gerekce (bkz. sel-1).',
   ('static/css/pages/sektor_harita.css', '.chip:hover', '.chip.sel-3'):
     'Ayni gerekce (bkz. sel-1).',
+  ('static/css/pages/iletisim.css', '.cf-input:hover', '.cf-input.cf-invalid'):
+    'Hatali alan isareti hover ile silinmemeli — hata, kullanici alani '
+    'duzeltene kadar gorunur kalmali (girdi olayinda sinif zaten kalkiyor).',
+  ('static/css/pages/iletisim.css', '.cf-input:focus', '.cf-input.cf-invalid'):
+    'Ayni gerekce: odaklanmak hatayi gizlememeli. Odak gorunurlugunu global '
+    ':focus-visible outline kurali (bp_critical_css) ayrica sagliyor.',
   ('static/css/shared.css', '.mbn-sheet-item:active', '.mbn-sheet-item.active'):
     'Mobil sayfada bulundugun satirin isaretli gorunumu, basili-tutma geri '
     'bildiriminden onceliklidir.',

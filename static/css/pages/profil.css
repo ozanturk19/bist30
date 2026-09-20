@@ -1,4 +1,10 @@
-/* ==== extracted from templates/profil.html (T2.5) ==== */
+/* ==== extracted from templates/profil.html (T2.5) ====
+   20.09 CPO — Data-Art donusumu. Bu sayfa (hos geldin mailindeki linkin
+   indigi tek yer) donusumun basladigi 18.09'dan beri hic siraya girmemisti:
+   duz kutu + duz dikdortgen secenekler + duz dikdortgen kaydet butonu.
+   Govde recetesi (degrade + kenarlik + radius + parilti) artik paylasilan
+   static/css/data-art.css `.da-panel` ilkelinden geliyor; burada SADECE bu
+   sayfanin deltasi duruyor. */
 
   * { box-sizing: border-box; }
   html { overflow-x: hidden; }
@@ -23,6 +29,7 @@
   .hero {
     text-align: center; margin-bottom: 32px;
   }
+  .hero .da-recap-tag { margin-bottom: 10px; }
   .hero h1 {
     font-family: 'Space Grotesk', sans-serif;
     font-size: var(--bp-text-28); font-weight: 800;
@@ -37,17 +44,12 @@
     margin: 0 auto;
   }
   footer { text-align: center; padding: 20px; font-size: var(--bp-text-sm); color: var(--bp-text3); margin-top: 32px; }
+  /* .da-panel deltasi — zemin/kenar/radius/parilti paylasilan katmandan gelir. */
   .form-card {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius-14);
     padding: 28px;
     margin-bottom: 18px;
-  }
-  .form-card.success {
-    background: rgba(var(--bp-al-rgb),0.05);
-    border-color: rgba(var(--bp-al-rgb),0.3);
-    text-align: center;
+    --da-glow-rgb: var(--bp-art-violet-rgb);
+    --da-glow-size: 360px; --da-glow-a: .13;
   }
   .question {
     margin-bottom: 28px;
@@ -68,14 +70,18 @@
   }
   .opts.cols-1 { grid-template-columns: 1fr; }
   .opt {
+    position: relative;
     background: var(--bp-surface2);
     border: 1.5px solid var(--bp-border);
-    border-radius:var(--bp-radius-md);
-    padding: 12px 14px;
+    border-radius: var(--bp-radius-xl);
+    padding: 13px 16px;
     cursor: pointer;
     font-size: var(--bp-text-base);
     color: var(--bp-text2);
-    transition: all .15s;
+    transition: border-color var(--bp-dur-base) var(--bp-ease-standard),
+                background   var(--bp-dur-base) var(--bp-ease-standard),
+                color        var(--bp-dur-base) var(--bp-ease-standard),
+                transform    var(--bp-dur-base) var(--bp-ease-standard);
     text-align: left;
     font-family: inherit;
     user-select: none;
@@ -83,38 +89,51 @@
   .opt:hover {
     border-color: var(--bp-border2);
     color: var(--bp-text);
-    background: rgba(255,255,255,0.02);
+    background: var(--bp-surface);
+    transform: translateY(-1px);
   }
+  /* K-G kasitli cift (tools/state-order-check.py): secim geri bildirimi
+     hover'dan onceliklidir — secili secenek hover ile bulanmamali. */
   .opt.selected {
     border-color: var(--bp-brand);
     background: rgba(var(--bp-brand-rgb),0.10);
     color: var(--bp-brand);
     font-weight: 600;
+    transform: rotate(-.5deg);
+    box-shadow: 0 6px 18px rgba(var(--bp-brand-rgb),.14);
   }
   .submit-row {
     display: flex; justify-content: center; gap: 12px;
     margin-top: 24px;
   }
   .btn {
+    display: inline-flex; align-items: center; gap: 7px;
     background: var(--bp-al);
     color: var(--bp-bg);
     border: none;
-    padding: 13px 36px;
-    border-radius:var(--bp-radius-md);
-    font-size: var(--bp-text-md); font-weight: 700;
+    padding: 12px 30px;
+    border-radius: var(--bp-radius-pill);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--bp-text-base); font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
     cursor: pointer;
-    font-family: inherit;
-    letter-spacing: 0.3px;
-    transition: opacity .15s, transform .1s;
+    text-decoration: none;
+    transform: rotate(-1deg);
+    box-shadow: 0 6px 18px rgba(var(--bp-al-rgb),.20);
+    transition: transform var(--bp-dur-base) var(--bp-ease-standard),
+                box-shadow var(--bp-dur-base) var(--bp-ease-standard);
   }
-  .btn:hover { opacity: 0.9; }
-  .btn:active { transform: scale(0.98); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn:hover { transform: rotate(0deg) translateY(-1px); box-shadow: 0 8px 22px rgba(var(--bp-al-rgb),.28); }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: rotate(0deg); box-shadow: none; }
   .btn-secondary {
     background: transparent;
     color: var(--bp-text3);
     border: 1px solid var(--bp-border);
+    box-shadow: none;
+    transform: rotate(.8deg);
   }
+  .btn-secondary:hover { box-shadow: none; }
   .alert {
     padding: 12px 16px;
     border-radius:var(--bp-radius-md);
@@ -131,6 +150,25 @@
     border: 1px solid rgba(var(--bp-al-rgb),0.30);
     color: var(--bp-al);
   }
+  /* Form ici dogrulama/hata mesaji — eskiden `alert()` idi (tarayici modali,
+     odagi calar, mobilde sayfa baglamindan kopariyordu). */
+  .profile-msg { display: none; margin-top: 14px; text-align: center; font-size: var(--bp-text-base); }
+  .profile-msg--on  { display: block; }
+  .profile-msg--err { color: var(--bp-sat); }
+
+  /* Basari paneli — eskiden formun KENDI ici innerHTML ile eziliyordu ve
+     form kalici bir role="status" canli bolgesiydi (bkz. sablondaki not). */
+  .profile-result {
+    padding: 34px 28px;
+    text-align: center;
+    margin-bottom: 18px;
+    --da-glow-rgb: var(--bp-al-rgb);
+    --da-glow-size: 340px; --da-glow-a: .12;
+  }
+  .profile-result-mark  { font-size: var(--bp-text-42); color: var(--bp-al); margin-bottom: 10px; line-height: 1; }
+  .profile-result-title { font-size: var(--bp-text-xl); font-weight: 800; color: var(--bp-al); margin-bottom: 8px; }
+  .profile-result-body  { font-size: var(--bp-text-base); color: var(--bp-text2); margin-bottom: 24px; }
+
   .footer-note {
     text-align: center;
     font-size: var(--bp-text-xs);
