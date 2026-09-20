@@ -1,6 +1,16 @@
 /* ==== extracted from templates/metodoloji.html (T2.5) ==== */
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* 20.09 CPO — CANLI OLCULDU: sayfadaki 8 baslik id'sinin HICBIRINDE
+     scroll-margin yoktu, html'de de scroll-padding. Bir `#adx` baglantisi
+     basligi tam viewport tepesine (top:0) getiriyor, oysa orada YAPISKAN
+     makro serit (33px) + header (60px) duruyor -- elementFromPoint o noktada
+     `span.macro-item` donuyordu, yani baslik FIILEN gorunmuyordu. Site
+     genelinde 8 ayri yerden /metodoloji#... derin baglantisi veriliyor
+     (hisse jargon ipuclari, blog, terim sozlugu), hepsi ayni sonucu
+     veriyordu. Tek kural her mevcut VE gelecek capayi kapsar. */
+  html { scroll-padding-top: calc(108px + env(safe-area-inset-top, 0px) * 2); }
+
   body {
     font-size: var(--bp-text-md);
     line-height: 1.7;
