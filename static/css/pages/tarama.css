@@ -277,8 +277,27 @@
   /* CPO-DEV2-100: overflow-x:auto kosulsuz uygulanmisti, geregi olmayan genislikte bile
      thead sticky referansini bozuyordu. >=900px'te tablo zaten viewport'a sigar (mobilde
      zaten #mobileResultCards devrede, table gizli) - scroll ihtiyaci kalmiyor. */
-  @media (min-width:900px) {
+  /* 20.09 CANLI OLCUM DUZELTMESI: yukaridaki ">=900px'te tablo zaten viewport'a
+     sigar" varsayimi YANLISTI. Canlida olculdu (1024px viewport, Chrome):
+     #resultTable dogal genisligi 1110px, .table-wrap ic genisligi 982px —
+     yani tablo 128px tasiyor, overflow-x:visible oldugu icin .table-wrap
+     scroll ETMIYOR ve html{overflow-x:clip} tasan kismi sessizce KIRPIYOR:
+     900-1149px arasi ekranlarda (kucuk dizustu / yatay tablet) "Sektor"
+     kolonu tamamen, "Tazelik" kolonu kismen GORUNMEZ ve kullanicinin onlara
+     ulasmasinin hicbir yolu yok (yatay kaydirma cubugu da yok). Temel Analiz
+     tablosu da ayni (1106px).
+     Esik, tablonun GERCEKTEN sigdigi genislige tasindi: container 1200px'te
+     tavanlandigi icin >=1200px viewport'ta ic genislik 1160px (~50px pay).
+     900-1199px bandinda .table-wrap yeniden scroll kabi oluyor; bu bantta
+     thead sticky'si bilincli olarak KAPATILIYOR — asagidaki (satir ~462)
+     aciklamada oldugu gibi bir scroll kabi ici sticky, referansini hic
+     kaymayan scrollport'a kaydirip yarim-bozuk davranir; veriyi kirpmak
+     yerine sticky'den vazgecmek acik ara daha iyi takas. */
+  @media (min-width:1200px) {
     .table-wrap { overflow-x: visible; }
+  }
+  @media (min-width:900px) and (max-width:1199px) {
+    thead th { position: static; }
   }
   table { width:100%; border-collapse:collapse; }
   thead th {
