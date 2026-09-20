@@ -3209,45 +3209,36 @@ function _pbColor(v) { return v == null ? 'var(--bp-text)' : v < 1 ? 'var(--bp-a
    (yıllık ~4 bar geniş, çeyreklik ~8 bar dar). */
 const _fundTrendData = { y: [], q: [] };
 
-/* ── Raporlama para birimi — CPO-1674 (20.09) ────────────────────────────────
+/* ── Raporlama para birimi — CPO-1674 (20.09), kalıcı çözüm DEV1 (21.09) ─────
    BIST'te birkac sirket finansallarini TRY disinda raporluyor (canli olcum,
-   prod cache 210 hisse: THYAO+ENKAI USD, TAVHL EUR — baska yok). Bu sayfa o
-   rakamlari bugune kadar KOSULSUZ "₺" diye etiketliyordu; THYAO'nun 24,1 Mr $
-   cirosu "24,1 Mr ₺" olarak gorunuyordu (~41 kat kucuk).
+   prod cache 210 hisse: THYAO+ENKAI USD, TAVHL EUR — baska yok).
 
-   Kritik nuans (olculdu, varsayilmadi): yfinance `info` blogu hisseye gore
-   DEGISIYOR — THYAO/ENKAI'de parasal alanlar (revenue/net_income/total_cash/
-   book_value) raporlama para biriminde, TAVHL'de ise TRY'ye cevrilmis geliyor.
-   `financial_currency` etiketi ucunde de "TRY degil" diyor, yani etiket tek
-   basina hangi alanin dovizli oldugunu SOYLEMIYOR — naif carpma/etiketleme
-   TAVHL'i BOZAR.
-
-   Guvenilir tek capa `statement_trend`: dort kontrol hissesinde de (THYAO/
-   ENKAI/TAVHL/ASELS) birebir `financial_currency` cinsinde geldigi dogrulandi.
-   Bu yuzden info blogunun dovizli olup olmadigini TRENDLE BUYUKLUK
-   KARSILASTIRMASIYLA belirliyoruz; kur farki (>x40) ile TTM/yil farki (x0.4-x2.5)
-   araliklari cakismadigi icin ayrim kesin.
-   Kalici cozum backend'de (DEV1 / CPO-1674): bu blok o zaman sadelesebilir. */
+   Backend artik iki AYRI, cozulmus alan gonderiyor (magnitude-tahmini frontend
+   heuristigi kaldirildi):
+   - f.financial_currency -> statement_trend grafiginin para birimi (yfinance
+     income_stmt, dort kontrol hissesinde de %100 dogrulandi).
+   - f.statement_currency -> revenue/net_income/total_cash/book_value kartlarinin
+     GERCEK para birimi. TAVHL'de financial_currency="EUR" etiketli olsa da
+     bu alan "TRY" doner (deger orada fiilen TRY, bkz. CPO-1674) — market_cap'e
+     bolunen F/S oraninin makul araliga (0.03-25) mi dustugune bakan bir
+     plausibility testiyle backend'de cozuluyor (app.py _resolve_statement_currency). */
 const _CUR_SYM = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' };
 const _CUR_ADI = { USD: 'ABD doları', EUR: 'euro', GBP: 'İngiliz sterlini' };
-let _fundCur = 'TRY';          // statement_trend'in para birimi
-let _fundInfoForeign = false;  // info blogundaki parasal alanlar da dovizli mi
+let _fundCur = 'TRY';  // statement_trend'in para birimi (financial_currency)
 function _curSym(c){ return _CUR_SYM[c] || (c ? ' ' + c : '₺'); }
 
-/* "26,35 Mrd₺" -> 26350000000 (backend'in onceden bicimledigi string).
-   Bicim tanimadiysa null — cagiran taraf o zaman hicbir sey degistirmiyor. */
-function _parseFmtMoney(s){
-  if (typeof s !== 'string') return null;
-  const m = s.match(/^(-?[\d.,]+)\s*(T|Mrd|Mn)?\s*₺/);
-  if (!m) return null;
-  const n = parseFloat(m[1].replace(/\./g, '').replace(',', '.'));
-  if (!isFinite(n)) return null;
-  return n * (m[2] === 'T' ? 1e12 : m[2] === 'Mrd' ? 1e9 : m[2] === 'Mn' ? 1e6 : 1);
-}
-/* Backend'in "₺" sonekini dogru sembolle degistirir (sadece dovizli hissede). */
-function _reCur(s){
-  if (!_fundInfoForeign || typeof s !== 'string') return s;
-  return s.replace(/₺\s*$/, _curSym(_fundCur));
+/* {value, currency} -> "26,35 Mrd$" gibi bicimli metin. perShare=true iken
+   Mrd/Mn/T olcekleme yapilmaz (book_value gibi hisse-basi kucuk sayilar icin). */
+function _fmtMoneyObj(m, perShare){
+  if (!m || m.value == null) return null;
+  const sym = _curSym(m.currency);
+  const v = m.value, av = Math.abs(v), sign = v < 0 ? '-' : '';
+  const dec2 = n => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  if (perShare) return sign + dec2(av) + ' ' + sym;
+  if (av >= 1e12) return sign + dec2(av/1e12) + ' T' + sym;
+  if (av >= 1e9)  return sign + dec2(av/1e9) + ' Mrd' + sym;
+  if (av >= 1e6)  return sign + dec2(av/1e6) + ' Mn' + sym;
+  return sign + dec2(av) + ' ' + sym;
 }
 
 function _fmtCompactCur(v){
@@ -3319,24 +3310,18 @@ async function loadFundamentals() {
       return;
     }
 
-    /* Raporlama para birimi tespiti — CPO-1674. Kart/trend render'larindan
-       ONCE calismali (ikisi de _fundCur/_fundInfoForeign'i okuyor). */
+    /* Raporlama para birimi — DEV1/CPO-1674: artik backend cozuyor, burada
+       sadece okunuyor. _fundCur (trend grafigi) <- financial_currency,
+       kartlar <- f.statement_currency (asagida _fmtMoneyObj icinde
+       her deger kendi .currency'sini tasidigi icin ayrica global degiskene
+       gerek yok, sadece not/trend icin _fundCur kaliyor). */
     _fundCur = f.financial_currency || 'TRY';
-    _fundInfoForeign = false;
-    if (_fundCur !== 'TRY') {
-      const _tr = f.statement_trend || [];
-      const _trRev = _tr.length ? Math.abs(_tr[_tr.length - 1].total_revenue || 0) : 0;
-      const _inRev = Math.abs(_parseFmtMoney(f.revenue) || 0);
-      if (_trRev > 0 && _inRev > 0) {
-        const _r = _inRev / _trRev;
-        /* x0.4-x2.5: TTM ile son tam yil arasindaki normal fark. Kur farki
-           (USD/TRY ~41, EUR/TRY ~48) bu araliga asla dusemez. */
-        _fundInfoForeign = (_r > 0.4 && _r < 2.5);
-      }
+    const _stmtCur = f.statement_currency || 'TRY';
+    if (_fundCur !== 'TRY' || _stmtCur !== 'TRY') {
       const _note = document.getElementById('fundCurNote');
       if (_note) {
         const _adi = _CUR_ADI[_fundCur] || _fundCur;
-        _note.innerHTML = _fundInfoForeign
+        _note.innerHTML = (_stmtCur !== 'TRY')
           ? `<strong style="color:var(--bp-gold)">Para birimi:</strong> Bu şirket finansallarını <strong>${_fundCur}</strong> (${_adi}) cinsinden raporluyor. Ciro, net kâr, nakit ve trend grafiğindeki tutarlar <strong>${_curSym(_fundCur)}</strong> cinsindedir; piyasa değeri ve hisse fiyatı ₺ cinsindedir. Bu ikisini doğrudan oranlamayın.`
           : `<strong style="color:var(--bp-gold)">Para birimi:</strong> Bu şirket finansallarını <strong>${_fundCur}</strong> (${_adi}) cinsinden raporluyor. Trend grafiğindeki tutarlar <strong>${_curSym(_fundCur)}</strong>, üstteki kartlar ₺ cinsindedir.`;
         _note.style.display = '';
@@ -3345,20 +3330,20 @@ async function loadFundamentals() {
 
     /* Değerleme kartları */
     const valCards = [
-      _fundCard('Piyasa Değeri', f.market_cap, 'var(--bp-text)'),  /* mcap her zaman ₺ (uc hissede de olculdu) */
+      _fundCard('Piyasa Değeri', _fmtMoneyObj(f.market_cap), 'var(--bp-text)'),  /* mcap her zaman ₺ */
       _fundCard('F/K Oranı', f.pe_ratio != null ? f.pe_ratio.toFixed(1).replace('.', ',') + 'x' : null, _peColor(f.pe_ratio), f.pe_ratio < 12 ? 'Ucuz' : f.pe_ratio < 25 ? 'Makul' : 'Pahalı'),
       _fundCard('İleriye Dönük F/K', f.forward_pe != null ? f.forward_pe.toFixed(1).replace('.', ',') + 'x' : null, _peColor(f.forward_pe), f.forward_pe < 12 ? 'Ucuz' : f.forward_pe < 25 ? 'Makul' : 'Pahalı'),
       _fundCard('F/DD Oranı', f.pb_ratio != null ? f.pb_ratio.toFixed(2).replace('.', ',') + 'x' : null, _pbColor(f.pb_ratio), f.pb_ratio < 1 ? 'Ucuz' : f.pb_ratio < 3 ? 'Makul' : 'Pahalı'),
       _fundCard('HBK (EPS)', f.eps != null ? f.eps.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : null, 'var(--bp-text)'),
-      _fundCard('F/S Oranı', (!_fundInfoForeign && f.price_to_sales != null) ? f.price_to_sales.toFixed(2).replace('.', ',') + 'x' : null, 'var(--bp-text)'),
-      _fundCard('Defter Değeri (Hisse Başı)', (!_fundInfoForeign && f.book_value != null) ? f.book_value.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : null, 'var(--bp-text)'),
-      _fundCard('Nakit ve Benzerleri', _reCur(f.total_cash), 'var(--bp-text)'),
+      _fundCard('F/S Oranı', f.price_to_sales != null ? f.price_to_sales.toFixed(2).replace('.', ',') + 'x' : null, 'var(--bp-text)'),
+      _fundCard('Defter Değeri (Hisse Başı)', _fmtMoneyObj(f.book_value, true), 'var(--bp-text)'),
+      _fundCard('Nakit ve Benzerleri', _fmtMoneyObj(f.total_cash), 'var(--bp-text)'),
     ].filter(Boolean).join('');
 
     /* Kârlılık kartları */
     const profCards = [
-      _fundCard('Yıllık Ciro', _reCur(f.revenue), 'var(--bp-text)'),
-      _fundCard('Net Kâr', _reCur(f.net_income), 'var(--bp-text)'),
+      _fundCard('Yıllık Ciro', _fmtMoneyObj(f.revenue), 'var(--bp-text)'),
+      _fundCard('Net Kâr', _fmtMoneyObj(f.net_income), 'var(--bp-text)'),
       _fundCard('Net Kâr Marjı', f.profit_margin != null ? `%${f.profit_margin.toFixed(1).replace('.', ',')}` : null, _growthColor(f.profit_margin), f.profit_margin > 10 ? 'Yüksek' : f.profit_margin > 0 ? 'Orta' : 'Negatif'),
       _fundCard('Faaliyet Marjı', f.operating_margin != null ? `%${f.operating_margin.toFixed(1).replace('.', ',')}` : null, _growthColor(f.operating_margin), f.operating_margin > 10 ? 'Yüksek' : f.operating_margin > 0 ? 'Orta' : 'Negatif'),
       _fundCard('Kazanç Büyümesi', f.earnings_growth != null ? `%${f.earnings_growth.toFixed(1).replace('.', ',')}` : null, _growthColor(f.earnings_growth), f.earnings_growth > 10 ? 'Güçlü' : f.earnings_growth > 0 ? 'Ilımlı' : 'Daralma'),

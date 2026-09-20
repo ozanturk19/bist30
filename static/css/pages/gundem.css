@@ -349,3 +349,14 @@
       .stock-card:hover { background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%); }
     }
   }
+
+  /* 8 ── Kart içi dikey hizalama (canlı ölçümle yakalandı).
+     .stock-grid `auto-fill` grid olduğu için aynı satırdaki kartlar eşit
+     yükseklikte (stretch) — ama içerik akışı block olduğundan "Detay →" satırı
+     metrik sayısına göre farklı yükseklikte duruyordu: ölçümde aynı satırdaki
+     138px'lik kartlarda footer kart dibinden 40px / 15px, yani 25px'lik görünür
+     hizasızlık (ENERY/AYGAZ/TUPRS'ta "Kalite Kovalama" ikinci satıra sarıyor,
+     bazı kartta ayrıca R/R satırı var). Kart başına metrik SAYISI veriye bağlı
+     olduğu için tipografiyle çözülemez — footer'ı dibe sabitliyoruz. */
+  .stock-card { display: flex; flex-direction: column; }
+  .sc-footer  { margin-top: auto; padding-top: 10px; }
