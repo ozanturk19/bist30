@@ -27,7 +27,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/gundem.css?v=5ee72e75">
+<link rel="stylesheet" href="/static/css/pages/gundem.css?v=8547f055">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -52,7 +52,11 @@
     {% if s.rsi is not none %}<div class="sc-metric"><span>RSI </span><strong>{{ '%.1f'|format(s.rsi)|replace('.', ',') }}</strong></div>{% endif %}
     {% if s.signal_date %}<div class="sc-metric"><span>Süre </span><strong>{{ s.signal_date|signal_age_text }}</strong></div>{% endif %}
     {% if s.entry_quality %}<div class="sc-metric"><span>Kalite </span><strong>{{ {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Kovalama'}.get(s.entry_quality, s.entry_quality) }}</strong></div>{% endif %}
-    {% if s.rr_signal %}<div class="sc-metric"><span>R/R </span><strong>1:{{ '%.1f'|format(s.rr_signal)|replace('.', ',') }}</strong></div>{% endif %}
+    {# 20.09 CPO: rr_signal NEGATIF gelebiliyor (NETAS canlida -0,74: TP1 90,85 -> 85,67,
+       yani hedef girisin ALTINDA). "1:N" oran notasyonu negatif sayiyi ifade EDEMEZ —
+       canlida "R/R 1:-0,7" diye anlamsiz bir metin basiliyordu. Kok neden backend'de
+       (CPO-1676, DEV1), burada malformed sayi basmiyoruz: yanlis sayi eksik sayidan kotu. #}
+    {% if s.rr_signal and s.rr_signal > 0 %}<div class="sc-metric"><span>R/R </span><strong>1:{{ '%.1f'|format(s.rr_signal)|replace('.', ',') }}</strong></div>{% endif %}
   </div>
   <div class="sc-footer">
     <div style="display:flex;align-items:center;gap:8px">
@@ -69,13 +73,13 @@
 {% include '_stale_banner.html' %}
 
   <!-- AI Makro Özeti -->
-  <div id="macroSummaryBox" role="status" aria-live="polite" style="display:none;background:linear-gradient(135deg,rgba(var(--bp-accent-cyan-rgb),.07),rgba(139,92,246,.04));border:1px solid rgba(var(--bp-accent-cyan-rgb),.18);border-radius:var(--bp-radius-lg);padding:12px 16px;margin-bottom:16px">
-    <div style="display:flex;align-items:flex-start;gap:10px">
-      <span style="font-size:var(--bp-text-xl);flex-shrink:0;margin-top:1px"><span aria-hidden="true">🤖</span></span>
+  <div id="macroSummaryBox" class="ai-summary-box" role="status" aria-live="polite" style="display:none">
+    <div class="ai-sum-row">
+      <span class="ai-sum-icon"><span aria-hidden="true">🤖</span></span>
       <div>
-        <div style="font-size:var(--bp-text-xs);font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">AI Piyasa Özeti</div>
-        <div id="macroSummaryText" style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.6"></div>
-        <div id="macroSummaryTime" style="font-size:var(--bp-text-2xs);color:var(--bp-text3);margin-top:4px"></div>
+        <div class="ai-sum-eyebrow">AI Piyasa Özeti</div>
+        <div id="macroSummaryText" class="ai-sum-text"></div>
+        <div id="macroSummaryTime" class="ai-sum-time"></div>
       </div>
     </div>
   </div>
@@ -153,11 +157,11 @@
         <a href="/bilanco-takvimi" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
       </div>
       <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap">{% for p in ssr_bilanco_upcoming %}{% set is_active = p.status == 'active' %}{% set dot_clr = 'var(--bp-gold)' if is_active else 'var(--bp-text3)' %}
-        <div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};border-radius:8px;padding:12px 14px">
+        <div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};border-radius:var(--bp-radius-md);padding:12px 14px">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
             <span style="width:7px;height:7px;border-radius:50%;background:{{ dot_clr }};flex-shrink:0"></span>
             <span style="font-size:var(--bp-text-sm);font-weight:600;color:var(--bp-text2)">{{ p.label }}</span>
-            <span style="font-size:10px;padding:1px 7px;border-radius:10px;background:{{ 'rgba(var(--bp-gold-rgb),.12)' if is_active else 'rgba(var(--bp-text3-rgb),.08)' }};border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};color:{{ dot_clr }};margin-left:auto">{{ 'Aktif' if is_active else 'Yaklaşıyor' }}</span>
+            <span style="font-size:var(--bp-text-2xs);padding:1px 7px;border-radius:var(--bp-radius-lg);background:{{ 'rgba(var(--bp-gold-rgb),.12)' if is_active else 'rgba(var(--bp-text3-rgb),.08)' }};border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};color:{{ dot_clr }};margin-left:auto">{{ 'Aktif' if is_active else 'Yaklaşıyor' }}</span>
           </div>
           <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-bottom:3px">{{ p.desc }}</div>
           <div style="font-size:var(--bp-text-xs);color:{{ dot_clr }};font-weight:500">{{ p.days_label }}</div>
@@ -183,7 +187,7 @@
     <div class="section">
       <div class="section-hdr">
         <div class="section-title">
-          <span class="dot" style="background:#8b5cf6"></span>
+          <span class="dot dot-macro"></span>
           Makro Haberler
         </div>
         <span class="section-sub" id="macroNewsUpdatedAt">—</span>
@@ -253,7 +257,8 @@ function renderCard(s, isNew) {
     metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeText(s.signal_date)}</strong></div>`);
   if (s.entry_quality)      metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${eqLabel(s.entry_quality)}</strong></div>`);
   /* DEV-1763: sabit rr_ratio(=2.0) yerine sinyal başından gerçek R/R (rr_signal) */
-  if (s.rr_signal)          metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_signal).toFixed(1).replace('.', ',')}</strong></div>`);
+  /* 20.09 CPO: SSR daliyla ayni guard — negatif rr_signal "1:-0,7" diye basiliyordu. */
+  if (s.rr_signal > 0)      metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_signal).toFixed(1).replace('.', ',')}</strong></div>`);
 
   const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';
 
@@ -347,11 +352,11 @@ async function loadGundem() {
           const dotClr   = isActive ? 'var(--bp-gold)' : 'var(--bp-text3)';
           const badgeBg  = isActive ? 'rgba(var(--bp-gold-rgb),.12)' : 'rgba(var(--bp-text3-rgb),.08)';
           const badgeBrd = isActive ? 'rgba(var(--bp-gold-rgb),.3)' : 'rgba(var(--bp-text3-rgb),.2)';
-          return `<div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid ${badgeBrd};border-radius:8px;padding:12px 14px">
+          return `<div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid ${badgeBrd};border-radius:var(--bp-radius-md);padding:12px 14px">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
               <span style="width:7px;height:7px;border-radius:50%;background:${dotClr};flex-shrink:0"></span>
               <span style="font-size:var(--bp-text-sm);font-weight:600;color:var(--bp-text2)">${p.label}</span>
-              <span style="font-size:10px;padding:1px 7px;border-radius:10px;background:${badgeBg};border:1px solid ${badgeBrd};color:${dotClr};margin-left:auto">${isActive ? 'Aktif' : 'Yaklaşıyor'}</span>
+              <span style="font-size:var(--bp-text-2xs);padding:1px 7px;border-radius:var(--bp-radius-lg);background:${badgeBg};border:1px solid ${badgeBrd};color:${dotClr};margin-left:auto">${isActive ? 'Aktif' : 'Yaklaşıyor'}</span>
             </div>
             <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-bottom:3px">${p.desc}</div>
             <div style="font-size:var(--bp-text-xs);color:${dotClr};font-weight:500">${p.days_label}</div>
@@ -389,12 +394,12 @@ async function loadGundem() {
           return `<div class="news-card" data-ticker="${etTicker}" role="link" tabindex="0"
             onclick="window.location.href='/hisse/'+this.dataset.ticker"
             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='/hisse/'+this.dataset.ticker}"
-            style="display:block;text-decoration:none;cursor:pointer;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:12px 14px;transition:border-color .15s"
+            style="display:block;text-decoration:none;cursor:pointer;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);padding:12px 14px;transition:border-color .15s"
             onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
               <a href="/hisse/${etTicker}" onclick="event.stopPropagation()" style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text2);text-decoration:none">${etTicker}</a>
               <span style="font-size:var(--bp-text-xs);font-weight:600;color:${sigCls}">${sigTxt}</span>
-              <span style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-left:auto">${escapeHtml(item.name||'')}</span>
+              <span style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-left:auto">${escapeHtml((item.name||'').replace(' A.Ş.','').replace(' T.A.Ş.',''))}</span>
               ${kapHref}
             </div>
             <div style="font-size:var(--bp-text-sm);color:var(--bp-text3);line-height:1.5">${snippet}</div>
@@ -448,7 +453,7 @@ async function loadEconCalendar() {
       const duTxt = e.is_today ? '<strong style="color:var(--bp-gold)">Bugün!</strong>'
                    : du === 1  ? '<span style="color:var(--bp-gold)">Yarın</span>'
                    : `<span style="color:var(--bp-text3)">${du} gün sonra</span>`;
-      return `<div style="display:flex;align-items:center;gap:12px;background:var(--bp-surface);border:1px solid ${e.is_today?'rgba(var(--bp-gold-rgb),.3)':'var(--bp-border)'};border-radius:8px;padding:10px 14px">
+      return `<div style="display:flex;align-items:center;gap:12px;background:var(--bp-surface);border:1px solid ${e.is_today?'rgba(var(--bp-gold-rgb),.3)':'var(--bp-border)'};border-radius:var(--bp-radius-md);padding:10px 14px">
         <span style="font-size:18px;flex-shrink:0">${e.icon||'📅'}</span>
         <div style="flex:1;min-width:0">
           <div style="font-size:var(--bp-text-base);font-weight:600;color:var(--bp-text2)">${escapeHtml(e.event)}</div>
@@ -481,11 +486,11 @@ async function loadMacroNewsSection() {
     }
     grid.innerHTML = items.slice(0, 8).map(item => {
       return `<a href="${safeHref(item.url)}" target="_blank" rel="noopener"
-        style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:8px;padding:10px 14px;transition:border-color .15s"
+        style="display:flex;align-items:flex-start;gap:10px;text-decoration:none;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);padding:10px 14px;transition:border-color .15s"
         onmouseover="this.style.borderColor='var(--bp-border2)'" onmouseout="this.style.borderColor='var(--bp-border)'">
         <span style="font-size:9px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.5px;background:rgba(var(--bp-text3-rgb),.1);border:1px solid rgba(var(--bp-text3-rgb),.15);border-radius:var(--bp-radius-4);padding:2px 6px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(item.source)}</span>
         <span style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.4;font-weight:500;flex:1">${escapeHtml(item.title)}</span>
-        <span style="font-size:10px;color:var(--bp-text3);white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(item.date_str||item.published||'')}</span>
+        <span style="font-size:var(--bp-text-2xs);color:var(--bp-text3);white-space:nowrap;flex-shrink:0;margin-top:2px">${escapeHtml(item.date_str||item.published||'')}</span>
       </a>`;
     }).join('');
   } catch(e) {
@@ -504,10 +509,14 @@ async function loadMacroSummary() {
     const box  = document.getElementById('macroSummaryBox');
     const el   = document.getElementById('macroSummaryText');
     const tm   = document.getElementById('macroSummaryTime');
+    /* 20.09 CPO: `hidden` (ozet 48 saatten eski) dalinda panel GORUNUR kalip
+       "Ozet hazirlanamadi, gundem basliklarina bakin." basiyordu. Canlida cache
+       10.09 10:22'de donmus durumda, yani sayfanin EN UST icerigi 10 gundur
+       "AI PIYASA OZETI" baslikli bos bir vaat kutusuydu. Bilgi tasimayan panel
+       gosterilmez (Maksimum Sadelik); kullanici asagidaki gercek gundem
+       basliklarini zaten goruyor. Backend tazeleme sorunu CPO-1676 ile DEV1'de. */
     if (data.hidden) {
-      if (el) el.textContent = 'Özet hazırlanamadı, gündem başlıklarına bakın.';
-      if (tm) tm.textContent = '';
-      if (box) box.style.display = '';
+      console.info('makro ozet 48s+ bayat (uretim: ' + (data.generated_date||'?') + '), panel gizli');
       return;
     }
     if (el) el.textContent = txt;

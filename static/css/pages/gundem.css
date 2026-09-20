@@ -194,3 +194,158 @@
   .bp-detail-toggle[open] .bp-detail-toggle-chev { transform: rotate(180deg); }
   .bp-detail-toggle-body { padding-top: 16px; }
 
+
+  /* ══ Data-Art dil aktarımı — gundem.html (20.09, Pazar) ══
+     hisse.html + tarama.html + sektor_harita.html + portfoy.html bitti (bkz. memory
+     project_data_art_kapsamli_donusum_baslangici_18_09); sıradaki yüksek-trafik
+     sayfa burası. Bu sayfaya bugüne kadar HİÇ Data-Art dokunmamıştı: her yüzey düz
+     --bp-surface + --bp-radius, bölüm başlıkları jenerik kalın metin, mikro-etiketler
+     .5px tracking'li sistem fontu. Yani ana sayfadan /gundem'e geçen kullanıcı iki
+     ayrı ürüne bakıyordu.
+     Reçete index.html (.da-eyebrow / .da-recap-panel) + hisse.css'ten birebir ödünç:
+     degrade gövde (surface→surface2), radius-20, Space Grotesk + geniş tracking
+     mikro-etiketler, violet radial glow.
+     DOKUNULMAYAN (bilinçli):
+      (a) .stock-card::before sol şerit — FONKSİYONEL (sinyal rengi taşıyor),
+      (b) .new-signal yeşil/kırmızı zemin tintı — "bugün değişti" işareti, renk
+          semantiği,
+      (c) .bp-detail-toggle-summary — hisse.css'teki emsaliyle birebir aynı kalması
+          gerekiyor (sayfalar-arası tek dil); ikisini birlikte dönüştürmek ayrı bir
+          tur, burada tek sayfayı ayırmak o tutarlılığı BOZARDI. ══ */
+
+  /* 1 ── Mikro-etiketler: bölüm başlıkları + stat etiketleri Space Grotesk'e ve
+         ana sayfanın .da-eyebrow tracking imzasına (.12em) geçiyor. Renk text2 —
+         cyan DEĞİL: cyan bu sayfada "Piyasa Haberleri" dot'unun ve KAP linkinin
+         rengi, başlıkları da cyan yapmak o ayrımı yok ederdi (hisse.css'te aynı
+         gerekçeyle verilen kararla birebir). */
+  .section-title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--bp-text-sm);
+    font-weight: 700;
+    color: var(--bp-text2);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+  }
+  .stat-lbl {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: .12em;
+  }
+  .section-sub {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: .06em;
+  }
+  /* Makro Haberler dot'u şablonda ham (token'suz) bir mor hex'ti — kanonik
+     Data-Art moru DEĞİL, ona yakın ama farklı bir tondu. Token'a alındı, artık
+     style-guard da görüyor. NOT: hex literalini bu yoruma yazmak style-guard
+     K-B sayacını tetikliyor (yorum/kod ayrımı yapmıyor, bkz. memory
+     reference_tokens_css_yorum_ayristirici_tuzagi) — bilinçli olarak yazılmadı. */
+  .section-title .dot-macro {
+    background: var(--bp-art-violet);
+    box-shadow: 0 0 6px rgba(var(--bp-art-violet-rgb),.5);
+  }
+
+  /* 2 ── Özet kartları (Güçlü Trend / Trend Bozuldu / Yatay / Toplam):
+         düz yüzey → degrade + radius-20 + violet radial parıltı. */
+  .stat-card {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+    border-radius: var(--bp-radius-20);
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: -70%; right: -20%;
+    width: 150px; height: 150px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),.12), transparent 70%);
+    pointer-events: none;
+  }
+  .stat-card > * { position: relative; }
+  .stat-num { letter-spacing: -.025em; }
+
+  /* 3 ── Hisse kartları: degrade gövde + radius-20. Sol sinyal şeridi
+         (::before) radius'a uyacak şekilde güncellendi; hover'da yüzey düzleşmek
+         yerine kendi aksan rengiyle parlıyor (ana sayfa kart dili). */
+  .stock-card {
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+    border-radius: var(--bp-radius-20);
+  }
+  .stock-card::before { border-radius: var(--bp-radius-20) 0 0 var(--bp-radius-20); }
+  @media (hover: hover) and (pointer: fine) {
+    .stock-card:hover {
+      background: linear-gradient(135deg, var(--bp-surface2) 0%, var(--bp-surface) 100%);
+      box-shadow: 0 18px 40px -24px rgba(var(--bp-art-violet-rgb),.55);
+    }
+  }
+  /* "Bugün" tintı degrade dokuyu koruyarak sinyal rengini taşımaya devam ediyor
+     (eskiden düz rgba idi — dönüşüm sonrası tek düz kart o olurdu). */
+  .stock-card.new-signal {
+    background: linear-gradient(135deg, rgba(var(--bp-al-rgb),.07) 0%, var(--bp-surface2) 100%);
+  }
+  .stock-card.new-signal.sat {
+    background: linear-gradient(135deg, rgba(var(--bp-sat-rgb),.07) 0%, var(--bp-surface2) 100%);
+  }
+  .sc-metric {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: .04em;
+  }
+  .sc-metric strong { font-variant-numeric: tabular-nums; }
+  .sc-price { font-variant-numeric: tabular-nums; }
+  .sc-chg   { font-variant-numeric: tabular-nums; }
+
+  /* 4 ── Boş/hata durumu kutusu.
+         GERÇEK BUG (canlıda bugün görünür): .empty-box .stock-grid'in İÇİNDE
+         render ediliyor, grid `repeat(auto-fill, minmax(280px,1fr))` olduğu için
+         kutu tek bir hücreye sıkışıyordu — "Bugün BIST işlem günü değil…" mesajı
+         1100px'lik konteynerde ~280px'lik dar bir kart gibi duruyor, sayfanın geri
+         kalanı boş kalıyordu. Aynı kusur JS hata dallarındaki "Veri yüklenemedi"
+         kutusunu da vuruyor. Tüm satırı kaplaması gerekiyor. */
+  .stock-grid .empty-box { grid-column: 1 / -1; }
+  .empty-box {
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+    border-radius: var(--bp-radius-20);
+  }
+
+  /* 5 ── AI Piyasa Özeti paneli: şablondaki uzun inline style buraya taşındı
+         (token'suz ham mor rgba() değeri kanonik --bp-art-violet-rgb'ye alındı —
+         style-guard ham renkleri ancak burada görüyor) ve .da-recap-panel dilinde
+         sol aksan şeridi + radius-20 kazandı. */
+  .ai-summary-box {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, rgba(var(--bp-accent-cyan-rgb),.07) 0%, rgba(var(--bp-art-violet-rgb),.05) 100%);
+    border: 1px solid rgba(var(--bp-accent-cyan-rgb),.18);
+    border-left: 3px solid var(--bp-accent-cyan);
+    border-radius: var(--bp-radius-20);
+    padding: 14px 18px;
+    margin-bottom: 16px;
+  }
+  .ai-sum-row  { display: flex; align-items: flex-start; gap: 10px; position: relative; }
+  .ai-sum-icon { font-size: var(--bp-text-xl); flex-shrink: 0; margin-top: 1px; }
+  .ai-sum-eyebrow {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--bp-text-xs); font-weight: 700;
+    color: var(--bp-accent-cyan);
+    text-transform: uppercase; letter-spacing: .12em; margin-bottom: 5px;
+  }
+  .ai-sum-text { font-size: var(--bp-text-base); color: var(--bp-text2); line-height: 1.6; }
+  .ai-sum-time { font-size: var(--bp-text-2xs); color: var(--bp-text3); margin-top: 4px; }
+
+  /* 6 ── Sinyal rozeti: ana sayfanın .da-badge tipografisi (Space Grotesk,
+         .08em tracking). Renk semantiği (yeşil/kırmızı/nötr) DEĞİŞMEDİ. */
+  .badge {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: .08em;
+  }
+  .new-badge {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--bp-text-2xs);
+    letter-spacing: .1em;
+    border-radius: var(--bp-radius-pill);
+    padding: 2px 7px;
+  }
+
+  /* 7 ── Hareket azaltma tercihi: hover glow'u gölge olduğu için hareket
+         üretmiyor, ancak degrade yön değişimi bazı kullanıcılarda titreşim
+         hissi verebiliyor — kapatıyoruz. */
+  @media (prefers-reduced-motion: reduce) {
+    @media (hover: hover) and (pointer: fine) {
+      .stock-card:hover { background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%); }
+    }
+  }
