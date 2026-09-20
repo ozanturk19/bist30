@@ -42,6 +42,20 @@ K-B  KANONIK-DEGERLI HAM HEX — RATCHET, bloklamaz ama ARTAMAZ
      ARTISI artik yakalaniyor. Migrasyon (inline style -> class/token) ayri bir
      karar/is kalemi — bu guard yalniz GORUNURLUK katıyor.
 
+     CPO-1673 GENISLETME (20.09.2026): CPO'nun bulgusu ("/gundem" rozetinde
+     metin `rgb(0,226,144)`, zemin `rgba(63,185,80,...)` — token'la CELISEN
+     eski GitHub-dark yesili) HEX_RE'nin YALNIZ `#rrggbb` sozdizimini yakalayip
+     `rgb()/rgba()` fonksiyon notasyonunu HIC gormedigini ortaya cikardi — dosya
+     turu (CSS/HTML) fark etmezdi, EK_HEX_DOSYALARI zaten static/css/**.css'i
+     tasiyordu (CPO'nun "CSS taranmiyor" teshisi bu yuzden yanlisti, dogru kok
+     neden regex'in renk SOZDIZIMI kapsamiydi). `kanonik_rgb_haritasi()` eklendi:
+     hem `--x-rgb: r,g,b;` bilesen tanimlari hem hex->rgb donusumu ile ayni
+     kanonik degerin `rgb()/rgba()` literal karsiligini da K-B'ye katar.
+     Olculdu: genisletme 298 occurrence'a cikardi (eskiden gorulmeyen 33 yeni
+     rgb/rgba literal, cogu blog_content.py+hisse.html+sektor_harita.html) —
+     mevcut borc yine bloklanmadi, `--baseline` ile tavana alindi; YENI rgb/rgba
+     kacisi bundan sonra FAIL verir.
+
 K-C  SABLON-YEREL :root — RATCHET, bloklamaz ama ARTAMAZ (T9.4-d, bkz. yerel_root_sayim())
 
 K-D  BOS catch{} — RATCHET, bloklamaz ama ARTAMAZ (T9.4)
@@ -116,6 +130,19 @@ HEX_RE = re.compile(r"#[0-9A-Fa-f]{3,8}\b")
 TOKEN_DEGER_RE = re.compile(r"(--[A-Za-z0-9_-]+)\s*:\s*(#[0-9A-Fa-f]{3,8})\s*;")
 BOS_CATCH_RE = re.compile(r"catch\s*(?:\([^)]*\))?\s*\{\s*\}")
 
+# CPO-1673 (20.09.2026): K-B'nin HEX_RE'si YALNIZ `#rrggbb` sozdizimini yakaliyordu.
+# CPO'nun bulgusundaki her iki deger de (rozet metni `rgb(0,226,144)`, zemin
+# `rgba(63,185,80,...)`) FONKSIYON notasyonundaydi — dosya CSS mi HTML mi oldugu
+# fark etmezdi, K-B ikisini de hicbir zaman goremezdi. Gercek kok neden bu, "CSS
+# dosyalari taranmiyor" degil (EK_HEX_DOSYALARI zaten static/css/**.css'i tasiyor,
+# asagidaki kanonik_rgb_haritasi() da ayni CSS dosyalarini okur). Bu yuzden K-B'yi
+# `rgb()/rgba()` literal renklerini de kapsayacak sekilde genisletiyoruz: deger,
+# bir token'in hex karsiligina veya `--x-rgb: r, g, b;` bilesen tanimina esitse
+# sayilir. `var(--bp-al-rgb)` gibi degisken kullanimlari sayiya GIRMEZ (regex
+# yalniz sayisal literal yakalar).
+RGB_LITERAL_RE = re.compile(r"rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*[,)]")
+TOKEN_RGB_DEGER_RE = re.compile(r"(--[A-Za-z0-9_-]+)\s*:\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*;")
+
 sys.path.insert(0, str(ROOT / "tools"))
 try:
     from lint_scope import sayfa_sablonlari
@@ -148,6 +175,28 @@ def kanonik_hex_haritasi():
     return {k: sorted(v) for k, v in m.items()}
 
 
+def kanonik_rgb_haritasi():
+    """(r,g,b) -> [token adlari] — CPO-1673 genisletmesi.
+
+    Iki kaynaktan beslenir: (1) `--x-rgb: r, g, b;` seklinde dogrudan bilesen
+    tanimlayan token'lar (rgba() alfa-kompozisyonu icin var, ornek --bp-al-rgb),
+    (2) kanonik_hex_haritasi()'ndeki hex degerlerin RGB'ye cevrilmis hali — boylece
+    `#00e290` icin hem `#00e290` hem `rgb(0,226,144)` ayni token'a kanonik sayilir.
+    """
+    m = {}
+    for f in sorted(CSS_DIR.glob("*.css")):
+        for tok, r, g, b in TOKEN_RGB_DEGER_RE.findall(_oku(f)):
+            m.setdefault((int(r), int(g), int(b)), set()).add(tok)
+    for hexval, toklar in kanonik_hex_haritasi().items():
+        h = hexval.lstrip("#")
+        if len(h) == 3:
+            h = "".join(c * 2 for c in h)
+        if len(h) == 6:
+            rgb = (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+            m.setdefault(rgb, set()).update(toklar)
+    return {k: sorted(v) for k, v in m.items()}
+
+
 def sayfalar():
     if sayfa_sablonlari is not None:
         return sayfa_sablonlari()
@@ -155,19 +204,24 @@ def sayfalar():
             if not f.name.startswith("_") and ".bak" not in f.name]
 
 
-def hex_say(metin, harita):
+def hex_say(metin, harita, rgbharita=None):
     n = 0
     for h in HEX_RE.findall(metin):
         hl = h.lower()
         if len(hl) in (4, 7, 9) and hl in harita:
             n += 1
+    if rgbharita:
+        for r, g, b in RGB_LITERAL_RE.findall(metin):
+            if (int(r), int(g), int(b)) in rgbharita:
+                n += 1
     return n
 
 
 def denetle():
     gtok = global_tanimlar()
     harita = kanonik_hex_haritasi()
-    imza = "%d:%s" % (len(harita), ",".join(sorted(harita)[:8]))
+    rgbharita = kanonik_rgb_haritasi()
+    imza = "%d:%s|%d" % (len(harita), ",".join(sorted(harita)[:8]), len(rgbharita))
 
     tanimsiz = {}
     hex_sayim = {}
@@ -187,7 +241,7 @@ def denetle():
                 eksik[tok] = len(re.findall(r"var\(\s*" + re.escape(tok), txt))
         if eksik:
             tanimsiz[f.name] = eksik
-        hex_sayim[f.name] = hex_say(txt, harita)
+        hex_sayim[f.name] = hex_say(txt, harita, rgbharita)
 
     # ── KABUK PARTIAL'LARI DA TARA (T2.2 dersi) ─────────────────────────────
     # KABUK_PARTIALS su ana kadar YALNIZ global_tanimlar()'da kullaniliyordu,
@@ -210,7 +264,7 @@ def denetle():
                 eksik[tok] = len(re.findall(r"var\(\s*" + re.escape(tok), txt))
         if eksik:
             tanimsiz[n] = eksik
-        hex_sayim[n] = hex_say(txt, harita)
+        hex_sayim[n] = hex_say(txt, harita, rgbharita)
 
     # ── EK HEX DOSYALARI (T1.7 genisletme, 15.08.2026) ──────────────────────
     # blog_content.py + static/css/*.css (tokens.css haric) — bunlar K-A
@@ -223,7 +277,7 @@ def denetle():
         if not f.exists():
             continue
         ad = str(f.relative_to(ROOT))
-        hex_sayim[ad] = hex_say(_oku(f), harita)
+        hex_sayim[ad] = hex_say(_oku(f), harita, rgbharita)
     return gtok, harita, imza, tanimsiz, hex_sayim
 
 
