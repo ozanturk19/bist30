@@ -1,16 +1,16 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
-<meta name="description" content="BIST100 hisseleri {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse trend bozulmuş? {% if historical_date %}O gün sinyal değişen hisseler.{% else %}Bugün sinyal değişen hisseler.{% endif %}">
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
+<meta name="description" content="BIST hisseleri (BIST100 + ek hisseler) {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse trend bozulmuş? {% if historical_date %}O gün sinyal değişen hisseler.{% else %}Bugün sinyal değişen hisseler.{% endif %}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 {% set canonical_url = ('https://borsapusula.com/ozet/' ~ historical_date) if historical_date else 'https://borsapusula.com/ozet' %}
 <link rel="canonical" href="{{ canonical_url }}">
-<meta property="og:title"       content="BIST100 Günlük Sinyal Özeti — {{ today_str }}">
-<meta property="og:description" content="{% if historical_date %}{{ today_str }} tarihinde{% else %}Bugün{% endif %} BIST100'de {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
+<meta property="og:title"       content="BIST Günlük Sinyal Özeti — {{ today_str }}">
+<meta property="og:description" content="{% if historical_date %}{{ today_str }} tarihinde{% else %}Bugün{% endif %} BIST'te (BIST100 + ek hisseler) {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
 <meta property="og:url"         content="{{ canonical_url }}">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="BIST100 Günlük Sinyal Özeti — {{ today_str }}">
-<meta name="twitter:description" content="{% if historical_date %}{{ today_str }} tarihinde{% else %}Bugün{% endif %} BIST100'de {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
+<meta name="twitter:title"       content="BIST Günlük Sinyal Özeti — {{ today_str }}">
+<meta name="twitter:description" content="{% if historical_date %}{{ today_str }} tarihinde{% else %}Bugün{% endif %} BIST'te (BIST100 + ek hisseler) {{ al_list|length }} güçlü, {{ sat_list|length }} trend bozulmuş hissesi var.">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">

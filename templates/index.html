@@ -1,12 +1,12 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | BorsaPusula</title>
-<meta name="description" content="{% if ssr_signal_counts and ssr_bist_level and ssr_bist_level.close is not none %}BIST100 {{ ssr_bist_level.close|tr_price }} seviyesinde — şu an {{ ssr_signal_counts.al }} Güçlü Trend, {{ ssr_signal_counts.sat }} Trend Bozuldu sinyali aktif. Supertrend, ADX, EMA12/99 tabanlı teknik analiz. Ücretsiz, günlük güncelleme.{% else %}BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 tabanlı Güçlü Trend / Trend Bozuldu sinyalleri. Ücretsiz, günlük güncelleme.{% endif %}">
+<meta name="description" content="{% if ssr_signal_counts and ssr_bist_level and ssr_bist_level.close is not none %}BIST100 {{ ssr_bist_level.close|tr_price }} seviyesinde — şu an {{ ssr_signal_counts.al }} Güçlü Trend, {{ ssr_signal_counts.sat }} Trend Bozuldu sinyali aktif. Supertrend, ADX, EMA12/99 tabanlı teknik analiz. Ücretsiz, günlük güncelleme.{% else %}BIST100 + ek hisseler için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 tabanlı Güçlü Trend / Trend Bozuldu sinyalleri. Ücretsiz, günlük güncelleme.{% endif %}">
 <meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, algoritmik borsa, sektör analizi">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/">
 <!-- Open Graph -->
 <meta property="og:type"        content="website">
 <meta property="og:title"       content="BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri">
-<meta property="og:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST100 teknik analiz sinyalleri. Ücretsiz, gün sonu verisiyle güncel.">
+<meta property="og:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik teknik analiz sinyalleri — BIST100 + ek hisseler. Ücretsiz, gün sonu verisiyle güncel.">
 <meta property="og:url"         content="https://borsapusula.com/">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
@@ -15,7 +15,7 @@
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri">
-<meta name="twitter:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST100 teknik analiz sinyalleri. Ücretsiz, gün sonu verisiyle güncel.">
+<meta name="twitter:description" content="Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik teknik analiz sinyalleri — BIST100 + ek hisseler. Ücretsiz, gün sonu verisiyle güncel.">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <script type="application/ld+json">
 {
@@ -51,7 +51,7 @@
 {
   "@context": "https://schema.org", "@type": "WebApplication", "@id": "https://borsapusula.com/#webapp",
   "name": "BIST100 Sinyal Paneli", "url": "https://borsapusula.com",
-  "description": "BIST100 hisseleri için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı ücretsiz Güçlü Trend / Trend Bozuldu / Yatay sinyalleri.",
+  "description": "BIST100 + ek hisseler için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 göstergelerine dayalı ücretsiz Güçlü Trend / Trend Bozuldu / Yatay sinyalleri.",
   "applicationCategory": "FinanceApplication", "applicationSubCategory": "Stock Market Analysis", "operatingSystem": "Web Browser",
   "browserRequirements": "Requires JavaScript. Requires HTML5.", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
   "inLanguage": "tr", "isAccessibleForFree": true, "publisher": { "@id": "https://borsapusula.com/#organization" },
