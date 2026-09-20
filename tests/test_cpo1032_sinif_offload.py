@@ -108,12 +108,20 @@ def _load_fn_isolated(func_name, extra_ns=None):
     kaldırılır."""
     import fcntl as real_fcntl
     import logging as real_logging
+    import threading as real_threading
 
     src = _read_app()
     body = _extract_function_body(src, func_name)
     assert body, f"{func_name}() bulunamadı"
     body = re.sub(rf"(def {re.escape(func_name)}\([^)]*\))\s*->\s*[^:]+:", r"\1:", body, count=1)
-    ns = {"_fcntl": real_fcntl, "logger": real_logging.getLogger("test_isolated")}
+    # CPO-1680 P0 takip: 5 leader-blocking fonksiyonu artık lazy-init'i paylaşılan
+    # `_leader_lock_init_guard` (threading.Lock) ile koruyor — izole namespace'in
+    # de aynı ismi taşıması lazım, gerçek fcntl/logger enjeksiyonuyla aynı ilke.
+    ns = {
+        "_fcntl": real_fcntl,
+        "logger": real_logging.getLogger("test_isolated"),
+        "_leader_lock_init_guard": real_threading.Lock(),
+    }
     ns.update(extra_ns or {})
     exec(body, ns)
     return ns[func_name], ns

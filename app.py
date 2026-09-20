@@ -2114,6 +2114,22 @@ _prev_signals_lock = threading.Lock()  # disk write atomik
 import fcntl as _fcntl
 _NOTIFY_LOCK_PATH = "/tmp/bp_notify_leader.lock"
 _notify_lock_fh = None
+# CPO-1680 P0 takip: refresh_worker.py TEK PROCESS icinde 15+ background thread
+# (freshness-monitor, digest-cron, chart-integrity-alarm, drift-monitor, ...)
+# ayni anda baslar ve bu dosyadaki 5 "leader" lock'unun (notify/bg/digest/
+# macro/gemini) HER BIRININ ayni check-then-act lazy-init deseni var:
+# `if _x_lock_fh is None: _x_lock_fh = open(...)`. Bu ATOMIK DEGIL — iki thread
+# ayni anda None gorup AYRI fd acabilir; flock per-open-file-description
+# oldugundan (ayni process, farkli fd = CAKISIR), "kaybeden" thread'in fd'si
+# global'e YAZILIRSA o thread SONSUZA KADAR non-leader kalir (kazanan fd asla
+# unlock edilmiyor, kalici leader-election tasarim geregi). Canli kanit: 20.09
+# restart sonrasi freshness-monitor thread'i py-spy ile surekli
+# `_is_notify_leader()` False dalinda (app.py satir ~3396) yakalandi, ayni
+# process'te digest-cron/notify_signal_changes lock'u ZATEN tutuyordu. Fix:
+# 5 fonksiyonun da fd-acma adimi TEK paylasilan lock ile korunuyor (double-
+# checked locking) — az sayida, sadece process omru boyunca BIR KEZ tetiklenen
+# init call'lari oldugu icin paylasilan tek lock'un contention maliyeti yok.
+_leader_lock_init_guard = threading.Lock()
 
 def _is_notify_leader_blocking():
     """Bu worker bildirim gönderme yetkisine sahip mi? fcntl.flock atomik —
@@ -2124,11 +2140,20 @@ def _is_notify_leader_blocking():
     `_gemini_rate_acquire` ile aynı sınıf) — yavaş disk/kontention altında bu
     kritik bölüm worker'ın TÜM OS thread'ini bloke edebilir. Kritik bölüm bu
     fonksiyona taşındı, çağrı `_is_notify_leader()` üzerinden threadpool'a
-    offload ediliyor."""
+    offload ediliyor.
+
+    CPO-1680 P0 takip: `_notify_lock_fh` lazy-init'i artık `_leader_lock_init_guard`
+    ile korunuyor (double-checked locking) — TEK process TEK fd açar, hangi
+    thread ilk çağırırsa çağırsın aynı fd'yi paylaşır. Önceki check-then-act
+    race'i (yukarıdaki modül-seviye not) çok-thread'li refresh_worker.py'de
+    bazı arka plan thread'lerinin (ör. freshness-monitor) kalıcı olarak yanlış
+    fd'ye kilitlenip SONSUZA KADAR non-leader kalmasına yol açıyordu."""
     global _notify_lock_fh
     try:
         if _notify_lock_fh is None:
-            _notify_lock_fh = open(_NOTIFY_LOCK_PATH, "w")
+            with _leader_lock_init_guard:
+                if _notify_lock_fh is None:  # double-checked locking
+                    _notify_lock_fh = open(_NOTIFY_LOCK_PATH, "w")
         _fcntl.flock(_notify_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
         return True
     except (BlockingIOError, OSError):
@@ -2180,11 +2205,17 @@ def _is_bg_leader_blocking():
 
     Sprint 6 SINIF fix (CPO-1032): open()/flock() gevent'ce cooperatize
     edilmiyor — kritik bölüm buraya taşındı, `_is_bg_leader()` threadpool'a
-    offload eder."""
+    offload eder.
+
+    CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
+    bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not (aynı sınıf
+    çok-thread race, tüm 5 leader fonksiyonunda ortak fix)."""
     global _bg_lock_fh
     try:
         if _bg_lock_fh is None:
-            _bg_lock_fh = open(_BG_LOCK_PATH, "w")
+            with _leader_lock_init_guard:
+                if _bg_lock_fh is None:
+                    _bg_lock_fh = open(_BG_LOCK_PATH, "w")
         _fcntl.flock(_bg_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
         return True
     except (BlockingIOError, OSError):
@@ -2216,11 +2247,16 @@ def _is_digest_leader_blocking():
 
     Sprint 6 SINIF fix (CPO-1032): open()/flock() gevent'ce cooperatize
     edilmiyor — kritik bölüm buraya taşındı, `_is_digest_leader()`
-    threadpool'a offload eder."""
+    threadpool'a offload eder.
+
+    CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
+    bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not."""
     global _digest_lock_fh
     try:
         if _digest_lock_fh is None:
-            _digest_lock_fh = open(_DIGEST_LOCK_PATH, "w")
+            with _leader_lock_init_guard:
+                if _digest_lock_fh is None:
+                    _digest_lock_fh = open(_DIGEST_LOCK_PATH, "w")
         _fcntl.flock(_digest_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
         return True
     except (BlockingIOError, OSError):
@@ -2248,11 +2284,16 @@ _gemini_lock_fh = None
 
 def _is_gemini_leader_blocking():
     """Bu worker Gemini bg prefetch yetkisine sahip mi? fcntl.flock —
-    4 worker'dan yalnızca biri leader → prefetch 4× yerine 1×."""
+    4 worker'dan yalnızca biri leader → prefetch 4× yerine 1×.
+
+    CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
+    bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not."""
     global _gemini_lock_fh
     try:
         if _gemini_lock_fh is None:
-            _gemini_lock_fh = open(_GEMINI_LOCK_PATH, "w")
+            with _leader_lock_init_guard:
+                if _gemini_lock_fh is None:
+                    _gemini_lock_fh = open(_GEMINI_LOCK_PATH, "w")
         _fcntl.flock(_gemini_lock_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
         return True
     except (BlockingIOError, OSError):
@@ -2288,11 +2329,16 @@ def _is_macro_leader_blocking():
 
     Sprint 6 SINIF fix (CPO-1032): open()/flock() gevent'ce cooperatize
     edilmiyor — kritik bölüm buraya taşındı, `_is_macro_leader()`
-    threadpool'a offload eder."""
+    threadpool'a offload eder.
+
+    CPO-1680 P0 takip: lazy-init `_leader_lock_init_guard` ile korunuyor —
+    bkz. `_is_notify_leader_blocking` üstündeki modül-seviye not."""
     global _macro_leader_fh
     try:
         if _macro_leader_fh is None:
-            _macro_leader_fh = open(_MACRO_LOCK_PATH, "w")
+            with _leader_lock_init_guard:
+                if _macro_leader_fh is None:
+                    _macro_leader_fh = open(_MACRO_LOCK_PATH, "w")
         _fcntl.flock(_macro_leader_fh, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
         return True
     except (BlockingIOError, OSError):
