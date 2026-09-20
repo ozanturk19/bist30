@@ -26,8 +26,9 @@
 ]}
 </script>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
+<link rel="stylesheet" href="/static/css/data-art.css?v=4de26da7">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/metodoloji.css?v=724527ac">
+<link rel="stylesheet" href="/static/css/pages/metodoloji.css?v=c2bffe08">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -40,10 +41,10 @@
 <main class="container" id="main-content" tabindex="-1">
 
 <!-- TL;DR Özet Kart -->
-<div class="tldr-card">
+<div class="tldr-card da-panel da-panel--accent">
   <div class="tldr-title">
     <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-    TL;DR — 3 Kriter, 3 Renk, Hepsi Bu Kadar
+    TL;DR — 3 Kriter, 3 Renk + 1 Filtre
   </div>
   <div class="tldr-rows">
     <div class="tldr-row tldr-green">
@@ -65,6 +66,11 @@
       <span class="tldr-formula">3 kriterin tamamı aynı yönde değil</span>
     </div>
   </div>
+  <p class="tldr-note">
+    Üç kriter aynı yönde olsa bile sinyal <strong>haftalık trend filtresinden</strong> de geçmek
+    zorundadır — haftalık EMA20 ters yöndeyse (ya da hissenin haftalık geçmişi yetersizse) sinyal
+    üretilmez, Yatay'da kalır. <a href="#haftalik-trend">Haftalık Trend Gate &rarr;</a>
+  </p>
 </div>
 
 <article class="prose">
@@ -76,24 +82,24 @@
 <h2>Nasıl Çalışır?</h2>
 
 <div class="criteria-grid">
-  <div class="criterion">
+  <div class="criterion da-panel">
     <div class="crit-num">①</div>
     <div class="crit-name">Supertrend(10,3)</div>
     <div class="crit-desc">Trend yönü ve destek/direnç seviyesi. ATR tabanlı dinamik kanal.</div>
   </div>
-  <div class="criterion">
+  <div class="criterion da-panel">
     <div class="crit-num">②</div>
     <div class="crit-name">ADX ≥ 25</div>
     <div class="crit-desc">Trend gücü ölçer. 25 üzeri güçlü trend, DI+ / DI− yönü verir.</div>
   </div>
-  <div class="criterion">
+  <div class="criterion da-panel">
     <div class="crit-num">③</div>
     <div class="crit-name">EMA12 / EMA99</div>
     <div class="crit-desc">Kısa ve uzun dönem ortalama kesişimi. EMA12 > EMA99 yükseliş.</div>
   </div>
 </div>
 
-<div class="formula-box">
+<div class="formula-box da-panel da-panel--accent">
 Güçlü Trend  <span role="img" aria-label="anlamına gelir">→</span>  ST = LONG   AND  ADX ≥ 25  AND  DI+ &gt; DI−  AND  EMA12 &gt; EMA99<br>
 Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SHORT  AND  ADX ≥ 25  AND  DI− &gt; DI+  AND  EMA12 &lt; EMA99
 </div>
@@ -141,7 +147,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   <li><code>RSI ≥ 80</code> <span role="img" aria-label="anlamına gelir">→</span> Aşırı Alım</li>
 </ul>
 <p>
-  BorsaPusula'da RSI, <strong>Güç Skoru</strong> hesaplamasında sinyal yönüne göre değerlendirilir:
+  BorsaPusula'da RSI, <strong>Teknik Güç Skoru</strong> hesaplamasında sinyal yönüne göre değerlendirilir:
   Güçlü Trend sinyalinde RSI 50–75 arası +10 puan, 75 üzeri +5 puan; Trend Bozuldu sinyalinde
   RSI 25–50 arası +10 puan, 25 altı +5 puan (ham maksimum katkı 10 puan — Teknik Güç Skoru'nun 100
   puanlık toplamına ölçeklendiğinde aşağıdaki "RSI bölgesi ~13p" değerine karşılık gelir).
@@ -176,12 +182,12 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   Tek günlük flash sinyaller olası gürültüdür.
 </p>
 
-<div class="signal-box al">
+<div class="signal-box da-panel da-panel--accent al">
   <strong style="color:var(--bp-al)">▲ Güçlü Trend Sinyali</strong> — 3 kriter aynı anda: ST LONG + ADX ≥ 25 + DI+ > DI− + EMA12 > EMA99.<br>
   <small class="bp-text-muted">Giriş fiyatı: Sinyalin oluştuğu günün kapanış fiyatı. Stop Loss: Supertrend alt bandı.</small>
 </div>
 
-<div class="signal-box sat">
+<div class="signal-box da-panel da-panel--accent sat">
   <strong class="bp-sat-text">▼ Trend Bozuldu Sinyali</strong> — 3 kriter aynı anda: ST SHORT + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99.<br>
   <small class="bp-text-muted">Mevcut yükseliş trendinin bozulduğunu gösterir. BorsaPusula long-only bir üründür — BIST'te bireysel yatırımcılar için açığa satış pratikte uygulanamadığından bu sinyalde somut giriş/hedef/stop seviyeleri gösterilmez, sadece pozisyon kapatma değerlendirmesi için bir uyarı niteliğindedir.</small>
 </div>
@@ -269,7 +275,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 </p>
 <p>Veriler <strong>günde bir kez</strong>, piyasa kapanışından sonra (yaklaşık 18:00–18:30 TR) güncellenir — BorsaPusula, orta/uzun vadeli yatırımcılara yönelik gün sonu (EOD) verisiyle çalışır.</p>
 
-<div class="disclaimer">
+<div class="disclaimer da-panel da-panel--accent">
   <span aria-hidden="true">⚠️</span> <strong>Önemli Uyarı:</strong> Bu platform yalnızca bilgilendirme amaçlıdır.
   Herhangi bir otomatik emir verilmez. Sinyal geçmişi iyi performans göstermiş olsa da,
   geçmiş getiri gelecek getiriyi garanti etmez. Yatırım kararları kişisel araştırma ve

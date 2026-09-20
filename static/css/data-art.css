@@ -61,6 +61,13 @@
   width:var(--da-glow-size,250px);height:var(--da-glow-size,250px);
   background:radial-gradient(circle,rgba(var(--da-glow-rgb,var(--bp-brand-rgb)),var(--da-glow-a,.11)),transparent 70%);
 }
+/* SINIR (20.09, /metodoloji turunda bulundu): bu kural yalnizca ELEMENT
+   cocuklarini korur. Panelin dogrudan icinde duran CIPLAK METIN DUGUMLERI
+   (ornegin `<div class="da-panel">Formul<br>...</div>`) boyama sirasinda
+   konumlandirilmis ::before pariltisinin ALTINDA kalir. Boyle bir panel
+   yazarken ya metni bir elemana sar ya da sayfa CSS'inde
+   `isolation:isolate` + `::before{z-index:-1}` deltasini tanimla
+   (bkz. pages/metodoloji.css). */
 .da-panel > *{position:relative}
 .da-panel--accent{border-left:3px solid var(--da-accent,var(--bp-brand))}
 

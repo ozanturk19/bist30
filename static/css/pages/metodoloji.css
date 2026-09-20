@@ -22,11 +22,21 @@
   .container { max-width: var(--bp-container-820); margin: 0 auto; padding: 32px 24px; }
 
   .prose h2 {
-    font-size: var(--bp-text-xl);
-    font-weight: 700;
+    font-family: 'Bricolage Grotesque', 'Space Grotesk', system-ui, sans-serif;
+    font-size: clamp(1.32rem, 2.6vw, 1.72rem);
+    font-weight: 800;
+    letter-spacing: -.022em;
+    line-height: 1.18;
     color: var(--bp-text);
-    margin: 32px 0 12px;
-    padding-bottom: 8px;
+    margin: 38px 0 12px;
+    padding-bottom: 10px;
+  }
+  /* Data-Art: baslik altinda kisa aksan cizgisi (index.html .da-section-title
+     ritminin metin-agirlikli sayfalardaki karsiligi). */
+  .prose h2::after {
+    content: ''; display: block; width: 42px; height: 2px; margin-top: 10px;
+    border-radius: var(--bp-radius-pill);
+    background: linear-gradient(90deg, var(--bp-accent-cyan), transparent);
   }
   .prose h3 {
     font-size: var(--bp-text-15);
@@ -47,15 +57,20 @@
     font-size: var(--bp-text-base);
   }
 
-  .signal-box {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
-    padding: 20px;
-    margin: 16px 0;
-  }
-  .signal-box.al  { border-color: rgba(var(--bp-al-rgb),.4); background: rgba(var(--bp-al-rgb),.05); }
-  .signal-box.sat { border-color: rgba(var(--bp-sat-rgb),.4); background: rgba(var(--bp-sat-rgb),.05); }
+  /* .da-panel'in CIPLAK METIN dugumu tasiyan kullanicilar icin savunma.
+     Paylasilan katmandaki `.da-panel > *{position:relative}` yalnizca ELEMENT
+     cocuklari parilti ::before'unun UZERINE cikarir; dogrudan panelin icinde
+     duran metin dugumleri (bu sayfada .formula-box / .signal-box / .disclaimer)
+     boyle bir kancaya sahip degil ve boyama sirasinda konumlandirilmis
+     ::before'un ALTINDA kalir. isolation:isolate panele bir yigin baglami
+     kurar, z-index:-1 de pariltiyi zemin ile icerik ARASINA yerlestirir. */
+  .formula-box, .signal-box, .disclaimer { isolation: isolate; }
+  .formula-box::before, .signal-box::before, .disclaimer::before { z-index: -1; }
+
+  /* .da-panel deltasi — zemin/kenar/radius paylasilan katmandan gelir. */
+  .signal-box { padding: 20px; margin: 16px 0; --da-glow-size: 220px; --da-glow-a: .14; }
+  .signal-box.al  { --da-accent: var(--bp-al);  --da-glow-rgb: var(--bp-al-rgb); }
+  .signal-box.sat { --da-accent: var(--bp-sat); --da-glow-rgb: var(--bp-sat-rgb); }
 
   .criteria-grid {
     display: grid;
@@ -63,35 +78,29 @@
     gap: 14px;
     margin: 16px 0;
   }
-  .criterion {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-md);
-    padding: 16px;
-  }
+  .criterion { border-radius: var(--bp-radius-xl); padding: 16px; --da-glow-size: 150px; --da-glow-a: .07; --da-glow-rgb: var(--bp-accent-cyan-rgb); }
   .crit-num   { font-size: var(--bp-text-28); font-weight: 800; color: var(--bp-accent-cyan); line-height: 1; }
   .crit-name  { font-size: var(--bp-text-md); font-weight: 600; color: var(--bp-text); margin: 6px 0 4px; }
   .crit-desc  { font-size: var(--bp-text-sm); color: var(--bp-text3); }
 
   .formula-box {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-left: 3px solid var(--bp-accent-cyan);
-    border-radius:var(--bp-radius);
     padding: 16px 18px;
     margin: 16px 0;
     font-family: var(--bp-font-mono);
     font-size: var(--bp-text-base);
     color: var(--bp-accent-cyan);
+    --da-accent: var(--bp-accent-cyan);
+    --da-glow-rgb: var(--bp-accent-cyan-rgb);
+    --da-glow-size: 200px; --da-glow-a: .10;
   }
 
   /* TL;DR Özet Kart */
   .tldr-card {
-    background: linear-gradient(135deg, rgba(var(--bp-accent-cyan-rgb),.06), rgba(var(--bp-accent-cyan-rgb),.04));
-    border: 1px solid rgba(var(--bp-accent-cyan-rgb),.22);
-    border-radius:var(--bp-radius-xl);
-    padding: 20px 24px;
+    padding: 22px 26px;
     margin-bottom: 28px;
+    --da-accent: var(--bp-accent-cyan);
+    --da-glow-rgb: var(--bp-accent-cyan-rgb);
+    --da-glow-size: 320px; --da-glow-a: .13;
   }
   .tldr-title {
     font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text3);
@@ -101,7 +110,7 @@
   .tldr-rows { display: flex; flex-direction: column; gap: 8px; }
   .tldr-row {
     display: flex; align-items: center; gap: 10px;
-    background: rgba(0,0,0,.2); border-radius:var(--bp-radius-md); padding: 10px 14px;
+    background: rgba(var(--bp-bg-rgb),.55); border-radius:var(--bp-radius-md); padding: 10px 14px;
     font-size: var(--bp-text-base); font-weight: 500;
   }
   .tldr-icon { font-size: var(--bp-text-lg); flex-shrink: 0; }
@@ -111,15 +120,25 @@
   .tldr-green .tldr-label { color: var(--bp-al); }
   .tldr-red   .tldr-label { color: var(--bp-sat); }
   .tldr-gray  .tldr-label { color: var(--bp-text3); }
+  /* CPO 20.09: "Hepsi Bu Kadar" iddiasi haftalik trend gate'ini yok sayiyordu
+     — TL;DR karti artik 4. kapiyi de gosteriyor. */
+  .tldr-note {
+    margin: 14px 0 0; padding-top: 13px;
+    border-top: 1px solid var(--bp-border);
+    font-size: var(--bp-text-sm); line-height: 1.6; color: var(--bp-text3);
+  }
+  .tldr-note strong { color: var(--bp-text2); }
+  .tldr-note a { color: var(--bp-accent-cyan); text-decoration: none; white-space: nowrap; }
+  .tldr-note a:hover { text-decoration: underline; }
 
   .disclaimer {
-    background: rgba(var(--bp-sat-rgb),.07);
-    border: 1px solid rgba(var(--bp-sat-rgb),.2);
-    border-radius:var(--bp-radius-md);
-    padding: 16px;
+    padding: 18px 20px;
     color: var(--bp-text2);
     font-size: var(--bp-text-base);
     margin-top: 32px;
+    --da-accent: var(--bp-sat);
+    --da-glow-rgb: var(--bp-sat-rgb);
+    --da-glow-size: 260px; --da-glow-a: .12;
   }
 
   footer {
