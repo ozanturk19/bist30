@@ -33,9 +33,6 @@
     min-height: calc(60px + env(safe-area-inset-top));
     max-height: calc(60px + env(safe-area-inset-top));
   }
-  .bp-header-row {
-    display: contents;  /* bp-search.js header forced flex:row uses children directly */
-  }
 
 
   /* ── Hisse Kimlik Çubuğu (makro bar altı) ── */
