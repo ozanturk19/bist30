@@ -290,13 +290,17 @@
   .sec-col-header::before {
     content: ''; position: absolute; top: -140%; right: -8%;
     width: 200px; height: 200px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(var(--col-glow-rgb, var(--bp-art-violet-rgb)),0.16), transparent 70%);
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.16), transparent 70%);
     pointer-events: none;
   }
   .sec-col-header > * { position: relative; }
-  .col-accent-0 .sec-col-header { --col-glow-rgb: var(--bp-al-rgb); }
-  .col-accent-1 .sec-col-header { --col-glow-rgb: var(--bp-gold-rgb); }
-  .col-accent-2 .sec-col-header { --col-glow-rgb: var(--bp-sat-rgb); }
+  /* NOT (20.09, ilk denemeden donuldu): glow once sutunun kendi aksan rengini
+     (yesil/altin/kirmizi) izliyordu. Canlida bakinca yanlis oldugu goruldu —
+     bu sayfanin KENDI lejandi yesil = Guclu Trend, kirmizi = Trend Bozuldu
+     diyor; 3. slota dusen sektorun tum baslik bandini kirmiziya boyamak
+     "bu sektor kotu" diye okunuyor, oysa renk sadece secim sirasi.
+     Glow notr violete sabitlendi (Data-Art aksani, sinyal anlami yok).
+     Sutun<->cip baglantisi ad rengi + cip renginden zaten kuruluyor. */
 
   /* 4 ── Mikro-etiket tipografisi tek kuralla Data-Art'a (Space Grotesk zaten
          vardı; eksik olan geniş tracking'di — 0.4-0.5px ≈ .035em'den .12em'e).
