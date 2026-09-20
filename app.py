@@ -9693,7 +9693,8 @@ def _compute_health():
     # loop-nabzı artık AYRI eksende, disk-bridge heartbeat ile aşağıda izleniyor.
     macro_stale  = macro_age_s is None or macro_age_s > _MACRO_TTL
 
-    # ── Component durumları ── (seans dışında stale OK — normal davranış)
+    # ── Component durumları ── (seans dışında stale OK — ama SADECE veri gerçekten
+    # beklenen trading-day'e aitse; CPO-1680 P0 — aşağıya bkz.)
     # CPO-1508/1512 (EOD-only, Faz 0): eski stocks_age_s>1800/900s eşiği cadence
     # 900s sürekli döngüyü varsayıyordu. Cadence günde-bir-keze indi (bkz.
     # background_refresh) — 10:00-17:59 TR arası stocks_age_s HER GÜN doğal
@@ -9704,12 +9705,19 @@ def _compute_health():
     _stocks_actual_date = (datetime.fromtimestamp(_stocks_eff_ts, _TZ_TR).date()
                             if _stocks_eff_ts else None)
     _stocks_expected_date = _expected_data_date()
+    # CPO-1680 P0: `elif not mkt_open: "ok"` DATE KONTROLÜNDEN ÖNCE geliyordu —
+    # 18.09 Cuma 38/217 ticker'ın Perşembe'de kalması gibi GERÇEK bir gecikme
+    # market kapalıyken (hafta sonu/gece) bu health endpoint'te de KÖR "ok"
+    # olarak raporlanıyordu (health_cron.sh'ın izlediği tam da bu alan — bkz.
+    # DEV yanıtı). Sıra artık _data_quality_snapshot/is_stale ile AYNI ilkede:
+    # tarih kontrolü ÖNCE (market_open'dan bağımsız gerçek arıza), "seans dışı
+    # normal" kısayolu SADECE tarih GEÇERLİYKEN devreye girer.
     if stocks_count == 0:
         stocks_status = "critical"
-    elif not mkt_open:
-        stocks_status = "ok"
     elif _stocks_actual_date is None or _stocks_actual_date < _stocks_expected_date:
         stocks_status = "critical"  # beklenen trading-day'e ait veri yok — gerçek sorun
+    elif not mkt_open:
+        stocks_status = "ok"
     elif bad_ticker_count > 5:  # M5: çok ticker stale → data kalitesi bozuk
         stocks_status = "degraded"
     else:
