@@ -17,7 +17,8 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/pages/404.css?v=f7ef92e5">
+<link rel="stylesheet" href="/static/css/data-art.css?v=bd5026af">
+<link rel="stylesheet" href="/static/css/pages/404.css?v=ca60982e">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <header>
   <a class="brand" href="/">
@@ -30,13 +31,15 @@
   <h1>Bu sayfa bulunamadı</h1>
   <p class="lead">Aradığınız sayfa taşınmış veya kaldırılmış olabilir. Bir hisse arayın ya da popüler sayfalara göz atın.</p>
 
-  <div class="search-card">
+  <div class="search-card da-panel">
     <label for="q404">Hisse kodu ile ara (ör. THYAO)</label>
     <form class="search-row" id="q404Form">
-      <input id="q404" name="q" type="text" maxlength="10" placeholder="THYAO, GARAN, ASELS...">
+      <input id="q404" name="q" type="text" maxlength="10" placeholder="THYAO, GARAN, ASELS..."
+             autocapitalize="characters" autocomplete="off" autocorrect="off"
+             spellcheck="false" enterkeyhint="go">
       <button type="submit">Git</button>
     </form>
-    <div id="q404Hint" style="margin-top:10px;font-size:var(--bp-text-sm);color:var(--bp-text3)"></div>
+    <div id="q404Hint" class="q404-hint" role="status" aria-live="polite"></div>
   </div>
   <script>
     (function(){
@@ -59,10 +62,13 @@
         var starts = _tickers.filter(function(t){ return t.indexOf(v) === 0; }).slice(0, 5);
         if (starts.length) {
           hint.innerHTML = 'Bunu mu demek istediniz? ' + starts.map(function(t){
-            return '<a href="/hisse/' + encodeURIComponent(t) + '" style="color:var(--bp-brand);margin-right:10px">' + t + '</a>';
+            return '<a href="/hisse/' + encodeURIComponent(t) + '" class="err-link">' + t + '</a>';
           }).join('');
         } else {
-          hint.innerHTML = '"' + v + '" ile eşleşen bir hisse bulunamadı. <a href="/tarama" style="color:var(--bp-brand)">Tarama sayfasından göz atın</a>.';
+          // kullanici girdisi (`v`) daha once innerHTML'e HAM giriyordu; metin
+          // dugumu olarak eklenip yalnizca sabit kisim innerHTML ile yaziliyor.
+          hint.textContent = '"' + v + '" ile eşleşen bir hisse bulunamadı. ';
+          hint.insertAdjacentHTML('beforeend', '<a href="/tarama" class="err-link">Tarama sayfasından göz atın</a>.');
         }
       });
     })();
@@ -79,5 +85,6 @@
     </div>
   </div>
 </main>
+{% include '_footer.html' %}
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

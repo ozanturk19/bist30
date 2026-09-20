@@ -17,7 +17,8 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/pages/404.css?v=f7ef92e5">
+<link rel="stylesheet" href="/static/css/data-art.css?v=bd5026af">
+<link rel="stylesheet" href="/static/css/pages/404.css?v=ca60982e">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <header>
   <a class="brand" href="/">
@@ -28,7 +29,8 @@
 <main id="main-content" tabindex="-1">
   <div class="code">500</div>
   <h1>Beklenmeyen bir sunucu hatası oluştu</h1>
-  <p class="lead">Sorun bizde — ekibimiz bilgilendirildi. Lütfen birkaç dakika sonra tekrar deneyin.</p>
+  <p class="lead">Sorun bizde, sizde değil. Lütfen birkaç dakika sonra tekrar deneyin — sürerse
+    <a href="/iletisim" class="err-link">bize bildirin</a>.</p>
 
   <div class="popular">
     <h2>Popüler Sayfalar</h2>
@@ -41,5 +43,6 @@
     </div>
   </div>
 </main>
+{% include '_footer.html' %}
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

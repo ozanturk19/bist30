@@ -23,12 +23,20 @@
     padding: 0 20px;
     text-align: center;
   }
+  /* Data-Art (20.09): kod, govdeden ayrilmis bir ROZET. Onceden 15px duz
+     metindi ve `.lead` ile ayni text3 rengindeydi -- sayfadaki en ayirt
+     edici bilgi (hangi hata) gorsel olarak en zayif ogeydi. */
   .code {
+    display: inline-flex; align-items: center; gap: 8px;
     font-family: 'Space Grotesk', sans-serif;
-    font-size: var(--bp-text-15); font-weight: 700;
-    color: var(--bp-text3);
-    letter-spacing: 2px;
-    margin-bottom: 12px;
+    font-size: var(--bp-text-xs); font-weight: 700;
+    color: var(--bp-accent-cyan);
+    letter-spacing: .12em;
+    padding: 6px 14px;
+    border: 1px solid rgba(var(--bp-accent-cyan-rgb), .28);
+    border-radius: var(--bp-radius-pill);
+    background: rgba(var(--bp-accent-cyan-rgb), .07);
+    margin-bottom: 18px;
   }
   h1 {
     font-family: 'Space Grotesk', sans-serif;
@@ -38,12 +46,11 @@
   }
   p.lead { color: var(--bp-text3); font-size: var(--bp-text-md); margin: 0 0 28px; }
   .search-card {
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius-14);
     padding: 20px;
     margin-bottom: 24px;
     text-align: left;
+    --da-glow-size: 200px;
+    --da-glow-rgb: var(--bp-accent-cyan-rgb);
   }
   .search-card label { display: block; font-size: var(--bp-text-sm); color: var(--bp-text3); margin-bottom: 8px; }
   .search-row { display: flex; gap: 8px; }
@@ -59,11 +66,20 @@
     text-transform: uppercase;
   } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
   .search-row input:focus { outline: none; border-color: var(--bp-brand); }
+  /* KONTRAST (20.09 olcumu): metin `#fff` idi -> #b8c3ff zemin uzerinde
+     beyaz metin **1.71:1** kontrast veriyordu (WCAG AA metin esigi 4.5:1).
+     Sitedeki 11 `background:var(--bp-brand)` kullaniminin DIGER 10'u zaten
+     `color:var(--bp-bg)` diyor (iletisim/blog/portfolio/ozet/hisse/index/
+     offline/skip-link) -- bu buton tek sapmaydi. --bp-bg ile 11.05:1. */
   .search-row button {
     background: var(--bp-brand);
-    color: #fff; border: none; border-radius:var(--bp-radius-md);
+    color: var(--bp-bg); border: none; border-radius:var(--bp-radius-md);
     padding: 0 18px; font-size: var(--bp-text-md); font-weight: 700;
     cursor: pointer;
+    transition: background var(--bp-dur-base) var(--bp-ease-standard);
+  }
+  @media (hover:hover) {
+    .search-row button:hover { background: var(--bp-accent-cyan); }
   }
   .popular { text-align: left; }
   .popular h2 { font-size: var(--bp-text-base); color: var(--bp-text3); font-weight: 700; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -84,5 +100,20 @@
     font-weight: 600;
     transition: border-color .15s;
   }
-  .popular-grid a:hover { border-color: var(--bp-brand); color: var(--bp-text); }
+  @media (hover:hover) {
+    .popular-grid a:hover { border-color: var(--bp-brand); color: var(--bp-text); }
+  }
+  /* K-G: durum kurali varyantin ALTINDA kalmali */
+  .popular-grid a:focus-visible { border-color: var(--bp-brand); color: var(--bp-text); }
 
+  /* Hata sayfasi ipucu/metin-ici link (404 + 500) — onceden sablonda inline style'di, iki link de CTA
+     rengi (--bp-brand) kullaniyordu. Kanonik ayrim (20.09): brand = dugme/CTA,
+     accent-cyan = metin ici referans linki. */
+  .q404-hint { margin-top: 10px; font-size: var(--bp-text-sm); color: var(--bp-text3); }
+  .q404-hint:empty { margin-top: 0; }
+  .err-link { color: var(--bp-accent-cyan); text-decoration: none; }
+  .q404-hint .err-link + .err-link { margin-left: 10px; }
+  @media (hover:hover) {
+    .err-link:hover { text-decoration: underline; }
+  }
+  .err-link:focus-visible { text-decoration: underline; }

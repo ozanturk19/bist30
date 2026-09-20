@@ -1,10 +1,10 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ ticker }} — Borsadan Çekildi | BorsaPusula</title>
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="20;url=/hisseler">
 <meta name="description" content="{{ ticker }} hissesi artık işlem görmüyor.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/pages/404.css?v=f7ef92e5">
+<link rel="stylesheet" href="/static/css/data-art.css?v=bd5026af">
+<link rel="stylesheet" href="/static/css/pages/404.css?v=ca60982e">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <header>
   <a class="brand" href="/">
@@ -15,7 +15,7 @@
 <main id="main-content" tabindex="-1">
   <div class="code">410</div>
   <h1>{{ ticker }} hissesi artık işlem görmüyor</h1>
-  <p class="lead">Bu hisse Borsa İstanbul'dan çekildi veya başka bir şirketle birleşti. 20 saniye içinde tüm hisselere yönlendirileceksiniz, ya da aşağıdaki sayfalardan birini seçebilirsiniz.</p>
+  <p class="lead">Bu hisse Borsa İstanbul'dan çekildi veya başka bir şirketle birleşti. Geçmiş verileri artık güncellenmiyor.</p>
 
   <div class="popular">
     <h2>Popüler Sayfalar</h2>
@@ -27,5 +27,6 @@
     </div>
   </div>
 </main>
+{% include '_footer.html' %}
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}
