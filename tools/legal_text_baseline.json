@@ -1,0 +1,10 @@
+{
+  "templates/gizlilik.html": {
+    "text_sha256": "e35d6baa0ba7d956e6b574be79dc69d31177112046a7b7b033e836bd81cbbaa7",
+    "updated": "Son güncelleme: Eylül 2026"
+  },
+  "templates/yasal.html": {
+    "text_sha256": "04f2be4cb0df262af341d9c4025f115cddc24ca3a2bad06f5ef7fed445c25f04",
+    "updated": "Son güncelleme: Eylül 2026 — Bu sayfa yasal zorunluluk kapsamında yayımlanmaktadır."
+  }
+}
