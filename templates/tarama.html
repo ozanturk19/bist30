@@ -115,15 +115,15 @@
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
       <select class="sort-select" id="sortSel" onchange="applyFilters()" aria-label="Sıralama">
-        <option value="signal_strength">Skor (Yüksek → Düşük)</option>
-        <option value="adx">ADX (Güçlü → Zayıf)</option>
+        <option value="signal_strength">Teknik Güç Skoru (Yüksek → Düşük)</option>
+        <option value="adx">Trend Gücü / ADX (Güçlü → Zayıf)</option>
         <option value="price">Fiyat (Yüksek → Düşük)</option>
         <option value="vol_ratio">RVOL (Yüksek → Düşük)</option>
         <option value="change_pct">Değişim % (Yüksek → Düşük)</option>
         <option value="signal_bars">Tazelik (Yeni → Eski)</option>
       </select>
       <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:var(--bp-text-sm);border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
-        data-tip="Skor: Birleşik kalite (günlük hacim oranı + ADX + RSI + Teyit) — Güçlü Sinyal / Standart bu skordan belirlenir. En kaliteli hisseler üstte.&#10;ADX: Sadece trend gücü. Güçlü Sinyal rozetli bir hisse ADX düşük olabilir.&#10;RVOL: günlük/20g hacim oranı — anormal hareket göstergesi (Skor'daki hacim bileşeniyle aynı değer, ayrı gösterilir).&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
+        data-tip="Teknik Güç Skoru: Birleşik kalite (günlük hacim oranı + ADX + RSI + Teyit) — 💎 rozeti bu skordan belirlenir. En kaliteli hisseler üstte.&#10;Trend Gücü: Sadece ADX. 💎 rozetli bir hisse ADX düşük olabilir.&#10;RVOL: günlük/20g hacim oranı — anormal hareket göstergesi (Teknik Güç Skoru'ndaki hacim bileşeniyle aynı değer, ayrı gösterilir).&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
       <button onclick="exportCSV()" title="Sonuçları CSV olarak indir"
         style="background:rgba(var(--bp-brand-rgb),.1);border:1px solid rgba(var(--bp-brand-rgb),.3);color:var(--bp-brand);
                border-radius:var(--bp-radius);padding:5px 11px;font-size:var(--bp-text-sm);cursor:pointer;font-family:inherit;
@@ -144,17 +144,17 @@
       <span>Veriler yükleniyor…</span>
     </div>
     <table id="resultTable"{% if not ssr_rows %} style="display:none"{% endif %}>
-      <caption class="sr-only">Tarama sonuçları — hisse, sinyal, sinyal gücü, trend gücü ve teknik göstergeler</caption>
+      <caption class="sr-only">Tarama sonuçları — hisse, sinyal, teknik güç skoru, trend gücü ve teknik göstergeler</caption>
       <thead>
         {# SPEC-UX-BATCH-2026-06-03 Task #23 (CPO-475): Tarama kolon redesign.
-           Yeni sıra: Hisse / Sinyal / Sinyal Gücü (T3.5, skor — sıralamanın kaynağı) / Trend Gücü (eski ADX) / Giriş Kalitesi (öne) / Fiyat / Değişim / RVOL× / Tazelik / Sektör.
+           Yeni sıra: Hisse / Sinyal / Teknik Güç (T3.5, skor — sıralamanın kaynağı; CPO-1682 kanonik ad) / Trend Gücü (eski ADX) / Giriş Kalitesi (öne) / Fiyat / Değişim / RVOL× / Tazelik / Sektör.
            ≤899px: table gizlenir, #mobileResultCards devreye girer (bkz. aşağıda kart render'ı).
            R/R kolonu Faz 2'ye ertelendi (backend TP veri yok, CPO ile sürüyor). #}
         <tr>
           <th scope="col">Hisse</th>
           <th scope="col">Sinyal</th>
-          <th scope="col" class="th-sortable" id="th-score" data-tooltip="Birleşik kalite skoru (ADX + günlük hacim oranı + RSI + Teyit) — Güçlü Sinyal/Standart bu skordan belirlenir. Varsayılan sıralama." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_strength')">Sinyal Gücü</button></th>
-          <th scope="col" class="th-sortable" id="th-adx" data-tooltip="ADX 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, <18 Zayıf" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('adx')">Trend Gücü</button></th>
+          <th scope="col" class="th-sortable" id="th-score" data-tooltip="Teknik Güç Skoru (0–100): ADX + günlük hacim oranı + RSI + Teyit bileşimi. 💎 rozeti bu skordan belirlenir. Varsayılan sıralama. Yandaki Trend Gücü ile karıştırmayın — o sadece ADX&#39;tir." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_strength')">Teknik Güç</button></th>
+          <th scope="col" class="th-sortable" id="th-adx" data-tooltip="Trend Gücü = yalnızca ADX göstergesi: 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, &lt;18 Zayıf. Soldaki Teknik Güç Skoru&#39;nun bir bileşenidir, aynı şey değildir." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('adx')">Trend Gücü</button></th>
           <th scope="col">Giriş Kalitesi</th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-price" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('price')">Fiyat</button></th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-chg" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('change_pct')">Değişim</button></th>
@@ -704,7 +704,7 @@ function renderResults(rows, count) {
   }
 
   // === Yardımcı fonksiyonlar (UX-2 Task #23, CPO-475) ===
-  // Sinyal Gücü (T3.5): signal_strength 0-100 (compose_score, app.py) — tier bandı ile aynı renk
+  // Teknik Güç Skoru (T3.5): signal_strength 0-100 (compose_score, app.py) — tier bandı ile aynı renk
   // (index.html tg-premium/tg-plus, CPO-986 #8.1). Eşikler _derive_tier() ile birebir
   // (app.py ~L1560): >=70 guclu_sinyal, >=56 standart, altı rozet-yok — burada tekrar tanımlanmaz,
   // sadece backend'in zaten döndürdüğü s.tier'a göre renklendirilir. CPO-DEV2-053/055: 3→2 katman —
@@ -724,7 +724,7 @@ function renderResults(rows, count) {
     const v = score;
     const cls = tier === 'guclu_sinyal' ? 'premium' : tier === 'standart' ? 'plus' : 'weak';
     const pct = Math.max(4, Math.min(100, v));
-    return `<div class="score-cell" tabindex="0" data-tip="Sinyal Gücü ${v}/100 — sıralama bu skora göre">
+    return `<div class="score-cell" tabindex="0" data-tip="Teknik Güç Skoru ${v}/100 — sıralama bu skora göre">
       <span class="score-val ${cls}">${v}</span>
       <div class="score-bar-bg"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div>
     </div>`;
@@ -772,7 +772,7 @@ function renderResults(rows, count) {
     return `<tr>
       <td>
         <a href="/hisse/${escapeHtml(s.ticker)}">
-          <div class="tk">${escapeHtml(s.ticker)}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Güçlü Sinyal" style="color:var(--bp-premium);font-size:var(--bp-text-xs);vertical-align:middle">💎</span>' : ''}</div>
+          <div class="tk">${escapeHtml(s.ticker)}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs);vertical-align:middle">💎</span>' : ''}</div>
           <div class="tk-name">${escapeHtml((s.name||'').replace(' A.Ş.','').substring(0,20))}</div>
         </a>
       </td>
@@ -799,7 +799,7 @@ function renderResults(rows, count) {
       const _eqH     = s.entry_quality
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
         : '<span style="color:var(--text3)">—</span>';
-      const _prm = s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Güçlü Sinyal" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '';
+      const _prm = s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '';
       const _tlbl = s.adx_label || 'Zayıf';
       const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
       // T3.5: mobil kartta da masaüstüyle aynı skor rengi (tier bazlı) — bkz. scoreCell()
@@ -813,7 +813,7 @@ function renderResults(rows, count) {
           <span class="sig-badge sig-${s.signal}">${s.signal==='AL'?'▲':s.signal==='SAT'?'▼':'●'} ${sigLabel(s.signal)}</span>
         </div>
         <div class="mr-bottom">
-          <div class="mr-metric"><div class="mr-metric-label">Sinyal Gücü</div><span class="score-val ${_sccls}">${_scDisp}</span><div class="score-bar-bg"><div class="score-bar-fill ${_sccls}" style="width:${_scv == null ? 0 : Math.max(4, Math.min(100, _scv))}%"></div></div></div>
+          <div class="mr-metric"><div class="mr-metric-label">Teknik Güç</div><span class="score-val ${_sccls}">${_scDisp}</span><div class="score-bar-bg"><div class="score-bar-fill ${_sccls}" style="width:${_scv == null ? 0 : Math.max(4, Math.min(100, _scv))}%"></div></div></div>
           <div class="mr-metric"><div class="mr-metric-label">Trend</div><span class="trend-label ${_tl[1]}">${_tl[0]}</span></div>
           <div class="mr-metric"><div class="mr-metric-label">Kalite</div>${_eqH}</div>
           <div class="mr-metric"><div class="mr-metric-label">Fiyat</div><span class="mr-price-val">${s.price != null ? s.price.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—'}</span></div>

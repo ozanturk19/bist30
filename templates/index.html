@@ -777,6 +777,8 @@ header{
   // Ürün sözlüğü — filtre butonlarıyla AYNI (index.html'in mevcut Tümü/AL/SAT/BEKLE metni).
   // "Güçlü Sinyal" ifadesi BİLEREK kullanılmadı — sinyal türü (AL) ile skor bandı
   // aynı adı taşırsa çakışma yaratır (bkz. reference_guclu_trend_guclu_sinyal_isim_carpismasi_05_09.md).
+  // CPO-1682: bu karar artık sitewide — skorun kanonik adı "Teknik Güç Skoru",
+  // bantları "Yüksek/Orta Skor"; "Sinyal" kelimesi yalnızca YÖN için kullanılır.
   var SIGNAL_META = {
     AL:    { label: 'Güçlü Trend',  cls: 'sig-al'    },
     SAT:   { label: 'Trend Bozuldu', cls: 'sig-sat'   },
@@ -784,7 +786,7 @@ header{
   };
   function signalMeta(sig){ return SIGNAL_META[sig] || SIGNAL_META.BEKLE; }
   // Teknik Güç Skoru bandı — _derive_tier eşikleriyle AYNI (70/56), ama "Güçlü Sinyal"
-  // yerine nötr "Güçlü/Orta/Zayıf" adlandırıldı (yukarıdaki çakışma notu).
+  // yerine nötr "Yüksek/Orta Skor" adlandırıldı (yukarıdaki çakışma notu).
   function scoreColorVar(v){
     if (typeof v !== 'number') return 'var(--bp-text3)';
     if (v >= 70) return 'var(--bp-al)';

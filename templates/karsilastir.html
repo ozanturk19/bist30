@@ -277,14 +277,18 @@ function renderCell(key, s) {
 // Önceden bu dosyanın kendi bağımsız calcScore() fonksiyonu vardı (tech+fund, 0-100,
 // signal/ADX/R-R/bull_score+temel veriden yeniden hesaplıyordu) — /hisse ve /tarama'nın
 // gösterdiği compose_score()'tan TAMAMEN farklı bir sayı üretiyordu (kanıt: BJKAS aynı an
-// hisse.html'de 95/Güçlü Sinyal, karsilastir.html'de 65/İyi gösteriyordu, "kazanan" 🏆
+// hisse.html'de 95/Yüksek Skor, karsilastir.html'de 65/İyi gösteriyordu, "kazanan" 🏆
 // işaretini de bu sahte skor belirliyordu — CPO-DEV2-053 raporu). Artık backend'in
 // analyze()'de zaten hesapladığı signal_strength+tier alanları doğrudan gösteriliyor,
 // ikinci bir skor icat edilmiyor. Temel analiz verileri (F/K, ROE, F/DD, temettü) ayrı
 // satırlar olarak tabloda kalmaya devam ediyor, ama artık skora/kazanana karışmıyorlar.
 const TIER_META = {
-  guclu_sinyal: { color: '#a855f7', label: 'Güçlü Sinyal' },
-  standart:     { color: '#1f6feb', label: 'Standart' },
+  // CPO-1682 terim netlestirmesi: etiketler 'Güçlü Sinyal'/'Standart' idi — "Güçlü
+  // Sinyal" sinyal TÜRÜ olan "Güçlü Trend" ile karışıyordu. Artık rozet, annote
+  // ettiği sayının (Teknik Güç Skoru) bandını söylüyor; "Sinyal" kelimesi sitede
+  // yalnızca yönü (Güçlü Trend / Trend Bozuldu / Yatay) ifade ediyor.
+  guclu_sinyal: { color: '#a855f7', label: 'Yüksek Skor' },
+  standart:     { color: '#1f6feb', label: 'Orta Skor' },
 };
 
 function verdictFor(tier) {

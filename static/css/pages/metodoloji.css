@@ -151,3 +151,32 @@
   .macro-item-lbl{font-weight:600;color:var(--bp-text2);}
   .mc-pos{color:var(--bp-al);}.mc-neg{color:var(--bp-sat);}.mc-neu{color:var(--bp-text3);}
 
+
+  /* Terimler — Karıştırılmaması Gerekenler (CPO-1682 terim netleştirmesi) */
+  .term-grid { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 20px; }
+  .term-row {
+    display: grid; grid-template-columns: minmax(150px, 220px) 1fr; gap: 4px 18px;
+    background: var(--bp-surface); border: 1px solid var(--bp-border-subtle);
+    border-left: 2px solid rgba(var(--bp-accent-cyan-rgb), .45);
+    border-radius: var(--bp-radius-md); padding: 11px 15px;
+  }
+  .term-row dt {
+    font-size: var(--bp-text-sm); font-weight: 700; color: var(--bp-text);
+    line-height: 1.45; margin: 0;
+  }
+  .term-row dd {
+    font-size: var(--bp-text-sm); color: var(--bp-text2); line-height: 1.6; margin: 0;
+  }
+  .term-num {
+    display: inline-block; margin-left: 5px; padding: 1px 6px;
+    font-family: var(--bp-font-mono); font-size: var(--bp-text-2xs); font-weight: 500;
+    color: var(--bp-text3); background: rgba(var(--bp-brand-rgb), .10);
+    border-radius: var(--bp-radius-sm); vertical-align: middle; letter-spacing: .2px;
+  }
+  .term-where {
+    display: block; margin-top: 4px;
+    font-size: var(--bp-text-2xs); color: var(--bp-text3); letter-spacing: .15px;
+  }
+  @media (max-width: 600px) {
+    .term-row { grid-template-columns: 1fr; gap: 5px; padding: 11px 13px; }
+  }

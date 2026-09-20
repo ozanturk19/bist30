@@ -1908,7 +1908,7 @@ Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir."""
       {"q": "Momentum ve trend takip aynı şey mi?", "a": "Çok benzer stratejilerdir. Trend takip daha uzun vadeli (haftalar-aylar), momentum genellikle daha kısa vadeli (günler-haftalar) olur. Her ikisi de 'güçlü yükselişi takip et' prensibine dayanır."},
       {"q": "ADX 50'nin üzerindeyken ne yapılmalı?", "a": "ADX 50+ aşırı momentum gösterir ve genellikle yakında yavaşlama/düzeltme gelir. Bu seviyede yeni pozisyon açmak yerine mevcut pozisyonun stop'unu sıkılaştırmak veya kısmi kar almak düşünülebilir."},
       {"q": "Düşük ADX'te momentum stratejisi işe yarar mı?", "a": "ADX 20'nin altındayken piyasa yatay hareket eder ve momentum sinyalleri çok fazla false positive üretir. Bu ortamda momentum stratejisi yerine destek/direnç ticareti daha uygun olabilir."},
-      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Tarama sayfasında Sinyal filtresinden 'Güçlü Trend', Min ADX alanına 25 girin ve sonuçları Sinyal Gücü'ne göre sıralayın. ⭐ Hacim Onaylı rozeti (RVOL ≥ 1.20) en güçlü hacim teyitli adayları işaretler."}
+      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Tarama sayfasında Sinyal filtresinden 'Güçlü Trend', Min ADX alanına 25 girin ve sonuçları Teknik Güç Skoru'na göre sıralayın. ⭐ Hacim Onaylı rozeti (RVOL ≥ 1.20) en güçlü hacim teyitli adayları işaretler."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'GARAN', 'KCHOL', 'BIMAS']
   },

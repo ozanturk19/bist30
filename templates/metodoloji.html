@@ -27,7 +27,7 @@
 </script>
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/metodoloji.css?v=e9583cf1">
+<link rel="stylesheet" href="/static/css/pages/metodoloji.css?v=724527ac">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -143,7 +143,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 <p>
   BorsaPusula'da RSI, <strong>Güç Skoru</strong> hesaplamasında sinyal yönüne göre değerlendirilir:
   Güçlü Trend sinyalinde RSI 50–75 arası +10 puan, 75 üzeri +5 puan; Trend Bozuldu sinyalinde
-  RSI 25–50 arası +10 puan, 25 altı +5 puan (ham maksimum katkı 10 puan — Sinyal Gücü'nün 100
+  RSI 25–50 arası +10 puan, 25 altı +5 puan (ham maksimum katkı 10 puan — Teknik Güç Skoru'nun 100
   puanlık toplamına ölçeklendiğinde aşağıdaki "RSI bölgesi ~13p" değerine karşılık gelir).
   Sinyal motoru ADX+Supertrend+EMA üzerinden çalışır; RSI teyit göstergesi niteliğindedir.
 </p>
@@ -186,26 +186,67 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   <small class="bp-text-muted">Mevcut yükseliş trendinin bozulduğunu gösterir. BorsaPusula long-only bir üründür — BIST'te bireysel yatırımcılar için açığa satış pratikte uygulanamadığından bu sinyalde somut giriş/hedef/stop seviyeleri gösterilmez, sadece pozisyon kapatma değerlendirmesi için bir uyarı niteliğindedir.</small>
 </div>
 
-<h2 id="sinyal-gucu">Sinyal Gücü (Skor)</h2>
+<h2 id="sinyal-gucu">Teknik Güç Skoru</h2>
 {# bughunt-13.09 (finansal-analist workflow §2.7): ~90 kelimelik nesir +
    eski /gucu-yuksek sayfa-migrasyon notu (iç-SEO detayı, kullanıcı için
    değersiz) silindi — formül ve rozet eşiği yoğun 2 satıra indirildi.
    RVOL/"Premium" karışıklığı ve rozet-düşürme kuralı (gerçek ürün mantığı)
    korundu, sadece kısaltıldı. #}
 <p>
-  0-100 arası <strong>Sinyal Gücü</strong> skoru, <a class="jargon-term" data-term="adx" href="#adx">ADX</a>+hacim+teyit+RSI'dan hesaplanır — sitede <strong>tek kaynaktan</strong> (hisse detay, tarama, karşılaştırma aynı sayıyı gösterir).
+  0-100 arası <strong>Teknik Güç Skoru</strong>, <a class="jargon-term" data-term="adx" href="#adx">ADX</a>+hacim+teyit+RSI'dan hesaplanır — sitede <strong>tek kaynaktan</strong> (hisse detay, tarama, karşılaştırma aynı sayıyı gösterir). Sinyalin <em>yönünü</em> değil, o yönün arkasındaki teknik teyidin <em>gücünü</em> ölçer.
 </p>
 <p style="font-family:var(--bp-font-mono, monospace);font-size:0.92em">
   ADX ~40p · Günlük hacim oranı ~33p · Teyit (3+ bar) ~13p · RSI bölgesi ~13p (toplam ≈100p) · AI haber duyarlılığı bu toplama sonradan ±5p ekler/çıkarır
 </p>
 <p style="font-family:var(--bp-font-mono, monospace);font-size:0.92em">
-  70+ → "Güçlü Sinyal" · 56–69 → "Standart" · &lt;56 → rozetsiz (sadece Güçlü Trend sinyalinde; Trend Bozuldu rozet almaz)
+  70+ → 💎 "Yüksek Skor" · 56–69 → "Orta Skor" · &lt;56 → rozetsiz (sadece Güçlü Trend sinyalinde; Trend Bozuldu rozet almaz)
 </p>
 <p>
   Düşük likidite (20 günlük ort. hacim 5M TL altı) veya yaklaşan bilanço tarihi varsa rozet bir kademe düşer; ikisi birden geçerliyse rozet iki kademe birden düşebilir (tamamen kalkabilir).
   Günlük hacim oranı (hacim / 20 günlük ort.), sayfalarda ayrıca gösterilen <strong>RVOL</strong> göstergesiyle AYNI hesaplamadır — Skor'un içinde bir bileşen olarak kullanılır.
   Bu rozet, hacim onaylı sinyaller için kullanılan <strong>"Premium"</strong> ifadesiyle karıştırılmamalı — ikisi de ücretsiz, ödeme/paket ile ilgisi yok.
 </p>
+
+<h2 id="terimler">Terimler — Karıştırılmaması Gerekenler</h2>
+<p>
+  Sitede benzer görünen ama <strong>tamamen farklı</strong> şeyleri ölçen terimler var.
+  Kuralımız basit: <strong>&laquo;Sinyal&raquo; kelimesi yalnızca YÖN demektir</strong>; güç/kalite ölçen her şey
+  &laquo;Skor&raquo; ya da &laquo;Güç&raquo; adıyla ayrı anılır.
+</p>
+<dl class="term-grid">
+  <div class="term-row">
+    <dt>Güçlü Trend · Trend Bozuldu · Yatay</dt>
+    <dd><strong>Sinyalin yönü.</strong> Yalnızca bu üç değerden biri olur, sayı değildir.
+      <span class="term-where">Sinyal kolonu, hisse sayfası rozeti</span></dd>
+  </div>
+  <div class="term-row">
+    <dt>Teknik Güç Skoru <span class="term-num">0–100</span></dt>
+    <dd>Yönün arkasındaki <strong>teknik teyidin gücü</strong> (ADX + hacim + teyit + RSI). Yön söylemez.
+      <span class="term-where">Hisse sayfasındaki halka, tarama &laquo;Teknik Güç&raquo; kolonu, karşılaştırma 🏆 satırı</span></dd>
+  </div>
+  <div class="term-row">
+    <dt>Trend Gücü <span class="term-num">ADX</span></dt>
+    <dd><strong>Sadece ADX göstergesinin bandı</strong> (Çok Güçlü / Güçlü / Orta / Zayıf). Teknik Güç Skoru'nun
+      <em>bir bileşenidir</em>, onunla aynı şey değildir — ADX yüksekken skor düşük olabilir.
+      <span class="term-where">Tarama &laquo;Trend Gücü&raquo; kolonu</span></dd>
+  </div>
+  <div class="term-row">
+    <dt><span aria-hidden="true">💎</span> Yüksek Skor · Orta Skor</dt>
+    <dd>Ayrı bir ölçüm değil — <strong>Teknik Güç Skoru'nun bandı</strong> (70+ / 56–69). Aynı sayının etiketi.
+      <span class="term-where">Tarama listesi, karşılaştırma</span></dd>
+  </div>
+  <div class="term-row">
+    <dt><span aria-hidden="true">⭐</span> Hacim Onaylı</dt>
+    <dd>Hacim teyidi de bulunan Güçlü Trend sinyalleri. <strong>Ücretli paketle ilgisi yoktur</strong>, tüm veriler ücretsizdir.
+      <span class="term-where">Hisse sayfası, tarama filtresi</span></dd>
+  </div>
+  <div class="term-row">
+    <dt>BorsaPusula Skoru <span class="term-num">0–100</span></dt>
+    <dd>Temel Analiz Skoru &times;%60 + Teknik Güç Skoru &times;%40 <strong>kompozit puan</strong>.
+      Teknik Güç Skoru'ndan farklı bir sayıdır, ikisi aynı hissede farklı çıkabilir.
+      <span class="term-where">Hisse sayfası ana skoru, anasayfa, karşılaştırma</span></dd>
+  </div>
+</dl>
 
 <h2>Veri Kaynağı</h2>
 <p>
