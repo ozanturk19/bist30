@@ -125,7 +125,15 @@
    blogunda gomuluydu; footer 19 sayfada tek kaynaga toplaninca (bkz.
    _footer.html basligi) buraya tasindi — index.html'deki kopyalar silindi.
    .bp-footer-link de ayni gerekceyle buraya geldi (index.html:73). */
-.da-footer{padding:clamp(48px,6vw,80px) 0 clamp(28px,4vw,44px)}
+/* margin-top/font-size/color 20.09'da buraya TASINDI: 16 sayfa CSS'i, footer tek
+   kaynaga toplanmadan onceki donemden kalma bir `footer{...}` ELEMENT kurali
+   tasiyordu ve bunlar olu degildi — .da-footer bu ozellikleri hic set etmedigi
+   icin element kurali kazaniyordu. Canli olcum: margin-top /gundem 0px, /ozet
+   20px, /yasal + /hisseler 32px — ayni kanonik footer uc farkli mesafede
+   duruyordu. Cogunluk (15/17) 32px oldugu icin kanonik deger o. Ayrica
+   yasal.css `footer a{margin:0 6px}` veriyordu: link araligi YALNIZ o sayfada
+   farkliydi. */
+.da-footer{padding:clamp(48px,6vw,80px) 0 clamp(28px,4vw,44px);margin-top:32px;font-size:var(--bp-text-sm);color:var(--bp-text3)}
 .da-footer-inner{max-width:900px;margin:0 auto;text-align:center;padding:0 16px}
 .da-footer-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;font-weight:700;font-size:var(--bp-text-md);color:var(--bp-text)}
 .da-footer-links{display:flex;justify-content:center;column-gap:4px;row-gap:0;flex-wrap:wrap;margin-bottom:16px;font-size:var(--bp-text-sm)}

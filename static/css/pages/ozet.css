@@ -162,13 +162,6 @@
   .bar-sat { position: absolute; right: 0; top: 0; height: 100%; background: var(--bp-sat); border-radius: 0 5px 5px 0; transition: width .4s; }
   .bar-labels { display: flex; justify-content: space-between; font-size: var(--bp-text-sm); color: var(--bp-text3); }
 
-  footer {
-    text-align: center;
-    padding: 20px;
-    font-size: var(--bp-text-sm);
-    color: var(--bp-text3);
-    margin-top: 20px;
-  }
 
   @media (max-width: 600px) {
     .container { padding: 12px; }

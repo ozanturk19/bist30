@@ -129,8 +129,6 @@
   }
   .pf-fetch-error-retry:hover { background:rgba(var(--bp-sat-rgb),.12); }
 
-  footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); margin-top:32px; }
-  footer a { color:var(--bp-text3); text-decoration:none; }
   @media(max-width:600px) { .container{padding:12px;} thead th.hm, td.hm{display:none;} .add-bar input{width:100px;} }
 
   /* ── CPO-DEV2-100: Yol A - mobilde tablo yerine kart listesi (tarama.html

@@ -1011,12 +1011,6 @@
     max-width: 130px;
   }
 
-  footer {
-    text-align: center;
-    padding: 20px;
-    font-size: var(--bp-text-sm);
-    color: var(--bp-text3);
-  }
 
 
   /* ── Responsive ── */
