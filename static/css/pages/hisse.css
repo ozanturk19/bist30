@@ -198,28 +198,47 @@
   /* ── Container ── */
   .container { max-width: var(--bp-container-1400); margin: 0 auto; padding: 20px 24px; }
 
-  /* ── Grafik bölümü ── */
+  /* ── Grafik bölümü (20.09 — Data-Art denetimi, Grafik sekmesi) ──
+     Panel gövdesi bilinçli olarak DÜZ var(--bp-surface) kalıyor: lightweight-charts
+     kendi canvas'ını opak #141416 (= --bp-surface) ile boyuyor, gövdeye degrade
+     verilirsek mum grafiğinin çevresinde görünür bir "yama" dikişi oluşuyor.
+     Data-Art dili bu yüzden grafiğin DOKUNMADIĞI iki şeride taşındı: üst başlık
+     şeridi (degrade + violet glow + eyebrow) ve alt 52-hafta şeridi. */
   .chart-section {
+    position: relative;
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
+    border-left: 3px solid rgba(var(--bp-art-violet-rgb),0.55);
+    border-radius:var(--bp-radius-20);
     overflow: hidden;
     margin-bottom: 20px;
     box-shadow: var(--bp-shadow-sm);
   }
 
   .chart-header {
+    position: relative;
+    overflow: hidden;
     padding: 14px 18px;
     display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid var(--bp-surface2);
+    align-items: baseline;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--bp-surface2) 0%, var(--bp-surface) 72%);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
     flex-wrap: wrap;
   }
+  .chart-header::before {
+    content:''; position:absolute; top:-140%; right:-4%;
+    width:220px; height:220px; border-radius:50%;
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.16), transparent 70%);
+    pointer-events:none;
+  }
+  .chart-header > * { position: relative; }
   .chart-label {
-    font-size: var(--bp-text-sm);
-    color: var(--bp-text3);
-    font-weight: 500;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--bp-text-15);
+    color: var(--bp-text);
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
   #chartLoading {
     display: flex;
@@ -244,17 +263,32 @@
 
   /* ── 52 Haftalık Bar ── */
   .week52-bar {
-    padding: 10px 18px 14px;
+    position: relative;
+    padding: 12px 18px 16px;
+    background: linear-gradient(180deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+    border-top: 1px solid rgba(255,255,255,0.06);
   }
   .week52-label {
     font-size: var(--bp-text-xs);
     color: var(--bp-text3);
-    text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
     margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .week52-title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--bp-text-xs); font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--bp-accent-cyan);
+  }
+  .week52-range {
+    font-family: var(--bp-font-mono);
+    font-size: var(--bp-text-xs); font-weight: 700;
+    letter-spacing: -0.2px;
   }
   .week52-track {
     position: relative;

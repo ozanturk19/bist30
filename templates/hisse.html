@@ -108,7 +108,7 @@
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=738ae045">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=21161518">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -563,7 +563,8 @@
   <!-- Grafik -->
   <div id="chart-section" data-tab-content="grafik" class="chart-section" role="tabpanel" aria-labelledby="tab-grafik" tabindex="0" style="scroll-margin-top:80px">
     <div class="chart-header">
-      <span class="chart-label">{{ ticker }} — Günlük Grafik (2 Yıl)</span>
+      <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Günlük Grafik · 2 Yıl</span>
+      <span class="chart-label">{{ ticker }}</span>
       <span id="emaLegend" style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-left:auto"></span>
     </div>
     <div id="chartBody" style="min-height:420px">
@@ -573,8 +574,8 @@
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
       <div class="week52-bar" id="week52Bar" style="display:none">
         <div class="week52-label">
-          <span id="w52label">52 Haftalık Aralık</span>
-          <span><span id="w52low" class="bp-sat-text">—</span> — <span id="w52high" class="bp-al-text">—</span></span>
+          <span id="w52label" class="week52-title">52 Haftalık Aralık</span>
+          <span class="week52-range"><span id="w52low" class="bp-sat-text">—</span> — <span id="w52high" class="bp-al-text">—</span></span>
         </div>
         <div class="week52-track">
           <div class="week52-fill"  id="w52fill"  style="width:0%"></div>
