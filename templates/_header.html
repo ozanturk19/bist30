@@ -26,10 +26,17 @@
     hdr_sub / hdr_sub_id / hdr_title_tag YALNIZCA hdr_title ile birlikte etkilidir;
     hdr_title verilmeden yazilirlarsa hata da uyari da vermeden SESSIZCE DUSERLER.
 
-    UYARI: hdr_title_tag='div' + hdr_sub YOK kombinasyonu kullanmayin.
-    Ortaya cikan <div class="page-title"> anti-CLS kurallarinin HICBIRINE
-    eslesmez (h1 kurali etiket yuzunden, :has(> .page-sub) kurali sarmalayici
-    olmadigi icin) -> baslik anti-CLS fazinda GORUNUR kalir ve CLS uretir.
+    ESKI UYARI (20.09'da OLCUMLE CURUTULDU, kayit olarak birakildi):
+    "hdr_title_tag='div' + hdr_sub YOK kombinasyonu kullanmayin, ortaya cikan
+    <div class="page-title"> anti-CLS kurallarinin HICBIRINE eslesmez" denmisti.
+    YANLIS: _bp_critical_css.html (19.09 konsolidasyonu) ilk kuralinda
+    `header div.page-title{display:none !important}` selektorunu ACIKCA
+    tasiyor — bare <div class="page-title"> de gizleniyor; bp-search.js:59
+    ayni selektoru bir kez daha basiyor. Kombinasyon GUVENLI.
+    Gercek durum: .page-title bu partial'i kullanan HER sayfada KALICI
+    gizli (gerekce bp-search.js:58: "nav ortada kalsin"), yani hdr_title/
+    hdr_icon parametreleri GORSEL OLARAK hicbir sey uretmiyor; degerleri
+    yalnizca sayfa sahibinin niyetini belgeliyor.
     NOT (olculmus, kasitli): abd_tarama.html basligi <div class="page-title">.
     ONCEKI GEREKCEM YANLISTI ve olcumle duzeltildi: "anti-CLS davranisini
     degistirir" demistim; DEGISTIRMEZ. Baslik bir <div> ile sarilmis ve o
