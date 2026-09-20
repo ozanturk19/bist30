@@ -38,7 +38,7 @@
   .sec-stats { display:flex; gap:6px; margin-bottom:10px; position:relative; flex-wrap:wrap; }
   .stat-pill { padding:2px 8px; border-radius:var(--bp-radius-lg); font-size:var(--bp-text-xs); font-weight:600; }
   .pill-al   { background:rgba(var(--bp-al-rgb),.10); color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.28); }
-  .pill-sat  { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
+  .pill-sat  { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat-on-tint); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .pill-bkl  { background:rgba(var(--bp-text3-rgb),.1); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.2); }
 
   /* Progress bar */
@@ -60,7 +60,7 @@
      muafiyeti YOK. Yazı boyutu değişmedi, yalnız hedef büyüdü. */
   .stock-chip { display:inline-flex; align-items:center; min-height:24px; padding:3px 8px; border-radius:var(--bp-radius); font-size:var(--bp-text-xs); font-weight:600; text-decoration:none; }
   .chip-al  { background:rgba(var(--bp-al-rgb),.10); color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.22); }
-  .chip-sat { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.25); }
+  .chip-sat { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat-on-tint); border:1px solid rgba(var(--bp-sat-rgb),.25); }
   .chip-bkl { background:rgba(var(--bp-text3-rgb),.08); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.18); }
   /* 19.09: "+N daha fazla" rozeti gerçek tıklanabilir hisse rozetleriyle görsel
      olarak birebir aynıydı, ayrım yoktu. Kesikli çerçeve + italik = "bu bir hisse
@@ -153,7 +153,7 @@
   .chip:hover { border-color:var(--bp-border2); color:var(--bp-text); }
   .chip.sel-1 { background:rgba(var(--bp-al-rgb),0.1); border-color:rgba(var(--bp-al-rgb),0.45); color:var(--bp-al); }
   .chip.sel-2 { background:rgba(var(--bp-gold-rgb),0.1); border-color:rgba(var(--bp-gold-rgb),0.45); color:var(--bp-gold); }
-  .chip.sel-3 { background:rgba(var(--bp-sat-rgb),0.1); border-color:rgba(var(--bp-sat-rgb),0.45); color:var(--bp-sat); }
+  .chip.sel-3 { background:rgba(var(--bp-sat-rgb),0.1); border-color:rgba(var(--bp-sat-rgb),0.45); color:var(--bp-sat-on-tint); }
   .selector-hint { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-top:10px; }
 
   .compare-btn {
@@ -214,7 +214,7 @@
   .cmp-stock-ticker { font-size:var(--bp-text-base); font-weight:800; font-family:'Space Grotesk',system-ui,sans-serif; min-width:60px; }
   .cmp-stock-sig { font-size:var(--bp-text-2xs); font-weight:700; padding:2px 7px; border-radius:var(--bp-radius-4); font-family:'Space Grotesk',sans-serif; flex-shrink:0; }
   .cmp-sig-al  { background:rgba(var(--bp-al-rgb),0.15); color:var(--bp-al); }
-  .cmp-sig-sat { background:rgba(var(--bp-sat-rgb),0.15); color:var(--bp-sat); }
+  .cmp-sig-sat { background:rgba(var(--bp-sat-rgb),0.15); color:var(--bp-sat-on-tint); }
   .cmp-sig-bkl { background:rgba(var(--bp-text3-rgb),0.15); color:var(--bp-bkl); }
   .cmp-stock-price { font-size:var(--bp-text-sm); font-variant-numeric:tabular-nums; font-family:'Space Grotesk',monospace,sans-serif; color:var(--bp-text2); margin-left:auto; }
   .cmp-stock-chg { font-size:var(--bp-text-sm); font-variant-numeric:tabular-nums; font-family:'Space Grotesk',monospace,sans-serif; min-width:52px; text-align:right; }

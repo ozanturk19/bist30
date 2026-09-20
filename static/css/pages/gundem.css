@@ -84,7 +84,7 @@
     text-transform: uppercase; white-space: nowrap;
   }
   .badge.al  { background: rgba(var(--bp-al-rgb),.12);  color:var(--bp-al);  border:1px solid rgba(var(--bp-al-rgb),.3); }
-  .badge.sat { background: rgba(var(--bp-sat-rgb),.12);  color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.3); }
+  .badge.sat { background: rgba(var(--bp-sat-rgb),.12);  color:var(--bp-sat-on-tint); border:1px solid rgba(var(--bp-sat-rgb),.3); }
   .badge.bkl { background: rgba(var(--bp-text3-rgb),.1); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.2); }
 
   .sc-metrics {
@@ -117,7 +117,7 @@
     background: rgba(var(--bp-al-rgb),.2); color: var(--bp-al); border-radius:var(--bp-radius-sm);
     padding: 1px 5px; text-transform: uppercase; letter-spacing: .5px; margin-left: 4px;
   }
-  .sat .new-badge { background: rgba(var(--bp-sat-rgb),.2); color: var(--bp-sat); }
+  .sat .new-badge { background: rgba(var(--bp-sat-rgb),.2); color: var(--bp-sat-on-tint); }
 
   /* ── Empty state ── */
   .empty-box {

@@ -53,7 +53,7 @@
   .rel-stock-price  { font-family:var(--bp-font-mono); font-size:var(--bp-text-base); color:var(--bp-text); }
   .rel-stock-sig    { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-2xs); font-weight:700; margin-top:5px; }
   .rel-stock-sig.al    { background:rgba(var(--bp-al-rgb),.12); color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.25); }
-  .rel-stock-sig.sat   { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),.25); }
+  .rel-stock-sig.sat   { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat-on-tint); border:1px solid rgba(var(--bp-sat-rgb),.25); }
   .rel-stock-sig.bekle { background:rgba(var(--bp-text3-rgb),.1); color:var(--bp-text3); border:1px solid rgba(var(--bp-text3-rgb),.2); }
   @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 

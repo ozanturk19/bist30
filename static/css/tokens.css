@@ -36,6 +36,12 @@
   --bp-sat:       #f85149;
   --bp-sat-bg:    #3d0f0f;
   --bp-sat-bd:    #da3633;
+  /* K-P (21.09): SOLUK SAT ZEMINI uzerindeki SAT METNI icin. --bp-sat (#f85149)
+     duz zeminde 5.49:1 ile rahat gecer, ama rgba(sat,.10+) tint zemini metnin
+     ARKASINI da kirmizilastirdigi icin oran 4.27-4.39:1'e duser (WCAG AA 4.5).
+     Canli olcum: /ozet .sc-sat 4.27 (53 kart), /bilanco-takvimi .pd-count--sat 4.39.
+     KURAL: tint zemin + SAT metin ayni kuralda ise -> var(--bp-sat-on-tint). */
+  --bp-sat-on-tint:  #ff7b72;
 
   /* Signal: BEKLİYOR (hold) */
   --bp-bkl:       #909097;

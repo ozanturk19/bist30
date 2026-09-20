@@ -64,7 +64,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
+<link rel="stylesheet" href="/static/css/tokens.css?v=6957a12d">
 <link rel="stylesheet" href="/static/css/data-art.css?v=1138fbe4">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <style id="bp-critical-css">
@@ -179,7 +179,7 @@ header{
 }
 .da-index-change{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:clamp(1rem,1.8vw,1.3rem);padding:8px 16px 8px 12px;border-radius:var(--bp-radius-pill);transform:rotate(-1.6deg);margin-bottom:10px}
 .da-index-change.pos{color:var(--bp-al);background:var(--bp-al-bg);border:1px solid var(--bp-al-bd)}
-.da-index-change.neg{color:var(--bp-sat);background:rgba(var(--bp-sat-rgb),.09);border:1px solid rgba(var(--bp-sat-rgb),.35)}
+.da-index-change.neg{color:var(--bp-sat-on-tint);background:rgba(var(--bp-sat-rgb),.09);border:1px solid rgba(var(--bp-sat-rgb),.35)}
 .da-index-change.neu{color:var(--bp-text3);background:var(--bp-surface2);border:1px solid var(--bp-border2)}
 .da-index-change svg{width:13px;height:13px}
 .da-index-sub{font-size:var(--bp-text-sm);color:var(--bp-text3);margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -226,7 +226,7 @@ header{
 .da-spot-price .d{font-weight:700;font-size:var(--bp-text-base);margin-top:3px}
 .da-spot-signal{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:var(--bp-text-sm);padding:5px 11px;border-radius:var(--bp-radius-pill);margin-bottom:16px}
 .da-spot-signal.sig-al{color:var(--bp-al);background:var(--bp-al-bg);border:1px solid var(--bp-al-bd)}
-.da-spot-signal.sig-sat{color:var(--bp-sat);background:rgba(var(--bp-sat-rgb),.09);border:1px solid rgba(var(--bp-sat-rgb),.35)}
+.da-spot-signal.sig-sat{color:var(--bp-sat-on-tint);background:rgba(var(--bp-sat-rgb),.09);border:1px solid rgba(var(--bp-sat-rgb),.35)}
 .da-spot-signal.sig-bekle{color:var(--bp-text3);background:var(--bp-surface2);border:1px solid var(--bp-border2)}
 .da-spot-subs{display:flex;flex-direction:column;gap:9px;max-width:340px}
 .da-spot-sub-row{display:flex;align-items:center;gap:9px}
@@ -306,7 +306,7 @@ header{
 .da-sc-ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',monospace,sans-serif;font-weight:700;font-size:1.2rem}
 .da-sc-sig{display:inline-flex;align-items:center;gap:5px;font-size:var(--bp-text-2xs);font-weight:700;padding:4px 9px;border-radius:var(--bp-radius-pill);white-space:nowrap}
 .da-sc-sig.sig-al{color:var(--bp-al);background:var(--bp-al-bg)}
-.da-sc-sig.sig-sat{color:var(--bp-sat);background:rgba(var(--bp-sat-rgb),.1)}
+.da-sc-sig.sig-sat{color:var(--bp-sat-on-tint);background:rgba(var(--bp-sat-rgb),.1)}
 .da-sc-sig.sig-bekle{color:var(--bp-text3);background:var(--bp-surface2)}
 @media(max-width:900px){.da-stock-grid{grid-template-columns:repeat(6,1fr)}.da-scard.xl,.da-scard.lg{grid-column:span 6;grid-row:auto}.da-scard.md,.da-scard.sm{grid-column:span 3}.da-scard.xs{grid-column:span 6}}
 @media(max-width:560px){.da-stock-grid{grid-template-columns:1fr}.da-scard,.da-scard.xl,.da-scard.lg,.da-scard.md,.da-scard.sm,.da-scard.xs{grid-column:1/-1;flex-direction:column;--rot:0deg !important}}
@@ -1014,7 +1014,7 @@ header{
     var cards = [];
     if (byScore.length) {
       cards.push(
-        '<div class="da-curated-card"><div class="da-curated-num da-display">01</div>' +
+        '<div class="da-curated-card"><div class="da-curated-num da-display" aria-hidden="true">01</div>' +
         '<div class="da-curated-body"><div class="da-curated-title">Bugünün En Güçlü Teknik Sinyalleri</div>' +
         '<div class="da-curated-desc">Teknik Güç Skoru en yüksek hisseler.</div></div>' +
         '<div class="da-chip-row">' + byScore.map(function(s){ return chip(s.ticker, fmtNum0(s.signal_strength), scoreColorVar(s.signal_strength), 'var(--bp-surface3)'); }).join('') + '</div></div>'
@@ -1022,7 +1022,7 @@ header{
     }
     if (byRvol.length) {
       cards.push(
-        '<div class="da-curated-card"><div class="da-curated-num da-display">02</div>' +
+        '<div class="da-curated-card"><div class="da-curated-num da-display" aria-hidden="true">02</div>' +
         '<div class="da-curated-body"><div class="da-curated-title">Yüksek Hacimli Hareketler</div>' +
         '<div class="da-curated-desc">Göreli hacim (RVOL) en yüksek hisseler.</div></div>' +
         '<div class="da-chip-row">' + byRvol.map(function(s){ return chip(s.ticker, s.rvol.toFixed(2).replace('.', ',')+'×', 'var(--bp-volume)', 'rgba(var(--bp-volume-rgb),.12)'); }).join('') + '</div></div>'

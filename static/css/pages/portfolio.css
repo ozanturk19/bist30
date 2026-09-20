@@ -78,7 +78,7 @@
      İçe Aktar) rest state'de görsel olarak birebir aynıydı — sadece hover'da
      kırmızıya dönüyordu, yani kullanıcı tıklamadan önce ayrımı hiç görmüyordu. */
   .btn-action.danger { border-color: rgba(var(--bp-sat-rgb),.35); color: var(--bp-sat); }
-  .btn-action.danger:hover { border-color: var(--bp-sat); color: var(--bp-sat); background: rgba(var(--bp-sat-rgb),.08); }
+  .btn-action.danger:hover { border-color: var(--bp-sat-on-tint); color: var(--bp-sat-on-tint); background: rgba(var(--bp-sat-rgb),.08); }
   #importFileInput { display: none; }
 
   /* Import modal */
