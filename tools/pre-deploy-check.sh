@@ -24,7 +24,7 @@ echo "=== Pre-Deploy Check (CPO-359 Tier 0) ==="
 echo ""
 
 # 1. Jinja parse
-echo "1/12 Jinja parse..."
+echo "1/13 Jinja parse..."
 if python3 "$(dirname "$0")/_predeploy_jinja_check.py"; then
   echo "  ✓ Jinja parse OK"
 else
@@ -34,7 +34,7 @@ fi
 
 # 2. Python compile
 echo ""
-echo "2/12 Python compile (app.py)..."
+echo "2/13 Python compile (app.py)..."
 if python3 -c "import ast;ast.parse(open('app.py').read())" 2>/dev/null; then
   echo "  ✓ app.py compile OK"
 else
@@ -49,7 +49,7 @@ fi
 # pre-commit, aynı gün genişletildi) tutarsızdı. Liste ikisinde de senkron
 # tutulmalı.
 echo ""
-echo "3/12 KALICI_KURALLAR audit..."
+echo "3/13 KALICI_KURALLAR audit..."
 KK_AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/index.html templates/portfolio.html templates/gundem.html templates/metodoloji.html templates/blog.html templates/blog_article.html templates/temettu_takvimi.html templates/bilanco_takvimi.html"
 KK_FAIL=0
 for f in $KK_AUDIT_FILES; do
@@ -66,7 +66,7 @@ fi
 
 # 4. format-lint
 echo ""
-echo "4/12 format-lint (CPO-1180 K6)..."
+echo "4/13 format-lint (CPO-1180 K6)..."
 if ./tools/format-lint.sh > /dev/null 2>&1; then
   echo "  ✓ format-lint PASS"
 else
@@ -80,7 +80,7 @@ fi
 # donuyordu, boyutu dogruydu, grep iceride buluyordu. Elle calistirilan bir arac bir
 # sonraki kazada yok hukmundedir -- kapiya baglandi.
 echo ""
-echo "5/12 CSS token guard (CPO-1349)..."
+echo "5/13 CSS token guard (CPO-1349)..."
 if python3 tools/css-token-guard.py static/css/*.css > /dev/null 2>&1; then
   echo "  ✓ CSS token guard PASS"
 else
@@ -92,7 +92,7 @@ echo ""
 # 6. style-guard (T1.7) — css-token-guard YALNIZ static/css/*.css (2 dosya) bakiyor;
 # sablonlarin icindeki ~2300 var(--bp-*) kullanimi HICBIR kapida denetlenmiyordu.
 # K-A tanimsiz var() BLOKLAYICI (taban 0), K-B/K-C/K-D ratchet (yalniz dusebilir).
-echo "6/12 style-guard (T1.7: sablon ici var()/ham hex/yerel :root/bos catch ratchet)..."
+echo "6/13 style-guard (T1.7: sablon ici var()/ham hex/yerel :root/bos catch ratchet)..."
 if python3 tools/style-guard.py > /dev/null 2>&1; then
   echo "  ✓ style-guard PASS"
 else
@@ -107,7 +107,7 @@ fi
 # duruma gecti ama hicbir deploy bunu raporlamadi — "YAZILMIS ama BAGLANMAMIS"
 # sinifinin kendisi, 8f6006f'in kapattigi iki guard'la AYNI hastalik. Bagliyoruz.
 echo ""
-echo "7/12 lint_scope ratchet (T9.4: sablon sayisi daralma dedektoru)..."
+echo "7/13 lint_scope ratchet (T9.4: sablon sayisi daralma dedektoru)..."
 if python3 tools/lint_scope.py --check > /dev/null 2>&1; then
   echo "  ✓ lint_scope PASS"
 else
@@ -124,7 +124,7 @@ fi
 # ONCESI yakalar (Jinja {{ }}/{% %} soyulup node --check ile dogrulanir,
 # 31/31 mevcut sablonda 0 yanlis-pozitif dogrulanmistir).
 echo ""
-echo "8/12 node-syntax-check (DEV2-T-MOBOVF-1: sablon-ici JS sozdizimi)..."
+echo "8/13 node-syntax-check (DEV2-T-MOBOVF-1: sablon-ici JS sozdizimi)..."
 if python3 tools/node-syntax-check.py > /dev/null 2>&1; then
   echo "  ✓ node-syntax-check PASS"
 else
@@ -142,7 +142,7 @@ fi
 # 4'unde marka rengi hover cercevesi HIC uygulanmiyordu. Taban SIFIR; kasitli
 # ciftler tool icindeki GOZDEN_GECIRILMIS_KASITLI'de GEREKCESIYLE yazilidir.
 echo ""
-echo "9/12 state-order-check (K-G: durum kurali varyantin ALTINDA olmali)..."
+echo "9/13 state-order-check (K-G: durum kurali varyantin ALTINDA olmali)..."
 if python3 tools/state-order-check.py > /dev/null 2>&1; then
   echo "  ✓ state-order-check PASS"
 else
@@ -162,7 +162,7 @@ fi
 # renklerin KENDISI. Taban SIFIR (77 cift). Kapsam siniri ve pozitif kontrol
 # kaydi tool'un docstring'inde.
 echo ""
-echo "10/12 contrast-check (K-I: ayni kuralda bg+fg WCAG kontrasti)..."
+echo "10/13 contrast-check (K-I: ayni kuralda bg+fg WCAG kontrasti)..."
 if python3 tools/contrast-check.py > /dev/null 2>&1; then
   echo "  ✓ contrast-check PASS"
 else
@@ -182,7 +182,7 @@ fi
 # hicbiri REFERANSA bakmaz. Taban SIFIR (118 referans). Elle artirilan
 # surum etiketleri (?v=75, ?v=4, ?v=20260915A) kasitli kapsam disi.
 echo ""
-echo "11/12 cachebust-check (K-J: ?v= referansi diskteki hash ile ayni mi)..."
+echo "11/13 cachebust-check (K-J: ?v= referansi diskteki hash ile ayni mi)..."
 if python3 tools/cachebust-check.py > /dev/null 2>&1; then
   echo "  ✓ cachebust-check PASS"
 else
@@ -201,12 +201,31 @@ fi
 # bu bulgu kodda degil, iki METIN alani arasindaki sozlesmede. Stil-only
 # duzenlemeler metin hash'ini degistirmedigi icin kapiyi TETIKLEMEZ.
 echo ""
-echo "12/12 legal-text-sync-check (K-H: hukuki metin <-> 'Son guncelleme' senkronu)..."
+echo "12/13 legal-text-sync-check (K-H: hukuki metin <-> 'Son guncelleme' senkronu)..."
 if python3 tools/legal-text-sync-check.py; then
   echo "  ✓ legal-text-sync-check PASS"
 else
   echo "  ✗ K-H KIRIK: hukuki metin degisti ama 'Son guncelleme' tarihi donmus kaldi."
   echo "    Detay için: python3 tools/legal-text-sync-check.py"
+  FAIL=$((FAIL + 1))
+fi
+
+# 13. da-override-check (K-K, CPO 21.09.2026) -- kanonik bir `.da-*` sinifinin
+# bildirdigi LONGHAND, ayni ogeye uygulanan ve data-art.css'ten SONRA yuklenen
+# bir sayfa kuralinda KISAYOLLA sifirlaniyor mu. 21.09'da kendi fix'im bunu
+# uretti: `.da-select` ok isaretini `background-image` ile veriyor, /iletisim'in
+# `.cf-input` kurali `background:` KISAYOLUNU kullaniyordu -> canlida
+# `appearance:none` + ok YOK, yani hicbir gostergesi olmayan bir <select>.
+# Ihlal TEK bir dosyada degil iki dosyanin KESISIMINDE; ustteki 12 katin
+# hicbiri (token/hex/kontrast/cascade-sirasi/referans/metin) bunu goremez.
+# Dogrudan longhand ezmesi KASITLI delta sayilir, kapsam disi. Taban SIFIR.
+echo ""
+echo "13/13 da-override-check (K-K: .da-* bildirimini kisayolla silme)..."
+if python3 tools/da-override-check.py; then
+  echo "  ✓ da-override-check PASS"
+else
+  echo "  ✗ K-K KIRIK: bir sayfa kurali kanonik .da-* bildirimini sessizce siliyor."
+  echo "    Detay için: python3 tools/da-override-check.py"
   FAIL=$((FAIL + 1))
 fi
 

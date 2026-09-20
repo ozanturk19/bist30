@@ -50,7 +50,11 @@
   }
   .cf-input {
     width: 100%;
-    background: var(--bp-border-subtle);
+    /* 21.09: `background` KISAYOLU degil — bu kural data-art.css'ten SONRA
+       yukleniyor ve kisayol `background-image`i de sifirliyor; `.da-select`in
+       ok isaretini SILIYORDU (appearance:none + ok yok = HIC gostergesi olmayan
+       select). Canli computed olcumde yakalandi. */
+    background-color: var(--bp-border-subtle);
     border: 1px solid var(--bp-border);
     border-radius: var(--bp-radius-md);
     padding: 10px 13px;
