@@ -26,8 +26,9 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
+<link rel="stylesheet" href="/static/css/data-art.css?v=67e915a8">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/temettu_takvimi.css?v=dafb4181">
+<link rel="stylesheet" href="/static/css/pages/temettu_takvimi.css?v=e72870bd">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker -->
@@ -45,10 +46,10 @@
   </div>
 
   <div class="summary-row">
-    <div class="sum-chip"><div class="sum-num" id="sumUpcoming" style="color:var(--bp-brand)">—</div><div class="sum-lbl">Yaklaşan Ex-Temettü</div></div>
-    <div class="sum-chip"><div class="sum-num bp-al-text" id="sumAl">—</div><div class="sum-lbl">Güçlü Trend</div></div>
-    <div class="sum-chip"><div class="sum-num bp-sat-text" id="sumSat">—</div><div class="sum-lbl">Trend Bozuldu</div></div>
-    <div class="sum-chip"><div class="sum-num" id="sumTotal" style="color:var(--bp-brand)">—</div><div class="sum-lbl">Toplam Hisse</div></div>
+    <div class="sum-chip da-panel"><div class="sum-num sum-num--brand" id="sumUpcoming">—</div><div class="sum-lbl">Yaklaşan Ex-Temettü</div></div>
+    <div class="sum-chip da-panel"><div class="sum-num bp-al-text" id="sumAl">—</div><div class="sum-lbl">Güçlü Trend</div></div>
+    <div class="sum-chip da-panel"><div class="sum-num bp-sat-text" id="sumSat">—</div><div class="sum-lbl">Trend Bozuldu</div></div>
+    <div class="sum-chip da-panel"><div class="sum-num sum-num--brand" id="sumTotal">—</div><div class="sum-lbl">Toplam Hisse</div></div>
   </div>
 
   <div class="filter-bar">
@@ -151,15 +152,23 @@ function render(data) {
   `).join('')}</div>`;
 }
 
+let _dtLoadSeq = 0;  /* 20.09: bilanco_takvimi.html'in r144 guard'inin portu — visibilitychange
+   her odaklanmada load()'u yeniden tetikliyor, hizli sekme-degistir'de eski yanit yeniyi
+   (ya da eski HATA yeni BASARILI yaniti) ezebiliyordu. Kardes sayfa bu fix'i almisti,
+   kopya olan bu sayfa almamisti. Ayrica timeout yoktu: asili bir istek "Yükleniyor…"da
+   sonsuz birakiyordu. */
 async function load() {
+  const mySeq = ++_dtLoadSeq;
   try {
-    const res  = await fetch('/api/temettu-takvimi');
+    const res  = await fetch('/api/temettu-takvimi', { signal: AbortSignal.timeout(15000) });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
+    if (mySeq !== _dtLoadSeq) return;  // daha yeni bir load() baslamis, bu yaniti at
     _allData = data;
     document.getElementById('lastUpdate').textContent = `Son güncelleme: ${data.updated_at || '—'}`;
     render(data);
   } catch(e) {
+    if (mySeq !== _dtLoadSeq) return;  // eski cagrinin hatasi yeni basarili yaniti ezmesin
     document.getElementById('stocksContainer').innerHTML =
       '<div class="loading-msg">⚠️ Veriler yüklenemedi (' + e.message + '). <a href="." onclick="location.reload();return false" style="color:var(--bp-brand)">Yenile</a></div>';
     document.getElementById('lastUpdate').textContent = 'Yüklenemedi';

@@ -33,14 +33,30 @@
 
   /* Period section */
   .period-section { margin-bottom:32px; }
+  /* .da-panel deltasi (bkz. .sum-chip notu) */
   .period-header {
+    --da-glow-rgb: var(--bp-art-violet-rgb);
+    --da-glow-a: .12;
+    --da-glow-y: -55%;
+    --da-glow-x: -8%;
+    --da-glow-size: 90px;
     display:flex; align-items:center; gap:12px; margin-bottom:14px;
     padding:14px 18px; border-radius:var(--bp-radius-lg);
-    background:var(--bp-surface); border:1px solid var(--bp-border);
   }
+  /* Aktif donem: .da-panel'in degradesini duz marka tonuyla ezer (kasitli). */
   .period-header.current-period {
     background:rgba(var(--bp-brand-rgb),0.08); border-color:rgba(var(--bp-brand-rgb),0.25);
+    --da-glow-rgb: var(--bp-brand-rgb);
   }
+  /* Donem basligindaki sayac cipleri — 20.09 oncesi sablonda ~200 karakterlik
+     iki satir-ici `style` idi (rozet recetesinin ucuncu el-kopyasi). */
+  .pd-count {
+    font-size:var(--bp-text-sm); padding:2px 8px; border-radius:var(--bp-radius-md);
+    font-variant-numeric:tabular-nums; white-space:nowrap;
+  }
+  .pd-count--al  { background:rgba(var(--bp-al-rgb),0.12);  color:var(--bp-al);  border:1px solid rgba(var(--bp-al-rgb),0.2); }
+  .pd-count--sat { background:rgba(var(--bp-sat-rgb),0.12); color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),0.2); }
+  .pd-counts { display:flex; gap:8px; align-items:center; }
   .period-badge {
     font-size:var(--bp-text-xs); font-weight:700; padding:2px 10px; border-radius:var(--bp-radius-lg);
     text-transform:uppercase; letter-spacing:.4px;
@@ -63,9 +79,20 @@
     display:block;
     min-width:0;
   }
-  .stock-card:hover { border-color:var(--bp-brand); transform:translateY(-1px); }
   .stock-card.sig-al  { border-color:rgba(var(--bp-al-rgb),0.3); background:rgba(var(--bp-al-rgb),0.05); }
   .stock-card.sig-sat { border-color:rgba(var(--bp-sat-rgb),0.3); background:rgba(var(--bp-sat-rgb),0.05); }
+  /* 20.09 — GERCEK BUG: bu kural once `.stock-card:hover` olarak sig
+     bilesiklerinin USTUNDE duruyordu. `.stock-card:hover` ve
+     `.stock-card.sig-al` ozgulluk bakimindan ESIT (0,2,0: bir sinif + bir
+     sozde-sinif = iki sinif) -> kaynak sirasi karar verir, sig-al/sig-sat
+     SONRA geldigi icin marka rengi hover cercevesi 46 kartin 29'unda HIC
+     uygulanmiyordu (yalnizca renksiz BEKLE kartlarinda calisiyordu; onlarin
+     `.sig-bkl` kurali (0,1,0) hover'a yeniliyor). Kural artik bilesiklerin
+     ALTINDA. Ayrica dokunmatikte hover "yapisir" (tap sonrasi cerceve mor
+     kalirdi) — `.filter-btn`in emsalindeki hover-yetenegi kapisina alindi. */
+  @media (hover: hover) and (pointer: fine) {
+    .stock-card:hover { border-color:var(--bp-brand); transform:translateY(-1px); }
+  }
 
   .sc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
   .sc-ticker { font-size:var(--bp-text-md); font-weight:700; color:var(--bp-text); }
@@ -73,9 +100,19 @@
     font-size:var(--bp-text-2xs); font-weight:700; padding:2px 7px; border-radius:var(--bp-radius-md);
     text-transform:uppercase; letter-spacing:.3px;
   }
-  .sig-al   { background:rgba(var(--bp-al-rgb),0.15);  color:var(--bp-al);  border:1px solid rgba(var(--bp-al-rgb),0.3); }
-  .sig-sat  { background:rgba(var(--bp-sat-rgb),0.15);  color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),0.3); }
-  .sig-bkl  { background:rgba(var(--bp-text3-rgb),0.1); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),0.2); }
+  /* 20.09 — GERCEK BUG (sinif ad-alani cakismasi): bu uc kural CIPLAK
+     `.sig-al`/`.sig-sat`/`.sig-bkl` idi, ama ayni uc degistirici KARTIN
+     kendisinde de var (`class="stock-card sig-bkl"`). AL/SAT icin yazari
+     `.stock-card.sig-*` bilesigini ayrica tanimladigi icin sizinti
+     gorunmuyordu; BEKLE icin boyle bir bilesik YOK -> 18 BEKLE karti
+     `--bp-surface` yerine ROZETIN zeminini (rgba(text3,.1)) ve kenarini
+     tasiyordu, ustune kartin tum metni `--bp-bkl`i miras aliyordu (canli
+     olculdu: card bg rgba(144,144,151,.1)). Temettu'de ayni kusur 28 kartin
+     24'unu etkiliyordu. Cozum: rozet degistiricileri `.sig-badge` altina
+     kapatildi; HTML'de degisiklik gerekmiyor. */
+  .sig-badge.sig-al   { background:rgba(var(--bp-al-rgb),0.15);  color:var(--bp-al);  border:1px solid rgba(var(--bp-al-rgb),0.3); }
+  .sig-badge.sig-sat  { background:rgba(var(--bp-sat-rgb),0.15);  color:var(--bp-sat); border:1px solid rgba(var(--bp-sat-rgb),0.3); }
+  .sig-badge.sig-bkl  { background:rgba(var(--bp-text3-rgb),0.1); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),0.2); }
 
   .sc-name  { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sc-price { font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text2); }
@@ -105,12 +142,20 @@
   .summary-row {
     display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px;
   }
+  /* .da-panel deltasi (govde reçetesi data-art.css'te; bkz. ozet.css
+     .counter-card emsali). 20.09 oncesi yuzey+kenar+radial parilti ELLE
+     kopyalanmisti — ayni recete bu iki takvim sayfasinda iki kez. */
   .sum-chip {
-    background:var(--bp-surface); border:1px solid var(--bp-border);
+    --da-glow-rgb: var(--bp-art-violet-rgb);
+    --da-glow-a: .12;
+    --da-glow-y: -55%;
+    --da-glow-x: -8%;
+    --da-glow-size: 90px;
     border-radius:var(--bp-radius-md); padding:10px 16px; text-align:center;
     flex:1; min-width:110px;
   }
-  .sum-num  { font-size:var(--bp-text-22); font-weight:800; }
+  .sum-num  { font-size:var(--bp-text-22); font-weight:800; font-family:'Space Grotesk',system-ui,sans-serif; font-variant-numeric:tabular-nums; }
+  .sum-num--brand { color:var(--bp-brand); }
   .sum-lbl  { font-size:var(--bp-text-xs); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
 
   /* Info banner */
@@ -161,27 +206,17 @@
   .mc-pos{color:var(--bp-al);}.mc-neg{color:var(--bp-sat);}.mc-neu{color:var(--bp-text3);}
 
   .stock-card { cursor: pointer; }
-  .stock-card:focus { outline: 2px solid var(--bp-accent-cyan); outline-offset: 2px; }
+  /* 20.09 — odak halkasi kaldirildi: kanonik kural _bp_critical_css.html'de
+     (`:focus-visible{outline:2px solid var(--bp-brand);outline-offset:2px}`).
+     Sayfa kurali `:focus-visible` DEGIL `:focus` uzerineydi ve (0,2,0) ile
+     kanonik (0,1,0) kurali eziyordu -> klavye odak halkasi SADECE bu sayfada
+     camgobegi, tum sitede mor cikiyordu (kardes /temettu-takvimi'nde ayni
+     kural --bp-brand yaziyordu: ayni desen, uc farkli renk). */
   .sc-ticker-link { text-decoration: none; color: inherit; }
   .sc-ticker-link:hover .sc-ticker { color: var(--bp-accent-cyan); }
 
-  /* ── Data-Art köşe parıltısı (09.09 gece) — özet kutuları + aktif dönem kartı;
-     yoğun stock-card ızgarasına (onlarca tekdüze kart) dokunulmadı, tarama.css'teki
-     aynı gerekçeyle (scanability). ── */
-  .sum-chip, .period-header {
-    position: relative;
-    overflow: hidden;
-  }
-  .sum-chip::before, .period-header::before {
-    content: '';
-    position: absolute;
-    top: -55%;
-    right: -8%;
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb), .12), transparent 70%);
-    pointer-events: none;
-  }
-  .sum-chip > *, .period-header > * { position: relative; }
+  /* 20.09 — 09.09'un el-yapimi Data-Art kose pariltisi buradan KALDIRILDI:
+     birebir ayni ::before artik data-art.css `.da-panel`de tek kaynakta.
+     Yogun stock-card izgarasina yine dokunulmadi (scanability, tarama.css
+     ile ayni gerekce). */
 
