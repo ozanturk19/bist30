@@ -65,12 +65,12 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/data-art.css?v=4de26da7">
+<link rel="stylesheet" href="/static/css/data-art.css?v=14b3c47a">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <style id="bp-critical-css">
 /* Kanonik anti-CLS bloğu — 27 şablonun paylaştığı desen, BİREBİR korunur (Madde 6f notu).
    Header page-title/nav düzenini erken kilitler, arama overlay'ini ilk boyada gizler. */
-.bp-footer-link{color:var(--bp-text3);text-decoration:none;transition:color .15s}.bp-footer-link:hover{color:var(--bp-text)}
+
 header h1.page-title,header h1.header-name,header .page-sub,header .header-sub{display:none !important}
 header > .header-info,header > div:has(> h1.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}
 header div[style]:has(> h1.page-title),header div[style]:has(> h1.header-name){display:none !important}
@@ -342,14 +342,7 @@ header{
 .da-sub-msg{font-size:var(--bp-text-xs);min-height:1em}
 .da-sub-done{display:flex;align-items:center;gap:10px;font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-al)}
 
-/* ── footer ── */
-.da-footer{padding:clamp(48px,6vw,80px) 0 clamp(28px,4vw,44px)}
-.da-footer-inner{max-width:900px;margin:0 auto;text-align:center}
-.da-footer-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;font-weight:700;font-size:var(--bp-text-md)}
-.da-footer-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:var(--bp-text-sm)}
-.da-footer-note{font-size:var(--bp-text-xs);color:var(--bp-text3);text-align:center;padding:10px 12px;margin-bottom:16px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);background:rgba(var(--bp-volume-rgb),.05)}
-.da-footer-disclaimer{color:var(--bp-text3);font-size:var(--bp-text-xs);margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto}
-.da-footer-copy{color:var(--bp-text3);font-size:var(--bp-text-xs);margin-top:8px}
+/* footer stilleri -> static/css/data-art.css (20.09 tek-kaynak) */
 
 /* Gündem & Haberler — mevcut gundem-section'ın Data-Art restili */
 .da-gnm-tabs{display:flex;gap:4px;background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-pill);padding:3px}
@@ -698,48 +691,7 @@ header{
 
 </main>
 
-<footer class="da-footer">
-  <div class="da-footer-inner">
-    <div class="da-footer-note">
-      <span aria-hidden="true">⏱</span> Veri kaynağı: Yahoo Finance · BIST resmi yayın gecikmesi yaklaşık <strong>15 dakika</strong> · Gün sonu (EOD) teknik analiz — gerçek-zamanlı işlem verisi değildir
-    </div>
-    <div class="da-footer-brand">
-      <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="36" height="36" rx="6" fill="var(--bp-surface)"/>
-        <circle cx="18" cy="18" r="13" stroke="var(--bp-border2)" stroke-width="1"/>
-        <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="var(--bp-al)"/>
-        <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="var(--bp-border)"/>
-        <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="var(--bp-border)"/>
-        <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="var(--bp-border)"/>
-        <circle cx="18" cy="18" r="2.8" fill="var(--bp-brand)"/>
-        <circle cx="18" cy="18" r="1.4" fill="var(--bp-text)"/>
-      </svg>
-      Borsa<span class="bp-al-text">Pusula</span>
-    </div>
-    <div class="da-footer-links">
-      <a href="/ozet" class="bp-footer-link">Günlük Özet</a>
-      <a href="/gundem" class="bp-footer-link">Gündem</a>
-      <a href="/tarama" class="bp-footer-link">Hisse Tarayıcı</a>
-      <a href="/karsilastir" class="bp-footer-link">Karşılaştır</a>
-      <a href="/portfolio" class="bp-footer-link">Portföy</a>
-      <a href="/sektor-harita" class="bp-footer-link">Sektör Haritası</a>
-      <a href="/hisseler" class="bp-footer-link">Tüm Hisseler</a>
-      <a href="/bilanco-takvimi" class="bp-footer-link">Bilanço Takvimi</a>
-      <a href="/temettu-takvimi" class="bp-footer-link">Temettü Takvimi</a>
-      <a href="/blog" class="bp-footer-link">Blog</a>
-      <a href="/metodoloji" class="bp-footer-link">Metodoloji</a>
-      <a href="/hakkinda" class="bp-footer-link">Hakkında</a>
-      <a href="/gizlilik" class="bp-footer-link">Gizlilik</a>
-      <a href="/yasal" class="bp-footer-link">Yasal Uyarı</a>
-      <a href="/iletisim" class="bp-footer-link">İletişim</a>
-    </div>
-    <!-- SPK uyarısı — BİREBİR korunan metin (Madde 6a) -->
-    <p class="da-footer-disclaimer">
-      <span aria-hidden="true">⚠️</span> Bu platform yalnızca bilgilendirme amaçlıdır. Sinyaller <strong style="color:var(--bp-text3)">yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez.
-    </p>
-    <p class="da-footer-copy">© 2026 borsapusula.com</p>
-  </div>
-</footer>
+{% with ftr_self='/', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
 {% include '_mobile_nav_partial.html' %}
 

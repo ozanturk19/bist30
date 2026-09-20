@@ -26,7 +26,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/data-art.css?v=4de26da7">
+<link rel="stylesheet" href="/static/css/data-art.css?v=14b3c47a">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <link rel="stylesheet" href="/static/css/pages/gundem.css?v=0af6ad48">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -220,10 +220,7 @@
 
 </main>
 
-<footer>
-  <a href="/">Ana Sayfa</a> · <a href="/tarama">Tarayıcı</a> · <a href="/ozet">Günlük Özet</a> · <a href="/metodoloji">Metodoloji</a> · <a href="/yasal">Yasal Uyarı</a>
-  <div style="margin-top:6px"><span aria-hidden="true">⚠️</span> Gündem içerikleri bilgi amaçlıdır, yatırım tavsiyesi değildir. © 2026 borsapusula.com</div>
-</footer>
+{% with ftr_self='/gundem', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
 <script>
 /* karsilastir.html'deki ile ayni desen (r27 bug-hunt) — defense-in-depth,

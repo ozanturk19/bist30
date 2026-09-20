@@ -1,0 +1,85 @@
+{#- KANONIK FOOTER (20.09) — 19 sablonun tek footer kaynagi.
+    NEDEN: olcum sonucu 19 sayfada 19 AYRI footer vardi (link kumesi 4..15 arasi
+    degisiyordu, uyari metni 8 farkli surumde yaziliydi, hisse.html'inki tamamen
+    inline style'di). Somut sonuclari:
+      * /gizlilik (KVKK aydinlatma metni) 19 sayfanin 11'inde footer'dan
+        ERISILEMIYORDU; /iletisim 12'sinde yoktu.
+      * portfolio.html footer'i KENDI sayfasina link veriyordu (self-link).
+      * "SPK tarafindan yetkilendirilmemistir" ifadesi yalnizca index ve hisse
+        sayfalarinda vardi; diger 17 sayfa 3 kelimelik "Yatirim tavsiyesi
+        degildir" kisaltmasiyla yetiniyordu.
+      * ~15 dk BIST gecikmesi + EOD analiz aciklamasi yalnizca index/hisse/yasal
+        sayfalarindaydi; fiyat/yuzde GOSTEREN 9 sayfa (tarama, ozet, gundem,
+        karsilastir, hisseler, sektor-harita, bilanco, temettu, portfolio)
+        bunu hic sOylemiyordu.
+
+    KULLANIM — parametrelerin HEPSI opsiyonel, hicbiri verilmezse kanonik footer:
+      {% include '_footer.html' %}
+      {% with ftr_self='/blog' %}{% include '_footer.html' %}{% endwith %}
+
+      ftr_self       str  vars. yok    -> sayfanin KENDI href'i; o link menude
+                                          GIZLENIR (bulundugun sayfaya link verme).
+                                          _header.html'deki hdr_self ile ayni desen.
+      ftr_data_note  bool vars. false  -> veri kaynagi / 15 dk gecikme / EOD
+                                          rozetini gosterir. Fiyat veya yuzde
+                                          GOSTEREN her sayfa true gecmeli.
+      ftr_note       str  vars. yok    -> sayfaya ozgu EK not (DUZ METIN, Jinja
+                                          autoescape uygular — HTML gecmeyin,
+                                          `|safe` EKLEMEYIN). ftr_data_note ile
+                                          birlikte kullanilirsa alt satirda cikar.
+
+    STIL: .da-footer* ve .bp-footer-link kurallari static/css/data-art.css'te
+    (20.09'a kadar index.html icine gomuluydu). Bu partial'i kullanan sayfa
+    data-art.css'i YUKLEMEK ZORUNDA.
+
+    SPK METNI: asagidaki uyari index.html'den BIREBIR tasindi (Madde 6a) —
+    degistirmeden once hukuki kontrol gerekir.
+-#}
+<footer class="da-footer">
+  <div class="da-footer-inner">
+    {%- if ftr_data_note is defined and ftr_data_note %}
+    <div class="da-footer-note">
+      <span aria-hidden="true">⏱</span> Veri kaynağı: Yahoo Finance · BIST resmi yayın gecikmesi yaklaşık <strong>15 dakika</strong> · Gün sonu (EOD) teknik analiz — gerçek-zamanlı işlem verisi değildir
+      {%- if ftr_note is defined and ftr_note %}<br>{{ ftr_note }}{% endif %}
+    </div>
+    {%- elif ftr_note is defined and ftr_note %}
+    <div class="da-footer-note">{{ ftr_note }}</div>
+    {%- endif %}
+    <div class="da-footer-brand">
+      <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <rect width="36" height="36" rx="6" fill="var(--bp-surface)"/>
+        <circle cx="18" cy="18" r="13" stroke="var(--bp-border2)" stroke-width="1"/>
+        <path d="M18 5 L15.5 18.5 L18 16 L20.5 18.5 Z" fill="var(--bp-al)"/>
+        <path d="M18 31 L15.5 17.5 L18 20 L20.5 17.5 Z" fill="var(--bp-border)"/>
+        <path d="M31 18 L17.5 15.5 L20 18 L17.5 20.5 Z" fill="var(--bp-border)"/>
+        <path d="M5 18 L18.5 15.5 L16 18 L18.5 20.5 Z" fill="var(--bp-border)"/>
+        <circle cx="18" cy="18" r="2.8" fill="var(--bp-brand)"/>
+        <circle cx="18" cy="18" r="1.4" fill="var(--bp-text)"/>
+      </svg>
+      Borsa<span class="bp-al-text">Pusula</span>
+    </div>
+    {%- set _self = ftr_self|default('', true) %}
+    <nav class="da-footer-links" aria-label="Alt bilgi bağlantıları">
+      {%- if _self != '/' %}<a href="/" class="bp-footer-link">Ana Sayfa</a>{% endif %}
+      {%- if _self != '/ozet' %}<a href="/ozet" class="bp-footer-link">Günlük Özet</a>{% endif %}
+      {%- if _self != '/gundem' %}<a href="/gundem" class="bp-footer-link">Gündem</a>{% endif %}
+      {%- if _self != '/tarama' %}<a href="/tarama" class="bp-footer-link">Hisse Tarayıcı</a>{% endif %}
+      {%- if _self != '/karsilastir' %}<a href="/karsilastir" class="bp-footer-link">Karşılaştır</a>{% endif %}
+      {%- if _self != '/portfolio' %}<a href="/portfolio" class="bp-footer-link">Portföy</a>{% endif %}
+      {%- if _self != '/sektor-harita' %}<a href="/sektor-harita" class="bp-footer-link">Sektör Haritası</a>{% endif %}
+      {%- if _self != '/hisseler' %}<a href="/hisseler" class="bp-footer-link">Tüm Hisseler</a>{% endif %}
+      {%- if _self != '/bilanco-takvimi' %}<a href="/bilanco-takvimi" class="bp-footer-link">Bilanço Takvimi</a>{% endif %}
+      {%- if _self != '/temettu-takvimi' %}<a href="/temettu-takvimi" class="bp-footer-link">Temettü Takvimi</a>{% endif %}
+      {%- if _self != '/blog' %}<a href="/blog" class="bp-footer-link">Blog</a>{% endif %}
+      {%- if _self != '/metodoloji' %}<a href="/metodoloji" class="bp-footer-link">Metodoloji</a>{% endif %}
+      {%- if _self != '/hakkinda' %}<a href="/hakkinda" class="bp-footer-link">Hakkında</a>{% endif %}
+      {%- if _self != '/gizlilik' %}<a href="/gizlilik" class="bp-footer-link">Gizlilik &amp; KVKK</a>{% endif %}
+      {%- if _self != '/yasal' %}<a href="/yasal" class="bp-footer-link">Yasal Uyarı</a>{% endif %}
+      {%- if _self != '/iletisim' %}<a href="/iletisim" class="bp-footer-link">İletişim</a>{% endif %}
+    </nav>
+    <p class="da-footer-disclaimer">
+      <span aria-hidden="true">⚠️</span> Bu platform yalnızca bilgilendirme amaçlıdır. Sinyaller <strong>yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez.
+    </p>
+    <p class="da-footer-copy">© 2026 borsapusula.com</p>
+  </div>
+</footer>

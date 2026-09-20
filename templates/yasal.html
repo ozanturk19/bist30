@@ -25,6 +25,7 @@
 ]}
 </script>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
+<link rel="stylesheet" href="/static/css/data-art.css?v=14b3c47a">
 <link rel="stylesheet" href="/static/css/pages/yasal.css?v=024985f6">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -136,14 +137,7 @@
 
 </main>
 
-<footer>
-  <a href="/">Ana Sayfa</a> ·
-  <a href="/gizlilik">Gizlilik &amp; KVKK</a> ·
-  <a href="/iletisim">İletişim</a> ·
-  <a href="/metodoloji">Metodoloji</a> ·
-  <a href="/hakkinda">Hakkında</a>
-  <div style="margin-top:8px"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir · © 2026 borsapusula.com</div>
-</footer>
+{% with ftr_self='/yasal' %}{% include '_footer.html' %}{% endwith %}
 
 <script src="/static/bp-search.js?v=75" defer></script>
 {% include '_mobile_nav_partial.html' %}

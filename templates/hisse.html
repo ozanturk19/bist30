@@ -107,7 +107,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/data-art.css?v=4de26da7">
+<link rel="stylesheet" href="/static/css/data-art.css?v=14b3c47a">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=1cc96cb3">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -1498,19 +1498,7 @@
 
 </main>
 
-<footer style="text-align:center;padding:20px;font-size:var(--bp-text-sm);color:var(--bp-text3);margin-top:20px">
-  <div style="margin-bottom:8px">
-    <a href="/" style="color:var(--bp-text3);text-decoration:none">Ana Sayfa</a> ·
-    <a href="/tarama" style="color:var(--bp-text3);text-decoration:none">Tarayıcı</a> ·
-    <a href="/hisseler" style="color:var(--bp-text3);text-decoration:none">Tüm Hisseler</a> ·
-    <a href="/gundem" style="color:var(--bp-text3);text-decoration:none">Gündem</a> ·
-    <a href="/ozet" style="color:var(--bp-text3);text-decoration:none">Özet</a> ·
-    <a href="/blog" style="color:var(--bp-text3);text-decoration:none">Blog</a> ·
-    <a href="/metodoloji" style="color:var(--bp-text3);text-decoration:none">Metodoloji</a> ·
-    <a href="/yasal" style="color:var(--bp-text3);text-decoration:none">Yasal Uyarı</a>
-  </div>
-  <span aria-hidden="true">⚠️</span> Bu sayfa yalnızca bilgi amaçlıdır. Herhangi bir otomatik emir verilmez ve <strong>yatırım tavsiyesi değildir</strong> ve SPK tarafından yetkilendirilmemiştir. Geçmiş performans gelecek getirileri garanti etmez. · © 2026 borsapusula.com
-</footer>
+{% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
 <script src="/static/bp-format.js?v=20260808a"></script>
 <script src="/static/stale-banner.js?v=c290d79e"></script>

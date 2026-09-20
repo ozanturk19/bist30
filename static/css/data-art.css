@@ -119,3 +119,21 @@
   opacity:.4;
   mix-blend-mode:overlay;
 }
+
+/* ── Kanonik footer (20.09) ────────────────────────────────────────────────
+   templates/_footer.html'in stil katmani. 20.09'a kadar index.html'in <style>
+   blogunda gomuluydu; footer 19 sayfada tek kaynaga toplaninca (bkz.
+   _footer.html basligi) buraya tasindi — index.html'deki kopyalar silindi.
+   .bp-footer-link de ayni gerekceyle buraya geldi (index.html:73). */
+.da-footer{padding:clamp(48px,6vw,80px) 0 clamp(28px,4vw,44px)}
+.da-footer-inner{max-width:900px;margin:0 auto;text-align:center;padding:0 16px}
+.da-footer-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;font-weight:700;font-size:var(--bp-text-md);color:var(--bp-text)}
+.da-footer-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:var(--bp-text-sm)}
+.da-footer-note{font-size:var(--bp-text-xs);color:var(--bp-text3);text-align:center;padding:10px 12px;margin-bottom:16px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);background:rgba(var(--bp-volume-rgb),.05);line-height:1.6}
+.da-footer-disclaimer{color:var(--bp-text3);font-size:var(--bp-text-xs);margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto}
+.da-footer-copy{color:var(--bp-text3);font-size:var(--bp-text-xs);margin-top:8px}
+.bp-footer-link{color:var(--bp-text3);text-decoration:none;transition:color var(--bp-dur-base) var(--bp-ease-standard)}
+@media (hover: hover) and (pointer: fine){
+  .bp-footer-link:hover{color:var(--bp-text)}
+}
+.bp-footer-link:focus-visible{color:var(--bp-text)}
