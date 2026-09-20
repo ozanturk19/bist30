@@ -289,15 +289,13 @@
      Esik, tablonun GERCEKTEN sigdigi genislige tasindi: container 1200px'te
      tavanlandigi icin >=1200px viewport'ta ic genislik 1160px (~50px pay).
      900-1199px bandinda .table-wrap yeniden scroll kabi oluyor; bu bantta
-     thead sticky'si bilincli olarak KAPATILIYOR — asagidaki (satir ~462)
+     thead sticky'si bilincli olarak KAPATILIYOR (kural DOSYANIN SONUNDA,
+     kaynak-sirasi gerekcesiyle) — asagidaki (satir ~462)
      aciklamada oldugu gibi bir scroll kabi ici sticky, referansini hic
      kaymayan scrollport'a kaydirip yarim-bozuk davranir; veriyi kirpmak
      yerine sticky'den vazgecmek acik ara daha iyi takas. */
   @media (min-width:1200px) {
     .table-wrap { overflow-x: visible; }
-  }
-  @media (min-width:900px) and (max-width:1199px) {
-    thead th { position: static; }
   }
   table { width:100%; border-collapse:collapse; }
   thead th {
@@ -671,4 +669,13 @@
       border-radius: var(--bp-radius-16);
       margin-bottom: 10px;
     }
+  }
+
+  /* 900-1199px bandinda thead sticky kapatma kurali (bkz. satir ~275 aciklamasi)
+     DOSYANIN SONUNDA: ayni secici (thead th) yukarida `position:sticky` ile
+     tanimli ve esit ozgullukte — kural oradan SONRA geldigi icin kaynak sirasi
+     kazanir. (Canlida olculdu: dosyanin ortasinda dururken position hala
+     "sticky" donuyordu.) */
+  @media (min-width:900px) and (max-width:1199px) {
+    thead th { position: static; }
   }
