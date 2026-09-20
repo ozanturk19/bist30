@@ -460,12 +460,19 @@
     padding: 16px 18px;
     margin-bottom: 20px;
   }
+  /* 20.09 Data-Art: sayfadaki 14 kart basligi TEK hamlede ayni tipografiye
+     getirildi (Space Grotesk + genis tracking = ana sayfanin .da-eyebrow
+     imzasi). Renk bilincli olarak cyan DEGIL text2: cyan bu sayfada
+     eyebrow+dot deseninin (panel etiketi) rengi, 14 basligi da cyan yapmak
+     o ayrimi yok ederdi; --bp-volume (index'in eyebrow rengi) ise burada
+     "Hacim Onayli" anlamini tasiyor, semantik carpisma olurdu. */
   .section-title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: var(--bp-text-sm);
-    color: var(--bp-text3);
+    color: var(--bp-text2);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
+    letter-spacing: 0.12em;
+    font-weight: 700;
     margin-bottom: 12px;
   }
 
@@ -609,18 +616,22 @@
 
   /* ── İlgili Blog Kartları ── */
   .blog-read-card {
-    background: var(--bp-surface);
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
     border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-md);
-    padding: 12px 14px;
+    border-radius:var(--bp-radius-lg);
+    padding: 13px 15px;
     text-decoration: none;
     display: block;
-    transition: all .15s;
+    transform: rotate(var(--rot, 0deg));
+    transition: border-color .15s, background .15s, transform .15s;
   }
+  .blog-read-card:nth-child(3n+1) { --rot: -.7deg; }
+  .blog-read-card:nth-child(3n+2) { --rot: .6deg; }
+  .blog-read-card:nth-child(3n+3) { --rot: -.4deg; }
   .blog-read-card:hover {
-    border-color: var(--bp-text3);
-    background: var(--bp-surface2);
-    transform: translateY(-1px);
+    border-color: var(--bp-accent-cyan);
+    background: rgba(var(--bp-accent-cyan-rgb), .07);
+    transform: rotate(0deg) translateY(-2px);
   }
 
   /* ── AI Haberler ── */
@@ -774,9 +785,10 @@
 
   /* ── Metodoloji notu ── */
   .methodology {
-    background: var(--bp-surface);
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
     border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
+    border-left: 3px solid rgba(var(--bp-art-violet-rgb),0.35);
+    border-radius:var(--bp-radius-20);
     padding: 16px 18px;
     margin-bottom: 24px;
     font-size: var(--bp-text-sm);
@@ -787,10 +799,10 @@
 
   /* SPEC-011 L4 / SPEC-013 — İçerik zenginleştirme blokları */
   .content-card {
-    background: var(--bp-surface);
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
     border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg);
-    padding: 16px 18px;
+    border-radius:var(--bp-radius-20);
+    padding: 18px 20px;
     margin-bottom: 20px;
   }
   .content-para {
@@ -811,12 +823,22 @@
      olarak .faq-q/.faq-a'dan (düz-yazı soru/cevap) farklı bir görsel
      dil — burası kısa değer listesi, cümle değil. */
   .quickfacts-card {
-    background: var(--bp-surface); border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius-lg); padding: 16px 18px; margin-bottom: 20px;
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+    border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius-20); padding: 18px 20px; margin-bottom: 20px;
   }
+  .quickfacts-card::before {
+    content:''; position:absolute; top:-45%; right:-8%;
+    width:240px; height:240px; border-radius:50%;
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.13), transparent 70%);
+    pointer-events:none;
+  }
+  .quickfacts-card > * { position: relative; }
   .quickfacts-title {
-    font-size: var(--bp-text-xs); color: var(--bp-text3); text-transform: uppercase;
-    letter-spacing: .5px; font-weight: 600; margin-bottom: 12px;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--bp-text-xs); color: var(--bp-accent-cyan); text-transform: uppercase;
+    letter-spacing: .12em; font-weight: 700; margin-bottom: 12px;
   }
   .quickfacts-list {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -824,7 +846,11 @@
   }
   .qf-row { display: flex; flex-direction: column; gap: 3px; }
   .qf-row dt { font-size: var(--bp-text-xs); color: var(--bp-text3); }
-  .qf-row dd { font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text); margin: 0; }
+  .qf-row dd {
+    font-family: var(--bp-font-mono);
+    font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text);
+    margin: 0; letter-spacing: -0.2px;
+  }
   .quickfacts-disclaimer {
     font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 14px;
     padding-top: 10px; border-top: 1px solid var(--bp-border-subtle);
@@ -1194,6 +1220,23 @@
     .da-share-btn:nth-child(3){ transform:rotate(-.6deg); }
     .da-share-btn:hover{ transform:rotate(0deg) translateY(-1px); }
     .da-share-btn:active{ transform:scale(.96); }
+
+    /* SEO teknik-ozet seridi — 20.09'a kadar sablon icinde inline duz-kutu
+       (surface + uppercase mikro-etiket) olarak duruyordu, yani Ozan'in
+       "amator" dedigi desenin ta kendisiydi. */
+    .da-techsum-panel{
+      position:relative;overflow:hidden;
+      background:linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+      border:1px solid var(--bp-border);border-radius:var(--bp-radius-20);
+      padding:16px 20px;margin-bottom:20px;
+    }
+    .da-techsum-panel::before{
+      content:'';position:absolute;top:-50%;left:-5%;width:220px;height:220px;border-radius:50%;
+      background:radial-gradient(circle, rgba(var(--bp-accent-cyan-rgb),.09), transparent 70%);
+      pointer-events:none;
+    }
+    .da-techsum-panel > *{position:relative}
+    .da-techsum-panel .da-util-eyebrow{margin-bottom:10px}
 
     .da-story-panel{
       position:relative;overflow:hidden;
