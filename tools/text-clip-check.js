@@ -1,0 +1,165 @@
+#!/usr/bin/env node
+// tools/text-clip-check.js — K-M: ELEMAN İÇİ metin kırpılması dedektörü (canlı)
+//
+// Neden var: tools/mobile-overflow-check.mjs YALNIZ sayfa düzeyi yatay taşmayı
+// ölçer (documentElement.scrollWidth > innerWidth). Bir kapsayıcı `overflow:hidden`
+// ise sayfa taşmaz — metin SESSİZCE kesilir ve harness yeşil kalır. Bu betik o
+// boşluğu kapatır: metin DÜĞÜMÜNÜN kendi kutusunu (Range.getClientRects) en yakın
+// kırpan atanın client kutusuyla karşılaştırır.
+//
+// Sınıflandırma:
+//   HARD  — kırpılıyor, hiçbir görsel gösterge YOK (ne ellipsis ne line-clamp) →
+//           kullanıcı metnin eksik olduğunu ANLAYAMAZ. Gerçek bug.
+//   ELLIP — ellipsis/line-clamp var (bilgi kaybı sinyalleniyor) → tasarım kararı,
+//           yalnız raporlanır.
+//   PLACE — input/textarea placeholder'ı alana sığmıyor (canvas ölçümü).
+//
+// Kullanım: node tools/text-clip-check.js [--base=https://borsapusula.com] [--w=375]
+const { chromium } = require('playwright');
+
+const BASE = (process.argv.find(a => a.startsWith('--base=')) || '').split('=')[1] || 'https://borsapusula.com';
+const W = parseInt((process.argv.find(a => a.startsWith('--w=')) || '').split('=')[1] || '375', 10);
+const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').split('=')[1] || '';
+
+const PAGES = [
+  '/', '/ozet', '/tarama', '/gundem', '/hisseler', '/sektor-harita',
+  '/hisse/ASELS', '/hisse/GARAN', '/karsilastir', '/portfoy',
+  '/bilanco-takvimi', '/temettu-takvimi', '/blog', '/blog/rsi-gostergesi-nedir',
+  '/metodoloji', '/hakkinda', '/iletisim', '/profil', '/yasal', '/gizlilik',
+];
+
+const PROBE = () => {
+  const out = [];
+  const sel = (el) => {
+    if (!el) return '?';
+    let s = el.tagName.toLowerCase();
+    if (el.id) s += '#' + el.id;
+    if (el.className && typeof el.className === 'string') s += '.' + el.className.trim().split(/\s+/).slice(0, 3).join('.');
+    return s;
+  };
+  // sr-only (1x1 clip) ve ANIMASYONLU kaydırıcı (marquee/ticker) kasıtlıdır → elenir
+  const isSrOnly = (el) => {
+    let p = el;
+    while (p && p !== document.body) {
+      const cs = getComputedStyle(p);
+      if ((cs.clip && cs.clip !== 'auto') || cs.clipPath === 'inset(50%)') return true;
+      const r = p.getBoundingClientRect();
+      if (r.width <= 1.5 && r.height <= 1.5 && p.textContent.trim().length > 2) return true;
+      p = p.parentElement;
+    }
+    return false;
+  };
+  const animatedUnder = (clipper, node) => {
+    let p = node.parentElement;
+    while (p && p !== clipper.parentElement) {
+      const cs = getComputedStyle(p);
+      if (cs.animationName !== 'none' || (cs.transitionProperty || '').includes('transform')) return true;
+      p = p.parentElement;
+    }
+    return false;
+  };
+  const clipperOf = (node) => {
+    // ÖNEMLİ: kaydırılabilir (auto/scroll) bir ata ÖNCE gelirse içerik ERİŞİLEBİLİR →
+    // kırpılma değil. body/html kırpıcı sayılmaz (sayfa düzeyi taşma ayrı harness'ta:
+    // mobile-overflow-check.mjs) — `body{overflow-x:hidden}` viewport'a PROPAGATE olur.
+    let p = node.parentElement;
+    while (p && p !== document.body && p !== document.documentElement) {
+      const cs = getComputedStyle(p);
+      const ox = cs.overflowX, oy = cs.overflowY;
+      if (ox === 'auto' || ox === 'scroll' || oy === 'auto' || oy === 'scroll') return null;
+      if (ox === 'hidden' || ox === 'clip' || oy === 'hidden' || oy === 'clip') return { el: p, cs };
+      p = p.parentElement;
+    }
+    return null;
+  };
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let n;
+  while ((n = walker.nextNode())) {
+    const txt = n.nodeValue.replace(/\s+/g, ' ').trim();
+    if (!txt) continue;
+    const parent = n.parentElement;
+    if (!parent) continue;
+    const pcs = getComputedStyle(parent);
+    if (pcs.display === 'none' || pcs.visibility === 'hidden' || parent.closest('script,style,noscript,template')) continue;
+    // ATA zinciri görünürlüğü: display:none ATA + content-visibility (checkVisibility)
+    if (parent.checkVisibility && !parent.checkVisibility({ checkVisibilityCSS: true, contentVisibilityAuto: true })) continue;
+    // KAPALI <details> içeriği kasıtlı gizlidir; Chromium bu düğümlere yine de
+    // kutu döndürür (::details-content / content-visibility:hidden) → sahte kırpılma
+    const dt = parent.closest('details');
+    if (dt && !dt.open && !parent.closest('summary')) continue;
+    if (isSrOnly(parent)) continue;
+    const c = clipperOf(n);
+    if (!c) continue;
+    if (animatedUnder(c.el, n)) continue;
+    const ccs = c.cs, ce = c.el;
+    const cr = ce.getBoundingClientRect();
+    const bl = parseFloat(ccs.borderLeftWidth) || 0, bt = parseFloat(ccs.borderTopWidth) || 0;
+    const L = cr.left + bl, T = cr.top + bt, R = L + ce.clientWidth, B = T + ce.clientHeight;
+    if (ce.clientWidth === 0 || ce.clientHeight === 0) continue;
+    const rng = document.createRange(); rng.selectNodeContents(n);
+    const rects = Array.from(rng.getClientRects()).filter(r => r.width > 0 && r.height > 0);
+    if (!rects.length) continue;
+    let ovR = 0, ovB = 0, ovL = 0;
+    for (const r of rects) {
+      ovR = Math.max(ovR, r.right - R);
+      ovL = Math.max(ovL, L - r.left);
+      ovB = Math.max(ovB, r.bottom - B);
+    }
+    const scrollableX = ccs.overflowX === 'auto' || ccs.overflowX === 'scroll';
+    const scrollableY = ccs.overflowY === 'auto' || ccs.overflowY === 'scroll';
+    const hx = (ovR > 2 || ovL > 2) && !scrollableX;
+    const hy = ovB > 2 && !scrollableY;
+    if (!hx && !hy) continue;
+    const tcs = getComputedStyle(parent);
+    const hasEllip = tcs.textOverflow === 'ellipsis' || ccs.textOverflow === 'ellipsis';
+    const clamp = tcs.webkitLineClamp && tcs.webkitLineClamp !== 'none';
+    out.push({
+      kind: (hasEllip && hx) || clamp ? 'ELLIP' : 'HARD',
+      text: txt.slice(0, 60),
+      node: sel(parent),
+      clipper: sel(ce),
+      ovR: +ovR.toFixed(1), ovL: +ovL.toFixed(1), ovB: +ovB.toFixed(1),
+      title: parent.getAttribute('title') || (ce.getAttribute && ce.getAttribute('title')) || '',
+    });
+  }
+  // placeholder ölçümü
+  const cv = document.createElement('canvas'); const ctx = cv.getContext('2d');
+  document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el => {
+    const ph = el.getAttribute('placeholder'); if (!ph) return;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden' || !el.offsetParent) return;
+    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const wTxt = ctx.measureText(ph).width;
+    const avail = el.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+    if (avail > 0 && wTxt > avail + 1) {
+      out.push({ kind: 'PLACE', text: ph.slice(0, 60), node: sel(el), clipper: '(placeholder)', ovR: +(wTxt - avail).toFixed(1), ovL: 0, ovB: 0, title: '' });
+    }
+  });
+  return out;
+};
+
+(async () => {
+  const browser = await chromium.launch();
+  const ctx = await browser.newContext({ viewport: { width: W, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const pages = ONLY ? ONLY.split(',') : PAGES;
+  let hard = 0, ellip = 0, place = 0;
+  for (const p of pages) {
+    const page = await ctx.newPage();
+    try {
+      await page.goto(BASE + p, { waitUntil: 'networkidle', timeout: 45000 });
+      await page.waitForTimeout(1200);
+      const res = await page.evaluate(PROBE);
+      const h = res.filter(r => r.kind === 'HARD'), e = res.filter(r => r.kind === 'ELLIP'), pl = res.filter(r => r.kind === 'PLACE');
+      hard += h.length; ellip += e.length; place += pl.length;
+      console.log(`\n=== ${p} — HARD:${h.length} ELLIP:${e.length} PLACE:${pl.length}`);
+      for (const r of [...h, ...pl]) console.log(`  [${r.kind}] ${r.node} < ${r.clipper}  R+${r.ovR} B+${r.ovB} L+${r.ovL} ${r.title ? '(title var)' : ''}\n        "${r.text}"`);
+      if (process.env.SHOW_ELLIP) for (const r of e) console.log(`  [ELLIP] ${r.node} < ${r.clipper} R+${r.ovR} B+${r.ovB}\n        "${r.text}"`);
+    } catch (err) {
+      console.log(`\n=== ${p} — HATA: ${err.message.split('\n')[0]}`);
+    }
+    await page.close();
+  }
+  console.log(`\nTOPLAM @${W}px — HARD:${hard} ELLIP:${ellip} PLACE:${place}`);
+  await browser.close();
+  process.exit(hard + place > 0 ? 1 : 0);
+})();

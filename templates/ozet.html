@@ -317,11 +317,20 @@ function goToDate(date) {
       <div style="font-size:var(--bp-text-md);font-weight:700;color:var(--bp-text);margin-bottom:3px"><span aria-hidden="true">📬</span> Günlük Özeti E-postayla Al</div>
       <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Her gün akşam 19:00'da BIST sinyal özeti gelen kutunuzda — ücretsiz, iptal her zaman.</div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px;flex-wrap:wrap" id="ozSubForm" role="status" aria-live="polite">
+    {#- 21.09 (CPO) CANLI BÖLGE: bu sarmalayıcı `role="status" aria-live="polite"`
+        taşıyordu — içinde e-posta alanı, Abone Ol butonu, KVKK onay kutusu ve
+        Gizlilik linki var. `role="status"` varsayılan `aria-atomic="true"` demek:
+        `#ozSubMsg`e tek satır yazıldığında ekran okuyucu TÜM formu baştan okuyor
+        ve sarmalayıcının kendi grup semantiği de status'a dönüşüyordu. Canlı bölge
+        yalnızca mesaj ögesine taşındı (/iletisim `cfMsg` ve /profil ile aynı desen). -#}
+    <div style="display:flex;gap:8px;align-items:center;flex:2;min-width:240px;flex-wrap:wrap" id="ozSubForm">
       <input id="ozSubEmail" type="email" required autocomplete="email" placeholder="e-posta adresiniz" aria-label="E-posta adresi"
+        {#- 21.09 (CPO) `min-width:0` iken alan 375px'te 142px'e sıkışıyordu ve
+            "e-posta adresiniz" placeholder'ı 8px taşıp KESİLİYORDU (anasayfadaki
+            kardeşi 176px alıp sığıyor). Gereken iç genişlik 150px → 170px min. #}
         style="flex:1;background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text);
                padding:8px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-lg);font-family:inherit;outline:none;
-               transition:border-color .15s;min-width:0"
+               transition:border-color .15s;min-width:170px"
         onfocus="this.style.borderColor='var(--bp-brand)';this.removeAttribute('aria-invalid');var m=document.getElementById('ozSubMsg');if(m)m.textContent='';" onblur="this.style.borderColor='var(--bp-border)'"
         onkeydown="if(event.key==='Enter')ozSubmitSub()">
       <button onclick="ozSubmitSub()"
@@ -335,7 +344,7 @@ function goToDate(date) {
         <input type="checkbox" class="da-check" id="ozSubKvkk" required>
         <span><a href="/gizlilik" target="_blank" class="da-link">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
       </label>
-      <span id="ozSubMsg" style="font-size:var(--bp-text-sm)"></span>
+      <span id="ozSubMsg" role="status" aria-live="polite" style="font-size:var(--bp-text-sm)"></span>
     </div>
     <button class="da-close" onclick="document.getElementById('ozSubBar').style.display='none'"
       title="Kapat" aria-label="Kapat">×</button>

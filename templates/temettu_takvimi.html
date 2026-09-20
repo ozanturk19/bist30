@@ -60,7 +60,12 @@
     <button class="filter-btn fsat"   onclick="setFilter('SAT')"      id="fbtn-SAT"      aria-pressed="false"><span aria-hidden="true">▼</span> Trend Bozuldu</button>
   </div>
 
-  <div id="stocksContainer" role="status" aria-live="polite">
+  {#- 21.09 (CPO) CANLI BÖLGE: bkz. bilanco_takvimi.html'deki aynı düzeltme —
+      kapsayıcı `role="status"` idi ve yüklendikten sonra 112 odaklanabilir
+      denetim taşıyordu; `role="status"` varsayılan `aria-atomic="true"` olduğu
+      için her filtre/otomatik-yenileme tüm listeyi baştan okutuyordu. -#}
+  <p id="dtStatus" class="sr-only" role="status" aria-live="polite"></p>
+  <div id="stocksContainer">
     <div class="loading-msg"><span aria-hidden="true">⏳</span> Veriler yükleniyor…</div>
   </div>
 
@@ -102,6 +107,21 @@ function formatDividendInfo(s) {
   return parts.length ? parts.join(' · ') : 'Veri bekleniyor';
 }
 
+/* 21.09 (CPO) — ekran okuyucu duyurusu; aynı metin tekrar yazılmaz (periyodik
+   yenileme kullanıcının sözünü kesmesin). */
+function _dtFilterLabel() {
+  return _filter === 'all' ? 'tümü'
+    : (_filter === 'upcoming' ? 'Yaklaşan'
+    : (_filter === 'AL' ? 'Güçlü Trend' : 'Trend Bozuldu'));
+}
+let _dtLastAnnounce = '';
+function dtAnnounce(msg) {
+  if (msg === _dtLastAnnounce) return;
+  _dtLastAnnounce = msg;
+  const el = document.getElementById('dtStatus');
+  if (el) el.textContent = msg;
+}
+
 function render(data) {
   const stocks = data.stocks || [];
 
@@ -116,6 +136,7 @@ function render(data) {
   const container = document.getElementById('stocksContainer');
   if (stocks.length === 0) {
     container.innerHTML = '<div class="loading-msg">Temettü verisi bulunamadı.</div>';
+    dtAnnounce('Temettü verisi bulunamadı.');
     return;
   }
 
@@ -127,6 +148,7 @@ function render(data) {
 
   if (filtered.length === 0) {
     container.innerHTML = '<div class="empty-state"><div class="empty-icon"><span aria-hidden="true">📭</span></div><h2>Sonuç bulunamadı</h2><p>Bu filtreye uyan hisse yok — tüm sinyalleri görmek için filtreyi sıfırlayın.</p><button class="btn-reset" onclick="setFilter(\'all\')">Filtreleri Sıfırla</button></div>';
+    dtAnnounce(`Sonuç bulunamadı — filtre: ${_dtFilterLabel()}.`);
     return;
   }
 
@@ -147,6 +169,8 @@ function render(data) {
       </a>
     </div>
   `).join('')}</div>`;
+
+  dtAnnounce(`Temettü takvimi listelendi — ${filtered.length} hisse. Filtre: ${_dtFilterLabel()}.`);
 }
 
 let _dtLoadSeq = 0;  /* 20.09: bilanco_takvimi.html'in r144 guard'inin portu — visibilitychange
@@ -169,6 +193,7 @@ async function load() {
     document.getElementById('stocksContainer').innerHTML =
       '<div class="loading-msg">⚠️ Veriler yüklenemedi (' + e.message + '). <a href="." onclick="location.reload();return false" style="color:var(--bp-brand)">Yenile</a></div>';
     document.getElementById('lastUpdate').textContent = 'Yüklenemedi';
+    dtAnnounce('Temettü takvimi yüklenemedi.');
   }
 }
 

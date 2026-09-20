@@ -62,7 +62,14 @@
     <button class="filter-btn fbkl"     onclick="setFilter('BEKLE')"id="fbtn-BEKLE"  aria-pressed="false"><span aria-hidden="true">●</span> Yatay</button>
   </div>
 
-  <div id="periodsContainer" role="status" aria-live="polite">
+  {#- 21.09 (CPO) CANLI BÖLGE: bu kapsayıcı `role="status" aria-live="polite"` idi.
+      Yüklendikten sonra 190 odaklanabilir denetim (kart/link/buton) taşıyor ve
+      `role="status"` varsayılan olarak `aria-atomic="true"` demek — yani her
+      `render()` (filtre değişimi VE 5 dakikalık otomatik yenileme) tüm listeyi
+      baştan okutuyordu. Canlı bölge, listeden ayrı bir sr-only ögeye taşındı:
+      duyurulan şey ARTIK kısa bir özet, listenin kendisi değil. -#}
+  <p id="btStatus" class="sr-only" role="status" aria-live="polite"></p>
+  <div id="periodsContainer">
     <div class="loading-msg"><span aria-hidden="true">⏳</span> Veriler yükleniyor…</div>
   </div>
 
@@ -75,6 +82,17 @@ let _allData = null;
 let _filter  = 'all';
 const BT_PAGE_SIZE = 24;
 let _btShownCounts = {};  /* CPO-DEV2-106: periyot-index -> gosterilen kart sayisi */
+
+/* 21.09 (CPO) — ekran okuyucu duyurusu. AYNI metin tekrar yazılmaz: 5 dakikalik
+   otomatik yenileme ayni ozeti uretiyorsa canli bolge sessiz kalir (yoksa kullanici
+   okurken periyodik olarak sozu kesilir). */
+let _btLastAnnounce = '';
+function btAnnounce(msg) {
+  if (msg === _btLastAnnounce) return;
+  _btLastAnnounce = msg;
+  const el = document.getElementById('btStatus');
+  if (el) el.textContent = msg;
+}
 
 function setFilter(f) {
   _filter = f;
@@ -129,6 +147,7 @@ function render(data) {
   const container = document.getElementById('periodsContainer');
   if (!periods || periods.length === 0) {
     container.innerHTML = '<div class="loading-msg">Dönem bulunamadı.</div>';
+    btAnnounce('Dönem bulunamadı.');
     return;
   }
 
@@ -198,6 +217,12 @@ function render(data) {
   container.innerHTML = sectionsHtml.trim() === ''
     ? '<div class="empty-state"><div class="empty-icon"><span aria-hidden="true">📭</span></div><h2>Sonuç bulunamadı</h2><p>Bu filtreye uyan hisse yok — tüm sinyalleri görmek için filtreyi sıfırlayın.</p><button class="btn-reset" onclick="setFilter(\'all\')">Filtreleri Sıfırla</button></div>'
     : sectionsHtml;
+
+  const _fLbl = _filter === 'all' ? 'tümü'
+    : (_filter === 'AL' ? 'Güçlü Trend' : (_filter === 'SAT' ? 'Trend Bozuldu' : 'Yatay'));
+  btAnnounce(sectionsHtml.trim() === ''
+    ? `Sonuç bulunamadı — filtre: ${_fLbl}.`
+    : `Bilanço takvimi listelendi — ${totalAll} şirket, ${periods.length} dönem. Filtre: ${_fLbl}.`);
 }
 
 let _btLoadSeq = 0;  /* r144: visibilitychange her odaklanmada load()'u yeniden tetikliyordu,
@@ -218,6 +243,7 @@ async function load() {
     document.getElementById('periodsContainer').innerHTML =
       '<div class="loading-msg">⚠️ Veriler yüklenemedi (' + e.message + '). <a href="." onclick="location.reload();return false" style="color:var(--bp-brand)">Yenile</a></div>';
     document.getElementById('lastUpdate').textContent = 'Yüklenemedi';
+    btAnnounce('Bilanço takvimi yüklenemedi.');
   }
 }
 
