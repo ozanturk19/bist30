@@ -8289,6 +8289,49 @@ def _load_fundamentals_cache_from_disk():
         logger.warning("_load_fundamentals_cache_from_disk hatası: %s", e)
 
 
+# CPO-1674: `financial_currency` (financialCurrency) tek başına güvenilir değil —
+# TAVHL'de etiket "EUR" ama revenue/net_income/total_cash/book_value fiilen TRY
+# (canlı doğrulandı, mailbox CPO-1674). Bu iki fonksiyon önce TRY karşılığı FX
+# oranını bulur, sonra hisse başı gerçek eksende hangi para biriminde olduğunu
+# örtük F/S oranının makul aralığa (0.03-25, çoğu sektör bu bantta) düşüp
+# düşmediğine bakarak belirler.
+def _get_fx_rate_to_try(currency):
+    if not currency or currency == "TRY":
+        return 1.0
+    label = {"USD": "USDTRY", "EUR": "EURTRY"}.get(currency)
+    if not label:
+        return None
+    with _lock:
+        items = _macro_cache.get("data") or []
+    for m in items:
+        if m.get("label") == label:
+            return m.get("price")
+    return None
+
+
+def _resolve_statement_currency(financial_currency, market_cap_raw, revenue_raw, fx_rate):
+    """market_cap her zaman TRY (fiyat × hisse adedi) — revenue'nun etiketlenen
+    para biriminde mi yoksa (TAVHL gibi) fiilen TRY mi olduğunu, ima edilen F/S
+    oranının iki varsayımdan hangisinde makul bir aralığa düştüğüne bakarak
+    çözer. Veri/FX eksikse etikete güvenilir (düşük güven, ama tek elde ne varsa)."""
+    if not financial_currency or financial_currency == "TRY":
+        return "TRY"
+    if not market_cap_raw or not revenue_raw:
+        return financial_currency
+    # CPO-1674 canlı ölçüm: TAVHL'nin "yabancı" varsayımı 0,0192'ye düşüyor —
+    # alt sınır 0,02 olsaydı sınırda kalırdı. 0,03 ile net ayrım (gerçek işletme
+    # P/S'i pratikte bu kadar düşük olmaz), üst sınır 25 aynı gerekçeyle.
+    plausible_as_try = 0.03 <= (market_cap_raw / revenue_raw) <= 25
+    plausible_as_foreign = False
+    if fx_rate:
+        plausible_as_foreign = 0.03 <= (market_cap_raw / (revenue_raw * fx_rate)) <= 25
+    if plausible_as_foreign and not plausible_as_try:
+        return financial_currency
+    if plausible_as_try and not plausible_as_foreign:
+        return "TRY"
+    return financial_currency
+
+
 def _get_fundamentals(ticker_base):
     """yfinance ile temel analiz verilerini döndürür."""
     now = time.time()
@@ -8300,7 +8343,13 @@ def _get_fundamentals(ticker_base):
         # yeterli. Ama leader'da (buradan devam) şema eksikse (statement_trend_quarterly
         # yok — eski kod/yarım fetch kalıntısı) TTL dolmamış olsa bile yeniden çekilsin;
         # aksi halde eksik kayıt tam 4 saat "taze" sayılıp donuk kalıyordu.
-        if _fresh and (_is_web or "statement_trend_quarterly" in cached["data"]):
+        # CPO-1674 (revert 5371780'den ders): aynı desen "statement_currency" için de
+        # gerekli — o alan olmadan money() şekilli revenue/net_income/vb. eski
+        # fmt_billion string'i taşıyor, yeni frontend _fmtMoneyObj bunu tolere eder
+        # (bkz. şablon) ama LEADER de bu eski kaydı bir sonraki warmup turunda
+        # (30dk) kendiliğinden tazelesin — TTL'in 4 saatini beklemesin.
+        _schema_ok = "statement_trend_quarterly" in cached["data"] and "statement_currency" in cached["data"] if cached else False
+        if _fresh and (_is_web or _schema_ok):
             return cached["data"]
     # CPO-558G: web worker'da synchronous yfinance yasak — stale/empty cache dön
     if _is_web:
@@ -8329,26 +8378,37 @@ def _get_fundamentals(ticker_base):
             except (TypeError, ValueError):
                 return default
 
-        def fmt_billion(v):
-            if v is None: return None
-            av = abs(v)
-            if av >= 1e12: return f"{tr_price_filter(v/1e12)} T₺"
-            if av >= 1e9:  return f"{tr_price_filter(v/1e9)} Mrd₺"
-            if av >= 1e6:  return f"{tr_price_filter(v/1e6)} Mn₺"
-            return f"{tr_price_filter(v)} ₺"
+        # CPO-1674: para birimi belirsizliği — market_cap her zaman TRY, ama
+        # revenue/net_income/total_cash/book_value hisseye göre financial_currency
+        # ya da (TAVHL gibi mislabeled durumlarda) fiilen TRY olabilir. Ham
+        # sayıları biçimlemeden ÖNCE çözüyoruz ki hem payload hem price_to_sales/
+        # ev_to_ebitda düzeltmesi aynı kararı kullansın.
+        _market_cap_raw = safe_num("marketCap")
+        _revenue_raw    = safe_num("totalRevenue")
+        _fin_cur        = safe("financialCurrency")
+        _fx_rate        = _get_fx_rate_to_try(_fin_cur)
+        _stmt_cur       = _resolve_statement_currency(_fin_cur, _market_cap_raw, _revenue_raw, _fx_rate)
+
+        def money(v):
+            return {"value": v, "currency": _stmt_cur} if v is not None else None
+
+        _pts_raw = round(safe_num("priceToSalesTrailing12Months"), 2) if safe_num("priceToSalesTrailing12Months") is not None else None
+        if _pts_raw is not None and _stmt_cur != "TRY":
+            # market_cap (TRY) / revenue (_stmt_cur) karışımı — aynı eksene çekilemezse None.
+            _pts_raw = round(_pts_raw / _fx_rate, 2) if _fx_rate else None
 
         raw = {
             "pe_ratio":          round(safe_num("trailingPE"), 1) if safe_num("trailingPE") is not None else None,
             "forward_pe":        round(safe_num("forwardPE"), 1) if safe_num("forwardPE") is not None else None,
             "pb_ratio":          round(safe_num("priceToBook"), 2) if safe_num("priceToBook") is not None else None,
             "eps":               safe("trailingEps"),
-            "market_cap":        fmt_billion(safe("marketCap")),
-            "revenue":           fmt_billion(safe("totalRevenue")),
-            "net_income":        fmt_billion(safe("netIncomeToCommon")),
+            "market_cap":        {"value": _market_cap_raw, "currency": "TRY"} if _market_cap_raw is not None else None,
+            "revenue":           money(_revenue_raw),
+            "net_income":        money(safe_num("netIncomeToCommon")),
             "dividend_yield":    round(safe_num("dividendYield"), 2) if safe_num("dividendYield") is not None else None,
             "roe":               round(safe_num("returnOnEquity") * 100, 1) if safe_num("returnOnEquity") is not None else None,
             "beta":              round(safe_num("beta"), 2) if safe_num("beta") is not None else None,
-            "shares":            fmt_billion(safe("sharesOutstanding")),
+            "shares":            safe_num("sharesOutstanding"),  # CPO-1674: hisse ADEDİ, para birimi yok (eski ₺ soneki hataydı)
             "52w_high":          safe("fiftyTwoWeekHigh"),
             "52w_low":           safe("fiftyTwoWeekLow"),
             "avg_volume":        safe("averageVolume"),
@@ -8359,23 +8419,30 @@ def _get_fundamentals(ticker_base):
             "revenue_growth":    round(safe_num("revenueGrowth") * 100, 1) if safe_num("revenueGrowth") is not None else None,
             "debt_to_equity":    round(safe_num("debtToEquity"), 2) if safe_num("debtToEquity") is not None else None,
             "current_ratio":     round(safe_num("currentRatio"), 2) if safe_num("currentRatio") is not None else None,
-            "price_to_sales":    round(safe_num("priceToSalesTrailing12Months"), 2) if safe_num("priceToSalesTrailing12Months") is not None else None,
+            "price_to_sales":    _pts_raw,
             # CPO r174 (Ozan istegi, temel analiz genisletme)
             "analyst_target":    safe("targetMeanPrice"),
             "analyst_rec":       _RECOMMENDATION_TR.get(safe("recommendationKey"), None),
             "analyst_count":     int(safe_num("numberOfAnalystOpinions")) if safe_num("numberOfAnalystOpinions") is not None else None,
-            "book_value":        safe("bookValue"),
-            "total_cash":        fmt_billion(safe("totalCash")),
+            "book_value":        money(safe_num("bookValue")),
+            "total_cash":        money(safe_num("totalCash")),
             "insider_pct":       round(safe_num("heldPercentInsiders") * 100, 1) if safe_num("heldPercentInsiders") is not None else None,
             "institutional_pct": round(safe_num("heldPercentInstitutions") * 100, 1) if safe_num("heldPercentInstitutions") is not None else None,
-            # CPO-1672: yfinance'in raporladığı bilanço para birimi (TRY/USD/EUR) —
-            # THYAO/ENKAI (USD) ve TAVHL (EUR) gibi hisselerde P/S, P/B gibi TRY
-            # piyasa değeriyle karışan oranları frontend'in etiketlemesi/gizlemesi için.
-            "financial_currency": safe("financialCurrency"),
+            # CPO-1672/1674: yfinance'in raporladığı bilanço para birimi (financial_currency,
+            # ham etiket) ile _stmt_cur (çözülmüş gerçek eksen, TAVHL-tipi mislabel düzeltilmiş)
+            # ayrı taşınıyor — statement_trend hep financial_currency'de (CPO doğruladı),
+            # yukarıdaki money() alanları hep _stmt_cur'de.
+            "financial_currency": _fin_cur,
+            "statement_currency": _stmt_cur,
         }
         # CPO-1528 Faz 2: Faz 1/CPO-1527 çapraz-tablo oranları — financial_health_score.py
         # girdisi. _FUND_SANITY zaten bu alanlar için sınır tanımlıyor (ocf_* hariç, bkz. yorum orada).
         raw.update(_fetched.get("extra") or {})
+        if raw.get("ev_to_ebitda") is not None and _stmt_cur != "TRY":
+            # CPO-1674: enterpriseValue'nun kendisi TRY piyasa değeri + yabancı para
+            # borç/nakit karışımı olabilir, EBITDA gibi tek bir fx_rate'e bölerek
+            # güvenle düzeltilemez (price_to_sales'ten farklı) — yanlış sayı yerine None.
+            raw["ev_to_ebitda"] = None
         data = _clean_fundamentals(raw)
         data["statement_trend"] = _fetched.get("statement_trend") or []
         data["statement_trend_quarterly"] = _fetched.get("statement_trend_quarterly") or []
