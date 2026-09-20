@@ -105,11 +105,15 @@
      iç-kutuya çıkarıldı ve bağlantı rozetin boyunu doldurur (align-self
      stretch) — yazı boyutu DEĞİŞMEDİ. */
   .sig-badge {
-    display:inline-flex; align-items:stretch; min-height:28px;
+    display:inline-flex; align-items:stretch;
     font-size:var(--bp-text-2xs); font-weight:700; padding:2px 7px; border-radius:var(--bp-radius-md);
     text-transform:uppercase; letter-spacing:.3px;
   }
-  .sig-badge > .jargon-term { display:flex; align-items:center; }
+  /* 24px ASGARI ROZETE DEĞİL BAĞLANTIYA yazılır: rozet border-box, min-height
+     28 iken padding(2+2)+border(1+1) düşünce ic kutu 22px kalıyordu — canlı
+     ölçümde 18 "Yatay" rozeti hâlâ 22px çıktı. Hedef olan öge bağlantının
+     KENDİSİ, ölçü de onun üzerinde olmalı. */
+  .sig-badge > .jargon-term { display:flex; align-items:center; min-height:24px; }
   /* 20.09 — GERCEK BUG (sinif ad-alani cakismasi): bu uc kural CIPLAK
      `.sig-al`/`.sig-sat`/`.sig-bkl` idi, ama ayni uc degistirici KARTIN
      kendisinde de var (`class="stock-card sig-bkl"`). AL/SAT icin yazari

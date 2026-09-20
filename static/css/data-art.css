@@ -239,8 +239,13 @@
    (`.da-link`, prose `.jargon-term`) — WCAG "inline" istisnası. ═════════ */
 
 /* Simge/kapat düğmeleri: GÖRSEL boyut değişmez, yalnız isabet alanı büyür.
-   Yoğun arayüzde (yan yana rozetler) halo'lar çakışabileceği için gerçek
-   büyütme gereken yerlerde .da-tap kullanılır, halo DEĞİL. */
+   ⚠️ EVRENSEL DEĞİL — 21.09 canlı isabet testi: portfolio `.ls-warning-close`
+   (13.3×16px buton) halosunun 6/6 probu butona isabet ederken, hisse.css
+   `.ind-help` (22×22px buton) halosunun 0/6 probu isabet etti; noktalar
+   komşu öğelere düştü. Halo yalnız hiçbir ata kırpmıyorsa ve üstüne başka
+   bir şey boyanmıyorsa çalışır. Şüphe varsa ögenin KENDİSİNİ 24px yap.
+   Yoğun arayüzde (yan yana rozetler) halo'lar birbiriyle de çakışır — orada
+   zaten .da-tap ile gerçek büyütme gerekir. */
 .da-tap-halo{position:relative}
 .da-tap-halo::before{
   content:'';position:absolute;top:50%;left:50%;
