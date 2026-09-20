@@ -256,7 +256,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   #chartsInner { display: none; }
-  #chartMain   { height: 340px; margin: 8px 14px 10px; }
+  #chartMain   { height: 340px; margin: 8px 18px 10px; }
 
   /* ── 52 Haftalık Bar ── */
   .week52-bar {
@@ -276,16 +276,56 @@
     align-items: baseline;
     gap: 10px;
   }
+  /* ── 20.09 Grafik sekmesi Data-Art denetimi: guncel fiyat etiketi seridin
+     ORTASINA sabitlenmisti (justify-content:space-between'in orta ogesi), imlec
+     ise gercek konumdaydi. THYAO'da imlec %24'te, etiket %50'de duruyordu —
+     kullanici barın ortasında bir fiyat gorup "aralığın ortasında" okuyordu.
+     Etiket artik imlece kenetli; uc degerleri kendi etiketlerinin altinda. ── */
+  .week52-cap {
+    position: absolute;
+    top: 13px;
+    font-family: var(--bp-font-mono);
+    font-size: var(--bp-text-xs);
+    font-weight: 700;
+    color: var(--bp-text);
+    background: var(--bp-surface2);
+    border: 1px solid var(--bp-border);
+    border-radius: var(--bp-radius-pill);
+    padding: 1px 8px;
+    white-space: nowrap;
+    transition: left 0.4s ease;
+  }
+  .week52-ends {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 10px;
+    margin-top: 36px;
+  }
+  .week52-end { display: flex; flex-direction: column; gap: 2px; }
+  .week52-end-hi { align-items: flex-end; }
+  .week52-endlbl {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--bp-text-2xs); font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--bp-text3);
+  }
+  .week52-endval {
+    font-family: var(--bp-font-mono);
+    font-size: var(--bp-text-xs); font-weight: 700;
+    letter-spacing: -0.2px;
+  }
   .week52-title {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: var(--bp-text-xs); font-weight: 700;
     letter-spacing: .12em; text-transform: uppercase;
     color: var(--bp-accent-cyan);
   }
-  .week52-range {
-    font-family: var(--bp-font-mono);
-    font-size: var(--bp-text-xs); font-weight: 700;
-    letter-spacing: -0.2px;
+  /* .week52-range (mono, ortadaki "dusuk — yuksek" ciftinin bicimi) 20.09'da
+     uc etiketlerine tasindigi icin kaldirildi; yerine konum cumlesi geldi. */
+  .week52-pos {
+    font-size: var(--bp-text-xs); font-weight: 600;
+    letter-spacing: 0; color: var(--bp-text3);
   }
   .week52-track {
     position: relative;
@@ -1004,7 +1044,11 @@
     .signal-badge  { font-size: var(--bp-text-xs); padding: 3px 7px; }
     #liveTs        { display: none; }
     .container { padding: 10px 12px; }
-    #chartMain    { height: 224px; margin: 6px 10px 8px; }
+    #chartMain    { height: 224px; margin: 6px 14px 8px; }
+    /* 20.09: masaustunde 18px olan serit insetleri mobilde de chartMain ile
+       ayni degerde kalmali — aksi halde grafik govdesi seritlerden 4-8px kayiyor. */
+    .chart-header { padding: 12px 14px; }
+    .week52-bar   { padding: 12px 14px 14px; }
     #chartLoading { height: 280px; }
     .info-grid { grid-template-columns: repeat(2, 1fr); }
     .chart-section { overflow: hidden; }
@@ -1168,7 +1212,7 @@
   
 
     .bp-hero-card {
-      background: linear-gradient(135deg, rgba(var(--bp-brand-rgb),0.08), rgba(29,78,216,0.04));
+      background: linear-gradient(135deg, rgba(var(--bp-brand-rgb),0.08), rgba(var(--bp-art-violet-rgb),0.05));
       border: 1px solid rgba(var(--bp-brand-rgb),0.18);
       border-radius: var(--bp-radius-14);
       padding: 18px 20px;
@@ -1310,6 +1354,41 @@
     }
     .da-techsum-panel > *{position:relative}
     .da-techsum-panel .da-util-eyebrow{margin-bottom:10px}
+
+    /* ── AI Analiz sekmesi (20.09) — sekmenin IKI paneli de sayfanin geri kalanindan
+       FARKLI bir dildeydi: govde sabit bir marka/cyan tintiyle (rgba(brand,.08) ->
+       rgba(29,78,216,.05)) boyaniyordu, oysa hisse.html'deki her Data-Art paneli
+       surface -> surface2 degradesi + tek bir radial parilti kullaniyor. Ustelik
+       ikinci renk duragi (29,78,216 = eski palet blue-700) 3eef645'teki palet
+       gocunden sag kalmis bir kalintiydi. Panel kimligi artik zeminle degil,
+       sol aksan seridi + parilti rengiyle tasiniyor (.da-story-panel emsali). ── */
+    .da-ai-panel{
+      position:relative;overflow:hidden;
+      background:linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+      border:1px solid var(--bp-border);border-left:3px solid var(--bp-brand);
+      border-radius:var(--bp-radius-20);padding:18px 20px;margin-bottom:20px;
+    }
+    .da-ai-panel::before{
+      content:'';position:absolute;top:-45%;right:-8%;width:250px;height:250px;border-radius:50%;
+      background:radial-gradient(circle, rgba(var(--bp-brand-rgb),.11), transparent 70%);
+      pointer-events:none;
+    }
+    .da-ai-panel > *{position:relative}
+    .da-ai-panel--fund{ border-left-color:var(--bp-accent-cyan); }
+    .da-ai-panel--fund::before{
+      background:radial-gradient(circle, rgba(var(--bp-accent-cyan-rgb),.10), transparent 70%);
+    }
+    .da-ai-head{position:relative;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .da-ai-badge{
+      margin-left:auto;font-size:var(--bp-text-xs);
+      background:rgba(var(--bp-brand-rgb),0.15);color:var(--bp-brand);
+      padding:2px 8px;border-radius:var(--bp-radius-pill);
+      border:1px solid rgba(var(--bp-brand-rgb),0.25);
+    }
+    .da-ai-body{
+      font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0;
+    }
+    .da-ai-note{font-size:var(--bp-text-xs);color:var(--bp-text3)}
 
     .da-story-panel{
       position:relative;overflow:hidden;

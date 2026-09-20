@@ -108,7 +108,7 @@
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=ca089a04">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=fdd04f30">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -510,19 +510,29 @@
     <div id="chartsInner" style="position:relative;min-height:420px">
       <div id="chartMain" role="img" aria-label="{{ ticker }} fiyat grafiği, günlük mum, 2 yıl"></div>
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
+      {# 20.09 — guncel fiyat etiketi seridin ORTASINA sabitlenmisti, imlec ise
+         gercek konumdaydi (THYAO: imlec %24, etiket %50) — bar "aralığın
+         ortasındasın" diye yanlis okunuyordu. Etiket artik imlece kenetli,
+         52H dusuk/yuksek degerleri kendi uc etiketlerinin altinda. #}
       <div class="week52-bar" id="week52Bar" style="display:none">
         <div class="week52-label">
           <span id="w52label" class="week52-title">52 Haftalık Aralık</span>
-          <span class="week52-range"><span id="w52low" class="bp-sat-text">—</span> — <span id="w52high" class="bp-al-text">—</span></span>
+          <span class="week52-pos" id="w52pos"></span>
         </div>
         <div class="week52-track">
           <div class="week52-fill"  id="w52fill"  style="width:0%"></div>
           <div class="week52-cursor" id="w52cursor" style="left:0%"></div>
+          <div class="week52-cap" id="w52cap" style="left:0%"><span class="sr-only">Güncel fiyat: </span><span id="w52cur">—</span></div>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:var(--bp-text-xs);color:var(--bp-text3)">
-          <span>52H Düşük</span>
-          <span id="w52cur" style="color:var(--bp-text)">—</span>
-          <span>52H Yüksek</span>
+        <div class="week52-ends">
+          <span class="week52-end">
+            <span class="week52-endlbl">52H Düşük</span>
+            <span id="w52low" class="week52-endval bp-sat-text">—</span>
+          </span>
+          <span class="week52-end week52-end-hi">
+            <span class="week52-endlbl">52H Yüksek</span>
+            <span id="w52high" class="week52-endval bp-al-text">—</span>
+          </span>
         </div>
       </div>
     </div>
@@ -1231,13 +1241,13 @@
 
   <!-- AI Sinyal Açıklaması -->
   <div id="ai-section" style="scroll-margin-top:80px"></div>
-  <div id="sigExplainSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),0.08),rgba(29,78,216,0.05));border:1px solid rgba(var(--bp-brand-rgb),0.2);border-radius:var(--bp-radius-20);padding:18px 18px;margin-bottom:20px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  <div id="sigExplainSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" class="da-ai-panel">
+    <div class="da-ai-head">
       <span class="da-util-eyebrow"><span aria-hidden="true">✨</span> Bu Sinyal Ne Anlama Geliyor?</span>
-      <span id="sigExplainBadge" style="margin-left:auto;font-size:var(--bp-text-xs);background:rgba(var(--bp-brand-rgb),0.15);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-pill);border:1px solid rgba(var(--bp-brand-rgb),0.25)">Gemini AI</span>
+      <span id="sigExplainBadge" class="da-ai-badge">Gemini AI</span>
     </div>
     {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
-    <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:var(--bp-text-sm);color:#f87171;line-height:1.6"></div>
+    <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:var(--bp-text-sm);color:var(--bp-sat);line-height:1.6"></div>
     <div id="sigExplainLoading" role="status" aria-live="polite" style="display:flex;flex-direction:column;gap:10px;color:var(--bp-text3);font-size:var(--bp-text-base)">
       {# bughunt-13.09 (finansal-analist workflow §2.3): metodoloji nesri yerine
          ✓ checklist — AL/SAT'ta 3 kriter sinyalin ÜRETİLME koşulu olduğu için
@@ -1265,13 +1275,13 @@
         {% endif %}
         Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-brand);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:#6b6b73">
+      <div style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:var(--bp-text3)">
         <div class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></div>
         AI yorumu hazırlanıyor…
       </div>
     </div>
-    <p id="sigExplainText" role="status" aria-live="polite" style="display:none;font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0"></p>
-    <div id="sigExplainFooter" style="display:none;margin-top:8px;font-size:var(--bp-text-xs);color:var(--bp-text3)">
+    <p id="sigExplainText" role="status" aria-live="polite" class="da-ai-body" style="display:none"></p>
+    <div id="sigExplainFooter" class="da-ai-note" style="display:none;margin-top:8px">
       <span aria-hidden="true">🤖</span> Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 12 saatte bir yenilenir
     </div>
   </div>
@@ -1285,13 +1295,13 @@
        Teknik karttaki gibi koşulsuz "Gemini AI" rozeti kullanılmadı (Skor Analizi'ndeki
        "✦ AI Yorumu" tarzıyla tutarlı, aşırı-iddia yok). -->
   {% set _temel_ready = hs_available and hs.temel_analiz_skoru is not none %}
-  <div data-tab-content="ai" style="background:linear-gradient(135deg,rgba(var(--bp-accent-cyan-rgb),0.07),rgba(29,78,216,0.03));border:1px solid rgba(var(--bp-accent-cyan-rgb),0.2);border-radius:var(--bp-radius-20);padding:18px 18px;margin-bottom:20px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  <div data-tab-content="ai" class="da-ai-panel da-ai-panel--fund">
+    <div class="da-ai-head">
       <span class="da-util-eyebrow"><span aria-hidden="true">📋</span> Temel Görünüm Ne Anlama Geliyor?</span>
     </div>
     {% if _temel_ready %}
-    <p style="font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0 0 8px">{{ hs.temel_analiz_aciklamasi if hs.temel_analiz_aciklamasi else 'AI yorumu hazırlanıyor.' }}</p>
-    <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">
+    <p class="da-ai-body" style="margin:0 0 8px">{{ hs.temel_analiz_aciklamasi if hs.temel_analiz_aciklamasi else 'AI yorumu hazırlanıyor.' }}</p>
+    <div class="da-ai-note">
       <span aria-hidden="true">📊</span> Temel Analiz Skoru {{ hs.temel_analiz_skoru }}/100 — detaylı sayısal kırılım için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" style="color:var(--bp-accent-cyan);text-decoration:none;border-bottom:1px dashed">Özet sekmesindeki Skor Analizi ve Temel Analiz</a> bölümlerine göz atabilirsiniz.
     </div>
     {% else %}
@@ -1462,7 +1472,7 @@
   {# SPEC-017 Faz B Bonus: "Tüm BIST100 Hisseleri" yatay scroll alt bar kaldırıldı (Ozan feedback K7 — amatör, sayfa şişiriyor). #}
 
 <!-- Subscription CTA -->
-<div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(29,78,216,.04));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius-lg);padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
+<div id="hisseSubCta" style="background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.07),rgba(var(--bp-art-violet-rgb),.05));border:1px solid rgba(var(--bp-brand-rgb),.2);border-radius:var(--bp-radius-lg);padding:14px 18px;margin:0 0 4px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:900px;margin-left:auto;margin-right:auto">
   <div style="flex:1;min-width:160px">
     <div style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text);margin-bottom:1px"><span aria-hidden="true">📬</span> {{ ticker }} sinyali değişince bildirim al</div>
     <div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Ücretsiz e-posta aboneliği</div>
@@ -2000,6 +2010,16 @@ function buildChart(d) {
     document.getElementById('w52cur').textContent    = fmt(cur) + ' ₺';
     document.getElementById('w52fill').style.width   = pct + '%';
     document.getElementById('w52cursor').style.left  = pct + '%';
+    /* Fiyat rozeti imlece kenetli; uclarda taşmasın diye hizalama ucta degisir. */
+    const w52cap = document.getElementById('w52cap');
+    if (w52cap) {
+      w52cap.style.left = pct + '%';
+      w52cap.style.transform = pct <= 8 ? 'translateX(0)'
+                             : pct >= 92 ? 'translateX(-100%)'
+                             : 'translateX(-50%)';
+    }
+    const w52pos = document.getElementById('w52pos');
+    if (w52pos) w52pos.textContent = hi > lo ? 'Aralığın %' + pct + ' seviyesinde' : '';
     /* CPO-1653 P2: az-geçmişli hisselerde "52 Haftalık" yanlış — backend'in
        fiilen kullandığı bar sayısını (bars_used) dürüstçe göster. */
     const w52label = document.getElementById('w52label');
