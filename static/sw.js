@@ -4,9 +4,9 @@ const CACHE = 'borsapusula-v29';
 /* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç) */
 const STATIC = [
   '/static/lightweight-charts.min.js?v=1',
-  '/static/manifest.json',
-  '/static/icon-192.png',
-  '/static/icon-512.png',
+  '/static/manifest.json?v=162d10e6',
+  '/static/icon-192.png?v=933a8452',
+  '/static/icon-512.png?v=e9ec3ef2',
   '/static/favicon.svg?v=6ef6d5a3',
   '/static/css/tokens.css?v=a9ea1d38',
   '/static/css/shared.css?v=5761378a',

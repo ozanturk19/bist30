@@ -22,6 +22,16 @@ OLCUT (taban SIFIR):
   referansi icin, <deger> 8 haneli hex ise (yani md5 prefix konvansiyonu)
   dosyanin gercek `md5 -q <dosya> | cut -c1-8` degerine ESIT olmak zorunda.
 
+IKINCI OLCUM — /offline precache KAPSAMI:
+  Ayni sinifin diger yuzu hash degil VARLIK meselesi: offline.html'in
+  istedigi bir dosya sw.js STATIC listesinde HIC yoksa (ya da orada farkli
+  bir anahtarla duruyorsa) sonuc yine aynidir -- cevrimdisi kullanici o
+  dosyayi alamaz. Olcum sirasinda bulundu: manifest.json / icon-192.png /
+  icon-512.png listede SORGUSUZ yaziliydi, sayfalar ise hepsini `?v=<md5>`
+  ile istiyordu -- ucu de cache'te kimsenin sormadigi bir anahtarda
+  duruyordu. Bu yuzden offline.html Jinja ile render edilip icindeki her
+  `/static/...` URL'i STATIC listesinde BIREBIR aranir.
+
 KAPSAM SINIRI (bilerek):
   `?v=75`, `?v=4`, `?v=20260915A` gibi ELLE artirilan surum etiketleri bu
   kapinin disindadir -- bunlar md5 degil, kasitli manuel konvansiyon; tek
@@ -54,6 +64,31 @@ def _scan_files():
                 yield os.path.join(rel, name)
 
 
+def _offline_precache_problems():
+    """offline.html'in istedigi her /static/ URL'i sw.js STATIC'inde var mi."""
+    try:
+        from jinja2 import Environment, FileSystemLoader
+    except ImportError:  # jinja2 yoksa bu olcum atlanir (ust katlar zaten var)
+        return [], 0
+    env = Environment(loader=FileSystemLoader(os.path.join(ROOT, "templates")), autoescape=True)
+    html = env.get_template("offline.html").render()
+    wanted = sorted(set(re.findall(r'/static/[^"\'\s>]+', html)))
+    with open(os.path.join(ROOT, "static", "sw.js"), encoding="utf-8") as fh:
+        sw = fh.read()
+    m = re.search(r"const STATIC = \[(.*?)\];", sw, re.S)
+    if not m:
+        return ["static/sw.js: STATIC listesi bulunamadi (kapi olcum yapamadi)"], 0
+    precached = set(re.findall(r"'([^']+)'", m.group(1)))
+    out = []
+    for url in wanted:
+        if url not in precached:
+            out.append(
+                f"templates/offline.html: {url} sw.js STATIC listesinde YOK "
+                f"-> cevrimdisi kullanici bu dosyayi alamaz"
+            )
+    return out, len(wanted)
+
+
 def main():
     verbose = "--verbose" in sys.argv
     problems, checked, skipped = [], 0, 0
@@ -78,6 +113,9 @@ def main():
                     f"(referans BAYAT; Cloudflare eski surumu servis eder)"
                 )
 
+    off_problems, off_count = _offline_precache_problems()
+    problems.extend(off_problems)
+
     if problems:
         print("K-J KIRIK — cache-bust hash suruklemesi:")
         for p in problems:
@@ -86,7 +124,8 @@ def main():
         return 1
     if verbose:
         print(f"K-J PASS — {checked} md5 cache-bust referansi diskle birebir "
-              f"({skipped} manuel surum etiketi kapsam disi).")
+              f"({skipped} manuel surum etiketi kapsam disi); "
+              f"/offline'in {off_count} asset'inin hepsi sw.js precache'inde.")
     return 0
 
 
