@@ -151,12 +151,15 @@ function render(data) {
     return;
   }
 
+  let _shownCount = 0, _shownPeriods = 0;
   const sectionsHtml = periods.map((period, idx) => {
     const filtered = _filter === 'all'
       ? period.stocks
       : period.stocks.filter(s => s.signal === _filter);
 
     if (filtered.length === 0) return '';
+    _shownCount += filtered.length;
+    _shownPeriods++;
 
     const isCurrent = period.is_current;
     const alCount   = period.stocks.filter(s => s.signal === 'AL').length;
@@ -222,7 +225,7 @@ function render(data) {
     : (_filter === 'AL' ? 'Güçlü Trend' : (_filter === 'SAT' ? 'Trend Bozuldu' : 'Yatay'));
   btAnnounce(sectionsHtml.trim() === ''
     ? `Sonuç bulunamadı — filtre: ${_fLbl}.`
-    : `Bilanço takvimi listelendi — ${totalAll} şirket, ${periods.length} dönem. Filtre: ${_fLbl}.`);
+    : `Bilanço takvimi listelendi — ${_shownCount} şirket, ${_shownPeriods} dönem. Filtre: ${_fLbl}.`);
 }
 
 let _btLoadSeq = 0;  /* r144: visibilitychange her odaklanmada load()'u yeniden tetikliyordu,
