@@ -312,3 +312,11 @@
       padding: 40px 20px;
     }
   }
+  /* Dar ekranda baslik + 5 arac butonu tek satira sigmadigi icin butonlar
+     saga dayali dar bir sutuna yigilıyordu (3 satir, baslik ortada asili
+     kaliyordu — canlida goruldu). Baslik kendi satirini aliyor, araclar
+     altinda soldan akiyor. */
+  @media (max-width: 600px) {
+    .pf-panel-header { flex-direction: column; align-items: stretch; gap: 8px; }
+    .pf-panel-header .pf-actions { justify-content: flex-start; flex: none; }
+  }
