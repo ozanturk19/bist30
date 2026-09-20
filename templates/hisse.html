@@ -1133,7 +1133,7 @@
       <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Yükleniyor…
     </div>
     <div id="fundContent" style="display:none;padding:16px 18px">
-      <!-- Raporlama para birimi uyarısı — CPO-1673 (20.09). Sadece finansallarını TRY
+      <!-- Raporlama para birimi uyarısı — CPO-1674 (20.09). Sadece finansallarını TRY
            dışında bir para biriminde raporlayan hisselerde görünür. Canlı ölçüm (prod
            cache, 210 hisse): sadece 3 hisse — THYAO/ENKAI USD, TAVHL EUR. -->
       <div id="fundCurNote" style="display:none;margin-bottom:14px;background:rgba(var(--bp-gold-rgb),.08);border:1px solid rgba(var(--bp-gold-rgb),.28);border-radius:var(--bp-radius-md);padding:10px 13px;font-size:var(--bp-text-xs);color:var(--bp-text2);line-height:1.55"></div>
@@ -3209,7 +3209,7 @@ function _pbColor(v) { return v == null ? 'var(--bp-text)' : v < 1 ? 'var(--bp-a
    (yıllık ~4 bar geniş, çeyreklik ~8 bar dar). */
 const _fundTrendData = { y: [], q: [] };
 
-/* ── Raporlama para birimi — CPO-1673 (20.09) ────────────────────────────────
+/* ── Raporlama para birimi — CPO-1674 (20.09) ────────────────────────────────
    BIST'te birkac sirket finansallarini TRY disinda raporluyor (canli olcum,
    prod cache 210 hisse: THYAO+ENKAI USD, TAVHL EUR — baska yok). Bu sayfa o
    rakamlari bugune kadar KOSULSUZ "₺" diye etiketliyordu; THYAO'nun 24,1 Mr $
@@ -3227,7 +3227,7 @@ const _fundTrendData = { y: [], q: [] };
    Bu yuzden info blogunun dovizli olup olmadigini TRENDLE BUYUKLUK
    KARSILASTIRMASIYLA belirliyoruz; kur farki (>x40) ile TTM/yil farki (x0.4-x2.5)
    araliklari cakismadigi icin ayrim kesin.
-   Kalici cozum backend'de (DEV1 / CPO-1673): bu blok o zaman sadelesebilir. */
+   Kalici cozum backend'de (DEV1 / CPO-1674): bu blok o zaman sadelesebilir. */
 const _CUR_SYM = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' };
 const _CUR_ADI = { USD: 'ABD doları', EUR: 'euro', GBP: 'İngiliz sterlini' };
 let _fundCur = 'TRY';          // statement_trend'in para birimi
@@ -3319,7 +3319,7 @@ async function loadFundamentals() {
       return;
     }
 
-    /* Raporlama para birimi tespiti — CPO-1673. Kart/trend render'larindan
+    /* Raporlama para birimi tespiti — CPO-1674. Kart/trend render'larindan
        ONCE calismali (ikisi de _fundCur/_fundInfoForeign'i okuyor). */
     _fundCur = f.financial_currency || 'TRY';
     _fundInfoForeign = false;
