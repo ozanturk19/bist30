@@ -56,6 +56,29 @@ K-B  KANONIK-DEGERLI HAM HEX — RATCHET, bloklamaz ama ARTAMAZ
      mevcut borc yine bloklanmadi, `--baseline` ile tavana alindi; YENI rgb/rgba
      kacisi bundan sonra FAIL verir.
 
+K-E  OLU PALET LITERALI — RATCHET, bloklamaz ama ARTAMAZ (CPO, 20.09.2026)
+
+     K-B'nin YAPISAL kor noktasi: K-B yalniz KANONIK-DEGERLI literalleri sayar,
+     yani bugun bir token'in degerine ESIT olanlari. Urun eski bir paletten
+     (GitHub-dark + Tailwind) kanonik palete gectiginde ESKI degerler hicbir
+     token'a esit olmaz — ve tam bu yuzden K-B onlari HIC GORMEZ. Sayim dusuyor
+     gorunur, oysa gorsel kusur olculmeyen sinifta duruyordur.
+
+     Olculdu (20.09.2026, CPO): bilanco_takvimi + temettu_takvimi sayfalarinda
+     14 adet Tailwind blue-500 (`rgba(59,130,246,...)`) — filtre dugmesinin
+     KENARI kanonik periwinkle (`var(--bp-brand)`) iken ZEMINI eski maviydi,
+     yani ayni ogenin iki yarisi iki ayri paletten boyaniyordu. Ayni iki sayfada
+     "Guclu Trend" sayaci `#3fb950` (eski GitHub yesili) ile boyaniyordu, oysa
+     AYNI SATIRDAKI "Trend Bozuldu" sayaci `.bp-sat-text` token sinifini
+     kullaniyordu. K-B bu 20 occurrence'in HICBIRINI raporlamiyordu.
+
+     Olcut: OLU_PALET haritasindaki her deger (hex + rgb()/rgba() literal
+     karsiligi) sayilir. Denylist'e yalniz KANONIK HALEFI BELGELI degerler
+     girer — "token'i olmayan renk" (ornek grafik EMA99 altini #e3b341) bu
+     kapinin konusu DEGILDIR, o K-B'nin/ayri bir kararin isidir. Savunma:
+     bir deger sonradan yeniden kanoniklesirse (tokens.css'e girerse)
+     denylist'ten OTOMATIK dusulur, yanlis-pozitif uretmez.
+
 K-C  SABLON-YEREL :root — RATCHET, bloklamaz ama ARTAMAZ (T9.4-d, bkz. yerel_root_sayim())
 
 K-D  BOS catch{} — RATCHET, bloklamaz ama ARTAMAZ (T9.4)
@@ -142,6 +165,64 @@ BOS_CATCH_RE = re.compile(r"catch\s*(?:\([^)]*\))?\s*\{\s*\}")
 # yalniz sayisal literal yakalar).
 RGB_LITERAL_RE = re.compile(r"rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*[,)]")
 TOKEN_RGB_DEGER_RE = re.compile(r"(--[A-Za-z0-9_-]+)\s*:\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*;")
+
+# ── K-E: OLU PALET (CPO, 20.09.2026) ────────────────────────────────────────
+# deger -> (kanonik halef, neden). YALNIZ halefi belgeli degerler; "token'i
+# olmayan renk" buraya GIRMEZ. Anahtarlar kucuk harf hex.
+OLU_PALET = {
+    "#58a6ff": ("--bp-brand", "eski GitHub-dark mavi"),
+    "#1f6feb": ("--bp-brand", "eski GitHub mavi vurgu"),
+    "#70b1ff": ("--bp-brand", "eski GitHub mavi (acik ton)"),
+    "#3b82f6": ("--bp-brand", "Tailwind blue-500"),
+    "#1d4ed8": ("--bp-brand", "Tailwind blue-700"),
+    "#3fb950": ("--bp-al", "eski GitHub yesili"),
+    "#8b949e": ("--bp-text3", "eski GitHub grisi (mavi tonlu)"),
+    "#c9d1d9": ("--bp-text2", "eski GitHub metin rengi"),
+    "#e6edf3": ("--bp-text", "eski GitHub parlak metin"),
+    "#0d1117": ("--bp-bg", "eski GitHub zemin"),
+    "#161b22": ("--bp-surface", "eski GitHub yuzey"),
+}
+# K-E kapsami: K-B'nin dosyalari + gercek JS dosyalari (tooltip/toast gibi
+# kullaniciya GORUNEN renkleri orada uretiliyor). VENDOR dosyasi haric —
+# lightweight-charts.min.js ucuncu parti, kendi paleti bizim kararimiz degil.
+OLU_PALET_VENDOR = {"lightweight-charts.min.js"}
+
+
+def olu_palet_haritasi(harita):
+    """Bugun kanonik OLMAYAN olu degerler -> {hex, (r,g,b)} kumeleri.
+
+    Savunma: bir deger sonradan tokens.css'e girerse (yeniden kanoniklesirse)
+    denylist'ten otomatik duser — guard'in kendisi yanlis-pozitif uretemez.
+    """
+    hexler, rgbler = {}, {}
+    for val, (halef, neden) in OLU_PALET.items():
+        if val in harita:                      # yeniden kanoniklesmis, olu degil
+            continue
+        h = val.lstrip("#")
+        hexler[val] = (halef, neden)
+        rgbler[(int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))] = (halef, neden)
+    return hexler, rgbler
+
+
+# K-E yanlis-pozitif savunmasi: bir olu degeri ANLATAN yorum ("#1f6feb'ten kanonik
+# token'a gecirildi") kusur DEGILDIR — sayilirsa taban sonsuza kadar sisik kalir ve
+# ayni dosyadaki GERCEK bir regresyonu maskeler. Blok yorumlari (/* */, {# #},
+# <!-- -->) olcumden cikarilir. `//` satir yorumu BILEREK cikarilmaz: `https://`
+# icindeki cift-egik onu yanlis kesip kodun yarisini olcum disi birakirdi.
+YORUM_RE = re.compile(r"/\*.*?\*/|{#.*?#}|<!--.*?-->", re.S)
+
+
+def olu_palet_say(metin, hexler, rgbler):
+    metin = YORUM_RE.sub(" ", metin)
+    n = 0
+    for h in HEX_RE.findall(metin):
+        if h.lower() in hexler:
+            n += 1
+    for r, g, b in RGB_LITERAL_RE.findall(metin):
+        if (int(r), int(g), int(b)) in rgbler:
+            n += 1
+    return n
+
 
 sys.path.insert(0, str(ROOT / "tools"))
 try:
@@ -278,7 +359,24 @@ def denetle():
             continue
         ad = str(f.relative_to(ROOT))
         hex_sayim[ad] = hex_say(_oku(f), harita, rgbharita)
-    return gtok, harita, imza, tanimsiz, hex_sayim
+
+    # ── K-E: olu palet sayimi (CPO, 20.09.2026) ─────────────────────────────
+    ohex, orgb = olu_palet_haritasi(harita)
+    olu_sayim = {}
+    kapsam = list(sayfalar()) + [TPL_DIR / n for n in KABUK_PARTIALS] + \
+        list(EK_HEX_DOSYALARI) + list(EK_CATCH_DOSYALARI)
+    gorulen = set()
+    for f in kapsam:
+        if not f.exists() or f.name in OLU_PALET_VENDOR:
+            continue
+        ad = f.name if f.parent == TPL_DIR else str(f.relative_to(ROOT))
+        if ad in gorulen:
+            continue
+        gorulen.add(ad)
+        n = olu_palet_say(_oku(f), ohex, orgb)
+        if n:
+            olu_sayim[ad] = n
+    return gtok, harita, imza, tanimsiz, hex_sayim, olu_sayim
 
 
 def yerel_root_sayim():
@@ -331,7 +429,7 @@ def bos_catch_sayim():
 
 def main(argv):
     verbose = "--verbose" in argv
-    gtok, harita, imza, tanimsiz, hex_sayim = denetle()
+    gtok, harita, imza, tanimsiz, hex_sayim, olu_sayim = denetle()
     # K-A (tanimsiz var()) yalniz gercek sayfa sablonlarini kapsar; K-B (ham
     # hex) artik EK_HEX_DOSYALARI (blog_content.py + harici css) ile de
     # genisledigi icin hex_sayim ile K-A'nin sayfa sayisi ARTIK AYNI DEGIL.
@@ -348,10 +446,13 @@ def main(argv):
              "token_imzasi": imza,
              "dosyalar": dict(sorted(hex_sayim.items())),
              "yerel_root": dict(sorted(yerel_root_sayim().items())),
-             "bos_catch": dict(sorted(bos_catch_sayim().items()))},
+             "bos_catch": dict(sorted(bos_catch_sayim().items())),
+             "olu_palet": dict(sorted(olu_sayim.items()))},
             ensure_ascii=False, indent=1), encoding="utf-8")
-        print("baseline yazildi: %d dosya (K-B), toplam %d kanonik-degerli ham hex"
-              % (toplam_hex_dosya, sum(hex_sayim.values())))
+        print("baseline yazildi: %d dosya (K-B), toplam %d kanonik-degerli ham hex; "
+              "K-E olu palet: %d dosya / %d occurrence"
+              % (toplam_hex_dosya, sum(hex_sayim.values()),
+                 len(olu_sayim), sum(olu_sayim.values())))
         return 0
 
     hata = 0
@@ -440,6 +541,27 @@ def main(argv):
         else:
             print("  TEMIZ  K-D bos catch{}: %d occurrence (taban %d, artis yok)"
                   % (sum(bc.values()), sum(bc_taban.values())))
+
+    # ── K-E: olu palet ratchet — ARTAMAZ ────────────────────────────────────
+    op_taban = ratchet.get("olu_palet")
+    if op_taban is None:
+        print("  ATLANDI K-E olu palet: ratchet'te taban yok — `--baseline` calistirin.")
+    else:
+        ohex, _orgb = olu_palet_haritasi(harita)
+        op_artan = [(ad, op_taban.get(ad, 0), n) for ad, n in sorted(olu_sayim.items())
+                    if n > op_taban.get(ad, 0)]
+        if op_artan:
+            hata = 1
+            print("  KIRIK  K-E olu palet ARTTI: %d dosya" % len(op_artan))
+            for ad, t, n in op_artan:
+                print("         %-28s %d -> %d" % (ad, t, n))
+            print("         Eski paletten (GitHub-dark/Tailwind) bir renk yazilmis.")
+            print("         Halefleri: " + ", ".join(
+                "%s->%s" % (v, ohex[v][0]) for v in sorted(ohex)))
+            print("         K-B bu sinifi YAPISAL OLARAK goremez (deger hicbir token'a esit degil).")
+        else:
+            print("  TEMIZ  K-E olu palet: %d occurrence (taban %d, artis yok)"
+                  % (sum(olu_sayim.values()), sum(op_taban.values())))
 
     if verbose:
         print("\n  %-32s %6s %6s" % ("dosya", "hex", "taban"))

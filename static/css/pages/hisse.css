@@ -101,7 +101,7 @@
   .hib-action-btn svg { width: 13px; height: 13px; transition: transform .15s; }
   .hib-action-btn:active svg { transform: scale(0.85); }
   .hib-action-btn.active-portfolio {
-    background: rgba(112,177,255,0.14); border-color: rgba(112,177,255,0.55); color: #70b1ff;
+    background: rgba(var(--bp-brand-rgb),0.14); border-color: rgba(var(--bp-brand-rgb),0.55); color: var(--bp-brand);
   }
   .hib-action-btn.active-bell {
     background: rgba(var(--bp-al-rgb),0.14); border-color: rgba(var(--bp-al-rgb),0.55); color: var(--bp-al);
@@ -356,8 +356,8 @@
 
   /* ── Teknik Yorum ── */
   .commentary-section {
-    background: rgba(88,166,255,0.05);
-    border: 1px solid rgba(88,166,255,0.15);
+    background: rgba(var(--bp-brand-rgb),0.05);
+    border: 1px solid rgba(var(--bp-brand-rgb),0.15);
     border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
@@ -763,7 +763,7 @@
   .news-content a {
     color: var(--bp-brand);
     text-decoration: underline;         /* WCAG link-in-text-block */
-    text-decoration-color: rgba(88,166,255,.4);
+    text-decoration-color: rgba(var(--bp-brand-rgb),.4);
     text-underline-offset: 2px;
   }
   .news-content a:hover { text-decoration-color: var(--bp-brand); }
@@ -795,8 +795,8 @@
     gap: 5px;
   }
   .news-badge {
-    background: rgba(88,166,255,0.1);
-    border: 1px solid rgba(88,166,255,0.2);
+    background: rgba(var(--bp-brand-rgb),0.1);
+    border: 1px solid rgba(var(--bp-brand-rgb),0.2);
     color: var(--bp-brand);
     font-size: var(--bp-text-2xs);
     font-weight: 600;
@@ -846,7 +846,7 @@
     flex-shrink: 0;
     margin-top: 1px;
   }
-  .kap-class-badge.oda { background: rgba(88,166,255,.1); color:var(--bp-brand); border:1px solid rgba(88,166,255,.2); }
+  .kap-class-badge.oda { background: rgba(var(--bp-brand-rgb),.1); color:var(--bp-brand); border:1px solid rgba(var(--bp-brand-rgb),.2); }
   .kap-class-badge.fr  { background: rgba(var(--bp-al-rgb),.1);  color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.2); }
   .kap-summary {
     font-size: var(--bp-text-base);
@@ -857,7 +857,7 @@
   .kap-summary a {
     color: var(--bp-text2);
     text-decoration: underline;         /* WCAG link-in-text-block: must be distinguishable from text */
-    text-decoration-color: rgba(201,209,217,.4);
+    text-decoration-color: rgba(var(--bp-text2-rgb),.4);
     text-underline-offset: 2px;
   }
   .kap-summary a:hover { color:var(--bp-brand); text-decoration-color: var(--bp-brand); }

@@ -150,8 +150,8 @@
   function attachOhlcTooltip(chart, candleSeries, elMain, dateFmt) {
     var tip = document.createElement('div');
     tip.style.cssText =
-      'position:absolute;display:none;padding:8px 10px;background:#161b22;' +
-      'border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-size:11px;' +
+      'position:absolute;display:none;padding:8px 10px;background:var(--bp-surface);' +
+      'border:1px solid var(--bp-border);border-radius:6px;color:var(--bp-text);font-size:11px;' +
       'line-height:1.55;font-variant-numeric:tabular-nums;pointer-events:none;' +
       'z-index:var(--bp-z-chart-legend);white-space:nowrap;box-shadow:var(--bp-shadow-sm)';
     elMain.style.position = 'relative';
@@ -165,11 +165,11 @@
       if (!bar) { tip.style.display = 'none'; return; }
       tip.style.display = 'block';
       tip.innerHTML =
-        '<div style="color:#8b949e;margin-bottom:4px;font-weight:600">' + dateFmt(param.time) + '</div>' +
-        '<div>A: <span style="color:#e6edf3">' + fmt(bar.open) + '</span>' +
+        '<div style="color:var(--bp-text3);margin-bottom:4px;font-weight:600">' + dateFmt(param.time) + '</div>' +
+        '<div>A: <span style="color:var(--bp-text)">' + fmt(bar.open) + '</span>' +
         '&nbsp;&nbsp;Y: <span style="color:#00e290">' + fmt(bar.high) + '</span></div>' +
         '<div>D: <span style="color:#f85149">' + fmt(bar.low) + '</span>' +
-        '&nbsp;&nbsp;K: <span style="color:#e6edf3;font-weight:700">' + fmt(bar.close) + ' ₺</span></div>';
+        '&nbsp;&nbsp;K: <span style="color:var(--bp-text);font-weight:700">' + fmt(bar.close) + ' ₺</span></div>';
       /* Konteyner sinirlari icinde kelepcele (r137: .chart-section overflow:hidden
          disina tasarsa kirpilir) - once olc, sonra konumlandir. */
       var tw = tip.offsetWidth, th = tip.offsetHeight;

@@ -43,7 +43,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
+<link rel="stylesheet" href="/static/css/tokens.css?v=1eabd653">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=3d8b5037">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -287,8 +287,8 @@ const TIER_META = {
   // Sinyal" sinyal TÜRÜ olan "Güçlü Trend" ile karışıyordu. Artık rozet, annote
   // ettiği sayının (Teknik Güç Skoru) bandını söylüyor; "Sinyal" kelimesi sitede
   // yalnızca yönü (Güçlü Trend / Trend Bozuldu / Yatay) ifade ediyor.
-  guclu_sinyal: { color: '#a855f7', label: 'Yüksek Skor' },
-  standart:     { color: '#1f6feb', label: 'Orta Skor' },
+  guclu_sinyal: { color: 'var(--bp-premium)', label: 'Yüksek Skor' },
+  standart:     { color: 'var(--bp-brand)', label: 'Orta Skor' },
 };
 
 function verdictFor(tier) {

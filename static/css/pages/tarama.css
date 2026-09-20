@@ -131,7 +131,9 @@
     appearance:none; cursor:pointer;
   } /* FAZ6 C6 devam (r136): iOS input-zoom onlemi, min 16px */
   .filter-group select {
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%238b949e' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    /* 20.09: eski palet grisi %238b949e -> kanonik --bp-text3'un LITERALI.
+       data: URI icinde var() calismaz, bu yuzden token adi DEGIL deger yazilir. */
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23909097' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
     background-repeat:no-repeat; background-position:right 10px center; padding-right:26px;
   }
   .filter-group select:focus,

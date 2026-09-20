@@ -19,16 +19,17 @@
   "hisse.html": 12,
   "hisseler.html": 0,
   "iletisim.html": 0,
-  "index.html": 3,
-  "karsilastir.html": 1,
+  "index.html": 2,
+  "karsilastir.html": 0,
   "metodoloji.html": 0,
   "offline.html": 0,
   "ozet.html": 1,
   "portfolio.html": 0,
   "profil.html": 0,
   "sektor_harita.html": 12,
+  "static/css/data-art.css": 0,
   "static/css/pages/404.css": 0,
-  "static/css/pages/bilanco_takvimi.css": 1,
+  "static/css/pages/bilanco_takvimi.css": 0,
   "static/css/pages/blog.css": 0,
   "static/css/pages/blog_article.css": 0,
   "static/css/pages/gizlilik.css": 0,
@@ -45,7 +46,7 @@
   "static/css/pages/profil.css": 0,
   "static/css/pages/sektor_harita.css": 2,
   "static/css/pages/tarama.css": 1,
-  "static/css/pages/temettu_takvimi.css": 1,
+  "static/css/pages/temettu_takvimi.css": 0,
   "static/css/pages/unsubscribe.css": 0,
   "static/css/pages/yasal.css": 0,
   "static/css/shared.css": 0,
@@ -55,5 +56,6 @@
   "yasal.html": 0
  },
  "yerel_root": {},
- "bos_catch": {}
+ "bos_catch": {},
+ "olu_palet": {}
 }

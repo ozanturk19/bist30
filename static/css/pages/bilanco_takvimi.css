@@ -23,9 +23,9 @@
     background:var(--bp-surface2); color:var(--bp-text2); cursor:pointer;
     font-size:var(--bp-text-sm); font-weight:600; transition:all .15s; font-family:inherit;
   }
-  .filter-btn.active { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
+  .filter-btn.active { border-color:var(--bp-brand); color:var(--bp-text); background:rgba(var(--bp-brand-rgb),0.15); }
   @media (hover: hover) and (pointer: fine) {
-    .filter-btn:hover { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
+    .filter-btn:hover { border-color:var(--bp-brand); color:var(--bp-text); background:rgba(var(--bp-brand-rgb),0.15); }
   }
   .filter-btn.fal.active   { border-color:var(--bp-al);  background:rgba(var(--bp-al-rgb),0.12);  color:var(--bp-al); }
   .filter-btn.fsat.active  { border-color:var(--bp-sat); background:rgba(var(--bp-sat-rgb),0.12);  color:var(--bp-sat); }
@@ -39,7 +39,7 @@
     background:var(--bp-surface); border:1px solid var(--bp-border);
   }
   .period-header.current-period {
-    background:rgba(59,130,246,0.08); border-color:rgba(59,130,246,0.25);
+    background:rgba(var(--bp-brand-rgb),0.08); border-color:rgba(var(--bp-brand-rgb),0.25);
   }
   .period-badge {
     font-size:var(--bp-text-xs); font-weight:700; padding:2px 10px; border-radius:var(--bp-radius-lg);
@@ -83,11 +83,11 @@
   .sc-kap   {
     display:inline-flex; align-items:center; gap:4px; margin-top:6px;
     font-size:var(--bp-text-2xs); color:var(--bp-brand); text-decoration:none;
-    background:rgba(59,130,246,0.08); padding:2px 7px; border-radius:var(--bp-radius);
-    border:1px solid rgba(59,130,246,0.15);
+    background:rgba(var(--bp-brand-rgb),0.08); padding:2px 7px; border-radius:var(--bp-radius);
+    border:1px solid rgba(var(--bp-brand-rgb),0.15);
     min-height:44px; /* r110 bug-hunt: 20.5px idi, WCAG 2.5.5 dokunma hedefi altinda (214 kart) */
   }
-  .sc-kap:hover { background:rgba(59,130,246,0.15); }
+  .sc-kap:hover { background:rgba(var(--bp-brand-rgb),0.15); }
 
   /* CPO-DEV2-106: 193 kart tek periyotta sayfalama olmadan render ediliyordu (~6385px,
      masaustunde ~9 ekran kaydirma) - blog.html'deki kanitlanmis "Daha Fazla Yukle"
@@ -99,7 +99,7 @@
     cursor:pointer; transition:all .15s; font-family:inherit;
     min-height:44px; display:inline-flex; align-items:center; justify-content:center; /* WCAG 2.5.5 dokunma hedefi, bkz. .sc-kap r110 emsali */
   }
-  .bt-loadmore-btn:hover { border-color:var(--bp-brand); color:#fff; background:rgba(59,130,246,0.15); }
+  .bt-loadmore-btn:hover { border-color:var(--bp-brand); color:var(--bp-text); background:rgba(var(--bp-brand-rgb),0.15); }
 
   /* Summary row */
   .summary-row {
@@ -180,7 +180,7 @@
     width: 90px;
     height: 90px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(124, 92, 255, .12), transparent 70%);
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb), .12), transparent 70%);
     pointer-events: none;
   }
   .sum-chip > *, .period-header > * { position: relative; }

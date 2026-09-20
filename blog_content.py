@@ -183,7 +183,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 </ul>
 
 <h2>BorsaPusula Grafiklerinde EMA</h2>
-<p>Hisse detay sayfalarında EMA12 <span style="color:#58a6ff">mavi</span>, EMA99 <span style="color:#e3b341">sarı</span> renkte gösterilir. İki ortalama arasındaki dolgu EMA12 > EMA99 ise yeşil, EMA12 < EMA99 ise kırmızı renge döner — trendin yönü tek bakışta anlaşılır.</p>
+<p>Hisse detay sayfalarında EMA12 <span style="color:var(--bp-brand)">mavi</span>, EMA99 <span style="color:#e3b341">sarı</span> renkte gösterilir. İki ortalama arasındaki dolgu EMA12 > EMA99 ise yeşil, EMA12 < EMA99 ise kırmızı renge döner — trendin yönü tek bakışta anlaşılır.</p>
 
 <h2>EMA Tek Başına Yeterli Mi?</h2>
 <p>Hayır. EMA kesişimleri gecikmeli sinyal üretir ve yatay piyasalarda çok sık kesişim yaşanır. Bu yüzden BorsaPusula, EMA'yı Supertrend ve ADX ile birlikte <strong>üçüncü teyit katmanı</strong> olarak kullanır. Üç kriter aynı anda aynı yönü gösterdiğinde sinyal çok daha güvenilirdir.</p>
@@ -2640,8 +2640,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li>Talep süresinde yeterli bakiyeniz bloke edilir</li>
   <li>Dağıtım sonrası hesabınıza düşen hisseler otomatik yatırılır, artı bakiye iade edilir</li>
 </ul>
-<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:#58a6ff">💡 Pratik Bilgi:</strong> Yoğun talep gören halka arzlarda oransal dağıtım yapılır. 100 lot talep ettiyseniz, dağıtım oranı %10 ise yalnızca 10 lot alabilirsiniz. Kalan bakiye iade edilir.
+<div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:var(--bp-brand)">💡 Pratik Bilgi:</strong> Yoğun talep gören halka arzlarda oransal dağıtım yapılır. 100 lot talep ettiyseniz, dağıtım oranı %10 ise yalnızca 10 lot alabilirsiniz. Kalan bakiye iade edilir.
 </div>
 
 <h2>Halka Arzın Avantajları</h2>
@@ -2719,12 +2719,12 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <tbody>
     <tr>
       <td style="padding:9px;border:1px solid #30363d">Çeşitlendirme</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">✅ Tek işlemle onlarca hisse</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">✅ Tek işlemle onlarca hisse</td>
       <td style="padding:9px;border:1px solid #30363d;color:#f85149">❌ Tek şirket riski</td>
     </tr>
     <tr style="background:#1a2030">
       <td style="padding:9px;border:1px solid #30363d">Şirket analizi</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">✅ Gerekmez</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">✅ Gerekmez</td>
       <td style="padding:9px;border:1px solid #30363d;color:#f85149">❌ Detaylı analiz şart</td>
     </tr>
     <tr>
@@ -2770,8 +2770,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>Kimler İçin Uygundur?</h2>
-<div style="background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:#3fb950">✅ ETF şu yatırımcılar için idealdir:</strong>
+<div style="background:rgba(var(--bp-al-rgb),.07);border:1px solid rgba(var(--bp-al-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:var(--bp-al)">✅ ETF şu yatırımcılar için idealdir:</strong>
   <ul style="margin:8px 0 0 0">
     <li>Borsaya yeni başlayanlar — tek hisse seçme stresini ortadan kaldırır</li>
     <li>Uzun vadeli, pasif yatırımcılar — piyasa getirisini yakalamak yeterli</li>
@@ -2827,8 +2827,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li>Bu kazançlar için yıllık gelir vergisi beyannamesi verilmesi gerekmez</li>
   <li><strong>İstisna:</strong> Aynı yıl hem BIST hem yabancı borsa geliri varsa durum karmaşıklaşabilir</li>
 </ul>
-<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:#58a6ff">💡 Pratik Not:</strong> Aracı kurumunuz yıl sonunda "yıllık kazanç/kayıp özeti" belgesi düzenler. Bu belgeyi saklayın; olası bir vergi incelemesinde gerekli olabilir.
+<div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:var(--bp-brand)">💡 Pratik Not:</strong> Aracı kurumunuz yıl sonunda "yıllık kazanç/kayıp özeti" belgesi düzenler. Bu belgeyi saklayın; olası bir vergi incelemesinde gerekli olabilir.
 </div>
 
 <h2>Zarar Mahsubu — Kayıpları Kazançtan Düşmek</h2>
@@ -2861,7 +2861,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <tbody>
     <tr>
       <td style="padding:9px;border:1px solid #30363d">BIST hisse alım satım kazancı</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">%0</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">%0</td>
       <td style="padding:9px;border:1px solid #30363d">Gerekmez (genel kural)</td>
     </tr>
     <tr style="background:#1a2030">
@@ -2871,7 +2871,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     </tr>
     <tr>
       <td style="padding:9px;border:1px solid #30363d">VIOP kazancı</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">%0</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">%0</td>
       <td style="padding:9px;border:1px solid #30363d">Gerekmez (genel kural)</td>
     </tr>
     <tr style="background:#1a2030">
@@ -2926,7 +2926,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     </tr>
     <tr style="background:#1a2030">
       <td style="padding:9px;border:1px solid #30363d">Çeşitlendirme</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Otomatik (düzinelerce varlık)</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">Otomatik (düzinelerce varlık)</td>
       <td style="padding:9px;border:1px solid #30363d">Manuel — yeterli sermaye gerekir</td>
     </tr>
     <tr>
@@ -2937,27 +2937,27 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     <tr style="background:#1a2030">
       <td style="padding:9px;border:1px solid #30363d">Getiri potansiyeli</td>
       <td style="padding:9px;border:1px solid #30363d">Fona göre değişir, çoğu endeksi geçemez</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Endeksi aşabilir</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">Endeksi aşabilir</td>
     </tr>
     <tr>
       <td style="padding:9px;border:1px solid #30363d">Zaman gereksinimi</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Düşük — fon yöneticisi takip eder</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">Düşük — fon yöneticisi takip eder</td>
       <td style="padding:9px;border:1px solid #30363d">Yüksek — düzenli takip şart</td>
     </tr>
     <tr style="background:#1a2030">
       <td style="padding:9px;border:1px solid #30363d">Bilgi gereksinimi</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Düşük</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">Düşük</td>
       <td style="padding:9px;border:1px solid #30363d">Teknik ve/veya temel analiz</td>
     </tr>
     <tr>
       <td style="padding:9px;border:1px solid #30363d">Likidite</td>
       <td style="padding:9px;border:1px solid #30363d">Genellikle T+1 veya T+2 ödeme</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Anlık (borsa saatleri içinde)</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">Anlık (borsa saatleri içinde)</td>
     </tr>
     <tr style="background:#1a2030">
       <td style="padding:9px;border:1px solid #30363d">Şeffaflık</td>
       <td style="padding:9px;border:1px solid #30363d">Aylık portföy açıklanır</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Anlık fiyat görünür</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">Anlık fiyat görünür</td>
     </tr>
   </tbody>
 </table>
@@ -2994,8 +2994,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Kim Hangisini Seçmeli?</h2>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0">
-  <div style="background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.15);border-radius:8px;padding:14px">
-    <strong style="color:#3fb950">Yatırım Fonu için:</strong>
+  <div style="background:rgba(var(--bp-al-rgb),.07);border:1px solid rgba(var(--bp-al-rgb),.15);border-radius:8px;padding:14px">
+    <strong style="color:var(--bp-al)">Yatırım Fonu için:</strong>
     <ul style="margin:8px 0 0 0;font-size:13px">
       <li>Borsaya yeni başlayanlar</li>
       <li>Piyasa takibi için zamanı olmayanlar</li>
@@ -3003,8 +3003,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       <li>Pasif, uzun vadeli yatırımcılar</li>
     </ul>
   </div>
-  <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px">
-    <strong style="color:#58a6ff">Hisse Senedi için:</strong>
+  <div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px">
+    <strong style="color:var(--bp-brand)">Hisse Senedi için:</strong>
     <ul style="margin:8px 0 0 0;font-size:13px">
       <li>Temel/teknik analiz öğrenenler</li>
       <li>Günlük veya haftalık takip edebilecekler</li>
@@ -3143,7 +3143,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <tbody>
     <tr>
       <td style="padding:9px;border:1px solid #30363d">Portföy değeri</td>
-      <td style="padding:9px;border:1px solid #30363d;color:#3fb950">Değişmez — matematiksel olarak aynı</td>
+      <td style="padding:9px;border:1px solid #30363d;color:var(--bp-al)">Değişmez — matematiksel olarak aynı</td>
     </tr>
     <tr style="background:#1a2030">
       <td style="padding:9px;border:1px solid #30363d">Hisse adedi</td>
@@ -3177,8 +3177,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li>BIST ve Merkezi Kayıt Kuruluşu (MKK) belirlenen tarihte işlemi gerçekleştirir</li>
   <li>Bölünme günü borsada yeni fiyatla açılış yapılır</li>
 </ol>
-<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:#58a6ff">💡 Pratik İpucu:</strong> KAP bildirimini gördüğünüzde bölünme tarihini not alın. Özellikle stop loss ve hedef fiyat seviyelerini bölünme sonrasına göre yeniden hesaplamanız gerekecektir.
+<div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:var(--bp-brand)">💡 Pratik İpucu:</strong> KAP bildirimini gördüğünüzde bölünme tarihini not alın. Özellikle stop loss ve hedef fiyat seviyelerini bölünme sonrasına göre yeniden hesaplamanız gerekecektir.
 </div>
 
 <h2>Bölünme Sonrası Fiyat Hareketi</h2>
@@ -3213,45 +3213,45 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <thead><tr style="background:#1e2d45">
     <th style="padding:8px 12px;text-align:left;font-size:var(--bp-text-sm);color:#94a3b8">Kriter</th>
     <th style="padding:8px 12px;text-align:center;font-size:12px;color:#e3b341">🥇 Altın</th>
-    <th style="padding:8px 12px;text-align:center;font-size:12px;color:#3fb950">📈 Borsa</th>
-    <th style="padding:8px 12px;text-align:center;font-size:12px;color:#58a6ff">💵 Döviz</th>
+    <th style="padding:8px 12px;text-align:center;font-size:12px;color:var(--bp-al)">📈 Borsa</th>
+    <th style="padding:8px 12px;text-align:center;font-size:12px;color:var(--bp-brand)">💵 Döviz</th>
   </tr></thead>
   <tbody>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Enflasyon Koruması</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Güçlü</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Orta-Güçlü</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">✅ Güçlü</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">✅ Orta-Güçlü</td>
       <td style="padding:8px 12px;text-align:center;color:#e3b341">⚠️ Değişken</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Uzun Vade Getiri Potansiyeli</td>
       <td style="padding:8px 12px;text-align:center;color:#e3b341">⚠️ Orta</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Yüksek</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">✅ Yüksek</td>
       <td style="padding:8px 12px;text-align:center;color:#f85149">❌ Düşük</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Likidite (Paraya Çevirme)</td>
       <td style="padding:8px 12px;text-align:center;color:#e3b341">⚠️ Orta</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Yüksek</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Yüksek</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">✅ Yüksek</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">✅ Yüksek</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Volatilite / Risk</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">Düşük-Orta</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">Düşük-Orta</td>
       <td style="padding:8px 12px;text-align:center;color:#e3b341">Orta-Yüksek</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">Düşük-Orta</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">Düşük-Orta</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Temettü / Düzenli Gelir</td>
       <td style="padding:8px 12px;text-align:center;color:#f85149">❌ Yok</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Var (bazı hisseler)</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">✅ Var (bazı hisseler)</td>
       <td style="padding:8px 12px;text-align:center;color:#f85149">❌ Yok</td>
     </tr>
     <tr>
       <td style="padding:8px 12px;font-weight:600">Kriz Döneminde Güvenli Liman</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Güçlü</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">✅ Güçlü</td>
       <td style="padding:8px 12px;text-align:center;color:#f85149">❌ Zayıf</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">✅ Güçlü (USD)</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">✅ Güçlü (USD)</td>
     </tr>
   </tbody>
 </table>
@@ -3281,8 +3281,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>Karma Portföy: En Akıllıca Yaklaşım</h2>
-<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:#58a6ff">💡 Türk yatırımcısı için örnek karma portföy:</strong>
+<div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:var(--bp-brand)">💡 Türk yatırımcısı için örnek karma portföy:</strong>
   <ul style="margin:8px 0 0 0">
     <li>%40 BIST hisseleri (teknik sinyal + temel filtre)</li>
     <li>%25 Altın (kriz tamponu)</li>
@@ -3321,7 +3321,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Temettü Verimi Nedir?</h2>
 <p>Temettü verimi (dividend yield), hisse başına ödenen yıllık temettünün hisse fiyatına bölünmesiyle hesaplanır:</p>
-<div style="background:#1a2438;border:1px solid #1e2d45;border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:var(--bp-text-15);font-weight:700;color:#58a6ff">
+<div style="background:#1a2438;border:1px solid #1e2d45;border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:var(--bp-text-15);font-weight:700;color:var(--bp-brand)">
   Temettü Verimi = (Hisse Başı Temettü ÷ Hisse Fiyatı) × 100
 </div>
 <p>Örnek: Hissesi 50 TL olan bir şirket 5 TL temettü ödüyorsa temettü verimi %10 olur.</p>
@@ -3337,7 +3337,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <tbody>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Bankacılık</td>
-      <td style="padding:8px 12px;color:#3fb950">Yüksek (BDDK sınırlı yıllarda orta)</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yüksek (BDDK sınırlı yıllarda orta)</td>
       <td style="padding:8px 12px">AKBNK, GARAN, ISCTR</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
@@ -3347,7 +3347,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Perakende</td>
-      <td style="padding:8px 12px;color:#3fb950">Yüksek (büyük zincirler)</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yüksek (büyük zincirler)</td>
       <td style="padding:8px 12px">BIMAS, MGROS</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
@@ -3425,7 +3425,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <thead><tr style="background:#1e2d45">
     <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Kriter</th>
     <th style="padding:8px 12px;text-align:center;font-size:12px;color:#f59e0b">₿ Bitcoin/Kripto</th>
-    <th style="padding:8px 12px;text-align:center;font-size:12px;color:#3fb950">📈 BIST Hisseleri</th>
+    <th style="padding:8px 12px;text-align:center;font-size:12px;color:var(--bp-al)">📈 BIST Hisseleri</th>
   </tr></thead>
   <tbody>
     <tr style="border-bottom:1px solid #1e2d45">
@@ -3436,32 +3436,32 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Gerçek Değer</td>
       <td style="padding:8px 12px;text-align:center;color:#e3b341">Tartışmalı (teknoloji değeri)</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">Şirketin kazancı, varlıkları</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">Şirketin kazancı, varlıkları</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">İşlem Saatleri</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">7/24</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">7/24</td>
       <td style="padding:8px 12px;text-align:center;color:#e3b341">Hafta içi 10:00-18:00</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Düzenleme/Koruma</td>
       <td style="padding:8px 12px;text-align:center;color:#f85149">Düşük (MASAK/SPK yok)</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">Yüksek (SPK, MKK, BIST)</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">Yüksek (SPK, MKK, BIST)</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Temettü / Pasif Gelir</td>
       <td style="padding:8px 12px;text-align:center;color:#f85149">Yok (staking hariç)</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">Var (yüksek temettü hisseleri)</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">Var (yüksek temettü hisseleri)</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Vergi (Türkiye 2026)</td>
       <td style="padding:8px 12px;text-align:center;color:#f85149">%0 (henüz net değil)</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">%0 sermaye kazancı, %15 temettü</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">%0 sermaye kazancı, %15 temettü</td>
     </tr>
     <tr>
       <td style="padding:8px 12px;font-weight:600">Uzun Vade (10 yıl) Getiri</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">Çok Yüksek (BTC 2014-2024)</td>
-      <td style="padding:8px 12px;text-align:center;color:#3fb950">Yüksek (BIST enflasyon üstü)</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">Çok Yüksek (BTC 2014-2024)</td>
+      <td style="padding:8px 12px;text-align:center;color:var(--bp-al)">Yüksek (BIST enflasyon üstü)</td>
     </tr>
   </tbody>
 </table>
@@ -3546,8 +3546,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Tahvil/mevduat cazip hale gelir, hisseden çıkış başlar</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
-      <td style="padding:8px 12px;color:#3fb950;font-weight:600">Faiz ↓ (düşer)</td>
-      <td style="padding:8px 12px;color:#3fb950">Borsa ↑ (genellikle)</td>
+      <td style="padding:8px 12px;color:var(--bp-al);font-weight:600">Faiz ↓ (düşer)</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Borsa ↑ (genellikle)</td>
       <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Alternatif getirileri düşer, hisseye para akar</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
@@ -3557,7 +3557,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     </tr>
     <tr>
       <td style="padding:8px 12px;color:#94a3b8">Beklenti Karşılandı</td>
-      <td style="padding:8px 12px;color:#8b949e">Sınırlı hareket</td>
+      <td style="padding:8px 12px;color:var(--bp-text3)">Sınırlı hareket</td>
       <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Karar zaten fiyatlanmıştı</td>
     </tr>
   </tbody>
@@ -3590,7 +3590,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <tbody>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">Bankacılık</td>
-      <td style="padding:8px 12px;color:#3fb950">Potansiyel pozitif</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Potansiyel pozitif</td>
       <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Net faiz marjı artabilir</td>
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
@@ -3605,7 +3605,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     </tr>
     <tr style="border-bottom:1px solid #1e2d45">
       <td style="padding:8px 12px;font-weight:600">İhracatçı Sanayi</td>
-      <td style="padding:8px 12px;color:#3fb950">Pozitif (TL zayıflarsa)</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Pozitif (TL zayıflarsa)</td>
       <td style="padding:8px 12px;font-size:12px;color:#94a3b8">Dolar geliri, TL maliyet avantajı</td>
     </tr>
     <tr>
@@ -3617,8 +3617,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </table>
 
 <h2>Faiz Kararı Öncesi ve Sonrası Strateji</h2>
-<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:#58a6ff">💡 "Beklenti al, gerçek sat" kuralı:</strong>
+<div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:var(--bp-brand)">💡 "Beklenti al, gerçek sat" kuralı:</strong>
   <p style="margin:8px 0 0 0">Piyasalar faiz kararını genellikle haftalar öncesinden fiyatlamaya başlar. Karar açıklandığında büyük hareket çoğu zaman beklenti yönünün tersinedir. Bu nedenle karar gününde ani pozisyon açmak risklidir.</p>
 </div>
 <ul>
@@ -3664,8 +3664,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <table style="width:100%;border-collapse:collapse;margin:16px 0">
   <thead><tr style="background:#1e2d45">
     <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Kriter</th>
-    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#58a6ff">Teknik Analiz</th>
-    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#3fb950">Temel Analiz</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-brand)">Teknik Analiz</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-al)">Temel Analiz</th>
   </tr></thead>
   <tbody>
     <tr style="border-bottom:1px solid #1e2d45">
@@ -3719,8 +3719,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>Birlikte Kullanım: En Güçlü Yaklaşım</h2>
-<div style="background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:#3fb950">✅ Kanıtlanmış Strateji: "Temel Analiz + Teknik Zamanlama"</strong>
+<div style="background:rgba(var(--bp-al-rgb),.07);border:1px solid rgba(var(--bp-al-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:var(--bp-al)">✅ Kanıtlanmış Strateji: "Temel Analiz + Teknik Zamanlama"</strong>
   <p style="margin:8px 0 0 0">Önce temel analizle "hangi hisse" sorusunu cevapla → Ardından teknik analizle "ne zaman" gireceğini belirle. Bu iki adımlı yaklaşım profesyonel portföy yöneticilerinin büyük çoğunluğunun benimsediği yöntemdir.</p>
 </div>
 
@@ -3899,8 +3899,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li><strong>Fon getirisi:</strong> Biriken para yatırım fonlarında değerlendirilir</li>
 </ol>
 
-<div style="background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:#3fb950">✅ Devlet Katkısı Avantajı:</strong>
+<div style="background:rgba(var(--bp-al-rgb),.07);border:1px solid rgba(var(--bp-al-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:var(--bp-al)">✅ Devlet Katkısı Avantajı:</strong>
   <p style="margin:8px 0 0 0">Aylık 1.000 TL katkı ödüyorsanız devlet 300 TL ekler → 1.300 TL fona yatırılır. Asgari ücretin %25'i kadar olan limit dahilinde katkı için bu oran uygulanır (2026 limitlerini kontrol edin).</p>
 </div>
 
@@ -3945,16 +3945,16 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 </ul>
 
 <h2>BES mi, Borsa Yatırımı mı?</h2>
-<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:#58a6ff">💡 Birbirinin Rakibi Değil:</strong>
+<div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:var(--bp-brand)">💡 Birbirinin Rakibi Değil:</strong>
   <p style="margin:8px 0 0 0">BES ve borsa birbirini tamamlayan araçlardır. BES'in devlet katkısı benzersiz bir avantaj sağlar — bu etkiyi borsada doğrudan yeniden üretemezsiniz. İdeal: BES ile uzun vadeli birikim + BIST sinyalleriyle aktif yönetim bir arada.</p>
 </div>
 
 <table style="width:100%;border-collapse:collapse;margin:16px 0">
   <thead><tr style="background:#1e2d45">
     <th style="padding:8px 12px;text-align:left;font-size:12px;color:#94a3b8">Kriter</th>
-    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#58a6ff">BES</th>
-    <th style="padding:8px 12px;text-align:left;font-size:12px;color:#3fb950">Doğrudan Borsa</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-brand)">BES</th>
+    <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--bp-al)">Doğrudan Borsa</th>
   </tr></thead>
   <tbody>
     <tr style="border-bottom:1px solid #1e2d45">
@@ -4021,7 +4021,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h3>1. Bilanço (Balance Sheet)</h3>
 <p>Şirketin belirli bir tarihteki varlıkları, yükümlülükleri ve öz sermayesini gösterir. Temel denklem:</p>
-<div style="background:#1a2438;border:1px solid #1e2d45;border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:var(--bp-text-lg);font-weight:700;color:#58a6ff">
+<div style="background:#1a2438;border:1px solid #1e2d45;border-radius:8px;padding:12px;margin:12px 0;text-align:center;font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-brand)">
   Varlıklar = Yükümlülükler + Öz Sermaye
 </div>
 <ul>
@@ -4115,8 +4115,8 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
   <li><strong>Değerleme makul mü?</strong> F/K ve PD/DD sektör ortalamasıyla karşılaştır</li>
 </ol>
 
-<div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:14px;margin:16px 0">
-  <strong style="color:#58a6ff">💡 KAP'tan Finansal Tablolara Erişim:</strong>
+<div style="background:rgba(var(--bp-brand-rgb),.07);border:1px solid rgba(var(--bp-brand-rgb),.15);border-radius:8px;padding:14px;margin:16px 0">
+  <strong style="color:var(--bp-brand)">💡 KAP'tan Finansal Tablolara Erişim:</strong>
   <p style="margin:8px 0 0 0">Türkiye'de halka açık şirketlerin tüm finansal tabloları KAP (Kamuyu Aydınlatma Platformu) üzerinden ücretsiz erişilebilir. BorsaPusula'da her hisse sayfasında KAP bildirimi linkine ve temel finansal oranlara doğrudan erişebilirsiniz.</p>
 </div>
 
@@ -4230,26 +4230,26 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <table style="width:100%;border-collapse:collapse;font-size:var(--bp-text-md);margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Seans</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Saat</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Açıklama</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Seans</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Saat</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Açıklama</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Sabah Tek Fiyat Seansı</td>
-      <td style="padding:8px 12px;color:#3fb950;font-family:monospace;font-weight:600">09:40 – 10:00</td>
-      <td style="padding:8px 12px;color:#8b949e">Açılış fiyatı belirlenir, emir toplanır</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Sabah Tek Fiyat Seansı</td>
+      <td style="padding:8px 12px;color:var(--bp-al);font-family:monospace;font-weight:600">09:40 – 10:00</td>
+      <td style="padding:8px 12px;color:var(--bp-text3)">Açılış fiyatı belirlenir, emir toplanır</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Sürekli Müzayede (Ana Seans)</td>
-      <td style="padding:8px 12px;color:#3fb950;font-family:monospace;font-weight:600">10:00 – 18:00</td>
-      <td style="padding:8px 12px;color:#8b949e">Emir eşleşmesi anlık gerçekleşir</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Sürekli Müzayede (Ana Seans)</td>
+      <td style="padding:8px 12px;color:var(--bp-al);font-family:monospace;font-weight:600">10:00 – 18:00</td>
+      <td style="padding:8px 12px;color:var(--bp-text3)">Emir eşleşmesi anlık gerçekleşir</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Kapanış Tek Fiyat Seansı</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Kapanış Tek Fiyat Seansı</td>
       <td style="padding:8px 12px;color:#f0883e;font-family:monospace;font-weight:600">18:00 – 18:10</td>
-      <td style="padding:8px 12px;color:#8b949e">Kapanış fiyatı belirlenir, emir toplanır</td>
+      <td style="padding:8px 12px;color:var(--bp-text3)">Kapanış fiyatı belirlenir, emir toplanır</td>
     </tr>
   </tbody>
 </table>
@@ -4330,41 +4330,41 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Özellik</th>
-      <th style="padding:8px 12px;text-align:left;color:#3fb950;font-weight:600">Hisse Senedi</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Özellik</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-al);font-weight:600">Hisse Senedi</th>
       <th style="padding:8px 12px;text-align:left;color:#f0883e;font-weight:600">Tahvil</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Ne satın alırsınız?</td>
-      <td style="padding:8px 12px;color:#e6edf3">Şirkete ortaklık payı</td>
-      <td style="padding:8px 12px;color:#e6edf3">Şirkete/devlete borç hakkı</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Ne satın alırsınız?</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Şirkete ortaklık payı</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Şirkete/devlete borç hakkı</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Getiri kaynağı</td>
-      <td style="padding:8px 12px;color:#e6edf3">Fiyat artışı + temettü</td>
-      <td style="padding:8px 12px;color:#e6edf3">Sabit faiz (kupon)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Getiri kaynağı</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Fiyat artışı + temettü</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Sabit faiz (kupon)</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Risk seviyesi</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Risk seviyesi</td>
       <td style="padding:8px 12px;color:#f85149">Yüksek</td>
-      <td style="padding:8px 12px;color:#3fb950">Orta / Düşük (devlet)</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Orta / Düşük (devlet)</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Oy hakkı</td>
-      <td style="padding:8px 12px;color:#e6edf3">Evet (genel kurul)</td>
-      <td style="padding:8px 12px;color:#e6edf3">Hayır</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Oy hakkı</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Evet (genel kurul)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Hayır</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Iflas önceliği</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Iflas önceliği</td>
       <td style="padding:8px 12px;color:#f85149">Sonuncu sırada</td>
-      <td style="padding:8px 12px;color:#3fb950">Hisse senetlerinden önce</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Hisse senetlerinden önce</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Vade</td>
-      <td style="padding:8px 12px;color:#e6edf3">Süresiz</td>
-      <td style="padding:8px 12px;color:#e6edf3">Belirli (1 ay – 30 yıl)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Vade</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Süresiz</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Belirli (1 ay – 30 yıl)</td>
     </tr>
   </tbody>
 </table>
@@ -4445,30 +4445,30 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Ürün Grubu</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Örnekler</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Ürün Grubu</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Örnekler</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Endeks Futures</td>
-      <td style="padding:8px 12px;color:#e6edf3">BIST30 vadeli (XU030 kontratları)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Endeks Futures</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">BIST30 vadeli (XU030 kontratları)</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Döviz Futures</td>
-      <td style="padding:8px 12px;color:#e6edf3">USD/TRY, EUR/TRY, GBP/TRY</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Döviz Futures</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">USD/TRY, EUR/TRY, GBP/TRY</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Pay Futures</td>
-      <td style="padding:8px 12px;color:#e6edf3">AKBNK, GARAN, THYAO gibi bireysel hisseler</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Pay Futures</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">AKBNK, GARAN, THYAO gibi bireysel hisseler</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Metal/Emtia Futures</td>
-      <td style="padding:8px 12px;color:#e6edf3">Altın, Gümüş</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Metal/Emtia Futures</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Altın, Gümüş</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Endeks Opsiyonları</td>
-      <td style="padding:8px 12px;color:#e6edf3">BIST30 call/put opsiyonları</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Endeks Opsiyonları</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">BIST30 call/put opsiyonları</td>
     </tr>
   </tbody>
 </table>
@@ -4551,30 +4551,30 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Durum</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Önerilen Emir</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Durum</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Önerilen Emir</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Açılışta hızlıca girmek istiyorum</td>
-      <td style="padding:8px 12px;color:#e6edf3">Piyasa emri (likit hisselerde)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Açılışta hızlıca girmek istiyorum</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Piyasa emri (likit hisselerde)</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Fiyat düşünce almak istiyorum</td>
-      <td style="padding:8px 12px;color:#e6edf3">Limit alım emri</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Fiyat düşünce almak istiyorum</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Limit alım emri</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Kırılım sonrası trende girmek istiyorum</td>
-      <td style="padding:8px 12px;color:#e6edf3">Stop-buy emri</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Kırılım sonrası trende girmek istiyorum</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Stop-buy emri</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Zarar kesmek istiyorum</td>
-      <td style="padding:8px 12px;color:#e6edf3">Stop-loss emri</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Zarar kesmek istiyorum</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Stop-loss emri</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Hem hedef hem stop belirlemek istiyorum</td>
-      <td style="padding:8px 12px;color:#e6edf3">OCO emri</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Hem hedef hem stop belirlemek istiyorum</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">OCO emri</td>
     </tr>
   </tbody>
 </table>
@@ -4613,7 +4613,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Lot Hesabı: Kaç Lira Ödersiniz?</h2>
 <p>İşlem maliyeti son derece basit hesaplanır:</p>
-<pre style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;font-size:var(--bp-text-base);color:#e6edf3">
+<pre style="background:var(--bp-surface);border:1px solid #30363d;border-radius:6px;padding:12px;font-size:var(--bp-text-base);color:var(--bp-text)">
 Maliyet = Lot Adedi × Hisse Fiyatı × (1 + Komisyon Oranı)
 
 Örnek — AKBNK @ 130₺, 100 lot:
@@ -4681,54 +4681,54 @@ Toplam ≈ 13.003,90₺
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Araç</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Enflasyon Koruması</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Risk</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Likidite</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Araç</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Enflasyon Koruması</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Risk</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Likidite</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Altın (TL bazlı)</td>
-      <td style="padding:8px 12px;color:#3fb950">✅ Güçlü</td>
-      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
-      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Altın (TL bazlı)</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">✅ Güçlü</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Orta</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yüksek</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Hisse Senedi (BIST)</td>
-      <td style="padding:8px 12px;color:#3fb950">✅ Orta-Güçlü</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Hisse Senedi (BIST)</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">✅ Orta-Güçlü</td>
       <td style="padding:8px 12px;color:#f85149">Yüksek</td>
-      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yüksek</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Döviz (USD/EUR)</td>
-      <td style="padding:8px 12px;color:#3fb950">✅ Güçlü (TL depreciation)</td>
-      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
-      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Döviz (USD/EUR)</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">✅ Güçlü (TL depreciation)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Orta</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yüksek</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">TÜFE Tahvil (Hazine)</td>
-      <td style="padding:8px 12px;color:#3fb950">✅ Tam</td>
-      <td style="padding:8px 12px;color:#e6edf3">Düşük</td>
-      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">TÜFE Tahvil (Hazine)</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">✅ Tam</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Düşük</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Orta</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Kira Geliri (GYO/BYF)</td>
-      <td style="padding:8px 12px;color:#e6edf3">⚠️ Sektöre Bağlı</td>
-      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
-      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Kira Geliri (GYO/BYF)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">⚠️ Sektöre Bağlı</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Orta</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yüksek</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Sabit Mevduat (TL)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Sabit Mevduat (TL)</td>
       <td style="padding:8px 12px;color:#f85149">❌ Yetersiz</td>
-      <td style="padding:8px 12px;color:#3fb950">Çok Düşük</td>
-      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Çok Düşük</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yüksek</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Kripto (BTC)</td>
-      <td style="padding:8px 12px;color:#e6edf3">⚠️ Spekülatif</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Kripto (BTC)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">⚠️ Spekülatif</td>
       <td style="padding:8px 12px;color:#f85149">Çok Yüksek</td>
-      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yüksek</td>
     </tr>
   </tbody>
 </table>
@@ -4897,21 +4897,21 @@ Toplam ≈ 13.003,90₺
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Komisyon Oranı</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">1.000₺ işlem</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Yıllık 50 işlem</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Komisyon Oranı</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">1.000₺ işlem</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Yıllık 50 işlem</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">%0,03 (düşük)</td>
-      <td style="padding:8px 12px;color:#e6edf3">0,30₺</td>
-      <td style="padding:8px 12px;color:#e6edf3">15₺</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">%0,03 (düşük)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">0,30₺</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">15₺</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">%0,10 (orta)</td>
-      <td style="padding:8px 12px;color:#e6edf3">1₺</td>
-      <td style="padding:8px 12px;color:#e6edf3">50₺</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">%0,10 (orta)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">1₺</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">50₺</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
       <td style="padding:8px 12px;color:#f85149">%0,30 (yüksek)</td>
@@ -4960,7 +4960,7 @@ Toplam ≈ 13.003,90₺
 
 <h2>ROE (Return on Equity) Nedir?</h2>
 <p>ROE, şirketin <strong>özkaynaklarını kullanarak ne kadar kâr ettiğini</strong> ölçer.</p>
-<pre style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:#e6edf3">
+<pre style="background:var(--bp-surface);border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:var(--bp-text)">
 ROE = Net Kâr / Ortalama Özkaynak × 100
 
 Örnek: Net Kâr 1 milyar₺, Özkaynak 5 milyar₺
@@ -4972,30 +4972,30 @@ ROE = 1/5 × 100 = %20
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">ROE Değeri</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Değerlendirme</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">ROE Değeri</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Değerlendirme</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
       <td style="padding:8px 12px;color:#f85149">%0 altı</td>
-      <td style="padding:8px 12px;color:#e6edf3">Zarar ediyor — dikkat</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Zarar ediyor — dikkat</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">%0 – %10</td>
-      <td style="padding:8px 12px;color:#e6edf3">Düşük kârlılık</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">%0 – %10</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Düşük kârlılık</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
       <td style="padding:8px 12px;color:#f0883e">%10 – %20</td>
-      <td style="padding:8px 12px;color:#e6edf3">Makul, sektöre göre değişir</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Makul, sektöre göre değişir</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#3fb950">%20+</td>
-      <td style="padding:8px 12px;color:#e6edf3">Güçlü kârlılık</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">%20+</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Güçlü kârlılık</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#3fb950">%30+</td>
-      <td style="padding:8px 12px;color:#e6edf3">Excellent — Warren Buffett eşiği</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">%30+</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Excellent — Warren Buffett eşiği</td>
     </tr>
   </tbody>
 </table>
@@ -5003,7 +5003,7 @@ ROE = 1/5 × 100 = %20
 
 <h2>Net Kâr Marjı Nedir?</h2>
 <p>Net kâr marjı, şirketin gelirinin ne kadarını net kâra dönüştürebildiğini gösterir.</p>
-<pre style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:#e6edf3">
+<pre style="background:var(--bp-surface);border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:var(--bp-text)">
 Net Kâr Marjı = Net Kâr / Net Satışlar × 100
 
 Örnek: Net Kâr 500M₺, Satışlar 5 milyar₺
@@ -5020,7 +5020,7 @@ Net Kâr Marjı = 500/5000 × 100 = %10
 
 <h2>ROA (Return on Assets — Aktif Kârlılığı)</h2>
 <p>ROA, şirketin tüm varlıklarını (özkaynak + borç) ne kadar verimli kullandığını ölçer.</p>
-<pre style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:#e6edf3">
+<pre style="background:var(--bp-surface);border:1px solid #30363d;border-radius:6px;padding:12px;font-size:13px;color:var(--bp-text)">
 ROA = Net Kâr / Toplam Aktifler × 100
 </pre>
 <p>Düşük ROA ama yüksek ROE → Şirket yüksek borç kullanıyor. Kaldıraç hem kazancı hem riski büyütür.</p>
@@ -5069,46 +5069,46 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Özellik</th>
-      <th style="padding:8px 12px;text-align:left;color:#3fb950;font-weight:600">Endeks Fonu</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Özellik</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-al);font-weight:600">Endeks Fonu</th>
       <th style="padding:8px 12px;text-align:left;color:#f0883e;font-weight:600">Bireysel Hisse</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Çeşitlendirme</td>
-      <td style="padding:8px 12px;color:#3fb950">Otomatik (30-100 hisse)</td>
-      <td style="padding:8px 12px;color:#e6edf3">Manuel, emek gerektirir</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Çeşitlendirme</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Otomatik (30-100 hisse)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Manuel, emek gerektirir</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Zaman maliyeti</td>
-      <td style="padding:8px 12px;color:#3fb950">Çok düşük</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Zaman maliyeti</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Çok düşük</td>
       <td style="padding:8px 12px;color:#f85149">Yüksek (araştırma, takip)</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Piyasayı yenme potansiyeli</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Piyasayı yenme potansiyeli</td>
       <td style="padding:8px 12px;color:#f85149">Yok (endeksin getirisi)</td>
-      <td style="padding:8px 12px;color:#3fb950">Var (ama zor)</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Var (ama zor)</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Komisyon maliyeti</td>
-      <td style="padding:8px 12px;color:#3fb950">Düşük</td>
-      <td style="padding:8px 12px;color:#e6edf3">Her işlemde birikim</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Komisyon maliyeti</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Düşük</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Her işlemde birikim</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Duygusal stres</td>
-      <td style="padding:8px 12px;color:#3fb950">Düşük ("pasif" yaklaşım)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Duygusal stres</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Düşük ("pasif" yaklaşım)</td>
       <td style="padding:8px 12px;color:#f85149">Yüksek (bireysel karar)</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Öğrenme fırsatı</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Öğrenme fırsatı</td>
       <td style="padding:8px 12px;color:#f85149">Düşük</td>
-      <td style="padding:8px 12px;color:#3fb950">Yüksek</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yüksek</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Performans (uzun vade)</td>
-      <td style="padding:8px 12px;color:#e6edf3">Endeks getirisi</td>
-      <td style="padding:8px 12px;color:#e6edf3">Değişken</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Performans (uzun vade)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Endeks getirisi</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Değişken</td>
     </tr>
   </tbody>
 </table>
@@ -5393,42 +5393,42 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Özellik</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Day Trading</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Özellik</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Day Trading</th>
       <th style="padding:8px 12px;text-align:left;color:#f0883e;font-weight:600">Swing Trading</th>
-      <th style="padding:8px 12px;text-align:left;color:#3fb950;font-weight:600">Uzun Vade</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-al);font-weight:600">Uzun Vade</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Pozisyon süresi</td>
-      <td style="padding:8px 12px;color:#e6edf3">Dakika – saat</td>
-      <td style="padding:8px 12px;color:#e6edf3">Gün – hafta</td>
-      <td style="padding:8px 12px;color:#e6edf3">Ay – yıl</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Pozisyon süresi</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Dakika – saat</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Gün – hafta</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Ay – yıl</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Gereken zaman</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Gereken zaman</td>
       <td style="padding:8px 12px;color:#f85149">Tam gün (6-8 saat)</td>
-      <td style="padding:8px 12px;color:#e6edf3">Günde 1-2 saat</td>
-      <td style="padding:8px 12px;color:#3fb950">Haftada 1-2 saat</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Günde 1-2 saat</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Haftada 1-2 saat</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Komisyon maliyeti</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Komisyon maliyeti</td>
       <td style="padding:8px 12px;color:#f85149">Çok yüksek</td>
-      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
-      <td style="padding:8px 12px;color:#3fb950">Düşük</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Orta</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Düşük</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Psikolojik stres</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Psikolojik stres</td>
       <td style="padding:8px 12px;color:#f85149">Çok yüksek</td>
-      <td style="padding:8px 12px;color:#e6edf3">Orta</td>
-      <td style="padding:8px 12px;color:#3fb950">Düşük</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Orta</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Düşük</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Başarı gereklilikleri</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Başarı gereklilikleri</td>
       <td style="padding:8px 12px;color:#f85149">Çok yüksek</td>
-      <td style="padding:8px 12px;color:#e6edf3">Orta-Yüksek</td>
-      <td style="padding:8px 12px;color:#3fb950">Orta</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Orta-Yüksek</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Orta</td>
     </tr>
   </tbody>
 </table>
@@ -5606,46 +5606,46 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Hisse</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Banka</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Tür</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Hisse</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Banka</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Tür</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/AKBNK" style="color:#58a6ff">AKBNK</a></td>
-      <td style="padding:8px 12px;color:#e6edf3">Akbank T.A.Ş.</td>
-      <td style="padding:8px 12px;color:#e6edf3">Özel Mevduat</td>
+      <td style="padding:8px 12px;color:var(--bp-brand);font-family:monospace;font-weight:600"><a href="/hisse/AKBNK" style="color:var(--bp-brand)">AKBNK</a></td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Akbank T.A.Ş.</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Özel Mevduat</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/GARAN" style="color:#58a6ff">GARAN</a></td>
-      <td style="padding:8px 12px;color:#e6edf3">T. Garanti Bankası A.Ş.</td>
-      <td style="padding:8px 12px;color:#e6edf3">Özel Mevduat</td>
+      <td style="padding:8px 12px;color:var(--bp-brand);font-family:monospace;font-weight:600"><a href="/hisse/GARAN" style="color:var(--bp-brand)">GARAN</a></td>
+      <td style="padding:8px 12px;color:var(--bp-text)">T. Garanti Bankası A.Ş.</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Özel Mevduat</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/ISCTR" style="color:#58a6ff">ISCTR</a></td>
-      <td style="padding:8px 12px;color:#e6edf3">Türkiye İş Bankası A.Ş.</td>
-      <td style="padding:8px 12px;color:#e6edf3">Özel Mevduat</td>
+      <td style="padding:8px 12px;color:var(--bp-brand);font-family:monospace;font-weight:600"><a href="/hisse/ISCTR" style="color:var(--bp-brand)">ISCTR</a></td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Türkiye İş Bankası A.Ş.</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Özel Mevduat</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/YKBNK" style="color:#58a6ff">YKBNK</a></td>
-      <td style="padding:8px 12px;color:#e6edf3">Yapı ve Kredi Bankası A.Ş.</td>
-      <td style="padding:8px 12px;color:#e6edf3">Özel Mevduat</td>
+      <td style="padding:8px 12px;color:var(--bp-brand);font-family:monospace;font-weight:600"><a href="/hisse/YKBNK" style="color:var(--bp-brand)">YKBNK</a></td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Yapı ve Kredi Bankası A.Ş.</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Özel Mevduat</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/VAKBN" style="color:#58a6ff">VAKBN</a></td>
-      <td style="padding:8px 12px;color:#e6edf3">Vakıflar Bankası T.A.O.</td>
-      <td style="padding:8px 12px;color:#e6edf3">Kamu Mevduat</td>
+      <td style="padding:8px 12px;color:var(--bp-brand);font-family:monospace;font-weight:600"><a href="/hisse/VAKBN" style="color:var(--bp-brand)">VAKBN</a></td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Vakıflar Bankası T.A.O.</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Kamu Mevduat</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/HALKB" style="color:#58a6ff">HALKB</a></td>
-      <td style="padding:8px 12px;color:#e6edf3">Türkiye Halk Bankası A.Ş.</td>
-      <td style="padding:8px 12px;color:#e6edf3">Kamu Mevduat</td>
+      <td style="padding:8px 12px;color:var(--bp-brand);font-family:monospace;font-weight:600"><a href="/hisse/HALKB" style="color:var(--bp-brand)">HALKB</a></td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Türkiye Halk Bankası A.Ş.</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Kamu Mevduat</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#58a6ff;font-family:monospace;font-weight:600"><a href="/hisse/ALBRK" style="color:#58a6ff">ALBRK</a></td>
-      <td style="padding:8px 12px;color:#e6edf3">Albaraka Türk Katılım Bankası</td>
-      <td style="padding:8px 12px;color:#e6edf3">Katılım</td>
+      <td style="padding:8px 12px;color:var(--bp-brand);font-family:monospace;font-weight:600"><a href="/hisse/ALBRK" style="color:var(--bp-brand)">ALBRK</a></td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Albaraka Türk Katılım Bankası</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Katılım</td>
     </tr>
   </tbody>
 </table>
@@ -5732,36 +5732,36 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin:12px 0">
   <thead>
     <tr style="background:#21262d">
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Varlık</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Kriz döneminde</th>
-      <th style="padding:8px 12px;text-align:left;color:#8b949e;font-weight:600">Rallide</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Varlık</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Kriz döneminde</th>
+      <th style="padding:8px 12px;text-align:left;color:var(--bp-text3);font-weight:600">Rallide</th>
     </tr>
   </thead>
   <tbody>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Altın</td>
-      <td style="padding:8px 12px;color:#3fb950">Yükselir</td>
-      <td style="padding:8px 12px;color:#8b949e">Geri kalabilir</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Altın</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yükselir</td>
+      <td style="padding:8px 12px;color:var(--bp-text3)">Geri kalabilir</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">USD</td>
-      <td style="padding:8px 12px;color:#3fb950">Güçlenir</td>
-      <td style="padding:8px 12px;color:#8b949e">Zayıflayabilir</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">USD</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Güçlenir</td>
+      <td style="padding:8px 12px;color:var(--bp-text3)">Zayıflayabilir</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Hisse Senedi</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Hisse Senedi</td>
       <td style="padding:8px 12px;color:#f85149">Düşer</td>
-      <td style="padding:8px 12px;color:#3fb950">Yükselir</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Yükselir</td>
     </tr>
     <tr style="border-top:1px solid #30363d;background:rgba(255,255,255,.02)">
-      <td style="padding:8px 12px;color:#e6edf3">Kripto (BTC)</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Kripto (BTC)</td>
       <td style="padding:8px 12px;color:#f85149">Genellikle düşer</td>
-      <td style="padding:8px 12px;color:#3fb950">Güçlü yükselir</td>
+      <td style="padding:8px 12px;color:var(--bp-al)">Güçlü yükselir</td>
     </tr>
     <tr style="border-top:1px solid #30363d">
-      <td style="padding:8px 12px;color:#e6edf3">Petrol</td>
-      <td style="padding:8px 12px;color:#e6edf3">Duruma bağlı</td>
-      <td style="padding:8px 12px;color:#e6edf3">Duruma bağlı</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Petrol</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Duruma bağlı</td>
+      <td style="padding:8px 12px;color:var(--bp-text)">Duruma bağlı</td>
     </tr>
   </tbody>
 </table>

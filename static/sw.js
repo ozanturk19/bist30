@@ -1,5 +1,5 @@
 /* BorsaPusula Service Worker v3.1 — offline fallback + PWA optimize */
-const CACHE = 'borsapusula-v27';
+const CACHE = 'borsapusula-v28';
 
 /* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç) */
 const STATIC = [
@@ -7,7 +7,7 @@ const STATIC = [
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',
-  '/static/css/tokens.css?v=f14ab7b6',
+  '/static/css/tokens.css?v=1eabd653',
   '/static/css/shared.css?v=5761378a',
   '/static/css/pages/offline.css?v=128de31d',
   '/offline',

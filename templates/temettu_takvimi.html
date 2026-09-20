@@ -25,9 +25,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
+<link rel="stylesheet" href="/static/css/tokens.css?v=1eabd653">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/temettu_takvimi.css?v=93b66299">
+<link rel="stylesheet" href="/static/css/pages/temettu_takvimi.css?v=dafb4181">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker -->
@@ -45,10 +45,10 @@
   </div>
 
   <div class="summary-row">
-    <div class="sum-chip"><div class="sum-num" id="sumUpcoming" style="color:#58a6ff">—</div><div class="sum-lbl">Yaklaşan Ex-Temettü</div></div>
-    <div class="sum-chip"><div class="sum-num" id="sumAl" style="color:#3fb950">—</div><div class="sum-lbl">Güçlü Trend</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumUpcoming" style="color:var(--bp-brand)">—</div><div class="sum-lbl">Yaklaşan Ex-Temettü</div></div>
+    <div class="sum-chip"><div class="sum-num bp-al-text" id="sumAl">—</div><div class="sum-lbl">Güçlü Trend</div></div>
     <div class="sum-chip"><div class="sum-num bp-sat-text" id="sumSat">—</div><div class="sum-lbl">Trend Bozuldu</div></div>
-    <div class="sum-chip"><div class="sum-num" id="sumTotal" style="color:#58a6ff">—</div><div class="sum-lbl">Toplam Hisse</div></div>
+    <div class="sum-chip"><div class="sum-num" id="sumTotal" style="color:var(--bp-brand)">—</div><div class="sum-lbl">Toplam Hisse</div></div>
   </div>
 
   <div class="filter-bar">
@@ -161,7 +161,7 @@ async function load() {
     render(data);
   } catch(e) {
     document.getElementById('stocksContainer').innerHTML =
-      '<div class="loading-msg">⚠️ Veriler yüklenemedi (' + e.message + '). <a href="." onclick="location.reload();return false" style="color:#58a6ff">Yenile</a></div>';
+      '<div class="loading-msg">⚠️ Veriler yüklenemedi (' + e.message + '). <a href="." onclick="location.reload();return false" style="color:var(--bp-brand)">Yenile</a></div>';
     document.getElementById('lastUpdate').textContent = 'Yüklenemedi';
   }
 }
