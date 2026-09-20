@@ -901,11 +901,11 @@
   }
   .methodology strong { color: var(--bp-text2); }
 
-  /* SPEC-011 L4 / SPEC-013 — İçerik zenginleştirme blokları */
+  /* SPEC-011 L4 / SPEC-013 — İçerik zenginleştirme blokları.
+     20.09: gövde reçetesi (degrade + kenarlık + radius-20 + parıltı) artık
+     data-art.css `.da-panel` — şablonda `class="da-panel content-card"`.
+     Burada yalnızca sayfaya özgü DELTA kalır. */
   .content-card {
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-20);
     padding: 18px 20px;
     margin-bottom: 20px;
   }
@@ -1463,37 +1463,25 @@
    parıltısını (violet .13, 220px, sağ-üst) taşıyordu. Canlı ölçümle yakalandı
    (getComputedStyle ::before: 220px/-35%/rgba(124,92,255,.13) ≠ kaynaktaki 240px).
    `#signalSummarySection` gruptan çıkarıldı: panel artık data-art.css `.da-panel`
-   ilkelini kullanıyor, yani sayfadaki diğer 6 panelle AYNI reçete. Hover'daki
-   kenarlık-vurgusu da kalktı — bu kutu tıklanabilir değil, hover affordance'ı
-   yanıltıcıydı. */
+   ilkelini kullanıyor, yani sayfadaki diğer 6 panelle AYNI reçete.
+
+   20.09 (ikinci adım) — bu iki kart da `.da-panel`e geçti: `position/overflow`,
+   `::before` parıltı bloğu ve `> *` z-index düzeltmesi elle kopyalanmış hâldeydi;
+   artık yalnızca parıltının DELTA'sı (renk/boyut/konum) burada duruyor. Değerler
+   önceki elle yazılmış hâlle birebir aynı tutuldu (violet .13 / 220px / -35% / -6%),
+   yani görsel çıktı değişmiyor — tek kaynak kazanıldı. */
 .content-card,
 .faq-card {
-  position: relative;
-  overflow: hidden;
+  --da-glow-rgb: var(--bp-art-violet-rgb);
+  --da-glow-a: .13;
+  --da-glow-size: 220px;
+  --da-glow-y: -35%;
+  --da-glow-x: -6%;
   transition: border-color var(--bp-dur-base) var(--bp-ease-standard);
-}
-.content-card::before,
-.faq-card::before {
-  content: '';
-  position: absolute;
-  top: -35%;
-  right: -6%;
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb), .13), transparent 70%);
-  pointer-events: none;
-  z-index: 0;
 }
 .content-card:hover,
 .faq-card:hover {
   border-color: var(--bp-border2);
-}
-/* İçerik kart-içi öğeler parıltının üstünde kalsın */
-.content-card > *,
-.faq-card > * {
-  position: relative;
-  z-index: 1;
 }
 
 .related-grid .related-chip {

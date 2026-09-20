@@ -26,8 +26,9 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
+<link rel="stylesheet" href="/static/css/data-art.css?v=67e915a8">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/gundem.css?v=ea8223ba">
+<link rel="stylesheet" href="/static/css/pages/gundem.css?v=0af6ad48">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -73,7 +74,7 @@
 {% include '_stale_banner.html' %}
 
   <!-- AI Makro Özeti -->
-  <div id="macroSummaryBox" class="ai-summary-box" role="status" aria-live="polite" style="display:none">
+  <div id="macroSummaryBox" class="da-panel da-panel--accent ai-summary-box" role="status" aria-live="polite" style="display:none">
     <div class="ai-sum-row">
       <span class="ai-sum-icon"><span aria-hidden="true">🤖</span></span>
       <div>
@@ -87,15 +88,15 @@
   <!-- Stats -->
   <div class="stats-row" id="statsRow" role="status" aria-live="polite">
     {% if ssr_signal_summary %}
-    <div class="stat-card"><div class="stat-num num-al">{{ ssr_signal_summary.al }}</div><div class="stat-lbl">Güçlü Trend</div></div>
-    <div class="stat-card"><div class="stat-num num-sat">{{ ssr_signal_summary.sat }}</div><div class="stat-lbl">Trend Bozuldu</div></div>
-    <div class="stat-card"><div class="stat-num num-bkl">{{ ssr_signal_summary.bekle }}</div><div class="stat-lbl">Yatay</div></div>
-    <div class="stat-card"><div class="stat-num num-tot">{{ ssr_signal_summary.total }}</div><div class="stat-lbl">Toplam Hisse</div></div>
+    <div class="da-panel stat-card"><div class="stat-num num-al">{{ ssr_signal_summary.al }}</div><div class="stat-lbl">Güçlü Trend</div></div>
+    <div class="da-panel stat-card"><div class="stat-num num-sat">{{ ssr_signal_summary.sat }}</div><div class="stat-lbl">Trend Bozuldu</div></div>
+    <div class="da-panel stat-card"><div class="stat-num num-bkl">{{ ssr_signal_summary.bekle }}</div><div class="stat-lbl">Yatay</div></div>
+    <div class="da-panel stat-card"><div class="stat-num num-tot">{{ ssr_signal_summary.total }}</div><div class="stat-lbl">Toplam Hisse</div></div>
     {% else %}
-    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Güçlü Trend</div></div>
-    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Trend Bozuldu</div></div>
-    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Yatay</div></div>
-    <div class="stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Toplam Hisse</div></div>
+    <div class="da-panel stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Güçlü Trend</div></div>
+    <div class="da-panel stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Trend Bozuldu</div></div>
+    <div class="da-panel stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Yatay</div></div>
+    <div class="da-panel stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Toplam Hisse</div></div>
     {% endif %}
   </div>
 
@@ -304,10 +305,10 @@ async function loadGundem() {
     // Stats
     const sm = d.signal_summary || {};
     document.getElementById('statsRow').innerHTML = `
-      <div class="stat-card"><div class="stat-num num-al">${sm.al||0}</div><div class="stat-lbl">Güçlü Trend</div></div>
-      <div class="stat-card"><div class="stat-num num-sat">${sm.sat||0}</div><div class="stat-lbl">Trend Bozuldu</div></div>
-      <div class="stat-card"><div class="stat-num num-bkl">${sm.bekle||0}</div><div class="stat-lbl">Yatay</div></div>
-      <div class="stat-card"><div class="stat-num num-tot">${sm.total||0}</div><div class="stat-lbl">Toplam Hisse</div></div>
+      <div class="da-panel stat-card"><div class="stat-num num-al">${sm.al||0}</div><div class="stat-lbl">Güçlü Trend</div></div>
+      <div class="da-panel stat-card"><div class="stat-num num-sat">${sm.sat||0}</div><div class="stat-lbl">Trend Bozuldu</div></div>
+      <div class="da-panel stat-card"><div class="stat-num num-bkl">${sm.bekle||0}</div><div class="stat-lbl">Yatay</div></div>
+      <div class="da-panel stat-card"><div class="stat-num num-tot">${sm.total||0}</div><div class="stat-lbl">Toplam Hisse</div></div>
     `;
 
     // Updated at
@@ -420,10 +421,10 @@ async function loadGundem() {
     const statsEl = document.getElementById('statsRow');
     if (statsEl) {
       statsEl.innerHTML = `
-        <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Güçlü Trend</div></div>
-        <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Trend Bozuldu</div></div>
-        <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Yatay</div></div>
-        <div class="stat-card"><div class="stat-num">—</div><div class="stat-lbl">Toplam Hisse</div></div>
+        <div class="da-panel stat-card"><div class="stat-num">—</div><div class="stat-lbl">Güçlü Trend</div></div>
+        <div class="da-panel stat-card"><div class="stat-num">—</div><div class="stat-lbl">Trend Bozuldu</div></div>
+        <div class="da-panel stat-card"><div class="stat-num">—</div><div class="stat-lbl">Yatay</div></div>
+        <div class="da-panel stat-card"><div class="stat-num">—</div><div class="stat-lbl">Toplam Hisse</div></div>
       `;
     }
     const upd = document.getElementById('updatedAt');

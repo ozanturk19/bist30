@@ -109,7 +109,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=f14ab7b6">
 <link rel="stylesheet" href="/static/css/data-art.css?v=67e915a8">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=7bfeadf7">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=93d5dfe4">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -1395,7 +1395,7 @@
   {% set _cs_paras = [] %}
   {% for para in company_summary.split('\n') %}{% if para.strip() %}{% set _ = _cs_paras.append(para.strip()) %}{% endif %}{% endfor %}
   <!-- SPEC-011 L4 — Şirket Hakkında (Gemini AI özet, AI-optimized content) -->
-  <section class="content-card" data-tab-content="always" aria-labelledby="company-summary-heading">
+  <section class="da-panel content-card" data-tab-content="always" aria-labelledby="company-summary-heading">
     <h2 class="section-title" id="company-summary-heading"><span aria-hidden="true">🏢</span> {{ ticker }} Hakkında</h2>
     {% if _cs_paras %}
     <p class="content-para">{{ _cs_paras[0] }}</p>
@@ -1428,7 +1428,7 @@
 
   {% if seo_faq %}
   <!-- SPEC-013 — Yatırımcı SSS (semantic dl, FAQPage schema ile uyumlu) -->
-  <section class="content-card faq-card" data-tab-content="always" aria-labelledby="faq-heading">
+  <section class="da-panel content-card faq-card" data-tab-content="always" aria-labelledby="faq-heading">
     <h2 class="section-title" id="faq-heading"><span aria-hidden="true">❓</span> {{ ticker }} — Sıkça Sorulan Sorular</h2>
     <dl class="faq-list">
       {% for item in seo_faq %}
@@ -1441,7 +1441,7 @@
 
   {% if related_stocks %}
   <!-- SPEC-011 L4/L5 — İlgili hisseler (internal linking, crawl budget) -->
-  <aside class="content-card" data-tab-content="always" aria-labelledby="related-heading">
+  <aside class="da-panel content-card" data-tab-content="always" aria-labelledby="related-heading">
     <h2 class="section-title" id="related-heading"><span aria-hidden="true">🔗</span> {{ sector }} Sektöründen Diğer Hisseler</h2>
     <div class="related-grid">
       {% for r in related_stocks %}
