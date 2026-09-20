@@ -150,6 +150,13 @@ except ImportError as _fhs_import_err:
 # ── Faz 12 P2.3 Sentry Integration ───────────────────────────────────────────
 _SENTRY_AVAILABLE = False
 
+# CPO-1690: SENTRY_DSN prod'da hiç set değil (motor hiç çalışmıyor) ve
+# @app.errorhandler(500) hiçbir yere tek satır bile yazmıyordu — kaç 500
+# döndüğü hiçbir yüzeyden görünmüyordu. DSN gerçek bir hesap/kayıt istediği
+# için burada icat edilemez; bunun yerine worker-local, dosyasız bir sayaç
+# (news_queue_worker_local ile aynı desen) + errorhandler'da logger.exception.
+_5xx_error_stats = {"count": 0, "last_ts": 0.0, "last_path": None}
+
 # CPO-1561 P0: abone auth token'ı (/profil?t=, /unsubscribe/<token>) hem query
 # string hem path segment'i olarak Sentry transaction/event URL'lerine ham
 # haliyle gidiyordu (send_default_pii kapalı olsa da request.url zaten
@@ -9888,6 +9895,10 @@ def _compute_health():
         # "total_added=0" gerçek kuyruğun boş olduğu anlamına GELMEYEBİLİR.
         "news_queue_worker_local":  _news_queue_stats,
         "news_queue_note":         "worker-local — 4 worker'ın her biri ayrı kuyruk/sayaç tutar, global toplam değildir",
+        # CPO-1690 §3: prod'da kaç 500 döndüğü hiçbir yüzeyden görünmüyordu.
+        # news_queue_worker_local ile aynı sınırlama — worker-local, dosyaya
+        # senkron edilmiyor, global toplam DEĞİL (4 worker'ın health'i ayrı sorulmalı).
+        "errors_5xx_worker_local": _5xx_error_stats,
         "last_news_queue_ts":       news_last_ts,
         "last_news_queue_age_s":    int(now - news_last_ts) if news_last_ts else None,
         # CPO-1207 §2: reload sonrası "prefetch canlı mı" sorusu önceden yalnız
@@ -13759,6 +13770,13 @@ def rate_limit_exceeded(e):
 # frontend res.json()te SyntaxErrora dusuyordu (429daki ayni sinif hata).
 @app.errorhandler(500)
 def internal_server_error(e):
+    # CPO-1690: tek yakalama noktası — DSN yokken bu satır olmadan hiçbir
+    # 500 hiçbir yere yazılmıyordu (journald'da bile). exc_info=True Flask'ın
+    # bu handler'ı except bloğu içinde çağırmasına güvenir (sys.exc_info() dolu).
+    logger.exception("unhandled_500 path=%s", request.path)
+    _5xx_error_stats["count"] += 1
+    _5xx_error_stats["last_ts"] = time.time()
+    _5xx_error_stats["last_path"] = request.path
     if request.path.startswith("/api/"):
         return jsonify({"ok": False, "error": "Sunucu hatası"}), 500
     # bug-hunt r90: 404/429 markali+Turkce iken 500 ciplak Flask ciktisi (Ingilizce,
