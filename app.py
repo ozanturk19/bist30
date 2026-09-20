@@ -8292,12 +8292,18 @@ def _load_fundamentals_cache_from_disk():
 def _get_fundamentals(ticker_base):
     """yfinance ile temel analiz verilerini döndürür."""
     now = time.time()
+    _is_web = os.environ.get("REFRESH_WORKER") == "web"
     with _lock:
         cached = _fundamentals_cache.get(ticker_base)
-        if cached and (now - cached["ts"]) < _FUND_TTL:
+        _fresh = bool(cached) and (now - cached["ts"]) < _FUND_TTL
+        # CPO-1671: web worker zaten fetch yapamaz (aşağıda cache-only döner), TTL
+        # yeterli. Ama leader'da (buradan devam) şema eksikse (statement_trend_quarterly
+        # yok — eski kod/yarım fetch kalıntısı) TTL dolmamış olsa bile yeniden çekilsin;
+        # aksi halde eksik kayıt tam 4 saat "taze" sayılıp donuk kalıyordu.
+        if _fresh and (_is_web or "statement_trend_quarterly" in cached["data"]):
             return cached["data"]
     # CPO-558G: web worker'da synchronous yfinance yasak — stale/empty cache dön
-    if os.environ.get("REFRESH_WORKER") == "web":
+    if _is_web:
         logger.debug("_get_fundamentals(%s): REFRESH_WORKER=web — cache-only", ticker_base)
         return cached["data"] if cached else {}
     try:
@@ -8362,6 +8368,10 @@ def _get_fundamentals(ticker_base):
             "total_cash":        fmt_billion(safe("totalCash")),
             "insider_pct":       round(safe_num("heldPercentInsiders") * 100, 1) if safe_num("heldPercentInsiders") is not None else None,
             "institutional_pct": round(safe_num("heldPercentInstitutions") * 100, 1) if safe_num("heldPercentInstitutions") is not None else None,
+            # CPO-1672: yfinance'in raporladığı bilanço para birimi (TRY/USD/EUR) —
+            # THYAO/ENKAI (USD) ve TAVHL (EUR) gibi hisselerde P/S, P/B gibi TRY
+            # piyasa değeriyle karışan oranları frontend'in etiketlemesi/gizlemesi için.
+            "financial_currency": safe("financialCurrency"),
         }
         # CPO-1528 Faz 2: Faz 1/CPO-1527 çapraz-tablo oranları — financial_health_score.py
         # girdisi. _FUND_SANITY zaten bu alanlar için sınır tanımlıyor (ocf_* hariç, bkz. yorum orada).
@@ -13510,7 +13520,13 @@ def _fundamentals_warmup_daemon():
         for _t in BIST30:
             with _lock:
                 _fc = _fundamentals_cache.get(_t)
-            if not _fc or (now - _fc["ts"]) > (_FUND_TTL - 1800):  # TTL'den 30dk önce tazele
+            # CPO-1671: TTL'e ek olarak şema tamlığı da kontrol edilir — "statement_trend_quarterly"
+            # eksikse (ör. deploy öncesi eski koddan kalma ya da bir önceki fetch'te boş dönmüş
+            # kayıt) TTL'in 3.5 saatini beklemeden bir sonraki 30dk'lık turda yeniden çekilir.
+            # Önceden sadece yaş bakıyordu — eksik alanlı bir kayıt tam TTL boyunca "taze" sayılıp
+            # atlanıyor, ceyreklik grafik saatlerce bozuk kalabiliyordu.
+            _stale_schema = bool(_fc) and "statement_trend_quarterly" not in (_fc.get("data") or {})
+            if not _fc or _stale_schema or (now - _fc["ts"]) > (_FUND_TTL - 1800):  # TTL'den 30dk önce tazele
                 try:
                     _get_fundamentals(_t)
                     _written_this_round += 1

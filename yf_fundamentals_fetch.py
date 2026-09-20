@@ -22,6 +22,11 @@ _NEEDED_KEYS = [
     "bookValue", "totalCash", "heldPercentInsiders", "heldPercentInstitutions",
     # CPO-1527 (FD/FAVOK icin): EBITDA payda, enterpriseValue pay
     "enterpriseValue",
+    # CPO-1672: bazı BIST hisseleri (THYAO/ENKAI USD, TAVHL EUR) bilançoyu TRY
+    # dışında raporluyor — oranlar (P/S, P/B) TRY piyasa değeri ile USD/EUR
+    # ciro/defter değeri karıştığı için yanlış çıkıyor. Ham alanı payload'a
+    # ekle, TRY-dışı dönüştürme/gizleme kararı frontend'de (CPO).
+    "financialCurrency",
 ]
 
 # CPO r174: yillik gelir tablosu trendi (Ciro+Net Kar, tum sektorlerde var) —
