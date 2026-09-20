@@ -206,6 +206,17 @@ OLU_PALET = {
     "#94a3b8": ("--bp-text3", "Tailwind slate-400 (mavi tonlu ikincil metin)"),
     "#64748b": ("--bp-text3", "Tailwind slate-500 (mavi tonlu ikincil metin)"),
     "#f0883e": ("--bp-warn", "eski GitHub turuncu -> dikkat/orta-risk amber"),
+    # ── 20.09 ucuncu tur (/sektor-harita isi haritasi gradyani) ─────────────
+    # Sektor kartlarinin renk bandi 7 adimli ham-hex bir gradyandi; 4 adimi
+    # kanonik (al/sat/bkl/sat-bd) ama 3'u Tailwind emerald/red idi. Canlida
+    # olculdu: #f97066 aktif render ediliyordu. Bu uc deger HER IKI kapinin
+    # da kor noktasindaydi -- K-B yalniz KANONIK-degerli literalleri sayar
+    # (bunlar hicbir token'a esit degil), K-E ise yalniz denylist'tekileri
+    # (bunlar listede degildi). Yani "ne kanonik ne denylist'te" olan bir hex
+    # hicbir kapida gorunmuyor; denylist'i genisletmek bu sinifin TEK savunmasi.
+    "#34d399": ("--bp-al", "Tailwind emerald-400"),
+    "#6ee7b7": ("--bp-al", "Tailwind emerald-300"),
+    "#f97066": ("--bp-sat", "Tailwind red-400"),
 }
 # K-E kapsami: K-B'nin dosyalari + gercek JS dosyalari (tooltip/toast gibi
 # kullaniciya GORUNEN renkleri orada uretiliyor). VENDOR dosyasi haric —

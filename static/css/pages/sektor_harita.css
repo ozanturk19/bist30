@@ -61,15 +61,26 @@
      değil, sayaç" sinyali. */
   .chip-more { background:transparent; border:1px dashed rgba(var(--bp-text3-rgb),.3); color:var(--bp-text3); font-style:italic; font-weight:500; }
 
-  /* Legend */
-  .legend { display:flex; gap:16px; align-items:center; margin-bottom:16px; font-size:var(--bp-text-sm); flex-wrap:wrap; color:var(--bp-text3); }
+  /* Legend — 20.09 (CPO): eskiden 3 nokta + tek satir formul tasiyan duz bir
+     seritti ve KARTLARI YANLIS ANLATIYORDU: kartlar 7 renkli bir gradyanla
+     boyaniyordu, lejant ise 3 renk tanimliyordu; zemin dolulugunun (isi
+     yogunlugu — sayfanin merkezi metaforu) ne anlama geldigi ise HIC
+     yazmiyordu. Kodlama 3 renge indirildikten sonra lejant artik kartlarin
+     birebir karsiligi; ayrica RVOL ve endeks tanimi hover'a bagli tooltip'ten
+     cikip GORUNUR metne alindi (dokunmatik cihazda hover yok). */
+  .legend { margin-bottom:16px; font-size:var(--bp-text-sm); color:var(--bp-text3); padding:14px 16px;
+            --da-accent:var(--bp-art-violet); --da-glow-rgb:var(--bp-art-violet-rgb); --da-glow-a:.10; --da-glow-size:200px; }
+  .legend-row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  .legend-key { margin:10px 0 0; font-size:var(--bp-text-xs); line-height:1.6; color:var(--bp-text3); max-width:96ch; }
+  .legend-key strong { color:var(--bp-text2); font-weight:700; }
   .legend-dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:4px; }
 
   /* Summary row */
   .sum-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
-  .sum-chip { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:10px 14px; text-align:center; flex:1; min-width:100px; transition:border-color .15s; position:relative; overflow:hidden; }
-  .sum-chip::before { content:''; position:absolute; top:-60%; right:-15%; width:80px; height:80px; border-radius:50%; background:radial-gradient(circle, rgba(var(--bp-art-violet-rgb),.12), transparent 70%); pointer-events:none; }
-  .sum-chip > * { position:relative; }
+  /* Gorsel govde (degrade + kenar + radius + parilti) .da-panel'den geliyor;
+     burada YALNIZ bu sayfanin deltasi kaliyor. */
+  .sum-chip { padding:10px 14px; text-align:center; flex:1; min-width:100px; transition:border-color .15s;
+              --da-glow-rgb:var(--bp-art-violet-rgb); --da-glow-a:.12; --da-glow-size:80px; --da-glow-y:-60%; --da-glow-x:-15%; }
   .sum-chip:hover { border-color:var(--bp-border2); }
   .sum-num  { font-size:var(--bp-text-22); font-weight:800; font-family:'Space Grotesk',system-ui,sans-serif; }
   .sum-lbl  { font-size:var(--bp-text-2xs); color:var(--bp-text3); text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
@@ -126,7 +137,8 @@
 
   /* ── T4.2: Karşılaştır paneli (eski /sektor-karsilastir, sektor_karsilastir.html'den taşındı) ── */
   .cmp-intro { color:var(--bp-text3); font-size:var(--bp-text-base); margin-bottom:16px; }
-  .selector-wrap { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:16px 18px; margin-bottom:24px; }
+  .selector-wrap { padding:16px 18px; margin-bottom:24px;
+                   --da-glow-rgb:var(--bp-art-violet-rgb); --da-glow-a:.13; --da-glow-size:220px; --da-glow-y:-120%; --da-glow-x:-6%; }
   .selector-label { font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-sm); font-weight:700; color:var(--bp-text3); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
   .sector-chips { display:flex; flex-wrap:wrap; gap:8px; }
   .chip {
@@ -151,7 +163,7 @@
   .compare-btn:hover { background:rgba(var(--bp-brand-rgb),0.2); }
   .compare-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
-  .cmp-skeleton { background:linear-gradient(90deg,var(--bp-surface2) 25%,#232124 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:cmpShimmer 1.4s infinite; border-radius:var(--bp-radius-md); }
+  .cmp-skeleton { background:linear-gradient(90deg,var(--bp-surface2) 25%,var(--bp-surface3) 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:cmpShimmer 1.4s infinite; border-radius:var(--bp-radius-md); }
   @keyframes cmpShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
   .compare-grid { display:grid; gap:16px; }
@@ -159,7 +171,7 @@
   .compare-grid.cols-3 { grid-template-columns:1fr 1fr 1fr; }
   @media (max-width:640px) { .compare-grid.cols-2, .compare-grid.cols-3 { grid-template-columns:1fr; } }
 
-  .sec-col { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-xl); overflow:hidden; }
+  .sec-col { --da-glow-rgb:var(--bp-art-violet-rgb); --da-glow-a:.16; --da-glow-size:200px; --da-glow-y:-42%; --da-glow-x:-8%; }
   .sec-col-header { padding:16px 18px 14px; border-bottom:1px solid var(--bp-border); }
   .sec-col-name { font-family:'Space Grotesk',system-ui,sans-serif; font-size:var(--bp-text-17); font-weight:700; margin:0 0 6px; }
   .col-accent-0 .sec-col-name { color:var(--bp-al); }
@@ -170,8 +182,8 @@
   .score-bar-label { display:flex; justify-content:space-between; font-size:var(--bp-text-xs); color:var(--bp-text3); margin-bottom:5px; font-family:'Space Grotesk',sans-serif; }
   .score-bar-track { height:6px; background:var(--bp-border); border-radius:var(--bp-radius-sm); overflow:hidden; position:relative; }
   .score-bar-fill { height:100%; border-radius:var(--bp-radius-sm); transition:width .4s ease; }
-  .score-positive { background:linear-gradient(90deg,var(--bp-al),#00c47a); }
-  .score-negative { background:linear-gradient(90deg,var(--bp-sat),#d03d36); }
+  .score-positive { background:linear-gradient(90deg,var(--bp-al),rgba(var(--bp-al-rgb),.55)); }
+  .score-negative { background:linear-gradient(90deg,var(--bp-sat),rgba(var(--bp-sat-rgb),.55)); }
   .score-neutral  { background:var(--bp-border2); }
 
   /* .sec-stats/.stat-pill isı haritası panelinde farklı bir düzen için zaten kullanılıyor (satır ~64-65) — çakışmayı önlemek için karşılaştır paneli kendi cmp- önekiyle isimlendirildi */
@@ -251,56 +263,20 @@
      --bp-surface2 opaklığı "kart içinde kart" hiyerarşisini taşıyor, hisse.css'te
      #fundAnalyst için verilen kararla aynı. ══ */
 
-  /* 1 ── Özet çipleri (Güçlü Trend / Trend Bozuldu / Yatay / Toplam):
-         düz yüzey → degrade + radius-20. Mevcut violet radial ::before parıltısı
-         zaten Data-Art'tandı, korunuyor. */
-  .sum-chip {
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border-radius: var(--bp-radius-20);
-  }
-
-  /* 2 ── Karşılaştır sekmesi seçici kutusu: düz kutu → degrade + radius-20 +
-         violet radial glow (ısı haritası kartlarıyla aynı aksan). */
-  .selector-wrap {
-    position: relative; overflow: hidden;
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border-radius: var(--bp-radius-20);
-  }
-  .selector-wrap::before {
-    content: ''; position: absolute; top: -120%; right: -6%;
-    width: 220px; height: 220px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.13), transparent 70%);
-    pointer-events: none;
-  }
-  .selector-wrap > * { position: relative; }
-
-  /* 3 ── Karşılaştırma sütunları: düz yüzey → degrade gövde; başlık bloğu
-         .chart-header reçetesiyle gerçek bir BAŞLIK BANDI oluyor (degrade şerit +
-         radial glow). Glow rengi sütunun kendi aksan rengini (yeşil/altın/kırmızı)
-         izliyor — üç sütunu birbirinden ayıran mevcut semantik korunup
-         güçlendiriliyor, yeni renk icat edilmiyor. */
-  .sec-col {
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border-radius: var(--bp-radius-20);
-  }
+  /* 1-3 ── (20.09 ikinci tur, CPO) Özet çipleri / seçici kutusu / karşılaştırma
+     sütunları burada AYNI panel reçetesini (surface→surface2 degrade + kenar +
+     radius-20 + violet radial ::before) ÜÇ KEZ elden kopyalamış hâldeydi —
+     `.da-panel`'i doğuran 6392529 taramasının (3 dosya / 8 kopya) kaçırdığı
+     4. dosya burasıydı, çünkü tarama `.da-*` SINIFI arıyordu, bu dosyada ise
+     reçete sınıfsız, kendi ad alanında yeniden yazılmıştı.
+     → Reçete artık tek kaynaktan (`data-art.css`, `.da-panel`); yukarıdaki
+     tanımlarda YALNIZCA bu sayfanın deltası (padding/glow konumu) kaldı.
+     Başlık bandı (.sec-col-header) kendi parıltısını BIRAKTI: panel zaten tek
+     bir parıltı taşıyor, iki üst üste binen radial gereksiz ışık lekesi yapıyordu.
+     Degrade şerit (bant hissi) korundu. */
   .sec-col-header {
-    position: relative; overflow: hidden;
     background: linear-gradient(135deg, var(--bp-surface2) 0%, var(--bp-surface) 72%);
   }
-  .sec-col-header::before {
-    content: ''; position: absolute; top: -140%; right: -8%;
-    width: 200px; height: 200px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.16), transparent 70%);
-    pointer-events: none;
-  }
-  .sec-col-header > * { position: relative; }
-  /* NOT (20.09, ilk denemeden donuldu): glow once sutunun kendi aksan rengini
-     (yesil/altin/kirmizi) izliyordu. Canlida bakinca yanlis oldugu goruldu —
-     bu sayfanin KENDI lejandi yesil = Guclu Trend, kirmizi = Trend Bozuldu
-     diyor; 3. slota dusen sektorun tum baslik bandini kirmiziya boyamak
-     "bu sektor kotu" diye okunuyor, oysa renk sadece secim sirasi.
-     Glow notr violete sabitlendi (Data-Art aksani, sinyal anlami yok).
-     Sutun<->cip baglantisi ad rengi + cip renginden zaten kuruluyor. */
 
   /* 4 ── Mikro-etiket tipografisi tek kuralla Data-Art'a (Space Grotesk zaten
          vardı; eksik olan geniş tracking'di — 0.4-0.5px ≈ .035em'den .12em'e).
