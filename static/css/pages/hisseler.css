@@ -21,8 +21,6 @@
     top: 0;
     z-index:var(--bp-z-dropdown);
   }
-  .page-title { font-size: var(--bp-text-2xl); font-weight: 700; color: var(--bp-text); }
-
   .container { max-width: var(--bp-container-860); margin: 0 auto; padding: 36px 24px 48px; }
 
 
@@ -38,22 +36,26 @@
 
   @media (max-width: 600px) {
     .container { padding: 16px 16px 32px; }
-    .hero { padding: 20px 16px; }
-    .hero-title { font-size: var(--bp-text-2xl); }
   }
 
 
+  /* 20.09 Data-Art: hero kendi el-yapimi degrade+kenar recetesiyle duruyordu
+     (cyan->yesil tint, ana sayfanin hicbir yuzeyine benzemiyordu). Artik
+     paylasilan `.da-panel` recetesi; burada YALNIZ delta var. Parilti sayfanin
+     kendi aksani olan camgobegine cekildi (--da-glow-rgb), sol serit de ayni. */
   .hh-hero {
-    background: linear-gradient(135deg, rgba(var(--bp-accent-cyan-rgb),.08) 0%, rgba(var(--bp-al-rgb),.05) 100%);
-    border: 1px solid rgba(var(--bp-accent-cyan-rgb),.2);
-    border-radius:var(--bp-radius-xl);
-    padding: 24px 26px 20px;
+    --da-accent: var(--bp-accent-cyan);
+    --da-glow-rgb: var(--bp-accent-cyan-rgb);
+    --da-glow-a: .13;
+    --da-glow-size: 320px;
+    padding: 26px 28px 22px;
     margin: 14px 0 18px;
   }
-  .hh-hero h1 { font-size: var(--bp-text-3xl); font-weight: 800; color: var(--bp-text); margin-bottom: 6px; letter-spacing: -0.4px; }
-  .hh-hero p  { font-size: var(--bp-text-md); color: var(--bp-text2); line-height: 1.55; margin: 0; max-width: 780px; }
-  .hh-hero .hh-stats { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
-  .hh-hero .hh-stat  { background: var(--bp-surface); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding: 8px 12px; font-size: var(--bp-text-sm); }
+  .hh-hero h1 { font-size: var(--bp-text-3xl); font-weight: 800; color: var(--bp-text); margin-bottom: 6px; letter-spacing: -0.025em; }
+  .hh-hero p  { font-size: var(--bp-text-md); color: var(--bp-text2); line-height: 1.6; margin: 0; max-width: 780px; }
+  .hh-hero p strong { color: var(--bp-text); font-weight: 700; }
+  .hh-hero .hh-stats { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+  .hh-hero .hh-stat  { background: var(--bp-surface2); border: 1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding: 8px 14px; font-size: var(--bp-text-sm); }
   .hh-hero .hh-stat strong { color: var(--bp-accent-cyan); font-size: var(--bp-text-lg); font-weight: 800; display: block; }
   .hh-hero .hh-stat span { color: var(--bp-text3); font-size: var(--bp-text-xs); }
 
@@ -85,13 +87,14 @@
 
   .hh-section { padding: 16px 0 8px; scroll-margin-top: 68px; }
   .hh-section h2 {
-    font-size: var(--bp-text-15); font-weight: 700; color: var(--bp-text);
+    font-size: var(--bp-text-lg); font-weight: 800; color: var(--bp-text);
+    letter-spacing: -0.02em;
     margin: 0 0 12px; display: flex; align-items: center; gap: 10px;
   }
   .hh-section h2 .hh-count {
-    font-size: var(--bp-text-xs); font-weight: 600; color: var(--bp-text3);
-    background: var(--bp-border-subtle); border: 1px solid var(--bp-border);
-    border-radius:var(--bp-radius-lg); padding: 2px 8px;
+    font-size: var(--bp-text-xs); font-weight: 700; color: var(--bp-text3);
+    background: var(--bp-surface2); border: 1px solid var(--bp-border2);
+    border-radius:var(--bp-radius-pill); padding: 2px 9px;
   }
   .hh-grid {
     display: grid;

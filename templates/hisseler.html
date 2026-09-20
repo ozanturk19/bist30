@@ -1,23 +1,23 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Tüm BIST Hisseleri — {{ total_count }} Şirket Listesi | BorsaPusula</title>
-<meta name="description" content="Borsa İstanbul'da işlem gören {{ total_count }} hissenin tam listesi. Sektörlere göre gruplandırılmış, alfabetik erişimli. Her hisse için trend sinyali ve grafik.">
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST Hisse Listesi — {{ total_count }} Şirket (BIST100 + ek hisseler) | BorsaPusula</title>
+<meta name="description" content="BorsaPusula'nın takip ettiği {{ total_count }} BIST hissesinin (BIST100 + ek hisseler) tam listesi. Sektörlere göre gruplandırılmış, alfabetik erişimli. Her hisse için trend sinyali ve grafik.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/hisseler">
-<meta property="og:title"       content="Tüm BIST Hisseleri — {{ total_count }} Şirket Listesi">
-<meta property="og:description" content="{{ total_count }} BIST hissesinin tam listesi. Sektörel + alfabetik. Günlük teknik analiz ve trend sinyali.">
+<meta property="og:title"       content="BIST Hisse Listesi — {{ total_count }} Şirket (BIST100 + ek hisseler)">
+<meta property="og:description" content="{{ total_count }} BIST hissesi (BIST100 + ek hisseler) — sektörel + alfabetik liste. Günlük teknik analiz ve trend sinyali.">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:url"         content="https://borsapusula.com/hisseler">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="Tüm BIST Hisseleri — {{ total_count }} Şirket Listesi">
-<meta name="twitter:description" content="{{ total_count }} BIST hissesinin tam listesi. Sektörel + alfabetik. Günlük teknik analiz ve trend sinyali.">
+<meta name="twitter:title"       content="BIST Hisse Listesi — {{ total_count }} Şirket (BIST100 + ek hisseler)">
+<meta name="twitter:description" content="{{ total_count }} BIST hissesi (BIST100 + ek hisseler) — sektörel + alfabetik liste. Günlük teknik analiz ve trend sinyali.">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
   {"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://borsapusula.com/"},
-  {"@type":"ListItem","position":2,"name":"Tüm BIST Hisseleri","item":"https://borsapusula.com/hisseler"}
+  {"@type":"ListItem","position":2,"name":"BIST Hisse Listesi","item":"https://borsapusula.com/hisseler"}
 ]}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,29 +25,31 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/pages/hisseler.css?v=405ff134">
+<link rel="stylesheet" href="/static/css/data-art.css?v=67e915a8">
+<link rel="stylesheet" href="/static/css/pages/hisseler.css?v=d770b51e">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 
 <!-- /hisseler — özel stil -->
 
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
-{% with hdr_title = 'Tüm BIST Hisseleri', hdr_self = '/hisseler', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+{% with hdr_title = 'BIST Hisse Listesi', hdr_self = '/hisseler', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
 <main id="main-content" class="container" tabindex="-1">
 
 {% include '_stale_banner.html' %}
 
-<section class="hh-hero">
-  <h1>Tüm BIST Hisseleri</h1>
+<section class="hh-hero da-panel da-panel--accent">
+  <div class="da-eyebrow">Hisse Evreni</div>
+  <h1 class="da-display">BIST Hisse Listesi</h1>
   <p>
-    Borsa İstanbul'da işlem gören <strong>{{ total_count }} hissenin</strong> tam listesi.
-    Sektörlere göre gruplandırılmış, alfabetik erişimli. Her hisse için günlük
-    teknik analiz, trend sinyali, fiyat grafiği, hacim verisi, KAP haberleri ve
-    şirket raporu mevcut.
+    BorsaPusula'nın takip ettiği <strong>{{ total_count }} BIST hissesi</strong>
+    (BIST100 + ek hisseler) — sektörlere göre gruplandırılmış, alfabetik erişimli.
+    Her hisse için günlük teknik analiz, trend sinyali, fiyat grafiği, hacim verisi,
+    KAP haberleri ve şirket raporu mevcut.
   </p>
   <div class="hh-stats">
-    <div class="hh-stat"><strong>{{ total_count }}</strong><span>Toplam hisse</span></div>
-    <div class="hh-stat"><strong>{{ sectors_sorted|length }}</strong><span>Sektör</span></div>
+    <div class="hh-stat"><strong class="da-num">{{ total_count }}</strong><span>Takip edilen hisse</span></div>
+    <div class="hh-stat"><strong class="da-num">{{ sectors_sorted|length }}</strong><span>Sektör</span></div>
     <div class="hh-stat"><strong>Günlük</strong><span>Sinyal güncelleme</span></div>
   </div>
 </section>
@@ -64,11 +66,11 @@
 <div id="hhViewSector" role="tabpanel" aria-labelledby="tabSector">
   {% for sector in sectors_sorted %}
   <section class="hh-section">
-    <h2>{{ sector }} <span class="hh-count">{{ by_sector[sector]|length }}</span></h2>
+    <h2 class="da-display">{{ sector }} <span class="hh-count da-num">{{ by_sector[sector]|length }}</span></h2>
     <div class="hh-grid">
       {% for ticker, name in by_sector[sector] %}
       <a class="hh-card" href="/hisse/{{ ticker }}" title="{{ ticker }} — {{ name }} teknik analiz">
-        <div class="hh-tk">{{ ticker }}</div>
+        <div class="hh-tk da-num">{{ ticker }}</div>
         <div class="hh-name">{{ name or ticker }}</div>
       </a>
       {% endfor %}
@@ -80,11 +82,11 @@
 <div id="hhViewAlpha" role="tabpanel" aria-labelledby="tabAlpha" style="display:none">
   {% for L in letters_sorted %}
   <section class="hh-section" id="letter-{{ L }}">
-    <h2>{{ L }} <span class="hh-count">{{ by_letter[L]|length }}</span></h2>
+    <h2 class="da-display">{{ L }} <span class="hh-count da-num">{{ by_letter[L]|length }}</span></h2>
     <div class="hh-grid">
       {% for ticker, name in by_letter[L] %}
       <a class="hh-card" href="/hisse/{{ ticker }}" title="{{ ticker }} — {{ name }} teknik analiz">
-        <div class="hh-tk">{{ ticker }}</div>
+        <div class="hh-tk da-num">{{ ticker }}</div>
         <div class="hh-name">{{ name or ticker }}</div>
       </a>
       {% endfor %}
@@ -119,6 +121,23 @@ function hhSetMode(mode) {
 // tuşuna basınca URL hash'i boşalıyor ama görünüm Alfabetik'te takılı kalıyordu.
 function hhApplyHashMode() {
   hhSetMode((location.hash && (location.hash.indexOf('#letter-') === 0 || location.hash === '#alpha')) ? 'alpha' : 'sector');
+  hhScrollToHashTarget();
+}
+/* 20.09 bug-hunt: #letter-X DERIN BAGLANTISI hic calismiyordu. Alfabetik gorunum
+   sunucudan `style="display:none"` ile geliyor; tarayici parça-kimliği (fragment)
+   navigasyonunu DOM ayrıştırılırken yapar ve GIZLI bir ögeye kaydırma yapamaz.
+   Sayfanın altındaki bu script sonra modu 'alpha'ya çeviriyor ama KAYDIRMAYI
+   kimse tekrar denemiyordu. Canlı ölçüm (/hisseler#letter-K): scrollY=0, hedef
+   11233px aşağıda — yani paylaşılan/yer-imlenmiş/yeniden-yüklenen her harf linki
+   listenin en başına düşüyordu. Sayfa İÇİNDEN tıklama çalışıyordu (onclick önce
+   görünür yapıyor, bağlantının varsayılan davranışı sonra kaydırıyor), bu yüzden
+   hata elle test edilirken görünmüyordu.
+   scrollIntoView() CSS'teki .hh-section{scroll-margin-top} degerine saygi duyar;
+   tarayici zaten dogru yere goturduyse ikinci cagri gorunur bir fark yaratmaz. */
+function hhScrollToHashTarget() {
+  if (!location.hash || location.hash.indexOf('#letter-') !== 0) return;
+  var el = document.getElementById(location.hash.slice(1));
+  if (el) el.scrollIntoView();
 }
 hhApplyHashMode();
 window.addEventListener('hashchange', hhApplyHashMode);
@@ -130,8 +149,8 @@ bpStartDataQualityPolling();
 <!-- JSON-LD: ItemList -->
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"CollectionPage",
- "name":"Tüm BIST Hisseleri",
- "description":"Borsa İstanbul'da işlem gören {{ total_count }} hissenin (BIST100 + ek hisseler) tam listesi.",
+ "name":"BIST Hisse Listesi",
+ "description":"BorsaPusula'nın takip ettiği {{ total_count }} BIST hissesinin (BIST100 + ek hisseler) tam listesi.",
  "url":"https://borsapusula.com/hisseler",
  "publisher":{"@type":"Organization","name":"BorsaPusula","url":"https://borsapusula.com"}}
 </script>
