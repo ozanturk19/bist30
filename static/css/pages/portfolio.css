@@ -210,3 +210,105 @@
     pointer-events: none;
   }
   .sum-card > *, .add-bar > * { position: relative; }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     20.09 — Data-Art unifikasyonu (index/hisse/tarama/sektor-harita ile ayni
+     recete). 09.09'da bu sayfaya SADECE .sum-card/.add-bar kose parıltısı
+     eklenmisti; yuzeylerin kendisi hala duz --bp-surface + radius-lg + jenerik
+     uppercase mikro-etiket diliydi, yani sayfa "konusmuyor"du.
+     Yogun pozisyon tablosuna (satir/hucre) yine DOKUNULMADI — scanability
+     onceligi, tarama.html'deki ayni kararla tutarli.
+     ══════════════════════════════════════════════════════════════════════════ */
+
+  /* 1 ── Yuzeyler: duz zemin -> degrade + radius-20 */
+  .sum-card, .add-bar {
+    background: linear-gradient(135deg, var(--bp-surface2) 0%, var(--bp-surface) 72%);
+    border-radius: var(--bp-radius-20);
+  }
+  .sum-card::before, .add-bar::before {
+    top: -70%; width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb), .14), transparent 70%);
+  }
+
+  /* 2 ── Pozisyon paneli baslik bandi: JSON/CSV/Ice Aktar/Temizle/Cloud Sync
+         araclari sayfanin ortasinda, hangi bolgeye ait olduklari belirsiz
+         sekilde yuzuyordu (ozet kutulariyla ekleme formu ARASINDA) — artik
+         tablonun kendi baslik seridinin icindeler ve serit tabloyla TEK panel
+         olarak birlesiyor (tarama.html .result-header + .table-wrap deseni).
+         Gorsel-gizli <h2>Pozisyonlarım</h2> de burada gorunur hale geldi;
+         ekleme formu kendi (sr-only) "Hisse Ekle" basligini aldi. */
+  .pf-panel-header {
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+    padding: 12px 18px;
+    background: linear-gradient(135deg, var(--bp-surface2) 0%, var(--bp-surface) 72%);
+    border: 1px solid var(--bp-border); border-bottom: none;
+    border-radius: var(--bp-radius-20) var(--bp-radius-20) 0 0;
+  }
+  .pf-panel-header::before {
+    content: ''; position: absolute; top: -140%; right: -4%;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb), .14), transparent 70%);
+    pointer-events: none;
+  }
+  .pf-panel-header > * { position: relative; }
+  .pf-panel-title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: var(--bp-text-15); font-weight: 700;
+    color: var(--bp-text); letter-spacing: -0.01em;
+  }
+  .pf-panel-header .pf-actions { margin-bottom: 0; flex: 1; justify-content: flex-end; }
+  .pf-table {
+    border-radius: 0 0 var(--bp-radius-20) var(--bp-radius-20);
+    border-top: none;
+  }
+
+  /* 3 ── Mikro-etiket tipografisi: Space Grotesk + genis tracking.
+         thead bilincli olarak .08em'de tutuldu — 12 kolonlu tablo nowrap,
+         daha genis tracking masaustunde yatay tasma riski yaratir (tarama.css
+         ayni karar). Renk semantigi DEGISMIYOR. */
+  .sum-lbl, .add-lbl, .pf-metric-label {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: .12em;
+  }
+  thead th {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: .08em;
+    background: linear-gradient(180deg, var(--bp-surface2) 0%, var(--bp-surface) 100%);
+  }
+  /* Sayfanin kahramani rakamlar: ozet kutularindaki degerler hizalansin diye
+     tabular-nums (kolonlar arasi zipzip oynama olmasin). */
+  .sum-num, .sum-pct {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 4 ── GERCEK BULGU (canli olcum, 20.09): .pf-mcard ile onu saran .pf-table
+         IKISI DE background:var(--bp-surface) idi — olculdu, ikisi de
+         rgb(20,20,22) — yani mobilde kartlar zeminleriyle AYNI renkteydi ve
+         sadece 1px kenarlikla ayrisiyordu ("kart" hissi yok). <900px'te
+         sarmalayici seffaflasiyor (o kirilimda #pfTable zaten gizli, sadece
+         kart tasiyor), kartlar sayfa zemininde gercekten yuzuyor.
+         tarama.html'de bulunan ayni hatanin bu sayfadaki esi. */
+  .pf-mcard {
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+    border-radius: var(--bp-radius-20);
+  }
+  @media (max-width: 899px) {
+    .pf-table {
+      background: transparent; border: none; border-radius: 0;
+    }
+    .pf-panel-header {
+      border-bottom: 1px solid var(--bp-border);
+      border-radius: var(--bp-radius-16);
+      margin-bottom: 10px;
+    }
+    /* sarmalayici seffaflasinca bos-durum mesaji zeminsiz kalirdi; kendi
+       yuzeyini aliyor (kartlarla ayni recete). */
+    .empty-msg {
+      background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+      border: 1px solid var(--bp-border); border-radius: var(--bp-radius-20);
+      padding: 40px 20px;
+    }
+  }
