@@ -202,20 +202,6 @@ function _naForSat(tip) {
   return `<span class="muted" style="font-size:var(--bp-text-xs)" data-tip="${tip}" tabindex="0">—</span>`;
 }
 
-// DEV1/CPO-1674: /api/stocks/compare market_cap artik {value, currency} donuyor
-// (her zaman TRY, ama frontend'in eski bicimli-string varsayimi kirilmasin diye
-// burada formatlaniyor — hisse.html'deki _fmtMoneyObj ile ayni olcek kurallari).
-function _fmtMcap(m) {
-  if (!m || m.value == null) return null;
-  const sym = m.currency === 'TRY' ? '₺' : (' ' + (m.currency || ''));
-  const v = m.value, av = Math.abs(v), sign = v < 0 ? '-' : '';
-  const dec2 = n => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
-  if (av >= 1e12) return sign + dec2(av/1e12) + ' T' + sym;
-  if (av >= 1e9)  return sign + dec2(av/1e9) + ' Mrd' + sym;
-  if (av >= 1e6)  return sign + dec2(av/1e6) + ' Mn' + sym;
-  return sign + dec2(av) + ' ' + sym;
-}
-
 function renderCell(key, s) {
   if (!s || !s.found) return '<span class="muted" style="font-size:20px">—</span>';
   const v = s[key];
@@ -247,7 +233,7 @@ function renderCell(key, s) {
       return `<span class="mono" style="font-weight:700;color:var(${_bandVar})">${v}<small style="font-weight:400;color:var(--bp-text3)"> / 100</small></span>`;
     }
     // ── Temel analiz ──
-    case 'market_cap':    { const _mc = _fmtMcap(v); return _mc ? `<span class="mono" style="font-size:var(--bp-text-base)">${_mc}</span>` : '<span class="muted">—</span>'; }
+    case 'market_cap':    return v ? `<span class="mono" style="font-size:var(--bp-text-base)">${v}</span>` : '<span class="muted">—</span>';
     case 'pe_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>';
     case 'pb_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(2).replace('.', ',')}</span>` : '<span class="muted">—</span>';
     case 'eps':           { if (v == null) return '<span class="muted">—</span>'; const n = parseFloat(v), cl = n < 0 ? 'dn' : ''; return `<span class="mono ${cl}">${n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>`; }
