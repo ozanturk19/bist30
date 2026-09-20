@@ -105,9 +105,12 @@
     display: flex; justify-content: center; gap: 12px;
     margin-top: 24px;
   }
+  /* 20.09: zemin --bp-al idi. Site genelinde --bp-al SINYAL isaretidir
+     (nokta/bar/segment, 6 kullanim); buton zemini olarak yalniz bu sayfa ve
+     /unsubscribe sapiyordu -- kanonik CTA zemini --bp-brand (14 emsal). */
   .btn {
     display: inline-flex; align-items: center; gap: 7px;
-    background: var(--bp-al);
+    background: var(--bp-brand);
     color: var(--bp-bg);
     border: none;
     padding: 12px 30px;
@@ -118,11 +121,11 @@
     cursor: pointer;
     text-decoration: none;
     transform: rotate(-1deg);
-    box-shadow: 0 6px 18px rgba(var(--bp-al-rgb),.20);
+    box-shadow: 0 6px 18px rgba(var(--bp-brand-rgb),.20);
     transition: transform var(--bp-dur-base) var(--bp-ease-standard),
                 box-shadow var(--bp-dur-base) var(--bp-ease-standard);
   }
-  .btn:hover { transform: rotate(0deg) translateY(-1px); box-shadow: 0 8px 22px rgba(var(--bp-al-rgb),.28); }
+  .btn:hover { transform: rotate(0deg) translateY(-1px); box-shadow: 0 8px 22px rgba(var(--bp-brand-rgb),.28); }
   .btn:active { transform: scale(0.97); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: rotate(0deg); box-shadow: none; }
   .btn-secondary {

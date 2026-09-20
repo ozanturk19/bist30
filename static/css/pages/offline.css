@@ -1,35 +1,67 @@
-/* ==== extracted from templates/offline.html (T2.5) ==== */
+/* ==== /offline — PWA çevrimdışı yedeği ====
+   20.09.2026 Data-Art turu. Bu sayfanın TEK kısıtı: ağ YOKKEN çizilir.
+   Bu yüzden yüklediği her dosya (tokens.css, data-art.css, bu dosya) ayrıca
+   static/sw.js'in STATIC precache listesinde DE bulunmak zorundadır — aksi
+   hâlde tam da işe yarayacağı anda stilsiz açılır (bu turun 1. bulgusu).
+   Panel reçetesi elle kopyalanmaz: .da-panel data-art.css'ten gelir. */
 
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{
-      min-height:100dvh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:1.5rem;
-      padding:2rem;
-      text-align:center;
-    }
-    .icon{font-size:3.5rem;line-height:1}
-    h1{font-size:1.4rem;font-weight:700;letter-spacing:-.02em}
-    p{font-size:.95rem;color:var(--bp-text3);max-width:320px;line-height:1.6}
-    button{
-      margin-top:.5rem;
-      padding:.65rem 1.6rem;
-      background:var(--bp-brand);
-      color:var(--bp-bg);
-      border:none;
-      border-radius:var(--bp-radius-md);
-      font-size:.9rem;
-      font-weight:600;
-      cursor:pointer;
-      transition:background .15s;
-    }
-    button:hover{background:var(--bp-accent-cyan)}
-    .signal-note{
-      font-size:.8rem;
-      color:var(--bp-text3);
-      max-width:280px;
-    }
-  
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:calc(2rem + env(safe-area-inset-top)) 1.25rem calc(2rem + env(safe-area-inset-bottom));
+}
+.off-card{
+  --da-glow-rgb:var(--bp-accent-cyan-rgb);
+  --da-glow-a:.13;
+  width:100%;
+  max-width:420px;
+  padding:34px 30px 30px;
+  text-align:center;
+}
+/* Data-Art imzası: marka satırı + nabız noktası (bağlantı yokken "sönük" nabız) */
+.off-brand{
+  display:inline-flex;align-items:center;gap:9px;
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  font-size:var(--bp-text-xs);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--bp-text3);margin-bottom:18px;
+}
+.off-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--bp-text3);
+  animation:offPulse 2.4s ease-in-out infinite;
+}
+@keyframes offPulse{0%,100%{opacity:.85}50%{opacity:.18}}
+@media (prefers-reduced-motion:reduce){.off-dot{animation:none}}
+
+.off-icon{font-size:var(--bp-text-40);line-height:1;display:block;margin-bottom:12px}
+.off-card h1{
+  font-weight:800;letter-spacing:-.025em;
+  font-size:clamp(1.35rem,4.5vw,1.65rem);line-height:1.2;
+  color:var(--bp-text);margin-bottom:10px;
+}
+.off-card p{
+  font-size:var(--bp-text-sm);color:var(--bp-text3);
+  line-height:1.65;max-width:34ch;margin:0 auto;
+}
+.off-retry{
+  margin-top:22px;
+  padding:11px 26px;
+  background:var(--bp-brand);
+  color:var(--bp-bg);
+  border:none;
+  border-radius:var(--bp-radius-md);
+  font-family:inherit;
+  font-size:var(--bp-text-sm);
+  font-weight:700;
+  cursor:pointer;
+  transition:opacity var(--bp-dur-base,.15s) var(--bp-ease-standard,ease);
+}
+.off-retry:hover{opacity:.9}
+.off-card .signal-note{
+  margin-top:16px;
+  font-size:var(--bp-text-xs);
+  color:var(--bp-text3);
+}

@@ -1,27 +1,32 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% set head_analytics = false %}{% block head %}<title>{{ 'Abonelik İptal Edildi' if success else ('Aboneliği İptal Et' if confirm else 'Geçersiz Bağlantı') }} | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% set head_analytics = false %}{% block head %}<title>{{ 'Abonelik İptal Edildi' if success else ('Aboneliği İptal Et' if confirm else 'Bağlantı Tanınmadı') }} | BorsaPusula</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/pages/unsubscribe.css?v=f71d66fc">
+<link rel="stylesheet" href="/static/css/data-art.css?v=bd5026af">
+<link rel="stylesheet" href="/static/css/pages/unsubscribe.css?v=2007b4df">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <main id="main-content" tabindex="-1">
-<div class="box">
-  <div class="box-icon" aria-hidden="true">{{ '✅' if success else ('❓' if confirm else '⚠️') }}</div>
-  <h1>{{ 'Abonelik İptal Edildi' if success else ('Aboneliğinizi İptal Etmek İstediğinize Emin Misiniz?' if confirm else 'Geçersiz veya Süresi Dolmuş Bağlantı') }}</h1>
+<div class="box da-panel">
+  <span class="box-icon" aria-hidden="true">{{ '✅' if success else ('❓' if confirm else '⚠️') }}</span>
+  <h1>{{ 'Abonelik İptal Edildi' if success else ('Aboneliğinizi İptal Etmek İstediğinize Emin Misiniz?' if confirm else 'Bu Bağlantı Tanınmadı') }}</h1>
   {% if success %}
-  <p><strong>{{ email }}</strong> adresi için bildirimler durduruldu ve kayıtlı verileriniz sistemden tamamen silindi.</p>
+  <p><strong>{{ email }}</strong> adresine ait abonelik kaydı — e-posta adresiniz, bildirim tercihleriniz ve takip listeniz — sunucudan tamamen silindi. Bu adrese bir daha bildirim gönderilmeyecek.</p>
   <a href="/" class="btn">Ana Sayfaya Dön</a>
   {% elif confirm %}
-  <p><strong>{{ email }}</strong> adresi için tüm bildirimler durdurulacak ve kayıtlı verileriniz sistemden tamamen silinecek. Bu işlem geri alınamaz.</p>
-  <form method="post" action="/unsubscribe/{{ token }}" style="display:flex;flex-direction:column;gap:10px;align-items:center">
+  <p><strong>{{ email }}</strong> adresine ait abonelik kaydı — e-posta adresiniz, bildirim tercihleriniz ve takip listeniz — sunucudan tamamen silinecek. Bu işlem geri alınamaz.</p>
+  <form method="post" action="/unsubscribe/{{ token }}" class="unsub-form">
     <button type="submit" class="btn">Evet, aboneliği iptal et</button>
     <a href="/" class="btn btn-secondary">Vazgeç, ana sayfaya dön</a>
   </form>
   {% else %}
-  <p>Bu abonelik iptal bağlantısı artık geçerli değil.</p>
-  <a href="/" class="btn">Ana Sayfaya Dön</a>
+  <p>Bu iptal bağlantısı kayıtlarımızla eşleşmedi. En olası iki neden: aboneliğiniz <strong>zaten iptal edilmiş</strong> olabilir ya da bağlantı e-posta istemcinizde bölünmüş olabilir.</p>
+  <p>Bildirim almaya devam ediyorsanız bize yazın, aboneliğinizi biz kapatalım.</p>
+  <div class="unsub-form">
+    <a href="/iletisim" class="btn">Bize Yazın</a>
+    <a href="/" class="btn btn-secondary">Ana sayfaya dön</a>
+  </div>
   {% endif %}
-  <p style="margin:16px 0 0;font-size:var(--bp-text-xs)"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir · <a href="/yasal" style="color:var(--bp-text3);text-decoration:underline">Yasal Uyarı</a></p>
+  <p class="unsub-legal"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir · <a href="/yasal">Yasal Uyarı</a> · <a href="/gizlilik">Gizlilik &amp; KVKK</a></p>
 </div>
 </main>
 {% endblock %}

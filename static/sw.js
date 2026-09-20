@@ -1,5 +1,5 @@
 /* BorsaPusula Service Worker v3.1 — offline fallback + PWA optimize */
-const CACHE = 'borsapusula-v28';
+const CACHE = 'borsapusula-v29';
 
 /* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç) */
 const STATIC = [
@@ -7,11 +7,23 @@ const STATIC = [
   '/static/manifest.json',
   '/static/icon-192.png',
   '/static/icon-512.png',
-  '/static/css/tokens.css?v=1eabd653',
+  '/static/favicon.svg?v=6ef6d5a3',
+  '/static/css/tokens.css?v=a9ea1d38',
   '/static/css/shared.css?v=5761378a',
-  '/static/css/pages/offline.css?v=128de31d',
+  '/static/css/data-art.css?v=bd5026af',
+  '/static/css/pages/offline.css?v=7569dc1f',
   '/offline',
 ];
+
+/* 20.09 BULGU: bu listedeki cache-bust hash'leri templates/offline.html'dekilerle
+   ELLE senkron tutuluyordu ve ikisi birbirinden kopmustu (tokens.css burada
+   ?v=1eabd653, sablonda ?v=a9ea1d38). `caches.match` varsayilan olarak query
+   string'i de ANAHTARIN PARCASI sayar -> cevrimdisi kullanici offline.html'i
+   aliyor ama sayfanin ISTEDIGI iki CSS de cache'te BULUNAMIYOR, fetch de
+   basarisiz oluyordu: sayfa tam da ise yarayacagi anda STILSIZ aciliyordu.
+   Iki katli onlem: (1) hash'ler duzeltildi + CACHE surumu artirildi,
+   (2) asagidaki ignoreSearch YEDEGI ile ileride yeniden kopsa bile en
+   kotusu BAYAT CSS olur, HIC CSS olmaz. */
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -69,7 +81,13 @@ self.addEventListener('fetch', e => {
             caches.open(CACHE).then(c => c.put(e.request, clone));
           }
           return res;
-        }).catch(() => cached);
+        }).catch(() =>
+          /* Ag yok: once tam eslesme (yoksa zaten undefined), sonra hash'i
+             yok sayan yedek. SADECE fetch BASARISIZ olunca devreye girer —
+             cevrimici akista tam-eslesme/ag onceligi degismez, yani yeni
+             hash yayinlandiginda kullanici bayat CSS gormeye devam etmez. */
+          cached || caches.match(e.request, { ignoreSearch: true })
+        );
         return cached || fetchPromise;
       })
     );
