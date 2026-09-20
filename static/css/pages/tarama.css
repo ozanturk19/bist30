@@ -273,10 +273,15 @@
   .result-count strong { color:var(--bp-text); font-size:var(--bp-text-lg); }
 
   /* Sıralama seçici */
+  /* 21.09: bu secici, 8 satir yukaridaki `.filter-group select` ile AYNI filtre
+     cubugunda yan yana duruyor ama appearance:auto + 12px idi — yerli ok +
+     iOS odak-yakinlastirmasi. Ortak receteyi artik `.da-select` veriyor
+     (data-art.css); burada yalniz yuzey/kenarlik ve ok payi kaliyor.
+     `font-size` BILEREK yazilmiyor: .da-select'in 16px'i gecerli olmali. */
   .sort-select {
-    background:var(--surface2); border:1px solid var(--border);
-    color:var(--text2); border-radius:var(--bp-radius); padding:5px 10px; font-size:var(--bp-text-sm);
-    font-family:inherit; outline:none; cursor:pointer;
+    background-color:var(--surface2); border:1px solid var(--border);
+    color:var(--text2); border-radius:var(--bp-radius); padding:5px 28px 5px 10px;
+    outline:none; cursor:pointer;
   }
   /* r122 bug-hunt: outline:none klavye kullanicisi icin gorunmez focus birakiyordu,
      .filter-group select:focus'taki ayni token/desen burada da uygulandi. */

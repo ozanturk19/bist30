@@ -25,9 +25,9 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/data-art.css?v=5c81cbb4">
+<link rel="stylesheet" href="/static/css/data-art.css?v=0856466e">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/tarama.css?v=65175877">
+<link rel="stylesheet" href="/static/css/pages/tarama.css?v=fabb828b">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -115,7 +115,7 @@
     <div class="result-count" id="resultCount" role="status" aria-live="polite"><strong>—</strong> sonuç<span id="inlineSpinner" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><svg width="14" height="14" viewBox="0 0 24 24" style="animation:tarSpin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke="var(--bp-brand)" stroke-width="2.5" fill="none" stroke-dasharray="50 60"/></svg></span></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
-      <select class="sort-select" id="sortSel" onchange="applyFilters()" aria-label="Sıralama">
+      <select class="sort-select da-select" id="sortSel" onchange="applyFilters()" aria-label="Sıralama">
         <option value="signal_strength">Teknik Güç Skoru (Yüksek → Düşük)</option>
         <option value="adx">Trend Gücü / ADX (Güçlü → Zayıf)</option>
         <option value="price">Fiyat (Yüksek → Düşük)</option>
@@ -256,7 +256,7 @@
       <div class="result-count" id="resultCountTemel" role="status" aria-live="polite"><strong>—</strong> sonuç<span id="inlineSpinnerTemel" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><svg width="14" height="14" viewBox="0 0 24 24" style="animation:tarSpin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke="var(--bp-brand)" stroke-width="2.5" fill="none" stroke-dasharray="50 60"/></svg></span></div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
-        <select class="sort-select" id="sortSelTemel" onchange="applyTemelFilters()" aria-label="Sıralama">
+        <select class="sort-select da-select" id="sortSelTemel" onchange="applyTemelFilters()" aria-label="Sıralama">
           <option value="temel_score">Temel Skor (Yüksek → Düşük)</option>
           <option value="borsapusula_score">BorsaPusula Skoru (Yüksek → Düşük)</option>
           <option value="karlilik">Kârlılık (Yüksek → Düşük)</option>

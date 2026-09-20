@@ -82,7 +82,12 @@
     font-size: var(--bp-text-xs); color: var(--bp-text3);
     cursor: pointer; line-height: 1.5;
   }
-  .cf-consent input { margin-top: 3px; flex-shrink: 0; accent-color: var(--bp-brand); }
+  /* kutu stilinin TEK KAYNAGI .da-check (data-art.css, 21.09) — burada yalniz
+     bu formun kendi dikey hizalama delta'si kalir. */
+  .cf-consent input { margin-top: 3px; }
+  /* .cf-input padding kisayolu .da-select'in padding-right'ini eziyor;
+     ok isaretinin uzerine metin binmesin diye select'e ozel pay: */
+  select.cf-input { padding-right: 30px; }
   .cf-consent a { color: var(--bp-accent-cyan); }
   .cf-submit {
     display: inline-flex; align-items: center; gap: 7px;

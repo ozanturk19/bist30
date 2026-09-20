@@ -26,7 +26,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
-<link rel="stylesheet" href="/static/css/data-art.css?v=5c81cbb4">
+<link rel="stylesheet" href="/static/css/data-art.css?v=0856466e">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
 <link rel="stylesheet" href="/static/css/pages/ozet.css?v=2a4e8e23">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -41,10 +41,10 @@
 
 <div style="max-width:1100px;margin:0 auto;padding:14px 24px 0;display:flex;justify-content:flex-end">
   <div style="display:flex;align-items:center;gap:8px">
-    <select id="dateSelector"
+    <select id="dateSelector" class="da-select"
       aria-label="Geçmiş özet tarihi seç"
       data-current="{{ historical_date if historical_date else '' }}"
-      style="background:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text3);padding:6px 10px;border-radius:var(--bp-radius);font-size:var(--bp-text-sm);cursor:pointer"
+      style="background-color:var(--bp-surface2);border:1px solid var(--bp-border);color:var(--bp-text3);padding:9px 28px 9px 11px;border-radius:var(--bp-radius);cursor:pointer"
       onchange="goToDate(this.value)">
       <option value="">📅 Geçmiş Tarih Seç</option>
     </select>
@@ -332,7 +332,7 @@ function goToDate(date) {
         Abone Ol
       </button>
       <label style="display:flex;align-items:flex-start;gap:6px;font-size:var(--bp-text-xs);color:var(--bp-text3);width:100%;cursor:pointer;line-height:1.4">
-        <input type="checkbox" id="ozSubKvkk" required style="margin-top:2px;flex-shrink:0">
+        <input type="checkbox" class="da-check" id="ozSubKvkk" required>
         <span><a href="/gizlilik" target="_blank" class="da-link">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
       </label>
       <span id="ozSubMsg" style="font-size:var(--bp-text-sm)"></span>
