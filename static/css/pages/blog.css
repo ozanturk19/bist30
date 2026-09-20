@@ -41,7 +41,13 @@
 
   .blog-loadmore-wrap { text-align:center; margin-top:24px; }
   .blog-loadmore-btn { background:var(--bp-border-subtle); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); color:var(--bp-text); padding:10px 26px; font-size:var(--bp-text-base); font-weight:600; cursor:pointer; transition:all .15s; font-family:inherit; }
-  .blog-loadmore-btn:hover { background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
+  /* CPO 20.09: bu :hover AYNI dosyadaki .cat-btn:hover ve .blog-card:hover'in aksine
+     hover-yetenegi sorgusu ALTINDA DEGILDI — dokunmatikte butona dokununca marka rengi
+     baska bir yere dokunulana kadar YAPISIYORDU. Mobilde en cok dokunulan buton bu. */
+  @media (hover: hover) and (pointer: fine) {
+    .blog-loadmore-btn:hover { background:var(--bp-brand); border-color:var(--bp-brand); color:var(--bp-bg); }
+  }
+  .blog-loadmore-btn:focus-visible { border-color:var(--bp-brand); }
 
   footer { text-align:center; padding:20px; font-size:var(--bp-text-sm); color:var(--bp-text3); margin-top:32px; }
   footer a { color:var(--bp-text3); text-decoration:none; }

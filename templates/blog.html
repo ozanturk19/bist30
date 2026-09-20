@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=a9ea1d38">
 <link rel="stylesheet" href="/static/css/data-art.css?v=14b3c47a">
 <script src="/static/bp-vocab.js?v=20260915A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/blog.css?v=7d92f99f">
+<link rel="stylesheet" href="/static/css/pages/blog.css?v=4232234f">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker -->
@@ -44,9 +44,17 @@
   </div>
 
   <div class="cat-filters">
-    <button class="cat-btn active" id="catAll" onclick="filterCat('Tümü', this)">Tümü ({{ articles|length }})</button>
+    {# CPO 20.09: kategori adi ONCEDEN onclick="filterCat('{{ cat }}', ...)" ile bir JS
+       string literali icine gomuluyordu. Bugunku 6 kategoride kesme isareti yok, yani
+       canli bir hata degildi; ama kesme isaretli TEK bir kategori adi (or. "Yatirimci'nin
+       Rehberi") autoescape'ten &#39; olarak cikip HTML oznitelik ayristirmasindan sonra
+       tekrar ' olacagi icin literali kapatir ve sayfanin TUM filtre JS'ini kirardi.
+       Deger artik data-cat'te tasiniyor, secim delegasyonla yapiliyor — veri hicbir
+       zaman kod baglamina girmiyor. Ayrica aktif filtre durumu YALNIZCA gorseldi;
+       aria-pressed eklendi (ekran okuyucu hangi kategorinin secili oldugunu goremiyordu). #}
+    <button type="button" class="cat-btn active" id="catAll" data-cat="Tümü" aria-pressed="true">Tümü ({{ articles|length }})</button>
     {% for cat, cnt in cat_counts %}
-    <button class="cat-btn" onclick="filterCat('{{ cat }}', this)">{{ cat }} ({{ cnt }})</button>
+    <button type="button" class="cat-btn" data-cat="{{ cat }}" aria-pressed="false">{{ cat }} ({{ cnt }})</button>
     {% endfor %}
   </div>
 
@@ -88,14 +96,31 @@ let _blogShownCount = BLOG_PAGE_SIZE;
 function filterCat(cat, btn) {
   _activeCat = cat;
   _blogShownCount = BLOG_PAGE_SIZE;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    const on = b === btn;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
   filterBlog();
 }
+document.querySelector('.cat-filters').addEventListener('click', function(e){
+  const btn = e.target.closest('.cat-btn');
+  if (btn) filterCat(btn.dataset.cat, btn);
+});
 
 function loadMoreBlog() {
+  const firstNew = _blogShownCount;   // yuklemeden ONCEKI gorunur kart sayisi
   _blogShownCount += BLOG_PAGE_SIZE;
   filterBlog();
+  /* CPO 20.09: son parti yuklendiginde buton display:none oluyor ve odak onun
+     uzerindeyken kayboluyordu -> tarayici odagi <body>'ye dusuruyor, klavye/ekran
+     okuyucu kullanicisi sayfanin BASINA firlatiliyordu. Odagi ilk yeni karta tasi. */
+  const wrap = document.getElementById('loadMoreWrap');
+  if (wrap.style.display === 'none') {
+    const shown = [...document.querySelectorAll('.blog-card')].filter(c => c.style.display !== 'none');
+    const target = shown[firstNew] || shown[shown.length - 1];
+    if (target) { target.setAttribute('tabindex', '-1'); target.focus({preventScroll: true}); }
+  }
 }
 
 /* DEV2-bughunt-r99: Türkçe büyük İ, düz .toLowerCase() ile 'i'+U+0307 (birleştirici
