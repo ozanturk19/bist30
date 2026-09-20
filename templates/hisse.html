@@ -563,7 +563,7 @@
   <!-- Grafik -->
   <div id="chart-section" data-tab-content="grafik" class="chart-section" role="tabpanel" aria-labelledby="tab-grafik" tabindex="0" style="scroll-margin-top:80px">
     <div class="chart-header">
-      <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Günlük Grafik · 2 Yıl</span>
+      <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Günlük Grafik<span id="chartPeriod"></span></span>
       <span class="chart-label">{{ ticker }}</span>
       <span id="emaLegend" style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-left:auto"></span>
     </div>
@@ -1993,8 +1993,12 @@ function buildChart(d) {
        veri-baslangici farkiyla 495-504 arasi dogal varyasyon gosteriyor (orn. AKBNK
        497) — 500 sert esigi bunlari yanlislikla "kisa gecmis" gibi etiketliyordu. */
     var sure = n >= 450 ? '2 Yıl' : (n + ' İşlem Günü');
-    var el = document.querySelector('.chart-label');
-    if (el) el.textContent = '{{ ticker }} — Günlük Grafik (' + sure + ')';
+    /* 20.09 Data-Art: baslik artik eyebrow (tur) + .chart-label (ticker) olarak
+       ikiye ayrildi. Sure bilgisi DINAMIK (kisa gecmisli hissede "2 Yil" DEGIL,
+       "N Islem Gunu") — bu yuzden SSR'da bos birakilip burada doldurulur, yanlis
+       bir "2 Yil" iddiasi hicbir an ekranda durmaz. */
+    var elP = document.getElementById('chartPeriod');
+    if (elP) elP.textContent = ' · ' + sure;
   })();
 
   /* #18-redux: sequential reindex — tatil/hafta sonu gap yok (TradingView standardı)
