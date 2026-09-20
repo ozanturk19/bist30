@@ -128,11 +128,18 @@
 .da-footer{padding:clamp(48px,6vw,80px) 0 clamp(28px,4vw,44px)}
 .da-footer-inner{max-width:900px;margin:0 auto;text-align:center;padding:0 16px}
 .da-footer-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;font-weight:700;font-size:var(--bp-text-md);color:var(--bp-text)}
-.da-footer-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:var(--bp-text-sm)}
+.da-footer-links{display:flex;justify-content:center;column-gap:4px;row-gap:0;flex-wrap:wrap;margin-bottom:16px;font-size:var(--bp-text-sm)}
 .da-footer-note{font-size:var(--bp-text-xs);color:var(--bp-text3);text-align:center;padding:10px 12px;margin-bottom:16px;border:1px solid var(--bp-border);border-radius:var(--bp-radius-md);background:rgba(var(--bp-volume-rgb),.05);line-height:1.6}
 .da-footer-disclaimer{color:var(--bp-text3);font-size:var(--bp-text-xs);margin-bottom:4px;line-height:1.6;max-width:600px;margin-left:auto;margin-right:auto}
 .da-footer-copy{color:var(--bp-text3);font-size:var(--bp-text-xs);margin-top:8px}
-.bp-footer-link{color:var(--bp-text3);text-decoration:none;transition:color var(--bp-dur-base) var(--bp-ease-standard)}
+/* Dokunma hedefi (20.09): footer linkleri 20.4px yuksekti — WCAG 2.5.8'in
+   24x24 tabanini bile gecmiyordu ve mobilde /gizlilik (KVKK) + /yasal +
+   /iletisim sayfalarina giden TEK yol bu menu (bp-mobile-nav'da yoklar).
+   min-height 44px + yatay padding ile kutu buyutuldu; satir araligi (row-gap)
+   16'dan 0'a cekildi cunku o bosluk artik linkin KENDI kutusunun icinde —
+   boylece hedefler buyurken satirlar birbirine girmiyor. column-gap 16->4,
+   padding 8px iki yandan geldigi icin gorunur aralik ~20px'te kaliyor. */
+.bp-footer-link{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;color:var(--bp-text3);text-decoration:none;transition:color var(--bp-dur-base) var(--bp-ease-standard)}
 @media (hover: hover) and (pointer: fine){
   .bp-footer-link:hover{color:var(--bp-text)}
 }
