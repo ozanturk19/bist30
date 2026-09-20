@@ -1916,6 +1916,26 @@ function shareSignal(platform) {
 
 /* ── Grafik kurulumu ─────────────────────────────────── */
 let _hisseChart = null;        // r140: onceki instance/RO/listener temizligi icin (index.html chartMain deseniyle simetrik)
+/* 52-hafta seridindeki guncel-fiyat rozetini imlecin GERCEK pikseline kenetler.
+   Yuzde tabanli bir esik (pct<=8 / >=92) rozet genisligi ekran boyuna gore
+   degistigi icin ucta 5-7px tasma birakiyordu; burada rozetin kendi genisligi
+   olculup pozisyon parcanin icine kirpiliyor. Sekme gizliyken (display:none)
+   clientWidth 0 doner — o durumda yuzde-tabanli ilk yerlesim korunur ve sekme
+   acilinca bpChartResize/ResizeObserver bu fonksiyonu yeniden cagirir. */
+function _syncW52Cap() {
+  const cap = document.getElementById('w52cap');
+  const tr  = document.querySelector('.week52-track');
+  if (!cap || !tr) return;
+  const pct = parseFloat(cap.dataset.pct);
+  if (!isFinite(pct)) return;
+  const trW = tr.clientWidth, capW = cap.offsetWidth;
+  if (!trW || !capW) return;
+  const half = capW / 2;
+  const cx = Math.min(Math.max((trW * pct) / 100, half), Math.max(trW - half, half));
+  cap.style.left = cx + 'px';
+  cap.style.transform = 'translateX(-50%)';
+}
+
 let _hisseChartRO = null;
 let _hisseResizeHandler = null;
 let _chartResizeT = null;   // r157: resize debounce (sparkline'daki _sparkResizeTimer desenine hizali)
@@ -2010,13 +2030,16 @@ function buildChart(d) {
     document.getElementById('w52cur').textContent    = fmt(cur) + ' ₺';
     document.getElementById('w52fill').style.width   = pct + '%';
     document.getElementById('w52cursor').style.left  = pct + '%';
-    /* Fiyat rozeti imlece kenetli; uclarda taşmasın diye hizalama ucta degisir. */
+    /* Fiyat rozeti imlece kenetli (bkz. _syncW52Cap). Once kaba yuzde yerlesimi —
+       sekme gizliyken olcum yapilamadigi icin bu fallback gerekli. */
     const w52cap = document.getElementById('w52cap');
     if (w52cap) {
+      w52cap.dataset.pct = pct;
       w52cap.style.left = pct + '%';
       w52cap.style.transform = pct <= 8 ? 'translateX(0)'
                              : pct >= 92 ? 'translateX(-100%)'
                              : 'translateX(-50%)';
+      requestAnimationFrame(_syncW52Cap);
     }
     const w52pos = document.getElementById('w52pos');
     if (w52pos) w52pos.textContent = hi > lo ? 'Aralığın %' + pct + ' seviyesinde' : '';
@@ -2081,6 +2104,7 @@ function buildChart(d) {
   });
 
   function _syncChartSize() {
+    _syncW52Cap();
     const w = elMain.clientWidth;
     if (!w || !chart) return;
     const isMob = window.innerWidth < 768;
