@@ -549,3 +549,107 @@
     box-shadow: 0 0 0 3px rgba(var(--bp-brand-rgb), .10);
   }
 
+
+  /* ══ Data-Art dil aktarımı — tarama.html (20.09, Pazar) ══
+     hisse.html bitti (bkz. memory project_data_art_kapsamli_donusum_baslangici_18_09),
+     trafik sırasında sonraki sayfa burası. 08.09'da SADECE .filter-bar'a köşe parıltısı
+     eklenmişti; yüzeylerin kendisi (düz --bp-surface + radius-lg + jenerik uppercase
+     mikro-etiket) hâlâ Data-Art öncesi dildi — Ozan'ın "amatör / sayfalar birbiriyle
+     konuşmuyor" dediği desenin ta kendisi.
+     Reçete hisse.css'ten birebir ödünç: degrade gövde (surface→surface2), radius-20,
+     degrade başlık şeridi + violet radial glow (.chart-header deseni), Space Grotesk +
+     geniş tracking mikro-etiketler.
+     DOKUNULMAYAN: yoğun veri tablosunun kendisi (satır/hücre) — 08.09'daki kararla aynı,
+     tarama/scanability önceliği; Data-Art sadece "app shell"e (filtre + sonuç şeridi +
+     panel kenarları + mobil kartlar) uygulandı. ══ */
+
+  /* 1 ── Filtre çubuğu: düz yüzey → degrade + radius-20 (mevcut köşe parıltısı korunuyor) */
+  .filter-bar {
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+    border-radius: var(--bp-radius-20);
+  }
+
+  /* 2 ── Sonuç şeridi, artık tablo panelinin BAŞLIK BANDI (hisse.css .chart-header
+         reçetesi): degrade şerit + violet radial glow, altındaki .table-wrap ile
+         tek bir panel olarak birleşiyor. Yeni içerik eklenmedi, var olan satır
+         (N sonuç + Sırala + CSV) yeniden çerçevelendi. */
+  .result-header {
+    position: relative; overflow: hidden;
+    margin-bottom: 0;
+    padding: 12px 18px;
+    background: linear-gradient(135deg, var(--bp-surface2) 0%, var(--bp-surface) 72%);
+    border: 1px solid var(--border); border-bottom: none;
+    border-radius: var(--bp-radius-20) var(--bp-radius-20) 0 0;
+  }
+  .result-header::before {
+    content: ''; position: absolute; top: -140%; right: -4%;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.14), transparent 70%);
+    pointer-events: none;
+  }
+  .result-header > * { position: relative; }
+  .result-count strong {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .table-wrap {
+    border-radius: 0 0 var(--bp-radius-20) var(--bp-radius-20);
+    border-top: none;
+  }
+
+  /* 3 ── Mikro-etiket tipografisi: filtre etiketleri, tablo başlıkları ve mobil
+         kart metrik etiketleri tek kuralla Data-Art'a (Space Grotesk + geniş
+         tracking) geçiyor. Renk semantiği DEĞİŞMİYOR — cyan bu sayfada
+         .trend-label.strong'un anlamı (trend gücü), etiketleri de cyan yapmak
+         o ayrımı silerdi (hisse.css'teki .section-title kararıyla aynı gerekçe).
+         thead tracking'i .08em'de tutuldu (.5px≈.045em'den ölçülü bir artış):
+         10 kolonlu tablo white-space:nowrap, daha geniş tracking masaüstünde
+         yatay taşma riski yaratır. */
+  .filter-group label,
+  .mr-metric-label {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: .12em;
+  }
+  thead th {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: .08em;
+    background: linear-gradient(180deg, var(--bp-surface2) 0%, var(--bp-surface) 100%);
+  }
+  .empty-state h2 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  /* 4 ── EOD-tazelik notu: düz kutu → cyan aksanlı Data-Art şeridi.
+         Cyan bilinçli: bu not "resmi/doğrulanabilir veri ne zaman hesaplanır"
+         bilgisi, hisse.html'deki KAP paneliyle aynı semantik (violet = AI üretimi). */
+  .temel-note {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+    border: 1px solid var(--border);
+    border-left: 3px solid rgba(var(--bp-accent-cyan-rgb),0.55);
+    border-radius: var(--bp-radius-16);
+    padding: 11px 16px;
+  }
+
+  /* 5 ── Mobil sonuç kartları: düz yüzey → degrade + radius-20.
+         GERÇEK BULGU: .mr-card ile onu saran .table-wrap'in ikisi de
+         background:var(--surface) idi, yani mobilde kartlar zeminleriyle AYNI
+         renkteydi ve sadece 1px kenarlıkla ayrışıyordu ("kart" hissi yok).
+         <900px'te sarmalayıcı şeffaflaşıyor (o kırılımda zaten sadece kart
+         taşıyor, tablo gizli), kartlar sayfa zemininde gerçekten yüzüyor. */
+  .mr-card {
+    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
+    border-radius: var(--bp-radius-20);
+  }
+  @media (max-width: 899px) {
+    .table-wrap {
+      background: transparent; border: none;
+      border-radius: 0;
+    }
+    .result-header {
+      border-bottom: 1px solid var(--border);
+      border-radius: var(--bp-radius-16);
+      margin-bottom: 10px;
+    }
+  }
