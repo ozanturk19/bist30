@@ -121,8 +121,22 @@ const SCENARIOS = [
   { id: 'portfolio-bos', page: '/portfolio', expect: '#emptyMsg' },
 
   { id: 'portfolio-fetch-hata', page: '/portfolio',
-    seed: () => { try { localStorage.setItem('bp_portfolio', JSON.stringify([{ id: 'k-u-1', ticker: 'ASELS', lot: 10, price: 50 }])); } catch (e) {} },
+    /* ⚠️ `id` SAYISAL olmali: sablon `onclick="removePosition(${p.id})"` uretir,
+       string bir id tirnaksiz gomulunce ReferenceError'a duser ve dugmeler
+       SESSIZCE olu kalir — bu, ✎/✕ isabet hatasini YANLIS NEGATIF gostermisti. */
+    seed: () => { try { localStorage.setItem('bp_portfolio', JSON.stringify([
+      { id: 1758400001, ticker: 'ASELS', lot: 10, price: 50 },
+      { id: 1758400002, ticker: 'GARAN', lot: 5, price: 120 }])); } catch (e) {} },
     routes: fail500(['/api/data', '/api/tarama']), expect: '#pfFetchError' },
+
+  /* ⛔ DOLU PORTFOY DE BIR KAPSAM BOSLUGUDUR: `localStorage` temiz baslar, bu
+     yuzden yedi canli denetci /portfolio'yu HEP bos durumda (`#emptyMsg`)
+     gordu; tablo/kart satirlari hic var olmadi. Mutlu yolda da olculur. */
+  { id: 'portfolio-dolu', page: '/portfolio',
+    seed: () => { try { localStorage.setItem('bp_portfolio', JSON.stringify([
+      { id: 1758400001, ticker: 'ASELS', lot: 10, price: 50 },
+      { id: 1758400002, ticker: 'GARAN', lot: 5, price: 120 }])); } catch (e) {} },
+    expect: '#pfBody tr, .pf-mcard' },
 
   { id: 'sektor-compare-hata', page: '/sektor-harita',
     routes: fail500(['/api/sektor-compare']),
