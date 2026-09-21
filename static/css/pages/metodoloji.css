@@ -9,7 +9,10 @@
      genelinde 8 ayri yerden /metodoloji#... derin baglantisi veriliyor
      (hisse jargon ipuclari, blog, terim sozlugu), hepsi ayni sonucu
      veriyordu. Tek kural her mevcut VE gelecek capayi kapsar. */
-  html { scroll-padding-top: calc(108px + env(safe-area-inset-top, 0px) * 2); }
+  /* K-AG: sayfa-yerel scroll-padding KALDIRILDI — shared.css'teki kanonik
+     --bp-sticky-top / html{scroll-padding-top} devraldi. Bu satir dogru care
+     idi ama TEK SAYFADA kalmisti; dedektorde /metodoloji'nin tek "OK" sayfa
+     cikmasi carenin canli pozitif kontrolu oldu. */
 
   body {
     font-size: var(--bp-text-md);

@@ -1,3 +1,8 @@
+/* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada makro serit YOK, yapiskan bant yalniz
+   header (canli olcum 0..60). shared.css'teki varsayilan 98px'i burada
+   kullanmak 32px gereksiz bosluk birakirdi — kural degil OLCU degisir. */
+:root { --bp-sticky-top: calc(60px + env(safe-area-inset-top, 0px) + 6px); }
+
 /* ==== extracted from templates/hakkinda.html (T2.5) ==== */
 
   * { margin: 0; padding: 0; box-sizing: border-box; }

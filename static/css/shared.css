@@ -166,3 +166,47 @@ html { -webkit-tap-highlight-color: transparent; }
     content: "" !important;
   }
 }
+
+/* ── K-AG: KLAVYE ODAĞI YAPIŞKAN BANTLARIN ALTINDA KAYBOLUYORDU ────────────
+   WCAG 2.2 · SC 2.4.11 "Focus Not Obscured (Minimum)" (AA).
+
+   Sitenin her sayfasında ÜST ÜSTE yapışkan bantlar var:
+     makro şerit (top:0, 32px) + header (top:calc(32px+inset), 60px+inset)
+   ve mobilde ALTTA `.mobile-bottom-nav` (position:fixed; bottom:0, bu dosya).
+   Tarayıcı Tab/Shift+Tab'da odaklanan elemanı "en yakın kenara" kaydırır:
+   ileri giderken ALT kenara (alt navigasyonun altına), GERİYE giderken ÜST
+   kenara (makro şerit + header'ın altına). Odak halkası çizilir ama
+   GÖRÜNMEZ — kullanıcı nerede olduğunu kaybeder.
+
+   Canlı ölçüm (tools/focus-obscured-check.js — 20 sayfa × 2 genişlik ×
+   2 yön, gerçek `el.focus()` + elementFromPoint ızgarası): onlarca odak
+   TAMAMEN örtülüydü. Odak GÖRÜNÜRLÜĞÜ (focus-visible-check.js) bu boyutu
+   ölçmez — halkanın VARLIĞINI sorar, GÖRÜLEBİLİRLİĞİNİ değil.
+
+   Kanonik çare `scroll-padding`: kaydırma kabının "görünür" saydığı alanı
+   bantlar kadar içeri çeker; hem odak kaydırmasını hem çapa (#id)
+   atlamalarını hem de `scrollIntoView()` çağrılarını aynı anda düzeltir.
+   ⛔ Bu çare `metodoloji.css`'te TEK SAYFA için zaten yazılmıştı ve
+   genelleştirilmemişti — dedektörde /metodoloji'nin TEK "OK" sayfa çıkması
+   çarenin doğruluğunun canlı pozitif kontrolü oldu (kapsam yalanı dersi).
+
+   Bant yüksekliği SAYFAYA GÖRE değişir, kural değişmez → ölçü token'dır:
+     varsayılan (makro şerit + header)      : 32 + 60 + 2×inset
+       (header'ın top'ı da yüksekliği de inset taşır — bu yüzden ×2)
+     /hisse/*  (+ .bp-segments, 57px)       : pages/hisse.css'te ezilir
+     iç sayfalar (makro şerit YOK, header 60): ilgili sayfa CSS'inde ezilir
+   +6px pay `:focus-visible{outline:2px; outline-offset:2px}` halkasının
+   kutunun 4px DIŞINA taşması içindir — kutuyu sığdırmak halkayı kesiyordu. */
+:root {
+  --bp-sticky-top: calc(32px + 60px + env(safe-area-inset-top, 0px) * 2 + 6px);
+  --bp-sticky-bottom: 0px;
+}
+@media (max-width: 900px) {
+  /* .mobile-bottom-nav bu kırılımda görünür (yukarıda, aynı eşik).
+     73px = .mbn-inner 64px + üst çizgi + etkin sekme göstergesi (canlı ölçüm). */
+  :root { --bp-sticky-bottom: calc(73px + env(safe-area-inset-bottom, 0px) + 6px); }
+}
+html {
+  scroll-padding-top: var(--bp-sticky-top);
+  scroll-padding-bottom: var(--bp-sticky-bottom);
+}

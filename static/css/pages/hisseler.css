@@ -1,3 +1,8 @@
+/* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada makro serit YOK, yapiskan bant yalniz
+   header (canli olcum 0..60). shared.css'teki varsayilan 98px'i burada
+   kullanmak 32px gereksiz bosluk birakirdi — kural degil OLCU degisir. */
+:root { --bp-sticky-top: calc(60px + env(safe-area-inset-top, 0px) + 6px); }
+
 /* ==== extracted from templates/hisseler.html (T2.5) ==== */
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -76,7 +81,10 @@
   .hh-tab.active { color: var(--bp-text); border-bottom-color: var(--bp-accent-cyan); }
   .hh-tab:hover { color: var(--bp-text); }
 
-  .hh-section { padding: 16px 0 8px; scroll-margin-top: 68px; }
+  /* K-AG: scroll-margin-top:68px kaldirildi — shared.css html{scroll-padding-top}
+     ayni isi TUM capa/odak kaydirmalari icin yapiyor; ikisi birlikte TOPLANIR
+     ve #letter-X atlamalarinda 134px'lik bos bant birakirdi. */
+  .hh-section { padding: 16px 0 8px; }
   .hh-section h2 {
     font-size: var(--bp-text-lg); font-weight: 800; color: var(--bp-text);
     letter-spacing: -0.02em;

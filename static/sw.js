@@ -9,7 +9,7 @@ const STATIC = [
   '/static/icon-512.png?v=e9ec3ef2',
   '/static/favicon.svg?v=6ef6d5a3',
   '/static/css/tokens.css?v=05a1361a',
-  '/static/css/shared.css?v=ffdd024b',
+  '/static/css/shared.css?v=313946ed',
   '/static/css/data-art.css?v=8a693451',
   '/static/css/pages/offline.css?v=34a9a271',
   '/offline',

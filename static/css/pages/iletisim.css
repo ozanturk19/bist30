@@ -1,3 +1,8 @@
+/* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada makro serit YOK, yapiskan bant yalniz
+   header (canli olcum 0..60). shared.css'teki varsayilan 98px'i burada
+   kullanmak 32px gereksiz bosluk birakirdi — kural degil OLCU degisir. */
+:root { --bp-sticky-top: calc(60px + env(safe-area-inset-top, 0px) + 6px); }
+
 /* ==== extracted from templates/iletisim.html (T2.5) ====
    20.09 CPO — Data-Art dönüşümü. Bu sayfa dönüşümün başladığı 18.09'dan beri
    hiç sıraya girmemişti: iki düz kutu (`background:var(--bp-surface)` + 1px

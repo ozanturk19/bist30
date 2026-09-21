@@ -1089,6 +1089,12 @@
 
 
 
+  /* K-AG (WCAG 2.2 SC 2.4.11): bu sayfada UCUNCU bir yapiskan bant var —
+     .bp-segments (asagida, top:92px, canli olcum 92..149 = 57px). shared.css'teki
+     kanonik --bp-sticky-top yalniz makro serit + header'i sayar; burada odak
+     sekme seridinin ALTINDA kayboluyordu. Kural degil OLCU degisir. */
+  :root { --bp-sticky-top: calc(32px + 60px + 57px + env(safe-area-inset-top, 0px) * 2 + 6px); }
+
     .bp-segments {
       /* SPEC-STICKY-HEADER-v3 fix5: header DIŞINDA sticky (bp-search.js !important header'ı 60px max-height kilitliyor; içerde overflow ediyordu).
          CPO: makro bar artık header'ın ÜSTÜNDE sticky (top:0, 32px yükseklik), header top:32px'e indi —
