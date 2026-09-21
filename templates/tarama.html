@@ -424,7 +424,7 @@ function exportCSV() {
     (s.adx||0).toFixed(1).replace('.', ','),
     s.price != null ? s.price.toFixed(2).replace('.', ',') : '',
     s.change_pct != null ? s.change_pct.toFixed(2).replace('.', ',')+'%' : '',
-    s.vol_ratio ? '×'+s.vol_ratio.toFixed(1).replace('.', ',') : '',
+    s.vol_ratio ? s.vol_ratio.toFixed(1).replace('.', ',')+'×' : '',
     bpSignalAgeCsv(s.signal_date),
     csvSafe(s.entry_quality||'')
   ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'));

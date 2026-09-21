@@ -172,7 +172,7 @@ function goToDate(date) {
       <span style="font-size:var(--bp-text-base);font-weight:700;color:var(--bp-text)">{{ s.ticker }}</span>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
-        <span style="font-size:var(--bp-text-xs);font-weight:600;color:{% if ret >= 0 %}var(--bp-al){% else %}var(--bp-sat){% endif %}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
+        <span style="font-size:var(--bp-text-xs);font-weight:600;color:{% if ret >= 0 %}var(--bp-al){% else %}var(--bp-sat){% endif %}">{{ '+' if ret >= 0 else '' }}{{ '%.1f'|format(ret)|replace('.', ',') }}%</span>
       {% endif %}
       <span style="font-size:var(--bp-text-2xs);color:var(--bp-al);font-weight:600"><span role="img" aria-label="İdeal giriş sinyali">✅</span></span>
     </a>
@@ -243,7 +243,7 @@ function goToDate(date) {
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
-          <span class="sc-ret {{ 'sc-ret-pos' if ret >= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
+          <span class="sc-ret {{ 'sc-ret-pos' if ret >= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ '%.1f'|format(ret)|replace('.', ',') }}%</span>
         </div>
       {% elif s.signal_price %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺</div>
@@ -271,7 +271,7 @@ function goToDate(date) {
           <!-- CPO-DEV2-081(B): long-only urunde SAT'ta fiyat hareketi kazanc/kayip
                degil - ham isaret DEGISTIRILMEDEN notr gosterilir (T3.7/CPO-DEV2-052#1/
                CPO-DEV2-074/CPO-DEV2-080 ile ayni desen+tooltip metni, 5. yuzey) -->
-          <span class="sc-ret" style="background:rgba(var(--bp-text3-rgb),.10);color:var(--bp-text3)" data-tip="Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez" tabindex="0">{{ '+' if ret >= 0 else '' }}{{ ret }}%</span>
+          <span class="sc-ret" style="background:rgba(var(--bp-text3-rgb),.10);color:var(--bp-text3)" data-tip="Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez" tabindex="0">{{ '+' if ret >= 0 else '' }}{{ '%.1f'|format(ret)|replace('.', ',') }}%</span>
         </div>
       {% elif s.signal_price %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺</div>
