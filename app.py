@@ -1892,9 +1892,15 @@ def analyze(ticker_base):
             atr_pct     = atr_now / c * 100
             atrs_moved  = round(pct_moved / atr_pct, 1) if atr_pct > 0 else 0.0
 
-            tp1      = round(c - risk * 2, 2)
-            tp2      = round(c - risk * 3, 2)
-            rr_ratio = 2.0
+            # CPO-1740 (22.09): tp1/tp2 = entry - risk*N, asagi yonde kelepceli
+            # degildi -- dusuk fiyatli/genis stoplu hisselerde (PASEU, MIATK...)
+            # NEGATIF hedef fiyat uretiyordu. Urun SAT icin bu sayilari hicbir
+            # yuzeyde göstermiyor (/metodoloji: "Trend Bozuldu sinyalinde somut
+            # giris/hedef/stop seviyeleri gösterilmez") -- BEKLE ile tutarli
+            # olarak None birakiliyor (asagida rr_signal/rr_now da otomatik None kalir).
+            tp1      = None
+            tp2      = None
+            rr_ratio = None
 
             # CPO-1666 #2: AL taraftaki aynı fix, SAT için simetrik (yukarıdaki
             # yorum bkz.) — fiyat SAT sinyaline karşı (yukarı) hareket ettiyse
@@ -12647,11 +12653,12 @@ def api_market_news():
             dur = "bugün" if bars <= 1 else f"son {bars} gündür"
             entry_q = s.get("entry_quality", "")
             sl_val  = s.get("sl_level") or 0
-            tp_val  = s.get("tp1") or 0
+            tp_val  = s.get("tp1")  # CPO-1740: SAT icin artik None (kelepcesiz negatif hedef riski)
             snippet = (
                 f"{dur.capitalize()} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif"
                 f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
-                f"SL: {tr_price_filter(sl_val)}₺ | Hedef: {tr_price_filter(tp_val)}₺"
+                f"SL: {tr_price_filter(sl_val)}₺"
+                f"{' | Hedef: ' + tr_price_filter(tp_val) + '₺' if tp_val else ''}"
             )
             source = "algorithmic"
 
@@ -12660,11 +12667,12 @@ def api_market_news():
             dur = "bugün" if bars <= 1 else f"son {bars} gündür"
             entry_q = s.get("entry_quality", "")
             sl_val  = s.get("sl_level") or 0
-            tp_val  = s.get("tp1") or 0
+            tp_val  = s.get("tp1")  # CPO-1740: SAT icin artik None (kelepcesiz negatif hedef riski)
             snippet = (
                 f"{dur.capitalize()} {_SIGNAL_LABELS.get(sig, sig)} sinyali aktif"
                 f"{', ' + entry_q.lower() + ' giriş bölgesi' if entry_q else ''}. "
-                f"SL: {tr_price_filter(sl_val)}₺ | Hedef: {tr_price_filter(tp_val)}₺"
+                f"SL: {tr_price_filter(sl_val)}₺"
+                f"{' | Hedef: ' + tr_price_filter(tp_val) + '₺' if tp_val else ''}"
             )
             source = "algorithmic"
 
