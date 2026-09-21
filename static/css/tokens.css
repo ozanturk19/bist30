@@ -593,6 +593,10 @@ body {
    degerin LITERALI (%23909097) yazildi. */
 .bp-al-text{color:var(--bp-al)}
 .bp-sat-text{color:var(--bp-sat)}
+/* K-BW (22.09): yon ucluysa sinif da uclu olmali. AL/SAT icin sinif vardi,
+   BEKLE dali her yerde `style="color:var(--bp-bkl)"` diye satir-ici
+   yaziliyordu -- ayni is icin ikinci yazim. */
+.bp-bkl-text{color:var(--bp-bkl)}
 .bp-text-muted{color:var(--bp-text3)}
 .bp-nav-cat-label{font-family:'Space Grotesk',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--bp-text3);text-transform:uppercase;letter-spacing:.6px;padding:6px 10px 4px;pointer-events:none}
 

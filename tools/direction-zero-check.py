@@ -53,6 +53,28 @@ JS_PAT    = re.compile(r"[\w\.\[\]\(\)\$]{1,40}\s*(?:>=|<=)\s*0\b\s*\?")
 # ICERMEDIGI icin JS_PAT'e takilmaz — ama tam olarak ayni hatadir.
 JS_ASSIGN = re.compile(r"(?:var|let|const)\s+\w{1,30}\s*=\s*[\w\.\[\]\(\)\$]{1,40}\s*(?:>=|<=)\s*0\s*[;,\)]")
 JINJA_PAT = re.compile(r"\{%-?\s*(?:el)?if\s+[^%]{0,80}(?:>=|<=)\s*0\s*%\}")
+
+# ── 52. ders (K-BW, 22.09): `a >= b` DE AYNI HATADIR ────────────────────────
+# Yukaridaki uc desen de SIFIR LITERALINI arar. Ama yon cogu zaman iki sayinin
+# KARSILASTIRMASIDIR ve o zaman ortada yazili bir `0` YOKTUR:
+#     var up = last >= first;          <- /hisse sparkline, 22.09'a kadar canli
+#     close >= open ? '--bp-al' : ...  <- doji mumu (a4d710f)
+# `last == first` -> "degisim 0" demektir; yesile boyamak K-BP'nin yasakladigi
+# seyin ta kendisi. Kapi bunu goremedigi icin sparkline aylarca gecti.
+# ⛔ DERS: BIR KAPI, HATANIN OGRENDIGI YAZIMINI DEGIL, HATANIN KENDISINI
+#    ARAMALIDIR. `x >= 0` ile `a >= b` ayni karardir.
+#
+# Yanlis alarmi dar tutan uc kosul birlikte aranir:
+#   (i)  iki taraf da SAYI LITERALI degil (indeks/uzunluk kiyaslari elenir),
+#   (ii) ya yon adli bir degiskene atanmis ya da bir ternary'nin kosulu,
+#   (iii) 140 karakter icinde bir YON ISARETI var (DIR_MARK).
+_OPND = r"[\w\.\[\]\(\)\$]{1,40}"
+NONZERO_ASSIGN = re.compile(
+    r"(?:var|let|const)\s+(?:is)?(?:up|down|dn|rising|falling|pos|neg|dir|yon)\w{0,10}"
+    r"\s*=\s*(" + _OPND + r")\s*(?:>=|<=)\s*(" + _OPND + r")\s*[;,\)]", re.I)
+NONZERO_TERN = re.compile(
+    r"(" + _OPND + r")\s*(?:>=|<=)\s*(" + _OPND + r")\s*\?")
+_NUMLIT = re.compile(r"^-?\d+(?:\.\d+)?$")
 PROX = 140
 
 ALLOW = {
@@ -96,6 +118,21 @@ def scan_tree(root):
                                     f"`{' '.join(m.group(0).split())}` + yon isareti "
                                     f"`{hit.group(0)}` -> 0 bir YONLE ayni kefede "
                                     f"(kanon: bp-format.js bpDir*)"))
+                # ── C) sifir literali OLMADAN ayni karar: `a >= b` ──────────
+                for pat in (NONZERO_ASSIGN, NONZERO_TERN):
+                    for m in pat.finditer(src):
+                        lhs, rhs = m.group(1), m.group(2)
+                        if _NUMLIT.match(lhs) or _NUMLIT.match(rhs):
+                            continue          # indeks/uzunluk kiyasi, yon degil
+                        win = src[max(0, m.start() - PROX): m.end() + PROX]
+                        hit = DIR_MARK.search(win)
+                        if not hit:
+                            continue
+                        ln = src[:m.start()].count('\n') + 1
+                        bad.append((rel, ln, 'C',
+                                    f"`{' '.join(m.group(0).split())}` + yon isareti "
+                                    f"`{hit.group(0)}` -> ESITLIK (fark = 0) bir YONLE "
+                                    f"ayni kefede (kanon: bp-format.js bpDir*)"))
     # ── B) CSS'te notr arm eksik ────────────────────────────────────────
     cssroot = os.path.join(root, 'static', 'css')
     for dp, _, fns in os.walk(cssroot):

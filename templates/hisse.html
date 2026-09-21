@@ -106,7 +106,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=7ed38bdb">
+<link rel="stylesheet" href="/static/css/tokens.css?v=306ecc56">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=04756784">
@@ -135,9 +135,13 @@
   {% if ssr_signal %}
   <span class="bp-symbol-pill">
     <strong>{{ ticker }}</strong>
+    {#- K-BW (22.09): SAT dali `#ff7875` yaziyordu -- bu renk tokens.css'te YOK
+        (--bp-sat #f85149). Ayni sayfadaki diger her SAT yuzeyi token'dan
+        geliyordu; 72/217 hisse sayfasi bu tek rozette BASKA bir kirmizi
+        gosteriyordu. Ucu de artik tek yazim: token sinifi. -#}
     {%- if ssr_signal.signal == 'AL' %} <span class="bp-al-text">▲ Güçlü</span>
-    {%- elif ssr_signal.signal == 'SAT' %} <span style="color:#ff7875">▼ Bozuldu</span>
-    {%- else %} <span style="color:var(--bp-bkl)">● Yatay</span>{% endif -%}
+    {%- elif ssr_signal.signal == 'SAT' %} <span class="bp-sat-text">▼ Bozuldu</span>
+    {%- else %} <span class="bp-bkl-text">● Yatay</span>{% endif -%}
   </span>
   {% endif %}
   <div class="bp-segments-inner" role="tablist" aria-label="Hisse detay segmentleri">
@@ -362,10 +366,10 @@
     {# SPEC-017 v2 c5 — Sparkline 30D (vanilla canvas + long-press crosshair) #}
     <div class="bp-spark-wrap" id="bpSparkWrap" style="display:none">
       <div class="bp-spark-label">
-        <span>Son 30 gün</span>
+        <span>Son 30 işlem günü</span>
         <span id="bpSparkVal" class="bp-spark-val">—</span>
       </div>
-      <canvas id="bpSpark" class="bp-spark-canvas" height="52" role="img" aria-label="30 günlük sparkline grafiği"></canvas>
+      <canvas id="bpSpark" class="bp-spark-canvas" height="52" role="img" aria-label="Son 30 işlem günü kapanış fiyatı grafiği"></canvas>
     </div>
     {# SPEC-017 Faz B K10: "Neden bu sinyal?" CTA + drawer SİLİNDİ (Ozan redundant feedback). AI tab + sigExplainSection zaten mevcut. #}
   </div>
@@ -391,8 +395,31 @@
       var ctx = cv.getContext('2d');
       ctx.setTransform(dpr,0,0,dpr,0,0);
       var first = data[0].c, last = data[data.length-1].c;
-      var up = last >= first;
-      var color = accent || (up ? '#00e290' : '#ff7875');
+      /* K-BW (22.09): burada IKI hata birlikteydi.
+         1) `last >= first` -- degisim SIFIRSA cizgi YESIL oluyordu (K-BP'nin
+            tam olarak yasakladigi sey). K-BP kapisi bunu goremedi: kapi
+            `x >= 0` yazimini arar, buradaki karsilastirma `a >= b`.
+            AYNI HATANIN IKINCI YAZIMI.
+         2) Renk ham hex'ti; `#ff7875` tokens.css'te HIC YOK (--bp-sat
+            #f85149). Ayni 52px'lik pencerede cizgi bir kirmizi, hemen
+            ustundeki yuzde metni (K-BP'de token'a gecmisti) BASKA bir
+            kirmizi idi.
+         Yon artik METNIN yuvarlamasiyla ayni kanondan (bpDir, 1 ondalik)
+         geliyor -- ekranda "0,0%" yazan hisse cizgide de notr. */
+      var _sparkPct = (first ? (last - first) / first * 100 : null);
+      var _sparkDir = (typeof bpDir === 'function') ? bpDir(_sparkPct, 1)
+                    : (last > first ? 1 : (last < first ? -1 : 0));
+      var _tok = (window.BPChart && BPChart.tok)
+                ? BPChart.tok
+                : function(v, fb){
+                    try {
+                      var r = getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+                      return r || fb;
+                    } catch (e) { return fb; }
+                  };
+      var color = accent || (_sparkDir === 1 ? _tok('--bp-al', '#00e290')
+                          : (_sparkDir === -1 ? _tok('--bp-sat', '#f85149')
+                                              : _tok('--bp-text2', '#c7c5cd')));
       var min = Infinity, max = -Infinity;
       data.forEach(function(x){ if(x.c<min)min=x.c; if(x.c>max)max=x.c; });
       var pad = 4, range = (max - min) || 1;
@@ -3824,7 +3851,7 @@ async function loadMTF() {
                kartindaki text3 olculdu, 5.94:1 ile geciyor, dokunulmadi. -->
           <div style="font-size:var(--bp-text-sm);color:var(--bp-text2);margin-bottom:8px">${tf.label}</div>
           <div style="font-size:20px;font-weight:800;color:${col}">${arr} ${lbl}</div>
-          <div style="font-size:var(--bp-text-sm);color:#b8b8c0;margin-top:4px">ADX ${_trNum(d.adx)}</div>
+          <div style="font-size:var(--bp-text-sm);color:var(--bp-text2);margin-top:4px">ADX ${_trNum(d.adx)}</div>
           ${scoreBar}
         </div>`;
     }).join('');
