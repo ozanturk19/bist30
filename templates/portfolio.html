@@ -407,6 +407,35 @@ function exportCSV() {
 const PF_IMPORT_MAX_BYTES   = 200 * 1024; // guvenlik payi -- 100 pozisyonluk gercek bir export'un cok uzerinde
 const PF_IMPORT_MAX_ENTRIES = 100;        // app.py _PF_MAX_ENTRIES ile ayni sinir
 
+/* ── K-BI (21.09 CPO): POZISYON BIRLESTIRME = TEK KANON ────────────────────
+   AYNI IS (gelen pozisyonlari mevcut portfoye ekleyip kullaniciya kac tanesinin
+   eklendigini soylemek) IKI YERDEN yapiliyordu ve ikisi FARKLI davraniyordu:
+     * importPortfolio (dosyadan)  -> gercekten eklenen sayiyi SAYIYOR,
+                                      "N pozisyon ice aktarildi (M zaten vardi)"
+     * loadCloudToken (buluttan)   -> HIC saymiyor, gecersiz olmayan her kaydi
+                                      EKLENMIS sayiyordu:
+                                      `${data.positions.length - skipped} pozisyon`
+   Sonuc: ayni token ikinci kez yuklendiginde (ya da cihazda veri zaten varken)
+   HICBIR pozisyon eklenmezken ekranda "Yuklendi! 5 pozisyon." yaziyordu --
+   mesaj kodun yapmadigi bir seyi iddia ediyordu (K-BH ile ayni sinif).
+   Yinelenen kaydi bulma olcutu de iki yerde ayri yazilmisti (`x.price === p.price`
+   vs `+x.price === +p.price`), yani iki yol ayni veriyi farkli
+   yinelemis/yinelememis sayabiliyordu. Her ikisi de artik BURADAN gecer. */
+function _pfIsSamePosition(a, b) {
+  return !!a && !!b && a.ticker === b.ticker && a.date === b.date && +a.price === +b.price;
+}
+/* list: dogrulanmis pozisyonlar. Donus: {added, duplicate} -- kullaniciya
+   gosterilen sayi DAIMA bu donusten gelir, gelen listenin uzunlugundan DEGIL. */
+function _pfMergePositions(list) {
+  let added = 0, duplicate = 0;
+  list.forEach(p => {
+    if (portfolio.some(x => _pfIsSamePosition(x, p))) { duplicate++; return; }
+    portfolio.push({ ...p, id: Date.now() + Math.random() });
+    added++;
+  });
+  return { added, duplicate };
+}
+
 function importPortfolio(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -437,19 +466,12 @@ function importPortfolio(e) {
         }
         p.lot = lot; p.price = price;
       });
-      // Mevcut portföyle birleştir — aynı ticker/tarih yoksa ekle
-      let added = 0;
-      positions.forEach(p => {
-        const exists = portfolio.some(x => x.ticker === p.ticker && x.date === p.date && x.price === p.price);
-        if (!exists) {
-          portfolio.push({ ...p, id: Date.now() + Math.random() });
-          added++;
-        }
-      });
+      // Mevcut portföyle birleştir — tek kanon (_pfMergePositions)
+      const _impMerge = _pfMergePositions(positions);
       save();
       render();
       fetchCharts();
-      showToast(`✅ ${added} pozisyon içe aktarıldı (${positions.length - added} zaten vardı).`, 'ok');
+      showToast(`✅ ${_impMerge.added} pozisyon içe aktarıldı (${_impMerge.duplicate} zaten vardı).`, 'ok');
     } catch(err) {
       const _pfImportMsgMap = {
         EMPTY:         'Dosyada pozisyon bulunamadı.',
@@ -916,22 +938,27 @@ async function loadCloudToken() {
     const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
     if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-sat)'); return; }
     const data = await res.json();
-    if (!data.positions) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-sat)'); return; }
+    if (!Array.isArray(data.positions)) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-sat)'); return; }
     if (!_safeSetToken(token)) { _setCloudMsg('Token bu cihazda saklanamadı (gizli mod?).', 'var(--bp-sat)'); return; }
     _showActiveToken(token);
     // r155 bug-hunt: importPortfolio ile ayni lot/price dogrulamasi —
     // eski-format/eksik kayitlar (yalniz buy_price/quantity, ya da lot/price
     // hic yok) sessizce atlanir, cost/pnlPct NaN sizintisina yol acmaz.
     let skipped = 0;
+    const _valid = [];
     data.positions.forEach(p => {
       const lot = Number(p.lot ?? p.quantity), price = Number(p.price ?? p.buy_price);
       if (!p.ticker || !Number.isFinite(lot) || lot <= 0 || lot > 1e9 || !Number.isInteger(lot) || !Number.isFinite(price) || price <= 0 || price > 1e9) { skipped++; return; }
       p.lot = lot; p.price = price;
-      const exists = portfolio.some(x => x.ticker === p.ticker && +x.price === +p.price && x.date === p.date);
-      if (!exists) portfolio.push({...p, id: Date.now() + Math.random()});
+      _valid.push(p);
     });
+    // K-BI: eklenen sayi ARTIK gercekten eklenenden gelir (eskiden gelen
+    // listenin uzunlugundan geliyordu -> "Yuklendi! 5 pozisyon." yalani).
+    const _cloudMerge = _pfMergePositions(_valid);
     save(); render();
-    _setCloudMsg(`Yüklendi! ${data.positions.length - skipped} pozisyon.${skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''}`, 'var(--bp-al)');
+    _setCloudMsg(`Yüklendi! ${_cloudMerge.added} pozisyon eklendi.`
+      + (_cloudMerge.duplicate ? ` (${_cloudMerge.duplicate} zaten vardı)` : '')
+      + (skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''), 'var(--bp-al)');
     input.value = '';
   } catch(e) {
     _setCloudMsg(e.name === 'TimeoutError' ? 'Zaman aşımı, tekrar deneyin.' : 'Hata: ' + e.message, 'var(--bp-sat)');
