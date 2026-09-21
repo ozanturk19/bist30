@@ -868,8 +868,16 @@
         var arrow = chg > 0.05 ? '▲' : chg < -0.05 ? '▼' : '●';
         return '<span class="macro-item"><span class="macro-item-lbl">' + lbl + '</span><span>' + price + '</span><span class="' + cls + '">' + arrow + ' ' + sign + chg.toFixed(2).replace('.', ',') + '%</span></span>';
       }).join('');
-      track.innerHTML = html + html;
-      window.bpStartMacroTicker({ track: track, pps: 55 });
+      /* K-AF (21.09): serit bir MARQUEE — icerik iki kez basilir ve kaydirma
+         ikinci kopyayi sürekli besler. `prefers-reduced-motion: reduce` altinda
+         tokens.css kaydirmayi durdurup seridi elle-kaydirilabilir yapiyor;
+         orada IKINCI KOPYA basilirsa kullanici ayni 9 kalemi ARKA ARKAYA IKI
+         KEZ kaydirmak zorunda kalir. Tek kopya bas, ticker'i hic baslatma
+         (bpStartMacroTicker scrollWidth/2 varsayar — tek kopyada o hesap da
+         yanlis olurdu). */
+      var bpReduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      track.innerHTML = bpReduceMotion ? html : (html + html);
+      if (!bpReduceMotion) window.bpStartMacroTicker({ track: track, pps: 55 });
       _bpMacroEverLoaded = true;
     } catch (e) {
       console.error('loadMacroBar basarisiz', e);

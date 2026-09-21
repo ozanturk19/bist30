@@ -593,3 +593,39 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── K-AF · 21.09.2026 — HAREKETİ AZALT MODUNDA MAKRO ŞERİT İÇERİK KAYBI ──────
+   Yukarıdaki global `*` kuralı (FAZ8) CSS hareketini doğru şekilde durduruyor
+   ama makro şerit bir MARQUEE: içerik iki kez basılır ve `.macro-track`
+   `translateX(0) → translateX(-50%)` ile kaydırılır; `.macro-bar` ise
+   `overflow:hidden`. `animation-duration:.01ms` + `iteration-count:1` +
+   `animation-fill-mode:none` üçlüsü şeridi ANINDA bitirip BAŞLANGIÇ durumuna
+   (transform:none) geri düşürür → şerit donar ve görüş alanına sığmayan her
+   kalem KALICI OLARAK ERİŞİLEMEZ hale gelir. Kaydırma da yok (overflow:hidden),
+   duraklat/oynat düğmesi de ölü (duracak bir hareket kalmamış).
+
+   CANLI ÖLÇÜM (borsapusula.com, 21.09): 9 makro kaleminin
+     @1280px  2'si (S&P500 · NASDAQ) erişilemez
+     @375px   7'si (EUR/TRY·BTC·Altın·Gümüş·Petrol·S&P500·NASDAQ) erişilemez
+   yani mobilde kalemlerin **%78'i**. 13 şablonun hepsinde.
+
+   ⛔ data-art.css'teki "prefers-reduced-motion: ÖLÇÜLDÜ, AYRI KURAL GEREKMİYOR"
+   notu bu yüzden YANLIŞTI: global kural hareketi azaltıyor ama marquee'de
+   hareket İÇERİĞİ TAŞIMA GÖREVİ görüyor — durdurmak tek başına içeriği yok eder.
+
+   Çözüm: hareket yerine KULLANICI KONTROLÜ. Şerit elle kaydırılabilir olur,
+   `bp-search.js` ikinci kopyayı basmaz (tekrar yok), kenar solma maskeleri ve
+   ölü duraklat düğmesi kalkar. Sayfa CSS'leri tokens.css'ten SONRA yüklendiği
+   için `!important` zorunlu (aynı 0,1,0 özgüllük).
+   ──────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .macro-bar { overflow-x: auto !important; scrollbar-width: none; -ms-overflow-style: none; }
+  .macro-bar::-webkit-scrollbar { display: none; }
+  /* Solma maskeleri `position:absolute` — kaydırma kabında içerikle birlikte
+     kayar ve tam da erişilebilir kıldığımız uçları örterdi. */
+  .macro-bar::before, .macro-bar::after { display: none !important; }
+  .macro-track, #macroTrack { animation: none !important; will-change: auto !important; }
+  /* Duraklatacak hareket yok → düğme ölü kontrol olurdu (WCAG 2.2.2 mekanizmayı
+     yalnız hareket VARKEN ister). */
+  .macro-pause-btn { display: none !important; }
+}
