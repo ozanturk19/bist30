@@ -108,6 +108,29 @@ def eod_fetch_trigger_ready_after(now_tr=None):
     return _now_total_min >= _ready_total_min
 
 
+# CPO-1703 (DEV-1980 §3 onaylı): EOD ana turu prev_cache fallback'e düşen
+# ticker'lar için AYNI gün içinde bir kez daha denenecek "catch-up" turunun
+# en erken tetiklenebileceği an. eod_data_ready_after (18:30 TR) chart
+# re-verify'ın kullandığı an — catch-up'ı ondan sonraya (19:30 TR) koymak
+# Yahoo'ya art arda iki erken re-fetch göndermez, ana turun geç bitmesi
+# ihtimaline de (CPO-1563: bazı günler 6+ saat) makul bir pay bırakır.
+_CATCHUP_RETRY_HOUR   = 19
+_CATCHUP_RETRY_MINUTE = 30
+
+
+def catchup_retry_ready_after(now_tr=None):
+    """CPO-1703: catch-up retry turu için en erken tetiklenebilir an (19:30 TR)
+    geçti mi? Sadece işlem günü. `eod_fetch_trigger_ready_after`/
+    `eod_data_ready_after` ile aynı desen — tek sabit, iki yerde ayrı
+    hardcode yok."""
+    now_tr = now_tr or datetime.now(_TZ_TR)
+    if not is_trading_day(now_tr.date()):
+        return False
+    _ready_total_min = _CATCHUP_RETRY_HOUR * 60 + _CATCHUP_RETRY_MINUTE
+    _now_total_min = now_tr.hour * 60 + now_tr.minute
+    return _now_total_min >= _ready_total_min
+
+
 def last_trading_day_on_or_before(d):
     """d dahil, geriye doğru en yakın işlem günü (hafta sonu/tatil atlanır)."""
     while not is_trading_day(d):

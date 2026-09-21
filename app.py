@@ -3066,6 +3066,7 @@ from lib.trading_calendar import (
     expected_data_date as _expected_data_date,
     eod_data_ready_after as _eod_data_ready_after,
     eod_fetch_trigger_ready_after as _eod_fetch_trigger_ready_after,
+    catchup_retry_ready_after as _catchup_retry_ready_after,
 )
 
 
@@ -4079,6 +4080,86 @@ def _refresh_data_impl():
         logger.warning("FROZEN_TICKER_CHECK exception: %s", _e)
 
 
+# CPO-1703 (DEV-1980 §3 onaylı): EOD-only pivot (CPO-1508/1512) günde TEK
+# refresh_data() denemesi bırakıyor — kısmi başarı (bazı ticker'lar Yahoo
+# tarafında geçici hata/anomali guard'ına takılıp prev_cache fallback'e
+# düşer) bir sonraki trading-day'e kadar hiç düzelmiyordu (CPO-1680/CPO-1701/
+# CPO-1701 aynı sınıf, üçüncü tekrar — bkz. [[project_eod_once_daily_no_catchup_retry]]).
+# Bu fonksiyon SADECE o gün prev_cache fallback'e düşmüş (data_quality=="stale")
+# ticker'ları, _staleness_priority_order sırasını koruyarak, AYNI background_refresh()
+# döngüsünün bir sonraki iterasyonunda (yeni thread/process YOK) bir kez daha dener.
+_CATCHUP_STALE_RATIO_THRESHOLD = 0.10  # DEV-1980 §3 örneği — CPO onayı bu eşiği değiştirmedi
+
+
+def _run_catchup_retry_pass(marker_path):
+    """Günde bir kez (marker_path varlığıyla korunur) çalışır. CB'ye (mevcut
+    _yahoo_cb) bağlıdır — yeni bir sayaç/eşik icat etmez (CPO-1703 şartı).
+    Sonuç TEK bir log satırından (CATCHUP: SONUC) grep'lenebilir — CPO-1703
+    kabul ölçütü: tetiklenme VE sonuç tek grep'le görülebilmeli."""
+    # Marker'ı EN BAŞTA yaz — sonuç ne olursa olsun (0 stale, CB açık, kısmi
+    # kurtarma) bugün için tek deneme hakkı tüketilir; aksi halde her 600s
+    # poll'da aynı turu tekrar tekrar denemeye çalışırdı.
+    try:
+        with open(marker_path, "w", encoding="utf-8") as _f:
+            _f.write(datetime.now(_TZ_TR).strftime("%d.%m.%Y %H:%M:%S"))
+    except OSError as _e:
+        logger.warning("CATCHUP: marker yazılamadı (%s) — yine de devam ediliyor", _e)
+
+    with _lock:
+        _stocks_snapshot = list(_cache.get("data") or [])
+    _stale_tickers = [s.get("ticker") for s in _stocks_snapshot
+                       if s.get("data_quality") == "stale" and s.get("ticker")]
+    _stale_ratio = (len(_stale_tickers) / len(_stocks_snapshot)) if _stocks_snapshot else 0.0
+
+    if not _stale_tickers:
+        logger.info("CATCHUP: tetiklendi — 0 stale ticker, atlandı")
+        return
+    if _stale_ratio <= _CATCHUP_STALE_RATIO_THRESHOLD:
+        logger.info("CATCHUP: tetiklendi — %d/%d ticker stale (%.1f%%) eşiğin (%.0f%%) altında, atlandı",
+                    len(_stale_tickers), len(_stocks_snapshot), _stale_ratio * 100,
+                    _CATCHUP_STALE_RATIO_THRESHOLD * 100)
+        return
+    if _yahoo_cb_blocked():
+        logger.warning("CATCHUP: SKIP — yahoo circuit breaker açık, %d ticker hiç denenmedi", len(_stale_tickers))
+        return
+
+    _last_fresh_by_ticker = {s.get("ticker"): s.get("last_fresh_ts") for s in _stocks_snapshot if s.get("ticker")}
+    _ordered_stale = _staleness_priority_order(_stale_tickers, _last_fresh_by_ticker.get)
+    logger.info("CATCHUP: tetiklendi — %d/%d ticker stale (%.1f%%), öncelik sırasıyla (en eski önce) deneniyor",
+                len(_ordered_stale), len(_stocks_snapshot), _stale_ratio * 100)
+
+    _attempted = 0
+    _rescued = []
+    for _t in _ordered_stale:
+        if _yahoo_cb_blocked():
+            logger.warning("CATCHUP: CB devrede açıldı — %d/%d ticker denendikten sonra geri çekildi",
+                            _attempted, len(_ordered_stale))
+            break
+        _attempted += 1
+        _r = _analyze_with_timeout(_t)
+        if _r:
+            _enrich_stock(_r)
+            _r["last_fresh_ts"] = time.time()
+            _rescued.append(_r)
+
+    if _rescued:
+        with _lock:
+            _by_ticker = {s.get("ticker"): s for s in _cache.get("data", [])}
+            for _r in _rescued:
+                _by_ticker[_r["ticker"]] = _r
+            _merged = list(_by_ticker.values())
+            _cache["data"] = _merged
+        _keep_known_good_cache(_merged)
+        _save_cache_to_disk(_merged)
+        try:
+            _notify_signal_changes(_rescued)
+        except Exception as _e:
+            logger.error("CATCHUP: _notify_signal_changes hatası: %s", _e)
+
+    logger.info("CATCHUP: SONUC — %d/%d denendi, %d kurtarıldı, %d hâlâ stale",
+                _attempted, len(_ordered_stale), len(_rescued), len(_ordered_stale) - len(_rescued))
+
+
 def _purge_stale_chart_caches():
     """Fiyat uyuşmazlığı olan BIST hisse chart cache'lerini temizler.
 
@@ -4284,6 +4365,16 @@ def background_refresh():
                 logger.warning("chart reverify marker yazılamadı: %s", _e)
 
         if not _should_run_eod:
+            # CPO-1703: ana EOD turu bugün için zaten çalıştıysa (_already_done_today)
+            # ve prev_cache fallback'e düşen ticker'lar varsa, günde BİR kez daha
+            # (19:30 TR'den itibaren) catch-up dene. Yeni thread/process yok — bu
+            # iterasyonun kendi senkron akışı.
+            if _already_done_today and is_trading_day(_today_tr):
+                _today_catchup_path = os.path.join(
+                    _SNAPSHOTS_DIR, f"{_today_tr.strftime('%Y-%m-%d')}_catchup.flag"
+                )
+                if not os.path.exists(_today_catchup_path) and _catchup_retry_ready_after():
+                    _run_catchup_retry_pass(_today_catchup_path)
             time.sleep(_EOD_POLL_INTERVAL)
             continue
 
