@@ -271,6 +271,42 @@ const step = async (ad, fn) => {
   focusKept === 'KORUNDU' ? ok('60 sn yenileme sonrasi odak korundu')
                           : bad('odak korunmadi', focusKept);
 
+  /* ── 4c) K-BI: birlestirme sayimi GERCEKTEN eklenen mi? ──────────────── */
+  /* Dizge araMAZ -- canli sayfada kanonu CALISTIRIR. Eski (yalanci) kod
+     yolunda bulut mesaji gelen listenin uzunlugunu yaziyordu; burada tamamen
+     YINELENEN bir liste verilir ve added===0 beklenir. `save()` cagrilmadigi
+     icin tarayicinin localStorage'ina dokunulmaz. */
+  console.log('\n[4c] K-BI — birlestirme sayimi (/portfolio)');
+  await p.goto(BASE + '/portfolio', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await p.waitForTimeout(1500);
+  const merge = await p.evaluate(() => {
+    if (typeof _pfMergePositions !== 'function') return { err: '_pfMergePositions YOK (kanon servis edilmiyor)' };
+    const before = Array.isArray(portfolio) ? portfolio.length : -1;
+    if (before < 0) return { err: 'portfolio dizi degil' };
+    const yeni  = { ticker: 'ZZTEST', lot: 1, price: 1.23, date: '2026-01-02' };
+    const r1 = _pfMergePositions([yeni]);                    // yeni kayit
+    const r2 = _pfMergePositions([{ ...yeni }]);             // AYNI kayit tekrar
+    const r3 = _pfMergePositions([{ ...yeni, price: '1.23' }]); // string fiyat = yine ayni
+    const after = portfolio.length;
+    return { before, after, r1, r2, r3 };
+  });
+  if (merge.err) {
+    bad('K-BI birlestirme kanonu', merge.err);
+  } else {
+    (merge.r1.added === 1 && merge.r1.duplicate === 0)
+      ? ok('K-BI yeni kayit eklendi', 'added=1')
+      : bad('K-BI yeni kayit', JSON.stringify(merge.r1));
+    (merge.r2.added === 0 && merge.r2.duplicate === 1)
+      ? ok('K-BI yinelenen kayit EKLENMEDI ve eklenmis SAYILMADI', 'added=0 duplicate=1')
+      : bad('K-BI yinelenen kayit', JSON.stringify(merge.r2) + ' (eski yalanci yol added=1 derdi)');
+    (merge.r3.added === 0 && merge.r3.duplicate === 1)
+      ? ok('K-BI dedupe sayisallastiriyor', 'string fiyat da yinelenen sayildi')
+      : bad('K-BI dedupe olcutu', JSON.stringify(merge.r3));
+    (merge.after === merge.before + 1)
+      ? ok('K-BI dizi uzunlugu tutarli', merge.before + ' -> ' + merge.after)
+      : bad('K-BI dizi uzunlugu', merge.before + ' -> ' + merge.after + ' (beklenen +1)');
+  }
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>
