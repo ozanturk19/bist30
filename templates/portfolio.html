@@ -45,6 +45,21 @@
     <button class="pf-fetch-error-retry" onclick="retryPortfolioFetch()">Tekrar dene</button>
   </div>
 
+  <!-- K-BM: OKUMA hatası (bozuk kayıt) banner'ı — yazma hatasından ayrı:
+       bu durumda kullanıcının verisi hâlâ tarayıcıda DURUYOR ve kurtarılabilir,
+       ama liste boş göründüğü için kullanıcı farkında olmadan üzerine yazar. -->
+  <div class="pf-fetch-error" id="pfCorruptWarn" role="alert" aria-live="assertive" style="display:none">
+    <span>
+      <span aria-hidden="true">⚠️</span>
+      <strong>Kayıtlı portföyünüz okunamadı</strong> — kayıt bozuk görünüyor, bu yüzden liste boş gösteriliyor.
+      <span id="pfCorruptBackupNote">Bozuk kaydın bir kopyası tarayıcınızda saklandı.</span>
+      Aşağıdaki düğmeyle indirip içindeki pozisyonları elle geri girebilirsiniz.
+      <strong>Yeni pozisyon eklerseniz bozuk kayıt tarayıcıdan silinir</strong> — önce indirin.
+    </span>
+    <button class="btn-action" type="button" onclick="downloadCorruptPortfolio()"
+            style="margin-left:auto;white-space:nowrap">Bozuk kaydı indir</button>
+  </div>
+
   <!-- bughunt-12.09: localStorage YAZMA hatası banner'ı, aşağıdaki bilgi bandından
        BİLEREK ayrı — save() başarısız olursa kullanıcı bilgi bandını daha önce
        kapatmış olsa bile bu mutlaka görünmeli (gerçek, o anki veri kaybı riski). -->
@@ -175,8 +190,8 @@
   <div class="pf-table">
     <div id="emptyMsg" class="da-empty da-empty--page">
       <div class="da-empty-icon"><span aria-hidden="true">💼</span></div>
-      <div>Portföyünüz boş.</div>
-      <div style="font-size:var(--bp-text-sm);margin-top:6px">Yukarıdaki formdan hisse ekleyin.</div>
+      <div id="pfEmptyTitle">Portföyünüz boş.</div>
+      <div id="pfEmptyHint" style="font-size:var(--bp-text-sm);margin-top:6px">Yukarıdaki formdan hisse ekleyin.</div>
     </div>
     <table id="pfTable" style="display:none">
       <caption class="sr-only">Portföyünüzdeki hisselerin adet, maliyet, güncel değer ve kâr/zarar tablosu</caption>
@@ -209,12 +224,25 @@
 <script>
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
+const PF_BACKUP_KEY = 'bp_portfolio_bozuk';
 let portfolio;
+/* K-BM (21.09): ONCEDEN bozuk kayit SESSIZCE `[]` ile degistiriliyordu ve
+   sayfa "Portföyünüz boş." diyordu. Kullanici bunu gercek bos portfoy sanip
+   yeni pozisyon ekleyince ilk `save()` ham kaydi KALICI siliyordu — icindeki
+   ticker/lot/fiyat bilgisi okunabilir durumda olsa bile. Ayni is icin ikinci
+   kanon olan hisse.html (togglePortfolio) ise bozuk veride islemi IPTAL EDIP
+   "mevcut verin korundu" diyor; zayif olan kanon veri kaybettiriyordu.
+   Artik: ham kayit yedeklenir (ilk bozulma korunur, uzerine yazilmaz),
+   kullaniciya gorunur banner + indirme yolu verilir, bos durum metni
+   "bos" degil "okunamadi" der ([[K-BK]]: bos != hata). */
+let _pfCorruptRaw = null;
 try {
-  portfolio = JSON.parse(localStorage.getItem(PF_KEY) || '[]');
+  const _raw = localStorage.getItem(PF_KEY);
+  portfolio = JSON.parse(_raw || '[]');
   if (!Array.isArray(portfolio)) throw new Error('not an array');
 } catch (e) {
-  console.warn('portfolio localStorage okunamadi, sifirlaniyor:', e);
+  console.warn('portfolio localStorage okunamadi, bozuk kayit yedekleniyor:', e);
+  try { _pfCorruptRaw = localStorage.getItem(PF_KEY); } catch (_) { _pfCorruptRaw = null; }
   portfolio = [];
 }
 let liveData   = {};  // ticker → {price, signal, signal_price}
@@ -246,6 +274,44 @@ function dismissLsWarning() {
   try { localStorage.setItem(LS_WARN_KEY, '1'); } catch (e) { /* best-effort - banner bir sonraki ziyarette tekrar gorunebilir */ }
 }
 showLsWarning();
+
+/* ── K-BM: bozuk kayit bildirimi + kurtarma ─────────────────────────── */
+function _pfShowCorruptWarning() {
+  if (_pfCorruptRaw == null) return;
+  /* Yedegi ILK bozulmada al ve bir daha UZERINE YAZMA: sonraki ziyaretlerde
+     `bp_portfolio` artik `[]` olabilir, o zaman bu yedek tek kopyadir. */
+  let backedUp = false;
+  try {
+    if (localStorage.getItem(PF_BACKUP_KEY) == null) localStorage.setItem(PF_BACKUP_KEY, _pfCorruptRaw);
+    backedUp = localStorage.getItem(PF_BACKUP_KEY) != null;
+  } catch (e) { console.warn('bozuk kayit yedeklenemedi (kota/gizli mod):', e); }
+  const note = document.getElementById('pfCorruptBackupNote');
+  if (note && !backedUp) note.textContent = 'Kopya saklanamadı (depolama dolu veya gizli mod) — bu sekmeyi kapatmadan indirin.';
+  const el = document.getElementById('pfCorruptWarn');
+  if (el) el.style.display = 'flex';
+  /* Bos durum metni de duzeltilir: "bos" ile "okunamadi" ayri seylerdir. */
+  const em = document.getElementById('pfEmptyTitle');
+  if (em) em.textContent = 'Portföy kaydınız okunamadı.';
+  const eh = document.getElementById('pfEmptyHint');
+  if (eh) eh.textContent = 'Yukarıdaki uyarıdan bozuk kaydı indirip pozisyonları elle girebilirsiniz.';
+}
+function downloadCorruptPortfolio() {
+  let raw = _pfCorruptRaw;
+  try { if (raw == null) raw = localStorage.getItem(PF_BACKUP_KEY); } catch (e) { /* localStorage erisilemez (gizli mod): bellekteki _pfCorruptRaw tek kaynak */ }
+  if (raw == null) { showToast('Bozuk kayıt bulunamadı.', 'err'); return; }
+  const blob = new Blob([raw], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `borsapusula-portfoy-bozuk-kayit-${bpTodayTrIso()}.json`,  // K-BD: TR takvim gunu
+  });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✅ Bozuk kayıt indirildi.', 'ok');
+}
+_pfShowCorruptWarning();
 
 function fmt(v, d=2) { return (+v).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}); }
 function fmtM(v) {
