@@ -255,7 +255,7 @@ const step = async (ad, fn) => {
      eklendiginde sayfa /hisse/GARAN'da kaldi ve adim "DUZENLE DUGMESI YOK"
      dedi -- yani K-AX regresyonu gibi GORUNEN sey aslinda OLCUM arizasiydi.
      Her adim artik kendi sayfasina KENDISI gider. */
-  console.log('\n[4] K-AX — periyodik yenileme odagi (/portfolio, 65 sn)');
+  console.log('\n[4a] K-AX — periyodik yenileme odagi (/portfolio, 65 sn)');
   await p.goto(BASE + '/portfolio', { waitUntil: 'domcontentloaded', timeout: 60000 });
   await p.waitForTimeout(3000);
   const focusKept = await p.evaluate(async () => {
@@ -276,7 +276,7 @@ const step = async (ad, fn) => {
      yolunda bulut mesaji gelen listenin uzunlugunu yaziyordu; burada tamamen
      YINELENEN bir liste verilir ve added===0 beklenir. `save()` cagrilmadigi
      icin tarayicinin localStorage'ina dokunulmaz. */
-  console.log('\n[4c] K-BI — birlestirme sayimi (/portfolio)');
+  console.log('\n[4b] K-BI — birlestirme sayimi (/portfolio)');
   await p.goto(BASE + '/portfolio', { waitUntil: 'domcontentloaded', timeout: 60000 });
   await p.waitForTimeout(1500);
   const merge = await p.evaluate(() => {
@@ -313,7 +313,7 @@ const step = async (ad, fn) => {
      K/Z'yi tablo render'inin aksine korumasizca hesapliyordu ("Infinity"/"NaN").
      Adim dizge ARAMAZ: canli sayfada gercek fonksiyonlari CALISTIRIR.
      f381efb dersi: kendi sayfasina KENDI gider, onceki adimin birakigina guvenmez. */
-  console.log('\n[4d] K-BJ — pozisyon sayisal dogrulamasi (tek kanon)');
+  console.log('\n[4c] K-BJ — pozisyon sayisal dogrulamasi (tek kanon)');
   await p.goto(BASE + '/portfolio', { waitUntil: 'domcontentloaded', timeout: 60000 });
   await p.waitForTimeout(1200);
   const kbj = await p.evaluate(() => {
@@ -365,7 +365,7 @@ const step = async (ad, fn) => {
   }
 
   /* ── 4e) K-BJ — hisse detay quick-add dogrulanmamis fiyat YAZMAMALI ──── */
-  console.log('\n[4e] K-BJ — hisse detay hizli-ekleme (/hisse/THYAO)');
+  console.log('\n[4d] K-BJ — hisse detay hizli-ekleme (/hisse/THYAO)');
   await p.goto(BASE + '/hisse/THYAO', { waitUntil: 'domcontentloaded', timeout: 60000 });
   await p.waitForTimeout(1800);
   const kbj2 = await p.evaluate(() => {
@@ -411,7 +411,7 @@ const step = async (ad, fn) => {
   /* ⛔ Bu adimlar KENDI context'lerini acar: route yakalama paylasilan sayfaya
      sizarsa sonraki adimlar bayat/sahte olcum verir
      ([[reference_olcum_sirasi_katmanin_durumunu_bozar]]). */
-  console.log('\n[4c] K-BK — soguk baslangic: bos liste != veri yok');
+  console.log('\n[4e] K-BK — soguk baslangic: bos liste != veri yok');
   {
     const COLD = JSON.stringify({ stocks: [], loading: true, data_quality: 'OK',
                                   stocks_age_s: 5, refreshing: true, data_freshness: {} });
@@ -538,6 +538,95 @@ const step = async (ad, fn) => {
       await pg.waitForTimeout(2000);
       hits === 0 ? ok('K-BK 404 bp-search onbellegini kullaniyor', '289 KB indirme yapilmadi')
                  : bad('K-BK 404 onbellek', '/api/data istek sayisi=' + hits);
+      await c.close();
+    });
+  }
+
+  /* ── 4d) K-BL: gorunen gun/saat CIHAZIN degil BIST'in takviminden gelir ─ */
+  /* Ayristirici olcum: tarayici saat dilimi America/New_York'a (TR-7) ayarlanir.
+     Fix oncesi rozet cihaz saatini bastigi icin NY saatini gosterirdi. */
+  console.log('\n[4f] K-BL — BIST saati/gunu, cihaz saat diliminden BAGIMSIZ');
+  {
+    await step('K-BL rozet: etiket kalici + BIST saati', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', timezoneId: 'America/New_York',
+                                     viewport: { width: 1280, height: 900 } });
+      const pg = await c.newPage();
+      await pg.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(2500);
+      /* ⛔ Etiket/saat/saniye AYRI dugumlerdir; aralarindaki bosluk flex `gap`
+         ile cizilir, metinde YOKTUR -- `wrap.textContent` "BIST21:30:49" verir
+         ve "^BIST\b" gibi bir sinir buna TAKILMAZ. Her dugum kendi selektoru
+         ile okunur (adimin ilk yazimi tam bu yuzden sahte-negatif uretti). */
+      const m = await pg.evaluate(() => {
+        const w = document.getElementById('bpLiveTime');
+        const l = document.querySelector('.bp-live-time-label');
+        const t = document.getElementById('bpLiveTimeText');
+        const sc = document.getElementById('bpLiveTimeSec');
+        return {
+          label: l ? l.textContent.trim() : '(yok)',
+          aria: w ? w.getAttribute('aria-label') : null,
+          shown: t ? t.textContent.trim() : '(yok)',
+          sec: sc ? sc.textContent.trim() : '(yok)',
+          labelVisible: l ? getComputedStyle(l).display !== 'none' : false,
+          deviceHH: String(new Date().getHours()).padStart(2, '0'),
+          canonHH: (typeof bpTrClock === 'function' ? bpTrClock() : '??:??:??').slice(0, 2),
+        };
+      });
+      /* Etiket ILK TICK'TE SILINMEMELI (fix oncesi "Yerel Saat" placeholder'i
+         hemen uzerine yazilir, rozet etiketsiz kalirdi). */
+      if (m.label !== 'BIST' || !m.labelVisible) return bad('K-BL rozet etiketi', m.label + ' (gorunur=' + m.labelVisible + ')');
+      if (!/^\d{2}:\d{2}$/.test(m.shown)) return bad('K-BL rozet saat bicimi', m.shown);
+      if (!/^:\d{2}$/.test(m.sec)) return bad('K-BL rozet saniye bicimi', m.sec);
+      if (m.aria !== 'Borsa Istanbul saati') return bad('K-BL rozet aria-label', String(m.aria));
+      /* NY (TR-7) cihazda gosterilen saat CIHAZIN degil BIST'in olmali. */
+      if (m.shown.slice(0, 2) !== m.canonHH) return bad('K-BL rozet BIST saati degil', m.shown + ' vs kanon ' + m.canonHH);
+      if (m.shown.slice(0, 2) === m.deviceHH) return bad('K-BL ayristirici dusuk', 'cihaz saati BIST saatiyle ayni (TZ emulasyonu calismadi?)');
+      ok('K-BL rozet "BIST HH:MM" + BIST saati', 'cihaz(NY)=' + m.deviceHH + 'h, gosterilen=' + m.shown);
+      await c.close();
+    });
+
+    await step('K-BL bayat banner tarihi: TR takvim gunu', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', timezoneId: 'America/New_York',
+                                     viewport: { width: 1280, height: 900 } });
+      const pg = await c.newPage();
+      /* TR takviminde BUGUN 01:00'a denk gelen bir yas sec: o an NY'de DUN 18:00'dir,
+         yani iki takvim AYRI gun gosterir -- rozetin hangi takvimi kullandigi
+         ancak boyle ayrisir. */
+      const trNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }));
+      let ageS = trNow.getHours() * 3600 + trNow.getMinutes() * 60 - 3600;
+      if (ageS < 0) ageS += 86400;
+      const want = new Date(trNow.getTime() - ageS * 1000);
+      const wantTxt = String(want.getDate()).padStart(2, '0') + '.' + String(want.getMonth() + 1).padStart(2, '0');
+      await pg.route('**/api/data-quality', r => r.fulfill({ status: 200, contentType: 'application/json',
+        body: JSON.stringify({ data_quality: 'seans_disi_eksik', stocks_age_s: ageS, refreshing: false }) }));
+      await pg.goto(BASE + '/hisseler', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(3000);
+      const t = await pg.evaluate(() => {
+        const e = document.getElementById('staleBannerText');
+        const b2 = document.getElementById('staleBanner');
+        if (!e || !b2) return '(yok)';
+        return (getComputedStyle(b2).display === 'none' ? '[GIZLI] ' : '') + e.textContent.trim();
+      });
+      t.startsWith(wantTxt + ' ') ? ok('K-BL banner TR takvim gunu', wantTxt + ' (NY cihazda bir gun geri kaymiyor)')
+                                  : bad('K-BL banner tarihi', 'beklenen ' + wantTxt + ', gelen: ' + t.slice(0, 90));
+      await c.close();
+    });
+
+    await step('K-BL olu kopya silindi, grafik ekseni saglam', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 900 } });
+      const pg = await c.newPage();
+      await pg.goto(BASE + '/hisse/THYAO', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(5000);
+      const m = await pg.evaluate(() => ({
+        dead: typeof _tickFmt === 'undefined',
+        canon: typeof BPChart === 'object' && typeof BPChart.fmtTickDate === 'function',
+        axis: (typeof BPChart === 'object' && typeof BPChart.fmtTickDate === 'function')
+          ? BPChart.fmtTickDate('2026-04-10', 2) : null,
+      }));
+      if (!m.dead) return bad('K-BL olu kopya', '_tickFmt hala tanimli');
+      if (!m.canon) return bad('K-BL kanon', 'BPChart.fmtTickDate yok');
+      if (m.axis !== 'Nis 10') return bad('K-BL eksen bicimi', String(m.axis));
+      ok('K-BL _tickFmt olu kopyasi gitti, kanon eksen bicimi calisiyor', 'fmtTickDate -> "Nis 10"');
       await c.close();
     });
   }
