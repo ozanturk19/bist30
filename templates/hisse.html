@@ -141,9 +141,9 @@
   </span>
   {% endif %}
   <div class="bp-segments-inner" role="tablist" aria-label="Hisse detay segmentleri">
-    <a class="bp-seg-item active" data-segment="ozet" id="tab-ozet" role="tab" aria-selected="true" aria-controls="panel-ozet" tabindex="0">Özet</a>
+    <a class="bp-seg-item active" data-segment="ozet" id="tab-ozet" role="tab" aria-selected="true" aria-controls="heroPanel panel-ozet" tabindex="0">Özet</a>
     <a class="bp-seg-item" data-segment="grafik" id="tab-grafik" role="tab" aria-selected="false" aria-controls="chart-section" tabindex="-1">Grafik</a>
-    <a class="bp-seg-item bp-seg-item-ai" data-segment="ai" id="tab-ai" role="tab" aria-selected="false" aria-controls="sigExplainSection" tabindex="-1">
+    <a class="bp-seg-item bp-seg-item-ai" data-segment="ai" id="tab-ai" role="tab" aria-selected="false" aria-controls="sigExplainSection aiFundSection" tabindex="-1">
       <svg class="bp-seg-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true" focusable="false">
         <path d="M12 2.5l1.4 4.1 4.1 1.4-4.1 1.4-1.4 4.1-1.4-4.1-4.1-1.4 4.1-1.4L12 2.5zm6.5 11l.95 2.55 2.55.95-2.55.95-.95 2.55-.95-2.55-2.55-.95 2.55-.95.95-2.55z"/>
       </svg>
@@ -264,7 +264,11 @@
      gauge+Son 30 Gün sparkline) artık SADECE Özet sekmesinde gösteriliyor.
      Kompakt bağlam (fiyat/sinyal/ticker) header'daki hpPrice/hpChg/hpSignal
      ile (bu bloğun DIŞINDA, satır ~222) zaten her sekmede görünür kalıyor. #}
-  <div class="bp-hero-card da-hero-card" data-tab-content="ozet" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
+  <!-- K-BF (21.09): hero kart Ozet sekmesiyle birlikte gizlenip gosterilir ama
+       `panel-ozet` sarmalayicisinin DISINDA (sekme seridinin hemen altinda)
+       duruyor; bu yuzden tab-ozet`in aria-controls`unda YOKTU. Sayfanin kendi
+       kanonu (tab-haberler -> iki tabpanel token listesi) burada da uygulandi. -->
+  <div id="heroPanel" class="bp-hero-card da-hero-card" data-tab-content="ozet" role="tabpanel" aria-labelledby="tab-ozet" tabindex="0" style="--hero-accent:{{ _hc }};--hero-accent-2:{{ _hc2 }}">
     <svg class="da-hero-art" viewBox="0 0 400 267" aria-hidden="true" focusable="false">
       <circle cx="60" cy="40" r="1.6" fill="{{ _hc }}" opacity=".55"/>
       <circle cx="340" cy="60" r="1.6" fill="{{ _hc }}" opacity=".4"/>
@@ -1315,7 +1319,12 @@
        Teknik karttaki gibi koşulsuz "Gemini AI" rozeti kullanılmadı (Skor Analizi'ndeki
        "✦ AI Yorumu" tarzıyla tutarlı, aşırı-iddia yok). -->
   {% set _temel_ready = hs_available and hs.temel_analiz_skoru is not none %}
-  <div data-tab-content="ai" class="da-panel da-panel--accent da-ai-panel da-ai-panel--fund">
+  <!-- K-BE/K-BF (21.09): AI sekmesinin IKINCI paneli. Haberler sekmesi bu kanonu
+       zaten uyguluyordu (tab-haberler -> "storySection panel-haberler-main", iki
+       tabpanel token listesiyle bildirilir); AI sekmesi MIRAS ALMAMISTI: bu panel
+       tab-ai`nin aria-controls`unda YOKTU ve role=tabpanel tasimiyordu, yani ekran
+       okuyucuya sekmenin parcasi olarak hic baglanmiyordu. -->
+  <div id="aiFundSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" class="da-panel da-panel--accent da-ai-panel da-ai-panel--fund">
     <div class="da-ai-head">
       <span class="da-util-eyebrow"><span aria-hidden="true">📋</span> Temel Görünüm Ne Anlama Geliyor?</span>
     </div>
