@@ -3568,7 +3568,7 @@ function _renderFundTrendChart(period) {
     const niWord = niNeg ? 'Net Zarar' : 'Net Kâr';
     const grpLbl = `${label} — Ciro: ${revTxt} · ${niWord}: ${niTxt}`;
     return `<div role="img" aria-label="${grpLbl}" data-tip="${grpLbl}" tabindex="0" style="flex:1;max-width:${groupW}px;display:flex;flex-direction:column;align-items:center;gap:5px;border-radius:var(--bp-radius-sm)">
-      <div style="font-size:${lblFont};line-height:1.5;text-align:center;white-space:nowrap">
+      <div class="ft-num" style="font-size:${lblFont};line-height:1.5;text-align:center;white-space:nowrap">
         <div style="color:var(--bp-brand);font-weight:700">${revTxt}</div>
         <div style="color:${niNeg ? 'var(--bp-sat)' : 'var(--bp-al)'};font-weight:700;font-style:italic">${niTxt}</div>
       </div>
@@ -3581,14 +3581,34 @@ function _renderFundTrendChart(period) {
   }).join('');
   const swatch = (bg, hatch) =>
     `<span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:2px;background-color:${bg}${hatch ? ';background-image:' + NI_HATCH : ''};margin-right:4px"></span>`;
+  /* K-BV eki (22.09): ETIKET GENISLIGI ICERIGE BAGLIDIR, VIEWPORT'A DEGIL.
+     Olcek kisaltmasi kanona gecince ("Mr" -> "Mrd") etiketler ~12px buyudu ve
+     320px'te (WCAG 1.4.10) son yil grubu grafik kutusunun 11,3px DISINA tasti
+     -- canli olcum /hisse/BIMAS, chart scrollWidth 268 > clientWidth 256.
+     Cozum sabit bir kirilma noktasi DEGIL, render SONRASI olcum: satir
+     kutusuna sigmiyorsa yazi ve bosluk bir kademe kuculur (8px/6px ile 320px'te
+     218,6px <= 228px, olculdu); o da yetmezse sarmal yatay kaydirir ve
+     ortalama birakilir -- `justify-content:center` tasma halinde SOL ucu
+     erisilemez kilar, bu yuzden ayni dalda flex-start'a cekiliyor. */
   chartEl.innerHTML =
-    `<div style="display:flex;gap:${gap}px;align-items:flex-end;justify-content:center;max-width:${containerW}px;margin:0 auto">${barsHtml}</div>
+    `<div class="ft-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div class="ft-row" style="display:flex;gap:${gap}px;align-items:flex-end;justify-content:center;max-width:${containerW}px;margin:0 auto">${barsHtml}</div></div>
      <div style="display:flex;gap:14px;margin-top:10px;justify-content:center;flex-wrap:wrap;font-size:var(--bp-text-2xs);color:var(--bp-text3)">
        <span>${swatch('var(--bp-brand)', false)}Ciro</span>
        <span>${swatch('var(--bp-al)', true)}<em>Net Kâr</em></span>
        ${hasNeg ? `<span>${swatch('var(--bp-sat)', true)}<em>Net Zarar</em></span>` : ''}
      </div>
      <div style="margin-top:6px;text-align:center;font-size:var(--bp-text-2xs);color:var(--bp-text3)">Taramalı ve <em>italik</em> olan net kâr/zarardır.</div>`;
+
+  const _scr = chartEl.querySelector('.ft-scroll');
+  const _row = chartEl.querySelector('.ft-row');
+  /* clientWidth 0 = yerlesim henuz yok (gizli kap): olcum GECERSIZ, dokunma --
+     yoksa 0 > 0+1 yanlis olsa da ilerideki bir yerlesimde sifir genislik
+     sahte "sigmiyor" uretebilir. Olculemeyen sey kuculmez. */
+  if (_scr && _row && _scr.clientWidth > 0 && _scr.scrollWidth > _scr.clientWidth + 1) {
+    _row.style.gap = '6px';
+    _row.querySelectorAll('.ft-num').forEach(el => { el.style.fontSize = '8px'; });
+    if (_scr.scrollWidth > _scr.clientWidth + 1) _row.style.justifyContent = 'flex-start';
+  }
 }
 window.fundTrendSetPeriod = function(period) {
   _renderFundTrendChart(period);
