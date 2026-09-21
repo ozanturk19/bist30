@@ -183,6 +183,17 @@ COMMENT_RE = re.compile(r"{#.*?#}", re.S)
 TANIM_RE = re.compile(r"(--[A-Za-z0-9_-]+)\s*:")
 VAR_RE = re.compile(r"var\(\s*(--[A-Za-z0-9_-]+)")
 HEX_RE = re.compile(r"#[0-9A-Fa-f]{3,8}\b")
+
+# CPO K-BG (21.09.2026): `_tok('--bp-x', '#yedek')` / `BPChart.tok(...)` KUSUR
+# DEGIL, KANONUN TA KENDISIDIR. JS'te `var(--bp-x)` yazilamaz; renk calisma
+# aninda tokens.css'ten okunur ve token cozulmezse literale DUSULMELIDIR
+# (yedek olmadan grafik renksiz kalir). K-B bu yedek argumani "ham hex" diye
+# sayiyordu: bu tur `--bp-chart-crosshair` token'landiginda bp-chart-common.js
+# 17 -> 19, hisse.html 12 -> 14 cikti -- yani DOGRU kod borc gibi gorundu.
+# Yanlis yon burada sisme: gelecek bir tur bu "borcu" temizlemeye calisirsa
+# yedegi SILER ve kapi onu odullendirir. Yedek argumani sayimdan cikariliyor.
+TOK_FALLBACK_RE = re.compile(
+    r"\b(?:_tok|BPChart\s*\.\s*tok)\s*\(\s*['\"]--[\w-]+['\"]\s*,\s*['\"][^'\"]*['\"]\s*\)")
 TOKEN_DEGER_RE = re.compile(r"(--[A-Za-z0-9_-]+)\s*:\s*(#[0-9A-Fa-f]{3,8})\s*;")
 BOS_CATCH_RE = re.compile(r"catch\s*(?:\([^)]*\))?\s*\{\s*\}")
 
@@ -327,6 +338,7 @@ def motorsuz_sozlesme_bul():
 
 def olu_palet_say(metin, hexler, rgbler):
     metin = YORUM_RE.sub(" ", metin)
+    metin = TOK_FALLBACK_RE.sub(" ", metin)          # K-BG: kanonik yedek argumani
     n = 0
     for h in HEX_RE.findall(metin):
         if h.lower() in hexler:
@@ -407,6 +419,7 @@ def hex_say(metin, harita, rgbharita=None):
     # maskeliyordu. Canli olcum: /ozet'in literali token'a cevrildi, ozet.css
     # sayimi yine de 1'de kaldi — tek kaynagi fix'i anlatan yorumdu.
     metin = YORUM_RE.sub(" ", metin)
+    metin = TOK_FALLBACK_RE.sub(" ", metin)          # K-BG: kanonik yedek argumani
     n = 0
     for h in HEX_RE.findall(metin):
         hl = h.lower()

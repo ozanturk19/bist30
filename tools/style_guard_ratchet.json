@@ -1,6 +1,6 @@
 {
  "_not": "T1.7 style-guard ratchet — kanonik-degerli ham hex, dosya basina TAVAN. Sayim yalniz DUSEBILIR; artis deploy'u bloklar. Yeni token eklenince token_imzasi degisir ve bu dosya --baseline ile yenilenir. 'dosyalar' anahtari sayfa sablonlarini + EK_HEX_DOSYALARI'ni (blog_content.py, harici css) birlikte tasir.",
- "token_imzasi": "24:#00e290,#0e0e12,#141416,#1c1b1f,#1e293b,#201f21,#21262d,#22d3ee|24",
+ "token_imzasi": "27:#00e290,#0e0e12,#141416,#1c1b1f,#1e293b,#201f21,#21262d,#22d3ee|27",
  "dosyalar": {
   "404.html": 0,
   "410.html": 0,
@@ -16,7 +16,7 @@
   "gizlilik.html": 0,
   "gundem.html": 0,
   "hakkinda.html": 0,
-  "hisse.html": 12,
+  "hisse.html": 9,
   "hisseler.html": 0,
   "iletisim.html": 0,
   "index.html": 0,
@@ -41,6 +41,7 @@
   "static/css/pages/hisse.css": 1,
   "static/css/pages/hisseler.css": 0,
   "static/css/pages/iletisim.css": 0,
+  "static/css/pages/index.css": 0,
   "static/css/pages/karsilastir.css": 0,
   "static/css/pages/metodoloji.css": 0,
   "static/css/pages/offline.css": 0,
@@ -53,7 +54,7 @@
   "static/css/pages/unsubscribe.css": 0,
   "static/css/pages/yasal.css": 0,
   "static/css/shared.css": 0,
-  "static/js/bp-chart-common.js": 17,
+  "static/js/bp-chart-common.js": 0,
   "static/js/bp-tooltip.js": 1,
   "static/js/focus-trap.js": 0,
   "static/js/toast.js": 4,
