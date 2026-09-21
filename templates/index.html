@@ -503,7 +503,7 @@ header{
 <section class="da-section" id="daRecapSection">
   <div class="da-panel da-panel--accent da-recap-panel">
     <div class="da-recap-tag"><span class="dot"></span>Piyasa Özeti</div>
-    <h2 class="da-recap-headline da-display">Bugün ne oldu?</h2>
+    <h2 class="da-recap-headline da-display">Son kapanışta ne oldu?</h2>
     <p class="da-recap-body" id="daRecapText">
       <span class="da-skel" style="display:block;width:96%;height:1.1em;border-radius:6px;margin-bottom:8px"></span>
       <span class="da-skel" style="display:block;width:80%;height:1.1em;border-radius:6px;margin-bottom:8px"></span>
@@ -521,7 +521,7 @@ header{
   <div class="da-section-head">
     <div>
       <div class="da-eyebrow">Gündem</div>
-      <h2 class="da-section-title da-display">Bugünün haberleri.</h2>
+      <h2 class="da-section-title da-display" id="daGnmHeadline">Gündem başlıkları.</h2>
     </div>
     <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
       <div class="da-gnm-tabs" id="daGnmTabs" role="tablist" aria-label="Gündem sekmeleri">
@@ -1256,6 +1256,21 @@ header{
     fetch('/api/macro-news').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(d){
       var items = (d && d.items) || [];
       if (!items.length) { list.innerHTML = '<div class="da-panel da-empty">Şu an haber yok.</div>'; return; }
+      /* 21.09 (K-AK): baslik "Bugunun haberleri." diye SABIT yaziliydi ama
+         akis donarsa (haber kotasi/feed kesintisi -- gecmiste makro ozet 10 gun
+         donmustu) altindaki her tarih damgasi baska bir gunu gosterirken baslik
+         "bugun" demeye devam ediyordu. Artik veriden turetiliyor: EN YENI
+         haberin date_str'i BIST gunuyle esitse "bugun" denir, degilse o tarih
+         yazilir. Tarih okunamazsa notr statik metin korunur. */
+      (function(){
+        var hEl = document.getElementById('daGnmHeadline');
+        if (!hEl || typeof bpTodayTr !== 'function') return;
+        var ds = (items[0] && items[0].date_str) || '';
+        if (!/^\d{2}\.\d{2}$/.test(ds)) return;
+        var t = bpTodayTr();
+        var todayStr = (t.d < 10 ? '0' : '') + t.d + '.' + (t.m < 10 ? '0' : '') + t.m;
+        hEl.textContent = (ds === todayStr) ? 'Bugünün haberleri.' : ds + ' haberleri.';
+      })();
       list.innerHTML = items.slice(0, 8).map(function(item){
         var url = (typeof safeHref === 'function') ? safeHref(item.url) : (item.url || '#');
         return '<a href="' + url + '" target="_blank" rel="noopener" class="da-macro-news-item">' +
