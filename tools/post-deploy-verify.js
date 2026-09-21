@@ -1129,10 +1129,22 @@ const step = async (ad, fn) => {
       bads.length ? bad('K-BR SSR ' + s.ticker, bads.join(' · '))
                   : ok('K-BR SSR ' + s.ticker, 'checklist/HapBilgi/meta/JSON-LD hepsi ' + adxTr);
 
-      /* CSR: indikator paneli ayni sayiyi mi basiyor? */
+      /* CSR: indikator paneli ayni sayiyi mi basiyor?
+         ⛔ 22.09 (K-BU turu) OLCUM DUZELTMESI — ARA DURUMU OLCUYORDUK.
+         Panel IKI FAZDA dolar: ilk gecis chart ozetiyle (`s`) calisir ve
+         ADX(14) satirini basar; RSI(14) satiri `signalData` (/api/data)
+         gelene kadar HIC eklenmez (hisse.html ~2721: `if (signalData &&
+         signalData.rsi != null)`). Eski bekleme kosulu YALNIZCA ADX(14)
+         ariyordu, yani ILK fazda cozuluyor ve RSI'yi bulamayip
+         "panel RSI farkli" diye SAHTE ALARM uretiyordu — canli EDATA'da
+         panel 5sn sonra "RSI(14): 18,1" basiyor, yani urun DOGRUYDU.
+         Yerlesik durumu bekle: ADX **ve** RSI birlikte gorunene kadar.
+         (K-BT dersi 47'nin ikizi: kismi render bir olcum degiskenidir.) */
       const csr = await p.waitForFunction(() => {
         const e = document.getElementById('indTechContent');
-        return (e && /ADX\(14\)/.test(e.textContent)) ? e.textContent.replace(/\s+/g, ' ') : null;
+        if (!e) return null;
+        const t = e.textContent;
+        return (/ADX\(14\)/.test(t) && /RSI\(14\)/.test(t)) ? t.replace(/\s+/g, ' ') : null;
       }, null, { timeout: 20000 }).then(h => h.jsonValue()).catch(() => null);
       if (!csr) bad('K-BR CSR ' + s.ticker, 'indikator paneli dolmadi (olcum gecersiz)');
       else if (!csr.includes('ADX(14): ' + adxTr)) bad('K-BR CSR ' + s.ticker, 'panel ADX farkli: ' + csr.slice(0, 90));
@@ -1160,6 +1172,67 @@ const step = async (ad, fn) => {
       else ok('K-BR anasayfa', 'SSR = CSR = ' + JSON.stringify(bq));
     }
   }
+
+  /* ── 4o) K-BU: /gundem karti ADX'i ETIKETTEN degil HAM ALANDAN okur ────
+     Kart, `indicators.adx.label` ("ADX 26", YUVARLANMIS) icinden sayiyi
+     parse edip `.toFixed(1)` ile basiyordu; AYNI SAYFANIN SSR makrosu
+     `'%.1f'|format(s.adx)` ile "25,9" basiyordu ve grid innerHTML ile
+     bastan yazildigi icin CSR, SSR'in DOGRU sayisini EZIYORDU (canli 7/7).
+     ⛔ SSR'i okumak YETMEZ: sayfa acilisinda gorulen sayi SSR'in olabilir.
+     Grid'i bir SENTINEL ile yok edip loadGundem()'i cagiriyoruz — boylece
+     olculen sey KESIN olarak renderCard'in ciktisidir (K-BT dersi 47'nin
+     ikizi: olculemedi != gecti). */
+  console.log('\n[4o] K-BU — /gundem karti sayiyi etiketten ayristirmamali');
+
+  await step('K-BU: CSR kart ADX/RSI degerleri /api/gundem ham alaniyla ayni', async () => {
+    await p.goto(BASE + '/gundem', { waitUntil: 'domcontentloaded' });
+    await p.waitForTimeout(3500);
+
+    const api = await (await ctx.request.get(BASE + '/api/gundem')).json();
+    const rows = [...(api.new_signals || []), ...(api.strong_al || [])];
+    if (!rows.length) return ok('K-BU', '/api/gundem bos — adim ATLANDI (olcum on-kosulu yok)');
+    const want = {};
+    for (const s of rows) if (s.adx != null) want[s.ticker] = s.adx.toFixed(1).replace('.', ',');
+
+    const r = await p.evaluate(async () => {
+      const g = document.getElementById('strongAlGrid');
+      if (!g) return { err: 'strongAlGrid yok' };
+      /* SSR'i YOK ET: bundan sonra okunan her sey renderCard ciktisidir. */
+      g.innerHTML = '<i id="__kbu_sentinel"></i>';
+      if (typeof loadGundem !== 'function') return { err: 'loadGundem tanimsiz' };
+      await loadGundem();
+      await new Promise(res => setTimeout(res, 800));
+      return {
+        sentinelSilindi: !document.getElementById('__kbu_sentinel'),
+        kanon: typeof bpIndNum + '/' + typeof sigLabel,
+        kartlar: [...g.querySelectorAll('.stock-card')].map(c => ({
+          t: (c.querySelector('.sc-ticker') || {}).textContent.trim(),
+          badge: (c.querySelector('.badge') || {}).textContent.trim(),
+          adx: [...c.querySelectorAll('.sc-metric')].map(m => m.textContent.trim())
+                 .find(x => x.indexOf('ADX') === 0) || null,
+        })),
+      };
+    });
+
+    if (r.err) return bad('K-BU', r.err);
+    if (r.kanon !== 'function/function')
+      return bad('K-BU kanon', 'bpIndNum/sigLabel renderCard aninda tanimsiz (' + r.kanon +
+                               ') — bp-format.js tuketicisinden SONRA mi yukleniyor?');
+    if (!r.sentinelSilindi) return bad('K-BU', 'grid yeniden render EDILMEDI (olcum gecersiz)');
+    if (!r.kartlar.length)  return bad('K-BU', 'CSR hic kart basmadi (olcum gecersiz)');
+
+    const yanlis = r.kartlar.filter(c => want[c.t] && c.adx !== 'ADX ' + want[c.t]);
+    if (yanlis.length)
+      return bad('K-BU', yanlis.length + '/' + r.kartlar.length + ' kartta CSR ADX ham alandan sapti: ' +
+                 yanlis.map(c => c.t + ' "' + c.adx + '" != ADX ' + want[c.t]).slice(0, 4).join(' · '));
+
+    /* Rozet metni de tek kanondan (sigLabel) gelmeli — elle kopya bayatlar. */
+    const rozet = r.kartlar.filter(c => !/^[▲▼●] (Güçlü Trend|Trend Bozuldu|Yatay)$/.test(c.badge));
+    if (rozet.length)
+      return bad('K-BU rozet', rozet.map(c => c.t + ' "' + c.badge + '"').slice(0, 3).join(' · '));
+
+    ok('K-BU', r.kartlar.length + ' CSR kart · ADX ham alanla birebir · rozet kanonda');
+  });
 
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
