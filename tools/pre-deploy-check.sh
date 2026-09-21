@@ -562,7 +562,7 @@ fi
 # /hakkinda, /metodoloji, /tarama, /gundem, index dogrusunu soyluyordu -> tek
 # is icin iki kanon. Kapi ayrica KENDI PREMISE'ini olcer: app.py'den EOD imzasi
 # kaybolursa PASS/FAIL vermez, "cadence degismis" diye duser.
-echo "33/35 eod-freshness-claim-check (K-BN: gosterilen fiyatin tazelik vaadi)..."
+echo "33/36 eod-freshness-claim-check (K-BN: gosterilen fiyatin tazelik vaadi)..."
 if python3 tools/eod-freshness-claim-check.py; then
   echo "  ✓ eod-freshness-claim-check PASS"
 else
@@ -579,7 +579,7 @@ fi
 # hucresine uygulanmamisti. Ikinci sinif: hacim ekseninin kanonik rengi
 # --bp-volume; --bp-gold/--bp-accent-yellow odunc alinmasi ayni kavrami
 # uc renge boluyordu (21.09'da 4 yuzey/10 ihlal, pozitif kontrol 49ae8c6).
-echo "34/35 volume-axis-color-check (K-BO: hacim ekseni yon rengiyle boyanamaz)..."
+echo "34/36 volume-axis-color-check (K-BO: hacim ekseni yon rengiyle boyanamaz)..."
 if python3 tools/volume-axis-color-check.py; then
   echo "  ✓ volume-axis-color-check PASS"
 else
@@ -598,13 +598,34 @@ fi
 # /karsilastir "+0,00%" YESIL. /portfolio'da daha sik: pozisyon guncel
 # fiyattan eklendiginde K/Z TAM SIFIRDIR ve "+0,00 ₺" YESIL yaziliyordu.
 # Pozitif kontrol (fix oncesi agac): 27 ihlal / 9 dosya.
-echo "35/35 direction-zero-check (K-BP: 0 bir yonle ayni kefeye konamaz)..."
+echo "35/36 direction-zero-check (K-BP: 0 bir yonle ayni kefeye konamaz)..."
 if python3 tools/direction-zero-check.py; then
   echo "  ✓ direction-zero-check PASS"
 else
   echo "  ✗ K-BP KIRIK: degismeyen bir deger yon rengi/isareti aliyor."
   echo "    Detay için: python3 tools/direction-zero-check.py"
   echo "    Pozitif kontrol: python3 tools/direction-zero-check.py --ref 739a8fc"
+  FAIL=$((FAIL + 1))
+fi
+
+# 36. stop-level-canon-check (K-BQ, CPO 21.09.2026) -- "STOP" BIR YON
+# IDDIASIDIR. `sl_level` Supertrend bandinin guncel degeridir, sinyal yonunden
+# bagimsiz HER hissede hesaplanir; long-only bir urunde ona "Stop" demek ancak
+# band fiyatin ALTINDAYKEN anlamlidir. 21.09 canli olcum (/api/data, 217 hisse):
+# sl_level > price olan **197** hisse (72/72 SAT + 125/138 BEKLE). MARTI: fiyat
+# 2,01 ₺ iken "Hap Bilgi" -> "Stop Seviyesi 2,74 ₺" (%36 YUKARIDA), ayni sayfa
+# iki satir yukarida "Net sinyal olmadigi icin tanimli bir giris bolgesi yok"
+# diyordu. /karsilastir ayni alani ZATEN dogru adlandirmisti ("Supertrend
+# Seviyesi" + "acik bir pozisyonun stopu anlamina gelmez") -- /hisse emsali
+# miras almamisti. Alt-etiket de band fiyatin ustundeyken "ST destegi" diyordu.
+# Pozitif kontrol (fix oncesi agac): 7 ihlal / hisse.html.
+echo "36/36 stop-level-canon-check (K-BQ: 'Stop' yon iddiasidir)..."
+if python3 tools/stop-level-canon-check.py; then
+  echo "  ✓ stop-level-canon-check PASS"
+else
+  echo "  ✗ K-BQ KIRIK: sl_level yuzeyinde 'stop'/'destek'/'direnc' kosulsuz iddia ediliyor."
+  echo "    Detay için: python3 tools/stop-level-canon-check.py"
+  echo "    Pozitif kontrol: python3 tools/stop-level-canon-check.py --ref 14248ef"
   FAIL=$((FAIL + 1))
 fi
 
