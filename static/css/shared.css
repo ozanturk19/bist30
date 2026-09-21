@@ -249,7 +249,12 @@ html {
     --bp-chrome-header: 0px;
     --bp-sticky-bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 6px);
   }
-  #macroBar, .macro-bar, header { position: static !important; }
+  /* ⛔ `static` DEGIL `relative`: `#macroBar` `.macro-pause-btn`in
+     (position:absolute; top:0; bottom:0) KAPSAYAN BLOGUDUR. `static`
+     yapinca dugme ilk kapsayan bloga (viewport) gerilip 375px'lik gorunmez
+     bir serit haline geliyordu -- olculdu, K-AY'nin kendi regresyonuydu.
+     `relative` yapiskanligi kaldirir, kapsama blogunu KORUR. */
+  #macroBar, .macro-bar, header { position: relative !important; }
   /* bp-search.js aynı kuralı `@media (max-width:768px)` altında !important
      ile yazıyor; ondan SONRA enjekte edildiği için burada daha YÜKSEK
      ÖZGÜLLÜK gerekiyor (kaynak sırası değil, özgüllük kazanır). */

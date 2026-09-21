@@ -281,10 +281,13 @@ async function run() {
         const m = await page.evaluate(MEASURE, FOCUSABLE);
         Object.assign(out, m);
 
-        // ── ANALİTİK SONUCU CANLI OLARAK DOĞRULA ───────────────────────
-        // F1 bulgularının ilk 3'ü gerçekten kaydırılıp rect ile sınanır.
-        out.verified = [];
-        for (const o of (m.obscured || []).slice(0, 3)) {
+        // ── ANALİTİK SONUÇ HÜKÜM DEĞİL, HİPOTEZDİR ─────────────────────
+        // ⛔ Analitik model bantları SABİT varsayar; oysa yapışkan bir bant
+        //   belgenin başında henüz YAPIŞMAMIŞTIR. Bu yüzden her F1 adayı
+        //   gerçekten o konuma kaydırılıp `elementFromPoint` ile örtülme
+        //   SINANIR; sınamadan geçemeyen aday ÇÜRÜTÜLÜR (bulgu sayılmaz).
+        out.verified = []; out.refuted = 0;
+        for (const o of (m.obscured || [])) {
           const v = await page.evaluate(async ({ want, n, FOCUSABLE }) => {
             window.scrollTo(0, want);
             await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -293,12 +296,27 @@ async function run() {
               const cs = getComputedStyle(e);
               return cs.visibility !== 'hidden' && cs.display !== 'none';
             });
-            const e = els[n]; if (!e) return { ok: false, why: 'öge kayboldu' };
+            const e = els[n]; if (!e) return { ok: false, gercek: false, why: 'öge kayboldu' };
             const r = e.getBoundingClientRect();
-            return { ok: true, top: Math.round(r.top), bottom: Math.round(r.bottom), scrollY: Math.round(window.scrollY) };
+            // Gorunur mu? Merkezinden (ve dort ic noktasindan) elementFromPoint.
+            const pts = [[0.5, 0.5], [0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]];
+            let gorunur = false, ortuc = null;
+            for (const [fx, fy] of pts) {
+              const x = r.left + r.width * fx, y = r.top + r.height * fy;
+              if (x < 0 || y < 0 || x > innerWidth || y > innerHeight) continue;
+              const hit = document.elementFromPoint(x, y);
+              if (!hit) continue;
+              if (hit === e || e.contains(hit) || hit.contains(e)) { gorunur = true; break; }
+              ortuc = (hit.id ? '#' + hit.id : hit.tagName.toLowerCase() + '.' + String(hit.className || '').split(/\s+/)[0]).slice(0, 34);
+            }
+            return { ok: true, gercek: !gorunur, ortuc, top: Math.round(r.top), bottom: Math.round(r.bottom), scrollY: Math.round(window.scrollY) };
           }, { want: o.want, n: o.n, FOCUSABLE });
           out.verified.push({ sel: o.sel, name: o.name, ...v });
+          if (v.ok && v.gercek === false) out.refuted++;
         }
+        // Yalniz SINAMADAN GECEN adaylar bulgudur.
+        m.obscured = m.obscured.filter((o, i) => !(out.verified[i] && out.verified[i].gercek === false));
+        out.obscured = m.obscured;
 
         tot.obscured += (m.obscured || []).length;
         tot.clipped += (m.clipped || []).length;
@@ -324,7 +342,8 @@ async function run() {
     console.log(`    kapsam disi: kapali-details=${sk.closedDetails || 0} gorunmez=${sk.invisible || 0} bant-ici=${sk.chrome || 0} ic-kaydirma=${sk.innerScroll || 0}`);
     if (r.hOverflow) console.log(`    F2 YATAY TASMA: scrollWidth=${r.hOverflow.scrollWidth} > ${r.hOverflow.vw}`);
     for (const o of r.obscured.slice(0, 6)) console.log(`    F1 ORTULU: ${o.sel} "${o.name}" (docTop=${Math.round(o.docTop)} en iyi scroll=${Math.round(o.want)})`);
-    for (const v of (r.verified || [])) console.log(`      dogrulama: ${v.sel} -> ${v.ok ? `top=${v.top} bottom=${v.bottom} @scrollY=${v.scrollY}` : v.why}`);
+    if (r.refuted) console.log(`    curutuldu (canli sinama gorunur buldu): ${r.refuted}`);
+    for (const v of (r.verified || []).filter(v => v.gercek)) console.log(`      dogrulama: ${v.sel} -> top=${v.top} bottom=${v.bottom} @scrollY=${v.scrollY} ortuc=${v.ortuc}`);
     for (const c of r.clipped.slice(0, 6)) console.log(`    F3 KIRPILMIS: ${c.sel} "${c.name}" <- ${c.clipper} (${c.axis})`);
   }
   if (LOCAL) {

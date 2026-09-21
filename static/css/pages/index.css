@@ -53,7 +53,9 @@ header{
 .macro-item{display:inline-flex;align-items:center;gap:6px;padding:0 16px;font-size:var(--bp-text-sm);font-variant-numeric:tabular-nums;font-family:'Space Grotesk',monospace,sans-serif;border-right:1px solid var(--bp-border);color:var(--bp-text)}
 .macro-item-lbl{font-weight:700;color:var(--bp-text2);letter-spacing:.2px}
 .mc-pos{color:var(--bp-al)}.mc-neg{color:var(--bp-sat)}.mc-neu{color:var(--bp-text3)}
-.macro-pause-btn{position:absolute;right:0;top:0;bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:linear-gradient(to left,var(--bp-surface) 60%,transparent);border:none;color:var(--bp-text2);opacity:.75;font-size:var(--bp-text-sm);line-height:1;cursor:pointer;padding:0}
+/* K-AZ: `top:0` seridin safe-area DOLGUSUNU da kapsiyordu -> dugmenin ust
+   24px'i PWA'da centigin altinda kaliyordu (olculdu, inset=47px). */
+.macro-pause-btn{position:absolute;right:0;top:env(safe-area-inset-top,0px);bottom:0;z-index:var(--bp-z-local-control);width:32px;display:flex;align-items:center;justify-content:center;background:linear-gradient(to left,var(--bp-surface) 60%,transparent);border:none;color:var(--bp-text2);opacity:.75;font-size:var(--bp-text-sm);line-height:1;cursor:pointer;padding:0}
 .macro-pause-btn:hover,.macro-pause-btn:focus-visible{opacity:1}
 
 /* ── sayfa gövdesi ── */
