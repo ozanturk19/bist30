@@ -915,6 +915,83 @@ const step = async (ad, fn) => {
     ok('K-BO /hisse Hacim Profili', '4 kural yon renginden arindi (' + href.split('=')[1] + ')');
   });
 
+  /* ── 4m) K-BP: degisim sifirsa yon rengi/isareti YOK ─────────────────── */
+  console.log('\n[4m] K-BP — 0 bir yonle ayni kefeye konamaz');
+  const AL  = 'rgb(0, 226, 144)';      /* --bp-al  #00e290 */
+  const SAT = 'rgb(248, 81, 73)';      /* --bp-sat #f85149 */
+
+  /* Once canli veriden GERCEKTEN degismeyen bir hisse bul — yoksa olcum
+     yapilamaz ve "temiz" demek YALAN olur (olculemedi != gecti). */
+  let zeroTics = [];
+  await step('K-BP olcum on-kosulu: change_pct = 0 olan hisse var mi', async () => {
+    const r = await ctx.request.get(BASE + '/api/data?_t=' + Date.now());
+    if (!r.ok()) return bad('K-BP on-kosul', '/api/data HTTP ' + r.status());
+    const d = await r.json();
+    zeroTics = (d.stocks || [])
+      .filter(s => typeof s.change_pct === 'number' && parseFloat(s.change_pct.toFixed(2)) === 0)
+      .map(s => s.ticker).slice(0, 3);
+    if (!zeroTics.length) {
+      /* Bugun sifir degisimli hisse YOK: /karsilastir adimini atlamak
+         DURUSTTUR, ama sessizce "gecti" saymayiz. */
+      return ok('K-BP on-kosul', 'bugun 0,00% kapatan hisse yok — /karsilastir adimi ATLANDI');
+    }
+    ok('K-BP on-kosul', zeroTics.length + ' hisse 0,00%: ' + zeroTics.join(', '));
+  });
+
+  if (zeroTics.length) {
+    await step('K-BP /karsilastir: 0,00% notr (yesil DEGIL) ve "+" yok', async () => {
+      await p.goto(BASE + '/karsilastir?tickers=' + zeroTics.join(','), { waitUntil: 'domcontentloaded' });
+      await p.waitForTimeout(2500);
+      const r = await p.evaluate(() => [...document.querySelectorAll('span.mono')]
+        .map(e => ({ t: e.textContent.trim(), c: getComputedStyle(e).color }))
+        .filter(x => /^[+\-]?0,00%$/.test(x.t) || /^[+\-]?0,0%$/.test(x.t)));
+      if (!r.length) return bad('K-BP /karsilastir', '0,00% hucresi bulunamadi (olcum gecersiz)');
+      const yesil = r.filter(x => x.c === AL || x.c === SAT);
+      if (yesil.length) return bad('K-BP /karsilastir',
+        yesil.length + '/' + r.length + ' hucre hala YON renginde: ' + JSON.stringify(yesil[0]));
+      const arti = r.filter(x => /^\+/.test(x.t));
+      if (arti.length) return bad('K-BP /karsilastir', arti.length + ' hucre "+0,00%" yaziyor (kazanc ima eder)');
+      ok('K-BP /karsilastir', r.length + ' hucre notr · hicbirinde "+" yok');
+    });
+  }
+
+  await step('K-BP anasayfa gundem karti yon rengini GERCEKTEN tasiyor', async () => {
+    await p.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+    await p.waitForTimeout(1500);
+    /* Kart listesi "Hisse" sekmesinde tembel yukleniyor. */
+    await p.evaluate(() => {
+      const t = [...document.querySelectorAll('.da-gnm-tab')].find(x => /Hisse/.test(x.textContent));
+      if (t) t.click();
+    });
+    await p.waitForTimeout(3500);
+    const r = await p.evaluate(() => [...document.querySelectorAll('.da-gnm-card')].map(c => {
+      const s = c.querySelector('.da-gnm-chg');
+      return s ? { t: s.textContent.trim(), c: getComputedStyle(s).color } : null;
+    }).filter(Boolean));
+    if (!r.length) return bad('K-BP anasayfa', 'gundem hisse karti bulunamadi (olcum gecersiz)');
+    /* ASIL HATA: sinif `.da-mrow` altina kilitliydi, 5/5 kart AYNI govde
+       rengindeydi. Yani "renk dogru mu" degil, "renk VAR MI" soruluyor. */
+    const yanlis = r.filter(x => (/^\+/.test(x.t) && x.c !== AL) || (/^-/.test(x.t) && x.c !== SAT));
+    if (yanlis.length) return bad('K-BP anasayfa',
+      yanlis.length + '/' + r.length + ' kartta yon rengi YOK/yanlis: ' + JSON.stringify(yanlis[0]));
+    const renkler = new Set(r.map(x => x.c));
+    ok('K-BP anasayfa', r.length + ' kart · ' + renkler.size + ' farkli yon rengi');
+  });
+
+  await step('K-BP kanon bp-format.js sayfada gercekten yuklu', async () => {
+    const r = await p.evaluate(() => {
+      if (typeof bpDir !== 'function') return { err: 'bpDir tanimli degil' };
+      return { d0: bpDir(0, 2), dneg: bpDir(-0.004, 2), f0: bpFormatPct(0, 2),
+               fneg: bpFormatPct(-0.004, 2), c0: bpDirClass(0, 2) };
+    });
+    if (r.err) return bad('K-BP kanon', r.err);
+    if (r.d0 !== 0 || r.dneg !== 0) return bad('K-BP kanon', 'bpDir 0/-0,004 icin 0 dondurmedi: ' + JSON.stringify(r));
+    if (r.f0 !== '0,00%' || r.fneg !== '0,00%') return bad('K-BP kanon',
+      'esiklenen sayi != gosterilen sayi: ' + JSON.stringify(r));
+    if (r.c0 !== 'neu') return bad('K-BP kanon', 'bpDirClass(0) != neu: ' + r.c0);
+    ok('K-BP kanon', 'bpDir/bpFormatPct/bpDirClass canlida dogru (-0,004 -> "0,00%" notr)');
+  });
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>
