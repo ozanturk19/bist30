@@ -64,7 +64,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=ea4f5f29">
+<link rel="stylesheet" href="/static/css/tokens.css?v=3f9511f0">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
 <style id="bp-critical-css">
@@ -1125,7 +1125,11 @@ header{
       var band = up ? 'var(--bp-al)' : 'var(--bp-sat)';
       return '<span class="da-mrow"><span class="mband" style="background:' + band + '"></span><span class="mt">' + esc(s.ticker) + '</span><span class="mp">' + fmtPrice(s.price) + ' ₺</span><span class="md ' + (up?'up':'down') + '">' + fmtPct(s.change_pct) + '</span></span>';
     }).join('');
-    track.innerHTML = rowsHtml + rowsHtml; // kusursuz döngü için ikileme
+    /* K-AF (21.09): ikileme YALNIZ kusursuz kaydırma döngüsü için. Hareketi
+       azalt modunda şerit kaydırılmaz, sarılır (tokens.css) — orada ikinci
+       kopya kullanıcıya aynı 10 hisseyi ARKA ARKAYA İKİ KEZ gösterirdi. */
+    var daReduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    track.innerHTML = daReduceMotion ? rowsHtml : (rowsHtml + rowsHtml);
   }
 
   // ── reveal-on-scroll ──

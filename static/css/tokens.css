@@ -628,4 +628,17 @@ body {
   /* Duraklatacak hareket yok → düğme ölü kontrol olurdu (WCAG 2.2.2 mekanizmayı
      yalnız hareket VARKEN ister). */
   .macro-pause-btn { display: none !important; }
+
+  /* ── İKİNCİ TAŞIYICI-HAREKET: ana sayfa "Gün İçi En Çok Hareket Edenler"
+     şeridi (`.da-marquee-track`, `@keyframes daMarquee`). Dedektör buldu —
+     makro şeridi elle ararken GÖZDEN KAÇMIŞTI (kalıcı ders: sınıf ADINA değil
+     GÖREVİNE göre tara). Canlı ölçüm, reduce altında: @375px 55, @1280px 46
+     metin düğümü erişilemez.
+
+     Burada çözüm kaydırma DEĞİL SARMA: makro şerit 32px'lik sabit yükseklikte
+     yapışkan bir bant (yükselmesi düzeni bozar, yatay kaydırma doğru cevap),
+     bu şerit ise sayfa akışındaki tam-genişlik bir bölüm — 10 kalemi alt alta
+     sarmak hem kaydırma gerektirmez hem de "Gün İçi En Çok Hareket Edenler"
+     başlığı yerinde kalır. Aynı sınıf, farklı yüzey, farklı doğru cevap. */
+  .da-marquee-track { animation: none !important; flex-wrap: wrap !important; width: auto !important; row-gap: 12px; }
 }
