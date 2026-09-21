@@ -216,6 +216,38 @@
       klass:isForm?'FORM':(hasText?'METINLI':'IKONSUZ')};
     if(isForm||!hasText){
       if(score+0.005>=NEED) continue;                                  /* GECER */
+      /* K-R (21.09) — DORDUNCU SAHTE-POZITIF SINIFI: AFFORDANSI KARDESTE
+         OLAN ALAN. #bpSearchInput tamamen seffaftir (border 0, bg transparent)
+         ve tek basina bakildiginda skoru 0'dir; ama alan kendi kutusuyla degil
+         KAPSAYICISIYLA taninir: kapsayicinin gorunur bir siniri var, icinde
+         alandan baska gorunur bir affordans (buyutec SVG) duruyor ve kutunun
+         tamami cursor:text. Canli dogrulama: wrap border-bottom 1px
+         rgb(42,42,44), kardes svg 18x18 rgb(144,144,151), placeholder ayni
+         renkte, overlay acilinca alan OTOMATIK odaklaniyor.
+         WCAG 1.4.11 Understanding: sinir ancak bilesen onsuz TANINAMIYORSA
+         gerekir -> bu desen muaf. K-Q'nun 2. sinifi ("ogenin KENDI
+         background-image'i") ile ayni ailedendir; oradaki affordans ogenin
+         icinde, burada KARDESINDE. Olcut dar tutuldu: UCUNUN DE saglanmasi
+         sart, yoksa sinirsiz her alan muaf olurdu. */
+      if(isForm && !hasFill && !hasBorder){
+        const par=el.parentElement;
+        if(par){
+          const pcs=getComputedStyle(par);
+          const pBorder=['Top','Right','Bottom','Left'].some(d=>{
+            const w=parseFloat(pcs['border'+d+'Width'])||0;
+            const c=parse(pcs['border'+d+'Color']);
+            return w>0 && c && c.a>0.05 && pcs['border'+d+'Style']!=='none';
+          });
+          const sibIcon=[...par.children].some(ch=>ch!==el &&
+            ch.getBoundingClientRect().width>=8 &&
+            (ch.tagName.toLowerCase()==='svg'||ch.querySelector('svg')));
+          if(pBorder && sibIcon && pcs.cursor==='text'){
+            UNMEAS.push({sig:sig(el),type:itype,
+              reason:'K-R muaf: affordans kardeste (kapsayici siniri + kardes ikon + cursor:text)'});
+            continue;
+          }
+        }
+      }
       if(outer.amb){rec.bgImage=outer.amb; AMB.push(rec);} else V.push(rec);
     } else {
       textIdent++;
