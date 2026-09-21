@@ -1234,6 +1234,80 @@ const step = async (ad, fn) => {
     ok('K-BU', r.kartlar.length + ' CSR kart · ADX ham alanla birebir · rozet kanonda');
   });
 
+  /* ── 4p) K-BV: para olcegi kisaltmasi TEK kanon + etiket kutusunu tasmaz ──
+     Iki kanal AYNI gecişte olculur, cunku ikisi ayni kokten dogdu:
+       (1) KISALTMA — /hisse Temel sekmesinde KART ("Yillik Ciro") ile hemen
+           altindaki CIRO/NET KAR GRAFIGI ayni buyuklugu ayni kelimeyle
+           yazmali. 22.09 oncesi kart "Mrd₺" derken grafik "Mr ₺" diyordu.
+       (2) TASMA — kisaltma buyudugu icin etiketler genisledi ve 320px'te
+           (WCAG 1.4.10) grafik kutusunun DISINA tasti. `docOverflow` 0 idi,
+           yani SAYFA duzeyinde olcum bunu GORMEZ: kayip kap icindedir.
+     ⛔ Olcum on-kosulu yoksa (fundamentals bos, grafik cizilmedi) adim
+        "ATLANDI" demez, DUSER — olculemedi != gecti. */
+  console.log('\n[4p] K-BV — para olcegi kisaltmasi tek kanon (/hisse Temel)');
+
+  await step('K-BV: kart ve grafik ayni olcek kisaltmasini kullanir + @320px tasma yok', async () => {
+    /* Olcum icin milyar/trilyon basamagina ULASAN bir hisse sec — kucuk
+       sirkette her sey "Mn" cikar ve kisaltma ayrimi olculemez. */
+    const data = await (await ctx.request.get(BASE + '/api/data')).json();
+    const tickers = (data.stocks || []).map(s => s.ticker).slice(0, 25);
+    let hedef = null, trendMax = 0;
+    for (const t of tickers) {
+      const f = await (await ctx.request.get(BASE + '/api/hisse/' + t + '/fundamentals')).json().catch(() => null);
+      const fd = f && f.fundamentals;
+      const tr = fd && fd.statement_trend;
+      if (!fd || !Array.isArray(tr) || tr.length < 2) continue;
+      const mx = Math.max(...tr.map(x => Math.abs(x.total_revenue || 0)));
+      if (mx >= 1e9) { hedef = t; trendMax = mx; break; }
+    }
+    if (!hedef) return bad('K-BV', 'milyar olcegine ulasan hisse bulunamadi (olcum gecersiz)');
+
+    await p.setViewportSize({ width: 320, height: 900 });
+    await p.goto(BASE + '/hisse/' + hedef, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await p.waitForSelector('#fundTrendChart .ft-row', { timeout: 20000 }).catch(() => {});
+    await p.waitForTimeout(2000);
+
+    const r = await p.evaluate(() => {
+      const c = document.getElementById('fundTrendChart');
+      const scr = c && c.querySelector('.ft-scroll');
+      const row = c && c.querySelector('.ft-row');
+      if (!c || !scr || !row) return { err: 'fundTrendChart/.ft-scroll/.ft-row yok' };
+      const gs = [...c.querySelectorAll('[role="img"]')];
+      if (!gs.length) return { err: 'grafik hic grup basmadi' };
+      const kartlar = [...document.querySelectorAll('#fundGridVal > *, #fundGridProfit > *')]
+        .map(e => e.textContent.replace(/\s+/g, ' ').trim());
+      if (!kartlar.length) return { err: 'Temel kartlari bos' };
+      const cr = c.getBoundingClientRect();
+      const birim = t => (t.match(/(?:^|\s)(T|Mrd|Mn|Mr|M|K)\s*₺/g) || []).map(x => x.trim());
+      return {
+        kartBirimleri:   [...new Set(kartlar.flatMap(birim))],
+        grafikBirimleri: [...new Set(gs.map(g => g.getAttribute('aria-label') || '').flatMap(birim))],
+        disari: gs.filter(g => { const b = g.getBoundingClientRect();
+                                 return b.right > cr.right + 1 || b.left < cr.left - 1; }).length,
+        grup: gs.length,
+        scrollFits: scr.scrollWidth <= scr.clientWidth + 1,
+        docOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        fn: typeof bpMoneyCompact,
+      };
+    });
+    await p.setViewportSize({ width: 1280, height: 900 });
+
+    if (r.err) return bad('K-BV', r.err + ' (olcum gecersiz)');
+    if (r.fn !== 'function') return bad('K-BV kanon', 'bpMoneyCompact tanimsiz — bp-format.js yuklenmedi mi?');
+    const eski = [...r.kartBirimleri, ...r.grafikBirimleri].filter(u => /^(Mr|M|K)\s*₺$/.test(u));
+    if (eski.length) return bad('K-BV kisaltma', 'kanon disi birim: ' + eski.join(' · '));
+    const fark = r.grafikBirimleri.filter(u => !r.kartBirimleri.includes(u));
+    /* Kart bir basamaga hic ulasmiyorsa (orn. sadece Mrd) grafikte Mn cikmasi
+       normaldir; ihlal, AYNI basamagin FARKLI yazilmasidir — bunu yukaridaki
+       `eski` testi yakalar. Burada yalnizca bilgi olarak raporlanir. */
+    if (r.disari)     return bad('K-BV tasma', r.disari + '/' + r.grup + ' yil grubu @320px grafik kutusunun DISINDA');
+    if (!r.scrollFits) return bad('K-BV tasma', '@320px satir kaba sigmiyor (kuculme dali calismamis)');
+    if (r.docOverflow > 0) return bad('K-BV tasma', '@320px sayfa yatay tasiyor: ' + r.docOverflow + 'px');
+    ok('K-BV', hedef + ' · kart[' + r.kartBirimleri.join(',') + '] grafik[' + r.grafikBirimleri.join(',') +
+               '] · ' + r.grup + '/' + r.grup + ' grup kutu icinde @320px' +
+               (fark.length ? ' · grafikte ek basamak: ' + fark.join(',') : ''));
+  });
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>
