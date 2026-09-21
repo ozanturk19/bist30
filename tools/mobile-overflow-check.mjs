@@ -53,14 +53,10 @@ const PAGES = [
   { name: 'iletisim', path: '/iletisim' },
   { name: 'yasal', path: '/yasal' },
   { name: 'portfolio', path: '/portfolio' },
-  { name: 'sinyaller', path: '/sinyaller' },
-  { name: 'sinyal-performans', path: '/sinyal-performans' },
   // 'dow' (/dow) BILEREK YOK: Dow verisi motorda yok, T0.7 kapsaminda route
   // zaten kaldirilmis (canli kanit: httpStatus=404, T9.1 kosumunda yakalandi).
   // 'djia' hic PAGES listesinde degildi, ek islem yok.
   { name: 'hisseler', path: '/hisseler' },
-  { name: 'sektorler', path: '/sektorler' },
-  { name: 'sektor', path: '/sektor' },
   { name: 'sektor-harita', path: '/sektor-harita' },
   { name: 'bilanco-takvimi', path: '/bilanco-takvimi' },
   // 'profil' (/profil) BILEREK YOK: Kucuk temizlik (Master Program,
@@ -68,8 +64,6 @@ const PAGES = [
   // ayni markali sayfa, yalniz HTTP status 200->404, zaten noindex,nofollow
   // tasiyordu). Bu harness tokensiz sabit /profil'i tarardi ve httpStatus>=400
   // guard'i (T9.1) bunu FAIL sayardi -- 'dow'/'abd-tarama' ile ayni desen.
-  { name: 'backtest', path: '/backtest' },
-  { name: 'virtual-portfolio', path: '/virtual-portfolio' },
   { name: 'blog', path: '/blog' },
   { name: 'blog-article', path: '/blog/supertrend-indikatoru-nedir' },
   // 'abd-tarama' (/abd/tarama) BILEREK YOK: f9e4ac8 (T4.1) ile kaldirildi,
@@ -78,11 +72,20 @@ const PAGES = [
   // ilk canli kosuda httpStatus=404 dondu, ama script bunu FAIL SAYMIYORDU
   // -- asagidaki httpStatus kontrolu bu korlugu da kapatiyor).
   { name: 'hisse-thyao', path: '/hisse/THYAO' },
-  { name: 'hisse-thyao-ozet', path: '/hisse/THYAO?tab=ozet' },
   { name: 'hisse-thyao-grafik', path: '/hisse/THYAO?tab=grafik' },
   { name: 'hisse-thyao-ai', path: '/hisse/THYAO?tab=ai' },
   { name: 'hisse-thyao-haberler', path: '/hisse/THYAO?tab=haberler' },
   { name: 'hisse-akbnk', path: '/hisse/AKBNK' },
+  // K-AD ikinci dalga: 7 kayit daha cikarildi. Yeni yonlendirme muhafizi,
+  // ilk turda cikarilan 16'nin YANINDA 6 sunucu-tarafi 301 daha ortaya
+  // cikardi (curl ile dogrulandi): /sinyaller /sinyal-performans /backtest
+  // -> /tarama · /sektorler /sektor -> /sektor-harita · /virtual-portfolio
+  // -> /portfolio. Yani harness /tarama'yi 4, /sektor-harita'yi 3,
+  // /portfolio'yu 2 kez olcuyordu. Ayrica 'hisse-thyao-ozet' cikarildi:
+  // ciplak /hisse/THYAO zaten ?tab=ozet'e normalize oluyor, AYNI DOM.
+  // Listelenen 45 kaydin 23'u ayni sayfanin tekrariydi; gercek kapsam
+  // 22 benzersiz sayfa. 'Kapsam sayisi = envanter uzunlugu' varsayimi
+  // olculene kadar bir iddiadir, olcu degil.
   // K-AD (21.09): 16 kayit BILEREK CIKARILDI -- /nasdaq /sp500 /kripto
   // /emtialar /btc /eth /sol /bnb /altin /gumus /petrol /dogalgaz /abd
   // /abd/sp500 /abd/nasdaq /abd/AAPL. Hepsi 19.08 BIST Odakli Sadelesme
@@ -167,10 +170,15 @@ async function checkPage(browser, pageDef, width) {
     // /petrol /dogalgaz /abd /abd/sp500 /abd/nasdaq /abd/AAPL /nasdaq /sp500)
     // 301 ile '/' adresine gidiyordu; harness 'ok' basiyor ama gercekte ANA
     // SAYFAYI 17 kez olcuyordu. "45 sayfa kapsandi" iddiasi yanlisti.
-    const finalUrl = page.url().replace(/\/$/, '');
-    const wantUrl = (BASE + pageDef.path).replace(/\/$/, '');
-    if (finalUrl !== wantUrl) {
-      throw new Error(`YONLENDIRME: ${pageDef.path} -> ${finalUrl} (listelenen sayfa olculmedi)`);
+    // Karsilastirma YOL duzeyinde: /hisse/<t> sayfasi ilk boyamada kendini
+    // `?tab=ozet`e normalize eder (history.replaceState, sunucu 301'i DEGIL,
+    // curl ile dogrulandi: HTTP 200). Bu AYNI sayfadir, bulgu degil. Sunucu
+    // tarafi 301'ler ise yolu degistirir ve burada yakalanir.
+    const norm = u => new URL(u).pathname.replace(/\/+$/, '') || '/';
+    const gotPath = norm(page.url());
+    const wantPath = norm(BASE + pageDef.path);
+    if (gotPath !== wantPath) {
+      throw new Error(`YONLENDIRME: ${pageDef.path} -> ${page.url()} (listelenen sayfa olculmedi)`);
     }
     await page.waitForTimeout(1200);
 
