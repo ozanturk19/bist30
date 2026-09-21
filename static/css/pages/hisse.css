@@ -482,12 +482,22 @@
   .hacim-profili .hp-row-icon { font-size:var(--bp-text-xs); flex-shrink:0; }
   .hacim-profili .hp-row-text { color:var(--bp-text2); flex-shrink:0; }
   .hacim-profili .hp-row-val { font-weight:700; font-variant-numeric:tabular-nums; }
-  .hacim-profili .hp-row-val.ok { color:var(--bp-al); }
-  .hacim-profili .hp-row-val.weak { color:var(--bp-bkl); }
-  .hacim-profili .hp-row-val.bad { color:var(--bp-sat); }
+  /* K-BO (21.09): Hacim Profili'nin IKI satiri da (RVOL 5g/20g + sinyal gunu
+     signal_vol_ratio) YON-BAGIMSIZ buyukluklerdir — yuksek hacim cokuste de
+     olusur, dusuk hacim "kotu" degil sadece ince. ok/bad yesil-kirmizi
+     boyanınca panel bir YON iddiasi gibi okunuyordu; ustelik hemen yanindaki
+     `.hp-tag.premium` (⭐ Hacim Onayli) zaten --bp-volume idi: tek satir, iki
+     renk. Emsal: tarama.css .trend-label (ADX, 10.09 BTCIM). Eksen tek renk +
+     notr kademeler. */
+  .hacim-profili .hp-row-val.ok { color:var(--bp-volume); }
+  .hacim-profili .hp-row-val.weak { color:var(--bp-text2); }
+  .hacim-profili .hp-row-val.bad { color:var(--bp-text3); }
   .hacim-profili .hp-row-val .hp-tag { font-size:var(--bp-text-2xs); padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:4px; font-weight:700; letter-spacing:.3px; }
   .hacim-profili .hp-row-val .hp-tag.premium { color:var(--bp-volume); background:rgba(var(--bp-volume-rgb),.10); border:1px solid rgba(var(--bp-volume-rgb),.45); }
-  .hacim-profili .hp-row-val .hp-tag.confirmed { color:var(--bp-al); background:rgba(var(--bp-al-rgb),.08); border:1px solid rgba(var(--bp-al-rgb),.40); }
+  /* K-BO: "✓ TEYITLI" de bir HACIM teyididir (sinyal gunu hacmi ortalamayi
+     gecti) — ⭐ Hacim Onayli ile AYNI eksen, ayni renk. Ikisi metinleriyle
+     ayrilir, renkle degil [[a32bfdc renk tek basina anlam tasimamali]]. */
+  .hacim-profili .hp-row-val .hp-tag.confirmed { color:var(--bp-volume); background:rgba(var(--bp-volume-rgb),.08); border:1px solid rgba(var(--bp-volume-rgb),.40); }
   .hacim-profili .hp-row-summary { margin-top:6px; font-size:var(--bp-text-sm); color:var(--bp-text3); font-style:italic; line-height:1.4; }
 
   /* ── İndikatör badges ── */

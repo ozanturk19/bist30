@@ -96,7 +96,15 @@
   /* CPO-1149/1150 (SENECA renk drifti kök nedeni): Hacim Onaylı (RVOL) ve
      tier/paywall rozetleri farklı eksenler — iki ayrı kanonik renk, elle
      hex serpiştirmek yerine BURADAN referans verilir. */
-  --bp-volume:    #ffc850;   /* Hacim Onaylı ⭐ (RVOL >= 1.20) — /gucu-yuksek'te zaten canlı */
+  --bp-volume:    #ffc850;   /* HACİM ekseninin kanonik rengi. Hacim Onaylı ⭐ (RVOL >= 1.20).
+                                 🔴 K-BO (21.09): hacim YÖN-BAĞIMSIZ bir büyüklüktür (çöküşte de
+                                 yüksek çıkar) — yön rengiyle (--bp-al/--bp-sat) boyanamaz; emsal
+                                 tarama.css .trend-label (ADX, 10.09 BTCIM). Aynı büyüklük dört
+                                 ayrı renkle boyanıyordu: / → --bp-volume, /sektor-harita ısı
+                                 haritası → --bp-accent-yellow (≥1,3) + --bp-al (≥2,0, ÖLÜ dal:
+                                 sektör ort. rvol canlıda max 1,48), /sektor-harita karşılaştır →
+                                 --bp-gold (≥2,0), /tarama → --bp-al (≥1,5). Hepsi buraya toplandı.
+                                 Eşik kanonu da tek: sitenin ilan ettiği RVOL >= 1,20. */
   --bp-volume-bg: rgba(var(--bp-volume-rgb), 0.10);
   --bp-volume-bd: rgba(var(--bp-volume-rgb), 0.45);
   --bp-premium:   #a855f7;   /* tier/paywall (Premium) — SPEC-018 W2 mor imza */
@@ -114,11 +122,11 @@
                                  değişiklik yok, yalnız kaynak tekilleşti).
                                  --bp-warn (#d29922, dikkat/orta-risk: entry-quality, bilanço
                                  rozeti, R:R orta bölge) AYRI eksendir — o bir DEĞERLENDIRME,
-                                 bu bir VERİ DURUMU. AÇIK SORU: sitede artık beş kehribar/sarı
-                                 var (--bp-gold, --bp-accent-yellow, --bp-volume, --bp-warn,
-                                 --bp-stale); hangilerinin gerçekten ayrı eksen olduğu ayrı
-                                 turda ölçülecek (--bp-accent-yellow'un kendi AÇIK SORU'suyla
-                                 aynı soru). */
+                                 bu bir VERİ DURUMU. K-BO (21.09) beş sarının SORUSUNU KAPATTI:
+                                 --bp-gold/--bp-accent-yellow/--bp-warn/--bp-stale ayrı eksenler
+                                 (premium · sarı aksan/EMA99 · değerlendirme · veri durumu), ama
+                                 HACİM ekseni üç yerde onlardan ÖDÜNÇ RENK ALIYORDU — bkz.
+                                 --bp-volume notu. */
   --bp-warn:      #d29922;   /* CPO-1576 (CPO-DEV2-061 emsaline dayalı kanonikleştirme): dikkat/orta-risk
                                  amber — entry-quality "dikkatli/uzak" + bilanço-yaklaşıyor rozeti + R:R
                                  orta-bölge. --bp-gold'dan (premium/altın) AYRI semantik eksen, karıştırma. */
@@ -136,9 +144,8 @@
                                  (--bp-accent-cyan emsali) çünkü üç ayrı semantik eksen aynı sarıyı
                                  paylaşıyor. --bp-gold (premium/altın) ve --bp-warn (dikkat/orta-risk)
                                  AYRI eksenler, karıştırma.
-                                 AÇIK SORU: sektor_harita'nın orta RVOL kademesi bu sarıyı
-                                 kullanıyor ama "Hacim Onaylı"nın kanonik rengi --bp-volume (#ffc850);
-                                 aynı kavram iki sarıyla boyanıyor olabilir — ayrı turda ölçülecek. */
+                                 K-BO (21.09) KAPATTI: sektor_harita'nın orta RVOL kademesi bu sarıyı
+                                 kullanıyordu — ölçüldü, GERÇEKTEN çakışmaydı, --bp-volume'a taşındı. */
 
   /* Radius */
   --bp-radius:    6px;

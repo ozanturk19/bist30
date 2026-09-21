@@ -454,11 +454,16 @@
     display:inline-flex; align-items:center; gap:6px;
     font-variant-numeric:tabular-nums; font-weight:600; font-size:var(--bp-text-base);
   }
-  .rvol-cell.high   { color:var(--bp-al); }
+  /* K-BO (21.09): hacim de ADX gibi YON-BAGIMSIZ bir buyukluk (yukaridaki
+     .trend-label notunun ayni gerekcesi, 10.09 BTCIM) — ama duzeltme kardes
+     hucreye uygulanmamisti. Ustelik AYNI SATIRDAKI "⭐ Hacim Onayli" rozeti
+     zaten --bp-volume: tek eksen, tek satir, iki renk. Hacim ekseni = --bp-volume.
+     (Bu sutun `vol_ratio` = Gunluk Hacim Orani; RVOL'den ayri sayi ama ayni eksen.) */
+  .rvol-cell.high   { color:var(--bp-volume); }
   .rvol-cell.normal { color:var(--bp-text); }
   .rvol-cell.low    { color:var(--text3); }
   .rvol-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .rvol-dot.high   { background:var(--bp-al); }
+  .rvol-dot.high   { background:var(--bp-volume); }
   .rvol-dot.normal { background:var(--bp-brand); }
   .rvol-dot.low    { background:var(--text3); }
 

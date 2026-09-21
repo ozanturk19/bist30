@@ -226,7 +226,12 @@
   .cmp-chg-pos { color:var(--bp-al); }
   .cmp-chg-neg { color:var(--bp-sat); }
   .cmp-stock-rvol { font-size:var(--bp-text-xs); color:var(--bp-text3); min-width:38px; text-align:right; }
-  .cmp-rvol-high { color:var(--bp-gold); }
+  /* K-BO (21.09): --bp-gold PREMIUM/ALTIN ekseni (tokens.css: "--bp-warn'dan AYRI
+     semantik eksen, karistirma") — hacim buyuklugunu onunla boyamak ayni sayfada
+     UCUNCU sariyi uretiyordu: Isi Haritasi sekmesi ayni metrigi --bp-accent-yellow,
+     ustundeki .stat-pill.pill-prem (⭐ Hacim Onayli) ise --bp-volume ile boyuyordu.
+     Hacim ekseninin kanonik rengi --bp-volume (tokens.css CPO-1149/1150). */
+  .cmp-rvol-high { color:var(--bp-volume); }
 
   /* 21.09 (K-V): `.cmp-empty-state` tek tuketicisi bir HATA mesajiydi ve
      notr gri bos-durum gibi goruntuluyordu -> kanonik `.da-empty--error`.

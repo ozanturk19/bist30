@@ -24,10 +24,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=070ccf90">
+<link rel="stylesheet" href="/static/css/tokens.css?v=7ed38bdb">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
-<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=736e5bdd">
+<link rel="stylesheet" href="/static/css/pages/sektor_harita.css?v=224cc515">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Mobile Bottom Navigation -->
@@ -83,7 +83,7 @@
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div class="score da-num" style="color:{{ color }}">{{ '+' if sec.score > 0 else '' }}{{ sec.score }}</div>
-          {% if sec.avg_rvol is not none %}<span style="font-size:10px;color:{{ 'var(--bp-al)' if sec.avg_rvol >= 2.0 else 'var(--bp-accent-yellow)' if sec.avg_rvol >= 1.3 else 'var(--bp-text3)' }}" data-tip="Sektörün ortalama RVOL&#39;u — 5 günlük ortalama hacim ÷ 20 günlük ortalama hacim" tabindex="0">RVOL {{ '%.2f'|format(sec.avg_rvol)|replace('.', ',') }}×</span>{% endif %}
+          {% if sec.avg_rvol is not none %}<span style="font-size:10px;color:{{ 'var(--bp-volume)' if sec.avg_rvol >= 1.20 else 'var(--bp-text3)' }}" data-tip="Sektörün ortalama RVOL&#39;u — 5 günlük ortalama hacim ÷ 20 günlük ortalama hacim" tabindex="0">RVOL {{ '%.2f'|format(sec.avg_rvol)|replace('.', ',') }}×</span>{% endif %}
         </div>
       </a>{% else %}<div class="loading-msg"><span aria-hidden="true">⏳</span> Veriler yükleniyor…</div>{% endfor %}
     </div>
@@ -213,7 +213,14 @@ function renderHeatmap(stocks) {
     const avgRvol = rvols.length > 0 ? (rvols.reduce((a,b) => a+b, 0) / rvols.length) : null;
     const rvolHtml = avgRvol != null
       ? (() => {
-          const rc = avgRvol >= 2.0 ? 'var(--bp-al)' : avgRvol >= 1.3 ? 'var(--bp-accent-yellow)' : 'var(--bp-text3)';
+          /* K-BO (21.09): hacim YON-BAGIMSIZ bir buyukluk olcusudur (cokuste de yuksek
+             cikar) — --bp-al (yukselis yesili) kullanilirsa ayni kartin seg-al cubugu
+             ve skor rengi zaten sinyal ekseninde oldugu icin "olumlu" okunuyordu;
+             emsal: tarama.css .trend-label (ADX, 10.09 BTCIM). Ustelik bu dal OLUYDU:
+             sektor ORTALAMA rvol'u canli veride max 1,48 (21.09, 13 sektor) — 2,0 esigi
+             hic tetiklenmiyordu. Tek eksen (--bp-volume, hacmin kanonik rengi) + sayfanin
+             KENDI lejandinin ilan ettigi tek esik (RVOL >= 1,20 = Hacim Onayli). */
+          const rc = avgRvol >= 1.20 ? 'var(--bp-volume)' : 'var(--bp-text3)';
           return `<span style="font-size:10px;color:${rc}" data-tip="Sektörün ortalama RVOL&#39;u — 5 günlük ortalama hacim ÷ 20 günlük ortalama hacim" tabindex="0">RVOL ${avgRvol.toFixed(2).replace('.', ',')}×</span>`;
         })()
       : '';
@@ -580,7 +587,10 @@ function renderCompare(json) {
       var chgVal = s.change_pct != null ? ((s.change_pct > 0 ? '+' : '') + s.change_pct.toFixed(2).replace('.', ',') + '%') : '—';
       var chgCls = s.change_pct > 0 ? 'cmp-chg-pos' : (s.change_pct < 0 ? 'cmp-chg-neg' : '');
       var rvolVal = s.rvol != null ? s.rvol.toFixed(2).replace('.', ',') + '×' : '';
-      var rvolCls = s.rvol >= 2 ? 'cmp-rvol-high' : '';
+      /* K-BO: esik 2,0 -> 1,20. Sayfanin lejandi "RVOL >= 1,20 = Hacim Onayli" diyor,
+         ama bu liste 2,0'a kadar griye boyuyordu: 21.09 canli veride 1,20+ olan 79
+         hissenin 74'u burada sonuk goruluyordu — sayfa kendi lejandiyla celisiyordu. */
+      var rvolCls = s.rvol >= 1.20 ? 'cmp-rvol-high' : '';
       row.innerHTML = '<span class="cmp-stock-ticker">' + esc(s.ticker) + '</span>' +
         '<span class="cmp-stock-sig ' + sigCls + '">' + sigLabel(s.signal) + '</span>' +
         '<span class="cmp-stock-price">' + (s.price != null ? fmtPrice(s.price) : '') + '</span>' +
