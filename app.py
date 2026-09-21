@@ -2938,6 +2938,12 @@ def _build_signal_email(changes, unsubscribe_url):
 _pending_changes_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pending_changes.json")
 _pending_changes_lock = _CrossProcessLock(_pending_changes_path + ".lock")
 
+# CPO-1705: haftalık digest için ayrı, günlük gönderimden bağımsız buffer.
+# pending_changes.json her gün daily digest sonunda temizlenir; weekly bunu
+# okursa yalnızca o günün (Cuma) değişimlerini görür. Bu dosya Pzt'den
+# Cuma'ya kadar birikir, yalnızca weekly gönderildikten sonra temizlenir.
+_pending_changes_weekly_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pending_changes_weekly.json")
+
 
 def _load_pending_changes():
     if not os.path.exists(_pending_changes_path):
@@ -2954,6 +2960,23 @@ def _save_pending_changes(items):
         _tp_write_json(_pending_changes_path, items, atomic=True, ensure_ascii=False, default=str)
     except Exception as e:
         logger.warning("pending_changes.json yazma hatası: %s", e)
+
+
+def _load_pending_changes_weekly():
+    if not os.path.exists(_pending_changes_weekly_path):
+        return []
+    try:
+        return _tp_read_json(_pending_changes_weekly_path, default=[])
+    except Exception as e:
+        logger.error("pending_changes_weekly.json okuma hatası (bozuk dosya olabilir): %s", e)
+        return []
+
+
+def _save_pending_changes_weekly(items):
+    try:
+        _tp_write_json(_pending_changes_weekly_path, items, atomic=True, ensure_ascii=False, default=str)
+    except Exception as e:
+        logger.warning("pending_changes_weekly.json yazma hatası: %s", e)
 
 
 def _serialize_change(c):
@@ -3014,6 +3037,14 @@ def _notify_email_signal_changes(changes):
         _save_pending_changes(pending)
         logger.info("Pending buffer: %d → %d (+%d) (file=pending_changes.json)",
                     prev_len, len(pending), len(changes))
+
+        # CPO-1705: aynı değişimler haftalık buffer'a da yazılır (daily temizlemesinden bağımsız)
+        weekly_pending = _load_pending_changes_weekly()
+        weekly_prev_len = len(weekly_pending)
+        weekly_pending.extend(_serialize_change(c) for c in changes)
+        _save_pending_changes_weekly(weekly_pending)
+        logger.info("Weekly pending buffer: %d → %d (+%d) (file=pending_changes_weekly.json)",
+                    weekly_prev_len, len(weekly_pending), len(changes))
 
     # 2) Anında gönderim — mail_pref=instant olan kullanıcılara
     def _send_instant():
@@ -3282,16 +3313,28 @@ def _send_digest_emails(timeframe="daily", force=False):
         logger.info("digest skipped: işlem günü değil (%s)", datetime.now(_TZ_TR).date())
         return {"status": "not_trading_day", "sent": 0}
 
-    with _pending_changes_lock:
-        pending = _load_pending_changes()
+    if timeframe == "weekly":
+        # CPO-1705: haftalık kendi buffer'ından okur, Pzt'den bugüne kadar birikmiş
+        with _pending_changes_lock:
+            pending = _load_pending_changes_weekly()
+        _now_tr = datetime.now(_TZ_TR)
+        _week_start_iso = (_now_tr.date() - timedelta(days=_now_tr.weekday())).isoformat()
+        _before = len(pending)
+        pending = [d for d in pending if d.get("ts", "")[:10] >= _week_start_iso]
+        if _before != len(pending):
+            logger.info("weekly pending ts filtresi: %d → %d (week_start=%s, filtered %d old)",
+                        _before, len(pending), _week_start_iso, _before - len(pending))
+    else:
+        with _pending_changes_lock:
+            pending = _load_pending_changes()
 
-    # CPO-690 Adım 4: sadece bugünkü değişimler (geçmiş buffer birikimini önle)
-    _today_iso = datetime.now(_TZ_TR).date().isoformat()
-    _before    = len(pending)
-    pending    = [d for d in pending if d.get("ts", "")[:10] >= _today_iso]
-    if _before != len(pending):
-        logger.info("pending ts filtresi: %d → %d (today=%s, filtered %d old)",
-                    _before, len(pending), _today_iso, _before - len(pending))
+        # CPO-690 Adım 4: sadece bugünkü değişimler (geçmiş buffer birikimini önle)
+        _today_iso = datetime.now(_TZ_TR).date().isoformat()
+        _before    = len(pending)
+        pending    = [d for d in pending if d.get("ts", "")[:10] >= _today_iso]
+        if _before != len(pending):
+            logger.info("pending ts filtresi: %d → %d (today=%s, filtered %d old)",
+                        _before, len(pending), _today_iso, _before - len(pending))
 
     # MSG-019B diag: pending durumu
     logger.info("_send_digest_emails(%s, force=%s): pending=%d items", timeframe, force, len(pending))
@@ -3359,6 +3402,10 @@ def _send_digest_emails(timeframe="daily", force=False):
         with _pending_changes_lock:
             _save_pending_changes([])
         logger.info("Pending changes buffer temizlendi (daily digest sonrası)")
+    elif timeframe == "weekly" and not force:
+        with _pending_changes_lock:
+            _save_pending_changes_weekly([])
+        logger.info("Weekly pending changes buffer temizlendi (haftalık digest sonrası)")
 
     return {
         "status": "ok",
