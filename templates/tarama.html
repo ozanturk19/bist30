@@ -116,13 +116,16 @@
      innerHTML'i yazildigi icin #inlineSpinner ILK RENDER'DA YOK EDILIYORDU. #}<span id="resultCountText"><strong>—</strong> sonuç</span><span id="inlineSpinner" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><span class="da-spin da-spin--sm"></span></span></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
+      {# 21.09 (K-AV): option metinleri YON IDDIA EDIYOR ("Yuksek -> Dusuk") ama yonu
+         sutun basligi da degistirebiliyor (sortBy toggle). Sabit metin yalan soyluyordu;
+         etiket artik _syncSortSelLabel() ile _sortDir'den TUREOR. Tek kaynak: _sortDir. #}
       <select class="sort-select da-select" id="sortSel" onchange="applyFilters()" aria-label="Sıralama">
-        <option value="signal_strength">Teknik Güç Skoru (Yüksek → Düşük)</option>
-        <option value="adx">Trend Gücü / ADX (Güçlü → Zayıf)</option>
-        <option value="price">Fiyat (Yüksek → Düşük)</option>
-        <option value="vol_ratio">Günlük Hacim Oranı (Yüksek → Düşük)</option>
-        <option value="change_pct">Değişim % (Yüksek → Düşük)</option>
-        <option value="signal_bars">Tazelik (Yeni → Eski)</option>
+        <option value="signal_strength" data-label="Teknik Güç Skoru" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Teknik Güç Skoru (Yüksek → Düşük)</option>
+        <option value="adx" data-label="Trend Gücü / ADX" data-desc="Güçlü → Zayıf" data-asc="Zayıf → Güçlü">Trend Gücü / ADX (Güçlü → Zayıf)</option>
+        <option value="price" data-label="Fiyat" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Fiyat (Yüksek → Düşük)</option>
+        <option value="vol_ratio" data-label="Günlük Hacim Oranı" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Günlük Hacim Oranı (Yüksek → Düşük)</option>
+        <option value="change_pct" data-label="Değişim %" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Değişim % (Yüksek → Düşük)</option>
+        <option value="signal_bars" data-label="Tazelik" data-desc="Eski → Yeni" data-asc="Yeni → Eski">Tazelik (Yeni → Eski)</option>
       </select>
       <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:var(--bp-text-sm);border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
         data-tip="Teknik Güç Skoru: Birleşik kalite (günlük hacim oranı + ADX + RSI + Teyit) — 💎 rozeti bu skordan belirlenir. En kaliteli hisseler üstte.&#10;Trend Gücü: Sadece ADX. 💎 rozetli bir hisse ADX düşük olabilir.&#10;Günlük Hacim Oranı: bugünkü hacim / 20 günlük ortalama — Teknik Güç Skoru'ndaki hacim bileşeniyle aynı değerdir. Diğer sayfalardaki RVOL ise 5 günlük ortalamayı kullanır, ayrı bir sayıdır.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
@@ -258,12 +261,12 @@
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
         <select class="sort-select da-select" id="sortSelTemel" onchange="applyTemelFilters()" aria-label="Sıralama">
-          <option value="temel_score">Temel Skor (Yüksek → Düşük)</option>
-          <option value="borsapusula_score">BorsaPusula Skoru (Yüksek → Düşük)</option>
-          <option value="karlilik">Kârlılık (Yüksek → Düşük)</option>
-          <option value="nakit_akisi">Nakit Akışı (Yüksek → Düşük)</option>
-          <option value="kaldirac">Kaldıraç (Yüksek → Düşük)</option>
-          <option value="degerleme_buyume">Değerleme/Büyüme (Yüksek → Düşük)</option>
+          <option value="temel_score" data-label="Temel Skor" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Temel Skor (Yüksek → Düşük)</option>
+          <option value="borsapusula_score" data-label="BorsaPusula Skoru" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">BorsaPusula Skoru (Yüksek → Düşük)</option>
+          <option value="karlilik" data-label="Kârlılık" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Kârlılık (Yüksek → Düşük)</option>
+          <option value="nakit_akisi" data-label="Nakit Akışı" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Nakit Akışı (Yüksek → Düşük)</option>
+          <option value="kaldirac" data-label="Kaldıraç" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Kaldıraç (Yüksek → Düşük)</option>
+          <option value="degerleme_buyume" data-label="Değerleme/Büyüme" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Değerleme/Büyüme (Yüksek → Düşük)</option>
         </select>
       </div>
     </div>
@@ -278,13 +281,18 @@
         <caption class="sr-only">Temel analiz tarama sonuçları — hisse, temel analiz skoru, BorsaPusula skoru, kategori kırılımı</caption>
         <thead>
           <tr>
+            {# 21.09 (K-AV): bu sekme Teknik sekmeyle AYNI isi (siralama) farkli bir
+               etkilesim diliyle yapiyordu -- orada baslik tiklaniyor, burada yalniz
+               acilir menu vardi; ustelik sirali sutun tabloda HIC isaretlenmiyordu
+               (10/10 th'de aria-sort yok). Backend /api/tarama/temel sort_dir'i zaten
+               destekliyor, frontend sabit 'desc' yolluyordu. #}
             <th scope="col">Hisse</th>
-            <th scope="col" tabindex="0" data-tip="Kârlılık×%30 + Nakit Akışı×%30 + Kaldıraç×%25 + Değerleme/Büyüme×%15 — varsayılan sıralama">Temel Skor</th>
-            <th scope="col" tabindex="0" class="hide-mob" data-tip="Temel×%60 + Teknik×%40 kompozit skor">BorsaPusula Skoru</th>
-            <th scope="col" class="hide-mob hide-tablet">Kârlılık</th>
-            <th scope="col" class="hide-mob hide-tablet">Nakit Akışı</th>
-            <th scope="col" class="hide-mob hide-tablet">Kaldıraç</th>
-            <th scope="col" class="hide-mob hide-tablet">Değerleme</th>
+            <th scope="col" class="th-sortable" id="tht-score" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Kârlılık×%30 + Nakit Akışı×%30 + Kaldıraç×%25 + Değerleme/Büyüme×%15 — varsayılan sıralama" onclick="sortByTemel('temel_score')">Temel Skor</button></th>
+            <th scope="col" class="hide-mob th-sortable" id="tht-bp" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Temel×%60 + Teknik×%40 kompozit skor" onclick="sortByTemel('borsapusula_score')">BorsaPusula Skoru</button></th>
+            <th scope="col" class="hide-mob hide-tablet th-sortable" id="tht-kar" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortByTemel('karlilik')">Kârlılık</button></th>
+            <th scope="col" class="hide-mob hide-tablet th-sortable" id="tht-nakit" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortByTemel('nakit_akisi')">Nakit Akışı</button></th>
+            <th scope="col" class="hide-mob hide-tablet th-sortable" id="tht-kald" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortByTemel('kaldirac')">Kaldıraç</button></th>
+            <th scope="col" class="hide-mob hide-tablet th-sortable" id="tht-deg" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortByTemel('degerleme_buyume')">Değerleme</button></th>
             <th scope="col">Teknik Sinyal</th>
             <th scope="col" class="hide-mob-narrow">Fiyat</th>
             <th scope="col" class="hide-mob hide-tablet">Sektör</th>
@@ -473,6 +481,7 @@ async function applyFilters() {
   _currentSort = sort;
   _resetSortTHVisuals();
   _applySortTHVisual(sort);
+  _syncSortSelLabel();
 
   const params = new URLSearchParams({
     signal: (sig === 'PREMIUM' ? 'AL' : sig),
@@ -842,6 +851,22 @@ function _resetSortTHVisuals() {
   });
 }
 
+/* 21.09 (K-AV): secili option'un yon ibaresi GERCEK yonu soylemeli. Basliga ikinci
+   kez tiklanip yon asc'ye donunce select metni "Yuksek -> Dusuk" demeye devam
+   ediyordu (canli olcum: aria-sort=ascending + liste Zayif->Guclu iken metin
+   "Guclu -> Zayif"). Secili olmayan option'lar KOLONUN VARSAYILAN yonunu gosterir --
+   onlara gecilince applyFilters() zaten o yone sifirliyor. */
+function _syncSortSelLabel() {
+  const sel = document.getElementById('sortSel');
+  if (!sel) return;
+  [...sel.options].forEach(o => {
+    const base = o.dataset.label;
+    if (!base) return;
+    const dir = (o.value === _currentSort) ? _sortDir : (_sortDefaultDir[o.value] || 'desc');
+    o.textContent = base + ' (' + (dir === 'asc' ? o.dataset.asc : o.dataset.desc) + ')';
+  });
+}
+
 function _applySortTHVisual(col) {
   const map = {adx:'th-adx', price:'th-price', change_pct:'th-chg', vol_ratio:'th-vol', signal_bars:'th-bars', signal_strength:'th-score'};
   const id = map[col];
@@ -898,6 +923,51 @@ let _searchQAsciiTemel = '';
 let _searchQFoldTemel = '';
 let _searchTimerTemel;
 let _filtersSeqTemel = 0;
+let _currentSortTemel = 'temel_score';
+let _sortDirTemel = 'desc';   // Teknik sekmenin _sortDir'inin aynasi (K-AV)
+
+const _TEMEL_TH_ID = {
+  temel_score:'tht-score', borsapusula_score:'tht-bp', karlilik:'tht-kar',
+  nakit_akisi:'tht-nakit', kaldirac:'tht-kald', degerleme_buyume:'tht-deg'
+};
+
+function _resetSortTHVisualsTemel() {
+  document.querySelectorAll('#resultTableTemel thead th.th-sortable').forEach(th => {
+    const btn = th.querySelector('.th-sort-btn');
+    if (btn) btn.classList.remove('sort-asc','sort-desc');
+    th.setAttribute('aria-sort', 'none');
+  });
+}
+
+function _applySortTHVisualTemel(col) {
+  const el = document.getElementById(_TEMEL_TH_ID[col] || '');
+  if (!el) return;
+  const btn = el.querySelector('.th-sort-btn');
+  if (btn) btn.classList.add(_sortDirTemel === 'asc' ? 'sort-asc' : 'sort-desc');
+  el.setAttribute('aria-sort', _sortDirTemel === 'asc' ? 'ascending' : 'descending');
+}
+
+function _syncSortSelLabelTemel() {
+  const sel = document.getElementById('sortSelTemel');
+  if (!sel) return;
+  [...sel.options].forEach(o => {
+    const base = o.dataset.label;
+    if (!base) return;
+    const dir = (o.value === _currentSortTemel) ? _sortDirTemel : 'desc';
+    o.textContent = base + ' (' + (dir === 'asc' ? o.dataset.asc : o.dataset.desc) + ')';
+  });
+}
+
+function sortByTemel(col) {
+  if (_currentSortTemel === col) {
+    _sortDirTemel = (_sortDirTemel === 'desc') ? 'asc' : 'desc';
+  } else {
+    _currentSortTemel = col;
+    _sortDirTemel = 'desc';
+  }
+  document.getElementById('sortSelTemel').value = col;
+  applyTemelFilters();   // gorseller/etiket orada senkronlanir
+}
 
 const _BAND_COLOR_VAR = { yesil: '--bp-al', sari: '--bp-volume', kirmizi: '--bp-sat' };
 function _bandColorVar(band) { return _BAND_COLOR_VAR[band] || '--bp-text3'; }
@@ -950,10 +1020,15 @@ async function applyTemelFilters() {
   const maxP   = document.getElementById('fMaxPTemel').value || 999999;
   const signal = document.getElementById('fSignalTemel').value;
   const sort   = document.getElementById('sortSelTemel').value;
+  if (sort !== _currentSortTemel) _sortDirTemel = 'desc';   // acilir menuden kolon degisti -> varsayilan yon
+  _currentSortTemel = sort;
+  _resetSortTHVisualsTemel();
+  _applySortTHVisualTemel(sort);
+  _syncSortSelLabelTemel();
 
   const params = new URLSearchParams({
     band, min_score: minScore, sector,
-    min_price: minP, max_price: maxP, signal, sort, sort_dir: 'desc'
+    min_price: minP, max_price: maxP, signal, sort, sort_dir: _sortDirTemel
   });
   [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999' || v==='0') params.delete(k); });
 
@@ -1088,6 +1163,9 @@ function resetTemelFilters() {
   document.getElementById('fMaxPTemel').value = '';
   document.getElementById('fSignalTemel').value = '';
   document.getElementById('sortSelTemel').value = 'temel_score';
+  _currentSortTemel = 'temel_score';
+  _sortDirTemel = 'desc';
+  _resetSortTHVisualsTemel();
   document.getElementById('fSearchTemel').value = '';
   document.getElementById('searchClearBtnTemel').style.display = 'none';
   _searchQTemel = ''; _searchQAsciiTemel = ''; _searchQFoldTemel = '';
