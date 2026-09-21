@@ -707,3 +707,15 @@
   @media (min-width:900px) and (max-width:1199px) {
     thead th { position: static; }
   }
+
+  /* K-AG (WCAG 2.2 SC 2.4.11) TAKIBI: bu sayfada DORDUNCU yapiskan bant var —
+     yukaridaki `thead th` (top:92px, canli olcum 92..125 = 33px). shared.css'teki
+     kanonik --bp-sticky-top makro serit + header'i sayar; K-AG fix'inden SONRA
+     bile Shift+Tab'da odak y=98'e, yani tam bu bandin ICINE dusuyordu
+     (dedektorde 12 TAM ORTULU kaldi -- fix'in kendi olcumu ikinci bandi buldu).
+     Kirilim bilerek 1200px: <900 tablo gizli (kart gorunumu), 900-1199 thead
+     `position:static` (hemen yukarida) -- bant yalniz >=1200'de VAR. Tek
+     genislikte ezmek diger ikisinde 33px gereksiz bosluk birakirdi. */
+  @media (min-width:1200px) {
+    :root { --bp-sticky-top: calc(32px + 60px + 33px + env(safe-area-inset-top, 0px) * 2 + 6px); }
+  }
