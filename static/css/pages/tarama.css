@@ -471,24 +471,16 @@
   .score-bar-fill.plus     { background:var(--bp-brand); }
   .score-bar-fill.weak     { background:var(--text3); }
 
-  /* TH tooltip (yeni kolon başlıkları) — position:relative eklemiyoruz,
-     thead th zaten position:sticky (CPO-DEV2-108: relative top:60px'i
-     kalitim alip basligi 60px asagi, ilk satirin ustune itiyordu) */
-  thead th[data-tooltip] { cursor:help; }
-  thead th[data-tooltip]:hover::after,
-  thead th[data-tooltip]:focus-within::after {
-    content: attr(data-tooltip);
-    position:absolute; top:100%; left:50%;
-    transform:translateX(-50%) translateY(6px);
-    background:var(--bp-surface2); color:var(--bp-text);
-    border:1px solid var(--bp-border-subtle);
-    border-radius:var(--bp-radius); padding:5px 9px;
-    font-size:var(--bp-text-xs); font-weight:500;
-    white-space:nowrap; z-index:var(--bp-z-dropdown);
-    box-shadow:var(--bp-shadow-sm);
-    pointer-events:none;
-    text-transform:none; letter-spacing:0;
-  }
+  /* 21.09 (K-AT) — TH tooltip'i artik KANONIK mekanizmada: [data-tip] +
+     static/js/bp-tooltip.js. Eski `th[data-tooltip]:hover::after` kurali
+     SILINDI: (1) `:hover` dokunmatikte hic tetiklenmez, `:focus-within` ise
+     odaklanabilir cocugu olmayan iki basligi (Temel Skor / BorsaPusula
+     Skoru) hic kapsamiyordu -> icerik SADECE fare ile erisilebiliyordu
+     (WCAG 1.4.13); (2) `white-space:nowrap` + max-width yok => 102px'lik
+     baslik altinda 502px, en uzununda ~1000px tek satir; (3) Escape ile
+     kapanmiyor ve `aria-describedby` kurmadigi icin ekran okuyucuya
+     baglanmiyordu. bp-tooltip.js dordunu de sagliyor. */
+  thead th[data-tip], .th-sort-btn[data-tip] { cursor:help; }
 
   /* Hide tablet ≤768 (yeni: Sektör tablet'te de gizli) */
   @media (max-width:768px) {

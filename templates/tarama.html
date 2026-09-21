@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/tarama.css?v=4913fe7b">
+<link rel="stylesheet" href="/static/css/pages/tarama.css?v=d1254583">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -155,13 +155,13 @@
         <tr>
           <th scope="col">Hisse</th>
           <th scope="col">Sinyal</th>
-          <th scope="col" class="th-sortable" id="th-score" data-tooltip="Teknik Güç Skoru (0–100): ADX + günlük hacim oranı + RSI + Teyit bileşimi. 💎 rozeti bu skordan belirlenir. Varsayılan sıralama. Yandaki Trend Gücü ile karıştırmayın — o sadece ADX&#39;tir." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_strength')">Teknik Güç</button></th>
-          <th scope="col" class="th-sortable" id="th-adx" data-tooltip="Trend Gücü = yalnızca ADX göstergesi: 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, &lt;18 Zayıf. Soldaki Teknik Güç Skoru&#39;nun bir bileşenidir, aynı şey değildir." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('adx')">Trend Gücü</button></th>
+          <th scope="col" class="th-sortable" id="th-score" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Teknik Güç Skoru (0–100): ADX + günlük hacim oranı + RSI + Teyit bileşimi. 💎 rozeti bu skordan belirlenir. Varsayılan sıralama. Yandaki Trend Gücü ile karıştırmayın — o sadece ADX&#39;tir." onclick="sortBy('signal_strength')">Teknik Güç</button></th>
+          <th scope="col" class="th-sortable" id="th-adx" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Trend Gücü = yalnızca ADX göstergesi: 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, &lt;18 Zayıf. Soldaki Teknik Güç Skoru&#39;nun bir bileşenidir, aynı şey değildir." onclick="sortBy('adx')">Trend Gücü</button></th>
           <th scope="col">Giriş Kalitesi</th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-price" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('price')">Fiyat</button></th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-chg" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('change_pct')">Değişim</button></th>
-          <th scope="col" class="hide-mob th-sortable" id="th-vol" data-tooltip="Günlük Hacim Oranı — bugünkü hacim / 20 günlük ortalama. Sitenin başka sayfalarındaki RVOL&#39;dan FARKLI bir sayıdır (o 5 günlük ortalamayı kullanır)." aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('vol_ratio')">Hacim Oranı ×</button></th>
-          <th scope="col" class="hide-mob th-sortable" id="th-bars" data-tooltip="Sinyal kaç gün önce oluştu" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('signal_bars')">Tazelik</button></th>
+          <th scope="col" class="hide-mob th-sortable" id="th-vol" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Günlük Hacim Oranı — bugünkü hacim / 20 günlük ortalama. Sitenin başka sayfalarındaki RVOL&#39;dan FARKLI bir sayıdır (o 5 günlük ortalamayı kullanır)." onclick="sortBy('vol_ratio')">Hacim Oranı ×</button></th>
+          <th scope="col" class="hide-mob th-sortable" id="th-bars" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Sinyal kaç gün önce oluştu" onclick="sortBy('signal_bars')">Tazelik</button></th>
           <th scope="col" class="hide-mob hide-tablet">Sektör</th>
         </tr>
       </thead>
@@ -279,8 +279,8 @@
         <thead>
           <tr>
             <th scope="col">Hisse</th>
-            <th scope="col" data-tooltip="Kârlılık×%30 + Nakit Akışı×%30 + Kaldıraç×%25 + Değerleme/Büyüme×%15 — varsayılan sıralama">Temel Skor</th>
-            <th scope="col" class="hide-mob" data-tooltip="Temel×%60 + Teknik×%40 kompozit skor">BorsaPusula Skoru</th>
+            <th scope="col" tabindex="0" data-tip="Kârlılık×%30 + Nakit Akışı×%30 + Kaldıraç×%25 + Değerleme/Büyüme×%15 — varsayılan sıralama">Temel Skor</th>
+            <th scope="col" tabindex="0" class="hide-mob" data-tip="Temel×%60 + Teknik×%40 kompozit skor">BorsaPusula Skoru</th>
             <th scope="col" class="hide-mob hide-tablet">Kârlılık</th>
             <th scope="col" class="hide-mob hide-tablet">Nakit Akışı</th>
             <th scope="col" class="hide-mob hide-tablet">Kaldıraç</th>
@@ -1016,7 +1016,7 @@ function renderTemelResults(rows, count) {
     const col = _bandColorVar(band);
     const pct = Math.max(4, Math.min(100, score));
     return `<div class="score-cell" tabindex="0" data-tip="Temel Analiz Skoru ${score}/100 — ${_bandLabel(band).replace(/^\S+\s/,'')}${partial ? ' · sınırlı veri' : ''}">
-      <span class="score-val" style="color:var(${col})">${score}${partial ? ' <span class="partial-dot" data-tip="Sınırlı veri — bu hissenin bazı göstergeleri hesaplanamadı" aria-label="Sınırlı veri">◐</span>' : ''}</span>
+      <span class="score-val" style="color:var(${col})">${score}${partial ? ' <span class="partial-dot" tabindex="0" data-tip="Sınırlı veri — bu hissenin bazı göstergeleri hesaplanamadı" aria-label="Sınırlı veri">◐</span>' : ''}</span>
       <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%;background:var(${col})"></div></div>
     </div>`;
   };

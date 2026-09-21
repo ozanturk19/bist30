@@ -807,7 +807,7 @@
       var pos = s.score >= 0;
       var alpha = Math.max(0.10, Math.min(0.5, Math.abs(s.score) / maxAbs * 0.42 + 0.08));
       var arrowPath = pos ? 'M12 4 L19 16 H5 Z' : 'M12 20 L19 8 H5 Z';
-      return '<div class="da-tile ' + (pos?'da-tile-pos':'da-tile-neg') + ' ' + sizeCls + '" style="--a:' + alpha.toFixed(2) + '" data-tip="' + s.al + ' Güçlü · ' + s.sat + ' Bozuldu · ' + s.bekle + ' Yatay (toplam ' + s.total + ')">' +
+      return '<div class="da-tile ' + (pos?'da-tile-pos':'da-tile-neg') + ' ' + sizeCls + '" tabindex="0" style="--a:' + alpha.toFixed(2) + '" data-tip="' + s.al + ' Güçlü · ' + s.sat + ' Bozuldu · ' + s.bekle + ' Yatay (toplam ' + s.total + ')">' +
         '<div class="name">' + esc(s.name) + '</div>' +
         '<div><div class="chg ' + (pos?'tile-up':'tile-down') + ' da-num"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor"/></svg>' + (pos?'+':'') + fmtNum0(s.score) + '<span class="u">skor</span></div>' +
         '<div class="meta">' + s.al + ' Güçlü / ' + s.sat + ' Bozuldu' + (s.avg_rvol!=null ? ' · RVOL ' + s.avg_rvol.toFixed(2).replace('.', ',') + '×' : '') + '</div></div>' +
