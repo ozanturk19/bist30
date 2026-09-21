@@ -34,7 +34,7 @@
     .blog-card:hover { border-color:var(--bp-text3); background:var(--bp-surface2); transform:translateY(-2px); }
   }
   .bc-cat  { font-size:var(--bp-text-xs); color:var(--bp-accent-cyan); font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
-  .bc-title{ font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); line-height:1.4; margin-bottom:8px; }
+  .bc-title{ font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); line-height:1.4; margin-top:0; margin-bottom:8px; }  /* K-AM: artik <h2> */
   .bc-desc { font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.6; margin-bottom:14px; }
   .bc-meta { display:flex; align-items:center; gap:12px; font-size:var(--bp-text-xs); color:var(--bp-text3); }
   .bc-meta span { display:flex; align-items:center; gap:4px; }

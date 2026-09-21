@@ -112,8 +112,11 @@ const PROBE = (opts) => {
 
     const txt = ownText(el);
     if (txt.length < 2 || txt.length > 60) continue;
-    // KAPI-A: salt sayı / para / yüzde / emoji — bir bölümü ADLANDIRMAZ
-    if (!/\p{L}{2}/u.test(txt)) continue;
+    // KAPI-A: salt sayı / para / yüzde / emoji — bir bölümü ADLANDIRMAZ.
+    // ⛔ `\p{L}{2}` (BİTİŞİK iki harf) yazımı yanlıştı: "Q2 2026 (H1)" dönem
+    //    başlığında bitişik iki harf YOKTUR ve gerçek bulgu sessizce düşüyordu.
+    //    Ölçüt bitişiklik değil, metinde TOPLAM en az iki harf olmasıdır.
+    if ((txt.match(/\p{L}/gu) || []).length < 2) continue;
 
     // KAPI-A2: ROZET/DURUM/DEĞER bileşenleri başlık değildir — bir bölümü
     // ADLANDIRMAZLAR, bir durumu GÖSTERİRLER (/hisse hero'sundaki "⏸ YATAY"
@@ -164,10 +167,19 @@ const PROBE = (opts) => {
       if (h > eh * 1.8 && (n.matches(SECT) || (n.parentElement && n.parentElement.tagName === 'MAIN'))) { region = n; break; }
       n = n.parentElement;
     }
-    if (!region) continue;
-    const rr = region.getBoundingClientRect();
-    // Başlık bir şeyi TANITMALI: altında en az 60px içerik olmalı.
-    if (rr.bottom - er0.bottom < 60) continue;
+    // ⛔ KÖR NOKTA (21.09 ikinci dalga): başlık, içeriğin YANINDAKİ bir başlık
+    //    PANELİNDE durabilir — /bilanco-takvimi'nde `.period-label`,
+    //    `.period-header.da-panel` içindedir ve asıl içerik onun KARDEŞİ olan
+    //    `.period-section`'dadır. İlk uyan atada durup "altında 60px içerik
+    //    yok" diye elemek, tam da aranan sınıfı düşürür (`.section-hdr`
+    //    tuzağının ikinci yüzü). Bu yüzden: içerik yetmiyorsa YUKARI DEVAM ET.
+    let rr = null;
+    while (region && region !== document.body) {
+      const cand = region.getBoundingClientRect();
+      if (cand.bottom - er0.bottom >= 60) { rr = cand; break; }
+      region = region.parentElement;
+    }
+    if (!region || !rr) continue;
 
     // KAPI-C: BAŞLIK BÖLGENİN TEPESİNDE DURUR. Ortada duran kalın metin
     // gövde vurgusudur ya da ızgaradaki N. kartın adıdır, bölüm adı değildir.

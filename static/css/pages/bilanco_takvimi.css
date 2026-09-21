@@ -74,7 +74,7 @@
   }
   .badge-current { background:rgba(var(--bp-accent-cyan-rgb),0.2); color:var(--bp-accent-cyan); }
   .badge-upcoming { background:rgba(var(--bp-text3-rgb),0.15); color:var(--bp-text3); }
-  .period-label { font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); }
+  .period-label { font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); margin:0; }  /* K-AM: artik <h2> — UA marji .period-header flex satirini buyuturdu */
   .period-dates { font-size:var(--bp-text-sm); color:var(--bp-text3); }
   .period-desc  { font-size:var(--bp-text-sm); color:var(--bp-text2); margin-left:auto; }
 

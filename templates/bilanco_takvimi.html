@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/bilanco_takvimi.css?v=8af01842">
+<link rel="stylesheet" href="/static/css/pages/bilanco_takvimi.css?v=ef290bbf">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -181,7 +181,7 @@ function render(data) {
           ${isCurrent ? '● Aktif Dönem' : '○ Yaklaşan'}
         </span>
         <div>
-          <div class="period-label">${escapeHtml(period.label)}</div>
+          <h2 class="period-label">${escapeHtml(period.label)}</h2>
           <div class="period-dates">${startFmt} – ${endFmt}</div>
         </div>
         <div class="pd-counts">
