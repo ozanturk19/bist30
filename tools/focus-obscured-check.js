@@ -62,7 +62,16 @@ const PAGES = [
 const EXPECT_4XX = new Set(['/profil']);
 
 // Sayfada tek seferde odaklanılacak eleman üst sınırı (uzun listelerde süre).
-const MAX_PER_PASS = 140;
+// ⛔ KAPSAM UYARISI (K-AD dersi): sınır aşıldığında ölçülmeyen eleman sayısı
+//   RAPORLANIR — "OK" demek "hepsi ölçüldü" demek değildir. İleri geçiş DOM
+//   sırasının BAŞINI, geri geçiş SONUNU örnekler; orta bölge sınır aşılan
+//   sayfalarda ölçülmez. Tam kapsam için: --cap=99999 (yavaş).
+const MAX_PER_PASS = parseInt((process.argv.find(a => a.startsWith('--cap=')) || '').split('=')[1] || '140', 10);
+
+// POZİTİF KONTROL: fix'i sayfa içinde geri alır (html{scroll-padding:0}).
+// Dedektörün kör olmadığını kanıtlamak için — ölçütü kendi kopyasından
+// türetmez, K-AG öncesi GERÇEK durumu yeniden üretir.
+const KILL_FIX = process.argv.includes('--kill-fix');
 
 const PROBE = async ({ dir, cap }) => {
   const rAF2 = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -194,6 +203,11 @@ const PROBE = async ({ dir, cap }) => {
         errors++; continue;
       }
 
+      if (KILL_FIX) {
+        await page.addStyleTag({ content: 'html{scroll-padding-top:0 !important;scroll-padding-bottom:0 !important}' });
+        await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+      }
+
       let pHard = 0, pSoft = 0, inv = 0, ns = 0;
       for (const dir of ['ileri', 'geri']) {
         const r = await page.evaluate(PROBE, { dir, cap: MAX_PER_PASS }).catch(e => ({ out: [], err: e.message }));
@@ -218,6 +232,7 @@ const PROBE = async ({ dir, cap }) => {
   }
 
   await browser.close();
+  if (KILL_FIX) console.log('\n⚠ POZİTİF KONTROL modu: fix sayfa içinde geri alındı (--kill-fix).');
   console.log(`\n=== K-AG özet: ${hard} TAM ÖRTÜLÜ (SC 2.4.11 AA ihlali) · ${soft} kısmen örtülü (SC 2.4.12 AAA) · ${errors} ERROR ===`);
   if (!hard && !soft && !errors) console.log('Klavye odağı hiçbir yapışkan bandın altında kaybolmuyor.');
   process.exit(errors || hard ? 2 : 0);
