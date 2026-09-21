@@ -538,6 +538,25 @@
     if (!el) return;
     el.innerHTML = '<div class="da-panel da-empty">' + esc(text) + '</div>';
   }
+  /* 21.09 (K-BK): "HENÜZ YOK" ile "HİÇ YOK" aynı ekranı basıyordu. `/api/data`
+     soğuk başlangıçta (her `systemctl restart` sonrası, yani HER DEPLOY'dan
+     sonra) `{"stocks": [], "loading": true}` döner; daLoadData() `loading`
+     alanını HİÇ okumuyordu ve dört bölüme birden kesin hükümlü "Şu an
+     gösterilecek hisse verisi yok." basıyordu. daLoadData() sayfa ömrü boyunca
+     BİR KEZ çağrılıyor (satır sonundaki ilk kurulum) ve boş dalında tekrar-dene
+     düğmesi de yok — yani o yalan kendiliğinden İYİLEŞMİYORDU, kullanıcı elle
+     yenileyene kadar ana sayfa "veri yok" diyordu. Kanonik "yükleniyor" dili
+     (.da-loading--block + .da-spin, K-W) zaten var; ana sayfa onu kullanmıyordu.
+     Aynı kök neden `templates/404.html`'de de vardı (orada "bulunamadı" yalanı
+     olarak çıkıyordu); kanon `static/bp-search.js:151` — `d.loading` dalını
+     yazılı gerekçesiyle ele alan TEK yer oydu. */
+  function daShowSectionLoading(containerId, text){
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = '<div class="da-panel da-loading da-loading--block" role="status" aria-live="polite"><div class="da-spin da-spin--lg" aria-hidden="true"></div>' + esc(text) + '</div>';
+  }
+  var DA_DATA_RETRY_MS = 5000, DA_DATA_MAX_TRIES = 6;   /* ~30 sn: soguk onbellek dolum penceresi */
+  var _daDataTries = 0;
 
   function drawSpark(svgEl, values){
     if (!svgEl || !values || values.length < 2) { if (svgEl) svgEl.innerHTML=''; return; }
@@ -570,12 +589,28 @@
       if (subEl) subEl.textContent = d.updated_at ? ('Son güncelleme: ' + d.updated_at + ' · gün sonu verisiyle güncellenir') : 'gün sonu verisiyle güncellenir';
 
       if (!real.length) {
-        daShowSectionEmpty('daSpotlightBody', 'Şu an gösterilecek hisse verisi yok.');
-        daShowSectionEmpty('daStockGrid', 'Şu an gösterilecek hisse verisi yok.');
-        daShowSectionEmpty('daCuratedList', 'Şu an liste oluşturulacak veri yok.');
-        var mEl = document.getElementById('daMarqueeTrack');
-        if (mEl) mEl.innerHTML = '<span class="da-mrow"><span class="mt">Şu an veri yok</span></span>';
+        /* K-BK: `loading === true` = backend onbellegi HENUZ dolmadi. Bu "veri
+           yok" DEGIL "veri hazirlaniyor"dur; kendiliginden iyilessin diye
+           sinirli sayida tekrar denenir. `loading` alani hic gelmediyse (eski
+           surum / kismi cevap) davranis ESKISI GIBI kalir — bilinmeyeni
+           "yukleniyor" saymak da bir yalan olurdu. */
+        if (d.loading === true && _daDataTries < DA_DATA_MAX_TRIES) {
+          _daDataTries++;
+          daShowSectionLoading('daSpotlightBody', 'Veriler hazırlanıyor…');
+          daShowSectionLoading('daStockGrid', 'Veriler hazırlanıyor…');
+          daShowSectionLoading('daCuratedList', 'Veriler hazırlanıyor…');
+          var mLd = document.getElementById('daMarqueeTrack');
+          if (mLd) mLd.innerHTML = '<span class="da-mrow"><span class="mt">Veriler hazırlanıyor…</span></span>';
+          setTimeout(daLoadData, DA_DATA_RETRY_MS);
+        } else {
+          daShowSectionEmpty('daSpotlightBody', 'Şu an gösterilecek hisse verisi yok.');
+          daShowSectionEmpty('daStockGrid', 'Şu an gösterilecek hisse verisi yok.');
+          daShowSectionEmpty('daCuratedList', 'Şu an liste oluşturulacak veri yok.');
+          var mEl = document.getElementById('daMarqueeTrack');
+          if (mEl) mEl.innerHTML = '<span class="da-mrow"><span class="mt">Şu an veri yok</span></span>';
+        }
       } else {
+        _daDataTries = 0;
         daRenderSpotlight(real);
         daRenderCurated(real);
         daRenderStockGrid(real);

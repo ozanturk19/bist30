@@ -2869,10 +2869,20 @@ function _showChartStatus(msg, withRetryBtn) {
    metnini yazar, onu asla temizlemez — bu fonksiyon /api/data turu ne şekilde
    biterse bitsin (ticker bulunamadı ya da fetch hata) çağrılır ve metin hâlâ
    "yükleniyor" ise dürüst bir son-durum mesajına çevirir. */
-function _resolveStuckEntryAnalysis() {
+/* 21.09 (K-BK): `warming = true` ile cagrildiginda "veri yetersiz" KESIN HUKMU
+   verilmez. `/api/data` soguk baslangicta (her `systemctl restart` sonrasi)
+   `{"stocks": [], "loading": true}` doner; bu hisse icin kayit BULUNAMAZ ama
+   sebep "veri yetersiz" DEGIL "onbellek henuz dolmadi"dir (canli olculdu:
+   route fulfill ile cold payload -> "giris analizi su an hesaplanamadi, veri
+   yetersiz"). Ayni kok neden index.html / 404.html / portfolio.html'de de
+   vardi; kanon static/bp-search.js:151. */
+function _resolveStuckEntryAnalysis(warming) {
   const grid = document.getElementById('entryAnalysisGrid');
   if (grid && grid.textContent.indexOf('yükleniyor') !== -1) {
-    grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">Bu sinyal için giriş analizi şu an hesaplanamadı, veri yetersiz.</div>';
+    const msg = warming
+      ? 'Giriş analizi hazırlanıyor, birkaç saniye içinde yüklenecek.'
+      : 'Bu sinyal için giriş analizi şu an hesaplanamadı, veri yetersiz.';
+    grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">' + msg + '</div>';
   }
 }
 
@@ -2937,11 +2947,20 @@ async function loadChart(retry) {
     }
 
     /* 2) /api/data ayrı non-blocking fetch — fail/timeout → sessiz (chart zaten render) */
-    fetch('/api/data').then(r => r.json()).then(data2 => {
+    const _enrich = (warmTries) => fetch('/api/data').then(r => r.json()).then(data2 => {
       renderFreshness(data2.data_freshness, data2.data_quality, data2.stocks_age_s, data2.refreshing);  /* SPEC-014 B2/B3 + CPO-551 A5 */
 
       /* Summary enrichment — signal_bars/date /api/data'dan */
       const sd = (data2.stocks || []).find(s => s.ticker === TICKER);
+      /* K-BK: kayit yoksa SEBEP onemli — `loading === true` ise onbellek henuz
+         dolmamistir, "veri yetersiz" demek yalan olur; sinirli sayida tekrar
+         denenir ve o sirada "hazirlaniyor" denir. */
+      const _warming = !sd && data2.loading === true;
+      if (_warming && warmTries < 6) {
+        _resolveStuckEntryAnalysis(true);
+        setTimeout(() => { if (_mySeq === _chartSeq) _enrich(warmTries + 1); }, 5000);
+        return;
+      }
       if (sd) {
         renderSummary(json.chart.summary, sd);  /* re-render with sd */
         /* _shareData.entry güncellemesi */
@@ -2955,14 +2974,15 @@ async function loadChart(retry) {
           _ab.style.display = '';
         }
       } else {
-        _resolveStuckEntryAnalysis();
+        _resolveStuckEntryAnalysis(_warming);
       }
 
     }).catch(err => {
       /* /api/data fail → chart yine görünür, sadece enrichment yok. Sessiz fail. */
       console.warn('[chart] /api/data enrichment fail (chart already rendered):', err);
-      _resolveStuckEntryAnalysis();
+      _resolveStuckEntryAnalysis(false);
     });
+    _enrich(0);
   } catch (e) {
     if (_mySeq !== _chartSeq) return;
     if (retry < _MAX_CHART_RETRY) {

@@ -41,7 +41,7 @@
 
   <!-- T7.4: canlı fiyat/grafik verisi çekilemediğinde gösterilen hata banner'ı -->
   <div class="pf-fetch-error" id="pfFetchError" role="status" aria-live="polite" style="display:none">
-    <span><span aria-hidden="true">⚠️</span> Güncel fiyat ve grafik verileri şu an yüklenemiyor.</span>
+    <span id="pfFetchErrorText"><span aria-hidden="true">⚠️</span> Güncel fiyat ve grafik verileri şu an yüklenemiyor.</span>
     <button class="pf-fetch-error-retry" onclick="retryPortfolioFetch()">Tekrar dene</button>
   </div>
 
@@ -273,11 +273,29 @@ function save() {
 /* T7.4: canlı veri (fiyat/sinyal) çekilemediğinde görünür uyarı + retry —
    hisse bazlı sparkline eksikliği tabloda zaten "—" ile zarifçe düşüyor
    (svgSparkline), o yüzden ayrı alarm tetiklemiyor. */
-const _pfFetchErr = { live: false };
+/* 21.09 (K-BK): `warming` AYRI bir durum — HATA DEGIL. `/api/data` soguk
+   baslangicta (her `systemctl restart` sonrasi) HTTP 200 + gecerli JSON +
+   `{"stocks": [], "loading": true}` doner; eski kod bunu basarili sayip
+   `live = false` yaziyordu, `liveData` bos kaliyordu ve renderSummary asagida
+   "N pozisyonun guncel fiyati bulunamadi (borsadan cekilmis olabilir) —
+   ... veya pozisyonu KALDIRIN" yaziyordu. K-U tam bu tavsiyeyi engellemek icin
+   yazilmisti ama YALNIZ `live` (sert hata) dalini kapatiyordu; soguk baslangic
+   o kapinin ALTINDAN geciyordu (canli olculdu: THYAO+GARAN portfoyu, route
+   fulfill ile cold payload -> uyari goruldu, hata banner'i GIZLIYDI). */
+const _pfFetchErr = { live: false, warming: false };
+const PF_WARM_RETRY_MS = 5000, PF_WARM_MAX_TRIES = 6;
+let _pfWarmTries = 0;
 function _updatePfFetchError() {
-  document.getElementById('pfFetchError').style.display = _pfFetchErr.live ? 'flex' : 'none';
+  const on = _pfFetchErr.live || _pfFetchErr.warming;
+  document.getElementById('pfFetchError').style.display = on ? 'flex' : 'none';
+  const txt = document.getElementById('pfFetchErrorText');
+  if (txt) {
+    txt.innerHTML = (_pfFetchErr.live && !_pfFetchErr.warming)
+      ? '<span aria-hidden="true">⚠️</span> Güncel fiyat ve grafik verileri şu an yüklenemiyor.'
+      : '<span aria-hidden="true">⏳</span> Güncel fiyatlar hazırlanıyor, birkaç saniye içinde yüklenecek.';
+  }
 }
-function retryPortfolioFetch() { fetchLive(); fetchCharts(); }
+function retryPortfolioFetch() { _pfWarmTries = 0; fetchLive(); fetchCharts(); }
 
 /* ── F6: Chart data + Sparkline ──────────── */
 let _fetchChartsBusy = false;
@@ -646,9 +664,21 @@ async function fetchLive() {
     /* HTTP 200 + bos payload da bir basarisizliktir (gecmis ders: "HTTP200 +
        null payload sessiz olum") — sessizce "veri yok" gibi davranmaz. */
     if (!j || !Array.isArray(j.stocks)) throw new Error('bos payload');
-    j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal, signal_price: s.signal_price }; });
-    _pfFetchErr.live = false;
-  } catch(e) { _pfFetchErr.live = true; }
+    /* K-BK: `loading === true` (veya bos liste) = onbellek HENUZ dolmadi. Bu bir
+       HATA degil, GECICI bir ara durum; kendiliginden iyilessin diye sinirli
+       sayida yeniden denenir ve bu sure boyunca "borsadan cekilmis olabilir"
+       tavsiyesi BASTIRILIR (renderSummary'deki K-BK dali). */
+    if (j.loading === true || !j.stocks.length) {
+      _pfFetchErr.live = false;
+      _pfFetchErr.warming = true;
+      if (_pfWarmTries < PF_WARM_MAX_TRIES) { _pfWarmTries++; setTimeout(fetchLive, PF_WARM_RETRY_MS); }
+    } else {
+      j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal, signal_price: s.signal_price }; });
+      _pfFetchErr.live = false;
+      _pfFetchErr.warming = false;
+      _pfWarmTries = 0;
+    }
+  } catch(e) { _pfFetchErr.live = true; _pfFetchErr.warming = false; }
   _updatePfFetchError();
   render();
   _fetchLiveBusy = false;
@@ -803,7 +833,7 @@ function renderSummary(s) {
      eksik olur; bu durumda "borsadan cekilmis olabilir — sembolu kontrol edin
      veya pozisyonu KALDIRIN" tavsiyesi hem yanlis hem de veri kaybina yol acan
      bir eylem onerir. Sistemik sebep zaten #pfFetchError banner'inda yaziyor. */
-  if (_pfFetchErr.live) {
+  if (_pfFetchErr.live || _pfFetchErr.warming) {   /* K-BK: warming de sistemik sebeptir */
     missWarnEl.style.display = 'none';
   } else if (s.missingPriceCount > 0) {
     missWarnEl.style.display = '';

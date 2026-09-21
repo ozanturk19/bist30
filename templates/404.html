@@ -45,20 +45,63 @@
     (function(){
       // bughunt-12.09: onceden hicbir dogrulama yapmadan direkt /hisse/<GIRDI>'ye
       // yonlendiriyordu -- yanlis/eksik bir kod ikinci bir 404'e dusuyordu, geri
-      // bildirim yoktu. /api/data zaten site genelinde kullanilan hafif kaynak,
+      // bildirim yoktu. /api/data zaten site genelinde kullanilan kaynak,
       // burada sadece ticker listesi icin kullaniliyor.
-      var _tickers = null;
-      fetch('/api/data').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
-        if (d && Array.isArray(d.stocks)) _tickers = d.stocks.map(function(s){ return s.ticker; }).filter(Boolean);
-      }).catch(function(err){ console.warn('404 ticker-list fetch failed:', err); });
+      //
+      // 21.09 (K-BK) — yukaridaki duzeltme UC noktada sizdiriyordu, ucu de
+      // CANLI olculdu (playwright + route fulfill):
+      //  1) SOGUK BASLANGIC: `/api/data` backend onbellegi dolmadan
+      //     {"stocks": [], "loading": true} doner. Eski kod `loading`i hic
+      //     okumadigi icin `_tickers` BOS DIZI oluyordu -- bos dizi truthy, yani
+      //     "liste hazir" sayiliyor ve THYAO icin bile
+      //     `"THYAO" ile eslesen bir hisse bulunamadi` yaziyordu. Duz bir yalan.
+      //     Kanon `static/bp-search.js:151`: orada bu dal YAZILI gerekcesiyle
+      //     ele alinmis; buradaki kopya kanonu hic gormemis. (Ayni kok neden
+      //     `templates/index.html` daLoadData()'da da vardi.)
+      //  2) YARIS: istek havada iken gonderilen form eski korumasiz dala
+      //     dusuyordu -- 12.09'da kapatildigi soylenen IKINCI 404 olculerek
+      //     yeniden uretildi (/hisse/ZZQQX, 404 rozetiyle).
+      //  3) Zaman asimi / onbellek YOK: kanon 10 sn AbortSignal + sessionStorage
+      //     (5 dk) kullanirken bu kopya her 404 isabetinde 289 KB'lik tam
+      //     veri setini yeniden cekiyordu -- 404'ler botlarin en cok vurdugu
+      //     yuzeydir. Ayni oturumda arama kutusu zaten kullanildiysa artik
+      //     hic indirme yapilmaz.
+      var TICKER_TIMEOUT_MS = 8000, SUBMIT_WAIT_MS = 3000;
+      var _tickers = null;   // null = liste YOK/bilinmiyor · dizi = hazir
       var form = document.getElementById('q404Form');
       var hint = document.getElementById('q404Hint');
-      form.addEventListener('submit', function(e){
-        e.preventDefault();
-        var v = document.getElementById('q404').value.trim().toUpperCase();
-        if (!v) return;
-        if (!_tickers) { window.location.href = '/hisse/' + encodeURIComponent(v); return; }
-        if (_tickers.indexOf(v) !== -1) { window.location.href = '/hisse/' + encodeURIComponent(v); return; }
+      function fromSearchCache(){
+        // bp-search.js'in yazdigi kanonik onbellek: [{t: 'THYAO', ...}, ...]
+        try {
+          var c = sessionStorage.getItem('bp_search_cache_v1');
+          var t = sessionStorage.getItem('bp_search_t_v1');
+          if (!c || !t || Date.now() - parseInt(t, 10) >= 300000) return null;
+          var a = JSON.parse(c);
+          if (!Array.isArray(a)) return null;
+          var ts = a.map(function(s){ return s && s.t; })
+                    .filter(function(x){ return typeof x === 'string' && x; });
+          return ts.length ? ts : null;
+        } catch(e) { return null; }   // private mod / bozuk kayit -> fetch'e dus
+      }
+      var _ready = (function(){
+        var cached = fromSearchCache();
+        if (cached) { _tickers = cached; return Promise.resolve(); }
+        var opt = {};
+        if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+          opt.signal = AbortSignal.timeout(TICKER_TIMEOUT_MS);   // eski tarayicida zaman asimsiz devam
+        }
+        return fetch('/api/data', opt).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+          // `loading === true` VEYA bos liste => liste HAZIR DEGIL. Bos diziyi
+          // "hazir liste" saymak "hisse bulunamadi" yalanini uretir.
+          if (!d || d.loading === true || !Array.isArray(d.stocks) || !d.stocks.length) return;
+          var ts = d.stocks.map(function(s){ return s && s.ticker; }).filter(Boolean);
+          if (ts.length) _tickers = ts;
+        }).catch(function(err){ console.warn('404 ticker-list fetch failed:', err); });
+      })();
+      function goTo(v){ window.location.href = '/hisse/' + encodeURIComponent(v); }
+      function decide(v){
+        if (!_tickers) { goTo(v); return; }   // liste yok: en iyi cabayla yonlendir
+        if (_tickers.indexOf(v) !== -1) { goTo(v); return; }
         var starts = _tickers.filter(function(t){ return t.indexOf(v) === 0; }).slice(0, 5);
         if (starts.length) {
           hint.innerHTML = 'Bunu mu demek istediniz? ' + starts.map(function(t){
@@ -70,6 +113,21 @@
           hint.textContent = '"' + v + '" ile eşleşen bir hisse bulunamadı. ';
           hint.insertAdjacentHTML('beforeend', '<a href="/tarama" class="err-link">Tarama sayfasından göz atın</a>.');
         }
+      }
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var v = document.getElementById('q404').value.trim().toUpperCase();
+        if (!v) return;
+        if (_tickers) { decide(v); return; }
+        // Liste henuz gelmedi: sessizce korumasiz yola dusmek yerine SINIRLI
+        // sure bekle (durum canli bolgeden duyurulur), sonra karar ver.
+        hint.textContent = 'Kontrol ediliyor…';
+        var done = false;
+        var guard = setTimeout(function(){ if (done) return; done = true; decide(v); }, SUBMIT_WAIT_MS);
+        _ready.then(function(){
+          if (done) return;
+          done = true; clearTimeout(guard); decide(v);
+        });
       });
     })();
   </script>
