@@ -42,6 +42,14 @@
      .mbn-sheet-item — icerik kartlari, kendi metniyle taninir (K-Q muafiyeti
      onlar icin GECERLI kaliyor). */
   --bp-ctl-border: #6e6e7a;
+  /* K-Z (21.09.2026) — DURUM SINIRI. K-Y rest'i 3.66:1'e cikardi ama ayni
+     kuralin :hover yarisi --bp-border2'de (1.97:1) kaldi: fareyle uzerine
+     gelince kontrolun kutusu %46 ZAYIFLIYORDU. Hover affordansi GUCLENDIRMELI.
+     6.07:1 (sayfa zemini) — rest'in belirgin USTUNDE, odak halkasiyla
+     karistirilmayacak kadar notr. YALNIZ rest'i --bp-ctl-border olan kontrol
+     ailesi icin; kartlarin (--bp-border rest) hover'i zaten YUKARI gidiyor,
+     onlara dokunulmadi. */
+  --bp-ctl-border-hover: #909097;
   --bp-border-subtle: #21262d;
 
   /* Text */

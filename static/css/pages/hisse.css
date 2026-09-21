@@ -98,7 +98,7 @@
     line-height: 1; white-space: nowrap;
     transition: all .15s ease;
   }
-  .hib-action-btn:hover { background: rgba(255,255,255,0.08); border-color: var(--bp-border2); color: var(--bp-text); }
+  .hib-action-btn:hover { background: rgba(255,255,255,0.08); border-color: var(--bp-ctl-border-hover); color: var(--bp-text); }
   .hib-action-btn svg { width: 13px; height: 13px; transition: transform .15s; }
   .hib-action-btn:active svg { transform: scale(0.85); }
   .hib-action-btn.active-portfolio {
@@ -1083,7 +1083,7 @@
   /* ── Header Search Button ── */
   .header-search-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: transparent; border: 1px solid var(--bp-border); border-radius:var(--bp-radius); color: var(--bp-text2); cursor: pointer; transition: all .15s; flex-shrink: 0; margin-left: 6px; }
   @media (hover: hover) and (pointer: fine) {
-    .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-border2); color: var(--bp-text); }
+    .header-search-btn:hover { background: var(--bp-surface2); border-color: var(--bp-ctl-border-hover); color: var(--bp-text); }
   }
   @media (max-width: 768px) { .header-search-btn { min-width: 44px; min-height: 44px; } }
 
