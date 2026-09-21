@@ -25,7 +25,7 @@ body{margin:0}
 header{
   background:var(--bp-bg);
   border-bottom:1px solid var(--bp-border);padding:0 clamp(14px,3vw,24px);height:60px;
-  display:flex;align-items:center;justify-content:space-between;position:sticky;top:calc(32px + env(safe-area-inset-top,0px));
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:var(--bp-anchor-macro);
   z-index:var(--bp-z-dropdown);gap:12px;transform:translateZ(0);
 }
 .logo-link{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}

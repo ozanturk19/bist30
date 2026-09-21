@@ -27,7 +27,7 @@
     background: var(--bp-bg);
     border-bottom: 1px solid rgba(var(--bp-border-rgb),0.95);
     position: sticky;
-    top: calc(32px + env(safe-area-inset-top,0px));
+    top: var(--bp-anchor-macro);
     z-index:var(--bp-z-dropdown);
     display: flex;
     min-height: calc(60px + env(safe-area-inset-top));
@@ -1089,13 +1089,17 @@
      .bp-segments (asagida, top:92px, canli olcum 92..149 = 57px). shared.css'teki
      kanonik --bp-sticky-top yalniz makro serit + header'i sayar; burada odak
      sekme seridinin ALTINDA kayboluyordu. Kural degil OLCU degisir. */
-  :root { --bp-sticky-top: calc(32px + 60px + 57px + env(safe-area-inset-top, 0px) * 2 + 6px); }
+  :root { --bp-chrome-extra: 57px; }   /* K-AY: kanonik --bp-sticky-top artık bunu kendisi toplar */
 
     .bp-segments {
       /* SPEC-STICKY-HEADER-v3 fix5: header DIŞINDA sticky (bp-search.js !important header'ı 60px max-height kilitliyor; içerde overflow ediyordu).
          CPO: makro bar artık header'ın ÜSTÜNDE sticky (top:0, 32px yükseklik), header top:32px'e indi —
          bu yüzden bp-segments top:60px'den top:92px'e (60+32) taşındı, header'ın hemen altında sabit kalmaya devam eder. */
-      position: sticky; top: 92px; left: 0; right: 0;
+      /* K-AY: `top:92px` header'ın KENDİ safe-area payını saymıyordu —
+         çentikli bir telefonda (PWA) bu şerit header'ın ALTINDA kalıyor,
+         50-55px örtülüyordu (ölçüldü: örtüşme = şeridin TAMAMI). Kanonik
+         çapaya geçti; ölçü shared.css'te tek yerde. */
+      position: sticky; top: var(--bp-anchor-header); left: 0; right: 0;
       z-index: var(--bp-z-sticky-subheader);
       background: var(--bp-bg);
       border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);

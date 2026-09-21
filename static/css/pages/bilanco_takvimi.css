@@ -8,7 +8,7 @@
   header {
     background:var(--bp-surface); border-bottom:1px solid var(--bp-border);
     padding:14px 24px; display:flex; align-items:center; gap:16px;
-    position:sticky; top:calc(32px + env(safe-area-inset-top,0px)); z-index:var(--bp-z-dropdown);
+    position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:var(--bp-text); }
   .page-sub   { font-size:var(--bp-text-base); color:var(--bp-text3); }

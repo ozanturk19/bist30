@@ -19,7 +19,7 @@
   header {
     background:var(--surface); border-bottom:1px solid var(--border);
     padding:12px 24px; display:flex; align-items:center; gap:14px;
-    position:sticky; top:calc(32px + env(safe-area-inset-top,0px)); z-index:var(--bp-z-dropdown);
+    position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
   .page-title { font-size:var(--bp-text-xl); font-weight:700; color:var(--bp-text); }
   .page-sub   { font-size:var(--bp-text-sm); color:var(--text2); margin-top:1px; }
@@ -321,7 +321,7 @@
     user-select:none; transition:color .15s;
     /* 18.09 bughunt: karsilastir.css/portfolio.css ile ayni eksik -- makro-bar
        (32px+inset) payi hic eklenmemisti, thead header'in alt kismina biniyordu. */
-    position:sticky; top:calc(32px + env(safe-area-inset-top,0px) + 60px); z-index:var(--bp-z-dropdown);
+    position:sticky; top:var(--bp-anchor-header); z-index:var(--bp-z-dropdown);
   }
   thead th:hover { color:var(--bp-text); }
   thead th.th-sortable { padding:0; }
@@ -709,5 +709,5 @@
      `position:static` (hemen yukarida) -- bant yalniz >=1200'de VAR. Tek
      genislikte ezmek diger ikisinde 33px gereksiz bosluk birakirdi. */
   @media (min-width:1200px) {
-    :root { --bp-sticky-top: calc(32px + 60px + 33px + env(safe-area-inset-top, 0px) * 2 + 6px); }
+    :root { --bp-chrome-extra: 33px; }   /* K-AY: kanonik --bp-sticky-top artık bunu kendisi toplar */
   }

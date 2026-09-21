@@ -12,7 +12,7 @@
   header {
     background: var(--bp-surface); border-bottom: 1px solid var(--bp-border);
     padding: 14px 24px; display: flex; align-items: center; gap: 16px;
-    position: sticky; top: calc(32px + env(safe-area-inset-top,0px)); z-index:var(--bp-z-dropdown);
+    position: sticky; top: var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
   .page-title { font-size: var(--bp-text-2xl); font-weight: 700; }
   .page-sub   { font-size: var(--bp-text-base); color: var(--bp-text3); }
@@ -96,7 +96,7 @@
        (satir 15) eklidir, ama bu satir sadece "60px = header yuksekligi"
        varsayimini tasiyip makro-bar payini hic eklemiyordu -- thead
        header'in alt ~32px'lik kismina biniyordu. */
-    position: sticky; top: calc(32px + env(safe-area-inset-top,0px) + 60px); z-index: var(--bp-z-dropdown);
+    position: sticky; top: var(--bp-anchor-header); z-index: var(--bp-z-dropdown);
   }
   .compare-table td {
     padding: 12px 16px; border-bottom: 1px solid var(--bp-border);

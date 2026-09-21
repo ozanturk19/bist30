@@ -197,8 +197,26 @@ html { -webkit-tap-highlight-color: transparent; }
      iç sayfalar (makro şerit YOK, header 60): ilgili sayfa CSS'inde ezilir
    +6px pay `:focus-visible{outline:2px; outline-offset:2px}` halkasının
    kutunun 4px DIŞINA taşması içindir — kutuyu sığdırmak halkayı kesiyordu. */
+/* ── K-AY (21.09): ÜST YAPIŞKAN ZİNCİRİN ÖLÇÜSÜ ARTIK TEK YERDE ──────────
+   Bu ölçü daha önce 13 ayrı yerde ELLE yazılıydı (10 sayfa header'ı +
+   2 yapışkan thead + .bp-segments) ve ÜÇÜ header'ın KENDİ safe-area payını
+   saymıyordu: header `top:32px+inset` VE `min-height:60px+inset` taşır,
+   yani alt kenarı 92px DEĞİL `92px + 2×inset`tir. Çentikli bir telefonda
+   (PWA/standalone, inset≈30-59px) ölçüm:
+     /hisse  .bp-segments  → header'ın altında 50-55px, yani sekme şeridinin
+                             TAMAMI kayboluyordu (top:92px sabit yazılmıştı)
+     /tarama, /karşılaştır  yapışkan thead → bir inset kadar örtülüydü
+   Artık üç çapa da bu değişkenlerden türüyor; ölçü değişirse hepsi izler. */
 :root {
-  --bp-sticky-top: calc(32px + 60px + env(safe-area-inset-top, 0px) * 2 + 6px);
+  --bp-chrome-macro: 32px;   /* makro şerit yüksekliği */
+  --bp-chrome-header: 60px;  /* header yüksekliği (inset hariç) */
+  --bp-chrome-extra: 0px;    /* sayfa-yerel 3. yapışkan şerit (hisse/tarama ezer) */
+  /* makro şeridin ALTI = sayfa header'larının yapışma noktası */
+  --bp-anchor-macro: calc(var(--bp-chrome-macro) + env(safe-area-inset-top, 0px));
+  /* header'ın ALTI = yapışkan thead / sekme şeridinin yapışma noktası.
+     env() İKİ KEZ geçer çünkü inset'i hem header'ın top'ı hem yüksekliği taşır. */
+  --bp-anchor-header: calc(var(--bp-anchor-macro) + var(--bp-chrome-header) + env(safe-area-inset-top, 0px));
+  --bp-sticky-top: calc(var(--bp-anchor-header) + var(--bp-chrome-extra) + 6px);
   --bp-sticky-bottom: 0px;
 }
 @media (max-width: 900px) {
@@ -209,4 +227,35 @@ html { -webkit-tap-highlight-color: transparent; }
 html {
   scroll-padding-top: var(--bp-sticky-top);
   scroll-padding-bottom: var(--bp-sticky-bottom);
+}
+
+
+/* ── K-AY: TELEFONU YAN ÇEVİREN KULLANICI EKRANIN YARISINI KAYBEDİYORDU ───
+   WCAG 2.1 · SC 1.3.4 "Orientation" (AA) + SC 1.4.10 "Reflow" (AA).
+
+   Yatay tutulan bir telefonda viewport yüksekliği 375px'e düşer. Sitenin
+   üç kalıcı bandı (makro şerit 33 + header 60 + alt gezinme 73 = 166px)
+   bu ekranın %44'ünü yiyordu; /hisse'de dördüncü bant (.bp-segments 55px)
+   ile birlikte **%59** — kullanıcıya 155px'lik bir okuma penceresi kalıyordu.
+   Canlı ölçüm: tools/landscape-viewport-check.js (13 sayfa × 667/812×375).
+
+   Çare: kısa ekranda üst zincir SABİTLENMEZ (yok edilmez — sayfanın başında
+   durmaya devam eder, yalnız kaydırınca yukarı çıkar), alt gezinme sıkışır.
+   Ölçü değişkenleri de sıfırlanır, böylece sayfa-yerel yapışkan şeritler
+   (thead, .bp-segments) kendiliğinden ekranın tepesine yapışır. */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --bp-chrome-macro: 0px;
+    --bp-chrome-header: 0px;
+    --bp-sticky-bottom: calc(52px + env(safe-area-inset-bottom, 0px) + 6px);
+  }
+  #macroBar, .macro-bar, header { position: static !important; }
+  /* bp-search.js aynı kuralı `@media (max-width:768px)` altında !important
+     ile yazıyor; ondan SONRA enjekte edildiği için burada daha YÜKSEK
+     ÖZGÜLLÜK gerekiyor (kaynak sırası değil, özgüllük kazanır). */
+  .mobile-bottom-nav .mbn-inner { height: 52px !important; }
+  .mobile-bottom-nav .mbn-icon { width: 20px; height: 20px; }
+  .mobile-bottom-nav .mbn-icon svg { width: 19px; height: 19px; }
+  .mobile-bottom-nav .mbn-item { gap: 2px; min-height: 48px; }
+  html body { padding-bottom: calc(52px + 6px + env(safe-area-inset-bottom, 0px)) !important; }
 }

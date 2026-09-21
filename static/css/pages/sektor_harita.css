@@ -9,7 +9,7 @@
     background: var(--bp-bg);
     border-bottom: 1px solid rgba(var(--bp-border-rgb),0.8);
     padding: 0 24px; height: 60px;
-    display:flex; align-items:center; gap:16px; position:sticky; top:calc(32px + env(safe-area-inset-top,0px)); z-index:var(--bp-z-dropdown);
+    display:flex; align-items:center; gap:16px; position:sticky; top:var(--bp-anchor-macro); z-index:var(--bp-z-dropdown);
   }
   .logo-link { display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
   .page-title { font-size:var(--bp-text-2xl); font-weight:700; color:var(--bp-text); font-family:'Space Grotesk',system-ui,sans-serif; }

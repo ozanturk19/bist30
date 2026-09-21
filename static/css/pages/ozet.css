@@ -19,7 +19,7 @@
     align-items: center;
     gap: 16px;
     position: sticky;
-    top: calc(32px + env(safe-area-inset-top,0px));
+    top: var(--bp-anchor-macro);
     z-index:var(--bp-z-dropdown);
   }
   .logo-link {
