@@ -33,6 +33,16 @@ const read = (f) => fs.readFileSync(path.join(__dirname, f), 'utf8');
 const KP = read('live-contrast-check.js');   // K-P metin kontrastı
 const KQ = read('nontext-contrast-check.js'); // K-Q metin-dışı kontrast
 const KL = read('tap-target-check.js');       // K-L dokunma hedefi
+const KO = read('focus-visible-check.js');    // K-O klavye odak halkasi
+// K-M metin kirpilmasi: text-clip-check.js bir Playwright harness'i; icindeki
+// PROBE fonksiyonunu ayiklayip page.evaluate'e veriyoruz (tek kaynak korunur).
+const KM = (() => {
+  const src = read('text-clip-check.js');
+  const i = src.indexOf('const PROBE = () => {');
+  const j = src.indexOf('\n};', i);
+  if (i < 0 || j < 0) throw new Error('text-clip-check.js PROBE ayiklanamadi');
+  return '(' + src.slice(i + 'const PROBE = '.length, j + 2) + ')()';
+})();
 
 // ── Katman açma reçeteleri ────────────────────────────────────────────────
 // Her reçete: { ad, sayfalar, aç(page), minW/maxW }
@@ -108,6 +118,14 @@ const runProbe = async (page, src) => {
 const keysKP = (r) => (r.HARD || []).map(v => `KP|${v.sig}|${v.ratio}|${(v.text || '').slice(0, 24)}`);
 const keysKQ = (r) => (r.HARD || []).map(v => `KQ|${v.sig}|${v.score !== undefined ? v.score : v.best}`);
 const keysKL = (r) => (r.agg || []).flatMap(v => Array.from({ length: v.n }, (_, i) => `KL|${v.sel}|${v.w}x${v.h}|${i}`));
+// K-O: A = hic gorsel degisiklik yok, B = halka <=1 kenarda gorunuyor
+const keysKO = (r) => [
+  ...(r.Aagg || []).flatMap(v => Array.from({ length: v.n }, (_, i) => `KO-A|${v.k}|${i}`)),
+  ...(r.Bagg || []).flatMap(v => Array.from({ length: v.n }, (_, i) => `KO-B|${v.k}|${i}`)),
+];
+// K-M: yalniz HARD (gostergesiz kirpilma) + PLACE; ELLIP kasitlidir
+const keysKM = (r) => (r || []).filter(v => v.kind === 'HARD' || v.kind === 'PLACE')
+  .map(v => `KM|${v.kind}|${v.node}|${(v.text || '').slice(0, 30)}`);
 
 (async () => {
   const browser = await chromium.launch();
@@ -125,11 +143,22 @@ const keysKL = (r) => (r.agg || []).flatMap(v => Array.from({ length: v.n }, (_,
         await page.goto(BASE + p, { waitUntil: 'networkidle', timeout: 45000 });
         await page.waitForTimeout(1200);
 
-        const base = {
+        /* ⛔ K-O'nun BELGELENMEMIS ON KOSULU: `:focus-visible` tarayicinin SON
+           GIRIS MODUNA baglidir. Fare tiklamasindan sonra `el.focus()` cagrisi
+           `:focus-visible`i ESLESTIRMEZ, yani her odak halkasi "yok" gorunur.
+           Canli olcum (/, 67 aday, 4/4 deterministik):
+             temiz yukleme -> A=0 · fare tiklamasi -> A=55 · Tab -> A=0 ·
+             tekrar fare -> A=55.
+           Katmani ACAN her tiklama olcumu bu sekilde zehirler. Her K-O
+           kosumundan once tarayiciyi KLAVYE moduna geri al. */
+        const probeAll = async () => ({
           KP: await runProbe(page, KP),
           KQ: await runProbe(page, KQ),
           KL: await runProbe(page, KL),
-        };
+          KO: await (async () => { await page.keyboard.press('Tab'); await page.waitForTimeout(80); return runProbe(page, KO); })(),
+          KM: await runProbe(page, KM),
+        });
+        const base = await probeAll();
         const opened = await layer.open(page);
 
         // katman gerçekten açıldı mı? görünür düğüm sayısı artmalı
@@ -139,34 +168,42 @@ const keysKL = (r) => (r.agg || []).flatMap(v => Array.from({ length: v.n }, (_,
           return n;
         });
 
-        const after = {
-          KP: await runProbe(page, KP),
-          KQ: await runProbe(page, KQ),
-          KL: await runProbe(page, KL),
-        };
+        const after = await probeAll();
 
-        const bk = new Set([...keysKP(base.KP), ...keysKQ(base.KQ), ...keysKL(base.KL)]);
-        const ak = [...keysKP(after.KP), ...keysKQ(after.KQ), ...keysKL(after.KL)];
+        const bk = new Set([...keysKP(base.KP), ...keysKQ(base.KQ), ...keysKL(base.KL),
+          ...keysKO(base.KO), ...keysKM(base.KM)]);
+        const ak = [...keysKP(after.KP), ...keysKQ(after.KQ), ...keysKL(after.KL),
+          ...keysKO(after.KO), ...keysKM(after.KM)];
         const delta = ak.filter(k => !bk.has(k));
 
         const rec = {
           page: p, layer: layer.name, w: W, visNodes: grew, opened: opened ?? null,
-          baseCounts: { KP: base.KP.hardCount, KQ: base.KQ.hardCount, KL: base.KL.bad },
-          afterCounts: { KP: after.KP.hardCount, KQ: after.KQ.hardCount, KL: after.KL.bad },
+          baseCounts: { KP: base.KP.hardCount, KQ: base.KQ.hardCount, KL: base.KL.bad,
+            KO: base.KO.A + base.KO.B, KM: keysKM(base.KM).length },
+          afterCounts: { KP: after.KP.hardCount, KQ: after.KQ.hardCount, KL: after.KL.bad,
+            KO: after.KO.A + after.KO.B, KM: keysKM(after.KM).length },
           delta,
           deltaDetail: {
             KP: (after.KP.HARD || []).filter(v => !bk.has(`KP|${v.sig}|${v.ratio}|${(v.text || '').slice(0, 24)}`)),
             KQ: (after.KQ.HARD || []).filter(v => !bk.has(`KQ|${v.sig}|${v.score !== undefined ? v.score : v.best}`)),
             KL: (after.KL.agg || []).filter(v => !(base.KL.agg || []).some(b => b.sel === v.sel && b.n >= v.n)),
+            KO: [
+              ...(after.KO.Aagg || []).filter(v => !(base.KO.Aagg || []).some(b => b.k === v.k && b.n >= v.n)).map(v => ({ ...v, tip: 'A-gosterge-yok' })),
+              ...(after.KO.Bagg || []).filter(v => !(base.KO.Bagg || []).some(b => b.k === v.k && b.n >= v.n)).map(v => ({ ...v, tip: 'B-halka-bogulmus' })),
+            ],
+            KM: (after.KM || []).filter(v => (v.kind === 'HARD' || v.kind === 'PLACE') &&
+              !bk.has(`KM|${v.kind}|${v.node}|${(v.text || '').slice(0, 30)}`)),
           },
         };
         totalFind += delta.length;
         results.push(rec);
         const d = rec.deltaDetail;
-        console.log(`${p} [${layer.name}] @${W}px  KP:${base.KP.hardCount}->${after.KP.hardCount}  KQ:${base.KQ.hardCount}->${after.KQ.hardCount}  KL:${base.KL.bad}->${after.KL.bad}  YENI:${d.KP.length}/${d.KQ.length}/${d.KL.length}`);
+        console.log(`${p} [${layer.name}] @${W}px  KP:${rec.baseCounts.KP}->${rec.afterCounts.KP}  KQ:${rec.baseCounts.KQ}->${rec.afterCounts.KQ}  KL:${rec.baseCounts.KL}->${rec.afterCounts.KL}  KO:${rec.baseCounts.KO}->${rec.afterCounts.KO}  KM:${rec.baseCounts.KM}->${rec.afterCounts.KM}  YENI:${d.KP.length}/${d.KQ.length}/${d.KL.length}/${d.KO.length}/${d.KM.length}`);
         for (const v of d.KP) console.log(`    [KP metin] ${v.sig} ${v.ratio}:1 (gerek ${v.need}) fg=${v.fg} bg=${v.bg} ${v.px}px "${v.text}"`);
         for (const v of d.KQ) console.log(`    [KQ sınır] ${v.sig} ${v.score !== undefined ? v.score : v.best}:1 ${v.box || ''} ${v.paint || ''}`);
         for (const v of d.KL) console.log(`    [KL tap]   ${v.sel} ${v.w}x${v.h} n=${v.n} "${v.txt}"`);
+        for (const v of d.KO) console.log(`    [KO odak]  ${v.tip} ${v.k} n=${v.n} ${v.d && v.d.txt ? '"' + v.d.txt + '"' : ''}`);
+        for (const v of d.KM) console.log(`    [KM kirp]  ${v.kind} ${v.node} < ${v.clipper} R+${v.ovR} B+${v.ovB} "${(v.text || '').slice(0, 40)}"`);
       } catch (e) {
         console.log(`${p} [${layer.name}] HATA: ${e.message.split('\n')[0]}`);
       }

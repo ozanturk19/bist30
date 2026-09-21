@@ -96,6 +96,29 @@ const PROBE = () => {
     const bl = parseFloat(ccs.borderLeftWidth) || 0, bt = parseFloat(ccs.borderTopWidth) || 0;
     const L = cr.left + bl, T = cr.top + bt, R = L + ce.clientWidth, B = T + ce.clientHeight;
     if (ce.clientWidth === 0 || ce.clientHeight === 0) continue;
+    /* ⛔ K-R (21.09) — BESINCI SAHTE-POZITIF SINIFI: DONDURULMUS/DONUSTURULMUS ATA.
+       `getClientRects()` viewport uzayinda (transform UYGULANMIS) AABB verir;
+       `clientHeight/clientWidth` ise ogenin KENDI yerel uzayindadir. Ikisi
+       karsilastirilamaz. Anasayfadaki `.da-scard` kartlari Data-Art efekti
+       olarak ~1.3 derece dondurulmus: matrix(0.999743, 0.0226873, ...). 13px
+       yuksekligindeki bir satirin AABB'si 170px genislikte 16.86'ya cikiyor ve
+       3.9px "kirpilma" gibi gorunuyordu. Sapma METNIN GENISLIGIYLE orantili —
+       en uzun sirket adi en buyuk sahte tasmayi uretiyordu (Tupras 3.9 yakalandi,
+       kisa isimler 0.3 ile esigin altinda kaldi), yani sinif tutarli bir yanilgi.
+       Curutme: `scrollHeight === clientHeight` (13 === 13) -> tasan icerik YOK.
+       Donusmus ata varsa Range karsilastirmasi birakilir, transform'dan
+       BAGIMSIZ olan scroll/client olcusune dusulur. */
+    let xf = null;
+    { let a = parent;
+      while (a && a !== document.documentElement) {
+        const acs = getComputedStyle(a);
+        if (acs.transform && acs.transform !== 'none') { xf = sel(a); break; }
+        a = a.parentElement; } }
+    if (xf) {
+      const realY = ce.scrollHeight > ce.clientHeight + 1;
+      const realX = ce.scrollWidth > ce.clientWidth + 1;
+      if (!realY && !realX) continue;   /* gercek tasma yok -> donme artefakti */
+    }
     const rng = document.createRange(); rng.selectNodeContents(n);
     const rects = Array.from(rng.getClientRects()).filter(r => r.width > 0 && r.height > 0);
     if (!rects.length) continue;

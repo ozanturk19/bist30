@@ -258,6 +258,20 @@ label:has(> .da-check){min-height:24px}
   width:44px;height:44px;transform:translate(-50%,-50%);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   KLAVYE ODAK HALKASI — kaydırılabilir şeritte boğulma (WCAG 2.4.7)
+   K-O (6ebb8df) bunu `.bp-main-nav` için çözmüştü: `overflow-x:auto` yazan
+   bir kap `overflow-y`yi de `auto` yapar, client kutusu öğeyle neredeyse aynı
+   yüksekliğe oturur ve DIŞARIYA çizilen halkanın üst/alt kenarı kırpılır.
+   K-R (21.09) aynı desenin KARDEŞİNİ buldu: `.bp-segments-inner` (hisse detay
+   sekme şeridi + tarama segmentleri). Canlı ölçüm @390px — kap padding 3px,
+   halka 2px genişlik + 2px offset = 4px gerekli; öğenin üst/alt/sol boşluğu
+   3px, yalnız SAĞ kenar görünüyordu (4 kenardan 1).
+   Kapsam ölçümü: 16 yüzey × 2 genişlik = 32 tarama, başka örnek YOK — yani
+   kural burada, kanonik paylaşılan katta durmalı ki üçüncü kullanım da
+   kendiliğinden kapansın. Halka içe alınır: layout etkisi SIFIR. */
+.bp-segments-inner :focus-visible{outline-offset:-2px}
+
 /* Bağımsız (cümle içinde OLMAYAN) CTA bağlantısı / kontrol. */
 .da-tap{
   display:inline-flex;align-items:center;gap:4px;
