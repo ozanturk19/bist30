@@ -647,6 +647,10 @@ def _fetch_chart_subprocess(yf_ticker, period="5y", timeout=40):
 # T1.1 (CPO-1321): business_rules.SIGNAL_LABELS tek kaynak, burada yalnız alias
 _SIGNAL_LABELS = SIGNAL_LABELS
 
+# CPO-1732: grafik yolunun AL/SAT/NÖTR renkleri site paletinden (tokens.css
+# --bp-al/--bp-sat/--bp-bkl) türesin — #3fb950 sitenin yeşili değildi.
+CHART_DIR_COLOR = {"AL": "#00e290", "SAT": "#f85149", "BEKLE": "#909097"}
+
 @app.template_filter('signal_label')
 def signal_label_filter(signal):
     return _SIGNAL_LABELS.get(signal, signal)
@@ -5628,7 +5632,7 @@ def get_chart_data():
                     markers.append({
                         "time":     d_str,
                         "position": "belowBar" if sig == "AL" else "aboveBar",
-                        "color":    "#3fb950"  if sig == "AL" else "#f85149",
+                        "color":    CHART_DIR_COLOR[sig],
                         "shape":    "arrowUp"  if sig == "AL" else "arrowDown",
                         "text":     "▲"        if sig == "AL" else "▼",
                     })
@@ -7826,7 +7830,7 @@ def _compute_chart_data(ticker_base, period="2y"):
                         markers.append({
                             "time":     d_str,
                             "position": "belowBar" if sig == "AL" else "aboveBar",
-                            "color":    "#3fb950"  if sig == "AL" else "#f85149",
+                            "color":    CHART_DIR_COLOR[sig],
                             "shape":    "arrowUp"  if sig == "AL" else "arrowDown",
                             "text":     "▲" if sig == "AL" else "▼",
                             "signal":   sig,
@@ -7893,10 +7897,12 @@ def _compute_chart_data(ticker_base, period="2y"):
                 try:
                     v = float(volume[ts]) if not pd.isna(volume[ts]) else 0
                     cl_ = float(close[ts]); op_ = float(open_[ts])
-                    color = "#3fb950" if cl_ >= op_ else "#f85149"
+                    # CPO-1732: doji (kapanış == açılış) yükseliş rengi ALMAMALI
+                    dir_key = "AL" if cl_ > op_ else "SAT" if cl_ < op_ else "BEKLE"
+                    color = CHART_DIR_COLOR[dir_key]
                     # yüksek hacim biraz daha parlak
                     if avg_vol > 0 and v > avg_vol * 2:
-                        color = "#3fb950cc" if cl_ >= op_ else "#f85149cc"
+                        color = color + "cc"
                     vol_data.append({"time": ts.strftime("%Y-%m-%d"), "value": v, "color": color})
                 except Exception:
                     continue
