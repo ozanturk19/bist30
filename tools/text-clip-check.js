@@ -15,15 +15,27 @@
 //   PLACE — input/textarea placeholder'ı alana sığmıyor (canvas ölçümü).
 //
 // Kullanım: node tools/text-clip-check.js [--base=https://borsapusula.com] [--w=375]
+// ⛔ ÖLÜ ROTA BİR KAPSAM YALANIDIR (21.09, K-S turunda yakalandı)
+// Bu betiğin sayfa listesinde `/portfoy` yazıyordu; gerçek rota `/portfolio`.
+// 404 sayfası da 'networkidle' ile sorunsuz YÜKLENİR, üstelik header/footer'ı
+// taşır — denetçi hiçbir ihlal görmez ve sayfayı "TEMİZ" raporlar. Sitenin en
+// etkileşimli sayfalarından biri böylece hiç ölçülmemiş oldu. Bu yüzden artık
+// HTTP durumu kontrol edilir: >=400 dönen rota SESSİZCE GEÇMEZ, ihlal sayılır.
 const { chromium } = require('playwright');
 
+// ⚠️ BEKLENEN 4xx: `/profil` tokensiz gelindiginde BILEREK 404 doner ama sitenin
+// markali hata varyantini RENDER EDER (app.py profil_page). Yani olu rota degil —
+// ama olculen sayfa da adi gecen sayfa DEGILDIR: token'li gercek profil formu bu
+// turda hic olculmemistir. Bu yuzden beklenen-4xx listesi olcumu SURDURUR, fakat
+// hangi varyantin olculdugunu acikca yazar.
+const EXPECT_4XX = new Set(['/profil']);
 const BASE = (process.argv.find(a => a.startsWith('--base=')) || '').split('=')[1] || 'https://borsapusula.com';
 const W = parseInt((process.argv.find(a => a.startsWith('--w=')) || '').split('=')[1] || '375', 10);
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').split('=')[1] || '';
 
 const PAGES = [
   '/', '/ozet', '/tarama', '/gundem', '/hisseler', '/sektor-harita',
-  '/hisse/ASELS', '/hisse/GARAN', '/karsilastir', '/portfoy',
+  '/hisse/ASELS', '/hisse/GARAN', '/karsilastir', '/portfolio',
   '/bilanco-takvimi', '/temettu-takvimi', '/blog', '/blog/rsi-gostergesi-nedir',
   '/metodoloji', '/hakkinda', '/iletisim', '/profil', '/yasal', '/gizlilik',
 ];
@@ -166,10 +178,15 @@ const PROBE = () => {
   const ctx = await browser.newContext({ viewport: { width: W, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const pages = ONLY ? ONLY.split(',') : PAGES;
   let hard = 0, ellip = 0, place = 0;
+  const deadRoutes = [];
   for (const p of pages) {
     const page = await ctx.newPage();
     try {
-      await page.goto(BASE + p, { waitUntil: 'networkidle', timeout: 45000 });
+      const _resp = await page.goto(BASE + p, { waitUntil: 'networkidle', timeout: 45000 });
+      if (_resp && _resp.status() >= 400) {
+        if (EXPECT_4XX.has(p)) { console.log(`bilgi  ${p}  HTTP ${_resp.status()} — BEKLENEN hata varyanti olculuyor (gercek sayfa degil)`); }
+        else { console.log(`OLU-ROTA  ${p}  HTTP ${_resp.status()} — bu rota HIC olculmuyor`); deadRoutes.push(`${p} HTTP ${_resp.status()}`); await page.close(); continue; }
+      }
       await page.waitForTimeout(1200);
       const res = await page.evaluate(PROBE);
       const h = res.filter(r => r.kind === 'HARD'), e = res.filter(r => r.kind === 'ELLIP'), pl = res.filter(r => r.kind === 'PLACE');
@@ -182,7 +199,7 @@ const PROBE = () => {
     }
     await page.close();
   }
-  console.log(`\nTOPLAM @${W}px — HARD:${hard} ELLIP:${ellip} PLACE:${place}`);
+  console.log(`\nTOPLAM @${W}px — HARD:${hard} ELLIP:${ellip} PLACE:${place}` + (deadRoutes.length ? `  OLU-ROTA:${deadRoutes.length} (${deadRoutes.join(', ')})` : ''));
   await browser.close();
-  process.exit(hard + place > 0 ? 1 : 0);
+  process.exit(hard + place + deadRoutes.length > 0 ? 1 : 0);
 })();

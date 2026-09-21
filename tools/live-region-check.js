@@ -14,11 +14,23 @@
 // kasıtlıdır → BILGI olarak raporlanır, eşik LIMIT ile ayarlanır.
 //
 // Kullanım: node tools/live-region-check.js [--base=...] [--limit=1]
+// ⛔ ÖLÜ ROTA BİR KAPSAM YALANIDIR (21.09, K-S turunda yakalandı)
+// Bu betiğin sayfa listesinde `/portfoy` yazıyordu; gerçek rota `/portfolio`.
+// 404 sayfası da 'networkidle' ile sorunsuz YÜKLENİR, üstelik header/footer'ı
+// taşır — denetçi hiçbir ihlal görmez ve sayfayı "TEMİZ" raporlar. Sitenin en
+// etkileşimli sayfalarından biri böylece hiç ölçülmemiş oldu. Bu yüzden artık
+// HTTP durumu kontrol edilir: >=400 dönen rota SESSİZCE GEÇMEZ, ihlal sayılır.
 const { chromium } = require('playwright');
+// ⚠️ BEKLENEN 4xx: `/profil` tokensiz gelindiginde BILEREK 404 doner ama sitenin
+// markali hata varyantini RENDER EDER (app.py profil_page). Yani olu rota degil —
+// ama olculen sayfa da adi gecen sayfa DEGILDIR: token'li gercek profil formu bu
+// turda hic olculmemistir. Bu yuzden beklenen-4xx listesi olcumu SURDURUR, fakat
+// hangi varyantin olculdugunu acikca yazar.
+const EXPECT_4XX = new Set(['/profil']);
 const BASE = (process.argv.find(a => a.startsWith('--base=')) || '').split('=')[1] || 'https://borsapusula.com';
 const LIMIT = parseInt((process.argv.find(a => a.startsWith('--limit=')) || '').split('=')[1] || '1', 10);
 const PAGES = ['/', '/ozet', '/tarama', '/gundem', '/hisseler', '/sektor-harita', '/hisse/ASELS',
-  '/karsilastir', '/portfoy', '/bilanco-takvimi', '/temettu-takvimi', '/blog', '/iletisim',
+  '/karsilastir', '/portfolio', '/bilanco-takvimi', '/temettu-takvimi', '/blog', '/iletisim',
   '/profil', '/metodoloji', '/hakkinda', '/yasal', '/gizlilik'];
 
 const FOCUSABLE = 'a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"]),summary,[role="link"],[role="button"]';
@@ -30,7 +42,11 @@ const FOCUSABLE = 'a[href],button,input,select,textarea,[tabindex]:not([tabindex
   for (const path of PAGES) {
     const page = await ctx.newPage();
     try {
-      await page.goto(BASE + path, { waitUntil: 'networkidle', timeout: 45000 });
+      const _resp = await page.goto(BASE + path, { waitUntil: 'networkidle', timeout: 45000 });
+      if (_resp && _resp.status() >= 400) {
+        if (EXPECT_4XX.has(path)) { console.log(`bilgi  ${path}  HTTP ${_resp.status()} — BEKLENEN hata varyanti olculuyor (gercek sayfa degil)`); }
+        else { console.log(`OLU-ROTA  ${path}  HTTP ${_resp.status()} — bu rota HIC olculmuyor`); fail++; await page.close(); continue; }
+      }
       await page.waitForTimeout(1000);
       const rows = await page.evaluate((F) => {
         const out = [];

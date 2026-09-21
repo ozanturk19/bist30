@@ -21,10 +21,26 @@
 // değilse de yöntem bozulmaz (fark alınır), ve tabanın kendisi raporlanır.
 //
 // Kullanım: node tools/overlay-layer-check.js [--base=...] [--w=1280] [--only=/tarama]
+// ⛔ ÖLÜ ROTA BİR KAPSAM YALANIDIR (21.09, K-S turunda yakalandı)
+// Bu betiğin sayfa listesinde `/portfoy` yazıyordu; gerçek rota `/portfolio`.
+// 404 sayfası da 'networkidle' ile sorunsuz YÜKLENİR, üstelik header/footer'ı
+// taşır — denetçi hiçbir ihlal görmez ve sayfayı "TEMİZ" raporlar. Sitenin en
+// etkileşimli sayfalarından biri böylece hiç ölçülmemiş oldu. Bu yüzden artık
+// HTTP durumu kontrol edilir: >=400 dönen rota SESSİZCE GEÇMEZ, ihlal sayılır.
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
+// ⛔ BU HARNESS'IN SAHTE-POZITIF SINIFI: ACIK KATMAN ARKA PLANIN ISABET TESTINI
+// ZEHIRLER (21.09, K-S turunda yakalandi). K-L olcutu `elementFromPoint` ile
+// calisir; tam ekran bir overlay acikken SAYFADAKI HER arka plan ogesi "ulasilamaz"
+// dondurur. Delta yontemi bunu normalde sifirlar (taban==sonra) — AMA oge tabandan
+// SONRA gorunur hale geliyorsa (async render) tabanda yoktur, sonrada vardir ve
+// YENI IHLAL diye raporlanir. Canli ornek: /portfolio `.ls-warning-close` (13.3x16)
+// iki katmanda da "yeni ihlal" gorundu; katman KAPALIYKEN olculunce KL bad=0 —
+// 44x44 halosu 5/5 isabet ediyor, yani belgelenmis muafiyet gecerli.
+// COZUM: taban IKI KEZ alinir (yukleme sonrasi + katmani ACMADAN hemen once) ve
+// birlesimi kullanilir; gec gelen arka plan ogeleri boylece "yeni" sayilmaz.
 const BASE = (process.argv.find(a => a.startsWith('--base=')) || '').split('=')[1] || 'https://borsapusula.com';
 const W = parseInt((process.argv.find(a => a.startsWith('--w=')) || '').split('=')[1] || '1280', 10);
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').split('=')[1] || '';
@@ -49,7 +65,7 @@ const KM = (() => {
 const LAYERS = [
   {
     name: 'arama-overlay (boş)',
-    pages: ['/', '/tarama', '/hisse/ASELS', '/portfoy'],
+    pages: ['/', '/tarama', '/hisse/ASELS', '/portfolio'],
     open: async (page) => {
       await page.evaluate(() => { if (window.bpOpenSearch) window.bpOpenSearch(); });
       await page.waitForTimeout(500);
@@ -85,7 +101,7 @@ const LAYERS = [
   },
   {
     name: 'cloud-modal',
-    pages: ['/portfoy'],
+    pages: ['/portfolio'],
     open: async (page) => {
       await page.evaluate(() => {
         if (window.openCloudSync) window.openCloudSync();
@@ -140,7 +156,8 @@ const keysKM = (r) => (r || []).filter(v => v.kind === 'HARD' || v.kind === 'PLA
       if (ONLY && p !== ONLY) continue;
       const page = await ctx.newPage();
       try {
-        await page.goto(BASE + p, { waitUntil: 'networkidle', timeout: 45000 });
+        const _resp = await page.goto(BASE + p, { waitUntil: 'networkidle', timeout: 45000 });
+        if (_resp && _resp.status() >= 400) { console.log(`${p} [${layer.name}] OLU-ROTA HTTP ${_resp.status()} — bu katman HIC olculmuyor`); totalFind++; await page.close(); continue; }
         await page.waitForTimeout(1200);
 
         /* ⛔ K-O'nun BELGELENMEMIS ON KOSULU: `:focus-visible` tarayicinin SON
@@ -159,6 +176,10 @@ const keysKM = (r) => (r || []).filter(v => v.kind === 'HARD' || v.kind === 'PLA
           KM: await runProbe(page, KM),
         });
         const base = await probeAll();
+        // ikinci taban: gec render olan arka plan ogeleri (ornegin /portfolio
+        // localStorage uyarisi) icin — bkz. yukaridaki sahte-pozitif notu
+        await page.waitForTimeout(1500);
+        const base2 = await probeAll();
         const opened = await layer.open(page);
 
         // katman gerçekten açıldı mı? görünür düğüm sayısı artmalı
@@ -171,7 +192,9 @@ const keysKM = (r) => (r || []).filter(v => v.kind === 'HARD' || v.kind === 'PLA
         const after = await probeAll();
 
         const bk = new Set([...keysKP(base.KP), ...keysKQ(base.KQ), ...keysKL(base.KL),
-          ...keysKO(base.KO), ...keysKM(base.KM)]);
+          ...keysKO(base.KO), ...keysKM(base.KM),
+          ...keysKP(base2.KP), ...keysKQ(base2.KQ), ...keysKL(base2.KL),
+          ...keysKO(base2.KO), ...keysKM(base2.KM)]);
         const ak = [...keysKP(after.KP), ...keysKQ(after.KQ), ...keysKL(after.KL),
           ...keysKO(after.KO), ...keysKM(after.KM)];
         const delta = ak.filter(k => !bk.has(k));
@@ -186,10 +209,10 @@ const keysKM = (r) => (r || []).filter(v => v.kind === 'HARD' || v.kind === 'PLA
           deltaDetail: {
             KP: (after.KP.HARD || []).filter(v => !bk.has(`KP|${v.sig}|${v.ratio}|${(v.text || '').slice(0, 24)}`)),
             KQ: (after.KQ.HARD || []).filter(v => !bk.has(`KQ|${v.sig}|${v.score !== undefined ? v.score : v.best}`)),
-            KL: (after.KL.agg || []).filter(v => !(base.KL.agg || []).some(b => b.sel === v.sel && b.n >= v.n)),
+            KL: (after.KL.agg || []).filter(v => ![...(base.KL.agg || []), ...(base2.KL.agg || [])].some(b => b.sel === v.sel && b.n >= v.n)),
             KO: [
-              ...(after.KO.Aagg || []).filter(v => !(base.KO.Aagg || []).some(b => b.k === v.k && b.n >= v.n)).map(v => ({ ...v, tip: 'A-gosterge-yok' })),
-              ...(after.KO.Bagg || []).filter(v => !(base.KO.Bagg || []).some(b => b.k === v.k && b.n >= v.n)).map(v => ({ ...v, tip: 'B-halka-bogulmus' })),
+              ...(after.KO.Aagg || []).filter(v => ![...(base.KO.Aagg || []), ...(base2.KO.Aagg || [])].some(b => b.k === v.k && b.n >= v.n)).map(v => ({ ...v, tip: 'A-gosterge-yok' })),
+              ...(after.KO.Bagg || []).filter(v => ![...(base.KO.Bagg || []), ...(base2.KO.Bagg || [])].some(b => b.k === v.k && b.n >= v.n)).map(v => ({ ...v, tip: 'B-halka-bogulmus' })),
             ],
             KM: (after.KM || []).filter(v => (v.kind === 'HARD' || v.kind === 'PLACE') &&
               !bk.has(`KM|${v.kind}|${v.node}|${(v.text || '').slice(0, 30)}`)),

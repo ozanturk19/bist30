@@ -87,7 +87,11 @@
   <!-- Cloud Sync Modal -->
   <div id="cloudModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:var(--bp-z-modal);align-items:center;justify-content:center">
     <div id="cloudModalDialog" role="dialog" aria-modal="true" aria-label="Cloud Sync" style="background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-xl);padding:24px;max-width:440px;width:90%;position:relative">
-      <button onclick="closeCloudSync()" aria-label="Kapat" style="position:absolute;top:12px;right:14px;background:none;border:none;color:var(--bp-text3);font-size:var(--bp-text-xl);cursor:pointer">×</button>
+      <!-- 21.09 K-S: 10.5x21px idi, merkezden ±12px'in 5 probundan yalniz 1'i isabet
+           ediyordu (WCAG 2.5.8). Boyut/renk/imlec kanonik `.da-close` katina (32x32)
+           birakildi; satir ici stil YALNIZ konumlandirma yapar — aksi halde satir ici
+           bildirim sinifi sessizce ezerdi. -->
+      <button onclick="closeCloudSync()" aria-label="Kapat" class="da-close" style="position:absolute;top:8px;right:10px">×</button>
       <div style="font-size:var(--bp-text-lg);font-weight:700;color:var(--bp-text);margin-bottom:6px"><span aria-hidden="true">☁</span> Cloud Sync</div>
       <div style="font-size:var(--bp-text-sm);color:var(--bp-text3);margin-bottom:16px">Portföyünüzü sunucuya kaydedin — farklı cihazlardan erişin veya bağlantıyla paylaşın.</div>
       <!-- Yeni oluştur / var olan token -->
@@ -96,7 +100,7 @@
           + Yeni Oluştur
         </button>
         <div style="flex:2;display:flex;gap:6px">
-          <input id="cloudTokenInput" type="text" placeholder="Token girin (XXXX-XXXX-...)" aria-label="Senkronizasyon token'ı" autocomplete="off"
+          <input id="cloudTokenInput" type="text" placeholder="Token yapıştırın" aria-label="Senkronizasyon token'ı" autocomplete="off"
             style="flex:1;background:var(--bp-bg);border:1px solid var(--bp-field-border);color:var(--bp-text);padding:7px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-lg);font-family:var(--bp-font-mono);min-width:0">
           <button id="cloudLoadTokenBtn" onclick="loadCloudToken()" style="background:var(--bp-border-subtle);color:var(--bp-text2);border:1px solid var(--bp-border);padding:7px 12px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer">Yükle</button>
         </div>
@@ -134,10 +138,10 @@
   <h2 class="sr-only">Hisse Ekle</h2>
   <div class="add-bar">
     <span class="add-lbl" id="addBarLbl" aria-live="polite">Hisse ekle:</span>
-    <input type="text" id="addTicker" placeholder="THYAO, Akbank…" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu veya adı">
+    <input type="text" id="addTicker" placeholder="THYAO" maxlength="20" style="text-transform:uppercase" list="bistTickerList" autocomplete="off" aria-label="Hisse kodu veya adı">
     <datalist id="bistTickerList"></datalist>
     <input type="number" id="addLot" placeholder="Adet" min="1" max="1000000000" step="1" inputmode="numeric" aria-label="Adet" onwheel="this.blur()">
-    <input type="text" id="addPrice" placeholder="Alış fiyatı ₺" inputmode="decimal" aria-label="Alış fiyatı">
+    <input type="text" id="addPrice" placeholder="Fiyat ₺" inputmode="decimal" aria-label="Alış fiyatı">
     <input type="date" id="addDate" aria-label="Alış tarihi">
     <button class="btn-add" onclick="addPosition()">+ Ekle</button>
     <button type="button" class="btn-add" id="editCancelBtn" onclick="cancelEditPosition()" style="display:none;background:transparent;border:1px solid var(--bp-border)">İptal</button>
@@ -995,7 +999,7 @@ document.getElementById('cloudModal').addEventListener('click', function(e) {
 // Makro Ticker Bandı
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
 </script>
-<script src="/static/bp-search.js?v=77" defer></script>
+<script src="/static/bp-search.js?v=78" defer></script>
 <script src="/static/stale-banner.js?v=c290d79e"></script>
 <script>bpStartDataQualityPolling();</script>
 

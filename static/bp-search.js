@@ -474,6 +474,43 @@
         if (!insideWrapOrMenu) closeMenu();
       }, 0);
     });
+    /* 21.09 K-S: "Daha" menusu stacking-context kacisi icin document.body'ye
+       PORTALLANIYOR (yukarida) — boylece DOM sirasinda sayfanin EN SON dugumu
+       oluyor. Tab sirasi DOM sirasini izledigi icin canli olcum (2 sayfa, iki
+       yon, deterministik):
+         · son linkten ileri Tab -> odak <body>'ye, yani HICBIR YERE dusuyor
+           (sonraki Tab tarayici cubuguna gider; kullanici nav'a donmek icin
+           butun sayfayi bastan Tab'lamak zorunda)
+         · ilk linkten Shift+Tab -> odak FOOTER'in son linkine ("Iletisim")
+           atliyor — sayfa basindaki bir menuden sayfanin en altina.
+       WCAG 2.4.3. APG menu-button davranisi: Tab menuyu kapatir ve odagi
+       BUTONDAN SONRAKI ogeye tasir. Kenar ogedeyken Tab'i biz ele aliyoruz. */
+    function tabSeq() {
+      var sel = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+      var m = document.querySelector('.bp-nav-more-menu');
+      return Array.prototype.filter.call(document.querySelectorAll(sel), function(el){
+        if (m && m.contains(el)) return false;
+        if (el.closest('[inert],[aria-hidden="true"]')) return false;
+        var r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      });
+    }
+    document.addEventListener('keydown', function(e){
+      if (e.key !== 'Tab') return;
+      var m = document.querySelector('.bp-nav-more-menu');
+      if (!m || !m.classList.contains('open')) return;
+      var links = Array.prototype.slice.call(m.querySelectorAll('a'));
+      var i = links.indexOf(document.activeElement);
+      if (i < 0) return;
+      var atEdge = e.shiftKey ? (i === 0) : (i === links.length - 1);
+      if (!atEdge) return;
+      e.preventDefault();
+      var btn = document.querySelector('.bp-nav-more-btn');
+      closeMenu();                       // odagi once butona iade eder
+      var seq = tabSeq(), bi = seq.indexOf(btn);
+      var next = (bi < 0) ? null : seq[bi + (e.shiftKey ? -1 : 1)];
+      (next || btn).focus();
+    });
     // Reposition on resize/scroll while open
     window.addEventListener('resize', function(){
       var m = document.querySelector('.bp-nav-more-menu');
