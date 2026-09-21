@@ -184,7 +184,14 @@ const step = async (ad, fn) => {
   });
 
   /* ── 4) K-AX: periyodik yenileme odagi koruyor mu? ───────────────────── */
+  /* ⛔ OLCUM SIRASI KATMANIN DURUMUNU BOZAR (K-S dersi): bu adim eskiden
+     "onceki adim /portfolio'da birakti" varsayimiyla calisiyordu. 3c adimi
+     eklendiginde sayfa /hisse/GARAN'da kaldi ve adim "DUZENLE DUGMESI YOK"
+     dedi -- yani K-AX regresyonu gibi GORUNEN sey aslinda OLCUM arizasiydi.
+     Her adim artik kendi sayfasina KENDISI gider. */
   console.log('\n[4] K-AX — periyodik yenileme odagi (/portfolio, 65 sn)');
+  await p.goto(BASE + '/portfolio', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await p.waitForTimeout(3000);
   const focusKept = await p.evaluate(async () => {
     const btn = document.querySelector('#pfTable tbody .btn-edit');
     if (!btn) return 'DUZENLE DUGMESI YOK';
