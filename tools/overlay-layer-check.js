@@ -39,8 +39,12 @@ const path = require('path');
 // YENI IHLAL diye raporlanir. Canli ornek: /portfolio `.ls-warning-close` (13.3x16)
 // iki katmanda da "yeni ihlal" gorundu; katman KAPALIYKEN olculunce KL bad=0 —
 // 44x44 halosu 5/5 isabet ediyor, yani belgelenmis muafiyet gecerli.
-// COZUM: taban IKI KEZ alinir (yukleme sonrasi + katmani ACMADAN hemen once) ve
-// birlesimi kullanilir; gec gelen arka plan ogeleri boylece "yeni" sayilmaz.
+// ⛔ ILK TESHIS YANLISTI, OLCUM DUZELTTI: "gec render" sanilmisti, cift taban
+// eklendi ve bulgu AYNEN kaldi — oge her iki tabanda da GORUNUR ve isabet
+// ediyordu. Gercek mekanizma ORTME: katman acikken elementFromPoint overlay'i
+// doner. Cozum: KL katman turunda YALNIZ katmanin icini olcer
+// (`window.__BP_TAP_SCOPE`, her recetenin `container` alani). Cift taban da
+// korundu — gec gelen arka plan ogelerine karsi ayri ve gecerli bir koruma.
 const BASE = (process.argv.find(a => a.startsWith('--base=')) || '').split('=')[1] || 'https://borsapusula.com';
 const W = parseInt((process.argv.find(a => a.startsWith('--w=')) || '').split('=')[1] || '1280', 10);
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').split('=')[1] || '';
@@ -65,6 +69,7 @@ const KM = (() => {
 const LAYERS = [
   {
     name: 'arama-overlay (boş)',
+    container: '#bpSearchModal',
     pages: ['/', '/tarama', '/hisse/ASELS', '/portfolio'],
     open: async (page) => {
       await page.evaluate(() => { if (window.bpOpenSearch) window.bpOpenSearch(); });
@@ -73,6 +78,7 @@ const LAYERS = [
   },
   {
     name: 'arama-overlay (sonuçlu)',
+    container: '#bpSearchModal',
     pages: ['/'],
     open: async (page) => {
       await page.evaluate(() => { if (window.bpOpenSearch) window.bpOpenSearch(); });
@@ -83,6 +89,7 @@ const LAYERS = [
   },
   {
     name: 'nav-daha-menusu',
+    container: '.bp-nav-more-menu',
     pages: ['/', '/tarama', '/hisse/ASELS'],
     minW: 1000,
     open: async (page) => {
@@ -92,6 +99,7 @@ const LAYERS = [
   },
   {
     name: 'mobil-sheet',
+    container: '#mbnSheet',
     pages: ['/', '/tarama', '/hisse/ASELS'],
     maxW: 768,
     open: async (page) => {
@@ -101,6 +109,7 @@ const LAYERS = [
   },
   {
     name: 'cloud-modal',
+    container: '#cloudModalDialog',
     pages: ['/portfolio'],
     open: async (page) => {
       await page.evaluate(() => {
@@ -168,18 +177,21 @@ const keysKM = (r) => (r || []).filter(v => v.kind === 'HARD' || v.kind === 'PLA
              tekrar fare -> A=55.
            Katmani ACAN her tiklama olcumu bu sekilde zehirler. Her K-O
            kosumundan once tarayiciyi KLAVYE moduna geri al. */
-        const probeAll = async () => ({
+        /* KL kapsamı: taban TÜM sayfa, katman açıkken YALNIZ katmanın içi.
+           Sebep yukarıdaki sahte-pozitif notunda — örtme, async render DEĞİL. */
+        const setScope = (sc) => page.evaluate((s) => { window.__BP_TAP_SCOPE = s; }, sc || null);
+        const probeAll = async (scope) => ({
           KP: await runProbe(page, KP),
           KQ: await runProbe(page, KQ),
-          KL: await runProbe(page, KL),
+          KL: await (async () => { await setScope(scope); const r = await runProbe(page, KL); await setScope(null); return r; })(),
           KO: await (async () => { await page.keyboard.press('Tab'); await page.waitForTimeout(80); return runProbe(page, KO); })(),
           KM: await runProbe(page, KM),
         });
-        const base = await probeAll();
+        const base = await probeAll(null);
         // ikinci taban: gec render olan arka plan ogeleri (ornegin /portfolio
         // localStorage uyarisi) icin — bkz. yukaridaki sahte-pozitif notu
         await page.waitForTimeout(1500);
-        const base2 = await probeAll();
+        const base2 = await probeAll(null);
         const opened = await layer.open(page);
 
         // katman gerçekten açıldı mı? görünür düğüm sayısı artmalı
@@ -189,7 +201,7 @@ const keysKM = (r) => (r || []).filter(v => v.kind === 'HARD' || v.kind === 'PLA
           return n;
         });
 
-        const after = await probeAll();
+        const after = await probeAll(layer.container || null);
 
         const bk = new Set([...keysKP(base.KP), ...keysKQ(base.KQ), ...keysKL(base.KL),
           ...keysKO(base.KO), ...keysKM(base.KM),

@@ -77,7 +77,17 @@
     return txt > 0;
   }
 
-  const els = [...document.querySelectorAll(sel)].filter(el => {
+  /* Opsiyonel KAPSAM: `window.__BP_TAP_SCOPE` bir seçici taşıyorsa yalnız o
+     kapsayıcının içi ölçülür. Tek başına kullanımda tanımsızdır → tüm sayfa.
+     Neden var: açık bir tam-ekran katman, `elementFromPoint`i ÖRTER — arka
+     plandaki her öge "ulaşılamaz" döner ve katman denetçisi onları YENİ ihlal
+     sanır (21.09: /portfolio `.ls-warning-close`, halosu kapalıyken 5/5 isabet
+     ederken katman açıkken 0/5). Katman turunda ölçüm katmanın İÇİYLE sınırlanır. */
+  const SCOPE = (typeof window !== 'undefined' && window.__BP_TAP_SCOPE)
+    ? document.querySelector(window.__BP_TAP_SCOPE) : null;
+  const root = SCOPE || document;
+
+  const els = [...root.querySelectorAll(sel)].filter(el => {
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden' || cs.pointerEvents === 'none') return false;
     const r = el.getBoundingClientRect();
