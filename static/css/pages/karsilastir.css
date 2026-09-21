@@ -151,6 +151,12 @@
      hisse /tarama'da `.chg-neu` ile notr griydi. 0 bir yukselis degildir. */
   .neu  { color: var(--bp-text2); }
   .muted{ color: var(--bp-text3); }
+  /* K-BQ (21.09): Supertrend seviyesinin FIYATA gore rolu. Bu seviye yon-bagimsiz
+     bir buyukluktur (K-BO) — rol renkle degil metinle soylenir. */
+  .sl-role {
+    display: block; font-family: var(--bp-font); font-size: var(--bp-text-2xs);
+    font-weight: 600; color: var(--bp-text3); letter-spacing: .3px; margin-top: 2px;
+  }
 
   .quality-badge {
     padding: 2px 7px; border-radius: var(--bp-radius-4); font-size: var(--bp-text-2xs); font-weight: 700;

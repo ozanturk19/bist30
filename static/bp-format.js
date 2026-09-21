@@ -303,3 +303,31 @@ function bpFormatPct(n, frac) {
   if (r === 0) r = 0;                        /* -0 -> 0 */
   return (r > 0 ? '+' : '') + r.toFixed(f).replace('.', ',') + '%';
 }
+
+/* ── K-BQ (21.09): SUPERTREND SEVIYESI ≠ "STOP" ──────────────────────────
+   `sl_level` Supertrend bandinin GUNCEL degeridir ve sinyal yonunden bagimsiz
+   HER hissede hesaplanir. Long-only bir urunde bu sayiya "Stop" demek yalnizca
+   band fiyatin ALTINDAYKEN (yukselis sinyali) anlamlidir.
+
+   CANLI OLCUM (21.09, /api/data 217 hisse): `sl_level > price` olan **197**
+   hisse (72/72 SAT + 125/138 BEKLE). MARTI: fiyat 2,01 ₺ iken "Hap Bilgi"de
+   "Stop Seviyesi 2,74 ₺" — %36 YUKARIDA; ayni sayfa iki satir yukarida "Net
+   sinyal olmadigi icin tanimli bir giris bolgesi yok" diyordu. Ayrica bandin
+   fiyatin USTUNDE oldugu durumda alt-etiket "ST destegi" yaziyordu: fiyatin
+   ustundeki bir seviye destek degil DIRENCTIR.
+
+   Kanon: ad her yerde "Supertrend Seviyesi" (karsilastir.html'in zaten dogru
+   olan emsali); "stop" kelimesi YALNIZCA signal==='AL' ve band fiyatin
+   altindayken. Yon eki fiyatla karsilastirilarak turer, sinyalden degil. */
+function bpStLevelRole(sl, price, signal) {
+  var s = (typeof sl === 'string') ? parseFloat(sl) : sl;
+  var p = (typeof price === 'string') ? parseFloat(price) : price;
+  if (typeof s !== 'number' || !isFinite(s) || typeof p !== 'number' || !isFinite(p) || p === 0) return null;
+  var above = s > p;
+  return {
+    above: above,
+    /* Uzaklik bir BUYUKLUKTUR — isareti etiket tasir, sayi tasimaz (K-BP). */
+    pct: Math.abs((s - p) / p * 100),
+    label: (!above && signal === 'AL') ? 'Riske uzaklık' : (above ? 'ST direnci' : 'ST desteği')
+  };
+}

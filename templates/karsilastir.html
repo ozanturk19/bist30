@@ -45,7 +45,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=7ed38bdb">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
-<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=efbdd8eb">
+<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=50c6bd89">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
@@ -239,7 +239,18 @@ function renderCell(key, s) {
     case 'signal_bars':   return `<span class="mono">${bpSignalAgeText(s.signal_date)}</span>`;
     case 'signal_date':   return v ? `<span style="font-size:var(--bp-text-sm)">${v}</span>` : '<span class="muted">—</span>';
     case 'entry_quality': return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde giriş değerlendirmesi gösterilmez') : renderQuality(v);
-    case 'sl_level':      return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde somut stop seviyesi gösterilmez') : (v ? `<span class="dn mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
+    /* K-BQ (21.09): iki kusur birden. (1) Satirin KENDI yardim metni "sinyal yonu ne
+       olursa olsun her zaman hesaplanir" derken deger SAT'ta gizleniyordu — sayfa kendi
+       aciklamasiyla celisiyordu; ad zaten "Supertrend Seviyesi", yani gizlenmesi gereken
+       long-only "stop" kavrami degil. (2) `dn` (yon kirmizisi) yon-BAGIMSIZ bir seviyeyi
+       boyuyordu (K-BO kanonu) — rol artik fiyata gore metinle soyleniyor, renkle degil. */
+    case 'sl_level': {
+      if (!v) return '<span class="muted">—</span>';
+      const _r = bpStLevelRole(v, s.price, s.signal);
+      const _txt = parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      return `<span class="mono">${_txt} ₺</span>` +
+             (_r ? `<span class="sl-role">${_r.above ? 'direnç' : (s.signal === 'AL' ? 'stop' : 'destek')}</span>` : '');
+    }
     case 'tp1':           return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
     case 'tp2':           return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
     case 'rr_ratio':      return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde risk/ödül oranı gösterilmez') : (v ? `<span class="mono" style="color:var(--bp-accent-cyan)">1 : ${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>');
@@ -793,7 +804,7 @@ window.addEventListener('popstate', function() {
 </script>
 <script src="/static/bp-search.js?v=f13259b5" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/bp-format.js?v=b454f15d"></script>
+<script src="/static/bp-format.js?v=71b6ae5e"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}

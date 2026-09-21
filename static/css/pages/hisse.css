@@ -964,6 +964,12 @@
     font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text);
     margin: 0; letter-spacing: -0.2px;
   }
+  /* K-BQ: Supertrend seviyesinin FIYATA GORE rolu (destek/direnc/stop) —
+     sayinin yanindaki ikincil aciklama, deger gibi okunmamali. */
+  .qf-row dd .qf-sub {
+    font-family: var(--bp-font); font-size: var(--bp-text-xs);
+    font-weight: 500; color: var(--bp-text3); letter-spacing: 0;
+  }
   .quickfacts-disclaimer {
     font-size: var(--bp-text-xs); color: var(--bp-text3); margin-top: 14px;
     padding-top: 10px; border-top: 1px solid var(--bp-border-subtle);

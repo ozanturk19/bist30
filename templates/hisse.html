@@ -109,7 +109,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=7ed38bdb">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=3cf78082">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=30510449">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -308,7 +308,12 @@
           </div>
         </div>
         {% endif %}
-        {% if _sig in ('AL', 'SAT') and (ssr_signal.tp_level or ssr_signal.sl_level) %}
+        {# K-BQ (21.09): SAT dalı kaldırıldı — /metodoloji "Trend Bozuldu sinyalinde
+           somut giriş/hedef/stop seviyeleri gösterilmez" diye YAZILI vaat ediyor ve bu
+           sayfanın kendi R/R kutusu (satır ~2432) aynı cümleyi kuruyordu; hero ise
+           72/72 SAT hissesinde "Stop: X ₺" basıyordu. Canlı: SAT'ta sl_level HER ZAMAN
+           fiyatın üstünde (72/72) — long-only üründe bu sayı stop değildir. #}
+        {% if _sig == 'AL' and (ssr_signal.tp_level or ssr_signal.sl_level) %}
         <div class="bp-hero-levels">
           {% if ssr_signal.tp_level %}<span><strong>Hedef:</strong>{{ ssr_signal.tp_level|tr_price }} ₺</span>{% endif %}
           {% if ssr_signal.sl_level %}<span><strong>Stop:</strong>{{ ssr_signal.sl_level|tr_price }} ₺</span>{% endif %}
@@ -1411,7 +1416,12 @@
       {% endif %}
       {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ ssr_signal.adx|round|int }}</dd></div>{% endif %}
       {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ ssr_signal.rsi|round|int }}</dd></div>{% endif %}
-      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Stop Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺</dd></div>{% endif %}
+      {# K-BQ: ad "Stop Seviyesi"ydi ve yön koşulu YOKTU — 138 BEKLE hissesinin
+         125'inde bu sayı güncel fiyatın ÜSTÜNDEdir (MARTI: fiyat 2,01 ₺ / "stop"
+         2,74 ₺). karsilastir.html aynı alanı zaten "Supertrend Seviyesi" diye
+         adlandırıp "açık bir pozisyonun stopu anlamına gelmez" diyordu; tek kanon
+         o. "Stop" kelimesi yalnız AL + band altta iken. #}
+      {% if ssr_signal.sl_level %}<div class="qf-row"><dt>Supertrend Seviyesi</dt><dd>{{ ssr_signal.sl_level|tr_price }} ₺{% if ssr_signal.price %}{% if ssr_signal.sl_level > ssr_signal.price %} <span class="qf-sub">— fiyatın üzerinde (direnç)</span>{% elif ssr_signal.signal == 'AL' %} <span class="qf-sub">— stop seviyesi</span>{% else %} <span class="qf-sub">— fiyatın altında (destek)</span>{% endif %}{% endif %}</dd></div>{% endif %}
     </dl>
     <div class="quickfacts-disclaimer"><span aria-hidden="true">⚠️</span> Yatırım tavsiyesi değildir.</div>
   </div>
@@ -1531,7 +1541,7 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=b454f15d"></script>
+<script src="/static/bp-format.js?v=71b6ae5e"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
@@ -2343,10 +2353,14 @@ function renderSummary(s, signalData) {
 
   /* SL */
   if (s.sl_level && _dispPrice) {
-    const slPct = ((s.sl_level - _dispPrice) / _dispPrice * 100).toFixed(1).replace('.', ',');
+    /* K-BQ: etiket sinyale bakıyordu, FİYATA bakmıyordu — band fiyatın üstündeyken
+       (SAT 72/72, BEKLE 125/138) "Riske uzaklık"/"ST desteği" diyordu. Fiyatın
+       ÜSTÜNDEKİ bir seviye destek değil dirençtir ve long-only üründe stop değildir. */
+    const _slRole = bpStLevelRole(s.sl_level, _dispPrice, s.signal);
     document.getElementById('icSl').textContent = fmt(s.sl_level);
-    document.getElementById('icSlPct').textContent =
-      (s.signal !== 'BEKLE' ? 'Riske uzaklık: ' : 'ST desteği: ') + slPct + '%';
+    document.getElementById('icSlPct').textContent = _slRole
+      ? _slRole.label + ': ' + _slRole.pct.toFixed(1).replace('.', ',') + '%'
+      : '—';
   }
 
   /* ── Giriş Analizi ── */
