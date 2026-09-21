@@ -106,14 +106,14 @@ except ImportError as _dqv_import_err:
         if a >= 25: return "Güçlü"
         if a >= 18: return "Orta"
         return "Zayıf"
-    def derive_rsi_zone(rsi):  # fallback: business_rules.derive_rsi_zone ile BIREBIR AYNI kalmali
+    def derive_rsi_zone(rsi, signal=None):  # fallback: business_rules.derive_rsi_zone ile BIREBIR AYNI kalmali
         try:
             r = float(rsi)
         except (TypeError, ValueError):
             return None
         if r < 30: return "Aşırı Satım"
         if r < 45: return "Dip Toparlanması"
-        if r < 60: return "İdeal Giriş Penceresi"
+        if r < 60: return "İdeal Giriş Penceresi" if signal == "AL" else "Nötr Bölge (RSI 45-60)"
         if r < 70: return "Trend Güçleniyor"
         if r < 80: return "Dikkatli"
         return "Aşırı Alım"
@@ -1972,7 +1972,9 @@ def analyze(ticker_base):
         # eşikler business_rules.py:derive_rsi_zone ile BIREBIR AYNI kalmali) —
         # önceden /api/karsilastir kendi bağımsız (>70 Aşırı Alım) eşiğini
         # kullanıyordu, aynı hissede iki sayfa zıt yorum üretiyordu.
-        rsi_zone = derive_rsi_zone(rsi_val)
+        # CPO-1745: signal iletiliyor — "İdeal Giriş Penceresi" artık yalnız
+        # AL'da, AL olmayanda "Nötr Bölge (RSI 45-60)" (kaynakta dogru, vaat yok).
+        rsi_zone = derive_rsi_zone(rsi_val, signal)
 
         # ── R/R Çift Oran (Faz 1 #2) — bug fix ─────────────────────────────
         # Önceki kod hard-coded rr_ratio=2.0 veriyordu (anlamsız).
@@ -9525,6 +9527,14 @@ def api_stock_chart(ticker):
         data["summary"]["bear_score"]  = main_stock.get("bear_score",  data["summary"].get("bear_score"))
         data["summary"]["sl_level"]    = main_stock.get("sl_level",    data["summary"].get("sl_level"))
         data["summary"]["signal_bars"] = main_stock.get("signal_bars", data["summary"].get("signal_bars", 1))
+        # CPO-1745 P1: chart'ın KENDİ (senkron olmayan) Supertrend hesabı summary.st_bull'u
+        # dolduruyordu — TAVHL örneğinde ana cache indicators.supertrend=SHORT (bull:false)
+        # derken summary.st_bull=true kalıyordu, ÜSTELİK yukarıda override edilen sl_level
+        # (279,10, SHORT'a uygun) ile de KENDİ İÇİNDE çelişiyordu. Tek kaynak: ana cache.
+        main_st = (main_stock.get("indicators") or {}).get("supertrend") or {}
+        if "bull" in main_st:
+            data["summary"]["st_bull"] = main_st.get("bull")
+            data["summary"]["st_bear"] = main_st.get("bear")
         # CPO-1639: _compute_chart_data() kendi bağımsız `close` serisinden
         # price/change_pct hesaplıyordu — ana cache'le (analyze()) farklı
         # zamanlarda/kaynaklarda çalıştığından 12/12 test edilen hissede
@@ -10923,7 +10933,8 @@ def api_karsilastir():
             # bağımsız (>70 Aşırı Alım) eşiği ADX'teki CPO-1648 deseninin
             # RSI'ya hiç uygulanmamış hâliydi, aynı hissede /hisse ile zıt
             # yorum üretiyordu (backend alanı burada açılır, frontend ayrı fix'te tüketir).
-            "rsi_zone":       derive_rsi_zone(s.get("rsi")),
+            # CPO-1745: signal iletiliyor, AL olmayanda "Nötr Bölge (RSI 45-60)".
+            "rsi_zone":       derive_rsi_zone(s.get("rsi"), s.get("signal")),
             "signal_bars":    s.get("signal_bars"),
             "signal_date":    s.get("signal_date"),
             "entry_quality":  s.get("entry_quality"),

@@ -185,11 +185,22 @@ def derive_adx_label(adx):
 # (kanonik <70 vs karsilastir'in kendi >70) çelişen RSI bölge etiketi
 # üretiyordu — aynı TUPRS RSI=70.6 için biri "Dikkatli" biri "(Aşırı Alım)"
 # gösteriyordu. derive_adx_label ile aynı desen: tek kaynak burada.
-def derive_rsi_zone(rsi):
+#
+# CPO-1745 (22.09): "İdeal Giriş Penceresi" (RSI 45-60) sinyalden BAĞIMSIZ
+# üretiliyordu — long-only üründe ancak AL sinyaliyle anlamlı bir vaat, ama
+# canlı ölçümde bu adı taşıyan hisselerin çoğu AL değildi (bazıları SAT).
+# Frontend zaten bpRsiZoneText() ile bu ismi signal!='AL' iken "Nötr bölge"ye
+# çeviriyordu (bp-format.js) — aynı düzeltme artık kaynakta da var, ham
+# /api/data tüketicileri (frontend'in üzerinden geçmeyenler) de doğru metni alır.
+def derive_rsi_zone(rsi, signal=None):
     """RSI değerinden tek kaynaklı bölge etiketi (Site Contract Bölüm 3.3).
 
     Eşikler: <30 Aşırı Satım · 30-45 Dip Toparlanması · 45-60 İdeal Giriş
     Penceresi · 60-70 Trend Güçleniyor · 70-80 Dikkatli · >=80 Aşırı Alım.
+
+    `signal` verilirse (AL/SAT/BEKLE): "İdeal Giriş Penceresi" yalnız AL
+    sinyalinde döner, aksi halde "Nötr Bölge (RSI 45-60)" — bu isim AL
+    olmayan bir sinyalde giriş vaadi taşımasın diye (CPO-1745).
     """
     try:
         r = float(rsi)
@@ -200,7 +211,7 @@ def derive_rsi_zone(rsi):
     if r < 45:
         return "Dip Toparlanması"
     if r < 60:
-        return "İdeal Giriş Penceresi"
+        return "İdeal Giriş Penceresi" if signal == "AL" else "Nötr Bölge (RSI 45-60)"
     if r < 70:
         return "Trend Güçleniyor"
     if r < 80:

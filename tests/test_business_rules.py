@@ -182,7 +182,7 @@ def test_rsi_zone_dip_toparlanma_lower_bound():
     assert derive_rsi_zone(30) == "Dip Toparlanması"
 
 def test_rsi_zone_ideal_giris_lower_bound():
-    assert derive_rsi_zone(45) == "İdeal Giriş Penceresi"
+    assert derive_rsi_zone(45, "AL") == "İdeal Giriş Penceresi"
 
 def test_rsi_zone_trend_guclenior_lower_bound():
     assert derive_rsi_zone(60) == "Trend Güçleniyor"
@@ -201,6 +201,27 @@ def test_rsi_zone_none_returns_none():
 
 def test_rsi_zone_invalid_returns_none():
     assert derive_rsi_zone("n/a") is None
+
+
+# ── derive_rsi_zone sinyal-koşullu (CPO-1745 — "İdeal Giriş Penceresi" vaadi) ─
+# Canlı 22.09: RSI 45-60 aralığındaki 46 hissenin 45'i AL değildi (3'ü SAT:
+# FROTO/MGROS/MAVI) ama hepsi "İdeal Giriş Penceresi" gösteriyordu — long-only
+# üründe AL olmayan bir sinyalde giriş vaadi vermek yanıltıcı. signal=='AL'
+# değilse "Nötr Bölge (RSI 45-60)" döner (frontend zaten bpRsiZoneText() ile
+# aynı düzeltmeyi yapıyordu — bkz. static/bp-format.js).
+
+def test_rsi_zone_ideal_giris_sat_sinyalinde_notr():
+    assert derive_rsi_zone(45, "SAT") == "Nötr Bölge (RSI 45-60)"
+
+def test_rsi_zone_ideal_giris_bekle_sinyalinde_notr():
+    assert derive_rsi_zone(59.9, "BEKLE") == "Nötr Bölge (RSI 45-60)"
+
+def test_rsi_zone_ideal_giris_signal_verilmezse_notr():
+    assert derive_rsi_zone(50) == "Nötr Bölge (RSI 45-60)"
+
+def test_rsi_zone_disi_bolgeler_signal_etkilemez():
+    assert derive_rsi_zone(29.9, "SAT") == "Aşırı Satım"
+    assert derive_rsi_zone(70.6, "BEKLE") == "Dikkatli"
 
 
 # ── derive_ema_deadband (CPO-1656 EK YANIT Seçenek B — UI-only rozet) ─────────
