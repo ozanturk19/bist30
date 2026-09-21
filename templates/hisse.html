@@ -1049,12 +1049,24 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">✓</span> Algoritmamızın Onayları</h2>
       <div style="display:flex;gap:6px;align-items:center">
+        <!-- K-AO (21.09): iki durumlu bir acma/kapama dugmesi; durumu YALNIZCA
+             goruneN metinden ("? Acikla" / "? Kapat") ve renkten okunuyordu.
+             Kanonik oznitelik aria-pressed — asagida _applyTooltipVisibility
+             her uygulamada guncelliyor. -->
         <button id="tooltipToggle" type="button" onclick="toggleTooltips()"
+                aria-pressed="true"
                 style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
                 onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
                 onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'"
                 data-tip="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
+        <!-- K-AO (21.09): bu dugme gizli bir bolge acip kapatiyordu ama ekran
+             okuyucuya bunu SOYLEMIYORDU — aria-expanded/aria-controls yoktu,
+             sira­dan bir buton gibi duyuruluyordu. (Kusur K-AN sayi-bicimi
+             taramasinda ORTAYA CIKTI: dedektorun "acilir olani ac" adimi bu
+             dugmeyi taniyamadi, cunku taniyacagi oznitelik yoktu; icerideki
+             "EMA12: 130.4" hatasi bu yuzden bir tur gizli kaldi.) -->
         <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
+                aria-expanded="false" aria-controls="indTechDetails"
                 style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
                 onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
                 onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'">
@@ -1546,6 +1558,9 @@ window.toggleIndDetails = function() {
   const open = det.style.display !== 'none';
   det.style.display = open ? 'none' : 'block';
   btn.innerHTML = open ? 'Detaylı göster ▾' : 'Detayları gizle ▴';
+  /* K-AO: gorsel ok isareti (▾/▴) makine tarafindan okunabilir bir durum
+     DEGILDIR — aria-expanded tek kanonik kaynaktir. */
+  btn.setAttribute('aria-expanded', open ? 'false' : 'true');
 };
 
 let LC = null;
@@ -3639,6 +3654,7 @@ function _applyTooltipVisibility() {
   const tb = document.getElementById('tooltipToggle');
   if (tb) {
     tb.textContent = show ? '? Kapat' : '? Açıkla';
+    tb.setAttribute('aria-pressed', show ? 'true' : 'false');  /* K-AO */
     tb.style.color = show ? 'var(--bp-brand)' : 'var(--bp-text3)';
     tb.style.borderColor = show ? 'rgba(184,195,255,0.35)' : 'var(--bp-border)';
   }
