@@ -108,6 +108,81 @@ const step = async (ad, fn) => {
     r4.trim() === '' ? ok('GECERLI kodda yanlis uyari yok') : bad('gecerli kodda uyari', '"' + r4 + '"');
   });
 
+  /* ── 3b) K-BD: "bugun" TR takvim gunu mu, UTC mi? ───────────────────── */
+  console.log('\n[3b] K-BD — TR takvim gunu kanonu (/portfolio)');
+  await step('K-BD bolumu', async () => {
+    const r = await p.evaluate(() => {
+      if (typeof bpTodayTrIso !== 'function') return { yok: true };
+      const RealDate = Date;
+      // TR 01:30 (ertesi gun) = UTC 22:30 (onceki gun) — kanonun ayristigi an
+      const fake = new RealDate('2026-09-20T22:30:00Z');
+      const Patched = class extends RealDate {
+        constructor(...a) { return a.length ? new RealDate(...a) : new RealDate(fake); }
+      };
+      Patched.UTC = RealDate.UTC; Patched.now = () => fake.getTime();
+      // eslint-disable-next-line no-global-assign
+      Date = Patched;
+      const tr = bpTodayTrIso();
+      const utc = new Date().toISOString().slice(0, 10);
+      Date = RealDate;
+      return { tr, utc, bugun: bpTodayTrIso() };
+    });
+    if (r.yok) return bad('bpTodayTrIso', 'sayfada TANIMLI DEGIL — eski kod servis ediliyor');
+    /^\d{4}-\d{2}-\d{2}$/.test(r.bugun) ? ok('bpTodayTrIso bicimi', r.bugun)
+                                        : bad('bpTodayTrIso bicimi', String(r.bugun));
+    (r.tr === '2026-09-21' && r.utc === '2026-09-20')
+      ? ok('TR gunu UTC gununden ayrisiyor', 'TR=' + r.tr + ' UTC=' + r.utc + ' (kanon TR yaniti veriyor)')
+      : bad('TR/UTC ayrimi', 'TR=' + r.tr + ' UTC=' + r.utc + ' (beklenen 2026-09-21 / 2026-09-20)');
+    // Disa aktarim dosya adi gercekten kanondan mi turuyor?
+    const dl = await p.evaluate(() => {
+      const a = [...document.querySelectorAll('button,a')].find(e => /CSV/i.test(e.textContent || ''));
+      return a ? true : false;
+    });
+    dl ? ok('CSV disa aktarim dugmesi var') : bad('CSV dugmesi', 'bulunamadi — ad dogrulanamadi');
+  });
+
+  /* ── 3c) K-BE/K-BF: hisse sayfasi (global cakisma + sekme<->panel) ───── */
+  console.log('\n[3c] K-BE/K-BF — /hisse/GARAN');
+  await step('K-BE/K-BF bolumu', async () => {
+    await p.goto(BASE + '/hisse/GARAN', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await p.waitForTimeout(3000);
+    // K-BE: safeHref TEK kaynaktan gelmeli (bp-vocab.js) ve calisir olmali
+    const se = await p.evaluate(() => {
+      if (typeof safeHref !== 'function') return { yok: true };
+      return {
+        gecerli: safeHref('https://kap.org.tr/x'),
+        cop: safeHref('javascript:alert(1)'),
+        bos: safeHref(''),
+      };
+    });
+    if (se.yok) return bad('safeHref', 'sayfada TANIMLI DEGIL');
+    se.gecerli === 'https://kap.org.tr/x' ? ok('safeHref http(s) gecirir', se.gecerli)
+                                          : bad('safeHref http(s)', String(se.gecerli));
+    (se.cop === '#' && se.bos === '#') ? ok('safeHref http(s) disini engeller', "javascript: -> '#'")
+                                       : bad('safeHref engelleme', 'javascript:->' + se.cop + ' bos->' + se.bos);
+    // K-BF: her sekmenin bildirdigi TUM paneller var ve tabpanel mi?
+    const tp = await p.evaluate(() => {
+      const out = [];
+      document.querySelectorAll('[role="tab"][aria-controls]').forEach(t => {
+        (t.getAttribute('aria-controls') || '').split(/\s+/).filter(Boolean).forEach(id => {
+          const el = document.getElementById(id);
+          out.push({ tab: t.id, id, var: !!el, rol: el ? el.getAttribute('role') : null,
+                     etiket: el ? el.getAttribute('aria-labelledby') : null });
+        });
+      });
+      return out;
+    });
+    const kirik = tp.filter(x => !x.var || x.rol !== 'tabpanel' || x.etiket !== x.tab);
+    kirik.length === 0
+      ? ok('sekme<->panel bagi', tp.length + ' bildirim, hepsi tabpanel ve dogru sekmeye bagli')
+      : bad('sekme<->panel bagi', JSON.stringify(kirik.slice(0, 3)));
+    const aiPanel = tp.filter(x => x.tab === 'tab-ai').length;
+    const ozPanel = tp.filter(x => x.tab === 'tab-ozet').length;
+    (aiPanel >= 2 && ozPanel >= 2)
+      ? ok('K-BF ikinci paneller bildirildi', 'tab-ai=' + aiPanel + ' tab-ozet=' + ozPanel)
+      : bad('K-BF ikinci paneller', 'tab-ai=' + aiPanel + ' tab-ozet=' + ozPanel + ' (beklenen >=2/>=2)');
+  });
+
   /* ── 4) K-AX: periyodik yenileme odagi koruyor mu? ───────────────────── */
   console.log('\n[4] K-AX — periyodik yenileme odagi (/portfolio, 65 sn)');
   const focusKept = await p.evaluate(async () => {
