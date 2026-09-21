@@ -173,6 +173,12 @@ const PROBE = () => {
   return out;
 };
 
+/* K-T (21.09): PROBE artik modul olarak da disari verilir — sekme denetcisi
+   (tools/tab-panel-check.js) ayni olcutu yeniden turetmesin diye. Dogrudan
+   calistirildiginda davranis AYNEN korunur (require.main kapisi). */
+module.exports = { PROBE };
+if (require.main !== module) return;
+
 (async () => {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: W, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });

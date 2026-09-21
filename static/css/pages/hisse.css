@@ -790,10 +790,16 @@
     align-items: center;
     gap: 10px;
   }
+  /* K-T (21.09): GIZLI SEKMEDE olculen ilk ihlal grubu. 22px yuksekti —
+     WCAG 2.5.8 (24px). Haberler sekmesi `display:none` oldugu icin K-L'nin
+     189 ihlallik canli turu bu dugmeyi HIC gormedi. */
   .news-retry-btn {
     background: none;
     border: 1px solid var(--bp-border);
     color: var(--bp-brand);
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
     padding: 3px 10px;
     border-radius: var(--bp-radius-5);
     cursor: pointer;
@@ -876,6 +882,14 @@
     text-underline-offset: 2px;
   }
   .kap-summary a:hover { color:var(--bp-brand); text-decoration-color: var(--bp-brand); }
+  /* K-T: bildirim BASLIGI satir-ici bir baglantidir ve kutusu font metrigiyle
+     16px'te kalir (line-height kutuyu BUYUTMEZ — satir-ici ogenin sinir kutusu
+     yazi tipi yukseligindendir). Satir-ici dikey dolgu satir kutusunu ETKILEMEZ
+     ama isabet alanini buyutur: duzen kaymasi SIFIR, hedef 16 -> 24px.
+     Not: `.kap-summary` metninin TAMAMI baglanti oldugu icin WCAG'in "cumle
+     icinde" muafiyeti burada GECERSIZ (muafiyet hedef-olmayan metnin satir
+     yuksekligiyle kisitlanmis hedefler icindir). */
+  .kap-summary a { padding-block: 4px; }
   .kap-meta {
     display: flex;
     align-items: center;
@@ -884,9 +898,16 @@
     color: var(--bp-text3);
     padding-left: 0;
   }
+  /* K-T: "↗" ikon baglantisi 8.5x13 idi — sitenin EN KUCUK hedefi (GARAN'da
+     20 kopya). `.kap-item-top` yogun bir satir (rozet + baslik + ikon), yani
+     `.da-tap-halo` burada komsulara tasardi; data-art.css'in kendi notu bu
+     durumda "ogenin KENDISINI 24px yap" diyor. Glifin gorsel boyu degismez. */
   .kap-link-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
     gap: 3px;
     font-size: var(--bp-text-xs);
     color: var(--bp-brand);
