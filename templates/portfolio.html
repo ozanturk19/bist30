@@ -512,6 +512,24 @@ function parseTRPrice(raw) {
 // mevcut kaydı yerinde günceller (id + sıradaki yeri korunur).
 let _editingId = null;
 
+/* K-BC (21.09): "bu kod var mi?" sorusunun TEK cevap yeri.
+   ⛔ KONUM KASITLI: render() ve addPosition() BU <script> blogunda; ilk
+   yazimda fonksiyonu 1038'deki IKINCI bloga koymustum -- render() sayfa
+   yuklenirken bu bloktan ONCE kosar, ReferenceError atar ve TABLO KOMPLE
+   KIRILIRDI. Bildirim hoisting yalnizca kendi blogu icinde gecerlidir.
+   (bkz. reference_defer_paylasilan_js_inline_betige_parse_aninda_YOK) Uc deger dondurur:
+     true  -> evrende var · false -> evren YUKLU ve icinde YOK · null -> evren
+     yuklenemedi, DOGRULANAMAZ. Ucuncu hali ikincisiyle birlestirmek K-U'nun
+     duzelttigi hatanin aynisi olurdu ("bos" ile "yuklenemedi" ayni sey degil). */
+function _pfKnownTicker(ticker) {
+  const dl = document.getElementById('bistTickerList');
+  if (!dl) return null;
+  const opts = Array.from(dl.querySelectorAll('option'));
+  if (!opts.length) return null;                 /* evren yuklenemedi */
+  const t = String(ticker || '').trim().toUpperCase();
+  return opts.some(o => (o.value || '').toUpperCase() === t);
+}
+
 function addPosition() {
   const btn = document.querySelector('.btn-add');
   if (btn && btn.disabled) return;
@@ -678,7 +696,10 @@ function render() {
       <td class="hm bp-text-muted">${fmtDate(p.date)}</td>
       <td>${Number.isFinite(p.lot) ? fmt(p.lot,0) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${Number.isFinite(p.price) ? fmt(p.price) : '<span style="color:var(--bp-text3)">—</span>'}</td>
-      <td>${cur !== null ? fmt(cur) + ' ₺' : '<span style="color:var(--bp-text3)">—</span>'}</td>
+      <td>${cur !== null ? fmt(cur) + ' ₺'
+            : `<span style="color:var(--bp-text3)" tabindex="0" data-tip="${_pfKnownTicker(p.ticker) === false
+                 ? esc(p.ticker) + ' BIST listemizde bulunamadı — kodu yanlış girmiş olabilirsiniz; güncel fiyat ve kâr/zarar hesaplanamıyor.'
+                 : 'Bu hisse için güncel fiyat şu an alınamadı. Bir sonraki yenilemede tekrar denenecek.'}">—</span>`}</td>
       <td class="hm bp-text-muted">${cost !== null ? fmtM(cost) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${val !== null ? fmtM(val) : '<span style="color:var(--bp-text3)">—</span>'}</td>
       <td>${pnlHtml}</td>
@@ -1074,7 +1095,28 @@ window.addPosition = async function() {
       inp.value = match.value;
     }
   }
-  return window._origAddPosition ? window._origAddPosition() : null;
+  /* K-BC: var olmayan bir kod SESSIZCE kaydediliyordu — hata yok, uyari yok,
+     satir sonsuza dek "—" gosteriyordu (canlida olculdu: "ZZZQQ" eklendi,
+     addErr bos, kayit kalici). Artik uyariyoruz.
+     ⛔ ENGELLEMIYORUZ: evren /api/tarama'dan geliyor ve BIST'in tamamini
+     kapsamayabilir (bkz. 214≠215 / XU030 notu). Gecerli bir hisseyi reddetmek,
+     duzeltmeye calistigimiz sessizlikten DAHA kotu bir regresyon olurdu. */
+  const known = _pfKnownTicker(inp.value);
+  const before = portfolio.length;
+  const r = window._origAddPosition ? window._origAddPosition() : null;
+  const err = document.getElementById('addErr');
+  if (err && portfolio.length > before) {        /* gercekten eklendiyse */
+    if (known === false) {
+      err.style.color = 'var(--bp-warn)';
+      err.textContent = val + ' BIST listemizde bulunamadı — eklendi, ancak güncel fiyatı takip edilemeyebilir. Kodu kontrol edin.';
+    } else if (known === null) {
+      err.style.color = 'var(--bp-warn)';
+      err.textContent = 'Hisse listesi yüklenemediği için kod doğrulanamadı — eklendi.';
+    } else {
+      err.style.color = 'var(--bp-sat)';
+    }
+  }
+  return r;
 };
 </script>
 {% include '_mobile_nav_partial.html' %}
