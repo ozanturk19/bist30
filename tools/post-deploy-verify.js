@@ -141,6 +141,72 @@ const step = async (ad, fn) => {
     dl ? ok('CSV disa aktarim dugmesi var') : bad('CSV dugmesi', 'bulunamadi — ad dogrulanamadi');
   });
 
+  /* ── 3d) K-BH: "kopyala" vaadi ile panoya yazilan sey ayni mi? ──────── */
+  console.log('\n[3d] K-BH — kopyala vaadi = kopyalanan sey (/portfolio)');
+  await step('K-BH bolumu', async () => {
+    /* Her adim KENDI sayfasina kendi gider (f381efb dersi). Sunucuya HIC
+       yazmadan olculur: sahte token localStorage'a konur, pano cagrisi
+       yakalanir -- /api/portfolio/new cagrilmaz. */
+    const FAKE = '00000000-1111-2222-3333-444444444444';
+    await p.goto(BASE + '/portfolio', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await p.evaluate(t => { try { localStorage.setItem('bp_cloud_token', t); } catch (e) {} }, FAKE);
+    await p.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
+    await p.waitForTimeout(2000);
+    await p.evaluate(() => {
+      window.__copied = null;
+      navigator.clipboard.writeText = v => { window.__copied = v; return Promise.resolve(); };
+      openCloudSync();
+    });
+    await p.waitForTimeout(600);
+
+    const promise = await p.evaluate(() => {
+      const b = document.querySelector('#cloudActiveSection button[onclick*="opyCloud"]');
+      if (!b) return null;
+      return { aria: b.getAttribute('aria-label') || '', tip: b.getAttribute('data-tip') || '' };
+    });
+    if (!promise) return bad('kopyala dugmesi', 'bulunamadi — eski kod servis ediliyor olabilir');
+
+    (promise.aria && promise.aria === promise.tip)
+      ? ok('tek kanon ad', '"' + promise.aria + '"')
+      : bad('ad/ipucu ayrisiyor', 'aria="' + promise.aria + '" tip="' + promise.tip + '"');
+
+    const saysLink = /bağlant|baglant|link|url/i.test(promise.aria + ' ' + promise.tip);
+
+    await p.evaluate(() => {
+      const b = document.querySelector('#cloudActiveSection button[onclick*="opyCloud"]');
+      b.click();
+    });
+    await p.waitForTimeout(800);
+    const r = await p.evaluate(() => ({
+      copied: window.__copied,
+      msg: (document.getElementById('cloudMsg') || {}).textContent || '',
+    }));
+
+    const isUrl = /^https?:\/\//i.test(String(r.copied || ''));
+    if (saysLink) {
+      isUrl ? ok('vaat "baglanti" — panoya URL yazildi', String(r.copied).slice(0, 50))
+            : bad('VAAT TUTMUYOR', '"' + promise.tip + '" diyor ama panoya "' + String(r.copied).slice(0, 40) + '" yazildi');
+    } else {
+      (r.copied === FAKE)
+        ? ok('vaat "token" — panoya token yazildi', String(r.copied).slice(0, 20) + '…')
+        : bad('token kopyalanmadi', 'panoya "' + String(r.copied).slice(0, 40) + '" yazildi');
+    }
+
+    /* Basari mesaji NE kopyalandigini soylemeli — cloudMsg aria-live'dir. */
+    /token/i.test(r.msg) ? ok('mesaj kopyalanani adlandiriyor', '"' + r.msg.trim() + '"')
+                         : bad('mesaj ne kopyalandigini soylemiyor', '"' + r.msg.trim() + '"');
+
+    /* Pencere metni artik var olmayan bir "baglantiyla paylasim" vaat etmemeli. */
+    const lie = await p.evaluate(() => {
+      const d = document.getElementById('cloudModalDialog');
+      return d ? /bağlantıyla paylaş/i.test(d.textContent || '') : null;
+    });
+    lie === false ? ok('pencere metninde var olmayan baglanti vaadi yok')
+                  : bad('baglanti vaadi hala duruyor', String(lie));
+
+    await p.evaluate(() => { try { localStorage.removeItem('bp_cloud_token'); } catch (e) {} });
+  });
+
   /* ── 3c) K-BE/K-BF: hisse sayfasi (global cakisma + sekme<->panel) ───── */
   console.log('\n[3c] K-BE/K-BF — /hisse/GARAN');
   await step('K-BE/K-BF bolumu', async () => {
