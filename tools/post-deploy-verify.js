@@ -735,6 +735,103 @@ const step = async (ad, fn) => {
     });
   }
 
+  /* ── 4.K-BN) EOD tazelik vaadi + --bp-stale token'i ──────────────────── */
+  console.log('\n[4k] K-BN — "gosterilen fiyat ne kadar taze?" vaadi');
+  await step('K-BN /yasal alt-gunluk gecikme rakami vermiyor', async () => {
+    await p.goto(BASE + '/yasal', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    const t = await p.$eval('#main-content', e => e.innerText);
+    if (/15\s*dakika\s*gecikmeli/i.test(t)) return bad('K-BN /yasal', 'hala "~15 dakika gecikmeli"');
+    if (!/seans içinde güncellenmez/i.test(t)) return bad('K-BN /yasal', 'EOD sozlesmesi cumlesi yok');
+    if (!/Son güncelleme:\s*21 Eylül 2026/.test(t)) return bad('K-BN /yasal', '"Son guncelleme" tarihi ilerlememis');
+    ok('K-BN /yasal', 'EOD sozlesmesi + tarih guncel');
+  });
+
+  for (const r of ['/', '/tarama', '/hisse/THYAO']) {
+    await step('K-BN footer veri rozeti ' + r, async () => {
+      await p.goto(BASE + r, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      const ft = await p.$eval('.da-footer-note', e => e.innerText).catch(() => null);
+      if (!ft) return bad('K-BN footer ' + r, '.da-footer-note bulunamadi');
+      if (/15\s*dakika/i.test(ft)) return bad('K-BN footer ' + r, 'hala "15 dakika"');
+      if (!/son kapanışa/i.test(ft)) return bad('K-BN footer ' + r, 'EOD sozlesmesi yok');
+      ok('K-BN footer ' + r, 'gun-sonu sozlesmesi');
+    });
+  }
+
+  await step('K-BN --bp-stale / --bp-stale-rgb canli cozuluyor', async () => {
+    await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    const t = await p.evaluate(() => {
+      const cs = getComputedStyle(document.documentElement);
+      return { s: cs.getPropertyValue('--bp-stale').trim(), r: cs.getPropertyValue('--bp-stale-rgb').trim() };
+    });
+    if (t.s.toLowerCase() !== '#f5c949') return bad('K-BN --bp-stale', JSON.stringify(t));
+    if (!/245,\s*201,\s*73/.test(t.r)) return bad('K-BN --bp-stale-rgb', JSON.stringify(t));
+    ok('K-BN tazelik token\'i', t.s + ' / ' + t.r);
+  });
+
+  /* ⛔ OLCUM NOTU: uc dq'yu TEK sayfa uzerinde sirayla olcmek SAHTE-NEGATIF
+     uretir -- sayfanin kendi periyodik bpUpdateStaleBanner('seans_disi')
+     cagrisi araya girip display'i 'none' yapiyor, satir-ici renkler kaliyor.
+     Her dq KENDI taze yuklemesinde, yazma ve okuma AYNI senkron blokta. */
+  for (const [dq, fg, bg] of [['stale', 'rgb(245, 201, 73)', 'rgba(245, 201, 73, 0.1)'],
+                              ['seans_disi_eksik', 'rgb(245, 201, 73)', 'rgba(245, 201, 73, 0.1)'],
+                              ['critical', 'rgb(248, 81, 73)', 'rgba(248, 81, 73, 0.12)']]) {
+    await step('K-BN stale banner ' + dq + ' token ile boyaniyor', async () => {
+      await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await p.waitForTimeout(2500);
+      const r = await p.evaluate((d) => {
+        if (typeof bpUpdateStaleBanner !== 'function') return { err: 'bpUpdateStaleBanner yok' };
+        bpUpdateStaleBanner(d, 90000, false);
+        const b = document.getElementById('staleBanner'), t = document.getElementById('staleBannerText');
+        return { disp: getComputedStyle(b).display, bg: getComputedStyle(b).backgroundColor,
+                 fg: t ? getComputedStyle(t).color : null, txt: b.innerText.slice(0, 200) };
+      }, dq);
+      if (r.err) return bad('K-BN banner ' + dq, r.err);
+      if (r.disp !== 'block') return bad('K-BN banner ' + dq, 'display=' + r.disp);
+      if (r.fg !== fg || r.bg !== bg) return bad('K-BN banner ' + dq, 'renk ' + r.fg + ' / ' + r.bg);
+      if (/gerçek zamanlı olmayabilir/i.test(r.txt)) return bad('K-BN banner ' + dq, 'tereddutlu cumle geri gelmis');
+      if (!/gün sonu \(EOD\) kapanış verisidir/.test(r.txt)) return bad('K-BN banner ' + dq, 'EOD kuyruk cumlesi yok');
+      ok('K-BN banner ' + dq, r.fg + ' / ' + r.bg);
+    });
+  }
+
+  await step('K-BN hisse.html olu "BIST ~15dk" dali yok', async () => {
+    const hs = await (await ctx.request.get(BASE + '/hisse/THYAO')).text();
+    /* Negatif iddia olcerken YORUMLARI SOY: dalin silindigini anlatan aciklama
+       yorumunun kendisi hem "BIST ~15dk" hem "age < 300" yazisini tasiyor. */
+    const kod = hs.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:\\])\/\/[^\n]*/g, '$1 ');
+    if (/label\s*=\s*['"][^'"]*15\s*dk/i.test(kod)) return bad('K-BN hisse cipi', 'etiket atamasi hala var');
+    if (/age\s*<\s*300/.test(kod)) return bad('K-BN hisse cipi', '`age < 300` dali hala var');
+    ok('K-BN hisse cipi', 'olu/yanlis dal kodda yok');
+  });
+
+  await step('K-BN stale-banner.js ham renk tasimiyor', async () => {
+    /* ⛔ CIPLAK VARLIK URL'I DEPLOY'U DEGIL CLOUDFLARE'I OLCER: ilk yazim
+       `/static/stale-banner.js`i (?v= YOK) cekiyordu ve CF oradan 13.09
+       tarihli bir HIT donduruyordu -> "ham renk hala var" SAHTE-NEGATIFI.
+       Hicbir sablon o URL'i istemiyor. Dogru olcum: sayfanin GERCEKTEN
+       yukledigi ?v='li src. ([[feedback_cf_cache_bust_static]]) */
+    await p.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    const src = await p.evaluate(() => {
+      const e = [...document.querySelectorAll('script[src]')].find(x => /stale-banner\.js/.test(x.src));
+      return e ? e.src : null;
+    });
+    if (!src) return bad('K-BN stale-banner.js', 'sayfa bu betigi hic yuklemiyor');
+    if (!/\?v=/.test(src)) return bad('K-BN stale-banner.js', "cache-bust'siz yukleniyor: " + src);
+    const sb = await (await ctx.request.get(src)).text();
+    if (/#f5c949|#f85149/.test(sb)) return bad('K-BN stale-banner.js', 'ham renk hala var (' + src + ')');
+    if (!/var\(--bp-stale\)/.test(sb)) return bad('K-BN stale-banner.js', 'token kullanimi yok');
+    ok('K-BN stale-banner.js', 'ham renk 0, token var (' + src.split('/').pop() + ')');
+  });
+
+  await step('K-BN sw.js surumu + on-bellek listesi tazelendi', async () => {
+    const sw = await (await ctx.request.get(BASE + '/sw.js')).text();
+    const m = sw.match(/tokens\.css\?v=([0-9a-f]+)/);
+    if (!m) return bad('K-BN sw.js', 'on-bellek listesinde tokens.css yok');
+    const css = await (await ctx.request.get(BASE + '/static/css/tokens.css?v=' + m[1])).text();
+    if (!/--bp-stale:/.test(css)) return bad('K-BN sw.js', 'on-bellek listesi ESKI tokens.css hash\'ini tasiyor');
+    ok('K-BN sw.js', 'on-bellek listesi guncel tokens.css hash\'i (' + m[1] + ')');
+  });
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>
