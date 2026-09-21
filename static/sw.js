@@ -1,9 +1,9 @@
 /* BorsaPusula Service Worker v3.1 — offline fallback + PWA optimize */
-const CACHE = 'borsapusula-v48';
+const CACHE = 'borsapusula-v49';
 
 /* Sadece truly static assets — HTML sayfaları ASLA pre-cache yapılmaz (offline.html hariç) */
 const STATIC = [
-  '/static/lightweight-charts.min.js?v=1',
+  '/static/lightweight-charts.min.js?v=86b4c600',
   '/static/manifest.json?v=162d10e6',
   '/static/icon-192.png?v=933a8452',
   '/static/icon-512.png?v=e9ec3ef2',

@@ -108,7 +108,7 @@
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
-<script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
+<script src="/static/bp-vocab.js?v=63a439ab" defer></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=5f584c1b">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -1520,7 +1520,7 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=b6c7a716a"></script>
+<script src="/static/bp-format.js?v=b6c7a716"></script>
 <script src="/static/stale-banner.js?v=cfbf4001"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
@@ -1568,7 +1568,7 @@ function _loadChartLib() {
   if (LC) return Promise.resolve();
   return new Promise(function(res, rej) {
     var s = document.createElement('script');
-    s.src = '/static/lightweight-charts.min.js?v=1';
+    s.src = '/static/lightweight-charts.min.js?v=86b4c600';
     s.onload  = function() { LC = LightweightCharts; res(); };
     s.onerror = function() { s.remove(); rej(new Error('lightweight-charts yuklenemedi')); };
     document.head.appendChild(s);
@@ -3629,10 +3629,10 @@ document.addEventListener('visibilitychange', () => {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=85" defer></script>
-<script src="/static/js/bp-tooltip.js?v=4"></script>
-<script src="/static/js/bp-chart-common.js?v=4"></script>
-<script src="/static/learning-mode.js?v=8" defer></script>
+<script src="/static/bp-search.js?v=de0c653e" defer></script>
+<script src="/static/js/bp-tooltip.js?v=01078545"></script>
+<script src="/static/js/bp-chart-common.js?v=144569e8"></script>
+<script src="/static/learning-mode.js?v=1417c5bb" defer></script>
 
 <script>
 /* 21.09 (K-AU): `.ind-help` sayfa-yerel tap-toggle + Escape dinleyicileri
@@ -3820,7 +3820,7 @@ window._bpApplyTooltips = _applyTooltipVisibility;
 })();
 </script>
 
-<script src="/static/js/toast.js?v=5" defer></script>
+<script src="/static/js/toast.js?v=50187172" defer></script>
 
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

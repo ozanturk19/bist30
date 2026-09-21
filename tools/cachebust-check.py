@@ -32,10 +32,27 @@ IKINCI OLCUM — /offline precache KAPSAMI:
   duruyordu. Bu yuzden offline.html Jinja ile render edilip icindeki her
   `/static/...` URL'i STATIC listesinde BIREBIR aranir.
 
-KAPSAM SINIRI (bilerek):
-  `?v=75`, `?v=4`, `?v=20260915A` gibi ELLE artirilan surum etiketleri bu
-  kapinin disindadir -- bunlar md5 degil, kasitli manuel konvansiyon; tek
-  gereklilikleri her degisimde artirilmalari ve bunu bu kapi olcemez.
+UCUNCU OLCUM — KAPSAM SIZINTISI (K-AW, 21.09.2026 eklendi):
+  Yukaridaki olcut yalnizca deger 8 HANE HEX ise calisiyordu; "manuel surum
+  etiketi" diye 9 asset kapinin TAMAMEN disinda kalmisti ve bunlarin ikisi
+  md5 KAMUFLAJLIYDI -- `bp-vocab.js?v=f8cb1ae4A` ve `bp-format.js?v=b6c7a716a`
+  degerleri dosyanin gercek md5'i + tek harfti. Okuyan "bu md5, kapi bakiyor"
+  sanardi; kapi ise 9. karakter yuzunden atliyordu. Olcum sirasinda bulundu:
+      bp-vocab.js  ?v=f8cb1ae4A  ama diskteki md5 63a439ab  (13 sablonda)
+      bp-search.js ?v=85         ama diskteki md5 de0c653e  (19 sablonda)
+      js/bp-tooltip.js ?v=4      ama diskteki md5 01078545  (19 sablonda)
+      ... toplam 9 asset / 64 referans
+  Elle artirilan sayac disiplinine o gune kadar UYULMUSTU (bp-search 82->85,
+  learning-mode 7->8) -- yani kusur henuz bayat asset servis ETMEMISTI; ama
+  disiplin tamamen INSAN hafizasina dayaniyordu ve bu turda CPO'nun kendi
+  bp-vocab.js duzenlemesi tam da bu bosluktan bayat cikacakti.
+  Cozum: dokuzu da md5 konvansiyonuna gocuruldu (sw.js STATIC dahil,
+  CACHE v48 -> v49) ve "manuel etiket" muafiyeti KALDIRILDI.
+
+OLCUT (taban SIFIR, artik istisnasiz):
+  Diskte var olan her `/static/<yol>?v=<deger>` referansinda <deger> dosyanin
+  `md5 -q <dosya> | cut -c1-8` degerine ESIT olmak zorunda. 8 hane hex
+  OLMAYAN deger de sapmadir -- kapsam disi birakmak kapinin kendisini korler.
   Referansi olup diskte OLMAYAN dosya da hata sayilir (404 asset).
 """
 import hashlib
@@ -102,7 +119,16 @@ def main():
                 problems.append(f"{rel}: /static/{asset} referansi var ama dosya DISKTE YOK")
                 continue
             if not MD5_RE.match(ver):
+                # K-AW: eskiden `continue` ile atlanirdi -- 9 asset / 64 referans
+                # bu bosluktan kapinin disinda kalmisti (ikisi md5 kamuflajli).
                 skipped += 1
+                with open(disk, "rb") as fh:
+                    real = hashlib.md5(fh.read()).hexdigest()[:8]
+                problems.append(
+                    f"{rel}: /static/{asset}?v={ver} -> md5 konvansiyonu DISINDA "
+                    f"(elle surum etiketi); dogru deger {real}. Manuel etiket "
+                    f"kapiyi korlestirir, kullanilamaz."
+                )
                 continue
             with open(disk, "rb") as fh:
                 real = hashlib.md5(fh.read()).hexdigest()[:8]
@@ -124,7 +150,7 @@ def main():
         return 1
     if verbose:
         print(f"K-J PASS — {checked} md5 cache-bust referansi diskle birebir "
-              f"({skipped} manuel surum etiketi kapsam disi); "
+              f"(kapsam disi manuel etiket: {skipped} — taban SIFIR); "
               f"/offline'in {off_count} asset'inin hepsi sw.js precache'inde.")
     return 0
 
