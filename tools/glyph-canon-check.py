@@ -31,9 +31,20 @@ KANON = {
            ("Hacim Onaylı", "Hacim onaylı", "RVOL")),
 }
 
-# dosya:satir -> gerekce  (kasitli, gozden gecirilmis istisnalar)
+# (dosya, SATIR ICERIGI) -> gerekce  (kasitli, gozden gecirilmis istisnalar)
+#
+# ⛔ K-BF (21.09) DERSI — BU ANAHTAR ESKIDEN "dosya:satir" IDI VE KIRILGANDI:
+#   uzerine bir satir eklendigi anda muafiyet kayiyordu. Iki yonlu ariza:
+#     (a) sahte-pozitif — gercek muaf satir artik eslesmiyor (bu tur boyle yakalandi:
+#         hisse.html:1617 -> 1626 kaydi, kapi masum bir JS yorumuna KIRIK dedi),
+#     (b) DAHA KOTUSU sessiz muafiyet — bambaska bir satir 1617'ye kayip gercek
+#         bir ihlali gorunmez kilabilirdi.
+#   Anahtar artik ICERIK. Satir degisirse muafiyet DUSER; bu kasitlidir: degisen
+#   satir yeniden gozden gecirilmelidir. Kullanilmayan muafiyet de HATADIR
+#   (asagida olculur) — beyaz liste curumesin.
 GOZDEN_GECIRILMIS = {
-    "hisse.html:1617": "JS bolum yorumu — kullaniciya gorunmez (⭐ Portfolio toggle basligi)",
+    ("hisse.html", "/* ── ⭐ Portfolio + 🔔 Watchlist toggle (LOCAL STORAGE) ── */"):
+        "JS bolum yorumu — kullaniciya gorunmez (⭐ Portfolio toggle basligi)",
 }
 
 # bir glifin "etiketi": ayni HTML etiketindeki data-tip + glifi iceren metin parcasi
@@ -51,6 +62,7 @@ def satir_baglami(line: str, idx: int) -> str:
 def main() -> int:
     print("glyph-canon-check (K-AQ: rozet glifi <-> kanonik anlam)")
     bulgular = []
+    kullanilan = set()
     sayac = {g: 0 for g in KANON}
     for f in sorted(TPL.glob("*.html")):
         for no, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
@@ -63,7 +75,9 @@ def main() -> int:
                     start = i + 1
                     sayac[glif] += 1
                     anahtar = f"{f.name}:{no}"
-                    if anahtar in GOZDEN_GECIRILMIS:
+                    muafiyet = (f.name, line.strip())
+                    if muafiyet in GOZDEN_GECIRILMIS:
+                        kullanilan.add(muafiyet)
                         continue
                     ctx = satir_baglami(line, i)
                     if not any(a in ctx for a in anahtarlar):
@@ -71,6 +85,15 @@ def main() -> int:
 
     for g, (ad, _) in KANON.items():
         print(f"  {g} = {ad}  ->  {sayac[g]} kullanim")
+
+    olu = sorted(set(GOZDEN_GECIRILMIS) - kullanilan)
+    print(f"  gozden gecirilmis muafiyet: {len(GOZDEN_GECIRILMIS)} · eslesti: {len(kullanilan)}")
+    if olu:
+        print("\n  ✗ OLU MUAFIYET — beyaz listede karsiligi olmayan kayit var:")
+        for dosya, icerik in olu:
+            print(f"    {dosya}  «{icerik[:90]}»")
+        print("    Satir degismis ya da silinmis olabilir; kaydi GUNCELLE veya KALDIR.")
+        return 1
 
     if bulgular:
         print(f"\n  ✗ {len(bulgular)} CAKISMA:")
