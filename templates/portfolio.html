@@ -205,7 +205,7 @@
 
 {% with ftr_self='/portfolio', ftr_data_note=true, ftr_note="Portföy verisi yalnızca kendi tarayıcınızda saklanır." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=115ff3c5"></script>
+<script src="/static/bp-format.js?v=167dacc4"></script>
 <script>
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
@@ -356,7 +356,7 @@ function exportPortfolio() {
   const url  = URL.createObjectURL(blob);
   const a    = Object.assign(document.createElement('a'), {
     href: url,
-    download: `borsapusula-portfolio-${new Date().toISOString().slice(0,10)}.json`,
+    download: `borsapusula-portfolio-${bpTodayTrIso()}.json`,  // K-BD: TR takvim gunu (UTC DEGIL)
   });
   document.body.appendChild(a);
   a.click();
@@ -395,7 +395,7 @@ function exportCSV() {
   const url  = URL.createObjectURL(blob);
   const a    = Object.assign(document.createElement('a'), {
     href: url,
-    download: `borsapusula-portfolio-${new Date().toISOString().slice(0,10)}.csv`,
+    download: `borsapusula-portfolio-${bpTodayTrIso()}.csv`,  // K-BD: TR takvim gunu (UTC DEGIL)
   });
   document.body.appendChild(a);
   a.click();
@@ -543,7 +543,7 @@ function addPosition() {
   if (!Number.isFinite(price) || price <= 0 || price > 1e9) { err.textContent = 'Geçerli fiyat girin.'; return; }
   err.textContent = '';
   if (btn) btn.disabled = true;
-  const finalDate = date || new Intl.DateTimeFormat('en-CA', {timeZone: 'Europe/Istanbul'}).format(new Date());
+  const finalDate = date || bpTodayTrIso();  // K-BD: tek kanon (bp-format.js)
   if (_editingId !== null) {
     const idx = portfolio.findIndex(p => p.id === _editingId);
     if (idx !== -1) portfolio[idx] = { ...portfolio[idx], ticker, lot, price, date: finalDate };

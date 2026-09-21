@@ -315,7 +315,7 @@
 
 {% with ftr_self='/tarama', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=115ff3c5"></script>
+<script src="/static/bp-format.js?v=167dacc4"></script>
 <script src="/static/stale-banner.js?v=cfbf4001"></script>
 <script>
 /* ── Makro ticker — merkezi bpLoadMacroBar (bp-search.js), CPO-DEV2-081(C) ── */
@@ -440,7 +440,7 @@ function exportCSV() {
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'borsapusula-tarama-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.href = url; a.download = 'borsapusula-tarama-' + bpTodayTrIso() + '.csv';  // K-BD: TR takvim gunu (UTC DEGIL)
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }

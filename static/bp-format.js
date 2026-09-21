@@ -175,3 +175,18 @@ function bpFormatTrNumber(n, maxFrac) {
     maximumFractionDigits: (maxFrac === undefined ? 2 : maxFrac)
   });
 }
+
+/* K-BD (21.09) — "BUGÜNÜN TARİHİ" DOSYA ADINDA UTC'DEN TÜRETİLİYORDU.
+   Dışa aktarılan dosyaların adı `new Date().toISOString().slice(0,10)` ile
+   üretiliyordu; bu UTC günüdür. TR saatiyle 00:00–02:59 arasında (UTC+3)
+   kullanıcı portföyünü indirdiğinde dosya BİR ÖNCEKİ günün adını alıyor,
+   içindeki alış tarihleri ise TR takvimiyle yazıldığı için dosya adı
+   içerikle çelişiyordu. Aynı dosyada (portfolio.html) iki kanon yan yanaydı:
+   yeni pozisyonun varsayılan tarihi Europe/Istanbul ile doğru türetilirken
+   dosya adı UTC'den türüyordu.
+   Kanon: görünen HER "bugün" değeri bpTodayTr()'den türer. */
+function bpTodayTrIso() {
+  var t = bpTodayTr();
+  var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+  return t.y + '-' + p2(t.m) + '-' + p2(t.d);
+}
