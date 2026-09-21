@@ -39,9 +39,33 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
     banner.style.background  = 'rgba(245,201,73,.10)';
     banner.style.borderColor = 'rgba(245,201,73,.4)';
     banner.style.display     = 'block';
+  } else if (dq === 'seans_disi_eksik') {
+    /* CPO-1680 FRONTEND YARISI (21.09, K-AB). DEV1 backend yarısını yapmıştı:
+       `_compute_data_quality` artık "normal seans dışı" (seans_disi) ile
+       "seans dışı AMA son işlem gününün verisi GELMEDİ" (seans_disi_eksik)
+       ayrımını üretiyor ve docstring'i açıkça "frontend bu değere göre ayrı
+       banner açabilir" diyor. O dal HİÇ YAZILMAMIŞTI: yeni değer buradaki
+       son `else`e düşüyor ve banner GİZLİ kalıyordu.
+       ⛔ CANLI KANIT (21.09 Pzt 07:30): /api/data-quality
+       `seans_disi_eksik` + `stocks_age_s` 306514 (**85.1 saat**) döndürürken
+       ana sayfa 17.09 Perşembe kapanışını hiçbir uyarı olmadan, /hisse ise
+       nötr gri "Piyasa kapalı" çipiyle servis ediyordu. Kullanıcı için
+       "hafta sonu, normal" ile "Cuma seansı hiç işlenmedi" ayırt edilemezdi.
+       RENK: `stale` ile aynı kehribar — bu bir arıza ama `critical` (kırmızı,
+       "veri şu an hiç alınamıyor") değil; gösterilen fiyat GERÇEK, sadece
+       beklenen işlem gününden eski. */
+    var eksikTxt = hasAge
+      ? dateTxt + ' gün sonu verileri gösterilmektedir — son işlem gününün kapanışı henüz alınamadı.'
+      : 'Son işlem gününün kapanışı henüz alınamadı — gösterilen veriler daha eski.';
+    if (bTxt) { bTxt.textContent = eksikTxt + suffix; bTxt.style.color = '#f5c949'; }
+    banner.style.background  = 'rgba(245,201,73,.10)';
+    banner.style.borderColor = 'rgba(245,201,73,.4)';
+    banner.style.display     = 'block';
   } else if (dq === 'seans_disi') {
     /* CPO-1338: seans dışı stale by-design — banner KASITLI gizli (fresh ile
-       karıştığı için değil, bu dal açıkça o kararı veriyor). */
+       karıştığı için değil, bu dal açıkça o kararı veriyor).
+       DİKKAT: bu dal artık YALNIZ gerçekten normal olan seans dışını kapsar;
+       gerçek gecikme yukarıdaki `seans_disi_eksik` dalına gider. */
     banner.style.display = 'none';
   } else {
     banner.style.display = 'none';

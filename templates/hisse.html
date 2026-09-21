@@ -1509,7 +1509,7 @@
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
 <script src="/static/bp-format.js?v=b6c7a716a"></script>
-<script src="/static/stale-banner.js?v=c290d79e"></script>
+<script src="/static/stale-banner.js?v=cfbf4001"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
 async function hisseSubscribe() {
@@ -2145,7 +2145,15 @@ function renderFreshness(f, dq, ageS, refreshing) {
      önce güncellendi") aynı ekranda iki kez basıyordu. Banner tetiklendiğinde
      (effDq stale/critical) burada kısa durum kalır, ayrıntı banner'da. */
   let color, label;
-  if (!f.market_open) {
+  /* CPO-1680 FRONTEND YARISI (21.09, K-AB) — İKİNCİ KÖR NOKTA.
+     `!f.market_open` dalı EN ÖNDEydi ve `seans_disi_eksik`i YUTUYORDU: canlı
+     ölçümde (21.09 Pzt 07:30) veri 85.1 saat eskiyken bu çip nötr gri
+     "Piyasa kapalı" diyordu — kullanıcıya hiçbir arıza sinyali yok. Gerçek
+     gecikme artık "Piyasa kapalı"dan ÖNCE değerlendirilir. Çipin kendisi
+     kısa kalır (T7.2 çift-bildirim kuralı), ayrıntı banner'da. */
+  if (effDq === 'seans_disi_eksik') {
+    color = '#f5c949'; label = 'Veri gecikmeli';
+  } else if (!f.market_open) {
     color = 'var(--bp-text3)'; label = 'Piyasa kapalı';
   } else if (effDq === 'critical') {
     color = 'var(--bp-sat)'; label = 'Veri bayat';
