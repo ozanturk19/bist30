@@ -40,7 +40,18 @@
     --da-glow-y: -55%;
     --da-glow-x: -8%;
     --da-glow-size: 90px;
-    display:flex; align-items:center; gap:12px; margin-bottom:14px;
+    /* K-AE (21.09): `flex-wrap` YOKTU. Basligin dort cocugu (rozet · donem
+       adi/tarih · sayac cipleri · aciklama) tek satira SIKISTIRILIYOR, `.pd-count`
+       ise `white-space:nowrap` oldugu icin kuculemiyordu; `.da-panel`in
+       `overflow:hidden`i tasan cipi ELLIPSIS OLMADAN kesiyordu. Canli olcum:
+       @320px "43 Bozuldu" cipi BUGUN, varsayilan aralikta 39.2px disarida.
+       Sayfa duzeyi tasma harness'i (mobile-overflow-check.mjs) bunu goremez —
+       kirpan kutu tasmayi YUTAR. WCAG 1.4.12 aralik dayatmasi altinda ayni
+       kok neden @375'te de kesiyordu. Sarma acildi: >=600px'te tek satir
+       AYNEN korunur (768/1024/1280 birebir dogrulandi), dar ekranda cipler
+       alt satira gecer ve basligin kendisi de KISALIR (@375 129px -> 96px,
+       cunku rozet artik kendi icinde sarmak zorunda degil). */
+    display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:14px;
     padding:14px 18px; border-radius:var(--bp-radius-lg);
   }
   /* Aktif donem: .da-panel'in degradesini duz marka tonuyla ezer (kasitli). */
@@ -56,7 +67,7 @@
   }
   .pd-count--al  { background:rgba(var(--bp-al-rgb),0.12);  color:var(--bp-al);  border:1px solid rgba(var(--bp-al-rgb),0.2); }
   .pd-count--sat { background:rgba(var(--bp-sat-rgb),0.12); color:var(--bp-sat-on-tint); border:1px solid rgba(var(--bp-sat-rgb),0.2); }
-  .pd-counts { display:flex; gap:8px; align-items:center; }
+  .pd-counts { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
   .period-badge {
     font-size:var(--bp-text-xs); font-weight:700; padding:2px 10px; border-radius:var(--bp-radius-lg);
     text-transform:uppercase; letter-spacing:.4px;
