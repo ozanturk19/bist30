@@ -209,6 +209,14 @@
     display: none;
   }
   .ac-dropdown.open { display: block; }
+  /* 21.09 (K-AU, 2. tasiyici): `.ac-dropdown` da sabit yonluydu — HER ZAMAN
+     asagi acilirdi. Canli olcum (/karsilastir, 320x420 = telefon + klavye acik):
+     4 girdinin 4'unde liste gorunur alanin ALTINA tasiyordu (64/115/118/118px),
+     6 oneriden yalniz 2'si gorunuyordu (gorunur yukseklik %39-40). Asagida yer
+     yoksa ve yukarida daha cok yer varsa JS `.ac-up` ekler; ayrica kalan bosluga
+     gore max-height kelepcelenir, boylece hicbir yonde tasma kalmaz.
+     Ayni kural bp-tooltip.js'in `top<8 -> alta cevir` mantiginin aynadaki esi. */
+  .ac-dropdown.ac-up { top: auto; bottom: calc(100% + 4px); }
   .ac-item {
     display: flex; align-items: center; justify-content: space-between;
     padding: 8px 12px; cursor: pointer; font-size: var(--bp-text-sm);

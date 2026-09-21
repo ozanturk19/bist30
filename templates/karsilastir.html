@@ -45,7 +45,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=8ba42632">
+<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=b0992814">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
@@ -576,6 +576,7 @@ function renderDropdown(inputId, items) {
     dd.classList.add('open');
     if (inp) { inp.setAttribute('aria-expanded', 'true'); inp.removeAttribute('aria-activedescendant'); }
     acState[inputId] = { idx: -1, items: [] };
+    placeDropdown(inputId);   /* K-AU */
     return;
   }
   const html = items.map((it, i) => `
@@ -588,6 +589,7 @@ function renderDropdown(inputId, items) {
   dd.classList.add('open');
   if (inp) { inp.setAttribute('aria-expanded', 'true'); inp.removeAttribute('aria-activedescendant'); }
   acState[inputId] = { idx: -1, items };
+  placeDropdown(inputId);   /* K-AU */
 
   dd.querySelectorAll('.ac-item').forEach(el => {
     el.addEventListener('mousedown', e => {
@@ -596,6 +598,31 @@ function renderDropdown(inputId, items) {
       selectAcItem(inputId, t);
     });
   });
+}
+
+/* 21.09 (K-AU, 2. tasiyici) — acilir liste sabit yonluydu: `top:calc(100%+4px)`
+   ile HER ZAMAN asagi acilirdi, yer olup olmadigina bakmadan. Canli olcum
+   (/karsilastir, 320x420 = telefon + klavye acik): 4/4 girdide liste gorunur
+   alanin altina tasiyordu (64/115/118/118px) ve 6 oneriden yalniz 2'si
+   gorunuyordu. placeDropdown() bp-tooltip.js'in `top<8 -> alta cevir`
+   mantiginin aynadaki esi: asagida yer yoksa VE yukarida daha cok yer varsa
+   yukari cevirir, sonra kalan bosluga gore max-height kelepceler. */
+function placeDropdown(inputId) {
+  const dd  = document.getElementById('ac' + inputId.slice(1));
+  const inp = document.getElementById(inputId);
+  if (!dd || !inp || !dd.classList.contains('open')) return;
+  dd.classList.remove('ac-up');
+  dd.style.maxHeight = '';
+  const ir    = inp.getBoundingClientRect();
+  const vh    = document.documentElement.clientHeight;
+  const below = vh - ir.bottom - 8;
+  const above = ir.top - 8;
+  const need  = dd.offsetHeight;          /* `.open` zaten eklendi -> olculebilir */
+  if (need > below && above > below) dd.classList.add('ac-up');
+  const space = dd.classList.contains('ac-up') ? above : below;
+  /* 96px tabani: cok kisa viewport'ta listeyi tamamen ezmek yerine kendi
+     icinde kaydirilabilir birakir (overflow-y:auto zaten var). */
+  if (need > space) dd.style.maxHeight = Math.max(96, space) + 'px';
 }
 
 function closeDropdown(inputId) {
@@ -689,6 +716,12 @@ document.addEventListener('click', e => {
     ['t1','t2','t3','t4'].forEach(id => closeDropdown(id));
   }
 });
+
+/* K-AU: acik liste kaydirma/yeniden boyutlandirmada yonunu kaybetmesin
+   (bp-tooltip.js'in onReflow esi). */
+const _acReflow = () => ['t1','t2','t3','t4'].forEach(placeDropdown);
+window.addEventListener('scroll', _acReflow, true);
+window.addEventListener('resize', _acReflow);
 
 loadStocksList();
 
