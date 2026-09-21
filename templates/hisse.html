@@ -366,10 +366,15 @@
     {# SPEC-017 v2 c5 — Sparkline 30D (vanilla canvas + long-press crosshair) #}
     <div class="bp-spark-wrap" id="bpSparkWrap" style="display:none">
       <div class="bp-spark-label">
-        <span>Son 30 işlem günü</span>
+        {#- K-BW olcum notu: once "Son 30 islem gunu" yazilmisti. @320px CANLI
+            olculdu: 16.391,39 ₺'lik fiyatla (evrendeki en yuksek) etiket IKI
+            SATIRA sariyordu (satir 15px -> 30px); eski kisa etiket sarmiyordu.
+            "seans" sitenin ZATEN kullandigi kelime (_stale_banner, /gundem,
+            _footer) ve ayni olcumde eski etiketle BIREBIR ayni yukseklik. -#}
+        <span>Son 30 seans</span>
         <span id="bpSparkVal" class="bp-spark-val">—</span>
       </div>
-      <canvas id="bpSpark" class="bp-spark-canvas" height="52" role="img" aria-label="Son 30 işlem günü kapanış fiyatı grafiği"></canvas>
+      <canvas id="bpSpark" class="bp-spark-canvas" height="52" role="img" aria-label="Son 30 seans kapanış fiyatı grafiği"></canvas>
     </div>
     {# SPEC-017 Faz B K10: "Neden bu sinyal?" CTA + drawer SİLİNDİ (Ozan redundant feedback). AI tab + sigExplainSection zaten mevcut. #}
   </div>
