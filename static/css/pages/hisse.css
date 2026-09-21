@@ -411,9 +411,12 @@
     padding: 16px 18px;
     margin-bottom: 20px;
   }
+  /* K-BT (22.09): ucuncu kolon "Hacim Profili" idi; artik kendi bolumunde
+     (bkz. hisse.html #volumeProfileSection) cunku girise bagimli erken-return'ler
+     onun DOM'unu siliyordu. Kalan iki kolon: Degerlendirme + Risk/Odul. */
   .entry-analysis-grid {
     display: grid;
-    grid-template-columns: 200px 1fr 160px;
+    grid-template-columns: 200px 1fr;
     gap: 16px;
     margin-top: 12px;
     align-items: start;

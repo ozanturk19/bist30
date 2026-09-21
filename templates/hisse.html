@@ -109,7 +109,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=7ed38bdb">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=76ce077a">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=04756784">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -1029,22 +1029,34 @@
         <div id="rrLevels"></div>
       </div>
 
-      <!-- Hacim Profili (signal_vol + RVOL birleşik) -->
-      <div class="hacim-profili">
-        <div class="vol-status-lbl">Hacim Profili</div>
-        <div class="hp-row-line" id="hpRvolRow" style="display:none">
-          <span class="hp-row-icon"><span aria-hidden="true">📊</span></span>
-          <span class="hp-row-text">Haftalık hacim ivmesi:</span>
-          <span class="hp-row-val" id="hpRvolVal">—</span>
-        </div>
-        <div class="hp-row-line" id="hpSvolRow" style="display:none">
-          <span class="hp-row-icon"><span aria-hidden="true">💥</span></span>
-          <span class="hp-row-text">Sinyal günü hacim:</span>
-          <span class="hp-row-val" id="hpSvolVal">—</span>
-        </div>
-        <div class="hp-row-summary" id="hpSummary"></div>
-      </div>
+    </div>
+  </div>
 
+  <!-- Hacim Profili — K-BT (22.09): bu panel 21.09'a kadar `#entryAnalysisGrid`in
+       UCUNCU COCUGUYDU. `renderEntryAnalysis()`in "aktif sinyal yok" dali
+       `grid.innerHTML = '<placeholder>'` yaziyor -> panelin BUTUN DOM'unu
+       (hpRvolRow/hpSvolRow/hpSummary dahil) siliyordu. Canli olcum 22.09:
+       BEKLE olan 138/217 hissede panel Ozet sekmesinde DOM'da bile yoktu,
+       oysa `rvol` ve `signal_vol_ratio` 217/217 hissede DOLU geliyor. Hacim
+       YON-BAGIMSIZ bir buyukluktur (K-BO) — sinyali olmayan hissede en anlamli
+       oldugu yer: "sinyal yok ama hacim olagandisi". Panel artik girise
+       bagimli degil, kendi bolumu; `data-tab-content="ozet"` ile applyTab
+       zaten gorunurlugu yonetiyor (K-U/K-AF sinifi: bir innerHTML yazimi
+       kardes bir bileseni yok etmemeli). -->
+  <div class="entry-analysis-section" id="volumeProfileSection" data-tab-content="ozet" style="display:none">
+    <h2 class="section-title"><span aria-hidden="true">📊</span> Hacim Profili</h2>
+    <div class="hacim-profili">
+      <div class="hp-row-line" id="hpRvolRow" style="display:none">
+        <span class="hp-row-icon"><span aria-hidden="true">📊</span></span>
+        <span class="hp-row-text">Haftalık hacim ivmesi:</span>
+        <span class="hp-row-val" id="hpRvolVal">—</span>
+      </div>
+      <div class="hp-row-line" id="hpSvolRow" style="display:none">
+        <span class="hp-row-icon"><span aria-hidden="true">💥</span></span>
+        <span class="hp-row-text">Sinyal günü hacim:</span>
+        <span class="hp-row-val" id="hpSvolVal">—</span>
+      </div>
+      <div class="hp-row-summary" id="hpSummary"></div>
     </div>
   </div>
 
@@ -2528,7 +2540,18 @@ function renderSummary(s, signalData) {
       }
     }
 
-    /* Hacim Profili — RVOL + signal_vol birleşik */
+  })();
+
+  /* Hacim Profili — K-BT (22.09): BU BLOK `renderEntryAnalysis()`IN ICINDEYDI,
+     yani UC erken-return'un (aktif sekme != ozet · aktif sinyal yok ·
+     entry_quality yok) ARKASINDA kaliyordu. Hacim, girisle ilgisiz ve
+     YON-BAGIMSIZ bir buyukluk (K-BO): sinyali olmayan hissede de -- hatta
+     ozellikle orada -- anlamli. Canli olcum 22.09: BEKLE olan 138/217 hissede
+     panel hic dolmuyordu (ustelik markup'i da siliniyordu, bkz. ~1046 notu),
+     oysa rvol/signal_vol_ratio 217/217 hissede DOLU. Artik kendi IIFE'sinde,
+     gorunurlugu applyTab'in `data-tab-content` kanonuna birakiliyor. */
+  (function renderVolumeProfile() {
+    if (!signalData) return;   /* ilk cizim: /api/data henuz gelmedi, satirlar gizli kalir */
     const vr = signalData.signal_vol_ratio;
     const rvolVal = signalData.rvol;
     const isPremium = signalData.is_premium === true;
