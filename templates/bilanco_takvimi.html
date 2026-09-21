@@ -146,7 +146,7 @@ function render(data) {
 
   const container = document.getElementById('periodsContainer');
   if (!periods || periods.length === 0) {
-    container.innerHTML = '<div class="loading-msg">Dönem bulunamadı.</div>';
+    container.innerHTML = '<div class="da-empty">Dönem bulunamadı.</div>';
     btAnnounce('Dönem bulunamadı.');
     return;
   }

@@ -289,7 +289,7 @@ async function load() {
       _loadAttempts++;
       if (_loadAttempts >= 4) {
         document.getElementById('heatmap').innerHTML =
-          '<div class="loading-msg">⚠️ Veriler henüz hazır değil. <a href="." onclick="location.reload();return false" style="color:var(--bp-brand)">Sayfayı yenile</a></div>';
+          '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Veriler henüz hazır değil.</span><button type="button" class="da-retry" onclick="load()">Tekrar dene</button></div>';
         document.getElementById('lastUpdate').textContent = 'Veri bekleniyor…';
         return;
       }
@@ -305,7 +305,7 @@ async function load() {
     _loadAttempts++;
     if (_loadAttempts >= 3) {
       document.getElementById('heatmap').innerHTML =
-        '<div class="loading-msg">Bağlantı hatası — lütfen daha sonra tekrar deneyin. <a href="." onclick="location.reload();return false" style="color:var(--bp-brand)">Sayfayı yenile</a></div>';
+        '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Bağlantı hatası — veriler yüklenemedi.</span><button type="button" class="da-retry" onclick="load()">Tekrar dene</button></div>';
       document.getElementById('lastUpdate').textContent = 'Yüklenemedi';
       return;
     }

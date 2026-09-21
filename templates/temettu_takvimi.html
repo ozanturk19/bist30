@@ -135,7 +135,7 @@ function render(data) {
 
   const container = document.getElementById('stocksContainer');
   if (stocks.length === 0) {
-    container.innerHTML = '<div class="loading-msg">Temettü verisi bulunamadı.</div>';
+    container.innerHTML = '<div class="da-empty">Temettü verisi bulunamadı.</div>';
     dtAnnounce('Temettü verisi bulunamadı.');
     return;
   }
