@@ -8090,12 +8090,12 @@ def abd_stock_page(ticker):
 
 # ── SPEC-014 A1 — Sinyal Özeti (deterministik, kural-tabanlı) ─────────────────
 def _fmt_tl(v):
-    """Sayiyi TR formatinda TL stringe cevirir."""
+    """Sayiyi TR formatinda ₺ stringe cevirir."""
     # bug-hunt r93: kanonik tr_price_filter (satir ~616) ile ayni TR-format
     # mantigini farkli bir algoritmayla (comma/X/dot swap-chain) tekrar
     # implemente ediyordu -- iki kod yolu sessizce birbirinden sapabilirdi.
     _s = tr_price_filter(v)
-    return _s if _s == "—" else _s + " TL"
+    return _s if _s == "—" else _s + " ₺"
 
 
 def build_signal_summary(stock):
@@ -8359,7 +8359,7 @@ def stock_page(ticker):
         _chg_txt = f", günlük değişim %{tr_price_filter(chg)}" if isinstance(chg, (int, float)) else ""
         seo_faq.append({
             "q": f"{ticker} hisse fiyatı ne kadar?",
-            "a": f"{ticker} güncel fiyatı {tr_price_filter(price)} TL{_chg_txt}.",
+            "a": f"{ticker} güncel fiyatı {tr_price_filter(price)} ₺{_chg_txt}.",
         })
     if adx_val is not None or score is not None:
         _parts = []
