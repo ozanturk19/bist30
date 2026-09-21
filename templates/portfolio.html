@@ -1011,7 +1011,10 @@ async function loadFromCloud() {
     const res  = await fetch(`/api/portfolio/${encodeURIComponent(token)}`, {signal: AbortSignal.timeout(15000)});
     if (!res.ok) { _setCloudMsg('Token bulunamadı.', 'var(--bp-sat)'); return; }
     const data = await res.json();
-    if (!data.positions) { _setCloudMsg('Geçersiz portföy.', 'var(--bp-sat)'); return; }
+    /* K-BI es-yazim taramasi: ayni zayif kontrol IKINCI bir bulut yolunda da
+       vardi. Obje donerse `.length` undefined, `.map` patlar ve kullaniciya
+       ham JS hata metni gosterilirdi. */
+    if (!Array.isArray(data.positions)) { _setCloudMsg('Geçersiz portföy verisi.', 'var(--bp-sat)'); return; }
     // id her zaman burada uretilir; guvenilmeyen cloud verisindeki p.id'ye
     // guvenilmiyor (onclick="removePosition(${p.id})" tirnaksiz sayi bekliyor)
     // r155 bug-hunt: importPortfolio ile ayni lot/price dogrulamasi — eski-

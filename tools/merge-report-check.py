@@ -24,6 +24,10 @@ IHLAL SINIFLARI (tabani SIFIR):
   B) KANONU ATLAMA-- birlestirme yolu `_pfMergePositions(` cagirmiyor
   C) UZUNLUKTAN SAYIM -- birlestirme yolunda `.length - ` ile sayi turetme
      (defektin tam bicimi: `positions.length - skipped`)
+  D) DOGRULANMAMIS DIZI -- `data.positions` tuketen yol once
+     `Array.isArray(data.positions)` ile dogrulamiyor (obje donerse
+     kullaniciya ham JS hata metni gosterilirdi; ayni zayif kontrol IKI
+     bulut yolunda birden vardi -- es-yazim taramasiyla bulundu)
 
 OLCUM DISIPLINI: blok yorumlar SOYULUR (bu dosyadaki ve sablondaki kendi
 aciklamalarim bulgu uretmesin) ve POZITIF KONTROL calisir --
@@ -40,6 +44,8 @@ TARGET = os.path.join(ROOT, "templates", "portfolio.html")
 
 PUSH_ALLOWED = ("_pfMergePositions", "addPosition")
 MERGE_CALLERS = ("importPortfolio", "loadCloudToken")
+# `data.positions` tuketen HER yol (birlestiren de, yerine koyan da)
+CLOUD_CONSUMERS = ("loadCloudToken", "loadFromCloud")
 CANON = "_pfMergePositions("
 
 
@@ -89,7 +95,7 @@ def audit(src):
     problems = []
 
     bodies = {}
-    for fn in set(PUSH_ALLOWED + MERGE_CALLERS):
+    for fn in set(PUSH_ALLOWED + MERGE_CALLERS + CLOUD_CONSUMERS):
         b = function_body(src, fn)
         if b is None:
             problems.append("EKSIK FONKSIYON: %s -- kanon yeri bulunamadi" % fn)
@@ -104,6 +110,15 @@ def audit(src):
             "fonksiyonlarinda (%s) -- %d tanesi disarida"
             % (total_push, inside, "/".join(PUSH_ALLOWED), total_push - inside)
         )
+
+    # D) dogrulanmamis dizi
+    for fn in CLOUD_CONSUMERS:
+        body = function_body(src, fn) or ""
+        if "data.positions" in body and "Array.isArray(data.positions)" not in body:
+            problems.append(
+                "D) DOGRULANMAMIS DIZI: %s() `data.positions` tuketiyor ama "
+                "`Array.isArray(data.positions)` ile dogrulamiyor" % fn
+            )
 
     for fn in MERGE_CALLERS:
         body = bodies[fn]
@@ -129,6 +144,10 @@ function importPortfolio(e) {
   const _impMerge = _pfMergePositions(positions);
   showToast(`${_impMerge.added} pozisyon (${positions.length - _impMerge.added} zaten vardi).`);
 }
+function loadFromCloud() {
+  if (!data.positions) { return; }
+  portfolio = data.positions.map(p => p);
+}
 function loadCloudToken() {
   let skipped = 0;
   data.positions.forEach(p => { if (!p.ticker) { skipped++; return; }
@@ -139,8 +158,8 @@ function loadCloudToken() {
 }
 """
     probs = audit(broken)
-    kinds = {p.split(")")[0] for p in probs if p[:1] in "ABC"}
-    ok = {"A", "B", "C"} <= kinds
+    kinds = {p.split(")")[0] for p in probs if p[:1] in "ABCD"}
+    ok = {"A", "B", "C", "D"} <= kinds
     print("POZITIF KONTROL: %s (%d ihlal, siniflar=%s)"
           % ("GECTI" if ok else "DUSTU", len(probs), ",".join(sorted(kinds))))
     for p in probs:
