@@ -173,7 +173,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 
 <h2>EMA12 ve EMA99 Neden?</h2>
 <ul>
-  <li><strong>EMA12:</strong> ~2.5 haftalık kısa dönem momentumu temsil eder</li>
+  <li><strong>EMA12:</strong> ~2,5 haftalık kısa dönem momentumu temsil eder</li>
   <li><strong>EMA99:</strong> ~5 aylık uzun dönem trendi temsil eder</li>
 </ul>
 <p>Bu iki ortalama birbirini <em>kestiğinde</em> trend değişimi sinyali oluşur:</p>
@@ -190,7 +190,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 """,
     "faqs": [
       {"q": "EMA ile SMA arasındaki temel fark nedir?", "a": "EMA (Üstel Hareketli Ortalama), son fiyatlara daha fazla ağırlık verirken SMA (Basit Hareketli Ortalama) tüm periyotlara eşit ağırlık verir. Bu nedenle EMA fiyat değişimlerine daha hızlı tepki verir."},
-      {"q": "BorsaPusula neden EMA12 ve EMA99 kullanıyor?", "a": "EMA12 yaklaşık 2.5 haftalık kısa dönem momentumu, EMA99 ise 5 aylık uzun dönem trendi temsil eder. Bu iki ortalamanın kesişimi, kısa dönem ivmesinin uzun dönem trendi geçtiğini gösterir."},
+      {"q": "BorsaPusula neden EMA12 ve EMA99 kullanıyor?", "a": "EMA12 yaklaşık 2,5 haftalık kısa dönem momentumu, EMA99 ise 5 aylık uzun dönem trendi temsil eder. Bu iki ortalamanın kesişimi, kısa dönem ivmesinin uzun dönem trendi geçtiğini gösterir."},
       {"q": "EMA kesişimi tek başına yeterli bir sinyal midir?", "a": "Hayır. EMA kesişimleri gecikmeli sinyal üretir ve yatay piyasalarda sık sık sahte kesişim yaşanır. BorsaPusula üçüncü teyit katmanı olarak kullanır: Supertrend + ADX + EMA üçü aynı anda teyit vermelidir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO']
@@ -537,7 +537,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
   <li>Önceki yüksek ve düşük noktalar</li>
   <li>Yuvarlak sayılar (100₺, 50₺, 200₺)</li>
   <li>EMA ve Supertrend seviyeleri</li>
-  <li>Fibonacci geri çekilme seviyeleri (%38.2, %50, %61.8)</li>
+  <li>Fibonacci geri çekilme seviyeleri (%38,2, %50, %61,8)</li>
 </ul>
 
 <h2>BorsaPusula Grafiklerinde Kullanımı</h2>
@@ -664,7 +664,7 @@ Histogram = MACD − Sinyal</pre>
     "faqs": [
       {"q": "Düşük hacimli kırılım neden güvenilmez sayılır?", "a": "Güçlü kırılımın arkasında kurumsal alıcıların varlığı gerekir. Düşük hacimli kırılım büyük oyuncuların o yönde konumlanmadığına işaret eder, sahte kırılım riski yüksektir."},
       {"q": "BorsaPusula hacim verisini nasıl kullanıyor?", "a": "Sinyal üretiminde doğrudan hacim göstergesi kullanılmasa da her hisse sayfasındaki grafiklerde hacim çubukları gösterilir. Sinyal tarihleri etrafındaki hacim artışları sinyalin gücünü değerlendirmenize yardımcı olur."},
-      {"q": "Vol Ratio ne anlama gelir?", "a": "Vol Ratio, son günün hacminin 20 günlük ortalamaya oranıdır. 1.5 üzeri, normalin 1.5 katı hacim anlamına gelir; sinyal günlerinde dikkat çekici bir göstergedir."}
+      {"q": "Vol Ratio ne anlama gelir?", "a": "Vol Ratio, son günün hacminin 20 günlük ortalamaya oranıdır. 1,5 üzeri, normalin 1,5 katı hacim anlamına gelir; sinyal günlerinde dikkat çekici bir göstergedir."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'ASELS']
   },
@@ -672,7 +672,7 @@ Histogram = MACD − Sinyal</pre>
     "slug": "fibonacci-seviyeleri",
     "canonical_slug": "fibonacci-geri-cekilme-seviyeleri",
     "title": "Fibonacci Geri Çekilme Seviyeleri Nedir?",
-    "desc": "Fibonacci oranları borsa analizinde nasıl kullanılır? %38.2, %50, %61.8 seviyeleri neden önemlidir?",
+    "desc": "Fibonacci oranları borsa analizinde nasıl kullanılır? %38,2, %50, %61,8 seviyeleri neden önemlidir?",
     "date": "2026-04-17",
     "mins": 5,
     "cat": "Teknik Analiz",
@@ -681,26 +681,26 @@ Histogram = MACD − Sinyal</pre>
 
 <h2>Temel Fibonacci Oranları</h2>
 <ul>
-  <li><strong>%23.6:</strong> Zayıf geri çekilme</li>
-  <li><strong>%38.2:</strong> Normal geri çekilme — sığ</li>
-  <li><strong>%50.0:</strong> Kritik orta seviye (Fibonacci dizisinden değil ama yaygın kullanılır)</li>
-  <li><strong>%61.8 (Altın Oran):</strong> En kritik geri çekilme seviyesi</li>
-  <li><strong>%78.6:</strong> Derin geri çekilme</li>
+  <li><strong>%23,6:</strong> Zayıf geri çekilme</li>
+  <li><strong>%38,2:</strong> Normal geri çekilme — sığ</li>
+  <li><strong>%50,0:</strong> Kritik orta seviye (Fibonacci dizisinden değil ama yaygın kullanılır)</li>
+  <li><strong>%61,8 (Altın Oran):</strong> En kritik geri çekilme seviyesi</li>
+  <li><strong>%78,6:</strong> Derin geri çekilme</li>
 </ul>
 
 <h2>Nasıl Çizilir?</h2>
 <p>Trend dip noktasından (0%) tepe noktasına (100%) bir çizgi çizilir. Fibonacci seviyeleri bu aralıkta otomatik olarak belirlenir. Fiyat bu seviyelerde destek bulabilir.</p>
 
-<h2>%61.8 — Altın Oran</h2>
-<p>Her Fibonacci sayısını bir öncekine bölünce elde edilen değer (örn. 21÷13 ≈ 1.618) altın orana yaklaşır. Bu oran, borsalarda en kritik geri çekilme seviyeleri için kullanılır. Birçok büyük yükseliş trendi %61.8 geri çekilmesinden sonra devam etmiştir.</p>
+<h2>%61,8 — Altın Oran</h2>
+<p>Her Fibonacci sayısını bir öncekine bölünce elde edilen değer (örn. 21÷13 ≈ 1,618) altın orana yaklaşır. Bu oran, borsalarda en kritik geri çekilme seviyeleri için kullanılır. Birçok büyük yükseliş trendi %61,8 geri çekilmesinden sonra devam etmiştir.</p>
 
 <h2>BorsaPusula ile Kullanımı</h2>
-<p>Supertrend Güçlü Trend sinyali geldiğinde, fiyat aynı zamanda %38.2 veya %61.8 Fibonacci desteğindeyse sinyal daha güçlü bir "giriş noktası" işaret eder. İki farklı metodun aynı seviyeye işaret etmesi "confluance" (örtüşme) olarak adlandırılır.</p>
+<p>Supertrend Güçlü Trend sinyali geldiğinde, fiyat aynı zamanda %38,2 veya %61,8 Fibonacci desteğindeyse sinyal daha güçlü bir "giriş noktası" işaret eder. İki farklı metodun aynı seviyeye işaret etmesi "confluance" (örtüşme) olarak adlandırılır.</p>
 """,
     "faqs": [
-      {"q": "Fibonacci seviyeleri nasıl çizilir?", "a": "Yükselen trendde trend başlangıcından (0%) sonuna (100%) çizgi çekin. Fibonacci aracı bu iki nokta arasında otomatik olarak %23.6, %38.2, %50, %61.8 ve %78.6 seviyelerini hesaplar."},
-      {"q": "Neden %61.8 altın oran olarak adlandırılır?", "a": "Her Fibonacci sayısının kendinden öncekine oranı yaklaşık 1.618'e yaklaşır (altın oran). Bu oran doğada ve mimaride de karşımıza çıkar. Analistler fiyatların bu seviyede tepki verdiğini gözlemlemişlerdir."},
-      {"q": "Supertrend ile Fibonacci kombinasyonu nasıl kullanılır?", "a": "Güçlü Trend sinyali geldiğinde fiyat eş zamanlı olarak %38.2 veya %61.8 Fibonacci desteğindeyse iki metodun aynı seviyeye işaret etmesi confluance (örtüşme) oluşturur. Bu giriş noktasının güvenilirliğini artırır."}
+      {"q": "Fibonacci seviyeleri nasıl çizilir?", "a": "Yükselen trendde trend başlangıcından (0%) sonuna (100%) çizgi çekin. Fibonacci aracı bu iki nokta arasında otomatik olarak %23,6, %38,2, %50, %61,8 ve %78,6 seviyelerini hesaplar."},
+      {"q": "Neden %61,8 altın oran olarak adlandırılır?", "a": "Her Fibonacci sayısının kendinden öncekine oranı yaklaşık 1,618'e yaklaşır (altın oran). Bu oran doğada ve mimaride de karşımıza çıkar. Analistler fiyatların bu seviyede tepki verdiğini gözlemlemişlerdir."},
+      {"q": "Supertrend ile Fibonacci kombinasyonu nasıl kullanılır?", "a": "Güçlü Trend sinyali geldiğinde fiyat eş zamanlı olarak %38,2 veya %61,8 Fibonacci desteğindeyse iki metodun aynı seviyeye işaret etmesi confluance (örtüşme) oluşturur. Bu giriş noktasının güvenilirliğini artırır."}
     ],
     "related_tickers": ['AKBNK', 'THYAO']
   },
@@ -1433,14 +1433,14 @@ ATR tabanlı stop-loss, sabit yüzde stop'tan çok daha akıllıcadır:
 ```
 Stop-Loss = Giriş Fiyatı - (ATR × Çarpan)
 
-Swing Trade için: ATR × 1.5
-Günlük Trade için: ATR × 1.0
-Pozisyon Trade için: ATR × 2.0-3.0
+Swing Trade için: ATR × 1,5
+Günlük Trade için: ATR × 1,0
+Pozisyon Trade için: ATR × 2,0-3,0
 ```
 
-**Örnek:** AKBNK ATR = 2.5 TL, giriş 85 TL
+**Örnek:** AKBNK ATR = 2,5 TL, giriş 85 TL
 
-- Stop = 85 - (2.5 × 1.5) = 85 - 3.75 = **81.25 TL**
+- Stop = 85 - (2,5 × 1,5) = 85 - 3,75 = **81,25 TL**
 
 Bu yaklaşım, hissenin volatilitesine göre dinamik stop belirler.
 
@@ -1451,7 +1451,7 @@ BorsaPusula'nın kullandığı **Supertrend indikatörü** doğrudan ATR kullan�
 Supertrend = Temel Fiyat ± (ATR × Çarpan)
 ```
 
-Varsayılan parametreler: ATR(10) × 3.0
+Varsayılan parametreler: ATR(10) × 3,0
 
 ATR yükseldikçe Supertrend bantları genişler, yani daha fazla hareket tolerans edilir.
 
@@ -1466,9 +1466,9 @@ ATR yüksek hissede daha az lot al, ATR düşük hissede daha fazla.
 
 | Hisse | Günlük ATR | Haftalık ATR |
 |-------|-----------|-------------|
-| BIST30 büyük cap | %1.5-3.0 | %4-8 |
-| BIST100 orta cap | %2.0-4.0 | %6-12 |
-| Küçük hisseler | %3.0-8.0+ | %10-25+ |
+| BIST30 büyük cap | %1,5-3,0 | %4-8 |
+| BIST100 orta cap | %2,0-4,0 | %6-12 |
+| Küçük hisseler | %3,0-8,0+ | %10-25+ |
 
 BIST büyük hisseleri günlük %2-3 ATR ile hareket ediyorsa, bu normal ve beklenen bir volatilitedir.
 
@@ -1651,7 +1651,7 @@ Destek/direnç bölgesine yaklaşırken hacim artışı önemlidir:
 3. Hacmin nasıl davrandığına bak
 
 ### Adım 3: Stop-Loss Yerleştir
-- Uzun (Long) pozisyon için: Destek seviyesinin biraz altına stop koy (ATR × 0.5 mesafe)
+- Uzun (Long) pozisyon için: Destek seviyesinin biraz altına stop koy (ATR × 0,5 mesafe)
 - Kısa (Short) pozisyon için: Direnç seviyesinin biraz üstüne stop koy
 
 ### Adım 4: Hedef Fiyat Belirle
@@ -1681,7 +1681,7 @@ Yatay seviyelerin yanında, eğik **trend çizgileri** de dinamik destek/direnç
 
 ## Fibonacci ve Konfluence (Çakışma)
 
-Fibonacci geri çekilme seviyelerinde en çok izlenen oranlar **%38.2**, **%50** ve **%61.8**'dir. Bu seviyeler tek başına destek/direnç işlevi görebilir, ancak asıl güç **konfluence (çakışma)** durumunda ortaya çıkar: bir Fibonacci seviyesi, EMA200 gibi bir hareketli ortalama ve önceki bir yatay destek/direnç aynı fiyat bölgesinde üst üste bindiğinde, o seviye çok daha güvenilir hale gelir.
+Fibonacci geri çekilme seviyelerinde en çok izlenen oranlar **%38,2**, **%50** ve **%61,8**'dir. Bu seviyeler tek başına destek/direnç işlevi görebilir, ancak asıl güç **konfluence (çakışma)** durumunda ortaya çıkar: bir Fibonacci seviyesi, EMA200 gibi bir hareketli ortalama ve önceki bir yatay destek/direnç aynı fiyat bölgesinde üst üste bindiğinde, o seviye çok daha güvenilir hale gelir.
 
 ## Kırılım Sonrası Retest (Geri Test)
 
@@ -1757,7 +1757,7 @@ BorsaPusula, her hisse için 20 günlük ortalama hacmi referans alır. Günlük
 
 - **2x üzerinde:** Yüksek hacim — sinyal güvenilirliği artar
 - **1-2x arası:** Normal hacim
-- **0.5x altında:** Düşük hacim — sinyaller daha az güvenilir
+- **0,5x altında:** Düşük hacim — sinyaller daha az güvenilir
 
 ### Supertrend + Hacim Teyidi
 BorsaPusula sinyallerinde hacim teyidi önemli rol oynar:
@@ -1786,7 +1786,7 @@ Trend devam ederken hacim azalır. Bu konsolidasyon döneminin sinyal olabilir:
 En yaygın kullanılanlar:
 
 - **OBV (On-Balance Volume):** Yükselen günlerde hacim ekler, düşende çıkarır. Uyumsuzluklar için kullanılır.
-- **Chaikin Money Flow:** Hacim para akışını ölçer. +0.25 üstü güçlü alım baskısı, -0.25 altı güçlü satım baskısı.
+- **Chaikin Money Flow:** Hacim para akışını ölçer. +0,25 üstü güçlü alım baskısı, -0,25 altı güçlü satım baskısı.
 - **Volume MA:** 20 günlük hacim ortalaması, referans için kullanılır.
 
 ## Özet: Hacim Kontrol Listesi
@@ -1859,7 +1859,7 @@ Güçlü momentum için hacim şart:
 
 - Yükseliş günlerinde hacim ortalamanın **üzerinde** olmalı
 - Düşüş günlerinde hacim ortalamanın **altında** olmalı
-- RVOL (5 günlük hacim ortalamasının 20 günlüğe oranı) ≥ 1.20 güçlü alıcı ilgisine işaret eder
+- RVOL (5 günlük hacim ortalamasının 20 günlüğe oranı) ≥ 1,20 güçlü alıcı ilgisine işaret eder
 
 ## Güçlü Momentum Hisseleri Nasıl Taranır?
 
@@ -1868,7 +1868,7 @@ Güçlü momentum için hacim şart:
 2. ADX ≥ 25 (trend güçlü)
 3. EMA12 > EMA99 (uzun vadeli eğilim yukarı)
 4. Sinyal 3+ bar onaylı (geçici sinyal değil)
-5. Hacim ≥ ortalamanın 1.2x'i
+5. Hacim ≥ ortalamanın 1,2x'i
 
 Bu kriterlerin tamamını sağlayan hisseler en güçlü momentum adaylarıdır.
 
@@ -1878,7 +1878,7 @@ Bu kriterlerin tamamını sağlayan hisseler en güçlü momentum adaylarıdır.
 
 - "Güçlü Trend" sinyal filtresi → Supertrend Güçlü Trend + ADX uyumlu
 - "Min ADX" alanına 25 girilmesi → trend gücü doğrulaması
-- ⭐ "Hacim Onaylı" rozeti (RVOL ≥ 1.20) → hacim teyidi
+- ⭐ "Hacim Onaylı" rozeti (RVOL ≥ 1,20) → hacim teyidi
 - Sinyal güç çubukları → momentum yoğunluğunu görsel olarak gösterir
 
 ## Momentum Stratejisinin Riskleri
@@ -1908,7 +1908,7 @@ Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir."""
       {"q": "Momentum ve trend takip aynı şey mi?", "a": "Çok benzer stratejilerdir. Trend takip daha uzun vadeli (haftalar-aylar), momentum genellikle daha kısa vadeli (günler-haftalar) olur. Her ikisi de 'güçlü yükselişi takip et' prensibine dayanır."},
       {"q": "ADX 50'nin üzerindeyken ne yapılmalı?", "a": "ADX 50+ aşırı momentum gösterir ve genellikle yakında yavaşlama/düzeltme gelir. Bu seviyede yeni pozisyon açmak yerine mevcut pozisyonun stop'unu sıkılaştırmak veya kısmi kar almak düşünülebilir."},
       {"q": "Düşük ADX'te momentum stratejisi işe yarar mı?", "a": "ADX 20'nin altındayken piyasa yatay hareket eder ve momentum sinyalleri çok fazla false positive üretir. Bu ortamda momentum stratejisi yerine destek/direnç ticareti daha uygun olabilir."},
-      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Tarama sayfasında Sinyal filtresinden 'Güçlü Trend', Min ADX alanına 25 girin ve sonuçları Teknik Güç Skoru'na göre sıralayın. ⭐ Hacim Onaylı rozeti (RVOL ≥ 1.20) en güçlü hacim teyitli adayları işaretler."}
+      {"q": "BorsaPusula'da en güçlü momentum hisseleri nasıl bulunur?", "a": "Tarama sayfasında Sinyal filtresinden 'Güçlü Trend', Min ADX alanına 25 girin ve sonuçları Teknik Güç Skoru'na göre sıralayın. ⭐ Hacim Onaylı rozeti (RVOL ≥ 1,20) en güçlü hacim teyitli adayları işaretler."}
     ],
     "related_tickers": ['AKBNK', 'THYAO', 'GARAN', 'KCHOL', 'BIMAS']
   },
@@ -2086,7 +2086,7 @@ BIST nominal (TL bazında) çok iyi görünse bile, dolar bazında değerlendiri
 
 - BIST endeksi +50% yükseldi (TL bazında)
 - Aynı dönemde USD/TRY +40% arttı
-- Dolar bazında BIST getirisi: ≈ +7% (50% ÷ 1.4 − 1)
+- Dolar bazında BIST getirisi: ≈ +7% (50% ÷ 1,4 − 1)
 
 Bu nedenle yabancı yatırımcılar BIST'i **dolar bazında** değerlendirir. BIST/USD'nin güçlendiği dönemler, yabancı ilgisinin arttığı dönemlerdir.
 
@@ -2498,7 +2498,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <ul>
 <li><strong>Giriş:</strong> Üç koşul aynı anda sağlandığında, ilk kapanıştan sonra giriş. Gecikme riskini azaltmak için ATR bazlı giriş bölgesi kullanılır.</li>
 <li><strong>Stop loss:</strong> Supertrend çizgisinin hemen altı — trendin bozulduğunu kanıtlayan seviye.</li>
-<li><strong>Kâr alma:</strong> TP1 = 1.5× ATR, TP2 = 3× ATR; ya da Supertrend çizgisi kırıldığında.</li>
+<li><strong>Kâr alma:</strong> TP1 = 1,5× ATR, TP2 = 3× ATR; ya da Supertrend çizgisi kırıldığında.</li>
 <li><strong>Çıkış:</strong> Supertrend Trend Bozuldu sinyaline geçtiğinde veya ADX 20'nin altına indiğinde.</li>
 </ul>
 
@@ -2521,7 +2521,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
       {"q": "Stop loss nereye koyulmalı?",
        "a": "Trend takip stratejisinde stop loss tipik olarak Supertrend çizgisinin biraz altına (Güçlü Trend için) veya üstüne (Trend Bozuldu için) yerleştirilir. Bu seviyenin kırılması trendin bozulduğuna işaret eder."},
       {"q": "Kâr alma hedefleri nasıl belirlenir?",
-       "a": "BorsaPusula TP1 için ~1.5×ATR, TP2 için ~3×ATR kullanır. Aktif yönetimde ise Supertrend çizgisinin kırılması güçlü bir çıkış sinyali olarak değerlendirilebilir."}
+       "a": "BorsaPusula TP1 için ~1,5×ATR, TP2 için ~3×ATR kullanır. Aktif yönetimde ise Supertrend çizgisinin kırılması güçlü bir çıkış sinyali olarak değerlendirilebilir."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'EREGL']
   },
@@ -2729,7 +2729,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
     </tr>
     <tr>
       <td style="padding:9px;border:1px solid var(--bp-bkl-bd)">Yönetim ücreti</td>
-      <td style="padding:9px;border:1px solid var(--bp-bkl-bd)">Yıllık %0.05–0.5</td>
+      <td style="padding:9px;border:1px solid var(--bp-bkl-bd)">Yıllık %0,05–0,5</td>
       <td style="padding:9px;border:1px solid var(--bp-bkl-bd)">Yok (sadece alım-satım komisyonu)</td>
     </tr>
     <tr style="background:var(--bp-surface2)">
@@ -3851,7 +3851,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>SPY, IVV, VOO gibi S&P500 ETF'leri tek alımla 500 şirkete yatırım sağlar. Türkiye'den erişim için yurt dışı platform gerekebilir.</p>
 <ul>
   <li>✅ Düşük maliyet, geniş çeşitlendirme</li>
-  <li>✅ Yıllık yönetim ücreti 0.03-0.09%</li>
+  <li>✅ Yıllık yönetim ücreti 0,03-0,09%</li>
   <li>❌ Belirli bir şirkete odaklanamama</li>
 </ul>
 
@@ -5475,7 +5475,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   <li><strong>TP1 (İlk Hedef):</strong> Konservatif hedef — sinyal güçlüyse ilk olası direnç bölgesi</li>
   <li><strong>TP2 (İkinci Hedef):</strong> Agresif hedef — tüm iyi koşullar devam ederse ulaşılabilecek seviye</li>
 </ul>
-<p>R/R (Risk/Ödül) oranı 2.0+ olan hisselerde TP1'e ulaşmak, kaybedilen stop loss pozisyonlarını telafi etmek için yeterlidir.</p>
+<p>R/R (Risk/Ödül) oranı 2,0+ olan hisselerde TP1'e ulaşmak, kaybedilen stop loss pozisyonlarını telafi etmek için yeterlidir.</p>
 
 <h2>Kademeli Satış Stratejisi</h2>
 <p>Tek seferde tüm pozisyonu kapatmak yerine kademeli satış yapmak hem riski yönetir hem de "erken sattım" pişmanlığını azaltır:</p>
@@ -5661,7 +5661,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Geri ödenemeyen kredilerin toplam kredilere oranıdır. %3'ün altı düşük risk, %5+ ise ciddi uyarı işaretidir. Ekonomik yavaşlama dönemlerinde bu oran yükselir.</p>
 
 <h3>Fiyat/Defter (PD/DD veya P/B)</h3>
-<p>Bankaların değerlemesi için P/B çok kritiktir. P/B 1.0 altı genellikle "ucuz" olarak değerlendirilebilir (varlık değerinin altında işlem görüyor), ancak düşük P/B bazen düşük kaliteyi de yansıtır.</p>
+<p>Bankaların değerlemesi için P/B çok kritiktir. P/B 1,0 altı genellikle "ucuz" olarak değerlendirilebilir (varlık değerinin altında işlem görüyor), ancak düşük P/B bazen düşük kaliteyi de yansıtır.</p>
 
 <h2>Bankacılık Hisselerini Etkileyen Faktörler</h2>
 <ul>
@@ -5675,7 +5675,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Bankacılık Hisselerinde Teknik + Temel Analiz Kombinasyonu</h2>
 <p>BorsaPusula bankacılık hisselerini teknik sinyal sistemiyle izler. Güçlü sinyal (Güçlü Trend + İdeal + ADX yüksek) olduğunda:</p>
 <ul>
-  <li>Temel analiz katmanı ekleyin: ROE > %15, NPL < %4, P/B < 1.5 gibi filtreler uygulayın</li>
+  <li>Temel analiz katmanı ekleyin: ROE > %15, NPL < %4, P/B < 1,5 gibi filtreler uygulayın</li>
   <li>Makro bağlama bakın: TCMB sıkılaştırma mı, gevşetme mi?</li>
   <li>Seçim dönemleri ve büyük ekonomik kararlar yaklaşıyorsa volatilite beklentisi yüksek tutun</li>
 </ul>
@@ -6128,7 +6128,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Scalp trading, pozisyonların dakikalar hatta saniyeler içinde açılıp kapandığı, küçük fiyat hareketlerinden sık sık kâr almayı hedefleyen yoğun bir işlem stratejisidir. Uzun vadeli yatırımcılığın tam tersi ucundadır: Şirketi analiz etmek yerine anlık fiyat hareketine odaklanılır.</p>
 
 <h2>Scalping Nasıl Çalışır?</h2>
-<p>Scalper'lar (scalping yapan trader'lar) gün boyunca onlarca hatta yüzlerce işlem yapar. Her işlemde hedeflenen kâr küçüktür (0.1%-0.5%) ama yüksek işlem sıklığıyla toplam getiri elde edilmeye çalışılır. Kaldıraç kullanımı bu stratejiyi daha da yoğunlaştırır.</p>
+<p>Scalper'lar (scalping yapan trader'lar) gün boyunca onlarca hatta yüzlerce işlem yapar. Her işlemde hedeflenen kâr küçüktür (0,1%-0,5%) ama yüksek işlem sıklığıyla toplam getiri elde edilmeye çalışılır. Kaldıraç kullanımı bu stratejiyi daha da yoğunlaştırır.</p>
 <p>Scalping'de temel prensipler:</p>
 <ul>
   <li>Her pozisyon için sıkı stop-loss (fiyatın belirli bir yüzdesi veya ATR tabanlı)</li>
@@ -6311,7 +6311,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
   {
     "slug": "fibonacci-geri-cekilme-seviyeleri",
     "title": "Fibonacci Geri Çekilme Seviyeleri: Giriş Noktası Nasıl Belirlenir?",
-    "desc": "Fibonacci oranları teknik analizde nasıl kullanılır? %23.6, %38.2, %50, %61.8 geri çekilme seviyeleri ve BIST hisselerinde pratik Fibonacci uygulaması.",
+    "desc": "Fibonacci oranları teknik analizde nasıl kullanılır? %23,6, %38,2, %50, %61,8 geri çekilme seviyeleri ve BIST hisselerinde pratik Fibonacci uygulaması.",
     "date": "2026-05-03",
     "mins": 7,
     "cat": "Teknik Analiz",
@@ -6321,11 +6321,11 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Temel Fibonacci Oranları</h2>
 <p>Fibonacci dizisinden türetilen başlıca oranlar:</p>
 <ul>
-  <li><strong>%23.6:</strong> Zayıf geri çekilme. Güçlü trendlerde fiyat bu seviyeden tekrar trendin yönüne devam edebilir.</li>
-  <li><strong>%38.2:</strong> Normal geri çekilme. Güçlü yükselen trendlerde genellikle ilk önemli destek seviyesi.</li>
+  <li><strong>%23,6:</strong> Zayıf geri çekilme. Güçlü trendlerde fiyat bu seviyeden tekrar trendin yönüne devam edebilir.</li>
+  <li><strong>%38,2:</strong> Normal geri çekilme. Güçlü yükselen trendlerde genellikle ilk önemli destek seviyesi.</li>
   <li><strong>%50:</strong> Teknik olarak Fibonacci serisi değil ama tradisyonel olarak dahil edilir. Psikolojik orta nokta.</li>
-  <li><strong>%61.8 (Altın Oran):</strong> En kritik Fibonacci seviyesi. Bu seviyeden sekme trendin devamını güçlü biçimde teyit eder; kırılım ise trend dönüşüne işaret eder.</li>
-  <li><strong>%78.6:</strong> Derin geri çekilme. Bu seviyenin tutmaması trend sona ermiş olabilir anlamına gelir.</li>
+  <li><strong>%61,8 (Altın Oran):</strong> En kritik Fibonacci seviyesi. Bu seviyeden sekme trendin devamını güçlü biçimde teyit eder; kırılım ise trend dönüşüne işaret eder.</li>
+  <li><strong>%78,6:</strong> Derin geri çekilme. Bu seviyenin tutmaması trend sona ermiş olabilir anlamına gelir.</li>
 </ul>
 
 <h2>Fibonacci Geri Çekilmesi Nasıl Çizilir?</h2>
@@ -6344,24 +6344,24 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Fibonacci + Diğer Araçlarla Kombinasyon</h2>
 <p>Fibonacci seviyeleri tek başına kullanıldığında güvenilirliği artar veya azalır. En güçlü kombinasyonlar:</p>
 <ul>
-  <li><strong>Fibonacci + EMA:</strong> %38.2 geri çekilme seviyesi EMA 50 ile çakışıyorsa destek çok daha güçlüdür.</li>
+  <li><strong>Fibonacci + EMA:</strong> %38,2 geri çekilme seviyesi EMA 50 ile çakışıyorsa destek çok daha güçlüdür.</li>
   <li><strong>Fibonacci + Hacim:</strong> Fibonacci desteğine düşen fiyatın hacimi azalıyorsa sekme ihtimali artar.</li>
-  <li><strong>Fibonacci + Supertrend:</strong> Supertrend yeşil (yükselen trend) + fiyat %38.2 veya %61.8 desteğinde → güçlü alım noktası.</li>
+  <li><strong>Fibonacci + Supertrend:</strong> Supertrend yeşil (yükselen trend) + fiyat %38,2 veya %61,8 desteğinde → güçlü alım noktası.</li>
   <li><strong>Fibonacci + RSI:</strong> Fibonacci desteği + RSI 30-40 aralığı → aşırı satım + teknik destek kombinasyonu.</li>
 </ul>
 
 <h2>BIST'te Fibonacci Kullanımı</h2>
 <p>Türkiye piyasasında özellikle BIST30 hisselerinde Fibonacci seviyeleri dikkat çekici biçimde çalışabilir. Yüksek işlem hacimli hisselerde kurumsal alıcılar da bu seviyelere dikkat ettiğinden destek/direnç kalitesi artar.</p>
-<p>Örnek yaklaşım: Güçlü bir Supertrend yükseliş sürecindeki AKBNK veya GARAN gibi hissede %38.2 veya %50 geri çekilme yaşandığında, bu seviyeden hacim azalması + RSI yükselişi + Supertrend yatay/yeşil kombinasyonu görülürse swing trade girişi değerlendirilebilir.</p>
-<p>Stop-loss: %61.8 seviyesinin altı genellikle makul stop bölgesidir. Bu seviye kırılırsa trend dönüşü veya daha derin düzeltme ihtimali artar.</p>
+<p>Örnek yaklaşım: Güçlü bir Supertrend yükseliş sürecindeki AKBNK veya GARAN gibi hissede %38,2 veya %50 geri çekilme yaşandığında, bu seviyeden hacim azalması + RSI yükselişi + Supertrend yatay/yeşil kombinasyonu görülürse swing trade girişi değerlendirilebilir.</p>
+<p>Stop-loss: %61,8 seviyesinin altı genellikle makul stop bölgesidir. Bu seviye kırılırsa trend dönüşü veya daha derin düzeltme ihtimali artar.</p>
 """,
     "faqs": [
       {"q": "Fibonacci seviyeleri hangi grafikte çalışır?",
        "a": "Fibonacci geri çekilme seviyeleri tüm zaman dilimlerinde (15 dakika, saatlik, günlük, haftalık) kullanılabilir. Ancak daha uzun zaman dilimlerinde (günlük, haftalık) Fibonacci seviyeleri daha güvenilir sonuç verir çünkü daha fazla katılımcı bu seviyeleri takip eder."},
       {"q": "En önemli Fibonacci seviyesi hangisi?",
-       "a": "%61.8 — 'Altın Oran' olarak da bilinir. Bu seviyeden sekme, yükselen trendin en güçlü destek noktasını temsil eder. Bu seviyenin kırılması genellikle trendin bitişine veya daha derin bir düzeltmeye işaret eder. Bu nedenle %61.8, stop-loss konumlandırması için de en yaygın kullanılan referans seviyesidir."},
+       "a": "%61,8 — 'Altın Oran' olarak da bilinir. Bu seviyeden sekme, yükselen trendin en güçlü destek noktasını temsil eder. Bu seviyenin kırılması genellikle trendin bitişine veya daha derin bir düzeltmeye işaret eder. Bu nedenle %61,8, stop-loss konumlandırması için de en yaygın kullanılan referans seviyesidir."},
       {"q": "Fibonacci uzantısı (extension) nedir?",
-       "a": "Fibonacci geri çekilme seviyeleri destek/direnç için kullanılırken Fibonacci uzantıları fiyat hedefi belirlemek için kullanılır. %127.2, %161.8 gibi uzantı seviyeleri trend devam ettiğinde hedef fiyatları gösterir. Geri çekilmenin sonunda bir trend devam formasyonu oluşursa uzantı seviyeleri kâr alma noktası olarak planlanabilir."},
+       "a": "Fibonacci geri çekilme seviyeleri destek/direnç için kullanılırken Fibonacci uzantıları fiyat hedefi belirlemek için kullanılır. %127,2, %161,8 gibi uzantı seviyeleri trend devam ettiğinde hedef fiyatları gösterir. Geri çekilmenin sonunda bir trend devam formasyonu oluşursa uzantı seviyeleri kâr alma noktası olarak planlanabilir."},
       {"q": "Fibonacci seviyeleri her zaman tutar mı?",
        "a": "Hayır. Fibonacci seviyeleri olasılıksal göstergelerdir, garanti değildir. Güçlü fundamental haberler, makroekonomik şoklar veya yüksek hacimli satış baskısı Fibonacci desteğini kolayca kırabilir. Bu nedenle Fibonacci seviyelerini stop-loss ile birlikte kullanmak ve tek başına karar verici olarak görmemek önemlidir."}
     ],
@@ -6462,7 +6462,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Stop-Loss Türleri</h2>
 <p><strong>1. Sabit Stop-Loss (Fixed Stop):</strong> Belirli bir fiyat seviyesine stop koyulur. Örneğin: 100 TL'ye alındı, stop-loss 90 TL. Basit ve öngörülebilir ama volatiliteye adapte olmaz.</p>
 <p><strong>2. Yüzde Bazlı Stop:</strong> Alış fiyatının belirli bir yüzdesi altına stop koyulur. "Alış fiyatından %5 düşerse çık" gibi. Tutarlı ama hisse volatilitesini görmezden gelir.</p>
-<p><strong>3. ATR Bazlı Stop (En Pratik Yöntem):</strong> ATR (Average True Range) hissenin günlük ortalama fiyat hareketini ölçer. Stop-loss = Alış Fiyatı − (ATR × Çarpan). Çarpan genellikle 1.5-3 arasında seçilir. Bu yöntem her hissenin volatilitesine göre dinamik stop koyar — düşük volatiliteli hissede dar, yüksek volatiliteli hissede geniş stop.</p>
+<p><strong>3. ATR Bazlı Stop (En Pratik Yöntem):</strong> ATR (Average True Range) hissenin günlük ortalama fiyat hareketini ölçer. Stop-loss = Alış Fiyatı − (ATR × Çarpan). Çarpan genellikle 1,5-3 arasında seçilir. Bu yöntem her hissenin volatilitesine göre dinamik stop koyar — düşük volatiliteli hissede dar, yüksek volatiliteli hissede geniş stop.</p>
 <p><strong>4. Supertrend Stop:</strong> BorsaPusula'nın kullandığı yöntem — Supertrend çizgisi dinamik stop-loss seviyesi olarak işlev görür. Fiyat Supertrend'in altına düşerse pozisyon kapatılır. Avantajı: Stop-loss trendle birlikte yükselir, gereksiz yere tetiklenmez.</p>
 <p><strong>5. Trailing Stop (İzleyen Stop):</strong> Stop-loss, fiyat yükseldikçe otomatik olarak yukarı çekilir; düşüşlerde sabit kalır. Örneğin: %5 trailing stop ile 100 TL'den alındı → fiyat 120'ye çıktı → stop-loss 114 TL'ye çekildi. Kârlı pozisyonda kâr kilitleyen akıllı bir stop türüdür.</p>
 
@@ -6854,7 +6854,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p><strong>2. Yuvarlak Sayılar (Psikolojik Seviyeler):</strong> 100 TL, 50 TL, 10 TL gibi yuvarlak rakamlar psikolojik destek/direnç oluşturur. Emirlerin bu seviyelerde yoğunlaşması eğilimi analistlerce iyi bilinir.</p>
 <p><strong>3. Trend Çizgileri (Dinamik Destek/Direnç):</strong> Yükselen trendde dip noktalarını birleştiren çizgi dinamik destek, tepe noktalarını birleştiren çizgi dinamik direnç oluşturur. Kanal içinde fiyat hareket eder.</p>
 <p><strong>4. Hareketli Ortalamalar (Dinamik):</strong> EMA 20, EMA 50, EMA 200 yükselen trendlerde dinamik destek olarak işlev görür. Fiyatın bu ortalamalara çekilip sektiği defalarca gözlemlenmiştir.</p>
-<p><strong>5. Fibonacci Seviyeleri:</strong> %38.2, %50, %61.8 geri çekilme seviyeleri teknik destekler arasında en yaygın kullanılanlardandır.</p>
+<p><strong>5. Fibonacci Seviyeleri:</strong> %38,2, %50, %61,8 geri çekilme seviyeleri teknik destekler arasında en yaygın kullanılanlardandır.</p>
 
 <h2>Güçlü Destek/Direnç Özellikleri</h2>
 <p>Bir destek veya direnç seviyesinin güçlü olduğuna işaret eden faktörler:</p>
@@ -6991,7 +6991,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Direnç kırılımı veya destek kırılımı için hacim teyidi kritik önemdedir:</p>
 <p><strong>Yüksek hacimdeki kırılım:</strong> Güçlü katılım, kırılım sürdürülebilir. "Gerçek kırılım" olarak yorumlanır.</p>
 <p><strong>Düşük hacimdeki kırılım:</strong> Az katılım, kırılım yalancı olabilir (fakeout). Ertesi gün geri dönüş riski yüksek.</p>
-<p>Pratik kural: Kırılım günkü hacim, son 20 günlük ortalama hacmin 1.5-2 katını geçiyorsa güvenilir kabul edilir.</p>
+<p>Pratik kural: Kırılım günkü hacim, son 20 günlük ortalama hacmin 1,5-2 katını geçiyorsa güvenilir kabul edilir.</p>
 
 <h2>Hacim Zirveleri ve Trend Dönüşleri</h2>
 <p>Özellikle dikkat edilmesi gereken hacim örüntüleri:</p>
@@ -7018,8 +7018,8 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Chaikin Money Flow (CMF) ile Para Akışını Ölçmek</h2>
 <p>Chaikin Money Flow (CMF), belirli bir dönemdeki (genellikle 20 gün) kapanış fiyatının mum aralığındaki konumunu hacimle ağırlıklandırarak alım-satım baskısını tek bir çizgide özetler. -1 ile +1 arasında salınır:</p>
 <ul>
-  <li><strong>+0.25 üzeri:</strong> Güçlü alım baskısı — fiyat mumların üst kısımlarında kapanıyor ve hacim bunu destekliyor.</li>
-  <li><strong>-0.25 altı:</strong> Güçlü satım baskısı — kapanışlar mumların alt kısımlarında ve hacim satış tarafında yoğunlaşıyor.</li>
+  <li><strong>+0,25 üzeri:</strong> Güçlü alım baskısı — fiyat mumların üst kısımlarında kapanıyor ve hacim bunu destekliyor.</li>
+  <li><strong>-0,25 altı:</strong> Güçlü satım baskısı — kapanışlar mumların alt kısımlarında ve hacim satış tarafında yoğunlaşıyor.</li>
   <li>Bu iki eşik arasındaki bölge genellikle kararsız/dengeli para akışı olarak yorumlanır.</li>
 </ul>
 <p>CMF'nin OBV'den farkı, sadece kapanışın önceki kapanışa göre yönüne değil, kapanışın günün range'i içindeki konumuna bakmasıdır — bu da fitili uzun günlerde daha hassas bir okuma sağlar.</p>
@@ -7037,7 +7037,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 """,
     "faqs": [
       {"q": "Hacim ne kadar yüksek olursa kırılım o kadar güçlü müdür?",
-       "a": "Genel olarak evet — kırılım günkü hacmin son 20 günlük ortalamanın 1.5-2 katı üzerinde olması güvenilir kırılım işareti sayılır. Çok aşırı hacim (10 kat) ise bazen tükenme işaretine dönüşebilir. 'Normal kırılım hacmi' ile 'patlama hacmi' arasındaki fark yorumda önemli rol oynar."},
+       "a": "Genel olarak evet — kırılım günkü hacmin son 20 günlük ortalamanın 1,5-2 katı üzerinde olması güvenilir kırılım işareti sayılır. Çok aşırı hacim (10 kat) ise bazen tükenme işaretine dönüşebilir. 'Normal kırılım hacmi' ile 'patlama hacmi' arasındaki fark yorumda önemli rol oynar."},
       {"q": "Düşük hacimde yükselen hisse ne anlama gelir?",
        "a": "Düşük hacimde yükselen hisse, fiyat artışının geniş katılımcı tabanı tarafından desteklenmediğini gösterir. Büyük alıcılar çekilmişse fiyat yapay olarak tutulabilir ya da sadece birkaç büyük emir fiyatı çekmiş olabilir. Böyle durumlarda kırılım güvenilmez, trendin kısa vadede sürdürülmesi güçtür."},
       {"q": "OBV göstergesi nerede bulunur?",
@@ -7253,8 +7253,8 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <h2>Bileşik Faizin Gücü</h2>
 <p>Albert Einstein'ın "dünyanın sekizinci harikası" dediği bileşik faiz, uzun vadeli yatırımın temel motorudur. Örnek:</p>
 <ul>
-  <li>Aylık 1.000 TL yatırım, yıllık %15 ortalama getiri, 30 yıl → yaklaşık 6.9 milyon TL birikim</li>
-  <li>Aynı yatırım 20 yıl → yaklaşık 1.5 milyon TL</li>
+  <li>Aylık 1.000 TL yatırım, yıllık %15 ortalama getiri, 30 yıl → yaklaşık 6,9 milyon TL birikim</li>
+  <li>Aynı yatırım 20 yıl → yaklaşık 1,5 milyon TL</li>
   <li>Aynı yatırım 10 yıl → yaklaşık 270.000 TL</li>
 </ul>
 <p>Erken başlamak, daha yüksek getiri oranı kadar kritik öneme sahiptir. 25 yaşında başlayan, 35 yaşında başlayana kıyasla 10 yıl önce başladığı için emeklilikte çok daha büyük bir farka sahip olabilir.</p>
