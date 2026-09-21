@@ -26,9 +26,9 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=6450b4ce">
-<link rel="stylesheet" href="/static/css/data-art.css?v=f1bd0cc1">
+<link rel="stylesheet" href="/static/css/data-art.css?v=c2a92cf7">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/gundem.css?v=f104d6de">
+<link rel="stylesheet" href="/static/css/pages/gundem.css?v=6604ab2f">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -111,8 +111,8 @@
     </div>
     <div id="newSignalsGrid" class="stock-grid">
       {% if ssr_new_signals %}{% for s in ssr_new_signals %}{{ gundem_card(s, true) }}{% endfor %}
-      {% elif ssr_market_open is defined and not ssr_market_open and ssr_closed_message %}<div class="empty-box">{{ ssr_closed_message }}</div>
-      {% elif ssr_market_open is defined %}<div class="empty-box">Bugün henüz yeni sinyal yok — sinyaller seans kapanışında (gün sonu) güncellenir.</div>
+      {% elif ssr_market_open is defined and not ssr_market_open and ssr_closed_message %}<div class="da-panel da-empty">{{ ssr_closed_message }}</div>
+      {% elif ssr_market_open is defined %}<div class="da-panel da-empty">Bugün henüz yeni sinyal yok — sinyaller seans kapanışında (gün sonu) güncellenir.</div>
       {% else %}
       <div class="skeleton sk-card"></div>
       <div class="skeleton sk-card"></div>
@@ -131,7 +131,7 @@
     </div>
     <div id="strongAlGrid" class="stock-grid">
       {% if ssr_strong_al %}{% for s in ssr_strong_al %}{{ gundem_card(s, false) }}{% endfor %}
-      {% elif ssr_strong_al is defined %}<div class="empty-box">Güçlü trend verisi bekleniyor…</div>
+      {% elif ssr_strong_al is defined %}<div class="da-panel da-empty">Güçlü trend verisi bekleniyor…</div>
       {% else %}
       <div class="skeleton sk-card"></div>
       <div class="skeleton sk-card"></div>
@@ -324,7 +324,7 @@ async function loadGundem() {
         ? escapeHtml(d.closed_message)
         : 'Bugün henüz yeni sinyal yok — sinyaller seans kapanışında (gün sonu) güncellenir.';
       document.getElementById('newSignalsGrid').innerHTML =
-        '<div class="empty-box">' + emptyMsg + '</div>';
+        '<div class="da-panel da-empty">' + emptyMsg + '</div>';
     } else {
       document.getElementById('newSignalsGrid').innerHTML = newSigs.map(s => renderCard(s, true)).join('');
     }
@@ -333,7 +333,7 @@ async function loadGundem() {
     const strong = d.strong_al || [];
     if (strong.length === 0) {
       document.getElementById('strongAlGrid').innerHTML =
-        '<div class="empty-box">Güçlü trend verisi bekleniyor…</div>';
+        '<div class="da-panel da-empty">Güçlü trend verisi bekleniyor…</div>';
     } else {
       document.getElementById('strongAlGrid').innerHTML = strong.map(s => renderCard(s, false)).join('');
     }
@@ -374,7 +374,7 @@ async function loadGundem() {
       const newsUpEl = document.getElementById('newsUpdatedAt');
       if (newsData.updated_at) newsUpEl.textContent = newsData.updated_at;
       if (!items.length) {
-        newsEl.innerHTML = '<div class="empty-box">Haber verisi bekleniyor…</div>';
+        newsEl.innerHTML = '<div class="da-panel da-empty">Haber verisi bekleniyor…</div>';
       } else {
         newsEl.innerHTML = items.map(item => {
           const isAl  = item.signal === 'AL';
@@ -406,14 +406,14 @@ async function loadGundem() {
       }
     } catch(ne) {
       const newsEl = document.getElementById('newsGrid');
-      if (newsEl) newsEl.innerHTML = '<div class="empty-box">Haberler yüklenemedi. Sayfayı yenileyin.</div>';
+      if (newsEl) newsEl.innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Haberler yüklenemedi.</span><button type="button" class="da-retry" onclick="loadGundem()">Tekrar dene</button></div>';
     }
 
   } catch(e) {
     if (mySeq !== _gundemSeq) return;  // eski cagrinin hatasi, daha yeni bir basarili yaniti ezmesin
     console.error('loadGundem error:', e);
     ['newSignalsGrid','strongAlGrid'].forEach(id => {
-      document.getElementById(id).innerHTML = '<div class="empty-box">Veri yüklenemedi. Sayfayı yenileyin.</div>';
+      document.getElementById(id).innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Veri yüklenemedi.</span><button type="button" class="da-retry" onclick="loadGundem()">Tekrar dene</button></div>';
     });
     const statsEl = document.getElementById('statsRow');
     if (statsEl) {
@@ -441,7 +441,7 @@ async function loadEconCalendar() {
     const seen = new Set();
     events.forEach(e => { const key = e.date + '|' + (e.event || ''); if (!seen.has(key)) { seen.add(key); unique.push(e); } });
     if (!unique.length) {
-      grid.innerHTML = '<div class="empty-box">Yaklaşan önemli ekonomik olay bulunamadı.</div>';
+      grid.innerHTML = '<div class="da-panel da-empty">Yaklaşan önemli ekonomik olay bulunamadı.</div>';
       return;
     }
     const IMP = { HIGH: { lbl: 'Yüksek', cls: 'color:var(--bp-sat)' }, MED: { lbl: 'Orta', cls: 'color:var(--bp-gold)' }, LOW: { lbl: 'Düşük', cls: 'color:var(--bp-text3)' } };
@@ -461,7 +461,7 @@ async function loadEconCalendar() {
       </div>`;
     }).join('');
   } catch(e) {
-    document.getElementById('econCalGrid').innerHTML = '<div class="empty-box">Takvim yüklenemedi.</div>';
+    document.getElementById('econCalGrid').innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Takvim yüklenemedi.</span><button type="button" class="da-retry" onclick="loadEconCalendar()">Tekrar dene</button></div>';
   }
 }
 
@@ -479,7 +479,7 @@ async function loadMacroNewsSection() {
     if (upEl && data.updated_at) upEl.textContent = 'Güncellendi: ' + data.updated_at;
     const items = data.items || [];
     if (!items.length) {
-      grid.innerHTML = '<div class="empty-box">Makro haber bekleniyor…</div>';
+      grid.innerHTML = '<div class="da-panel da-empty">Makro haber bekleniyor…</div>';
       return;
     }
     grid.innerHTML = items.slice(0, 8).map(item => {
@@ -493,7 +493,7 @@ async function loadMacroNewsSection() {
     }).join('');
   } catch(e) {
     if (mySeq !== _macroNewsSeq) return;  // eski cagrinin hatasi, daha yeni bir basarili yaniti ezmesin
-    grid.innerHTML = '<div class="empty-box">Makro haberler yüklenemedi.</div>';
+    grid.innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Makro haberler yüklenemedi.</span><button type="button" class="da-retry" onclick="loadMacroNewsSection()">Tekrar dene</button></div>';
   }
 }
 

@@ -25,7 +25,7 @@
   .blog-search:focus { border-color:var(--bp-brand); }
   .blog-search::placeholder { color:var(--bp-text3); }
   .blog-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--bp-text3); pointer-events:none; }
-  .no-results { padding:40px 24px; text-align:center; color:var(--bp-text3); }
+  /* 21.09 (K-V): `.no-results` kanonik `.da-empty` katina alindi. */
   .bc-new { display:inline-block; background:rgba(var(--bp-al-rgb),.12); border:1px solid rgba(var(--bp-al-rgb),.3); color:var(--bp-al); font-size:var(--bp-text-sm); font-weight:700; padding:1px 6px; border-radius:var(--bp-radius-md); margin-left:6px; vertical-align:middle; text-transform:uppercase; letter-spacing:.3px; }
 
   .blog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }

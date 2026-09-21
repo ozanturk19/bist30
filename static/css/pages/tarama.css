@@ -377,12 +377,11 @@
   .chg-pos { color:var(--al); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); font-weight:600; }
   .chg-neg { color:var(--sat); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); font-weight:600; }
   .chg-neu { color:var(--text2); font-variant-numeric:tabular-nums; font-size:var(--bp-text-sm); }
-  /* ── Boş durum ── */
-  .empty-state {
-    text-align:center; padding:60px 20px; color:var(--text2);
-  }
-  .empty-state .empty-icon { font-size:var(--bp-text-40); margin-bottom:14px; }
-  .empty-state h2 { font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); margin-bottom:6px; }
+  /* ── Boş durum ──
+     21.09 (K-V): kanonik `.da-empty` katina alindi (data-art.css). Sablondaki
+     `<p style="font-size:…;margin-top:6px">` satir-ici yamasi da kalkti —
+     `.empty-state p` bu dosyada HIC tanimli degildi, bu yuzden iki sablonda
+     elle yazilmisti. */
 
   /* ── Loading ── */
   .loading-overlay {
@@ -668,10 +667,7 @@
     letter-spacing: .08em;
     background: linear-gradient(180deg, var(--bp-surface2) 0%, var(--bp-surface) 100%);
   }
-  .empty-state h2 {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    letter-spacing: -0.01em;
-  }
+  /* (Baslik Space Grotesk + -.01em'i artik `.da-empty h2`den aliyor.) */
 
   /* 4 ── EOD-tazelik notu: düz kutu → cyan aksanlı Data-Art şeridi.
          Cyan bilinçli: bu not "resmi/doğrulanabilir veri ne zaman hesaplanır"

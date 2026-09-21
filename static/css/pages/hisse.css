@@ -915,12 +915,10 @@
     transition: opacity .15s;
   }
   .kap-link-btn:hover { opacity: 1; }
-  .kap-empty {
-    font-size: var(--bp-text-base);
-    color: var(--bp-text3);
-    padding: 12px 0;
-    text-align: center;
-  }
+  /* 21.09 (K-V): gövde kanonik `.da-empty`den geliyor; burada DELTA yalniz
+     dar ic boşluk — bu kutu panelin ICINDE, kisa bir listenin yerinde durur,
+     sayfa boyu bos durum degildir. */
+  .kap-empty { padding: 12px 0; }
 
   /* ── Metodoloji notu ── */
   .methodology {

@@ -159,12 +159,12 @@
   .q-none   { color: var(--bp-text3); }
 
 
-  /* ── Empty / Loading ── */
-  .empty-state {
-    text-align: center; padding: 60px 24px; color: var(--bp-text3);
-  }
-  .empty-state h2 { font-size: var(--bp-text-lg); font-weight: 600; color: var(--bp-text2); margin-bottom: 8px; }
-  .empty-state p  { font-size: var(--bp-text-base); line-height: 1.6; }
+  /* ── Empty / Loading ──
+     21.09 (K-V): bu sayfanin `.empty-state`i ayni adi tasidigi halde
+     tarama/bilanco/temettu'dakinden FARKLI bir dil konusuyordu (gövde
+     --bp-text3 vs --bp-text2, h2 600 vs 700, baslik --bp-text2 vs --bp-text).
+     Kanonik `.da-empty` katina alindi; burada DELTA kalmadi. h2 basliklari
+     `.da-empty-title` olcegini `.da-empty h2` uzerinden aliyor. */
 
   .skeleton {
     background: linear-gradient(90deg, var(--bp-surface) 25%, var(--bp-surface2) 50%, var(--bp-surface) 75%);

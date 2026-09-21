@@ -303,3 +303,104 @@ label:has(> .da-check){min-height:24px}
   flex-shrink:0;
 }
 .da-close:hover{color:var(--bp-text2)}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOŞ DURUM / HATA DURUMU — kanonik kat  (K-V, 21.09)
+   ─────────────────────────────────────────────────────────────────────
+   ÖNCE: aynı işi yapan ALTI ayrı reçete, beş ayrı isimle —
+     .empty-state  (tarama / bilanco_takvimi / temettu_takvimi / karsilastir)
+                   üçü text2 + h2 700 + --bp-text, karsilastir ise
+                   text3 + h2 600 + --bp-text2  → aynı sınıf adı, farklı dil
+     .empty-msg    (portfolio)  yüzeyi YALNIZ mobil media-query'de alıyordu
+     .empty-box    (gundem)     tek satır, kendi yüzeyi var
+     .cmp-empty-state (sektor_harita) · .no-results (blog) · hisse.html'de
+     satır-içi el yazımı (2644 / 3301 / 3502)
+   Ayrıca `.empty-state p` tarama.css'te TANIMSIZ olduğu için şablonda iki
+   kez satır-içi `style="font-size:…;margin-top:6px"` yazılmıştı.
+
+   ASIL BULGU — BOŞ DURUM İLE HATA DURUMU AYIRT EDİLEMİYOR:
+   "Bugün henüz yeni sinyal yok" (normal, beklenen) ile "Veri yüklenemedi"
+   (sistem bozuk) BİREBİR aynı nötr gri kutuda çıkıyordu. Site hata için bir
+   dili zaten SEÇMİŞTİ — portfolio `.pf-fetch-error`: sat tint + sat kenarlık
+   + gerçek **Tekrar dene** düğmesi (2c8dbd9) — ama o dil tek sayfada kalmış,
+   geri kalan 14 hata dalı kullanıcıya nötr bir kutu ve "Sayfayı yenileyin"
+   diyordu (tek bir bölüm başarısızken TÜM sayfayı yeniletmek).
+   Bu kat o dili genelleştirir.
+
+   BİLEREK YÜZEYSİZ: `.da-empty` yalnız yerleşim + tipografi verir. Bu
+   kutuların çoğu ZATEN bir yüzeyin içinde duruyor (tarama sonuç kartı,
+   portfolio `.pf-table`) — taban reçeteye zemin koymak iç içe panel yapardı.
+   Kendi zeminine ihtiyacı olan `.da-panel` ile birlikte yazılır
+   (`class="da-panel da-empty"`), gundem `.empty-box` örneğindeki gibi.
+   ─────────────────────────────────────────────────────────────────────── */
+.da-empty{
+  text-align:center;
+  padding:28px 20px;
+  color:var(--bp-text2);
+  font-size:var(--bp-text-base);
+  line-height:1.6;
+}
+/* Sayfayı dolduran (tablo/sonuç listesi yerine geçen) boş durum. */
+.da-empty--page{padding:clamp(40px,6vw,60px) 20px}
+
+.da-empty-icon{
+  font-size:var(--bp-text-40);line-height:1;
+  margin-bottom:14px;
+}
+/* Baslik: sablonlarin cogu `<h2>` yaziyor (tarama / bilanco / temettu /
+   karsilastir), JS ile uretilenler `.da-empty-title` span'i kullanabilir —
+   ikisi de ayni olcegi alir. */
+.da-empty h2,
+.da-empty-title{
+  display:block;
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  font-size:var(--bp-text-lg);font-weight:700;letter-spacing:-.01em;
+  color:var(--bp-text);
+  margin:0 0 6px;
+}
+.da-empty p,.da-empty-body{
+  font-size:var(--bp-text-base);color:var(--bp-text2);
+  line-height:1.6;margin:6px 0 0;
+}
+
+/* ── HATA varyantı ────────────────────────────────────────────────────
+   Renk sat (kırmızı): sitede kırmızı = düşüş olduğu için bu bir SEMANTİK
+   çakışma adayı, ama `.pf-fetch-error` ile canlıya zaten bu dille çıkılmış
+   durumda — ikinci bir hata rengi icat etmek tutarsızlığı artırırdı.
+   Ayrım rengin TEK BAŞINA taşıdığı yükü azaltan üç işaretle yapılıyor:
+   tint zemin + kenarlık + ⚠ ikon + eylem düğmesi (WCAG 1.4.1: renk tek
+   ayırt edici değil).
+   KONTRAST (21.09 hesaplandı, sonra canlı doğrulandı): --bp-sat (#f85149)
+   kendi .08 tint'i üzerinde bg'de 5.36:1 / surface'te 5.07:1 → 4.5 eşiğini
+   GEÇİYOR, bu yüzden K-P'nin --bp-sat-on-tint token'ı burada GEREKMİYOR
+   (.12 hover tint'te bile 4.84:1). Tint'i koyulaştıran biri çıkarsa eşik
+   yeniden ölçülmeli. */
+.da-empty--error{
+  background:rgba(var(--bp-sat-rgb),.08);
+  border:1px solid var(--bp-sat-bd);
+  border-radius:var(--bp-radius-lg);
+  color:var(--bp-sat);
+}
+.da-empty--error h2,
+.da-empty--error .da-empty-title{color:var(--bp-sat)}
+.da-empty--error p,.da-empty--error .da-empty-body{color:var(--bp-sat)}
+
+/* Hata kutusunun eylem düğmesi. Metin + düğme tek satıra sığıyorsa yan yana,
+   sığmıyorsa alta sarar (`.pf-fetch-error`in yerleşimi genelleştirildi).
+   min-height 32: dokunma hedefi katıyla (.da-tap) tutarlı. */
+.da-empty--error{
+  display:flex;align-items:center;justify-content:center;
+  flex-wrap:wrap;gap:12px;
+  text-align:left;
+}
+.da-empty--error.da-empty--stack{display:block;text-align:center}
+.da-retry{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:32px;padding:5px 12px;
+  background:none;border:1px solid var(--bp-sat-bd);color:var(--bp-sat);
+  border-radius:var(--bp-radius);
+  font-size:var(--bp-text-sm);font-weight:600;font-family:inherit;
+  cursor:pointer;flex-shrink:0;
+  transition:background .15s;
+}
+.da-retry:hover{background:rgba(var(--bp-sat-rgb),.12)}

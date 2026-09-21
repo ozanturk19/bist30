@@ -25,9 +25,9 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=6450b4ce">
-<link rel="stylesheet" href="/static/css/data-art.css?v=f1bd0cc1">
+<link rel="stylesheet" href="/static/css/data-art.css?v=c2a92cf7">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/tarama.css?v=f6c86c2c">
+<link rel="stylesheet" href="/static/css/pages/tarama.css?v=4b31de99">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -178,10 +178,10 @@
       </tr>{% endfor %}</tbody>
     </table>
     <div id="mobileResultCards"></div>
-    <div class="empty-state" id="emptyDiv" style="display:none" role="status" aria-live="polite">
-      <div class="empty-icon"><span aria-hidden="true">📭</span></div>
+    <div class="da-empty da-empty--page" id="emptyDiv" style="display:none" role="status" aria-live="polite">
+      <div class="da-empty-icon"><span aria-hidden="true">📭</span></div>
       <h2>Sonuç bulunamadı</h2>
-      <p style="font-size:var(--bp-text-base);margin-top:6px">Filtreleri gevşeterek tekrar deneyin.</p>
+      <p>Filtreleri gevşeterek tekrar deneyin.</p>
       <button class="btn-reset" style="margin-top:14px" onclick="resetFilters()">Filtreleri Sıfırla</button>
     </div>
   </div>
@@ -292,10 +292,10 @@
         <tbody id="resultBodyTemel"></tbody>
       </table>
       <div id="mobileResultCardsTemel"></div>
-      <div class="empty-state" id="emptyDivTemel" style="display:none" role="status" aria-live="polite">
-        <div class="empty-icon"><span aria-hidden="true">📭</span></div>
+      <div class="da-empty da-empty--page" id="emptyDivTemel" style="display:none" role="status" aria-live="polite">
+        <div class="da-empty-icon"><span aria-hidden="true">📭</span></div>
         <h2>Sonuç bulunamadı</h2>
-        <p style="font-size:var(--bp-text-base);margin-top:6px">Filtreleri gevşeterek tekrar deneyin.</p>
+        <p>Filtreleri gevşeterek tekrar deneyin.</p>
         <button class="btn-reset" style="margin-top:14px" onclick="resetTemelFilters()">Filtreleri Sıfırla</button>
       </div>
     </div>
@@ -526,7 +526,7 @@ async function applyFilters() {
     if (typeof renderActiveFilterChips === 'function') renderActiveFilterChips();
   } catch(e) {
     if (mySeq !== _filtersSeq) return;
-    document.getElementById('loadingDiv').innerHTML = '<div style="color:var(--sat);padding:24px">Veri yüklenemedi. Lütfen sayfayı yenileyin.</div>';
+    document.getElementById('loadingDiv').innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Veri yüklenemedi.</span><button type="button" class="da-retry" onclick="applyFilters()">Tekrar dene</button></div>';
     showToast('Filtre uygulanamadı — bağlantı hatası. Tekrar deneyin.', 'err');
   } finally {
     if (mySeq !== _filtersSeq) return; // spinner/opacity resetini sadece en guncel cagri yapsin
@@ -977,7 +977,7 @@ async function applyTemelFilters() {
     renderTemelResults(filtered, filtered.length);
   } catch(e) {
     if (mySeq !== _filtersSeqTemel) return;
-    document.getElementById('loadingDivTemel').innerHTML = '<div style="color:var(--sat);padding:24px">Veri yüklenemedi. Lütfen sayfayı yenileyin.</div>';
+    document.getElementById('loadingDivTemel').innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Veri yüklenemedi.</span><button type="button" class="da-retry" onclick="applyTemelFilters()">Tekrar dene</button></div>';
     showToast('Filtre uygulanamadı — bağlantı hatası. Tekrar deneyin.', 'err');
   } finally {
     if (mySeq !== _filtersSeqTemel) return;

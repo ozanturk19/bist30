@@ -181,12 +181,12 @@
 
   .loading-msg { text-align:center; padding:60px; color:var(--bp-text3); font-size:var(--bp-text-lg); }
 
-  /* ── Filtre sonucu boş durum (bughunt-12.09: tarama.html'in .empty-state
+  /* ── Filtre sonucu boş durum (bughunt-12.09: tarama.html'in bos-durum
      desenine hizalandi, ikon+baslik+CTA icermeyen ciplak loading-msg yerine) ── */
-  .empty-state { text-align:center; padding:60px 20px; color:var(--bp-text2); }
-  .empty-state .empty-icon { font-size:var(--bp-text-40); margin-bottom:14px; }
-  .empty-state h2 { font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); margin-bottom:6px; }
-  .empty-state p { font-size:var(--bp-text-base); margin-top:6px; }
+  /* 21.09 (K-V): kanonik `.da-empty` katina alindi (data-art.css). Bu dort
+     kural tarama.css / bilanco_takvimi.css / temettu_takvimi.css icinde
+     BIREBIR yinelenmisti; karsilastir.css ise ayni adla FARKLI bir dil
+     yaziyordu. Burada delta kalmadi. */
   .btn-reset {
     background:none; color:var(--bp-text2); border:1px solid var(--bp-border);
     border-radius:var(--bp-radius); padding:8px 14px; font-size:var(--bp-text-base); cursor:pointer;

@@ -110,8 +110,7 @@
     .import-toast { bottom: calc(24px + 64px + env(safe-area-inset-bottom)); }
   }
 
-  .empty-msg { text-align:center; padding:60px; color:var(--bp-text3); }
-  .empty-msg .em-icon { font-size:var(--bp-text-40); margin-bottom:12px; }
+  /* 21.09 (K-V): `.empty-msg` kanonik `.da-empty` katina alindi. */
 
   /* localStorage uyarı banner */
   .ls-warning {
@@ -322,8 +321,11 @@
       margin-bottom: 10px;
     }
     /* sarmalayici seffaflasinca bos-durum mesaji zeminsiz kalirdi; kendi
-       yuzeyini aliyor (kartlarla ayni recete). */
-    .empty-msg {
+       yuzeyini aliyor (kartlarla ayni recete). 21.09: sinif `.da-empty`,
+       yuzey reçetesi `.da-panel`in birebir aynisi — DELTA yalniz burada,
+       cunku masaustunde `.pf-table` zaten yuzey veriyor (ic ice panel
+       olmasin diye taban `.da-empty` BILEREK yuzeysiz). */
+    .da-empty {
       background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
       border: 1px solid var(--bp-border); border-radius: var(--bp-radius-20);
       padding: 40px 20px;

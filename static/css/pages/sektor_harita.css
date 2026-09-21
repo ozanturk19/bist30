@@ -223,8 +223,9 @@
   .cmp-stock-rvol { font-size:var(--bp-text-xs); color:var(--bp-text3); min-width:38px; text-align:right; }
   .cmp-rvol-high { color:var(--bp-gold); }
 
-  .cmp-empty-state { padding:40px 18px; text-align:center; color:var(--bp-text3); }
-  .cmp-empty-state svg { width:40px; height:40px; margin-bottom:12px; opacity:.4; }
+  /* 21.09 (K-V): `.cmp-empty-state` tek tuketicisi bir HATA mesajiydi ve
+     notr gri bos-durum gibi goruntuluyordu -> kanonik `.da-empty--error`.
+     Beraberindeki `svg` kurali OLU idi (hicbir yerde SVG'li kullanim yok). */
 
   #cmpLoadingOverlay { display:none; padding:48px; text-align:center; color:var(--bp-text3); font-size:var(--bp-text-base); }
   #cmpLoadingOverlay.visible { display:block; }

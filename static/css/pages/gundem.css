@@ -119,12 +119,10 @@
   }
   .sat .new-badge { background: rgba(var(--bp-sat-rgb),.2); color: var(--bp-sat-on-tint); }
 
-  /* ── Empty state ── */
-  .empty-box {
-    background: var(--bp-surface); border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius); padding: 28px; text-align: center;
-    color: var(--bp-text3); font-size: var(--bp-text-base);
-  }
+  /* ── Empty state ──
+     21.09 (K-V): gövde artik kanonik `.da-panel .da-empty` katindan geliyor
+     (yüzey + yerlesim + tipografi). Burada DELTA kalmadi; hata dallari ise
+     ayri bir dile gecti (`.da-empty--error` + gercek "Tekrar dene"). */
 
   /* ── Skeleton ── */
   .skeleton {
@@ -290,17 +288,15 @@
   .sc-chg   { font-variant-numeric: tabular-nums; }
 
   /* 4 ── Boş/hata durumu kutusu.
-         GERÇEK BUG (canlıda bugün görünür): .empty-box .stock-grid'in İÇİNDE
+         GERÇEK BUG (canlıda bugün görünür): boş-durum kutusu .stock-grid'in İÇİNDE
          render ediliyor, grid `repeat(auto-fill, minmax(280px,1fr))` olduğu için
          kutu tek bir hücreye sıkışıyordu — "Bugün BIST işlem günü değil…" mesajı
          1100px'lik konteynerde ~280px'lik dar bir kart gibi duruyor, sayfanın geri
          kalanı boş kalıyordu. Aynı kusur JS hata dallarındaki "Veri yüklenemedi"
-         kutusunu da vuruyor. Tüm satırı kaplaması gerekiyor. */
-  .stock-grid .empty-box { grid-column: 1 / -1; }
-  .empty-box {
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border-radius: var(--bp-radius-20);
-  }
+         kutusunu da vuruyor. Tüm satırı kaplaması gerekiyor.
+         21.09 (K-V): sinif kanonik `.da-empty` oldu; yüzey/degrade artik
+         `.da-panel`den geliyor, burada yalniz GRID DELTASI kaliyor. */
+  .stock-grid > .da-empty { grid-column: 1 / -1; }
 
   /* 5 ── AI Piyasa Özeti paneli: şablondaki uzun inline style buraya taşındı
          (token'suz ham mor rgba() değeri kanonik --bp-art-violet-rgb'ye alındı —
