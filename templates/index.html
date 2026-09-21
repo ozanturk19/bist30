@@ -64,7 +64,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=3f9511f0">
+<link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
 <style id="bp-critical-css">
@@ -312,7 +312,11 @@ header{
 @media(max-width:560px){.da-stock-grid{grid-template-columns:1fr}.da-scard,.da-scard.xl,.da-scard.lg,.da-scard.md,.da-scard.sm,.da-scard.xs{grid-column:1/-1;flex-direction:column;--rot:0deg !important}}
 
 /* ── gün içi hareket şeridi ── */
-.da-marquee-wrap{padding:clamp(20px,3vw,32px) 0;border-top:1px solid var(--bp-border);border-bottom:1px solid var(--bp-border);overflow:hidden;background:var(--bp-surface);margin:0 clamp(-16px,-4vw,-40px)}
+.da-marquee-wrap{position:relative;padding:clamp(20px,3vw,32px) 0;border-top:1px solid var(--bp-border);border-bottom:1px solid var(--bp-border);overflow:hidden;background:var(--bp-surface);margin:0 clamp(-16px,-4vw,-40px)}
+.da-marquee-pause{position:absolute;top:clamp(14px,2.4vw,24px);right:clamp(16px,4vw,40px);z-index:var(--bp-z-local-control);width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--bp-text3);font-size:var(--bp-text-sm);line-height:1;cursor:pointer;padding:0;opacity:.55}
+.da-marquee-pause::before{content:'';position:absolute;top:50%;left:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
+.da-marquee-pause:hover,.da-marquee-pause:focus-visible{opacity:1;color:var(--bp-text)}
+.da-marquee-wrap[data-paused="true"] .da-marquee-track{animation-play-state:paused !important}
 .da-marquee-label{font-family:'Space Grotesk',system-ui,sans-serif;font-size:var(--bp-text-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--bp-text3);padding:0 clamp(16px,4vw,40px) 14px}
 .da-marquee-track{display:flex;width:max-content;animation:daMarquee 34s linear infinite}
 .da-marquee-track:hover{animation-play-state:paused}
@@ -662,6 +666,11 @@ header{
 <!-- Gün içi hareket şeridi — gerçek en çok hareket eden hisseler -->
 <div class="da-marquee-wrap">
   <div class="da-marquee-label">Gün İçi En Çok Hareket Edenler</div>
+  {# K-AF (21.09): bu şeridin duraklatma yolu YALNIZ `:hover`'dı — klavye ve
+     dokunmatik kullanıcı için mekanizma HİÇ yoktu (WCAG 2.2.2). Makro şeridin
+     `.macro-pause-btn` deseni birebir uygulandı (aynı aria-pressed/etiket
+     değişimi), yalnız konumu bu bölümün sağ üstü. #}
+  <button type="button" class="da-marquee-pause" id="daMarqueePause" aria-pressed="false" aria-controls="daMarqueeTrack" aria-label="Hareket şeridini duraklat" onclick="(function(b){var w=b.closest('.da-marquee-wrap');var p=w.getAttribute('data-paused')==='true';w.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.querySelector('span').textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Hareket şeridini devam ettir':'Hareket şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button>
   <div class="da-marquee-track" id="daMarqueeTrack">
     <span class="da-mrow"><span class="mt">Yükleniyor…</span></span>
   </div>

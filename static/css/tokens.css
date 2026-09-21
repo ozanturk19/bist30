@@ -641,4 +641,6 @@ body {
      sarmak hem kaydırma gerektirmez hem de "Gün İçi En Çok Hareket Edenler"
      başlığı yerinde kalır. Aynı sınıf, farklı yüzey, farklı doğru cevap. */
   .da-marquee-track { animation: none !important; flex-wrap: wrap !important; width: auto !important; row-gap: 12px; }
+  /* Sarilmis liste hic hareket etmiyor → duraklat dugmesi burada da olu kontrol. */
+  .da-marquee-pause { display: none !important; }
 }
