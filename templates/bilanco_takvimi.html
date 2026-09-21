@@ -203,7 +203,8 @@ function render(data) {
             ${s.price ? `<div class="sc-price">${s.price.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2})} ₺</div>` : ''}
             <div class="sc-date">📅 ${formatEarningsDate(s, period.label)}</div>
             <a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener"
-               class="sc-kap" onclick="event.stopPropagation()">
+               class="sc-kap" onclick="event.stopPropagation()"
+               aria-label="${escapeHtml(s.ticker)} KAP bildirimleri (yeni sekmede açılır)">
               📋 KAP bildirimleri ↗
             </a>
           </div>

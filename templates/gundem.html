@@ -154,7 +154,7 @@
           <span class="dot" style="background:var(--bp-gold)"></span>
           Bilanço Takvimi
         </h2>
-        <a href="/bilanco-takvimi" class="da-tap" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
+        <a href="/bilanco-takvimi" class="da-tap" aria-label="Tümü — bilanço takvimi" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
       </div>
       <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap">{% for p in ssr_bilanco_upcoming %}{% set is_active = p.status == 'active' %}{% set dot_clr = 'var(--bp-gold)' if is_active else 'var(--bp-text3)' %}
         <div style="flex:1;min-width:200px;background:var(--bp-surface);border:1px solid {{ 'rgba(var(--bp-gold-rgb),.3)' if is_active else 'rgba(var(--bp-text3-rgb),.2)' }};border-radius:var(--bp-radius-md);padding:12px 14px">
@@ -386,7 +386,7 @@ async function loadGundem() {
              erken kapatıp kalanı "boş/mükerrer <a>" olarak DOM'a yaziyordu.
              temettu_takvimi.html/bilanco_takvimi.html'deki ayni desen (div
              role=link + inner <a onclick=stopPropagation>) buraya da taşındı. */
-          const kapHref = item.kap_url ? `<a href="${safeHref(item.kap_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="da-tap" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
+          const kapHref = item.kap_url ? `<a href="${safeHref(item.kap_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="da-tap" aria-label="${escapeHtml(item.ticker)} KAP bildirimi (yeni sekmede açılır)" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
           const etTicker = escapeHtml(item.ticker);
           return `<div class="news-card" data-ticker="${etTicker}" role="link" tabindex="0"
             onclick="window.location.href='/hisse/'+this.dataset.ticker"

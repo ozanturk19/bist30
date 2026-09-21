@@ -165,7 +165,7 @@
   </div>
   {% if sector %}
   <span class="hib-sector">{{ sector }}</span>
-  <a href="{{ compare_url }}" class="hib-compare" data-tip="Sektördeki diğer hisselerle karşılaştır">
+  <a href="{{ compare_url }}" class="hib-compare" data-tip="Sektördeki diğer hisselerle karşılaştır" aria-label="Karşılaştır: {{ sector }} sektöründeki benzer hisselerle">
     <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
     Karşılaştır
   </a>
@@ -1353,7 +1353,7 @@
          class="da-tap"
          style="margin-left:auto;font-size:var(--bp-text-xs);color:var(--bp-text3);background:var(--bp-surface2);border:1px solid var(--bp-border);border-radius:5px;padding:3px 9px;text-decoration:none;transition:all .15s"
          onmouseover="this.style.color='var(--bp-text)'" onmouseout="this.style.color='var(--bp-text3)'">
-        KAP'ta Aç <span aria-hidden="true">↗</span>
+        <span aria-hidden="true">KAP'ta Aç ↗</span><span class="sr-only">{{ ticker }} tüm KAP bildirimleri (kap.org.tr, yeni sekmede açılır)</span>
       </a>
     </div>
     <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:var(--bp-text3);font-size:var(--bp-text-base);padding:6px 0">
@@ -1510,7 +1510,7 @@
   </div>
   <label style="display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--bp-text3);flex-basis:100%;cursor:pointer;line-height:1.4">
     <input type="checkbox" class="da-check" id="hisseSubKvkk" required>
-    <span><a href="/gizlilik" target="_blank" class="da-link">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
+    <span><a href="/gizlilik" target="_blank" rel="noopener" class="da-link">Gizlilik Politikası<span class="sr-only"> (yeni sekmede açılır)</span></a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
   </label>
   <button class="da-close" onclick="document.getElementById('hisseSubCta').style.display='none'"
     aria-label="Kapat">×</button>
@@ -3211,13 +3211,13 @@ async function loadKapDisclosures() {
       const dateShort = d.date ? d.date.substring(0, 16) : '';
       const summaryText = escHtml(d.summary || '');
       const summaryHtml = (d.url && summaryText)
-        ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" aria-label="${summaryText}">${summaryText}</a>`
+        ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" aria-label="${summaryText}${dateShort ? ' — ' + dateShort : ''}">${summaryText}</a>`
         : summaryText;
       return `<div class="kap-item">
         <div class="kap-item-top">
           <span class="kap-class-badge ${cls}">${lbl}</span>
           <span class="kap-summary">${summaryHtml}</span>
-          ${d.url ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" aria-label="KAP'ta aç">↗</a>` : ''}
+          ${d.url ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" aria-label="${summaryText || 'Bildirim'}${dateShort ? ' (' + dateShort + ')' : ''} — KAP'ta aç">↗</a>` : ''}
         </div>
         <div class="kap-meta">
           <span>${dateShort}</span>
