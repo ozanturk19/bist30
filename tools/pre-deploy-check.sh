@@ -562,7 +562,7 @@ fi
 # /hakkinda, /metodoloji, /tarama, /gundem, index dogrusunu soyluyordu -> tek
 # is icin iki kanon. Kapi ayrica KENDI PREMISE'ini olcer: app.py'den EOD imzasi
 # kaybolursa PASS/FAIL vermez, "cadence degismis" diye duser.
-echo "33/34 eod-freshness-claim-check (K-BN: gosterilen fiyatin tazelik vaadi)..."
+echo "33/35 eod-freshness-claim-check (K-BN: gosterilen fiyatin tazelik vaadi)..."
 if python3 tools/eod-freshness-claim-check.py; then
   echo "  ✓ eod-freshness-claim-check PASS"
 else
@@ -579,13 +579,32 @@ fi
 # hucresine uygulanmamisti. Ikinci sinif: hacim ekseninin kanonik rengi
 # --bp-volume; --bp-gold/--bp-accent-yellow odunc alinmasi ayni kavrami
 # uc renge boluyordu (21.09'da 4 yuzey/10 ihlal, pozitif kontrol 49ae8c6).
-echo "34/34 volume-axis-color-check (K-BO: hacim ekseni yon rengiyle boyanamaz)..."
+echo "34/35 volume-axis-color-check (K-BO: hacim ekseni yon rengiyle boyanamaz)..."
 if python3 tools/volume-axis-color-check.py; then
   echo "  ✓ volume-axis-color-check PASS"
 else
   echo "  ✗ K-BO KIRIK: hacim ekseni yabanci bir eksenin rengiyle boyaniyor."
   echo "    Detay için: python3 tools/volume-axis-color-check.py"
   echo "    Pozitif kontrol: python3 tools/volume-axis-color-check.py --ref 49ae8c6"
+  FAIL=$((FAIL + 1))
+fi
+
+# 35. direction-zero-check (K-BP, CPO 21.09.2026) -- DEGISIM SIFIRSA YON
+# RENGI YOKTUR. Yesil "yukselis", kirmizi "dusus", "+" kazanc vaadidir; 0
+# bunlarin hicbiri degil. Sitede iki kanon vardi: `x > 0 ? AL : x < 0 ? SAT :
+# NOTR` (/tarama, /gundem, /sektor-harita) ve `x >= 0 ? AL : SAT` (/karsilastir,
+# /portfolio, /ozet, /hisse, anasayfa serit, blog widget). 21.09 canli kanit:
+# ALARK/DOAS/ARCLK/CEMTS/ISMEN change_pct=0 -> /tarama "0,00%" GRI,
+# /karsilastir "+0,00%" YESIL. /portfolio'da daha sik: pozisyon guncel
+# fiyattan eklendiginde K/Z TAM SIFIRDIR ve "+0,00 ₺" YESIL yaziliyordu.
+# Pozitif kontrol (fix oncesi agac): 27 ihlal / 9 dosya.
+echo "35/35 direction-zero-check (K-BP: 0 bir yonle ayni kefeye konamaz)..."
+if python3 tools/direction-zero-check.py; then
+  echo "  ✓ direction-zero-check PASS"
+else
+  echo "  ✗ K-BP KIRIK: degismeyen bir deger yon rengi/isareti aliyor."
+  echo "    Detay için: python3 tools/direction-zero-check.py"
+  echo "    Pozitif kontrol: python3 tools/direction-zero-check.py --ref 739a8fc"
   FAIL=$((FAIL + 1))
 fi
 
