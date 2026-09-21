@@ -896,10 +896,19 @@
         ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
         @keyframes bp-fade-in  { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
         ::view-transition-new(root) { animation: bp-fade-in .22s ease-out; }
-        a[href^="/"] { -webkit-tap-highlight-color: transparent; }
       `;
       document.head.appendChild(s);
     }
+
+    // 1b. iOS Safari `:active` kilidi (K-AA, 21.09)
+    // `a[href^="/"]{-webkit-tap-highlight-color:transparent}` buradan KALDIRILDI —
+    // artık shared.css `html`e yazıyor (kalıtsal, tek satır, 26/26 şablon; burası
+    // yalnız 22 şablondu). Yerine konan `:active` basma katmanının iOS Safari'de
+    // çalışması için belgelenmiş şart: WebKit, sayfada dokunma dinleyicisi YOKSA
+    // <a>/<div> gibi düğme olmayan ögelerde `:active`i HİÇ uygulamaz. Boş,
+    // passive bir touchstart dinleyicisi bu kilidi açar ve scroll'u bloke etmez.
+    document.addEventListener('touchstart', function () {}, { passive: true });
+
     // 2. Pre-fetch on hover (instant.page-style, only same-origin)
     let _prefetched = new Set();
     document.addEventListener('mouseover', function(e) {

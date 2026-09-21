@@ -85,6 +85,45 @@
     .bp-logo { width: 169px; height: auto; }
   }
 
+/* ── K-AA: BASMA (DOKUNMA) GERİ BİLDİRİMİ — KANONİK KATMAN (21.09 CPO) ──────
+   K-Z'nin kendi itirafındaki 1. madde: ":active = dokunma geri bildirimi ve
+   bu eksende neredeyse HİÇ kural yok." Ölçüldü (tools/press-feedback-check.js,
+   375×812 canlı, 9 yüzey): 1073 dokunulabilir kontrolün **532'sinde** basma
+   anında HİÇBİR görsel geri bildirim yoktu.
+
+   Masaüstünde bu soruyu :hover cevaplar. Dokunmatikte :hover YOKTUR ve bu
+   sitede hover kurallarının çoğu zaten `@media (hover:hover)` arkasında —
+   yani mobilde HİÇ uygulanmaz (ölçüm: /sektor-harita'da 125 kontrol tam
+   olarak bu durumda). Geriye tarayıcının varsayılan tap-highlight'ı kalıyordu
+   ve o da tutarsızdı: 6 CSS dosyası + bp-search.js onu kapatıyor, geri
+   kalanda açık kalıyordu.
+
+   ⛔ ÖLÇÜM HİPOTEZİMİ ÇÜRÜTTÜ: "koyu zeminde varsayılan vurgu görünmez"
+   diye başladım; Chrome'un varsayılanı rgba(0,0,0,.18) DEĞİL,
+   rgba(51,181,229,.4) çıktı ve #141416 üzerinde 2.23:1 ile GÖRÜNÜR. Yani
+   sorun görünmezlik değil TUTARSIZLIK + marka dışı mavi flaş. Karar: varsayılan
+   vurgu site genelinde kapatılır (html üzerinden — özellik kalıtsaldır, tek
+   satır yeter) ve yerine Data-Art'ın kendi basma dili konur.
+
+   NEDEN `opacity`: her kontrol tipinde çalışan TEK ilkel — ikon-only düğme,
+   çipi, kart, satır-içi bağlantı, alt-bilgi linki. `transform:scale` 223
+   kartlı /ozet'te repaint maliyeti getirir; `background` ise zemini olmayan
+   kontrollerde (satır-içi bağlantı) hiçbir şey yapmaz.
+   NEDEN `transition` YOK: basma geri bildirimi ANINDA olmalı; ayrıca
+   `transition` kısayolu ilgili ögelerin mevcut geçişlerini (.mr-card'ın
+   border/background/transform'u) EZERDİ — sessiz regresyon.
+   NEDEN `:where()`: içerideki seçici listesi 0 özgüllük katar, kural (0,1,0)
+   kalır; sayfa-özel CSS ezmek isterse tek sınıf yeter, !important gerekmez.
+   İÇ İÇE KONTROL: ölçüldü — 9 yüzeyin 7'sinde 0; yalnız /bilanco-takvimi'nde
+   46 (`.stock-card > .sc-ticker-link`) ve /hisse'de 6 var. Orada iki katman
+   birden sönüyor (.72² = .52) — "daha kuvvetli basıldı" okunuyor, kusur değil.
+   ÇATIŞMA TARAMASI: site genelinde etkileşimli ögeye `opacity` yazan tek
+   kural `.box .btn:hover{opacity:.9}` (/unsubscribe, hover — mobilde hiç
+   tetiklenmez). Kaynak sırası tuzağı (bkz. aşağıdaki print notu) bu yüzden
+   ısırmıyor; yeni sayfa CSS'i `opacity` yazarsa bu katman sessizce düşer. */
+html { -webkit-tap-highlight-color: transparent; }
+:where(a[href], button, summary, label[for], input[type="submit"], input[type="button"], [role="button"], [role="tab"], [role="link"]):active { opacity: .72; }
+
 /* PRINT-STYLESHEET-MISSING fix (r123 bug-hunt): sitede hicbir @media print
    katmani yoktu (0/24 CSS, 0/29+ sablon dogrulandi) - kullanici Ctrl+P /
    "PDF olarak kaydet" yaptiginda sticky/fixed header + alt navigasyon her
