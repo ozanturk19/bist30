@@ -221,30 +221,54 @@
 
 {% with ftr_self='/gundem', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
+<!-- K-BU (22.09): bu sayfa bp-format.js'i KENDI TUKETICISINDEN SONRA (eski satir
+     590) yukluyordu; site kanonu (K-BL: blog/hisseler/tarama/index…) ONCE yuklemek.
+     renderCard `bpIndNum`/`bpSignalAgeText`i cagiriyor ve `loadGundem()` parse
+     aninda basliyor — cagri async devamda oldugu icin pratikte yetisiyordu, ama
+     bu sadece agin betikten yavas olmasina dayanan bir SIRA SANSI idi. -->
+<script src="/static/bp-format.js?v=c2db667a"></script>
+
 <script>
 /* karsilastir.html'deki ile ayni desen (r27 bug-hunt) — defense-in-depth,
    API verisi (haber/ekonomik takvim) HTML sink'lerine kacissiz yazilmasin. */
-function adxFromStock(s) {
-  const inds = s.indicators || {};
-  const lbl  = (inds.adx || {}).label || '';
-  try { return parseFloat(lbl.replace('ADX','').trim()) || null; }
-  catch { return null; }
-}
+
+/* ── K-BU (22.09): SAYI KENDI ALANINDAN OKUNUR, ETIKETTEN GERI AYRISTIRILMAZ ──
+   Bu kart ADX'i `indicators.adx.label`'dan PARSE EDIYORDU. O alan INSAN icin
+   yazilmis bir metindir ("ADX 26") ve sayiyi TAM SAYIYA yuvarlayarak tasir;
+   `.toFixed(1)` onu geri kurtarmaz, yalnizca yuvarlanmis degere sahte bir
+   ondalik ekler ("26,0"). Oysa AYNI SAYFANIN SSR makrosu (gundem.html:51)
+   ayni hisse icin `'%.1f'|format(s.adx)` ile "25,9" basiyor ve bu grid'ler
+   `innerHTML` ile TAMAMEN yeniden yazildigi icin CSR, SSR'in DOGRU sayisini
+   YANLIS olanla EZIYORDU — kullanici ilk boyamada 25,9 gorup JS yuklenince
+   26,0'a zipliyordu (K-BR dersi: SSR != CSR bicimi = gorunur ziplama).
+   Canli olcum (22.09 00:5x, /api/gundem): **7/7 kartta** SSR != CSR —
+   ENERY 43,6→44,0 · AYGAZ 35,1→35,0 · TUPRS 34,7→35,0 · TKFEN 33,4→33,0 ·
+   AHGAZ 29,6→30,0 · ISDMR 25,9→26,0 · BIMAS 25,1→25,0. Son ikisi urunun
+   **25 esigine** cakisiyor: yuvarlama "kil payi gecti"yi "tam esikte"ye,
+   "tam esikte"yi de "rahat gecti"ye cevirebiliyordu.
+   Ham `s.adx` payload'da ZATEN var (7/7 dolu). Tek kanon: `bpIndNum`
+   (bp-format.js) — SSR'in `'%.1f'|format(...)|replace('.', ',')` esdegeri.
+   Yan etki: eski yazim `parseFloat(...) || null` ADX 0'i da "yok" sayiyordu. */
 
 function renderCard(s, isNew) {
   const isAl  = s.signal === 'AL';
   const isSat = s.signal === 'SAT';
   const sigCls  = isAl ? 'al' : isSat ? 'sat' : 'bkl';
-  const badgeTxt = isAl ? '▲ Güçlü Trend' : isSat ? '▼ Trend Bozuldu' : '● Yatay';
-  const adx  = adxFromStock(s);
+  /* K-BU: etiket metni SSR'da `signal_label` filtresinden (business_rules.
+     SIGNAL_LABELS, T1.1/CPO-1321 tek kaynak) gelirken burada ELLE kopyalanmisti
+     — "ayni is icin iki kanon". CPO-1321'de SAT etiketi bir kez zaten degisti;
+     bir dahakinde bu kopya sessizce bayatlardi. bp-vocab.js `sigLabel` ayni
+     haritayi tasiyor, ok isareti SSR makrosuyla birebir ayni sirada. */
+  const badgeTxt = (isAl ? '▲ ' : isSat ? '▼ ' : '● ') + sigLabel(s.signal);
   const chg  = s.change_pct != null ? parseFloat(s.change_pct) : null;
   const chgCls = chg > 0 ? 'up' : chg < 0 ? 'dn' : 'neu';
   const chgTxt = chg != null ? (chg>0?'+':'') + chg.toFixed(2).replace('.', ',') + '%' : '';
   const priceStr = s.price ? parseFloat(s.price).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '';
 
   const metrics = [];
-  if (adx != null)          metrics.push(`<div class="sc-metric"><span>ADX </span><strong>${adx.toFixed(1).replace('.', ',')}</strong></div>`);
-  if (s.rsi != null)        metrics.push(`<div class="sc-metric"><span>RSI </span><strong>${parseFloat(s.rsi).toFixed(1).replace('.', ',')}</strong></div>`);
+  /* K-BU: guard SSR makrosuyla birebir (`s.adx is not none`), bicim bpIndNum. */
+  if (s.adx != null)        metrics.push(`<div class="sc-metric"><span>ADX </span><strong>${bpIndNum(s.adx)}</strong></div>`);
+  if (s.rsi != null)        metrics.push(`<div class="sc-metric"><span>RSI </span><strong>${bpIndNum(s.rsi)}</strong></div>`);
   /* CPO-1335: "Süre" bar sayacı değil takvim yaşı.
      CPO-1668 #2: bpSignalAgeShort ("10G") SSR'ın kanonik signal_age_text filtresiyle
      ("Bugün"/"Dün"/"N gün") uyuşmuyordu — sayfa yüklenip JS re-render tetiklenince
@@ -570,7 +594,8 @@ document.addEventListener('visibilitychange', () => {
 </script>
 <script src="/static/bp-search.js?v=f13259b5" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/bp-format.js?v=c2db667a"></script>
+<!-- K-BU: bp-format.js YUKARI tasindi (satir ~229) — stale-banner.js TR takvim
+     gunu icin onun kanonunu cagirir, sirasi hala ONCE. -->
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}
