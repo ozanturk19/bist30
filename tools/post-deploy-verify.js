@@ -992,6 +992,103 @@ const step = async (ad, fn) => {
     ok('K-BP kanon', 'bpDir/bpFormatPct/bpDirClass canlida dogru (-0,004 -> "0,00%" notr)');
   });
 
+  /* ── K-BQ (21.09): "Stop" bir YON iddiasidir ─────────────────────────
+     `sl_level` Supertrend bandinin guncel degeri; long-only uründe ona "stop"
+     demek ancak band fiyatin ALTINDAYKEN anlamli. Canli olcum 21.09: 197/217
+     hissede `sl_level > price` (72/72 SAT + 125/138 BEKLE).
+     ⛔ K-BP dersi 40: once ON-KOSUL olculur — bugun boyle bir hisse yoksa adim
+     ATLANIR ve bu ACIKCA soylenir; "olculemedi" != "gecti". */
+  console.log('\n[4c] K-BQ — Supertrend seviyesi / "Stop" ayrimi');
+  {
+    const api = await (await ctx.request.get(BASE + '/api/data')).json();
+    const rows = (api.stocks || []).filter(s => s.sl_level && s.price);
+    const above = rows.filter(s => s.sl_level > s.price);
+    const alBelow = rows.filter(s => s.signal === 'AL' && s.sl_level < s.price);
+
+    if (!above.length) {
+      bad('K-BQ on-kosul', 'sl_level > price olan hisse YOK — adim OLCULEMEDI (gecti degil)');
+    } else {
+      const bek = above.find(s => s.signal === 'BEKLE');
+      const sat = above.find(s => s.signal === 'SAT');
+      ok('K-BQ on-kosul', above.length + '/' + rows.length + ' hissede band fiyatin USTUNDE');
+
+      /* A) Hap Bilgi: ad notr + rol FIYATTAN turemis */
+      for (const [s, beklenen] of [[bek, 'direnç'], [sat, 'direnç'], [alBelow[0], 'stop']]) {
+        if (!s) continue;
+        await p.goto(BASE + '/hisse/' + s.ticker, { waitUntil: 'domcontentloaded' });
+        const q = await p.evaluate(() => {
+          const dt = [...document.querySelectorAll('.qf-row dt')]
+            .find(e => /Supertrend Seviyesi|Stop Seviyesi/.test(e.textContent));
+          if (!dt) return null;
+          const dd = dt.parentElement.querySelector('dd');
+          const hero = document.querySelector('.bp-hero-levels');
+          return { label: dt.textContent.trim(), value: dd ? dd.textContent.trim() : '',
+                   heroText: hero ? hero.textContent.replace(/\s+/g, ' ').trim() : null };
+        });
+        if (!q) { bad('K-BQ hap bilgi ' + s.ticker, 'satir bulunamadi (olcum gecersiz)'); continue; }
+        if (/Stop Seviyesi/.test(q.label))
+          bad('K-BQ hap bilgi ' + s.ticker, 'ad hala "Stop Seviyesi" (yon-bagimsiz alan)');
+        else if (!q.value.includes(beklenen))
+          bad('K-BQ hap bilgi ' + s.ticker, 'rol eki "' + beklenen + '" degil: ' + q.value);
+        else
+          ok('K-BQ hap bilgi ' + s.ticker, q.label + ' -> ' + q.value);
+
+        /* B) hero "Stop:" SADECE AL'de */
+        if (s.signal !== 'AL' && q.heroText && /Stop:/.test(q.heroText))
+          bad('K-BQ hero ' + s.ticker, s.signal + ' sinyalinde "Stop:" basiliyor: ' + q.heroText);
+        else if (s.signal === 'AL' && (!q.heroText || !/Stop:/.test(q.heroText)))
+          bad('K-BQ hero ' + s.ticker, 'AL sinyalinde hero stop KAYBOLDU (asiri-duzeltme): ' + q.heroText);
+        else
+          ok('K-BQ hero ' + s.ticker, s.signal + ' -> ' + (q.heroText || 'blok yok (dogru)'));
+
+        /* C) indikator karti alt-etiketi: yon FIYATTAN.
+           ⛔ Bu deger SSR degil, `renderSummary` ile CSR doluyor — `domcontentloaded`
+           aninda HENUZ BOS. Ilk yazimda 3/3 "olculemedi" verdi; urun dogruydu,
+           OLCUM ERKENDI (K-BO dersi 36'nin ikizi). Once dolmasini bekle. */
+        const ic = await p.waitForFunction(() => {
+          const e = document.getElementById('icSlPct');
+          return (e && e.textContent.trim() && e.textContent.trim() !== '—') ? e.textContent.trim() : null;
+        }, null, { timeout: 15000 }).then(h => h.jsonValue()).catch(() => null);
+        const wantLbl = s.signal === 'AL' ? 'Riske uzaklık' : 'ST direnci';
+        if (!ic || ic === '—') bad('K-BQ icSlPct ' + s.ticker, 'alt-etiket bos (olcum gecersiz)');
+        else if (!ic.startsWith(wantLbl)) bad('K-BQ icSlPct ' + s.ticker, '"' + wantLbl + '" bekleniyordu: ' + ic);
+        else if (/-\d/.test(ic)) bad('K-BQ icSlPct ' + s.ticker, 'uzaklik isaretli yaziliyor: ' + ic);
+        else ok('K-BQ icSlPct ' + s.ticker, ic);
+      }
+
+      /* D) kanon canlida yuklu mu */
+      const k = await p.evaluate(() => {
+        if (typeof bpStLevelRole !== 'function') return { err: 'bpStLevelRole tanimli degil' };
+        return { yuk: bpStLevelRole(12, 10, 'BEKLE'), alt: bpStLevelRole(8, 10, 'AL'),
+                 altBekle: bpStLevelRole(8, 10, 'BEKLE'), bos: bpStLevelRole(null, 10, 'AL') };
+      });
+      if (k.err) bad('K-BQ kanon', k.err);
+      else if (k.yuk.label !== 'ST direnci' || k.alt.label !== 'Riske uzaklık' ||
+               k.altBekle.label !== 'ST desteği' || k.bos !== null)
+        bad('K-BQ kanon', 'bpStLevelRole yanlis: ' + JSON.stringify(k));
+      else if (Math.abs(k.yuk.pct - 20) > 0.001)
+        bad('K-BQ kanon', 'uzaklik buyukluk degil: ' + k.yuk.pct);
+      else ok('K-BQ kanon', 'bpStLevelRole canlida dogru (ust->direnc · alt+AL->riske uzaklik · alt+BEKLE->destek)');
+
+      /* E) /karsilastir: rol metinle, yon rengiyle DEGIL */
+      const cmpT = [bek, sat, alBelow[0]].filter(Boolean).map(s => s.ticker).join(',');
+      await p.goto(BASE + '/karsilastir?tickers=' + cmpT, { waitUntil: 'networkidle' });
+      await p.waitForTimeout(4000);
+      const cr = await p.evaluate(() => [...document.querySelectorAll('.sl-role')].map(e => {
+        const mono = e.parentElement.querySelector('.mono');
+        return { role: e.textContent.trim(), cls: mono ? mono.className : '',
+                 color: mono ? getComputedStyle(mono).color : '' };
+      }));
+      if (!cr.length) bad('K-BQ /karsilastir', '.sl-role hic render edilmedi (olcum gecersiz)');
+      else {
+        const yonRenkli = cr.filter(x => x.color === AL || x.color === SAT || /\bdn\b|\bup\b/.test(x.cls));
+        if (yonRenkli.length) bad('K-BQ /karsilastir',
+          yonRenkli.length + ' hucrede yon-BAGIMSIZ seviye yon rengiyle boyali: ' + JSON.stringify(yonRenkli[0]));
+        else ok('K-BQ /karsilastir', cr.length + ' hucre · roller: ' + [...new Set(cr.map(x => x.role))].join('/'));
+      }
+    }
+  }
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>
