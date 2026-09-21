@@ -407,6 +407,141 @@ const step = async (ad, fn) => {
                       : bad('K-BJ negatif kontrol', 'kanon mesru fiyati da reddediyor: ' + kbj2.okunurFiyat);
   }
 
+  /* ── 4c) K-BK: bos /api/data listesi "veri yok" diye sunulmamali ─────── */
+  /* ⛔ Bu adimlar KENDI context'lerini acar: route yakalama paylasilan sayfaya
+     sizarsa sonraki adimlar bayat/sahte olcum verir
+     ([[reference_olcum_sirasi_katmanin_durumunu_bozar]]). */
+  console.log('\n[4c] K-BK — soguk baslangic: bos liste != veri yok');
+  {
+    const COLD = JSON.stringify({ stocks: [], loading: true, data_quality: 'OK',
+                                  stocks_age_s: 5, refreshing: true, data_freshness: {} });
+    const rd = async (pg, sel) => pg.evaluate(s2 => {
+      const e = document.querySelector(s2); if (!e) return '(yok)';
+      const cs = getComputedStyle(e);
+      return (cs.display === 'none' ? '[GIZLI] ' : '') + e.textContent.replace(/\s+/g, ' ').trim().slice(0, 140);
+    }, sel);
+
+    await step('K-BK ana sayfa', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 900 } });
+      const pg = await c.newPage();
+      await pg.route('**/api/data', r => r.fulfill({ status: 200, contentType: 'application/json', body: COLD }));
+      await pg.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(3500);
+      const t = await rd(pg, '#daSpotlightBody');
+      (/hazırlanıyor/.test(t) && !/verisi yok/.test(t))
+        ? ok('K-BK ana sayfa soguk baslangicta "hazirlaniyor"', '(fix oncesi: "Su an gosterilecek hisse verisi yok.")')
+        : bad('K-BK ana sayfa', t);
+      await c.close();
+    });
+
+    await step('K-BK ana sayfa negatif kontrol', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 900 } });
+      const pg = await c.newPage();
+      await pg.route('**/api/data', r => r.fulfill({ status: 200, contentType: 'application/json',
+        body: JSON.stringify({ stocks: [], loading: false }) }));
+      await pg.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(3000);
+      const t = await rd(pg, '#daSpotlightBody');
+      /verisi yok/.test(t) ? ok('K-BK negatif kontrol', 'GERCEKTEN bos (loading:false) -> "veri yok" aynen kaldi')
+                           : bad('K-BK negatif kontrol', t);
+      await c.close();
+    });
+
+    await step('K-BK portfoy', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 900 } });
+      await c.addInitScript(() => { try { localStorage.setItem('bp_portfolio', JSON.stringify([
+        { id: 'kbk1', ticker: 'THYAO', lot: 10, price: 250, date: '2026-01-02' },
+        { id: 'kbk2', ticker: 'GARAN', lot: 5,  price: 100, date: '2026-02-03' }])); } catch (e) {} });
+      const pg = await c.newPage();
+      await pg.route('**/api/data', r => r.fulfill({ status: 200, contentType: 'application/json', body: COLD }));
+      await pg.goto(BASE + '/portfolio', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(3500);
+      const miss = await rd(pg, '#pfMissingPriceWarn'), ban = await rd(pg, '#pfFetchError');
+      (/^\[GIZLI\]/.test(miss) || !/kaldırın/.test(miss))
+        ? ok('K-BK portfoy "pozisyonu kaldirin" tavsiyesi bastirildi', '(veri kaybina yol acan tavsiye)')
+        : bad('K-BK portfoy yikici tavsiye', miss);
+      (!/^\[GIZLI\]/.test(ban) && /hazırlanıyor/.test(ban))
+        ? ok('K-BK portfoy banner "hazirlaniyor" diyor')
+        : bad('K-BK portfoy banner', ban);
+      await c.close();
+    });
+
+    await step('K-BK portfoy negatif kontrol (gercek 500)', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 900 } });
+      await c.addInitScript(() => { try { localStorage.setItem('bp_portfolio', JSON.stringify([
+        { id: 'kbk1', ticker: 'THYAO', lot: 10, price: 250, date: '2026-01-02' }])); } catch (e) {} });
+      const pg = await c.newPage();
+      await pg.route('**/api/data', r => r.fulfill({ status: 500, contentType: 'application/json', body: '{}' }));
+      await pg.goto(BASE + '/portfolio', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(3000);
+      const ban = await rd(pg, '#pfFetchError');
+      /yüklenemiyor/.test(ban) ? ok('K-BK negatif kontrol', 'gercek hata hala HATA dili kullaniyor (K-U korundu)')
+                               : bad('K-BK portfoy 500 dili', ban);
+      await c.close();
+    });
+
+    await step('K-BK hisse detay', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 900 } });
+      const pg = await c.newPage();
+      await pg.route('**/api/data', r => r.fulfill({ status: 200, contentType: 'application/json', body: COLD }));
+      await pg.goto(BASE + '/hisse/BIMAS', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(7000);
+      const t = await rd(pg, '#entryAnalysisGrid');
+      (/hazırlanıyor/.test(t) && !/veri yetersiz/.test(t))
+        ? ok('K-BK hisse detay "veri yetersiz" kesin hukmu vermiyor')
+        : bad('K-BK hisse detay', t);
+      await c.close();
+    });
+
+    await step('K-BK 404 aramasi — soguk baslangic', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 900 } });
+      const pg = await c.newPage();
+      await pg.route('**/api/data', r => r.fulfill({ status: 200, contentType: 'application/json', body: COLD }));
+      await pg.goto(BASE + '/bu-sayfa-yok-kbk', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(2500);
+      await pg.fill('#q404', 'THYAO');
+      await pg.click('#q404Form button[type=submit]');
+      await pg.waitForTimeout(5000);
+      const h = await rd(pg, '#q404Hint');
+      (!/bulunamadı/.test(h) && /\/hisse\/THYAO/.test(pg.url()))
+        ? ok('K-BK 404 aramasi THYAO icin "bulunamadi" YALANI soylemiyor')
+        : bad('K-BK 404 soguk baslangic', h + ' | url=' + pg.url());
+      await c.close();
+    });
+
+    await step('K-BK 404 aramasi — yaris (ikinci 404 uretmemeli)', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 900 } });
+      const pg = await c.newPage();
+      await pg.route('**/api/data', async r => { await new Promise(s2 => setTimeout(s2, 1500)); r.continue(); });
+      await pg.goto(BASE + '/bu-sayfa-yok-kbk', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(120);
+      await pg.fill('#q404', 'ZZQQX');
+      await pg.click('#q404Form button[type=submit]');
+      await pg.waitForTimeout(6000);
+      const h = await rd(pg, '#q404Hint');
+      (/bu-sayfa-yok-kbk/.test(pg.url()) && /bulunamadı|demek istediniz/.test(h))
+        ? ok('K-BK 404 yaris penceresi kapali', '(fix oncesi: /hisse/ZZQQX -> IKINCI 404)')
+        : bad('K-BK 404 yaris', h + ' | url=' + pg.url());
+      await c.close();
+    });
+
+    await step('K-BK 404 aramasi — onbellek varsa /api/data cekilmez', async () => {
+      const c = await b.newContext({ locale: 'tr-TR', viewport: { width: 1280, height: 900 } });
+      await c.addInitScript(() => { try {
+        sessionStorage.setItem('bp_search_cache_v1', JSON.stringify([{ t: 'THYAO' }, { t: 'GARAN' }]));
+        sessionStorage.setItem('bp_search_t_v1', String(Date.now()));
+      } catch (e) {} });
+      const pg = await c.newPage();
+      let hits = 0;
+      pg.on('request', r => { if (/\/api\/data(\?|$)/.test(r.url())) hits++; });
+      await pg.goto(BASE + '/bu-sayfa-yok-kbk', { waitUntil: 'networkidle', timeout: 60000 });
+      await pg.waitForTimeout(2000);
+      hits === 0 ? ok('K-BK 404 bp-search onbellegini kullaniyor', '289 KB indirme yapilmadi')
+                 : bad('K-BK 404 onbellek', '/api/data istek sayisi=' + hits);
+      await c.close();
+    });
+  }
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>
