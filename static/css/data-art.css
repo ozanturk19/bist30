@@ -278,6 +278,15 @@ label:has(> .da-check){min-height:24px}
   min-height:24px;
 }
 
+/* Rozet ICINDEKI jargon baglantisi: "cumle ici satir-ici" muafiyeti YALNIZ
+   proz icin gecerlidir — `● Yatay` bir cumle degildir, komsu metin dugumu
+   tek karakter oldugu icin denetcinin muafiyeti de kapanir. Bu kural
+   hisse.css'te vardi, portfolio.css MIRAS ALMAMISTI (K-U canli: portfolio
+   mobil kartta `.jargon-term` 30.2x14). Tek kaynak: burasi. */
+.signal-badge > .jargon-term{
+  display:flex;align-items:center;min-height:24px;
+}
+
 /* Abone çubuğu "×" kapat düğmesi — 20.09'a kadar ozet.html/hisse.html/
    blog_article.html'de ÜÇ AYRI el-yazımı inline stil vardı ve üçü üç farklı
    boyut veriyordu (17.3×22.5 · 22.5×22 · 19×22). Tek kaynak. */

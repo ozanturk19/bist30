@@ -39,7 +39,11 @@
   tbody tr:last-child { border-bottom:none; }
   tbody tr:hover { background:var(--bp-surface2); }
   td { padding:10px 14px; white-space:nowrap; font-size:var(--bp-text-base); }
-  .ticker-link { font-weight:700; color:var(--bp-text); text-decoration:none; }
+  /* K-U: dolu portfoy tablosu HIC olculmemisti (localStorage bos basliyor) —
+     hisse baglantisi 42.5x16 idi, WCAG 2.5.8 AA altinda. Hucre ici tek baglanti
+     "cumle ici satir-ici" muafiyetine girmez. */
+  .ticker-link { font-weight:700; color:var(--bp-text); text-decoration:none;
+                 display:inline-flex; align-items:center; min-height:24px; }
   .ticker-link:hover { color:var(--bp-accent-cyan); }
 
   .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; }
@@ -51,12 +55,24 @@
   .neg-pnl { color:var(--bp-sat); font-weight:600; }
   .neu-pnl { color:var(--bp-text3); }
 
-  .btn-del { position:relative; background:none; border:none; color:var(--bp-text3); cursor:pointer; font-size:var(--bp-text-md); padding:2px 6px; }
-  .btn-del::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
-  .btn-del:hover { color:var(--bp-sat); }
-
-  .btn-edit { position:relative; background:none; border:none; color:var(--bp-text3); cursor:pointer; font-size:var(--bp-text-md); padding:2px 6px; }
-  .btn-edit::before { content:''; position:absolute; top:50%; left:50%; width:44px; height:44px; transform:translate(-50%,-50%); }
+  /* ⛔ K-U (21.09) — YIKICI ISABET HATASI, canli olculdu ve TIKLAMAYLA kanitlandi.
+     Iki dugme de 23x21'di ve ikisi de 44x44 `::before` halosu tasiyordu. Halolar
+     dugmelerin KENDISINDEN iki kat genis, aralari ise ~6px: `.btn-del` DOM'da
+     SONRA geldigi icin ustte boyaniyor ve halosu `.btn-edit`i TAMAMEN ortuyordu.
+     Masaustu tabloda (1280px) `.btn-edit` MERKEZI dahil 5/5 prob `.btn-del`e
+     dusuyordu; gercek fare tiklamasi ✎ Duzenle'nin tam ortasina yapildiginda
+     pozisyon SILINIYORDU (2 -> 1) — `removePosition()` onay sormaz, geri alinmaz.
+     Mobil kartta merkez dogru, yalniz +12px sag prob komsuya tasiyordu (4/5).
+     data-art.css'in kendi notu bu durumu zaten tarif ediyor: "Yogun arayuzde
+     (yan yana rozetler) halo'lar birbiriyle de cakisir — orada zaten gercek
+     buyutme gerekir." Halolar kaldirildi, dugmelerin KENDISI 32x32 yapildi. */
+  .btn-del, .btn-edit {
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:32px; min-height:32px; padding:0;
+    background:none; border:none; color:var(--bp-text3); cursor:pointer;
+    font-size:var(--bp-text-md);
+  }
+  .btn-del:hover  { color:var(--bp-sat); }
   .btn-edit:hover { color:var(--bp-brand); }
 
   /* Export / Import toolbar */
@@ -149,7 +165,10 @@
     padding:12px 14px;
   }
   .pf-mtop { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px; }
-  .pf-mticker { font-size:var(--bp-text-15); font-weight:700; color:var(--bp-text); text-decoration:none; }
+  /* K-U: mobil kart esdegeri — 48.3x18 idi (bkz. .ticker-link notu). `.pf-mtop`
+     zaten flex/align-items:center, min-height buyumesi satiri kaydirmaz. */
+  .pf-mticker { font-size:var(--bp-text-15); font-weight:700; color:var(--bp-text); text-decoration:none;
+                display:inline-flex; align-items:center; min-height:24px; }
   .pf-mticker:hover { color:var(--bp-accent-cyan); }
   .pf-mtop-right { display:flex; align-items:center; gap:8px; }
   .pf-mprice-row, .pf-mdetail-row { display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; }

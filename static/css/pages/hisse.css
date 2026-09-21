@@ -178,7 +178,9 @@
   /* K-R (21.09): ayni rozet deseninin UCUNCU ismi (.sig-badge takvimlerde,
      .sig-badge tarama'da, .signal-badge burada). Icindeki jargon baglantisi
      masaustunde 69.4x14 idi — hedef 24px asgariyi tutmuyordu. */
-  .signal-badge > .jargon-term { display:flex; align-items:center; min-height:24px; }
+  /* K-U: bu kural data-art.css'e (kanonik `.signal-badge > .jargon-term`)
+     tasindi — portfolio.css de ayni ihlali tasiyordu, iki kopya yerine tek
+     kaynak. Buradaki yinelenen bildirim kaldirildi. */
   .signal-AL   {
     background: rgba(var(--bp-al-rgb),.10); color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.35);
     box-shadow: 0 0 8px rgba(var(--bp-al-rgb), 0.18), inset 0 0 8px rgba(var(--bp-al-rgb), 0.05);
