@@ -348,3 +348,39 @@ function bpIndNum(v) {
   if (typeof n !== 'number' || !isFinite(n)) return '—';
   return n.toFixed(1).replace('.', ',');
 }
+
+/* ── K-BS (22.09): GOSTERGE PANELI TEK AGIZDAN KONUSUR ───────────────────
+   Uc ayri kusurun ortak koku: rozet bir kaynaktan, hemen altindaki teknik
+   satir BASKA bir kaynaktan/yuvarlamadan okuyor.
+
+   1) BASILAN CIFT, YAZILAN SONUCU DESTEKLEMELI (K-BO kanonunun ikizi).
+      Canli 22.09 /hisse/DURDO: rozet "Vade Uyumu — Kısa > Uzun" (yesil) derken
+      hemen altindaki teknik satir "EMA12: 4,9 · EMA99: 4,9" basiyordu. Iki
+      esit sayinin altina "biri digerinden buyuk" yazmak, okura sayfanin
+      kendisini yanlis okutur. Gercek fark %0,137 — yani sonuc DOGRU, GOSTERIM
+      eksik. Sayiyi buyutemedigimiz yerde (chart ozeti 1 ondalikta geliyor)
+      dogru davranis, farki UZLASTIRAN kisa bir not dusmektir.
+      `dir`: 1 => "a > b" iddia edildi, -1 => "a < b", 0 => iddia yok.
+
+   2) RSI BOLGE ADI BIR VAAT TASIYABILIR. `rsi_zone` backend'de sinyalden
+      BAGIMSIZ turetilir; "Ideal Giris Penceresi" (RSI 45-60) long-only bir
+      urunde ancak AL sinyaliyle anlamlidir. Canli 22.09: bu bolge adini tasiyan
+      46 hissenin **45'i AL DEGIL** (FROTO/MGROS/MAVI dahil 3'u SAT). Rengi
+      CPO-DEV2-031/033 zaten notrlemisti — KELIMELER kalmisti. */
+function bpNumPairNote(aStr, bStr, dir) {
+  if (!dir || aStr == null || bStr == null) return '';
+  var a = parseFloat(String(aStr).replace(',', '.'));
+  var b = parseFloat(String(bStr).replace(',', '.'));
+  if (!isFinite(a) || !isFinite(b)) return '';
+  var shown = a > b ? 1 : (a < b ? -1 : 0);
+  if (shown === dir) return '';
+  return shown === 0
+    ? ' (gösterilen basamakta eşit)'
+    : ' (gösterilen değerler yuvarlanmış)';
+}
+
+function bpRsiZoneText(zone, signal) {
+  var z = zone || '';
+  if (z.indexOf('İdeal Giriş') === 0 && signal !== 'AL') return 'Nötr bölge';
+  return z;
+}

@@ -560,8 +560,16 @@
   .ind-bull    { background: rgba(var(--bp-al-rgb),.15);  color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.3);  }
   .ind-bear    { background: rgba(var(--bp-sat-rgb),.15);  color: var(--bp-sat-on-tint); border: 1px solid rgba(var(--bp-sat-rgb),.3);  }
   .ind-neutral { background: rgba(var(--bp-text3-rgb),.12); color: var(--bp-bkl); border: 1px solid rgba(var(--bp-text3-rgb),.25); }
+  /* K-BS (22.09) — HACIM EKSENI: yon-bagimsiz bir buyukluk, yon rengiyle
+     boyanamaz (K-BO). Rozet `ind-bull` (= --bp-al yukselis yesili) kullaniyordu;
+     kapi 34 token/ham-hex taradigi icin SINIF ADI uzerinden gelen ihlali
+     gormemisti. Hacim ekseninin kanonik rengi --bp-volume (tokens.css
+     CPO-1149/1150) — ayni sayfadaki "⭐ Hacim Onaylı" chip'iyle ayni uclu
+     (--bp-volume / -bg / -bd), tek eksen tek renk. */
+  .ind-volume  { background: var(--bp-volume-bg); color: var(--bp-volume); border: 1px solid var(--bp-volume-bd); }
   .ind-bull:hover    { border-color: rgba(var(--bp-al-rgb),.6);  box-shadow: 0 0 0 3px rgba(var(--bp-al-rgb),.12); }
   .ind-bear:hover    { border-color: rgba(var(--bp-sat-rgb),.6); box-shadow: 0 0 0 3px rgba(var(--bp-sat-rgb),.12); }
+  .ind-volume:hover  { border-color: rgba(var(--bp-volume-rgb),.7); box-shadow: 0 0 0 3px rgba(var(--bp-volume-rgb),.12); }
 
   .ind-detail {
     font-size: var(--bp-text-xs);

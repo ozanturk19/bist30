@@ -109,7 +109,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=7ed38bdb">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=30510449">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=76ce077a">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -1545,7 +1545,7 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=a0d054f8"></script>
+<script src="/static/bp-format.js?v=c2db667a"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
@@ -2615,11 +2615,23 @@ function renderSummary(s, signalData) {
   const adxBear = (_siInd && _siInd.adx)        ? _siInd.adx.bear        : s.adx_bear;
   const e12Bull = (_siInd && _siInd.ema1299)    ? _siInd.ema1299.bull    : s.e12_bull;
   const e12Bear = (_siInd && _siInd.ema1299)    ? _siInd.ema1299.bear    : s.e12_bear;
+  /* K-BS (22.09): `techDetail` satirlari CPO-1665'in TERK ETTIGI kaynaktan
+     okumaya devam ediyordu. CPO-1665 rozetin metnini (`detail`) ve isaretini
+     (`ok`) otoriter kaynaga (signalData.indicators) tasidi, ama AYNI NESNENIN
+     kardes alani `techDetail` chart ozetinde (`s.*`) kaldi — yani duzeltilen
+     GUBRF celiskisi bir satir asagida hayatta kaldi. Canli kanit 22.09
+     /hisse/TAVHL: rozet "Trend Yönü — ↓ Düşüş" (otoriter: ST SHORT) derken
+     teknik detay satiri "Supertrend(10,3): LONG" basiyordu (chart ozeti
+     st_bull=true). Sonuc cumlesi HER ZAMAN rozetle ayni kaynaktan gelir. */
+  const _emaDir = e12Bull ? 1 : (e12Bear ? -1 : 0);
+  const _adxDir = adxBull ? 1 : (adxBear ? -1 : 0);
+  const _e12s = bpIndNum(s.e12), _e99s = bpIndNum(s.e99);
+  const _dips = bpIndNum(s.di_plus), _dims = bpIndNum(s.di_minus);
   const inds = [
     {
       label: 'Trend Yönü',
       detail: stBull ? '↑ Yükseliş' : stBear ? '↓ Düşüş' : '— Net değil',
-      techDetail: 'Supertrend(10,3): ' + (s.st_bull ? 'LONG' : s.st_bear ? 'SHORT' : 'NEUTRAL'),
+      techDetail: 'Supertrend(10,3): ' + (stBull ? 'LONG' : stBear ? 'SHORT' : 'NEUTRAL'),
       ok: s.signal === 'SAT' ? stBear : stBull,
       blog: '/blog/supertrend-indikatoru-nedir', blogLabel: 'Supertrend'
     },
@@ -2631,7 +2643,8 @@ function renderSummary(s, signalData) {
       // etiketi zaten signalData'yı önceliklendiriyordu (satır üstte), sayı da aynı
       // kaynağa hizalandı.
       detail: adxStrength + (adxNum ? ' (' + Number(adxNum).toFixed(1).replace('.', ',') + ')' : ''),
-      techDetail: 'ADX(14): ' + bpIndNum(adxNum) + ' · DI+: ' + bpIndNum(s.di_plus) + ' · DI−: ' + bpIndNum(s.di_minus),
+      techDetail: 'ADX(14): ' + bpIndNum(adxNum) + ' · DI+: ' + _dips + ' · DI−: ' + _dims +
+        bpNumPairNote(_dips, _dims, _adxDir),
       ok: s.signal === 'SAT' ? adxBear : adxBull,
       blog: '/blog/adx-indikatoru-nedir', blogLabel: 'ADX'
     },
@@ -2639,7 +2652,9 @@ function renderSummary(s, signalData) {
       label: 'Vade Uyumu',
       detail: (e12Bull ? 'Kısa > Uzun' : e12Bear ? 'Kısa < Uzun' : 'Eşit') +
         (_emaDb && _emaDb.deadband ? ' · ⚠️ kararsızlık bölgesi' : ''),
-      techDetail: 'EMA12: ' + _trNum(s.e12) + ' · EMA99: ' + _trNum(s.e99) +
+      techDetail: 'EMA12: ' + _e12s + ' · EMA99: ' + _e99s +
+        /* K-BS: basilan cift, yazilan sonucu desteklemeli. */
+        bpNumPairNote(_e12s, _e99s, _emaDir) +
         /* K-BR ek: `String(diff_pct)` HAM HASSASIYETI ekrana siziyordu —
            canli ISDMR "fark: %11,055" (3 ondalik), sitenin baska hicbir
            yuzeyinde olmayan bir bicim. Deadband esigi %0,15 oldugu icin
@@ -2681,7 +2696,14 @@ function renderSummary(s, signalData) {
   /* RSI14 badge — Faz 1 #3: 6-zone */
   if (signalData && signalData.rsi != null) {
     const rsi = signalData.rsi;
-    const zone = signalData.rsi_zone || '';
+    /* K-BS (22.09): P0-2 "İdeal Giriş" RENGINI notrlemisti, KELIMELERI kalmisti.
+       `rsi_zone` backend'de sinyalden BAGIMSIZ turetilir; long-only bir urunde
+       "İdeal Giriş Penceresi" ancak AL sinyaliyle bir vaat tasir. Canli 22.09:
+       bu bolge adini tasiyan 46 hissenin **45'i AL DEGIL** — 3'u SAT (FROTO
+       46,5 · MGROS 47,1 · MAVI 51,0), yani "trend bozuldu" denen hissede
+       "İdeal Giriş Penceresi" yaziyordu. Tek kanon: bp-format.js
+       `bpRsiZoneText` (/karsilastir ayni fonksiyonu kullanir). */
+    const zone = bpRsiZoneText(signalData.rsi_zone, s.signal);
     // ind-bull yeşil (Aşırı Satım, İdeal Giriş), ind-bear kırmızı (Aşırı Alım), ind-neutral gri
     // P0-2 (CPO-DEV2-031/033): "İdeal Giriş" yeşili sadece AL sinyalinde — SAT'ta
     // sinyal yönüyle çelişen yanıltıcı yeşil onayı önler.
@@ -2697,12 +2719,27 @@ function renderSummary(s, signalData) {
       `<button type="button" class="ind-help" data-tip="RSI: 0-100 aras\u0131 momentum g\u00f6stergesi. 30 alt\u0131 a\u015f\u0131r\u0131 sat\u0131m, 30-45 dip toparlanmas\u0131, 45-60 ideal giri\u015f penceresi, 60-70 trend g\u00fc\u00e7leniyor, 70-80 dikkatli, 80 \u00fcst\u00fc a\u015f\u0131r\u0131 al\u0131m." aria-label="RSI açıklamasını göster">?</button>`;
   }
 
-  /* Hacim oranı badge (sadece dikkat çekici olduğunda göster) */
+  /* Günlük Hacim Oranı badge (sadece dikkat çekici olduğunda göster)
+     K-BS (22.09) — IKI KUSUR BIRDEN:
+     (a) K-BO ihlali SINIF ADI uzerinden hayatta kalmisti. Hacim YON-BAGIMSIZ
+         bir buyukluktur; `ind-bull` ise hisse.css'te `--bp-al` (yukselis
+         yesili). Kapi 34 token/ham-hex ariyordu, SINIF ADINI degil — bu yuzden
+         gormemisti. Canli 22.09: vol_ratio >= 3 olan 4 hisse (SASA 7,35 ·
+         USAK 4,45 · ANHYT 3,41 · TUKAS 3,40); DORDU DE BEKLE ve IKISI O GUN
+         DUSMUS (SASA −1,70% · USAK −3,85%) — yani "yesil" rozet dusen bir
+         hissede "olumlu" okunuyordu. Hacim ekseninin kanonik rengi
+         --bp-volume (tokens.css CPO-1149/1150) -> `.ind-volume`.
+     (b) ETIKET "Hacim" JENERIK. Bu alan `vol_ratio` (bugun / 20g ort.), ama
+         AYNI SAYFANIN Hacim Profili paneli RVOL (5g/20g) basiyor ve
+         /metodoloji acikca "ikisini karistirmayin, ayni sayi degildir" diyor.
+         Canli: rozetin gorundugu 37 hissenin 37'sinde iki sayi FARKLI
+         (DURDO rozet 1,83× · RVOL 1,52×). Kanonik ad /tarama ve /metodoloji'de
+         zaten yazili: "Günlük Hacim Oranı" (CPO-1687). */
   if (signalData && signalData.vol_ratio != null) {
     const vr = signalData.vol_ratio;
     if (vr >= 1.5) {
-      const vrCls = vr >= 3 ? 'ind-badge ind-bull' : 'ind-badge ind-neutral';
-      indHtml += `<span class="${vrCls}">Hacim ${_trNum(vr)}×<span class="ind-detail">${vr >= 3 ? 'Çok yüksek hacim' : 'Yüksek hacim'}</span></span>`;
+      const vrTip = 'Günlük Hacim Oranı — bugünkü hacim / 20 günlük ortalama. Bu sayfadaki RVOL (5 günlük ort. / 20 günlük ort.) FARKLI bir sayıdır.';
+      indHtml += `<span class="ind-badge ind-volume" data-tip="${vrTip}" tabindex="0">Hacim Oranı ${_trNum(vr)}×<span class="ind-detail">${vr >= 3 ? 'Çok yüksek hacim' : 'Yüksek hacim'}</span></span>`;
     }
   }
 
