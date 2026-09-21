@@ -120,9 +120,19 @@
    ÇATIŞMA TARAMASI: site genelinde etkileşimli ögeye `opacity` yazan tek
    kural `.box .btn:hover{opacity:.9}` (/unsubscribe, hover — mobilde hiç
    tetiklenmez). Kaynak sırası tuzağı (bkz. aşağıdaki print notu) bu yüzden
-   ısırmıyor; yeni sayfa CSS'i `opacity` yazarsa bu katman sessizce düşer. */
+   ısırmıyor; yeni sayfa CSS'i `opacity` yazarsa bu katman sessizce düşer.
+   MUAFİYET — onay kutusu/radyo: basma geri bildirimi KENDİ durum değişimidir
+   (işaret anında görünür), native kutuya opacity yazmak bunu bulanıklaştırır.
+   Onun yerine SARMALAYAN `label` kapsama alındı (`label[for]` değil `label`:
+   /'ın KVKK onayı `<label class="da-sub-kvkk"><input class="da-check">` ile
+   SARMAL kurulmuş, `for` yok — ölçümle çıktı, varsayımla değil).
+   GECİKME NOTU: `transition:opacity` taşıyan 3 kontrolde (.bp-fab-up .2s,
+   /unsubscribe .box .btn .15s, /offline .15s) sönme animasyonlu olur. Bu
+   geçişler bu katmandan ÖNCE de vardı, yeni regresyon değil.
+   POZİTİF KONTROL (gerçek fare, canlı): `.da-chip` mousedown anında
+   `matches(':active')=true`, computed `opacity` 1 → **0.72**. */
 html { -webkit-tap-highlight-color: transparent; }
-:where(a[href], button, summary, label[for], input[type="submit"], input[type="button"], [role="button"], [role="tab"], [role="link"]):active { opacity: .72; }
+:where(a[href], button, summary, label, input[type="submit"], input[type="button"], [role="button"], [role="tab"], [role="link"]):active { opacity: .72; }
 
 /* PRINT-STYLESHEET-MISSING fix (r123 bug-hunt): sitede hicbir @media print
    katmani yoktu (0/24 CSS, 0/29+ sablon dogrulandi) - kullanici Ctrl+P /

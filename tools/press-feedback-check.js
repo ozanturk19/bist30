@@ -28,6 +28,11 @@
       Çalışan yol: kaynağı bir kez localStorage'a yaz, her sayfada
       <script> etiketiyle enjekte et (unsafe-inline AÇIK).
 
+   POZİTİF KONTROL (gerçek fare, canlı, fix sonrası): capture-fazında bir
+   `mousedown` dinleyicisi kurulur, `computer left_click` ile GERÇEK basış
+   yapılır, dinleyici içinde `el.matches(':active')` ve computed `opacity`
+   okunur. Beklenen: true / 0.72 (rest 1). Ölçüldü: `.da-chip` → true / 0.72.
+
    Çıktı: {page, vw, cand, none, activeCovered, hoverOnly, thlKilled,
            thlUseless, agg:[{sel,n,why,txt}]}. Hedef: none = 0.
    ───────────────────────────────────────────────────────────────────────── */
@@ -50,12 +55,31 @@
     return s || '*';
   }
 
+  // ⛔ TUZAK 3 (K-AA'nın kendi ilk koşumunda yalan söyledi): selectorText'i
+  //    `.split(',')` ile bölmek `:where(a[href], button, …):active` gibi
+  //    FONKSİYONEL SÖZDE-SINIFLARI paramparça eder — kanonik basma kuralının
+  //    kendisi görünmez olur ve denetçi "hâlâ 257 ihlal" der. Virgül yalnız
+  //    PARANTEZ DIŞINDA bölücüdür.
+  function splitTop(sel) {
+    const out = []; let d = 0, buf = '', q = null;
+    for (const ch of sel) {
+      if (q) { buf += ch; if (ch === q) q = null; continue; }
+      if (ch === '"' || ch === "'") { q = ch; buf += ch; continue; }
+      if (ch === '(' || ch === '[') d++;
+      else if (ch === ')' || ch === ']') d--;
+      if (ch === ',' && d === 0) { out.push(buf); buf = ''; continue; }
+      buf += ch;
+    }
+    if (buf.trim()) out.push(buf);
+    return out;
+  }
+
   function harvest(list, gated) {
     for (const r of list) {
       // ⛔ TUZAK: r.cssRules ile gruplayıcı ayırma HER KURALI yutar.
       if (r.style && typeof r.selectorText === 'string') {
         rulesSeen++;
-        for (const part of r.selectorText.split(',')) {
+        for (const part of splitTop(r.selectorText)) {
           const p = part.trim();
           if (!p) continue;
           if (p.includes(':active')) {
@@ -119,7 +143,12 @@
     if (r.width < 4 || r.height < 4) continue;
     if (el.disabled) continue;
     // metin girişi kendi imleci ile geri bildirim verir
+    // metin girişi kendi imleci ile geri bildirim verir
     if (el.matches('input:not([type=submit]):not([type=button]):not([type=checkbox]):not([type=radio]),textarea,select')) continue;
+    // MUAFİYET (K-AA, canlı turda gerçek çıktı): onay kutusu / radyo — basma
+    // geri bildirimi KENDİ durum değişimidir. Kanonik katman bunun yerine
+    // SARMALAYAN `label`i kapsar (/'ın `.da-sub-kvkk` KVKK onayı böyle kurulu).
+    if (el.matches('input[type=checkbox],input[type=radio]')) continue;
     cand++;
 
     const hasActive = activeTriggers.some(t => { try { return !!el.closest(t.stripped); } catch (e) { return false; } });
