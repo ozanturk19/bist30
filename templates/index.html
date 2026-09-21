@@ -459,7 +459,7 @@ header{
         </div>
       </div>
       {% set _chg = ssr_bist_level.change_pct if ssr_bist_level else none %}
-      <span class="da-index-change {{ 'pos' if _chg is not none and _chg > 0.05 else 'neg' if _chg is not none and _chg < -0.05 else 'neu' }}" id="daIndexChange">{% if _chg is not none %}<svg viewBox="0 0 24 24" fill="none"><path d="{{ 'M12 4 L19 16 H5 Z' if _chg > 0.05 else 'M12 20 L19 8 H5 Z' if _chg < -0.05 else 'M5 12 H19' }}" fill="currentColor" stroke="currentColor" stroke-width="1.5"/></svg>{{ '+' if _chg > 0 else '' }}{{ '%.2f'|format(_chg)|replace('.', ',') }}%{% else %}<span class="da-skel" style="display:inline-block;width:4ch;height:1em;border-radius:6px"></span>{% endif %}
+      <span class="da-index-change {{ 'pos' if _chg is not none and _chg > 0.05 else 'neg' if _chg is not none and _chg < -0.05 else 'neu' }}" id="daIndexChange">{% if _chg is not none %}<svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="{{ 'M12 4 L19 16 H5 Z' if _chg > 0.05 else 'M12 20 L19 8 H5 Z' if _chg < -0.05 else 'M5 12 H19' }}" fill="currentColor" stroke="currentColor" stroke-width="1.5"/></svg>{{ '+' if _chg > 0 else '' }}{{ '%.2f'|format(_chg)|replace('.', ',') }}%{% else %}<span class="da-skel" style="display:inline-block;width:4ch;height:1em;border-radius:6px"></span>{% endif %}
       </span>
     </div>
     <div class="da-index-sub">
@@ -481,7 +481,7 @@ header{
        ipucu vermiyordu, kullanıcı önce tıklamayı göze almak zorundaydı.
        Zaten inşa edilmiş çözümü görünür kılan tek satırlık ekleme. #}
     <button type="button" class="da-search-trigger" onclick="bpOpenSearch()" aria-label="Hisse veya sektör ara — Cmd+K">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21 L16.65 16.65"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21 L16.65 16.65"/></svg>
       <span class="da-st-label">THYAO, GARAN ya da bir sektör ara…</span>
       <span class="da-search-kbd">⌘K</span>
     </button>
@@ -705,7 +705,7 @@ header{
 
 <script src="/static/bp-format.js?v=b6c7a716a"></script>
 <script src="/static/stale-banner.js?v=cfbf4001"></script>
-<script src="/static/bp-search.js?v=83" defer></script>
+<script src="/static/bp-search.js?v=84" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════════════════
@@ -811,7 +811,7 @@ header{
       var cls = (typeof chg === 'number') ? (chg > 0.05 ? 'pos' : chg < -0.05 ? 'neg' : 'neu') : 'neu';
       var arrowPath = cls === 'pos' ? 'M12 4 L19 16 H5 Z' : cls === 'neg' ? 'M12 20 L19 8 H5 Z' : 'M5 12 H19';
       chgEl.className = 'da-index-change ' + cls;
-      chgEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor" stroke="currentColor" stroke-width="1.5"/></svg>' + fmtPct(chg);
+      chgEl.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor" stroke="currentColor" stroke-width="1.5"/></svg>' + fmtPct(chg);
     }
     daRenderRecap();
   }
@@ -991,7 +991,7 @@ header{
     var tekCol = hasTek ? scoreColorVar(s.signal_strength) : null;
     body.innerHTML =
       '<div class="da-spot-grid">' +
-        '<div class="da-spot-ring-wrap"><svg viewBox="0 0 100 100">' +
+        '<div class="da-spot-ring-wrap"><svg aria-hidden="true" viewBox="0 0 100 100">' +
           '<circle class="da-spot-ring-track" cx="50" cy="50" r="44"/>' +
           '<circle class="da-spot-ring-val" cx="50" cy="50" r="44" stroke="' + col + '" stroke-dasharray="' + dash + '"/>' +
         '</svg><div class="da-spot-ring-num"><span class="n da-num">' + fmtNum0(ringVal) + '</span><span class="l">' + ringLabel + '</span></div></div>' +
@@ -1092,7 +1092,7 @@ header{
         '<div class="da-sc-top"><div><div class="da-sc-ticker">' + esc(s.ticker) + '</div><div class="da-sc-company">' + esc(s.name||'') + '</div></div>' +
         '<div class="da-sc-price"><div class="p">' + fmtPrice(s.price) + '</div><div class="d" style="color:' + (up?'var(--bp-al)':'var(--bp-sat)') + '">' + fmtPct(chg) + '</div></div></div>' +
         extraHtml +
-        '<div class="da-sc-mid"><div class="da-sc-ring"><svg viewBox="0 0 70 70"><circle class="da-sc-ring-track" cx="35" cy="35" r="27"/><circle class="da-sc-ring-val" cx="35" cy="35" r="27" stroke="' + col + '" stroke-dasharray="' + dash + '"/></svg>' +
+        '<div class="da-sc-mid"><div class="da-sc-ring"><svg aria-hidden="true" viewBox="0 0 70 70"><circle class="da-sc-ring-track" cx="35" cy="35" r="27"/><circle class="da-sc-ring-val" cx="35" cy="35" r="27" stroke="' + col + '" stroke-dasharray="' + dash + '"/></svg>' +
         '<div class="da-sc-ring-num">' + fmtNum0(s.signal_strength) + '</div></div>' +
         '<span class="da-sc-sig ' + sig.cls + '">● ' + sig.label + '</span></div>' +
       '</a>';
@@ -1114,7 +1114,7 @@ header{
       var arrowPath = pos ? 'M12 4 L19 16 H5 Z' : 'M12 20 L19 8 H5 Z';
       return '<div class="da-tile ' + (pos?'da-tile-pos':'da-tile-neg') + ' ' + sizeCls + '" style="--a:' + alpha.toFixed(2) + '" data-tip="' + s.al + ' Güçlü · ' + s.sat + ' Bozuldu · ' + s.bekle + ' Yatay (toplam ' + s.total + ')">' +
         '<div class="name">' + esc(s.name) + '</div>' +
-        '<div><div class="chg ' + (pos?'tile-up':'tile-down') + ' da-num"><svg viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor"/></svg>' + (pos?'+':'') + fmtNum0(s.score) + '<span class="u">skor</span></div>' +
+        '<div><div class="chg ' + (pos?'tile-up':'tile-down') + ' da-num"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor"/></svg>' + (pos?'+':'') + fmtNum0(s.score) + '<span class="u">skor</span></div>' +
         '<div class="meta">' + s.al + ' Güçlü / ' + s.sat + ' Bozuldu' + (s.avg_rvol!=null ? ' · RVOL ' + s.avg_rvol.toFixed(2).replace('.', ',') + '×' : '') + '</div></div>' +
       '</div>';
     }).join('') + '</div>';
