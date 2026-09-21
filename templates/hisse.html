@@ -3268,9 +3268,14 @@ function escHtml(s) {
   if (!s) return '';
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-function safeHref(url) {
-  return /^https?:\/\//i.test(url || '') ? escHtml(url) : '#';
-}
+/* K-BE (21.09) — BU KOPYA SILINDI, OLCUM OLU OLDUGUNU GOSTERDI.
+   `safeHref` hem burada hem KANONIK bp-vocab.js'te UST DUZEY (global) tanimliydi.
+   bp-vocab.js `defer` ile yuklendigi icin belge ayristirmasi BITTIKTEN sonra
+   calisir ve bu satir-ici tanimi EZER: asagidaki 4 cagri (KAP/haber linkleri,
+   hepsi async fetch sonrasi calisir) zaten bp-vocab.js'in surumunu kullaniyordu.
+   Yani hangi surumun kazandigina `defer` zamanlamasi karar veriyordu — iki
+   uygulama bugun ayni davransa da, birini degistiren bir sonraki tur icin
+   sessiz bir tuzakti. Kanon: bp-vocab.js (tools/global-collision-check.py). */
 
 loadKapDisclosures();
 
