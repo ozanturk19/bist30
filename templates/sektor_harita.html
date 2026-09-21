@@ -83,7 +83,7 @@
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div class="score da-num" style="color:{{ color }}">{{ '+' if sec.score > 0 else '' }}{{ sec.score }}</div>
-          {% if sec.avg_rvol is not none %}<span style="font-size:10px;color:{{ 'var(--bp-volume)' if sec.avg_rvol >= 1.20 else 'var(--bp-text3)' }}" data-tip="Sektörün ortalama RVOL&#39;u — 5 günlük ortalama hacim ÷ 20 günlük ortalama hacim" tabindex="0">RVOL {{ '%.2f'|format(sec.avg_rvol)|replace('.', ',') }}×</span>{% endif %}
+          {% if sec.avg_rvol is not none %}<span style="font-size:10px;color:{{ 'var(--bp-volume)' if sec.avg_rvol|round(2) >= 1.20 else 'var(--bp-text3)' }}" data-tip="Sektörün ortalama RVOL&#39;u — 5 günlük ortalama hacim ÷ 20 günlük ortalama hacim" tabindex="0">RVOL {{ '%.2f'|format(sec.avg_rvol)|replace('.', ',') }}×</span>{% endif %}
         </div>
       </a>{% else %}<div class="loading-msg"><span aria-hidden="true">⏳</span> Veriler yükleniyor…</div>{% endfor %}
     </div>
@@ -220,7 +220,12 @@ function renderHeatmap(stocks) {
              sektor ORTALAMA rvol'u canli veride max 1,48 (21.09, 13 sektor) — 2,0 esigi
              hic tetiklenmiyordu. Tek eksen (--bp-volume, hacmin kanonik rengi) + sayfanin
              KENDI lejandinin ilan ettigi tek esik (RVOL >= 1,20 = Hacim Onayli). */
-          const rc = avgRvol >= 1.20 ? 'var(--bp-volume)' : 'var(--bp-text3)';
+          /* K-BO ek: ESIKLENEN SAYI = GOSTERILEN SAYI olmali. Ilk yazim ham degeri
+             esikliyordu ama ekrana `toFixed(2)` yaziyordu: canlida 1,1987 olan iki
+             sektor ekranda "RVOL 1,20×" yazip GRI kaliyordu — sayfanin kendi lejandi
+             "RVOL >= 1,20 = Hacim Onayli" derken. Kullanicinin OKUDUGU sayi rengi
+             belirler. (K-BO dogrulama adimi bunu canli yakaladi.) */
+          const rc = parseFloat(avgRvol.toFixed(2)) >= 1.20 ? 'var(--bp-volume)' : 'var(--bp-text3)';
           return `<span style="font-size:10px;color:${rc}" data-tip="Sektörün ortalama RVOL&#39;u — 5 günlük ortalama hacim ÷ 20 günlük ortalama hacim" tabindex="0">RVOL ${avgRvol.toFixed(2).replace('.', ',')}×</span>`;
         })()
       : '';
@@ -590,7 +595,7 @@ function renderCompare(json) {
       /* K-BO: esik 2,0 -> 1,20. Sayfanin lejandi "RVOL >= 1,20 = Hacim Onayli" diyor,
          ama bu liste 2,0'a kadar griye boyuyordu: 21.09 canli veride 1,20+ olan 79
          hissenin 74'u burada sonuk goruluyordu — sayfa kendi lejandiyla celisiyordu. */
-      var rvolCls = s.rvol >= 1.20 ? 'cmp-rvol-high' : '';
+      var rvolCls = parseFloat(s.rvol.toFixed(2)) >= 1.20 ? 'cmp-rvol-high' : '';
       row.innerHTML = '<span class="cmp-stock-ticker">' + esc(s.ticker) + '</span>' +
         '<span class="cmp-stock-sig ' + sigCls + '">' + sigLabel(s.signal) + '</span>' +
         '<span class="cmp-stock-price">' + (s.price != null ? fmtPrice(s.price) : '') + '</span>' +

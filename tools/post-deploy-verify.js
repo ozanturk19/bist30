@@ -832,6 +832,85 @@ const step = async (ad, fn) => {
     ok('K-BN sw.js', 'on-bellek listesi guncel tokens.css hash\'i (' + m[1] + ')');
   });
 
+  /* ── 4l) K-BO: hacim ekseni tek renk (--bp-volume) + tek esik (1,20) ─── */
+  console.log('\n[4l] K-BO — hacim yon-bagimsiz bir buyukluk');
+  const VOL = 'rgb(255, 200, 80)';               /* --bp-volume #ffc850 */
+  const YON = ['rgb(0, 226, 144)', 'rgb(248, 81, 73)'];  /* --bp-al / --bp-sat */
+  const YABANCI = { 'rgb(245, 158, 11)': '--bp-gold', 'rgb(227, 179, 65)': '--bp-accent-yellow' };
+
+  await step('K-BO /sektor-harita isi haritasi RVOL etiketi', async () => {
+    await p.goto(BASE + '/sektor-harita', { waitUntil: 'domcontentloaded' });
+    await p.waitForTimeout(1200);
+    /* Hesaplanmis stil oku — satir-ici `color:` metnini degil.
+       [[feedback_kabul_olcutu_style_degil_computed]] */
+    const r = await p.evaluate(() => {
+      const els = [...document.querySelectorAll('[data-tip*="ortalama RVOL"]')];
+      return els.map(e => ({ t: e.textContent.trim(), c: getComputedStyle(e).color }));
+    });
+    if (!r.length) return bad('K-BO isi haritasi', 'RVOL etiketi hic bulunamadi (olcum gecersiz)');
+    const kotu = r.filter(x => YON.includes(x.c) || YABANCI[x.c]);
+    if (kotu.length) return bad('K-BO isi haritasi',
+      kotu.length + ' etiket yabanci eksende: ' + JSON.stringify(kotu.slice(0, 3)));
+    /* Esik kanonu: vurgulu olanlarin HEPSI >= 1,20, sonuk olanlarin HEPSI < 1,20 */
+    /* Premis: urun artik GOSTERILEN (yuvarlanmis) sayiyi esikliyor -- bu adim
+       tam da bu premisi olcer. Ilk kosuda 1,1987'lik iki sektor ekranda
+       "1,20×" yazip gri kaldigi icin DUSTU ve urun hatasini aciga cikardi. */
+    const say = t => parseFloat((t.match(/([0-9]+,[0-9]+)/) || [0, '0'])[1].replace(',', '.'));
+    const yanlis = r.filter(x => (x.c === VOL) !== (say(x.t) >= 1.20));
+    if (yanlis.length) return bad('K-BO isi haritasi esigi',
+      'renk 1,20 esigiyle uyusmuyor: ' + JSON.stringify(yanlis.slice(0, 3)));
+    ok('K-BO isi haritasi', r.length + ' etiket · vurgulu=' + r.filter(x => x.c === VOL).length + ' (hepsi >=1,20)');
+  });
+
+  await step('K-BO /sektor-harita karsilastirma esigi lejandla ayni', async () => {
+    const src = await (await ctx.request.get(BASE + '/sektor-harita')).text();
+    const kod = src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:\\])\/\/[^\n]*/g, '$1 ');
+    const m = kod.match(/rvolCls\s*=\s*s\.rvol\s*>=\s*([0-9.]+)/);
+    if (!m) return bad('K-BO karsilastirma', 'esik ifadesi bulunamadi (olcum gecersiz)');
+    if (parseFloat(m[1]) !== 1.20) return bad('K-BO karsilastirma',
+      'esik ' + m[1] + ', sayfanin lejandi "RVOL >= 1,20" diyor');
+    ok('K-BO karsilastirma', 'esik 1,20 — lejandla ayni');
+  });
+
+  await step('K-BO /tarama hacim sutunu yon renginde degil', async () => {
+    await p.goto(BASE + '/tarama', { waitUntil: 'domcontentloaded' });
+    await p.waitForTimeout(1500);
+    const r = await p.evaluate(() => {
+      const c = document.querySelector('.rvol-cell.high'), d = document.querySelector('.rvol-dot.high');
+      return { n: document.querySelectorAll('.rvol-cell').length,
+               c: c && getComputedStyle(c).color, d: d && getComputedStyle(d).backgroundColor };
+    });
+    if (!r.n) return bad('K-BO /tarama', 'hic RVOL hucresi yok (olcum gecersiz)');
+    if (r.c && YON.includes(r.c)) return bad('K-BO /tarama', 'yuksek hacim yon renginde: ' + r.c);
+    if (r.d && YON.includes(r.d)) return bad('K-BO /tarama noktasi', 'yon renginde: ' + r.d);
+    if (r.c && r.c !== VOL) return bad('K-BO /tarama', 'hacim ekseni disi renk: ' + r.c);
+    ok('K-BO /tarama', r.n + ' hucre · yuksek=' + (r.c || 'ekranda yok (kural CSS ile dogrulandi)'));
+  });
+
+  await step('K-BO /hisse Hacim Profili notr kademeli', async () => {
+    const css = await (await ctx.request.get(BASE + '/hisse/THYAO')).text();
+    const href = (css.match(/\/static\/css\/pages\/hisse\.css\?v=[0-9a-f]+/) || [])[0];
+    if (!href) return bad('K-BO /hisse', 'sayfa hisse.css\'i ?v= ile yuklemiyor (CDN olcumu riski)');
+    const body = await (await ctx.request.get(BASE + href)).text();
+    /* Dinamik RegExp yerine duz metin arama: ilk yazimda kacis seviyeleri
+       (Python heredoc -> JS kaynagi -> RegExp) fazla katmanliydi ve kural
+       HIC bulunamiyordu -> "olcum gecersiz". Basit arama daha az yalan soyler. */
+    const kural = (sel) => {
+      const i = body.indexOf('.hacim-profili .hp-row-val' + sel + ' {');
+      if (i < 0) return null;
+      return body.slice(i, body.indexOf('}', i) + 1);
+    };
+    const yasak = /--bp-al|--bp-sat/;
+    for (const k of ['.ok', '.weak', '.bad', ' .hp-tag.confirmed']) {
+      const r = kural(k);
+      if (!r) return bad('K-BO /hisse', 'kural bulunamadi: hp-row-val' + k + ' (olcum gecersiz)');
+      if (yasak.test(r)) return bad('K-BO /hisse', 'yon rengi hala var: ' + r.trim());
+    }
+    if (!/\.hp-row-val\.ok \{ color:var\(--bp-volume\); \}/.test(body))
+      return bad('K-BO /hisse', 'ok dali --bp-volume degil');
+    ok('K-BO /hisse Hacim Profili', '4 kural yon renginden arindi (' + href.split('=')[1] + ')');
+  });
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>
