@@ -1089,6 +1089,78 @@ const step = async (ad, fn) => {
     }
   }
 
+  /* ── K-BR (22.09): ADX/RSI tek gosterim kanonu ───────────────────────
+     Esik tasiyan sayi tam sayiya yuvarlanamaz: `|int` ASAGI KESER ve ayni
+     sayfada `|round|int` ile 1 fark yaratir. Once ON-KOSUL: bugun ondalik
+     kismi 0,5'i asan bir hisse var mi? */
+  console.log('\n[4d] K-BR — ADX/RSI 1 ondalik, tek gosterim');
+  {
+    const api = await (await ctx.request.get(BASE + '/api/data')).json();
+    const cand = (api.stocks || []).filter(s =>
+      s.adx != null && s.rsi != null && Math.trunc(s.adx) !== Math.round(s.adx));
+    if (!cand.length) {
+      bad('K-BR on-kosul', 'int(adx) != round(adx) olan hisse YOK — adim OLCULEMEDI (gecti degil)');
+    } else {
+      const s = cand.find(x => x.adx >= 25 && x.adx < 26) || cand[0];
+      const adxTr = s.adx.toFixed(1).replace('.', ',');
+      const rsiTr = s.rsi.toFixed(1).replace('.', ',');
+      ok('K-BR on-kosul', cand.length + ' hisse ondalikli; secilen ' + s.ticker +
+         ' ADX=' + adxTr + ' RSI=' + rsiTr);
+
+      await p.goto(BASE + '/hisse/' + s.ticker, { waitUntil: 'domcontentloaded' });
+      const ssr = await p.evaluate(() => {
+        const dt = [...document.querySelectorAll('.qf-row dt')];
+        const g = n => { const e = dt.find(x => x.textContent.trim() === n);
+                         return e ? e.parentElement.querySelector('dd').textContent.trim() : null; };
+        const md = document.querySelector('meta[name="description"]');
+        const ld = [...document.querySelectorAll('script[type="application/ld+json"]')]
+                     .map(e => e.textContent).join(' ');
+        const cl = document.body.innerHTML.match(/ADX\s*([\d.,]+)\s*—\s*Güçlü trend/);
+        return { qfAdx: g('ADX'), qfRsi: g('RSI'), meta: md ? md.content : '',
+                 ld, checklist: cl ? cl[1] : null };
+      });
+      const bads = [];
+      if (ssr.qfAdx !== adxTr) bads.push('Hap Bilgi ADX=' + ssr.qfAdx);
+      if (ssr.qfRsi !== rsiTr) bads.push('Hap Bilgi RSI=' + ssr.qfRsi);
+      if (!ssr.meta.includes('ADX ' + adxTr)) bads.push('meta ADX yok/farkli');
+      if (ssr.checklist && ssr.checklist !== adxTr) bads.push('checklist ADX=' + ssr.checklist);
+      /* JSON-LD yapisal veri: ondalik ayirac NOKTA kalmali */
+      if (!ssr.ld.includes('"' + s.adx.toFixed(1) + '"')) bads.push('JSON-LD ADX != ' + s.adx.toFixed(1));
+      bads.length ? bad('K-BR SSR ' + s.ticker, bads.join(' · '))
+                  : ok('K-BR SSR ' + s.ticker, 'checklist/HapBilgi/meta/JSON-LD hepsi ' + adxTr);
+
+      /* CSR: indikator paneli ayni sayiyi mi basiyor? */
+      const csr = await p.waitForFunction(() => {
+        const e = document.getElementById('indTechContent');
+        return (e && /ADX\(14\)/.test(e.textContent)) ? e.textContent.replace(/\s+/g, ' ') : null;
+      }, null, { timeout: 20000 }).then(h => h.jsonValue()).catch(() => null);
+      if (!csr) bad('K-BR CSR ' + s.ticker, 'indikator paneli dolmadi (olcum gecersiz)');
+      else if (!csr.includes('ADX(14): ' + adxTr)) bad('K-BR CSR ' + s.ticker, 'panel ADX farkli: ' + csr.slice(0, 90));
+      else if (!csr.includes('RSI(14): ' + rsiTr)) bad('K-BR CSR ' + s.ticker, 'panel RSI farkli: ' + csr.slice(0, 120));
+      else if (/fark: %[\d,]+,?\d{3,}/.test(csr)) bad('K-BR CSR ' + s.ticker, 'EMA fark yuzdesi ham hassasiyette: ' + (csr.match(/fark: %[\d,]+/) || [''])[0]);
+      else ok('K-BR CSR ' + s.ticker, 'indikator paneli SSR ile ayni (ADX ' + adxTr + ' · RSI ' + rsiTr + ')');
+
+      /* Anasayfa spotlight: SSR render'i CSR UZERINE farkli sayi yazmasin */
+      await p.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+      const read = () => p.evaluate(() => {
+        const rows = [...document.querySelectorAll('.da-spot-sub-row')];
+        const f = l => { const r = rows.find(x => x.querySelector('.lbl') &&
+                           x.querySelector('.lbl').textContent.trim() === l);
+                         return r ? r.querySelector('.val').textContent.trim() : null; };
+        return { adx: f('ADX'), rsi: f('RSI') };
+      });
+      const a = await read();
+      await p.waitForTimeout(4000);
+      const bq = await read();
+      if (!a.adx) bad('K-BR anasayfa', 'spotlight ADX satiri yok (olcum gecersiz)');
+      else if (a.adx !== bq.adx || a.rsi !== bq.rsi)
+        bad('K-BR anasayfa', 'SSR ' + JSON.stringify(a) + ' -> CSR ' + JSON.stringify(bq) + ' (gorunur ziplama)');
+      else if (!/,/.test(bq.adx))
+        bad('K-BR anasayfa', 'spotlight ADX tam sayi: ' + bq.adx);
+      else ok('K-BR anasayfa', 'SSR = CSR = ' + JSON.stringify(bq));
+    }
+  }
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>

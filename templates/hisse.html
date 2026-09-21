@@ -2640,7 +2640,13 @@ function renderSummary(s, signalData) {
       detail: (e12Bull ? 'Kısa > Uzun' : e12Bear ? 'Kısa < Uzun' : 'Eşit') +
         (_emaDb && _emaDb.deadband ? ' · ⚠️ kararsızlık bölgesi' : ''),
       techDetail: 'EMA12: ' + _trNum(s.e12) + ' · EMA99: ' + _trNum(s.e99) +
-        (_emaDb && _emaDb.diff_pct != null ? ' · fark: %' + String(_emaDb.diff_pct).replace('.', ',') : ''),
+        /* K-BR ek: `String(diff_pct)` HAM HASSASIYETI ekrana siziyordu —
+           canli ISDMR "fark: %11,055" (3 ondalik), sitenin baska hicbir
+           yuzeyinde olmayan bir bicim. Deadband esigi %0,15 oldugu icin
+           kanon 2 ondalik. Fark bir BUYUKLUKTUR: yonu zaten "Kısa > Uzun"
+           satiri soyluyor, sayi isaret tasimaz (K-BP/K-BQ dersi). */
+        (_emaDb && _emaDb.diff_pct != null
+          ? ' · fark: %' + Math.abs(_emaDb.diff_pct).toFixed(2).replace('.', ',') : ''),
       ok: s.signal === 'SAT' ? e12Bear : e12Bull,
       blog: '/blog/ema-hareketli-ortalama-nedir', blogLabel: 'EMA'
     },
