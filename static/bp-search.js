@@ -780,6 +780,79 @@
   // farklı içerik genişliğinde farklı görünür hız sorununu geri getirmez).
   // animation-play-state'e HİÇ dokunmuyoruz — mevcut :hover / [data-paused] CSS
   // kuralları (tüm sayfalarda zaten var) aynen çalışmaya devam eder.
+  /* ── K-AX (21.09): PERİYODİK YENİLEME KULLANICININ YERİNİ SİLİYORDU ────────
+     WCAG 2.2.2 (A) + 2.4.3 (A). /portfolio 60sn'de bir `tbody.innerHTML = ...`
+     ile tüm satırları baştan yazıyordu; satırların içinde "✎ düzenle" ve
+     "✕ kaldır" düğmeleri var. Klavyeyle bir düğmeye gelip duraksayan kullanıcı
+     düğmeyi kaybediyor, odak <body>'ye düşüyor: Enter hiçbir şey yapmıyor, Tab
+     belgenin EN BAŞINDAN başlıyor — ve 60 saniyede bir tekrarlıyor. Ölçüldü:
+     5 sayfa / 6 zamanlayıcı / 529 öğe risk altında (bilanço takvimi 190,
+     sektör haritası 164 — sonuncusu 2 DAKİKADA bir).
+
+     ⛔ ODAK ÇALMAMA GUARD'I — bu yardımcının kendisi bir 3.2.1 ihlali OLABİLİRDİ:
+     yenileme sürerken kullanıcı başka bir yere Tab'lamışsa, odağı geri almak
+     onu yerinden ETMEK olurdu. Bu yüzden geri yükleme YALNIZCA odak gerçekten
+     kaybolmuşsa (activeElement body/html/null) yapılır. Odak yaşayan bir
+     öğedeyse — eskisi olsun yenisi olsun — dokunulmaz.
+
+     `preventScroll:true`: odağı geri vermek sayfayı kaydırmamalı; kullanıcı bu
+     sırada başka bir yere bakıyor olabilir. */
+  function bpFocusKey(el) {
+    if (!el || !el.tagName) return null;
+    return {
+      id:    el.id || '',
+      label: el.getAttribute && el.getAttribute('aria-label') || '',
+      tag:   el.tagName,
+      cls:   (typeof el.className === 'string' ? el.className : '') || '',
+      text:  (el.textContent || '').trim().slice(0, 80)
+    };
+  }
+  function bpFindByKey(k) {
+    if (k.id) {
+      var byId = document.getElementById(k.id);
+      if (byId) return byId;
+    }
+    var cands = document.querySelectorAll(
+      'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),' +
+      'textarea:not([disabled]),[tabindex]:not([tabindex="-1"])');
+    var fallback = null;
+    for (var i = 0; i < cands.length; i++) {
+      var e = cands[i];
+      if (e.tagName !== k.tag) continue;
+      /* aria-label bu satırlarda ticker içerir ("ASELS pozisyonunu kaldır") —
+         yeniden yazımdan sonra AYNI pozisyonu bulmanın en güvenilir yolu. */
+      if (k.label && e.getAttribute('aria-label') === k.label) return e;
+      if (!k.label && k.text && (e.textContent || '').trim().slice(0, 80) === k.text) return e;
+      if (!fallback && k.cls && (typeof e.className === 'string' ? e.className : '') === k.cls) fallback = e;
+    }
+    return fallback;
+  }
+  /* Periyodik yenileyicileri sarmalar. Hiçbir şey yok edilmediyse bedava:
+     odak kaybolmadıysa hiç çalışmaz. */
+  window.bpPreserveFocus = function(fn) {
+    return function() {
+      var el = document.activeElement;
+      var key = (el && el !== document.body && el !== document.documentElement)
+        ? bpFocusKey(el) : null;
+      var restore = function() {
+        if (!key || window.__bpKillFocusRestore) return;   // __bpKill… = dedektörün pozitif kontrolü
+        var now = document.activeElement;
+        // Odak hâlâ yaşayan bir öğedeyse KULLANICININDIR — dokunma.
+        if (now && now !== document.body && now !== document.documentElement) return;
+        var target = bpFindByKey(key);
+        if (target && target.focus) { try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); } }
+      };
+      var out;
+      try { out = fn.apply(this, arguments); } catch (e) { restore(); throw e; }
+      if (out && typeof out.then === 'function') {
+        return out.then(function(v) { restore(); return v; },
+                        function(e) { restore(); throw e; });
+      }
+      restore();
+      return out;
+    };
+  };
+
   window.bpStartMacroTicker = function(opts) {
     opts = opts || {};
     var pps = opts.pps || 55;          // pixels-per-second (sabit, içerik genişliğinden bağımsız hız)

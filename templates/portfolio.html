@@ -792,8 +792,21 @@ document.getElementById('addTicker').addEventListener('input', e => {
 render();
 fetchLive();
 fetchCharts();
-let _pfLiveInt   = setInterval(fetchLive, 60000);
-let _pfChartsInt = setInterval(fetchCharts, 300000); // sparkline + XU030 5dk'da bir yenile
+/* ── K-AX (21.09): PERİYODİK YENİLEME KULLANICININ YERİNİ SİLİYORDU ──────────
+   Bu sayfa kendini periyodik olarak yeniliyor ve yenileme, içeriği `innerHTML`
+   ile baştan yazdığı için o an ODAKTA olan öğeyi yok ediyordu: odak <body>'ye
+   düşüyor, Enter hiçbir şey yapmıyor, Tab belgenin EN BAŞINDAN başlıyor — ve
+   bu, süre dolduğu her seferde yeniden oluyordu (WCAG 2.2.2 A / 2.4.3 A).
+
+   ⛔ SARMALAMA TIK ANINDA (lazy) YAPILIR: `bp-search.js` `defer` ile ve bu
+   inline betikten SONRA çalışır, yani BURADA `window.bpPreserveFocus` henüz
+   TANIMSIZDIR. Parse anında sarmalamak `ReferenceError` atıp sayfanın tüm
+   betiğini öldürürdü. `||` dalı ayrıca bp-search.js hiç yüklenemezse eski
+   davranışa sessizce döner — yenileme çalışmaya devam eder. */
+const _pfLiveTick   = () => (window.bpPreserveFocus ? window.bpPreserveFocus(fetchLive)   : fetchLive)();
+const _pfChartsTick = () => (window.bpPreserveFocus ? window.bpPreserveFocus(fetchCharts) : fetchCharts)();
+let _pfLiveInt   = setInterval(_pfLiveTick, 60000);
+let _pfChartsInt = setInterval(_pfChartsTick, 300000); // sparkline + XU030 5dk'da bir yenile
 
 /* ── CPO-DEV2-087(1) r120: Page Visibility — sekme arka plandayken duraklat ──
    index.html/hisse.html'deki CPO-DEV2-072 r98 deseniyle aynı ilke; bu sayfa
@@ -804,10 +817,10 @@ document.addEventListener('visibilitychange', () => {
     clearInterval(_pfLiveInt);
     clearInterval(_pfChartsInt);
   } else {
-    fetchLive();
-    fetchCharts();
-    _pfLiveInt   = setInterval(fetchLive, 60000);
-    _pfChartsInt = setInterval(fetchCharts, 300000);
+    _pfLiveTick();
+    _pfChartsTick();
+    _pfLiveInt   = setInterval(_pfLiveTick, 60000);
+    _pfChartsInt = setInterval(_pfChartsTick, 300000);
   }
 });
 
@@ -1017,7 +1030,7 @@ document.getElementById('cloudModal').addEventListener('click', function(e) {
 // Makro Ticker Bandı
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
 </script>
-<script src="/static/bp-search.js?v=de0c653e" defer></script>
+<script src="/static/bp-search.js?v=9ea11269" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/stale-banner.js?v=cfbf4001"></script>
 <script>bpStartDataQualityPolling();</script>

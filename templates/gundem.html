@@ -533,8 +533,21 @@ loadEconCalendar();
 loadMacroNewsSection();
 loadMacroSummary();
 // 5 dakikada bir otomatik yenile
-let _gdGundemInt = setInterval(loadGundem, 5 * 60 * 1000);
-let _gdNewsInt    = setInterval(loadMacroNewsSection, 30 * 60 * 1000);
+/* ── K-AX (21.09): PERİYODİK YENİLEME KULLANICININ YERİNİ SİLİYORDU ──────────
+   Bu sayfa kendini periyodik olarak yeniliyor ve yenileme, içeriği `innerHTML`
+   ile baştan yazdığı için o an ODAKTA olan öğeyi yok ediyordu: odak <body>'ye
+   düşüyor, Enter hiçbir şey yapmıyor, Tab belgenin EN BAŞINDAN başlıyor — ve
+   bu, süre dolduğu her seferde yeniden oluyordu (WCAG 2.2.2 A / 2.4.3 A).
+
+   ⛔ SARMALAMA TIK ANINDA (lazy) YAPILIR: `bp-search.js` `defer` ile ve bu
+   inline betikten SONRA çalışır, yani BURADA `window.bpPreserveFocus` henüz
+   TANIMSIZDIR. Parse anında sarmalamak `ReferenceError` atıp sayfanın tüm
+   betiğini öldürürdü. `||` dalı ayrıca bp-search.js hiç yüklenemezse eski
+   davranışa sessizce döner — yenileme çalışmaya devam eder. */
+const _gdGundemTick = () => (window.bpPreserveFocus ? window.bpPreserveFocus(loadGundem) : loadGundem)();
+const _gdNewsTick   = () => (window.bpPreserveFocus ? window.bpPreserveFocus(loadMacroNewsSection) : loadMacroNewsSection)();
+let _gdGundemInt = setInterval(_gdGundemTick, 5 * 60 * 1000);
+let _gdNewsInt    = setInterval(_gdNewsTick, 30 * 60 * 1000);
 
 /* ── CPO-DEV2-087(1) r120: Page Visibility — sekme arka plandayken duraklat ──
    loadMacroNewsSection ozellikle onemli: dar Gemini/haber kotasini sekme
@@ -547,15 +560,15 @@ document.addEventListener('visibilitychange', () => {
   } else {
     loadGundem();
     loadMacroNewsSection();
-    _gdGundemInt = setInterval(loadGundem, 5 * 60 * 1000);
-    _gdNewsInt    = setInterval(loadMacroNewsSection, 30 * 60 * 1000);
+    _gdGundemInt = setInterval(_gdGundemTick, 5 * 60 * 1000);
+    _gdNewsInt    = setInterval(_gdNewsTick, 30 * 60 * 1000);
   }
 });
 
 /* ── Makro Ticker ── */
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
 </script>
-<script src="/static/bp-search.js?v=de0c653e" defer></script>
+<script src="/static/bp-search.js?v=9ea11269" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/bp-format.js?v=b6c7a716"></script>
 <script src="/static/stale-banner.js?v=cfbf4001"></script>
