@@ -24,7 +24,7 @@ echo "=== Pre-Deploy Check (CPO-359 Tier 0) ==="
 echo ""
 
 # 1. Jinja parse
-echo "1/21 Jinja parse..."
+echo "1/22 Jinja parse..."
 if python3 "$(dirname "$0")/_predeploy_jinja_check.py"; then
   echo "  ✓ Jinja parse OK"
 else
@@ -34,7 +34,7 @@ fi
 
 # 2. Python compile
 echo ""
-echo "2/21 Python compile (app.py)..."
+echo "2/22 Python compile (app.py)..."
 if python3 -c "import ast;ast.parse(open('app.py').read())" 2>/dev/null; then
   echo "  ✓ app.py compile OK"
 else
@@ -49,7 +49,7 @@ fi
 # pre-commit, aynı gün genişletildi) tutarsızdı. Liste ikisinde de senkron
 # tutulmalı.
 echo ""
-echo "3/21 KALICI_KURALLAR audit..."
+echo "3/22 KALICI_KURALLAR audit..."
 KK_AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/index.html templates/portfolio.html templates/gundem.html templates/metodoloji.html templates/blog.html templates/blog_article.html templates/temettu_takvimi.html templates/bilanco_takvimi.html"
 KK_FAIL=0
 for f in $KK_AUDIT_FILES; do
@@ -66,7 +66,7 @@ fi
 
 # 4. format-lint
 echo ""
-echo "4/21 format-lint (CPO-1180 K6)..."
+echo "4/22 format-lint (CPO-1180 K6)..."
 if ./tools/format-lint.sh > /dev/null 2>&1; then
   echo "  ✓ format-lint PASS"
 else
@@ -80,7 +80,7 @@ fi
 # donuyordu, boyutu dogruydu, grep iceride buluyordu. Elle calistirilan bir arac bir
 # sonraki kazada yok hukmundedir -- kapiya baglandi.
 echo ""
-echo "5/21 CSS token guard (CPO-1349)..."
+echo "5/22 CSS token guard (CPO-1349)..."
 if python3 tools/css-token-guard.py static/css/*.css > /dev/null 2>&1; then
   echo "  ✓ CSS token guard PASS"
 else
@@ -92,7 +92,7 @@ echo ""
 # 6. style-guard (T1.7) — css-token-guard YALNIZ static/css/*.css (2 dosya) bakiyor;
 # sablonlarin icindeki ~2300 var(--bp-*) kullanimi HICBIR kapida denetlenmiyordu.
 # K-A tanimsiz var() BLOKLAYICI (taban 0), K-B/K-C/K-D ratchet (yalniz dusebilir).
-echo "6/21 style-guard (T1.7: sablon ici var()/ham hex/yerel :root/bos catch ratchet)..."
+echo "6/22 style-guard (T1.7: sablon ici var()/ham hex/yerel :root/bos catch ratchet)..."
 if python3 tools/style-guard.py > /dev/null 2>&1; then
   echo "  ✓ style-guard PASS"
 else
@@ -107,7 +107,7 @@ fi
 # duruma gecti ama hicbir deploy bunu raporlamadi — "YAZILMIS ama BAGLANMAMIS"
 # sinifinin kendisi, 8f6006f'in kapattigi iki guard'la AYNI hastalik. Bagliyoruz.
 echo ""
-echo "7/21 lint_scope ratchet (T9.4: sablon sayisi daralma dedektoru)..."
+echo "7/22 lint_scope ratchet (T9.4: sablon sayisi daralma dedektoru)..."
 if python3 tools/lint_scope.py --check > /dev/null 2>&1; then
   echo "  ✓ lint_scope PASS"
 else
@@ -124,7 +124,7 @@ fi
 # ONCESI yakalar (Jinja {{ }}/{% %} soyulup node --check ile dogrulanir,
 # 31/31 mevcut sablonda 0 yanlis-pozitif dogrulanmistir).
 echo ""
-echo "8/21 node-syntax-check (DEV2-T-MOBOVF-1: sablon-ici JS sozdizimi)..."
+echo "8/22 node-syntax-check (DEV2-T-MOBOVF-1: sablon-ici JS sozdizimi)..."
 if python3 tools/node-syntax-check.py > /dev/null 2>&1; then
   echo "  ✓ node-syntax-check PASS"
 else
@@ -142,7 +142,7 @@ fi
 # 4'unde marka rengi hover cercevesi HIC uygulanmiyordu. Taban SIFIR; kasitli
 # ciftler tool icindeki GOZDEN_GECIRILMIS_KASITLI'de GEREKCESIYLE yazilidir.
 echo ""
-echo "9/21 state-order-check (K-G: durum kurali varyantin ALTINDA olmali)..."
+echo "9/22 state-order-check (K-G: durum kurali varyantin ALTINDA olmali)..."
 if python3 tools/state-order-check.py > /dev/null 2>&1; then
   echo "  ✓ state-order-check PASS"
 else
@@ -162,7 +162,7 @@ fi
 # renklerin KENDISI. Taban SIFIR (77 cift). Kapsam siniri ve pozitif kontrol
 # kaydi tool'un docstring'inde.
 echo ""
-echo "10/21 contrast-check (K-I: ayni kuralda bg+fg WCAG kontrasti)..."
+echo "10/22 contrast-check (K-I: ayni kuralda bg+fg WCAG kontrasti)..."
 if python3 tools/contrast-check.py > /dev/null 2>&1; then
   echo "  ✓ contrast-check PASS"
 else
@@ -182,7 +182,7 @@ fi
 # hicbiri REFERANSA bakmaz. Taban SIFIR (118 referans). Elle artirilan
 # surum etiketleri (?v=75, ?v=4, ?v=20260915A) kasitli kapsam disi.
 echo ""
-echo "11/21 cachebust-check (K-J: ?v= referansi diskteki hash ile ayni mi)..."
+echo "11/22 cachebust-check (K-J: ?v= referansi diskteki hash ile ayni mi)..."
 if python3 tools/cachebust-check.py > /dev/null 2>&1; then
   echo "  ✓ cachebust-check PASS"
 else
@@ -201,7 +201,7 @@ fi
 # bu bulgu kodda degil, iki METIN alani arasindaki sozlesmede. Stil-only
 # duzenlemeler metin hash'ini degistirmedigi icin kapiyi TETIKLEMEZ.
 echo ""
-echo "12/21 legal-text-sync-check (K-H: hukuki metin <-> 'Son guncelleme' senkronu)..."
+echo "12/22 legal-text-sync-check (K-H: hukuki metin <-> 'Son guncelleme' senkronu)..."
 if python3 tools/legal-text-sync-check.py; then
   echo "  ✓ legal-text-sync-check PASS"
 else
@@ -220,7 +220,7 @@ fi
 # hicbiri (token/hex/kontrast/cascade-sirasi/referans/metin) bunu goremez.
 # Dogrudan longhand ezmesi KASITLI delta sayilir, kapsam disi. Taban SIFIR.
 echo ""
-echo "13/21 da-override-check (K-K: .da-* bildirimini kisayolla silme)..."
+echo "13/22 da-override-check (K-K: .da-* bildirimini kisayolla silme)..."
 if python3 tools/da-override-check.py; then
   echo "  ✓ da-override-check PASS"
 else
@@ -241,7 +241,7 @@ fi
 # Inter yaziyordu -- 21 sayfanin 20'si bir yazi tipinde, o tek basina baskasinda.
 # --* ozel ozellikleri ve yalniz bosluk farki kapsam disi. Taban SIFIR.
 echo ""
-echo "14/21 canon-conflict-check (K-AP: kanonik kaynak <-> sayfa-yerel kopya)..."
+echo "14/22 canon-conflict-check (K-AP: kanonik kaynak <-> sayfa-yerel kopya)..."
 if python3 tools/canon-conflict-check.py; then
   echo "  ✓ canon-conflict-check PASS"
 else
@@ -259,7 +259,7 @@ fi
 # "Trend Bozuldu" hissesinde "RSI 10,9 💎 Asiri Satim"). Kanon: 💎 = skor bandi,
 # ⭐ = Hacim Onayli. Taban SIFIR, pozitif kontrol 4/4.
 echo ""
-echo "15/21 glyph-canon-check (K-AQ: rozet glifi <-> kanonik anlam)..."
+echo "15/22 glyph-canon-check (K-AQ: rozet glifi <-> kanonik anlam)..."
 if python3 tools/glyph-canon-check.py; then
   echo "  ✓ glyph-canon-check PASS"
 else
@@ -279,7 +279,7 @@ fi
 # 11 kod + 9 nesir esigi, pozitif kontrol 4/4 (dort katmanda da yakalandi).
 # Kapsam tabani var: olculen esik sayisi duserse cikis kodu 2.
 echo ""
-echo "16/21 threshold-sync-check (K-AR: bant esigi kopyalari <-> business_rules)..."
+echo "16/22 threshold-sync-check (K-AR: bant esigi kopyalari <-> business_rules)..."
 if python3 tools/threshold-sync-check.py; then
   echo "  ✓ threshold-sync-check PASS"
 else
@@ -301,7 +301,7 @@ fi
 # yuzden canli taramada GORUNMEDI. Taban SIFIR, 63 baglanti, kapsam tabani
 # 55, pozitif kontrol 3/3 (ad uyusmazligi / SC 2.5.3 / logo adi).
 echo ""
-echo "17/21 nav-label-canon-check (K-AS: gezinme etiketi kanonu)..."
+echo "17/22 nav-label-canon-check (K-AS: gezinme etiketi kanonu)..."
 if python3 tools/nav-label-canon-check.py; then
   echo "  ✓ nav-label-canon-check PASS"
 else
@@ -327,7 +327,7 @@ fi
 # calisiyordu, WCAG 2.1.1 A); (3) [data-tip] kullanan sablon bp-tooltip.js'i
 # yuklemeli. Taban SIFIR, 72 kullanim, kapsam tabani 50, pozitif kontrol 4/4.
 echo ""
-echo "18/21 tooltip-canon-check (K-AT: ipucu mekanizmasi kanonu)..."
+echo "18/22 tooltip-canon-check (K-AT: ipucu mekanizmasi kanonu)..."
 if python3 tools/tooltip-canon-check.py; then
   echo "  ✓ tooltip-canon-check PASS"
 else
@@ -348,7 +348,7 @@ fi
 # baslik th.th-sortable + aria-sort + button.th-sort-btn kalibini izlemeli.
 # Kapsam tabani 10 option / 10 baslik, pozitif kontrol 4/4.
 echo ""
-echo "19/21 sort-canon-check (K-AV: siralama kontrolu durum kanonu)..."
+echo "19/22 sort-canon-check (K-AV: siralama kontrolu durum kanonu)..."
 if python3 tools/sort-canon-check.py; then
   echo "  ✓ sort-canon-check PASS"
 else
@@ -370,7 +370,7 @@ fi
 # 800 karakter icindeki baska bir baglanti oku zaten tasiyorsa.
 # Kapsam tabani 20 baglanti, pozitif kontrol 7/7.
 echo ""
-echo "20/21 newtab-canon-check (K-AW: yeni sekme uyarisi kanonu)..."
+echo "20/22 newtab-canon-check (K-AW: yeni sekme uyarisi kanonu)..."
 if python3 tools/newtab-canon-check.py; then
   echo "  ✓ newtab-canon-check PASS"
 else
@@ -394,12 +394,29 @@ fi
 # gecmez, paylasilan makro serit ise ayrica olculur (yalniz <span> uretmeli).
 # Taban SIFIR, pozitif kontrol 13/13 (takma ad sokulunce) + 4/4 (ciplak handler).
 echo ""
-echo "21/21 autorefresh-canon-check (K-AX: periyodik yenileme odak kanonu)..."
+echo "21/22 autorefresh-canon-check (K-AX: periyodik yenileme odak kanonu)..."
 if python3 tools/autorefresh-canon-check.py; then
   echo "  ✓ autorefresh-canon-check PASS"
 else
   echo "  ✗ K-AX KIRIK: sarmalanmamis periyodik icerik yenileyici (odaktaki oge yok edilir)."
   echo "    Detay için: python3 tools/autorefresh-canon-check.py"
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
+# 22. sticky-anchor-check (K-AY, CPO 21.09.2026) -- YAPISKAN CAPA KANONU.
+#     Ust kabugun olcusu (makro serit 32 + header 60 + 2*safe-area-inset) 13
+#     ayri yerde ELLE yaziliydi; UCU header'in kendi inset payini saymiyordu.
+#     Centikli telefonda (PWA) /hisse sekme seridi header'in altinda TAMAMEN,
+#     /tarama + /karsilastir thead'leri bir inset kadar kayboluyordu -- masaustunde
+#     inset=0 oldugu icin 20+ tur denetimden gorunmeden gecti. Olcu artik
+#     shared.css'te tek kaynak: var(--bp-anchor-macro|header).
+echo "22/22 sticky-anchor-check (K-AY: yapiskan capa kanonu)..."
+if python3 tools/sticky-anchor-check.py; then
+  echo "  ✓ sticky-anchor-check PASS"
+else
+  echo "  ✗ K-AY KIRIK: kabuk olcusu elle yazilmis yapiskan capa (centikli cihazda kayar)."
+  echo "    Detay için: python3 tools/sticky-anchor-check.py"
   FAIL=$((FAIL + 1))
 fi
 
