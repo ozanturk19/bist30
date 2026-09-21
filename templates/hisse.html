@@ -1832,12 +1832,34 @@ function toggleHisseWatch() {
   if (_hibBtn && !_pending) _hibBtn.disabled = false;
 }
 
+/* K-BM: kayit okunamadiginda durum BILINMIYOR demektir — "bu hissede
+   pozisyonun yok" demek degil. Eski kod catch'te bos dizi ile devam edip
+   dugmeyi "Portföye ekle / aria-pressed=false" durumuna getiriyordu, yani
+   olcemedigi bir seyi kesin olarak iddia ediyordu ([[K-BK]]: bos != bilinmiyor).
+   Artik dugme notr kalir, aria-pressed HIC bildirilmez ve kullaniciya nereden
+   kurtaracagi soylenir (/portfolio bozuk kaydi yedekleyip indirtiyor). */
+function _hibMarkUnknown(btn, ne) {
+  if (!btn) return;
+  btn.classList.remove('active-portfolio', 'active-star', 'active-bell');
+  btn.removeAttribute('aria-pressed');
+  const t = ne + ' kaydın okunamadı (bozuk olabilir) — durum bilinmiyor. /portfolio sayfasından kurtarabilirsin.';
+  btn.title = t;
+  btn.setAttribute('aria-label', t);
+}
+
 function updateHibStarBtn() {
   const btn = document.getElementById('hibStarBtn');
   if (!btn) return;
   let pf = [];
-  try { pf = JSON.parse(localStorage.getItem(HIB_PF_KEY) || '[]'); } catch(_) { console.warn('updateHibStarBtn: portfoy okunamadi', _); }
-  const inPf = Array.isArray(pf) && pf.some(x => x && x.ticker === TICKER);
+  try {
+    pf = JSON.parse(localStorage.getItem(HIB_PF_KEY) || '[]');
+    if (!Array.isArray(pf)) throw new Error('not an array');
+  } catch(_) {
+    console.warn('updateHibStarBtn: portfoy okunamadi', _);
+    _hibMarkUnknown(btn, 'Portföy');
+    return;
+  }
+  const inPf = pf.some(x => x && x.ticker === TICKER);
   const lbl = btn.querySelector('.hib-action-lbl');
   if (inPf) {
     btn.classList.add('active-portfolio');
@@ -1856,8 +1878,15 @@ function updateHibStarBtn() {
 function updateHibBellBtn() {
   const btn = document.getElementById('hibBellBtn');
   let w = [];
-  try { w = JSON.parse(localStorage.getItem(HIB_WATCH_KEY) || '[]'); } catch(_) { console.warn('updateHibBellBtn: takip listesi okunamadi', _); }
-  const inW = Array.isArray(w) && w.includes(TICKER);
+  try {
+    w = JSON.parse(localStorage.getItem(HIB_WATCH_KEY) || '[]');
+    if (!Array.isArray(w)) throw new Error('not an array');
+  } catch(_) {
+    console.warn('updateHibBellBtn: takip listesi okunamadi', _);
+    _hibMarkUnknown(btn, 'Takip listesi');   // K-BM: bilinmiyor != takipte degil
+    return;
+  }
+  const inW = w.includes(TICKER);
   if (btn) {
     const lbl = btn.querySelector('.hib-action-lbl');
     // bughunt-13.09 (2sa edge-case workflow, P3): "Alarm aktif ✓" kalici

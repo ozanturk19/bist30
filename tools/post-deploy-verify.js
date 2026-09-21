@@ -631,6 +631,110 @@ const step = async (ad, fn) => {
     });
   }
 
+  /* ── 4g) K-BM: bozuk yerel kayit SESSIZCE silinmemeli ────────────────── */
+  /* Fix oncesi: bozuk `bp_portfolio` -> bellek [], ekranda "Portföyünüz boş.",
+     hicbir uyari yok, ilk save() ham kaydi KALICI eziyordu. Adim gercek
+     save()'i CALISTIRIR: onemli olan ham kaydin degil, YEDEGIN hayatta
+     kalmasidir. Her senaryo kendi context'inde kosar (izole localStorage). */
+  console.log('\n[4g] K-BM — bozuk portfoy kaydi: yedekle, soyle, yalan soyleme');
+  {
+    const CORRUPT = '[{"ticker":"THYAO","lot":10,"price":290.5},{"ticker":"GARAN","lot":5,"pri';
+    const olc = async (seed) => {
+      const c = await b.newContext({ locale: 'tr-TR', timezoneId: 'Europe/Istanbul',
+                                     viewport: { width: 1280, height: 900 } });
+      if (seed !== null) await c.addInitScript(v => { try { localStorage.setItem('bp_portfolio', v); } catch (_) {} }, seed);
+      const pg = await c.newPage();
+      await pg.goto(BASE + '/portfolio', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(3000);
+      const r = await pg.evaluate(() => {
+        const w = document.getElementById('pfCorruptWarn');
+        return {
+          banner: !!w && getComputedStyle(w).display !== 'none',
+          role: w ? w.getAttribute('role') : null,
+          dugme: !!(w && w.querySelector('button')),
+          bosBaslik: (document.getElementById('pfEmptyTitle') || {}).textContent || '',
+          yedek: localStorage.getItem('bp_portfolio_bozuk'),
+        };
+      });
+      r.sonra = await pg.evaluate(() => { save(); return localStorage.getItem('bp_portfolio_bozuk'); });
+      await c.close();
+      return r;
+    };
+
+    await step('K-BM bozuk kayit: uyari + yedek + dogru bos durum metni', async () => {
+      const r = await olc(CORRUPT);
+      if (!r.banner) return bad('K-BM banner', 'bozuk kayitta uyari GORUNMUYOR');
+      if (r.role !== 'alert') return bad('K-BM banner role', String(r.role));
+      if (!r.dugme) return bad('K-BM kurtarma yolu', 'indirme dugmesi yok');
+      if (!/okunamad/i.test(r.bosBaslik)) return bad('K-BM bos durum metni', r.bosBaslik);
+      if (r.yedek !== CORRUPT) return bad('K-BM yedek', 'ham kayit yedeklenmedi: ' + String(r.yedek).slice(0, 40));
+      if (r.sonra !== CORRUPT) return bad('K-BM yedek save() sonrasi', 'yedek ezildi/silindi');
+      ok('K-BM bozuk kayit korundu ve soylendi', 'banner+indirme, yedek save() sonrasi da duruyor');
+    });
+
+    await step('K-BM dizi-olmayan kayit da bozuk sayilir', async () => {
+      const r = await olc('{"THYAO":{"lot":10}}');
+      if (!r.banner) return bad('K-BM dizi-degil', 'JSON gecerli ama dizi degil -> uyari yok');
+      if (r.yedek !== '{"THYAO":{"lot":10}}') return bad('K-BM dizi-degil yedek', String(r.yedek).slice(0, 40));
+      ok('K-BM dizi-olmayan kayit', 'gecerli JSON ama dizi degil -> yine yedeklendi');
+    });
+
+    await step('K-BM negatif kontrol: gercekten bos portfoy', async () => {
+      const r = await olc(null);
+      if (r.banner) return bad('K-BM sahte alarm', 'bos portfoyde bozukluk uyarisi cikti');
+      if (!/boş/i.test(r.bosBaslik)) return bad('K-BM bos durum metni degisti', r.bosBaslik);
+      if (r.yedek !== null) return bad('K-BM gereksiz yedek', 'bos portfoyde yedek yazildi');
+      ok('K-BM negatif kontrol (bos)', '"Portföyünüz boş." aynen kaldi, uyari yok');
+    });
+
+    await step('K-BM negatif kontrol: gecerli portfoy', async () => {
+      const r = await olc('[{"ticker":"THYAO","lot":10,"price":290.5,"date":"2026-09-01","id":1}]');
+      if (r.banner) return bad('K-BM sahte alarm', 'gecerli portfoyde bozukluk uyarisi cikti');
+      if (r.yedek !== null) return bad('K-BM gereksiz yedek', 'gecerli portfoyde yedek yazildi');
+      ok('K-BM negatif kontrol (gecerli)', 'uyari yok, yedek yok');
+    });
+
+    /* Salt-OKUMA yollari: bozuk kayitta dugme "bu hissede pozisyonun yok"
+       diye KESIN hukum vermemeli — olcemedigi seyi iddia ediyordu. */
+    const dugme = async (seed) => {
+      const c = await b.newContext({ locale: 'tr-TR', timezoneId: 'Europe/Istanbul',
+                                     viewport: { width: 1280, height: 900 } });
+      await c.addInitScript(v => {
+        try { localStorage.setItem('bp_portfolio', v.pf); localStorage.setItem('bp_watchlist_v2', v.w); } catch (_) {}
+      }, seed);
+      const pg = await c.newPage();
+      await pg.goto(BASE + '/hisse/THYAO', { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await pg.waitForTimeout(3000);
+      const r = await pg.evaluate(() => {
+        const g = id => {
+          const e = document.getElementById(id);
+          return e ? { pressed: e.getAttribute('aria-pressed'), title: e.title || '',
+                       aria: e.getAttribute('aria-label') || '' } : null;
+        };
+        return { yildiz: g('hibStarBtn'), zil: g('hibBellBtn') };
+      });
+      await c.close();
+      return r;
+    };
+
+    await step('K-BM bozuk kayit: dugme durumu "bilinmiyor" der, yalan demez', async () => {
+      const r = await dugme({ pf: '[{"ticker":"THYAO","lo', w: '{"THYAO":1}' });
+      if (!r.yildiz || !r.zil) return bad('K-BM dugmeler', 'hibStarBtn/hibBellBtn bulunamadi');
+      if (r.yildiz.pressed !== null) return bad('K-BM yildiz iddiasi', 'aria-pressed=' + r.yildiz.pressed + ' (bilinmiyorken bildiriliyor)');
+      if (!/okunamad/i.test(r.yildiz.aria)) return bad('K-BM yildiz aciklamasi', r.yildiz.aria.slice(0, 60));
+      if (r.zil.pressed !== null) return bad('K-BM zil iddiasi', 'aria-pressed=' + r.zil.pressed);
+      if (!/okunamad/i.test(r.zil.aria)) return bad('K-BM zil aciklamasi', r.zil.aria.slice(0, 60));
+      ok('K-BM salt-okuma yollari', 'bozuk kayitta aria-pressed bildirilmiyor, sebep soyleniyor');
+    });
+
+    await step('K-BM negatif kontrol: saglam kayitta dugmeler dogru durumu bildirir', async () => {
+      const r = await dugme({ pf: '[{"ticker":"THYAO","lot":3,"price":290,"date":"2026-09-01","id":2}]', w: '["THYAO"]' });
+      if (r.yildiz.pressed !== 'true') return bad('K-BM yildiz regresyonu', 'portfoyde olan hissede aria-pressed=' + r.yildiz.pressed);
+      if (r.zil.pressed !== 'true') return bad('K-BM zil regresyonu', 'takipteki hissede aria-pressed=' + r.zil.pressed);
+      ok('K-BM negatif kontrol (saglam kayit)', 'yildiz+zil aria-pressed=true, durum dogru bildiriliyor');
+    });
+  }
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>
