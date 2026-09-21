@@ -64,8 +64,8 @@
 {% include '_stale_banner.html' %}
 
   <!-- Search Bar -->
-  <div class="search-bar da-panel">
-    <span class="search-bar-label">Karşılaştırılacak hisseler (2-4 adet)</span>
+  <div class="search-bar da-panel" role="group" aria-labelledby="cmpSearchLbl">
+    <span class="search-bar-label" id="cmpSearchLbl">Karşılaştırılacak hisseler (2-4 adet)</span>
     <div class="ticker-inputs">
       <div class="ac-wrap">
         <input type="text" class="ticker-input" id="t1" placeholder="AKBNK" maxlength="20" autocomplete="off" aria-label="1. hisse" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="ac1">

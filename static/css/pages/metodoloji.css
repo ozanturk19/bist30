@@ -117,7 +117,9 @@
   }
   .tldr-title {
     font-size: var(--bp-text-base); font-weight: 700; color: var(--bp-text3);
-    text-transform: uppercase; letter-spacing: .6px; margin-bottom: 14px;
+    text-transform: uppercase; letter-spacing: .6px;
+    margin-top: 0;   /* K-AM: artik <h2> */
+    margin-bottom: 14px;
     display: flex; align-items: center; gap: 6px;
   }
   .tldr-rows { display: flex; flex-direction: column; gap: 8px; }

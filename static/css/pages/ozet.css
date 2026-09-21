@@ -82,6 +82,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
+    margin-top: 0;   /* K-AM: artik <h2> — UA ust marji sifirlandi */
     margin-bottom: 12px;
     font-family: 'Space Grotesk', system-ui, sans-serif;
   }

@@ -105,7 +105,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/blog_article.css?v=d2caf716">
+<link rel="stylesheet" href="/static/css/pages/blog_article.css?v=5d7a82bc">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="read-progress" id="readProgress"></div>
@@ -144,7 +144,7 @@
   {% if article.faqs %}
   <!-- SSS (Sık Sorulan Sorular) -->
   <div class="faq-section" id="faqSection">
-    <div class="faq-section-title"><span aria-hidden="true">❓</span> Sık Sorulan Sorular</div>
+    <h2 class="faq-section-title"><span aria-hidden="true">❓</span> Sık Sorulan Sorular</h2>
     {% for faq in article.faqs %}
     {#- K-AC (21.09): SSS akordeonu sitenin DORDUNCU acilir diliydi ve kendi
         recetesiyle sapmisti (13/16px · 600 · radius-md · zeminsiz · hover .03)
@@ -167,9 +167,9 @@
   {% endif %}
 
   <!-- CTA kutusu -->
-  <div class="cta-box">
+  <div class="cta-box" role="group" aria-labelledby="ctaBoxTitle">
     <div class="cta-box-text">
-      <strong><span aria-hidden="true">📊</span> BIST Sinyallerini Gör</strong>
+      <strong id="ctaBoxTitle"><span aria-hidden="true">📊</span> BIST Sinyallerini Gör</strong>
       <span>Bu makalede öğrendiklerinizi gerçek piyasa verisiyle karşılaştırın.<br>
         BIST100 + ek hisseler için algoritmik Supertrend + ADX sinyalleri — ücretsiz.</span>
     </div>
@@ -191,14 +191,14 @@
   </div>
 
   <!-- E-posta abonelik CTA -->
-  <div id="artSubBar" style="
+  <div id="artSubBar" role="group" aria-labelledby="artSubTitle" style="
     background:linear-gradient(135deg,rgba(var(--bp-brand-rgb),.08),rgba(var(--bp-premium-rgb),.05));
     border:1px solid rgba(var(--bp-brand-rgb),.25);border-radius:var(--bp-radius-xl);
     padding:18px 20px;margin:22px 0;display:flex;gap:16px;align-items:center;flex-wrap:wrap;
     position:relative;">
     <div style="font-size:var(--bp-text-22);line-height:1"><span aria-hidden="true">📬</span></div>
     <div style="flex:1;min-width:180px">
-      <div style="font-weight:700;font-size:var(--bp-text-md);color:var(--bp-text);margin-bottom:3px">BIST Sinyalleri Gelen Kutunuzda</div>
+      <div id="artSubTitle" style="font-weight:700;font-size:var(--bp-text-md);color:var(--bp-text);margin-bottom:3px">BIST Sinyalleri Gelen Kutunuzda</div>
       <div style="font-size:var(--bp-text-sm);color:var(--bp-text3)">Sinyal değişimi olan işlem günlerinde akşam 19:00 özeti — ücretsiz, istediğinizde iptal.</div>
     </div>
     <div id="artSubForm" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">

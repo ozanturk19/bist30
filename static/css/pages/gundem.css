@@ -46,6 +46,10 @@
   .section-title {
     font-size: var(--bp-text-md); font-weight: 700; color: var(--bp-text);
     display: flex; align-items: center; gap: 7px;
+    /* K-AM: bu kural artik bir <h2>'yi bicimliyor — UA varsayilan
+       `margin:.83em 0` .section-hdr flex satirini buyuturdu. Sifirlandi:
+       gorsel cikti div halindekiyle birebir ayni. */
+    margin: 0;
   }
   .section-title .dot {
     width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;

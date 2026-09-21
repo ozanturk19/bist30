@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/gundem.css?v=2cab6985">
+<link rel="stylesheet" href="/static/css/pages/gundem.css?v=a59f51af">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -103,10 +103,10 @@
   <!-- Bugün Sinyal Değişenler -->
   <div class="section">
     <div class="section-hdr">
-      <div class="section-title">
+      <h2 class="section-title">
         <span class="dot dot-al"></span>
         Bugün Sinyal Değişenler
-      </div>
+      </h2>
       <span class="section-sub" id="newSigCount" aria-live="polite">{{ (ssr_new_signals|length ~ ' hisse') if ssr_new_signals else '' }}</span>
     </div>
     <div id="newSignalsGrid" class="stock-grid">
@@ -123,10 +123,10 @@
   <!-- En Güçlü Trendler -->
   <div class="section">
     <div class="section-hdr">
-      <div class="section-title">
+      <h2 class="section-title">
         <span class="dot dot-str"></span>
         En Güçlü Trendler
-      </div>
+      </h2>
       <span class="section-sub">ADX sıralamalı — Top 8</span>
     </div>
     <div id="strongAlGrid" class="stock-grid">
@@ -151,10 +151,10 @@
     <!-- Bilanço Takvimi -->
     <div class="section" id="bilancoBand"{% if not ssr_bilanco_upcoming %} style="display:none"{% endif %}>
       <div class="section-hdr">
-        <div class="section-title">
+        <h2 class="section-title">
           <span class="dot" style="background:var(--bp-gold)"></span>
           Bilanço Takvimi
-        </div>
+        </h2>
         <a href="/bilanco-takvimi" class="da-tap" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none">Tümü <span aria-hidden="true">→</span></a>
       </div>
       <div id="bilancoPeriods" style="display:flex;gap:10px;flex-wrap:wrap">{% for p in ssr_bilanco_upcoming %}{% set is_active = p.status == 'active' %}{% set dot_clr = 'var(--bp-gold)' if is_active else 'var(--bp-text3)' %}
@@ -172,10 +172,10 @@
     <!-- Ekonomik Takvim -->
     <div class="section" id="econCalSection">
       <div class="section-hdr">
-        <div class="section-title">
+        <h2 class="section-title">
           <span class="dot" style="background:var(--bp-gold)"></span>
           Ekonomik Takvim
-        </div>
+        </h2>
         <span class="section-sub">Yaklaşan önemli tarihler</span>
       </div>
       <div id="econCalGrid" style="display:flex;flex-direction:column;gap:8px">
@@ -187,10 +187,10 @@
     <!-- Makro Haberler -->
     <div class="section">
       <div class="section-hdr">
-        <div class="section-title">
+        <h2 class="section-title">
           <span class="dot dot-macro"></span>
           Makro Haberler
-        </div>
+        </h2>
         <span class="section-sub" id="macroNewsUpdatedAt">—</span>
       </div>
       <div id="macroNewsGrid" style="display:flex;flex-direction:column;gap:8px">
@@ -203,10 +203,10 @@
     <!-- Piyasa Haberleri -->
     <div class="section">
       <div class="section-hdr">
-        <div class="section-title">
+        <h2 class="section-title">
           <span class="dot" style="background:var(--bp-accent-cyan)"></span>
           Piyasa Haberleri
-        </div>
+        </h2>
         <span class="section-sub" id="newsUpdatedAt">—</span>
       </div>
       <div id="newsGrid" style="display:flex;flex-direction:column;gap:10px">

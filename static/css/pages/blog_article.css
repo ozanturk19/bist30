@@ -68,7 +68,7 @@
 
   /* SSS Akordeon */
   .faq-section { margin-top:36px; padding-top:28px; }
-  .faq-section-title { font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); margin-bottom:14px; }
+  .faq-section-title { font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); margin-top:0; margin-bottom:14px; }  /* K-AM: artik <h2> */
   /* K-AC (21.09): kendi recetesi (13/16px · 600 · radius-md · zeminsiz ·
      hover .03) SILINDI — kanonik `.bp-detail-toggle` (data-art.css) devraldi.
      Burada yalniz SSS'e OZEL iki fark kalir: liste araligi (kanonik 20px bir

@@ -109,7 +109,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=e307a04d">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=768bce96">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -1211,7 +1211,7 @@
 
   <!-- Sosyal Paylaşım -->
   <div id="shareSection" style="display:none" class="da-panel da-share-panel">
-    <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span> Sinyali Paylaş</span>
+    <span class="da-util-eyebrow" role="heading" aria-level="2"><span class="dot" aria-hidden="true"></span> Sinyali Paylaş</span>
     <div class="da-share-btns">
       <button id="shareWA" class="da-share-btn" onclick="shareSignal('wa')"
         style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.55);color:#25D366"
@@ -1374,7 +1374,7 @@
        (bkz. proje planı, 11.09 GEO turu). Sadece mevcut ssr_signal/hs
        context'inden — yeni hesaplama yok, uydurma sayı yok. -->
   <div class="quickfacts-card" data-tab-content="always">
-    <div class="quickfacts-title"><span aria-hidden="true">📌</span> {{ ticker }} — Hap Bilgi</div>
+    <h2 class="quickfacts-title"><span aria-hidden="true">📌</span> {{ ticker }} — Hap Bilgi</h2>
     <dl class="quickfacts-list">
       <div class="qf-row"><dt>Hisse</dt><dd>{{ ticker }} — {{ name }}</dd></div>
       <div class="qf-row"><dt>Sektör</dt><dd>{{ sector }}</dd></div>

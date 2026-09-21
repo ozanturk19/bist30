@@ -22,7 +22,9 @@
   }
   .warn-banner-title {
     font-size: var(--bp-text-lg); font-weight: 700; color: var(--bp-sat);
-    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 0;   /* K-AM: artik <h2> */
+    margin-bottom: 10px;
   }
   .warn-banner p { color: var(--bp-text2); font-size: var(--bp-text-base); margin-bottom: 8px; }
   .warn-banner p:last-child { margin-bottom: 0; }

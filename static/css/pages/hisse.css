@@ -945,7 +945,9 @@
   .quickfacts-title {
     font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: var(--bp-text-xs); color: var(--bp-accent-cyan); text-transform: uppercase;
-    letter-spacing: .12em; font-weight: 700; margin-bottom: 12px;
+    letter-spacing: .12em; font-weight: 700;
+    margin-top: 0;   /* K-AM: artik <h2> */
+    margin-bottom: 12px;
   }
   .quickfacts-list {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
