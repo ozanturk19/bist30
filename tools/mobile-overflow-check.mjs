@@ -30,7 +30,11 @@ const BASE = (process.argv.find(a => a.startsWith('--base=')) || '').split('=')[
 const OUT = (process.argv.find(a => a.startsWith('--out=')) || '').split('=')[1]
   || path.join(REPO_ROOT, 'tests', 'mobile-overflow', 'latest.json');
 
-const WIDTHS = [360, 375, 390, 414];
+// K-AD (21.09, CPO): 320 EKSIKTI. WCAG 1.4.10 Reflow'un tanimli genisligi
+// 320 CSS px'tir; liste 360'tan basliyordu ve aradaki bant hic olculmedi.
+// Ilk 320 kosumunda ana sayfanin abonelik formu (.da-sub-form min-width:280px)
+// +3px tasma verdi -- 360/375/390/414'te GORUNMUYOR, yani bu aciga yerlesmisti.
+const WIDTHS = [320, 360, 375, 390, 414];
 const HEIGHT = 800;
 
 // Sayfa envanteri: app.py'deki GET/HTML route'lardan türetildi (API/webhook/static
@@ -51,8 +55,6 @@ const PAGES = [
   { name: 'portfolio', path: '/portfolio' },
   { name: 'sinyaller', path: '/sinyaller' },
   { name: 'sinyal-performans', path: '/sinyal-performans' },
-  { name: 'nasdaq', path: '/nasdaq' },
-  { name: 'sp500', path: '/sp500' },
   // 'dow' (/dow) BILEREK YOK: Dow verisi motorda yok, T0.7 kapsaminda route
   // zaten kaldirilmis (canli kanit: httpStatus=404, T9.1 kosumunda yakalandi).
   // 'djia' hic PAGES listesinde degildi, ek islem yok.
@@ -70,31 +72,24 @@ const PAGES = [
   { name: 'virtual-portfolio', path: '/virtual-portfolio' },
   { name: 'blog', path: '/blog' },
   { name: 'blog-article', path: '/blog/supertrend-indikatoru-nedir' },
-  { name: 'kripto', path: '/kripto' },
-  { name: 'emtialar', path: '/emtialar' },
-  { name: 'btc', path: '/btc' },
-  { name: 'eth', path: '/eth' },
-  { name: 'sol', path: '/sol' },
-  { name: 'bnb', path: '/bnb' },
-  { name: 'altin', path: '/altin' },
-  { name: 'gumus', path: '/gumus' },
-  { name: 'petrol', path: '/petrol' },
-  { name: 'dogalgaz', path: '/dogalgaz' },
-  { name: 'abd', path: '/abd' },
   // 'abd-tarama' (/abd/tarama) BILEREK YOK: f9e4ac8 (T4.1) ile kaldirildi,
   // 0 ic link / yetim sayfa, trafik tamami bot/agent idi. Bu harness hic
   // calistirilmadigi icin kaldirmadan sonra guncellenmemisti (T9.1 kanit:
   // ilk canli kosuda httpStatus=404 dondu, ama script bunu FAIL SAYMIYORDU
   // -- asagidaki httpStatus kontrolu bu korlugu da kapatiyor).
-  { name: 'abd-sp500', path: '/abd/sp500' },
-  { name: 'abd-nasdaq', path: '/abd/nasdaq' },
-  { name: 'abd-aapl', path: '/abd/AAPL' },
   { name: 'hisse-thyao', path: '/hisse/THYAO' },
   { name: 'hisse-thyao-ozet', path: '/hisse/THYAO?tab=ozet' },
   { name: 'hisse-thyao-grafik', path: '/hisse/THYAO?tab=grafik' },
   { name: 'hisse-thyao-ai', path: '/hisse/THYAO?tab=ai' },
   { name: 'hisse-thyao-haberler', path: '/hisse/THYAO?tab=haberler' },
   { name: 'hisse-akbnk', path: '/hisse/AKBNK' },
+  // K-AD (21.09): 16 kayit BILEREK CIKARILDI -- /nasdaq /sp500 /kripto
+  // /emtialar /btc /eth /sol /bnb /altin /gumus /petrol /dogalgaz /abd
+  // /abd/sp500 /abd/nasdaq /abd/AAPL. Hepsi 19.08 BIST Odakli Sadelesme
+  // (CPO-DEV2-036) ile kaldirildi ve bugun 301 ile '/' adresine gidiyor.
+  // Harness bunlari 'ok' sayiyordu cunku Playwright yonlendirmeyi izler:
+  // gerceklesen sey, ana sayfanin her genislikte 17 kez olculmesiydi
+  // (gunluk kosumun ~%35'i bos is). '/dow' ve '/abd/tarama' ile AYNI emsal.
 ];
 
 // CPO-1201 §5(b) kapsamı: details/summary bu turda GENERİK olarak destekleniyor
@@ -123,7 +118,14 @@ async function measureState(page) {
   // GÜVENİLMEZ — measurementClean=false ile işaretlenir, harness bunu FAIL eder.
   const measurementClean = scrollbarSlack === 0;
   const rawOverflow = m.scrollWidth - m.clientWidth;
-  const overflowPx = Math.max(0, rawOverflow - Math.max(0, scrollbarSlack));
+  // K-AD: slack ARTIK CIKARILMIYOR. Orijinal cikarma (CPO-1201 §3) klasik
+  // scrollbar'i elemek icindi, ama checkPage artik `isMobile:true` +
+  // `hasTouch:true` ile kosuyor -> Chromium OVERLAY scrollbar kullanir ve
+  // gercek slack HER ZAMAN 0'dir. Bu baglamda slack>0'in tek sebebi, icerik
+  // tastigi icin layout viewport'unun GENISLEMESIDIR. Yani cikarma islemi
+  // tam da yakalamak icin var oldugu tasmayi siliyordu: ana sayfa @320'de
+  // iw=323/cw=320/sw=323 olcuyordu ve overflowPx=0 basiyordu (gercek: +3px).
+  const overflowPx = Math.max(0, rawOverflow);
   return { ...m, scrollbarSlack, measurementClean, rawOverflow, overflowPx };
 }
 
@@ -157,6 +159,18 @@ async function checkPage(browser, pageDef, width) {
     // yaziyordu). 4xx/5xx artik yuklenemedi sayilir, olcum atlanir.
     if (result.httpStatus && result.httpStatus >= 400) {
       throw new Error('HTTP ' + result.httpStatus);
+    }
+    // K-AD: 3xx KORLUGU. Playwright yonlendirmeyi SESSIZCE izler ve
+    // resp.status() HEDEF sayfanin 200'unu doner -- yani yukaridaki 4xx/5xx
+    // muhafizi (T9.1) olu rotalari yakalamaz. Canli kanit: PAGES'teki 45
+    // kaydin 16'si (/kripto /emtialar /btc /eth /sol /bnb /altin /gumus
+    // /petrol /dogalgaz /abd /abd/sp500 /abd/nasdaq /abd/AAPL /nasdaq /sp500)
+    // 301 ile '/' adresine gidiyordu; harness 'ok' basiyor ama gercekte ANA
+    // SAYFAYI 17 kez olcuyordu. "45 sayfa kapsandi" iddiasi yanlisti.
+    const finalUrl = page.url().replace(/\/$/, '');
+    const wantUrl = (BASE + pageDef.path).replace(/\/$/, '');
+    if (finalUrl !== wantUrl) {
+      throw new Error(`YONLENDIRME: ${pageDef.path} -> ${finalUrl} (listelenen sayfa olculmedi)`);
     }
     await page.waitForTimeout(1200);
 
@@ -217,8 +231,14 @@ async function checkPage(browser, pageDef, width) {
 // tutarli (bkz. yukaridaki yorum: buyumesi regresyon sinyali, kucculmesi duzelme).
 const DIRTY_GROUND_ALLOWLIST = new Set([]);
 
-function isExplainedDirty(s) {
-  return s.scrollbarSlack === s.rawOverflow && s.overflowPx === 0;
+// K-AD: ESKI TANIM BIR TUZAKTI -- `slack === rawOverflow && overflowPx === 0`
+// kosulu, mobil emulasyonda GERCEK TASMANIN imzasinin TA KENDISIDIR (viewport
+// icerik genisligine kadar genisler: iw-cw == sw-cw). Yani allowlist'e alinan
+// her sayfada gercek bir tasma kalici olarak "aciklanmis kirli zemin" diye
+// gorunmez olurdu. Overlay scrollbar altinda mesru bir kirli zemin YOKTUR;
+// slack>0 daima bulgudur, mazeret degil.
+function isExplainedDirty(_s) {
+  return false;
 }
 
 async function main() {
