@@ -71,7 +71,7 @@
   .opt {
     position: relative;
     background: var(--bp-surface2);
-    border: 1.5px solid var(--bp-border);
+    border: 1.5px solid var(--bp-ctl-border);
     border-radius: var(--bp-radius-xl);
     padding: 13px 16px;
     cursor: pointer;
@@ -131,7 +131,7 @@
   .btn-secondary {
     background: transparent;
     color: var(--bp-text3);
-    border: 1px solid var(--bp-border);
+    border: 1px solid var(--bp-ctl-border);
     box-shadow: none;
     transform: rotate(.8deg);
   }

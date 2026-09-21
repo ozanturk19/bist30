@@ -80,7 +80,7 @@
     font-size: var(--bp-text-xs);
     font-weight: 600;
     background: rgba(var(--bp-brand-rgb),.1);
-    border: 1px solid rgba(var(--bp-brand-rgb),.3);
+    border: 1px solid rgba(var(--bp-brand-rgb),.48);
     border-radius:var(--bp-radius-lg);
     padding: 3px 10px;
     color: var(--bp-brand);
@@ -92,7 +92,7 @@
   .hib-action-btn {
     display: inline-flex; align-items: center; gap: 5px;
     height: 28px; padding: 0 10px; border-radius: var(--bp-radius-14);
-    background: rgba(255,255,255,0.04); border: 1px solid var(--bp-border);
+    background: rgba(255,255,255,0.04); border: 1px solid var(--bp-ctl-border);
     color: var(--bp-text2); cursor: pointer; flex-shrink: 0;
     font-size: var(--bp-text-xs); font-weight: 600; font-family: inherit;
     line-height: 1; white-space: nowrap;

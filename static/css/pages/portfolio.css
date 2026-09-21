@@ -83,7 +83,7 @@
   .btn-action {
     position: relative;
     display: inline-flex; align-items: center; gap: 5px;
-    background: none; border: 1px solid var(--bp-border); color: var(--bp-text3);
+    background: none; border: 1px solid var(--bp-ctl-border); color: var(--bp-text3);
     border-radius:var(--bp-radius); padding: 5px 12px; font-size: var(--bp-text-sm);
     cursor: pointer; transition: all .15s;
   }
@@ -93,7 +93,7 @@
   /* 19.09: "Temizle" (kalıcı silme) diğer zararsız aksiyon butonlarıyla (JSON/CSV/
      İçe Aktar) rest state'de görsel olarak birebir aynıydı — sadece hover'da
      kırmızıya dönüyordu, yani kullanıcı tıklamadan önce ayrımı hiç görmüyordu. */
-  .btn-action.danger { border-color: rgba(var(--bp-sat-rgb),.35); color: var(--bp-sat); }
+  .btn-action.danger { border-color: rgba(var(--bp-sat-rgb),.72); color: var(--bp-sat); }
   .btn-action.danger:hover { border-color: var(--bp-sat); color: var(--bp-sat-on-tint); background: rgba(var(--bp-sat-rgb),.08); }
   #importFileInput { display: none; }
 

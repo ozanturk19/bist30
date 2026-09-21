@@ -259,7 +259,7 @@
   }
 
   .btn-reset {
-    background:none; color:var(--text2); border:1px solid var(--border);
+    background:none; color:var(--text2); border:1px solid var(--bp-ctl-border);
     border-radius:var(--bp-radius); padding:8px 14px; font-size:var(--bp-text-base); cursor:pointer;
     font-family:inherit; transition:all .15s;
   }

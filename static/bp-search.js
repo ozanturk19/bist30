@@ -16,7 +16,7 @@
 
   // ---- CSS (hardcoded hex so it works on any page) ----
   var CSS = ''
-    + '.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;background:transparent;border:1px solid #2a2a2c;border-radius:6px;color:#c7c5cd;cursor:pointer;transition:all .15s;flex-shrink:0;padding:0;font-family:inherit}'
+    + '.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;background:transparent;border:1px solid #6e6e7a;border-radius:6px;color:#c7c5cd;cursor:pointer;transition:all .15s;flex-shrink:0;padding:0;font-family:inherit}'
     + '.header-search-btn:hover{background:#1c1b1f;border-color:#46464d;color:#e5e1e4}'
     + '.bp-search-overlay{display:none;position:fixed;inset:0;z-index:var(--bp-z-overlay);background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding-top:80px}'
     + '.bp-search-overlay.open{display:flex}'
@@ -98,7 +98,7 @@
        Notr gri + sabit nokta (nabiz yok) + "Yerel Saat" metnine cevrildi. */
     + '.bp-live-time{display:inline-flex;align-items:center;gap:5px;background:rgba(144,144,151,0.08);border:1px solid rgba(144,144,151,0.20);color:#909097;font-size:11px;font-weight:700;padding:5px 9px;border-radius:6px;font-family:"Space Grotesk",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0.3px;white-space:nowrap}'
     + '.bp-live-dot{width:6px;height:6px;border-radius:50%;background:#909097;flex-shrink:0}'
-    + '.bp-refresh-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid #2a2a2c;color:#c7c5cd;font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;transition:background .15s,border-color .15s;text-transform:uppercase;letter-spacing:0.4px;font-family:"Space Grotesk",system-ui,sans-serif;flex-shrink:0;line-height:1}'
+    + '.bp-refresh-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid #6e6e7a;color:#c7c5cd;font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;transition:background .15s,border-color .15s;text-transform:uppercase;letter-spacing:0.4px;font-family:"Space Grotesk",system-ui,sans-serif;flex-shrink:0;line-height:1}'
     + '.bp-refresh-btn:hover{background:rgba(184,195,255,0.08);border-color:#46464d;color:#e5e1e4}'
     + '.bp-refresh-btn.spinning svg{animation:bpRefreshSpin 0.8s linear infinite}'
     + '@keyframes bpRefreshSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}'

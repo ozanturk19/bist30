@@ -25,7 +25,23 @@
      #6e6e7a sitedeki UC zeminin hepsinde gecer: #0e0e12'de 4.20:1,
      #141416'da 4.02:1, #1c1b1f'te 3.65:1, alan dolgusu #21262d'de 3.31:1.
      YALNIZ input/textarea/select icin; dekoratif kenarliklara UYGULANMAZ. */
-  --bp-field-border: #6e6e7a;
+  --bp-field-border: var(--bp-ctl-border);
+
+  /* 21.09 (CPO) K-Y — ETKILESIMLI KONTROL SINIRI, WCAG 1.4.11 (3:1).
+     K-Q yukaridaki yorumda kapsamini "YALNIZ input/textarea/select" diye
+     KENDI YAZDI; gerekcesi "kart kendi metniyle tanindigi icin muaf"ti.
+     O gerekce KART icin dogru, BUTON icin degil: 1.4.11'in kanonik ornegi
+     zaten butondur. Canli olcum (5 yuzey, kompozit zemin):
+       .header-search-btn  1.28:1  — IKON-ONLY, hic metni yok, TEK kimligi kutusu
+       .bp-refresh-btn     1.28:1  · .bp-lm-toggle 1.28:1 · .btn-action 1.34:1
+       .hib-action-btn     1.28:1  · .btn-reset 1.58:1 · .opt 1.34:1
+     Hepsinin DOLGUSU da dis zeminden ayirt edilemiyordu (<1.5:1), yani sinir
+     TEK sinyaldi. Dolgulu/secili kardeslerinde sorun YOK (.opt.selected
+     11.27:1, #profileSubmit 11.27:1) — kusur yalnizca CERCEVEYLE cizilenlerde.
+     Kapsam DISI (bilerek): .related-chip/.blog-read-card/.stock-card/
+     .mbn-sheet-item — icerik kartlari, kendi metniyle taninir (K-Q muafiyeti
+     onlar icin GECERLI kaliyor). */
+  --bp-ctl-border: #6e6e7a;
   --bp-border-subtle: #21262d;
 
   /* Text */

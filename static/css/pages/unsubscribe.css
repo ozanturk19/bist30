@@ -45,7 +45,7 @@ body{
 .box .btn:hover{opacity:.9}
 /* CPO-DEV2-052 #3: unsubscribe onay adımı — ikinci, düşük-vurgulu buton */
 .box .btn-secondary{
-  background:transparent;color:var(--bp-text2);border:1px solid var(--bp-border);
+  background:transparent;color:var(--bp-text2);border:1px solid var(--bp-ctl-border);
 }
 .box .btn-secondary:hover{opacity:1;border-color:var(--bp-border2);color:var(--bp-text)}
 
