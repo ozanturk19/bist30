@@ -190,3 +190,22 @@ function bpTodayTrIso() {
   var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
   return t.y + '-' + p2(t.m) + '-' + p2(t.d);
 }
+
+/* K-BJ: POZISYON SAYISAL DOGRULAMA — TEK KANON.
+   Portfoye pozisyon yazan DORT yol vardi ve olcut UC ayri yerde yaziliydi:
+     * addPosition()      (form)            -> lot tamsayi>0<=1e9, price>0<=1e9
+     * importPortfolio()  (dosya)           -> ayni olcut, ikinci kez yazilmis
+     * loadCloudToken/loadFromCloud (bulut) -> sayisal dogrulama YOK
+     * togglePortfolio()  (hisse detay)     -> dogrulama YOK; dahasi fiyat
+       okunamadiginda _hibCurrentPrice() 0 donup MALIYET olarak 0 yaziyordu.
+   price=0 pozisyon tabloda cost=0 uretir; pnl = deger - 0 = pozisyonun TAM
+   degeri "kar" gorunur ve toplam K/Z kutusunu da sisirir.
+   Kanon: pozisyon sayisi yazan/dogrulayan HER yol bu ikisini cagirir. */
+function bpIsValidLot(lot) {
+  var n = Number(lot);
+  return Number.isFinite(n) && Number.isInteger(n) && n > 0 && n <= 1e9;
+}
+function bpIsValidPrice(price) {
+  var n = Number(price);
+  return Number.isFinite(n) && n > 0 && n <= 1e9;
+}

@@ -1529,7 +1529,7 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=167dacc4"></script>
+<script src="/static/bp-format.js?v=342ef281"></script>
 <script src="/static/stale-banner.js?v=cfbf4001"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
@@ -1661,7 +1661,12 @@ function _hibCurrentPrice() {
   // Fallback: header'daki gösterilen fiyat
   const txt = document.getElementById('hpPrice')?.textContent || '';
   const num = parseFloat(txt.replace(/\./g,'').replace(',','.'));
-  return isFinite(num) ? num : 0;
+  // K-BJ: fiyat okunamadiginda 0 DONUYORDU ve bu 0 dogrudan portfoye MALIYET
+  // olarak yaziliyordu (hpPrice SSR'da fiyat yoksa '—' basar, o an quick-add'e
+  // basmak mumkun). Maliyeti 0 olan pozisyon /portfolio'da cost=0 uretir, K/Z
+  // pozisyonun TAM degerini "kar" gosterir ve toplam K/Z kutusunu sisirir.
+  // "Fiyat yok" ile "fiyat sifir" ayri seylerdir -> null.
+  return isFinite(num) ? num : null;
 }
 
 function togglePortfolio() {
@@ -1688,6 +1693,12 @@ function togglePortfolio() {
     }
   } else {
     const price = _hibCurrentPrice();
+    // K-BJ: pozisyon yazan diger UC yol (form / dosya / sunucu) lot+fiyati
+    // dogruluyordu, bu yol HIC dogrulamiyordu — tek kanon bp-format.js.
+    if (!bpIsValidPrice(price)) {
+      _hibToast('Güncel fiyat henüz yüklenmedi — portföye eklenmedi. Birkaç saniye sonra tekrar deneyin veya /portfolio\'dan elle ekleyin.', 'warn');
+      return;
+    }
     pf.push({
       ticker: TICKER,
       lot:    1,

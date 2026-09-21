@@ -205,7 +205,7 @@
 
 {% with ftr_self='/portfolio', ftr_data_note=true, ftr_note="Portföy verisi yalnızca kendi tarayıcınızda saklanır." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=167dacc4"></script>
+<script src="/static/bp-format.js?v=342ef281"></script>
 <script>
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
@@ -376,8 +376,13 @@ function exportCSV() {
     const live     = liveData[p.ticker];
     const current  = live ? live.price  : '';
     const sig      = live ? csvSafe(sigLabel(live.signal)) : '';
-    const pnlVal   = current ? ((current - p.price) * p.lot).toFixed(2) : '';
-    const pnlPct   = current ? (((current - p.price) / p.price) * 100).toFixed(2) : '';
+    // K-BJ: tablo render'i K/Z'yi Number.isFinite + cost>0 ile koruyordu, CSV
+    // AYNI hesabi korumasizca yapiyordu (ayni is icin iki kanon). Bulut yolundan
+    // gelen veya eski-format bir pozisyonda price=0 ise bolme Infinity, lot/price
+    // sayisal degilse NaN uretir ve indirilen dosyaya "Infinity"/"NaN" yazilirdi.
+    const _valid   = bpIsValidLot(p.lot) && bpIsValidPrice(p.price);
+    const pnlVal   = (current && _valid) ? ((current - p.price) * p.lot).toFixed(2) : '';
+    const pnlPct   = (current && _valid) ? (((current - p.price) / p.price) * 100).toFixed(2) : '';
     return [
       csvSafe(p.ticker),
       csvSafe(p.lot),
@@ -461,7 +466,7 @@ function importPortfolio(e) {
       // import yolunu da aynı standarda getirir.
       positions.forEach(p => {
         const lot = Number(p.lot ?? p.quantity), price = Number(p.price ?? p.buy_price);
-        if (!p.ticker || !Number.isFinite(lot) || lot <= 0 || lot > 1e9 || !Number.isInteger(lot) || !Number.isFinite(price) || price <= 0 || price > 1e9) {
+        if (!p.ticker || !bpIsValidLot(lot) || !bpIsValidPrice(price)) {   // K-BJ: tek kanon (bp-format.js)
           throw new Error('INVALID_FIELD');
         }
         p.lot = lot; p.price = price;
@@ -561,8 +566,8 @@ function addPosition() {
   const date   = document.getElementById('addDate').value;
   const err    = document.getElementById('addErr');
   if (!ticker) { err.textContent = 'Hisse kodu girin.'; return; }
-  if (!Number.isFinite(lot) || lot <= 0 || lot > 1e9 || !Number.isInteger(lot)) { err.textContent = 'Geçerli (tam sayı) adet girin.'; return; }
-  if (!Number.isFinite(price) || price <= 0 || price > 1e9) { err.textContent = 'Geçerli fiyat girin.'; return; }
+  if (!bpIsValidLot(lot))   { err.textContent = 'Geçerli (tam sayı) adet girin.'; return; }   // K-BJ: tek kanon (bp-format.js)
+  if (!bpIsValidPrice(price)) { err.textContent = 'Geçerli fiyat girin.'; return; }             // K-BJ: tek kanon (bp-format.js)
   err.textContent = '';
   if (btn) btn.disabled = true;
   const finalDate = date || bpTodayTrIso();  // K-BD: tek kanon (bp-format.js)
@@ -948,7 +953,7 @@ async function loadCloudToken() {
     const _valid = [];
     data.positions.forEach(p => {
       const lot = Number(p.lot ?? p.quantity), price = Number(p.price ?? p.buy_price);
-      if (!p.ticker || !Number.isFinite(lot) || lot <= 0 || lot > 1e9 || !Number.isInteger(lot) || !Number.isFinite(price) || price <= 0 || price > 1e9) { skipped++; return; }
+      if (!p.ticker || !bpIsValidLot(lot) || !bpIsValidPrice(price)) { skipped++; return; }   // K-BJ: tek kanon (bp-format.js)
       p.lot = lot; p.price = price;
       _valid.push(p);
     });
@@ -1022,7 +1027,9 @@ async function loadFromCloud() {
     const rawCount = data.positions.length;
     portfolio = data.positions
       .map(p => { const lot = Number(p.lot ?? p.quantity), price = Number(p.price ?? p.buy_price); return {...p, lot, price, id: Date.now() + Math.random()}; })
-      .filter(p => p.ticker && Number.isFinite(p.lot) && p.lot > 0 && p.lot <= 1e9 && Number.isInteger(p.lot) && Number.isFinite(p.price) && p.price > 0 && p.price <= 1e9);
+      // K-BJ: olcut burada TERS yazimdaydi (p.lot > 0) — ayni kural dort yerde
+      // uc ayri yazimla duruyordu; tek kanon bp-format.js.
+      .filter(p => p.ticker && bpIsValidLot(p.lot) && bpIsValidPrice(p.price));
     save(); render();
     const skipped = rawCount - portfolio.length;
     _setCloudMsg(`Yüklendi! ${portfolio.length} pozisyon.${skipped ? ` (${skipped} geçersiz kayıt atlandı)` : ''}`, 'var(--bp-al)');
