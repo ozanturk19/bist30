@@ -109,7 +109,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=b9b5cd42">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=a7e0490a">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -925,7 +925,7 @@
          gauge sabit mavi (--bp-brand) renkliydi, skordan bağımsız — hero'daki
          AYNI skorun rengiyle (_hc, AL/SAT yön+güç bazlı) hizalandı. #}
       <!-- Teknik Güç Skoru — mevcut kaynak (ssr_signal), hs'ten bağımsız -->
-      <div class="gauge teknik-gauge" data-tip="Teknik Güç Skoru — Supertrend + ADX + hacim teyidi"
+      <div class="gauge teknik-gauge" tabindex="0" data-tip="Teknik Güç Skoru — Supertrend + ADX + hacim teyidi"
            style="--band-color:{{ _hc }};"
            role="img" aria-label="Teknik Güç Skoru {{ new_teknik_score }} / 100">
         <svg aria-hidden="true" class="gauge-ring" viewBox="0 0 100 100">
@@ -942,7 +942,7 @@
 
       {% if hs_available %}
       <!-- Temel Analiz Skoru -->
-      <div class="gauge temel-gauge" data-missing="{{ 'true' if temel_missing else 'false' }}"
+      <div class="gauge temel-gauge" tabindex="0" data-missing="{{ 'true' if temel_missing else 'false' }}"
            data-tip="Temel Analiz Skoru — 4 eksenli finansal sağlık"
            role="img" aria-label="Temel Analiz Skoru {{ temel_score if not temel_missing else 'veri yok' }} / 100">
         {# bughunt-13.09 (derinlemesine tasarım araştırması, P0-3): "YENİ" rozeti
@@ -2548,7 +2548,7 @@ function renderSummary(s, signalData) {
       detail: stBull ? '↑ Yükseliş' : stBear ? '↓ Düşüş' : '— Net değil',
       techDetail: 'Supertrend(10,3): ' + (s.st_bull ? 'LONG' : s.st_bear ? 'SHORT' : 'NEUTRAL'),
       ok: s.signal === 'SAT' ? stBear : stBull,
-      blog: '/blog/supertrend-indikatoru-nedir'
+      blog: '/blog/supertrend-indikatoru-nedir', blogLabel: 'Supertrend'
     },
     {
       label: 'Momentum',
@@ -2560,7 +2560,7 @@ function renderSummary(s, signalData) {
       detail: adxStrength + (adxNum ? ' (' + Number(adxNum).toFixed(1).replace('.', ',') + ')' : ''),
       techDetail: 'ADX(14): ' + _trNum(adxNum) + ' · DI+: ' + _trNum(s.di_plus) + ' · DI−: ' + _trNum(s.di_minus),
       ok: s.signal === 'SAT' ? adxBear : adxBull,
-      blog: '/blog/adx-indikatoru-nedir'
+      blog: '/blog/adx-indikatoru-nedir', blogLabel: 'ADX'
     },
     {
       label: 'Vade Uyumu',
@@ -2569,15 +2569,26 @@ function renderSummary(s, signalData) {
       techDetail: 'EMA12: ' + _trNum(s.e12) + ' · EMA99: ' + _trNum(s.e99) +
         (_emaDb && _emaDb.diff_pct != null ? ' · fark: %' + String(_emaDb.diff_pct).replace('.', ',') : ''),
       ok: s.signal === 'SAT' ? e12Bear : e12Bull,
-      blog: '/blog/ema-hareketli-ortalama-nedir'
+      blog: '/blog/ema-hareketli-ortalama-nedir', blogLabel: 'EMA'
     },
   ].map(i => Object.assign(i, { tooltip: _IND_TOOLTIPS[i.label] || '' }));
 
   // Tech details for expandable section — renk-kodlu satırlar (ind-badge ile aynı bull/bear/neutral mantığı)
-  const techDetailsHtml = inds.map(i => {
+  /* 21.09 (K-AT): `blog:` alani bugune kadar SADECE olu `data-link` ozniteligine
+     yaziliyordu, hicbir JS onu okumuyordu -> gostergeleri anlatan 4 blog yazisi
+     /hisse/* sayfasindan HIC erisilemiyordu. Artik teknik detay satirinda gercek
+     bir baglanti; adi hedefin konusudur (K-AS: SC 2.4.4). */
+  const _indLink = (href, label) =>
+    href ? ' <a class="tech-row-link" href="' + href + '">' + label + ' nedir?</a>' : '';
+  let techDetailsHtml = inds.map(i => {
     const stateCls = i.ok ? (s.signal === 'SAT' ? 'tech-row-bear' : 'tech-row-bull') : 'tech-row-neutral';
-    return '<div class="tech-row ' + stateCls + '"><span class="tech-row-dot"></span>' + i.techDetail + '</div>';
+    return '<div class="tech-row ' + stateCls + '"><span class="tech-row-dot"></span>' + i.techDetail +
+           _indLink(i.blog, i.blogLabel) + '</div>';
   }).join('');
+  if (signalData && signalData.rsi != null) {
+    techDetailsHtml += '<div class="tech-row tech-row-neutral"><span class="tech-row-dot"></span>RSI(14): ' +
+      _trNum(signalData.rsi) + _indLink('/blog/rsi-gostergesi-nedir', 'RSI') + '</div>';
+  }
   const techContentEl = document.getElementById('indTechContent');
   if (techContentEl) techContentEl.innerHTML = techDetailsHtml;
   let indHtml = inds.map(ind => {
@@ -2585,7 +2596,7 @@ function renderSummary(s, signalData) {
       ? (s.signal === 'SAT' ? 'ind-badge ind-bear' : 'ind-badge ind-bull')
       : 'ind-badge ind-neutral';
     return `<span class="${cls}">${ind.label}<span class="ind-detail">${ind.detail}</span></span>` +
-      `<button type="button" class="ind-help" data-tooltip="${(ind.tooltip||'Bu gösterge hakkında detayl\u0131 bilgi i\u00e7in metodolojiye bakın.').replace(/"/g,'&quot;')}" data-link="${ind.blog||''}" aria-label="${ind.label} nedir?">?</button>`;
+      `<button type="button" class="ind-help" data-tooltip="${(ind.tooltip||'Bu gösterge hakkında detayl\u0131 bilgi i\u00e7in metodolojiye bakın.').replace(/"/g,'&quot;')}" aria-label="${ind.label} açıklamasını göster">?</button>`;
   }).join('');
 
   /* RSI14 badge — Faz 1 #3: 6-zone */
@@ -2604,7 +2615,7 @@ function renderSummary(s, signalData) {
                     rsi < 30 ? '🔵' : '';
     const rsiLbl = rsiIcon ? `${rsiIcon} ${zone}` : zone || 'Normal';
     indHtml += `<span class="${rsiCls}">RSI ${_trNum(rsi)}<span class="ind-detail">${rsiLbl}</span></span>` +
-      `<button type="button" class="ind-help" data-tooltip="RSI: 0-100 aras\u0131 momentum g\u00f6stergesi. 30 alt\u0131 a\u015f\u0131r\u0131 sat\u0131m, 30-45 dip toparlanmas\u0131, 45-60 ideal giri\u015f penceresi, 60-70 trend g\u00fc\u00e7leniyor, 70-80 dikkatli, 80 \u00fcst\u00fc a\u015f\u0131r\u0131 al\u0131m." data-link="/blog/rsi-gostergesi-nedir" aria-label="RSI nedir?">?</button>`;
+      `<button type="button" class="ind-help" data-tooltip="RSI: 0-100 aras\u0131 momentum g\u00f6stergesi. 30 alt\u0131 a\u015f\u0131r\u0131 sat\u0131m, 30-45 dip toparlanmas\u0131, 45-60 ideal giri\u015f penceresi, 60-70 trend g\u00fc\u00e7leniyor, 70-80 dikkatli, 80 \u00fcst\u00fc a\u015f\u0131r\u0131 al\u0131m." aria-label="RSI açıklamasını göster">?</button>`;
   }
 
   /* Hacim oranı badge (sadece dikkat çekici olduğunda göster) */
