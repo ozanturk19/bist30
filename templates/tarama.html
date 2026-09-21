@@ -99,7 +99,7 @@
       <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
       </svg>
-      <button class="search-clear" id="searchClearBtn" onclick="clearSearch()" title="Temizle" aria-label="Aramayı temizle">×</button>
+      <button class="search-clear" id="searchClearBtn" onclick="clearSearch()" aria-label="Aramayı temizle">×</button>
     </div>
 
     <div class="filter-actions">
@@ -126,7 +126,7 @@
       </select>
       <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:var(--bp-text-sm);border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
         data-tip="Teknik Güç Skoru: Birleşik kalite (günlük hacim oranı + ADX + RSI + Teyit) — 💎 rozeti bu skordan belirlenir. En kaliteli hisseler üstte.&#10;Trend Gücü: Sadece ADX. 💎 rozetli bir hisse ADX düşük olabilir.&#10;Günlük Hacim Oranı: bugünkü hacim / 20 günlük ortalama — Teknik Güç Skoru'ndaki hacim bileşeniyle aynı değerdir. Diğer sayfalardaki RVOL ise 5 günlük ortalamayı kullanır, ayrı bir sayıdır.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
-      <button onclick="exportCSV()" title="Sonuçları CSV olarak indir"
+      <button onclick="exportCSV()" data-tip="Sonuçları CSV olarak indir"
         style="background:rgba(var(--bp-brand-rgb),.1);border:1px solid rgba(var(--bp-brand-rgb),.3);color:var(--bp-brand);
                border-radius:var(--bp-radius);padding:5px 11px;font-size:var(--bp-text-sm);cursor:pointer;font-family:inherit;
                display:flex;align-items:center;gap:5px;transition:all .15s"
@@ -244,7 +244,7 @@
         <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
         </svg>
-        <button class="search-clear" id="searchClearBtnTemel" onclick="clearSearchTemel()" title="Temizle" aria-label="Aramayı temizle">×</button>
+        <button class="search-clear" id="searchClearBtnTemel" onclick="clearSearchTemel()" aria-label="Aramayı temizle">×</button>
       </div>
 
       <div class="filter-actions">
@@ -1015,7 +1015,7 @@ function renderTemelResults(rows, count) {
     const col = _bandColorVar(band);
     const pct = Math.max(4, Math.min(100, score));
     return `<div class="score-cell" tabindex="0" data-tip="Temel Analiz Skoru ${score}/100 — ${_bandLabel(band).replace(/^\S+\s/,'')}${partial ? ' · sınırlı veri' : ''}">
-      <span class="score-val" style="color:var(${col})">${score}${partial ? ' <span class="partial-dot" title="Sınırlı veri" aria-label="Sınırlı veri">◐</span>' : ''}</span>
+      <span class="score-val" style="color:var(${col})">${score}${partial ? ' <span class="partial-dot" data-tip="Sınırlı veri — bu hissenin bazı göstergeleri hesaplanamadı" aria-label="Sınırlı veri">◐</span>' : ''}</span>
       <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%;background:var(${col})"></div></div>
     </div>`;
   };
@@ -1189,7 +1189,7 @@ window.addEventListener('popstate', () => {
    önceki tek-atım eksikliği burada düzeldi) */
 bpStartDataQualityPolling();
 </script>
-<script src="/static/bp-search.js?v=82" defer></script>
+<script src="/static/bp-search.js?v=83" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 <script src="/static/learning-mode.js?v=7" defer></script>
 {% include '_mobile_nav_partial.html' %}

@@ -160,25 +160,25 @@
   <div class="header-price-group">
     <span class="header-price" id="hpPrice">{{ ssr_signal.price|tr_price if ssr_signal and ssr_signal.price is not none else '—' }}</span>
     <span class="header-chg neu" id="hpChg">—</span>
-    <span class="signal-badge signal-BEKLE" id="hpSignal" title="Yükleniyor">⋯</span>
+    <span class="signal-badge signal-BEKLE" id="hpSignal">⋯</span>
     <span id="hpAnomalyBadge" style="display:none" class="anomaly-badge"><span aria-hidden="true">⚠</span> Anomal</span>
   </div>
   {% if sector %}
   <span class="hib-sector">{{ sector }}</span>
-  <a href="{{ compare_url }}" class="hib-compare" title="Sektördeki diğer hisselerle karşılaştır">
+  <a href="{{ compare_url }}" class="hib-compare" data-tip="Sektördeki diğer hisselerle karşılaştır">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
     Karşılaştır
   </a>
   {% endif %}
   <span class="hib-action-bar">
-    <button class="hib-action-btn" id="hibStarBtn" type="button" onclick="togglePortfolio()" title="Portföye ekle / çıkar" aria-label="Portföye ekle" aria-pressed="false">
+    <button class="hib-action-btn" id="hibStarBtn" type="button" onclick="togglePortfolio()" data-tip="Portföye ekle / çıkar" aria-label="Portföye ekle" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
         <line x1="12" y1="5" x2="12" y2="19"/>
         <line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
       <span class="hib-action-lbl">Portföye ekle</span>
     </button>
-    <button class="hib-action-btn" id="hibBellBtn" type="button" onclick="toggleHisseWatch()" title="Sinyal değişiminde bildirim al" aria-label="Bildirim al" aria-pressed="false">
+    <button class="hib-action-btn" id="hibBellBtn" type="button" onclick="toggleHisseWatch()" data-tip="Sinyal değişiminde bildirim al" aria-label="Bildirim al" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
         <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -611,7 +611,7 @@
        Dokunma hedefi min-height:24 varyantın içinde korunuyor. #}
     <details class="bp-detail-toggle bp-detail-toggle--inline" id="signalSummaryDetails" style="margin-top:10px;padding-top:10px">
       <summary class="bp-detail-toggle-summary"
-               title="Aç/kapat — ADX, RSI, EMA, DI±, Supertrend göstergeleri ve metodoloji linkleri">
+               data-tip="Aç/kapat — ADX, RSI, EMA, DI±, Supertrend göstergeleri ve metodoloji linkleri">
         <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
         <span class="bp-detail-toggle-label">Detaylı teknik göstergeler <span class="bp-detail-toggle-hint">— aç/kapat</span></span>
       </summary>
@@ -622,11 +622,11 @@
           <p class="commentary-text" id="commentaryText"></p>
         </div>
         <p style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin:6px 0 0;line-height:1.5">
-          Göstergeler (<a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" title="Metodoloji — ADX">ADX</a>,
-          <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" title="Metodoloji — RSI">RSI</a>,
-          <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" title="Metodoloji — EMA">EMA</a>,
-          <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" title="Metodoloji — DI±">DI±</a>,
-          <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" title="Metodoloji — Supertrend">Supertrend</a>)
+          Göstergeler (<a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — ADX">ADX</a>,
+          <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" data-tip="Metodoloji — RSI">RSI</a>,
+          <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" data-tip="Metodoloji — EMA">EMA</a>,
+          <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — DI±">DI±</a>,
+          <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" data-tip="Metodoloji — Supertrend">Supertrend</a>)
           algoritmik sinyalin temelidir.
           Sinyal kartları ve giriş analizi aşağıda detaylandırılmıştır.
         </p>
@@ -925,7 +925,7 @@
          gauge sabit mavi (--bp-brand) renkliydi, skordan bağımsız — hero'daki
          AYNI skorun rengiyle (_hc, AL/SAT yön+güç bazlı) hizalandı. #}
       <!-- Teknik Güç Skoru — mevcut kaynak (ssr_signal), hs'ten bağımsız -->
-      <div class="gauge teknik-gauge" title="Teknik Güç Skoru — Supertrend + ADX + hacim teyidi"
+      <div class="gauge teknik-gauge" data-tip="Teknik Güç Skoru — Supertrend + ADX + hacim teyidi"
            style="--band-color:{{ _hc }};"
            role="img" aria-label="Teknik Güç Skoru {{ new_teknik_score }} / 100">
         <svg class="gauge-ring" viewBox="0 0 100 100">
@@ -943,7 +943,7 @@
       {% if hs_available %}
       <!-- Temel Analiz Skoru -->
       <div class="gauge temel-gauge" data-missing="{{ 'true' if temel_missing else 'false' }}"
-           title="Temel Analiz Skoru — 4 eksenli finansal sağlık"
+           data-tip="Temel Analiz Skoru — 4 eksenli finansal sağlık"
            role="img" aria-label="Temel Analiz Skoru {{ temel_score if not temel_missing else 'veri yok' }} / 100">
         {# bughunt-13.09 (derinlemesine tasarım araştırması, P0-3): "YENİ" rozeti
            koşulsuzdu, git log ile 09.09 (Faz 4 lansmanı) tarihli olduğu
@@ -1053,7 +1053,7 @@
                 style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;letter-spacing:0.4px;transition:all .15s"
                 onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
                 onmouseout="this.style.borderColor='var(--bp-border)';this.style.color='var(--bp-text3)'"
-                title="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
+                data-tip="Gösterge açıklamalarını göster/gizle">? Açıkla</button>
         <button id="indDetailToggle" type="button" onclick="toggleIndDetails()"
                 style="background:transparent;border:1px solid var(--bp-border);color:var(--bp-text3);font-size:var(--bp-text-xs);padding:4px 10px;min-height:26px;border-radius:var(--bp-radius);cursor:pointer;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;transition:all .15s"
                 onmouseover="this.style.borderColor='var(--bp-border2)';this.style.color='var(--bp-text2)'"
@@ -1501,7 +1501,7 @@
     <span><a href="/gizlilik" target="_blank" class="da-link">Gizlilik Politikası</a>'nı okudum, e-posta adresimin işlenmesini kabul ediyorum.</span>
   </label>
   <button class="da-close" onclick="document.getElementById('hisseSubCta').style.display='none'"
-    title="Kapat" aria-label="Kapat">×</button>
+    aria-label="Kapat">×</button>
 </div>
 
 </main>
@@ -3194,7 +3194,7 @@ async function loadKapDisclosures() {
         <div class="kap-item-top">
           <span class="kap-class-badge ${cls}">${lbl}</span>
           <span class="kap-summary">${summaryHtml}</span>
-          ${d.url ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" title="KAP'ta aç" aria-label="KAP'ta aç">↗</a>` : ''}
+          ${d.url ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" aria-label="KAP'ta aç">↗</a>` : ''}
         </div>
         <div class="kap-meta">
           <span>${dateShort}</span>
@@ -3574,7 +3574,7 @@ document.addEventListener('visibilitychange', () => {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=82" defer></script>
+<script src="/static/bp-search.js?v=83" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 <script src="/static/js/bp-chart-common.js?v=4"></script>
 <script src="/static/learning-mode.js?v=7" defer></script>

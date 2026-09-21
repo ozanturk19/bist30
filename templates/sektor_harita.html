@@ -67,7 +67,7 @@
     </div>
 
     <div class="heatmap" id="heatmap">{% for sec in ssr_sectors %}{% set color = 'var(--bp-al)' if sec.score >= 10 else 'var(--bp-sat)' if sec.score <= -10 else 'var(--bp-bkl)' %}{% set al_pct = (sec.al / sec.total * 100)|round(0)|int if sec.total > 0 else 0 %}{% set sat_pct = (sec.sat / sec.total * 100)|round(0)|int if sec.total > 0 else 0 %}{% set heat_op = [0.28, 0.05 + (sec.score|abs) / 100 * 0.22]|min %}
-      <a href="/tarama?sector={{ sec.name|urlencode }}" class="sector-card" data-sector="{{ sec.name }}" data-href="/tarama?sector={{ sec.name|urlencode }}" data-heat-target="{{ '%.3f'|format(heat_op) }}" style="--heat-color:{{ color }};--heat-opacity:0;cursor:pointer;text-decoration:none;display:block" title="{{ sec.name }} sektöründeki tüm hisseleri taramaya götür">
+      <a href="/tarama?sector={{ sec.name|urlencode }}" class="sector-card" data-sector="{{ sec.name }}" data-href="/tarama?sector={{ sec.name|urlencode }}" data-heat-target="{{ '%.3f'|format(heat_op) }}" style="--heat-color:{{ color }};--heat-opacity:0;cursor:pointer;text-decoration:none;display:block" data-tip="{{ sec.name }} sektöründeki tüm hisseleri taramaya götür">
         <h2 class="sec-name da-display" style="color:{{ color }}">{{ sec.name }}</h2>
         <div class="sec-stats">
           {% if sec.premium %}<span class="stat-pill pill-prem" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" tabindex="0">⭐ {{ sec.premium }}</span>{% endif %}
@@ -222,7 +222,7 @@ function renderHeatmap(stocks) {
     const heatOpacity = Math.min(0.28, 0.05 + Math.abs(sec.score) / 100 * 0.22);
 
     return `
-    <div class="sector-card" data-sector="${esc(sec.name)}" data-href="/tarama?sector=${encodeURIComponent(sec.name)}" data-heat-target="${heatOpacity.toFixed(3)}" style="--heat-color:${color};--heat-opacity:0;cursor:pointer" title="${esc(sec.name)} sektöründeki tüm hisseleri taramaya götür" tabindex="0" role="link">
+    <div class="sector-card" data-sector="${esc(sec.name)}" data-href="/tarama?sector=${encodeURIComponent(sec.name)}" data-heat-target="${heatOpacity.toFixed(3)}" style="--heat-color:${color};--heat-opacity:0;cursor:pointer" data-tip="${esc(sec.name)} sektöründeki tüm hisseleri taramaya götür" tabindex="0" role="link">
       <h2 class="sec-name da-display" style="color:${color}">${esc(sec.name)}</h2>
       <div class="sec-stats">
         ${premPill}
@@ -600,7 +600,7 @@ function fmtPrice(p) {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=82" defer></script>
+<script src="/static/bp-search.js?v=83" defer></script>
 <script src="/static/js/bp-tooltip.js?v=4"></script>
 
 {% include '_mobile_nav_partial.html' %}

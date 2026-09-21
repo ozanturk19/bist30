@@ -560,7 +560,6 @@
     var refreshBtn = document.createElement('button');
     refreshBtn.className = 'bp-refresh-btn';
     refreshBtn.id = 'bpRefreshBtn';
-    refreshBtn.title = 'Sayfayı yenile';
     refreshBtn.setAttribute('aria-label', 'Yenile');
     refreshBtn.onclick = function() { window.bpSmartRefresh(); };
     refreshBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
@@ -813,9 +812,13 @@
       badge.className = 'macro-stale-badge';
       badge.setAttribute('role', 'img');
       badge.setAttribute('aria-label', 'Veriler gecikmeli olabilir');
-      badge.title = 'Piyasa verileri gecikmeli olabilir (son güncellemeden bu yana zaman geçti)';
+      // K-AH: `title` burada OLU idi -- asagidaki pointer-events:none yuzunden
+      // masaustunde bile hic acilmiyordu. [data-tip] + pointer-events:auto ile
+      // aciklama hover/odak/dokunma ile erisilebilir hale geldi.
+      badge.setAttribute('data-tip', 'Piyasa verileri gecikmeli olabilir (son güncellemeden bu yana zaman geçti)');
+      badge.tabIndex = 0;
       badge.textContent = '⏱';
-      badge.style.cssText = 'position:absolute;top:2px;left:6px;font-size:10px;line-height:1;opacity:.75;z-index:4;pointer-events:none;color:inherit';
+      badge.style.cssText = 'position:absolute;top:2px;left:6px;font-size:10px;line-height:1;opacity:.75;z-index:4;pointer-events:auto;cursor:help;color:inherit';
       bar.appendChild(badge);
     }
     badge.style.display = isStale ? 'inline' : 'none';

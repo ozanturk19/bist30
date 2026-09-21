@@ -62,7 +62,7 @@
       Tarayıcı geçmişini, site verilerini veya çerezleri temizlerseniz ve Cloud Sync kullanmadıysanız <strong style="color:var(--bp-text)">portföy silinir.</strong>
       Önemli pozisyonlarınızı ayrıca not almanızı öneririz.
     </div>
-    <button class="ls-warning-close" onclick="dismissLsWarning()" title="Kapat" aria-label="Kapat">×</button>
+    <button class="ls-warning-close" onclick="dismissLsWarning()" aria-label="Kapat">×</button>
   </div>
 
   <!-- Özet kartlar -->
@@ -110,7 +110,7 @@
         <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-bottom:6px">Aktif Token:</div>
         <div style="display:flex;gap:8px;align-items:center;background:var(--bp-bg);border:1px solid var(--bp-border);border-radius:var(--bp-radius-7);padding:8px 12px;margin-bottom:12px">
           <code id="cloudActiveToken" style="font-size:var(--bp-text-sm);color:var(--bp-accent-cyan);flex:1;word-break:break-all"></code>
-          <button onclick="copyCloudLink()" style="background:none;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-md)" title="Kopyala"><span role="img" aria-label="Kopyala">📋</span></button>
+          <button onclick="copyCloudLink()" style="background:none;border:none;color:var(--bp-text3);cursor:pointer;font-size:var(--bp-text-md)" data-tip="Bağlantıyı panoya kopyala"><span role="img" aria-label="Kopyala">📋</span></button>
         </div>
         <div style="display:flex;gap:8px">
           <button id="cloudSaveBtn" onclick="saveToCloud()" style="flex:1;background:rgba(var(--bp-al-rgb),.1);border:1px solid rgba(var(--bp-al-rgb),.2);color:var(--bp-al);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
@@ -119,7 +119,7 @@
           <button id="cloudLoadFromCloudBtn" onclick="loadFromCloud()" style="flex:1;background:rgba(var(--bp-accent-cyan-rgb),.08);border:1px solid rgba(var(--bp-accent-cyan-rgb),.15);color:var(--bp-accent-cyan);padding:8px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-base);font-weight:600;cursor:pointer">
             <span aria-hidden="true">⬇</span> Sunucudan Yükle
           </button>
-          <button onclick="forgetCloudToken()" style="background:none;border:1px solid var(--bp-border);color:var(--bp-text3);padding:8px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer" title="Token'ı unut (yerel portföy kalır)">
+          <button onclick="forgetCloudToken()" style="background:none;border:1px solid var(--bp-border);color:var(--bp-text3);padding:8px 10px;border-radius:var(--bp-radius-7);font-size:var(--bp-text-sm);cursor:pointer" data-tip="Token'ı unut (yerel portföy kalır)">
             <span aria-hidden="true">✕</span> Unut
           </button>
         </div>
@@ -152,23 +152,23 @@
   <div class="pf-panel-header">
     <h2 class="pf-panel-title">Pozisyonlarım</h2>
     <div class="pf-actions">
-      <button class="btn-action" onclick="exportPortfolio()" title="Portföyü JSON dosyası olarak indir">
+      <button class="btn-action" onclick="exportPortfolio()" data-tip="Portföyü JSON dosyası olarak indir">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> JSON
       </button>
-      <button class="btn-action" onclick="exportCSV()" title="Portföyü Excel/CSV dosyası olarak indir">
+      <button class="btn-action" onclick="exportCSV()" data-tip="Portföyü Excel/CSV dosyası olarak indir">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg> CSV
       </button>
-      <label class="btn-action" title="Daha önce dışa aktardığın JSON dosyasını yükle">
+      <label class="btn-action" data-tip="Daha önce dışa aktardığın JSON dosyasını yükle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> İçe Aktar
         <input type="file" id="importFileInput" accept=".json" onchange="importPortfolio(event)">
       </label>
-      <button class="btn-action danger" onclick="clearPortfolio()" title="Tüm pozisyonları sil">
+      <button class="btn-action danger" onclick="clearPortfolio()" data-tip="Tüm pozisyonları sil">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> Temizle
       </button>
       <!-- Cloud Sync -->
       <button class="btn-action" id="cloudBtn" onclick="openCloudSync()"
         style="background:rgba(var(--bp-brand-rgb),.08);border-color:rgba(var(--bp-brand-rgb),.48);color:var(--bp-brand)"
-        title="Cihazlar arası senkronizasyon">
+        data-tip="Cihazlar arası senkronizasyon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg> Cloud Sync
       </button>
     </div>
@@ -662,7 +662,7 @@ function render() {
       ? `<span class="${pnlPct>=0?'pos-pnl':'neg-pnl'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1).replace('.', ',')}%</span>`
       : '<span class="neu-pnl">—</span>';
     const entryBtn = (sig === 'AL' && live && live.signal_price)
-      ? `<button class="btn-entry" onclick="fillEntry('${esc(escJsStr(p.ticker))}',${live.signal_price})" title="Sinyal giriş fiyatı: ${fmt(live.signal_price)} ₺">Giriş ${fmt(live.signal_price)}₺</button>`
+      ? `<button class="btn-entry" onclick="fillEntry('${esc(escJsStr(p.ticker))}',${live.signal_price})" data-tip="Sinyal giriş fiyatı: ${fmt(live.signal_price)} ₺">Giriş ${fmt(live.signal_price)}₺</button>`
       : '';
     const sigBadge = sig !== '—'
       ? `<span class="signal-badge signal-${sig}">${sig==='AL'?'▲':sig==='SAT'?'▼':'●'} ${sigLabelTooltip(sig)}</span>${entryBtn}`
@@ -680,7 +680,7 @@ function render() {
       <td>${pnlPctHtml}</td>
       <td>${sigBadge}</td>
       <td class="hm td-spark">${sparkHtml}</td>
-      <td><button class="btn-edit" onclick="editPosition(${p.id})" title="Düzenle" aria-label="${esc(p.ticker)} pozisyonunu düzenle">✎</button><button class="btn-del" onclick="removePosition(${p.id})" title="Kaldır" aria-label="${esc(p.ticker)} pozisyonunu kaldır">✕</button></td>
+      <td><button class="btn-edit" onclick="editPosition(${p.id})" aria-label="${esc(p.ticker)} pozisyonunu düzenle">✎</button><button class="btn-del" onclick="removePosition(${p.id})" aria-label="${esc(p.ticker)} pozisyonunu kaldır">✕</button></td>
     </tr>`;
     // CPO-DEV2-100: Yol A - tarama.html #mobileResultCards ile ayni desen,
     // <=899px'te tabloyla ayni veri kart formatinda gosterilir.
@@ -689,8 +689,8 @@ function render() {
         <a href="/hisse/${esc(p.ticker)}" class="pf-mticker">${esc(p.ticker)}</a>
         <div class="pf-mtop-right">
           ${sigBadge}
-          <button class="btn-edit" onclick="editPosition(${p.id})" title="Düzenle" aria-label="${esc(p.ticker)} pozisyonunu düzenle">✎</button>
-          <button class="btn-del" onclick="removePosition(${p.id})" title="Kaldır" aria-label="${esc(p.ticker)} pozisyonunu kaldır">✕</button>
+          <button class="btn-edit" onclick="editPosition(${p.id})" aria-label="${esc(p.ticker)} pozisyonunu düzenle">✎</button>
+          <button class="btn-del" onclick="removePosition(${p.id})" aria-label="${esc(p.ticker)} pozisyonunu kaldır">✕</button>
         </div>
       </div>
       <div class="pf-mprice-row">
@@ -1013,7 +1013,8 @@ document.getElementById('cloudModal').addEventListener('click', function(e) {
 // Makro Ticker Bandı
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
 </script>
-<script src="/static/bp-search.js?v=82" defer></script>
+<script src="/static/bp-search.js?v=83" defer></script>
+<script src="/static/js/bp-tooltip.js?v=4"></script>
 <script src="/static/stale-banner.js?v=cfbf4001"></script>
 <script>bpStartDataQualityPolling();</script>
 

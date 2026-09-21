@@ -509,7 +509,7 @@ header{
       <span class="da-skel" style="display:block;width:80%;height:1.1em;border-radius:6px;margin-bottom:8px"></span>
       <span class="da-skel" style="display:block;width:60%;height:1.1em;border-radius:6px"></span>
     </p>
-    <span class="da-det-badge" title="Bu özet bir LLM tarafından değil, sabit kurallarla (en yüksek |değişim|, en güçlü sektör) üretildi.">⚙️ Deterministik özet · kural tabanlı</span>
+    <span class="da-det-badge" tabindex="0" data-tip="Bu özet bir LLM tarafından değil, sabit kurallarla (en yüksek |değişim|, en güçlü sektör) üretildi.">⚙️ Deterministik özet · kural tabanlı</span>
   </div>
 </section>
 
@@ -705,7 +705,8 @@ header{
 
 <script src="/static/bp-format.js?v=b6c7a716a"></script>
 <script src="/static/stale-banner.js?v=cfbf4001"></script>
-<script src="/static/bp-search.js?v=82" defer></script>
+<script src="/static/bp-search.js?v=83" defer></script>
+<script src="/static/js/bp-tooltip.js?v=4"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════════════════
    DATA-ART ANA SAYFA — veri katmanı. Gerçek endpoint'ler:
@@ -1003,10 +1004,10 @@ header{
           '</div>' +
           '<span class="da-spot-signal ' + sig.cls + '">● ' + sig.label + '</span>' +
           '<div class="da-spot-subs">' +
-            (useBps && hasTek ? '<div class="da-spot-sub-row"><span class="lbl" title="Teknik Güç Skoru — ADX, hacim teyidi ve RSI bölgesinin bileşimi">Teknik</span><div class="bar"><i style="width:' + s.signal_strength + '%;background:' + tekCol + '"></i></div><span class="val da-num" style="color:' + tekCol + '">' + fmtNum0(s.signal_strength) + '</span></div>' : '') +
-            '<div class="da-spot-sub-row"><span class="lbl" title="ADX — trend gücü (25 üzeri güçlü, /metodoloji)">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.adx!=null?Math.round(s.adx):'—') + '</span></div>' +
-            '<div class="da-spot-sub-row"><span class="lbl" title="RVOL — 5 günlük ortalama hacim / 20 günlük ortalama hacim">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2).replace('.', ',')+'×':'—') + '</span></div>' +
-            '<div class="da-spot-sub-row"><span class="lbl" title="RSI — göreceli güç endeksi, aşırı alım/satım bölgesi">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rsi!=null?Math.round(s.rsi):'—') + '</span></div>' +
+            (useBps && hasTek ? '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="Teknik Güç Skoru — ADX, hacim teyidi ve RSI bölgesinin bileşimi">Teknik</span><div class="bar"><i style="width:' + s.signal_strength + '%;background:' + tekCol + '"></i></div><span class="val da-num" style="color:' + tekCol + '">' + fmtNum0(s.signal_strength) + '</span></div>' : '') +
+            '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="ADX — trend gücü (25 üzeri güçlü, /metodoloji)">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.adx!=null?Math.round(s.adx):'—') + '</span></div>' +
+            '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="RVOL — 5 günlük ortalama hacim / 20 günlük ortalama hacim">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2).replace('.', ',')+'×':'—') + '</span></div>' +
+            '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="RSI — göreceli güç endeksi, aşırı alım/satım bölgesi">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rsi!=null?Math.round(s.rsi):'—') + '</span></div>' +
           '</div>' +
           (useBps ? '' :
             '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-fund-teaser" style="text-decoration:none">BorsaPusula Skoru → hisse sayfasında</a>') +
@@ -1111,7 +1112,7 @@ header{
       var pos = s.score >= 0;
       var alpha = Math.max(0.10, Math.min(0.5, Math.abs(s.score) / maxAbs * 0.42 + 0.08));
       var arrowPath = pos ? 'M12 4 L19 16 H5 Z' : 'M12 20 L19 8 H5 Z';
-      return '<div class="da-tile ' + (pos?'da-tile-pos':'da-tile-neg') + ' ' + sizeCls + '" style="--a:' + alpha.toFixed(2) + '" title="' + s.al + ' Güçlü · ' + s.sat + ' Bozuldu · ' + s.bekle + ' Yatay (toplam ' + s.total + ')">' +
+      return '<div class="da-tile ' + (pos?'da-tile-pos':'da-tile-neg') + ' ' + sizeCls + '" style="--a:' + alpha.toFixed(2) + '" data-tip="' + s.al + ' Güçlü · ' + s.sat + ' Bozuldu · ' + s.bekle + ' Yatay (toplam ' + s.total + ')">' +
         '<div class="name">' + esc(s.name) + '</div>' +
         '<div><div class="chg ' + (pos?'tile-up':'tile-down') + ' da-num"><svg viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor"/></svg>' + (pos?'+':'') + fmtNum0(s.score) + '<span class="u">skor</span></div>' +
         '<div class="meta">' + s.al + ' Güçlü / ' + s.sat + ' Bozuldu' + (s.avg_rvol!=null ? ' · RVOL ' + s.avg_rvol.toFixed(2).replace('.', ',') + '×' : '') + '</div></div>' +
