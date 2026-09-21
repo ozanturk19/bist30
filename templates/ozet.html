@@ -477,8 +477,10 @@ window.addEventListener('pageshow', (ev) => {
      tasimayan 46 durak. Desenin diger 5 yuzeyi (tarama/hisse/karsilastir/
      bilanco/temettu) bu dosyayi zaten yukluyor. -->
 <script src="/static/js/bp-tooltip.js?v=01078545" defer></script>
-<script src="/static/bp-search.js?v=0e78a076" defer></script>
-<script src="/static/stale-banner.js?v=cfbf4001"></script>
+<script src="/static/bp-search.js?v=f13259b5" defer></script>
+<!-- K-BL: stale-banner.js TR takvim gunu icin bp-format.js kanonunu cagirir; ONCE yuklenmeli. -->
+<script src="/static/bp-format.js?v=034a65d2"></script>
+<script src="/static/stale-banner.js?v=60af70e8"></script>
 <script>bpStartDataQualityPolling();</script>
 
 {% include '_mobile_nav_partial.html' %}

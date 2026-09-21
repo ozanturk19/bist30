@@ -46,21 +46,47 @@ function bpParseTrDate(s) {
   return { y: y, m: mo, d: d };
 }
 
-/* Bugünün TR takvim günü. Kullanıcının cihaz saat dilimi ne olursa olsun
-   BIST günü esas alınır (yurt dışındaki kullanıcı bir gün kaymasın). */
-function bpTodayTr() {
+/* HERHANGİ BİR ANIN TR takvim günü. Kullanıcının cihaz saat dilimi ne olursa
+   olsun BIST günü esas alınır (yurt dışındaki kullanıcı bir gün kaymasın).
+   K-BL (21.09): bu fonksiyon `bpTodayTr()`den genelleştirildi — stale-banner
+   "şu an"ı değil, `ageS` saniye ÖNCEKİ anı TR gününe çevirmek zorundaydı ve
+   bunu kendi içinde getDate()/getMonth() ile, yani CİHAZ saat diliminde
+   yapıyordu (aşağıdaki K-BD notuyla birebir aynı sınıf hata, ikinci çağrı
+   yerinde). Kanon: görünen HER TR takvim günü bu fonksiyondan türer. */
+function bpTrDatePartsAt(dateOrMs) {
+  var when = (dateOrMs instanceof Date) ? dateOrMs : new Date(dateOrMs);
+  if (isNaN(when.getTime())) return null;
   try {
     var parts = new Intl.DateTimeFormat('en-CA', {
       timeZone: BP_TZ_TR, year: 'numeric', month: '2-digit', day: '2-digit'
-    }).formatToParts(new Date());
+    }).formatToParts(when);
     var o = {};
     for (var i = 0; i < parts.length; i++) o[parts[i].type] = parts[i].value;
     if (o.year && o.month && o.day) {
       return { y: parseInt(o.year, 10), m: parseInt(o.month, 10), d: parseInt(o.day, 10) };
     }
   } catch (e) { /* Intl/timeZone desteklenmiyor — yerel güne düş */ }
-  var n = new Date();
-  return { y: n.getFullYear(), m: n.getMonth() + 1, d: n.getDate() };
+  return { y: when.getFullYear(), m: when.getMonth() + 1, d: when.getDate() };
+}
+
+/* Bugünün TR takvim günü. */
+function bpTodayTr() {
+  return bpTrDatePartsAt(new Date());
+}
+
+/* ŞU ANIN BIST SAATİ, "HH:MM:SS". K-BL (21.09): header'daki canlı saat rozeti
+   `new Date().getHours()` ile CİHAZIN saat diliminden okunuyordu — site ise
+   her yerde BIST saatini esas alıyor ("~18:00 TR": metodoloji, hakkinda,
+   yasal, hisse). Rozet bu yüzden bu dosyaya, TR takvim günü kanonunun yanına
+   taşındı: aynı saat dilimi sabitinden (BP_TZ_TR) türeyen tek bir yer.
+   Intl/timeZone yoksa null — çağıran rozeti GİZLER, yerel saati BIST saatiymiş
+   gibi göstermez. */
+function bpTrClock() {
+  try {
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: BP_TZ_TR, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    }).format(new Date());
+  } catch (e) { return null; }
 }
 
 /* signal_date ile bugün arasındaki TAKVİM GÜNÜ farkı. Bilinmiyorsa null. */

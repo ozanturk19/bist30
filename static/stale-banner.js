@@ -9,11 +9,22 @@
    (günde bir kez, gün-sonu kapanışı) çelişiyordu — Ozan'ın notu: mutlak
    tarih ("08.09 gün sonu verileri gösterilmektedir") her zaman daha doğru.
    ageS'ten geriye doğru gerçek takvim tarihini hesaplar. */
+/* K-BL (21.09): bu fonksiyon takvim gününü getDate()/getMonth() ile, yani
+   KULLANICININ CİHAZ SAAT DİLİMİNDE hesaplıyordu. Banner'ın söylediği şey
+   ("18.09 gün sonu verileri gösterilmektedir") bir BIST işlem günüdür; TR
+   gününden başka bir takvimde üretilemez. K-BD'de aynı hata dışa aktarım
+   dosya adında bulunup bp-format.js'te kanona bağlanmıştı — bu İKİNCİ çağrı
+   yeri o taramada görülmemişti (orada `toISOString`, burada `getDate()`:
+   aynı hata, farklı yazım).
+   Kanon yüklenmemişse (bp-format.js sayfada yoksa) TARİH ÜRETİLMEZ: null
+   döner ve çağıran zaten var olan "son güncelleme zamanı doğrulanamıyor"
+   dürüst metnine düşer — yanlış bir günü basmaktansa hiç basmamak. */
 function bpFmtUpdateDate(ageS) {
-  var d = new Date(Date.now() - ageS * 1000);
-  var dd = String(d.getDate()).padStart(2, '0');
-  var mm = String(d.getMonth() + 1).padStart(2, '0');
-  return dd + '.' + mm;
+  if (typeof bpTrDatePartsAt !== 'function') return null;
+  var t = bpTrDatePartsAt(Date.now() - ageS * 1000);
+  if (!t) return null;
+  var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+  return p2(t.d) + '.' + p2(t.m);
 }
 
 function bpUpdateStaleBanner(dq, ageS, refreshing) {
@@ -22,6 +33,9 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
   if (!banner) return;
   var hasAge = ageS != null && !isNaN(ageS);
   var dateTxt = hasAge ? bpFmtUpdateDate(ageS) : null;
+  /* K-BL: tarih üretilemediyse (kanon yok) "bilinmiyor" dalı kullanılır —
+     aşağıdaki üç dal da dateTxt'i yalnız hasAge ile koşulluyordu. */
+  if (!dateTxt) hasAge = false;
   var suffix = refreshing === true ? ' Yenileniyor...' : '';
   if (dq === 'critical') {
     var critTxt = hasAge

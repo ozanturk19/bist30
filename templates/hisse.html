@@ -1529,8 +1529,8 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=342ef281"></script>
-<script src="/static/stale-banner.js?v=cfbf4001"></script>
+<script src="/static/bp-format.js?v=034a65d2"></script>
+<script src="/static/stale-banner.js?v=60af70e8"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
 async function hisseSubscribe() {
@@ -1590,24 +1590,16 @@ function _loadChartLib() {
    2. timeVisible:false ile crosshair'de "00:00:00" kalkıyor
    3. setVisibleLogicalRange from değeri -260 ile sol label kırpılması engelleniyor */
 const _MTHS = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-/* tickMarkFormatter — time: "YYYY-MM-DD" string (app.py format), number (unix ts) veya {year,month,day}
-   type: 0=Year 1=Month 2=DayOfMonth (LC numeric constants — TickMarkType enum'a bağımlı değil) */
-function _tickFmt(time, type) {
-  let yr, mo, dy;
-  if (typeof time === 'string') {
-    const p = time.split('-');
-    yr = +p[0]; mo = +p[1] - 1; dy = +p[2];          // "2025-05-15" → month 0-indexed
-  } else if (typeof time === 'number') {
-    const d = new Date(time * 1000);
-    yr = d.getUTCFullYear(); mo = d.getUTCMonth(); dy = d.getUTCDate();
-  } else if (time && typeof time === 'object') {
-    yr = time.year; mo = (time.month || 1) - 1; dy = time.day;  // BusinessDay {year,month,day}
-  } else { return ''; }
-  if (type === 0) return String(yr);                             // Year
-  if (type === 1) return _MTHS[mo] || '';                        // Month
-  if (type === 2) return (_MTHS[mo] || '') + ' ' + dy;          // DayOfMonth → "Nis 10"
-  return '';
-}
+/* K-BL (21.09) — ÖLÜ KOPYA KALDIRILDI. Burada `_tickFmt(time, type)` adıyla,
+   `static/js/bp-chart-common.js` içindeki `fmtTickDate` ile SATIR SATIR aynı
+   fonksiyon duruyordu. bp-chart-common.js'in kendi dosya başlığı bu dosyayla
+   arasındaki kopya-bakım riskini gerekçe göstererek yazılmıştı; konsolidasyon
+   sırasında bu kopya silinmemiş. Üstelik çağrılmıyordu da: bu sayfa hafta
+   sonu boşluğu olmasın diye sequential-index eksenini ve kendi
+   `_tickFmtIdx`ini kullanıyor (K-BE ile aynı aile: hisse.html'de duran, ama
+   yürümeyen ikinci bir yazım). `_MTHS` KALIYOR — `_tickFmtIdx` ve
+   `_fmtDateShort` onu kullanıyor. Tarih ekseni formatı gerekirse kanon
+   `BPChart.fmtTickDate`tır. */
 
 const TICKER  = "{{ ticker }}";
 /* K-AN (21.09) TR SAYI BIÇIMI — KANONIK. Ham bir JS sayısı string'e
@@ -3676,7 +3668,7 @@ document.addEventListener('visibilitychange', () => {
 })();
 </script>
 
-<script src="/static/bp-search.js?v=0e78a076" defer></script>
+<script src="/static/bp-search.js?v=f13259b5" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
 <script src="/static/learning-mode.js?v=1417c5bb" defer></script>

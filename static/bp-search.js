@@ -104,12 +104,18 @@
        Notr gri + sabit nokta (nabiz yok) + "Yerel Saat" metnine cevrildi. */
     + '.bp-live-time{display:inline-flex;align-items:center;gap:5px;background:rgba(144,144,151,0.08);border:1px solid rgba(144,144,151,0.20);color:#909097;font-size:11px;font-weight:700;padding:5px 9px;border-radius:6px;font-family:"Space Grotesk",system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0.3px;white-space:nowrap}'
     + '.bp-live-dot{width:6px;height:6px;border-radius:50%;background:#909097;flex-shrink:0}'
+    /* K-BL: etiket KALICI — rozetin ne oldugunu soyleyen tek sey bu. */
+    + '.bp-live-time-label{opacity:.75;font-weight:600;letter-spacing:.5px;margin-right:1px}'
+    + '.bp-live-time-sec{opacity:.55}'
     + '.bp-refresh-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid #6e6e7a;color:#c7c5cd;font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;transition:background .15s,border-color .15s;text-transform:uppercase;letter-spacing:0.4px;font-family:"Space Grotesk",system-ui,sans-serif;flex-shrink:0;line-height:1}'
     + '.bp-refresh-btn:hover{background:rgba(184,195,255,0.08);border-color:#909097;color:#e5e1e4}'
     + '.bp-refresh-btn.spinning svg{animation:bpRefreshSpin 0.8s linear infinite}'
     + '@keyframes bpRefreshSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}'
     + '.bp-refresh-btn svg{width:12px;height:12px;flex-shrink:0}'
-    + '@media (max-width:768px){.bp-live-time{font-size:10px;padding:4px 7px}.bp-live-time .bp-live-time-text{display:none}.bp-refresh-btn .bp-refresh-label{display:none}.bp-refresh-btn{padding:5px 8px}}'
+    /* K-BL: eski kural dar ekranda SAATI gizleyip etiketi birakiyordu (rozetin
+       tek isi saatti). Artik dusen sey saniye — "BIST 21:13" her genislikte
+       tam ve etiketli kalir. */
+    + '@media (max-width:768px){.bp-live-time{font-size:10px;padding:4px 7px}.bp-live-time .bp-live-time-sec{display:none}.bp-refresh-btn .bp-refresh-label{display:none}.bp-refresh-btn{padding:5px 8px}}'
     + '@media (max-width:480px){.bp-live-time{display:none}}';
     /* 15.09 fresh-ground-audit #3: CPO-1192'nin "Yenile pull-to-refresh'le çözülür" varsayımı
        yanlıştı — sitede gerçek bir touch pull-to-refresh implementasyonu hiç yoktu, mobilde
@@ -568,7 +574,20 @@
     var liveTime = document.createElement('span');
     liveTime.className = 'bp-live-time';
     liveTime.id = 'bpLiveTime';
-    liveTime.innerHTML = '<span class="bp-live-dot"></span><span class="bp-live-time-text" id="bpLiveTimeText">Yerel Saat</span>';
+    /* K-BL (21.09) — ETIKET ILK TICK'TE SILINIYORDU + SAAT CIHAZ SAAT DILIMINDEYDI.
+       CPO-1666 #6 bu rozeti "Yerel Saat" metnine cevirmisti ama o metin yalniz
+       ILK RENDER'IN placeholder'iydi: asagidaki tick() senkron calisip uzerine
+       "21:13:04" yaziyor, etiket kullaniciya HIC gorunmuyordu (canli olculdu,
+       21.09 21:13 — header'da ciplak "● 21:13:04"). Yani duzeltme OLUYDU.
+       Ikinci kusur: saat new Date().getHours() ile CIHAZIN saat diliminden
+       okunuyordu; site metinleri ise her yerde BIST saatini ("~18:00 TR",
+       metodoloji/hakkinda/yasal/hisse) esas aliyor. Yurt disindaki (veya saati
+       yanlis ayarli) bir kullanici kendi saatini seans saati sanardi.
+       Kanon: rozet BIST (Europe/Istanbul) saatini gosterir ve etiketi
+       KALICIDIR — saniye ayri span'da, dar ekranda o dusuyor, etiket kalmiyor
+       degil. */
+    liveTime.setAttribute('aria-label', 'Borsa Istanbul saati');
+    liveTime.innerHTML = '<span class="bp-live-dot"></span><span class="bp-live-time-label">BIST</span><span class="bp-live-time-text" id="bpLiveTimeText">--:--</span><span class="bp-live-time-sec" id="bpLiveTimeSec"></span>';
     wrapper.appendChild(liveTime);
 
     // Move/append search button into wrapper
@@ -599,13 +618,20 @@
 
     // Tick live time every second
     var tickEl = document.getElementById('bpLiveTimeText');
+    var secEl  = document.getElementById('bpLiveTimeSec');
+    /* BIST saati KANONU bp-format.js'tedir (bpTrClock) — ilk yazimda burada
+       ikinci bir Intl cagrisi acilmisti, K-BD kapisi onu "IKINCI-KANON" diye
+       reddetti (kapi hakliydi: ayni saat diliminin iki sahibi olamaz). Kanon
+       tasinip bp-format.js `bp-search.js` yukleyen 23 sablonun HEPSINE eklendi.
+       Kanon yuklenmemisse rozet GIZLENIR: yerel saati BIST saatiymis gibi
+       gostermek yalan olurdu. */
     function tick() {
       if (document.hidden) return;
-      var d = new Date();
-      var hh = String(d.getHours()).padStart(2, '0');
-      var mm = String(d.getMinutes()).padStart(2, '0');
-      var ss = String(d.getSeconds()).padStart(2, '0');
-      if (tickEl) tickEl.textContent = hh + ':' + mm + ':' + ss;
+      var t = (typeof bpTrClock === 'function') ? bpTrClock() : null;
+      if (!t) { liveTime.style.display = 'none'; return; }
+      var p = t.split(':');
+      if (tickEl) tickEl.textContent = p[0] + ':' + p[1];
+      if (secEl)  secEl.textContent  = ':' + p[2];
     }
     tick();
     setInterval(tick, 1000);
