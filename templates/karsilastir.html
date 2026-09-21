@@ -45,7 +45,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=306ecc56">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
-<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=50c6bd89">
+<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=fb47e319">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
@@ -272,20 +272,32 @@ function renderCell(key, s) {
     case 'pe_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>';
     case 'pb_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(2).replace('.', ',')}</span>` : '<span class="muted">—</span>';
     case 'eps':           { if (v == null) return '<span class="muted">—</span>'; const n = parseFloat(v), cl = n < 0 ? 'dn' : ''; return `<span class="mono ${cl}">${n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>`; }
+    /* K-BX eki (22.09) — AYNI SAYI, IKI SAYFA, IKI KEFE. Bu sutun ROE'yi
+       15/7 esikleriyle ve "Iyi/Orta/Zayif" sozcukleriyle bantliyordu;
+       /hisse'nin Temel karti ise 20/10 ve "Guclu/Orta/Zayif" ile. CANLI
+       olcum: ROE dolu 103 hissenin 23'u iki sayfada FARKLI kefeye
+       dusuyordu (BIMAS %15,6 -> /hisse "Orta", /karsilastir "Iyi";
+       TUPRS %17,6, HALKB %15,3 ayni sekilde). Kanon /hisse'nin bandi:
+       TL bazli ROE %15 enflasyonun altinda kalir, "Iyi" demek yaniltir.
+       Bu dosyanin kendi tarihinde ayni sinif bir hata zaten yasanmisti
+       (CPO-DEV2-053: bagimsiz calcScore()); band tablolari da ayni
+       riski tasiyor. */
     case 'roe': {
       if (v == null) return '<span class="muted">—</span>';
       const n = parseFloat(v);
-      const cl = n >= 15 ? 'up' : n < 7 ? 'dn' : '';
-      const lbl = n >= 15 ? 'İyi' : n < 7 ? 'Zayıf' : 'Orta';
+      const cl  = n > 20 ? 'up'     : n > 10 ? 'mid'  : 'dn';
+      const lbl = n > 20 ? 'Güçlü'  : n > 10 ? 'Orta' : 'Zayıf';
       return `<span class="${cl} mono">%${n.toFixed(1).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
     }
     case 'dividend_yield': {
       if (v == null) return '<span class="muted">—</span>';
       const n = parseFloat(v);
       if (n === 0) return '<span class="mono">%0,00</span> <span style="font-size:10px;color:var(--bp-text3)">Yok</span>';
-      const cl = n >= 4 ? 'up' : '';
-      const lbl = n >= 4 ? 'Yüksek' : '';
-      return `<span class="${cl} mono">%${n.toFixed(2).replace('.', ',')}</span>${lbl ? ` <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>` : ''}`;
+      /* K-BX eki: /hisse'de 0 < verim < 4 bandinin adi "Standart"; burada
+         bu band ADSIZ kaliyordu -- ayni ucluden biri sessizdi. */
+      const cl  = n >= 4 ? 'up' : 'mid';
+      const lbl = n >= 4 ? 'Yüksek' : 'Standart';
+      return `<span class="${cl} mono">%${n.toFixed(2).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
     }
     default:              return v != null ? String(v) : '<span class="muted">—</span>';
   }

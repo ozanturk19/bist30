@@ -1421,6 +1421,83 @@ const step = async (ad, fn) => {
                '" @320px tek satir · satir-ici ciplak hex 0');
   });
 
+  /* ── 4r) K-BX: TEMEL ANALIZ KARTI -- BIRIM VE BAND ────────────────────
+     22.09 oncesi "Borc/Oz Sermaye" karti yfinance `debtToEquity` alanini
+     (YUZDE doner) dogrudan "x" (kat) diye basiyor, esiklerini (>2/>1) oran
+     gibi uyguluyordu. CANLI: D/E dolu 94 hissenin 85'i kirmizi "Yuksek";
+     dogru cevrimde 80'i yesil "Dusuk" -- kart borcsuz sirketleri asiri
+     borclu ilan ediyordu (THYAO 89,39 -> 0,89x; OTKAR 869,17 -> 8,69x).
+     2. bulgu: beta kartinda RENK 0,7/1,3, ETIKET 1,0 esigini kullaniyordu
+     (62 kartin 11'i celisik).
+     ⛔ Bu kartlar CLIENT-SIDE render -- curl/grep GOREMEZ, DOM okunur.
+     ⛔ Olcum on-kosulu (kart hic yok) varsa adim DUSER, atlanmaz. */
+  console.log('\n[4r] K-BX — temel analiz karti: birim (D/E) + band (beta)');
+
+  await step('K-BX: D/E orani ham yuzde degil + beta renk/etiket ayni band', async () => {
+    const data = await (await ctx.request.get(BASE + '/api/data')).json();
+    const hepsi = (data.stocks || []).filter(x => x.ticker !== 'XU030').map(x => x.ticker);
+    /* D/E'si dolu ilk birkac hisseyi API'den sec -- kart yalnizca alan
+       doluyken ciziliyor, bos hisseyle olcum GECERSIZ olur. */
+    const aday = [];
+    for (const t of hepsi) {
+      if (aday.length >= 4) break;
+      let f = null;
+      try { f = (await (await ctx.request.get(BASE + '/api/hisse/' + t + '/fundamentals')).json()).fundamentals; }
+      catch (e) { continue; }
+      if (f && f.debt_to_equity != null) aday.push({ t, de: f.debt_to_equity, beta: f.beta });
+    }
+    if (!aday.length) return bad('K-BX', 'D/E dolu hisse bulunamadi (olcum gecersiz)');
+
+    const sonuc = [];
+    for (const a of aday) {
+      await p.goto(BASE + '/hisse/' + a.t, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await p.evaluate(() => {
+        const b = [...document.querySelectorAll('[role="tab"],button,a')]
+          .find(e => /Temel/i.test(e.textContent || ''));
+        if (b) b.click();
+      });
+      await p.waitForFunction(() =>
+        document.querySelectorAll('#fundGridReturn > div').length > 0,
+        { timeout: 30000 }).catch(() => {});
+      const r = await p.evaluate(() => {
+        const pick = (lbl) => {
+          const c = [...document.querySelectorAll('#fundGridReturn > div')]
+            .find(x => x.querySelector('div') && x.querySelector('div').textContent.trim() === lbl);
+          if (!c) return null;
+          const d = c.querySelectorAll('div');
+          return { val: d[1] ? d[1].textContent.trim() : null,
+                   sub: d[2] ? d[2].textContent.trim() : null,
+                   renk: d[1] ? getComputedStyle(d[1]).color : null };
+        };
+        return { de: pick('Borç/Öz Sermaye'), beta: pick('Beta (Piyasa Riski)') };
+      });
+      if (!r.de) return bad('K-BX', a.t + ' icin "Borç/Öz Sermaye" karti DOM\'da yok (olcum gecersiz)');
+
+      const gorunen = parseFloat(r.de.val.replace('x', '').replace('.', '').replace(',', '.'));
+      const beklenen = a.de / 100;
+      if (Math.abs(gorunen - beklenen) > 0.01)
+        return bad('K-BX', a.t + ': D/E karti "' + r.de.val + '" yaziyor, ham alan ' +
+                   a.de + ' (yuzde) -> beklenen ' + beklenen.toFixed(2) + 'x');
+      const bekEt = beklenen > 2 ? 'Yüksek' : beklenen > 1 ? 'Orta' : 'Düşük';
+      if (r.de.sub !== bekEt)
+        return bad('K-BX', a.t + ': D/E etiketi "' + r.de.sub + '", oran ' +
+                   beklenen.toFixed(2) + 'x icin "' + bekEt + '" olmali');
+
+      if (a.beta != null && r.beta) {
+        const bekB = a.beta > 1.3 ? 'üstü' : a.beta < 0.7 ? 'altı' : 'benzer';
+        if (!r.beta.sub || r.beta.sub.indexOf(bekB) < 0)
+          return bad('K-BX', a.t + ': beta ' + a.beta + ' icin etiket "' + r.beta.sub +
+                     '" — renk bandi ile ayni bandi soylemiyor (beklenen "' + bekB + '")');
+        if (/volatilite/i.test(r.beta.sub))
+          return bad('K-BX', a.t + ': beta alt etiketi hala "volatilite" diyor — beta ' +
+                     'piyasa DUYARLILIGI olcer, volatilite degil');
+      }
+      sonuc.push(a.t + ' ' + r.de.val + '/' + r.de.sub +
+                 (r.beta ? ' · β ' + r.beta.val + '/' + r.beta.sub : ''));
+    }
+    ok('K-BX', sonuc.join(' · '));
+  });
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>

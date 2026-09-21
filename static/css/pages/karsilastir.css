@@ -150,6 +150,10 @@
      degismeyen hisse (change_pct = 0) `.up` ile YESIL boyaniyordu — ayni
      hisse /tarama'da `.chg-neu` ile notr griydi. 0 bir yukselis degildir. */
   .neu  { color: var(--bp-text2); }
+  /* K-BX eki (22.09): ORTA band. /hisse'nin `_roeColor`'i orta bandi
+     --bp-gold ile boyuyor; bu sayfada gold sinifi YOKTU, bu yuzden ROE
+     bandi hem esik hem HUE olarak ayrisiyordu. */
+  .mid  { color: var(--bp-gold); }
   .muted{ color: var(--bp-text3); }
   /* K-BQ (21.09): Supertrend seviyesinin FIYATA gore rolu. Bu seviye yon-bagimsiz
      bir buyukluktur (K-BO) — rol renkle degil metinle soylenir. */

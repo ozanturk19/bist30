@@ -244,6 +244,91 @@ def scan(root):
     return bad
 
 
+
+# ── Kural C yardimcilari ──────────────────────────────────────────────────
+# Band ETIKETI: kullaniciya gosterilen, BUYUK harfle baslayan Turkce dizge.
+# CSS sinif adlari ('up', 'dn', 'mid', 'muted', 'mono') kucuk harfle baslar
+# -- ayrim yapisal, beyaz liste degil.
+LABEL = re.compile(r"'([A-ZÇĞİÖŞÜ][^']{0,24})'")
+# Etiket bazen tirnakli bir sabit degil, dizgenin ICINDEKI HTML metin
+# dugumudur (`<span ...>Yok</span>`). Ilk yazimda bu yuzden /karsilastir'in
+# "Yok" bandi gorulmeyip YANLIS ALARM cikti -- dedektor etiketin YAZILIS
+# BICIMINE degil kullaniciya gorunur olmasina bakmali.
+LABEL_HTML = re.compile(r">([A-ZÇĞİÖŞÜ][^<>{}'\"]{0,24})<")
+CASE = re.compile(r"case\s+'(\w+)'\s*:")
+
+
+def band_signature(text, helpers):
+    """Bir kod parcasindaki (esik kumesi, etiket kumesi) imzasi."""
+    return (frozenset(expr_numbers(text, helpers)),
+            frozenset(LABEL.findall(text)) |
+            {x.strip() for x in LABEL_HTML.findall(text) if x.strip()})
+
+
+def block_after(src, start):
+    """`case 'x':` sonrasi bir sonraki `case`/`default`e kadar olan govde."""
+    nxt = [m.start() for m in re.finditer(r"\n\s*(?:case\s+'|default\s*:)",
+                                          src[start:])]
+    return src[start:start + (nxt[0] if nxt else 1200)]
+
+
+def cross_surface(root):
+    """AYNI backend alani, FARKLI sayfada FARKLI band -> ihlal.
+
+    22.09'da canli: ROE dolu 103 hissenin 23'u iki sayfada farkli kefede
+    (BIMAS %15,6 -> /hisse "Orta", /karsilastir "Iyi"). /hisse 20/10 +
+    Guclu/Orta/Zayif, /karsilastir 15/7 + Iyi/Orta/Zayif kullaniyordu.
+    ⛔ "Ayni is icin iki kanon" basli basina bulgudur (3 kez P1 uretti)."""
+    seen = {}
+    tdir = os.path.join(root, 'templates')
+    for dp, _, fns in os.walk(tdir):
+        for fn in sorted(fns):
+            if not fn.endswith('.html'):
+                continue
+            rel = os.path.relpath(os.path.join(dp, fn), root)
+            src = strip_comments(io.open(os.path.join(dp, fn),
+                                         encoding='utf-8',
+                                         errors='replace').read())
+            helpers = helper_numbers(src)
+            # (a) _fundCard(...) cagrilari -> RENK + ETIKET argumanlari
+            pos = 0
+            while True:
+                i = src.find('_fundCard(', pos)
+                if i < 0:
+                    break
+                args, end = call_args(src, '_fundCard', i)
+                pos = end + 1
+                if not args or len(args) < 4:
+                    continue
+                text = args[2] + ' ' + args[3]
+                flds = set(re.findall(r'f\.(\w+)', args[1] + ' ' + text))
+                sig = band_signature(text, helpers)
+                if not sig[1]:
+                    continue
+                for fld in flds:
+                    seen.setdefault(fld, []).append(
+                        (rel, src[:i].count('\n') + 1, sig))
+            # (b) `case 'alan':` bloklari (karsilastir tipi sutun render'i)
+            for m in CASE.finditer(src):
+                body = block_after(src, m.end())
+                sig = band_signature(body, helpers)
+                if not sig[1]:
+                    continue
+                seen.setdefault(m.group(1), []).append(
+                    (rel, src[:m.start()].count('\n') + 1, sig))
+
+    bad = []
+    for fld, occ in sorted(seen.items()):
+        sigs = {o[2] for o in occ}
+        if len(sigs) > 1:
+            nerede = ' · '.join(
+                '%s:%d esik%s etiket%s'
+                % (r, l, sorted(s[0]), sorted(s[1])) for r, l, s in occ)
+            bad.append((occ[0][1], fld, 'KANON',
+                        '`%s` alani %d yuzeyde FARKLI bantlaniyor -> %s'
+                        % (fld, len(occ), nerede)))
+    return bad
+
 def tree_at_ref(ref):
     d = tempfile.mkdtemp(prefix='fundband-')
     blob = subprocess.check_output(['git', 'archive', ref])
@@ -257,7 +342,7 @@ def main():
         ref = sys.argv[sys.argv.index('--ref') + 1]
     root = (tree_at_ref(ref) if ref
             else os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    bad = scan(root)
+    bad = scan(root) + cross_surface(root)
     suffix = ' (ref %s)' % ref if ref else ''
     if not bad:
         print('K-BX OK — temel analiz kartlarinda birim/band sapmasi yok%s.'
