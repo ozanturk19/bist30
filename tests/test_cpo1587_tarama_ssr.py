@@ -20,17 +20,17 @@ _SECTORS = {"AKBNK": "Bankacılık", "THYAO": "Ulaştırma", "ASELS": "Savunma"}
 _STOCKS = [
     {"ticker": "XU030", "signal": "AL", "price": 1, "signal_strength": 999},
     {"ticker": "AKBNK", "signal": "AL", "price": 50.0, "change_pct": 1.2,
-     "indicators": {"adx": {"label": "ADX 30"}}, "signal_bars": 2,
+     "adx": 30.4, "indicators": {"adx": {"label": "ADX 30"}}, "signal_bars": 2,
      "signal_date": "10.09.2026", "entry_quality": "IDEAL", "vol_ratio": 1.5,
      "is_premium": True, "tier": "guclu_sinyal", "signal_strength": 80,
      "bull_score": 70, "sl_level": 45.0},
     {"ticker": "THYAO", "signal": "SAT", "price": 300.0, "change_pct": -2.1,
-     "indicators": {"adx": {"label": "ADX 40"}}, "signal_bars": 1,
+     "adx": 39.6, "indicators": {"adx": {"label": "ADX 40"}}, "signal_bars": 1,
      "signal_date": "11.09.2026", "entry_quality": "DIKKATLI", "vol_ratio": 0.8,
      "is_premium": False, "tier": None, "signal_strength": 55,
      "bull_score": 10, "sl_level": None},
     {"ticker": "ASELS", "signal": "BEKLE", "price": 90.0, "change_pct": 0.0,
-     "indicators": {"adx": {"label": "ADX 15"}}, "signal_bars": 5,
+     "adx": 15.4, "indicators": {"adx": {"label": "ADX 15"}}, "signal_bars": 5,
      "signal_date": "05.09.2026", "entry_quality": "UZAK", "vol_ratio": 1.0,
      "is_premium": False, "tier": None, "signal_strength": 20,
      "bull_score": 5, "sl_level": None},
@@ -47,15 +47,16 @@ class _FakeLockCtx:
         return False
 
 
-def _fresh_compute():
+def _fresh_compute(stocks=None, updated_at="11.09.2026 18:00"):
     """Her cagrida kaynaktan yeniden exec eder — testler arasi mutasyona kapali."""
     with open(_APP_PY, encoding="utf-8") as f:
         src = f.read()
     m = re.search(r"def _compute_tarama_results\(.*?\n\n\n", src, re.DOTALL)
     assert m
+    cache = {"data": _STOCKS if stocks is None else stocks, "updated_at": updated_at}
     ns = {
         "_lock": _FakeLockCtx(),
-        "_cache": _cache,
+        "_cache": cache,
         "_get_sector": lambda ticker: _SECTORS.get(ticker, "Diğer"),
         "STOCK_NAMES": {},
         "derive_adx_label": lambda adx: f"ADX {adx:.0f}",
@@ -100,6 +101,24 @@ def test_min_adx_filter():
     fn = _fresh_compute()
     results, _, _ = fn(min_adx=35)
     assert [r["ticker"] for r in results] == ["THYAO"]
+
+
+def test_min_adx_filter_uses_raw_adx_not_rounded_label():
+    """CPO-1751/K-BU dersi: `indicators.adx.label` insan-okur YUVARLANMIS
+    metindir ("ADX 26"). ISDMR canli ornegi (22.09): raw adx=25.9, label
+    "ADX 26"ya yuvarlanir. min_adx=26 filtresi HAM degere gore calismali --
+    25.9 esigi GECMEDI, sonucta olmamali. Eski kod label'i geri parse edip
+    26.0 >= 26 ile yanlislikla iceri alirdi."""
+    stocks = [
+        {"ticker": "ISDMR", "signal": "AL", "price": 10.0, "change_pct": 0.5,
+         "adx": 25.9, "indicators": {"adx": {"label": "ADX 26"}},
+         "signal_bars": 1, "signal_date": "20.09.2026", "entry_quality": "IDEAL",
+         "vol_ratio": 1.0, "is_premium": False, "tier": None,
+         "signal_strength": 40, "bull_score": 20, "sl_level": None},
+    ]
+    fn = _fresh_compute(stocks=stocks)
+    results, _, _ = fn(min_adx=26)
+    assert results == []
 
 
 def test_only_premium_filter():

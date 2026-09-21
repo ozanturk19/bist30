@@ -9590,14 +9590,13 @@ def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
         upd    = _cache.get("updated_at", "")
 
     def _parse_adx(s):
-        """ADX değerini indicators.adx.label'dan çıkar ('ADX 26' → 26.0)."""
-        inds = s.get("indicators") or {}
-        adx_ind = inds.get("adx") or {}
-        label = adx_ind.get("label", "")  # "ADX 26"
-        try:
-            return float(label.split()[-1])
-        except (ValueError, IndexError):
-            return 0.0
+        """Ham ADX değeri — top-level `adx` alanı (analyze() bunu her zaman yazar).
+        CPO-1751/K-BU: `indicators.adx.label` insan-okur YUVARLANMIŞ metindir
+        ("ADX 26"); önceden bu metin geri parse ediliyordu, min_adx filtresini
+        ve adx_label eşiklemesini (18/25/40) yuvarlanmış değer üzerinden
+        yapıyordu — tam eşikte olan hisseler yanlış tarafa düşebiliyordu."""
+        adx = s.get("adx")
+        return float(adx) if adx is not None else 0.0
 
     results = []
     for s in stocks:
