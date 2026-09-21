@@ -206,13 +206,18 @@
      verilirsek mum grafiğinin çevresinde görünür bir "yama" dikişi oluşuyor.
      Data-Art dili bu yüzden grafiğin DOKUNMADIĞI iki şeride taşındı: üst başlık
      şeridi (degrade + violet glow + eyebrow) ve alt 52-hafta şeridi. */
+  /* K-T (21.09) — DATA-ART DIL TUTARLILIGI, Grafik sekmesi.
+     Bu panel hisse sayfasinin YEDI panelinden TEK DUZ ZEMINLI olaniydi
+     (`background:var(--bp-surface)`), digerlerinin hepsi kanonik
+     `.da-panel` gradyani (135deg surface -> surface2) + parilti tasiyor;
+     ustelik accent seridi tokenin ALFALI kopyasiyla (rgba(...,.55)) yaziliydi,
+     kardeslerinde ise DOLU token var. Gizli sekmede durdugu icin hicbir
+     gorsel denetim turu bunu karsilastirmali gormemisti.
+     Kural (bu turda yazildi): SERIT RENGI = PARILTI RENGI. */
   .chart-section {
-    position: relative;
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-left: 3px solid rgba(var(--bp-art-violet-rgb),0.55);
-    border-radius:var(--bp-radius-20);
-    overflow: hidden;
+    --da-accent: var(--bp-art-violet);
+    --da-glow-rgb: var(--bp-art-violet-rgb);
+    --da-glow-a: .13;
     margin-bottom: 20px;
     box-shadow: var(--bp-shadow-sm);
   }
@@ -737,21 +742,17 @@
   /* Data-Art (20.09): AI haber ozeti paneli. Glow rengi VIOLET — bu kutunun
      icerigi Gemini uretimi, sayfadaki diger AI yuzeyleriyle (AI Analiz sekmesi)
      ayni aksan; KAP paneli ise resmi/dogrulanabilir veri oldugu icin cyan. */
+  /* K-T: Haberler sekmesinin UC panelinden ikisi (story + KAP) 3px accent
+     seridi tasirken bu SERITSIZDI — ayni goruntude kardes panellerle ayni
+     aileye ait gorunmuyordu. Parilti moru oldugu icin serit de mor. */
   .news-section {
-    position: relative; overflow: hidden;
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius-20);
+    --da-accent: var(--bp-art-violet);
+    --da-glow-rgb: var(--bp-art-violet-rgb);
+    --da-glow-a: .13;
+    --da-glow-size: 240px;
     padding: 18px 20px;
     margin-bottom: 20px;
   }
-  .news-section::before {
-    content:''; position:absolute; top:-45%; right:-8%;
-    width:240px; height:240px; border-radius:50%;
-    background: radial-gradient(circle, rgba(var(--bp-art-violet-rgb),0.13), transparent 70%);
-    pointer-events:none;
-  }
-  .news-section > * { position: relative; }
   .news-loading {
     display: flex; align-items: center; gap: 8px;
     color: var(--bp-text3); font-size: var(--bp-text-base); padding: 8px 0;
@@ -827,22 +828,18 @@
   }
 
   /* ── KAP Bildirimleri ── */
+  /* K-T: gorunum zaten kanonikle AYNIYDI, ama el yazimiyla kopyalanmisti —
+     tek kaynaga alindi (parilti SOLDA kalir: --da-glow-left). */
   .kap-section {
-    position: relative; overflow: hidden;
-    background: linear-gradient(135deg, var(--bp-surface) 0%, var(--bp-surface2) 100%);
-    border: 1px solid var(--bp-border);
-    border-left: 3px solid var(--bp-accent-cyan);
-    border-radius: var(--bp-radius-20);
+    --da-accent: var(--bp-accent-cyan);
+    --da-glow-rgb: var(--bp-accent-cyan-rgb);
+    --da-glow-a: .10;
+    --da-glow-size: 240px;
+    --da-glow-left: -6%;
+    --da-glow-x: auto;
     padding: 18px 20px;
     margin-bottom: 20px;
   }
-  .kap-section::before {
-    content:''; position:absolute; top:-45%; left:-6%;
-    width:240px; height:240px; border-radius:50%;
-    background: radial-gradient(circle, rgba(var(--bp-accent-cyan-rgb),0.10), transparent 70%);
-    pointer-events:none;
-  }
-  .kap-section > * { position: relative; }
   .kap-item {
     display: flex;
     flex-direction: column;

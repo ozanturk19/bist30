@@ -109,7 +109,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=6450b4ce">
 <link rel="stylesheet" href="/static/css/data-art.css?v=697496a3">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=55a0633c">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=fa0e5212">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -500,7 +500,7 @@
   </button>
 
   <!-- Grafik -->
-  <div id="chart-section" data-tab-content="grafik" class="chart-section" role="tabpanel" aria-labelledby="tab-grafik" tabindex="0" style="scroll-margin-top:80px">
+  <div id="chart-section" data-tab-content="grafik" class="da-panel da-panel--accent chart-section" role="tabpanel" aria-labelledby="tab-grafik" tabindex="0" style="scroll-margin-top:80px">
     <div class="chart-header">
       <span class="da-util-eyebrow"><span class="dot" aria-hidden="true"></span>Günlük Grafik<span id="chartPeriod"></span></span>
       <span class="chart-label">{{ ticker }}</span>
@@ -1317,7 +1317,7 @@
   <!-- AI Haberler -->
   <div id="news-section" style="scroll-margin-top:80px"></div>
   <div id="panel-haberler-main" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0">
-  <div class="news-section" id="newsSection" data-tab-content="haberler">
+  <div class="da-panel da-panel--accent news-section" id="newsSection" data-tab-content="haberler">
     <h2 class="section-title"><span aria-hidden="true">🤖</span> Son Haber Özeti</h2>
     <div class="news-loading" id="newsLoading" role="status" aria-live="polite">
       <div class="spinner"></div> Haberler yükleniyor…
@@ -1330,7 +1330,7 @@
   </div>
 
   <!-- KAP Bildirimleri -->
-  <div class="kap-section" id="kapSection" data-tab-content="haberler">
+  <div class="da-panel da-panel--accent kap-section" id="kapSection" data-tab-content="haberler">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
       <h2 class="section-title" style="margin:0"><span aria-hidden="true">📋</span> KAP Bildirimleri</h2>
       <span style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Son 90 gün · ODA + Finansal Rapor</span>
