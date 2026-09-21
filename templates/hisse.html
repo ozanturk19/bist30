@@ -989,8 +989,8 @@
         <div class="pending-icon">⏳</div>
         <div>
           <div class="pending-title">Temel Analiz &amp; BorsaPusula Skoru bekleniyor</div>
-          <div class="pending-text">Bu hissenin Temel Analiz Skoru ve BorsaPusula kompozit skoru için bugünkü EOD (gün-sonu) turu henüz tamamlanmadı. Teknik Analiz Skoru yukarıda güncel.</div>
-          <div class="pending-eta">Tahmini: bugün ~18:00 TR</div>
+          <div class="pending-text">Bu hisse için son EOD (gün-sonu) turu Temel Analiz Skoru ve BorsaPusula kompozit skorunu üretmedi. Teknik Analiz Skoru yukarıda güncel.</div>
+          <div class="pending-eta">Tahmini: işlem günü kapanışından sonra, ~18:00 TR</div>
         </div>
       </div>
       {% endif %}
@@ -1313,7 +1313,7 @@
       <span aria-hidden="true">📊</span> Temel Analiz Skoru {{ hs.temel_analiz_skoru }}/100 — detaylı sayısal kırılım için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" class="da-link">Özet sekmesindeki Skor Analizi ve Temel Analiz</a> bölümlerine göz atabilirsiniz.
     </div>
     {% else %}
-    <p style="font-size:var(--bp-text-base);color:var(--bp-text3);line-height:1.65;margin:0">Bu hissenin Temel Analiz Skoru için bugünkü EOD (gün-sonu) turu henüz tamamlanmadı.</p>
+    <p style="font-size:var(--bp-text-base);color:var(--bp-text3);line-height:1.65;margin:0">Bu hisse için son EOD (gün-sonu) turu Temel Analiz Skorunu üretmedi.</p>
     {% endif %}
   </div>
 
