@@ -307,6 +307,106 @@ const step = async (ad, fn) => {
       : bad('K-BI dizi uzunlugu', merge.before + ' -> ' + merge.after + ' (beklenen +1)');
   }
 
+  /* ── 4d) K-BJ — pozisyon sayisal dogrulamasi tek kanon ─────────────────
+     Fix oncesi: hisse detay quick-add fiyat okunamayinca MALIYETI 0 yaziyordu
+     (cost=0 -> pozisyonun tam degeri "kar" gorunur) ve CSV disa aktarimi ayni
+     K/Z'yi tablo render'inin aksine korumasizca hesapliyordu ("Infinity"/"NaN").
+     Adim dizge ARAMAZ: canli sayfada gercek fonksiyonlari CALISTIRIR.
+     f381efb dersi: kendi sayfasina KENDI gider, onceki adimin birakigina guvenmez. */
+  console.log('\n[4d] K-BJ — pozisyon sayisal dogrulamasi (tek kanon)');
+  await p.goto(BASE + '/portfolio', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await p.waitForTimeout(1200);
+  const kbj = await p.evaluate(() => {
+    if (typeof bpIsValidLot !== 'function' || typeof bpIsValidPrice !== 'function')
+      return { err: 'bpIsValidLot/bpIsValidPrice YOK (kanon servis edilmiyor)' };
+    const r = {};
+    r.kanon = [bpIsValidPrice(0), bpIsValidPrice(-5), bpIsValidPrice(NaN), bpIsValidPrice(undefined),
+               bpIsValidLot(0), bpIsValidLot(1.5), bpIsValidLot(2e9)].every(x => x === false)
+           && bpIsValidPrice(12.34) === true && bpIsValidLot(3) === true;
+    // GERCEK exportCSV()'yi bozuk pozisyonlarla calistir, ciktisini yakala.
+    // save() cagrilmaz -> tarayicinin localStorage'ina DOKUNULMAZ.
+    const yedek = JSON.parse(JSON.stringify(portfolio));
+    const OB = window.Blob, OC = URL.createObjectURL, OR = URL.revokeObjectURL;
+    const OK = HTMLAnchorElement.prototype.click;
+    let csv = null;
+    try {
+      window.Blob = function (parts, opts) { csv = String(parts[0]); return new OB(parts, opts); };
+      URL.createObjectURL = () => 'blob:stub'; URL.revokeObjectURL = () => {};
+      HTMLAnchorElement.prototype.click = function () {};
+      portfolio.length = 0;
+      portfolio.push({ ticker: 'THYAO', lot: 1, price: 0,   date: '2026-09-21', id: 1 });
+      portfolio.push({ ticker: 'GARAN', lot: 1, price: 'x', date: '2026-09-21', id: 2 });
+      exportCSV();
+      r.csvTemiz = !!csv && !/Infinity|NaN/.test(csv);
+      render();
+      r.domTemiz = !/Infinity|NaN/.test(document.querySelector('main').innerText);
+    } finally {
+      window.Blob = OB; URL.createObjectURL = OC; URL.revokeObjectURL = OR;
+      HTMLAnchorElement.prototype.click = OK;
+      portfolio.length = 0; yedek.forEach(x => portfolio.push(x)); render();
+    }
+    // POZITIF KONTROL: ayni veri fix ONCESI ifadeden gecerse Infinity/NaN uretmeli,
+    // yoksa bu adim kor demektir.
+    const eski = (o, cur) => (((cur - o.price) / o.price) * 100).toFixed(2);
+    r.pozitifKontrol = eski({ price: 0 }, 293.5) === 'Infinity' && eski({ price: 'x' }, 293.5) === 'NaN';
+    return r;
+  });
+  if (kbj.err) {
+    bad('K-BJ kanon', kbj.err);
+  } else {
+    kbj.kanon ? ok('K-BJ kanon dogru', '0/negatif/NaN/ondalik-lot reddedildi, gecerli kabul')
+              : bad('K-BJ kanon', 'bpIsValidLot/bpIsValidPrice beklenen sonucu vermedi');
+    kbj.pozitifKontrol ? ok('K-BJ pozitif kontrol', 'fix oncesi ifade ayni veriyle Infinity/NaN uretiyor')
+                       : bad('K-BJ POZITIF KONTROL DUSTU', 'senaryo defekti tetiklemiyor, adim kor olabilir');
+    kbj.csvTemiz ? ok('K-BJ CSV korumali', 'price=0 ve sayisal-olmayan fiyatta K/Z bos, Infinity/NaN yok')
+                 : bad('K-BJ CSV', 'disa aktarimda Infinity/NaN var');
+    kbj.domTemiz ? ok('K-BJ tablo korumali', 'bozuk pozisyon DOM\'a Infinity/NaN sizdirmiyor')
+                 : bad('K-BJ tablo', 'DOM\'da Infinity/NaN var');
+  }
+
+  /* ── 4e) K-BJ — hisse detay quick-add dogrulanmamis fiyat YAZMAMALI ──── */
+  console.log('\n[4e] K-BJ — hisse detay hizli-ekleme (/hisse/THYAO)');
+  await p.goto(BASE + '/hisse/THYAO', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await p.waitForTimeout(1800);
+  const kbj2 = await p.evaluate(() => {
+    if (typeof togglePortfolio !== 'function') return { err: 'togglePortfolio YOK' };
+    const bas = localStorage.getItem('bp_portfolio');
+    const sig = window._bpLastSignalData;
+    const el  = document.getElementById('hpPrice');
+    const txt = el ? el.textContent : null;
+    const r = {};
+    try {
+      // Fiyatin okunamadigi hal (SSR fiyatsizken hpPrice '—' basar)
+      window._bpLastSignalData = null;
+      if (el) el.textContent = '—';
+      r.donus = _hibCurrentPrice();           // fix oncesi 0 DONUYORDU
+      r.nullDonuyor = r.donus === null;
+      togglePortfolio();
+      r.yazilmadi = localStorage.getItem('bp_portfolio') === bas;
+      r.uyariVar  = /yüklenmedi/i.test((document.getElementById('hibToast') || {}).textContent || '');
+    } finally {
+      window._bpLastSignalData = sig; if (el) el.textContent = txt;
+      if (bas === null) localStorage.removeItem('bp_portfolio');
+      else localStorage.setItem('bp_portfolio', bas);
+    }
+    // NEGATIF KONTROL: fiyat okunurken kanon mesru eklemeyi ENGELLEMEMELI
+    r.okunurFiyat = _hibCurrentPrice();
+    r.mesruGecerli = bpIsValidPrice(r.okunurFiyat);
+    return r;
+  });
+  if (kbj2.err) {
+    bad('K-BJ quick-add', kbj2.err);
+  } else {
+    kbj2.nullDonuyor ? ok('K-BJ fiyat okunamazsa null', '(fix oncesi 0 donup MALIYET olarak yaziliyordu)')
+                     : bad('K-BJ _hibCurrentPrice', 'null degil: ' + JSON.stringify(kbj2.donus));
+    kbj2.yazilmadi ? ok('K-BJ dogrulanmamis fiyat portfoye YAZILMADI', 'localStorage degismedi')
+                   : bad('K-BJ quick-add', 'gecersiz fiyatli pozisyon yazildi');
+    kbj2.uyariVar ? ok('K-BJ kullaniciya sebep soylendi', 'uyari mesaji gosterildi')
+                  : bad('K-BJ uyari', 'sessizce iptal edildi');
+    kbj2.mesruGecerli ? ok('K-BJ negatif kontrol', 'fiyat okunurken mesru ekleme engellenmiyor (' + kbj2.okunurFiyat + ')')
+                      : bad('K-BJ negatif kontrol', 'kanon mesru fiyati da reddediyor: ' + kbj2.okunurFiyat);
+  }
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>
