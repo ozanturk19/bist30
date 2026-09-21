@@ -2586,13 +2586,29 @@ function renderSummary(s, signalData) {
     const hpSummary = document.getElementById('hpSummary');
     if (hpSummary) {
       let txt = '';
-      if (isPremium && vr != null && vr >= 1.7) {
+      /* K-BT ek (22.09): `vr == null` BILINMIYOR demektir, "dusuk" DEMEZ.
+         `signal_vol_ratio` sinyal GUNUNUN hacmidir; aktif sinyali olmayan
+         hissede hic hesaplanmaz -- canli olcum 22.09: 138/217 hissede NULL.
+         Eski dal `(vr == null || vr < 1.0)` ile ikisini AYNI kefeye koyuyordu
+         ve **42 hissede** "sinyal gunu hacmi DUSUK" diye basiyordu; hemen
+         ustundeki satir ise ayni anda "Sinyal gunu hacim: —" (bilinmiyor)
+         diyordu. Bu cumle K-BT fix'ine kadar panelin silinmesi yuzunden
+         GORUNMUYORDU; panel gorunur olunca kapatildi. (K-V kanonu: bos bir
+         deger bir OLCUM degildir.) */
+      if (vr == null) {
+        txt = rvolVal == null ? ''
+          : rvolVal >= 1.20
+            ? 'Haftalık hacim momentumu güçlü. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.'
+            : rvolVal >= 1.0
+              ? 'Haftalık hacim momentumu ortalama seviyede. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.'
+              : 'Haftalık hacim momentumu zayıf. Sinyal günü hacmi yok — bu hissede şu an aktif bir sinyal bulunmuyor.';
+      } else if (isPremium && vr >= 1.7) {
         txt = 'İkisi de güçlü — Hacim hem yapısal hem sinyal günü güçlü.';
-      } else if (isPremium && vr != null && vr < 1.7) {
+      } else if (isPremium && vr < 1.7) {
         txt = 'Haftalık hacim güçlü, sinyal günü sessiz — yavaş kıvılcımlanan trend.';
-      } else if (!isPremium && vr != null && vr >= 1.7) {
+      } else if (!isPremium && vr >= 1.7) {
         txt = 'Sinyal günü güçlü patladı ama haftalık momentum henüz oluşmamış.';
-      } else if (rvolVal != null && rvolVal >= 1.20 && (vr == null || vr < 1.0)) {
+      } else if (rvolVal != null && rvolVal >= 1.20 && vr < 1.0) {
         txt = 'Yapısal momentum güçlü; sinyal günü hacmi düşük — kademeli birikim.';
       } else if (rvolVal != null && rvolVal < 1.0 && vr != null && vr >= 1.2) {
         txt = 'Sinyal günü orta hacim ama haftalık momentum oluşmamış — temkinli izle.';
