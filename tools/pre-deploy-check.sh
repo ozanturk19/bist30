@@ -24,7 +24,7 @@ echo "=== Pre-Deploy Check (CPO-359 Tier 0) ==="
 echo ""
 
 # 1. Jinja parse
-echo "1/17 Jinja parse..."
+echo "1/18 Jinja parse..."
 if python3 "$(dirname "$0")/_predeploy_jinja_check.py"; then
   echo "  ✓ Jinja parse OK"
 else
@@ -34,7 +34,7 @@ fi
 
 # 2. Python compile
 echo ""
-echo "2/17 Python compile (app.py)..."
+echo "2/18 Python compile (app.py)..."
 if python3 -c "import ast;ast.parse(open('app.py').read())" 2>/dev/null; then
   echo "  ✓ app.py compile OK"
 else
@@ -49,7 +49,7 @@ fi
 # pre-commit, aynı gün genişletildi) tutarsızdı. Liste ikisinde de senkron
 # tutulmalı.
 echo ""
-echo "3/17 KALICI_KURALLAR audit..."
+echo "3/18 KALICI_KURALLAR audit..."
 KK_AUDIT_FILES="templates/hisse.html templates/karsilastir.html templates/ozet.html templates/sektor_harita.html templates/tarama.html templates/hisseler.html templates/index.html templates/portfolio.html templates/gundem.html templates/metodoloji.html templates/blog.html templates/blog_article.html templates/temettu_takvimi.html templates/bilanco_takvimi.html"
 KK_FAIL=0
 for f in $KK_AUDIT_FILES; do
@@ -66,7 +66,7 @@ fi
 
 # 4. format-lint
 echo ""
-echo "4/17 format-lint (CPO-1180 K6)..."
+echo "4/18 format-lint (CPO-1180 K6)..."
 if ./tools/format-lint.sh > /dev/null 2>&1; then
   echo "  ✓ format-lint PASS"
 else
@@ -80,7 +80,7 @@ fi
 # donuyordu, boyutu dogruydu, grep iceride buluyordu. Elle calistirilan bir arac bir
 # sonraki kazada yok hukmundedir -- kapiya baglandi.
 echo ""
-echo "5/17 CSS token guard (CPO-1349)..."
+echo "5/18 CSS token guard (CPO-1349)..."
 if python3 tools/css-token-guard.py static/css/*.css > /dev/null 2>&1; then
   echo "  ✓ CSS token guard PASS"
 else
@@ -92,7 +92,7 @@ echo ""
 # 6. style-guard (T1.7) — css-token-guard YALNIZ static/css/*.css (2 dosya) bakiyor;
 # sablonlarin icindeki ~2300 var(--bp-*) kullanimi HICBIR kapida denetlenmiyordu.
 # K-A tanimsiz var() BLOKLAYICI (taban 0), K-B/K-C/K-D ratchet (yalniz dusebilir).
-echo "6/17 style-guard (T1.7: sablon ici var()/ham hex/yerel :root/bos catch ratchet)..."
+echo "6/18 style-guard (T1.7: sablon ici var()/ham hex/yerel :root/bos catch ratchet)..."
 if python3 tools/style-guard.py > /dev/null 2>&1; then
   echo "  ✓ style-guard PASS"
 else
@@ -107,7 +107,7 @@ fi
 # duruma gecti ama hicbir deploy bunu raporlamadi — "YAZILMIS ama BAGLANMAMIS"
 # sinifinin kendisi, 8f6006f'in kapattigi iki guard'la AYNI hastalik. Bagliyoruz.
 echo ""
-echo "7/17 lint_scope ratchet (T9.4: sablon sayisi daralma dedektoru)..."
+echo "7/18 lint_scope ratchet (T9.4: sablon sayisi daralma dedektoru)..."
 if python3 tools/lint_scope.py --check > /dev/null 2>&1; then
   echo "  ✓ lint_scope PASS"
 else
@@ -124,7 +124,7 @@ fi
 # ONCESI yakalar (Jinja {{ }}/{% %} soyulup node --check ile dogrulanir,
 # 31/31 mevcut sablonda 0 yanlis-pozitif dogrulanmistir).
 echo ""
-echo "8/17 node-syntax-check (DEV2-T-MOBOVF-1: sablon-ici JS sozdizimi)..."
+echo "8/18 node-syntax-check (DEV2-T-MOBOVF-1: sablon-ici JS sozdizimi)..."
 if python3 tools/node-syntax-check.py > /dev/null 2>&1; then
   echo "  ✓ node-syntax-check PASS"
 else
@@ -142,7 +142,7 @@ fi
 # 4'unde marka rengi hover cercevesi HIC uygulanmiyordu. Taban SIFIR; kasitli
 # ciftler tool icindeki GOZDEN_GECIRILMIS_KASITLI'de GEREKCESIYLE yazilidir.
 echo ""
-echo "9/17 state-order-check (K-G: durum kurali varyantin ALTINDA olmali)..."
+echo "9/18 state-order-check (K-G: durum kurali varyantin ALTINDA olmali)..."
 if python3 tools/state-order-check.py > /dev/null 2>&1; then
   echo "  ✓ state-order-check PASS"
 else
@@ -162,7 +162,7 @@ fi
 # renklerin KENDISI. Taban SIFIR (77 cift). Kapsam siniri ve pozitif kontrol
 # kaydi tool'un docstring'inde.
 echo ""
-echo "10/17 contrast-check (K-I: ayni kuralda bg+fg WCAG kontrasti)..."
+echo "10/18 contrast-check (K-I: ayni kuralda bg+fg WCAG kontrasti)..."
 if python3 tools/contrast-check.py > /dev/null 2>&1; then
   echo "  ✓ contrast-check PASS"
 else
@@ -182,7 +182,7 @@ fi
 # hicbiri REFERANSA bakmaz. Taban SIFIR (118 referans). Elle artirilan
 # surum etiketleri (?v=75, ?v=4, ?v=20260915A) kasitli kapsam disi.
 echo ""
-echo "11/17 cachebust-check (K-J: ?v= referansi diskteki hash ile ayni mi)..."
+echo "11/18 cachebust-check (K-J: ?v= referansi diskteki hash ile ayni mi)..."
 if python3 tools/cachebust-check.py > /dev/null 2>&1; then
   echo "  ✓ cachebust-check PASS"
 else
@@ -201,7 +201,7 @@ fi
 # bu bulgu kodda degil, iki METIN alani arasindaki sozlesmede. Stil-only
 # duzenlemeler metin hash'ini degistirmedigi icin kapiyi TETIKLEMEZ.
 echo ""
-echo "12/17 legal-text-sync-check (K-H: hukuki metin <-> 'Son guncelleme' senkronu)..."
+echo "12/18 legal-text-sync-check (K-H: hukuki metin <-> 'Son guncelleme' senkronu)..."
 if python3 tools/legal-text-sync-check.py; then
   echo "  ✓ legal-text-sync-check PASS"
 else
@@ -220,7 +220,7 @@ fi
 # hicbiri (token/hex/kontrast/cascade-sirasi/referans/metin) bunu goremez.
 # Dogrudan longhand ezmesi KASITLI delta sayilir, kapsam disi. Taban SIFIR.
 echo ""
-echo "13/17 da-override-check (K-K: .da-* bildirimini kisayolla silme)..."
+echo "13/18 da-override-check (K-K: .da-* bildirimini kisayolla silme)..."
 if python3 tools/da-override-check.py; then
   echo "  ✓ da-override-check PASS"
 else
@@ -241,7 +241,7 @@ fi
 # Inter yaziyordu -- 21 sayfanin 20'si bir yazi tipinde, o tek basina baskasinda.
 # --* ozel ozellikleri ve yalniz bosluk farki kapsam disi. Taban SIFIR.
 echo ""
-echo "14/17 canon-conflict-check (K-AP: kanonik kaynak <-> sayfa-yerel kopya)..."
+echo "14/18 canon-conflict-check (K-AP: kanonik kaynak <-> sayfa-yerel kopya)..."
 if python3 tools/canon-conflict-check.py; then
   echo "  ✓ canon-conflict-check PASS"
 else
@@ -259,7 +259,7 @@ fi
 # "Trend Bozuldu" hissesinde "RSI 10,9 💎 Asiri Satim"). Kanon: 💎 = skor bandi,
 # ⭐ = Hacim Onayli. Taban SIFIR, pozitif kontrol 4/4.
 echo ""
-echo "15/17 glyph-canon-check (K-AQ: rozet glifi <-> kanonik anlam)..."
+echo "15/18 glyph-canon-check (K-AQ: rozet glifi <-> kanonik anlam)..."
 if python3 tools/glyph-canon-check.py; then
   echo "  ✓ glyph-canon-check PASS"
 else
@@ -279,7 +279,7 @@ fi
 # 11 kod + 9 nesir esigi, pozitif kontrol 4/4 (dort katmanda da yakalandi).
 # Kapsam tabani var: olculen esik sayisi duserse cikis kodu 2.
 echo ""
-echo "16/17 threshold-sync-check (K-AR: bant esigi kopyalari <-> business_rules)..."
+echo "16/18 threshold-sync-check (K-AR: bant esigi kopyalari <-> business_rules)..."
 if python3 tools/threshold-sync-check.py; then
   echo "  ✓ threshold-sync-check PASS"
 else
@@ -301,12 +301,38 @@ fi
 # yuzden canli taramada GORUNMEDI. Taban SIFIR, 63 baglanti, kapsam tabani
 # 55, pozitif kontrol 3/3 (ad uyusmazligi / SC 2.5.3 / logo adi).
 echo ""
-echo "17/17 nav-label-canon-check (K-AS: gezinme etiketi kanonu)..."
+echo "17/18 nav-label-canon-check (K-AS: gezinme etiketi kanonu)..."
 if python3 tools/nav-label-canon-check.py; then
   echo "  ✓ nav-label-canon-check PASS"
 else
   echo "  ✗ K-AS KIRIK: bir gezinme etiketi kanonik addan sapti (ya da kapsam dustu)."
   echo "    Detay için: python3 tools/nav-label-canon-check.py"
+  FAIL=$((FAIL + 1))
+fi
+
+# 18. tooltip-canon-check (K-AT, CPO 21.09.2026) -- IPUCU MEKANIZMASI KANONU.
+# Sitede IKI paralel ipucu mekanizmasi vardi. Kanonik olan [data-tip] +
+# static/js/bp-tooltip.js (hover + focus + tap-toggle + Escape + viewport
+# kirpma + aria-describedby). Ikincisi tarama.css'teki
+# `thead th[data-tooltip]:hover::after` idi: dokunmatikte HIC acilmiyor,
+# :focus-within ise odaklanabilir cocugu olmayan iki baslikta (Temel Skor /
+# BorsaPusula Skoru) hic tetiklenemiyordu -> skor FORMULU yalnizca fareyle
+# okunabiliyordu (WCAG 1.4.13). Ustelik white-space:nowrap + max-width yok:
+# 102px'lik basligin altinda 502px, en uzununda ~1000px tek satir.
+# Kapi uc ekseni olcer: (1) CSS'te `content:attr(data-*)` ile kurulan ikinci
+# mekanizma -- yalniz `.ind-help` beyaz listede (onun tap+Escape JS'i var);
+# (2) [data-tip] tasiyan her oge klavyeyle odaklanabilir olmali -- <label>
+# istisnasi KOSULLU, sardigi kontrol display:none ise dusut (gercek bulgu:
+# `#importFileInput{display:none}` yuzunden "İçe Aktar" YALNIZCA fareyle
+# calisiyordu, WCAG 2.1.1 A); (3) [data-tip] kullanan sablon bp-tooltip.js'i
+# yuklemeli. Taban SIFIR, 72 kullanim, kapsam tabani 50, pozitif kontrol 4/4.
+echo ""
+echo "18/18 tooltip-canon-check (K-AT: ipucu mekanizmasi kanonu)..."
+if python3 tools/tooltip-canon-check.py; then
+  echo "  ✓ tooltip-canon-check PASS"
+else
+  echo "  ✗ K-AT KIRIK: ikinci bir ipucu mekanizmasi ya da yalniz-fare ipucu (ya da kapsam dustu)."
+  echo "    Detay için: python3 tools/tooltip-canon-check.py"
   FAIL=$((FAIL + 1))
 fi
 
