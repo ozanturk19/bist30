@@ -249,23 +249,12 @@
     font-weight: 700;
     letter-spacing: -0.01em;
   }
-  #chartLoading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    height: 420px;
-    color: var(--bp-text3);
-    font-size: var(--bp-text-base);
-  }
-  .spinner {
-    width: 18px; height: 18px;
-    border: 2px solid var(--bp-border);
-    border-top-color: var(--bp-brand);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  /* 21.09 (K-W): `.spinner` + @keyframes spin SİLİNDİ — kanonik `.da-spin`
+     (data-art.css §5). Aynı ad tarama.css'te de tanımlıydı, AYRI geometriyle
+     (24px/3px/.7s) ve bu şablondaki altı kullanımın dördü zaten geometriyi
+     inline eziyordu. `#chartLoading` yerleşimi `.da-loading--block`a geçti;
+     burada yalnız grafik alanının yüksekliği (sayfa deltası) kaldı. */
+  #chartLoading { height: 420px; padding: 0; }
 
   #chartsInner { display: none; }
   #chartMain   { height: 340px; margin: 8px 18px 10px; }
@@ -527,27 +516,10 @@
 
   /* CPO-DEV2-098: Özet sekmesi IA yeniden yapılandırması — ikincil derinlik
      (indikatör/MTF/geçmiş/temel-analiz/backtest) native <details> ile talep
-     üzerine açılır, varsayılan kapalı. */
-  .bp-detail-toggle { margin-bottom: 20px; }
-  .bp-detail-toggle-summary {
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer; list-style: none;
-    padding: 14px 18px;
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius-lg);
-    font-size: var(--bp-text-base);
-    font-weight: 700;
-    color: var(--bp-text);
-    user-select: none;
-    transition: border-color .15s, background .15s;
-  }
-  .bp-detail-toggle-summary::-webkit-details-marker { display: none; }
-  .bp-detail-toggle-summary::marker { content: ""; }
-  .bp-detail-toggle-summary:hover { border-color: var(--bp-border2); background: rgba(255,255,255,.02); }
-  .bp-detail-toggle-chev { color: var(--bp-text3); font-size: var(--bp-text-sm); transition: transform .2s ease; }
-  .bp-detail-toggle[open] .bp-detail-toggle-chev { transform: rotate(180deg); }
-  .bp-detail-toggle-body { padding-top: 16px; }
+     üzerine açılır, varsayılan kapalı.
+     21.09 (K-W): `.bp-detail-toggle*` reçetesi buradan data-art.css §7'ye
+     taşındı — aynı blok gundem.css + ozet.css'te de ayrı ayrı yazılmıştı ve
+     ozet.css'inki sessizce sapmıştı (11px/600/uppercase/text3). Tek kaynak. */
   /* Screen-reader only — visually hidden but crawlable */
   .sr-only {
     position: absolute;
@@ -634,8 +606,7 @@
   .sig-stat-card:hover { border-color:var(--bp-text3); }
   .sig-stat-val  { font-size:var(--bp-text-26); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
   .sig-stat-lbl  { font-size:var(--bp-text-2xs); color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
-  @keyframes shimmerStat { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-  .stat-sk { background:linear-gradient(90deg,var(--bp-surface2) 25%,var(--bp-surface3) 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:shimmerStat 1.4s infinite; border-radius:var(--bp-radius-4); display:inline-block; }
+  /* 21.09 (K-W): `.stat-sk` + @keyframes shimmerStat SİLİNDİ — kanonik `.da-skel`. */
   @media(max-width:600px) { .sig-stats-row{grid-template-columns:repeat(2,1fr);} }
 
   /* ── Sinyal geçmişi ── */
@@ -755,10 +726,9 @@
     padding: 18px 20px;
     margin-bottom: 20px;
   }
-  .news-loading {
-    display: flex; align-items: center; gap: 8px;
-    color: var(--bp-text3); font-size: var(--bp-text-base); padding: 8px 0;
-  }
+  /* 21.09 (K-W): `.news-loading` yerleşimi kanonik `.da-loading`a geçti;
+     burada yalnız dikey boşluk deltası kaldı. */
+  .news-loading { padding: 8px 0; }
   .news-content {
     font-size: var(--bp-text-base);
     color: var(--bp-text2);

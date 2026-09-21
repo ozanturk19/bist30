@@ -65,7 +65,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=6450b4ce">
-<link rel="stylesheet" href="/static/css/data-art.css?v=c2a92cf7">
+<link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
 <style id="bp-critical-css">
 /* Kanonik anti-CLS bloğu — 27 şablonun paylaştığı desen, BİREBİR korunur (Madde 6f notu).
@@ -818,14 +818,20 @@ header{
   function daShowSectionError(containerId, retryFn){
     var el = document.getElementById(containerId);
     if (!el) return;
-    el.innerHTML = '<div class="da-state-msg da-state-err">⚠️ Veri şu an yüklenemiyor. Bağlantınızı kontrol edip tekrar deneyin.<button type="button">Tekrar dene</button></div>';
+    /* 21.09 (K-W): `.da-state-msg`/`.da-state-err` SİTEDEKİ İKİNCİ durum diliydi
+       ve K-V'nin (21.09) kanonikleştirdiği `.da-empty` ailesi ANA SAYFAYI hiç
+       görmemişti — K-V adlarına göre (`.empty-*`, `.loading-msg`) taramıştı.
+       İkinci dilin hata varyantı ayrımı YALNIZ RENKLE yapıyordu (kesikli
+       kenarlığın rengi + metin rengi): WCAG 1.4.1. Kanonik dilde ayrım tint
+       zemin + kenarlık + ⚠ ikon + eylem düğmesi. */
+    el.innerHTML = '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> Veri şu an yüklenemiyor. Bağlantınızı kontrol edip tekrar deneyin.</span><button type="button" class="da-retry">Tekrar dene</button></div>';
     var btn = el.querySelector('button');
     if (btn) btn.addEventListener('click', retryFn);
   }
   function daShowSectionEmpty(containerId, text){
     var el = document.getElementById(containerId);
     if (!el) return;
-    el.innerHTML = '<div class="da-state-msg">🔍 ' + esc(text) + '</div>';
+    el.innerHTML = '<div class="da-panel da-empty">' + esc(text) + '</div>';
   }
 
   function drawSpark(svgEl, values){
@@ -1230,9 +1236,12 @@ header{
   function daLoadMacroNews(){
     var list = document.getElementById('daMacroNewsList');
     if (!list) return;
-    fetch('/api/macro-news').then(function(r){ return r.json(); }).then(function(d){
+    /* 21.09 (K-W): `r.ok` kapısı YOKTU — sunucu 500'de gövdeyi JSON olarak
+       döndürseydi `items` boş çıkar ve kullanıcı BOZUK sistemi "şu an haber
+       yok" diye görürdü (K-V'nin boş≠hata bulgusunun aynısı, ana sayfada). */
+    fetch('/api/macro-news').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(d){
       var items = (d && d.items) || [];
-      if (!items.length) { list.innerHTML = '<div class="da-state-msg">🔍 Şu an haber yok.</div>'; return; }
+      if (!items.length) { list.innerHTML = '<div class="da-panel da-empty">Şu an haber yok.</div>'; return; }
       list.innerHTML = items.slice(0, 8).map(function(item){
         var url = (typeof safeHref === 'function') ? safeHref(item.url) : (item.url || '#');
         return '<a href="' + url + '" target="_blank" rel="noopener" class="da-macro-news-item">' +
@@ -1241,20 +1250,26 @@ header{
           '<span class="da-macro-news-time">' + esc(item.date_str || '') + '</span></a>';
       }).join('');
       _daGnmMakroLoaded = true;
-    }).catch(function(){ list.innerHTML = '<div class="da-state-msg da-state-err">⚠️ Haberler yüklenemedi.</div>'; });
+    }).catch(function(){ daShowSectionError('daMacroNewsList', daLoadMacroNews); });
   }
 
   function daLoadGundemHisse(){
     var cardsEl = document.getElementById('daGundemCards');
     var bilEl = document.getElementById('daBilancoMiniBody');
     Promise.all([fetch('/api/market-news'), fetch('/api/bilanco-mini')]).then(function(res){
-      return Promise.all([res[0].ok ? res[0].json() : {items:[]}, res[1].ok ? res[1].json() : {periods:[]}]);
+      /* 21.09 (K-W): burada `!ok` sessizce BOŞ PAYLOAD'a çevriliyordu, yani
+         HTTP 500 kullanıcıya "Şu an güncel haber yok" / "Yaklaşan dönem
+         bulunamadı" diye görünüyordu. Artık null → bölüm kendi hata dalını
+         gösteriyor (diğer bölüm etkilenmeden). */
+      return Promise.all([res[0].ok ? res[0].json() : null, res[1].ok ? res[1].json() : null]);
     }).then(function(data){
       var newsData = data[0], bilData = data[1];
       var items = (newsData && newsData.items) || [];
-      if (cardsEl) {
+      if (cardsEl && newsData === null) {
+        daShowSectionError('daGundemCards', daLoadGundemHisse);
+      } else if (cardsEl) {
         cardsEl.innerHTML = !items.length
-          ? '<div class="da-state-msg">🔍 Şu an güncel haber yok.</div>'
+          ? '<div class="da-panel da-empty">Şu an güncel haber yok.</div>'
           : items.map(function(item){
               var chg = item.change_pct;
               var chgCls = (typeof chg === 'number') ? (chg >= 0 ? 'up' : 'down') : '';
@@ -1267,7 +1282,9 @@ header{
                 '<div class="da-gnm-snippet">' + esc(item.snippet || item.summary || 'Özet hazırlanıyor…') + '</div></div>';
             }).join('');
       }
-      if (bilEl) {
+      if (bilEl && bilData === null) {
+        daShowSectionError('daBilancoMiniBody', daLoadGundemHisse);
+      } else if (bilEl) {
         var periods = (bilData && bilData.periods) || [];
         bilEl.innerHTML = !periods.length
           ? '<div style="font-size:var(--bp-text-xs);color:var(--bp-text3)">Yaklaşan dönem bulunamadı.</div>'
@@ -1278,7 +1295,7 @@ header{
       }
       _daGnmHisseLoaded = true;
     }).catch(function(){
-      if (cardsEl) cardsEl.innerHTML = '<div class="da-state-msg da-state-err">⚠️ Gündem yüklenemedi.</div>';
+      if (cardsEl) daShowSectionError('daGundemCards', daLoadGundemHisse);
     });
   }
 

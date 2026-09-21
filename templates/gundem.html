@@ -26,9 +26,9 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=6450b4ce">
-<link rel="stylesheet" href="/static/css/data-art.css?v=c2a92cf7">
+<link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/gundem.css?v=6604ab2f">
+<link rel="stylesheet" href="/static/css/pages/gundem.css?v=2cab6985">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -93,10 +93,10 @@
     <div class="da-panel stat-card"><div class="stat-num num-bkl">{{ ssr_signal_summary.bekle }}</div><div class="stat-lbl">Yatay</div></div>
     <div class="da-panel stat-card"><div class="stat-num num-tot">{{ ssr_signal_summary.total }}</div><div class="stat-lbl">Toplam Hisse</div></div>
     {% else %}
-    <div class="da-panel stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Güçlü Trend</div></div>
-    <div class="da-panel stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Trend Bozuldu</div></div>
-    <div class="da-panel stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Yatay</div></div>
-    <div class="da-panel stat-card"><div class="skeleton" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Toplam Hisse</div></div>
+    <div class="da-panel stat-card"><div class="da-skel" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Güçlü Trend</div></div>
+    <div class="da-panel stat-card"><div class="da-skel" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Trend Bozuldu</div></div>
+    <div class="da-panel stat-card"><div class="da-skel" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Yatay</div></div>
+    <div class="da-panel stat-card"><div class="da-skel" style="height:36px;width:50px;margin:0 auto"></div><div class="stat-lbl">Toplam Hisse</div></div>
     {% endif %}
   </div>
 
@@ -114,8 +114,8 @@
       {% elif ssr_market_open is defined and not ssr_market_open and ssr_closed_message %}<div class="da-panel da-empty">{{ ssr_closed_message }}</div>
       {% elif ssr_market_open is defined %}<div class="da-panel da-empty">Bugün henüz yeni sinyal yok — sinyaller seans kapanışında (gün sonu) güncellenir.</div>
       {% else %}
-      <div class="skeleton sk-card"></div>
-      <div class="skeleton sk-card"></div>
+      <div class="da-skel sk-card"></div>
+      <div class="da-skel sk-card"></div>
       {% endif %}
     </div>
   </div>
@@ -133,9 +133,9 @@
       {% if ssr_strong_al %}{% for s in ssr_strong_al %}{{ gundem_card(s, false) }}{% endfor %}
       {% elif ssr_strong_al is defined %}<div class="da-panel da-empty">Güçlü trend verisi bekleniyor…</div>
       {% else %}
-      <div class="skeleton sk-card"></div>
-      <div class="skeleton sk-card"></div>
-      <div class="skeleton sk-card"></div>
+      <div class="da-skel sk-card"></div>
+      <div class="da-skel sk-card"></div>
+      <div class="da-skel sk-card"></div>
       {% endif %}
     </div>
   </div>
@@ -179,8 +179,8 @@
         <span class="section-sub">Yaklaşan önemli tarihler</span>
       </div>
       <div id="econCalGrid" style="display:flex;flex-direction:column;gap:8px">
-        <div class="skeleton" style="height:48px;border-radius:var(--bp-radius-md)"></div>
-        <div class="skeleton" style="height:48px;border-radius:var(--bp-radius-md)"></div>
+        <div class="da-skel" style="height:48px;border-radius:var(--bp-radius-md)"></div>
+        <div class="da-skel" style="height:48px;border-radius:var(--bp-radius-md)"></div>
       </div>
     </div>
 
@@ -194,9 +194,9 @@
         <span class="section-sub" id="macroNewsUpdatedAt">—</span>
       </div>
       <div id="macroNewsGrid" style="display:flex;flex-direction:column;gap:8px">
-        <div class="skeleton" style="height:52px;border-radius:var(--bp-radius-md)"></div>
-        <div class="skeleton" style="height:52px;border-radius:var(--bp-radius-md)"></div>
-        <div class="skeleton" style="height:52px;border-radius:var(--bp-radius-md)"></div>
+        <div class="da-skel" style="height:52px;border-radius:var(--bp-radius-md)"></div>
+        <div class="da-skel" style="height:52px;border-radius:var(--bp-radius-md)"></div>
+        <div class="da-skel" style="height:52px;border-radius:var(--bp-radius-md)"></div>
       </div>
     </div>
 
@@ -210,8 +210,8 @@
         <span class="section-sub" id="newsUpdatedAt">—</span>
       </div>
       <div id="newsGrid" style="display:flex;flex-direction:column;gap:10px">
-        <div class="skeleton" style="height:80px;border-radius:var(--bp-radius-md)"></div>
-        <div class="skeleton" style="height:80px;border-radius:var(--bp-radius-md)"></div>
+        <div class="da-skel" style="height:80px;border-radius:var(--bp-radius-md)"></div>
+        <div class="da-skel" style="height:80px;border-radius:var(--bp-radius-md)"></div>
       </div>
     </div>
 

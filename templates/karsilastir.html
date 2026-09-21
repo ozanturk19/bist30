@@ -44,9 +44,9 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=6450b4ce">
-<link rel="stylesheet" href="/static/css/data-art.css?v=c2a92cf7">
+<link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=e7906b86">
+<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=58d36371">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
@@ -443,12 +443,12 @@ async function doCompare(opts) {
     <div class="compare-wrap">
       <table class="compare-table" style="min-width:400px">
         <caption class="sr-only">Seçilen hisselerin yan yana karşılaştırma tablosu</caption>
-        <thead><tr><th class="row-label" scope="col"></th>${inputs.map(t=>{const et=escapeHtml(t); const eu=encodeURIComponent(t); return `<th class="col-hdr" scope="col"><a href="/hisse/${eu}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${et} detay sayfası">${et}</a><div class="skeleton" style="margin:6px auto;width:60px"></div></th>`;}).join('')}</tr></thead>
+        <thead><tr><th class="row-label" scope="col"></th>${inputs.map(t=>{const et=escapeHtml(t); const eu=encodeURIComponent(t); return `<th class="col-hdr" scope="col"><a href="/hisse/${eu}" class="col-ticker" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(var(--bp-brand-rgb),.35)" title="${et} detay sayfası">${et}</a><div class="da-skel da-skel--line" style="margin:6px auto;width:60px"></div></th>`;}).join('')}</tr></thead>
         <tbody>
-          <tr class="score-row"><th class="row-label" scope="row"><span aria-hidden="true">🏆</span> Teknik Güç</th>${inputs.map(()=>`<td><div class="skeleton" style="height:60px;width:90px"></div></td>`).join('')}</tr>
+          <tr class="score-row"><th class="row-label" scope="row"><span aria-hidden="true">🏆</span> Teknik Güç</th>${inputs.map(()=>`<td><div class="da-skel da-skel--line" style="height:60px;width:90px"></div></td>`).join('')}</tr>
           ${ROW_LABELS.map(({label, isSep})=>{
             if (isSep) return `<tr class="row-sep"><td colspan="${skelColspan}">${label}</td></tr>`;
-            return `<tr><th class="row-label" scope="row">${label}</th>${inputs.map(()=>`<td><div class="skeleton"></div></td>`).join('')}</tr>`;
+            return `<tr><th class="row-label" scope="row">${label}</th>${inputs.map(()=>`<td><div class="da-skel da-skel--line"></div></td>`).join('')}</tr>`;
           }).join('')}
         </tbody>
       </table>

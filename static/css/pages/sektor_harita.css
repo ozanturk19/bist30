@@ -166,8 +166,9 @@
   .compare-btn:hover { background:rgba(var(--bp-brand-rgb),0.2); }
   .compare-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
-  .cmp-skeleton { background:linear-gradient(90deg,var(--bp-surface2) 25%,var(--bp-surface3) 50%,var(--bp-surface2) 75%); background-size:200% 100%; animation:cmpShimmer 1.4s infinite; border-radius:var(--bp-radius-md); }
-  @keyframes cmpShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  /* 21.09 (K-W): `.cmp-skeleton` SİLİNDİ — kanonik `.da-skel`. Bu kopyanın
+     süpürmesi sitedeki DİĞER HEPSİNİN TERSİ yönde akıyordu (cmpShimmer
+     200%→-200%), yani aynı sayfa ailesinde iki zıt hareket vardı. */
 
   .compare-grid { display:grid; gap:16px; }
   .compare-grid.cols-2 { grid-template-columns:1fr 1fr; }
@@ -227,9 +228,11 @@
      notr gri bos-durum gibi goruntuluyordu -> kanonik `.da-empty--error`.
      Beraberindeki `svg` kurali OLU idi (hicbir yerde SVG'li kullanim yok). */
 
-  #cmpLoadingOverlay { display:none; padding:48px; text-align:center; color:var(--bp-text3); font-size:var(--bp-text-base); }
-  #cmpLoadingOverlay.visible { display:block; }
-  @keyframes cmpSpin { to{transform:rotate(360deg)} }
+  /* 21.09 (K-W): yerleşim `.da-loading--block`a geçti; burada yalnız
+     görünürlük anahtarı kaldı. @keyframes cmpSpin ÖLÜYDÜ (hiçbir kural
+     onu çağırmıyordu) — silindi. */
+  #cmpLoadingOverlay { display:none; }
+  #cmpLoadingOverlay.visible { display:flex; }
 
   /* ── Data-Art sektör kartı cilası (08.09/09.09 gece) — ::before ısı-katmanı
      FONKSİYONEL (heat-color overlay), dokunulmadı; hafif eğim + mor hover-glow

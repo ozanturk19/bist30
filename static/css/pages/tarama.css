@@ -172,8 +172,9 @@
 
   .filter-actions { display:flex; gap:8px; align-items:flex-end; margin-left:auto; }
   /* T2 — inline spinner (filter reactivity fetch göstergesi) */
-  @keyframes tarSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  #inlineSpinner svg { display: inline-block; }
+  /* 21.09 (K-W): @keyframes tarSpin SİLİNDİ — satır-içi SVG-yay spinner'ı da
+     aynı role hizmet ediyordu (üçüncü bir dönen görüntü), `.da-spin--sm`e
+     alındı. */
 
   /* I1 — Active filter chips (SENECA Faz 1, CPO MSG-062) */
   .active-chips-bar {
@@ -384,16 +385,11 @@
      elle yazilmisti. */
 
   /* ── Loading ── */
-  .loading-overlay {
-    text-align:center; padding:60px 20px; color:var(--text2);
-    display:flex; flex-direction:column; align-items:center; gap:12px;
-  }
-  .spinner {
-    width:24px; height:24px; border:3px solid var(--border);
-    border-top-color:var(--brand); border-radius:50%;
-    animation:spin .7s linear infinite;
-  }
-  @keyframes spin { to{transform:rotate(360deg)} }
+  /* 21.09 (K-W): `.loading-overlay` → `.da-loading--block`, `.spinner` →
+     `.da-spin .da-spin--lg` (data-art.css §5). `.spinner` hisse.css'te de
+     tanımlıydı, BAŞKA geometriyle (18px/2px/.8s) — aynı ad iki farklı
+     görüntü. Halkanın kenarlığı burada `--border` (=--bp-bkl-bd, #30363d)
+     idi, hisse'de `--bp-border` (#2a2a2c): kanonik ikincisi. */
 
   /* ── Hide mobile ── */
   @media(max-width:768px) {

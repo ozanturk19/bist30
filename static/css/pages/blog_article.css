@@ -55,7 +55,14 @@
   .rel-stock-sig.al    { background:rgba(var(--bp-al-rgb),.12); color:var(--bp-al); border:1px solid rgba(var(--bp-al-rgb),.25); }
   .rel-stock-sig.sat   { background:rgba(var(--bp-sat-rgb),.12); color:var(--bp-sat-on-tint); border:1px solid rgba(var(--bp-sat-rgb),.25); }
   .rel-stock-sig.bekle { background:rgba(var(--bp-text3-rgb),.1); color:var(--bp-text3); border:1px solid rgba(var(--bp-text3-rgb),.2); }
-  @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+  /* 21.09 (K-W): `.rel-stock-skeleton` bir SINIF ADIYDI ama HİÇBİR CSS kuralı
+     yoktu — kutunun tamamı (kenarlık, dolgu, iki iç şerit, shimmer) şablona
+     inline yazılmıştı. Üstelik kenarlığı `--bp-bkl-bd` (#30363d) idi,
+     yerini aldığı `.rel-stock-card`ınki `--bp-border` (#2a2a2c): veri
+     gelince kenarlık GÖRÜNÜR ŞEKİLDE koyulaşıyordu. Yer tutucu artık
+     yerini aldığı kartın geometrisini paylaşıyor, şeritler `.da-skel`. */
+  .rel-stock-skeleton { background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); padding:12px 16px; min-width:130px; flex:1; max-width:180px; }
+  .rel-stock-skeleton .da-skel { display:block; border-radius:var(--bp-radius-4); }
 
   .disclaimer { background:rgba(var(--bp-sat-rgb),.07); border:1px solid rgba(var(--bp-sat-rgb),.2); border-radius:var(--bp-radius-md); padding:14px 16px; color:var(--bp-text2); font-size:var(--bp-text-base); margin-top:32px; }
 

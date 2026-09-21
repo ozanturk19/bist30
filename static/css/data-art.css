@@ -98,9 +98,67 @@
 .da-skel{position:relative;overflow:hidden;background:var(--bp-surface2);border-radius:var(--bp-radius-md)}
 .da-skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(var(--bp-text-rgb),.06),transparent);animation:daShimmer 1.5s infinite}
 @keyframes daShimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-.da-state-msg{display:flex;align-items:center;gap:10px;padding:18px 20px;border:1px dashed var(--bp-border2);border-radius:var(--bp-radius-lg);color:var(--bp-text3);font-size:var(--bp-text-base);background:var(--bp-surface)}
-.da-state-msg.da-state-err{border-color:rgba(var(--bp-sat-rgb),.4);color:var(--bp-sat)}
-.da-state-msg button{margin-left:auto;background:var(--bp-surface2);border:1px solid var(--bp-border2);color:var(--bp-text);border-radius:var(--bp-radius);padding:6px 12px;font-size:var(--bp-text-sm);font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0}
+/* 21.09 (K-W): `.da-state-msg` / `.da-state-err` SİLİNDİ — sitenin İKİNCİ
+   boş/hata diliydi ve yalnız index.html'de (6 kullanım) yaşıyordu. K-V
+   (21.09) `.da-empty` ailesini kanonikleştirirken bunu GÖREMEDİ çünkü
+   `.empty-*` / `.loading-msg` gibi ADLARA göre taramıştı — bu sınıf ne
+   "empty" ne "loading" adı taşıyordu. K-V'nin kendi dersi burada bir kez
+   daha doğrulandı: ADINA göre değil GÖREVİNE göre tara.
+   Somut kusur: hata varyantı ayrımı YALNIZ RENKLE yapıyordu (kesikli
+   kenarlık rengi + metin rengi) — WCAG 1.4.1. Altı kullanım
+   `.da-empty` / `.da-empty--error` + `.da-retry`ye geçirildi. */
+
+/* ── 5b. YÜKLENİYOR KATI — iskelet · dönen halka · durum satırı ───────────
+   21.09 (CPO, K-W). K-V "yükleniyor ailesi hâlâ parçalı" diye kendi kör
+   noktasını yazmıştı; ölçüldü, parçalanma sanılandan büyüktü.
+
+   İSKELET — BEŞ reçete, ÜÇ farklı taban tonu, İKİ yön, İKİ süre:
+     .da-skel      (index)          #1c1b1f + beyaz .06 süpürme, translateX, 1.5s
+     .skeleton     (gundem)         #141416→#1c1b1f gradyan, bg-position,  1.4s
+     .skeleton     (karsilastir)    aynı gradyan — AYRI bir @keyframes shimmer
+     .cmp-skeleton (sektor-harita)  #1c1b1f→#201f21, 1.4s, **TERS YÖNDE akıyor**
+     .stat-sk      (hisse)          #1c1b1f→#201f21, 1.4s, @keyframes shimmerStat
+     .rel-stock-skeleton (blog)     CSS'te HİÇ TANIMSIZ — tamamı el yazımı inline
+   Beş @keyframes (shimmer ×3 + shimmerStat + cmpShimmer) → tek daShimmer.
+
+   DÖNEN HALKA — `.spinner` İKİ kez tanımlı (hisse 18px/2px/.8s · tarama
+   24px/3px/.7s) ve hisse.html'deki ALTI kullanımın DÖRDÜ geometriyi inline
+   ezmişti (14px ×3, 12px ×1) + hepsi ölü bir `margin:0` taşıyordu. Yani
+   "kanonik" 18px hiçbir gerçek kullanıma uymuyordu. Ölçek üçe indirildi;
+   tek 12px örnek 14'e çekildi (2px, ayrı bir basamağı hak etmiyor).
+   tarama'nın ayrı SVG-yay spinner'ı (@keyframes tarSpin) da aynı role
+   hizmetti — o da bu halkaya alındı.
+
+   prefers-reduced-motion: ÖLÇÜLDÜ, AYRI KURAL GEREKMİYOR — tokens.css'te
+   `*` kapsamlı global azaltma kuralı zaten var (FAZ8).
+   ─────────────────────────────────────────────────────────────────────── */
+/* Metin satırı yerine geçen iskelet (tablo hücresi, etiket). */
+.da-skel--line{display:inline-block;height:14px;width:80px;border-radius:var(--bp-radius-4)}
+
+/* Dönen halka. Ölçek: --sm satır-içi metin yanında, taban bölüm başlığı
+   yanında, --lg bölümün tamamının yerine geçen blok yüklemede. */
+.da-spin{
+  display:inline-block;vertical-align:middle;flex-shrink:0;
+  width:18px;height:18px;
+  border:2px solid var(--bp-border);
+  border-top-color:var(--bp-brand);
+  border-radius:50%;
+  animation:daSpin .8s linear infinite;
+}
+.da-spin--sm{width:14px;height:14px;border-width:2px}
+.da-spin--lg{width:24px;height:24px;border-width:3px}
+@keyframes daSpin{to{transform:rotate(360deg)}}
+
+/* Durum satırı: halka + "… yükleniyor" metni. Satır-içi (bir bölümün
+   başlığının altında) ya da --block (bölümün tamamının yerine). */
+.da-loading{
+  display:flex;align-items:center;gap:10px;
+  color:var(--bp-text3);font-size:var(--bp-text-base);
+}
+.da-loading--block{
+  flex-direction:column;justify-content:center;
+  gap:12px;padding:60px 20px;text-align:center;
+}
 
 /* ── 6. Data-Art imza dokuları ──────────────────────────────────────────── */
 /* Diyagonal kesim — bir bölümü ayrı bir görsel blok yapar (mockup-c .score-section) */
@@ -404,3 +462,61 @@ label:has(> .da-check){min-height:24px}
   transition:background .15s;
 }
 .da-retry:hover{background:rgba(var(--bp-sat-rgb),.12)}
+
+/* ── 7. AÇILIR KATMAN — native <details> akordeon ─────────────────────────
+   21.09 (CPO, K-W) BULGU — ÜÇ KOPYA, BİRİ SESSİZCE SAPMIŞ:
+   `.bp-detail-toggle*` hisse.css (CPO-DEV2-098) · gundem.css (CPO-DEV2-104) ·
+   ozet.css (CPO-DEV2-102) içinde ÜÇ KEZ ayrı ayrı yazılmıştı. İkisinin kendi
+   yorumu "hisse.css'teki emsaliyle BİREBİR AYNI kalması gerekiyor" diyordu —
+   ozet.css'inki DEĞİLDİ. Canlı computed ölçümü (21.09):
+     /gundem + /hisse : 13px · 700 · #e5e1e4 · none      · 14px 18px
+     /ozet            : 11px · 600 · #909097 · UPPERCASE · 14px 16px + .5px tracking
+   Yani aynı "aç/kapat" denetimi bir sayfada tam kontrastlı kart başlığı,
+   diğerinde soluk gri mikro-etiketti. Bu bir tasarım tercihi değil sapmadır
+   (ölçüt: tokens.css'in #8b949e kararı — "aynı rolü iki farklı dille boyamak
+   bir bug'dır"). Çoğunluk + tam affordans olan reçete kanonik yapıldı.
+
+   `.bp-detail-toggle-label` ÜÇ ŞABLONUN DE markup'ında vardı ama HİÇBİR
+   CSS dosyasında tanımlı değildi (sözleşmesiz sınıf) — burada tanımlandı.
+   ─────────────────────────────────────────────────────────────────────── */
+.bp-detail-toggle{margin-bottom:20px}
+.bp-detail-toggle-summary{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  cursor:pointer;list-style:none;
+  padding:14px 18px;
+  background:var(--bp-surface);
+  border:1px solid var(--bp-border);
+  border-radius:var(--bp-radius-lg);
+  font-size:var(--bp-text-base);
+  font-weight:700;
+  color:var(--bp-text);
+  user-select:none;
+  transition:border-color .15s, background .15s;
+}
+.bp-detail-toggle-summary::-webkit-details-marker{display:none}
+.bp-detail-toggle-summary::marker{content:""}
+.bp-detail-toggle-summary:hover{border-color:var(--bp-border2);background:rgba(255,255,255,.02)}
+.bp-detail-toggle-label{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.bp-detail-toggle-chev{color:var(--bp-text3);font-size:var(--bp-text-sm);transition:transform .2s ease;flex-shrink:0}
+.bp-detail-toggle[open] .bp-detail-toggle-chev{transform:rotate(180deg)}
+.bp-detail-toggle-body{padding-top:16px}
+
+/* Satır-içi varyant — KENDİ YÜZEYİ OLAN bir panelin İÇİNDE açılan akordeon.
+   hisse.html'in dördüncü akordeonu (#signalSummaryDetails) bu yüzden el
+   yazımı inline stille kalmıştı: kart reçetesi orada iç içe panel yapardı
+   (aynı gerekçe `.da-empty`nin bilerek yüzeysiz olmasında da geçerli).
+   Çözüm kanonikten kaçmak değil, kanoniğin ikinci varyantı olmak.
+   min-height 24: WCAG 2.5.8-AA dokunma hedefi (21.09'da eklenen fix korundu). */
+.bp-detail-toggle--inline{margin-bottom:0}
+.bp-detail-toggle--inline > .bp-detail-toggle-summary{
+  justify-content:flex-start;gap:6px;flex-wrap:wrap;
+  padding:0;min-height:24px;
+  background:none;border:0;border-radius:0;
+  font-size:var(--bp-text-sm);font-weight:600;
+  color:var(--bp-brand);
+}
+.bp-detail-toggle--inline > .bp-detail-toggle-summary:hover{
+  background:none;text-decoration:underline;
+}
+.bp-detail-toggle--inline > .bp-detail-toggle-body{padding-top:10px}
+.bp-detail-toggle-hint{color:var(--bp-text3);font-weight:400;font-size:var(--bp-text-xs)}

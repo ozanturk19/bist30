@@ -166,15 +166,9 @@
      Kanonik `.da-empty` katina alindi; burada DELTA kalmadi. h2 basliklari
      `.da-empty-title` olcegini `.da-empty h2` uzerinden aliyor. */
 
-  .skeleton {
-    background: linear-gradient(90deg, var(--bp-surface) 25%, var(--bp-surface2) 50%, var(--bp-surface) 75%);
-    background-size: 200% 100%; animation: shimmer 1.4s infinite;
-    border-radius: var(--bp-radius-4); height: 14px; width: 80px; display: inline-block;
-  }
-  @keyframes shimmer {
-    0%  { background-position: -200% 0; }
-    100%{ background-position:  200% 0; }
-  }
+  /* 21.09 (K-W): `.skeleton` + @keyframes shimmer SİLİNDİ. Bu sayfanınki bir
+     METİN SATIRI yer tutucusuydu (14×80 inline-block) — kanonikte
+     `.da-skel .da-skel--line` olarak yaşıyor (data-art.css §5). */
 
   /* ── Makro Ticker Bandı ── */
   .macro-bar {

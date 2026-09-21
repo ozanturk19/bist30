@@ -125,11 +125,8 @@
      ayri bir dile gecti (`.da-empty--error` + gercek "Tekrar dene"). */
 
   /* ── Skeleton ── */
-  .skeleton {
-    background: linear-gradient(90deg, var(--bp-surface) 25%, var(--bp-surface2) 50%, var(--bp-surface) 75%);
-    background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: var(--bp-radius-4);
-  }
-  @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+  /* 21.09 (K-W): `.skeleton` + @keyframes shimmer SİLİNDİ — kanonik `.da-skel`
+     (data-art.css §5). Burada yalnız sayfaya özgü geometri deltası kaldı. */
   .sk-card { height: 100px; border-radius: var(--bp-radius); }
 
   /* ── Responsive ── */
@@ -169,29 +166,9 @@
   }
   .macro-item-lbl { font-weight:600; color:var(--bp-text2); }
   .mc-pos { color:var(--bp-al); } .mc-neg { color:var(--bp-sat); } .mc-neu { color:var(--bp-text3); }
-
-  /* CPO-DEV2-104: ikincil/arşiv icerik toggle — hisse.css'teki (CPO-DEV2-098)
-     .bp-detail-toggle deseniyle birebir ayni class adlari, sayfalar-arasi tutarlilik */
-  .bp-detail-toggle { margin-bottom: 20px; }
-  .bp-detail-toggle-summary {
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer; list-style: none;
-    padding: 14px 18px;
-    background: var(--bp-surface);
-    border: 1px solid var(--bp-border);
-    border-radius: var(--bp-radius-lg);
-    font-size: var(--bp-text-base);
-    font-weight: 700;
-    color: var(--bp-text);
-    user-select: none;
-    transition: border-color .15s, background .15s;
-  }
-  .bp-detail-toggle-summary::-webkit-details-marker { display: none; }
-  .bp-detail-toggle-summary::marker { content: ""; }
-  .bp-detail-toggle-summary:hover { border-color: var(--bp-border2); background: rgba(255,255,255,.02); }
-  .bp-detail-toggle-chev { color: var(--bp-text3); font-size: var(--bp-text-sm); transition: transform .2s ease; }
-  .bp-detail-toggle[open] .bp-detail-toggle-chev { transform: rotate(180deg); }
-  .bp-detail-toggle-body { padding-top: 16px; }
+  /* CPO-DEV2-104: ikincil/arşiv icerik toggle.
+     21.09 (K-W): `.bp-detail-toggle*` kopyası data-art.css §7'ye taşındı
+     (bu kopya kanonikle birebir aynıydı — sapan /ozet'inkiydi). */
 
 
   /* ══ Data-Art dil aktarımı — gundem.html (20.09, Pazar) ══

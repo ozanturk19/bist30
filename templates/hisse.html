@@ -107,9 +107,9 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=6450b4ce">
-<link rel="stylesheet" href="/static/css/data-art.css?v=c2a92cf7">
+<link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=e08fed84">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=1474b158">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -507,7 +507,7 @@
       <span id="emaLegend" style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-left:auto"></span>
     </div>
     <div id="chartBody" style="min-height:420px">
-    <div id="chartLoading"><div class="spinner"></div> Grafik yükleniyor…</div>
+    <div id="chartLoading" class="da-loading da-loading--block"><div class="da-spin"></div> Grafik yükleniyor…</div>
     <div id="chartsInner" style="position:relative;min-height:420px">
       <div id="chartMain" role="img" aria-label="{{ ticker }} fiyat grafiği, günlük mum, 2 yıl"></div>
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
@@ -603,16 +603,19 @@
     </ul>
 
     <!-- Katman C — detaylı teknik göstergeler (accordion, kapalı başlar) -->
-    <details id="signalSummaryDetails" style="margin-top:10px;padding-top:10px">
-      {# 21.09 (CPO) DOKUNMA HEDEFİ: bu <summary> 309×15.5px'ti — aynı şablondaki
-         diğer iki accordion başlığı `.bp-detail-toggle-summary` kanoniğini
-         kullanırken bu üçüncüsü el yazımı inline stille kalmıştı. min-height
-         WCAG 2.5.8-AA (24px) için eklendi; renk/boyut aynı bırakıldı. #}
-      <summary style="cursor:pointer;font-size:var(--bp-text-sm);color:var(--bp-brand);list-style:none;user-select:none;display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:24px"
+    {# 21.09 (K-W) TEK KAYNAK: bu dördüncü akordeon şablonun diğer üçü
+       `.bp-detail-toggle` kanoniğini kullanırken el yazımı inline stille
+       kalmıştı (21.09'da yalnız min-height'i yamanmıştı). Kart reçetesi
+       burada iç içe panel yapardı — bu yüzden kanoniğin satır-içi varyantı
+       (`--inline`, data-art.css §7) eklendi ve buraya uygulandı.
+       Dokunma hedefi min-height:24 varyantın içinde korunuyor. #}
+    <details class="bp-detail-toggle bp-detail-toggle--inline" id="signalSummaryDetails" style="margin-top:10px;padding-top:10px">
+      <summary class="bp-detail-toggle-summary"
                title="Aç/kapat — ADX, RSI, EMA, DI±, Supertrend göstergeleri ve metodoloji linkleri">
-        ▾ Detaylı teknik göstergeler <span style="color:var(--bp-text3);font-weight:normal;font-size:var(--bp-text-xs)">— aç/kapat</span>
+        <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
+        <span class="bp-detail-toggle-label">Detaylı teknik göstergeler <span class="bp-detail-toggle-hint">— aç/kapat</span></span>
       </summary>
-      <div style="margin-top:10px">
+      <div class="bp-detail-toggle-body">
         <!-- Teknik Görünüm (eski commentary-section — taşındı, silinmedi) -->
         <div class="commentary-section" id="commentarySection" style="display:none;margin-bottom:6px">
           <h3 class="section-title" style="margin-bottom:6px;font-size:var(--bp-text-base)"><span aria-hidden="true">📊</span> Teknik Görünüm</h3>
@@ -1078,10 +1081,10 @@
 
   <!-- Sinyal Mini İstatistik Satırı -->
   <div class="sig-stats-row" id="sigMiniStats">
-    <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:36px;margin:auto"></div><div class="sig-stat-lbl">Toplam Sinyal</div></div>
-    <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▲ Güçlü Trend</div></div>
-    <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Trend Bozuldu</div></div>
-    <div class="sig-stat-card"><div class="stat-sk" style="height:26px;width:56px;margin:auto"></div><div class="sig-stat-lbl">⏱ Ort. Aralık</div></div>
+    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:36px;margin:auto"></div><div class="sig-stat-lbl">Toplam Sinyal</div></div>
+    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▲ Güçlü Trend</div></div>
+    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:28px;margin:auto"></div><div class="sig-stat-lbl">▼ Trend Bozuldu</div></div>
+    <div class="sig-stat-card"><div class="da-skel" style="height:26px;width:56px;margin:auto"></div><div class="sig-stat-lbl">⏱ Ort. Aralık</div></div>
   </div>
 
   <!-- Sinyal Geçmişi -->
@@ -1145,7 +1148,7 @@
       <span class="da-fund-note">4 saatte bir güncellenir</span>
     </div>
     <div id="fundLoading" style="color:var(--bp-text3);font-size:var(--bp-text-base);display:flex;align-items:center;gap:8px;padding:20px 18px">
-      <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Yükleniyor…
+      <div class="da-spin da-spin--sm"></div> Yükleniyor…
     </div>
     <div id="fundContent" style="display:none;padding:16px 18px">
       <!-- Raporlama para birimi uyarısı — CPO-1674 (20.09). Sadece finansallarını TRY
@@ -1281,7 +1284,7 @@
         Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" class="da-link">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
       <div style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:var(--bp-text3)">
-        <div class="spinner" style="width:12px;height:12px;border-width:2px;margin:0"></div>
+        <div class="da-spin da-spin--sm"></div>
         AI yorumu hazırlanıyor…
       </div>
     </div>
@@ -1319,8 +1322,8 @@
   <div id="panel-haberler-main" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0">
   <div class="da-panel da-panel--accent news-section" id="newsSection" data-tab-content="haberler">
     <h2 class="section-title"><span aria-hidden="true">🤖</span> Son Haber Özeti</h2>
-    <div class="news-loading" id="newsLoading" role="status" aria-live="polite">
-      <div class="spinner"></div> Haberler yükleniyor…
+    <div class="da-loading news-loading" id="newsLoading" role="status" aria-live="polite">
+      <div class="da-spin"></div> Haberler yükleniyor…
     </div>
     <div class="news-content" id="newsContent" role="status" aria-live="polite" style="display:none"></div>
     <div class="news-source" id="newsSource" style="display:none">
@@ -1342,7 +1345,7 @@
       </a>
     </div>
     <div id="kapLoading" style="display:flex;align-items:center;gap:8px;color:var(--bp-text3);font-size:var(--bp-text-base);padding:6px 0">
-      <div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div>
+      <div class="da-spin da-spin--sm"></div>
       Bildirimler yükleniyor…
     </div>
     <div id="kapList" style="display:none"></div>
@@ -2762,7 +2765,12 @@ const _MAX_CHART_RETRY = 3;
 function _showChartStatus(msg, withRetryBtn) {
   const el = document.getElementById('chartLoading');
   if (!el) return;
-  el.style.display = 'block';
+  /* 21.09 (K-W): burada `display:'block'` YAZILIYDI ve konteynerin kanonik
+     `.da-loading` (flex) yerlesimini inline olarak eziyordu. Yukleniyor dali
+     artik stil katmanina birakiliyor; HATA dali ise bilerek blok kaliyor
+     (hata kutusu tam genislik ister) — degisiklik yok, sadece acik yazildi. */
+  el.style.display = '';
+  el.className = withRetryBtn ? 'da-loading--block' : 'da-loading da-loading--block';
   document.getElementById('chartsInner').style.display = 'none';
   /* 21.09 (K-V): hata dali kanonik `.da-empty--error` + `.da-retry` diline
      gecti — bu sayfada ucuncu, sitede besinci elle-yazilmis "Tekrar dene"
@@ -2770,7 +2778,7 @@ function _showChartStatus(msg, withRetryBtn) {
   el.innerHTML = withRetryBtn
     ? '<div class="da-empty da-empty--error" role="alert"><span><span aria-hidden="true">⚠️</span> ' +
       msg + '</span><button type="button" class="da-retry" onclick="loadChart(0)">Tekrar dene</button></div>'
-    : '<div class="spinner"></div> ' + msg;
+    : '<div class="da-spin"></div> ' + msg;
   // CPO-DEV2-045 #3: nihai hata (retry tükendi) — hpSignal placeholder'ı
   // gerçek bir sinyalmiş gibi ("● Yatay") kalmasın diye görünür "veri yok" işaretine çevir.
   if (withRetryBtn) {
@@ -3067,7 +3075,7 @@ async function loadSignalExplanation(retryCount) {
     } else if (data && data.reason === 'no_data') {
       // Stok verisi yüklenmemişse kısa süre sonra tekrar dene
       if (retryCount < 3) {
-        loadEl.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0"></div> Sinyal verisi yükleniyor…';
+        loadEl.innerHTML = '<div class="da-spin da-spin--sm"></div> Sinyal verisi yükleniyor…';
         loadEl.style.display = 'flex';
         setTimeout(() => loadSignalExplanation(retryCount + 1), 6000);
       } else {
