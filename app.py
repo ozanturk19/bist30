@@ -270,6 +270,10 @@ def require_admin():
 # ── CPO-1108 A1/A4: Analytics doğruluk katmanı ────────────────────────────────
 CF_BEACON_TOKEN = os.environ.get("CF_BEACON_TOKEN", "").strip()  # boşsa CF WA beacon basılmaz
 
+# CPO-1695: /profil denetim token'ı — gerçek aboneye bağlı DEĞİL, subscribers.json'a
+# hiç yazılmaz/okunmaz. Boşsa özellik tamamen kapalı (fail-closed).
+PROFIL_QA_TOKEN = os.environ.get("PROFIL_QA_TOKEN", "").strip()
+
 _NON_HUMAN_UA_RE = re.compile(
     r"BorsaPusulaQA|HeadlessChrome|Claude/|curl|python-requests|"
     r"UptimeRobot|Go-http|\bbot\b|\bspider\b|\bcrawl\b",
@@ -12727,6 +12731,19 @@ def profil_page():
         resp.set_cookie("bp_sub", url_token, max_age=31536000, samesite="Lax", secure=True, httponly=True)
         return resp
     token = request.cookies.get("bp_sub", "")
+    if PROFIL_QA_TOKEN and token and secrets.compare_digest(token, PROFIL_QA_TOKEN):
+        # CPO-1695: kalıcı denetim hesabı — gerçek abone kaydı yok, subscribers.json'a
+        # dokunmaz, mail gönderim döngülerine hiç girmez.
+        qa_profile = {
+            "level": "orta", "freq": "swing", "size": "10-50k",
+            "segments": ["bist30", "teknoloji"], "mail_pref": "daily",
+        }
+        return _nocache_html(render_template("profil.html",
+                               email="qa-test@borsapusula.local",
+                               name="Test Kullanıcı",
+                               profile=qa_profile,
+                               token=token,
+                               done=True))
     if not token:
         # CPO-1190 K9: çıplak 400 yerine markalı açıklama sayfası — kullanıcı
         # bu sayfaya yalnızca e-posta linkiyle (?t=token) gelmeli. Küçük
@@ -12795,6 +12812,10 @@ def api_profile():
     mail_pref = _safe_str(data.get("mail_pref"), "daily")[:20]
     if mail_pref not in ("daily", "instant", "premium", "weekly"):
         return safe_json({"ok": False, "error": "Geçersiz mail_pref değeri"}), 400
+
+    if PROFIL_QA_TOKEN and secrets.compare_digest(token, PROFIL_QA_TOKEN):
+        # CPO-1695: denetim hesabı — gerçek subscribers.json'a hiç yazılmaz.
+        return safe_json({"ok": True, "message": "Profil kaydedildi! Mail tercihleriniz güncellendi."})
 
     with _sub_lock:
         subs = _load_subscribers()
