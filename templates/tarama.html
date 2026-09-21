@@ -64,7 +64,7 @@
       <label for="fSignal">Sinyal</label>
       <select id="fSignal">
         <option value="">Tümü</option>
-        <option value="PREMIUM">💎 Premium (Güçlü Trend + Hacim Onaylı)</option>
+        <option value="PREMIUM">⭐ Hacim Onaylı (Güçlü Trend + RVOL ≥ 1,20)</option>
         <option value="AL">▲ Güçlü Trend</option>
         <option value="SAT">▼ Trend Bozuldu</option>
         <option value="BEKLE">● Yatay</option>
@@ -556,7 +556,7 @@ function renderActiveFilterChips() {
   const maxP = (parseFloat(maxPRaw) > 0) ? maxPRaw : '';
 
   if (sig) {
-    const labels = { PREMIUM: '💎 Premium', AL: '▲ Güçlü Trend', SAT: '▼ Trend Bozuldu', BEKLE: '● Yatay' };
+    const labels = { PREMIUM: '⭐ Hacim Onaylı', AL: '▲ Güçlü Trend', SAT: '▼ Trend Bozuldu', BEKLE: '● Yatay' };
     chips.push({ label: labels[sig] || sig, key: 'signal' });
   }
   if (minAdx > 0) chips.push({ label: `ADX ≥ ${minAdx}`, key: 'minAdx' });
@@ -776,7 +776,7 @@ function renderResults(rows, count) {
     return `<tr>
       <td>
         <a href="/hisse/${escapeHtml(s.ticker)}">
-          <div class="tk">${escapeHtml(s.ticker)}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs);vertical-align:middle">💎</span>' : ''}</div>
+          <div class="tk">${escapeHtml(s.ticker)}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs);vertical-align:middle">💎</span>' : ''}${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs);vertical-align:middle">⭐</span>' : ''}</div>
           <div class="tk-name">${escapeHtml((s.name||'').replace(' A.Ş.',''))}</div>
         </a>
       </td>
@@ -803,7 +803,8 @@ function renderResults(rows, count) {
       const _eqH     = s.entry_quality
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
         : '<span style="color:var(--text3)">—</span>';
-      const _prm = s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '';
+      const _prm = (s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '')
+                 + (s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs)">⭐</span>' : '');
       const _tlbl = s.adx_label || 'Zayıf';
       const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
       // T3.5: mobil kartta da masaüstüyle aynı skor rengi (tier bazlı) — bkz. scoreCell()
