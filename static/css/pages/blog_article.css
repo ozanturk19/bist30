@@ -69,21 +69,18 @@
   /* SSS Akordeon */
   .faq-section { margin-top:36px; padding-top:28px; }
   .faq-section-title { font-size:var(--bp-text-lg); font-weight:700; color:var(--bp-text); margin-bottom:14px; }
-  .faq-item { border:1px solid var(--bp-border); border-radius:var(--bp-radius-md); margin-bottom:8px; overflow:hidden; transition:border-color .15s; }
-  .faq-item:hover { border-color:var(--bp-border2); }
-  .faq-q {
-    width:100%; text-align:left; background:none; border:none; cursor:pointer;
-    padding:13px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px;
-    font-size:var(--bp-text-base); font-weight:600; color:var(--bp-text); font-family:inherit; line-height:1.4;
-    transition:background .12s;
-  }
-  .faq-q:hover { background:rgba(255,255,255,.03); }
-  .faq-q .faq-chevron { flex-shrink:0; color:var(--bp-text3); transition:transform .2s; }
-  .faq-item.open .faq-chevron { transform:rotate(180deg); }
-  .faq-a {
-    display:none; padding:0 16px 13px; font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.65;
-  }
-  .faq-item.open .faq-a { display:block; }
+  /* K-AC (21.09): kendi recetesi (13/16px · 600 · radius-md · zeminsiz ·
+     hover .03) SILINDI — kanonik `.bp-detail-toggle` (data-art.css) devraldi.
+     Burada yalniz SSS'e OZEL iki fark kalir: liste araligi (kanonik 20px bir
+     SSS listesinde cok genis) ve cevap metninin girintisi (kanonik
+     `.bp-detail-toggle-body` yatay dolgusuz; ozet/gundem'de icine tam
+     genislikte izgara koyuluyor, burada duz-yazi var ve soruyla hizalanmali).
+     `.bp-detail-toggle-label` kanonikte `inline-flex` — uzun bir SORU icin
+     `block` daha guvenli (tek satirlik etiket degil, sarmasi gereken cumle). */
+  .faq-item { margin-bottom:8px; }
+  .faq-item > .bp-detail-toggle-summary { line-height:1.4; }
+  .faq-item .bp-detail-toggle-label { display:block; }
+  .faq-item .faq-a { padding:12px 18px 2px; font-size:var(--bp-text-base); color:var(--bp-text3); line-height:1.65; }
 
   /* CTA kutusu */
   .cta-box {

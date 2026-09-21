@@ -105,7 +105,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=2aef5288">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/blog_article.css?v=fc4cd626">
+<link rel="stylesheet" href="/static/css/pages/blog_article.css?v=d2caf716">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="read-progress" id="readProgress"></div>
@@ -146,13 +146,22 @@
   <div class="faq-section" id="faqSection">
     <div class="faq-section-title"><span aria-hidden="true">❓</span> Sık Sorulan Sorular</div>
     {% for faq in article.faqs %}
-    <div class="faq-item" id="faq-{{ loop.index }}">
-      <button class="faq-q" aria-expanded="false" aria-controls="faq-a-{{ loop.index }}" onclick="toggleFaq('faq-{{ loop.index }}')">
-        <span>{{ faq.q }}</span>
-        <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-      <div class="faq-a" id="faq-a-{{ loop.index }}">{{ faq.a }}</div>
-    </div>
+    {#- K-AC (21.09): SSS akordeonu sitenin DORDUNCU acilir diliydi ve kendi
+        recetesiyle sapmisti (13/16px · 600 · radius-md · zeminsiz · hover .03)
+        — kanonik `.bp-detail-toggle` (14/18px · 700 · radius-lg · --bp-surface ·
+        hover .02) ile ayni rolu iki farkli dille boyuyordu. Native <details>'e
+        tasindi: `toggleFaq()` JS'i, elle `aria-expanded`/`aria-controls`
+        defteri ve ayri chevron SVG'si SILINDI (summary zaten yerlesik
+        genisletme durumunu tasir; summary'de elle aria-expanded bir
+        anti-desendir). K-W'nin "akordeon 3 kopya/biri sapmis" bulgusunun
+        dorduncu uyesi. -#}
+    <details class="bp-detail-toggle faq-item" id="faq-{{ loop.index }}">
+      <summary class="bp-detail-toggle-summary">
+        <span class="bp-detail-toggle-label">{{ faq.q }}</span>
+        <span class="bp-detail-toggle-chev" aria-hidden="true">▾</span>
+      </summary>
+      <div class="bp-detail-toggle-body faq-a">{{ faq.a }}</div>
+    </details>
     {% endfor %}
   </div>
   {% endif %}
@@ -334,15 +343,6 @@ function shareBlogCopy() {
     if (btn) { const t = btn.innerHTML; btn.textContent = '✓ Kopyalandı'; setTimeout(() => btn.innerHTML = t, 2000); }
     announceCopy('Bağlantı kopyalandı');
   }).catch(fallbackCopy);
-}
-
-// ── SSS Akordeon ─────────────────────────────────────────
-function toggleFaq(id) {
-  const item = document.getElementById(id);
-  if (!item) return;
-  const isOpen = item.classList.toggle('open');
-  const btn = item.querySelector('.faq-q');
-  if (btn) btn.setAttribute('aria-expanded', String(isOpen));
 }
 
 // ── E-posta abonelik ────────────────────────────────────
