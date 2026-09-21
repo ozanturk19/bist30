@@ -220,7 +220,7 @@
 
 {% with ftr_self='/portfolio', ftr_data_note=true, ftr_note="Portföy verisi yalnızca kendi tarayıcınızda saklanır." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=c2db667a"></script>
+<script src="/static/bp-format.js?v=648ff6b4"></script>
 <script>
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
@@ -314,10 +314,15 @@ function downloadCorruptPortfolio() {
 _pfShowCorruptWarning();
 
 function fmt(v, d=2) { return (+v).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+/* K-BV (22.09): BU SAYFA PARA OLCEGINI UCUNCU BIR YAZIMLA BASIYORDU.
+   `M₺`/`K₺` — sitenin geri kalani `Mn ₺`/`Mrd ₺` diyor; dahasi burada
+   MILYAR ve TRILYON basamagi HIC yoktu, 1,2 milyarlik bir portfoy
+   "1.200,00 M₺" olarak yaziliyordu. `K₺` kisaltmasi da bir para urununde
+   hassasiyet kaybiydi (1.500 ₺ -> "1,5 K₺"); kanon 1.000.000 altini tam
+   yazar. Genislik: `.pf-table` overflow-x:auto, `.pf-mdetail-row`
+   flex-wrap:wrap — tasma uretmez. Tek kanon: bp-format.js bpMoneyCompact. */
 function fmtM(v) {
-  if (Math.abs(v) >= 1e6) return fmt(v/1e6,2) + ' M₺';
-  if (Math.abs(v) >= 1e3) return fmt(v/1e3,1) + ' K₺';
-  return fmt(v) + ' ₺';
+  return bpMoneyCompact(v) || '—';
 }
 
 function save() {

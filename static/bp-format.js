@@ -384,3 +384,61 @@ function bpRsiZoneText(zone, signal) {
   if (z.indexOf('İdeal Giriş') === 0 && signal !== 'AL') return 'Nötr bölge';
   return z;
 }
+
+/* ── K-BV (22.09): PARA ÖLÇEĞİ KISALTMASI — TEK KANON ────────────────────
+   Sitede AYNI büyüklük ÜÇ ayrı yazımla basılıyordu; ikisi AYNI SEKMEDE,
+   birbirinin birkaç piksel altında:
+
+     (a) `Mrd₺` / `Mn₺`   — 2 ondalık, sembolden ÖNCE boşluk YOK
+                            (/hisse Temel kartları `_fmtMoneyObj`,
+                             /karsilastir `_fmtMcap`)
+     (b) `Mr ₺`  / `Mn ₺` — 1 ondalık (milyar) veya tam sayı (milyon),
+                            sembolden önce boşluk VAR, T basamağı YOK
+                            (/hisse Temel sekmesi Ciro/Net Kâr grafiği
+                             `_fmtCompactCur` — hem görünen etiket hem
+                             `aria-label`/`data-tip` metni)
+     (c) `M₺` / `K₺`      — /portfolio `fmtM`; milyar ve trilyon basamağı
+                            HİÇ yok, yani 1,2 milyarlık bir portföy
+                            "1.200,00 M₺" diye yazılıyordu.
+
+   Canlı ölçüm 22.09 (7/7 hisse, /api/hisse/<T>/fundamentals): ASELS Temel
+   sekmesinde "Yıllık Ciro 197,98 Mrd₺" kartının hemen altındaki grafik aynı
+   kalemi "180,4 Mr ₺" diye yazıyor; TUPRS kartta "1,03 T₺" iken grafiğin
+   trilyon basamağı olmadığı için 2022 cirosu "916,8 Mr ₺" kalıyor. Aynı
+   ekranda iki farklı birim kısaltması okuyan kullanıcı ikisini FARKLI
+   büyüklük sanabilir ("Mr" ile "Mrd" aynı mı?).
+
+   Kanon: `<sayı> <ÖLÇEK> <SEMBOL>` — tek boşlukla, ölçek adları
+   `Mn` / `Mrd` / `T`. 1.000.000 altı TAM yazılır: /portfolio'nun `K₺`
+   kısaltması (1.500 ₺ -> "1,5 K₺") para ürününde gereksiz hassasiyet
+   kaybıydı ve dördüncü bir yazım demekti; `.pf-table` zaten `overflow-x:auto`,
+   mobil kart satırı `flex-wrap:wrap` olduğu için tam yazım taşma üretmez.
+   Sayı biçimi tr-TR, ölçeklenmiş değerde `frac` (varsayılan 2) ondalık,
+   ölçeklenmemiş tutar HER ZAMAN 2 ondalık (para). */
+var BP_MONEY_SCALES = [
+  { min: 1e12, unit: 'T'   },
+  { min: 1e9,  unit: 'Mrd' },
+  { min: 1e6,  unit: 'Mn'  }
+];
+
+/* v: sayı (veya sayıya çözülen dizge). opts:
+     sym  -> para sembolü/kodu, varsayılan '₺'; boş dizge verilirse basılmaz
+     frac -> ÖLÇEKLENMİŞ değerin ondalık hanesi (varsayılan 2)
+   Sayı değilse null döner — çağıran nötr bir şey basmalı (uydurma YOK). */
+function bpMoneyCompact(v, opts) {
+  var n = (typeof v === 'string') ? parseFloat(v) : v;
+  if (typeof n !== 'number' || !isFinite(n)) return null;
+  var o = opts || {};
+  var frac = (o.frac == null) ? 2 : o.frac;
+  var av = Math.abs(n), sign = n < 0 ? '-' : '';
+
+  var unit = '', val = av, d = 2;
+  for (var i = 0; i < BP_MONEY_SCALES.length; i++) {
+    if (av >= BP_MONEY_SCALES[i].min) {
+      unit = BP_MONEY_SCALES[i].unit; val = av / BP_MONEY_SCALES[i].min; d = frac; break;
+    }
+  }
+  var txt = sign + val.toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d });
+  var sym = (o.sym == null) ? '₺' : String(o.sym).trim();
+  return txt + (unit ? ' ' + unit : '') + (sym ? ' ' + sym : '');
+}

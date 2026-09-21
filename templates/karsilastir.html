@@ -222,12 +222,8 @@ function _fmtMcap(m) {
   if (typeof m === 'string') return m || null;
   if (!m || m.value == null) return null;
   const sym = m.currency === 'TRY' ? '₺' : (' ' + (m.currency || ''));
-  const v = m.value, av = Math.abs(v), sign = v < 0 ? '-' : '';
-  const dec2 = n => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
-  if (av >= 1e12) return sign + dec2(av/1e12) + ' T' + sym;
-  if (av >= 1e9)  return sign + dec2(av/1e9) + ' Mrd' + sym;
-  if (av >= 1e6)  return sign + dec2(av/1e6) + ' Mn' + sym;
-  return sign + dec2(av) + ' ' + sym;
+  // K-BV (22.09): olcek kisaltmasi tek kanon (bp-format.js bpMoneyCompact).
+  return bpMoneyCompact(m.value, { sym: sym });
 }
 
 function renderCell(key, s) {
@@ -809,7 +805,7 @@ window.addEventListener('popstate', function() {
 </script>
 <script src="/static/bp-search.js?v=f13259b5" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/bp-format.js?v=c2db667a"></script>
+<script src="/static/bp-format.js?v=648ff6b4"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}

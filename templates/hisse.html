@@ -1557,7 +1557,7 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=c2db667a"></script>
+<script src="/static/bp-format.js?v=648ff6b4"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
@@ -3508,22 +3508,27 @@ function _fmtMoneyObj(m, perShare){
   if (typeof m === 'string') return m || null;
   if (!m || m.value == null) return null;
   const sym = _curSym(m.currency);
-  const v = m.value, av = Math.abs(v), sign = v < 0 ? '-' : '';
-  const dec2 = n => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
-  if (perShare) return sign + dec2(av) + ' ' + sym;
-  if (av >= 1e12) return sign + dec2(av/1e12) + ' T' + sym;
-  if (av >= 1e9)  return sign + dec2(av/1e9) + ' Mrd' + sym;
-  if (av >= 1e6)  return sign + dec2(av/1e6) + ' Mn' + sym;
-  return sign + dec2(av) + ' ' + sym;
+  /* K-BV (22.09): olcek kisaltmasi tek kanon (bp-format.js bpMoneyCompact).
+     perShare=true iken olcekleme yapilmaz (book_value gibi hisse-basi kucuk
+     sayilar) -> 1e6 altinda kanon zaten tam yazar, ama hisse-basi bir deger
+     teorik olarak da milyona ulasmayacagi icin niyet acik kalsin diye
+     dogrudan bicimleniyor. */
+  const v = m.value;
+  if (perShare) {
+    return (v < 0 ? '-' : '') + Math.abs(v).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ' + sym;
+  }
+  return bpMoneyCompact(v, { sym: sym });
 }
 
+/* K-BV (22.09): BU FONKSIYON "Mr" DIYORDU, 40 PIKSEL YUKARIDAKI KART "Mrd".
+   Ayni Temel sekmesinde ayni buyukluk iki ayri kisaltmayla basiliyordu
+   (canli 22.09: ASELS karti "197,98 Mrd₺", hemen altindaki grafik
+   "180,4 Mr ₺"); ustelik burada T basamagi YOKTU, TUPRS kartta "1,03 T₺"
+   iken grafikte 2022 cirosu "916,8 Mr ₺" kaliyordu. Bu metin yalnizca
+   gorunen etiket degil, her yil grubunun `aria-label`/`data-tip` okumasi da.
+   Tek kanon: bp-format.js bpMoneyCompact. */
 function _fmtCompactCur(v){
-  if (v == null) return '—';
-  const sym = _curSym(_fundCur);
-  const abs = Math.abs(v), sign = v < 0 ? '-' : '';
-  if (abs >= 1e9) return sign + (abs/1e9).toFixed(1).replace('.', ',') + ' Mr ' + sym;
-  if (abs >= 1e6) return sign + Math.round(abs/1e6).toLocaleString('tr-TR') + ' Mn ' + sym;
-  return sign + Math.round(abs).toLocaleString('tr-TR') + ' ' + sym;
+  return bpMoneyCompact(v, { sym: _curSym(_fundCur) }) || '—';
 }
 function _renderFundTrendChart(period) {
   const chartEl = document.getElementById('fundTrendChart');
