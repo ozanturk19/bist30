@@ -83,6 +83,13 @@
         <div class="ac-dropdown" id="ac4" role="listbox"></div>
       </div>
     </div>
+    <!-- K-BB: dort acilir listenin PAYLASILAN durum bolgesi. Boy ekran okuyucu
+         yalnizca role="option" cocuklarini gezer; ".ac-empty" mesaji listbox
+         icinde role'suz bir <div> oldugu icin erisilebilirlik agacinda
+         `role:generic, name:""` olarak duruyordu -- yani K-U'nun "neden bos"
+         ayrimi ekran okuyucuya HIC ulasmiyordu (canli AX olcumu, 21.09).
+         bp-search.js'teki #bpSearchStatus ile ayni kanon. -->
+    <div class="sr-only" id="acStatus" role="status" aria-live="polite"></div>
     <button class="compare-btn" onclick="doCompare()">Karşılaştır</button>
     <a id="shareBtn" class="share-btn" href="." onclick="copyShareUrl(event);return false">
       <span aria-hidden="true">🔗</span> Linki Kopyala
@@ -562,6 +569,14 @@ function searchStocks(query, max=6) {
   return [...starts, ...contains].slice(0, max);
 }
 
+/* K-BB: paylasilan sr-only durum bolgesine yaz. Ayni metni ust uste yazmak
+   bazi ekran okuyucularda tekrar duyuru uretmez; her tus vurusunda gereksiz
+   tekrar olmasin diye degismediyse dokunmuyoruz. */
+function acAnnounce(text) {
+  const st = document.getElementById('acStatus');
+  if (st && st.textContent !== text) st.textContent = text;
+}
+
 function renderDropdown(inputId, items) {
   const dd = document.getElementById('ac' + inputId.slice(1));
   const inp = document.getElementById(inputId);
@@ -574,7 +589,14 @@ function renderDropdown(inputId, items) {
       ? '<div class="ac-empty">Sonuç bulunamadı</div>'
       : '<div class="ac-empty">Hisse listesi yüklenemedi — kodu elle yazıp karşılaştırabilirsiniz.</div>';
     dd.classList.add('open');
-    if (inp) { inp.setAttribute('aria-expanded', 'true'); inp.removeAttribute('aria-activedescendant'); }
+    /* K-BB: 0 secenek varken "genisletilmis" demek YALANDIR -- ekran okuyucu
+       oyle duyurur, kullanici Asagi Ok'a basar, hicbir sey olmaz (olculdu:
+       aria-activedescendant null kaliyordu). Durum GERCEK secenek sayisindan
+       turer; bp-search.js:250 (K-AJ) ile ayni kural. Gorunen mesaj ayrica
+       canli bolgeden duyurulur, cunku listbox icinde role'suz bir <div>
+       ekran okuyucuya ulasmaz. */
+    if (inp) { inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); }
+    acAnnounce(dd.innerText.trim());
     acState[inputId] = { idx: -1, items: [] };
     placeDropdown(inputId);   /* K-AU */
     return;
@@ -630,6 +652,7 @@ function closeDropdown(inputId) {
   const inp = document.getElementById(inputId);
   if (dd) dd.classList.remove('open');
   if (inp) { inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); }
+  acAnnounce('');   /* K-BB: bayat "Sonuç bulunamadı" duyurusu asili kalmasin */
   acState[inputId] = { idx: -1, items: [] };
 }
 
