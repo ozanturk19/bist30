@@ -25,9 +25,9 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=7ed38bdb">
-<link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
+<link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
-<link rel="stylesheet" href="/static/css/pages/portfolio.css?v=a6c8951d">
+<link rel="stylesheet" href="/static/css/pages/portfolio.css?v=ea806b40">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
@@ -220,7 +220,7 @@
 
 {% with ftr_self='/portfolio', ftr_data_note=true, ftr_note="Portföy verisi yalnızca kendi tarayıcınızda saklanır." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=034a65d2"></script>
+<script src="/static/bp-format.js?v=b454f15d"></script>
 <script>
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
@@ -403,7 +403,7 @@ function svgSparkline(prices) {
   // satırdaki K/Z maliyete göredir, bu eğri SON 30 GÜNÜ anlatır. Bu yüzden
   // dekoratif sayılıp gizlenemez; metin eşdeğeri veriliyor.
   const _chg = ((prices[prices.length - 1] - prices[0]) / (prices[0] || 1)) * 100;
-  const _lbl = 'Son 30 gün: ' + (_chg >= 0 ? '+' : '') + _chg.toFixed(1).replace('.', ',') + '%';
+  const _lbl = 'Son 30 gün: ' + bpFormatPct(_chg, 1);   /* K-BP: tek kanon */
   return '<svg role="img" aria-label="' + _lbl + '" width="' + W + '" height="' + H + '" style="display:block;overflow:visible">' +
     '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
     '</svg>';
@@ -801,11 +801,14 @@ function render() {
     if (sig === 'AL') alCount++;
     if (sig === 'SAT') satCount++;
 
+    /* K-BP (21.09): `pnl>=0` yolu K/Z TAM SIFIR iken — yani pozisyon guncel
+       fiyattan eklendiginde, ilk acilisin EN SIK hali — "+0,00 ₺" YESIL
+       yaziyordu. Kar yokken kar vaadi. Yon tek kanon (bp-format.js). */
     const pnlHtml = pnl !== null
-      ? `<span class="${pnl>=0?'pos-pnl':'neg-pnl'}">${pnl>=0?'+':''}${fmtM(pnl)}</span>`
+      ? `<span class="${bpDirClass(pnl, 2, ['pos-pnl','neg-pnl','neu-pnl'])}">${bpDirSign(pnl, 2)}${fmtM(bpZero(pnl, 2))}</span>`
       : '<span class="neu-pnl">—</span>';
     const pnlPctHtml = pnlPct !== null
-      ? `<span class="${pnlPct>=0?'pos-pnl':'neg-pnl'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1).replace('.', ',')}%</span>`
+      ? `<span class="${bpDirClass(pnlPct, 1, ['pos-pnl','neg-pnl','neu-pnl'])}">${bpFormatPct(pnlPct, 1)}</span>`
       : '<span class="neu-pnl">—</span>';
     const entryBtn = (sig === 'AL' && live && live.signal_price)
       ? `<button class="btn-entry" onclick="fillEntry('${esc(escJsStr(p.ticker))}',${live.signal_price})" data-tip="Sinyal giriş fiyatı: ${fmt(live.signal_price)} ₺">Giriş ${fmt(live.signal_price)}₺</button>`
@@ -911,13 +914,14 @@ function renderSummary(s) {
   document.getElementById('sumCost').textContent  = s.totalCost ? fmtM(s.totalCost) : '—';
   document.getElementById('sumValue').textContent = s.totalVal ? fmtM(s.totalVal) : '—';
   const pnlEl = document.getElementById('sumPnl');
-  pnlEl.textContent = s.totalVal ? (s.pnl >= 0 ? '+' : '') + fmtM(s.pnl) : '—';
-  pnlEl.className   = 'sum-num ' + (s.pnl >= 0 ? 'sum-green' : 'sum-red');
+  /* K-BP: toplam K/Z tam sifirken de YESIL "+0,00 ₺" yaziyordu. */
+  pnlEl.textContent = s.totalVal ? bpDirSign(s.pnl, 2) + fmtM(bpZero(s.pnl, 2)) : '—';
+  pnlEl.className   = 'sum-num ' + bpDirClass(s.pnl, 2, ['sum-green','sum-red','sum-neutral']);
   const pctEl = document.getElementById('sumPnlPct');
   if (s.totalVal && s.totalCost) {
     const pfRet = (s.pnl / s.totalCost) * 100;
-    pctEl.textContent = (pfRet >= 0 ? '+' : '') + pfRet.toFixed(1).replace('.', ',') + '%';
-    pctEl.className   = 'sum-pct ' + (pfRet >= 0 ? 'sum-green' : 'sum-red');
+    pctEl.textContent = bpFormatPct(pfRet, 1);
+    pctEl.className   = 'sum-pct ' + bpDirClass(pfRet, 1, ['sum-green','sum-red','sum-neutral']);
   } else {
     pctEl.textContent = '';
     pctEl.className   = 'sum-pct';

@@ -103,7 +103,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=7ed38bdb">
-<link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
+<link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
 <link rel="stylesheet" href="/static/css/pages/blog_article.css?v=af3c7ed7">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -277,8 +277,10 @@
       if (!s) return '';
       const sig    = (s.signal || 'BEKLE').toLowerCase().replace('ü','u');
       const sigLbl = s.signal === 'AL' ? '▲ Güçlü Trend' : s.signal === 'SAT' ? '▼ Trend Bozuldu' : '● Yatay';
-      const chg    = s.change_pct != null ? (s.change_pct >= 0 ? '+' : '') + (+s.change_pct).toFixed(2).replace('.', ',') + '%' : '';
-      const chgClr = s.change_pct >= 0 ? 'var(--bp-al)' : 'var(--bp-sat)';
+      /* K-BP: yon tek kanon (bp-format.js). Eskiden `>= 0` hem 0,00%'i YESIL
+         yapiyordu hem de change_pct NULL iken (null >= 0 === true) yine YESIL. */
+      const chg    = s.change_pct != null ? bpFormatPct(+s.change_pct, 2) : '';
+      const chgClr = bpDirColor(s.change_pct != null ? +s.change_pct : null, 2);
       const price  = s.price != null ? (+s.price).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺' : '—';
       return `<a href="/hisse/${t}" class="rel-stock-card" data-tip="${escapeHtml(s.name||t)}">
         <div class="rel-stock-ticker">${t}</div>
@@ -414,7 +416,7 @@ window.addEventListener('pageshow', (ev) => {
 })();
 </script>
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
-<script src="/static/bp-format.js?v=034a65d2"></script>
+<script src="/static/bp-format.js?v=b454f15d"></script>
 <script src="/static/bp-search.js?v=f13259b5" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 {% include '_mobile_nav_partial.html' %}

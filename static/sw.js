@@ -10,7 +10,7 @@ const STATIC = [
   '/static/favicon.svg?v=6ef6d5a3',
   '/static/css/tokens.css?v=7ed38bdb',
   '/static/css/shared.css?v=8dd42c5e',
-  '/static/css/data-art.css?v=8a693451',
+  '/static/css/data-art.css?v=09f50516',
   '/static/css/pages/offline.css?v=34a9a271',
   '/offline',
 ];

@@ -13,6 +13,9 @@
   .sum-pct  { font-size:var(--bp-text-sm); font-weight:700; margin-top:3px; line-height:1.2; min-height:1.2em; }
   .sum-lbl  { font-size:var(--bp-text-xs); color:var(--bp-text3); margin-top:6px; text-transform:uppercase; letter-spacing:.5px; }
   .sum-green{ color:var(--bp-al); } .sum-red{ color:var(--bp-sat); } .sum-blue{ color:var(--bp-accent-cyan); }
+  /* K-BP (21.09): K/Z TAM SIFIR — pozisyon guncel fiyattan eklendiginde ilk
+     gorulen hal — "+0,00 ₺" YESIL yaziliyordu. Kar yokken kar rengi yok. */
+  .sum-neutral{ color:var(--bp-text2); }
 
   .add-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; background:var(--bp-surface); border:1px solid var(--bp-border); border-radius:var(--bp-radius-lg); padding:16px; }
   .add-bar input { background:var(--bp-border-subtle); border:1px solid var(--bp-field-border); /* K-Q */ color:var(--bp-text); border-radius:var(--bp-radius); padding:7px 12px; font-size:var(--bp-text-lg); outline:none; } /* FAZ6 C6: iOS input-zoom onlemi, min 16px */

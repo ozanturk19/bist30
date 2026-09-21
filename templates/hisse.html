@@ -107,7 +107,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
 <link rel="stylesheet" href="/static/css/tokens.css?v=7ed38bdb">
-<link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
+<link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=3cf78082">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -423,9 +423,11 @@
           val.textContent = v + ' ₺';
         } else {
           var pct = ((last-first)/first*100);
-          var sign = pct >= 0 ? '+' : '';
-          val.textContent = last.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺ (' + sign + pct.toFixed(1).replace('.', ',') + '%)';
-          val.style.color = up ? '#00e290' : '#ff7875';
+          /* K-BP: isaret+renk tek kanon (bp-format.js). Eskiden `pct >= 0`
+             0,0%'i "+" ile yaziyor, renk de ham hex'ti (#ff7875 tokens.css'te
+             YOK — --bp-sat #f85149). */
+          val.textContent = last.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺ (' + bpFormatPct(pct, 1) + ')';
+          val.style.color = bpDirColor(pct, 1);
         }
       }
       paint(null);
@@ -1529,7 +1531,7 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=034a65d2"></script>
+<script src="/static/bp-format.js?v=b454f15d"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
@@ -2327,10 +2329,10 @@ function renderSummary(s, signalData) {
       // fiyat) kullanirken bu hesap ham s.price (bayat chart-summary fiyati)
       // kullaniyordu - ayni ekranda iki tutarsiz fiyat kaynagi.
       const ret = ((_dispPrice - ep) / ep * 100);
-      const retSign = ret >= 0 ? '+' : '';
-      const retColor = ret >= 0 ? 'var(--bp-al)' : 'var(--bp-sat)';
+      /* K-BP: yon tek kanon — fiyat giris fiyatina esitse "+0,0%" YESIL degil. */
+      const retColor = bpDirColor(ret, 1);
       document.getElementById('icEntry').innerHTML =
-        fmt(ep) + ` <span style="font-size:var(--bp-text-xs);color:${retColor}">(${retSign}${ret.toFixed(1).replace('.', ',')}%)</span>`;
+        fmt(ep) + ` <span style="font-size:var(--bp-text-xs);color:${retColor}">(${bpFormatPct(ret, 1)})</span>`;
     } else if (s.signal !== 'BEKLE' && isNew) {
       document.getElementById('icEntry').innerHTML = '<span style="color:var(--bp-accent-yellow);font-size:var(--bp-text-sm)">⚡ Bugün oluştu</span>';
     } else {
@@ -2778,7 +2780,7 @@ function renderHistory(history, currentPrice, liveSignal) {
 
     if (exitPrice != null && h.price) {
       const ret  = ((exitPrice - h.price) / h.price * 100);
-      const sign = ret >= 0 ? '+' : '';
+      const sign = bpDirSign(ret, 1);   /* K-BP: "+" yalniz gercekten pozitifte */
       if (h.signal === 'SAT') {
         retHtml = `<td style="color:var(--bp-text3);font-weight:600;font-family:var(--bp-font-mono);font-size:var(--bp-text-sm)" data-tip="${_SAT_TIP}" tabindex="0">${sign}${ret.toFixed(1).replace('.', ',')}%${activeTag}</td>`;
       } else {
@@ -3573,7 +3575,7 @@ async function loadFundamentals() {
       const recColor = recColors[f.analyst_rec] || 'var(--bp-text3)';
       const recBadge = f.analyst_rec ? `<span style="background:${recColor};color:var(--bp-bg);font-weight:700;font-size:var(--bp-text-xs);padding:2px 9px;border-radius:var(--bp-radius-20)">${f.analyst_rec}</span>` : '';
       const upsideHtml = upside != null
-        ? `<span style="color:${upside >= 0 ? 'var(--bp-al)' : 'var(--bp-sat)'};font-weight:600">${upside >= 0 ? '+' : ''}${upside.toFixed(1).replace('.', ',')}%</span>`
+        ? `<span style="color:${bpDirColor(upside, 1)};font-weight:600">${bpFormatPct(upside, 1)}</span>`  /* K-BP */
         : '';
       document.getElementById('fundAnalyst').innerHTML =
         `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">

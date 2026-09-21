@@ -146,6 +146,10 @@
   .mono { font-family: var(--bp-font-mono); font-size: var(--bp-text-base); }
   .up   { color: var(--bp-al); }
   .dn   { color: var(--bp-sat); }
+  /* K-BP (21.09): YON EKSENININ UCUNCU HALI. Burada .neu YOKTU, bu yuzden
+     degismeyen hisse (change_pct = 0) `.up` ile YESIL boyaniyordu — ayni
+     hisse /tarama'da `.chg-neu` ile notr griydi. 0 bir yukselis degildir. */
+  .neu  { color: var(--bp-text2); }
   .muted{ color: var(--bp-text3); }
 
   .quality-badge {

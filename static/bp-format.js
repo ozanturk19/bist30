@@ -235,3 +235,71 @@ function bpIsValidPrice(price) {
   var n = Number(price);
   return Number.isFinite(n) && n > 0 && n <= 1e9;
 }
+
+/* K-BP (21.09): YON EKSENI (degisim / getiri / K-Z) — TEK KANON.
+
+   Sitede AYNI IS icin IKI KANON vardi:
+     (a) `x > 0 ? AL : x < 0 ? SAT : NOTR`  -> /tarama, /gundem, /sektor-harita
+     (b) `x >= 0 ? AL : SAT`                -> /karsilastir, /portfolio, /ozet,
+                                               /hisse, anasayfa serit, blog widget
+   (b) yolunda DEGISMEYEN bir hisse "+0,00%" ve YESIL goruruyordu. Canli kanit
+   (21.09, /api/data 217 hisse): ALARK/DOAS/ARCLK/CEMTS/ISMEN change_pct = 0.
+   AYNI GUN, AYNI HISSE -> /tarama "0,00%" gri rgb(199,197,205),
+   /karsilastir "+0,00%" yesil rgb(0,226,144). Site kendi kendisiyle celisiyordu.
+   Yesil "yukselis" vaadidir; 0 bir yukselis DEGILDIR ve "+" bir kazanc ima eder.
+
+   Ikinci kural K-BO'dan miras: ESIKLENEN SAYI, KULLANICININ OKUDUGU SAYI
+   OLMALI. -0,004 ekranda "0,00%" yazip KIRMIZI olamaz. Bu yuzden yon, once
+   GORUNTU ONDALIGINA yuvarlanmis deger uzerinden belirlenir.
+
+   Kanon: >0 -> --bp-al · <0 -> --bp-sat · =0 -> NOTR (hem renk hem isaret). */
+
+/* -1 / 0 / +1, veya sayi degilse null. `frac` = ekranda gosterilen ondalik. */
+function bpDir(n, frac) {
+  var v = (typeof n === 'string') ? parseFloat(n) : n;
+  if (typeof v !== 'number' || !isFinite(v)) return null;
+  var f = (typeof frac === 'number') ? frac : 2;
+  var r = parseFloat(v.toFixed(f));          /* KULLANICININ OKUDUGU SAYI */
+  return r > 0 ? 1 : (r < 0 ? -1 : 0);
+}
+
+/* '+' YALNIZ gercekten pozitif GORUNEN sayida. 0 ve gecersiz -> ''. */
+function bpDirSign(n, frac) {
+  return bpDir(n, frac) === 1 ? '+' : '';
+}
+
+/* Yon rengi (CSS degiskeni metni). Notr varsayilan: --bp-text2. */
+function bpDirColor(n, frac, neutralVar) {
+  var d = bpDir(n, frac);
+  var neu = neutralVar || 'var(--bp-text2)';
+  if (d === null) return 'var(--bp-text3)';
+  return d === 1 ? 'var(--bp-al)' : (d === -1 ? 'var(--bp-sat)' : neu);
+}
+
+/* Yon sinifi. names = [pozitif, negatif, notr]; varsayilan ['up','down','neu'].
+   Sinif adlari sayfadan sayfaya degisir (up/dn, chg-pos/chg-neg/chg-neu,
+   pos-pnl/neg-pnl/neu-pnl) — degismeyen sey KARARIN kendisidir. */
+function bpDirClass(n, frac, names) {
+  var nm = names || ['up', 'down', 'neu'];
+  var d = bpDir(n, frac);
+  if (d === null) return '';
+  return d === 1 ? nm[0] : (d === -1 ? nm[1] : nm[2]);
+}
+
+/* Gosterimde sifira yuvarlanan degeri GERCEK 0 yapar — boylece para/sayi
+   bicimleyicileri (toLocaleString) "-0,00 ₺" gibi isaretli sifir yazamaz.
+   Notr renkle eksi isaretinin ayni hucrede bulunmasini engeller. */
+function bpZero(n, frac) {
+  return bpDir(n, frac) === 0 ? 0 : n;
+}
+
+/* Yuzde metni: isaret + TR ondalik + '%'. Yon ile AYNI yuvarlamayi kullanir,
+   boylece -0,004 "-0,00%" degil "0,00%" yazar (isaretli sifir yok). */
+function bpFormatPct(n, frac) {
+  var v = (typeof n === 'string') ? parseFloat(n) : n;
+  if (typeof v !== 'number' || !isFinite(v)) return '—';
+  var f = (typeof frac === 'number') ? frac : 2;
+  var r = parseFloat(v.toFixed(f));
+  if (r === 0) r = 0;                        /* -0 -> 0 */
+  return (r > 0 ? '+' : '') + r.toFixed(f).replace('.', ',') + '%';
+}

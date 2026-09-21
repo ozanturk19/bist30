@@ -65,10 +65,10 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=7ed38bdb">
-<link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
+<link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=68fe3acb">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=3b04bc71">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="da-grain" aria-hidden="true"></div>
 <h1 style="position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri</h1>
@@ -398,7 +398,7 @@
 
 {% include '_mobile_nav_partial.html' %}
 
-<script src="/static/bp-format.js?v=034a65d2"></script>
+<script src="/static/bp-format.js?v=b454f15d"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script src="/static/bp-search.js?v=f13259b5" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
@@ -422,9 +422,9 @@
     return n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
   }
   function fmtPct(n){
-    if (typeof n !== 'number' || !isFinite(n)) return '—';
-    var sign = n > 0 ? '+' : '';
-    return sign + n.toFixed(2).replace('.', ',') + '%';
+    /* K-BP: yuzde metni tek kanon (bp-format.js) — isaret ve renk AYNI
+       yuvarlanmis sayidan turer. */
+    return bpFormatPct(n, 2);
   }
   function fmtNum0(n){
     if (typeof n !== 'number' || !isFinite(n)) return '—';
@@ -659,8 +659,8 @@
     }
     var frags = [];
     if (st.macro && typeof st.macro.change === 'number') {
-      var up = st.macro.change >= 0;
-      frags.push('BIST100 son kapanışta <span class="' + (up?'up':'down') + '">' + fmtPct(st.macro.change) + '</span> ile <strong>' + fmtPrice(st.macro.price) + '</strong> seviyesinde.');
+      /* K-BP: XU100 gunu tam 0,00% kapatirsa YESIL yazmasin. */
+      frags.push('BIST100 son kapanışta <span class="' + bpDirClass(st.macro.change, 2) + '">' + fmtPct(st.macro.change) + '</span> ile <strong>' + fmtPrice(st.macro.price) + '</strong> seviyesinde.');
     }
     if (st.sectors && st.sectors.length) {
       var top = st.sectors[0]; // API zaten score DESC sıralı dönüyor
@@ -668,15 +668,15 @@
       // "pozitif ayrışmayla öne çıktı" diyordu ama kendi verdiği (0 Güçlü/0 Bozuldu)
       // rakamlarla çelişiyordu — hiçbir ayrışma yokken "öne çıktı" iddiası saçma.
       if (top && typeof top.score === 'number' && (top.al > 0 || top.sat > 0)) {
-        frags.push('<strong>' + esc(top.name) + '</strong> sektörü ' + (top.score>=0?'pozitif':'negatif') + ' ayrışmayla öne çıktı — sektör skoru ' + fmtNum0(top.score) + ' (' + top.al + ' Güçlü / ' + top.sat + ' Bozuldu).');
+        frags.push('<strong>' + esc(top.name) + '</strong> sektörü ' + (bpDir(top.score,0)===0?'dengeli':(bpDir(top.score,0)===1?'pozitif':'negatif')) + ' ayrışmayla öne çıktı — sektör skoru ' + fmtNum0(top.score) + ' (' + top.al + ' Güçlü / ' + top.sat + ' Bozuldu).');
       }
     }
     if (st.realStocks && st.realStocks.length) {
       var withChg = st.realStocks.filter(function(s){ return typeof s.change_pct === 'number'; });
       if (withChg.length) {
         var mover = withChg.reduce(function(a,b){ return Math.abs(b.change_pct) > Math.abs(a.change_pct) ? b : a; });
-        var mup = mover.change_pct >= 0;
-        frags.push('<strong>' + esc(mover.ticker) + '</strong> <span class="' + (mup?'up':'down') + '">' + fmtPct(mover.change_pct) + '</span> değişimle son kapanışın en hareketli hissesi oldu.');
+        /* K-BP: `>= 0` 0,00%'i YESIL yaziyordu. Yon tek kanon (bp-format.js). */
+        frags.push('<strong>' + esc(mover.ticker) + '</strong> <span class="' + bpDirClass(mover.change_pct, 2) + '">' + fmtPct(mover.change_pct) + '</span> değişimle son kapanışın en hareketli hissesi oldu.');
       }
     }
     if (!frags.length) {
@@ -861,9 +861,9 @@
     var top = withChg.sort(function(a,b){ return Math.abs(b.change_pct) - Math.abs(a.change_pct); }).slice(0, 10);
     if (!top.length) { track.innerHTML = '<span class="da-mrow"><span class="mt">Şu an veri yok</span></span>'; return; }
     var rowsHtml = top.map(function(s){
-      var up = s.change_pct >= 0;
-      var band = up ? 'var(--bp-al)' : 'var(--bp-sat)';
-      return '<span class="da-mrow"><span class="mband" style="background:' + band + '"></span><span class="mt">' + esc(s.ticker) + '</span><span class="mp">' + fmtPrice(s.price) + ' ₺</span><span class="md ' + (up?'up':'down') + '">' + fmtPct(s.change_pct) + '</span></span>';
+      /* K-BP: `>= 0` degismeyen hisseyi yesil bant + yesil yuzde yapiyordu. */
+      var band = bpDirColor(s.change_pct, 2);
+      return '<span class="da-mrow"><span class="mband" style="background:' + band + '"></span><span class="mt">' + esc(s.ticker) + '</span><span class="mp">' + fmtPrice(s.price) + ' ₺</span><span class="md ' + bpDirClass(s.change_pct, 2) + '">' + fmtPct(s.change_pct) + '</span></span>';
     }).join('');
     /* K-AF (21.09): ikileme YALNIZ kusursuz kaydırma döngüsü için. Hareketi
        azalt modunda şerit kaydırılmaz, sarılır (tokens.css) — orada ikinci
@@ -1032,13 +1032,19 @@
           ? '<div class="da-panel da-empty">Şu an güncel haber yok.</div>'
           : items.map(function(item){
               var chg = item.change_pct;
-              var chgCls = (typeof chg === 'number') ? (chg >= 0 ? 'up' : 'down') : '';
+              /* K-BP (21.09) IKI hata birden: (a) `>= 0` 0,00%'i YESIL
+                 sayiyordu; (b) `.md.up/.down` YALNIZ `.da-mrow` altinda
+                 tanimliydi, bu kart `.da-mrow` icinde DEGIL — canlida 5/5
+                 kart (BIMAS +2,98% ve ENERY -7,86% dahil) AYNI govde
+                 rengindeydi, yon bilgisi tamamen olmustu. Sinif adi
+                 `da-gnm-chg` ile kendi kuralina baglandi. */
+              var chgCls = 'da-gnm-chg ' + bpDirClass(chg, 2);
               var chgTxt = (typeof chg === 'number') ? fmtPct(chg) : '';
               var dest = '/hisse/' + encodeURIComponent(item.ticker || '');
               return '<div class="da-gnm-card" role="link" tabindex="0" onclick="location.href=\'' + dest + '\'" onkeydown="if(event.key===\'Enter\'){location.href=\'' + dest + '\'}">' +
                 '<div class="da-gnm-card-top"><div><div class="da-gnm-ticker">' + esc(item.ticker || '') + '</div>' +
                 '<div class="da-gnm-name">' + esc(item.name || '') + '</div></div>' +
-                (chgTxt ? '<span class="md ' + chgCls + '" style="font-weight:700;font-size:var(--bp-text-sm)">' + chgTxt + '</span>' : '') + '</div>' +
+                (chgTxt ? '<span class="' + chgCls + '" style="font-weight:700;font-size:var(--bp-text-sm)">' + chgTxt + '</span>' : '') + '</div>' +
                 '<div class="da-gnm-snippet">' + esc(item.snippet || item.summary || 'Özet hazırlanıyor…') + '</div></div>';
             }).join('');
       }

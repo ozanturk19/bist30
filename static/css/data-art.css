@@ -79,6 +79,8 @@
 .da-recap-body strong{color:var(--bp-text);font-weight:700}
 .da-recap-body .up{color:var(--bp-al);font-weight:700}
 .da-recap-body .down{color:var(--bp-sat);font-weight:700}
+/* K-BP (21.09): 0,00% yon RENGI almaz — yesil bir yukselis vaadidir. */
+.da-recap-body .neu{color:var(--bp-text2);font-weight:700}
 .da-det-badge{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-family:'Space Grotesk',monospace,sans-serif;font-size:var(--bp-text-2xs);letter-spacing:.06em;text-transform:uppercase;color:var(--bp-text3);border:1px solid var(--bp-border2);border-radius:var(--bp-radius-pill);padding:5px 11px;position:relative}
 
 @keyframes daPulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.72)}}

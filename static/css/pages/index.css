@@ -245,6 +245,9 @@ header{
 .da-mrow .md{font-weight:700}
 .da-mrow .md.up{color:var(--bp-al)}
 .da-mrow .md.down{color:var(--bp-sat)}
+/* K-BP (21.09): yon ekseninin UCUNCU hali — degismeyen hisse (0,00%) ne
+   yesil ne kirmizi. Ayni kural .da-recap-body ve .da-gnm-chg'de de var. */
+.da-mrow .md.neu{color:var(--bp-text2)}
 .da-mrow .mband{width:7px;height:7px;border-radius:50%;flex:none}
 
 /* ── abonelik ── */
@@ -282,6 +285,14 @@ header{
 .da-gnm-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}
 .da-gnm-ticker{font-weight:800;font-size:var(--bp-text-md)}
 .da-gnm-name{font-size:var(--bp-text-xs);color:var(--bp-text3)}
+/* K-BP (21.09): bu yuzdenin rengi `.md.up/.down` ile yaziliyordu, ama o
+   kural `.da-mrow` (kayan serit) altina kilitliydi ve bu kart serit icinde
+   DEGIL — canlida 5/5 kart ayni govde rengindeydi (+2,98% ile -7,86% ayni).
+   Yon sinifi artik kendi kuralina bagli. */
+.da-gnm-chg{font-weight:700}
+.da-gnm-chg.up{color:var(--bp-al)}
+.da-gnm-chg.down{color:var(--bp-sat)}
+.da-gnm-chg.neu{color:var(--bp-text2)}
 .da-gnm-snippet{font-size:var(--bp-text-sm);color:var(--bp-text2);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .da-bilanco-mini{background:var(--bp-surface);border:1px solid var(--bp-border);border-radius:var(--bp-radius-20);padding:18px}
 .da-bilanco-mini-title{font-size:var(--bp-text-sm);font-weight:700;margin:0 0 12px}
