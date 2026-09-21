@@ -112,7 +112,8 @@
 
   <!-- Sonuç başlık -->
   <div class="result-header">
-    <div class="result-count" id="resultCount" role="status" aria-live="polite"><strong>—</strong> sonuç<span id="inlineSpinner" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><span class="da-spin da-spin--sm"></span></span></div>
+    <div class="result-count" id="resultCount" role="status" aria-live="polite">{# 21.09 (K-W): sayac metni KENDI kabinda. Once dogrudan bu div'in
+     innerHTML'i yazildigi icin #inlineSpinner ILK RENDER'DA YOK EDILIYORDU. #}<span id="resultCountText"><strong>—</strong> sonuç</span><span id="inlineSpinner" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><span class="da-spin da-spin--sm"></span></span></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
       <select class="sort-select da-select" id="sortSel" onchange="applyFilters()" aria-label="Sıralama">
@@ -253,7 +254,7 @@
 
     <!-- Sonuç başlık — Temel -->
     <div class="result-header">
-      <div class="result-count" id="resultCountTemel" role="status" aria-live="polite"><strong>—</strong> sonuç<span id="inlineSpinnerTemel" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><span class="da-spin da-spin--sm"></span></span></div>
+      <div class="result-count" id="resultCountTemel" role="status" aria-live="polite"><span id="resultCountTextTemel"><strong>—</strong> sonuç</span><span id="inlineSpinnerTemel" aria-hidden="true" style="display:none;margin-left:8px;vertical-align:middle"><span class="da-spin da-spin--sm"></span></span></div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span style="font-size:var(--bp-text-sm);color:var(--text2)">Sırala:</span>
         <select class="sort-select da-select" id="sortSelTemel" onchange="applyTemelFilters()" aria-label="Sıralama">
@@ -686,7 +687,13 @@ function _hydrateFiltersFromUrl() {
 function renderResults(rows, count) {
   _csvData = rows;
   document.getElementById('loadingDiv').style.display = 'none';
-  document.getElementById('resultCount').innerHTML = _searchQ
+  /* 21.09 (K-W): burada `#resultCount`in TAMAMI yeniden yaziliyordu ve
+     kardes `#inlineSpinner` SILINIYORDU — sonraki her filtre degisikliginde
+     `getElementById('inlineSpinner')` null donup `if (sp)` kapisi sessizce
+     yutuyordu. Yani "T2 bilateral loading state" ozelligi ilk render'dan
+     sonra HIC calismiyordu (canli dogrulandi: eleman yok). Artik yalnizca
+     metin kabi yaziliyor. */
+  document.getElementById('resultCountText').innerHTML = _searchQ
     ? `<strong>${count}</strong> sonuç <span style="font-size:var(--bp-text-xs);color:var(--text3)">(arama: "${_esc(_searchQ.toLowerCase())}")</span>`
     : `<strong>${count}</strong> sonuç`;
 
@@ -990,7 +997,8 @@ async function applyTemelFilters() {
 
 function renderTemelResults(rows, count) {
   document.getElementById('loadingDivTemel').style.display = 'none';
-  document.getElementById('resultCountTemel').innerHTML = _searchQTemel
+  /* 21.09 (K-W): bkz. renderResults — spinner kardesi siliniyordu. */
+  document.getElementById('resultCountTextTemel').innerHTML = _searchQTemel
     ? `<strong>${count}</strong> sonuç <span style="font-size:var(--bp-text-xs);color:var(--text3)">(arama: "${_esc(_searchQTemel.toLowerCase())}")</span>`
     : `<strong>${count}</strong> sonuç`;
 
