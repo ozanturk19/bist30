@@ -124,7 +124,11 @@
      kolon dusurmek), bir FILTRE icin degil: kolon gizlenince veri yine de satirda
      duruyor, filtre gizlenince yetenek tamamen kayboluyor. Artik gizlenmiyorlar;
      dar ekranda yan yana iki sutuna sariliyorlar. */
-  .filter-price input[type=number] { width:100px; }
+  /* K-BA: fiyat alanlari type=number -> type=text + inputmode=decimal oldu
+     (Turkce "12,50" girdisini tarayici sessizce "1250" yapiyordu). Genislik
+     kurali TIPE degil, ROLE baglanir; aksi halde tip degisince kutu buyuyup
+     filtre seridi kayardi. */
+  .filter-price input { width:100px; }
   .filter-group label { font-size:var(--bp-text-2xs); font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
   .filter-group select,
   .filter-group input[type=number],
@@ -143,6 +147,15 @@
   .filter-group select:focus,
   .filter-group input[type=number]:focus,
   .filter-group input[type=text]:focus { border-color:var(--brand); }
+  /* K-BA: ayristirilamayan girdi (or. "abc"). type=number bunu engelliyordu,
+     type=text engellemez -> gorunur + duyurulabilir isaret sart (filtre
+     uygulanmaz). ⛔ KONUM KASITLI: bu kural taban `.filter-group input[...]`
+     border bildiriminden ve :focus'tan SONRA gelmeli. Ozgullugu esit
+     (0,2,1 / 0,3,1); once yazilirsa kaynak sirasinda KAYBEDER ve kenarlik hic
+     degismez -- ilk yazimim tam olarak boyle kirikti, olcumle yakalandi
+     (ayni tuzak: CPO-974 Bug3 notu, birkac satir yukarida). */
+  .filter-group input[aria-invalid="true"],
+  .filter-group input[aria-invalid="true"]:focus { border-color:var(--bp-sat); }
   /* CPO-974 Bug3 (2026-07-02): CPO-468'in padding-left:36 fix'i hiç uygulanmamış —
      .filter-group input[type=text] (specificity 0,2,1, padding:7px 10px shorthand) .search-group input'u
      (specificity 0,1,1) her zaman eziyordu. Kalıcı çözüm: aynı [type=text] attribute selector eklenerek

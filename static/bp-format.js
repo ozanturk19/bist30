@@ -129,3 +129,49 @@ function bpSignalDateKey(signalDate) {
   if (age === 1) return 'yesterday';
   return 'older';
 }
+
+/* ── K-BA — TÜRKÇE SAYI GİRDİSİ: TEK KAYNAK ──────────────────────────────
+   KUSUR (canlıda ölçüldü, /tarama): fiyat filtreleri `type="number"`di.
+   Türkçe konuşan kullanıcı "12,50" yazınca tarayıcı virgülü SESSİZCE atıyor
+   ve `input.value` **"1250"** oluyor — `validity.valid` hâlâ true, badInput
+   false, hiçbir hata yok. 216 hisse 5'e düşüyor, çip güvenle "Min 1250 ₺"
+   yazıyor. Kullanıcı 100 kat sapmayı göremiyor.
+
+   Bu hata daha ÖNCE bir kez bulunmuştu (portfolio.html "Alış ₺" alanı,
+   r161-bughunt) ve YALNIZCA orada düzeltilmişti — /tarama'daki dört fiyat
+   alanı fix'i miras almadı. Bu yüzden ayrıştırıcı artık burada, tek kopya.
+
+   BELİRSİZLİK VE ÇÖZÜMÜ (kasıtlı, ölçülebilir):
+     · virgül VARSA  → noktalar binlik ayracıdır, virgül ondalıktır:
+                       "1.234,56" → 1234.56
+     · virgül YOKSA ve NOKTA BİRDEN FAZLAYSA → hepsi binlik ayracıdır
+                       ("1.234.567" tek bir ondalık nokta OLAMAZ) → 1234567
+     · virgül YOKSA ve tek nokta varsa → KARARLAŞTIRILAMAZ ("1.234" hem
+       1,234 hem 1234 olabilir). Makine biçimi (JSON/URL) varsayılır,
+       DOKUNULMAZ: 1.234. Kullanıcı binlik kastediyorsa virgül yazmalı.
+       (portfolio.html'in mevcut davranışı budur; değiştirilmedi.)
+
+   Ayrıştırılamayan girdi için NaN döner — çağıran "filtre yok"a düşmeli ve
+   alanı `aria-invalid` ile işaretlemeli. Sessizce 0'a düşürmek YASAK: bu,
+   düzeltmeye çalıştığımız sessiz başarısızlığın ta kendisidir. */
+function bpParseTrNumber(raw) {
+  if (raw === null || raw === undefined) return NaN;
+  raw = String(raw).trim();
+  if (!raw) return NaN;
+  if (raw.indexOf(',') !== -1) {
+    raw = raw.replace(/\./g, '').replace(',', '.');
+  } else if ((raw.match(/\./g) || []).length > 1) {
+    raw = raw.replace(/\./g, '');
+  }
+  if (!/^[+-]?\d*\.?\d+$/.test(raw)) return NaN;
+  return parseFloat(raw);
+}
+
+/* Sayıyı Türkçe biçimde GÖSTER (çip/etiket metni). Ayrıştırılamayanı
+   uydurmaz — sonlu değilse boş dizge. */
+function bpFormatTrNumber(n, maxFrac) {
+  if (!isFinite(n)) return '';
+  return Number(n).toLocaleString('tr-TR', {
+    maximumFractionDigits: (maxFrac === undefined ? 2 : maxFrac)
+  });
+}

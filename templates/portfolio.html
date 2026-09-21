@@ -205,6 +205,7 @@
 
 {% with ftr_self='/portfolio', ftr_data_note=true, ftr_note="Portföy verisi yalnızca kendi tarayıcınızda saklanır." %}{% include '_footer.html' %}{% endwith %}
 
+<script src="/static/bp-format.js?v=115ff3c5"></script>
 <script>
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
@@ -498,11 +499,11 @@ async function clearPortfolio() {
 // ondalik-virgul girisini — ör. "1.234,56" — sessizce "1.23456"e bozuyordu). hisse.html:1184
 // ile ayni TR-format parse deseni: virgul varsa once binlik noktalari sil, sonra virgulu
 // ondalik noktaya cevir; virgul yoksa (zaten "1234.56" gibi) dokunma.
+// K-BA: ayristirici artik bp-format.js'te tek kopya (ayni hata /tarama'nin DORT
+// fiyat alaninda da vardi; bu fix oraya miras kalmamisti). Burasi yalnizca
+// kanona delege eder — iki kopyanin sessizce ayrisma riski kalmadi.
 function parseTRPrice(raw) {
-  raw = String(raw).trim();
-  if (!raw) return NaN;
-  if (raw.includes(',')) raw = raw.replace(/\./g, '').replace(',', '.');
-  return parseFloat(raw);
+  return bpParseTrNumber(raw);
 }
 
 // bughunt-12.09 (live-flow-audit-2): portfolio'da tek CRUD eksiği "Update"ti —

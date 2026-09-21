@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
-<link rel="stylesheet" href="/static/css/pages/tarama.css?v=557fad84">
+<link rel="stylesheet" href="/static/css/pages/tarama.css?v=e38ff7d2">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -85,12 +85,12 @@
 
     <div class="filter-group filter-price">
       <label for="fMinP">Min Fiyat (₺)</label>
-      <input type="number" id="fMinP" value="" min="0" step="0.01" inputmode="decimal" placeholder="—" onwheel="this.blur()">
+      <input type="text" id="fMinP" value="" inputmode="decimal" placeholder="—" autocomplete="off" spellcheck="false" maxlength="14">
     </div>
 
     <div class="filter-group filter-price">
       <label for="fMaxP">Max Fiyat (₺)</label>
-      <input type="number" id="fMaxP" value="" min="0" step="0.01" inputmode="decimal" placeholder="—" onwheel="this.blur()">
+      <input type="text" id="fMaxP" value="" inputmode="decimal" placeholder="—" autocomplete="off" spellcheck="false" maxlength="14">
     </div>
 
     <div class="filter-group search-group" style="min-width:160px">
@@ -223,12 +223,12 @@
 
       <div class="filter-group filter-price">
         <label for="fMinPTemel">Min Fiyat (₺)</label>
-        <input type="number" id="fMinPTemel" value="" min="0" step="0.01" inputmode="decimal" placeholder="—" onwheel="this.blur()">
+        <input type="text" id="fMinPTemel" value="" inputmode="decimal" placeholder="—" autocomplete="off" spellcheck="false" maxlength="14">
       </div>
 
       <div class="filter-group filter-price">
         <label for="fMaxPTemel">Max Fiyat (₺)</label>
-        <input type="number" id="fMaxPTemel" value="" min="0" step="0.01" inputmode="decimal" placeholder="—" onwheel="this.blur()">
+        <input type="text" id="fMaxPTemel" value="" inputmode="decimal" placeholder="—" autocomplete="off" spellcheck="false" maxlength="14">
       </div>
 
       <div class="filter-group">
@@ -315,7 +315,7 @@
 
 {% with ftr_self='/tarama', ftr_data_note=true %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=b6c7a716"></script>
+<script src="/static/bp-format.js?v=115ff3c5"></script>
 <script src="/static/stale-banner.js?v=cfbf4001"></script>
 <script>
 /* ── Makro ticker — merkezi bpLoadMacroBar (bp-search.js), CPO-DEV2-081(C) ── */
@@ -467,13 +467,36 @@ async function loadSectors() {
 
 let _filtersSeq = 0;
 
+// ── K-BA: TR ondalık fiyat girdisi ────────────────────────────────────────
+// Alanlar artık type="text" + inputmode="decimal" (type="number" Türkçe
+// "12,50"yi SESSİZCE "1250"ye çeviriyordu — canlıda ölçüldü: 216 hisse -> 5,
+// çip "Min 1250 ₺" diyordu, validity.valid hâlâ true). Ayrıştırma tek
+// kaynaktan: bp-format.js -> bpParseTrNumber().
+// Ayrıştırılamayan girdi 0'a DÜŞÜRÜLMEZ (o, düzelttiğimiz sessiz hatanın
+// aynısı olurdu) — filtre uygulanmaz ve alan aria-invalid ile işaretlenir.
+function _priceFieldValue(id) {
+  const el = document.getElementById(id);
+  if (!el) return NaN;
+  const raw = (el.value || '').trim();
+  if (!raw) { el.removeAttribute('aria-invalid'); return NaN; }
+  const n = bpParseTrNumber(raw);
+  const ok = Number.isFinite(n) && n >= 0;
+  if (ok) el.removeAttribute('aria-invalid');
+  else    el.setAttribute('aria-invalid', 'true');
+  return ok ? n : NaN;
+}
+function _priceParam(id, fallback) {
+  const n = _priceFieldValue(id);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 async function applyFilters() {
   const mySeq = ++_filtersSeq;
   const sig    = document.getElementById('fSignal').value;
   const minAdx = document.getElementById('fMinAdx').value || 0;
   const sector = document.getElementById('fSector').value;
-  const minP   = document.getElementById('fMinP').value || 0;
-  const maxP   = document.getElementById('fMaxP').value || 999999;
+  const minP   = _priceParam('fMinP', 0);
+  const maxP   = _priceParam('fMaxP', 999999);
   const sort   = document.getElementById('sortSel').value;
   if (sort !== _currentSort) {
     _sortDir = _sortDefaultDir[sort] || 'desc';
@@ -559,10 +582,12 @@ function renderActiveFilterChips() {
   const sig = (document.getElementById('fSignal').value || '').trim();
   const minAdx = parseFloat(document.getElementById('fMinAdx').value) || 0;
   const sector = (document.getElementById('fSector').value || '').trim();
-  const minPRaw = (document.getElementById('fMinP').value || '').trim();
-  const maxPRaw = (document.getElementById('fMaxP').value || '').trim();
-  const minP = (parseFloat(minPRaw) > 0) ? minPRaw : '';
-  const maxP = (parseFloat(maxPRaw) > 0) ? maxPRaw : '';
+  // K-BA: çip ham dizgeyi basıyordu — "12,50" yazan kullanıcıya tarayıcının
+  // bozduğu "1250"yi güvenle gösteriyordu. Artık uygulanan SAYI gösteriliyor.
+  const minPn = _priceFieldValue('fMinP');
+  const maxPn = _priceFieldValue('fMaxP');
+  const minP = (minPn > 0) ? bpFormatTrNumber(minPn) : '';
+  const maxP = (maxPn > 0) ? bpFormatTrNumber(maxPn) : '';
 
   if (sig) {
     const labels = { PREMIUM: '⭐ Hacim Onaylı', AL: '▲ Güçlü Trend', SAT: '▼ Trend Bozuldu', BEKLE: '● Yatay' };
@@ -677,6 +702,15 @@ function _hydrateFiltersFromUrl() {
         if (el) el.value = val;
       }
     }
+    // K-BA: URL makine bicimi tasir ("12.5"); alan artik metin kutusu oldugu
+    // icin kullaniciya TURKCE gosterilir ("12,5"). Geri okuma ayni sayiyi verir
+    // (bpParseTrNumber tek kaynak), yani tur-gidis kayipsiz.
+    ['fMinP', 'fMaxP'].forEach(pid => {
+      const pel = document.getElementById(pid);
+      if (!pel || !pel.value) return;
+      const pn = bpParseTrNumber(pel.value);
+      if (Number.isFinite(pn)) pel.value = bpFormatTrNumber(pn);
+    });
     // CPO-DEV2-r34: sort_dir URL'e yaziliyordu (applyFilters, T2 yorum satiri: 'paylasilabilir')
     // ama hic geri okunmuyordu -- applyFilters() ilk calistiginda 'kolon degisti' sanip
     // yonu kolonun varsayilanina sifirliyordu, paylasilan/yenilenen ?sort_dir=asc URL'leri
@@ -1016,8 +1050,8 @@ async function applyTemelFilters() {
   const band   = document.getElementById('fBant').value;
   const minScore = document.getElementById('fMinTemel').value || 0;
   const sector = document.getElementById('fSectorTemel').value;
-  const minP   = document.getElementById('fMinPTemel').value || 0;
-  const maxP   = document.getElementById('fMaxPTemel').value || 999999;
+  const minP   = _priceParam('fMinPTemel', 0);
+  const maxP   = _priceParam('fMaxPTemel', 999999);
   const signal = document.getElementById('fSignalTemel').value;
   const sort   = document.getElementById('sortSelTemel').value;
   if (sort !== _currentSortTemel) _sortDirTemel = 'desc';   // acilir menuden kolon degisti -> varsayilan yon
