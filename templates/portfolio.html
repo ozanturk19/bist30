@@ -585,10 +585,18 @@ async function fetchLive() {
   _fetchLiveBusy = true;
   try {
     const r = await fetch('/api/data', { signal: AbortSignal.timeout(15000) });
+    /* K-U: `fetch()` HTTP 500'de THROW ETMEZ — govde gecerli JSON oldugu surece
+       (Flask'in JSON hata sayfasi dahil) catch'e HIC girilmezdi ve asagida
+       `_pfFetchErr.live = false` yazilirdi. Sonuc: sunucu hatasinda hata
+       banner'i HIC gorunmuyordu; kullanici bunun yerine renderSummary'den
+       "borsadan cekilmis olabilir — pozisyonu kaldirin" tavsiyesini aliyordu
+       (canli olculdu: /api/data 500 -> #pfFetchError display:none). */
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const j = await r.json();
-    if (j.stocks) {
-      j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal, signal_price: s.signal_price }; });
-    }
+    /* HTTP 200 + bos payload da bir basarisizliktir (gecmis ders: "HTTP200 +
+       null payload sessiz olum") — sessizce "veri yok" gibi davranmaz. */
+    if (!j || !Array.isArray(j.stocks)) throw new Error('bos payload');
+    j.stocks.forEach(s => { liveData[s.ticker] = { price: s.price, signal: s.signal, signal_price: s.signal_price }; });
     _pfFetchErr.live = false;
   } catch(e) { _pfFetchErr.live = true; }
   _updatePfFetchError();
@@ -738,7 +746,13 @@ function renderSummary(s) {
     return;
   }
   const missWarnEl = document.getElementById('pfMissingPriceWarn');
-  if (s.missingPriceCount > 0) {
+  /* K-U: TEK SEBEP, TEK MESAJ. Canli veri cekilemediginde HER pozisyonun fiyati
+     eksik olur; bu durumda "borsadan cekilmis olabilir — sembolu kontrol edin
+     veya pozisyonu KALDIRIN" tavsiyesi hem yanlis hem de veri kaybina yol acan
+     bir eylem onerir. Sistemik sebep zaten #pfFetchError banner'inda yaziyor. */
+  if (_pfFetchErr.live) {
+    missWarnEl.style.display = 'none';
+  } else if (s.missingPriceCount > 0) {
     missWarnEl.style.display = '';
     missWarnEl.textContent = `⚠ ${s.missingPriceCount} pozisyonun güncel fiyatı bulunamadı (borsadan çekilmiş olabilir) — sembolü kontrol edin veya pozisyonu kaldırın. Kâr/Zarar bu pozisyon(lar) hariç hesaplandı.`;
   } else {

@@ -517,6 +517,7 @@ function copyShareUrl(e) {
 
 // ── Autocomplete: ticker ve şirket adına göre arama ──
 let ALL_STOCKS = [];
+let STOCKS_READY = false;   /* K-U: liste GERCEKTEN yuklendi mi? */
 let acState = {};  // { t1: {idx, items}, ... }
 
 function _normalize(s) {
@@ -535,6 +536,7 @@ function _normalize(s) {
 async function loadStocksList() {
   try {
     const r = await fetch('/api/stocks/list');
+    if (!r.ok) throw new Error('HTTP ' + r.status);   /* K-U: 500 throw ETMEZ */
     const d = await r.json();
     ALL_STOCKS = (d.stocks || []).map(s => ({
       ticker: s.ticker,
@@ -542,6 +544,7 @@ async function loadStocksList() {
       _t: _normalize(s.ticker),
       _n: _normalize(s.name)
     }));
+    STOCKS_READY = ALL_STOCKS.length > 0;
   } catch(e) {
     console.warn('stocks/list fetch failed', e);
   }
@@ -565,7 +568,12 @@ function renderDropdown(inputId, items) {
   const inp = document.getElementById(inputId);
   if (!dd) return;
   if (!items.length) {
-    dd.innerHTML = '<div class="ac-empty">Sonuç bulunamadı</div>';
+    /* K-U: liste HIC yuklenemediyse her sorgu bos doner — o zaman "Sonuç
+       bulunamadı" demek kullaniciya GECERLI bir hisse kodunun yok oldugunu
+       soylemektir. Sebebi ayirt et. */
+    dd.innerHTML = STOCKS_READY
+      ? '<div class="ac-empty">Sonuç bulunamadı</div>'
+      : '<div class="ac-empty">Hisse listesi yüklenemedi — kodu elle yazıp karşılaştırabilirsiniz.</div>';
     dd.classList.add('open');
     if (inp) { inp.setAttribute('aria-expanded', 'true'); inp.removeAttribute('aria-activedescendant'); }
     acState[inputId] = { idx: -1, items: [] };
