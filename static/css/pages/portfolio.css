@@ -95,7 +95,18 @@
      kırmızıya dönüyordu, yani kullanıcı tıklamadan önce ayrımı hiç görmüyordu. */
   .btn-action.danger { border-color: rgba(var(--bp-sat-rgb),.72); color: var(--bp-sat); }
   .btn-action.danger:hover { border-color: var(--bp-sat); color: var(--bp-sat-on-tint); background: rgba(var(--bp-sat-rgb),.08); }
-  #importFileInput { display: none; }
+  /* 21.09 (K-AT): `display:none` bir <input type="file">'i SEKME SIRASINDAN
+     tamamen cikarir. Tetikleyici sadece onu SARAN <label> oldugu ve label da
+     odaklanabilir olmadigi icin "İçe Aktar" YALNIZCA FAREYLE calisiyordu —
+     klavye kullanicisi yedek dosyasindan portfoyunu geri yukleyemiyordu
+     (WCAG 2.1.1 Klavye, A seviyesi; canli /portfolio'da input.focus() sonrasi
+     document.activeElement BODY kaliyordu). Gorsel olarak gizli ama
+     ODAKLANABILIR kalip (.sr-only ile ayni) + halkayi saran label tasir. */
+  #importFileInput {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  label.btn-action:focus-within { outline: 2px solid var(--bp-brand); outline-offset: 2px; }
 
   /* Import modal */
   .import-toast {
