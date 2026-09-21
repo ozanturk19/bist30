@@ -43,7 +43,13 @@
     + '.bp-sr-chg.bp-pos{color:#00e290}.bp-sr-chg.bp-neg{color:#f85149}.bp-sr-chg.bp-neu{color:#909097}'
     + '.bp-search-topic{display:block;padding:9px 12px;text-decoration:none;color:#e5e1e4;border-radius:8px;font-size:13px;transition:background .12s}'
     + '.bp-search-topic:hover,.bp-search-topic.bp-sel{background:#1c1b1f}'
-    + '@media (max-width:600px){.bp-search-overlay{padding-top:0;align-items:stretch}.bp-search-modal{width:100vw;height:100vh;max-height:100vh;border-radius:0;border:none}.bp-search-result{grid-template-columns:56px 14px 1fr auto}.bp-sr-price{display:none}}'
+    /* K-AZ: tam ekran mobil varyant `top:0`dan basliyordu ve safe-area payi YOKTU —
+       PWA/standalone'da (viewport-fit=cover) arama kutusu ve ✕ kapat dugmesi
+       TAMAMEN centigin/durum cubugunun altinda kaliyordu (olculdu: inset=47px'te
+       ikisi de %100 guvensiz bolgede). Sonuc listesi de ev gostergesinin altina
+       tasiyordu. 100vh -> 100dvh: iOS'ta URL cubugu kadar TASIYORDU (ayni ders
+       unsubscribe.css'te yazili), vh satiri dvh desteklemeyen tarayici yedegi. */
+    + '@media (max-width:600px){.bp-search-overlay{padding-top:0;align-items:stretch}.bp-search-modal{width:100vw;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;border-radius:0;border:none;padding-top:env(safe-area-inset-top,0px)}.bp-search-results{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}.bp-search-result{grid-template-columns:56px 14px 1fr auto}.bp-sr-price{display:none}}'
     /* ── Anti-CLS: reserve space for async-loaded sections ── */
     + '#gundemSec{min-height:230px}'
     + '#statsBar,.stats-bar{min-height:78px}'

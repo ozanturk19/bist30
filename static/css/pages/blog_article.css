@@ -139,7 +139,9 @@
 
   /* Reading progress bar */
   .read-progress {
-    position: fixed; top: 0; left: 0;
+    /* K-AZ: `top:0` PWA'da centigin/durum cubugunun ALTINA denk geliyordu —
+       3px'lik cubugun TAMAMI gorunmezdi (olculdu: inset=47px'te top 0..3). */
+    position: fixed; top: env(safe-area-inset-top, 0px); left: 0;
     width: 0%; height: 3px; z-index:var(--bp-z-toast);
     background: linear-gradient(90deg, var(--bp-brand) 0%, var(--bp-accent-cyan) 50%, var(--bp-art-violet) 100%);
     will-change: width; pointer-events: none;
