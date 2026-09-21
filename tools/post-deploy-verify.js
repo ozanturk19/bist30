@@ -1308,6 +1308,107 @@ const step = async (ad, fn) => {
                (fark.length ? ' · grafikte ek basamak: ' + fark.join(',') : ''));
   });
 
+  /* ── 4q) K-BW: YON RENGI TEK TOKENDAN + sparkline penceresi durustce
+     etiketlenmis mi? ────────────────────────────────────────────────────
+     22.09 oncesi /hisse'de UC ayri kusur ayni ekseni bozuyordu:
+       (1) hero rozeti satir-ici `#ff7875` -- tokens.css'te HIC YOK
+           (kanonik --bp-sat = #f85149); canli 72/217 sayfa.
+       (2) sparkline cizgisi `last >= first` ile SIFIRI yesile katiyor ve
+           metinden FARKLI bir kirmizi kullaniyordu (ayni 52px pencerede
+           iki kirmizi). Yon, metnin yuvarlamasiyla AYNI olmali (K-BO).
+       (3) etiket "Son 30 gun" diyordu, pencere 30 ISLEM BARI = 41 takvim
+           gunu. Etiket "Son 30 seans"a cekildi.
+     ⛔ Kanvas rengi DOM'dan okunamaz -- piksel sayilir. Ve etiket @320px
+        olculur: bu turda etiketin kendisi bir satir tasirmisti (K-BV dersi).
+     ⛔ Olcum on-kosulu (sparkline cizilmedi) varsa adim DUSER, atlanmaz. */
+  console.log('\n[4q] K-BW — yon rengi tek token + sparkline penceresi durust');
+
+  await step('K-BW: rozet/cizgi/metin AYNI token rengi + etiket @320px tek satir', async () => {
+    const data = await (await ctx.request.get(BASE + '/api/data')).json();
+    const ss = (data.stocks || []);
+    const sat = ss.find(x => x.signal === 'SAT');
+    if (!sat) return bad('K-BW', 'SAT sinyalli hisse yok (olcum gecersiz)');
+
+    await p.setViewportSize({ width: 320, height: 900 });
+    await p.goto(BASE + '/hisse/' + sat.ticker, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await p.waitForSelector('#bpSparkWrap', { state: 'attached', timeout: 25000 }).catch(() => {});
+    await p.waitForFunction(() => {
+      const w = document.getElementById('bpSparkWrap');
+      return w && getComputedStyle(w).display !== 'none';
+    }, { timeout: 30000 }).catch(() => {});
+    await p.waitForTimeout(1500);
+
+    const r = await p.evaluate(() => {
+      const wrap = document.getElementById('bpSparkWrap');
+      const cv = document.getElementById('bpSpark');
+      const lab = document.querySelector('.bp-spark-label');
+      const pill = document.querySelector('.bp-symbol-pill span:last-child');
+      if (!wrap || !cv || !lab || !pill) return { err: 'sparkline/rozet DOM yok' };
+      if (getComputedStyle(wrap).display === 'none') return { err: 'sparkline cizilmedi' };
+      const sp = lab.querySelector('span');
+      const val = document.getElementById('bpSparkVal');
+      /* Kanvasin BASKIN opak rengi = cizgi rengi (kenar yumusatma komsulari
+         dagilir, baskin olan gercek renktir). */
+      let d;
+      try { d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; }
+      catch (e) { return { err: 'kanvas okunamadi: ' + e.message }; }
+      const t = {};
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] < 200) continue;
+        const h = '#' + [d[i], d[i + 1], d[i + 2]].map(x => x.toString(16).padStart(2, '0')).join('');
+        t[h] = (t[h] || 0) + 1;
+      }
+      const top = Object.entries(t).sort((a, b) => b[1] - a[1])[0];
+      if (!top || top[1] < 200) return { err: 'kanvas bos (cizgi cizilmemis)' };
+      const cs = getComputedStyle(document.documentElement);
+      return {
+        cizgi: top[0], cizgiPx: top[1],
+        sat: cs.getPropertyValue('--bp-sat').trim(),
+        al: cs.getPropertyValue('--bp-al').trim(),
+        valColor: getComputedStyle(val).color,
+        pillColor: getComputedStyle(pill).color,
+        pillCls: pill.className,
+        etiket: sp.textContent.trim(),
+        aria: cv.getAttribute('aria-label') || '',
+        etiketSatirlari: sp.offsetHeight > 16 ? 2 : 1,
+        docOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        hamHexKalinti: /style="color:#/.test(document.documentElement.outerHTML)
+      };
+    });
+    await p.setViewportSize({ width: 1280, height: 900 });
+    if (r.err) return bad('K-BW', r.err + ' (olcum gecersiz)');
+
+    const hex2rgb = h => {
+      const m = /^#([0-9a-f]{6})$/i.exec(h);
+      if (!m) return null;
+      const n = parseInt(m[1], 16);
+      return 'rgb(' + [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(', ') + ')';
+    };
+    /* SAT hissesinde 30 barlik degisim YUKSELIS de olabilir -- cizgi o zaman
+       --bp-al'dir. Ihlal, cizginin bu IKI tokenden HICBIRI olmamasidir
+       (ya da notr --bp-text2). Onemli olan: PALET DISI bir renk olmamasi. */
+    const izinli = [r.sat.toLowerCase(), r.al.toLowerCase(), '#c7c5cd'];
+    if (!izinli.includes(r.cizgi.toLowerCase()))
+      return bad('K-BW', 'sparkline cizgisi palet disi: ' + r.cizgi + ' (izinli: ' + izinli.join('/') + ')');
+    if (r.pillColor !== hex2rgb(r.sat))
+      return bad('K-BW', 'SAT rozeti --bp-sat degil: ' + r.pillColor + ' (beklenen ' + hex2rgb(r.sat) + ')');
+    if (!/bp-(al|sat|bkl)-text/.test(r.pillCls))
+      return bad('K-BW', 'rozet token sinifi kullanmiyor: class="' + r.pillCls + '"');
+    if (r.hamHexKalinti)
+      return bad('K-BW', 'sayfada hala satir-ici `style="color:#..."` var');
+    if (!/^Son 30 seans$/.test(r.etiket))
+      return bad('K-BW', 'sparkline etiketi beklenen degil: "' + r.etiket + '" (30 bar = 41 takvim gunu)');
+    if (!/Son 30 seans/.test(r.aria))
+      return bad('K-BW', 'aria-label gorunur metni icermiyor (WCAG 2.5.3): "' + r.aria + '"');
+    if (r.etiketSatirlari > 1)
+      return bad('K-BW', '@320px sparkline etiketi IKI satira sardi (K-BV dersi)');
+    if (r.docOverflow > 0)
+      return bad('K-BW', '@320px sayfa yatay tasiyor: ' + r.docOverflow + 'px');
+    ok('K-BW', sat.ticker + ' · cizgi ' + r.cizgi + ' (' + r.cizgiPx + 'px) · rozet ' +
+               r.pillColor + ' = --bp-sat · metin ' + r.valColor + ' · "' + r.etiket +
+               '" @320px tek satir · satir-ici ciplak hex 0');
+  });
+
   /* ── 5) Cache-bust: sayfadaki ?v= diskteki hash ile ayni mi? ─────────── */
   console.log('\n[5] Cache-bust (?v= <-> servis edilen dosyanin md5i)');
   const assets = await p.evaluate(() =>
