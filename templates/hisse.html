@@ -109,7 +109,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=05a1361a">
 <link rel="stylesheet" href="/static/css/data-art.css?v=8a693451">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=a7e0490a">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=5f584c1b">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -2596,7 +2596,7 @@ function renderSummary(s, signalData) {
       ? (s.signal === 'SAT' ? 'ind-badge ind-bear' : 'ind-badge ind-bull')
       : 'ind-badge ind-neutral';
     return `<span class="${cls}">${ind.label}<span class="ind-detail">${ind.detail}</span></span>` +
-      `<button type="button" class="ind-help" data-tooltip="${(ind.tooltip||'Bu gösterge hakkında detayl\u0131 bilgi i\u00e7in metodolojiye bakın.').replace(/"/g,'&quot;')}" aria-label="${ind.label} açıklamasını göster">?</button>`;
+      `<button type="button" class="ind-help" data-tip="${(ind.tooltip||'Bu gösterge hakkında detayl\u0131 bilgi i\u00e7in metodolojiye bakın.').replace(/"/g,'&quot;')}" aria-label="${ind.label} açıklamasını göster">?</button>`;
   }).join('');
 
   /* RSI14 badge — Faz 1 #3: 6-zone */
@@ -2615,7 +2615,7 @@ function renderSummary(s, signalData) {
                     rsi < 30 ? '🔵' : '';
     const rsiLbl = rsiIcon ? `${rsiIcon} ${zone}` : zone || 'Normal';
     indHtml += `<span class="${rsiCls}">RSI ${_trNum(rsi)}<span class="ind-detail">${rsiLbl}</span></span>` +
-      `<button type="button" class="ind-help" data-tooltip="RSI: 0-100 aras\u0131 momentum g\u00f6stergesi. 30 alt\u0131 a\u015f\u0131r\u0131 sat\u0131m, 30-45 dip toparlanmas\u0131, 45-60 ideal giri\u015f penceresi, 60-70 trend g\u00fc\u00e7leniyor, 70-80 dikkatli, 80 \u00fcst\u00fc a\u015f\u0131r\u0131 al\u0131m." aria-label="RSI açıklamasını göster">?</button>`;
+      `<button type="button" class="ind-help" data-tip="RSI: 0-100 aras\u0131 momentum g\u00f6stergesi. 30 alt\u0131 a\u015f\u0131r\u0131 sat\u0131m, 30-45 dip toparlanmas\u0131, 45-60 ideal giri\u015f penceresi, 60-70 trend g\u00fc\u00e7leniyor, 70-80 dikkatli, 80 \u00fcst\u00fc a\u015f\u0131r\u0131 al\u0131m." aria-label="RSI açıklamasını göster">?</button>`;
   }
 
   /* Hacim oranı badge (sadece dikkat çekici olduğunda göster) */
@@ -3635,24 +3635,11 @@ document.addEventListener('visibilitychange', () => {
 <script src="/static/learning-mode.js?v=8" defer></script>
 
 <script>
-/* ind-help: mobile tap-to-toggle */
-document.addEventListener('click', function(e) {
-  const btn = e.target.closest('.ind-help');
-  if (!btn) {
-    document.querySelectorAll('.ind-help.open').forEach(x => x.classList.remove('open'));
-    return;
-  }
-  e.preventDefault();
-  const isOpen = btn.classList.contains('open');
-  document.querySelectorAll('.ind-help.open').forEach(x => x.classList.remove('open'));
-  if (!isOpen) btn.classList.add('open');
-});
-/* ind-help: Escape ile kapatma (harici klavyeli dokunmatik cihazlar icin, WCAG 2.1.2) */
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.ind-help.open').forEach(x => x.classList.remove('open'));
-  }
-});
+/* 21.09 (K-AU): `.ind-help` sayfa-yerel tap-toggle + Escape dinleyicileri
+   SILINDI. `.ind-help` artik kanonik [data-tip] mekanizmasini kullaniyor;
+   bp-tooltip.js (yukarida yuklu) tap-toggle, Escape, disari-tiklama,
+   aria-describedby VE viewport cevirmesi/yatay kelepceyi zaten yapiyor.
+   Eski CSS-yalniz `::after` sabit yonlu aciliyordu, bkz. hisse.css ~582. */
 
 /* F3 — Eğitim Tooltip toggle (localStorage bp_show_tooltips) */
 const _TIPS_KEY = 'bp_show_tooltips';

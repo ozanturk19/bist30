@@ -575,30 +575,24 @@
     background: var(--bp-border); color: var(--bp-text3); font-size: var(--bp-text-xs); font-weight: 700;
     text-decoration: none; margin-left: 4px; vertical-align: middle;
     transition: all .15s; opacity: .8;
-    border: none; cursor: help; padding: 0; position: relative;
+    border: none; cursor: help; padding: 0;
     font-family: inherit;
   }
   .ind-help:hover { opacity: 1; background: var(--bp-border2); color: var(--bp-text); }
-  /* Tooltip popup */
-  .ind-help::after {
-    content: attr(data-tooltip);
-    position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
-    background: var(--bp-surface2); border: 1px solid var(--bp-border2); border-radius:var(--bp-radius-md);
-    padding: 10px 12px; font-size: var(--bp-text-sm); font-weight: 400;
-    color: var(--bp-text); line-height: 1.5;
-    width: max-content; max-width: 280px; text-align: left;
-    white-space: normal; pointer-events: none;
-    opacity: 0; visibility: hidden;
-    transition: opacity .15s; z-index:var(--bp-z-modal);
-    box-shadow: var(--bp-shadow-md);
-  }
-  .ind-help:hover::after, .ind-help:focus::after {
-    opacity: 1; visibility: visible;
-  }
-  /* Mobile: tap to toggle */
-  @media (hover: none) {
-    .ind-help.open::after { opacity: 1; visibility: visible; }
-  }
+  /* 21.09 (K-AU) — `.ind-help::after` (content:attr(data-tooltip)) SILINDI.
+     Sabit yonlu aciliyordu (bottom:130% = HER ZAMAN yukari, left:50% =
+     HER ZAMAN ortali), viewport cevirmesi/kenar kelepcesi YOKTU. Canli olcum
+     (borsapusula.com/hisse/ASELS, 604daef): dugme yapiskan `.macro-bar`in
+     hemen altindayken 4/4 ipucunun ustu gorunur alanin DISINA tasiyordu
+     (75/93/129/165px) — gorunur yukseklik orani %0. 320px'te ayrica 4/4
+     saga tasiyordu (20/35/47/64px) ve `html{overflow-x:clip}` (bkz. ~1021)
+     yuzunden o metin KAYDIRMAYLA DA geri getirilemiyordu (RSI ipucunun her
+     satirinin sag %23'u). Cozum yamamak degil GOC: kanonik [data-tip] +
+     static/js/bp-tooltip.js — position:fixed, `top<8` olunca alta cevirir,
+     `Math.max(8, min(left, vw-tw-8))` ile yatay kelepceler, tap-toggle +
+     Escape + disari-tiklama + aria-describedby zaten icinde.
+     Ayni goc tarama.css'te (bkz. ~475) daha once yapilmisti.
+     `position:relative` de kalkti — tek isi bu ::after'i cipalamakti. */
 
   /* ── Sinyal mini istatistik satırı ── */
   .sig-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
