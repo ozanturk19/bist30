@@ -2072,6 +2072,12 @@ def analyze(ticker_base):
             "low_liquidity": low_liquidity,
             "adx":           round(adx_val, 1),  # top-level for SSR/SEO
             "adx_label":     derive_adx_label(adx_val),  # CPO-1196 D0 #4: tek kaynaklı Zayıf/Orta/Güçlü/Çok Güçlü
+            # CPO-1741: indicators.ema1299.value zaten "{:.0f}/{:.0f}" — o STRING'i
+            # geri parse eden _compute_signal_commentary (app.py ~7040) düşük fiyatlı
+            # hisselerde (ör. MARTI EMA12 2,3/EMA99 1,9 → "2/2") iki değeri eşitliyordu.
+            # Ham hassasiyeti top-level alanla taşı (adx ile aynı desen).
+            "e12":           round(e12, 2),
+            "e99":           round(e99, 2),
             "indicators": {
                 "supertrend": {
                     "label": "ST",
@@ -7169,7 +7175,7 @@ def _enrich_signal_explanation(ticker, signal_data):
         f"  • Supertrend: {'YUKARI ✓' if st_bull else 'AŞAĞI ✓'}\n"
         f"  • ADX: {adx:.0f} ({'güçlü trend ✓' if derive_adx_label(adx) in ('Güçlü', 'Çok Güçlü') else derive_adx_label(adx).lower()}), "
         f"DI+: {di_plus:.0f}, DI-: {di_minus:.0f}\n"
-        f"  • EMA12 {e12:.0f} {'>' if e12 > e99 else '<'} EMA99 {e99:.0f} ✓\n"
+        f"  • EMA12 {tr_price_filter(e12)} {'>' if e12 > e99 else '<'} EMA99 {tr_price_filter(e99)} ✓\n"
         f"  • Fiyat: {tr_price_filter(price)} ₺ | Sinyal süresi: {bars} gün{sl_line}\n\n"
         f"Yukarıdaki rakamlar/göstergeler zaten kullanıcıya ayrıca gösteriliyor — onları tekrarlama. "
         f"SADECE bu sinyalde neden şu an dikkat çekici olduğunu tek cümlede, en fazla 15 kelimeyle vurgula."
@@ -7628,7 +7634,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
     if signal == "AL":
         trend_dir  = "yükseliş"
         st_text    = "yükseliş yönünde"
-        ema_text   = f"EMA12 ({e12:.0f} ₺), EMA99 ({e99:.0f} ₺) üzerinde seyrediyor"
+        ema_text   = f"EMA12 ({tr_price_filter(e12)} ₺), EMA99 ({tr_price_filter(e99)} ₺) üzerinde seyrediyor"
         di_text    = f"DI+ {di_p:.0f} DI- {di_m:.0f}'i geçmiş durumda"
         if signal_date and not is_signal_from_today(signal_date):
             dur_label = derive_signal_date_label(signal_date) or signal_date
@@ -7652,7 +7658,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
     elif signal == "SAT":
         trend_dir  = "düşüş"
         st_text    = "düşüş yönünde"
-        ema_text   = f"EMA12 ({e12:.0f} ₺), EMA99 ({e99:.0f} ₺) altında seyrediyor"
+        ema_text   = f"EMA12 ({tr_price_filter(e12)} ₺), EMA99 ({tr_price_filter(e99)} ₺) altında seyrediyor"
         di_text    = f"DI- {di_m:.0f} DI+ {di_p:.0f}'ün üzerinde"
         if signal_date and not is_signal_from_today(signal_date):
             dur_label = derive_signal_date_label(signal_date) or signal_date
@@ -7680,7 +7686,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         return (
             f"{ticker} ({name}) hissesi şu anda net bir Güçlü Trend / Trend Bozuldu sinyali üretmiyor. "
             f"{mixed} "
-            f"ADX {adx:.0f} ({adx_quality}), EMA12 {e12:.0f} / EMA99 {e99:.0f}."
+            f"ADX {adx:.0f} ({adx_quality}), EMA12 {tr_price_filter(e12)} / EMA99 {tr_price_filter(e99)}."
         )
 
 
