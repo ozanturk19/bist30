@@ -104,6 +104,21 @@
   --bp-art-violet: #7c5cff;   /* CPO-1558: Data-Art mockup'ın kendi dekoratif gradyan mor'u (hero-art
                                   blob'ları + logo mark'ı aynı kaynaktan — --bp-brand'in soluk
                                   periwinkle'ından KASITLI olarak daha canlı/doygun */
+  --bp-stale:     #f5c949;   /* K-BN (21.09): VERI TAZELIGI uyari kehribari. Fiilen zaten kanonikti —
+                                 aynı değer 6 yerde, 3 dosyada BAĞIMSIZ yazılıydı ve hiçbiri token
+                                 değildi: hisse.html renderFreshness (×3 dal), _stale_banner.html
+                                 (metin + zemin/kenar rgb), static/stale-banner.js (stale +
+                                 seans_disi_eksik dalları). Aynı bileşenin `critical` dalı bir
+                                 dosyada var(--bp-sat), diğerinde ham '#f85149' yazıyordu — tek
+                                 kavram, iki kanon. DEĞER DEĞİŞTİRİLMEDİ (K-BG emsali: görsel
+                                 değişiklik yok, yalnız kaynak tekilleşti).
+                                 --bp-warn (#d29922, dikkat/orta-risk: entry-quality, bilanço
+                                 rozeti, R:R orta bölge) AYRI eksendir — o bir DEĞERLENDIRME,
+                                 bu bir VERİ DURUMU. AÇIK SORU: sitede artık beş kehribar/sarı
+                                 var (--bp-gold, --bp-accent-yellow, --bp-volume, --bp-warn,
+                                 --bp-stale); hangilerinin gerçekten ayrı eksen olduğu ayrı
+                                 turda ölçülecek (--bp-accent-yellow'un kendi AÇIK SORU'suyla
+                                 aynı soru). */
   --bp-warn:      #d29922;   /* CPO-1576 (CPO-DEV2-061 emsaline dayalı kanonikleştirme): dikkat/orta-risk
                                  amber — entry-quality "dikkatli/uzak" + bilanço-yaklaşıyor rozeti + R:R
                                  orta-bölge. --bp-gold'dan (premium/altın) AYRI semantik eksen, karıştırma. */
@@ -161,6 +176,7 @@
   --bp-premium-rgb:  168, 85, 247;
   --bp-accent-cyan-rgb: 34, 211, 238;
   --bp-art-violet-rgb: 124, 92, 255;
+  --bp-stale-rgb: 245, 201, 73;
   --bp-warn-rgb:  210, 153, 34;
   --bp-accent-yellow-rgb: 227, 179, 65;
 

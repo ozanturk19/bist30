@@ -8,7 +8,7 @@
       * "SPK tarafindan yetkilendirilmemistir" ifadesi yalnizca index ve hisse
         sayfalarinda vardi; diger 17 sayfa 3 kelimelik "Yatirim tavsiyesi
         degildir" kisaltmasiyla yetiniyordu.
-      * ~15 dk BIST gecikmesi + EOD analiz aciklamasi yalnizca index/hisse/yasal
+      * veri kaynagi + EOD analiz aciklamasi yalnizca index/hisse/yasal
         sayfalarindaydi; fiyat/yuzde GOSTEREN 9 sayfa (tarama, ozet, gundem,
         karsilastir, hisseler, sektor-harita, bilanco, temettu, portfolio)
         bunu hic sOylemiyordu.
@@ -20,9 +20,19 @@
       ftr_self       str  vars. yok    -> sayfanin KENDI href'i; o link menude
                                           GIZLENIR (bulundugun sayfaya link verme).
                                           _header.html'deki hdr_self ile ayni desen.
-      ftr_data_note  bool vars. false  -> veri kaynagi / 15 dk gecikme / EOD
+      ftr_data_note  bool vars. false  -> veri kaynagi / gun-sonu (EOD) tazelik
                                           rozetini gosterir. Fiyat veya yuzde
                                           GOSTEREN her sayfa true gecmeli.
+                                          K-BN (21.09): rozet eskiden "BIST resmi
+                                          yayin gecikmesi ~15 dakika" diyordu.
+                                          Bu BIST'in KENDI yayini icin dogru ama
+                                          BIZIM gosterdigimiz fiyat icin degil:
+                                          EOD-only cadence'te (app.py
+                                          background_refresh, CPO-1508/1512) veri
+                                          gunde BIR kez, 18:10+ TR'de tazelenir --
+                                          Pazartesi 09:07 TR'de canli olcum
+                                          updated_at=18.09 18:14 (~63 SAAT)
+                                          gosterdi. "15 dakika" ifadesi kaldirildi.
       ftr_note       str  vars. yok    -> sayfaya ozgu EK not (DUZ METIN, Jinja
                                           autoescape uygular — HTML gecmeyin,
                                           `|safe` EKLEMEYIN). ftr_data_note ile
@@ -39,7 +49,7 @@
   <div class="da-footer-inner">
     {%- if ftr_data_note is defined and ftr_data_note %}
     <div class="da-footer-note">
-      <span aria-hidden="true">⏱</span> Veri kaynağı: Yahoo Finance · BIST resmi yayın gecikmesi yaklaşık <strong>15 dakika</strong> · Gün sonu (EOD) teknik analiz — gerçek-zamanlı işlem verisi değildir
+      <span aria-hidden="true">⏱</span> Veri kaynağı: Yahoo Finance · Gün sonu (EOD) teknik analiz — gösterilen fiyatlar <strong>son kapanışa</strong> aittir, seans içinde güncellenmez
       {%- if ftr_note is defined and ftr_note %}<br>{{ ftr_note }}{% endif %}
     </div>
     {%- elif ftr_note is defined and ftr_note %}

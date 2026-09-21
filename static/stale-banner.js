@@ -41,17 +41,17 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
     var critTxt = hasAge
       ? dateTxt + ' gün sonu verileri gösterilmektedir — güncel veri şu an alınamıyor.'
       : 'Veriler güncellenemiyor — son güncelleme zamanı doğrulanamıyor.';
-    if (bTxt) { bTxt.textContent = critTxt + suffix; bTxt.style.color = '#f85149'; }
-    banner.style.background  = 'rgba(248,81,73,0.12)';
-    banner.style.borderColor = '#f85149';
+    if (bTxt) { bTxt.textContent = critTxt + suffix; bTxt.style.color = 'var(--bp-sat)'; }
+    banner.style.background  = 'rgba(var(--bp-sat-rgb),0.12)';
+    banner.style.borderColor = 'var(--bp-sat)';
     banner.style.display     = 'block';
   } else if (dq === 'stale') {
     var staleTxt = hasAge
       ? dateTxt + ' gün sonu verileri gösterilmektedir.'
       : 'Veriler bayat olabilir — son güncelleme zamanı doğrulanamıyor.';
-    if (bTxt) { bTxt.textContent = staleTxt + suffix; bTxt.style.color = '#f5c949'; }
-    banner.style.background  = 'rgba(245,201,73,.10)';
-    banner.style.borderColor = 'rgba(245,201,73,.4)';
+    if (bTxt) { bTxt.textContent = staleTxt + suffix; bTxt.style.color = 'var(--bp-stale)'; }
+    banner.style.background  = 'rgba(var(--bp-stale-rgb),.10)';
+    banner.style.borderColor = 'rgba(var(--bp-stale-rgb),.4)';
     banner.style.display     = 'block';
   } else if (dq === 'seans_disi_eksik') {
     /* CPO-1680 FRONTEND YARISI (21.09, K-AB). DEV1 backend yarısını yapmıştı:
@@ -71,9 +71,9 @@ function bpUpdateStaleBanner(dq, ageS, refreshing) {
     var eksikTxt = hasAge
       ? dateTxt + ' gün sonu verileri gösterilmektedir — son işlem gününün kapanışı henüz alınamadı.'
       : 'Son işlem gününün kapanışı henüz alınamadı — gösterilen veriler daha eski.';
-    if (bTxt) { bTxt.textContent = eksikTxt + suffix; bTxt.style.color = '#f5c949'; }
-    banner.style.background  = 'rgba(245,201,73,.10)';
-    banner.style.borderColor = 'rgba(245,201,73,.4)';
+    if (bTxt) { bTxt.textContent = eksikTxt + suffix; bTxt.style.color = 'var(--bp-stale)'; }
+    banner.style.background  = 'rgba(var(--bp-stale-rgb),.10)';
+    banner.style.borderColor = 'rgba(var(--bp-stale-rgb),.4)';
     banner.style.display     = 'block';
   } else if (dq === 'seans_disi') {
     /* CPO-1338: seans dışı stale by-design — banner KASITLI gizli (fresh ile
