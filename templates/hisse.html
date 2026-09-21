@@ -3591,7 +3591,7 @@ function _renderFundTrendChart(period) {
      ortalama birakilir -- `justify-content:center` tasma halinde SOL ucu
      erisilemez kilar, bu yuzden ayni dalda flex-start'a cekiliyor. */
   chartEl.innerHTML =
-    `<div class="ft-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div class="ft-row" style="display:flex;gap:${gap}px;align-items:flex-end;justify-content:center;max-width:${containerW}px;margin:0 auto">${barsHtml}</div></div>
+    `<div class="ft-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div class="ft-row" data-basegap="${gap}" data-basefont="${lblFont}" style="display:flex;gap:${gap}px;align-items:flex-end;justify-content:center;max-width:${containerW}px;margin:0 auto">${barsHtml}</div></div>
      <div style="display:flex;gap:14px;margin-top:10px;justify-content:center;flex-wrap:wrap;font-size:var(--bp-text-2xs);color:var(--bp-text3)">
        <span>${swatch('var(--bp-brand)', false)}Ciro</span>
        <span>${swatch('var(--bp-al)', true)}<em>Net Kâr</em></span>
@@ -3599,16 +3599,39 @@ function _renderFundTrendChart(period) {
      </div>
      <div style="margin-top:6px;text-align:center;font-size:var(--bp-text-2xs);color:var(--bp-text3)">Taramalı ve <em>italik</em> olan net kâr/zarardır.</div>`;
 
-  const _scr = chartEl.querySelector('.ft-scroll');
-  const _row = chartEl.querySelector('.ft-row');
-  /* clientWidth 0 = yerlesim henuz yok (gizli kap): olcum GECERSIZ, dokunma --
-     yoksa 0 > 0+1 yanlis olsa da ilerideki bir yerlesimde sifir genislik
-     sahte "sigmiyor" uretebilir. Olculemeyen sey kuculmez. */
-  if (_scr && _row && _scr.clientWidth > 0 && _scr.scrollWidth > _scr.clientWidth + 1) {
-    _row.style.gap = '6px';
-    _row.querySelectorAll('.ft-num').forEach(el => { el.style.fontSize = '8px'; });
-    if (_scr.scrollWidth > _scr.clientWidth + 1) _row.style.justifyContent = 'flex-start';
+  _ftFitLabels(chartEl);
+  /* ⛔ TEK SEFERLIK OLCUM YETMEDI (canli kanit 22.09, /hisse/BIMAS @320px):
+     innerHTML'in hemen ardindaki olcum sigiyor dedi, birkac kare sonra
+     kap 228px'e oturunca satir 254px'le TASIYORDU ve kuculme dali bir daha
+     hic calismadi. Yerlesim sonrasi iki rAF + kabin kendi ResizeObserver'i:
+     olcum kabin GERCEK genisligine baglanir, donme/yeniden boyutlandirma da
+     kapsanir. (Ayni aile: getComputedStyle ayni tick'te bayat okur.) */
+  requestAnimationFrame(() => requestAnimationFrame(() => _ftFitLabels(chartEl)));
+  if (typeof ResizeObserver === 'function' && !chartEl._ftRO) {
+    chartEl._ftRO = new ResizeObserver(() => _ftFitLabels(chartEl));
+    chartEl._ftRO.observe(chartEl);
   }
+}
+
+/* K-BV eki: etiket genisligi ICERIGE baglidir (Mn/Mrd/T + basamak sayisi),
+   viewport'a degil. Once TABAN olcuye don, sonra olc -- kuculmus hali
+   "sigiyor" der ve kap genisledigin de bir daha asla buyumez (histerezis). */
+function _ftFitLabels(chartEl) {
+  const scr = chartEl && chartEl.querySelector('.ft-scroll');
+  const row = chartEl && chartEl.querySelector('.ft-row');
+  if (!scr || !row || !scr.clientWidth) return;   /* olculemeyen sey kuculmez */
+  const baseGap  = row.dataset.basegap || '10';
+  const baseFont = row.dataset.basefont || '10px';
+  row.style.gap = baseGap + 'px';
+  row.style.justifyContent = 'center';
+  const nums = row.querySelectorAll('.ft-num');
+  nums.forEach(el => { el.style.fontSize = baseFont; });
+  if (scr.scrollWidth <= scr.clientWidth + 1) return;
+  row.style.gap = '6px';
+  nums.forEach(el => { el.style.fontSize = '8px'; });
+  /* Hala tasiyorsa sarmal kaydirir; ortalanmis tasan icerigin SOL ucuna
+     kaydirarak ulasilamaz, bu yuzden flex-start. */
+  if (scr.scrollWidth > scr.clientWidth + 1) row.style.justifyContent = 'flex-start';
 }
 window.fundTrendSetPeriod = function(period) {
   _renderFundTrendChart(period);
