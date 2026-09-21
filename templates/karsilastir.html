@@ -334,7 +334,7 @@ function buildTable(stocks) {
     const inner = `
         <div class="col-ticker">${escapeHtml(s.ticker)}</div>
         <div class="col-name" title="${escapeHtml(s.name||'')}">${s.found ? escapeHtml(s.name||'') : '<span class="muted">Bulunamadı</span>'}</div>
-        ${s.kap_url ? `<a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
+        ${s.kap_url ? `<a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener" class="col-kap"><span aria-hidden="true">KAP ↗</span><span class="sr-only">${escapeHtml(s.ticker)} KAP bildirimleri (kap.org.tr, yeni sekmede açılır)</span></a>` : ''}
       `;
     return `
     <th class="col-hdr" scope="col">
@@ -410,7 +410,7 @@ function buildMobileCards(stocks) {
           <span class="cmp-mticker">${escapeHtml(s.ticker)}</span>
           <span class="cmp-mname">${escapeHtml(s.name||'')}</span>
         </a>
-        ${s.kap_url ? `<a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener" class="col-kap">KAP <span aria-hidden="true">↗</span></a>` : ''}
+        ${s.kap_url ? `<a href="${safeHref(s.kap_url)}" target="_blank" rel="noopener" class="col-kap"><span aria-hidden="true">KAP ↗</span><span class="sr-only">${escapeHtml(s.ticker)} KAP bildirimleri (kap.org.tr, yeni sekmede açılır)</span></a>` : ''}
       </div>`;
     const scoreHtml = `<div class="cmp-mscore">${renderScoreCell(s, isWinner)}</div>`;
     const rowsHtml = ROW_LABELS.map(({key, label, isSep, help}) => {

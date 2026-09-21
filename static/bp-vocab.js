@@ -152,7 +152,7 @@ function sigLabelTooltip(sig) {
   // .stock-card) — .sc-ticker-link'in zaten yaptığı gibi tıklamanın karta sızmasını
   // engeller. Gerçek <a> içine YERLEŞTİRME (nested-anchor) gereken yerlerde (tarama.html
   // .mr-card, sektor_harita.html .cmp-stock-row) bu fonksiyon KULLANILMAZ, sigLabel() kalır.
-  return '<a class="jargon-term" data-term="sinyal" href="/metodoloji#sinyal-onayi" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + sigLabel(sig) + '</a>';
+  return '<a class="jargon-term" data-term="sinyal" href="/metodoloji#sinyal-onayi" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + sigLabel(sig) + '<span class="sr-only"> (yeni sekmede açılır)</span></a>';
 }
 
 /* Giris kalitesi etiketi — kanonik harita, 3 sablonda (gundem/karsilastir/

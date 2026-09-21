@@ -971,7 +971,8 @@
         return '<a href="' + url + '" target="_blank" rel="noopener" class="da-macro-news-item">' +
           '<span class="da-macro-news-src">' + esc(item.source || '') + '</span>' +
           '<span class="da-macro-news-title">' + esc(item.title || '') + '</span>' +
-          '<span class="da-macro-news-time">' + esc(item.date_str || '') + '</span></a>';
+          '<span class="da-macro-news-time">' + esc(item.date_str || '') + ' <span aria-hidden="true">↗</span></span>' +
+          '<span class="sr-only"> (yeni sekmede açılır)</span></a>';
       }).join('');
       _daGnmMakroLoaded = true;
     }).catch(function(){ daShowSectionError('daMacroNewsList', daLoadMacroNews); });

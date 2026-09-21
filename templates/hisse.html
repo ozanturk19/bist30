@@ -622,11 +622,11 @@
           <p class="commentary-text" id="commentaryText"></p>
         </div>
         <p style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin:6px 0 0;line-height:1.5">
-          Göstergeler (<a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — ADX">ADX</a>,
-          <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" data-tip="Metodoloji — RSI">RSI</a>,
-          <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" data-tip="Metodoloji — EMA">EMA</a>,
-          <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — DI±">DI±</a>,
-          <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" data-tip="Metodoloji — Supertrend">Supertrend</a>)
+          Göstergeler (<a class="jargon-term" data-term="adx" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — ADX">ADX<span class="sr-only"> (yeni sekmede açılır)</span></a>,
+          <a class="jargon-term" data-term="rsi" href="/metodoloji#rsi" target="_blank" rel="noopener" data-tip="Metodoloji — RSI">RSI<span class="sr-only"> (yeni sekmede açılır)</span></a>,
+          <a class="jargon-term" data-term="ema" href="/metodoloji#ema" target="_blank" rel="noopener" data-tip="Metodoloji — EMA">EMA<span class="sr-only"> (yeni sekmede açılır)</span></a>,
+          <a class="jargon-term" data-term="di+" href="/metodoloji#adx" target="_blank" rel="noopener" data-tip="Metodoloji — DI±">DI±<span class="sr-only"> (yeni sekmede açılır)</span></a>,
+          <a class="jargon-term" data-term="supertrend" href="/metodoloji#supertrend" target="_blank" rel="noopener" data-tip="Metodoloji — Supertrend">Supertrend<span class="sr-only"> (yeni sekmede açılır)</span></a>)
           algoritmik sinyalin temelidir.
           Sinyal kartları ve giriş analizi aşağıda detaylandırılmıştır.
         </p>
@@ -1013,7 +1013,7 @@
 
       <!-- R/R Görsel -->
       <div>
-        <div class="rr-card-label"><a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">Risk / Ödül</a></div>
+        <div class="rr-card-label"><a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">Risk / Ödül<span class="sr-only"> (yeni sekmede açılır)</span></a></div>
         <div id="rrBarContainer"></div>
         <div id="rrLevels"></div>
       </div>
@@ -2429,7 +2429,7 @@ function renderSummary(s, signalData) {
           const rrRowsHtml = (rrSig != null) ? `
             <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:var(--bp-text-xs);font-variant-numeric:tabular-nums">
               <div style="display:flex;justify-content:space-between;color:var(--bp-text3)">
-                <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">R/R</a></span>
+                <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">R/R<span class="sr-only"> (yeni sekmede açılır)</span></a></span>
                 <strong style="color:${rrSig >= 2.0 ? 'var(--bp-al)' : rrSig >= 1.0 ? 'var(--bp-warn)' : 'var(--bp-sat)'}">${rrSig.toFixed(2).replace('.', ',')}x</strong>
               </div>
             </div>` : '';
@@ -3173,10 +3173,10 @@ async function loadSignalStory() {
       return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--bp-surface2)">
         <span style="font-size:10px;color:${clr};background:rgba(0,0,0,.15);border:1px solid currentColor;border-radius:3px;padding:1px 5px;white-space:nowrap;flex-shrink:0;margin-top:2px">${escHtml(ev.class)}</span>
         <div style="flex:1;min-width:0">
-          <a href="${safeHref(ev.url)}" target="_blank" rel="noopener" style="font-size:var(--bp-text-base);color:var(--bp-text2);text-decoration:underline;text-decoration-color:rgba(var(--bp-text2-rgb),.3);text-underline-offset:2px;line-height:1.4;display:block">${escHtml(summary)}</a>
+          <a href="${safeHref(ev.url)}" target="_blank" rel="noopener" style="font-size:var(--bp-text-base);color:var(--bp-text2);text-decoration:underline;text-decoration-color:rgba(var(--bp-text2-rgb),.3);text-underline-offset:2px;line-height:1.4;display:block">${escHtml(summary)}<span class="sr-only"> (yeni sekmede açılır)</span></a>
           <div style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin-top:2px">${ev.date.substring(0,10)} · <span style="color:${delta <= 0 ? 'var(--bp-text3)' : 'var(--bp-brand)'}">${deltaStr}</span></div>
         </div>
-        ${ev.url ? `<a href="${safeHref(ev.url)}" target="_blank" rel="noopener" aria-label="Haberi aç" style="font-size:var(--bp-text-xs);color:var(--bp-brand);opacity:.6;flex-shrink:0;margin-top:2px">↗</a>` : ''}
+        ${ev.url ? `<a href="${safeHref(ev.url)}" target="_blank" rel="noopener" aria-label="Haberi aç (yeni sekmede açılır)" style="font-size:var(--bp-text-xs);color:var(--bp-brand);opacity:.6;flex-shrink:0;margin-top:2px">↗</a>` : ''}
       </div>`;
     }).join('');
 
@@ -3222,13 +3222,13 @@ async function loadKapDisclosures() {
       const dateShort = d.date ? d.date.substring(0, 16) : '';
       const summaryText = escHtml(d.summary || '');
       const summaryHtml = (d.url && summaryText)
-        ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" aria-label="${summaryText}${dateShort ? ' — ' + dateShort : ''}">${summaryText}</a>`
+        ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" aria-label="${summaryText}${dateShort ? ' — ' + dateShort : ''} (yeni sekmede açılır)">${summaryText}</a>`
         : summaryText;
       return `<div class="kap-item">
         <div class="kap-item-top">
           <span class="kap-class-badge ${cls}">${lbl}</span>
           <span class="kap-summary">${summaryHtml}</span>
-          ${d.url ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" aria-label="${summaryText || 'Bildirim'}${dateShort ? ' (' + dateShort + ')' : ''} — KAP'ta aç">↗</a>` : ''}
+          ${d.url ? `<a href="${safeHref(d.url)}" target="_blank" rel="noopener" class="kap-link-btn kap-ga-link" data-cls="${cls}" aria-label="${summaryText || 'Bildirim'}${dateShort ? ' (' + dateShort + ')' : ''} — KAP'ta aç (yeni sekmede açılır)">↗</a>` : ''}
         </div>
         <div class="kap-meta">
           <span>${dateShort}</span>
@@ -3241,7 +3241,7 @@ async function loadKapDisclosures() {
     if (items.length > 20) {
       listEl.innerHTML += `<div style="padding:10px 0;text-align:center;font-size:var(--bp-text-sm);color:var(--bp-text3)">
         +${items.length - 20} daha fazla bildirim —
-        <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q=${TICKER}" target="_blank" rel="noopener" style="color:var(--bp-brand);text-decoration:underline;text-decoration-color:rgba(var(--bp-brand-rgb),.45);text-underline-offset:2px">KAP'ta görüntüle ↗</a>
+        <a href="https://www.kap.org.tr/tr/bildirim-sorgu?q=${TICKER}" target="_blank" rel="noopener" style="color:var(--bp-brand);text-decoration:underline;text-decoration-color:rgba(var(--bp-brand-rgb),.45);text-underline-offset:2px"><span aria-hidden="true">KAP'ta görüntüle ↗</span><span class="sr-only">${TICKER} tüm KAP bildirimlerini görüntüle (kap.org.tr, yeni sekmede açılır)</span></a>
       </div>`;
     }
 
