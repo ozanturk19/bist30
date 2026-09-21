@@ -26,7 +26,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=6450b4ce">
-<link rel="stylesheet" href="/static/css/data-art.css?v=1138fbe4">
+<link rel="stylesheet" href="/static/css/data-art.css?v=e105a74b">
 <script src="/static/bp-vocab.js?v=f8cb1ae4A" defer></script>
 <link rel="stylesheet" href="/static/css/pages/gundem.css?v=f104d6de">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -387,7 +387,7 @@ async function loadGundem() {
              erken kapatıp kalanı "boş/mükerrer <a>" olarak DOM'a yaziyordu.
              temettu_takvimi.html/bilanco_takvimi.html'deki ayni desen (div
              role=link + inner <a onclick=stopPropagation>) buraya da taşındı. */
-          const kapHref = item.kap_url ? `<a href="${safeHref(item.kap_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
+          const kapHref = item.kap_url ? `<a href="${safeHref(item.kap_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="da-tap" style="font-size:var(--bp-text-xs);color:var(--bp-accent-cyan);text-decoration:none;flex-shrink:0">KAP <span aria-hidden="true">↗</span></a>` : '';
           const etTicker = escapeHtml(item.ticker);
           return `<div class="news-card" data-ticker="${etTicker}" role="link" tabindex="0"
             onclick="window.location.href='/hisse/'+this.dataset.ticker"
@@ -556,7 +556,7 @@ document.addEventListener('visibilitychange', () => {
 /* ── Makro Ticker ── */
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
 </script>
-<script src="/static/bp-search.js?v=76" defer></script>
+<script src="/static/bp-search.js?v=77" defer></script>
 <script src="/static/bp-format.js?v=b6c7a716a"></script>
 <script src="/static/stale-banner.js?v=c290d79e"></script>
 <script>bpStartDataQualityPolling();</script>

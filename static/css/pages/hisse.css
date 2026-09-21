@@ -168,13 +168,17 @@
 
   .signal-badge {
     display: inline-flex;
-    align-items: center;
+    align-items: stretch;
     padding: 4px 10px;
     border-radius: var(--bp-radius-20);
     font-size: var(--bp-text-sm);
     font-weight: 600;
     letter-spacing: 0.3px;
   }
+  /* K-R (21.09): ayni rozet deseninin UCUNCU ismi (.sig-badge takvimlerde,
+     .sig-badge tarama'da, .signal-badge burada). Icindeki jargon baglantisi
+     masaustunde 69.4x14 idi — hedef 24px asgariyi tutmuyordu. */
+  .signal-badge > .jargon-term { display:flex; align-items:center; min-height:24px; }
   .signal-AL   {
     background: rgba(var(--bp-al-rgb),.10); color: var(--bp-al); border: 1px solid rgba(var(--bp-al-rgb),.35);
     box-shadow: 0 0 8px rgba(var(--bp-al-rgb), 0.18), inset 0 0 8px rgba(var(--bp-al-rgb), 0.05);
