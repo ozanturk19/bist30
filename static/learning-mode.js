@@ -62,7 +62,16 @@
 
   function closePop() {
     if (openPop) { openPop.remove(); openPop = null; }
-    if (openPopOwner) { openPopOwner.setAttribute('aria-expanded', 'false'); openPopOwner = null; }
+    if (openPopOwner) {
+      openPopOwner.setAttribute('aria-expanded', 'false');
+      /* K-AJ (21.09): showPop() anchor'a aria-controls="<id>-pop" yaziyordu ama
+         kapanista SILMIYORDU — popup DOM'dan kalkiyor, oznitelik kaliyor. Sonuc:
+         bir kez acilip kapanmis her "?" dugmesi, HICBIR ZAMAN cozulmeyen bir
+         IDREF tasiyor (canli olcum: acik=1 cozulen / kapali=1 cozulmeyen).
+         Kirik IDREF sessizdir: hata yok, konsol yok, gorsel fark yok. */
+      openPopOwner.removeAttribute('aria-controls');
+      openPopOwner = null;
+    }
     document.removeEventListener('click', onceClose, true);
     document.removeEventListener('keydown', onKeydownClose, true);
   }

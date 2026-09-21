@@ -234,7 +234,17 @@
     if (!inp) return;
     var items = getItems();
     items.forEach(function(it, i){ it.setAttribute('aria-selected', i === _sel ? 'true' : 'false'); });
-    inp.setAttribute('aria-activedescendant', (_sel >= 0 && items[_sel]) ? items[_sel].id : '');
+    /* K-AJ (21.09): aria-expanded acilis isaretlemesinde SABIT "true" yazilmisti
+       ve hicbir yerde guncellenmiyordu. "Hic eslesme yok" ekraninda (0 secenek)
+       ekran okuyucu yine "genisletilmis" diyor, kullanici Asagi Ok'a basip
+       hicbir sey bulamiyordu (WAI-ARIA combobox: acilir liste GORUNTULENMIYORSA
+       expanded=false). Durum artik GERCEK secenek sayisindan turetiliyor.
+       aria-activedescendant da bos birakilmiyor: ARIA'da bos IDREF diye bir sey
+       yoktur, aktif secenek yoksa oznitelik KALDIRILIR. */
+    inp.setAttribute('aria-expanded', items.length ? 'true' : 'false');
+    var _active = (_sel >= 0 && items[_sel]) ? items[_sel].id : '';
+    if (_active) inp.setAttribute('aria-activedescendant', _active);
+    else inp.removeAttribute('aria-activedescendant');
   }
 
   function render(q) {
@@ -299,7 +309,7 @@
       +   '<div class="bp-search-modal" id="bpSearchModal" role="dialog" aria-modal="true" aria-label="Site içi arama">'
       +     '<div class="bp-search-input-wrap">'
       +       '<svg aria-hidden="true" class="bp-search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
-      +       '<input id="bpSearchInput" type="search" placeholder="Hisse, sektör veya konu ara…" aria-label="Hisse, sektör veya konu ara" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="bpSearchResults" aria-autocomplete="list" aria-activedescendant="">'
+      +       '<input id="bpSearchInput" type="search" placeholder="Hisse, sektör veya konu ara…" aria-label="Hisse, sektör veya konu ara" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="bpSearchResults" aria-autocomplete="list">'
       +       '<button class="bp-search-close" type="button" id="bpSearchClose" aria-label="Kapat">✕</button>'
       +     '</div>'
       +     '<div class="bp-search-results" id="bpSearchResults" role="listbox" aria-label="Arama sonuçları"></div>'
@@ -352,6 +362,10 @@
     if (!ov) return;
     ov.classList.remove('open');
     ov.setAttribute('aria-hidden', 'true');
+    /* K-AJ: kapanista durum sifirlanir — overlay zaten aria-hidden oldugu icin
+       AT'ye gorunmez, ama oznitelik bir daha ACILANA kadar yalan soylememeli. */
+    var _i = document.getElementById('bpSearchInput');
+    if (_i) { _i.setAttribute('aria-expanded', 'false'); _i.removeAttribute('aria-activedescendant'); }
     document.body.style.overflow = '';
     if (_trapRelease) { _trapRelease(); _trapRelease = null; }
   }
