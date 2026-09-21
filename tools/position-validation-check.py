@@ -86,12 +86,20 @@ def git_reader(ref):
                                        cwd=ROOT).decode('utf-8')
     return r
 
-# --- POZITIF KONTROL: her kosuda, gercek agaca karsi (fix ONCESI HEAD) ---
+# --- POZITIF KONTROL: her kosuda, fix ONCESI SABITLENMIS agaca karsi ---
+# ⛔ 21.09 (K-BK turunda yakalandi): burada `HEAD` yaziyordu. Yazildigi anda
+# dogruydu (fix henuz commit edilmemisti, HEAD = fix oncesi agac) ama K-BJ fix'i
+# `a381515` olarak commit edilir edilmez HEAD fix'i ICERMEYE basladi, pozitif
+# kontrol ihlal bulamadi ve kapi KENDI KENDINI kirdi — deploy reddedildi.
+# DERS: pozitif kontrol HAREKETLI bir referansa (HEAD/main) baglanamaz;
+# degismez bir commit'e sabitlenmeli.
+PRE_FIX_REF = 'a381515^'   # K-BJ fix'inin ebeveyni — dort ihlalin hepsi burada
 try:
-    pc = scan(git_reader('HEAD'))
+    pc = scan(git_reader(PRE_FIX_REF))
     if not pc:
-        print('K-BJ kapisi: POZITIF KONTROL DUSTU — fix oncesi agacta (HEAD) '
-              'hic ihlal bulunamadi, dedektor kor olabilir.', file=sys.stderr)
+        print('K-BJ kapisi: POZITIF KONTROL DUSTU — fix oncesi agacta (%s) '
+              'hic ihlal bulunamadi, dedektor kor olabilir.' % PRE_FIX_REF,
+              file=sys.stderr)
         sys.exit(2)
 except SystemExit:
     raise
@@ -107,5 +115,5 @@ if viol:
     sys.exit(1)
 
 print('K-BJ kapisi OK — pozisyon sayisal dogrulamasi tek kanon '
-      '(pozitif kontrol: HEAD uzerinde %d ihlal goruldu).' % len(pc))
+      '(pozitif kontrol: %s uzerinde %d ihlal goruldu).' % (PRE_FIX_REF, len(pc)))
 sys.exit(0)
