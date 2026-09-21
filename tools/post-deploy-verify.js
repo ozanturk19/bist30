@@ -865,7 +865,11 @@ const step = async (ad, fn) => {
   await step('K-BO /sektor-harita karsilastirma esigi lejandla ayni', async () => {
     const src = await (await ctx.request.get(BASE + '/sektor-harita')).text();
     const kod = src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:\\])\/\/[^\n]*/g, '$1 ');
-    const m = kod.match(/rvolCls\s*=\s*s\.rvol\s*>=\s*([0-9.]+)/);
+    /* ⛔ Desen TEK BIR YAZIMA baglanmasin: ilk yazim `s.rvol >= N` bekliyordu,
+       yuvarlama duzeltmesi ifadeyi `parseFloat(s.rvol.toFixed(2)) >= N` yapinca
+       adim "olcum gecersiz" dedi -- urun dogruydu, OLCU bayatlamisti.
+       [[reference_k_turu_olcum_dersleri_hub]] */
+    const m = kod.match(/rvolCls\s*=[\s\S]{0,60}?>=\s*([0-9.]+)/);
     if (!m) return bad('K-BO karsilastirma', 'esik ifadesi bulunamadi (olcum gecersiz)');
     if (parseFloat(m[1]) !== 1.20) return bad('K-BO karsilastirma',
       'esik ' + m[1] + ', sayfanin lejandi "RVOL >= 1,20" diyor');
