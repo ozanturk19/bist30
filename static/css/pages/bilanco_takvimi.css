@@ -19,7 +19,7 @@
     display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; align-items:center;
   }
   .filter-btn {
-    padding:6px 14px; border-radius:var(--bp-radius-20); border:1px solid var(--bp-border);
+    padding:6px 14px; border-radius:var(--bp-radius-20); border:1px solid var(--bp-ctl-border);
     background:var(--bp-surface2); color:var(--bp-text2); cursor:pointer;
     font-size:var(--bp-text-sm); font-weight:600; transition:all .15s; font-family:inherit;
   }
@@ -145,7 +145,7 @@
      deseni (24-luk parti, filtre aktifken bypass) buraya da uygulandi. */
   .bt-loadmore-wrap { text-align:center; margin-top:14px; }
   .bt-loadmore-btn {
-    background:var(--bp-surface2); border:1px solid var(--bp-border); border-radius:var(--bp-radius-md);
+    background:var(--bp-surface2); border:1px solid var(--bp-ctl-border); border-radius:var(--bp-radius-md);
     color:var(--bp-text2); padding:9px 22px; font-size:var(--bp-text-sm); font-weight:600;
     cursor:pointer; transition:all .15s; font-family:inherit;
     min-height:44px; display:inline-flex; align-items:center; justify-content:center; /* WCAG 2.5.5 dokunma hedefi, bkz. .sc-kap r110 emsali */

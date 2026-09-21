@@ -27,7 +27,7 @@
     display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; align-items:center;
   }
   .filter-btn {
-    padding:6px 14px; border-radius:var(--bp-radius-20); border:1px solid var(--bp-border);
+    padding:6px 14px; border-radius:var(--bp-radius-20); border:1px solid var(--bp-ctl-border);
     background:var(--bp-surface2); color:var(--bp-text2); cursor:pointer;
     font-size:var(--bp-text-sm); font-weight:600; transition:all .15s; font-family:inherit;
   }

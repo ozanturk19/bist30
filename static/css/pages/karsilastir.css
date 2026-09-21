@@ -60,7 +60,7 @@
   .compare-btn:hover { background: var(--bp-accent-cyan); }
   .share-btn {
     position: relative;
-    background: var(--bp-surface2); color: var(--bp-text2); border: 1px solid var(--bp-border);
+    background: var(--bp-surface2); color: var(--bp-text2); border: 1px solid var(--bp-ctl-border);
     border-radius:var(--bp-radius); padding: 8px 14px; font-size: var(--bp-text-sm); cursor: pointer;
     transition: all .15s; white-space: nowrap; text-decoration: none; display: flex;
     align-items: center; gap: 5px;
