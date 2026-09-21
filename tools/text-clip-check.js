@@ -30,7 +30,16 @@ const { chromium } = require('playwright');
 // hangi varyantin olculdugunu acikca yazar.
 const EXPECT_4XX = new Set(['/profil']);
 const BASE = (process.argv.find(a => a.startsWith('--base=')) || '').split('=')[1] || 'https://borsapusula.com';
-const W = parseInt((process.argv.find(a => a.startsWith('--w=')) || '').split('=')[1] || '375', 10);
+/* K-AE (21.09): TEK GENISLIK BIR KAPSAM YALANIYDI. Bu betik yalniz 375'te
+   kosuyordu; `/bilanco-takvimi` donem basligindaki "43 Bozuldu" cipi @320px'te
+   ELLIPSIS OLMADAN kesiliyor, @375'te ise TAM SIGIYORDU -- yani kusur olculen
+   tek genisligin ALTINDA yasiyordu. Sayfa duzeyi harness'i (mobile-overflow-
+   check.mjs) de goremez: kirpan kutu (`overflow:hidden`) tasmayi YUTAR, sayfa
+   tasmaz. Iki dedektorun arasindaki acikti. Artik varsayilan 320 VE 375
+   (WCAG 1.4.10'un tanimli tabani + yaygin telefon); `--w=375` verilirse
+   davranis AYNEN eskisi gibi tek genisliktir. */
+const WIDTHS = ((process.argv.find(a => a.startsWith('--w=')) || '').split('=')[1] || '320,375')
+  .split(',').map(n => parseInt(n, 10)).filter(n => n > 0);
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').split('=')[1] || '';
 
 const PAGES = [
@@ -181,10 +190,13 @@ if (require.main !== module) return;
 
 (async () => {
   const browser = await chromium.launch();
-  const ctx = await browser.newContext({ viewport: { width: W, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const pages = ONLY ? ONLY.split(',') : PAGES;
+  let grandHard = 0, grandPlace = 0, grandDead = 0;
+  for (const W of WIDTHS) {
+  const ctx = await browser.newContext({ viewport: { width: W, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   let hard = 0, ellip = 0, place = 0;
   const deadRoutes = [];
+  console.log(`\n########## GENISLIK ${W}px ##########`);
   for (const p of pages) {
     const page = await ctx.newPage();
     try {
@@ -206,6 +218,10 @@ if (require.main !== module) return;
     await page.close();
   }
   console.log(`\nTOPLAM @${W}px — HARD:${hard} ELLIP:${ellip} PLACE:${place}` + (deadRoutes.length ? `  OLU-ROTA:${deadRoutes.length} (${deadRoutes.join(', ')})` : ''));
+  grandHard += hard; grandPlace += place; grandDead += deadRoutes.length;
+  await ctx.close();
+  }
+  console.log(`\n=== GENEL TOPLAM (${WIDTHS.join('/')}px) — HARD:${grandHard} PLACE:${grandPlace} OLU-ROTA:${grandDead} ===`);
   await browser.close();
-  process.exit(hard + place + deadRoutes.length > 0 ? 1 : 0);
+  process.exit(grandHard + grandPlace + grandDead > 0 ? 1 : 0);
 })();
