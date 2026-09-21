@@ -1,13 +1,13 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}{# ── SEO değişkenleri: sinyal durumuna göre dinamik title + description ── #}
 {% if ssr_signal and ssr_signal.signal == 'AL' %}
   {% set _st = ticker ~ ' Güçlü Trend — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|round|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|round|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') Güçlü Trend sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
 {% elif ssr_signal and ssr_signal.signal == 'SAT' %}
   {% set _st = ticker ~ ' Trend Bozuldu — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') Trend Bozuldu sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ (ssr_signal.adx or 0)|round|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|round|int ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') Trend Bozuldu sinyali aktif, ' ~ (ssr_signal.signal_date or '') ~ '. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA algoritmik BIST analizi. Ücretsiz.' %}
 {% elif ssr_signal %}
   {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
-  {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ (ssr_signal.adx or 0)|round|int ~ ', RSI ' ~ (ssr_signal.rsi or 0)|round|int ~ '. Supertrend+EMA12/99 tabanlı algoritmik BIST sinyali. Ücretsiz.' %}
+  {% set _sd = ticker ~ ' (' ~ name ~ ') teknik analiz. ADX ' ~ '%.1f'|format(ssr_signal.adx or 0)|replace('.', ',') ~ ', RSI ' ~ '%.1f'|format(ssr_signal.rsi or 0)|replace('.', ',') ~ '. Supertrend+EMA12/99 tabanlı algoritmik BIST sinyali. Ücretsiz.' %}
 {% else %}
   {% set _st = ticker ~ ' Teknik Analiz — ' ~ name ~ ' | BorsaPusula' %}
   {% set _sd = ticker ~ ' (' ~ name ~ ') güncel teknik analiz sinyali. Supertrend, ADX ve EMA12/99 göstergelerine dayalı algoritmik BIST analizi. Ücretsiz, günlük güncelleme.' %}
@@ -55,8 +55,8 @@
        (13.5→14, round-half) — aynı sayfada iki farklı yuvarlama kuralı "3 farklı
        sayı" çelişkisine katkıda bulunuyordu. |round FAQ ile aynı davranışa (en
        yakın tam sayı) yaklaştırır. #}
-    {"@type": "PropertyValue", "name": "ADX", "value": "{{ seo_adx|round|int }}"}{% endif %}{% if seo_rsi is not none %},
-    {"@type": "PropertyValue", "name": "RSI", "value": "{{ seo_rsi|round|int }}"}{% endif %}{% if hs_available and hs.borsapusula_skoru is not none %},
+    {"@type": "PropertyValue", "name": "ADX", "value": "{{ '%.1f'|format(seo_adx) }}"}{% endif %}{% if seo_rsi is not none %},
+    {"@type": "PropertyValue", "name": "RSI", "value": "{{ '%.1f'|format(seo_rsi) }}"}{% endif %}{% if hs_available and hs.borsapusula_skoru is not none %},
     {"@type": "PropertyValue", "name": "BorsaPusula Skoru", "value": "{{ hs.borsapusula_skoru }}"}{% endif %}
   ],{% endif %}
   "inLanguage": "tr"
@@ -1284,20 +1284,24 @@
          ✓ checklist — AL/SAT'ta 3 kriter sinyalin ÜRETİLME koşulu olduğu için
          (motor mantığı gereği) her zaman DOĞRU, EMA12/EMA99'un gerçek ₺ değeri
          ssr_signal'da yok (fabrике edilmedi) — sadece yön etiketi gösterilir.
+         K-BR (22.09): ADX burada `|int` ile ASAGI KESILIYORDU — ISDMR 25,9
+         "ADX 25 — Güçlü trend (eşik: 25)" diye basılıyor, "kıl payı geçti"
+         diye okunuyordu; aynı sayfanın Hap Bilgi'si `|round|int` ile 26
+         diyordu. Site kanonu 1 ondalık (/tarama, /karsilastir).
          Yatay'da hangi kriterin başarısız olduğu bilinmediği için checklist
          DEĞİL, dürüst tek cümle kullanılır. #}
       <div style="font-size:var(--bp-text-base);color:var(--bp-text2);line-height:1.65;padding:10px 12px;background:rgba(var(--bp-brand-rgb),0.06);border-left:3px solid rgba(var(--bp-brand-rgb),0.4);border-radius:0 8px 8px 0">
         {% if ssr_signal.signal == 'AL' %}
         <ul style="list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px;font-size:var(--bp-text-sm)">
           <li><span class="bp-al-text" aria-hidden="true">✓</span> Supertrend — Yükseliş yönü</li>
-          <li><span class="bp-al-text" aria-hidden="true">✓</span> ADX {{ ssr_signal.adx|int if ssr_signal.adx else '—' }} — Güçlü trend (eşik: 25)</li>
+          <li><span class="bp-al-text" aria-hidden="true">✓</span> ADX {{ '%.1f'|format(ssr_signal.adx)|replace('.', ',') if ssr_signal.adx else '—' }} — Güçlü trend (eşik: 25)</li>
           <li><span class="bp-al-text" aria-hidden="true">✓</span> EMA12 &gt; EMA99 — Yükseliş hizalaması</li>
         </ul>
         <strong class="bp-al-text">3/3 kriter uyumlu → Güçlü Trend.</strong>
         {% elif ssr_signal.signal == 'SAT' %}
         <ul style="list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px;font-size:var(--bp-text-sm)">
           <li><span class="bp-sat-text" aria-hidden="true">✓</span> Supertrend — Düşüş yönü</li>
-          <li><span class="bp-sat-text" aria-hidden="true">✓</span> ADX {{ ssr_signal.adx|int if ssr_signal.adx else '—' }} — Güçlü trend (eşik: 25)</li>
+          <li><span class="bp-sat-text" aria-hidden="true">✓</span> ADX {{ '%.1f'|format(ssr_signal.adx)|replace('.', ',') if ssr_signal.adx else '—' }} — Güçlü trend (eşik: 25)</li>
           <li><span class="bp-sat-text" aria-hidden="true">✓</span> EMA12 &lt; EMA99 — Düşüş hizalaması</li>
         </ul>
         <strong class="bp-sat-text">3/3 kriter uyumlu → Trend Bozuldu.</strong>
@@ -1414,8 +1418,8 @@
       {% if hs_available and hs.borsapusula_skoru is not none %}
       <div class="qf-row"><dt>BorsaPusula Skoru</dt><dd>{{ hs.borsapusula_skoru }}/100</dd></div>
       {% endif %}
-      {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ ssr_signal.adx|round|int }}</dd></div>{% endif %}
-      {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ ssr_signal.rsi|round|int }}</dd></div>{% endif %}
+      {% if ssr_signal.adx %}<div class="qf-row"><dt>ADX</dt><dd>{{ '%.1f'|format(ssr_signal.adx)|replace('.', ',') }}</dd></div>{% endif %}
+      {% if ssr_signal.rsi %}<div class="qf-row"><dt>RSI</dt><dd>{{ '%.1f'|format(ssr_signal.rsi)|replace('.', ',') }}</dd></div>{% endif %}
       {# K-BQ: ad "Stop Seviyesi"ydi ve yön koşulu YOKTU — 138 BEKLE hissesinin
          125'inde bu sayı güncel fiyatın ÜSTÜNDEdir (MARTI: fiyat 2,01 ₺ / "stop"
          2,74 ₺). karsilastir.html aynı alanı zaten "Supertrend Seviyesi" diye
@@ -1541,7 +1545,7 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=71b6ae5e"></script>
+<script src="/static/bp-format.js?v=a0d054f8"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
@@ -2627,7 +2631,7 @@ function renderSummary(s, signalData) {
       // etiketi zaten signalData'yı önceliklendiriyordu (satır üstte), sayı da aynı
       // kaynağa hizalandı.
       detail: adxStrength + (adxNum ? ' (' + Number(adxNum).toFixed(1).replace('.', ',') + ')' : ''),
-      techDetail: 'ADX(14): ' + _trNum(adxNum) + ' · DI+: ' + _trNum(s.di_plus) + ' · DI−: ' + _trNum(s.di_minus),
+      techDetail: 'ADX(14): ' + bpIndNum(adxNum) + ' · DI+: ' + bpIndNum(s.di_plus) + ' · DI−: ' + bpIndNum(s.di_minus),
       ok: s.signal === 'SAT' ? adxBear : adxBull,
       blog: '/blog/adx-indikatoru-nedir', blogLabel: 'ADX'
     },
@@ -2656,7 +2660,7 @@ function renderSummary(s, signalData) {
   }).join('');
   if (signalData && signalData.rsi != null) {
     techDetailsHtml += '<div class="tech-row tech-row-neutral"><span class="tech-row-dot"></span>RSI(14): ' +
-      _trNum(signalData.rsi) + _indLink('/blog/rsi-gostergesi-nedir', 'RSI') + '</div>';
+      bpIndNum(signalData.rsi) + _indLink('/blog/rsi-gostergesi-nedir', 'RSI') + '</div>';
   }
   const techContentEl = document.getElementById('indTechContent');
   if (techContentEl) techContentEl.innerHTML = techDetailsHtml;
@@ -2683,7 +2687,7 @@ function renderSummary(s, signalData) {
                     rIdeal ? '✅' :
                     rsi < 30 ? '🔵' : '';
     const rsiLbl = rsiIcon ? `${rsiIcon} ${zone}` : zone || 'Normal';
-    indHtml += `<span class="${rsiCls}">RSI ${_trNum(rsi)}<span class="ind-detail">${rsiLbl}</span></span>` +
+    indHtml += `<span class="${rsiCls}">RSI ${bpIndNum(rsi)}<span class="ind-detail">${rsiLbl}</span></span>` +
       `<button type="button" class="ind-help" data-tip="RSI: 0-100 aras\u0131 momentum g\u00f6stergesi. 30 alt\u0131 a\u015f\u0131r\u0131 sat\u0131m, 30-45 dip toparlanmas\u0131, 45-60 ideal giri\u015f penceresi, 60-70 trend g\u00fc\u00e7leniyor, 70-80 dikkatli, 80 \u00fcst\u00fc a\u015f\u0131r\u0131 al\u0131m." aria-label="RSI açıklamasını göster">?</button>`;
   }
 

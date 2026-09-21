@@ -331,3 +331,20 @@ function bpStLevelRole(sl, price, signal) {
     label: (!above && signal === 'AL') ? 'Riske uzaklık' : (above ? 'ST direnci' : 'ST desteği')
   };
 }
+
+/* ── K-BR (22.09): GOSTERGE SAYISI TEK KANON (1 ondalik, TR) ─────────────
+   ADX ve RSI 0-100 olcegindedir ve ADX'in **25** esigi urunun sinyal kurali.
+   Tam sayiya yuvarlamak iki sey birden bozar:
+     1. `|int` ASAGI KESER -> ISDMR ADX 25,9 "ADX 25 — Guclu trend (esik: 25)"
+        diye basiliyordu: kullaniciya "kil payi gecti" diye okunur.
+     2. Ayni sayfada `|round|int` 26 der -> AYNI SAYI IKI YERDE 25 ve 26.
+   Canli olcum (22.09, /api/data 217 hisse): `int(adx) != round(adx)` olan
+   **91** hisse; ADX 25,0-25,9 bandinda **14** hisse (esikle cakisma riski).
+   Site kanonu zaten 1 ondaliktir (/tarama `toFixed(1)`, /karsilastir
+   `renderAdx/renderRsi`) — sapan yalniz /hisse'nin SSR tarafi ve anasayfa
+   spotlight'iydi. Jinja tarafinda esdegeri: `'%.1f'|format(x)|replace('.', ',')`. */
+function bpIndNum(v) {
+  var n = (typeof v === 'string') ? parseFloat(v) : v;
+  if (typeof n !== 'number' || !isFinite(n)) return '—';
+  return n.toFixed(1).replace('.', ',');
+}

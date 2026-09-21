@@ -282,9 +282,9 @@
         {% if s.signal == 'AL' %}<span class="da-spot-signal sig-al">● Güçlü Trend</span>{% elif s.signal == 'SAT' %}<span class="da-spot-signal sig-sat">● Trend Bozuldu</span>{% else %}<span class="da-spot-signal sig-bekle">● Yatay</span>{% endif %}
         <div class="da-spot-subs">
           {% if _useBps %}<div class="da-spot-sub-row"><span class="lbl">Teknik</span><span class="val da-num">{{ s.signal_strength|tr_num if s.signal_strength is not none else '—' }}</span></div>{% endif %}
-          <div class="da-spot-sub-row"><span class="lbl">ADX</span><span class="val da-num">{{ s.adx|round(0)|int if s.adx is not none else '—' }}</span></div>
+          <div class="da-spot-sub-row"><span class="lbl">ADX</span><span class="val da-num">{{ '%.1f'|format(s.adx)|replace('.', ',') if s.adx is not none else '—' }}</span></div>
           <div class="da-spot-sub-row"><span class="lbl">RVOL</span><span class="val da-num">{{ ('%.2f'|format(s.rvol)|replace('.', ',')) ~ '×' if s.rvol is not none else '—' }}</span></div>
-          <div class="da-spot-sub-row"><span class="lbl">RSI</span><span class="val da-num">{{ s.rsi|round(0)|int if s.rsi is not none else '—' }}</span></div>
+          <div class="da-spot-sub-row"><span class="lbl">RSI</span><span class="val da-num">{{ '%.1f'|format(s.rsi)|replace('.', ',') if s.rsi is not none else '—' }}</span></div>
         </div>
       </div>
     </div>
@@ -398,7 +398,7 @@
 
 {% include '_mobile_nav_partial.html' %}
 
-<script src="/static/bp-format.js?v=71b6ae5e"></script>
+<script src="/static/bp-format.js?v=a0d054f8"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script src="/static/bp-search.js?v=f13259b5" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
@@ -713,6 +713,12 @@
     var col = useBps ? bpScoreColorVar(ringVal) : scoreColorVar(ringVal);
     var dash = ringDash(ringVal, 44);
     var ringLabel = useBps ? 'BorsaPusula Skoru' : 'Teknik Güç Skoru';
+    /* K-BR (22.09): ADX/RSI burada `Math.round` ile TAM SAYIYA yuvarlaniyordu;
+       AYNI KARTIN SSR hali (satir ~285) de `|round(0)|int` kullaniyordu, yani
+       sayfa /tarama ve /karsilastir'la (ikisi de 1 ondalik) celisiyordu ve
+       ADX 25,x olan 14 hissede esik (25) ile gosterilen sayi cakisiyordu.
+       Tek kanon: bp-format.js `bpIndNum` — SSR tarafi da ayni bicimi basar,
+       boylece CSR render'i SSR degerinin UZERINE farkli bir sayi yazmaz. */
     var adxPct = Math.max(0, Math.min(100, ((s.adx||0)/50)*100));
     var rvolPct = Math.max(0, Math.min(100, ((s.rvol||0)/3)*100));
     var rsiPct = Math.max(0, Math.min(100, (s.rsi||0)));
@@ -735,9 +741,9 @@
           '<span class="da-spot-signal ' + sig.cls + '">● ' + sig.label + '</span>' +
           '<div class="da-spot-subs">' +
             (useBps && hasTek ? '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="Teknik Güç Skoru — ADX, hacim teyidi ve RSI bölgesinin bileşimi">Teknik</span><div class="bar"><i style="width:' + s.signal_strength + '%;background:' + tekCol + '"></i></div><span class="val da-num" style="color:' + tekCol + '">' + fmtNum0(s.signal_strength) + '</span></div>' : '') +
-            '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="ADX — trend gücü (25 üzeri güçlü, /metodoloji)">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.adx!=null?Math.round(s.adx):'—') + '</span></div>' +
+            '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="ADX — trend gücü (25 üzeri güçlü, /metodoloji)">ADX</span><div class="bar bar-adx"><i style="width:' + adxPct.toFixed(0) + '%"></i></div><span class="val da-num">' + bpIndNum(s.adx) + '</span></div>' +
             '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="RVOL — 5 günlük ortalama hacim / 20 günlük ortalama hacim">RVOL</span><div class="bar bar-rvol"><i style="width:' + rvolPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rvol!=null?s.rvol.toFixed(2).replace('.', ',')+'×':'—') + '</span></div>' +
-            '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="RSI — göreceli güç endeksi, aşırı alım/satım bölgesi">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + (s.rsi!=null?Math.round(s.rsi):'—') + '</span></div>' +
+            '<div class="da-spot-sub-row"><span class="lbl" tabindex="0" data-tip="RSI — göreceli güç endeksi, aşırı alım/satım bölgesi">RSI</span><div class="bar bar-rsi"><i style="width:' + rsiPct.toFixed(0) + '%"></i></div><span class="val da-num">' + bpIndNum(s.rsi) + '</span></div>' +
           '</div>' +
           (useBps ? '' :
             '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-fund-teaser" style="text-decoration:none">BorsaPusula Skoru → hisse sayfasında</a>') +

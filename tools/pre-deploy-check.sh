@@ -562,7 +562,7 @@ fi
 # /hakkinda, /metodoloji, /tarama, /gundem, index dogrusunu soyluyordu -> tek
 # is icin iki kanon. Kapi ayrica KENDI PREMISE'ini olcer: app.py'den EOD imzasi
 # kaybolursa PASS/FAIL vermez, "cadence degismis" diye duser.
-echo "33/36 eod-freshness-claim-check (K-BN: gosterilen fiyatin tazelik vaadi)..."
+echo "33/37 eod-freshness-claim-check (K-BN: gosterilen fiyatin tazelik vaadi)..."
 if python3 tools/eod-freshness-claim-check.py; then
   echo "  ✓ eod-freshness-claim-check PASS"
 else
@@ -579,7 +579,7 @@ fi
 # hucresine uygulanmamisti. Ikinci sinif: hacim ekseninin kanonik rengi
 # --bp-volume; --bp-gold/--bp-accent-yellow odunc alinmasi ayni kavrami
 # uc renge boluyordu (21.09'da 4 yuzey/10 ihlal, pozitif kontrol 49ae8c6).
-echo "34/36 volume-axis-color-check (K-BO: hacim ekseni yon rengiyle boyanamaz)..."
+echo "34/37 volume-axis-color-check (K-BO: hacim ekseni yon rengiyle boyanamaz)..."
 if python3 tools/volume-axis-color-check.py; then
   echo "  ✓ volume-axis-color-check PASS"
 else
@@ -598,7 +598,7 @@ fi
 # /karsilastir "+0,00%" YESIL. /portfolio'da daha sik: pozisyon guncel
 # fiyattan eklendiginde K/Z TAM SIFIRDIR ve "+0,00 ₺" YESIL yaziliyordu.
 # Pozitif kontrol (fix oncesi agac): 27 ihlal / 9 dosya.
-echo "35/36 direction-zero-check (K-BP: 0 bir yonle ayni kefeye konamaz)..."
+echo "35/37 direction-zero-check (K-BP: 0 bir yonle ayni kefeye konamaz)..."
 if python3 tools/direction-zero-check.py; then
   echo "  ✓ direction-zero-check PASS"
 else
@@ -619,13 +619,33 @@ fi
 # Seviyesi" + "acik bir pozisyonun stopu anlamina gelmez") -- /hisse emsali
 # miras almamisti. Alt-etiket de band fiyatin ustundeyken "ST destegi" diyordu.
 # Pozitif kontrol (fix oncesi agac): 7 ihlal / hisse.html.
-echo "36/36 stop-level-canon-check (K-BQ: 'Stop' yon iddiasidir)..."
+echo "36/37 stop-level-canon-check (K-BQ: 'Stop' yon iddiasidir)..."
 if python3 tools/stop-level-canon-check.py; then
   echo "  ✓ stop-level-canon-check PASS"
 else
   echo "  ✗ K-BQ KIRIK: sl_level yuzeyinde 'stop'/'destek'/'direnc' kosulsuz iddia ediliyor."
   echo "    Detay için: python3 tools/stop-level-canon-check.py"
   echo "    Pozitif kontrol: python3 tools/stop-level-canon-check.py --ref 14248ef"
+  FAIL=$((FAIL + 1))
+fi
+
+# 37. indicator-precision-check (K-BR, CPO 22.09.2026) -- ESIK TASIYAN
+# GOSTERGE TAM SAYIYA YUVARLANAMAZ. ADX'in 25 esigi urunun sinyal kuralidir.
+# `|int` ASAGI KESER: ISDMR ADX 25,9 iken /hisse checklist'i "✓ ADX 25 --
+# Güçlü trend (eşik: 25)" basiyordu ("kil payi gecti" diye okunur), ayni
+# sayfanin Hap Bilgi'si `|round|int` ile "26", indikator paneli "25,9"
+# diyordu -- AYNI SAYI UC GOSTERIM. Anasayfa spotlight'inda SSR (`|round(0)`)
+# ile CSR (`Math.round`) ayni karti ciziyordu. Canli: int!=round olan 91
+# hisse, ADX 25,0-25,9 bandinda 14 hisse. Site kanonu ZATEN 1 ondalikti
+# (/tarama, /karsilastir) -- sapan /hisse SSR + anasayfa spotlight'ti.
+# Pozitif kontrol (fix oncesi agac): 13 ihlal.
+echo "37/37 indicator-precision-check (K-BR: ADX/RSI 1 ondalik kanonu)..."
+if python3 tools/indicator-precision-check.py; then
+  echo "  ✓ indicator-precision-check PASS"
+else
+  echo "  ✗ K-BR KIRIK: ADX/RSI tam sayiya yuvarlaniyor (esik 25 ile cakisir)."
+  echo "    Detay için: python3 tools/indicator-precision-check.py"
+  echo "    Pozitif kontrol: python3 tools/indicator-precision-check.py --ref 6c4d5f8"
   FAIL=$((FAIL + 1))
 fi
 
