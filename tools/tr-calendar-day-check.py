@@ -50,23 +50,74 @@ RE_UTC_DAY = re.compile(
 # B) ikinci kanon: Intl ile bugun
 RE_INTL_TODAY = re.compile(
     r'Intl\s*\.\s*DateTimeFormat\s*\([^)]*\)\s*\.\s*format\s*\(\s*new\s+Date\s*\(\s*\)\s*\)')
-# C) yerel gun getter'lari
+# C) yerel gun getter'lari (dogrudan zincirli yazim)
 RE_LOCAL_DAY = re.compile(
     r'new\s+Date\s*\(\s*\)\s*\.\s*get(?:FullYear|Month|Date|Day)\s*\(')
+# D) K-BL (21.09) — ES-YAZIM. C sinifi YALNIZ `new Date().getX()` zincirini
+#    goruyordu. Iki gercek ihlal tam bu yuzden kacmisti:
+#      * static/stale-banner.js:14  var d = new Date(Date.now() - ageS*1000); d.getDate()
+#        (argumanli new Date + ARA DEGISKEN -> zincir yok)
+#      * static/bp-search.js:605    var d = new Date(); d.getHours()
+#        (ara degisken + saat getter'i listede bile yoktu)
+#    Yerel-saat getter'i bir DEGISKEN uzerinden de cagrilsa sonuc aynidir:
+#    deger CIHAZIN saat diliminden gelir. `getUTC*` KASITLI oldugu icin muaf
+#    (ayri isim, regex onu icermez) -- kanon evi bp-format.js zaten kapsam disi.
+RE_LOCAL_ANY = re.compile(
+    r'(?<!UTC)\.\s*get(?:FullYear|Month|Date|Day|Hours|Minutes|Seconds)\s*\(\s*\)')
 
 CLASSES = (
     ('UTC-GUN', RE_UTC_DAY),
     ('IKINCI-KANON', RE_INTL_TODAY),
     ('YEREL-GUN', RE_LOCAL_DAY),
+    ('YEREL-SAAT-DEGISKEN', RE_LOCAL_ANY),
 )
 
 
+# K-BL (21.09) — SOYUCU REGEX LITERALINI BILMIYORDU (kapinin kendi kor noktasi).
+# `static/bp-search.js:173` su satiri tasiyor:
+#     return String(s||'').replace(/[&<>"']/g, function(m){
+# Soyucu `/.../ ` regex'ini kod sanip ICINDEKI `"` ile bir string ACIYOR, bir
+# sonraki tirnakla kapatiyor ve o noktadan sonra dosyanin TAMAMINDA string/kod
+# ayrimini kaybediyordu: 178. satirdan itibaren HICBIR yorum soyulmuyordu.
+# Sonuc iki yonlu: (a) SAHTE-POZITIF -- bu turda kapi, ihlali ANLATAN yorumumu
+# ihlal sandi; (b) SAHTE-NEGATIF -- string icindeki desenler kod sanilabilirdi.
+# Cozum tam bir JS ayristiricisi degil, JS'in kendi kuralinin heuristigi: `/`
+# bir REGEX baslatabilir ancak kendinden onceki anlamli karakter bir deger
+# BITIRMIYORSA (yani `(`, `,`, `=`, `:`, `[`, `!`, `&`, `|`, `?`, `{`, `}`,
+# `;`, `+`, `-`, `*`, `%`, `<`, `>`, `~`, `^`, veya satir basi ise).
+_RE_PREV_OK = set('(,=:[!&|?{};+-*%<>~^')
+
+
 def strip_js_comments(src):
-    """// ve /* */ yorumlarini bosluga cevirir (satir sayisi korunur)."""
+    """// ve /* */ yorumlarini bosluga cevirir (satir sayisi korunur).
+    String VE regex literalleri atlanir -- icerikleri taranmaz ama uzunlugu korunur."""
     out = []
     i, n = 0, len(src)
+    prev_sig = ''          # son anlamli (bosluk/yorum disi) karakter
     while i < n:
         c = src[i]
+        # --- regex literali: /.../flags ---
+        if c == '/' and i + 1 < n and src[i + 1] not in '/*' and \
+           (prev_sig == '' or prev_sig in _RE_PREV_OK):
+            out.append(c)
+            i += 1
+            in_class = False
+            while i < n and src[i] != '\n':
+                ch = src[i]
+                if ch == '\\' and i + 1 < n:
+                    out.append('  ')
+                    i += 2
+                    continue
+                out.append(ch)
+                i += 1
+                if ch == '[':
+                    in_class = True
+                elif ch == ']':
+                    in_class = False
+                elif ch == '/' and not in_class:
+                    break
+            prev_sig = '/'
+            continue
         if c in '"\'`':
             q = c
             out.append(c)
@@ -81,6 +132,7 @@ def strip_js_comments(src):
                     i += 1
                     break
                 i += 1
+            prev_sig = q       # string bir DEGER bitirir -> sonraki `/` bolme
             continue
         if c == '/' and i + 1 < n and src[i + 1] == '/':
             while i < n and src[i] != '\n':
@@ -95,6 +147,8 @@ def strip_js_comments(src):
             i += 2
             continue
         out.append(c)
+        if not c.isspace():
+            prev_sig = c
         i += 1
     return ''.join(out)
 
@@ -111,12 +165,17 @@ def js_chunks(path, text):
 
 def scan_text(path, text):
     hits = []
+    seen = set()
     for base_line, src in js_chunks(path, text):
         clean = strip_js_comments(src)
         for label, rx in CLASSES:
             for m in rx.finditer(clean):
                 line = base_line + clean[:m.start()].count('\n')
                 snippet = src.splitlines()[line - base_line].strip() if 0 <= line - base_line < len(src.splitlines()) else ''
+                key = (path, line)
+                if key in seen:
+                    continue   # C ve D ayni satiri gorebilir — tek bulgu yeter
+                seen.add(key)
                 hits.append((label, path, line, snippet[:120]))
     return hits
 
@@ -156,6 +215,7 @@ def main():
         ('UTC-GUN', "<script>var a = new Date().toISOString().slice(0,10);</script>"),
         ('IKINCI-KANON', "<script>var b = new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Istanbul'}).format(new Date());</script>"),
         ('YEREL-GUN', "<script>var c = new Date().getFullYear();</script>"),
+        ('YEREL-SAAT-DEGISKEN', "<script>var d = new Date(Date.now()-1); var h = d.getHours();</script>"),
     ]
     pos_ok = 0
     for label, probe in probes:
@@ -170,6 +230,9 @@ def main():
         "<script>var t = new Date().toISOString();</script>",                      # tam zaman damgasi
         "<script>var d = someDate.toLocaleDateString('tr-TR',{timeZone:'Europe/Istanbul'});</script>",
         "<script>/* new Date().toISOString().slice(0,10) — yorumda */</script>",   # yorum
+        "<script>var u = new Date(t*1000); var y = u.getUTCFullYear();</script>",  # K-BL: getUTC* kasitli
+        # K-BL: regex literali string acmamali -- sonraki yorum SOYULMALI
+        "<script>x.replace(/[&<>\"']/g, f);\n/* d.getHours() yorumda */</script>",
     ]
     neg_ok = 0
     for probe in neg_probes:
@@ -191,7 +254,8 @@ def main():
         print('K-BD IHLAL — "bugun" degeri kanon disi turetiliyor (%d):' % len(hits))
         for label, path, line, snippet in hits:
             print('  [%s] %s:%d  %s' % (label, path, line, snippet))
-        print('  DUZELTME: bp-format.js -> bpTodayTrIso() (veya bpTodayTr()) kullan.')
+        print('  DUZELTME: bp-format.js -> bpTodayTr()/bpTodayTrIso()/bpTrDatePartsAt() (gun)')
+        print('             veya bpTrClock() (saat) kullan.')
         return 1
 
     print('  ✓ her "bugun" degeri bpTodayTr()/bpTodayTrIso() kanonundan turuyor')
