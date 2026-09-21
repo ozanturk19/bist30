@@ -37,20 +37,43 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TPL  = os.path.join(ROOT, 'templates')
 CSS  = os.path.join(ROOT, 'static', 'css')
 
-# (B) sinifinin tek MESRU ornegi: hisse.css `.ind-help` — tap-toggle + Escape
-# JS'i templates/hisse.html icinde mevcut (grep: `.ind-help.open`), bu yuzden
-# yalniz-fare DEGIL. Yeni bir istisna eklemeden once o JS'in de yazilmasi sart.
-CSS_ALLOW = {('pages/hisse.css', '.ind-help')}
+# 21.09 (K-AU) — BEYAZ LISTE BOSALTILDI. Tek uyesi `.ind-help` idi; "tap-toggle
+# + Escape JS'i var, yani yalniz-fare degil" gerekcesiyle serbest birakilmisti.
+# O gerekce EKSIKTI: mekanizmanin klavye/dokunma erisimi vardi ama KONUMLANDIRMASI
+# sabit yonluydu (bottom:130% + left:50%), viewport cevirmesi yoktu — canli olcumde
+# yapiskan baslik altindaki 4/4 ipucunun gorunur yuksekligi %0, 320px'te 4/4'u saga
+# tasiyor ve html{overflow-x:clip} yuzunden kirpiliyordu. `.ind-help` kanonik
+# [data-tip]'e gocurdu; artik istisna YOK. Yeni istisna eklenmeden once o
+# mekanizmanin hem ERISIMI hem KONUMLANDIRMASI olculmeli.
+CSS_ALLOW = set()
 
 NATIVE_FOCUSABLE = {'a', 'button', 'input', 'select', 'textarea', 'summary'}
 
 # kapsam tabanlari — dedektor bunlarin altina duserse sessizce korlesmis demektir
 MIN_TIPS      = 50
-MIN_CSS_RULES = 1
+# 21.09 (K-AU): gercek sayi artik 0 oldugu icin ">=1" tabani kapiyi surekli
+# "korlesmis" (cikis 2) yapardi. Sifir bir kapsam yalani OLMASIN diye taban
+# yerine POZITIF KONTROL var: css_attr_tooltips()'in mantigi sentetik bir
+# kurala uygulanir, bulmazsa dedektor gercekten korlesmistir.
+MIN_CSS_RULES = 0
+
+
+def scan_css_text(rel, src):
+    """Tek bir CSS govdesinde `content: attr(data-…)` kurallarini bul.
+       Ayri fonksiyon: ayni mantik hem gercek dosyalara hem POZITIF KONTROL
+       fikstürüne uygulansin diye (bkz. positive_control)."""
+    out = []
+    # yorumlari temizle (yorum icindeki ornek kod sahte pozitif uretir)
+    body = re.sub(r'/\*.*?\*/', '', src, flags=re.S)
+    for m in re.finditer(r'([^{}]+)\{([^{}]*content\s*:\s*attr\(\s*(data-[\w-]+)[^{}]*)\}',
+                         body, flags=re.S):
+        sel = ' '.join(m.group(1).split())
+        out.append((rel, sel, m.group(3)))
+    return out
 
 
 def css_attr_tooltips():
-    """CSS'te `content: attr(data-…)` tasiyan kurallar -> (dosya, secici, hover_only)"""
+    """CSS'te `content: attr(data-…)` tasiyan kurallar -> (dosya, secici, oznitelik)"""
     out = []
     for dirpath, _, files in os.walk(CSS):
         for fn in sorted(files):
@@ -58,14 +81,31 @@ def css_attr_tooltips():
                 continue
             path = os.path.join(dirpath, fn)
             rel  = os.path.relpath(path, CSS)
-            src  = open(path, encoding='utf-8').read()
-            # yorumlari temizle (yorum icindeki ornek kod sahte pozitif uretir)
-            body = re.sub(r'/\*.*?\*/', '', src, flags=re.S)
-            for m in re.finditer(r'([^{}]+)\{([^{}]*content\s*:\s*attr\(\s*(data-[\w-]+)[^{}]*)\}',
-                                 body, flags=re.S):
-                sel = ' '.join(m.group(1).split())
-                out.append((rel, sel, m.group(3)))
+            out.extend(scan_css_text(rel, open(path, encoding='utf-8').read()))
     return out
+
+
+# 21.09 (K-AU) — gercek sayi 0'a indigi icin ">=1 kural bulmali" tabani artik
+# kullanilamaz. Yerine POZITIF KONTROL: dedektorun kendi mantigi, bulmasi
+# GEREKEN sentetik bir kurala uygulanir. Sifir ancak bu 3/3 gecerse "temiz"
+# demektir; gecmezse dedektor gercekten korlesmistir (cikis 2).
+POSCTRL = [
+    # (fikstur, beklenen oznitelik) — ucu de ayri yazim yolu
+    ('.zzz-fake::after{content:attr(data-tooltip);position:absolute}', 'data-tooltip'),
+    ('.zzz-b:hover::before {\n  content : attr( data-hint ) ;\n}',    'data-hint'),
+    ('/* content:attr(data-yorum) */\n.zzz-c::after{color:red;content:attr(data-x);}', 'data-x'),
+]
+
+
+def positive_control():
+    """Dedektorun gordugunu kanitla. -> (gecen, toplam, hata listesi)"""
+    errs = []
+    for i, (fixture, expect) in enumerate(POSCTRL, 1):
+        hits = scan_css_text('POSCTRL-%d' % i, fixture)
+        attrs = [h[2] for h in hits]
+        if expect not in attrs:
+            errs.append('POSCTRL-%d: `%s` bekleniyordu, bulunan: %s' % (i, expect, attrs or 'YOK'))
+    return len(POSCTRL) - len(errs), len(POSCTRL), errs
 
 
 DISPLAY_NONE_RE = None
@@ -130,12 +170,11 @@ def main():
             continue
         src = open(os.path.join(TPL, fn), encoding='utf-8').read()
 
-        # eski oznitelik geri gelmis mi? (.ind-help disinda)
+        # eski oznitelik geri gelmis mi? (K-AU'dan beri ISTISNASIZ)
         for m in re.finditer(r'data-tooltip\s*=', src):
             tag, frag, _ = tag_of(src, m.start())
-            if 'ind-help' not in frag:
-                problems.append('templates/%s: `data-tooltip` kanonik disi mekanizma '
-                                '(yalniz `.ind-help` serbest) -> %s' % (fn, frag[:90]))
+            problems.append('templates/%s: `data-tooltip` kanonik disi mekanizma '
+                            '(istisna YOK, kanonik yol [data-tip]) -> %s' % (fn, frag[:90]))
 
         hits = list(re.finditer(r'data-tip\s*=', src))
         tips_total += len(hits)
@@ -170,9 +209,18 @@ def main():
                                 '(dogal odaklanabilir degil, tabindex yok) -> ipucu '
                                 'yalniz-fare (WCAG 1.4.13). %s' % (fn, tag, frag[:90]))
 
-    print('tooltip-canon-check (K-AT: ipucu mekanizmasi kanonu)')
-    print('  kanonik [data-tip] kullanimi: %d · CSS attr() ipucu kurali: %d (beyaz liste: %d)'
-          % (tips_total, len(css_rules), len(CSS_ALLOW)))
+    pc_ok, pc_tot, pc_errs = positive_control()
+
+    print('tooltip-canon-check (K-AT ipucu mekanizmasi kanonu + K-AU beyaz liste 1->0)')
+    print('  kanonik [data-tip] kullanimi: %d · CSS attr() ipucu kurali: %d (beyaz liste: %d) '
+          '· pozitif kontrol: %d/%d'
+          % (tips_total, len(css_rules), len(CSS_ALLOW), pc_ok, pc_tot))
+
+    if pc_errs:
+        print('  !! POZITIF KONTROL DUSTU — dedektor korlesmis, "0 kural" bir KAPSAM YALANI:')
+        for e in pc_errs:
+            print('      · ' + e)
+        return 2
 
     if tips_total < MIN_TIPS or len(css_rules) < MIN_CSS_RULES:
         print('  !! KAPSAM TABANI ALTINDA (data-tip %d < %d  ya da  css %d < %d) — '
@@ -185,7 +233,7 @@ def main():
             print('      · ' + p)
         return 1
 
-    print('  ✓ tek mekanizma, hepsi klavyeye acik')
+    print('  ✓ tek mekanizma (CSS attr() istisnasi YOK), hepsi klavyeye acik')
     return 0
 
 
