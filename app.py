@@ -134,7 +134,7 @@ except ImportError as _dqv_import_err:
     def signal_date_age_days(signal_date, today=None):     return None
     # T1.1 fallback: business_rules yüklenemezse bugünkü değerlerle aynı sözlük
     SIGNAL_LABELS = {'AL': 'Güçlü Trend', 'SAT': 'Trend Bozuldu', 'BEKLE': 'Yatay'}
-    ENTRY_QUALITY_LABELS = {'IDEAL': 'İdeal', 'IYI': 'İyi', 'DIKKATLI': 'Dikkatli', 'UZAK': 'Uzak'}
+    ENTRY_QUALITY_LABELS = {'IDEAL': 'İdeal', 'IYI': 'İyi', 'DIKKATLI': 'Dikkatli', 'UZAK': 'Kovalama'}
     SIGNAL_DATE_LABELS = {'TODAY': 'Bugün', 'YESTERDAY': 'Dün'}
 
 # ── CPO-1528 Faz 2: Temel Analiz Skoru + BorsaPusula Kompozit Skoru ──────────

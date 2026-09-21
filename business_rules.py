@@ -271,7 +271,7 @@ ENTRY_QUALITY_LABELS = {
     "IDEAL": "İdeal",
     "IYI": "İyi",
     "DIKKATLI": "Dikkatli",
-    "UZAK": "Uzak",
+    "UZAK": "Kovalama",
 }
 
 # ── CPO-1335 — göreli tarih etiketi kanonik türetimi ────────────────────────
