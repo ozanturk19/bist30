@@ -1348,21 +1348,32 @@ const step = async (ad, fn) => {
       const sp = lab.querySelector('span');
       const val = document.getElementById('bpSparkVal');
       /* Kanvasin BASKIN opak rengi = cizgi rengi (kenar yumusatma komsulari
-         dagilir, baskin olan gercek renktir). */
+         dagilir, baskin olan gercek renktir).
+         ⛔ 59. DERS: MUTLAK PIKSEL ESIGI BIR ESIK DEGILDIR. Ilk yazimda
+         "opak piksel >= 200" dedim; bu esigi retina ekranda (dpr=2) olcup
+         yazmistim, orada cizgi 1514px tutuyordu. Headless Chromium dpr=1
+         ile ayni cizgi 184px -- kanvas DOGRU boyanmis oldugu halde adim
+         "kanvas bos" diye DUSTU. Kanvas pikseli dpr ile KARELENEREK
+         olceklenir. Esik artik ORAN: opak piksellerin >=%60'i tek renk
+         olmali; mutlak sayi yalnizca "hic bir sey cizilmemis"i eler. */
       let d;
       try { d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; }
       catch (e) { return { err: 'kanvas okunamadi: ' + e.message }; }
       const t = {};
+      let opak = 0;
       for (let i = 0; i < d.length; i += 4) {
-        if (d[i + 3] < 200) continue;
+        if (d[i + 3] < 240) continue;          /* dolgu gradyani seffaf, cizgi cekirdegi opak */
+        opak++;
         const h = '#' + [d[i], d[i + 1], d[i + 2]].map(x => x.toString(16).padStart(2, '0')).join('');
         t[h] = (t[h] || 0) + 1;
       }
       const top = Object.entries(t).sort((a, b) => b[1] - a[1])[0];
-      if (!top || top[1] < 200) return { err: 'kanvas bos (cizgi cizilmemis)' };
+      if (!top || opak < 40) return { err: 'kanvas bos (cizgi cizilmemis, opak piksel ' + opak + ')' };
+      const pay = top[1] / opak;
+      if (pay < 0.6) return { err: 'kanvasta baskin cizgi rengi yok (' + top[0] + ' pay %' + Math.round(pay * 100) + ')' };
       const cs = getComputedStyle(document.documentElement);
       return {
-        cizgi: top[0], cizgiPx: top[1],
+        cizgi: top[0], cizgiPx: top[1], cizgiPay: Math.round(pay * 100), opakPx: opak, dpr: devicePixelRatio,
         sat: cs.getPropertyValue('--bp-sat').trim(),
         al: cs.getPropertyValue('--bp-al').trim(),
         valColor: getComputedStyle(val).color,
@@ -1404,7 +1415,8 @@ const step = async (ad, fn) => {
       return bad('K-BW', '@320px sparkline etiketi IKI satira sardi (K-BV dersi)');
     if (r.docOverflow > 0)
       return bad('K-BW', '@320px sayfa yatay tasiyor: ' + r.docOverflow + 'px');
-    ok('K-BW', sat.ticker + ' · cizgi ' + r.cizgi + ' (' + r.cizgiPx + 'px) · rozet ' +
+    ok('K-BW', sat.ticker + ' · cizgi ' + r.cizgi + ' (' + r.cizgiPx + '/' + r.opakPx +
+               'px opak = %' + r.cizgiPay + ', dpr ' + r.dpr + ') · rozet ' +
                r.pillColor + ' = --bp-sat · metin ' + r.valColor + ' · "' + r.etiket +
                '" @320px tek satir · satir-ici ciplak hex 0');
   });
