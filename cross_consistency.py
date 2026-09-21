@@ -105,10 +105,22 @@ def validate_stocks_cross_consistency(stocks, charts_map, tolerance_pct=DEFAULT_
 
     failed = list({e["ticker"] for e in all_errors})
     if all_errors:
-        logger.warning(
-            "CROSS: %d inconsistencies across %d tickers: %s",
-            len(all_errors), len(failed), failed,
-        )
+        # CPO-1729: CACHE_MISS (chart cache henüz yok/ısınmadı) gerçek fiyat
+        # sapması DEĞİL — ayrı sayılmazsa "217/217 inconsistencies" gibi
+        # yanıltıcı, evrenin tamamını kapsayan bir satır gerçek bir
+        # CROSS_INCONSISTENCY regresyonunu maskeleyebilir.
+        _real = [e for e in all_errors if e.get("flag") != "CACHE_MISS"]
+        _miss = [e for e in all_errors if e.get("flag") == "CACHE_MISS"]
+        if _real:
+            logger.warning(
+                "CROSS: %d real inconsistencies across %d tickers: %s (+%d cache-miss)",
+                len(_real), len({e["ticker"] for e in _real}), [e["ticker"] for e in _real], len(_miss),
+            )
+        else:
+            logger.debug(
+                "CROSS: 0 real inconsistencies, %d cache-miss (chart cache soğuk/henüz yok): %s",
+                len(_miss), failed,
+            )
     return {
         "total": len(stocks),
         "checked": checked,

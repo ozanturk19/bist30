@@ -4033,12 +4033,21 @@ def _refresh_data_impl():
     # ── Faz 12 P2.1 DQV: Cross-Consistency Validation ────────────────────────
     if _DQV_AVAILABLE:
         try:
-            with _lock:
-                _charts_map = {
-                    s["ticker"]: ((_stock_chart_cache.get(s["ticker"]) or {}).get("data") or {})
-                                 .get("summary", {}).get("price")
-                    for s in results if s.get("ticker")
-                }
+            # CPO-1729: refresh_worker.py (REFRESH_WORKER=1) hiçbir HTTP isteği
+            # servis etmez; _stock_chart_cache (in-memory) SADECE /api/hisse/X/chart
+            # handler'ı (web worker) tarafından doldurulur. Bu yüzden bu process'te
+            # _stock_chart_cache hep boştu -> charts_map her ticker için None ->
+            # kontrol yapısal olarak HER turda 217/217 CACHE_MISS üretiyordu (gerçek
+            # fiyat karşılaştırması hiç yapılmıyordu). Leader zaten per-ticker chart
+            # dosyalarını kendi yazdığı için (_slow_chart_refresh_daemon) aynı diski
+            # doğrudan okuyoruz — gerçek karşılaştırmayı geri getirir.
+            _charts_map = {}
+            for _s in results:
+                _t = _s.get("ticker")
+                if not _t:
+                    continue
+                _chart_data, _ = _load_chart_from_disk_per_ticker(_t)
+                _charts_map[_t] = ((_chart_data or {}).get("summary") or {}).get("price")
             _cc = _dqv_cross_consistency(results, _charts_map)
             # CACHE_MISS → debug log only (startup/restart expected); real drifts → alert
             _real_errs = [e for e in _cc["errors"] if e.get("flag") != "CACHE_MISS"]
