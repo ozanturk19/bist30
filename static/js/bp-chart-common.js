@@ -32,15 +32,18 @@
      withVolume=true ise sag fiyat eksenine altta hacim barlari icin bosluk birakilir. */
   function baseOpts(LC, withVolume) {
     return {
-      layout: { background: { color: '#141416' }, textColor: '#c7c5cd' },
-      grid: { vertLines: { color: '#21262d' }, horzLines: { color: '#21262d' } },
+      /* K-BG: palet _tok()'tan okunur (hex yalniz yedek). Bu dosyanin KENDI
+         kanonu zaten buydu (addEmaPair 20.09'da gecmisti) ama baseOpts ve
+         addCandleSeries ham hex'te kalmisti -- ayni dosyada iki kanon. */
+      layout: { background: { color: _tok('--bp-surface', '#141416') }, textColor: _tok('--bp-text2', '#c7c5cd') },
+      grid: { vertLines: { color: _tok('--bp-border-subtle', '#21262d') }, horzLines: { color: _tok('--bp-border-subtle', '#21262d') } },
       crosshair: {
         mode: LC.CrosshairMode.Normal,
-        vertLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 },
-        horzLine: { color: '#3d5a80', labelBackgroundColor: '#b8c3ff', width: 1, style: 0 },
+        vertLine: { color: _tok('--bp-chart-crosshair', '#3d5a80'), labelBackgroundColor: _tok('--bp-brand', '#b8c3ff'), width: 1, style: 0 },
+        horzLine: { color: _tok('--bp-chart-crosshair', '#3d5a80'), labelBackgroundColor: _tok('--bp-brand', '#b8c3ff'), width: 1, style: 0 },
       },
       rightPriceScale: {
-        borderColor: 'rgba(48,54,61,0.6)',
+        borderColor: 'rgba(' + _hexRgb(_tok('--bp-bkl-bd', '#30363d'), '48,54,61') + ',0.6)',
         scaleMargins: withVolume ? { top: 0.08, bottom: 0.26 } : { top: 0.08, bottom: 0.08 },
       },
       handleScroll: true,
@@ -57,9 +60,9 @@
   /* Kanonik mum serisi. */
   function addCandleSeries(chart) {
     return chart.addCandlestickSeries({
-      upColor: '#00e290', downColor: '#f85149',
-      borderUpColor: '#00e290', borderDownColor: '#f85149',
-      wickUpColor: '#00e290', wickDownColor: '#f85149',
+      upColor: _tok('--bp-al', '#00e290'), downColor: _tok('--bp-sat', '#f85149'),
+      borderUpColor: _tok('--bp-al', '#00e290'), borderDownColor: _tok('--bp-sat', '#f85149'),
+      wickUpColor: _tok('--bp-al', '#00e290'), wickDownColor: _tok('--bp-sat', '#f85149'),
       priceLineVisible: false, lastValueVisible: true,
     });
   }
@@ -133,6 +136,15 @@
      COZEMEZ — bu yuzden renkler burada literal duruyordu ve tokens.css'ten
      KOPUKTU. _tok() token'i calisma aninda okur, cozulmezse bugunku literali
      yedek olarak dondurur (davranis degismez, tek kaynak kazanilir). */
+  /* "#30363d" -> "48,54,61". Token rgb degilse yedek dizgeyi dondurur --
+     uydurmaz. */
+  function _hexRgb(hex, yedek) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim());
+    if (!m) return yedek;
+    var n = parseInt(m[1], 16);
+    return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255);
+  }
+
   function _tok(ad, yedek) {
     try {
       var v = getComputedStyle(document.documentElement).getPropertyValue(ad).trim();
@@ -183,8 +195,8 @@
       tip.innerHTML =
         '<div style="color:var(--bp-text3);margin-bottom:4px;font-weight:600">' + dateFmt(param.time) + '</div>' +
         '<div>A: <span style="color:var(--bp-text)">' + fmt(bar.open) + '</span>' +
-        '&nbsp;&nbsp;Y: <span style="color:#00e290">' + fmt(bar.high) + '</span></div>' +
-        '<div>D: <span style="color:#f85149">' + fmt(bar.low) + '</span>' +
+        '&nbsp;&nbsp;Y: <span style="color:' + _tok('--bp-al', '#00e290') + '">' + fmt(bar.high) + '</span></div>' +
+        '<div>D: <span style="color:' + _tok('--bp-sat', '#f85149') + '">' + fmt(bar.low) + '</span>' +
         '&nbsp;&nbsp;K: <span style="color:var(--bp-text);font-weight:700">' + fmt(bar.close) + ' ₺</span></div>';
       /* Konteyner sinirlari icinde kelepcele (r137: .chart-section overflow:hidden
          disina tasarsa kirpilir) - once olc, sonra konumlandir. */
@@ -202,6 +214,7 @@
   }
 
   window.BPChart = {
+    tok: _tok,               /* K-BG: sablonlar KENDI okuyucusunu yazmasin */
     fmtTickDate: fmtTickDate,
     baseOpts: baseOpts,
     addCandleSeries: addCandleSeries,

@@ -52,6 +52,15 @@
   --bp-ctl-border-hover: #909097;
   --bp-border-subtle: #21262d;
 
+  /* K-BG (21.09) — GRAFIK CROSSHAIR CIZGISI. Data-Art oncesi paletten SAG KALAN
+     tek renk buydu: `#3d5a80` bp-chart-common.js ve hisse.html'de BIRBIRINDEN
+     BAGIMSIZ yaziliydi ve tokens.css'te hicbir karsiligi YOKTU -- yani 20.09
+     palet gocu bu rengi hic gormedi (style-guard YALNIZ static/css/*.css bakar,
+     JS icindeki ham hex kapinin tamamen disindaydi). Deger AYNEN korunarak
+     token'landi: bu commit gorsel degisiklik YAPMAZ, rengi tek kaynaga baglar.
+     Izgara cizgileri --bp-border-subtle'i (ayni #21262d) kullanir. */
+  --bp-chart-crosshair: #3d5a80;
+
   /* Text */
   --bp-text:      #e5e1e4;
   --bp-text2:     #c7c5cd;
