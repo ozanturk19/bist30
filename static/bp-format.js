@@ -381,8 +381,39 @@ function bpNumPairNote(aStr, bStr, dir) {
 
 function bpRsiZoneText(zone, signal) {
   var z = zone || '';
-  if (z.indexOf('İdeal Giriş') === 0 && signal !== 'AL') return 'Nötr bölge';
+  /* K-CB (22.09): AYNI BOLGE ICIN UC YAZIM vardi. CPO-1745 ayni duzeltmeyi
+     kaynaga da tasidi ama BASKA bir dizeyle: business_rules.derive_rsi_zone
+     "Nötr Bölge (RSI 45-60)" dondururken bu fonksiyon "Nötr bölge" yaziyordu.
+     Canli 22.09: /api/karsilastir FROTO/MGROS/MAVI icin "Nötr Bölge (RSI
+     45-60)", /api/data (EOD cache) ayni hisseler icin hala "İdeal Giriş
+     Penceresi" -> /hisse "Nötr bölge", /karsilastir "Nötr Bölge (RSI 45-60)"
+     basiyordu; ustelik bir sonraki EOD turunda /hisse'nin yazimi da kendi
+     kendine degisecekti (kaynak dizesi degistigi icin).
+     Tek kanon burada: hangi kaynaktan gelirse gelsin tek ad "Nötr Bölge"
+     (kardes bolge adlari gibi Baslik Bicimi, parantezli aralik YOK -- RSI
+     sayisi rozetin hemen yaninda zaten basili). */
+  if (z.indexOf('Nötr') === 0) return 'Nötr Bölge';
+  if (z.indexOf('İdeal Giriş') === 0 && signal !== 'AL') return 'Nötr Bölge';
   return z;
+}
+
+/* ── K-CB (22.09): BAR PENCERESI BEYANI — TEK KANON ──────────────────────
+   /hisse grafiginin GORUNEN sure etiketi dinamikti ("2 Yıl" / "N İşlem Günü",
+   esik 450 bar) ve kodun yanindaki not "yanlis bir '2 Yil' iddiasi hicbir an
+   ekranda durmaz" diyordu -- ama AYNI ogenin `aria-label`i SSR'da sabit
+   "2 yıl" yaziyordu ve hic guncellenmiyordu. Canli 22.09 olcumu: DSTKF 405
+   bar / 592 takvim gunu -> goren kullanici "405 İşlem Günü", ekran okuyucu
+   "2 yıl"; MARKA'da ohlc=0 -> hic cizilmemis bir grafik role="img" ile "2 yıl"
+   diye adlandiriliyordu. Birim sozcugu de ikiye ayrilmisti: ayni sayfada
+   sparkline "seans", grafik "İşlem Günü" (K-BW'de site kanonu "seans" secildi).
+   Bar sayisindan pencere metni URETEN TEK YER burasi. */
+function bpBarWindowText(n) {
+  var k = Number(n);
+  if (!isFinite(k) || k <= 0) return '';
+  /* Esik 500 degil 450: tam 2 yillik pencere alan yerlesik hisseler bile
+     tatil/veri-baslangici farkiyla 495-504 arasi dogal varyasyon gosteriyor
+     (orn. AKBNK 497) -- 500 sert esigi bunlari "kisa gecmis" sayardi. */
+  return k >= 450 ? '2 Yıl' : (k + ' Seans');
 }
 
 /* ── K-BV (22.09): PARA ÖLÇEĞİ KISALTMASI — TEK KANON ────────────────────

@@ -384,10 +384,17 @@
             SATIRA sariyordu (satir 15px -> 30px); eski kisa etiket sarmiyordu.
             "seans" sitenin ZATEN kullandigi kelime (_stale_banner, /gundem,
             _footer) ve ayni olcumde eski etiketle BIREBIR ayni yukseklik. -#}
-        <span>Son 30 seans</span>
+        {#- K-CB (22.09): "30" SABITTI; veri `ohlc.slice(-30)` yani 30'dan AZ da
+            olabilir (kisa gecmisli hisse). Ayni sayfadaki buyuk grafik etiketi
+            bar sayisindan DINAMIK turetiliyordu — sayfa kendi icinde iki
+            kanondu. Sayi artik cizilen nokta sayisindan geliyor. -#}
+        <span id="bpSparkWin"></span>
         <span id="bpSparkVal" class="bp-spark-val">—</span>
       </div>
-      <canvas id="bpSpark" class="bp-spark-canvas" height="52" role="img" aria-label="Son 30 seans kapanış fiyatı grafiği"></canvas>
+      {#- Pencere iddiasi SSR'da BOS birakilir (#chartPeriod ile ayni gerekce):
+          sayi cizilen veriden gelir, yanlis bir "30" hicbir an ekranda /
+          erisilebilirlik agacinda durmaz. -#}
+      <canvas id="bpSpark" class="bp-spark-canvas" height="52" role="img" aria-label="Kapanış fiyatı grafiği"></canvas>
     </div>
     {# SPEC-017 Faz B K10: "Neden bu sinyal?" CTA + drawer SİLİNDİ (Ozan redundant feedback). AI tab + sigExplainSection zaten mevcut. #}
   </div>
@@ -403,6 +410,11 @@
         return { t: b.time || b.t, c: +(b.close != null ? b.close : b.c) };
       }).filter(function(x){ return isFinite(x.c) && x.c > 0; });
       if (data.length < 2) return;
+      /* K-CB: pencere beyani cizilen veriden turer (yukaridaki nota bak). */
+      var winTxt = 'Son ' + data.length + ' seans';
+      var winEl = document.getElementById('bpSparkWin');
+      if (winEl) winEl.textContent = winTxt;
+      cv.setAttribute('aria-label', winTxt + ' kapanış fiyatı grafiği');
       cv._bpSparkLastOhlc = ohlc;
       cv._bpSparkLastAccent = accent;
       wrap.style.display = 'block';
@@ -568,7 +580,13 @@
     <div id="chartBody" style="min-height:420px">
     <div id="chartLoading" class="da-loading da-loading--block"><div class="da-spin"></div> Grafik yükleniyor…</div>
     <div id="chartsInner" style="position:relative;min-height:420px">
-      <div id="chartMain" role="img" aria-label="{{ ticker }} fiyat grafiği, günlük mum, 2 yıl"></div>
+      {# K-CB (22.09): buradaki erisilebilir ad SSR'da sabit "2 yıl" diyordu ve
+         hic guncellenmiyordu — GORUNEN sure etiketi (#chartPeriod) ise bar
+         sayisindan dinamik turetiliyordu. DSTKF canli: goren "405 İşlem Günü",
+         ekran okuyucu "2 yıl". Artik iki etiket de AYNI kaynaktan
+         (bp-format.js `bpBarWindowText`) yaziliyor; SSR yalnizca pencere
+         IDDIASI ICERMEYEN bir taban ad birakir. #}
+      <div id="chartMain" role="img" aria-label="{{ ticker }} fiyat grafiği, günlük mum"></div>
       <!-- 52 Haftalık Yüksek / Düşük Barı -->
       {# 20.09 — guncel fiyat etiketi seridin ORTASINA sabitlenmisti, imlec ise
          gercek konumdaydi (THYAO: imlec %24, etiket %50) — bar "aralığın
@@ -1605,7 +1623,7 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=648ff6b4"></script>
+<script src="/static/bp-format.js?v=b8108049"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
@@ -2098,16 +2116,25 @@ function buildChart(d) {
    * hisse icin). Etiket her zaman "Gunluk" kalir, sure kismi dogru veriye gore kurulur. */
   (function() {
     var n = (d.ohlc || []).length;
-    /* esik 500 degil 450: tam 2 yillik pencere alan yerlesik hisseler bile tatil/
-       veri-baslangici farkiyla 495-504 arasi dogal varyasyon gosteriyor (orn. AKBNK
-       497) — 500 sert esigi bunlari yanlislikla "kisa gecmis" gibi etiketliyordu. */
-    var sure = n >= 450 ? '2 Yıl' : (n + ' İşlem Günü');
     /* 20.09 Data-Art: baslik artik eyebrow (tur) + .chart-label (ticker) olarak
        ikiye ayrildi. Sure bilgisi DINAMIK (kisa gecmisli hissede "2 Yil" DEGIL,
-       "N Islem Gunu") — bu yuzden SSR'da bos birakilip burada doldurulur, yanlis
-       bir "2 Yil" iddiasi hicbir an ekranda durmaz. */
+       "N Seans") — bu yuzden SSR'da bos birakilip burada doldurulur, yanlis
+       bir "2 Yil" iddiasi hicbir an ekranda durmaz.
+       K-CB (22.09): esik/yazim artik bp-format.js `bpBarWindowText`te —
+       ve AYNI metin grafigin `aria-label`ina da yaziliyor (SSR'daki sabit
+       "2 yıl" iddiasi oradan kaldirildi; ekran okuyucu ile goren kullanici
+       ayni pencereyi duyuyor). Bos-veri dali SAVUNMA amacli: buildChart zaten
+       ohlc<2'de erken donuyor (MARKA canli: ohlc=0 -> chartsInner display:none,
+       yani eski sabit etiket ekran okuyucuya HIC acilmiyordu). */
+    var sure = bpBarWindowText(n);
     var elP = document.getElementById('chartPeriod');
-    if (elP) elP.textContent = ' · ' + sure;
+    if (elP) elP.textContent = sure ? (' · ' + sure) : '';
+    var elC = document.getElementById('chartMain');
+    if (elC) {
+      elC.setAttribute('aria-label', sure
+        ? ('{{ ticker }} fiyat grafiği, günlük mum, ' + sure)
+        : '{{ ticker }} için grafik verisi yok');
+    }
   })();
 
   /* #18-redux: sequential reindex — tatil/hafta sonu gap yok (TradingView standardı)
@@ -2186,8 +2213,13 @@ function buildChart(d) {
        fiilen kullandığı bar sayısını (bars_used) dürüstçe göster. */
     const w52label = document.getElementById('w52label');
     if (w52label) {
+      /* K-CB (22.09): `bars_used` bir BAR (seans) sayacidir — "Günlük Aralık"
+         onu takvim gunuymus gibi sunuyordu (252 bar ~ 365 takvim gunu, yani
+         kisa gecmiste de sapma ayni yonde). Canli 22.09 olcumu: 215/215
+         hissede bars_used=252 -> is_partial hep false, yani bu dal SU AN OLU;
+         yazim yine de kanona (seans) cekildi, canlanirsa dogru cikacak. */
       w52label.textContent = d.week52.is_partial
-        ? d.week52.bars_used + ' Günlük Aralık (halka arzdan bu yana)'
+        ? bpBarWindowText(d.week52.bars_used) + 'lık Aralık (halka arzdan bu yana)'
         : '52 Haftalık Aralık';
     }
     document.getElementById('week52Bar').style.display = '';

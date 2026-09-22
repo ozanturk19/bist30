@@ -220,7 +220,7 @@
 
 {% with ftr_self='/portfolio', ftr_data_note=true, ftr_note="Portföy verisi yalnızca kendi tarayıcınızda saklanır." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=648ff6b4"></script>
+<script src="/static/bp-format.js?v=b8108049"></script>
 <script>
 const PF_KEY      = 'bp_portfolio';
 const LS_WARN_KEY = 'bp_ls_warn_dismissed';
@@ -408,7 +408,12 @@ function svgSparkline(prices) {
   // satırdaki K/Z maliyete göredir, bu eğri SON 30 GÜNÜ anlatır. Bu yüzden
   // dekoratif sayılıp gizlenemez; metin eşdeğeri veriliyor.
   const _chg = ((prices[prices.length - 1] - prices[0]) / (prices[0] || 1)) * 100;
-  const _lbl = 'Son 30 gün: ' + bpFormatPct(_chg, 1);   /* K-BP: tek kanon */
+  /* K-CB (22.09): bu metin "Son 30 gün" diyordu ama veri `ohlc.slice(-30)`,
+     yani 30 SEANS (~42 takvim gunu) — ustelik 30'dan az da olabilir. AYNI
+     endpoint'in AYNI dilimi /hisse'de "Son 30 seans" diye etiketleniyordu:
+     tek veri, iki birim. Bu etiket egrinin TEK metin esdegeri oldugu icin
+     (bkz. K-AI notu) hata dogrudan ekran okuyucuya gidiyordu. */
+  const _lbl = 'Son ' + prices.length + ' seans: ' + bpFormatPct(_chg, 1);   /* K-BP: tek kanon */
   return '<svg role="img" aria-label="' + _lbl + '" width="' + W + '" height="' + H + '" style="display:block;overflow:visible">' +
     '<polyline points="' + pts + '" fill="none" stroke="' + col + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
     '</svg>';

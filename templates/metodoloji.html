@@ -141,7 +141,9 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 <ul>
   <li><code>RSI &lt; 30</code> <span role="img" aria-label="anlamına gelir">→</span> Aşırı Satım</li>
   <li><code>RSI 30–45</code> <span role="img" aria-label="anlamına gelir">→</span> Dip Toparlanması</li>
-  <li><code>RSI 45–60</code> <span role="img" aria-label="anlamına gelir">→</span> İdeal Giriş Penceresi</li>
+  <li><code>RSI 45–60</code> <span role="img" aria-label="anlamına gelir">→</span>
+      Güçlü Trend sinyalinde <strong>İdeal Giriş Penceresi</strong>, diğer tüm sinyallerde
+      <strong>Nötr Bölge</strong></li>
   <li><code>RSI 60–70</code> <span role="img" aria-label="anlamına gelir">→</span> Trend Güçleniyor</li>
   <li><code>RSI 70–80</code> <span role="img" aria-label="anlamına gelir">→</span> Dikkatli</li>
   <li><code>RSI ≥ 80</code> <span role="img" aria-label="anlamına gelir">→</span> Aşırı Alım</li>
@@ -152,6 +154,17 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   RSI 25–50 arası +10 puan, 25 altı +5 puan (ham maksimum katkı 10 puan — Teknik Güç Skoru'nun 100
   puanlık toplamına ölçeklendiğinde aşağıdaki "RSI bölgesi ~13p" değerine karşılık gelir).
   Sinyal motoru ADX+Supertrend+EMA üzerinden çalışır; RSI teyit göstergesi niteliğindedir.
+</p>
+{# K-CB (22.09): bu sayfa "RSI 45–60 → İdeal Giriş Penceresi"ni KOŞULSUZ yazıyordu.
+   22.09'daki K-BS/CPO-1745 düzeltmesinden sonra ürün artık o adı yalnız Güçlü Trend
+   sinyalinde basıyor; diğerlerinde "Nötr Bölge". Canlı 22.09: bu bantta 46 hisse var
+   ve 45'i Güçlü Trend DEĞİL — yani sitede en sık görülen ad metodolojide HİÇ
+   geçmiyordu. Vaat içeren bir ad, onu doğuran koşulla birlikte yazılır. #}
+<p>
+  <strong>Neden koşullu?</strong> BorsaPusula <em>long-only</em> bir üründür: "ideal giriş"
+  ancak yönü yukarı gösteren bir sinyalin yanında bir şey vaat eder. Trend Bozuldu ya da
+  Yatay görünümdeki bir hissede aynı RSI aralığı bir giriş önerisi değildir; bu yüzden
+  o durumda nötr adlandırılır. Bant sınırları (45–60) her iki halde de aynıdır.
 </p>
 
 <h2 id="ema">3. EMA12 / EMA99 Kesişimi</h2>
@@ -322,7 +335,7 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 </script>
 
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
-<script src="/static/bp-format.js?v=648ff6b4"></script>
+<script src="/static/bp-format.js?v=b8108049"></script>
 <script src="/static/bp-search.js?v=f13259b5" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/learning-mode.js?v=0ad88e9f" defer></script>
