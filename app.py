@@ -8520,7 +8520,7 @@ _FUND_SANITY = {
     "pe_ratio":       (0.0, 150.0),   # P/E > 150 → muhtemelen dolar/lira karışıklığı
     "forward_pe":     (0.0, 150.0),
     "dividend_yield": (0.0, 50.0),    # %50 üstü → imkânsız (zaten *100 çarpılmış)
-    "beta":           (0.10, 5.0),    # 0.06-0.09 beta havacılık için saçma
+    "beta":           (-1.0, 5.0),    # CPO-1787: artık XU030'a göre kendi hesabımız (0.10 tabanı düşük-betalı savunma hisselerini yutuyordu)
     "pb_ratio":       (0.0, 15.0),    # P/B > 15 → bozuk (BIST tipik 0.3-5x, CPO-DEV2-038)
     "roe":            (-100.0, 200.0),# ROE > 200% → bozuk
     "profit_margin":  (-200.0, 100.0),
@@ -8671,6 +8671,45 @@ def _fundamentals_schema_ok(data):
     return bool(data.get("statement_trend_quarterly")) and bool(data.get("financial_currency")) and bool(data.get("statement_currency"))
 
 
+_BETA_MIN_OVERLAP_DAYS = 60  # CPO-1787: rejim/IPO gibi kısa ortak geçmişte regresyon güvenilmez
+
+def _compute_beta_vs_xu030(ticker_base):
+    """CPO-1787: yfinance'in ham `beta` alanı BIST'e göre ölçülmemiş (canlı
+    ölçüm: kart ortalaması 0,45, XU030'a göre gerçek ortalama 0,92 — endeksin
+    kendi ağır hisseleri yapısal gereği ~1,0 civarında olmak ZORUNDA). Ek
+    Yahoo çağrısı yapmadan, zaten dolu olan 500 barlık chart cache'lerinden
+    (_stock_chart_cache / _chart_cache) XU030'a göre günlük getiri
+    regresyonu: cov(r_hisse, r_XU030) / var(r_XU030), son 252 işlem günü.
+    Ortak geçmiş yetersizse (None, None) döner — yanlış sayı basmaktansa
+    hiç basmamak tercih edilir (bkz. CPO-1787 mail)."""
+    with _lock:
+        _stock_ohlc = ((_stock_chart_cache.get(ticker_base) or {}).get("data") or {}).get("ohlc") or []
+        _mkt_ohlc   = (_chart_cache.get("data") or {}).get("ohlc") or []
+    if not _stock_ohlc or not _mkt_ohlc:
+        return None, None
+    _stock_close = {b["time"]: b["close"] for b in _stock_ohlc if b.get("close") is not None}
+    _mkt_close   = {b["time"]: b["close"] for b in _mkt_ohlc if b.get("close") is not None}
+    _common = sorted(set(_stock_close) & set(_mkt_close))
+    if len(_common) < _BETA_MIN_OVERLAP_DAYS:
+        return None, None
+    _common = _common[-252:]  # ~1y işlem günü
+    try:
+        _s = np.array([_stock_close[d] for d in _common], dtype=float)
+        _m = np.array([_mkt_close[d] for d in _common], dtype=float)
+        _rs = _s[1:] / _s[:-1] - 1.0
+        _rm = _m[1:] / _m[:-1] - 1.0
+        _var_m = np.var(_rm, ddof=1)
+        if not np.isfinite(_var_m) or _var_m <= 0:
+            return None, None
+        _beta = float(np.cov(_rs, _rm, ddof=1)[0, 1] / _var_m)
+        if not np.isfinite(_beta):
+            return None, None
+        return _beta, len(_rs)
+    except Exception as e:
+        logger.debug("_compute_beta_vs_xu030(%s): %s", ticker_base, e)
+        return None, None
+
+
 def _get_fundamentals(ticker_base):
     """yfinance ile temel analiz verilerini döndürür."""
     now = time.time()
@@ -8736,6 +8775,9 @@ def _get_fundamentals(ticker_base):
             # market_cap (TRY) / revenue (_stmt_cur) karışımı — aynı eksene çekilemezse None.
             _pts_raw = round(_pts_raw / _fx_rate, 2) if _fx_rate else None
 
+        # CPO-1787: yfinance'in ham "beta" alanı YERİNE kendi XU030-göre hesabımız kullanılır.
+        _beta_raw, _beta_days = _compute_beta_vs_xu030(ticker_base)
+
         raw = {
             "pe_ratio":          round(safe_num("trailingPE"), 1) if safe_num("trailingPE") is not None else None,
             "forward_pe":        round(safe_num("forwardPE"), 1) if safe_num("forwardPE") is not None else None,
@@ -8746,7 +8788,9 @@ def _get_fundamentals(ticker_base):
             "net_income":        money(safe_num("netIncomeToCommon")),
             "dividend_yield":    round(safe_num("dividendYield"), 2) if safe_num("dividendYield") is not None else None,
             "roe":               round(safe_num("returnOnEquity") * 100, 1) if safe_num("returnOnEquity") is not None else None,
-            "beta":              round(safe_num("beta"), 2) if safe_num("beta") is not None else None,
+            "beta":              round(_beta_raw, 2) if _beta_raw is not None else None,
+            "beta_benchmark":    "XU030" if _beta_raw is not None else None,
+            "beta_window_days":  _beta_days,
             "shares":            safe_num("sharesOutstanding"),  # CPO-1674: hisse ADEDİ, para birimi yok (eski ₺ soneki hataydı)
             "52w_high":          safe("fiftyTwoWeekHigh"),
             "52w_low":           safe("fiftyTwoWeekLow"),
@@ -8786,6 +8830,11 @@ def _get_fundamentals(ticker_base):
             # güvenle düzeltilemez (price_to_sales'ten farklı) — yanlış sayı yerine None.
             raw["ev_to_ebitda"] = None
         data = _clean_fundamentals(raw)
+        if data.get("beta") is None:
+            # _clean_fundamentals sanity dışı beta'yı None'a çekmiş olabilir —
+            # benchmark/window etiketleri de tutarlılık için birlikte silinir.
+            data["beta_benchmark"] = None
+            data["beta_window_days"] = None
         data["statement_trend"] = _fetched.get("statement_trend") or []
         data["statement_trend_quarterly"] = _fetched.get("statement_trend_quarterly") or []
         with _lock:
