@@ -2026,14 +2026,9 @@ def analyze(ticker_base):
                 rsi=float(rsi_val or 50),
                 signal=signal,
             )
-            # F5 — AI Sentiment boost: ±5 capped at 100
-            _sent = _sentiment_cache.get(ticker_base, {})
-            if _sent.get("score") is not None and not _sent.get("failed"):
-                _sent_score = _sent["score"]
-                if _sent_score >= 50:
-                    signal_strength = min(signal_strength + 5, 100)
-                elif _sent_score <= -50:
-                    signal_strength = max(signal_strength - 5, 0)
+            # F5 — AI Sentiment boost KALDIRILDI (CPO-1781): _sentiment_bg_worker
+            # durduruldu, cache artık güncellenmiyor — burada bırakılsaydı donmuş/bayat
+            # skor sonsuza dek signal_strength'i etkilerdi (DEV-2034 bulgusu).
 
         # ── SPEC-018 W2: 2-Katmanlı Tier (Standart / Güçlü Sinyal) ────────────
         # signal_strength'ten türetilir — compose_score() tasarım bantları
@@ -4665,16 +4660,8 @@ def api_data():
     _default_anomaly = {"score": 0.0, "flag": False, "reason": ""}
     for s in stocks:
         s["anomaly"] = _ac_snap.get(s.get("ticker", ""), _default_anomaly)
-    # Annotate stocks with AI sentiment data (F5)
-    with _lock:
-        _sent_snap = dict(_sentiment_cache)
-    _default_sentiment = {"score": None, "label": None, "news_count": 0}
-    for s in stocks:
-        _sc = _sent_snap.get(s.get("ticker", ""), {})
-        if _sc and not _sc.get("failed") and _sc.get("score") is not None:
-            s["sentiment"] = {"score": _sc["score"], "label": _sc["label"], "news_count": _sc.get("news_count", 0)}
-        else:
-            s["sentiment"] = _default_sentiment
+    # sentiment alanı payload'dan kaldırıldı (CPO-1781) — sıfır frontend tüketicisi,
+    # _sentiment_bg_worker durduruldu.
     # ADX null fix (BUG-C1) — sector/name artık cache yazılırken ekleniyor
     for s in stocks:
         # Parse ADX from nested indicators if top-level is null
@@ -10437,7 +10424,7 @@ def api_cache_inventory():
            content_ts_field="ts")
     _check("news", _NEWS_CACHE_DISK_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
     _check("company_summary", _COMPANY_SUMMARY_PATH, "Gemini kota bağımlı, sadece prefetch yazıyor (D-6 defer)")
-    _check("sentiment", _SENTIMENT_DISK_PATH)
+    _check("sentiment", _SENTIMENT_DISK_PATH, "CPO-1781: bg worker kasıtlı durduruldu, STALE beklenir (donmuş cache)")
     _check("signal_explain", _SIG_EXPLAIN_DISK_PATH, "Gemini kota bağımlı")
     _check("earnings_calendar", _EARNINGS_CACHE_DISK_PATH)
     _check("mtf", _MTF_CACHE_DISK_PATH)
@@ -13828,8 +13815,10 @@ def _startup():
         time.sleep(1800)   # 30 dakika sonra
         run_backtest()
     threading.Thread(target=_delayed_backtest, daemon=True).start()
-    # F5 — AI Sentiment bg worker
-    threading.Thread(target=_sentiment_bg_worker, daemon=True, name="sentiment-bg").start()
+    # F5 — AI Sentiment bg worker DURDURULDU (CPO-1781): sıfır tüketici + aktif
+    # Gemini kota tüketimi. _compute_sentiment() silinmedi, geri açmak için bu
+    # satırı geri aç yeterli.
+    # threading.Thread(target=_sentiment_bg_worker, daemon=True, name="sentiment-bg").start()
     # Bilanco takvimi ilk yuklemesini arkaplanda hazirla (yfinance cagrilari yuzunden yavastir)
     def _warm_earnings_2():
         # CPO-558B: web worker'da yfinance yasak
