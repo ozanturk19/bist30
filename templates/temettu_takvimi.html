@@ -1,13 +1,13 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Temettü Takvimi — BIST Temettü Tarihleri ve Tutarları | BorsaPusula</title>
+{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST30 Temettü Takvimi — Ex-Temettü Tarihleri ve Tutarları | BorsaPusula</title>
 <meta name="description" content="BIST30 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları. Trend sinyalleriyle birlikte temettü takvimini takip edin.">
 <link rel="canonical" href="https://borsapusula.com/temettu-takvimi">
-<meta property="og:title"       content="Temettü Takvimi — BIST Temettü Tarihleri ve Tutarları | BorsaPusula">
+<meta property="og:title"       content="BIST30 Temettü Takvimi — Ex-Temettü Tarihleri ve Tutarları | BorsaPusula">
 <meta property="og:description" content="BIST30 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları.">
 <meta property="og:url"         content="https://borsapusula.com/temettu-takvimi">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="Temettü Takvimi — BIST Temettü Tarihleri ve Tutarları | BorsaPusula">
+<meta name="twitter:title"       content="BIST30 Temettü Takvimi — Ex-Temettü Tarihleri ve Tutarları | BorsaPusula">
 <meta name="twitter:description" content="BIST30 şirketlerinin ex-temettü tarihleri ve hisse başı temettü tutarları.">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
@@ -27,20 +27,30 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=c0c5d88e">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=da3d601d" defer></script>
-<link rel="stylesheet" href="/static/css/pages/temettu_takvimi.css?v=e251426f">
+<link rel="stylesheet" href="/static/css/pages/temettu_takvimi.css?v=22f1d5aa">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker -->
 <div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 {% with hdr_icon = '💰', hdr_title = 'Temettü Takvimi', hdr_sub = 'Veriler yükleniyor…', hdr_sub_id = 'lastUpdate', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
-<h1 class="sr-only">BIST Temettü (Ex-Temettü) Takvimi</h1>
+<h1 class="sr-only">BIST30 Temettü (Ex-Temettü) Takvimi</h1>
 
 <main class="container" id="main-content" tabindex="-1">
 
   {% include '_stale_banner.html' %}
 
+  {#- K-DN (22.09): KAPSAM IDDIASI ASIMETRISI. Bu takvim backend'de
+      `BIST30_LITERAL` ornekleminden uretiliyor (app.py `_dividend_refresh_impl`,
+      hiz/rate-limit gerekcesi) — canli 22.09: 28 hisse. Sayfanin GORUNUR her
+      yuzeyi ise BIST genelini vaat ediyordu (<title> "BIST Temettü Tarihleri",
+      sr-only h1 "BIST Temettü ... Takvimi", "Toplam Hisse" cipi). Dogru kapsami
+      soyleyen TEK yer meta description'di — yani kullaniciya gorunmeyen yer.
+      Kardes sayfa /bilanco-takvimi ayni kabukta 216 hisse servis ediyor, yani
+      sitede gezen kullanici icin iki takvim ayni evreni kapsiyormus gibi duruyor.
+      Kapsam artik banner'da yaziyor; genisletme DEV1'de (CPO-1789). -#}
   <div class="info-banner">
-    <span aria-hidden="true">ℹ️</span> <strong>Temettü verileri Yahoo Finance (yfinance) kaynaklıdır.</strong> Şirketler ex-temettü tarihini genellikle genel kurul sonrası netleştirir.
+    <span aria-hidden="true">ℹ️</span> <strong>Bu takvim BIST30 şirketlerini kapsar.</strong> Diğer hisselerin temettü verimi kendi <a href="/hisseler">hisse sayfalarında</a> yer alır.
+    Temettü verileri Yahoo Finance (yfinance) kaynaklıdır; şirketler ex-temettü tarihini genellikle genel kurul sonrası netleştirir.
     Kesin tarih ve tutarlar için KAP bağlantısına tıklayın.
   </div>
 
@@ -48,7 +58,7 @@
     <div class="sum-chip da-panel"><div class="sum-num sum-num--brand" id="sumUpcoming">—</div><div class="sum-lbl">Yaklaşan Ex-Temettü</div></div>
     <div class="sum-chip da-panel"><div class="sum-num bp-al-text" id="sumAl">—</div><div class="sum-lbl">Güçlü Trend</div></div>
     <div class="sum-chip da-panel"><div class="sum-num bp-sat-text" id="sumSat">—</div><div class="sum-lbl">Trend Bozuldu</div></div>
-    <div class="sum-chip da-panel"><div class="sum-num sum-num--brand" id="sumTotal">—</div><div class="sum-lbl">Toplam Hisse</div></div>
+    <div class="sum-chip da-panel"><div class="sum-num sum-num--brand" id="sumTotal">—</div><div class="sum-lbl">Takvimdeki Hisse</div></div>
   </div>
 
   <div class="filter-bar">
@@ -134,8 +144,8 @@ function render(data) {
 
   const container = document.getElementById('stocksContainer');
   if (stocks.length === 0) {
-    container.innerHTML = '<div class="da-empty">Temettü verisi bulunamadı.</div>';
-    dtAnnounce('Temettü verisi bulunamadı.');
+    container.innerHTML = '<div class="da-empty">BIST30 şirketleri için temettü verisi bulunamadı.</div>';
+    dtAnnounce('BIST30 şirketleri için temettü verisi bulunamadı.');
     return;
   }
 

@@ -10764,7 +10764,7 @@ def llms_txt():
 - [Hisse Karşılaştır](https://borsapusula.com/karsilastir): 2-4 hisseyi yan yana karşılaştırma
 - [Tüm Hisseler](https://borsapusula.com/hisseler): tam hisse listesi
 - [Bilanço Takvimi](https://borsapusula.com/bilanco-takvimi): yaklaşan finansal sonuç tarihleri
-- [Temettü Takvimi](https://borsapusula.com/temettu-takvimi): yaklaşan temettü ödemeleri
+- [Temettü Takvimi](https://borsapusula.com/temettu-takvimi): BIST30 şirketlerinin yaklaşan ex-temettü tarihleri
 - [Blog](https://borsapusula.com/blog): teknik analiz eğitim içerikleri (okumalar)
 
 ## Hisse Sayfaları
