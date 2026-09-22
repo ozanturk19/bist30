@@ -112,7 +112,16 @@ NESIR = re.compile(
     r"|(?P<ustu>[0-9]+(?:[.,][0-9]+)?)\s*üstü"
     r"|(?P<alti>[0-9]+(?:[.,][0-9]+)?)\s*altı"
     r"|&lt;\s*(?P<lt>[0-9]+(?:[.,][0-9]+)?)"
-    r")\s*:?\s*(?P<etiket>[A-Za-zÇĞİÖŞÜçğıöşü ]{3,28}?)(?=[,.;)\n\"]|&#10;|$)", re.M)
+    # 22.09 (K-CN): kanonik yazim artik KOSULU da tasiyor ("45-60 Güçlü Trend
+    # sinyalinde İdeal Giriş Penceresi") -- K-BS/K-CB/K-CH'den beri vaat iceren
+    # ad, onu doguran kosulla birlikte yaziliyor. Ilk NESIR regex'i etiketi
+    # sayinin HEMEN ardinda bekledigi icin bu yazimi DUSURUYORDU: hisse.html
+    # RSI tooltip'i kanona cekilince nesir kapsami sessizce 9'dan 8'e indi ve
+    # kapi KAPSAM KAYBI verdi. Araya giren "<kosul> sinyalinde" ibaresi ve
+    # tire/em-dash sonlandiricisi artik taniniyor -- kapi kanonik yazimi
+    # olcmeye devam ediyor.
+    r")\s*:?\s*(?:[A-Za-zÇĞİÖŞÜçğıöşü ]{3,30}?\s+sinyalinde\s+)?"
+    r"(?P<etiket>[A-Za-zÇĞİÖŞÜçğıöşü ]{3,28}?)(?=[,.;)\n\"—–]|&#10;|$)", re.M)
 
 # Turkce kucultme tuzagi: Python'da "İ".lower() iki kod noktasi uretir
 # ("i" + birlesen ustnokta), bu yuzden "İdeal Giriş Penceresi".lower() ==

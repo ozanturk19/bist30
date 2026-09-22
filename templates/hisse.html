@@ -1002,7 +1002,7 @@
          gauge sabit mavi (--bp-brand) renkliydi, skordan bağımsız — hero'daki
          AYNI skorun rengiyle (_hc, AL/SAT yön+güç bazlı) hizalandı. #}
       <!-- Teknik Güç Skoru — mevcut kaynak (ssr_signal), hs'ten bağımsız -->
-      <div class="gauge teknik-gauge" tabindex="0" data-tip="Teknik Güç Skoru — Supertrend + ADX + hacim teyidi"
+      <div class="gauge teknik-gauge" tabindex="0" data-tip="Teknik Güç Skoru (0–100) — ADX + günlük hacim oranı + RSI + Teyit bileşimi. Supertrend/EMA sinyalin YÖNÜNÜ belirler, bu skora girmez."
            style="--band-color:{{ _hc }};"
            role="img" aria-label="Teknik Güç Skoru {{ new_teknik_score }} / 100">
         <svg aria-hidden="true" class="gauge-ring" viewBox="0 0 100 100">
@@ -2853,7 +2853,7 @@ function renderSummary(s, signalData) {
                     rsi < 30 ? '🔵' : '';
     const rsiLbl = rsiIcon ? `${rsiIcon} ${zone}` : zone || 'Normal';
     indHtml += `<span class="${rsiCls}">RSI ${bpIndNum(rsi)}<span class="ind-detail">${rsiLbl}</span></span>` +
-      `<button type="button" class="ind-help" data-tip="RSI: 0-100 aras\u0131 momentum g\u00f6stergesi. 30 alt\u0131 a\u015f\u0131r\u0131 sat\u0131m, 30-45 dip toparlanmas\u0131, 45-60 ideal giri\u015f penceresi, 60-70 trend g\u00fc\u00e7leniyor, 70-80 dikkatli, 80 \u00fcst\u00fc a\u015f\u0131r\u0131 al\u0131m." aria-label="RSI açıklamasını göster">?</button>`;
+      `<button type="button" class="ind-help" data-tip="RSI: 0-100 arası momentum göstergesi. 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 Güçlü Trend sinyalinde İdeal Giriş Penceresi — diğer sinyallerde Nötr Bölge, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım." aria-label="RSI açıklamasını göster">?</button>`;
   }
 
   /* Günlük Hacim Oranı badge (sadece dikkat çekici olduğunda göster)
