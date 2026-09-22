@@ -10783,20 +10783,36 @@ def _og_image_stats():
     return al_count, sat_count, total, today_s
 
 
+_og_image_url_cache = {"ts": None, "url": None}
+
+
 def _og_image_url():
     """CPO-1767 madde 1: og:image URL'i sabitti (/og-image.png), sosyal
     platformlar URL'e göre önbelleklediği için içerik EOD turundan turuna
     değişse de kart haftalarca dondu. `?d=` sürüm eki EOD verisi değişince
     URL'i değiştirir -> platform yeniden tarar. Tek-kanon (K-CK ilkesi):
     ikinci bir tarih kaynağı açmıyor, zaten yayımlanan _data_quality_snapshot
-    updated_at'ini okuyor."""
+    updated_at'ini okuyor.
+
+    CPO-1768: context processor'la birlikte bu fonksiyon artık 21 şablonun
+    HER render'ında koşuyor, ama dönen değer yalnız EOD turunda (last_refresh_ts
+    değişince) değişiyor -- aradaki tüm istekler _lock'u iki kez alıp 217
+    hissede tam tarama + p90 sıralamayı (_data_quality_snapshot) tekrarlıyordu.
+    last_refresh_ts'e anahtarlı memoize: sıcak yolda (değer değişmedi) kilide
+    hiç girilmiyor, tek-kanonu (K-CK) bozmadan sadece tekrar hesaplamayı
+    önlüyor."""
+    _lr_ts = _cache.get("last_refresh_ts", 0) or 0
+    if _og_image_url_cache["ts"] == _lr_ts and _og_image_url_cache["url"]:
+        return _og_image_url_cache["url"]
     with _lock:
         stocks = list(_cache["data"])
     _updated_at = _data_quality_snapshot(stocks).get("updated_at")  # "dd.mm.YYYY HH:MM:SS"
     if _updated_at:
         try:
             _d = datetime.strptime(_updated_at, "%d.%m.%Y %H:%M:%S").strftime("%Y%m%d")
-            return f"/og-image.png?d={_d}"
+            _url = f"/og-image.png?d={_d}"
+            _og_image_url_cache["ts"], _og_image_url_cache["url"] = _lr_ts, _url
+            return _url
         except ValueError:
             pass
     return "/og-image.png"
@@ -10922,6 +10938,12 @@ def og_image_png():
 
     buf = io.BytesIO()
     img.save(buf, format="PNG")
+    # CPO-1768: origin burada max-age=3600 ilan ediyor ama CF zone-level
+    # "Browser Cache TTL" sabit 14400'e kilitli (canli dogrulandi) -- /sw.js'te
+    # (CPO-1452/DEV2-375 bulgusu B) gozlenenle ayni desen, gercek TTL 14400.
+    # Bu gorsel icin risksiz: URL zaten `?d=YYYYMMDD` ile surumlu (_og_image_url),
+    # EOD turu degisince URL degisir ve platform/CF onbellegi yeniden cekilir --
+    # asil duzeltme (CF panel: Caching > Browser Cache TTL) DEV'in alani degil.
     return Response(buf.getvalue(), mimetype="image/png",
                     headers={"Cache-Control": "public, max-age=3600"})
 
