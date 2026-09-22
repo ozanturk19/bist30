@@ -1,3 +1,28 @@
+/* ── K-DP: MARKA FONTU KONTROL OGELERINE MIRAS KALMIYORDU ──────────────────
+   <button>/<input>/<select>/<textarea> font-family'yi MIRAS ALMAZ; UA
+   stylesheet'i kendi sistem fontunu dayatir. Sitede bu, kontrol kontrol
+   `font-family: inherit` YAZILARAK cozulmeye calisilmisti -- 14 dosyada 26
+   kez. Yani kanon yoktu, el emegi vardi; yazmayi unutulan her kontrol
+   sessizce Arial'da kaliyordu.
+
+   Canli olcum 22.09 (getComputedStyle, govde "Space Grotesk"):
+     /portfolio  17 METINLI kontrol Arial -- kullanicinin yazdigi "THYAO",
+                 Adet ve Fiyat girdileri, "+ Ekle", "Cloud Sync", "CSV"...
+     /karsilastir ana CTA ".compare-btn" (Karsilastir) Arial
+     /hisse      "Tekrar dene", /tarama ".search-clear", her sayfada
+                 ".macro-pause-btn"
+   Data-Art dilinde yazi tipi birincil marka tasiyicisi; bu dogrudan gorunur
+   bir kirilma. Tek kanon buraya yaziliyor: ELEMAN ozgullugunde (0,0,1), yani
+   kendi yazi tipini BILEREK secen her sinif kurali (ticker girdisinin
+   ui-monospace'i, .mbn-item'in Manrope'u) uzerine yazmaya devam eder.
+   [[reference_k_turu_olcum_dersleri_hub]] · 171. ders: ayni is, tek kanon. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 /* ==== extracted from templates/_mobile_nav_partial.html (T2.5) ==== */
 
   /* CPO 10.09: denetimde jank-riski işaretlendi — arkaplan zaten %96 opak
