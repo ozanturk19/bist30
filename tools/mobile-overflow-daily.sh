@@ -11,6 +11,16 @@
 # ("Gorunurluk Ertelenmez" — sessiz PASS-varsayimi degil, ama gunluk PASS
 # gurultusu de mailbox'i doldurmasin diye yalniz durum degisiminde/olumsuzda yazar).
 #
+# K-DQ (22.09): bu script artik IKI harness kosuyor.
+#   1) mobile-overflow-check.mjs  -> belge yatay kayiyor mu? (scrollWidth)
+#   2) clipped-content-check.mjs  -> KAPI 83: icerik kaydirilamadan KIRPILIYOR mu?
+# Ikisi ayni seyi olcmez ve (1) tek basina YETMEZ: sitede
+# `html/body{overflow-x:clip}` bulunan sayfalarda (1)'in olctugu sayi TANIMI
+# GEREGI 0'dir -- tasan icerik scrollWidth'e sizmaz, ama ekrandan da kaybolur.
+# Canli kanit (K-DQ): /hisse gecmis tablosunun "Getiri" sutunu 320px'te 9px
+# disarida kaliyordu, yatay kaydirma da imkansizdi; (1) o gun "110/110 temiz,
+# 0 tasma" raporluyordu. Durum ozeti ikisinin EN KOTUSUdur.
+#
 # Crontab: 20 4 * * * /root/bist30/tools/mobile-overflow-daily.sh >/dev/null 2>&1
 
 set -uo pipefail
@@ -28,15 +38,22 @@ flock -n 200 || { echo "$TS SKIP — onceki kosum hala calisiyor" >> "$LOG"; exi
 OUT="$(node tools/mobile-overflow-check.mjs --base=https://borsapusula.com 2>&1)"
 EXIT=$?
 
+CLIP_OUT="$(node tools/clipped-content-check.mjs --base=https://borsapusula.com 2>&1)"
+CLIP_EXIT=$?
+
 {
-  echo "=== $TS — exit=$EXIT ==="
+  echo "=== $TS — mobile-overflow exit=$EXIT | kapi-83 clipped exit=$CLIP_EXIT ==="
   echo "$OUT"
+  echo "--- KAPI 83 (kirpilmis-kaydirilamaz icerik) ---"
+  echo "$CLIP_OUT"
   echo ""
 } >> "$LOG"
 
 STATUS="PASS"
 [ "$EXIT" = "1" ] && STATUS="WARN"
 [ "$EXIT" = "2" ] && STATUS="FAIL"
+# Kapi 83 yalniz 0/2 dondurur; FAIL her zaman baskindir (WARN'i da ezer).
+[ "$CLIP_EXIT" != "0" ] && STATUS="FAIL"
 
 PREV_STATUS="$(cat "$STATE" 2>/dev/null || echo "UNKNOWN")"
 echo "$STATUS" > "$STATE"
@@ -45,7 +62,8 @@ echo "$STATUS" > "$STATE"
 # "PASS" satirini mailbox'a basmak gurultu, ama ilk kez FAIL'e donmek ya da
 # FAIL'de kalmaya devam etmek sessizce yutulamaz.
 if [ "$STATUS" != "PASS" ]; then
-  SUMMARY="$(echo "$OUT" | grep -E '^Integrity failures:' || echo "(ozet satiri parse edilemedi, LOG'a bak)")"
+  SUMMARY="$(echo "$OUT" | grep -E '^Integrity failures:' || echo "(ozet satiri parse edilemedi, LOG'a bak)")
+$(echo "$CLIP_OUT" | grep -E '^KAPI 83' || echo "(kapi 83 ozet satiri parse edilemedi)")"
   {
     echo ""
     echo "## [CRON-AUTO] mobile-overflow-check.mjs gunluk kosum — $STATUS [$TS]"
@@ -54,7 +72,7 @@ if [ "$STATUS" != "PASS" ]; then
     echo "$SUMMARY"
     echo '```'
     echo ""
-    echo "Detay: $LOG (host), tests/mobile-overflow/latest.json (JSON). Onceki durum: $PREV_STATUS."
+    echo "Detay: $LOG (host), tests/mobile-overflow/latest.json + clipped-latest.json (JSON). Onceki durum: $PREV_STATUS."
     echo ""
   } >> "$MAILBOX" 2>/dev/null
 

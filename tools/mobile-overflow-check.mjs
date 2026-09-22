@@ -8,6 +8,18 @@
 //      scrollbar genişliği (~11px) her ölçümde sahte "taşma" olarak raporlandı.
 // Bu script ikisini de yapısal olarak imkansız kılmak için var — nokta ölçüm değil.
 //
+// ⚠️ KÖR NOKTASI (K-DQ, 22.09) — BU HARNESS TEK BAŞINA YETMEZ.
+// Ölçtüğü sayı `documentElement.scrollWidth - clientWidth`. Sitenin bir kısmında
+// `html{overflow-x:clip}` var (aşağıda 232-235: guard bilerek html'e taşındı),
+// ve o sayfalarda bu fark TANIMI GEREĞİ 0'dır: viewport'tan geniş içerik artık
+// scrollWidth'e sızmaz — ama ekrandan da silinir, kullanıcıya hiçbir işaret
+// verilmeden. Yani buradaki "0 taşma" o sayfalar için bir ölçüm değil, bir
+// TANIMDIR. Canlı kanıt: /hisse geçmiş tablosunun "Getiri" sütunu 320px'te
+// 9px dışarıdaydı ve yatay kaydırma imkânsızdı; bu harness aynı gün
+// "110/110 temiz" diyordu. Kırpılmış-ama-kaydırılamaz içeriği ÖGE DÜZEYİNDE
+// ölçen ikinci harness: tools/clipped-content-check.mjs (KAPI 83). İkisi
+// birlikte koşar (tools/mobile-overflow-daily.sh).
+//
 // Kullanım:
 //   node tools/mobile-overflow-check.mjs [--base=https://borsapusula.com] [--out=path.json]
 //

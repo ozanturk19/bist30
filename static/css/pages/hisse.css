@@ -625,12 +625,28 @@
   @media(max-width:600px) { .sig-stats-row{grid-template-columns:repeat(2,1fr);} }
 
   /* ── Sinyal geçmişi ── */
+  /* K-DQ (22.09) — GETIRI SUTUNU 320px'TE YOK OLUYORDU.
+     Tablonun dogal genisligi 320px viewport'ta 305px; kap (.history-section)
+     `overflow-x: visible` oldugu icin SCROLL ETMIYOR, tasan kismi
+     `html/body{overflow-x:clip}` (bkz. ~1049) sessizce KIRPIYORDU. Canli
+     olcum: tablo sag kenari 336px, viewport 320px -> "Getiri" basligi ve
+     HER SATIRIN getiri yuzdesi 6px disarida, `window.scrollTo(100,0)` sonrasi
+     `scrollX` hala 0 -- yani kullanicinin o sayiya ulasmasinin HICBIR yolu
+     yoktu. /tarama'da 20.09'da olculen sinifin AYNISI (bkz. tarama.css ~310).
+     Gunluk 320px harness bunu goremez: o `documentElement.scrollWidth -
+     clientWidth` olcer ve bu sayi `overflow-x:clip` varken TANIMI GEREGI 0'dir.
+     Kapi 83 (`tools/clipped-content-check.mjs`) bu sinifi oge duzeyinde olcer.
+     Iki katmanli cozum: (1) kap artik gercek bir kaydirma kabi -- veri bir
+     daha asla ampute edilemez; (2) dar ekranda hucre dolgusu kisaliyor, yani
+     PRATIKTE kaydirmaya gerek kalmadan tablo sigiyor. */
   .history-section {
     background: var(--bp-surface);
     border: 1px solid var(--bp-border);
     border-radius:var(--bp-radius-lg);
     padding: 16px 18px;
     margin-bottom: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .history-table {
     width: 100%;
@@ -654,6 +670,12 @@
     color: var(--bp-text2);
   }
   .history-table tr:last-child td { border-bottom: none; }
+  /* Dar ekranda 4 sutunun yatay dolgusu 80px yer kapliyordu; 16px'lik tasmayi
+     kapatmak icin 32px serbest birakmak yetiyor (olculdu: 305px -> 273px). */
+  @media (max-width: 380px) {
+    .history-table th,
+    .history-table td { padding-left: 6px; padding-right: 6px; }
+  }
   .history-table tr { transition: background .15s, box-shadow .15s; }
   @media (hover: hover) and (pointer: fine) {
     .history-table tr:hover { background: var(--bp-surface2); box-shadow: inset 3px 0 0 rgba(var(--bp-al-rgb),.35); }
