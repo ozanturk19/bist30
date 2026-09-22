@@ -486,6 +486,48 @@ async function loadSectors() {
 
 let _filtersSeq = 0;
 
+/* ── K-CS (22.09) — ADRES ÇUBUĞU YALNIZ AKTİF SEKMENİN DURUMUNU TAŞIR ──
+   Sayfada iki tarayıcı (Teknik/Temel) var, ama TEK bir adres çubuğu.
+   Önceki hâlinde yalnız Teknik yazıyordu: Temel'de Bant/Sektör/Sıralama
+   değiştirmek adresi hiç değiştirmiyordu (canlı ölçüm 22.09: Bant=Yeşil +
+   Sektör=Enerji + Sırala=Kârlılık → 2 sonuç, adres hâlâ `/tarama?tab=temel`),
+   yani Temel'de yapılan hiçbir filtre paylaşılamıyor, yer imine alınamıyor,
+   sayfa yenilenince korunmuyordu. `tab` dışındaki her şey kayboluyordu.
+
+   Kanon: durumu YALNIZ aktif sekmenin yazarı yayımlar; pasif sekmenin
+   parametreleri adreste durmaz (iki sekme `sector`/`min_price`/`max_price`/
+   `signal`/`sort` adlarını paylaşıyor, değer kümeleri ise ayrı — karışık bir
+   adres ikisinde de yanlış okunur). Her yazar kendi sözlüğünü `_publishTaramaUrl`
+   ile teslim eder; adrese çeviren tek yer `_writeTaramaUrl`. 105. ders (bir
+   yazarın başka bir yazarın alanını sıfırdan kurması) böylece yapısal olarak
+   imkânsız: sıfırdan kuran yazar her zaman aktif sekmenin kendi yazarıdır. */
+let _activeTaramaTab = 'teknik';
+const _taramaUrlState = { teknik: null, temel: null };
+
+function _publishTaramaUrl(tab, params, urlDefaults) {
+  try {
+    // params fetch için de kullanılıyor — kopya üzerinde çalış, çağıranı bozma
+    const p = new URLSearchParams(params.toString());
+    if (urlDefaults) {
+      for (const [k, v] of Object.entries(urlDefaults)) { if (p.get(k) === v) p.delete(k); }
+    }
+    _taramaUrlState[tab] = p.toString();
+    if (tab === _activeTaramaTab) _writeTaramaUrl();
+  } catch(_) { /* best-effort: adres senkronu filtrelemeyi engellemez */ }
+}
+
+function _writeTaramaUrl() {
+  try {
+    const p = new URLSearchParams(_taramaUrlState[_activeTaramaTab] || '');
+    p.delete('tab');
+    // K-CR kanonu: varsayılan sekme adreste GÖRÜNMEZ, varsayılan-dışı yazılır
+    if (_activeTaramaTab !== 'teknik') p.set('tab', _activeTaramaTab);
+    const newUrl = window.location.pathname + (p.toString() ? '?' + p.toString() : '');
+    const curUrl = window.location.pathname + window.location.search;
+    if (newUrl !== curUrl) window.history.replaceState({tab: _activeTaramaTab}, '', newUrl);
+  } catch(_) { /* best-effort */ }
+}
+
 // ── K-BA: TR ondalık fiyat girdisi ────────────────────────────────────────
 // Alanlar artık type="text" + inputmode="decimal" (type="number" Türkçe
 // "12,50"yi SESSİZCE "1250"ye çeviriyordu — canlıda ölçüldü: 216 hisse -> 5,
@@ -539,24 +581,14 @@ async function applyFilters() {
   const _defaultSortDir = _sortDefaultDir[sort] || 'desc';
   [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999' || v==='0' || v==='all' || v==='signal_strength' || (k==='sort_dir' && v===_defaultSortDir)) params.delete(k); });
 
-  /* K-CQ (22.09): URL DURUMU IKI YERDEN YAZILIYORDU VE BIRI DIGERININ ALANINI SILIYORDU.
-     Bu blok URL'yi filtre sozlugunden SIFIRDAN kuruyor; `tab` o sozlukte olmadigi
-     icin her `applyFilters()` cagrisi onu dusuruyordu. Init akisi
-     (`applyFilters()` -> sonra `searchParams.get('tab')`) yuzunden bu, sekme
-     okunmadan ONCE oluyordu: canli olcum 22.09, `/tarama?tab=temel` ile acilan
-     sayfa URL'yi `/tarama`ya cevirip TEKNIK sekmesini aciyordu (aria-selected
-     teknik:true / temel:false, panelTemel display:none). Yani Temel sekmesine
-     dogrudan baglanti -- paylasilan link, yer imi, /tarama?tab=temel yonlendirmesi
-     -- hic calismiyordu. Sekme adi `switchTaramaTab`in kanonu, bu blok onu
-     korumakla yukumlu: yalniz varsayilan-disi deger tasinir (teknik varsayilan
-     oldugu icin URL'de gorunmez, switchTaramaTab'in `delete('tab')` kurali). */
-  try {
-    const _curTab = new URLSearchParams(window.location.search).get('tab');
-    if (_curTab === 'temel') params.set('tab', _curTab);
-    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-    const curUrl = window.location.pathname + window.location.search;
-    if (newUrl !== curUrl) window.history.replaceState(null, '', newUrl);
-  } catch(_) { /* URL history.replaceState best-effort - filtreleme (asagidaki /api/tarama cagrisi) buna bagli degil */ }
+  /* K-CQ (22.09) + K-CS (22.09): Bu blok URL'yi filtre sözlüğünden SIFIRDAN
+     kuruyor ve `tab` o sözlükte yok — eskiden her `applyFilters()` çağrısı onu
+     düşürüyordu (canlı: `/tarama?tab=temel` açılışı adresi `/tarama`ya çevirip
+     TEKNİK sekmesini açıyordu). Artık yazma işi `_publishTaramaUrl`ta tek
+     noktada: `tab` orada korunur ve bu yazar YALNIZ Teknik aktifken adrese
+     dokunur — Teknik her sayfa açılışında eager yüklendiği için, Temel ile
+     açılan bir adresi aksi hâlde yine sıfırlardı. */
+  _publishTaramaUrl('teknik', params);
 
   // T2: Bilateral loading state — ilk yüklemede full spinner, sonraki sefer inline
   const isInitialLoad = !_hasLoadedOnce;
@@ -718,25 +750,48 @@ function _initReactiveFiltersTemel() {
   });
 }
 
-function _hydrateFiltersFromUrl() {
+/* ── K-CS (22.09) — HİDRASYON SEKME-FARKINDA OLMAK ZORUNDA ──
+   Adres tek bir sözlük taşır ve o sözlük aktif sekmenin durumudur. İki sekme
+   `sector` / `min_price` / `max_price` / `signal` / `sort` adlarını paylaşıyor
+   ama DEĞER KÜMELERİ ayrı: `sort` Teknik'te `signal_strength|adx|…`, Temel'de
+   `temel_score|karlilik|…`. Sekme-kör bir hidrasyon yabancı değeri <select>'e
+   yazıyor, eşleşen <option> olmadığı için tarayıcı değeri SESSİZCE "" yapıyordu
+   — canlı ölçüm 22.09: `/tarama?sort=temel_score` → `sortSel.value=""`,
+   `selectedIndex=-1`, "Sırala" menüsü hiçbir şey seçili görünmüyordu (ve
+   `_currentSort` da "" oluyordu). `_setFilterFieldFromUrl` bu yutulmayı
+   yapısal olarak engelliyor: eşleşen seçenek yoksa alana hiç dokunulmaz. */
+const _TARAMA_URL_MAP = {
+  teknik: { 'signal': 'fSignal', 'min_adx': 'fMinAdx', 'sector': 'fSector',
+            'min_price': 'fMinP', 'max_price': 'fMaxP', 'sort': 'sortSel' },
+  temel:  { 'band': 'fBant', 'min_score': 'fMinTemel', 'sector': 'fSectorTemel',
+            'min_price': 'fMinPTemel', 'max_price': 'fMaxPTemel',
+            'signal': 'fSignalTemel', 'sort': 'sortSelTemel' }
+};
+
+function _setFilterFieldFromUrl(elId, val) {
+  const el = document.getElementById(elId);
+  if (!el) return false;
+  if (el.tagName === 'SELECT' && !Array.from(el.options).some(o => o.value === val)) {
+    console.warn('URL parametresi bu sekmenin seçenekleri arasında yok, yok sayıldı:', elId, val);
+    return false;
+  }
+  el.value = val;
+  return true;
+}
+
+function _hydrateFiltersFromUrl(tab) {
   try {
+    tab = (tab === 'temel') ? 'temel' : 'teknik';
     const params = new URLSearchParams(window.location.search);
-    const mapping = {
-      'signal': 'fSignal', 'min_adx': 'fMinAdx', 'sector': 'fSector',
-      'min_price': 'fMinP', 'max_price': 'fMaxP',
-      'sort': 'sortSel'
-    };
-    for (const [param, elId] of Object.entries(mapping)) {
+    for (const [param, elId] of Object.entries(_TARAMA_URL_MAP[tab])) {
       const val = params.get(param);
-      if (val !== null && val !== '') {
-        const el = document.getElementById(elId);
-        if (el) el.value = val;
-      }
+      if (val !== null && val !== '') _setFilterFieldFromUrl(elId, val);
     }
     // K-BA: URL makine bicimi tasir ("12.5"); alan artik metin kutusu oldugu
     // icin kullaniciya TURKCE gosterilir ("12,5"). Geri okuma ayni sayiyi verir
     // (bpParseTrNumber tek kaynak), yani tur-gidis kayipsiz.
-    ['fMinP', 'fMaxP'].forEach(pid => {
+    const priceIds = (tab === 'temel') ? ['fMinPTemel', 'fMaxPTemel'] : ['fMinP', 'fMaxP'];
+    priceIds.forEach(pid => {
       const pel = document.getElementById(pid);
       if (!pel || !pel.value) return;
       const pn = bpParseTrNumber(pel.value);
@@ -747,13 +802,19 @@ function _hydrateFiltersFromUrl() {
     // yonu kolonun varsayilanina sifirliyordu, paylasilan/yenilenen ?sort_dir=asc URL'leri
     // sessizce desc'e donuyordu. _currentSort'u burada senkronize ediyoruz ki applyFilters()
     // bu sort_dir'i ezmesin (bkz. applyFilters: `if (sort !== _currentSort) _sortDir = ...`).
-    _currentSort = document.getElementById('sortSel').value;
+    // K-CS: ayni koruma Temel'in _currentSortTemel/_sortDirTemel ciftine de gerekli.
     const sd = params.get('sort_dir');
-    if (sd === 'asc' || sd === 'desc') _sortDir = sd;
-    // only_premium=1 → fSignal=PREMIUM (mevcut applyFilters mantığı bunu AL'a çevirir)
-    if (params.get('only_premium') === '1') {
-      const sigEl = document.getElementById('fSignal');
-      if (sigEl) sigEl.value = 'PREMIUM';
+    if (tab === 'temel') {
+      _currentSortTemel = document.getElementById('sortSelTemel').value;
+      if (sd === 'asc' || sd === 'desc') _sortDirTemel = sd;
+    } else {
+      _currentSort = document.getElementById('sortSel').value;
+      if (sd === 'asc' || sd === 'desc') _sortDir = sd;
+      // only_premium=1 -> fSignal=PREMIUM (mevcut applyFilters mantigi bunu AL'a cevirir)
+      if (params.get('only_premium') === '1') {
+        const sigEl = document.getElementById('fSignal');
+        if (sigEl) sigEl.value = 'PREMIUM';
+      }
     }
   } catch(_) { console.warn('URL filtre parametreleri forma uygulanamadi', _); }
 }
@@ -1106,6 +1167,11 @@ async function applyTemelFilters() {
   });
   [...params.entries()].forEach(([k,v]) => { if(!v || v==='999999' || v==='0') params.delete(k); });
 
+  /* K-CS: Temel'in durumu da paylaşılabilir olmalı. Varsayılanlar adrese
+     yazılmaz (Teknik'te `sort`/`sort_dir` için zaten öyle) — ama fetch
+     parametreleri değişmiyor, ayıklama yalnız adres kopyasında yapılıyor. */
+  _publishTaramaUrl('temel', params, { sort: 'temel_score', sort_dir: 'desc' });
+
   const isInitialLoad = !_temelLoadedOnce;
   if (isInitialLoad) {
     document.getElementById('loadingDivTemel').style.display  = '';
@@ -1273,6 +1339,7 @@ const TARAMA_TABS = ['teknik', 'temel'];
 function switchTaramaTab(tab, opts) {
   opts = opts || {};
   if (TARAMA_TABS.indexOf(tab) === -1) tab = 'teknik';
+  _activeTaramaTab = tab;   // K-CS: adres yazarlari bunu okur, panellerden ONCE kurulmali
   document.getElementById('panelTeknik').style.display = (tab === 'teknik') ? '' : 'none';
   document.getElementById('panelTemel').style.display  = (tab === 'temel')  ? '' : 'none';
   document.querySelectorAll('.tarama-segments .bp-seg-item').forEach(el => {
@@ -1282,14 +1349,11 @@ function switchTaramaTab(tab, opts) {
     el.tabIndex = isActive ? 0 : -1;
   });
   try { localStorage.setItem('bp_tarama_tab', tab); } catch(e) { console.warn('Sekme tercihi kaydedilemedi', e); }
-  if (!opts.skipUrl) {
-    try {
-      const url = new URL(window.location.href);
-      if (tab === 'teknik') url.searchParams.delete('tab');
-      else url.searchParams.set('tab', tab);
-      history.replaceState({tab: tab}, '', url.toString());
-    } catch(e) { console.warn('Sekme URL senkronizasyonu başarısız', e); }
-  }
+  /* K-CS: sekme degisince adres SADECE `tab`i degil, yeni aktif sekmenin
+     durumunun TAMAMINI yansitir. Eskiden `tab` degisiyor, pasif sekmeden kalan
+     parametreler adreste kaliyordu — `?tab=temel&sort=adx` gibi hicbir sekmede
+     gecerli olmayan bir adres uretiliyordu. */
+  if (!opts.skipUrl) _writeTaramaUrl();
   // Tembel-yükleme: Temel sekmesi ilk kez açılıyorsa veri çek.
   if (tab === 'temel' && !_temelLoadedOnce) applyTemelFilters();
 }
@@ -1323,10 +1387,8 @@ window.addEventListener('popstate', () => {
 // switchTaramaTab tembel-yükleme).
 (async () => {
   await loadSectors();
-  _hydrateFiltersFromUrl();
-  _initReactiveFilters();
-  _initReactiveFiltersTemel();
-  applyFilters();
+  /* K-CS: aktif sekme, hidrasyon ve ilk `applyFilters()`ten ONCE bilinmeli —
+     hangi sozlugun okunacagini ve adrese kimin yazacagini o belirliyor. */
   let initialTab = 'teknik';
   try {
     const urlTab = new URL(window.location.href).searchParams.get('tab');
@@ -1334,6 +1396,11 @@ window.addEventListener('popstate', () => {
     else initialTab = localStorage.getItem('bp_tarama_tab') || 'teknik';
   } catch(e) { console.warn('Sekme başlangıç durumu okunamadı', e); }
   if (TARAMA_TABS.indexOf(initialTab) === -1) initialTab = 'teknik';
+  _activeTaramaTab = initialTab;
+  _hydrateFiltersFromUrl(initialTab);
+  _initReactiveFilters();
+  _initReactiveFiltersTemel();
+  applyFilters();
   switchTaramaTab(initialTab, {skipUrl: true});
 })();
 

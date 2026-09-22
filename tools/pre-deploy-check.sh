@@ -1282,6 +1282,27 @@ else
   FAIL=$((FAIL + 1))
 fi
 
+# KAPI 64 (K-CS, 22.09) -- PAYLASILAN ADRES CUBUGU / FORM DURUMU TUR-GIDISI.
+#   NOT: kapi 63 DEV1'e rezerve (CPO-1774'te teyit edildi), CPO 64'u aldi.
+#   /tarama'da ayni adres cubugunu paylasan IKI form var, yalniz Teknik yaziyordu:
+#   canli olcum 22.09 -> Temel'de Bant=Yesil + Sektor=Enerji + Sirala=Karlilik ile
+#   2 sonuc kaliyor, adres hala `/tarama?tab=temel`; paylasilan link filtresiz aciliyor.
+#   Ikinci bulgu: sekme-kor hidrasyon yabanci `sort` degerini <select>e yaziyordu,
+#   eslesen <option> olmadigi icin tarayici degeri SESSIZCE "" yapiyor -- canli:
+#   `/tarama?sort=temel_score` -> sortSel.value="", selectedIndex=-1, menu bos.
+#   R1 yazma simetrisi · R2 <select> yutulmasi korumasi · R3 tur-gidis (yazilan
+#   her parametre geri okunmali). MUAFIYET ANLAM KURALIDIR: kapsam "URLSearchParams
+#   kurup fetch eden fonksiyon"; tek kuruculu sablonlar R1 disinda.
+echo "64/64 form-url-state-check (K-CS: form durumu <-> adres cubugu tur-gidisi)..."
+if python3 tools/form-url-state-check.py; then
+  echo "  ✓ form-url-state-check PASS"
+else
+  echo "  ✗ K-CS KIRIK: bir formun durumu adrese yazilmiyor ya da geri okunmuyor."
+  echo "    Pozitif kontrol: python3 tools/form-url-state-check.py --self-test   # 4/4 beklenir"
+  echo "    Regresyon ornegi: python3 tools/form-url-state-check.py --ref d7c3782  # 3 ihlal beklenir"
+  FAIL=$((FAIL + 1))
+fi
+
 echo ""
 if [ "$FAIL" = "0" ]; then
   echo "✅ Pre-deploy TÜM CHECK GEÇTİ — deploy izinli."
