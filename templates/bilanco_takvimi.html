@@ -25,7 +25,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=c0c5d88e">
-<link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
+<link rel="stylesheet" href="/static/css/data-art.css?v=96623028">
 <script src="/static/bp-vocab.js?v=da3d601d" defer></script>
 <link rel="stylesheet" href="/static/css/pages/bilanco_takvimi.css?v=405102f3">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -34,12 +34,19 @@
 <!-- Makro Ticker -->
 <div class="macro-bar" id="macroBar"><button type="button" class="macro-pause-btn" id="macroPauseBtn" aria-pressed="false" aria-label="Haber şeridini duraklat" onclick="(function(b){var bar=b.closest('.macro-bar');var p=bar.getAttribute('data-paused')==='true';bar.setAttribute('data-paused',String(!p));b.setAttribute('aria-pressed',String(!p));b.textContent=!p?'▶':'⏸';b.setAttribute('aria-label',!p?'Haber şeridini devam ettir':'Haber şeridini duraklat');})(this)"><span aria-hidden="true">⏸</span></button><div class="macro-track" id="macroTrack"><span class="macro-item"><span class="macro-item-lbl">Yükleniyor…</span></span></div></div>
 
-{% with hdr_icon = '📅', hdr_title = 'Bilanço Takvimi', hdr_sub = 'Veriler yükleniyor…', hdr_sub_id = 'lastUpdate', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+{% with hdr_icon = '📅', hdr_title = 'Bilanço Takvimi', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
 <h1 class="sr-only">BIST Bilanço Açıklama Takvimi</h1>
 
 <main class="container" id="main-content" tabindex="-1">
 
   {% include '_stale_banner.html' %}
+
+{#- K-DO (22.09): bu damga `_header.html`in `hdr_sub`/`hdr_sub_id`
+      parametreleriyle uretiliyordu; olusan `.page-sub` dugumu anti-CLS
+      kurali yuzunden HER sayfada KALICI gizli (canli olcum: metin dolu,
+      kutu 0x0) ve `aria-live` da olu aliyordu. Artik <main> icinde,
+      gorunur. Yazan JS DEGISMEDI -- ayni id. -#}
+  <p class="da-updated" id="lastUpdate" role="status" aria-live="polite">Veriler yükleniyor…</p>
 
   <div class="info-banner">
     <span aria-hidden="true">ℹ️</span> <strong>Yaklaşık dönemler gösterilmektedir.</strong> BIST şirketleri çeyrek sonuçlarını genellikle çeyrek bitiminden 3-7 hafta içinde KAP'a bildirir.

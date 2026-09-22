@@ -10,8 +10,8 @@
                                              ile sarili dekoratif emoji/ikon (T22-a11y).
                                              hdr_title'in KENDI icine emoji gomme —
                                              autoescape span'i literal metne cevirir.
-      hdr_sub              str  vars. yok  -> verilirse baslik+alt-baslik <div> ile sarilir
-      hdr_sub_id           str  vars. yok  -> alt-basligin id ozniteligi (JS hedefi)
+      hdr_sub              str  ⛔ KULLANMAYIN (K-DO 22.09) -- asagiya bakin
+      hdr_sub_id           str  ⛔ KULLANMAYIN (K-DO 22.09) -- asagiya bakin
       hdr_title_tag        str  vars. 'h1' -> yalniz 'h1'/'h2'/'div'; baskasi 'h1'e duser
       hdr_self             str  vars. yok  -> sayfanin KENDI nav href'i; verilirse
                                              o oge menude GIZLENIR (bulundugun sayfaya
@@ -37,6 +37,22 @@
     gizli (gerekce bp-search.js:58: "nav ortada kalsin"), yani hdr_title/
     hdr_icon parametreleri GORSEL OLARAK hicbir sey uretmiyor; degerleri
     yalnizca sayfa sahibinin niyetini belgeliyor.
+    ⛔ K-DO (22.09) -- `hdr_sub` / `hdr_sub_id` BIR TUZAKTIR, KAPI 81 REDDEDER.
+    Yukaridaki "gorsel olarak hicbir sey uretmiyor" tespiti `.page-title` icin
+    yazilmisti; ayni sey `.page-sub` icin de GECERLI, cunku gizlenen sey
+    SARMALAYICI: `header > div:has(> .page-sub){display:none !important}`.
+    5 sayfa (gundem · sektor-harita · bilanco-takvimi · temettu-takvimi ·
+    karsilastir) VERI TAZELIK DAMGASINI ve secim yankisini buraya yaziyordu.
+    Canli olcum 22.09: `#lastUpdate`.textContent = "Son güncelleme: 22.09.2026
+    07:50", getBoundingClientRect() = 0x0, parent display=none. Yani damga
+    13 saat eski bir veriyi isaret ediyordu ve kullanici bunu GORMUYORDU.
+    Ustelik dugum `role="status" aria-live="polite"` tasiyordu: `display:none`
+    alt agaci a11y agacindan duser, dolayisiyla canli bolge EKRAN OKUYUCUYA DA
+    hic duyurulmuyordu -- kanal iki yonlu oluydu.
+    Dogrusu: damgayi `<main>` icinde `<p class="da-updated" id="..."
+    role="status" aria-live="polite">` ile ciz (data-art.css). Yazan JS
+    degismez, id ayni kalir.
+
     NOT (olculmus, kasitli): abd_tarama.html basligi <div class="page-title">.
     ONCEKI GEREKCEM YANLISTI ve olcumle duzeltildi: "anti-CLS davranisini
     degistirir" demistim; DEGISTIRMEZ. Baslik bir <div> ile sarilmis ve o

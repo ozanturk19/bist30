@@ -522,3 +522,23 @@ label:has(> .da-check){min-height:24px}
 }
 .bp-detail-toggle--inline > .bp-detail-toggle-body{padding-top:10px}
 .bp-detail-toggle-hint{color:var(--bp-text3);font-weight:400;font-size:var(--bp-text-xs)}
+
+/* ── K-DO (22.09): VERI TAZELIK DAMGASI ─────────────────────────────────
+   `_header.html`in `hdr_sub` / `hdr_sub_id` parametreleri bir TUZAKTI:
+   uretilen `.page-sub` dugumu, `_bp_critical_css.html`in anti-CLS kurali
+   (`header > div:has(> .page-sub){display:none !important}`) yuzunden HER
+   sayfada KALICI gizli. 4 sayfa (gundem · sektor-harita · bilanco-takvimi ·
+   temettu-takvimi) "Son güncelleme: …" damgasini oraya yaziyordu: canli
+   olcumde metin DOLU, kutu 0x0. Ustelik dugum `role="status" aria-live`
+   tasiyordu -- `display:none` alt agacindaki canli bolge ekran okuyucuya da
+   HIC duyurulmaz, yani kanal iki yonlu oluydu.
+   Damga artik `<main>` icinde, GORUNUR tek kanonda. */
+.da-updated{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  margin:0 0 14px;
+  font-size:var(--bp-text-xs);color:var(--bp-text3);line-height:1.5;
+}
+.da-updated::before{
+  content:"";width:5px;height:5px;border-radius:50%;
+  background:var(--bp-text3);flex:none;
+}

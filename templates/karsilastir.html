@@ -50,7 +50,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=c0c5d88e">
-<link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
+<link rel="stylesheet" href="/static/css/data-art.css?v=96623028">
 <script src="/static/bp-vocab.js?v=da3d601d" defer></script>
 <link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=fb47e319">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -62,12 +62,20 @@
   </div>
 </div>
 
-{% with hdr_title = 'Hisse Karşılaştırma', hdr_sub = '2-4 hisseyi seçin', hdr_sub_id = 'compareSubtitle', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
+{% with hdr_title = 'Hisse Karşılaştırma', hdr_title_tag = 'div' %}{% include '_header.html' %}{% endwith %}
 <h1 class="sr-only">Hisse Karşılaştırma</h1>
 
 <main id="main-content" class="container" tabindex="-1">
 
 {% include '_stale_banner.html' %}
+
+{#- K-DO (22.09): secilen hisselerin yankisi `hdr_sub_id='compareSubtitle'`
+    ile uretiliyordu; `.page-sub` kalici gizli oldugu icin `role="status"`
+    canli bolgesi EKRAN OKUYUCUYA DA hic duyurulmuyordu (display:none alt
+    agaci a11y agacindan duser). Gorsel olarak gereksiz -- secimler zaten
+    girdi alanlarinda yaziyor -- ama duyuru degerli: sr-only'e tasindi.
+    Yazan JS DEGISMEDI, ayni id. -#}
+<p class="sr-only" id="compareSubtitle" role="status" aria-live="polite">2-4 hisseyi seçin</p>
 
   <!-- Search Bar -->
   <div class="search-bar da-panel" role="group" aria-labelledby="cmpSearchLbl">
