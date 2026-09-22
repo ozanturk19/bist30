@@ -2070,7 +2070,10 @@ def analyze(ticker_base):
             "volume_tl_avg20": volume_tl_avg20,
             "low_liquidity": low_liquidity,
             "adx":           round(adx_val, 1),  # top-level for SSR/SEO
-            "adx_label":     derive_adx_label(adx_val),  # CPO-1196 D0 #4: tek kaynaklı Zayıf/Orta/Güçlü/Çok Güçlü
+            # CPO-1760: etiket YUVARLANMIŞ değerden türer (esiklenen sayi = gosterilen
+            # sayi) — ham adx_val'den türetilirse tam eşikte (ör. 24.9x) yayınlanan
+            # "25,0" ile farklı bant seçilir; _tarama_core/karsilastir zaten böyle yapıyordu.
+            "adx_label":     derive_adx_label(round(adx_val, 1)),  # CPO-1196 D0 #4: tek kaynaklı Zayıf/Orta/Güçlü/Çok Güçlü
             # CPO-1741: indicators.ema1299.value zaten "{:.0f}/{:.0f}" — o STRING'i
             # geri parse eden _compute_signal_commentary (app.py ~7040) düşük fiyatlı
             # hisselerde (ör. MARTI EMA12 2,3/EMA99 1,9 → "2/2") iki değeri eşitliyordu.
