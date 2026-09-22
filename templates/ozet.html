@@ -242,7 +242,16 @@ function goToDate(date) {
       <div class="sc-ticker">{{ s.ticker }}</div>
       <div class="sc-name" title="{{ stock_names.get(s.ticker, '') }}">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-al">▲ Güçlü Trend</div>
-      <div class="sc-meta">{{ s.signal_date|signal_age_text(historical_date) }} · {{ s.signal_date or '—' }}</div>
+      {#- K-CD (22.09): "Bugün"/"Dün" OKUYUCUNUN takvimine göre okunur; burada
+          referans gün ARŞİV günüydü (bug-hunt r27), yani 22.09'da bakan bir
+          kullanıcı AYNI ÖĞEDE "Bugün · 21.09.2026" görüyordu (canlı 21 kart);
+          /ozet/2026-09-18 ise "Bugün · 18.09.2026" + "Dün · 17.09.2026"
+          basıyordu. Sayfanın kalanı arşiv modunda MUTLAK tarihe geçirilmişti
+          (başlık 218, "… oluştu" 228, bant 94/97) — bu iki satır atlanmıştı.
+          Tek kanon: göreli yaş HER YERDE okuyucunun bugününe göre (tarama/
+          gundem/hisse zaten öyle); mutlak tarih zaten yanında basılı, yani
+          arşiv çerçevesi kaybolmuyor. Referans-gün argümanı kaldırıldı. -#}
+      <div class="sc-meta">{{ s.signal_date|signal_age_text }} · {{ s.signal_date or '—' }}</div>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
@@ -269,7 +278,16 @@ function goToDate(date) {
       <div class="sc-ticker">{{ s.ticker }}</div>
       <div class="sc-name" title="{{ stock_names.get(s.ticker, '') }}">{{ stock_names.get(s.ticker, '') }}</div>
       <div class="sc-signal sc-sat">▼ Trend Bozuldu</div>
-      <div class="sc-meta">{{ s.signal_date|signal_age_text(historical_date) }} · {{ s.signal_date or '—' }}</div>
+      {#- K-CD (22.09): "Bugün"/"Dün" OKUYUCUNUN takvimine göre okunur; burada
+          referans gün ARŞİV günüydü (bug-hunt r27), yani 22.09'da bakan bir
+          kullanıcı AYNI ÖĞEDE "Bugün · 21.09.2026" görüyordu (canlı 21 kart);
+          /ozet/2026-09-18 ise "Bugün · 18.09.2026" + "Dün · 17.09.2026"
+          basıyordu. Sayfanın kalanı arşiv modunda MUTLAK tarihe geçirilmişti
+          (başlık 218, "… oluştu" 228, bant 94/97) — bu iki satır atlanmıştı.
+          Tek kanon: göreli yaş HER YERDE okuyucunun bugününe göre (tarama/
+          gundem/hisse zaten öyle); mutlak tarih zaten yanında basılı, yani
+          arşiv çerçevesi kaybolmuyor. Referans-gün argümanı kaldırıldı. -#}
+      <div class="sc-meta">{{ s.signal_date|signal_age_text }} · {{ s.signal_date or '—' }}</div>
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
