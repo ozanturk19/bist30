@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST Sinyal Özeti {{ today_str }} — Günlük Trend Raporu | BorsaPusula</title>
 <meta name="description" content="BIST hisseleri (BIST100 + ek hisseler) {{ today_str }} günlük sinyal özeti. Kaç hisse güçlü, kaç hisse trend bozulmuş? {% if historical_date %}O gün sinyal değişen hisseler.{% else %}Bugün sinyal değişen hisseler.{% endif %}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 {% set canonical_url = ('https://borsapusula.com/ozet/' ~ historical_date) if historical_date else 'https://borsapusula.com/ozet' %}
@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=f436a453">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
-<link rel="stylesheet" href="/static/css/pages/ozet.css?v=1ccb4945">
+<link rel="stylesheet" href="/static/css/pages/ozet.css?v=a9f614ca">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -246,7 +246,9 @@ function goToDate(date) {
       {% if s.signal_price and s.price and s.signal_price == s.signal_price and s.price == s.price %}
         {% set ret = (((s.price - s.signal_price) / s.signal_price * 100) | round(1)) + 0 %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺
-          <span class="sc-ret {{ 'sc-ret-pos' if ret >= 0 else 'sc-ret-neg' }}">{{ '+' if ret >= 0 else '' }}{{ '%.1f'|format(ret)|replace('.', ',') }}%</span>
+          {# K-CC: `ret >= 0` giris fiyatindan HIC uzaklasmamis pozisyonu YESIL +
+               "+0,0%" yapiyordu (22.09 canli: 1 AL karti). Jinja yon kanonu. #}
+          <span class="sc-ret {{ bpf.dir_class(ret, 1, 'sc-ret-pos,sc-ret-neg,sc-ret-neu') }}">{{ bpf.pct_text(ret, 1) }}</span>
         </div>
       {% elif s.signal_price %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺</div>
@@ -274,7 +276,7 @@ function goToDate(date) {
           <!-- CPO-DEV2-081(B): long-only urunde SAT'ta fiyat hareketi kazanc/kayip
                degil - ham isaret DEGISTIRILMEDEN notr gosterilir (T3.7/CPO-DEV2-052#1/
                CPO-DEV2-074/CPO-DEV2-080 ile ayni desen+tooltip metni, 5. yuzey) -->
-          <span class="sc-ret" style="background:rgba(var(--bp-text3-rgb),.10);color:var(--bp-text3)" data-tip="Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez" tabindex="0">{{ '+' if ret >= 0 else '' }}{{ '%.1f'|format(ret)|replace('.', ',') }}%</span>
+          <span class="sc-ret" style="background:rgba(var(--bp-text3-rgb),.10);color:var(--bp-text3)" data-tip="Trend Bozuldu sinyalinde fiyat hareketi kazanç/kayıp olarak gösterilmez" tabindex="0">{{ bpf.pct_text(ret, 1) }}</span>
         </div>
       {% elif s.signal_price %}
         <div class="sc-meta">Giriş: {{ s.signal_price|tr_price }} ₺</div>

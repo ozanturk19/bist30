@@ -1,0 +1,44 @@
+{# ═══════════════════════════════════════════════════════════════════════
+   K-CC (22.09.2026) — SUNUCU TARAFI (JINJA) YON KANONU.
+
+   bp-format.js'teki `bpDir` / `bpDirColor` / `bpFormatPct` ailesinin BİREBİR
+   Jinja karşılığı. K-BP (21.09) yön kararını tek kanona indirdi ama YALNIZCA
+   JS kanalında: aynı karar anasayfanın ve /tarama'nın SSR satırlarında
+   `{{ 'var(--bp-al)' if x >= 0 else 'var(--bp-sat)' }}` ve `'%+.2f'|format(x)`
+   olarak İKİNCİ KEZ, yanlış yazılmış halde duruyordu (kapı 35 bu kanalı
+   taramıyordu — bkz. tools/direction-zero-check.py, K-CC eksenleri).
+
+   KURAL (bp-format.js ile aynı): yön, KULLANICININ OKUDUĞU sayıdan —
+   yani `frac` ondalığa yuvarlanmış değerden — türer.
+     r > 0 → --bp-al · r < 0 → --bp-sat · r == 0 → NÖTR (--bp-text2)
+   '+' işareti YALNIZ gerçekten pozitif GÖRÜNEN sayıda basılır.
+   ═══════════════════════════════════════════════════════════════════════ #}
+
+{# Yön rengi (CSS değişkeni metni). Değer yoksa --bp-text3. #}
+{%- macro dir_color(v, frac=2, neutral='var(--bp-text2)') -%}
+{%- if v is none -%}var(--bp-text3)
+{%- else -%}
+{%- set r = v|round(frac) -%}
+{{- 'var(--bp-al)' if r > 0 else ('var(--bp-sat)' if r < 0 else neutral) -}}
+{%- endif -%}
+{%- endmacro -%}
+
+{# Yüzde metni: işaret + TR ondalık + '%'. `bpFormatPct` ile aynı çıktı. #}
+{%- macro pct_text(v, frac=2) -%}
+{%- if v is none -%}—
+{%- else -%}
+{%- set r0 = v|round(frac) -%}
+{%- set r = 0 if r0 == 0 else r0 -%}
+{{- ('+' if r > 0 else '') ~ (('%.' ~ frac ~ 'f')|format(r))|replace('.', ',') ~ '%' -}}
+{%- endif -%}
+{%- endmacro -%}
+
+{# Yön sınıfı. names = 'poz,neg,notr' (virgülle). `bpDirClass` karşılığı. #}
+{%- macro dir_class(v, frac=2, names='up,down,neu') -%}
+{%- if v is none -%}
+{%- else -%}
+{%- set nm = names.split(',') -%}
+{%- set r = v|round(frac) -%}
+{{- nm[0] if r > 0 else (nm[1] if r < 0 else nm[2]) -}}
+{%- endif -%}
+{%- endmacro -%}

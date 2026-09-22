@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri | BorsaPusula</title>
 <meta name="description" content="{% if ssr_signal_counts and ssr_bist_level and ssr_bist_level.close is not none %}BIST100 {{ ssr_bist_level.close|tr_price }} seviyesinde — şu an {{ ssr_signal_counts.al }} Güçlü Trend, {{ ssr_signal_counts.sat }} Trend Bozuldu sinyali aktif. Supertrend, ADX, EMA12/99 tabanlı teknik analiz. Ücretsiz, günlük güncelleme.{% else %}BIST100 + ek hisseler için algoritmik teknik analiz sinyalleri. Supertrend, ADX ve EMA12/99 tabanlı Güçlü Trend / Trend Bozuldu sinyalleri. Ücretsiz, günlük güncelleme.{% endif %}">
 <meta name="keywords" content="BIST100 sinyalleri, BIST30 teknik analiz, supertrend, ADX indikatörü, hisse trend sinyali, algoritmik borsa, sektör analizi">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
@@ -68,7 +68,7 @@
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
-<link rel="stylesheet" href="/static/css/pages/index.css?v=e607e7e2">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=9d7a3b27">
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <div class="da-grain" aria-hidden="true"></div>
 <h1 style="position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">BIST100 Sinyal Paneli — Algoritmik Trend Sinyalleri</h1>
@@ -277,7 +277,7 @@
           <div><div class="da-spot-ticker"><a href="/hisse/{{ s.ticker }}">{{ s.ticker }}</a></div>
           <div class="da-spot-company">{{ s.name or '' }}</div>
           {% if s.sector %}<span class="da-spot-sector">{{ s.sector }}</span>{% endif %}</div>
-          <div class="da-spot-price"><div class="p da-num">{{ s.price|tr_price }} ₺</div><div class="d da-num" style="color:{{ 'var(--bp-al)' if (s.change_pct is not none and s.change_pct >= 0) else 'var(--bp-sat)' }}">{{ '%+.2f'|format(s.change_pct)|replace('.', ',') if s.change_pct is not none else '—' }}%</div></div>
+          <div class="da-spot-price"><div class="p da-num">{{ s.price|tr_price }} ₺</div><div class="d da-num" style="color:{{ bpf.dir_color(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</div></div>
         </div>
         {% if s.signal == 'AL' %}<span class="da-spot-signal sig-al">● Güçlü Trend</span>{% elif s.signal == 'SAT' %}<span class="da-spot-signal sig-sat">● Trend Bozuldu</span>{% else %}<span class="da-spot-signal sig-bekle">● Yatay</span>{% endif %}
         <div class="da-spot-subs">
@@ -331,7 +331,7 @@
     {% if ssr_top_signals %}{% for s in ssr_top_signals %}
     <a href="/hisse/{{ s.ticker }}" class="da-scard sm">
       <div class="da-sc-top"><div><div class="da-sc-ticker">{{ s.ticker }}</div><div class="da-sc-company">{{ s.name or '' }}</div></div>
-      <div class="da-sc-price"><div class="p">{{ s.price|tr_price }}</div><div class="d" style="color:{{ 'var(--bp-al)' if (s.change_pct is not none and s.change_pct >= 0) else 'var(--bp-sat)' }}">{{ '%+.2f'|format(s.change_pct)|replace('.', ',') if s.change_pct is not none else '—' }}%</div></div></div>
+      <div class="da-sc-price"><div class="p">{{ s.price|tr_price }}</div><div class="d" style="color:{{ bpf.dir_color(s.change_pct) }}">{{ bpf.pct_text(s.change_pct) }}</div></div></div>
       <div class="da-sc-mid"><div class="da-sc-ring-num">{{ s.signal_strength|tr_num if s.signal_strength is not none else '—' }}</div>
       <span class="da-sc-sig sig-al">● Güçlü Trend</span></div>
     </a>
@@ -568,8 +568,10 @@
       var y = h - pad - ((v - min) / span) * (h - pad*2);
       return x.toFixed(1) + ',' + y.toFixed(1);
     }).join(' ');
-    var up = values[values.length-1] >= values[0];
-    svgEl.innerHTML = '<polyline points="' + pts + '" fill="none" stroke="' + (up ? 'var(--bp-al)' : 'var(--bp-sat)') + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>';
+    /* K-CC: `>= 0` duz (fark=0) bir seriyi YUKSELIS diye yesile boyuyordu.
+       Yon tek kanon (bp-format.js) — fiyat serisi 2 ondalikla okunur. */
+    var sparkDir = bpDirColor(values[values.length-1] - values[0], 2);
+    svgEl.innerHTML = '<polyline points="' + pts + '" fill="none" stroke="' + sparkDir + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>';
   }
 
   function daLoadData(){
@@ -722,7 +724,9 @@
     var adxPct = Math.max(0, Math.min(100, ((s.adx||0)/50)*100));
     var rvolPct = Math.max(0, Math.min(100, ((s.rvol||0)/3)*100));
     var rsiPct = Math.max(0, Math.min(100, (s.rsi||0)));
-    var chg = s.change_pct, chgUp = typeof chg === 'number' && chg >= 0;
+    /* K-CC: `chg >= 0` 0,00%'i YESIL yaziyordu (kapi 35'in 140-karakterlik
+       yakinlik penceresi bu dolayli degiskeni goremedi). Tek kanon. */
+    var chg = s.change_pct;
     var hasTek = typeof s.signal_strength === 'number';
     var tekCol = hasTek ? scoreColorVar(s.signal_strength) : null;
     body.innerHTML =
@@ -736,7 +740,7 @@
             '<div><div class="da-spot-ticker"><a href="/hisse/' + encodeURIComponent(s.ticker) + '">' + esc(s.ticker) + '</a></div>' +
             '<div class="da-spot-company">' + esc(s.name||'') + '</div>' +
             (s.sector ? '<span class="da-spot-sector">' + esc(s.sector) + '</span>' : '') + '</div>' +
-            '<div class="da-spot-price"><div class="p da-num">' + fmtPrice(s.price) + ' ₺</div><div class="d da-num" style="color:' + (chgUp?'var(--bp-al)':'var(--bp-sat)') + '">' + fmtPct(chg) + '</div></div>' +
+            '<div class="da-spot-price"><div class="p da-num">' + fmtPrice(s.price) + ' ₺</div><div class="d da-num" style="color:' + bpDirColor(chg, 2) + '">' + fmtPct(chg) + '</div></div>' +
           '</div>' +
           '<span class="da-spot-signal ' + sig.cls + '">● ' + sig.label + '</span>' +
           '<div class="da-spot-subs">' +
@@ -800,7 +804,8 @@
       var sig = signalMeta(s.signal);
       var col = scoreColorVar(s.signal_strength);
       var dash = ringDash(s.signal_strength, 27);
-      var chg = s.change_pct, up = typeof chg === 'number' && chg >= 0;
+      /* K-CC: bkz. yukarisi — ayni kusurun ikinci kopyasi. */
+      var chg = s.change_pct;
       // CPO-1557 + 10.09 devamı: xl/lg kartlar (grid-row:span 2) .da-sc-mid'in
       // margin-top:auto'suyla ring/rozet'i dibe iterken üstte büyük bir boş alan
       // kalıyordu (Ozan bulgusu, CPO-1557'de sektör/ADX/RVOL chip'leriyle kısmen
@@ -826,7 +831,7 @@
       }
       return '<a href="/hisse/' + encodeURIComponent(s.ticker) + '" class="da-scard ' + sizeCls + '" style="--rot:' + rots[i%rots.length] + 'deg">' +
         '<div class="da-sc-top"><div><div class="da-sc-ticker">' + esc(s.ticker) + '</div><div class="da-sc-company">' + esc(s.name||'') + '</div></div>' +
-        '<div class="da-sc-price"><div class="p">' + fmtPrice(s.price) + '</div><div class="d" style="color:' + (up?'var(--bp-al)':'var(--bp-sat)') + '">' + fmtPct(chg) + '</div></div></div>' +
+        '<div class="da-sc-price"><div class="p">' + fmtPrice(s.price) + '</div><div class="d" style="color:' + bpDirColor(chg, 2) + '">' + fmtPct(chg) + '</div></div></div>' +
         extraHtml +
         '<div class="da-sc-mid"><div class="da-sc-ring"><svg aria-hidden="true" viewBox="0 0 70 70"><circle class="da-sc-ring-track" cx="35" cy="35" r="27"/><circle class="da-sc-ring-val" cx="35" cy="35" r="27" stroke="' + col + '" stroke-dasharray="' + dash + '"/></svg>' +
         '<div class="da-sc-ring-num">' + fmtNum0(s.signal_strength) + '</div></div>' +
@@ -845,12 +850,17 @@
     var maxAbs = Math.max(1, sorted[0] ? Math.abs(sorted[0].score) : 1);
     var html = '<div class="da-mosaic">' + sorted.map(function(s, i){
       var sizeCls = i === 0 ? 'da-tile-lg' : (i <= 2 ? 'da-tile-md' : '');
-      var pos = s.score >= 0;
+      /* K-CC: `score >= 0` NOTR sektoru (AL=SAT=0, hepsi Yatay) YESIL zemin +
+         YUKARI ok + "+0 skor" yapiyordu. 22.09 canli: Ulasim ve Telekom tam
+         olarak bu durumdaydi. Skor TAM SAYI gosterilir -> frac 0. */
+      var scoreDir = bpDir(s.score, 0);
+      var dirCls = bpDirClass(s.score, 0, ['da-tile-pos', 'da-tile-neg', 'da-tile-neu']);
+      var chgCls = bpDirClass(s.score, 0, ['tile-up', 'tile-down', 'tile-neu']);
       var alpha = Math.max(0.10, Math.min(0.5, Math.abs(s.score) / maxAbs * 0.42 + 0.08));
-      var arrowPath = pos ? 'M12 4 L19 16 H5 Z' : 'M12 20 L19 8 H5 Z';
-      return '<div class="da-tile ' + (pos?'da-tile-pos':'da-tile-neg') + ' ' + sizeCls + '" tabindex="0" style="--a:' + alpha.toFixed(2) + '" data-tip="' + s.al + ' Güçlü · ' + s.sat + ' Bozuldu · ' + s.bekle + ' Yatay (toplam ' + s.total + ')">' +
+      var arrowPath = scoreDir === 1 ? 'M12 4 L19 16 H5 Z' : scoreDir === -1 ? 'M12 20 L19 8 H5 Z' : 'M5 11 H19 V13 H5 Z';
+      return '<div class="da-tile ' + dirCls + ' ' + sizeCls + '" tabindex="0" style="--a:' + alpha.toFixed(2) + '" data-tip="' + s.al + ' Güçlü · ' + s.sat + ' Bozuldu · ' + s.bekle + ' Yatay (toplam ' + s.total + ')">' +
         '<div class="name">' + esc(s.name) + '</div>' +
-        '<div><div class="chg ' + (pos?'tile-up':'tile-down') + ' da-num"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor"/></svg>' + (pos?'+':'') + fmtNum0(s.score) + '<span class="u">skor</span></div>' +
+        '<div><div class="chg ' + chgCls + ' da-num"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="' + arrowPath + '" fill="currentColor"/></svg>' + bpDirSign(s.score, 0) + fmtNum0(s.score) + '<span class="u">skor</span></div>' +
         '<div class="meta">' + s.al + ' Güçlü / ' + s.sat + ' Bozuldu' + (s.avg_rvol!=null ? ' · RVOL ' + s.avg_rvol.toFixed(2).replace('.', ',') + '×' : '') + '</div></div>' +
       '</div>';
     }).join('') + '</div>';

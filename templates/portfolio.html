@@ -475,17 +475,26 @@ function exportCSV() {
     // gelen veya eski-format bir pozisyonda price=0 ise bolme Infinity, lot/price
     // sayisal degilse NaN uretir ve indirilen dosyaya "Infinity"/"NaN" yazilirdi.
     const _valid   = bpIsValidLot(p.lot) && bpIsValidPrice(p.price);
-    const pnlVal   = (current && _valid) ? ((current - p.price) * p.lot).toFixed(2) : '';
-    const pnlPct   = (current && _valid) ? (((current - p.price) / p.price) * 100).toFixed(2) : '';
+    /* K-CC: indirilen dosya EKRANDAKI SAYIYI vermeli. Tablo K/Z ₺'yi
+       bpDirSign+bpZero (2 ondalik, isaretli) ve K/Z %'yi bpFormatPct(...,1)
+       ile basiyordu; CSV ikisini de ISARETSIZ ve %'yi 2 ondalikla yaziyordu —
+       ayni satir icin iki farkli sayi. Tek kanon: bp-format.js. */
+    const _pnlNum  = (current && _valid) ? ((current - p.price) * p.lot) : null;
+    const _pnlPctN = (current && _valid) ? (((current - p.price) / p.price) * 100) : null;
+    const pnlVal   = _pnlNum  !== null ? (bpDirSign(_pnlNum, 2) + bpZero(_pnlNum, 2).toFixed(2)) : '';
+    const pnlPct   = _pnlPctN !== null ? bpFormatPct(_pnlPctN, 1) : '';
     return [
       csvSafe(p.ticker),
       csvSafe(p.lot),
-      csvSafe(String(p.price).replace('.', ',')),
+      /* Fiyatlar ekranda her zaman 2 ondalik (fmt/fmtM); `String(11.8)`
+         CSV'ye "11,8" yaziyordu. */
+      csvSafe(bpIsValidPrice(p.price) ? Number(p.price).toFixed(2).replace('.', ',') : String(p.price)),
       csvSafe(fmtDate(p.date)),
-      current ? String(current).replace('.', ',') : '',
+      current != null ? Number(current).toFixed(2).replace('.', ',') : '',
       sig,
-      pnlVal ? String(pnlVal).replace('.', ',') : '',
-      pnlPct ? String(pnlPct).replace('.', ',') + '%' : '',
+      /* csvSafe: isaretli sayilari Excel FORMUL sanmasin. */
+      pnlVal ? csvSafe(String(pnlVal).replace('.', ',')) : '',
+      pnlPct ? csvSafe(pnlPct) : '',
     ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';');
   });
   const bom = '\uFEFF'; // UTF-8 BOM — Excel'in Türkçe karakterleri doğru okuması için

@@ -1,4 +1,4 @@
-{% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hisse Tarayıcı — BIST Sinyal Filtresi | BorsaPusula</title>
+{% extends '_base.html' %}{% import '_fmt_macros.html' as bpf %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Hisse Tarayıcı — BIST Sinyal Filtresi | BorsaPusula</title>
 <meta name="description" content="BIST hisselerini sinyal, ADX, sektör ve fiyat kriterlerine göre filtreleyin. Güçlü Trend + ADX ≥ 25 + güvenli giriş kombinasyonlarını anında bulun.">
 <link rel="canonical" href="https://borsapusula.com/tarama">
 <meta property="og:title"       content="Hisse Tarayıcı — BIST Sinyal Filtresi | borsapusula.com">
@@ -175,7 +175,9 @@
         <td>{{ s.adx_label }}</td>
         <td>{{ _eq.get(s.entry_quality, '—') }}</td>
         <td class="hide-mob-narrow price-val">{{ s.price|tr_price }}</td>
-        <td class="hide-mob-narrow">{{ '%+.2f%%'|format(s.change_pct)|replace('.', ',') if s.change_pct is not none else '—' }}</td>
+        {# K-CC: `%+.2f` DEGISMEYEN hisseye de "+" basiyordu ("+0,00%" — kazanc imasi).
+           Jinja yon kanonu (_fmt_macros.html) bp-format.js ile ayni yuvarlamayi kullanir. #}
+        <td class="hide-mob-narrow {{ bpf.dir_class(s.change_pct, 2, 'chg-pos,chg-neg,chg-neu') }}">{{ bpf.pct_text(s.change_pct) }}</td>
         <td class="hide-mob">{{ '%.2f×'|format(s.vol_ratio)|replace('.', ',') if s.vol_ratio is not none else '—' }}</td>
         <td class="hide-mob">{{ s.signal_date|signal_age_text }}</td>
         <td class="hide-mob hide-tablet"><span class="sector-tag">{{ s.sector or '—' }}</span></td>
@@ -429,12 +431,23 @@ function exportCSV() {
     csvSafe(s.name||''),
     csvSafe(s.sector||''),
     csvSafe(sigLabel(s.signal)),
-    (s.adx||0).toFixed(1).replace('.', ','),
+    /* K-CC: indirilen dosya EKRANDAKI SAYIYI vermeli.
+       - ADX: `||0` bilinmeyen ADX'i "0,0" diye bir IDDIAYA ceviriyordu.
+       - Hacim Orani: ekran 2 ondalik (`rvolCell` -> "1,46×"), CSV 1 ondalikti
+         ("1,5×") — 22.09 canli olcum: 217 hissenin 195'inde sayi FARKLI, 14'u
+         sayfanin kendi bandini (>=1,5 "Yuksek hacim") karsi tarafa geciyordu.
+       - `s.vol_ratio ?` FALSY: vol_ratio TAM 0 olan 5 hissede hucre BOS
+         kaliyordu, ekran ise "0,00× / Dusuk hacim" diyordu.
+       - Giris Kalitesi: ham kod (IDEAL/IYI/DIKKATLI/UZAK) basiliyordu; ekranda
+         eqLabel() ile "Ideal/Iyi/Dikkatli/Kovalama". UZAK->Kovalama esleme
+         CSV okuyucusu icin tamamen kayipti. Tek kanon: bp-vocab.js eqLabel. */
+    s.adx != null ? s.adx.toFixed(1).replace('.', ',') : '',
     s.price != null ? s.price.toFixed(2).replace('.', ',') : '',
-    s.change_pct != null ? s.change_pct.toFixed(2).replace('.', ',')+'%' : '',
-    s.vol_ratio ? s.vol_ratio.toFixed(1).replace('.', ',')+'×' : '',
+    /* csvSafe: bpFormatPct '+'/'-' ile baslar; Excel bunlari FORMUL sanar. */
+    s.change_pct != null ? csvSafe(bpFormatPct(s.change_pct, 2)) : '',
+    s.vol_ratio != null ? s.vol_ratio.toFixed(2).replace('.', ',')+'×' : '',
     bpSignalAgeCsv(s.signal_date),
-    csvSafe(s.entry_quality||'')
+    csvSafe(s.entry_quality ? eqLabel(s.entry_quality) : '')
   ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'));
   const csv = [hdr.map(h=>`"${h}"`).join(';'), ...rows].join('\r\n');
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
