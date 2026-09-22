@@ -12773,6 +12773,11 @@ def _dividend_refresh_impl():
         stocks = list(_cache["data"])
     sig_map = {s["ticker"]: s for s in stocks}
 
+    # KALICI ÜRÜN KARARI (CPO-1789, DEV-2043): temettü takvimi BIST30 ile
+    # sınırlı kalır. 217 hisseye genişletmek 2 yfinance çağrısı x 217 =
+    # ~7-8dk tek turda + ciddi rate-limit riski demek (bkz. DEV-1409 /
+    # bulk_refresh_also_yahoo_blocked emsali) — kapsam sabit, sayfa UI'si
+    # (title/h1/banner/"Takvimdeki Hisse" cipi) bu kararla tutarlı yazıldı.
     sample_tickers = BIST30_LITERAL   # bilanco-takvimi ile aynı örneklem (hız/rate-limit)
     result_stocks = []
     for t in sample_tickers:
