@@ -1247,7 +1247,7 @@ fi
 #        ihlali (2486/2499/2511) KACIRDI, buna karsilik kendi aciklama
 #        YORUMUNDAKI ornegi ihlal sandi. Simdi yorumlar bosaltiliyor ve
 #        degisken->ID bagi akis sirali izleniyor (--ref HEAD -> 7 ihlal).
-echo "61/61 tab-visibility-canon-check (K-CP: sekme gorunurlugu tek kanon)..."
+echo "61/62 tab-visibility-canon-check (K-CP: sekme gorunurlugu tek kanon)..."
 if python3 tools/tab-visibility-canon-check.py; then
   echo "  ✓ tab-visibility-canon-check PASS"
 else
@@ -1255,6 +1255,30 @@ else
   echo "    Detay icin: python3 tools/tab-visibility-canon-check.py --verbose"
   echo "    Pozitif kontrol: python3 tools/tab-visibility-canon-check.py --self-test"
   echo "    Regresyon ornegi: python3 tools/tab-visibility-canon-check.py --ref 87c165e  # 7 ihlal beklenir"
+  FAIL=$((FAIL + 1))
+fi
+
+# KAPI 62 — K-CQ (22.09): URL durumunun COK-YAZARLI korunumu.
+#   /tarama'da URL'yi iki yazar yonetiyordu: `applyFilters()` filtre sozlugunden
+#   SIFIRDAN kuruyordu (`location.pathname + '?' + params.toString()`), `tab` o
+#   sozlukte olmadigi icin her cagri onu dusuruyordu; `switchTaramaTab()` ise
+#   `set('tab')/delete('tab')` ile yaziyordu. Init akisi applyFilters -> sonra
+#   searchParams.get('tab') oldugu icin sekme OKUNMADAN once siliniyordu.
+#   Canli 22.09: `/tarama?tab=temel` -> URL `/tarama`, TEKNIK sekmesi acik
+#   (aria-selected teknik:true), panelTemel display:none. Temel sekmesine
+#   dogrudan baglanti (paylasilan link / yer imi) hic calismiyordu.
+#   Enjeksiyon: yamasiz `?tab=temel&min_adx=30` -> ``; yamali -> `?tab=temel`.
+# MUAFIYET ANLAM KURALIDIR (43. ders): "durum parametresi" olmak icin ad hem
+#   searchParams.get ile OKUNMALI hem set/delete ile YAZILMALI -- boylece `?d=`
+#   gibi salt-okunur/tek-yonlu parametreler kapsam disinda kalir.
+echo "62/62 url-state-param-check (K-CQ: URL durum parametresi korunumu)..."
+if python3 tools/url-state-param-check.py; then
+  echo "  ✓ url-state-param-check PASS"
+else
+  echo "  ✗ K-CQ KIRIK: URL'yi sifirdan kuran yazar baska bir yazarin param'ini siliyor."
+  echo "    Detay icin: python3 tools/url-state-param-check.py --verbose"
+  echo "    Pozitif kontrol: python3 tools/url-state-param-check.py --self-test"
+  echo "    Regresyon ornegi: python3 tools/url-state-param-check.py --ref 4ee0558  # 1 ihlal beklenir"
   FAIL=$((FAIL + 1))
 fi
 
