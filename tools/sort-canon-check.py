@@ -23,6 +23,15 @@ Kanon:
      yonden turer (_syncSortSelLabel / _syncSortSelLabelTemel).
   B) Siralanabilir baslik `th.th-sortable` + `aria-sort` + icinde
      `button.th-sort-btn` kalibini izler (klavye + durum bildirimi).
+  C) GRUPLU SIRALAMA BEYANI (K-DF, 22.09). Bir siralama anahtari backend'de
+     once YON BUCKET'ina (AL=0 / BEKLE=1 / SAT=2, CPO-1581) sokuluyorsa,
+     sutun bastan sona monoton DEGILDIR. Canli olcum 22.09: menu "Yuksek ->
+     Dusuk" derken sutun 72,62,61,57,49,44,43 -> 137 satir "—" -> 71,70,68...
+     gidiyordu, yani tablonun EN YUKSEK skoru (71) 145. siradaydi. Boyle bir
+     anahtar icin (1) option'un data-desc/data-asc metni gruplamayi SOYLEMELI
+     ve (2) istemci o sutuna `aria-sort="other"` yazmali (WAI-ARIA: "asc/desc
+     disinda bir algoritmaya gore sirali"). `descending` demek ekran okuyucuya
+     olmayan bir duzen vaat etmektir.
 
 Cikis: 0 temiz · 1 sapma · 2 kapsam tabani altinda (dedektor korlesmis).
 """
@@ -40,6 +49,13 @@ TH_SORTABLE_RE = re.compile(r'<th\b[^>]*class="[^"]*\bth-sortable\b[^"]*"[^>]*>.
 MIN_OPTIONS = 10
 MIN_THS     = 10
 
+# C) yon bucket'li siralama anahtarlari — app.py `_tarama_sort_key` ile ayni
+# kume. Backend bir anahtari daha bucket'larsa buraya EKLENMELI (yoksa kapi
+# o anahtar icin kor kalir; envanter bayatligi da bir kusurdur).
+BUCKETED_SORTS = ('signal_strength',)
+# gruplamayi soyleyen ibare (etiket metninde aranir)
+GROUP_CLAIM = re.compile(r'(?:once|önce)', re.I)
+
 
 def scan_text(html):
     """(yon iddiasi tasiyan option'lar, th-sortable bloklari) -> sapma listesi."""
@@ -56,6 +72,16 @@ def scan_text(html):
         missing = [a for a in ('data-label', 'data-desc', 'data-asc') if a not in blk]
         if missing:
             devs.append(('option', inner.strip()[:60], 'eksik: ' + ', '.join(missing)))
+        # C) gruplu anahtarin etiketi gruplamayi soylemeli
+        mval = re.search(r'value="([^"]+)"', blk)
+        if mval and mval.group(1) in BUCKETED_SORTS:
+            for attr in ('data-desc', 'data-asc'):
+                mattr = re.search(attr + r'="([^"]*)"', blk)
+                if not mattr or not GROUP_CLAIM.search(mattr.group(1)):
+                    devs.append(('option', inner.strip()[:60],
+                                 'yon bucket\'li anahtar (%s) ama %s gruplamayi '
+                                 'soylemiyor -- sutun monoton degil'
+                                 % (mval.group(1), attr)))
     for m in TH_SORTABLE_RE.finditer(html):
         blk = m.group(0)
         n_th += 1
@@ -66,6 +92,24 @@ def scan_text(html):
     return devs, n_opt, n_th
 
 
+def scan_aria_other(html):
+    """C) gruplu anahtar icin `aria-sort` 'other' dalina sahip mi.
+
+    Kapi hatanin YAZIMINI degil kendisini arar: yalnizca "other" kelimesinin
+    dosyada gecmesi yetmez, ayni ifadede bucket'li anahtarin adi da gecmeli.
+    """
+    if not any(("'%s'" % k) in html or ('"%s"' % k) in html for k in BUCKETED_SORTS):
+        return []
+    if "aria-sort" not in html:
+        return []
+    for m in re.finditer(r"setAttribute\(\s*'aria-sort'\s*,(.{0,240})", html, re.S):
+        expr = m.group(1)
+        if "'other'" in expr and any(k in expr for k in BUCKETED_SORTS):
+            return []
+    return [('js', 'aria-sort', "yon bucket'li anahtar var ama aria-sort hicbir "
+             "yerde 'other' dalina girmiyor -- tabloya olmayan bir duzen atfediliyor")]
+
+
 def positive_control():
     """Taban ne kadar yuksek olursa olsun, mantigin kendisi sentetik sapmalari
     yakalamali (bkz. K-AU dersi: sifir/taban tek basina kanit degildir)."""
@@ -74,6 +118,12 @@ def positive_control():
         ('<th class="th-sortable"><button class="th-sort-btn">A</button></th>', 1),  # aria-sort yok
         ('<th class="th-sortable" aria-sort="none">A</th>', 1),                    # buton yok
         ('<option value="x" data-label="Fiyat" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Fiyat (Yüksek → Düşük)</option>', 0),
+        # C) bucket'li anahtar, gruplamayi soylemeyen etiket
+        ('<option value="signal_strength" data-label="Skor" data-desc="Yüksek → Düşük" '
+         'data-asc="Düşük → Yüksek">Skor (Yüksek → Düşük)</option>', 1),
+        # C) bucket'li anahtar, gruplamayi soyleyen etiket
+        ('<option value="signal_strength" data-label="Skor" data-desc="Güçlü Trend önce · Yüksek → Düşük" '
+         'data-asc="Güçlü Trend önce · Düşük → Yüksek">Skor (Güçlü Trend önce · Yüksek → Düşük)</option>', 0),
     ]
     hits = 0
     for html, expected in fixtures:
@@ -92,6 +142,7 @@ def main():
         with open(os.path.join(TPL, fn), encoding='utf-8') as f:
             html = f.read()
         d, n_o, n_t = scan_text(html)
+        d += scan_aria_other(html)
         tot_opt += n_o
         tot_th  += n_t
         devs += [(fn,) + x for x in d]

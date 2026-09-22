@@ -120,7 +120,13 @@
          sutun basligi da degistirebiliyor (sortBy toggle). Sabit metin yalan soyluyordu;
          etiket artik _syncSortSelLabel() ile _sortDir'den TUREOR. Tek kaynak: _sortDir. #}
       <select class="sort-select da-select" id="sortSel" onchange="applyFilters()" aria-label="Sıralama">
-        <option value="signal_strength" data-label="Teknik Güç Skoru" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Teknik Güç Skoru (Yüksek → Düşük)</option>
+        {# K-DF (22.09): bu siralama SAF bir skor siralamasi DEGIL. Backend once yon
+   bucket'i uyguluyor (AL=0, BEKLE=1, SAT=2 -- CPO-1581, Ozan'in long-only
+   talimati), skor bucket ICINDE siralaniyor. Canli olcum 22.09: menu
+   "Yuksek -> Dusuk" derken sutun 72, 62, 61, 57, 49, 44, 43, sonra 137 satir
+   "—", sonra 71, 70, 68... diye gidiyordu; tablonun EN YUKSEK skoru (71)
+   145. sirada duruyordu. Etiket artik gruplamayi da soyluyor. #}
+        <option value="signal_strength" data-label="Teknik Güç Skoru" data-desc="Güçlü Trend önce · Yüksek → Düşük" data-asc="Güçlü Trend önce · Düşük → Yüksek">Teknik Güç Skoru (Güçlü Trend önce · Yüksek → Düşük)</option>
         <option value="adx" data-label="Trend Gücü / ADX" data-desc="Güçlü → Zayıf" data-asc="Zayıf → Güçlü">Trend Gücü / ADX (Güçlü → Zayıf)</option>
         <option value="price" data-label="Fiyat" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Fiyat (Yüksek → Düşük)</option>
         <option value="vol_ratio" data-label="Günlük Hacim Oranı" data-desc="Yüksek → Düşük" data-asc="Düşük → Yüksek">Günlük Hacim Oranı (Yüksek → Düşük)</option>
@@ -128,7 +134,7 @@
         <option value="signal_bars" data-label="Tazelik" data-desc="Eski → Yeni" data-asc="Yeni → Eski">Tazelik (Yeni → Eski)</option>
       </select>
       <span class="sort-help" tabindex="0" style="color:var(--text2);opacity:.6;cursor:help;font-size:var(--bp-text-sm);border:1px solid var(--text2);border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;line-height:1"
-        data-tip="Teknik Güç Skoru: Birleşik kalite (günlük hacim oranı + ADX + RSI + Teyit) — 💎 rozeti bu skordan belirlenir. En kaliteli hisseler üstte.&#10;Trend Gücü: Sadece ADX. 💎 rozetli bir hisse ADX düşük olabilir.&#10;Günlük Hacim Oranı: bugünkü hacim / 20 günlük ortalama — Teknik Güç Skoru'ndaki hacim bileşeniyle aynı değerdir. Diğer sayfalardaki RVOL ise 5 günlük ortalamayı kullanır, ayrı bir sayıdır.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
+        data-tip="Teknik Güç Skoru: Birleşik kalite (günlük hacim oranı + ADX + RSI + Teyit) — 💎 rozeti bu skordan belirlenir (yalnız Güçlü Trend sinyalinde). Sıralama önce sinyal yönüne göre gruplanır: Güçlü Trend → Yatay → Trend Bozuldu; skor grupların içinde sıralanır.&#10;Trend Gücü: Sadece ADX. 💎 rozetli bir hisse ADX düşük olabilir.&#10;Günlük Hacim Oranı: bugünkü hacim / 20 günlük ortalama — Teknik Güç Skoru'ndaki hacim bileşeniyle aynı değerdir. Diğer sayfalardaki RVOL ise 5 günlük ortalamayı kullanır, ayrı bir sayıdır.&#10;Tazelik: Sinyal ne kadar önce çıkmış.">?</span>
       <button onclick="exportCSV()" data-tip="Sonuçları CSV olarak indir"
         style="background:rgba(var(--bp-brand-rgb),.1);border:1px solid rgba(var(--bp-brand-rgb),.3);color:var(--bp-brand);
                border-radius:var(--bp-radius);padding:5px 11px;font-size:var(--bp-text-sm);cursor:pointer;font-family:inherit;
@@ -158,7 +164,7 @@
         <tr>
           <th scope="col">Hisse</th>
           <th scope="col">Sinyal</th>
-          <th scope="col" class="th-sortable" id="th-score" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Teknik Güç Skoru (0–100): ADX + günlük hacim oranı + RSI + Teyit bileşimi. 💎 rozeti bu skordan belirlenir. Varsayılan sıralama. Yandaki Trend Gücü ile karıştırmayın — o sadece ADX&#39;tir." onclick="sortBy('signal_strength')">Teknik Güç</button></th>
+          <th scope="col" class="th-sortable" id="th-score" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Teknik Güç Skoru (0–100): ADX + günlük hacim oranı + RSI + Teyit bileşimi. 💎 rozeti bu skordan belirlenir — yalnız Güçlü Trend sinyalinde (Trend Bozuldu rozet almaz). Varsayılan sıralama: önce sinyal yönü (Güçlü Trend → Yatay → Trend Bozuldu), sonra her grubun içinde skor. Yandaki Trend Gücü ile karıştırmayın — o sadece ADX&#39;tir." onclick="sortBy('signal_strength')">Teknik Güç</button></th>
           <th scope="col" class="th-sortable" id="th-adx" aria-sort="none"><button type="button" class="th-sort-btn" data-tip="Trend Gücü = yalnızca ADX göstergesi: 40+ Çok Güçlü, 25-40 Güçlü, 18-25 Orta, &lt;18 Zayıf. Soldaki Teknik Güç Skoru&#39;nun bir bileşenidir, aynı şey değildir." onclick="sortBy('adx')">Trend Gücü</button></th>
           <th scope="col">Giriş Kalitesi</th>
           <th scope="col" class="hide-mob-narrow th-sortable" id="th-price" aria-sort="none"><button type="button" class="th-sort-btn" onclick="sortBy('price')">Fiyat</button></th>
@@ -1027,7 +1033,12 @@ function _applySortTHVisual(col) {
   const el = document.getElementById(id);
   const btn = el && el.querySelector('.th-sort-btn');
   if (btn) btn.classList.add(_sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
-  if (el) el.setAttribute('aria-sort', _sortDir === 'asc' ? 'ascending' : 'descending');
+  /* K-DF: `signal_strength` yon bucket'li (AL > BEKLE > SAT, CPO-1581) —
+     sutun degerleri bastan sona monoton DEGIL. WAI-ARIA'da bunun adi
+     `other` ("asc/desc disinda bir algoritmaya gore sirali"); `descending`
+     demek ekran okuyucuya olmayan bir duzen vaat etmekti. */
+  if (el) el.setAttribute('aria-sort',
+    col === 'signal_strength' ? 'other' : (_sortDir === 'asc' ? 'ascending' : 'descending'));
 }
 
 function sortBy(col) {
