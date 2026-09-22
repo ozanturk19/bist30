@@ -63,7 +63,7 @@ import tempfile
 import subprocess
 
 SCAN_DIRS = ['templates', 'static']
-SCAN_FILES = ['blog_content.py']
+SCAN_FILES = ['blog_content.py', 'app.py']
 SCAN_EXT = ('.html', '.js', '.py')
 
 # --- kural beyani imzasi -----------------------------------------------------

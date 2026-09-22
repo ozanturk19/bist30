@@ -6732,7 +6732,7 @@ KURAL 6 — YASAKLI İFADELER:
 
 ═══ İYİ ÖRNEK ═══
 
-"AKBNK için Güçlü Trend sinyali aktif: hisse fiyatı 32,45 ₺ seviyesinde işlem görüyor, trend göstergesi yukarı yönü işaret ediyor ve trend gücü 28 ile güçlü seviyede. Bu üç koşulun aynı anda oluşması, hissenin son 5 gündür istikrarlı bir yükseliş eğiliminde olduğunu gösteriyor; zarar durdurma seviyesi 30,12 ₺ olarak hesaplanmış durumda. Yatırım tavsiyesi değildir."
+"AKBNK için Güçlü Trend sinyali aktif: hisse fiyatı 32,45 ₺ seviyesinde işlem görüyor, trend göstergesi yukarı yönü işaret ediyor ve trend gücü 28 ile güçlü seviyede. Bu dört koşulun aynı anda oluşması, hissenin son 5 gündür istikrarlı bir yükseliş eğiliminde olduğunu gösteriyor; zarar durdurma seviyesi 30,12 ₺ olarak hesaplanmış durumda. Yatırım tavsiyesi değildir."
 
 ═══ KÖTÜ ÖRNEKLER ═══
 
@@ -6745,10 +6745,11 @@ KURAL 6 — YASAKLI İFADELER:
 
 Algoritmik sinyal motoru üç gösterge kombinasyonu kullanır:
 1. Supertrend — fiyatın trend bandının üstünde mi altında mı?
-2. ADX (Average Directional Index) — trend ne kadar güçlü?
-3. EMA12 vs EMA99 — kısa vade uzun vade hareketli ortalamasının üstünde mi?
+2. ADX (14) ≥ 25 — trend ne kadar güçlü?
+3. DI+ / DI− — trendin yönü hangi tarafta?
+4. EMA12 vs EMA99 — kısa vade uzun vade hareketli ortalamasının üstünde mi?
 
-Üç koşul da AYNI yönde olursa sinyal aktif olur. Bu nedenle açıklamalar
+Dört koşul da AYNI yönde olursa sinyal aktif olur. Bu nedenle açıklamalar
 çelişkisiz, tek yönde olmalı. Yatırımcıya "bu üç gösterge nedir?" sorusunun
 cevabını sade dille verebilirsin.
 
