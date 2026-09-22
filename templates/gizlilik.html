@@ -42,10 +42,11 @@
   <h2>Toplanan Veriler</h2>
   <p>borsapusula.com, kullanıcı adı/şifre ile geleneksel bir hesap sistemi içermez; bunun yerine e-posta bağlantısıyla taşınan, şifresiz bir <strong>tanıma çerezi</strong> (bp_sub) kullanılır. Aşağıdaki veriler toplanmaktadır:</p>
   <ul>
-    <li><strong>Teknik veriler (otomatik):</strong> IP adresi, ziyaret edilen sayfa URL'leri, tarayıcı türü ve işletim sistemi (User-Agent), ziyaret tarihi ve saati. Bu veriler teknik sorunların giderilmesi ve sitenin kötüye kullanıma/aşırı istek yüküne karşı korunması (rate-limit) amacıyla kullanılır.</li>
+    <li><strong>Teknik veriler (otomatik):</strong> IP adresi, ziyaret edilen sayfa URL'leri, tarayıcı türü ve işletim sistemi (User-Agent), ziyaret tarihi ve saati. Ayrıca sayfada bir JavaScript hatası oluşursa hata mesajı, hatanın kaynak dosyası/satır numarası ve hatanın oluştuğu sayfa adresi sunucu günlüğüne yazılır (bu kayıt e-posta adresinizle ilişkilendirilmez). Bu veriler teknik sorunların giderilmesi ve sitenin kötüye kullanıma/aşırı istek yüküne karşı korunması (rate-limit) amacıyla kullanılır.</li>
     <li><strong>E-posta adresi (isteğe bağlı):</strong> Sinyal bildirim aboneliği için e-posta adresi toplanmaktadır. Abonelik tamamen gönüllülük esasına dayanır.</li>
     <li><strong>Bildirim tercihleri:</strong> Aboneliğinizi kişiselleştirmek için seçtiğiniz mail sıklığı tercihi (günlük özet / kapanış sonrası / haftada bir / sadece Hacim Onaylı), e-posta adresinizle ilişkilendirilerek saklanır.</li>
-    <li><strong>Portföy/izleme listesi (isteğe bağlı bulut senkronizasyonu):</strong> "Buluta kaydet" özelliğini kullanırsanız, girdiğiniz hisse/lot/fiyat/tarih/not bilgileri rastgele üretilmiş bir bağlantı koduyla (token) sunucuda saklanır; bu veriler tarafınızca silinene kadar sunucuda kalır, otomatik bir silme süresi yoktur.</li>
+    <li><strong>Portföy (isteğe bağlı bulut senkronizasyonu):</strong> "Buluta kaydet" özelliğini kullanırsanız, portföyünüze girdiğiniz hisse/lot/fiyat/tarih/not bilgileri rastgele üretilmiş bir bağlantı koduyla (token) sunucuda saklanır; bu veriler tarafınızca silinene kadar sunucuda kalır, otomatik bir silme süresi yoktur. Bu kanal yalnızca portföy pozisyonlarınızı taşır — izleme listeniz buraya dâhil değildir (izleme listesi için bir alttaki maddeye bakınız).</li>
+    <li><strong>Hisse bazlı e-posta alarmları:</strong> E-posta aboneliğiniz varken bir hisse sayfasındaki "Bildirim al" (🔔) düğmesine bastığınızda, <strong>o hissenin sembolü ve seçtiğiniz alarm koşulu</strong> (sinyal değişimi, fiyat değişim yüzdesi, RSI veya hacim eşiği) e-posta adresinizle ilişkilendirilerek sunucuda saklanır — alarmı size gönderebilmemizin başka yolu yoktur. Kayıt, alarmı kapattığınızda (aynı düğme ya da profil sayfanızdaki alarm listesi) veya aboneliğinizi sonlandırdığınızda silinir. <strong>Abone değilseniz</strong> bu düğme yalnızca tarayıcınızdaki yerel listeye yazar; sunucuya hiçbir şey gönderilmez.</li>
     <li><strong>İletişim formu:</strong> /iletisim sayfasından mesaj gönderirseniz ad-soyad, e-posta adresi ve mesaj içeriğiniz, yalnızca talebinizi yanıtlamak amacıyla e-posta yoluyla iletilir; ayrı bir veritabanında saklanmaz.</li>
     <li><strong>Tanıma çerezi (bp_sub):</strong> Aboneliğiniz sırasında tarayıcınıza 1 yıl geçerli, şifresiz bir tanıma çerezi yerleştirilir; bu çerez profil sayfanıza ve tercihlerinize e-posta linkine tekrar tıklamadan erişmenizi sağlar.</li>
   </ul>
@@ -53,15 +54,15 @@
   <h2>E-posta Aboneliği ve KVKK</h2>
   <p>Sinyal bildirimleri için e-posta aboneliği oluşturduğunuzda, <strong>e-posta adresiniz ve yukarıdaki bildirim tercihleriniz</strong> 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında veri sorumlusu sıfatıyla borsapusula.com tarafından işlenmektedir.</p>
   <ul>
-    <li><strong>İşleme amacı:</strong> Yalnızca algoritmik sinyal bildirimlerinin iletilmesi ve bildirim tercihlerinizin uygulanması.</li>
+    <li><strong>İşleme amacı:</strong> Yalnızca algoritmik sinyal bildirimlerinin iletilmesi, kurduğunuz hisse bazlı alarmların çalıştırılması ve bildirim tercihlerinizin uygulanması.</li>
     <li><strong>Hukuki dayanak:</strong> Açık rıza (KVKK Madde 5/1).</li>
-    <li><strong>Saklama süresi:</strong> Abonelik iptaline kadar veya talep üzerine derhal. (Portföy/izleme listesi verileri için bkz. yukarıdaki "Portföy/izleme listesi" maddesi — bu veriler ayrı olarak, siz silene kadar saklanır.)</li>
+    <li><strong>Saklama süresi:</strong> Abonelik iptaline kadar veya talep üzerine derhal. Hisse bazlı alarm kayıtlarınız abonelik kaydınızın içinde tutulur; aboneliği sonlandırdığınızda onlar da aynı anda silinir. (Bulut senkronizasyonuyla kaydedilen portföy verisi bundan ayrıdır — bkz. yukarıdaki "Portföy" maddesi; o veri siz silene kadar saklanır.)</li>
     <li><strong>Üçüncü taraflarla paylaşım:</strong> E-posta adresiniz hiçbir üçüncü tarafla paylaşılmaz, satılmaz veya pazarlama amacıyla kullanılmaz.</li>
     <li><strong>Abonelik iptali:</strong> Gelen bildirim e-postalarındaki "aboneliği sonlandır" bağlantısına tıklayarak veya <a href="mailto:iletisim@borsapusula.com" class="da-link">iletisim@borsapusula.com</a> adresine e-posta göndererek istediğiniz zaman aboneliğinizi sonlandırabilirsiniz.</li>
   </ul>
 
   <h2>Çerezler (Cookie)</h2>
-  <p>Site pazarlama çerezi kullanmamaktadır. Tarayıcınızın oturum verisi (localStorage) tema tercihi, izleme listesi gibi yerel ayarları saklamak için kullanılır ve sunucuya gönderilmez. bp_sub tanıma çerezi yalnızca abone olduğunuzda, yukarıda açıklanan amaçla yerleştirilir. Google Analytics (GA4) yalnızca <strong>açık onayınızla</strong> çalışır: ilk ziyaretinizde çıkan bantta "Kabul Et"e basmadığınız sürece GA4 hiç yüklenmez; "Reddet"e basmanız veya bandı kapatmanız GA4'ün o tarayıcıda hiç çalışmaması anlamına gelir. Tercihiniz localStorage'a yazılır — bir sonraki ziyaretinizde bant tekrar çıkmaz, tarayıcı verilerinizi temizlerseniz tekrar sorulur. Cloudflare Web Analytics (aşağıda ayrıca açıklanmıştır) bu onay mekanizmasından bağımsız olarak, çerez kullanmadan çalışır.</p>
+  <p>Site pazarlama çerezi kullanmamaktadır. Tarayıcınızın yerel deposu (localStorage) portföyünüz, izleme listeniz, açık sekme, Öğrenme Modu ve ipucu balonları gibi arayüz tercihlerinizi saklamak için kullanılır; bu kayıtlar <strong>varsayılan olarak</strong> sunucuya gönderilmez. İki istisna vardır ve her ikisi de sizin bir eyleminizle başlar: portföyünüz için "Buluta kaydet", izleme listeniz için abone olarak kurduğunuz hisse alarmları (yukarıdaki "Portföy" ve "Hisse bazlı e-posta alarmları" maddeleri). bp_sub tanıma çerezi yalnızca abone olduğunuzda, yukarıda açıklanan amaçla yerleştirilir. Google Analytics (GA4) yalnızca <strong>açık onayınızla</strong> çalışır: ilk ziyaretinizde çıkan bantta "Kabul Et"e basmadığınız sürece GA4 hiç yüklenmez; "Reddet"e basmanız veya bandı kapatmanız GA4'ün o tarayıcıda hiç çalışmaması anlamına gelir. Tercihiniz localStorage'a yazılır — bir sonraki ziyaretinizde bant tekrar çıkmaz, tarayıcı verilerinizi temizlerseniz tekrar sorulur. Cloudflare Web Analytics (aşağıda ayrıca açıklanmıştır) bu onay mekanizmasından bağımsız olarak, çerez kullanmadan çalışır.</p>
 
   <h2>Üçüncü Taraf Hizmetler</h2>
   <ul>
@@ -73,7 +74,7 @@
   </ul>
 
   <h2>Veri Saklama</h2>
-  <p>Sunucu erişim günlükleri otomatik olarak 14 gün sonra silinir. Portföy/izleme listesi verileri ve bildirim tercihleri, yukarıda belirtildiği gibi otomatik bir silme süresine tabi değildir; talep üzerine silinir.</p>
+  <p>Sunucu erişim günlükleri otomatik olarak 14 gün sonra silinir. Bulut senkronizasyonuyla kaydedilen portföy verisi ve bildirim tercihleri otomatik bir silme süresine tabi değildir; talep üzerine silinir. Hisse bazlı alarm kayıtları abonelik kaydınıza bağlıdır ve abonelik sonlandığında birlikte silinir.</p>
 
   <h2>Haklarınız</h2>
   <p>KVKK (6698 sayılı Kişisel Verilerin Korunması Kanunu) <strong>Madde 11</strong> uyarınca veri sahibi olarak aşağıdaki haklara sahipsiniz:</p>
