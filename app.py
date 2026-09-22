@@ -10783,6 +10783,25 @@ def _og_image_stats():
     return al_count, sat_count, total, today_s
 
 
+def _og_image_url():
+    """CPO-1767 madde 1: og:image URL'i sabitti (/og-image.png), sosyal
+    platformlar URL'e göre önbelleklediği için içerik EOD turundan turuna
+    değişse de kart haftalarca dondu. `?d=` sürüm eki EOD verisi değişince
+    URL'i değiştirir -> platform yeniden tarar. Tek-kanon (K-CK ilkesi):
+    ikinci bir tarih kaynağı açmıyor, zaten yayımlanan _data_quality_snapshot
+    updated_at'ini okuyor."""
+    with _lock:
+        stocks = list(_cache["data"])
+    _updated_at = _data_quality_snapshot(stocks).get("updated_at")  # "dd.mm.YYYY HH:MM:SS"
+    if _updated_at:
+        try:
+            _d = datetime.strptime(_updated_at, "%d.%m.%Y %H:%M:%S").strftime("%Y%m%d")
+            return f"/og-image.png?d={_d}"
+        except ValueError:
+            pass
+    return "/og-image.png"
+
+
 @app.route("/og-image.svg")
 @limiter.limit("30 per minute")  # DEV2-r103 (bughunt): ozel limit yoktu, global 300/dk worker-local zayif, PIL/SVG render her istekte tekrarlaniyor
 def og_image():
@@ -11833,6 +11852,18 @@ def _inject_analytics_context():
         track = False
         logger.warning("_inject_analytics_context: should_track hatası: %s", e)
     return dict(should_track=track, cf_beacon_token=CF_BEACON_TOKEN)
+
+
+@app.context_processor
+def _inject_og_image_url():
+    """CPO-1767 madde 1: 21 şablonun og:image meta'sı için tek kanon sürümlü
+    URL — `{{ og_image_url }}`. Bkz. _og_image_url()."""
+    try:
+        url = _og_image_url()
+    except Exception as e:
+        url = "/og-image.png"
+        logger.warning("_inject_og_image_url: %s", e)
+    return dict(og_image_url=url)
 
 
 @app.route("/sinyaller")
