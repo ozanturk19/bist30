@@ -1,0 +1,81 @@
+{
+  "_doc": [
+    "K-DE (22.09.2026) — LONG-ONLY SUNUM KANALI ENVANTERI.",
+    "Kural /metodoloji'de YAZILI: BorsaPusula long-only bir urundur; 'ideal giris'",
+    "ancak yonu yukari gosteren bir sinyalin yaninda bir sey vaat eder, ve Trend",
+    "Bozuldu sinyallerinde giris kalitesi / hedef-stop yapisi / R/R gosterilmez.",
+    "Bu dosya, o kurala TABI alanlari okuyan HER frontend kanalini sayar.",
+    "Yeni kanal bildirilmeden eklenirse de, bildirilen kanal alani birakirsa da",
+    "kapi FAIL verir (bayat envanter = kor kapi).",
+    "dialects: hangi dilde render ediliyor — 'jinja' (SSR) ve/veya 'js' (istemci).",
+    "Ikisi birden varsa IKISINDE DE kapi araninir: 'JS'i duzeltip SSR'i unutmak'",
+    "bu urunde daha once uc kez oldu (ders 36/136).",
+    "NEGATIF SONUC (22.09, tekrar bakma): templates/ozet.html alani YALNIZ",
+    "`selectattr('entry_quality','equalto','IDEAL')` filtresinde okur ve kaynak",
+    "listesi (`al_list`) zaten yalniz Guclu Trend sinyalli hisseleri tasir --",
+    "ekrana basan bir okuma YOKTUR, bu yuzden envanterde de yer almaz. Oraya",
+    "bir gun yayin eklenirse R1 (bildirilmemis kanal) yakalar.",
+    "SINIR: kapi 'ekrana basan okuma'yi arar; alani yerel degiskene alan yazim",
+    "TAKMA AD olarak izlenir (const tp1 = signalData.tp1 -> ${fmt(tp1)}), ama",
+    "iki adim otesi (obje icine koyup baska dosyada basmak) gorulmez -- o yuzden",
+    "R1 kanal envanteri asil emniyet kemeridir."
+  ],
+  "fields": [
+    "entry_quality",
+    "optimal_entry",
+    "rr_signal",
+    "tp1",
+    "tp2"
+  ],
+  "surfaces": {
+    "templates/tarama.html": {
+      "fields": [
+        "entry_quality"
+      ],
+      "dialects": [
+        "jinja",
+        "js"
+      ],
+      "status": "guarded",
+      "note": "SSR satiri + masaustu satiri + mobil kart + CSV disa aktarimi (4 yazar)."
+    },
+    "templates/gundem.html": {
+      "fields": [
+        "entry_quality",
+        "rr_signal"
+      ],
+      "dialects": [
+        "jinja",
+        "js"
+      ],
+      "status": "guarded",
+      "note": "Kart makrosu (SSR) ve renderCard (JS) ayni metrik listesini kuruyor."
+    },
+    "templates/hisse.html": {
+      "fields": [
+        "entry_quality",
+        "optimal_entry",
+        "tp1",
+        "tp2",
+        "rr_signal"
+      ],
+      "dialects": [
+        "js"
+      ],
+      "status": "guarded",
+      "note": "CPO-DEV2-052 #1 (Ozan karari): SAT dalinda somut giris/hedef yapisi yok."
+    },
+    "templates/karsilastir.html": {
+      "fields": [
+        "entry_quality",
+        "tp1",
+        "tp2"
+      ],
+      "dialects": [
+        "js"
+      ],
+      "status": "guarded",
+      "note": "_naForSat() — SAT hucresi tooltipli '—'."
+    }
+  }
+}

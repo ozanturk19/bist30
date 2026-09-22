@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=c0c5d88e">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
-<script src="/static/bp-vocab.js?v=63a439ab" defer></script>
+<script src="/static/bp-vocab.js?v=d2d2d481" defer></script>
 <link rel="stylesheet" href="/static/css/pages/tarama.css?v=e7c206c8">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -173,7 +173,10 @@
         <td><span class="sig-badge sig-{{ s.signal }}">{{ '▲' if s.signal=='AL' else '▼' if s.signal=='SAT' else '●' }} {{ s.signal|signal_label }}</span></td>
         <td>{{ s.signal_strength if s.signal_strength is not none else '—' }}</td>
         <td>{{ s.adx_label }}</td>
-        <td>{{ _eq.get(s.entry_quality, '—') }}</td>
+        {# K-DE: giris kalitesi = ALIM girisi degerlendirmesi (bp-vocab.js eqApplies).
+           SSR JS cagiramaz, kural burada `s.signal == 'AL'` yazimiyla tekrar edilir —
+           kapi 73 iki yazimi birbirine bagli tutar. #}
+        <td>{% if s.signal == 'AL' %}{{ _eq.get(s.entry_quality, '—') }}{% elif s.signal == 'SAT' %}<span style="color:var(--bp-text3)" data-tip="Trend Bozuldu sinyalinde giriş değerlendirmesi gösterilmez" tabindex="0">—</span>{% else %}—{% endif %}</td>
         <td class="hide-mob-narrow price-val">{{ s.price|tr_price }}</td>
         {# K-CC: `%+.2f` DEGISMEYEN hisseye de "+" basiyordu ("+0,00%" — kazanc imasi).
            Jinja yon kanonu (_fmt_macros.html) bp-format.js ile ayni yuvarlamayi kullanir. #}
@@ -453,7 +456,10 @@ function exportCSV() {
     s.change_pct != null ? csvSafe(bpFormatPct(s.change_pct, 2)) : '',
     s.vol_ratio != null ? s.vol_ratio.toFixed(2).replace('.', ',')+'×' : '',
     bpSignalAgeCsv(s.signal_date),
-    csvSafe(s.entry_quality ? eqLabel(s.entry_quality) : '')
+    /* K-DE: CSV ekranin kopyasidir (K-CC) — ekran SAT'ta "—" basiyorsa
+       disa aktarim da bos birakir, yoksa dosya sayfanin soylemedigi bir
+       giris degerlendirmesi vaat eder. */
+    csvSafe(eqApplies(s.signal) && s.entry_quality ? eqLabel(s.entry_quality) : '')
   ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'));
   const csv = [hdr.map(h=>`"${h}"`).join(';'), ...rows].join('\r\n');
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
@@ -919,10 +925,15 @@ function renderResults(rows, count) {
   tbody.innerHTML = rows.map(s => {
     const chgCls = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
     const chgSign = s.change_pct > 0 ? '+' : '';
+    /* K-DE: SAT satirinda "Ideal"/"Iyi" rozeti AL YESILIYLE basiliyordu (canli
+       22.09: 72 SAT satirinin 35'i) — /hisse ayni hissede "somut giris/hedef
+       seviyesi bu sinyal tipinde gosterilmez" derken. Kanon: eqApplies(). */
     const eqSafe  = s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI';
-    const eqHtml  = s.entry_quality
+    const eqHtml  = (eqApplies(s.signal) && s.entry_quality)
       ? `<span class="eq-badge ${eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
-      : '—';
+      : (s.signal === 'SAT'
+          ? `<span style="color:var(--bp-text3)" data-tip="${BP_EQ_NA_TIP}" tabindex="0">—</span>`
+          : '—');
     return `<tr>
       <td>
         <a href="/hisse/${escapeHtml(s.ticker)}">
@@ -949,10 +960,11 @@ function renderResults(rows, count) {
     _mrl.innerHTML = rows.map(s => {
       const _chgCls  = s.change_pct > 0 ? 'chg-pos' : s.change_pct < 0 ? 'chg-neg' : 'chg-neu';
       const _chgSign = s.change_pct > 0 ? '+' : '';
+      /* K-DE: masaustu satiriyla ayni long-only kapisi (eqApplies). */
       const _eqSafe  = s.entry_quality === 'IDEAL' || s.entry_quality === 'IYI';
-      const _eqH     = s.entry_quality
+      const _eqH     = (eqApplies(s.signal) && s.entry_quality)
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
-        : '<span style="color:var(--text3)">—</span>';
+        : `<span style="color:var(--bp-text3)"${s.signal === 'SAT' ? ` data-tip="${BP_EQ_NA_TIP}" tabindex="0"` : ''}>—</span>`;
       const _prm = (s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Yüksek Skor bandı — Güçlü Trend sinyali + Teknik Güç Skoru 70+" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '')
                  + (s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs)">⭐</span>' : '');
       const _tlbl = s.adx_label || 'Zayıf';

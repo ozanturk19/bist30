@@ -170,6 +170,31 @@ function eqLabel(code) {
   return BP_EQ_LABELS[code] || code;
 }
 
+/* K-DE (22.09.2026) — LONG-ONLY SUNUM KAPISI, TEK KANON.
+
+   "Giris Kalitesi" bir ALIM girisi degerlendirmesidir: karsilastir.html'in
+   kendi yardim metni "Su an satin alinsa giris ne kadar uygun?" diyor.
+   Urun kanonu /metodoloji'de YAZILI: «BorsaPusula long-only bir urundur:
+   "ideal giris" ancak yonu yukari gosteren bir sinyalin yaninda bir sey
+   vaat eder» + «Trend Bozuldu sinyallerinde hedef/stop yapisi ve R/R
+   gosterilmez». hisse.html (CPO-DEV2-052 #1, Ozan karari) ve
+   karsilastir.html (_naForSat) kurali uyguluyordu; /tarama ve /gundem
+   HIC gormemisti.
+
+   Canli olcum 22.09 (borsapusula.com/tarama, Sinyal=Trend Bozuldu):
+   72 satirin 35'i "Ideal"/"Iyi" rozetini `--bp-al` YESILIYLE
+   (rgb(0,226,144) — urunun AL rengi) basiyordu; mobil kartlarda da 35.
+   Ayni hissenin kendi sayfasi ayni anda "Trend asagi yonlu — somut
+   giris/hedef seviyesi bu sinyal tipinde gosterilmez" diyordu.
+
+   Kural artik TEK yerde: gosterilecek mi sorusunu eqApplies() cevaplar.
+   (Jinja/SSR dallari JS'i cagiramaz — orada `s.signal == 'AL'` yazimi
+   kullanilir ve kapi 73 iki yazimi birbirine bagli tutar.) */
+var BP_EQ_NA_TIP = 'Trend Bozuldu sinyalinde giriş değerlendirmesi gösterilmez';
+function eqApplies(signal) {
+  return signal === 'AL';
+}
+
 /* HTML escape + guvenli href — kanonik, 4 sablonda (bilanco_takvimi/
    gundem/karsilastir/tarama) birebir ayni kopyalanmisti (105. bagimsiz
    bug-hunt turu bulgusu). hisse.html kendi 'escHtml' adiyla ayri bir

@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=c0c5d88e">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
-<script src="/static/bp-vocab.js?v=63a439ab" defer></script>
+<script src="/static/bp-vocab.js?v=d2d2d481" defer></script>
 <link rel="stylesheet" href="/static/css/pages/gundem.css?v=52a390d2">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -51,12 +51,16 @@
     {% if s.adx is not none %}<div class="sc-metric"><span>ADX </span><strong>{{ '%.1f'|format(s.adx)|replace('.', ',') }}</strong></div>{% endif %}
     {% if s.rsi is not none %}<div class="sc-metric"><span>RSI </span><strong>{{ '%.1f'|format(s.rsi)|replace('.', ',') }}</strong></div>{% endif %}
     {% if s.signal_date %}<div class="sc-metric"><span>Süre </span><strong>{{ s.signal_date|signal_age_text }}</strong></div>{% endif %}
-    {% if s.entry_quality %}<div class="sc-metric"><span>Kalite </span><strong>{{ {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Kovalama'}.get(s.entry_quality, s.entry_quality) }}</strong></div>{% endif %}
+    {# K-DE: "Kalite" bir ALIM girisi degerlendirmesidir (bp-vocab.js eqApplies /
+       /metodoloji long-only kanonu) — Trend Bozuldu kartinda gosterilmez. #}
+    {% if s.entry_quality and s.signal == 'AL' %}<div class="sc-metric"><span>Kalite </span><strong>{{ {'IDEAL':'İdeal','IYI':'İyi','DIKKATLI':'Dikkatli','UZAK':'Kovalama'}.get(s.entry_quality, s.entry_quality) }}</strong></div>{% endif %}
     {# 20.09 CPO: rr_signal NEGATIF gelebiliyor (NETAS canlida -0,74: TP1 90,85 -> 85,67,
        yani hedef girisin ALTINDA). "1:N" oran notasyonu negatif sayiyi ifade EDEMEZ —
        canlida "R/R 1:-0,7" diye anlamsiz bir metin basiliyordu. Kok neden backend'de
        (CPO-1676, DEV1), burada malformed sayi basmiyoruz: yanlis sayi eksik sayidan kotu. #}
-    {% if s.rr_signal and s.rr_signal > 0 %}<div class="sc-metric"><span>R/R </span><strong>1:{{ '%.1f'|format(s.rr_signal)|replace('.', ',') }}</strong></div>{% endif %}
+    {# K-DE: /metodoloji «Trend Bozuldu sinyallerinde hedef/stop yapisi ve R/R
+       gosterilmez» diyor, /hisse de oyle davraniyor — bu kart istisna kalmisti. #}
+    {% if s.rr_signal and s.rr_signal > 0 and s.signal == 'AL' %}<div class="sc-metric"><span>R/R </span><strong>1:{{ '%.1f'|format(s.rr_signal)|replace('.', ',') }}</strong></div>{% endif %}
   </div>
   <div class="sc-footer">
     <div style="display:flex;align-items:center;gap:8px">
@@ -276,10 +280,14 @@ function renderCard(s, isNew) {
      ile birebir aynı Bugün/Dün/N-gün mantığını uyguluyor (bkz. bp-format.js). */
   if (bpSignalDateAgeDays(s.signal_date) !== null)
     metrics.push(`<div class="sc-metric"><span>Süre </span><strong>${bpSignalAgeText(s.signal_date)}</strong></div>`);
-  if (s.entry_quality)      metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${eqLabel(s.entry_quality)}</strong></div>`);
+  /* K-DE: SSR makrosuyla birebir long-only kapisi — kanon bp-vocab.js eqApplies.
+     Kapi ile yayin AYNI ifadede tutulur: kapi 73 komsu satirdaki bir yon
+     kontrolunu (orn. `isAl`) kapi saymaz, cunku o baska bir hucreyi boyuyordu. */
+  if (eqApplies(s.signal) && s.entry_quality) metrics.push(`<div class="sc-metric"><span>Kalite </span><strong>${eqLabel(s.entry_quality)}</strong></div>`);
   /* DEV-1763: sabit rr_ratio(=2.0) yerine sinyal başından gerçek R/R (rr_signal) */
   /* 20.09 CPO: SSR daliyla ayni guard — negatif rr_signal "1:-0,7" diye basiliyordu. */
-  if (s.rr_signal > 0)      metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_signal).toFixed(1).replace('.', ',')}</strong></div>`);
+  /* K-DE: SAT kartinda R/R gosterilmez (bkz. SSR makrosu + /metodoloji). */
+  if (eqApplies(s.signal) && s.rr_signal > 0) metrics.push(`<div class="sc-metric"><span>R/R </span><strong>1:${parseFloat(s.rr_signal).toFixed(1).replace('.', ',')}</strong></div>`);
 
   const newMark = isNew ? `<span class="new-badge">Bugün</span>` : '';
 
