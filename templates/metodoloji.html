@@ -213,6 +213,35 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
   Bu rozet, hacim teyidini gösteren <span aria-hidden="true">⭐</span> <strong>Hacim Onaylı</strong> rozetiyle de karıştırılmamalı: <span aria-hidden="true">💎</span> skorun bandını, <span aria-hidden="true">⭐</span> hacmin teyidini söyler — ikisi de ücretsiz, ödeme/paket ile ilgisi yok.
 </p>
 
+{# K-CA (22.09): /hisse sayfasindaki iki "R/R" jargon-linki de bu sayfaya
+   geliyordu ama sayfada "Risk", "Ödül" ya da "R/R" kelimeleri HIC gecmiyordu
+   -- yani terim, tanimini vaat eden bir baglantinin ucunda tanimsizdi (ADX
+   linki `#adx` ankrasina gidiyor, bu ikisinin ankrasi bile yoktu). #}
+<h2 id="risk-odul">Risk / Ödül (R/R)</h2>
+<p>
+  <strong>R/R</strong>, göze alınan riskin karşılığında hedeflenen kazancın kaç katı
+  olduğunu söyler. <strong>1:2</strong> şöyle okunur: 1 birim risk alınıyorsa 2 birim
+  kazanç hedefleniyor. Yön iddiası <em>değildir</em>, sinyalin tutacağı anlamına da
+  gelmez — yalnızca hedef ile stop arasındaki <strong>mesafe oranıdır</strong>.
+</p>
+<p style="font-family:var(--bp-font-mono, monospace);font-size:0.92em">
+  R/R = (TP1 &minus; sinyal fiyatı) &divide; (sinyal fiyatı &minus; Supertrend seviyesi)
+</p>
+<p>
+  Sitede <strong>tek bir</strong> R/R gösterilir: <strong>sinyal başından</strong> ölçülen oran
+  (hisse sayfasındaki çubuk ve hemen altındaki sayı, gündem kartlarındaki &laquo;R/R&raquo;).
+  Hisse sayfasındaki <strong>TP1 / TP2</strong> rakamları ise <strong>şimdiki fiyattan</strong>
+  2 ve 3 birim risk yukarıda kurulur. Bu yüzden sinyal verildikten sonra fiyat
+  Supertrend seviyesinden uzaklaştıkça sinyal başından ölçülen R/R <em>büyür</em>,
+  yaklaştıkça <em>küçülür</em>: R/R sabit bir vaat değil, pozisyon yaşlandıkça değişen
+  bir ölçüdür. Çok yükselmiş bir R/R, &laquo;ödül büyüdü&raquo; demekten çok
+  &laquo;giriş fiyatı artık çok geride kaldı&raquo; demektir.
+</p>
+<p>
+  Trend Bozuldu sinyallerinde hedef/stop yapısı ve R/R gösterilmez — BIST'te bireysel
+  yatırımcı genellikle açığa satamaz, bu rakamlar uygulanamaz bir vaat olurdu.
+</p>
+
 <h2 id="terimler">Terimler — Karıştırılmaması Gerekenler</h2>
 <p>
   Sitede benzer görünen ama <strong>tamamen farklı</strong> şeyleri ölçen terimler var.
@@ -296,6 +325,6 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 <script src="/static/bp-format.js?v=648ff6b4"></script>
 <script src="/static/bp-search.js?v=f13259b5" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/learning-mode.js?v=1417c5bb" defer></script>
+<script src="/static/learning-mode.js?v=0ad88e9f" defer></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

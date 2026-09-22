@@ -20,8 +20,18 @@
     'stop bölgesi': 'Sinyalin geçersiz sayılacağı, pozisyon çıkışına işaret eden fiyat aralığı.',
     'tier_score': 'Sinyal kalite puanı (0–100). Premium/Plus/Standart sınıflandırması bu skora göre yapılır.',
     'kovalama': 'Fiyat sinyal başlangıcına göre belirgin yükselmişken alım yapma riski. Genelde geri çekilme beklemek daha güvenli.',
-    'r/r': 'Risk/Ödül oranı — potansiyel kazanç ÷ kabul edilen risk. 1:2 ve üstü genellikle anlamlı bulunur.',
-    'rr_ratio': 'Risk/Ödül oranı — pozisyondan potansiyel kazanç ile stop\'a uzaklığın oranı.'
+    /* K-CA (22.09): bu iki anahtar AYNI terimi IKI FARKLI capadan tanimliyordu
+       ('r/r' hedefe uzaklik, 'rr_ratio' pozisyondan uzaklik) ve 'rr_ratio'ya
+       hicbir element ulasamiyordu -- sitede `data-term="rr_ratio"` yok, o adda
+       bir gorunur metin de yok. Olu anahtar silindi, kalan tanim /metodoloji
+       #risk-odul bolumundeki capayla (sinyal fiyati) birlestirildi. */
+    'r/r': 'Risk/Ödül oranı — sinyal fiyatından ölçülür: (TP1 − sinyal fiyatı) ÷ (sinyal fiyatı − Supertrend seviyesi). 1:2 ve üstü genellikle anlamlı bulunur. Sabit bir vaat değildir; fiyat stop seviyesinden uzaklaştıkça büyür.',
+    /* K-CA: `data-term="sinyal"` sitedeki EN YAYGIN jargon-linki (bp-vocab.js
+       her sinyal cipini bununla sariyor) ama sozlukte karsiligi YOKTU -- yani
+       Ogrenme Modu acikken bu terimde "?" dugmesi HIC cikmiyordu. Ustelik
+       /metodoloji'nin "Karistirilmamasi Gerekenler" bolumu tam da bu terimi
+       aciklamak icin yazilmis. Tanim o bolumun kanonuyla birebir. */
+    'sinyal': 'Sinyalin YÖNÜ — yalnızca Güçlü Trend, Trend Bozuldu ya da Yatay olur; sayı değildir. Gücü/kalitesi ayrı anılır: Teknik Güç Skoru ve BorsaPusula Skoru.'
   };
 
   var STORAGE_KEY = 'bp_learning_mode';

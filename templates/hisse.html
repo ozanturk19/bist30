@@ -1072,7 +1072,7 @@
 
       <!-- R/R Görsel -->
       <div>
-        <div class="rr-card-label"><a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">Risk / Ödül<span class="sr-only"> (yeni sekmede açılır)</span></a></div>
+        <div class="rr-card-label"><a class="jargon-term" data-term="r/r" href="/metodoloji#risk-odul" target="_blank" rel="noopener">Risk / Ödül<span class="sr-only"> (yeni sekmede açılır)</span></a></div>
         <div id="rrBarContainer"></div>
         <div id="rrLevels"></div>
       </div>
@@ -2538,19 +2538,36 @@ function renderSummary(s, signalData) {
       // sayesinde maskeli/eşit ama defansif olarak ayni desene hizalandı.
       const cur = _dispPrice;
       if (tp1 && tp2 && sl && cur) {
-        const risk   = Math.abs(cur - sl);
-        const reward = Math.abs(tp2 - cur);
-        const total  = risk + reward || 1;
-        const riskW  = Math.round(risk / total * 100);
-        const rewW   = 100 - riskW;
-
+        // ── K-CA (22.09): BU BAR HER HISSEDE AYNI GORUNUYORDU ────────────────
+        // Eski hesap `risk = |cur - sl|`, `reward = |tp2 - cur|` idi. Ama TP2
+        // backend'de ZATEN `cur + 3 x risk` olarak kuruluyor -- yani oran
+        // cebirsel olarak HER ZAMAN 3,0 (bar 25% / 75%). Canli olcum 22.09:
+        // rr_signal'i olan 55 hissenin 55'inde bar tipatip 25/75; ustelik
+        // hemen ALTINDAKI satir ayni karta "13,25x" (TKFEN) ya da "0,34x"
+        // (MAVI) yaziyordu. Tek kart, tek etiket ("Risk / Ödül"), IKI KANON.
+        // CPO-DEV2-045 ayni totolojiyi `rr_now` SAYISINDAN silmisti; BAR ayni
+        // hesabi yasatiyordu (ders 56: kapi komsu kanali gormez).
+        // Artik bar, altinda YAZAN sayinin (rr_signal) ta kendisini cizer.
+        const rrSig = signalData.rr_signal;
         const rrBarEl = document.getElementById('rrBarContainer');
         if (rrBarEl) {
-          rrBarEl.innerHTML = `
-            <div class="rr-bar">
+          if (typeof rrSig === 'number' && isFinite(rrSig) && rrSig > 0) {
+            // 1 birim risk : rrSig birim ödül. Uc oranlarda (40,7x) risk dilimi
+            // gorunmez olmasin diye %8-%92 araliginda kirpilir -- kirpma SADECE
+            // genislige uygulanir, yazan sayi ham deger kalir.
+            let riskW = Math.round(100 / (1 + rrSig));
+            riskW = Math.max(8, Math.min(92, riskW));
+            const rewW = 100 - riskW;
+            rrBarEl.innerHTML = `
+            <div class="rr-bar" role="img" aria-label="Risk ödül oranı 1:${rrSig.toFixed(1).replace('.', ',')}">
               <div class="rr-risk-seg" style="width:${riskW}%"></div>
               <div class="rr-reward-seg" style="width:${rewW}%"></div>
             </div>`;
+          } else {
+            // rr_signal yoksa cizilecek bir oran da yok -- sabit bir bar
+            // cizmek "olculmus bir oran var" demektir (K-V: bos != hata).
+            rrBarEl.innerHTML = '';
+          }
         }
 
         const rrLevelsEl = document.getElementById('rrLevels');
@@ -2558,12 +2575,13 @@ function renderSummary(s, signalData) {
           // CPO-DEV2-045 #1: "Şu an girersen R/R" (rr_now) kaldırıldı — TP1=entry+risk*2
           // sabit formülü yüzünden cebirsel olarak HER ZAMAN 2.0 çıkıyordu (totoloji),
           // entry_quality/kovalama uyarısıyla çelişebiliyordu. Sadece sinyal başından R/R kalıyor.
-          const rrSig = signalData.rr_signal;
-          const rrRowsHtml = (rrSig != null) ? `
+          // K-CA (22.09): yazim kanonu /gundem ile birlestirildi -- ayni buyukluk
+          // orada "1:2,0", burada "2,00x" diye basiliyordu (ayni is, iki kanon).
+          const rrRowsHtml = (typeof rrSig === 'number' && isFinite(rrSig) && rrSig > 0) ? `
             <div style="display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:var(--bp-text-xs);font-variant-numeric:tabular-nums">
               <div style="display:flex;justify-content:space-between;color:var(--bp-text3)">
-                <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji" target="_blank" rel="noopener">R/R<span class="sr-only"> (yeni sekmede açılır)</span></a></span>
-                <strong style="color:${rrSig >= 2.0 ? 'var(--bp-al)' : rrSig >= 1.0 ? 'var(--bp-warn)' : 'var(--bp-sat)'}">${rrSig.toFixed(2).replace('.', ',')}x</strong>
+                <span>Sinyal başından <a class="jargon-term" data-term="r/r" href="/metodoloji#risk-odul" target="_blank" rel="noopener">R/R<span class="sr-only"> (yeni sekmede açılır)</span></a></span>
+                <strong style="color:${rrSig >= 2.0 ? 'var(--bp-al)' : rrSig >= 1.0 ? 'var(--bp-warn)' : 'var(--bp-sat)'}">1:${rrSig.toFixed(1).replace('.', ',')}</strong>
               </div>
             </div>` : '';
           rrLevelsEl.innerHTML = `
@@ -2577,10 +2595,10 @@ function renderSummary(s, signalData) {
                 <strong>${fmt(cur)}</strong>
               </div>
               <div class="rr-lvl" style="text-align:right">
-                <span class="bp-al-text">TP1 (2R)</span>
+                <span class="bp-al-text" data-tip="Şimdiki fiyattan 2 birim risk yukarıda" tabindex="0">TP1</span>
                 <strong class="bp-al-text">${fmt(tp1)}</strong>
                 <br>
-                <span style="color:var(--bp-brand);font-size:10px">TP2 (3R)</span>
+                <span style="color:var(--bp-brand);font-size:10px" data-tip="Şimdiki fiyattan 3 birim risk yukarıda" tabindex="0">TP2</span>
                 <strong style="color:var(--bp-brand);font-size:var(--bp-text-xs)"> ${fmt(tp2)}</strong>
               </div>
             </div>` + rrRowsHtml;
@@ -3960,7 +3978,7 @@ document.addEventListener('visibilitychange', () => {
 <script src="/static/bp-search.js?v=f13259b5" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/js/bp-chart-common.js?v=365caf6c"></script>
-<script src="/static/learning-mode.js?v=1417c5bb" defer></script>
+<script src="/static/learning-mode.js?v=0ad88e9f" defer></script>
 
 <script>
 /* 21.09 (K-AU): `.ind-help` sayfa-yerel tap-toggle + Escape dinleyicileri

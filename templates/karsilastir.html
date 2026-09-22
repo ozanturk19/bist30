@@ -1,16 +1,16 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ page_title|default('Hisse Karşılaştırma | BorsaPusula') }}</title>
-<meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, R/R ve daha fazlası.') }}">
+<meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
 {% if tickers_param %}<meta name="robots" content="noindex,follow">{% endif %}
 <meta property="og:title"       content="{{ page_title|default('Hisse Karşılaştırma — BorsaPusula') }}">
-<meta property="og:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, R/R ve daha fazlası.') }}">
+<meta property="og:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
 <meta property="og:url"         content="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="{{ page_title|default('Hisse Karşılaştırma — BorsaPusula') }}">
-<meta name="twitter:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, R/R ve daha fazlası.') }}">
+<meta name="twitter:description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -130,7 +130,18 @@ const ROW_LABELS = [
   { key: 'sl_level',      label: 'Supertrend Seviyesi', help: 'Supertrend bandının güncel seviyesi — sinyal yönü ne olursa olsun her zaman hesaplanır, açık bir pozisyonun stopu anlamına gelmez.' },
   { key: 'tp1',           label: 'Hedef 1 (TP1)' },
   { key: 'tp2',           label: 'Hedef 2 (TP2)' },
-  { key: 'rr_ratio',      label: 'Risk/Ödül (R/R)' },
+  /* ── K-CA (22.09): "Risk/Ödül (R/R)" SATIRI KALDIRILDI ───────────────────
+     `rr_ratio` canli evrende SABIT: /api/data 217 hissenin 79'unda deger
+     donuyor ve 79'unun DA degeri tipatip 2.0 (kalan 138'i null). Yani bu
+     satir karsilastirmaya giren her hisse icin ayni "1 : 2,0"i basiyordu --
+     karsilastirma sayfasinda hicbir seyi ayirt etmeyen bir sutun.
+     Dahasi ayni buyuklugu /hisse ve /gundem `rr_signal`den okuyor: TKFEN
+     burada "1 : 2,0" iken hisse detayinda "1:13,3", AHGAZ 2,0 vs 1,9.
+     Kok neden backend: bu alan TP1'in kurulus formulunun totolojisi
+     (TP1 = giris + 2 x risk => oran hep 2). /gundem ayni alandan DEV-1763'te
+     `rr_signal`e gecirilmisti, bu sayfa gecirilmemisti (ders 56).
+     `/api/karsilastir` payload'inda `rr_signal` YOK -- eklenmesi DEV1'de
+     (CPO-1758). Alan gelince satir `rr_signal` okuyarak geri konacak. */
   { key: 'sector',        label: 'Sektör' },
   // Temel Analiz
   { key: '_sep_fund',     label: '<span aria-hidden="true">📋</span> TEMEL ANALİZ', isSep: true },
@@ -254,7 +265,6 @@ function renderCell(key, s) {
     }
     case 'tp1':           return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
     case 'tp2':           return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde hedef fiyat gösterilmez') : (v ? `<span class="up mono">${parseFloat(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>` : '<span class="muted">—</span>');
-    case 'rr_ratio':      return (s.signal === 'SAT') ? _naForSat('Trend Bozuldu sinyalinde risk/ödül oranı gösterilmez') : (v ? `<span class="mono" style="color:var(--bp-accent-cyan)">1 : ${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>');
     case 'sector':        return v ? `<span style="font-size:var(--bp-text-xs);color:var(--bp-text2)">${v}</span>` : '<span class="muted">—</span>';
     // CPO-1610: EOD skor turu bu hisse icin henuz calismadiysa (hs_available=false)
     // dogru "bekleniyor" durumu — sahte/varsayilan sayi YOK (hisse.html ile ayni durus).
