@@ -425,7 +425,13 @@ function csvSafe(v) {
 }
 function exportCSV() {
   if (!_csvData.length) { showToast('Filtrelerinize uygun sonuç yok, CSV boş olur.', 'err'); return; }
-  const hdr = ['Hisse','İsim','Sektör','Sinyal','ADX','Fiyat','Değişim%','Hacim Oranı','Sinyal Yaşı (gün)','Giriş Kalitesi'];
+/* K-CM: CSV basliklari ekran kolonlariyla IKI KANON'du. 'ADX' -> ekranda
+   kolon adi "Trend Gucu"; 'Hacim Orani' -> ekranda "Gunluk Hacim Orani"
+   ve 20.09'da (661f4cb) RVOL(5g/20g) ile Gunluk Hacim Orani(bugun/20g)
+   AYRI iki metrik olarak ayrilmisti -- kisaltilmis baslik tam o ayrimi
+   CSV okuyucusu icin geri siliyordu. K-BZ CSV<->ekran SAYI paritesini
+   kapatmisti, BASLIKLARI degil. */
+  const hdr = ['Hisse','İsim','Sektör','Sinyal','Trend Gücü (ADX)','Fiyat','Değişim%','Günlük Hacim Oranı','Sinyal Yaşı (gün)','Giriş Kalitesi'];
   const rows = _csvData.map(s => [
     csvSafe(s.ticker),
     csvSafe(s.name||''),
@@ -781,8 +787,14 @@ function renderResults(rows, count) {
     }
     const v = score;
     const cls = tier === 'guclu_sinyal' ? 'premium' : tier === 'standart' ? 'plus' : 'weak';
+    // K-CM: /metodoloji sozlugu bu bant adlarinin ("Yuksek Skor" / "Orta Skor")
+    // gorulecegi yer olarak TARAMA LISTESINI ilan ediyor, ama listede yalnizca
+    // 70+ bandi rozet aliyordu; 56-69 bandi SADECE mavi renkle ayirt ediliyor, adi
+    // hicbir yerde gecmiyordu. Bant adi kanonik kaynaktan (tier) turetilir,
+    // esik burada TEKRAR TANIMLANMAZ.
+    const band = tier === 'guclu_sinyal' ? 'Yüksek Skor' : tier === 'standart' ? 'Orta Skor' : '';
     const pct = Math.max(4, Math.min(100, v));
-    return `<div class="score-cell" tabindex="0" data-tip="Teknik Güç Skoru ${v}/100 — sıralama bu skora göre">
+    return `<div class="score-cell" tabindex="0" data-tip="Teknik Güç Skoru ${v}/100${band ? ' · ' + band : ''} — sıralama bu skora göre">
       <span class="score-val ${cls}">${v}</span>
       <div class="score-bar-bg"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div>
     </div>`;
@@ -835,7 +847,7 @@ function renderResults(rows, count) {
     return `<tr>
       <td>
         <a href="/hisse/${escapeHtml(s.ticker)}">
-          <div class="tk">${escapeHtml(s.ticker)}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs);vertical-align:middle">💎</span>' : ''}${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs);vertical-align:middle">⭐</span>' : ''}</div>
+          <div class="tk">${escapeHtml(s.ticker)}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek Skor (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs);vertical-align:middle">💎</span>' : ''}${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs);vertical-align:middle">⭐</span>' : ''}</div>
           <div class="tk-name">${escapeHtml((s.name||'').replace(' A.Ş.',''))}</div>
         </a>
       </td>
@@ -862,7 +874,7 @@ function renderResults(rows, count) {
       const _eqH     = s.entry_quality
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
         : '<span style="color:var(--text3)">—</span>';
-      const _prm = (s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '')
+      const _prm = (s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek Skor (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '')
                  + (s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs)">⭐</span>' : '');
       const _tlbl = s.adx_label || 'Zayıf';
       const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
