@@ -1293,13 +1293,35 @@ fi
 #   R1 yazma simetrisi · R2 <select> yutulmasi korumasi · R3 tur-gidis (yazilan
 #   her parametre geri okunmali). MUAFIYET ANLAM KURALIDIR: kapsam "URLSearchParams
 #   kurup fetch eden fonksiyon"; tek kuruculu sablonlar R1 disinda.
-echo "64/64 form-url-state-check (K-CS: form durumu <-> adres cubugu tur-gidisi)..."
+echo "64/65 form-url-state-check (K-CS: form durumu <-> adres cubugu tur-gidisi)..."
 if python3 tools/form-url-state-check.py; then
   echo "  ✓ form-url-state-check PASS"
 else
   echo "  ✗ K-CS KIRIK: bir formun durumu adrese yazilmiyor ya da geri okunmuyor."
   echo "    Pozitif kontrol: python3 tools/form-url-state-check.py --self-test   # 4/4 beklenir"
   echo "    Regresyon ornegi: python3 tools/form-url-state-check.py --ref d7c3782  # 3 ihlal beklenir"
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
+# KAPI 65 -- K-CT: adres cubugunun SAHIPLIGI (form-disi URL durumu).
+#   Kapi 64'un kapsami "URLSearchParams kurup fetch eden fonksiyon" + "`.value`
+#   ile forma yazan hidrator"; /sektor-harita durumunu FORM ALANIYLA degil
+#   `aria-pressed` cipleriyle tasidigi icin o okuma yuzeyine HIC girmiyordu
+#   (76/109. ders: dedektorun sekli yuzeyi secer).
+#   Canli olculdu: Karsilastir'da 2 sektor sec -> Isi Haritasi'na don ->
+#   adres `?tab=heatmap&s=Ulasim&s=Telekom` kaliyordu; o adres acildiginda
+#   `loadSectors()` hic kosmadigi icin `_selected` [] geliyordu -- sayfa KENDI
+#   URETTIGI olu derin baglantiyi paylastiriyordu. Ayrica tek sektorluk secim
+#   adrese yaziliyor ama okuma esigine (`>= 2`) takilip geri okunmuyordu.
+#   R1 tek yayimci · R2 tur-gidis · R3 `append` birikmesi · R4 sekme kapsami.
+echo "65/65 url-state-owner-check (K-CT: adres cubugunun tek sahibi)..."
+if python3 tools/url-state-owner-check.py; then
+  echo "  ✓ url-state-owner-check PASS"
+else
+  echo "  ✗ K-CT KIRIK: adres cubugu iki yazarli ya da yazdigini geri okumuyor."
+  echo "    Pozitif kontrol: python3 tools/url-state-owner-check.py --self-test  # 5/5 beklenir"
+  echo "    Regresyon ornegi: python3 tools/url-state-owner-check.py --ref 5944a02  # 1 ihlal beklenir"
   FAIL=$((FAIL + 1))
 fi
 

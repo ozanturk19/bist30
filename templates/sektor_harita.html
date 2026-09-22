@@ -404,19 +404,43 @@ function switchSektorTab(tab) {
       _sectorLoadInt = setInterval(_secLoadTick, 120000);
     }
   }
-  /* K-CR (22.09): varsayilan sekme URL'de gorunmez (/tarama'nin kanonu).
-     Onceki hal `set('tab','heatmap')` yaziyordu: Isi Haritasi'na her donuste
-     adres `?tab=heatmap` ile kirleniyordu, oysa okuma tarafi yalniz
-     `=== 'compare'`e bakiyor -- yazilan deger hicbir sey ifade etmiyordu.
-     Ayrica URL degismediginde replaceState cagrilmaz (acilistaki
-     `?tab=compare` IIFE'si bos bir history yazimi tetikliyordu). */
-  const url = new URL(location.href);
-  if (tab === 'compare') url.searchParams.set('tab', 'compare');
-  else url.searchParams.delete('tab');
-  const _next = url.pathname + url.search;
-  if (_next !== location.pathname + location.search) {
+  _publishSektorUrl(tab);
+}
+
+/* ── K-CT (22.09): adres cubugunun TEK yazari ────────────────────────────────
+   Once iki ayri yazar vardi ve ikisi birbirinden habersizdi: switchSektorTab
+   yalniz `tab`i, updateHint yalniz `s`yi yaziyordu. Sonuc olculdu (canli):
+   Karsilastir'da 2 sektor secip Isi Haritasi'na donunce adres
+   `?s=Ulasim&s=Telekom` kaliyordu -- sayfa KENDI URETTIGI olu derin baglantiyi
+   paylastiriyordu: o adres acildiginda `loadSectors()` hic kosmadigi icin
+   `_selected` [] geliyor, hicbir sey geri yuklenmiyordu.
+   K-CS kanonu: adres cubugu YALNIZ aktif sekmenin durumunu tasir. */
+function _publishSektorUrl(tab) {
+  if (!tab) {
+    var _pc = document.getElementById('panelKarsilastir');
+    tab = (_pc && _pc.style.display === 'block') ? 'compare' : 'heatmap';
+  }
+  var url = new URL(location.href);
+  url.searchParams.delete('tab');
+  url.searchParams.delete('s');
+  if (tab === 'compare') {
+    /* K-CR: varsayilan sekme (Isi Haritasi) adreste gorunmez. */
+    url.searchParams.set('tab', 'compare');
+    (_selected || []).forEach(function(s) { url.searchParams.append('s', s); });
+  }
+  var next = url.pathname + url.search;
+  if (next !== location.pathname + location.search) {
     history.replaceState(null, '', url.toString());
   }
+}
+
+/* Sekme niyetinin TEK okuyucusu: `tab=compare` ya da tasidigi `s` durumu.
+   Eski `/sektor-karsilastir?s=...` derin baglantilari `tab` tasimiyordu. */
+function _resolveSektorTab() {
+  var params = new URLSearchParams(location.search);
+  if (params.get('tab') === 'compare') return 'compare';
+  if (params.getAll('s').length > 0) return 'compare';
+  return 'heatmap';
 }
 
 // r103 bug-hunt: role="tab" sekmelerinde ok-tuşu navigasyonu yoktu (APG tab
@@ -452,12 +476,17 @@ async function loadSectors() {
     _sectors = json.sectors || [];
     renderChips();
     // URL'den on-yukleme (eski /sektor-karsilastir?s=...&s=... deep-link'leri icin)
-    var params = new URLSearchParams(location.search);
-    var pre = params.getlist ? params.getlist('s') : params.getAll('s');
-    if (pre.length >= 2) {
-      pre.forEach(function(s) { if (_sectors.find(function(x){return x.name===s;})) toggleChip(s); });
-      if (_selected.length >= 2) runCompare();
-    }
+    /* K-CT: esik `>= 2` idi -- tek sektorluk secim adrese YAZILIYOR ama geri
+       OKUNMUYORDU (canli olcum: `?tab=compare&s=Ulasim` -> "Secili: 0 sektor").
+       Ayrica `params.getlist` Python API'si; JS'te hicbir zaman tanimli degil,
+       olu daldi. */
+    var pre = new URLSearchParams(location.search).getAll('s');
+    pre.forEach(function(s) { if (_sectors.find(function(x){return x.name===s;})) toggleChip(s); });
+    /* Taninmayan `s` degeri hicbir sipi eslestirmez; adresi gercege esitle
+       (aksi halde adres, sayfanin gostermedigi bir durumu iddia etmeye devam
+       ederdi -- hicbir chip secili degilse toggleChip hic kosmaz). */
+    _publishSektorUrl('compare');
+    if (_selected.length >= 2) runCompare();
   } catch(e) {
     document.getElementById('sectorChips').innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><span aria-hidden="true">⚠️</span> Sektör verileri yüklenemedi.</span><button type="button" class="da-retry" onclick="loadSectors()">Tekrar dene</button></div>';
   }
@@ -507,10 +536,7 @@ function updateHint() {
   else if (n === 1) { hint.textContent = 'Seçili: 1 sektör — 1 tane daha seçin'; }
   else { hint.textContent = 'Seçili: ' + n + ' sektör — Karşılaştır\'a basın'; }
   btn.disabled = n < 2;
-  var url = new URL(location.href);
-  url.searchParams.delete('s');
-  _selected.forEach(function(s) { url.searchParams.append('s', s); });
-  history.replaceState(null, '', url.toString());
+  _publishSektorUrl();
 }
 
 var _cmpReqId = 0;
@@ -632,10 +658,9 @@ function fmtPrice(p) {
   return n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
-// Sayfa yuklendiginde ?tab=compare varsa Karsilastir sekmesini ac (eski /sektor-karsilastir 301'i)
+// Sayfa yuklendiginde sekme niyeti tek yerden cozulur (eski /sektor-karsilastir 301'i)
 (function(){
-  var params = new URLSearchParams(location.search);
-  if (params.get('tab') === 'compare') switchSektorTab('compare');
+  if (_resolveSektorTab() === 'compare') switchSektorTab('compare');
 })();
 </script>
 
