@@ -1221,13 +1221,40 @@ fi
 #        "veritaban|ında" 3 sahte pozitif verdi -- Turkce "-ında" eki.
 #    (b) R2'nin ilk yazimi her "(a,b,c)" grubunu sayim sandi: rgba(184,195,
 #        255,0.06) sahte pozitifti. Sayim artik >=3 HARFLI oge ister.
-echo "60/60 delivery-timing-claim-check (K-CO: teslimat anindaligi vaadi)..."
+echo "60/61 delivery-timing-claim-check (K-CO: teslimat anindaligi vaadi)..."
 if python3 tools/delivery-timing-claim-check.py; then
   echo "  ✓ delivery-timing-claim-check PASS"
 else
   echo "  ✗ K-CO KIRIK: urun EOD-only mimaride 'aninda' teslimat vaat ediyor."
   echo "    Detay icin: python3 tools/delivery-timing-claim-check.py --verbose"
   echo "    Pozitif kontrol: python3 tools/delivery-timing-claim-check.py --self-test"
+  FAIL=$((FAIL + 1))
+fi
+
+# KAPI 61 — K-CP (22.09): sekme/panel gorunurlugunde TEK KANON.
+#   /hisse'de UC yer ayni karari veriyordu: applyTab'in `data-tab-content`
+#   dongusu (gercek kanon) · ALL_PANELS/SHOW_FOR_TAB ID listesi (eksik ve
+#   etkisiz ikinci kanon) · renderEntryAnalysis()'in "aktif sekme ozet degilse
+#   DOKUNMA ve RETURN" erken cikisi. Ucuncusu, IIFE'nin applyTab(initial)'den
+#   SONRA calistigini gormuyordu: ?tab=ai (ya da localStorage `bp_hisse_tab`)
+#   ile acilan sayfada grid HIC doldurulmuyor, kullanici Ozet'e gecince bolum
+#   goruntuye alinip BOS kaliyordu. Canli 22.09 BIMAS (AL + entry_quality):
+#   ?tab=ozet -> eqBadge 45 / rrBar 228 / rrLevels 1632 karakter;
+#   ?tab=ai -> Ozet'e gecince UCU DE 0.
+# ⛔ POZITIF KONTROL KAPIYI 2 KEZ DUZELTTI (85. ders):
+#    (a) R1 ilk yazimi `.style.display !== 'none'` OKUMASINI da yazim sandi.
+#    (b) R1 ilk yazimi degiskeni 4 satirlik pencerede ariyordu: gercek uc
+#        ihlali (2486/2499/2511) KACIRDI, buna karsilik kendi aciklama
+#        YORUMUNDAKI ornegi ihlal sandi. Simdi yorumlar bosaltiliyor ve
+#        degisken->ID bagi akis sirali izleniyor (--ref HEAD -> 7 ihlal).
+echo "61/61 tab-visibility-canon-check (K-CP: sekme gorunurlugu tek kanon)..."
+if python3 tools/tab-visibility-canon-check.py; then
+  echo "  ✓ tab-visibility-canon-check PASS"
+else
+  echo "  ✗ K-CP KIRIK: sekme panelinin gorunurlugu applyTab disindan yonetiliyor."
+  echo "    Detay icin: python3 tools/tab-visibility-canon-check.py --verbose"
+  echo "    Pozitif kontrol: python3 tools/tab-visibility-canon-check.py --self-test"
+  echo "    Regresyon ornegi: python3 tools/tab-visibility-canon-check.py --ref 87c165e  # 7 ihlal beklenir"
   FAIL=$((FAIL + 1))
 fi
 

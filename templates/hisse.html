@@ -617,7 +617,14 @@
     </div>
   </div>
 
-  <div id="panel-ozet" role="tabpanel" aria-labelledby="tab-ozet" tabindex="0">
+  {# K-CP (22.09): sarmalayici `role="tabpanel"` idi ama `data-tab-content`
+   tasimiyordu -- applyTab onu hic gormuyordu, yani Ozet DISINDAKI sekmelerde
+   de DOM'da "Ozet sekme paneli" olarak asili kaliyordu (canli olcum 22.09,
+   ?tab=ai: display:block, yukseklik 0 -- gorunmez ama ARIA agacinda var,
+   aria-selected=false olan sekmenin paneli gizlenmelidir). Icindeki dokuz
+   panelin HEPSI zaten data-tab-content="ozet"; sarmalayici ayni degeri alinca
+   ikinci bir gorunurluk kanonu dogmaz, yalniz mevcut kanon tam uygulanir. #}
+<div id="panel-ozet" data-tab-content="ozet" role="tabpanel" aria-labelledby="tab-ozet" tabindex="0">
   <!-- SPEC-014 A1 — Sinyal Özeti (konsolide karar kutusu) -->
   {% if signal_summary %}
   <div id="signalSummarySection"
@@ -1429,7 +1436,8 @@
 
   <!-- AI Haberler -->
   <div id="news-section"></div>
-  <div id="panel-haberler-main" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0">
+  {# K-CP: ayni duzeltme -- icindeki newsSection/kapSection ikisi de "haberler". #}
+<div id="panel-haberler-main" data-tab-content="haberler" role="tabpanel" aria-labelledby="tab-haberler" tabindex="0">
   <div class="da-panel da-panel--accent news-section" id="newsSection" data-tab-content="haberler">
     <h2 class="section-title"><span aria-hidden="true">🤖</span> Son Haber Özeti</h2>
     <div class="da-loading news-loading" id="newsLoading" role="status" aria-live="polite">
@@ -2462,15 +2470,23 @@ function renderSummary(s, signalData) {
   /* ── Giriş Analizi ── */
   (function renderEntryAnalysis() {
     const section = document.getElementById('entryAnalysisSection');
-    // CPO r-fix (05.09): bu fonksiyon asenkron veri geldiginde (initial tab-uygulamasindan
-    // SONRA) calisabiliyordu ve asagidaki her dal kosulsuz section.style.display='block'
-    // yapiyordu -- ozet DISINDA bir sekme (orn. ?tab=ai ile dogrudan link) aktifken bile
-    // Giris Analizi kutusu yanlislikla goruntuye sizabiliyordu (canli dogrulandi,
-    // data-tab-content="ozet" olan bu section applyTab()'in gizlemesine ragmen tekrar
-    // aciliyordu). Once aktif sekmeyi kontrol et, ozet degilse dokunma.
-    const _activeSeg = document.querySelector('.bp-segments-inner a.active');
-    const _activeTab = _activeSeg ? _activeSeg.dataset.segment : 'ozet';
-    if (_activeTab !== 'ozet') { if (section) section.style.display = 'none'; return; }
+    /* K-CP (22.09): GORUNURLUK ARTIK BU FONKSIYONUN ISI DEGIL.
+       Onceki hali (CPO r-fix 05.09) sizintiyi "aktif sekme ozet degilse DOKUNMA ve
+       RETURN" diye kapatiyordu. Ama bu IIFE sayfa omrunde en fazla iki kez calisir
+       (renderSummary ~3165 sd=null, ~3196 sd dolu) ve IKISI DE applyTab(initial)'den
+       SONRA gelir. Yani ?tab=ai / ?tab=grafik / ?tab=haberler ile -- ya da
+       localStorage'daki `bp_hisse_tab` yuzunden, ki bir kez AI sekmesine bakan
+       kullanicinin SONRAKI her hisse sayfasi oyle acilir -- acilan sayfada grid HIC
+       doldurulmuyordu; kullanici Ozet'e tiklayinca applyTab bolumu goruntuye aliyor
+       ama icerigi bos kaliyordu. Canli olcum 22.09 (BIMAS, AL + entry_quality dolu):
+       ?tab=ozet -> eqBadge 45 / rrBar 228 / rrLevels 1632 karakter (SL 400,06 ·
+       Simdi 432,25 · TP1 496,63 · TP2 528,82 · R/R 1:2,0); ?tab=ai -> Ozet'e gecince
+       UCU DE 0 karakter, ekranda yalniz "DEGERLENDIRME" ve "RISK / ODUL" etiketleri.
+       Sinyalsiz hissede de ayni: "aktif sinyal yok" aciklamasi hic basilmiyordu.
+       Kok neden sekme kontrolu degil, asagidaki `section.style.display='block'`
+       yazimlariydi -- onlar kalkinca sizinti da biter. Gorunurlugun TEK kanonu
+       applyTab'in `data-tab-content` kanonu (K-BT'de Hacim Profili icin verilen
+       ayni karar). Render kosulsuz yapilir, bolum gizliyse kullanici gormez. */
     const grid = document.getElementById('entryAnalysisGrid');
     if (grid && _pristineEntryGridHtml === null) _pristineEntryGridHtml = grid.innerHTML;
     // CPO-1107 Faz0 #2 (TUPRS-sınıfı çelişki): "aktif sinyal yok" kararı header
@@ -2483,7 +2499,7 @@ function renderSummary(s, signalData) {
     if (!hasActiveSignal) {
       /* CPO-983 Opsiyon B: boş kutular yerine anlamlı placeholder — aktif sinyal yok */
       if (section) {
-        section.style.display = 'block';
+        /* K-CP: display yazimi yok -- gorunurluk applyTab'in kanonu */
         const grid = document.getElementById('entryAnalysisGrid');
         if (grid) {
           grid.innerHTML = '<div style="grid-column:1/-1;color:var(--bp-text3);font-size:var(--bp-text-base);padding:8px 2px;line-height:1.6">Bu hisse için şu an aktif bir sinyal yok, giriş analizi hesaplanmadı. Yeni sinyal oluştuğunda bu bölüm otomatik güncellenir.</div>';
@@ -2496,7 +2512,7 @@ function renderSummary(s, signalData) {
       /* Sinyal aktif ama giriş analizi verisi henüz gelmedi ya da hesaplanamadı —
          "aktif sinyal yok" demek yanlış olur, header'la çelişir. */
       if (section) {
-        section.style.display = 'block';
+        /* K-CP: display yazimi yok -- gorunurluk applyTab'in kanonu */
         const grid = document.getElementById('entryAnalysisGrid');
         if (grid) {
           const msg = !signalData
@@ -2508,7 +2524,7 @@ function renderSummary(s, signalData) {
       return;
     }
 
-    if (section) section.style.display = 'block';
+    /* K-CP: gorunurluk applyTab'in `data-tab-content` kanonunda */
     // CPO-1558: bir önceki çağrı bu grid'i bir placeholder mesajıyla değiştirmiş
     // olabilir (yükleniyor/veri yok/sinyal yok dalları) — bu, aşağıdaki başarı
     // dalının getElementById ile aradığı #eqBadge/#eqNote/#rrBarContainer/
@@ -4073,31 +4089,20 @@ window._bpApplyTooltips = _applyTooltipVisibility;
     }, {passive: true});
   }
 
-  // Tab → hangi section ID'leri görünür
-  // ALL_PANELS = grafik+ai+haberler section'ları (toggle'a tabi)
-  // Özet tab default: bunların hepsi gizli, kalan içerik (signalSummary + miniStats + history) görünür
-  var ALL_PANELS = ['chart-section', 'sigExplainSection', 'newsSection'];
-  var SHOW_FOR_TAB = {
-    'ozet':     [],  // hepsi gizli → kullanıcı sadece özet görür
-    'grafik':   ['chart-section'],
-    'ai':       ['sigExplainSection'],
-    'haberler': ['newsSection']
-  };
-  var VALID_TABS = Object.keys(SHOW_FOR_TAB);
+  /* Sekme -> panel gorunurlugu TEK kanondan yonetilir: her panelin kendi
+     `data-tab-content` niteligi (asagida). K-CP (22.09): burada ayrica bir
+     ALL_PANELS/SHOW_FOR_TAB ID listesi vardi -- ayni is icin IKINCI bir kanon.
+     Uc ID sayiyordu (chart-section · sigExplainSection · newsSection) ama ai
+     sekmesinin `aiFundSection`ini ve haberler sekmesinin `kapSection`ini hic
+     bilmiyordu; ucunun de `data-tab-content`i oldugu icin ikinci adim zaten
+     birincinin yazdigini eziyordu, yani liste hem eksik hem etkisizdi. Bir
+     panel eklendiginde guncellenmeyi bekleyen ikinci bir yer birakmamak icin
+     kaldirildi. Sekme adlari artik tek yerde. */
+  var VALID_TABS = ['ozet', 'grafik', 'ai', 'haberler'];
 
   function applyTab(tab, opts) {
     opts = opts || {};
     if (VALID_TABS.indexOf(tab) === -1) tab = 'ozet';
-    // Legacy ID toggle
-    ALL_PANELS.forEach(function(id){
-      var el = document.getElementById(id);
-      if (el) el.style.display = 'none';
-    });
-    var showList = SHOW_FOR_TAB[tab] || [];
-    showList.forEach(function(id){
-      var el = document.getElementById(id);
-      if (el) el.style.display = '';
-    });
     // SPEC-017 v2 Faz A — data-tab-content attribute (true tab-switch)
     var panes = document.querySelectorAll('[data-tab-content]');
     panes.forEach(function(p){
