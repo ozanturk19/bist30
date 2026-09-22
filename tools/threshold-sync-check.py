@@ -20,6 +20,8 @@ Taban SIFIR.
 """
 import re, sys, pathlib
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 LADDERS = {
@@ -117,11 +119,15 @@ NESIR = re.compile(
 # "ideal giriş penceresi" KARSILASTIRMASI FALSE doner. Ilk yazimda RSI
 # nesrindeki "45-60 ideal giriş penceresi" iddiasi tam bu yuzden sessizce
 # kapsam disi kaldi -- dedektor "temiz" diyordu ama o satiri hic olcmemisti.
-_TR = str.maketrans({"İ": "i", "I": "ı", "Ş": "ş", "Ğ": "ğ",
-                     "Ü": "ü", "Ö": "ö", "Ç": "ç"})
-
-def tr_lower(x):
-    return x.translate(_TR).lower()
+# 22.09 (K-CI): bu dosyanin yardimcisi tuzagi DOGRU teshis etti ama yaniti
+# `I -> ı` (Turkce-dogru buyuk/kucuk esligi) diye yazdi. Olculdu: ASCII bir
+# kalibi ("ideal giris") ararken bu yazim 5 es-yazimin 3'unde DUSER
+# ("IDEAL GIRIS" -> "ıdeal gırıs"). Burada simetrik kullanildigi icin canli
+# bug uretmiyordu, ama kapi 53 ayni ise BASKA bir yanit yazmisti -- "ayni is
+# icin iki kanon". Ikisi de tools/_tr.py'ye tasindi.
+# `fold_map` ayrica CAKISMAYI SESSIZ GECMEZ: iki farkli etiket ayni anahtara
+# katlanirsa biri sessizce kaybolacagi yerde ValueError atar.
+from _tr import tr_fold as tr_lower, fold_map
 
 
 UNI = re.compile(r"\\u([0-9a-fA-F]{4})")
@@ -137,7 +143,7 @@ def coz(text):
 
 def nesir_kontrol(labels, arlk):
     """Metindeki '<sayi> <etiket>' iddialarini kanonik ARALIKLA karsilastirir."""
-    lower = {tr_lower(l): l for l in labels}
+    lower = fold_map(labels)
     bulgular, sayac = [], 0
     for f in sorted((ROOT / "templates").glob("*.html")):
         text = coz(f.read_text(encoding="utf-8"))

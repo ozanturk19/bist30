@@ -51,6 +51,8 @@ Cikis: ihlal varsa 1.
 """
 import os, re, sys, pathlib
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 # --- kapsam: tarayiciya inen, elle yazilmis paylasilan JS -------------------
@@ -152,12 +154,13 @@ VERI_ANAHTARLARI = {
 # yeni yazilan bu kapida TEKRARLADI. Bilgi repoda duruyordu ama PAYLASILAN
 # BIR YARDIMCIDA degil, tek bir dosyanin yorumunda yasiyordu. Tekrarlanan
 # bir olcum tuzagi, yorum olarak degil FONKSIYON olarak saklanmalidir.
-_TR_HARITA = str.maketrans({
-    "İ": "i", "I": "i", "ı": "i", "\u0307": "",
-})
-
-def _tr_kucult(s):
-    return s.translate(_TR_HARITA).lower().replace("\u0307", "")
+# 22.09 (K-CI): bu yardimci ARTIK BURADA TANIMLI DEGIL. Olculdu ki
+# `threshold-sync-check.py`nin ayni isi yapan yardimcisi BU DOSYADAKINDEN
+# FARKLI davraniyordu (orada `I -> ı`, burada `I -> i`) -- yani "ayni is
+# icin iki kanon", ve bu kez kanon catlagi OLCUM KATMANINDAYDI. Ikisi de
+# tools/_tr.py'ye tasindi; tuzagin kendisi artik yorumda degil FONKSIYONDA
+# yasiyor (84. dersin dersi). Desen aramasinda `tr_fold` kullanilir.
+from _tr import tr_fold as _tr_kucult
 
 
 KANON_SKOR_ADLARI = ("Teknik Güç Skoru", "BorsaPusula Skoru")
