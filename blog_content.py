@@ -1282,6 +1282,7 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
   },
   {
     "slug": "swing-trading-nedir",
+    "date": "2026-05-01",
     "title": "Swing Trading Nedir? BIST'te Swing Trade Nasıl Yapılır?",
     "cat": "Strateji",
     "read_min": 7,
@@ -1397,6 +1398,7 @@ BorsaPusula'daki algoritmik sinyaller tam olarak swing trading için tasarlanmı
   },
   {
     "slug": "atr-indikatoru-nedir",
+    "date": "2026-05-01",
     "title": "ATR (Average True Range) Nedir? Volatilite Ölçümü",
     "cat": "Teknik Analiz",
     "read_min": 5,
@@ -1510,6 +1512,7 @@ Yüksek ATR dönemlerinde sinyaller daha geniş stop ile gelir, bu normaldir ve 
   # ── Makale 32 ──────────────────────────────────────────────────────
   {
     "slug": "macd-indikatoru-nedir",
+    "date": "2026-05-02",
     "title": "MACD İndikatörü Nedir? Nasıl Yorumlanır?",
     "cat": "Teknik Analiz",
     "read_min": 6,
@@ -1587,6 +1590,7 @@ BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA12/99 kombinasyonunu kullan
   # ── Makale 33 ──────────────────────────────────────────────────────
   {
     "slug": "destek-direnc-seviyeleri-nedir",
+    "date": "2026-05-02",
     "title": "Destek ve Direnç Seviyeleri Nedir? Nasıl Belirlenir?",
     "cat": "Teknik Analiz",
     "read_min": 7,
@@ -1713,6 +1717,7 @@ Not: Bir seviye ne kadar çok test edilirse o kadar güçlenir, ama bu aynı zam
   # ── Makale 34 ──────────────────────────────────────────────────────
   {
     "slug": "hacim-analizi-nedir",
+    "date": "2026-05-02",
     "canonical_slug": "hacim-analizi-borsa-volume",
     "title": "Hacim Analizi: Fiyatı Hacimle Doğrulama",
     "cat": "Teknik Analiz",
@@ -1811,6 +1816,7 @@ Her sinyal öncesi şunları kontrol edin:
   # ── Makale 35 ──────────────────────────────────────────────────────
   {
     "slug": "guclu-momentum-hisseleri-nasil-tespit-edilir",
+    "date": "2026-05-02",
     "title": "Güçlü Momentum Hisseleri Nasıl Tespit Edilir?",
     "cat": "Strateji",
     "read_min": 6,
@@ -1916,6 +1922,7 @@ Momentum trading'de disiplin kazanmadan başarı sürdürülebilir değildir."""
   # ── Makale 36 ──────────────────────────────────────────────────────
   {
     "slug": "mum-grafik-formasyonlari",
+    "date": "2026-05-02",
     "canonical_slug": "mum-formasyonlari-teknik-analiz-rehberi",
     "title": "Mum Grafik Formasyonları: 10 Kritik Sinyal",
     "cat": "Teknik Analiz",
@@ -2028,6 +2035,7 @@ BorsaPusula'nın sinyal algoritması doğrudan mum formasyonlarına bakmaz; Supe
   # ── Makale 37 ──────────────────────────────────────────────────────
   {
     "slug": "dolar-tl-borsa-iliskisi",
+    "date": "2026-05-02",
     "title": "Dolar/TL ve BIST İlişkisi: Kur Yükselince Ne Olur?",
     "cat": "Makro Ekonomi",
     "read_min": 5,
