@@ -858,6 +858,26 @@ if (TICKERS_PARAM) {
     });
     doCompare({skipUrl: true});
   });
+} else {
+  // K-DM: `?tickers=<tek hisse>` sunucuda KASITLI bosaltiliyor (CPO-1630 P2 --
+  // tek hisselik "karsilastirma" backend'de de engelli, dogru karar). Yan
+  // etkisi: /hisse hero'sundan AKRANSIZ gelen kullanici (sektoru "Diğer" olan
+  // 11 hisse) ticker'ini de kaybediyor, bombos bir arac sayfasina dusuyordu.
+  // Burada karsilastirma YAPILMAZ -- yalnizca ilk alan tohumlanir ve bos durum
+  // "1 hisse secildi, 1 tane daha ekleyin" der; kullanici ikinciyi secince
+  // akis normal doCompare()'e doner.
+  document.addEventListener('DOMContentLoaded', () => {
+    let seed = '';
+    try {
+      seed = (new URL(window.location.href).searchParams.get('tickers') || '')
+        .split(',')[0].trim().toUpperCase().replace(/[^A-Z0-9.]/g, '').slice(0, 20);
+    } catch (e) { seed = ''; }
+    if (!seed) return;
+    const el = document.getElementById('t1');
+    if (!el || el.value) return;
+    el.value = seed;
+    document.getElementById('compareResult').innerHTML = bpCompareEmptyHtml(1);
+  });
 }
 
 // bug-hunt r94: URL pushState ile guncelleniyordu ama popstate dinleyicisi yoktu —
