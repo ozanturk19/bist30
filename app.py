@@ -1973,28 +1973,24 @@ def analyze(ticker_base):
         # AL'da, AL olmayanda "Nötr Bölge (RSI 45-60)" (kaynakta dogru, vaat yok).
         rsi_zone = derive_rsi_zone(rsi_val, signal)
 
-        # ── R/R Çift Oran (Faz 1 #2) — bug fix ─────────────────────────────
+        # ── R/R (Faz 1 #2) — bug fix ────────────────────────────────────────
         # Önceki kod hard-coded rr_ratio=2.0 veriyordu (anlamsız).
-        # Doğru hesap: TP1 fix bir hedef, iki farklı giriş için R/R farklı:
-        #  - Sinyal başından: entry=signal_price, ideal koşullar (en yüksek R/R)
-        #  - Şu an girersen: entry=current, fiyat yükseldikçe R/R düşer (kovalama riski)
+        # rr_signal: sinyal başından (entry=signal_price) gerçek R/R.
+        # CPO-1762: rr_now (entry=current) kaldırıldı — tp1 = c + risk*2
+        # totolojisi yüzünden AL'da HER ZAMAN tam 2.0 (matematiksel garanti,
+        # 79/79 canlı ölçümde doğrulandı), sıfır tüketicisi vardı (CPO-DEV2-045
+        # ile frontend'den zaten kaldırılmıştı). rr_ratio'nun aynı totolojiyle
+        # kaldırılmasıyla (CPO-1758) birebir aynı sınıf.
         rr_signal = None
-        rr_now    = None
         if tp1 is not None and signal_price is not None and sl_val is not None:
             if signal == "AL":
                 _risk_sig = signal_price - sl_val
-                _risk_now = c - sl_val
                 if _risk_sig > 0:
                     rr_signal = round((tp1 - signal_price) / _risk_sig, 2)
-                if _risk_now > 0:
-                    rr_now = round((tp1 - c) / _risk_now, 2)
             elif signal == "SAT":
                 _risk_sig = sl_val - signal_price
-                _risk_now = sl_val - c
                 if _risk_sig > 0:
                     rr_signal = round((signal_price - tp1) / _risk_sig, 2)
-                if _risk_now > 0:
-                    rr_now = round((c - tp1) / _risk_now, 2)
 
         # ── Likidite Filtresi (Faz 1) — Günlük TL hacim 20 gün ortalaması ─────
         # < 5M TL → "Düşük Likidite" uyarısı (slippage + manipülasyon riski)
@@ -2111,10 +2107,10 @@ def analyze(ticker_base):
             "optimal_entry":   optimal_entry,
             "tp1":             tp1,
             "tp2":             tp2,
-            # CPO-1758: rr_ratio (hep 2.0 -- TP1=entry+risk*2 totolojisi) kaldirildi,
-            # frontend'de sifir tuketicisi kalmisti. rr_signal tek R/R kaynagi.
+            # CPO-1758: rr_ratio (hep 2.0 -- TP1=entry+risk*2 totolojisi) kaldirildi.
+            # CPO-1762: rr_now (aynı totoloji, farklı ad) de kaldırıldı -- rr_signal
+            # tek R/R kaynağı.
             "rr_signal":       rr_signal,  # Faz 1 #2: sinyal başından R/R
-            "rr_now":          rr_now,     # Faz 1 #2: şu an girersen R/R
         }
     except Exception as e:
         logger.error("analyze(%s): %s", ticker_base, e, exc_info=True)
@@ -4089,22 +4085,34 @@ def _refresh_data_impl():
     # ── Faz 12 P2.2 DQV: Anomaly Detection Validation ───────────────────────
     if _DQV_AVAILABLE:
         try:
-            with _lock:
-                _stocks_with_hist = []
-                for _s in results:
-                    _t = _s.get("ticker")
-                    if not _t:
-                        continue
-                    _ohlc = ((_stock_chart_cache.get(_t) or {}).get("data") or {}).get("ohlc") or []
-                    _price_hist = [e["close"] for e in _ohlc[-6:-1] if e.get("close")]
-                    _vol_hist   = [e.get("volume", 0) for e in _ohlc[-6:-1] if e.get("close")]
-                    _stocks_with_hist.append({
-                        "ticker":        _t,
-                        "today_price":   _s.get("price"),
-                        "price_history": _price_hist,
-                        "today_volume":  _s.get("volume"),
-                        "volume_history": _vol_hist,
-                    })
+            # CPO-1762: DQV_CROSS bloğuyla (yukarıda, CPO-1729) AYNI kök neden --
+            # önceden burada da _stock_chart_cache.get(_t) doğrudan okunuyordu.
+            # refresh_worker.py process'inde o in-memory cache SADECE bu fonksiyonun
+            # kendi disk-okumasıyla dolar (_load_chart_from_disk_per_ticker); bu blok
+            # DQV_CROSS'un side-effect'ine ÖRTÜK bağımlıydı (sıra değişirse veya
+            # DQV_CROSS exception'la erken çıkarsa sessizce boş history'ye düşer --
+            # CPO-1729'dan ÖNCE tam olarak bu oluyordu: z_score_check hep mean=None
+            # görüp None dönüyordu, 217/217 flag=false ama "temiz" değil "hiç
+            # çalışmıyor" anlamına geliyordu). Artık DQV_CROSS ile birebir aynı
+            # desen: kendi disk okumasını yapıyor, _lock DIŞINDA (fonksiyon kendi
+            # içinde kilitliyor -- _lock reentrant değil, içeride tutarken çağrılırsa
+            # deadlock olur).
+            _stocks_with_hist = []
+            for _s in results:
+                _t = _s.get("ticker")
+                if not _t:
+                    continue
+                _chart_data, _ = _load_chart_from_disk_per_ticker(_t)
+                _ohlc = (_chart_data or {}).get("ohlc") or []
+                _price_hist = [e["close"] for e in _ohlc[-6:-1] if e.get("close")]
+                _vol_hist   = [e.get("volume", 0) for e in _ohlc[-6:-1] if e.get("close")]
+                _stocks_with_hist.append({
+                    "ticker":        _t,
+                    "today_price":   _s.get("price"),
+                    "price_history": _price_hist,
+                    "today_volume":  _s.get("volume"),
+                    "volume_history": _vol_hist,
+                })
             _an = _dqv_anomalies(_stocks_with_hist)
             if _an["errors"]:
                 if _ALERTING_AVAILABLE:
