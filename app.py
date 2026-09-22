@@ -8575,6 +8575,23 @@ def _resolve_statement_currency(financial_currency, market_cap_raw, revenue_raw,
     return financial_currency
 
 
+def _fundamentals_schema_ok(data):
+    """CPO-1706: 'schema tam mı' kontrolü eskiden SADECE anahtarın VARLIĞINA
+    bakıyordu (`"statement_trend_quarterly" in data`) -- ama bu alan HER
+    yazımda `_fetched.get(...) or []` ile garanti VAR ediliyor, boş/None
+    olsa bile. Yahoo bir turda quarterly/financialCurrency ucunu boş
+    döndürürse (script hata vermez, sadece o alanlar boş gelir -- CB de
+    yakalamaz) kayıt bir daha ASLA 'eksik' sayılmıyordu; sadece TTL
+    (~3.5s) dolunca yeniden denenirdi. Canlı kanıt (22.09 ~03:1x TR):
+    217/217 ticker financial_currency=null yazılmış, iki ayrı warmup
+    turunda (farklı restart'lar) da aynı sonuç, hiçbir hata log'lanmamış.
+    Artık İÇERİK (truthy) kontrol ediliyor -- boş yazım bir sonraki 30dk'lık
+    turda tekrar denenir."""
+    if not data:
+        return False
+    return bool(data.get("statement_trend_quarterly")) and bool(data.get("financial_currency")) and bool(data.get("statement_currency"))
+
+
 def _get_fundamentals(ticker_base):
     """yfinance ile temel analiz verilerini döndürür."""
     now = time.time()
@@ -8591,7 +8608,7 @@ def _get_fundamentals(ticker_base):
         # fmt_billion string'i taşıyor, yeni frontend _fmtMoneyObj bunu tolere eder
         # (bkz. şablon) ama LEADER de bu eski kaydı bir sonraki warmup turunda
         # (30dk) kendiliğinden tazelesin — TTL'in 4 saatini beklemesin.
-        _schema_ok = "statement_trend_quarterly" in cached["data"] and "statement_currency" in cached["data"] if cached else False
+        _schema_ok = _fundamentals_schema_ok(cached["data"]) if cached else False
         if _fresh and (_is_web or _schema_ok):
             return cached["data"]
     # CPO-558G: web worker'da synchronous yfinance yasak — stale/empty cache dön
@@ -8660,6 +8677,9 @@ def _get_fundamentals(ticker_base):
             "operating_margin":  round(safe_num("operatingMargins") * 100, 1) if safe_num("operatingMargins") is not None else None,
             "earnings_growth":   round(safe_num("earningsGrowth") * 100, 1) if safe_num("earningsGrowth") is not None else None,
             "revenue_growth":    round(safe_num("revenueGrowth") * 100, 1) if safe_num("revenueGrowth") is not None else None,
+            # CPO-1754: yfinance'in debtToEquity alani YUZDE doner (ornek THYAO ~89 =
+            # 0,89x), "kat" DEGIL -- frontend (hisse.html K-BX) bunu /100 ile olcekliyor.
+            # Bu alani KAT/ORAN gibi kullanacak yeni kod eklersen ayni /100'u uygula.
             "debt_to_equity":    round(safe_num("debtToEquity"), 2) if safe_num("debtToEquity") is not None else None,
             "current_ratio":     round(safe_num("currentRatio"), 2) if safe_num("currentRatio") is not None else None,
             "price_to_sales":    _pts_raw,
@@ -13923,7 +13943,9 @@ def _fundamentals_warmup_daemon():
             # kayıt) TTL'in 3.5 saatini beklemeden bir sonraki 30dk'lık turda yeniden çekilir.
             # Önceden sadece yaş bakıyordu — eksik alanlı bir kayıt tam TTL boyunca "taze" sayılıp
             # atlanıyor, ceyreklik grafik saatlerce bozuk kalabiliyordu.
-            _stale_schema = bool(_fc) and "statement_trend_quarterly" not in (_fc.get("data") or {})
+            # CPO-1706: artık _fundamentals_schema_ok() ile İÇERİK (truthy) kontrol
+            # ediliyor, sadece anahtar varlığı değil — bkz. fonksiyonun docstring'i.
+            _stale_schema = bool(_fc) and not _fundamentals_schema_ok(_fc.get("data"))
             if not _fc or _stale_schema or (now - _fc["ts"]) > (_FUND_TTL - 1800):  # TTL'den 30dk önce tazele
                 try:
                     _get_fundamentals(_t)
