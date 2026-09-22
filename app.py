@@ -2651,7 +2651,40 @@ def send_email(to_email, subject, html_body, unsubscribe_url=None, reply_to=None
 
 
 def _email_base(content_html, unsubscribe_url, preheader=""):
-    """Ortak e-posta şablonu — site dark teması, pusula logo, modern footer."""
+    """Ortak e-posta şablonu — site dark teması, pusula logo, modern footer.
+
+    CPO-1782 (22.09) köken kaydı: e-posta istemcilerinde var() çalışmadığından
+    bu dosyadaki (ve _build_welcome_email / _build_login_email /
+    _build_signal_email / _check_user_alerts watchlist alarmındaki) tüm renk
+    stilleri ham hex literal. Aşağıdaki eşleme static/css/tokens.css'teki
+    kanonik karşılıklarını kayda geçirir; DEĞER DEĞİŞMEDİ, sadece köken:
+      #0e0e12 -> --bp-bg        (tam eşleşme)
+      #161618 -> KANONA KARSILIK YOK (tokens.css'te --bp-surface #141416'ya
+                 en yakin ama esit degil; e-posta kart zemini icin ayri bir
+                 varyant -- kanon eksik, CPO'ya bildirildi)
+      #2a2a2c -> --bp-border    (tam eşleşme)
+      #e5e1e4 -> --bp-text      (tam eşleşme)
+      #c7c5cd -> --bp-text2     (tam eşleşme)
+      #909097 -> --bp-text3 / --bp-bkl / --bp-ctl-border-hover (üçü de aynı
+                 değer; e-postada BEKLE sinyali + ikincil metin için kullanılıyor)
+      #00e290 -> --bp-al / --bp-logo-accent (aynı değer; e-postada hem AL
+                 sinyali hem CTA buton zemini için kullanılıyor)
+      #f85149 -> --bp-sat       (tam eşleşme)
+      #ffc850 -> --bp-volume    (tam eşleşme; Hacim Onaylı rozeti)
+      #b8c3ff -> --bp-brand     (tam eşleşme; kişiselleştirme CTA'sı)
+      #eef3f8 -> KANONA KARSILIK YOK (logo wordmark'ın açık yarısı; sitede
+                 --bp-text kullanılıyor, e-postada neden ayrı bir beyaz
+                 tonu var belirsiz -- kanon eksik)
+      #00e2a1 -> KANONA KARSILIK YOK (logo wordmark vurgusu; --bp-al'a
+                 %0,2 yakın ama eşit değil -- olası kopya-hata, kanon eksik)
+      #8f98a8 -> KANONA KARSILIK YOK (üst başlık altyazısı "PİYASANIN YÖNÜ")
+      #5a5a62 / #3a3a42 -> KANONA KARSILIK YOK (footer ayraç/metin tonları)
+      #1c1c1f -> KANONA KARSILIK YOK (watchlist alarm tablo başlığı zemini;
+                 --bp-surface2 #1c1b1f'e çok yakın ama eşit değil)
+    Sonuç: 5 literal hiçbir tokene karşılık gelmiyor (#eef3f8, #00e2a1,
+    #8f98a8, #5a5a62, #3a3a42) + 2 "neredeyse eşit ama farklı"
+    (#161618 vs --bp-surface, #1c1c1f vs --bp-surface2). Değer değiştirilmedi.
+    """
     preheader_html = f'''<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#0e0e12;opacity:0">{preheader}</div>''' if preheader else ""
     return f"""<!DOCTYPE html>
 <html lang="tr">

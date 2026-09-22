@@ -13,6 +13,11 @@
   --bp-surface:   #141416;
   --bp-surface2:  #1c1b1f;
   --bp-surface3:  #201f21;
+  /* CPO-1782 (22.09) köken notu: app.py e-posta şablonları (_email_base ve
+     watchlist alarm HTML'i) var() kullanamadığı için #161618 ve #1c1c1f ham
+     literallerini taşıyor — bu tokenlere YAKIN ama EŞİT DEĞİL (kanon eksik,
+     tam eşleme yapılmadı). Ayrıntılı hex->token dökümü app.py::_email_base
+     docstring'inde. */
 
   /* Borders */
   --bp-border:    #2a2a2c;
