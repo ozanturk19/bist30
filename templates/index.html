@@ -64,7 +64,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
-<link rel="stylesheet" href="/static/css/tokens.css?v=306ecc56">
+<link rel="stylesheet" href="/static/css/tokens.css?v=e2879e56">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
@@ -97,36 +97,36 @@
       <defs>
         <filter id="daSoftBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="70"/></filter>
         <linearGradient id="daWaveGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#ff37d8"/>
-          <stop offset="50%" stop-color="#1fe0ff"/>
-          <stop offset="100%" stop-color="#00e6a0"/>
+          <stop offset="0" style="stop-color:var(--bp-art-magenta)"/>
+          <stop offset="50%" style="stop-color:var(--bp-accent-cyan)"/>
+          <stop offset="100%" style="stop-color:var(--bp-al)"/>
         </linearGradient>
       </defs>
       <g filter="url(#daSoftBlur)" opacity="0.55">
         <circle class="da-blob da-blob-a" cx="220" cy="150" r="150" fill="var(--bp-art-violet)"/>
-        <circle class="da-blob da-blob-b" cx="960" cy="120" r="170" fill="#ff37d8"/>
-        <circle class="da-blob da-blob-c" cx="1040" cy="430" r="150" fill="#00e6a0"/>
-        <circle class="da-blob da-blob-d" cx="180" cy="470" r="140" fill="#1fe0ff"/>
+        <circle class="da-blob da-blob-b" cx="960" cy="120" r="170" fill="var(--bp-art-magenta)"/>
+        <circle class="da-blob da-blob-c" cx="1040" cy="430" r="150" fill="var(--bp-al)"/>
+        <circle class="da-blob da-blob-d" cx="180" cy="470" r="140" fill="var(--bp-accent-cyan)"/>
       </g>
       <path d="M0,340 C60,318 100,270 150,310 C200,350 240,200 280,265 C320,330 360,150 410,225 C460,300 500,175 550,260 C600,345 650,120 700,250 C750,380 800,205 850,290 C900,375 950,165 1000,270 C1050,375 1100,230 1150,310 C1180,350 1190,310 1200,330"
         fill="none" stroke="url(#daWaveGrad)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
       <g opacity="0.75">
-        <circle class="da-node" cx="120" cy="90" r="3.5" fill="#1fe0ff"/>
-        <circle class="da-node" cx="260" cy="60" r="2.5" fill="#ff37d8" style="animation-delay:.4s"/>
-        <circle class="da-node" cx="380" cy="130" r="4" fill="#00e6a0" style="animation-delay:.8s"/>
+        <circle class="da-node" cx="120" cy="90" r="3.5" fill="var(--bp-accent-cyan)"/>
+        <circle class="da-node" cx="260" cy="60" r="2.5" fill="var(--bp-art-magenta)" style="animation-delay:.4s"/>
+        <circle class="da-node" cx="380" cy="130" r="4" fill="var(--bp-al)" style="animation-delay:.8s"/>
         <circle class="da-node" cx="520" cy="70" r="2.5" fill="var(--bp-art-violet)" style="animation-delay:1.2s"/>
-        <circle class="da-node" cx="640" cy="150" r="3" fill="#1fe0ff" style="animation-delay:.2s"/>
-        <circle class="da-node" cx="760" cy="80" r="4.5" fill="#ff9d2e" style="animation-delay:1.6s"/>
-        <circle class="da-node" cx="880" cy="160" r="3" fill="#ff37d8" style="animation-delay:.6s"/>
-        <circle class="da-node" cx="1010" cy="90" r="2.5" fill="#00e6a0" style="animation-delay:1s"/>
-        <circle class="da-node" cx="1120" cy="180" r="3.5" fill="#1fe0ff" style="animation-delay:1.4s"/>
+        <circle class="da-node" cx="640" cy="150" r="3" fill="var(--bp-accent-cyan)" style="animation-delay:.2s"/>
+        <circle class="da-node" cx="760" cy="80" r="4.5" fill="var(--bp-art-orange)" style="animation-delay:1.6s"/>
+        <circle class="da-node" cx="880" cy="160" r="3" fill="var(--bp-art-magenta)" style="animation-delay:.6s"/>
+        <circle class="da-node" cx="1010" cy="90" r="2.5" fill="var(--bp-al)" style="animation-delay:1s"/>
+        <circle class="da-node" cx="1120" cy="180" r="3.5" fill="var(--bp-accent-cyan)" style="animation-delay:1.4s"/>
         <circle class="da-node" cx="90" cy="480" r="3" fill="var(--bp-art-violet)" style="animation-delay:.9s"/>
-        <circle class="da-node" cx="240" cy="540" r="2.5" fill="#ff37d8" style="animation-delay:.3s"/>
-        <circle class="da-node" cx="410" cy="500" r="4" fill="#00e6a0" style="animation-delay:1.8s"/>
-        <circle class="da-node" cx="600" cy="560" r="3" fill="#1fe0ff" style="animation-delay:.5s"/>
-        <circle class="da-node" cx="780" cy="500" r="2.5" fill="#ff9d2e" style="animation-delay:1.1s"/>
-        <circle class="da-node" cx="950" cy="550" r="3.5" fill="#ff37d8" style="animation-delay:.7s"/>
-        <circle class="da-node" cx="1110" cy="490" r="3" fill="#00e6a0" style="animation-delay:1.5s"/>
+        <circle class="da-node" cx="240" cy="540" r="2.5" fill="var(--bp-art-magenta)" style="animation-delay:.3s"/>
+        <circle class="da-node" cx="410" cy="500" r="4" fill="var(--bp-al)" style="animation-delay:1.8s"/>
+        <circle class="da-node" cx="600" cy="560" r="3" fill="var(--bp-accent-cyan)" style="animation-delay:.5s"/>
+        <circle class="da-node" cx="780" cy="500" r="2.5" fill="var(--bp-art-orange)" style="animation-delay:1.1s"/>
+        <circle class="da-node" cx="950" cy="550" r="3.5" fill="var(--bp-art-magenta)" style="animation-delay:.7s"/>
+        <circle class="da-node" cx="1110" cy="490" r="3" fill="var(--bp-al)" style="animation-delay:1.5s"/>
         <g stroke="#ffffff" stroke-opacity="0.12" stroke-width="1">
           <line x1="120" y1="90" x2="260" y2="60"/><line x1="260" y1="60" x2="380" y2="130"/>
           <line x1="380" y1="130" x2="520" y2="70"/><line x1="520" y1="70" x2="640" y2="150"/>

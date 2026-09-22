@@ -106,10 +106,10 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=306ecc56">
+<link rel="stylesheet" href="/static/css/tokens.css?v=e2879e56">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=04756784">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=67776c67">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -239,15 +239,28 @@
   {# CPO-535 #36 / SPEC-018 W2: signal_strength (compose_score) tek kaynak — tier_score emekli #}
   {%- set _score = ssr_signal.signal_strength | default(0) -%}
   {# SPEC-017 Faz C K3+K6+K9-1: Hero badge tek-vocab — "ORTA TREND"/"GÜÇLÜ SAT" yasaklandı; 🥇🥈🥉 medal kaldırıldı; SAT → "Trend Bozuldu" (K3) #}
+  {#- K-BY (22.09): BU BLOK DOKUZ HAM HEX YAZIYORDU ve dokuzunun HICBIRI
+      tokens.css'te YOKTU (#16a34a/#15803d/#22c55e/#86efac/#4ade80 ve
+      #dc2626/#991b1b/#ef4444/#fca5a5 -- yabanci bir paletin yesil/kirmizi
+      merdiveni). Canli olcum: 217 hissenin 79'u hero'sunu bu renklerle
+      basiyordu; ayni sayfadaki her diger AL/SAT yuzeyi --bp-al (#00e290) /
+      --bp-sat (#f85149) kullanirken.
+      NEDEN KAPILARDAN GECTI: renk burada `style=` icinde DEGIL, once bir
+      Jinja {% set %} degiskenine yaziliyor, sonra asagida
+      `style="--hero-accent:{{ _hc }}"` ile enterpole ediliyor. Kapi 42
+      (inline-style-hex-check) satir-ici `style=` metnine bakar, orada hex
+      GORMEZ. K-BW ayni kartin ROZETINI (#ff7875, satir ~139) duzeltmisti;
+      iki satir yukaridaki bu degisken AYNI turda hayatta kaldi -- cunku
+      kapi hatanin kendisini degil, hatanin O ANKI YAZIMINI ariyordu.
+      IKINCI KANON: renk yon DEGIL yon x GUC kodluyordu; ayni "SAT" uc ayri
+      kirmiziya boyaniyor, oysa rozet metni her ucunde de ayni. Gucun kendi
+      gostergesi zaten var (.bp-hero-power-bar dolgusu + sayisal etiket).
+      K-BO/K-BP kanonu: YON TEK RENKTIR. Renk yone, guc bara birakildi. -#}
   {%- if _sig == 'AL' -%}
-    {%- if _score >= 75 %}{% set _hc='#16a34a' %}{% set _hc2='#15803d' %}
-    {%- elif _score >= 60 %}{% set _hc='#22c55e' %}{% set _hc2='#16a34a' %}
-    {%- else %}{% set _hc='#86efac' %}{% set _hc2='#4ade80' %}{% endif -%}
+    {% set _hc='var(--bp-al)' %}{% set _hc2='rgba(var(--bp-al-rgb), 0.45)' %}
     {% set _lbl='GÜÇLÜ TREND' %}{% set _icon='▲' %}
   {%- elif _sig == 'SAT' -%}
-    {%- if _score >= 75 %}{% set _hc='#dc2626' %}{% set _hc2='#991b1b' %}
-    {%- elif _score >= 60 %}{% set _hc='#ef4444' %}{% set _hc2='#dc2626' %}
-    {%- else %}{% set _hc='#fca5a5' %}{% set _hc2='#ef4444' %}{% endif -%}
+    {% set _hc='var(--bp-sat)' %}{% set _hc2='rgba(var(--bp-sat-rgb), 0.45)' %}
     {% set _lbl='TREND BOZULDU' %}{% set _icon='▼' %}
   {%- else -%}
     {% set _hc='var(--bp-text3)' %}{% set _hc2='var(--bp-bkl)' %}{% set _lbl='YATAY' %}{% set _icon='⏸' %}
@@ -451,10 +464,13 @@
         // crosshair
         if (hi != null) {
           var idx = Math.max(0, Math.min(data.length-1, hi));
-          ctx.strokeStyle = 'rgba(229,225,228,0.35)';
+          /* K-BY: ayni renk (--bp-text) burada IKI ayri notasyonla ELLE
+             yazilmisti -- `rgba(229,225,228,…)` ve `#e5e1e4`. Ikisi de token
+             okumuyordu; dosyanin kendi kalibi (_tok, satir ~430) kullanildi. */
+          ctx.strokeStyle = 'rgba(' + _tok('--bp-text-rgb', '229, 225, 228') + ', 0.35)';
           ctx.lineWidth = 1;
           ctx.beginPath(); ctx.moveTo(xs[idx], pad); ctx.lineTo(xs[idx], H-pad); ctx.stroke();
-          ctx.fillStyle = '#e5e1e4';
+          ctx.fillStyle = _tok('--bp-text', '#e5e1e4');
           ctx.beginPath(); ctx.arc(xs[idx], ys[idx], 3.2, 0, Math.PI*2); ctx.fill();
           var v = data[idx].c.toLocaleString('tr-TR', {minimumFractionDigits:2,maximumFractionDigits:2});
           val.textContent = v + ' ₺';
@@ -3844,8 +3860,13 @@ async function loadMTF() {
     ];
 
     const sigColor = s => s === 'AL' ? 'var(--bp-al)' : s === 'SAT' ? 'var(--bp-sat)' : 'var(--bp-bkl)';
-    const sigBg    = s => s === 'AL' ? '#1a4731' : s === 'SAT' ? 'var(--bp-sat-bg)' : 'var(--bp-surface2)';
-    const sigBord  = s => s === 'AL' ? '#238636' : s === 'SAT' ? 'var(--bp-sat-bd)' : 'var(--bp-border)';
+    /* K-BY: AYNI UCLU KOSULUN iki dali iki ayri kanaldandi -- SAT ve BEKLE
+       token okurken AL ham hex yaziyordu (#1a4731 / #238636, ikisi de
+       tokens.css'te YOK) ve karsiliklari (--bp-al-bg / --bp-al-bd) zaten
+       VARDI; portfolio.css .signal-AL/.signal-SAT ciftini tam olarak boyle
+       esliyor. Canli: 217 sayfanin 6'sinda 11 AL karti boyaniyordu. */
+    const sigBg    = s => s === 'AL' ? 'var(--bp-al-bg)' : s === 'SAT' ? 'var(--bp-sat-bg)' : 'var(--bp-surface2)';
+    const sigBord  = s => s === 'AL' ? 'var(--bp-al-bd)' : s === 'SAT' ? 'var(--bp-sat-bd)' : 'var(--bp-border)';
     const sigArrow = s => s === 'AL' ? '▲' : s === 'SAT' ? '▼' : '●';
 
     /* CPO-983 Opsiyon B: 4 ayrı boş "Veri yok" kutusu yerine tek anlamlı placeholder */

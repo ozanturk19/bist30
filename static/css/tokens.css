@@ -112,6 +112,17 @@
   --bp-art-violet: #7c5cff;   /* CPO-1558: Data-Art mockup'ın kendi dekoratif gradyan mor'u (hero-art
                                   blob'ları + logo mark'ı aynı kaynaktan — --bp-brand'in soluk
                                   periwinkle'ından KASITLI olarak daha canlı/doygun */
+  /* K-BY (22.09): ANA SAYFA hero-art'ının KALAN dekoratif renkleri. Aynı SVG'nin 3
+     dairesi zaten var(--bp-art-violet) ile boyanıyordu, 13'ü HAM HEX'ti — tek öge
+     yarı göç etmişti. hisse.html'in "homepage hero-art yankısı" yorumlu kardeş
+     deseni ise TAMAMEN token'lı (--bp-brand + --bp-accent-cyan). Aşağıdaki ikisi
+     değeri DEĞİŞTİRMEDEN token'landı; cyan ve yeşil ise zaten var olan
+     token'lara bağlandı (bkz. index.html) — o ikisi "aynı iş için iki kanon"du:
+       #1fe0ff -> --bp-accent-cyan (#22d3ee; token'ın kendi yorumu zaten
+                  "Data-Art ana sayfa" diyor, ama o sayfa onu kullanmıyordu)
+       #00e6a0 -> --bp-al          (#00e290; %0,2 farkla ayrı yazılmış ikiz) */
+  --bp-art-magenta: #ff37d8;  /* dekoratif blob/node + dalga gradyanı başlangıcı */
+  --bp-art-orange:  #ff9d2e;  /* dekoratif node (2 adet) */
   --bp-stale:     #f5c949;   /* K-BN (21.09): VERI TAZELIGI uyari kehribari. Fiilen zaten kanonikti —
                                  aynı değer 6 yerde, 3 dosyada BAĞIMSIZ yazılıydı ve hiçbiri token
                                  değildi: hisse.html renderFreshness (×3 dal), _stale_banner.html

@@ -1282,7 +1282,9 @@
     }
     .bp-hero-power-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--hero-accent, var(--bp-al)), var(--hero-accent-2, #16a34a));
+      /* K-BY: yedek arguman ham hexti (#16a34a, tokens.css'te yok) -- ayni satirin
+         ILK yedegi zaten token'di, ikincisi atlanmisti. */
+      background: linear-gradient(90deg, var(--hero-accent, var(--bp-al)), var(--hero-accent-2, rgba(var(--bp-al-rgb), 0.45)));
       transition: width 0.6s ease;
     }
     .bp-hero-levels {
