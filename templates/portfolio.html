@@ -1218,6 +1218,11 @@ document.getElementById('cloudModal').addEventListener('click', function(e) {
 (function(){ function _bpMacroInit(){ window.bpLoadMacroBar(); setInterval(window.bpLoadMacroBar, 180000); window._bpResumeMacro = window.bpLoadMacroBar; } if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', _bpMacroInit); } else { _bpMacroInit(); } document.addEventListener('visibilitychange', () => { if (!document.hidden && window._bpResumeMacro) window._bpResumeMacro(); }); })(); /* bughunt-12.09 r98 pattern: resume-on-visible, önceden eksikti */
 </script>
 <script src="/static/bp-search.js?v=551896da" defer></script>
+<!-- K-DH: bu sayfa sigLabelTooltip() ile `.jargon-term` capasi basiyor;
+     capalar vardi ama Ogrenme Modu betigi HIC yuklenmiyordu (canli olcum
+     22.09: /bilanco-takvimi 46, /temettu-takvimi 28, /karsilastir 4 capa,
+     hicbirinde "?" cikmiyordu). Kapi 76 envanteri bagli tutar. -->
+<script src="/static/learning-mode.js?v=898900f8" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>bpStartDataQualityPolling();</script>

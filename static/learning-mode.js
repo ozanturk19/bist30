@@ -59,22 +59,33 @@
 
   function ensureStyles() {
     if (document.getElementById('bp-lm-style')) return;
+    /* K-DH (22.09): bu blok 11 HAM HEX tasiyordu (js-palette ratchet'inde
+       muaf duruyordu, tavan degil SIFIR kurali geregi kapatildi). Hepsi
+       tokens.css'te zaten tanimli; ayrica "acik" noktasi AL yesiliydi --
+       o renk urunde "Guclu Trend / AL" ANLAMI tasir (K-CZ), bir ozelligin
+       acik olmasini anlatamaz. Nokta artik marka aksani. */
     var css =
       '.bp-lm-btn{display:none;margin-left:4px;width:16px;height:16px;line-height:14px;text-align:center;' +
-      'border:1px solid rgba(184,195,255,.45);border-radius:50%;background:rgba(184,195,255,.10);' +
-      'color:#b8c3ff;font-size:10px;font-weight:700;cursor:help;vertical-align:baseline;padding:0;font-family:inherit}' +
-      '.bp-lm-btn:hover{background:rgba(184,195,255,.25)}' +
+      'border:1px solid rgba(var(--bp-brand-rgb),.45);border-radius:50%;background:rgba(var(--bp-brand-rgb),.10);' +
+      'color:var(--bp-brand);font-size:10px;font-weight:700;cursor:help;vertical-align:baseline;padding:0;font-family:inherit}' +
+      '.bp-lm-btn:hover{background:rgba(var(--bp-brand-rgb),.25)}' +
       'body.learning-on .bp-lm-btn{display:inline-block}' +
-      '.bp-lm-pop{position:absolute;z-index:var(--bp-z-toast);max-width:280px;background:#1c1b1f;border:1px solid #2a2a2c;' +
-      'border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55;color:#e5e1e4;' +
+      '.bp-lm-pop{position:absolute;z-index:var(--bp-z-toast);max-width:280px;background:var(--bp-surface2);' +
+      'border:1px solid var(--bp-border);' +
+      'border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55;color:var(--bp-text);' +
       'box-shadow:0 6px 24px rgba(0,0,0,.5)}' +
-      '.bp-lm-pop b{color:#b8c3ff;display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.6px}' +
-      '.bp-lm-toggle{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid #6e6e7a;' +
-      'color:#c7c5cd;font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap}' +
-      '.bp-lm-toggle:hover{border-color:#b8c3ff;color:#e5e1e4}' +
-      '.bp-lm-toggle .bp-lm-dot{width:7px;height:7px;border-radius:50%;background:#6b7280;display:inline-block}' +
-      'body.learning-on .bp-lm-toggle .bp-lm-dot{background:#00e290}' +
-      '@media (max-width:600px){header .bp-lm-toggle{display:none}}';
+      '.bp-lm-pop b{color:var(--bp-brand);display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.6px}' +
+      '.bp-lm-toggle{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--bp-ctl-border);' +
+      'color:var(--bp-text2);font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap}' +
+      '.bp-lm-toggle:hover{border-color:var(--bp-brand);color:var(--bp-text)}' +
+      '.bp-lm-toggle .bp-lm-dot{width:7px;height:7px;border-radius:50%;background:var(--bp-text3);display:inline-block}' +
+      'body.learning-on .bp-lm-toggle .bp-lm-dot{background:var(--bp-brand)}' +
+      /* K-DH: eskiden `header .bp-lm-toggle{display:none}` idi -- ozelligin
+         TEK kontrolu mobilde tamamen kayboluyordu, yani Ogrenme Modu telefonda
+         hic acilamiyordu (urunun trafigi agirlikli mobil). Kontrol kaliyor,
+         yalniz metin etiketi daraliyor; eriselebilir ad `aria-label`da. */
+      '@media (max-width:600px){header .bp-lm-toggle{padding:6px 8px;min-height:32px}' +
+      'header .bp-lm-toggle .bp-lm-label{display:none}}';
     var s = document.createElement('style');
     s.id = 'bp-lm-style';
     s.textContent = css;
@@ -190,7 +201,10 @@
     b.setAttribute('aria-label', 'Öğrenme Modu');
     b.setAttribute('aria-pressed', STATE ? 'true' : 'false');
     b.title = 'Öğrenme Modu — teknik terimlerin yanında ? açıklaması';
-    b.innerHTML = '<span class="bp-lm-dot"></span>📚 Öğrenme Modu';
+    /* K-DH: gorunur metin ayri span -- dar ekranda gizlenir, eriselebilir ad
+       `aria-label`dan gelir (ikon tek basina ad DEGILDIR). */
+    b.innerHTML = '<span class="bp-lm-dot"></span><span aria-hidden="true">📚</span>'
+                + '<span class="bp-lm-label"> Öğrenme Modu</span>';
     b.addEventListener('click', toggle);
     return b;
   }
