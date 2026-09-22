@@ -97,16 +97,22 @@ def test_compose_score_called_only_in_analyze():
     )
 
 
-def test_signal_strength_includes_sentiment_adjustment():
-    """analyze() içinde signal_strength F5 AI Sentiment ayarını içermeli."""
+def test_signal_strength_sentiment_adjustment_removed():
+    """CPO-1781: F5 AI Sentiment ±5 ayarı KASITLI kaldırıldı (bg worker durdu,
+    sentiment cache artık güncellenmiyor — donmuş veriyle boost uygulamak
+    yanıltıcı olurdu). Bu test artık YOKLUĞUNU doğruluyor; CPO-983'ün asıl
+    garantisi (gucu_yuksek() ↔ analyze() aynı sayıyı üretir) diğer testlerle
+    korunuyor, sentiment o garantinin bir parçası değildi."""
     src = _read_app()
     body = _extract_function_body(src, "analyze")
     assert body, "analyze() bulunamadı"
-    assert "signal_strength = min(signal_strength + 5, 100)" in body, (
-        "F5 AI Sentiment pozitif ayarı signal_strength hesaplamasından kayboldu"
+    assert "signal_strength = min(signal_strength + 5, 100)" not in body, (
+        "F5 AI Sentiment pozitif ayarı geri geldi — CPO-1781 kararına göre "
+        "sentiment cache'i güncellenmiyor, bu ayar donmuş veriyle çalışır"
     )
-    assert "signal_strength = max(signal_strength - 5, 0)" in body, (
-        "F5 AI Sentiment negatif ayarı signal_strength hesaplamasından kayboldu"
+    assert "signal_strength = max(signal_strength - 5, 0)" not in body, (
+        "F5 AI Sentiment negatif ayarı geri geldi — CPO-1781 kararına göre "
+        "sentiment cache'i güncellenmiyor, bu ayar donmuş veriyle çalışır"
     )
 
 
@@ -115,7 +121,7 @@ if __name__ == "__main__":
         test_gucu_yuksek_reads_cached_signal_strength,
         test_gucu_yuksek_does_not_recompute_compose_score,
         test_compose_score_called_only_in_analyze,
-        test_signal_strength_includes_sentiment_adjustment,
+        test_signal_strength_sentiment_adjustment_removed,
     ]
     passed = 0
     fail_names = []
