@@ -69,6 +69,7 @@ Kullanim:
 """
 import ast
 import re
+import xml.dom.minidom
 import subprocess
 import sys
 from pathlib import Path
@@ -159,8 +160,16 @@ def _route_body(app_src, route):
 
 
 def _svg_texts(body):
-    """SVG <text ...>GOVDE</text> govdeleri."""
-    return [t.strip() for t in re.findall(r"<text\b[^>]*>(.*?)</text>", body, re.S)]
+    """SVG <text ...>GOVDE</text> govdeleri.
+
+    K-DB (22.09): govdedeki IC ETIKETLER (<tspan fill=...>) SOYULUR. Marka
+    sozcuk-isareti `<text>Borsa<tspan>Pusula</tspan></text>` olarak yazilir --
+    soyulmazsa R6 bu yuzeyi PNG'deki "BorsaPusula" ile hic eslestiremez ve
+    kapi kendi isaretleme bicimi yuzunden sahte-pozitif uretir."""
+    out = []
+    for t in re.findall(r"<text\b[^>]*>(.*?)</text>", body, re.S):
+        out.append(re.sub(r"<[^>]+>", "", t).strip())
+    return out
 
 
 def _png_texts(body):
@@ -178,6 +187,16 @@ def _png_texts(body):
         out.append(m.group(1))
     # font_family / tuple icinde gecen renk kodlarini disla
     return [t.strip() for t in out if not t.startswith("#")]
+
+
+def _og_title(app_src):
+    """K-DB: baslik artik IKI rotada da `_OG_TITLE_PARTS`tan turuyor; rota
+    govdesinde literal olarak GECMEZ. Modul sabitinden cozulur, boylece R6
+    her iki yuzeyde de AYNI tek metni gorur."""
+    m = re.search(r"_OG_TITLE_PARTS\s*=\s*\((.*?)\)\n", app_src, re.S)
+    if not m:
+        return None
+    return "".join(re.findall(r'\("([^"]+)"\s*,\s*"[a-z0-9_]+"\)', m.group(1)))
 
 
 def _norm(t):
@@ -200,8 +219,10 @@ def main():
         print("  [R0] og-image rotalari bulunamadi -- kapi kor, ayristirici guncellenmeli")
         return 1
 
-    og_surfaces = [("/og-image.svg", svg_body, _svg_texts(svg_body)),
-                   ("/og-image.png", png_body, _png_texts(png_body))]
+    _title = _og_title(app_src)
+    _t = [_title] if _title else []
+    og_surfaces = [("/og-image.svg", svg_body, _svg_texts(svg_body) + _t),
+                   ("/og-image.png", png_body, _png_texts(png_body) + _t)]
 
     for name, body, texts in og_surfaces:
         for t in texts:
@@ -222,6 +243,54 @@ def main():
                 out.append(("R7", name,
                             f'"{t}" -> kutu etiketi endeks adlandiriyor; sayilan kume '
                             f"XU030 haric TUM evren (kanon: 'BIST100 + ek hisseler')"))
+
+    # R9 (K-DB, 22.09) -- /og-image.svg IYI-BICIMLI XML MI?
+    #   Rota bir f-string ile elle kuruluyor; sablon motoru yok, dolayisiyla
+    #   hicbir sey iyi-bicimliligi dogrulamiyordu. K-DB sirasinda tam da bu
+    #   sinifta bir kusur URETILDI: aciklama yorumuna token adi yazildi ve
+    #   XML yorumu ICINDE IKI TIRE YAN YANA gecemedigi icin belge bozuldu
+    #   (olculdu: expat "not well-formed", satir 5). Tarayici bagislar, kati
+    #   ayristirici (ve bazi paylasim onizleyicileri) bagislamaz.
+    #   Kapi rotayi vekil sayilarla render edip ayristirir.
+    try:
+        _ns = {}
+        _pal = app_src[app_src.index("_OG_PALETTE = {"):]
+        exec(_pal[:_pal.index(chr(10) + "}" + chr(10)) + 3], _ns)
+        _tp = app_src.index("_OG_TITLE_PARTS =")
+        exec(app_src[_tp:app_src.index(chr(10), app_src.index("_OG_SUBTITLE", _tp)) + 1], _ns)
+        _stat = "    al_count, sat_count, total, _today_unused = _og_image_stats()"
+        _i = app_src.index(_stat, app_src.index('@app.route("/og-image.svg")'))
+        _j = app_src.index("</svg>", _i) + len("</svg>") + 3   # + kapatan uclu tirnak
+        _body = app_src[_i:_j].replace(
+            _stat.strip(), "al_count, sat_count, total = 7, 72, 216")
+        exec("def _r():" + chr(10) + _body + chr(10) + "    return svg" + chr(10), _ns)
+        xml.dom.minidom.parseString(_ns["_r"]())
+    except Exception as exc:
+        out.append(("R9", "/og-image.svg",
+                    "rota iyi-bicimli XML uretmiyor / ayristirilamadi: %s" % exc))
+
+    # R7b (K-DB, 22.09) -- BIR KURAL, PARCA PARCA CIZILEN METNI GORMEZ.
+    #   R7 ("kisa kutu etiketi endeks adlandiramaz") 22.09'a kadar HIC
+    #   tetiklenmemisti, oysa tam da onun tarif ettigi kusur kartin BASLIGINDA
+    #   duruyordu: "BIST100 Sinyal Paneli" -- ayni gorselin ucuncu kutusu
+    #   "216 TAKIP EDILEN HISSE" diyordu (XU030 haric TUM evren). Kural
+    #   gormedi cunku baslik UC AYRI parcadan ciziliyordu: ("BIST"),("100"),
+    #   (" Sinyal Paneli") -- hicbir parca tek basina `BIST\s*\d+` degil.
+    #   36. dersin ikizi: AYNI ISIN PARCALANMIS HALI AYRI BIR YAZIMDIR.
+    #   Cozum: her yuzeyde ardisik parcalarin 2- ve 3-gram birlesimleri de
+    #   ayni kurala sokulur. `len<=25` esigi korunur -- kanonik kapsam
+    #   ifadesi ("BIST100 + ek hisseler", 21+ karakterlik cumle icinde)
+    #   uzun oldugu icin tetiklenmez, kisa endeks etiketi tetiklenir.
+    for name, body, texts in og_surfaces:
+        frags = [t for t in texts if t]
+        for n in (2, 3):
+            for i in range(len(frags) - n + 1):
+                joined = "".join(frags[i:i + n]).strip()
+                if len(joined) <= 25 and re.search(r"BIST\s*\d+", joined, re.I):
+                    out.append(("R7b", name,
+                                f'"{joined}" -> PARCA PARCA cizilen baslik endeks '
+                                f"adlandiriyor ({n} parca); sayilan kume XU030 haric "
+                                f"TUM evren (kanon: 'BIST100 + ek hisseler')"))
 
     # R7a -- kapinin oncüllü hala gecerli mi (kapi kor kalmasin)
     stats = re.search(r"def _og_image_stats\(\):(.*?)(?=\n@|\ndef\s)", app_src, re.S)

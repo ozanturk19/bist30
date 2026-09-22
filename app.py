@@ -10838,6 +10838,60 @@ def _og_image_url():
     return "/og-image.png"
 
 
+# ── K-DB (22.09): SOSYAL PAYLASIM KARTININ PALETI ────────────────────────────
+# `/og-image.png` urunun EN KAMUSAL yuzeyi: WhatsApp/X/Facebook/LinkedIn
+# onizleme karti (21 sablonun og:image'i, CPO-1767) VE `static/manifest.json`
+# `screenshots[form_factor=wide]` -> Chrome PWA kurulum istemi.
+#
+# 22.09 CANLI OLCUM (1200x630 PNG, piksel sayimi): 12 ayri renk, 11'i
+# tokens.css'te YOK. Kart GitHub koyu temasinin paletiyle boyaniyordu:
+#   #0d1117 zemin (kanon --bp-bg #0e0e12)      #161b22 kart (--bp-surface #141416)
+#   #f0f6fc baslik (--bp-text #e5e1e4)         #8b949e ikincil (--bp-text3 #909097)
+#   #30363d kenarlik (--bp-border #2a2a2c)     #c9d1d9 slogan (--bp-text2 #c7c5cd)
+#   #58a6ff marka vurgusu/sayi/serit/cubuk     #3fb950 AL     #484f58 yasal uyari
+#   #1c2b3a + #1f6feb ikon kutusu
+# TEK esleseni `#f85149` (SAT) idi -> AYNI GORSELDE yon cifti ASIMETRIKTI:
+# dusus rengi kanonik, yukselis rengi degil. Kullanici karti siteyle yan yana
+# gordugunde kirmizi tutuyor, yesil tutmuyordu.
+#
+# `#3fb950` ozellikle: app.py:651'de (CHART_DIR_COLOR) "sitenin yesili
+# DEGILDI" diye zaten yaziliydi -- ders bir kanalda uygulanip bu kanalda
+# uygulanmamisti (51-54. ders: KANAL ENVANTERI).
+# `#58a6ff`: K-CZ marka sozcuk-isaretinin UC kanonunu TEKE indirmisti; bu
+# DORDUNCU yazim, ustelik hicbir web yuzeyinde bulunmayan bir mavi.
+#
+# Hicbir palet kapisi bu kanali gormuyordu: style-guard yalniz
+# `static/css/*.css`, js-palette-check yalniz JS, template-color-channel-check
+# yalniz sablon bakar. **KAPI 72** (`tools/og-image-palette-check.py`) bu
+# bosluğu kapatir: app.py'deki HER ham hex ya tokens.css'te bir token degeri
+# olmali ya da `tools/app_hex_exempt.json`daki dondurulmus listede (e-posta
+# govdesi, CPO-1782, DEV1 alani) bulunmali.
+_OG_PALETTE = {          # degerler tokens.css ile BIREBIR (kapi 72 dogrular)
+    "bg":       "#0e0e12",   # --bp-bg
+    "surface":  "#141416",   # --bp-surface
+    "surface2": "#1c1b1f",   # --bp-surface2
+    "border":   "#2a2a2c",   # --bp-border
+    "text":     "#e5e1e4",   # --bp-text
+    "text2":    "#c7c5cd",   # --bp-text2
+    "text3":    "#909097",   # --bp-text3
+    "brand":    "#b8c3ff",   # --bp-brand   (yon TASIMAYAN vurgu -- K-BO)
+    "logo":     "#00e290",   # --bp-logo-accent (marka sozcuk-isareti, K-CZ)
+    "al":       "#00e290",   # --bp-al
+    "sat":      "#f85149",   # --bp-sat
+}
+
+# K-DB icerik bulgusu: kart basligi "BIST100 Sinyal Paneli" diyordu, UCUNCU
+# kutusu ise AYNI GORSELDE "216 TAKIP EDILEN HISSE" (=`_og_image_stats` total,
+# XU030 haric TUM evren). Sitenin kanonik kapsam ifadesi 9 sablonda
+# "BIST100 + ek hisseler"; kart bunun KISALTILMIS halini kullanip yanindaki
+# sayiyla celisiyordu. Ustelik kartta marka yalnizca kucuk gri alt satirda
+# ("borsapusula.com") geciyor, vurgu rengi markaya degil "100" SAYISINA
+# veriliyordu. Baslik artik marka sozcuk-isareti (K-CZ kanonu), kapsam
+# ifadesi alt satirda ve TAM.
+_OG_TITLE_PARTS = (("Borsa", "text"), ("Pusula", "logo"))
+_OG_SUBTITLE    = "borsapusula.com · BIST100 + ek hisseler · Algoritmik Trend Sinyalleri"
+
+
 @app.route("/og-image.svg")
 @limiter.limit("30 per minute")  # DEV2-r103 (bughunt): ozel limit yoktu, global 300/dk worker-local zayif, PIL/SVG render her istekte tekrarlaniyor
 def og_image():
@@ -10852,33 +10906,45 @@ def og_image():
     # doner (86. ders: kuralin sertligi kanalin yeniden-degerlendirme
     # yetenegine baglidir). Tarih satirdan tumuyle kaldirildi.
     al_count, sat_count, total, _today_unused = _og_image_stats()
+    c = _OG_PALETTE
+    c_bg, c_sf, c_sf2, c_bd = c["bg"], c["surface"], c["surface2"], c["border"]
+    c_tx, c_t2, c_t3 = c["text"], c["text2"], c["text3"]
+    c_br, c_lg, c_al, c_sat = c["brand"], c["logo"], c["al"], c["sat"]
+
+    # Baslik IKI rotada da _OG_TITLE_PARTS'tan turer (head-meta-check R6:
+    # tek urun, tek metin kanonu). Ilk parca kapsayici elemanin kendi
+    # fill'ini alir; kalanlar tspan ile kendi token'larindan boyanir.
+    # (Bu yorumda SVG etiketi YAZILMAZ: kapinin metin ayristiricisi
+    #  ham kaynaga bakar, yorum govdeyi uzatip sahte-pozitif uretir.)
+    _svg_title = "".join(
+        p if i == 0 else f'<tspan fill="{c[role]}">{p}</tspan>'
+        for i, (p, role) in enumerate(_OG_TITLE_PARTS))
 
     svg = f'''<svg width="1200" height="630" viewBox="0 0 1200 630"
      xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
-  <rect width="1200" height="630" fill="#0d1117"/>
-  <rect x="0" y="0" width="6" height="630" fill="#58a6ff"/>
-  <!-- Logo / başlık -->
-  <text x="60" y="120" font-size="64" font-weight="700" fill="#f0f6fc">BIST</text>
-  <text x="194" y="120" font-size="64" font-weight="700" fill="#58a6ff">100</text>
-  <text x="310" y="120" font-size="64" font-weight="700" fill="#f0f6fc"> Sinyal Paneli</text>
-  <text x="60" y="165" font-size="26" fill="#8b949e">borsapusula.com · Algoritmik Trend Sinyalleri</text>
+  <rect width="1200" height="630" fill="{c_bg}"/>
+  <rect x="0" y="0" width="6" height="630" fill="{c_br}"/>
+  <!-- Marka sozcuk-isareti — K-CZ kanonu: vurgulu yari bp-logo-accent token'i
+       (XML yorumunda iki tire yan yana YAZILAMAZ: belge iyi-bicimli kalmaz) -->
+  <text x="60" y="120" font-size="64" font-weight="700" fill="{c_tx}">{_svg_title}</text>
+  <text x="60" y="165" font-size="26" fill="{c_t3}">{_OG_SUBTITLE}</text>
   <!-- Ayırıcı çizgi -->
-  <line x1="60" y1="195" x2="1140" y2="195" stroke="#30363d" stroke-width="1"/>
+  <line x1="60" y1="195" x2="1140" y2="195" stroke="{c_bd}" stroke-width="1"/>
   <!-- İstatistik kutular -->
-  <rect x="60"  y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
-  <text x="200" y="305" font-size="72" font-weight="800" fill="#3fb950" text-anchor="middle">{al_count}</text>
-  <text x="200" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▲ GÜÇLÜ TREND</text>
-  <rect x="380" y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
-  <text x="520" y="305" font-size="72" font-weight="800" fill="#f85149" text-anchor="middle">{sat_count}</text>
-  <text x="520" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▼ TREND BOZULDU</text>
-  <rect x="700" y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
-  <text x="840" y="305" font-size="72" font-weight="800" fill="#58a6ff" text-anchor="middle">{total}</text>
-  <text x="840" y="355" font-size="22" fill="#8b949e" text-anchor="middle">TAKİP EDİLEN HİSSE</text>
+  <rect x="60"  y="230" width="280" height="160" rx="12" fill="{c_sf}" stroke="{c_bd}" stroke-width="1"/>
+  <text x="200" y="305" font-size="72" font-weight="800" fill="{c_al}" text-anchor="middle">{al_count}</text>
+  <text x="200" y="355" font-size="22" fill="{c_t3}" text-anchor="middle">▲ GÜÇLÜ TREND</text>
+  <rect x="380" y="230" width="280" height="160" rx="12" fill="{c_sf}" stroke="{c_bd}" stroke-width="1"/>
+  <text x="520" y="305" font-size="72" font-weight="800" fill="{c_sat}" text-anchor="middle">{sat_count}</text>
+  <text x="520" y="355" font-size="22" fill="{c_t3}" text-anchor="middle">▼ TREND BOZULDU</text>
+  <rect x="700" y="230" width="280" height="160" rx="12" fill="{c_sf}" stroke="{c_bd}" stroke-width="1"/>
+  <text x="840" y="305" font-size="72" font-weight="800" fill="{c_br}" text-anchor="middle">{total}</text>
+  <text x="840" y="355" font-size="22" fill="{c_t3}" text-anchor="middle">TAKİP EDİLEN HİSSE</text>
   <!-- Alt slogan -->
-  <text x="60" y="480" font-size="30" fill="#c9d1d9">Supertrend · ADX · EMA12/99</text>
-  <text x="60" y="525" font-size="22" fill="#484f58">Algoritmik, ücretsiz, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.</text>
+  <text x="60" y="480" font-size="30" fill="{c_t2}">Supertrend · ADX · EMA12/99</text>
+  <text x="60" y="525" font-size="22" fill="{c_t3}">Algoritmik, ücretsiz, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.</text>
   <!-- Sağ ikon -->
-  <rect x="1020" y="230" width="120" height="160" rx="12" fill="#1c2b3a" stroke="#1f6feb44" stroke-width="1"/>
+  <rect x="1020" y="230" width="120" height="160" rx="12" fill="{c_sf2}" stroke="{c_bd}" stroke-width="1"/>
   <text x="1080" y="335" font-size="56" text-anchor="middle">📊</text>
 </svg>'''
     return Response(svg, mimetype="image/svg+xml",
@@ -10916,45 +10982,46 @@ def og_image_png():
     # yetenegine baglidir). Tarih satirdan tumuyle kaldirildi.
     al_count, sat_count, total, _today_unused = _og_image_stats()
 
-    img  = Image.new("RGB", (1200, 630), "#0d1117")
+    c = _OG_PALETTE
+    img  = Image.new("RGB", (1200, 630), c["bg"])
     draw = ImageDraw.Draw(img)
-    draw.rectangle([0, 0, 6, 630], fill="#58a6ff")
+    draw.rectangle([0, 0, 6, 630], fill=c["brand"])
 
+    # Marka sozcuk-isareti — K-CZ kanonu (vurgulu yari --bp-logo-accent).
     f_title = _og_font(64, bold=True)
     x = 60
-    for text, color in [("BIST", "#f0f6fc"), ("100", "#58a6ff"), (" Sinyal Paneli", "#f0f6fc")]:
-        draw.text((x, 70), text, font=f_title, fill=color)
+    for text, role in _OG_TITLE_PARTS:
+        draw.text((x, 70), text, font=f_title, fill=c[role])
         x += draw.textlength(text, font=f_title)
 
-    draw.text((60, 150), "borsapusula.com · Algoritmik Trend Sinyalleri",
-               font=_og_font(26), fill="#8b949e")
-    draw.line([(60, 195), (1140, 195)], fill="#30363d", width=1)
+    draw.text((60, 150), _OG_SUBTITLE, font=_og_font(26), fill=c["text3"])
+    draw.line([(60, 195), (1140, 195)], fill=c["border"], width=1)
 
     f_num = _og_font(72, bold=True)
     f_lbl = _og_font(22)
     boxes = [
-        (60,  str(al_count),  "▲ GÜÇLÜ TREND", "#3fb950"),
-        (380, str(sat_count), "▼ TREND BOZULDU", "#f85149"),
-        (700, str(total),     "TAKİP EDİLEN HİSSE", "#58a6ff"),
+        (60,  str(al_count),  "▲ GÜÇLÜ TREND", c["al"]),
+        (380, str(sat_count), "▼ TREND BOZULDU", c["sat"]),
+        (700, str(total),     "TAKİP EDİLEN HİSSE", c["brand"]),
     ]
     for bx, num, label, color in boxes:
-        draw.rounded_rectangle([bx, 230, bx + 280, 390], radius=12, fill="#161b22", outline="#30363d", width=1)
+        draw.rounded_rectangle([bx, 230, bx + 280, 390], radius=12, fill=c["surface"], outline=c["border"], width=1)
         w_num = draw.textlength(num, font=f_num)
         draw.text((bx + 140 - w_num / 2, 268), num, font=f_num, fill=color)
         w_lbl = draw.textlength(label, font=f_lbl)
-        draw.text((bx + 140 - w_lbl / 2, 350), label, font=f_lbl, fill="#8b949e")
+        draw.text((bx + 140 - w_lbl / 2, 350), label, font=f_lbl, fill=c["text3"])
 
-    draw.text((60, 465), "Supertrend · ADX · EMA12/99", font=_og_font(30), fill="#c9d1d9")
+    draw.text((60, 465), "Supertrend · ADX · EMA12/99", font=_og_font(30), fill=c["text2"])
     draw.text((60, 512), "Algoritmik, ücretsiz, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.",
-               font=_og_font(22), fill="#484f58")
+               font=_og_font(22), fill=c["text3"])
 
     # Sağ ikon kutusu — mini bar-chart (emoji yerine, font-bağımsız)
-    draw.rounded_rectangle([1020, 230, 1140, 390], radius=12, fill="#1c2b3a", outline="#1f6feb", width=1)
+    draw.rounded_rectangle([1020, 230, 1140, 390], radius=12, fill=c["surface2"], outline=c["border"], width=1)
     bar_w, bar_gap, base_y = 16, 10, 350
     bar_x = 1020 + (120 - (3 * bar_w + 2 * bar_gap)) / 2
     for i, h in enumerate([40, 65, 50]):
         bx0 = bar_x + i * (bar_w + bar_gap)
-        draw.rectangle([bx0, base_y - h, bx0 + bar_w, base_y], fill="#58a6ff")
+        draw.rectangle([bx0, base_y - h, bx0 + bar_w, base_y], fill=c["brand"])
 
     buf = io.BytesIO()
     img.save(buf, format="PNG")
