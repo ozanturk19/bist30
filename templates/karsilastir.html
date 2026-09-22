@@ -1,4 +1,11 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>{{ page_title|default('Hisse Karşılaştırma | BorsaPusula') }}</title>
+{# ⛔ K-CA (22.09): ASAGIDAKI UC `|default(...)` METNI CANLIDA HIC RENDER
+   OLMAZ. app.py `/karsilastir` rotasi (~10876) page_description'i HER ZAMAN
+   veriyor, ticker secilince de (~10902) yeniden yaziyor. Yani buradaki metni
+   duzeltmek canliyi degistirmez -- 22.09'da tam olarak bu yasandi: satirdan
+   kaldirilan "R/R" vaadi sablonda duzeltildi, canli meta hala "R/R" diyordu.
+   Gercek kaynak app.py'dir (CPO-1758, DEV1). Buradaki metin yalnizca
+   rota page_description vermezse devreye girer. #}
 <meta name="description" content="{{ page_description|default('BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.') }}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="{{ canonical_url|default('https://borsapusula.com/karsilastir') }}">
