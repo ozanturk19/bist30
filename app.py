@@ -113,7 +113,7 @@ except ImportError as _dqv_import_err:
             return None
         if r < 30: return "Aşırı Satım"
         if r < 45: return "Dip Toparlanması"
-        if r < 60: return "İdeal Giriş Penceresi" if signal == "AL" else "Nötr Bölge (RSI 45-60)"
+        if r < 60: return "İdeal Giriş Penceresi" if signal == "AL" else "Nötr Bölge"
         if r < 70: return "Trend Güçleniyor"
         if r < 80: return "Dikkatli"
         return "Aşırı Alım"
