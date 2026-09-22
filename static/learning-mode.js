@@ -97,7 +97,9 @@
       'border-radius:var(--bp-radius-lg);color:var(--bp-text);font-size:var(--bp-text-xs);' +
       'font-weight:600;padding:14px 6px;min-height:70px;white-space:normal;text-align:center;line-height:1.3}' +
       '.bp-lm-toggle.bp-lm-sheet:hover{border-color:var(--bp-border);color:var(--bp-text)}' +
-      'body.learning-on .bp-lm-toggle.bp-lm-sheet{border-color:rgba(var(--bp-brand-rgb),.55)}';
+      'body.learning-on .bp-lm-toggle.bp-lm-sheet{border-color:rgba(var(--bp-brand-rgb),.55)}' +
+      '.bp-lm-toggle.bp-lm-sheet .bp-lm-ico{font-size:20px;line-height:1}' +
+      '.bp-lm-toggle.bp-lm-sheet .bp-lm-label{display:block}';
     var s = document.createElement('style');
     s.id = 'bp-lm-style';
     s.textContent = css;
@@ -213,9 +215,12 @@
     b.setAttribute('aria-label', 'Öğrenme Modu');
     b.setAttribute('aria-pressed', STATE ? 'true' : 'false');
     b.title = 'Öğrenme Modu — teknik terimlerin yanında ? açıklaması';
-    /* K-DH: gorunur metin ayri span -- dar ekranda gizlenir, eriselebilir ad
-       `aria-label`dan gelir (ikon tek basina ad DEGILDIR). */
-    b.innerHTML = '<span class="bp-lm-dot"></span><span aria-hidden="true">📚</span>'
+    /* K-DH: ikon ve gorunur metin ayri span'lerde -- sayfadaki (sheet)
+       varyant ikonu buyutup metni alt satira alabiliyor. Eriselebilir ad
+       her iki varyantta da `aria-label`dan gelir (ikon tek basina ad
+       DEGILDIR); durum noktasi dekoratiftir, rengi tek basina anlam
+       tasimaz (a32bfdc dersi) -- `aria-pressed` durumu bildirir. */
+    b.innerHTML = '<span class="bp-lm-dot"></span><span class="bp-lm-ico" aria-hidden="true">📚</span>'
                 + '<span class="bp-lm-label"> Öğrenme Modu</span>';
     b.addEventListener('click', toggle);
     return b;
