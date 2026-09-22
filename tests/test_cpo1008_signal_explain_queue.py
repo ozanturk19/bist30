@@ -59,10 +59,11 @@ def test_cache_miss_returns_immediately_without_gemini_call(monkeypatch):
     monkeypatch.setattr(app, "_gemini_call", _fake_gemini_call)
 
     start = time.time()
-    text = app.get_ai_signal_explanation(ticker, _fake_signal_data())
+    text, source = app.get_ai_signal_explanation(ticker, _fake_signal_data())
     elapsed = time.time() - start
 
     assert text is not None and "Yatırım tavsiyesi değildir." in text
+    assert source == "algorithmic", "cache-miss anında dönen metin AI ile zenginleştirilmedi (CPO-1756)"
     assert gemini_calls == [], "request path Gemini çağırmamalı (bg kuyruğa taşınmalı)"
     assert elapsed < 1.0, "cache-miss request path 1sn altında dönmeli (senkron Gemini yok)"
 
@@ -79,9 +80,10 @@ def test_non_leader_never_queues(monkeypatch):
     monkeypatch.setattr(app, "GEMINI_API_KEY", "fake-key-for-test")
     monkeypatch.setattr(app, "_is_gemini_leader", lambda: False)
 
-    text = app.get_ai_signal_explanation(ticker, _fake_signal_data())
+    text, source = app.get_ai_signal_explanation(ticker, _fake_signal_data())
 
     assert text is not None
+    assert source == "algorithmic", "non-leader worker asla AI metni dönmemeli (CPO-1756)"
     with app._signal_explain_queue_lock:
         assert ticker not in app._signal_explain_queue, "non-leader kuyruğa eklememeli"
 
@@ -102,8 +104,9 @@ def test_enrich_writes_jittered_ttl_and_clears_via_worker_pattern(monkeypatch):
     monkeypatch.setattr(app, "_gemini_call", _fake_gemini_call)
 
     signal_data = _fake_signal_data()
-    fallback = app.get_ai_signal_explanation(ticker, signal_data)
+    fallback, fallback_source = app.get_ai_signal_explanation(ticker, signal_data)
     assert fallback is not None
+    assert fallback_source == "algorithmic"
 
     app._enrich_signal_explanation(ticker, signal_data)
 
@@ -114,6 +117,11 @@ def test_enrich_writes_jittered_ttl_and_clears_via_worker_pattern(monkeypatch):
     lo = app._SIG_EXPLAIN_TTL - app._SIG_EXPLAIN_TTL_JITTER
     hi = app._SIG_EXPLAIN_TTL + app._SIG_EXPLAIN_TTL_JITTER
     assert lo <= cached["ttl"] <= hi, "TTL jitter aralık dışında"
+
+    # CPO-1756 Bulgu 1: enrich sonrası cache AI metniyle dolu — artık "gemini" dönmeli
+    text, source = app.get_ai_signal_explanation(ticker, signal_data)
+    assert source == "gemini", "cache'te failed=False AI metni varken source 'gemini' olmalı"
+    assert text == cached["text"]
 
     _reset_state(ticker)
 
@@ -139,5 +147,9 @@ def test_validation_rejects_contradicting_ai_text(monkeypatch):
         cached = app._signal_explain_cache.get(ticker)
     assert cached["failed"] is True, "AI sinyalle çelişince commentary fallback + failed=True olmalı"
     assert "Yatırım tavsiyesi değildir." in cached["text"]
+
+    # CPO-1756 Bulgu 1: failed=True cache girdisi "algorithmic" dönmeli, "gemini" DEĞİL
+    text, source = app.get_ai_signal_explanation(ticker, signal_data)
+    assert source == "algorithmic", "reddedilen AI metni failed=True cache'te — provenans algorithmic olmalı"
 
     _reset_state(ticker)

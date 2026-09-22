@@ -7088,6 +7088,10 @@ def get_ai_signal_explanation(ticker, signal_data):
 
     Model fallback: gemini-2.5-flash → gemini-2.5-flash-lite
     Negatif cache: yalnızca GERÇEK API hatalarında (commentary her zaman var)
+
+    Returns: (text, source) — CPO-1756 Bulgu 1: source ARTIK "GEMINI_API_KEY var mı"
+    konfig kontrolü değil, dönen metnin gerçek kökeni (cache hit + failed=False
+    → "gemini", her diğer yol — cache miss, non-leader, fallback — → "algorithmic").
     """
     now = time.time()
     sig = signal_data.get("signal", "BEKLE")
@@ -7098,7 +7102,7 @@ def get_ai_signal_explanation(ticker, signal_data):
         if cached:
             ttl = _SIG_FAIL_TTL if cached.get("failed") else cached.get("ttl", _SIG_EXPLAIN_TTL)
             if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
-                return cached.get("text")
+                return cached.get("text"), ("algorithmic" if cached.get("failed") else "gemini")
 
     # SPEC-020 Faz 1 — Memory miss → DISK cache lazy-load (H3 pattern mtime guard)
     # Workers arası senkron: leader Gemini yazdığında non-leader buradan okur
@@ -7108,7 +7112,7 @@ def get_ai_signal_explanation(ticker, signal_data):
         if cached:
             ttl = _SIG_FAIL_TTL if cached.get("failed") else cached.get("ttl", _SIG_EXPLAIN_TTL)
             if (now - cached["ts"]) < ttl and cached.get("sig") == sig:
-                return cached.get("text")
+                return cached.get("text"), ("algorithmic" if cached.get("failed") else "gemini")
 
     # SPEC-AI-EXPLANATION-FIX (CPO-428): commentary her zaman hesaplanır —
     # AI tab ASLA boş/takılı kalmasın, Gemini gelince üzerine yazar.
@@ -7116,11 +7120,11 @@ def get_ai_signal_explanation(ticker, signal_data):
 
     # Non-leader worker → Gemini call YOK, direkt commentary dön (Glass-box + K8 data-trust)
     if not _is_gemini_leader():
-        return fallback_text
+        return fallback_text, "algorithmic"
 
     # AI yoksa direkt algoritmik metni döndür
     if not GEMINI_API_KEY:
-        return fallback_text
+        return fallback_text, "algorithmic"
 
     # CPO-1008 — ARCHITECTURAL FIX: /news'teki cache-or-queue pattern'e taşındı.
     # ÖNCEKİ DAVRANIŞ: request handler İÇİNDE senkron Gemini call → _gemini_rate_acquire
@@ -7129,7 +7133,7 @@ def get_ai_signal_explanation(ticker, signal_data):
     # Gemini çağrısı SIFIR — commentary anında dön, zenginleştirme bg thread kuyruğunda.
     with _signal_explain_queue_lock:
         _signal_explain_queue[ticker] = signal_data
-    return fallback_text
+    return fallback_text, "algorithmic"
 
 
 def _enrich_signal_explanation(ticker, signal_data):
@@ -7619,6 +7623,14 @@ _signal_explain_ondemand_thread = threading.Thread(
 _signal_explain_ondemand_thread.start()
 
 
+def _tr1(value):
+    """CPO-1756 Bulgu 3: ADX/DI+/DI- site kanonu 1 ondalik + TR virgül (JS
+    `.toFixed(1).replace('.', ',')` eşdeğeri — bkz. tarama.html/hisse.html).
+    `:.0f` ile yuvarlama 24,5-25,0 aralığındaki değerleri "ADX 25" gösterip
+    "yetersiz" etiketiyle kendi cümlesiyle çelişiyordu."""
+    return f"{value:.1f}".replace(".", ",")
+
+
 def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di_m, e12, e99, st_bull):
     """Algoritmik teknik yorum metni üretir (SEO + kullanıcı için)."""
     _varlik_names = {
@@ -7637,7 +7649,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         trend_dir  = "yükseliş"
         st_text    = "yükseliş yönünde"
         ema_text   = f"EMA12 ({tr_price_filter(e12)} ₺), EMA99 ({tr_price_filter(e99)} ₺) üzerinde seyrediyor"
-        di_text    = f"DI+ {di_p:.0f} DI- {di_m:.0f}'i geçmiş durumda"
+        di_text    = f"DI+ {_tr1(di_p)} DI- {_tr1(di_m)}'i geçmiş durumda"
         if signal_date and not is_signal_from_today(signal_date):
             dur_label = derive_signal_date_label(signal_date) or signal_date
             # CPO-1668 #3: signal_bars bir BAR sayacı (hafta sonu/tazelenmeyen
@@ -7654,14 +7666,14 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
             dur_text = "Bugün Güçlü Trend sinyali oluştu"
         return (
             f"{ticker} ({name}) hissesi {dur_text}. "
-            f"Supertrend göstergesi {st_text}, ADX {adx:.0f} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
+            f"Supertrend göstergesi {st_text}, ADX {_tr1(adx)} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
             f"{ema_text}. {di_text}."
         )
     elif signal == "SAT":
         trend_dir  = "düşüş"
         st_text    = "düşüş yönünde"
         ema_text   = f"EMA12 ({tr_price_filter(e12)} ₺), EMA99 ({tr_price_filter(e99)} ₺) altında seyrediyor"
-        di_text    = f"DI- {di_m:.0f} DI+ {di_p:.0f}'ün üzerinde"
+        di_text    = f"DI- {_tr1(di_m)} DI+ {_tr1(di_p)}'ün üzerinde"
         if signal_date and not is_signal_from_today(signal_date):
             dur_label = derive_signal_date_label(signal_date) or signal_date
             # CPO-1668 #3: bkz. AL dalındaki aynı açıklama (signal_bars≠takvim günü).
@@ -7674,7 +7686,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
             dur_text = "Bugün Trend Bozuldu sinyali oluştu"
         return (
             f"{ticker} ({name}) hissesi {dur_text}. "
-            f"Supertrend göstergesi {st_text}, ADX {adx:.0f} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
+            f"Supertrend göstergesi {st_text}, ADX {_tr1(adx)} ile {adx_quality} bir {trend_dir} trendi işaret ediyor. "
             f"{ema_text}. {di_text}."
         )
     else:
@@ -7688,7 +7700,7 @@ def _generate_commentary(ticker, signal, signal_bars, signal_date, adx, di_p, di
         return (
             f"{ticker} ({name}) hissesi şu anda net bir Güçlü Trend / Trend Bozuldu sinyali üretmiyor. "
             f"{mixed} "
-            f"ADX {adx:.0f} ({adx_quality}), EMA12 {tr_price_filter(e12)} / EMA99 {tr_price_filter(e99)}."
+            f"ADX {_tr1(adx)} ({adx_quality}), EMA12 {tr_price_filter(e12)} / EMA99 {tr_price_filter(e99)}."
         )
 
 
@@ -9240,8 +9252,7 @@ def api_signal_explanation(ticker):
         # hisse.html loadSignalExplanation() bu durumu reason=="no_data" ile ayri okur.
         return safe_json({"explanation": None, "reason": "no_data"}), 503
 
-    text = get_ai_signal_explanation(ticker, stock)
-    source = "gemini" if GEMINI_API_KEY else "algorithmic"
+    text, source = get_ai_signal_explanation(ticker, stock)
     return safe_json({"explanation": text, "signal": stock.get("signal"), "source": source})
 
 
