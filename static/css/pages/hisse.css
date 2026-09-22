@@ -1391,6 +1391,13 @@
       padding:2px 8px;border-radius:var(--bp-radius-pill);
       border:1px solid rgba(var(--bp-brand-rgb),0.25);
     }
+    /* K-BZ (22.09): rozet altindaki icerigin kokenini soyler. Kural tabanli
+       (SSR 3-kriter checklist / hata / veri-yok) durumda marka-AI rengi degil
+       notr yuzey kullanilir — "Gemini AI" rozeti yalnizca gercek AI metninde. */
+    .da-ai-badge--rule{
+      background:var(--bp-surface2);color:var(--bp-text3);
+      border-color:var(--bp-border);
+    }
     .da-ai-body{
       font-size:var(--bp-text-base);color:var(--bp-text);line-height:1.75;margin:0;
     }

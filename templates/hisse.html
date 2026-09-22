@@ -109,7 +109,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=f436a453">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
-<link rel="stylesheet" href="/static/css/pages/hisse.css?v=67776c67">
+<link rel="stylesheet" href="/static/css/pages/hisse.css?v=eba77b21">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -1335,7 +1335,7 @@
   <div id="sigExplainSection" data-tab-content="ai" role="tabpanel" aria-labelledby="tab-ai" tabindex="0" class="da-panel da-panel--accent da-ai-panel">
     <div class="da-ai-head">
       <span class="da-util-eyebrow"><span aria-hidden="true">✨</span> Bu Sinyal Ne Anlama Geliyor?</span>
-      <span id="sigExplainBadge" class="da-ai-badge">Gemini AI</span>
+      <span id="sigExplainBadge" class="da-ai-badge da-ai-badge--rule" title="Sinyal motorunun 3 kriter kontrolünden türetildi — yapay zeka değil">Kural tabanlı</span>
     </div>
     {# ticket #30: AL sinyal + günlük önemli düşüş çelişki uyarısı — renderSummary tarafından doldurulur #}
     <div id="sigConflictNote" style="display:none;margin-bottom:10px;padding:9px 12px;background:rgba(var(--bp-sat-rgb),0.08);border-left:3px solid rgba(var(--bp-sat-rgb),0.5);border-radius:0 6px 6px 0;font-size:var(--bp-text-sm);color:var(--bp-sat-on-tint);line-height:1.6"></div>
@@ -1370,7 +1370,7 @@
         {% endif %}
         Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" class="da-link">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:var(--bp-text3)">
+      <div id="sigExplainStatus" style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:var(--bp-text3)">
         <div class="da-spin da-spin--sm"></div>
         AI yorumu hazırlanıyor…
       </div>
@@ -3296,12 +3296,26 @@ async function loadSignalExplanation(retryCount) {
     if (_sigExplainActive) return;
     _sigExplainActive = true;
   }
-  const loadEl   = document.getElementById('sigExplainLoading');
+  const sigLoadEl   = document.getElementById('sigExplainLoading');
+  const statusEl = document.getElementById('sigExplainStatus') || sigLoadEl;
   const textEl   = document.getElementById('sigExplainText');
   const footerEl = document.getElementById('sigExplainFooter');
   const badgeEl  = document.getElementById('sigExplainBadge');
 
-  loadEl.style.display = 'flex';
+  /* K-BZ (22.09): rozet ALTINDAKI ICERIGIN KOKENINI soyler.
+     Yukleme/hata/veri-yok durumlarinda ekranda duran sey SSR'in kural-tabanli
+     3-kriter checklist'i; rozet orada "Gemini AI" diyordu. Rozet artik yalnizca
+     gercek yanit geldiginde kaynak etiketine gecer, her yeni denemede kural
+     durumuna geri doner. */
+  function sigBadge(kind, label, tip) {
+    if (!badgeEl) return;
+    badgeEl.classList.toggle('da-ai-badge--rule', kind === 'rule');
+    badgeEl.textContent = label;
+    badgeEl.title = tip;
+  }
+  sigBadge('rule', 'Kural tabanlı', 'Sinyal motorunun 3 kriter kontrolünden türetildi — yapay zeka değil');
+
+  sigLoadEl.style.display = 'flex';
   textEl.style.display = 'none';
   footerEl.style.display = 'none';
 
@@ -3312,7 +3326,7 @@ async function loadSignalExplanation(retryCount) {
     /* CPO-DEV2-083: backend artik gecerli-ama-veri-eksik durumda 503 donuyor (once 200'du).
        reason==='no_data' govdesi varsa mevcut ozel retry akisini koru, aksi halde eskisi gibi at. */
     if (!res.ok && !(data && data.reason === 'no_data')) throw new Error('HTTP ' + res.status);
-    loadEl.style.display = 'none';
+    sigLoadEl.style.display = 'none';
 
     if (data && data.explanation) {
       textEl.textContent = data.explanation;
@@ -3326,12 +3340,10 @@ async function loadSignalExplanation(retryCount) {
 
       // Badge ve footer'ı kaynağa göre ayarla
       const isAI = data.source === 'gemini';
-      if (badgeEl) {
-        badgeEl.textContent = isAI ? 'Gemini AI' : 'Algoritmik';
-        badgeEl.title = isAI
-          ? 'Gemini yapay zekası tarafından oluşturuldu'
-          : 'Algoritmik sinyal motorundan türetildi';
-      }
+      sigBadge(isAI ? 'ai' : 'rule',
+               isAI ? 'Gemini AI' : 'Algoritmik',
+               isAI ? 'Gemini yapay zekası tarafından oluşturuldu'
+                    : 'Algoritmik sinyal motorundan türetildi');
       footerEl.innerHTML = isAI
         ? '🤖 Yapay zeka açıklaması — bilgi amaçlıdır, yatırım tavsiyesi değildir · 12 saatte bir yenilenir'
         : '📐 Algoritmik analiz — sinyal motorundaki göstergeler temel alınmıştır · yatırım tavsiyesi değildir';
@@ -3340,16 +3352,21 @@ async function loadSignalExplanation(retryCount) {
     } else if (data && data.reason === 'no_data') {
       // Stok verisi yüklenmemişse kısa süre sonra tekrar dene
       if (retryCount < 3) {
-        loadEl.innerHTML = '<div class="da-spin da-spin--sm"></div> Sinyal verisi yükleniyor…';
-        loadEl.style.display = 'flex';
+        statusEl.innerHTML = '<div class="da-spin da-spin--sm"></div> Sinyal verisi yükleniyor…';
+        sigLoadEl.style.display = 'flex';
         setTimeout(() => loadSignalExplanation(retryCount + 1), 6000);
       } else {
-        loadEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:var(--bp-text-sm);margin-left:6px">Tekrar dene</button>';
-        loadEl.style.display = 'flex';
+        statusEl.innerHTML = 'Sinyal verisi henüz yüklenmedi. <button onclick="loadSignalExplanation(0)" style="background:none;border:1px solid var(--bp-border);color:var(--bp-brand);padding:2px 8px;border-radius:var(--bp-radius-4);cursor:pointer;font-size:var(--bp-text-sm);margin-left:6px">Tekrar dene</button>';
+        sigLoadEl.style.display = 'flex';
         _sigExplainActive = false;
       }
     } else {
-      loadEl.style.display = 'none';
+      /* K-BZ: bu dal (200 + explanation bos + reason yok) sigLoadEl'i gizleyip
+         yerine HICBIR SEY koymuyordu -> "Bu Sinyal Ne Anlama Geliyor?" basligi
+         ve rozet duruyor, govde bombos kaliyordu (K-V: bos != hata).
+         SSR checklist'i birakip yalnizca durum satirini duzelt. */
+      statusEl.innerHTML = 'AI yorumu şu an üretilemedi — yukarıdaki kural tabanlı özet geçerlidir. <button type="button" class="da-retry" onclick="loadSignalExplanation(0)">Tekrar dene</button>';
+      sigLoadEl.style.display = 'flex';
       _sigExplainActive = false;
     }
 
@@ -3357,8 +3374,8 @@ async function loadSignalExplanation(retryCount) {
     if (retryCount < 2) {
       setTimeout(() => loadSignalExplanation(retryCount + 1), 8000);
     } else {
-      loadEl.innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><span aria-hidden="true">⚠️</span> Açıklama yüklenemedi.</span><button type="button" class="da-retry" onclick="loadSignalExplanation(0)">Tekrar dene</button></div>';
-      loadEl.style.display = 'flex';
+      statusEl.innerHTML = '<div class="da-empty da-empty--error" role="alert" style="width:100%"><span><span aria-hidden="true">⚠️</span> Açıklama yüklenemedi.</span><button type="button" class="da-retry" onclick="loadSignalExplanation(0)">Tekrar dene</button></div>';
+      sigLoadEl.style.display = 'flex';
       _sigExplainActive = false;
     }
   }
