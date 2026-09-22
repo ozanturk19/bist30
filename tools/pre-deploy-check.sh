@@ -1293,7 +1293,7 @@ fi
 #   R1 yazma simetrisi · R2 <select> yutulmasi korumasi · R3 tur-gidis (yazilan
 #   her parametre geri okunmali). MUAFIYET ANLAM KURALIDIR: kapsam "URLSearchParams
 #   kurup fetch eden fonksiyon"; tek kuruculu sablonlar R1 disinda.
-echo "64/66 form-url-state-check (K-CS: form durumu <-> adres cubugu tur-gidisi)..."
+echo "64/67 form-url-state-check (K-CS: form durumu <-> adres cubugu tur-gidisi)..."
 if python3 tools/form-url-state-check.py; then
   echo "  ✓ form-url-state-check PASS"
 else
@@ -1315,7 +1315,7 @@ echo ""
 #   URETTIGI olu derin baglantiyi paylastiriyordu. Ayrica tek sektorluk secim
 #   adrese yaziliyor ama okuma esigine (`>= 2`) takilip geri okunmuyordu.
 #   R1 tek yayimci · R2 tur-gidis · R3 `append` birikmesi · R4 sekme kapsami.
-echo "65/66 url-state-owner-check (K-CT: adres cubugunun tek sahibi)..."
+echo "65/67 url-state-owner-check (K-CT: adres cubugunun tek sahibi)..."
 if python3 tools/url-state-owner-check.py; then
   echo "  ✓ url-state-owner-check PASS"
 else
@@ -1338,13 +1338,40 @@ echo ""
 #   Harness pozitif kontrolu (eski kod): sunucuda kayitli + yerelde yok iken
 #   tiklama POST gonderiyordu (kapatmak isterken ALIYORDU), ters durumda DELETE.
 #   R1 yazma/okuma asimetrisi · R2 dallanma sahibi · R3 bos != bilinmiyor.
-echo "66/66 client-server-state-owner-check (K-CU: sunucu durumunun istemcideki sahibi)..."
+echo "66/67 client-server-state-owner-check (K-CU: sunucu durumunun istemcideki sahibi)..."
 if python3 tools/client-server-state-owner-check.py; then
   echo "  ✓ client-server-state-owner-check PASS"
 else
   echo "  ✗ K-CU KIRIK: sunucuda yasayan bir durum istemcide sahipsiz."
   echo "    Pozitif kontrol: python3 tools/client-server-state-owner-check.py --self-test  # 5/5 beklenir"
   echo "    Regresyon ornegi: python3 tools/client-server-state-owner-check.py --ref 2065e69  # 2 ihlal beklenir"
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
+# KAPI 67 -- K-CV: GIZLILIK BEYANI ILE GERCEK VERI AKISI ARASINDAKI KANON.
+#   Kapi 66 "sunucuda yasayan durumun istemcideki SAHIBI var mi" diye soruyordu.
+#   Ayni mercek bir kez daha kayar: kullanicinin verisi hakkinda SITENIN YAZILI
+#   BEYANI da bir kanondur. Digerleri bozuldugunda UI yanlis gosterir; bu
+#   bozuldugunda site KVKK kapsaminda YANLIS BEYANDA bulunur.
+#   Canli olculdu (/gizlilik): "localStorage ... IZLEME LISTESI gibi yerel
+#   ayarlari saklar ve SUNUCUYA GONDERILMEZ" deniyordu; oysa giris yapmis
+#   kullanicida 🔔 dugmesi `POST /api/user-alerts/<T>` gonderiyor ve kayit
+#   `subs[email]["alerts"][ticker]` olarak E-POSTAYLA ILISKILI sunucuda duruyor.
+#   Ayni sayfa 20 satir yukarida "sunucuda saklanir" diyordu -> tek is icin iki
+#   kanon. Ayrica izleme listesi YANLIS kanala (bulut sync) atfedilmisti (govde
+#   `{positions}` -- izleme listesi orada yok), gercek kanal hic aciklanmamisti,
+#   ve "tema tercihi" diye saklanan hicbir sey yoktu (site dark-only).
+#   R1 toplama kanali beyan edilmeli (cift yonlu) · R2 yerel depo envanteri
+#   cift yonlu + sunucuya aynalanan anahtar varken NITELENDIRILMEMIS mutlak
+#   "sunucuya gonderilmez" iddiasi yasak.
+echo "67/67 privacy-claim-flow-check (K-CV: gizlilik beyani <-> veri akisi)..."
+if python3 tools/privacy-claim-flow-check.py; then
+  echo "  ✓ privacy-claim-flow-check PASS"
+else
+  echo "  ✗ K-CV KIRIK: gizlilik metni gercek veri akisiyla celisiyor."
+  echo "    Pozitif kontrol: python3 tools/privacy-claim-flow-check.py --self-test  # 5/5 beklenir"
+  echo "    Regresyon ornegi: python3 tools/privacy-claim-flow-check.py --ref bd47ac4  # 5 ihlal beklenir"
   FAIL=$((FAIL + 1))
 fi
 

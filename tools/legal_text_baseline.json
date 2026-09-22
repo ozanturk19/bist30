@@ -1,7 +1,7 @@
 {
   "templates/gizlilik.html": {
-    "text_sha256": "253429e2b98617afa56822a03a38685ee3bba9af9479c2a4e4e88291e9f7e065",
-    "updated": "Son güncelleme: 22 Eylül 2026"
+    "text_sha256": "c0ff0b0dd76bfb255cf35315a274ec5bfb31b2b721e2e4ed2244b896559697e8",
+    "updated": "Son güncelleme: 22 Eylül 2026 (rev. 2) — hisse bazlı e-posta alarmlarının sunucuda saklanması ayrı bir madde olarak eklendi; aşağıdaki \"Değişiklikler\" bölümüne bakınız."
   },
   "templates/yasal.html": {
     "text_sha256": "18590745b54f51e3963ed9f0aa8f48035087467fb5e0189fb5a6d67ffa90c2eb",
