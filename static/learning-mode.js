@@ -227,8 +227,23 @@
     mountToggle();
     injectHints();
     applyBody();
-    // Geç eklenen içerik (JS render) için observer
-    var mo = new MutationObserver(function () { injectHints(); });
+    /* Gec eklenen icerik (JS render) icin observer.
+       K-DH: geri cagirma ONCEDEN her mutasyonda dogrudan injectHints()
+       kosturuyordu -- her cagri `querySelectorAll('.jargon-term')` demek.
+       Motor 3 sayfadayken tasiniyordu; 8 sayfaya yayilinca (makro seridi
+       3 dakikada bir, isi haritasi/portfoy grafikleri sik sik DOM
+       degistiriyor) bu sessiz bir maliyet olurdu. Ayni kare icindeki
+       mutasyonlar tek taramada birlestiriliyor -- davranis ayni, is
+       kat kat az. */
+    var pending = false;
+    var mo = new MutationObserver(function () {
+      if (pending) return;
+      pending = true;
+      (window.requestAnimationFrame || window.setTimeout)(function () {
+        pending = false;
+        injectHints();
+      }, 0);
+    });
     mo.observe(document.body, { childList: true, subtree: true });
   }
 
