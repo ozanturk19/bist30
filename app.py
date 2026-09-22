@@ -13891,6 +13891,14 @@ _MTF_DISK_FLUSH_EVERY_N = 5  # CPO-1187 D-6 Sıra-1 revizyonu: tur-sonu tek yazm
 
 def _mtf_warmup_daemon():
     time.sleep(90)  # ilk cycle'dan sonra başla — startup I/O ile çakışma önlenir
+    # CPO-1755 FIX: leader restart'ta _mtf_cache BOŞ başlıyordu; daemon 5 ticker'da
+    # bir _save_mtf_cache_to_disk() (dict(_mtf_cache) TAM üzerine yazar) çağırdığı
+    # için diskteki önceden birikmiş 217 kayıt, bu turun ilk birkaç kaydıyla
+    # EZİLİYORDU (CPO-1670 gereği her deploy'da restart oluyor, gecede 7+ kez).
+    # Sonuç: last_mtf_cache.json 217 ↔ ~35 arası salınıyor, web worker'lar boş
+    # cache'e denk geldiğinde /api/hisse/<T>/mtf {} dönüyordu. Turdan önce diski
+    # belleğe yükleyip devam etmek, overwrite'ı merge'e çeviriyor.
+    _load_mtf_cache_from_disk()
     while True:
         now = time.time()
         _written_this_round = 0
