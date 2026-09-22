@@ -176,6 +176,76 @@
   .profile-result-title { font-size: var(--bp-text-xl); font-weight: 800; color: var(--bp-al); margin-bottom: 8px; }
   .profile-result-body  { font-size: var(--bp-text-base); color: var(--bp-text2); margin-bottom: 24px; }
 
+  /* ── K-CU eki: alarm listesi ────────────────────────────────────────
+     Alarm e-postasinin isaret ettigi ama var olmayan yuzey. Govde receteci
+     `.da-panel`den gelir; burada yalniz satir duzeni duruyor. */
+  .pf-alerts { margin-bottom: 18px; }
+  .pf-alerts-title {
+    font-size: var(--bp-text-lg);
+    font-weight: 700;
+    color: var(--bp-text);
+    margin: 0 0 6px;
+  }
+  .pf-alerts-sub {
+    font-size: var(--bp-text-sm);
+    color: var(--bp-text3);
+    margin: 0 0 14px;
+    line-height: 1.5;
+  }
+  .pf-alerts-state {
+    font-size: var(--bp-text-sm);
+    color: var(--bp-text2);
+    margin-bottom: 10px;
+  }
+  /* Bos durum ile HATA durumu ayri okunur ([[K-BK]]: bos != bilinmiyor). */
+  .pf-alerts-state--err { color: var(--bp-sat); }
+  .pf-alerts-list { list-style: none; margin: 0; padding: 0; }
+  .pf-alert-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;                 /* 320px: tasma yerine sarmala */
+    gap: 10px;
+    padding: 12px 0;
+    border-top: 1px solid var(--bp-border);
+  }
+  .pf-alert-row:first-child { border-top: 0; }
+  .pf-alert-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .pf-alert-tic {
+    font-size: var(--bp-text-base);
+    font-weight: 700;
+    color: var(--bp-text);
+    text-decoration: none;
+    letter-spacing: .02em;
+  }
+  .pf-alert-tic:hover { color: var(--bp-brand); text-decoration: underline; }
+  .pf-alert-kosul {
+    font-size: var(--bp-text-xs);
+    color: var(--bp-text3);
+    line-height: 1.45;
+  }
+  .pf-alert-off {
+    flex: none;
+    min-height: 44px;                /* dokunma hedefi (WCAG 2.5.8) */
+    padding: 0 16px;
+    border-radius: var(--bp-radius-pill);
+    border: 1px solid var(--bp-ctl-border);
+    background: var(--bp-surface2);
+    color: var(--bp-text2);
+    font-size: var(--bp-text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: color var(--bp-dur-base) var(--bp-ease-standard),
+                border-color var(--bp-dur-base) var(--bp-ease-standard),
+                background var(--bp-dur-base) var(--bp-ease-standard);
+  }
+  .pf-alert-off:hover:not(:disabled) {
+    color: var(--bp-sat);
+    border-color: rgba(var(--bp-sat-rgb), 0.45);
+    background: rgba(var(--bp-sat-rgb), 0.08);
+  }
+  .pf-alert-off:disabled { opacity: .55; cursor: default; }
+
   .footer-note {
     text-align: center;
     font-size: var(--bp-text-xs);

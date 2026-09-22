@@ -8,7 +8,7 @@
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="stylesheet" href="/static/css/tokens.css?v=f436a453">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
-<link rel="stylesheet" href="/static/css/pages/profil.css?v=cb8a87d1">
+<link rel="stylesheet" href="/static/css/pages/profil.css?v=bb7ba220">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 
@@ -56,6 +56,23 @@
 </form>
 
 <div id="profileResult" class="form-card da-panel profile-result" role="status" aria-live="polite" tabindex="-1" hidden></div>
+
+<!-- K-CU eki (22.09): ALARM E-POSTASININ ISARET ETTIGI YUZEY YOKTU.
+     `_check_user_alerts()` maili "Bu alarmi devre disi birakmak icin PROFIL
+     SAYFANDAN ilgili takibi silebilirsin" diyor ve buraya link veriyordu —
+     ama bu sayfada alarm/takip listesi HIC YOKTU. Kullanicinin alarmi
+     kapatabilmesinin tek yolu, alarmi kurdugu cihazin localStorage'i hala
+     duruyorsa /hisse/<T> sayfasindaki 🔔 dugmesiydi; tarayici verisi
+     silinmisse kayit YETIM kaliyor ve e-postalar suresiz devam ediyordu.
+     Backend gerekmedi: /profil'e `?t=<token>` ile gelen ziyaretci zaten
+     `bp_sub` cerezini aliyor (app.py /profil), yani `GET /api/user-alerts`
+     ve `DELETE /api/user-alerts/<T>` bu sayfada dogrudan calisiyor. -->
+<section class="form-card da-panel pf-alerts" id="alertsCard" aria-labelledby="alertsTitle">
+  <h2 class="pf-alerts-title" id="alertsTitle"><span aria-hidden="true">🔔</span> Takip ettiğin hisseler</h2>
+  <p class="pf-alerts-sub">Koşul gerçekleştiğinde bu hisseler için e-posta gönderiyoruz. Alarmı buradan kapatabilirsin.</p>
+  <div id="alertsState" class="pf-alerts-state" role="status" aria-live="polite">Alarmların yükleniyor…</div>
+  <ul id="alertsList" class="pf-alerts-list" hidden></ul>
+</section>
 
 <div class="footer-note">
   <a href="/"><span aria-hidden="true">←</span> Sinyal paneline dön</a> &nbsp;·&nbsp;
@@ -177,6 +194,107 @@ async function submitProfile(e) {
   }
   return false;
 }
+
+/* ── K-CU eki: alarm listesi ───────────────────────────────────────────
+   Durumun sahibi SUNUCUDUR; bu sayfa yerel bir kopya tutmaz, her acilista
+   `GET /api/user-alerts` okur. [[K-BK]]: HTTP 200 + eksik govde "alarmin
+   yok" demek degildir — bos durum ile hata durumu AYRI metinlerdir. */
+function _pfTr(v) { return String(v).replace('.', ','); }
+
+function _pfAlertKosul(cfg) {
+  const out = [];
+  if (!cfg || typeof cfg !== 'object') return ['Koşul okunamadı'];
+  if (cfg.signal_change) out.push('Sinyal değişiminde');
+  if (cfg.price_pct != null)      out.push('Günlük %' + _pfTr(cfg.price_pct) + ' hareket');
+  if (cfg.rsi_threshold != null)  out.push('RSI ' + _pfTr(cfg.rsi_threshold) + ' altına inince');
+  if (cfg.rvol_threshold != null) out.push('Hacim oranı ' + _pfTr(cfg.rvol_threshold) + '× üstüne çıkınca');
+  return out.length ? out : ['Koşul tanımlı değil'];
+}
+
+function _pfRenderAlerts(alerts) {
+  const list  = document.getElementById('alertsList');
+  const state = document.getElementById('alertsState');
+  const tickers = Object.keys(alerts).sort();
+  list.textContent = '';
+  if (!tickers.length) {
+    list.hidden = true;
+    state.textContent = 'Şu an takip ettiğin hisse yok. Bir hisse sayfasındaki 🔔 düğmesiyle alarm kurabilirsin.';
+    return;
+  }
+  state.textContent = tickers.length + ' hisse takipte.';
+  tickers.forEach(t => {
+    const li = document.createElement('li');
+    li.className = 'pf-alert-row';
+    li.dataset.ticker = t;
+
+    const info = document.createElement('div');
+    info.className = 'pf-alert-info';
+    const a = document.createElement('a');
+    a.className = 'pf-alert-tic';
+    a.href = '/hisse/' + encodeURIComponent(t);
+    a.textContent = t;                       // metin DOM ile yazilir, innerHTML yok
+    const k = document.createElement('span');
+    k.className = 'pf-alert-kosul';
+    k.textContent = _pfAlertKosul(alerts[t]).join(' · ');
+    info.appendChild(a); info.appendChild(k);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pf-alert-off';
+    btn.textContent = 'Alarmı kapat';
+    btn.setAttribute('aria-label', t + ' alarmını kapat');
+    btn.addEventListener('click', () => _pfDeleteAlert(t, btn, li));
+
+    li.appendChild(info); li.appendChild(btn);
+    list.appendChild(li);
+  });
+  list.hidden = false;
+}
+
+async function _pfLoadAlerts() {
+  const card  = document.getElementById('alertsCard');
+  const state = document.getElementById('alertsState');
+  if (!card || !state) return;
+  try {
+    const r = await fetch('/api/user-alerts', { credentials: 'same-origin', signal: AbortSignal.timeout(10000) });
+    if (r.status === 401) { card.hidden = true; return; }   // oturum yok: bos liste gostermek yaniltici olurdu
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    if (!j || j.ok !== true || !j.alerts || typeof j.alerts !== 'object') throw new Error('beklenmeyen govde');
+    _pfRenderAlerts(j.alerts);
+  } catch (e) {
+    console.warn('alarm listesi yuklenemedi:', e);
+    document.getElementById('alertsList').hidden = true;
+    state.textContent = 'Alarm listen yüklenemedi — bu "alarmın yok" demek değil. Sayfayı yenileyip tekrar dene.';
+    state.classList.add('pf-alerts-state--err');
+  }
+}
+
+async function _pfDeleteAlert(ticker, btn, row) {
+  const state = document.getElementById('alertsState');
+  btn.disabled = true;
+  const eski = btn.textContent;
+  btn.textContent = 'Kapatılıyor…';
+  try {
+    const r = await fetch('/api/user-alerts/' + encodeURIComponent(ticker), {
+      method: 'DELETE', credentials: 'same-origin', signal: AbortSignal.timeout(10000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    row.remove();
+    const kalan = document.querySelectorAll('.pf-alert-row').length;
+    state.classList.remove('pf-alerts-state--err');
+    state.textContent = kalan
+      ? (ticker + ' alarmı kapatıldı. ' + kalan + ' hisse takipte.')
+      : (ticker + ' alarmı kapatıldı. Artık takip ettiğin hisse yok.');
+    if (!kalan) document.getElementById('alertsList').hidden = true;
+  } catch (e) {
+    console.warn('alarm silinemedi:', e);
+    btn.disabled = false;
+    btn.textContent = eski;
+    state.classList.add('pf-alerts-state--err');
+    state.textContent = ticker + ' alarmı kapatılamadı — sunucuda aktif kalmaya devam ediyor. Tekrar dene.';
+  }
+}
+_pfLoadAlerts();
 
 // bfcache donuk-state: bkz. iletisim.html ayni desen.
 window.addEventListener('pageshow', (ev) => {
