@@ -28,7 +28,7 @@ ARTICLES = [
 
 <h2>BIST100'ü Takip Etmenin Yolları</h2>
 <ul>
-  <li>BorsaPusula'da 214 hissenin (BIST100 + ek hisseler) güncel sinyalini izleyin — sinyaller günlük olarak, gün sonu verisiyle hesaplanır.</li>
+  <li>BorsaPusula'da BIST100 ve ötesinde takip edilen 200'ün üzerinde hissenin güncel sinyalini izleyin — sinyaller günlük olarak, gün sonu verisiyle hesaplanır.</li>
   <li>Günlük <a href="/ozet">Sinyal Özeti</a> sayfasından piyasa genelinin durumunu görün.</li>
   <li>Endeks bileşenlerinin tamamı Borsa İstanbul resmi sitesinde yayınlanır.</li>
 </ul>
@@ -47,7 +47,7 @@ ARTICLES = [
       },
       {
         "q": "BorsaPusula'da kaç BIST100 hissesi takip ediliyor?",
-        "a": "BorsaPusula, BIST100 ve ötesinde 214 hisse için algoritmik Supertrend + ADX + EMA teknik analiz sinyallerini günlük olarak hesaplar ve ücretsiz sunar."
+        "a": "BorsaPusula, BIST100'ün tamamı ve ötesinde 200'ün üzerinde hisse için algoritmik Supertrend + ADX + EMA teknik analiz sinyallerini günlük olarak hesaplar ve ücretsiz sunar."
       }
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS', 'TUPRS', 'ISCTR', 'FROTO']
@@ -496,7 +496,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <ul>
   <li>Algoritmanın tutarlılığı + insanın bağlamsal değerlendirmesi</li>
   <li>Temel analiz, haberler veya makro faktörleri entegre etme imkânı</li>
-  <li>Sistematik bir tarama — 214 hisseyi manuel incelemenize gerek yok</li>
+  <li>Sistematik bir tarama — 200'ün üzerinde hisseyi manuel incelemenize gerek yok</li>
 </ul>
 
 <h2>Backtesting ve Gerçekçi Beklentiler</h2>
@@ -506,7 +506,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Kendi algo sisteminizi kurmak için programlama bilgisi gerekir. Ancak BorsaPusula gibi platformlar aracılığıyla algoritmaların ürettiği sinyalleri kullanmak için teknik bilgiye ihtiyaç yoktur. Önemli olan sistemi <em>anlamak</em> ve kurallara uymaktır.</p>
 """,
     "faqs": [
-      {"q": "Algoritmik trading bireysel yatırımcı için nasıl faydalıdır?", "a": "BorsaPusula gibi platformlar sayesinde programlama bilgisi olmadan algoritmik sinyallerden yararlanılabilir. Platform 214 hisseyi tarar ve Güçlü Trend/Trend Bozuldu/Yatay kararı üretir; siz sadece değerlendirip karar verirsiniz."},
+      {"q": "Algoritmik trading bireysel yatırımcı için nasıl faydalıdır?", "a": "BorsaPusula gibi platformlar sayesinde programlama bilgisi olmadan algoritmik sinyallerden yararlanılabilir. Platform BIST100 ve ötesinde 200'ün üzerinde hisseyi tarar ve Güçlü Trend/Trend Bozuldu/Yatay kararı üretir; siz sadece değerlendirip karar verirsiniz."},
       {"q": "Algoritmik sistemler her zaman başarılı mı olur?", "a": "Hayır. Algoritmik sistemler istatistiksel olasılıklar üzerinde çalışır, kesinlik garantisi vermez. Piyasa rejimleri değişebilir ve sistemi periyodik olarak gözden geçirmek önemlidir."},
       {"q": "BorsaPusula tam otomatik işlem yapıyor mu?", "a": "Hayır. BorsaPusula algoritmik sinyal üretir ancak emir vermez. Bu yarı otomatik model algoritmanın tutarlılığını insanın bağlamsal değerlendirmesiyle birleştirir."}
     ],
@@ -569,10 +569,10 @@ RS = Ortalama Yükselen Bar / Ortalama Düşen Bar (genellikle son 14 bar)</pre>
 <ul>
   <li><strong>RSI &lt; 30:</strong> Aşırı Satım. Hisse kısa vadede ucuz, toparlanma olabilir.</li>
   <li><strong>RSI 30–45:</strong> Dip Toparlanması.</li>
-  <li><strong>RSI 45–60:</strong> İdeal Giriş Penceresi.</li>
+  <li><strong>RSI 45–60:</strong> Güçlü Trend sinyali varsa İdeal Giriş Penceresi, diğer tüm sinyallerde Nötr Bölge.</li>
   <li><strong>RSI 60–70:</strong> Trend Güçleniyor.</li>
   <li><strong>RSI 70–80:</strong> Dikkatli — trend güçlü olabilir ama geri çekilme riski artar.</li>
-  <li><strong>RSI &gt; 80:</strong> Aşırı Alım. Hisse kısa vadede pahalı, geri çekilme olabilir.</li>
+  <li><strong>RSI 80 ve üzeri:</strong> Aşırı Alım. Hisse kısa vadede pahalı, geri çekilme olabilir.</li>
 </ul>
 <p>⚠️ Dikkat: Güçlü bir trendde RSI uzun süre 70 üzerinde kalabilir. "Dikkatli"/"Aşırı Alım" bölgeleri tek başına satış sinyali değildir.</p>
 
@@ -589,7 +589,7 @@ RS = Ortalama Yükselen Bar / Ortalama Düşen Bar (genellikle son 14 bar)</pre>
     "faqs": [
       {"q": "RSI 30 altına düştüğünde hisse mutlaka alınmalı mıdır?", "a": "Hayır. RSI 30 altı aşırı satım bölgesi olsa da güçlü düşüş trendinde RSI uzun süre 30 altında kalabilir. BorsaPusula Supertrend ve ADX teyidiyle birlikte değerlendirmek gerekir."},
       {"q": "RSI divergence nasıl tespit edilir?", "a": "Bearish divergence: Fiyat yeni yüksek yaparken RSI yapamıyor. Bullish divergence: Fiyat yeni düşük yaparken RSI yapamıyor. Bu uyumsuzluk yaklaşan trend dönüşüne işaret edebilir."},
-      {"q": "BorsaPusula'da RSI değeri nerede görünür?", "a": "Her hisse sayfasında güncel RSI değeri gösterilir. RSI 45-60 arasındaki hisseler İdeal Giriş Penceresi'ndedir, henüz aşırı alım bölgesine girmemiş demektir."}
+      {"q": "BorsaPusula'da RSI değeri nerede görünür?", "a": "Her hisse sayfasında güncel RSI değeri ve bölge adı gösterilir. RSI 45-60 bandındaki bir hisse İdeal Giriş Penceresi adını yalnızca Güçlü Trend sinyali varsa alır; diğer sinyallerde aynı bant Nötr Bölge olarak adlandırılır."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'ASELS']
   },
@@ -893,7 +893,7 @@ Histogram = MACD − Sinyal</pre>
     "mins": 6,
     "cat": "Teknik Analiz",
     "body": """
-<p>BorsaPusula, 214 hisseyi (BIST100 + ek hisseler) her gün algoritmik olarak analiz eder ve her hisse için Güçlü Trend, Trend Bozuldu veya Yatay kararı üretir. Bu makalede bu sistemin arka planını anlıyoruz.</p>
+<p>BorsaPusula, BIST100 ve ötesinde takip edilen 200'ün üzerinde hisseyi her gün algoritmik olarak analiz eder ve her hisse için Güçlü Trend, Trend Bozuldu veya Yatay kararı üretir. Bu makalede bu sistemin arka planını anlıyoruz.</p>
 
 <h2>Üçlü Filtre Mantığı</h2>
 <p>Tek bir gösterge sahte sinyal üretebilir. Üç göstergenin aynı anda aynı yönü göstermesi, yanlış sinyal olasılığını dramatik şekilde düşürür. BorsaPusula'nın üç kriteri:</p>
@@ -1271,12 +1271,12 @@ Bu döngü, alıcıları tepede ve satıcıları dipte toplar. Kurumsal oyuncula
   <li><strong>Risk/Ödül:</strong> R/R oranı en az 1:2 mi?</li>
   <li><strong>Sektör bağlamı:</strong> Sektörde genel trend yukarı mı?</li>
 </ol>
-<p><a href="/gucu-yuksek">Güçlü Momentum</a> sayfasında tüm bu kriterleri en iyi karşılayan BIST30 hisseleri sıralanmaktadır.</p>
+<p><a href="/gucu-yuksek">Tarama</a> sayfası tüm bu kriterleri en iyi karşılayan hisseleri sinyal gücüne göre sıralar — BIST30 dahil, takip edilen tüm hisse evreni.</p>
 """,
     "faqs": [
       {"q": "BIST30'da kaç hisse var ve hangileri?", "a": "BIST30, Borsa İstanbul'da en likit 30 hisseyi kapsar. Bankacılık (AKBNK, GARAN, ISCTR, YKBNK, VAKBN, DSTKF), holding/sanayi (KCHOL, SAHOL, FROTO, TOASO, EREGL, KRDMD), enerji (TUPRS, PETKM, ASTOR, ENKAI, SASA, GUBRF) ve diğer sektörlerden oluşur."},
       {"q": "BIST30 endeksi ne kadar sıklıkla güncellenir?", "a": "Borsa İstanbul, BIST30 endeks bileşenlerini yılda dört kez (Ocak-Mart, Nisan-Haziran, Temmuz-Eylül, Ekim-Aralık dönemleri sonunda) inceler ve günceller. Yeterli likidite ve piyasa değeri kriterlerini karşılayamayan hisseler çıkarılır, yerlerine uygun hisseler alınır."},
-      {"q": "BIST30 hisselerinin teknik sinyalleri nereden takip edilir?", "a": "BorsaPusula'da BIST30 hisselerinin tamamı için Supertrend + ADX + EMA algoritmik sinyalleri ücretsiz olarak sunulmaktadır. Ana sayfada 'BIST30' filtresiyle bu hisseleri ayrıca görebilirsiniz."}
+      {"q": "BIST30 hisselerinin teknik sinyalleri nereden takip edilir?", "a": "BorsaPusula'da BIST30 hisselerinin tamamı için Supertrend + ADX + EMA algoritmik sinyalleri ücretsiz olarak sunulmaktadır. Tarama sayfasında sinyal, sektör ve ADX filtreleriyle bu hisseleri daraltabilirsiniz."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'EREGL', 'ASELS']
   },
@@ -2100,7 +2100,7 @@ Türkiye'de para politikası ve kur arasındaki ilişki özellikle kritiktir:
 
 ## BorsaPusula'da Kur Takibi
 
-BorsaPusula'nın **[makro ticker bandı](/),** USD/TRY kurunu anlık olarak gösterir. Kur hareketlerine göre sektör filtresi kullanarak:
+BorsaPusula'nın **[makro ticker bandı](/),** USD/TRY kurunu gösterir. Kur hareketlerine göre sektör filtresi kullanarak:
 
 - Kur yükselişinde: FROTO, EREGL gibi ihracatçı hisselerin sinyallerini takip edin
 - Kur düşüşünde: İthalatçı şirketler ve tüketici sektörü sinyallerini değerlendirin
@@ -2510,7 +2510,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <li><strong>Ani tersine dönüş riski:</strong> Güçlü trend aniden bozulabilir; bu nedenle stop loss kritik önem taşır.</li>
 </ul>
 
-<p>BorsaPusula sinyallerinin geçmiş performans analizine <a href="/sinyal-performans">Sinyal Performans sayfasından</a> ulaşabilirsiniz.</p>""",
+<p>BorsaPusula sinyallerinin hangi göstergelerden ve hangi eşiklerden üretildiğini <a href="/metodoloji">Metodoloji sayfasından</a> inceleyebilirsiniz.</p>""",
     "faqs": [
       {"q": "Trend takip stratejisi nedir?",
        "a": "Fiyatın mevcut yönünde devam edeceği varsayımıyla hareket eden bir yatırım yaklaşımıdır. 'Dibe yakın al, tepeye yakın sat' değil; 'trend başladığında katıl, trend bitmeden çık' mantığıyla çalışır."},
@@ -6230,7 +6230,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Pratik kural: BIST'te bireysel yatırımcı için 5-12 hisse, en az 3-4 farklı sektörden, ideal aralık.</p>
 
 <h2>BorsaPusula ile Çeşitlendirme Takibi</h2>
-<p>BorsaPusula'nın ana sayfasında tüm BIST30 hisselerinin sinyal durumunu tek ekranda görebilirsiniz. Sektörel filtreleme özelliğiyle belirli bir sektördeki hisseleri izole edebilir ve portföyünüzün sektörel dağılımını optimize edebilirsiniz. Güçlü Trend sinyali veren hisseler farklı sektörlerden seçildiğinde hem kâr potansiyeli hem risk yönetimi dengesi sağlanmış olur.</p>
+<p>BorsaPusula'nın ana sayfasında BIST100 ve ötesinde takip edilen tüm hisselerin sinyal durumunu tek ekranda görebilirsiniz. Sektörel filtreleme özelliğiyle belirli bir sektördeki hisseleri izole edebilir ve portföyünüzün sektörel dağılımını optimize edebilirsiniz. Güçlü Trend sinyali veren hisseler farklı sektörlerden seçildiğinde hem kâr potansiyeli hem risk yönetimi dengesi sağlanmış olur.</p>
 """,
     "faqs": [
       {"q": "Kaç hisse ile portföy oluşturulmalı?",
@@ -6810,7 +6810,7 @@ ROA = Net Kâr / Toplam Aktifler × 100
 <p>Ortak nokta: Her büyük kriz, sabırlı uzun vadeli yatırımcılar için önemli alım fırsatı sundu. Panikle satan kısa vadeli yatırımcılar her seferinde toparlanmanın dışında kaldı.</p>
 
 <h2>BorsaPusula ile Kriz Yönetimi</h2>
-<p>BorsaPusula sinyalleri kriz dönemlerinde netlik sağlar: Tüm BIST30'da Trend Bozuldu sinyali ağırlıklıysa piyasa henüz dip yapmamış olabilir. Güçlü Trend sinyalleri yeniden yoğunlaşmaya başladığında trendin dönüşü teknik olarak teyit ediliyor demektir. Bu mekanik teyit, duygusal kararların yerini alır.</p>
+<p>BorsaPusula sinyalleri kriz dönemlerinde netlik sağlar: Takip edilen hisselerin genelinde Trend Bozuldu sinyali ağırlıklıysa piyasa henüz dip yapmamış olabilir. Güçlü Trend sinyalleri yeniden yoğunlaşmaya başladığında trendin dönüşü teknik olarak teyit ediliyor demektir. Bu mekanik teyit, duygusal kararların yerini alır.</p>
 """,
     "faqs": [
       {"q": "Düşen bıçağı tutmak neden tehlikeli?",
