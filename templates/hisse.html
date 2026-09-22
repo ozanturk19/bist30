@@ -2030,12 +2030,30 @@ function toggleHisseWatch() {
    olcemedigi bir seyi kesin olarak iddia ediyordu ([[K-BK]]: bos != bilinmiyor).
    Artik dugme notr kalir, aria-pressed HIC bildirilmez ve kullaniciya nereden
    kurtaracagi soylenir (/portfolio bozuk kaydi yedekleyip indirtiyor). */
+/* ── K-CX (22.09): DURUM DEGISINCE ERISILEBILIR KANAL DA GUNCELLENMELI ──────
+   K-AH native `title=`i yasaklamisti cunku dokunmatikte ve klavye odaginda HIC
+   gosterilmez; kanonik kanal [data-tip] (bp-tooltip.js: hover+focus+tap+Escape).
+   Ama JS ile DURUMA gore yazilan aciklamalar hala `el.title`a gidiyordu ve
+   statik `data-tip` ACILIS metninde DONUP kaliyordu. Canli olcum 22.09
+   (/hisse/ASELS, izleme listesi dolu): buton "Takipte ✓" gosterirken
+   data-tip HALA "Sinyal degisiminde bildirim al" diyordu -- dokunmatik/klavye
+   kullanicisina YIKICI eylem (listeden cikarma) TERS tarif ediliyordu.
+   K-AH kapisi (title-tooltip-check.js) bunu goremez: `data-tip` VARLIGI onun
+   sahte-pozitif muafiyetidir, TAZELIGI degil; ustelik durum/hata/gizli-sekme
+   dallari o kosuda hic tetiklenmiyor.
+   Tek yazar: aciklama data-tip'e gider, native title HER ZAMAN silinir. */
+function _bpTip(el, text) {
+  if (!el) return;
+  if (text) el.setAttribute('data-tip', text); else el.removeAttribute('data-tip');
+  el.removeAttribute('title');   // iki kanal = iki kanon; fare-only kanal kapali
+}
+
 function _hibMarkUnknown(btn, ne) {
   if (!btn) return;
   btn.classList.remove('active-portfolio', 'active-star', 'active-bell');
   btn.removeAttribute('aria-pressed');
   const t = ne + ' kaydın okunamadı (bozuk olabilir) — durum bilinmiyor. /portfolio sayfasından kurtarabilirsin.';
-  btn.title = t;
+  _bpTip(btn, t);
   btn.setAttribute('aria-label', t);
 }
 
@@ -2056,11 +2074,11 @@ function updateHibStarBtn() {
   if (inPf) {
     btn.classList.add('active-portfolio');
     btn.classList.remove('active-star');
-    btn.title = 'Portföyde — çıkarmak için tıkla';
+    _bpTip(btn, 'Portföyde — çıkarmak için tıkla');
     if (lbl) lbl.textContent = 'Portföyde ✓';
   } else {
     btn.classList.remove('active-portfolio', 'active-star');
-    btn.title = 'Portföye ekle';
+    _bpTip(btn, 'Portföye ekle');
     if (lbl) lbl.textContent = 'Portföye ekle';
   }
   btn.setAttribute('aria-pressed', String(inPf));
@@ -2083,7 +2101,7 @@ function updateHibBellBtn() {
     btn.disabled = true;
     btn.setAttribute('aria-busy', 'true');
     btn.removeAttribute('aria-pressed');     // bilinmeyen durum bildirilmez
-    btn.title = 'Alarm durumun kontrol ediliyor…';
+    _bpTip(btn, 'Alarm durumun kontrol ediliyor…');
     btn.setAttribute('aria-label', 'Alarm durumu kontrol ediliyor');
     if (lblP) lblP.textContent = 'Kontrol ediliyor…';
     return;
@@ -2103,13 +2121,13 @@ function updateHibBellBtn() {
       btn.classList.add('active-bell');
       /* K-CU: girişliyken kayıt HESABA bağlıdır (her cihazda geçerli, e-posta
          gider); giriş yokken gerçekten yalnız bu cihazın listesidir. */
-      btn.title = _hibLoggedIn()
+      _bpTip(btn, _hibLoggedIn()
         ? 'Takipte — sinyal değişiminde e-posta gelir; kapatmak için tıkla'
-        : 'Takipte (yalnız bu cihazda, e-posta gönderilmez) — çıkarmak için tıkla';
+        : 'Takipte (yalnız bu cihazda, e-posta gönderilmez) — çıkarmak için tıkla');
       if (lbl) lbl.textContent = 'Takipte ✓';
     } else {
       btn.classList.remove('active-bell');
-      btn.title = 'Sinyal değişiminde bildirim al';
+      _bpTip(btn, 'Sinyal değişiminde bildirim al');
       if (lbl) lbl.textContent = 'Bildirim al';
     }
     btn.setAttribute('aria-pressed', String(inW));
@@ -3203,7 +3221,10 @@ function _showChartStatus(msg, withRetryBtn) {
     const sigEl = document.getElementById('hpSignal');
     if (sigEl) {
       sigEl.textContent = '?';
-      sigEl.title = 'Sinyal verisi yüklenemedi';
+      /* K-CX: gorunen metin yalniz "?" -- anlami SADECE fare-only title'da
+         durursa dokunmatik/klavye/ekran okuyucu hicbiri ulasamaz. */
+      _bpTip(sigEl, 'Sinyal verisi yüklenemedi');
+      sigEl.setAttribute('aria-label', 'Sinyal verisi yüklenemedi');
       sigEl.className = 'signal-badge signal-BEKLE';
     }
     const historyBody = document.getElementById('historyBody');
@@ -3323,7 +3344,12 @@ async function loadChart(retry) {
         /* F2 — Anomali rozet */
         const _ab = document.getElementById('hpAnomalyBadge');
         if (_ab && sd.anomaly && sd.anomaly.flag) {
-          _ab.title = sd.anomaly.reason || '';
+          /* K-CX: rozet "⚠ Anomal" diyor, NEDENI yalniz title'daydi ->
+             dokunmatikte ve klavyede ulasilmazdi (canli evrende flag bugun
+             0/217, yani K-AH'nin canli DOM kapisi bu dali HIC goremedi). */
+          var _areason = sd.anomaly.reason || '';
+          _bpTip(_ab, _areason || 'Fiyat/hacim normal daginimin disinda');
+          _ab.setAttribute('aria-label', 'Anomali' + (_areason ? ': ' + _areason : ''));
           _ab.style.display = '';
         }
       } else {
@@ -3483,7 +3509,11 @@ async function loadSignalExplanation(retryCount) {
     if (!badgeEl) return;
     badgeEl.classList.toggle('da-ai-badge--rule', kind === 'rule');
     badgeEl.textContent = label;
-    badgeEl.title = tip;
+    /* K-CX: bu rozet bir GUVEN beyani ("yapay zeka degil") ve gizli sekmede
+       duruyor -- K-AH kosusu /hisse/<t> adresini ?tab=ai olmadan ziyaret
+       ettigi icin display:none goruyor ve muaf sayiyordu. */
+    _bpTip(badgeEl, tip);
+    badgeEl.setAttribute('aria-label', label + ' — ' + tip);
   }
   sigBadge('rule', 'Kural tabanlı', 'Sinyal motorunun 3 kriter kontrolünden türetildi — yapay zeka değil');
 
