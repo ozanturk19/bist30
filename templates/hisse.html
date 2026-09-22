@@ -640,6 +640,7 @@
   {% if signal_summary %}
   <div id="signalSummarySection"
        data-tab-content="ozet"
+       tabindex="-1"
        class="da-panel da-summary-panel">
     <div class="da-summary-head">
       <div style="flex:1;min-width:0">
@@ -1406,7 +1407,7 @@
         {% else %}
         Supertrend, ADX ≥ 25, DI yönü (DI+/DI−) ve EMA12/EMA99 kriterleri şu an aynı anda sağlanmıyor — net bir trend sinyali yok.
         {% endif %}
-        Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" class="da-link">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
+        Detaylı teknik durum için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet')" class="da-link">Özet sekmesindeki indikatör paneli</a>'ne göz atabilirsiniz.
       </div>
       <div id="sigExplainStatus" style="display:flex;align-items:center;gap:8px;font-size:var(--bp-text-sm);color:var(--bp-text3)">
         <div class="da-spin da-spin--sm"></div>
@@ -1440,7 +1441,7 @@
     {% if _temel_ready %}
     <p class="da-ai-body" style="margin:0 0 8px">{{ hs.temel_analiz_aciklamasi if hs.temel_analiz_aciklamasi else 'AI yorumu hazırlanıyor.' }}</p>
     <div class="da-ai-note">
-      <span aria-hidden="true">📊</span> Temel Analiz Skoru {{ hs.temel_analiz_skoru }}/100 — detaylı sayısal kırılım için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet');return false" class="da-link">Özet sekmesindeki Skor Analizi ve Temel Analiz</a> bölümlerine göz atabilirsiniz.
+      <span aria-hidden="true">📊</span> Temel Analiz Skoru {{ hs.temel_analiz_skoru }}/100 — detaylı sayısal kırılım için <a href="#signalSummarySection" onclick="window.applyTab&&applyTab('ozet')" class="da-link">Özet sekmesindeki Skor Analizi ve Temel Analiz</a> bölümlerine göz atabilirsiniz.
     </div>
     {% else %}
     <p style="font-size:var(--bp-text-base);color:var(--bp-text3);line-height:1.65;margin:0">Bu hisse için son EOD (gün-sonu) turu Temel Analiz Skorunu üretmedi.</p>

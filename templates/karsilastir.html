@@ -52,7 +52,7 @@
 <link rel="stylesheet" href="/static/css/tokens.css?v=c0c5d88e">
 <link rel="stylesheet" href="/static/css/data-art.css?v=96623028">
 <script src="/static/bp-vocab.js?v=da3d601d" defer></script>
-<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=fb47e319">
+<link rel="stylesheet" href="/static/css/pages/karsilastir.css?v=77ebf132">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
 <!-- Makro Ticker Bandı -->
@@ -106,9 +106,18 @@
          bp-search.js'teki #bpSearchStatus ile ayni kanon. -->
     <div class="sr-only" id="acStatus" role="status" aria-live="polite"></div>
     <button class="compare-btn" onclick="doCompare()">Karşılaştır</button>
-    <a id="shareBtn" class="share-btn" href="." onclick="copyShareUrl(event);return false">
+    <!-- K-DP (22.09): bu bir GEZINME degil, PANOYA KOPYALAMA eylemi. Eskiden
+         `<a href=".">` idi; `.` /karsilastir'da ANA SAYFAYA cozuluyordu
+         (canli olcum: a.href = https://borsapusula.com/). Yani dugmenin tek
+         isi "bu karsilastirmanin adresini ver" iken, sag tik > "baglanti
+         adresini kopyala" / Ctrl+tik / orta tik VAADIN TAM TERSINI, ana
+         sayfayi veriyordu. Ayrica <a href> SPACE ile etkinlesmez (tarayici
+         sayfayi kaydirir) ve elemanin kendi onkeydown'i yoktu -> klavye
+         kullanicisi kopyalayamiyordu. Yanindaki kardes kontrol (.compare-btn)
+         zaten gercek <button>; ayni satirda iki kanon vardi (52. ders). -->
+    <button type="button" id="shareBtn" class="share-btn" onclick="copyShareUrl(event)">
       <span aria-hidden="true">🔗</span> Linki Kopyala
-    </a>
+    </button>
     <span id="shareCopyStatus" class="sr-only" role="status" aria-live="polite"></span>
   </div>
 

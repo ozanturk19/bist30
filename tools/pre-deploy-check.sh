@@ -1721,13 +1721,42 @@ fi
 #   R1 sablon `hdr_sub`/`hdr_sub_id` gecmemeli · R2 anti-CLS kurali yerinde
 #   durmali (gerekce cokerse kural gozden gecirilsin) · R3 JS'in yazdigi her
 #   id sablonda tanimli olmali (damgayi <main>'e tasimayi unutma senaryosu).
-echo "80/80 hidden-write-target-check (K-DO: gizli yazma hedefi)..."
+echo "80/81 hidden-write-target-check (K-DO: gizli yazma hedefi)..."
 if python3 tools/hidden-write-target-check.py; then
   echo "  ✓ hidden-write-target-check PASS"
 else
   echo "  ✗ K-DO KIRIK: JS kalici gizli bir dugume yaziyor ya da hedef id yok."
   echo "    Self-test:       python3 tools/hidden-write-target-check.py --self-test  # 9/9 beklenir"
   echo "    Pozitif kontrol: python3 tools/hidden-write-target-check.py --ref 77f66e9  # 10 ihlal beklenir"
+  FAIL=$((FAIL + 1))
+fi
+
+# 81. control-role-behavior-check (KAPI 82 -- K-DP)
+#   BIR KONTROLUN ROLU ILE DAVRANISI AYNI SEYI SOYLEMELI.
+#   /karsilastir "🔗 Linki Kopyala" bir <a href="."> idi; `.` bu sayfada ANA
+#   SAYFAYA cozuluyordu (canli olcum: a.href == "https://borsapusula.com/").
+#   Dugmenin tek isi "bu karsilastirmanin adresini ver"ken sag tik > "baglanti
+#   adresini kopyala" / Ctrl+tik / orta tik VAADIN TAM TERSINI veriyordu;
+#   ustelik <a href> SPACE ile etkinlesmez ve elemanin onkeydown'i yoktu ->
+#   klavye kullanicisi hic kopyalayamiyordu. Kardesi (.compare-btn) zaten
+#   gercek <button>'di: ayni satirda iki kanon (52. ders).
+#   Ikinci sinif: /hisse'de iki <a href="#signalSummarySection"> onclick'inde
+#   `return false` ile varsayilan FRAGMENT GEZINMESINI iptal ediyordu -- sekme
+#   degisiyor ama tarayici hedefe ne kaydiriyor ne odak tasiyordu (olcum:
+#   /hisse/GARAN'da hedef ekranin 2487px USTUNDE kaldi, location'da fragment
+#   yoktu). `applyTab && applyTab(); return false` ifadesi applyTab TANIMSIZ
+#   iken de iptal ediyordu: href'in yedek olma sebebi tam da ise yarayacagi
+#   senaryoda yok ediliyordu.
+#   R(A) <a>'nin href'i yer tutucu olamaz (`.`, `#`, bos, `javascript:`) ve
+#   href'siz <a> onclick tasiyamaz -> <button type="button">.
+#   R(B) gercek sayfa-ici capaya sahip <a>'nin satir-ici onclick'i varsayilani
+#   IPTAL edemez (return false / preventDefault).
+echo "81/81 control-role-behavior-check (K-DP: kontrol rolu = davranisi)..."
+if python3 tools/control-role-behavior-check.py; then
+  echo "  ✓ control-role-behavior-check PASS"
+else
+  echo "  ✗ K-DP KIRIK: bir <a> gezinmiyor ya da capasi gercekte sicramiyor."
+  echo "    Pozitif kontrol: python3 tools/control-role-behavior-check.py --ref 61777f3  # 3 ihlal beklenir"
   FAIL=$((FAIL + 1))
 fi
 
