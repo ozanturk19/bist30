@@ -138,6 +138,28 @@ VERI_ANAHTARLARI = {
     "premium", "is_premium", "tier", "only_premium",
 }
 
+# ⛔ 84. DERS -- PYTHON'DA `"İ".lower()` "i" DEGILDIR
+# `"İ".lower()` == "i" + U+0307 (birlesik ustnokta). Yani `"ideal giriş" in
+# dize.lower()` testi, dizede KANONIK yazimla ("İdeal Giriş") gecen bir adi
+# GORMEZ. Bu kapinin ilk yazimi tam bu tuzaga dustu: 4/4 sentetik pozitif
+# gecti cunku sentetiklerin ve fix-oncesi agacin HEPSI kucuk harfliydi --
+# oysa ihlalin DAHA OLASI yazimi buyuk harfli olandir. Eslesme artik
+# `_tr_kucult` uzerinden: noktali İ ve noktasiz I, ASCII i'ye indirgenir.
+# (18.09 RVOL dersinin ayni ailesi: bir iddia, es-yazimlarin HEPSI taranmadan
+# dogrulanmis sayilmaz.)
+# ⛔ DERSIN DERSI: `tools/threshold-sync-check.py:115` bu tuzagi ZATEN
+# belgelemisti -- ve tam ayni kusur, ayni kanon adinda ('İdeal Giriş'),
+# yeni yazilan bu kapida TEKRARLADI. Bilgi repoda duruyordu ama PAYLASILAN
+# BIR YARDIMCIDA degil, tek bir dosyanin yorumunda yasiyordu. Tekrarlanan
+# bir olcum tuzagi, yorum olarak degil FONKSIYON olarak saklanmalidir.
+_TR_HARITA = str.maketrans({
+    "İ": "i", "I": "i", "ı": "i", "\u0307": "",
+})
+
+def _tr_kucult(s):
+    return s.translate(_TR_HARITA).lower().replace("\u0307", "")
+
+
 KANON_SKOR_ADLARI = ("Teknik Güç Skoru", "BorsaPusula Skoru")
 KANON_DISI_SKOR = re.compile(
     r"(Sinyal\s+Skoru|Sinyal\s+kalite\s+puan[ıi]|Kalite\s+Puan[ıi]|Güç\s+Puan[ıi])",
@@ -149,7 +171,7 @@ def kurallari_uygula(dize):
     if dize.strip() in VERI_ANAHTARLARI:
         return bulgular
     d = dize
-    dl = d.lower()
+    dl = _tr_kucult(d)
 
     if re.search(r"\bPremium\b", d):
         bulgular.append(("R1", 'emekli "Premium" sozcugu (kanon: ⭐ Hacim Onaylı / tier)'))
@@ -158,7 +180,8 @@ def kurallari_uygula(dize):
     m = KANON_DISI_SKOR.search(d)
     if m and not any(k in d for k in KANON_SKOR_ADLARI):
         bulgular.append(("R3", 'kanon disi skor adi "%s" (kanon: Teknik Güç Skoru)' % m.group(1)))
-    if "ideal giriş" in dl and "45" in d and "güçlü trend" not in dl:
+    if "ideal giris" in dl.replace("ş", "s") and "45" in d \
+            and "guclu trend" not in dl.replace("ü", "u").replace("ç", "c"):
         bulgular.append(("R4", 'RSI bandi -> "İdeal Giriş" eslemesi KOSULSUZ yazilmis '
                                '(kanon: yalniz Güçlü Trend sinyalinde)'))
     return bulgular
