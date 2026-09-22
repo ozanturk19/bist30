@@ -28,6 +28,18 @@ sozcuk, HTML'den temizlenip `static/*.js` icinde yasamaya devam etti. Bir
 kanal "sablon degil" diye degil, "kullaniciya ULASMIYOR" diye kapsam disi
 birakilabilir -- ve paylasilan JS kullaniciya ulasir.
 
+== 85. DERS (CPO-1769, K-CM) -- BU KAPININ KENDI KAPSAMI YARIM KALMISTI ==
+R1-R4 sadece `static/**/*.js`yi taniyordu. Sablonlarin INLINE `<script>`
+govdeleri (22 sablon / 8276 satir / 4128 dize, olculdu 22.09) ayni sozlugu
+tasiyabilir ama hicbir metin kapisi -- kapi 50/51/52/bu kapi -- bunu
+R1-R4 ile taramiyordu: kapi 50/K-BN bu metni GORUYOR (intraday/tazelik
+iddiasi icin), ama bu kapinin SOZLUK kurallari icin kor bir kanaldi.
+Ayni sozluk iki kanalda (static JS / sablon inline JS) farkli kapsamla
+korunuyordu -- K-turunun tekrar tekrar uzerine dustugu desen. `src=`
+(harici dosya, zaten `hedefler()` kapsiyor) ve `application/ld+json`
+(yapisal veri, nesir degil) bloklari HARIC tutulur; deseni
+`tools/glossary-where-check.py`nin `yayimlanan_metin()`inden alinmistir.
+
 KURALLAR (taban SIFIR):
   R1  emekli "Premium" sozcugu           (kanon: ⭐ Hacim Onayli / tier)
   R2  💎 glifi                            (urunde "Yuksek Skor" demek; 81. ders)
@@ -65,6 +77,26 @@ def hedefler():
         if "/vendor/" in "/" + rel:
             continue
         out.append(p)
+    return out
+
+# --- 85. ders: sablonlarin inline <script> govdesi ---------------------------
+RE_TPL_SCRIPT = re.compile(
+    r"<script(?![^>]*\bsrc=)(?![^>]*type=[\"']application/ld\+json[\"'])"
+    r"[^>]*>(.*?)</script>", re.S | re.I)
+
+
+def sablon_script_bloklari():
+    """[(relpath, blok_baslangic_satiri, script_govdesi)] -- src= ve JSON-LD
+    HARIC, sablonlarin el yazimi inline JS'i. blok_baslangic_satiri, govdenin
+    ilk karakterinin gercek dosyadaki satir numarasi (dizeleri_cikar() 1'den
+    sayar, ihlal raporunda gercek satira bu offsetle donusturulur)."""
+    out = []
+    for p in sorted((ROOT / "templates").rglob("*.html")):
+        rel = p.relative_to(ROOT).as_posix()
+        src = p.read_text(encoding="utf-8")
+        for m in RE_TPL_SCRIPT.finditer(src):
+            blok_satir = src.count("\n", 0, m.start(1)) + 1
+            out.append((rel, blok_satir, m.group(1)))
     return out
 
 # --- 77. ders: yalniz dize literalleri --------------------------------------
@@ -203,12 +235,32 @@ def main():
                 kisa = dize if len(dize) <= 110 else dize[:110] + "…"
                 print("IHLAL %s  %s:%d  %s" % (kural, rel, satir, aciklama))
                 print("        » %s" % kisa.replace("\n", " "))
+
+    # 85. ders: sablonlarin inline <script> govdesi de ayni R1-R4 ile taranir.
+    # R2 (💎 glifi) HARIC: canli olcum (22.09) tarama.html'de 2 kullanim
+    # buldu, ikisi de bitisik bir `data-tip="... Yuksek Skor ..."` ile
+    # aciklanmis rozet -- K-CH'nin bulgusu (learning-mode.js'de ACIKLAMASIZ
+    # sozluk tanimi) burada yok. R2 static JS'e ozel kalir; R1/R3/R4
+    # (aciklamaya bagli olmayan, kosulsuz kanon ihlalleri) tam calisir.
+    sablon_dosyalari = set()
+    for rel, blok_satir, govde in sablon_script_bloklari():
+        sablon_dosyalari.add(rel)
+        for satir, dize in dizeleri_cikar(govde):
+            gercek_satir = blok_satir + satir - 1
+            for kural, aciklama in kurallari_uygula(dize):
+                if kural == "R2":
+                    continue
+                ihlal += 1
+                kisa = dize if len(dize) <= 110 else dize[:110] + "…"
+                print("IHLAL %s  %s:%d  %s" % (kural, rel, gercek_satir, aciklama))
+                print("        » %s" % kisa.replace("\n", " "))
+
     if verbose:
-        print("taranan dosya: %d" % taranan)
+        print("taranan dosya: %d static + %d sablon (inline JS)" % (taranan, len(sablon_dosyalari)))
     if ihlal:
         print("\nstatic-js-text-check: %d ihlal (taban 0)" % ihlal)
         return 1
-    print("static-js-text-check: OK (%d dosya, 0 ihlal)" % taranan)
+    print("static-js-text-check: OK (%d static dosya + %d sablon, 0 ihlal)" % (taranan, len(sablon_dosyalari)))
     return 0
 
 if __name__ == "__main__":
