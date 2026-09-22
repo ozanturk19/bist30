@@ -304,6 +304,25 @@ function bpFormatPct(n, frac) {
   return (r > 0 ? '+' : '') + r.toFixed(f).replace('.', ',') + '%';
 }
 
+/* ── K-DL (22.09): SEVIYE YUZDESI (degisim degil) ────────────────────────
+   `bpFormatPct` DEGISIM icindir: isaret zorunlu, '%' sona gelir (-4,28%).
+   ROE, net kar marji, temettu verimi gibi SEVIYE yuzdeleri sitede Turkce
+   yazimla, '%' ONDE basiliyor (%17,6) -- ve bu dogru; ama negatif deger
+   `'%' + (-3.5)` yazimiyla **"%-3,5"** uretiyordu: eksi isareti yuzde
+   isaretiyle rakamin ARASINA sikisiyor. Turkcede isaret disarida durur:
+   -%3,5. Iki sayfa (hisse.html Temel karti, karsilastir.html ROE satiri)
+   ayni yanlis yazimi bagimsizca tasiyordu -- tek kanon burasi.
+
+   Degisim yuzdesi icin `bpFormatPct`, seviye yuzdesi icin bu. */
+function bpPctLevel(n, frac) {
+  var v = (typeof n === 'string') ? parseFloat(n) : n;
+  if (typeof v !== 'number' || !isFinite(v)) return '\u2014';
+  var f = (typeof frac === 'number') ? frac : 1;
+  var r = parseFloat(v.toFixed(f));
+  if (r === 0) r = 0;                        /* -0 -> 0 */
+  return (r < 0 ? '-' : '') + '%' + Math.abs(r).toFixed(f).replace('.', ',');
+}
+
 /* ── K-BQ (21.09): SUPERTREND SEVIYESI ≠ "STOP" ──────────────────────────
    `sl_level` Supertrend bandinin GUNCEL degeridir ve sinyal yonunden bagimsiz
    HER hissede hesaplanir. Long-only bir urunde bu sayiya "Stop" demek yalnizca

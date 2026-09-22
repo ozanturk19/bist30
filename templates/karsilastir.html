@@ -342,9 +342,13 @@ function renderCell(key, s) {
     case 'roe': {
       if (v == null) return '<span class="muted">—</span>';
       const n = parseFloat(v);
+      /* K-DL (22.09): sifir/negatif ROE bu satirda da 'Zayif' diyordu -- /hisse'nin
+         Temel karti ayni turda 'Basabas'/'Negatif'e gecti; kapi (cross_surface)
+         iki yuzeyi bagli tutuyor, band kumesi burada da ayni olmali. Negatif ROE
+         'zayif getiri' degil, OZ SERMAYE ERIMESIdir. */
       const cl  = n > 20 ? 'up'     : n > 10 ? 'mid'  : 'dn';
-      const lbl = n > 20 ? 'Güçlü'  : n > 10 ? 'Orta' : 'Zayıf';
-      return `<span class="${cl} mono">%${n.toFixed(1).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
+      const lbl = n > 20 ? 'Güçlü'  : n > 10 ? 'Orta' : n > 0 ? 'Zayıf' : n === 0 ? 'Başabaş' : 'Negatif';
+      return `<span class="${cl} mono">${bpPctLevel(n, 1)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
     }
     case 'dividend_yield': {
       if (v == null) return '<span class="muted">—</span>';
@@ -354,7 +358,7 @@ function renderCell(key, s) {
          bu band ADSIZ kaliyordu -- ayni ucluden biri sessizdi. */
       const cl  = n >= 4 ? 'up' : 'mid';
       const lbl = n >= 4 ? 'Yüksek' : 'Standart';
-      return `<span class="${cl} mono">%${n.toFixed(2).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
+      return `<span class="${cl} mono">${bpPctLevel(n, 2)}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
     }
     default:              return v != null ? String(v) : '<span class="muted">—</span>';
   }
@@ -874,7 +878,7 @@ window.addEventListener('popstate', function() {
      hicbirinde "?" cikmiyordu). Kapi 76 envanteri bagli tutar. -->
 <script src="/static/learning-mode.js?v=5c5e1748" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
-<script src="/static/bp-format.js?v=b8108049"></script>
+<script src="/static/bp-format.js?v=dd31dd69"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>bpStartDataQualityPolling();</script>
 {% include '_mobile_nav_partial.html' %}

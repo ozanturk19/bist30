@@ -142,6 +142,40 @@ def helper_numbers(src):
     return out
 
 
+# Kanonik BICIMLEYICILER: son argumanlari ondalik BASAMAK SAYISIdir, esik
+# degil. K-DL (22.09): `bpPctLevel(n, 1)` yazimi `.toFixed(1)`in tam
+# esdegeri ama farkli yazildigi icin "1" bir band esigi sanilip
+# /karsilastir'in ROE imzasini [0,10,20]'den [0,1,10,20]'ye kaydirdi ve
+# SAHTE bir cross-surface ihlali uretti. Bicim sayisi, yazimina bakilmadan,
+# esik olamaz.
+FMT_CALL = re.compile(r'\b(bpPctLevel|bpFormatPct|bpMoneyCompact)\s*\(')
+
+
+def _strip_fmt_frac(e):
+    """`bpPctLevel(x, 2)` -> `bpPctLevel(x)` (bicim basamagini dusur)."""
+    out, pos = [], 0
+    for m in FMT_CALL.finditer(e):
+        args, end = call_args(e, m.group(1), m.start())
+        if args is None:
+            continue
+        keep = args[:1] if len(args) > 1 else args
+        out.append(e[pos:m.start()])
+        out.append(m.group(1) + '(' + ','.join(keep) + ')')
+        pos = end + 1
+    out.append(e[pos:])
+    return ''.join(out)
+
+
+def has_pct_unit(expr):
+    """Kart degeri YUZDE mi? K-DL: eski kapi bunu `'%' in val` diye, yani
+    sayinin YAZILIS BICIMINDEN okuyordu; deger kanonik bicimleyiciye
+    (`bpPctLevel`) tasininca literal '%' kayboldu ve yuzde kartlari
+    Kural A'ya dustu -- kapi kendi 52. dersini (hatanin yazimini degil
+    kendisini ara) ihlal ediyordu. Yuzde iddiasi ya literal '%' ile ya da
+    kanonik yuzde bicimleyicisiyle kurulur."""
+    return '%' in expr or 'bpPctLevel(' in expr or 'bpFormatPct(' in expr
+
+
 def expr_numbers(expr, helpers):
     """Bir arguman ifadesindeki esik kumesi. Yardimci cagrilari cozulur;
     `.toFixed(2)` gibi BICIM sayilari ve olcek bolenleri (/100) elenir."""
@@ -150,6 +184,7 @@ def expr_numbers(expr, helpers):
     for name, inner in helpers.items():
         if name + '(' in e:
             nums |= inner
+    e = _strip_fmt_frac(e)
     e = re.sub(r'\.toFixed\(\s*\d+\s*\)', ' ', e)
     e = re.sub(r'(?:minimum|maximum)FractionDigits\s*:\s*\d+', ' ', e)
     e = re.sub(r'/\s*\d+(?:\.\d+)?', ' ', e)        # olcek bolme
@@ -178,12 +213,20 @@ def scan(root):
     sanity = sanity_ranges(root)
     bad = []
 
-    # Olcek duzeltmeleri: `const _x = f.alan / 100` -> _x, (alan, 100)
+    # Yerel takma adlar: `const _x = ... f.alan ...` -> _x, (alan, bolen).
+    # K-DL (22.09) — ENJEKSIYON POZITIF KONTROLU BU DELIGI ACTI: eski yazim
+    # YALNIZ `/ NUM` iceren tanimlari kaydediyordu. Yani K-BX'in kendi
+    # duzeltmesini (`f.debt_to_equity / 100`) geri alan bir regresyonda
+    # `f.debt_to_equity` referansi karttan TAMAMEN kayboluyor, `refs` bos
+    # kaliyor ve kapi -- korumak icin YAZILDIGI hatayi -- sessizce geciriyordu.
+    # Takma ad bolensiz de kaydedilir (div=1), olcek duzeltmesi ayri bir sart.
     scaled = {}
-    for var, fld, div in re.findall(
-            r'(?:const|let|var)\s+(_\w+)\s*=\s*[^;\n]*?f\.(\w+)[^;\n]*?'
-            r'/\s*(\d+(?:\.\d+)?)', src):
-        scaled[var] = (fld, float(div))
+    for var, expr in re.findall(r'(?:const|let|var)\s+(_\w+)\s*=\s*([^;\n]*)', src):
+        mf = re.search(r'f\.(\w+)', expr)
+        if not mf:
+            continue
+        md = re.search(r'/\s*(\d+(?:\.\d+)?)', expr)
+        scaled[var] = (mf.group(1), float(md.group(1)) if md else 1.0)
 
     pos = 0
     while True:
@@ -215,7 +258,7 @@ def scan(root):
         # esik bir olcek isareti degil NITEL bir taban (kazanc buyumesi
         # %1000 olabilir, "Guclu" esigi yine %10'dur) -- bu ayrim alan ADINA
         # degil kartin KENDI birim iddiasina bakar.
-        if '%' in val:
+        if has_pct_unit(val):
             continue
         refs = set(re.findall(r'f\.(\w+)', val + ' ' + color + ' ' + (sub or '')))
         for v in re.findall(r'(_\w+)', val + ' ' + color + ' ' + (sub or '')):

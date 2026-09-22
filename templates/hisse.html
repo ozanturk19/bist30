@@ -1633,7 +1633,7 @@
 
 {% with ftr_data_note=true, ftr_note="Bu sayfada hiçbir otomatik emir verilmez." %}{% include '_footer.html' %}{% endwith %}
 
-<script src="/static/bp-format.js?v=b8108049"></script>
+<script src="/static/bp-format.js?v=dd31dd69"></script>
 <script src="/static/stale-banner.js?v=72c144ab"></script>
 <script>
 /* ── Hisse sayfası e-posta aboneliği ── */
@@ -3734,9 +3734,13 @@ function _fundCard(lbl, val, color, sub) {
     ${subHtml}
   </div>`;
 }
-function _pct(v, label) { return v != null ? `%${v}` : null; }
-function _growthColor(v) { return v == null ? 'var(--bp-text)' : v > 10 ? 'var(--bp-al)' : v > 0 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
-function _roeColor(v) { return v == null ? 'var(--bp-text)' : v > 20 ? 'var(--bp-al)' : v > 10 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
+/* K-DL (22.09) — K-DI'nin "TAM SIFIR" dersinin "yuksek = iyi" ailesindeki
+   karsiligi. Her iki fonksiyon da `v > 0` yanlis dalinda sifiri NEGATIFLE
+   ayni kefeye koyuyordu: %0,0 net kar marji (basabas) ya da %0,0 kazanc
+   buyumesi (yatay) KIRMIZI boyaniyordu. Sifir bir yon degil, yonun YOKLUGU
+   -- notr. `=== 0` dali bilincli ve acik (kapi 45 / K-BP kurali). */
+function _growthColor(v) { return v == null ? 'var(--bp-text)' : v > 10 ? 'var(--bp-al)' : v > 0 ? 'var(--bp-gold)' : v === 0 ? 'var(--bp-text)' : 'var(--bp-sat)'; }
+function _roeColor(v) { return v == null ? 'var(--bp-text)' : v > 20 ? 'var(--bp-al)' : v > 10 ? 'var(--bp-gold)' : v > 0 ? 'var(--bp-sat)' : v === 0 ? 'var(--bp-text)' : 'var(--bp-sat)'; }
 /* K-BX (22.09) — "DUSUK = IYI" metriklerinde NEGATIF deger en iyi kefeye
    duser: zarar eden sirketin F/K'si negatiftir ve `-8 < 12` -> 'Ucuz' +
    yesil. Bugun canlida olusMUYOR (app.py _FUND_SANITY pe/forward_pe/pb/
@@ -3977,10 +3981,10 @@ async function loadFundamentals() {
     const profCards = [
       _fundCard('Yıllık Ciro', _fmtMoneyObj(f.revenue), 'var(--bp-text)'),
       _fundCard('Net Kâr', _fmtMoneyObj(f.net_income), 'var(--bp-text)'),
-      _fundCard('Net Kâr Marjı', f.profit_margin != null ? `%${f.profit_margin.toFixed(1).replace('.', ',')}` : null, _growthColor(f.profit_margin), f.profit_margin > 10 ? 'Yüksek' : f.profit_margin > 0 ? 'Orta' : 'Negatif'),
-      _fundCard('Faaliyet Marjı', f.operating_margin != null ? `%${f.operating_margin.toFixed(1).replace('.', ',')}` : null, _growthColor(f.operating_margin), f.operating_margin > 10 ? 'Yüksek' : f.operating_margin > 0 ? 'Orta' : 'Negatif'),
-      _fundCard('Kazanç Büyümesi', f.earnings_growth != null ? `%${f.earnings_growth.toFixed(1).replace('.', ',')}` : null, _growthColor(f.earnings_growth), f.earnings_growth > 10 ? 'Güçlü' : f.earnings_growth > 0 ? 'Ilımlı' : 'Daralma'),
-      _fundCard('Gelir Büyümesi', f.revenue_growth != null ? `%${f.revenue_growth.toFixed(1).replace('.', ',')}` : null, _growthColor(f.revenue_growth), f.revenue_growth > 10 ? 'Güçlü' : f.revenue_growth > 0 ? 'Ilımlı' : 'Daralma'),
+      _fundCard('Net Kâr Marjı', f.profit_margin != null ? bpPctLevel(f.profit_margin, 1) : null, _growthColor(f.profit_margin), f.profit_margin > 10 ? 'Yüksek' : f.profit_margin > 0 ? 'Orta' : f.profit_margin === 0 ? 'Başabaş' : 'Negatif'),
+      _fundCard('Faaliyet Marjı', f.operating_margin != null ? bpPctLevel(f.operating_margin, 1) : null, _growthColor(f.operating_margin), f.operating_margin > 10 ? 'Yüksek' : f.operating_margin > 0 ? 'Orta' : f.operating_margin === 0 ? 'Başabaş' : 'Negatif'),
+      _fundCard('Kazanç Büyümesi', f.earnings_growth != null ? bpPctLevel(f.earnings_growth, 1) : null, _growthColor(f.earnings_growth), f.earnings_growth > 10 ? 'Güçlü' : f.earnings_growth > 0 ? 'Ilımlı' : f.earnings_growth === 0 ? 'Yatay' : 'Daralma'),
+      _fundCard('Gelir Büyümesi', f.revenue_growth != null ? bpPctLevel(f.revenue_growth, 1) : null, _growthColor(f.revenue_growth), f.revenue_growth > 10 ? 'Güçlü' : f.revenue_growth > 0 ? 'Ilımlı' : f.revenue_growth === 0 ? 'Yatay' : 'Daralma'),
     ].filter(Boolean).join('');
 
     /* ── Getiri & Risk kartları ───────────────────────────────────────────
@@ -3995,16 +3999,35 @@ async function loadFundamentals() {
        BİR KEZ orana çevrilir, aşağıdaki renk ve etiket aynı değişkeni okur. */
     const _deRatio = f.debt_to_equity != null ? f.debt_to_equity / 100 : null;
     const retCards = [
-      _fundCard('Temettü Verimi', f.dividend_yield != null ? `%${f.dividend_yield.toFixed(2).replace('.', ',')}` : null, f.dividend_yield >= 4 ? 'var(--bp-al)' : f.dividend_yield > 0 ? 'var(--bp-gold)' : 'var(--bp-text3)', f.dividend_yield >= 4 ? 'Yüksek' : f.dividend_yield > 0 ? 'Standart' : 'Yok'),
-      _fundCard('ROE (Öz Ser. Get.)', f.roe != null ? `%${f.roe.toFixed(1).replace('.', ',')}` : null, _roeColor(f.roe), f.roe > 20 ? 'Güçlü' : f.roe > 10 ? 'Orta' : 'Zayıf'),
-      /* K-BX 2. bulgu — aynı kartta RENK 0,7/1,3 eşiğini, ETİKET 1,0 eşiğini
-         kullanıyordu: canlı 62 beta kartının 11'inde renk ile yazı farklı
-         bandı söylüyordu (ör. KAREL 0,99 nötr renk + "Düşük volatilite",
-         POLHO 1,19 nötr renk + "Piyasa üstü risk"). K-BO'nun "eşiklenen
-         sayı = gösterilen sayı" kuralı. Ayrıca beta VOLATİLİTE değil piyasa
-         DUYARLILIĞI ölçer — kartın kendi başlığı ("Piyasa Riski") doğruydu,
-         alt etiketi yanlış kavramı adlandırıyordu. Tek band kümesi: 0,7/1,3. */
-      _fundCard('Beta (Piyasa Riski)', f.beta != null ? f.beta.toFixed(2).replace('.', ',') : null, f.beta == null ? 'var(--bp-text)' : f.beta > 1.3 ? 'var(--bp-sat)' : f.beta < 0.7 ? 'var(--bp-al)' : 'var(--bp-text)', f.beta == null ? null : f.beta > 1.3 ? 'Piyasa üstü hareket' : f.beta < 0.7 ? 'Piyasa altı hareket' : 'Piyasayla benzer'),
+      _fundCard('Temettü Verimi', f.dividend_yield != null ? bpPctLevel(f.dividend_yield, 2) : null, f.dividend_yield >= 4 ? 'var(--bp-al)' : f.dividend_yield > 0 ? 'var(--bp-gold)' : 'var(--bp-text3)', f.dividend_yield >= 4 ? 'Yüksek' : f.dividend_yield > 0 ? 'Standart' : 'Yok'),
+      _fundCard('ROE (Öz Ser. Get.)', f.roe != null ? bpPctLevel(f.roe, 1) : null, _roeColor(f.roe), f.roe > 20 ? 'Güçlü' : f.roe > 10 ? 'Orta' : f.roe > 0 ? 'Zayıf' : f.roe === 0 ? 'Başabaş' : 'Negatif'),
+      /* ── K-DL (22.09): BETA KARTI KALDIRILDI ────────────────────────────
+         Kart `f.beta`yı (app.py `safe_num("beta")` → yfinance `beta`) "Piyasa
+         Riski" diye sunup BIST'e göre bir yargı basıyordu ("Piyasa altı/üstü
+         hareket"). Bu sayı BIST'e göre ÖLÇÜLMÜŞ değil.
+
+         Ölçüm (22.09, sitenin KENDİ verisiyle — /api/hisse/<T>/chart 494 günlük
+         kapanış, kıyas XU030): kartın gösterdiği beta ≠ ölçülen beta.
+           ISCTR kart 0,20 → ölçülen 1,21 · GARAN 0,51 → 1,15 · AKBNK 0,69 → 1,29
+           FROTO 0,30 → 0,86 · CCOLA 0,23 → 0,73 · ARCLK 0,12 → 0,83
+         25 büyük hissede kart ortalaması 0,45; ölçülen ortalama 0,92. Endeksin
+         kendi ağır hisselerinin betası inşa gereği ~1,0 etrafında olmak
+         ZORUNDA — 0,45 bir ölçüm değil, farklı bir kıyas (TL değil, BIST değil).
+         "Piyasa altı hareket" etiketi taşıyan 10 hissenin 9'unda ölçüm TERSİNİ
+         söylüyordu: kart bankaları "piyasadan az oynak" ilan ediyordu. Canlı
+         dağılım tek başına da yeter: beta dolu 128 hissenin 96'sı (%75) "Piyasa
+         altı", yalnız 5'i "üstü".
+
+         app.py `_FUND_SANITY`'nin kendi yorumu da bunu zaten itiraf ediyor:
+         `"beta": (0.10, 5.0),  # 0.06-0.09 beta havacılık için saçma` — alt
+         sınır, saçma sayıyı DÜZELTMİYOR, yalnızca en uçtakini gizliyor (THYAO
+         bugün bu yüzden None).
+
+         Doğru sayı üretilebilir: XU030'un 500 barı da, hissenin 500 barı da
+         zaten elimizde. Bu backend işi — CPO-1787 ile DEV1'e yazıldı. Alan
+         XU030'a göre hesaplanıp döndüğünde kart bu satıra geri gelir (band
+         kanonu 0,7/1,3, K-BX'in tek-band kuralı). Sayıyı frontend'de "tahmin
+         etmek" yerine göstermemeyi seçtik: yanlış yön, eksik bilgiden kötüdür. */
       _fundCard('Borç/Öz Sermaye', _deRatio != null ? _deRatio.toFixed(2).replace('.', ',') + 'x' : null, (_deRatio == null || _deRatio < 0) ? 'var(--bp-text)' : _deRatio > 2 ? 'var(--bp-sat)' : _deRatio > 1 ? 'var(--bp-gold)' : 'var(--bp-al)', (_deRatio == null || _deRatio < 0) ? null : _deRatio > 2 ? 'Yüksek' : _deRatio > 1 ? 'Orta' : 'Düşük'),
       _fundCard('Cari Oran', f.current_ratio != null ? f.current_ratio.toFixed(2).replace('.', ',') : null, f.current_ratio >= 2 ? 'var(--bp-al)' : f.current_ratio >= 1 ? 'var(--bp-gold)' : 'var(--bp-sat)', f.current_ratio >= 2 ? 'Güçlü' : f.current_ratio >= 1 ? 'Yeterli' : 'Zayıf'),
     ].filter(Boolean).join('');
@@ -4058,8 +4081,8 @@ async function loadFundamentals() {
     /* Sahiplik — r174 */
     if (f.insider_pct != null || f.institutional_pct != null) {
       const parts = [];
-      if (f.insider_pct != null) parts.push(`İçeriden sahiplik %${f.insider_pct.toFixed(1).replace('.', ',')}`);
-      if (f.institutional_pct != null) parts.push(`Kurumsal sahiplik %${f.institutional_pct.toFixed(1).replace('.', ',')}`);
+      if (f.insider_pct != null) parts.push(`İçeriden sahiplik ${bpPctLevel(f.insider_pct, 1)}`);
+      if (f.institutional_pct != null) parts.push(`Kurumsal sahiplik ${bpPctLevel(f.institutional_pct, 1)}`);
       document.getElementById('fundOwnership').textContent = parts.join(' · ');
       document.getElementById('fundOwnership').style.display = '';
     }
