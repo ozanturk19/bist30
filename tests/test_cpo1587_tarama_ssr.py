@@ -61,6 +61,9 @@ def _fresh_compute(stocks=None, updated_at="11.09.2026 18:00"):
         "STOCK_NAMES": {},
         "derive_adx_label": lambda adx: f"ADX {adx:.0f}",
         "datetime": datetime,
+        # CPO-1783: _compute_tarama_results artık INDEX_TICKERS kanonuna
+        # bağlı (önceden inline `("XU030", "XU100")` idi).
+        "INDEX_TICKERS": {"XU030", "XU100"},
     }
     exec(m.group(0), ns)
     return ns["_compute_tarama_results"]

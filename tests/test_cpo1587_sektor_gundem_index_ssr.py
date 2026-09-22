@@ -113,6 +113,10 @@ def _fresh_gundem():
         "is_trading_day": lambda d: True,
         "_market_open": lambda now: True,
         "_data_quality_snapshot": lambda stocks: {"updated_at": "12.09.2026 09:00"},
+        # CPO-1783: _compute_gundem_data artık INDEX_TICKERS kanonuna bağlı
+        # (önceden inline `!= "XU030"` idi) — exec izole namespace'te bu
+        # modül seviyesi sabiti görmez, testin kendisi sağlamalı.
+        "INDEX_TICKERS": {"XU030", "XU100"},
     }
     exec(_extract("_compute_gundem_data"), ns)
     return ns["_compute_gundem_data"]
