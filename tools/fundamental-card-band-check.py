@@ -258,11 +258,40 @@ LABEL_HTML = re.compile(r">([A-ZÇĞİÖŞÜ][^<>{}'\"]{0,24})<")
 CASE = re.compile(r"case\s+'(\w+)'\s*:")
 
 
-def band_signature(text, helpers):
+def helper_labels(src):
+    """Tek satirlik yardimcilarin ICINDEKI etiket sozcukleri.
+
+    K-DI (22.09): `expr_numbers` yardimci cagrilarinin ESIKLERINI cozuyordu
+    ama ETIKETLERINI cozmuyordu. `/hisse` F/K karti etiketi
+    `_ucuzlukEtiketi(f.pe_ratio, 12, 25)` ile veriyor -- 'Ucuz'/'Makul'/
+    'Pahali' sozcukleri CAGRIDA degil yardimcinin GOVDESINDE. Imza etiket
+    kumesini bos gorunce `cross_surface` o alani HIC kaydetmiyordu, yani
+    kapi F/K ve F/DD'yi yillardir izlemiyordu. Tam da bu yuzden
+    `/karsilastir`in ayni alanlari YARGISIZ basmasi (renk yok, etiket yok)
+    sessiz kaldi: yargidan KACINAN yuzey, karsilastirmaya hic girmiyordu.
+    (⛔ 52. ders: kapi hatanin ogrendigi yazimini degil kendisini arar.)"""
+    out = {}
+    for m in HELPER.finditer(src):
+        body = m.group(3)
+        if len(body) > 600:
+            continue
+        out[m.group(1)] = set(LABEL.findall(body))
+    return out
+
+
+def expr_labels(expr, hlabels):
+    lbls = set(LABEL.findall(expr))
+    lbls |= {x.strip() for x in LABEL_HTML.findall(expr) if x.strip()}
+    for name, inner in hlabels.items():
+        if name + '(' in expr:
+            lbls |= inner
+    return lbls
+
+
+def band_signature(text, helpers, hlabels=None):
     """Bir kod parcasindaki (esik kumesi, etiket kumesi) imzasi."""
     return (frozenset(expr_numbers(text, helpers)),
-            frozenset(LABEL.findall(text)) |
-            {x.strip() for x in LABEL_HTML.findall(text) if x.strip()})
+            frozenset(expr_labels(text, hlabels or {})))
 
 
 def block_after(src, start):
@@ -290,6 +319,7 @@ def cross_surface(root):
                                          encoding='utf-8',
                                          errors='replace').read())
             helpers = helper_numbers(src)
+            hlabels = helper_labels(src)
             # (a) _fundCard(...) cagrilari -> RENK + ETIKET argumanlari
             pos = 0
             while True:
@@ -302,7 +332,7 @@ def cross_surface(root):
                     continue
                 text = args[2] + ' ' + args[3]
                 flds = set(re.findall(r'f\.(\w+)', args[1] + ' ' + text))
-                sig = band_signature(text, helpers)
+                sig = band_signature(text, helpers, hlabels)
                 if not sig[1]:
                     continue
                 for fld in flds:
@@ -311,7 +341,7 @@ def cross_surface(root):
             # (b) `case 'alan':` bloklari (karsilastir tipi sutun render'i)
             for m in CASE.finditer(src):
                 body = block_after(src, m.end())
-                sig = band_signature(body, helpers)
+                sig = band_signature(body, helpers, hlabels)
                 if not sig[1]:
                     continue
                 seen.setdefault(m.group(1), []).append(

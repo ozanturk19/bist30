@@ -215,6 +215,22 @@ function renderRsi(v, zone, signal) {
   return `<span class="${cl} mono">${n.toFixed(1).replace('.', ',')}</span> <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>`;
 }
 
+/* K-DI: bant -> hucre. Sozcukler ve renk kefeleri /hisse Temel karti ile
+   birebir ('Ucuz'/'Makul'/'Pahalı'); bant KARARI cagiran case'te, SUNUM
+   burada. Bant null ise (oran negatif ya da 0) yargi YOKTUR: notr renk,
+   etiket yok -- "ucuz" degil TANIMSIZ demektir. */
+function _valuationCell(txt, band) {
+  /* Esleme TERNARY ile yazildi, nesne haritasiyla degil: kapi 47
+     (`fundamental-card-band-check`) yardimci govdesini SUSLU PARANTEZ
+     dengesiyle degil ILK `}`e kadar okur -- harita yazimi etiketleri
+     govdenin disinda birakir ve kapi F/K'yi yine izleyemez hale gelir
+     (bu turda bir kez o tuzaga dusuldu, olcumle yakalandi). */
+  const cl  = band === 'ucuz' ? 'up'   : band === 'makul' ? 'mid'   : band === 'pahali' ? 'dn' : '';
+  const lbl = band === 'ucuz' ? 'Ucuz' : band === 'makul' ? 'Makul' : band === 'pahali' ? 'Pahalı' : '';
+  return `<span class="${cl} mono">${txt}</span>`
+       + (lbl ? ` <span style="font-size:10px;color:var(--bp-text3)">${lbl}</span>` : '');
+}
+
 function renderQuality(v) {
   if (!v) return '<span class="muted">—</span>';
   const map = { 'IDEAL':'q-ideal', 'IYI':'q-iyi', 'DIKKATLI':'q-dikkat', 'UZAK':'q-uzak' };
@@ -286,8 +302,32 @@ function renderCell(key, s) {
     }
     // ── Temel analiz ──
     case 'market_cap':    { const _mc = _fmtMcap(v); return _mc ? `<span class="mono" style="font-size:var(--bp-text-base)">${_mc}</span>` : '<span class="muted">—</span>'; }
-    case 'pe_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(1).replace('.', ',')}</span>` : '<span class="muted">—</span>';
-    case 'pb_ratio':      return v != null ? `<span class="mono">${parseFloat(v).toFixed(2).replace('.', ',')}</span>` : '<span class="muted">—</span>';
+    /* K-DI (22.09) — K-BX ekinin YARIM KALAN yarisi. O tur bu dosyada ROE ve
+       temettu verimini /hisse kanonuna baglamisti; F/K ve F/DD atlanmisti ve
+       burada DUZ SAYI olarak basiliyordu (renk yok, etiket yok). Ayni sayi
+       /hisse Temel kartinda `_peColor` (12/25) + `_ucuzlukEtiketi` ile
+       Ucuz/Makul/Pahali diye YARGILANIYOR. Karsilastirma sayfasinin tek isi
+       "hangisi daha iyi" sorusuna cevap vermek; en cok kullanilan iki
+       degerleme oraninda susuyordu. Esikler ve sozcukler /hisse ile BIREBIR
+       (kapi `fundamental-card-band-check.py` cross_surface bunu bagli tutar).
+       Negatif ya da 0: oran "ucuz" degil TANIMSIZ demektir -- yargi yok,
+       notr renk (K-BX'in "sifiri ve isareti acikca ele al" kurali). */
+    /* Bant `n > 0` UC-YOLLU yazimla kuruluyor; `n <= 0 ?` yazimi bilincli
+       OLARAK kullanilmadi: kapi 45 (K-BP) sifiri bir yonle ayni kefeye koyan
+       `<= 0 ?` desenini yon isaretinin ('up') yakininda gorunce -- hakli
+       olarak -- ihlal sayiyor. Anlam ayni, yazim kanonik. */
+    case 'pe_ratio': {
+      if (v == null) return '<span class="muted">—</span>';
+      const n = parseFloat(v);
+      const band = n > 0 ? (n < 12 ? 'ucuz' : n < 25 ? 'makul' : 'pahali') : null;
+      return _valuationCell(n.toFixed(1).replace('.', ','), band);
+    }
+    case 'pb_ratio': {
+      if (v == null) return '<span class="muted">—</span>';
+      const n = parseFloat(v);
+      const band = n > 0 ? (n < 1 ? 'ucuz' : n < 3 ? 'makul' : 'pahali') : null;
+      return _valuationCell(n.toFixed(2).replace('.', ','), band);
+    }
     case 'eps':           { if (v == null) return '<span class="muted">—</span>'; const n = parseFloat(v), cl = n < 0 ? 'dn' : ''; return `<span class="mono ${cl}">${n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>`; }
     /* K-BX eki (22.09) — AYNI SAYI, IKI SAYFA, IKI KEFE. Bu sutun ROE'yi
        15/7 esikleriyle ve "Iyi/Orta/Zayif" sozcukleriyle bantliyordu;
