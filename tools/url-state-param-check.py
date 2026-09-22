@@ -34,6 +34,21 @@ DURUM PARAMETRESI olan her ad onun sozlugunde bulunmalidir.
 Ikinci kosul, `?d=` gibi salt-okunur/tek-yonlu parametreleri disarida
 birakir -- muafiyet ANLAM kuralidir, satir numarasi degil (43. ders).
 
+R2 -- VARSAYILAN SEKME URL'DE GORUNMEZ (K-CR, 22.09)
+------------------------------------------------------
+Uc sekme sisteminde sekme adinin URL kurali UC FARKLIYDI:
+  /tarama        varsayilan "teknik" -> `delete('tab')`   (URL temiz)
+  /hisse         varsayilan "ozet"   -> `set('tab','ozet')`
+  /sektor-harita varsayilan "heatmap"-> `set('tab','heatmap')`
+Temiz `/hisse/ASELS` acilisi adres cubugunu `/hisse/ASELS?tab=ozet` yapiyordu;
+sayfanin KENDI ilan ettigi kanonik adres (link rel=canonical + og:url, ikisi de
+parametresiz -- canli olcum 22.09) bundan farkliydi, yani kullanicinin
+kopyaladigi adres ayni icerigi ikinci bir URL'den yayiyordu. /sektor-harita'da
+yazilan deger ustelik OLU: okuma tarafi yalniz `=== 'compare'`e bakiyor.
+Kanon /tarama'nindir. Olculebilir bicimi: bir sablon `searchParams.set('tab')`
+yaziyorsa, ayni sablonda `searchParams.delete('tab')` de bulunmalidir --
+varsayilani temizleyecek bir yol yoksa varsayilan kacinilmaz olarak yazilir.
+
 DERS (K-turu ortak mercegi): "ayni is icin iki kanon" basli basina
 bulgudur. Burada iki kanon CAKISMIYOR, biri digerinin alanini SESSIZCE
 siliyordu -- ve silinen sey bir sonraki satirda okunuyordu.
@@ -106,11 +121,18 @@ def scan_file(rel, text):
     read = set(_RE_GET.findall(t))
     written = set(_RE_SETDEL.findall(t))
     state = read & written           # hem okunan hem URL'ye yazilan = durum param
-    if not state:
-        return viol, 0
+
+    # R2 — varsayilan sekme URL'de gorunmez: set('tab') varsa delete('tab') de olmali
+    if re.search(r"""searchParams\.set\(\s*['"]tab['"]""", t) and not re.search(
+            r"""searchParams\.delete\(\s*['"]tab['"]""", t):
+        m2 = re.search(r"""searchParams\.set\(\s*['"]tab['"]""", t)
+        viol.append((rel, t[:m2.start()].count("\n") + 1, "R2",
+                     "`searchParams.set('tab')` var ama `delete('tab')` yok -- "
+                     "varsayilan sekme de URL'ye yaziliyor, adres sayfanin kendi "
+                     "canonical/og:url'inden ayrisiyor (kanon: /tarama)"))
 
     scratch = _RE_SCRATCH.findall(t)
-    if not scratch:
+    if not state or not scratch:
         return viol, len(state)
 
     for var in set(scratch):
@@ -172,14 +194,36 @@ def self_test():
       const d = new URL(location.href).searchParams.get('d');
     """
     # sifirdan kuran yazar YOKSA ihlal degil
+    # R1'e ozgu negatif: sifirdan-kuran yazar YOK (R2'yi tetiklememesi icin
+    # varsayilani temizleme yolu da var)
     yazarsiz = """
       const url = new URL(location.href);
-      url.searchParams.set('tab','temel');
+      if (t === 'teknik') url.searchParams.delete('tab');
+      else url.searchParams.set('tab','temel');
       history.replaceState(null,'',url.toString());
       const t = new URL(location.href).searchParams.get('tab');
     """
+    r2_bozuk = """
+      function switchTab(tab){
+        const url = new URL(location.href);
+        url.searchParams.set('tab', tab);
+        history.replaceState(null,'',url.toString());
+      }
+      const t = new URL(location.href).searchParams.get('tab');
+    """
+    r2_temiz = """
+      function switchTab(tab){
+        const url = new URL(location.href);
+        if (tab === 'ozet') url.searchParams.delete('tab');
+        else url.searchParams.set('tab', tab);
+        history.replaceState(null,'',url.toString());
+      }
+      const t = new URL(location.href).searchParams.get('tab');
+    """
     ok = 0
-    cases = [("POZITIF bozuk", bozuk, True),
+    cases = [("POZITIF R2 varsayilan yaziliyor", r2_bozuk, True),
+             ("NEGATIF R2 varsayilan siliniyor", r2_temiz, False),
+             ("POZITIF bozuk", bozuk, True),
              ("NEGATIF duzeltilmis", duzeltilmis, False),
              ("NEGATIF salt-okunur param", saltokunur, False),
              ("NEGATIF sifirdan-kuran yazar yok", yazarsiz, False)]

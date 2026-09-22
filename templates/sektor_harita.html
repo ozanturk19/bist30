@@ -404,9 +404,19 @@ function switchSektorTab(tab) {
       _sectorLoadInt = setInterval(_secLoadTick, 120000);
     }
   }
+  /* K-CR (22.09): varsayilan sekme URL'de gorunmez (/tarama'nin kanonu).
+     Onceki hal `set('tab','heatmap')` yaziyordu: Isi Haritasi'na her donuste
+     adres `?tab=heatmap` ile kirleniyordu, oysa okuma tarafi yalniz
+     `=== 'compare'`e bakiyor -- yazilan deger hicbir sey ifade etmiyordu.
+     Ayrica URL degismediginde replaceState cagrilmaz (acilistaki
+     `?tab=compare` IIFE'si bos bir history yazimi tetikliyordu). */
   const url = new URL(location.href);
-  url.searchParams.set('tab', tab);
-  history.replaceState(null, '', url.toString());
+  if (tab === 'compare') url.searchParams.set('tab', 'compare');
+  else url.searchParams.delete('tab');
+  const _next = url.pathname + url.search;
+  if (_next !== location.pathname + location.search) {
+    history.replaceState(null, '', url.toString());
+  }
 }
 
 // r103 bug-hunt: role="tab" sekmelerinde ok-tuşu navigasyonu yoktu (APG tab

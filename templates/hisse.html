@@ -4120,9 +4120,20 @@ window._bpApplyTooltips = _applyTooltipVisibility;
     try { localStorage.setItem('bp_hisse_tab', tab); } catch(e) { /* sekme bu oturumda zaten degisti, sadece bir sonraki ziyarette hatirlanmayabilir (private mod/kota) */ }
     if (!opts.skipUrl) {
       try {
+        /* K-CR (22.09): VARSAYILAN SEKME URL'DE GORUNMEZ. Onceki hal her sekme
+           icin `set('tab', tab)` yaziyordu, yani temiz `/hisse/ASELS` acilisi
+           adres cubugunu `/hisse/ASELS?tab=ozet` yapiyordu -- sayfanin KENDI
+           ilan ettigi kanonik adresten (link rel=canonical ve og:url, ikisi de
+           parametresiz; canli olcum 22.09) farkli bir URL. Kullanicinin
+           kopyalayip paylastigi adres bu oldugu icin ayni icerik iki adresle
+           yayiliyordu. Kanon /tarama'nin kurali: varsayilan deger silinir,
+           varsayilan-disi deger yazilir. */
         var url = new URL(window.location.href);
-        if (url.searchParams.get('tab') !== tab) {
-          url.searchParams.set('tab', tab);
+        var _cur = url.searchParams.get('tab');
+        var _want = (tab === 'ozet') ? null : tab;
+        if (_cur !== _want) {
+          if (_want === null) url.searchParams.delete('tab');
+          else url.searchParams.set('tab', _want);
           history.replaceState({tab: tab}, '', url.toString());
         }
       } catch(e) { console.warn('URL sekme durumu senkronizasyonu basarisiz', e); }
