@@ -9,7 +9,13 @@
 
   var GLOSSARY = {
     'adx': 'Trend gücü göstergesi (0–100). 25 üstü güçlü trend demek, 18 altı zayıf/yatay piyasa, arası orta güçte.',
-    'rsi': 'Göreceli Güç Endeksi (0–100). 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 ideal giriş penceresi, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım.',
+    /* K-CH (22.09): bu tanim "45-60 ideal giris penceresi"ni KOSULSUZ yaziyordu.
+       Urun K-BS/CPO-1745'ten beri o adi YALNIZ Guclu Trend sinyalinde basiyor
+       (app.py:116, bp-format.js:396, metodoloji.html:145). Canli olcum 22.09:
+       RSI 45-60 bandinda 46 hisse var, 45'i Guclu Trend DEGIL -- yani Ogrenme
+       Modu'nu acan kullanici ekranda "Notr Bolge" yazarken sozlukten "ideal
+       giris penceresi" okuyordu. Vaat iceren ad, onu doguran kosulla yazilir. */
+    'rsi': 'Göreceli Güç Endeksi (0–100). 30 altı aşırı satım, 30-45 dip toparlanması, 45-60 Güçlü Trend sinyalinde İdeal Giriş Penceresi — diğer tüm sinyallerde Nötr Bölge, 60-70 trend güçleniyor, 70-80 dikkatli, 80 üstü aşırı alım.',
     'ema12': 'Üstel hareketli ortalama (12 gün). Kısa vadeli trend yönünü gösterir.',
     'ema99': 'Üstel hareketli ortalama (99 gün). Uzun vadeli trend yönünü gösterir.',
     'ema': 'Üstel hareketli ortalama — son verilere daha çok ağırlık verir. EMA12 kısa, EMA99 uzun vadeyi temsil eder.',
@@ -18,7 +24,15 @@
     'di-': 'Negatif yön göstergesi — aşağı yönlü hareketin gücü. DI+ üstündeyse trend aşağı.',
     'stop loss': 'Pozisyondan çıkış yapılacak fiyat seviyesi. Risk yönetiminin temel taşı.',
     'stop bölgesi': 'Sinyalin geçersiz sayılacağı, pozisyon çıkışına işaret eden fiyat aralığı.',
-    'tier_score': 'Sinyal kalite puanı (0–100). Premium/Plus/Standart sınıflandırması bu skora göre yapılır.',
+    /* K-CH (22.09): 'tier_score' anahtari SILINDI -- K-CA'daki 'rr_ratio' ile ayni
+       sinif (sitede `data-term="tier_score"` YOK, hicbir element ulasamiyordu) ama
+       tanimi ayrica UC kanon ihlali tasiyordu: (1) "Premium" 22.08'de emekli edildi
+       ve bu, urunun TUM yayimlanan metninde kalan TEK canli ornegiydi (sablonlardaki
+       isabetlerin hepsi yorum); (2) "Plus" diye bir katman hic olmadi -- kanon iki
+       katman: Guclu Sinyal / Standart (hisse.html:634); (3) "Sinyal kalite puani"
+       skorun UCUNCU adiydi, kanon "Teknik Guc Skoru" (metodoloji.html:215) ve bu
+       dosyanin kendi 'sinyal' tanimi zaten dogru adi kullaniyor. `tier_score` alani
+       app.py:1563'e gore de emekli (AUDIT-004 yerine gecti). */
     'kovalama': 'Fiyat sinyal başlangıcına göre belirgin yükselmişken alım yapma riski. Genelde geri çekilme beklemek daha güvenli.',
     /* K-CA (22.09): bu iki anahtar AYNI terimi IKI FARKLI capadan tanimliyordu
        ('r/r' hedefe uzaklik, 'rr_ratio' pozisyondan uzaklik) ve 'rr_ratio'ya

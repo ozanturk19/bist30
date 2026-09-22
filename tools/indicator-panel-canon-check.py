@@ -120,7 +120,18 @@ def check_tree(root):
                 if IDEAL_LITERAL.search(line) and 'metodoloji' not in rel and 'blog' not in rel:
                     # Kosulsuz ham literal (ozet.html gibi ZATEN AL-filtreli
                     # listeler haric: orada baslik kendi filtresinin altinda).
-                    if 'ideal_al' not in line and 'İdeal Giriş Noktası' not in line:
+                    # K-CH (22.09): bu kural "KOSULSUZ ham literal" diyordu ama
+                    # kosulu HIC test etmiyordu -- yalnizca iki YOL (metodoloji,
+                    # blog) muafti. Oysa muafiyetin gerekcesi yol degil TUR:
+                    # o yuzeyler adi RENDER etmiyor, TANIMLIYOR ve kosulunu de
+                    # yaziyor. Ayni tur `static/learning-mode.js` sozlugunde de
+                    # var (Ogrenme Modu = /metodoloji'nin satir-ici hali).
+                    # Kural artik beyanina uyuyor: adi KOSULUYLA BIRLIKTE yazan
+                    # bir satir (hem "Güçlü Trend" hem "Nötr Bölge" geciyorsa)
+                    # kanonu ogretiyordur, ihlal etmez. Yol muafiyeti yerine
+                    # genellenebilir kosul testi -- her yuzey icin gecerli.
+                    ogretici = 'Güçlü Trend' in line and 'Nötr Bölge' in line
+                    if 'ideal_al' not in line and 'İdeal Giriş Noktası' not in line and not ogretici:
                         viol.append((rel, i, 'C', 'bolge adi ham literal olarak basiliyor',
                                      raw_lines[i - 1].strip()[:150]))
     return viol
