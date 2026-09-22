@@ -3741,8 +3741,15 @@ function _roeColor(v) { return v == null ? 'var(--bp-text)' : v > 20 ? 'var(--bp
    debt_to_equity alt sinirlari 0.0, negatifi None'a ceviriyor) ama sablon
    bu savunmaya yaslanmamali -- K-BP'nin `null >= 0` dersinin aynisi:
    yon/kefe karari SIFIRI ve isareti ACIKCA ele almali. */
-function _peColor(v) { return (v == null || v < 0) ? 'var(--bp-text)' : v < 12 ? 'var(--bp-al)' : v < 25 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
-function _pbColor(v) { return (v == null || v < 0) ? 'var(--bp-text)' : v < 1 ? 'var(--bp-al)' : v < 3 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
+/* K-DI (22.09): esik `v < 0` idi -- yani TAM SIFIR `0 < 12` dalina dusup
+   YESIL "ucuz" rengini aliyordu, oysa hemen altindaki `_ucuzlukEtiketi`
+   `v <= 0`i etiketsiz birakiyor: ayni karta 0 gelseydi RENK "ucuz", YAZI
+   yok olurdu (K-BO'nun renk/yazi ayrismasi). Bugun canlida olusmuyor
+   (`_FUND_SANITY` alt siniri 0.0) ama ustteki K-BX yorumu tam da buna
+   yaslanmamayi soyluyor. `!(v > 0)` yazimi bilincli: `<= 0 ?` yazimi kapi
+   45'in (K-BP) sifiri bir yonle ayni kefeye koyan desenine takilir. */
+function _peColor(v) { return !(v > 0) ? 'var(--bp-text)' : v < 12 ? 'var(--bp-al)' : v < 25 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
+function _pbColor(v) { return !(v > 0) ? 'var(--bp-text)' : v < 1 ? 'var(--bp-al)' : v < 3 ? 'var(--bp-gold)' : 'var(--bp-sat)'; }
 /* Tek kanon: F/K, ileriye donuk F/K ve F/DD kartlarinin alt etiketi. Negatif
    (ya da 0) deger bir "ucuzluk" degil, oranin TANIMSIZ oldugu anlamina gelir. */
 function _ucuzlukEtiketi(v, ucuzAlti, makulAlti) {
