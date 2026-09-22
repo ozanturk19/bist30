@@ -76,7 +76,21 @@
 
   /* Signal: SAT (sell) — corruption red */
   --bp-sat:       #f85149;
-  --bp-sat-bg:    #3d0f0f;
+  /* K-BY eki (22.09): --bp-sat-bg OPAK #3d0f0f idi, --bp-al-bg ise %7 ALFA TINT.
+     Ayni rolde (AL/SAT cip zemini) iki AYRI agirlik sinifi demekti: canli
+     olcum, sayfa zemininden luminans sapmasi AL +0,0058 / SAT +0,0092 --
+     SAT dolgusu AL'in ~2 kati, BEKLE (--bp-surface2, +0,0068) bile AL'dan
+     agirdi; yani "sinyal yok" karti "AL sinyali" kartindan daha one cikiyordu.
+     Sitenin KENDI kanonu zaten tint'ti: index.css `.da-index-change.neg`,
+     `.da-spot-signal.sig-sat`, `.da-sc-sig.sig-sat` -- UC bilesen de
+     rgba(var(--bp-sat-rgb),.09) + .35 kenari ELLE yaziyordu, cunku opak token
+     o eslesmeye uymuyordu. Token tint'e cevrildi, 3 elle kopya buraya bagli.
+     Yeni denge: AL +0,0058 · SAT +0,0047 · BEKLE +0,0068 (dar bant).
+     --bp-sat-bd (#da3633) OPAK KALDI: onun tuketicileri cip degil HATA
+     yuzeyleri (.da-empty--error, .pf-fetch-error, .import-toast.err,
+     .da-retry) -- ayri eksen, iddiali kenar orada dogru. */
+  --bp-sat-bg:    rgba(var(--bp-sat-rgb), 0.09);
+  --bp-sat-bd-tint: rgba(var(--bp-sat-rgb), 0.35);  /* --bp-al-bd (.32) esi */
   --bp-sat-bd:    #da3633;
   /* K-P (21.09): SOLUK SAT ZEMINI uzerindeki SAT METNI icin. --bp-sat (#f85149)
      duz zeminde 5.49:1 ile rahat gecer, ama rgba(sat,.10+) tint zemini metnin
@@ -87,7 +101,8 @@
 
   /* Signal: BEKLİYOR (hold) */
   --bp-bkl:       #909097;
-  --bp-bkl-bg:    #1e293b;
+  /* K-BY eki: --bp-bkl-bg (#1e293b) SILINDI -- tum repoda SIFIR tuketicisi
+     vardi (notr cip zemini fiilen --bp-surface2). Olu token, canon tuzagi. */
   --bp-bkl-bd:    #30363d;
 
   /* Accent */

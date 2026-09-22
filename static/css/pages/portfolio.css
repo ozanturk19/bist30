@@ -51,7 +51,10 @@
 
   .signal-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:var(--bp-radius-xl); font-size:var(--bp-text-xs); font-weight:600; }
   .signal-AL    { background:var(--bp-al-bg); color:var(--bp-al); border:1px solid var(--bp-al-bd); }
-  .signal-SAT   { background:var(--bp-sat-bg); color:var(--bp-sat); border:1px solid var(--bp-sat-bd); }
+  /* K-BY eki: zemin artik TINT -> K-P kurali geregi metin --bp-sat-on-tint
+     (tint uzerinde --bp-sat 4,63:1'e duser; on-tint 6,15:1). Kenar da cip
+     esine (--bp-sat-bd-tint) alindi; --bp-sat-bd hata yuzeylerinde kaldi. */
+  .signal-SAT   { background:var(--bp-sat-bg); color:var(--bp-sat-on-tint); border:1px solid var(--bp-sat-bd-tint); }
   .signal-BEKLE { background:rgba(var(--bp-text3-rgb),.15); color:var(--bp-bkl); border:1px solid rgba(var(--bp-text3-rgb),.3); }
 
   .pos-pnl { color:var(--bp-al); font-weight:600; }

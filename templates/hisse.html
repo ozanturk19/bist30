@@ -106,7 +106,7 @@
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <!-- lightweight-charts lazy-load: _loadChartLib() ile yalnızca grafik gerektiğinde yüklenir -->
-<link rel="stylesheet" href="/static/css/tokens.css?v=e2879e56">
+<link rel="stylesheet" href="/static/css/tokens.css?v=f436a453">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
 <script src="/static/bp-vocab.js?v=63a439ab" defer></script>
 <link rel="stylesheet" href="/static/css/pages/hisse.css?v=67776c67">
@@ -3859,14 +3859,15 @@ async function loadMTF() {
       { key: 'monthly', label: '🗓️ Aylık',     short: '1M' },
     ];
 
-    const sigColor = s => s === 'AL' ? 'var(--bp-al)' : s === 'SAT' ? 'var(--bp-sat)' : 'var(--bp-bkl)';
+    /* K-BY eki: SAT zemini tint oldugu icin metin K-P kanonu --bp-sat-on-tint. */
+    const sigColor = s => s === 'AL' ? 'var(--bp-al)' : s === 'SAT' ? 'var(--bp-sat-on-tint)' : 'var(--bp-bkl)';
     /* K-BY: AYNI UCLU KOSULUN iki dali iki ayri kanaldandi -- SAT ve BEKLE
        token okurken AL ham hex yaziyordu (#1a4731 / #238636, ikisi de
        tokens.css'te YOK) ve karsiliklari (--bp-al-bg / --bp-al-bd) zaten
        VARDI; portfolio.css .signal-AL/.signal-SAT ciftini tam olarak boyle
        esliyor. Canli: 217 sayfanin 6'sinda 11 AL karti boyaniyordu. */
     const sigBg    = s => s === 'AL' ? 'var(--bp-al-bg)' : s === 'SAT' ? 'var(--bp-sat-bg)' : 'var(--bp-surface2)';
-    const sigBord  = s => s === 'AL' ? 'var(--bp-al-bd)' : s === 'SAT' ? 'var(--bp-sat-bd)' : 'var(--bp-border)';
+    const sigBord  = s => s === 'AL' ? 'var(--bp-al-bd)' : s === 'SAT' ? 'var(--bp-sat-bd-tint)' : 'var(--bp-border)';
     const sigArrow = s => s === 'AL' ? '▲' : s === 'SAT' ? '▼' : '●';
 
     /* CPO-983 Opsiyon B: 4 ayrı boş "Veri yok" kutusu yerine tek anlamlı placeholder */
