@@ -1844,7 +1844,6 @@ def analyze(ticker_base):
         entry_note    = None
         optimal_entry = None
         tp1 = tp2     = None
-        rr_ratio      = None
 
         if signal == "AL" and signal_price and sl_val and c > sl_val and atr_now > 0:
             risk         = c - sl_val                            # mevcut fiyattan SL'ye mesafe
@@ -1855,7 +1854,6 @@ def analyze(ticker_base):
 
             tp1      = round(c + risk * 2, 2)    # 2R hedef
             tp2      = round(c + risk * 3, 2)    # 3R hedef
-            rr_ratio = 2.0                        # standart 2R TP hedefleniyor
 
             # CPO-1666 #2: pct_moved negatifken (fiyat sinyale KARŞI hareket etti,
             # AL sinyalinden sonra düştü) atrs_moved da negatif olup < 1.0 testini
@@ -1900,7 +1898,6 @@ def analyze(ticker_base):
             # olarak None birakiliyor (asagida rr_signal/rr_now da otomatik None kalir).
             tp1      = None
             tp2      = None
-            rr_ratio = None
 
             # CPO-1666 #2: AL taraftaki aynı fix, SAT için simetrik (yukarıdaki
             # yorum bkz.) — fiyat SAT sinyaline karşı (yukarı) hareket ettiyse
@@ -2111,7 +2108,8 @@ def analyze(ticker_base):
             "optimal_entry":   optimal_entry,
             "tp1":             tp1,
             "tp2":             tp2,
-            "rr_ratio":        rr_ratio,
+            # CPO-1758: rr_ratio (hep 2.0 -- TP1=entry+risk*2 totolojisi) kaldirildi,
+            # frontend'de sifir tuketicisi kalmisti. rr_signal tek R/R kaynagi.
             "rr_signal":       rr_signal,  # Faz 1 #2: sinyal başından R/R
             "rr_now":          rr_now,     # Faz 1 #2: şu an girersen R/R
         }
@@ -8367,7 +8365,11 @@ def stock_page(ticker):
     price    = (ssr_signal or {}).get("price")
     chg      = (ssr_signal or {}).get("change_pct")
     rsi_val  = (ssr_signal or {}).get("rsi")
-    rr_val   = (ssr_signal or {}).get("rr_ratio")
+    # CPO-1758: rr_ratio hep 2.0 sabitti (TP1=entry+risk*2 totolojisi) --
+    # bu FAQ metni JSON-LD/SEO'ya "R/R oranı 2" diye sizan, hic kimsenin
+    # denetlemedigi ikinci bir tuketiciydi (asil payload denetimi bunu
+    # kacirmisti). Hero/gundem ile ayni kaynaga (rr_signal) gecirildi.
+    rr_val   = (ssr_signal or {}).get("rr_signal")
     # SPEC-017 Faz 3 batch v2 B2: hero card signal_strength (0-100) vs SSS score (bull/bear 0-3) tutarsızlığı.
     # SSS de signal_strength kullanmalı (hero ile aynı kaynak) — kullanıcı "skor 3/100 düşük" sanmaz.
     score = (ssr_signal or {}).get("signal_strength")
@@ -8408,8 +8410,11 @@ def stock_page(ticker):
             _parts.append(f"ADX {adx_val:.0f} (trend gücü)")
         if score is not None:
             _parts.append(f"sinyal skoru {score}/100")
-        if isinstance(rr_val, (int, float)) and rr_val:
-            _parts.append(f"R/R oranı {tr_num_filter(rr_val)}")
+        # CPO-1758 + 20.09 CPO notu (gundem.html): rr_signal negatif gelebiliyor
+        # (fiyat sinyale karsi hareket ettiyse) -- hero/gundem ile ayni guard
+        # (>0) ve ayni "1:N,N" kanonik yazim.
+        if isinstance(rr_val, (int, float)) and rr_val > 0:
+            _parts.append(f"R/R oranı 1:{tr_num_filter(round(rr_val, 1))}")
         seo_faq.append({
             "q": f"{ticker} hissesi prim potansiyeli nedir?",
             "a": "Teknik göstergeler: " + ", ".join(_parts) + ". Yatırım tavsiyesi değildir.",
@@ -10874,7 +10879,7 @@ def karsilastir():
     canonical_url    = f"{base}/karsilastir"
     page_title       = "Hisse Karşılaştırma | BorsaPusula"
     page_description = ("BIST hisselerini teknik sinyal, temel analiz ve yatırım skoru ile "
-                        "yan yana karşılaştırın. F/K, ROE, ADX, RSI, R/R ve daha fazlası.")
+                        "yan yana karşılaştırın. F/K, ROE, ADX, RSI, Supertrend ve daha fazlası.")
     tickers_param    = raw
 
     if raw:
@@ -10972,7 +10977,10 @@ def api_karsilastir():
             "sl_level":       s.get("sl_level"),
             "tp1":            s.get("tp1"),
             "tp2":            s.get("tp2"),
-            "rr_ratio":       s.get("rr_ratio"),
+            # CPO-1758: rr_ratio (hep 2.0, sifir tuketici) kaldirildi -- rr_signal
+            # zaten _cache["data"]'da (analyze() Faz 1 #2) dolu geliyor, ekstra
+            # hesap/gate gerekmiyor. /hisse ve /gundem ile ayni kaynak.
+            "rr_signal":      s.get("rr_signal"),
             "bull_score":     s.get("bull_score"),
             "bear_score":     s.get("bear_score"),
             # CPO-DEV2-043: kanonik puan (compose_score, /hisse ve /tarama'nin kaynagi) —
