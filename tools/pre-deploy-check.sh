@@ -1129,6 +1129,7 @@ else
   echo "  ✗ K-CK KIRIK: sitemap girdisi kendi tazelik iddiasiyla ya da mimariyle celisiyor."
   echo "    Detay icin: python3 tools/sitemap-claim-check.py --verbose"
   echo "    Pozitif kontrol: python3 tools/sitemap-claim-check.py --ref e7a9221  # 6 ihlal beklenir (R1 + R2x5)"
+  echo "                     python3 tools/sitemap-claim-check.py --ref 4d9af15  # 1 ihlal beklenir (R5)"
   FAIL=$((FAIL + 1))
 fi
 

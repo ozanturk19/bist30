@@ -38,6 +38,9 @@ R2  `changefreq` weekly/monthly/yearly olan bir girdi, `lastmod`'u
     varsayilan `today`'e duser ve kendi changefreq'iyle celisir.
 R3  Literal `loc` degerleri gercek bir Flask rotasina karsilik gelmeli.
 R4  Ayni `loc` iki kez eklenmemeli.
+R5  Blog girdileri HAM `ARTICLES`ten degil, makale SAYFASININ okudugu
+    normalize edilmis listeden (`_get_blog_cache()`) gelmeli -- aksi halde
+    ayni makalenin tarihi icin IKI KANON olusur.
 
 ⓘ Kapi app.py'yi STATIK ayristirir (yerel Flask kosmuyor -- Python 3.9).
 
@@ -87,6 +90,18 @@ def main():
         routes.append(re.compile("^" + re.sub(r"<[^>]+>", "[^/]+", raw) + "$"))
 
     out, seen = [], {}
+
+    # R5 -- "ayni is icin iki kanon" merceginin bu kanaldaki hali.
+    # 8 makalede "date" alani hic yok; `_normalize_article()` onlara
+    # "2026-05-01" veriyor (makale sayfasinin JSON-LD datePublished'i budur),
+    # ham `ARTICLES` uzerinden `a.get("date", today)` ise `today`e duser --
+    # o 8 URL sitemap'te HER GUN "bugun degisti" derken kendi sayfasiyla
+    # celisiyordu. Esleme KULLANIM TURUNU dogrular (87. ders): dongu hedefi.
+    if re.search(r"for\s+\w+\s+in\s+ARTICLES\s*:", src):
+        out.append(("R5", "/blog/*",
+                    "sitemap HAM `ARTICLES` uzerinde donuyor -- makale sayfasi "
+                    "`_get_blog_cache()` (normalize) okuyor; tarih icin IKI KANON"))
+
     n = 0
     for m in ENTRY.finditer(src):
         n += 1

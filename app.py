@@ -10485,7 +10485,15 @@ def sitemap():
     for t in BIST30:
         if t != "XU030":
             pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
-    _blog_lastmod = max((a.get("date") or today) for a in ARTICLES) if ARTICLES else today
+    # K-CK #2: sitemap HAM `ARTICLES`i okuyordu, makale SAYFASI ise
+    # `_normalize_article()`ten gecen listeyi -- yani ayni olgunun (bir
+    # makalenin tarihi) IKI KANONU vardi. 8 makalede "date" alani hic yok;
+    # normalizer onlara "2026-05-01" veriyor (sayfanin JSON-LD
+    # datePublished'i bu), sitemap ise `today` fallback'ine dusuyordu:
+    # o 8 URL HER GUN "bugun degisti" diyordu, kendi sayfasiyla celisiyordu.
+    # Tek kanon: normalize edilmis liste.
+    _blog_articles, _ = _get_blog_cache()
+    _blog_lastmod = max((a.get("date") or today) for a in _blog_articles) if _blog_articles else today
     pages.append({"loc": "/blog",               "priority": "0.8", "changefreq": "weekly",
                   "lastmod": _blog_lastmod})
     # K-CK: lastmod varsayilani `today` oldugu icin bu girdi her gun "bugun
@@ -10510,7 +10518,7 @@ def sitemap():
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly",
                   "lastmod": _tpl_lastmod("karsilastir.html", today)})
-    for a in ARTICLES:
+    for a in _blog_articles:
         if a.get("canonical_slug"):
             continue  # deprecated/duplicate slug — canonical hedefi kendi ARTICLES girdisiyle zaten listeleniyor
         pages.append({"loc": f"/blog/{quote(a['slug'])}", "priority": "0.7", "changefreq": "monthly",
