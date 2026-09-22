@@ -10471,7 +10471,9 @@ def sitemap():
         return Response(_sitemap_cache["xml"], mimetype="application/xml",
                          headers={"Cache-Control": "public, max-age=3600"})
     pages = [
-        {"loc": "/",            "priority": "1.0", "changefreq": "hourly"},
+        # K-CK: mimari EOD-only (K-CE kanonu). "hourly" bu kanalda da bir
+        # gun-ici iddiasidir -- sayfa gunde BIR kez, EOD turunda tazelenir.
+        {"loc": "/",            "priority": "1.0", "changefreq": "daily"},
         {"loc": "/ozet",        "priority": "0.9", "changefreq": "daily"},
         {"loc": "/tarama",      "priority": "0.8", "changefreq": "daily"},
         {"loc": "/metodoloji",  "priority": "0.7", "changefreq": "monthly", "lastmod": _tpl_lastmod("metodoloji.html", today)},
@@ -10483,8 +10485,13 @@ def sitemap():
     for t in BIST30:
         if t != "XU030":
             pages.append({"loc": f"/hisse/{t}", "priority": "0.85", "changefreq": "daily"})
-    pages.append({"loc": "/blog",               "priority": "0.8", "changefreq": "weekly"})
-    pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly"})
+    _blog_lastmod = max((a.get("date") or today) for a in ARTICLES) if ARTICLES else today
+    pages.append({"loc": "/blog",               "priority": "0.8", "changefreq": "weekly",
+                  "lastmod": _blog_lastmod})
+    # K-CK: lastmod varsayilani `today` oldugu icin bu girdi her gun "bugun
+    # degisti" diyordu -- changefreq "monthly" ile ayni satirda celisiyordu.
+    pages.append({"loc": "/portfolio",          "priority": "0.6", "changefreq": "monthly",
+                  "lastmod": _tpl_lastmod("portfolio.html", today)})
     pages.append({"loc": "/sektor-harita",      "priority": "0.7", "changefreq": "daily"})
     pages.append({"loc": "/hisseler",          "priority": "0.85", "changefreq": "daily"})
     # T0.8 (CPO-1321): /ozet/<tarih> arşivi — günlük büyüyen içerik, indekslenmesi için sitemap'e eklenir
@@ -10498,10 +10505,11 @@ def sitemap():
             pages.append({"loc": f"/ozet/{d}", "priority": "0.5", "changefreq": "never", "lastmod": d})
     except Exception as e:
         logger.warning("sitemap: /ozet arsiv listesi okunamadi: %s", e)
-    pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "weekly"})
-    pages.append({"loc": "/temettu-takvimi",    "priority": "0.8", "changefreq": "weekly"})
+    pages.append({"loc": "/bilanco-takvimi",    "priority": "0.8", "changefreq": "daily"})
+    pages.append({"loc": "/temettu-takvimi",    "priority": "0.8", "changefreq": "daily"})
     pages.append({"loc": "/gundem",             "priority": "0.8", "changefreq": "daily"})
-    pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly"})
+    pages.append({"loc": "/karsilastir",        "priority": "0.6", "changefreq": "monthly",
+                  "lastmod": _tpl_lastmod("karsilastir.html", today)})
     for a in ARTICLES:
         if a.get("canonical_slug"):
             continue  # deprecated/duplicate slug — canonical hedefi kendi ARTICLES girdisiyle zaten listeleniyor
