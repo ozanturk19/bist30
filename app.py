@@ -2650,41 +2650,54 @@ def send_email(to_email, subject, html_body, unsubscribe_url=None, reply_to=None
         return False
 
 
+# CPO-1782 (22.09) koken kaydi: e-posta istemcilerinde var() calismadigindan
+# bu dosyadaki (ve _build_welcome_email / _build_login_email /
+# _build_signal_email / _check_user_alerts watchlist alarmindaki) tum renk
+# stilleri ham hex literal. Asagidaki esleme static/css/tokens.css'teki
+# kanonik karsiliklarini kayda gecirir (asagidaki hex'ler bilerek # olmadan
+# yazildi -- KAPI 72 py-palette-check.py bu yorum bloguyla degil, koddaki
+# gercek literallerle ilgilenir):
+#   0e0e12 -> --bp-bg        (tam eslesme)
+#   161618 -> --bp-surface   141416 (K-DC ile duzeltildi, asagida)
+#   2a2a2c -> --bp-border    (tam eslesme)
+#   e5e1e4 -> --bp-text      (tam eslesme)
+#   c7c5cd -> --bp-text2     (tam eslesme)
+#   909097 -> --bp-text3 / --bp-bkl / --bp-ctl-border-hover (ucu de ayni
+#              deger; e-postada BEKLE sinyali + ikincil metin icin kullaniliyor)
+#   00e290 -> --bp-al / --bp-logo-accent (ayni deger; e-postada hem AL
+#              sinyali hem CTA buton zemini icin kullaniliyor)
+#   f85149 -> --bp-sat       (tam eslesme)
+#   ffc850 -> --bp-volume    (tam eslesme; Hacim Onayli rozeti)
+#   b8c3ff -> --bp-brand     (tam eslesme; kisisellestirme CTA'si)
+#   1c1c1f -> --bp-surface2  1c1b1f (K-DC ile duzeltildi, asagida)
+#
+# K-DC (22.09, CPO-1783 karari) -- 7 kanon-disi literal kanona baglandi:
+# CPO-1782'de "kanona karsilik yok" isaretlenen 5 literal + "neredeyse esit
+# ama farkli" 2 literal artik BIREBIR bir token degerine esit (DEGER
+# DEGISTI, tools/app_hex_exempt.json'daki 7 satir bu commit'le silindi):
+#   eski eef3f8 -> e5e1e4 (--bp-text) -- logo wordmark acik yarisi, artik
+#              sitenin metin rengiyle birebir.
+#   eski 00e2a1 -> 00e290 (--bp-al / --bp-logo-accent) -- CPO: ucuncu ikiz
+#              yazim, %0,2 fark kopya hatasiydi (bkz. tokens.css 00e6a0
+#              notu, ayni sinif).
+#   eski 161618 -> 141416 (--bp-surface) -- kart zemini.
+#   eski 1c1c1f -> 1c1b1f (--bp-surface2) -- watchlist alarm tablo basligi.
+#   eski 8f98a8 -> 909097 (--bp-text3) -- ust baslik altyazisi "PIYASANIN
+#              YONU": yon TASIMAYAN bir etiket, bu yuzden ayni degerdeki
+#              sinyal token'i --bp-bkl degil metin token'i --bp-text3
+#              secildi (K-BO ekseni: sinyal rengi yon tasimayan bir
+#              buyuklugu boyayamaz -- burada tersi: yon tasimayan metin de
+#              sinyal token'indan ayri kalmali).
+#   eski 5a5a62 -> 46464d (--bp-border2) -- footer metni. En yakin kanon
+#              Oklid mesafesiyle --bp-border2 (fark 35) ve --bp-ctl-border
+#              (fark 37) arasinda yakin; site genelinde hicbir yerde bir
+#              border token'i `color:` (metin) icin kullanilmiyor -- ilk
+#              emsal. CPO'ya bildirildi, itiraz gelirse degisebilir.
+#   eski 3a3a42 -> 30363d (--bp-bkl-bd) -- footer link ayraci. En yakin
+#              kanon (fark 12) ama --bp-bkl-bd de bir kenarlik token'i,
+#              ayni ilk-emsal notu gecerli.
 def _email_base(content_html, unsubscribe_url, preheader=""):
-    """Ortak e-posta şablonu — site dark teması, pusula logo, modern footer.
-
-    CPO-1782 (22.09) köken kaydı: e-posta istemcilerinde var() çalışmadığından
-    bu dosyadaki (ve _build_welcome_email / _build_login_email /
-    _build_signal_email / _check_user_alerts watchlist alarmındaki) tüm renk
-    stilleri ham hex literal. Aşağıdaki eşleme static/css/tokens.css'teki
-    kanonik karşılıklarını kayda geçirir; DEĞER DEĞİŞMEDİ, sadece köken:
-      #0e0e12 -> --bp-bg        (tam eşleşme)
-      #161618 -> KANONA KARSILIK YOK (tokens.css'te --bp-surface #141416'ya
-                 en yakin ama esit degil; e-posta kart zemini icin ayri bir
-                 varyant -- kanon eksik, CPO'ya bildirildi)
-      #2a2a2c -> --bp-border    (tam eşleşme)
-      #e5e1e4 -> --bp-text      (tam eşleşme)
-      #c7c5cd -> --bp-text2     (tam eşleşme)
-      #909097 -> --bp-text3 / --bp-bkl / --bp-ctl-border-hover (üçü de aynı
-                 değer; e-postada BEKLE sinyali + ikincil metin için kullanılıyor)
-      #00e290 -> --bp-al / --bp-logo-accent (aynı değer; e-postada hem AL
-                 sinyali hem CTA buton zemini için kullanılıyor)
-      #f85149 -> --bp-sat       (tam eşleşme)
-      #ffc850 -> --bp-volume    (tam eşleşme; Hacim Onaylı rozeti)
-      #b8c3ff -> --bp-brand     (tam eşleşme; kişiselleştirme CTA'sı)
-      #eef3f8 -> KANONA KARSILIK YOK (logo wordmark'ın açık yarısı; sitede
-                 --bp-text kullanılıyor, e-postada neden ayrı bir beyaz
-                 tonu var belirsiz -- kanon eksik)
-      #00e2a1 -> KANONA KARSILIK YOK (logo wordmark vurgusu; --bp-al'a
-                 %0,2 yakın ama eşit değil -- olası kopya-hata, kanon eksik)
-      #8f98a8 -> KANONA KARSILIK YOK (üst başlık altyazısı "PİYASANIN YÖNÜ")
-      #5a5a62 / #3a3a42 -> KANONA KARSILIK YOK (footer ayraç/metin tonları)
-      #1c1c1f -> KANONA KARSILIK YOK (watchlist alarm tablo başlığı zemini;
-                 --bp-surface2 #1c1b1f'e çok yakın ama eşit değil)
-    Sonuç: 5 literal hiçbir tokene karşılık gelmiyor (#eef3f8, #00e2a1,
-    #8f98a8, #5a5a62, #3a3a42) + 2 "neredeyse eşit ama farklı"
-    (#161618 vs --bp-surface, #1c1c1f vs --bp-surface2). Değer değiştirilmedi.
-    """
+    """Ortak e-posta şablonu — site dark teması, pusula logo, modern footer."""
     preheader_html = f'''<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#0e0e12;opacity:0">{preheader}</div>''' if preheader else ""
     return f"""<!DOCTYPE html>
 <html lang="tr">
@@ -2710,8 +2723,8 @@ def _email_base(content_html, unsubscribe_url, preheader=""):
                 <img src="https://borsapusula.com/static/icon-192.png" width="44" height="44" alt="BorsaPusula" style="display:block;border:0;border-radius:10px">
               </td>
               <td style="vertical-align:middle;text-align:left">
-                <div style="font-size:26px;font-weight:800;line-height:1.1;letter-spacing:-0.5px;font-family:'Sora','Manrope',Arial,sans-serif;color:#eef3f8">Borsa<span style="color:#00e2a1">Pusula</span></div>
-                <div style="font-size:10px;font-weight:700;letter-spacing:2.4px;color:#8f98a8;margin-top:4px;font-family:'Manrope',Arial,sans-serif">PİYASANIN YÖNÜ</div>
+                <div style="font-size:26px;font-weight:800;line-height:1.1;letter-spacing:-0.5px;font-family:'Sora','Manrope',Arial,sans-serif;color:#e5e1e4">Borsa<span style="color:#00e290">Pusula</span></div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:2.4px;color:#909097;margin-top:4px;font-family:'Manrope',Arial,sans-serif">PİYASANIN YÖNÜ</div>
               </td>
             </tr>
           </table>
@@ -2724,15 +2737,15 @@ def _email_base(content_html, unsubscribe_url, preheader=""):
       <!-- Footer -->
       <tr><td style="padding-top:32px">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr><td style="border-top:1px solid #2a2a2c;padding-top:18px;text-align:center;font-size:11px;color:#5a5a62;line-height:1.6">
+          <tr><td style="border-top:1px solid #2a2a2c;padding-top:18px;text-align:center;font-size:11px;color:#46464d;line-height:1.6">
             ⚠️ Bu bildirim <strong style="color:#909097">yatırım tavsiyesi değildir</strong>. Algoritmik sinyal bilgilendirmesidir.<br>
             Geçmiş performans gelecekteki sonuçların garantisi değildir.
           </td></tr>
           <tr><td align="center" style="padding-top:12px">
             <a href="https://borsapusula.com" style="font-size:11px;color:#909097;text-decoration:none;margin:0 10px">borsapusula.com</a>
-            <span style="color:#3a3a42">·</span>
+            <span style="color:#30363d">·</span>
             <a href="https://borsapusula.com/iletisim" style="font-size:11px;color:#909097;text-decoration:none;margin:0 10px">iletişim</a>
-            <span style="color:#3a3a42">·</span>
+            <span style="color:#30363d">·</span>
             <a href="{unsubscribe_url}" style="font-size:11px;color:#909097;text-decoration:underline;margin:0 10px">aboneliği sonlandır</a>
           </td></tr>
         </table>
@@ -2766,7 +2779,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     </table>
 
     <!-- Ne alacaksın? -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:16px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:16px">
       <tr><td style="padding:20px 22px">
         <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:14px">📬 Ne tür mailler alacaksın</div>
 
@@ -2788,7 +2801,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     </table>
 
     <!-- Şu an sitede neler var -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:24px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:24px">
       <tr><td style="padding:20px 22px">
         <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:12px">🎯 Site&apos;de neler var</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -2841,7 +2854,7 @@ def _build_login_email(email, login_url, unsubscribe_url, name=None):
     # CPO-DEV2-r31: _build_welcome_email ile ayni escape-eksikligi, ayni fix.
     greeting = f"Merhaba {_html.escape(name.split()[0])}," if name else "Merhaba,"
     content = f'''
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
       <tr><td style="padding:28px 24px;text-align:center">
         <div style="font-size:32px;margin-bottom:8px">🔑</div>
         <div style="font-size:20px;font-weight:800;color:#e5e1e4;margin-bottom:14px;letter-spacing:-0.3px">{greeting}</div>
@@ -2950,7 +2963,7 @@ def _build_signal_email(changes, unsubscribe_url):
     _now_tr = datetime.now(_TZ_TR)
     content = f'''
     <!-- Header -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#161618;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#141416;border:1px solid #2a2a2c;border-radius:10px;margin-bottom:20px">
       <tr><td style="padding:18px 22px;text-align:center">
         <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:8px">📊 Yeni Sinyal Değişimleri</div>
         <div style="font-size:13px;color:#c7c5cd;margin-bottom:14px">{_now_tr.strftime("%d")} {_tr_month(_now_tr)} {_now_tr.strftime("%Y · %H:%M")}</div>
@@ -13463,12 +13476,13 @@ def _check_user_alerts(stocks):
             # zorunlu tuttugu _email_base() deseni bu mail tipine de getirildi — yasal
             # disclaimer + gercek (tiklanabilir) unsubscribe linki artik var.
             # CPO-1509 madde 4: diger maillerin (_build_signal_email/_email_base) marka
-            # paletine (#161618/#2a2a2c/#e5e1e4/#909097/#00e290/#f85149) hizalandi,
+            # paletine hizalandi (o tarihte #161618/#2a2a2c/#e5e1e4/#909097/#00e290/#f85149,
+            # K-DC 22.09'da #161618 -> #141416/--bp-surface kanona baglandi),
             # eskiden GitHub-dark benzeri ayrı bir palet (#161b22/#1f2937) kullaniyordu.
             content = f"""<h2 style="margin:0 0 12px;font-size:20px;color:#e5e1e4">🔔 Watchlist Alarmı</h2>
 <p style="margin:0 0 16px;color:#c7c5cd;font-size:14px;line-height:1.6">Merhaba {name}, takip listendeki hisselerde alarm koşulları tetiklendi:</p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;background:#161618;border:1px solid #2a2a2c;border-radius:8px;overflow:hidden">
-<tr style="background:#1c1c1f;color:#909097;font-size:12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;background:#141416;border:1px solid #2a2a2c;border-radius:8px;overflow:hidden">
+<tr style="background:#1c1b1f;color:#909097;font-size:12px">
   <th style="padding:8px 14px;text-align:left">Hisse</th>
   <th style="padding:8px 14px;text-align:left">Sinyal</th>
   <th style="padding:8px 14px;text-align:left">Fiyat</th>

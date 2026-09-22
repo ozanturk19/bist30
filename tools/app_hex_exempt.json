@@ -1,14 +1,6 @@
 {
-  "_ref": "CPO-1782 / K-DA (22.09) — E-POSTA GOVDESININ HAM HEX'LERI. DEV1 her birinin token kokenini app.py'ye ve tokens.css'e capraz-referansladi (commit 5e864a7), DEGER DEGISTIRMEDI. Bu liste DONDURULMUS bir borctur: SADECE KUCULEBILIR. Yeni bir kanon-disi hex eklemek icin once o rengin neden kanona giremedigi tokens.css'te yazilmalidir.",
+  "_ref": "CPO-1782 / K-DA (22.09) — E-POSTA GOVDESININ HAM HEX'LERI. DEV1 her birinin token kokenini app.py'ye ve tokens.css'e capraz-referansladi (commit 5e864a7), DEGER DEGISTIRMEDI. K-DC (22.09, CPO-1783 karari) 7 literali de kanon deger ile degistirdi (commit sonrasi) -- liste ratchet asagi kurali geregi BOSALTILDI. Yeni bir kanon-disi hex eklemek icin once o rengin neden kanona giremedigi tokens.css'te yazilmalidir.",
   "_owner": "DEV1 (e-posta HTML'i backend sablonu) — CPO alani degil",
   "_rule": "Listedeki bir hex app.py'de artik gecmiyorsa KAPI FAIL verir: satiri sil (ratchet asagi).",
-  "hexes": [
-    "#161618",
-    "#1c1c1f",
-    "#eef3f8",
-    "#00e2a1",
-    "#8f98a8",
-    "#5a5a62",
-    "#3a3a42"
-  ]
+  "hexes": []
 }
