@@ -14,7 +14,7 @@
 {% endif %}
 <title>{{ _st }}</title>
 <meta name="description" content="{{ _sd }}">
-<meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} sinyal, {{ ticker }} hisse yorum, {{ ticker }} supertrend, {{ name }} borsa analiz, {{ name }} teknik, BIST100 sinyalleri{% if sector %}, {{ sector }} hisseleri{% endif %}, {{ ticker }} stop loss, {{ ticker }} RSI ADX">
+<meta name="keywords" content="{{ ticker }} teknik analiz, {{ ticker }} sinyal, {{ ticker }} hisse yorum, {{ ticker }} supertrend, {{ name }} borsa analiz, {{ name }} teknik, BIST100 sinyalleri{% if sector and sector != 'Diğer' %}, {{ sector }} hisseleri{% endif %}, {{ ticker }} stop loss, {{ ticker }} RSI ADX">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/hisse/{{ ticker }}">
 <!-- Open Graph -->
@@ -37,7 +37,8 @@
   "@type": "FinancialProduct",
   "name": "{{ ticker }} ({{ name }}) Teknik Analiz Sinyali",
   "description": "{{ ticker }} hissesi için algoritmik Supertrend(10,3) + ADX + EMA12/99 teknik analiz sinyali. Günlük güncelleme, ücretsiz.",
-  "url": "https://borsapusula.com/hisse/{{ ticker }}",{% if sector %}
+  "url": "https://borsapusula.com/hisse/{{ ticker }}",{# K-DM: "Diğer" siniflandirilamayanlarin catch-all kovasi; makine-okunur
+       bir kategori/anahtar-kelime olarak "Diğer hisseleri" bilgi tasimaz. #}{% if sector and sector != 'Diğer' %}
   "category": "{{ sector }}",{% endif %}
   "provider": {
     "@type": "Organization",
@@ -169,7 +170,17 @@
   </div>
   {% if sector %}
   <span class="hib-sector">{{ sector }}</span>
-  <a href="{{ compare_url }}" class="hib-compare" data-tip="Sektördeki diğer hisselerle karşılaştır" aria-label="Karşılaştır: {{ sector }} sektöründeki benzer hisselerle">
+  {# K-DM: "Diğer" gercek bir sektor DEGIL -- app.py (CPO-1464 #3) o ticker'lar
+     icin _sector_pool'u BOSALTIYOR. related_stocks bu bosalmayi dalliyordu
+     ({% if related_stocks %}), hero'daki Karsilastir dugmesi DALLANMIYORDU:
+     compare_url akransiz kaliyor ("/karsilastir?tickers=BJKAS"), dugme
+     "Sektordeki diger hisselerle karsilastir" diye vaat ediyor ama sayfa
+     "en az 2 hisse" bos durumuna dusuyordu -- 11 hisse (ADEL AGROT BJKAS
+     DURDO FENER FMIZP FORMT GSRAY IEYHO KARTN MARTI). Vaat artik akranin
+     VARLIGINA bagli; dugme kalir (tek ticker input'a on-dolduruluyor,
+     kullanici ikinciyi kendisi secer) ama sektor iddiasi etmez. #}
+  {% set _has_peers = ',' in compare_url %}
+  <a href="{{ compare_url }}" class="hib-compare" data-tip="{% if _has_peers %}Sektördeki diğer hisselerle karşılaştır{% else %}Başka bir hisseyle karşılaştır{% endif %}" aria-label="{% if _has_peers %}Karşılaştır: {{ sector }} sektöründeki benzer hisselerle{% else %}Karşılaştır: {{ ticker }} ile başka bir hisseyi yan yana koy{% endif %}">
     <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
     Karşılaştır
   </a>

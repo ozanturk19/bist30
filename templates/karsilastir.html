@@ -522,13 +522,27 @@ function buildMobileCards(stocks) {
 
 let _compareSeq = 0;  /* hizli tekrar-cagrida eski istek yenisini ezmesin (bug-hunt) */
 
+// K-DM: "2'den az secim" bos durumu UC yerde uretiliyordu ve IKI farkli metin
+// tasiyordu -- SSR blogu + popstate "Karsilastirma Araci / En az 2 hisse sembolu
+// girin...", doCompare ise "En az 2 hisse giriniz / Karsilastirma icin 2 ila 4
+// hisse sembolu girin.". Ayni durum, iki kanon. Tek uretici; SSR blogu da ayni
+// cumleleri tasiyor. n=1 dali /hisse hero'sundan akransiz gelen kullaniciyi
+// (sektoru "Diger" olan 11 hisse) cikmaza degil bir SONRAKI ADIMA yonlendirir.
+function bpCompareEmptyHtml(n) {
+  const lead = (n === 1)
+    ? '1 hisse seçildi. Karşılaştırmak için en az 1 hisse daha ekleyin.'
+    : 'En az 2 hisse sembolü girin ve karşılaştırın.';
+  return '<div class="da-empty da-empty--page"><h2>Karşılaştırma Aracı</h2><p>' + lead +
+         '<br>ADX, RSI, Supertrend Seviyesi, Hedef Fiyat ve daha fazlası yan yana.</p></div>';
+}
+
 async function doCompare(opts) {
   const skipUrl = !!(opts && opts.skipUrl);
   const mySeq = ++_compareSeq;
   const inputs = [...new Set(['t1','t2','t3','t4'].map(id => document.getElementById(id).value.trim().toUpperCase()).filter(Boolean))];
   if (inputs.length < 2) {
-    document.getElementById('compareResult').innerHTML =
-      '<div class="da-empty da-empty--page"><h2>En az 2 hisse giriniz</h2><p>Karşılaştırma için 2 ila 4 hisse sembolü girin.</p></div>';
+    document.getElementById('compareResult').innerHTML = bpCompareEmptyHtml(inputs.length);
+    document.getElementById('compareSubtitle').textContent = '';
     return;
   }
 
@@ -861,8 +875,7 @@ window.addEventListener('popstate', function() {
     if (parts.length >= 2) {
       doCompare({skipUrl: true});
     } else {
-      document.getElementById('compareResult').innerHTML =
-        '<div class="da-empty da-empty--page"><h2>Karşılaştırma Aracı</h2><p>En az 2 hisse sembolü girin ve karşılaştırın.<br>ADX, RSI, Supertrend Seviyesi, Hedef Fiyat ve daha fazlası yan yana.</p></div>';
+      document.getElementById('compareResult').innerHTML = bpCompareEmptyHtml(parts.length);
       document.getElementById('compareSubtitle').textContent = '';
     }
   } catch(e) { console.warn('popstate karsilastirma geri yukleme basarisiz', e); }
