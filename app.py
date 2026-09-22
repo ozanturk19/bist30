@@ -2779,7 +2779,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
       <tr><td style="padding:18px 22px">
         <div style="font-size:14px;font-weight:700;color:#b8c3ff;margin-bottom:6px">🎯 Sinyalleri sana özelleştir</div>
         <div style="font-size:12.5px;color:#c7c5cd;line-height:1.55;margin-bottom:12px">
-          10 saniye sürer — mail sıklığını seç (günlük özet, anında, sadece Hacim Onaylı veya haftalık).
+          10 saniye sürer — mail sıklığını seç (günlük özet, kapanış sonrası, sadece Hacim Onaylı veya haftada bir).
         </div>
         <a href="https://borsapusula.com/profil?t={profile_token}" style="display:inline-block;background:rgba(184,195,255,0.14);color:#b8c3ff;border:1px solid rgba(184,195,255,0.45);padding:8px 18px;border-radius:6px;text-decoration:none;font-size:12.5px;font-weight:700;letter-spacing:0.3px">
           Profili Tamamla →
@@ -2798,7 +2798,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
 
     <p style="text-align:center;font-size:12px;color:#909097;margin-top:18px;line-height:1.5">
       İlk özet mailini bir sonraki işlem günü akşamı alacaksın (günlük özet — varsayılan tercih).<br>
-      Anlık bildirim istersen profilinden "Anında" seçeneğini seçebilirsin.
+      Özeti yaklaşık yarım saat önce istersen profilinden "Kapanış sonrası" seçeneğini seçebilirsin.
     </p>
     '''
     return _email_base(content, unsubscribe_url, preheader=preheader)
