@@ -1293,7 +1293,7 @@ fi
 #   R1 yazma simetrisi · R2 <select> yutulmasi korumasi · R3 tur-gidis (yazilan
 #   her parametre geri okunmali). MUAFIYET ANLAM KURALIDIR: kapsam "URLSearchParams
 #   kurup fetch eden fonksiyon"; tek kuruculu sablonlar R1 disinda.
-echo "64/65 form-url-state-check (K-CS: form durumu <-> adres cubugu tur-gidisi)..."
+echo "64/66 form-url-state-check (K-CS: form durumu <-> adres cubugu tur-gidisi)..."
 if python3 tools/form-url-state-check.py; then
   echo "  ✓ form-url-state-check PASS"
 else
@@ -1315,13 +1315,36 @@ echo ""
 #   URETTIGI olu derin baglantiyi paylastiriyordu. Ayrica tek sektorluk secim
 #   adrese yaziliyor ama okuma esigine (`>= 2`) takilip geri okunmuyordu.
 #   R1 tek yayimci · R2 tur-gidis · R3 `append` birikmesi · R4 sekme kapsami.
-echo "65/65 url-state-owner-check (K-CT: adres cubugunun tek sahibi)..."
+echo "65/66 url-state-owner-check (K-CT: adres cubugunun tek sahibi)..."
 if python3 tools/url-state-owner-check.py; then
   echo "  ✓ url-state-owner-check PASS"
 else
   echo "  ✗ K-CT KIRIK: adres cubugu iki yazarli ya da yazdigini geri okumuyor."
   echo "    Pozitif kontrol: python3 tools/url-state-owner-check.py --self-test  # 5/5 beklenir"
   echo "    Regresyon ornegi: python3 tools/url-state-owner-check.py --ref 5944a02  # 1 ihlal beklenir"
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
+# KAPI 66 -- K-CU: SUNUCUDA YASAYAN DURUMUN ISTEMCIDEKI SAHIBI.
+#   Kapi 64/65 paylasilan yuzey olarak ADRES CUBUGUNU ele aliyordu; 111. dersin
+#   ("paylasilan yuzeyin bir SAHIBI var mi") bir sonraki yuzeyi sunucuda tutulan
+#   ve istemcide kopyasi bulunan durumdur (alarm/abonelik/tercih).
+#   Canli olculdu (/hisse/<T> 🔔): dugmenin durumu YALNIZ localStorage'dan
+#   okunuyordu, gercek e-posta alarmi sunucuda yasiyordu; `GET /api/user-alerts`
+#   uretimde CANLI ama hicbir istemci yuzeyi onu OKUMUYORDU. Telefonda takibe
+#   alinan hisse masaustunde "Bildirim al" gorunuyor, e-posta geliyor ama alarm
+#   KAPATILAMIYORDU; tarayici verisi silinince kayit YETIM kaliyordu.
+#   Harness pozitif kontrolu (eski kod): sunucuda kayitli + yerelde yok iken
+#   tiklama POST gonderiyordu (kapatmak isterken ALIYORDU), ters durumda DELETE.
+#   R1 yazma/okuma asimetrisi · R2 dallanma sahibi · R3 bos != bilinmiyor.
+echo "66/66 client-server-state-owner-check (K-CU: sunucu durumunun istemcideki sahibi)..."
+if python3 tools/client-server-state-owner-check.py; then
+  echo "  ✓ client-server-state-owner-check PASS"
+else
+  echo "  ✗ K-CU KIRIK: sunucuda yasayan bir durum istemcide sahipsiz."
+  echo "    Pozitif kontrol: python3 tools/client-server-state-owner-check.py --self-test  # 5/5 beklenir"
+  echo "    Regresyon ornegi: python3 tools/client-server-state-owner-check.py --ref 2065e69  # 2 ihlal beklenir"
   FAIL=$((FAIL + 1))
 fi
 

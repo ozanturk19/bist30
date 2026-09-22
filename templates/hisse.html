@@ -1719,8 +1719,74 @@ let _shareData = {};
 
 /* ── ⭐ Portfolio + 🔔 Watchlist toggle (LOCAL STORAGE) ── */
 const HIB_PF_KEY    = 'bp_portfolio';
-const HIB_WATCH_KEY = 'bp_watchlist_v2';        // Faz 1 #2: versionleme (index.html ile sync)
+const HIB_WATCH_KEY = 'bp_watchlist_v2';        // Faz 1 #2: versionleme (yalnız bu sayfada; giriş yoksa TEK kaynak)
 const HIB_WATCH_KEY_LEGACY = 'bp_watchlist';    // migration kaynağı
+
+/* ── K-CU (22.09): ALARM DURUMUNUN SAHİBİ SUNUCUDUR ───────────────────
+   ÖNCEDEN: 🔔 düğmesinin durumu YALNIZCA `bp_watchlist_v2`den (bu cihazın
+   localStorage'ı) okunuyordu. Gerçek e-posta alarmı ise sunucuda
+   `subscribers[email].alerts[TICKER]` içinde yaşıyor ve onu POST/DELETE
+   yazıyor. İki kanon vardı, hiç buluşmuyorlardı — `GET /api/user-alerts`
+   üretimde CANLI (401/200) ama sitenin HİÇBİR yüzeyi onu okumuyordu.
+   Sonuçları:
+     • Telefonda takibe alınan hisse masaüstünde "Bildirim al" görünüyordu;
+       e-postalar geliyor ama kullanıcı alarmı KAPATAMIYORDU — kapatma dalına
+       ancak yerel listede "takipte" görünürse girilebiliyordu.
+     • Tarayıcı verisi silinince (veya başka tarayıcıda) sunucudaki alarm
+       YETİM kalıyordu: hiçbir sayfa alarm listesi göstermediği için kapatma
+       yolu kalmıyor, e-postalar süresiz devam ediyordu.
+     • Kullanıcı kaç alarmı olduğunu göremiyor, `_ALERT_MAX_ENTRIES` kotası
+       dolunca neyi sileceğini bilemiyordu.
+   ARTIK: giriş varsa gerçeğin sahibi sunucudur (e-postayı o gönderiyor),
+   yerel liste yalnız giriş YOKKEN kaynaktır. Durumu okuyan TEK yer
+   `_hibWatchState()`, hem düğme render'ı hem toggle dallanması ondan
+   besleniyor ([[K-CT]] 111. ders: paylaşılan yüzeyin bir SAHİBİ olmalı).
+   Uzlaştırma birleştiricidir: sunucuda olan yerele eklenir, yereldeki hiçbir
+   giriş SİLİNMEZ (giriş öncesi niyet korunur, veri kaybı yok). */
+const _hibLoggedIn = () => !!document.cookie.match(/(?:^|;\s*)bp_sub=/);
+let _hibServerAlerts     = null;   // Set = sunucu cevabı geldi (otorite), null = henüz yok
+let _hibServerLoadFailed = false;  // true = sunucu okunamadı, yerel listeye düşüldü
+
+/* Alarm durumunun TEK OKUYUCUSU → 'on' | 'off' | 'pending' | 'unknown' */
+function _hibWatchState() {
+  if (_hibLoggedIn()) {
+    if (_hibServerAlerts) return _hibServerAlerts.has(TICKER) ? 'on' : 'off';
+    if (!_hibServerLoadFailed) return 'pending';   // K-BW: ara durum ≠ "takipte değil"
+  }
+  let w;
+  try { w = JSON.parse(localStorage.getItem(HIB_WATCH_KEY) || '[]'); }
+  catch (e) { console.warn('takip listesi okunamadi:', e); return 'unknown'; }
+  if (!Array.isArray(w)) return 'unknown';
+  return w.includes(TICKER) ? 'on' : 'off';
+}
+
+/* Sunucudaki gerçek alarm kümesini oku (yalnız girişli kullanıcı). */
+function _hibLoadServerAlerts() {
+  if (!_hibLoggedIn()) return;
+  fetch('/api/user-alerts', { credentials: 'same-origin' })
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+    .then(j => {
+      // [[K-BK]]: HTTP 200 + boş/bozuk gövde "alarmın yok" demek değildir.
+      if (!j || j.ok !== true || !j.alerts || typeof j.alerts !== 'object') throw new Error('beklenmeyen govde');
+      _hibServerAlerts = new Set(Object.keys(j.alerts));
+      _hibMergeServerIntoLocal();
+    })
+    .catch(e => {
+      console.warn('sunucu alarm durumu okunamadi, yerel listeye dusuldu:', e);
+      _hibServerLoadFailed = true;
+    })
+    .finally(() => updateHibBellBtn());
+}
+
+/* Sunucuda olup yerelde olmayanı yerele ekler (cihaz değişimi). Silme YOK. */
+function _hibMergeServerIntoLocal() {
+  if (!_hibServerAlerts) return;
+  let w;
+  try { w = JSON.parse(localStorage.getItem(HIB_WATCH_KEY) || '[]'); } catch (e) { return; }
+  if (!Array.isArray(w)) return;   // bozuk kayda dokunma (K-BM: üzerine yazma)
+  const eksik = [..._hibServerAlerts].filter(t => !w.includes(t));
+  if (eksik.length) _hibSafeWriteWatch(w.concat(eksik));
+}
 
 /* Faz 1 #2: v1 → v2 migration (idempotent, ilk ziyarette tetiklenir) */
 (function _hibMigrateWatch() {
@@ -1870,38 +1936,56 @@ function toggleHisseWatch() {
     return;
   }
 
+  /* K-CU: dallanma artık yerel dizinin indeksinden DEĞİL, durumun tek
+     okuyucusundan geliyor. Eskiden yerelde "takipte" görünen ama sunucuda
+     olmayan (ya da tersi) bir hissede düğme "Bildirim al" derken tıklama
+     KAPATMA dalına giriyordu — etiket ile eylem zıt yönü gösteriyordu. */
+  const _st = _hibWatchState();
+  if (_st === 'pending') {
+    _hibToast('Alarm durumun kontrol ediliyor, bir saniye…', 'warn');
+    if (_hibBtn) _hibBtn.disabled = false;
+    return;
+  }
   const idx = w.indexOf(TICKER);
   let _pending = false;
-  if (idx >= 0) {
-    w.splice(idx, 1);
+  if (_st === 'on') {
+    if (idx >= 0) w.splice(idx, 1);
     if (_hibSafeWriteWatch(w)) {
       _hibToast(TICKER + ' alarmı kapatıldı', 'warn');
-      if (document.cookie.match(/(?:^|;\s*)bp_sub=/)) {
+      if (_hibLoggedIn()) {
         _pending = true;
         _hibWatchToggleInFlight = true;
+        if (_hibServerAlerts) _hibServerAlerts.delete(TICKER);   // iyimser; r.ok değilse geri alınır
         fetch(`/api/user-alerts/${TICKER}`, { method: 'DELETE', credentials: 'same-origin' })
           .then(r => {
             // r147 bug-hunt: r.ok kontrolu yoktu, 4xx/5xx sessizce yutuluyordu (fetch
             // sadece network-level red'de reject eder) - sunucudaki e-posta alerti
             // silinmemis halde yetim kalabiliyordu, kullanici hic haberdar olmuyordu.
             // index.html toggleWatch() (bug-hunt r96) emsaliyle ayni ilke.
-            if (!r.ok) _hibToast(TICKER + ' e-posta alerti silinemedi, sunucuda aktif kalmaya devam ediyor', 'warn');
+            // K-CU: sunucu reddettiyse alarm HÂLÂ aktif — iyimser silme geri alınır,
+            // düğme "Bildirim al" diye yalan söylemez (finally'deki render yansıtır).
+            if (!r.ok) {
+              if (_hibServerAlerts) _hibServerAlerts.add(TICKER);
+              _hibToast(TICKER + ' e-posta alerti silinemedi, sunucuda aktif kalmaya devam ediyor', 'warn');
+            }
           })
           .catch(e => {
             console.warn('takipten cikarken sunucu alerti silinemedi:', e);
+            if (_hibServerAlerts) _hibServerAlerts.add(TICKER);
             _hibToast(TICKER + ' e-posta alerti silinemedi (bağlantı hatası)', 'warn');
           })
           .finally(() => {
             _hibWatchToggleInFlight = false;
             const _hibBtn2 = document.getElementById('hibBellBtn');
             if (_hibBtn2) _hibBtn2.disabled = false;
+            updateHibBellBtn();
           });
       }
     }
   } else {
-    w.push(TICKER);
+    if (idx < 0) w.push(TICKER);
     if (_hibSafeWriteWatch(w)) {
-      const _loggedIn = !!document.cookie.match(/(?:^|;\s*)bp_sub=/);
+      const _loggedIn = _hibLoggedIn();
       _hibToast(TICKER + ' takibe eklendi' + (_loggedIn ? ' — sinyal değiştiğinde e-posta ile haber vereceğiz' : ''), 'success');
       if (_loggedIn) {
         // 16.09: eskiden burada hicbir sunucu cagrisi yoktu, toast var-olmayan bir
@@ -1910,22 +1994,28 @@ function toggleHisseWatch() {
         // + r.ok kontrolu + sessiz-yutmama desenini simetrik olarak uyguluyor.
         _pending = true;
         _hibWatchToggleInFlight = true;
+        if (_hibServerAlerts) _hibServerAlerts.add(TICKER);   // iyimser; r.ok değilse geri alınır
         fetch(`/api/user-alerts/${TICKER}`, {
           method: 'POST', credentials: 'same-origin',
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({signal_change: true})
         })
           .then(r => {
-            if (!r.ok) _hibToast(TICKER + ' e-posta alarmı kaydedilemedi, takip listesinde ama bildirim almayacaksın', 'warn');
+            if (!r.ok) {
+              if (_hibServerAlerts) _hibServerAlerts.delete(TICKER);
+              _hibToast(TICKER + ' e-posta alarmı kaydedilemedi, takip listesinde ama bildirim almayacaksın', 'warn');
+            }
           })
           .catch(e => {
             console.warn('takibe eklerken sunucu alerti kaydedilemedi:', e);
+            if (_hibServerAlerts) _hibServerAlerts.delete(TICKER);
             _hibToast(TICKER + ' e-posta alarmı kaydedilemedi (bağlantı hatası)', 'warn');
           })
           .finally(() => {
             _hibWatchToggleInFlight = false;
             const _hibBtn2 = document.getElementById('hibBellBtn');
             if (_hibBtn2) _hibBtn2.disabled = false;
+            updateHibBellBtn();
           });
       }
     }
@@ -1979,17 +2069,29 @@ function updateHibStarBtn() {
 
 function updateHibBellBtn() {
   const btn = document.getElementById('hibBellBtn');
-  let w = [];
-  try {
-    w = JSON.parse(localStorage.getItem(HIB_WATCH_KEY) || '[]');
-    if (!Array.isArray(w)) throw new Error('not an array');
-  } catch(_) {
-    console.warn('updateHibBellBtn: takip listesi okunamadi', _);
+  /* K-CU: durum tek okuyucudan. 'pending' = sunucu cevabı yolda (giriş var):
+     K-BW/K-BM ilkesi — ölçülmemiş bir şey "takipte değil" diye iddia edilmez. */
+  const st = _hibWatchState();
+  if (st === 'unknown') {
+    if (btn) { btn.removeAttribute('aria-busy'); if (!_hibWatchToggleInFlight) btn.disabled = false; }
     _hibMarkUnknown(btn, 'Takip listesi');   // K-BM: bilinmiyor != takipte degil
     return;
   }
-  const inW = w.includes(TICKER);
+  if (btn && st === 'pending') {
+    const lblP = btn.querySelector('.hib-action-lbl');
+    btn.classList.remove('active-bell');
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    btn.removeAttribute('aria-pressed');     // bilinmeyen durum bildirilmez
+    btn.title = 'Alarm durumun kontrol ediliyor…';
+    btn.setAttribute('aria-label', 'Alarm durumu kontrol ediliyor');
+    if (lblP) lblP.textContent = 'Kontrol ediliyor…';
+    return;
+  }
+  const inW = (st === 'on');
   if (btn) {
+    if (!_hibWatchToggleInFlight) btn.disabled = false;
+    btn.removeAttribute('aria-busy');
     const lbl = btn.querySelector('.hib-action-lbl');
     // bughunt-13.09 (2sa edge-case workflow, P3): "Alarm aktif ✓" kalici
     // etiketi, giris yapilmamis kullanicida sadece bu cihazin localStorage'ina
@@ -1999,7 +2101,11 @@ function updateHibBellBtn() {
     // gore dogru koşullanmisti, sadece bu kalici buton etiketi tutarsizdi.
     if (inW) {
       btn.classList.add('active-bell');
-      btn.title = 'Takipte (bu cihazda) — çıkarmak için tıkla';
+      /* K-CU: girişliyken kayıt HESABA bağlıdır (her cihazda geçerli, e-posta
+         gider); giriş yokken gerçekten yalnız bu cihazın listesidir. */
+      btn.title = _hibLoggedIn()
+        ? 'Takipte — sinyal değişiminde e-posta gelir; kapatmak için tıkla'
+        : 'Takipte (yalnız bu cihazda, e-posta gönderilmez) — çıkarmak için tıkla';
       if (lbl) lbl.textContent = 'Takipte ✓';
     } else {
       btn.classList.remove('active-bell');
@@ -2022,9 +2128,9 @@ window.addEventListener('storage', e => {
 
 // Init when DOM ready
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { updateHibStarBtn(); updateHibBellBtn(); });
+  document.addEventListener('DOMContentLoaded', () => { updateHibStarBtn(); updateHibBellBtn(); _hibLoadServerAlerts(); });
 } else {
-  updateHibStarBtn(); updateHibBellBtn();
+  updateHibStarBtn(); updateHibBellBtn(); _hibLoadServerAlerts();
 }
 
 function shareSignal(platform) {
