@@ -7,13 +7,13 @@
 <meta property="og:description" content="{{ article.desc }}">
 <meta property="og:url"         content="https://borsapusula.com/blog/{{ (article.canonical_slug if article.canonical_slug else article.slug) | urlencode }}">
 <meta property="og:site_name"   content="borsapusula.com">
-<meta property="og:image"       content="https://borsapusula.com/og-image.png">
+<meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="{{ article.title }} | borsapusula.com">
 <meta name="twitter:description" content="{{ article.desc }}">
-<meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
+<meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -46,7 +46,7 @@
   },
   "image": {
     "@type": "ImageObject",
-    "url": "https://borsapusula.com/og-image.png",
+    "url": "https://borsapusula.com{{ og_image_url }}",
     "width": 1200,
     "height": 630
   }

@@ -107,6 +107,15 @@ REQUIRED_META = [
 ]
 RE_NOINDEX = re.compile(r'name=["\']robots["\'][^>]*noindex', re.I)
 
+# ---------------------------------------------------------------- R8
+# CPO-1767 madde 1: og gorselinin ICERIGI her EOD turunda degisiyor ama URL
+# sabitti (/og-image.png); Facebook/WhatsApp/X karti URL'e gore onbellekler,
+# kart ILK taramanin fotografinda donuyordu. Kanon: `{{ og_image_url }}`
+# (app.py `_inject_og_image_url` -> `?d=YYYYMMDD`, EOD veri tarihinden).
+# Bu kural SABIT yazimi arar -- R3 gibi metni degil, URL'in kendisini.
+RE_STATIC_OG_URL = re.compile(r"/og-image\.(?:png|svg)(?![?\w])")
+RE_OG_CANON = re.compile(r"\{\{\s*og_image_url\s*\}\}")
+
 # Meta DEGERI tasiyan satirlar (yalniz `content="..."` ve <title>).
 RE_META_CONTENT = re.compile(
     r'<meta\s+(?:name|property)=["\'](?P<key>[^"\']+)["\'][^>]*?'
@@ -221,6 +230,15 @@ def main():
                     "sayim kumesi degismis (XU030 haric tum evren degil) -- R7'nin "
                     "oncülü gecersiz, kural gozden gecirilmeli"))
 
+    # R8a -- kapinin oncülü hala gecerli mi: sablonlarin bel bagladigi
+    # `og_image_url` degiskenini app.py GERCEKTEN yayinliyor mu? Context
+    # processor silinirse Jinja undefined -> og:image "https://borsapusula.com"
+    # olur ve R8 (sabit URL arar) bunu GORMEZ -- kapi kor kalir.
+    if "og_image_url=" not in app_src or "@app.context_processor" not in app_src:
+        out.append(("R8a", "app.py",
+                    "`og_image_url` context processor'u yok -- sablonlardaki "
+                    "`{{ og_image_url }}` bos render edilir, R8 kor kalir"))
+
     # R6 -- iki rota AYNI metni yayinlamali.
     # BILEREK MUAF (57. ders -- muafiyeti dosyada ACIKCA beyan et):
     #   "📊"  : PNG'de bilerek YOK. Rotanin kendi yorumu: "mini bar-chart
@@ -285,6 +303,17 @@ def main():
                 if raw not in expect or len(canvas) > 1:
                     out.append(("R5", f"{fname}:{key}",
                                 f"ilan {raw}, rota(lar) {sorted(canvas)} uretiyor"))
+
+        # R8 -- og gorseli URL'i SABIT olamaz (surumlu kanon zorunlu).
+        # Yalniz meta degil TUM kaynak taranir: ayni gorsel JSON-LD
+        # ImageObject.url'de de ilan ediliyor (blog_article) -- "ayni is icin
+        # iki kanon" orada da dogar.
+        for m in RE_STATIC_OG_URL.finditer(src):
+            line = src[:m.start()].count("\n") + 1
+            out.append(("R8", f"{fname}:{line}",
+                        f'"{m.group(0)}" sabit/surumsuz og gorseli URL\'i -- kanon '
+                        f"`{{{{ og_image_url }}}}` (platform onbellegi URL-bazli, "
+                        f"kart ilk taramada donar)"))
 
         # R4 -- indekslenebilir sayfa zorunlu meta seti
         if not RE_NOINDEX.search(head):
