@@ -293,8 +293,15 @@ def main():
                                 f"TUM evren (kanon: 'BIST100 + ek hisseler')"))
 
     # R7a -- kapinin oncüllü hala gecerli mi (kapi kor kalmasin)
+    # CPO-1783: kanon INDEX_TICKERS'a baglandi -- literal `!= "XU030"` yazimi
+    # `not in INDEX_TICKERS` oldu, kural degismedi (hala XU030 haric TUM evren).
     stats = re.search(r"def _og_image_stats\(\):(.*?)(?=\n@|\ndef\s)", app_src, re.S)
-    if not stats or 'ticker"] != "XU030"' not in stats.group(1):
+    _stats_body = stats.group(1) if stats else ""
+    _og_excludes_index = (
+        'ticker"] != "XU030"' in _stats_body
+        or 'ticker"] not in INDEX_TICKERS' in _stats_body
+    )
+    if not stats or not _og_excludes_index:
         out.append(("R7a", "_og_image_stats",
                     "sayim kumesi degismis (XU030 haric tum evren degil) -- R7'nin "
                     "oncülü gecersiz, kural gozden gecirilmeli"))

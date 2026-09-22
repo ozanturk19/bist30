@@ -888,8 +888,16 @@ BIST100 = [
 ]
 # Geriye dönük uyumluluk için alias
 BIST30 = BIST100
+# CPO-1783: "endeks bir hisse değil" kuralının ADLANDIRILMIŞ TEK kanonu —
+# BIST100/BIST_STOCK_COUNT/route kabul kapıları/ticker ayrıştırma hep buraya
+# bağlanır. Önceden aynı iş 9 ayrı yerde elle (`!= "XU030"`) tekrarlanıyordu;
+# route kabul kapıları (stock_page, /api/hisse/<t>/lite) bu tekrarların hiçbirini
+# içermediği için XU030 hisse şablonuyla 200 dönüyordu. XU100 bugün BIST100
+# listesinde değil (zaten 404 dönüyor) ama aynı sınıf — ticker ayrıştırma/liste
+# filtrelerinde simetrik olarak elenir.
+INDEX_TICKERS = {"XU030", "XU100"}
 # CPO-1107 Faz0#6: tek kaynak evren sayısı — XU030 endeks, hisse değil, hariç tutulur
-BIST_STOCK_COUNT = len([t for t in BIST100 if t != "XU030"])
+BIST_STOCK_COUNT = len([t for t in BIST100 if t not in INDEX_TICKERS])
 # CPO-1533: gerçek BIST30 endeks bileşenleri (BIST30 adı yukarıda BIST100'e
 # alias'landığı için ayrı isim) — Gemini kotası paylaşan işlerde (health-explain)
 # evreni daraltmak için tek kaynak; BIST100[:28] deseni zaten 3 yerde (backtest,
@@ -4835,7 +4843,9 @@ def api_hisse_lite(ticker):
     client-side kendi ticker'ını filtreliyordu. Bu endpoint sadece o sayfanın
     gerçekten kullandığı alanları tek ticker için döner (bkz. renderSummary)."""
     ticker = ticker.upper()
-    if ticker not in BIST100:
+    # CPO-1783: /hisse/XU030 ile aynı kabul kapısı kusuru — XU030 BIST100
+    # içinde olduğu için bu endpoint de hisse şablonunu besliyordu.
+    if ticker in INDEX_TICKERS or ticker not in BIST100:
         return safe_json({"error": "Hisse bulunamadı"}), 404
     with _lock:
         stocks = list(_cache["data"])
@@ -8350,7 +8360,12 @@ def stock_page(ticker):
         # path'ler 200 donup canonical/og:url ile celisiyordu (duplicate content).
         return redirect(f"/hisse/{ticker.upper()}", code=301)
     ticker = ticker.upper()
-    if ticker not in BIST100:
+    # CPO-1783: kabul kapısı `ticker not in BIST100` idi ama XU030 BIST100
+    # LİSTESİNİN İÇİNDE (evren sayısı için orada tutuluyor) — bu yüzden
+    # /hisse/XU030 tam donanımlı hisse şablonuyla 200 dönüyordu (₺ fiyat,
+    # stop bölgesi, portföy/bildirim düğmeleri — hiçbiri bir endeks için
+    # anlamlı değil). Endeks ticker'ları hiç var olmamış sayılır (404, 410 değil).
+    if ticker in INDEX_TICKERS or ticker not in BIST100:
         if ticker in DELISTED_TICKERS:
             # CPO-1653 P1: eskiden ham hardcoded HTML string (marka kimliğinin
             # tamamen dışında) — 404/500 ile aynı markalı _base.html desenine taşındı.
@@ -9680,7 +9695,7 @@ def _compute_tarama_results(sig="", min_adx=0, min_p=0, max_p=999999, sector="",
 
     results = []
     for s in stocks:
-        if s.get("ticker") in ("XU030", "XU100"): continue
+        if s.get("ticker") in INDEX_TICKERS: continue
         if sig    and s.get("signal")              != sig:    continue
         if sector and _get_sector(s.get("ticker","")).lower() != sector.lower(): continue
         if eq     and s.get("entry_quality")       != eq:    continue
@@ -10809,9 +10824,9 @@ def humans_txt():
 def _og_image_stats():
     with _lock:
         stocks = list(_cache["data"])
-    al_count  = sum(1 for s in stocks if s["signal"] == "AL" and s["ticker"] != "XU030")
-    sat_count = sum(1 for s in stocks if s["signal"] == "SAT" and s["ticker"] != "XU030")
-    total     = sum(1 for s in stocks if s["ticker"] != "XU030")
+    al_count  = sum(1 for s in stocks if s["signal"] == "AL" and s["ticker"] not in INDEX_TICKERS)
+    sat_count = sum(1 for s in stocks if s["signal"] == "SAT" and s["ticker"] not in INDEX_TICKERS)
+    total     = sum(1 for s in stocks if s["ticker"] not in INDEX_TICKERS)
     today_s   = datetime.now(_TZ_TR).strftime("%d.%m.%Y")
     return al_count, sat_count, total, today_s
 
@@ -11053,10 +11068,13 @@ def _normalize_tickers(raw, limit=4):
     TEK ortak mantıkla normalize eder (CPO-1630 P2): trim + upper + whitelist +
     alfabetik dedup + limit. Önceden sayfa sorted(set(...)) kullanırken API
     dict.fromkeys(...) (giriş sırası) kullanıyordu — aynı ticker seti farklı
-    sırayla girilince limit'in kestiği 4'lü farklılaşabiliyordu."""
+    sırayla girilince limit'in kestiği 4'lü farklılaşabiliyordu.
+    CPO-1783: endeks ticker'ları (INDEX_TICKERS) burada elenir — /karsilastir
+    ve /api/karsilastir AYNI fonksiyonu kullanır, tek eleme iki yüzeyi kapatır."""
     return sorted({
         t.strip().upper() for t in raw.split(",")
         if re.match(r"^[A-Z0-9]{1,10}$", t.strip().upper())
+        and t.strip().upper() not in INDEX_TICKERS
     })[:limit]
 
 
@@ -11065,7 +11083,11 @@ def _normalize_tickers(raw, limit=4):
 def karsilastir():
     """SPEC-011 L1+L2 — Query-param normalize + self-canonical + dinamik meta.
     `?tickers=` farklı varyasyonları (case/sıra/duplicate) tek canonical URL'e
-    301 ile yönlendirir → Google duplicate dropluyor sorununu çözer (#40)."""
+    301 ile yönlendirir → Google duplicate dropluyor sorununu çözer (#40).
+
+    CPO-1783: kabul kapısı — XU030/XU100 (INDEX_TICKERS) burada değil,
+    `_normalize_tickers()` içinde elenir (aşağıdaki `raw` işleme çağrısı);
+    tek eleme /karsilastir ve /api/karsilastir'i birlikte kapatır."""
     raw = request.args.get("tickers", "").strip()
     if not raw:
         # CPO-1107 madde 9: bazı paylaşılan/eski linkler ?a=&b= şemasını kullanıyor —
@@ -11220,7 +11242,7 @@ def api_karsilastir():
 def api_stocks_list():
     """Autocomplete için tüm hisseler: ticker + isim listesi"""
     result = [{"ticker": t, "name": STOCK_NAMES.get(t, t)}
-              for t in BIST100 if t != "XU030"]
+              for t in BIST100 if t not in INDEX_TICKERS]
     return safe_json({"stocks": result})
 
 
@@ -11233,7 +11255,7 @@ def _compute_gundem_data():
         stocks = list(_cache["data"])
 
     # CPO-1107 Faz0#6: XU030 bir endeks, hisse değil — evren sayısı/liste tek kaynak
-    stocks = [s for s in stocks if s.get("ticker") != "XU030"]
+    stocks = [s for s in stocks if s.get("ticker") not in INDEX_TICKERS]
 
     # CPO-1335: eksen zaten signal_date (doğru) — yalnız gün sınırı TR'ye
     # sabitlendi; date.today() sunucu (UTC) günüydü, 00:00-03:00 TR arasında
@@ -12034,7 +12056,7 @@ def hisseler_hub():
     # gösteriyordu. _get_sector() zaten /hisse/<ticker> detay sayfasının kullandığı
     # kanonik tek-sektör kaynağı (_TICKER_TO_SECTOR reverse-index) — hub da aynısını
     # kullanınca her ticker tam olarak bir sektörde görünür, dup kart/şişmiş sayaç kalkar.
-    bist_set = set(BIST100) - {"XU030", "XU100"}
+    bist_set = set(BIST100) - INDEX_TICKERS
     by_sector = {}
     for t in bist_set:
         by_sector.setdefault(_get_sector(t), []).append((t, STOCK_NAMES.get(t, t)))

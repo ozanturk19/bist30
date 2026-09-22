@@ -33,16 +33,5 @@
       "reason": "kullanicinin girdigi pozisyonlar icin liveData[ticker] sozlugu kurar"
     }
   },
-  "route_guard_exempt": {
-    "stock_page": {
-      "ticket": "CPO-1783",
-      "reason": "/hisse/XU030 200 donuyor: endeks, tam donanimli HISSE sayfasi olarak yayinda (₺ ekli endeks puani, stop seviyesi, Portfoye ekle / Bildirim al). Route guard app.py mantigi = DEV1 alani.",
-      "measured": "22.09.2026 canli: /hisse/XU030 -> 200, self-canonical, robots noindex YOK"
-    },
-    "karsilastir": {
-      "ticket": "CPO-1783",
-      "reason": "/karsilastir?tickers=ASELS,XU030 -> 200, baslik 'ASELS, XU030 hisselerini ... karsilastirin'. noindex,follow oldugu icin SEO etkisi yok, metin yalani var.",
-      "measured": "22.09.2026 canli"
-    }
-  }
+  "route_guard_exempt": {}
 }
