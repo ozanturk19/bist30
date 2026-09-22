@@ -186,7 +186,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Hisse detay sayfalarında EMA12 <span style="color:var(--bp-brand)">mavi</span>, EMA99 <span style="color:var(--bp-accent-yellow)">sarı</span> renkte gösterilir. İki ortalama arasındaki dolgu EMA12 > EMA99 ise yeşil, EMA12 < EMA99 ise kırmızı renge döner — trendin yönü tek bakışta anlaşılır.</p>
 
 <h2>EMA Tek Başına Yeterli Mi?</h2>
-<p>Hayır. EMA kesişimleri gecikmeli sinyal üretir ve yatay piyasalarda çok sık kesişim yaşanır. Bu yüzden BorsaPusula, EMA'yı Supertrend ve ADX ile birlikte <strong>üçüncü teyit katmanı</strong> olarak kullanır. Üç kriter aynı anda aynı yönü gösterdiğinde sinyal çok daha güvenilirdir.</p>
+<p>Hayır. EMA kesişimleri gecikmeli sinyal üretir ve yatay piyasalarda çok sık kesişim yaşanır. Bu yüzden BorsaPusula, EMA'yı Supertrend ve ADX ile birlikte <strong>üçüncü teyit katmanı</strong> olarak kullanır. Dört koşul aynı anda aynı yönü gösterdiğinde sinyal çok daha güvenilirdir.</p>
 """,
     "faqs": [
       {"q": "EMA ile SMA arasındaki temel fark nedir?", "a": "EMA (Üstel Hareketli Ortalama), son fiyatlara daha fazla ağırlık verirken SMA (Basit Hareketli Ortalama) tüm periyotlara eşit ağırlık verir. Bu nedenle EMA fiyat değişimlerine daha hızlı tepki verir."},
@@ -238,7 +238,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "faqs": [
       {"q": "Teknik analiz mi temel analiz mi daha önemlidir?", "a": "İkisi birbirini tamamlar. Temel analiz 'hangi hisseye' gireceğinizi belirler; teknik analiz 'ne zaman' gireceğinizi söyler. BorsaPusula teknik sinyaller üretir ancak temel verilerle birlikte değerlendirilmesi tavsiye edilir."},
       {"q": "Teknik analiz geçmişe mi geleceğe mi bakar?", "a": "Teknik analiz geçmiş fiyat ve hacim verilerini inceleyerek geleceğe dair olasılıksal tahminler yapar. Tarih tekerrür eder prensibi üzerine kuruludur ancak kesin öngörü değildir."},
-      {"q": "BorsaPusula hangi teknik göstergeleri kullanıyor?", "a": "BorsaPusula üçlü filtre sistemi kullanır: Supertrend (ATR tabanlı trend yönü), ADX ≥ 25 (trend gücü doğrulaması) ve EMA12/EMA99 kesişimi (orta-uzun vadeli trend teyidi). Üçü aynı anda Güçlü Trend yönünde olduğunda sinyal verilir."}
+      {"q": "BorsaPusula hangi teknik göstergeleri kullanıyor?", "a": "BorsaPusula üç göstergeden türeyen dört koşul kullanır: Supertrend (ATR tabanlı trend yönü), ADX ≥ 25 (trend gücü doğrulaması), DI+ > DI− (yön teyidi) ve EMA12/EMA99 kesişimi (orta-uzun vadeli trend teyidi). Dördü aynı anda Güçlü Trend yönünde olduğunda sinyal verilir."}
     ],
     "related_tickers": ['AKBNK', 'ASELS', 'THYAO']
   },
@@ -333,10 +333,10 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
     "mins": 5,
     "cat": "Temel Kavramlar",
     "body": """
-<p>BorsaPusula'daki Güçlü Trend ve Trend Bozuldu sinyalleri, <strong>üç teknik kriteri aynı anda</strong> sağlayan hisseler için otomatik olarak üretilir. Bu sinyaller bir tavsiye değil, teknik bir tespittir. Kararı yatırımcı verir.</p>
+<p>BorsaPusula'daki Güçlü Trend ve Trend Bozuldu sinyalleri, <strong>dört teknik kriteri aynı anda</strong> sağlayan hisseler için otomatik olarak üretilir. Bu sinyaller bir tavsiye değil, teknik bir tespittir. Kararı yatırımcı verir.</p>
 
 <h2>Güçlü Trend Sinyali Ne Demek?</h2>
-<p>Güçlü Trend sinyali şu üç kriter aynı anda sağlandığında oluşur:</p>
+<p>Güçlü Trend sinyali şu dört kriter aynı anda sağlandığında oluşur:</p>
 <ul>
   <li>✅ Supertrend yükseliş modda (fiyat bandın üzerinde)</li>
   <li>✅ ADX ≥ 25 (güçlü trend var)</li>
@@ -352,7 +352,7 @@ Alt Band  = (Yüksek + Düşük) / 2 - Multiplier × ATR(Period)</pre>
 <p>Hisse sayfasında "X gündür Güçlü Trend" ifadesine dikkat edin. 1. günde oluşan sinyal henüz teyit edilmemiştir. <strong>3 gün ve üzeri</strong> sinyaller daha güvenilirdir. Giriş fiyatı, sinyalin oluştuğu günün kapanış fiyatı olarak gösterilir.</p>
 
 <h2>Yatay Sinyali</h2>
-<p>Üç kriterin tamamı aynı yönü göstermiyorsa sinyal Yatay'dır. Bu, "kaçırma korkusuyla" pozisyon almamak için önemli bir filtredir. Pek çok iyi işlem, Yatay'dan Güçlü Trend'e geçişi sabırla bekleyerek yakalanır.</p>
+<p>Dört koşulun tamamı aynı yönü göstermiyorsa sinyal Yatay'dır. Bu, "kaçırma korkusuyla" pozisyon almamak için önemli bir filtredir. Pek çok iyi işlem, Yatay'dan Güçlü Trend'e geçişi sabırla bekleyerek yakalanır.</p>
 
 <h2>Neyi Yapmaz?</h2>
 <ul>
@@ -896,10 +896,11 @@ Histogram = MACD − Sinyal</pre>
 <p>BorsaPusula, BIST100 ve ötesinde takip edilen 200'ün üzerinde hisseyi her gün algoritmik olarak analiz eder ve her hisse için Güçlü Trend, Trend Bozuldu veya Yatay kararı üretir. Bu makalede bu sistemin arka planını anlıyoruz.</p>
 
 <h2>Üçlü Filtre Mantığı</h2>
-<p>Tek bir gösterge sahte sinyal üretebilir. Üç göstergenin aynı anda aynı yönü göstermesi, yanlış sinyal olasılığını dramatik şekilde düşürür. BorsaPusula'nın üç kriteri:</p>
+<p>Tek bir gösterge sahte sinyal üretebilir. Üç göstergenin aynı anda aynı yönü göstermesi, yanlış sinyal olasılığını dramatik şekilde düşürür. BorsaPusula'nın dört koşulu:</p>
 <ol>
   <li><strong>Supertrend(10,3):</strong> Trend yönü ve dinamik destek/direnç</li>
-  <li><strong>ADX ≥ 25 + DI+/DI−:</strong> Trendin güçlü olduğunu ve yönünü doğrulama</li>
+  <li><strong>ADX ≥ 25:</strong> Trendin güçlü olduğunu doğrulama</li>
+  <li><strong>DI+ &gt; DI− (veya tersi):</strong> Trendin yönünü doğrulama</li>
   <li><strong>EMA12 &gt; EMA99 (veya tersi):</strong> Orta-uzun vadeli trendin teyidi</li>
 </ol>
 
@@ -1872,9 +1873,10 @@ Güçlü momentum için hacim şart:
 **Filtre kriterleri:**
 1. Supertrend = Güçlü Trend (yükseliş trendi aktif)
 2. ADX ≥ 25 (trend güçlü)
-3. EMA12 > EMA99 (uzun vadeli eğilim yukarı)
-4. Sinyal 3+ bar onaylı (geçici sinyal değil)
-5. Hacim ≥ ortalamanın 1,2x'i
+3. DI+ > DI− (yön alıcılarda)
+4. EMA12 > EMA99 (uzun vadeli eğilim yukarı)
+5. Sinyal 3+ bar onaylı (geçici sinyal değil)
+6. Hacim ≥ ortalamanın 1,2x'i
 
 Bu kriterlerin tamamını sağlayan hisseler en güçlü momentum adaylarıdır.
 
@@ -2186,7 +2188,7 @@ Sinyal güvenilirliği için iki göstergenin aynı yönü işaret etmesi tercih
 
 ## BorsaPusula Sinyalleriyle İlişkisi
 
-BorsaPusula'nın Güçlü Trend sinyali, **ADX ≥ 25 + Supertrend + EMA12/99** üçlü kritere dayanır. RSI, bu sistemde *tamamlayıcı gösterge* olarak kullanılır. [Hisse sayfasındaki](/hisse/AKBNK) sinyal badge'ine hover ettiğinizde RSI değerini görebilirsiniz.
+BorsaPusula'nın Güçlü Trend sinyali, **Supertrend + ADX ≥ 25 + DI+ > DI− + EMA12/99** dörtlü kritere dayanır. RSI, bu sistemde *tamamlayıcı gösterge* olarak kullanılır. [Hisse sayfasındaki](/hisse/AKBNK) sinyal badge'ine hover ettiğinizde RSI değerini görebilirsiniz.
 
 Stokastik osilatörü grafik platformunda ek katman olarak kullanarak, BorsaPusula sinyallerine **ikinci bir momentum teyidi** ekleyebilirsiniz.
 
@@ -2207,7 +2209,7 @@ Stokastik osilatörü grafik platformunda ek katman olarak kullanarak, BorsaPusu
       {"q": "Stokastik hangi piyasalarda işe yarar?",
        "a": "Stokastik, yatay (range-bound) piyasalarda ve kısa vadeli işlemlerde güçlüdür. Güçlü yükseliş veya düşüş trendlerinde ise uzun süre aşırı alım/satım bölgesinde kalarak yanıltıcı sinyaller üretebilir."},
       {"q": "BorsaPusula stokastik osilatör kullanıyor mu?",
-       "a": "BorsaPusula'nın sinyal motoru Supertrend + ADX + EMA üçlü kriterine dayanır. Stokastik doğrudan kullanılmasa da RSI tamamlayıcı gösterge olarak hisse sayfalarında gösterilir. Stokastiği grafik platformunuzda ek teyit için kullanabilirsiniz."}
+       "a": "BorsaPusula'nın sinyal motoru Supertrend + ADX ≥ 25 + DI+ > DI− + EMA12/99 dörtlü koşuluna dayanır. Stokastik doğrudan kullanılmasa da RSI tamamlayıcı gösterge olarak hisse sayfalarında gösterilir. Stokastiği grafik platformunuzda ek teyit için kullanabilirsiniz."}
     ],
     "related_tickers": ['AKBNK', 'GARAN', 'THYAO', 'ASELS', 'TUPRS']
   },
@@ -2490,7 +2492,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <p>Kısa vadeli hareketli ortalamanın (EMA12) uzun vadeliyi (EMA99) aşması, yükseliş momentumunun yerleştiğini gösterir. Bu iki ortalama arasındaki mesafe büyüdükçe trend güçlenir.</p>
 
 <h2>Neden Üç İndikatörün Aynı Anda Onaylaması?</h2>
-<p>Tek bir gösterge her zaman yanıltabilir. Supertrend yanlış kırılım üretebilir; ADX yüksek ama trend tersine dönüyor olabilir; EMA geçişi de bazen gürültülü olabilir. Üç koşulun birlikte sağlanması, yanlış sinyal olasılığını önemli ölçüde azaltır.</p>
+<p>Tek bir gösterge her zaman yanıltabilir. Supertrend yanlış kırılım üretebilir; ADX yüksek ama trend tersine dönüyor olabilir; EMA geçişi de bazen gürültülü olabilir. Dört koşulun birlikte sağlanması, yanlış sinyal olasılığını önemli ölçüde azaltır.</p>
 
 <table>
 <thead><tr><th>Senaryo</th><th>ST</th><th>ADX</th><th>EMA</th><th>Sonuç</th></tr></thead>
@@ -2504,7 +2506,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 
 <h2>Giriş ve Çıkış Kuralları</h2>
 <ul>
-<li><strong>Giriş:</strong> Üç koşul aynı anda sağlandığında, ilk kapanıştan sonra giriş. Gecikme riskini azaltmak için ATR bazlı giriş bölgesi kullanılır.</li>
+<li><strong>Giriş:</strong> Dört koşul aynı anda sağlandığında, ilk kapanıştan sonra giriş. Gecikme riskini azaltmak için ATR bazlı giriş bölgesi kullanılır.</li>
 <li><strong>Stop loss:</strong> Supertrend çizgisinin hemen altı — trendin bozulduğunu kanıtlayan seviye.</li>
 <li><strong>Kâr alma:</strong> TP1 = 1,5× ATR, TP2 = 3× ATR; ya da Supertrend çizgisi kırıldığında.</li>
 <li><strong>Çıkış:</strong> Supertrend Trend Bozuldu sinyaline geçtiğinde veya ADX 20'nin altına indiğinde.</li>
@@ -3735,7 +3737,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h3>Örnek Uygulama — AKBNK</h3>
 <ol>
   <li><strong>Temel filtre:</strong> Banka karlılığı güçlü, F/K oranı sektör ortalamasının altında, temettü verimi cazip</li>
-  <li><strong>Teknik giriş:</strong> BorsaPusula sinyali Güçlü Trend durumuna geçiyor, ADX ≥ 25, Supertrend yeşil</li>
+  <li><strong>Teknik giriş:</strong> BorsaPusula sinyali Güçlü Trend durumuna geçiyor, ADX ≥ 25 ve DI+ > DI−, Supertrend yeşil</li>
   <li><strong>Karar:</strong> Her iki filtreden geçen hisse için giriş değerlendirilebilir</li>
 </ol>
 
@@ -3768,7 +3770,7 @@ Türk yatırımcı için TL'nin değer kaybı riski önemlidir. Uzun vadeli DCA 
 <h2>BorsaPusula Yaklaşımı: Hibrit Model</h2>
 <p>BorsaPusula sinyal sistemi her ikisini birleştirir:</p>
 <ul>
-  <li><strong>Teknik katman:</strong> Supertrend + ADX ≥ 25 + EMA12/99 — zamanlama için</li>
+  <li><strong>Teknik katman:</strong> Supertrend + ADX ≥ 25 + DI+ > DI− + EMA12/99 — zamanlama için</li>
   <li><strong>Temel katman:</strong> Her hisse sayfasında F/K, PD/DD, ROE, temettü verimi — değerleme için</li>
   <li><strong>Çok zaman dilimi (MTF):</strong> H4 → Günlük → Haftalık → Aylık trend uyumu — büyük trendle aynı yönde işlem için</li>
 </ul>

@@ -86,14 +86,16 @@
 <h2>Sinyal Metodolojisi</h2>
 <div class="method-box da-panel da-panel--accent">
   <p style="color:var(--bp-text2);font-size:var(--bp-text-base);margin-bottom:8px">
-    Her hisse için 3 teknik gösterge aynı anda değerlendiriliyor:
+    Her hisse için 3 teknik gösterge (Supertrend, ADX ailesi, EMA) — toplam 4 koşul — aynı anda değerlendiriliyor:
   </p>
   <div class="method-formula">
 Güçlü Trend  →  Supertrend(10,3) LONG  <br>
                +  ADX(14) ≥ 25          <br>
+               +  DI+ &gt; DI−            <br>
                +  EMA12 &gt; EMA99       <br><br>
 Trend Bozuldu  →  Supertrend SHORT        <br>
                +  ADX(14) ≥ 25          <br>
+               +  DI− &gt; DI+            <br>
                +  EMA12 &lt; EMA99
   </div>
   <p style="color:var(--bp-text3);font-size:var(--bp-text-sm);margin-top:8px;margin-bottom:0">
@@ -137,14 +139,14 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
     <div class="feature-icon"><span aria-hidden="true">🔍</span></div>
     <div>
       <div class="feature-title">Hisse Tarayıcı</div>
-      <div class="feature-desc">Sinyal tipi, ADX gücü, sektör ve fiyat aralığı ile filtreli tarama. Kriterlere uyan hisseleri anında listele.</div>
+      <div class="feature-desc">İki sekme: <strong>Teknik</strong> (sinyal tipi, ADX, sektör, fiyat aralığı) ve <strong>Temel</strong> (temel skor bandı, min temel skor, sektör, fiyat, teknik sinyal). Kriterlere uyan hisseleri listele, sırala, CSV olarak indir.</div>
     </div>
   </div>
   <div class="feature-card da-panel">
     <div class="feature-icon"><span aria-hidden="true">🔥</span></div>
     <div>
-      <div class="feature-title">En Güçlü Sinyaller</div>
-      <div class="feature-desc">Ana sayfadaki vitrin: Teknik Güç Skoru'na göre sıralanmış, günün en güçlü teyit almış trend sinyalleri.</div>
+      <div class="feature-title">En Yüksek Teknik Güç Skorları</div>
+      <div class="feature-desc">Ana sayfadaki &laquo;Güçlü Trend'de en yüksek skorlar&raquo; vitrini: Güçlü Trend sinyali olan hisseler, Teknik Güç Skoru'na göre sıralı.</div>
     </div>
   </div>
   <div class="feature-card da-panel">
@@ -158,7 +160,7 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
     <div class="feature-icon"><span aria-hidden="true">⇌</span></div>
     <div>
       <div class="feature-title">Hisse Karşılaştırma</div>
-      <div class="feature-desc">Birden fazla hisseyi ADX, RSI, Supertrend ve EMA metrikleriyle yan yana karşılaştır.</div>
+      <div class="feature-desc">Birden fazla hisseyi yan yana karşılaştır. Teknik tarafta sinyal, ADX, RSI, Supertrend seviyesi ve hedefler; temel tarafta F/K, F/DD, HBK, ROE, temettü verimi ve piyasa değeri; ayrıca her iki skor.</div>
     </div>
   </div>
   <div class="feature-card da-panel">
@@ -252,7 +254,7 @@ Trend Bozuldu  →  Supertrend SHORT        <br>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>AI haber özeti — Gemini 2.5 Flash + Google Search grounding</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Piyasa Gündem Merkezi</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Hisse Tarayıcı (ADX / sektör / fiyat filtreli)</span></li>
-  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Ana sayfa &laquo;En güçlü sinyaller&raquo; vitrini (Teknik Güç Skoru sıralamalı)</span></li>
+  <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Ana sayfa &laquo;Güçlü Trend'de en yüksek skorlar&raquo; vitrini (Teknik Güç Skoru sıralamalı)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Portföy Takibi (localStorage)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Bilanço Takvimi (çeyreklik finansal sonuç tarihleri)</span></li>
   <li><span class="rl-done"><span role="img" aria-label="Tamamlandı"><span aria-hidden="true">✅</span></span></span> <span>Hisse Karşılaştırma (yan yana teknik metrikler)</span></li>

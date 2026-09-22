@@ -8,14 +8,14 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="canonical" href="https://borsapusula.com/metodoloji">
 <meta property="og:title"       content="Sinyal Metodolojisi — Supertrend + ADX + EMA12/99 | borsapusula.com">
-<meta property="og:description" content="BorsaPusula sinyal motorunun teknik temeli: 3 kriter aynı anda yeşil olduğunda trend sinyali üretilir.">
+<meta property="og:description" content="BorsaPusula sinyal motorunun teknik temeli: 3 gösterge, 4 koşul aynı anda yeşil olduğunda trend sinyali üretilir.">
 <meta property="og:site_name"   content="borsapusula.com">
 <meta property="og:url"         content="https://borsapusula.com/metodoloji">
 <meta property="og:image"       content="https://borsapusula.com{{ og_image_url }}">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Sinyal Metodolojisi — Supertrend + ADX + EMA12/99 | borsapusula.com">
-<meta name="twitter:description" content="BorsaPusula sinyal motorunun teknik temeli: 3 kriter aynı anda yeşil olduğunda trend sinyali üretilir.">
+<meta name="twitter:description" content="BorsaPusula sinyal motorunun teknik temeli: 3 gösterge, 4 koşul aynı anda yeşil olduğunda trend sinyali üretilir.">
 <meta name="twitter:image"       content="https://borsapusula.com{{ og_image_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -44,30 +44,30 @@
 <div class="tldr-card da-panel da-panel--accent">
   <h2 class="tldr-title">
     <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-    TL;DR — 3 Kriter, 3 Renk + 1 Filtre
+    TL;DR — 4 Koşul, 3 Renk + 1 Filtre
   </h2>
   <div class="tldr-rows">
     <div class="tldr-row tldr-green">
       <span class="tldr-icon"><span aria-hidden="true">🟢</span></span>
       <span class="tldr-label">Güçlü Trend</span>
       <span class="tldr-eq">=</span>
-      <span class="tldr-formula">Supertrend ▲ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; EMA12 &gt; EMA99</span>
+      <span class="tldr-formula">Supertrend ▲ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; DI+ &gt; DI− &nbsp;+&nbsp; EMA12 &gt; EMA99</span>
     </div>
     <div class="tldr-row tldr-red">
       <span class="tldr-icon"><span aria-hidden="true">🔴</span></span>
       <span class="tldr-label">Trend Bozuldu</span>
       <span class="tldr-eq">=</span>
-      <span class="tldr-formula">Supertrend ▼ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; EMA12 &lt; EMA99</span>
+      <span class="tldr-formula">Supertrend ▼ &nbsp;+&nbsp; ADX ≥ 25 &nbsp;+&nbsp; DI− &gt; DI+ &nbsp;+&nbsp; EMA12 &lt; EMA99</span>
     </div>
     <div class="tldr-row tldr-gray">
       <span class="tldr-icon"><span aria-hidden="true">⚪</span></span>
       <span class="tldr-label">Yatay</span>
       <span class="tldr-eq">=</span>
-      <span class="tldr-formula">3 kriterin tamamı aynı yönde değil</span>
+      <span class="tldr-formula">4 koşulun tamamı aynı yönde değil</span>
     </div>
   </div>
   <p class="tldr-note">
-    Üç kriter aynı yönde olsa bile sinyal <strong>haftalık trend filtresinden</strong> de geçmek
+    Dört koşul aynı yönde olsa bile sinyal <strong>haftalık trend filtresinden</strong> de geçmek
     zorundadır — haftalık EMA20 ters yöndeyse (ya da hissenin haftalık geçmişi yetersizse) sinyal
     üretilmez, Yatay'da kalır. <a href="#haftalik-trend">Haftalık Trend Gate &rarr;</a>
   </p>
@@ -196,12 +196,12 @@ Trend Bozuldu  <span role="img" aria-label="anlamına gelir">→</span>  ST = SH
 </p>
 
 <div class="signal-box da-panel da-panel--accent al">
-  <strong style="color:var(--bp-al)">▲ Güçlü Trend Sinyali</strong> — 3 kriter aynı anda: ST LONG + ADX ≥ 25 + DI+ > DI− + EMA12 > EMA99.<br>
+  <strong style="color:var(--bp-al)">▲ Güçlü Trend Sinyali</strong> — 4 koşul aynı anda: ST LONG + ADX ≥ 25 + DI+ > DI− + EMA12 > EMA99.<br>
   <small class="bp-text-muted">Giriş fiyatı: Sinyalin oluştuğu günün kapanış fiyatı. Stop Loss: Supertrend alt bandı.</small>
 </div>
 
 <div class="signal-box da-panel da-panel--accent sat">
-  <strong class="bp-sat-text">▼ Trend Bozuldu Sinyali</strong> — 3 kriter aynı anda: ST SHORT + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99.<br>
+  <strong class="bp-sat-text">▼ Trend Bozuldu Sinyali</strong> — 4 koşul aynı anda: ST SHORT + ADX ≥ 25 + DI− > DI+ + EMA12 < EMA99.<br>
   <small class="bp-text-muted">Mevcut yükseliş trendinin bozulduğunu gösterir. BorsaPusula long-only bir üründür — BIST'te bireysel yatırımcılar için açığa satış pratikte uygulanamadığından bu sinyalde somut giriş/hedef/stop seviyeleri gösterilmez, sadece pozisyon kapatma değerlendirmesi için bir uyarı niteliğindedir.</small>
 </div>
 
