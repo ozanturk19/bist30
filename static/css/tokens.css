@@ -68,6 +68,21 @@
 
   /* Brand */
   --bp-brand:     #b8c3ff;   /* periwinkle / electric violet */
+  /* K-CZ (22.09): MARKA SOZCUK-ISARETININ ("Borsa|Pusula") vurgulu yarisi.
+     AYRI EKSEN, --bp-al DEGIL: wordmark'in ikinci yarisi 22 yuzeyde
+     var(--bp-al) ile -- yani urunun ANLAM TASIYAN "AL sinyali" rengiyle --
+     boyaniyordu (K-BO kurali: yon/sinyal rengi yon tasimayan bir buyuklugu
+     boyayamaz; K-CY'de ayni ihlal navigasyonda bulunmustu). Ayrica ayni ad
+     UC kanondan boyaniyordu: --bp-al (header SVG + footer, 22 sayfa),
+     --bp-brand (404/410/429/500 -- CPO-1558 ONCESI gradyan renginden kalma),
+     --bp-accent-cyan (/hakkinda hero). Deger bugunku BASKIN renkle ayni
+     birakildi: bu commit 22 sayfada gorsel degisiklik YAPMAZ, yalniz 5
+     yuzeyi kanona getirir ve markayi sinyal ekseninden KOPARIR (--bp-al
+     ileride degisirse marka degismez). Emsal: --bp-volume (hacim ekseni).
+     ACIK GORSEL KARAR (Ozan): marka ISARETI CPO-1558'de mor->camgobegi
+     gradyanina gecirildi, sozcuk-isareti yesil kaldi -- ikisi ayni logonun
+     icinde ILISKISIZ iki renk ailesinden. Bkz. cpo-to-dev / dispatch notu. */
+  --bp-logo-accent: #00e290;
 
   /* Signal: AL (buy) — neon mint */
   --bp-al:        #00e290;
@@ -618,6 +633,8 @@ body {
    select-ok'u: deger bir data: URI'nin ICINDE, orada var() CALISMAZ -- kanonik
    degerin LITERALI (%23909097) yazildi. */
 .bp-al-text{color:var(--bp-al)}
+/* K-CZ: marka sozcuk-isareti vurgusu -- .bp-al-text'in ikizi DEGIL, ayri eksen. */
+.bp-logo-accent{color:var(--bp-logo-accent)}
 .bp-sat-text{color:var(--bp-sat)}
 /* K-BW (22.09): yon ucluysa sinif da uclu olmali. AL/SAT icin sinif vardi,
    BEKLE dali her yerde `style="color:var(--bp-bkl)"` diye satir-ici

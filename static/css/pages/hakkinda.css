@@ -64,7 +64,10 @@
     line-height: 1.2;
     margin-bottom: 10px;
   }
-  .hero-title span { color: var(--bp-accent-cyan); }
+  /* K-CZ (22.09): --bp-accent-cyan idi -- ayni ekranin header logosu ayni
+     kelimeyi var(--bp-al) ile basiyordu (tek sayfada ayni sozcuk iki renkte).
+     Tek kanon: --bp-logo-accent. */
+  .hero-title span { color: var(--bp-logo-accent); }
   .hero-sub {
     color: var(--bp-text3);
     font-size: var(--bp-text-15);
