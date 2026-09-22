@@ -10789,7 +10789,14 @@ def og_image():
     """Eski SVG OG image — geri uyumluluk için tutulur (eski paylaşılan linkler).
     CPO-1107 madde 10: yeni sayfalar /og-image.png kullanır — çoğu sosyal medya
     platformu (Facebook/WhatsApp/LinkedIn) og:image için SVG render etmiyor."""
-    al_count, sat_count, total, today_s = _og_image_stats()
+    # K-CL (22.09): 4. deger BILEREK KULLANILMIYOR. Eskiden alt basliga
+    # `datetime.now()` tarihi basiliyordu; veri ise bir onceki EOD turundan
+    # geliyor (olculdu 22.09 09:3x: gorsel "22.09.2026", veri 21.09 18:22).
+    # Ustelik og:image URL'i versiyonsuz -- Facebook/WhatsApp/X kartı URL'e
+    # gore onbelleklediginden HERHANGI bir tarih onbellekte kalici yalana
+    # doner (86. ders: kuralin sertligi kanalin yeniden-degerlendirme
+    # yetenegine baglidir). Tarih satirdan tumuyle kaldirildi.
+    al_count, sat_count, total, _today_unused = _og_image_stats()
 
     svg = f'''<svg width="1200" height="630" viewBox="0 0 1200 630"
      xmlns="http://www.w3.org/2000/svg" font-family="Arial,sans-serif">
@@ -10799,7 +10806,7 @@ def og_image():
   <text x="60" y="120" font-size="64" font-weight="700" fill="#f0f6fc">BIST</text>
   <text x="194" y="120" font-size="64" font-weight="700" fill="#58a6ff">100</text>
   <text x="310" y="120" font-size="64" font-weight="700" fill="#f0f6fc"> Sinyal Paneli</text>
-  <text x="60" y="165" font-size="26" fill="#8b949e">borsapusula.com · Algoritmik Trend Sinyalleri · {today_s}</text>
+  <text x="60" y="165" font-size="26" fill="#8b949e">borsapusula.com · Algoritmik Trend Sinyalleri</text>
   <!-- Ayırıcı çizgi -->
   <line x1="60" y1="195" x2="1140" y2="195" stroke="#30363d" stroke-width="1"/>
   <!-- İstatistik kutular -->
@@ -10811,10 +10818,10 @@ def og_image():
   <text x="520" y="355" font-size="22" fill="#8b949e" text-anchor="middle">▼ TREND BOZULDU</text>
   <rect x="700" y="230" width="280" height="160" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
   <text x="840" y="305" font-size="72" font-weight="800" fill="#58a6ff" text-anchor="middle">{total}</text>
-  <text x="840" y="355" font-size="22" fill="#8b949e" text-anchor="middle">BIST100 HİSSE</text>
+  <text x="840" y="355" font-size="22" fill="#8b949e" text-anchor="middle">TAKİP EDİLEN HİSSE</text>
   <!-- Alt slogan -->
   <text x="60" y="480" font-size="30" fill="#c9d1d9">Supertrend · ADX · EMA12/99</text>
-  <text x="60" y="525" font-size="22" fill="#484f58">Algoritmik, ücretsiz, canlı güncelleme · Yatırım tavsiyesi değildir.</text>
+  <text x="60" y="525" font-size="22" fill="#484f58">Algoritmik, ücretsiz, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.</text>
   <!-- Sağ ikon -->
   <rect x="1020" y="230" width="120" height="160" rx="12" fill="#1c2b3a" stroke="#1f6feb44" stroke-width="1"/>
   <text x="1080" y="335" font-size="56" text-anchor="middle">📊</text>
@@ -10845,7 +10852,14 @@ def og_image_png():
     import io
     from PIL import Image, ImageDraw
 
-    al_count, sat_count, total, today_s = _og_image_stats()
+    # K-CL (22.09): 4. deger BILEREK KULLANILMIYOR. Eskiden alt basliga
+    # `datetime.now()` tarihi basiliyordu; veri ise bir onceki EOD turundan
+    # geliyor (olculdu 22.09 09:3x: gorsel "22.09.2026", veri 21.09 18:22).
+    # Ustelik og:image URL'i versiyonsuz -- Facebook/WhatsApp/X kartı URL'e
+    # gore onbelleklediginden HERHANGI bir tarih onbellekte kalici yalana
+    # doner (86. ders: kuralin sertligi kanalin yeniden-degerlendirme
+    # yetenegine baglidir). Tarih satirdan tumuyle kaldirildi.
+    al_count, sat_count, total, _today_unused = _og_image_stats()
 
     img  = Image.new("RGB", (1200, 630), "#0d1117")
     draw = ImageDraw.Draw(img)
@@ -10857,7 +10871,7 @@ def og_image_png():
         draw.text((x, 70), text, font=f_title, fill=color)
         x += draw.textlength(text, font=f_title)
 
-    draw.text((60, 150), f"borsapusula.com · Algoritmik Trend Sinyalleri · {today_s}",
+    draw.text((60, 150), "borsapusula.com · Algoritmik Trend Sinyalleri",
                font=_og_font(26), fill="#8b949e")
     draw.line([(60, 195), (1140, 195)], fill="#30363d", width=1)
 
@@ -10866,7 +10880,7 @@ def og_image_png():
     boxes = [
         (60,  str(al_count),  "▲ GÜÇLÜ TREND", "#3fb950"),
         (380, str(sat_count), "▼ TREND BOZULDU", "#f85149"),
-        (700, str(total),     "BIST100 HİSSE", "#58a6ff"),
+        (700, str(total),     "TAKİP EDİLEN HİSSE", "#58a6ff"),
     ]
     for bx, num, label, color in boxes:
         draw.rounded_rectangle([bx, 230, bx + 280, 390], radius=12, fill="#161b22", outline="#30363d", width=1)
@@ -10876,7 +10890,7 @@ def og_image_png():
         draw.text((bx + 140 - w_lbl / 2, 350), label, font=f_lbl, fill="#8b949e")
 
     draw.text((60, 465), "Supertrend · ADX · EMA12/99", font=_og_font(30), fill="#c9d1d9")
-    draw.text((60, 512), "Algoritmik, ücretsiz, canlı güncelleme · Yatırım tavsiyesi değildir.",
+    draw.text((60, 512), "Algoritmik, ücretsiz, gün sonu (EOD) verisi · Yatırım tavsiyesi değildir.",
                font=_og_font(22), fill="#484f58")
 
     # Sağ ikon kutusu — mini bar-chart (emoji yerine, font-bağımsız)
