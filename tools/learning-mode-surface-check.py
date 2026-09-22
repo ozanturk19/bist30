@@ -37,9 +37,13 @@ OLCUT (taban SIFIR):
   R2  MOTOR -> CAPA (bayat yukleme): learning-mode.js yukleyen sablonda hic
       capa yoksa girdi BAYAT demektir; ya capa silinmis ya betik gereksiz.
       metodoloji.html muaf DEGIL -- orada da capa var.
-  R3  KONTROL HER KIRILMA NOKTASINDA ULASILABILIR: learning-mode.js
-      `.bp-lm-toggle`i `display:none` yapan bir kural YAZMAMALI. Ozelligin
-      tek kontrolu gizlenirse ozellik o genislikte YOK demektir.
+  R3  KONTROL HER KIRILMA NOKTASINDA ULASILABILIR: `.bp-lm-toggle`i
+      `display:none` yapan bir kural ANCAK yerine gecen bir varyant
+      (`createToggleButton('sheet')`, mobil menu karti) MOUNT EDILIYORSA
+      mesrudur; o varyant da gizliyse ihlal. "Gizlemek" ile "tasimak"
+      farkli seylerdir -- kapi ikincisini SUBSTITUTE VARLIGINA baglar.
+      320px olcumu bunu zorunlu kildi: baslikta daraltilmis cip bile
+      `bp-refresh-btn`i ekran disina itiyordu.
   R4  SOZLUK CAPALI: GLOSSARY'deki her anahtar en az bir `data-term` ile
       ulasilabilir olmali (K-CA/K-CH'nin olu anahtar sinifi) -- bu kural
       UYARI uretir, FAIL degil: terim ekranda cikmadan once sozluge
@@ -64,6 +68,11 @@ MIN_ANCHOR_TEMPLATES = 6
 RE_ANCHOR = re.compile(r'class="[^"]*\bjargon-term\b|sigLabelTooltip\s*\(')
 RE_ENGINE_TAG = re.compile(r'src="/static/' + re.escape(ENGINE) + r'\?')
 RE_HIDE_TOGGLE = re.compile(r'\.bp-lm-toggle\s*\{[^}]*display\s*:\s*none')
+# Dar ekranda baslik varyanti gizlenebilir -- AMA yalnizca baska bir varyant
+# MOUNT EDILIYORSA. "Kontrolu gizlemek" ile "kontrolu tasimak" farkli seylerdir;
+# kapi ikincisini bir SUBSTITUTE VARLIGI sartina baglar (K-DH, 151. ders).
+RE_SHEET_MOUNT = re.compile(r"createToggleButton\s*\(\s*'sheet'\s*\)")
+RE_SHEET_HIDDEN = re.compile(r'\.bp-lm-sheet[^{]{0,40}\{[^}]*display\s*:\s*none')
 
 
 def strip_comments(src):
@@ -104,8 +113,14 @@ def scan(read, listdir):
         js = ''
     js_clean = strip_comments(js)
     if RE_HIDE_TOGGLE.search(js_clean):
-        viol.append(('static/' + ENGINE, 'R3',
-                     'ozelligin tek kontrolu (.bp-lm-toggle) bir kuralda display:none'))
+        if not RE_SHEET_MOUNT.search(js_clean):
+            viol.append(('static/' + ENGINE, 'R3',
+                         'kontrol (.bp-lm-toggle) display:none ediliyor ama YERINE gecen '
+                         'bir varyant mount EDILMIYOR -- o genislikte ozellik yok demektir'))
+        elif RE_SHEET_HIDDEN.search(js_clean):
+            viol.append(('static/' + ENGINE, 'R3',
+                         'yerine gecen varyant (.bp-lm-sheet) de display:none -- '
+                         'iki kontrol de gizli'))
 
     # R4 — olu sozluk anahtari (UYARI)
     keys = set()
@@ -186,12 +201,19 @@ def self_test():
         hit += ok
         print("   %s %s" % ('✓' if ok else '✗', desc))
     hide_cases = [
-        ('display:none kurali', "'@media (max-width:600px){header .bp-lm-toggle{display:none}}'", True),
+        ('gizleme + YEDEK YOK -> ihlal',
+         "'@media (max-width:600px){header .bp-lm-toggle{display:none}}'", True),
+        ('gizleme + sheet varyanti mount -> ihlal DEGIL',
+         "'@media (max-width:600px){header .bp-lm-toggle{display:none}}' ; createToggleButton('sheet')", False),
+        ('gizleme + sheet mount AMA sheet de gizli -> ihlal',
+         "'header .bp-lm-toggle{display:none}' ; '.bp-lm-sheet{display:none}' ; createToggleButton('sheet')", True),
         ('yalniz padding daraltmasi', "'@media (max-width:600px){header .bp-lm-toggle{padding:6px 8px}}'", False),
         ('etiket gizleme (kontrol duruyor)', "'header .bp-lm-toggle .bp-lm-label{display:none}'", False),
     ]
     for desc, src, expect in hide_cases:
-        got = bool(RE_HIDE_TOGGLE.search(strip_comments(src)))
+        c = strip_comments(src)
+        got = bool(RE_HIDE_TOGGLE.search(c)) and (
+            not RE_SHEET_MOUNT.search(c) or bool(RE_SHEET_HIDDEN.search(c)))
         ok = got == expect
         hit += ok
         print("   %s %s" % ('✓' if ok else '✗', desc))

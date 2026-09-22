@@ -80,12 +80,24 @@
       '.bp-lm-toggle:hover{border-color:var(--bp-brand);color:var(--bp-text)}' +
       '.bp-lm-toggle .bp-lm-dot{width:7px;height:7px;border-radius:50%;background:var(--bp-text3);display:inline-block}' +
       'body.learning-on .bp-lm-toggle .bp-lm-dot{background:var(--bp-brand)}' +
-      /* K-DH: eskiden `header .bp-lm-toggle{display:none}` idi -- ozelligin
-         TEK kontrolu mobilde tamamen kayboluyordu, yani Ogrenme Modu telefonda
-         hic acilamiyordu (urunun trafigi agirlikli mobil). Kontrol kaliyor,
-         yalniz metin etiketi daraliyor; eriselebilir ad `aria-label`da. */
-      '@media (max-width:600px){header .bp-lm-toggle{padding:6px 8px;min-height:32px}' +
-      'header .bp-lm-toggle .bp-lm-label{display:none}}';
+      /* K-DH: dar ekranda kontrol MOBIL MENU SAYFASINA tasinir.
+         Eskiden yalniz `header .bp-lm-toggle{display:none}` vardi ve baska
+         hicbir yerde kontrol YOKTU -- Ogrenme Modu telefonda hic
+         acilamiyordu (urunun trafigi agirlikli mobil). Basligi daraltip
+         yerinde birakmak DA calismiyor: 320px'te olculdu, baslik sagi
+         (arama + yenile) 300px'te bitiyor, 43px'lik cip `bp-refresh-btn`i
+         ekran disina itiyordu. Bu yuzden kontrol "Menu" sayfasindaki
+         "Daha" izgarasina, sitenin kendi `.mbn-sheet-item` kartiyla ayni
+         dille ekleniyor (mountSheetToggle). */
+      '@media (max-width:600px){header .bp-lm-toggle{display:none}}' +
+      /* Sayfadaki (sheet) varyant: temel .bp-lm-toggle kurallarini ezer,
+         gorunumu sitenin kendi menu kartiyla ayni olur. */
+      '.bp-lm-toggle.bp-lm-sheet{display:flex;flex-direction:column;justify-content:center;' +
+      'gap:7px;background:var(--bp-surface2);border:1px solid var(--bp-border);' +
+      'border-radius:var(--bp-radius-lg);color:var(--bp-text);font-size:var(--bp-text-xs);' +
+      'font-weight:600;padding:14px 6px;min-height:70px;white-space:normal;text-align:center;line-height:1.3}' +
+      '.bp-lm-toggle.bp-lm-sheet:hover{border-color:var(--bp-border);color:var(--bp-text)}' +
+      'body.learning-on .bp-lm-toggle.bp-lm-sheet{border-color:rgba(var(--bp-brand-rgb),.55)}';
     var s = document.createElement('style');
     s.id = 'bp-lm-style';
     s.textContent = css;
@@ -194,10 +206,10 @@
     }
   }
 
-  function createToggleButton() {
+  function createToggleButton(variant) {
     var b = document.createElement('button');
     b.type = 'button';
-    b.className = 'bp-lm-toggle';
+    b.className = variant === 'sheet' ? 'bp-lm-toggle bp-lm-sheet' : 'bp-lm-toggle';
     b.setAttribute('aria-label', 'Öğrenme Modu');
     b.setAttribute('aria-pressed', STATE ? 'true' : 'false');
     b.title = 'Öğrenme Modu — teknik terimlerin yanında ? açıklaması';
@@ -210,16 +222,31 @@
   }
 
   function mountToggle() {
-    if (document.querySelector('.bp-lm-toggle')) return;
-    // Header'da arama butonunun yanına eklemeyi dene
-    var anchor = document.querySelector('.header-search-btn');
-    if (anchor && anchor.parentNode) {
-      anchor.parentNode.insertBefore(createToggleButton(), anchor);
-      return;
+    /* K-DH: eskiden tek bir `if (querySelector('.bp-lm-toggle')) return;`
+       vardi; iki varyant olunca bu erken cikis ikincisini de engellerdi. */
+    if (!document.querySelector('.bp-lm-toggle:not(.bp-lm-sheet)')) {
+      // Header'da arama butonunun yanına eklemeyi dene
+      var anchor = document.querySelector('.header-search-btn');
+      if (anchor && anchor.parentNode) {
+        anchor.parentNode.insertBefore(createToggleButton(), anchor);
+      } else {
+        var header = document.querySelector('header');
+        if (header) header.appendChild(createToggleButton());
+      }
     }
-    // Yoksa header sonuna
-    var header = document.querySelector('header');
-    if (header) header.appendChild(createToggleButton());
+    mountSheetToggle();
+  }
+
+  /* Dar ekranin kontrolu: mobil "Menü" sayfasindaki son ("Daha") izgaraya
+     bir kart olarak eklenir. Sayfa `_mobile_nav_partial.html` ile gelir;
+     yoksa sessizce atlanir (masaustu-only sablonlar). */
+  function mountSheetToggle() {
+    var sheet = document.getElementById('mbnSheet');
+    if (!sheet || sheet.querySelector('.bp-lm-sheet')) return;
+    var grids = sheet.querySelectorAll('.mbn-sheet-grid');
+    var grid = grids[grids.length - 1];
+    if (!grid) return;
+    grid.appendChild(createToggleButton('sheet'));
   }
 
   function init() {

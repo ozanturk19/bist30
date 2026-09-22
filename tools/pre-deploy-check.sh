@@ -1431,7 +1431,7 @@ if python3 tools/dynamic-tip-canon-check.py; then
   echo "  ✓ dynamic-tip-canon-check PASS"
 else
   echo "  ✗ K-CX KIRIK: aciklama fare-only `title` kanalina yaziliyor, [data-tip] donuk kaliyor."
-  echo "    Pozitif kontrol: python3 tools/dynamic-tip-canon-check.py --self-test  # 9/9 beklenir"
+  echo "    Pozitif kontrol: python3 tools/dynamic-tip-canon-check.py --self-test  # 11/11 beklenir"
   echo "    Kill-fix:        python3 tools/dynamic-tip-canon-check.py --kill-fix   # 2/2 beklenir"
   echo "    Regresyon ornegi: 0f9f2b6 agacinda 9 ihlal (hepsi hisse.html)"
   FAIL=$((FAIL + 1))
@@ -1602,7 +1602,7 @@ if python3 tools/learning-mode-surface-check.py; then
   echo "  ✓ learning-mode-surface-check PASS"
 else
   echo "  ✗ K-DH KIRIK: jargon capasi basan bir sayfa Ogrenme Modu motorunu yuklemiyor (ya da kontrol gizlenmis)."
-  echo "    Self-test:       python3 tools/learning-mode-surface-check.py --self-test  # 9/9 beklenir"
+  echo "    Self-test:       python3 tools/learning-mode-surface-check.py --self-test  # 11/11 beklenir"
   echo "    Pozitif kontrol: python3 tools/learning-mode-surface-check.py --ref 1dd9684  # 6 ihlal beklenir"
   FAIL=$((FAIL + 1))
 fi
