@@ -979,13 +979,46 @@ fi
 # yorumlari otomatik disarida kalir, markdown `#` basliklari korunur -- 56. ders)
 # ve kural CUMLE granulerliginde isler (koca makale govdesinde bir yerde gecen
 # "Güçlü Trend" 40 satir asagidaki kosulsuz cumleyi muaf yapmasin -- 43. ders).
-echo "51/51 blog-claim-check (K-CF: blog govdesi icerik-dogruluk kanonu)..."
+echo "51/52 blog-claim-check (K-CF: blog govdesi icerik-dogruluk kanonu)..."
 if python3 tools/blog-claim-check.py; then
   echo "  ✓ blog-claim-check PASS"
 else
   echo "  ✗ K-CF KIRIK: blog govdesi urunun kanonu/kapsami/sayfalariyla celisiyor."
   echo "    Detay icin: python3 tools/blog-claim-check.py"
   echo "    Pozitif kontrol: git show HEAD~1:blog_content.py > /tmp/pc_blog.py && python3 tools/blog-claim-check.py /tmp/pc_blog.py"
+  FAIL=$((FAIL + 1))
+fi
+
+# 52. app-published-text-check (K-CG, CPO 22.09.2026) -- 76. DERSIN IKINCI
+# UYGULAMASI: kapi 50 yalniz templates/, kapi 51 yalniz blog_content.py tarar.
+# Oysa urunun kullaniciya BASTIGI metnin bir bolumu app.py'de yasiyor --
+# e-posta govdeleri, e-posta KONU satirlari, SSS/JSON-LD ureteci ve AI prompt
+# sozlugu. Bu kanal 51 kapinin HICBIRININ girdi kumesinde degildi ve 22.09
+# olcumunde 17 ihlal tasiyordu:
+#   * /profil kullaniciya "⭐ Sadece Hacim Onaylı" diye SECTIRIYOR, ayni
+#     tercihten uretilen mail "💎 Premium Sinyal Değişimi" KONUSUYLA geliyordu;
+#   * rozet 💎, urunun kendi /metodoloji sayfasinda "Yüksek Skor" (Teknik Güç
+#     Skoru 70+) demek ve o sayfa "⭐ Hacim Onaylı ile KARISTIRILMAMALI" diye
+#     acikca uyariyor -- mail tam da o karisikligi ogretiyordu;
+#   * "Premium" sozcugu CPO-DEV2-053/055 ile paywall cagrisimi yuzunden emekli
+#     edilmisti, site uydu, e-posta kanali eski sozlukte dondu (10 yerde);
+#   * hos geldin maili "2-yıllık backtest performans raporu" vaat ediyordu --
+#     /backtest ve /sinyal-performans 301 ile /tarama'ya gider, /hakkinda bu
+#     ozelligi "🔚 retire edildi, güncel bir arayüzü yok" diye isaretliyor;
+#   * SSS JSON-LD skoru "sinyal skoru" diye adlandiriyordu (kanon: Teknik Güç
+#     Skoru -- ayni sayfa 4 yerde oyle yaziyor).
+# Olcum: `ast` ile YALNIZ string literalleri (77. ders); docstring'ler ve
+# serbest string bloklari YAYIMLANMADIGI icin haric tutulur, boylece yorum
+# bagisikligi bedavaya gelir. Veri anahtarlari (only_premium, mail_pref
+# degeri "premium") tam-esitlikle muaf -- beyaz liste anahtari satir numarasi
+# DEGIL, dizenin kendisidir.
+echo "52/52 app-published-text-check (K-CG: app.py yayimlanan metin kanonu)..."
+if python3 tools/app-published-text-check.py; then
+  echo "  ✓ app-published-text-check PASS"
+else
+  echo "  ✗ K-CG KIRIK: app.py'nin kullaniciya bastigi metin kanon disi."
+  echo "    Detay icin: python3 tools/app-published-text-check.py"
+  echo "    Pozitif kontrol: mkdir -p /tmp/pc52/tools; git show HEAD~1:app.py > /tmp/pc52/app.py; cp tools/app-published-text-check.py /tmp/pc52/tools/; python3 /tmp/pc52/tools/app-published-text-check.py"
   FAIL=$((FAIL + 1))
 fi
 

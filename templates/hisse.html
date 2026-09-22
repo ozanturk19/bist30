@@ -50,7 +50,7 @@
      güvenilir sayar. #}
   "additionalProperty": [
     {"@type": "PropertyValue", "name": "Sinyal", "value": "{{ seo_signal|signal_label }}"}{% if seo_score is not none %},
-    {"@type": "PropertyValue", "name": "Sinyal Skoru", "value": "{{ seo_score }}"}{% endif %}{% if seo_adx is not none %},
+    {"@type": "PropertyValue", "name": "Teknik Güç Skoru", "value": "{{ seo_score }}"}{% endif %}{% if seo_adx is not none %},
     {# CPO-1649: |int KESER (13.5→13), FAQ metni app.py:8080'de {:.0f} kullanıyor
        (13.5→14, round-half) — aynı sayfada iki farklı yuvarlama kuralı "3 farklı
        sayı" çelişkisine katkıda bulunuyordu. |round FAQ ile aynı davranışa (en

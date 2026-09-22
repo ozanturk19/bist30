@@ -2722,7 +2722,7 @@ def _email_base(content_html, unsubscribe_url, preheader=""):
 
 def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
     """Hoş geldin maili — kişisel, motivasyonel, CTA güçlü."""
-    preheader = f"Aboneliğin onaylandı. Premium sinyaller hacim onaylı olarak işaretli."
+    preheader = f"Aboneliğin onaylandı. Hacim onaylı sinyaller ⭐ rozetiyle işaretli."
     # CPO-DEV2-r31: name/email /api/subscribe'da karakter filtresiz kabul ediliyor
     # (sadece 80 karaktere kirpiliyor) — HTML-escape edilmeden e-posta govdesine
     # yazilirsa keyfi HTML enjekte edilebilir (ayni desen /api/contact'ta zaten var).
@@ -2755,9 +2755,9 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
               <strong style="color:#e5e1e4">Trend Bozuldu sinyali</strong> oluştuğunda — yeni pozisyon önerisi değil, risk/çıkış bilgilendirmesi
             </td></tr>
-          <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">💎</td>
+          <tr><td style="padding:8px 0;vertical-align:top;font-size:18px">⭐</td>
             <td style="padding:8px 0;vertical-align:top;font-size:13.5px;color:#c7c5cd;line-height:1.55">
-              <strong style="color:#ffc850">Premium işaretli</strong> sinyaller — hacim onaylı (RVOL ≥ 1.20). Backtest&apos;te %50.7 win rate, Sharpe 2.35.
+              <strong style="color:#ffc850">Hacim Onaylı</strong> sinyaller — hacim teyitli (RVOL ≥ 1.20). Backtest&apos;te %50.7 win rate, Sharpe 2.35.
             </td></tr>
         </table>
       </td></tr>
@@ -2769,10 +2769,10 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
         <div style="font-size:11px;color:#909097;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;margin-bottom:12px">🎯 Site&apos;de neler var</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📊 {BIST_STOCK_COUNT} BIST hissesi günlük analiz</td></tr>
-          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">💎 Premium hacim filtreli sinyaller</td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">⭐ Hacim onaylı sinyal filtresi</td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">🗺️ Sektör ısı haritası</td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📅 Bilanço takvimi</td></tr>
-          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📈 2-yıllık backtest performans raporu</td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">📈 Hisse bazlı sinyal geçmişi</td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#c7c5cd">⚖️ Hisse karşılaştırma</td></tr>
         </table>
       </td></tr>
@@ -2783,7 +2783,7 @@ def _build_welcome_email(email, unsubscribe_url, name=None, profile_token=""):
       <tr><td style="padding:18px 22px">
         <div style="font-size:14px;font-weight:700;color:#b8c3ff;margin-bottom:6px">🎯 Sinyalleri sana özelleştir</div>
         <div style="font-size:12.5px;color:#c7c5cd;line-height:1.55;margin-bottom:12px">
-          10 saniye sürer — mail sıklığını seç (günlük özet, anında, sadece Premium veya haftalık).
+          10 saniye sürer — mail sıklığını seç (günlük özet, anında, sadece Hacim Onaylı veya haftalık).
         </div>
         <a href="https://borsapusula.com/profil?t={profile_token}" style="display:inline-block;background:rgba(184,195,255,0.14);color:#b8c3ff;border:1px solid rgba(184,195,255,0.45);padding:8px 18px;border-radius:6px;text-decoration:none;font-size:12.5px;font-weight:700;letter-spacing:0.3px">
           Profili Tamamla →
@@ -2851,7 +2851,7 @@ def _build_signal_email(changes, unsubscribe_url):
     tickers_str = ", ".join(c[0] for c in changes[:4])
     if len(changes) > 4: tickers_str += f" +{len(changes)-4}"
 
-    preheader = f"{al_count} Güçlü Trend · {sat_count} Trend Bozuldu · {prem_count} Premium 💎 — {tickers_str}"
+    preheader = f"{al_count} Güçlü Trend · {sat_count} Trend Bozuldu · {prem_count} Hacim Onaylı ⭐ — {tickers_str}"
 
     # Sinyal kartları
     cards = ""
@@ -2870,7 +2870,7 @@ def _build_signal_email(changes, unsubscribe_url):
 
         prem_badge = ""
         if is_prem:
-            prem_badge = '''<span style="display:inline-block;background:rgba(255,200,80,0.12);border:1px solid rgba(255,200,80,0.45);color:#ffc850;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:0.4px;margin-left:6px;vertical-align:middle">💎 PREMIUM</span>'''
+            prem_badge = '''<span style="display:inline-block;background:rgba(255,200,80,0.12);border:1px solid rgba(255,200,80,0.45);color:#ffc850;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:0.4px;margin-left:6px;vertical-align:middle">⭐ HACİM ONAYLI</span>'''
 
         sl_html = f'<span style="color:#909097">SL <strong style="color:#c7c5cd">{tr_price_filter(sl_level)}₺</strong></span>' if sl_level else ''
         rvol_html = f'<span style="color:#909097">·  RVOL <strong style="color:{"#ffc850" if is_prem else "#c7c5cd"}">{rvol:.2f}×</strong></span>' if rvol is not None else ''
@@ -2913,7 +2913,7 @@ def _build_signal_email(changes, unsubscribe_url):
     if sat_count > 0:
         summary_chips += f'<span style="display:inline-block;background:rgba(248,81,73,0.10);border:1px solid rgba(248,81,73,0.30);color:#f85149;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">▼ {sat_count} Trend Bozuldu</span>'
     if prem_count > 0:
-        summary_chips += f'<span style="display:inline-block;background:rgba(255,200,80,0.10);border:1px solid rgba(255,200,80,0.40);color:#ffc850;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">💎 {prem_count} Premium</span>'
+        summary_chips += f'<span style="display:inline-block;background:rgba(255,200,80,0.10);border:1px solid rgba(255,200,80,0.40);color:#ffc850;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;margin:0 4px">⭐ {prem_count} Hacim Onaylı</span>'
 
     more_html = ""
     if len(changes) > 10:
@@ -3092,7 +3092,7 @@ def _notify_email_signal_changes(changes):
             if not relevant:
                 continue
             unsub_url = f"https://borsapusula.com/unsubscribe/{token}"
-            subject_prefix = "💎 Premium" if mail_pref == "premium" else "🔔 BorsaPusula —"
+            subject_prefix = "⭐ Hacim Onaylı" if mail_pref == "premium" else "🔔 BorsaPusula —"
             subject = subject_prefix + " Sinyal Değişimi: " + ", ".join(c[0] for c in relevant[:3])
             if len(relevant) > 3:
                 subject += f" +{len(relevant) - 3}"
@@ -3403,7 +3403,7 @@ def _send_digest_emails(timeframe="daily", force=False):
         # Premium count for subject hint
         prem_count = sum(1 for c in relevant if c[3].get("is_premium"))
         if prem_count > 0:
-            subject += f" — {prem_count} Premium 💎"
+            subject += f" — {prem_count} Hacim Onaylı ⭐"
 
         if send_email(email, subject, _build_signal_email(relevant, unsub_url), unsubscribe_url=unsub_url):
             sent += 1
@@ -6701,7 +6701,7 @@ Algoritmik sinyal motoru üç gösterge kombinasyonu kullanır:
 çelişkisiz, tek yönde olmalı. Yatırımcıya "bu üç gösterge nedir?" sorusunun
 cevabını sade dille verebilirsin.
 
-Premium sinyal: Eğer hisse "Premium" olarak işaretliyse, bu AL sinyali +
+Hacim Onaylı sinyal: Eğer hisse "Hacim Onaylı" olarak işaretliyse, bu AL sinyali +
 hacim teyidinin de olduğu anlamına gelir (RVOL ≥ 1.20). Bunu yorumda
 "hacimle desteklenmiş güçlü sinyal" şeklinde belirtmek serbest ama zorunlu değil.
 
@@ -8412,7 +8412,7 @@ def stock_page(ticker):
         if adx_val is not None:
             _parts.append(f"ADX {adx_val:.0f} (trend gücü)")
         if score is not None:
-            _parts.append(f"sinyal skoru {score}/100")
+            _parts.append(f"Teknik Güç Skoru {score}/100")
         # CPO-1758 + 20.09 CPO notu (gundem.html): rr_signal negatif gelebiliyor
         # (fiyat sinyale karsi hareket ettiyse) -- hero/gundem ile ayni guard
         # (>0) ve ayni "1:N,N" kanonik yazim.
