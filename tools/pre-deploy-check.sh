@@ -1293,7 +1293,7 @@ fi
 #   R1 yazma simetrisi · R2 <select> yutulmasi korumasi · R3 tur-gidis (yazilan
 #   her parametre geri okunmali). MUAFIYET ANLAM KURALIDIR: kapsam "URLSearchParams
 #   kurup fetch eden fonksiyon"; tek kuruculu sablonlar R1 disinda.
-echo "64/67 form-url-state-check (K-CS: form durumu <-> adres cubugu tur-gidisi)..."
+echo "64/68 form-url-state-check (K-CS: form durumu <-> adres cubugu tur-gidisi)..."
 if python3 tools/form-url-state-check.py; then
   echo "  ✓ form-url-state-check PASS"
 else
@@ -1315,7 +1315,7 @@ echo ""
 #   URETTIGI olu derin baglantiyi paylastiriyordu. Ayrica tek sektorluk secim
 #   adrese yaziliyor ama okuma esigine (`>= 2`) takilip geri okunmuyordu.
 #   R1 tek yayimci · R2 tur-gidis · R3 `append` birikmesi · R4 sekme kapsami.
-echo "65/67 url-state-owner-check (K-CT: adres cubugunun tek sahibi)..."
+echo "65/68 url-state-owner-check (K-CT: adres cubugunun tek sahibi)..."
 if python3 tools/url-state-owner-check.py; then
   echo "  ✓ url-state-owner-check PASS"
 else
@@ -1338,7 +1338,7 @@ echo ""
 #   Harness pozitif kontrolu (eski kod): sunucuda kayitli + yerelde yok iken
 #   tiklama POST gonderiyordu (kapatmak isterken ALIYORDU), ters durumda DELETE.
 #   R1 yazma/okuma asimetrisi · R2 dallanma sahibi · R3 bos != bilinmiyor.
-echo "66/67 client-server-state-owner-check (K-CU: sunucu durumunun istemcideki sahibi)..."
+echo "66/68 client-server-state-owner-check (K-CU: sunucu durumunun istemcideki sahibi)..."
 if python3 tools/client-server-state-owner-check.py; then
   echo "  ✓ client-server-state-owner-check PASS"
 else
@@ -1365,13 +1365,38 @@ echo ""
 #   R1 toplama kanali beyan edilmeli (cift yonlu) · R2 yerel depo envanteri
 #   cift yonlu + sunucuya aynalanan anahtar varken NITELENDIRILMEMIS mutlak
 #   "sunucuya gonderilmez" iddiasi yasak.
-echo "67/67 privacy-claim-flow-check (K-CV: gizlilik beyani <-> veri akisi)..."
+echo "67/68 privacy-claim-flow-check (K-CV: gizlilik beyani <-> veri akisi)..."
 if python3 tools/privacy-claim-flow-check.py; then
   echo "  ✓ privacy-claim-flow-check PASS"
 else
   echo "  ✗ K-CV KIRIK: gizlilik metni gercek veri akisiyla celisiyor."
   echo "    Pozitif kontrol: python3 tools/privacy-claim-flow-check.py --self-test  # 5/5 beklenir"
   echo "    Regresyon ornegi: python3 tools/privacy-claim-flow-check.py --ref bd47ac4  # 5 ihlal beklenir"
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
+# KAPI 68 -- K-CW: TEKNIK GUC SKORU'NUN BANT KANONU (renk + ad).
+#   Kapi 67 "yazili beyan <-> kod" kanonuna bakiyordu. Ayni mercek bir kez daha
+#   kayar: SAYININ GORSEL SINIFLANDIRMASI da bir kanondur ve sessizce ikilesir.
+#   Canli olculdu (22.09, getComputedStyle): ayni Teknik Guc Skoru anasayfada
+#   ham skor esigine (70/56 -> --bp-al/--bp-volume/--bp-sat), /tarama ve
+#   /hisse'de kanonik `tier` alanina (mor/periwinkle/notr) gore boyaniyordu --
+#   ENERY 72 / TUPRS 62 / AYGAZ 49 / BIMAS 43'te 4/4 renk uyusmazligi. Dahasi
+#   AL sinyalli hisselerin skoru SAT'in kanonik rengiyle (--bp-sat) boyaniyordu:
+#   "en yuksek skorlar" izgarasinda 7 karttan 3'u KIRMIZI halka + YESIL "Guclu
+#   Trend" rozeti tasiyordu. Bant ADLARI da ucuncu kanondu (lejant "Guclu/Orta/
+#   Zayif" vs kanonik "Yuksek Skor/Orta Skor/rozetsiz") ve "Guclu" ayni sayfada
+#   AL sinyalinin adiyla ayni kelime + ayni renkti (CPO-1682 cakismasi).
+#   R1 tier dalinin rengi kanonik · R2 ham skor esiginden (56) bant rengi yasak
+#   · R3 bant adi kanonik ("Guclu Sinyal" ve swatch yanindaki "Guclu/Zayif" yasak).
+echo "68/68 score-band-canon-check (K-CW: skor bandinin renk+ad kanonu)..."
+if python3 tools/score-band-canon-check.py; then
+  echo "  ✓ score-band-canon-check PASS"
+else
+  echo "  ✗ K-CW KIRIK: ayni skor iki farkli bant sozlugune gore sunuluyor."
+  echo "    Pozitif kontrol: python3 tools/score-band-canon-check.py --self-test  # 7/7 beklenir"
+  echo "    Regresyon ornegi: python3 tools/score-band-canon-check.py --ref 9d347bf  # 4 ihlal beklenir"
   FAIL=$((FAIL + 1))
 fi
 

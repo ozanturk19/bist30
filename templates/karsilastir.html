@@ -339,7 +339,9 @@ const TIER_META = {
 };
 
 function verdictFor(tier) {
-  return TIER_META[tier] || { color: 'var(--bp-text3)', label: 'Nötr' };
+  // K-CW: rozetsiz bandın adı burada 'Nötr' idi; /metodoloji sözlüğünün ve
+  // /tarama ipucunun kanonik adı "rozetsiz" — aynı bant için iki ad kalmasın.
+  return TIER_META[tier] || { color: 'var(--bp-text3)', label: 'Rozetsiz' };
 }
 
 function renderScoreCell(s, isWinner) {

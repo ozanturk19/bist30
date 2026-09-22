@@ -182,12 +182,25 @@
     </button>
     <p style="font-size:var(--bp-text-xs);color:var(--bp-text3);margin:6px 0 0;text-align:center">Ne arayacağınızı bilmiyor musunuz? Tıklayın, popüler konuları gösterelim.</p>
 
+    {# K-CW (22.09): lejant (a) HANGİ skoru tarif ettiğini söylemiyordu — hemen
+       altındaki Spotlight BorsaPusula Skoru gösteriyor ve onun kanonik bandı
+       70/50, lejant ise Teknik Güç Skoru'nun 70/56'sını çiziyordu; (b) bant
+       adları üçüncü bir kanondu ("Güçlü/Orta/Zayıf"), kanonik adlar
+       "Yüksek Skor / Orta Skor / rozetsiz" (CPO-1682, /metodoloji); (c) "Güçlü"
+       aynı sayfada AL sinyalinin adıydı ("Güçlü Trend") ve aynı rengi
+       taşıyordu; (d) palet --bp-al/--bp-volume/--bp-sat idi, oysa aynı skor
+       /tarama ve /hisse'de tier paletiyle (mor/periwinkle/nötr) boyanıyor.
+       Renk ve bant adı artık tek kanondan: app.py _derive_tier. #}
     <div class="da-legend-strip">
-      <div class="da-legend-item"><span class="sw" style="background:var(--bp-al)"></span>70–100 Güçlü</div>
+      <div class="da-legend-item" style="color:var(--bp-text3)">Teknik Güç Skoru rozetleri</div>
       <div class="da-legend-sep"></div>
-      <div class="da-legend-item"><span class="sw" style="background:var(--bp-volume)"></span>56–69 Orta</div>
+      <div class="da-legend-item"><span class="sw" style="background:var(--bp-premium)"></span>70+ Yüksek Skor</div>
       <div class="da-legend-sep"></div>
-      <div class="da-legend-item"><span class="sw" style="background:var(--bp-sat)"></span>&lt;56 Zayıf</div>
+      <div class="da-legend-item"><span class="sw" style="background:var(--bp-brand)"></span>56–69 Orta Skor</div>
+      <div class="da-legend-sep"></div>
+      <div class="da-legend-item"><span class="sw" style="background:var(--bp-text3)"></span>Rozetsiz</div>
+      <div class="da-legend-sep"></div>
+      <div class="da-legend-item" style="color:var(--bp-text3)">Rozet yalnız Güçlü Trend sinyalinde verilir</div>
       <div class="da-legend-sep"></div>
       <a href="/metodoloji" class="da-legend-item da-tap" style="color:var(--bp-brand);text-decoration:none">Nasıl hesaplanıyor? →</a>
     </div>
@@ -323,7 +336,10 @@
   <div class="da-section-head">
     <div>
       <div class="da-eyebrow">Teknik Güç Skoru</div>
-      <h2 class="da-section-title da-display">En güçlü sinyaller.</h2>
+      {# K-CW: "sinyal" kelimesi CPO-1682 kanonunda yalnız YÖN için kullanılır;
+         bu ızgara signal==='AL' filtreli ve signal_strength'e göre sıralı —
+         başlık ikisini de söylüyor. #}
+      <h2 class="da-section-title da-display">Güçlü Trend'de en yüksek skorlar.</h2>
     </div>
     <a href="/tarama?sort=signal_strength" class="da-tap" style="font-size:var(--bp-text-sm);color:var(--bp-brand);text-decoration:none;font-weight:600;white-space:nowrap">Tüm taramayı gör →</a>
   </div>
@@ -450,13 +466,21 @@
     BEKLE: { label: 'Yatay',        cls: 'sig-bekle' }
   };
   function signalMeta(sig){ return SIGNAL_META[sig] || SIGNAL_META.BEKLE; }
-  // Teknik Güç Skoru bandı — _derive_tier eşikleriyle AYNI (70/56), ama "Güçlü Sinyal"
-  // yerine nötr "Yüksek/Orta Skor" adlandırıldı (yukarıdaki çakışma notu).
-  function scoreColorVar(v){
-    if (typeof v !== 'number') return 'var(--bp-text3)';
-    if (v >= 70) return 'var(--bp-al)';
-    if (v >= 56) return 'var(--bp-volume)';
-    return 'var(--bp-sat)';
+  // K-CW: Teknik Güç Skoru'nun RENGİ kanonik `tier` alanından türer
+  // (app.py _derive_tier — AL sinyali + 70/56 eşiği + likidite/bilanço demote),
+  // /tarama scoreCell() ve /hisse skor halkasıyla BİREBİR aynı sözlük:
+  // guclu_sinyal = mor, standart = periwinkle, rozet-yok = nötr. Eşik BURADA
+  // TEKRAR TANIMLANMAZ.
+  // Önceki hali ham skoru 70/56 ile --bp-al/--bp-volume/--bp-sat'a boyuyordu:
+  // (a) aynı sayi ana sayfada yeşil, /tarama ve /hisse'de mordu (22.09 ölçüm:
+  // ENERY 72 / TUPRS 62 / AYGAZ 49 / BIMAS 43 → 4/4 renk uyuşmazlığı),
+  // (b) AL sinyalli bir hissenin skoru SAT'ın kanonik rengiyle boyanıyordu —
+  // "en yüksek skorlar" ızgarasında 7 karttan 3'ü kırmızı halka + yeşil
+  // "Güçlü Trend" rozeti taşıyordu.
+  function scoreColorVar(tier){
+    if (tier === 'guclu_sinyal') return 'var(--bp-premium)';
+    if (tier === 'standart')     return 'var(--bp-brand)';
+    return 'var(--bp-text3)';
   }
   // bughunt-13.09 (CPO-1627 backend fix sonrasi): BorsaPusula Skoru icin AYRI
   // fonksiyon — scoreColorVar (70/56) Teknik Guc Skoru rozet esigi, BorsaPusula
@@ -721,7 +745,7 @@
     if (!s) { daShowSectionEmpty('daSpotlightBody', 'Şu an gösterilecek hisse verisi yok.'); return; }
     var sig = signalMeta(s.signal);
     var ringVal = useBps ? s.borsapusula_skoru : s.signal_strength;
-    var col = useBps ? bpScoreColorVar(ringVal) : scoreColorVar(ringVal);
+    var col = useBps ? bpScoreColorVar(ringVal) : scoreColorVar(s.tier);
     var dash = ringDash(ringVal, 44);
     var ringLabel = useBps ? 'BorsaPusula Skoru' : 'Teknik Güç Skoru';
     /* K-BR (22.09): ADX/RSI burada `Math.round` ile TAM SAYIYA yuvarlaniyordu;
@@ -737,7 +761,7 @@
        yakinlik penceresi bu dolayli degiskeni goremedi). Tek kanon. */
     var chg = s.change_pct;
     var hasTek = typeof s.signal_strength === 'number';
-    var tekCol = hasTek ? scoreColorVar(s.signal_strength) : null;
+    var tekCol = hasTek ? scoreColorVar(s.tier) : null;
     body.innerHTML =
       '<div class="da-spot-grid">' +
         '<div class="da-spot-ring-wrap"><svg aria-hidden="true" viewBox="0 0 100 100">' +
@@ -813,7 +837,7 @@
     el.innerHTML = top.map(function(s, i){
       var sizeCls = sizeCycle[i] || 'sm';
       var sig = signalMeta(s.signal);
-      var col = scoreColorVar(s.signal_strength);
+      var col = scoreColorVar(s.tier);
       var dash = ringDash(s.signal_strength, 27);
       /* K-CC: bkz. yukarisi — ayni kusurun ikinci kopyasi. */
       var chg = s.change_pct;

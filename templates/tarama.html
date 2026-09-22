@@ -866,8 +866,14 @@ function renderResults(rows, count) {
     // hicbir yerde gecmiyordu. Bant adi kanonik kaynaktan (tier) turetilir,
     // esik burada TEKRAR TANIMLANMAZ.
     const band = tier === 'guclu_sinyal' ? 'Yüksek Skor' : tier === 'standart' ? 'Orta Skor' : '';
+    // K-CW: rozetsiz satirda ipucu SADECE sayiyi soyluyordu; kullanici 70+ bir
+    // skorda (bugun FORMT 71, sinyal SAT) rozet yoklugunun NEDENINI hicbir
+    // yuzeyde bulamiyordu. Bant rozeti AL sinyaline bagli (_derive_tier,
+    // CPO-1572 long-only) -- esik burada TEKRAR TANIMLANMAZ, yalniz nedeni yazilir.
+    const bandTip = band ? ' · ' + band
+                         : ' · rozetsiz (bant rozeti yalnız Güçlü Trend sinyalinde verilir)';
     const pct = Math.max(4, Math.min(100, v));
-    return `<div class="score-cell" tabindex="0" data-tip="Teknik Güç Skoru ${v}/100${band ? ' · ' + band : ''} — sıralama bu skora göre">
+    return `<div class="score-cell" tabindex="0" data-tip="Teknik Güç Skoru ${v}/100${bandTip} — sıralama bu skora göre">
       <span class="score-val ${cls}">${v}</span>
       <div class="score-bar-bg"><div class="score-bar-fill ${cls}" style="width:${pct}%"></div></div>
     </div>`;
@@ -920,7 +926,7 @@ function renderResults(rows, count) {
     return `<tr>
       <td>
         <a href="/hisse/${escapeHtml(s.ticker)}">
-          <div class="tk">${escapeHtml(s.ticker)}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek Skor (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs);vertical-align:middle">💎</span>' : ''}${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs);vertical-align:middle">⭐</span>' : ''}</div>
+          <div class="tk">${escapeHtml(s.ticker)}${s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Yüksek Skor bandı — Güçlü Trend sinyali + Teknik Güç Skoru 70+" style="color:var(--bp-premium);font-size:var(--bp-text-xs);vertical-align:middle">💎</span>' : ''}${s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs);vertical-align:middle">⭐</span>' : ''}</div>
           <div class="tk-name">${escapeHtml((s.name||'').replace(' A.Ş.',''))}</div>
         </a>
       </td>
@@ -947,7 +953,7 @@ function renderResults(rows, count) {
       const _eqH     = s.entry_quality
         ? `<span class="eq-badge ${_eqSafe?'eq-safe':'eq-risky'}">${eqLabel(s.entry_quality)}</span>`
         : '<span style="color:var(--text3)">—</span>';
-      const _prm = (s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Teknik Güç Skoru: Yüksek Skor (70+)" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '')
+      const _prm = (s.tier === 'guclu_sinyal' ? ' <span tabindex="0" data-tip="Yüksek Skor bandı — Güçlü Trend sinyali + Teknik Güç Skoru 70+" style="color:var(--bp-premium);font-size:var(--bp-text-xs)">💎</span>' : '')
                  + (s.is_premium ? ' <span tabindex="0" data-tip="Hacim Onaylı — Güçlü Trend sinyali + RVOL ≥ 1,20" style="color:var(--bp-volume);font-size:var(--bp-text-xs)">⭐</span>' : '');
       const _tlbl = s.adx_label || 'Zayıf';
       const _tl   = [_tlbl, (_tlbl === 'Güçlü' || _tlbl === 'Çok Güçlü') ? 'strong' : _tlbl === 'Orta' ? 'medium' : 'weak'];
