@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=c0c5d88e">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
-<script src="/static/bp-vocab.js?v=d2d2d481" defer></script>
+<script src="/static/bp-vocab.js?v=da3d601d" defer></script>
 <link rel="stylesheet" href="/static/css/pages/blog.css?v=3289fefa">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -128,7 +128,10 @@ function loadMoreBlog() {
    trFold() — aynı kök-neden, r28/r85'te başka yerlerde düzeltilmiş, blog.html'in kendi
    bağımsız filterBlog()'una hiç taşınmamıştı). İ/I'yı toLowerCase()'den ÖNCE düz 'i'ye
    çevirerek kaçının. */
-function trFold(s) { return String(s || '').replace(/İ/g, 'i').replace(/I/g, 'i').toLowerCase(); }
+/* K-DG: bu govde hicbir diyakritigi katlamiyordu -- 91 blog kartinin 86'sinin
+   basliginda ASCII yazilinca bulunamayan en az bir kelime vardi ("yonetim" 0
+   sonuc / kanon 10, "guclu" 0 / 8, "turkiye" 0 / 9). Kanon: bpTrFold(). */
+function trFold(s) { return bpTrFold(s); }
 
 // bug-hunt r149: blogSearch input debounce'suzdu (tarama.html fSearch/
 // index.html setSearch emsalleriyle tutarsiz) - 180ms debounce eklendi,
@@ -169,7 +172,7 @@ function filterBlog() {
 </script>
 <!-- K-BL: bp-search.js header saat rozeti icin bp-format.js kanonunu (bpTrClock) cagirir; ONCE yuklenmeli. -->
 <script src="/static/bp-format.js?v=b8108049"></script>
-<script src="/static/bp-search.js?v=8f6942dd" defer></script>
+<script src="/static/bp-search.js?v=551896da" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 {% include '_mobile_nav_partial.html' %}
 {% endblock %}

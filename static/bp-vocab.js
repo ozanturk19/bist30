@@ -209,3 +209,48 @@ function escapeHtml(str) {
 function safeHref(url) {
   return /^https?:\/\//i.test(url || '') ? escapeHtml(url) : '#';
 }
+
+/* ── K-DG (22.09.2026): TÜRKÇE ARAMA KATLAMASI — TEK KANON ──────────────
+   "Kullanıcının ASCII klavyeyle yazdığı sorgu, Türkçe harf içeren adla
+   eşleşsin" işi üründe BEŞ yerde ayrı yazılmıştı ve DÖRDÜ farklıydı:
+
+     bp-search.js  trFold      İ,I→i · lower · ı,ş,ğ,ü,ö,ç→ASCII   (tam)
+     tarama.html   _trFold     birebir aynı kopya                  (tam)
+     karsilastir   _normalize  `ı` KATLANMIYOR
+     portfolio     _pfFold     ş,ğ,ü,ö,ç KATLANMIYOR
+     blog.html     trFold      hiçbir diyakritik KATLANMIYOR
+
+   CANLI ÖLÇÜM 22.09 (şablonlardan sökülen gerçek fonksiyon gövdeleri,
+   /api/stocks/list'in 216 şirket adı üzerinde çalıştırıldı) — kanondan
+   sapan ad sayısı: karşılaştır 49, portföy 102, blog 124. Sorgu düzeyinde
+   aynı ürün aynı soruya farklı cevap veriyordu:
+
+     "turk hava yollari"  → üst arama 1 sonuç · /karsilastir 0 · /blog 0
+     "is bankasi"         → üst arama 1 sonuç · /karsilastir 0 · /portfolio 0
+     "sabanci holding"    → üst arama 1 sonuç · /karsilastir 0
+
+   /blog'da 91 kartın 86'sının başlığında ASCII yazılınca bulunamayan en az
+   bir kelime vardı ("yonetim" 0 sonuç ↔ kanon 10, "guclu" 0 ↔ 8,
+   "turkiye" 0 ↔ 9, "temettu" 0 ↔ 5) — üstelik "Risk Yönetimi" sayfanın
+   KENDİ kategori çipinin adı.
+
+   Kural artık TEK yerde: katlama sorusunu bpTrFold() cevaplar. Çağıranlar
+   kendi gövdelerini yazmaz, delege eder (kapı 75 bunu bağlı tutar).
+
+   NEDEN bu sıra: `toLowerCase()` ASCII 'I'yı 'i' yapar ama 'İ'yi
+   'i'+U+0307 (birleştirici nokta) iki kod noktasına açar; locale'li
+   `toLocaleLowerCase('tr-TR')` ise ASCII 'I'yı noktasız 'ı' yapar ve
+   SISE/ISCTR/BIMAS gibi 33 ticker küçük harfle bulunamaz olur. İkisini de
+   ÖNCE elle düz 'i'ye katlayıp SONRA locale'siz küçültmek her iki tuzağı
+   da kapatır (r28/r85/r86'nın birleşik dersi). */
+function bpTrFold(s) {
+  return String(s || '')
+    .replace(/İ/g, 'i').replace(/I/g, 'i')
+    .toLowerCase()
+    .replace(/ı/g, 'i')
+    .replace(/ş/g, 's')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c');
+}

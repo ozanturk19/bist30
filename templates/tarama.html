@@ -26,7 +26,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=optional"></noscript>
 <link rel="stylesheet" href="/static/css/tokens.css?v=c0c5d88e">
 <link rel="stylesheet" href="/static/css/data-art.css?v=09f50516">
-<script src="/static/bp-vocab.js?v=d2d2d481" defer></script>
+<script src="/static/bp-vocab.js?v=da3d601d" defer></script>
 <link rel="stylesheet" href="/static/css/pages/tarama.css?v=e7c206c8">
 <style id="bp-critical-css">{% include '_bp_critical_css.html' %}</style>
 {% endblock %}{% block body %}<a href="#main-content" class="skip-link">Ana içeriğe atla</a>
@@ -364,13 +364,7 @@ let _searchTimer;
 // CPO-06.09: bp-search.js'teki trFold() ile ayni mantik — 223 isimden 117'si (%52)
 // İ/I disinda Turkce harf iceriyor, toLocaleUpperCase('tr-TR') tek basina bunlari
 // ASCII yaziyla eslestiremiyor ("eregli" Ereğli'yi, "koc holding" Koç Holding'i bulamiyordu).
-function _trFold(s) {
-  return String(s || '')
-    .replace(/İ/g, 'i').replace(/I/g, 'i')
-    .toLowerCase()
-    .replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g')
-    .replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c');
-}
+function _trFold(s) { return bpTrFold(s); }  /* K-DG: katlama kanonu bp-vocab.js */
 
 function onSearchInput(val) {
   const q = val.trim();
@@ -1438,7 +1432,7 @@ window.addEventListener('popstate', () => {
    önceki tek-atım eksikliği burada düzeldi) */
 bpStartDataQualityPolling();
 </script>
-<script src="/static/bp-search.js?v=8f6942dd" defer></script>
+<script src="/static/bp-search.js?v=551896da" defer></script>
 <script src="/static/js/bp-tooltip.js?v=01078545"></script>
 <script src="/static/learning-mode.js?v=55c014b1" defer></script>
 {% include '_mobile_nav_partial.html' %}

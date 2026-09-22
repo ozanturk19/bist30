@@ -202,17 +202,11 @@
   // arama kutusu ise cogunlukla ASCII klavyeyle yaziliyor). İ/I fold'undan SONRA,
   // once (locale-bagimsiz) toLowerCase ile buyuk/kucuk esitlenir, sonra kalan
   // Turkce kucuk harfler ASCII esdegerine katlanir.
-  function trFold(s) {
-    return String(s || '')
-      .replace(/İ/g, 'i').replace(/I/g, 'i')
-      .toLowerCase()
-      .replace(/ı/g, 'i')
-      .replace(/ş/g, 's')
-      .replace(/ğ/g, 'g')
-      .replace(/ü/g, 'u')
-      .replace(/ö/g, 'o')
-      .replace(/ç/g, 'c');
-  }
+  /* K-DG: katlama kanonu bp-vocab.js `bpTrFold()`. Bu dosya bp-vocab.js'ten
+     SONRA yuklenir (ikisi de defer, belge sirasi korunur) ve arama ancak
+     kullanici yazinca calisir -- yerel kopya BIRAKILMADI, cunku bes kopyanin
+     dordu birbirinden ayrismisti (kapi 75). */
+  function trFold(s) { return bpTrFold(s); }
 
   function filter(q) {
     if (!_syms) return [];
