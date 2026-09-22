@@ -14,10 +14,18 @@
   if (window.__bpSearchMounted) return;
   window.__bpSearchMounted = true;
 
-  // ---- CSS (hardcoded hex so it works on any page) ----
+  // ---- CSS ----
+  // K-CY (22.09): "hardcoded hex so it works on any page" gerekcesi ARTIK GECERLI
+  // DEGIL -- tokens.css bp-search.js'i yukleyen 20 sayfanin hepsinde <head>'de.
+  // Ham hex, tokens.css degisince bu dosyanin SESSIZCE eski palette kalmasi
+  // demekti (K-BG'nin grafik dosyasinda olculen kusurunun aynisi).
+  // Ayrica `.header-search-btn`in gorunum ozellikleri (zemin/kenarlik/yaricap/
+  // renk) `_bp_critical_css.html`te ZATEN kanonik olarak tanimli; buradaki kopya
+  // birebir ayni degerleri ikinci kez yaziyordu. Yalniz kanonigin tasimadigi
+  // gecis + hover burada kaldi. Kapi: tools/canon-css-dup-check.py
   var CSS = ''
-    + '.header-search-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;background:transparent;border:1px solid #6e6e7a;border-radius:6px;color:#c7c5cd;cursor:pointer;transition:all .15s;flex-shrink:0;padding:0;font-family:inherit}'
-    + '.header-search-btn:hover{background:#1c1b1f;border-color:#909097;color:#e5e1e4}'
+    + '.header-search-btn{transition:all .15s;padding:0;font-family:inherit}'
+    + '.header-search-btn:hover{background:var(--bp-surface2);border-color:var(--bp-ctl-border-hover);color:var(--bp-text)}'
     + '.bp-search-overlay{display:none;position:fixed;inset:0;z-index:var(--bp-z-overlay);background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding-top:80px}'
     + '.bp-search-overlay.open{display:flex}'
     + '.bp-search-modal{width:min(560px,calc(100vw - 32px));background:#141416;border:1px solid #2a2a2c;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);max-height:calc(100vh - 120px);display:flex;flex-direction:column}'
@@ -68,35 +76,43 @@
     + 'header > *{max-height:48px}'
     + 'header > .header-info,header > div:has(> h1.page-title),header > div:has(> div.page-title),header > div:has(> h1.header-name),header > div:has(> .page-sub),header > div:has(> .header-sub){display:none !important}'
     + 'header div[style]:has(> h1.page-title),header div[style]:has(> div.page-title),header div[style]:has(> h1.header-name){display:none !important}'
-    /* ── Unified Nav (bp-main-nav) — v2.1: UPPERCASE, safe-center, scaled ── */
-    + '.bp-main-nav{display:flex;align-items:center;justify-content:safe center;gap:5px;flex-wrap:nowrap;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}'
-    + '.bp-main-nav::-webkit-scrollbar{display:none}'
-    + '.bp-nav-item{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:8px;font-size:11px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:#c7c5cd;text-decoration:none;transition:background .18s ease,color .18s ease,box-shadow .18s ease;white-space:nowrap;font-family:"Space Grotesk",system-ui,sans-serif;background:none;border:none;cursor:pointer;line-height:1;flex-shrink:0}'
+    /* ── Unified Nav (bp-main-nav) — K-CY (22.09): TEK KANON ──
+       BU BLOK ESKIDEN kanonik nav stilinin TAM BIR IKINCI KOPYASIYDI ve runtime'da
+       <head>'in SONUNA enjekte edildigi icin `_bp_critical_css.html`teki kanonigi
+       20 sayfanin HEPSINDE eziyordu (canli olculdu 22.09): aktif nav ogesi
+       `--bp-al` (AL sinyali yesili #00e290) ile boyaniyor, kanonik `--bp-brand`
+       hap (pill + rotate(-1deg)) hic gorunmuyordu -- kenarlik brand, metin AL
+       yesili, yani TEK OGE IKI SOZLUKTEN boyaniyordu. Ayrica durum anahtari da
+       ikileşmişti: kanonik CSS `[aria-current="page"]`, bu kopya `.active`.
+       COZUM: cakisan kurallar (.bp-main-nav / .bp-nav-item taban+hover / .active /
+       .bp-nav-more-wrap / 900px) BURADAN SILINDI -- kanonik `_bp_critical_css.html`
+       artik gercekten kanonik. Burada YALNIZ kanonigin tasimadigi acilir menu ve
+       ikon/olcek kurallari kalir, hepsi tokens.css'ten okur. */
+    + '.bp-main-nav{-ms-overflow-style:none}'
     + '.bp-nav-item svg{width:13px;height:13px;opacity:0.65;flex-shrink:0}'
-    + '.bp-nav-item:hover{background:rgba(255,255,255,0.045);color:#e5e1e4}'
     + '.bp-nav-item:hover svg{opacity:1}'
-    + '.bp-nav-item.active{background:rgba(0,226,144,0.12);color:#00e290;font-weight:700;box-shadow:inset 0 0 0 1px rgba(0,226,144,0.18)}'
-    + '.bp-nav-item.active svg{opacity:1}'
-    + '.bp-nav-more-wrap{position:relative;flex-shrink:0}'
+    + '.bp-nav-item[aria-current="page"] svg{opacity:1}'
+    /* Acilir menu kapaliyken de "buradasin" gorunur olsun: kanonik hap dili + nokta */
+    + '.bp-nav-more-btn[data-has-current="true"]{color:var(--bp-brand);background:rgba(var(--bp-brand-rgb),.10);border-color:rgba(var(--bp-brand-rgb),.24)}'
+    + '.bp-nav-more-btn[data-has-current="true"]::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--bp-brand);flex-shrink:0}'
     + '.bp-nav-chev{width:11px !important;height:11px !important;transition:transform .18s ease;opacity:0.6}'
     + '.bp-nav-more-btn[aria-expanded="true"] .bp-nav-chev{transform:rotate(180deg);opacity:1}'
-    + '.bp-nav-more-btn[aria-expanded="true"]{background:rgba(184,195,255,0.12);color:#b8c3ff}'
+    + '.bp-nav-more-btn[aria-expanded="true"]{background:rgba(var(--bp-brand-rgb),0.12);color:var(--bp-brand)}'
     /* Dropdown rendered as fixed/portal to body to escape stacking context */
-    + '.bp-nav-more-menu{display:none;position:fixed;min-width:220px;background:#1c1b1f;border:1px solid #46464d;border-radius:10px;padding:6px;box-shadow:0 14px 50px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04);z-index:var(--bp-z-toast)}'
+    + '.bp-nav-more-menu{display:none;position:fixed;min-width:220px;background:var(--bp-surface2);border:1px solid var(--bp-border2);border-radius:10px;padding:6px;box-shadow:0 14px 50px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04);z-index:var(--bp-z-toast)}'
     + '.bp-nav-more-menu.open{display:block;animation:bpNavMoreIn .15s ease}'
     + '@keyframes bpNavMoreIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}'
-    + '.bp-nav-more-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:12px;font-weight:500;letter-spacing:0.3px;text-transform:uppercase;color:#e5e1e4;text-decoration:none;border-radius:6px;transition:background .12s;font-family:"Space Grotesk",system-ui,sans-serif}'
-    + '.bp-nav-more-menu a:hover{background:#1c1b1f}'
+    + '.bp-nav-more-menu a{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:12px;font-weight:500;letter-spacing:0.3px;text-transform:uppercase;color:var(--bp-text);text-decoration:none;border-radius:6px;transition:background .12s;font-family:"Space Grotesk",system-ui,sans-serif}'
+    + '.bp-nav-more-menu a:hover{background:var(--bp-surface2)}'
     + '.bp-nav-more-menu a svg{width:14px;height:14px;opacity:0.7;flex-shrink:0}'
-    + '.bp-nav-more-menu a.active{background:rgba(0,226,144,0.12);color:#00e290}'
-    + '.bp-nav-more-menu a.active svg{opacity:1}'
-    + '.bp-nav-sep{height:1px;background:#2a2a2c;margin:5px 8px}'
+    + '.bp-nav-more-menu a[aria-current="page"]{background:rgba(var(--bp-brand-rgb),0.12);color:var(--bp-brand);font-weight:700}'
+    + '.bp-nav-more-menu a[aria-current="page"] svg{opacity:1}'
+    + '.bp-nav-sep{height:1px;background:var(--bp-border);margin:5px 8px}'
     /* On wider screens: bump up padding/font slightly */
     + '@media (min-width:1500px){.bp-nav-item{padding:9px 16px;font-size:11.5px;letter-spacing:0.7px;gap:7px}.bp-main-nav{gap:6px}}'
     /* On tighter screens: shrink */
     + '@media (max-width:1100px){.bp-nav-item{padding:7px 10px;letter-spacing:0.4px;gap:4px}.bp-main-nav{gap:3px}}'
     + '@media (max-width:1000px){.bp-nav-item{padding:7px 8px;font-size:10.5px;gap:3px}}'
-    + '@media (max-width:900px){.bp-main-nav{display:none}}'
     /* ── Header-right uniform actions: live time + refresh + search (all pages) ── */
     + '.bp-header-right{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}'
     /* CPO-1666 #6: yesil nabiz + "CANLI" etiketi EOD (gun-sonu) mimariyle
@@ -418,16 +434,30 @@
   });
 
   // ---- Nav: auto-activate current route + Daha dropdown ----
+  // K-CY (22.09): TEK DURUM ANAHTARI = `aria-current="page"`.
+  // Onceden burasi `.active` sinifini DA ekliyordu ve enjekte edilen CSS o sinifa
+  // gore boyuyordu; kanonik `_bp_critical_css.html` ise `[aria-current]`e gore
+  // boyuyor -- ayni durum iki anahtar + iki renk sozlugu demekti (canli olculdu:
+  // metin AL yesili, kenarlik brand). `.active` artik YAZILMIYOR; tek okuyucu
+  // `aria-current`. Ek: acilir menudeki bir oge gecerli sayfaysa kapali "Daha"
+  // dugmesi de isaretlenir -- 14 hedeften 10'u masaustunde hicbir "buradasin"
+  // gostermiyordu (menu kapaliyken vurgu gorunmez kaliyordu).
   function activateNav() {
     var path = location.pathname;
     var items = document.querySelectorAll('.bp-nav-item[data-route], .bp-nav-more-menu a[data-route]');
+    var hiddenCurrent = false;
     items.forEach(function(el){
       var route = el.getAttribute('data-route');
       if (route === '/' ? path === '/' : path.indexOf(route) === 0) {
-        el.classList.add('active');
         el.setAttribute('aria-current', 'page');
+        if (el.closest('.bp-nav-more-menu')) hiddenCurrent = true;
       }
     });
+    var moreBtn = document.querySelector('.bp-nav-more-btn');
+    if (moreBtn) {
+      if (hiddenCurrent) moreBtn.setAttribute('data-has-current', 'true');
+      else moreBtn.removeAttribute('data-has-current');
+    }
   }
 
   function positionMenu() {
