@@ -97,6 +97,9 @@ def test_enrich_writes_jittered_ttl_and_clears_via_worker_pattern(monkeypatch):
     monkeypatch.setattr(app, "GEMINI_API_KEY", "fake-key-for-test")
     monkeypatch.setattr(app, "_is_gemini_leader", lambda: True)
     monkeypatch.setattr(app, "_save_explain_cache_to_disk", lambda: None)
+    # CPO-1496: _enrich_signal_explanation piyasa kapalıyken erken return eder —
+    # bu test cache yazımını doğruluyor, saatten bağımsız çalışmalı.
+    monkeypatch.setattr(app, "_market_open", lambda: True)
 
     def _fake_gemini_call(*args, **kwargs):
         return "gemini-2.5-flash", "Güçlü trend devam ediyor, göstergeler yükseliş yönünde."
@@ -132,6 +135,7 @@ def test_validation_rejects_contradicting_ai_text(monkeypatch):
 
     monkeypatch.setattr(app, "GEMINI_API_KEY", "fake-key-for-test")
     monkeypatch.setattr(app, "_is_gemini_leader", lambda: True)
+    monkeypatch.setattr(app, "_market_open", lambda: True)
     monkeypatch.setattr(app, "_save_explain_cache_to_disk", lambda: None)
 
     def _fake_gemini_call(*args, **kwargs):
