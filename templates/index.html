@@ -350,17 +350,26 @@
       <div class="da-eyebrow">Küratörlü Listeler</div>
       <h2 class="da-section-title da-display">Tarama motorunun öne çıkardıkları.</h2>
     </div>
-    <p class="da-section-desc">Her sayfa yüklemesinde /api/data üzerinden yeniden hesaplanır.</p>
+    <p class="da-section-desc">Son kapanış verisinden her sayfa yüklemesinde yeniden hesaplanır.</p>
   </div>
+  {# K-CE (22.09): burada IKI iskelet karti vardi cunku iki kart basiliyordu;
+     "Bugünün En Güçlü Teknik Sinyalleri" karti bir ust bolumun (#skorlar)
+     ilk 6 hissesinin BIREBIR AYNISIYDI (ayni filtre, ayni siralama, canli
+     olcum 6/6 kesisim) ve ustune EOD veriye "Bugünün" diye tarih iddiasi
+     ekliyordu. Kart kaldirildi -> tek iskelet. #}
   <div class="da-curated-list" id="daCuratedList">
-    <div class="da-curated-card"><div class="da-skel" style="width:60px;height:60px;border-radius:12px"></div><div style="flex:1"><div class="da-skel" style="width:50%;height:1.2rem;border-radius:6px"></div></div></div>
     <div class="da-curated-card"><div class="da-skel" style="width:60px;height:60px;border-radius:12px"></div><div style="flex:1"><div class="da-skel" style="width:50%;height:1.2rem;border-radius:6px"></div></div></div>
   </div>
 </section>
 
-<!-- Gün içi hareket şeridi — gerçek en çok hareket eden hisseler -->
+<!-- Son kapanış hareket şeridi — gerçek en çok hareket eden hisseler.
+     K-CE (22.09): etiket "Gün İçi En Çok Hareket Edenler" idi. Mimari
+     CPO-1508/1512/1703 ile EOD-only: /api/data GUNDE TEK KEZ, kapanistan
+     sonra yazilir; change_pct her zaman TAMAMLANMIS gunun kapanis-kapanis
+     degisimidir, gun ici degil. Ustelik AYNI SAYFA ayni alani "Son
+     kapanista ne oldu?" basligi altinda dogru adlandiriyordu. -->
 <div class="da-marquee-wrap">
-  <div class="da-marquee-label">Gün İçi En Çok Hareket Edenler</div>
+  <div class="da-marquee-label">Son Kapanışta En Çok Hareket Edenler</div>
   {# K-AF (21.09): bu şeridin duraklatma yolu YALNIZ `:hover`'dı — klavye ve
      dokunmatik kullanıcı için mekanizma HİÇ yoktu (WCAG 2.2.2). Makro şeridin
      `.macro-pause-btn` deseni birebir uygulandı (aynı aria-pressed/etiket
@@ -759,8 +768,18 @@
   function daRenderCurated(real){
     var el = document.getElementById('daCuratedList');
     if (!el) return;
-    var byScore = real.filter(function(s){ return typeof s.signal_strength === 'number' && s.signal === 'AL'; })
-                       .sort(function(a,b){ return b.signal_strength - a.signal_strength; }).slice(0, 6);
+    /* K-CE (22.09): `byScore` karti ("Bugünün En Güçlü Teknik Sinyalleri")
+       KALDIRILDI. Iki kusuru birden vardi:
+         1) AYNI SAYFANIN bir ust bolumu (#skorlar, "En güçlü sinyaller.")
+            ZATEN ayni filtreyi (signal==='AL') ayni anahtarla (signal_strength)
+            siralayip ilk 8'i basiyordu; bu kart onun ilk 6'siydi -- canli
+            olcumde 6/6 ticker ayni, ayni sirada. Ayni is icin iki yuzey.
+         2) Basligindaki "Bugünün" TARIH IDDIASIYDI, ama liste hicbir tarih
+            filtresi icermiyor ve veri EOD-only (/api/data gunde tek tur,
+            kapanis sonrasi): 22.09 sabahi kullaniciya 21.09 kapanisinin
+            siralamasi "Bugünün ..." diye sunuluyordu (K-CD 70. ders).
+       Hacim karti KALIR -- o gercekten ayri bir eksen (rvol) ve #skorlar'da
+       karsiligi yok. */
     var byRvol = real.filter(function(s){ return typeof s.rvol === 'number'; })
                       .sort(function(a,b){ return b.rvol - a.rvol; }).slice(0, 6);
     function chip(t, badgeTxt, badgeColorVar, badgeBgVar){
@@ -768,17 +787,9 @@
              '<span class="da-chip-badge" style="color:' + badgeColorVar + ';background:' + badgeBgVar + '">' + esc(badgeTxt) + '</span></a>';
     }
     var cards = [];
-    if (byScore.length) {
-      cards.push(
-        '<div class="da-curated-card"><div class="da-curated-num da-display" aria-hidden="true">01</div>' +
-        '<div class="da-curated-body"><div class="da-curated-title">Bugünün En Güçlü Teknik Sinyalleri</div>' +
-        '<div class="da-curated-desc">Teknik Güç Skoru en yüksek hisseler.</div></div>' +
-        '<div class="da-chip-row">' + byScore.map(function(s){ return chip(s.ticker, fmtNum0(s.signal_strength), scoreColorVar(s.signal_strength), 'var(--bp-surface3)'); }).join('') + '</div></div>'
-      );
-    }
     if (byRvol.length) {
       cards.push(
-        '<div class="da-curated-card"><div class="da-curated-num da-display" aria-hidden="true">02</div>' +
+        '<div class="da-curated-card"><div class="da-curated-num da-display" aria-hidden="true">01</div>' +
         '<div class="da-curated-body"><div class="da-curated-title">Yüksek Hacimli Hareketler</div>' +
         '<div class="da-curated-desc">Göreli hacim (RVOL) en yüksek hisseler.</div></div>' +
         '<div class="da-chip-row">' + byRvol.map(function(s){ return chip(s.ticker, s.rvol.toFixed(2).replace('.', ',')+'×', 'var(--bp-volume)', 'rgba(var(--bp-volume-rgb),.12)'); }).join('') + '</div></div>'
@@ -869,7 +880,7 @@
     if (obs) el.querySelectorAll('.da-tile').forEach(function(t, i){ t.style.transitionDelay = (Math.min(i,10)*0.04) + 's'; obs.observe(t); });
   }
 
-  // ── Gün içi hareket şeridi (gerçek top |değişim|) ──
+  // ── Son kapanış hareket şeridi (gerçek top |değişim|) — K-CE: EOD-only ──
   function daRenderMarquee(real){
     var track = document.getElementById('daMarqueeTrack');
     if (!track) return;

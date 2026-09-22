@@ -1,15 +1,21 @@
 {% extends '_base.html' %}{% set head_viewport_extra = ', viewport-fit=cover' %}{% set head_ios_standalone = true %}{% block head %}<title>Portföy Takibi | BorsaPusula</title>
-<meta name="description" content="BIST hisselerinizi takip edin. Giriş fiyatı, anlık değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
+{# K-CE (22.09): bu uc meta kanali "anlık değer" diyordu. Portfoy fiyatlari
+   /api/data'dan geliyor (satir ~740) ve mimari EOD-only (CPO-1508/1512/1703):
+   gunde TEK tur, kapanistan sonra. "Anlık" = gercek zamanli iddiasi; /yasal ve
+   /hakkinda ACIKCA "fiyatlar gercek zamanli DEGILDIR, son kapanistir" diyor.
+   Sayfanin KENDI gorunur kanonu zaten "Güncel Değer"/"Güncel Fiyat" -- uc meta
+   kanali o kanona hizalandi (71. ders: bir modun TUM kanallarini say). #}
+<meta name="description" content="BIST hisselerinizi takip edin. Giriş fiyatı, güncel değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=6ef6d5a3">
 <link rel="canonical" href="https://borsapusula.com/portfolio">
 <meta property="og:title"       content="Portföy Takibi — BorsaPusula">
-<meta property="og:description" content="BIST hisselerinizi takip edin. Giriş fiyatı, anlık değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
+<meta property="og:description" content="BIST hisselerinizi takip edin. Giriş fiyatı, güncel değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
 <meta property="og:url"         content="https://borsapusula.com/portfolio">
 <meta property="og:image"       content="https://borsapusula.com/og-image.png">
 <!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Portföy Takibi — BorsaPusula">
-<meta name="twitter:description" content="BIST hisselerinizi takip edin. Giriş fiyatı, anlık değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
+<meta name="twitter:description" content="BIST hisselerinizi takip edin. Giriş fiyatı, güncel değer, kâr/zarar ve sinyal durumunu tek ekranda görün.">
 <meta name="twitter:image"       content="https://borsapusula.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
