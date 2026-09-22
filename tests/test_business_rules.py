@@ -207,17 +207,22 @@ def test_rsi_zone_invalid_returns_none():
 # Canlı 22.09: RSI 45-60 aralığındaki 46 hissenin 45'i AL değildi (3'ü SAT:
 # FROTO/MGROS/MAVI) ama hepsi "İdeal Giriş Penceresi" gösteriyordu — long-only
 # üründe AL olmayan bir sinyalde giriş vaadi vermek yanıltıcı. signal=='AL'
-# değilse "Nötr Bölge (RSI 45-60)" döner (frontend zaten bpRsiZoneText() ile
-# aynı düzeltmeyi yapıyordu — bkz. static/bp-format.js).
+# değilse "Nötr Bölge" döner (frontend zaten bpRsiZoneText() ile aynı
+# düzeltmeyi yapıyordu — bkz. static/bp-format.js).
+#
+# CPO-1759 (22.09): parantezli "(RSI 45-60)" aralığı KALDIRILDI — diğer beş
+# bölge adının hiçbiri aralık taşımıyor, RSI sayısı zaten rozetin yanında
+# basılı; ham /api/data tüketicileri (frontend'in üzerinden geçmeyenler)
+# kaynakta duran ve sitede hiç görünmeyen bir dize alıyordu.
 
 def test_rsi_zone_ideal_giris_sat_sinyalinde_notr():
-    assert derive_rsi_zone(45, "SAT") == "Nötr Bölge (RSI 45-60)"
+    assert derive_rsi_zone(45, "SAT") == "Nötr Bölge"
 
 def test_rsi_zone_ideal_giris_bekle_sinyalinde_notr():
-    assert derive_rsi_zone(59.9, "BEKLE") == "Nötr Bölge (RSI 45-60)"
+    assert derive_rsi_zone(59.9, "BEKLE") == "Nötr Bölge"
 
 def test_rsi_zone_ideal_giris_signal_verilmezse_notr():
-    assert derive_rsi_zone(50) == "Nötr Bölge (RSI 45-60)"
+    assert derive_rsi_zone(50) == "Nötr Bölge"
 
 def test_rsi_zone_disi_bolgeler_signal_etkilemez():
     assert derive_rsi_zone(29.9, "SAT") == "Aşırı Satım"
