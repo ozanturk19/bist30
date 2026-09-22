@@ -8335,10 +8335,12 @@ def build_signal_summary(stock):
         risk_lvl = f"Risk seviyesi: stop bölgesi {_fmt_tl(sl)}."
     else:
         risk_lvl = "Risk seviyesi: bu sinyal için tanımlı stop bölgesi bulunmuyor."
-    if opt:
-        risk_lvl += f" İdeal giriş bölgesi {_fmt_tl(opt)} civarı."
-    elif isinstance(eq, str) and eq:
-        risk_lvl += f" Giriş kalitesi: {ENTRY_QUALITY_LABELS.get(eq, eq)}."
+    if signal == "AL":
+        # CPO-1784: long-only urun -- giris kalitesi/ideal giris vaadi yalniz AL sinyalinde anlam tasir
+        if opt:
+            risk_lvl += f" İdeal giriş bölgesi {_fmt_tl(opt)} civarı."
+        elif isinstance(eq, str) and eq:
+            risk_lvl += f" Giriş kalitesi: {ENTRY_QUALITY_LABELS.get(eq, eq)}."
     points.append({
         "text": risk_lvl,
         "tip":  "Stop bölgesi, sinyal geçersiz sayılabilecek fiyat seviyesidir.",
@@ -12937,7 +12939,8 @@ def api_market_news():
         if source == "news" and len(snippet) < 160 and \
                 any(pat in snippet.lower() for pat in _EMPTY_PATTERNS):
             dur = "bugün" if bars <= 1 else f"son {bars} gündür"
-            entry_q = s.get("entry_quality", "")
+            # CPO-1784: long-only urun -- giris kalitesi vaadi yalniz AL sinyalinde anlam tasir
+            entry_q = s.get("entry_quality", "") if sig == "AL" else ""
             sl_val  = s.get("sl_level") or 0
             tp_val  = s.get("tp1")  # CPO-1740: SAT icin artik None (kelepcesiz negatif hedef riski)
             snippet = (
@@ -12951,7 +12954,8 @@ def api_market_news():
         # Guard: _skip_prefixes tüm satırları silmişse (ör. "kayda değer" yanıtı) → algoritmik fallback
         if not snippet.strip():
             dur = "bugün" if bars <= 1 else f"son {bars} gündür"
-            entry_q = s.get("entry_quality", "")
+            # CPO-1784: long-only urun -- giris kalitesi vaadi yalniz AL sinyalinde anlam tasir
+            entry_q = s.get("entry_quality", "") if sig == "AL" else ""
             sl_val  = s.get("sl_level") or 0
             tp_val  = s.get("tp1")  # CPO-1740: SAT icin artik None (kelepcesiz negatif hedef riski)
             snippet = (
